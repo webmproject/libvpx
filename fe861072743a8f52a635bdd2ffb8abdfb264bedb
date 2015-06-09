@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9d41838_70039841",
+        "filename": "vp9/common/vp9_enums.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-06-09T17:22:14Z",
+      "side": 1,
+      "message": "Will be good to add comments to describe what the A and B versions are.",
+      "revId": "fe861072743a8f52a635bdd2ffb8abdfb264bedb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9d9cc70_02abec92",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1513,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-06-09T17:22:14Z",
+      "side": 1,
+      "message": "These seem to be reversed I think. Can you double check?\n\nIn my thinking,\nVERT_A should be in this order:\n1. mi_row, mi_col, bsize2\n2. mi_row + hbs, mi_col, bsize2\n3. mi_row, mi_col + hbs, subsize\n\nVERT_B should be in this order:\n1. mi_row, mi_col, subsize\n2. mi_row, mi_col + hbs, bsize2\n3. mi_row + hbs, mi_col + hbs\n\nHORZ_A should be in this order:\n1. mi_row, mi_col, bsize2\n2. mi_row, mi_col + hbs, bsize2\n3. mi_row + hbs, mi_col, subsize\n\nHORZ_B should be in this order:\n1. mi_row, mi_col, subsize\n2. mi_row + hbs, mi_col, bsize2\n3. mi_row + hbs, mi_col + hbs, bsize2",
+      "revId": "fe861072743a8f52a635bdd2ffb8abdfb264bedb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
