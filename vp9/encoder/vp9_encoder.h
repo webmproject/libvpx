@@ -424,8 +424,11 @@ typedef struct VP9_COMP {
   PICK_MODE_CONTEXT *leaf_tree;
   PC_TREE *pc_tree;
   PC_TREE *pc_root;
+#if CONFIG_EXT_PARTITION
+  int partition_cost[PARTITION_CONTEXTS][EXT_PARTITION_TYPES];
+#else
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
-
+#endif
   int multi_arf_allowed;
   int multi_arf_enabled;
   int multi_arf_last_grp_enabled;

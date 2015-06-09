@@ -58,6 +58,21 @@ typedef enum BLOCK_SIZE {
   BLOCK_INVALID = BLOCK_SIZES
 } BLOCK_SIZE;
 
+#if CONFIG_EXT_PARTITION
+typedef enum PARTITION_TYPE {
+  PARTITION_NONE,
+  PARTITION_HORZ,
+  PARTITION_VERT,
+  PARTITION_SPLIT,
+  PARTITION_HORZ_A,  // HORZ split and the left partition is recursively split
+  PARTITION_HORZ_B,  // HORZ split and the right partition is recursively split
+  PARTITION_VERT_A,  // VERT split and the top partition is recursively split
+  PARTITION_VERT_B,  // VERT split and the bottom partition is recursively split
+  EXT_PARTITION_TYPES,
+  PARTITION_TYPES = PARTITION_SPLIT + 1,
+  PARTITION_INVALID = EXT_PARTITION_TYPES
+} PARTITION_TYPE;
+#else
 typedef enum PARTITION_TYPE {
   PARTITION_NONE,
   PARTITION_HORZ,
@@ -66,6 +81,7 @@ typedef enum PARTITION_TYPE {
   PARTITION_TYPES,
   PARTITION_INVALID = PARTITION_TYPES
 } PARTITION_TYPE;
+#endif
 
 typedef char PARTITION_CONTEXT;
 #define PARTITION_PLOFFSET   4  // number of probability models per block size

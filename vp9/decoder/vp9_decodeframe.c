@@ -1333,15 +1333,22 @@ static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
   const int has_rows = (mi_row + hbs) < cm->mi_rows;
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
   PARTITION_TYPE p;
-
-  if (has_rows && has_cols)
+  if (has_rows && has_cols) {
+#if CONFIG_EXT_PARTITION
+    if (bsize <= BLOCK_8X8)
+      p = (PARTITION_TYPE)vp9_read_tree(r, vp9_partition_tree, probs);
+    else
+      p = (PARTITION_TYPE)vp9_read_tree(r, vp9_ext_partition_tree, probs);
+#else
     p = (PARTITION_TYPE)vp9_read_tree(r, vp9_partition_tree, probs);
-  else if (!has_rows && has_cols)
+#endif
+  } else if (!has_rows && has_cols) {
     p = vp9_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
-  else if (has_rows && !has_cols)
+  } else if (has_rows && !has_cols) {
     p = vp9_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
-  else
+  } else {
     p = PARTITION_SPLIT;
+  }
 
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.partition[ctx][p];
@@ -1370,6 +1377,9 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize, uv_subsize;
+#if CONFIG_EXT_PARTITION
+  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+#endif
 #if CONFIG_SUPERTX
   const int read_token = !supertx_enabled;
   int skip = 0;
@@ -1479,6 +1489,28 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         decode_partition(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, subsize);
 #endif
         break;
+#if CONFIG_EXT_PARTITION
+      case PARTITION_HORZ_A:
+        decode_partition(cm, xd, tile, mi_row,       mi_col,       r, bsize2);
+        decode_partition(cm, xd, tile, mi_row,       mi_col + hbs, r, bsize2);
+        decode_block(cm, xd, tile, mi_row + hbs, mi_col, r, subsize);
+        break;
+      case PARTITION_HORZ_B:
+        decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_partition(cm, xd, tile, mi_row + hbs, mi_col,       r, bsize2);
+        decode_partition(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, bsize2);
+        break;
+      case PARTITION_VERT_A:
+        decode_partition(cm, xd, tile, mi_row,       mi_col,       r, bsize2);
+        decode_partition(cm, xd, tile, mi_row + hbs, mi_col,       r, bsize2);
+        decode_block(cm, xd, tile, mi_row, mi_col + hbs, r, subsize);
+        break;
+      case PARTITION_VERT_B:
+        decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_partition(cm, xd, tile, mi_row,       mi_col + hbs, r, bsize2);
+        decode_partition(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, bsize2);
+        break;
+#endif
       default:
         assert(0 && "Invalid partition type");
     }
@@ -1522,10 +1554,39 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 #endif  // CONFIG_SUPERTX
 
+#if CONFIG_EXT_PARTITION
+  if (bsize >= BLOCK_8X8) {
+    switch (partition) {
+      case PARTITION_SPLIT:
+        if (bsize > BLOCK_8X8)
+          break;
+      case PARTITION_NONE:
+      case PARTITION_HORZ:
+      case PARTITION_VERT:
+        update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+        break;
+      case PARTITION_HORZ_A:
+        update_partition_context(xd, mi_row + hbs, mi_col, subsize, subsize);
+        break;
+      case PARTITION_HORZ_B:
+        update_partition_context(xd, mi_row, mi_col, subsize, subsize);
+        break;
+      case PARTITION_VERT_A:
+        update_partition_context(xd, mi_row, mi_col + hbs, subsize, subsize);
+        break;
+      case PARTITION_VERT_B:
+        update_partition_context(xd, mi_row, mi_col, subsize, subsize);
+        break;
+      default:
+        assert(0 && "Invalid partition type");
+    }
+  }
+#else
   // update partition context
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+#endif
 }
 
 static void setup_token_decoder(const uint8_t *data,
@@ -2772,10 +2833,17 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
       for (i = 0; i < INTRA_MODES - 1; ++i)
         vp9_diff_update_prob(&r, &fc->y_mode_prob[j][i]);
 
+#if CONFIG_EXT_PARTITION
+    for (i = 0; i < PARTITION_TYPES - 1; ++i)
+      vp9_diff_update_prob(&r, &fc->partition_prob[0][i]);
+    for (j = 1; j < PARTITION_CONTEXTS; ++j)
+      for (i = 0; i < EXT_PARTITION_TYPES - 1; ++i)
+        vp9_diff_update_prob(&r, &fc->partition_prob[j][i]);
+#else
     for (j = 0; j < PARTITION_CONTEXTS; ++j)
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
         vp9_diff_update_prob(&r, &fc->partition_prob[j][i]);
-
+#endif
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
 #if CONFIG_EXT_TX
     read_ext_tx_probs(fc, &r);
