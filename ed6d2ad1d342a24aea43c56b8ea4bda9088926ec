@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9d9cc70_1cbc770a",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2831,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-06-09T14:09:51Z",
+      "side": 1,
+      "message": "is this comment still correct with your config?",
+      "range": {
+        "startLine": 2831,
+        "startChar": 14,
+        "endLine": 2831,
+        "endChar": 22
+      },
+      "revId": "ed6d2ad1d342a24aea43c56b8ea4bda9088926ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9d9cc70_3cde1352",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2833,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-06-09T14:09:51Z",
+      "side": 1,
+      "message": "I think we should go the exact opposite to this patch.  None should always be allowed.   \n\nImagine an image that\u0027s 642 x 640. The last columns 2x64, should be allowed to be a single 64x64 block. \n\nMy reasoning?  Avoids 7 eob tokens.    ( assuming we have a 64x64 transform). \n\nI grant that this does potentially save partition bits, as now you know longer can pick and choose between splitting and not.\n\nI think it needs some data?",
+      "revId": "ed6d2ad1d342a24aea43c56b8ea4bda9088926ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
