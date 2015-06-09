@@ -1305,7 +1305,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_COPY_MODE
   if (mbmi->sb_type >= BLOCK_8X8)
     num_candidate = vp9_construct_ref_inter_list(
-        cm, xd, mbmi->sb_type, mi_row, mi_col, inter_ref_list);
+        cm, xd, tile, mbmi->sb_type, mi_row, mi_col, inter_ref_list);
   if (mbmi->sb_type >= BLOCK_8X8 && num_candidate > 0) {
     int ctx = vp9_get_copy_mode_context(xd);
     int is_copy = vp9_read(r, cm->fc.copy_noref_prob[ctx][mbmi->sb_type]);

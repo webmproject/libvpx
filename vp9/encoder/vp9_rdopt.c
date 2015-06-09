@@ -5929,7 +5929,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                            &comp_mode_p);
 #if CONFIG_COPY_MODE
   inter_ref_count =
-    vp9_construct_ref_inter_list(cm, xd, bsize, mi_row, mi_col, inter_ref_list);
+    vp9_construct_ref_inter_list(cm, xd, tile, bsize, mi_row, mi_col,
+                           inter_ref_list);
   mbmi->inter_ref_count = inter_ref_count;
 #endif  // CONFIG_COPY_MODE
 
