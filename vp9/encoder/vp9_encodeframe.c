@@ -4175,20 +4175,9 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
-      if (!is_inter_block(mbmi)) {
+      if (!is_inter_block(mbmi))
         ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
                         &td->counts->tx)[mbmi->tx_size];
-      } else {
-        BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
-        int bh = num_4x4_blocks_wide_lookup[txb_size];
-        int width  = num_4x4_blocks_wide_lookup[bsize];
-        int height = num_4x4_blocks_high_lookup[bsize];
-        int idx, idy;
-        for (idy = 0; idy < height; idy += bh)
-          for (idx = 0; idx < width; idx += bh)
-            update_txfm_count(xd, td->counts, max_txsize_lookup[mbmi->sb_type],
-                              idy, idx, 0);
-      }
     } else {
       int x, y;
       TX_SIZE tx_size;
@@ -4207,21 +4196,21 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     }
     ++td->counts->tx.tx_totals[mbmi->tx_size];
     ++td->counts->tx.tx_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
-  } else {
-    if (cm->tx_mode == TX_MODE_SELECT &&
-        mbmi->sb_type >= BLOCK_8X8  &&
-        !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
-      if (is_inter_block(mbmi)) {
-        BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
-        int bh = num_4x4_blocks_wide_lookup[txb_size];
-        int width  = num_4x4_blocks_wide_lookup[bsize];
-        int height = num_4x4_blocks_high_lookup[bsize];
-        int idx, idy;
-        for (idy = 0; idy < height; idy += bh)
-          for (idx = 0; idx < width; idx += bh)
-            update_txfm_count(xd, td->counts, max_txsize_lookup[mbmi->sb_type],
-                              idy, idx, 1);
-      }
+  }
+
+  if (cm->tx_mode == TX_MODE_SELECT &&
+      mbmi->sb_type >= BLOCK_8X8  &&
+      !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
+    if (is_inter_block(mbmi)) {
+      BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
+      int bh = num_4x4_blocks_wide_lookup[txb_size];
+      int width  = num_4x4_blocks_wide_lookup[bsize];
+      int height = num_4x4_blocks_high_lookup[bsize];
+      int idx, idy;
+      for (idy = 0; idy < height; idy += bh)
+        for (idx = 0; idx < width; idx += bh)
+          update_txfm_count(xd, td->counts, max_txsize_lookup[mbmi->sb_type],
+                            idy, idx, !output_enabled);
     }
   }
 
