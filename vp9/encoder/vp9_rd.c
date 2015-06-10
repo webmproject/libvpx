@@ -321,9 +321,17 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
       fill_token_costs_pxd(x->token_costs_pxd, cm->fc.coef_probs_pxd);
 #endif  // CONFIG_TX_SKIP
 
+#if CONFIG_EXT_PARTITION
+    vp9_cost_tokens(cpi->partition_cost[0], get_partition_probs(cm, 0),
+                    vp9_partition_tree);
+    for (i = 1; i < PARTITION_CONTEXTS; ++i)
+      vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
+                      vp9_ext_partition_tree);
+#else
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
       vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
                       vp9_partition_tree);
+#endif
   }
 
   if (!cpi->sf.use_nonrd_pick_mode || (cm->current_video_frame & 0x07) == 1 ||

@@ -64,10 +64,10 @@ typedef enum PARTITION_TYPE {
   PARTITION_HORZ,
   PARTITION_VERT,
   PARTITION_SPLIT,
-  PARTITION_HORZ_A,  // HORZ split and the left partition is recursively split
-  PARTITION_HORZ_B,  // HORZ split and the right partition is recursively split
-  PARTITION_VERT_A,  // VERT split and the top partition is recursively split
-  PARTITION_VERT_B,  // VERT split and the bottom partition is recursively split
+  PARTITION_HORZ_A,  // HORZ split and the left partition is split again
+  PARTITION_HORZ_B,  // HORZ split and the right partition is split again
+  PARTITION_VERT_A,  // VERT split and the top partition is split again
+  PARTITION_VERT_B,  // VERT split and the bottom partition is split again
   EXT_PARTITION_TYPES,
   PARTITION_TYPES = PARTITION_SPLIT + 1,
   PARTITION_INVALID = EXT_PARTITION_TYPES

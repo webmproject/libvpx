@@ -1178,8 +1178,11 @@ static void write_modes_sb(VP9_COMP *cpi,
     return;
 
   m = cm->mi[mi_row * cm->mi_stride + mi_col].src_mi;
-
   partition = partition_lookup[bsl][m->mbmi.sb_type];
+#if CONFIG_EXT_PARTITION
+  partition = get_partition(cm->mi, cm->mi_stride, cm->mi_rows, cm->mi_cols,
+                            mi_row, mi_col, bsize);
+#endif
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
   subsize = get_subsize(bsize, partition);
 #if CONFIG_SUPERTX
@@ -1270,6 +1273,28 @@ static void write_modes_sb(VP9_COMP *cpi,
 #endif
                        mi_row + bs, mi_col + bs, subsize);
         break;
+#if CONFIG_EXT_PARTITION
+      case PARTITION_HORZ_A:
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
+        break;
+      case PARTITION_HORZ_B:
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col + bs);
+        break;
+      case PARTITION_VERT_A:
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
+        break;
+      case PARTITION_VERT_B:
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col + bs);
+        break;
+#endif
       default:
         assert(0);
     }
@@ -1282,9 +1307,13 @@ static void write_modes_sb(VP9_COMP *cpi,
 #endif
 
   // update partition context
+#if CONFIG_EXT_PARTITION
+  update_ext_partition_context(xd, mi_row, mi_col, subsize, bsize, partition);
+#else
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+#endif
 }
 
 static void write_modes(VP9_COMP *cpi,

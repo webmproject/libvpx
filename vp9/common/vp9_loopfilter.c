@@ -1870,8 +1870,12 @@ void vp9_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
                           struct macroblockd_plane planes[MAX_MB_PLANE],
                           int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
+#if CONFIG_EXT_PARTITION
+  const int use_420 = 0;
+#else
   const int use_420 = y_only || (planes[1].subsampling_y == 1 &&
                                  planes[1].subsampling_x == 1);
+#endif
   LOOP_FILTER_MASK lfm;
   int mi_row, mi_col;
 

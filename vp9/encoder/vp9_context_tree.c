@@ -87,9 +87,33 @@ static void alloc_tree_contexts(VP9_COMMON *cm, PC_TREE *tree,
    * Figure out a better way to do this. */
   alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[1]);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[1]);
+
+#if CONFIG_EXT_PARTITION
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontala[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontala[1]);
+  alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontala[2]);
+  alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontalb[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontalb[1]);
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontalb[2]);
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticala[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticala[1]);
+  alloc_mode_context(cm, num_4x4_blk/2, &tree->verticala[2]);
+  alloc_mode_context(cm, num_4x4_blk/2, &tree->verticalb[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticalb[1]);
+  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticalb[2]);
+#endif
 }
 
 static void free_tree_contexts(PC_TREE *tree) {
+#if CONFIG_EXT_PARTITION
+  int i;
+  for (i = 0; i < 3; i++) {
+    free_mode_context(&tree->horizontala[i]);
+    free_mode_context(&tree->horizontalb[i]);
+    free_mode_context(&tree->verticala[i]);
+    free_mode_context(&tree->verticalb[i]);
+  }
+#endif
   free_mode_context(&tree->none);
   free_mode_context(&tree->horizontal[0]);
   free_mode_context(&tree->horizontal[1]);

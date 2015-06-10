@@ -1491,24 +1491,24 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         break;
 #if CONFIG_EXT_PARTITION
       case PARTITION_HORZ_A:
-        decode_partition(cm, xd, tile, mi_row,       mi_col,       r, bsize2);
-        decode_partition(cm, xd, tile, mi_row,       mi_col + hbs, r, bsize2);
+        decode_block(cm, xd, tile, mi_row,       mi_col,       r, bsize2);
+        decode_block(cm, xd, tile, mi_row,       mi_col + hbs, r, bsize2);
         decode_block(cm, xd, tile, mi_row + hbs, mi_col, r, subsize);
         break;
       case PARTITION_HORZ_B:
         decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
-        decode_partition(cm, xd, tile, mi_row + hbs, mi_col,       r, bsize2);
-        decode_partition(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, bsize2);
+        decode_block(cm, xd, tile, mi_row + hbs, mi_col,       r, bsize2);
+        decode_block(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, bsize2);
         break;
       case PARTITION_VERT_A:
-        decode_partition(cm, xd, tile, mi_row,       mi_col,       r, bsize2);
-        decode_partition(cm, xd, tile, mi_row + hbs, mi_col,       r, bsize2);
+        decode_block(cm, xd, tile, mi_row,       mi_col,       r, bsize2);
+        decode_block(cm, xd, tile, mi_row + hbs, mi_col,       r, bsize2);
         decode_block(cm, xd, tile, mi_row, mi_col + hbs, r, subsize);
         break;
       case PARTITION_VERT_B:
         decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
-        decode_partition(cm, xd, tile, mi_row,       mi_col + hbs, r, bsize2);
-        decode_partition(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, bsize2);
+        decode_block(cm, xd, tile, mi_row,       mi_col + hbs, r, bsize2);
+        decode_block(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, bsize2);
         break;
 #endif
       default:
@@ -1566,16 +1566,20 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         update_partition_context(xd, mi_row, mi_col, subsize, bsize);
         break;
       case PARTITION_HORZ_A:
+        update_partition_context(xd, mi_row, mi_col, bsize2, subsize);
         update_partition_context(xd, mi_row + hbs, mi_col, subsize, subsize);
         break;
       case PARTITION_HORZ_B:
         update_partition_context(xd, mi_row, mi_col, subsize, subsize);
+        update_partition_context(xd, mi_row + hbs, mi_col, bsize2, subsize);
         break;
       case PARTITION_VERT_A:
+        update_partition_context(xd, mi_row, mi_col, bsize2, subsize);
         update_partition_context(xd, mi_row, mi_col + hbs, subsize, subsize);
         break;
       case PARTITION_VERT_B:
         update_partition_context(xd, mi_row, mi_col, subsize, subsize);
+        update_partition_context(xd, mi_row, mi_col + hbs, bsize2, subsize);
         break;
       default:
         assert(0 && "Invalid partition type");

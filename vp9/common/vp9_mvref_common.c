@@ -612,7 +612,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
       break;
     }
     default:
-      assert("Invalid block index.");
+      assert(0 && "Invalid block index.");
   }
 }
 
