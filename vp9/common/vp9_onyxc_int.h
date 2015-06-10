@@ -429,10 +429,9 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
 
-static void txfm_partition_update(MACROBLOCKD *xd, int blk_row, int blk_col,
+static void txfm_partition_update(TXFM_CONTEXT *above_ctx,
+                                  TXFM_CONTEXT *left_ctx,
                                   TX_SIZE tx_size) {
-  TXFM_CONTEXT *above_ctx = xd->above_txfm_context + (blk_col / 2);
-  TXFM_CONTEXT *left_ctx = xd->left_txfm_context + (blk_row / 2);
   BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
   int bs = num_8x8_blocks_high_lookup[bsize];
   int i;
@@ -442,11 +441,9 @@ static void txfm_partition_update(MACROBLOCKD *xd, int blk_row, int blk_col,
   }
 }
 
-static int txfm_partition_context(const MACROBLOCKD *xd,
-                                  int blk_row, int blk_col,
+static int txfm_partition_context(const TXFM_CONTEXT *above_ctx,
+                                  const TXFM_CONTEXT *left_ctx,
                                   TX_SIZE tx_size) {
-  const TXFM_CONTEXT *above_ctx = xd->above_txfm_context + (blk_col / 2);
-  const TXFM_CONTEXT *left_ctx = xd->left_txfm_context + (blk_row / 2);
   int above = *above_ctx < tx_size;
   int left = *left_ctx < tx_size;
   return (tx_size - 1) * 3 + above + left;

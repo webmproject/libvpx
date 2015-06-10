@@ -4066,7 +4066,9 @@ static void update_txfm_count(MACROBLOCKD *xd, FRAME_COUNTS *counts,
   int tx_idx = (blk_row / 2) * 8 + (blk_col / 2);
   int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
-  int ctx = txfm_partition_context(xd, blk_row, blk_col, tx_size);
+  int ctx = txfm_partition_context(xd->above_txfm_context + (blk_col / 2),
+                                   xd->left_txfm_context + (blk_row / 2),
+                                   tx_size);
   TX_SIZE plane_tx_size = mbmi->inter_tx_size[tx_idx];
 
   if (xd->mb_to_bottom_edge < 0)
@@ -4081,7 +4083,8 @@ static void update_txfm_count(MACROBLOCKD *xd, FRAME_COUNTS *counts,
     if (!dry_run)
       ++counts->txfm_partition[ctx][0];
     mbmi->tx_size = tx_size;
-    txfm_partition_update(xd, blk_row, blk_col, tx_size);
+    txfm_partition_update(xd->above_txfm_context + (blk_col / 2),
+                          xd->left_txfm_context + (blk_row / 2), tx_size);
   } else {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bh = num_4x4_blocks_high_lookup[bsize];
@@ -4092,7 +4095,8 @@ static void update_txfm_count(MACROBLOCKD *xd, FRAME_COUNTS *counts,
     if (tx_size == TX_8X8) {
       mbmi->inter_tx_size[tx_idx] = TX_4X4;
       mbmi->tx_size = TX_4X4;
-      txfm_partition_update(xd, blk_row, blk_col, TX_4X4);
+      txfm_partition_update(xd->above_txfm_context + (blk_col / 2),
+                            xd->left_txfm_context + (blk_row / 2), TX_4X4);
       return;
     }
 
@@ -4215,5 +4219,6 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
   }
 
   if (mbmi->sb_type < BLOCK_8X8)
-    txfm_partition_update(xd, 0, 0, TX_4X4);
+    txfm_partition_update(xd->above_txfm_context,
+                          xd->left_txfm_context, TX_4X4);
 }
