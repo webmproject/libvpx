@@ -373,6 +373,7 @@ libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
 
 TEST_INTRA_PRED_SPEED_BIN=./test_intra_pred_speed$(EXE_SFX)
 TEST_INTRA_PRED_SPEED_SRCS=$(addprefix test/,$(call enabled,TEST_INTRA_PRED_SPEED_SRCS))
+TEST_INTRA_PRED_SPEED_OBJS := $(sort $(call objs,$(TEST_INTRA_PRED_SPEED_SRCS)))
 
 libvpx_test_srcs.txt:
 	@echo "    [CREATE] $@"
@@ -486,7 +487,6 @@ $(eval $(call linkerxx_template,$(LIBVPX_TEST_BIN), \
               $(LIBVPX_TEST_OBJS) \
               -L. -lvpx -lgtest $(extralibs) -lm))
 
-TEST_INTRA_PRED_SPEED_OBJS := $(sort $(call objs,$(TEST_INTRA_PRED_SPEED_SRCS)))
 ifneq ($(strip $(TEST_INTRA_PRED_SPEED_OBJS)),)
 $(TEST_INTRA_PRED_SPEED_OBJS) $(TEST_INTRA_PRED_SPEED_OBJS:.o=.d): CXXFLAGS += $(GTEST_INCLUDES)
 OBJS-yes += $(TEST_INTRA_PRED_SPEED_OBJS)
