@@ -16,6 +16,7 @@
 
 #include "./vp9_rtcd.h"
 #include "test/acm_random.h"
+#include "test/clear_system_state.h"
 #include "test/md5_helper.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
@@ -66,6 +67,7 @@ void TestIntraPred(const char name[], VpxPredFunc const *pred_funcs,
     for (int num_tests = 0; num_tests < kNumTests; ++num_tests) {
       pred_funcs[k](src, kBPS, above, left);
     }
+    libvpx_test::ClearSystemState();
     vpx_usec_timer_mark(&timer);
     const int elapsed_time =
         static_cast<int>(vpx_usec_timer_elapsed(&timer) / 1000);
