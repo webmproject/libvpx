@@ -51,8 +51,8 @@ typedef struct {
   double pcnt_motion;
   double pcnt_second_ref;
   double pcnt_neutral;
-  double ul_intra_pct;
-  double image_start_row;
+  double intra_skip_pct;
+  double inactive_zone_rows;  // Image mask rows top and bottom.
   double MVr;
   double mvr_abs;
   double MVc;
