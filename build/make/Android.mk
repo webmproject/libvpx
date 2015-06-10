@@ -163,6 +163,7 @@ ifeq ($(CONFIG_RUNTIME_CPU_DETECT),yes)
 endif
 
 # Add a dependency to force generation of the RTCD files.
+define rtcd_dep_template
 ifeq ($(CONFIG_VP8), yes)
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vp8_rtcd.h
 endif
@@ -175,6 +176,9 @@ $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_dsp_rtcd.h
 ifeq ($(TARGET_ARCH_ABI),x86)
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_config.asm
 endif
+endef
+
+$(eval $(call rtcd_dep_template))
 
 .PHONY: clean
 clean:
