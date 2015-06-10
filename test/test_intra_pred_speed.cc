@@ -311,17 +311,20 @@ INTRA_PRED_TEST(C, TestIntraPred32, vp9_dc_predictor_32x32_c,
                 vp9_d63_predictor_32x32_c, vp9_tm_predictor_32x32_c)
 
 #if HAVE_SSE2
+#if ARCH_X86_64
 INTRA_PRED_TEST(SSE2, TestIntraPred32, vp9_dc_predictor_32x32_sse2,
                 vp9_dc_left_predictor_32x32_sse2,
                 vp9_dc_top_predictor_32x32_sse2,
                 vp9_dc_128_predictor_32x32_sse2, vp9_v_predictor_32x32_sse2,
                 NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-#if ARCH_X86_64
-                vp9_tm_predictor_32x32_sse2
+                vp9_tm_predictor_32x32_sse2)
 #else
-                NULL
-#endif
-               )
+INTRA_PRED_TEST(SSE2, TestIntraPred32, vp9_dc_predictor_32x32_sse2,
+                vp9_dc_left_predictor_32x32_sse2,
+                vp9_dc_top_predictor_32x32_sse2,
+                vp9_dc_128_predictor_32x32_sse2, vp9_v_predictor_32x32_sse2,
+                NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+#endif  // ARCH_X86_64
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
