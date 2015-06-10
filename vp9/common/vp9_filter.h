@@ -27,17 +27,16 @@ extern "C" {
 #define SUBPEL_SHIFTS (1 << SUBPEL_BITS)
 #define SUBPEL_TAPS 8
 
-typedef enum {
-  EIGHTTAP = 0,
-  EIGHTTAP_SMOOTH = 1,
-  EIGHTTAP_SHARP = 2,
-  SWITCHABLE_FILTERS = 3, /* Number of switchable filters */
-  BILINEAR = 3,
-  // The codec can operate in four possible inter prediction filter mode:
-  // 8-tap, 8-tap-smooth, 8-tap-sharp, and switching between the three.
-  SWITCHABLE_FILTER_CONTEXTS = SWITCHABLE_FILTERS + 1,
-  SWITCHABLE = 4  /* should be the last one */
-} INTERP_FILTER;
+#define EIGHTTAP            0
+#define EIGHTTAP_SMOOTH     1
+#define EIGHTTAP_SHARP      2
+#define SWITCHABLE_FILTERS  3 /* Number of switchable filters */
+#define BILINEAR            3
+// The codec can operate in four possible inter prediction filter mode:
+// 8-tap, 8-tap-smooth, 8-tap-sharp, and switching between the three.
+#define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
+#define SWITCHABLE 4 /* should be the last one */
+typedef uint8_t INTERP_FILTER;
 
 typedef int16_t InterpKernel[SUBPEL_TAPS];
 

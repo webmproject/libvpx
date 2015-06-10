@@ -18,7 +18,8 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                              int_mv *mv_ref_list,
                              int block, int mi_row, int mi_col,
-                             find_mv_refs_sync sync, void *const data) {
+                             find_mv_refs_sync sync, void *const data,
+                             uint8_t *mode_context) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
@@ -138,7 +139,7 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
  Done:
 
-  mi->mbmi.mode_context[ref_frame] = counter_to_context[context_counter];
+  mode_context[ref_frame] = counter_to_context[context_counter];
 
   // Clamp vectors
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
@@ -150,9 +151,10 @@ void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col,
-                      find_mv_refs_sync sync, void *const data) {
+                      find_mv_refs_sync sync, void *const data,
+                      uint8_t *mode_context) {
   find_mv_refs_idx(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
-                   mi_row, mi_col, sync, data);
+                   mi_row, mi_col, sync, data, mode_context);
 }
 
 static void lower_mv_precision(MV *mv, int allow_hp) {
@@ -181,7 +183,8 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
                                    int block, int ref, int mi_row, int mi_col,
-                                   int_mv *nearest_mv, int_mv *near_mv) {
+                                   int_mv *nearest_mv, int_mv *near_mv,
+                                   uint8_t *mode_context) {
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
   MODE_INFO *const mi = xd->mi[0];
   b_mode_info *bmi = mi->bmi;
@@ -190,7 +193,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
   assert(MAX_MV_REF_CANDIDATES == 2);
 
   find_mv_refs_idx(cm, xd, tile, mi, mi->mbmi.ref_frame[ref], mv_list, block,
-                   mi_row, mi_col, NULL, NULL);
+                   mi_row, mi_col, NULL, NULL, mode_context);
 
   near_mv->as_int = 0;
   switch (block) {

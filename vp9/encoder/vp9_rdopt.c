@@ -1804,7 +1804,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
         frame_mv[ZEROMV][frame].as_int = 0;
         vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, i, ref, mi_row, mi_col,
                                       &frame_mv[NEARESTMV][frame],
-                                      &frame_mv[NEARMV][frame]);
+                                      &frame_mv[NEARMV][frame],
+                                      xd->mi[0]->mbmi.mode_context);
       }
 
       // search for the best motion vector on this segment
@@ -2220,7 +2221,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Gets an initial list of candidate vectors from neighbours and orders them
   vp9_find_mv_refs(cm, xd, tile, mi, ref_frame, candidates, mi_row, mi_col,
-                   NULL, NULL);
+                   NULL, NULL, xd->mi[0]->mbmi.mode_context);
 
   // Candidate refinement carried out at encoder and decoder
   vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
