@@ -1020,12 +1020,6 @@ static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
                              : literal_to_filter[vp9_rb_read_literal(rb, 2)];
 }
 
-void vp9_read_frame_size(struct vp9_read_bit_buffer *rb,
-                         int *width, int *height) {
-  *width = vp9_rb_read_literal(rb, 16) + 1;
-  *height = vp9_rb_read_literal(rb, 16) + 1;
-}
-
 static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   cm->display_width = cm->width;
   cm->display_height = cm->height;
@@ -1604,20 +1598,6 @@ static void error_handler(void *data) {
   vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
 }
 
-int vp9_read_sync_code(struct vp9_read_bit_buffer *const rb) {
-  return vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_0 &&
-         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_1 &&
-         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
-}
-
-BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb) {
-  int profile = vp9_rb_read_bit(rb);
-  profile |= vp9_rb_read_bit(rb) << 1;
-  if (profile > 2)
-    profile += vp9_rb_read_bit(rb);
-  return (BITSTREAM_PROFILE) profile;
-}
-
 static void read_bitdepth_colorspace_sampling(
     VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
@@ -1965,6 +1945,28 @@ static struct vp9_read_bit_buffer* init_read_bit_buffer(
     rb->bit_buffer_end = data_end;
   }
   return rb;
+}
+
+//------------------------------------------------------------------------------
+
+int vp9_read_sync_code(struct vp9_read_bit_buffer *const rb) {
+  return vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_0 &&
+         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_1 &&
+         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
+}
+
+void vp9_read_frame_size(struct vp9_read_bit_buffer *rb,
+                         int *width, int *height) {
+  *width = vp9_rb_read_literal(rb, 16) + 1;
+  *height = vp9_rb_read_literal(rb, 16) + 1;
+}
+
+BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb) {
+  int profile = vp9_rb_read_bit(rb);
+  profile |= vp9_rb_read_bit(rb) << 1;
+  if (profile > 2)
+    profile += vp9_rb_read_bit(rb);
+  return (BITSTREAM_PROFILE) profile;
 }
 
 void vp9_decode_frame(VP9Decoder *pbi,
