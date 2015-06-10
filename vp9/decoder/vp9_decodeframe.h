@@ -16,11 +16,8 @@
 extern "C" {
 #endif
 
-struct VP9Common;
 struct VP9Decoder;
 struct vp9_read_bit_buffer;
-
-void vp9_init_dequantizer(struct VP9Common *cm);
 
 int vp9_read_sync_code(struct vp9_read_bit_buffer *const rb);
 void vp9_read_frame_size(struct vp9_read_bit_buffer *rb,
