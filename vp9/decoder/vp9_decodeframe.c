@@ -1974,7 +1974,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
                       const uint8_t **p_data_end) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  struct vp9_read_bit_buffer rb = { NULL, NULL, 0, NULL, 0};
+  struct vp9_read_bit_buffer rb;
   int context_updated = 0;
   uint8_t clear_data[MAX_VP9_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,
