@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "992af412_1d033742",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-06-10T23:55:49Z",
+      "side": 1,
+      "message": "Small alignment issue.",
+      "range": {
+        "startLine": 483,
+        "startChar": 5,
+        "endLine": 485,
+        "endChar": 28
+      },
+      "revId": "54901f9e196c9bb2453d29deb94206209826acb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
