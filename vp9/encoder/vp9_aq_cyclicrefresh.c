@@ -95,19 +95,6 @@ static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
     return 1;
 }
 
-static void adjust_cyclic_refresh_parameters(VP9_COMP *const cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
-  const RATE_CONTROL *const rc = &cpi->rc;
-  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-  // Adjust some parameters, currently only for low resolutions at low bitrates.
-  if (cm->width <= 352 &&
-      cm->height <= 288 &&
-      rc->avg_frame_bandwidth < 3400) {
-      cr->motion_thresh = 4;
-      cr->rate_boost_fac = 1.25;
-  }
-}
-
 // Check if this coding block, of size bsize, should be considered for refresh
 // (lower-qp coding). Decision can be based on various factors, such as
 // size of the coding block (i.e., below min_block size rejected), coding
@@ -435,18 +422,30 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
   cr->sb_index = i;
 }
 
-// Set/update global/frame level cyclic refresh parameters.
+// Set cyclic refresh parameters.
 void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   cr->percent_refresh = 10;
+  cr->max_qdelta_perc = 50;
+  cr->time_for_refresh = 0;
   // Use larger delta-qp (increase rate_ratio_qdelta) for first few (~4)
-  // periods of the refresh cycle, after a key frame. This corresponds to ~40
-  // frames with cr->percent_refresh = 10.
-  if (rc->frames_since_key <  40)
+  // periods of the refresh cycle, after a key frame.
+  if (rc->frames_since_key <  4 * cr->percent_refresh)
     cr->rate_ratio_qdelta = 3.0;
   else
     cr->rate_ratio_qdelta = 2.0;
+  // Adjust some parameters for low resolutions at low bitrates.
+  if (cm->width <= 352 &&
+      cm->height <= 288 &&
+      rc->avg_frame_bandwidth < 3400) {
+    cr->motion_thresh = 4;
+    cr->rate_boost_fac = 1.25;
+  } else {
+    cr->motion_thresh = 32;
+    cr->rate_boost_fac = 1.7;
+  }
 }
 
 // Setup cyclic background refresh: set delta q and segmentation map.
@@ -475,9 +474,6 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     int qindex2;
     const double q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
     vp9_clear_system_state();
-    cr->max_qdelta_perc = 50;
-    cr->time_for_refresh = 0;
-    cr->rate_boost_fac = 1.7;
     // Set rate threshold to some multiple (set to 2 for now) of the target
     // rate (target is given by sb64_target_rate and scaled by 256).
     cr->thresh_rate_sb = ((int64_t)(rc->sb64_target_rate) << 8) << 2;
@@ -485,9 +481,6 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     // q will not exceed 457, so (q * q) is within 32bit; see:
     // vp9_convert_qindex_to_q(), vp9_ac_quant(), ac_qlookup*[].
     cr->thresh_dist_sb = ((int64_t)(q * q)) << 2;
-    cr->motion_thresh = 32;
-
-    adjust_cyclic_refresh_parameters(cpi);
 
     // Set up segmentation.
     // Clear down the segment map.
