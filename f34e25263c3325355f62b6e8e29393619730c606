@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "992af412_4ed81796",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2140,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-06-11T19:02:50Z",
+      "side": 1,
+      "message": "This number should be replaced with the actual bits per pixel value (cpi-\u003ecommon.bit_depth).",
+      "range": {
+        "startLine": 2140,
+        "startChar": 31,
+        "endLine": 2140,
+        "endChar": 32
+      },
+      "revId": "f34e25263c3325355f62b6e8e29393619730c606",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9ecd03d_a8e29f13",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2706,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-06-11T19:02:50Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2706,
+        "startChar": 20,
+        "endLine": 2706,
+        "endChar": 22
+      },
+      "revId": "f34e25263c3325355f62b6e8e29393619730c606",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b92b3816_f238e1ff",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5741,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-06-11T19:02:50Z",
+      "side": 1,
+      "message": "It\u0027s bug here. Should be 1 + PALETTE_DELTA_BIT + cm-\u003ebitdepth * m2",
+      "range": {
+        "startLine": 5741,
+        "startChar": 40,
+        "endLine": 5741,
+        "endChar": 41
+      },
+      "revId": "f34e25263c3325355f62b6e8e29393619730c606",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b92b3816_12a1ddb1",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 7424,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-06-11T19:02:50Z",
+      "side": 1,
+      "message": "replace with cpi-\u003ecommon.bitdepth",
+      "range": {
+        "startLine": 7424,
+        "startChar": 12,
+        "endLine": 7424,
+        "endChar": 13
+      },
+      "revId": "f34e25263c3325355f62b6e8e29393619730c606",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
