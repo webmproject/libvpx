@@ -306,6 +306,7 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG scaled_last_source;
 
   TileDataEnc *tile_data;
+  int allocated_tiles;  // Keep track of memory allocated for tiles.
 
   // For a still frame, this flag is set to 1 to skip partition search.
   int partition_search_skippable_frame;
