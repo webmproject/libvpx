@@ -652,9 +652,9 @@ static int compare_interinfo(MB_MODE_INFO *mbmi, MB_MODE_INFO *ref_mbmi) {
   }
 }
 
-static int check_inside(VP9_COMMON *cm, int mi_row, int mi_col) {
-  return mi_row >= 0 && mi_col >= 0 &&
-         mi_row < cm->mi_rows && mi_col < cm->mi_cols;
+static int check_inside(const TileInfo *const tile, int mi_row, int mi_col) {
+  return mi_row >= tile->mi_row_start && mi_col >= tile->mi_col_start &&
+         mi_row < tile->mi_row_end && mi_col < tile->mi_col_end;
 }
 
 static int is_right_available(BLOCK_SIZE bsize, int mi_row, int mi_col) {
@@ -707,6 +707,7 @@ static int is_second_rec(int mi_row, int mi_col, BLOCK_SIZE bsize) {
 }
 
 int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
+                                 const TileInfo *const tile,
                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
                                  MB_MODE_INFO *ref_list[18]) {
   int bw = 4 << b_width_log2_lookup[bsize];
@@ -771,7 +772,7 @@ int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
     col_offset = col_offset_cand[i];
     if ((col_offset < (bw / 8) ||
         (col_offset == (bw / 8) && is_right_available(bsize, mi_row, mi_col)))
-        && check_inside(cm, mi_row + row_offset, mi_col + col_offset)) {
+        && check_inside(tile, mi_row + row_offset, mi_col + col_offset)) {
       mi_offset = row_offset * cm->mi_stride + col_offset;
       ref_mbmi = &xd->mi[mi_offset].src_mi->mbmi;
       if (is_inter_block(ref_mbmi)) {
