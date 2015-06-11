@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b92b3816_63ac0124",
+        "filename": "vp9/common/vp9_seg_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-11T22:22:33Z",
+      "side": 1,
+      "message": "are this and the next one used in any hot paths?",
+      "revId": "9c17b988e294f26fb4f09fdf4d707761470753dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79254042_b2e6e95e",
+        "filename": "vp9/common/vp9_seg_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-11T22:22:33Z",
+      "side": 1,
+      "message": "how about this one?",
+      "revId": "9c17b988e294f26fb4f09fdf4d707761470753dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
