@@ -54,12 +54,6 @@ void vp9_set_segdata(struct segmentation *seg, int segment_id,
   seg->feature_data[segment_id][feature_id] = seg_data;
 }
 
-int vp9_get_segdata(const struct segmentation *seg, int segment_id,
-                    SEG_LVL_FEATURES feature_id) {
-  return seg->feature_data[segment_id][feature_id];
-}
-
-
 const vp9_tree_index vp9_segment_tree[TREE_SIZE(MAX_SEGMENTS)] = {
   2,  4,  6,  8, 10, 12,
   0, -1, -2, -3, -4, -5, -6, -7

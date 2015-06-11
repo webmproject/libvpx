@@ -3008,7 +3008,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
     if (segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
-        vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
+        get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
       ref_frame_skip_mask[0] |= (1 << ref_frame);
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
     }
@@ -3876,7 +3876,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
     if (segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
-        vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
+        get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
       continue;
     // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to

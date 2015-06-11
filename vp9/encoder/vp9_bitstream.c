@@ -210,7 +210,7 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     assert(!is_compound);
     assert(mbmi->ref_frame[0] ==
-               vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME));
+               get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME));
   } else {
     // does the feature use compound prediction or not
     // (if not specified at the frame/segment level)
@@ -790,7 +790,7 @@ static void encode_segmentation(VP9_COMMON *cm, MACROBLOCKD *xd,
         const int active = segfeature_active(seg, i, j);
         vp9_wb_write_bit(wb, active);
         if (active) {
-          const int data = vp9_get_segdata(seg, i, j);
+          const int data = get_segdata(seg, i, j);
           const int data_max = vp9_seg_feature_data_max(j);
 
           if (vp9_is_segfeature_signed(j)) {
