@@ -893,6 +893,10 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
              sizeof(uint8_t) * ctx->num_4x4_blk);
 
+  for (i = 0; i < MAX_MB_PLANE; ++i)
+    vpx_memcpy(x->blk_skip[i], ctx->blk_skip[i],
+               sizeof(uint8_t) * ctx->num_4x4_blk);
+
   if (!output_enabled)
     return;
 
@@ -3800,6 +3804,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(rdc->filter_diff);
   vp9_zero(rdc->tx_select_diff);
   vp9_zero(rd_opt->tx_select_threshes);
+  vp9_zero(x->blk_skip);
 
   xd->lossless = cm->base_qindex == 0 &&
                  cm->y_dc_delta_q == 0 &&

@@ -21,6 +21,7 @@ struct ThreadData;
 typedef struct {
   MODE_INFO mic;
   uint8_t *zcoeff_blk;
+  uint8_t *blk_skip[MAX_MB_PLANE];
   tran_low_t *coeff[MAX_MB_PLANE][3];
   tran_low_t *qcoeff[MAX_MB_PLANE][3];
   tran_low_t *dqcoeff[MAX_MB_PLANE][3];

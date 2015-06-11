@@ -95,6 +95,7 @@ struct macroblock {
 
   uint8_t zcoeff_blk[TX_SIZES][256];
   int skip;
+  uint8_t blk_skip[MAX_MB_PLANE][256];
 
   int encode_breakout;
 
