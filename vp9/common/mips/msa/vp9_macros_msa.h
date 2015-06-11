@@ -743,6 +743,26 @@
   CLIP_SH2_0_255(in2, in3);                   \
 }
 
+/* Description : Horizontal addition of unsigned byte vector elements
+   Arguments   : Inputs  - in0, in1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each unsigned odd byte element from 'in0' is added to
+                 even unsigned byte element from 'in0' (pairwise) and the
+                 halfword result is stored in 'out0'
+*/
+#define HADD_UB2(RTYPE, in0, in1, out0, out1) {          \
+  out0 = (RTYPE)__msa_hadd_u_h((v16u8)in0, (v16u8)in0);  \
+  out1 = (RTYPE)__msa_hadd_u_h((v16u8)in1, (v16u8)in1);  \
+}
+#define HADD_UB2_UH(...) HADD_UB2(v8u16, __VA_ARGS__)
+
+#define HADD_UB4(RTYPE, in0, in1, in2, in3, out0, out1, out2, out3) {  \
+  HADD_UB2(RTYPE, in0, in1, out0, out1);                               \
+  HADD_UB2(RTYPE, in2, in3, out2, out3);                               \
+}
+#define HADD_UB4_UH(...) HADD_UB4(v8u16, __VA_ARGS__)
+
 /* Description : Insert specified word elements from input vectors to 1
                  destination vector
    Arguments   : Inputs  - in0, in1, in2, in3 (4 input vectors)
@@ -754,6 +774,19 @@
   out = (RTYPE)__msa_insert_w((v4i32)out, 1, in1);  \
 }
 #define INSERT_W2_SB(...) INSERT_W2(v16i8, __VA_ARGS__)
+
+/* Description : Insert specified double word elements from input vectors to 1
+                 destination vector
+   Arguments   : Inputs  - in0, in1      (2 input vectors)
+                 Outputs - out           (output vector)
+                 Return Type - as per RTYPE
+*/
+#define INSERT_D2(RTYPE, in0, in1, out) {           \
+  out = (RTYPE)__msa_insert_d((v2i64)out, 0, in0);  \
+  out = (RTYPE)__msa_insert_d((v2i64)out, 1, in1);  \
+}
+#define INSERT_D2_UB(...) INSERT_D2(v16u8, __VA_ARGS__)
+#define INSERT_D2_SB(...) INSERT_D2(v16i8, __VA_ARGS__)
 
 /* Description : Interleave even byte elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
