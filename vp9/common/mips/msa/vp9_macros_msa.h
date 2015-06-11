@@ -244,6 +244,22 @@
   out3 = LW((psrc) + 3 * stride);                    \
 }
 
+/* Description : Load double words with stride
+   Arguments   : Inputs  - psrc    (source pointer to load from)
+                         - stride
+                 Outputs - out0, out1
+   Details     : Loads double word in 'out0' from (psrc)
+                 Loads double word in 'out1' from (psrc + stride)
+*/
+#define LD2(psrc, stride, out0, out1) {  \
+  out0 = LD((psrc));                     \
+  out1 = LD((psrc) + stride);            \
+}
+#define LD4(psrc, stride, out0, out1, out2, out3) {  \
+  LD2((psrc), stride, out0, out1);                   \
+  LD2((psrc) + 2 * stride, stride, out2, out3);      \
+}
+
 /* Description : Store 4 words with stride
    Arguments   : Inputs  - in0, in1, in2, in3, pdst, stride
    Details     : Stores word from 'in0' to (pdst)
@@ -480,6 +496,24 @@
                                           \
   out0_m = __msa_copy_u_d((v2i64)in, 0);  \
   SD(out0_m, pdst);                       \
+}
+
+/* Description : Store as 8x2 byte block to destination memory from input vector
+   Arguments   : Inputs  - in, pdst, stride
+   Details     : Index 0 double word element from input vector 'in' is copied
+                 and stored to destination memory at (pdst)
+                 Index 1 double word element from input vector 'in' is copied
+                 and stored to destination memory at (pdst + stride)
+*/
+#define ST8x2_UB(in, pdst, stride) {        \
+  uint64_t out0_m, out1_m;                  \
+  uint8_t *pblk_8x2_m = (uint8_t *)(pdst);  \
+                                            \
+  out0_m = __msa_copy_u_d((v2i64)in, 0);    \
+  out1_m = __msa_copy_u_d((v2i64)in, 1);    \
+                                            \
+  SD(out0_m, pblk_8x2_m);                   \
+  SD(out1_m, pblk_8x2_m + stride);          \
 }
 
 /* Description : Store as 8x4 byte block to destination memory from input
