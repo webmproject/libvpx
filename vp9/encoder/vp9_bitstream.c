@@ -340,6 +340,22 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     txfm_partition_update(xd->above_txfm_context,
                           xd->left_txfm_context, TX_4X4);
 
+  if (is_inter) {
+    if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT && skip) {
+      TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+      BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+      int bh = num_4x4_blocks_wide_lookup[txb_size];
+      int width  = num_4x4_blocks_wide_lookup[bsize];
+      int height = num_4x4_blocks_high_lookup[bsize];
+      int idx, idy;
+      for (idy = 0; idy < height; idy += bh)
+        for (idx = 0; idx < width; idx += bh)
+          txfm_partition_update(xd->above_txfm_context + (idx / 2),
+                                xd->left_txfm_context + (idy / 2),
+                                max_tx_size);
+    }
+  }
+
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
       write_intra_mode(w, mode, cm->fc->y_mode_prob[size_group_lookup[bsize]]);

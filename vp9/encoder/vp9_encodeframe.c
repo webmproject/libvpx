@@ -4202,10 +4202,8 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     ++td->counts->tx.tx_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
   }
 
-  if (cm->tx_mode == TX_MODE_SELECT &&
-      mbmi->sb_type >= BLOCK_8X8  &&
-      !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
-    if (is_inter_block(mbmi)) {
+  if (is_inter_block(mbmi)) {
+    if (cm->tx_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_8X8) {
       BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
       int bh = num_4x4_blocks_wide_lookup[txb_size];
       int width  = num_4x4_blocks_wide_lookup[bsize];
@@ -4213,8 +4211,13 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
       int idx, idy;
       for (idy = 0; idy < height; idy += bh)
         for (idx = 0; idx < width; idx += bh)
-          update_txfm_count(xd, td->counts, max_txsize_lookup[mbmi->sb_type],
-                            idy, idx, !output_enabled);
+          if (mbmi->skip || seg_skip)
+            txfm_partition_update(xd->above_txfm_context + (idx / 2),
+                                  xd->left_txfm_context + (idy / 2),
+                                  max_txsize_lookup[bsize]);
+          else
+            update_txfm_count(xd, td->counts, max_txsize_lookup[mbmi->sb_type],
+                              idy, idx, !output_enabled);
     }
   }
 
