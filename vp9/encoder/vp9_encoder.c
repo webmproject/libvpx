@@ -4165,7 +4165,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           (is_two_pass_svc(cpi) &&
               cpi->svc.encode_empty_frame_state != ENCODING))) {
     vp9_rc_get_second_pass_params(cpi);
-  } else {
+  } else if (oxcf->pass == 1) {
     set_frame_size(cpi);
   }
 
