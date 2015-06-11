@@ -16,6 +16,24 @@
       "revId": "a2288d274c19b6604d10e9261e39feb8b03b6e35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d95e2ccf_2655d694",
+        "filename": "vp9/common/mips/msa/vp9_intra_predict_msa.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-06-11T03:31:44Z",
+      "side": 1,
+      "message": "ok.",
+      "parentUuid": "39858859_00bc300a",
+      "revId": "a2288d274c19b6604d10e9261e39feb8b03b6e35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
