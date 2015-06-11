@@ -2120,8 +2120,8 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
                                      unsigned int *ref_costs_single,
                                      unsigned int *ref_costs_comp,
                                      vp9_prob *comp_mode_p) {
-  int seg_ref_active = vp9_segfeature_active(&cm->seg, segment_id,
-                                             SEG_LVL_REF_FRAME);
+  int seg_ref_active = segfeature_active(&cm->seg, segment_id,
+                                         SEG_LVL_REF_FRAME);
   if (seg_ref_active) {
     memset(ref_costs_single, 0, MAX_REF_FRAMES * sizeof(*ref_costs_single));
     memset(ref_costs_comp,   0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
@@ -3007,7 +3007,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
     }
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
-    if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
+    if (segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
         vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
       ref_frame_skip_mask[0] |= (1 << ref_frame);
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
@@ -3017,7 +3017,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   // Disable this drop out case if the ref frame
   // segment level feature is enabled for this segment. This is to
   // prevent the possibility that we end up unable to pick any mode.
-  if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME)) {
+  if (!segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME)) {
     // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
     // unless ARNR filtering is enabled in which case we want
     // an unfiltered alternative. We allow near/nearest as well
@@ -3196,7 +3196,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
 
       // Do not allow compound prediction if the segment level reference frame
       // feature is in use as in this case there can only be one reference.
-      if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
+      if (segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
         continue;
 
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
@@ -3638,7 +3638,7 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
 
   rd_cost->rate = INT_MAX;
 
-  assert(vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP));
+  assert(segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP));
 
   mbmi->mode = ZEROMV;
   mbmi->uv_mode = DC_PRED;
@@ -3850,7 +3850,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
         continue;
       // Do not allow compound prediction if the segment level reference frame
       // feature is in use as in this case there can only be one reference.
-      if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
+      if (segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
         continue;
 
       if ((sf->mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
@@ -3875,13 +3875,13 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
 
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
-    if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
+    if (segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
         vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
       continue;
     // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to
     // prevent the possibility that we end up unable to pick any mode.
-    } else if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME)) {
+    } else if (!segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME)) {
       // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
       // unless ARNR filtering is enabled in which case we want
       // an unfiltered alternative. We allow near/nearest as well

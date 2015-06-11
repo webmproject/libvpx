@@ -177,7 +177,7 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
                      int segment_id, vp9_reader *r) {
-  if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
+  if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
     const int ctx = vp9_get_skip_context(xd);
@@ -307,7 +307,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = xd->counts;
 
-  if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
+  if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     ref_frame[0] = (MV_REFERENCE_FRAME)vp9_get_segdata(&cm->seg, segment_id,
                                                        SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
@@ -444,7 +444,7 @@ static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
 
 static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                int segment_id, vp9_reader *r) {
-  if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
+  if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     return vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) !=
            INTRA_FRAME;
   } else {
@@ -493,7 +493,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
                      mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
 
-  if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+  if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     mbmi->mode = ZEROMV;
     if (bsize < BLOCK_8X8) {
         vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,

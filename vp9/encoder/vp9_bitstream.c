@@ -93,7 +93,7 @@ static void write_selected_tx_size(const VP9_COMMON *cm,
 
 static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       int segment_id, const MODE_INFO *mi, vp9_writer *w) {
-  if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
+  if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
     const int skip = mi->mbmi.skip;
@@ -207,7 +207,7 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
   // If segment level coding of this signal is disabled...
   // or the segment allows multiple reference frame options
-  if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
+  if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     assert(!is_compound);
     assert(mbmi->ref_frame[0] ==
                vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME));
@@ -264,7 +264,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
   skip = write_skip(cm, xd, segment_id, mi, w);
 
-  if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
+  if (!segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
     vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
@@ -293,7 +293,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     write_ref_frames(cm, xd, w);
 
     // If segment skip is not enabled code the mode.
-    if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
+    if (!segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
         write_inter_mode(w, mode, inter_probs);
       }
@@ -787,7 +787,7 @@ static void encode_segmentation(VP9_COMMON *cm, MACROBLOCKD *xd,
 
     for (i = 0; i < MAX_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
-        const int active = vp9_segfeature_active(seg, i, j);
+        const int active = segfeature_active(seg, i, j);
         vp9_wb_write_bit(wb, active);
         if (active) {
           const int data = vp9_get_segdata(seg, i, j);
