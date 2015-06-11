@@ -173,7 +173,8 @@ static void calc_centroids(const double *data, double *centroids,
                            const int *indices, int n, int k, int dim) {
   int i, j, index;
   int count[256];
-  unsigned int seed = data[0];
+
+  srand((unsigned int) data[0]);
   vpx_memset(count, 0, sizeof(count[0]) * k);
   vpx_memset(centroids, 0, sizeof(centroids[0]) * k * dim);
 
@@ -187,7 +188,7 @@ static void calc_centroids(const double *data, double *centroids,
 
   for (i = 0; i < k; i++) {
     if (count[i] == 0) {
-      vpx_memcpy(centroids + i * dim, data + (rand_r(&seed) % n) * dim,
+      vpx_memcpy(centroids + i * dim, data + (rand() % n) * dim,
                  sizeof(centroids[0]) * dim);
     } else {
       const double norm = 1.0 / count[i];
