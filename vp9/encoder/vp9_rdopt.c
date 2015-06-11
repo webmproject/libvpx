@@ -1359,20 +1359,23 @@ static void select_tx_block(const VP9_COMP *cpi, MACROBLOCK *x,
                   plane_bsize, ta, tl, &zero_blk_rate, rate, dist, bsse, skip);
     txfm_partition_update(txa + (blk_col / 2), txl + (blk_row / 2), tx_size);
 
-    if (RDCOST(x->rdmult, x->rddiv, *rate, *dist) >=
-        RDCOST(x->rdmult, x->rddiv, zero_blk_rate, *bsse) && !xd->lossless) {
-      int i;
-      *rate = zero_blk_rate;
-      *dist = *bsse;
-      *skip = 1;
+    if (*skip == 1) {
       x->blk_skip[plane][blk_row * block_stride + blk_col] = 1;
-      for (i = 0; i < (1 << tx_size); ++i) {
-        pta[i] = 0;
-        ptl[i] = 0;
-      }
     } else {
-      x->blk_skip[plane][blk_row * block_stride + blk_col] = 0;
-      *skip = 0;
+      if (RDCOST(x->rdmult, x->rddiv, *rate, *dist) >=
+          RDCOST(x->rdmult, x->rddiv, zero_blk_rate, *bsse)) {
+        int i;
+        *rate = zero_blk_rate;
+        *dist = *bsse;
+        *skip = 1;
+        x->blk_skip[plane][blk_row * block_stride + blk_col] = 1;
+        for (i = 0; i < (1 << tx_size); ++i) {
+          pta[i] = 0;
+          ptl[i] = 0;
+        }
+      } else {
+        x->blk_skip[plane][blk_row * block_stride + blk_col] = 0;
+      }
     }
 
     if (tx_size >= TX_8X8)
@@ -4261,8 +4264,13 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
-  vp9_zero(x->blk_skip);
   vp9_zero(best_mbmode);
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    int j;
+    for (j = 0; j < 4; ++j)
+      x->blk_skip[i][j] = 0;
+  }
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     filter_cache[i] = INT64_MAX;
