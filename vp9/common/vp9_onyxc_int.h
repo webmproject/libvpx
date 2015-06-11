@@ -355,7 +355,12 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
                                             BLOCK_SIZE bsize) {
   PARTITION_CONTEXT *const above_ctx = xd->above_seg_context + mi_col;
   PARTITION_CONTEXT *const left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
-
+#if CONFIG_EXT_PARTITION
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
+  vpx_memset(above_ctx, partition_context_lookup[subsize].above, bw);
+  vpx_memset(left_ctx, partition_context_lookup[subsize].left, bh);
+#else
   // num_4x4_blocks_wide_lookup[bsize] / 2
   const int bs = num_8x8_blocks_wide_lookup[bsize];
 
@@ -364,6 +369,7 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   // bits of smaller block sizes to be zero.
   vpx_memset(above_ctx, partition_context_lookup[subsize].above, bs);
   vpx_memset(left_ctx, partition_context_lookup[subsize].left, bs);
+#endif
 }
 
 static INLINE int partition_plane_context(const MACROBLOCKD *xd,

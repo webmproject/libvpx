@@ -44,7 +44,11 @@ struct tx_counts {
 typedef struct frame_contexts {
   vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
   vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
+#if CONFIG_EXT_PARTITION
+  vp9_prob partition_prob[PARTITION_CONTEXTS][EXT_PARTITION_TYPES - 1];
+#else
   vp9_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
+#endif
   vp9_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
   vp9_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
@@ -109,7 +113,11 @@ typedef struct frame_contexts {
 typedef struct {
   unsigned int y_mode[BLOCK_SIZE_GROUPS][INTRA_MODES];
   unsigned int uv_mode[INTRA_MODES][INTRA_MODES];
+#if CONFIG_EXT_PARTITION
+  unsigned int partition[PARTITION_CONTEXTS][EXT_PARTITION_TYPES];
+#else
   unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
+#endif
   vp9_coeff_count_model coef[TX_SIZES][PLANE_TYPES];
   unsigned int eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES]
                          [COEF_BANDS][COEFF_CONTEXTS];
@@ -173,11 +181,20 @@ typedef struct {
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
 extern const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
                                         [INTRA_MODES - 1];
+#if CONFIG_EXT_PARTITION
+extern const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
+                                            [EXT_PARTITION_TYPES - 1];
+#else
 extern const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
                                             [PARTITION_TYPES - 1];
+#endif
 extern const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 extern const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
+#if CONFIG_EXT_PARTITION
+extern const vp9_tree_index vp9_ext_partition_tree
+                                [TREE_SIZE(EXT_PARTITION_TYPES)];
+#endif
 extern const vp9_tree_index vp9_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
 #if CONFIG_EXT_TX

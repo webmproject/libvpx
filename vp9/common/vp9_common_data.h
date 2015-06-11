@@ -27,7 +27,11 @@ extern const int num_4x4_blocks_wide_lookup[BLOCK_SIZES];
 extern const int size_group_lookup[BLOCK_SIZES];
 extern const int num_pels_log2_lookup[BLOCK_SIZES];
 extern const PARTITION_TYPE partition_lookup[][BLOCK_SIZES];
+#if CONFIG_EXT_PARTITION
+extern const BLOCK_SIZE subsize_lookup[EXT_PARTITION_TYPES][BLOCK_SIZES];
+#else
 extern const BLOCK_SIZE subsize_lookup[PARTITION_TYPES][BLOCK_SIZES];
+#endif
 extern const TX_SIZE max_txsize_lookup[BLOCK_SIZES];
 extern const BLOCK_SIZE txsize_to_bsize[TX_SIZES];
 extern const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES];

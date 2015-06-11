@@ -39,6 +39,9 @@
 
 static struct vp9_token intra_mode_encodings[INTRA_MODES];
 static struct vp9_token switchable_interp_encodings[SWITCHABLE_FILTERS];
+#if CONFIG_EXT_PARTITION
+static struct vp9_token ext_partition_encodings[EXT_PARTITION_TYPES];
+#endif
 static struct vp9_token partition_encodings[PARTITION_TYPES];
 static struct vp9_token inter_mode_encodings[INTER_MODES];
 #if CONFIG_EXT_TX
@@ -75,6 +78,9 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(intra_mode_encodings, vp9_intra_mode_tree);
   vp9_tokens_from_tree(switchable_interp_encodings, vp9_switchable_interp_tree);
   vp9_tokens_from_tree(partition_encodings, vp9_partition_tree);
+#if CONFIG_EXT_PARTITION
+  vp9_tokens_from_tree(ext_partition_encodings, vp9_ext_partition_tree);
+#endif
   vp9_tokens_from_tree(inter_mode_encodings, vp9_inter_mode_tree);
 #if CONFIG_EXT_TX
   vp9_tokens_from_tree(ext_tx_encodings, vp9_ext_tx_tree);
@@ -1129,7 +1135,15 @@ static void write_partition(const VP9_COMMON *const cm,
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
   if (has_rows && has_cols) {
+#if CONFIG_EXT_PARTITION
+    if (bsize <= BLOCK_8X8)
+      vp9_write_token(w, vp9_partition_tree, probs, &partition_encodings[p]);
+    else
+      vp9_write_token(w, vp9_ext_partition_tree, probs,
+                      &ext_partition_encodings[p]);
+#else
     vp9_write_token(w, vp9_partition_tree, probs, &partition_encodings[p]);
+#endif
   } else if (!has_rows && has_cols) {
     assert(p == PARTITION_SPLIT || p == PARTITION_HORZ);
     vp9_write(w, p == PARTITION_SPLIT, probs[1]);
@@ -2336,9 +2350,18 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
       prob_diff_update(vp9_intra_mode_tree, cm->fc.y_mode_prob[i],
                        cm->counts.y_mode[i], INTRA_MODES, &header_bc);
 
+#if CONFIG_EXT_PARTITION
+    prob_diff_update(vp9_partition_tree, fc->partition_prob[0],
+                     cm->counts.partition[0], PARTITION_TYPES, &header_bc);
+    for (i = 1; i < PARTITION_CONTEXTS; ++i)
+      prob_diff_update(vp9_ext_partition_tree, fc->partition_prob[i],
+                       cm->counts.partition[i], EXT_PARTITION_TYPES,
+                       &header_bc);
+#else
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
       prob_diff_update(vp9_partition_tree, fc->partition_prob[i],
                        cm->counts.partition[i], PARTITION_TYPES, &header_bc);
+#endif
 
     vp9_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc);
 
