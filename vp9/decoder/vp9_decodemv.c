@@ -308,8 +308,8 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   FRAME_COUNTS *counts = xd->counts;
 
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
-    ref_frame[0] = (MV_REFERENCE_FRAME)vp9_get_segdata(&cm->seg, segment_id,
-                                                       SEG_LVL_REF_FRAME);
+    ref_frame[0] = (MV_REFERENCE_FRAME)get_segdata(&cm->seg, segment_id,
+                                                   SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
     const REFERENCE_MODE mode = read_block_reference_mode(cm, xd, r);
@@ -445,8 +445,7 @@ static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
 static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                int segment_id, vp9_reader *r) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
-    return vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) !=
-           INTRA_FRAME;
+    return get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) != INTRA_FRAME;
   } else {
     const int ctx = vp9_get_intra_inter_context(xd);
     const int is_inter = vp9_read(r, cm->fc->intra_inter_prob[ctx]);
