@@ -49,9 +49,12 @@ struct segmentation {
   unsigned int feature_mask[MAX_SEGMENTS];
 };
 
-int vp9_segfeature_active(const struct segmentation *seg,
-                          int segment_id,
-                          SEG_LVL_FEATURES feature_id);
+static INLINE int segfeature_active(const struct segmentation *seg,
+                                    int segment_id,
+                                    SEG_LVL_FEATURES feature_id) {
+  return seg->enabled &&
+         (seg->feature_mask[segment_id] & (1 << feature_id));
+}
 
 void vp9_clearall_segfeatures(struct segmentation *seg);
 

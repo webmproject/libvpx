@@ -1051,7 +1051,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   if (!output_enabled)
     return;
 
-  if (!vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+  if (!segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     for (i = 0; i < TX_MODES; i++)
       rdc->tx_select_diff[i] += ctx->tx_rd_diff[i];
   }
@@ -1248,7 +1248,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
     vp9_rd_pick_intra_mode_sb(cpi, x, rd_cost, bsize, ctx, best_rd);
   } else {
     if (bsize >= BLOCK_8X8) {
-      if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+      if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
         vp9_rd_pick_inter_mode_sb_seg_skip(cpi, tile_data, x, rd_cost, bsize,
                                            ctx, best_rd);
       else
@@ -1291,8 +1291,8 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
   if (!frame_is_intra_only(cm)) {
     FRAME_COUNTS *const counts = td->counts;
     const int inter_block = is_inter_block(mbmi);
-    const int seg_ref_active = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
-                                                     SEG_LVL_REF_FRAME);
+    const int seg_ref_active = segfeature_active(&cm->seg, mbmi->segment_id,
+                                                 SEG_LVL_REF_FRAME);
     if (!seg_ref_active) {
       counts->intra_inter[vp9_get_intra_inter_context(xd)][inter_block]++;
       // If the segment reference feature is enabled we have only a single
@@ -1317,7 +1317,7 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
       }
     }
     if (inter_block &&
-        !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
@@ -2849,7 +2849,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       int segment_id = vp9_get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
-      seg_skip = vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP);
+      seg_skip = segfeature_active(seg, segment_id, SEG_LVL_SKIP);
     }
 
     x->source_variance = UINT_MAX;
@@ -2909,7 +2909,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 static int check_dual_ref_flags(VP9_COMP *cpi) {
   const int ref_flags = cpi->ref_frame_flags;
 
-  if (vp9_segfeature_active(&cpi->common.seg, 1, SEG_LVL_REF_FRAME)) {
+  if (segfeature_active(&cpi->common.seg, 1, SEG_LVL_REF_FRAME)) {
     return 0;
   } else {
     return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG)
@@ -2984,7 +2984,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
 
   if (cm->frame_type == KEY_FRAME)
     hybrid_intra_mode_search(cpi, x, rd_cost, bsize, ctx);
-  else if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+  else if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
     set_mode_info_seg_skip(x, cm->tx_mode, rd_cost, bsize);
   else if (bsize >= BLOCK_8X8)
     vp9_pick_inter_mode(cpi, x, tile_data, mi_row, mi_col,
@@ -3599,7 +3599,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       int segment_id = vp9_get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
-      seg_skip = vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP);
+      seg_skip = segfeature_active(seg, segment_id, SEG_LVL_SKIP);
       if (seg_skip) {
         partition_search_type = FIXED_PARTITION;
       }
@@ -4157,8 +4157,8 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
   MODE_INFO **mi_8x8 = xd->mi;
   MODE_INFO *mi = mi_8x8[0];
   MB_MODE_INFO *mbmi = &mi->mbmi;
-  const int seg_skip = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
-                                             SEG_LVL_SKIP);
+  const int seg_skip = segfeature_active(&cm->seg, mbmi->segment_id,
+                                         SEG_LVL_SKIP);
   const int mis = cm->mi_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];

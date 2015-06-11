@@ -25,12 +25,6 @@ static const int seg_feature_data_max[SEG_LVL_MAX] = {
 // the coding mechanism is still subject to change so these provide a
 // convenient single point of change.
 
-int vp9_segfeature_active(const struct segmentation *seg, int segment_id,
-                          SEG_LVL_FEATURES feature_id) {
-  return seg->enabled &&
-         (seg->feature_mask[segment_id] & (1 << feature_id));
-}
-
 void vp9_clearall_segfeatures(struct segmentation *seg) {
   vp9_zero(seg->feature_data);
   vp9_zero(seg->feature_mask);

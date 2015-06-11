@@ -484,7 +484,7 @@ static INLINE void add_token_no_extra(TOKENEXTRA **t,
 static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
                              TX_SIZE tx_size) {
   const int eob_max = 16 << (tx_size << 1);
-  return vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
+  return segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -615,8 +615,8 @@ void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const int ctx = vp9_get_skip_context(xd);
-  const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
-                                              SEG_LVL_SKIP);
+  const int skip_inc = !segfeature_active(&cm->seg, mbmi->segment_id,
+                                          SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, td, t};
   if (mbmi->skip) {
     if (!dry_run)
