@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39858859_00bc300a",
+        "filename": "vp9/common/mips/msa/vp9_intra_predict_msa.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-11T01:17:40Z",
+      "side": 1,
+      "message": "you can merge 252 and 255 as well; many of the other functions have a similar pattern, I find it better for economy of space and clarity to join them and make them const when possible",
+      "revId": "a2288d274c19b6604d10e9261e39feb8b03b6e35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
