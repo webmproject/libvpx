@@ -1926,12 +1926,12 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
 }
 #endif  // NDEBUG
 
-static struct vp9_read_bit_buffer* init_read_bit_buffer(
+static struct vp9_read_bit_buffer *init_read_bit_buffer(
     VP9Decoder *pbi,
     struct vp9_read_bit_buffer *rb,
     const uint8_t *data,
     const uint8_t *data_end,
-    uint8_t *clear_data /* buffer size MAX_VP9_HEADER_SIZE */) {
+    uint8_t clear_data[MAX_VP9_HEADER_SIZE]) {
   rb->bit_offset = 0;
   rb->error_handler = error_handler;
   rb->error_handler_data = &pbi->common;
@@ -1974,7 +1974,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
                       const uint8_t **p_data_end) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  struct vp9_read_bit_buffer rb = { NULL, NULL, 0, NULL, 0};
+  struct vp9_read_bit_buffer rb;
   int context_updated = 0;
   uint8_t clear_data[MAX_VP9_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,
