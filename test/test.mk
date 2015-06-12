@@ -136,6 +136,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += lpf_8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_avg_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += quantize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += error_block_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += vp9_intrapred_test.cc
 
