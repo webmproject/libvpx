@@ -276,10 +276,10 @@ specialize qw/vp9_plane_add_noise sse2/;
 $vp9_plane_add_noise_sse2=vp9_plane_add_noise_wmt;
 
 add_proto qw/void vp9_filter_by_weight16x16/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
-specialize qw/vp9_filter_by_weight16x16 sse2/;
+specialize qw/vp9_filter_by_weight16x16 sse2 msa/;
 
 add_proto qw/void vp9_filter_by_weight8x8/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
-specialize qw/vp9_filter_by_weight8x8 sse2/;
+specialize qw/vp9_filter_by_weight8x8 sse2 msa/;
 }
 
 #
