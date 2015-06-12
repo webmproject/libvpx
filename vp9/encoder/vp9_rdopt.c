@@ -1218,7 +1218,7 @@ static void tx_block_rd_b(VP9_COMP const *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     cpi->fn_ptr[txm_bsize].vf(src, src_stride,
                               rec_buffer, 32, &tmp_sse);
   }
-  *bsse += (int64_t)tmp_sse * 16;
+  *bsse = (int64_t)tmp_sse * 16;
 
   vp9_xform_quant_inter(x, plane, block, blk_row, blk_col,
                         plane_bsize, tx_size);
@@ -1266,7 +1266,7 @@ static void tx_block_rd_b(VP9_COMP const *cpi, MACROBLOCK *x, TX_SIZE tx_size,
                                 rec_buffer, 32, &tmp_sse);
     }
   }
-  *dist += (int64_t)tmp_sse * 16;
+  *dist = (int64_t)tmp_sse * 16;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   switch (tx_size) {
@@ -1291,14 +1291,14 @@ static void tx_block_rd_b(VP9_COMP const *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   pt = (ta[0] != 0) + (tl[0] != 0);
   *zero_blk_rate =
       x->token_costs[tx_size][pd->plane_type][1][0][0][pt][EOB_TOKEN];
-  *rate += cost_coeffs(x, plane, block, ta, tl, tx_size,
-                       sc->scan, sc->neighbors, 0);
+  *rate = cost_coeffs(x, plane, block, ta, tl, tx_size,
+                      sc->scan, sc->neighbors, 0);
 
   for (i = 0; i < (1 << tx_size); ++i) {
     ta[i] = ta[0];
     tl[i] = tl[0];
   }
-  *skip &= (p->eobs[block] == 0);
+  *skip = (p->eobs[block] == 0);
 }
 
 static void select_tx_block(const VP9_COMP *cpi, MACROBLOCK *x,
@@ -1518,10 +1518,11 @@ static void tx_block_rd(const VP9_COMP *cpi, MACROBLOCK *x,
   TX_SIZE plane_tx_size = plane ?
       get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], plane_bsize, 0, 0) :
       mbmi->inter_tx_size[tx_idx];
-
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
   int zero_blk_rate;
+  int this_rate, this_skip;
+  int64_t this_dist, this_bsse;
 
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
@@ -1534,7 +1535,12 @@ static void tx_block_rd(const VP9_COMP *cpi, MACROBLOCK *x,
   if (tx_size == plane_tx_size) {
     tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                   plane_bsize, above_ctx, left_ctx,
-                  &zero_blk_rate, rate, dist, bsse, skip);
+                  &zero_blk_rate, &this_rate,
+                  &this_dist, &this_bsse, &this_skip);
+    *rate += this_rate;
+    *dist += this_dist;
+    *bsse += this_bsse;
+    *skip &= this_skip;
   } else {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bh = num_4x4_blocks_high_lookup[bsize];
