@@ -1106,12 +1106,12 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 
-#if CONFIG_VP8
+#if CONFIG_VP8_ENCODER
 typedef SubpelVarianceTest<SubpixVarMxNFunc> VP8SubpelVarianceTest;
 
 TEST_P(VP8SubpelVarianceTest, Ref) { RefTest(); }
 TEST_P(VP8SubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
-#endif  // CONFIG_VP8
+#endif  // CONFIG_VP8_ENCODER
 
 #if CONFIG_VP9_ENCODER
 typedef SubpelVarianceTest<SubpixVarMxNFunc> VP9SubpelVarianceTest;
@@ -1160,7 +1160,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(6, 5, subpel_variance64x32_c, 0),
                       make_tuple(6, 6, subpel_variance64x64_c, 0)));
 
-#if CONFIG_VP8
+#if CONFIG_VP8_ENCODER
 const SubpixVarMxNFunc vp8_subpel_variance16x16_c =
     vp8_sub_pixel_variance16x16_c;
 const SubpixVarMxNFunc vp8_subpel_variance16x8_c = vp8_sub_pixel_variance16x8_c;
@@ -1174,7 +1174,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(3, 4, vp8_subpel_variance8x16_c, 0),
                       make_tuple(4, 3, vp8_subpel_variance16x8_c, 0),
                       make_tuple(4, 4, vp8_subpel_variance16x16_c, 0)));
-#endif  // CONFIG_VP8
+#endif  // CONFIG_VP8_ENCODER
 
 const vp9_subp_avg_variance_fn_t subpel_avg_variance4x4_c =
     vp9_sub_pixel_avg_variance4x4_c;
@@ -1460,7 +1460,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_VP9_ENCODER
 
-#if CONFIG_VP8
+#if CONFIG_VP8_ENCODER
 #if HAVE_MMX
 const SubpixVarMxNFunc subpel_variance16x16_mmx =
     vp8_sub_pixel_variance16x16_mmx;
@@ -1476,7 +1476,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(3, 3, subpel_variance8x8_mmx, 0),
                       make_tuple(2, 2, subpel_variance4x4_mmx, 0)));
 #endif  // HAVE_MMX
-#endif  // CONFIG_VP8
+#endif  // CONFIG_VP8_ENCODER
 
 #if CONFIG_VP9_ENCODER
 #if HAVE_SSE2
@@ -1768,7 +1768,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 #endif  // CONFIG_VP9_ENCODER
 
-#if CONFIG_VP8
+#if CONFIG_VP8_ENCODER
 #if HAVE_SSE2
 const SubpixVarMxNFunc vp8_subpel_variance16x16_sse2 =
     vp8_sub_pixel_variance16x16_wmt;
@@ -1788,7 +1788,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 3, vp8_subpel_variance16x8_sse2, 0),
                       make_tuple(4, 4, vp8_subpel_variance16x16_sse2, 0)));
 #endif  // HAVE_SSE2
-#endif  // CONFIG_VP8
+#endif  // CONFIG_VP8_ENCODER
 
 #if CONFIG_VP9_ENCODER
 #if HAVE_SSSE3
@@ -1879,7 +1879,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSSE3
 #endif  // CONFIG_VP9_ENCODER
 
-#if CONFIG_VP8
+#if CONFIG_VP8_ENCODER
 #if HAVE_SSSE3
 const SubpixVarMxNFunc vp8_subpel_variance16x16_ssse3 =
     vp8_sub_pixel_variance16x16_ssse3;
@@ -1890,7 +1890,7 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(make_tuple(4, 3, vp8_subpel_variance16x8_ssse3, 0),
                       make_tuple(4, 4, vp8_subpel_variance16x16_ssse3, 0)));
 #endif  // HAVE_SSSE3
-#endif  // CONFIG_VP8
+#endif  // CONFIG_VP8_ENCODER
 
 #if HAVE_AVX2
 const VarianceMxNFunc mse16x16_avx2 = vpx_mse16x16_avx2;
@@ -1931,7 +1931,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_ENCODER
 #endif  // HAVE_AVX2
 
-#if CONFIG_VP8
+#if CONFIG_VP8_ENCODER
 #if HAVE_MEDIA
 const SubpixVarMxNFunc subpel_variance16x16_media =
     vp8_sub_pixel_variance16x16_armv6;
@@ -1942,7 +1942,7 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(make_tuple(3, 3, subpel_variance8x8_media, 0),
                       make_tuple(4, 4, subpel_variance16x16_media, 0)));
 #endif  // HAVE_MEDIA
-#endif  // CONFIG_VP8
+#endif  // CONFIG_VP8_ENCODER
 
 #if HAVE_NEON
 const Get4x4SseFunc get4x4sse_cs_neon = vpx_get4x4sse_cs_neon;
@@ -1972,7 +1972,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(3, 4, variance8x16_neon, 0),
                       make_tuple(3, 3, variance8x8_neon, 0)));
 
-#if CONFIG_VP8
+#if CONFIG_VP8_ENCODER
 #if HAVE_NEON_ASM
 const SubpixVarMxNFunc vp8_subpel_variance16x16_neon =
     vp8_sub_pixel_variance16x16_neon;
@@ -1980,7 +1980,7 @@ INSTANTIATE_TEST_CASE_P(
     NEON, VP8SubpelVarianceTest,
     ::testing::Values(make_tuple(4, 4, vp8_subpel_variance16x16_neon, 0)));
 #endif  // HAVE_NEON_ASM
-#endif  // CONFIG_VP8
+#endif  // CONFIG_VP8_ENCODER
 
 #if CONFIG_VP9_ENCODER
 const SubpixVarMxNFunc subpel_variance8x8_neon = vp9_sub_pixel_variance8x8_neon;
