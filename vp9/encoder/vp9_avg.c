@@ -29,6 +29,8 @@ unsigned int vp9_avg_4x4_c(const uint8_t *s, int p) {
   return (sum + 8) >> 4;
 }
 
+// src_diff: first pass, 9 bit, dynamic range [-255, 255]
+//           second pass, 12 bit, dynamic range [-2040, 2040]
 static void hadamard_col8(const int16_t *src_diff, int src_stride,
                           int16_t *coeff) {
   int16_t b0 = src_diff[0 * src_stride] + src_diff[1 * src_stride];
@@ -65,15 +67,18 @@ void vp9_hadamard_8x8_c(int16_t const *src_diff, int src_stride,
   int16_t buffer[64];
   int16_t *tmp_buf = &buffer[0];
   for (idx = 0; idx < 8; ++idx) {
-    hadamard_col8(src_diff, src_stride, tmp_buf);
+    hadamard_col8(src_diff, src_stride, tmp_buf);  // src_diff: 9 bit
+                                                   // dynamic range [-255, 255]
     tmp_buf += 8;
     ++src_diff;
   }
 
   tmp_buf = &buffer[0];
   for (idx = 0; idx < 8; ++idx) {
-    hadamard_col8(tmp_buf, 8, coeff);
-    coeff += 8;
+    hadamard_col8(tmp_buf, 8, coeff);  // tmp_buf: 12 bit
+                                       // dynamic range [-2040, 2040]
+    coeff += 8;  // coeff: 15 bit
+                 // dynamic range [-16320, 16320]
     ++tmp_buf;
   }
 }
