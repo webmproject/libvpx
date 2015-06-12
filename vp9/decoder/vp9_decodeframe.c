@@ -1457,8 +1457,6 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   if (pbi->num_tile_workers == 0) {
     const int num_threads = pbi->max_threads & ~1;
     int i;
-    // TODO(jzern): Allocate one less worker, as in the current code we only
-    // use num_threads - 1 workers.
     CHECK_MEM_ERROR(cm, pbi->tile_workers,
                     vpx_malloc(num_threads * sizeof(*pbi->tile_workers)));
     // Ensure tile data offsets will be properly aligned. This may fail on
