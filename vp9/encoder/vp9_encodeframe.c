@@ -3786,9 +3786,13 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
   TOKENEXTRA *pre_tok = cpi->tile_tok[0][0];
   int tile_tok = 0;
 
-  if (cpi->tile_data == NULL) {
+  if (cpi->tile_data == NULL || cpi->allocated_tiles < tile_cols * tile_rows) {
+    if (cpi->tile_data != NULL)
+      vpx_free(cpi->tile_data);
     CHECK_MEM_ERROR(cm, cpi->tile_data,
         vpx_malloc(tile_cols * tile_rows * sizeof(*cpi->tile_data)));
+    cpi->allocated_tiles = tile_cols * tile_rows;
+
     for (tile_row = 0; tile_row < tile_rows; ++tile_row)
       for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
         TileDataEnc *tile_data =
