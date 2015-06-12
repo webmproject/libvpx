@@ -88,26 +88,28 @@ void vp9_hadamard_16x16_c(int16_t const *src_diff, int src_stride,
                           int16_t *coeff) {
   int idx;
   for (idx = 0; idx < 4; ++idx) {
+    // src_diff: 9 bit, dynamic range [-255, 255]
     int16_t const *src_ptr = src_diff + (idx >> 1) * 8 * src_stride
                                 + (idx & 0x01) * 8;
     vp9_hadamard_8x8_c(src_ptr, src_stride, coeff + idx * 64);
   }
 
+  // coeff: 15 bit, dynamic range [-16320, 16320]
   for (idx = 0; idx < 64; ++idx) {
     int16_t a0 = coeff[0];
     int16_t a1 = coeff[64];
     int16_t a2 = coeff[128];
     int16_t a3 = coeff[192];
 
-    int16_t b0 = a0 + a1;
-    int16_t b1 = a0 - a1;
-    int16_t b2 = a2 + a3;
-    int16_t b3 = a2 - a3;
+    int16_t b0 = (a0 + a1) >> 1;  // (a0 + a1): 16 bit, [-32640, 32640]
+    int16_t b1 = (a0 - a1) >> 1;  // b0-b3: 15 bit, dynamic range
+    int16_t b2 = (a2 + a3) >> 1;  // [-16320, 16320]
+    int16_t b3 = (a2 - a3) >> 1;
 
-    coeff[0]   = (b0 + b2) >> 1;
-    coeff[64]  = (b1 + b3) >> 1;
-    coeff[128] = (b0 - b2) >> 1;
-    coeff[192] = (b1 - b3) >> 1;
+    coeff[0]   = b0 + b2;  // 16 bit, [-32640, 32640]
+    coeff[64]  = b1 + b3;
+    coeff[128] = b0 - b2;
+    coeff[192] = b1 - b3;
 
     ++coeff;
   }
