@@ -264,17 +264,18 @@ void vp9_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
     __m128i b2 = _mm_add_epi16(coeff2, coeff3);
     __m128i b3 = _mm_sub_epi16(coeff2, coeff3);
 
+    b0 = _mm_srai_epi16(b0, 1);
+    b1 = _mm_srai_epi16(b1, 1);
+    b2 = _mm_srai_epi16(b2, 1);
+    b3 = _mm_srai_epi16(b3, 1);
+
     coeff0 = _mm_add_epi16(b0, b2);
     coeff1 = _mm_add_epi16(b1, b3);
-    coeff0 = _mm_srai_epi16(coeff0, 1);
-    coeff1 = _mm_srai_epi16(coeff1, 1);
     _mm_store_si128((__m128i *)coeff, coeff0);
     _mm_store_si128((__m128i *)(coeff + 64), coeff1);
 
     coeff2 = _mm_sub_epi16(b0, b2);
     coeff3 = _mm_sub_epi16(b1, b3);
-    coeff2 = _mm_srai_epi16(coeff2, 1);
-    coeff3 = _mm_srai_epi16(coeff3, 1);
     _mm_store_si128((__m128i *)(coeff + 128), coeff2);
     _mm_store_si128((__m128i *)(coeff + 192), coeff3);
 
