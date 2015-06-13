@@ -90,8 +90,6 @@ extern const vp9_tree_index vp9_switchable_interp_tree
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 
-void vp9_init_mode_probs(FRAME_CONTEXT *fc);
-
 void vp9_adapt_mode_probs(struct VP9Common *cm);
 
 void tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
