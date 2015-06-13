@@ -74,7 +74,6 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high12[18]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #define EOB_MODEL_TOKEN 3
-extern const vp9_tree_index vp9_coefmodel_tree[];
 
 typedef struct {
   const vp9_tree_index *tree;
