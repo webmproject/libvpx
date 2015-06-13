@@ -3962,7 +3962,6 @@ static void check_src_altref(VP9_COMP *cpi,
 extern double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
                                  const unsigned char *img2, int img2_pitch,
                                  int width, int height);
-#endif
 
 static void adjust_image_stat(double y, double u, double v, double all,
                               ImageStat *s) {
@@ -3972,6 +3971,7 @@ static void adjust_image_stat(double y, double u, double v, double all,
   s->stat[ALL] += all;
   s->worst = MIN(s->worst, all);
 }
+#endif  // CONFIG_INTERNAL_STATS
 
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
