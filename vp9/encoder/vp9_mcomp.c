@@ -610,7 +610,7 @@ int vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
   return besterr;
 }
 
-const MV search_step_table[12] = {
+static const MV search_step_table[12] = {
     // left, right, up, down
     {0, -4}, {0, 4}, {-4, 0}, {4, 0},
     {0, -2}, {0, 2}, {-2, 0}, {2, 0},
