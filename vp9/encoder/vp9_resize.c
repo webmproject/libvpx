@@ -29,7 +29,7 @@
 typedef int16_t interp_kernel[INTERP_TAPS];
 
 // Filters for interpolation (0.5-band) - note this also filters integer pels.
-const interp_kernel vp9_filteredinterp_filters500[(1 << SUBPEL_BITS)] = {
+static const interp_kernel filteredinterp_filters500[(1 << SUBPEL_BITS)] = {
   {-3,  0, 35, 64, 35,  0, -3, 0},
   {-3, -1, 34, 64, 36,  1, -3, 0},
   {-3, -1, 32, 64, 38,  1, -3, 0},
@@ -65,7 +65,7 @@ const interp_kernel vp9_filteredinterp_filters500[(1 << SUBPEL_BITS)] = {
 };
 
 // Filters for interpolation (0.625-band) - note this also filters integer pels.
-const interp_kernel vp9_filteredinterp_filters625[(1 << SUBPEL_BITS)] = {
+static const interp_kernel filteredinterp_filters625[(1 << SUBPEL_BITS)] = {
   {-1, -8, 33, 80, 33, -8, -1, 0},
   {-1, -8, 30, 80, 35, -8, -1, 1},
   {-1, -8, 28, 80, 37, -7, -2, 1},
@@ -101,7 +101,7 @@ const interp_kernel vp9_filteredinterp_filters625[(1 << SUBPEL_BITS)] = {
 };
 
 // Filters for interpolation (0.75-band) - note this also filters integer pels.
-const interp_kernel vp9_filteredinterp_filters750[(1 << SUBPEL_BITS)] = {
+static const interp_kernel filteredinterp_filters750[(1 << SUBPEL_BITS)] = {
   {2, -11,  25,  96,  25, -11,   2, 0},
   {2, -11,  22,  96,  28, -11,   2, 0},
   {2, -10,  19,  95,  31, -11,   2, 0},
@@ -137,7 +137,7 @@ const interp_kernel vp9_filteredinterp_filters750[(1 << SUBPEL_BITS)] = {
 };
 
 // Filters for interpolation (0.875-band) - note this also filters integer pels.
-const interp_kernel vp9_filteredinterp_filters875[(1 << SUBPEL_BITS)] = {
+static const interp_kernel filteredinterp_filters875[(1 << SUBPEL_BITS)] = {
   {3,  -8,  13, 112,  13,  -8,   3, 0},
   {3,  -7,  10, 112,  17,  -9,   3, -1},
   {2,  -6,   7, 111,  21,  -9,   3, -1},
@@ -173,7 +173,7 @@ const interp_kernel vp9_filteredinterp_filters875[(1 << SUBPEL_BITS)] = {
 };
 
 // Filters for interpolation (full-band) - no filtering for integer pixels
-const interp_kernel vp9_filteredinterp_filters1000[(1 << SUBPEL_BITS)] = {
+static const interp_kernel filteredinterp_filters1000[(1 << SUBPEL_BITS)] = {
   {0,   0,   0, 128,   0,   0,   0, 0},
   {0,   1,  -3, 128,   3,  -1,   0, 0},
   {-1,   2,  -6, 127,   7,  -2,   1, 0},
@@ -215,15 +215,15 @@ static const int16_t vp9_down2_symodd_half_filter[] = {64, 35, 0, -3};
 static const interp_kernel *choose_interp_filter(int inlength, int outlength) {
   int outlength16 = outlength * 16;
   if (outlength16 >= inlength * 16)
-    return vp9_filteredinterp_filters1000;
+    return filteredinterp_filters1000;
   else if (outlength16 >= inlength * 13)
-    return vp9_filteredinterp_filters875;
+    return filteredinterp_filters875;
   else if (outlength16 >= inlength * 11)
-    return vp9_filteredinterp_filters750;
+    return filteredinterp_filters750;
   else if (outlength16 >= inlength * 9)
-    return vp9_filteredinterp_filters625;
+    return filteredinterp_filters625;
   else
-    return vp9_filteredinterp_filters500;
+    return filteredinterp_filters500;
 }
 
 static void interpolate(const uint8_t *const input, int inlength,
