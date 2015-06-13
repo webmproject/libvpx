@@ -192,7 +192,7 @@ add_proto qw/void vp9_d135_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, 
 specialize qw/vp9_d135_predictor_32x32/;
 
 add_proto qw/void vp9_d153_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_d153_predictor_32x32/;
+specialize qw/vp9_d153_predictor_32x32/, "$ssse3_x86inc";
 
 add_proto qw/void vp9_v_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vp9_v_predictor_32x32 neon msa/, "$sse2_x86inc";

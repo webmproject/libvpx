@@ -356,8 +356,9 @@ INTRA_PRED_TEST(SSE2, TestIntraPred32, vp9_dc_predictor_32x32_sse2,
 #if HAVE_SSSE3
 INTRA_PRED_TEST(SSSE3, TestIntraPred32, NULL, NULL, NULL, NULL, NULL,
                 vp9_h_predictor_32x32_ssse3, vp9_d45_predictor_32x32_ssse3,
-                NULL, NULL, NULL, vp9_d207_predictor_32x32_ssse3,
-                vp9_d63_predictor_32x32_ssse3, NULL)
+                NULL, NULL, vp9_d153_predictor_32x32_ssse3,
+                vp9_d207_predictor_32x32_ssse3, vp9_d63_predictor_32x32_ssse3,
+                NULL)
 #endif  // HAVE_SSSE3
 
 #if HAVE_NEON
