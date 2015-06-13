@@ -1564,7 +1564,7 @@ static void set_fixed_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-const struct {
+static const struct {
   int row;
   int col;
 } coord_lookup[16] = {
