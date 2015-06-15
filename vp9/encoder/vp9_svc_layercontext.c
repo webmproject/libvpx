@@ -152,7 +152,6 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
     }
   } else {
     int layer_end;
-    float bitrate_alloc = 1.0;
 
     if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
       layer_end = svc->number_temporal_layers;
