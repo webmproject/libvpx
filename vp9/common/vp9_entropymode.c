@@ -314,7 +314,7 @@ static const vp9_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
   { 149, 144, },
 };
 
-void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
+static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->uv_mode_prob, default_if_uv_probs);
   vp9_copy(fc->y_mode_prob, default_if_y_probs);
   vp9_copy(fc->switchable_interp_prob, default_switchable_interp_prob);
@@ -444,7 +444,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   lf->last_sharpness_level = -1;
 
   vp9_default_coef_probs(cm);
-  vp9_init_mode_probs(cm->fc);
+  init_mode_probs(cm->fc);
   vp9_init_mv_probs(cm);
   cm->fc->initialized = 1;
 
