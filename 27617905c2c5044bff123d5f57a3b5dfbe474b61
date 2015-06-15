@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b98a589d_06bac02e",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-15T17:55:50Z",
+      "side": 1,
+      "message": "replace line 633 with (so it gets set only from command line):\nif (svc_ctx.threads)\n  vpx_codec_control(\u0026codec, VP9E_SET_TILE_COLUMNS, (svc_ctx.threads \u003e\u003e 1));",
+      "range": {
+        "startLine": 633,
+        "startChar": 28,
+        "endLine": 633,
+        "endChar": 49
+      },
+      "revId": "27617905c2c5044bff123d5f57a3b5dfbe474b61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
