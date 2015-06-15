@@ -4224,6 +4224,17 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
             update_txfm_count(xd, td->counts, max_txsize_lookup[mbmi->sb_type],
                               idy, idx, !output_enabled);
     }
+  } else {
+    TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+    BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    int width  = num_4x4_blocks_wide_lookup[bsize];
+    int height = num_4x4_blocks_high_lookup[bsize];
+    int idx, idy;
+    for (idy = 0; idy < height; idy += bh)
+      for (idx = 0; idx < width; idx += bh)
+        txfm_partition_update(xd->above_txfm_context + (idx / 2),
+                              xd->left_txfm_context + (idy / 2), mbmi->tx_size);
   }
 
   if (mbmi->sb_type < BLOCK_8X8)
