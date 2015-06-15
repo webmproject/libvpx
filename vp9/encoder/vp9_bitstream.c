@@ -472,17 +472,17 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       write_segment_id(w, seg, segment_id);
     }
   }
+
+#if !CONFIG_MISC_ENTROPY
 #if CONFIG_SUPERTX
   if (supertx_enabled)
     skip = mbmi->skip;
   else
     skip = write_skip(cm, xd, segment_id, mi, w);
 #else
-#if !CONFIG_MISC_ENTROPY
   skip = write_skip(cm, xd, segment_id, mi, w);
-#endif
-
 #endif  // CONFIG_SUPERTX
+#endif
 
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
@@ -492,12 +492,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #endif
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
       vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
-#if CONFIG_SUPERTX
-  }
-#endif
-
 #if CONFIG_MISC_ENTROPY
   skip = write_skip(cm, xd, segment_id, mi, is_inter, w);
+#endif
+
+#if CONFIG_SUPERTX
+  } else {
+    skip = mbmi->skip;
+  }
 #endif
 
 #if CONFIG_PALETTE
