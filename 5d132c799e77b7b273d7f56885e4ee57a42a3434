@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "796d40b3_569f1267",
+        "filename": "vp9/common/vp9_palette.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-06-15T16:32:59Z",
+      "side": 1,
+      "message": "Rand is threadsafe on Windows but not on Linux. We probably need to make our own {vp9/vpx}_rand().",
+      "range": {
+        "startLine": 191,
+        "startChar": 46,
+        "endLine": 191,
+        "endChar": 50
+      },
+      "revId": "5d132c799e77b7b273d7f56885e4ee57a42a3434",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
