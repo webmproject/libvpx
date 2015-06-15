@@ -1450,15 +1450,21 @@ static double calc_frame_boost(VP9_COMP *cpi,
                                const FIRSTPASS_STATS *this_frame,
                                double this_frame_mv_in_out,
                                double max_boost) {
+  VP9_COMMON *const cm = &cpi->common;
   double frame_boost;
   const double lq =
     vp9_convert_qindex_to_q(cpi->rc.avg_frame_qindex[INTER_FRAME],
                             cpi->common.bit_depth);
   const double boost_q_correction = MIN((0.5 + (lq * 0.015)), 1.5);
-  const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
-                      ? cpi->initial_mbs : cpi->common.MBs;
+  double inactive_pct;
+  int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
+                ? cpi->initial_mbs : cpi->common.MBs;
 
-  // TODO(paulwilkins): correct for dead zone
+  // Correct for any inactive zone in the image
+  inactive_pct = (this_frame->intra_skip_pct / 2) +
+                 ((this_frame->inactive_zone_rows * 2) / (double)cm->mb_rows);
+  inactive_pct = fclamp(inactive_pct, 0.0, 0.5);
+  num_mbs = (int)MAX(1, num_mbs - (num_mbs * inactive_pct));
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
