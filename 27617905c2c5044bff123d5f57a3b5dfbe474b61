@@ -22,6 +22,30 @@
       "revId": "27617905c2c5044bff123d5f57a3b5dfbe474b61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b98a589d_3296161d",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-06-15T21:30:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b98a589d_06bac02e",
+      "range": {
+        "startLine": 633,
+        "startChar": 28,
+        "endLine": 633,
+        "endChar": 49
+      },
+      "revId": "27617905c2c5044bff123d5f57a3b5dfbe474b61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
