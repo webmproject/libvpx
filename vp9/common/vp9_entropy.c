@@ -133,12 +133,6 @@ const uint8_t vp9_pt_energy_class[ENTROPY_TOKENS] = {
   0, 1, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5
 };
 
-const vp9_tree_index vp9_coefmodel_tree[TREE_SIZE(UNCONSTRAINED_NODES + 1)] = {
-  -EOB_MODEL_TOKEN, 2,
-  -ZERO_TOKEN, 4,
-  -ONE_TOKEN, -TWO_TOKEN,
-};
-
 // Model obtained from a 2-sided zero-centerd distribuition derived
 // from a Pareto distribution. The cdf of the distribution is:
 // cdf(x) = 0.5 + 0.5 * sgn(x) * [1 - {alpha/(alpha + |x|)} ^ beta]
