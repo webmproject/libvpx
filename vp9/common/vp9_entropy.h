@@ -273,7 +273,11 @@ static INLINE const scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
     return &vp9_default_scan_orders_pxd[tx_size];
 #endif  // CONFIG_TX_SKIP
 
-  if (is_inter_block(&mi->mbmi) || type != PLANE_TYPE_Y || xd->lossless) {
+  if (is_inter_block(&mi->mbmi) || type != PLANE_TYPE_Y || xd->lossless
+#if CONFIG_INTRABC
+      || is_intrabc_mode(mi->mbmi.mode)
+#endif
+      ) {
     return &vp9_default_scan_orders[tx_size];
   } else {
     const PREDICTION_MODE mode = get_y_mode(mi, block_idx);

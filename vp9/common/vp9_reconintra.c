@@ -27,9 +27,6 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   DCT_ADST,   // D207
   ADST_DCT,   // D63
   ADST_ADST,  // TM
-#if CONFIG_INTRABC
-  DCT_DCT,    // BC
-#endif  // CONFIG_INTRABC
 };
 
 // This serves as a wrapper function, so that all the prediction functions

@@ -228,8 +228,13 @@ typedef struct VP9Common {
   int current_palette_count[PALETTE_BUF_SIZE];
   int allow_palette_mode;
   int palette_counter;
-  int block_counter;
+  int palette_blocks_signalled;
 #endif  // CONFIG_PALETTE
+#if CONFIG_INTRABC
+  int allow_intrabc_mode;
+  int intrabc_counter;
+  int intrabc_blocks_signalled;
+#endif  // CONFIG_INTRABC
 #if CONFIG_GLOBAL_MOTION
   int num_global_motion[MAX_REF_FRAMES];
   Global_Motion_Params global_motion[MAX_REF_FRAMES][MAX_GLOBAL_MOTION_MODELS];

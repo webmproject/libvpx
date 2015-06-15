@@ -145,11 +145,9 @@ static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
 static INLINE int is_intrabc_mode(PREDICTION_MODE mode) {
   return mode == NEWDV;
 }
-#define INTRA_MODES (NEWDV + 1)  // XXX
-#else
-#define INTRA_MODES (TM_PRED + 1)  // XXX
 #endif  // CONFIG_INTRABC
 
+#define INTRA_MODES (TM_PRED + 1)
 #if CONFIG_NEW_INTER
 #define INTER_MODES (1 + NEW2MV - NEARESTMV)
 #else
@@ -499,12 +497,17 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
     return DCT_DCT;
 #endif
+#if CONFIG_INTRABC
+  if (is_intrabc_mode(mbmi->mode))
+    return DCT_DCT;
+#endif  // CONFIG_INTRABC
   return intra_mode_to_tx_type_lookup[mbmi->mode];
 }
 
 static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
   const MODE_INFO *const mi = xd->mi[0].src_mi;
+  PREDICTION_MODE mode;
 
 #if CONFIG_EXT_TX
   if (plane_type != PLANE_TYPE_Y || xd->lossless)
@@ -518,7 +521,13 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
     return DCT_DCT;
 #endif
 
-  return intra_mode_to_tx_type_lookup[get_y_mode(mi, ib)];
+  mode = get_y_mode(mi, ib);
+#if CONFIG_INTRABC
+  if (is_intrabc_mode(mode))
+    return DCT_DCT;
+#endif  // CONFIG_INTRABC
+
+  return intra_mode_to_tx_type_lookup[mode];
 }
 
 void vp9_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);
