@@ -221,7 +221,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
     if (cpi->oxcf.aq_mode != VARIANCE_AQ) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
-      mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+      mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
     vp9_init_plane_quantizers(cpi, x);
 
@@ -670,7 +670,7 @@ static int choose_partitioning(VP9_COMP *cpi,
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
     const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map :
                                                     cm->last_frame_seg_map;
-    segment_id = vp9_get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
+    segment_id = get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
 
     if (cyclic_refresh_segment_id_boosted(segment_id)) {
       int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
@@ -993,7 +993,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       mi_addr->mbmi.segment_id =
-        vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+        get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
     // Else for cyclic refresh mode update the segment map, set the segment id
     // and then update the quantizer.
@@ -1228,7 +1228,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
     } else {
       const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
                                                     : cm->last_frame_seg_map;
-      mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+      mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
     x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == COMPLEXITY_AQ) {
@@ -1238,7 +1238,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
                                                   : cm->last_frame_seg_map;
     // If segment is boosted, use rdmult for that segment.
     if (cyclic_refresh_segment_id_boosted(
-            vp9_get_segment_id(cm, map, bsize, mi_row, mi_col)))
+            get_segment_id(cm, map, bsize, mi_row, mi_col)))
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
   }
 
@@ -1687,7 +1687,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
         cpi->oxcf.aq_mode == VARIANCE_AQ ) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
-      mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+      mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     } else {
     // Setting segmentation map for cyclic_refresh.
       vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize,
@@ -2848,7 +2848,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
     if (seg->enabled) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
-      int segment_id = vp9_get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
+      int segment_id = get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
       seg_skip = segfeature_active(seg, segment_id, SEG_LVL_SKIP);
     }
 
@@ -3598,7 +3598,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
     if (seg->enabled) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
-      int segment_id = vp9_get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
+      int segment_id = get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
       seg_skip = segfeature_active(seg, segment_id, SEG_LVL_SKIP);
       if (seg_skip) {
         partition_search_type = FIXED_PARTITION;

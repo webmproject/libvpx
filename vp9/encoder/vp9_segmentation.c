@@ -129,8 +129,8 @@ static void count_segs(const VP9_COMMON *cm, MACROBLOCKD *xd,
   if (cm->frame_type != KEY_FRAME) {
     const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
     // Test to see if the segment id matches the predicted value.
-    const int pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
-                                                   bsize, mi_row, mi_col);
+    const int pred_segment_id = get_segment_id(cm, cm->last_frame_seg_map,
+                                               bsize, mi_row, mi_col);
     const int pred_flag = pred_segment_id == segment_id;
     const int pred_context = vp9_get_pred_context_seg_id(xd);
 

@@ -155,7 +155,7 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     return 0;  // Default for disabled segmentation
 
   predicted_segment_id = cm->last_frame_seg_map ?
-      vp9_get_segment_id(cm, cm->last_frame_seg_map, bsize, mi_row, mi_col) : 0;
+      get_segment_id(cm, cm->last_frame_seg_map, bsize, mi_row, mi_col) : 0;
 
   if (!seg->update_map) {
     copy_segment_id(cm, cm->last_frame_seg_map, cm->current_frame_seg_map,
