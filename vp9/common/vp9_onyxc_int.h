@@ -335,6 +335,18 @@ static INLINE int mi_cols_aligned_to_sb(int n_mis) {
   return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
 }
 
+static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
+  return cm->frame_type == KEY_FRAME || cm->intra_only;
+}
+
+static INLINE void set_partition_probs(const VP9_COMMON *const cm,
+                                       MACROBLOCKD *const xd) {
+  xd->partition_probs =
+      frame_is_intra_only(cm) ?
+          &vp9_kf_partition_probs[0] :
+          (const vp9_prob (*)[PARTITION_TYPES - 1])cm->fc->partition_prob;
+}
+
 static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
   int i;
 
@@ -355,16 +367,13 @@ static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
   xd->above_seg_context = cm->above_seg_context;
   xd->mi_stride = cm->mi_stride;
   xd->error_info = &cm->error;
+
+  set_partition_probs(cm, xd);
 }
 
-static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
-  return cm->frame_type == KEY_FRAME || cm->intra_only;
-}
-
-static INLINE const vp9_prob* get_partition_probs(const VP9_COMMON *cm,
+static INLINE const vp9_prob* get_partition_probs(const MACROBLOCKD *xd,
                                                   int ctx) {
-  return frame_is_intra_only(cm) ? vp9_kf_partition_probs[ctx]
-                                 : cm->fc->partition_prob[ctx];
+  return xd->partition_probs[ctx];
 }
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {

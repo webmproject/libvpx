@@ -425,7 +425,7 @@ static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
                                      int mi_row, int mi_col, BLOCK_SIZE bsize,
                                      vp9_reader *r) {
   const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
-  const vp9_prob *const probs = get_partition_probs(cm, ctx);
+  const vp9_prob *const probs = get_partition_probs(xd, ctx);
   const int has_rows = (mi_row + hbs) < cm->mi_rows;
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
   FRAME_COUNTS *counts = xd->counts;
