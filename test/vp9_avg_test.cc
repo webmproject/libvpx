@@ -286,6 +286,11 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(16, 16, 5, 8, &vp9_avg_8x8_neon),
         make_tuple(32, 32, 15, 8, &vp9_avg_8x8_neon)));
 
+INSTANTIATE_TEST_CASE_P(
+    NEON, IntProRowTest, ::testing::Values(
+        make_tuple(16, &vp9_int_pro_row_neon, &vp9_int_pro_row_c),
+        make_tuple(32, &vp9_int_pro_row_neon, &vp9_int_pro_row_c),
+        make_tuple(64, &vp9_int_pro_row_neon, &vp9_int_pro_row_c)));
 #endif
 
 }  // namespace
