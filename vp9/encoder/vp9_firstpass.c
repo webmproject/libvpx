@@ -228,18 +228,43 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->duration   -= frame->duration;
 }
 
+// Calculate an active area of the image that discounts formatting
+// bars and partially discounts other 0 energy areas.
+#define MIN_ACTIVE_AREA 0.5
+#define MAX_ACTIVE_AREA 1.0
+static double calculate_active_area(const VP9_COMP *cpi,
+                                    const FIRSTPASS_STATS *this_frame)
+{
+  double active_pct;
+
+  active_pct = 1.0 -
+    ((this_frame->intra_skip_pct / 2) +
+     ((this_frame->inactive_zone_rows * 2) / (double)cpi->common.mb_rows));
+  return fclamp(active_pct, MIN_ACTIVE_AREA, MAX_ACTIVE_AREA);
+}
 
 // Calculate a modified Error used in distributing bits between easier and
 // harder frames.
-static double calculate_modified_err(const TWO_PASS *twopass,
+#define ACT_AREA_CORRECTION 0.5
+static double calculate_modified_err(const VP9_COMP *cpi,
+                                     const TWO_PASS *twopass,
                                      const VP9EncoderConfig *oxcf,
                                      const FIRSTPASS_STATS *this_frame) {
   const FIRSTPASS_STATS *const stats = &twopass->total_stats;
   const double av_weight = stats->weight / stats->count;
   const double av_err = (stats->coded_error * av_weight) / stats->count;
-  const double modified_error =
+  double modified_error =
     av_err * pow(this_frame->coded_error * this_frame->weight /
                  DOUBLE_DIVIDE_CHECK(av_err), oxcf->two_pass_vbrbias / 100.0);
+
+  // Correction for active area. Frames with a reduced active area
+  // (eg due to formatting bars) have a higher error per mb for the
+  // remaining active MBs. The correction here assumes that coding
+  // 0.5N blocks of complexity 2X is a little easier than coding N
+  // blocks of complexity X.
+  modified_error *=
+    pow(calculate_active_area(cpi, this_frame), ACT_AREA_CORRECTION);
+
   return fclamp(modified_error,
                 twopass->modified_error_min, twopass->modified_error_max);
 }
@@ -1286,7 +1311,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     twopass->modified_error_max = (avg_error *
                                       oxcf->two_pass_vbrmax_section) / 100;
     while (s < twopass->stats_in_end) {
-      modified_error_total += calculate_modified_err(twopass, oxcf, s);
+      modified_error_total += calculate_modified_err(cpi, twopass, oxcf, s);
       ++s;
     }
     twopass->modified_error_left = modified_error_total;
@@ -1450,21 +1475,16 @@ static double calc_frame_boost(VP9_COMP *cpi,
                                const FIRSTPASS_STATS *this_frame,
                                double this_frame_mv_in_out,
                                double max_boost) {
-  VP9_COMMON *const cm = &cpi->common;
   double frame_boost;
   const double lq =
     vp9_convert_qindex_to_q(cpi->rc.avg_frame_qindex[INTER_FRAME],
                             cpi->common.bit_depth);
   const double boost_q_correction = MIN((0.5 + (lq * 0.015)), 1.5);
-  double inactive_pct;
   int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
                 ? cpi->initial_mbs : cpi->common.MBs;
 
-  // Correct for any inactive zone in the image
-  inactive_pct = (this_frame->intra_skip_pct / 2) +
-                 ((this_frame->inactive_zone_rows * 2) / (double)cm->mb_rows);
-  inactive_pct = fclamp(inactive_pct, 0.0, 0.5);
-  num_mbs = (int)MAX(1, num_mbs - (num_mbs * inactive_pct));
+  // Correct for any inactive region in the image
+  num_mbs = (int)MAX(1, num_mbs * calculate_active_area(cpi, this_frame));
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
@@ -1759,7 +1779,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       ++frame_index;
     }
 
-    modified_err = calculate_modified_err(twopass, oxcf, &frame_stats);
+    modified_err = calculate_modified_err(cpi, twopass, oxcf, &frame_stats);
 
     if (group_error > 0)
       err_fraction = modified_err / DOUBLE_DIVIDE_CHECK(group_error);
@@ -1869,7 +1889,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_zero(next_frame);
 
   // Load stats for the current frame.
-  mod_frame_err = calculate_modified_err(twopass, oxcf, this_frame);
+  mod_frame_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
 
   // Note the error of the frame at the start of the group. This will be
   // the GF frame error if we code a normal gf.
@@ -1923,7 +1943,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     ++i;
 
     // Accumulate error score of frames in this gf group.
-    mod_frame_err = calculate_modified_err(twopass, oxcf, this_frame);
+    mod_frame_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
     gf_group_err += mod_frame_err;
 #if GROUP_ADAPTIVE_MAXQ
     gf_group_raw_error += this_frame->coded_error;
@@ -2028,7 +2048,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     for (j = 0; j < new_gf_interval - rc->baseline_gf_interval; ++j) {
       if (EOF == input_stats(twopass, this_frame))
         break;
-      gf_group_err += calculate_modified_err(twopass, oxcf, this_frame);
+      gf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
 #if GROUP_ADAPTIVE_MAXQ
       gf_group_raw_error += this_frame->coded_error;
 #endif
@@ -2277,14 +2297,14 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_group_bits = 0;        // Total bits available to kf group
   twopass->kf_group_error_left = 0;  // Group modified error score.
 
-  kf_mod_err = calculate_modified_err(twopass, oxcf, this_frame);
+  kf_mod_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
 
   // Find the next keyframe.
   i = 0;
   while (twopass->stats_in < twopass->stats_in_end &&
          rc->frames_to_key < cpi->oxcf.key_freq) {
     // Accumulate kf group error.
-    kf_group_err += calculate_modified_err(twopass, oxcf, this_frame);
+    kf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
 
     // Load the next frame's stats.
     last_frame = *this_frame;
@@ -2346,7 +2366,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Rescan to get the correct error data for the forced kf group.
     for (i = 0; i < rc->frames_to_key; ++i) {
-      kf_group_err += calculate_modified_err(twopass, oxcf, &tmp_frame);
+      kf_group_err += calculate_modified_err(cpi, twopass, oxcf, &tmp_frame);
       input_stats(twopass, &tmp_frame);
     }
     rc->next_key_frame_forced = 1;
@@ -2364,7 +2384,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     for (j = 0; j < new_frame_to_key - rc->frames_to_key; ++j) {
       if (EOF == input_stats(twopass, this_frame))
         break;
-      kf_group_err += calculate_modified_err(twopass, oxcf, this_frame);
+      kf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
     }
     rc->frames_to_key = new_frame_to_key;
   }
@@ -2372,7 +2392,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Special case for the last key frame of the file.
   if (twopass->stats_in >= twopass->stats_in_end) {
     // Accumulate kf group error.
-    kf_group_err += calculate_modified_err(twopass, oxcf, this_frame);
+    kf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
   }
 
   // Calculate the number of bits that should be assigned to the kf group.
