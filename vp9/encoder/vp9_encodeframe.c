@@ -4217,7 +4217,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
-      ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
+      ++get_tx_counts(max_txsize_lookup[bsize], get_tx_size_context(xd),
                       &td->counts->tx)[mbmi->tx_size];
     } else {
       int x, y;

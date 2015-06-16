@@ -104,7 +104,28 @@ static INLINE vp9_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
   return cm->fc->single_ref_prob[vp9_get_pred_context_single_ref_p2(xd)][1];
 }
 
-int vp9_get_tx_size_context(const MACROBLOCKD *xd);
+// Returns a context number for the given MB prediction signal
+// The mode info data structure has a one element border above and to the
+// left of the entries corresponding to real blocks.
+// The prediction flags in these dummy entries are initialized to 0.
+static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
+  const int max_tx_size = max_txsize_lookup[xd->mi[0]->mbmi.sb_type];
+  const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
+  const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
+  const int has_above = xd->up_available;
+  const int has_left = xd->left_available;
+  int above_ctx = (has_above && !above_mbmi->skip) ? (int)above_mbmi->tx_size
+                                                   : max_tx_size;
+  int left_ctx = (has_left && !left_mbmi->skip) ? (int)left_mbmi->tx_size
+                                                : max_tx_size;
+  if (!has_left)
+    left_ctx = above_ctx;
+
+  if (!has_above)
+    above_ctx = left_ctx;
+
+  return (above_ctx + left_ctx) > max_tx_size;
+}
 
 static INLINE const vp9_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
                                            const struct tx_probs *tx_probs) {
@@ -124,7 +145,7 @@ static INLINE const vp9_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
 static INLINE const vp9_prob *get_tx_probs2(TX_SIZE max_tx_size,
                                             const MACROBLOCKD *xd,
                                             const struct tx_probs *tx_probs) {
-  return get_tx_probs(max_tx_size, vp9_get_tx_size_context(xd), tx_probs);
+  return get_tx_probs(max_tx_size, get_tx_size_context(xd), tx_probs);
 }
 
 static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
