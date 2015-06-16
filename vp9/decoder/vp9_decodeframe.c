@@ -771,14 +771,11 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
-static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                     int hbs,
-                                     int mi_row, int mi_col, BLOCK_SIZE bsize,
-                                     vp9_reader *r) {
+static PARTITION_TYPE read_partition(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                     BLOCK_SIZE bsize, vp9_reader *r,
+                                     int has_rows, int has_cols) {
   const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
   const vp9_prob *const probs = get_partition_probs(xd, ctx);
-  const int has_rows = (mi_row + hbs) < cm->mi_rows;
-  const int has_cols = (mi_col + hbs) < cm->mi_cols;
   FRAME_COUNTS *counts = xd->counts;
   PARTITION_TYPE p;
 
@@ -805,11 +802,13 @@ static void decode_partition(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
+  const int has_rows = (mi_row + hbs) < cm->mi_rows;
+  const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  partition = read_partition(cm, xd, hbs, mi_row, mi_col, bsize, r);
+  partition = read_partition(xd, mi_row, mi_col, bsize, r, has_rows, has_cols);
   subsize = get_subsize(bsize, partition);
   if (bsize == BLOCK_8X8) {
     decode_block(pbi, xd, tile, mi_row, mi_col, r, subsize);
@@ -820,12 +819,12 @@ static void decode_partition(VP9Decoder *const pbi, MACROBLOCKD *const xd,
         break;
       case PARTITION_HORZ:
         decode_block(pbi, xd, tile, mi_row, mi_col, r, subsize);
-        if (mi_row + hbs < cm->mi_rows)
+        if (has_rows)
           decode_block(pbi, xd, tile, mi_row + hbs, mi_col, r, subsize);
         break;
       case PARTITION_VERT:
         decode_block(pbi, xd, tile, mi_row, mi_col, r, subsize);
-        if (mi_col + hbs < cm->mi_cols)
+        if (has_cols)
           decode_block(pbi, xd, tile, mi_row, mi_col + hbs, r, subsize);
         break;
       case PARTITION_SPLIT:
