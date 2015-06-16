@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "99abd4ef_95640642",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-06-16T12:26:12Z",
+      "side": 1,
+      "message": ":-)\n\nDid this to keep the size of the struct the same.  Probably most of these flags can be reduced.",
+      "parentUuid": "d9df0c22_399cb871",
+      "revId": "d05514c3a9e53d04fddbfc1e0898802ed96eecd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99e914d2_463a83fa",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 2
