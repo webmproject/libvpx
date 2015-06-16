@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "796d40b3_3f54224b",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-16T23:20:24Z",
+      "side": 1,
+      "message": "this prototype would be better written as \u0027int16_t hbuf[16], ...\u0027\nif its size is fixed",
+      "revId": "b87878c101049134ac42ae026aa05a7dbc4724f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "796d40b3_9f4b76a8",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-16T23:20:24Z",
+      "side": 1,
+      "message": "so height may be up to 64 and anything in between or size based on possible block sizes?",
+      "revId": "b87878c101049134ac42ae026aa05a7dbc4724f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
