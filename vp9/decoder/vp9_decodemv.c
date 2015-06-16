@@ -464,7 +464,6 @@ static void fpm_sync(void *const data, int mi_row) {
 
 static void read_inter_block_mode_info(VP9Decoder *const pbi,
                                        MACROBLOCKD *const xd,
-                                       const TileInfo *const tile,
                                        MODE_INFO *const mi,
                                        int mi_row, int mi_col, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
@@ -482,13 +481,14 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
     RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
+
     xd->block_refs[ref] = ref_buf;
     if ((!vp9_is_valid_scale(&ref_buf->sf)))
       vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
                          "Reference frame has invalid dimensions");
     vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col,
                          &ref_buf->sf);
-    vp9_find_mv_refs(cm, xd, tile, mi, frame, ref_mvs[frame],
+    vp9_find_mv_refs(cm, xd, mi, frame, ref_mvs[frame],
                      mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
 
@@ -531,7 +531,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
           uint8_t dummy_mode_ctx[MAX_REF_FRAMES];
           for (ref = 0; ref < 1 + is_compound; ++ref)
-            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, j, ref, mi_row, mi_col,
+            vp9_append_sub8x8_mvs_for_idx(cm, xd, j, ref, mi_row, mi_col,
                                           &nearest_sub8x8[ref],
                                           &near_sub8x8[ref],
                                           dummy_mode_ctx);
@@ -567,7 +567,6 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
 
 static void read_inter_frame_mode_info(VP9Decoder *const pbi,
                                        MACROBLOCKD *const xd,
-                                       const TileInfo *const tile,
                                        int mi_row, int mi_col, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
@@ -582,13 +581,12 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
   mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
 
   if (inter_block)
-    read_inter_block_mode_info(pbi, xd, tile, mi, mi_row, mi_col, r);
+    read_inter_block_mode_info(pbi, xd, mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(cm, xd, mi, r);
 }
 
 void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
-                        const TileInfo *const tile,
                         int mi_row, int mi_col, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
@@ -602,7 +600,7 @@ void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
   if (frame_is_intra_only(cm)) {
     read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
   } else {
-    read_inter_frame_mode_info(pbi, xd, tile, mi_row, mi_col, r);
+    read_inter_frame_mode_info(pbi, xd, mi_row, mi_col, r);
 
     for (h = 0; h < y_mis; ++h) {
       MV_REF *const frame_mv = frame_mvs + h * cm->mi_cols;

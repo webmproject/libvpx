@@ -23,6 +23,7 @@
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_scale.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_tile_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -149,7 +150,10 @@ typedef struct RefBuffer {
 
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
+
   FRAME_COUNTS *counts;
+  TileInfo tile;
+
   int mi_stride;
 
   MODE_INFO **mi;

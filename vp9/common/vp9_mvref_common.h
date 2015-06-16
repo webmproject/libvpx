@@ -209,7 +209,6 @@ static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
 
 typedef void (*find_mv_refs_sync)(void *const data, int mi_row);
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                      const TileInfo *const tile,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list, int mi_row, int mi_col,
                       find_mv_refs_sync sync, void *const data,
@@ -222,7 +221,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
                            int_mv *mvlist, int_mv *nearest_mv, int_mv *near_mv);
 
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                   const TileInfo *const tile,
                                    int block, int ref, int mi_row, int mi_col,
                                    int_mv *nearest_mv, int_mv *near_mv,
                                    uint8_t *mode_context);
