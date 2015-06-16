@@ -128,15 +128,18 @@ int16_t vp9_satd_c(const int16_t *coeff, int length) {
 }
 
 // Integer projection onto row vectors.
-void vp9_int_pro_row_c(int16_t *hbuf, uint8_t const *ref,
+// height: value range {16, 32, 64}.
+void vp9_int_pro_row_c(int16_t hbuf[16], uint8_t const *ref,
                        const int ref_stride, const int height) {
   int idx;
-  const int norm_factor = MAX(8, height >> 1);
+  const int norm_factor = height >> 1;
   for (idx = 0; idx < 16; ++idx) {
     int i;
     hbuf[idx] = 0;
+    // hbuf[idx]: 14 bit, dynamic range [0, 16320].
     for (i = 0; i < height; ++i)
       hbuf[idx] += ref[i * ref_stride];
+    // hbuf[idx]: 9 bit, dynamic range [0, 510].
     hbuf[idx] /= norm_factor;
     ++ref;
   }
