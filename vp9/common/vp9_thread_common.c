@@ -138,7 +138,6 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
             break;
         }
       }
-
       sync_write(lf_sync, r, c, sb_cols);
     }
   }

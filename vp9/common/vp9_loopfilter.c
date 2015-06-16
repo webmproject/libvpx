@@ -1176,26 +1176,36 @@ void vp9_filter_block_plane_non420(VP9_COMMON *cm,
     // Determine the vertical edges that need filtering
     for (c = 0; c < MI_BLOCK_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
       const MODE_INFO *mi = mi_8x8[c].src_mi;
-      const BLOCK_SIZE sb_type = mi[0].mbmi.sb_type;
-      const int skip_this = mi[0].mbmi.skip && is_inter_block(&mi[0].mbmi);
+      const MB_MODE_INFO *mbmi = &mi[0].mbmi;
+      const BLOCK_SIZE sb_type = mbmi->sb_type;
+      const int skip_this = mbmi->skip && is_inter_block(mbmi);
+      const int blk_row = r & (num_8x8_blocks_high_lookup[sb_type] - 1);
+      const int blk_col = c & (num_8x8_blocks_wide_lookup[sb_type] - 1);
       // left edge of current unit is block/partition edge -> no skip
       const int block_edge_left = (num_4x4_blocks_wide_lookup[sb_type] > 1) ?
-          !(c & (num_8x8_blocks_wide_lookup[sb_type] - 1)) : 1;
+          !blk_col : 1;
       const int skip_this_c = skip_this && !block_edge_left;
       // top edge of current unit is block/partition edge -> no skip
       const int block_edge_above = (num_4x4_blocks_high_lookup[sb_type] > 1) ?
-          !(r & (num_8x8_blocks_high_lookup[sb_type] - 1)) : 1;
+          !blk_row : 1;
       const int skip_this_r = skip_this && !block_edge_above;
-      const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
-                            ? get_uv_tx_size(&mi[0].mbmi, plane)
-                            : mi[0].mbmi.tx_size;
+
+      TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV) ?
+          get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, ss_x, ss_y)
+          : mbmi->tx_size;
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
       // Filter level can vary per MI
       if (!(lfl[(r << 3) + (c >> ss_x)] =
-            get_filter_level(&cm->lf_info, &mi[0].mbmi)))
+            get_filter_level(&cm->lf_info, mbmi)))
         continue;
+
+      if (is_inter_block(mbmi) && !mbmi->skip)
+        tx_size = (plane->plane_type == PLANE_TYPE_UV) ?
+            get_uv_tx_size_impl(mbmi->inter_tx_size[blk_row * 8 + blk_col],
+                                mbmi->sb_type, ss_x, ss_y)
+            : mbmi->inter_tx_size[blk_row * 8 + blk_col];
 
       // Build masks based on the transform size of each block
       if (tx_size == TX_32X32) {
@@ -1531,18 +1541,7 @@ void vp9_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
                           struct macroblockd_plane planes[MAX_MB_PLANE],
                           int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
-  enum lf_path path;
-  LOOP_FILTER_MASK lfm;
   int mi_row, mi_col;
-
-  if (y_only)
-    path = LF_PATH_444;
-  else if (planes[1].subsampling_y == 1 && planes[1].subsampling_x == 1)
-    path = LF_PATH_420;
-  else if (planes[1].subsampling_y == 0 && planes[1].subsampling_x == 0)
-    path = LF_PATH_444;
-  else
-    path = LF_PATH_SLOW;
 
   for (mi_row = start; mi_row < stop; mi_row += MI_BLOCK_SIZE) {
     MODE_INFO *mi = cm->mi + mi_row * cm->mi_stride;
@@ -1552,25 +1551,9 @@ void vp9_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
 
       vp9_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
-      // TODO(JBB): Make setup_mask work for non 420.
-      vp9_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
-                     &lfm);
-
-      vp9_filter_block_plane_ss00(cm, &planes[0], mi_row, &lfm);
-      for (plane = 1; plane < num_planes; ++plane) {
-        switch (path) {
-          case LF_PATH_420:
-            vp9_filter_block_plane_ss11(cm, &planes[plane], mi_row, &lfm);
-            break;
-          case LF_PATH_444:
-            vp9_filter_block_plane_ss00(cm, &planes[plane], mi_row, &lfm);
-            break;
-          case LF_PATH_SLOW:
-            vp9_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
-                                          mi_row, mi_col);
-            break;
-        }
-      }
+      for (plane = 0; plane < num_planes; ++plane)
+        vp9_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
+                                      mi_row, mi_col);
     }
   }
 }
