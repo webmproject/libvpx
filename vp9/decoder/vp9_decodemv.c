@@ -599,19 +599,20 @@ void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
   MV_REF* frame_mvs = cm->cur_frame->mvs + mi_row * cm->mi_cols + mi_col;
   int w, h;
 
-  if (frame_is_intra_only(cm))
+  if (frame_is_intra_only(cm)) {
     read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
-  else
+  } else {
     read_inter_frame_mode_info(pbi, xd, tile, mi_row, mi_col, r);
 
-  for (h = 0; h < y_mis; ++h) {
-    MV_REF *const frame_mv = frame_mvs + h * cm->mi_cols;
-    for (w = 0; w < x_mis; ++w) {
-      MV_REF *const mv = frame_mv + w;
-      mv->ref_frame[0] = mi->mbmi.ref_frame[0];
-      mv->ref_frame[1] = mi->mbmi.ref_frame[1];
-      mv->mv[0].as_int = mi->mbmi.mv[0].as_int;
-      mv->mv[1].as_int = mi->mbmi.mv[1].as_int;
+    for (h = 0; h < y_mis; ++h) {
+      MV_REF *const frame_mv = frame_mvs + h * cm->mi_cols;
+      for (w = 0; w < x_mis; ++w) {
+        MV_REF *const mv = frame_mv + w;
+        mv->ref_frame[0] = mi->mbmi.ref_frame[0];
+        mv->ref_frame[1] = mi->mbmi.ref_frame[1];
+        mv->mv[0].as_int = mi->mbmi.mv[0].as_int;
+        mv->mv[1].as_int = mi->mbmi.mv[1].as_int;
+      }
     }
   }
 }

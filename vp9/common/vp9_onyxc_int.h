@@ -162,7 +162,8 @@ typedef struct VP9Common {
   int show_existing_frame;
 
   // Flag signaling that the frame is encoded using only INTRA modes.
-  int intra_only;
+  uint8_t intra_only;
+  uint8_t last_intra_only;
 
   int allow_high_precision_mv;
 
