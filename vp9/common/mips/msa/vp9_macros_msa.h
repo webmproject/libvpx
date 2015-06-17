@@ -720,6 +720,24 @@
 }
 #define DOTP_SH4_SW(...) DOTP_SH4(v4i32, __VA_ARGS__)
 
+/* Description : Dot product of word vector elements
+   Arguments   : Inputs  - mult0, mult1
+                           cnst0, cnst1
+                 Outputs - out0, out1
+                 Return Type - signed word
+   Details     : Signed word elements from mult0 are multiplied with
+                 signed word elements from cnst0 producing a result
+                 twice the size of input i.e. signed double word.
+                 Then this multiplication results of adjacent odd-even elements
+                 are added together and stored to the out vector
+                 (2 signed double word results)
+*/
+#define DOTP_SW2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1) {  \
+  out0 = (RTYPE)__msa_dotp_s_d((v4i32)mult0, (v4i32)cnst0);        \
+  out1 = (RTYPE)__msa_dotp_s_d((v4i32)mult1, (v4i32)cnst1);        \
+}
+#define DOTP_SW2_SD(...) DOTP_SW2(v2i64, __VA_ARGS__)
+
 /* Description : Dot product & addition of byte vector elements
    Arguments   : Inputs  - mult0, mult1
                            cnst0, cnst1
@@ -1103,7 +1121,7 @@
                  Return Type - unsigned halfword
    Details     : Each unsigned halfword element from 'in0' is saturated to the
                  value generated with (sat_val+1) bit range.
-                 The results are in placed to original vectors
+                 The results are stored in place
 */
 #define SAT_UH2(RTYPE, in0, in1, sat_val) {         \
   in0 = (RTYPE)__msa_sat_u_h((v8u16)in0, sat_val);  \
@@ -1125,7 +1143,7 @@
                  Return Type - unsigned halfword
    Details     : Each unsigned halfword element from 'in0' is saturated to the
                  value generated with (sat_val+1) bit range
-                 The results are in placed to original vectors
+                 The results are stored in place
 */
 #define SAT_SH2(RTYPE, in0, in1, sat_val) {         \
   in0 = (RTYPE)__msa_sat_s_h((v8i16)in0, sat_val);  \
@@ -1438,6 +1456,24 @@
   v16i8 zero_m = { 0 };                 \
                                         \
   ILVRL_B2_SH(zero_m, in, out0, out1);  \
+}
+
+/* Description : Sign extend halfword elements from input vector and return
+                 result in pair of vectors
+   Arguments   : Inputs  - in           (1 input halfword vector)
+                 Outputs - out0, out1   (sign extended 2 word vectors)
+                 Return Type - signed word
+   Details     : Sign bit of halfword elements from input vector 'in' is
+                 extracted and interleaved right with same vector 'in0' to
+                 generate 4 signed word elements in 'out0'
+                 Then interleaved left with same vector 'in0' to
+                 generate 4 signed word elements in 'out1'
+*/
+#define UNPCK_SH_SW(in, out0, out1) {    \
+  v8i16 tmp_m;                           \
+                                         \
+  tmp_m = __msa_clti_s_h((v8i16)in, 0);  \
+  ILVRL_H2_SW(tmp_m, in, out0, out1);    \
 }
 
 /* Description : Butterfly of 4 input vectors
