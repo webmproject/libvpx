@@ -84,16 +84,16 @@ add_proto qw/void vp9_tm_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, cons
 specialize qw/vp9_tm_predictor_4x4 neon dspr2 msa/, "$sse_x86inc";
 
 add_proto qw/void vp9_dc_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_predictor_4x4 dspr2 msa/, "$sse_x86inc";
+specialize qw/vp9_dc_predictor_4x4 dspr2 msa neon/, "$sse_x86inc";
 
 add_proto qw/void vp9_dc_top_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_top_predictor_4x4 msa/, "$sse_x86inc";
+specialize qw/vp9_dc_top_predictor_4x4 msa neon/, "$sse_x86inc";
 
 add_proto qw/void vp9_dc_left_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_left_predictor_4x4 msa/, "$sse_x86inc";
+specialize qw/vp9_dc_left_predictor_4x4 msa neon/, "$sse_x86inc";
 
 add_proto qw/void vp9_dc_128_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_128_predictor_4x4 msa/, "$sse_x86inc";
+specialize qw/vp9_dc_128_predictor_4x4 msa neon/, "$sse_x86inc";
 
 add_proto qw/void vp9_d207_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vp9_d207_predictor_8x8/, "$ssse3_x86inc";
