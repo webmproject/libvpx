@@ -1287,24 +1287,72 @@ static void write_modes_sb(VP9_COMP *cpi,
         break;
 #if CONFIG_EXT_PARTITION
       case PARTITION_HORZ_A:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col);
         break;
       case PARTITION_HORZ_B:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col + bs);
         break;
       case PARTITION_VERT_A:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col + bs);
         break;
       case PARTITION_VERT_B:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col + bs);
         break;
 #endif
       default:
