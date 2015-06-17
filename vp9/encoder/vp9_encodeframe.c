@@ -3460,9 +3460,11 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
     abort_flag = (sum_rdc.rdcost >= best_rd && bsize > BLOCK_8X8) ||
                  (sum_rdc.rate == INT_MAX && bsize == BLOCK_8X8);
+    if (sum_rdc.rdcost < INT64_MAX &&
+#else
+    if (sum_rdc.rdcost < best_rdc.rdcost &&
 #endif
-
-    if (sum_rdc.rdcost < best_rdc.rdcost && mi_row + mi_step < cm->mi_rows &&
+        mi_row + mi_step < cm->mi_rows &&
         bsize > BLOCK_8X8) {
       PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
       update_state(cpi, ctx, mi_row, mi_col, subsize, 0);
@@ -3615,8 +3617,11 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
     abort_flag = (sum_rdc.rdcost >= best_rd && bsize > BLOCK_8X8) ||
                  (sum_rdc.rate == INT_MAX && bsize == BLOCK_8X8);
+    if (sum_rdc.rdcost < INT64_MAX &&
+#else
+    if (sum_rdc.rdcost < best_rdc.rdcost &&
 #endif
-    if (sum_rdc.rdcost < best_rdc.rdcost && mi_col + mi_step < cm->mi_cols &&
+        mi_col + mi_step < cm->mi_cols &&
         bsize > BLOCK_8X8) {
       update_state(cpi, &pc_tree->vertical[0], mi_row, mi_col, subsize, 0);
       encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize,
