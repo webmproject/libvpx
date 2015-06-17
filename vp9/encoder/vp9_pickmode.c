@@ -913,8 +913,6 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   // TODO(jingning): This needs further refactoring.
   block_yrd(cpi, x, &rate, &dist, &is_skippable, &this_sse, 0,
             bsize_tx, MIN(tx_size, TX_16X16));
-  // this_sse is a dummy variable here. Its value should remain INT64_MAX.
-  assert(this_sse == INT64_MAX);
   x->skip_txfm[0] = is_skippable;
   rate += vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), is_skippable);
 
