@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99203484_2df6d5cf",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 3051,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-18T00:00:47Z",
+      "side": 1,
+      "message": "only if resize_now !\u003d 0 ?",
+      "range": {
+        "startLine": 3051,
+        "startChar": 15,
+        "endLine": 3051,
+        "endChar": 18
+      },
+      "revId": "e621ba4aaeaed221cfed67b1b325cf8ed3634bc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "192d2477_71642ac3",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1774,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-18T00:00:47Z",
+      "side": 1,
+      "message": "Doesn\u0027t this depend on the frame rate?",
+      "range": {
+        "startLine": 1774,
+        "startChar": 33,
+        "endLine": 1774,
+        "endChar": 35
+      },
+      "revId": "e621ba4aaeaed221cfed67b1b325cf8ed3634bc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
