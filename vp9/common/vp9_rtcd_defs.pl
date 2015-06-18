@@ -72,7 +72,7 @@ add_proto qw/void vp9_d117_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, co
 specialize qw/vp9_d117_predictor_4x4/;
 
 add_proto qw/void vp9_d135_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_d135_predictor_4x4/;
+specialize qw/vp9_d135_predictor_4x4 neon/;
 
 add_proto qw/void vp9_d153_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vp9_d153_predictor_4x4/, "$ssse3_x86inc";
