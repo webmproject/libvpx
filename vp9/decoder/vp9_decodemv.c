@@ -636,14 +636,14 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
 
   if (mbmi->sb_type >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !mbmi->skip && inter_block) {
-    BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
+    BLOCK_SIZE txb_size = txsize_to_bsize[mbmi->max_tx_size];
     int bh = num_4x4_blocks_wide_lookup[txb_size];
     int width  = num_4x4_blocks_wide_lookup[bsize];
     int height = num_4x4_blocks_high_lookup[bsize];
     int idx, idy;
     for (idy = 0; idy < height; idy += bh)
       for (idx = 0; idx < width; idx += bh)
-        read_tx_size_inter(cm, xd, counts, max_txsize_lookup[mbmi->sb_type],
+        read_tx_size_inter(cm, xd, counts, mbmi->max_tx_size,
                            idy, idx, r);
   } else {
     int i;
@@ -659,8 +659,7 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
 
   if (inter_block) {
     if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT && mbmi->skip) {
-      TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-      BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+      BLOCK_SIZE txb_size = txsize_to_bsize[mbmi->max_tx_size];
       int bh = num_4x4_blocks_wide_lookup[txb_size];
       int width  = num_4x4_blocks_wide_lookup[bsize];
       int height = num_4x4_blocks_high_lookup[bsize];
@@ -669,11 +668,10 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
         for (idx = 0; idx < width; idx += bh)
           txfm_partition_update(xd->above_txfm_context + (idx / 2),
                                 xd->left_txfm_context + (idy / 2),
-                                max_tx_size);
+                                mbmi->max_tx_size);
     }
   } else {
-    TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-    BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+    BLOCK_SIZE txb_size = txsize_to_bsize[mbmi->max_tx_size];
     int bh = num_4x4_blocks_wide_lookup[txb_size];
     int width  = num_4x4_blocks_wide_lookup[bsize];
     int height = num_4x4_blocks_high_lookup[bsize];

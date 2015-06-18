@@ -325,14 +325,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     if (!is_inter) {
       write_selected_tx_size(cm, xd, w);
     } else {
-      BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
+      BLOCK_SIZE txb_size = txsize_to_bsize[mbmi->max_tx_size];
       int bh = num_4x4_blocks_wide_lookup[txb_size];
       int width  = num_4x4_blocks_wide_lookup[bsize];
       int height = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
       for (idy = 0; idy < height; idy += bh)
         for (idx = 0; idx < width; idx += bh)
-          write_tx_size_inter(cm, xd, max_txsize_lookup[bsize], idy, idx, w);
+          write_tx_size_inter(cm, xd, mbmi->max_tx_size, idy, idx, w);
     }
   }
 
@@ -342,8 +342,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
   if (is_inter) {
     if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT && skip) {
-      TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-      BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+      BLOCK_SIZE txb_size = txsize_to_bsize[mbmi->max_tx_size];
       int bh = num_4x4_blocks_wide_lookup[txb_size];
       int width  = num_4x4_blocks_wide_lookup[bsize];
       int height = num_4x4_blocks_high_lookup[bsize];
@@ -352,11 +351,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         for (idx = 0; idx < width; idx += bh)
           txfm_partition_update(xd->above_txfm_context + (idx / 2),
                                 xd->left_txfm_context + (idy / 2),
-                                max_tx_size);
+                                mbmi->max_tx_size);
     }
   } else {
-    TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-    BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+    BLOCK_SIZE txb_size = txsize_to_bsize[mbmi->max_tx_size];
     int bh = num_4x4_blocks_wide_lookup[txb_size];
     int width  = num_4x4_blocks_wide_lookup[bsize];
     int height = num_4x4_blocks_high_lookup[bsize];

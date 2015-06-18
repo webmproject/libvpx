@@ -987,6 +987,7 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   mbmi->mode = ZEROMV;
   mbmi->tx_size = MIN(max_txsize_lookup[bsize],
                       tx_mode_to_biggest_tx_size[tx_mode]);
+  mbmi->max_tx_size = max_txsize_lookup[bsize];
   mbmi->skip = 1;
   mbmi->uv_mode = DC_PRED;
   mbmi->ref_frame[0] = LAST_FRAME;
@@ -1035,6 +1036,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
   mbmi = &xd->mi[0].src_mi->mbmi;
   mbmi->sb_type = bsize;
+  mbmi->max_tx_size = max_txsize_lookup[bsize];
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][0];
@@ -1414,6 +1416,7 @@ static void set_fixed_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
         int index = block_row * mis + block_col;
         mi_8x8[index].src_mi = mi_upper_left + index;
         mi_8x8[index].src_mi->mbmi.sb_type = bsize;
+        mi_8x8[index].src_mi->mbmi.max_tx_size = max_txsize_lookup[bsize];
       }
     }
   } else {
@@ -1479,6 +1482,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
         index = b_mi_row * mis + b_mi_col;
         mi_8x8[index].src_mi = mi_upper_left + index;
         mi_8x8[index].src_mi->mbmi.sb_type = BLOCK_16X16;
+        mi_8x8[index].src_mi->mbmi.max_tx_size = max_txsize_lookup[BLOCK_16X16];
 
         // TODO(yunqingwang): If d16[j].var is very large, use 8x8 partition
         // size to further improve quality.
@@ -1501,6 +1505,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
         index = coord_lookup[i*4].row * mis + coord_lookup[i*4].col;
         mi_8x8[index].src_mi = mi_upper_left + index;
         mi_8x8[index].src_mi->mbmi.sb_type = BLOCK_32X32;
+        mi_8x8[index].src_mi->mbmi.max_tx_size = max_txsize_lookup[BLOCK_32X32];
       }
     }
 
@@ -1513,6 +1518,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
       if (is_larger_better) {
         mi_8x8[0].src_mi = mi_upper_left;
         mi_8x8[0].src_mi->mbmi.sb_type = BLOCK_64X64;
+        mi_8x8[0].src_mi->mbmi.max_tx_size = max_txsize_lookup[BLOCK_64X64];
       }
     }
   } else {   // partial in-image SB64
@@ -2896,6 +2902,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
   mbmi = &xd->mi[0].src_mi->mbmi;
   mbmi->sb_type = bsize;
+  mbmi->max_tx_size = max_txsize_lookup[bsize];
 
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
     if (cyclic_refresh_segment_id_boosted(mbmi->segment_id))

@@ -423,6 +423,7 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   xd->mi = cm->mi + offset;
   xd->mi[0].src_mi = &xd->mi[0];  // Point to self.
   xd->mi[0].mbmi.sb_type = bsize;
+  xd->mi[0].mbmi.max_tx_size = max_txsize_lookup[bsize];
 
   for (y = 0; y < y_mis; ++y)
     for (x = !y; x < x_mis; ++x) {

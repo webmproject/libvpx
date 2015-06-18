@@ -1454,14 +1454,14 @@ static void inter_block_yrd(const VP9_COMP *cpi, MACROBLOCK *x,
 
   if (is_cost_valid) {
     const struct macroblockd_plane *const pd = &xd->plane[0];
-    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-    const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
-    const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
-    BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
+    const int mi_width = num_4x4_blocks_wide_lookup[bsize];
+    const int mi_height = num_4x4_blocks_high_lookup[bsize];
+    TX_SIZE max_tx_size = xd->mi[0].mbmi.max_tx_size;
+    BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
     int bh = num_4x4_blocks_wide_lookup[txb_size];
     int idx, idy;
     int block = 0;
-    int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
+    int step = 1 << (max_tx_size * 2);
     ENTROPY_CONTEXT ctxa[16], ctxl[16];
     TXFM_CONTEXT txa[8], txl[8];
 
@@ -1471,14 +1471,14 @@ static void inter_block_yrd(const VP9_COMP *cpi, MACROBLOCK *x,
     vp9_get_entropy_contexts(bsize, TX_4X4, pd, ctxa, ctxl);
 
     vpx_memcpy(txa, xd->above_txfm_context,
-               sizeof(TXFM_CONTEXT) * num_8x8_blocks_wide_lookup[plane_bsize]);
+               sizeof(TXFM_CONTEXT) * num_8x8_blocks_wide_lookup[bsize]);
     vpx_memcpy(txl, xd->left_txfm_context,
-               sizeof(TXFM_CONTEXT) * num_8x8_blocks_high_lookup[plane_bsize]);
+               sizeof(TXFM_CONTEXT) * num_8x8_blocks_high_lookup[bsize]);
 
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         select_tx_block(cpi, x, idy, idx, 0, block,
-                        max_txsize_lookup[plane_bsize], plane_bsize, txb_size,
+                        max_tx_size, bsize, txb_size,
                         ctxa, ctxl, txa, txl,
                         &pnrate, &pndist, &pnsse, &pnskip);
         *rate += pnrate;

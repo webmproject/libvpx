@@ -116,6 +116,7 @@ typedef struct {
   PREDICTION_MODE mode;
   TX_SIZE tx_size;
   TX_SIZE inter_tx_size[64];  // Assume maximum of 64x64 block size.
+  TX_SIZE max_tx_size;        // Maximum tx size allowed in current block.
   int8_t skip;
   int8_t segment_id;
   int8_t seg_id_predicted;  // valid only when temporal_update is enabled
@@ -129,7 +130,6 @@ typedef struct {
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   uint8_t mode_context[MAX_REF_FRAMES];
   INTERP_FILTER interp_filter;
-
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
