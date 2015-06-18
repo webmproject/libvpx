@@ -15,6 +15,75 @@
 #include "vpx/vpx_integer.h"
 
 //------------------------------------------------------------------------------
+// DC 4x4
+
+// 'do_above' and 'do_left' facilitate branch removal when inlined.
+static INLINE void dc_4x4(uint8_t *dst, ptrdiff_t stride,
+                          const uint8_t *above, const uint8_t *left,
+                          int do_above, int do_left) {
+  uint16x8_t sum_top;
+  uint16x8_t sum_left;
+  uint8x8_t dc0;
+
+  if (do_above) {
+    const uint8x8_t A = vld1_u8(above);  // top row
+    const uint16x4_t p0 = vpaddl_u8(A);  // cascading summation of the top
+    const uint16x4_t p1 = vpadd_u16(p0, p0);
+    sum_top = vcombine_u16(p1, p1);
+  }
+
+  if (do_left) {
+    const uint8x8_t L = vld1_u8(left);  // left border
+    const uint16x4_t p0 = vpaddl_u8(L);  // cascading summation of the left
+    const uint16x4_t p1 = vpadd_u16(p0, p0);
+    sum_left = vcombine_u16(p1, p1);
+  }
+
+  if (do_above && do_left) {
+    const uint16x8_t sum = vaddq_u16(sum_left, sum_top);
+    dc0 = vrshrn_n_u16(sum, 3);
+  } else if (do_above) {
+    dc0 = vrshrn_n_u16(sum_top, 2);
+  } else if (do_left) {
+    dc0 = vrshrn_n_u16(sum_left, 2);
+  } else {
+    dc0 = vdup_n_u8(0x80);
+  }
+
+  {
+    const uint8x8_t dc = vdup_lane_u8(dc0, 0);
+    int i;
+    for (i = 0; i < 4; ++i) {
+      vst1_lane_u32((uint32_t*)(dst + i * stride), vreinterpret_u32_u8(dc), 0);
+    }
+  }
+}
+
+void vp9_dc_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+                               const uint8_t *above, const uint8_t *left) {
+  dc_4x4(dst, stride, above, left, 1, 1);
+}
+
+void vp9_dc_left_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+                                    const uint8_t *above, const uint8_t *left) {
+  (void)above;
+  dc_4x4(dst, stride, NULL, left, 0, 1);
+}
+
+void vp9_dc_top_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+                                   const uint8_t *above, const uint8_t *left) {
+  (void)left;
+  dc_4x4(dst, stride, above, NULL, 1, 0);
+}
+
+void vp9_dc_128_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+                                   const uint8_t *above, const uint8_t *left) {
+  (void)above;
+  (void)left;
+  dc_4x4(dst, stride, NULL, NULL, 0, 0);
+}
+
+//------------------------------------------------------------------------------
 // DC 8x8
 
 // 'do_above' and 'do_left' facilitate branch removal when inlined.
