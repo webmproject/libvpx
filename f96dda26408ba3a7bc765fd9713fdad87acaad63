@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e700ec3_59b6232f",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-18T04:05:07Z",
+      "side": 1,
+      "message": "note in webp left[0..3] aren\u0027t contiguous so we load each into a uint32 and do a vcreate_u64() here; this is faster, but I didn\u0027t really give it much thought.\nit\u0027s unfortunate that I need a 0 since we\u0027re reversing this one, otherwise XABC could be applied directly",
+      "revId": "f96dda26408ba3a7bc765fd9713fdad87acaad63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
