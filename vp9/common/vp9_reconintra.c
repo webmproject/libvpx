@@ -533,8 +533,8 @@ static INLINE void d117_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
 }
 intra_pred_no_4x4(d117)
 
-void vp9_d135_predictor_4x4(uint8_t *dst, ptrdiff_t stride,
-                            const uint8_t *above, const uint8_t *left) {
+void vp9_d135_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
   const int I = left[0];
   const int J = left[1];
   const int K = left[2];
