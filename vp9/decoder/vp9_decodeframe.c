@@ -1539,6 +1539,11 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       int eobtotal = 0;
       struct inter_args arg = { cm, xd, r, &eobtotal };
       set_offsets_topblock(cm, xd, tile, bsize, mi_row, mi_col);
+      if (cm->seg.enabled) {
+        setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg,
+                                                    xd->mi[0].mbmi.segment_id,
+                                                    cm->base_qindex));
+      }
 #if CONFIG_EXT_TX
       xd->mi[0].mbmi.ext_txfrm = txfm;
 #endif
