@@ -4080,6 +4080,7 @@ static void update_txfm_count(MACROBLOCKD *xd, FRAME_COUNTS *counts,
   int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
   int ctx = txfm_partition_context(xd->above_txfm_context + (blk_col / 2),
                                    xd->left_txfm_context + (blk_row / 2),
+                                   mbmi->max_tx_size,
                                    tx_size);
   TX_SIZE plane_tx_size = mbmi->inter_tx_size[tx_idx];
 

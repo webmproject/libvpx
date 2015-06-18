@@ -1326,6 +1326,7 @@ static void select_tx_block(const VP9_COMP *cpi, MACROBLOCK *x,
   TXFM_CONTEXT stxa[8], stxl[8];
   int ctx = txfm_partition_context(txa + (blk_col / 2),
                                    txl + (blk_row / 2),
+                                   mbmi->max_tx_size,
                                    tx_size);
   int zero_blk_rate;
 

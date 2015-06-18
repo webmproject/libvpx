@@ -29,7 +29,7 @@ extern "C" {
 #define BLOCK_SIZE_GROUPS 4
 #define SKIP_CONTEXTS 3
 #define INTER_MODE_CONTEXTS 7
-#define TXFM_PARTITION_CONTEXTS 9
+#define TXFM_PARTITION_CONTEXTS 12
 
 /* Segment Feature Masks */
 #define MAX_MV_REF_CANDIDATES 2

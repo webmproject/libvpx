@@ -73,6 +73,7 @@ static void read_tx_size_inter(VP9_COMMON *cm, MACROBLOCKD *xd,
   int i, j;
   int ctx = txfm_partition_context(xd->above_txfm_context + (blk_col / 2),
                                    xd->left_txfm_context + (blk_row / 2),
+                                   mbmi->max_tx_size,
                                    tx_size);
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> 5;
