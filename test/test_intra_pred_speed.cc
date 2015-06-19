@@ -211,8 +211,8 @@ INTRA_PRED_TEST(DSPR2, TestIntraPred4, vp9_dc_predictor_4x4_dspr2, NULL, NULL,
 INTRA_PRED_TEST(NEON, TestIntraPred4, vp9_dc_predictor_4x4_neon,
                 vp9_dc_left_predictor_4x4_neon, vp9_dc_top_predictor_4x4_neon,
                 vp9_dc_128_predictor_4x4_neon, vp9_v_predictor_4x4_neon,
-                vp9_h_predictor_4x4_neon, NULL, NULL, NULL, NULL, NULL, NULL,
-                vp9_tm_predictor_4x4_neon)
+                vp9_h_predictor_4x4_neon, NULL, vp9_d135_predictor_4x4_neon,
+                NULL, NULL, NULL, NULL, vp9_tm_predictor_4x4_neon)
 #endif  // HAVE_NEON
 
 #if HAVE_MSA

@@ -313,6 +313,36 @@ void vp9_dc_128_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
   dc_32x32(dst, stride, NULL, NULL, 0, 0);
 }
 
+// -----------------------------------------------------------------------------
+
+void vp9_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+                                 const uint8_t *above, const uint8_t *left) {
+  const uint8x8_t XABCD_u8 = vld1_u8(above - 1);
+  const uint64x1_t XABCD = vreinterpret_u64_u8(XABCD_u8);
+  const uint64x1_t ____XABC = vshl_n_u64(XABCD, 32);
+  const uint32x2_t zero = vdup_n_u32(0);
+  const uint32x2_t IJKL = vld1_lane_u32((const uint32_t *)left, zero, 0);
+  const uint8x8_t IJKL_u8 = vreinterpret_u8_u32(IJKL);
+  const uint64x1_t LKJI____ = vreinterpret_u64_u8(vrev32_u8(IJKL_u8));
+  const uint64x1_t LKJIXABC = vorr_u64(LKJI____, ____XABC);
+  const uint8x8_t KJIXABC_ = vreinterpret_u8_u64(vshr_n_u64(LKJIXABC, 8));
+  const uint8x8_t JIXABC__ = vreinterpret_u8_u64(vshr_n_u64(LKJIXABC, 16));
+  const uint8_t D = vget_lane_u8(XABCD_u8, 4);
+  const uint8x8_t JIXABCD_ = vset_lane_u8(D, JIXABC__, 6);
+  const uint8x8_t LKJIXABC_u8 = vreinterpret_u8_u64(LKJIXABC);
+  const uint8x8_t avg1 = vhadd_u8(JIXABCD_, LKJIXABC_u8);
+  const uint8x8_t avg2 = vrhadd_u8(avg1, KJIXABC_);
+  const uint64x1_t avg2_u64 = vreinterpret_u64_u8(avg2);
+  const uint32x2_t r3 = vreinterpret_u32_u8(avg2);
+  const uint32x2_t r2 = vreinterpret_u32_u64(vshr_n_u64(avg2_u64, 8));
+  const uint32x2_t r1 = vreinterpret_u32_u64(vshr_n_u64(avg2_u64, 16));
+  const uint32x2_t r0 = vreinterpret_u32_u64(vshr_n_u64(avg2_u64, 24));
+  vst1_lane_u32((uint32_t *)(dst + 0 * stride), r0, 0);
+  vst1_lane_u32((uint32_t *)(dst + 1 * stride), r1, 0);
+  vst1_lane_u32((uint32_t *)(dst + 2 * stride), r2, 0);
+  vst1_lane_u32((uint32_t *)(dst + 3 * stride), r3, 0);
+}
+
 #if !HAVE_NEON_ASM
 
 void vp9_v_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
