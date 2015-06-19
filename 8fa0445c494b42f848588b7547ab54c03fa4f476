@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e700ec3_5b360e74",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1326,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-19T19:16:09Z",
+      "side": 1,
+      "message": "resulting in",
+      "revId": "8fa0445c494b42f848588b7547ab54c03fa4f476",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e6dc2eb_978ebb34",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1327,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-19T19:16:09Z",
+      "side": 1,
+      "message": "...in the result.",
+      "revId": "8fa0445c494b42f848588b7547ab54c03fa4f476",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e700ec3_1bcdf6d4",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1397,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-19T19:16:09Z",
+      "side": 1,
+      "message": "you can just say \u0027shifted right\u0027 or change arithmetic to arithmetically if you want to be clear",
+      "revId": "8fa0445c494b42f848588b7547ab54c03fa4f476",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e7adaa8_b448957c",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1398,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-19T19:16:09Z",
+      "side": 1,
+      "message": "...by the number of bits in the corresponding element in the vector \u0027shift\u0027",
+      "revId": "8fa0445c494b42f848588b7547ab54c03fa4f476",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
