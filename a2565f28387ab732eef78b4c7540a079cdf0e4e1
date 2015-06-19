@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e67ca0f_a9e1224b",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-06-19T17:01:18Z",
+      "side": 1,
+      "message": "If the only possible values of height are 16, 32, 64. Can you can just change this to:\nconst int norm_factor \u003d height \u003e\u003e 1;",
+      "range": {
+        "startLine": 135,
+        "startChar": 33,
+        "endLine": 135,
+        "endChar": 39
+      },
+      "revId": "a2565f28387ab732eef78b4c7540a079cdf0e4e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
