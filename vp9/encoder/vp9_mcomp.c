@@ -286,20 +286,20 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
   bestmv->row *= 8;                                                        \
   bestmv->col *= 8;
 
-static INLINE unsigned int setup_center_error(const MACROBLOCKD *xd,
-                                              const MV *bestmv,
-                                              const MV *ref_mv,
-                                              int error_per_bit,
-                                              const vp9_variance_fn_ptr_t *vfp,
-                                              const uint8_t *const src,
-                                              const int src_stride,
-                                              const uint8_t *const y,
-                                              int y_stride,
-                                              const uint8_t *second_pred,
-                                              int w, int h, int offset,
-                                              int *mvjcost, int *mvcost[2],
-                                              unsigned int *sse1,
-                                              int *distortion) {
+static unsigned int setup_center_error(const MACROBLOCKD *xd,
+                                       const MV *bestmv,
+                                       const MV *ref_mv,
+                                       int error_per_bit,
+                                       const vp9_variance_fn_ptr_t *vfp,
+                                       const uint8_t *const src,
+                                       const int src_stride,
+                                       const uint8_t *const y,
+                                       int y_stride,
+                                       const uint8_t *second_pred,
+                                       int w, int h, int offset,
+                                       int *mvjcost, int *mvcost[2],
+                                       unsigned int *sse1,
+                                       int *distortion) {
   unsigned int besterr;
 #if CONFIG_VP9_HIGHBITDEPTH
   if (second_pred != NULL) {
@@ -610,7 +610,7 @@ int vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
   return besterr;
 }
 
-const MV search_step_table[12] = {
+static const MV search_step_table[12] = {
     // left, right, up, down
     {0, -4}, {0, 4}, {-4, 0}, {4, 0},
     {0, -2}, {0, 2}, {-2, 0}, {2, 0},
