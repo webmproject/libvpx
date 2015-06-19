@@ -22,8 +22,10 @@ clean:: .DEFAULT
 exampletest: .DEFAULT
 install:: .DEFAULT
 test:: .DEFAULT
+test-no-data-check:: .DEFAULT
 testdata:: .DEFAULT
 utiltest: .DEFAULT
+exampletest-no-data-check utiltest-no-data-check: .DEFAULT
 
 
 # Note: md5sum is not installed on OS X, but openssl is. Openssl may not be
@@ -113,6 +115,9 @@ test::
 testdata::
 .PHONY: utiltest
 utiltest:
+.PHONY: test-no-data-check exampletest-no-data-check utiltest-no-data-check
+test-no-data-check::
+exampletest-no-data-check utiltest-no-data-check:
 
 # Add compiler flags for intrinsic files
 ifeq ($(TOOLCHAIN), x86-os2-gcc)
