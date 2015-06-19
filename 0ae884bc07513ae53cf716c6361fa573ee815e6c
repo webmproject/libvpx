@@ -16,6 +16,24 @@
       "revId": "0ae884bc07513ae53cf716c6361fa573ee815e6c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ecf3a47_6f9fad3c",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-06-19T06:31:06Z",
+      "side": 1,
+      "message": "ok. we will submit seperate patch for cosmetic changes.",
+      "parentUuid": "1eb50aac_8e653fc3",
+      "revId": "0ae884bc07513ae53cf716c6361fa573ee815e6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
