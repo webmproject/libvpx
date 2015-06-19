@@ -22,6 +22,30 @@
       "revId": "2118062762e0b00324fa4766098873f29d542ba2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e67ca0f_1e3b9bd9",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-06-19T22:14:53Z",
+      "side": 1,
+      "message": "So we are trying to keep track of the last Q a block was coded at. In the general case this is just the current Q that we are coding it at. However if a block is 0,0-skip then it really hasn\u0027t been coded again, the Q that it has previously been coded at remains the best indication of the last value it was quantized at. For intra-blocks even if they have no residual (skip), they are clearly being coded at the current active Q.\n\nNow this approximation clearly falls apart for inter non-0,0 blocks, the previous active Q should follow the motion vector not just sit in the current spatial location. Likewise if the reference is golden frame, then we should use Q from golden frame, not last frame.",
+      "parentUuid": "3e700ec3_31d7bbba",
+      "range": {
+        "startLine": 265,
+        "startChar": 26,
+        "endLine": 265,
+        "endChar": 30
+      },
+      "revId": "2118062762e0b00324fa4766098873f29d542ba2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
