@@ -1596,6 +1596,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
                   sizeof(*cm->frame_contexts)));
 
   cpi->use_svc = 0;
+  cpi->resize_state = 0;
+  cpi->resize_avg_qp = 0;
+  cpi->resize_buffer_underflow = 0;
   cpi->common.buffer_pool = pool;
 
   init_config(cpi, oxcf);
@@ -3030,6 +3033,31 @@ static void set_frame_size(VP9_COMP *cpi) {
     // There has been a change in frame size.
     vp9_set_size_literal(cpi, oxcf->scaled_frame_width,
                          oxcf->scaled_frame_height);
+  }
+
+  if (oxcf->pass == 0 &&
+      oxcf->rc_mode == VPX_CBR &&
+      !cpi->use_svc &&
+      oxcf->resize_mode == RESIZE_DYNAMIC) {
+      if (cpi->resize_state == 1) {
+        oxcf->scaled_frame_width =
+            (cm->width * cpi->resize_scale_num) / cpi->resize_scale_den;
+        oxcf->scaled_frame_height =
+            (cm->height * cpi->resize_scale_num) /cpi->resize_scale_den;
+      } else if (cpi->resize_state == -1) {
+        // Go back up to original size.
+        oxcf->scaled_frame_width = oxcf->width;
+        oxcf->scaled_frame_height = oxcf->height;
+      }
+      if (cpi->resize_state != 0) {
+        // There has been a change in frame size.
+        vp9_set_size_literal(cpi,
+                             oxcf->scaled_frame_width,
+                             oxcf->scaled_frame_height);
+
+        // TODO(agrange) Scale cpi->max_mv_magnitude if frame-size has changed.
+        set_mv_search_params(cpi);
+      }
   }
 
   if ((oxcf->pass == 2) &&

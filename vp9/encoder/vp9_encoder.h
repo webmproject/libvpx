@@ -479,6 +479,12 @@ typedef struct VP9_COMP {
 #endif
 
   int resize_pending;
+  int resize_state;
+  int resize_scale_num;
+  int resize_scale_den;
+  int resize_avg_qp;
+  int resize_buffer_underflow;
+  int resize_count;
 
   // VAR_BASED_PARTITION thresholds
   // 0 - threshold_64x64; 1 - threshold_32x32;

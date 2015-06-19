@@ -245,6 +245,8 @@ void vp9_rc_set_gf_interval_range(const struct VP9_COMP *const cpi,
 
 void vp9_set_target_rate(struct VP9_COMP *cpi);
 
+int vp9_resize_one_pass_cbr(struct VP9_COMP *cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
