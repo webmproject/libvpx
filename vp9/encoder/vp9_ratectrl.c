@@ -1775,7 +1775,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   // Resize based on average QP over some window.
   // Ignore samples close to key frame, since QP is usually high after key.
   if (cpi->rc.frames_since_key > 2 * cpi->framerate) {
-    const int window = 5 * cpi->framerate;
+    const int window = (int)(5 * cpi->framerate);
     cpi->resize_avg_qp += cm->base_qindex;
     if (cpi->rc.buffer_level < 0)
       ++cpi->resize_buffer_underflow;
