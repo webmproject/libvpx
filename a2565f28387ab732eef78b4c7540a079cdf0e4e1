@@ -22,6 +22,30 @@
       "revId": "a2565f28387ab732eef78b4c7540a079cdf0e4e1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e7adaa8_455b8d7e",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-06-20T00:40:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1e67ca0f_a9e1224b",
+      "range": {
+        "startLine": 135,
+        "startChar": 33,
+        "endLine": 135,
+        "endChar": 39
+      },
+      "revId": "a2565f28387ab732eef78b4c7540a079cdf0e4e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
