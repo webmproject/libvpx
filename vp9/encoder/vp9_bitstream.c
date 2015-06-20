@@ -44,6 +44,53 @@ static const struct vp9_token partition_encodings[PARTITION_TYPES] =
 static const struct vp9_token inter_mode_encodings[INTER_MODES] =
   {{2, 2}, {6, 3}, {0, 1}, {7, 3}};
 
+static void write_intra_mode_exp(const VP9_COMMON *cm,
+                                 vp9_writer *w, const MODE_INFO *mi,
+                                 const MODE_INFO *above_mi,
+                                 const MODE_INFO *left_mi, int block,
+                                 PREDICTION_MODE mode) {
+  const PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, block);
+  const PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, block);
+  PREDICTION_MODE i;
+  int count = 0;
+
+  if (above == left) {
+    vp9_write(w, mode == above, cm->fc->intra_predictor_prob[0]);
+    if (mode == above)
+      return;
+
+    for (i = DC_PRED; i < INTRA_MODES - 1; ++i) {
+      if (i == above)
+        continue;
+      vp9_write(w, i == mode, vp9_intra_mode_prob[count]);
+      ++count;
+      if (i == mode)
+        return;
+      if (count == INTRA_MODES - 2)
+        return;
+    }
+  } else {
+    // above and left reference modes differ
+    vp9_write(w, mode == above, cm->fc->intra_predictor_prob[1]);
+    if (mode == above)
+      return;
+    vp9_write(w, mode == left, cm->fc->intra_predictor_prob[2]);
+    if (mode == left)
+      return;
+
+    for (i = DC_PRED; i < INTRA_MODES - 1; ++i) {
+      if (i == above || i == left)
+        continue;
+      vp9_write(w, i == mode, vp9_intra_mode_prob[count + 1]);
+      ++count;
+      if (i == mode)
+        return;
+      if (count == INTRA_MODES - 3)
+        return;
+    }
+  }
+}
+
 static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
                              const vp9_prob *probs) {
   vp9_write_token(w, vp9_intra_mode_tree, probs, &intra_mode_encodings[mode]);
@@ -143,6 +190,14 @@ static void update_txfm_partition_probs(VP9_COMMON *cm, vp9_writer *w,
   for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
     vp9_cond_prob_diff_update(w, &cm->fc->txfm_partition_prob[k],
                               counts->txfm_partition[k]);
+}
+
+static void update_intra_predictor_probs(VP9_COMMON *cm, vp9_writer *w,
+                                         FRAME_COUNTS *counts) {
+  int k;
+  for (k = 0; k < 3; ++k)
+    vp9_cond_prob_diff_update(w, &cm->fc->intra_predictor_prob[k],
+                              counts->intra_predictor[k]);
 }
 
 static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
@@ -449,7 +504,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     write_selected_tx_size(cm, xd, w);
 
   if (bsize >= BLOCK_8X8) {
-    write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
+    write_intra_mode_exp(cm, w, mi, above_mi, left_mi, 0, mbmi->mode);
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -458,8 +513,8 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int block = idy * 2 + idx;
-        write_intra_mode(w, mi->bmi[block].as_mode,
-                         get_y_mode_probs(mi, above_mi, left_mi, block));
+        write_intra_mode_exp(cm, w, mi, above_mi, left_mi, block,
+                             mi->bmi[block].as_mode);
       }
     }
   }
@@ -1258,6 +1313,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
   update_coef_probs(cpi, &header_bc);
   update_txfm_partition_probs(cm, &header_bc, counts);
+  update_intra_predictor_probs(cm, &header_bc, counts);
   update_skip_probs(cm, &header_bc, counts);
 
   if (!frame_is_intra_only(cm)) {

@@ -4211,6 +4211,45 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
           if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
             mi_8x8[mis * y + x].src_mi->mbmi.tx_size = tx_size;
     }
+
+    if (!is_inter_block(mbmi)) {
+      // TODO(jingning): refactor this code for speed improvement.
+      const MODE_INFO *above_mi = xd->mi[-cm->mi_stride].src_mi;
+      const MODE_INFO *left_mi  = xd->left_available ? xd->mi[-1].src_mi : NULL;
+      if (bsize >= BLOCK_8X8) {
+        int idx, idy;
+        const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
+        const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
+        for (idy = 0; idy < 2; idy += num_4x4_h) {
+          for (idx = 0; idx < 2; idx += num_4x4_w) {
+            const int block = idy * 2 + idx;
+            const PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi,
+                                                               block);
+            const PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi,
+                                                             block);
+            if (above == left) {
+              ++td->counts->intra_predictor[0][mi->bmi[block].as_mode == above];
+            } else {
+              ++td->counts->intra_predictor[1][mi->bmi[block].as_mode == above];
+              if (mbmi->mode != above)
+                ++td->counts->intra_predictor[1]
+                                             [mi->bmi[block].as_mode == left];
+            }
+          }
+        }
+      } else {
+        const PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, 0);
+        const PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, 0);
+        if (above == left) {
+          ++td->counts->intra_predictor[0][mbmi->mode == above];
+        } else {
+          ++td->counts->intra_predictor[1][mbmi->mode == above];
+          if (mbmi->mode != above)
+            ++td->counts->intra_predictor[1][mbmi->mode == left];
+        }
+      }
+    }
+
     ++td->counts->tx.tx_totals[mbmi->tx_size];
     ++td->counts->tx.tx_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
   }

@@ -23,6 +23,51 @@
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_reader.h"
 
+static PREDICTION_MODE read_intra_mode_exp(const VP9_COMMON *cm,
+                                           vp9_reader *r, const MODE_INFO *mi,
+                                           const MODE_INFO *above_mi,
+                                           const MODE_INFO *left_mi,
+                                           int block) {
+  const PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, block);
+  const PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, block);
+  PREDICTION_MODE i;
+  int count = 0;
+
+  if (above == left) {
+    if (vp9_read(r, cm->fc->intra_predictor_prob[0]))
+      return above;
+    for (i = DC_PRED; i < INTRA_MODES - 1; ++i) {
+      if (i == above)
+        continue;
+      if (vp9_read(r, vp9_intra_mode_prob[count]))
+        return i;
+      ++count;
+      if (count == INTRA_MODES - 2)
+        return (i + 1) == above ? (i + 2) : (i + 1);
+    }
+    return (INTRA_MODES - 1);
+  } else {
+    if (vp9_read(r, cm->fc->intra_predictor_prob[1]))
+      return above;
+    if (vp9_read(r, cm->fc->intra_predictor_prob[2]))
+      return left;
+
+    for (i = DC_PRED; i < INTRA_MODES - 1; ++i) {
+      if (i == above || i == left)
+        continue;
+      if (vp9_read(r, vp9_intra_mode_prob[count + 1]))
+        return i;
+      ++count;
+      if (count == INTRA_MODES - 3)
+        break;
+    }
+    for (++i; i <= INTRA_MODES - 1; ++i)
+      if (i != above && i != left)
+        return i;
+    return (INTRA_MODES - 1);
+  }
+}
+
 static PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
   return (PREDICTION_MODE)vp9_read_tree(r, vp9_intra_mode_tree, p);
 }
@@ -264,24 +309,24 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     case BLOCK_4X4:
       for (i = 0; i < 4; ++i)
         mi->bmi[i].as_mode =
-            read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, i));
+            read_intra_mode_exp(cm, r, mi, above_mi, left_mi, i);
       mbmi->mode = mi->bmi[3].as_mode;
       break;
     case BLOCK_4X8:
       mi->bmi[0].as_mode = mi->bmi[2].as_mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 0));
+          read_intra_mode_exp(cm, r, mi, above_mi, left_mi, 0);
       mi->bmi[1].as_mode = mi->bmi[3].as_mode = mbmi->mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 1));
+          read_intra_mode_exp(cm, r, mi, above_mi, left_mi, 1);
       break;
     case BLOCK_8X4:
       mi->bmi[0].as_mode = mi->bmi[1].as_mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 0));
+          read_intra_mode_exp(cm, r, mi, above_mi, left_mi, 0);
       mi->bmi[2].as_mode = mi->bmi[3].as_mode = mbmi->mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 2));
+          read_intra_mode_exp(cm, r, mi, above_mi, left_mi, 2);
       break;
     default:
-      mbmi->mode = read_intra_mode(r,
-                                   get_y_mode_probs(mi, above_mi, left_mi, 0));
+      mbmi->mode =
+          read_intra_mode_exp(cm, r, mi, above_mi, left_mi, 0);
   }
 
   mbmi->uv_mode = read_intra_mode(r, vp9_kf_uv_mode_prob[mbmi->mode]);

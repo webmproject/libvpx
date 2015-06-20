@@ -940,12 +940,11 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       MIN(max_txsize_lookup[bsize],
           tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
   MODE_INFO *const mic = xd->mi[0].src_mi;
-  int *bmode_costs;
+  int bmode_costs;
   const MODE_INFO *above_mi = xd->mi[-xd->mi_stride].src_mi;
   const MODE_INFO *left_mi = xd->left_available ? xd->mi[-1].src_mi : NULL;
   const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
   const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
-  bmode_costs = cpi->y_mode_costs[A][L];
 
   (void) ctx;
   vp9_rd_cost_reset(&best_rdc);
@@ -963,11 +962,17 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
     args.rate = 0;
     args.dist = 0;
     mbmi->tx_size = intra_tx_size;
+
+    if (A == L)
+      bmode_costs = (this_mode == A) ? 406 : 961;
+    else  // (A != L)
+      bmode_costs = (this_mode == A) || (this_mode == L) ? 512 : 1024;
+
     vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
                                            estimate_block_intra, &args);
     this_rdc.rate = args.rate;
     this_rdc.dist = args.dist;
-    this_rdc.rate += bmode_costs[this_mode];
+    this_rdc.rate += bmode_costs;
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                              this_rdc.rate, this_rdc.dist);
 

@@ -777,8 +777,8 @@ static int conditional_skipintra(PREDICTION_MODE mode,
 
 static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      PREDICTION_MODE *best_mode,
-                                     const int *bmode_costs,
                                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                                     PREDICTION_MODE A, PREDICTION_MODE L,
                                      int *bestrate, int *bestratey,
                                      int64_t *bestdistortion,
                                      BLOCK_SIZE bsize, int64_t rd_thresh) {
@@ -817,7 +817,12 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       int64_t this_rd;
       int ratey = 0;
       int64_t distortion = 0;
-      int rate = bmode_costs[mode];
+      int rate;
+
+      if (A == L)
+        rate = (mode == A) ? 256 : 1064;
+      else  // (A != L)
+        rate = (mode == A) || (mode == L) ? 404 : 1169;
 
       if (!(cpi->sf.intra_y_mode_mask[TX_4X4] & (1 << mode)))
         continue;
@@ -918,7 +923,12 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     int64_t this_rd;
     int ratey = 0;
     int64_t distortion = 0;
-    int rate = bmode_costs[mode];
+    int rate;
+
+    if (A == L)
+      rate = (mode == A) ? 406 : 961;
+    else  // (A != L)
+      rate = (mode == A) || (mode == L) ? 512 : 1024;
 
     if (!(cpi->sf.intra_y_mode_mask[TX_4X4] & (1 << mode)))
       continue;
@@ -1026,7 +1036,8 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
   int tot_rate_y = 0;
   int64_t total_rd = 0;
   ENTROPY_CONTEXT t_above[4], t_left[4];
-  const int *bmode_costs = cpi->mbmode_cost;
+  PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
+  PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
 
   vpx_memcpy(t_above, xd->plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, xd->plane[0].left_context, sizeof(t_left));
@@ -1039,14 +1050,13 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
       int64_t d = INT64_MAX, this_rd = INT64_MAX;
       i = idy * 2 + idx;
       if (cpi->common.frame_type == KEY_FRAME) {
-        const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, i);
-        const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, i);
-
-        bmode_costs  = cpi->y_mode_costs[A][L];
+        A = vp9_above_block_mode(mic, above_mi, i);
+        L = vp9_left_block_mode(mic, left_mi, i);
       }
 
-      this_rd = rd_pick_intra4x4block(cpi, mb, i, &best_mode, bmode_costs,
-                                      t_above + idx, t_left + idy, &r, &ry, &d,
+      this_rd = rd_pick_intra4x4block(cpi, mb, i, &best_mode,
+                                      t_above + idx, t_left + idy,
+                                      A, L, &r, &ry, &d,
                                       bsize, best_rd - total_rd);
       if (this_rd >= best_rd - total_rd)
         return INT64_MAX;
@@ -1090,12 +1100,11 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t this_distortion, this_rd;
   TX_SIZE best_tx = TX_4X4;
   int i;
-  int *bmode_costs;
+  int bmode_costs;
   const MODE_INFO *above_mi = xd->above_mi;
   const MODE_INFO *left_mi = xd->left_mi;
   const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
   const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
-  bmode_costs = cpi->y_mode_costs[A][L];
 
   if (cpi->sf.tx_size_search_method == USE_FULL_RD)
     for (i = 0; i < TX_MODES; i++)
@@ -1105,6 +1114,11 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   /* Y Search for intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_tx_cache[TX_MODES];
+
+    if (A == L)
+      bmode_costs = (mode == A) ? 406 : 961;
+    else  // (A != L)
+      bmode_costs = (mode == A) || (mode == L) ? 512 : 1024;
 
     if (cpi->sf.use_nonrd_pick_mode) {
       // These speed features are turned on in hybrid non-RD and RD mode
@@ -1123,7 +1137,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_rate_tokenonly == INT_MAX)
       continue;
 
-    this_rate = this_rate_tokenonly + bmode_costs[mode];
+    this_rate = this_rate_tokenonly + bmode_costs;
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
     if (this_rd < best_rd) {
@@ -3782,6 +3796,13 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
       struct macroblockd_plane *const pd = &xd->plane[1];
+      MODE_INFO *const mic = xd->mi[0].src_mi;
+      const MODE_INFO *above_mi = xd->above_mi;
+      const MODE_INFO *left_mi = xd->left_mi;
+
+      const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
+      const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
+      int intra_mode_cost;
       vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
                       NULL, bsize, tx_cache, best_rd);
@@ -3796,12 +3817,17 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                              &dist_uv[uv_tx], &skip_uv[uv_tx], &mode_uv[uv_tx]);
       }
 
+      if (A == L)
+        intra_mode_cost = (this_mode == A) ? 256 : 1064;
+      else  // (A != L)
+        intra_mode_cost = (this_mode == A) || (this_mode == L) ? 404 : 1169;
+
       rate_uv = rate_uv_tokenonly[uv_tx];
       distortion_uv = dist_uv[uv_tx];
       skippable = skippable && skip_uv[uv_tx];
       mbmi->uv_mode = mode_uv[uv_tx];
 
-      rate2 = rate_y + cpi->mbmode_cost[mbmi->mode] + rate_uv_intra[uv_tx];
+      rate2 = rate_y + intra_mode_cost + rate_uv_intra[uv_tx];
       if (this_mode != DC_PRED && this_mode != TM_PRED)
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;

@@ -50,6 +50,7 @@ typedef struct frame_contexts {
   vp9_prob comp_ref_prob[REF_CONTEXTS];
   struct tx_probs tx_probs;
   vp9_prob txfm_partition_prob[TXFM_PARTITION_CONTEXTS];
+  vp9_prob intra_predictor_prob[3];
   vp9_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
   int initialized;
@@ -72,12 +73,12 @@ typedef struct FRAME_COUNTS {
   struct tx_counts tx;
   unsigned int skip[SKIP_CONTEXTS][2];
   unsigned int txfm_partition[TXFM_PARTITION_CONTEXTS][2];
+  unsigned int intra_predictor[2][2];
   nmv_context_counts mv;
 } FRAME_COUNTS;
 
+extern const vp9_prob vp9_intra_mode_prob[INTRA_MODES];
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-extern const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
-                                        [INTRA_MODES - 1];
 extern const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
                                             [PARTITION_TYPES - 1];
 extern const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
@@ -98,15 +99,6 @@ void tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,
                                       unsigned int (*ct_16x16p)[2]);
 void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
                                     unsigned int (*ct_8x8p)[2]);
-
-static INLINE const vp9_prob *get_y_mode_probs(const MODE_INFO *mi,
-                                               const MODE_INFO *above_mi,
-                                               const MODE_INFO *left_mi,
-                                               int block) {
-  const PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, block);
-  const PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, block);
-  return vp9_kf_y_mode_prob[above][left];
-}
 
 #ifdef __cplusplus
 }  // extern "C"
