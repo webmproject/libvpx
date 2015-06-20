@@ -856,6 +856,15 @@
 }
 #define INSERT_W2_SB(...) INSERT_W2(v16i8, __VA_ARGS__)
 
+#define INSERT_W4(RTYPE, in0, in1, in2, in3, out) {  \
+  out = (RTYPE)__msa_insert_w((v4i32)out, 0, in0);   \
+  out = (RTYPE)__msa_insert_w((v4i32)out, 1, in1);   \
+  out = (RTYPE)__msa_insert_w((v4i32)out, 2, in2);   \
+  out = (RTYPE)__msa_insert_w((v4i32)out, 3, in3);   \
+}
+#define INSERT_W4_UB(...) INSERT_W4(v16u8, __VA_ARGS__)
+#define INSERT_W4_SB(...) INSERT_W4(v16i8, __VA_ARGS__)
+
 /* Description : Insert specified double word elements from input vectors to 1
                  destination vector
    Arguments   : Inputs  - in0, in1      (2 input vectors)
@@ -901,6 +910,19 @@
 #define ILVEV_H2_UB(...) ILVEV_H2(v16u8, __VA_ARGS__)
 #define ILVEV_H2_SH(...) ILVEV_H2(v8i16, __VA_ARGS__)
 #define ILVEV_H2_SW(...) ILVEV_H2(v4i32, __VA_ARGS__)
+
+/* Description : Interleave even word elements from vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Even word elements of 'in0' and 'in1' are interleaved
+                 and written to 'out0'
+*/
+#define ILVEV_W2(RTYPE, in0, in1, in2, in3, out0, out1) {  \
+  out0 = (RTYPE)__msa_ilvev_w((v4i32)in1, (v4i32)in0);     \
+  out1 = (RTYPE)__msa_ilvev_w((v4i32)in3, (v4i32)in2);     \
+}
+#define ILVEV_W2_SB(...) ILVEV_W2(v16i8, __VA_ARGS__)
 
 /* Description : Interleave even double word elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
@@ -1296,6 +1318,24 @@
 }
 #define XORI_B7_128_SB(...) XORI_B7_128(v16i8, __VA_ARGS__)
 
+/* Description : Average of signed halfword elements -> (a + b) / 2
+   Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7
+                 Outputs - out0, out1, out2, out3
+                 Return Type - as per RTYPE
+   Details     : Each signed halfword element from 'in0' is added to each
+                 signed halfword element of 'in1' with full precision resulting
+                 in one extra bit in the result. The result is then divided by
+                 2 and written to 'out0'
+*/
+#define AVE_SH4(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,  \
+                out0, out1, out2, out3) {                       \
+  out0 = (RTYPE)__msa_ave_s_h((v8i16)in0, (v8i16)in1);          \
+  out1 = (RTYPE)__msa_ave_s_h((v8i16)in2, (v8i16)in3);          \
+  out2 = (RTYPE)__msa_ave_s_h((v8i16)in4, (v8i16)in5);          \
+  out3 = (RTYPE)__msa_ave_s_h((v8i16)in6, (v8i16)in7);          \
+}
+#define AVE_SH4_SH(...) AVE_SH4(v8i16, __VA_ARGS__)
+
 /* Description : Addition of signed halfword elements and signed saturation
    Arguments   : Inputs  - in0, in1, in2, in3
                  Outputs - out0, out1
@@ -1350,6 +1390,27 @@
   in3 = in3 >> shift;                        \
 }
 
+/* Description : Shift right arithmetic rounded words
+   Arguments   : Inputs  - in0, in1, shift
+                 Outputs - in place operation
+                 Return Type - as per RTYPE
+   Details     : Each element of vector 'in0' is shifted right arithmetically by
+                 the number of bits in the corresponding element in the vector
+                 'shift'. The last discarded bit is added to shifted value for
+                 rounding and the result is written in-place.
+                 'shift' is a vector.
+*/
+#define SRAR_W2(RTYPE, in0, in1, shift) {               \
+  in0 = (RTYPE)__msa_srar_w((v4i32)in0, (v4i32)shift);  \
+  in1 = (RTYPE)__msa_srar_w((v4i32)in1, (v4i32)shift);  \
+}
+
+#define SRAR_W4(RTYPE, in0, in1, in2, in3, shift) {  \
+  SRAR_W2(RTYPE, in0, in1, shift)                    \
+  SRAR_W2(RTYPE, in2, in3, shift)                    \
+}
+#define SRAR_W4_SW(...) SRAR_W4(v4i32, __VA_ARGS__)
+
 /* Description : Shift right arithmetic rounded (immediate)
    Arguments   : Inputs  - in0, in1, in2, in3, shift
                  Outputs - in0, in1, in2, in3 (in place)
@@ -1395,6 +1456,21 @@
   SRARI_W2(RTYPE, in2, in3, shift);                   \
 }
 #define SRARI_W4_SW(...) SRARI_W4(v4i32, __VA_ARGS__)
+
+/* Description : Logical shift right all elements of vector (immediate)
+   Arguments   : Inputs  - in0, in1, in2, in3, shift
+                 Outputs - out0, out1, out2, out3
+                 Return Type - as per RTYPE
+   Details     : Each element of vector 'in0' is right shifted by 'shift' and
+                 the result is written in-place. 'shift' is an immediate value.
+*/
+#define SRLI_H4(RTYPE, in0, in1, in2, in3, out0, out1, out2, out3, shift) {  \
+  out0 = (RTYPE)__msa_srli_h((v8i16)in0, shift);                             \
+  out1 = (RTYPE)__msa_srli_h((v8i16)in1, shift);                             \
+  out2 = (RTYPE)__msa_srli_h((v8i16)in2, shift);                             \
+  out3 = (RTYPE)__msa_srli_h((v8i16)in3, shift);                             \
+}
+#define SRLI_H4_SH(...) SRLI_H4(v8i16, __VA_ARGS__)
 
 /* Description : Addition of 2 pairs of vectors
    Arguments   : Inputs  - in0, in1, in2, in3
