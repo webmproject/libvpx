@@ -2899,7 +2899,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
     vp9_set_quantizer(cm, q);
 
+#if !CONFIG_QCTX_TPROBS
     if (loop_count == 0)
+#endif  // CONFIG_QCTX_TPROBS
       setup_frame(cpi);
 
 #if CONFIG_PALETTE
