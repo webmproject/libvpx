@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e2acebf_bd3a57d2",
+        "filename": "vp9/common/x86/vp9_loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-22T23:03:29Z",
+      "side": 1,
+      "message": "drop the tabs from the file",
+      "revId": "ce4a8905416166a9019cbfe185376848537e2f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e2acebf_5d26bbc1",
+        "filename": "vp9/common/x86/vp9_loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 1191,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-22T23:03:29Z",
+      "side": 1,
+      "message": "use \u0027times N dw ...\u0027 here and below",
+      "revId": "ce4a8905416166a9019cbfe185376848537e2f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
