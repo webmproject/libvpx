@@ -2885,8 +2885,7 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi, MACROBLOCKD *const xd) {
   if (xd->lossless)
     return ONLY_4X4;
   if (cpi->common.frame_type == KEY_FRAME &&
-      cpi->sf.use_nonrd_pick_mode &&
-      cpi->sf.partition_search_type == VAR_BASED_PARTITION)
+      cpi->sf.use_nonrd_pick_mode)
     return ALLOW_16X16;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
@@ -3583,8 +3582,15 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
                                INT64_MAX, td->pc_root);
         } else {
           choose_partitioning(cpi, tile_info, x, mi_row, mi_col);
-          nonrd_select_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
-                                 BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
+          // TODO(marpan): Seems like nonrd_select_partition does not support
+          // 4x4 partition. Since 4x4 is used on key frame, use this switch
+          // for now.
+          if (cm->frame_type == KEY_FRAME)
+            nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
+                                BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
+          else
+            nonrd_select_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
+                                   BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
         }
 
         break;
