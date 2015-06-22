@@ -2996,6 +2996,15 @@ static void rd_test_partition3(VP9_COMP *cpi, const TileInfo *const tile,
                                PARTITION_CONTEXT sl[8],
                                PARTITION_CONTEXT sa[8],
 #endif
+#if CONFIG_PALETTE
+                               int previous_size,
+                               int previous_count[PALETTE_BUF_SIZE],
+#if CONFIG_VP9_HIGHBITDEPTH
+                               uint16_t previous_colors[PALETTE_BUF_SIZE],
+#else
+                               uint8_t previous_colors[PALETTE_BUF_SIZE],
+#endif
+#endif
                                int mi_row0, int mi_col0, BLOCK_SIZE subsize0,
                                int mi_row1, int mi_col1, BLOCK_SIZE subsize1,
                                int mi_row2, int mi_col2, BLOCK_SIZE subsize2) {
@@ -3009,8 +3018,21 @@ static void rd_test_partition3(VP9_COMP *cpi, const TileInfo *const tile,
   int tmp_rate;
   int64_t tmp_dist, tmp_rd;
 #endif
+#if CONFIG_PALETTE
+  PICK_MODE_CONTEXT *c, *p;
+#endif
   if (cpi->sf.adaptive_motion_search)
     load_pred_mv(x, ctx);
+
+#if CONFIG_PALETTE
+    c = &ctxs[0];
+    c->palette_buf_size = previous_size;
+    vpx_memcpy(c->palette_colors_buf, previous_colors,
+               previous_size * sizeof(previous_colors[0]));
+    vpx_memcpy(c->palette_count_buf, previous_count,
+               previous_size * sizeof(previous_count[0]));
+#endif
+
   rd_pick_sb_modes(cpi, tile, mi_row0, mi_col0, &sum_rdc,
 #if CONFIG_SUPERTX
                    &sum_rate_nocoef,
@@ -3031,6 +3053,11 @@ static void rd_test_partition3(VP9_COMP *cpi, const TileInfo *const tile,
 
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, ctx);
+
+#if CONFIG_PALETTE
+      copy_palette_info(&ctxs[1], &ctxs[0]);
+#endif
+
 #if CONFIG_SUPERTX
     rd_pick_sb_modes(cpi, tile, mi_row1, mi_col1, &this_rdc,
                      &this_rate_nocoef, subsize1, &ctxs[1],
@@ -3065,6 +3092,11 @@ static void rd_test_partition3(VP9_COMP *cpi, const TileInfo *const tile,
 
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, ctx);
+
+#if CONFIG_PALETTE
+      copy_palette_info(&ctxs[2], &ctxs[1]);
+#endif
+
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile, mi_row2, mi_col2, &this_rdc,
                        &this_rate_nocoef, subsize2, &ctxs[2],
@@ -3151,6 +3183,11 @@ static void rd_test_partition3(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
           *best_rdc = sum_rdc;
           pc_tree->partitioning = partition;
+#if CONFIG_PALETTE
+          c = &pc_tree->current;
+          p = &ctxs[2];
+          copy_palette_info(c, p);
+#endif
         }
       }
     }
@@ -3994,6 +4031,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, cm, l, a, sl, sa,
 #endif
+#if CONFIG_PALETTE
+                       previous_size, previous_count, previous_colors,
+#endif
                        mi_row, mi_col, bsize2,
                        mi_row, mi_col + mi_step, bsize2,
                        mi_row + mi_step, mi_col, subsize);
@@ -4008,6 +4048,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                        ctx, mi_row, mi_col, bsize, PARTITION_HORZ_B,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, cm, l, a, sl, sa,
+#endif
+#if CONFIG_PALETTE
+                       previous_size, previous_count, previous_colors,
 #endif
                        mi_row, mi_col, subsize,
                        mi_row + mi_step, mi_col, bsize2,
@@ -4024,6 +4067,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, cm, l, a, sl, sa,
 #endif
+#if CONFIG_PALETTE
+                       previous_size, previous_count, previous_colors,
+#endif
                        mi_row, mi_col, bsize2,
                        mi_row + mi_step, mi_col, bsize2,
                        mi_row, mi_col + mi_step, subsize);
@@ -4038,6 +4084,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                        ctx, mi_row, mi_col, bsize, PARTITION_VERT_B,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, cm, l, a, sl, sa,
+#endif
+#if CONFIG_PALETTE
+                       previous_size, previous_count, previous_colors,
 #endif
                        mi_row, mi_col, subsize,
                        mi_row, mi_col + mi_step, bsize2,
