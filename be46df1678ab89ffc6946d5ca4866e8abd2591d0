@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5efea270_4cb0d380",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-22T19:12:22Z",
+      "side": 1,
+      "message": "might not be the cleanest way to do it but i\u0027d like to remove armv6/media eventually.",
+      "range": {
+        "startLine": 813,
+        "startChar": 28,
+        "endLine": 813,
+        "endChar": 30
+      },
+      "revId": "be46df1678ab89ffc6946d5ca4866e8abd2591d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
