@@ -168,6 +168,8 @@ static void count_segs_sb(const VP9_COMMON *cm, MACROBLOCKD *xd,
 
   bw = num_8x8_blocks_wide_lookup[mi[0].src_mi->mbmi.sb_type];
   bh = num_8x8_blocks_high_lookup[mi[0].src_mi->mbmi.sb_type];
+  (void) bw;
+  (void) bh;
 
 #if CONFIG_EXT_PARTITION
   if (bsize == BLOCK_8X8)
