@@ -24,6 +24,11 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
 #if CONFIG_SUPERTX
                         int supertx_enabled,
 #endif
+#if CONFIG_COPY_MODE
+#if CONFIG_EXT_PARTITION
+                        PARTITION_TYPE partition,
+#endif
+#endif
                         int mi_row, int mi_col, vp9_reader *r);
 
 #ifdef __cplusplus

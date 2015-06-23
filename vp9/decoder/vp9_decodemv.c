@@ -1290,6 +1290,11 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_SUPERTX
                                        int supertx_enabled,
 #endif
+#if CONFIG_COPY_MODE
+#if CONFIG_EXT_PARTITION
+                                       PARTITION_TYPE partition,
+#endif
+#endif
                                        int mi_row, int mi_col, vp9_reader *r) {
   MODE_INFO *const mi = xd->mi[0].src_mi;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -1308,7 +1313,11 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_COPY_MODE
   if (mbmi->sb_type >= BLOCK_8X8)
     num_candidate = vp9_construct_ref_inter_list(
-        cm, xd, tile, mbmi->sb_type, mi_row, mi_col, inter_ref_list);
+        cm, xd, tile, mbmi->sb_type,
+#if CONFIG_EXT_PARTITION
+        partition,
+#endif
+        mi_row, mi_col, inter_ref_list);
   if (mbmi->sb_type >= BLOCK_8X8 && num_candidate > 0) {
     int ctx = vp9_get_copy_mode_context(xd);
     int is_copy = vp9_read(r, cm->fc.copy_noref_prob[ctx][mbmi->sb_type]);
@@ -1611,6 +1620,11 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
 #if CONFIG_SUPERTX
                         int supertx_enabled,
 #endif
+#if CONFIG_COPY_MODE
+#if CONFIG_EXT_PARTITION
+                        PARTITION_TYPE partition,
+#endif
+#endif
                         int mi_row, int mi_col, vp9_reader *r) {
   if (frame_is_intra_only(cm))
     read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
@@ -1618,6 +1632,11 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
     read_inter_frame_mode_info(cm, xd, tile,
 #if CONFIG_SUPERTX
                                supertx_enabled,
+#endif
+#if CONFIG_COPY_MODE
+#if CONFIG_EXT_PARTITION
+                               partition,
+#endif
 #endif
                                mi_row, mi_col, r);
 }

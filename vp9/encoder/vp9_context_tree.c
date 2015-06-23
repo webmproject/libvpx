@@ -19,12 +19,17 @@ static const BLOCK_SIZE square[] = {
 };
 
 static void alloc_mode_context(VP9_COMMON *cm, int num_4x4_blk,
+#if CONFIG_EXT_PARTITION
+                               PARTITION_TYPE partition,
+#endif
                                PICK_MODE_CONTEXT *ctx) {
   const int num_blk = (num_4x4_blk < 4 ? 4 : num_4x4_blk);
   const int num_pix = num_blk << 4;
   int i, k;
   ctx->num_4x4_blk = num_blk;
-
+#if CONFIG_EXT_PARTITION
+  ctx->partition = partition;
+#endif
   CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
                   vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
   for (i = 0; i < MAX_MB_PLANE; ++i) {
@@ -79,6 +84,32 @@ static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
 
 static void alloc_tree_contexts(VP9_COMMON *cm, PC_TREE *tree,
                                 int num_4x4_blk) {
+#if CONFIG_EXT_PARTITION
+  alloc_mode_context(cm, num_4x4_blk, PARTITION_NONE, &tree->none);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_HORZ, &tree->horizontal[0]);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT, &tree->vertical[0]);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT, &tree->horizontal[1]);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT, &tree->vertical[1]);
+
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_A,
+                     &tree->horizontala[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_A,
+                     &tree->horizontala[1]);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_HORZ_A,
+                     &tree->horizontala[2]);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_HORZ_B,
+                     &tree->horizontalb[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_B,
+                     &tree->horizontalb[1]);
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_B,
+                     &tree->horizontalb[2]);
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_A, &tree->verticala[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_A, &tree->verticala[1]);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT_A, &tree->verticala[2]);
+  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT_B, &tree->verticalb[0]);
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_B, &tree->verticalb[1]);
+  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_B, &tree->verticalb[2]);
+#else
   alloc_mode_context(cm, num_4x4_blk, &tree->none);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[0]);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[0]);
@@ -87,20 +118,6 @@ static void alloc_tree_contexts(VP9_COMMON *cm, PC_TREE *tree,
    * Figure out a better way to do this. */
   alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[1]);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[1]);
-
-#if CONFIG_EXT_PARTITION
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontala[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontala[1]);
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontala[2]);
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontalb[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontalb[1]);
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->horizontalb[2]);
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticala[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticala[1]);
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->verticala[2]);
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->verticalb[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticalb[1]);
-  alloc_mode_context(cm, num_4x4_blk/4, &tree->verticalb[2]);
 #endif
 }
 
@@ -147,9 +164,13 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, VP9_COMP *cpi) {
 
   // 4x4 blocks smaller than 8x8 but in the same 8x8 block share the same
   // context so we only need to allocate 1 for each 8x8 block.
+#if CONFIG_EXT_PARTITION
+  for (i = 0; i < leaf_nodes; ++i)
+    alloc_mode_context(cm, 1, PARTITION_NONE, &cpi->leaf_tree[i]);
+#else
   for (i = 0; i < leaf_nodes; ++i)
     alloc_mode_context(cm, 1, &cpi->leaf_tree[i]);
-
+#endif
   // Sets up all the leaf nodes in the tree.
   for (pc_tree_index = 0; pc_tree_index < leaf_nodes; ++pc_tree_index) {
     PC_TREE *const tree = &cpi->pc_tree[pc_tree_index];

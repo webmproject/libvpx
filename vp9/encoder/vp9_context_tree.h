@@ -69,6 +69,9 @@ typedef struct {
   // search loop
   MV pred_mv[MAX_REF_FRAMES];
   INTERP_FILTER pred_interp_filter;
+#if CONFIG_EXT_PARTITION
+  PARTITION_TYPE partition;
+#endif
 } PICK_MODE_CONTEXT;
 
 typedef struct PC_TREE {

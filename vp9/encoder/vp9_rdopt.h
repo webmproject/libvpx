@@ -39,6 +39,12 @@ void vp9_rd_pick_inter_mode_sb(struct VP9_COMP *cpi, struct macroblock *x,
 #if CONFIG_SUPERTX
                                int *returnrate_nocoef,
 #endif
+#if CONFIG_COPY_MODE
+#if CONFIG_EXT_PARTITION
+                               PARTITION_TYPE partition,
+#endif
+#endif
+
                                BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
                                int64_t best_rd_so_far);
 

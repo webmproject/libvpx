@@ -1484,6 +1484,11 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
                                   totalrate_nocoef,
 #endif
+#if CONFIG_COPY_MODE
+#if CONFIG_EXT_PARTITION
+                                  ctx->partition,
+#endif
+#endif
                                   bsize, ctx, best_rd);
       }
     } else {

@@ -385,7 +385,11 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
 #if CONFIG_COPY_MODE
 int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
                                  const TileInfo *const tile,
-                                 BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                 BLOCK_SIZE bsize,
+#if CONFIG_EXT_PARTITION
+                                 PARTITION_TYPE partition,
+#endif
+                                 int mi_row, int mi_col,
                                  MB_MODE_INFO *ref_list[18]);
 #endif  // CONFIG_COPY_MODE
 
