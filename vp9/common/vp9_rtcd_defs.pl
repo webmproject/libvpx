@@ -948,7 +948,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_fdct8x8_quant/;
 } else {
   add_proto qw/int64_t vp9_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz";
-  specialize qw/vp9_block_error avx2/, "$sse2_x86inc";
+  specialize qw/vp9_block_error avx2 msa/, "$sse2_x86inc";
 
   add_proto qw/int64_t vp9_block_error_fp/, "const int16_t *coeff, const int16_t *dqcoeff, int block_size";
   specialize qw/vp9_block_error_fp sse2/;

@@ -440,6 +440,17 @@
 }
 #define ST_SH8(...) ST_H8(v8i16, __VA_ARGS__)
 
+/* Description : Store vectors of word elements with stride
+   Arguments   : Inputs  - in0, in1, stride
+                         - pdst    (destination pointer to store to)
+   Details     : Store 4 word elements from 'in0' to (pdst)
+                 Store 4 word elements from 'in1' to (pdst + stride)
+*/
+#define ST_SW2(in0, in1, pdst, stride) {  \
+  ST_SW(in0, (pdst));                     \
+  ST_SW(in1, (pdst) + stride);            \
+}
+
 /* Description : Store as 2x4 byte block to destination memory from input vector
    Arguments   : Inputs  - in, stidx, pdst, stride
                  Return Type - unsigned byte
@@ -781,6 +792,39 @@
 }
 #define DPADD_SB4_SH(...) DPADD_SB4(v8i16, __VA_ARGS__)
 
+/* Description : Dot product & addition of halfword vector elements
+   Arguments   : Inputs  - mult0, mult1
+                           cnst0, cnst1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Signed halfword elements from 'mult0' are multiplied with
+                 signed halfword elements from 'cnst0' producing a result
+                 twice the size of input i.e. signed word.
+                 The multiplication result of adjacent odd-even elements
+                 are added to the 'out0' vector
+*/
+#define DPADD_SH2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1) {         \
+  out0 = (RTYPE)__msa_dpadd_s_w((v4i32)out0, (v8i16)mult0, (v8i16)cnst0);  \
+  out1 = (RTYPE)__msa_dpadd_s_w((v4i32)out1, (v8i16)mult1, (v8i16)cnst1);  \
+}
+#define DPADD_SH2_SW(...) DPADD_SH2(v4i32, __VA_ARGS__)
+
+/* Description : Dot product & addition of double word vector elements
+   Arguments   : Inputs  - mult0, mult1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each signed word element from 'mult0' is multiplied with itself
+                 producing an intermediate result twice the size of input
+                 i.e. signed double word
+                 The multiplication result of adjacent odd-even elements
+                 are added to the 'out0' vector
+*/
+#define DPADD_SD2(RTYPE, mult0, mult1, out0, out1) {                       \
+  out0 = (RTYPE)__msa_dpadd_s_d((v2i64)out0, (v4i32)mult0, (v4i32)mult0);  \
+  out1 = (RTYPE)__msa_dpadd_s_d((v2i64)out1, (v4i32)mult1, (v4i32)mult1);  \
+}
+#define DPADD_SD2_SD(...) DPADD_SD2(v2i64, __VA_ARGS__)
+
 /* Description : Minimum values between unsigned elements of
                  either vector are copied to the output vector
    Arguments   : Inputs  - in0, in1, min_vec
@@ -861,6 +905,34 @@
   HADD_UB2(RTYPE, in2, in3, out2, out3);                               \
 }
 #define HADD_UB4_UH(...) HADD_UB4(v8u16, __VA_ARGS__)
+
+/* Description : Horizontal subtraction of unsigned byte vector elements
+   Arguments   : Inputs  - in0, in1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each unsigned odd byte element from 'in0' is subtracted from
+                 even unsigned byte element from 'in0' (pairwise) and the
+                 halfword result is written to 'out0'
+*/
+#define HSUB_UB2(RTYPE, in0, in1, out0, out1) {          \
+  out0 = (RTYPE)__msa_hsub_u_h((v16u8)in0, (v16u8)in0);  \
+  out1 = (RTYPE)__msa_hsub_u_h((v16u8)in1, (v16u8)in1);  \
+}
+#define HSUB_UB2_SH(...) HSUB_UB2(v8i16, __VA_ARGS__)
+
+/* Description : Horizontal subtraction of signed halfword vector elements
+   Arguments   : Inputs  - in0, in1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each signed odd halfword element from 'in0' is subtracted from
+                 even signed halfword element from 'in0' (pairwise) and the
+                 word result is written to 'out0'
+*/
+#define HSUB_UH2(RTYPE, in0, in1, out0, out1) {          \
+  out0 = (RTYPE)__msa_hsub_s_w((v8i16)in0, (v8i16)in0);  \
+  out1 = (RTYPE)__msa_hsub_s_w((v8i16)in1, (v8i16)in1);  \
+}
+#define HSUB_UH2_SW(...) HSUB_UH2(v4i32, __VA_ARGS__)
 
 /* Description : Insert specified word elements from input vectors to 1
                  destination vector
