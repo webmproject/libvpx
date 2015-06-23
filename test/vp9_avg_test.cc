@@ -288,4 +288,16 @@ INSTANTIATE_TEST_CASE_P(
 
 #endif
 
+#if HAVE_MSA
+INSTANTIATE_TEST_CASE_P(
+    MSA, AverageTest,
+    ::testing::Values(
+        make_tuple(16, 16, 0, 8, &vp9_avg_8x8_msa),
+        make_tuple(16, 16, 5, 8, &vp9_avg_8x8_msa),
+        make_tuple(32, 32, 15, 8, &vp9_avg_8x8_msa),
+        make_tuple(16, 16, 0, 4, &vp9_avg_4x4_msa),
+        make_tuple(16, 16, 5, 4, &vp9_avg_4x4_msa),
+        make_tuple(32, 32, 15, 4, &vp9_avg_4x4_msa)));
+#endif
+
 }  // namespace

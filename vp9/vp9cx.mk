@@ -157,5 +157,6 @@ VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct8x8_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct16x16_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct32x32_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct_msa.h
+VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_avg_msa.c
 
 VP9_CX_SRCS-yes := $(filter-out $(VP9_CX_SRCS_REMOVE-yes),$(VP9_CX_SRCS-yes))

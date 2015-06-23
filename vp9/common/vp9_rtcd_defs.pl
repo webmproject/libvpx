@@ -878,10 +878,10 @@ add_proto qw/unsigned int vp9_sub_pixel_avg_variance4x4/, "const uint8_t *src_pt
 specialize qw/vp9_sub_pixel_avg_variance4x4/, "$sse_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_avg_8x8/, "const uint8_t *, int p";
-specialize qw/vp9_avg_8x8 sse2 neon/;
+specialize qw/vp9_avg_8x8 sse2 neon msa/;
 
 add_proto qw/unsigned int vp9_avg_4x4/, "const uint8_t *, int p";
-specialize qw/vp9_avg_4x4 sse2/;
+specialize qw/vp9_avg_4x4 sse2 msa/;
 
 add_proto qw/void vp9_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
 specialize qw/vp9_minmax_8x8 sse2/;
