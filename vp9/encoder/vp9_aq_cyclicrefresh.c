@@ -129,7 +129,8 @@ static int candidate_refresh_aq(const CYCLIC_REFRESH *cr,
   else  if (bsize >= BLOCK_16X16 &&
             rate < cr->thresh_rate_sb &&
             is_inter_block(mbmi) &&
-            mbmi->mv[0].as_int == 0)
+            mbmi->mv[0].as_int == 0 &&
+            cr->rate_boost_fac > 1.0)
     // More aggressive delta-q for bigger blocks with zero motion.
     return CR_SEGMENT_ID_BOOST2;
   else
@@ -464,7 +465,7 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
       cm->height <= 288 &&
       rc->avg_frame_bandwidth < 3400) {
     cr->motion_thresh = 4;
-    cr->rate_boost_fac = 1.25;
+    cr->rate_boost_fac = 1.0;
   } else {
     cr->motion_thresh = 32;
     cr->rate_boost_fac = 1.7;
