@@ -793,7 +793,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
 
 #if CONFIG_TX_SKIP
   if (xd->lossless && tx_size != TX_4X4 &&
-      !xd->mi[0].src_mi->mbmi.tx_skip[plane != 0]) {
+      (!xd->mi[0].src_mi->mbmi.tx_skip[plane != 0] || tx_size >= TX_32X32)) {
     *rate       = INT_MAX;
     *distortion = INT64_MAX;
     *sse        = INT64_MAX;
