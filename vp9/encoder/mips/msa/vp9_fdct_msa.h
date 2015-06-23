@@ -190,6 +190,67 @@
   vec1 >>= 2;                                     \
 }
 
+#define VP9_FDCT4(in0, in1, in2, in3, out0, out1, out2, out3) {     \
+  v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m;                         \
+  v8i16 vec0_m, vec1_m, vec2_m, vec3_m;                             \
+  v4i32 vec4_m, vec5_m, vec6_m, vec7_m;                             \
+  v8i16 coeff_m = { cospi_16_64, -cospi_16_64, cospi_8_64,          \
+                    cospi_24_64, -cospi_8_64, 0, 0, 0 };            \
+                                                                    \
+  BUTTERFLY_4(in0, in1, in2, in3, vec0_m, vec1_m, vec2_m, vec3_m);  \
+  ILVR_H2_SH(vec1_m, vec0_m, vec3_m, vec2_m, vec0_m, vec2_m);       \
+  SPLATI_H2_SH(coeff_m, 0, 1, cnst0_m, cnst1_m);                    \
+  cnst1_m = __msa_ilvev_h(cnst1_m, cnst0_m);                        \
+  vec5_m = __msa_dotp_s_w(vec0_m, cnst1_m);                         \
+                                                                    \
+  SPLATI_H2_SH(coeff_m, 4, 3, cnst2_m, cnst3_m);                    \
+  cnst2_m = __msa_ilvev_h(cnst3_m, cnst2_m);                        \
+  vec7_m = __msa_dotp_s_w(vec2_m, cnst2_m);                         \
+                                                                    \
+  vec4_m = __msa_dotp_s_w(vec0_m, cnst0_m);                         \
+  cnst2_m = __msa_splati_h(coeff_m, 2);                             \
+  cnst2_m = __msa_ilvev_h(cnst2_m, cnst3_m);                        \
+  vec6_m = __msa_dotp_s_w(vec2_m, cnst2_m);                         \
+                                                                    \
+  SRARI_W4_SW(vec4_m, vec5_m, vec6_m, vec7_m, DCT_CONST_BITS);      \
+  PCKEV_H4_SH(vec4_m, vec4_m, vec5_m, vec5_m, vec6_m, vec6_m,       \
+              vec7_m, vec7_m, out0, out2, out1, out3);              \
+}
+
+#define VP9_FADST4(in0, in1, in2, in3, out0, out1, out2, out3) {  \
+  v4i32 s0_m, s1_m, s2_m, s3_m, constant_m;                       \
+  v4i32 in0_r_m, in1_r_m, in2_r_m, in3_r_m;                       \
+                                                                  \
+  UNPCK_R_SH_SW(in0, in0_r_m);                                    \
+  UNPCK_R_SH_SW(in1, in1_r_m);                                    \
+  UNPCK_R_SH_SW(in2, in2_r_m);                                    \
+  UNPCK_R_SH_SW(in3, in3_r_m);                                    \
+                                                                  \
+  constant_m = __msa_fill_w(sinpi_4_9);                           \
+  MUL2(in0_r_m, constant_m, in3_r_m, constant_m, s1_m, s0_m);     \
+                                                                  \
+  constant_m = __msa_fill_w(sinpi_1_9);                           \
+  s0_m += in0_r_m * constant_m;                                   \
+  s1_m -= in1_r_m * constant_m;                                   \
+                                                                  \
+  constant_m = __msa_fill_w(sinpi_2_9);                           \
+  s0_m += in1_r_m * constant_m;                                   \
+  s1_m += in3_r_m * constant_m;                                   \
+                                                                  \
+  s2_m = in0_r_m + in1_r_m - in3_r_m;                             \
+                                                                  \
+  constant_m = __msa_fill_w(sinpi_3_9);                           \
+  MUL2(in2_r_m, constant_m, s2_m, constant_m, s3_m, in1_r_m);     \
+                                                                  \
+  in0_r_m = s0_m + s3_m;                                          \
+  s2_m = s1_m - s3_m;                                             \
+  s3_m = s1_m - s0_m + s3_m;                                      \
+                                                                  \
+  SRARI_W4_SW(in0_r_m, in1_r_m, s2_m, s3_m, DCT_CONST_BITS);      \
+  PCKEV_H4_SH(in0_r_m, in0_r_m, in1_r_m, in1_r_m, s2_m, s2_m,     \
+              s3_m, s3_m, out0, out1, out2, out3);                \
+}
+
 #define VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,            \
                   out0, out1, out2, out3, out4, out5, out6, out7) {  \
   v8i16 s0_m, s1_m, s2_m, s3_m, s4_m, s5_m, s6_m;                    \

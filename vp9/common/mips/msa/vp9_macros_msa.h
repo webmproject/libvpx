@@ -467,6 +467,24 @@
   SH(out3_m, pblk_2x4_m + 3 * stride);              \
 }
 
+/* Description : Store 4x2 byte block to destination memory from input vector
+   Arguments   : Inputs  - in, pdst, stride
+   Details     : Index 0 word element from 'in' vector is copied to a GP
+                 register and stored to (pdst)
+                 Index 1 word element from 'in' vector is copied to a GP
+                 register and stored to (pdst + stride)
+*/
+#define ST4x2_UB(in, pdst, stride) {        \
+  uint32_t out0_m, out1_m;                  \
+  uint8_t *pblk_4x2_m = (uint8_t *)(pdst);  \
+                                            \
+  out0_m = __msa_copy_u_w((v4i32)in, 0);    \
+  out1_m = __msa_copy_u_w((v4i32)in, 1);    \
+                                            \
+  SW(out0_m, pblk_4x2_m);                   \
+  SW(out1_m, pblk_4x2_m + stride);          \
+}
+
 /* Description : Store as 4x4 byte block to destination memory from input vector
    Arguments   : Inputs  - in0, in1, pdst, stride
                  Return Type - unsigned byte
@@ -1471,6 +1489,22 @@
   out3 = (RTYPE)__msa_srli_h((v8i16)in3, shift);                             \
 }
 #define SRLI_H4_SH(...) SRLI_H4(v8i16, __VA_ARGS__)
+
+/* Description : Multiplication of pairs of vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+   Details     : Each element from 'in0' is multiplied with elements from 'in1'
+                 and the result is written to 'out0'
+*/
+#define MUL2(in0, in1, in2, in3, out0, out1) {  \
+  out0 = in0 * in1;                             \
+  out1 = in2 * in3;                             \
+}
+#define MUL4(in0, in1, in2, in3, in4, in5, in6, in7,  \
+             out0, out1, out2, out3) {                \
+  MUL2(in0, in1, in2, in3, out0, out1);               \
+  MUL2(in4, in5, in6, in7, out2, out3);               \
+}
 
 /* Description : Addition of 2 pairs of vectors
    Arguments   : Inputs  - in0, in1, in2, in3
