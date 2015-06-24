@@ -1455,7 +1455,6 @@ static INLINE int mv_check_bounds(const MACROBLOCK *x, const MV *mv) {
 }
 
 #if CONFIG_INTRABC
-#define ODD_PEL_DV 0  // Allow odd pel displacemnt vectors
 static void intrabc_search(VP9_COMP *cpi, MACROBLOCK *x,
                            BLOCK_SIZE bsize,
                            int mi_row, int mi_col,
@@ -1523,23 +1522,28 @@ static void intrabc_search(VP9_COMP *cpi, MACROBLOCK *x,
   assert(tmp_mv->as_int != 0);
 
   if (bestsme < INT_MAX) {
-    if (pd[1].subsampling_x != 0 || pd[1].subsampling_y != 0) {
-#if ODD_PEL_DV
+    // Check that the vector doesn't require uv subpel interpolation pixels
+    // from outside of the coded area.
+    if (pd[1].subsampling_y != 0) {
       if (tmp_mv->as_mv.col > -w) {
         assert(tmp_mv->as_mv.row <= -h);
         if (tmp_mv->as_mv.row == -h - 1) {
           tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
         }
       } else {
-        assert(tmp_mv->as_mv.row <= 8 * 8 - h);
-        if (tmp_mv->as_mv.row == 8 * 8 - h - 1) {
+        assert(tmp_mv->as_mv.row <= (sb_mi_row + 8 - mi_row) * 8 - h);
+        if (tmp_mv->as_mv.row == (sb_mi_row + 8 - mi_row) * 8 - h - 1) {
           tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
         }
       }
-#else
-      tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
-      tmp_mv->as_mv.col = tmp_mv->as_mv.col / 2 * 2;
-#endif  // ODD_PEL_DV
+    }
+    if (pd[1].subsampling_x != 0) {
+      if (tmp_mv->as_mv.row > -h) {
+        assert(tmp_mv->as_mv.col <= -(mi_col - sb_mi_col) * 8 - w);
+        if (tmp_mv->as_mv.col == -(mi_col - sb_mi_col) * 8 - w - 1) {
+          tmp_mv->as_mv.col = tmp_mv->as_mv.col / 2 * 2;
+        }
+      }
     }
     tmp_mv->as_mv.row *= 8;
     tmp_mv->as_mv.col *= 8;
