@@ -358,6 +358,23 @@ void vp9_d45_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   vst1_u8(dst + i * stride, row);
 }
 
+void vp9_d45_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+                                  const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t A0 = vld1q_u8(above);  // top row
+  const uint8x16_t above_right = vld1q_dup_u8(above + 15);
+  const uint8x16_t A1 = vextq_u8(A0, above_right, 1);
+  const uint8x16_t A2 = vextq_u8(A0, above_right, 2);
+  const uint8x16_t avg1 = vhaddq_u8(A0, A2);
+  uint8x16_t row = vrhaddq_u8(avg1, A1);
+  int i;
+  (void)left;
+  for (i = 0; i < 15; ++i) {
+    vst1q_u8(dst + i * stride, row);
+    row = vextq_u8(row, above_right, 1);
+  }
+  vst1q_u8(dst + i * stride, row);
+}
+
 // -----------------------------------------------------------------------------
 
 void vp9_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,

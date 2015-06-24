@@ -316,8 +316,8 @@ INTRA_PRED_TEST(NEON, TestIntraPred16, vp9_dc_predictor_16x16_neon,
                 vp9_dc_left_predictor_16x16_neon,
                 vp9_dc_top_predictor_16x16_neon,
                 vp9_dc_128_predictor_16x16_neon, vp9_v_predictor_16x16_neon,
-                vp9_h_predictor_16x16_neon, NULL, NULL, NULL, NULL, NULL, NULL,
-                vp9_tm_predictor_16x16_neon)
+                vp9_h_predictor_16x16_neon, vp9_d45_predictor_16x16_neon, NULL,
+                NULL, NULL, NULL, NULL, vp9_tm_predictor_16x16_neon)
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
