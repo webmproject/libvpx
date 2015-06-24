@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "becf9e9d_752148d6",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-06-24T01:34:19Z",
+      "side": 1,
+      "message": "because webrtc",
+      "revId": "8281a19465a6bfcffa9ba1935bed1417e6b16ad6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ece5aa2_b45b6056",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-06-24T01:34:19Z",
+      "side": 1,
+      "message": "seq abuse because lazy; don\u0027t want to touch this for 1080p/2k/4k updates other than to change the max.",
+      "revId": "8281a19465a6bfcffa9ba1935bed1417e6b16ad6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
