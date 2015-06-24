@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ebb4af3_f84af1f9",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1465,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-06-24T12:22:50Z",
+      "side": 1,
+      "message": "delete",
+      "revId": "f59275db0ed230a04b28f9e8e48bc7ebfcab58e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
