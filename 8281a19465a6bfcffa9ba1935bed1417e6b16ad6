@@ -51,6 +51,24 @@
       "revId": "8281a19465a6bfcffa9ba1935bed1417e6b16ad6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e0f82b1_aa208fa5",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-06-24T16:36:06Z",
+      "side": 1,
+      "message": "yeah; our docs on this are either confusing, sparse, or both. Users are going to use this wrong. Might as well test it that way.",
+      "parentUuid": "5ec1426b_3a498180",
+      "revId": "8281a19465a6bfcffa9ba1935bed1417e6b16ad6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
