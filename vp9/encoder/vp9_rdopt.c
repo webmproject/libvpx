@@ -6071,6 +6071,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int inter_ref_count;
   MB_MODE_INFO *inter_ref_list[18];
   int copy_mode_context = vp9_get_copy_mode_context(xd);
+  int orig_segment_id = mbmi->segment_id;
 #endif  // CONFIG_COPY_MODE
 #if CONFIG_PALETTE
   int best_n = 0, colors, palette_ctx;
@@ -7128,6 +7129,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_EXT_TX
 
     *mbmi = *inter_ref_list[copy_mode - REF0];
+    mbmi->segment_id = orig_segment_id;
 #if CONFIG_INTERINTRA
     if (mbmi->ref_frame[1] == INTRA_FRAME)
       mbmi->ref_frame[1] = NONE;
