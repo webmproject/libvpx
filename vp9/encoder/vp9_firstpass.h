@@ -53,6 +53,7 @@ typedef struct {
   double pcnt_neutral;
   double intra_skip_pct;
   double inactive_zone_rows;  // Image mask rows top and bottom.
+  double inactive_zone_cols;  // Image mask columns at left and right edges.
   double MVr;
   double mvr_abs;
   double MVc;

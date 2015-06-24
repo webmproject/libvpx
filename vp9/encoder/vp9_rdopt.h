@@ -54,6 +54,9 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(struct VP9_COMP *cpi,
                                         PICK_MODE_CONTEXT *ctx,
                                         int64_t best_rd_so_far);
 
+int vp9_internal_image_edge(struct VP9_COMP *cpi);
+int vp9_active_edge_sb(struct VP9_COMP *cpi, int mi_row, int mi_col);
+
 void vp9_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
                                    struct TileDataEnc *tile_data,
                                    struct macroblock *x,
@@ -61,6 +64,7 @@ void vp9_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
                                    struct RD_COST *rd_cost,
                                    BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
                                    int64_t best_rd_so_far);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

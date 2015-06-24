@@ -2123,38 +2123,6 @@ static const BLOCK_SIZE max_partition_size[BLOCK_SIZES] = {
   BLOCK_64X64
 };
 
-// Checks to see if a macro block is at the edge of the active image.
-// In most cases this is the "real" edge unless there are formatting
-// bars embedded in the stream.
-static int active_edge_sb(VP9_COMP *cpi,
-                          int mi_row, int mi_col) {
-  int is_active_edge = 0;
-  int top_edge = 0;
-  int bottom_edge = cpi->common.mi_rows;
-  int left_edge = 0;
-  int right_edge = cpi->common.mi_cols;
-
-  // For two pass account for any formatting bars detected.
-  if (cpi->oxcf.pass == 2) {
-    TWO_PASS *twopass = &cpi->twopass;
-
-    // The inactive region is specified in MBs not mi units.
-    // The image edge is in the following MB row.
-    top_edge += (int)(twopass->this_frame_stats.inactive_zone_rows * 2);
-
-    bottom_edge -= (int)(twopass->this_frame_stats.inactive_zone_rows * 2);
-    bottom_edge = MAX(top_edge, bottom_edge);
-  }
-
-  if (((top_edge >= mi_row) && (top_edge < (mi_row + MI_BLOCK_SIZE))) ||
-      ((bottom_edge >= mi_row) && (bottom_edge < (mi_row + MI_BLOCK_SIZE))) ||
-      ((left_edge >= mi_col) && (left_edge < (mi_col + MI_BLOCK_SIZE))) ||
-      ((right_edge >= mi_col) && (right_edge < (mi_col + MI_BLOCK_SIZE)))) {
-    is_active_edge = 1;
-  }
-
-  return is_active_edge;
-}
 
 // Look at all the mode_info entries for blocks that are part of this
 // partition and find the min and max values for sb_type.
@@ -2253,7 +2221,7 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   // Test for blocks at the edge of the active image.
   // This may be the actual edge of the image or where there are formatting
   // bars.
-  if (active_edge_sb(cpi, mi_row, mi_col)) {
+  if (vp9_active_edge_sb(cpi, mi_row, mi_col)) {
     min_size = BLOCK_4X4;
   } else {
     min_size = MIN(cpi->sf.rd_auto_partition_min_limit,

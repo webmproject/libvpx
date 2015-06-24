@@ -2898,6 +2898,47 @@ static void rd_variance_adjustment(VP9_COMP *cpi,
   *this_rd += (*this_rd * var_factor) / 100;
 }
 
+
+// Do we have an internal image edge (e.g. formatting bars).
+int vp9_internal_image_edge(VP9_COMP *cpi) {
+  return (cpi->oxcf.pass == 2) &&
+    ((cpi->twopass.this_frame_stats.inactive_zone_rows > 0) ||
+    (cpi->twopass.this_frame_stats.inactive_zone_cols > 0));
+}
+
+// Checks to see if a macro block is at the edge of the active image.
+// In most cases this is the "real" edge unless there are formatting
+// bars embedded in the stream.
+int vp9_active_edge_sb(VP9_COMP *cpi,
+  int mi_row, int mi_col) {
+  int is_active_edge = 0;
+  int top_edge = 0;
+  int bottom_edge = cpi->common.mi_rows;
+  int left_edge = 0;
+  int right_edge = cpi->common.mi_cols;
+
+  // For two pass account for any formatting bars detected.
+  if (cpi->oxcf.pass == 2) {
+    TWO_PASS *twopass = &cpi->twopass;
+
+    // The inactive region is specified in MBs not mi units.
+    // The image edge is in the following MB row.
+    top_edge += (int)(twopass->this_frame_stats.inactive_zone_rows * 2);
+
+    bottom_edge -= (int)(twopass->this_frame_stats.inactive_zone_rows * 2);
+    bottom_edge = MAX(top_edge, bottom_edge);
+  }
+
+  if (((top_edge >= mi_row) && (top_edge < (mi_row + MI_BLOCK_SIZE))) ||
+    ((bottom_edge >= mi_row) && (bottom_edge < (mi_row + MI_BLOCK_SIZE))) ||
+    ((left_edge >= mi_col) && (left_edge < (mi_col + MI_BLOCK_SIZE))) ||
+    ((right_edge >= mi_col) && (right_edge < (mi_col + MI_BLOCK_SIZE)))) {
+    is_active_edge = 1;
+  }
+
+  return is_active_edge;
+}
+
 void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                                TileDataEnc *tile_data,
                                MACROBLOCK *x,
@@ -3751,13 +3792,15 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
   int skip_uv;
   PREDICTION_MODE mode_uv = DC_PRED;
   const int intra_cost_penalty = vp9_get_intra_cost_penalty(
-      cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
+    cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
   int ref_frame_skip_mask[2] = { 0 };
   int64_t mask_filter = 0;
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
+  int internal_active_edge =
+    vp9_active_edge_sb(cpi, mi_row, mi_col) && vp9_internal_image_edge(cpi);
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   memset(x->zcoeff_blk[TX_4X4], 0, 4);
@@ -3843,7 +3886,8 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
       continue;
 
     // Test best rd so far against threshold for trying this mode.
-    if (rd_less_than_thresh(best_rd,
+    if (!internal_active_edge &&
+        rd_less_than_thresh(best_rd,
                             rd_opt->threshes[segment_id][bsize][ref_index],
                             tile_data->thresh_freq_fact[bsize][ref_index]))
       continue;
