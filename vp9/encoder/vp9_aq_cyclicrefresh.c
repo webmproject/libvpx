@@ -51,7 +51,7 @@ struct CYCLIC_REFRESH {
   // Rate target ratio to set q delta.
   double rate_ratio_qdelta;
   // Boost factor for rate target ratio, for segment CR_SEGMENT_ID_BOOST2.
-  double rate_boost_fac;
+  int rate_boost_fac;
   double low_content_avg;
   int qindex_delta[3];
 };
@@ -130,7 +130,7 @@ static int candidate_refresh_aq(const CYCLIC_REFRESH *cr,
             rate < cr->thresh_rate_sb &&
             is_inter_block(mbmi) &&
             mbmi->mv[0].as_int == 0 &&
-            cr->rate_boost_fac > 1.0)
+            cr->rate_boost_fac > 10)
     // More aggressive delta-q for bigger blocks with zero motion.
     return CR_SEGMENT_ID_BOOST2;
   else
@@ -465,10 +465,10 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
       cm->height <= 288 &&
       rc->avg_frame_bandwidth < 3400) {
     cr->motion_thresh = 4;
-    cr->rate_boost_fac = 1.0;
+    cr->rate_boost_fac = 10;
   } else {
     cr->motion_thresh = 32;
-    cr->rate_boost_fac = 1.7;
+    cr->rate_boost_fac = 17;
   }
 }
 
@@ -542,9 +542,9 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     vp9_set_segdata(seg, CR_SEGMENT_ID_BOOST1, SEG_LVL_ALT_Q, qindex_delta);
 
     // Set a more aggressive (higher) q delta for segment BOOST2.
-    qindex_delta = compute_deltaq(cpi, cm->base_qindex,
-                                  MIN(CR_MAX_RATE_TARGET_RATIO,
-                                  cr->rate_boost_fac * cr->rate_ratio_qdelta));
+    qindex_delta = compute_deltaq(
+        cpi, cm->base_qindex, MIN(CR_MAX_RATE_TARGET_RATIO,
+        0.1 * cr->rate_boost_fac * cr->rate_ratio_qdelta));
     cr->qindex_delta[2] = qindex_delta;
     vp9_set_segdata(seg, CR_SEGMENT_ID_BOOST2, SEG_LVL_ALT_Q, qindex_delta);
 
