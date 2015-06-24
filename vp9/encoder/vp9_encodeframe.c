@@ -2642,8 +2642,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   }
 
   // PARTITION_HORZ
-  if (partition_horz_allowed && do_rect) {
-    subsize = get_subsize(bsize, PARTITION_HORZ);
+  if (partition_horz_allowed &&
+      (do_rect || vp9_active_h_edge(cpi, mi_row, mi_step))) {
+      subsize = get_subsize(bsize, PARTITION_HORZ);
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
@@ -2689,8 +2690,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
   }
   // PARTITION_VERT
-  if (partition_vert_allowed && do_rect) {
-    subsize = get_subsize(bsize, PARTITION_VERT);
+  if (partition_vert_allowed &&
+      (do_rect || vp9_active_v_edge(cpi, mi_col, mi_step))) {
+      subsize = get_subsize(bsize, PARTITION_VERT);
 
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, ctx);

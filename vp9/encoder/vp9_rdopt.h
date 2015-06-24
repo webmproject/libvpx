@@ -55,6 +55,8 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(struct VP9_COMP *cpi,
                                         int64_t best_rd_so_far);
 
 int vp9_internal_image_edge(struct VP9_COMP *cpi);
+int vp9_active_h_edge(struct VP9_COMP *cpi, int mi_row, int mi_step);
+int vp9_active_v_edge(struct VP9_COMP *cpi, int mi_col, int mi_step);
 int vp9_active_edge_sb(struct VP9_COMP *cpi, int mi_row, int mi_col);
 
 void vp9_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
