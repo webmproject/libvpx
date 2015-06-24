@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e098aaf_8bd4b1b6",
+        "filename": "vp8/common/arm/neon/vp8_subpixelvariance_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 976,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-24T18:57:24Z",
+      "side": 1,
+      "message": "previously this loaded \"0 128 0 0, 0 112 0 16\" (top half of the 16bit register is empty)- if it passes tests then that\u0027s cool.\n\nactually nevermind since this is duplicating one element it should be ok. although in that case it\u0027s weird that [0] didn\u0027t always load 0.",
+      "range": {
+        "startLine": 976,
+        "startChar": 23,
+        "endLine": 976,
+        "endChar": 32
+      },
+      "revId": "4bd87a9b9eda6b223087bcdb4c96d2555ff60780",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
