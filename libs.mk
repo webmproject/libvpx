@@ -508,11 +508,13 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(TEST_INTRA_PRED_SPEED_SRCS)
 
 define test_shard_template
 test:: test_shard.$(1)
-test_shard.$(1): $(LIBVPX_TEST_BIN) testdata
+test-no-data-check:: test_shard_ndc.$(1)
+test_shard.$(1) test_shard_ndc.$(1): $(LIBVPX_TEST_BIN)
 	@set -e; \
 	 export GTEST_SHARD_INDEX=$(1); \
 	 export GTEST_TOTAL_SHARDS=$(2); \
 	 $(LIBVPX_TEST_BIN)
+test_shard.$(1): testdata
 .PHONY: test_shard.$(1)
 endef
 
@@ -557,15 +559,16 @@ ifeq ($(CONFIG_MSVS),yes)
 # TODO(tomfinegan): Support running the debug versions of tools?
 TEST_BIN_PATH := $(addsuffix /$(TGT_OS:win64=x64)/Release, $(TEST_BIN_PATH))
 endif
-utiltest: testdata
+utiltest utiltest-no-data-check:
 	$(qexec)$(SRC_PATH_BARE)/test/vpxdec.sh \
 		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
 		--bin-path $(TEST_BIN_PATH)
 	$(qexec)$(SRC_PATH_BARE)/test/vpxenc.sh \
 		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
 		--bin-path $(TEST_BIN_PATH)
+utiltest: testdata
 else
-utiltest:
+utiltest utiltest-no-data-check:
 	@echo Unit tests must be enabled to make the utiltest target.
 endif
 
@@ -583,11 +586,12 @@ ifeq ($(CONFIG_MSVS),yes)
 # TODO(tomfinegan): Support running the debug versions of tools?
 EXAMPLES_BIN_PATH := $(TGT_OS:win64=x64)/Release
 endif
-exampletest: examples testdata
+exampletest exampletest-no-data-check: examples
 	$(qexec)$(SRC_PATH_BARE)/test/examples.sh \
 		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
 		--bin-path $(EXAMPLES_BIN_PATH)
+exampletest: testdata
 else
-exampletest:
+exampletest exampletest-no-data-check:
 	@echo Unit tests must be enabled to make the exampletest target.
 endif
