@@ -1596,7 +1596,10 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     target = calc_pframe_target_size_one_pass_cbr(cpi);
 
   vp9_rc_set_frame_target(cpi, target);
-  cpi->resize_state = vp9_resize_one_pass_cbr(cpi);
+  if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC)
+    cpi->resize_state = vp9_resize_one_pass_cbr(cpi);
+  else
+    cpi->resize_state = 0;
 }
 
 int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
@@ -1781,7 +1784,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
       ++cpi->resize_buffer_underflow;
     ++cpi->resize_count;
     // Check for resize action every "window" frames.
-    if (cpi->resize_count == window) {
+    if (cpi->resize_count >= window) {
       int avg_qp = cpi->resize_avg_qp / cpi->resize_count;
       // Resize down if buffer level has underflowed sufficent amount in past
       // window, and we are at original resolution.
