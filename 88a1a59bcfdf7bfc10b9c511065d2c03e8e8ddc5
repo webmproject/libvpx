@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e856e59_f16c68b2",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1842,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-06-25T09:58:14Z",
+      "side": 1,
+      "message": "This means that at high Q the minimum interval will actually be higher than the paramaeter value.\n\nPerhaps use a baseline #define MIN_GF_INTERVAL here then test that the sum (active_min_gf_interval) is not less than the user passed in rc-\u003emin_gf_interval value.",
+      "range": {
+        "startLine": 1842,
+        "startChar": 50,
+        "endLine": 1842,
+        "endChar": 51
+      },
+      "revId": "88a1a59bcfdf7bfc10b9c511065d2c03e8e8ddc5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
