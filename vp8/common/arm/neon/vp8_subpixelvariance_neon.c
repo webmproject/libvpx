@@ -12,7 +12,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 
-static const uint16_t bilinear_taps_coeff[8][2] = {
+static const uint8_t bilinear_taps_coeff[8][2] = {
     {128,   0},
     {112,  16},
     { 96,  32},
@@ -972,9 +972,9 @@ static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
                                       int pixel_step,
                                       unsigned int output_height,
                                       unsigned int output_width,
-                                      const uint16_t *vpx_filter) {
-  const uint8x8_t f0 = vmov_n_u8((uint8_t)vpx_filter[0]);
-  const uint8x8_t f1 = vmov_n_u8((uint8_t)vpx_filter[1]);
+                                      const uint8_t *vpx_filter) {
+  const uint8x8_t f0 = vmov_n_u8(vpx_filter[0]);
+  const uint8x8_t f1 = vmov_n_u8(vpx_filter[1]);
   unsigned int i;
   for (i = 0; i < output_height; ++i) {
     const uint8x8_t src_0 = vld1_u8(&src_ptr[0]);
