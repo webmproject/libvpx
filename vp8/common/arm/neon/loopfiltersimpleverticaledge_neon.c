@@ -153,6 +153,7 @@ uint8x8x4_t read_4x8(unsigned char *src, int pitch, uint8x8x4_t x) {
 #else
 static INLINE
 uint8x8x4_t read_4x8(unsigned char *src, int pitch, uint8x8x4_t x) {
+    x.val[0] = x.val[1] = x.val[2] = x.val[3] = vdup_n_u8(0);
     x = vld4_lane_u8(src, x, 0);
     src += pitch;
     x = vld4_lane_u8(src, x, 1);
