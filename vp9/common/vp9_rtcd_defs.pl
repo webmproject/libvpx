@@ -916,7 +916,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 # ENCODEMB INVOKE
 
 add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
-specialize qw/vp9_subtract_block neon/, "$sse2_x86inc";
+specialize qw/vp9_subtract_block neon msa/, "$sse2_x86inc";
 
 #
 # Denoiser
