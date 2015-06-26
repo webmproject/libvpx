@@ -1031,8 +1031,10 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       fps.mvr_abs = (double)sum_mvr_abs / mvcount;
       fps.MVc = (double)sum_mvc / mvcount;
       fps.mvc_abs = (double)sum_mvc_abs / mvcount;
-      fps.MVrv = ((double)sum_mvrs - (fps.MVr * fps.MVr / mvcount)) / mvcount;
-      fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / mvcount)) / mvcount;
+      fps.MVrv = ((double)sum_mvrs -
+                  ((double)sum_mvr * sum_mvr / mvcount)) / mvcount;
+      fps.MVcv = ((double)sum_mvcs -
+                  ((double)sum_mvc * sum_mvc / mvcount)) / mvcount;
       fps.mv_in_out_count = (double)sum_in_vectors / (mvcount * 2);
       fps.new_mv_count = new_mv_count;
       fps.pcnt_motion = (double)mvcount / num_mbs;
