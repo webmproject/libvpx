@@ -1077,7 +1077,7 @@ add_proto qw/int vp9_full_range_search/, "const struct macroblock *x, const stru
 specialize qw/vp9_full_range_search/;
 
 add_proto qw/void vp9_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
-specialize qw/vp9_temporal_filter_apply sse2/;
+specialize qw/vp9_temporal_filter_apply sse2 msa/;
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
