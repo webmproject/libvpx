@@ -230,6 +230,9 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
     mbmi->segment_id = 0;
     x->encode_breakout = cpi->encode_breakout;
   }
+
+  // required by vp9_append_sub8x8_mvs_for_idx() and vp9_find_best_ref_mvs()
+  xd->tile = *tile;
 }
 
 static void duplicate_mode_info_in_sb(VP9_COMMON *cm, MACROBLOCKD *xd,
@@ -2929,7 +2932,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
     vp9_pick_inter_mode(cpi, x, tile_data, mi_row, mi_col,
                         rd_cost, bsize, ctx);
   else
-    vp9_pick_inter_mode_sub8x8(cpi, x, tile_data, mi_row, mi_col,
+    vp9_pick_inter_mode_sub8x8(cpi, x, mi_row, mi_col,
                                rd_cost, bsize, ctx);
 
   duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);

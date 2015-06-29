@@ -1732,7 +1732,6 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                                        const TileInfo * const tile,
                                         int_mv *best_ref_mv,
                                         int_mv *second_best_ref_mv,
                                         int64_t best_rd, int *returntotrate,
@@ -1802,7 +1801,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
       for (ref = 0; ref < 1 + has_second_rf; ++ref) {
         const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
         frame_mv[ZEROMV][frame].as_int = 0;
-        vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, i, ref, mi_row, mi_col,
+        vp9_append_sub8x8_mvs_for_idx(cm, xd, i, ref, mi_row, mi_col,
                                       &frame_mv[NEARESTMV][frame],
                                       &frame_mv[NEARMV][frame],
                                       xd->mi[0]->mbmi.mode_context);
@@ -2199,7 +2198,6 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
 }
 
 static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
-                               const TileInfo *const tile,
                                MV_REFERENCE_FRAME ref_frame,
                                BLOCK_SIZE block_size,
                                int mi_row, int mi_col,
@@ -2220,7 +2218,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col, sf, sf);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
-  vp9_find_mv_refs(cm, xd, tile, mi, ref_frame, candidates, mi_row, mi_col,
+  vp9_find_mv_refs(cm, xd, mi, ref_frame, candidates, mi_row, mi_col,
                    NULL, NULL, xd->mi[0]->mbmi.mode_context);
 
   // Candidate refinement carried out at encoder and decoder
@@ -2982,7 +2980,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       assert(get_ref_frame_buffer(cpi, ref_frame) != NULL);
-      setup_buffer_inter(cpi, x, tile_info, ref_frame, bsize, mi_row, mi_col,
+      setup_buffer_inter(cpi, x, ref_frame, bsize, mi_row, mi_col,
                          frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -3714,7 +3712,6 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
                                    PICK_MODE_CONTEXT *ctx,
                                    int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
-  TileInfo *const tile_info = &tile_data->tile_info;
   RD_OPT *const rd_opt = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3778,8 +3775,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, tile_info,
-                         ref_frame, bsize, mi_row, mi_col,
+      setup_buffer_inter(cpi, x, ref_frame, bsize, mi_row, mi_col,
                          frame_mv[NEARESTMV], frame_mv[NEARMV],
                          yv12_mb);
     } else {
@@ -3971,7 +3967,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
             int newbest, rs;
             int64_t rs_rd;
             mbmi->interp_filter = switchable_filter_index;
-            tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile_info,
+            tmp_rd = rd_pick_best_sub8x8_mode(cpi, x,
                                               &mbmi->ref_mvs[ref_frame][0],
                                               second_ref, best_yrd, &rate,
                                               &rate_y, &distortion,
@@ -4037,7 +4033,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level
-        tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile_info,
+        tmp_rd = rd_pick_best_sub8x8_mode(cpi, x,
                                           &mbmi->ref_mvs[ref_frame][0],
                                           second_ref, best_yrd, &rate, &rate_y,
                                           &distortion, &skippable, &total_sse,
