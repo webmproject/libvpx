@@ -547,7 +547,22 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
         mi->bmi[j].as_mv[0].as_int = block[0].as_int;
         if (is_compound)
           mi->bmi[j].as_mv[1].as_int = block[1].as_int;
-
+#if CONFIG_INTERNAL_STATS
+        if (mi->bmi[j].as_mv[0].as_mv.row & 0x07)
+          pbi->subpel_mc_block_in_4x4 +=
+              (1 << (num_pels_log2_lookup[bsize] - 4));
+        if (mi->bmi[j].as_mv[0].as_mv.col & 0x07)
+          pbi->subpel_mc_block_in_4x4 +=
+              (1 << (num_pels_log2_lookup[bsize] - 4));
+        if (is_compound) {
+          if (mi->bmi[j].as_mv[1].as_mv.row & 0x07)
+            pbi->subpel_mc_block_in_4x4 +=
+                (1 << (num_pels_log2_lookup[bsize] - 4));
+          if (mi->bmi[j].as_mv[1].as_mv.col & 0x07)
+            pbi->subpel_mc_block_in_4x4 +=
+                (1 << (num_pels_log2_lookup[bsize] - 4));
+        }
+#endif
         if (num_4x4_h == 2)
           mi->bmi[j + 2] = mi->bmi[j];
         if (num_4x4_w == 2)
@@ -562,6 +577,18 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
   } else {
     xd->corrupted |= !assign_mv(cm, xd, mbmi->mode, mbmi->mv, nearestmv,
                                 nearestmv, nearmv, is_compound, allow_hp, r);
+#if CONFIG_INTERNAL_STATS
+    if (mbmi->mv[0].as_mv.row & 0x07)
+      pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+    if (mbmi->mv[0].as_mv.col & 0x07)
+      pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+    if (is_compound) {
+      if (mbmi->mv[1].as_mv.row & 0x07)
+        pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+      if (mbmi->mv[1].as_mv.col & 0x07)
+        pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+    }
+#endif
   }
 }
 

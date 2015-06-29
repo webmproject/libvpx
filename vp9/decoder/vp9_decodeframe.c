@@ -746,6 +746,12 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   if (less8x8)
     bsize = BLOCK_8X8;
 
+#if CONFIG_INTERNAL_STATS
+  pbi->total_block_in_8x8 += (1 << (num_pels_log2_lookup[bsize] - 6));
+  if (!is_inter_block(mbmi))
+    pbi->intra_block_in_8x8 += (1 << (num_pels_log2_lookup[bsize] - 6));
+#endif
+
   if (mbmi->skip) {
     reset_skip_context(xd, bsize);
   }
@@ -2008,6 +2014,12 @@ void vp9_decode_frame(VP9Decoder *pbi,
                        "Uninitialized entropy context.");
 
   vp9_zero(cm->counts);
+#if CONFIG_INTERNAL_STATS
+  // Reset internal stats
+  pbi->total_block_in_8x8 = 0;
+  pbi->subpel_mc_block_in_4x4 = 0;
+  pbi->intra_block_in_8x8 = 0;
+#endif
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
@@ -2076,4 +2088,18 @@ void vp9_decode_frame(VP9Decoder *pbi,
   // Non frame parallel update frame context here.
   if (cm->refresh_frame_context && !context_updated)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
+
+#if CONFIG_INTERNAL_STATS
+  vp9_clear_system_state();
+  {
+    FILE *pf = fopen("frame_level_stats.stt", "a");
+    double subpel_mc = (double)pbi->subpel_mc_block_in_4x4 /
+        (double)pbi->total_block_in_8x8;
+    double intra_mode = (double)pbi->intra_block_in_8x8 /
+        (double)pbi->total_block_in_8x8;
+    fprintf(pf, "frame index %d, sub-pel mc %7.3f\tintra mode%7.3f\n",
+            cm->current_video_frame, 25 * subpel_mc, 100 * intra_mode);
+    fclose(pf);
+  }
+#endif
 }
