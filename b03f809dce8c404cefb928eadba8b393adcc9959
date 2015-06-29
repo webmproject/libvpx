@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "93fbb585_d58a8eed",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 4
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-06-29T22:16:19Z",
+      "side": 1,
+      "message": "yes. the comment can be removed.",
+      "parentUuid": "53277df4_ada349ff",
+      "range": {
+        "startLine": 798,
+        "startChar": 18,
+        "endLine": 798,
+        "endChar": 22
+      },
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "332a09c0_2fa3cdbd",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 4
