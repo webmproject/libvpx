@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "73f6419f_91a93c6a",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 865,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "ack",
+      "parentUuid": "332a09c0_2c62bb38",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "53277df4_ada349ff",
         "filename": "vp9/common/vp9_rtcd_defs.pl",
         "patchSetId": 4
@@ -66,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "332a09c0_32dcd656",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 4
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "cool thanks",
+      "parentUuid": "93fbb585_d58a8eed",
+      "range": {
+        "startLine": 798,
+        "startChar": 18,
+        "endLine": 798,
+        "endChar": 22
+      },
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "332a09c0_2fa3cdbd",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 4
@@ -77,6 +119,24 @@
       "writtenOn": "2015-06-29T22:11:47Z",
       "side": 1,
       "message": "const",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53277df4_6d5cb175",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "332a09c0_2fa3cdbd",
       "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -100,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "53277df4_50db445c",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "332a09c0_cf74b1ad",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "73f6419f_313848fe",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 4
@@ -111,6 +189,24 @@
       "writtenOn": "2015-06-29T22:11:47Z",
       "side": 1,
       "message": "the first-pass",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53277df4_b0ef20fd",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "73f6419f_313848fe",
       "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -134,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "53277df4_90ec9c09",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "93fbb585_926bfc17",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "73f6419f_5137d40b",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 4
@@ -145,6 +259,24 @@
       "writtenOn": "2015-06-29T22:11:47Z",
       "side": 1,
       "message": "bilinear",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "132185e2_ab6e9527",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "73f6419f_5137d40b",
       "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -168,6 +300,24 @@
     },
     {
       "key": {
+        "uuid": "73f6419f_313e887c",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "53277df4_0d1255e1",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "332a09c0_0fd409e4",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 4
@@ -179,6 +329,24 @@
       "writtenOn": "2015-06-29T22:11:47Z",
       "side": 1,
       "message": "preincrement",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "332a09c0_eff37512",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "332a09c0_0fd409e4",
       "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -202,6 +370,24 @@
     },
     {
       "key": {
+        "uuid": "93fbb585_955806cf",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "53277df4_6d1791d1",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "73f6419f_31516836",
         "filename": "vpx_dsp/variance.h",
         "patchSetId": 4
@@ -213,6 +399,24 @@
       "writtenOn": "2015-06-29T22:11:47Z",
       "side": 1,
       "message": "2015",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "73f6419f_318048d3",
+        "filename": "vpx_dsp/variance.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "73f6419f_31516836",
       "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -236,6 +440,24 @@
     },
     {
       "key": {
+        "uuid": "332a09c0_af6e9d27",
+        "filename": "vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "ptrdiff was only used in sse2 implementations. i believe it was all preexisting. i was considering a cleanup pass of unsigned int -\u003e uint32_t, char -\u003e int8_t, etc. already did short -\u003e int16_t because it was a style warning.",
+      "parentUuid": "132185e2_4b4719f2",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "332a09c0_4fa8c165",
         "filename": "vpx_dsp/x86/variance_avx2.c",
         "patchSetId": 4
@@ -253,6 +475,24 @@
     },
     {
       "key": {
+        "uuid": "53277df4_1056ec2d",
+        "filename": "vpx_dsp/x86/variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "332a09c0_4fa8c165",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "132185e2_8ba3d136",
         "filename": "vpx_dsp/x86/variance_mmx.c",
         "patchSetId": 4
@@ -264,6 +504,24 @@
       "writtenOn": "2015-06-29T22:11:47Z",
       "side": 1,
       "message": "can this be static?",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "332a09c0_cf4cb1c4",
+        "filename": "vpx_dsp/x86/variance_mmx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-29T22:29:09Z",
+      "side": 1,
+      "message": "Done. It is for avx2.",
+      "parentUuid": "132185e2_8ba3d136",
       "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
