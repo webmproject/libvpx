@@ -1693,7 +1693,11 @@ INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
     make_tuple(64, 64, &convolve12_sse2)));
 #else
 const ConvolveFunctions convolve8_sse2(
+#if CONFIG_USE_X86INC
     vp9_convolve_copy_sse2, vp9_convolve_avg_sse2,
+#else
+    vp9_convolve_copy_c, vp9_convolve_avg_c,
+#endif  // CONFIG_USE_X86INC
     vp9_convolve8_horiz_sse2, vp9_convolve8_avg_horiz_sse2,
     vp9_convolve8_vert_sse2, vp9_convolve8_avg_vert_sse2,
     vp9_convolve8_sse2, vp9_convolve8_avg_sse2, 0);
