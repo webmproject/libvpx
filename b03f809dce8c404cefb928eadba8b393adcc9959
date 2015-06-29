@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "332a09c0_2c62bb38",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 865,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "can be 1 line and should be named VpxHbdSubpel, but there\u0027s some existing code like this so it\u0027s fine to leave it for a follow-up",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "332a09c0_2fa3cdbd",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "const",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "332a09c0_cf74b1ad",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "bilinear",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "73f6419f_313848fe",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "the first-pass",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "93fbb585_926bfc17",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "the next pass",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "73f6419f_5137d40b",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "bilinear",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53277df4_0d1255e1",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "332a09c0_0fd409e4",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "preincrement",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53277df4_6d1791d1",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "73f6419f_31516836",
+        "filename": "vpx_dsp/variance.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "2015",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "132185e2_4b4719f2",
+        "filename": "vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "there seems to be a mix in rtcd and code with int/unsigned int/ptrdiff_t for stride. not sure how much was pre-existing",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "332a09c0_4fa8c165",
+        "filename": "vpx_dsp/x86/variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "elements",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "132185e2_8ba3d136",
+        "filename": "vpx_dsp/x86/variance_mmx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-29T22:11:47Z",
+      "side": 1,
+      "message": "can this be static?",
+      "revId": "b03f809dce8c404cefb928eadba8b393adcc9959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
