@@ -10,6 +10,7 @@
 
 #include <math.h>
 
+
 #include "./vpx_config.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_onyxc_int.h"
@@ -233,6 +234,67 @@ static const int mode_lf_lut[MB_MODE_COUNT] = {
 static const int bilateral_weight = (1 << BILATERAL_WEIGHT_BITS) - 1;
 static const int bilateral_weight_round = 1 << (BILATERAL_WEIGHT_BITS - 1);
 
+static double bilateral_filters_r_kf[BILATERAL_LEVELS_KF + 1][513];
+static double bilateral_filters_r[BILATERAL_LEVELS + 1][513];
+static double bilateral_filters_s_kf[BILATERAL_LEVELS_KF + 1]
+                                    [BILATERAL_WIN][BILATERAL_WIN];
+static double bilateral_filters_s[BILATERAL_LEVELS + 1]
+                                 [BILATERAL_WIN][BILATERAL_WIN];
+
+void vp9_loop_bilateral_precal() {
+  int i;
+
+  for (i = 1; i < BILATERAL_LEVELS_KF + 1; i ++) {
+    const bilateral_params_t param = vp9_bilateral_level_to_params(i, 1);
+    const int sigma_x = param.sigma_x;
+    const int sigma_y = param.sigma_y;
+    const int sigma_r = param.sigma_r;
+    const double sigma_r_d = (double)sigma_r / BILATERAL_PRECISION;
+    const double sigma_x_d = (double)sigma_x / BILATERAL_PRECISION;
+    const double sigma_y_d = (double)sigma_y / BILATERAL_PRECISION;
+
+    double *fr = bilateral_filters_r_kf[i] + 256;
+    int j, x, y;
+    for (j = 0; j <= 256; j++) {
+      fr[j] = exp(-(j * j) / (2 * sigma_r_d * sigma_r_d));
+      fr[-j] = fr[j];
+    }
+    for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; y++) {
+      for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; x++) {
+        bilateral_filters_s_kf[i][y + BILATERAL_HALFWIN]
+                                 [x + BILATERAL_HALFWIN] =
+          exp(-(x * x) / (2 * sigma_x_d * sigma_x_d)
+              -(y * y) / (2 * sigma_y_d * sigma_y_d));
+      }
+    }
+  }
+
+
+  for (i = 1; i < BILATERAL_LEVELS + 1; i ++) {
+    const bilateral_params_t param = vp9_bilateral_level_to_params(i, 0);
+    const int sigma_x = param.sigma_x;
+    const int sigma_y = param.sigma_y;
+    const int sigma_r = param.sigma_r;
+    const double sigma_r_d = (double)sigma_r / BILATERAL_PRECISION;
+    const double sigma_x_d = (double)sigma_x / BILATERAL_PRECISION;
+    const double sigma_y_d = (double)sigma_y / BILATERAL_PRECISION;
+
+    double *fr = bilateral_filters_r[i] + 256;
+    int j, x, y;
+    for (j = 0; j <= 256; j++) {
+      fr[j] = exp(-(j * j) / (2 * sigma_r_d * sigma_r_d));
+      fr[-j] = fr[j];
+    }
+    for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; y++) {
+      for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; x++) {
+        bilateral_filters_s[i][y + BILATERAL_HALFWIN][x + BILATERAL_HALFWIN] =
+          exp(-(x * x) / (2 * sigma_x_d * sigma_x_d)
+              -(y * y) / (2 * sigma_y_d * sigma_y_d));
+      }
+    }
+  }
+}
+
 int vp9_bilateral_level_bits(const VP9_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME ?
       BILATERAL_LEVEL_BITS_KF : BILATERAL_LEVEL_BITS;
@@ -244,35 +306,15 @@ int vp9_loop_bilateral_used(int level, int kf) {
 }
 
 void vp9_loop_bilateral_init(loop_filter_info_n *lfi, int level, int kf) {
-  const bilateral_params_t param = vp9_bilateral_level_to_params(level, kf);
   lfi->bilateral_used = vp9_loop_bilateral_used(level, kf);
+
   if (lfi->bilateral_used) {
-    if (param.sigma_x != lfi->bilateral_sigma_x_set ||
-        param.sigma_y != lfi->bilateral_sigma_y_set ||
-        param.sigma_r != lfi->bilateral_sigma_r_set) {
-      const int sigma_x = param.sigma_x;
-      const int sigma_y = param.sigma_y;
-      const int sigma_r = param.sigma_r;
-      const double sigma_r_d = (double)sigma_r / BILATERAL_PRECISION;
-      const double sigma_x_d = (double)sigma_x / BILATERAL_PRECISION;
-      const double sigma_y_d = (double)sigma_y / BILATERAL_PRECISION;
-      double *wr_lut_ = lfi->wr_lut + 255;
-      double *wx_lut_ = lfi->wx_lut + BILATERAL_HALFWIN * (1 + BILATERAL_WIN);
-      int i, x, y;
-      for (i = 0; i < 256; i++) {
-        wr_lut_[i] = exp(-(i * i) / (2 * sigma_r_d * sigma_r_d));
-        wr_lut_[-i] = wr_lut_[i];
-      }
-      for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; y++)
-        for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; x++) {
-          wx_lut_[y * BILATERAL_WIN + x] =
-              exp(-(x * x) / (2 * sigma_x_d * sigma_x_d) -
-                   (y * y) / (2 * sigma_y_d * sigma_y_d));
-        }
-      lfi->bilateral_sigma_x_set = sigma_x;
-      lfi->bilateral_sigma_y_set = sigma_y;
-      lfi->bilateral_sigma_r_set = sigma_r;
-    }
+    int i;
+    lfi->wr_lut = kf ? bilateral_filters_r_kf[level] :
+                       bilateral_filters_r[level];
+    for (i = 0; i < BILATERAL_WIN; i++)
+      lfi->wx_lut[i] = kf ? bilateral_filters_s_kf[level][i] :
+                            bilateral_filters_s[level][i];
   }
 }
 
@@ -284,33 +326,33 @@ void loop_bilateral_filter(uint8_t *data, int width, int height,
                            int stride, loop_filter_info_n *lfi,
                            uint8_t *tmpdata, int tmpstride) {
   int i, j;
-  const double *wr_lut_ = lfi->wr_lut + 255;
-  const double *wx_lut_ = lfi->wx_lut + BILATERAL_HALFWIN * (1 + BILATERAL_WIN);
+  const double *wr_lut_ = lfi->wr_lut + 256;
+
+  uint8_t *data_p = data;
+  uint8_t *tmpdata_p = tmpdata;
   for (i = 0; i < height; ++i) {
     for (j = 0; j < width; ++j) {
       int x, y;
-      double wt;
-      double flsum = 0;
-      double wtsum = 0;
-      uint8_t *v = data + i * stride + j;
-      uint8_t *z = tmpdata + i * tmpstride + j;
-      uint8_t *d;
+      double flsum = 0, wtsum = 0, wt;
+      uint8_t *data_p2 = data_p + j - BILATERAL_HALFWIN * stride;
       for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; ++y) {
         for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; ++x) {
           if (!is_in_image(j + x, i + y, width, height))
             continue;
-          d = data + (i + y) * stride + (j + x);
-          wt = wr_lut_[d[0] - v[0]] * wx_lut_[y * BILATERAL_WIN + x];
+          wt = lfi->wx_lut[y + BILATERAL_HALFWIN][x + BILATERAL_HALFWIN] *
+               wr_lut_[data_p2[x] - data_p[j]];
           wtsum += wt;
-          flsum += wt * d[0];
+          flsum += wt * data_p2[x];
         }
+        data_p2 += stride;
       }
-      if (wtsum > 0)
-        z[0] = (int)(flsum / wtsum + 0.5);
-      else
-        z[0] = v[0];
+      assert(wtsum > 0);
+      tmpdata_p[j] = clip_pixel((int)(flsum / wtsum + 0.5));
     }
+    tmpdata_p += tmpstride;
+    data_p += stride;
   }
+
   for (i = 0; i < height; ++i) {
     vpx_memcpy(data + i * stride, tmpdata + i * tmpstride,
                width * sizeof(*data));
@@ -322,36 +364,41 @@ void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
                            int stride, loop_filter_info_n *lfi,
                            uint8_t *tmpdata8, int tmpstride, int bit_depth) {
   int i, j;
-  const double *wr_lut_ = lfi->wr_lut + 255;
-  const double *wx_lut_ = lfi->wx_lut + BILATERAL_HALFWIN * (1 + BILATERAL_WIN);
+  const double *wr_lut_ = lfi->wr_lut + 256;
+
   uint16_t *data = CONVERT_TO_SHORTPTR(data8);
   uint16_t *tmpdata = CONVERT_TO_SHORTPTR(tmpdata8);
+  uint16_t *data_p = data;
+  uint16_t *tmpdata_p = tmpdata;
   for (i = 0; i < height; ++i) {
     for (j = 0; j < width; ++j) {
-      int x, y;
-      double wt;
-      double flsum = 0;
-      double wtsum = 0;
-      uint16_t *v = data + i * stride + j;
-      uint16_t *z = tmpdata + i * tmpstride + j;
-      uint16_t *d;
+      int x, y, diff_r;
+      double flsum = 0, wtsum = 0, wt;
+      uint16_t *data_p2 = data_p + j - BILATERAL_HALFWIN * stride;
+
       for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; ++y) {
         for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; ++x) {
           if (!is_in_image(j + x, i + y, width, height))
             continue;
-          d = data + (i + y) * stride + (j + x);
-          wt = wr_lut_[(d[0] - v[0]) >> (bit_depth - 8)] *
-               wx_lut_[y * BILATERAL_WIN + x];
+
+          diff_r = (data_p2[x] - data_p[j]) >> (bit_depth - 8);
+          assert(diff_r >= -256 && diff_r <= 256);
+
+          wt = lfi->wx_lut[y + BILATERAL_HALFWIN][x + BILATERAL_HALFWIN] *
+               wr_lut_[diff_r];
           wtsum += wt;
-          flsum += wt * d[0];
+          flsum += wt * data_p2[x];
         }
+        data_p2 += stride;
       }
-      if (wtsum > 0)
-        z[0] = (int)(flsum / wtsum + 0.5);
-      else
-        z[0] = v[0];
+
+      assert(wtsum > 0);
+      tmpdata_p[j] = (int)(flsum / wtsum + 0.5);
     }
+    tmpdata_p += tmpstride;
+    data_p += stride;
   }
+
   for (i = 0; i < height; ++i) {
     vpx_memcpy(data + i * stride, tmpdata + i * tmpstride,
                width * sizeof(*data));
@@ -468,7 +515,7 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
     vpx_memset(lfi->lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
 
 #if CONFIG_LOOP_POSTFILTER
-  vp9_loop_bilateral_init(lfi, DEF_BILATERAL_LEVEL, 1);
+  vp9_loop_bilateral_precal();
 #endif  // CONFIG_LOOP_POSTFILTER
 }
 
