@@ -291,6 +291,7 @@ typedef struct IMAGE_STAT {
 typedef struct VP9_COMP {
   QUANTS quants;
   ThreadData td;
+  MB_MODE_INFO_EXT *mbmi_ext_base;
   DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
   VP9_COMMON common;

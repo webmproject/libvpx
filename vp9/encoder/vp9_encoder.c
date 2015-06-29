@@ -335,6 +335,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
 
+  vpx_free(cpi->mbmi_ext_base);
+  cpi->mbmi_ext_base = NULL;
+
   vpx_free(cpi->tile_data);
   cpi->tile_data = NULL;
 
@@ -670,10 +673,24 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
                        "Failed to allocate scaled last source buffer");
 }
 
+
+static int alloc_context_buffers_ext(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  int mi_size = cm->mi_cols * cm->mi_rows;
+
+  cpi->mbmi_ext_base = vpx_calloc(mi_size, sizeof(*cpi->mbmi_ext_base));
+  if (!cpi->mbmi_ext_base)
+    return 1;
+
+  return 0;
+}
+
 void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
   vp9_alloc_context_buffers(cm, cm->width, cm->height);
+
+  alloc_context_buffers_ext(cpi);
 
   vpx_free(cpi->tile_tok[0][0]);
 
@@ -716,6 +733,9 @@ static void update_frame_size(VP9_COMP *cpi) {
   vp9_set_mb_mi(cm, cm->width, cm->height);
   vp9_init_context_buffers(cm);
   init_macroblockd(cm, xd);
+  cpi->td.mb.mbmi_ext_base = cpi->mbmi_ext_base;
+  memset(cpi->mbmi_ext_base, 0,
+         cm->mi_rows * cm->mi_cols * sizeof(*cpi->mbmi_ext_base));
 
   set_tile_limits(cpi);
 

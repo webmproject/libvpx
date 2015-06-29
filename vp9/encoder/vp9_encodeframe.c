@@ -170,12 +170,14 @@ static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi, MACROBLOCK *x,
 // Lighter version of set_offsets that only sets the mode info
 // pointers.
 static INLINE void set_mode_info_offsets(VP9_COMMON *const cm,
+                                         MACROBLOCK *const x,
                                          MACROBLOCKD *const xd,
                                          int mi_row,
                                          int mi_col) {
   const int idx_str = xd->mi_stride * mi_row + mi_col;
   xd->mi = cm->mi_grid_visible + idx_str;
   xd->mi[0] = cm->mi + idx_str;
+  x->mbmi_ext = x->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 }
 
 static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
@@ -190,7 +192,8 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   set_skip_context(xd, mi_row, mi_col);
 
-  set_mode_info_offsets(cm, xd, mi_row, mi_col);
+  set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
+
 
   mbmi = &xd->mi[0]->mbmi;
 
@@ -249,11 +252,12 @@ static void duplicate_mode_info_in_sb(VP9_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static void set_block_size(VP9_COMP * const cpi,
+                           MACROBLOCK *const x,
                            MACROBLOCKD *const xd,
                            int mi_row, int mi_col,
                            BLOCK_SIZE bsize) {
   if (cpi->common.mi_cols > mi_col && cpi->common.mi_rows > mi_row) {
-    set_mode_info_offsets(&cpi->common, xd, mi_row, mi_col);
+    set_mode_info_offsets(&cpi->common, x, xd, mi_row, mi_col);
     xd->mi[0]->mbmi.sb_type = bsize;
   }
 }
@@ -384,6 +388,7 @@ static void fill_variance_tree(void *data, BLOCK_SIZE bsize) {
 }
 
 static int set_vt_partitioning(VP9_COMP *cpi,
+                               MACROBLOCK *const x,
                                MACROBLOCKD *const xd,
                                void *data,
                                BLOCK_SIZE bsize,
@@ -414,7 +419,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
     if (mi_col + block_width / 2 < cm->mi_cols &&
         mi_row + block_height / 2 < cm->mi_rows &&
         vt.part_variances->none.variance < threshold) {
-      set_block_size(cpi, xd, mi_row, mi_col, bsize);
+      set_block_size(cpi, x, xd, mi_row, mi_col, bsize);
       return 1;
     }
     return 0;
@@ -432,7 +437,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
     if (mi_col + block_width / 2 < cm->mi_cols &&
         mi_row + block_height / 2 < cm->mi_rows &&
         vt.part_variances->none.variance < threshold) {
-      set_block_size(cpi, xd, mi_row, mi_col, bsize);
+      set_block_size(cpi, x, xd, mi_row, mi_col, bsize);
       return 1;
     }
 
@@ -444,8 +449,8 @@ static int set_vt_partitioning(VP9_COMP *cpi,
       if (vt.part_variances->vert[0].variance < threshold &&
           vt.part_variances->vert[1].variance < threshold &&
           get_plane_block_size(subsize, &xd->plane[1]) < BLOCK_INVALID) {
-        set_block_size(cpi, xd, mi_row, mi_col, subsize);
-        set_block_size(cpi, xd, mi_row, mi_col + block_width / 2, subsize);
+        set_block_size(cpi, x, xd, mi_row, mi_col, subsize);
+        set_block_size(cpi, x, xd, mi_row, mi_col + block_width / 2, subsize);
         return 1;
       }
     }
@@ -457,8 +462,8 @@ static int set_vt_partitioning(VP9_COMP *cpi,
       if (vt.part_variances->horz[0].variance < threshold &&
           vt.part_variances->horz[1].variance < threshold &&
           get_plane_block_size(subsize, &xd->plane[1]) < BLOCK_INVALID) {
-        set_block_size(cpi, xd, mi_row, mi_col, subsize);
-        set_block_size(cpi, xd, mi_row + block_height / 2, mi_col, subsize);
+        set_block_size(cpi, x, xd, mi_row, mi_col, subsize);
+        set_block_size(cpi, x, xd, mi_row + block_height / 2, mi_col, subsize);
         return 1;
       }
     }
@@ -770,7 +775,7 @@ static int choose_partitioning(VP9_COMP *cpi,
       const int block_height = num_8x8_blocks_high_lookup[BLOCK_64X64];
       if (mi_col + block_width / 2 < cm->mi_cols &&
           mi_row + block_height / 2 < cm->mi_rows) {
-        set_block_size(cpi, xd, mi_row, mi_col, BLOCK_64X64);
+        set_block_size(cpi, x, xd, mi_row, mi_col, BLOCK_64X64);
         return 0;
       }
     }
@@ -903,13 +908,13 @@ static int choose_partitioning(VP9_COMP *cpi,
   // Now go through the entire structure, splitting every block size until
   // we get to one that's got a variance lower than our threshold.
   if ( mi_col + 8 > cm->mi_cols || mi_row + 8 > cm->mi_rows ||
-      !set_vt_partitioning(cpi, xd, &vt, BLOCK_64X64, mi_row, mi_col,
+      !set_vt_partitioning(cpi, x, xd, &vt, BLOCK_64X64, mi_row, mi_col,
                            thresholds[0], BLOCK_16X16, force_split[0])) {
     for (i = 0; i < 4; ++i) {
       const int x32_idx = ((i & 1) << 2);
       const int y32_idx = ((i >> 1) << 2);
       const int i2 = i << 2;
-      if (!set_vt_partitioning(cpi, xd, &vt.split[i], BLOCK_32X32,
+      if (!set_vt_partitioning(cpi, x, xd, &vt.split[i], BLOCK_32X32,
                                (mi_row + y32_idx), (mi_col + x32_idx),
                                thresholds[1], BLOCK_16X16,
                                force_split[i + 1])) {
@@ -922,7 +927,7 @@ static int choose_partitioning(VP9_COMP *cpi,
           v16x16 *vtemp = (!is_key_frame &&
                            variance4x4downsample[i2 + j] == 1) ?
                            &vt2[i2 + j] : &vt.split[i].split[j];
-          if (!set_vt_partitioning(cpi, xd, vtemp, BLOCK_16X16,
+          if (!set_vt_partitioning(cpi, x, xd, vtemp, BLOCK_16X16,
                                    mi_row + y32_idx + y16_idx,
                                    mi_col + x32_idx + x16_idx,
                                    thresholds[2],
@@ -932,18 +937,18 @@ static int choose_partitioning(VP9_COMP *cpi,
               const int x8_idx = (k & 1);
               const int y8_idx = (k >> 1);
               if (use_4x4_partition) {
-                if (!set_vt_partitioning(cpi, xd, &vtemp->split[k],
+                if (!set_vt_partitioning(cpi, x, xd, &vtemp->split[k],
                                          BLOCK_8X8,
                                          mi_row + y32_idx + y16_idx + y8_idx,
                                          mi_col + x32_idx + x16_idx + x8_idx,
                                          thresholds[3], BLOCK_8X8, 0)) {
-                  set_block_size(cpi, xd,
+                  set_block_size(cpi, x, xd,
                                  (mi_row + y32_idx + y16_idx + y8_idx),
                                  (mi_col + x32_idx + x16_idx + x8_idx),
                                  BLOCK_4X4);
                 }
               } else {
-                set_block_size(cpi, xd,
+                set_block_size(cpi, x, xd,
                                (mi_row + y32_idx + y16_idx + y8_idx),
                                (mi_col + x32_idx + x16_idx + x8_idx),
                                BLOCK_8X8);
@@ -988,6 +993,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   assert(mi->mbmi.sb_type == bsize);
 
   *mi_addr = *mi;
+  *x->mbmi_ext = ctx->mbmi_ext;
 
   // If segmentation in use
   if (seg->enabled) {
@@ -1289,6 +1295,7 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
   const BLOCK_SIZE bsize = mbmi->sb_type;
 
   if (!frame_is_intra_only(cm)) {
@@ -1321,7 +1328,7 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
     }
     if (inter_block &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
+      const int mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
         ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
@@ -1682,6 +1689,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   const int y_mis = MIN(bh, cm->mi_rows - mi_row);
 
   *(xd->mi[0]) = ctx->mic;
+  *(x->mbmi_ext) = ctx->mbmi_ext;
 
   if (seg->enabled && cpi->oxcf.aq_mode) {
     // For in frame complexity AQ or variance AQ, copy segment_id from
@@ -2960,28 +2968,33 @@ static void fill_mode_info_sb(VP9_COMMON *cm, MACROBLOCK *x,
 
   switch (partition) {
     case PARTITION_NONE:
-      set_mode_info_offsets(cm, xd, mi_row, mi_col);
+      set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
       *(xd->mi[0]) = pc_tree->none.mic;
+      *(x->mbmi_ext) = pc_tree->none.mbmi_ext;
       duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
       break;
     case PARTITION_VERT:
-      set_mode_info_offsets(cm, xd, mi_row, mi_col);
+      set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
       *(xd->mi[0]) = pc_tree->vertical[0].mic;
+      *(x->mbmi_ext) = pc_tree->vertical[0].mbmi_ext;
       duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, subsize);
 
       if (mi_col + hbs < cm->mi_cols) {
-        set_mode_info_offsets(cm, xd, mi_row, mi_col + hbs);
+        set_mode_info_offsets(cm, x, xd, mi_row, mi_col + hbs);
         *(xd->mi[0]) = pc_tree->vertical[1].mic;
+        *(x->mbmi_ext) = pc_tree->vertical[1].mbmi_ext;
         duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col + hbs, subsize);
       }
       break;
     case PARTITION_HORZ:
-      set_mode_info_offsets(cm, xd, mi_row, mi_col);
+      set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
       *(xd->mi[0]) = pc_tree->horizontal[0].mic;
+      *(x->mbmi_ext) = pc_tree->horizontal[0].mbmi_ext;
       duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, subsize);
       if (mi_row + hbs < cm->mi_rows) {
-        set_mode_info_offsets(cm, xd, mi_row + hbs, mi_col);
+        set_mode_info_offsets(cm, x, xd, mi_row + hbs, mi_col);
         *(xd->mi[0]) = pc_tree->horizontal[1].mic;
+        *(x->mbmi_ext) = pc_tree->horizontal[1].mbmi_ext;
         duplicate_mode_info_in_sb(cm, xd, mi_row + hbs, mi_col, subsize);
       }
       break;
@@ -3082,6 +3095,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col,
                         &this_rdc, bsize, ctx);
     ctx->mic.mbmi = xd->mi[0]->mbmi;
+    ctx->mbmi_ext = *x->mbmi_ext;
     ctx->skip_txfm[0] = x->skip_txfm[0];
     ctx->skip = x->skip;
 
@@ -3164,6 +3178,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                         &pc_tree->horizontal[0]);
 
     pc_tree->horizontal[0].mic.mbmi = xd->mi[0]->mbmi;
+    pc_tree->horizontal[0].mbmi_ext = *x->mbmi_ext;
     pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->horizontal[0].skip = x->skip;
 
@@ -3175,6 +3190,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                           &pc_tree->horizontal[1]);
 
       pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->horizontal[1].mbmi_ext = *x->mbmi_ext;
       pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->horizontal[1].skip = x->skip;
 
@@ -3207,6 +3223,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
                         &pc_tree->vertical[0]);
     pc_tree->vertical[0].mic.mbmi = xd->mi[0]->mbmi;
+    pc_tree->vertical[0].mbmi_ext = *x->mbmi_ext;
     pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->vertical[0].skip = x->skip;
 
@@ -3217,6 +3234,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                           &this_rdc, subsize,
                           &pc_tree->vertical[1]);
       pc_tree->vertical[1].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->vertical[1].mbmi_ext = *x->mbmi_ext;
       pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->vertical[1].skip = x->skip;
 
@@ -3308,6 +3326,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
         nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, rd_cost,
                             subsize, &pc_tree->none);
         pc_tree->none.mic.mbmi = xd->mi[0]->mbmi;
+        pc_tree->none.mbmi_ext = *x->mbmi_ext;
         pc_tree->none.skip_txfm[0] = x->skip_txfm[0];
         pc_tree->none.skip = x->skip;
         break;
@@ -3316,6 +3335,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
         nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, rd_cost,
                             subsize, &pc_tree->vertical[0]);
         pc_tree->vertical[0].mic.mbmi = xd->mi[0]->mbmi;
+        pc_tree->vertical[0].mbmi_ext = *x->mbmi_ext;
         pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->vertical[0].skip = x->skip;
         if (mi_col + hbs < cm->mi_cols) {
@@ -3323,6 +3343,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
           nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + hbs,
                               &this_rdc, subsize, &pc_tree->vertical[1]);
           pc_tree->vertical[1].mic.mbmi = xd->mi[0]->mbmi;
+          pc_tree->vertical[1].mbmi_ext = *x->mbmi_ext;
           pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
           pc_tree->vertical[1].skip = x->skip;
           if (this_rdc.rate != INT_MAX && this_rdc.dist != INT64_MAX &&
@@ -3337,6 +3358,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
         nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, rd_cost,
                             subsize, &pc_tree->horizontal[0]);
         pc_tree->horizontal[0].mic.mbmi = xd->mi[0]->mbmi;
+        pc_tree->horizontal[0].mbmi_ext = *x->mbmi_ext;
         pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->horizontal[0].skip = x->skip;
         if (mi_row + hbs < cm->mi_rows) {
@@ -3344,6 +3366,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
           nonrd_pick_sb_modes(cpi, tile_data, x, mi_row + hbs, mi_col,
                               &this_rdc, subsize, &pc_tree->horizontal[1]);
           pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
+          pc_tree->horizontal[1].mbmi_ext = *x->mbmi_ext;
           pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
           pc_tree->horizontal[1].skip = x->skip;
           if (this_rdc.rate != INT_MAX && this_rdc.dist != INT64_MAX &&
@@ -3428,6 +3451,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, dummy_cost,
                           subsize, &pc_tree->none);
       pc_tree->none.mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->none.mbmi_ext = *x->mbmi_ext;
       pc_tree->none.skip_txfm[0] = x->skip_txfm[0];
       pc_tree->none.skip = x->skip;
       encode_b_rt(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled,
@@ -3438,6 +3462,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, dummy_cost,
                           subsize, &pc_tree->vertical[0]);
       pc_tree->vertical[0].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->vertical[0].mbmi_ext = *x->mbmi_ext;
       pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->vertical[0].skip = x->skip;
       encode_b_rt(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled,
@@ -3447,6 +3472,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
         nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + hbs,
                             dummy_cost, subsize, &pc_tree->vertical[1]);
         pc_tree->vertical[1].mic.mbmi = xd->mi[0]->mbmi;
+        pc_tree->vertical[1].mbmi_ext = *x->mbmi_ext;
         pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->vertical[1].skip = x->skip;
         encode_b_rt(cpi, td, tile_info, tp, mi_row, mi_col + hbs,
@@ -3458,6 +3484,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, dummy_cost,
                           subsize, &pc_tree->horizontal[0]);
       pc_tree->horizontal[0].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->horizontal[0].mbmi_ext = *x->mbmi_ext;
       pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->horizontal[0].skip = x->skip;
       encode_b_rt(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled,
@@ -3468,6 +3495,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
         nonrd_pick_sb_modes(cpi, tile_data, x, mi_row + hbs, mi_col,
                             dummy_cost, subsize, &pc_tree->horizontal[1]);
         pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
+        pc_tree->horizontal[1].mbmi_ext = *x->mbmi_ext;
         pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->horizontal[1].skip = x->skip;
         encode_b_rt(cpi, td, tile_info, tp, mi_row + hbs, mi_col,

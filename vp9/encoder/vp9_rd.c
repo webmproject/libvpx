@@ -452,8 +452,6 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
 void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
                  uint8_t *ref_y_buffer, int ref_y_stride,
                  int ref_frame, BLOCK_SIZE block_size) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   int i;
   int zero_seen = 0;
   int best_index = 0;
@@ -468,13 +466,14 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
                      block_size < x->max_partition_size);
 
   MV pred_mv[3];
-  pred_mv[0] = mbmi->ref_mvs[ref_frame][0].as_mv;
-  pred_mv[1] = mbmi->ref_mvs[ref_frame][1].as_mv;
+  pred_mv[0] = x->mbmi_ext->ref_mvs[ref_frame][0].as_mv;
+  pred_mv[1] = x->mbmi_ext->ref_mvs[ref_frame][1].as_mv;
   pred_mv[2] = x->pred_mv[ref_frame];
   assert(num_mv_refs <= (int)(sizeof(pred_mv) / sizeof(pred_mv[0])));
 
   near_same_nearest =
-      mbmi->ref_mvs[ref_frame][0].as_int == mbmi->ref_mvs[ref_frame][1].as_int;
+      x->mbmi_ext->ref_mvs[ref_frame][0].as_int ==
+          x->mbmi_ext->ref_mvs[ref_frame][1].as_int;
   // Get the sad for each candidate reference mv.
   for (i = 0; i < num_mv_refs; ++i) {
     const MV *this_mv = &pred_mv[i];

@@ -12,6 +12,7 @@
 #define VP9_ENCODER_VP9_CONTEXT_TREE_H_
 
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/encoder/vp9_block.h"
 
 struct VP9_COMP;
 struct VP9Common;
@@ -20,6 +21,7 @@ struct ThreadData;
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
   MODE_INFO mic;
+  MB_MODE_INFO_EXT mbmi_ext;
   uint8_t *zcoeff_blk;
   tran_low_t *coeff[MAX_MB_PLANE][3];
   tran_low_t *qcoeff[MAX_MB_PLANE][3];
