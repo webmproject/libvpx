@@ -684,8 +684,6 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 3, VPX_BITS_8)));
 #else
-// TODO(jingning): re-enable after this handles the expanded range [0, 65535]
-// returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
@@ -696,8 +694,6 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-// TODO(jingning): re-enable after this handles the expanded range [0, 65535]
-// returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8DCT,
     ::testing::Values(
@@ -716,8 +712,6 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-// TODO(jingning): re-enable after these handle the expanded range [0, 65535]
-// returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
     ::testing::Values(
@@ -746,8 +740,6 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_highbd_fdct8x8_sse2,
                    &idct8x8_64_add_12_sse2, 12, VPX_BITS_12)));
 
-// TODO(jingning): re-enable after these handle the expanded range [0, 65535]
-// returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
     ::testing::Values(
@@ -773,8 +765,6 @@ INSTANTIATE_TEST_CASE_P(
 
 #if HAVE_SSSE3 && CONFIG_USE_X86INC && ARCH_X86_64 && \
     !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-// TODO(jingning): re-enable after this handles the expanded range [0, 65535]
-// returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
     SSSE3, FwdTrans8x8DCT,
     ::testing::Values(
