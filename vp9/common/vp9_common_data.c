@@ -11,27 +11,27 @@
 #include "vp9/common/vp9_common_data.h"
 
 // Log 2 conversion lookup tables for block width and height
-const int b_width_log2_lookup[BLOCK_SIZES] =
+const uint8_t b_width_log2_lookup[BLOCK_SIZES] =
   {0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4};
-const int b_height_log2_lookup[BLOCK_SIZES] =
+const uint8_t b_height_log2_lookup[BLOCK_SIZES] =
   {0, 1, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4};
-const int num_4x4_blocks_wide_lookup[BLOCK_SIZES] =
+const uint8_t num_4x4_blocks_wide_lookup[BLOCK_SIZES] =
   {1, 1, 2, 2, 2, 4, 4, 4, 8, 8, 8, 16, 16};
-const int num_4x4_blocks_high_lookup[BLOCK_SIZES] =
+const uint8_t num_4x4_blocks_high_lookup[BLOCK_SIZES] =
   {1, 2, 1, 2, 4, 2, 4, 8, 4, 8, 16, 8, 16};
 // Log 2 conversion lookup tables for modeinfo width and height
-const int mi_width_log2_lookup[BLOCK_SIZES] =
+const uint8_t mi_width_log2_lookup[BLOCK_SIZES] =
   {0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
-const int num_8x8_blocks_wide_lookup[BLOCK_SIZES] =
+const uint8_t num_8x8_blocks_wide_lookup[BLOCK_SIZES] =
   {1, 1, 1, 1, 1, 2, 2, 2, 4, 4, 4, 8, 8};
-const int num_8x8_blocks_high_lookup[BLOCK_SIZES] =
+const uint8_t num_8x8_blocks_high_lookup[BLOCK_SIZES] =
   {1, 1, 1, 1, 2, 1, 2, 4, 2, 4, 8, 4, 8};
 
 // MIN(3, MIN(b_width_log2(bsize), b_height_log2(bsize)))
-const int size_group_lookup[BLOCK_SIZES] =
+const uint8_t size_group_lookup[BLOCK_SIZES] =
   {0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3};
 
-const int num_pels_log2_lookup[BLOCK_SIZES] =
+const uint8_t num_pels_log2_lookup[BLOCK_SIZES] =
   {4, 5, 5, 6, 7, 7, 8, 9, 9, 10, 11, 11, 12};
 
 const PARTITION_TYPE partition_lookup[][BLOCK_SIZES] = {
