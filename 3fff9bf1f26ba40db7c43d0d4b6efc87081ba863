@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73f6419f_657a0a66",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-30T16:17:18Z",
+      "side": 1,
+      "message": "Not sure why this wasn\u0027t enabled, but turned it on and it seems OK",
+      "range": {
+        "startLine": 303,
+        "startChar": 20,
+        "endLine": 303,
+        "endChar": 44
+      },
+      "revId": "3fff9bf1f26ba40db7c43d0d4b6efc87081ba863",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
