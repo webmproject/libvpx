@@ -2627,9 +2627,10 @@ static int recode_loop_test(VP9_COMP *cpi,
   const int frame_is_kfgfarf = frame_is_kf_gf_arf(cpi);
   int force_recode = 0;
 
-  if ((cpi->sf.recode_loop == ALLOW_RECODE) ||
+  if ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
+      (cpi->sf.recode_loop == ALLOW_RECODE) ||
       (frame_is_kfgfarf &&
-      (cpi->sf.recode_loop == ALLOW_RECODE_KFARFGF))) {
+       (cpi->sf.recode_loop == ALLOW_RECODE_KFARFGF))) {
     if (frame_is_kfgfarf &&
         (oxcf->resize_mode == RESIZE_DYNAMIC) &&
         scale_down(cpi, q)) {
