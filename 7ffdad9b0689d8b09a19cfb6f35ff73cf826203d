@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "332a09c0_b8f9c5f8",
+        "filename": "test/test.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-30T00:49:25Z",
+      "side": 1,
+      "message": "you should add the new file here",
+      "revId": "7ffdad9b0689d8b09a19cfb6f35ff73cf826203d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
