@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "339be98e_8165ba15",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-30T19:06:42Z",
+      "side": 1,
+      "message": "these should probably be bulk-fixed since none of the others are set. i\u0027ll figure out who added these and bug them.",
+      "range": {
+        "startLine": 303,
+        "startChar": 0,
+        "endLine": 303,
+        "endChar": 41
+      },
+      "revId": "1b036393b83bdd771986b95f1c691cdec34d2e6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
