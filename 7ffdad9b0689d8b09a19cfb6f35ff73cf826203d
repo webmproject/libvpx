@@ -16,6 +16,24 @@
       "revId": "7ffdad9b0689d8b09a19cfb6f35ff73cf826203d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "332a09c0_18957191",
+        "filename": "test/test.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-30T00:54:26Z",
+      "side": 1,
+      "message": "or check #if CONFIG_SHARED around the internal function you\u0027re trying to use. that would allow the public api to be tested in all cases",
+      "parentUuid": "332a09c0_b8f9c5f8",
+      "revId": "7ffdad9b0689d8b09a19cfb6f35ff73cf826203d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
