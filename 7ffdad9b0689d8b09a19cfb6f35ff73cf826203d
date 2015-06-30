@@ -34,6 +34,24 @@
       "revId": "7ffdad9b0689d8b09a19cfb6f35ff73cf826203d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53277df4_be5ed1f1",
+        "filename": "test/test.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-06-30T01:07:45Z",
+      "side": 1,
+      "message": "Done the former.",
+      "parentUuid": "332a09c0_18957191",
+      "revId": "7ffdad9b0689d8b09a19cfb6f35ff73cf826203d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
