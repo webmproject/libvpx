@@ -131,6 +131,7 @@ using std::tr1::make_tuple;
 
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_USE_X86INC
 #if ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, VP9IntraPredTest,
                         ::testing::Values(
@@ -179,7 +180,8 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, VP9IntraPredTest,
                                        &vp9_highbd_tm_predictor_4x4_c, 4, 8),
                             make_tuple(&vp9_highbd_tm_predictor_8x8_sse2,
                                        &vp9_highbd_tm_predictor_8x8_c, 8, 8)));
-#endif
+#endif  // !ARCH_X86_64
+
 #if ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, VP9IntraPredTest,
                         ::testing::Values(
@@ -235,7 +237,7 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, VP9IntraPredTest,
                                        &vp9_highbd_tm_predictor_4x4_c, 4, 10),
                             make_tuple(&vp9_highbd_tm_predictor_8x8_sse2,
                                        &vp9_highbd_tm_predictor_8x8_c, 8, 10)));
-#endif
+#endif  // !ARCH_X86_64
 
 #if ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, VP9IntraPredTest,
@@ -292,7 +294,8 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, VP9IntraPredTest,
                                        &vp9_highbd_tm_predictor_4x4_c, 4, 12),
                             make_tuple(&vp9_highbd_tm_predictor_8x8_sse2,
                                        &vp9_highbd_tm_predictor_8x8_c, 8, 12)));
-#endif
+#endif  // !ARCH_X86_64
+#endif  // CONFIG_USE_X86INC
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 }  // namespace
