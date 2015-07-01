@@ -2011,4 +2011,52 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(make_tuple(4, 4, variance16x16_media, 0),
                       make_tuple(3, 3, variance8x8_media, 0)));
 #endif  // HAVE_MEDIA
+
+#if HAVE_MSA
+INSTANTIATE_TEST_CASE_P(MSA, SumOfSquaresTest,
+                        ::testing::Values(vpx_get_mb_ss_msa));
+
+const Get4x4SseFunc get4x4sse_cs_msa = vpx_get4x4sse_cs_msa;
+INSTANTIATE_TEST_CASE_P(MSA, VpxSseTest,
+                        ::testing::Values(make_tuple(2, 2, get4x4sse_cs_msa)));
+
+const VarianceMxNFunc mse16x16_msa = vpx_mse16x16_msa;
+const VarianceMxNFunc mse16x8_msa = vpx_mse16x8_msa;
+const VarianceMxNFunc mse8x16_msa = vpx_mse8x16_msa;
+const VarianceMxNFunc mse8x8_msa = vpx_mse8x8_msa;
+INSTANTIATE_TEST_CASE_P(MSA, VpxMseTest,
+                        ::testing::Values(make_tuple(4, 4, mse16x16_msa),
+                                          make_tuple(4, 3, mse16x8_msa),
+                                          make_tuple(3, 4, mse8x16_msa),
+                                          make_tuple(3, 3, mse8x8_msa)));
+
+const VarianceMxNFunc variance64x64_msa = vpx_variance64x64_msa;
+const VarianceMxNFunc variance64x32_msa = vpx_variance64x32_msa;
+const VarianceMxNFunc variance32x64_msa = vpx_variance32x64_msa;
+const VarianceMxNFunc variance32x32_msa = vpx_variance32x32_msa;
+const VarianceMxNFunc variance32x16_msa = vpx_variance32x16_msa;
+const VarianceMxNFunc variance16x32_msa = vpx_variance16x32_msa;
+const VarianceMxNFunc variance16x16_msa = vpx_variance16x16_msa;
+const VarianceMxNFunc variance16x8_msa = vpx_variance16x8_msa;
+const VarianceMxNFunc variance8x16_msa = vpx_variance8x16_msa;
+const VarianceMxNFunc variance8x8_msa = vpx_variance8x8_msa;
+const VarianceMxNFunc variance8x4_msa = vpx_variance8x4_msa;
+const VarianceMxNFunc variance4x8_msa = vpx_variance4x8_msa;
+const VarianceMxNFunc variance4x4_msa = vpx_variance4x4_msa;
+INSTANTIATE_TEST_CASE_P(
+    MSA, VpxVarianceTest,
+    ::testing::Values(make_tuple(6, 6, variance64x64_msa, 0),
+                      make_tuple(6, 5, variance64x32_msa, 0),
+                      make_tuple(5, 6, variance32x64_msa, 0),
+                      make_tuple(5, 5, variance32x32_msa, 0),
+                      make_tuple(5, 4, variance32x16_msa, 0),
+                      make_tuple(4, 5, variance16x32_msa, 0),
+                      make_tuple(4, 4, variance16x16_msa, 0),
+                      make_tuple(4, 3, variance16x8_msa, 0),
+                      make_tuple(3, 4, variance8x16_msa, 0),
+                      make_tuple(3, 3, variance8x8_msa, 0),
+                      make_tuple(3, 2, variance8x4_msa, 0),
+                      make_tuple(2, 3, variance4x8_msa, 0),
+                      make_tuple(2, 2, variance4x4_msa, 0)));
+#endif  // HAVE_MSA
 }  // namespace
