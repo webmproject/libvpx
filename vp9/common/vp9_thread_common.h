@@ -48,7 +48,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               struct macroblockd_plane planes[MAX_MB_PLANE],
                               int frame_filter_level,
                               int y_only, int partial_frame,
-                              VP9Worker *workers, int num_workers,
+                              VPxWorker *workers, int num_workers,
                               VP9LfSync *lf_sync);
 
 void vp9_accumulate_frame_counts(struct VP9Common *cm,

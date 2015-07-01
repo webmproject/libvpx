@@ -118,7 +118,7 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
 
   cm->error.setjmp = 0;
 
-  vp9_get_worker_interface()->init(&pbi->lf_worker);
+  vpx_get_worker_interface()->init(&pbi->lf_worker);
 
   return pbi;
 }
@@ -126,12 +126,12 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
 void vp9_decoder_remove(VP9Decoder *pbi) {
   int i;
 
-  vp9_get_worker_interface()->end(&pbi->lf_worker);
+  vpx_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->tile_data);
   for (i = 0; i < pbi->num_tile_workers; ++i) {
-    VP9Worker *const worker = &pbi->tile_workers[i];
-    vp9_get_worker_interface()->end(worker);
+    VPxWorker *const worker = &pbi->tile_workers[i];
+    vpx_get_worker_interface()->end(worker);
   }
   vpx_free(pbi->tile_worker_data);
   vpx_free(pbi->tile_worker_info);
@@ -311,7 +311,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   pbi->hold_ref_buf = 0;
   if (pbi->frame_parallel_decode) {
-    VP9Worker *const worker = pbi->frame_worker_owner;
+    VPxWorker *const worker = pbi->frame_worker_owner;
     vp9_frameworker_lock_stats(worker);
     frame_bufs[cm->new_fb_idx].frame_worker_owner = worker;
     // Reset decoding progress.
@@ -325,7 +325,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
 
   if (setjmp(cm->error.jmp)) {
-    const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
+    const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
     int i;
 
     cm->error.setjmp = 0;
@@ -387,7 +387,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   if (pbi->frame_parallel_decode) {
     // Need to lock the mutex here as another thread may
     // be accessing this buffer.
-    VP9Worker *const worker = pbi->frame_worker_owner;
+    VPxWorker *const worker = pbi->frame_worker_owner;
     FrameWorkerData *const frame_worker_data = worker->data1;
     vp9_frameworker_lock_stats(worker);
 

@@ -496,7 +496,7 @@ typedef struct VP9_COMP {
 
   // Multi-threading
   int num_workers;
-  VP9Worker *workers;
+  VPxWorker *workers;
   struct EncWorkerData *tile_thr_data;
   VP9LfSync lf_row_sync;
 } VP9_COMP;

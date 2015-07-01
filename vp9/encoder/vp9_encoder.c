@@ -1993,11 +1993,11 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 
   for (t = 0; t < cpi->num_workers; ++t) {
-    VP9Worker *const worker = &cpi->workers[t];
+    VPxWorker *const worker = &cpi->workers[t];
     EncWorkerData *const thread_data = &cpi->tile_thr_data[t];
 
     // Deallocate allocated threads.
-    vp9_get_worker_interface()->end(worker);
+    vpx_get_worker_interface()->end(worker);
 
     // Deallocate allocated thread data.
     if (t < cpi->num_workers - 1) {
