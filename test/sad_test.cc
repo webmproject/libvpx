@@ -1114,4 +1114,98 @@ const SadMxNx4Param x4d_avx2_tests[] = {
 INSTANTIATE_TEST_CASE_P(AVX2, SADx4Test, ::testing::ValuesIn(x4d_avx2_tests));
 #endif  // HAVE_AVX2
 
+//------------------------------------------------------------------------------
+// MIPS functions
+#if HAVE_MSA
+const SadMxNFunc sad64x64_msa = vpx_sad64x64_msa;
+const SadMxNFunc sad64x32_msa = vpx_sad64x32_msa;
+const SadMxNFunc sad32x64_msa = vpx_sad32x64_msa;
+const SadMxNFunc sad32x32_msa = vpx_sad32x32_msa;
+const SadMxNFunc sad32x16_msa = vpx_sad32x16_msa;
+const SadMxNFunc sad16x32_msa = vpx_sad16x32_msa;
+const SadMxNFunc sad16x16_msa = vpx_sad16x16_msa;
+const SadMxNFunc sad16x8_msa = vpx_sad16x8_msa;
+const SadMxNFunc sad8x16_msa = vpx_sad8x16_msa;
+const SadMxNFunc sad8x8_msa = vpx_sad8x8_msa;
+const SadMxNFunc sad8x4_msa = vpx_sad8x4_msa;
+const SadMxNFunc sad4x8_msa = vpx_sad4x8_msa;
+const SadMxNFunc sad4x4_msa = vpx_sad4x4_msa;
+const SadMxNParam msa_tests[] = {
+  make_tuple(64, 64, sad64x64_msa, -1),
+  make_tuple(64, 32, sad64x32_msa, -1),
+  make_tuple(32, 64, sad32x64_msa, -1),
+  make_tuple(32, 32, sad32x32_msa, -1),
+  make_tuple(32, 16, sad32x16_msa, -1),
+  make_tuple(16, 32, sad16x32_msa, -1),
+  make_tuple(16, 16, sad16x16_msa, -1),
+  make_tuple(16, 8, sad16x8_msa, -1),
+  make_tuple(8, 16, sad8x16_msa, -1),
+  make_tuple(8, 8, sad8x8_msa, -1),
+  make_tuple(8, 4, sad8x4_msa, -1),
+  make_tuple(4, 8, sad4x8_msa, -1),
+  make_tuple(4, 4, sad4x4_msa, -1),
+};
+INSTANTIATE_TEST_CASE_P(MSA, SADTest, ::testing::ValuesIn(msa_tests));
+
+const SadMxNAvgFunc sad64x64_avg_msa = vpx_sad64x64_avg_msa;
+const SadMxNAvgFunc sad64x32_avg_msa = vpx_sad64x32_avg_msa;
+const SadMxNAvgFunc sad32x64_avg_msa = vpx_sad32x64_avg_msa;
+const SadMxNAvgFunc sad32x32_avg_msa = vpx_sad32x32_avg_msa;
+const SadMxNAvgFunc sad32x16_avg_msa = vpx_sad32x16_avg_msa;
+const SadMxNAvgFunc sad16x32_avg_msa = vpx_sad16x32_avg_msa;
+const SadMxNAvgFunc sad16x16_avg_msa = vpx_sad16x16_avg_msa;
+const SadMxNAvgFunc sad16x8_avg_msa = vpx_sad16x8_avg_msa;
+const SadMxNAvgFunc sad8x16_avg_msa = vpx_sad8x16_avg_msa;
+const SadMxNAvgFunc sad8x8_avg_msa = vpx_sad8x8_avg_msa;
+const SadMxNAvgFunc sad8x4_avg_msa = vpx_sad8x4_avg_msa;
+const SadMxNAvgFunc sad4x8_avg_msa = vpx_sad4x8_avg_msa;
+const SadMxNAvgFunc sad4x4_avg_msa = vpx_sad4x4_avg_msa;
+const SadMxNAvgParam avg_msa_tests[] = {
+  make_tuple(64, 64, sad64x64_avg_msa, -1),
+  make_tuple(64, 32, sad64x32_avg_msa, -1),
+  make_tuple(32, 64, sad32x64_avg_msa, -1),
+  make_tuple(32, 32, sad32x32_avg_msa, -1),
+  make_tuple(32, 16, sad32x16_avg_msa, -1),
+  make_tuple(16, 32, sad16x32_avg_msa, -1),
+  make_tuple(16, 16, sad16x16_avg_msa, -1),
+  make_tuple(16, 8, sad16x8_avg_msa, -1),
+  make_tuple(8, 16, sad8x16_avg_msa, -1),
+  make_tuple(8, 8, sad8x8_avg_msa, -1),
+  make_tuple(8, 4, sad8x4_avg_msa, -1),
+  make_tuple(4, 8, sad4x8_avg_msa, -1),
+  make_tuple(4, 4, sad4x4_avg_msa, -1),
+};
+INSTANTIATE_TEST_CASE_P(MSA, SADavgTest, ::testing::ValuesIn(avg_msa_tests));
+
+const SadMxNx4Func sad64x64x4d_msa = vpx_sad64x64x4d_msa;
+const SadMxNx4Func sad64x32x4d_msa = vpx_sad64x32x4d_msa;
+const SadMxNx4Func sad32x64x4d_msa = vpx_sad32x64x4d_msa;
+const SadMxNx4Func sad32x32x4d_msa = vpx_sad32x32x4d_msa;
+const SadMxNx4Func sad32x16x4d_msa = vpx_sad32x16x4d_msa;
+const SadMxNx4Func sad16x32x4d_msa = vpx_sad16x32x4d_msa;
+const SadMxNx4Func sad16x16x4d_msa = vpx_sad16x16x4d_msa;
+const SadMxNx4Func sad16x8x4d_msa = vpx_sad16x8x4d_msa;
+const SadMxNx4Func sad8x16x4d_msa = vpx_sad8x16x4d_msa;
+const SadMxNx4Func sad8x8x4d_msa = vpx_sad8x8x4d_msa;
+const SadMxNx4Func sad8x4x4d_msa = vpx_sad8x4x4d_msa;
+const SadMxNx4Func sad4x8x4d_msa = vpx_sad4x8x4d_msa;
+const SadMxNx4Func sad4x4x4d_msa = vpx_sad4x4x4d_msa;
+const SadMxNx4Param x4d_msa_tests[] = {
+  make_tuple(64, 64, sad64x64x4d_msa, -1),
+  make_tuple(64, 32, sad64x32x4d_msa, -1),
+  make_tuple(32, 64, sad32x64x4d_msa, -1),
+  make_tuple(32, 32, sad32x32x4d_msa, -1),
+  make_tuple(32, 16, sad32x16x4d_msa, -1),
+  make_tuple(16, 32, sad16x32x4d_msa, -1),
+  make_tuple(16, 16, sad16x16x4d_msa, -1),
+  make_tuple(16, 8, sad16x8x4d_msa, -1),
+  make_tuple(8, 16, sad8x16x4d_msa, -1),
+  make_tuple(8, 8, sad8x8x4d_msa, -1),
+  make_tuple(8, 4, sad8x4x4d_msa, -1),
+  make_tuple(4, 8, sad4x8x4d_msa, -1),
+  make_tuple(4, 4, sad4x4x4d_msa, -1),
+};
+INSTANTIATE_TEST_CASE_P(MSA, SADx4Test, ::testing::ValuesIn(x4d_msa_tests));
+#endif  // HAVE_MSA
+
 }  // namespace

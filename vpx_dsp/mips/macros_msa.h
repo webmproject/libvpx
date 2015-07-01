@@ -82,11 +82,23 @@
 }
 #define LD_UB2(...) LD_B2(v16u8, __VA_ARGS__)
 
+#define LD_B3(RTYPE, psrc, stride, out0, out1, out2) {  \
+  LD_B2(RTYPE, (psrc), stride, out0, out1);             \
+  out2 = LD_B(RTYPE, (psrc) + 2 * stride);              \
+}
+#define LD_UB3(...) LD_B3(v16u8, __VA_ARGS__)
+
 #define LD_B4(RTYPE, psrc, stride, out0, out1, out2, out3) {  \
   LD_B2(RTYPE, (psrc), stride, out0, out1);                   \
   LD_B2(RTYPE, (psrc) + 2 * stride , stride, out2, out3);     \
 }
 #define LD_UB4(...) LD_B4(v16u8, __VA_ARGS__)
+
+#define LD_B5(RTYPE, psrc, stride, out0, out1, out2, out3, out4) {  \
+  LD_B4(RTYPE, (psrc), stride, out0, out1, out2, out3);             \
+  out4 = LD_B(RTYPE, (psrc) + 4 * stride);                          \
+}
+#define LD_UB5(...) LD_B5(v16u8, __VA_ARGS__)
 
 /* Description : Load vectors with 8 halfword elements with stride
    Arguments   : Inputs  - psrc, stride
@@ -104,6 +116,40 @@
   LD_H2(RTYPE, (psrc) + 2 * stride, stride, out2, out3);      \
 }
 #define LD_SH4(...) LD_H4(v8i16, __VA_ARGS__)
+
+/* Description : average with rounding (in0 + in1 + 1) / 2.
+   Arguments   : Inputs  - in0, in1, in2, in3,
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each unsigned byte element from 'in0' vector is added with
+                 each unsigned byte element from 'in1' vector. Then the average
+                 with rounding is calculated and written to 'out0'
+*/
+#define AVER_UB2(RTYPE, in0, in1, in2, in3, out0, out1) {  \
+  out0 = (RTYPE)__msa_aver_u_b((v16u8)in0, (v16u8)in1);    \
+  out1 = (RTYPE)__msa_aver_u_b((v16u8)in2, (v16u8)in3);    \
+}
+#define AVER_UB2_UB(...) AVER_UB2(v16u8, __VA_ARGS__)
+
+#define AVER_UB4(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,  \
+                 out0, out1, out2, out3) {                       \
+  AVER_UB2(RTYPE, in0, in1, in2, in3, out0, out1)                \
+  AVER_UB2(RTYPE, in4, in5, in6, in7, out2, out3)                \
+}
+#define AVER_UB4_UB(...) AVER_UB4(v16u8, __VA_ARGS__)
+
+/* Description : Immediate number of elements to slide
+   Arguments   : Inputs  - in0_0, in0_1, in1_0, in1_1, slide_val
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Byte elements from 'in0_0' vector are slid into 'in1_0' by
+                 value specified in the 'slide_val'
+*/
+#define SLDI_B2(RTYPE, in0_0, in0_1, in1_0, in1_1, out0, out1, slide_val) {  \
+  out0 = (RTYPE)__msa_sldi_b((v16i8)in0_0, (v16i8)in1_0, slide_val);         \
+  out1 = (RTYPE)__msa_sldi_b((v16i8)in0_1, (v16i8)in1_1, slide_val);         \
+}
+#define SLDI_B2_UB(...) SLDI_B2(v16u8, __VA_ARGS__)
 
 /* Description : Dot product & addition of halfword vector elements
    Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
@@ -155,6 +201,26 @@
   sum_m;                                          \
 })
 
+/* Description : Horizontal addition of 8 unsigned halfword elements
+   Arguments   : Inputs  - in       (unsigned halfword vector)
+                 Outputs - sum_m    (u32 sum)
+                 Return Type - unsigned word
+   Details     : 8 unsigned halfword elements of input vector are added
+                 together and the resulting integer sum is returned
+*/
+#define HADD_UH_U32(in) ({                           \
+  v4u32 res_m;                                       \
+  v2u64 res0_m, res1_m;                              \
+  uint32_t sum_m;                                    \
+                                                     \
+  res_m = __msa_hadd_u_w((v8u16)in, (v8u16)in);      \
+  res0_m = __msa_hadd_u_d(res_m, res_m);             \
+  res1_m = (v2u64)__msa_splati_d((v2i64)res0_m, 1);  \
+  res0_m = res0_m + res1_m;                          \
+  sum_m = __msa_copy_u_w((v4i32)res0_m, 0);          \
+  sum_m;                                             \
+})
+
 /* Description : Horizontal subtraction of unsigned byte vector elements
    Arguments   : Inputs  - in0, in1
                  Outputs - out0, out1
@@ -168,6 +234,27 @@
   out1 = (RTYPE)__msa_hsub_u_h((v16u8)in1, (v16u8)in1);  \
 }
 #define HSUB_UB2_SH(...) HSUB_UB2(v8i16, __VA_ARGS__)
+
+/* Description : SAD (Sum of Absolute Difference)
+   Arguments   : Inputs  - in0, in1, ref0, ref1
+                 Outputs - sad_m                 (halfword vector)
+                 Return Type - unsigned halfword
+   Details     : Absolute difference of all the byte elements from 'in0' with
+                 'ref0' is calculated and preserved in 'diff0'. Then even-odd
+                 pairs are added together to generate 8 halfword results.
+*/
+#define SAD_UB2_UH(in0, in1, ref0, ref1) ({                 \
+  v16u8 diff0_m, diff1_m;                                   \
+  v8u16 sad_m = { 0 };                                      \
+                                                            \
+  diff0_m = __msa_asub_u_b((v16u8)in0, (v16u8)ref0);        \
+  diff1_m = __msa_asub_u_b((v16u8)in1, (v16u8)ref1);        \
+                                                            \
+  sad_m += __msa_hadd_u_h((v16u8)diff0_m, (v16u8)diff0_m);  \
+  sad_m += __msa_hadd_u_h((v16u8)diff1_m, (v16u8)diff1_m);  \
+                                                            \
+  sad_m;                                                    \
+})
 
 /* Description : Set element n input vector to GPR value
    Arguments   : Inputs - in0, in1, in2, in3
