@@ -13,6 +13,7 @@
 
 #include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
+#include "vpx_thread/vpx_thread.h"
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
@@ -21,7 +22,6 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_frame_buffers.h"
 #include "vp9/common/vp9_quant_common.h"
-#include "vp9/common/vp9_thread.h"
 #include "vp9/common/vp9_tile_common.h"
 
 #if CONFIG_VP9_POSTPROC

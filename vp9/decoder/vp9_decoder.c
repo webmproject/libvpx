@@ -20,6 +20,7 @@
 #include "vpx_ports/vpx_once.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
+#include "vpx_thread/vpx_thread.h"
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
@@ -30,7 +31,6 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
-#include "vp9/common/vp9_thread.h"
 
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_decoder.h"

@@ -50,6 +50,9 @@ CODEC_SRCS-yes += $(addprefix vpx_ports/,$(call enabled,PORTS_SRCS))
 include $(SRC_PATH_BARE)/vpx_dsp/vpx_dsp.mk
 CODEC_SRCS-yes += $(addprefix vpx_dsp/,$(call enabled,DSP_SRCS))
 
+include $(SRC_PATH_BARE)/vpx_thread/vpx_thread.mk
+CODEC_SRCS-yes += $(addprefix vpx_thread/,$(call enabled,THREAD_SRCS))
+
 ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
   VP8_PREFIX=vp8/
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
