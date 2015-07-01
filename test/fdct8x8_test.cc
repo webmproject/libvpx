@@ -771,8 +771,8 @@ INSTANTIATE_TEST_CASE_P(
                    &idct8x8_64_add_12_sse2, 6225, VPX_BITS_12)));
 #endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH && \
-    !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSSE3 && CONFIG_USE_X86INC && ARCH_X86_64 && \
+    !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 // TODO(jingning): re-enable after this handles the expanded range [0, 65535]
 // returned from Rand16().
 INSTANTIATE_TEST_CASE_P(

@@ -96,10 +96,12 @@ VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_intrapred_ssse3.asm
 endif
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_intrapred_sse2.asm
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_loopfilter_intrin_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_subpixel_8t_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_subpixel_bilinear_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_loopfilter_intrin_sse2.c
+ifeq ($(CONFIG_USE_X86INC),yes)
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_intrapred_sse2.asm
+endif
 endif
 
 # common (c)
@@ -158,8 +160,11 @@ endif
 
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.h
+
 ifeq ($(ARCH_X86_64), yes)
+ifeq ($(CONFIG_USE_X86INC),yes)
 VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_idct_ssse3_x86_64.asm
+endif
 endif
 
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_loopfilter_16_neon_asm$(ASM)
