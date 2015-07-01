@@ -18,14 +18,18 @@
 extern "C" {
 #endif
 
-void inter_predictor(const uint8_t *src, int src_stride,
-                            uint8_t *dst, int dst_stride,
-                            const int subpel_x,
-                            const int subpel_y,
-                            const struct scale_factors *sf,
-                            int w, int h, int ref,
-                            const InterpKernel *kernel,
-                            int xs, int ys);
+static INLINE void inter_predictor(const uint8_t *src, int src_stride,
+                                   uint8_t *dst, int dst_stride,
+                                   const int subpel_x,
+                                   const int subpel_y,
+                                   const struct scale_factors *sf,
+                                   int w, int h, int ref,
+                                   const InterpKernel *kernel,
+                                   int xs, int ys) {
+  sf->predict[subpel_x != 0][subpel_y != 0][ref](
+      src, src_stride, dst, dst_stride,
+      kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+}
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void high_inter_predictor(const uint8_t *src, int src_stride,
