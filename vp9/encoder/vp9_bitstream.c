@@ -242,6 +242,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
   const PREDICTION_MODE mode = mbmi->mode;
   const int segment_id = mbmi->segment_id;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -288,7 +289,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     }
     write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mode]);
   } else {
-    const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
+    const int mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
     const vp9_prob *const inter_probs = cm->fc->inter_mode_probs[mode_ctx];
     write_ref_frames(cm, xd, w);
 
@@ -321,7 +322,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
           if (b_mode == NEWMV) {
             for (ref = 0; ref < 1 + is_compound; ++ref)
               vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
-                            &mbmi->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
+                            &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
                             nmvc, allow_hp);
           }
         }
@@ -330,7 +331,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       if (mode == NEWMV) {
         for (ref = 0; ref < 1 + is_compound; ++ref)
           vp9_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
-                        &mbmi->ref_mvs[mbmi->ref_frame[ref]][0].as_mv, nmvc,
+                        &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv, nmvc,
                         allow_hp);
       }
     }
@@ -383,6 +384,9 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
 
   xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
   m = xd->mi[0];
+
+  cpi->td.mb.mbmi_ext = cpi->td.mb.mbmi_ext_base +
+      (mi_row * cm->mi_cols + mi_col);
 
   set_mi_row_col(xd, tile,
                  mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],

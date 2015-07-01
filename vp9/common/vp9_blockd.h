@@ -81,12 +81,6 @@ typedef struct {
 
   // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
   int_mv mv[2];
-
-#if CONFIG_VP9_ENCODER
-  // TODO(slavarnway): Move to encoder
-  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
-  uint8_t mode_context[MAX_REF_FRAMES];
-#endif
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {

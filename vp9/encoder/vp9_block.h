@@ -47,11 +47,18 @@ struct macroblock_plane {
 typedef unsigned int vp9_coeff_cost[PLANE_TYPES][REF_TYPES][COEF_BANDS][2]
                                    [COEFF_CONTEXTS][ENTROPY_TOKENS];
 
+typedef struct {
+  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
+  uint8_t mode_context[MAX_REF_FRAMES];
+} MB_MODE_INFO_EXT;
+
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
   struct macroblock_plane plane[MAX_MB_PLANE];
 
   MACROBLOCKD e_mbd;
+  MB_MODE_INFO_EXT *mbmi_ext;
+  MB_MODE_INFO_EXT *mbmi_ext_base;
   int skip_block;
   int select_tx_size;
   int skip_recode;
