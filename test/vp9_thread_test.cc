@@ -18,7 +18,7 @@
 #if CONFIG_WEBM_IO
 #include "test/webm_video_source.h"
 #endif
-#include "vpx_thread/vpx_thread.h"
+#include "vpx_util/vpx_thread.h"
 
 namespace {
 

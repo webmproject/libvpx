@@ -18,7 +18,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_scale/vpx_scale.h"
-#include "vpx_thread/vpx_thread.h"
+#include "vpx_util/vpx_thread.h"
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_common.h"
