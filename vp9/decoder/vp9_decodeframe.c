@@ -1259,7 +1259,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,
                                    const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
-  const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
+  const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -1272,7 +1272,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
       pbi->lf_worker.data1 == NULL) {
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
                     vpx_memalign(32, sizeof(LFWorkerData)));
-    pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
+    pbi->lf_worker.hook = (VPxWorkerHook)vp9_loop_filter_worker;
     if (pbi->max_threads > 1 && !winterface->reset(&pbi->lf_worker)) {
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Loop filter thread creation failed");
@@ -1434,7 +1434,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
                                       const uint8_t *data,
                                       const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
-  const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
+  const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   const uint8_t *bit_reader_end = NULL;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -1464,7 +1464,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     CHECK_MEM_ERROR(cm, pbi->tile_worker_info,
                     vpx_malloc(num_threads * sizeof(*pbi->tile_worker_info)));
     for (i = 0; i < num_threads; ++i) {
-      VP9Worker *const worker = &pbi->tile_workers[i];
+      VPxWorker *const worker = &pbi->tile_workers[i];
       ++pbi->num_tile_workers;
 
       winterface->init(worker);
@@ -1477,9 +1477,9 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   // Reset tile decoding hook
   for (n = 0; n < num_workers; ++n) {
-    VP9Worker *const worker = &pbi->tile_workers[n];
+    VPxWorker *const worker = &pbi->tile_workers[n];
     winterface->sync(worker);
-    worker->hook = (VP9WorkerHook)tile_worker_hook;
+    worker->hook = (VPxWorkerHook)tile_worker_hook;
     worker->data1 = &pbi->tile_worker_data[n];
     worker->data2 = &pbi->tile_worker_info[n];
   }
@@ -1529,7 +1529,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   while (n < tile_cols) {
     int i;
     for (i = 0; i < num_workers && n < tile_cols; ++i) {
-      VP9Worker *const worker = &pbi->tile_workers[i];
+      VPxWorker *const worker = &pbi->tile_workers[i];
       TileWorkerData *const tile_data = (TileWorkerData*)worker->data1;
       TileInfo *const tile = (TileInfo*)worker->data2;
       TileBuffer *const buf = &tile_buffers[0][n];
@@ -1561,7 +1561,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     }
 
     for (; i > 0; --i) {
-      VP9Worker *const worker = &pbi->tile_workers[i - 1];
+      VPxWorker *const worker = &pbi->tile_workers[i - 1];
       // TODO(jzern): The tile may have specific error data associated with
       // its vpx_internal_error_info which could be propagated to the main info
       // in cm. Additionally once the threads have been synced and an error is
@@ -2020,7 +2020,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
   // If encoded in frame parallel mode, frame context is ready after decoding
   // the frame header.
   if (pbi->frame_parallel_decode && cm->frame_parallel_decoding_mode) {
-    VP9Worker *const worker = pbi->frame_worker_owner;
+    VPxWorker *const worker = pbi->frame_worker_owner;
     FrameWorkerData *const frame_worker_data = worker->data1;
     if (cm->refresh_frame_context) {
       context_updated = 1;
