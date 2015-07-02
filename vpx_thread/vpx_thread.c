@@ -15,7 +15,7 @@
 
 #include <assert.h>
 #include <string.h>   // for memset()
-#include "./vp9_thread.h"
+#include "./vpx_thread.h"
 #include "vpx_mem/vpx_mem.h"
 
 #if CONFIG_MULTITHREAD

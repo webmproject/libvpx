@@ -12,7 +12,7 @@
 #define VP9_DECODER_VP9_DTHREAD_H_
 
 #include "./vpx_config.h"
-#include "vp9/common/vp9_thread.h"
+#include "vpx_thread/vpx_thread.h"
 #include "vpx/internal/vpx_codec_internal.h"
 
 struct VP9Common;
