@@ -18,7 +18,7 @@ static int inv_recenter_nonneg(int v, int m) {
   if (v > 2 * m)
     return v;
 
-  return v % 2 ? m - (v + 1) / 2 : m + v / 2;
+  return (v & 1) ? m - ((v + 1) >> 1) : m + (v >> 1);
 }
 
 static int decode_uniform(vp9_reader *r) {
