@@ -161,7 +161,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0];
   const int is_compound = has_second_ref(&mi->mbmi);
-  const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
+  const InterpKernel *kernel = vp9_filter_kernels[mi->mbmi.interp_filter];
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {

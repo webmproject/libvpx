@@ -40,7 +40,7 @@ typedef uint8_t INTERP_FILTER;
 
 typedef int16_t InterpKernel[SUBPEL_TAPS];
 
-const InterpKernel *vp9_get_interp_kernel(INTERP_FILTER filter);
+extern const InterpKernel *vp9_filter_kernels[4];
 
 #ifdef __cplusplus
 }  // extern "C"
