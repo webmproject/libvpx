@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f3ba3136_6fb1d17b",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-02T00:18:06Z",
+      "side": 1,
+      "message": "as said offline the calculations that add 1 following the sync look suspicious given this one; something to be visited later",
+      "revId": "d7cdf56544f3d5288444c323e30d3f9c457dd19d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
