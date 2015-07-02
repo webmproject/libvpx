@@ -29,21 +29,21 @@ $vp8_clear_system_state_mmx=vpx_reset_mmx_state;
 # Dequant
 #
 add_proto qw/void vp8_dequantize_b/, "struct blockd*, short *dqc";
-specialize qw/vp8_dequantize_b mmx media neon/;
+specialize qw/vp8_dequantize_b mmx media neon msa/;
 $vp8_dequantize_b_media=vp8_dequantize_b_v6;
 
 add_proto qw/void vp8_dequant_idct_add/, "short *input, short *dq, unsigned char *output, int stride";
-specialize qw/vp8_dequant_idct_add mmx media neon dspr2/;
+specialize qw/vp8_dequant_idct_add mmx media neon dspr2 msa/;
 $vp8_dequant_idct_add_media=vp8_dequant_idct_add_v6;
 $vp8_dequant_idct_add_dspr2=vp8_dequant_idct_add_dspr2;
 
 add_proto qw/void vp8_dequant_idct_add_y_block/, "short *q, short *dq, unsigned char *dst, int stride, char *eobs";
-specialize qw/vp8_dequant_idct_add_y_block mmx sse2 media neon dspr2/;
+specialize qw/vp8_dequant_idct_add_y_block mmx sse2 media neon dspr2 msa/;
 $vp8_dequant_idct_add_y_block_media=vp8_dequant_idct_add_y_block_v6;
 $vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2;
 
 add_proto qw/void vp8_dequant_idct_add_uv_block/, "short *q, short *dq, unsigned char *dst_u, unsigned char *dst_v, int stride, char *eobs";
-specialize qw/vp8_dequant_idct_add_uv_block mmx sse2 media neon dspr2/;
+specialize qw/vp8_dequant_idct_add_uv_block mmx sse2 media neon dspr2 msa/;
 $vp8_dequant_idct_add_uv_block_media=vp8_dequant_idct_add_uv_block_v6;
 $vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2;
 
@@ -108,7 +108,7 @@ $vp8_loop_filter_simple_bh_neon=vp8_loop_filter_bhs_neon;
 #
 #idct16
 add_proto qw/void vp8_short_idct4x4llm/, "short *input, unsigned char *pred, int pitch, unsigned char *dst, int dst_stride";
-specialize qw/vp8_short_idct4x4llm mmx media neon dspr2/;
+specialize qw/vp8_short_idct4x4llm mmx media neon dspr2 msa/;
 $vp8_short_idct4x4llm_media=vp8_short_idct4x4llm_v6_dual;
 $vp8_short_idct4x4llm_dspr2=vp8_short_idct4x4llm_dspr2;
 
@@ -120,13 +120,13 @@ $vp8_short_inv_walsh4x4_1_dspr2=vp8_short_inv_walsh4x4_1_dspr2;
 
 #iwalsh16
 add_proto qw/void vp8_short_inv_walsh4x4/, "short *input, short *output";
-specialize qw/vp8_short_inv_walsh4x4 mmx sse2 media neon dspr2/;
+specialize qw/vp8_short_inv_walsh4x4 mmx sse2 media neon dspr2 msa/;
 $vp8_short_inv_walsh4x4_media=vp8_short_inv_walsh4x4_v6;
 $vp8_short_inv_walsh4x4_dspr2=vp8_short_inv_walsh4x4_dspr2;
 
 #idct1_scalar_add
 add_proto qw/void vp8_dc_only_idct_add/, "short input, unsigned char *pred, int pred_stride, unsigned char *dst, int dst_stride";
-specialize qw/vp8_dc_only_idct_add	mmx media neon dspr2/;
+specialize qw/vp8_dc_only_idct_add	mmx media neon dspr2 msa/;
 $vp8_dc_only_idct_add_media=vp8_dc_only_idct_add_v6;
 $vp8_dc_only_idct_add_dspr2=vp8_dc_only_idct_add_dspr2;
 
