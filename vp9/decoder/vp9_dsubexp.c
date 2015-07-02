@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
+
 #include "vp9/common/vp9_entropy.h"
 
 #include "vp9/decoder/vp9_dsubexp.h"
@@ -27,7 +29,7 @@ static int decode_uniform(vp9_reader *r) {
 }
 
 static int inv_remap_prob(int v, int m) {
-  static int inv_map_table[MAX_PROB - 1] = {
+  static int inv_map_table[MAX_PROB] = {
       6,  19,  32,  45,  58,  71,  84,  97, 110, 123, 136, 149, 162, 175, 188,
     201, 214, 227, 240, 253,   0,   1,   2,   3,   4,   5,   7,   8,   9,  10,
      11,  12,  13,  14,  15,  16,  17,  18,  20,  21,  22,  23,  24,  25,  26,
@@ -44,11 +46,9 @@ static int inv_remap_prob(int v, int m) {
     190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 202, 203, 204, 205,
     206, 207, 208, 209, 210, 211, 212, 213, 215, 216, 217, 218, 219, 220, 221,
     222, 223, 224, 225, 226, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237,
-    238, 239, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252
+    238, 239, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 252
   };
-  // The clamp is not necessary for conforming VP9 stream, it is added to
-  // prevent out of bound access for bad input data
-  v = clamp(v, 0, 253);
+  assert(v < (int)(sizeof(inv_map_table) / sizeof(inv_map_table[0])));
   v = inv_map_table[v];
   m--;
   if ((m << 1) <= MAX_PROB) {
