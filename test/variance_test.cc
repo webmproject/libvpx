@@ -2058,5 +2058,43 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(3, 2, variance8x4_msa, 0),
                       make_tuple(2, 3, variance4x8_msa, 0),
                       make_tuple(2, 2, variance4x4_msa, 0)));
+
+#if CONFIG_VP9_ENCODER
+const SubpixVarMxNFunc subpel_variance4x4_msa = vp9_sub_pixel_variance4x4_msa;
+const SubpixVarMxNFunc subpel_variance4x8_msa = vp9_sub_pixel_variance4x8_msa;
+const SubpixVarMxNFunc subpel_variance8x4_msa = vp9_sub_pixel_variance8x4_msa;
+const SubpixVarMxNFunc subpel_variance8x8_msa = vp9_sub_pixel_variance8x8_msa;
+const SubpixVarMxNFunc subpel_variance8x16_msa = vp9_sub_pixel_variance8x16_msa;
+const SubpixVarMxNFunc subpel_variance16x8_msa = vp9_sub_pixel_variance16x8_msa;
+const SubpixVarMxNFunc subpel_variance16x16_msa =
+    vp9_sub_pixel_variance16x16_msa;
+const SubpixVarMxNFunc subpel_variance16x32_msa =
+    vp9_sub_pixel_variance16x32_msa;
+const SubpixVarMxNFunc subpel_variance32x16_msa =
+    vp9_sub_pixel_variance32x16_msa;
+const SubpixVarMxNFunc subpel_variance32x32_msa =
+    vp9_sub_pixel_variance32x32_msa;
+const SubpixVarMxNFunc subpel_variance32x64_msa =
+    vp9_sub_pixel_variance32x64_msa;
+const SubpixVarMxNFunc subpel_variance64x32_msa =
+    vp9_sub_pixel_variance64x32_msa;
+const SubpixVarMxNFunc subpel_variance64x64_msa =
+    vp9_sub_pixel_variance64x64_msa;
+INSTANTIATE_TEST_CASE_P(
+    MSA, VP9SubpelVarianceTest,
+    ::testing::Values(make_tuple(2, 2, subpel_variance4x4_msa, 0),
+                      make_tuple(2, 3, subpel_variance4x8_msa, 0),
+                      make_tuple(3, 2, subpel_variance8x4_msa, 0),
+                      make_tuple(3, 3, subpel_variance8x8_msa, 0),
+                      make_tuple(3, 4, subpel_variance8x16_msa, 0),
+                      make_tuple(4, 3, subpel_variance16x8_msa, 0),
+                      make_tuple(4, 4, subpel_variance16x16_msa, 0),
+                      make_tuple(4, 5, subpel_variance16x32_msa, 0),
+                      make_tuple(5, 4, subpel_variance32x16_msa, 0),
+                      make_tuple(5, 5, subpel_variance32x32_msa, 0),
+                      make_tuple(5, 6, subpel_variance32x64_msa, 0),
+                      make_tuple(6, 5, subpel_variance64x32_msa, 0),
+                      make_tuple(6, 6, subpel_variance64x64_msa, 0)));
+#endif  // CONFIG_VP9_ENCODER
 #endif  // HAVE_MSA
 }  // namespace
