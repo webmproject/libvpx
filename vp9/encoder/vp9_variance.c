@@ -19,7 +19,7 @@
 
 #include "vp9/encoder/vp9_variance.h"
 
-static uint8_t bilinear_filters[8][2] = {
+static const uint8_t bilinear_filters[8][2] = {
   { 128,   0, },
   { 112,  16, },
   {  96,  32, },
