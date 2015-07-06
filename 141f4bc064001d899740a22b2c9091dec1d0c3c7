@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "534a1d43_b555aa22",
+        "filename": "vp9/encoder/mips/msa/vp9_variance_msa.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-06T21:59:13Z",
+      "side": 1,
+      "message": "this can remain const, though the signatures of the functions should be updated to uint8; I see the existing c-code is out of sync, I\u0027ll take care of both",
+      "revId": "141f4bc064001d899740a22b2c9091dec1d0c3c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
