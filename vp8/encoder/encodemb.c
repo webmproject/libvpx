@@ -19,6 +19,8 @@
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
 
+// TODO(jingning,johannkoenig): use vpx_subtract_block to replace
+// codec specified vp9_subtract_ functions.
 void vp8_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch)
 {
     unsigned char *src_ptr = (*(be->base_src) + be->src);

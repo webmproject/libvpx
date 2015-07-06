@@ -24,6 +24,9 @@
 #define LD_UH(...) LD_H(v8u16, __VA_ARGS__)
 #define LD_SH(...) LD_H(v8i16, __VA_ARGS__)
 
+#define ST_H(RTYPE, in, pdst) *((RTYPE *)(pdst)) = (in)
+#define ST_SH(...) ST_H(v8i16, __VA_ARGS__)
+
 #if (__mips_isa_rev >= 6)
 #define LW(psrc) ({                                 \
   const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
@@ -38,6 +41,61 @@
                                                     \
   val_m;                                            \
 })
+
+#if (__mips == 64)
+#define LD(psrc) ({                                 \
+  const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
+  uint64_t val_m = 0;                               \
+                                                    \
+  __asm__ __volatile__ (                            \
+      "ld  %[val_m],  %[psrc_m]  \n\t"              \
+                                                    \
+      : [val_m] "=r" (val_m)                        \
+      : [psrc_m] "m" (*psrc_m)                      \
+  );                                                \
+                                                    \
+  val_m;                                            \
+})
+#else  // !(__mips == 64)
+#define LD(psrc) ({                                        \
+  const uint8_t *psrc_m = (const uint8_t *)(psrc);         \
+  uint32_t val0_m, val1_m;                                 \
+  uint64_t val_m = 0;                                      \
+                                                           \
+  val0_m = LW(psrc_m);                                     \
+  val1_m = LW(psrc_m + 4);                                 \
+                                                           \
+  val_m = (uint64_t)(val1_m);                              \
+  val_m = (uint64_t)((val_m << 32) & 0xFFFFFFFF00000000);  \
+  val_m = (uint64_t)(val_m | (uint64_t)val0_m);            \
+                                                           \
+  val_m;                                                   \
+})
+#endif  // (__mips == 64)
+
+#define SW(val, pdst) {                 \
+  uint8_t *pdst_m = (uint8_t *)(pdst);  \
+  const uint32_t val_m = (val);         \
+                                        \
+  __asm__ __volatile__ (                \
+      "sw  %[val_m],  %[pdst_m]  \n\t"  \
+                                        \
+      : [pdst_m] "=m" (*pdst_m)         \
+      : [val_m] "r" (val_m)             \
+  );                                    \
+}
+
+#define SD(val, pdst) {                 \
+  uint8_t *pdst_m = (uint8_t *)(pdst);  \
+  const uint64_t val_m = (val);         \
+                                        \
+  __asm__ __volatile__ (                \
+      "sd  %[val_m],  %[pdst_m]  \n\t"  \
+                                        \
+      : [pdst_m] "=m" (*pdst_m)         \
+      : [val_m] "r" (val_m)             \
+  );                                    \
+}
 #else  // !(__mips_isa_rev >= 6)
 #define LW(psrc) ({                                 \
   const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
@@ -52,6 +110,60 @@
                                                     \
   val_m;                                            \
 })
+
+#define SW(val, pdst) {                  \
+  uint8_t *pdst_m = (uint8_t *)(pdst);   \
+  const uint32_t val_m = (val);          \
+                                         \
+  __asm__ __volatile__ (                 \
+      "usw  %[val_m],  %[pdst_m]  \n\t"  \
+                                         \
+      : [pdst_m] "=m" (*pdst_m)          \
+      : [val_m] "r" (val_m)              \
+  );                                     \
+}
+
+#if (__mips == 64)
+#define LD(psrc) ({                                 \
+  const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
+  uint64_t val_m = 0;                               \
+                                                    \
+  __asm__ __volatile__ (                            \
+      "uld  %[val_m],  %[psrc_m]  \n\t"             \
+                                                    \
+      : [val_m] "=r" (val_m)                        \
+      : [psrc_m] "m" (*psrc_m)                      \
+  );                                                \
+                                                    \
+  val_m;                                            \
+})
+#else  // !(__mips == 64)
+#define LD(psrc) ({                                        \
+  const uint8_t *psrc_m1 = (const uint8_t *)(psrc);        \
+  uint32_t val0_m, val1_m;                                 \
+  uint64_t val_m = 0;                                      \
+                                                           \
+  val0_m = LW(psrc_m1);                                    \
+  val1_m = LW(psrc_m1 + 4);                                \
+                                                           \
+  val_m = (uint64_t)(val1_m);                              \
+  val_m = (uint64_t)((val_m << 32) & 0xFFFFFFFF00000000);  \
+  val_m = (uint64_t)(val_m | (uint64_t)val0_m);            \
+                                                           \
+  val_m;                                                   \
+})
+#endif  // (__mips == 64)
+
+#define SD(val, pdst) {                                     \
+  uint8_t *pdst_m1 = (uint8_t *)(pdst);                     \
+  uint32_t val0_m, val1_m;                                  \
+                                                            \
+  val0_m = (uint32_t)((val) & 0x00000000FFFFFFFF);          \
+  val1_m = (uint32_t)(((val) >> 32) & 0x00000000FFFFFFFF);  \
+                                                            \
+  SW(val0_m, pdst_m1);                                      \
+  SW(val1_m, pdst_m1 + 4);                                  \
+}
 #endif  // (__mips_isa_rev >= 6)
 
 /* Description : Load 4 words with stride
@@ -69,6 +181,21 @@
   out3 = LW((psrc) + 3 * stride);                    \
 }
 
+/* Description : Load double words with stride
+   Arguments   : Inputs  - psrc, stride
+                 Outputs - out0, out1
+   Details     : Load double word in 'out0' from (psrc)
+                 Load double word in 'out1' from (psrc + stride)
+*/
+#define LD2(psrc, stride, out0, out1) {  \
+  out0 = LD((psrc));                     \
+  out1 = LD((psrc) + stride);            \
+}
+#define LD4(psrc, stride, out0, out1, out2, out3) {  \
+  LD2((psrc), stride, out0, out1);                   \
+  LD2((psrc) + 2 * stride, stride, out2, out3);      \
+}
+
 /* Description : Load vectors with 16 byte elements with stride
    Arguments   : Inputs  - psrc, stride
                  Outputs - out0, out1
@@ -81,6 +208,7 @@
   out1 = LD_B(RTYPE, (psrc) + stride);            \
 }
 #define LD_UB2(...) LD_B2(v16u8, __VA_ARGS__)
+#define LD_SB2(...) LD_B2(v16i8, __VA_ARGS__)
 
 #define LD_B3(RTYPE, psrc, stride, out0, out1, out2) {  \
   LD_B2(RTYPE, (psrc), stride, out0, out1);             \
@@ -93,12 +221,21 @@
   LD_B2(RTYPE, (psrc) + 2 * stride , stride, out2, out3);     \
 }
 #define LD_UB4(...) LD_B4(v16u8, __VA_ARGS__)
+#define LD_SB4(...) LD_B4(v16i8, __VA_ARGS__)
 
 #define LD_B5(RTYPE, psrc, stride, out0, out1, out2, out3, out4) {  \
   LD_B4(RTYPE, (psrc), stride, out0, out1, out2, out3);             \
   out4 = LD_B(RTYPE, (psrc) + 4 * stride);                          \
 }
 #define LD_UB5(...) LD_B5(v16u8, __VA_ARGS__)
+
+#define LD_B8(RTYPE, psrc, stride,                                    \
+              out0, out1, out2, out3, out4, out5, out6, out7) {       \
+  LD_B4(RTYPE, (psrc), stride, out0, out1, out2, out3);               \
+  LD_B4(RTYPE, (psrc) + 4 * stride, stride, out4, out5, out6, out7);  \
+}
+#define LD_UB8(...) LD_B8(v16u8, __VA_ARGS__)
+#define LD_SB8(...) LD_B8(v16i8, __VA_ARGS__)
 
 /* Description : Load vectors with 8 halfword elements with stride
    Arguments   : Inputs  - psrc, stride
@@ -271,6 +408,13 @@
 #define INSERT_W4_UB(...) INSERT_W4(v16u8, __VA_ARGS__)
 #define INSERT_W4_SB(...) INSERT_W4(v16i8, __VA_ARGS__)
 
+#define INSERT_D2(RTYPE, in0, in1, out) {           \
+  out = (RTYPE)__msa_insert_d((v2i64)out, 0, in0);  \
+  out = (RTYPE)__msa_insert_d((v2i64)out, 1, in1);  \
+}
+#define INSERT_D2_UB(...) INSERT_D2(v16u8, __VA_ARGS__)
+#define INSERT_D2_SB(...) INSERT_D2(v16i8, __VA_ARGS__)
+
 /* Description : Interleave both left and right half of input vectors
    Arguments   : Inputs  - in0, in1
                  Outputs - out0, out1
@@ -327,5 +471,54 @@
                                          \
   tmp_m = __msa_clti_s_h((v8i16)in, 0);  \
   ILVRL_H2_SW(tmp_m, in, out0, out1);    \
+}
+
+/* Description : Store 4 double words with stride
+   Arguments   : Inputs - in0, in1, in2, in3, pdst, stride
+   Details     : Store double word from 'in0' to (pdst)
+                 Store double word from 'in1' to (pdst + stride)
+                 Store double word from 'in2' to (pdst + 2 * stride)
+                 Store double word from 'in3' to (pdst + 3 * stride)
+*/
+#define SD4(in0, in1, in2, in3, pdst, stride) {  \
+  SD(in0, (pdst))                                \
+  SD(in1, (pdst) + stride);                      \
+  SD(in2, (pdst) + 2 * stride);                  \
+  SD(in3, (pdst) + 3 * stride);                  \
+}
+
+/* Description : Store vectors of 8 halfword elements with stride
+   Arguments   : Inputs - in0, in1, pdst, stride
+   Details     : Store 8 halfword elements from 'in0' to (pdst)
+                 Store 8 halfword elements from 'in1' to (pdst + stride)
+*/
+#define ST_H2(RTYPE, in0, in1, pdst, stride) {  \
+  ST_H(RTYPE, in0, (pdst));                     \
+  ST_H(RTYPE, in1, (pdst) + stride);            \
+}
+#define ST_SH2(...) ST_H2(v8i16, __VA_ARGS__)
+
+/* Description : Store 8x4 byte block to destination memory from input
+                 vectors
+   Arguments   : Inputs - in0, in1, pdst, stride
+   Details     : Index 0 double word element from 'in0' vector is copied to the
+                 GP register and stored to (pdst)
+                 Index 1 double word element from 'in0' vector is copied to the
+                 GP register and stored to (pdst + stride)
+                 Index 0 double word element from 'in1' vector is copied to the
+                 GP register and stored to (pdst + 2 * stride)
+                 Index 1 double word element from 'in1' vector is copied to the
+                 GP register and stored to (pdst + 3 * stride)
+*/
+#define ST8x4_UB(in0, in1, pdst, stride) {                  \
+  uint64_t out0_m, out1_m, out2_m, out3_m;                  \
+  uint8_t *pblk_8x4_m = (uint8_t *)(pdst);                  \
+                                                            \
+  out0_m = __msa_copy_u_d((v2i64)in0, 0);                   \
+  out1_m = __msa_copy_u_d((v2i64)in0, 1);                   \
+  out2_m = __msa_copy_u_d((v2i64)in1, 0);                   \
+  out3_m = __msa_copy_u_d((v2i64)in1, 1);                   \
+                                                            \
+  SD4(out0_m, out1_m, out2_m, out3_m, pblk_8x4_m, stride);  \
 }
 #endif  /* VPX_DSP_MIPS_MACROS_MSA_H_ */

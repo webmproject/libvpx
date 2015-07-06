@@ -12,13 +12,16 @@ DSP_SRCS-yes += vpx_dsp.mk
 
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes            += sad.c
+DSP_SRCS-yes            += subtract.c
 
 DSP_SRCS-$(HAVE_MEDIA)  += arm/sad_media$(ASM)
 DSP_SRCS-$(HAVE_NEON)   += arm/sad4d_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/sad_neon.c
+DSP_SRCS-$(HAVE_NEON)   += arm/subtract_neon.c
 
 DSP_SRCS-$(HAVE_MSA)    += mips/macros_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/sad_msa.c
+DSP_SRCS-$(HAVE_MSA)    += mips/subtract_msa.c
 
 DSP_SRCS-$(HAVE_MMX)    += x86/sad_mmx.asm
 DSP_SRCS-$(HAVE_SSE3)   += x86/sad_sse3.asm
@@ -30,6 +33,7 @@ DSP_SRCS-$(HAVE_AVX2)   += x86/sad_avx2.c
 ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/sad4d_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/sad_sse2.asm
+DSP_SRCS-$(HAVE_SSE2)   += x86/subtract_sse2.asm
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad4d_sse2.asm
