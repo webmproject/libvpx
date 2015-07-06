@@ -8,6 +8,6 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 
-THREAD_SRCS-yes += vpx_thread.mk
-THREAD_SRCS-yes += vpx_thread.c
-THREAD_SRCS-yes += vpx_thread.h
+UTIL_SRCS-yes += vpx_util.mk
+UTIL_SRCS-yes += vpx_thread.c
+UTIL_SRCS-yes += vpx_thread.h
