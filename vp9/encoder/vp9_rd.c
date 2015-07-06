@@ -314,57 +314,52 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   set_block_thresholds(cm, rd);
 
-  if (!cpi->sf.use_nonrd_pick_mode || cm->frame_type == KEY_FRAME) {
-    fill_token_costs(x->token_costs, cm->fc.coef_probs);
+  fill_token_costs(x->token_costs, cm->fc.coef_probs);
 #if CONFIG_TX_SKIP
-    if (FOR_SCREEN_CONTENT)
-      fill_token_costs_pxd(x->token_costs_pxd, cm->fc.coef_probs_pxd);
+  if (FOR_SCREEN_CONTENT)
+    fill_token_costs_pxd(x->token_costs_pxd, cm->fc.coef_probs_pxd);
 #endif  // CONFIG_TX_SKIP
 
 #if CONFIG_EXT_PARTITION
-    vp9_cost_tokens(cpi->partition_cost[0], get_partition_probs(cm, 0),
-                    vp9_partition_tree);
-    for (i = 1; i < PARTITION_CONTEXTS; ++i)
-      vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
-                      vp9_ext_partition_tree);
+  vp9_cost_tokens(cpi->partition_cost[0], get_partition_probs(cm, 0),
+                  vp9_partition_tree);
+  for (i = 1; i < PARTITION_CONTEXTS; ++i)
+    vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
+                    vp9_ext_partition_tree);
 #else
-    for (i = 0; i < PARTITION_CONTEXTS; ++i)
-      vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
-                      vp9_partition_tree);
+  for (i = 0; i < PARTITION_CONTEXTS; ++i)
+    vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
+                    vp9_partition_tree);
 #endif
-  }
 
-  if (!cpi->sf.use_nonrd_pick_mode || (cm->current_video_frame & 0x07) == 1 ||
-      cm->frame_type == KEY_FRAME) {
-    fill_mode_costs(cpi);
+  fill_mode_costs(cpi);
 
-    if (!frame_is_intra_only(cm)) {
-      vp9_build_nmv_cost_table(x->nmvjointcost,
-                               cm->allow_high_precision_mv ? x->nmvcost_hp
-                                                           : x->nmvcost,
-                               &cm->fc.nmvc,
+  if (!frame_is_intra_only(cm)) {
+    vp9_build_nmv_cost_table(x->nmvjointcost,
+                             cm->allow_high_precision_mv ? x->nmvcost_hp
+                                                         : x->nmvcost,
+                             &cm->fc.nmvc,
 #if CONFIG_INTRABC
-                               1,
+                             1,
 #endif  // CONFIG_INTRABC
-                               cm->allow_high_precision_mv);
+                             cm->allow_high_precision_mv);
 
-      for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-        vp9_cost_tokens((int *)cpi->inter_mode_cost[i],
-                        cm->fc.inter_mode_probs[i], vp9_inter_mode_tree);
+    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+      vp9_cost_tokens((int *)cpi->inter_mode_cost[i],
+                      cm->fc.inter_mode_probs[i], vp9_inter_mode_tree);
 
 #if CONFIG_NEW_INTER
-      for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-        vp9_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
-                        cm->fc.inter_compound_mode_probs[i],
-                        vp9_inter_compound_mode_tree);
+    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+      vp9_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
+                      cm->fc.inter_compound_mode_probs[i],
+                      vp9_inter_compound_mode_tree);
 #endif  // CONFIG_NEW_INTER
 #if CONFIG_INTRABC
-    } else {
-      vp9_build_nmv_cost_table(x->nmvjointcost,
-                               x->ndvcost,
-                               &cm->fc.ndvc, 0, 0);
+  } else {
+    vp9_build_nmv_cost_table(x->nmvjointcost,
+                             x->ndvcost,
+                             &cm->fc.ndvc, 0, 0);
 #endif  // CONFIG_INTRABC
-    }
   }
 
 #if CONFIG_COPY_MODE

@@ -211,13 +211,6 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     cr->thresh_rate_sb = (rc->sb64_target_rate * 256) >> 2;
     // Distortion threshold, quadratic in Q, scale factor to be adjusted.
     cr->thresh_dist_sb = 8 * (int)(q * q);
-    if (cpi->sf.use_nonrd_pick_mode) {
-      // May want to be more conservative with thresholds in non-rd mode for now
-      // as rate/distortion are derived from model based on prediction residual.
-      cr->thresh_rate_sb = (rc->sb64_target_rate * 256) >> 3;
-      cr->thresh_dist_sb = 4 * (int)(q * q);
-    }
-
     cr->num_seg_blocks = 0;
     // Set up segmentation.
     // Clear down the segment map.

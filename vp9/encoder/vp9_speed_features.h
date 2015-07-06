@@ -402,9 +402,6 @@ typedef struct SPEED_FEATURES {
   // by only looking at counts from 1/2 the bands.
   FAST_COEFF_UPDATE use_fast_coef_updates;
 
-  // This flag controls the use of non-RD mode decision.
-  int use_nonrd_pick_mode;
-
   // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
   // modes are used in order from LSB to MSB for each BLOCK_SIZE.
   int inter_mode_mask[BLOCK_SIZES];
