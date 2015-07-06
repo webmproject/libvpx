@@ -31,6 +31,8 @@ struct vp9_extracfg {
   unsigned int                tile_rows;
   unsigned int                arnr_max_frames;
   unsigned int                arnr_strength;
+  unsigned int                min_gf_interval;
+  unsigned int                max_gf_interval;
   vp8e_tuning                 tuning;
   unsigned int                cq_level;  // constrained quality level
   unsigned int                rc_max_intra_bitrate_pct;
@@ -55,6 +57,8 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                          // tile_rows
   7,                          // arnr_max_frames
   5,                          // arnr_strength
+  0,                          // min_gf_interval; 0 -> default decision
+  0,                          // max_gf_interval; 0 -> default decision
   VP8_TUNE_PSNR,              // tuning
   10,                         // cq_level
   0,                          // rc_max_intra_bitrate_pct
@@ -167,6 +171,12 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
   RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
   RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
+  RANGE_CHECK(extra_cfg, min_gf_interval, 0, (MAX_LAG_BUFFERS - 1));
+  RANGE_CHECK(extra_cfg, max_gf_interval, 0, (MAX_LAG_BUFFERS - 1));
+  if (extra_cfg->min_gf_interval > 0 && extra_cfg->max_gf_interval > 0) {
+    RANGE_CHECK(extra_cfg, max_gf_interval, extra_cfg->min_gf_interval,
+                (MAX_LAG_BUFFERS - 1));
+  }
 
   if (cfg->rc_resize_allowed == 1) {
     RANGE_CHECK(cfg, rc_scaled_width, 0, cfg->g_w);
@@ -454,6 +464,8 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->color_space = extra_cfg->color_space;
   oxcf->arnr_max_frames = extra_cfg->arnr_max_frames;
   oxcf->arnr_strength   = extra_cfg->arnr_strength;
+  oxcf->min_gf_interval = extra_cfg->min_gf_interval;
+  oxcf->max_gf_interval = extra_cfg->max_gf_interval;
 
   oxcf->tuning = extra_cfg->tuning;
   oxcf->content = extra_cfg->content;
@@ -724,6 +736,20 @@ static vpx_codec_err_t ctrl_set_aq_mode(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.aq_mode = CAST(VP9E_SET_AQ_MODE, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_min_gf_interval(vpx_codec_alg_priv_t *ctx,
+                                                va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.min_gf_interval = CAST(VP9E_SET_MIN_GF_INTERVAL, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_max_gf_interval(vpx_codec_alg_priv_t *ctx,
+                                                va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.max_gf_interval = CAST(VP9E_SET_MAX_GF_INTERVAL, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1444,6 +1470,8 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_TUNE_CONTENT,             ctrl_set_tune_content},
   {VP9E_SET_COLOR_SPACE,              ctrl_set_color_space},
   {VP9E_SET_NOISE_SENSITIVITY,        ctrl_set_noise_sensitivity},
+  {VP9E_SET_MIN_GF_INTERVAL,          ctrl_set_min_gf_interval},
+  {VP9E_SET_MAX_GF_INTERVAL,          ctrl_set_max_gf_interval},
 
   // Getters
   {VP8E_GET_LAST_QUANTIZER,           ctrl_get_quantizer},
