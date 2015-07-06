@@ -22,6 +22,29 @@
       "revId": "432cd4bfb795534c8ba479fd735cc11dc8562469",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "334da95a_1432faaa",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 6
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-06T22:47:37Z",
+      "side": 1,
+      "message": "don\u0027t need a \u0027specialize\u0027 line until there is an optimized version.",
+      "range": {
+        "startLine": 223,
+        "startChar": 16,
+        "endLine": 223,
+        "endChar": 41
+      },
+      "revId": "432cd4bfb795534c8ba479fd735cc11dc8562469",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
