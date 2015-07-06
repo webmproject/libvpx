@@ -140,10 +140,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += quantize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += error_block_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += vp9_intrapred_test.cc
 
-ifeq ($(CONFIG_VP9_ENCODER),yes)
-LIBVPX_TEST_SRCS-$(CONFIG_SPATIAL_SVC) += svc_test.cc
-endif
-
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_TEMPORAL_DENOISING),yesyes)
 LIBVPX_TEST_SRCS-$(HAVE_SSE2) += vp9_denoiser_sse2_test.cc
 endif

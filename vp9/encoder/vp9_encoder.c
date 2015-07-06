@@ -48,7 +48,6 @@
 #endif
 #include "vp9/encoder/vp9_temporal_filter.h"
 #include "vp9/encoder/vp9_resize.h"
-#include "vp9/encoder/vp9_svc_layercontext.h"
 
 void vp9_coef_tree_initialize();
 
@@ -124,13 +123,11 @@ static void setup_frame(VP9_COMP *cpi) {
   if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
     vp9_setup_past_independence(cm);
   } else {
-    if (!cpi->use_svc)
-      cm->frame_context_idx = cpi->refresh_alt_ref_frame;
+    cm->frame_context_idx = cpi->refresh_alt_ref_frame;
   }
 
   if (cm->frame_type == KEY_FRAME) {
-    if (!is_two_pass_svc(cpi))
-      cpi->refresh_golden_frame = 1;
+    cpi->refresh_golden_frame = 1;
     cpi->refresh_alt_ref_frame = 1;
     vp9_zero(cpi->interp_filter_selected);
   } else {
@@ -158,7 +155,6 @@ void vp9_initialize_enc() {
 
 static void dealloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  int i;
 
   // Delete sementation map
   vpx_free(cpi->segmentation_map);
@@ -218,26 +214,10 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_free_pc_tree(cpi);
 
-  for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
-    LAYER_CONTEXT *const lc = &cpi->svc.layer_context[i];
-    vpx_free(lc->rc_twopass_stats_in.buf);
-    lc->rc_twopass_stats_in.buf = NULL;
-    lc->rc_twopass_stats_in.sz = 0;
-  }
-
   if (cpi->source_diff_var != NULL) {
     vpx_free(cpi->source_diff_var);
     cpi->source_diff_var = NULL;
   }
-
-  for (i = 0; i < MAX_LAG_BUFFERS; ++i) {
-    vp9_free_frame_buffer(&cpi->svc.scaled_frames[i]);
-  }
-  vpx_memset(&cpi->svc.scaled_frames[0], 0,
-             MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
-
-  vp9_free_frame_buffer(&cpi->svc.empty_frame.img);
-  vpx_memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
 }
 
 static void save_coding_context(VP9_COMP *cpi) {
@@ -550,18 +530,6 @@ static void update_frame_size(VP9_COMP *cpi) {
   vp9_set_mb_mi(cm, cm->width, cm->height);
   vp9_init_context_buffers(cm);
   init_macroblockd(cm, xd);
-
-  if (is_two_pass_svc(cpi)) {
-    if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
-                                 cm->width, cm->height,
-                                 cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                                 cm->use_highbitdepth,
-#endif
-                                 VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                         "Failed to reallocate alt_ref_buffer");
-  }
 }
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
@@ -631,18 +599,6 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   cm->width = oxcf->width;
   cm->height = oxcf->height;
   vp9_alloc_compressor_data(cpi);
-
-  // Spatial scalability.
-  cpi->svc.number_spatial_layers = oxcf->ss_number_layers;
-  // Temporal scalability.
-  cpi->svc.number_temporal_layers = oxcf->ts_number_layers;
-
-  if ((cpi->svc.number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) ||
-      ((cpi->svc.number_temporal_layers > 1 ||
-        cpi->svc.number_spatial_layers > 1) &&
-       cpi->oxcf.pass == 2)) {
-    vp9_init_layer_context(cpi);
-  }
 
   // change includes all joint functionality
   vp9_change_config(cpi, oxcf);
@@ -1556,15 +1512,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   }
   update_frame_size(cpi);
 
-  if ((cpi->svc.number_temporal_layers > 1 &&
-      cpi->oxcf.rc_mode == VPX_CBR) ||
-      ((cpi->svc.number_temporal_layers > 1 ||
-        cpi->svc.number_spatial_layers > 1) &&
-       cpi->oxcf.pass == 2)) {
-    vp9_update_layer_context_change_config(cpi,
-                                           (int)cpi->oxcf.target_bandwidth);
-  }
-
   cpi->alt_ref_source = NULL;
   rc->is_src_frame_alt_ref = 0;
 
@@ -1655,8 +1602,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   }
 
   cm->error.setjmp = 1;
-
-  cpi->use_svc = 0;
 
   init_config(cpi, oxcf);
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
@@ -1803,63 +1748,24 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
     const size_t packet_sz = sizeof(FIRSTPASS_STATS);
     const int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
 
-    if (cpi->svc.number_spatial_layers > 1
-        || cpi->svc.number_temporal_layers > 1) {
-      FIRSTPASS_STATS *const stats = oxcf->two_pass_stats_in.buf;
-      FIRSTPASS_STATS *stats_copy[VPX_SS_MAX_LAYERS] = {0};
-      int i;
-
-      for (i = 0; i < oxcf->ss_number_layers; ++i) {
-        FIRSTPASS_STATS *const last_packet_for_layer =
-            &stats[packets - oxcf->ss_number_layers + i];
-        const int layer_id = (int)last_packet_for_layer->spatial_layer_id;
-        const int packets_in_layer = (int)last_packet_for_layer->count + 1;
-        if (layer_id >= 0 && layer_id < oxcf->ss_number_layers) {
-          LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer_id];
-
-          vpx_free(lc->rc_twopass_stats_in.buf);
-
-          lc->rc_twopass_stats_in.sz = packets_in_layer * packet_sz;
-          CHECK_MEM_ERROR(cm, lc->rc_twopass_stats_in.buf,
-                          vpx_malloc(lc->rc_twopass_stats_in.sz));
-          lc->twopass.stats_in_start = lc->rc_twopass_stats_in.buf;
-          lc->twopass.stats_in = lc->twopass.stats_in_start;
-          lc->twopass.stats_in_end = lc->twopass.stats_in_start
-                                     + packets_in_layer - 1;
-          stats_copy[layer_id] = lc->rc_twopass_stats_in.buf;
-        }
-      }
-
-      for (i = 0; i < packets; ++i) {
-        const int layer_id = (int)stats[i].spatial_layer_id;
-        if (layer_id >= 0 && layer_id < oxcf->ss_number_layers
-            && stats_copy[layer_id] != NULL) {
-          *stats_copy[layer_id] = stats[i];
-          ++stats_copy[layer_id];
-        }
-      }
-
-      vp9_init_second_pass_spatial_svc(cpi);
-    } else {
 #if CONFIG_FP_MB_STATS
-      if (cpi->use_fp_mb_stats) {
-        const size_t psz = cpi->common.MBs * sizeof(uint8_t);
-        const int ps = (int)(oxcf->firstpass_mb_stats_in.sz / psz);
+    if (cpi->use_fp_mb_stats) {
+      const size_t psz = cpi->common.MBs * sizeof(uint8_t);
+      const int ps = (int)(oxcf->firstpass_mb_stats_in.sz / psz);
 
-        cpi->twopass.firstpass_mb_stats.mb_stats_start =
-            oxcf->firstpass_mb_stats_in.buf;
-        cpi->twopass.firstpass_mb_stats.mb_stats_end =
-            cpi->twopass.firstpass_mb_stats.mb_stats_start +
-            (ps - 1) * cpi->common.MBs * sizeof(uint8_t);
-      }
+      cpi->twopass.firstpass_mb_stats.mb_stats_start =
+          oxcf->firstpass_mb_stats_in.buf;
+      cpi->twopass.firstpass_mb_stats.mb_stats_end =
+          cpi->twopass.firstpass_mb_stats.mb_stats_start +
+          (ps - 1) * cpi->common.MBs * sizeof(uint8_t);
+    }
 #endif
 
-      cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
-      cpi->twopass.stats_in = cpi->twopass.stats_in_start;
-      cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
+    cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
+    cpi->twopass.stats_in = cpi->twopass.stats_in_start;
+    cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
 
-      vp9_init_second_pass(cpi);
-    }
+    vp9_init_second_pass(cpi);
   }
 
   vp9_set_speed_features(cpi);
@@ -2321,10 +2227,7 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
     pkt.data.psnr.psnr[i] = psnr.psnr[i];
   }
   pkt.kind = VPX_CODEC_PSNR_PKT;
-  if (is_two_pass_svc(cpi))
-    cpi->svc.layer_context[cpi->svc.spatial_layer_id].psnr_pkt = pkt.data.psnr;
-  else
-    vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
+  vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
 
 int vp9_use_as_reference(VP9_COMP *cpi, int ref_frame_flags) {
@@ -2638,11 +2541,6 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     tmp = cpi->alt_fb_idx;
     cpi->alt_fb_idx = cpi->gld_fb_idx;
     cpi->gld_fb_idx = tmp;
-
-    if (is_two_pass_svc(cpi)) {
-      cpi->svc.layer_context[0].gold_ref_idx = cpi->gld_fb_idx;
-      cpi->svc.layer_context[0].alt_ref_idx = cpi->alt_fb_idx;
-    }
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
@@ -3122,7 +3020,7 @@ static int get_ref_frame_flags(const VP9_COMP *cpi) {
   if (gold_is_last)
     flags &= ~VP9_GOLD_FLAG;
 
-  if (cpi->rc.frames_till_gf_update_due == INT_MAX && !is_two_pass_svc(cpi))
+  if (cpi->rc.frames_till_gf_update_due == INT_MAX)
     flags &= ~VP9_GOLD_FLAG;
 
   if (alt_is_last)
@@ -3172,9 +3070,7 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
   // first  pass, and so do its previous and forward frames, then this frame
   // can be skipped for partition check, and the partition size is assigned
   // according to the variance
-  const SVC *const svc = &cpi->svc;
-  const TWO_PASS *const twopass = is_two_pass_svc(cpi) ?
-      &svc->layer_context[svc->spatial_layer_id].twopass : &cpi->twopass;
+  const TWO_PASS *const twopass = &cpi->twopass;
 
   return (!frame_is_intra_only(&cpi->common) &&
     twopass->stats_in - 2 > twopass->stats_in_start &&
@@ -3319,37 +3215,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       cm->reset_frame_context = 2;
     }
   }
-  if (is_two_pass_svc(cpi) && cm->error_resilient_mode == 0) {
-    // Use the last frame context for the empty frame.
-    cm->frame_context_idx =
-        (cpi->svc.encode_empty_frame_state == ENCODING) ? FRAME_CONTEXTS - 1 :
-        cpi->svc.spatial_layer_id * cpi->svc.number_temporal_layers +
-        cpi->svc.temporal_layer_id;
-
-    // The probs will be updated based on the frame type of its previous
-    // frame if frame_parallel_decoding_mode is 0. The type may vary for
-    // the frame after a key frame in base layer since we may drop enhancement
-    // layers. So set frame_parallel_decoding_mode to 1 in this case.
-    if (cpi->svc.number_temporal_layers == 1) {
-      if (cpi->svc.spatial_layer_id == 0 &&
-          cpi->svc.layer_context[0].last_frame_type == KEY_FRAME)
-        cm->frame_parallel_decoding_mode = 1;
-      else
-        cm->frame_parallel_decoding_mode = 0;
-    } else if (cpi->svc.spatial_layer_id == 0) {
-      // Find the 2nd frame in temporal base layer and 1st frame in temporal
-      // enhancement layers from the key frame.
-      int i;
-      for (i = 0; i < cpi->svc.number_temporal_layers; ++i) {
-        if (cpi->svc.layer_context[0].frames_from_key_frame == 1 << i) {
-          cm->frame_parallel_decoding_mode = 1;
-          break;
-        }
-      }
-      if (i == cpi->svc.number_temporal_layers)
-        cm->frame_parallel_decoding_mode = 0;
-    }
-  }
 
   // Configure experimental use of segmentation for enhanced coding of
   // static regions if indicated.
@@ -3360,8 +3225,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // Check if the current frame is skippable for the partition search in the
   // second pass according to the first pass stats
-  if (cpi->sf.allow_partition_search_skip && oxcf->pass == 2 &&
-      (!cpi->use_svc || is_two_pass_svc(cpi))) {
+  if (cpi->sf.allow_partition_search_skip && oxcf->pass == 2) {
     cpi->partition_search_skippable_frame = is_skippable_frame(cpi);
   }
 
@@ -3517,8 +3381,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     cm->lf.last_bilateral_level = 0;
 #endif
 
-  if (!(is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING))
-    vp9_rc_postencode_update(cpi, *size);
+  vp9_rc_postencode_update(cpi, *size);
 
 #if 0
   output_frame_level_debug_stats(cpi);
@@ -3551,19 +3414,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
     ++cm->current_video_frame;
-    if (cpi->use_svc)
-      vp9_inc_frame_in_layer(cpi);
   }
-
-  if (is_two_pass_svc(cpi))
-    cpi->svc.layer_context[cpi->svc.spatial_layer_id].last_frame_type =
-        cm->frame_type;
-}
-
-static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
-                      unsigned int *frame_flags) {
-  vp9_rc_get_svc_params(cpi);
-  encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
 
 static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
@@ -3580,9 +3431,7 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size,
                         uint8_t *dest, unsigned int *frame_flags) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-
-  if (!(is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING))
-    vp9_twopass_postencode_update(cpi);
+  vp9_twopass_postencode_update(cpi);
 }
 
 static void init_motion_estimation(VP9_COMP *cpi) {
@@ -3767,25 +3616,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   MV_REFERENCE_FRAME ref_frame;
   int arf_src_index;
 
-  if (is_two_pass_svc(cpi)) {
-#if CONFIG_SPATIAL_SVC
-    vp9_svc_start_frame(cpi);
-    // Use a small empty frame instead of a real frame
-    if (cpi->svc.encode_empty_frame_state == ENCODING)
-      source = &cpi->svc.empty_frame;
-#endif
-    if (oxcf->pass == 2)
-      vp9_restore_layer_context(cpi);
-  }
-
   vpx_usec_timer_start(&cmptimer);
 
   vp9_set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
 
   // Is multi-arf enabled.
-  // Note that at the moment multi_arf is only configured for 2 pass VBR and
-  // will not work properly with svc.
-  if ((oxcf->pass == 2) && !cpi->use_svc &&
+  if ((oxcf->pass == 2) &&
       (cpi->oxcf.enable_auto_arf > 1) && (cpi->oxcf.rc_mode == VPX_VBR))
     cpi->multi_arf_allowed = 1;
   else
@@ -3802,29 +3638,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // Should we encode an arf frame.
   arf_src_index = get_arf_src_index(cpi);
 
-  // Skip alt frame if we encode the empty frame
-  if (is_two_pass_svc(cpi) && source != NULL)
-    arf_src_index = 0;
-
   if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
 
     if ((source = vp9_lookahead_peek(cpi->lookahead, arf_src_index)) != NULL) {
       cpi->alt_ref_source = source;
-
-#if CONFIG_SPATIAL_SVC
-      if (is_two_pass_svc(cpi) && cpi->svc.spatial_layer_id > 0) {
-        int i;
-        // Reference a hidden frame from a lower layer
-        for (i = cpi->svc.spatial_layer_id - 1; i >= 0; --i) {
-          if (oxcf->ss_enable_auto_arf[i]) {
-            cpi->gld_fb_idx = cpi->svc.layer_context[i].alt_ref_idx;
-            break;
-          }
-        }
-      }
-      cpi->svc.layer_context[cpi->svc.spatial_layer_id].has_alt_frame = 1;
-#endif
 
       if (oxcf->arnr_max_frames > 0) {
         // Produce the filtered ARF frame.
@@ -3852,11 +3670,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     }
 
     // Read in the source frame.
-#if CONFIG_SPATIAL_SVC
-    if (is_two_pass_svc(cpi))
-      source = vp9_svc_lookahead_pop(cpi, cpi->lookahead, flush);
-    else
-#endif
       source = vp9_lookahead_pop(cpi->lookahead, flush);
     if (source != NULL) {
       cm->show_frame = 1;
@@ -3899,12 +3712,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     adjust_frame_rate(cpi, source);
   }
 
-  if (cpi->svc.number_temporal_layers > 1 &&
-      oxcf->rc_mode == VPX_CBR) {
-    vp9_update_temporal_layer_framerate(cpi);
-    vp9_restore_layer_context(cpi);
-  }
-
   // start with a 0 size frame
   *size = 0;
 
@@ -3916,14 +3723,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // For two pass encodes analyse the first pass stats and determine
   // the bit allocation and other parameters for this frame / group of frames.
-  if ((oxcf->pass == 2) &&
-      (!cpi->use_svc ||
-       (is_two_pass_svc(cpi) &&
-        cpi->svc.encode_empty_frame_state != ENCODING))) {
+  if (oxcf->pass == 2) {
     vp9_rc_get_second_pass_params(cpi);
   }
 
-  if (!cpi->use_svc && cpi->multi_arf_allowed) {
+  if (cpi->multi_arf_allowed) {
     if (cm->frame_type == KEY_FRAME) {
       init_buffer_indices(cpi);
     } else if (oxcf->pass == 2) {
@@ -3982,8 +3786,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     vp9_vaq_init();
   }
 
-  if (oxcf->pass == 1 &&
-      (!cpi->use_svc || is_two_pass_svc(cpi))) {
+  if (oxcf->pass == 1) {
     const int lossless = is_lossless_requested(oxcf);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cpi->oxcf.use_highbitdepth)
@@ -3997,11 +3800,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi, source);
-  } else if (oxcf->pass == 2 &&
-      (!cpi->use_svc || is_two_pass_svc(cpi))) {
+  } else if (oxcf->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);
-  } else if (cpi->use_svc) {
-    SvcEncode(cpi, size, dest, frame_flags);
   } else {
     // One pass encode
     Pass0Encode(cpi, size, dest, frame_flags);
@@ -4017,15 +3817,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   if (*size > 0) {
     cpi->droppable = !frame_is_reference(cpi);
-  }
-
-  // Save layer specific state.
-  if ((cpi->svc.number_temporal_layers > 1 &&
-       oxcf->rc_mode == VPX_CBR) ||
-      ((cpi->svc.number_temporal_layers > 1 ||
-        cpi->svc.number_spatial_layers > 1) &&
-       oxcf->pass == 2)) {
-    vp9_save_layer_context(cpi);
   }
 
   vpx_usec_timer_mark(&cmptimer);
@@ -4145,22 +3936,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       }
     }
   }
-
 #endif
-
-  if (is_two_pass_svc(cpi)) {
-    if (cpi->svc.encode_empty_frame_state == ENCODING)
-      cpi->svc.encode_empty_frame_state = ENCODED;
-
-    if (cm->show_frame) {
-      ++cpi->svc.spatial_layer_to_encode;
-      if (cpi->svc.spatial_layer_to_encode >= cpi->svc.number_spatial_layers)
-        cpi->svc.spatial_layer_to_encode = 0;
-
-      // May need the empty frame after an visible frame.
-      cpi->svc.encode_empty_frame_state = NEED_TO_ENCODE;
-    }
-  }
   return 0;
 }
 
@@ -4269,11 +4045,6 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
   update_frame_size(cpi);
 
   return 0;
-}
-
-void vp9_set_svc(VP9_COMP *cpi, int use_svc) {
-  cpi->use_svc = use_svc;
-  return;
 }
 
 int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b) {

@@ -32,7 +32,6 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_speed_features.h"
-#include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_variance.h"
 #if CONFIG_VP9_TEMPORAL_DENOISING
@@ -175,16 +174,6 @@ typedef struct VP9EncoderConfig {
   int two_pass_vbrmax_section;
   // END DATARATE CONTROL OPTIONS
   // ----------------------------------------------------------------
-
-  // Spatial and temporal scalability.
-  int ss_number_layers;  // Number of spatial layers.
-  int ts_number_layers;  // Number of temporal layers.
-  // Bitrate allocation for spatial layers.
-  int ss_target_bitrate[VPX_SS_MAX_LAYERS];
-  int ss_enable_auto_arf[VPX_SS_MAX_LAYERS];
-  // Bitrate allocation (CBR mode) and framerate factor, for temporal layers.
-  int ts_target_bitrate[VPX_TS_MAX_LAYERS];
-  int ts_rate_decimator[VPX_TS_MAX_LAYERS];
 
   int enable_auto_arf;
 
@@ -384,10 +373,6 @@ typedef struct VP9_COMP {
   int initial_width;
   int initial_height;
 
-  int use_svc;
-
-  SVC svc;
-
   // Store frame variance info in SOURCE_VAR_BASED_PARTITION search type.
   diff *source_diff_var;
   // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
@@ -486,8 +471,6 @@ int vp9_set_internal_size(VP9_COMP *cpi,
 int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height);
 
-void vp9_set_svc(VP9_COMP *cpi, int use_svc);
-
 int vp9_get_quantizer(struct VP9_COMP *cpi);
 
 static INLINE int get_ref_frame_idx(const VP9_COMP *cpi,
@@ -547,18 +530,9 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
 
 void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
 
-static INLINE int is_two_pass_svc(const struct VP9_COMP *const cpi) {
-  return cpi->use_svc &&
-         (cpi->svc.number_temporal_layers > 1 ||
-          cpi->svc.number_spatial_layers > 1) &&
-         (cpi->oxcf.pass == 1 || cpi->oxcf.pass == 2);
-}
-
 static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
   return cpi->oxcf.mode != REALTIME && cpi->oxcf.lag_in_frames > 0 &&
-         (cpi->oxcf.enable_auto_arf &&
-          (!is_two_pass_svc(cpi) ||
-           cpi->oxcf.ss_enable_auto_arf[cpi->svc.spatial_layer_id]));
+         cpi->oxcf.enable_auto_arf;
 }
 
 static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
