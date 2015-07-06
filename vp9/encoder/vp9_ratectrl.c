@@ -1900,3 +1900,86 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   }
   return resize_now;
 }
+
+// Compute average source sad (temporal sad: between current source and
+// previous source) over a subset of superblocks. Use this is detect big changes
+// in content and allow rate control to react.
+// TODO(marpan): Superblock sad is computed again in variance partition for
+// non-rd mode (but based on last reconstructed frame). Should try to reuse
+// these computations.
+void vp9_avg_source_sad(VP9_COMP *cpi) {
+  VP9_COMMON * const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  rc->high_source_sad = 0;
+  if (cpi->Last_Source != NULL) {
+    const uint8_t *src_y = cpi->Source->y_buffer;
+    const int src_ystride = cpi->Source->y_stride;
+    const uint8_t *last_src_y = cpi->Last_Source->y_buffer;
+    const int last_src_ystride = cpi->Last_Source->y_stride;
+    int sbi_row, sbi_col;
+    const BLOCK_SIZE bsize = BLOCK_64X64;
+    // Loop over sub-sample of frame, and compute average sad over 64x64 blocks.
+    uint64_t avg_sad = 0;
+    int num_samples = 0;
+    int sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
+    int sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
+    for (sbi_row = 0; sbi_row < sb_rows; sbi_row ++) {
+      for (sbi_col = 0; sbi_col < sb_cols; sbi_col ++) {
+        // Checker-board pattern, ignore boundary.
+        if ((sbi_row > 0 && sbi_col > 0) &&
+            (sbi_row < sb_rows - 1 && sbi_col < sb_cols - 1) &&
+            ((sbi_row % 2 == 0 && sbi_col % 2 == 0) ||
+            (sbi_row % 2 != 0 && sbi_col % 2 != 0))) {
+          num_samples++;
+          avg_sad += cpi->fn_ptr[bsize].sdf(src_y,
+                                            src_ystride,
+                                            last_src_y,
+                                            last_src_ystride);
+        }
+        src_y += 64;
+        last_src_y += 64;
+      }
+      src_y += (src_ystride << 6) - (sb_cols << 6);
+      last_src_y += (last_src_ystride << 6) - (sb_cols << 6);
+    }
+    if (num_samples > 0)
+      avg_sad = avg_sad / num_samples;
+    // Set high_source_sad flag if we detect very high increase in avg_sad
+    // between current and the previous frame value(s). Use a minimum threshold
+    // for cases where there is small change from content that is completely
+    // static.
+    if (avg_sad > MAX(4000, (rc->avg_source_sad << 3)) &&
+        rc->frames_since_key > 1)
+      rc->high_source_sad = 1;
+    else
+      rc->high_source_sad = 0;
+    rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
+  }
+}
+
+// Test if encoded frame will significantly overshoot the target bitrate, and
+// if so, set the QP, reset/adjust some rate control parameters, and return 1.
+int vp9_encodedframe_overshoot(VP9_COMP *cpi,
+                               int frame_size,
+                               int *q) {
+  VP9_COMMON * const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  int thresh_qp = 3 * (rc->worst_quality >> 2);
+  int thresh_rate = rc->avg_frame_bandwidth * 10;
+  if (cm->base_qindex < thresh_qp &&
+      frame_size > thresh_rate) {
+    // Force a re-encode, and for now use max-QP.
+    *q = cpi->rc.worst_quality;
+    // Adjust avg_frame_qindex and buffer_level, as these parameters will affect
+    // QP selection for subsequent frames. If they have settled down to a very
+    // different (low QP) state, then not re-adjusting them may cause next
+    // frame to select low QP and overshoot again.
+    // TODO(marpan): Check if rate correction factor should also be adjusted.
+    cpi->rc.avg_frame_qindex[INTER_FRAME] = *q;
+    rc->buffer_level = rc->optimal_buffer_level;
+    rc->bits_off_target = rc->optimal_buffer_level;
+    return 1;
+  } else {
+    return 0;
+  }
+}
