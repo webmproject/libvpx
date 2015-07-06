@@ -1358,7 +1358,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   int thisrate = 0, ref;
   const scan_order *so = &vp9_default_scan_orders[TX_4X4];
   const int is_compound = has_second_ref(&mi->mbmi);
-  const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
+  const InterpKernel *kernel = vp9_filter_kernels[mi->mbmi.interp_filter];
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const uint8_t *pre = &pd->pre[ref].buf[vp9_raster_block_offset(BLOCK_8X8, i,
@@ -1564,7 +1564,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                        mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]};
   int_mv ref_mv[2];
   int ite, ref;
-  const InterpKernel *kernel = vp9_get_interp_kernel(mbmi->interp_filter);
+  const InterpKernel *kernel = vp9_filter_kernels[mbmi->interp_filter];
   struct scale_factors sf;
 
   // Do joint motion search in compound mode to get more accurate mv.

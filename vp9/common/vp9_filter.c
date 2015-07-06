@@ -96,15 +96,9 @@ DECLARE_ALIGNED(256, static const InterpKernel,
 };
 
 
-static const InterpKernel* filter_kernels[4] = {
+const InterpKernel *vp9_filter_kernels[4] = {
   sub_pel_filters_8,
   sub_pel_filters_8lp,
   sub_pel_filters_8s,
   bilinear_filters
 };
-
-const InterpKernel *vp9_get_interp_kernel(INTERP_FILTER filter) {
-  assert(filter != SWITCHABLE);
-  return filter_kernels[filter];
-}
-

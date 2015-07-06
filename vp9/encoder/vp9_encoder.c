@@ -2562,7 +2562,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
   uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
   const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
-  const InterpKernel *const kernel = vp9_get_interp_kernel(EIGHTTAP);
+  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP];
   int x, y, i;
 
   for (y = 0; y < dst_h; y += 16) {
