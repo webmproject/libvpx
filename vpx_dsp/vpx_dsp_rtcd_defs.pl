@@ -37,6 +37,12 @@ if ($opts{arch} eq "x86_64") {
 
 if (vpx_config("CONFIG_ENCODERS") eq "yes") {
 #
+# Block subtraction
+#
+add_proto qw/void vpx_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
+specialize qw/vpx_subtract_block neon msa/, "$sse2_x86inc";
+
+#
 # Single block SAD
 #
 add_proto qw/unsigned int vpx_sad64x64/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
@@ -210,6 +216,12 @@ add_proto qw/void vpx_sad4x4x4d/, "const uint8_t *src_ptr, int src_stride, const
 specialize qw/vpx_sad4x4x4d msa/, "$sse_x86inc";
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+  #
+  # Block subtraction
+  #
+  add_proto qw/void vpx_highbd_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride, int bd";
+  specialize qw/vpx_highbd_subtract_block/;
+
   #
   # Single block SAD
   #

@@ -11,6 +11,7 @@
 
 #include "./vp9_rtcd.h"
 #include "./vpx_config.h"
+#include "./vpx_dsp_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
@@ -31,45 +32,6 @@ struct optimize_ctx {
   ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
 };
 
-void vp9_subtract_block_c(int rows, int cols,
-                          int16_t *diff, ptrdiff_t diff_stride,
-                          const uint8_t *src, ptrdiff_t src_stride,
-                          const uint8_t *pred, ptrdiff_t pred_stride) {
-  int r, c;
-
-  for (r = 0; r < rows; r++) {
-    for (c = 0; c < cols; c++)
-      diff[c] = src[c] - pred[c];
-
-    diff += diff_stride;
-    pred += pred_stride;
-    src  += src_stride;
-  }
-}
-
-#if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_subtract_block_c(int rows, int cols,
-                                 int16_t *diff, ptrdiff_t diff_stride,
-                                 const uint8_t *src8, ptrdiff_t src_stride,
-                                 const uint8_t *pred8, ptrdiff_t pred_stride,
-                                 int bd) {
-  int r, c;
-  uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
-  (void) bd;
-
-  for (r = 0; r < rows; r++) {
-    for (c = 0; c < cols; c++) {
-      diff[c] = src[c] - pred[c];
-    }
-
-    diff += diff_stride;
-    pred += pred_stride;
-    src  += src_stride;
-  }
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
 void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &x->e_mbd.plane[plane];
@@ -79,13 +41,13 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_highbd_subtract_block(bh, bw, p->src_diff, bw, p->src.buf,
+    vpx_highbd_subtract_block(bh, bw, p->src_diff, bw, p->src.buf,
                               p->src.stride, pd->dst.buf, pd->dst.stride,
                               x->e_mbd.bd);
     return;
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  vp9_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
+  vpx_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
                      pd->dst.buf, pd->dst.stride);
 }
 
@@ -838,7 +800,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
         if (!x->skip_recode) {
-          vp9_highbd_subtract_block(32, 32, src_diff, diff_stride,
+          vpx_highbd_subtract_block(32, 32, src_diff, diff_stride,
                                     src, src_stride, dst, dst_stride, xd->bd);
           highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
           vp9_highbd_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin,
@@ -859,7 +821,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
         if (!x->skip_recode) {
-          vp9_highbd_subtract_block(16, 16, src_diff, diff_stride,
+          vpx_highbd_subtract_block(16, 16, src_diff, diff_stride,
                                     src, src_stride, dst, dst_stride, xd->bd);
           vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
           vp9_highbd_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
@@ -881,7 +843,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
         if (!x->skip_recode) {
-          vp9_highbd_subtract_block(8, 8, src_diff, diff_stride,
+          vpx_highbd_subtract_block(8, 8, src_diff, diff_stride,
                                     src, src_stride, dst, dst_stride, xd->bd);
           vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
           vp9_highbd_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
@@ -904,7 +866,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 dst, dst_stride, i, j, plane);
 
         if (!x->skip_recode) {
-          vp9_highbd_subtract_block(4, 4, src_diff, diff_stride,
+          vpx_highbd_subtract_block(4, 4, src_diff, diff_stride,
                                     src, src_stride, dst, dst_stride, xd->bd);
           if (tx_type != DCT_DCT)
             vp9_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
@@ -946,7 +908,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
       if (!x->skip_recode) {
-        vp9_subtract_block(32, 32, src_diff, diff_stride,
+        vpx_subtract_block(32, 32, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
         fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
         vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
@@ -966,7 +928,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
       if (!x->skip_recode) {
-        vp9_subtract_block(16, 16, src_diff, diff_stride,
+        vpx_subtract_block(16, 16, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
         vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
         vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
@@ -986,7 +948,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
       if (!x->skip_recode) {
-        vp9_subtract_block(8, 8, src_diff, diff_stride,
+        vpx_subtract_block(8, 8, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
         vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
         vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
@@ -1007,7 +969,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               dst, dst_stride, i, j, plane);
 
       if (!x->skip_recode) {
-        vp9_subtract_block(4, 4, src_diff, diff_stride,
+        vpx_subtract_block(4, 4, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
         if (tx_type != DCT_DCT)
           vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);

@@ -14,6 +14,7 @@
 #include "test/register_state_check.h"
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vpx_mem/vpx_mem.h"
 
@@ -89,15 +90,15 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
 }
 
 INSTANTIATE_TEST_CASE_P(C, VP9SubtractBlockTest,
-                        ::testing::Values(vp9_subtract_block_c));
+                        ::testing::Values(vpx_subtract_block_c));
 
 #if HAVE_SSE2 && CONFIG_USE_X86INC
 INSTANTIATE_TEST_CASE_P(SSE2, VP9SubtractBlockTest,
-                        ::testing::Values(vp9_subtract_block_sse2));
+                        ::testing::Values(vpx_subtract_block_sse2));
 #endif
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, VP9SubtractBlockTest,
-                        ::testing::Values(vp9_subtract_block_neon));
+                        ::testing::Values(vpx_subtract_block_neon));
 #endif
 
 }  // namespace vp9

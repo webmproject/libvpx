@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
@@ -832,7 +833,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                   x->skip_encode ? src : dst,
                                   x->skip_encode ? src_stride : dst_stride,
                                   dst, dst_stride, idx, idy, 0);
-          vp9_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride,
+          vpx_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride,
                                     dst, dst_stride, xd->bd);
           if (xd->lossless) {
             const scan_order *so = &vp9_default_scan_orders[TX_4X4];
@@ -932,7 +933,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, idx, idy, 0);
-        vp9_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
+        vpx_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
 
         if (xd->lossless) {
           const scan_order *so = &vp9_default_scan_orders[TX_4X4];
@@ -1394,16 +1395,16 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_highbd_subtract_block(
+    vpx_highbd_subtract_block(
         height, width, vp9_raster_block_offset_int16(BLOCK_8X8, i, p->src_diff),
         8, src, p->src.stride, dst, pd->dst.stride, xd->bd);
   } else {
-    vp9_subtract_block(
+    vpx_subtract_block(
         height, width, vp9_raster_block_offset_int16(BLOCK_8X8, i, p->src_diff),
         8, src, p->src.stride, dst, pd->dst.stride);
   }
 #else
-  vp9_subtract_block(height, width,
+  vpx_subtract_block(height, width,
                      vp9_raster_block_offset_int16(BLOCK_8X8, i, p->src_diff),
                      8, src, p->src.stride, dst, pd->dst.stride);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
