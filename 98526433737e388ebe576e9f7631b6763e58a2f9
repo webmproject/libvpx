@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "534a1d43_d506ae25",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-06T21:41:14Z",
+      "side": 1,
+      "message": "there\u0027s no way to detect availability at compile time; if you wanted to add support to ffmpeg you\u0027d be forced to make configure check for the latest version.",
+      "revId": "98526433737e388ebe576e9f7631b6763e58a2f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
