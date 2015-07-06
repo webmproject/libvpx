@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "f80dae2c_37ac78a9",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-06T23:33:41Z",
+      "side": 1,
+      "message": "then it shouldn\u0027t be included in the move if it will require a more careful review, though before the move one should have a good idea if it\u0027s feasible to merge the two",
+      "parentUuid": "534a1d43_55b1de7a",
+      "range": {
+        "startLine": 23,
+        "startChar": 19,
+        "endLine": 23,
+        "endChar": 32
+      },
+      "revId": "432cd4bfb795534c8ba479fd735cc11dc8562469",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "334da95a_1432faaa",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 6
