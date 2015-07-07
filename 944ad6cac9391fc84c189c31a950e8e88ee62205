@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "736d61b3_1f2da6cd",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-07T19:31:55Z",
+      "side": 1,
+      "message": "It uses up to 14 bits. So both uint16_t and int16_t are fine. The result is then involved in subtraction, which requires int type. The original plan was to avoid converting uint to int in the next comparison stage.",
+      "parentUuid": "534a1d43_a6065e56",
+      "revId": "944ad6cac9391fc84c189c31a950e8e88ee62205",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f356b1ec_63faaa3b",
         "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
         "patchSetId": 5
