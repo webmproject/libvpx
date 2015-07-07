@@ -66,6 +66,30 @@
     },
     {
       "key": {
+        "uuid": "f356b1ec_63b1ca7b",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T19:26:23Z",
+      "side": 1,
+      "message": "oh woops. llvm has it defined in their targets, weird, but it\u0027s not an intrinsic or an actual instruction. that\u0027s awkward.",
+      "parentUuid": "534a1d43_06372a0c",
+      "range": {
+        "startLine": 56,
+        "startChar": 50,
+        "endLine": 56,
+        "endChar": 51
+      },
+      "revId": "944ad6cac9391fc84c189c31a950e8e88ee62205",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f80dae2c_bd5627a0",
         "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
         "patchSetId": 5
@@ -101,6 +125,30 @@
       "side": 1,
       "message": "I had the if statements with the shift by constant at first, but the generated code added 1-2 branches.",
       "parentUuid": "f80dae2c_bd5627a0",
+      "range": {
+        "startLine": 96,
+        "startChar": 25,
+        "endLine": 96,
+        "endChar": 35
+      },
+      "revId": "944ad6cac9391fc84c189c31a950e8e88ee62205",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f356b1ec_a399f200",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T19:26:23Z",
+      "side": 1,
+      "message": "i guess the hardcore alternative would be 16, 32, 64 specific functions. it\u0027d allow the compiler some more leeway with the larger values (i don\u0027t think it\u0027ll even unroll this twice, even though all the possibilities allow it)",
+      "parentUuid": "f356b1ec_63562aa2",
       "range": {
         "startLine": 96,
         "startChar": 25,
