@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "135425e3_6542acc0",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 1586,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "534a1d43_c6944297",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f80dae2c_20343067",
         "filename": "test/variance_test.cc",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-07T22:30:05Z",
       "side": 1,
       "message": "indent should be 4 in this case",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "736d61b3_d565cf97",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 1689,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f80dae2c_20343067",
       "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "135425e3_25d3447c",
+        "filename": "vpx_dsp/arm/subpel_variance_neon.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f80dae2c_6068e816",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f356b1ec_9ede0186",
         "filename": "vpx_dsp/mips/macros_msa.h",
         "patchSetId": 15
@@ -64,6 +118,24 @@
       "writtenOn": "2015-07-07T22:30:05Z",
       "side": 1,
       "message": "slid",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "534a1d43_012394b2",
+        "filename": "vpx_dsp/mips/macros_msa.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f356b1ec_9ede0186",
       "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "736d61b3_551e1feb",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "Done. These are from vp8, they don\u0027t exist in vp9 (and even their use in vp8 is weird - they\u0027re more like implementation details and shouldn\u0027t have been made available)",
+      "parentUuid": "f80dae2c_4b2985c0",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f80dae2c_cb035542",
         "filename": "vpx_dsp/variance.h",
         "patchSetId": 15
@@ -115,6 +205,24 @@
       "writtenOn": "2015-07-07T22:30:05Z",
       "side": 1,
       "message": "could drop this line",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f356b1ec_09601d04",
+        "filename": "vpx_dsp/variance.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f80dae2c_cb035542",
       "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "736d61b3_75423bc0",
+        "filename": "vpx_dsp/x86/highbd_variance_sse2.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "leftover from the original commit. hesitant to touch.",
+      "parentUuid": "736d61b3_35460325",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f356b1ec_29f081d9",
         "filename": "vpx_dsp/x86/variance_mmx.c",
         "patchSetId": 15
@@ -149,6 +275,24 @@
       "writtenOn": "2015-07-07T22:30:05Z",
       "side": 1,
       "message": "this file could be reindented later",
+      "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "135425e3_a57ad4e5",
+        "filename": "vpx_dsp/x86/variance_mmx.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T22:51:15Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f356b1ec_29f081d9",
       "revId": "ca2fe5cb5c32f98089aa4eff5bcce5e6ed717253",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
