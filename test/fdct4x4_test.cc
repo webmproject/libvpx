@@ -494,6 +494,14 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fwht4x4_mmx, &vp9_iwht4x4_16_add_c, 0, VPX_BITS_8)));
 #endif
 
+#if CONFIG_USE_X86INC && HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && \
+    !CONFIG_EMULATE_HARDWARE
+INSTANTIATE_TEST_CASE_P(
+    SSE2, Trans4x4WHT,
+    ::testing::Values(
+        make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_sse2, 0, VPX_BITS_8)));
+#endif
+
 #if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4DCT,
