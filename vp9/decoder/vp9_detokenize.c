@@ -17,7 +17,6 @@
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #include "vp9/common/vp9_idct.h"
 #endif
-#include "vp9/common/vp9_scan.h"
 
 #include "vp9/decoder/vp9_detokenize.h"
 
@@ -207,7 +206,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
 }
 
 int vp9_decode_block_tokens(MACROBLOCKD *xd,
-                            int plane, int block,
+                            int plane, const scan_order *sc,
                             BLOCK_SIZE plane_bsize, int x, int y,
                             TX_SIZE tx_size, vp9_reader *r,
                             int seg_id) {
@@ -215,10 +214,9 @@ int vp9_decode_block_tokens(MACROBLOCKD *xd,
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
-  const scan_order *so = get_scan(xd, tx_size, pd->plane_type, block);
   const int eob = decode_coefs(xd, pd->plane_type,
                                pd->dqcoeff, tx_size,
-                               dequant, ctx, so->scan, so->neighbors, r);
+                               dequant, ctx, sc->scan, sc->neighbors, r);
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   return eob;
 }

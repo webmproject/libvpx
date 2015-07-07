@@ -315,7 +315,10 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                           x, y, plane);
 
   if (!mi->mbmi.skip) {
-    const int eob = vp9_decode_block_tokens(xd, plane, block,
+    const scan_order *sc = (plane || xd->lossless) ?
+        &vp9_default_scan_orders[tx_size] :
+        &vp9_scan_orders[tx_size][intra_mode_to_tx_type_lookup[mode]];
+    const int eob = vp9_decode_block_tokens(xd, plane, sc,
                                             plane_bsize, x, y, tx_size,
                                             args->r, args->seg_id);
     inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride,
@@ -337,8 +340,9 @@ static void reconstruct_inter_block(int plane, int block,
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int x, y, eob;
+  const scan_order *sc = &vp9_default_scan_orders[tx_size];
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
-  eob = vp9_decode_block_tokens(xd, plane, block, plane_bsize,
+  eob = vp9_decode_block_tokens(xd, plane, sc, plane_bsize,
                                 x, y, tx_size, args->r, args->seg_id);
   inverse_transform_block(xd, plane, block, tx_size,
                           &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
