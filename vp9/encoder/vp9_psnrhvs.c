@@ -25,7 +25,7 @@
 
 void od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x, int xstride) {
   (void) xstride;
-  vp9_fdct8x8_c(x, y, ystride);
+  vp9_fdct8x8(x, y, ystride);
 }
 
 /* Normalized inverse quantization matrix for 8x8 DCT at the point of
