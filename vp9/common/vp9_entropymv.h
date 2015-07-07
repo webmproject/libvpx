@@ -106,8 +106,6 @@ static INLINE MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv) {
 }
 
 MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset);
-int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset);
-
 
 typedef struct {
   unsigned int sign[2];
