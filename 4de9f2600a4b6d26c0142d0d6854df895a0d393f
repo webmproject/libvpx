@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "135425e3_6479d2ec",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-07T16:29:14Z",
+      "side": 1,
+      "message": "Perhaps we should make a set of subtraction functions, each corresponds to a particular block size and call them via function pointer, like what we do for variance and SAD. This probably involves redesign the SIMD optimizations though.\n\nLet\u0027s keep this issue open and revisit it after the VPx factoring work(?)",
+      "parentUuid": "135425e3_04600604",
+      "range": {
+        "startLine": 23,
+        "startChar": 19,
+        "endLine": 23,
+        "endChar": 20
+      },
+      "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "135425e3_646f12f4",
         "filename": "vp8/encoder/encodemb.h",
         "patchSetId": 1
@@ -84,6 +108,24 @@
       "writtenOn": "2015-07-07T05:46:46Z",
       "side": 1,
       "message": "fix the alignment",
+      "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "135425e3_44a12ef6",
+        "filename": "vp8/encoder/encodemb.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-07T16:29:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "135425e3_646f12f4",
       "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
