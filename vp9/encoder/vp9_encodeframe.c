@@ -3349,8 +3349,13 @@ static void nonrd_select_partition(VP9_COMP *cpi,
   subsize = (bsize >= BLOCK_8X8) ? mi[0]->mbmi.sb_type : BLOCK_4X4;
   partition = partition_lookup[bsl][subsize];
 
-  if (bsize == BLOCK_32X32 && partition != PARTITION_NONE &&
-      subsize >= BLOCK_16X16) {
+  if (bsize == BLOCK_32X32 && subsize == BLOCK_32X32) {
+    x->max_partition_size = BLOCK_32X32;
+    x->min_partition_size = BLOCK_16X16;
+    nonrd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col, bsize,
+                         rd_cost, 0, INT64_MAX, pc_tree);
+  } else if (bsize == BLOCK_32X32 && partition != PARTITION_NONE &&
+             subsize >= BLOCK_16X16) {
     x->max_partition_size = BLOCK_32X32;
     x->min_partition_size = BLOCK_8X8;
     nonrd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col, bsize,
