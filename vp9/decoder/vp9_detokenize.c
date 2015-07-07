@@ -217,7 +217,7 @@ int vp9_decode_block_tokens(MACROBLOCKD *xd,
                                                pd->left_context + y);
   const scan_order *so = get_scan(xd, tx_size, pd->plane_type, block);
   const int eob = decode_coefs(xd, pd->plane_type,
-                               BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
+                               pd->dqcoeff, tx_size,
                                dequant, ctx, so->scan, so->neighbors, r);
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   return eob;
