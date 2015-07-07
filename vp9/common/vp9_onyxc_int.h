@@ -348,7 +348,7 @@ static INLINE void set_partition_probs(const VP9_COMMON *const cm,
           (const vp9_prob (*)[PARTITION_TYPES - 1])cm->fc->partition_prob;
 }
 
-static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
+static INLINE void vp9_init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
