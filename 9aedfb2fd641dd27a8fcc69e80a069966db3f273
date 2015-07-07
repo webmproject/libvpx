@@ -52,6 +52,24 @@
       "revId": "9aedfb2fd641dd27a8fcc69e80a069966db3f273",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8fb8a32_fef021dc",
+        "filename": "vp8/common/mips/msa/idct_msa.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-07-07T05:50:49Z",
+      "side": 1,
+      "message": "Ok. I will update this patch for consistency.",
+      "parentUuid": "736d61b3_8d435561",
+      "revId": "9aedfb2fd641dd27a8fcc69e80a069966db3f273",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
