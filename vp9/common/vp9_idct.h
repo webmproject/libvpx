@@ -37,6 +37,10 @@ extern "C" {
   _mm_set_epi16((int16_t)(b), (int16_t)(b), (int16_t)(b), (int16_t)(b), \
                 (int16_t)(a), (int16_t)(a), (int16_t)(a), (int16_t)(a))
 
+#define octa_set_epi16(a, b, c, d, e, f, g, h) \
+  _mm_setr_epi16((int16_t)(a), (int16_t)(b), (int16_t)(c), (int16_t)(d), \
+                 (int16_t)(e), (int16_t)(f), (int16_t)(g), (int16_t)(h))
+
 // Constants:
 //  for (int i = 1; i< 32; ++i)
 //    printf("static const int cospi_%d_64 = %.0f;\n", i,
@@ -158,7 +162,7 @@ typedef struct {
 // bd of x uses trans_low with 8+x bits, need to remove 24-x bits
 #define WRAPLOW(x, bd) ((((int32_t)(x)) << (24 - bd)) >> (24 - bd))
 #else
-#define WRAPLOW(x, bd) (x)
+#define WRAPLOW(x, bd) ((int32_t)(x))
 #endif  // CONFIG_EMULATE_HARDWARE
 
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,

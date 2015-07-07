@@ -392,7 +392,7 @@ void vpx_img_truncate_16_to_8(vpx_image_t *dst, vpx_image_t *src) {
           (uint16_t *)(src->planes[plane] + y * src->stride[plane]);
       uint8_t *p_dst = dst->planes[plane] + y * dst->stride[plane];
       for (x = 0; x < w; x++) {
-        *p_dst++ = *p_src++;
+        *p_dst++ = (uint8_t)(*p_src++);
       }
     }
   }
