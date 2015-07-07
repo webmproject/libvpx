@@ -16,6 +16,24 @@
       "revId": "10e1ab6f71efb0c51505430aa46509fa5dab3c83",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "731ba15b_a9a719c6",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-07-07T23:18:29Z",
+      "side": 1,
+      "message": "Agree, I will remove the duplicate cast and keep the cast here.",
+      "parentUuid": "135425e3_d7a78bc5",
+      "revId": "10e1ab6f71efb0c51505430aa46509fa5dab3c83",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
