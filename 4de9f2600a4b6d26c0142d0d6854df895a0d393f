@@ -22,6 +22,30 @@
       "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "93201584_c7ce0027",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-07T05:20:22Z",
+      "side": 1,
+      "message": "I kind of think these three wrapper functions provide better readability than directly calling vpx_subtract_block() function. They explicitly separate the use for 4x4 blocks, macroblock chroma components, and macroblock luma component.",
+      "parentUuid": "736d61b3_4762fe0c",
+      "range": {
+        "startLine": 23,
+        "startChar": 19,
+        "endLine": 23,
+        "endChar": 20
+      },
+      "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
