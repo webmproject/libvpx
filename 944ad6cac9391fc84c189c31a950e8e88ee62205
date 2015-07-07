@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "534a1d43_a6065e56",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T19:00:13Z",
+      "side": 1,
+      "message": "i wonder why hbuf is int, given that it accumulates unsigned values.",
+      "revId": "944ad6cac9391fc84c189c31a950e8e88ee62205",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f356b1ec_63faaa3b",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T19:00:13Z",
+      "side": 1,
+      "message": "the goal of this is to convert 64 -\u003e 5, 32 -\u003e 4, 16 -\u003e 3. skip the negation, the correct instruction exists for neon. vshrq_u16. unless there\u0027s some side effect where using the negative value causes a signed shift? should convert/reinterpret first in that case.",
+      "range": {
+        "startLine": 56,
+        "startChar": 50,
+        "endLine": 56,
+        "endChar": 51
+      },
+      "revId": "944ad6cac9391fc84c189c31a950e8e88ee62205",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f80dae2c_bd5627a0",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-07T19:00:13Z",
+      "side": 1,
+      "message": "the sse2 breaks this out with an if statement because, like neon, the instruction that does this only takes a constant, not a variable. vshrq_n_u16. not sure whether calculating and duping the value is better or the if statements.",
+      "range": {
+        "startLine": 96,
+        "startChar": 25,
+        "endLine": 96,
+        "endChar": 35
+      },
+      "revId": "944ad6cac9391fc84c189c31a950e8e88ee62205",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
