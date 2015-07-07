@@ -11,7 +11,7 @@
 #ifndef VP9_COMMON_MIPS_MSA_VP9_LOOPFILTER_MSA_H_
 #define VP9_COMMON_MIPS_MSA_VP9_LOOPFILTER_MSA_H_
 
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 #define VP9_LPF_FILTER4_8W(p1_in, p0_in, q0_in, q1_in, mask_in, hev_in,  \
                            p1_out, p0_out, q0_out, q1_out) {             \

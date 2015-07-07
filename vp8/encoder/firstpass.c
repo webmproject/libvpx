@@ -16,7 +16,7 @@
 #include "./vpx_scale_rtcd.h"
 #include "block.h"
 #include "onyx_int.h"
-#include "vp8/common/variance.h"
+#include "vpx_dsp/variance.h"
 #include "encodeintra.h"
 #include "vp8/common/setupintrarecon.h"
 #include "vp8/common/systemdependent.h"

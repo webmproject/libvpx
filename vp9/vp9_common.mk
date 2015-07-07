@@ -131,7 +131,6 @@ VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_mblpf_horiz_loopfilter_d
 VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_mblpf_vert_loopfilter_dspr2.c
 
 # common (msa)
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_macros_msa.h
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_avg_horiz_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_avg_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_avg_vert_msa.c

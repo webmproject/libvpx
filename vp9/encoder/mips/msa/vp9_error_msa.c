@@ -9,7 +9,7 @@
  */
 
 #include "./vp9_rtcd.h"
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 #define BLOCK_ERROR_BLOCKSIZE_MSA(BSize)                                   \
 static int64_t block_error_##BSize##size_msa(const int16_t *coeff_ptr,     \

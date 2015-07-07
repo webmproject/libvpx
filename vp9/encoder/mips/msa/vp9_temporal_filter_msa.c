@@ -9,7 +9,7 @@
  */
 
 #include "./vp9_rtcd.h"
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 static void temporal_filter_apply_8size_msa(uint8_t *frm1_ptr,
                                             uint32_t stride,

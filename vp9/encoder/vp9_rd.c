@@ -37,7 +37,6 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/encoder/vp9_variance.h"
 
 #define RD_THRESH_POW      1.25
 #define RD_MULT_EPB_RATIO  64

@@ -9,14 +9,13 @@
  */
 
 #include <arm_neon.h>
-#include "./vp9_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_config.h"
 
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 
-#include "vp9/common/vp9_filter.h"
+#include "vpx_dsp/variance.h"
 
 static const uint8_t bilinear_filters[8][2] = {
   { 128,   0, },
@@ -35,9 +34,9 @@ static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
                                       int pixel_step,
                                       unsigned int output_height,
                                       unsigned int output_width,
-                                      const uint8_t *vp9_filter) {
-  const uint8x8_t f0 = vmov_n_u8(vp9_filter[0]);
-  const uint8x8_t f1 = vmov_n_u8(vp9_filter[1]);
+                                      const uint8_t *filter) {
+  const uint8x8_t f0 = vmov_n_u8(filter[0]);
+  const uint8x8_t f1 = vmov_n_u8(filter[1]);
   unsigned int i;
   for (i = 0; i < output_height; ++i) {
     const uint8x8_t src_0 = vld1_u8(&src_ptr[0]);
@@ -58,9 +57,9 @@ static void var_filter_block2d_bil_w16(const uint8_t *src_ptr,
                                        int pixel_step,
                                        unsigned int output_height,
                                        unsigned int output_width,
-                                       const uint8_t *vp9_filter) {
-  const uint8x8_t f0 = vmov_n_u8(vp9_filter[0]);
-  const uint8x8_t f1 = vmov_n_u8(vp9_filter[1]);
+                                       const uint8_t *filter) {
+  const uint8x8_t f0 = vmov_n_u8(filter[0]);
+  const uint8x8_t f1 = vmov_n_u8(filter[1]);
   unsigned int i, j;
   for (i = 0; i < output_height; ++i) {
     for (j = 0; j < output_width; j += 16) {
@@ -80,7 +79,7 @@ static void var_filter_block2d_bil_w16(const uint8_t *src_ptr,
   }
 }
 
-unsigned int vp9_sub_pixel_variance8x8_neon(const uint8_t *src,
+unsigned int vpx_sub_pixel_variance8x8_neon(const uint8_t *src,
                                             int src_stride,
                                             int xoffset,
                                             int yoffset,
@@ -98,7 +97,7 @@ unsigned int vp9_sub_pixel_variance8x8_neon(const uint8_t *src,
   return vpx_variance8x8_neon(temp2, 8, dst, dst_stride, sse);
 }
 
-unsigned int vp9_sub_pixel_variance16x16_neon(const uint8_t *src,
+unsigned int vpx_sub_pixel_variance16x16_neon(const uint8_t *src,
                                               int src_stride,
                                               int xoffset,
                                               int yoffset,
@@ -116,7 +115,7 @@ unsigned int vp9_sub_pixel_variance16x16_neon(const uint8_t *src,
   return vpx_variance16x16_neon(temp2, 16, dst, dst_stride, sse);
 }
 
-unsigned int vp9_sub_pixel_variance32x32_neon(const uint8_t *src,
+unsigned int vpx_sub_pixel_variance32x32_neon(const uint8_t *src,
                                               int src_stride,
                                               int xoffset,
                                               int yoffset,
@@ -134,7 +133,7 @@ unsigned int vp9_sub_pixel_variance32x32_neon(const uint8_t *src,
   return vpx_variance32x32_neon(temp2, 32, dst, dst_stride, sse);
 }
 
-unsigned int vp9_sub_pixel_variance64x64_neon(const uint8_t *src,
+unsigned int vpx_sub_pixel_variance64x64_neon(const uint8_t *src,
                                               int src_stride,
                                               int xoffset,
                                               int yoffset,

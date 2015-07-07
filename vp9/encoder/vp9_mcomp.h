@@ -13,7 +13,7 @@
 #define VP9_ENCODER_VP9_MCOMP_H_
 
 #include "vp9/encoder/vp9_block.h"
-#include "vp9/encoder/vp9_variance.h"
+#include "vpx_dsp/variance.h"
 
 #ifdef __cplusplus
 extern "C" {

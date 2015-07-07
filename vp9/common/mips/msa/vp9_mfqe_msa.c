@@ -10,7 +10,7 @@
 
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 static void filter_by_weight8x8_msa(const uint8_t *src_ptr, int32_t src_stride,
                                     uint8_t *dst_ptr, int32_t dst_stride,

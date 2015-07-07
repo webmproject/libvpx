@@ -35,7 +35,7 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_rd.h"
-#include "vp9/encoder/vp9_variance.h"
+#include "vpx_dsp/variance.h"
 
 #define OUTPUT_FPF          0
 #define ARF_STATS_OUTPUT    0
@@ -298,7 +298,7 @@ void vp9_end_first_pass(VP9_COMP *cpi) {
   }
 }
 
-static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
+static vpx_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
   switch (bsize) {
     case BLOCK_8X8:
       return vpx_mse8x8;
@@ -315,13 +315,13 @@ static unsigned int get_prediction_error(BLOCK_SIZE bsize,
                                          const struct buf_2d *src,
                                          const struct buf_2d *ref) {
   unsigned int sse;
-  const vp9_variance_fn_t fn = get_block_variance_fn(bsize);
+  const vpx_variance_fn_t fn = get_block_variance_fn(bsize);
   fn(src->buf, src->stride, ref->buf, ref->stride, &sse);
   return sse;
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static vp9_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
+static vpx_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
                                                       int bd) {
   switch (bd) {
     default:
@@ -368,7 +368,7 @@ static unsigned int highbd_get_prediction_error(BLOCK_SIZE bsize,
                                                 const struct buf_2d *ref,
                                                 int bd) {
   unsigned int sse;
-  const vp9_variance_fn_t fn = highbd_get_block_variance_fn(bsize, bd);
+  const vpx_variance_fn_t fn = highbd_get_block_variance_fn(bsize, bd);
   fn(src->buf, src->stride, ref->buf, ref->stride, &sse);
   return sse;
 }
