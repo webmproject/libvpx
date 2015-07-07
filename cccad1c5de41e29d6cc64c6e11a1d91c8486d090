@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "135425e3_a5057485",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-07-07T22:36:34Z",
+      "side": 1,
+      "message": "Do you think at some point we could refactor this variable to be in a decoder struct and an encoder struct? At this point I think most places we use libvpx will define both the vp9 encoder and decoder.",
+      "range": {
+        "startLine": 194,
+        "startChar": 2,
+        "endLine": 194,
+        "endChar": 17
+      },
+      "revId": "cccad1c5de41e29d6cc64c6e11a1d91c8486d090",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
