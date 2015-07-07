@@ -16,6 +16,24 @@
       "revId": "9aedfb2fd641dd27a8fcc69e80a069966db3f273",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8fb8a32_3ed7a933",
+        "filename": "vp8/common/mips/msa/idct_msa.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-07-07T05:44:02Z",
+      "side": 1,
+      "message": "Yes. But keeping function/macro braces on their own lines gives style warnings as\n{ should almost always be at the end of the previous line",
+      "parentUuid": "135425e3_d6d8741b",
+      "revId": "9aedfb2fd641dd27a8fcc69e80a069966db3f273",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
