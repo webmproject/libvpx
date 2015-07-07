@@ -46,6 +46,47 @@
       "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "135425e3_04600604",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-07T05:46:46Z",
+      "side": 1,
+      "message": "this is no worse than the old vp8 asm adapters, though removing them might help as it will remove a function call, that would be better done as a subsequent change. the somewhat unfortunate thing here is that the block sizes are passed as variables, constants can help simplify loops in the asm.",
+      "parentUuid": "93201584_c7ce0027",
+      "range": {
+        "startLine": 23,
+        "startChar": 19,
+        "endLine": 23,
+        "endChar": 20
+      },
+      "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "135425e3_646f12f4",
+        "filename": "vp8/encoder/encodemb.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-07T05:46:46Z",
+      "side": 1,
+      "message": "fix the alignment",
+      "revId": "4de9f2600a4b6d26c0142d0d6854df895a0d393f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
