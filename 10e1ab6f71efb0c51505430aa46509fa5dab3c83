@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "135425e3_d7a78bc5",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-07T23:06:05Z",
+      "side": 1,
+      "message": "now you have a double cast on this one. this macro should define its return value and cast here I\u0027d say. or just make it a inline function",
+      "revId": "10e1ab6f71efb0c51505430aa46509fa5dab3c83",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
