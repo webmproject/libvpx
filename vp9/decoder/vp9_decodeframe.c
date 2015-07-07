@@ -188,7 +188,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   if (eob > 0) {
     TX_TYPE tx_type = DCT_DCT;
-    tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+    tran_low_t *const dqcoeff = pd->dqcoeff;
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (xd->lossless) {
