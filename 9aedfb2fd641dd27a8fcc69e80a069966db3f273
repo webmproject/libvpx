@@ -34,6 +34,24 @@
       "revId": "9aedfb2fd641dd27a8fcc69e80a069966db3f273",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "736d61b3_8d435561",
+        "filename": "vp8/common/mips/msa/idct_msa.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-07T05:48:04Z",
+      "side": 1,
+      "message": "they can be ignored since we\u0027re going for consistency. the build result will clear that -1.",
+      "parentUuid": "d8fb8a32_3ed7a933",
+      "revId": "9aedfb2fd641dd27a8fcc69e80a069966db3f273",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
