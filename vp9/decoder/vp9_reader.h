@@ -29,6 +29,11 @@ typedef size_t BD_VALUE;
 
 #define BD_VALUE_SIZE ((int)sizeof(BD_VALUE) * CHAR_BIT)
 
+// This is meant to be a large, positive constant that can still be efficiently
+// loaded as an immediate (on platforms like ARM, for example).
+// Even relatively modest values like 100 would work fine.
+#define LOTS_OF_BITS 0x40000000
+
 typedef struct {
   // Be careful when reordering this struct, it may impact the cache negatively.
   BD_VALUE value;
@@ -49,9 +54,25 @@ int vp9_reader_init(vp9_reader *r,
 
 void vp9_reader_fill(vp9_reader *r);
 
-int vp9_reader_has_error(vp9_reader *r);
-
 const uint8_t *vp9_reader_find_end(vp9_reader *r);
+
+static INLINE int vp9_reader_has_error(vp9_reader *r) {
+  // Check if we have reached the end of the buffer.
+  //
+  // Variable 'count' stores the number of bits in the 'value' buffer, minus
+  // 8. The top byte is part of the algorithm, and the remainder is buffered
+  // to be shifted into it. So if count == 8, the top 16 bits of 'value' are
+  // occupied, 8 for the algorithm and 8 in the buffer.
+  //
+  // When reading a byte from the user's buffer, count is filled with 8 and
+  // one byte is filled into the value buffer. When we reach the end of the
+  // data, count is additionally filled with LOTS_OF_BITS. So when
+  // count == LOTS_OF_BITS - 1, the user's data has been exhausted.
+  //
+  // 1 if we have tried to decode bits after the end of stream was encountered.
+  // 0 No error.
+  return r->count > BD_VALUE_SIZE && r->count < LOTS_OF_BITS;
+}
 
 static INLINE int vp9_read(vp9_reader *r, int prob) {
   unsigned int bit = 0;
