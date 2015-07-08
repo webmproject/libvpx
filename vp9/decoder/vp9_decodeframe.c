@@ -277,7 +277,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if (eob == 1) {
-      memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
+      dqcoeff[0] = 0;
     } else {
       if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
         memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
