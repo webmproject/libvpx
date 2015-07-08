@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "135425e3_cd3c5ef4",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-08T01:14:23Z",
+      "side": 1,
+      "message": "I don\u0027t expect much difference from this given the small size of the original memset, but note you\u0027re only setting 1 entry now rather than 2. I believe some older code did this, but I just want to verify this is your intent",
+      "revId": "76ccba9ec88fd421814a21f8049a16e71ae9d119",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
