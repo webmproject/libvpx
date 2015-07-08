@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "135425e3_8dca563d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-08T01:31:29Z",
+      "side": 1,
+      "message": "I assume the return is casting \u0027se\u0027 to a larger value, it should be fine to resize this one here, still though this macro is a bit gross",
+      "revId": "d6eafff68345d96ef34702802fa9ada3367e2587",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
