@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3219987_4b9e99b2",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-07-08T01:17:36Z",
+      "side": 1,
+      "message": "so shift is just BD_VALUE_SIZE - count, correct?",
+      "range": {
+        "startLine": 87,
+        "startChar": 58,
+        "endLine": 87,
+        "endChar": 60
+      },
+      "revId": "d8510b65ab7e3159aa881c3d58c722a8407f3cd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
