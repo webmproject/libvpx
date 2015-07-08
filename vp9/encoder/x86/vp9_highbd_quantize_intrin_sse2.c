@@ -85,13 +85,13 @@ void vp9_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
       for (j = 0; j < 4; j++) {
         if (test & (1 << (4 * j))) {
           int k = 4 * i + j;
-          int64_t tmp = clamp(abs_coeff[j] + round_ptr[k != 0],
-                              INT32_MIN, INT32_MAX);
-          tmp = ((((tmp * quant_ptr[k != 0]) >> 16) + tmp) *
-                    quant_shift_ptr[k != 0]) >> 16;  // quantization
-          qcoeff_ptr[k] = (tmp ^ coeff_sign[j]) - coeff_sign[j];
+          const int64_t tmp1 = abs_coeff[j] + round_ptr[k != 0];
+          const int64_t tmp2 = ((tmp1 * quant_ptr[k != 0]) >> 16) + tmp1;
+          const uint32_t abs_qcoeff =
+              (uint32_t)((tmp2 * quant_shift_ptr[k != 0]) >> 16);
+          qcoeff_ptr[k] = (int)(abs_qcoeff ^ coeff_sign[j]) - coeff_sign[j];
           dqcoeff_ptr[k] = qcoeff_ptr[k] * dequant_ptr[k != 0];
-          if (tmp)
+          if (abs_qcoeff)
             eob_i = iscan[k] > eob_i ? iscan[k] : eob_i;
         }
       }
@@ -162,17 +162,15 @@ void vp9_highbd_quantize_b_32x32_sse2(const tran_low_t *coeff_ptr,
       const int rc = idx_arr[i];
       const int coeff = coeff_ptr[rc];
       const int coeff_sign = (coeff >> 31);
-      int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
-      int64_t tmp = clamp(abs_coeff +
-                          ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1),
-                          INT32_MIN, INT32_MAX);
-      tmp = ((((tmp * quant_ptr[rc != 0]) >> 16) + tmp) *
-               quant_shift_ptr[rc != 0]) >> 15;
-
-      qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
+      const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
+      const int64_t tmp1 = abs_coeff
+                         + ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
+      const int64_t tmp2 = ((tmp1 * quant_ptr[rc != 0]) >> 16) + tmp1;
+      const uint32_t abs_qcoeff =
+          (uint32_t)((tmp2 * quant_shift_ptr[rc != 0]) >> 15);
+      qcoeff_ptr[rc] = (int)(abs_qcoeff ^ coeff_sign) - coeff_sign;
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
-
-      if (tmp)
+      if (abs_qcoeff)
         eob = iscan[idx_arr[i]] > eob ? iscan[idx_arr[i]] : eob;
     }
   }
