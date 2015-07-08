@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "736d61b3_0b42c8e2",
+        "filename": "vp9/common/vp9_systemdependent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-08T00:07:42Z",
+      "side": 1,
+      "message": "this appears to be neutral on arm and can be worse on atom/celeron platforms where bsr has a high latency. is it worth refining this further or making it an optional define?",
+      "revId": "4e846d38a8844fcad0e41e994e84d2108923d37b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
