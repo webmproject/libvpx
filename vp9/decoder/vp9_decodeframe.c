@@ -406,20 +406,20 @@ struct inter_args {
   int seg_id;
 };
 
-static void reconstruct_inter_block(int plane, int block,
+static void reconstruct_inter_block(int plane, int row, int col,
                                     BLOCK_SIZE plane_bsize,
-                                    TX_SIZE tx_size, void *arg) {
+                                    TX_SIZE tx_size, struct inter_args *arg) {
   struct inter_args *args = (struct inter_args *)arg;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  int x, y, eob;
+  int eob;
   const scan_order *sc = &vp9_default_scan_orders[tx_size];
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
   eob = vp9_decode_block_tokens(xd, plane, sc, plane_bsize,
-                                x, y, tx_size, args->r, args->seg_id);
+                                col, row, tx_size, args->r, args->seg_id);
+
   inverse_transform_block_inter(xd, plane, tx_size,
-                                &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
-                                pd->dst.stride, eob);
+                            &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
+                            pd->dst.stride, eob);
   *args->eobtotal += eob;
 }
 
@@ -838,7 +838,27 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
     if (!mbmi->skip) {
       int eobtotal = 0;
       struct inter_args arg = {xd, r, &eobtotal, mbmi->segment_id};
-      vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+      int plane;
+
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        const struct macroblockd_plane *const pd = &xd->plane[plane];
+        const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd)
+                                      : mbmi->tx_size;
+        const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+        const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+        const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+        const int step = (1 << tx_size);
+        int r, c;
+        const int max_blocks_wide = num_4x4_w + (xd->mb_to_right_edge >= 0 ?
+            0 : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
+        const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ?
+            0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+
+        for (r = 0; r < max_blocks_high; r += step)
+          for (c = 0; c < max_blocks_wide; c += step)
+            reconstruct_inter_block(plane, r, c, plane_bsize, tx_size, &arg);
+      }
+
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter
     }
