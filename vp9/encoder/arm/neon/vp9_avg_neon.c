@@ -47,3 +47,56 @@ unsigned int vp9_avg_8x8_neon(const uint8_t *s, int p) {
 
   return (horizontal_add_u16x8(v_sum) + 32) >> 6;
 }
+
+void vp9_int_pro_row_neon(int16_t hbuf[16], uint8_t const *ref,
+                          const int ref_stride, const int height) {
+  int i;
+  uint16x8_t vec_sum_lo = vdupq_n_u16(0);
+  uint16x8_t vec_sum_hi = vdupq_n_u16(0);
+  const int shift_factor = ((height >> 5) + 3) * -1;
+  const int16x8_t vec_shift = vdupq_n_s16(shift_factor);
+
+  for (i = 0; i < height; i += 8) {
+    const uint8x16_t vec_row1 = vld1q_u8(ref);
+    const uint8x16_t vec_row2 = vld1q_u8(ref + ref_stride);
+    const uint8x16_t vec_row3 = vld1q_u8(ref + ref_stride * 2);
+    const uint8x16_t vec_row4 = vld1q_u8(ref + ref_stride * 3);
+    const uint8x16_t vec_row5 = vld1q_u8(ref + ref_stride * 4);
+    const uint8x16_t vec_row6 = vld1q_u8(ref + ref_stride * 5);
+    const uint8x16_t vec_row7 = vld1q_u8(ref + ref_stride * 6);
+    const uint8x16_t vec_row8 = vld1q_u8(ref + ref_stride * 7);
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row1));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row1));
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row2));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row2));
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row3));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row3));
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row4));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row4));
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row5));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row5));
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row6));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row6));
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row7));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row7));
+
+    vec_sum_lo = vaddw_u8(vec_sum_lo, vget_low_u8(vec_row8));
+    vec_sum_hi = vaddw_u8(vec_sum_hi, vget_high_u8(vec_row8));
+
+    ref += ref_stride * 8;
+  }
+
+  vec_sum_lo = vshlq_u16(vec_sum_lo, vec_shift);
+  vec_sum_hi = vshlq_u16(vec_sum_hi, vec_shift);
+
+  vst1q_s16(hbuf, vreinterpretq_s16_u16(vec_sum_lo));
+  hbuf += 8;
+  vst1q_s16(hbuf, vreinterpretq_s16_u16(vec_sum_hi));
+}
