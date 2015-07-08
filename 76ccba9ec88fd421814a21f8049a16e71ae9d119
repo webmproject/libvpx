@@ -16,6 +16,24 @@
       "revId": "76ccba9ec88fd421814a21f8049a16e71ae9d119",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "534a1d43_79ddf883",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-08T16:01:38Z",
+      "side": 1,
+      "message": "Yes, it is intended. if eob is 1, the only non-zero dqcoeff is the first one. So one only needs to reset dqcoeff[0].",
+      "parentUuid": "135425e3_cd3c5ef4",
+      "revId": "76ccba9ec88fd421814a21f8049a16e71ae9d119",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
