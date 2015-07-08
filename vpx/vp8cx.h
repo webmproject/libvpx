@@ -207,7 +207,17 @@ enum vp8e_enc_control_id {
    *  0: off, 1: OnYOnly
    */
   VP9E_SET_NOISE_SENSITIVITY,
+
+  VP9E_SET_SVC,
+  VP9E_SET_SVC_PARAMETERS,
+  /*!\brief control function to set svc layer for spatial and temporal.
+   * \note Valid ranges: 0..#vpx_codec_enc_cfg::ss_number_layers for spatial
+   *                     layer and 0..#vpx_codec_enc_cfg::ts_number_layers for
+   *                     temporal layer.
+   */
+  VP9E_SET_SVC_LAYER_ID,
   VP9E_SET_TUNE_CONTENT,
+  VP9E_GET_SVC_LAYER_ID,
   VP9E_REGISTER_CX_CALLBACK,
 
   /*!\brief control function to set color space info.
@@ -310,6 +320,18 @@ typedef enum {
   VP8_TUNE_SSIM
 } vp8e_tuning;
 
+/*!\brief  vp9 svc layer parameters
+ *
+ * This defines the spatial and temporal layer id numbers for svc encoding.
+ * This is used with the #VP9E_SET_SVC_LAYER_ID control to set the spatial and
+ * temporal layer id for the current frame.
+ *
+ */
+typedef struct vpx_svc_layer_id {
+  int spatial_layer_id;       /**< Spatial layer id number. */
+  int temporal_layer_id;      /**< Temporal layer id number. */
+} vpx_svc_layer_id_t;
+
 /*!\brief VP8 encoder control function parameter type
  *
  * Defines the data types that VP8E control functions take. Note that
@@ -328,6 +350,10 @@ VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_USE_REFERENCE,          int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ROI_MAP,            vpx_roi_map_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_ACTIVEMAP,          vpx_active_map_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC,                int)
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC_PARAMETERS,     void *)
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC_LAYER_ID,       vpx_svc_layer_id_t *)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ENABLEAUTOALTREF,   unsigned int)

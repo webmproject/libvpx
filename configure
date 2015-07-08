@@ -278,6 +278,7 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
+    spatial_svc
     vp9_temporal_denoising
     fp_mb_stats
     emulate_hardware
