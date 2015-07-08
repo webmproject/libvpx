@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "388746d3_a1461e72",
+        "filename": "vp9/common/x86/vp9_loopfilter_sse2.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-07-08T23:39:43Z",
+      "side": 1,
+      "message": "You need to add GET_GOT to support build for 32bit PIC.",
+      "range": {
+        "startLine": 71,
+        "startChar": 11,
+        "endLine": 71,
+        "endChar": 12
+      },
+      "revId": "0b0af57dd8686e6c8aa7870e0e58dc5997111574",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
