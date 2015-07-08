@@ -242,6 +242,7 @@ static int read_mv_component(vp9_reader *r,
   // Integer part
   if (class0) {
     d = vp9_read_tree(r, vp9_mv_class0_tree, mvcomp->class0);
+    mag = 0;
   } else {
     int i;
     const int n = mv_class + CLASS0_BITS - 1;  // number of bits
@@ -249,6 +250,7 @@ static int read_mv_component(vp9_reader *r,
     d = 0;
     for (i = 0; i < n; ++i)
       d |= vp9_read(r, mvcomp->bits[i]) << i;
+    mag = CLASS0_SIZE << (mv_class + 2);
   }
 
   // Fractional part
@@ -260,7 +262,7 @@ static int read_mv_component(vp9_reader *r,
              : 1;
 
   // Result
-  mag = vp9_get_mv_mag(mv_class, (d << 3) | (fr << 1) | hp) + 1;
+  mag += ((d << 3) | (fr << 1) | hp) + 1;
   return sign ? -mag : mag;
 }
 

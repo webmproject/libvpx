@@ -132,10 +132,6 @@ int vp9_use_mv_hp(const MV *ref) {
          (abs(ref->col) >> 3) < COMPANDED_MVREF_THRESH;
 }
 
-int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset) {
-  return mv_class_base(c) + offset;
-}
-
 static void inc_mv_component(int v, nmv_component_counts *comp_counts,
                              int incr, int usehp) {
   int s, z, c, o, d, e, f;
