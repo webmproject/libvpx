@@ -1324,11 +1324,12 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
       tile_data->xd.corrupted = 0;
       tile_data->xd.counts = cm->frame_parallel_decoding_mode ?
                              NULL : &cm->counts;
+      vp9_zero(tile_data->dqcoeff);
       vp9_tile_init(&tile_data->xd.tile, tile_data->cm, tile_row, tile_col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
-      vp9_init_macroblockd(cm, &tile_data->xd);
+      vp9_init_macroblockd(cm, &tile_data->xd, tile_data->dqcoeff);
     }
   }
 
@@ -1543,12 +1544,13 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       tile_data->xd.corrupted = 0;
       tile_data->xd.counts = cm->frame_parallel_decoding_mode ?
                              0 : &tile_data->counts;
+      vp9_zero(tile_data->dqcoeff);
       vp9_tile_init(tile, cm, 0, buf->col);
       vp9_tile_init(&tile_data->xd.tile, cm, 0, buf->col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
-      vp9_init_macroblockd(cm, &tile_data->xd);
+      vp9_init_macroblockd(cm, &tile_data->xd, tile_data->dqcoeff);
 
       worker->had_error = 0;
       if (i == num_workers - 1 || n == tile_cols - 1) {

@@ -732,7 +732,7 @@ static void update_frame_size(VP9_COMP *cpi) {
 
   vp9_set_mb_mi(cm, cm->width, cm->height);
   vp9_init_context_buffers(cm);
-  vp9_init_macroblockd(cm, xd);
+  vp9_init_macroblockd(cm, xd, NULL);
   cpi->td.mb.mbmi_ext_base = cpi->mbmi_ext_base;
   memset(cpi->mbmi_ext_base, 0,
          cm->mi_rows * cm->mi_cols * sizeof(*cpi->mbmi_ext_base));

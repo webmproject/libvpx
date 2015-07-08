@@ -348,11 +348,12 @@ static INLINE void set_partition_probs(const VP9_COMMON *const cm,
           (const vp9_prob (*)[PARTITION_TYPES - 1])cm->fc->partition_prob;
 }
 
-static INLINE void vp9_init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
+static INLINE void vp9_init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                        tran_low_t *dqcoeff) {
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    xd->plane[i].dqcoeff = xd->dqcoeff;
+    xd->plane[i].dqcoeff = dqcoeff;
     xd->above_context[i] = cm->above_context +
         i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
 
