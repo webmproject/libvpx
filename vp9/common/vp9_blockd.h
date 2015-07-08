@@ -187,12 +187,6 @@ typedef struct macroblockd {
   int bd;
 #endif
 
-  /* dqcoeff are shared by all the planes. So planes must be decoded serially */
-#if CONFIG_VP9_ENCODER
-  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[64 * 64]);
-#else
-  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
-#endif
   int lossless;
   int corrupted;
 
