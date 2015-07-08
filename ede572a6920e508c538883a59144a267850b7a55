@@ -59,6 +59,23 @@
     },
     {
       "key": {
+        "uuid": "58e87a65_e85aa7fc",
+        "filename": "vp9/common/x86/vp9_idct_mmx.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-07-08T05:29:29Z",
+      "side": 1,
+      "message": "Also since the transpose happens first and inputq is linear SSE might actually be useful here even though the vec size is 4xint16",
+      "revId": "ede572a6920e508c538883a59144a267850b7a55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f80dae2c_e653f060",
         "filename": "vp9/common/x86/vp9_idct_mmx.asm",
         "patchSetId": 1
