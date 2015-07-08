@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d3260d9c_09c3cd2d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-07-08T14:34:56Z",
+      "side": 1,
+      "message": "Make a dct_dct only version of this function.  Then you can eliminate an unnecessary \"if (tx_type \u003d\u003d DCT_DCT)\" check in the vp9_ihtXxX_add() by calling the correct dct_dct idct function.  ie call vp9_idct4x4_add() instead of vp9_iht4x4_add()",
+      "revId": "a3f706b4ecdfaa5792eb001a88dbf3dc96ad0316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
