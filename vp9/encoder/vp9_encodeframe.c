@@ -194,7 +194,6 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
 
-
   mbmi = &xd->mi[0]->mbmi;
 
   // Set up destination pointers.

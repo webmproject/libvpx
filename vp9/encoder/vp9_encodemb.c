@@ -763,7 +763,7 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
 }
 
 void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
-                               TX_SIZE tx_size, void *arg) {
+                            TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
