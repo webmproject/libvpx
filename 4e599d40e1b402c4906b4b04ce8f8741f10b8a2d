@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b81fb653_97257fbb",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-07-08T23:44:54Z",
+      "side": 1,
+      "message": "Should be aligned to the left",
+      "range": {
+        "startLine": 65,
+        "startChar": 6,
+        "endLine": 65,
+        "endChar": 17
+      },
+      "revId": "4e599d40e1b402c4906b4b04ce8f8741f10b8a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
