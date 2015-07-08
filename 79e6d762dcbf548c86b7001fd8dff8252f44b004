@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "135425e3_ad3d5a80",
+        "filename": "vp9/encoder/x86/vp9_highbd_quantize_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-08T02:27:09Z",
+      "side": 1,
+      "message": "some intermediate const\u0027s would help here in readability",
+      "revId": "79e6d762dcbf548c86b7001fd8dff8252f44b004",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

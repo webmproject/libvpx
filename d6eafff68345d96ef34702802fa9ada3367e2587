@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f356b1ec_e484e05f",
+        "filename": "vp9/encoder/x86/vp9_highbd_quantize_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-08T02:27:09Z",
+      "side": 0,
+      "message": "weird. but this is where documenting the coeff ranges in the c-code can help",
+      "revId": "d6eafff68345d96ef34702802fa9ada3367e2587",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
