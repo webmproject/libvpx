@@ -3835,7 +3835,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
       if (cpi->b_calculate_psnr) {
         YV12_BUFFER_CONFIG *orig = cpi->Source;
-        YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
+        YV12_BUFFER_CONFIG *recon = cm->frame_to_show;
         YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
         PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
