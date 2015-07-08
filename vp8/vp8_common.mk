@@ -115,6 +115,7 @@ VP8_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/dequantize_dspr2.c
 
 # common (c)
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct_msa.c
+VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/loopfilter_filters_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp8_macros_msa.h
 
 # common (c)
