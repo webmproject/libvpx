@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "534a1d43_2d0c0645",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-07-08T20:49:39Z",
+      "side": 1,
+      "message": "Yes, This is what happens when trying to get something uploaded before catching the bus.",
+      "parentUuid": "534a1d43_8c3fbb3f",
+      "revId": "1cc0e7620e4ab38520c7460c5a5fa0a6f863857b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "135425e3_edbe8200",
         "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-08T00:58:55Z",
       "side": 1,
       "message": "this is defined to be an immediate; unoptimized or older gcc builds will probably fail",
+      "revId": "1cc0e7620e4ab38520c7460c5a5fa0a6f863857b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "534a1d43_8d1b3279",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-07-08T20:49:39Z",
+      "side": 1,
+      "message": "I looked into the docs and it didn\u0027t say immediate. I found this https://gcc.gnu.org/bugzilla/show_bug.cgi?id\u003d32961 which talked about gcc at one time not compiling this code. Anyway I can switch this to use a register.",
+      "parentUuid": "135425e3_edbe8200",
       "revId": "1cc0e7620e4ab38520c7460c5a5fa0a6f863857b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
