@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f80dae2c_562925c0",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1327,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-07-08T19:38:22Z",
+      "side": 1,
+      "message": "Why do these need to be pre-zeroed?",
+      "parentUuid": "731ba15b_8c16eb04",
+      "revId": "7e64cda4b939e934bdae8914ed6de9e632511902",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3219987_f9c39f7b",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 3
@@ -47,6 +65,24 @@
       "writtenOn": "2015-07-08T19:34:22Z",
       "side": 1,
       "message": "Is this one needed?",
+      "revId": "7e64cda4b939e934bdae8914ed6de9e632511902",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "534a1d43_324c6594",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-07-08T19:38:22Z",
+      "side": 1,
+      "message": "Turns out this one was just a poor man\u0027s memset",
+      "parentUuid": "731ba15b_ac1ba72d",
       "revId": "7e64cda4b939e934bdae8914ed6de9e632511902",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
