@@ -128,6 +128,11 @@ struct macroblockd_plane {
   ENTROPY_CONTEXT *left_context;
   int16_t seg_dequant[MAX_SEGMENTS][2];
 
+  // number of 4x4s in current block
+  uint16_t n4_w, n4_h;
+  // log2 of n4_w, n4_h
+  uint8_t n4_wl, n4_hl;
+
   // encoder
   const int16_t *dequant;
 };
@@ -144,6 +149,8 @@ typedef struct RefBuffer {
 
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
+  uint8_t bmode_blocks_wl;
+  uint8_t bmode_blocks_hl;
 
   FRAME_COUNTS *counts;
   TileInfo tile;
