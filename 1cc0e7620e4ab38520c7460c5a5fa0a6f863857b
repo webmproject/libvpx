@@ -69,6 +69,24 @@
       "revId": "1cc0e7620e4ab38520c7460c5a5fa0a6f863857b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "789c5e2a_3b5237e1",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-09T15:55:51Z",
+      "side": 1,
+      "message": "https://code.google.com/p/webm/issues/detail?id\u003d958\n\n(openbsd gcc 4.2 I believe); though psraw should work with both, so it probably was a bug...",
+      "parentUuid": "534a1d43_8d1b3279",
+      "revId": "1cc0e7620e4ab38520c7460c5a5fa0a6f863857b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
