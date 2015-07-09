@@ -2906,16 +2906,13 @@ int vp9_internal_image_edge(VP9_COMP *cpi) {
     (cpi->twopass.this_frame_stats.inactive_zone_cols > 0));
 }
 
-// Checks to see if a macro block is at the edge of the active image.
+// Checks to see if a super block is on a horizontal image edge.
 // In most cases this is the "real" edge unless there are formatting
 // bars embedded in the stream.
-int vp9_active_edge_sb(VP9_COMP *cpi,
-  int mi_row, int mi_col) {
-  int is_active_edge = 0;
+int vp9_active_h_edge(VP9_COMP *cpi, int mi_row, int mi_step) {
   int top_edge = 0;
   int bottom_edge = cpi->common.mi_rows;
-  int left_edge = 0;
-  int right_edge = cpi->common.mi_cols;
+  int is_active_h_edge = 0;
 
   // For two pass account for any formatting bars detected.
   if (cpi->oxcf.pass == 2) {
@@ -2929,14 +2926,47 @@ int vp9_active_edge_sb(VP9_COMP *cpi,
     bottom_edge = MAX(top_edge, bottom_edge);
   }
 
-  if (((top_edge >= mi_row) && (top_edge < (mi_row + MI_BLOCK_SIZE))) ||
-    ((bottom_edge >= mi_row) && (bottom_edge < (mi_row + MI_BLOCK_SIZE))) ||
-    ((left_edge >= mi_col) && (left_edge < (mi_col + MI_BLOCK_SIZE))) ||
-    ((right_edge >= mi_col) && (right_edge < (mi_col + MI_BLOCK_SIZE)))) {
-    is_active_edge = 1;
+  if (((top_edge >= mi_row) && (top_edge < (mi_row + mi_step))) ||
+      ((bottom_edge >= mi_row) && (bottom_edge < (mi_row + mi_step)))) {
+    is_active_h_edge = 1;
+  }
+  return is_active_h_edge;
+}
+
+// Checks to see if a super block is on a vertical image edge.
+// In most cases this is the "real" edge unless there are formatting
+// bars embedded in the stream.
+int vp9_active_v_edge(VP9_COMP *cpi, int mi_col, int mi_step) {
+  int left_edge = 0;
+  int right_edge = cpi->common.mi_cols;
+  int is_active_v_edge = 0;
+
+  // For two pass account for any formatting bars detected.
+  if (cpi->oxcf.pass == 2) {
+    TWO_PASS *twopass = &cpi->twopass;
+
+    // The inactive region is specified in MBs not mi units.
+    // The image edge is in the following MB row.
+    left_edge += (int)(twopass->this_frame_stats.inactive_zone_cols * 2);
+
+    right_edge -= (int)(twopass->this_frame_stats.inactive_zone_cols * 2);
+    right_edge = MAX(left_edge, right_edge);
   }
 
-  return is_active_edge;
+  if (((left_edge >= mi_col) && (left_edge < (mi_col + mi_step))) ||
+      ((right_edge >= mi_col) && (right_edge < (mi_col + mi_step)))) {
+    is_active_v_edge = 1;
+  }
+  return is_active_v_edge;
+}
+
+// Checks to see if a super block is at the edge of the active image.
+// In most cases this is the "real" edge unless there are formatting
+// bars embedded in the stream.
+int vp9_active_edge_sb(VP9_COMP *cpi,
+                       int mi_row, int mi_col) {
+  return vp9_active_h_edge(cpi, mi_row, MI_BLOCK_SIZE) ||
+         vp9_active_v_edge(cpi, mi_col, MI_BLOCK_SIZE);
 }
 
 void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
