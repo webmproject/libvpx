@@ -12,6 +12,8 @@
 
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_speed_features.h"
+#include "vp9/encoder/vp9_rdopt.h"
+
 
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
@@ -90,7 +92,8 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   // If this is a two pass clip that fits the criteria for animated or
   // graphics content then reset disable_split_mask for speeds 1-4.
   if ((speed >= 1) && (cpi->oxcf.pass == 2) &&
-      (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION)) {
+      ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
+       (vp9_internal_image_edge(cpi)))) {
     sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
   }
 
