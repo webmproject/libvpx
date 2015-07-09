@@ -22,6 +22,52 @@
       "revId": "4e599d40e1b402c4906b4b04ce8f8741f10b8a2d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98a11261_a5462472",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-07-09T18:31:57Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 70,
+        "startChar": 6,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "4e599d40e1b402c4906b4b04ce8f8741f10b8a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "387026c3_df4c5396",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-07-09T18:31:57Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 76,
+        "startChar": 4,
+        "endLine": 76,
+        "endChar": 7
+      },
+      "revId": "4e599d40e1b402c4906b4b04ce8f8741f10b8a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
