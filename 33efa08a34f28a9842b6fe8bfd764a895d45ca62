@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b95978ea_2574eef3",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2015-07-09T18:14:22Z",
+      "side": 1,
+      "message": "why ifneq if in the original code you did ifeq?",
+      "parentUuid": "992af412_a8d683ec",
+      "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "79254042_47555e93",
         "filename": "test/android/Android.mk",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "f967709d_2a2a7f09",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2015-07-09T18:14:22Z",
+      "side": 1,
+      "message": "to build vpxdec/vpxenc thats why I used examples.mk.\nwhat is CONFIG_EXAMPLES?",
+      "parentUuid": "79254042_47555e93",
+      "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b92b3816_ea146b01",
         "filename": "test/android/README",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-06-11T02:35:24Z",
       "side": 1,
       "message": "let\u0027s keep this consistent, the only difference should be the removal of --disable-examples or --enable-examples to be explicit; the platform shouldn\u0027t matter.",
+      "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "795380ca_463014a4",
+        "filename": "test/android/README",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2015-07-09T18:14:22Z",
+      "side": 1,
+      "message": "I can remove the line on x86, I just dont understand why --disable-examples or --enable-examples matters?",
+      "parentUuid": "b92b3816_ea146b01",
       "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
