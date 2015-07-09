@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8970a01_b22c284f",
+        "filename": "vp9/common/x86/vp9_loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-07-09T19:33:05Z",
+      "side": 1,
+      "message": "GLOBAL should not be removed. You need to add GET_GOT as you did for the other patch.",
+      "range": {
+        "startLine": 679,
+        "startChar": 20,
+        "endLine": 679,
+        "endChar": 21
+      },
+      "revId": "2167bd54a1342a567bfe2f5e9e6337a4f4725779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
