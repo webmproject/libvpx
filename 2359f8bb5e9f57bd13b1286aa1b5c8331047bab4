@@ -33,6 +33,24 @@
       "revId": "2359f8bb5e9f57bd13b1286aa1b5c8331047bab4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9fdf8c1_dfaf03ed",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2015-07-09T18:14:22Z",
+      "side": 1,
+      "message": "because I thought that if the regular vpxdec/enc is compiled inside the libvpx then that should do too.\nif I will compile outside of libvpx all the files that are generated will be generated outside of libvpx.",
+      "parentUuid": "19d6040d_c669361f",
+      "revId": "2359f8bb5e9f57bd13b1286aa1b5c8331047bab4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
