@@ -91,41 +91,44 @@ static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
     return MIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
 }
 
-static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
-                           int mi_row, int mi_col, int segment_id) {
-  const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = num_8x8_blocks_wide_lookup[bsize];
-  const int bh = num_8x8_blocks_high_lookup[bsize];
-  const int xmis = MIN(cm->mi_cols - mi_col, bw);
-  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+static int dec_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
+                              int mi_offset, int x_mis, int y_mis) {
+  int x, y, segment_id = INT_MAX;
+
+  for (y = 0; y < y_mis; y++)
+    for (x = 0; x < x_mis; x++)
+      segment_id = MIN(segment_id,
+                       segment_ids[mi_offset + y * cm->mi_cols + x]);
+
+  assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
+  return segment_id;
+}
+
+static void set_segment_id(VP9_COMMON *cm, int mi_offset,
+                           int x_mis, int y_mis, int segment_id) {
   int x, y;
 
   assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
 
-  for (y = 0; y < ymis; y++)
-    for (x = 0; x < xmis; x++)
+  for (y = 0; y < y_mis; y++)
+    for (x = 0; x < x_mis; x++)
       cm->current_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
 }
 
 static void copy_segment_id(const VP9_COMMON *cm,
                            const uint8_t *last_segment_ids,
                            uint8_t *current_segment_ids,
-                           BLOCK_SIZE bsize, int mi_row, int mi_col) {
-  const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = num_8x8_blocks_wide_lookup[bsize];
-  const int bh = num_8x8_blocks_high_lookup[bsize];
-  const int xmis = MIN(cm->mi_cols - mi_col, bw);
-  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+                           int mi_offset, int x_mis, int y_mis) {
   int x, y;
 
-  for (y = 0; y < ymis; y++)
-    for (x = 0; x < xmis; x++)
+  for (y = 0; y < y_mis; y++)
+    for (x = 0; x < x_mis; x++)
       current_segment_ids[mi_offset + y * cm->mi_cols + x] =  last_segment_ids ?
           last_segment_ids[mi_offset + y * cm->mi_cols + x] : 0;
 }
 
-static int read_intra_segment_id(VP9_COMMON *const cm, BLOCK_SIZE bsize,
-                                 int mi_row, int mi_col,
+static int read_intra_segment_id(VP9_COMMON *const cm, int mi_offset,
+                                 int x_mis, int y_mis,
                                  vp9_reader *r) {
   struct segmentation *const seg = &cm->seg;
   int segment_id;
@@ -135,12 +138,12 @@ static int read_intra_segment_id(VP9_COMMON *const cm, BLOCK_SIZE bsize,
 
   if (!seg->update_map) {
     copy_segment_id(cm, cm->last_frame_seg_map, cm->current_frame_seg_map,
-                    bsize, mi_row, mi_col);
+                    mi_offset, x_mis, y_mis);
     return 0;
   }
 
   segment_id = read_segment_id(r, seg);
-  set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
+  set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;
 }
 
@@ -148,18 +151,25 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col, vp9_reader *r) {
   struct segmentation *const seg = &cm->seg;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
   int predicted_segment_id, segment_id;
+  const int mi_offset = mi_row * cm->mi_cols + mi_col;
+  const int bw = xd->plane[0].n4_w >> 1;
+  const int bh = xd->plane[0].n4_h >> 1;
+
+  // TODO(slavarnway): move x_mis, y_mis into xd ?????
+  const int x_mis = MIN(cm->mi_cols - mi_col, bw);
+  const int y_mis = MIN(cm->mi_rows - mi_row, bh);
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
 
   predicted_segment_id = cm->last_frame_seg_map ?
-      get_segment_id(cm, cm->last_frame_seg_map, bsize, mi_row, mi_col) : 0;
+      dec_get_segment_id(cm, cm->last_frame_seg_map, mi_offset, x_mis, y_mis) :
+      0;
 
   if (!seg->update_map) {
     copy_segment_id(cm, cm->last_frame_seg_map, cm->current_frame_seg_map,
-                    bsize, mi_row, mi_col);
+                    mi_offset, x_mis, y_mis);
     return predicted_segment_id;
   }
 
@@ -171,7 +181,7 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   } else {
     segment_id = read_segment_id(r, seg);
   }
-  set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
+  set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;
 }
 
@@ -198,8 +208,15 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   const MODE_INFO *left_mi  = xd->left_mi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int i;
+  const int mi_offset = mi_row * cm->mi_cols + mi_col;
+  const int bw = xd->plane[0].n4_w >> 1;
+  const int bh = xd->plane[0].n4_h >> 1;
 
-  mbmi->segment_id = read_intra_segment_id(cm, bsize, mi_row, mi_col, r);
+  // TODO(slavarnway): move x_mis, y_mis into xd ?????
+  const int x_mis = MIN(cm->mi_cols - mi_col, bw);
+  const int y_mis = MIN(cm->mi_rows - mi_row, bh);
+
+  mbmi->segment_id = read_intra_segment_id(cm, mi_offset, x_mis, y_mis, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
@@ -519,8 +536,8 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
                       : cm->interp_filter;
 
   if (bsize < BLOCK_8X8) {
-    const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
-    const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];  // 1 or 2
+    const int num_4x4_w = 1 << xd->bmode_blocks_wl;
+    const int num_4x4_h = 1 << xd->bmode_blocks_hl;
     int idx, idy;
     PREDICTION_MODE b_mode;
     int_mv nearest_sub8x8[2], near_sub8x8[2];
@@ -589,13 +606,10 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
 }
 
 void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
-                        int mi_row, int mi_col, vp9_reader *r) {
+                        int mi_row, int mi_col, vp9_reader *r,
+                        int x_mis, int y_mis) {
   VP9_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
-  const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type];
-  const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type];
-  const int x_mis = MIN(bw, cm->mi_cols - mi_col);
-  const int y_mis = MIN(bh, cm->mi_rows - mi_row);
   MV_REF* frame_mvs = cm->cur_frame->mvs + mi_row * cm->mi_cols + mi_col;
   int w, h;
 
