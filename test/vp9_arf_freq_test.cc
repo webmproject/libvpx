@@ -21,8 +21,8 @@ namespace {
 const unsigned int kFrames = 100;
 const int kBitrate = 500;
 
-#define ARF_NOT_SEEN   1000001
-#define ARF_SEEN_ONCE  1000000
+#define ARF_NOT_SEEN               1000001
+#define ARF_SEEN_ONCE              1000000
 
 typedef struct {
   const char *filename;
@@ -108,7 +108,7 @@ class ArfFreqTest
   }
 
   virtual void BeginPassHook(unsigned int) {
-    min_arf_ = ARF_NOT_SEEN;
+    min_run_ = ARF_NOT_SEEN;
     run_of_visible_frames_ = 0;
   }
 
@@ -137,15 +137,15 @@ class ArfFreqTest
     if (frames == 1) {
       run_of_visible_frames_++;
     } else if (frames == 2) {
-      if (min_arf_ == ARF_NOT_SEEN) {
-        min_arf_ = ARF_SEEN_ONCE;
-      } else if (min_arf_ == ARF_SEEN_ONCE ||
-                 run_of_visible_frames_ < min_arf_) {
-        min_arf_ = run_of_visible_frames_;
+      if (min_run_ == ARF_NOT_SEEN) {
+        min_run_ = ARF_SEEN_ONCE;
+      } else if (min_run_ == ARF_SEEN_ONCE ||
+                 run_of_visible_frames_ < min_run_) {
+        min_run_ = run_of_visible_frames_;
       }
       run_of_visible_frames_ = 1;
     } else {
-      min_arf_ = 0;
+      min_run_ = 0;
       run_of_visible_frames_ = 1;
     }
   }
@@ -166,8 +166,8 @@ class ArfFreqTest
     }
   }
 
-  int GetMinArfDistance() const {
-    return min_arf_;
+  int GetMinVisibleRun() const {
+    return min_run_;
   }
 
   int GetMinArfDistanceRequested() const {
@@ -185,7 +185,7 @@ class ArfFreqTest
 
  private:
   int min_arf_requested_;
-  int min_arf_;
+  int min_run_;
   int run_of_visible_frames_;
 };
 
@@ -214,9 +214,10 @@ TEST_P(ArfFreqTest, MinArfFreqTest) {
   }
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(video));
-  const int min_arf_dist = GetMinArfDistance();
+  const int min_run = GetMinVisibleRun();
   const int min_arf_dist_requested = GetMinArfDistanceRequested();
-  if (min_arf_dist != ARF_NOT_SEEN && min_arf_dist != ARF_SEEN_ONCE) {
+  if (min_run != ARF_NOT_SEEN && min_run != ARF_SEEN_ONCE) {
+    const int min_arf_dist = min_run + 1;
     EXPECT_GE(min_arf_dist, min_arf_dist_requested);
   }
   delete(video);

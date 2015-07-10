@@ -281,11 +281,14 @@ int vp9_rc_get_default_min_gf_interval(
   // Assume we do not need any constraint lower than 4K 20 fps
   static const double factor_safe = 3840 * 2160 * 20.0;
   const double factor = width * height * framerate;
+  const double default_interval =
+      MIN(MAX_GF_INTERVAL, MAX(MIN_GF_INTERVAL, (int)(framerate * 0.125)));
 
   if (factor <= factor_safe)
-    return MIN_GF_INTERVAL;
+    return (int)default_interval;
   else
-    return (int)(MIN_GF_INTERVAL * factor / factor_safe + 0.5);
+    return (int)MAX(default_interval,
+                    (int)(MIN_GF_INTERVAL * factor / factor_safe + 0.5));
   // Note this logic makes:
   // 4K24: 5
   // 4K30: 6
@@ -294,6 +297,7 @@ int vp9_rc_get_default_min_gf_interval(
 
 int vp9_rc_get_default_max_gf_interval(double framerate, int min_gf_interval) {
   int interval = MIN(MAX_GF_INTERVAL, (int)(framerate * 0.75));
+  interval += (interval & 0x01);  // Round to even value
   return MAX(interval, min_gf_interval);
 }
 
@@ -1693,7 +1697,6 @@ void vp9_rc_set_gf_interval_range(const VP9_COMP *const cpi,
   if (rc->max_gf_interval == 0)
     rc->max_gf_interval = vp9_rc_get_default_max_gf_interval(
         cpi->framerate, rc->min_gf_interval);
-  rc->max_gf_interval += (rc->max_gf_interval & 0x01);
 
   // Extended interval for genuinely static scenes
   rc->static_scene_max_gf_interval = MAX_LAG_BUFFERS * 2;
