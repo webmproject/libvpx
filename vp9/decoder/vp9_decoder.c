@@ -213,8 +213,11 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
 
     // Find an empty frame buffer.
     const int free_fb = get_free_fb(cm);
-    if (cm->new_fb_idx == INVALID_IDX)
-      return VPX_CODEC_MEM_ERROR;
+    if (cm->new_fb_idx == INVALID_IDX) {
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Unable to find free frame buffer");
+      return cm->error.error_code;
+    }
 
     // Decrease ref_count since it will be increased again in
     // ref_cnt_fb() below.
@@ -305,8 +308,11 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   // Find a free frame buffer. Return error if can not find any.
   cm->new_fb_idx = get_free_fb(cm);
-  if (cm->new_fb_idx == INVALID_IDX)
-    return VPX_CODEC_MEM_ERROR;
+  if (cm->new_fb_idx == INVALID_IDX) {
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Unable to find free frame buffer");
+    return cm->error.error_code;
+  }
 
   // Assign a MV array to the frame buffer.
   cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
