@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "987af2a8_45b2ad56",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-12T18:35:54Z",
+      "side": 1,
+      "message": "you could move this to endian_inl.h and might call it HToBEXX to match the other conversion macros",
+      "revId": "9b4f9f45eee4d63cef3cd10f24923ed0bdd5ab7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "987af2a8_a5adc1f8",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-12T18:35:54Z",
+      "side": 1,
+      "message": "this isn\u0027t safe in general c-code; you\u0027ll want a memcpy path for platforms that might insert an alignment hint based on the cast",
+      "revId": "9b4f9f45eee4d63cef3cd10f24923ed0bdd5ab7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78753eb8_e7c74a88",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-12T18:35:54Z",
+      "side": 1,
+      "message": "this will produce a type conversion warning in 64-bit builds (size_t -\u003e uint32_t)",
+      "revId": "9b4f9f45eee4d63cef3cd10f24923ed0bdd5ab7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
