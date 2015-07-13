@@ -391,8 +391,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   dec_txfrm_block_to_raster_xy(bwl, tx_size, block, &x, &y);
   dst = &pd->dst.buf[4 * y * pd->dst.stride + 4 * x];
 
-  vp9_predict_intra_block(xd, block >> (tx_size << 1),
-                          bwl, tx_size, mode,
+  vp9_predict_intra_block(xd, bwl, tx_size, mode,
                           dst, pd->dst.stride, dst, pd->dst.stride,
                           x, y, plane);
 

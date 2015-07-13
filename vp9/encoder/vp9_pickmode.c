@@ -902,8 +902,7 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   p->src.buf = &src_buf_base[4 * (j * src_stride + i)];
   pd->dst.buf = &dst_buf_base[4 * (j * dst_stride + i)];
   // Use source buffer as an approximation for the fully reconstructed buffer.
-  vp9_predict_intra_block(xd, block >> (2 * tx_size),
-                          b_width_log2_lookup[plane_bsize],
+  vp9_predict_intra_block(xd, b_width_log2_lookup[plane_bsize],
                           tx_size, args->mode,
                           x->skip_encode ? p->src.buf : pd->dst.buf,
                           x->skip_encode ? src_stride : dst_stride,
