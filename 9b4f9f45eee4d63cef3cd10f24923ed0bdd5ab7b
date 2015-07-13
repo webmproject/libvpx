@@ -50,6 +50,24 @@
       "revId": "9b4f9f45eee4d63cef3cd10f24923ed0bdd5ab7b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "987af2a8_c0130b10",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-07-13T13:47:14Z",
+      "side": 1,
+      "message": "I saw the failure on vs10 over the weekend. \n\nI guess my UINTPTR_MAX \u003d\u003d 0xff...   didn\u0027t work the way I hoped or it would have gone to the other path.",
+      "parentUuid": "78753eb8_e7c74a88",
+      "revId": "9b4f9f45eee4d63cef3cd10f24923ed0bdd5ab7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
