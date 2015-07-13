@@ -7,23 +7,11 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include <stdlib.h>
 
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
 
-#include "./vpx_config.h"
 #include "vp9/decoder/vp9_reader.h"
-
-#include "vpx_util/endian_inl.h"
-
-#if CONFIG_BIG_ENDIAN
-#define BIGENDIFY64(X) (X)
-#define BIGENDIFY32(X) (X)
-#else
-#define BIGENDIFY64(X) BSwap64(X)
-#define BIGENDIFY32(X) BSwap32(X)
-#endif
 
 int vp9_reader_init(vp9_reader *r,
                     const uint8_t *buffer,
@@ -51,9 +39,11 @@ void vp9_reader_fill(vp9_reader *r) {
   const uint8_t *buffer_start = buffer;
   BD_VALUE value = r->value;
   int count = r->count;
+  int shift = BD_VALUE_SIZE - CHAR_BIT - (count + CHAR_BIT);
+  int loop_end = 0;
   const size_t bytes_left = buffer_end - buffer;
   const size_t bits_left = bytes_left * CHAR_BIT;
-  int shift = BD_VALUE_SIZE - CHAR_BIT - (count + CHAR_BIT);
+  const int x = (int)(shift + CHAR_BIT - bits_left);
 
   if (r->decrypt_cb) {
     size_t n = MIN(sizeof(r->clear_buffer), bytes_left);
@@ -61,31 +51,17 @@ void vp9_reader_fill(vp9_reader *r) {
     buffer = r->clear_buffer;
     buffer_start = r->clear_buffer;
   }
-  if (bits_left > BD_VALUE_SIZE) {
-#if UINTPTR_MAX == 0xffffffffffffffff
-      BD_VALUE big_endian_values = BIGENDIFY64(*((const BD_VALUE *) buffer));
-#else
-      BD_VALUE big_endian_values = BIGENDIFY32(*((const BD_VALUE *) buffer));
-#endif
-      const int bits = (shift & 0xfffffff8) + CHAR_BIT;
-      const BD_VALUE nv = big_endian_values >> (BD_VALUE_SIZE - bits);
-      count += bits;
-      buffer += (bits >> 3);
-      value = r->value | (nv << (shift & 0x7));
-  } else {
-    const int bits_over = (int)(shift + CHAR_BIT - bits_left);
-    int loop_end = 0;
-    if (bits_over >= 0) {
-      count += LOTS_OF_BITS;
-      loop_end = bits_over;
-    }
 
-    if (bits_over < 0 || bits_left) {
-      while (shift >= loop_end) {
-        count += CHAR_BIT;
-        value |= (BD_VALUE)*buffer++ << shift;
-        shift -= CHAR_BIT;
-      }
+  if (x >= 0) {
+    count += LOTS_OF_BITS;
+    loop_end = x;
+  }
+
+  if (x < 0 || bits_left) {
+    while (shift >= loop_end) {
+      count += CHAR_BIT;
+      value |= (BD_VALUE)*buffer++ << shift;
+      shift -= CHAR_BIT;
     }
   }
 
