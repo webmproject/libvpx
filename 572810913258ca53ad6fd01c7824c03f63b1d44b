@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8de8ef5_eff641ce",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-07-13T18:49:43Z",
+      "side": 1,
+      "message": "Please align the commas, like the original.",
+      "revId": "572810913258ca53ad6fd01c7824c03f63b1d44b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
