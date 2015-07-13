@@ -361,47 +361,32 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
   }
 }
 
-static INLINE void dec_txfrm_block_to_raster_xy(int bwl,
-                                                TX_SIZE tx_size, int block,
-                                                int *x, int *y) {
-  const int tx_cols_log2 = bwl - tx_size;
-  const int tx_cols = 1 << tx_cols_log2;
-  const int raster_mb = block >> (tx_size << 1);
-  *x = (raster_mb & (tx_cols - 1)) << tx_size;
-  *y = (raster_mb >> tx_cols_log2) << tx_size;
-}
-
-struct intra_args {
-  MACROBLOCKD *xd;
-  vp9_reader *r;
-  int seg_id;
-};
-
-static void predict_and_reconstruct_intra_block(int plane, int block,
-                                                TX_SIZE tx_size, void *arg) {
-  struct intra_args *const args = (struct intra_args *)arg;
-  MACROBLOCKD *const xd = args->xd;
+static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
+                                                vp9_reader *r,
+                                                MB_MODE_INFO *const mbmi,
+                                                int plane,
+                                                int row, int col,
+                                                TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  MODE_INFO *const mi = xd->mi[0];
-  const PREDICTION_MODE mode = (plane == 0) ? get_y_mode(mi, block)
-                                            : mi->mbmi.uv_mode;
-  int x, y;
+  PREDICTION_MODE mode = (plane == 0) ? mbmi->mode : mbmi->uv_mode;
   uint8_t *dst;
-  const int bwl = pd->n4_wl;
-  dec_txfrm_block_to_raster_xy(bwl, tx_size, block, &x, &y);
-  dst = &pd->dst.buf[4 * y * pd->dst.stride + 4 * x];
+  dst = &pd->dst.buf[4 * row * pd->dst.stride + 4 * col];
 
-  vp9_predict_intra_block(xd, bwl, tx_size, mode,
+  if (mbmi->sb_type < BLOCK_8X8)
+    if (plane == 0)
+      mode = xd->mi[0]->bmi[(row << 1) + col].as_mode;
+
+  vp9_predict_intra_block(xd, pd->n4_wl, tx_size, mode,
                           dst, pd->dst.stride, dst, pd->dst.stride,
-                          x, y, plane);
+                          col, row, plane);
 
-  if (!mi->mbmi.skip) {
+  if (!mbmi->skip) {
     const TX_TYPE tx_type = (plane || xd->lossless) ?
         DCT_DCT : intra_mode_to_tx_type_lookup[mode];
     const scan_order *sc = (plane || xd->lossless) ?
         &vp9_default_scan_orders[tx_size] : &vp9_scan_orders[tx_size][tx_type];
-    const int eob = vp9_decode_block_tokens(xd, plane, sc, x, y, tx_size,
-                                            args->r, args->seg_id);
+    const int eob = vp9_decode_block_tokens(xd, plane, sc, col, row, tx_size,
+                                            r, mbmi->segment_id);
     inverse_transform_block_intra(xd, plane, tx_type, tx_size,
                                   dst, pd->dst.stride, eob);
   }
@@ -775,58 +760,6 @@ static INLINE TX_SIZE dec_get_uv_tx_size(const MB_MODE_INFO *mbmi,
   return MIN(mbmi->tx_size,  x);
 }
 
-// TODO(slavarnway): Eliminate the foreach_ functions in future commits.
-// NOTE: Jingning removed the foreach_ for recon inter in a previous commit.
-
-typedef void (*dec_foreach_transformed_block_visitor)(int plane, int block,
-                                                      TX_SIZE tx_size,
-                                                      void *arg);
-
-static void dec_foreach_transformed_block_in_plane(
-    const MACROBLOCKD *const xd,
-    int plane,
-    dec_foreach_transformed_block_visitor visit, void *arg) {
-  const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const MB_MODE_INFO* mbmi = &xd->mi[0]->mbmi;
-  // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
-  // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-  // transform size varies per plane, look it up in a common way.
-  const TX_SIZE tx_size =
-      plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
-              : mbmi->tx_size;
-  const int num_4x4_w = pd->n4_w;
-  const int num_4x4_h = pd->n4_h;
-  const int step = 1 << (tx_size << 1);
-  int i = 0, r, c;
-
-  // If mb_to_right_edge is < 0 we are in a situation in which
-  // the current block size extends into the UMV and we won't
-  // visit the sub blocks that are wholly within the UMV.
-  const int max_blocks_wide = num_4x4_w + (xd->mb_to_right_edge >= 0 ? 0 :
-      xd->mb_to_right_edge >> (5 + pd->subsampling_x));
-  const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ? 0 :
-      xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-
-  // Keep track of the row and column of the blocks we use so that we know
-  // if we are in the unrestricted motion border.
-  for (r = 0; r < max_blocks_high; r += (1 << tx_size)) {
-    for (c = 0; c < num_4x4_w; c += (1 << tx_size)) {
-      // Skip visiting the sub blocks that are wholly within the UMV.
-      if (c < max_blocks_wide)
-        visit(plane, i, tx_size, arg);
-      i += step;
-    }
-  }
-}
-
-static void dec_foreach_transformed_block(const MACROBLOCKD* const xd,
-    dec_foreach_transformed_block_visitor visit, void *arg) {
-  int plane;
-
-  for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-    dec_foreach_transformed_block_in_plane(xd, plane, visit, arg);
-}
-
 static INLINE void dec_reset_skip_context(MACROBLOCKD *xd) {
   int i;
   for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -906,9 +839,26 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   }
 
   if (!is_inter_block(mbmi)) {
-    struct intra_args arg = {xd, r, mbmi->segment_id};
-    dec_foreach_transformed_block(xd,
-                                  predict_and_reconstruct_intra_block, &arg);
+    int plane;
+    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+      const TX_SIZE tx_size =
+          plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
+                  : mbmi->tx_size;
+      const int num_4x4_w = pd->n4_w;
+      const int num_4x4_h = pd->n4_h;
+      const int step = (1 << tx_size);
+      int row, col;
+      const int max_blocks_wide = num_4x4_w + (xd->mb_to_right_edge >= 0 ?
+          0 : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
+      const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ?
+          0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+
+      for (row = 0; row < max_blocks_high; row += step)
+        for (col = 0; col < max_blocks_wide; col += step)
+          predict_and_reconstruct_intra_block(xd, r, mbmi, plane,
+                                              row, col, tx_size);
+    }
   } else {
     // Prediction
     dec_build_inter_predictors_sb(pbi, xd, mi_row, mi_col);
