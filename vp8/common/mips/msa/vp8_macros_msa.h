@@ -32,6 +32,210 @@
 #define ST_UH(...) ST_H(v8u16, __VA_ARGS__)
 #define ST_SH(...) ST_H(v8i16, __VA_ARGS__)
 
+#if (__mips_isa_rev >= 6)
+#define LW(psrc)                                      \
+({                                                    \
+    const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
+    uint32_t val_m;                                   \
+                                                      \
+    asm volatile (                                    \
+        "lw  %[val_m],  %[psrc_m]  \n\t"              \
+                                                      \
+        : [val_m] "=r" (val_m)                        \
+        : [psrc_m] "m" (*psrc_m)                      \
+    );                                                \
+                                                      \
+    val_m;                                            \
+})
+
+#if (__mips == 64)
+#define LD(psrc)                                      \
+({                                                    \
+    const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
+    uint64_t val_m = 0;                               \
+                                                      \
+    asm volatile (                                    \
+        "ld  %[val_m],  %[psrc_m]  \n\t"              \
+                                                      \
+        : [val_m] "=r" (val_m)                        \
+        : [psrc_m] "m" (*psrc_m)                      \
+    );                                                \
+                                                      \
+    val_m;                                            \
+})
+#else  // !(__mips == 64)
+#define LD(psrc)                                             \
+({                                                           \
+    const uint8_t *psrc_m = (const uint8_t *)(psrc);         \
+    uint32_t val0_m, val1_m;                                 \
+    uint64_t val_m = 0;                                      \
+                                                             \
+    val0_m = LW(psrc_m);                                     \
+    val1_m = LW(psrc_m + 4);                                 \
+                                                             \
+    val_m = (uint64_t)(val1_m);                              \
+    val_m = (uint64_t)((val_m << 32) & 0xFFFFFFFF00000000);  \
+    val_m = (uint64_t)(val_m | (uint64_t)val0_m);            \
+                                                             \
+    val_m;                                                   \
+})
+#endif  // (__mips == 64)
+
+#define SH(val, pdst)                     \
+{                                         \
+    uint8_t *pdst_m = (uint8_t *)(pdst);  \
+    const uint16_t val_m = (val);         \
+                                          \
+    asm volatile (                        \
+        "sh  %[val_m],  %[pdst_m]  \n\t"  \
+                                          \
+        : [pdst_m] "=m" (*pdst_m)         \
+        : [val_m] "r" (val_m)             \
+    );                                    \
+}
+
+#define SW(val, pdst)                     \
+{                                         \
+    uint8_t *pdst_m = (uint8_t *)(pdst);  \
+    const uint32_t val_m = (val);         \
+                                          \
+    asm volatile (                        \
+        "sw  %[val_m],  %[pdst_m]  \n\t"  \
+                                          \
+        : [pdst_m] "=m" (*pdst_m)         \
+        : [val_m] "r" (val_m)             \
+    );                                    \
+}
+
+#define SD(val, pdst)                     \
+{                                         \
+    uint8_t *pdst_m = (uint8_t *)(pdst);  \
+    const uint64_t val_m = (val);         \
+                                          \
+    asm volatile (                        \
+        "sd  %[val_m],  %[pdst_m]  \n\t"  \
+                                          \
+        : [pdst_m] "=m" (*pdst_m)         \
+        : [val_m] "r" (val_m)             \
+    );                                    \
+}
+#else  // !(__mips_isa_rev >= 6)
+#define LW(psrc)                                      \
+({                                                    \
+    const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
+    uint32_t val_m;                                   \
+                                                      \
+    asm volatile (                                    \
+        "ulw  %[val_m],  %[psrc_m]  \n\t"             \
+                                                      \
+        : [val_m] "=r" (val_m)                        \
+        : [psrc_m] "m" (*psrc_m)                      \
+    );                                                \
+                                                      \
+    val_m;                                            \
+})
+
+#if (__mips == 64)
+#define LD(psrc)                                      \
+({                                                    \
+    const uint8_t *psrc_m = (const uint8_t *)(psrc);  \
+    uint64_t val_m = 0;                               \
+                                                      \
+    asm volatile (                                    \
+        "uld  %[val_m],  %[psrc_m]  \n\t"             \
+                                                      \
+        : [val_m] "=r" (val_m)                        \
+        : [psrc_m] "m" (*psrc_m)                      \
+    );                                                \
+                                                      \
+    val_m;                                            \
+})
+#else  // !(__mips == 64)
+#define LD(psrc)                                             \
+({                                                           \
+    const uint8_t *psrc_m1 = (const uint8_t *)(psrc);        \
+    uint32_t val0_m, val1_m;                                 \
+    uint64_t val_m = 0;                                      \
+                                                             \
+    val0_m = LW(psrc_m1);                                    \
+    val1_m = LW(psrc_m1 + 4);                                \
+                                                             \
+    val_m = (uint64_t)(val1_m);                              \
+    val_m = (uint64_t)((val_m << 32) & 0xFFFFFFFF00000000);  \
+    val_m = (uint64_t)(val_m | (uint64_t)val0_m);            \
+                                                             \
+    val_m;                                                   \
+})
+#endif  // (__mips == 64)
+#define SH(val, pdst)                      \
+{                                          \
+    uint8_t *pdst_m = (uint8_t *)(pdst);   \
+    const uint16_t val_m = (val);          \
+                                           \
+    asm volatile (                         \
+        "ush  %[val_m],  %[pdst_m]  \n\t"  \
+                                           \
+        : [pdst_m] "=m" (*pdst_m)          \
+        : [val_m] "r" (val_m)              \
+    );                                     \
+}
+
+#define SW(val, pdst)                      \
+{                                          \
+    uint8_t *pdst_m = (uint8_t *)(pdst);   \
+    const uint32_t val_m = (val);          \
+                                           \
+    asm volatile (                         \
+        "usw  %[val_m],  %[pdst_m]  \n\t"  \
+                                           \
+        : [pdst_m] "=m" (*pdst_m)          \
+        : [val_m] "r" (val_m)              \
+    );                                     \
+}
+
+#define SD(val, pdst)                                         \
+{                                                             \
+    uint8_t *pdst_m1 = (uint8_t *)(pdst);                     \
+    uint32_t val0_m, val1_m;                                  \
+                                                              \
+    val0_m = (uint32_t)((val) & 0x00000000FFFFFFFF);          \
+    val1_m = (uint32_t)(((val) >> 32) & 0x00000000FFFFFFFF);  \
+                                                              \
+    SW(val0_m, pdst_m1);                                      \
+    SW(val1_m, pdst_m1 + 4);                                  \
+}
+#endif  // (__mips_isa_rev >= 6)
+
+/* Description : Store 4 words with stride
+   Arguments   : Inputs - in0, in1, in2, in3, pdst, stride
+   Details     : Store word from 'in0' to (pdst)
+                 Store word from 'in1' to (pdst + stride)
+                 Store word from 'in2' to (pdst + 2 * stride)
+                 Store word from 'in3' to (pdst + 3 * stride)
+*/
+#define SW4(in0, in1, in2, in3, pdst, stride)  \
+{                                              \
+    SW(in0, (pdst));                           \
+    SW(in1, (pdst) + stride);                  \
+    SW(in2, (pdst) + 2 * stride);              \
+    SW(in3, (pdst) + 3 * stride);              \
+}
+
+/* Description : Store 4 double words with stride
+   Arguments   : Inputs - in0, in1, in2, in3, pdst, stride
+   Details     : Store double word from 'in0' to (pdst)
+                 Store double word from 'in1' to (pdst + stride)
+                 Store double word from 'in2' to (pdst + 2 * stride)
+                 Store double word from 'in3' to (pdst + 3 * stride)
+*/
+#define SD4(in0, in1, in2, in3, pdst, stride)  \
+{                                              \
+    SD(in0, (pdst));                           \
+    SD(in1, (pdst) + stride);                  \
+    SD(in2, (pdst) + 2 * stride);              \
+    SD(in3, (pdst) + 3 * stride);              \
+}
+
 /* Description : Load vectors with 16 byte elements with stride
    Arguments   : Inputs  - psrc, stride
                  Outputs - out0, out1
@@ -54,6 +258,14 @@
 }
 #define LD_UB4(...) LD_B4(v16u8, __VA_ARGS__)
 #define LD_SB4(...) LD_B4(v16i8, __VA_ARGS__)
+
+#define LD_B8(RTYPE, psrc, stride,                                      \
+              out0, out1, out2, out3, out4, out5, out6, out7)           \
+{                                                                       \
+    LD_B4(RTYPE, (psrc), stride, out0, out1, out2, out3);               \
+    LD_B4(RTYPE, (psrc) + 4 * stride, stride, out4, out5, out6, out7);  \
+}
+#define LD_UB8(...) LD_B8(v16u8, __VA_ARGS__)
 
 /* Description : Load vectors with 8 halfword elements with stride
    Arguments   : Inputs  - psrc, stride
@@ -85,6 +297,7 @@
     ST_B(RTYPE, in0, (pdst));                 \
     ST_B(RTYPE, in1, (pdst) + stride);        \
 }
+#define ST_UB2(...) ST_B2(v16u8, __VA_ARGS__)
 
 #define ST_B4(RTYPE, in0, in1, in2, in3, pdst, stride)    \
 {                                                         \
@@ -105,6 +318,64 @@
     ST_H(RTYPE, in1, (pdst) + stride);        \
 }
 #define ST_SH2(...) ST_H2(v8i16, __VA_ARGS__)
+
+/* Description : Store 2x4 byte block to destination memory from input vector
+   Arguments   : Inputs - in, stidx, pdst, stride
+   Details     : Index 'stidx' halfword element from 'in' vector is copied to
+                 the GP register and stored to (pdst)
+                 Index 'stidx+1' halfword element from 'in' vector is copied to
+                 the GP register and stored to (pdst + stride)
+                 Index 'stidx+2' halfword element from 'in' vector is copied to
+                 the GP register and stored to (pdst + 2 * stride)
+                 Index 'stidx+3' halfword element from 'in' vector is copied to
+                 the GP register and stored to (pdst + 3 * stride)
+*/
+#define ST2x4_UB(in, stidx, pdst, stride)             \
+{                                                     \
+    uint16_t out0_m, out1_m, out2_m, out3_m;          \
+    uint8_t *pblk_2x4_m = (uint8_t *)(pdst);          \
+                                                      \
+    out0_m = __msa_copy_u_h((v8i16)in, (stidx));      \
+    out1_m = __msa_copy_u_h((v8i16)in, (stidx + 1));  \
+    out2_m = __msa_copy_u_h((v8i16)in, (stidx + 2));  \
+    out3_m = __msa_copy_u_h((v8i16)in, (stidx + 3));  \
+                                                      \
+    SH(out0_m, pblk_2x4_m);                           \
+    SH(out1_m, pblk_2x4_m + stride);                  \
+    SH(out2_m, pblk_2x4_m + 2 * stride);              \
+    SH(out3_m, pblk_2x4_m + 3 * stride);              \
+}
+
+/* Description : Store 4x4 byte block to destination memory from input vector
+   Arguments   : Inputs - in0, in1, pdst, stride
+   Details     : 'Idx0' word element from input vector 'in0' is copied to the
+                 GP register and stored to (pdst)
+                 'Idx1' word element from input vector 'in0' is copied to the
+                 GP register and stored to (pdst + stride)
+                 'Idx2' word element from input vector 'in0' is copied to the
+                 GP register and stored to (pdst + 2 * stride)
+                 'Idx3' word element from input vector 'in0' is copied to the
+                 GP register and stored to (pdst + 3 * stride)
+*/
+#define ST4x4_UB(in0, in1, idx0, idx1, idx2, idx3, pdst, stride)  \
+{                                                                 \
+    uint32_t out0_m, out1_m, out2_m, out3_m;                      \
+    uint8_t *pblk_4x4_m = (uint8_t *)(pdst);                      \
+                                                                  \
+    out0_m = __msa_copy_u_w((v4i32)in0, idx0);                    \
+    out1_m = __msa_copy_u_w((v4i32)in0, idx1);                    \
+    out2_m = __msa_copy_u_w((v4i32)in1, idx2);                    \
+    out3_m = __msa_copy_u_w((v4i32)in1, idx3);                    \
+                                                                  \
+    SW4(out0_m, out1_m, out2_m, out3_m, pblk_4x4_m, stride);      \
+}
+#define ST4x8_UB(in0, in1, pdst, stride)                            \
+{                                                                   \
+    uint8_t *pblk_4x8 = (uint8_t *)(pdst);                          \
+                                                                    \
+    ST4x4_UB(in0, in0, 0, 1, 2, 3, pblk_4x8, stride);               \
+    ST4x4_UB(in1, in1, 0, 1, 2, 3, pblk_4x8 + 4 * stride, stride);  \
+}
 
 /* Description : Shuffle byte vector elements as per mask vector
    Arguments   : Inputs  - in0, in1, in2, in3, mask0, mask1
@@ -162,6 +433,76 @@
     out_m;                                              \
 })
 
+/* Description : Interleave even byte elements from vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Even byte elements of 'in0' and 'in1' are interleaved
+                 and written to 'out0'
+*/
+#define ILVEV_B2(RTYPE, in0, in1, in2, in3, out0, out1)   \
+{                                                         \
+    out0 = (RTYPE)__msa_ilvev_b((v16i8)in1, (v16i8)in0);  \
+    out1 = (RTYPE)__msa_ilvev_b((v16i8)in3, (v16i8)in2);  \
+}
+#define ILVEV_B2_SD(...) ILVEV_B2(v2i64, __VA_ARGS__)
+
+/* Description : Interleave even halfword elements from vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Even halfword elements of 'in0' and 'in1' are interleaved
+                 and written to 'out0'
+*/
+#define ILVEV_H2(RTYPE, in0, in1, in2, in3, out0, out1)   \
+{                                                         \
+    out0 = (RTYPE)__msa_ilvev_h((v8i16)in1, (v8i16)in0);  \
+    out1 = (RTYPE)__msa_ilvev_h((v8i16)in3, (v8i16)in2);  \
+}
+#define ILVEV_H2_UB(...) ILVEV_H2(v16u8, __VA_ARGS__)
+
+/* Description : Interleave even word elements from vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Even word elements of 'in0' and 'in1' are interleaved
+                 and written to 'out0'
+*/
+#define ILVEV_W2(RTYPE, in0, in1, in2, in3, out0, out1)   \
+{                                                         \
+    out0 = (RTYPE)__msa_ilvev_w((v4i32)in1, (v4i32)in0);  \
+    out1 = (RTYPE)__msa_ilvev_w((v4i32)in3, (v4i32)in2);  \
+}
+#define ILVEV_W2_SD(...) ILVEV_W2(v2i64, __VA_ARGS__)
+
+/* Description : Interleave even double word elements from vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Even double word elements of 'in0' and 'in1' are interleaved
+                 and written to 'out0'
+*/
+#define ILVEV_D2(RTYPE, in0, in1, in2, in3, out0, out1)   \
+{                                                         \
+    out0 = (RTYPE)__msa_ilvev_d((v2i64)in1, (v2i64)in0);  \
+    out1 = (RTYPE)__msa_ilvev_d((v2i64)in3, (v2i64)in2);  \
+}
+#define ILVEV_D2_UB(...) ILVEV_D2(v16u8, __VA_ARGS__)
+
+/* Description : Interleave left half of byte elements from vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Left half of byte elements of 'in0' and 'in1' are interleaved
+                 and written to 'out0'.
+*/
+#define ILVL_B2(RTYPE, in0, in1, in2, in3, out0, out1)   \
+{                                                        \
+    out0 = (RTYPE)__msa_ilvl_b((v16i8)in0, (v16i8)in1);  \
+    out1 = (RTYPE)__msa_ilvl_b((v16i8)in2, (v16i8)in3);  \
+}
+#define ILVL_B2_SH(...) ILVL_B2(v8i16, __VA_ARGS__)
+
 /* Description : Interleave left half of halfword elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
                  Outputs - out0, out1
@@ -203,6 +544,8 @@
     out0 = (RTYPE)__msa_ilvr_b((v16i8)in0, (v16i8)in1);  \
     out1 = (RTYPE)__msa_ilvr_b((v16i8)in2, (v16i8)in3);  \
 }
+#define ILVR_B2_SH(...) ILVR_B2(v8i16, __VA_ARGS__)
+#define ILVR_B2_SW(...) ILVR_B2(v4i32, __VA_ARGS__)
 
 #define ILVR_B4(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,  \
                 out0, out1, out2, out3)                         \
@@ -260,6 +603,14 @@
 #define ILVR_D2_SB(...) ILVR_D2(v16i8, __VA_ARGS__)
 #define ILVR_D2_SH(...) ILVR_D2(v8i16, __VA_ARGS__)
 
+#define ILVR_D4(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,  \
+                out0, out1, out2, out3)                         \
+{                                                               \
+    ILVR_D2(RTYPE, in0, in1, in2, in3, out0, out1);             \
+    ILVR_D2(RTYPE, in4, in5, in6, in7, out2, out3);             \
+}
+#define ILVR_D4_UB(...) ILVR_D4(v16u8, __VA_ARGS__)
+
 /* Description : Interleave both left and right half of input vectors
    Arguments   : Inputs  - in0, in1
                  Outputs - out0, out1
@@ -267,6 +618,13 @@
    Details     : Right half of byte elements from 'in0' and 'in1' are
                  interleaved and written to 'out0'
 */
+#define ILVRL_B2(RTYPE, in0, in1, out0, out1)            \
+{                                                        \
+    out0 = (RTYPE)__msa_ilvr_b((v16i8)in0, (v16i8)in1);  \
+    out1 = (RTYPE)__msa_ilvl_b((v16i8)in0, (v16i8)in1);  \
+}
+#define ILVRL_B2_SH(...) ILVRL_B2(v8i16, __VA_ARGS__)
+
 #define ILVRL_H2(RTYPE, in0, in1, out0, out1)            \
 {                                                        \
     out0 = (RTYPE)__msa_ilvr_h((v8i16)in0, (v8i16)in1);  \
@@ -478,6 +836,88 @@
                                                                  \
     out2 = in1 - in2;                                            \
     out3 = in0 - in3;                                            \
+}
+
+/* Description : Transpose 16x4 block into 4x16 with byte elements in vectors
+   Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7,
+                           in8, in9, in10, in11, in12, in13, in14, in15
+                 Outputs - out0, out1, out2, out3
+                 Return Type - unsigned byte
+*/
+#define TRANSPOSE16x4_UB_UB(in0, in1, in2, in3, in4, in5, in6, in7,        \
+                            in8, in9, in10, in11, in12, in13, in14, in15,  \
+                            out0, out1, out2, out3)                        \
+{                                                                          \
+    v2i64 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                  \
+                                                                           \
+    ILVEV_W2_SD(in0, in4, in8, in12, tmp0_m, tmp1_m);                      \
+    out1 = (v16u8)__msa_ilvev_d(tmp1_m, tmp0_m);                           \
+                                                                           \
+    ILVEV_W2_SD(in1, in5, in9, in13, tmp0_m, tmp1_m);                      \
+    out3 = (v16u8)__msa_ilvev_d(tmp1_m, tmp0_m);                           \
+                                                                           \
+    ILVEV_W2_SD(in2, in6, in10, in14, tmp0_m, tmp1_m);                     \
+                                                                           \
+    tmp2_m = __msa_ilvev_d(tmp1_m, tmp0_m);                                \
+    ILVEV_W2_SD(in3, in7, in11, in15, tmp0_m, tmp1_m);                     \
+                                                                           \
+    tmp3_m = __msa_ilvev_d(tmp1_m, tmp0_m);                                \
+    ILVEV_B2_SD(out1, out3, tmp2_m, tmp3_m, tmp0_m, tmp1_m);               \
+    out0 = (v16u8)__msa_ilvev_h((v8i16)tmp1_m, (v8i16)tmp0_m);             \
+    out2 = (v16u8)__msa_ilvod_h((v8i16)tmp1_m, (v8i16)tmp0_m);             \
+                                                                           \
+    tmp0_m = (v2i64)__msa_ilvod_b((v16i8)out3, (v16i8)out1);               \
+    tmp1_m = (v2i64)__msa_ilvod_b((v16i8)tmp3_m, (v16i8)tmp2_m);           \
+    out1 = (v16u8)__msa_ilvev_h((v8i16)tmp1_m, (v8i16)tmp0_m);             \
+    out3 = (v16u8)__msa_ilvod_h((v8i16)tmp1_m, (v8i16)tmp0_m);             \
+}
+
+/* Description : Transpose 16x8 block into 8x16 with byte elements in vectors
+   Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7,
+                           in8, in9, in10, in11, in12, in13, in14, in15
+                 Outputs - out0, out1, out2, out3, out4, out5, out6, out7
+                 Return Type - unsigned byte
+*/
+#define TRANSPOSE16x8_UB_UB(in0, in1, in2, in3, in4, in5, in6, in7,          \
+                            in8, in9, in10, in11, in12, in13, in14, in15,    \
+                            out0, out1, out2, out3, out4, out5, out6, out7)  \
+{                                                                            \
+    v16u8 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                    \
+    v16u8 tmp4_m, tmp5_m, tmp6_m, tmp7_m;                                    \
+                                                                             \
+    ILVEV_D2_UB(in0, in8, in1, in9, out7, out6);                             \
+    ILVEV_D2_UB(in2, in10, in3, in11, out5, out4);                           \
+    ILVEV_D2_UB(in4, in12, in5, in13, out3, out2);                           \
+    ILVEV_D2_UB(in6, in14, in7, in15, out1, out0);                           \
+                                                                             \
+    tmp0_m = (v16u8)__msa_ilvev_b((v16i8)out6, (v16i8)out7);                 \
+    tmp4_m = (v16u8)__msa_ilvod_b((v16i8)out6, (v16i8)out7);                 \
+    tmp1_m = (v16u8)__msa_ilvev_b((v16i8)out4, (v16i8)out5);                 \
+    tmp5_m = (v16u8)__msa_ilvod_b((v16i8)out4, (v16i8)out5);                 \
+    out5 = (v16u8)__msa_ilvev_b((v16i8)out2, (v16i8)out3);                   \
+    tmp6_m = (v16u8)__msa_ilvod_b((v16i8)out2, (v16i8)out3);                 \
+    out7 = (v16u8)__msa_ilvev_b((v16i8)out0, (v16i8)out1);                   \
+    tmp7_m = (v16u8)__msa_ilvod_b((v16i8)out0, (v16i8)out1);                 \
+                                                                             \
+    ILVEV_H2_UB(tmp0_m, tmp1_m, out5, out7, tmp2_m, tmp3_m);                 \
+    out0 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+    out4 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+                                                                             \
+    tmp2_m = (v16u8)__msa_ilvod_h((v8i16)tmp1_m, (v8i16)tmp0_m);             \
+    tmp3_m = (v16u8)__msa_ilvod_h((v8i16)out7, (v8i16)out5);                 \
+    out2 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+    out6 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+                                                                             \
+    ILVEV_H2_UB(tmp4_m, tmp5_m, tmp6_m, tmp7_m, tmp2_m, tmp3_m);             \
+    out1 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+    out5 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+                                                                             \
+    tmp2_m = (v16u8)__msa_ilvod_h((v8i16)tmp5_m, (v8i16)tmp4_m);             \
+    tmp2_m = (v16u8)__msa_ilvod_h((v8i16)tmp5_m, (v8i16)tmp4_m);             \
+    tmp3_m = (v16u8)__msa_ilvod_h((v8i16)tmp7_m, (v8i16)tmp6_m);             \
+    tmp3_m = (v16u8)__msa_ilvod_h((v8i16)tmp7_m, (v8i16)tmp6_m);             \
+    out3 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+    out7 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
 }
 
 /* Description : Transpose 8x4 block with half word elements in vectors
