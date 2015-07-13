@@ -238,4 +238,16 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(8, 4, sixtap_8x4_ssse3),
         make_tuple(4, 4, sixtap_4x4_ssse3)));
 #endif
+#if HAVE_MSA
+const SixtapPredictFunc sixtap_16x16_msa = vp8_sixtap_predict16x16_msa;
+const SixtapPredictFunc sixtap_8x8_msa = vp8_sixtap_predict8x8_msa;
+const SixtapPredictFunc sixtap_8x4_msa = vp8_sixtap_predict8x4_msa;
+const SixtapPredictFunc sixtap_4x4_msa = vp8_sixtap_predict4x4_msa;
+INSTANTIATE_TEST_CASE_P(
+    MSA, SixtapPredictTest, ::testing::Values(
+        make_tuple(16, 16, sixtap_16x16_msa),
+        make_tuple(8, 8, sixtap_8x8_msa),
+        make_tuple(8, 4, sixtap_8x4_msa),
+        make_tuple(4, 4, sixtap_4x4_msa)));
+#endif
 }  // namespace
