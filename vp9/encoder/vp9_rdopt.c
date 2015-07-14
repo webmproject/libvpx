@@ -3443,7 +3443,6 @@ static int64_t rd_pick_best_sub8x8_mode(
   ENTROPY_CONTEXT t_above[2], t_left[2];
   int subpelmv = 1, have_ref = 0;
   const int has_second_rf = has_second_ref(mbmi);
-  const uint32_t inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
   int_mv ref_mv_sub8x8[2];
   const int refs[2] = { mbmi->ref_frame[0], mbmi->ref_frame[1] };
 
@@ -3578,8 +3577,6 @@ static int64_t rd_pick_best_sub8x8_mode(
 #endif  // CONFIG_NEW_INTER
 
         bsi->rdstat[i][mode_idx].brdcost = INT64_MAX;
-        if (!(inter_mode_mask & (1 << this_mode)))
-          continue;
 
 #if CONFIG_GLOBAL_MOTION
         if (get_gmtype(&cm->global_motion[mbmi->ref_frame[0]][0]) ==
@@ -6268,11 +6265,6 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         cpi->rc.frames_since_golden >= 3)
       if (x->pred_mv_sad[GOLDEN_FRAME] > (x->pred_mv_sad[LAST_FRAME] << 1))
         mode_skip_mask[GOLDEN_FRAME] |= INTER_ALL;
-  }
-
-  if (bsize > sf->max_intra_bsize) {
-    ref_frame_skip_mask[0] |= (1 << INTRA_FRAME);
-    ref_frame_skip_mask[1] |= (1 << INTRA_FRAME);
   }
 
   mode_skip_mask[INTRA_FRAME] |=

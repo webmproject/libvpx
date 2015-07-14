@@ -402,10 +402,6 @@ typedef struct SPEED_FEATURES {
   // by only looking at counts from 1/2 the bands.
   FAST_COEFF_UPDATE use_fast_coef_updates;
 
-  // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
-  // modes are used in order from LSB to MSB for each BLOCK_SIZE.
-  int inter_mode_mask[BLOCK_SIZES];
-
   // This feature controls whether we do the expensive context update and
   // calculation in the rd coefficient costing loop.
   int use_fast_coef_costing;
@@ -413,11 +409,6 @@ typedef struct SPEED_FEATURES {
   // This feature controls the tolerence vs target used in deciding whether to
   // recode a frame. It has no meaning if recode is disabled.
   int recode_tolerance;
-
-  // This variable controls the maximum block size where intra blocks can be
-  // used in inter frames.
-  // TODO(aconverse): Fold this into one of the other many mode skips
-  BLOCK_SIZE max_intra_bsize;
 
   // The frequency that we check if SOURCE_VAR_BASED_PARTITION or
   // FIXED_PARTITION search type should be used.
