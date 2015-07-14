@@ -3147,8 +3147,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
   if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
       cpi->oxcf.resize_mode == RESIZE_DYNAMIC &&
-      cpi->resize_scale_num == 1 &&
-      cpi->resize_scale_den == 2) {
+      cpi->un_scaled_source->y_width == (cm->width << 1) &&
+      cpi->un_scaled_source->y_height == (cm->height << 1)) {
     cpi->Source = vp9_scale_if_required_fast(cm,
                                              cpi->un_scaled_source,
                                              &cpi->scaled_source);
