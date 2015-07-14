@@ -290,9 +290,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed) {
 
     sf->tx_size_search_method = is_keyframe ? USE_LARGESTALL : USE_TX_8X8;
 
-    // Increase mode checking threshold for NEWMV.
-    sf->elevate_newmv_thresh = 1000;
-
     sf->mv.reduce_first_step_size = 1;
   }
 
@@ -302,11 +299,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed) {
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
         800 : 300;
-    sf->elevate_newmv_thresh = 2500;
   }
 
   if (speed >= 12) {
-    sf->elevate_newmv_thresh = 4000;
     sf->mv.subpel_force_stop = 2;
   }
 }
@@ -376,7 +371,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->always_this_block_size = BLOCK_16X16;
   sf->search_type_check_frequency = 50;
   sf->encode_breakout_thresh = 0;
-  sf->elevate_newmv_thresh = 0;
   // Recode loop tolerence %.
   sf->recode_tolerance = 25;
   sf->default_interp_filter = SWITCHABLE;
