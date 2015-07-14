@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9870321a_782e49cb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-07-14T17:36:10Z",
+      "side": 1,
+      "message": "core",
+      "range": {
+        "startLine": 12,
+        "startChar": 15,
+        "endLine": 12,
+        "endChar": 20
+      },
+      "revId": "572810913258ca53ad6fd01c7824c03f63b1d44b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8de8ef5_eff641ce",
         "filename": "vp9/common/x86/vp9_copy_sse2.asm",
         "patchSetId": 2
