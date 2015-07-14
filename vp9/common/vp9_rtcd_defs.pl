@@ -475,7 +475,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vp9_iwht4x4_1_add msa/;
 
     add_proto qw/void vp9_iwht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_iwht4x4_16_add msa/;
+    specialize qw/vp9_iwht4x4_16_add msa/, "$sse2_x86inc";
   }
 }
 
