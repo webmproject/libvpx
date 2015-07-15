@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include "./vpx_config.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_systemdependent.h"
@@ -23,9 +24,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 // Only need this for fixed-size arrays, for structs just assign.
 #define vp9_copy(dest, src) {            \
@@ -41,18 +39,6 @@ extern "C" {
 
 #define vp9_zero(dest) memset(&(dest), 0, sizeof(dest))
 #define vp9_zero_array(dest, n) memset(dest, 0, n * sizeof(*dest))
-
-static INLINE uint8_t clip_pixel(int val) {
-  return (val > 255) ? 255 : (val < 0) ? 0 : val;
-}
-
-static INLINE int clamp(int value, int low, int high) {
-  return value < low ? low : (value > high ? high : value);
-}
-
-static INLINE double fclamp(double value, double low, double high) {
-  return value < low ? low : (value > high ? high : value);
-}
 
 static INLINE int get_unsigned_bits(unsigned int num_values) {
   return num_values > 0 ? get_msb(num_values) + 1 : 0;

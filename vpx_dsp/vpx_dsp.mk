@@ -9,6 +9,7 @@
 ##
 
 DSP_SRCS-yes += vpx_dsp.mk
+DSP_SRCS-yes += vpx_dsp_common.h
 
 DSP_SRCS-$(HAVE_MSA)    += mips/macros_msa.h
 
