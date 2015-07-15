@@ -1813,7 +1813,8 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   if (cpi->rc.frames_since_key > 2 * cpi->framerate) {
     const int window = (int)(5 * cpi->framerate);
     cpi->resize_avg_qp += cm->base_qindex;
-    if (cpi->rc.buffer_level < 0)
+    if (cpi->rc.buffer_level < (int)(cpi->oxcf.drop_frames_water_mark *
+        rc->optimal_buffer_level / 100))
       ++cpi->resize_buffer_underflow;
     ++cpi->resize_count;
     // Check for resize action every "window" frames.
@@ -1824,7 +1825,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
       // Resize back up if average QP is low, and we are currently in a resized
       // down state.
       if (cpi->resize_state == 0 &&
-          cpi->resize_buffer_underflow > (cpi->resize_count >> 3)) {
+          cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
         resize_now = 1;
       } else if (cpi->resize_state == 1 &&
                  avg_qp < 40 * cpi->rc.worst_quality / 100) {
