@@ -291,6 +291,12 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(16, &vp9_int_pro_row_neon, &vp9_int_pro_row_c),
         make_tuple(32, &vp9_int_pro_row_neon, &vp9_int_pro_row_c),
         make_tuple(64, &vp9_int_pro_row_neon, &vp9_int_pro_row_c)));
+
+INSTANTIATE_TEST_CASE_P(
+    NEON, IntProColTest, ::testing::Values(
+        make_tuple(16, &vp9_int_pro_col_neon, &vp9_int_pro_col_c),
+        make_tuple(32, &vp9_int_pro_col_neon, &vp9_int_pro_col_c),
+        make_tuple(64, &vp9_int_pro_col_neon, &vp9_int_pro_col_c)));
 #endif
 
 #if HAVE_MSA
