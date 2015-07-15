@@ -3061,17 +3061,17 @@ static void set_frame_size(VP9_COMP *cpi) {
       oxcf->rc_mode == VPX_CBR &&
       !cpi->use_svc &&
       oxcf->resize_mode == RESIZE_DYNAMIC) {
-      if (cpi->resize_state == 1) {
+      if (cpi->resize_pending == 1) {
         oxcf->scaled_frame_width =
             (cm->width * cpi->resize_scale_num) / cpi->resize_scale_den;
         oxcf->scaled_frame_height =
             (cm->height * cpi->resize_scale_num) /cpi->resize_scale_den;
-      } else if (cpi->resize_state == -1) {
+      } else if (cpi->resize_pending == -1) {
         // Go back up to original size.
         oxcf->scaled_frame_width = oxcf->width;
         oxcf->scaled_frame_height = oxcf->height;
       }
-      if (cpi->resize_state != 0) {
+      if (cpi->resize_pending != 0) {
         // There has been a change in frame size.
         vp9_set_size_literal(cpi,
                              oxcf->scaled_frame_width,

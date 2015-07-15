@@ -1355,9 +1355,11 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   }
 
   // Trigger the resizing of the next frame if it is scaled.
-  cpi->resize_pending =
-      rc->next_frame_size_selector != rc->frame_size_selector;
-  rc->frame_size_selector = rc->next_frame_size_selector;
+  if (oxcf->pass != 0) {
+    cpi->resize_pending =
+        rc->next_frame_size_selector != rc->frame_size_selector;
+    rc->frame_size_selector = rc->next_frame_size_selector;
+  }
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
@@ -1632,9 +1634,9 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
 
   vp9_rc_set_frame_target(cpi, target);
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC)
-    cpi->resize_state = vp9_resize_one_pass_cbr(cpi);
+    cpi->resize_pending = vp9_resize_one_pass_cbr(cpi);
   else
-    cpi->resize_state = 0;
+    cpi->resize_pending = 0;
 }
 
 int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
@@ -1827,9 +1829,11 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
       if (cpi->resize_state == 0 &&
           cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
         resize_now = 1;
+        cpi->resize_state = 1;
       } else if (cpi->resize_state == 1 &&
                  avg_qp < 40 * cpi->rc.worst_quality / 100) {
         resize_now = -1;
+        cpi->resize_state = 0;
       }
       // Reset for next window measurement.
       cpi->resize_avg_qp = 0;
