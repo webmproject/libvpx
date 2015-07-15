@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "183e024a_434eb8ba",
+        "filename": "vpx_dsp/vpx_dsp_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-15T22:05:55Z",
+      "side": 1,
+      "message": "They will be used in many other places throughout the codec, but out of the loop filter scope though.",
+      "parentUuid": "183e024a_439c78b6",
+      "range": {
+        "startLine": 25,
+        "startChar": 16,
+        "endLine": 25,
+        "endChar": 17
+      },
+      "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "183e024a_636e5c2a",
         "filename": "vpx_dsp/vpx_dsp_common.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-07-15T21:56:27Z",
       "side": 1,
       "message": "Don\u0027t see this either",
+      "range": {
+        "startLine": 27,
+        "startChar": 22,
+        "endLine": 27,
+        "endChar": 32
+      },
+      "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5834fa65_68f157de",
+        "filename": "vpx_dsp/vpx_dsp_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-15T22:05:55Z",
+      "side": 1,
+      "message": "This will be needed by inter/intra prediction and inverse transform functions.\n\nYes, it is beyond the scope of loop filter.\n\nIt is convenient to move them altogether with clamp functions.",
+      "parentUuid": "183e024a_636e5c2a",
       "range": {
         "startLine": 27,
         "startChar": 22,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "183e024a_c6c2d67a",
+        "filename": "vpx_dsp/vpx_dsp_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-15T22:05:55Z",
+      "side": 1,
+      "message": "signed_char_clamp() calls this clamp().",
+      "parentUuid": "3837466d_a7f0ee8d",
+      "range": {
+        "startLine": 31,
+        "startChar": 28,
+        "endLine": 31,
+        "endChar": 33
+      },
+      "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8404ed5_a5e6aaa9",
         "filename": "vpx_dsp/vpx_dsp_common.h",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2015-07-15T21:56:27Z",
       "side": 1,
       "message": "Also doesn\u0027t appear to be used.",
+      "range": {
+        "startLine": 35,
+        "startChar": 20,
+        "endLine": 35,
+        "endChar": 21
+      },
+      "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8404ed5_c53dee7b",
+        "filename": "vpx_dsp/vpx_dsp_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-15T22:05:55Z",
+      "side": 1,
+      "message": "floating pointer clamp is probably only used in the rate control scheme. Moving it together with integer clamp is just for code alignment reason.",
+      "parentUuid": "f8404ed5_a5e6aaa9",
       "range": {
         "startLine": 35,
         "startChar": 20,
