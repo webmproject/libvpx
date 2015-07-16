@@ -172,6 +172,30 @@
     },
     {
       "key": {
+        "uuid": "d8754a3f_b13d7a7c",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-16T23:11:30Z",
+      "side": 1,
+      "message": "has both intrinsic and asm",
+      "parentUuid": "188c4286_50476c21",
+      "range": {
+        "startLine": 50,
+        "startChar": 14,
+        "endLine": 50,
+        "endChar": 32
+      },
+      "revId": "0cb95c83124dd3d016a9a4344de61950c72dcfce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "586b1a6a_8a592b5e",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 2
@@ -266,6 +290,30 @@
     },
     {
       "key": {
+        "uuid": "987f5221_2f01253a",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-16T23:11:30Z",
+      "side": 1,
+      "message": "neon_asm only",
+      "parentUuid": "f88e8e7f_4f5eedf3",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 63
+      },
+      "revId": "0cb95c83124dd3d016a9a4344de61950c72dcfce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8709650_4d2359e2",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 2
@@ -301,6 +349,24 @@
     },
     {
       "key": {
+        "uuid": "386e667b_294e0dba",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-16T23:11:30Z",
+      "side": 1,
+      "message": "have both",
+      "parentUuid": "586b1a6a_4aeb33a1",
+      "revId": "0cb95c83124dd3d016a9a4344de61950c72dcfce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "188c4286_d02efccb",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 2
@@ -330,6 +396,24 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "188c4286_d02efccb",
+      "revId": "0cb95c83124dd3d016a9a4344de61950c72dcfce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8709650_d034c26c",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-16T23:11:30Z",
+      "side": 1,
+      "message": "only has neon_asm definition",
+      "parentUuid": "b8709650_2d65adc1",
       "revId": "0cb95c83124dd3d016a9a4344de61950c72dcfce",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
