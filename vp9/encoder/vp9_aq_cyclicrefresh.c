@@ -347,7 +347,10 @@ void vp9_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
   // For video conference clips, if the background has high motion in current
   // frame because of the camera movement, set this frame as the golden frame.
   // Use 70% and 5% as the thresholds for golden frame refreshing.
-  if (cnt1 * 10 > (70 * rows * cols) && cnt2 * 20 < cnt1) {
+  // Also, force this frame as a golden update frame if this frame will change
+  // the resolution (resize_pending != 0).
+  if (cpi->resize_pending != 0 ||
+     (cnt1 * 10 > (70 * rows * cols) && cnt2 * 20 < cnt1)) {
     vp9_cyclic_refresh_set_golden_update(cpi);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 
@@ -562,4 +565,5 @@ void vp9_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   memset(cr->map, 0, cm->mi_rows * cm->mi_cols);
   cr->sb_index = 0;
+  cpi->refresh_golden_frame = 1;
 }
