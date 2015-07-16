@@ -824,7 +824,7 @@ add_proto qw/void vp9_int_pro_row/, "int16_t *hbuf, uint8_t const *ref, const in
 specialize qw/vp9_int_pro_row sse2 neon/;
 
 add_proto qw/int16_t vp9_int_pro_col/, "uint8_t const *ref, const int width";
-specialize qw/vp9_int_pro_col sse2/;
+specialize qw/vp9_int_pro_col sse2 neon/;
 
 add_proto qw/int vp9_vector_var/, "int16_t const *ref, int16_t const *src, const int bwl";
 specialize qw/vp9_vector_var sse2/;

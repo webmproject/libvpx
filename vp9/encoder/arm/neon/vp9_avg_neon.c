@@ -100,3 +100,17 @@ void vp9_int_pro_row_neon(int16_t hbuf[16], uint8_t const *ref,
   hbuf += 8;
   vst1q_s16(hbuf, vreinterpretq_s16_u16(vec_sum_hi));
 }
+
+int16_t vp9_int_pro_col_neon(uint8_t const *ref, const int width) {
+  int i;
+  uint16x8_t vec_sum = vdupq_n_u16(0);
+
+  for (i = 0; i < width; i += 16) {
+    const uint8x16_t vec_row = vld1q_u8(ref);
+    vec_sum = vaddw_u8(vec_sum, vget_low_u8(vec_row));
+    vec_sum = vaddw_u8(vec_sum, vget_high_u8(vec_row));
+    ref += 16;
+  }
+
+  return horizontal_add_u16x8(vec_sum);
+}
