@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "386e667b_492341e2",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T20:47:36Z",
+      "side": 1,
+      "message": "To fix the build these need to be compiled mutually exclusively:\n\nifeq ($(HAVE_NEON_ASM), yes)\nfiles ending in _neon$(ASM)\nelse\nifeq ($(HAVE_NEON), yes)\nfiles ending in _neon.c\nendif  #HAVE NEON\nendif  # HAVE_NEON_ASM",
+      "revId": "d56b90e31827e4b475540b4b705efbff4b1fb543",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
