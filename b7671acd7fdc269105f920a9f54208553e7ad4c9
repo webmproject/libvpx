@@ -94,6 +94,30 @@
       "revId": "b7671acd7fdc269105f920a9f54208553e7ad4c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8f20ee5_72ebb6a1",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-07-16T19:32:59Z",
+      "side": 1,
+      "message": "Sure, but I think it should be:\ncnt1 * 100 \u003e (70 * rows * cols)\n(I agree should be separate patch to fix)",
+      "parentUuid": "f8404ed5_94939262",
+      "range": {
+        "startLine": 353,
+        "startChar": 6,
+        "endLine": 353,
+        "endChar": 37
+      },
+      "revId": "b7671acd7fdc269105f920a9f54208553e7ad4c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
