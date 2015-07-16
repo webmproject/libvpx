@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "f88e8e7f_7254f649",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-16T23:43:12Z",
+      "side": 1,
+      "message": "lpf_horizontal_8_dual and lpf_vertical_8_dual are defined only under neon_asm flag.",
+      "parentUuid": "58823a52_b20a6028",
+      "revId": "0cb95c83124dd3d016a9a4344de61950c72dcfce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "987f5221_6cf73bcb",
         "filename": "vpx_dsp/loopfilter.c",
         "patchSetId": 2
