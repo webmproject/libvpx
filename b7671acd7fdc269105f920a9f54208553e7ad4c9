@@ -46,6 +46,54 @@
       "revId": "b7671acd7fdc269105f920a9f54208553e7ad4c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8404ed5_94939262",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-07-16T18:46:54Z",
+      "side": 1,
+      "message": "i think it was written like that to avoid division, so will leave it as is.",
+      "parentUuid": "98fcb2c6_6aebb3a1",
+      "range": {
+        "startLine": 353,
+        "startChar": 6,
+        "endLine": 353,
+        "endChar": 37
+      },
+      "revId": "b7671acd7fdc269105f920a9f54208553e7ad4c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3837466d_fbf68f8a",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-07-16T18:46:54Z",
+      "side": 1,
+      "message": "Looks like that condition is wrong, yeah maybe should be 100.\nI will check with yunqing.\nBut i won\u0027t make that change in this patch, as this patch is not intended to change any behavior unless resizing happens.",
+      "parentUuid": "98fcb2c6_4ae8f7a2",
+      "range": {
+        "startLine": 353,
+        "startChar": 6,
+        "endLine": 353,
+        "endChar": 37
+      },
+      "revId": "b7671acd7fdc269105f920a9f54208553e7ad4c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
