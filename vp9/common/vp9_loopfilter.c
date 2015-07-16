@@ -9,6 +9,7 @@
  */
 
 #include "./vpx_config.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_reconinter.h"

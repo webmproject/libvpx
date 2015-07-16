@@ -19,7 +19,7 @@
 #include "test/util.h"
 
 #include "./vpx_config.h"
-#include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vpx/vpx_integer.h"
@@ -665,11 +665,11 @@ INSTANTIATE_TEST_CASE_P(
                    &wrapper_vertical_16_c, 8, 1),
         make_tuple(&wrapper_vertical_16_dual_neon,
                    &wrapper_vertical_16_dual_c, 8, 1),
+#endif  // HAVE_NEON_ASM
         make_tuple(&vp9_lpf_horizontal_8_neon,
                    &vp9_lpf_horizontal_8_c, 8, 1),
         make_tuple(&vp9_lpf_vertical_8_neon,
                    &vp9_lpf_vertical_8_c, 8, 1),
-#endif  // HAVE_NEON_ASM
         make_tuple(&vp9_lpf_horizontal_4_neon,
                    &vp9_lpf_horizontal_4_c, 8, 1),
         make_tuple(&vp9_lpf_vertical_4_neon,
