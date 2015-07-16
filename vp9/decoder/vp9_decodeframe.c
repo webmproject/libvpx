@@ -1816,10 +1816,15 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
                          "Invalid frame marker");
 
   cm->profile = vp9_read_profile(rb);
-
+#if CONFIG_VP9_HIGHBITDEPTH
   if (cm->profile >= MAX_PROFILES)
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Unsupported bitstream profile");
+#else
+  if (cm->profile >= PROFILE_2)
+    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                       "Unsupported bitstream profile");
+#endif
 
   cm->show_existing_frame = vp9_rb_read_bit(rb);
   if (cm->show_existing_frame) {
