@@ -46,6 +46,63 @@
       "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "386e667b_e96eb5aa",
+        "filename": "vp9/vp9_common.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 0,
+      "message": "_16_ and mb_lpf_neon need to be outside the condition",
+      "range": {
+        "startLine": 168,
+        "startChar": 52,
+        "endLine": 168,
+        "endChar": 78
+      },
+      "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "987f5221_acebe370",
+        "filename": "vp9/vp9_common.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 0,
+      "message": "This is now covered by the intrinsics, so it should be inside",
+      "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "58823a52_72a95866",
+        "filename": "vp9/vp9_common.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 0,
+      "message": "This also appears to be common code, should be outside the condition.",
+      "revId": "db8e731b8d5a9e15e369e3921d4326e32b9efa10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }

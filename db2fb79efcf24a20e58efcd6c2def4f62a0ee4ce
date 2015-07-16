@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8709650_0d41d10a",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 1,
+      "message": "These are already guarded by the larger HAVE_NEON",
+      "revId": "db2fb79efcf24a20e58efcd6c2def4f62a0ee4ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "386e667b_0968e998",
+        "filename": "vpx_dsp/arm/loopfilter_16_neon.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 1,
+      "message": "ugh names _16_ but actually does the 4_dual",
+      "revId": "db2fb79efcf24a20e58efcd6c2def4f62a0ee4ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "188c4286_f010e0db",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 1,
+      "message": "this is the actual _16_ and has no corresponding intrinsic, so it needs to be outside the condition (actually probably doesn\u0027t but i\u0027m not totally sure)",
+      "revId": "db2fb79efcf24a20e58efcd6c2def4f62a0ee4ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "188c4286_708cf0ba",
+        "filename": "vpx_dsp/arm/loopfilter_neon.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 1,
+      "message": "yeah this is required for both build setups",
+      "revId": "db2fb79efcf24a20e58efcd6c2def4f62a0ee4ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38858659_71d5d8ac",
+        "filename": "vpx_dsp/mips/loopfilter_msa.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 1,
+      "message": "looks like you did move all the mips code?",
+      "revId": "db2fb79efcf24a20e58efcd6c2def4f62a0ee4ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "787a9e34_ab5189dd",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 1,
+      "message": "outside the condition",
+      "revId": "db2fb79efcf24a20e58efcd6c2def4f62a0ee4ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "188c4286_5020cc2c",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-16T21:43:33Z",
+      "side": 1,
+      "message": "outside the condition",
+      "revId": "db2fb79efcf24a20e58efcd6c2def4f62a0ee4ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
