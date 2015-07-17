@@ -10,12 +10,12 @@
 
 #include <stdlib.h>
 
-#include "./vp9_rtcd.h"
-#include "vp9/common/mips/dspr2/vp9_loopfilter_macros_dspr2.h"
-#include "vp9/common/mips/dspr2/vp9_loopfilter_masks_dspr2.h"
-#include "vp9/common/mips/dspr2/vp9_loopfilter_filters_dspr2.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/mips/common_dspr2.h"
+#include "vpx_dsp/mips/loopfilter_filters_dspr2.h"
+#include "vpx_dsp/mips/loopfilter_macros_dspr2.h"
+#include "vpx_dsp/mips/loopfilter_masks_dspr2.h"
 #include "vpx_mem/vpx_mem.h"
 
 #if HAVE_DSPR2

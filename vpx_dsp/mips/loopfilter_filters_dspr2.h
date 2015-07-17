@@ -13,7 +13,7 @@
 
 #include <stdlib.h>
 
-#include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
