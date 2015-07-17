@@ -15,13 +15,13 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/mips/common_dspr2.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #if HAVE_DSPR2
-#define CROP_WIDTH 512
 extern uint8_t *vp9_ff_cropTbl;
 
 #define DCT_CONST_ROUND_SHIFT_TWICE_COSPI_16_64(input)                    ({   \
@@ -49,40 +49,6 @@ extern uint8_t *vp9_ff_cropTbl;
         [cospi_16_64] "r" (cospi_16_64)                                        \
    );                                                                          \
   out;                                                                    })
-
-static INLINE void vp9_prefetch_load(const unsigned char *src) {
-  __asm__ __volatile__ (
-      "pref   0,  0(%[src])   \n\t"
-      :
-      : [src] "r" (src)
-  );
-}
-
-/* prefetch data for store */
-static INLINE void vp9_prefetch_store(unsigned char *dst) {
-  __asm__ __volatile__ (
-      "pref   1,  0(%[dst])   \n\t"
-      :
-      : [dst] "r" (dst)
-  );
-}
-
-static INLINE void vp9_prefetch_load_streamed(const unsigned char *src) {
-  __asm__ __volatile__ (
-      "pref   4,  0(%[src])   \n\t"
-      :
-      : [src] "r" (src)
-  );
-}
-
-/* prefetch data for store */
-static INLINE void vp9_prefetch_store_streamed(unsigned char *dst) {
-  __asm__ __volatile__ (
-      "pref   5,  0(%[dst])   \n\t"
-      :
-      : [dst] "r" (dst)
-  );
-}
 
 void vp9_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
                                    int dest_stride);
