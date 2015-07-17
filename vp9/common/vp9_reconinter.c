@@ -933,6 +933,7 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 }
 
 #if CONFIG_SUPERTX
+
 static const uint8_t mask_8[8] = {
   64, 64, 62, 52, 12,  2,  0,  0
 };
@@ -955,20 +956,42 @@ static const uint8_t mask_64[64] = {
 };
 #endif
 
-static void generate_1dmask(int length, uint8_t *mask) {
+static const uint8_t mask_8_uv[8] = {
+  64, 64, 62, 52,  12,  2,  0,  0
+};
+
+static const uint8_t mask_16_uv[16] = {
+  64, 64, 64, 64, 61, 53, 45, 36, 28, 19, 11, 3, 0,  0,  0,  0
+};
+
+static const uint8_t mask_32_uv[32] = {
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 60, 54, 46, 36,
+  28, 18, 10,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+};
+
+#if CONFIG_TX64X64
+static const uint8_t mask_64_uv[64] = {
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 60, 54, 46, 36,
+  28, 18, 10,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+};
+#endif
+
+static void generate_1dmask(int length, uint8_t *mask, int plane) {
   switch (length) {
     case 8:
-      vpx_memcpy(mask, mask_8, length);
+      vpx_memcpy(mask, plane ? mask_8_uv : mask_8, length);
       break;
     case 16:
-      vpx_memcpy(mask, mask_16, length);
+      vpx_memcpy(mask, plane ? mask_16_uv : mask_16, length);
       break;
     case 32:
-      vpx_memcpy(mask, mask_32, length);
+      vpx_memcpy(mask, plane ? mask_32_uv : mask_32, length);
       break;
 #if CONFIG_TX64X64
     case 64:
-      vpx_memcpy(mask, mask_64, length);
+      vpx_memcpy(mask, plane ? mask_64_uv : mask_64, length);
       break;
 #endif
     default:
@@ -976,12 +999,13 @@ static void generate_1dmask(int length, uint8_t *mask) {
   }
 }
 
+
 void vp9_build_masked_inter_predictor_complex(
     MACROBLOCKD *xd,
     uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
     const struct macroblockd_plane *pd, int mi_row, int mi_col,
     int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
-    PARTITION_TYPE partition) {
+    PARTITION_TYPE partition, int plane) {
   int i, j;
   uint8_t mask[MAXTXLEN];
   int top_w = 4 << b_width_log2_lookup[top_bsize],
@@ -989,6 +1013,12 @@ void vp9_build_masked_inter_predictor_complex(
   int w = 4 << b_width_log2_lookup[bsize], h = 4 << b_height_log2_lookup[bsize];
   int w_offset = (mi_col - mi_col_ori) << 3,
       h_offset = (mi_row - mi_row_ori) << 3;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t *dst16= CONVERT_TO_SHORTPTR(dst);
+  uint16_t *dst216 = CONVERT_TO_SHORTPTR(dst2);
+  int b_hdb = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   top_w >>= pd->subsampling_x;
   top_h >>= pd->subsampling_y;
@@ -999,52 +1029,169 @@ void vp9_build_masked_inter_predictor_complex(
 
   switch (partition) {
     case PARTITION_HORZ:
-      generate_1dmask(h, mask + h_offset);
-      vpx_memset(mask, 64, h_offset);
-      vpx_memset(mask + h_offset + h, 0, top_h - h_offset - h);
+    {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (b_hdb) {
+        uint16_t *dst_tmp = dst16 + h_offset * dst_stride;
+        uint16_t *dst2_tmp = dst216 + h_offset * dst2_stride;
+        generate_1dmask(h, mask + h_offset,
+                        plane && xd->plane[plane].subsampling_y);
+
+        for (i = h_offset; i < h_offset + h; i++) {
+          for (j = 0; j < top_w; j++) {
+            const int m = mask[i];  assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+
+        for (; i < top_h; i ++) {
+          vpx_memcpy(dst_tmp, dst2_tmp, top_w * sizeof(uint16_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+      } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        uint8_t *dst_tmp = dst + h_offset * dst_stride;
+        uint8_t *dst2_tmp = dst2 + h_offset * dst2_stride;
+        generate_1dmask(h, mask + h_offset,
+                        plane && xd->plane[plane].subsampling_y);
+
+        for (i = h_offset; i < h_offset + h; i++) {
+          for (j = 0; j < top_w; j++) {
+            const int m = mask[i];  assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+
+        for (; i < top_h; i ++) {
+          vpx_memcpy(dst_tmp, dst2_tmp, top_w * sizeof(uint8_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+#if CONFIG_VP9_HIGHBITDEPTH
+      }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    }
+
       break;
     case PARTITION_VERT:
-      generate_1dmask(w, mask + w_offset);
-      vpx_memset(mask, 64, w_offset);
-      vpx_memset(mask + w_offset + w, 0, top_w - w_offset - w);
+    {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (b_hdb) {
+        uint16_t *dst_tmp = dst16;
+        uint16_t *dst2_tmp = dst216;
+        generate_1dmask(w, mask + w_offset,
+                        plane && xd->plane[plane].subsampling_x);
+
+        for (i = 0; i < top_h; i++) {
+          for (j = w_offset; j < w_offset + w; j++) {
+            const int m = mask[j];   assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+          vpx_memcpy(dst_tmp + j, dst2_tmp + j,
+                     (top_w - w_offset - w) * sizeof(uint16_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+      } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        uint8_t *dst_tmp = dst;
+        uint8_t *dst2_tmp = dst2;
+        generate_1dmask(w, mask + w_offset,
+                        plane && xd->plane[plane].subsampling_x);
+
+        for (i = 0; i < top_h; i++) {
+          for (j = w_offset; j < w_offset + w; j++) {
+            const int m = mask[j];   assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+            vpx_memcpy(dst_tmp + j, dst2_tmp + j,
+                       (top_w - w_offset - w) * sizeof(uint8_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+#if CONFIG_VP9_HIGHBITDEPTH
+      }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    }
       break;
     default:
       assert(0);
   }
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    uint16_t *dst16= CONVERT_TO_SHORTPTR(dst);
-    uint16_t *dst216 = CONVERT_TO_SHORTPTR(dst2);
-    for (i = 0; i < top_h; ++i) {
-      for (j = 0; j < top_w; ++j) {
-        const int m = (partition == PARTITION_HORZ ? mask[i] : mask[j]);
-        if (m == 64)
-          continue;
-        else if (m == 0)
-          dst16[i * dst_stride + j] = dst216[i * dst2_stride + j];
-        else
-          dst16[i * dst_stride + j] = (dst16[i * dst_stride + j] * m +
-                                       dst216[i * dst2_stride + j] * (64 - m) +
-                                       32) >> 6;
-      }
-    }
-    return;
-  }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
   (void) xd;
-  for (i = 0; i < top_h; ++i) {
-    for (j = 0; j < top_w; ++j) {
-      const int m = (partition == PARTITION_HORZ ? mask[i] : mask[j]);
-      if (m == 64)
-        continue;
-      else if (m == 0)
-        dst[i * dst_stride + j] = dst2[i * dst2_stride + j];
-      else
-        dst[i * dst_stride + j] = (dst[i * dst_stride + j] * m +
-                                   dst2[i * dst2_stride + j] * (64 - m) +
-                                   32) >> 6;
-    }
+}
+
+void vp9_build_inter_predictors_sb_sub8x8(MACROBLOCKD *xd,
+                                          int mi_row, int mi_col,
+                                          BLOCK_SIZE bsize, int block) {
+  // Prediction function used in supertx:
+  // Use the mv at current block (which is less than 8x8)
+  // to get prediction of a block located at (mi_row, mi_col) at size of bsize
+  // bsize can be larger than 8x8.
+  // block (0-3): the sub8x8 location of current block
+  int plane;
+  const int mi_x = mi_col * MI_SIZE;
+  const int mi_y = mi_row * MI_SIZE;
+
+  // For sub8x8 uv:
+  // Skip uv prediction in supertx except the first block (block = 0)
+  int max_plane = block ? 1 : MAX_MB_PLANE;
+
+  for (plane = 0; plane < max_plane; plane++) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
+
+    build_inter_predictors(xd, plane, block, bw, bh,
+                           0, 0, bw, bh,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                            0, 0,
+#endif
+                           mi_x, mi_y);
   }
+#if CONFIG_INTERINTRA
+  if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+#if CONFIG_INTRABC
+      xd->mi[0].src_mi->mbmi.ref_frame[0] != INTRA_FRAME &&
+#endif  // CONFIG_INTRABC
+      is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
+    vp9_build_interintra_predictors(xd, xd->plane[0].dst.buf,
+                                    xd->plane[1].dst.buf, xd->plane[2].dst.buf,
+                                    xd->plane[0].dst.stride,
+                                    xd->plane[1].dst.stride,
+                                    xd->plane[2].dst.stride, bsize);
+#endif  // CONFIG_INTERINTRA
 }
 
 #if CONFIG_WEDGE_PARTITION
@@ -1071,248 +1218,48 @@ void vp9_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
            build_inter_predictors(xd, plane, i++, bw, bh, 4 * x, 4 * y, 4, 4,
-                                  wedge_offset_x, wedge_offset_y, mi_x, mi_y);
+                            wedge_offset_x >> (xd->plane[plane].subsampling_x),
+                            wedge_offset_y >> (xd->plane[plane].subsampling_y),
+                            mi_x, mi_y);
     } else {
       build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
-                             wedge_offset_x, wedge_offset_y, mi_x, mi_y);
+                            wedge_offset_x >> (xd->plane[plane].subsampling_x),
+                            wedge_offset_y >> (xd->plane[plane].subsampling_y),
+                            mi_x, mi_y);
     }
   }
 }
-#endif  // CONFIG_WEDGE_PARTITION
-
-void vp9_build_inter_predictors_sby_sub8x8_extend(
+void vp9_build_inter_predictors_sb_sub8x8_extend(
     MACROBLOCKD *xd,
     int mi_row, int mi_col,
-    int mi_row_ori,
-    int mi_col_ori,
-    BLOCK_SIZE top_bsize,
-    PARTITION_TYPE partition) {
-  const int mi_x = mi_col_ori * MI_SIZE;
-  const int mi_y = mi_row_ori * MI_SIZE;
-#if CONFIG_WEDGE_PARTITION
-  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
-  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
-#endif  // CONFIG_WEDGE_PARTITION
-  uint8_t *orig_dst;
-  int orig_dst_stride;
-  int bw = 4 << b_width_log2_lookup[top_bsize];
-  int bh = 4 << b_height_log2_lookup[top_bsize];
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, 2 * MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf1, 2 * MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf2, 2 * MAXTXLEN * MAXTXLEN);
-
-    orig_dst = xd->plane[0].dst.buf;
-    orig_dst_stride = xd->plane[0].dst.stride;
-    build_inter_predictors(xd, 0, 0, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                           wedge_offset_x, wedge_offset_y,
-#endif
-                           mi_x, mi_y);
-
-    xd->plane[0].dst.buf = CONVERT_TO_BYTEPTR(tmp_buf);
-    xd->plane[0].dst.stride = MAXTXLEN;
-    switch (partition) {
-      case PARTITION_HORZ:
-        build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        break;
-      case PARTITION_VERT:
-        build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        break;
-      case PARTITION_SPLIT:
-        build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        xd->plane[0].dst.buf = CONVERT_TO_BYTEPTR(tmp_buf1);
-        xd->plane[0].dst.stride = MAXTXLEN;
-        build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        xd->plane[0].dst.buf = CONVERT_TO_BYTEPTR(tmp_buf2);
-        xd->plane[0].dst.stride = MAXTXLEN;
-        build_inter_predictors(xd, 0, 3, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        break;
-      default:
-        assert(0);
-    }
-    if (partition != PARTITION_SPLIT) {
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          orig_dst, orig_dst_stride,
-          CONVERT_TO_BYTEPTR(tmp_buf), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          partition);
-    } else {
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          orig_dst, orig_dst_stride,
-          CONVERT_TO_BYTEPTR(tmp_buf), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          CONVERT_TO_BYTEPTR(tmp_buf1), MAXTXLEN,
-          CONVERT_TO_BYTEPTR(tmp_buf2), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          orig_dst, orig_dst_stride,
-          CONVERT_TO_BYTEPTR(tmp_buf1), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          PARTITION_HORZ);
-    }
-    xd->plane[0].dst.buf = orig_dst;
-    xd->plane[0].dst.stride = orig_dst_stride;
-    return;
-  }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  {
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf1, MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf2, MAXTXLEN * MAXTXLEN);
-
-    orig_dst = xd->plane[0].dst.buf;
-    orig_dst_stride = xd->plane[0].dst.stride;
-    build_inter_predictors(xd, 0, 0, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                           wedge_offset_x, wedge_offset_y,
-#endif
-                           mi_x, mi_y);
-
-    xd->plane[0].dst.buf = tmp_buf;
-    xd->plane[0].dst.stride = MAXTXLEN;
-    switch (partition) {
-      case PARTITION_HORZ:
-        build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        break;
-      case PARTITION_VERT:
-        build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        break;
-      case PARTITION_SPLIT:
-        build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        xd->plane[0].dst.buf = tmp_buf1;
-        xd->plane[0].dst.stride = MAXTXLEN;
-        build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        xd->plane[0].dst.buf = tmp_buf2;
-        xd->plane[0].dst.stride = MAXTXLEN;
-        build_inter_predictors(xd, 0, 3, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-        break;
-      default:
-        assert(0);
-    }
-
-    if (partition != PARTITION_SPLIT) {
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               orig_dst, orig_dst_stride,
-                                               tmp_buf, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               partition);
-    } else {
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               orig_dst, orig_dst_stride,
-                                               tmp_buf, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               tmp_buf1, MAXTXLEN,
-                                               tmp_buf2, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               orig_dst, orig_dst_stride,
-                                               tmp_buf1, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               PARTITION_HORZ);
-    }
-    xd->plane[0].dst.buf = orig_dst;
-    xd->plane[0].dst.stride = orig_dst_stride;
-  }
-}
-
-void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
-#if CONFIG_WEDGE_PARTITION
-                                                   int mi_row, int mi_col,
-#endif
-                                                   int mi_row_ori,
-                                                   int mi_col_ori,
-                                                   BLOCK_SIZE top_bsize) {
+    int mi_row_ori, int mi_col_ori,
+    BLOCK_SIZE bsize, int block) {
+  // Sub8x8 prediction for wedge partition in supertx
   int plane;
   const int mi_x = mi_col_ori * MI_SIZE;
   const int mi_y = mi_row_ori * MI_SIZE;
-#if CONFIG_WEDGE_PARTITION
   const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
   const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
-#endif
-  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
-    const BLOCK_SIZE plane_bsize = get_plane_block_size(top_bsize,
+
+  // For sub8x8 uv:
+  // Skip uv prediction in supertx except the first block (block = 0)
+  int max_plane = block ? 1 : MAX_MB_PLANE;
+
+  for (plane = 0; plane < max_plane; ++plane) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
                                                         &xd->plane[plane]);
     const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
     const int bw = 4 * num_4x4_w;
     const int bh = 4 * num_4x4_h;
 
-    build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                           wedge_offset_x, wedge_offset_y,
-#endif
+    build_inter_predictors(xd, plane, block, bw, bh, 0, 0, bw, bh,
+                           wedge_offset_x >> (xd->plane[plane].subsampling_x),
+                           wedge_offset_y >> (xd->plane[plane].subsampling_y),
                            mi_x, mi_y);
   }
 }
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_SUPERTX
 
 // TODO(jingning): This function serves as a placeholder for decoder prediction
@@ -1698,6 +1645,48 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 }
 
 #if CONFIG_SUPERTX
+void vp9_dec_build_inter_predictors_sb_sub8x8(MACROBLOCKD *xd,
+                                       int mi_row, int mi_col,
+                                       BLOCK_SIZE bsize, int block) {
+  // Prediction function used in supertx:
+  // Use the mv at current block (which is less than 8x8)
+  // to get prediction of a block located at (mi_row, mi_col) at size of bsize
+  // bsize can be larger than 8x8.
+  // block (0-3): the sub8x8 location of current block
+  int plane;
+  const int mi_x = mi_col * MI_SIZE;
+  const int mi_y = mi_row * MI_SIZE;
+
+  // For sub8x8 uv:
+  // Skip uv prediction in supertx except the first block (block = 0)
+  int max_plane = (block) ? 1 : MAX_MB_PLANE;
+
+  for (plane = 0; plane < max_plane; plane++) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
+
+    dec_build_inter_predictors(xd, plane, block, bw, bh,
+                                     0, 0, bw, bh,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                                     0, 0,
+#endif
+                                     mi_x, mi_y);
+  }
+#if CONFIG_INTERINTRA  // not sure
+  if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+      is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
+    vp9_build_interintra_predictors(xd, xd->plane[0].dst.buf,
+                                    xd->plane[1].dst.buf, xd->plane[2].dst.buf,
+                                    xd->plane[0].dst.stride,
+                                    xd->plane[1].dst.stride,
+                                    xd->plane[2].dst.stride, bsize);
+#endif  // CONFIG_INTERINTRA
+}
+
 #if CONFIG_WEDGE_PARTITION
 void vp9_dec_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
                                               int mi_row, int mi_col,
@@ -1721,252 +1710,55 @@ void vp9_dec_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
       assert(bsize == BLOCK_8X8);
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
-          dec_build_inter_predictors(xd, plane, i++, bw, bh, 4 * x, 4 * y, 4, 4,
-                                     wedge_offset_x, wedge_offset_y,
-                                     mi_x, mi_y);
+          dec_build_inter_predictors(
+              xd, plane, i++, bw, bh, 4 * x, 4 * y, 4, 4,
+              wedge_offset_x >> (xd->plane[plane].subsampling_x),
+              wedge_offset_y >> (xd->plane[plane].subsampling_y),
+              mi_x, mi_y);
     } else {
-      dec_build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
-                                 wedge_offset_x, wedge_offset_y,
-                                 mi_x, mi_y);
+      dec_build_inter_predictors(
+          xd, plane, 0, bw, bh, 0, 0, bw, bh,
+          wedge_offset_x >> (xd->plane[plane].subsampling_x),
+          wedge_offset_y >> (xd->plane[plane].subsampling_y),
+          mi_x, mi_y);
     }
   }
 }
-#endif  // CONFIG_WEDGE_PARTITION
 
-void vp9_dec_build_inter_predictors_sby_sub8x8_extend(
+void vp9_dec_build_inter_predictors_sb_sub8x8_extend(
     MACROBLOCKD *xd,
     int mi_row, int mi_col,
-    int mi_row_ori,
-    int mi_col_ori,
-    BLOCK_SIZE top_bsize,
-    PARTITION_TYPE partition) {
-  const int mi_x = mi_col_ori * MI_SIZE;
-  const int mi_y = mi_row_ori * MI_SIZE;
-#if CONFIG_WEDGE_PARTITION
-  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
-  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
-#endif
-  uint8_t *orig_dst;
-  int orig_dst_stride;
-  int bw = 4 << b_width_log2_lookup[top_bsize];
-  int bh = 4 << b_height_log2_lookup[top_bsize];
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, 2 * MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf1, 2 * MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf2, 2 * MAXTXLEN * MAXTXLEN);
-
-    orig_dst = xd->plane[0].dst.buf;
-    orig_dst_stride = xd->plane[0].dst.stride;
-    dec_build_inter_predictors(xd, 0, 0, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-
-    xd->plane[0].dst.buf = CONVERT_TO_BYTEPTR(tmp_buf);
-    xd->plane[0].dst.stride = MAXTXLEN;
-    switch (partition) {
-      case PARTITION_HORZ:
-        dec_build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        break;
-      case PARTITION_VERT:
-        dec_build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        break;
-      case PARTITION_SPLIT:
-        dec_build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        xd->plane[0].dst.buf = CONVERT_TO_BYTEPTR(tmp_buf1);
-        xd->plane[0].dst.stride = MAXTXLEN;
-        dec_build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        xd->plane[0].dst.buf = CONVERT_TO_BYTEPTR(tmp_buf2);
-        xd->plane[0].dst.stride = MAXTXLEN;
-        dec_build_inter_predictors(xd, 0, 3, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        break;
-      default:
-        assert(0);
-    }
-
-    if (partition != PARTITION_SPLIT) {
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          orig_dst, orig_dst_stride,
-          CONVERT_TO_BYTEPTR(tmp_buf), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          partition);
-    } else {
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          orig_dst, orig_dst_stride,
-          CONVERT_TO_BYTEPTR(tmp_buf), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          CONVERT_TO_BYTEPTR(tmp_buf1), MAXTXLEN,
-          CONVERT_TO_BYTEPTR(tmp_buf2), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(
-          xd,
-          orig_dst, orig_dst_stride,
-          CONVERT_TO_BYTEPTR(tmp_buf1), MAXTXLEN,
-          &xd->plane[0], mi_row, mi_col,
-          mi_row_ori, mi_col_ori,
-          BLOCK_8X8, top_bsize,
-          PARTITION_HORZ);
-    }
-    xd->plane[0].dst.buf = orig_dst;
-    xd->plane[0].dst.stride = orig_dst_stride;
-    return;
-  }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  {
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf1, MAXTXLEN * MAXTXLEN);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf2, MAXTXLEN * MAXTXLEN);
-
-    orig_dst = xd->plane[0].dst.buf;
-    orig_dst_stride = xd->plane[0].dst.stride;
-    dec_build_inter_predictors(xd, 0, 0, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
-
-    xd->plane[0].dst.buf = tmp_buf;
-    xd->plane[0].dst.stride = MAXTXLEN;
-    switch (partition) {
-      case PARTITION_HORZ:
-        dec_build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        break;
-      case PARTITION_VERT:
-        dec_build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        break;
-      case PARTITION_SPLIT:
-        dec_build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        xd->plane[0].dst.buf = tmp_buf1;
-        xd->plane[0].dst.stride = MAXTXLEN;
-        dec_build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        xd->plane[0].dst.buf = tmp_buf2;
-        xd->plane[0].dst.stride = MAXTXLEN;
-        dec_build_inter_predictors(xd, 0, 3, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                                   wedge_offset_x, wedge_offset_y,
-#endif
-                                   mi_x, mi_y);
-        break;
-      default:
-        assert(0);
-    }
-
-    if (partition != PARTITION_SPLIT) {
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               orig_dst, orig_dst_stride,
-                                               tmp_buf, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               partition);
-    } else {
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               orig_dst, orig_dst_stride,
-                                               tmp_buf, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               tmp_buf1, MAXTXLEN,
-                                               tmp_buf2, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               PARTITION_VERT);
-      vp9_build_masked_inter_predictor_complex(xd,
-                                               orig_dst, orig_dst_stride,
-                                               tmp_buf1, MAXTXLEN,
-                                               &xd->plane[0], mi_row, mi_col,
-                                               mi_row_ori, mi_col_ori,
-                                               BLOCK_8X8, top_bsize,
-                                               PARTITION_HORZ);
-    }
-    xd->plane[0].dst.buf = orig_dst;
-    xd->plane[0].dst.stride = orig_dst_stride;
-  }
-}
-
-void vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
-#if CONFIG_WEDGE_PARTITION
-                                                       int mi_row, int mi_col,
-#endif
-                                                       int mi_row_ori,
-                                                       int mi_col_ori,
-                                                       BLOCK_SIZE top_bsize) {
+    int mi_row_ori, int mi_col_ori,
+    BLOCK_SIZE bsize, int block) {
+  // Sub8x8 prediction for wedge partition in supertx
   int plane;
   const int mi_x = mi_col_ori * MI_SIZE;
   const int mi_y = mi_row_ori * MI_SIZE;
-#if CONFIG_WEDGE_PARTITION
   const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
   const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
-#endif
-  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
-    const BLOCK_SIZE plane_bsize = get_plane_block_size(top_bsize,
+
+  // For sub8x8 uv:
+  // Skip uv prediction in supertx except the first block (block = 0)
+  int max_plane = block ? 1 : MAX_MB_PLANE;
+
+  for (plane = 0; plane < max_plane; ++plane) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
                                                         &xd->plane[plane]);
     const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
     const int bw = 4 * num_4x4_w;
     const int bh = 4 * num_4x4_h;
 
-    dec_build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
-#if CONFIG_WEDGE_PARTITION
-                               wedge_offset_x, wedge_offset_y,
-#endif
-                               mi_x, mi_y);
+    dec_build_inter_predictors(
+        xd, plane, block, bw, bh, 0, 0, bw, bh,
+        wedge_offset_x >> (xd->plane[plane].subsampling_x),
+        wedge_offset_y >> (xd->plane[plane].subsampling_y),
+        mi_x, mi_y);
   }
 }
+
+#endif  // CONFIG_WEDGE_PARTITION
+
 #endif  // CONFIG_SUPERTX
 
 void vp9_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],

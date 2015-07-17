@@ -30,6 +30,15 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                        BLOCK_SIZE bsize);
 
+#if CONFIG_SUPERTX
+void vp9_build_inter_predictors_sb_sub8x8(MACROBLOCKD *xd,
+                                          int mi_row, int mi_col,
+                                          BLOCK_SIZE bsize, int block);
+void vp9_dec_build_inter_predictors_sb_sub8x8(MACROBLOCKD *xd,
+                                       int mi_row, int mi_col,
+                                       BLOCK_SIZE bsize, int block);
+#endif
+
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const MV *mv_q3,
@@ -88,39 +97,15 @@ void vp9_generate_hard_mask(int wedge_index, BLOCK_SIZE sb_type,
 #endif  // CONFIG_WEDGE_PARTITION
 
 #if CONFIG_SUPERTX
+
 struct macroblockd_plane;
-void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
-                                                  int mi_row, int mi_col,
-                                                  int mi_row_ori,
-                                                  int mi_col_ori,
-                                                  BLOCK_SIZE top_bsize,
-                                                  PARTITION_TYPE partition);
-void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
-#if CONFIG_WEDGE_PARTITION
-                                                   int mi_row, int mi_col,
-#endif
-                                                   int mi_row_ori,
-                                                   int mi_col_ori,
-                                                   BLOCK_SIZE top_bsize);
+
 void vp9_build_masked_inter_predictor_complex(
     MACROBLOCKD *xd,
     uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
     const struct macroblockd_plane *pd, int mi_row, int mi_col,
     int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
-    PARTITION_TYPE partition);
-void vp9_dec_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
-                                                      int mi_row, int mi_col,
-                                                      int mi_row_ori,
-                                                      int mi_col_ori,
-                                                      BLOCK_SIZE top_bsize,
-                                                      PARTITION_TYPE p);
-void vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
-#if CONFIG_WEDGE_PARTITION
-                                                       int mi_row, int mi_col,
-#endif
-                                                       int mi_row_ori,
-                                                       int mi_col_ori,
-                                                       BLOCK_SIZE top_bsize);
+    PARTITION_TYPE partition, int plane);
 
 #if CONFIG_WEDGE_PARTITION
 void vp9_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
@@ -131,6 +116,18 @@ void vp9_dec_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
                                               int mi_row, int mi_col,
                                               int mi_row_ori, int mi_col_ori,
                                               BLOCK_SIZE bsize);
+
+void vp9_build_inter_predictors_sb_sub8x8_extend(
+    MACROBLOCKD *xd,
+    int mi_row, int mi_col,
+    int mi_row_ori, int mi_col_ori,
+    BLOCK_SIZE bsize, int block);
+void vp9_dec_build_inter_predictors_sb_sub8x8_extend(
+    MACROBLOCKD *xd,
+    int mi_row, int mi_col,
+    int mi_row_ori, int mi_col_ori,
+    BLOCK_SIZE bsize, int block);
+
 #endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_SUPERTX
 
