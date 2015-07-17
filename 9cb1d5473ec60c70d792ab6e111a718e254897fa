@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f88e8e7f_29512159",
+        "filename": "vpx_dsp/arm/loopfilter_16_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-17T22:41:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d8754a3f_9892da25",
+      "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "787a9e34_bf61bf33",
         "filename": "vpx_dsp/arm/loopfilter_4_neon.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-17T21:50:19Z",
       "side": 1,
       "message": "static",
+      "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38858659_452a4a33",
+        "filename": "vpx_dsp/arm/loopfilter_4_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-17T22:41:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "787a9e34_bf61bf33",
       "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "38858659_a569b673",
+        "filename": "vpx_dsp/arm/loopfilter_8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-17T22:41:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8709650_fc4d1513",
+      "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "386e667b_1db6e3c5",
         "filename": "vpx_dsp/mips/common_dspr2.h",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-07-17T21:50:19Z",
       "side": 1,
       "message": "all static -\u003e drop vpx_",
+      "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8754a3f_7847ee21",
+        "filename": "vpx_dsp/mips/common_dspr2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-17T22:41:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "386e667b_1db6e3c5",
       "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "586b1a6a_b91a4bf6",
+        "filename": "vpx_dsp/mips/loopfilter_filters_dspr2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-17T22:41:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "386e667b_3db3a7d6",
+      "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "386e667b_dd804bd7",
         "filename": "vpx_dsp/mips/loopfilter_filters_dspr2.h",
         "patchSetId": 1
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "d8754a3f_58f8f23e",
+        "filename": "vpx_dsp/mips/loopfilter_filters_dspr2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-17T22:41:16Z",
+      "side": 1,
+      "message": "looks like dspr2 codes are not covered by jenkins. would prefer not to touch the internal variables, until these functions are tested.",
+      "parentUuid": "386e667b_dd804bd7",
+      "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8709650_3c54fd96",
         "filename": "vpx_dsp/mips/loopfilter_masks_dspr2.h",
         "patchSetId": 1
@@ -115,6 +223,24 @@
       "writtenOn": "2015-07-17T21:50:19Z",
       "side": 1,
       "message": "static",
+      "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "58823a52_c6616233",
+        "filename": "vpx_dsp/mips/loopfilter_masks_dspr2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-17T22:41:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8709650_3c54fd96",
       "revId": "9cb1d5473ec60c70d792ab6e111a718e254897fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
