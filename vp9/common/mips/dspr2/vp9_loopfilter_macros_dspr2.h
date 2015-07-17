@@ -14,8 +14,8 @@
 #include <stdlib.h>
 
 #include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_onyxc_int.h"
+#include "vpx/vpx_integer.h"
+#include "vpx_mem/vpx_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

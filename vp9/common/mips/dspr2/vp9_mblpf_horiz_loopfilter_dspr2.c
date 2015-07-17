@@ -11,13 +11,12 @@
 #include <stdlib.h>
 
 #include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_loopfilter.h"
-#include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/mips/dspr2/vp9_loopfilter_macros_dspr2.h"
 #include "vp9/common/mips/dspr2/vp9_loopfilter_masks_dspr2.h"
 #include "vp9/common/mips/dspr2/vp9_loopfilter_filters_dspr2.h"
+#include "vpx/vpx_integer.h"
 #include "vpx_dsp/mips/common_dspr2.h"
+#include "vpx_mem/vpx_mem.h"
 
 #if HAVE_DSPR2
 void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
