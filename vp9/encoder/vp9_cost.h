@@ -11,7 +11,7 @@
 #ifndef VP9_ENCODER_VP9_COST_H_
 #define VP9_ENCODER_VP9_COST_H_
 
-#include "vp9/common/vp9_prob.h"
+#include "vpx_dsp/vp9_prob.h"
 
 #ifdef __cplusplus
 extern "C" {

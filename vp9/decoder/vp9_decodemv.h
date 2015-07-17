@@ -11,8 +11,9 @@
 #ifndef VP9_DECODER_VP9_DECODEMV_H_
 #define VP9_DECODER_VP9_DECODEMV_H_
 
+#include "vpx_dsp/vp9_reader.h"
+
 #include "vp9/decoder/vp9_decoder.h"
-#include "vp9/decoder/vp9_reader.h"
 
 #ifdef __cplusplus
 extern "C" {

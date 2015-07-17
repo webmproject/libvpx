@@ -14,11 +14,12 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "vp9/decoder/vp9_reader.h"
+#include "vpx/vpx_integer.h"
+#include "vpx_dsp/vp9_reader.h"
+
 #include "vp9/encoder/vp9_writer.h"
 
 #include "test/acm_random.h"
-#include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
 

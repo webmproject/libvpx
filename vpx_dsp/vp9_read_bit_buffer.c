@@ -7,7 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include "vp9/decoder/vp9_read_bit_buffer.h"
+#include "./vp9_read_bit_buffer.h"
 
 size_t vp9_rb_bytes_read(struct vp9_read_bit_buffer *rb) {
   return (rb->bit_offset + 7) >> 3;

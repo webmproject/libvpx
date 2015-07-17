@@ -12,10 +12,10 @@
 #define VP9_COMMON_VP9_ENTROPY_H_
 
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/vp9_prob.h"
 
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
-#include "vp9/common/vp9_prob.h"
 
 #ifdef __cplusplus
 extern "C" {

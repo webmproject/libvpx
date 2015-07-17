@@ -7,11 +7,11 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "./vp9_prob.h"
+#include "./vp9_reader.h"
 
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
-
-#include "vp9/decoder/vp9_reader.h"
 
 int vp9_reader_init(vp9_reader *r,
                     const uint8_t *buffer,

@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/common/vp9_prob.h"
+#include "./vp9_prob.h"
 
 const uint8_t vp9_norm[256] = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
