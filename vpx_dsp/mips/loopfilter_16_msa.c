@@ -648,8 +648,8 @@ void vp9_lpf_horizontal_16_msa(uint8_t *src, int32_t pitch,
   }
 }
 
-static void vp9_transpose_16x8_to_8x16(uint8_t *input, int32_t in_pitch,
-                                       uint8_t *output, int32_t out_pitch) {
+static void transpose_16x8_to_8x16(uint8_t *input, int32_t in_pitch,
+                                   uint8_t *output, int32_t out_pitch) {
   v16u8 p7_org, p6_org, p5_org, p4_org, p3_org, p2_org, p1_org, p0_org;
   v16i8 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   v16u8 p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7;
@@ -673,8 +673,8 @@ static void vp9_transpose_16x8_to_8x16(uint8_t *input, int32_t in_pitch,
   ST_UB8(q0, q1, q2, q3, q4, q5, q6, q7, output, out_pitch);
 }
 
-static void vp9_transpose_8x16_to_16x8(uint8_t *input, int32_t in_pitch,
-                                       uint8_t *output, int32_t out_pitch) {
+static void transpose_8x16_to_16x8(uint8_t *input, int32_t in_pitch,
+                                   uint8_t *output, int32_t out_pitch) {
   v16u8 p7_o, p6_o, p5_o, p4_o, p3_o, p2_o, p1_o, p0_o;
   v16u8 p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7;
 
@@ -685,8 +685,8 @@ static void vp9_transpose_8x16_to_16x8(uint8_t *input, int32_t in_pitch,
   ST_UB8(p7_o, p6_o, p5_o, p4_o, p3_o, p2_o, p1_o, p0_o, output, out_pitch);
 }
 
-static void vp9_transpose_16x16(uint8_t *input, int32_t in_pitch,
-                                uint8_t *output, int32_t out_pitch) {
+static void transpose_16x16(uint8_t *input, int32_t in_pitch,
+                            uint8_t *output, int32_t out_pitch) {
   v16u8 row0, row1, row2, row3, row4, row5, row6, row7;
   v16u8 row8, row9, row10, row11, row12, row13, row14, row15;
   v16u8 p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7;
@@ -1040,7 +1040,7 @@ void vp9_lpf_vertical_16_msa(uint8_t *src, int32_t pitch,
   DECLARE_ALIGNED(32, uint8_t, transposed_input[16 * 24]);
   uint8_t *filter48 = &transposed_input[16 * 16];
 
-  vp9_transpose_16x8_to_8x16(src - 8, pitch, transposed_input, 16);
+  transpose_16x8_to_8x16(src - 8, pitch, transposed_input, 16);
 
   early_exit = vp9_vt_lpf_t4_and_t8_8w((transposed_input + 16 * 8),
                                        &filter48[0], src, pitch, b_limit_ptr,
@@ -1051,7 +1051,7 @@ void vp9_lpf_vertical_16_msa(uint8_t *src, int32_t pitch,
                                    &filter48[0]);
 
     if (0 == early_exit) {
-      vp9_transpose_8x16_to_16x8(transposed_input, 16, src - 8, pitch);
+      transpose_8x16_to_16x8(transposed_input, 16, src - 8, pitch);
     }
   }
 }
@@ -1463,7 +1463,7 @@ void vp9_lpf_vertical_16_dual_msa(uint8_t *src, int32_t pitch,
   DECLARE_ALIGNED(32, uint8_t, transposed_input[16 * 24]);
   uint8_t *filter48 = &transposed_input[16 * 16];
 
-  vp9_transpose_16x16((src - 8), pitch, &transposed_input[0], 16);
+  transpose_16x16((src - 8), pitch, &transposed_input[0], 16);
 
   early_exit = vp9_vt_lpf_t4_and_t8_16w((transposed_input + 16 * 8),
                                         &filter48[0], src, pitch, b_limit_ptr,
@@ -1474,7 +1474,7 @@ void vp9_lpf_vertical_16_dual_msa(uint8_t *src, int32_t pitch,
                                     &filter48[0]);
 
     if (0 == early_exit) {
-      vp9_transpose_16x16(transposed_input, 16, (src - 8), pitch);
+      transpose_16x16(transposed_input, 16, (src - 8), pitch);
     }
   }
 }
