@@ -10,8 +10,8 @@
 
 #include <emmintrin.h>  // SSE2
 
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_loopfilter.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_ports/mem.h"
 #include "vpx_ports/emmintrin_compat.h"
 
 static INLINE __m128i abs_diff(__m128i a, __m128i b) {

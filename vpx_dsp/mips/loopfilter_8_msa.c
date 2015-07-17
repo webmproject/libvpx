@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/common/mips/msa/vp9_loopfilter_msa.h"
+#include "vpx_dsp/mips/loopfilter_msa.h"
 
 void vp9_lpf_horizontal_8_msa(uint8_t *src, int32_t pitch,
                               const uint8_t *b_limit_ptr,

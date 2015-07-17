@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
+#include "./vpx_dsp_rtcd.h"
 
 static INLINE void vp9_mbloop_filter_neon(
         uint8x8_t dblimit,   // mblimit
@@ -264,11 +264,11 @@ static INLINE void vp9_mbloop_filter_neon(
 }
 
 void vp9_lpf_horizontal_8_neon(
-        unsigned char *src,
+        uint8_t *src,
         int pitch,
-        unsigned char *blimit,
-        unsigned char *limit,
-        unsigned char *thresh,
+        const uint8_t *blimit,
+        const uint8_t *limit,
+        const uint8_t *thresh,
         int count) {
     int i;
     uint8_t *s, *psrc;
@@ -324,11 +324,11 @@ void vp9_lpf_horizontal_8_neon(
 }
 
 void vp9_lpf_vertical_8_neon(
-        unsigned char *src,
+        uint8_t *src,
         int pitch,
-        unsigned char *blimit,
-        unsigned char *limit,
-        unsigned char *thresh,
+        const uint8_t *blimit,
+        const uint8_t *limit,
+        const uint8_t *thresh,
         int count) {
     int i;
     uint8_t *s;

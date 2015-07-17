@@ -9,7 +9,7 @@
  */
 
 #include "vpx_ports/mem.h"
-#include "vp9/common/mips/msa/vp9_loopfilter_msa.h"
+#include "vpx_dsp/mips/loopfilter_msa.h"
 
 int32_t vp9_hz_lpf_t4_and_t8_16w(uint8_t *src, int32_t pitch,
                                  uint8_t *filter48,
