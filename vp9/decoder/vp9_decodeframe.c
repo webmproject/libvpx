@@ -14,8 +14,8 @@
 #include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 
-#include "vpx_dsp/vp9_read_bit_buffer.h"
-#include "vpx_dsp/vp9_reader.h"
+#include "vpx_dsp/bitreader_buffer.h"
+#include "vpx_dsp/bitreader.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/mem_ops.h"

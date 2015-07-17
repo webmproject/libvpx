@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_PROB_H_
-#define VP9_COMMON_VP9_PROB_H_
+#ifndef VPX_DSP_PROB_H_
+#define VPX_DSP_PROB_H_
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_common.h"
@@ -100,4 +100,4 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_PROB_H_
+#endif  // VPX_DSP_PROB_H_

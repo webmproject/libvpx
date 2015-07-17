@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#include "vpx_dsp/vp9_prob.h"
+#include "vpx_dsp/prob.h"
 
 struct vp9_writer;
 

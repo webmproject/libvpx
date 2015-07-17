@@ -12,8 +12,7 @@
 #ifndef VP9_DECODER_VP9_DETOKENIZE_H_
 #define VP9_DECODER_VP9_DETOKENIZE_H_
 
-#include "vpx_dsp/vp9_reader.h"
-
+#include "vpx_dsp/bitreader.h"
 #include "vp9/decoder/vp9_decoder.h"
 #include "vp9/common/vp9_scan.h"
 

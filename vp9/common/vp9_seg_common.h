@@ -11,7 +11,7 @@
 #ifndef VP9_COMMON_VP9_SEG_COMMON_H_
 #define VP9_COMMON_VP9_SEG_COMMON_H_
 
-#include "vpx_dsp/vp9_prob.h"
+#include "vpx_dsp/prob.h"
 
 #ifdef __cplusplus
 extern "C" {

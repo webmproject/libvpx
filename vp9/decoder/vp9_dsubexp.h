@@ -12,7 +12,7 @@
 #ifndef VP9_DECODER_VP9_DSUBEXP_H_
 #define VP9_DECODER_VP9_DSUBEXP_H_
 
-#include "vpx_dsp/vp9_reader.h"
+#include "vpx_dsp/bitreader.h"
 
 #ifdef __cplusplus
 extern "C" {

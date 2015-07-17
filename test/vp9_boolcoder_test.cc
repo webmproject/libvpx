@@ -15,7 +15,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/vp9_reader.h"
+#include "vpx_dsp/bitreader.h"
 
 #include "vp9/encoder/vp9_writer.h"
 

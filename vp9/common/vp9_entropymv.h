@@ -14,7 +14,7 @@
 
 #include "./vpx_config.h"
 
-#include "vpx_dsp/vp9_prob.h"
+#include "vpx_dsp/prob.h"
 
 #include "vp9/common/vp9_mv.h"
 
