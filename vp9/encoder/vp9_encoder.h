@@ -393,7 +393,11 @@ typedef struct VP9_COMP {
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 #if CONFIG_EXT_TX
+#if CONFIG_WAVELETS
+  int ext_tx_costs[TX_SIZES][EXT_TX_TYPES];
+#else
   int ext_tx_costs[3][EXT_TX_TYPES];
+#endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
 #if CONFIG_COPY_MODE
   int copy_mode_cost_l2[COPY_MODE_CONTEXTS][2];

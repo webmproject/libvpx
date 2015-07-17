@@ -46,7 +46,10 @@ static struct vp9_token partition_encodings[PARTITION_TYPES];
 static struct vp9_token inter_mode_encodings[INTER_MODES];
 #if CONFIG_EXT_TX
 static struct vp9_token ext_tx_encodings[EXT_TX_TYPES];
-#endif
+#if CONFIG_WAVELETS
+static struct vp9_token ext_tx_large_encodings[EXT_TX_TYPES_LARGE];
+#endif  // CONFIG_WAVELETS
+#endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
 static struct vp9_token palette_size_encodings[PALETTE_SIZES];
 static struct vp9_token palette_color_encodings[PALETTE_COLORS];
@@ -84,7 +87,10 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(inter_mode_encodings, vp9_inter_mode_tree);
 #if CONFIG_EXT_TX
   vp9_tokens_from_tree(ext_tx_encodings, vp9_ext_tx_tree);
+#if CONFIG_WAVELETS
+  vp9_tokens_from_tree(ext_tx_large_encodings, vp9_ext_tx_large_tree);
 #endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
   vp9_tokens_from_tree(palette_size_encodings, vp9_palette_size_tree);
   vp9_tokens_from_tree(palette_color_encodings, vp9_palette_color_tree);
@@ -245,6 +251,13 @@ static void update_ext_tx_probs(VP9_COMMON *cm, vp9_writer *w) {
     savings += prob_diff_update_savings(vp9_ext_tx_tree, cm->fc.ext_tx_prob[i],
                                         cm->counts.ext_tx[i], EXT_TX_TYPES);
   }
+#if CONFIG_WAVELETS
+  for (; i < TX_SIZES; ++i) {
+    savings += prob_diff_update_savings(
+        vp9_ext_tx_large_tree, cm->fc.ext_tx_prob[i], cm->counts.ext_tx[i],
+        EXT_TX_TYPES_LARGE);
+  }
+#endif
   do_update = savings > savings_thresh;
   vp9_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
   if (do_update) {
@@ -252,6 +265,12 @@ static void update_ext_tx_probs(VP9_COMMON *cm, vp9_writer *w) {
       prob_diff_update(vp9_ext_tx_tree, cm->fc.ext_tx_prob[i],
                        cm->counts.ext_tx[i], EXT_TX_TYPES, w);
     }
+#if CONFIG_WAVELETS
+    for (; i < TX_SIZES; ++i) {
+      prob_diff_update(vp9_ext_tx_large_tree, cm->fc.ext_tx_prob[i],
+                       cm->counts.ext_tx[i], EXT_TX_TYPES_LARGE, w);
+    }
+#endif  // CONFIG_WAVELETS
   }
 }
 #endif  // CONFIG_EXT_TX
@@ -607,7 +626,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   }
 #if CONFIG_EXT_TX
   if (is_inter &&
-      mbmi->tx_size < TX_32X32 &&
+#if !CONFIG_WAVELETS
+      mbmi->tx_size <= TX_16X16 &&
+#endif
       cm->base_qindex > 0 &&
       bsize >= BLOCK_8X8 &&
 #if CONFIG_SUPERTX
@@ -615,8 +636,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #endif
       !mbmi->skip &&
       !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+#if CONFIG_WAVELETS
+    vp9_write_token(w, GET_EXT_TX_TREE(mbmi->tx_size),
+                    cm->fc.ext_tx_prob[mbmi->tx_size],
+                    &((GET_EXT_TX_ENCODINGS(mbmi->tx_size))[mbmi->ext_txfrm]));
+#else
     vp9_write_token(w, vp9_ext_tx_tree, cm->fc.ext_tx_prob[mbmi->tx_size],
                     &ext_tx_encodings[mbmi->ext_txfrm]);
+#endif  // CONFIG_WAVELETS
   }
 #endif  // CONFIG_EXT_TX
 
@@ -1211,10 +1238,18 @@ static void write_modes_sb(VP9_COMP *cpi,
     if (supertx_enabled) {
       vp9_write(w, xd->mi[0].mbmi.skip, vp9_get_skip_prob(cm, xd));
 #if CONFIG_EXT_TX
+#if CONFIG_WAVELETS
+      if (!xd->mi[0].mbmi.skip)
+        vp9_write_token(w, GET_EXT_TX_TREE(supertx_size),
+                        cm->fc.ext_tx_prob[supertx_size],
+                        &GET_EXT_TX_ENCODINGS(supertx_size)
+                            [xd->mi[0].mbmi.ext_txfrm]);
+#else
       if (supertx_size <= TX_16X16 && !xd->mi[0].mbmi.skip)
         vp9_write_token(w, vp9_ext_tx_tree, cm->fc.ext_tx_prob[supertx_size],
                         &ext_tx_encodings[xd->mi[0].mbmi.ext_txfrm]);
-#endif
+#endif  // CONFIG_WAVELETS
+#endif  // CONFIG_EXT_TX
     }
   }
 #endif  // CONFIG_SUPERTX

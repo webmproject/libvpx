@@ -519,7 +519,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
     unsigned int tokens = get_token_alloc(cm->mb_rows, cm->mb_cols);
     CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
-
   vp9_setup_pc_tree(&cpi->common, cpi);
 }
 

@@ -18,13 +18,6 @@
 extern "C" {
 #endif
 
-#if CONFIG_TX64X64
-void vp9_fdwt64x64(tran_low_t *input, tran_low_t *output, int stride);
-void vp9_fdwtdct64x64(tran_low_t *input, tran_low_t *output, int stride);
-#endif  // CONFIG_TX64X64
-void vp9_fdwt32x32(tran_low_t *input, tran_low_t *output, int stride);
-void vp9_fdwtdct32x32(tran_low_t *input, tran_low_t *output, int stride);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

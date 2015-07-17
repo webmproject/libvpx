@@ -85,6 +85,11 @@ static void fill_mode_costs(VP9_COMP *cpi) {
 #if CONFIG_EXT_TX
   for (i = TX_4X4; i <= TX_16X16; ++i)
     vp9_cost_tokens(cpi->ext_tx_costs[i], fc->ext_tx_prob[i], vp9_ext_tx_tree);
+#if CONFIG_WAVELETS
+  for (; i < TX_SIZES; ++i)
+    vp9_cost_tokens(cpi->ext_tx_costs[i], fc->ext_tx_prob[i],
+                    vp9_ext_tx_large_tree);
+#endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
   for (i = 0; i < PALETTE_MAX_SIZE - 1; ++i)

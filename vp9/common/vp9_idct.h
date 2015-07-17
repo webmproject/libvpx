@@ -143,6 +143,11 @@ typedef struct {
 #define WRAPLOW(x, bd) (x)
 #endif  // CONFIG_EMULATE_HARDWARE
 
+static INLINE uint8_t clip_pixel_add(uint8_t dest, tran_high_t trans) {
+  trans = WRAPLOW(trans, 8);
+  return clip_pixel(WRAPLOW(dest + trans, 8));
+}
+
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
 void vp9_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,

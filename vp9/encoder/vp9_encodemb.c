@@ -23,6 +23,9 @@
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_tokenize.h"
+#if CONFIG_WAVELETS
+#include "vp9/encoder/vp9_dwt.h"
+#endif
 
 struct optimize_ctx {
   ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
@@ -573,6 +576,34 @@ static void copy_fliplrud(const int16_t *src, int src_stride, int l,
   fliplrud(dest, dest_stride, l);
 }
 
+#if CONFIG_WAVELETS
+static void forw_tx32x32(MACROBLOCK *x, int plane,
+                         const int16_t *src_diff, int diff_stride,
+                         tran_low_t *const coeff) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  TX_TYPE tx_type = get_tx_type_large(plane, xd);
+  if (tx_type == WAVELET1_DCT_DCT) {
+    vp9_fdwtdct32x32(src_diff, coeff, diff_stride);
+  } else {
+    fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
+  }
+}
+
+#if CONFIG_TX64X64
+static void forw_tx64x64(MACROBLOCK *x, int plane,
+                         const int16_t *src_diff, int diff_stride,
+                         tran_low_t *const coeff) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  TX_TYPE tx_type = get_tx_type_large(plane, xd);
+  if (tx_type == WAVELET1_DCT_DCT) {
+    vp9_fdwtdct64x64(src_diff, coeff, diff_stride);
+  } else {
+    vp9_fdct64x64(src_diff, coeff, diff_stride);
+  }
+}
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_WAVELETS
+
 static void forw_tx16x16(MACROBLOCK *x, int plane,
                          const int16_t *src_diff, int diff_stride,
                          tran_low_t *const coeff) {
@@ -925,7 +956,11 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx64x64(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct64x64(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_64x64_nuq(coeff, 4096, x->skip_block,
                              p->quant, p->quant_shift, pd->dequant,
                              (const cumbins_type_nuq *)p->cumbins_nuq,
@@ -935,7 +970,11 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx32x32(x, plane, src_diff, diff_stride, coeff);
+#else
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_32x32_nuq(coeff, 1024, x->skip_block,
                              p->quant, p->quant_shift, pd->dequant,
                              (const cumbins_type_nuq *)p->cumbins_nuq,
@@ -1165,7 +1204,11 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx64x64(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct64x64(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_64x64_fp_nuq(coeff, 4096, x->skip_block,
                                 p->quant_fp, pd->dequant,
                                 (const cumbins_type_nuq *)p->cumbins_nuq,
@@ -1176,7 +1219,11 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx32x32(x, plane, src_diff, diff_stride, coeff);
+#else
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_32x32_fp_nuq(coeff, 1024, x->skip_block,
                                 p->quant_fp, pd->dequant,
                                 (const cumbins_type_nuq *)p->cumbins_nuq,
@@ -1384,7 +1431,11 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx64x64(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct64x64_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc_64x64_nuq(coeff, x->skip_block,
                                 p->quant[0], p->quant_shift[0], pd->dequant[0],
                                 p->cumbins_nuq[0], pd->dequant_val_nuq[0],
@@ -1392,7 +1443,11 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx32x32(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct32x32_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc_32x32_nuq(coeff, x->skip_block,
                                 p->quant[0], p->quant_shift[0], pd->dequant[0],
                                 p->cumbins_nuq[0], pd->dequant_val_nuq[0],
@@ -1584,7 +1639,11 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx64x64(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct64x64_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc_64x64_fp_nuq(coeff, x->skip_block,
                                    p->quant_fp[0], pd->dequant[0],
                                    p->cumbins_nuq[0], pd->dequant_val_nuq[0],
@@ -1592,7 +1651,11 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx32x32(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct32x32_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc_32x32_fp_nuq(coeff, x->skip_block,
                                    p->quant_fp[0], pd->dequant[0],
                                    p->cumbins_nuq[0], pd->dequant_val_nuq[0],
@@ -1784,7 +1847,11 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx64x64(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct64x64(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_fp_64x64(coeff, 4096, x->skip_block, p->zbin, p->round_fp,
                             p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                             pd->dequant, eob, scan_order->scan,
@@ -1792,7 +1859,11 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx32x32(x, plane, src_diff, diff_stride, coeff);
+#else
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin,
                             p->round_fp, p->quant_fp, p->quant_shift,
                             qcoeff, dqcoeff, pd->dequant, eob,
@@ -1963,14 +2034,22 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx64x64(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct64x64_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc_64x64(coeff, x->skip_block, p->round,
                             p->quant_fp[0], qcoeff, dqcoeff,
                             pd->dequant[0], eob);
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx32x32(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct32x32_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc_32x32(coeff, x->skip_block, p->round,
                             p->quant_fp[0], qcoeff, dqcoeff,
                             pd->dequant[0], eob);
@@ -2154,7 +2233,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx64x64(x, plane, src_diff, diff_stride, coeff);
+#else
       vp9_fdct64x64(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_b_64x64(coeff, 4096, x->skip_block, p->zbin, p->round,
                            p->quant, p->quant_shift, qcoeff, dqcoeff,
                            pd->dequant, eob, scan_order->scan,
@@ -2162,7 +2245,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      forw_tx32x32(x, plane, src_diff, diff_stride, coeff);
+#else
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
                            p->quant, p->quant_shift, qcoeff, dqcoeff,
                            pd->dequant, eob, scan_order->scan,
@@ -2380,10 +2467,22 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      tx_type = get_tx_type_large(plane, xd);
+      if (tx_type == WAVELET1_DCT_DCT)
+        vp9_idwtdct64x64_add(dqcoeff, dst, pd->dst.stride);
+      else
+#endif  // CONFIG_EXT_TX && CONFIG_WAVELETS
       vp9_idct64x64_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
-#endif
+#endif  // CONFIG_TX64X64
     case TX_32X32:
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+      tx_type = get_tx_type_large(plane, xd);
+      if (tx_type == WAVELET1_DCT_DCT)
+        vp9_idwtdct32x32_add(dqcoeff, dst, pd->dst.stride);
+      else
+#endif  // CONFIG_EXT_TX && CONFIG_WAVELETS
       vp9_idct32x32_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
     case TX_16X16:
@@ -3194,7 +3293,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_16X16:
         tx_type = get_tx_type(pd->plane_type, xd);
-        scan_order = &vp9_scan_orders[TX_16X16][tx_type];
+        scan_order = &vp9_intra_scan_orders[TX_16X16][tx_type];
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
 #if CONFIG_FILTERINTRA
@@ -3238,7 +3337,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_8X8:
         tx_type = get_tx_type(pd->plane_type, xd);
-        scan_order = &vp9_scan_orders[TX_8X8][tx_type];
+        scan_order = &vp9_intra_scan_orders[TX_8X8][tx_type];
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,
 #if CONFIG_FILTERINTRA
@@ -3282,7 +3381,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_4X4:
         tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
-        scan_order = &vp9_scan_orders[TX_4X4][tx_type];
+        scan_order = &vp9_intra_scan_orders[TX_4X4][tx_type];
         mode = plane == 0 ? get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
 #if CONFIG_FILTERINTRA
@@ -3433,7 +3532,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_16X16:
       tx_type = get_tx_type(pd->plane_type, xd);
-      scan_order = &vp9_scan_orders[TX_16X16][tx_type];
+      scan_order = &vp9_intra_scan_orders[TX_16X16][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
 #if CONFIG_FILTERINTRA
@@ -3473,7 +3572,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_8X8:
       tx_type = get_tx_type(pd->plane_type, xd);
-      scan_order = &vp9_scan_orders[TX_8X8][tx_type];
+      scan_order = &vp9_intra_scan_orders[TX_8X8][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,
 #if CONFIG_FILTERINTRA
@@ -3513,7 +3612,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
-      scan_order = &vp9_scan_orders[TX_4X4][tx_type];
+      scan_order = &vp9_intra_scan_orders[TX_4X4][tx_type];
       mode = plane == 0 ? get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
 #if CONFIG_FILTERINTRA

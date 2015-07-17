@@ -495,12 +495,22 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                 vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
                 break;
               case TX_32X32:
-                tx_type = DCT_DCT;
-                vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+                tx_type = get_tx_type_large(plane_type, xd);
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+                if (tx_type == WAVELET1_DCT_DCT)
+                  vp9_idwtdct32x32_add(dqcoeff, dst, stride);
+                else
+#endif  // CONFIG_EXT_TX && CONFIG_WAVELETS
+                  vp9_idct32x32_add(dqcoeff, dst, stride, eob);
                 break;
 #if CONFIG_TX64X64
               case TX_64X64:
-                tx_type = DCT_DCT;
+                tx_type = get_tx_type_large(plane_type, xd);
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+                if (tx_type == WAVELET1_DCT_DCT)
+                  vp9_idwtdct64x64_add(dqcoeff, dst, stride);
+                else
+#endif  // CONFIG_EXT_TX && CONFIG_WAVELETS
                 vp9_idct64x64_add(dqcoeff, dst, stride, eob);
                 break;
 #endif  // CONFIG_TX64X64
@@ -525,7 +535,6 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
       vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
     } else {
       const PLANE_TYPE plane_type = pd->plane_type;
-
 #if CONFIG_TX_SKIP
       if (mbmi->tx_skip[plane != 0]) {
         int bs = 4 << tx_size;
@@ -555,12 +564,22 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
           break;
         case TX_32X32:
-          tx_type = DCT_DCT;
-          vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+          tx_type = get_tx_type_large(plane_type, xd);
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+          if (tx_type == WAVELET1_DCT_DCT)
+            vp9_idwtdct32x32_add(dqcoeff, dst, stride);
+          else
+#endif  // CONFIG_EXT_TX && CONFIG_WAVELETS
+            vp9_idct32x32_add(dqcoeff, dst, stride, eob);
           break;
 #if CONFIG_TX64X64
         case TX_64X64:
-          tx_type = DCT_DCT;
+          tx_type = get_tx_type_large(plane_type, xd);
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+          if (tx_type == WAVELET1_DCT_DCT)
+            vp9_idwtdct64x64_add(dqcoeff, dst, stride);
+          else
+#endif  // CONFIG_EXT_TX && CONFIG_WAVELETS
           vp9_idct64x64_add(dqcoeff, dst, stride, eob);
           break;
 #endif  // CONFIG_TX64X64
@@ -1769,18 +1788,28 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     if (skip)
       reset_skip_context(xd, bsize);
 #if CONFIG_EXT_TX
-    if (bsize <= BLOCK_16X16 && !skip) {
-      txfm = vp9_read_tree(r, vp9_ext_tx_tree,
-                           cm->fc.ext_tx_prob[supertx_size]);
-      if (!cm->frame_parallel_decoding_mode)
-        ++cm->counts.ext_tx[supertx_size][txfm];
+    if (!skip) {
+      if (supertx_size <= TX_16X16) {
+        txfm = vp9_read_tree(r, vp9_ext_tx_tree,
+                             cm->fc.ext_tx_prob[supertx_size]);
+        if (!cm->frame_parallel_decoding_mode)
+          ++cm->counts.ext_tx[supertx_size][txfm];
+#if CONFIG_WAVELETS
+      } else {
+        txfm = vp9_read_tree(r, vp9_ext_tx_large_tree,
+                             cm->fc.ext_tx_prob[supertx_size]);
+        if (!cm->frame_parallel_decoding_mode)
+          ++cm->counts.ext_tx[supertx_size][txfm];
+#endif  // CONFIG_WAVELETS
+      }
     }
-#endif
+#endif  // CONFIG_EXT_TX
   }
 #endif  // CONFIG_SUPERTX
   if (subsize < BLOCK_8X8) {
     decode_block(cm, xd, tile,
 #if CONFIG_SUPERTX
+
                  supertx_enabled,
 #endif
 #if CONFIG_COPY_MODE
@@ -3210,6 +3239,11 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
     for (j = TX_4X4; j <= TX_16X16; ++j)
       for (i = 0; i < EXT_TX_TYPES - 1; ++i)
         vp9_diff_update_prob(r, &fc->ext_tx_prob[j][i]);
+#if CONFIG_WAVELETS
+    for (; j < TX_SIZES; ++j)
+      for (i = 0; i < EXT_TX_TYPES_LARGE - 1; ++i)
+        vp9_diff_update_prob(r, &fc->ext_tx_prob[j][i]);
+#endif
   }
 }
 #endif  // CONFIG_EXT_TX
@@ -3494,7 +3528,7 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
 #if CONFIG_EXT_TX
   assert(!memcmp(cm->counts.ext_tx, zero_counts.ext_tx,
                  sizeof(cm->counts.ext_tx)));
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_NEW_INTER
   assert(!memcmp(cm->counts.inter_compound_mode,
                  zero_counts.inter_compound_mode,

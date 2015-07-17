@@ -434,11 +434,27 @@ const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)] = {
   -ALT7, -ALT8,
 };
 
+#if CONFIG_WAVELETS
+static const vp9_prob default_ext_tx_prob[TX_SIZES][EXT_TX_TYPES - 1] = {
+  { 240, 128, 128, 128, 128, 128, 128, 128 },
+  { 208, 128, 128, 128, 128, 128, 128, 128 },
+  { 176, 128, 128, 128, 128, 128, 128, 128 },
+  { 160, 128, 128, 128, 128, 128, 128, 128 },
+#if CONFIG_TX64X64
+  { 160, 128, 128, 128, 128, 128, 128, 128 },
+#endif
+};
+
+const vp9_tree_index vp9_ext_tx_large_tree[TREE_SIZE(EXT_TX_TYPES_LARGE)] = {
+  -NORM, -ALT1,
+};
+#else   // CONFIG_WAVELETS
 static const vp9_prob default_ext_tx_prob[3][EXT_TX_TYPES - 1] = {
   { 240, 128, 128, 128, 128, 128, 128, 128 },
   { 208, 128, 128, 128, 128, 128, 128, 128 },
   { 176, 128, 128, 128, 128, 128, 128, 128 },
 };
+#endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_PALETTE
@@ -1041,6 +1057,12 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     adapt_probs(vp9_ext_tx_tree, pre_fc->ext_tx_prob[i], counts->ext_tx[i],
                 fc->ext_tx_prob[i]);
   }
+#if CONFIG_WAVELETS
+  for (; i < TX_SIZES; ++i) {
+    adapt_probs(vp9_ext_tx_large_tree, pre_fc->ext_tx_prob[i],
+                counts->ext_tx[i], fc->ext_tx_prob[i]);
+  }
+#endif
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_SUPERTX

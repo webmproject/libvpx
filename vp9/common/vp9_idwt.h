@@ -19,7 +19,7 @@
 #include "vp9/common/vp9_idct.h"
 
 #define DWT_MAX_LENGTH   64
-#define DWT_TYPE         26    // 26/53/97
+#define DWT_TYPE         53    // 26/53/97
 
 #ifdef __cplusplus
 extern "C" {

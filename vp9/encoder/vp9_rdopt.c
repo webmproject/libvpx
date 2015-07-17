@@ -875,11 +875,24 @@ static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
 
   mbmi->tx_size = MIN(max_tx_size, largest_tx_size);
 
+#if CONFIG_EXT_TX
+  if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(mbmi->tx_size)) {
+    *rate = INT_MAX;
+    *distortion = INT64_MAX;
+    *sse = INT64_MAX;
+    *skip = 0;
+    return;
+  }
+#endif  // CONFIG_EXT_TX
+
   txfm_rd_in_plane(x, rate, distortion, skip,
                    sse, ref_best_rd, 0, bs,
                    mbmi->tx_size, cpi->sf.use_fast_coef_costing);
 #if CONFIG_EXT_TX
-  if (is_inter_block(mbmi) && mbmi->tx_size < TX_32X32 && bs >= BLOCK_8X8 &&
+  if (is_inter_block(mbmi) && bs >= BLOCK_8X8 &&
+#if !CONFIG_WAVELETS
+      mbmi->tx_size <= TX_16X16 &&
+#endif
       !xd->lossless && *rate != INT_MAX)
     *rate += cpi->ext_tx_costs[mbmi->tx_size][mbmi->ext_txfrm];
 #endif
@@ -921,14 +934,24 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   s1 = vp9_cost_bit(skip_prob, 1);
 
   for (n = max_tx_size; n >= 0;  n--) {
-    txfm_rd_in_plane(x, &r[n][0], &d[n], &s[n],
-                     &sse[n], ref_best_rd, 0, bs, n,
-                     cpi->sf.use_fast_coef_costing);
 #if CONFIG_EXT_TX
-    if (is_inter_block(mbmi) && n < TX_32X32 && bs >= BLOCK_8X8 &&
+    if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(n)) {
+      r[n][0] = r[n][1] = INT_MAX;
+      d[n] = INT64_MAX;
+    } else {
+#endif  // CONFIG_EXT_TX
+      txfm_rd_in_plane(x, &r[n][0], &d[n], &s[n],
+                       &sse[n], ref_best_rd, 0, bs, n,
+                       cpi->sf.use_fast_coef_costing);
+#if CONFIG_EXT_TX
+    }
+    if (is_inter_block(mbmi) && bs >= BLOCK_8X8 &&
+#if !CONFIG_WAVELETS
+        n <= TX_16X16 &&
+#endif
         !xd->lossless && r[n][0] != INT_MAX)
       r[n][0] += cpi->ext_tx_costs[n][mbmi->ext_txfrm];
-#endif
+#endif  // CONFIG_EXT_TX
     r[n][1] = r[n][0];
     if (r[n][0] < INT_MAX) {
       for (m = 0; m <= n - (n == (int) max_tx_size); m++) {
@@ -1172,7 +1195,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           } else {
             int64_t unused;
             const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
-            const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
+            const scan_order *so = &vp9_intra_scan_orders[TX_4X4][tx_type];
             vp9_highbd_fht4x4(src_diff, coeff, 8, tx_type);
             vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
             ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
@@ -1305,7 +1328,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         } else {
           int64_t unused;
           const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
-          const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
+          const scan_order *so = &vp9_intra_scan_orders[TX_4X4][tx_type];
           vp9_fht4x4(src_diff, coeff, 8, tx_type);
           vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
           ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
@@ -5429,7 +5452,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int64_t best_rdcost_tx = INT64_MAX;
       int best_ext_tx = NORM;
 
-      for (i = 0; i < EXT_TX_TYPES; i++) {
+      for (i = NORM; i < EXT_TX_TYPES; i++) {
         mbmi->ext_txfrm = i;
         super_block_yrd(cpi, x, &rate_y_tx, &distortion_y_tx, &dummy, psse,
                         bsize, txfm_cache, INT64_MAX);
@@ -5443,12 +5466,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           best_rdcost_tx = rdcost_tx;
         }
       }
-      if (mbmi->tx_size >= TX_32X32)
-        mbmi->ext_txfrm = NORM;
-      else
-        mbmi->ext_txfrm = best_ext_tx;
+#if !CONFIG_WAVELETS
+      if (mbmi->tx_size > TX_16X16)
+        assert(best_ext_tx == NORM);
+#endif  // !CONFIG_WAVELETS
+      mbmi->ext_txfrm = best_ext_tx;
     }
-#endif
+#endif  // CONFIG_EXT_TX
 
     // Y cost and distortion
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
@@ -7236,9 +7260,11 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (bestrd_tx == INT64_MAX)
       continue;
 
+#if !CONFIG_WAVELETS
     if (best_tx_size < TX_32X32)
       mbmi->ext_txfrm = best_tx_type;
     else
+#endif  // !CONFIG_WAVELETS
       mbmi->ext_txfrm = NORM;
     mbmi->tx_size = best_tx_size;
     vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], tmp_zcoeff_blk,

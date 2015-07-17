@@ -474,6 +474,22 @@ static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
 #endif  // CONFIG_SUPERTX
 
 #if CONFIG_EXT_TX
+#if CONFIG_WAVELETS
+#define GET_EXT_TX_TYPES(tx_size) \
+    ((tx_size) >= TX_32X32 ? EXT_TX_TYPES_LARGE : EXT_TX_TYPES)
+#define GET_EXT_TX_TREE(tx_size) \
+    ((tx_size) >= TX_32X32 ? vp9_ext_tx_large_tree : vp9_ext_tx_tree)
+#define GET_EXT_TX_ENCODINGS(tx_size) \
+    ((tx_size) >= TX_32X32 ? ext_tx_large_encodings : ext_tx_encodings)
+#else
+#define GET_EXT_TX_TYPES(tx_size) \
+    ((tx_size) >= TX_32X32 ? 1 : EXT_TX_TYPES)
+#define GET_EXT_TX_TREE(tx_size) \
+    ((tx_size) >= TX_32X32 ? NULL : vp9_ext_tx_tree)
+#define GET_EXT_TX_ENCODINGS(tx_size) \
+    ((tx_size) >= TX_32X32 ? NULL : ext_tx_encodings)
+#endif  // CONFIG_WAVELETS
+
 static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
   DCT_DCT,
   ADST_ADST,
@@ -485,7 +501,30 @@ static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
   FLIPADST_DCT,
   DCT_FLIPADST,
 };
+
+#if CONFIG_WAVELETS
+static TX_TYPE ext_tx_to_txtype_large[EXT_TX_TYPES_LARGE] = {
+  DCT_DCT,
+  WAVELET1_DCT_DCT
+};
+#endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
+
+static INLINE TX_TYPE get_tx_type_large(PLANE_TYPE plane_type,
+                                        const MACROBLOCKD *xd) {
+#if CONFIG_EXT_TX && CONFIG_WAVELETS
+  const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
+  if (plane_type != PLANE_TYPE_Y || xd->lossless)
+      return DCT_DCT;
+
+  if (is_inter_block(mbmi)) {
+    return ext_tx_to_txtype_large[mbmi->ext_txfrm];
+  }
+#endif  // CONFIG_EXT_TX  && CONFIG_WAVELETS
+  (void) plane_type;
+  (void) xd;
+  return DCT_DCT;
+}
 
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {
@@ -501,7 +540,7 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
 #else
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
     return DCT_DCT;
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_INTRABC
   if (is_intrabc_mode(mbmi->mode))
     return DCT_DCT;

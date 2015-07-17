@@ -30,7 +30,10 @@ typedef struct {
 } scan_order;
 
 extern const scan_order vp9_default_scan_orders[TX_SIZES];
-extern const scan_order vp9_scan_orders[TX_SIZES][TX_TYPES];
+extern const scan_order vp9_intra_scan_orders[TX_SIZES][TX_TYPES];
+#if CONFIG_EXT_TX
+extern const scan_order vp9_inter_scan_orders[TX_SIZES][TOTAL_TX_TYPES];
+#endif  // CONFIG_EXT_TX
 
 #if CONFIG_TX_SKIP
 // pixel domain default scan orders

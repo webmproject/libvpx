@@ -1522,15 +1522,22 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 
 #if CONFIG_EXT_TX
     if (inter_block &&
+#if !CONFIG_WAVELETS
         mbmi->tx_size <= TX_16X16 &&
+#endif
         cm->base_qindex > 0 &&
         mbmi->sb_type >= BLOCK_8X8 &&
 #if CONFIG_SUPERTX
-      !supertx_enabled &&
+        !supertx_enabled &&
 #endif
-      !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
-      !mbmi->skip) {
-      mbmi->ext_txfrm = vp9_read_tree(r, vp9_ext_tx_tree,
+        !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+        !mbmi->skip) {
+      mbmi->ext_txfrm = vp9_read_tree(r,
+#if CONFIG_WAVELETS
+                                      GET_EXT_TX_TREE(mbmi->tx_size),
+#else
+                                      vp9_ext_tx_tree,
+#endif
                                       cm->fc.ext_tx_prob[mbmi->tx_size]);
       if (!cm->frame_parallel_decoding_mode)
         ++cm->counts.ext_tx[mbmi->tx_size][mbmi->ext_txfrm];

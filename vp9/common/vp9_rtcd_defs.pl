@@ -413,6 +413,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_idct32x32_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
   specialize qw/vp9_idct32x32_1_add/;
 
+  if (vpx_config("CONFIG_WAVELETS") eq "yes") {
+    add_proto qw/void vp9_idwtdct32x32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+    specialize qw/vp9_idwtdct32x32_add/;
+
+    add_proto qw/void vp9_idwt32x32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+    specialize qw/vp9_idwt32x32_add/;
+  }
+
   if (vpx_config("CONFIG_TX64X64") eq "yes") {
     add_proto qw/void vp9_idct64x64_4096_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vp9_idct64x64_4096_add/;
@@ -420,6 +428,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     if (vpx_config("CONFIG_WAVELETS") eq "yes") {
       add_proto qw/void vp9_idct32x32_noscale/, "const tran_low_t *input, int16_t *dest, int dest_stride";
       specialize qw/vp9_idct32x32_noscale/;
+
+      add_proto qw/void vp9_idwtdct64x64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idwtdct64x64_add/;
+
+      add_proto qw/void vp9_idwt64x64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idwt64x64_add/;
     }
   }
 
@@ -481,6 +495,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vp9_idct32x32_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vp9_idct32x32_1_add/;
 
+    if (vpx_config("CONFIG_WAVELETS") eq "yes") {
+      add_proto qw/void vp9_idwtdct32x32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idwtdct32x32_add/;
+
+      add_proto qw/void vp9_idwt32x32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idwt32x32_add/;
+    }
+
     if (vpx_config("CONFIG_TX64X64") eq "yes") {
       add_proto qw/void vp9_idct64x64_4096_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
       specialize qw/vp9_idct64x64_4096_add/;
@@ -488,6 +510,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
       if (vpx_config("CONFIG_WAVELETS") eq "yes") {
         add_proto qw/void vp9_idct32x32_noscale/, "const tran_low_t *input, int16_t *dest, int dest_stride";
         specialize qw/vp9_idct32x32_noscale/;
+
+        add_proto qw/void vp9_idwtdct64x64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+        specialize qw/vp9_idwtdct64x64_add/;
+
+        add_proto qw/void vp9_idwt64x64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+        specialize qw/vp9_idwt64x64_add/;
       }
     }
 
@@ -557,6 +585,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vp9_idct32x32_1_add sse2 neon_asm dspr2/;
     $vp9_idct32x32_1_add_neon_asm=vp9_idct32x32_1_add_neon;
 
+    if (vpx_config("CONFIG_WAVELETS") eq "yes") {
+      add_proto qw/void vp9_idwtdct32x32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idwtdct32x32_add/;
+
+      add_proto qw/void vp9_idwt32x32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idwt32x32_add/;
+    }
+
     if (vpx_config("CONFIG_TX64X64") eq "yes") {
       add_proto qw/void vp9_idct64x64_4096_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
       specialize qw/vp9_idct64x64_4096_add/;
@@ -564,6 +600,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
       if (vpx_config("CONFIG_WAVELETS") eq "yes") {
         add_proto qw/void vp9_idct32x32_noscale/, "const tran_low_t *input, int16_t *dest, int dest_stride";
         specialize qw/vp9_idct32x32_noscale/;
+
+        add_proto qw/void vp9_idwtdct64x64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+        specialize qw/vp9_idwtdct64x64_add/;
+
+        add_proto qw/void vp9_idwt64x64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+        specialize qw/vp9_idwt64x64_add/;
       }
     }
 
@@ -1589,6 +1631,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   if (vpx_config("CONFIG_WAVELETS") eq "yes") {
     add_proto qw/void vp9_fdct16x16_noscale/, "const int16_t *input, tran_low_t *output, int stride";
     specialize qw/vp9_fdct16x16_noscale/;
+
+    add_proto qw/void vp9_fdwtdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_fdwtdct32x32/;
+
+    add_proto qw/void vp9_fdwt32x32/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_fdwt32x32/;
   }
 
   if (vpx_config("CONFIG_TX64X64") eq "yes") {
@@ -1601,6 +1649,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     if (vpx_config("CONFIG_WAVELETS") eq "yes") {
       add_proto qw/void vp9_fdct32x32_noscale/, "const int16_t *input, tran_low_t *output, int stride";
       specialize qw/vp9_fdct32x32_noscale/;
+
+      add_proto qw/void vp9_fdwtdct64x64/, "const int16_t *input, tran_low_t *output, int stride";
+      specialize qw/vp9_fdwtdct64x64/;
+
+      add_proto qw/void vp9_fdwt64x64/, "const int16_t *input, tran_low_t *output, int stride";
+      specialize qw/vp9_fdwt64x64/;
     }
   }
 }

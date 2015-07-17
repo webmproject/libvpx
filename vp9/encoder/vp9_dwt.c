@@ -71,7 +71,7 @@ static void analysis_53_col(int length, tran_low_t *x,
 }
 
 static void dyadic_analyze_53(int levels, int width, int height,
-                              int16_t *x, int pitch_x,
+                              const int16_t *x, int pitch_x,
                               tran_low_t *c, int pitch_c,
                               int dwt_scale_bits) {
   int lv, i, j, nh, nw, hh = height, hw = width;
@@ -152,7 +152,7 @@ static void analysis_26_col(int length, tran_low_t *x,
 }
 
 static void dyadic_analyze_26(int levels, int width, int height,
-                              int16_t *x, int pitch_x,
+                              const int16_t *x, int pitch_x,
                               tran_low_t *c, int pitch_c,
                               int dwt_scale_bits) {
   int lv, i, j, nh, nw, hh = height, hw = width;
@@ -221,7 +221,7 @@ static void analysis_97(int length, double *x,
 }
 
 static void dyadic_analyze_97(int levels, int width, int height,
-                              int16_t *x, int pitch_x,
+                              const int16_t *x, int pitch_x,
                               tran_low_t *c, int pitch_c,
                               int dwt_scale_bits) {
   int lv, i, j, nh, nw, hh = height, hw = width;
@@ -258,7 +258,7 @@ static void dyadic_analyze_97(int levels, int width, int height,
   }
 }
 
-void vp9_fdwt32x32_c(tran_low_t *input, tran_low_t *output, int stride) {
+void vp9_fdwt32x32_c(const int16_t *input, tran_low_t *output, int stride) {
 #if DWT_TYPE == 26
   dyadic_analyze_26(4, 32, 32, input, stride, output, 32, 2);
 #elif DWT_TYPE == 97
@@ -268,11 +268,11 @@ void vp9_fdwt32x32_c(tran_low_t *input, tran_low_t *output, int stride) {
 #endif
 }
 
-void vp9_fdwtdct32x32_c(tran_low_t *input, tran_low_t *output,
+void vp9_fdwtdct32x32_c(const int16_t *input, tran_low_t *output,
                         int stride) {
   const int dwt_levels = 1;
   tran_low_t buffer[16 * 16];
-  int i, j;
+  int i;
   // Scales up by 2-bit from unitary
 #if DWT_TYPE == 26
   dyadic_analyze_26(dwt_levels, 32, 32, input, stride, output, 32, 2);
@@ -290,7 +290,7 @@ void vp9_fdwtdct32x32_c(tran_low_t *input, tran_low_t *output,
 }
 
 #if CONFIG_TX64X64
-void vp9_fdwt64x64_c(tran_low_t *input, tran_low_t *output, int stride) {
+void vp9_fdwt64x64_c(const int16_t *input, tran_low_t *output, int stride) {
 #if DWT_TYPE == 26
   dyadic_analyze_26(4, 64, 64, input, stride, output, 64, 1);
 #elif DWT_TYPE == 97
@@ -300,8 +300,7 @@ void vp9_fdwt64x64_c(tran_low_t *input, tran_low_t *output, int stride) {
 #endif
 }
 
-void vp9_fdwtdct64x64_c(tran_low_t *input, tran_low_t *output,
-                        int stride) {
+void vp9_fdwtdct64x64_c(const int16_t *input, tran_low_t *output, int stride) {
   const int dwt_levels = 1;
   tran_low_t buffer[32 * 32];
   int i;

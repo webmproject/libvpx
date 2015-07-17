@@ -15,11 +15,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idct.h"
 
-static INLINE uint8_t clip_pixel_add(uint8_t dest, tran_high_t trans) {
-  trans = WRAPLOW(trans, 8);
-  return clip_pixel(WRAPLOW(dest + trans, 8));
-}
-
 void vp9_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
    0.5 shifts per pixel. */

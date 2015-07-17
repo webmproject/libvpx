@@ -75,7 +75,11 @@ typedef struct frame_contexts {
   vp9_prob filterintra_prob[TX_SIZES][INTRA_MODES];
 #endif  // CONFIG_FILTERINTRA
 #if CONFIG_EXT_TX
+#if CONFIG_WAVELETS
+  vp9_prob ext_tx_prob[TX_SIZES][EXT_TX_TYPES - 1];
+#else
   vp9_prob ext_tx_prob[3][EXT_TX_TYPES - 1];
+#endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
   vp9_prob palette_enabled_prob[10][3];
@@ -145,7 +149,11 @@ typedef struct {
   unsigned int filterintra[TX_SIZES][INTRA_MODES][2];
 #endif  // CONFIG_FILTERINTRA
 #if CONFIG_EXT_TX
+#if CONFIG_WAVELETS
+  unsigned int ext_tx[TX_SIZES][EXT_TX_TYPES];
+#else
   unsigned int ext_tx[3][EXT_TX_TYPES];
+#endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
   unsigned int supertx[PARTITION_SUPERTX_CONTEXTS][TX_SIZES][2];
@@ -203,6 +211,10 @@ extern const vp9_tree_index vp9_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
 #if CONFIG_EXT_TX
 extern const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)];
+#if CONFIG_WAVELETS
+extern const
+    vp9_tree_index vp9_ext_tx_large_tree[TREE_SIZE(EXT_TX_TYPES_LARGE)];
+#endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
 extern const vp9_tree_index vp9_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];

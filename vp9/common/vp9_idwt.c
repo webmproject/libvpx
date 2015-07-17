@@ -15,7 +15,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idwt.h"
 
-
 // Note: block length must be even for this implementation
 static void synthesis_53_row(int length,
                              tran_low_t *lowpass, tran_low_t *highpass,
@@ -286,17 +285,20 @@ static void dyadic_synthesize_97(int levels, int width, int height,
                                  (1 << dwt_scale_bits));
 }
 
-void vp9_idwt32x32_c(tran_low_t *input, tran_low_t *output, int stride) {
+void vp9_idwt32x32_c(const tran_low_t *input, tran_low_t *output, int stride) {
+  tran_low_t in[32 * 32];
+  vpx_memcpy(in, input, sizeof(in));
 #if DWT_TYPE == 26
-  dyadic_synthesize_26(4, 32, 32, input, 32, output, stride, 2);
+  dyadic_synthesize_26(4, 32, 32, in, 32, output, stride, 2);
 #elif DWT_TYPE == 97
-  dyadic_synthesize_97(4, 32, 32, input, 32, output, stride, 2);
+  dyadic_synthesize_97(4, 32, 32, in, 32, output, stride, 2);
 #elif DWT_TYPE == 53
-  dyadic_synthesize_53(4, 32, 32, input, 32, output, stride, 2);
+  dyadic_synthesize_53(4, 32, 32, in, 32, output, stride, 2);
 #endif
 }
 
-void vp9_idwtdct32x32_c(tran_low_t *input, tran_low_t *output, int stride) {
+void vp9_idwtdct32x32_c(const tran_low_t *input, tran_low_t *output,
+                        int stride) {
   const int dwt_levels = 1;
   tran_low_t buffer[16 * 16];
   tran_low_t buffer2[32 * 32];
@@ -318,18 +320,46 @@ void vp9_idwtdct32x32_c(tran_low_t *input, tran_low_t *output, int stride) {
 #endif
 }
 
+void vp9_idwt32x32_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
+  int i, j;
+  tran_low_t output[32 * 32];
+  vp9_idwt32x32_c(input, output, 32);
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) {
+      dest[j * stride + i] =
+          clip_pixel_add(dest[j * stride + i], output[j * 32 + i]);
+    }
+  }
+}
+
+void vp9_idwtdct32x32_add_c(const tran_low_t *input, uint8_t *dest,
+                            int stride) {
+  int i, j;
+  tran_low_t output[32 * 32];
+  vp9_idwtdct32x32_c(input, output, 32);
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) {
+      dest[j * stride + i] =
+          clip_pixel_add(dest[j * stride + i], output[j * 32 + i]);
+    }
+  }
+}
+
 #if CONFIG_TX64X64
-void vp9_idwt64x64_c(tran_low_t *input, tran_low_t *output, int stride) {
+void vp9_idwt64x64_c(const tran_low_t *input, tran_low_t *output, int stride) {
+  tran_low_t in[64 * 64];
+  vpx_memcpy(in, input, sizeof(in));
 #if DWT_TYPE == 26
-  dyadic_synthesize_26(4, 64, 64, input, 64, output, stride, 1);
+  dyadic_synthesize_26(4, 64, 64, in, 64, output, stride, 1);
 #elif DWT_TYPE == 97
-  dyadic_synthesize_97(4, 64, 64, input, 64, output, stride, 1);
+  dyadic_synthesize_97(4, 64, 64, in, 64, output, stride, 1);
 #elif DWT_TYPE == 53
-  dyadic_synthesize_53(4, 64, 64, input, 64, output, stride, 1);
+  dyadic_synthesize_53(4, 64, 64, in, 64, output, stride, 1);
 #endif
 }
 
-void vp9_idwtdct64x64_c(tran_low_t *input, tran_low_t *output, int stride) {
+void vp9_idwtdct64x64_c(const tran_low_t *input, tran_low_t *output,
+                        int stride) {
   const int dwt_levels = 1;
   tran_low_t buffer[32 * 32];
   tran_low_t buffer2[64 * 64];
@@ -348,5 +378,30 @@ void vp9_idwtdct64x64_c(tran_low_t *input, tran_low_t *output, int stride) {
 #elif DWT_TYPE == 53
   dyadic_synthesize_53(dwt_levels, 64, 64, buffer2, 64, output, stride, 1);
 #endif
+}
+
+void vp9_idwt64x64_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
+  int i, j;
+  tran_low_t output[64 * 64];
+  vp9_idwt64x64_c(input, output, 64);
+  for (i = 0; i < 64; ++i) {
+    for (j = 0; j < 64; ++j) {
+      dest[j * stride + i] =
+          clip_pixel_add(dest[j * stride + i], output[j * 64 + i]);
+    }
+  }
+}
+
+void vp9_idwtdct64x64_add_c(const tran_low_t *input, uint8_t *dest,
+                            int stride) {
+  int i, j;
+  tran_low_t output[64 * 64];
+  vp9_idwtdct64x64_c(input, output, 64);
+  for (i = 0; i < 64; ++i) {
+    for (j = 0; j < 64; ++j) {
+      dest[j * stride + i] =
+          clip_pixel_add(dest[j * stride + i], output[j * 64 + i]);
+    }
+  }
 }
 #endif  // CONFIG_TX64X64
