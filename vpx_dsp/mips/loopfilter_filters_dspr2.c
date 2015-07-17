@@ -19,7 +19,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 #if HAVE_DSPR2
-void vp9_lpf_horizontal_4_dspr2(unsigned char *s,
+void vpx_lpf_horizontal_4_dspr2(unsigned char *s,
                                 int pitch,
                                 const uint8_t *blimit,
                                 const uint8_t *limit,
@@ -49,7 +49,7 @@ void vp9_lpf_horizontal_4_dspr2(unsigned char *s,
   );
 
   /* prefetch data for store */
-  vp9_prefetch_store(s);
+  prefetch_store(s);
 
   /* loop filter designed to work using chars so that we can make maximum use
      of 8 bit simd instructions. */
@@ -87,14 +87,14 @@ void vp9_lpf_horizontal_4_dspr2(unsigned char *s,
           : [sm1] "r" (sm1), [s0] "r" (s0), [s5] "r" (s5), [s6] "r" (s6)
       );
 
-      vp9_filter_hev_mask_dspr2(limit_vec, flimit_vec, p1, p2,
-                                pm1, p0, p3, p4, p5, p6,
-                                thresh_vec, &hev, &mask);
+      filter_hev_mask_dspr2(limit_vec, flimit_vec, p1, p2,
+                            pm1, p0, p3, p4, p5, p6,
+                            thresh_vec, &hev, &mask);
 
       /* if mask == 0 do filtering is not needed */
       if (mask) {
         /* filtering */
-        vp9_filter_dspr2(mask, hev, &p1, &p2, &p3, &p4);
+        filter_dspr2(mask, hev, &p1, &p2, &p3, &p4);
 
         __asm__ __volatile__ (
             "sw     %[p1],  (%[s1])    \n\t"
@@ -113,7 +113,7 @@ void vp9_lpf_horizontal_4_dspr2(unsigned char *s,
   }
 }
 
-void vp9_lpf_vertical_4_dspr2(unsigned char *s,
+void vpx_lpf_vertical_4_dspr2(unsigned char *s,
                               int pitch,
                               const uint8_t *blimit,
                               const uint8_t *limit,
@@ -143,7 +143,7 @@ void vp9_lpf_vertical_4_dspr2(unsigned char *s,
   );
 
   /* prefetch data for store */
-  vp9_prefetch_store(s + pitch);
+  prefetch_store(s + pitch);
 
   for (i = 0; i < 2; i++) {
     s1 = s;
@@ -216,14 +216,14 @@ void vp9_lpf_vertical_4_dspr2(unsigned char *s,
      * mask will be zero and filtering is not needed
      */
     if (!(((p1 - p4) == 0) && ((p2 - p3) == 0))) {
-      vp9_filter_hev_mask_dspr2(limit_vec, flimit_vec, p1, p2, pm1,
-                                p0, p3, p4, p5, p6, thresh_vec,
-                                &hev, &mask);
+      filter_hev_mask_dspr2(limit_vec, flimit_vec, p1, p2, pm1,
+                            p0, p3, p4, p5, p6, thresh_vec,
+                            &hev, &mask);
 
       /* if mask == 0 do filtering is not needed */
       if (mask) {
         /* filtering */
-        vp9_filter_dspr2(mask, hev, &p1, &p2, &p3, &p4);
+        filter_dspr2(mask, hev, &p1, &p2, &p3, &p4);
 
         /* unpack processed 4x4 neighborhood
          * don't use transpose on output data
@@ -306,56 +306,56 @@ void vp9_lpf_vertical_4_dspr2(unsigned char *s,
   }
 }
 
-void vp9_lpf_horizontal_4_dual_dspr2(uint8_t *s, int p /* pitch */,
+void vpx_lpf_horizontal_4_dual_dspr2(uint8_t *s, int p /* pitch */,
                                      const uint8_t *blimit0,
                                      const uint8_t *limit0,
                                      const uint8_t *thresh0,
                                      const uint8_t *blimit1,
                                      const uint8_t *limit1,
                                      const uint8_t *thresh1) {
-  vp9_lpf_horizontal_4_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_lpf_horizontal_4_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
+  vpx_lpf_horizontal_4_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vpx_lpf_horizontal_4_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
 }
 
-void vp9_lpf_horizontal_8_dual_dspr2(uint8_t *s, int p /* pitch */,
+void vpx_lpf_horizontal_8_dual_dspr2(uint8_t *s, int p /* pitch */,
                                      const uint8_t *blimit0,
                                      const uint8_t *limit0,
                                      const uint8_t *thresh0,
                                      const uint8_t *blimit1,
                                      const uint8_t *limit1,
                                      const uint8_t *thresh1) {
-  vp9_lpf_horizontal_8_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_lpf_horizontal_8_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
+  vpx_lpf_horizontal_8_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vpx_lpf_horizontal_8_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
 }
 
-void vp9_lpf_vertical_4_dual_dspr2(uint8_t *s, int p,
+void vpx_lpf_vertical_4_dual_dspr2(uint8_t *s, int p,
                                    const uint8_t *blimit0,
                                    const uint8_t *limit0,
                                    const uint8_t *thresh0,
                                    const uint8_t *blimit1,
                                    const uint8_t *limit1,
                                    const uint8_t *thresh1) {
-  vp9_lpf_vertical_4_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_lpf_vertical_4_dspr2(s + 8 * p, p, blimit1, limit1, thresh1, 1);
+  vpx_lpf_vertical_4_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vpx_lpf_vertical_4_dspr2(s + 8 * p, p, blimit1, limit1, thresh1, 1);
 }
 
-void vp9_lpf_vertical_8_dual_dspr2(uint8_t *s, int p,
+void vpx_lpf_vertical_8_dual_dspr2(uint8_t *s, int p,
                                    const uint8_t *blimit0,
                                    const uint8_t *limit0,
                                    const uint8_t *thresh0,
                                    const uint8_t *blimit1,
                                    const uint8_t *limit1,
                                    const uint8_t *thresh1) {
-  vp9_lpf_vertical_8_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_lpf_vertical_8_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
+  vpx_lpf_vertical_8_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vpx_lpf_vertical_8_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
                                        1);
 }
 
-void vp9_lpf_vertical_16_dual_dspr2(uint8_t *s, int p,
+void vpx_lpf_vertical_16_dual_dspr2(uint8_t *s, int p,
                                     const uint8_t *blimit,
                                     const uint8_t *limit,
                                     const uint8_t *thresh) {
-  vp9_lpf_vertical_16_dspr2(s, p, blimit, limit, thresh);
-  vp9_lpf_vertical_16_dspr2(s + 8 * p, p, blimit, limit, thresh);
+  vpx_lpf_vertical_16_dspr2(s, p, blimit, limit, thresh);
+  vpx_lpf_vertical_16_dspr2(s + 8 * p, p, blimit, limit, thresh);
 }
 #endif  // #if HAVE_DSPR2

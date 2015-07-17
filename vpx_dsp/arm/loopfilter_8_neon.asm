@@ -8,18 +8,18 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vp9_lpf_horizontal_8_neon|
-    EXPORT  |vp9_lpf_vertical_8_neon|
+    EXPORT  |vpx_lpf_horizontal_8_neon|
+    EXPORT  |vpx_lpf_vertical_8_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-; Currently vp9 only works on iterations 8 at a time. The vp8 loop filter
+; Currently vpx only works on iterations 8 at a time. The vp8 loop filter
 ; works on 16 iterations at a time.
 ; TODO(fgalligan): See about removing the count code as this function is only
 ; called with a count of 1.
 ;
-; void vp9_lpf_horizontal_8_neon(uint8_t *s, int p,
+; void vpx_lpf_horizontal_8_neon(uint8_t *s, int p,
 ;                                const uint8_t *blimit,
 ;                                const uint8_t *limit,
 ;                                const uint8_t *thresh,
@@ -30,7 +30,7 @@
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
 ; sp+4  int count
-|vp9_lpf_horizontal_8_neon| PROC
+|vpx_lpf_horizontal_8_neon| PROC
     push        {r4-r5, lr}
 
     vld1.8      {d0[]}, [r2]               ; duplicate *blimit
@@ -39,7 +39,7 @@
     add         r1, r1, r1                 ; double pitch
 
     cmp         r12, #0
-    beq         end_vp9_mblf_h_edge
+    beq         end_vpx_mblf_h_edge
 
     vld1.8      {d1[]}, [r3]               ; duplicate *limit
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
@@ -60,7 +60,7 @@ count_mblf_h_loop
     sub         r3, r3, r1, lsl #1
     sub         r2, r2, r1, lsl #2
 
-    bl          vp9_mbloop_filter_neon
+    bl          vpx_mbloop_filter_neon
 
     vst1.u8     {d0}, [r2@64], r1          ; store op2
     vst1.u8     {d1}, [r3@64], r1          ; store op1
@@ -73,12 +73,12 @@ count_mblf_h_loop
     subs        r12, r12, #1
     bne         count_mblf_h_loop
 
-end_vp9_mblf_h_edge
+end_vpx_mblf_h_edge
     pop         {r4-r5, pc}
 
-    ENDP        ; |vp9_lpf_horizontal_8_neon|
+    ENDP        ; |vpx_lpf_horizontal_8_neon|
 
-; void vp9_lpf_vertical_8_neon(uint8_t *s,
+; void vpx_lpf_vertical_8_neon(uint8_t *s,
 ;                              int pitch,
 ;                              const uint8_t *blimit,
 ;                              const uint8_t *limit,
@@ -91,7 +91,7 @@ end_vp9_mblf_h_edge
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
 ; sp+4  int count
-|vp9_lpf_vertical_8_neon| PROC
+|vpx_lpf_vertical_8_neon| PROC
     push        {r4-r5, lr}
 
     vld1.8      {d0[]}, [r2]              ; duplicate *blimit
@@ -101,7 +101,7 @@ end_vp9_mblf_h_edge
     ldr         r3, [sp, #12]             ; load thresh
     sub         r2, r0, #4                ; move s pointer down by 4 columns
     cmp         r12, #0
-    beq         end_vp9_mblf_v_edge
+    beq         end_vpx_mblf_v_edge
 
     vld1.8      {d2[]}, [r3]              ; duplicate *thresh
 
@@ -134,7 +134,7 @@ count_mblf_v_loop
     sub         r2, r0, #3
     add         r3, r0, #1
 
-    bl          vp9_mbloop_filter_neon
+    bl          vpx_mbloop_filter_neon
 
     ;store op2, op1, op0, oq0
     vst4.8      {d0[0], d1[0], d2[0], d3[0]}, [r2], r1
@@ -161,11 +161,11 @@ count_mblf_v_loop
     subne       r2, r0, #4                 ; move s pointer down by 4 columns
     bne         count_mblf_v_loop
 
-end_vp9_mblf_v_edge
+end_vpx_mblf_v_edge
     pop         {r4-r5, pc}
-    ENDP        ; |vp9_lpf_vertical_8_neon|
+    ENDP        ; |vpx_lpf_vertical_8_neon|
 
-; void vp9_mbloop_filter_neon();
+; void vpx_mbloop_filter_neon();
 ; This is a helper function for the loopfilters. The invidual functions do the
 ; necessary load, transpose (if necessary) and store. The function does not use
 ; registers d8-d15.
@@ -191,7 +191,7 @@ end_vp9_mblf_v_edge
 ; d3    oq0
 ; d4    oq1
 ; d5    oq2
-|vp9_mbloop_filter_neon| PROC
+|vpx_mbloop_filter_neon| PROC
     ; filter_mask
     vabd.u8     d19, d3, d4                ; m1 = abs(p3 - p2)
     vabd.u8     d20, d4, d5                ; m2 = abs(p2 - p1)
@@ -446,6 +446,6 @@ filter_branch_only
 
     bx          lr
 
-    ENDP        ; |vp9_mbloop_filter_neon|
+    ENDP        ; |vpx_mbloop_filter_neon|
 
     END

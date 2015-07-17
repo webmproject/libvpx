@@ -91,6 +91,7 @@ endif
 ## shared library builds don't make these functions accessible.
 ##
 ifeq ($(CONFIG_SHARED),)
+LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += lpf_8_test.cc
 
 ## VP8
 ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
@@ -142,7 +143,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += lpf_8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_avg_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_error_block_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc

@@ -44,7 +44,7 @@ static void convolve_bi_avg_vert_4_dspr2(const uint8_t *src,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_store(dst + dst_stride);
+    prefetch_store(dst + dst_stride);
 
     for (x = 0; x < w; x += 4) {
       src_ptr = src + x;
@@ -148,8 +148,8 @@ static void convolve_bi_avg_vert_64_dspr2(const uint8_t *src,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_store(dst + dst_stride);
-    vp9_prefetch_store(dst + dst_stride + 32);
+    prefetch_store(dst + dst_stride);
+    prefetch_store(dst + dst_stride + 32);
 
     for (x = 0; x < 64; x += 4) {
       src_ptr = src + x;
@@ -245,7 +245,7 @@ void vp9_convolve2_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
       : [pos] "r" (pos)
     );
 
-    vp9_prefetch_store(dst);
+    prefetch_store(dst);
 
     switch (w) {
       case 4:
@@ -257,7 +257,7 @@ void vp9_convolve2_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                      filter_y, w, h);
         break;
       case 64:
-        vp9_prefetch_store(dst + 32);
+        prefetch_store(dst + 32);
         convolve_bi_avg_vert_64_dspr2(src, src_stride,
                                       dst, dst_stride,
                                       filter_y, h);

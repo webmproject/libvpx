@@ -43,9 +43,9 @@ static void convolve_horiz_4_dspr2(const uint8_t *src,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src + src_stride);
-    vp9_prefetch_load(src + src_stride + 32);
-    vp9_prefetch_store(dst + dst_stride);
+    prefetch_load(src + src_stride);
+    prefetch_load(src + src_stride + 32);
+    prefetch_store(dst + dst_stride);
 
     __asm__ __volatile__ (
         "ulw              %[tp1],      0(%[src])                      \n\t"
@@ -154,9 +154,9 @@ static void convolve_horiz_8_dspr2(const uint8_t *src,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src + src_stride);
-    vp9_prefetch_load(src + src_stride + 32);
-    vp9_prefetch_store(dst + dst_stride);
+    prefetch_load(src + src_stride);
+    prefetch_load(src + src_stride + 32);
+    prefetch_store(dst + dst_stride);
 
     __asm__ __volatile__ (
         "ulw              %[tp1],      0(%[src])                      \n\t"
@@ -323,9 +323,9 @@ static void convolve_horiz_16_dspr2(const uint8_t *src_ptr,
     dst = dst_ptr;
 
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src_ptr + src_stride);
-    vp9_prefetch_load(src_ptr + src_stride + 32);
-    vp9_prefetch_store(dst_ptr + dst_stride);
+    prefetch_load(src_ptr + src_stride);
+    prefetch_load(src_ptr + src_stride + 32);
+    prefetch_store(dst_ptr + dst_stride);
 
     for (c = 0; c < count; c++) {
       __asm__ __volatile__ (
@@ -593,11 +593,11 @@ static void convolve_horiz_64_dspr2(const uint8_t *src_ptr,
     dst = dst_ptr;
 
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src_ptr + src_stride);
-    vp9_prefetch_load(src_ptr + src_stride + 32);
-    vp9_prefetch_load(src_ptr + src_stride + 64);
-    vp9_prefetch_store(dst_ptr + dst_stride);
-    vp9_prefetch_store(dst_ptr + dst_stride + 32);
+    prefetch_load(src_ptr + src_stride);
+    prefetch_load(src_ptr + src_stride + 32);
+    prefetch_load(src_ptr + src_stride + 64);
+    prefetch_store(dst_ptr + dst_stride);
+    prefetch_store(dst_ptr + dst_stride + 32);
 
     for (c = 0; c < 4; c++) {
       __asm__ __volatile__ (
@@ -859,7 +859,7 @@ void vp9_convolve8_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
     if (16 == x_step_q4) {
       uint32_t pos = 38;
 
-      vp9_prefetch_load((const uint8_t *)filter_x);
+      prefetch_load((const uint8_t *)filter_x);
       src -= 3;
 
       /* bit positon for extract from acc */
@@ -870,9 +870,9 @@ void vp9_convolve8_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
       );
 
       /* prefetch data to cache memory */
-      vp9_prefetch_load(src);
-      vp9_prefetch_load(src + 32);
-      vp9_prefetch_store(dst);
+      prefetch_load(src);
+      prefetch_load(src + 32);
+      prefetch_store(dst);
 
       switch (w) {
         case 4:
@@ -896,8 +896,8 @@ void vp9_convolve8_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                   filter_x, (int32_t)h, 2);
           break;
         case 64:
-          vp9_prefetch_load(src + 64);
-          vp9_prefetch_store(dst + 32);
+          prefetch_load(src + 64);
+          prefetch_store(dst + 32);
 
           convolve_horiz_64_dspr2(src, (int32_t)src_stride,
                                   dst, (int32_t)dst_stride,

@@ -14,7 +14,7 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
-static INLINE void vp9_loop_filter_neon_16(
+static INLINE void loop_filter_neon_16(
         uint8x16_t qblimit,  // blimit
         uint8x16_t qlimit,   // limit
         uint8x16_t qthresh,  // thresh
@@ -124,7 +124,7 @@ static INLINE void vp9_loop_filter_neon_16(
     return;
 }
 
-void vp9_lpf_horizontal_4_dual_neon(uint8_t *s, int p /* pitch */,
+void vpx_lpf_horizontal_4_dual_neon(uint8_t *s, int p /* pitch */,
                                     const uint8_t *blimit0,
                                     const uint8_t *limit0,
                                     const uint8_t *thresh0,
@@ -163,9 +163,9 @@ void vp9_lpf_horizontal_4_dual_neon(uint8_t *s, int p /* pitch */,
     s += p;
     q10u8 = vld1q_u8(s);
 
-    vp9_loop_filter_neon_16(qblimit, qlimit, qthresh,
-                            q3u8, q4u8, q5u8, q6u8, q7u8, q8u8, q9u8, q10u8,
-                            &q5u8, &q6u8, &q7u8, &q8u8);
+    loop_filter_neon_16(qblimit, qlimit, qthresh,
+                        q3u8, q4u8, q5u8, q6u8, q7u8, q8u8, q9u8, q10u8,
+                        &q5u8, &q6u8, &q7u8, &q8u8);
 
     s -= (p * 5);
     vst1q_u8(s, q5u8);

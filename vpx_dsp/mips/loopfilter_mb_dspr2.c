@@ -19,7 +19,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 #if HAVE_DSPR2
-void vp9_lpf_horizontal_8_dspr2(unsigned char *s,
+void vpx_lpf_horizontal_8_dspr2(unsigned char *s,
                                 int pitch,
                                 const uint8_t *blimit,
                                 const uint8_t *limit,
@@ -52,7 +52,7 @@ void vp9_lpf_horizontal_8_dspr2(unsigned char *s,
   );
 
   /* prefetch data for store */
-  vp9_prefetch_store(s);
+  prefetch_store(s);
 
   for (i = 0; i < 2; i++) {
     sp3 = s - (pitch << 2);
@@ -80,13 +80,13 @@ void vp9_lpf_horizontal_8_dspr2(unsigned char *s,
           [sq3] "r" (sq3), [sq2] "r" (sq2), [sq1] "r" (sq1), [sq0] "r" (sq0)
     );
 
-    vp9_filter_hev_mask_flatmask4_dspr2(limit_vec, flimit_vec, thresh_vec,
-                                        p1, p0, p3, p2, q0, q1, q2, q3,
-                                        &hev, &mask, &flat);
+    filter_hev_mask_flatmask4_dspr2(limit_vec, flimit_vec, thresh_vec,
+                                    p1, p0, p3, p2, q0, q1, q2, q3,
+                                    &hev, &mask, &flat);
 
     if ((flat == 0) && (mask != 0)) {
-      vp9_filter1_dspr2(mask, hev, p1, p0, q0, q1,
-                        &p1_f0, &p0_f0, &q0_f0, &q1_f0);
+      filter1_dspr2(mask, hev, p1, p0, q0, q1,
+                    &p1_f0, &p0_f0, &q0_f0, &q1_f0);
 
       __asm__ __volatile__ (
           "sw       %[p1_f0],   (%[sp1])    \n\t"
@@ -103,13 +103,13 @@ void vp9_lpf_horizontal_8_dspr2(unsigned char *s,
     } else if ((mask & flat) == 0xFFFFFFFF) {
       /* left 2 element operation */
       PACK_LEFT_0TO3()
-      vp9_mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
-                         &q0_l, &q1_l, &q2_l, &q3_l);
+      mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
+                     &q0_l, &q1_l, &q2_l, &q3_l);
 
       /* right 2 element operation */
       PACK_RIGHT_0TO3()
-      vp9_mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
-                         &q0_r, &q1_r, &q2_r, &q3_r);
+      mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
+                     &q0_r, &q1_r, &q2_r, &q3_r);
 
       COMBINE_LEFT_RIGHT_0TO2()
 
@@ -129,18 +129,18 @@ void vp9_lpf_horizontal_8_dspr2(unsigned char *s,
       );
     } else if ((flat != 0) && (mask != 0)) {
       /* filtering */
-      vp9_filter1_dspr2(mask, hev, p1, p0, q0, q1,
-                        &p1_f0, &p0_f0, &q0_f0, &q1_f0);
+      filter1_dspr2(mask, hev, p1, p0, q0, q1,
+                    &p1_f0, &p0_f0, &q0_f0, &q1_f0);
 
       /* left 2 element operation */
       PACK_LEFT_0TO3()
-      vp9_mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
-                         &q0_l, &q1_l, &q2_l, &q3_l);
+      mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
+                     &q0_l, &q1_l, &q2_l, &q3_l);
 
       /* right 2 element operation */
       PACK_RIGHT_0TO3()
-      vp9_mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
-                         &q0_r, &q1_r, &q2_r, &q3_r);
+      mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
+                     &q0_r, &q1_r, &q2_r, &q3_r);
 
       if (mask & flat & 0x000000FF) {
         __asm__ __volatile__ (
@@ -318,7 +318,7 @@ void vp9_lpf_horizontal_8_dspr2(unsigned char *s,
   }
 }
 
-void vp9_lpf_vertical_8_dspr2(unsigned char *s,
+void vpx_lpf_vertical_8_dspr2(unsigned char *s,
                               int pitch,
                               const uint8_t *blimit,
                               const uint8_t *limit,
@@ -350,7 +350,7 @@ void vp9_lpf_vertical_8_dspr2(unsigned char *s,
       : [uthresh] "r" (uthresh), [uflimit] "r" (uflimit), [ulimit] "r" (ulimit)
   );
 
-  vp9_prefetch_store(s + pitch);
+  prefetch_store(s + pitch);
 
   for (i = 0; i < 2; i++) {
     s1 = s;
@@ -450,39 +450,39 @@ void vp9_lpf_vertical_8_dspr2(unsigned char *s,
         :
     );
 
-    vp9_filter_hev_mask_flatmask4_dspr2(limit_vec, flimit_vec, thresh_vec,
-                                        p1, p0, p3, p2, q0, q1, q2, q3,
-                                        &hev, &mask, &flat);
+    filter_hev_mask_flatmask4_dspr2(limit_vec, flimit_vec, thresh_vec,
+                                    p1, p0, p3, p2, q0, q1, q2, q3,
+                                    &hev, &mask, &flat);
 
     if ((flat == 0) && (mask != 0)) {
-      vp9_filter1_dspr2(mask, hev, p1, p0, q0, q1,
-                        &p1_f0, &p0_f0, &q0_f0, &q1_f0);
+      filter1_dspr2(mask, hev, p1, p0, q0, q1,
+                    &p1_f0, &p0_f0, &q0_f0, &q1_f0);
       STORE_F0()
     } else if ((mask & flat) == 0xFFFFFFFF) {
       /* left 2 element operation */
       PACK_LEFT_0TO3()
-      vp9_mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
-                         &q0_l, &q1_l, &q2_l, &q3_l);
+      mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
+                     &q0_l, &q1_l, &q2_l, &q3_l);
 
       /* right 2 element operation */
       PACK_RIGHT_0TO3()
-      vp9_mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
-                         &q0_r, &q1_r, &q2_r, &q3_r);
+      mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
+                     &q0_r, &q1_r, &q2_r, &q3_r);
 
       STORE_F1()
     } else if ((flat != 0) && (mask != 0)) {
-      vp9_filter1_dspr2(mask, hev, p1, p0, q0, q1,
-                        &p1_f0, &p0_f0, &q0_f0, &q1_f0);
+      filter1_dspr2(mask, hev, p1, p0, q0, q1,
+                    &p1_f0, &p0_f0, &q0_f0, &q1_f0);
 
       /* left 2 element operation */
       PACK_LEFT_0TO3()
-      vp9_mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
-                         &q0_l, &q1_l, &q2_l, &q3_l);
+      mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
+                     &q0_l, &q1_l, &q2_l, &q3_l);
 
       /* right 2 element operation */
       PACK_RIGHT_0TO3()
-      vp9_mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
-                         &q0_r, &q1_r, &q2_r, &q3_r);
+      mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
+                     &q0_r, &q1_r, &q2_r, &q3_r);
 
       if (mask & flat & 0x000000FF) {
         __asm__ __volatile__ (
