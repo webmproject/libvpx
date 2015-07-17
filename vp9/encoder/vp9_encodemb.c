@@ -13,6 +13,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 
+#include "vpx_dsp/quantize.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
@@ -23,7 +24,6 @@
 #include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/encoder/vp9_encodemb.h"
-#include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_tokenize.h"
 

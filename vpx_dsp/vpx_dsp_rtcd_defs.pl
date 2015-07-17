@@ -5,12 +5,18 @@ print <<EOF
  */
 
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 EOF
 }
 forward_decls qw/vpx_dsp_forward_decls/;
 
-# Functions which use x86inc.asm instead of x86_abi_support.asm
+# x86inc.asm had specific constraints. break it out so it's easy to disable.
+# zero all the variables to avoid tricky else conditions.
+$mmx_x86inc = $sse_x86inc = $sse2_x86inc = $ssse3_x86inc = $avx_x86inc =
+  $avx2_x86inc = '';
+$mmx_x86_64_x86inc = $sse_x86_64_x86inc = $sse2_x86_64_x86inc =
+  $ssse3_x86_64_x86inc = $avx_x86_64_x86inc = $avx2_x86_64_x86inc = '';
 if (vpx_config("CONFIG_USE_X86INC") eq "yes") {
   $mmx_x86inc = 'mmx';
   $sse_x86inc = 'sse';
@@ -18,21 +24,24 @@ if (vpx_config("CONFIG_USE_X86INC") eq "yes") {
   $ssse3_x86inc = 'ssse3';
   $avx_x86inc = 'avx';
   $avx2_x86inc = 'avx2';
-} else {
-  $mmx_x86inc = $sse_x86inc = $sse2_x86inc = $ssse3_x86inc =
-  $avx_x86inc = $avx2_x86inc = '';
+  if ($opts{arch} eq "x86_64") {
+    $mmx_x86_64_x86inc = 'mmx';
+    $sse_x86_64_x86inc = 'sse';
+    $sse2_x86_64_x86inc = 'sse2';
+    $ssse3_x86_64_x86inc = 'ssse3';
+    $avx_x86_64_x86inc = 'avx';
+    $avx2_x86_64_x86inc = 'avx2';
+  }
 }
 
-# Functions which are 64 bit only.
+# functions that are 64 bit only.
+$mmx_x86_64 = $sse2_x86_64 = $ssse3_x86_64 = $avx_x86_64 = $avx2_x86_64 = '';
 if ($opts{arch} eq "x86_64") {
   $mmx_x86_64 = 'mmx';
   $sse2_x86_64 = 'sse2';
   $ssse3_x86_64 = 'ssse3';
   $avx_x86_64 = 'avx';
   $avx2_x86_64 = 'avx2';
-} else {
-  $mmx_x86_64 = $sse2_x86_64 = $ssse3_x86_64 =
-  $avx_x86_64 = $avx2_x86_64 = '';
 }
 
 #
@@ -109,6 +118,31 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_highbd_lpf_horizontal_4_dual/, "uint16_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1, int bd";
   specialize qw/vp9_highbd_lpf_horizontal_4_dual sse2/;
+}  # CONFIG_VP9_HIGHBITDEPTH
+
+#
+# Encoder functions.
+#
+if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
+if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+  add_proto qw/void vp9_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+  specialize qw/vp9_quantize_b/;
+
+  add_proto qw/void vp9_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+  specialize qw/vp9_quantize_b_32x32/;
+
+  add_proto qw/void vp9_highbd_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+  specialize qw/vp9_highbd_quantize_b sse2/;
+
+  add_proto qw/void vp9_highbd_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+  specialize qw/vp9_highbd_quantize_b_32x32 sse2/;
+} else {
+  add_proto qw/void vp9_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+  specialize qw/vp9_quantize_b sse2/, "$ssse3_x86_64_x86inc";
+
+  add_proto qw/void vp9_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+  specialize qw/vp9_quantize_b_32x32/, "$ssse3_x86_64_x86inc";
+}  # CONFIG_VP9_ENCODER
 }  # CONFIG_VP9_HIGHBITDEPTH
 
 if (vpx_config("CONFIG_ENCODERS") eq "yes") {

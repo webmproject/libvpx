@@ -43,6 +43,21 @@ ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_loopfilter_sse2.c
 endif  # CONFIG_VP9_HIGHBITDEPTH
 
+ifeq ($(CONFIG_VP9_ENCODER),yes)
+DSP_SRCS-yes            += quantize.c
+DSP_SRCS-yes            += quantize.h
+
+DSP_SRCS-$(HAVE_SSE2)   += x86/quantize_sse2.c
+ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_quantize_intrin_sse2.c
+endif
+ifeq ($(ARCH_X86_64),yes)
+ifeq ($(CONFIG_USE_X86INC),yes)
+DSP_SRCS-$(HAVE_SSSE3) += x86/quantize_ssse3_x86_64.asm
+endif
+endif
+endif  # CONFIG_VP9_ENCODER
+
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes            += sad.c
 DSP_SRCS-yes            += subtract.c
