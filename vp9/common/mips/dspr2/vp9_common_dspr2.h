@@ -15,7 +15,6 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
-#include "vp9/common/vp9_common.h"
 
 #ifdef __cplusplus
 extern "C" {
