@@ -24,13 +24,13 @@ extern "C" {
 #if HAVE_DSPR2
 /* processing 4 pixels at the same time
  * compute hev and mask in the same function */
-static INLINE void vp9_filter_hev_mask_dspr2(uint32_t limit, uint32_t flimit,
-                                             uint32_t p1, uint32_t p0,
-                                             uint32_t p3, uint32_t p2,
-                                             uint32_t q0, uint32_t q1,
-                                             uint32_t q2, uint32_t q3,
-                                             uint32_t thresh, uint32_t *hev,
-                                             uint32_t *mask) {
+static INLINE void filter_hev_mask_dspr2(uint32_t limit, uint32_t flimit,
+                                         uint32_t p1, uint32_t p0,
+                                         uint32_t p3, uint32_t p2,
+                                         uint32_t q0, uint32_t q1,
+                                         uint32_t q2, uint32_t q3,
+                                         uint32_t thresh, uint32_t *hev,
+                                         uint32_t *mask) {
   uint32_t  c, r, r3, r_k;
   uint32_t  s1, s2, s3;
   uint32_t  ones = 0xFFFFFFFF;
@@ -129,16 +129,16 @@ static INLINE void vp9_filter_hev_mask_dspr2(uint32_t limit, uint32_t flimit,
   *mask = s2;
 }
 
-static INLINE void vp9_filter_hev_mask_flatmask4_dspr2(uint32_t limit,
-                                                       uint32_t flimit,
-                                                       uint32_t thresh,
-                                                       uint32_t p1, uint32_t p0,
-                                                       uint32_t p3, uint32_t p2,
-                                                       uint32_t q0, uint32_t q1,
-                                                       uint32_t q2, uint32_t q3,
-                                                       uint32_t *hev,
-                                                       uint32_t *mask,
-                                                       uint32_t *flat) {
+static INLINE void filter_hev_mask_flatmask4_dspr2(uint32_t limit,
+                                                   uint32_t flimit,
+                                                   uint32_t thresh,
+                                                   uint32_t p1, uint32_t p0,
+                                                   uint32_t p3, uint32_t p2,
+                                                   uint32_t q0, uint32_t q1,
+                                                   uint32_t q2, uint32_t q3,
+                                                   uint32_t *hev,
+                                                   uint32_t *mask,
+                                                   uint32_t *flat) {
   uint32_t  c, r, r3, r_k, r_flat;
   uint32_t  s1, s2, s3;
   uint32_t  ones = 0xFFFFFFFF;
@@ -279,12 +279,12 @@ static INLINE void vp9_filter_hev_mask_flatmask4_dspr2(uint32_t limit,
   *flat = flat1;
 }
 
-static INLINE void vp9_flatmask5(uint32_t p4, uint32_t p3,
-                                 uint32_t p2, uint32_t p1,
-                                 uint32_t p0, uint32_t q0,
-                                 uint32_t q1, uint32_t q2,
-                                 uint32_t q3, uint32_t q4,
-                                 uint32_t *flat2) {
+static INLINE void flatmask5(uint32_t p4, uint32_t p3,
+                             uint32_t p2, uint32_t p1,
+                             uint32_t p0, uint32_t q0,
+                             uint32_t q1, uint32_t q2,
+                             uint32_t q3, uint32_t q4,
+                             uint32_t *flat2) {
   uint32_t  c, r, r_k, r_flat;
   uint32_t  ones = 0xFFFFFFFF;
   uint32_t  flat_thresh = 0x01010101;

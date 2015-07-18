@@ -96,8 +96,8 @@ static void idct32_rows_dspr2(const int16_t *input, int16_t *output,
     }
 
     /* prefetch row */
-    vp9_prefetch_load((const uint8_t *)(input + 32));
-    vp9_prefetch_load((const uint8_t *)(input + 48));
+    prefetch_load((const uint8_t *)(input + 32));
+    prefetch_load((const uint8_t *)(input + 48));
 
     __asm__ __volatile__ (
         "lh       %[load1],             2(%[input])                     \n\t"

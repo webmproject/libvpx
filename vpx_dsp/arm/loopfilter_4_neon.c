@@ -12,7 +12,7 @@
 
 #include "./vpx_dsp_rtcd.h"
 
-static INLINE void vp9_loop_filter_neon(
+static INLINE void loop_filter_neon(
         uint8x8_t dblimit,    // flimit
         uint8x8_t dlimit,     // limit
         uint8x8_t dthresh,    // thresh
@@ -110,7 +110,7 @@ static INLINE void vp9_loop_filter_neon(
     return;
 }
 
-void vp9_lpf_horizontal_4_neon(
+void vpx_lpf_horizontal_4_neon(
         uint8_t *src,
         int pitch,
         const uint8_t *blimit,
@@ -122,7 +122,7 @@ void vp9_lpf_horizontal_4_neon(
     uint8x8_t dblimit, dlimit, dthresh;
     uint8x8_t d3u8, d4u8, d5u8, d6u8, d7u8, d16u8, d17u8, d18u8;
 
-    if (count == 0)  // end_vp9_lf_h_edge
+    if (count == 0)  // end_vpx_lf_h_edge
         return;
 
     dblimit = vld1_u8(blimit);
@@ -149,9 +149,9 @@ void vp9_lpf_horizontal_4_neon(
         s += pitch;
         d18u8 = vld1_u8(s);
 
-        vp9_loop_filter_neon(dblimit, dlimit, dthresh,
-                             d3u8, d4u8, d5u8, d6u8, d7u8, d16u8, d17u8, d18u8,
-                             &d4u8, &d5u8, &d6u8, &d7u8);
+        loop_filter_neon(dblimit, dlimit, dthresh,
+                         d3u8, d4u8, d5u8, d6u8, d7u8, d16u8, d17u8, d18u8,
+                         &d4u8, &d5u8, &d6u8, &d7u8);
 
         s -= (pitch * 5);
         vst1_u8(s, d4u8);
@@ -165,7 +165,7 @@ void vp9_lpf_horizontal_4_neon(
     return;
 }
 
-void vp9_lpf_vertical_4_neon(
+void vpx_lpf_vertical_4_neon(
         uint8_t *src,
         int pitch,
         const uint8_t *blimit,
@@ -181,7 +181,7 @@ void vp9_lpf_vertical_4_neon(
     uint8x8x2_t d2tmp8, d2tmp9, d2tmp10, d2tmp11;
     uint8x8x4_t d4Result;
 
-    if (count == 0)  // end_vp9_lf_h_edge
+    if (count == 0)  // end_vpx_lf_h_edge
         return;
 
     dblimit = vld1_u8(blimit);
@@ -244,9 +244,9 @@ void vp9_lpf_vertical_4_neon(
         d17u8 = d2tmp11.val[0];
         d18u8 = d2tmp11.val[1];
 
-        vp9_loop_filter_neon(dblimit, dlimit, dthresh,
-                             d3u8, d4u8, d5u8, d6u8, d7u8, d16u8, d17u8, d18u8,
-                             &d4u8, &d5u8, &d6u8, &d7u8);
+        loop_filter_neon(dblimit, dlimit, dthresh,
+                         d3u8, d4u8, d5u8, d6u8, d7u8, d16u8, d17u8, d18u8,
+                         &d4u8, &d5u8, &d6u8, &d7u8);
 
         d4Result.val[0] = d4u8;
         d4Result.val[1] = d5u8;

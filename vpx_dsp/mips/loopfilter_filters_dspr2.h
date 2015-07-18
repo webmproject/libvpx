@@ -24,10 +24,10 @@ extern "C" {
 
 #if HAVE_DSPR2
 /* inputs & outputs are quad-byte vectors */
-static INLINE void vp9_filter_dspr2(uint32_t mask, uint32_t hev,
-                                    uint32_t *ps1, uint32_t *ps0,
-                                    uint32_t *qs0, uint32_t *qs1) {
-  int32_t   vp9_filter_l, vp9_filter_r;
+static INLINE void filter_dspr2(uint32_t mask, uint32_t hev,
+                                uint32_t *ps1, uint32_t *ps0,
+                                uint32_t *qs0, uint32_t *qs1) {
+  int32_t   vpx_filter_l, vpx_filter_r;
   int32_t   Filter1_l, Filter1_r, Filter2_l, Filter2_r;
   int32_t   subr_r, subr_l;
   uint32_t  t1, t2, HWM, t3;
@@ -73,34 +73,34 @@ static INLINE void vp9_filter_dspr2(uint32_t mask, uint32_t hev,
   hev_r = hev_r & HWM;
 
   __asm__ __volatile__ (
-      /* vp9_filter = vp8_signed_char_clamp(ps1 - qs1); */
-      "subq_s.ph    %[vp9_filter_l], %[vps1_l],       %[vqs1_l]       \n\t"
-      "subq_s.ph    %[vp9_filter_r], %[vps1_r],       %[vqs1_r]       \n\t"
+      /* vpx_filter = vp8_signed_char_clamp(ps1 - qs1); */
+      "subq_s.ph    %[vpx_filter_l], %[vps1_l],       %[vqs1_l]       \n\t"
+      "subq_s.ph    %[vpx_filter_r], %[vps1_r],       %[vqs1_r]       \n\t"
 
       /* qs0 - ps0 */
       "subq_s.ph    %[subr_l],       %[vqs0_l],       %[vps0_l]       \n\t"
       "subq_s.ph    %[subr_r],       %[vqs0_r],       %[vps0_r]       \n\t"
 
-      /* vp9_filter &= hev; */
-      "and          %[vp9_filter_l], %[vp9_filter_l], %[hev_l]        \n\t"
-      "and          %[vp9_filter_r], %[vp9_filter_r], %[hev_r]        \n\t"
+      /* vpx_filter &= hev; */
+      "and          %[vpx_filter_l], %[vpx_filter_l], %[hev_l]        \n\t"
+      "and          %[vpx_filter_r], %[vpx_filter_r], %[hev_r]        \n\t"
 
-      /* vp9_filter = vp8_signed_char_clamp(vp9_filter + 3 * (qs0 - ps0)); */
-      "addq_s.ph    %[vp9_filter_l], %[vp9_filter_l], %[subr_l]       \n\t"
-      "addq_s.ph    %[vp9_filter_r], %[vp9_filter_r], %[subr_r]       \n\t"
+      /* vpx_filter = vp8_signed_char_clamp(vpx_filter + 3 * (qs0 - ps0)); */
+      "addq_s.ph    %[vpx_filter_l], %[vpx_filter_l], %[subr_l]       \n\t"
+      "addq_s.ph    %[vpx_filter_r], %[vpx_filter_r], %[subr_r]       \n\t"
       "xor          %[invhev_l],     %[hev_l],        %[HWM]          \n\t"
-      "addq_s.ph    %[vp9_filter_l], %[vp9_filter_l], %[subr_l]       \n\t"
-      "addq_s.ph    %[vp9_filter_r], %[vp9_filter_r], %[subr_r]       \n\t"
+      "addq_s.ph    %[vpx_filter_l], %[vpx_filter_l], %[subr_l]       \n\t"
+      "addq_s.ph    %[vpx_filter_r], %[vpx_filter_r], %[subr_r]       \n\t"
       "xor          %[invhev_r],     %[hev_r],        %[HWM]          \n\t"
-      "addq_s.ph    %[vp9_filter_l], %[vp9_filter_l], %[subr_l]       \n\t"
-      "addq_s.ph    %[vp9_filter_r], %[vp9_filter_r], %[subr_r]       \n\t"
+      "addq_s.ph    %[vpx_filter_l], %[vpx_filter_l], %[subr_l]       \n\t"
+      "addq_s.ph    %[vpx_filter_r], %[vpx_filter_r], %[subr_r]       \n\t"
 
-      /* vp9_filter &= mask; */
-      "and          %[vp9_filter_l], %[vp9_filter_l], %[mask_l]       \n\t"
-      "and          %[vp9_filter_r], %[vp9_filter_r], %[mask_r]       \n\t"
+      /* vpx_filter &= mask; */
+      "and          %[vpx_filter_l], %[vpx_filter_l], %[mask_l]       \n\t"
+      "and          %[vpx_filter_r], %[vpx_filter_r], %[mask_r]       \n\t"
 
-      : [vp9_filter_l] "=&r" (vp9_filter_l),
-        [vp9_filter_r] "=&r" (vp9_filter_r),
+      : [vpx_filter_l] "=&r" (vpx_filter_l),
+        [vpx_filter_r] "=&r" (vpx_filter_r),
         [subr_l] "=&r" (subr_l), [subr_r] "=&r" (subr_r),
         [invhev_l] "=&r" (invhev_l), [invhev_r] "=&r" (invhev_r)
       : [vps0_l] "r" (vps0_l), [vps0_r] "r" (vps0_r), [vps1_l] "r" (vps1_l),
@@ -113,13 +113,13 @@ static INLINE void vp9_filter_dspr2(uint32_t mask, uint32_t hev,
 
   /* save bottom 3 bits so that we round one side +4 and the other +3 */
   __asm__ __volatile__ (
-      /* Filter2 = vp8_signed_char_clamp(vp9_filter + 3) >>= 3; */
-      "addq_s.ph    %[Filter1_l],    %[vp9_filter_l], %[t2]           \n\t"
-      "addq_s.ph    %[Filter1_r],    %[vp9_filter_r], %[t2]           \n\t"
+      /* Filter2 = vp8_signed_char_clamp(vpx_filter + 3) >>= 3; */
+      "addq_s.ph    %[Filter1_l],    %[vpx_filter_l], %[t2]           \n\t"
+      "addq_s.ph    %[Filter1_r],    %[vpx_filter_r], %[t2]           \n\t"
 
-      /* Filter1 = vp8_signed_char_clamp(vp9_filter + 4) >>= 3; */
-      "addq_s.ph    %[Filter2_l],    %[vp9_filter_l], %[t1]           \n\t"
-      "addq_s.ph    %[Filter2_r],    %[vp9_filter_r], %[t1]           \n\t"
+      /* Filter1 = vp8_signed_char_clamp(vpx_filter + 4) >>= 3; */
+      "addq_s.ph    %[Filter2_l],    %[vpx_filter_l], %[t1]           \n\t"
+      "addq_s.ph    %[Filter2_r],    %[vpx_filter_r], %[t1]           \n\t"
       "shra.ph      %[Filter1_r],    %[Filter1_r],    3               \n\t"
       "shra.ph      %[Filter1_l],    %[Filter1_l],    3               \n\t"
 
@@ -142,23 +142,23 @@ static INLINE void vp9_filter_dspr2(uint32_t mask, uint32_t hev,
         [vps0_l] "+r" (vps0_l), [vps0_r] "+r" (vps0_r),
         [vqs0_l] "+r" (vqs0_l), [vqs0_r] "+r" (vqs0_r)
       : [t1] "r" (t1), [t2] "r" (t2), [HWM] "r" (HWM),
-        [vp9_filter_l] "r" (vp9_filter_l), [vp9_filter_r] "r" (vp9_filter_r)
+        [vpx_filter_l] "r" (vpx_filter_l), [vpx_filter_r] "r" (vpx_filter_r)
   );
 
   __asm__ __volatile__ (
-      /* (vp9_filter += 1) >>= 1 */
+      /* (vpx_filter += 1) >>= 1 */
       "addqh.ph    %[Filter1_l],    %[Filter1_l],     %[t3]           \n\t"
       "addqh.ph    %[Filter1_r],    %[Filter1_r],     %[t3]           \n\t"
 
-      /* vp9_filter &= ~hev; */
+      /* vpx_filter &= ~hev; */
       "and          %[Filter1_l],    %[Filter1_l],    %[invhev_l]     \n\t"
       "and          %[Filter1_r],    %[Filter1_r],    %[invhev_r]     \n\t"
 
-      /* vps1 = vp8_signed_char_clamp(ps1 + vp9_filter); */
+      /* vps1 = vp8_signed_char_clamp(ps1 + vpx_filter); */
       "addq_s.ph    %[vps1_l],       %[vps1_l],       %[Filter1_l]    \n\t"
       "addq_s.ph    %[vps1_r],       %[vps1_r],       %[Filter1_r]    \n\t"
 
-      /* vqs1 = vp8_signed_char_clamp(qs1 - vp9_filter); */
+      /* vqs1 = vp8_signed_char_clamp(qs1 - vpx_filter); */
       "subq_s.ph    %[vqs1_l],       %[vqs1_l],       %[Filter1_l]    \n\t"
       "subq_s.ph    %[vqs1_r],       %[vqs1_r],       %[Filter1_r]    \n\t"
 
@@ -196,12 +196,12 @@ static INLINE void vp9_filter_dspr2(uint32_t mask, uint32_t hev,
   *qs1 = vqs1 ^ N128;
 }
 
-static INLINE void vp9_filter1_dspr2(uint32_t mask, uint32_t hev,
-                                     uint32_t ps1, uint32_t ps0,
-                                     uint32_t qs0, uint32_t qs1,
-                                     uint32_t *p1_f0, uint32_t *p0_f0,
-                                     uint32_t *q0_f0, uint32_t *q1_f0) {
-  int32_t   vp9_filter_l, vp9_filter_r;
+static INLINE void filter1_dspr2(uint32_t mask, uint32_t hev,
+                                 uint32_t ps1, uint32_t ps0,
+                                 uint32_t qs0, uint32_t qs1,
+                                 uint32_t *p1_f0, uint32_t *p0_f0,
+                                 uint32_t *q0_f0, uint32_t *q1_f0) {
+  int32_t   vpx_filter_l, vpx_filter_r;
   int32_t   Filter1_l, Filter1_r, Filter2_l, Filter2_r;
   int32_t   subr_r, subr_l;
   uint32_t  t1, t2, HWM, t3;
@@ -247,34 +247,34 @@ static INLINE void vp9_filter1_dspr2(uint32_t mask, uint32_t hev,
   hev_r = hev_r & HWM;
 
   __asm__ __volatile__ (
-      /* vp9_filter = vp8_signed_char_clamp(ps1 - qs1); */
-      "subq_s.ph    %[vp9_filter_l], %[vps1_l],       %[vqs1_l]       \n\t"
-      "subq_s.ph    %[vp9_filter_r], %[vps1_r],       %[vqs1_r]       \n\t"
+      /* vpx_filter = vp8_signed_char_clamp(ps1 - qs1); */
+      "subq_s.ph    %[vpx_filter_l], %[vps1_l],       %[vqs1_l]       \n\t"
+      "subq_s.ph    %[vpx_filter_r], %[vps1_r],       %[vqs1_r]       \n\t"
 
       /* qs0 - ps0 */
       "subq_s.ph    %[subr_l],       %[vqs0_l],       %[vps0_l]       \n\t"
       "subq_s.ph    %[subr_r],       %[vqs0_r],       %[vps0_r]       \n\t"
 
-      /* vp9_filter &= hev; */
-      "and          %[vp9_filter_l], %[vp9_filter_l], %[hev_l]        \n\t"
-      "and          %[vp9_filter_r], %[vp9_filter_r], %[hev_r]        \n\t"
+      /* vpx_filter &= hev; */
+      "and          %[vpx_filter_l], %[vpx_filter_l], %[hev_l]        \n\t"
+      "and          %[vpx_filter_r], %[vpx_filter_r], %[hev_r]        \n\t"
 
-      /* vp9_filter = vp8_signed_char_clamp(vp9_filter + 3 * (qs0 - ps0)); */
-      "addq_s.ph    %[vp9_filter_l], %[vp9_filter_l], %[subr_l]       \n\t"
-      "addq_s.ph    %[vp9_filter_r], %[vp9_filter_r], %[subr_r]       \n\t"
+      /* vpx_filter = vp8_signed_char_clamp(vpx_filter + 3 * (qs0 - ps0)); */
+      "addq_s.ph    %[vpx_filter_l], %[vpx_filter_l], %[subr_l]       \n\t"
+      "addq_s.ph    %[vpx_filter_r], %[vpx_filter_r], %[subr_r]       \n\t"
       "xor          %[invhev_l],     %[hev_l],        %[HWM]          \n\t"
-      "addq_s.ph    %[vp9_filter_l], %[vp9_filter_l], %[subr_l]       \n\t"
-      "addq_s.ph    %[vp9_filter_r], %[vp9_filter_r], %[subr_r]       \n\t"
+      "addq_s.ph    %[vpx_filter_l], %[vpx_filter_l], %[subr_l]       \n\t"
+      "addq_s.ph    %[vpx_filter_r], %[vpx_filter_r], %[subr_r]       \n\t"
       "xor          %[invhev_r],     %[hev_r],        %[HWM]          \n\t"
-      "addq_s.ph    %[vp9_filter_l], %[vp9_filter_l], %[subr_l]       \n\t"
-      "addq_s.ph    %[vp9_filter_r], %[vp9_filter_r], %[subr_r]       \n\t"
+      "addq_s.ph    %[vpx_filter_l], %[vpx_filter_l], %[subr_l]       \n\t"
+      "addq_s.ph    %[vpx_filter_r], %[vpx_filter_r], %[subr_r]       \n\t"
 
-      /* vp9_filter &= mask; */
-      "and          %[vp9_filter_l], %[vp9_filter_l], %[mask_l]       \n\t"
-      "and          %[vp9_filter_r], %[vp9_filter_r], %[mask_r]       \n\t"
+      /* vpx_filter &= mask; */
+      "and          %[vpx_filter_l], %[vpx_filter_l], %[mask_l]       \n\t"
+      "and          %[vpx_filter_r], %[vpx_filter_r], %[mask_r]       \n\t"
 
-      : [vp9_filter_l] "=&r" (vp9_filter_l),
-        [vp9_filter_r] "=&r" (vp9_filter_r),
+      : [vpx_filter_l] "=&r" (vpx_filter_l),
+        [vpx_filter_r] "=&r" (vpx_filter_r),
         [subr_l] "=&r" (subr_l), [subr_r] "=&r" (subr_r),
         [invhev_l] "=&r" (invhev_l), [invhev_r] "=&r" (invhev_r)
       : [vps0_l] "r" (vps0_l), [vps0_r] "r" (vps0_r), [vps1_l] "r" (vps1_l),
@@ -286,13 +286,13 @@ static INLINE void vp9_filter1_dspr2(uint32_t mask, uint32_t hev,
 
   /* save bottom 3 bits so that we round one side +4 and the other +3 */
   __asm__ __volatile__ (
-      /* Filter2 = vp8_signed_char_clamp(vp9_filter + 3) >>= 3; */
-      "addq_s.ph    %[Filter1_l],    %[vp9_filter_l], %[t2]           \n\t"
-      "addq_s.ph    %[Filter1_r],    %[vp9_filter_r], %[t2]           \n\t"
+      /* Filter2 = vp8_signed_char_clamp(vpx_filter + 3) >>= 3; */
+      "addq_s.ph    %[Filter1_l],    %[vpx_filter_l], %[t2]           \n\t"
+      "addq_s.ph    %[Filter1_r],    %[vpx_filter_r], %[t2]           \n\t"
 
-      /* Filter1 = vp8_signed_char_clamp(vp9_filter + 4) >>= 3; */
-      "addq_s.ph    %[Filter2_l],    %[vp9_filter_l], %[t1]           \n\t"
-      "addq_s.ph    %[Filter2_r],    %[vp9_filter_r], %[t1]           \n\t"
+      /* Filter1 = vp8_signed_char_clamp(vpx_filter + 4) >>= 3; */
+      "addq_s.ph    %[Filter2_l],    %[vpx_filter_l], %[t1]           \n\t"
+      "addq_s.ph    %[Filter2_r],    %[vpx_filter_r], %[t1]           \n\t"
       "shra.ph      %[Filter1_r],    %[Filter1_r],    3               \n\t"
       "shra.ph      %[Filter1_l],    %[Filter1_l],    3               \n\t"
 
@@ -315,23 +315,23 @@ static INLINE void vp9_filter1_dspr2(uint32_t mask, uint32_t hev,
         [vps0_l] "+r" (vps0_l), [vps0_r] "+r" (vps0_r),
         [vqs0_l] "+r" (vqs0_l), [vqs0_r] "+r" (vqs0_r)
       : [t1] "r" (t1), [t2] "r" (t2), [HWM] "r" (HWM),
-        [vp9_filter_l] "r" (vp9_filter_l), [vp9_filter_r] "r" (vp9_filter_r)
+        [vpx_filter_l] "r" (vpx_filter_l), [vpx_filter_r] "r" (vpx_filter_r)
   );
 
   __asm__ __volatile__ (
-      /* (vp9_filter += 1) >>= 1 */
+      /* (vpx_filter += 1) >>= 1 */
       "addqh.ph    %[Filter1_l],    %[Filter1_l],     %[t3]           \n\t"
       "addqh.ph    %[Filter1_r],    %[Filter1_r],     %[t3]           \n\t"
 
-      /* vp9_filter &= ~hev; */
+      /* vpx_filter &= ~hev; */
       "and          %[Filter1_l],    %[Filter1_l],    %[invhev_l]     \n\t"
       "and          %[Filter1_r],    %[Filter1_r],    %[invhev_r]     \n\t"
 
-      /* vps1 = vp8_signed_char_clamp(ps1 + vp9_filter); */
+      /* vps1 = vp8_signed_char_clamp(ps1 + vpx_filter); */
       "addq_s.ph    %[vps1_l],       %[vps1_l],       %[Filter1_l]    \n\t"
       "addq_s.ph    %[vps1_r],       %[vps1_r],       %[Filter1_r]    \n\t"
 
-      /* vqs1 = vp8_signed_char_clamp(qs1 - vp9_filter); */
+      /* vqs1 = vp8_signed_char_clamp(qs1 - vpx_filter); */
       "subq_s.ph    %[vqs1_l],       %[vqs1_l],       %[Filter1_l]    \n\t"
       "subq_s.ph    %[vqs1_r],       %[vqs1_r],       %[Filter1_r]    \n\t"
 
@@ -369,10 +369,10 @@ static INLINE void vp9_filter1_dspr2(uint32_t mask, uint32_t hev,
   *q1_f0 = vqs1 ^ N128;
 }
 
-static INLINE void vp9_mbfilter_dspr2(uint32_t *op3, uint32_t *op2,
-                                      uint32_t *op1, uint32_t *op0,
-                                      uint32_t *oq0, uint32_t *oq1,
-                                      uint32_t *oq2, uint32_t *oq3) {
+static INLINE void mbfilter_dspr2(uint32_t *op3, uint32_t *op2,
+                                  uint32_t *op1, uint32_t *op0,
+                                  uint32_t *oq0, uint32_t *oq1,
+                                  uint32_t *oq2, uint32_t *oq3) {
   /* use a 7 tap filter [1, 1, 1, 2, 1, 1, 1] for flat line */
   const uint32_t p3 = *op3, p2 = *op2, p1 = *op1, p0 = *op0;
   const uint32_t q0 = *oq0, q1 = *oq1, q2 = *oq2, q3 = *oq3;
@@ -446,14 +446,14 @@ static INLINE void vp9_mbfilter_dspr2(uint32_t *op3, uint32_t *op2,
   *oq2 = res_oq2;
 }
 
-static INLINE void vp9_mbfilter1_dspr2(uint32_t p3, uint32_t p2,
-                                       uint32_t p1, uint32_t p0,
-                                       uint32_t q0, uint32_t q1,
-                                       uint32_t q2, uint32_t q3,
-                                       uint32_t *op2_f1,
-                                       uint32_t *op1_f1, uint32_t *op0_f1,
-                                       uint32_t *oq0_f1, uint32_t *oq1_f1,
-                                       uint32_t *oq2_f1) {
+static INLINE void mbfilter1_dspr2(uint32_t p3, uint32_t p2,
+                                   uint32_t p1, uint32_t p0,
+                                   uint32_t q0, uint32_t q1,
+                                   uint32_t q2, uint32_t q3,
+                                   uint32_t *op2_f1,
+                                   uint32_t *op1_f1, uint32_t *op0_f1,
+                                   uint32_t *oq0_f1, uint32_t *oq1_f1,
+                                   uint32_t *oq2_f1) {
   /* use a 7 tap filter [1, 1, 1, 2, 1, 1, 1] for flat line */
   uint32_t  res_op2, res_op1, res_op0;
   uint32_t  res_oq0, res_oq1, res_oq2;
@@ -524,14 +524,14 @@ static INLINE void vp9_mbfilter1_dspr2(uint32_t p3, uint32_t p2,
   *oq2_f1 = res_oq2;
 }
 
-static INLINE void vp9_wide_mbfilter_dspr2(uint32_t *op7, uint32_t *op6,
-                                           uint32_t *op5, uint32_t *op4,
-                                           uint32_t *op3, uint32_t *op2,
-                                           uint32_t *op1, uint32_t *op0,
-                                           uint32_t *oq0, uint32_t *oq1,
-                                           uint32_t *oq2, uint32_t *oq3,
-                                           uint32_t *oq4, uint32_t *oq5,
-                                           uint32_t *oq6, uint32_t *oq7) {
+static INLINE void wide_mbfilter_dspr2(uint32_t *op7, uint32_t *op6,
+                                       uint32_t *op5, uint32_t *op4,
+                                       uint32_t *op3, uint32_t *op2,
+                                       uint32_t *op1, uint32_t *op0,
+                                       uint32_t *oq0, uint32_t *oq1,
+                                       uint32_t *oq2, uint32_t *oq3,
+                                       uint32_t *oq4, uint32_t *oq5,
+                                       uint32_t *oq6, uint32_t *oq7) {
   const uint32_t p7 = *op7, p6 = *op6, p5 = *op5, p4 = *op4;
   const uint32_t p3 = *op3, p2 = *op2, p1 = *op1, p0 = *op0;
   const uint32_t q0 = *oq0, q1 = *oq1, q2 = *oq2, q3 = *oq3;

@@ -41,8 +41,8 @@ static void convolve_bi_horiz_4_transposed_dspr2(const uint8_t *src,
   for (y = h; y--;) {
     dst_ptr = dst;
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src + src_stride);
-    vp9_prefetch_load(src + src_stride + 32);
+    prefetch_load(src + src_stride);
+    prefetch_load(src + src_stride + 32);
 
     __asm__ __volatile__ (
         "ulw              %[tp1],         0(%[src])                      \n\t"
@@ -132,8 +132,8 @@ static void convolve_bi_horiz_8_transposed_dspr2(const uint8_t *src,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src + src_stride);
-    vp9_prefetch_load(src + src_stride + 32);
+    prefetch_load(src + src_stride);
+    prefetch_load(src + src_stride + 32);
 
     dst_ptr = dst;
     odd_dst = (dst_ptr + dst_stride);
@@ -272,8 +272,8 @@ static void convolve_bi_horiz_16_transposed_dspr2(const uint8_t *src_ptr,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src_ptr + src_stride);
-    vp9_prefetch_load(src_ptr + src_stride + 32);
+    prefetch_load(src_ptr + src_stride);
+    prefetch_load(src_ptr + src_stride + 32);
 
     src = src_ptr;
     dst = dst_ptr;
@@ -504,9 +504,9 @@ static void convolve_bi_horiz_64_transposed_dspr2(const uint8_t *src_ptr,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_load(src_ptr + src_stride);
-    vp9_prefetch_load(src_ptr + src_stride + 32);
-    vp9_prefetch_load(src_ptr + src_stride + 64);
+    prefetch_load(src_ptr + src_stride);
+    prefetch_load(src_ptr + src_stride + 32);
+    prefetch_load(src_ptr + src_stride + 64);
 
     src = src_ptr;
     dst = dst_ptr;
@@ -747,8 +747,8 @@ void vp9_convolve2_dspr2(const uint8_t *src, ptrdiff_t src_stride,
   );
 
   /* prefetch data to cache memory */
-  vp9_prefetch_load(src);
-  vp9_prefetch_load(src + 32);
+  prefetch_load(src);
+  prefetch_load(src + 32);
 
   switch (w) {
     case 4:
@@ -769,7 +769,7 @@ void vp9_convolve2_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                             (w/16));
       break;
     case 64:
-      vp9_prefetch_load(src + 32);
+      prefetch_load(src + 32);
       convolve_bi_horiz_64_transposed_dspr2(src, src_stride,
                                             dst, dst_stride,
                                             filter, h);

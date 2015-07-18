@@ -21,7 +21,7 @@ extern "C" {
 #if HAVE_DSPR2
 #define CROP_WIDTH 512
 
-static INLINE void vp9_prefetch_load(const unsigned char *src) {
+static INLINE void prefetch_load(const unsigned char *src) {
   __asm__ __volatile__ (
       "pref   0,  0(%[src])   \n\t"
       :
@@ -30,7 +30,7 @@ static INLINE void vp9_prefetch_load(const unsigned char *src) {
 }
 
 /* prefetch data for store */
-static INLINE void vp9_prefetch_store(unsigned char *dst) {
+static INLINE void prefetch_store(unsigned char *dst) {
   __asm__ __volatile__ (
       "pref   1,  0(%[dst])   \n\t"
       :
@@ -38,7 +38,7 @@ static INLINE void vp9_prefetch_store(unsigned char *dst) {
   );
 }
 
-static INLINE void vp9_prefetch_load_streamed(const unsigned char *src) {
+static INLINE void prefetch_load_streamed(const unsigned char *src) {
   __asm__ __volatile__ (
       "pref   4,  0(%[src])   \n\t"
       :
@@ -47,7 +47,7 @@ static INLINE void vp9_prefetch_load_streamed(const unsigned char *src) {
 }
 
 /* prefetch data for store */
-static INLINE void vp9_prefetch_store_streamed(unsigned char *dst) {
+static INLINE void prefetch_store_streamed(unsigned char *dst) {
   __asm__ __volatile__ (
       "pref   5,  0(%[dst])   \n\t"
       :

@@ -19,7 +19,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 #if HAVE_DSPR2
-void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
+void vpx_lpf_horizontal_16_dspr2(unsigned char *s,
                                  int pitch,
                                  const uint8_t *blimit,
                                  const uint8_t *limit,
@@ -57,7 +57,7 @@ void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
   );
 
   /* prefetch data for store */
-  vp9_prefetch_store(s);
+  prefetch_store(s);
 
   for (i = 0; i < (2 * count); i++) {
     sp7 = s - (pitch << 3);
@@ -109,17 +109,17 @@ void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
           [sq4] "r" (sq4), [sq5] "r" (sq5), [sq6] "r" (sq6), [sq7] "r" (sq7)
     );
 
-    vp9_filter_hev_mask_flatmask4_dspr2(limit_vec, flimit_vec, thresh_vec,
-                                        p1, p0, p3, p2, q0, q1, q2, q3,
-                                        &hev, &mask, &flat);
+    filter_hev_mask_flatmask4_dspr2(limit_vec, flimit_vec, thresh_vec,
+                                    p1, p0, p3, p2, q0, q1, q2, q3,
+                                    &hev, &mask, &flat);
 
-    vp9_flatmask5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, &flat2);
+    flatmask5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, &flat2);
 
     /* f0 */
     if (((flat2 == 0) && (flat == 0) && (mask != 0)) ||
         ((flat2 != 0) && (flat == 0) && (mask != 0))) {
-      vp9_filter1_dspr2(mask, hev, p1, p0, q0, q1,
-                        &p1_f0, &p0_f0, &q0_f0, &q1_f0);
+      filter1_dspr2(mask, hev, p1, p0, q0, q1,
+                    &p1_f0, &p0_f0, &q0_f0, &q1_f0);
 
       __asm__ __volatile__ (
           "sw       %[p1_f0],   (%[sp1])            \n\t"
@@ -138,17 +138,17 @@ void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
       /* f2 */
       PACK_LEFT_0TO3()
       PACK_LEFT_4TO7()
-      vp9_wide_mbfilter_dspr2(&p7_l, &p6_l, &p5_l, &p4_l,
-                              &p3_l, &p2_l, &p1_l, &p0_l,
-                              &q0_l, &q1_l, &q2_l, &q3_l,
-                              &q4_l, &q5_l, &q6_l, &q7_l);
+      wide_mbfilter_dspr2(&p7_l, &p6_l, &p5_l, &p4_l,
+                          &p3_l, &p2_l, &p1_l, &p0_l,
+                          &q0_l, &q1_l, &q2_l, &q3_l,
+                          &q4_l, &q5_l, &q6_l, &q7_l);
 
       PACK_RIGHT_0TO3()
       PACK_RIGHT_4TO7()
-      vp9_wide_mbfilter_dspr2(&p7_r, &p6_r, &p5_r, &p4_r,
-                              &p3_r, &p2_r, &p1_r, &p0_r,
-                              &q0_r, &q1_r, &q2_r, &q3_r,
-                              &q4_r, &q5_r, &q6_r, &q7_r);
+      wide_mbfilter_dspr2(&p7_r, &p6_r, &p5_r, &p4_r,
+                          &p3_r, &p2_r, &p1_r, &p0_r,
+                          &q0_r, &q1_r, &q2_r, &q3_r,
+                          &q4_r, &q5_r, &q6_r, &q7_r);
 
       COMBINE_LEFT_RIGHT_0TO2()
       COMBINE_LEFT_RIGHT_3TO6()
@@ -188,13 +188,13 @@ void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
       /* f1 */
       /* left 2 element operation */
       PACK_LEFT_0TO3()
-      vp9_mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
-                         &q0_l, &q1_l, &q2_l, &q3_l);
+      mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
+                     &q0_l, &q1_l, &q2_l, &q3_l);
 
       /* right 2 element operation */
       PACK_RIGHT_0TO3()
-      vp9_mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
-                         &q0_r, &q1_r, &q2_r, &q3_r);
+      mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
+                     &q0_r, &q1_r, &q2_r, &q3_r);
 
       COMBINE_LEFT_RIGHT_0TO2()
 
@@ -214,18 +214,18 @@ void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
       );
     } else if ((flat2 == 0) && (flat != 0) && (mask != 0)) {
       /* f0+f1 */
-      vp9_filter1_dspr2(mask, hev, p1, p0, q0, q1,
-                        &p1_f0, &p0_f0, &q0_f0, &q1_f0);
+      filter1_dspr2(mask, hev, p1, p0, q0, q1,
+                    &p1_f0, &p0_f0, &q0_f0, &q1_f0);
 
       /* left 2 element operation */
       PACK_LEFT_0TO3()
-      vp9_mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
-                         &q0_l, &q1_l, &q2_l, &q3_l);
+      mbfilter_dspr2(&p3_l, &p2_l, &p1_l, &p0_l,
+                     &q0_l, &q1_l, &q2_l, &q3_l);
 
       /* right 2 element operation */
       PACK_RIGHT_0TO3()
-      vp9_mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
-                         &q0_r, &q1_r, &q2_r, &q3_r);
+      mbfilter_dspr2(&p3_r, &p2_r, &p1_r, &p0_r,
+                     &q0_r, &q1_r, &q2_r, &q3_r);
 
       if (mask & flat & 0x000000FF) {
         __asm__ __volatile__ (
@@ -398,36 +398,36 @@ void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
     } else if ((flat2 != 0) && (flat != 0) && (mask != 0)) {
       /* f0 + f1 + f2 */
       /* f0  function */
-      vp9_filter1_dspr2(mask, hev, p1, p0, q0, q1,
-                        &p1_f0, &p0_f0, &q0_f0, &q1_f0);
+      filter1_dspr2(mask, hev, p1, p0, q0, q1,
+                    &p1_f0, &p0_f0, &q0_f0, &q1_f0);
 
       /* f1  function */
       /* left 2 element operation */
       PACK_LEFT_0TO3()
-      vp9_mbfilter1_dspr2(p3_l, p2_l, p1_l, p0_l,
-                          q0_l, q1_l, q2_l, q3_l,
-                          &p2_l_f1, &p1_l_f1, &p0_l_f1,
-                          &q0_l_f1, &q1_l_f1, &q2_l_f1);
+      mbfilter1_dspr2(p3_l, p2_l, p1_l, p0_l,
+                      q0_l, q1_l, q2_l, q3_l,
+                      &p2_l_f1, &p1_l_f1, &p0_l_f1,
+                      &q0_l_f1, &q1_l_f1, &q2_l_f1);
 
       /* right 2 element operation */
       PACK_RIGHT_0TO3()
-      vp9_mbfilter1_dspr2(p3_r, p2_r, p1_r, p0_r,
-                          q0_r, q1_r, q2_r, q3_r,
-                          &p2_r_f1, &p1_r_f1, &p0_r_f1,
-                          &q0_r_f1, &q1_r_f1, &q2_r_f1);
+      mbfilter1_dspr2(p3_r, p2_r, p1_r, p0_r,
+                      q0_r, q1_r, q2_r, q3_r,
+                      &p2_r_f1, &p1_r_f1, &p0_r_f1,
+                      &q0_r_f1, &q1_r_f1, &q2_r_f1);
 
       /* f2  function */
       PACK_LEFT_4TO7()
-      vp9_wide_mbfilter_dspr2(&p7_l, &p6_l, &p5_l, &p4_l,
-                              &p3_l, &p2_l, &p1_l, &p0_l,
-                              &q0_l, &q1_l, &q2_l, &q3_l,
-                              &q4_l, &q5_l, &q6_l, &q7_l);
+      wide_mbfilter_dspr2(&p7_l, &p6_l, &p5_l, &p4_l,
+                          &p3_l, &p2_l, &p1_l, &p0_l,
+                          &q0_l, &q1_l, &q2_l, &q3_l,
+                          &q4_l, &q5_l, &q6_l, &q7_l);
 
       PACK_RIGHT_4TO7()
-      vp9_wide_mbfilter_dspr2(&p7_r, &p6_r, &p5_r, &p4_r,
-                              &p3_r, &p2_r, &p1_r, &p0_r,
-                              &q0_r, &q1_r, &q2_r, &q3_r,
-                              &q4_r, &q5_r, &q6_r, &q7_r);
+      wide_mbfilter_dspr2(&p7_r, &p6_r, &p5_r, &p4_r,
+                          &p3_r, &p2_r, &p1_r, &p0_r,
+                          &q0_r, &q1_r, &q2_r, &q3_r,
+                          &q4_r, &q5_r, &q6_r, &q7_r);
 
       if (mask & flat & flat2 & 0x000000FF) {
         __asm__ __volatile__ (

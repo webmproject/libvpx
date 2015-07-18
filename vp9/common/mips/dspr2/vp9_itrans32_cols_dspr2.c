@@ -44,14 +44,14 @@ void vp9_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
   uint8_t *cm = vp9_ff_cropTbl;
 
   /* prefetch vp9_ff_cropTbl */
-  vp9_prefetch_load(vp9_ff_cropTbl);
-  vp9_prefetch_load(vp9_ff_cropTbl +  32);
-  vp9_prefetch_load(vp9_ff_cropTbl +  64);
-  vp9_prefetch_load(vp9_ff_cropTbl +  96);
-  vp9_prefetch_load(vp9_ff_cropTbl + 128);
-  vp9_prefetch_load(vp9_ff_cropTbl + 160);
-  vp9_prefetch_load(vp9_ff_cropTbl + 192);
-  vp9_prefetch_load(vp9_ff_cropTbl + 224);
+  prefetch_load(vp9_ff_cropTbl);
+  prefetch_load(vp9_ff_cropTbl +  32);
+  prefetch_load(vp9_ff_cropTbl +  64);
+  prefetch_load(vp9_ff_cropTbl +  96);
+  prefetch_load(vp9_ff_cropTbl + 128);
+  prefetch_load(vp9_ff_cropTbl + 160);
+  prefetch_load(vp9_ff_cropTbl + 192);
+  prefetch_load(vp9_ff_cropTbl + 224);
 
   for (i = 0; i < 32; ++i) {
     dest_pix = dest + i;

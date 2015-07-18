@@ -49,7 +49,7 @@ static void convolve_avg_vert_4_dspr2(const uint8_t *src,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_store(dst + dst_stride);
+    prefetch_store(dst + dst_stride);
 
     for (x = 0; x < w; x += 4) {
       src_ptr = src + x;
@@ -210,8 +210,8 @@ static void convolve_avg_vert_64_dspr2(const uint8_t *src,
 
   for (y = h; y--;) {
     /* prefetch data to cache memory */
-    vp9_prefetch_store(dst + dst_stride);
-    vp9_prefetch_store(dst + dst_stride + 32);
+    prefetch_store(dst + dst_stride);
+    prefetch_store(dst + dst_stride + 32);
 
     for (x = 0; x < 64; x += 4) {
       src_ptr = src + x;
@@ -372,7 +372,7 @@ void vp9_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         : [pos] "r" (pos)
       );
 
-      vp9_prefetch_store(dst);
+      prefetch_store(dst);
 
       switch (w) {
         case 4:
@@ -384,7 +384,7 @@ void vp9_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                     filter_y, w, h);
           break;
         case 64:
-          vp9_prefetch_store(dst + 32);
+          prefetch_store(dst + 32);
           convolve_avg_vert_64_dspr2(src, src_stride,
                                      dst, dst_stride,
                                      filter_y, h);
@@ -452,17 +452,17 @@ void vp9_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
   uint32_t tp3, tp4, tn2;
 
   /* prefetch data to cache memory */
-  vp9_prefetch_load(src);
-  vp9_prefetch_load(src + 32);
-  vp9_prefetch_store(dst);
+  prefetch_load(src);
+  prefetch_load(src + 32);
+  prefetch_store(dst);
 
   switch (w) {
     case 4:
       /* 1 word storage */
       for (y = h; y--; ) {
-        vp9_prefetch_load(src + src_stride);
-        vp9_prefetch_load(src + src_stride + 32);
-        vp9_prefetch_store(dst + dst_stride);
+        prefetch_load(src + src_stride);
+        prefetch_load(src + src_stride + 32);
+        prefetch_store(dst + dst_stride);
 
         __asm__ __volatile__ (
             "ulw              %[tp1],         0(%[src])      \n\t"
@@ -482,9 +482,9 @@ void vp9_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
     case 8:
       /* 2 word storage */
       for (y = h; y--; ) {
-        vp9_prefetch_load(src + src_stride);
-        vp9_prefetch_load(src + src_stride + 32);
-        vp9_prefetch_store(dst + dst_stride);
+        prefetch_load(src + src_stride);
+        prefetch_load(src + src_stride + 32);
+        prefetch_store(dst + dst_stride);
 
         __asm__ __volatile__ (
             "ulw              %[tp1],         0(%[src])      \n\t"
@@ -509,9 +509,9 @@ void vp9_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
     case 16:
       /* 4 word storage */
       for (y = h; y--; ) {
-        vp9_prefetch_load(src + src_stride);
-        vp9_prefetch_load(src + src_stride + 32);
-        vp9_prefetch_store(dst + dst_stride);
+        prefetch_load(src + src_stride);
+        prefetch_load(src + src_stride + 32);
+        prefetch_store(dst + dst_stride);
 
         __asm__ __volatile__ (
             "ulw              %[tp1],         0(%[src])      \n\t"
@@ -544,9 +544,9 @@ void vp9_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
     case 32:
       /* 8 word storage */
       for (y = h; y--; ) {
-        vp9_prefetch_load(src + src_stride);
-        vp9_prefetch_load(src + src_stride + 32);
-        vp9_prefetch_store(dst + dst_stride);
+        prefetch_load(src + src_stride);
+        prefetch_load(src + src_stride + 32);
+        prefetch_store(dst + dst_stride);
 
         __asm__ __volatile__ (
             "ulw              %[tp1],         0(%[src])      \n\t"
@@ -593,16 +593,16 @@ void vp9_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
       }
       break;
     case 64:
-      vp9_prefetch_load(src + 64);
-      vp9_prefetch_store(dst + 32);
+      prefetch_load(src + 64);
+      prefetch_store(dst + 32);
 
       /* 16 word storage */
       for (y = h; y--; ) {
-        vp9_prefetch_load(src + src_stride);
-        vp9_prefetch_load(src + src_stride + 32);
-        vp9_prefetch_load(src + src_stride + 64);
-        vp9_prefetch_store(dst + dst_stride);
-        vp9_prefetch_store(dst + dst_stride + 32);
+        prefetch_load(src + src_stride);
+        prefetch_load(src + src_stride + 32);
+        prefetch_load(src + src_stride + 64);
+        prefetch_store(dst + dst_stride);
+        prefetch_store(dst + dst_stride + 32);
 
         __asm__ __volatile__ (
             "ulw              %[tp1],         0(%[src])      \n\t"

@@ -34,7 +34,7 @@ static void idct16_rows_dspr2(const int16_t *input, int16_t *output,
 
   for (i = no_rows; i--; ) {
     /* prefetch row */
-    vp9_prefetch_load((const uint8_t *)(input + 16));
+    prefetch_load((const uint8_t *)(input + 16));
 
     __asm__ __volatile__ (
         "lh       %[load1],              0(%[input])                    \n\t"
@@ -421,14 +421,14 @@ static void idct16_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
   uint8_t *cm = vp9_ff_cropTbl;
 
   /* prefetch vp9_ff_cropTbl */
-  vp9_prefetch_load(vp9_ff_cropTbl);
-  vp9_prefetch_load(vp9_ff_cropTbl +  32);
-  vp9_prefetch_load(vp9_ff_cropTbl +  64);
-  vp9_prefetch_load(vp9_ff_cropTbl +  96);
-  vp9_prefetch_load(vp9_ff_cropTbl + 128);
-  vp9_prefetch_load(vp9_ff_cropTbl + 160);
-  vp9_prefetch_load(vp9_ff_cropTbl + 192);
-  vp9_prefetch_load(vp9_ff_cropTbl + 224);
+  prefetch_load(vp9_ff_cropTbl);
+  prefetch_load(vp9_ff_cropTbl +  32);
+  prefetch_load(vp9_ff_cropTbl +  64);
+  prefetch_load(vp9_ff_cropTbl +  96);
+  prefetch_load(vp9_ff_cropTbl + 128);
+  prefetch_load(vp9_ff_cropTbl + 160);
+  prefetch_load(vp9_ff_cropTbl + 192);
+  prefetch_load(vp9_ff_cropTbl + 224);
 
   for (i = 0; i < 16; ++i) {
     dest_pix = (dest + i);
@@ -1124,7 +1124,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
 
       for (i = 0; i < 16; ++i) {
         /* prefetch row */
-        vp9_prefetch_load((const uint8_t *)(input + 16));
+        prefetch_load((const uint8_t *)(input + 16));
 
         iadst16(input, outptr);
         input += 16;
@@ -1144,7 +1144,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
 
       for (i = 0; i < 16; ++i) {
         /* prefetch row */
-        vp9_prefetch_load((const uint8_t *)(input + 16));
+        prefetch_load((const uint8_t *)(input + 16));
 
         iadst16(input, outptr);
         input += 16;

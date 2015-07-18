@@ -10,7 +10,7 @@
 
 #include "vpx_dsp/mips/loopfilter_msa.h"
 
-void vp9_lpf_horizontal_8_msa(uint8_t *src, int32_t pitch,
+void vpx_lpf_horizontal_8_msa(uint8_t *src, int32_t pitch,
                               const uint8_t *b_limit_ptr,
                               const uint8_t *limit_ptr,
                               const uint8_t *thresh_ptr,
@@ -83,7 +83,7 @@ void vp9_lpf_horizontal_8_msa(uint8_t *src, int32_t pitch,
   }
 }
 
-void vp9_lpf_horizontal_8_dual_msa(uint8_t *src, int32_t pitch,
+void vpx_lpf_horizontal_8_dual_msa(uint8_t *src, int32_t pitch,
                                    const uint8_t *b_limit0,
                                    const uint8_t *limit0,
                                    const uint8_t *thresh0,
@@ -158,7 +158,7 @@ void vp9_lpf_horizontal_8_dual_msa(uint8_t *src, int32_t pitch,
   }
 }
 
-void vp9_lpf_vertical_8_msa(uint8_t *src, int32_t pitch,
+void vpx_lpf_vertical_8_msa(uint8_t *src, int32_t pitch,
                             const uint8_t *b_limit_ptr,
                             const uint8_t *limit_ptr,
                             const uint8_t *thresh_ptr,
@@ -237,7 +237,7 @@ void vp9_lpf_vertical_8_msa(uint8_t *src, int32_t pitch,
   }
 }
 
-void vp9_lpf_vertical_8_dual_msa(uint8_t *src, int32_t pitch,
+void vpx_lpf_vertical_8_dual_msa(uint8_t *src, int32_t pitch,
                                  const uint8_t *b_limit0,
                                  const uint8_t *limit0,
                                  const uint8_t *thresh0,
