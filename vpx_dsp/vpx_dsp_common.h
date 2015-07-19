@@ -50,6 +50,20 @@ static INLINE double fclamp(double value, double low, double high) {
   return value < low ? low : (value > high ? high : value);
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE uint16_t clip_pixel_highbd(int val, int bd) {
+  switch (bd) {
+    case 8:
+    default:
+      return (uint16_t)clamp(val, 0, 255);
+    case 10:
+      return (uint16_t)clamp(val, 0, 1023);
+    case 12:
+      return (uint16_t)clamp(val, 0, 4095);
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

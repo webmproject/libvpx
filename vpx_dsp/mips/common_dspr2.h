@@ -21,6 +21,8 @@ extern "C" {
 #if HAVE_DSPR2
 #define CROP_WIDTH 512
 
+extern uint8_t *vpx_ff_cropTbl;  // From "vpx_dsp/mips/intrapred4_dspr2.c"
+
 static INLINE void prefetch_load(const unsigned char *src) {
   __asm__ __volatile__ (
       "pref   0,  0(%[src])   \n\t"

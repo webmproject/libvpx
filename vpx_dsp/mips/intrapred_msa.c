@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/mips/macros_msa.h"
 
 #define IPRED_SUBS_UH2_UH(in0, in1, out0, out1) {  \
