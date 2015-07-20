@@ -28,17 +28,17 @@ struct vp9_token {
 
 void vp9_tokens_from_tree(struct vp9_token*, const vpx_tree_index *);
 
-static INLINE void vp9_write_tree(vp9_writer *w, const vpx_tree_index *tree,
+static INLINE void vp9_write_tree(vpx_writer *w, const vpx_tree_index *tree,
                                   const vpx_prob *probs, int bits, int len,
                                   vpx_tree_index i) {
   do {
     const int bit = (bits >> --len) & 1;
-    vp9_write(w, bit, probs[i >> 1]);
+    vpx_write(w, bit, probs[i >> 1]);
     i = tree[i + bit];
   } while (len);
 }
 
-static INLINE void vp9_write_token(vp9_writer *w, const vpx_tree_index *tree,
+static INLINE void vp9_write_token(vpx_writer *w, const vpx_tree_index *tree,
                                    const vpx_prob *probs,
                                    const struct vp9_token *token) {
   vp9_write_tree(w, tree, probs, token->value, token->len, 0);
