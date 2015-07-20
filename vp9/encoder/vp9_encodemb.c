@@ -823,7 +823,10 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         if (!x->skip_recode) {
           vpx_highbd_subtract_block(16, 16, src_diff, diff_stride,
                                     src, src_stride, dst, dst_stride, xd->bd);
-          vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
+          if (tx_type == DCT_DCT)
+            vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
+          else
+            vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
           vp9_highbd_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                                 p->quant, p->quant_shift, qcoeff, dqcoeff,
                                 pd->dequant, eob,
@@ -845,7 +848,10 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         if (!x->skip_recode) {
           vpx_highbd_subtract_block(8, 8, src_diff, diff_stride,
                                     src, src_stride, dst, dst_stride, xd->bd);
-          vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
+          if (tx_type == DCT_DCT)
+            vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
+          else
+            vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
           vp9_highbd_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
                                 p->quant, p->quant_shift, qcoeff, dqcoeff,
                                 pd->dequant, eob,
