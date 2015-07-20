@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8eed634_260d1c3f",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-20T16:36:01Z",
+      "side": 1,
+      "message": "take out the first \"+\"",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 1
+      },
+      "revId": "37ecb807f97a7d5a6c2c7700718357304fa6ef6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
