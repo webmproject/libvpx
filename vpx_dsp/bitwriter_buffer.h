@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_WRITE_BIT_BUFFER_H_
-#define VP9_ENCODER_VP9_WRITE_BIT_BUFFER_H_
+#ifndef VPX_DSP_BITWRITER_BUFFER_H_
+#define VPX_DSP_BITWRITER_BUFFER_H_
 
 #include "vpx/vpx_integer.h"
 
@@ -33,4 +33,4 @@ void vp9_wb_write_literal(struct vp9_write_bit_buffer *wb, int data, int bits);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_WRITE_BIT_BUFFER_H_
+#endif  // VPX_DSP_BITWRITER_BUFFER_H_

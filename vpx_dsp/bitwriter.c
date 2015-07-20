@@ -10,7 +10,7 @@
 
 #include <assert.h>
 
-#include "./vp9_writer.h"
+#include "./bitwriter.h"
 
 void vp9_start_encode(vp9_writer *br, uint8_t *source) {
   br->lowvalue = 0;

@@ -13,7 +13,7 @@
 #include <limits.h>
 
 #include "vpx/vpx_encoder.h"
-#include "vpx_dsp/vp9_write_bit_buffer.h"
+#include "vpx_dsp/bitwriter_buffer.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem_ops.h"
 

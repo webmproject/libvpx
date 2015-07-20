@@ -18,10 +18,10 @@ DSP_SRCS-yes += prob.h
 DSP_SRCS-yes += prob.c
 
 ifeq ($(CONFIG_ENCODERS),yes)
-DSP_SRCS-yes += vp9_writer.h
-DSP_SRCS-yes += vp9_writer.c
-DSP_SRCS-yes += vp9_write_bit_buffer.c
-DSP_SRCS-yes += vp9_write_bit_buffer.h
+DSP_SRCS-yes += bitwriter.h
+DSP_SRCS-yes += bitwriter.c
+DSP_SRCS-yes += bitwriter_buffer.c
+DSP_SRCS-yes += bitwriter_buffer.h
 endif
 
 ifeq ($(CONFIG_DECODERS),yes)
