@@ -733,9 +733,19 @@ VPX_CTRL_USE_TYPE(VP9E_SET_TUNE_CONTENT, int) /* vp9e_tune_content */
 VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_SPACE, int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_MIN_GF_INTERVAL,  unsigned int)
+
+/*!\brief
+ *
+ * TODO(debargha) : add support of the control in ffmpeg
+ */
 #define VPX_CTRL_VP9E_SET_MIN_GF_INTERVAL
 
+
 VPX_CTRL_USE_TYPE(VP9E_SET_MAX_GF_INTERVAL,  unsigned int)
+/*!\brief
+ *
+ * TODO(debargha) : add support of the control in ffmpeg
+ */
 #define VPX_CTRL_VP9E_SET_MAX_GF_INTERVAL
 
 VPX_CTRL_USE_TYPE(VP9E_GET_ACTIVEMAP, vpx_active_map_t *)
