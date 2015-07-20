@@ -20,6 +20,34 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/encoder/vp9_dct.h"
 
+static void fdct4(const tran_low_t *input, tran_low_t *output);
+static void fadst4(const tran_low_t *input, tran_low_t *output);
+static void fdct8(const tran_low_t *input, tran_low_t *output);
+static void fadst8(const tran_low_t *input, tran_low_t *output);
+static void fdct16(const tran_low_t in[16], tran_low_t out[16]);
+static void fadst16(const tran_low_t *input, tran_low_t *output);
+
+static const transform_2d FHT_4[] = {
+  { fdct4,  fdct4  },  // DCT_DCT  = 0
+  { fadst4, fdct4  },  // ADST_DCT = 1
+  { fdct4,  fadst4 },  // DCT_ADST = 2
+  { fadst4, fadst4 }   // ADST_ADST = 3
+};
+
+static const transform_2d FHT_8[] = {
+  { fdct8,  fdct8  },  // DCT_DCT  = 0
+  { fadst8, fdct8  },  // ADST_DCT = 1
+  { fdct8,  fadst8 },  // DCT_ADST = 2
+  { fadst8, fadst8 }   // ADST_ADST = 3
+};
+
+static const transform_2d FHT_16[] = {
+  { fdct16,  fdct16  },  // DCT_DCT  = 0
+  { fadst16, fdct16  },  // ADST_DCT = 1
+  { fdct16,  fadst16 },  // DCT_ADST = 2
+  { fadst16, fadst16 }   // ADST_ADST = 3
+};
+
 static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   // TODO(debargha, peter.derivaz): Find new bounds for this assert
@@ -28,7 +56,7 @@ static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
   return rv;
 }
 
-void vp9_fdct4(const tran_low_t *input, tran_low_t *output) {
+static void fdct4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t step[4];
   tran_high_t temp1, temp2;
 
@@ -125,7 +153,7 @@ void vp9_fdct4x4_c(const int16_t *input, tran_low_t *output, int stride) {
   }
 }
 
-void vp9_fadst4(const tran_low_t *input, tran_low_t *output) {
+static void fadst4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x0, x1, x2, x3;
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
@@ -197,7 +225,7 @@ void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
   }
 }
 
-void vp9_fdct8(const tran_low_t *input, tran_low_t *output) {
+static void fdct8(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;  // canbe16
   tran_high_t t0, t1, t2, t3;                  // needs32
   tran_high_t x0, x1, x2, x3;                  // canbe16
@@ -325,7 +353,7 @@ void vp9_fdct8x8_c(const int16_t *input, tran_low_t *final_output, int stride) {
 
   // Rows
   for (i = 0; i < 8; ++i) {
-    vp9_fdct8(&intermediate[i * 8], &final_output[i * 8]);
+    fdct8(&intermediate[i * 8], &final_output[i * 8]);
     for (j = 0; j < 8; ++j)
       final_output[j + i * 8] /= 2;
   }
@@ -407,7 +435,7 @@ void vp9_fdct8x8_quant_c(const int16_t *input, int stride,
 
   // Rows
   for (i = 0; i < 8; ++i) {
-    vp9_fdct8(&intermediate[i * 8], &coeff_ptr[i * 8]);
+    fdct8(&intermediate[i * 8], &coeff_ptr[i * 8]);
     for (j = 0; j < 8; ++j)
       coeff_ptr[j + i * 8] /= 2;
   }
@@ -634,7 +662,7 @@ void vp9_fdct16x16_c(const int16_t *input, tran_low_t *output, int stride) {
   }
 }
 
-void vp9_fadst8(const tran_low_t *input, tran_low_t *output) {
+static void fadst8(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
   tran_high_t x0 = input[7];
@@ -792,7 +820,7 @@ void vp9_fwht4x4_c(const int16_t *input, tran_low_t *output, int stride) {
 }
 
 // Rewrote to use same algorithm as others.
-void vp9_fdct16(const tran_low_t in[16], tran_low_t out[16]) {
+static void fdct16(const tran_low_t in[16], tran_low_t out[16]) {
   tran_high_t step1[8];      // canbe16
   tran_high_t step2[8];      // canbe16
   tran_high_t step3[8];      // canbe16
@@ -933,7 +961,7 @@ void vp9_fdct16(const tran_low_t in[16], tran_low_t out[16]) {
   out[15] = (tran_low_t)fdct_round_shift(temp2);
 }
 
-void vp9_fadst16(const tran_low_t *input, tran_low_t *output) {
+static void fadst16(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
   tran_high_t s9, s10, s11, s12, s13, s14, s15;
 
