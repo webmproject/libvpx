@@ -14,8 +14,9 @@
 
 #include "./vpx_config.h"
 
+#include "vpx_dsp/vp9_prob.h"
+
 #include "vp9/common/vp9_mv.h"
-#include "vp9/common/vp9_prob.h"
 
 #ifdef __cplusplus
 extern "C" {

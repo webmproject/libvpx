@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 
 #include "vpx/vpx_codec.h"
+#include "vpx_dsp/vp9_reader.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx_util/vpx_thread.h"
 
@@ -21,7 +22,6 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_ppflags.h"
 #include "vp9/decoder/vp9_dthread.h"
-#include "vp9/decoder/vp9_reader.h"
 
 #ifdef __cplusplus
 extern "C" {

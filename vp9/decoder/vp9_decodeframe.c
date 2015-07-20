@@ -14,6 +14,8 @@
 #include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 
+#include "vpx_dsp/vp9_read_bit_buffer.h"
+#include "vpx_dsp/vp9_reader.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/mem_ops.h"
@@ -38,8 +40,6 @@
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_dsubexp.h"
-#include "vp9/decoder/vp9_read_bit_buffer.h"
-#include "vp9/decoder/vp9_reader.h"
 
 #define MAX_VP9_HEADER_SIZE 80
 

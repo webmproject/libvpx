@@ -12,10 +12,9 @@
 #define VP9_COMMON_VP9_PROB_H_
 
 #include "./vpx_config.h"
+#include "./vpx_dsp_common.h"
 
 #include "vpx_ports/mem.h"
-
-#include "vp9/common/vp9_common.h"
 
 #ifdef __cplusplus
 extern "C" {

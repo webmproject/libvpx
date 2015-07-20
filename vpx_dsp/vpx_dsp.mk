@@ -13,6 +13,17 @@ DSP_SRCS-yes += vpx_dsp_common.h
 
 DSP_SRCS-$(HAVE_MSA)    += mips/macros_msa.h
 
+# bit reader
+DSP_SRCS-yes += vp9_prob.h
+DSP_SRCS-yes += vp9_prob.c
+
+ifeq ($(CONFIG_DECODERS),yes)
+DSP_SRCS-yes += vp9_reader.h
+DSP_SRCS-yes += vp9_reader.c
+DSP_SRCS-yes += vp9_read_bit_buffer.c
+DSP_SRCS-yes += vp9_read_bit_buffer.h
+endif
+
 # loop filters
 DSP_SRCS-yes += loopfilter.c
 
