@@ -75,7 +75,7 @@ static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
 }
 
 static int decode_unsigned_max(struct vpx_read_bit_buffer *rb, int max) {
-  const int data = vp9_rb_read_literal(rb, get_unsigned_bits(max));
+  const int data = vpx_rb_read_literal(rb, get_unsigned_bits(max));
   return data > max ? max : data;
 }
 
@@ -1051,21 +1051,21 @@ static void setup_segmentation(struct segmentation *seg,
   seg->update_map = 0;
   seg->update_data = 0;
 
-  seg->enabled = vp9_rb_read_bit(rb);
+  seg->enabled = vpx_rb_read_bit(rb);
   if (!seg->enabled)
     return;
 
   // Segmentation map update
-  seg->update_map = vp9_rb_read_bit(rb);
+  seg->update_map = vpx_rb_read_bit(rb);
   if (seg->update_map) {
     for (i = 0; i < SEG_TREE_PROBS; i++)
-      seg->tree_probs[i] = vp9_rb_read_bit(rb) ? vp9_rb_read_literal(rb, 8)
+      seg->tree_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
                                                : MAX_PROB;
 
-    seg->temporal_update = vp9_rb_read_bit(rb);
+    seg->temporal_update = vpx_rb_read_bit(rb);
     if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++)
-        seg->pred_probs[i] = vp9_rb_read_bit(rb) ? vp9_rb_read_literal(rb, 8)
+        seg->pred_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
                                                  : MAX_PROB;
     } else {
       for (i = 0; i < PREDICTION_PROBS; i++)
@@ -1074,21 +1074,21 @@ static void setup_segmentation(struct segmentation *seg,
   }
 
   // Segmentation data update
-  seg->update_data = vp9_rb_read_bit(rb);
+  seg->update_data = vpx_rb_read_bit(rb);
   if (seg->update_data) {
-    seg->abs_delta = vp9_rb_read_bit(rb);
+    seg->abs_delta = vpx_rb_read_bit(rb);
 
     vp9_clearall_segfeatures(seg);
 
     for (i = 0; i < MAX_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
         int data = 0;
-        const int feature_enabled = vp9_rb_read_bit(rb);
+        const int feature_enabled = vpx_rb_read_bit(rb);
         if (feature_enabled) {
           vp9_enable_segfeature(seg, i, j);
           data = decode_unsigned_max(rb, vp9_seg_feature_data_max(j));
           if (vp9_is_segfeature_signed(j))
-            data = vp9_rb_read_bit(rb) ? -data : data;
+            data = vpx_rb_read_bit(rb) ? -data : data;
         }
         vp9_set_segdata(seg, i, j, data);
       }
@@ -1098,37 +1098,37 @@ static void setup_segmentation(struct segmentation *seg,
 
 static void setup_loopfilter(struct loopfilter *lf,
                              struct vpx_read_bit_buffer *rb) {
-  lf->filter_level = vp9_rb_read_literal(rb, 6);
-  lf->sharpness_level = vp9_rb_read_literal(rb, 3);
+  lf->filter_level = vpx_rb_read_literal(rb, 6);
+  lf->sharpness_level = vpx_rb_read_literal(rb, 3);
 
   // Read in loop filter deltas applied at the MB level based on mode or ref
   // frame.
   lf->mode_ref_delta_update = 0;
 
-  lf->mode_ref_delta_enabled = vp9_rb_read_bit(rb);
+  lf->mode_ref_delta_enabled = vpx_rb_read_bit(rb);
   if (lf->mode_ref_delta_enabled) {
-    lf->mode_ref_delta_update = vp9_rb_read_bit(rb);
+    lf->mode_ref_delta_update = vpx_rb_read_bit(rb);
     if (lf->mode_ref_delta_update) {
       int i;
 
       for (i = 0; i < MAX_REF_LF_DELTAS; i++)
-        if (vp9_rb_read_bit(rb))
-          lf->ref_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
+        if (vpx_rb_read_bit(rb))
+          lf->ref_deltas[i] = vpx_rb_read_signed_literal(rb, 6);
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++)
-        if (vp9_rb_read_bit(rb))
-          lf->mode_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
+        if (vpx_rb_read_bit(rb))
+          lf->mode_deltas[i] = vpx_rb_read_signed_literal(rb, 6);
     }
   }
 }
 
 static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
-  return vp9_rb_read_bit(rb) ? vp9_rb_read_signed_literal(rb, 4) : 0;
+  return vpx_rb_read_bit(rb) ? vpx_rb_read_signed_literal(rb, 4) : 0;
 }
 
 static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                struct vpx_read_bit_buffer *rb) {
-  cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
+  cm->base_qindex = vpx_rb_read_literal(rb, QINDEX_BITS);
   cm->y_dc_delta_q = read_delta_q(rb);
   cm->uv_dc_delta_q = read_delta_q(rb);
   cm->uv_ac_delta_q = read_delta_q(rb);
@@ -1175,14 +1175,14 @@ static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
                                               EIGHTTAP,
                                               EIGHTTAP_SHARP,
                                               BILINEAR };
-  return vp9_rb_read_bit(rb) ? SWITCHABLE
-                             : literal_to_filter[vp9_rb_read_literal(rb, 2)];
+  return vpx_rb_read_bit(rb) ? SWITCHABLE
+                             : literal_to_filter[vpx_rb_read_literal(rb, 2)];
 }
 
 static void setup_display_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   cm->display_width = cm->width;
   cm->display_height = cm->height;
-  if (vp9_rb_read_bit(rb))
+  if (vpx_rb_read_bit(rb))
     vp9_read_frame_size(rb, &cm->display_width, &cm->display_height);
 }
 
@@ -1271,7 +1271,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   int has_valid_ref_frame = 0;
   BufferPool *const pool = cm->buffer_pool;
   for (i = 0; i < REFS_PER_FRAME; ++i) {
-    if (vp9_rb_read_bit(rb)) {
+    if (vpx_rb_read_bit(rb)) {
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
       width = buf->y_crop_width;
       height = buf->y_crop_height;
@@ -1344,7 +1344,7 @@ static void setup_tile_info(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   // columns
   max_ones = max_log2_tile_cols - min_log2_tile_cols;
   cm->log2_tile_cols = min_log2_tile_cols;
-  while (max_ones-- && vp9_rb_read_bit(rb))
+  while (max_ones-- && vpx_rb_read_bit(rb))
     cm->log2_tile_cols++;
 
   if (cm->log2_tile_cols > 6)
@@ -1352,9 +1352,9 @@ static void setup_tile_info(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
                        "Invalid number of tile columns");
 
   // rows
-  cm->log2_tile_rows = vp9_rb_read_bit(rb);
+  cm->log2_tile_rows = vpx_rb_read_bit(rb);
   if (cm->log2_tile_rows)
-    cm->log2_tile_rows += vp9_rb_read_bit(rb);
+    cm->log2_tile_rows += vpx_rb_read_bit(rb);
 }
 
 typedef struct TileBuffer {
@@ -1760,7 +1760,7 @@ static void error_handler(void *data) {
 static void read_bitdepth_colorspace_sampling(
     VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
-    cm->bit_depth = vp9_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
+    cm->bit_depth = vpx_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
 #if CONFIG_VP9_HIGHBITDEPTH
     cm->use_highbitdepth = 1;
 #endif
@@ -1770,16 +1770,16 @@ static void read_bitdepth_colorspace_sampling(
     cm->use_highbitdepth = 0;
 #endif
   }
-  cm->color_space = vp9_rb_read_literal(rb, 3);
+  cm->color_space = vpx_rb_read_literal(rb, 3);
   if (cm->color_space != VPX_CS_SRGB) {
-    vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
+    vpx_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
     if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-      cm->subsampling_x = vp9_rb_read_bit(rb);
-      cm->subsampling_y = vp9_rb_read_bit(rb);
+      cm->subsampling_x = vpx_rb_read_bit(rb);
+      cm->subsampling_y = vpx_rb_read_bit(rb);
       if (cm->subsampling_x == 1 && cm->subsampling_y == 1)
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "4:2:0 color not supported in profile 1 or 3");
-      if (vp9_rb_read_bit(rb))
+      if (vpx_rb_read_bit(rb))
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "Reserved bit set");
     } else {
@@ -1790,7 +1790,7 @@ static void read_bitdepth_colorspace_sampling(
       // Note if colorspace is SRGB then 4:4:4 chroma sampling is assumed.
       // 4:2:2 or 4:4:0 chroma sampling is not allowed.
       cm->subsampling_y = cm->subsampling_x = 0;
-      if (vp9_rb_read_bit(rb))
+      if (vpx_rb_read_bit(rb))
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "Reserved bit set");
     } else {
@@ -1811,7 +1811,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   cm->last_frame_type = cm->frame_type;
   cm->last_intra_only = cm->intra_only;
 
-  if (vp9_rb_read_literal(rb, 2) != VP9_FRAME_MARKER)
+  if (vpx_rb_read_literal(rb, 2) != VP9_FRAME_MARKER)
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame marker");
 
@@ -1826,10 +1826,10 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
                        "Unsupported bitstream profile");
 #endif
 
-  cm->show_existing_frame = vp9_rb_read_bit(rb);
+  cm->show_existing_frame = vpx_rb_read_bit(rb);
   if (cm->show_existing_frame) {
     // Show an existing frame directly.
-    const int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
+    const int frame_to_show = cm->ref_frame_map[vpx_rb_read_literal(rb, 3)];
     lock_buffer_pool(pool);
     if (frame_to_show < 0 || frame_bufs[frame_to_show].ref_count < 1) {
       unlock_buffer_pool(pool);
@@ -1851,9 +1851,9 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     return 0;
   }
 
-  cm->frame_type = (FRAME_TYPE) vp9_rb_read_bit(rb);
-  cm->show_frame = vp9_rb_read_bit(rb);
-  cm->error_resilient_mode = vp9_rb_read_bit(rb);
+  cm->frame_type = (FRAME_TYPE) vpx_rb_read_bit(rb);
+  cm->show_frame = vpx_rb_read_bit(rb);
+  cm->error_resilient_mode = vpx_rb_read_bit(rb);
 
   if (cm->frame_type == KEY_FRAME) {
     if (!vp9_read_sync_code(rb))
@@ -1874,10 +1874,10 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       pbi->need_resync = 0;
     }
   } else {
-    cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
+    cm->intra_only = cm->show_frame ? 0 : vpx_rb_read_bit(rb);
 
     cm->reset_frame_context = cm->error_resilient_mode ?
-        0 : vp9_rb_read_literal(rb, 2);
+        0 : vpx_rb_read_literal(rb, 2);
 
     if (cm->intra_only) {
       if (!vp9_read_sync_code(rb))
@@ -1898,26 +1898,26 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 #endif
       }
 
-      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
+      pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
       if (pbi->need_resync) {
         memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
         pbi->need_resync = 0;
       }
     } else if (pbi->need_resync != 1) {  /* Skip if need resync */
-      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
+      pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
       for (i = 0; i < REFS_PER_FRAME; ++i) {
-        const int ref = vp9_rb_read_literal(rb, REF_FRAMES_LOG2);
+        const int ref = vpx_rb_read_literal(rb, REF_FRAMES_LOG2);
         const int idx = cm->ref_frame_map[ref];
         RefBuffer *const ref_frame = &cm->frame_refs[i];
         ref_frame->idx = idx;
         ref_frame->buf = &frame_bufs[idx].buf;
-        cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
+        cm->ref_frame_sign_bias[LAST_FRAME + i] = vpx_rb_read_bit(rb);
       }
 
       setup_frame_size_with_refs(cm, rb);
 
-      cm->allow_high_precision_mv = vp9_rb_read_bit(rb);
+      cm->allow_high_precision_mv = vpx_rb_read_bit(rb);
       cm->interp_filter = read_interp_filter(rb);
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
@@ -1949,8 +1949,8 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   }
 
   if (!cm->error_resilient_mode) {
-    cm->refresh_frame_context = vp9_rb_read_bit(rb);
-    cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
+    cm->refresh_frame_context = vpx_rb_read_bit(rb);
+    cm->frame_parallel_decoding_mode = vpx_rb_read_bit(rb);
   } else {
     cm->refresh_frame_context = 0;
     cm->frame_parallel_decoding_mode = 1;
@@ -1958,7 +1958,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
   // This flag will be overridden by the call to vp9_setup_past_independence
   // below, forcing the use of context 0 for those frame types.
-  cm->frame_context_idx = vp9_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
+  cm->frame_context_idx = vpx_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
 
   // Generate next_ref_frame_map.
   lock_buffer_pool(pool);
@@ -1993,7 +1993,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   setup_segmentation_dequant(cm);
 
   setup_tile_info(cm, rb);
-  sz = vp9_rb_read_literal(rb, 16);
+  sz = vpx_rb_read_literal(rb, 16);
 
   if (sz == 0)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
@@ -2115,22 +2115,22 @@ static struct vpx_read_bit_buffer *init_read_bit_buffer(
 //------------------------------------------------------------------------------
 
 int vp9_read_sync_code(struct vpx_read_bit_buffer *const rb) {
-  return vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_0 &&
-         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_1 &&
-         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
+  return vpx_rb_read_literal(rb, 8) == VP9_SYNC_CODE_0 &&
+         vpx_rb_read_literal(rb, 8) == VP9_SYNC_CODE_1 &&
+         vpx_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
 }
 
 void vp9_read_frame_size(struct vpx_read_bit_buffer *rb,
                          int *width, int *height) {
-  *width = vp9_rb_read_literal(rb, 16) + 1;
-  *height = vp9_rb_read_literal(rb, 16) + 1;
+  *width = vpx_rb_read_literal(rb, 16) + 1;
+  *height = vpx_rb_read_literal(rb, 16) + 1;
 }
 
 BITSTREAM_PROFILE vp9_read_profile(struct vpx_read_bit_buffer *rb) {
-  int profile = vp9_rb_read_bit(rb);
-  profile |= vp9_rb_read_bit(rb) << 1;
+  int profile = vpx_rb_read_bit(rb);
+  profile |= vpx_rb_read_bit(rb) << 1;
   if (profile > 2)
-    profile += vp9_rb_read_bit(rb);
+    profile += vpx_rb_read_bit(rb);
   return (BITSTREAM_PROFILE) profile;
 }
 
@@ -2155,7 +2155,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
     return;
   }
 
-  data += vp9_rb_bytes_read(&rb);
+  data += vpx_rb_bytes_read(&rb);
   if (!read_is_valid(data, first_partition_size, data_end))
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt header length");
