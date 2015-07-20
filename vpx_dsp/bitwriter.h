@@ -46,7 +46,7 @@ static INLINE void vp9_write(vp9_writer *br, int bit, int probability) {
     range = br->range - split;
   }
 
-  shift = vp9_norm[range];
+  shift = vpx_norm[range];
 
   range <<= shift;
   count += shift;

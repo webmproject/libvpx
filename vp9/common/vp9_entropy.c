@@ -16,7 +16,7 @@
 #include "vpx/vpx_integer.h"
 
 // Unconstrained Node Tree
-const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
+const vpx_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
   2, 6,                                // 0 = LOW_VAL
   -TWO_TOKEN, 4,                       // 1 = TWO
   -THREE_TOKEN, -FOUR_TOKEN,           // 2 = THREE

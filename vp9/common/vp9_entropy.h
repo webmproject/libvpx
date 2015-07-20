@@ -76,7 +76,7 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high12[18]);
 #define EOB_MODEL_TOKEN 3
 
 typedef struct {
-  const vp9_tree_index *tree;
+  const vpx_tree_index *tree;
   const vpx_prob *prob;
   int len;
   int base_val;
@@ -160,7 +160,7 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 #define PIVOT_NODE                  2   // which node is pivot
 
 #define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
-extern const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
+extern const vpx_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
 extern const vpx_prob vp9_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 
 typedef vpx_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]

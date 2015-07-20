@@ -82,10 +82,10 @@ extern const vpx_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
                                         [INTRA_MODES - 1];
 extern const vpx_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
                                             [PARTITION_TYPES - 1];
-extern const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
-extern const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
-extern const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
-extern const vp9_tree_index vp9_switchable_interp_tree
+extern const vpx_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
+extern const vpx_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
+extern const vpx_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
+extern const vpx_tree_index vp9_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
 
 void vp9_setup_past_independence(struct VP9Common *cm);

@@ -61,7 +61,7 @@ static void encode_unsigned_max(struct vp9_write_bit_buffer *wb,
   vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
 }
 
-static void prob_diff_update(const vp9_tree_index *tree,
+static void prob_diff_update(const vpx_tree_index *tree,
                              vpx_prob probs[/*n - 1*/],
                              const unsigned int counts[/*n - 1*/],
                              int n, vp9_writer *w) {

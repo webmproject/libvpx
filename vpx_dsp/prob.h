@@ -26,22 +26,22 @@ typedef uint8_t vpx_prob;
 
 #define vpx_prob_half ((vpx_prob) 128)
 
-typedef int8_t vp9_tree_index;
+typedef int8_t vpx_tree_index;
 
 #define TREE_SIZE(leaf_count) (2 * (leaf_count) - 2)
 
-#define vp9_complement(x) (255 - x)
+#define vpx_complement(x) (255 - x)
 
 #define MODE_MV_COUNT_SAT 20
 
 /* We build coding trees compactly in arrays.
-   Each node of the tree is a pair of vp9_tree_indices.
+   Each node of the tree is a pair of vpx_tree_indices.
    Array index often references a corresponding probability table.
    Index <= 0 means done encoding/decoding and value = -Index,
    Index > 0 means need another bit, specification at index.
    Nonnegative indices are always even;  processing begins at node 0. */
 
-typedef const vp9_tree_index vp9_tree[];
+typedef const vpx_tree_index vpx_tree[];
 
 static INLINE vpx_prob clip_prob(int p) {
   return (p > 255) ? 255 : (p < 1) ? 1 : p;
@@ -90,11 +90,11 @@ static INLINE vpx_prob mode_mv_merge_probs(vpx_prob pre_prob,
   }
 }
 
-void vp9_tree_merge_probs(const vp9_tree_index *tree, const vpx_prob *pre_probs,
+void vpx_tree_merge_probs(const vpx_tree_index *tree, const vpx_prob *pre_probs,
                           const unsigned int *counts, vpx_prob *probs);
 
 
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
+DECLARE_ALIGNED(16, extern const uint8_t, vpx_norm[256]);
 
 #ifdef __cplusplus
 }  // extern "C"

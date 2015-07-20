@@ -77,10 +77,10 @@ typedef enum {
 #define MV_UPP   ((1 << MV_IN_USE_BITS) - 1)
 #define MV_LOW   (-(1 << MV_IN_USE_BITS))
 
-extern const vp9_tree_index vp9_mv_joint_tree[];
-extern const vp9_tree_index vp9_mv_class_tree[];
-extern const vp9_tree_index vp9_mv_class0_tree[];
-extern const vp9_tree_index vp9_mv_fp_tree[];
+extern const vpx_tree_index vp9_mv_joint_tree[];
+extern const vpx_tree_index vp9_mv_class_tree[];
+extern const vpx_tree_index vp9_mv_class0_tree[];
+extern const vpx_tree_index vp9_mv_fp_tree[];
 
 typedef struct {
   vpx_prob sign;

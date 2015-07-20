@@ -52,7 +52,7 @@ const TOKENVALUE *vp9_dct_cat_lt_10_value_tokens = dct_cat_lt_10_value_tokens +
     / 2;
 
 // Array indices are identical to previously-existing CONTEXT_NODE indices
-const vp9_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
+const vpx_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
   -EOB_TOKEN, 2,                       // 0  = EOB
   -ZERO_TOKEN, 4,                      // 1  = ZERO
   -ONE_TOKEN, 6,                       // 2  = ONE
@@ -66,12 +66,12 @@ const vp9_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
   -CATEGORY5_TOKEN, -CATEGORY6_TOKEN   // 10 = CAT_FIVE
 };
 
-static const vp9_tree_index cat1[2] = {0, 0};
-static const vp9_tree_index cat2[4] = {2, 2, 0, 0};
-static const vp9_tree_index cat3[6] = {2, 2, 4, 4, 0, 0};
-static const vp9_tree_index cat4[8] = {2, 2, 4, 4, 6, 6, 0, 0};
-static const vp9_tree_index cat5[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
-static const vp9_tree_index cat6[28] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12,
+static const vpx_tree_index cat1[2] = {0, 0};
+static const vpx_tree_index cat2[4] = {2, 2, 0, 0};
+static const vpx_tree_index cat3[6] = {2, 2, 4, 4, 0, 0};
+static const vpx_tree_index cat4[8] = {2, 2, 4, 4, 6, 6, 0, 0};
+static const vpx_tree_index cat5[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
+static const vpx_tree_index cat6[28] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12,
     14, 14, 16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 0, 0};
 
 static const int16_t zero_cost[] = {0};
@@ -367,20 +367,20 @@ const int16_t vp9_cat6_high12_high_cost[2048] = {
 #endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static const vp9_tree_index cat1_high10[2] = {0, 0};
-static const vp9_tree_index cat2_high10[4] = {2, 2, 0, 0};
-static const vp9_tree_index cat3_high10[6] = {2, 2, 4, 4, 0, 0};
-static const vp9_tree_index cat4_high10[8] = {2, 2, 4, 4, 6, 6, 0, 0};
-static const vp9_tree_index cat5_high10[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
-static const vp9_tree_index cat6_high10[32] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10,
+static const vpx_tree_index cat1_high10[2] = {0, 0};
+static const vpx_tree_index cat2_high10[4] = {2, 2, 0, 0};
+static const vpx_tree_index cat3_high10[6] = {2, 2, 4, 4, 0, 0};
+static const vpx_tree_index cat4_high10[8] = {2, 2, 4, 4, 6, 6, 0, 0};
+static const vpx_tree_index cat5_high10[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
+static const vpx_tree_index cat6_high10[32] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10,
   12, 12, 14, 14, 16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 28, 28,
   30, 30, 0, 0};
-static const vp9_tree_index cat1_high12[2] = {0, 0};
-static const vp9_tree_index cat2_high12[4] = {2, 2, 0, 0};
-static const vp9_tree_index cat3_high12[6] = {2, 2, 4, 4, 0, 0};
-static const vp9_tree_index cat4_high12[8] = {2, 2, 4, 4, 6, 6, 0, 0};
-static const vp9_tree_index cat5_high12[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
-static const vp9_tree_index cat6_high12[36] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10,
+static const vpx_tree_index cat1_high12[2] = {0, 0};
+static const vpx_tree_index cat2_high12[4] = {2, 2, 0, 0};
+static const vpx_tree_index cat3_high12[6] = {2, 2, 4, 4, 0, 0};
+static const vpx_tree_index cat4_high12[8] = {2, 2, 4, 4, 6, 6, 0, 0};
+static const vpx_tree_index cat5_high12[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
+static const vpx_tree_index cat6_high12[36] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10,
   12, 12, 14, 14, 16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 28, 28,
   30, 30, 32, 32, 34, 34, 0, 0};
 #endif

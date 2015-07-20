@@ -76,7 +76,7 @@ static INLINE int get_segdata(const struct segmentation *seg, int segment_id,
   return seg->feature_data[segment_id][feature_id];
 }
 
-extern const vp9_tree_index vp9_segment_tree[TREE_SIZE(MAX_SEGMENTS)];
+extern const vpx_tree_index vp9_segment_tree[TREE_SIZE(MAX_SEGMENTS)];
 
 #ifdef __cplusplus
 }  // extern "C"

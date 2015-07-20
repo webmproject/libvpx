@@ -146,7 +146,7 @@ static int update_mv(vp9_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
   return update;
 }
 
-static void write_mv_update(const vp9_tree_index *tree,
+static void write_mv_update(const vpx_tree_index *tree,
                             vpx_prob probs[/*n - 1*/],
                             const unsigned int counts[/*n - 1*/],
                             int n, vp9_writer *w) {

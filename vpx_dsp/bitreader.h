@@ -98,7 +98,7 @@ static INLINE int vpx_read(vpx_reader *r, int prob) {
   }
 
   {
-    register unsigned int shift = vp9_norm[range];
+    register unsigned int shift = vpx_norm[range];
     range <<= shift;
     value <<= shift;
     count -= shift;
@@ -123,9 +123,9 @@ static INLINE int vpx_read_literal(vpx_reader *r, int bits) {
   return literal;
 }
 
-static INLINE int vpx_read_tree(vpx_reader *r, const vp9_tree_index *tree,
+static INLINE int vpx_read_tree(vpx_reader *r, const vpx_tree_index *tree,
                                 const vpx_prob *probs) {
-  vp9_tree_index i = 0;
+  vpx_tree_index i = 0;
 
   while ((i = tree[i + vpx_read(r, probs[i >> 1])]) > 0)
     continue;
