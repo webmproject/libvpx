@@ -4307,7 +4307,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_INTERNAL_STATS
 
   if (oxcf->pass != 1) {
-    double samples;
+    double samples = 0.0;
     cpi->bytes += (int)(*size);
 
     if (cm->show_frame) {
