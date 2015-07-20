@@ -11,7 +11,7 @@
 #ifndef VP9_ENCODER_VP9_TREEWRITER_H_
 #define VP9_ENCODER_VP9_TREEWRITER_H_
 
-#include "vpx_dsp/vp9_writer.h"
+#include "vpx_dsp/bitwriter.h"
 
 #ifdef __cplusplus
 extern "C" {

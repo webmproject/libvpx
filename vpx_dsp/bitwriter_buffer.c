@@ -10,7 +10,7 @@
 
 #include <limits.h>
 
-#include "./vp9_write_bit_buffer.h"
+#include "./bitwriter_buffer.h"
 
 size_t vp9_wb_bytes_written(const struct vp9_write_bit_buffer *wb) {
   return wb->bit_offset / CHAR_BIT + (wb->bit_offset % CHAR_BIT > 0);
