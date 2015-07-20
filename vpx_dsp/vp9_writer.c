@@ -9,8 +9,8 @@
  */
 
 #include <assert.h>
-#include "vp9/encoder/vp9_writer.h"
-#include "vp9/common/vp9_entropy.h"
+
+#include "./vp9_writer.h"
 
 void vp9_start_encode(vp9_writer *br, uint8_t *source) {
   br->lowvalue = 0;

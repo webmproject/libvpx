@@ -13,6 +13,7 @@
 #include <limits.h>
 
 #include "vpx/vpx_encoder.h"
+#include "vpx_dsp/vp9_write_bit_buffer.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem_ops.h"
 
@@ -32,7 +33,6 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_subexp.h"
 #include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/encoder/vp9_write_bit_buffer.h"
 
 static const struct vp9_token intra_mode_encodings[INTRA_MODES] = {
   {0, 1}, {6, 3}, {28, 5}, {30, 5}, {58, 6}, {59, 6}, {126, 7}, {127, 7},

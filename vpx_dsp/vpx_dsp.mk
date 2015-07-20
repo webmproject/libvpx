@@ -17,6 +17,13 @@ DSP_SRCS-$(HAVE_MSA)    += mips/macros_msa.h
 DSP_SRCS-yes += prob.h
 DSP_SRCS-yes += prob.c
 
+ifeq ($(CONFIG_ENCODERS),yes)
+DSP_SRCS-yes += vp9_writer.h
+DSP_SRCS-yes += vp9_writer.c
+DSP_SRCS-yes += vp9_write_bit_buffer.c
+DSP_SRCS-yes += vp9_write_bit_buffer.h
+endif
+
 ifeq ($(CONFIG_DECODERS),yes)
 DSP_SRCS-yes += bitreader.h
 DSP_SRCS-yes += bitreader.c
