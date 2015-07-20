@@ -7,13 +7,12 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "vpx_dsp/vp9_writer.h"
 
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
-
 #include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_subexp.h"
-#include "vp9/encoder/vp9_writer.h"
 
 #define vp9_cost_upd256  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)))
 

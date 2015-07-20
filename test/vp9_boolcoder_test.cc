@@ -16,8 +16,7 @@
 
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/bitreader.h"
-
-#include "vp9/encoder/vp9_writer.h"
+#include "vpx_dsp/vp9_writer.h"
 
 #include "test/acm_random.h"
 
