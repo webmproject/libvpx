@@ -531,14 +531,6 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4HT,
     ::testing::Values(
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_10, 1, VPX_BITS_10),
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_10, 2, VPX_BITS_10),
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_10, 3, VPX_BITS_10),
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_12, 0, VPX_BITS_12),
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_12, 1, VPX_BITS_12),
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_12, 2, VPX_BITS_12),
-        make_tuple(&vp9_highbd_fht4x4_sse2, &iht4x4_12, 3, VPX_BITS_12),
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_c, 1, VPX_BITS_8),
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_c, 2, VPX_BITS_8),
