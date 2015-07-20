@@ -641,7 +641,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
+  vpx_prob skip_prob = vp9_get_skip_prob(cm, xd);
   int r[TX_SIZES][2], s[TX_SIZES];
   int64_t d[TX_SIZES], sse[TX_SIZES];
   int64_t rd[TX_SIZES][2] = {{INT64_MAX, INT64_MAX},
@@ -654,7 +654,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_rd = INT64_MAX;
   TX_SIZE best_tx = max_tx_size;
 
-  const vp9_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
+  const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
   assert(skip_prob > 0);
   s0 = vp9_cost_bit(skip_prob, 0);
   s1 = vp9_cost_bit(skip_prob, 1);
@@ -2118,7 +2118,7 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
                                      int segment_id,
                                      unsigned int *ref_costs_single,
                                      unsigned int *ref_costs_comp,
-                                     vp9_prob *comp_mode_p) {
+                                     vpx_prob *comp_mode_p) {
   int seg_ref_active = segfeature_active(&cm->seg, segment_id,
                                          SEG_LVL_REF_FRAME);
   if (seg_ref_active) {
@@ -2126,8 +2126,8 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
     memset(ref_costs_comp,   0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
     *comp_mode_p = 128;
   } else {
-    vp9_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
-    vp9_prob comp_inter_p = 128;
+    vpx_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
+    vpx_prob comp_inter_p = 128;
 
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
       comp_inter_p = vp9_get_reference_mode_prob(cm, xd);
@@ -2139,8 +2139,8 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
     ref_costs_single[INTRA_FRAME] = vp9_cost_bit(intra_inter_p, 0);
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
-      vp9_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
-      vp9_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
+      vpx_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
+      vpx_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
       if (cm->reference_mode == REFERENCE_MODE_SELECT)
@@ -2159,7 +2159,7 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
       ref_costs_single[ALTREF_FRAME] = 512;
     }
     if (cm->reference_mode != SINGLE_REFERENCE) {
-      vp9_prob ref_comp_p = vp9_get_pred_prob_comp_ref_p(cm, xd);
+      vpx_prob ref_comp_p = vp9_get_pred_prob_comp_ref_p(cm, xd);
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
       if (cm->reference_mode == REFERENCE_MODE_SELECT)
@@ -3003,7 +3003,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   int best_mode_skippable = 0;
   int midx, best_mode_index = -1;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
-  vp9_prob comp_mode_p;
+  vpx_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
   unsigned int best_pred_sse = UINT_MAX;
   PREDICTION_MODE best_intra_mode = DC_PRED;
@@ -3696,7 +3696,7 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
   int64_t best_pred_diff[REFERENCE_MODES];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
-  vp9_prob comp_mode_p;
+  vpx_prob comp_mode_p;
   INTERP_FILTER best_filter = SWITCHABLE;
   int64_t this_rd = INT64_MAX;
   int rate2 = 0;
@@ -3812,7 +3812,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
   MB_MODE_INFO best_mbmode;
   int ref_index, best_ref_index = 0;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
-  vp9_prob comp_mode_p;
+  vpx_prob comp_mode_p;
   INTERP_FILTER tmp_best_filter = SWITCHABLE;
   int rate_uv_intra, rate_uv_tokenonly;
   int64_t dist_uv;

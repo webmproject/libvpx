@@ -69,8 +69,8 @@ TEST(VP9, TestBitIO) {
         // First bit should be zero
         GTEST_ASSERT_EQ(bw_buffer[0] & 0x80, 0);
 
-        vp9_reader br;
-        vp9_reader_init(&br, bw_buffer, kBufferSize, NULL, NULL);
+        vpx_reader br;
+        vpx_reader_init(&br, bw_buffer, kBufferSize, NULL, NULL);
         bit_rnd.Reset(random_seed);
         for (int i = 0; i < kBitsToTest; ++i) {
           if (bit_method == 2) {
@@ -78,7 +78,7 @@ TEST(VP9, TestBitIO) {
           } else if (bit_method == 3) {
             bit = bit_rnd(2);
           }
-          GTEST_ASSERT_EQ(vp9_read(&br, probas[i]), bit)
+          GTEST_ASSERT_EQ(vpx_read(&br, probas[i]), bit)
               << "pos: " << i << " / " << kBitsToTest
               << " bit_method: " << bit_method
               << " method: " << method;

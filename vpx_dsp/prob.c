@@ -31,9 +31,9 @@ const uint8_t vp9_norm[256] = {
 
 static unsigned int tree_merge_probs_impl(unsigned int i,
                                           const vp9_tree_index *tree,
-                                          const vp9_prob *pre_probs,
+                                          const vpx_prob *pre_probs,
                                           const unsigned int *counts,
-                                          vp9_prob *probs) {
+                                          vpx_prob *probs) {
   const int l = tree[i];
   const unsigned int left_count = (l <= 0)
                  ? counts[-l]
@@ -47,7 +47,7 @@ static unsigned int tree_merge_probs_impl(unsigned int i,
   return left_count + right_count;
 }
 
-void vp9_tree_merge_probs(const vp9_tree_index *tree, const vp9_prob *pre_probs,
-                          const unsigned int *counts, vp9_prob *probs) {
+void vp9_tree_merge_probs(const vp9_tree_index *tree, const vpx_prob *pre_probs,
+                          const unsigned int *counts, vpx_prob *probs) {
   tree_merge_probs_impl(0, tree, pre_probs, counts, probs);
 }

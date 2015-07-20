@@ -133,9 +133,9 @@ static void build_nmv_component_cost_table(int *mvcost,
   }
 }
 
-static int update_mv(vp9_writer *w, const unsigned int ct[2], vp9_prob *cur_p,
-                     vp9_prob upd_p) {
-  const vp9_prob new_p = get_binary_prob(ct[0], ct[1]) | 1;
+static int update_mv(vp9_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
+                     vpx_prob upd_p) {
+  const vpx_prob new_p = get_binary_prob(ct[0], ct[1]) | 1;
   const int update = cost_branch256(ct, *cur_p) + vp9_cost_zero(upd_p) >
                      cost_branch256(ct, new_p) + vp9_cost_one(upd_p) + 7 * 256;
   vp9_write(w, update, upd_p);
@@ -147,7 +147,7 @@ static int update_mv(vp9_writer *w, const unsigned int ct[2], vp9_prob *cur_p,
 }
 
 static void write_mv_update(const vp9_tree_index *tree,
-                            vp9_prob probs[/*n - 1*/],
+                            vpx_prob probs[/*n - 1*/],
                             const unsigned int counts[/*n - 1*/],
                             int n, vp9_writer *w) {
   int i;

@@ -28,9 +28,9 @@ extern "C" {
 struct VP9Common;
 
 struct tx_probs {
-  vp9_prob p32x32[TX_SIZE_CONTEXTS][TX_SIZES - 1];
-  vp9_prob p16x16[TX_SIZE_CONTEXTS][TX_SIZES - 2];
-  vp9_prob p8x8[TX_SIZE_CONTEXTS][TX_SIZES - 3];
+  vpx_prob p32x32[TX_SIZE_CONTEXTS][TX_SIZES - 1];
+  vpx_prob p16x16[TX_SIZE_CONTEXTS][TX_SIZES - 2];
+  vpx_prob p8x8[TX_SIZE_CONTEXTS][TX_SIZES - 3];
 };
 
 struct tx_counts {
@@ -41,19 +41,19 @@ struct tx_counts {
 };
 
 typedef struct frame_contexts {
-  vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
-  vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-  vp9_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
+  vpx_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
+  vpx_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
+  vpx_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   vp9_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
-  vp9_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
+  vpx_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
-  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
-  vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
-  vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
-  vp9_prob single_ref_prob[REF_CONTEXTS][2];
-  vp9_prob comp_ref_prob[REF_CONTEXTS];
+  vpx_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
+  vpx_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
+  vpx_prob comp_inter_prob[COMP_INTER_CONTEXTS];
+  vpx_prob single_ref_prob[REF_CONTEXTS][2];
+  vpx_prob comp_ref_prob[REF_CONTEXTS];
   struct tx_probs tx_probs;
-  vp9_prob skip_probs[SKIP_CONTEXTS];
+  vpx_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
   int initialized;
 } FRAME_CONTEXT;
@@ -77,10 +77,10 @@ typedef struct FRAME_COUNTS {
   nmv_context_counts mv;
 } FRAME_COUNTS;
 
-extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-extern const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
+extern const vpx_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
+extern const vpx_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
                                         [INTRA_MODES - 1];
-extern const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
+extern const vpx_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
                                             [PARTITION_TYPES - 1];
 extern const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];

@@ -166,7 +166,7 @@ typedef struct macroblockd {
   int up_available;
   int left_available;
 
-  const vp9_prob (*partition_probs)[PARTITION_TYPES - 1];
+  const vpx_prob (*partition_probs)[PARTITION_TYPES - 1];
 
   /* Distance of MB away from frame edges */
   int mb_to_left_edge;
@@ -262,7 +262,7 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
   }
 }
 
-static INLINE const vp9_prob *get_y_mode_probs(const MODE_INFO *mi,
+static INLINE const vpx_prob *get_y_mode_probs(const MODE_INFO *mi,
                                                const MODE_INFO *above_mi,
                                                const MODE_INFO *left_mi,
                                                int block) {

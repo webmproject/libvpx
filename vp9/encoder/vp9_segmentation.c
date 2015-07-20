@@ -49,7 +49,7 @@ void vp9_clear_segdata(struct segmentation *seg, int segment_id,
 }
 
 // Based on set of segment counts calculate a probability tree
-static void calc_segtree_probs(int *segcounts, vp9_prob *segment_tree_probs) {
+static void calc_segtree_probs(int *segcounts, vpx_prob *segment_tree_probs) {
   // Work out probabilities of each segment
   const int c01 = segcounts[0] + segcounts[1];
   const int c23 = segcounts[2] + segcounts[3];
@@ -66,7 +66,7 @@ static void calc_segtree_probs(int *segcounts, vp9_prob *segment_tree_probs) {
 }
 
 // Based on set of segment counts and probabilities calculate a cost estimate
-static int cost_segmap(int *segcounts, vp9_prob *probs) {
+static int cost_segmap(int *segcounts, vpx_prob *probs) {
   const int c01 = segcounts[0] + segcounts[1];
   const int c23 = segcounts[2] + segcounts[3];
   const int c45 = segcounts[4] + segcounts[5];
@@ -207,9 +207,9 @@ void vp9_choose_segmap_coding_method(VP9_COMMON *cm, MACROBLOCKD *xd) {
   int no_pred_segcounts[MAX_SEGMENTS] = { 0 };
   int t_unpred_seg_counts[MAX_SEGMENTS] = { 0 };
 
-  vp9_prob no_pred_tree[SEG_TREE_PROBS];
-  vp9_prob t_pred_tree[SEG_TREE_PROBS];
-  vp9_prob t_nopred_prob[PREDICTION_PROBS];
+  vpx_prob no_pred_tree[SEG_TREE_PROBS];
+  vpx_prob t_pred_tree[SEG_TREE_PROBS];
+  vpx_prob t_nopred_prob[PREDICTION_PROBS];
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities

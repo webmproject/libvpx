@@ -145,7 +145,7 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
 }
 
 static int parse_bitdepth_colorspace_sampling(
-    BITSTREAM_PROFILE profile, struct vp9_read_bit_buffer *rb) {
+    BITSTREAM_PROFILE profile, struct vpx_read_bit_buffer *rb) {
   vpx_color_space_t color_space;
   if (profile >= PROFILE_2)
     rb->bit_offset += 1;  // Bit-depth 10 or 12.
@@ -191,7 +191,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
   {
     int show_frame;
     int error_resilient;
-    struct vp9_read_bit_buffer rb = { data, data + data_sz, 0, NULL, NULL };
+    struct vpx_read_bit_buffer rb = { data, data + data_sz, 0, NULL, NULL };
     const int frame_marker = vp9_rb_read_literal(&rb, 2);
     const BITSTREAM_PROFILE profile = vp9_read_profile(&rb);
 

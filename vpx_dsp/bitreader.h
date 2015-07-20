@@ -43,19 +43,19 @@ typedef struct {
   vpx_decrypt_cb decrypt_cb;
   void *decrypt_state;
   uint8_t clear_buffer[sizeof(BD_VALUE) + 1];
-} vp9_reader;
+} vpx_reader;
 
-int vp9_reader_init(vp9_reader *r,
+int vpx_reader_init(vpx_reader *r,
                     const uint8_t *buffer,
                     size_t size,
                     vpx_decrypt_cb decrypt_cb,
                     void *decrypt_state);
 
-void vp9_reader_fill(vp9_reader *r);
+void vpx_reader_fill(vpx_reader *r);
 
-const uint8_t *vp9_reader_find_end(vp9_reader *r);
+const uint8_t *vpx_reader_find_end(vpx_reader *r);
 
-static INLINE int vp9_reader_has_error(vp9_reader *r) {
+static INLINE int vpx_reader_has_error(vpx_reader *r) {
   // Check if we have reached the end of the buffer.
   //
   // Variable 'count' stores the number of bits in the 'value' buffer, minus
@@ -73,7 +73,7 @@ static INLINE int vp9_reader_has_error(vp9_reader *r) {
   return r->count > BD_VALUE_SIZE && r->count < LOTS_OF_BITS;
 }
 
-static INLINE int vp9_read(vp9_reader *r, int prob) {
+static INLINE int vpx_read(vpx_reader *r, int prob) {
   unsigned int bit = 0;
   BD_VALUE value;
   BD_VALUE bigsplit;
@@ -82,7 +82,7 @@ static INLINE int vp9_read(vp9_reader *r, int prob) {
   unsigned int split = (r->range * prob + (256 - prob)) >> CHAR_BIT;
 
   if (r->count < 0)
-    vp9_reader_fill(r);
+    vpx_reader_fill(r);
 
   value = r->value;
   count = r->count;
@@ -110,24 +110,24 @@ static INLINE int vp9_read(vp9_reader *r, int prob) {
   return bit;
 }
 
-static INLINE int vp9_read_bit(vp9_reader *r) {
-  return vp9_read(r, 128);  // vp9_prob_half
+static INLINE int vpx_read_bit(vpx_reader *r) {
+  return vpx_read(r, 128);  // vpx_prob_half
 }
 
-static INLINE int vp9_read_literal(vp9_reader *r, int bits) {
+static INLINE int vpx_read_literal(vpx_reader *r, int bits) {
   int literal = 0, bit;
 
   for (bit = bits - 1; bit >= 0; bit--)
-    literal |= vp9_read_bit(r) << bit;
+    literal |= vpx_read_bit(r) << bit;
 
   return literal;
 }
 
-static INLINE int vp9_read_tree(vp9_reader *r, const vp9_tree_index *tree,
-                                const vp9_prob *probs) {
+static INLINE int vpx_read_tree(vpx_reader *r, const vp9_tree_index *tree,
+                                const vpx_prob *probs) {
   vp9_tree_index i = 0;
 
-  while ((i = tree[i + vp9_read(r, probs[i >> 1])]) > 0)
+  while ((i = tree[i + vpx_read(r, probs[i >> 1])]) > 0)
     continue;
 
   return -i;
