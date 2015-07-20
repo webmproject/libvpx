@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_DECODER_VP9_READER_H_
-#define VP9_DECODER_VP9_READER_H_
+#ifndef VPX_DSP_BITREADER_H_
+#define VPX_DSP_BITREADER_H_
 
 #include <stddef.h>
 #include <limits.h>
@@ -18,7 +18,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/vp9_prob.h"
+#include "vpx_dsp/prob.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -137,4 +137,4 @@ static INLINE int vp9_read_tree(vp9_reader *r, const vp9_tree_index *tree,
 }  // extern "C"
 #endif
 
-#endif  // VP9_DECODER_VP9_READER_H_
+#endif  // VPX_DSP_BITREADER_H_

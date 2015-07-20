@@ -13,7 +13,7 @@
 
 #include "vpx_ports/mem.h"
 
-#include "vpx_dsp/vp9_prob.h"
+#include "vpx_dsp/prob.h"
 
 #ifdef __cplusplus
 extern "C" {

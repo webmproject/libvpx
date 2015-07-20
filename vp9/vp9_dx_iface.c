@@ -17,7 +17,7 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
-#include "vpx_dsp/vp9_read_bit_buffer.h"
+#include "vpx_dsp/bitreader_buffer.h"
 #include "vpx_util/vpx_thread.h"
 
 #include "vp9/common/vp9_alloccommon.h"
