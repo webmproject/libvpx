@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2015 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -10,8 +10,9 @@
 
 #include <emmintrin.h>
 
+#include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
-#include "vp9/common/vp9_common.h"
 
 #if CONFIG_VP9_HIGHBITDEPTH
 // from vp9_idct.h: typedef int32_t tran_low_t;
