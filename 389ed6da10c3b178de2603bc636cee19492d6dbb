@@ -16,6 +16,24 @@
       "revId": "389ed6da10c3b178de2603bc636cee19492d6dbb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8884ea6_6247f86f",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 827,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-20T18:01:06Z",
+      "side": 1,
+      "message": "vp9_highbd_fht functions are only optimized for DCT_DCT only. In other cases, it calls back to 1-D case C functions in vp9_fdct.c, where these 1-D functions\u0027 scope should remain inside vp9_fdct.c.\n\nWhen highbd_fht version is added later, the vp9_highbd_fht functions would automatically assume the SIMD version.",
+      "parentUuid": "d81c6a21_1fbf8faa",
+      "revId": "389ed6da10c3b178de2603bc636cee19492d6dbb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
