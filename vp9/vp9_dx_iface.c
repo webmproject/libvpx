@@ -149,7 +149,7 @@ static int parse_bitdepth_colorspace_sampling(
   vpx_color_space_t color_space;
   if (profile >= PROFILE_2)
     rb->bit_offset += 1;  // Bit-depth 10 or 12.
-  color_space = (vpx_color_space_t)vp9_rb_read_literal(rb, 3);
+  color_space = (vpx_color_space_t)vpx_rb_read_literal(rb, 3);
   if (color_space != VPX_CS_SRGB) {
     rb->bit_offset += 1;  // [16,235] (including xvycc) vs [0,255] range.
     if (profile == PROFILE_1 || profile == PROFILE_3) {
@@ -192,7 +192,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
     int show_frame;
     int error_resilient;
     struct vpx_read_bit_buffer rb = { data, data + data_sz, 0, NULL, NULL };
-    const int frame_marker = vp9_rb_read_literal(&rb, 2);
+    const int frame_marker = vpx_rb_read_literal(&rb, 2);
     const BITSTREAM_PROFILE profile = vp9_read_profile(&rb);
 
     if (frame_marker != VP9_FRAME_MARKER)
@@ -204,17 +204,17 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
     if ((profile >= 2 && data_sz <= 1) || data_sz < 1)
       return VPX_CODEC_UNSUP_BITSTREAM;
 
-    if (vp9_rb_read_bit(&rb)) {  // show an existing frame
-      vp9_rb_read_literal(&rb, 3);  // Frame buffer to show.
+    if (vpx_rb_read_bit(&rb)) {  // show an existing frame
+      vpx_rb_read_literal(&rb, 3);  // Frame buffer to show.
       return VPX_CODEC_OK;
     }
 
     if (data_sz <= 8)
       return VPX_CODEC_UNSUP_BITSTREAM;
 
-    si->is_kf = !vp9_rb_read_bit(&rb);
-    show_frame = vp9_rb_read_bit(&rb);
-    error_resilient = vp9_rb_read_bit(&rb);
+    si->is_kf = !vpx_rb_read_bit(&rb);
+    show_frame = vpx_rb_read_bit(&rb);
+    error_resilient = vpx_rb_read_bit(&rb);
 
     if (si->is_kf) {
       if (!vp9_read_sync_code(&rb))
@@ -224,7 +224,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
         return VPX_CODEC_UNSUP_BITSTREAM;
       vp9_read_frame_size(&rb, (int *)&si->w, (int *)&si->h);
     } else {
-      intra_only_flag = show_frame ? 0 : vp9_rb_read_bit(&rb);
+      intra_only_flag = show_frame ? 0 : vpx_rb_read_bit(&rb);
 
       rb.bit_offset += error_resilient ? 0 : 2;  // reset_frame_context
 
