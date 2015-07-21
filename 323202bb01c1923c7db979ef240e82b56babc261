@@ -22,6 +22,30 @@
       "revId": "323202bb01c1923c7db979ef240e82b56babc261",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "185442e3_701a6576",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 15
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-07-21T20:48:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ada13660_7c16790d",
+      "range": {
+        "startLine": 38,
+        "startChar": 29,
+        "endLine": 38,
+        "endChar": 48
+      },
+      "revId": "323202bb01c1923c7db979ef240e82b56babc261",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
