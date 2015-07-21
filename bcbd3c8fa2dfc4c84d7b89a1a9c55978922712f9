@@ -16,6 +16,24 @@
       "revId": "bcbd3c8fa2dfc4c84d7b89a1a9c55978922712f9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d83d4aa0_b7c84a1c",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2_impl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-21T05:02:16Z",
+      "side": 0,
+      "message": "this file only provides a configurable template to generate various versions of 32x32 forward 2D-DCT. The actual function is defined in vp9_dct_sse2.c.\n\nvp9_rtcd.h is not needed by this file.",
+      "parentUuid": "6d11fe41_c04b327c",
+      "revId": "bcbd3c8fa2dfc4c84d7b89a1a9c55978922712f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
