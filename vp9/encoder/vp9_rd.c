@@ -93,7 +93,7 @@ static void fill_token_costs(vp9_coeff_cost *c,
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
-            vp9_prob probs[ENTROPY_NODES];
+            vpx_prob probs[ENTROPY_NODES];
             vp9_model_to_full_probs(p[t][i][j][k][l], probs);
             vp9_cost_tokens((int *)c[t][i][j][k][0][l], probs,
                             vp9_coef_tree);

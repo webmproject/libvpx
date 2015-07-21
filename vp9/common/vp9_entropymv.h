@@ -83,18 +83,18 @@ extern const vp9_tree_index vp9_mv_class0_tree[];
 extern const vp9_tree_index vp9_mv_fp_tree[];
 
 typedef struct {
-  vp9_prob sign;
-  vp9_prob classes[MV_CLASSES - 1];
-  vp9_prob class0[CLASS0_SIZE - 1];
-  vp9_prob bits[MV_OFFSET_BITS];
-  vp9_prob class0_fp[CLASS0_SIZE][MV_FP_SIZE - 1];
-  vp9_prob fp[MV_FP_SIZE - 1];
-  vp9_prob class0_hp;
-  vp9_prob hp;
+  vpx_prob sign;
+  vpx_prob classes[MV_CLASSES - 1];
+  vpx_prob class0[CLASS0_SIZE - 1];
+  vpx_prob bits[MV_OFFSET_BITS];
+  vpx_prob class0_fp[CLASS0_SIZE][MV_FP_SIZE - 1];
+  vpx_prob fp[MV_FP_SIZE - 1];
+  vpx_prob class0_hp;
+  vpx_prob hp;
 } nmv_component;
 
 typedef struct {
-  vp9_prob joints[MV_JOINTS - 1];
+  vpx_prob joints[MV_JOINTS - 1];
   nmv_component comps[2];
 } nmv_context;
 

@@ -35,7 +35,7 @@ typedef struct {
 } TOKENVALUE;
 
 typedef struct {
-  const vp9_prob *context_tree;
+  const vpx_prob *context_tree;
   EXTRABIT extra;
   uint8_t token;
   uint8_t skip_eob_node;

@@ -21,7 +21,7 @@ extern "C" {
 
 typedef void (*vp9_rb_error_handler)(void *data);
 
-struct vp9_read_bit_buffer {
+struct vpx_read_bit_buffer {
   const uint8_t *bit_buffer;
   const uint8_t *bit_buffer_end;
   size_t bit_offset;
@@ -30,13 +30,13 @@ struct vp9_read_bit_buffer {
   vp9_rb_error_handler error_handler;
 };
 
-size_t vp9_rb_bytes_read(struct vp9_read_bit_buffer *rb);
+size_t vp9_rb_bytes_read(struct vpx_read_bit_buffer *rb);
 
-int vp9_rb_read_bit(struct vp9_read_bit_buffer *rb);
+int vp9_rb_read_bit(struct vpx_read_bit_buffer *rb);
 
-int vp9_rb_read_literal(struct vp9_read_bit_buffer *rb, int bits);
+int vp9_rb_read_literal(struct vpx_read_bit_buffer *rb, int bits);
 
-int vp9_rb_read_signed_literal(struct vp9_read_bit_buffer *rb, int bits);
+int vp9_rb_read_signed_literal(struct vpx_read_bit_buffer *rb, int bits);
 
 #ifdef __cplusplus
 }  // extern "C"

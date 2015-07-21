@@ -45,12 +45,12 @@ static const struct vp9_token inter_mode_encodings[INTER_MODES] =
   {{2, 2}, {6, 3}, {0, 1}, {7, 3}};
 
 static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
-                             const vp9_prob *probs) {
+                             const vpx_prob *probs) {
   vp9_write_token(w, vp9_intra_mode_tree, probs, &intra_mode_encodings[mode]);
 }
 
 static void write_inter_mode(vp9_writer *w, PREDICTION_MODE mode,
-                             const vp9_prob *probs) {
+                             const vpx_prob *probs) {
   assert(is_inter_mode(mode));
   vp9_write_token(w, vp9_inter_mode_tree, probs,
                   &inter_mode_encodings[INTER_OFFSET(mode)]);
@@ -62,7 +62,7 @@ static void encode_unsigned_max(struct vp9_write_bit_buffer *wb,
 }
 
 static void prob_diff_update(const vp9_tree_index *tree,
-                             vp9_prob probs[/*n - 1*/],
+                             vpx_prob probs[/*n - 1*/],
                              const unsigned int counts[/*n - 1*/],
                              int n, vp9_writer *w) {
   int i;
@@ -81,7 +81,7 @@ static void write_selected_tx_size(const VP9_COMMON *cm,
   TX_SIZE tx_size = xd->mi[0]->mbmi.tx_size;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-  const vp9_prob *const tx_probs = get_tx_probs2(max_tx_size, xd,
+  const vpx_prob *const tx_probs = get_tx_probs2(max_tx_size, xd,
                                                  &cm->fc->tx_probs);
   vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
   if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
@@ -254,7 +254,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   if (seg->update_map) {
     if (seg->temporal_update) {
       const int pred_flag = mbmi->seg_id_predicted;
-      vp9_prob pred_prob = vp9_get_pred_prob_seg_id(seg, xd);
+      vpx_prob pred_prob = vp9_get_pred_prob_seg_id(seg, xd);
       vp9_write(w, pred_flag, pred_prob);
       if (!pred_flag)
         write_segment_id(w, seg, segment_id);
@@ -290,7 +290,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mode]);
   } else {
     const int mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
-    const vp9_prob *const inter_probs = cm->fc->inter_mode_probs[mode_ctx];
+    const vpx_prob *const inter_probs = cm->fc->inter_mode_probs[mode_ctx];
     write_ref_frames(cm, xd, w);
 
     // If segment skip is not enabled code the mode.
@@ -407,7 +407,7 @@ static void write_partition(const VP9_COMMON *const cm,
                             int hbs, int mi_row, int mi_col,
                             PARTITION_TYPE p, BLOCK_SIZE bsize, vp9_writer *w) {
   const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
-  const vp9_prob *const probs = xd->partition_probs[ctx];
+  const vpx_prob *const probs = xd->partition_probs[ctx];
   const int has_rows = (mi_row + hbs) < cm->mi_rows;
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
@@ -533,7 +533,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                                      vp9_coeff_stats *frame_branch_ct,
                                      vp9_coeff_probs_model *new_coef_probs) {
   vp9_coeff_probs_model *old_coef_probs = cpi->common.fc->coef_probs[tx_size];
-  const vp9_prob upd = DIFF_UPDATE_PROB;
+  const vpx_prob upd = DIFF_UPDATE_PROB;
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
   int i, j, k, l, t;
   int stepsize = cpi->sf.coeff_prob_appx_step;
@@ -548,8 +548,8 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
           for (k = 0; k < COEF_BANDS; ++k) {
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               for (t = 0; t < entropy_nodes_update; ++t) {
-                vp9_prob newp = new_coef_probs[i][j][k][l][t];
-                const vp9_prob oldp = old_coef_probs[i][j][k][l][t];
+                vpx_prob newp = new_coef_probs[i][j][k][l][t];
+                const vpx_prob oldp = old_coef_probs[i][j][k][l][t];
                 int s;
                 int u = 0;
                 if (t == PIVOT_NODE)
@@ -585,9 +585,9 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               // calc probs and branch cts for this frame only
               for (t = 0; t < entropy_nodes_update; ++t) {
-                vp9_prob newp = new_coef_probs[i][j][k][l][t];
-                vp9_prob *oldp = old_coef_probs[i][j][k][l] + t;
-                const vp9_prob upd = DIFF_UPDATE_PROB;
+                vpx_prob newp = new_coef_probs[i][j][k][l][t];
+                vpx_prob *oldp = old_coef_probs[i][j][k][l] + t;
+                const vpx_prob upd = DIFF_UPDATE_PROB;
                 int s;
                 int u = 0;
                 if (t == PIVOT_NODE)
@@ -623,8 +623,8 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               // calc probs and branch cts for this frame only
               for (t = 0; t < entropy_nodes_update; ++t) {
-                vp9_prob newp = new_coef_probs[i][j][k][l][t];
-                vp9_prob *oldp = old_coef_probs[i][j][k][l] + t;
+                vpx_prob newp = new_coef_probs[i][j][k][l][t];
+                vpx_prob *oldp = old_coef_probs[i][j][k][l] + t;
                 int s;
                 int u = 0;
 

@@ -1019,9 +1019,9 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
 static void init_ref_frame_cost(VP9_COMMON *const cm,
                                 MACROBLOCKD *const xd,
                                 int ref_frame_cost[MAX_REF_FRAMES]) {
-  vp9_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
-  vp9_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
-  vp9_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
+  vpx_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
+  vpx_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
+  vpx_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
 
   ref_frame_cost[INTRA_FRAME] = vp9_cost_bit(intra_inter_p, 0);
   ref_frame_cost[LAST_FRAME] = ref_frame_cost[GOLDEN_FRAME] =

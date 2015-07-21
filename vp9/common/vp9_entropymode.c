@@ -13,7 +13,7 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
-const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
+const vpx_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
   {  // above = dc
     { 137,  30,  42, 148, 151, 207,  70,  52,  91 },  // left = dc
     {  92,  45, 102, 136, 116, 180,  74,  90, 100 },  // left = v
@@ -127,7 +127,7 @@ const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
   }
 };
 
-const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1] = {
+const vpx_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1] = {
   { 144,  11,  54, 157, 195, 130,  46,  58, 108 },  // y = dc
   { 118,  15, 123, 148, 131, 101,  44,  93, 131 },  // y = v
   { 113,  12,  23, 188, 226, 142,  26,  32, 125 },  // y = h
@@ -140,14 +140,14 @@ const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1] = {
   { 102,  19,  66, 162, 182, 122,  35,  59, 128 }   // y = tm
 };
 
-static const vp9_prob default_if_y_probs[BLOCK_SIZE_GROUPS][INTRA_MODES - 1] = {
+static const vpx_prob default_if_y_probs[BLOCK_SIZE_GROUPS][INTRA_MODES - 1] = {
   {  65,  32,  18, 144, 162, 194,  41,  51,  98 },  // block_size < 8x8
   { 132,  68,  18, 165, 217, 196,  45,  40,  78 },  // block_size < 16x16
   { 173,  80,  19, 176, 240, 193,  64,  35,  46 },  // block_size < 32x32
   { 221, 135,  38, 194, 248, 121,  96,  85,  29 }   // block_size >= 32x32
 };
 
-static const vp9_prob default_if_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
+static const vpx_prob default_if_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
   { 120,   7,  76, 176, 208, 126,  28,  54, 103 },  // y = dc
   {  48,  12, 154, 155, 139,  90,  34, 117, 119 },  // y = v
   {  67,   6,  25, 204, 243, 158,  13,  21,  96 },  // y = h
@@ -160,7 +160,7 @@ static const vp9_prob default_if_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
   { 101,  21, 107, 181, 192, 103,  19,  67, 125 }   // y = tm
 };
 
-const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
+const vpx_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
                                      [PARTITION_TYPES - 1] = {
   // 8x8 -> 4x4
   { 158,  97,  94 },  // a/l both not split
@@ -184,7 +184,7 @@ const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
   {  12,   3,   3 },  // a/l both split
 };
 
-static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
+static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
                                              [PARTITION_TYPES - 1] = {
   // 8x8 -> 4x4
   { 199, 122, 141 },  // a/l both not split
@@ -208,7 +208,7 @@ static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
   {  10,   7,   6 },  // a/l both split
 };
 
-static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
+static const vpx_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [INTER_MODES - 1] = {
   {2,       173,   34},  // 0 = both zero mv
   {7,       145,   85},  // 1 = one zero mv + one a predicted mv
@@ -244,19 +244,19 @@ const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)] = {
   -PARTITION_VERT, -PARTITION_SPLIT
 };
 
-static const vp9_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
+static const vpx_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
   9, 102, 187, 225
 };
 
-static const vp9_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
+static const vpx_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
   239, 183, 119,  96,  41
 };
 
-static const vp9_prob default_comp_ref_p[REF_CONTEXTS] = {
+static const vpx_prob default_comp_ref_p[REF_CONTEXTS] = {
   50, 126, 123, 221, 226
 };
 
-static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
+static const vpx_prob default_single_ref_p[REF_CONTEXTS][2] = {
   {  33,  16 },
   {  77,  74 },
   { 142, 142 },
@@ -302,11 +302,11 @@ void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
   ct_8x8p[0][1] = tx_count_8x8p[TX_8X8];
 }
 
-static const vp9_prob default_skip_probs[SKIP_CONTEXTS] = {
+static const vpx_prob default_skip_probs[SKIP_CONTEXTS] = {
   192, 128, 64
 };
 
-static const vp9_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
+static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                                     [SWITCHABLE_FILTERS - 1] = {
   { 235, 162, },
   { 36, 255, },

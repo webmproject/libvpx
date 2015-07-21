@@ -79,7 +79,7 @@ static INLINE void vp9_write(vp9_writer *br, int bit, int probability) {
 }
 
 static INLINE void vp9_write_bit(vp9_writer *w, int bit) {
-  vp9_write(w, bit, 128);  // vp9_prob_half
+  vp9_write(w, bit, 128);  // vpx_prob_half
 }
 
 static INLINE void vp9_write_literal(vp9_writer *w, int data, int bits) {

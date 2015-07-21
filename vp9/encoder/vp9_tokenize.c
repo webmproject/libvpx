@@ -457,7 +457,7 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
                    aoff, loff);
 }
 
-static INLINE void add_token(TOKENEXTRA **t, const vp9_prob *context_tree,
+static INLINE void add_token(TOKENEXTRA **t, const vpx_prob *context_tree,
                              int32_t extra, uint8_t token,
                              uint8_t skip_eob_node,
                              unsigned int *counts) {
@@ -470,7 +470,7 @@ static INLINE void add_token(TOKENEXTRA **t, const vp9_prob *context_tree,
 }
 
 static INLINE void add_token_no_extra(TOKENEXTRA **t,
-                                      const vp9_prob *context_tree,
+                                      const vpx_prob *context_tree,
                                       uint8_t token,
                                       uint8_t skip_eob_node,
                                       unsigned int *counts) {
@@ -511,7 +511,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const int ref = is_inter_block(mbmi);
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       td->rd_counts.coef_counts[tx_size][type][ref];
-  vp9_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  vpx_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->common.fc->coef_probs[tx_size][type][ref];
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
       td->counts->eob_branch[tx_size][type][ref];

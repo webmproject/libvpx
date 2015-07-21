@@ -42,8 +42,8 @@ struct segmentation {
   uint8_t abs_delta;
   uint8_t temporal_update;
 
-  vp9_prob tree_probs[SEG_TREE_PROBS];
-  vp9_prob pred_probs[PREDICTION_PROBS];
+  vpx_prob tree_probs[SEG_TREE_PROBS];
+  vpx_prob pred_probs[PREDICTION_PROBS];
 
   int16_t feature_data[MAX_SEGMENTS][SEG_LVL_MAX];
   unsigned int feature_mask[MAX_SEGMENTS];

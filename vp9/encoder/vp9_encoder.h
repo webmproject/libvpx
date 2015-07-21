@@ -55,7 +55,7 @@ typedef struct {
   int nmvcosts[2][MV_VALS];
   int nmvcosts_hp[2][MV_VALS];
 
-  vp9_prob segment_pred_probs[PREDICTION_PROBS];
+  vpx_prob segment_pred_probs[PREDICTION_PROBS];
 
   unsigned char *last_frame_seg_map_copy;
 

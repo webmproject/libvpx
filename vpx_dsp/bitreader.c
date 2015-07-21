@@ -13,7 +13,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
 
-int vp9_reader_init(vp9_reader *r,
+int vpx_reader_init(vpx_reader *r,
                     const uint8_t *buffer,
                     size_t size,
                     vpx_decrypt_cb decrypt_cb,
@@ -28,12 +28,12 @@ int vp9_reader_init(vp9_reader *r,
     r->range = 255;
     r->decrypt_cb = decrypt_cb;
     r->decrypt_state = decrypt_state;
-    vp9_reader_fill(r);
-    return vp9_read_bit(r) != 0;  // marker bit
+    vpx_reader_fill(r);
+    return vpx_read_bit(r) != 0;  // marker bit
   }
 }
 
-void vp9_reader_fill(vp9_reader *r) {
+void vpx_reader_fill(vpx_reader *r) {
   const uint8_t *const buffer_end = r->buffer_end;
   const uint8_t *buffer = r->buffer;
   const uint8_t *buffer_start = buffer;
@@ -73,7 +73,7 @@ void vp9_reader_fill(vp9_reader *r) {
   r->count = count;
 }
 
-const uint8_t *vp9_reader_find_end(vp9_reader *r) {
+const uint8_t *vpx_reader_find_end(vpx_reader *r) {
   // Find the end of the coded buffer
   while (r->count > CHAR_BIT && r->count < BD_VALUE_SIZE) {
     r->count -= CHAR_BIT;

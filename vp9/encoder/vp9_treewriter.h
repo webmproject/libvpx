@@ -29,7 +29,7 @@ struct vp9_token {
 void vp9_tokens_from_tree(struct vp9_token*, const vp9_tree_index *);
 
 static INLINE void vp9_write_tree(vp9_writer *w, const vp9_tree_index *tree,
-                                  const vp9_prob *probs, int bits, int len,
+                                  const vpx_prob *probs, int bits, int len,
                                   vp9_tree_index i) {
   do {
     const int bit = (bits >> --len) & 1;
@@ -39,7 +39,7 @@ static INLINE void vp9_write_tree(vp9_writer *w, const vp9_tree_index *tree,
 }
 
 static INLINE void vp9_write_token(vp9_writer *w, const vp9_tree_index *tree,
-                                   const vp9_prob *probs,
+                                   const vpx_prob *probs,
                                    const struct vp9_token *token) {
   vp9_write_tree(w, tree, probs, token->value, token->len, 0);
 }

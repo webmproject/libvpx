@@ -74,19 +74,19 @@ static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
   return len != 0 && len <= (size_t)(end - start);
 }
 
-static int decode_unsigned_max(struct vp9_read_bit_buffer *rb, int max) {
+static int decode_unsigned_max(struct vpx_read_bit_buffer *rb, int max) {
   const int data = vp9_rb_read_literal(rb, get_unsigned_bits(max));
   return data > max ? max : data;
 }
 
-static TX_MODE read_tx_mode(vp9_reader *r) {
-  TX_MODE tx_mode = vp9_read_literal(r, 2);
+static TX_MODE read_tx_mode(vpx_reader *r) {
+  TX_MODE tx_mode = vpx_read_literal(r, 2);
   if (tx_mode == ALLOW_32X32)
-    tx_mode += vp9_read_bit(r);
+    tx_mode += vpx_read_bit(r);
   return tx_mode;
 }
 
-static void read_tx_mode_probs(struct tx_probs *tx_probs, vp9_reader *r) {
+static void read_tx_mode_probs(struct tx_probs *tx_probs, vpx_reader *r) {
   int i, j;
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
@@ -102,14 +102,14 @@ static void read_tx_mode_probs(struct tx_probs *tx_probs, vp9_reader *r) {
       vp9_diff_update_prob(r, &tx_probs->p32x32[i][j]);
 }
 
-static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
       vp9_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
 }
 
-static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+static void read_inter_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   int i, j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
     for (j = 0; j < INTER_MODES - 1; ++j)
@@ -117,9 +117,9 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
 }
 
 static REFERENCE_MODE read_frame_reference_mode(const VP9_COMMON *cm,
-                                                vp9_reader *r) {
+                                                vpx_reader *r) {
   if (is_compound_reference_allowed(cm)) {
-    return vp9_read_bit(r) ? (vp9_read_bit(r) ? REFERENCE_MODE_SELECT
+    return vpx_read_bit(r) ? (vpx_read_bit(r) ? REFERENCE_MODE_SELECT
                                               : COMPOUND_REFERENCE)
                            : SINGLE_REFERENCE;
   } else {
@@ -127,7 +127,7 @@ static REFERENCE_MODE read_frame_reference_mode(const VP9_COMMON *cm,
   }
 }
 
-static void read_frame_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
+static void read_frame_reference_mode_probs(VP9_COMMON *cm, vpx_reader *r) {
   FRAME_CONTEXT *const fc = cm->fc;
   int i;
 
@@ -146,14 +146,14 @@ static void read_frame_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
       vp9_diff_update_prob(r, &fc->comp_ref_prob[i]);
 }
 
-static void update_mv_probs(vp9_prob *p, int n, vp9_reader *r) {
+static void update_mv_probs(vpx_prob *p, int n, vpx_reader *r) {
   int i;
   for (i = 0; i < n; ++i)
-    if (vp9_read(r, MV_UPDATE_PROB))
-      p[i] = (vp9_read_literal(r, 7) << 1) | 1;
+    if (vpx_read(r, MV_UPDATE_PROB))
+      p[i] = (vpx_read_literal(r, 7) << 1) | 1;
 }
 
-static void read_mv_probs(nmv_context *ctx, int allow_hp, vp9_reader *r) {
+static void read_mv_probs(nmv_context *ctx, int allow_hp, vpx_reader *r) {
   int i, j;
 
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
@@ -362,7 +362,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
 }
 
 static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
-                                                vp9_reader *r,
+                                                vpx_reader *r,
                                                 MB_MODE_INFO *const mbmi,
                                                 int plane,
                                                 int row, int col,
@@ -392,7 +392,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
   }
 }
 
-static int reconstruct_inter_block(MACROBLOCKD *const xd, vp9_reader *r,
+static int reconstruct_inter_block(MACROBLOCKD *const xd, vpx_reader *r,
                                    MB_MODE_INFO *const mbmi, int plane,
                                    int row, int col, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -812,7 +812,7 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
                          int mi_row, int mi_col,
-                         vp9_reader *r, BLOCK_SIZE bsize,
+                         vpx_reader *r, BLOCK_SIZE bsize,
                          int bwl, int bhl) {
   VP9_COMMON *const cm = &pbi->common;
   const int less8x8 = bsize < BLOCK_8X8;
@@ -832,7 +832,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
                          VPX_CODEC_CORRUPT_FRAME, "Invalid block size.");
   }
 
-  vp9_read_mode_info(pbi, xd, mi_row, mi_col, r, x_mis, y_mis);
+  vpx_read_mode_info(pbi, xd, mi_row, mi_col, r, x_mis, y_mis);
 
   if (mbmi->skip) {
     dec_reset_skip_context(xd);
@@ -893,7 +893,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
     }
   }
 
-  xd->corrupted |= vp9_reader_has_error(r);
+  xd->corrupted |= vpx_reader_has_error(r);
 }
 
 static INLINE int dec_partition_plane_context(const MACROBLOCKD *xd,
@@ -923,19 +923,19 @@ static INLINE void dec_update_partition_context(MACROBLOCKD *xd,
 }
 
 static PARTITION_TYPE read_partition(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                     vp9_reader *r,
+                                     vpx_reader *r,
                                      int has_rows, int has_cols, int bsl) {
   const int ctx = dec_partition_plane_context(xd, mi_row, mi_col, bsl);
-  const vp9_prob *const probs = get_partition_probs(xd, ctx);
+  const vpx_prob *const probs = get_partition_probs(xd, ctx);
   FRAME_COUNTS *counts = xd->counts;
   PARTITION_TYPE p;
 
   if (has_rows && has_cols)
-    p = (PARTITION_TYPE)vp9_read_tree(r, vp9_partition_tree, probs);
+    p = (PARTITION_TYPE)vpx_read_tree(r, vp9_partition_tree, probs);
   else if (!has_rows && has_cols)
-    p = vp9_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
+    p = vpx_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
   else if (has_rows && !has_cols)
-    p = vp9_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
+    p = vpx_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
   else
     p = PARTITION_SPLIT;
 
@@ -948,7 +948,7 @@ static PARTITION_TYPE read_partition(MACROBLOCKD *xd, int mi_row, int mi_col,
 // TODO(slavarnway): eliminate bsize and subsize in future commits
 static void decode_partition(VP9Decoder *const pbi, MACROBLOCKD *const xd,
                              int mi_row, int mi_col,
-                             vp9_reader* r, BLOCK_SIZE bsize, int n4x4_l2) {
+                             vpx_reader* r, BLOCK_SIZE bsize, int n4x4_l2) {
   VP9_COMMON *const cm = &pbi->common;
   const int n8x8_l2 = n4x4_l2 - 1;
   const int num_8x8_wh = 1 << n8x8_l2;
@@ -1008,7 +1008,7 @@ static void setup_token_decoder(const uint8_t *data,
                                 const uint8_t *data_end,
                                 size_t read_size,
                                 struct vpx_internal_error_info *error_info,
-                                vp9_reader *r,
+                                vpx_reader *r,
                                 vpx_decrypt_cb decrypt_cb,
                                 void *decrypt_state) {
   // Validate the calculated partition length. If the buffer
@@ -1018,16 +1018,16 @@ static void setup_token_decoder(const uint8_t *data,
     vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt tile length");
 
-  if (vp9_reader_init(r, data, read_size, decrypt_cb, decrypt_state))
+  if (vpx_reader_init(r, data, read_size, decrypt_cb, decrypt_state))
     vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
 
 static void read_coef_probs_common(vp9_coeff_probs_model *coef_probs,
-                                   vp9_reader *r) {
+                                   vpx_reader *r) {
   int i, j, k, l, m;
 
-  if (vp9_read_bit(r))
+  if (vpx_read_bit(r))
     for (i = 0; i < PLANE_TYPES; ++i)
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
@@ -1037,7 +1037,7 @@ static void read_coef_probs_common(vp9_coeff_probs_model *coef_probs,
 }
 
 static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
-                            vp9_reader *r) {
+                            vpx_reader *r) {
     const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
     TX_SIZE tx_size;
     for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
@@ -1045,7 +1045,7 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
 }
 
 static void setup_segmentation(struct segmentation *seg,
-                               struct vp9_read_bit_buffer *rb) {
+                               struct vpx_read_bit_buffer *rb) {
   int i, j;
 
   seg->update_map = 0;
@@ -1097,7 +1097,7 @@ static void setup_segmentation(struct segmentation *seg,
 }
 
 static void setup_loopfilter(struct loopfilter *lf,
-                             struct vp9_read_bit_buffer *rb) {
+                             struct vpx_read_bit_buffer *rb) {
   lf->filter_level = vp9_rb_read_literal(rb, 6);
   lf->sharpness_level = vp9_rb_read_literal(rb, 3);
 
@@ -1122,12 +1122,12 @@ static void setup_loopfilter(struct loopfilter *lf,
   }
 }
 
-static INLINE int read_delta_q(struct vp9_read_bit_buffer *rb) {
+static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
   return vp9_rb_read_bit(rb) ? vp9_rb_read_signed_literal(rb, 4) : 0;
 }
 
 static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                               struct vp9_read_bit_buffer *rb) {
+                               struct vpx_read_bit_buffer *rb) {
   cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
   cm->y_dc_delta_q = read_delta_q(rb);
   cm->uv_dc_delta_q = read_delta_q(rb);
@@ -1170,7 +1170,7 @@ static void setup_segmentation_dequant(VP9_COMMON *const cm) {
   }
 }
 
-static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
+static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
   const INTERP_FILTER literal_to_filter[] = { EIGHTTAP_SMOOTH,
                                               EIGHTTAP,
                                               EIGHTTAP_SHARP,
@@ -1179,7 +1179,7 @@ static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
                              : literal_to_filter[vp9_rb_read_literal(rb, 2)];
 }
 
-static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+static void setup_display_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   cm->display_width = cm->width;
   cm->display_height = cm->height;
   if (vp9_rb_read_bit(rb))
@@ -1226,7 +1226,7 @@ static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
   }
 }
 
-static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   int width, height;
   BufferPool *const pool = cm->buffer_pool;
   vp9_read_frame_size(rb, &width, &height);
@@ -1265,7 +1265,7 @@ static INLINE int valid_ref_frame_img_fmt(vpx_bit_depth_t ref_bit_depth,
 }
 
 static void setup_frame_size_with_refs(VP9_COMMON *cm,
-                                       struct vp9_read_bit_buffer *rb) {
+                                       struct vpx_read_bit_buffer *rb) {
   int width, height;
   int found = 0, i;
   int has_valid_ref_frame = 0;
@@ -1337,7 +1337,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   pool->frame_bufs[cm->new_fb_idx].buf.color_space = cm->color_space;
 }
 
-static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+static void setup_tile_info(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   int min_log2_tile_cols, max_log2_tile_cols, max_ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
@@ -1556,7 +1556,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 
   if (pbi->frame_parallel_decode)
     vp9_frameworker_broadcast(pbi->cur_buf, INT_MAX);
-  return vp9_reader_find_end(&tile_data->bit_reader);
+  return vpx_reader_find_end(&tile_data->bit_reader);
 }
 
 static int tile_worker_hook(TileWorkerData *const tile_data,
@@ -1735,7 +1735,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     if (final_worker > -1) {
       TileWorkerData *const tile_data =
           (TileWorkerData*)pbi->tile_workers[final_worker].data1;
-      bit_reader_end = vp9_reader_find_end(&tile_data->bit_reader);
+      bit_reader_end = vpx_reader_find_end(&tile_data->bit_reader);
       final_worker = -1;
     }
 
@@ -1758,7 +1758,7 @@ static void error_handler(void *data) {
 }
 
 static void read_bitdepth_colorspace_sampling(
-    VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+    VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
     cm->bit_depth = vp9_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1801,7 +1801,7 @@ static void read_bitdepth_colorspace_sampling(
 }
 
 static size_t read_uncompressed_header(VP9Decoder *pbi,
-                                       struct vp9_read_bit_buffer *rb) {
+                                       struct vpx_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
   BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = pool->frame_bufs;
@@ -2007,10 +2007,10 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   FRAME_CONTEXT *const fc = cm->fc;
-  vp9_reader r;
+  vpx_reader r;
   int k;
 
-  if (vp9_reader_init(&r, data, partition_size, pbi->decrypt_cb,
+  if (vpx_reader_init(&r, data, partition_size, pbi->decrypt_cb,
                       pbi->decrypt_state))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
@@ -2051,7 +2051,7 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
   }
 
-  return vp9_reader_has_error(&r);
+  return vpx_reader_has_error(&r);
 }
 
 #ifdef NDEBUG
@@ -2091,9 +2091,9 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
 }
 #endif  // NDEBUG
 
-static struct vp9_read_bit_buffer *init_read_bit_buffer(
+static struct vpx_read_bit_buffer *init_read_bit_buffer(
     VP9Decoder *pbi,
-    struct vp9_read_bit_buffer *rb,
+    struct vpx_read_bit_buffer *rb,
     const uint8_t *data,
     const uint8_t *data_end,
     uint8_t clear_data[MAX_VP9_HEADER_SIZE]) {
@@ -2114,19 +2114,19 @@ static struct vp9_read_bit_buffer *init_read_bit_buffer(
 
 //------------------------------------------------------------------------------
 
-int vp9_read_sync_code(struct vp9_read_bit_buffer *const rb) {
+int vp9_read_sync_code(struct vpx_read_bit_buffer *const rb) {
   return vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_0 &&
          vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_1 &&
          vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
 }
 
-void vp9_read_frame_size(struct vp9_read_bit_buffer *rb,
+void vp9_read_frame_size(struct vpx_read_bit_buffer *rb,
                          int *width, int *height) {
   *width = vp9_rb_read_literal(rb, 16) + 1;
   *height = vp9_rb_read_literal(rb, 16) + 1;
 }
 
-BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb) {
+BITSTREAM_PROFILE vp9_read_profile(struct vpx_read_bit_buffer *rb) {
   int profile = vp9_rb_read_bit(rb);
   profile |= vp9_rb_read_bit(rb) << 1;
   if (profile > 2)
@@ -2139,7 +2139,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
                       const uint8_t **p_data_end) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  struct vp9_read_bit_buffer rb;
+  struct vpx_read_bit_buffer rb;
   int context_updated = 0;
   uint8_t clear_data[MAX_VP9_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,

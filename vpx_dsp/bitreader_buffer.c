@@ -9,11 +9,11 @@
  */
 #include "./bitreader_buffer.h"
 
-size_t vp9_rb_bytes_read(struct vp9_read_bit_buffer *rb) {
+size_t vp9_rb_bytes_read(struct vpx_read_bit_buffer *rb) {
   return (rb->bit_offset + 7) >> 3;
 }
 
-int vp9_rb_read_bit(struct vp9_read_bit_buffer *rb) {
+int vp9_rb_read_bit(struct vpx_read_bit_buffer *rb) {
   const size_t off = rb->bit_offset;
   const size_t p = off >> 3;
   const int q = 7 - (int)(off & 0x7);
@@ -27,14 +27,14 @@ int vp9_rb_read_bit(struct vp9_read_bit_buffer *rb) {
   }
 }
 
-int vp9_rb_read_literal(struct vp9_read_bit_buffer *rb, int bits) {
+int vp9_rb_read_literal(struct vpx_read_bit_buffer *rb, int bits) {
   int value = 0, bit;
   for (bit = bits - 1; bit >= 0; bit--)
     value |= vp9_rb_read_bit(rb) << bit;
   return value;
 }
 
-int vp9_rb_read_signed_literal(struct vp9_read_bit_buffer *rb,
+int vp9_rb_read_signed_literal(struct vpx_read_bit_buffer *rb,
                                int bits) {
   const int value = vp9_rb_read_literal(rb, bits);
   return vp9_rb_read_bit(rb) ? -value : value;
