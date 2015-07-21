@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d11fe41_c04b327c",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2_impl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-21T01:27:15Z",
+      "side": 0,
+      "message": "where in the chain is vp9_rtcd.h being included? it\u0027s best to include what\u0027s needed here to avoid function signatures from falling out of sync",
+      "revId": "bcbd3c8fa2dfc4c84d7b89a1a9c55978922712f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
