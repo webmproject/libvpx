@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "185442e3_6d2a920c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-21T19:54:49Z",
+      "side": 1,
+      "message": "prediction too",
+      "range": {
+        "startLine": 7,
+        "startChar": 33,
+        "endLine": 7,
+        "endChar": 34
+      },
+      "revId": "a0a773f579a04af622c521d28bad571b5cc6f5ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "185442e3_2d232ae3",
         "filename": "test/test.mk",
         "patchSetId": 2
