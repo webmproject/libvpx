@@ -56,9 +56,9 @@ static void write_inter_mode(vpx_writer *w, PREDICTION_MODE mode,
                   &inter_mode_encodings[INTER_OFFSET(mode)]);
 }
 
-static void encode_unsigned_max(struct vp9_write_bit_buffer *wb,
+static void encode_unsigned_max(struct vpx_write_bit_buffer *wb,
                                 int data, int max) {
-  vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
+  vpx_wb_write_literal(wb, data, get_unsigned_bits(max));
 }
 
 static void prob_diff_update(const vpx_tree_index *tree,
@@ -693,75 +693,75 @@ static void update_coef_probs(VP9_COMP *cpi, vpx_writer* w) {
 }
 
 static void encode_loopfilter(struct loopfilter *lf,
-                              struct vp9_write_bit_buffer *wb) {
+                              struct vpx_write_bit_buffer *wb) {
   int i;
 
   // Encode the loop filter level and type
-  vp9_wb_write_literal(wb, lf->filter_level, 6);
-  vp9_wb_write_literal(wb, lf->sharpness_level, 3);
+  vpx_wb_write_literal(wb, lf->filter_level, 6);
+  vpx_wb_write_literal(wb, lf->sharpness_level, 3);
 
   // Write out loop filter deltas applied at the MB level based on mode or
   // ref frame (if they are enabled).
-  vp9_wb_write_bit(wb, lf->mode_ref_delta_enabled);
+  vpx_wb_write_bit(wb, lf->mode_ref_delta_enabled);
 
   if (lf->mode_ref_delta_enabled) {
-    vp9_wb_write_bit(wb, lf->mode_ref_delta_update);
+    vpx_wb_write_bit(wb, lf->mode_ref_delta_update);
     if (lf->mode_ref_delta_update) {
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
         const int delta = lf->ref_deltas[i];
         const int changed = delta != lf->last_ref_deltas[i];
-        vp9_wb_write_bit(wb, changed);
+        vpx_wb_write_bit(wb, changed);
         if (changed) {
           lf->last_ref_deltas[i] = delta;
-          vp9_wb_write_literal(wb, abs(delta) & 0x3F, 6);
-          vp9_wb_write_bit(wb, delta < 0);
+          vpx_wb_write_literal(wb, abs(delta) & 0x3F, 6);
+          vpx_wb_write_bit(wb, delta < 0);
         }
       }
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
         const int delta = lf->mode_deltas[i];
         const int changed = delta != lf->last_mode_deltas[i];
-        vp9_wb_write_bit(wb, changed);
+        vpx_wb_write_bit(wb, changed);
         if (changed) {
           lf->last_mode_deltas[i] = delta;
-          vp9_wb_write_literal(wb, abs(delta) & 0x3F, 6);
-          vp9_wb_write_bit(wb, delta < 0);
+          vpx_wb_write_literal(wb, abs(delta) & 0x3F, 6);
+          vpx_wb_write_bit(wb, delta < 0);
         }
       }
     }
   }
 }
 
-static void write_delta_q(struct vp9_write_bit_buffer *wb, int delta_q) {
+static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
   if (delta_q != 0) {
-    vp9_wb_write_bit(wb, 1);
-    vp9_wb_write_literal(wb, abs(delta_q), 4);
-    vp9_wb_write_bit(wb, delta_q < 0);
+    vpx_wb_write_bit(wb, 1);
+    vpx_wb_write_literal(wb, abs(delta_q), 4);
+    vpx_wb_write_bit(wb, delta_q < 0);
   } else {
-    vp9_wb_write_bit(wb, 0);
+    vpx_wb_write_bit(wb, 0);
   }
 }
 
 static void encode_quantization(const VP9_COMMON *const cm,
-                                struct vp9_write_bit_buffer *wb) {
-  vp9_wb_write_literal(wb, cm->base_qindex, QINDEX_BITS);
+                                struct vpx_write_bit_buffer *wb) {
+  vpx_wb_write_literal(wb, cm->base_qindex, QINDEX_BITS);
   write_delta_q(wb, cm->y_dc_delta_q);
   write_delta_q(wb, cm->uv_dc_delta_q);
   write_delta_q(wb, cm->uv_ac_delta_q);
 }
 
 static void encode_segmentation(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                struct vp9_write_bit_buffer *wb) {
+                                struct vpx_write_bit_buffer *wb) {
   int i, j;
 
   const struct segmentation *seg = &cm->seg;
 
-  vp9_wb_write_bit(wb, seg->enabled);
+  vpx_wb_write_bit(wb, seg->enabled);
   if (!seg->enabled)
     return;
 
   // Segmentation map
-  vp9_wb_write_bit(wb, seg->update_map);
+  vpx_wb_write_bit(wb, seg->update_map);
   if (seg->update_map) {
     // Select the coding strategy (temporal or spatial)
     vp9_choose_segmap_coding_method(cm, xd);
@@ -769,40 +769,40 @@ static void encode_segmentation(VP9_COMMON *cm, MACROBLOCKD *xd,
     for (i = 0; i < SEG_TREE_PROBS; i++) {
       const int prob = seg->tree_probs[i];
       const int update = prob != MAX_PROB;
-      vp9_wb_write_bit(wb, update);
+      vpx_wb_write_bit(wb, update);
       if (update)
-        vp9_wb_write_literal(wb, prob, 8);
+        vpx_wb_write_literal(wb, prob, 8);
     }
 
     // Write out the chosen coding method.
-    vp9_wb_write_bit(wb, seg->temporal_update);
+    vpx_wb_write_bit(wb, seg->temporal_update);
     if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++) {
         const int prob = seg->pred_probs[i];
         const int update = prob != MAX_PROB;
-        vp9_wb_write_bit(wb, update);
+        vpx_wb_write_bit(wb, update);
         if (update)
-          vp9_wb_write_literal(wb, prob, 8);
+          vpx_wb_write_literal(wb, prob, 8);
       }
     }
   }
 
   // Segmentation data
-  vp9_wb_write_bit(wb, seg->update_data);
+  vpx_wb_write_bit(wb, seg->update_data);
   if (seg->update_data) {
-    vp9_wb_write_bit(wb, seg->abs_delta);
+    vpx_wb_write_bit(wb, seg->abs_delta);
 
     for (i = 0; i < MAX_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
         const int active = segfeature_active(seg, i, j);
-        vp9_wb_write_bit(wb, active);
+        vpx_wb_write_bit(wb, active);
         if (active) {
           const int data = get_segdata(seg, i, j);
           const int data_max = vp9_seg_feature_data_max(j);
 
           if (vp9_is_segfeature_signed(j)) {
             encode_unsigned_max(wb, abs(data), data_max);
-            vp9_wb_write_bit(wb, data < 0);
+            vpx_wb_write_bit(wb, data < 0);
           } else {
             encode_unsigned_max(wb, data, data_max);
           }
@@ -850,12 +850,12 @@ static void encode_txfm_probs(VP9_COMMON *cm, vpx_writer *w,
 }
 
 static void write_interp_filter(INTERP_FILTER filter,
-                                struct vp9_write_bit_buffer *wb) {
+                                struct vpx_write_bit_buffer *wb) {
   const int filter_to_literal[] = { 1, 0, 2, 3 };
 
-  vp9_wb_write_bit(wb, filter == SWITCHABLE);
+  vpx_wb_write_bit(wb, filter == SWITCHABLE);
   if (filter != SWITCHABLE)
-    vp9_wb_write_literal(wb, filter_to_literal[filter], 2);
+    vpx_wb_write_literal(wb, filter_to_literal[filter], 2);
 }
 
 static void fix_interp_filter(VP9_COMMON *cm, FRAME_COUNTS *counts) {
@@ -882,22 +882,22 @@ static void fix_interp_filter(VP9_COMMON *cm, FRAME_COUNTS *counts) {
 }
 
 static void write_tile_info(const VP9_COMMON *const cm,
-                            struct vp9_write_bit_buffer *wb) {
+                            struct vpx_write_bit_buffer *wb) {
   int min_log2_tile_cols, max_log2_tile_cols, ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
   // columns
   ones = cm->log2_tile_cols - min_log2_tile_cols;
   while (ones--)
-    vp9_wb_write_bit(wb, 1);
+    vpx_wb_write_bit(wb, 1);
 
   if (cm->log2_tile_cols < max_log2_tile_cols)
-    vp9_wb_write_bit(wb, 0);
+    vpx_wb_write_bit(wb, 0);
 
   // rows
-  vp9_wb_write_bit(wb, cm->log2_tile_rows != 0);
+  vpx_wb_write_bit(wb, cm->log2_tile_rows != 0);
   if (cm->log2_tile_rows != 0)
-    vp9_wb_write_bit(wb, cm->log2_tile_rows != 1);
+    vpx_wb_write_bit(wb, cm->log2_tile_rows != 1);
 }
 
 static int get_refresh_mask(VP9_COMP *cpi) {
@@ -969,26 +969,26 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
 }
 
 static void write_display_size(const VP9_COMMON *cm,
-                               struct vp9_write_bit_buffer *wb) {
+                               struct vpx_write_bit_buffer *wb) {
   const int scaling_active = cm->width != cm->display_width ||
                              cm->height != cm->display_height;
-  vp9_wb_write_bit(wb, scaling_active);
+  vpx_wb_write_bit(wb, scaling_active);
   if (scaling_active) {
-    vp9_wb_write_literal(wb, cm->display_width - 1, 16);
-    vp9_wb_write_literal(wb, cm->display_height - 1, 16);
+    vpx_wb_write_literal(wb, cm->display_width - 1, 16);
+    vpx_wb_write_literal(wb, cm->display_height - 1, 16);
   }
 }
 
 static void write_frame_size(const VP9_COMMON *cm,
-                             struct vp9_write_bit_buffer *wb) {
-  vp9_wb_write_literal(wb, cm->width - 1, 16);
-  vp9_wb_write_literal(wb, cm->height - 1, 16);
+                             struct vpx_write_bit_buffer *wb) {
+  vpx_wb_write_literal(wb, cm->width - 1, 16);
+  vpx_wb_write_literal(wb, cm->height - 1, 16);
 
   write_display_size(cm, wb);
 }
 
 static void write_frame_size_with_refs(VP9_COMP *cpi,
-                                       struct vp9_write_bit_buffer *wb) {
+                                       struct vpx_write_bit_buffer *wb) {
   VP9_COMMON *const cm = &cpi->common;
   int found = 0;
 
@@ -1011,40 +1011,40 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
       found = cm->width == cfg->y_crop_width &&
               cm->height == cfg->y_crop_height;
     }
-    vp9_wb_write_bit(wb, found);
+    vpx_wb_write_bit(wb, found);
     if (found) {
       break;
     }
   }
 
   if (!found) {
-    vp9_wb_write_literal(wb, cm->width - 1, 16);
-    vp9_wb_write_literal(wb, cm->height - 1, 16);
+    vpx_wb_write_literal(wb, cm->width - 1, 16);
+    vpx_wb_write_literal(wb, cm->height - 1, 16);
   }
 
   write_display_size(cm, wb);
 }
 
-static void write_sync_code(struct vp9_write_bit_buffer *wb) {
-  vp9_wb_write_literal(wb, VP9_SYNC_CODE_0, 8);
-  vp9_wb_write_literal(wb, VP9_SYNC_CODE_1, 8);
-  vp9_wb_write_literal(wb, VP9_SYNC_CODE_2, 8);
+static void write_sync_code(struct vpx_write_bit_buffer *wb) {
+  vpx_wb_write_literal(wb, VP9_SYNC_CODE_0, 8);
+  vpx_wb_write_literal(wb, VP9_SYNC_CODE_1, 8);
+  vpx_wb_write_literal(wb, VP9_SYNC_CODE_2, 8);
 }
 
 static void write_profile(BITSTREAM_PROFILE profile,
-                          struct vp9_write_bit_buffer *wb) {
+                          struct vpx_write_bit_buffer *wb) {
   switch (profile) {
     case PROFILE_0:
-      vp9_wb_write_literal(wb, 0, 2);
+      vpx_wb_write_literal(wb, 0, 2);
       break;
     case PROFILE_1:
-      vp9_wb_write_literal(wb, 2, 2);
+      vpx_wb_write_literal(wb, 2, 2);
       break;
     case PROFILE_2:
-      vp9_wb_write_literal(wb, 1, 2);
+      vpx_wb_write_literal(wb, 1, 2);
       break;
     case PROFILE_3:
-      vp9_wb_write_literal(wb, 6, 3);
+      vpx_wb_write_literal(wb, 6, 3);
       break;
     default:
       assert(0);
@@ -1052,41 +1052,41 @@ static void write_profile(BITSTREAM_PROFILE profile,
 }
 
 static void write_bitdepth_colorspace_sampling(
-    VP9_COMMON *const cm, struct vp9_write_bit_buffer *wb) {
+    VP9_COMMON *const cm, struct vpx_write_bit_buffer *wb) {
   if (cm->profile >= PROFILE_2) {
     assert(cm->bit_depth > VPX_BITS_8);
-    vp9_wb_write_bit(wb, cm->bit_depth == VPX_BITS_10 ? 0 : 1);
+    vpx_wb_write_bit(wb, cm->bit_depth == VPX_BITS_10 ? 0 : 1);
   }
-  vp9_wb_write_literal(wb, cm->color_space, 3);
+  vpx_wb_write_literal(wb, cm->color_space, 3);
   if (cm->color_space != VPX_CS_SRGB) {
-    vp9_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
+    vpx_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
     if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
       assert(cm->subsampling_x != 1 || cm->subsampling_y != 1);
-      vp9_wb_write_bit(wb, cm->subsampling_x);
-      vp9_wb_write_bit(wb, cm->subsampling_y);
-      vp9_wb_write_bit(wb, 0);  // unused
+      vpx_wb_write_bit(wb, cm->subsampling_x);
+      vpx_wb_write_bit(wb, cm->subsampling_y);
+      vpx_wb_write_bit(wb, 0);  // unused
     } else {
       assert(cm->subsampling_x == 1 && cm->subsampling_y == 1);
     }
   } else {
     assert(cm->profile == PROFILE_1 || cm->profile == PROFILE_3);
-    vp9_wb_write_bit(wb, 0);  // unused
+    vpx_wb_write_bit(wb, 0);  // unused
   }
 }
 
 static void write_uncompressed_header(VP9_COMP *cpi,
-                                      struct vp9_write_bit_buffer *wb) {
+                                      struct vpx_write_bit_buffer *wb) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
-  vp9_wb_write_literal(wb, VP9_FRAME_MARKER, 2);
+  vpx_wb_write_literal(wb, VP9_FRAME_MARKER, 2);
 
   write_profile(cm->profile, wb);
 
-  vp9_wb_write_bit(wb, 0);  // show_existing_frame
-  vp9_wb_write_bit(wb, cm->frame_type);
-  vp9_wb_write_bit(wb, cm->show_frame);
-  vp9_wb_write_bit(wb, cm->error_resilient_mode);
+  vpx_wb_write_bit(wb, 0);  // show_existing_frame
+  vpx_wb_write_bit(wb, cm->frame_type);
+  vpx_wb_write_bit(wb, cm->show_frame);
+  vpx_wb_write_bit(wb, cm->error_resilient_mode);
 
   if (cm->frame_type == KEY_FRAME) {
     write_sync_code(wb);
@@ -1102,10 +1102,10 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     // show_existing_frame flag which tells the decoder which frame we want to
     // show.
     if (!cm->show_frame)
-      vp9_wb_write_bit(wb, cm->intra_only);
+      vpx_wb_write_bit(wb, cm->intra_only);
 
     if (!cm->error_resilient_mode)
-      vp9_wb_write_literal(wb, cm->reset_frame_context, 2);
+      vpx_wb_write_literal(wb, cm->reset_frame_context, 2);
 
     if (cm->intra_only) {
       write_sync_code(wb);
@@ -1115,21 +1115,21 @@ static void write_uncompressed_header(VP9_COMP *cpi,
         write_bitdepth_colorspace_sampling(cm, wb);
       }
 
-      vp9_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
+      vpx_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
       write_frame_size(cm, wb);
     } else {
       MV_REFERENCE_FRAME ref_frame;
-      vp9_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
+      vpx_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
       for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
         assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
-        vp9_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),
+        vpx_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),
                              REF_FRAMES_LOG2);
-        vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
+        vpx_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
       }
 
       write_frame_size_with_refs(cpi, wb);
 
-      vp9_wb_write_bit(wb, cm->allow_high_precision_mv);
+      vpx_wb_write_bit(wb, cm->allow_high_precision_mv);
 
       fix_interp_filter(cm, cpi->td.counts);
       write_interp_filter(cm->interp_filter, wb);
@@ -1137,11 +1137,11 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   }
 
   if (!cm->error_resilient_mode) {
-    vp9_wb_write_bit(wb, cm->refresh_frame_context);
-    vp9_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
+    vpx_wb_write_bit(wb, cm->refresh_frame_context);
+    vpx_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
   }
 
-  vp9_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);
+  vpx_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);
 
   encode_loopfilter(&cm->lf, wb);
   encode_quantization(cm, wb);
@@ -1230,14 +1230,14 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   uint8_t *data = dest;
   size_t first_part_size, uncompressed_hdr_size;
-  struct vp9_write_bit_buffer wb = {data, 0};
-  struct vp9_write_bit_buffer saved_wb;
+  struct vpx_write_bit_buffer wb = {data, 0};
+  struct vpx_write_bit_buffer saved_wb;
 
   write_uncompressed_header(cpi, &wb);
   saved_wb = wb;
-  vp9_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
+  vpx_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
 
-  uncompressed_hdr_size = vp9_wb_bytes_written(&wb);
+  uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
   data += uncompressed_hdr_size;
 
   vp9_clear_system_state();
@@ -1245,7 +1245,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   first_part_size = write_compressed_header(cpi, data);
   data += first_part_size;
   // TODO(jbb): Figure out what to do if first_part_size > 16 bits.
-  vp9_wb_write_literal(&saved_wb, (int)first_part_size, 16);
+  vpx_wb_write_literal(&saved_wb, (int)first_part_size, 16);
 
   data += encode_tiles(cpi, data);
 
