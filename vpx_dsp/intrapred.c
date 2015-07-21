@@ -247,7 +247,7 @@ static INLINE void dc_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-void vp9_d207_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+void vpx_d207_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   const int I = left[0];
   const int J = left[1];
@@ -264,7 +264,7 @@ void vp9_d207_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
       DST(0, 3) = DST(1, 3) = DST(2, 3) = DST(3, 3) = L;
 }
 
-void vp9_d63_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+void vpx_d63_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                              const uint8_t *above, const uint8_t *left) {
   const int A = above[0];
   const int B = above[1];
@@ -287,7 +287,7 @@ void vp9_d63_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
               DST(3, 3) = AVG3(E, F, G);  // differs from vp8
 }
 
-void vp9_d45_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+void vpx_d45_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                              const uint8_t *above, const uint8_t *left) {
   const int A = above[0];
   const int B = above[1];
@@ -308,7 +308,7 @@ void vp9_d45_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                                       DST(3, 3) = H;  // differs from vp8
 }
 
-void vp9_d117_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+void vpx_d117_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   const int I = left[0];
   const int J = left[1];
@@ -331,7 +331,7 @@ void vp9_d117_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
   DST(3, 1) =             AVG3(B, C, D);
 }
 
-void vp9_d135_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+void vpx_d135_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   const int I = left[0];
   const int J = left[1];
@@ -352,7 +352,7 @@ void vp9_d135_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                                       DST(3, 0) = AVG3(D, C, B);
 }
 
-void vp9_d153_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+void vpx_d153_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   const int I = left[0];
   const int J = left[1];
@@ -629,7 +629,7 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 // can be unified and accessed as a pointer array. Note that the boundary
 // above and left are not necessarily used all the time.
 #define intra_pred_sized(type, size) \
-  void vp9_##type##_predictor_##size##x##size##_c(uint8_t *dst, \
+  void vpx_##type##_predictor_##size##x##size##_c(uint8_t *dst, \
                                                   ptrdiff_t stride, \
                                                   const uint8_t *above, \
                                                   const uint8_t *left) { \
@@ -638,7 +638,7 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 #define intra_pred_highbd_sized(type, size) \
-  void vp9_highbd_##type##_predictor_##size##x##size##_c( \
+  void vpx_highbd_##type##_predictor_##size##x##size##_c( \
       uint16_t *dst, ptrdiff_t stride, const uint16_t *above, \
       const uint16_t *left, int bd) { \
     highbd_##type##_predictor(dst, stride, size, above, left, bd); \

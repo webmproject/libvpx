@@ -66,10 +66,10 @@ static intra_high_pred_fn dc_pred_high[2][2][4];
 
 static void vp9_init_intra_predictors_internal(void) {
 #define INIT_ALL_SIZES(p, type) \
-  p[TX_4X4] = vp9_##type##_predictor_4x4; \
-  p[TX_8X8] = vp9_##type##_predictor_8x8; \
-  p[TX_16X16] = vp9_##type##_predictor_16x16; \
-  p[TX_32X32] = vp9_##type##_predictor_32x32
+  p[TX_4X4] = vpx_##type##_predictor_4x4; \
+  p[TX_8X8] = vpx_##type##_predictor_8x8; \
+  p[TX_16X16] = vpx_##type##_predictor_16x16; \
+  p[TX_32X32] = vpx_##type##_predictor_32x32
 
   INIT_ALL_SIZES(pred[V_PRED], v);
   INIT_ALL_SIZES(pred[H_PRED], h);

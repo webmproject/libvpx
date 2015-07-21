@@ -164,8 +164,8 @@ endif # VP9
 
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += sad_test.cc
 
-TEST_INTRA_PRED_SPEED_SRCS-$(CONFIG_VP9_DECODER) := test_intra_pred_speed.cc
-TEST_INTRA_PRED_SPEED_SRCS-$(CONFIG_VP9_DECODER) += ../md5_utils.h ../md5_utils.c
+TEST_INTRA_PRED_SPEED_SRCS-$(CONFIG_VP9) := test_intra_pred_speed.cc
+TEST_INTRA_PRED_SPEED_SRCS-$(CONFIG_VP9) += ../md5_utils.h ../md5_utils.c
 
 endif # CONFIG_SHARED
 
