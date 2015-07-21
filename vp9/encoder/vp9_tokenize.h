@@ -41,8 +41,8 @@ typedef struct {
   uint8_t skip_eob_node;
 } TOKENEXTRA;
 
-extern const vp9_tree_index vp9_coef_tree[];
-extern const vp9_tree_index vp9_coef_con_tree[];
+extern const vpx_tree_index vp9_coef_tree[];
+extern const vpx_tree_index vp9_coef_con_tree[];
 extern const struct vp9_token vp9_coef_encodings[];
 
 int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
