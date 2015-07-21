@@ -1994,5 +1994,47 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(5, 6, subpel_variance32x64_msa, 0),
                       make_tuple(6, 5, subpel_variance64x32_msa, 0),
                       make_tuple(6, 6, subpel_variance64x64_msa, 0)));
+
+const SubpixAvgVarMxNFunc subpel_avg_variance64x64_msa =
+    vpx_sub_pixel_avg_variance64x64_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance64x32_msa =
+    vpx_sub_pixel_avg_variance64x32_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance32x64_msa =
+    vpx_sub_pixel_avg_variance32x64_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance32x32_msa =
+    vpx_sub_pixel_avg_variance32x32_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance32x16_msa =
+    vpx_sub_pixel_avg_variance32x16_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance16x32_msa =
+    vpx_sub_pixel_avg_variance16x32_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance16x16_msa =
+    vpx_sub_pixel_avg_variance16x16_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance16x8_msa =
+    vpx_sub_pixel_avg_variance16x8_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance8x16_msa =
+    vpx_sub_pixel_avg_variance8x16_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance8x8_msa =
+    vpx_sub_pixel_avg_variance8x8_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance8x4_msa =
+    vpx_sub_pixel_avg_variance8x4_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance4x8_msa =
+    vpx_sub_pixel_avg_variance4x8_msa;
+const SubpixAvgVarMxNFunc subpel_avg_variance4x4_msa =
+    vpx_sub_pixel_avg_variance4x4_msa;
+INSTANTIATE_TEST_CASE_P(
+    MSA, VpxSubpelAvgVarianceTest,
+    ::testing::Values(make_tuple(6, 6, subpel_avg_variance64x64_msa, 0),
+                      make_tuple(6, 5, subpel_avg_variance64x32_msa, 0),
+                      make_tuple(5, 6, subpel_avg_variance32x64_msa, 0),
+                      make_tuple(5, 5, subpel_avg_variance32x32_msa, 0),
+                      make_tuple(5, 4, subpel_avg_variance32x16_msa, 0),
+                      make_tuple(4, 5, subpel_avg_variance16x32_msa, 0),
+                      make_tuple(4, 4, subpel_avg_variance16x16_msa, 0),
+                      make_tuple(4, 3, subpel_avg_variance16x8_msa, 0),
+                      make_tuple(3, 4, subpel_avg_variance8x16_msa, 0),
+                      make_tuple(3, 3, subpel_avg_variance8x8_msa, 0),
+                      make_tuple(3, 2, subpel_avg_variance8x4_msa, 0),
+                      make_tuple(2, 3, subpel_avg_variance4x8_msa, 0),
+                      make_tuple(2, 2, subpel_avg_variance4x4_msa, 0)));
 #endif  // HAVE_MSA
 }  // namespace
