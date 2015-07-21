@@ -829,20 +829,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_fdct4x4_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct4x4_1 sse2/;
 
-  add_proto qw/void vp9_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct4x4 sse2/;
-
   add_proto qw/void vp9_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct8x8_1 sse2/;
 
-  add_proto qw/void vp9_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct8x8 sse2/;
-
   add_proto qw/void vp9_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct16x16_1 sse2/;
-
-  add_proto qw/void vp9_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct16x16 sse2/;
 
   add_proto qw/void vp9_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct32x32_1 sse2/;
@@ -868,20 +859,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_fdct4x4_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct4x4_1 sse2/;
 
-  add_proto qw/void vp9_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct4x4 sse2 msa/;
-
   add_proto qw/void vp9_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct8x8_1 sse2 neon msa/;
 
-  add_proto qw/void vp9_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct8x8 sse2 neon msa/, "$ssse3_x86_64_x86inc";
-
   add_proto qw/void vp9_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct16x16_1 sse2 msa/;
-
-  add_proto qw/void vp9_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct16x16 sse2 msa/;
 
   add_proto qw/void vp9_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct32x32_1 sse2 msa/;
@@ -944,20 +926,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_highbd_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fwht4x4/;
 
-  add_proto qw/void vp9_highbd_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct4x4 sse2/;
-
   add_proto qw/void vp9_highbd_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct8x8_1/;
 
-  add_proto qw/void vp9_highbd_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct8x8 sse2/;
-
   add_proto qw/void vp9_highbd_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct16x16_1/;
-
-  add_proto qw/void vp9_highbd_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct16x16 sse2/;
 
   add_proto qw/void vp9_highbd_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct32x32_1/;
