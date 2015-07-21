@@ -29,7 +29,7 @@ void vp9_entropy_mv_init(void) {
   vp9_tokens_from_tree(mv_fp_encodings, vp9_mv_fp_tree);
 }
 
-static void encode_mv_component(vp9_writer* w, int comp,
+static void encode_mv_component(vpx_writer* w, int comp,
                                 const nmv_component* mvcomp, int usehp) {
   int offset;
   const int sign = comp < 0;
@@ -42,7 +42,7 @@ static void encode_mv_component(vp9_writer* w, int comp,
   assert(comp != 0);
 
   // Sign
-  vp9_write(w, sign, mvcomp->sign);
+  vpx_write(w, sign, mvcomp->sign);
 
   // Class
   vp9_write_token(w, vp9_mv_class_tree, mvcomp->classes,
@@ -56,7 +56,7 @@ static void encode_mv_component(vp9_writer* w, int comp,
     int i;
     const int n = mv_class + CLASS0_BITS - 1;  // number of bits
     for (i = 0; i < n; ++i)
-      vp9_write(w, (d >> i) & 1, mvcomp->bits[i]);
+      vpx_write(w, (d >> i) & 1, mvcomp->bits[i]);
   }
 
   // Fractional bits
@@ -66,7 +66,7 @@ static void encode_mv_component(vp9_writer* w, int comp,
 
   // High precision bit
   if (usehp)
-    vp9_write(w, hp,
+    vpx_write(w, hp,
               mv_class == MV_CLASS_0 ? mvcomp->class0_hp : mvcomp->hp);
 }
 
@@ -133,15 +133,15 @@ static void build_nmv_component_cost_table(int *mvcost,
   }
 }
 
-static int update_mv(vp9_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
+static int update_mv(vpx_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
                      vpx_prob upd_p) {
   const vpx_prob new_p = get_binary_prob(ct[0], ct[1]) | 1;
   const int update = cost_branch256(ct, *cur_p) + vp9_cost_zero(upd_p) >
                      cost_branch256(ct, new_p) + vp9_cost_one(upd_p) + 7 * 256;
-  vp9_write(w, update, upd_p);
+  vpx_write(w, update, upd_p);
   if (update) {
     *cur_p = new_p;
-    vp9_write_literal(w, new_p >> 1, 7);
+    vpx_write_literal(w, new_p >> 1, 7);
   }
   return update;
 }
@@ -149,7 +149,7 @@ static int update_mv(vp9_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
 static void write_mv_update(const vpx_tree_index *tree,
                             vpx_prob probs[/*n - 1*/],
                             const unsigned int counts[/*n - 1*/],
-                            int n, vp9_writer *w) {
+                            int n, vpx_writer *w) {
   int i;
   unsigned int branch_ct[32][2];
 
@@ -161,7 +161,7 @@ static void write_mv_update(const vpx_tree_index *tree,
     update_mv(w, branch_ct[i], &probs[i], MV_UPDATE_PROB);
 }
 
-void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w,
+void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vpx_writer *w,
                          nmv_context_counts *const counts) {
   int i, j;
   nmv_context *const mvc = &cm->fc->nmvc;
@@ -199,7 +199,7 @@ void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w,
   }
 }
 
-void vp9_encode_mv(VP9_COMP* cpi, vp9_writer* w,
+void vp9_encode_mv(VP9_COMP* cpi, vpx_writer* w,
                    const MV* mv, const MV* ref,
                    const nmv_context* mvctx, int usehp) {
   const MV diff = {mv->row - ref->row,

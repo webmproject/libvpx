@@ -19,18 +19,18 @@
 extern "C" {
 #endif
 
-typedef struct vp9_writer {
+typedef struct vpx_writer {
   unsigned int lowvalue;
   unsigned int range;
   int count;
   unsigned int pos;
   uint8_t *buffer;
-} vp9_writer;
+} vpx_writer;
 
-void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
-void vp9_stop_encode(vp9_writer *bc);
+void vpx_start_encode(vpx_writer *bc, uint8_t *buffer);
+void vpx_stop_encode(vpx_writer *bc);
 
-static INLINE void vp9_write(vp9_writer *br, int bit, int probability) {
+static INLINE void vpx_write(vpx_writer *br, int bit, int probability) {
   unsigned int split;
   int count = br->count;
   unsigned int range = br->range;
@@ -78,18 +78,18 @@ static INLINE void vp9_write(vp9_writer *br, int bit, int probability) {
   br->range = range;
 }
 
-static INLINE void vp9_write_bit(vp9_writer *w, int bit) {
-  vp9_write(w, bit, 128);  // vpx_prob_half
+static INLINE void vpx_write_bit(vpx_writer *w, int bit) {
+  vpx_write(w, bit, 128);  // vpx_prob_half
 }
 
-static INLINE void vp9_write_literal(vp9_writer *w, int data, int bits) {
+static INLINE void vpx_write_literal(vpx_writer *w, int data, int bits) {
   int bit;
 
   for (bit = bits - 1; bit >= 0; bit--)
-    vp9_write_bit(w, 1 & (data >> bit));
+    vpx_write_bit(w, 1 & (data >> bit));
 }
 
-#define vp9_write_prob(w, v) vp9_write_literal((w), (v), 8)
+#define vpx_write_prob(w, v) vpx_write_literal((w), (v), 8)
 
 #ifdef __cplusplus
 }  // extern "C"
