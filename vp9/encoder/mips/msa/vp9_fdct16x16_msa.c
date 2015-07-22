@@ -37,8 +37,8 @@ static void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
   SLLI_4V(in12, in13, in14, in15, 2);
   ADD4(in0, in15, in1, in14, in2, in13, in3, in12, tmp0, tmp1, tmp2, tmp3);
   ADD4(in4, in11, in5, in10, in6, in9, in7, in8, tmp4, tmp5, tmp6, tmp7);
-  VP9_FDCT8x16_EVEN(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7,
-                    tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
+  FDCT8x16_EVEN(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7,
+                tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
   ST_SH8(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp_ptr, 32);
   SUB4(in0, in15, in1, in14, in2, in13, in3, in12, in15, in14, in13, in12);
   SUB4(in4, in11, in5, in10, in6, in9, in7, in8, in11, in10, in9, in8);
@@ -50,13 +50,13 @@ static void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
   ILVR_H2_SH(in10, in13, in11, in12, vec3, vec5);
 
   cnst4 = __msa_splati_h(coeff, 0);
-  stp25 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst4);
+  stp25 = DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst4);
 
   cnst5 = __msa_splati_h(coeff, 1);
   cnst5 = __msa_ilvev_h(cnst5, cnst4);
-  stp22 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst5);
-  stp24 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst4);
-  stp23 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst5);
+  stp22 = DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst5);
+  stp24 = DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst4);
+  stp23 = DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst5);
 
   /* stp2 */
   BUTTERFLY_4(in8, in9, stp22, stp23, stp30, stp31, stp32, stp33);
@@ -65,45 +65,45 @@ static void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
   ILVR_H2_SH(stp36, stp31, stp35, stp32, vec3, vec5);
   SPLATI_H2_SH(coeff, 2, 3, cnst0, cnst1);
   cnst0 = __msa_ilvev_h(cnst0, cnst1);
-  stp26 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst0);
+  stp26 = DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst0);
 
   cnst0 = __msa_splati_h(coeff, 4);
   cnst1 = __msa_ilvev_h(cnst1, cnst0);
-  stp21 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst1);
+  stp21 = DOT_SHIFT_RIGHT_PCK_H(vec2, vec3, cnst1);
 
   BUTTERFLY_4(stp30, stp37, stp26, stp21, in8, in15, in14, in9);
   ILVRL_H2_SH(in15, in8, vec1, vec0);
   SPLATI_H2_SH(coeff1, 0, 1, cnst0, cnst1);
   cnst0 = __msa_ilvev_h(cnst0, cnst1);
 
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
   ST_SH(in8, tmp_ptr);
 
   cnst0 = __msa_splati_h(coeff2, 0);
   cnst0 = __msa_ilvev_h(cnst1, cnst0);
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
   ST_SH(in8, tmp_ptr + 224);
 
   ILVRL_H2_SH(in14, in9, vec1, vec0);
   SPLATI_H2_SH(coeff1, 2, 3, cnst0, cnst1);
   cnst1 = __msa_ilvev_h(cnst1, cnst0);
 
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst1);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst1);
   ST_SH(in8, tmp_ptr + 128);
 
   cnst1 = __msa_splati_h(coeff2, 2);
   cnst0 = __msa_ilvev_h(cnst0, cnst1);
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
   ST_SH(in8, tmp_ptr + 96);
 
   SPLATI_H2_SH(coeff, 2, 5, cnst0, cnst1);
   cnst1 = __msa_ilvev_h(cnst1, cnst0);
 
-  stp25 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst1);
+  stp25 = DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst1);
 
   cnst1 = __msa_splati_h(coeff, 3);
   cnst1 = __msa_ilvev_h(cnst0, cnst1);
-  stp22 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst1);
+  stp22 = DOT_SHIFT_RIGHT_PCK_H(vec4, vec5, cnst1);
 
   /* stp4 */
   ADD2(stp34, stp25, stp33, stp22, in13, in10);
@@ -111,12 +111,12 @@ static void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
   ILVRL_H2_SH(in13, in10, vec1, vec0);
   SPLATI_H2_SH(coeff1, 4, 5, cnst0, cnst1);
   cnst0 = __msa_ilvev_h(cnst0, cnst1);
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
   ST_SH(in8, tmp_ptr + 64);
 
   cnst0 = __msa_splati_h(coeff2, 1);
   cnst0 = __msa_ilvev_h(cnst1, cnst0);
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
   ST_SH(in8, tmp_ptr + 160);
 
   SUB2(stp34, stp25, stp33, stp22, in12, in11);
@@ -124,12 +124,12 @@ static void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
   SPLATI_H2_SH(coeff1, 6, 7, cnst0, cnst1);
   cnst1 = __msa_ilvev_h(cnst1, cnst0);
 
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst1);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst1);
   ST_SH(in8, tmp_ptr + 192);
 
   cnst1 = __msa_splati_h(coeff2, 3);
   cnst0 = __msa_ilvev_h(cnst0, cnst1);
-  in8 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
+  in8 = DOT_SHIFT_RIGHT_PCK_H(vec0, vec1, cnst0);
   ST_SH(in8, tmp_ptr + 32);
 }
 
@@ -156,11 +156,11 @@ static void fdct16x8_1d_row(int16_t *input, int16_t *output) {
                in12, in13, in14, in15, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5,
                tmp6, tmp7, in8, in9, in10, in11, in12, in13, in14, in15);
   ST_SH8(in8, in9, in10, in11, in12, in13, in14, in15, input, 16);
-  VP9_FDCT8x16_EVEN(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7,
-                    tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
+  FDCT8x16_EVEN(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7,
+                tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
   LD_SH8(input, 16, in8, in9, in10, in11, in12, in13, in14, in15);
-  VP9_FDCT8x16_ODD(in8, in9, in10, in11, in12, in13, in14, in15,
-                   in0, in1, in2, in3, in4, in5, in6, in7);
+  FDCT8x16_ODD(in8, in9, in10, in11, in12, in13, in14, in15,
+               in0, in1, in2, in3, in4, in5, in6, in7);
   TRANSPOSE8x8_SH_SH(tmp0, in0, tmp1, in1, tmp2, in2, tmp3, in3,
                      tmp0, in0, tmp1, in1, tmp2, in2, tmp3, in3);
   ST_SH8(tmp0, in0, tmp1, in1, tmp2, in2, tmp3, in3, output, 16);
@@ -188,10 +188,10 @@ void vp9_fdct16x16_msa(const int16_t *input, int16_t *output,
 void vp9_fdct16x16_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
   out[1] = 0;
 
-  out[0] = VP9_LD_HADD(input, stride);
-  out[0] += VP9_LD_HADD(input + 8, stride);
-  out[0] += VP9_LD_HADD(input + 16 * 8, stride);
-  out[0] += VP9_LD_HADD(input + 16 * 8 + 8, stride);
+  out[0] = LD_HADD(input, stride);
+  out[0] += LD_HADD(input + 8, stride);
+  out[0] += LD_HADD(input + 16 * 8, stride);
+  out[0] += LD_HADD(input + 16 * 8 + 8, stride);
   out[0] >>= 1;
 }
 
@@ -211,7 +211,7 @@ static void fadst16_cols_step1_msa(const int16_t *input, int32_t stride,
   /* stage 1 */
   LD_SW2(const0, 4, k0, k1);
   LD_SW2(const0 + 8, 4, k2, k3);
-  VP9_MADD_BF(r15, r0, r7, r8, k0, k1, k2, k3, g0, g1, g2, g3);
+  MADD_BF(r15, r0, r7, r8, k0, k1, k2, k3, g0, g1, g2, g3);
 
   r3 = LD_SH(input + 3 * stride);
   r4 = LD_SH(input + 4 * stride);
@@ -221,7 +221,7 @@ static void fadst16_cols_step1_msa(const int16_t *input, int32_t stride,
 
   LD_SW2(const0 + 4 * 4, 4, k0, k1);
   LD_SW2(const0 + 4 * 6, 4, k2, k3);
-  VP9_MADD_BF(r11, r4, r3, r12, k0, k1, k2, k3, g8, g9, g10, g11);
+  MADD_BF(r11, r4, r3, r12, k0, k1, k2, k3, g8, g9, g10, g11);
 
   /* stage 2 */
   BUTTERFLY_4(g0, g2, g10, g8, tp0, tp2, tp3, tp1);
@@ -230,7 +230,7 @@ static void fadst16_cols_step1_msa(const int16_t *input, int32_t stride,
 
   LD_SW2(const0 + 4 * 8, 4, k0, k1);
   k2 = LD_SW(const0 + 4 * 10);
-  VP9_MADD_BF(g1, g3, g9, g11, k0, k1, k2, k0, h0, h1, h2, h3);
+  MADD_BF(g1, g3, g9, g11, k0, k1, k2, k0, h0, h1, h2, h3);
 
   ST_SH2(h0, h1, int_buf + 8 * 8, 8);
   ST_SH2(h3, h2, int_buf + 12 * 8, 8);
@@ -243,7 +243,7 @@ static void fadst16_cols_step1_msa(const int16_t *input, int32_t stride,
 
   LD_SW2(const0 + 4 * 11, 4, k0, k1);
   LD_SW2(const0 + 4 * 13, 4, k2, k3);
-  VP9_MADD_BF(r9, r6, r1, r14, k0, k1, k2, k3, g0, g1, g2, g3);
+  MADD_BF(r9, r6, r1, r14, k0, k1, k2, k3, g0, g1, g2, g3);
 
   ST_SH2(g1, g3, int_buf + 3 * 8, 4 * 8);
 
@@ -255,7 +255,7 @@ static void fadst16_cols_step1_msa(const int16_t *input, int32_t stride,
 
   LD_SW2(const0 + 4 * 15, 4, k0, k1);
   LD_SW2(const0 + 4 * 17, 4, k2, k3);
-  VP9_MADD_BF(r13, r2, r5, r10, k0, k1, k2, k3, h0, h1, h2, h3);
+  MADD_BF(r13, r2, r5, r10, k0, k1, k2, k3, h0, h1, h2, h3);
 
   ST_SH2(h1, h3, int_buf + 11 * 8, 4 * 8);
 
@@ -276,7 +276,7 @@ static void fadst16_cols_step2_msa(int16_t *int_buf, const int32_t *const0,
   LD_SH2(int_buf + 11 * 8, 4 * 8, g5, g7);
   LD_SW2(const0 + 4 * 19, 4, k0, k1);
   k2 = LD_SW(const0 + 4 * 21);
-  VP9_MADD_BF(g7, g5, g15, g13, k0, k1, k2, k0, h4, h5, h6, h7);
+  MADD_BF(g7, g5, g15, g13, k0, k1, k2, k0, h4, h5, h6, h7);
 
   tp0 = LD_SH(int_buf + 4 * 8);
   tp1 = LD_SH(int_buf + 5 * 8);
@@ -284,14 +284,14 @@ static void fadst16_cols_step2_msa(int16_t *int_buf, const int32_t *const0,
   tp2 = LD_SH(int_buf + 14 * 8);
   LD_SW2(const0 + 4 * 22, 4, k0, k1);
   k2 = LD_SW(const0 + 4 * 24);
-  VP9_MADD_BF(tp0, tp1, tp2, tp3, k0, k1, k2, k0, out4, out6, out5, out7);
+  MADD_BF(tp0, tp1, tp2, tp3, k0, k1, k2, k0, out4, out6, out5, out7);
   out4 = -out4;
   ST_SH(out4, (out + 3 * 16));
   ST_SH(out5, (out_ptr + 4 * 16));
 
   h1 = LD_SH(int_buf + 9 * 8);
   h3 = LD_SH(int_buf + 12 * 8);
-  VP9_MADD_BF(h1, h3, h5, h7, k0, k1, k2, k0, out12, out14, out13, out15);
+  MADD_BF(h1, h3, h5, h7, k0, k1, k2, k0, out12, out14, out13, out15);
   out13 = -out13;
   ST_SH(out12, (out + 2 * 16));
   ST_SH(out13, (out_ptr + 5 * 16));
@@ -317,19 +317,19 @@ static void fadst16_cols_step2_msa(int16_t *int_buf, const int32_t *const0,
   /* stage 4 */
   LD_SW2(const0 + 4 * 25, 4, k0, k1);
   LD_SW2(const0 + 4 * 27, 4, k2, k3);
-  VP9_MADD_SHORT(h10, h11, k1, k2, out2, out3);
+  MADD_SHORT(h10, h11, k1, k2, out2, out3);
   ST_SH(out2, (out + 7 * 16));
   ST_SH(out3, (out_ptr));
 
-  VP9_MADD_SHORT(out6, out7, k0, k3, out6, out7);
+  MADD_SHORT(out6, out7, k0, k3, out6, out7);
   ST_SH(out6, (out + 4 * 16));
   ST_SH(out7, (out_ptr + 3 * 16));
 
-  VP9_MADD_SHORT(out10, out11, k0, k3, out10, out11);
+  MADD_SHORT(out10, out11, k0, k3, out10, out11);
   ST_SH(out10, (out + 6 * 16));
   ST_SH(out11, (out_ptr + 16));
 
-  VP9_MADD_SHORT(out14, out15, k1, k2, out14, out15);
+  MADD_SHORT(out14, out15, k1, k2, out14, out15);
   ST_SH(out14, (out + 5 * 16));
   ST_SH(out15, (out_ptr + 2 * 16));
 }
@@ -342,20 +342,20 @@ static void fadst16_transpose_postproc_msa(int16_t *input, int16_t *out) {
   LD_SH8(input, 16, l0, l1, l2, l3, l4, l5, l6, l7);
   TRANSPOSE8x8_SH_SH(l0, l1, l2, l3, l4, l5, l6, l7,
                      r0, r1, r2, r3, r4, r5, r6, r7);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r0, r1);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r2, r3);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r4, r5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r6, r7);
+  FDCT_POSTPROC_2V_NEG_H(r0, r1);
+  FDCT_POSTPROC_2V_NEG_H(r2, r3);
+  FDCT_POSTPROC_2V_NEG_H(r4, r5);
+  FDCT_POSTPROC_2V_NEG_H(r6, r7);
   ST_SH8(r0, r1, r2, r3, r4, r5, r6, r7, out, 8);
   out += 64;
 
   LD_SH8(input + 8, 16, l8, l9, l10, l11, l12, l13, l14, l15);
   TRANSPOSE8x8_SH_SH(l8, l9, l10, l11, l12, l13, l14, l15,
                      r8, r9, r10, r11, r12, r13, r14, r15);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r8, r9);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r10, r11);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r12, r13);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r14, r15);
+  FDCT_POSTPROC_2V_NEG_H(r8, r9);
+  FDCT_POSTPROC_2V_NEG_H(r10, r11);
+  FDCT_POSTPROC_2V_NEG_H(r12, r13);
+  FDCT_POSTPROC_2V_NEG_H(r14, r15);
   ST_SH8(r8, r9, r10, r11, r12, r13, r14, r15, out, 8);
   out += 64;
 
@@ -364,20 +364,20 @@ static void fadst16_transpose_postproc_msa(int16_t *input, int16_t *out) {
   LD_SH8(input, 16, l0, l1, l2, l3, l4, l5, l6, l7);
   TRANSPOSE8x8_SH_SH(l0, l1, l2, l3, l4, l5, l6, l7,
                      r0, r1, r2, r3, r4, r5, r6, r7);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r0, r1);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r2, r3);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r4, r5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r6, r7);
+  FDCT_POSTPROC_2V_NEG_H(r0, r1);
+  FDCT_POSTPROC_2V_NEG_H(r2, r3);
+  FDCT_POSTPROC_2V_NEG_H(r4, r5);
+  FDCT_POSTPROC_2V_NEG_H(r6, r7);
   ST_SH8(r0, r1, r2, r3, r4, r5, r6, r7, out, 8);
   out += 64;
 
   LD_SH8(input + 8, 16, l8, l9, l10, l11, l12, l13, l14, l15);
   TRANSPOSE8x8_SH_SH(l8, l9, l10, l11, l12, l13, l14, l15,
                      r8, r9, r10, r11, r12, r13, r14, r15);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r8, r9);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r10, r11);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r12, r13);
-  VP9_FDCT_POSTPROC_2V_NEG_H(r14, r15);
+  FDCT_POSTPROC_2V_NEG_H(r8, r9);
+  FDCT_POSTPROC_2V_NEG_H(r10, r11);
+  FDCT_POSTPROC_2V_NEG_H(r12, r13);
+  FDCT_POSTPROC_2V_NEG_H(r14, r15);
   ST_SH8(r8, r9, r10, r11, r12, r13, r14, r15, out, 8);
 }
 
@@ -396,7 +396,7 @@ static void fadst16_rows_step1_msa(int16_t *input, const int32_t *const0,
   /* stage 1 */
   LD_SW2(const0, 4, k0, k1);
   LD_SW2(const0 + 4 * 2, 4, k2, k3);
-  VP9_MADD_BF(r15, r0, r7, r8, k0, k1, k2, k3, g0, g1, g2, g3);
+  MADD_BF(r15, r0, r7, r8, k0, k1, k2, k3, g0, g1, g2, g3);
 
   r3 = LD_SH(input + 3 * 8);
   r4 = LD_SH(input + 4 * 8);
@@ -405,7 +405,7 @@ static void fadst16_rows_step1_msa(int16_t *input, const int32_t *const0,
 
   LD_SW2(const0 + 4 * 4, 4, k0, k1);
   LD_SW2(const0 + 4 * 6, 4, k2, k3);
-  VP9_MADD_BF(r11, r4, r3, r12, k0, k1, k2, k3, g8, g9, g10, g11);
+  MADD_BF(r11, r4, r3, r12, k0, k1, k2, k3, g8, g9, g10, g11);
 
   /* stage 2 */
   BUTTERFLY_4(g0, g2, g10, g8, tp0, tp2, tp3, tp1);
@@ -414,7 +414,7 @@ static void fadst16_rows_step1_msa(int16_t *input, const int32_t *const0,
 
   LD_SW2(const0 + 4 * 8, 4, k0, k1);
   k2 = LD_SW(const0 + 4 * 10);
-  VP9_MADD_BF(g1, g3, g9, g11, k0, k1, k2, k0, h0, h1, h2, h3);
+  MADD_BF(g1, g3, g9, g11, k0, k1, k2, k0, h0, h1, h2, h3);
   ST_SH2(h0, h3, int_buf + 8 * 8, 4 * 8);
   ST_SH2(h1, h2, int_buf + 9 * 8, 4 * 8);
 
@@ -425,7 +425,7 @@ static void fadst16_rows_step1_msa(int16_t *input, const int32_t *const0,
 
   LD_SW2(const0 + 4 * 11, 4, k0, k1);
   LD_SW2(const0 + 4 * 13, 4, k2, k3);
-  VP9_MADD_BF(r9, r6, r1, r14, k0, k1, k2, k3, g0, g1, g2, g3);
+  MADD_BF(r9, r6, r1, r14, k0, k1, k2, k3, g0, g1, g2, g3);
   ST_SH2(g1, g3, int_buf + 3 * 8, 4 * 8);
 
   r2 = LD_SH(input + 2 * 8);
@@ -435,7 +435,7 @@ static void fadst16_rows_step1_msa(int16_t *input, const int32_t *const0,
 
   LD_SW2(const0 + 4 * 15, 4, k0, k1);
   LD_SW2(const0 + 4 * 17, 4, k2, k3);
-  VP9_MADD_BF(r13, r2, r5, r10, k0, k1, k2, k3, h0, h1, h2, h3);
+  MADD_BF(r13, r2, r5, r10, k0, k1, k2, k3, h0, h1, h2, h3);
   ST_SH2(h1, h3, int_buf + 11 * 8, 4 * 8);
   BUTTERFLY_4(h0, h2, g2, g0, tp0, tp1, tp2, tp3);
   ST_SH4(tp0, tp1, tp2, tp3, int_buf + 2 * 8, 4 * 8);
@@ -457,7 +457,7 @@ static void fadst16_rows_step2_msa(int16_t *int_buf, const int32_t *const0,
 
   LD_SW2(const0 + 4 * 19, 4, k0, k1);
   k2 = LD_SW(const0 + 4 * 21);
-  VP9_MADD_BF(g7, g5, g15, g13, k0, k1, k2, k0, h4, h5, h6, h7);
+  MADD_BF(g7, g5, g15, g13, k0, k1, k2, k0, h4, h5, h6, h7);
 
   tp0 = LD_SH(int_buf + 4 * 8);
   tp1 = LD_SH(int_buf + 5 * 8);
@@ -466,14 +466,14 @@ static void fadst16_rows_step2_msa(int16_t *int_buf, const int32_t *const0,
 
   LD_SW2(const0 + 4 * 22, 4, k0, k1);
   k2 = LD_SW(const0 + 4 * 24);
-  VP9_MADD_BF(tp0, tp1, tp2, tp3, k0, k1, k2, k0, out4, out6, out5, out7);
+  MADD_BF(tp0, tp1, tp2, tp3, k0, k1, k2, k0, out4, out6, out5, out7);
   out4 = -out4;
   ST_SH(out4, (out + 3 * 16));
   ST_SH(out5, (out_ptr + 4 * 16));
 
   h1 = LD_SH(int_buf + 9 * 8);
   h3 = LD_SH(int_buf + 12 * 8);
-  VP9_MADD_BF(h1, h3, h5, h7, k0, k1, k2, k0, out12, out14, out13, out15);
+  MADD_BF(h1, h3, h5, h7, k0, k1, k2, k0, out12, out14, out13, out15);
   out13 = -out13;
   ST_SH(out12, (out + 2 * 16));
   ST_SH(out13, (out_ptr + 5 * 16));
@@ -498,19 +498,19 @@ static void fadst16_rows_step2_msa(int16_t *int_buf, const int32_t *const0,
   /* stage 4 */
   LD_SW2(const0 + 4 * 25, 4, k0, k1);
   LD_SW2(const0 + 4 * 27, 4, k2, k3);
-  VP9_MADD_SHORT(h10, h11, k1, k2, out2, out3);
+  MADD_SHORT(h10, h11, k1, k2, out2, out3);
   ST_SH(out2, (out + 7 * 16));
   ST_SH(out3, (out_ptr));
 
-  VP9_MADD_SHORT(out6, out7, k0, k3, out6, out7);
+  MADD_SHORT(out6, out7, k0, k3, out6, out7);
   ST_SH(out6, (out + 4 * 16));
   ST_SH(out7, (out_ptr + 3 * 16));
 
-  VP9_MADD_SHORT(out10, out11, k0, k3, out10, out11);
+  MADD_SHORT(out10, out11, k0, k3, out10, out11);
   ST_SH(out10, (out + 6 * 16));
   ST_SH(out11, (out_ptr + 16));
 
-  VP9_MADD_SHORT(out14, out15, k1, k2, out14, out15);
+  MADD_SHORT(out14, out15, k1, k2, out14, out15);
   ST_SH(out14, (out + 5 * 16));
   ST_SH(out15, (out_ptr + 2 * 16));
 }
@@ -556,26 +556,26 @@ static void postproc_fdct16x8_1d_row(int16_t *intermediate, int16_t *output) {
                      in0, in1, in2, in3, in4, in5, in6, in7);
   TRANSPOSE8x8_SH_SH(in8, in9, in10, in11, in12, in13, in14, in15,
                      in8, in9, in10, in11, in12, in13, in14, in15);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in0, in1);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in2, in3);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in4, in5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in6, in7);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in8, in9);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in10, in11);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in12, in13);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in14, in15);
+  FDCT_POSTPROC_2V_NEG_H(in0, in1);
+  FDCT_POSTPROC_2V_NEG_H(in2, in3);
+  FDCT_POSTPROC_2V_NEG_H(in4, in5);
+  FDCT_POSTPROC_2V_NEG_H(in6, in7);
+  FDCT_POSTPROC_2V_NEG_H(in8, in9);
+  FDCT_POSTPROC_2V_NEG_H(in10, in11);
+  FDCT_POSTPROC_2V_NEG_H(in12, in13);
+  FDCT_POSTPROC_2V_NEG_H(in14, in15);
   BUTTERFLY_16(in0, in1, in2, in3, in4, in5, in6, in7,
                in8, in9, in10, in11, in12, in13, in14, in15,
                tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7,
                in8, in9, in10, in11, in12, in13, in14, in15);
   temp = intermediate;
   ST_SH8(in8, in9, in10, in11, in12, in13, in14, in15, temp, 16);
-  VP9_FDCT8x16_EVEN(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7,
-                    tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
+  FDCT8x16_EVEN(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7,
+                tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
   temp = intermediate;
   LD_SH8(temp, 16, in8, in9, in10, in11, in12, in13, in14, in15);
-  VP9_FDCT8x16_ODD(in8, in9, in10, in11, in12, in13, in14, in15,
-                   in0, in1, in2, in3, in4, in5, in6, in7);
+  FDCT8x16_ODD(in8, in9, in10, in11, in12, in13, in14, in15,
+               in0, in1, in2, in3, in4, in5, in6, in7);
   TRANSPOSE8x8_SH_SH(tmp0, in0, tmp1, in1, tmp2, in2, tmp3, in3,
                      tmp0, in0, tmp1, in1, tmp2, in2, tmp3, in3);
   ST_SH8(tmp0, in0, tmp1, in1, tmp2, in2, tmp3, in3, out, 16);

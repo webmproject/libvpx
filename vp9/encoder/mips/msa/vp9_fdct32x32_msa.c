@@ -75,57 +75,57 @@ static void fdct8x32_1d_column_even_store(int16_t *input, int16_t *temp) {
   /* Stage 3 */
   ADD4(vec0, vec7, vec1, vec6, vec2, vec5, vec3, vec4, in0, in1, in2, in3);
   BUTTERFLY_4(in0, in1, in2, in3, temp0, in4, in1, in0);
-  VP9_DOTP_CONST_PAIR(temp0, in4, cospi_16_64, cospi_16_64, temp1, temp0);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(temp0, in4, cospi_16_64, cospi_16_64, temp1, temp0);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp);
   ST_SH(temp1, temp + 512);
 
-  VP9_DOTP_CONST_PAIR(in0, in1, cospi_24_64, cospi_8_64, temp1, temp0);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(in0, in1, cospi_24_64, cospi_8_64, temp1, temp0);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp + 256);
   ST_SH(temp1, temp + 768);
 
   SUB4(vec0, vec7, vec1, vec6, vec2, vec5, vec3, vec4, vec7, vec6, vec5, vec4);
-  VP9_DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
+  DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
   ADD2(vec4, vec5, vec7, vec6, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, temp1, temp0);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, temp1, temp0);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp + 128);
   ST_SH(temp1, temp + 896);
 
   SUB2(vec4, vec5, vec7, vec6, vec4, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, temp1, temp0);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, temp1, temp0);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp + 640);
   ST_SH(temp1, temp + 384);
 
-  VP9_DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
-  VP9_DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
+  DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
+  DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
   ADD4(in8, vec3, in9, vec2, in14, vec5, in15, vec4, in0, vec1, vec6, in2);
-  VP9_DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
+  DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
   ADD2(in0, in1, in2, in3, vec0, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, temp1, temp0);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, temp1, temp0);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp + 64);
   ST_SH(temp1, temp + 960);
 
   SUB2(in0, in1, in2, in3, in0, in2);
-  VP9_DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, temp1, temp0);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, temp1, temp0);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp + 576);
   ST_SH(temp1, temp + 448);
 
   SUB2(in9, vec2, in14, vec5, vec2, vec5);
-  VP9_DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
+  DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
   SUB4(in8, vec3, in15, vec4, in3, in2, in0, in1, in3, in0, vec2, vec5);
-  VP9_DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, temp1, temp0);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, temp1, temp0);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp + 320);
   ST_SH(temp1, temp + 704);
 
   ADD2(in3, in2, in0, in1, vec3, vec4);
-  VP9_DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, temp0, temp1);
-  VP9_FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, temp0, temp1);
+  FDCT32_POSTPROC_2V_POS_H(temp0, temp1);
   ST_SH(temp0, temp + 192);
   ST_SH(temp1, temp + 832);
 }
@@ -139,8 +139,8 @@ static void fdct8x32_1d_column_odd_store(int16_t *input, int16_t *temp_ptr) {
   in26 = LD_SH(input + 80);
   in27 = LD_SH(input + 88);
 
-  VP9_DOTP_CONST_PAIR(in27, in20, cospi_16_64, cospi_16_64, in20, in27);
-  VP9_DOTP_CONST_PAIR(in26, in21, cospi_16_64, cospi_16_64, in21, in26);
+  DOTP_CONST_PAIR(in27, in20, cospi_16_64, cospi_16_64, in20, in27);
+  DOTP_CONST_PAIR(in26, in21, cospi_16_64, cospi_16_64, in21, in26);
 
   in18 = LD_SH(input + 16);
   in19 = LD_SH(input + 24);
@@ -162,8 +162,8 @@ static void fdct8x32_1d_column_odd_store(int16_t *input, int16_t *temp_ptr) {
   in26 = in29 + in26;
 
   LD_SH4(input + 48, 8, in22, in23, in24, in25);
-  VP9_DOTP_CONST_PAIR(in25, in22, cospi_16_64, cospi_16_64, in22, in25);
-  VP9_DOTP_CONST_PAIR(in24, in23, cospi_16_64, cospi_16_64, in23, in24);
+  DOTP_CONST_PAIR(in25, in22, cospi_16_64, cospi_16_64, in22, in25);
+  DOTP_CONST_PAIR(in24, in23, cospi_16_64, cospi_16_64, in23, in24);
 
   in16 = LD_SH(input);
   in17 = LD_SH(input + 8);
@@ -180,33 +180,33 @@ static void fdct8x32_1d_column_odd_store(int16_t *input, int16_t *temp_ptr) {
   ST_SH(vec4, input + 104);
 
   ADD4(in16, in23, in17, in22, in30, in25, in31, in24, in16, in17, in30, in31);
-  VP9_DOTP_CONST_PAIR(in26, in21, cospi_24_64, cospi_8_64, in18, in29);
-  VP9_DOTP_CONST_PAIR(in27, in20, cospi_24_64, cospi_8_64, in19, in28);
+  DOTP_CONST_PAIR(in26, in21, cospi_24_64, cospi_8_64, in18, in29);
+  DOTP_CONST_PAIR(in27, in20, cospi_24_64, cospi_8_64, in19, in28);
   ADD4(in16, in19, in17, in18, in30, in29, in31, in28, in27, in22, in21, in25);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_28_64, cospi_4_64, in26, in24);
+  DOTP_CONST_PAIR(in21, in22, cospi_28_64, cospi_4_64, in26, in24);
   ADD2(in27, in26, in25, in24, in23, in20);
-  VP9_DOTP_CONST_PAIR(in20, in23, cospi_31_64, cospi_1_64, vec4, vec5);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in20, in23, cospi_31_64, cospi_1_64, vec4, vec5);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec5, temp_ptr);
   ST_SH(vec4, temp_ptr + 960);
 
   SUB2(in27, in26, in25, in24, in22, in21);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_15_64, cospi_17_64, vec5, vec4);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in21, in22, cospi_15_64, cospi_17_64, vec5, vec4);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec5, temp_ptr + 448);
   ST_SH(vec4, temp_ptr + 512);
 
   SUB4(in17, in18, in16, in19, in31, in28, in30, in29, in23, in26, in24, in20);
-  VP9_DOTP_CONST_PAIR((-in23), in20, cospi_28_64, cospi_4_64, in27, in25);
+  DOTP_CONST_PAIR((-in23), in20, cospi_28_64, cospi_4_64, in27, in25);
   SUB2(in26, in27, in24, in25, in23, in20);
-  VP9_DOTP_CONST_PAIR(in20, in23, cospi_23_64, cospi_9_64, vec4, vec5);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in20, in23, cospi_23_64, cospi_9_64, vec4, vec5);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec4, temp_ptr + 704);
   ST_SH(vec5, temp_ptr + 256);
 
   ADD2(in26, in27, in24, in25, in22, in21);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_7_64, cospi_25_64, vec4, vec5);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in21, in22, cospi_7_64, cospi_25_64, vec4, vec5);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec4, temp_ptr + 192);
   ST_SH(vec5, temp_ptr + 768);
 
@@ -214,32 +214,32 @@ static void fdct8x32_1d_column_odd_store(int16_t *input, int16_t *temp_ptr) {
   LD_SH4(input + 80, 8, in26, in27, in24, in25);
   in16 = in20;
   in17 = in21;
-  VP9_DOTP_CONST_PAIR(-in16, in27, cospi_24_64, cospi_8_64, in20, in27);
-  VP9_DOTP_CONST_PAIR(-in17, in26, cospi_24_64, cospi_8_64, in21, in26);
+  DOTP_CONST_PAIR(-in16, in27, cospi_24_64, cospi_8_64, in20, in27);
+  DOTP_CONST_PAIR(-in17, in26, cospi_24_64, cospi_8_64, in21, in26);
   SUB4(in23, in20, in22, in21, in25, in26, in24, in27, in28, in17, in18, in31);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_12_64, cospi_20_64, in29, in30);
+  DOTP_CONST_PAIR(in18, in17, cospi_12_64, cospi_20_64, in29, in30);
   ADD2(in28, in29, in31, in30, in16, in19);
-  VP9_DOTP_CONST_PAIR(in19, in16, cospi_27_64, cospi_5_64, vec5, vec4);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in19, in16, cospi_27_64, cospi_5_64, vec5, vec4);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec5, temp_ptr + 832);
   ST_SH(vec4, temp_ptr + 128);
 
   SUB2(in28, in29, in31, in30, in17, in18);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_11_64, cospi_21_64, vec5, vec4);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in18, in17, cospi_11_64, cospi_21_64, vec5, vec4);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec5, temp_ptr + 320);
   ST_SH(vec4, temp_ptr + 640);
   ADD4(in22, in21, in23, in20, in24, in27, in25, in26, in16, in29, in30, in19);
-  VP9_DOTP_CONST_PAIR(-in16, in19, cospi_12_64, cospi_20_64, in28, in31);
+  DOTP_CONST_PAIR(-in16, in19, cospi_12_64, cospi_20_64, in28, in31);
   SUB2(in29, in28, in30, in31, in16, in19);
-  VP9_DOTP_CONST_PAIR(in19, in16, cospi_19_64, cospi_13_64, vec5, vec4);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in19, in16, cospi_19_64, cospi_13_64, vec5, vec4);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec5, temp_ptr + 576);
   ST_SH(vec4, temp_ptr + 384);
 
   ADD2(in29, in28, in30, in31, in17, in18);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_3_64, cospi_29_64, vec5, vec4);
-  VP9_FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
+  DOTP_CONST_PAIR(in18, in17, cospi_3_64, cospi_29_64, vec5, vec4);
+  FDCT32_POSTPROC_2V_POS_H(vec5, vec4);
   ST_SH(vec5, temp_ptr + 64);
   ST_SH(vec4, temp_ptr + 896);
 }
@@ -327,67 +327,67 @@ static void fdct8x32_1d_row_even_4x(int16_t *input, int16_t *interm_ptr,
   vec3_r = vec1_r + vec2_r;
   vec1_r = vec1_r - vec2_r;
 
-  VP9_DOTP_CONST_PAIR_W(vec4_r, vec6_r, tmp3_w, vec3_r, cospi_16_64,
-                        cospi_16_64, vec4_r, tmp3_w, vec6_r, vec3_r);
-  VP9_FDCT32_POSTPROC_NEG_W(vec4_r);
-  VP9_FDCT32_POSTPROC_NEG_W(tmp3_w);
-  VP9_FDCT32_POSTPROC_NEG_W(vec6_r);
-  VP9_FDCT32_POSTPROC_NEG_W(vec3_r);
+  DOTP_CONST_PAIR_W(vec4_r, vec6_r, tmp3_w, vec3_r, cospi_16_64,
+                    cospi_16_64, vec4_r, tmp3_w, vec6_r, vec3_r);
+  FDCT32_POSTPROC_NEG_W(vec4_r);
+  FDCT32_POSTPROC_NEG_W(tmp3_w);
+  FDCT32_POSTPROC_NEG_W(vec6_r);
+  FDCT32_POSTPROC_NEG_W(vec3_r);
   PCKEV_H2_SH(vec4_r, tmp3_w, vec6_r, vec3_r, vec4, vec5);
   ST_SH2(vec5, vec4, out, 8);
 
-  VP9_DOTP_CONST_PAIR_W(vec5_r, vec7_r, vec0_r, vec1_r, cospi_24_64,
-                        cospi_8_64, vec4_r, tmp3_w, vec6_r, vec3_r);
-  VP9_FDCT32_POSTPROC_NEG_W(vec4_r);
-  VP9_FDCT32_POSTPROC_NEG_W(tmp3_w);
-  VP9_FDCT32_POSTPROC_NEG_W(vec6_r);
-  VP9_FDCT32_POSTPROC_NEG_W(vec3_r);
+  DOTP_CONST_PAIR_W(vec5_r, vec7_r, vec0_r, vec1_r, cospi_24_64,
+                    cospi_8_64, vec4_r, tmp3_w, vec6_r, vec3_r);
+  FDCT32_POSTPROC_NEG_W(vec4_r);
+  FDCT32_POSTPROC_NEG_W(tmp3_w);
+  FDCT32_POSTPROC_NEG_W(vec6_r);
+  FDCT32_POSTPROC_NEG_W(vec3_r);
   PCKEV_H2_SH(vec4_r, tmp3_w, vec6_r, vec3_r, vec4, vec5);
   ST_SH2(vec5, vec4, out + 16, 8);
 
   LD_SH8(interm_ptr, 8, vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7);
   SUB4(vec3, vec4, vec2, vec5, vec1, vec6, vec0, vec7, vec4, vec5, vec6, vec7);
-  VP9_DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
+  DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
   ADD2(vec4, vec5, vec7, vec6, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, in5, in4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in4, in5);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, in5, in4);
+  FDCT_POSTPROC_2V_NEG_H(in4, in5);
   ST_SH(in4, out + 32);
   ST_SH(in5, out + 56);
 
   SUB2(vec4, vec5, vec7, vec6, vec4, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, in5, in4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in4, in5);
+  DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, in5, in4);
+  FDCT_POSTPROC_2V_NEG_H(in4, in5);
   ST_SH(in4, out + 40);
   ST_SH(in5, out + 48);
 
   LD_SH8(interm_ptr + 64, 8, in8, in9, in10, in11, in12, in13, in14, in15);
-  VP9_DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
-  VP9_DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
+  DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
+  DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
   ADD4(in8, vec3, in9, vec2, in14, vec5, in15, vec4, in0, vec1, vec6, in2);
-  VP9_DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
+  DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
   ADD2(in0, in1, in2, in3, vec0, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, in5, in4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in4, in5);
+  DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, in5, in4);
+  FDCT_POSTPROC_2V_NEG_H(in4, in5);
   ST_SH(in4, out + 64);
   ST_SH(in5, out + 120);
 
   SUB2(in0, in1, in2, in3, in0, in2);
-  VP9_DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, in5, in4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in4, in5);
+  DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, in5, in4);
+  FDCT_POSTPROC_2V_NEG_H(in4, in5);
   ST_SH(in4, out + 72);
   ST_SH(in5, out + 112);
 
   SUB2(in9, vec2, in14, vec5, vec2, vec5);
-  VP9_DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
+  DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
   SUB4(in8, vec3, in15, vec4, in3, in2, in0, in1, in3, in0, vec2, vec5);
-  VP9_DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, in5, in4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in4, in5);
+  DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, in5, in4);
+  FDCT_POSTPROC_2V_NEG_H(in4, in5);
   ST_SH(in4, out + 80);
   ST_SH(in5, out + 104);
 
   ADD2(in3, in2, in0, in1, vec3, vec4);
-  VP9_DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, in4, in5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in4, in5);
+  DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, in4, in5);
+  FDCT_POSTPROC_2V_NEG_H(in4, in5);
   ST_SH(in4, out + 96);
   ST_SH(in5, out + 88);
 }
@@ -410,57 +410,57 @@ static void fdct8x32_1d_row_even(int16_t *temp, int16_t *out) {
   /* Stage 3 */
   ADD4(vec0, vec7, vec1, vec6, vec2, vec5, vec3, vec4, in0, in1, in2, in3);
   BUTTERFLY_4(in0, in1, in2, in3, temp0, in4, in1, in0);
-  VP9_DOTP_CONST_PAIR(temp0, in4, cospi_16_64, cospi_16_64, temp1, temp0);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(temp0, in4, cospi_16_64, cospi_16_64, temp1, temp0);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out);
   ST_SH(temp1, out + 8);
 
-  VP9_DOTP_CONST_PAIR(in0, in1, cospi_24_64, cospi_8_64, temp1, temp0);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(in0, in1, cospi_24_64, cospi_8_64, temp1, temp0);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 16);
   ST_SH(temp1, out + 24);
 
   SUB4(vec3, vec4, vec2, vec5, vec1, vec6, vec0, vec7, vec4, vec5, vec6, vec7);
-  VP9_DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
+  DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
   ADD2(vec4, vec5, vec7, vec6, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, temp1, temp0);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, temp1, temp0);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 32);
   ST_SH(temp1, out + 56);
 
   SUB2(vec4, vec5, vec7, vec6, vec4, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, temp1, temp0);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, temp1, temp0);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 40);
   ST_SH(temp1, out + 48);
 
-  VP9_DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
-  VP9_DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
+  DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
+  DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
   ADD4(in8, vec3, in9, vec2, in14, vec5, in15, vec4, in0, vec1, vec6, in2);
-  VP9_DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
+  DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
   ADD2(in0, in1, in2, in3, vec0, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, temp1, temp0);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, temp1, temp0);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 64);
   ST_SH(temp1, out + 120);
 
   SUB2(in0, in1, in2, in3, in0, in2);
-  VP9_DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, temp1, temp0);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, temp1, temp0);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 72);
   ST_SH(temp1, out + 112);
 
   SUB2(in9, vec2, in14, vec5, vec2, vec5);
-  VP9_DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
+  DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
   SUB4(in8, vec3, in15, vec4, in3, in2, in0, in1, in3, in0, vec2, vec5)
-  VP9_DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, temp1, temp0);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, temp1, temp0);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 80);
   ST_SH(temp1, out + 104);
 
   ADD2(in3, in2, in0, in1, vec3, vec4);
-  VP9_DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, temp0, temp1);
-  VP9_FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
+  DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, temp0, temp1);
+  FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 96);
   ST_SH(temp1, out + 88);
 }
@@ -475,8 +475,8 @@ static void fdct8x32_1d_row_odd(int16_t *temp, int16_t *interm_ptr,
   in26 = LD_SH(temp + 80);
   in27 = LD_SH(temp + 88);
 
-  VP9_DOTP_CONST_PAIR(in27, in20, cospi_16_64, cospi_16_64, in20, in27);
-  VP9_DOTP_CONST_PAIR(in26, in21, cospi_16_64, cospi_16_64, in21, in26);
+  DOTP_CONST_PAIR(in27, in20, cospi_16_64, cospi_16_64, in20, in27);
+  DOTP_CONST_PAIR(in26, in21, cospi_16_64, cospi_16_64, in21, in26);
 
   in18 = LD_SH(temp + 16);
   in19 = LD_SH(temp + 24);
@@ -499,8 +499,8 @@ static void fdct8x32_1d_row_odd(int16_t *temp, int16_t *interm_ptr,
   in24 = LD_SH(temp + 64);
   in25 = LD_SH(temp + 72);
 
-  VP9_DOTP_CONST_PAIR(in25, in22, cospi_16_64, cospi_16_64, in22, in25);
-  VP9_DOTP_CONST_PAIR(in24, in23, cospi_16_64, cospi_16_64, in23, in24);
+  DOTP_CONST_PAIR(in25, in22, cospi_16_64, cospi_16_64, in22, in25);
+  DOTP_CONST_PAIR(in24, in23, cospi_16_64, cospi_16_64, in23, in24);
 
   in16 = LD_SH(temp);
   in17 = LD_SH(temp + 8);
@@ -517,37 +517,37 @@ static void fdct8x32_1d_row_odd(int16_t *temp, int16_t *interm_ptr,
   ST_SH(vec4, interm_ptr + 80);
 
   ADD4(in16, in23, in17, in22, in30, in25, in31, in24, in16, in17, in30, in31);
-  VP9_DOTP_CONST_PAIR(in26, in21, cospi_24_64, cospi_8_64, in18, in29);
-  VP9_DOTP_CONST_PAIR(in27, in20, cospi_24_64, cospi_8_64, in19, in28);
+  DOTP_CONST_PAIR(in26, in21, cospi_24_64, cospi_8_64, in18, in29);
+  DOTP_CONST_PAIR(in27, in20, cospi_24_64, cospi_8_64, in19, in28);
 
   ADD4(in16, in19, in17, in18, in30, in29, in31, in28, in27, in22, in21, in25);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_28_64, cospi_4_64, in26, in24);
+  DOTP_CONST_PAIR(in21, in22, cospi_28_64, cospi_4_64, in26, in24);
   ADD2(in27, in26, in25, in24, in23, in20);
 
-  VP9_DOTP_CONST_PAIR(in20, in23, cospi_31_64, cospi_1_64, vec4, vec5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in20, in23, cospi_31_64, cospi_1_64, vec4, vec5);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec5, out);
   ST_SH(vec4, out + 120);
 
   SUB2(in27, in26, in25, in24, in22, in21);
 
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_15_64, cospi_17_64, vec5, vec4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in21, in22, cospi_15_64, cospi_17_64, vec5, vec4);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec5, out + 112);
   ST_SH(vec4, out + 8);
 
   SUB4(in17, in18, in16, in19, in31, in28, in30, in29, in23, in26, in24, in20);
-  VP9_DOTP_CONST_PAIR((-in23), in20, cospi_28_64, cospi_4_64, in27, in25);
+  DOTP_CONST_PAIR((-in23), in20, cospi_28_64, cospi_4_64, in27, in25);
   SUB2(in26, in27, in24, in25, in23, in20);
 
-  VP9_DOTP_CONST_PAIR(in20, in23, cospi_23_64, cospi_9_64, vec4, vec5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in20, in23, cospi_23_64, cospi_9_64, vec4, vec5);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec4, out + 16);
   ST_SH(vec5, out + 104);
 
   ADD2(in26, in27, in24, in25, in22, in21);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_7_64, cospi_25_64, vec4, vec5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in21, in22, cospi_7_64, cospi_25_64, vec4, vec5);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec4, out + 24);
   ST_SH(vec5, out + 96);
 
@@ -558,8 +558,8 @@ static void fdct8x32_1d_row_odd(int16_t *temp, int16_t *interm_ptr,
 
   in16 = in20;
   in17 = in21;
-  VP9_DOTP_CONST_PAIR(-in16, in27, cospi_24_64, cospi_8_64, in20, in27);
-  VP9_DOTP_CONST_PAIR(-in17, in26, cospi_24_64, cospi_8_64, in21, in26);
+  DOTP_CONST_PAIR(-in16, in27, cospi_24_64, cospi_8_64, in20, in27);
+  DOTP_CONST_PAIR(-in17, in26, cospi_24_64, cospi_8_64, in21, in26);
 
   in22 = LD_SH(interm_ptr + 40);
   in25 = LD_SH(interm_ptr + 48);
@@ -567,32 +567,32 @@ static void fdct8x32_1d_row_odd(int16_t *temp, int16_t *interm_ptr,
   in23 = LD_SH(interm_ptr + 80);
 
   SUB4(in23, in20, in22, in21, in25, in26, in24, in27, in28, in17, in18, in31);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_12_64, cospi_20_64, in29, in30);
+  DOTP_CONST_PAIR(in18, in17, cospi_12_64, cospi_20_64, in29, in30);
   ADD2(in28, in29, in31, in30, in16, in19);
-  VP9_DOTP_CONST_PAIR(in19, in16, cospi_27_64, cospi_5_64, vec5, vec4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in19, in16, cospi_27_64, cospi_5_64, vec5, vec4);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec5, out + 32);
   ST_SH(vec4, out + 88);
 
   SUB2(in28, in29, in31, in30, in17, in18);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_11_64, cospi_21_64, vec5, vec4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in18, in17, cospi_11_64, cospi_21_64, vec5, vec4);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec5, out + 40);
   ST_SH(vec4, out + 80);
 
   ADD4(in22, in21, in23, in20, in24, in27, in25, in26, in16, in29, in30, in19);
-  VP9_DOTP_CONST_PAIR(-in16, in19, cospi_12_64, cospi_20_64, in28, in31);
+  DOTP_CONST_PAIR(-in16, in19, cospi_12_64, cospi_20_64, in28, in31);
   SUB2(in29, in28, in30, in31, in16, in19);
 
-  VP9_DOTP_CONST_PAIR(in19, in16, cospi_19_64, cospi_13_64, vec5, vec4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in19, in16, cospi_19_64, cospi_13_64, vec5, vec4);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec5, out + 72);
   ST_SH(vec4, out + 48);
 
   ADD2(in29, in28, in30, in31, in17, in18);
 
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_3_64, cospi_29_64, vec5, vec4);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
+  DOTP_CONST_PAIR(in18, in17, cospi_3_64, cospi_29_64, vec5, vec4);
+  FDCT_POSTPROC_2V_NEG_H(vec5, vec4);
   ST_SH(vec4, out + 56);
   ST_SH(vec5, out + 64);
 }
@@ -700,22 +700,22 @@ void vp9_fdct32x32_msa(const int16_t *input, int16_t *output,
 void vp9_fdct32x32_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
   out[1] = 0;
 
-  out[0] = VP9_LD_HADD(input, stride);
-  out[0] += VP9_LD_HADD(input + 8, stride);
-  out[0] += VP9_LD_HADD(input + 16, stride);
-  out[0] += VP9_LD_HADD(input + 24, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 8, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 8 + 8, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 8 + 16, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 8 + 24, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 16, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 16 + 8, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 16 + 16, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 16 + 24, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 24, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 24 + 8, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 24 + 16, stride);
-  out[0] += VP9_LD_HADD(input + 32 * 24 + 24, stride);
+  out[0] = LD_HADD(input, stride);
+  out[0] += LD_HADD(input + 8, stride);
+  out[0] += LD_HADD(input + 16, stride);
+  out[0] += LD_HADD(input + 24, stride);
+  out[0] += LD_HADD(input + 32 * 8, stride);
+  out[0] += LD_HADD(input + 32 * 8 + 8, stride);
+  out[0] += LD_HADD(input + 32 * 8 + 16, stride);
+  out[0] += LD_HADD(input + 32 * 8 + 24, stride);
+  out[0] += LD_HADD(input + 32 * 16, stride);
+  out[0] += LD_HADD(input + 32 * 16 + 8, stride);
+  out[0] += LD_HADD(input + 32 * 16 + 16, stride);
+  out[0] += LD_HADD(input + 32 * 16 + 24, stride);
+  out[0] += LD_HADD(input + 32 * 24, stride);
+  out[0] += LD_HADD(input + 32 * 24 + 8, stride);
+  out[0] += LD_HADD(input + 32 * 24 + 16, stride);
+  out[0] += LD_HADD(input + 32 * 24 + 24, stride);
   out[0] >>= 3;
 }
 
@@ -733,14 +733,14 @@ static void fdct8x32_1d_row_even_rd(int16_t *temp, int16_t *out) {
                in8, in9, in10, in11, in12, in13, in14, in15,
                vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7,
                in8, in9, in10, in11, in12, in13, in14, in15);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec0, vec1);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec2, vec3);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec4, vec5);
-  VP9_FDCT_POSTPROC_2V_NEG_H(vec6, vec7);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in8, in9);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in10, in11);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in12, in13);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in14, in15);
+  FDCT_POSTPROC_2V_NEG_H(vec0, vec1);
+  FDCT_POSTPROC_2V_NEG_H(vec2, vec3);
+  FDCT_POSTPROC_2V_NEG_H(vec4, vec5);
+  FDCT_POSTPROC_2V_NEG_H(vec6, vec7);
+  FDCT_POSTPROC_2V_NEG_H(in8, in9);
+  FDCT_POSTPROC_2V_NEG_H(in10, in11);
+  FDCT_POSTPROC_2V_NEG_H(in12, in13);
+  FDCT_POSTPROC_2V_NEG_H(in14, in15);
 
   /* Stage 3 */
   ADD4(vec0, vec7, vec1, vec6, vec2, vec5, vec3, vec4, in0, in1, in2, in3);
@@ -750,49 +750,49 @@ static void fdct8x32_1d_row_even_rd(int16_t *temp, int16_t *out) {
   in3 = in1 + in2;
   in1 = in1 - in2;
 
-  VP9_DOTP_CONST_PAIR(temp0, in3, cospi_16_64, cospi_16_64, temp1, temp0);
+  DOTP_CONST_PAIR(temp0, in3, cospi_16_64, cospi_16_64, temp1, temp0);
   ST_SH(temp0, out);
   ST_SH(temp1, out + 8);
 
-  VP9_DOTP_CONST_PAIR(in0, in1, cospi_24_64, cospi_8_64, temp1, temp0);
+  DOTP_CONST_PAIR(in0, in1, cospi_24_64, cospi_8_64, temp1, temp0);
   ST_SH(temp0, out + 16);
   ST_SH(temp1, out + 24);
 
   SUB4(vec3, vec4, vec2, vec5, vec1, vec6, vec0, vec7, vec4, vec5, vec6, vec7);
-  VP9_DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
+  DOTP_CONST_PAIR(vec6, vec5, cospi_16_64, cospi_16_64, vec5, vec6);
   ADD2(vec4, vec5, vec7, vec6, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, temp1, temp0);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_28_64, cospi_4_64, temp1, temp0);
   ST_SH(temp0, out + 32);
   ST_SH(temp1, out + 56);
 
   SUB2(vec4, vec5, vec7, vec6, vec4, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, temp1, temp0);
+  DOTP_CONST_PAIR(vec7, vec4, cospi_12_64, cospi_20_64, temp1, temp0);
   ST_SH(temp0, out + 40);
   ST_SH(temp1, out + 48);
 
-  VP9_DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
-  VP9_DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
+  DOTP_CONST_PAIR(in13, in10, cospi_16_64, cospi_16_64, vec2, vec5);
+  DOTP_CONST_PAIR(in12, in11, cospi_16_64, cospi_16_64, vec3, vec4);
   ADD4(in8, vec3, in9, vec2, in14, vec5, in15, vec4, in0, vec1, vec6, in2);
-  VP9_DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
+  DOTP_CONST_PAIR(vec6, vec1, cospi_24_64, cospi_8_64, in1, in3);
   ADD2(in0, in1, in2, in3, vec0, vec7);
-  VP9_DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, temp1, temp0);
+  DOTP_CONST_PAIR(vec7, vec0, cospi_30_64, cospi_2_64, temp1, temp0);
   ST_SH(temp0, out + 64);
   ST_SH(temp1, out + 120);
 
   SUB2(in0, in1, in2, in3, in0, in2);
-  VP9_DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, temp1, temp0);
+  DOTP_CONST_PAIR(in2, in0, cospi_14_64, cospi_18_64, temp1, temp0);
   ST_SH(temp0, out + 72);
   ST_SH(temp1, out + 112);
 
   SUB2(in9, vec2, in14, vec5, vec2, vec5);
-  VP9_DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
+  DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
   SUB4(in8, vec3, in15, vec4, in3, in2, in0, in1, in3, in0, vec2, vec5);
-  VP9_DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, temp1, temp0);
+  DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, temp1, temp0);
   ST_SH(temp0, out + 80);
   ST_SH(temp1, out + 104);
 
   ADD2(in3, in2, in0, in1, vec3, vec4);
-  VP9_DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, temp0, temp1);
+  DOTP_CONST_PAIR(vec4, vec3, cospi_6_64, cospi_26_64, temp0, temp1);
   ST_SH(temp0, out + 96);
   ST_SH(temp1, out + 88);
 }
@@ -808,19 +808,19 @@ static void fdct8x32_1d_row_odd_rd(int16_t *temp, int16_t *interm_ptr,
   in26 = LD_SH(temp + 80);
   in27 = LD_SH(temp + 88);
 
-  VP9_DOTP_CONST_PAIR(in27, in20, cospi_16_64, cospi_16_64, in20, in27);
-  VP9_DOTP_CONST_PAIR(in26, in21, cospi_16_64, cospi_16_64, in21, in26);
+  DOTP_CONST_PAIR(in27, in20, cospi_16_64, cospi_16_64, in20, in27);
+  DOTP_CONST_PAIR(in26, in21, cospi_16_64, cospi_16_64, in21, in26);
 
-  VP9_FDCT_POSTPROC_2V_NEG_H(in20, in21);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in26, in27);
+  FDCT_POSTPROC_2V_NEG_H(in20, in21);
+  FDCT_POSTPROC_2V_NEG_H(in26, in27);
 
   in18 = LD_SH(temp + 16);
   in19 = LD_SH(temp + 24);
   in28 = LD_SH(temp + 96);
   in29 = LD_SH(temp + 104);
 
-  VP9_FDCT_POSTPROC_2V_NEG_H(in18, in19);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in28, in29);
+  FDCT_POSTPROC_2V_NEG_H(in18, in19);
+  FDCT_POSTPROC_2V_NEG_H(in28, in29);
 
   vec4 = in19 - in20;
   ST_SH(vec4, interm_ptr + 32);
@@ -838,18 +838,18 @@ static void fdct8x32_1d_row_odd_rd(int16_t *temp, int16_t *interm_ptr,
   in24 = LD_SH(temp + 64);
   in25 = LD_SH(temp + 72);
 
-  VP9_DOTP_CONST_PAIR(in25, in22, cospi_16_64, cospi_16_64, in22, in25);
-  VP9_DOTP_CONST_PAIR(in24, in23, cospi_16_64, cospi_16_64, in23, in24);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in22, in23);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in24, in25);
+  DOTP_CONST_PAIR(in25, in22, cospi_16_64, cospi_16_64, in22, in25);
+  DOTP_CONST_PAIR(in24, in23, cospi_16_64, cospi_16_64, in23, in24);
+  FDCT_POSTPROC_2V_NEG_H(in22, in23);
+  FDCT_POSTPROC_2V_NEG_H(in24, in25);
 
   in16 = LD_SH(temp);
   in17 = LD_SH(temp + 8);
   in30 = LD_SH(temp + 112);
   in31 = LD_SH(temp + 120);
 
-  VP9_FDCT_POSTPROC_2V_NEG_H(in16, in17);
-  VP9_FDCT_POSTPROC_2V_NEG_H(in30, in31);
+  FDCT_POSTPROC_2V_NEG_H(in16, in17);
+  FDCT_POSTPROC_2V_NEG_H(in30, in31);
 
   vec4 = in17 - in22;
   ST_SH(vec4, interm_ptr + 40);
@@ -861,29 +861,29 @@ static void fdct8x32_1d_row_odd_rd(int16_t *temp, int16_t *interm_ptr,
   ST_SH(vec4, interm_ptr + 80);
 
   ADD4(in16, in23, in17, in22, in30, in25, in31, in24, in16, in17, in30, in31);
-  VP9_DOTP_CONST_PAIR(in26, in21, cospi_24_64, cospi_8_64, in18, in29);
-  VP9_DOTP_CONST_PAIR(in27, in20, cospi_24_64, cospi_8_64, in19, in28);
+  DOTP_CONST_PAIR(in26, in21, cospi_24_64, cospi_8_64, in18, in29);
+  DOTP_CONST_PAIR(in27, in20, cospi_24_64, cospi_8_64, in19, in28);
   ADD4(in16, in19, in17, in18, in30, in29, in31, in28, in27, in22, in21, in25);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_28_64, cospi_4_64, in26, in24);
+  DOTP_CONST_PAIR(in21, in22, cospi_28_64, cospi_4_64, in26, in24);
   ADD2(in27, in26, in25, in24, in23, in20);
-  VP9_DOTP_CONST_PAIR(in20, in23, cospi_31_64, cospi_1_64, vec4, vec5);
+  DOTP_CONST_PAIR(in20, in23, cospi_31_64, cospi_1_64, vec4, vec5);
   ST_SH(vec5, out);
   ST_SH(vec4, out + 120);
 
   SUB2(in27, in26, in25, in24, in22, in21);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_15_64, cospi_17_64, vec5, vec4);
+  DOTP_CONST_PAIR(in21, in22, cospi_15_64, cospi_17_64, vec5, vec4);
   ST_SH(vec5, out + 112);
   ST_SH(vec4, out + 8);
 
   SUB4(in17, in18, in16, in19, in31, in28, in30, in29, in23, in26, in24, in20);
-  VP9_DOTP_CONST_PAIR((-in23), in20, cospi_28_64, cospi_4_64, in27, in25);
+  DOTP_CONST_PAIR((-in23), in20, cospi_28_64, cospi_4_64, in27, in25);
   SUB2(in26, in27, in24, in25, in23, in20);
-  VP9_DOTP_CONST_PAIR(in20, in23, cospi_23_64, cospi_9_64, vec4, vec5);
+  DOTP_CONST_PAIR(in20, in23, cospi_23_64, cospi_9_64, vec4, vec5);
   ST_SH(vec4, out + 16);
   ST_SH(vec5, out + 104);
 
   ADD2(in26, in27, in24, in25, in22, in21);
-  VP9_DOTP_CONST_PAIR(in21, in22, cospi_7_64, cospi_25_64, vec4, vec5);
+  DOTP_CONST_PAIR(in21, in22, cospi_7_64, cospi_25_64, vec4, vec5);
   ST_SH(vec4, out + 24);
   ST_SH(vec5, out + 96);
 
@@ -894,8 +894,8 @@ static void fdct8x32_1d_row_odd_rd(int16_t *temp, int16_t *interm_ptr,
 
   in16 = in20;
   in17 = in21;
-  VP9_DOTP_CONST_PAIR(-in16, in27, cospi_24_64, cospi_8_64, in20, in27);
-  VP9_DOTP_CONST_PAIR(-in17, in26, cospi_24_64, cospi_8_64, in21, in26);
+  DOTP_CONST_PAIR(-in16, in27, cospi_24_64, cospi_8_64, in20, in27);
+  DOTP_CONST_PAIR(-in17, in26, cospi_24_64, cospi_8_64, in21, in26);
 
   in22 = LD_SH(interm_ptr + 40);
   in25 = LD_SH(interm_ptr + 48);
@@ -903,27 +903,27 @@ static void fdct8x32_1d_row_odd_rd(int16_t *temp, int16_t *interm_ptr,
   in23 = LD_SH(interm_ptr + 80);
 
   SUB4(in23, in20, in22, in21, in25, in26, in24, in27, in28, in17, in18, in31);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_12_64, cospi_20_64, in29, in30);
+  DOTP_CONST_PAIR(in18, in17, cospi_12_64, cospi_20_64, in29, in30);
   in16 = in28 + in29;
   in19 = in31 + in30;
-  VP9_DOTP_CONST_PAIR(in19, in16, cospi_27_64, cospi_5_64, vec5, vec4);
+  DOTP_CONST_PAIR(in19, in16, cospi_27_64, cospi_5_64, vec5, vec4);
   ST_SH(vec5, out + 32);
   ST_SH(vec4, out + 88);
 
   SUB2(in28, in29, in31, in30, in17, in18);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_11_64, cospi_21_64, vec5, vec4);
+  DOTP_CONST_PAIR(in18, in17, cospi_11_64, cospi_21_64, vec5, vec4);
   ST_SH(vec5, out + 40);
   ST_SH(vec4, out + 80);
 
   ADD4(in22, in21, in23, in20, in24, in27, in25, in26, in16, in29, in30, in19);
-  VP9_DOTP_CONST_PAIR(-in16, in19, cospi_12_64, cospi_20_64, in28, in31);
+  DOTP_CONST_PAIR(-in16, in19, cospi_12_64, cospi_20_64, in28, in31);
   SUB2(in29, in28, in30, in31, in16, in19);
-  VP9_DOTP_CONST_PAIR(in19, in16, cospi_19_64, cospi_13_64, vec5, vec4);
+  DOTP_CONST_PAIR(in19, in16, cospi_19_64, cospi_13_64, vec5, vec4);
   ST_SH(vec5, out + 72);
   ST_SH(vec4, out + 48);
 
   ADD2(in29, in28, in30, in31, in17, in18);
-  VP9_DOTP_CONST_PAIR(in18, in17, cospi_3_64, cospi_29_64, vec5, vec4);
+  DOTP_CONST_PAIR(in18, in17, cospi_3_64, cospi_29_64, vec5, vec4);
   ST_SH(vec4, out + 56);
   ST_SH(vec5, out + 64);
 }

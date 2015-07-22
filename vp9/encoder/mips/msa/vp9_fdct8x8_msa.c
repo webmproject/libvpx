@@ -28,12 +28,12 @@ void vp9_fdct8x8_msa(const int16_t *input, int16_t *output,
             in0, in1, in2, in3, in4, in5, in6, in7);
   TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                      in0, in1, in2, in3, in4, in5, in6, in7);
-  VP9_SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7);
+  SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7);
   ST_SH8(in0, in1, in2, in3, in4, in5, in6, in7, output, 8);
 }
 
 void vp9_fdct8x8_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
-  out[0] = VP9_LD_HADD(input, stride);
+  out[0] = LD_HADD(input, stride);
   out[1] = 0;
 }
 
@@ -85,6 +85,6 @@ void vp9_fht8x8_msa(const int16_t *input, int16_t *output, int32_t stride,
 
   TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                      in0, in1, in2, in3, in4, in5, in6, in7);
-  VP9_SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7);
+  SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7);
   ST_SH8(in0, in1, in2, in3, in4, in5, in6, in7, output, 8);
 }
