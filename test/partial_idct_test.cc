@@ -19,6 +19,7 @@
 #include "test/util.h"
 
 #include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_scan.h"
 #include "vpx/vpx_integer.h"

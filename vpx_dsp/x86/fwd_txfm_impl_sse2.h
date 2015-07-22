@@ -10,12 +10,15 @@
 
 #include <emmintrin.h>  // SSE2
 
-#include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vp9/encoder/vp9_dct.h"
 #include "vp9/encoder/x86/vp9_dct_sse2.h"
 #include "vpx_ports/mem.h"
 
+// TODO(jingning) The high bit-depth functions need rework for performance.
+// After we properly fix the high bit-depth function implementations, this
+// file's dependency should be substantially simplified.
 #if DCT_HIGH_BIT_DEPTH
 #define ADD_EPI16 _mm_adds_epi16
 #define SUB_EPI16 _mm_subs_epi16
