@@ -538,8 +538,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_c, 3, VPX_BITS_8)));
 #endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-// TODO(jingning) Re-enable the mips/msa unit test.
-#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE && 0
+#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     MSA, Trans4x4DCT,
     ::testing::Values(

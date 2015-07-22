@@ -13,25 +13,6 @@
 #include "./vp9_rtcd.h"
 #include "vp9/encoder/mips/msa/vp9_fdct_msa.h"
 
-void vp9_fdct8x8_msa(const int16_t *input, int16_t *output,
-                     int32_t src_stride) {
-  v8i16 in0, in1, in2, in3, in4, in5, in6, in7;
-
-  LD_SH8(input, src_stride, in0, in1, in2, in3, in4, in5, in6, in7);
-  SLLI_4V(in0, in1, in2, in3, 2);
-  SLLI_4V(in4, in5, in6, in7, 2);
-  VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
-            in0, in1, in2, in3, in4, in5, in6, in7);
-  TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
-                     in0, in1, in2, in3, in4, in5, in6, in7);
-  VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
-            in0, in1, in2, in3, in4, in5, in6, in7);
-  TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
-                     in0, in1, in2, in3, in4, in5, in6, in7);
-  SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7);
-  ST_SH8(in0, in1, in2, in3, in4, in5, in6, in7, output, 8);
-}
-
 void vp9_fdct8x8_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
   out[0] = LD_HADD(input, stride);
   out[1] = 0;

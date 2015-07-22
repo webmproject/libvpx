@@ -148,13 +148,13 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_highbd_fdct16x16 sse2/;
 } else {
   add_proto qw/void vp9_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct4x4 sse2/;
+  specialize qw/vp9_fdct4x4 sse2 msa/;
 
   add_proto qw/void vp9_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct8x8 sse2 neon/, "$ssse3_x86_64_x86inc";
+  specialize qw/vp9_fdct8x8 sse2 neon msa/, "$ssse3_x86_64_x86inc";
 
   add_proto qw/void vp9_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct16x16 sse2/;
+  specialize qw/vp9_fdct16x16 sse2 msa/;
 }  # CONFIG_VP9_HIGHBITDEPTH
 }  # CONFIG_VP9_ENCODER
 
