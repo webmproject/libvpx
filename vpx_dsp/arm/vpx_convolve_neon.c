@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 
-void vp9_convolve8_neon(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve8_neon(const uint8_t *src, ptrdiff_t src_stride,
                         uint8_t *dst, ptrdiff_t dst_stride,
                         const int16_t *filter_x, int x_step_q4,
                         const int16_t *filter_y, int y_step_q4,
@@ -26,7 +26,7 @@ void vp9_convolve8_neon(const uint8_t *src, ptrdiff_t src_stride,
   int intermediate_height = h + 7;
 
   if (x_step_q4 != 16 || y_step_q4 != 16) {
-    vp9_convolve8_c(src, src_stride,
+    vpx_convolve8_c(src, src_stride,
                     dst, dst_stride,
                     filter_x, x_step_q4,
                     filter_y, y_step_q4,
@@ -39,19 +39,19 @@ void vp9_convolve8_neon(const uint8_t *src, ptrdiff_t src_stride,
    * the temp buffer which has lots of extra room and is subsequently discarded
    * this is safe if somewhat less than ideal.
    */
-  vp9_convolve8_horiz_neon(src - src_stride * 3, src_stride,
+  vpx_convolve8_horiz_neon(src - src_stride * 3, src_stride,
                            temp, 64,
                            filter_x, x_step_q4, filter_y, y_step_q4,
                            w, intermediate_height);
 
   /* Step into the temp buffer 3 lines to get the actual frame data */
-  vp9_convolve8_vert_neon(temp + 64 * 3, 64,
+  vpx_convolve8_vert_neon(temp + 64 * 3, 64,
                           dst, dst_stride,
                           filter_x, x_step_q4, filter_y, y_step_q4,
                           w, h);
 }
 
-void vp9_convolve8_avg_neon(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve8_avg_neon(const uint8_t *src, ptrdiff_t src_stride,
                             uint8_t *dst, ptrdiff_t dst_stride,
                             const int16_t *filter_x, int x_step_q4,
                             const int16_t *filter_y, int y_step_q4,
@@ -60,7 +60,7 @@ void vp9_convolve8_avg_neon(const uint8_t *src, ptrdiff_t src_stride,
   int intermediate_height = h + 7;
 
   if (x_step_q4 != 16 || y_step_q4 != 16) {
-    vp9_convolve8_avg_c(src, src_stride,
+    vpx_convolve8_avg_c(src, src_stride,
                         dst, dst_stride,
                         filter_x, x_step_q4,
                         filter_y, y_step_q4,
@@ -71,11 +71,11 @@ void vp9_convolve8_avg_neon(const uint8_t *src, ptrdiff_t src_stride,
   /* This implementation has the same issues as above. In addition, we only want
    * to average the values after both passes.
    */
-  vp9_convolve8_horiz_neon(src - src_stride * 3, src_stride,
+  vpx_convolve8_horiz_neon(src - src_stride * 3, src_stride,
                            temp, 64,
                            filter_x, x_step_q4, filter_y, y_step_q4,
                            w, intermediate_height);
-  vp9_convolve8_avg_vert_neon(temp + 64 * 3,
+  vpx_convolve8_avg_vert_neon(temp + 64 * 3,
                               64, dst, dst_stride,
                               filter_x, x_step_q4, filter_y, y_step_q4,
                               w, h);

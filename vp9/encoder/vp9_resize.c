@@ -15,6 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if CONFIG_VP9_HIGHBITDEPTH
+#include "vpx_dsp/vpx_dsp_common.h"
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_resize.h"

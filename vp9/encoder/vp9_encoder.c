@@ -12,11 +12,12 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include "./vpx_config.h"
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 #include "vpx/internal/vpx_psnr.h"
+#include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
@@ -2580,18 +2581,18 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
 
 #if CONFIG_VP9_HIGHBITDEPTH
         if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
-          vp9_highbd_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
+          vpx_highbd_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
                                kernel[x_q4 & 0xf], 16 * src_w / dst_w,
                                kernel[y_q4 & 0xf], 16 * src_h / dst_h,
                                16 / factor, 16 / factor, bd);
         } else {
-          vp9_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
+          vpx_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
                         kernel[x_q4 & 0xf], 16 * src_w / dst_w,
                         kernel[y_q4 & 0xf], 16 * src_h / dst_h,
                         16 / factor, 16 / factor);
         }
 #else
-        vp9_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
+        vpx_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
                       kernel[x_q4 & 0xf], 16 * src_w / dst_w,
                       kernel[y_q4 & 0xf], 16 * src_h / dst_h,
                       16 / factor, 16 / factor);

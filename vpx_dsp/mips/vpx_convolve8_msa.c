@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp9_rtcd.h"
-#include "vp9/common/mips/msa/vp9_convolve_msa.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/mips/vpx_convolve_msa.h"
 
 const uint8_t mc_filt_mask_arr[16 * 3] = {
   /* 8 width cases */
@@ -551,7 +551,7 @@ static void common_hv_2ht_2vt_64w_msa(const uint8_t *src, int32_t src_stride,
   }
 }
 
-void vp9_convolve8_msa(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve8_msa(const uint8_t *src, ptrdiff_t src_stride,
                        uint8_t *dst, ptrdiff_t dst_stride,
                        const int16_t *filter_x, int32_t x_step_q4,
                        const int16_t *filter_y, int32_t y_step_q4,
@@ -559,7 +559,7 @@ void vp9_convolve8_msa(const uint8_t *src, ptrdiff_t src_stride,
   int8_t cnt, filt_hor[8], filt_ver[8];
 
   if (16 != x_step_q4 || 16 != y_step_q4) {
-    vp9_convolve8_c(src, src_stride, dst, dst_stride,
+    vpx_convolve8_c(src, src_stride, dst, dst_stride,
                     filter_x, x_step_q4, filter_y, y_step_q4,
                     w, h);
     return;
@@ -567,7 +567,7 @@ void vp9_convolve8_msa(const uint8_t *src, ptrdiff_t src_stride,
 
   if (((const int32_t *)filter_x)[1] == 0x800000 &&
       ((const int32_t *)filter_y)[1] == 0x800000) {
-    vp9_convolve_copy(src, src_stride, dst, dst_stride,
+    vpx_convolve_copy(src, src_stride, dst, dst_stride,
                       filter_x, x_step_q4, filter_y, y_step_q4,
                       w, h);
     return;
@@ -607,14 +607,14 @@ void vp9_convolve8_msa(const uint8_t *src, ptrdiff_t src_stride,
                                   &filt_hor[3], &filt_ver[3], (int32_t)h);
         break;
       default:
-        vp9_convolve8_c(src, src_stride, dst, dst_stride,
+        vpx_convolve8_c(src, src_stride, dst, dst_stride,
                         filter_x, x_step_q4, filter_y, y_step_q4,
                         w, h);
         break;
     }
   } else if (((const int32_t *)filter_x)[0] == 0 ||
              ((const int32_t *)filter_y)[0] == 0) {
-    vp9_convolve8_c(src, src_stride, dst, dst_stride,
+    vpx_convolve8_c(src, src_stride, dst, dst_stride,
                     filter_x, x_step_q4, filter_y, y_step_q4,
                     w, h);
   } else {
@@ -645,7 +645,7 @@ void vp9_convolve8_msa(const uint8_t *src, ptrdiff_t src_stride,
                                   filt_hor, filt_ver, (int32_t)h);
         break;
       default:
-        vp9_convolve8_c(src, src_stride, dst, dst_stride,
+        vpx_convolve8_c(src, src_stride, dst, dst_stride,
                         filter_x, x_step_q4, filter_y, y_step_q4,
                         w, h);
         break;

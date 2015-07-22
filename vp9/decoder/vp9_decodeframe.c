@@ -12,6 +12,7 @@
 #include <stdlib.h>  // qsort()
 
 #include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_dsp/bitreader_buffer.h"
