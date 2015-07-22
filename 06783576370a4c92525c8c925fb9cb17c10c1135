@@ -16,6 +16,24 @@
       "revId": "06783576370a4c92525c8c925fb9cb17c10c1135",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cdc02a18_b025f634",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 925,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-22T00:53:23Z",
+      "side": 1,
+      "message": "this was intended. the msa codes need more refactoring work before the migration. i am planning to get its header split and clear out dependency next, then move the 2d-dct part to vpx_dsp.",
+      "parentUuid": "6dd2dee8_3276f04e",
+      "revId": "06783576370a4c92525c8c925fb9cb17c10c1135",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
