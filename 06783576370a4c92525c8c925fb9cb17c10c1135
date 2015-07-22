@@ -34,6 +34,58 @@
       "revId": "06783576370a4c92525c8c925fb9cb17c10c1135",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "edc5ee24_c3123489",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 925,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-22T22:38:02Z",
+      "side": 1,
+      "message": "Re-enable would be more clear than revert here with a note as to why it\u0027s disabled: re-enable ... \u0027after doing whatever needs to be done\u0027",
+      "parentUuid": "cdc02a18_b025f634",
+      "revId": "06783576370a4c92525c8c925fb9cb17c10c1135",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad7a16a8_8e3d4f7e",
+        "filename": "vpx_dsp/x86/fwd_txfm_sse2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-22T22:38:02Z",
+      "side": 1,
+      "message": "Even though this is a template I think it\u0027s appropriate to include vpx_config.h here as this code directly depends on it. that would avoid any issues if code is shifted around",
+      "revId": "06783576370a4c92525c8c925fb9cb17c10c1135",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d7552bb_ed996951",
+        "filename": "vpx_dsp/x86/fwd_txfm_sse2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-22T22:38:02Z",
+      "side": 1,
+      "message": "you can delete this line",
+      "revId": "06783576370a4c92525c8c925fb9cb17c10c1135",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
