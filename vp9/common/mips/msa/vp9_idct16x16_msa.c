@@ -25,12 +25,12 @@ void vp9_idct16_1d_rows_msa(const int16_t *input, int16_t *output) {
                      reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7);
   TRANSPOSE8x8_SH_SH(reg8, reg9, reg10, reg11, reg12, reg13, reg14, reg15,
                      reg8, reg9, reg10, reg11, reg12, reg13, reg14, reg15);
-  VP9_DOTP_CONST_PAIR(reg2, reg14, cospi_28_64, cospi_4_64, reg2, reg14);
-  VP9_DOTP_CONST_PAIR(reg10, reg6, cospi_12_64, cospi_20_64, reg10, reg6);
+  DOTP_CONST_PAIR(reg2, reg14, cospi_28_64, cospi_4_64, reg2, reg14);
+  DOTP_CONST_PAIR(reg10, reg6, cospi_12_64, cospi_20_64, reg10, reg6);
   BUTTERFLY_4(reg2, reg14, reg6, reg10, loc0, loc1, reg14, reg2);
-  VP9_DOTP_CONST_PAIR(reg14, reg2, cospi_16_64, cospi_16_64, loc2, loc3);
-  VP9_DOTP_CONST_PAIR(reg0, reg8, cospi_16_64, cospi_16_64, reg0, reg8);
-  VP9_DOTP_CONST_PAIR(reg4, reg12, cospi_24_64, cospi_8_64, reg4, reg12);
+  DOTP_CONST_PAIR(reg14, reg2, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(reg0, reg8, cospi_16_64, cospi_16_64, reg0, reg8);
+  DOTP_CONST_PAIR(reg4, reg12, cospi_24_64, cospi_8_64, reg4, reg12);
   BUTTERFLY_4(reg8, reg0, reg4, reg12, reg2, reg6, reg10, reg14);
   SUB4(reg2, loc1, reg14, loc0, reg6, loc3, reg10, loc2, reg0, reg12, reg4,
        reg8);
@@ -38,16 +38,16 @@ void vp9_idct16_1d_rows_msa(const int16_t *input, int16_t *output) {
        reg10);
 
   /* stage 2 */
-  VP9_DOTP_CONST_PAIR(reg1, reg15, cospi_30_64, cospi_2_64, reg1, reg15);
-  VP9_DOTP_CONST_PAIR(reg9, reg7, cospi_14_64, cospi_18_64, loc2, loc3);
+  DOTP_CONST_PAIR(reg1, reg15, cospi_30_64, cospi_2_64, reg1, reg15);
+  DOTP_CONST_PAIR(reg9, reg7, cospi_14_64, cospi_18_64, loc2, loc3);
 
   reg9 = reg1 - loc2;
   reg1 = reg1 + loc2;
   reg7 = reg15 - loc3;
   reg15 = reg15 + loc3;
 
-  VP9_DOTP_CONST_PAIR(reg5, reg11, cospi_22_64, cospi_10_64, reg5, reg11);
-  VP9_DOTP_CONST_PAIR(reg13, reg3, cospi_6_64, cospi_26_64, loc0, loc1);
+  DOTP_CONST_PAIR(reg5, reg11, cospi_22_64, cospi_10_64, reg5, reg11);
+  DOTP_CONST_PAIR(reg13, reg3, cospi_6_64, cospi_26_64, loc0, loc1);
   BUTTERFLY_4(loc0, loc1, reg11, reg5, reg13, reg3, reg11, reg5);
 
   loc1 = reg15 + reg3;
@@ -63,8 +63,8 @@ void vp9_idct16_1d_rows_msa(const int16_t *input, int16_t *output) {
   tmp7 = loc1;
   reg0 = loc2;
 
-  VP9_DOTP_CONST_PAIR(reg7, reg9, cospi_24_64, cospi_8_64, reg7, reg9);
-  VP9_DOTP_CONST_PAIR((-reg5), (-reg11), cospi_8_64, cospi_24_64, reg5, reg11);
+  DOTP_CONST_PAIR(reg7, reg9, cospi_24_64, cospi_8_64, reg7, reg9);
+  DOTP_CONST_PAIR((-reg5), (-reg11), cospi_8_64, cospi_24_64, reg5, reg11);
 
   loc0 = reg9 + reg5;
   reg5 = reg9 - reg5;
@@ -77,13 +77,13 @@ void vp9_idct16_1d_rows_msa(const int16_t *input, int16_t *output) {
   loc2 = reg4 - loc0;
   tmp5 = loc1;
 
-  VP9_DOTP_CONST_PAIR(reg5, reg11, cospi_16_64, cospi_16_64, reg5, reg11);
+  DOTP_CONST_PAIR(reg5, reg11, cospi_16_64, cospi_16_64, reg5, reg11);
   BUTTERFLY_4(reg8, reg10, reg11, reg5, loc0, reg4, reg9, loc1);
 
   reg10 = loc0;
   reg11 = loc1;
 
-  VP9_DOTP_CONST_PAIR(reg3, reg13, cospi_16_64, cospi_16_64, reg3, reg13);
+  DOTP_CONST_PAIR(reg3, reg13, cospi_16_64, cospi_16_64, reg3, reg13);
   BUTTERFLY_4(reg12, reg14, reg13, reg3, reg8, reg6, reg7, reg5);
 
   reg13 = loc2;
@@ -117,12 +117,12 @@ void vp9_idct16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   /* load bottom 8x8 */
   LD_SH8(input, 16, reg8, reg9, reg10, reg11, reg12, reg13, reg14, reg15);
 
-  VP9_DOTP_CONST_PAIR(reg2, reg14, cospi_28_64, cospi_4_64, reg2, reg14);
-  VP9_DOTP_CONST_PAIR(reg10, reg6, cospi_12_64, cospi_20_64, reg10, reg6);
+  DOTP_CONST_PAIR(reg2, reg14, cospi_28_64, cospi_4_64, reg2, reg14);
+  DOTP_CONST_PAIR(reg10, reg6, cospi_12_64, cospi_20_64, reg10, reg6);
   BUTTERFLY_4(reg2, reg14, reg6, reg10, loc0, loc1, reg14, reg2);
-  VP9_DOTP_CONST_PAIR(reg14, reg2, cospi_16_64, cospi_16_64, loc2, loc3);
-  VP9_DOTP_CONST_PAIR(reg0, reg8, cospi_16_64, cospi_16_64, reg0, reg8);
-  VP9_DOTP_CONST_PAIR(reg4, reg12, cospi_24_64, cospi_8_64, reg4, reg12);
+  DOTP_CONST_PAIR(reg14, reg2, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(reg0, reg8, cospi_16_64, cospi_16_64, reg0, reg8);
+  DOTP_CONST_PAIR(reg4, reg12, cospi_24_64, cospi_8_64, reg4, reg12);
   BUTTERFLY_4(reg8, reg0, reg4, reg12, reg2, reg6, reg10, reg14);
 
   reg0 = reg2 - loc1;
@@ -135,16 +135,16 @@ void vp9_idct16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   reg10 = reg10 + loc2;
 
   /* stage 2 */
-  VP9_DOTP_CONST_PAIR(reg1, reg15, cospi_30_64, cospi_2_64, reg1, reg15);
-  VP9_DOTP_CONST_PAIR(reg9, reg7, cospi_14_64, cospi_18_64, loc2, loc3);
+  DOTP_CONST_PAIR(reg1, reg15, cospi_30_64, cospi_2_64, reg1, reg15);
+  DOTP_CONST_PAIR(reg9, reg7, cospi_14_64, cospi_18_64, loc2, loc3);
 
   reg9 = reg1 - loc2;
   reg1 = reg1 + loc2;
   reg7 = reg15 - loc3;
   reg15 = reg15 + loc3;
 
-  VP9_DOTP_CONST_PAIR(reg5, reg11, cospi_22_64, cospi_10_64, reg5, reg11);
-  VP9_DOTP_CONST_PAIR(reg13, reg3, cospi_6_64, cospi_26_64, loc0, loc1);
+  DOTP_CONST_PAIR(reg5, reg11, cospi_22_64, cospi_10_64, reg5, reg11);
+  DOTP_CONST_PAIR(reg13, reg3, cospi_6_64, cospi_26_64, loc0, loc1);
   BUTTERFLY_4(loc0, loc1, reg11, reg5, reg13, reg3, reg11, reg5);
 
   loc1 = reg15 + reg3;
@@ -160,8 +160,8 @@ void vp9_idct16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   tmp7 = loc1;
   reg0 = loc2;
 
-  VP9_DOTP_CONST_PAIR(reg7, reg9, cospi_24_64, cospi_8_64, reg7, reg9);
-  VP9_DOTP_CONST_PAIR((-reg5), (-reg11), cospi_8_64, cospi_24_64, reg5, reg11);
+  DOTP_CONST_PAIR(reg7, reg9, cospi_24_64, cospi_8_64, reg7, reg9);
+  DOTP_CONST_PAIR((-reg5), (-reg11), cospi_8_64, cospi_24_64, reg5, reg11);
 
   loc0 = reg9 + reg5;
   reg5 = reg9 - reg5;
@@ -174,13 +174,13 @@ void vp9_idct16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   loc2 = reg4 - loc0;
   tmp5 = loc1;
 
-  VP9_DOTP_CONST_PAIR(reg5, reg11, cospi_16_64, cospi_16_64, reg5, reg11);
+  DOTP_CONST_PAIR(reg5, reg11, cospi_16_64, cospi_16_64, reg5, reg11);
   BUTTERFLY_4(reg8, reg10, reg11, reg5, loc0, reg4, reg9, loc1);
 
   reg10 = loc0;
   reg11 = loc1;
 
-  VP9_DOTP_CONST_PAIR(reg3, reg13, cospi_16_64, cospi_16_64, reg3, reg13);
+  DOTP_CONST_PAIR(reg3, reg13, cospi_16_64, cospi_16_64, reg3, reg13);
   BUTTERFLY_4(reg12, reg14, reg13, reg3, reg8, reg6, reg7, reg5);
   reg13 = loc2;
 
@@ -350,17 +350,17 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   k1 = VP9_SET_COSPI_PAIR(cospi_31_64, -cospi_1_64);
   k2 = VP9_SET_COSPI_PAIR(cospi_17_64, cospi_15_64);
   k3 = VP9_SET_COSPI_PAIR(cospi_15_64, -cospi_17_64);
-  VP9_MADD_BF(r15, r0, r7, r8, k0, k1, k2, k3, g0, g1, g2, g3);
+  MADD_BF(r15, r0, r7, r8, k0, k1, k2, k3, g0, g1, g2, g3);
   k0 = VP9_SET_COSPI_PAIR(cospi_9_64, cospi_23_64);
   k1 = VP9_SET_COSPI_PAIR(cospi_23_64, -cospi_9_64);
   k2 = VP9_SET_COSPI_PAIR(cospi_25_64, cospi_7_64);
   k3 = VP9_SET_COSPI_PAIR(cospi_7_64, -cospi_25_64);
-  VP9_MADD_BF(r11, r4, r3, r12, k0, k1, k2, k3, g8, g9, g10, g11);
+  MADD_BF(r11, r4, r3, r12, k0, k1, k2, k3, g8, g9, g10, g11);
   BUTTERFLY_4(g0, g2, g10, g8, h8, h9, v2, v0);
   k0 = VP9_SET_COSPI_PAIR(cospi_4_64, cospi_28_64);
   k1 = VP9_SET_COSPI_PAIR(cospi_28_64, -cospi_4_64);
   k2 = VP9_SET_COSPI_PAIR(-cospi_28_64, cospi_4_64);
-  VP9_MADD_BF(g1, g3, g9, g11, k0, k1, k2, k0, h0, h1, h2, h3);
+  MADD_BF(g1, g3, g9, g11, k0, k1, k2, k0, h0, h1, h2, h3);
 
   r1 = LD_SH(input + 1 * 16);
   r2 = LD_SH(input + 2 * 16);
@@ -375,12 +375,12 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   k1 = VP9_SET_COSPI_PAIR(cospi_27_64, -cospi_5_64);
   k2 = VP9_SET_COSPI_PAIR(cospi_21_64, cospi_11_64);
   k3 = VP9_SET_COSPI_PAIR(cospi_11_64, -cospi_21_64);
-  VP9_MADD_BF(r13, r2, r5, r10, k0, k1, k2, k3, g4, g5, g6, g7);
+  MADD_BF(r13, r2, r5, r10, k0, k1, k2, k3, g4, g5, g6, g7);
   k0 = VP9_SET_COSPI_PAIR(cospi_13_64, cospi_19_64);
   k1 = VP9_SET_COSPI_PAIR(cospi_19_64, -cospi_13_64);
   k2 = VP9_SET_COSPI_PAIR(cospi_29_64, cospi_3_64);
   k3 = VP9_SET_COSPI_PAIR(cospi_3_64, -cospi_29_64);
-  VP9_MADD_BF(r9, r6, r1, r14, k0, k1, k2, k3, g12, g13, g14, g15);
+  MADD_BF(r9, r6, r1, r14, k0, k1, k2, k3, g12, g13, g14, g15);
   BUTTERFLY_4(g4, g6, g14, g12, h10, h11, v6, v4);
   BUTTERFLY_4(h8, h9, h11, h10, out0, out1, h11, h10);
   out1 = -out1;
@@ -397,7 +397,7 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   k0 = VP9_SET_COSPI_PAIR(cospi_12_64, cospi_20_64);
   k1 = VP9_SET_COSPI_PAIR(-cospi_20_64, cospi_12_64);
   k2 = VP9_SET_COSPI_PAIR(cospi_20_64, -cospi_12_64);
-  VP9_MADD_BF(g7, g5, g15, g13, k0, k1, k2, k0, h4, h5, h6, h7);
+  MADD_BF(g7, g5, g15, g13, k0, k1, k2, k0, h4, h5, h6, h7);
   BUTTERFLY_4(h0, h2, h6, h4, out8, out9, out11, out10);
   out8 = -out8;
 
@@ -414,7 +414,7 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   k0 = VP9_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);
   k1 = VP9_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);
   k2 = VP9_SET_COSPI_PAIR(-cospi_24_64, cospi_8_64);
-  VP9_MADD_BF(v0, v2, v4, v6, k0, k1, k2, k0, out4, out6, out5, out7);
+  MADD_BF(v0, v2, v4, v6, k0, k1, k2, k0, out4, out6, out5, out7);
   out4 = -out4;
   SRARI_H2_SH(out4, out5, 6);
   dst4 = LD_UB(dst + 3 * dst_stride);
@@ -426,7 +426,7 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   ST8x1_UB(res4, dst + 3 * dst_stride);
   ST8x1_UB(res5, dst + 12 * dst_stride);
 
-  VP9_MADD_BF(h1, h3, h5, h7, k0, k1, k2, k0, out12, out14, out13, out15);
+  MADD_BF(h1, h3, h5, h7, k0, k1, k2, k0, out12, out14, out13, out15);
   out13 = -out13;
   SRARI_H2_SH(out12, out13, 6);
   dst12 = LD_UB(dst + 2 * dst_stride);
@@ -440,7 +440,7 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
 
   k0 = VP9_SET_COSPI_PAIR(cospi_16_64, cospi_16_64);
   k3 = VP9_SET_COSPI_PAIR(-cospi_16_64, cospi_16_64);
-  VP9_MADD_SHORT(out6, out7, k0, k3, out6, out7);
+  MADD_SHORT(out6, out7, k0, k3, out6, out7);
   SRARI_H2_SH(out6, out7, 6);
   dst6 = LD_UB(dst + 4 * dst_stride);
   dst7 = LD_UB(dst + 11 * dst_stride);
@@ -451,7 +451,7 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   ST8x1_UB(res6, dst + 4 * dst_stride);
   ST8x1_UB(res7, dst + 11 * dst_stride);
 
-  VP9_MADD_SHORT(out10, out11, k0, k3, out10, out11);
+  MADD_SHORT(out10, out11, k0, k3, out10, out11);
   SRARI_H2_SH(out10, out11, 6);
   dst10 = LD_UB(dst + 6 * dst_stride);
   dst11 = LD_UB(dst + 9 * dst_stride);
@@ -464,7 +464,7 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
 
   k1 = VP9_SET_COSPI_PAIR(-cospi_16_64, -cospi_16_64);
   k2 = VP9_SET_COSPI_PAIR(cospi_16_64, -cospi_16_64);
-  VP9_MADD_SHORT(h10, h11, k1, k2, out2, out3);
+  MADD_SHORT(h10, h11, k1, k2, out2, out3);
   SRARI_H2_SH(out2, out3, 6);
   dst2 = LD_UB(dst + 7 * dst_stride);
   dst3 = LD_UB(dst + 8 * dst_stride);
@@ -475,7 +475,7 @@ static void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
   ST8x1_UB(res2, dst + 7 * dst_stride);
   ST8x1_UB(res3, dst + 8 * dst_stride);
 
-  VP9_MADD_SHORT(out14, out15, k1, k2, out14, out15);
+  MADD_SHORT(out14, out15, k1, k2, out14, out15);
   SRARI_H2_SH(out14, out15, 6);
   dst14 = LD_UB(dst + 5 * dst_stride);
   dst15 = LD_UB(dst + 10 * dst_stride);

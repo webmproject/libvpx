@@ -14,52 +14,7 @@
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_idct.h"
 #include "vpx_dsp/mips/macros_msa.h"
-
-#define VP9_DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1) {  \
-  v8i16 k0_m = __msa_fill_h(cnst0);                                  \
-  v4i32 s0_m, s1_m, s2_m, s3_m;                                      \
-                                                                     \
-  s0_m = (v4i32)__msa_fill_h(cnst1);                                 \
-  k0_m = __msa_ilvev_h((v8i16)s0_m, k0_m);                           \
-                                                                     \
-  ILVRL_H2_SW((-reg1), reg0, s1_m, s0_m);                            \
-  ILVRL_H2_SW(reg0, reg1, s3_m, s2_m);                               \
-  DOTP_SH2_SW(s1_m, s0_m, k0_m, k0_m, s1_m, s0_m);                   \
-  SRARI_W2_SW(s1_m, s0_m, DCT_CONST_BITS);                           \
-  out0 = __msa_pckev_h((v8i16)s0_m, (v8i16)s1_m);                    \
-                                                                     \
-  DOTP_SH2_SW(s3_m, s2_m, k0_m, k0_m, s1_m, s0_m);                   \
-  SRARI_W2_SW(s1_m, s0_m, DCT_CONST_BITS);                           \
-  out1 = __msa_pckev_h((v8i16)s0_m, (v8i16)s1_m);                    \
-}
-
-#define VP9_DOT_ADD_SUB_SRARI_PCK(in0, in1, in2, in3, in4, in5, in6, in7,  \
-                                  dst0, dst1, dst2, dst3) {                \
-  v4i32 tp0_m, tp1_m, tp2_m, tp3_m, tp4_m;                                 \
-  v4i32 tp5_m, tp6_m, tp7_m, tp8_m, tp9_m;                                 \
-                                                                           \
-  DOTP_SH4_SW(in0, in1, in0, in1, in4, in4, in5, in5,                      \
-              tp0_m, tp2_m, tp3_m, tp4_m);                                 \
-  DOTP_SH4_SW(in2, in3, in2, in3, in6, in6, in7, in7,                      \
-              tp5_m, tp6_m, tp7_m, tp8_m);                                 \
-  BUTTERFLY_4(tp0_m, tp3_m, tp7_m, tp5_m, tp1_m, tp9_m, tp7_m, tp5_m);     \
-  BUTTERFLY_4(tp2_m, tp4_m, tp8_m, tp6_m, tp3_m, tp0_m, tp4_m, tp2_m);     \
-  SRARI_W4_SW(tp1_m, tp9_m, tp7_m, tp5_m, DCT_CONST_BITS);                 \
-  SRARI_W4_SW(tp3_m, tp0_m, tp4_m, tp2_m, DCT_CONST_BITS);                 \
-  PCKEV_H4_SH(tp1_m, tp3_m, tp9_m, tp0_m, tp7_m, tp4_m, tp5_m, tp2_m,      \
-              dst0, dst1, dst2, dst3);                                     \
-}
-
-#define VP9_DOT_SHIFT_RIGHT_PCK_H(in0, in1, in2) ({   \
-  v8i16 dst_m;                                        \
-  v4i32 tp0_m, tp1_m;                                 \
-                                                      \
-  DOTP_SH2_SW(in0, in1, in2, in2, tp1_m, tp0_m);      \
-  SRARI_W2_SW(tp1_m, tp0_m, DCT_CONST_BITS);          \
-  dst_m = __msa_pckev_h((v8i16)tp1_m, (v8i16)tp0_m);  \
-                                                      \
-  dst_m;                                              \
-})
+#include "vpx_dsp/mips/txfm_macros_msa.h"
 
 #define VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,               \
                   out0, out1, out2, out3, out4, out5, out6, out7) {     \
@@ -79,9 +34,9 @@
                                                                         \
   ILVRL_H2_SH(in0, in7, vec1_m, vec0_m);                                \
   ILVRL_H2_SH(in4, in3, vec3_m, vec2_m);                                \
-  VP9_DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,    \
-                            cnst1_m, cnst2_m, cnst3_m, in7, in0,        \
-                            in4, in3);                                  \
+  DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,        \
+                        cnst1_m, cnst2_m, cnst3_m, in7, in0,            \
+                        in4, in3);                                      \
                                                                         \
   SPLATI_H2_SH(coeff0_m, 2, 5, cnst0_m, cnst1_m);                       \
   cnst2_m = -cnst0_m;                                                   \
@@ -93,9 +48,9 @@
   ILVRL_H2_SH(in2, in5, vec1_m, vec0_m);                                \
   ILVRL_H2_SH(in6, in1, vec3_m, vec2_m);                                \
                                                                         \
-  VP9_DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,    \
-                            cnst1_m, cnst2_m, cnst3_m, in5, in2,        \
-                            in6, in1);                                  \
+  DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,        \
+                        cnst1_m, cnst2_m, cnst3_m, in5, in2,            \
+                        in6, in1);                                      \
   BUTTERFLY_4(in7, in0, in2, in5, s1_m, s0_m, in2, in5);                \
   out7 = -s0_m;                                                         \
   out0 = s1_m;                                                          \
@@ -109,55 +64,23 @@
                                                                         \
   ILVRL_H2_SH(in4, in3, vec1_m, vec0_m);                                \
   ILVRL_H2_SH(in6, in1, vec3_m, vec2_m);                                \
-  VP9_DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,    \
-                            cnst2_m, cnst3_m, cnst1_m, out1, out6,      \
-                            s0_m, s1_m);                                \
+  DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,        \
+                        cnst2_m, cnst3_m, cnst1_m, out1, out6,          \
+                        s0_m, s1_m);                                    \
                                                                         \
   SPLATI_H2_SH(coeff1_m, 2, 3, cnst0_m, cnst1_m);                       \
   cnst1_m = __msa_ilvev_h(cnst1_m, cnst0_m);                            \
                                                                         \
   ILVRL_H2_SH(in2, in5, vec1_m, vec0_m);                                \
   ILVRL_H2_SH(s0_m, s1_m, vec3_m, vec2_m);                              \
-  out3 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);            \
-  out4 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);            \
-  out2 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst0_m);            \
-  out5 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst1_m);            \
+  out3 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);                \
+  out4 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);                \
+  out2 = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst0_m);                \
+  out5 = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst1_m);                \
                                                                         \
   out1 = -out1;                                                         \
   out3 = -out3;                                                         \
   out5 = -out5;                                                         \
-}
-
-#define VP9_MADD_SHORT(m0, m1, c0, c1, res0, res1) {                \
-  v4i32 madd0_m, madd1_m, madd2_m, madd3_m;                         \
-  v8i16 madd_s0_m, madd_s1_m;                                       \
-                                                                    \
-  ILVRL_H2_SH(m1, m0, madd_s0_m, madd_s1_m);                        \
-  DOTP_SH4_SW(madd_s0_m, madd_s1_m, madd_s0_m, madd_s1_m,           \
-              c0, c0, c1, c1, madd0_m, madd1_m, madd2_m, madd3_m);  \
-  SRARI_W4_SW(madd0_m, madd1_m, madd2_m, madd3_m, DCT_CONST_BITS);  \
-  PCKEV_H2_SH(madd1_m, madd0_m, madd3_m, madd2_m, res0, res1);      \
-}
-
-#define VP9_MADD_BF(inp0, inp1, inp2, inp3, cst0, cst1, cst2, cst3,     \
-                    out0, out1, out2, out3) {                           \
-  v8i16 madd_s0_m, madd_s1_m, madd_s2_m, madd_s3_m;                     \
-  v4i32 tmp0_m, tmp1_m, tmp2_m, tmp3_m, m4_m, m5_m;                     \
-                                                                        \
-  ILVRL_H2_SH(inp1, inp0, madd_s0_m, madd_s1_m);                        \
-  ILVRL_H2_SH(inp3, inp2, madd_s2_m, madd_s3_m);                        \
-  DOTP_SH4_SW(madd_s0_m, madd_s1_m, madd_s2_m, madd_s3_m,               \
-              cst0, cst0, cst2, cst2, tmp0_m, tmp1_m, tmp2_m, tmp3_m);  \
-  BUTTERFLY_4(tmp0_m, tmp1_m, tmp3_m, tmp2_m,                           \
-              m4_m, m5_m, tmp3_m, tmp2_m);                              \
-  SRARI_W4_SW(m4_m, m5_m, tmp2_m, tmp3_m, DCT_CONST_BITS);              \
-  PCKEV_H2_SH(m5_m, m4_m, tmp3_m, tmp2_m, out0, out1);                  \
-  DOTP_SH4_SW(madd_s0_m, madd_s1_m, madd_s2_m, madd_s3_m,               \
-              cst1, cst1, cst3, cst3, tmp0_m, tmp1_m, tmp2_m, tmp3_m);  \
-  BUTTERFLY_4(tmp0_m, tmp1_m, tmp3_m, tmp2_m,                           \
-              m4_m, m5_m, tmp3_m, tmp2_m);                              \
-  SRARI_W4_SW(m4_m, m5_m, tmp2_m, tmp3_m, DCT_CONST_BITS);              \
-  PCKEV_H2_SH(m5_m, m4_m, tmp3_m, tmp2_m, out2, out3);                  \
 }
 
 #define VP9_SET_COSPI_PAIR(c0_h, c1_h) ({  \
@@ -422,38 +345,38 @@
   k1_m = VP9_SET_COSPI_PAIR(cospi_31_64, -cospi_1_64);              \
   k2_m = VP9_SET_COSPI_PAIR(cospi_17_64, cospi_15_64);              \
   k3_m = VP9_SET_COSPI_PAIR(cospi_15_64, -cospi_17_64);             \
-  VP9_MADD_BF(r15, r0, r7, r8, k0_m, k1_m, k2_m, k3_m,              \
-              g0_m, g1_m, g2_m, g3_m);                              \
+  MADD_BF(r15, r0, r7, r8, k0_m, k1_m, k2_m, k3_m,                  \
+          g0_m, g1_m, g2_m, g3_m);                                  \
   k0_m = VP9_SET_COSPI_PAIR(cospi_5_64, cospi_27_64);               \
   k1_m = VP9_SET_COSPI_PAIR(cospi_27_64, -cospi_5_64);              \
   k2_m = VP9_SET_COSPI_PAIR(cospi_21_64, cospi_11_64);              \
   k3_m = VP9_SET_COSPI_PAIR(cospi_11_64, -cospi_21_64);             \
-  VP9_MADD_BF(r13, r2, r5, r10, k0_m, k1_m, k2_m, k3_m,             \
-              g4_m, g5_m, g6_m, g7_m);                              \
+  MADD_BF(r13, r2, r5, r10, k0_m, k1_m, k2_m, k3_m,                 \
+          g4_m, g5_m, g6_m, g7_m);                                  \
   k0_m = VP9_SET_COSPI_PAIR(cospi_9_64, cospi_23_64);               \
   k1_m = VP9_SET_COSPI_PAIR(cospi_23_64, -cospi_9_64);              \
   k2_m = VP9_SET_COSPI_PAIR(cospi_25_64, cospi_7_64);               \
   k3_m = VP9_SET_COSPI_PAIR(cospi_7_64, -cospi_25_64);              \
-  VP9_MADD_BF(r11, r4, r3, r12, k0_m, k1_m, k2_m, k3_m,             \
-              g8_m, g9_m, g10_m, g11_m);                            \
+  MADD_BF(r11, r4, r3, r12, k0_m, k1_m, k2_m, k3_m,                 \
+          g8_m, g9_m, g10_m, g11_m);                                \
   k0_m = VP9_SET_COSPI_PAIR(cospi_13_64, cospi_19_64);              \
   k1_m = VP9_SET_COSPI_PAIR(cospi_19_64, -cospi_13_64);             \
   k2_m = VP9_SET_COSPI_PAIR(cospi_29_64, cospi_3_64);               \
   k3_m = VP9_SET_COSPI_PAIR(cospi_3_64, -cospi_29_64);              \
-  VP9_MADD_BF(r9, r6, r1, r14, k0_m, k1_m, k2_m, k3_m,              \
-              g12_m, g13_m, g14_m, g15_m);                          \
+  MADD_BF(r9, r6, r1, r14, k0_m, k1_m, k2_m, k3_m,                  \
+          g12_m, g13_m, g14_m, g15_m);                              \
                                                                     \
   /* stage 2 */                                                     \
   k0_m = VP9_SET_COSPI_PAIR(cospi_4_64, cospi_28_64);               \
   k1_m = VP9_SET_COSPI_PAIR(cospi_28_64, -cospi_4_64);              \
   k2_m = VP9_SET_COSPI_PAIR(-cospi_28_64, cospi_4_64);              \
-  VP9_MADD_BF(g1_m, g3_m, g9_m, g11_m, k0_m, k1_m, k2_m, k0_m,      \
-              h0_m, h1_m, h2_m, h3_m);                              \
+  MADD_BF(g1_m, g3_m, g9_m, g11_m, k0_m, k1_m, k2_m, k0_m,          \
+          h0_m, h1_m, h2_m, h3_m);                                  \
   k0_m = VP9_SET_COSPI_PAIR(cospi_12_64, cospi_20_64);              \
   k1_m = VP9_SET_COSPI_PAIR(-cospi_20_64, cospi_12_64);             \
   k2_m = VP9_SET_COSPI_PAIR(cospi_20_64, -cospi_12_64);             \
-  VP9_MADD_BF(g7_m, g5_m, g15_m, g13_m, k0_m, k1_m, k2_m, k0_m,     \
-              h4_m, h5_m, h6_m, h7_m);                              \
+  MADD_BF(g7_m, g5_m, g15_m, g13_m, k0_m, k1_m, k2_m, k0_m,         \
+          h4_m, h5_m, h6_m, h7_m);                                  \
   BUTTERFLY_4(h0_m, h2_m, h6_m, h4_m, out8, out9, out11, out10);    \
   BUTTERFLY_8(g0_m, g2_m, g4_m, g6_m, g14_m, g12_m, g10_m, g8_m,    \
               h8_m, h9_m, h10_m, h11_m, h6_m, h4_m, h2_m, h0_m);    \
@@ -463,19 +386,19 @@
   k0_m = VP9_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);               \
   k1_m = VP9_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);              \
   k2_m = VP9_SET_COSPI_PAIR(-cospi_24_64, cospi_8_64);              \
-  VP9_MADD_BF(h0_m, h2_m, h4_m, h6_m, k0_m, k1_m, k2_m, k0_m,       \
-              out4, out6, out5, out7);                              \
-  VP9_MADD_BF(h1_m, h3_m, h5_m, h7_m, k0_m, k1_m, k2_m, k0_m,       \
-              out12, out14, out13, out15);                          \
+  MADD_BF(h0_m, h2_m, h4_m, h6_m, k0_m, k1_m, k2_m, k0_m,           \
+          out4, out6, out5, out7);                                  \
+  MADD_BF(h1_m, h3_m, h5_m, h7_m, k0_m, k1_m, k2_m, k0_m,           \
+          out12, out14, out13, out15);                              \
                                                                     \
   /* stage 4 */                                                     \
   k0_m = VP9_SET_COSPI_PAIR(cospi_16_64, cospi_16_64);              \
   k1_m = VP9_SET_COSPI_PAIR(-cospi_16_64, -cospi_16_64);            \
   k2_m = VP9_SET_COSPI_PAIR(cospi_16_64, -cospi_16_64);             \
   k3_m = VP9_SET_COSPI_PAIR(-cospi_16_64, cospi_16_64);             \
-  VP9_MADD_SHORT(h10_m, h11_m, k1_m, k2_m, out2, out3);             \
-  VP9_MADD_SHORT(out6, out7, k0_m, k3_m, out6, out7);               \
-  VP9_MADD_SHORT(out10, out11, k0_m, k3_m, out10, out11);           \
-  VP9_MADD_SHORT(out14, out15, k1_m, k2_m, out14, out15);           \
+  MADD_SHORT(h10_m, h11_m, k1_m, k2_m, out2, out3);                 \
+  MADD_SHORT(out6, out7, k0_m, k3_m, out6, out7);                   \
+  MADD_SHORT(out10, out11, k0_m, k3_m, out10, out11);               \
+  MADD_SHORT(out14, out15, k1_m, k2_m, out14, out15);               \
 }
 #endif  /* VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_ */

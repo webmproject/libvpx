@@ -72,6 +72,7 @@ DSP_SRCS-$(HAVE_SSSE3)  += x86/fwd_txfm_ssse3.asm
 endif
 DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
 endif  # CONFIG_VP9_ENCODER
+DSP_SRCS-$(HAVE_MSA)    += mips/txfm_macros_msa.h
 
 # quantization
 ifeq ($(CONFIG_VP9_ENCODER),yes)

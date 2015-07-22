@@ -47,26 +47,26 @@ static void vp9_idct32x8_row_even_process_store(int16_t *tmp_buf,
   /* Even stage 1 */
   LD_SH8(tmp_buf, 32, reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7);
 
-  VP9_DOTP_CONST_PAIR(reg1, reg7, cospi_28_64, cospi_4_64, reg1, reg7);
-  VP9_DOTP_CONST_PAIR(reg5, reg3, cospi_12_64, cospi_20_64, reg5, reg3);
+  DOTP_CONST_PAIR(reg1, reg7, cospi_28_64, cospi_4_64, reg1, reg7);
+  DOTP_CONST_PAIR(reg5, reg3, cospi_12_64, cospi_20_64, reg5, reg3);
   BUTTERFLY_4(reg1, reg7, reg3, reg5, vec1, vec3, vec2, vec0);
-  VP9_DOTP_CONST_PAIR(vec2, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec2, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
 
   loc1 = vec3;
   loc0 = vec1;
 
-  VP9_DOTP_CONST_PAIR(reg0, reg4, cospi_16_64, cospi_16_64, reg0, reg4);
-  VP9_DOTP_CONST_PAIR(reg2, reg6, cospi_24_64, cospi_8_64, reg2, reg6);
+  DOTP_CONST_PAIR(reg0, reg4, cospi_16_64, cospi_16_64, reg0, reg4);
+  DOTP_CONST_PAIR(reg2, reg6, cospi_24_64, cospi_8_64, reg2, reg6);
   BUTTERFLY_4(reg4, reg0, reg2, reg6, vec1, vec3, vec2, vec0);
   BUTTERFLY_4(vec0, vec1, loc1, loc0, stp3, stp0, stp7, stp4);
   BUTTERFLY_4(vec2, vec3, loc3, loc2, stp2, stp1, stp6, stp5);
 
   /* Even stage 2 */
   LD_SH8((tmp_buf + 16), 32, reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7);
-  VP9_DOTP_CONST_PAIR(reg0, reg7, cospi_30_64, cospi_2_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR(reg4, reg3, cospi_14_64, cospi_18_64, reg4, reg3);
-  VP9_DOTP_CONST_PAIR(reg2, reg5, cospi_22_64, cospi_10_64, reg2, reg5);
-  VP9_DOTP_CONST_PAIR(reg6, reg1, cospi_6_64, cospi_26_64, reg6, reg1);
+  DOTP_CONST_PAIR(reg0, reg7, cospi_30_64, cospi_2_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg4, reg3, cospi_14_64, cospi_18_64, reg4, reg3);
+  DOTP_CONST_PAIR(reg2, reg5, cospi_22_64, cospi_10_64, reg2, reg5);
+  DOTP_CONST_PAIR(reg6, reg1, cospi_6_64, cospi_26_64, reg6, reg1);
 
   vec0 = reg0 + reg4;
   reg0 = reg0 - reg4;
@@ -84,16 +84,16 @@ static void vp9_idct32x8_row_even_process_store(int16_t *tmp_buf,
   reg4 = reg5 - vec1;
   reg5 = reg5 + vec1;
 
-  VP9_DOTP_CONST_PAIR(reg7, reg0, cospi_24_64, cospi_8_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR((-reg6), reg1, cospi_24_64, cospi_8_64, reg6, reg1);
+  DOTP_CONST_PAIR(reg7, reg0, cospi_24_64, cospi_8_64, reg0, reg7);
+  DOTP_CONST_PAIR((-reg6), reg1, cospi_24_64, cospi_8_64, reg6, reg1);
 
   vec0 = reg0 - reg6;
   reg0 = reg0 + reg6;
   vec1 = reg7 - reg1;
   reg7 = reg7 + reg1;
 
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, reg6, reg1);
-  VP9_DOTP_CONST_PAIR(reg4, reg3, cospi_16_64, cospi_16_64, reg3, reg4);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, reg6, reg1);
+  DOTP_CONST_PAIR(reg4, reg3, cospi_16_64, cospi_16_64, reg3, reg4);
 
   /* Even stage 3 : Dependency on Even stage 1 & Even stage 2 */
   BUTTERFLY_4(stp0, stp1, reg7, reg5, loc1, loc3, loc2, loc0);
@@ -137,10 +137,10 @@ static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
   reg6 = LD_SH(tmp_buf + 25 * 8);
   reg7 = LD_SH(tmp_buf + 31 * 8);
 
-  VP9_DOTP_CONST_PAIR(reg0, reg7, cospi_31_64, cospi_1_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR(reg4, reg3, cospi_15_64, cospi_17_64, reg3, reg4);
-  VP9_DOTP_CONST_PAIR(reg2, reg5, cospi_23_64, cospi_9_64, reg2, reg5);
-  VP9_DOTP_CONST_PAIR(reg6, reg1, cospi_7_64, cospi_25_64, reg1, reg6);
+  DOTP_CONST_PAIR(reg0, reg7, cospi_31_64, cospi_1_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg4, reg3, cospi_15_64, cospi_17_64, reg3, reg4);
+  DOTP_CONST_PAIR(reg2, reg5, cospi_23_64, cospi_9_64, reg2, reg5);
+  DOTP_CONST_PAIR(reg6, reg1, cospi_7_64, cospi_25_64, reg1, reg6);
 
   vec0 = reg0 + reg3;
   reg0 = reg0 - reg3;
@@ -157,16 +157,16 @@ static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
   ST_SH2(vec0, vec1, (tmp_odd_buf + 4 * 8), 8);
 
   SUB2(reg5, reg4, reg3, reg2, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_24_64, cospi_8_64, vec0, vec1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_24_64, cospi_8_64, vec0, vec1);
   ST_SH2(vec0, vec1, (tmp_odd_buf), 8);
 
   /* 4 Stores */
-  VP9_DOTP_CONST_PAIR(reg7, reg0, cospi_28_64, cospi_4_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR(reg6, reg1, -cospi_4_64, cospi_28_64, reg1, reg6);
+  DOTP_CONST_PAIR(reg7, reg0, cospi_28_64, cospi_4_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg6, reg1, -cospi_4_64, cospi_28_64, reg1, reg6);
   BUTTERFLY_4(reg0, reg7, reg6, reg1, vec0, vec1, vec2, vec3);
   ST_SH2(vec0, vec1, (tmp_odd_buf + 6 * 8), 8);
 
-  VP9_DOTP_CONST_PAIR(vec2, vec3, cospi_24_64, cospi_8_64, vec2, vec3);
+  DOTP_CONST_PAIR(vec2, vec3, cospi_24_64, cospi_8_64, vec2, vec3);
   ST_SH2(vec2, vec3, (tmp_odd_buf + 2 * 8), 8);
 
   /* Odd stage 2 */
@@ -180,21 +180,21 @@ static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
   reg6 = LD_SH(tmp_buf + 27 * 8);
   reg7 = LD_SH(tmp_buf + 29 * 8);
 
-  VP9_DOTP_CONST_PAIR(reg1, reg6, cospi_27_64, cospi_5_64, reg1, reg6);
-  VP9_DOTP_CONST_PAIR(reg5, reg2, cospi_11_64, cospi_21_64, reg2, reg5);
-  VP9_DOTP_CONST_PAIR(reg3, reg4, cospi_19_64, cospi_13_64, reg3, reg4);
-  VP9_DOTP_CONST_PAIR(reg7, reg0, cospi_3_64, cospi_29_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg1, reg6, cospi_27_64, cospi_5_64, reg1, reg6);
+  DOTP_CONST_PAIR(reg5, reg2, cospi_11_64, cospi_21_64, reg2, reg5);
+  DOTP_CONST_PAIR(reg3, reg4, cospi_19_64, cospi_13_64, reg3, reg4);
+  DOTP_CONST_PAIR(reg7, reg0, cospi_3_64, cospi_29_64, reg0, reg7);
 
   /* 4 Stores */
   SUB4(reg1, reg2, reg6, reg5, reg0, reg3, reg7, reg4,
        vec0, vec1, vec2, vec3);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_12_64, cospi_20_64, loc0, loc1);
-  VP9_DOTP_CONST_PAIR(vec3, vec2, -cospi_20_64, cospi_12_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_12_64, cospi_20_64, loc0, loc1);
+  DOTP_CONST_PAIR(vec3, vec2, -cospi_20_64, cospi_12_64, loc2, loc3);
 
   BUTTERFLY_4(loc3, loc2, loc0, loc1, vec1, vec0, vec2, vec3);
   ST_SH2(vec0, vec1, (tmp_odd_buf + 12 * 8), 3 * 8);
 
-  VP9_DOTP_CONST_PAIR(vec3, vec2, -cospi_8_64, cospi_24_64, vec0, vec1);
+  DOTP_CONST_PAIR(vec3, vec2, -cospi_8_64, cospi_24_64, vec0, vec1);
   ST_SH2(vec0, vec1, (tmp_odd_buf + 10 * 8), 8);
 
   /* 4 Stores */
@@ -204,7 +204,7 @@ static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
   ST_SH(reg0, (tmp_odd_buf + 13 * 8));
   ST_SH(reg1, (tmp_odd_buf + 14 * 8));
 
-  VP9_DOTP_CONST_PAIR(reg3, reg2, -cospi_8_64, cospi_24_64, reg0, reg1);
+  DOTP_CONST_PAIR(reg3, reg2, -cospi_8_64, cospi_24_64, reg0, reg1);
   ST_SH2(reg0, reg1, (tmp_odd_buf + 8 * 8), 8);
 
   /* Odd stage 3 : Dependency on Odd stage 1 & Odd stage 2 */
@@ -218,10 +218,10 @@ static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
   ST_SH4(loc0, loc1, loc2, loc3, tmp_odd_buf, 8);
 
   SUB2(reg0, reg4, reg1, reg5, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
 
   SUB2(reg2, reg6, reg3, reg7, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 8 * 8), 8);
 
   /* Load 8 & Store 8 */
@@ -233,10 +233,10 @@ static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 4 * 8), 8);
 
   SUB2(reg0, reg4, reg3, reg7, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
 
   SUB2(reg1, reg5, reg2, reg6, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 12 * 8), 8);
 }
 
@@ -363,16 +363,16 @@ static void vp9_idct8x32_column_even_process_store(int16_t *tmp_buf,
   LD_SH8(tmp_buf, (4 * 32), reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7);
   tmp_buf += (2 * 32);
 
-  VP9_DOTP_CONST_PAIR(reg1, reg7, cospi_28_64, cospi_4_64, reg1, reg7);
-  VP9_DOTP_CONST_PAIR(reg5, reg3, cospi_12_64, cospi_20_64, reg5, reg3);
+  DOTP_CONST_PAIR(reg1, reg7, cospi_28_64, cospi_4_64, reg1, reg7);
+  DOTP_CONST_PAIR(reg5, reg3, cospi_12_64, cospi_20_64, reg5, reg3);
   BUTTERFLY_4(reg1, reg7, reg3, reg5, vec1, vec3, vec2, vec0);
-  VP9_DOTP_CONST_PAIR(vec2, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec2, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
 
   loc1 = vec3;
   loc0 = vec1;
 
-  VP9_DOTP_CONST_PAIR(reg0, reg4, cospi_16_64, cospi_16_64, reg0, reg4);
-  VP9_DOTP_CONST_PAIR(reg2, reg6, cospi_24_64, cospi_8_64, reg2, reg6);
+  DOTP_CONST_PAIR(reg0, reg4, cospi_16_64, cospi_16_64, reg0, reg4);
+  DOTP_CONST_PAIR(reg2, reg6, cospi_24_64, cospi_8_64, reg2, reg6);
   BUTTERFLY_4(reg4, reg0, reg2, reg6, vec1, vec3, vec2, vec0);
   BUTTERFLY_4(vec0, vec1, loc1, loc0, stp3, stp0, stp7, stp4);
   BUTTERFLY_4(vec2, vec3, loc3, loc2, stp2, stp1, stp6, stp5);
@@ -381,10 +381,10 @@ static void vp9_idct8x32_column_even_process_store(int16_t *tmp_buf,
   /* Load 8 */
   LD_SH8(tmp_buf, (4 * 32), reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7);
 
-  VP9_DOTP_CONST_PAIR(reg0, reg7, cospi_30_64, cospi_2_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR(reg4, reg3, cospi_14_64, cospi_18_64, reg4, reg3);
-  VP9_DOTP_CONST_PAIR(reg2, reg5, cospi_22_64, cospi_10_64, reg2, reg5);
-  VP9_DOTP_CONST_PAIR(reg6, reg1, cospi_6_64, cospi_26_64, reg6, reg1);
+  DOTP_CONST_PAIR(reg0, reg7, cospi_30_64, cospi_2_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg4, reg3, cospi_14_64, cospi_18_64, reg4, reg3);
+  DOTP_CONST_PAIR(reg2, reg5, cospi_22_64, cospi_10_64, reg2, reg5);
+  DOTP_CONST_PAIR(reg6, reg1, cospi_6_64, cospi_26_64, reg6, reg1);
 
   vec0 = reg0 + reg4;
   reg0 = reg0 - reg4;
@@ -402,16 +402,16 @@ static void vp9_idct8x32_column_even_process_store(int16_t *tmp_buf,
   reg4 = reg5 - vec1;
   reg5 = reg5 + vec1;
 
-  VP9_DOTP_CONST_PAIR(reg7, reg0, cospi_24_64, cospi_8_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR((-reg6), reg1, cospi_24_64, cospi_8_64, reg6, reg1);
+  DOTP_CONST_PAIR(reg7, reg0, cospi_24_64, cospi_8_64, reg0, reg7);
+  DOTP_CONST_PAIR((-reg6), reg1, cospi_24_64, cospi_8_64, reg6, reg1);
 
   vec0 = reg0 - reg6;
   reg0 = reg0 + reg6;
   vec1 = reg7 - reg1;
   reg7 = reg7 + reg1;
 
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, reg6, reg1);
-  VP9_DOTP_CONST_PAIR(reg4, reg3, cospi_16_64, cospi_16_64, reg3, reg4);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, reg6, reg1);
+  DOTP_CONST_PAIR(reg4, reg3, cospi_16_64, cospi_16_64, reg3, reg4);
 
   /* Even stage 3 : Dependency on Even stage 1 & Even stage 2 */
   /* Store 8 */
@@ -448,10 +448,10 @@ static void vp9_idct8x32_column_odd_process_store(int16_t *tmp_buf,
   reg6 = LD_SH(tmp_buf + 25 * 32);
   reg7 = LD_SH(tmp_buf + 31 * 32);
 
-  VP9_DOTP_CONST_PAIR(reg0, reg7, cospi_31_64, cospi_1_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR(reg4, reg3, cospi_15_64, cospi_17_64, reg3, reg4);
-  VP9_DOTP_CONST_PAIR(reg2, reg5, cospi_23_64, cospi_9_64, reg2, reg5);
-  VP9_DOTP_CONST_PAIR(reg6, reg1, cospi_7_64, cospi_25_64, reg1, reg6);
+  DOTP_CONST_PAIR(reg0, reg7, cospi_31_64, cospi_1_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg4, reg3, cospi_15_64, cospi_17_64, reg3, reg4);
+  DOTP_CONST_PAIR(reg2, reg5, cospi_23_64, cospi_9_64, reg2, reg5);
+  DOTP_CONST_PAIR(reg6, reg1, cospi_7_64, cospi_25_64, reg1, reg6);
 
   vec0 = reg0 + reg3;
   reg0 = reg0 - reg3;
@@ -467,15 +467,15 @@ static void vp9_idct8x32_column_odd_process_store(int16_t *tmp_buf,
   ADD2(reg5, reg4, reg3, reg2, vec0, vec1);
   ST_SH2(vec0, vec1, (tmp_odd_buf + 4 * 8), 8);
   SUB2(reg5, reg4, reg3, reg2, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_24_64, cospi_8_64, vec0, vec1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_24_64, cospi_8_64, vec0, vec1);
   ST_SH2(vec0, vec1, tmp_odd_buf, 8);
 
   /* 4 Stores */
-  VP9_DOTP_CONST_PAIR(reg7, reg0, cospi_28_64, cospi_4_64, reg0, reg7);
-  VP9_DOTP_CONST_PAIR(reg6, reg1, -cospi_4_64, cospi_28_64, reg1, reg6);
+  DOTP_CONST_PAIR(reg7, reg0, cospi_28_64, cospi_4_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg6, reg1, -cospi_4_64, cospi_28_64, reg1, reg6);
   BUTTERFLY_4(reg0, reg7, reg6, reg1, vec0, vec1, vec2, vec3);
   ST_SH2(vec0, vec1, (tmp_odd_buf + 6 * 8), 8);
-  VP9_DOTP_CONST_PAIR(vec2, vec3, cospi_24_64, cospi_8_64, vec2, vec3);
+  DOTP_CONST_PAIR(vec2, vec3, cospi_24_64, cospi_8_64, vec2, vec3);
   ST_SH2(vec2, vec3, (tmp_odd_buf + 2 * 8), 8);
 
   /* Odd stage 2 */
@@ -489,25 +489,25 @@ static void vp9_idct8x32_column_odd_process_store(int16_t *tmp_buf,
   reg6 = LD_SH(tmp_buf + 27 * 32);
   reg7 = LD_SH(tmp_buf + 29 * 32);
 
-  VP9_DOTP_CONST_PAIR(reg1, reg6, cospi_27_64, cospi_5_64, reg1, reg6);
-  VP9_DOTP_CONST_PAIR(reg5, reg2, cospi_11_64, cospi_21_64, reg2, reg5);
-  VP9_DOTP_CONST_PAIR(reg3, reg4, cospi_19_64, cospi_13_64, reg3, reg4);
-  VP9_DOTP_CONST_PAIR(reg7, reg0, cospi_3_64, cospi_29_64, reg0, reg7);
+  DOTP_CONST_PAIR(reg1, reg6, cospi_27_64, cospi_5_64, reg1, reg6);
+  DOTP_CONST_PAIR(reg5, reg2, cospi_11_64, cospi_21_64, reg2, reg5);
+  DOTP_CONST_PAIR(reg3, reg4, cospi_19_64, cospi_13_64, reg3, reg4);
+  DOTP_CONST_PAIR(reg7, reg0, cospi_3_64, cospi_29_64, reg0, reg7);
 
   /* 4 Stores */
   SUB4(reg1, reg2, reg6, reg5, reg0, reg3, reg7, reg4, vec0, vec1, vec2, vec3);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_12_64, cospi_20_64, loc0, loc1);
-  VP9_DOTP_CONST_PAIR(vec3, vec2, -cospi_20_64, cospi_12_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_12_64, cospi_20_64, loc0, loc1);
+  DOTP_CONST_PAIR(vec3, vec2, -cospi_20_64, cospi_12_64, loc2, loc3);
   BUTTERFLY_4(loc2, loc3, loc1, loc0, vec0, vec1, vec3, vec2);
   ST_SH2(vec0, vec1, (tmp_odd_buf + 12 * 8), 3 * 8);
-  VP9_DOTP_CONST_PAIR(vec3, vec2, -cospi_8_64, cospi_24_64, vec0, vec1);
+  DOTP_CONST_PAIR(vec3, vec2, -cospi_8_64, cospi_24_64, vec0, vec1);
   ST_SH2(vec0, vec1, (tmp_odd_buf + 10 * 8), 8);
 
   /* 4 Stores */
   ADD4(reg0, reg3, reg1, reg2, reg5, reg6, reg4, reg7, vec0, vec1, vec2, vec3);
   BUTTERFLY_4(vec0, vec3, vec2, vec1, reg0, reg1, reg3, reg2);
   ST_SH2(reg0, reg1, (tmp_odd_buf + 13 * 8), 8);
-  VP9_DOTP_CONST_PAIR(reg3, reg2, -cospi_8_64, cospi_24_64, reg0, reg1);
+  DOTP_CONST_PAIR(reg3, reg2, -cospi_8_64, cospi_24_64, reg0, reg1);
   ST_SH2(reg0, reg1, (tmp_odd_buf + 8 * 8), 8);
 
   /* Odd stage 3 : Dependency on Odd stage 1 & Odd stage 2 */
@@ -519,10 +519,10 @@ static void vp9_idct8x32_column_odd_process_store(int16_t *tmp_buf,
   ST_SH4(loc0, loc1, loc2, loc3, tmp_odd_buf, 8);
 
   SUB2(reg0, reg4, reg1, reg5, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
 
   SUB2(reg2, reg6, reg3, reg7, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 8 * 8), 8);
 
   /* Load 8 & Store 8 */
@@ -533,10 +533,10 @@ static void vp9_idct8x32_column_odd_process_store(int16_t *tmp_buf,
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 4 * 8), 8);
 
   SUB2(reg0, reg4, reg3, reg7, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc0, loc1);
 
   SUB2(reg1, reg5, reg2, reg6, vec0, vec1);
-  VP9_DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
+  DOTP_CONST_PAIR(vec1, vec0, cospi_16_64, cospi_16_64, loc2, loc3);
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 12 * 8), 8);
 }
 
