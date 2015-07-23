@@ -15,7 +15,7 @@
 #include "vp9/common/vp9_idct.h"
 #include "vpx_dsp/mips/macros_msa.h"
 
-#define VP9_DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1) {  \
+#define DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1) {      \
   v8i16 k0_m = __msa_fill_h(cnst0);                                  \
   v4i32 s0_m, s1_m, s2_m, s3_m;                                      \
                                                                      \
@@ -33,8 +33,8 @@
   out1 = __msa_pckev_h((v8i16)s0_m, (v8i16)s1_m);                    \
 }
 
-#define VP9_DOT_ADD_SUB_SRARI_PCK(in0, in1, in2, in3, in4, in5, in6, in7,  \
-                                  dst0, dst1, dst2, dst3) {                \
+#define DOT_ADD_SUB_SRARI_PCK(in0, in1, in2, in3, in4, in5, in6, in7,      \
+                              dst0, dst1, dst2, dst3) {                    \
   v4i32 tp0_m, tp1_m, tp2_m, tp3_m, tp4_m;                                 \
   v4i32 tp5_m, tp6_m, tp7_m, tp8_m, tp9_m;                                 \
                                                                            \
@@ -50,7 +50,7 @@
               dst0, dst1, dst2, dst3);                                     \
 }
 
-#define VP9_DOT_SHIFT_RIGHT_PCK_H(in0, in1, in2) ({   \
+#define DOT_SHIFT_RIGHT_PCK_H(in0, in1, in2) ({       \
   v8i16 dst_m;                                        \
   v4i32 tp0_m, tp1_m;                                 \
                                                       \
@@ -79,9 +79,9 @@
                                                                             \
   ILVRL_H2_SH(in0, in7, vec1_m, vec0_m);                                    \
   ILVRL_H2_SH(in4, in3, vec3_m, vec2_m);                                    \
-  VP9_DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,        \
-                            cnst1_m, cnst2_m, cnst3_m, in7, in0,            \
-                            in4, in3);                                      \
+  DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,            \
+                        cnst1_m, cnst2_m, cnst3_m, in7, in0,                \
+                        in4, in3);                                          \
                                                                             \
   SPLATI_H2_SH(coeff0_m, 2, 5, cnst0_m, cnst1_m);                           \
   cnst2_m = -cnst0_m;                                                       \
@@ -93,9 +93,9 @@
   ILVRL_H2_SH(in2, in5, vec1_m, vec0_m);                                    \
   ILVRL_H2_SH(in6, in1, vec3_m, vec2_m);                                    \
                                                                             \
-  VP9_DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,        \
-                            cnst1_m, cnst2_m, cnst3_m, in5, in2,            \
-                            in6, in1);                                      \
+  DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,            \
+                        cnst1_m, cnst2_m, cnst3_m, in5, in2,                \
+                        in6, in1);                                          \
   BUTTERFLY_4(in7, in0, in2, in5, s1_m, s0_m, in2, in5);                    \
   out7 = -s0_m;                                                             \
   out0 = s1_m;                                                              \
@@ -108,26 +108,26 @@
                                                                             \
   ILVRL_H2_SH(in4, in3, vec1_m, vec0_m);                                    \
   ILVRL_H2_SH(in6, in1, vec3_m, vec2_m);                                    \
-  VP9_DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,        \
-                            cnst2_m, cnst3_m, cnst1_m, out1, out6,          \
-                            s0_m, s1_m);                                    \
+  DOT_ADD_SUB_SRARI_PCK(vec0_m, vec1_m, vec2_m, vec3_m, cnst0_m,            \
+                        cnst2_m, cnst3_m, cnst1_m, out1, out6,              \
+                        s0_m, s1_m);                                        \
                                                                             \
   SPLATI_H2_SH(coeff1_m, 2, 3, cnst0_m, cnst1_m);                           \
   cnst1_m = __msa_ilvev_h(cnst1_m, cnst0_m);                                \
                                                                             \
   ILVRL_H2_SH(in2, in5, vec1_m, vec0_m);                                    \
   ILVRL_H2_SH(s0_m, s1_m, vec3_m, vec2_m);                                  \
-  out3 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);                \
-  out4 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);                \
-  out2 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst0_m);                \
-  out5 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst1_m);                \
+  out3 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);                    \
+  out4 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);                    \
+  out2 = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst0_m);                    \
+  out5 = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst1_m);                    \
                                                                             \
   out1 = -out1;                                                             \
   out3 = -out3;                                                             \
   out5 = -out5;                                                             \
 }
 
-#define VP9_MADD_SHORT(m0, m1, c0, c1, res0, res1) {                \
+#define MADD_SHORT(m0, m1, c0, c1, res0, res1) {                    \
   v4i32 madd0_m, madd1_m, madd2_m, madd3_m;                         \
   v8i16 madd_s0_m, madd_s1_m;                                       \
                                                                     \
@@ -138,8 +138,8 @@
   PCKEV_H2_SH(madd1_m, madd0_m, madd3_m, madd2_m, res0, res1);      \
 }
 
-#define VP9_MADD_BF(inp0, inp1, inp2, inp3, cst0, cst1, cst2, cst3,     \
-                    out0, out1, out2, out3) {                           \
+#define MADD_BF(inp0, inp1, inp2, inp3, cst0, cst1, cst2, cst3,         \
+                out0, out1, out2, out3) {                               \
   v8i16 madd_s0_m, madd_s1_m, madd_s2_m, madd_s3_m;                     \
   v4i32 tmp0_m, tmp1_m, tmp2_m, tmp3_m, m4_m, m5_m;                     \
                                                                         \
@@ -159,7 +159,7 @@
   PCKEV_H2_SH(m5_m, m4_m, tmp3_m, tmp2_m, out2, out3);                  \
 }
 
-#define VP9_LD_HADD(psrc, stride) ({                                  \
+#define LD_HADD(psrc, stride) ({                                      \
   v8i16 in0_m, in1_m, in2_m, in3_m, in4_m, in5_m, in6_m, in7_m;       \
   v4i32 vec_w_m;                                                      \
                                                                       \
@@ -174,7 +174,7 @@
   HADD_SW_S32(vec_w_m);                                               \
 })
 
-#define VP9_FDCT_POSTPROC_2V_NEG_H(vec0, vec1) {  \
+#define FDCT_POSTPROC_2V_NEG_H(vec0, vec1) {      \
   v8i16 tp0_m, tp1_m;                             \
   v8i16 one_m = __msa_ldi_h(1);                   \
                                                   \
@@ -267,23 +267,23 @@
   ILVR_H2_SH(x1_m, x0_m, x3_m, x2_m, s1_m, s3_m);                    \
   SPLATI_H2_SH(coeff_m, 0, 1, x0_m, x1_m);                           \
   x1_m = __msa_ilvev_h(x1_m, x0_m);                                  \
-  out4 = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                \
+  out4 = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                    \
                                                                      \
   SPLATI_H2_SH(coeff_m, 2, 3, x2_m, x3_m);                           \
   x2_m = -x2_m;                                                      \
   x2_m = __msa_ilvev_h(x3_m, x2_m);                                  \
-  out6 = VP9_DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                \
+  out6 = DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                    \
                                                                      \
-  out0 = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                \
+  out0 = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                    \
   x2_m = __msa_splati_h(coeff_m, 2);                                 \
   x2_m = __msa_ilvev_h(x2_m, x3_m);                                  \
-  out2 = VP9_DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                \
+  out2 = DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                    \
                                                                      \
   /* stage2 */                                                       \
   ILVRL_H2_SH(s5_m, s6_m, s1_m, s0_m);                               \
                                                                      \
-  s6_m = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                \
-  s5_m = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                \
+  s6_m = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                    \
+  s5_m = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                    \
                                                                      \
   /* stage3 */                                                       \
   BUTTERFLY_4(s4_m, s7_m, s6_m, s5_m, x0_m, x3_m, x2_m, x1_m);       \
@@ -294,24 +294,24 @@
                                                                      \
   SPLATI_H2_SH(coeff_m, 4, 5, x0_m, x1_m);                           \
   x1_m = __msa_ilvev_h(x0_m, x1_m);                                  \
-  out1 = VP9_DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x1_m);                \
+  out1 = DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x1_m);                    \
                                                                      \
   SPLATI_H2_SH(coeff_m, 6, 7, x2_m, x3_m);                           \
   x2_m = __msa_ilvev_h(x3_m, x2_m);                                  \
-  out5 = VP9_DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                \
+  out5 = DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                    \
                                                                      \
   x1_m = __msa_splati_h(coeff_m, 5);                                 \
   x0_m = -x0_m;                                                      \
   x0_m = __msa_ilvev_h(x1_m, x0_m);                                  \
-  out7 = VP9_DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x0_m);                \
+  out7 = DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x0_m);                    \
                                                                      \
   x2_m = __msa_splati_h(coeff_m, 6);                                 \
   x3_m = -x3_m;                                                      \
   x2_m = __msa_ilvev_h(x2_m, x3_m);                                  \
-  out3 = VP9_DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                \
+  out3 = DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                    \
 }
 
-#define VP9_SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7) {    \
+#define SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7) {        \
   v8i16 vec0_m, vec1_m, vec2_m, vec3_m, vec4_m, vec5_m, vec6_m, vec7_m;  \
                                                                          \
   SRLI_H4_SH(in0, in1, in2, in3, vec0_m, vec1_m, vec2_m, vec3_m, 15);    \
@@ -322,8 +322,8 @@
              in4, in5, in6, in7);                                        \
 }
 
-#define VP9_FDCT8x16_EVEN(in0, in1, in2, in3, in4, in5, in6, in7,            \
-                          out0, out1, out2, out3, out4, out5, out6, out7) {  \
+#define FDCT8x16_EVEN(in0, in1, in2, in3, in4, in5, in6, in7,                \
+                      out0, out1, out2, out3, out4, out5, out6, out7) {      \
   v8i16 s0_m, s1_m, s2_m, s3_m, s4_m, s5_m, s6_m, s7_m;                      \
   v8i16 x0_m, x1_m, x2_m, x3_m;                                              \
   v8i16 coeff_m = { cospi_16_64, -cospi_16_64, cospi_8_64, cospi_24_64,      \
@@ -337,23 +337,23 @@
   ILVR_H2_SH(x1_m, x0_m, x3_m, x2_m, s1_m, s3_m);                            \
   SPLATI_H2_SH(coeff_m, 0, 1, x0_m, x1_m);                                   \
   x1_m = __msa_ilvev_h(x1_m, x0_m);                                          \
-  out4 = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                        \
+  out4 = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                            \
                                                                              \
   SPLATI_H2_SH(coeff_m, 2, 3, x2_m, x3_m);                                   \
   x2_m = -x2_m;                                                              \
   x2_m = __msa_ilvev_h(x3_m, x2_m);                                          \
-  out6 = VP9_DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                        \
+  out6 = DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                            \
                                                                              \
-  out0 = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                        \
+  out0 = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                            \
   x2_m = __msa_splati_h(coeff_m, 2);                                         \
   x2_m = __msa_ilvev_h(x2_m, x3_m);                                          \
-  out2 = VP9_DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                        \
+  out2 = DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m);                            \
                                                                              \
   /* stage2 */                                                               \
   ILVRL_H2_SH(s5_m, s6_m, s1_m, s0_m);                                       \
                                                                              \
-  s6_m = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                        \
-  s5_m = VP9_DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                        \
+  s6_m = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m);                            \
+  s5_m = DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m);                            \
                                                                              \
   /* stage3 */                                                               \
   BUTTERFLY_4(s4_m, s7_m, s6_m, s5_m, x0_m, x3_m, x2_m, x1_m);               \
@@ -364,27 +364,27 @@
                                                                              \
   SPLATI_H2_SH(coeff_m, 4, 5, x0_m, x1_m);                                   \
   x1_m = __msa_ilvev_h(x0_m, x1_m);                                          \
-  out1 = VP9_DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x1_m);                        \
+  out1 = DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x1_m);                            \
                                                                              \
   SPLATI_H2_SH(coeff_m, 6, 7, x2_m, x3_m);                                   \
   x2_m = __msa_ilvev_h(x3_m, x2_m);                                          \
-  out5 = VP9_DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                        \
+  out5 = DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                            \
                                                                              \
   x1_m = __msa_splati_h(coeff_m, 5);                                         \
   x0_m = -x0_m;                                                              \
   x0_m = __msa_ilvev_h(x1_m, x0_m);                                          \
-  out7 = VP9_DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x0_m);                        \
+  out7 = DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x0_m);                            \
                                                                              \
   x2_m = __msa_splati_h(coeff_m, 6);                                         \
   x3_m = -x3_m;                                                              \
   x2_m = __msa_ilvev_h(x2_m, x3_m);                                          \
-  out3 = VP9_DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                        \
+  out3 = DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m);                            \
 }
 
-#define VP9_FDCT8x16_ODD(input0, input1, input2, input3,           \
-                         input4, input5, input6, input7,           \
-                         out1, out3, out5, out7,                   \
-                         out9, out11, out13, out15) {              \
+#define FDCT8x16_ODD(input0, input1, input2, input3,               \
+                     input4, input5, input6, input7,               \
+                     out1, out3, out5, out7,                       \
+                     out9, out11, out13, out15) {                  \
   v8i16 stp21_m, stp22_m, stp23_m, stp24_m, stp25_m, stp26_m;      \
   v8i16 stp30_m, stp31_m, stp32_m, stp33_m, stp34_m, stp35_m;      \
   v8i16 stp36_m, stp37_m, vec0_m, vec1_m;                          \
@@ -404,13 +404,13 @@
   ILVR_H2_SH(input2, input5, input3, input4, vec3_m, vec5_m);      \
                                                                    \
   cnst4_m = __msa_splati_h(coeff_m, 0);                            \
-  stp25_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst4_m);    \
+  stp25_m = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst4_m);        \
                                                                    \
   cnst5_m = __msa_splati_h(coeff_m, 1);                            \
   cnst5_m = __msa_ilvev_h(cnst5_m, cnst4_m);                       \
-  stp22_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst5_m);    \
-  stp24_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst4_m);    \
-  stp23_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst5_m);    \
+  stp22_m = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst5_m);        \
+  stp24_m = DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst4_m);        \
+  stp23_m = DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst5_m);        \
                                                                    \
   /* stp2 */                                                       \
   BUTTERFLY_4(input0, input1, stp22_m, stp23_m,                    \
@@ -423,19 +423,19 @@
                                                                    \
   SPLATI_H2_SH(coeff_m, 2, 3, cnst0_m, cnst1_m);                   \
   cnst0_m = __msa_ilvev_h(cnst0_m, cnst1_m);                       \
-  stp26_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst0_m);    \
+  stp26_m = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst0_m);        \
                                                                    \
   cnst0_m = __msa_splati_h(coeff_m, 4);                            \
   cnst1_m = __msa_ilvev_h(cnst1_m, cnst0_m);                       \
-  stp21_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst1_m);    \
+  stp21_m = DOT_SHIFT_RIGHT_PCK_H(vec2_m, vec3_m, cnst1_m);        \
                                                                    \
   SPLATI_H2_SH(coeff_m, 5, 2, cnst0_m, cnst1_m);                   \
   cnst1_m = __msa_ilvev_h(cnst0_m, cnst1_m);                       \
-  stp25_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst1_m);    \
+  stp25_m = DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst1_m);        \
                                                                    \
   cnst0_m = __msa_splati_h(coeff_m, 3);                            \
   cnst1_m = __msa_ilvev_h(cnst1_m, cnst0_m);                       \
-  stp22_m = VP9_DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst1_m);    \
+  stp22_m = DOT_SHIFT_RIGHT_PCK_H(vec4_m, vec5_m, cnst1_m);        \
                                                                    \
   /* stp4 */                                                       \
   BUTTERFLY_4(stp30_m, stp37_m, stp26_m, stp21_m,                  \
@@ -447,43 +447,43 @@
   SPLATI_H2_SH(coeff1_m, 0, 1, cnst0_m, cnst1_m);                  \
   cnst0_m = __msa_ilvev_h(cnst0_m, cnst1_m);                       \
                                                                    \
-  out1 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);       \
+  out1 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);           \
                                                                    \
   cnst0_m = __msa_splati_h(coeff2_m, 0);                           \
   cnst0_m = __msa_ilvev_h(cnst1_m, cnst0_m);                       \
-  out15 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);      \
+  out15 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);          \
                                                                    \
   ILVRL_H2_SH(vec4_m, vec5_m, vec1_m, vec0_m);                     \
   SPLATI_H2_SH(coeff1_m, 2, 3, cnst0_m, cnst1_m);                  \
   cnst1_m = __msa_ilvev_h(cnst1_m, cnst0_m);                       \
                                                                    \
-  out9 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);       \
+  out9 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);           \
                                                                    \
   cnst1_m = __msa_splati_h(coeff2_m, 2);                           \
   cnst0_m = __msa_ilvev_h(cnst0_m, cnst1_m);                       \
-  out7 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);       \
+  out7 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);           \
                                                                    \
   ILVRL_H2_SH(stp23_m, stp21_m, vec1_m, vec0_m);                   \
   SPLATI_H2_SH(coeff1_m, 4, 5, cnst0_m, cnst1_m);                  \
   cnst0_m = __msa_ilvev_h(cnst0_m, cnst1_m);                       \
-  out5 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);       \
+  out5 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);           \
                                                                    \
   cnst0_m = __msa_splati_h(coeff2_m, 1);                           \
   cnst0_m = __msa_ilvev_h(cnst1_m, cnst0_m);                       \
-  out11 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);      \
+  out11 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);          \
                                                                    \
   ILVRL_H2_SH(stp24_m, stp31_m, vec1_m, vec0_m);                   \
   SPLATI_H2_SH(coeff1_m, 6, 7, cnst0_m, cnst1_m);                  \
   cnst1_m = __msa_ilvev_h(cnst1_m, cnst0_m);                       \
                                                                    \
-  out13 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);      \
+  out13 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst1_m);          \
                                                                    \
   cnst1_m = __msa_splati_h(coeff2_m, 3);                           \
   cnst0_m = __msa_ilvev_h(cnst0_m, cnst1_m);                       \
-  out3 = VP9_DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);       \
+  out3 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);           \
 }
 
-#define VP9_FDCT32_POSTPROC_NEG_W(vec) {  \
+#define FDCT32_POSTPROC_NEG_W(vec) {      \
   v4i32 temp_m;                           \
   v4i32 one_m = __msa_ldi_w(1);           \
                                           \
@@ -494,7 +494,7 @@
   vec >>= 2;                              \
 }
 
-#define VP9_FDCT32_POSTPROC_2V_POS_H(vec0, vec1) {  \
+#define FDCT32_POSTPROC_2V_POS_H(vec0, vec1) {      \
   v8i16 tp0_m, tp1_m;                               \
   v8i16 one = __msa_ldi_h(1);                       \
                                                     \
@@ -512,9 +512,9 @@
   vec1 >>= 2;                                       \
 }
 
-#define VP9_DOTP_CONST_PAIR_W(reg0_left, reg1_left, reg0_right,  \
-                              reg1_right, const0, const1,        \
-                              out0, out1, out2, out3) {          \
+#define DOTP_CONST_PAIR_W(reg0_left, reg1_left, reg0_right,      \
+                          reg1_right, const0, const1,            \
+                          out0, out1, out2, out3) {              \
   v4i32 s0_m, s1_m, s2_m, s3_m, s4_m, s5_m, s6_m, s7_m;          \
   v2i64 tp0_m, tp1_m, tp2_m, tp3_m;                              \
   v4i32 k0_m = __msa_fill_w((int32_t) const0);                   \
