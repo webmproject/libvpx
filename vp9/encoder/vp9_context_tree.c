@@ -26,7 +26,7 @@ static void alloc_mode_context(VP9_COMMON *cm, int num_4x4_blk,
   ctx->num_4x4_blk = num_blk;
 
   CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
-                  vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
+                  vpx_calloc(num_blk, sizeof(uint8_t)));
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     for (k = 0; k < 3; ++k) {
       CHECK_MEM_ERROR(cm, ctx->coeff[i][k],
