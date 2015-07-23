@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "6dd2dee8_e11bb0a7",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-23T04:00:17Z",
+      "side": 1,
+      "message": "I just meant the expression would be simpler using findstring rather than filter",
+      "parentUuid": "b95978ea_2574eef3",
+      "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "79254042_47555e93",
         "filename": "test/android/Android.mk",
         "patchSetId": 3
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "8d7552bb_dc677cc2",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-23T04:00:17Z",
+      "side": 1,
+      "message": "CONFIG_EXAMPLES is from configure and config.mk so this can be special cased for that rather than x86*, since they should build for all platforms",
+      "parentUuid": "f967709d_2a2a7f09",
+      "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b92b3816_ea146b01",
         "filename": "test/android/README",
         "patchSetId": 3
@@ -101,6 +137,24 @@
       "side": 1,
       "message": "I can remove the line on x86, I just dont understand why --disable-examples or --enable-examples matters?",
       "parentUuid": "b92b3816_ea146b01",
+      "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6dd2dee8_a115a873",
+        "filename": "test/android/README",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-23T04:00:17Z",
+      "side": 1,
+      "message": "--disable-examples was likely a simplification in the earlier code, it can probably go",
+      "parentUuid": "795380ca_463014a4",
       "revId": "33efa08a34f28a9842b6fe8bfd764a895d45ca62",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
