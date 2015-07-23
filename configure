@@ -304,6 +304,7 @@ EXPERIMENT_LIST="
     wavelets
     ext_partition
     qctx_tprobs
+    dst1
 "
 CONFIG_LIST="
     external_build

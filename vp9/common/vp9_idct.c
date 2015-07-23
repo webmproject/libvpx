@@ -15,39 +15,173 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idct.h"
 
-void vp9_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
-/* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
-   0.5 shifts per pixel. */
-  int i;
-  tran_low_t output[16];
-  tran_high_t a1, b1, c1, d1, e1;
-  const tran_low_t *ip = input;
-  tran_low_t *op = output;
+#if CONFIG_DST1
+// Integers to represent double.
+// The sine transform formula is: X{i} = Sum_{0<=j<N}( x_j *
+// sin((i+1)*(j+1)/(N+1) * PI) ) * sqrt(2/(N+1))
+// e.g. when N == 4, it is a series of sin(PI*i/5) and sqrt(2/5). Similar for
+// N = 8 and 16.
+// For integer calculation, we multiply 2^14.
+// sin_pi_5 = sin(PI/5)*pow(2,14)
+// sqrt_2_5 = sqrt(2/5)*pow(2,14)
 
-  for (i = 0; i < 4; i++) {
-    a1 = ip[0] >> UNIT_QUANT_SHIFT;
-    c1 = ip[1] >> UNIT_QUANT_SHIFT;
-    d1 = ip[2] >> UNIT_QUANT_SHIFT;
-    b1 = ip[3] >> UNIT_QUANT_SHIFT;
-    a1 += c1;
-    d1 -= b1;
-    e1 = (a1 - d1) >> 1;
-    b1 = e1 - b1;
-    c1 = e1 - c1;
-    a1 -= b1;
-    d1 += c1;
-    op[0] = WRAPLOW(a1, 8);
-    op[1] = WRAPLOW(b1, 8);
-    op[2] = WRAPLOW(c1, 8);
-    op[3] = WRAPLOW(d1, 8);
-    ip += 4;
-    op += 4;
+// {sin(pi/5), sin(pi*2/5)}
+int sinvalue_lookup_table_4[2] = { 9630, 15582 };
+// {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)}
+int sinvalue_lookup_table_8[4] = { 5604, 10531, 14189, 16135 };
+// {sin(pi/17), ...
+int sinvalue_lookup_table_16[] = { 3011,  5919,  8625, 11038,
+                                  13075, 14666, 15759, 16314 };
+
+void vp9_dst1d_type1(int64_t *in, int64_t *out, int N) {
+  int i, j;
+  for (i = 0; i < N; i++) {
+    int64_t sum = 0;
+    for (j = 0; j < N; j++) {
+      int64_t sinvalue = 0;
+      int idx = (i + 1) * (j + 1);
+      int sign = 0;
+      if (idx > N + 1) {
+        sign = idx / (N + 1);
+        sign = sign % 2 ? 1 : 0;
+        idx %= (N + 1);
+      }
+      idx = idx > N + 1 - idx ? N + 1 - idx : idx;
+      if (idx == 0) continue;
+      idx--;
+
+      if (N == 4)
+        sinvalue = sinvalue_lookup_table_4[idx];
+      else if (N == 8)
+        sinvalue = sinvalue_lookup_table_8[idx];
+      else if (N == 16)
+        sinvalue = sinvalue_lookup_table_16[idx];
+      else
+        assert(0 && "Invalid transform size.");
+      if (sign) sinvalue = -sinvalue;
+
+      sum += in[j] * sinvalue;
+    }
+    out[i] = sum;
+  }
+}
+
+static void idstNxN_add(const tran_low_t *input, uint8_t *output,
+                        int stride, int N) {
+  const int val_2_5 = 6554;
+  const int val_2_9 = 3641;
+  const int val_2_17 = 1928;
+  int i, j;
+  int64_t *in = (int64_t *) malloc (N * sizeof(int64_t));
+  int64_t *inter = (int64_t *) malloc (N * sizeof(int64_t));
+  int64_t *mat = (int64_t *) malloc (N * N * sizeof(int64_t));
+  int64_t *mat2 = (int64_t *) malloc (N * N * sizeof(int64_t));
+  int64_t val;
+
+  // 1d dst: transform columns
+  for (j = 0; j < N; j++) {
+    for (i = 0; i < N; i++) {
+      in[i] = input[i * N + j];
+    }
+    vp9_dst1d_type1(in, inter, N);
+    for (i = 0; i < N; i++) {
+      mat2[i * N + j] = inter[i];
+    }
   }
 
-  ip = output;
-  for (i = 0; i < 4; i++) {
-    a1 = ip[4 * 0];
-    c1 = ip[4 * 1];
+  // transpose
+  for (i = 0; i < N; i++)
+    for (j = 0; j < N; j++)
+      mat[i * N + j] = mat2[i + j * N];
+
+  switch (N) {
+    case 4:
+      val = val_2_5;
+      break;
+    case 8:
+      val = val_2_9;
+      break;
+    case 16:
+      val = val_2_17;
+      break;
+    default:
+      assert(0 && "Invalid transform size.");
+      return;
+  }
+
+  // 1d dst: transform rows
+  for (j = 0; j < N; j++) {
+    for (i = 0; i < N; i++) {
+      in[i] = mat[i * N + j];
+    }
+    vp9_dst1d_type1(in, inter, N);
+    for (i = 0; i < N; i++) {
+      int64_t tmp = inter[i];
+      tmp = tmp >> DCT_CONST_BITS;
+      tmp *= val;
+      mat[i*N + j] = tmp >> (2 * DCT_CONST_BITS);
+    }
+  }
+  for (i = 0; i < N; i++) {
+    for (j = 0; j < N; j++) {
+      tran_high_t tmp = mat[i * N + j];
+      tmp = WRAPLOW(tmp, 8);
+      output[i * stride + j] = clip_pixel_add(output[i * stride + j],
+                                              ROUND_POWER_OF_TWO(tmp, 3));
+    }
+  }
+  free(in);
+  free(inter);
+  free(mat);
+  free(mat2);
+}
+
+void vp9_idst4x4_add(const tran_low_t *input, uint8_t *dest, int stride) {
+  idstNxN_add(input, dest, stride, 4);
+}
+
+void vp9_idst8x8_add(const tran_low_t *input, uint8_t *dest, int stride) {
+  idstNxN_add(input, dest, stride, 8);
+}
+
+void vp9_idst16x16_add(const tran_low_t *input, uint8_t *dest, int stride) {
+  idstNxN_add(input, dest, stride, 16);
+}
+#endif  // CONFIG_DST1
+
+void vp9_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
+  /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
+     0.5 shifts per pixel. */
+  int i;
+    tran_low_t output[16];
+    tran_high_t a1, b1, c1, d1, e1;
+    const tran_low_t *ip = input;
+    tran_low_t *op = output;
+
+    for (i = 0; i < 4; i++) {
+      a1 = ip[0] >> UNIT_QUANT_SHIFT;
+      c1 = ip[1] >> UNIT_QUANT_SHIFT;
+      d1 = ip[2] >> UNIT_QUANT_SHIFT;
+      b1 = ip[3] >> UNIT_QUANT_SHIFT;
+      a1 += c1;
+      d1 -= b1;
+      e1 = (a1 - d1) >> 1;
+      b1 = e1 - b1;
+      c1 = e1 - c1;
+      a1 -= b1;
+      d1 += c1;
+      op[0] = WRAPLOW(a1, 8);
+      op[1] = WRAPLOW(b1, 8);
+      op[2] = WRAPLOW(c1, 8);
+      op[3] = WRAPLOW(d1, 8);
+      ip += 4;
+      op += 4;
+    }
+
+    ip = output;
+    for (i = 0; i < 4; i++) {
+      a1 = ip[4 * 0];
+      c1 = ip[4 * 1];
     d1 = ip[4 * 2];
     b1 = ip[4 * 3];
     a1 += c1;
@@ -322,7 +456,7 @@ static void iadst8(const tran_low_t *input, tran_low_t *output) {
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
     output[0] = output[1] = output[2] = output[3] = output[4]
-              = output[5] = output[6] = output[7] = 0;
+        = output[5] = output[6] = output[7] = 0;
     return;
   }
 
@@ -1531,6 +1665,10 @@ void vp9_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
   if (tx_type == DCT_DCT) {
     vp9_idct4x4_add(input, dest, stride, eob);
 #if CONFIG_EXT_TX
+#if CONFIG_DST1
+  } else if (tx_type == DST_DST) {
+    vp9_idst4x4_add(input, dest, stride);
+#endif  // CONFIG_DST1
   } else if (tx_type == FLIPADST_DCT) {
     flipud(dest, stride, 4);
     vp9_iht4x4_16_add(input, dest, stride, ADST_DCT);
@@ -1562,6 +1700,10 @@ void vp9_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
   if (tx_type == DCT_DCT) {
     vp9_idct8x8_add(input, dest, stride, eob);
 #if CONFIG_EXT_TX
+#if CONFIG_DST1
+  } else if (tx_type == DST_DST) {
+    vp9_idst8x8_add(input, dest, stride);
+#endif  // CONFIG_DST1
   } else if (tx_type == FLIPADST_DCT) {
     flipud(dest, stride, 8);
     vp9_iht8x8_64_add(input, dest, stride, ADST_DCT);
@@ -1593,6 +1735,10 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
   if (tx_type == DCT_DCT) {
     vp9_idct16x16_add(input, dest, stride, eob);
 #if CONFIG_EXT_TX
+#if CONFIG_DST1
+  } else if (tx_type == DST_DST) {
+    vp9_idst16x16_add(input, dest, stride);
+#endif  // CONFIG_DST1
   } else if (tx_type == FLIPADST_DCT) {
     flipud(dest, stride, 16);
     vp9_iht16x16_256_add(input, dest, stride, ADST_DCT);

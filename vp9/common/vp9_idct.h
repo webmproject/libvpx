@@ -199,11 +199,7 @@ static INLINE uint16_t highbd_clip_pixel_add(uint16_t dest, tran_high_t trans,
   return clip_pixel_highbd(WRAPLOW(dest + trans, bd), bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-#ifdef __cplusplus
-}  // extern "C"
-#endif
 
-#endif  // VP9_COMMON_VP9_IDCT_H_
 #if CONFIG_TX_SKIP
 void vp9_tx_identity_add_rect(const tran_low_t *input, uint8_t *dest,
                               int row, int col, int stride_in,
@@ -218,3 +214,16 @@ void vp9_highbd_tx_identity_add(const tran_low_t *input, uint8_t *dest,
                                 int stride, int bs, int shift, int bd);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_TX_SKIP
+
+#if CONFIG_DST1
+void vp9_dst1d_type1(int64_t *in, int64_t *out, int N);
+void vp9_idst4x4_add(const tran_low_t *input, uint8_t *dest, int stride);
+void vp9_idst8x8_add(const tran_low_t *input, uint8_t *dest, int stride);
+void vp9_idst16x16_add(const tran_low_t *input, uint8_t *dest, int stride);
+#endif
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+#endif  // VP9_COMMON_VP9_IDCT_H_

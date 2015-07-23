@@ -124,8 +124,11 @@ typedef enum {
   FLIPADST_FLIPADST = 6,
   ADST_FLIPADST = 7,
   FLIPADST_ADST = 8,
+#if CONFIG_DST1
+  DST_DST,
+#endif  // CONFIG_DST1
 #if CONFIG_WAVELETS
-  WAVELET1_DCT_DCT = 9,
+  WAVELET1_DCT_DCT,
 #endif  // CONFIG_WAVELETS
   TOTAL_TX_TYPES,
 #endif  // CONFIG_EXT_TX
@@ -145,6 +148,9 @@ typedef enum {
   ALT6 = 6,
   ALT7 = 7,
   ALT8 = 8,
+#if CONFIG_DST1
+  ALT9 = 9,
+#endif  // CONFIG_DST1
   EXT_TX_TYPES
 } EXT_TX_TYPE;
 #endif  // CONFIG_EXT_TX

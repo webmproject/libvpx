@@ -423,6 +423,39 @@ static const struct tx_probs default_tx_probs = {
 };
 
 #if CONFIG_EXT_TX
+#if CONFIG_DST1
+const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)] = {
+  -NORM, 2,
+  -ALT9, 4,
+  6, 12,
+  8, 10,
+  -ALT1, -ALT2,
+  -ALT3, -ALT4,
+  14, 16,
+  -ALT5, -ALT6,
+  -ALT7, -ALT8,
+};
+
+#if CONFIG_WAVELETS
+static const vp9_prob default_ext_tx_prob[TX_SIZES][EXT_TX_TYPES - 1] = {
+  { 240, 32, 128, 128, 128, 128, 128, 128, 128 },
+  { 208, 32, 128, 128, 128, 128, 128, 128, 128 },
+  { 176, 32, 128, 128, 128, 128, 128, 128, 128 },
+  { 160, 32, 128, 128, 128, 128, 128, 128, 128 },
+#if CONFIG_TX64X64
+  { 160, 32, 128, 128, 128, 128, 128, 128, 128 },
+#endif  // CONFIG_TX64X64
+};
+#else
+static const vp9_prob default_ext_tx_prob[3][EXT_TX_TYPES - 1] = {
+  { 240, 32, 128, 128, 128, 128, 128, 128, 128 },
+  { 208, 32, 128, 128, 128, 128, 128, 128, 128 },
+  { 176, 32, 128, 128, 128, 128, 128, 128, 128 },
+};
+#endif  // CONFIG_WAVELETS
+
+#else  // CONFIG_DST1
+
 const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)] = {
   -NORM, 2,
   4, 10,
@@ -442,11 +475,7 @@ static const vp9_prob default_ext_tx_prob[TX_SIZES][EXT_TX_TYPES - 1] = {
   { 160, 128, 128, 128, 128, 128, 128, 128 },
 #if CONFIG_TX64X64
   { 160, 128, 128, 128, 128, 128, 128, 128 },
-#endif
-};
-
-const vp9_tree_index vp9_ext_tx_large_tree[TREE_SIZE(EXT_TX_TYPES_LARGE)] = {
-  -NORM, -ALT1,
+#endif  // CONFIG_TX64X64
 };
 #else   // CONFIG_WAVELETS
 static const vp9_prob default_ext_tx_prob[3][EXT_TX_TYPES - 1] = {
@@ -455,6 +484,14 @@ static const vp9_prob default_ext_tx_prob[3][EXT_TX_TYPES - 1] = {
   { 176, 128, 128, 128, 128, 128, 128, 128 },
 };
 #endif  // CONFIG_WAVELETS
+
+#endif  // CONFIG_DST1
+
+#if CONFIG_WAVELETS
+const vp9_tree_index vp9_ext_tx_large_tree[TREE_SIZE(EXT_TX_TYPES_LARGE)] = {
+  -NORM, -ALT1,
+};
+#endif   // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_PALETTE

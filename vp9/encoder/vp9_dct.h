@@ -33,6 +33,12 @@ void vp9_fdct16(const tran_low_t in[16], tran_low_t out[16]);
 void vp9_fadst16(const tran_low_t *input, tran_low_t *output);
 void vp9_fdct32(const tran_high_t *input, tran_high_t *output, int round);
 
+#if CONFIG_DST1
+void vp9_fdst4x4(const int16_t *input, tran_low_t *output, int stride);
+void vp9_fdst8x8(const int16_t *input, tran_low_t *output, int stride);
+void vp9_fdst16x16(const int16_t *input, tran_low_t *output, int stride);
+#endif  // CONFIG_DST1
+
 static const transform_2d FHT_4[] = {
   { vp9_fdct4,  vp9_fdct4  },  // DCT_DCT  = 0
   { vp9_fadst4, vp9_fdct4  },  // ADST_DCT = 1
