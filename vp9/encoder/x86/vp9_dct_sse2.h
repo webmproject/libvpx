@@ -18,16 +18,6 @@ extern "C" {
 #define pair_set_epi32(a, b) \
   _mm_set_epi32((int)(b), (int)(a), (int)(b), (int)(a))
 
-void vp9_fdct4x4_sse2(const int16_t *input, tran_low_t *output, int stride);
-void vp9_fdct8x8_sse2(const int16_t *input, tran_low_t *output, int stride);
-void vp9_fdct16x16_sse2(const int16_t *input, tran_low_t *output, int stride);
-void vp9_highbd_fdct4x4_sse2(const int16_t *input, tran_low_t *output,
-                            int stride);
-void vp9_highbd_fdct8x8_sse2(const int16_t *input, tran_low_t *output,
-                            int stride);
-void vp9_highbd_fdct16x16_sse2(const int16_t *input, tran_low_t *output,
-                               int stride);
-
 static INLINE __m128i k_madd_epi32(__m128i a, __m128i b) {
   __m128i buf0, buf1;
   buf0 = _mm_mul_epu32(a, b);
