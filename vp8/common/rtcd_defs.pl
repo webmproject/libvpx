@@ -204,23 +204,23 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes") {
 # Subpixel
 #
 add_proto qw/void vp8_sixtap_predict16x16/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict16x16 mmx sse2 ssse3 media neon dspr2/;
+specialize qw/vp8_sixtap_predict16x16 mmx sse2 ssse3 media neon dspr2 msa/;
 $vp8_sixtap_predict16x16_media=vp8_sixtap_predict16x16_armv6;
 $vp8_sixtap_predict16x16_dspr2=vp8_sixtap_predict16x16_dspr2;
 
 add_proto qw/void vp8_sixtap_predict8x8/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict8x8 mmx sse2 ssse3 media neon dspr2/;
+specialize qw/vp8_sixtap_predict8x8 mmx sse2 ssse3 media neon dspr2 msa/;
 $vp8_sixtap_predict8x8_media=vp8_sixtap_predict8x8_armv6;
 $vp8_sixtap_predict8x8_dspr2=vp8_sixtap_predict8x8_dspr2;
 
 add_proto qw/void vp8_sixtap_predict8x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict8x4 mmx sse2 ssse3 media neon dspr2/;
+specialize qw/vp8_sixtap_predict8x4 mmx sse2 ssse3 media neon dspr2 msa/;
 $vp8_sixtap_predict8x4_media=vp8_sixtap_predict8x4_armv6;
 $vp8_sixtap_predict8x4_dspr2=vp8_sixtap_predict8x4_dspr2;
 
 add_proto qw/void vp8_sixtap_predict4x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 #TODO(johannkoenig): fix the neon version https://code.google.com/p/webm/issues/detail?id=817
-specialize qw/vp8_sixtap_predict4x4 mmx ssse3 media dspr2/;
+specialize qw/vp8_sixtap_predict4x4 mmx ssse3 media dspr2 msa/;
 $vp8_sixtap_predict4x4_media=vp8_sixtap_predict4x4_armv6;
 $vp8_sixtap_predict4x4_dspr2=vp8_sixtap_predict4x4_dspr2;
 
