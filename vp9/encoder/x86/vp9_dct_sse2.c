@@ -13,8 +13,9 @@
 
 #include "./vp9_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
-#include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vp9/encoder/x86/vp9_dct_sse2.h"
+#include "vpx_dsp/txfm_common.h"
+#include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"
 
 void vp9_fdct4x4_1_sse2(const int16_t *input, tran_low_t *output, int stride) {

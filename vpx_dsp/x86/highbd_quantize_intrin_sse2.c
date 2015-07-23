@@ -15,7 +15,6 @@
 #include "vpx_ports/mem.h"
 
 #if CONFIG_VP9_HIGHBITDEPTH
-// from vp9_idct.h: typedef int32_t tran_low_t;
 void vp9_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
                                 intptr_t count,
                                 int skip_block,

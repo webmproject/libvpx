@@ -9,9 +9,9 @@
  */
 
 #include "./vp9_rtcd.h"
-#include "vpx_ports/mem.h"
 #include "vp9/common/x86/vp9_idct_intrin_sse2.h"
-#include "vp9/common/vp9_idct.h"
+#include "vpx_dsp/x86/txfm_common_sse2.h"
+#include "vpx_ports/mem.h"
 
 #define RECON_AND_STORE4X4(dest, in_x) \
 {                                                     \

@@ -11,6 +11,8 @@
 #include <emmintrin.h>  // SSE2
 
 #include "vp9/encoder/vp9_dct.h"
+#include "vpx_dsp/txfm_common.h"
+#include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"
 
 #if DCT_HIGH_BIT_DEPTH

@@ -12,7 +12,7 @@
 #define VPX_DSP_MIPS_FWD_TXFM_MSA_H_
 
 #include "vpx_dsp/mips/txfm_macros_msa.h"
-#include "vp9/common/vp9_idct.h"
+#include "vpx_dsp/txfm_common.h"
 
 #define VP9_FDCT4(in0, in1, in2, in3, out0, out1, out2, out3) {     \
   v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m;                         \

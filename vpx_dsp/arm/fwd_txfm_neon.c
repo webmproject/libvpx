@@ -9,8 +9,9 @@
  */
 
 #include <arm_neon.h>
+
 #include "./vpx_config.h"
-#include "vp9/common/vp9_idct.h"
+#include "vpx_dsp/txfm_common.h"
 
 void vp9_fdct8x8_neon(const int16_t *input, int16_t *final_output, int stride) {
   int i;
