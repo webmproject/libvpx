@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6dd2dee8_2c4e8f42",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-23T18:35:22Z",
+      "side": 1,
+      "message": "fyi - many of the other files use _x86_64_ in the file names. it may not be necessary, but if issues pop up in the future (google3 import?), that\u0027s one thing to check. i wouldn\u0027t change it now since it might not do anything.",
+      "revId": "b78a967be5d99988f04fe6ae949fa80d5964131e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
