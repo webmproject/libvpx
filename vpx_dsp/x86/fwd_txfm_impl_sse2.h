@@ -12,7 +12,6 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vp9/common/vp9_idct.h"  // for cospi constants
-#include "vp9/encoder/vp9_dct.h"
 #include "vp9/encoder/x86/vp9_dct_sse2.h"
 #include "vpx_ports/mem.h"
 
