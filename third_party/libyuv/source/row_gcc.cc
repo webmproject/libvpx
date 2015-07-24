@@ -236,8 +236,8 @@ void TestRow_SSE2(const uint8* src_y, uint8* dst_argb, int pix) {
 }
 #endif  // TESTING
 
-#ifdef HAS_I400TOARGBROW_SSE2
-void I400ToARGBRow_SSE2(const uint8* src_y, uint8* dst_argb, int pix) {
+#ifdef HAS_J400TOARGBROW_SSE2
+void J400ToARGBRow_SSE2(const uint8* src_y, uint8* dst_argb, int pix) {
   asm volatile (
     "pcmpeqb   %%xmm5,%%xmm5                   \n"
     "pslld     $0x18,%%xmm5                    \n"
@@ -262,7 +262,7 @@ void I400ToARGBRow_SSE2(const uint8* src_y, uint8* dst_argb, int pix) {
   :: "memory", "cc", "xmm0", "xmm1", "xmm5"
   );
 }
-#endif  // HAS_I400TOARGBROW_SSE2
+#endif  // HAS_J400TOARGBROW_SSE2
 
 #ifdef HAS_RGB24TOARGBROW_SSSE3
 void RGB24ToARGBRow_SSSE3(const uint8* src_rgb24, uint8* dst_argb, int pix) {
@@ -953,7 +953,6 @@ void ARGBToUVRow_AVX2(const uint8* src_argb0, int src_stride_argb,
 #endif  // HAS_ARGBTOUVROW_AVX2
 
 #ifdef HAS_ARGBTOUVJROW_SSSE3
-// TODO(fbarchard): Share code with ARGBToUVRow_SSSE3.
 void ARGBToUVJRow_SSSE3(const uint8* src_argb0, int src_stride_argb,
                         uint8* dst_u, uint8* dst_v, int width) {
   asm volatile (
@@ -1414,22 +1413,6 @@ void RGBAToUVRow_SSSE3(const uint8* src_rgba0, int src_stride_rgba,
 
 #if defined(HAS_I422TOARGBROW_SSSE3) || defined(HAS_I422TOARGBROW_AVX2)
 
-// YUV to RGB conversion constants.
-// Y contribution to R,G,B.  Scale and bias.
-#define YG 18997 /* round(1.164 * 64 * 256 * 256 / 257) */
-#define YGB 1160 /* 1.164 * 64 * 16 - adjusted for even error distribution */
-
-// U and V contributions to R,G,B.
-#define UB -128 /* -min(128, round(2.018 * 64)) */
-#define UG 25 /* -round(-0.391 * 64) */
-#define VG 52 /* -round(-0.813 * 64) */
-#define VR -102 /* -round(1.596 * 64) */
-
-// Bias values to subtract 16 from Y and 128 from U and V.
-#define BB (UB * 128            - YGB)
-#define BG (UG * 128 + VG * 128 - YGB)
-#define BR            (VR * 128 - YGB)
-
 struct YuvConstants {
   lvec8 kUVToB;     // 0
   lvec8 kUVToG;     // 32
@@ -1439,6 +1422,27 @@ struct YuvConstants {
   lvec16 kUVBiasR;  // 160
   lvec16 kYToRgb;   // 192
 };
+
+// BT.601 YUV to RGB reference
+//  R = (Y - 16) * 1.164              - V * -1.596
+//  G = (Y - 16) * 1.164 - U *  0.391 - V *  0.813
+//  B = (Y - 16) * 1.164 - U * -2.018
+
+// Y contribution to R,G,B.  Scale and bias.
+// TODO(fbarchard): Consider moving constants into a common header.
+#define YG 18997 /* round(1.164 * 64 * 256 * 256 / 257) */
+#define YGB -1160 /* 1.164 * 64 * -16 + 64 / 2 */
+
+// U and V contributions to R,G,B.
+#define UB -128 /* max(-128, round(-2.018 * 64)) */
+#define UG 25 /* round(0.391 * 64) */
+#define VG 52 /* round(0.813 * 64) */
+#define VR -102 /* round(-1.596 * 64) */
+
+// Bias values to subtract 16 from Y and 128 from U and V.
+#define BB (UB * 128            + YGB)
+#define BG (UG * 128 + VG * 128 + YGB)
+#define BR            (VR * 128 + YGB)
 
 // BT601 constants for YUV to RGB.
 static YuvConstants SIMD_ALIGNED(kYuvConstants) = {
@@ -1467,6 +1471,67 @@ static YuvConstants SIMD_ALIGNED(kYvuConstants) = {
   { BR, BR, BR, BR, BR, BR, BR, BR, BR, BR, BR, BR, BR, BR, BR, BR },
   { YG, YG, YG, YG, YG, YG, YG, YG, YG, YG, YG, YG, YG, YG, YG, YG }
 };
+
+#undef YG
+#undef YGB
+#undef UB
+#undef UG
+#undef VG
+#undef VR
+#undef BB
+#undef BG
+#undef BR
+
+// JPEG YUV to RGB reference
+// *  R = Y                - V * -1.40200
+// *  G = Y - U *  0.34414 - V *  0.71414
+// *  B = Y - U * -1.77200
+
+// Y contribution to R,G,B.  Scale and bias.
+// TODO(fbarchard): Consider moving constants into a common header.
+#define YGJ 16320 /* round(1.000 * 64 * 256 * 256 / 257) */
+#define YGBJ 32  /* 64 / 2 */
+
+// U and V contributions to R,G,B.
+#define UBJ -113 /* round(-1.77200 * 64) */
+#define UGJ 22 /* round(0.34414 * 64) */
+#define VGJ 46 /* round(0.71414  * 64) */
+#define VRJ -90 /* round(-1.40200 * 64) */
+
+// Bias values to subtract 16 from Y and 128 from U and V.
+#define BBJ (UBJ * 128             + YGBJ)
+#define BGJ (UGJ * 128 + VGJ * 128 + YGBJ)
+#define BRJ             (VRJ * 128 + YGBJ)
+
+// JPEG constants for YUV to RGB.
+YuvConstants SIMD_ALIGNED(kYuvJConstants) = {
+  { UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0,
+    UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0, UBJ, 0 },
+  { UGJ, VGJ, UGJ, VGJ, UGJ, VGJ, UGJ, VGJ,
+    UGJ, VGJ, UGJ, VGJ, UGJ, VGJ, UGJ, VGJ,
+    UGJ, VGJ, UGJ, VGJ, UGJ, VGJ, UGJ, VGJ,
+    UGJ, VGJ, UGJ, VGJ, UGJ, VGJ, UGJ, VGJ },
+  { 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ,
+    0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ, 0, VRJ },
+  { BBJ, BBJ, BBJ, BBJ, BBJ, BBJ, BBJ, BBJ,
+    BBJ, BBJ, BBJ, BBJ, BBJ, BBJ, BBJ, BBJ },
+  { BGJ, BGJ, BGJ, BGJ, BGJ, BGJ, BGJ, BGJ,
+    BGJ, BGJ, BGJ, BGJ, BGJ, BGJ, BGJ, BGJ },
+  { BRJ, BRJ, BRJ, BRJ, BRJ, BRJ, BRJ, BRJ,
+    BRJ, BRJ, BRJ, BRJ, BRJ, BRJ, BRJ, BRJ },
+  { YGJ, YGJ, YGJ, YGJ, YGJ, YGJ, YGJ, YGJ,
+    YGJ, YGJ, YGJ, YGJ, YGJ, YGJ, YGJ, YGJ }
+};
+
+#undef YGJ
+#undef YGBJ
+#undef UBJ
+#undef UGJ
+#undef VGJ
+#undef VRJ
+#undef BBJ
+#undef BGJ
+#undef BRJ
 
 // Read 8 UV from 411
 #define READYUV444                                                             \
@@ -1534,8 +1599,8 @@ static YuvConstants SIMD_ALIGNED(kYvuConstants) = {
     "punpcklwd  %%xmm2,%%xmm0                                    \n"           \
     "punpckhwd  %%xmm2,%%xmm1                                    \n"           \
     "movdqu     %%xmm0," MEMACCESS([dst_argb]) "                 \n"           \
-    "movdqu     %%xmm1," MEMACCESS2(0x10,[dst_argb]) "           \n"           \
-    "lea        " MEMLEA(0x20,[dst_argb]) ",%[dst_argb]          \n"
+    "movdqu     %%xmm1," MEMACCESS2(0x10, [dst_argb]) "          \n"           \
+    "lea        " MEMLEA(0x20, [dst_argb]) ", %[dst_argb]        \n"
 
 // Store 8 BGRA values. Assumes XMM5 is zero.
 #define STOREBGRA                                                              \
@@ -1546,8 +1611,8 @@ static YuvConstants SIMD_ALIGNED(kYvuConstants) = {
     "punpcklwd %%xmm1,%%xmm5                                     \n"           \
     "punpckhwd %%xmm1,%%xmm0                                     \n"           \
     "movdqu    %%xmm5," MEMACCESS([dst_bgra]) "                  \n"           \
-    "movdqu    %%xmm0," MEMACCESS2(0x10,[dst_bgra]) "            \n"           \
-    "lea       " MEMLEA(0x20,[dst_bgra]) ",%[dst_bgra]           \n"
+    "movdqu    %%xmm0," MEMACCESS2(0x10, [dst_bgra]) "           \n"           \
+    "lea       " MEMLEA(0x20, [dst_bgra]) ", %[dst_bgra]         \n"
 
 // Store 8 ABGR values. Assumes XMM5 is zero.
 #define STOREABGR                                                              \
@@ -1557,8 +1622,8 @@ static YuvConstants SIMD_ALIGNED(kYvuConstants) = {
     "punpcklwd %%xmm0,%%xmm2                                     \n"           \
     "punpckhwd %%xmm0,%%xmm1                                     \n"           \
     "movdqu    %%xmm2," MEMACCESS([dst_abgr]) "                  \n"           \
-    "movdqu    %%xmm1," MEMACCESS2(0x10,[dst_abgr]) "            \n"           \
-    "lea       " MEMLEA(0x20,[dst_abgr]) ",%[dst_abgr]           \n"
+    "movdqu    %%xmm1," MEMACCESS2(0x10, [dst_abgr]) "           \n"           \
+    "lea       " MEMLEA(0x20, [dst_abgr]) ", %[dst_abgr]         \n"
 
 // Store 8 RGBA values. Assumes XMM5 is zero.
 #define STORERGBA                                                              \
@@ -1569,8 +1634,8 @@ static YuvConstants SIMD_ALIGNED(kYvuConstants) = {
     "punpcklwd %%xmm1,%%xmm5                                     \n"           \
     "punpckhwd %%xmm1,%%xmm0                                     \n"           \
     "movdqu    %%xmm5," MEMACCESS([dst_rgba]) "                  \n"           \
-    "movdqu    %%xmm0," MEMACCESS2(0x10,[dst_rgba]) "            \n"           \
-    "lea       " MEMLEA(0x20,[dst_rgba]) ",%[dst_rgba]           \n"
+    "movdqu    %%xmm0," MEMACCESS2(0x10, [dst_rgba]) "           \n"           \
+    "lea       " MEMLEA(0x20, [dst_rgba]) ",%[dst_rgba]          \n"
 
 void OMITFP I444ToARGBRow_SSSE3(const uint8* y_buf,
                                 const uint8* u_buf,
@@ -1708,6 +1773,32 @@ void OMITFP I422ToARGBRow_SSSE3(const uint8* y_buf,
     [dst_argb]"+r"(dst_argb),  // %[dst_argb]
     [width]"+rm"(width)    // %[width]
   : [kYuvConstants]"r"(&kYuvConstants.kUVToB) // %[kYuvConstants]
+  : "memory", "cc", NACL_R14
+    "xmm0", "xmm1", "xmm2", "xmm3", "xmm5"
+  );
+}
+
+void OMITFP J422ToARGBRow_SSSE3(const uint8* y_buf,
+                                const uint8* u_buf,
+                                const uint8* v_buf,
+                                uint8* dst_argb,
+                                int width) {
+  asm volatile (
+    "sub       %[u_buf],%[v_buf]               \n"
+    "pcmpeqb   %%xmm5,%%xmm5                   \n"
+    LABELALIGN
+  "1:                                          \n"
+    READYUV422
+    YUVTORGB(kYuvConstants)
+    STOREARGB
+    "sub       $0x8,%[width]                   \n"
+    "jg        1b                              \n"
+  : [y_buf]"+r"(y_buf),    // %[y_buf]
+    [u_buf]"+r"(u_buf),    // %[u_buf]
+    [v_buf]"+r"(v_buf),    // %[v_buf]
+    [dst_argb]"+r"(dst_argb),  // %[dst_argb]
+    [width]"+rm"(width)    // %[width]
+  : [kYuvConstants]"r"(&kYuvJConstants.kUVToB) // %[kYuvConstants]
   : "memory", "cc", NACL_R14
     "xmm0", "xmm1", "xmm2", "xmm3", "xmm5"
   );
@@ -1881,10 +1972,10 @@ void OMITFP I422ToRGBARow_SSSE3(const uint8* y_buf,
     "vpmaddubsw  " MEMACCESS([YuvConstants]) ",%%ymm0,%%ymm0        \n"        \
     "vmovdqu     " MEMACCESS2(160, [YuvConstants]) ",%%ymm3         \n"        \
     "vpsubw      %%ymm2,%%ymm3,%%ymm2                               \n"        \
-    "vmovdqu     " MEMACCESS2(128, [YuvConstants]) ",%%ymm2         \n"        \
-    "vpsubw      %%ymm1,%%ymm2,%%ymm1                               \n"        \
-    "vmovdqu     " MEMACCESS2(96, [YuvConstants]) ",%%ymm1          \n"        \
-    "vpsubw      %%ymm0,%%ymm1,%%ymm0                               \n"        \
+    "vmovdqu     " MEMACCESS2(128, [YuvConstants]) ",%%ymm3         \n"        \
+    "vpsubw      %%ymm1,%%ymm3,%%ymm1                               \n"        \
+    "vmovdqu     " MEMACCESS2(96, [YuvConstants]) ",%%ymm3          \n"        \
+    "vpsubw      %%ymm0,%%ymm3,%%ymm0                               \n"        \
     "vmovdqu     " MEMACCESS([y_buf]) ",%%xmm3                      \n"        \
     "lea         " MEMLEA(0x10, [y_buf]) ",%[y_buf]                 \n"        \
     "vpermq      $0xd8,%%ymm3,%%ymm3                                \n"        \
@@ -1984,6 +2075,48 @@ void OMITFP I422ToARGBRow_AVX2(const uint8* y_buf,
 }
 #endif  // HAS_I422TOARGBROW_AVX2
 
+#if defined(HAS_J422TOARGBROW_AVX2)
+// 16 pixels
+// 8 UV values upsampled to 16 UV, mixed with 16 Y producing 16 ARGB (64 bytes).
+void OMITFP J422ToARGBRow_AVX2(const uint8* y_buf,
+                               const uint8* u_buf,
+                               const uint8* v_buf,
+                               uint8* dst_argb,
+                               int width) {
+  asm volatile (
+    "sub       %[u_buf],%[v_buf]               \n"
+    "vpcmpeqb   %%ymm5,%%ymm5,%%ymm5           \n"
+    LABELALIGN
+  "1:                                          \n"
+    READYUV422_AVX2
+    YUVTORGB_AVX2(kYuvConstants)
+
+    // Step 3: Weave into ARGB
+    "vpunpcklbw %%ymm1,%%ymm0,%%ymm0           \n"  // BG
+    "vpermq     $0xd8,%%ymm0,%%ymm0            \n"
+    "vpunpcklbw %%ymm5,%%ymm2,%%ymm2           \n"  // RA
+    "vpermq     $0xd8,%%ymm2,%%ymm2            \n"
+    "vpunpcklwd %%ymm2,%%ymm0,%%ymm1           \n"  // BGRA first 8 pixels
+    "vpunpckhwd %%ymm2,%%ymm0,%%ymm0           \n"  // BGRA next 8 pixels
+
+    "vmovdqu    %%ymm1," MEMACCESS([dst_argb]) "\n"
+    "vmovdqu    %%ymm0," MEMACCESS2(0x20,[dst_argb]) "\n"
+    "lea       " MEMLEA(0x40,[dst_argb]) ",%[dst_argb] \n"
+    "sub       $0x10,%[width]                  \n"
+    "jg        1b                              \n"
+    "vzeroupper                                \n"
+  : [y_buf]"+r"(y_buf),    // %[y_buf]
+    [u_buf]"+r"(u_buf),    // %[u_buf]
+    [v_buf]"+r"(v_buf),    // %[v_buf]
+    [dst_argb]"+r"(dst_argb),  // %[dst_argb]
+    [width]"+rm"(width)    // %[width]
+  : [kYuvConstants]"r"(&kYuvJConstants.kUVToB)  // %[kYuvConstants]
+  : "memory", "cc", NACL_R14
+    "xmm0", "xmm1", "xmm2", "xmm3", "xmm5"
+  );
+}
+#endif  // HAS_J422TOARGBROW_AVX2
+
 #if defined(HAS_I422TOABGRROW_AVX2)
 // 16 pixels
 // 8 UV values upsampled to 16 UV, mixed with 16 Y producing 16 ABGR (64 bytes).
@@ -2066,8 +2199,8 @@ void OMITFP I422ToRGBARow_AVX2(const uint8* y_buf,
 }
 #endif  // HAS_I422TORGBAROW_AVX2
 
-#ifdef HAS_YTOARGBROW_SSE2
-void YToARGBRow_SSE2(const uint8* y_buf, uint8* dst_argb, int width) {
+#ifdef HAS_I400TOARGBROW_SSE2
+void I400ToARGBRow_SSE2(const uint8* y_buf, uint8* dst_argb, int width) {
   asm volatile (
     "mov       $0x4a354a35,%%eax               \n"  // 4a35 = 18997 = 1.164
     "movd      %%eax,%%xmm2                    \n"
@@ -2109,12 +2242,12 @@ void YToARGBRow_SSE2(const uint8* y_buf, uint8* dst_argb, int width) {
     , "xmm0", "xmm1", "xmm2", "xmm3", "xmm4"
   );
 }
-#endif  // HAS_YTOARGBROW_SSE2
+#endif  // HAS_I400TOARGBROW_SSE2
 
-#ifdef HAS_YTOARGBROW_AVX2
+#ifdef HAS_I400TOARGBROW_AVX2
 // 16 pixels of Y converted to 16 pixels of ARGB (64 bytes).
 // note: vpunpcklbw mutates and vpackuswb unmutates.
-void YToARGBRow_AVX2(const uint8* y_buf, uint8* dst_argb, int width) {
+void I400ToARGBRow_AVX2(const uint8* y_buf, uint8* dst_argb, int width) {
   asm volatile (
     "mov        $0x4a354a35,%%eax              \n" // 0488 = 1160 = 1.164 * 16
     "vmovd      %%eax,%%xmm2                   \n"
@@ -2156,7 +2289,7 @@ void YToARGBRow_AVX2(const uint8* y_buf, uint8* dst_argb, int width) {
     , "xmm0", "xmm1", "xmm2", "xmm3", "xmm4"
   );
 }
-#endif  // HAS_YTOARGBROW_AVX2
+#endif  // HAS_I400TOARGBROW_AVX2
 
 #ifdef HAS_MIRRORROW_SSSE3
 // Shuffle table for reversing the bytes.
@@ -3096,41 +3229,7 @@ void ARGBBlendRow_SSE2(const uint8* src_argb0, const uint8* src_argb1,
     "psllw     $0x8,%%xmm5                     \n"
     "pcmpeqb   %%xmm4,%%xmm4                   \n"
     "pslld     $0x18,%%xmm4                    \n"
-    "sub       $0x1,%3                         \n"
-    "je        91f                             \n"
-    "jl        99f                             \n"
-
-    // 1 pixel loop until destination pointer is aligned.
-  "10:                                         \n"
-    "test      $0xf,%2                         \n"
-    "je        19f                             \n"
-    "movd      " MEMACCESS(0) ",%%xmm3         \n"
-    "lea       " MEMLEA(0x4,0) ",%0            \n"
-    "movdqa    %%xmm3,%%xmm0                   \n"
-    "pxor      %%xmm4,%%xmm3                   \n"
-    "movd      " MEMACCESS(1) ",%%xmm2         \n"
-    "psrlw     $0x8,%%xmm3                     \n"
-    "pshufhw   $0xf5,%%xmm3,%%xmm3             \n"
-    "pshuflw   $0xf5,%%xmm3,%%xmm3             \n"
-    "pand      %%xmm6,%%xmm2                   \n"
-    "paddw     %%xmm7,%%xmm3                   \n"
-    "pmullw    %%xmm3,%%xmm2                   \n"
-    "movd      " MEMACCESS(1) ",%%xmm1         \n"
-    "lea       " MEMLEA(0x4,1) ",%1            \n"
-    "psrlw     $0x8,%%xmm1                     \n"
-    "por       %%xmm4,%%xmm0                   \n"
-    "pmullw    %%xmm3,%%xmm1                   \n"
-    "psrlw     $0x8,%%xmm2                     \n"
-    "paddusb   %%xmm2,%%xmm0                   \n"
-    "pand      %%xmm5,%%xmm1                   \n"
-    "paddusb   %%xmm1,%%xmm0                   \n"
-    "movd      %%xmm0," MEMACCESS(2) "         \n"
-    "lea       " MEMLEA(0x4,2) ",%2            \n"
-    "sub       $0x1,%3                         \n"
-    "jge       10b                             \n"
-
-  "19:                                         \n"
-    "add       $1-4,%3                         \n"
+    "sub       $0x4,%3                         \n"
     "jl        49f                             \n"
 
     // 4 pixel loop.
@@ -3231,39 +3330,7 @@ void ARGBBlendRow_SSSE3(const uint8* src_argb0, const uint8* src_argb1,
     "psllw     $0x8,%%xmm5                     \n"
     "pcmpeqb   %%xmm4,%%xmm4                   \n"
     "pslld     $0x18,%%xmm4                    \n"
-    "sub       $0x1,%3                         \n"
-    "je        91f                             \n"
-    "jl        99f                             \n"
-
-    // 1 pixel loop until destination pointer is aligned.
-  "10:                                         \n"
-    "test      $0xf,%2                         \n"
-    "je        19f                             \n"
-    "movd      " MEMACCESS(0) ",%%xmm3         \n"
-    "lea       " MEMLEA(0x4,0) ",%0            \n"
-    "movdqa    %%xmm3,%%xmm0                   \n"
-    "pxor      %%xmm4,%%xmm3                   \n"
-    "movd      " MEMACCESS(1) ",%%xmm2         \n"
-    "pshufb    %4,%%xmm3                       \n"
-    "pand      %%xmm6,%%xmm2                   \n"
-    "paddw     %%xmm7,%%xmm3                   \n"
-    "pmullw    %%xmm3,%%xmm2                   \n"
-    "movd      " MEMACCESS(1) ",%%xmm1         \n"
-    "lea       " MEMLEA(0x4,1) ",%1            \n"
-    "psrlw     $0x8,%%xmm1                     \n"
-    "por       %%xmm4,%%xmm0                   \n"
-    "pmullw    %%xmm3,%%xmm1                   \n"
-    "psrlw     $0x8,%%xmm2                     \n"
-    "paddusb   %%xmm2,%%xmm0                   \n"
-    "pand      %%xmm5,%%xmm1                   \n"
-    "paddusb   %%xmm1,%%xmm0                   \n"
-    "movd      %%xmm0," MEMACCESS(2) "         \n"
-    "lea       " MEMLEA(0x4,2) ",%2            \n"
-    "sub       $0x1,%3                         \n"
-    "jge       10b                             \n"
-
-  "19:                                         \n"
-    "add       $1-4,%3                         \n"
+    "sub       $0x4,%3                         \n"
     "jl        49f                             \n"
 
     // 4 pixel loop.
@@ -4896,37 +4963,6 @@ void InterpolateRow_SSE2(uint8* dst_ptr, const uint8* src_ptr,
   );
 }
 #endif  // HAS_INTERPOLATEROW_SSE2
-
-#ifdef HAS_ARGBTOBAYERGGROW_SSE2
-void ARGBToBayerGGRow_SSE2(const uint8* src_argb, uint8* dst_bayer,
-                           uint32 selector, int pix) {
-  asm volatile (
-    "pcmpeqb   %%xmm5,%%xmm5                   \n"
-    "psrld     $0x18,%%xmm5                    \n"
-    LABELALIGN
-  "1:                                          \n"
-    "movdqu    " MEMACCESS(0) ",%%xmm0         \n"
-    "movdqu    " MEMACCESS2(0x10,0) ",%%xmm1   \n"
-    "lea       " MEMLEA(0x20,0) ",%0           \n"
-    "psrld     $0x8,%%xmm0                     \n"
-    "psrld     $0x8,%%xmm1                     \n"
-    "pand      %%xmm5,%%xmm0                   \n"
-    "pand      %%xmm5,%%xmm1                   \n"
-    "packssdw  %%xmm1,%%xmm0                   \n"
-    "packuswb  %%xmm1,%%xmm0                   \n"
-    "movq      %%xmm0," MEMACCESS(1) "         \n"
-    "lea       " MEMLEA(0x8,1) ",%1            \n"
-    "sub       $0x8,%2                         \n"
-    "jg        1b                              \n"
-  : "+r"(src_argb),  // %0
-    "+r"(dst_bayer), // %1
-    "+r"(pix)        // %2
-  :
-  : "memory", "cc"
-    , "xmm0", "xmm1", "xmm5"
-  );
-}
-#endif  // HAS_ARGBTOBAYERGGROW_SSE2
 
 #ifdef HAS_ARGBSHUFFLEROW_SSSE3
 // For BGRAToARGB, ABGRToARGB, RGBAToARGB, and ARGBToRGBA.
