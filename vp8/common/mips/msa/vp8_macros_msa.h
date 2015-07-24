@@ -460,6 +460,27 @@
     SD4(out0_m, out1_m, out2_m, out3_m, pblk_8x4_m, stride);  \
 }
 
+/* Description : Immediate number of elements to slide
+   Arguments   : Inputs  - in0_0, in0_1, in1_0, in1_1, slide_val
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Byte elements from 'in0_0' vector are slid into 'in1_0' by
+                 value specified in the 'slide_val'
+*/
+#define SLDI_B2(RTYPE, in0_0, in0_1, in1_0, in1_1, out0, out1, slide_val)  \
+{                                                                          \
+    out0 = (RTYPE)__msa_sldi_b((v16i8)in0_0, (v16i8)in1_0, slide_val);     \
+    out1 = (RTYPE)__msa_sldi_b((v16i8)in0_1, (v16i8)in1_1, slide_val);     \
+}
+
+#define SLDI_B3(RTYPE, in0_0, in0_1, in0_2, in1_0, in1_1, in1_2,        \
+                out0, out1, out2, slide_val)                            \
+{                                                                       \
+    SLDI_B2(RTYPE, in0_0, in0_1, in1_0, in1_1, out0, out1, slide_val);  \
+    out2 = (RTYPE)__msa_sldi_b((v16i8)in0_2, (v16i8)in1_2, slide_val);  \
+}
+#define SLDI_B3_UH(...) SLDI_B3(v8u16, __VA_ARGS__)
+
 /* Description : Shuffle byte vector elements as per mask vector
    Arguments   : Inputs  - in0, in1, in2, in3, mask0, mask1
                  Outputs - out0, out1
@@ -472,7 +493,9 @@
     out0 = (RTYPE)__msa_vshf_b((v16i8)mask0, (v16i8)in1, (v16i8)in0);  \
     out1 = (RTYPE)__msa_vshf_b((v16i8)mask1, (v16i8)in3, (v16i8)in2);  \
 }
+#define VSHF_B2_UB(...) VSHF_B2(v16u8, __VA_ARGS__)
 #define VSHF_B2_SB(...) VSHF_B2(v16i8, __VA_ARGS__)
+#define VSHF_B2_UH(...) VSHF_B2(v8u16, __VA_ARGS__)
 
 #define VSHF_B3(RTYPE, in0, in1, in2, in3, in4, in5, mask0, mask1, mask2,  \
                 out0, out1, out2)                                          \
@@ -481,6 +504,32 @@
     out2 = (RTYPE)__msa_vshf_b((v16i8)mask2, (v16i8)in5, (v16i8)in4);      \
 }
 #define VSHF_B3_SB(...) VSHF_B3(v16i8, __VA_ARGS__)
+
+/* Description : Dot product of byte vector elements
+   Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Unsigned byte elements from 'mult0' are multiplied with
+                 unsigned byte elements from 'cnst0' producing a result
+                 twice the size of input i.e. unsigned halfword.
+                 The multiplication result of adjacent odd-even elements
+                 are added together and written to the 'out0' vector
+*/
+#define DOTP_UB2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1)  \
+{                                                                \
+    out0 = (RTYPE)__msa_dotp_u_h((v16u8)mult0, (v16u8)cnst0);    \
+    out1 = (RTYPE)__msa_dotp_u_h((v16u8)mult1, (v16u8)cnst1);    \
+}
+#define DOTP_UB2_UH(...) DOTP_UB2(v8u16, __VA_ARGS__)
+
+#define DOTP_UB4(RTYPE, mult0, mult1, mult2, mult3,           \
+                 cnst0, cnst1, cnst2, cnst3,                  \
+                 out0, out1, out2, out3)                      \
+{                                                             \
+    DOTP_UB2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1);  \
+    DOTP_UB2(RTYPE, mult2, mult3, cnst2, cnst3, out2, out3);  \
+}
+#define DOTP_UB4_UH(...) DOTP_UB4(v8u16, __VA_ARGS__)
 
 /* Description : Dot product of byte vector elements
    Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
@@ -768,6 +817,7 @@
     ILVR_D2(RTYPE, in0, in1, in2, in3, out0, out1);             \
     ILVR_D2(RTYPE, in4, in5, in6, in7, out2, out3);             \
 }
+#define ILVR_D4_SB(...) ILVR_D4(v16i8, __VA_ARGS__)
 #define ILVR_D4_UB(...) ILVR_D4(v16u8, __VA_ARGS__)
 
 /* Description : Interleave both left and right half of input vectors
@@ -1251,5 +1301,31 @@
     out_m = (v16u8)__msa_pckev_b((v16i8)in1, (v16i8)in0);  \
     out_m = (v16u8)__msa_xori_b((v16u8)out_m, 128);        \
     out_m;                                                 \
+})
+
+/* Description : Pack even byte elements and store byte vector in destination
+                 memory
+   Arguments   : Inputs - in0, in1, pdst
+*/
+#define PCKEV_ST_SB(in0, in1, pdst)                 \
+{                                                   \
+    v16i8 tmp_m;                                    \
+    tmp_m = __msa_pckev_b((v16i8)in1, (v16i8)in0);  \
+    ST_SB(tmp_m, (pdst));                           \
+}
+
+/* Description : Horizontal 2 tap filter kernel code
+   Arguments   : Inputs - in0, in1, mask, coeff, shift
+*/
+#define HORIZ_2TAP_FILT_UH(in0, in1, mask, coeff, shift)         \
+({                                                               \
+    v16i8 tmp0_m;                                                \
+    v8u16 tmp1_m;                                                \
+                                                                 \
+    tmp0_m = __msa_vshf_b((v16i8)mask, (v16i8)in1, (v16i8)in0);  \
+    tmp1_m = __msa_dotp_u_h((v16u8)tmp0_m, (v16u8)coeff);        \
+    tmp1_m = (v8u16)__msa_srari_h((v8i16)tmp1_m, shift);         \
+                                                                 \
+    tmp1_m;                                                      \
 })
 #endif  /* VP8_COMMON_MIPS_MSA_VP8_MACROS_MSA_H_ */
