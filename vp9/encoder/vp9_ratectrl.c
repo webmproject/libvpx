@@ -281,14 +281,14 @@ int vp9_rc_get_default_min_gf_interval(
   // Assume we do not need any constraint lower than 4K 20 fps
   static const double factor_safe = 3840 * 2160 * 20.0;
   const double factor = width * height * framerate;
-  const double default_interval =
-      MIN(MAX_GF_INTERVAL, MAX(MIN_GF_INTERVAL, (int)(framerate * 0.125)));
+  const int default_interval =
+      clamp((int)(framerate * 0.125), MIN_GF_INTERVAL, MAX_GF_INTERVAL);
 
   if (factor <= factor_safe)
-    return (int)default_interval;
+    return default_interval;
   else
-    return (int)MAX(default_interval,
-                    (int)(MIN_GF_INTERVAL * factor / factor_safe + 0.5));
+    return MAX(default_interval,
+               (int)(MIN_GF_INTERVAL * factor / factor_safe + 0.5));
   // Note this logic makes:
   // 4K24: 5
   // 4K30: 6
