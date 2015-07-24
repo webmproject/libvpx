@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "ed8dee45_c91bf2a7",
+        "filename": "vpx_dsp/mips/fwd_txfm_msa.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-24T21:22:27Z",
+      "side": 1,
+      "message": "I\u0027d say alphabetic order is easier to maintain, with the exception perhaps of rtcd/config; one can then just do a regular LC_ALL\u003dC sort on the list rather than have to remember any subtle restrictions",
+      "parentUuid": "ed8dee45_0e4fc0b9",
+      "revId": "8862da9e3b9d20ceea1a19f041e075ab824eef93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ad977653_555ebe74",
         "filename": "vpx_dsp/txfm_common.h",
         "patchSetId": 5
