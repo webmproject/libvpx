@@ -59,16 +59,17 @@ void vp9_foreach_transformed_block_in_plane(
       xd->mb_to_right_edge >> (5 + pd->subsampling_x));
   const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ? 0 :
       xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+  const int extra_step = ((num_4x4_w - max_blocks_wide) >> tx_size) * step;
 
   // Keep track of the row and column of the blocks we use so that we know
   // if we are in the unrestricted motion border.
   for (r = 0; r < max_blocks_high; r += (1 << tx_size)) {
-    for (c = 0; c < num_4x4_w; c += (1 << tx_size)) {
-      // Skip visiting the sub blocks that are wholly within the UMV.
-      if (c < max_blocks_wide)
-        visit(plane, i, plane_bsize, tx_size, arg);
+    // Skip visiting the sub blocks that are wholly within the UMV.
+    for (c = 0; c < max_blocks_wide; c += (1 << tx_size)) {
+      visit(plane, i, plane_bsize, tx_size, arg);
       i += step;
     }
+    i += extra_step;
   }
 }
 
