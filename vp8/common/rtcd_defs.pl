@@ -138,17 +138,17 @@ $vp8_dc_only_idct_add_dspr2=vp8_dc_only_idct_add_dspr2;
 # RECON
 #
 add_proto qw/void vp8_copy_mem16x16/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_copy_mem16x16 mmx sse2 media neon dspr2/;
+specialize qw/vp8_copy_mem16x16 mmx sse2 media neon dspr2 msa/;
 $vp8_copy_mem16x16_media=vp8_copy_mem16x16_v6;
 $vp8_copy_mem16x16_dspr2=vp8_copy_mem16x16_dspr2;
 
 add_proto qw/void vp8_copy_mem8x8/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_copy_mem8x8 mmx media neon dspr2/;
+specialize qw/vp8_copy_mem8x8 mmx media neon dspr2 msa/;
 $vp8_copy_mem8x8_media=vp8_copy_mem8x8_v6;
 $vp8_copy_mem8x8_dspr2=vp8_copy_mem8x8_dspr2;
 
 add_proto qw/void vp8_copy_mem8x4/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_copy_mem8x4 mmx media neon dspr2/;
+specialize qw/vp8_copy_mem8x4 mmx media neon dspr2 msa/;
 $vp8_copy_mem8x4_media=vp8_copy_mem8x4_v6;
 $vp8_copy_mem8x4_dspr2=vp8_copy_mem8x4_dspr2;
 

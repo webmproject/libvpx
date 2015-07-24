@@ -222,6 +222,23 @@
     out3 = LW((psrc) + 3 * stride);                \
 }
 
+/* Description : Load double words with stride
+   Arguments   : Inputs  - psrc, stride
+                 Outputs - out0, out1
+   Details     : Load double word in 'out0' from (psrc)
+                 Load double word in 'out1' from (psrc + stride)
+*/
+#define LD2(psrc, stride, out0, out1)  \
+{                                      \
+    out0 = LD((psrc));                 \
+    out1 = LD((psrc) + stride);        \
+}
+#define LD4(psrc, stride, out0, out1, out2, out3)  \
+{                                                  \
+    LD2((psrc), stride, out0, out1);               \
+    LD2((psrc) + 2 * stride, stride, out2, out3);  \
+}
+
 /* Description : Store 4 words with stride
    Arguments   : Inputs - in0, in1, in2, in3, pdst, stride
    Details     : Store word from 'in0' to (pdst)
@@ -298,6 +315,7 @@
     LD_B4(RTYPE, (psrc) + 4 * stride, stride, out4, out5, out6, out7);  \
 }
 #define LD_UB8(...) LD_B8(v16u8, __VA_ARGS__)
+#define LD_SB8(...) LD_B8(v16i8, __VA_ARGS__)
 
 /* Description : Load vectors with 8 halfword elements with stride
    Arguments   : Inputs  - psrc, stride
@@ -338,6 +356,14 @@
 }
 #define ST_UB4(...) ST_B4(v16u8, __VA_ARGS__)
 #define ST_SB4(...) ST_B4(v16i8, __VA_ARGS__)
+
+#define ST_B8(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,        \
+              pdst, stride)                                         \
+{                                                                   \
+    ST_B4(RTYPE, in0, in1, in2, in3, pdst, stride);                 \
+    ST_B4(RTYPE, in4, in5, in6, in7, (pdst) + 4 * stride, stride);  \
+}
+#define ST_UB8(...) ST_B8(v16u8, __VA_ARGS__)
 
 /* Description : Store vectors of 8 halfword elements with stride
    Arguments   : Inputs - in0, in1, pdst, stride
