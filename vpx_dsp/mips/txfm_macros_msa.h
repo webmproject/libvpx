@@ -11,6 +11,8 @@
 #ifndef VPX_DSP_MIPS_TXFM_MACROS_MIPS_MSA_H_
 #define VPX_DSP_MIPS_TXFM_MACROS_MIPS_MSA_H_
 
+#include "vpx_dsp/mips/macros_msa.h"
+
 #define DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1) {      \
   v8i16 k0_m = __msa_fill_h(cnst0);                                  \
   v4i32 s0_m, s1_m, s2_m, s3_m;                                      \

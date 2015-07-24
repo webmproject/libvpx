@@ -773,8 +773,7 @@ INSTANTIATE_TEST_CASE_P(
                    VPX_BITS_8)));
 #endif
 
-// TODO(jingning) Re-enable the mips/msa unit test.
-#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE && 0
+#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     MSA, FwdTrans8x8DCT,
     ::testing::Values(
