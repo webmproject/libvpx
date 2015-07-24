@@ -11,7 +11,7 @@
 #include <immintrin.h>  // AVX2
 
 #include "./vp9_rtcd.h"
-#include "vp9/common/vp9_idct.h"  // for cospi constants
+#include "vpx_dsp/txfm_common.h"
 #include "vpx_ports/mem.h"
 
 #define pair256_set_epi16(a, b) \

@@ -15,8 +15,8 @@
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vp9/common/vp9_idct.h"
 #include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
+#include "vpx_dsp/txfm_common.h"
 
 #if HAVE_DSPR2
 static void idct32_rows_dspr2(const int16_t *input, int16_t *output,

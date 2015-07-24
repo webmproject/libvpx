@@ -14,7 +14,7 @@
 #include "./vpx_config.h"
 
 #include "vp9/common/vp9_blockd.h"
-#include "vp9/common/vp9_idct.h"
+#include "vpx_dsp/txfm_common.h"
 
 void vp9_fdct8x8_1_neon(const int16_t *input, int16_t *output, int stride) {
   int r;

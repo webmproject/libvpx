@@ -10,8 +10,8 @@
 
 #include <arm_neon.h>
 
-#include "vpx_ports/mem.h"
 #include "vp9/common/vp9_idct.h"
+#include "vpx_ports/mem.h"
 
 void vp9_idct16x16_1_add_neon(
         int16_t *input,
