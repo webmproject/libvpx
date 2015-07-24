@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d9d1a6f_77be6820",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-07-24T19:57:09Z",
+      "side": 1,
+      "message": "NIT: making this an int can remove most of the casts.",
+      "range": {
+        "startLine": 284,
+        "startChar": 8,
+        "endLine": 284,
+        "endChar": 14
+      },
+      "revId": "2a5c8c25bcba5dc0576da07436d117271d3ed0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
