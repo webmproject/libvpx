@@ -34,6 +34,24 @@
       "revId": "8723c4e09ab2cf23508ea197994a96dd2117ef27",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d9ade79_e6d6266e",
+        "filename": "vpx_dsp/mips/fwd_txfm_msa.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-24T18:50:07Z",
+      "side": 1,
+      "message": "it\u0027s based on file+path so it should be unique:\n\nhttps://google-styleguide.googlecode.com/svn/trunk/cppguide.html#The__define_Guard",
+      "parentUuid": "6d9ade79_46f5327a",
+      "revId": "8723c4e09ab2cf23508ea197994a96dd2117ef27",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
