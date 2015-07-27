@@ -68,6 +68,7 @@ DSP_SRCS-$(HAVE_MSA)    += mips/txfm_macros_msa.h
 ifeq ($(CONFIG_VP9_ENCODER),yes)
 DSP_SRCS-yes            += fwd_txfm.c
 DSP_SRCS-yes            += fwd_txfm.h
+DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_sse2.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_impl_sse2.h
 ifeq ($(ARCH_X86_64),yes)

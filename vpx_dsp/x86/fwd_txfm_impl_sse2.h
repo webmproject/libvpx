@@ -11,8 +11,8 @@
 #include <emmintrin.h>  // SSE2
 
 #include "./vpx_dsp_rtcd.h"
-#include "vp9/encoder/x86/vp9_dct_sse2.h"
 #include "vpx_dsp/txfm_common.h"
+#include "vpx_dsp/x86/fwd_txfm_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"
 
