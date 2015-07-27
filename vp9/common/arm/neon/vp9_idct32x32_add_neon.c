@@ -11,38 +11,7 @@
 #include <arm_neon.h>
 
 #include "./vpx_config.h"
-
-static int16_t cospi_1_64 = 16364;
-static int16_t cospi_2_64 = 16305;
-static int16_t cospi_3_64 = 16207;
-static int16_t cospi_4_64 = 16069;
-static int16_t cospi_5_64 = 15893;
-static int16_t cospi_6_64 = 15679;
-static int16_t cospi_7_64 = 15426;
-static int16_t cospi_8_64 = 15137;
-static int16_t cospi_9_64 = 14811;
-static int16_t cospi_10_64 = 14449;
-static int16_t cospi_11_64 = 14053;
-static int16_t cospi_12_64 = 13623;
-static int16_t cospi_13_64 = 13160;
-static int16_t cospi_14_64 = 12665;
-static int16_t cospi_15_64 = 12140;
-static int16_t cospi_16_64 = 11585;
-static int16_t cospi_17_64 = 11003;
-static int16_t cospi_18_64 = 10394;
-static int16_t cospi_19_64 = 9760;
-static int16_t cospi_20_64 = 9102;
-static int16_t cospi_21_64 = 8423;
-static int16_t cospi_22_64 = 7723;
-static int16_t cospi_23_64 = 7005;
-static int16_t cospi_24_64 = 6270;
-static int16_t cospi_25_64 = 5520;
-static int16_t cospi_26_64 = 4756;
-static int16_t cospi_27_64 = 3981;
-static int16_t cospi_28_64 = 3196;
-static int16_t cospi_29_64 = 2404;
-static int16_t cospi_30_64 = 1606;
-static int16_t cospi_31_64 = 804;
+#include "vpx_dsp/txfm_common.h"
 
 #define LOAD_FROM_TRANSPOSED(prev, first, second) \
     q14s16 = vld1q_s16(trans_buf + first * 8); \
