@@ -10,9 +10,7 @@
 
 #include <immintrin.h>  // AVX2
 
-#include "./vp9_rtcd.h"
 #include "vpx_dsp/txfm_common.h"
-#include "vpx_ports/mem.h"
 
 #define pair256_set_epi16(a, b) \
   _mm256_set_epi16((int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a), \

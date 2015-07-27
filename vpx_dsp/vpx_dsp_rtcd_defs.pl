@@ -138,6 +138,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct16x16 sse2/;
 
+  add_proto qw/void vp9_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
+  specialize qw/vp9_fdct32x32 sse2/;
+
+  add_proto qw/void vp9_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
+  specialize qw/vp9_fdct32x32_rd sse2/;
+
   add_proto qw/void vp9_highbd_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct4x4 sse2/;
 
@@ -146,6 +152,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_highbd_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct16x16 sse2/;
+
+  add_proto qw/void vp9_highbd_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
+  specialize qw/vp9_highbd_fdct32x32 sse2/;
+
+  add_proto qw/void vp9_highbd_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
+  specialize qw/vp9_highbd_fdct32x32_rd sse2/;
 } else {
   add_proto qw/void vp9_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct4x4 sse2 msa/;
@@ -155,6 +167,12 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct16x16 sse2 msa/;
+
+  add_proto qw/void vp9_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
+  specialize qw/vp9_fdct32x32 sse2 avx2 msa/;
+
+  add_proto qw/void vp9_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
+  specialize qw/vp9_fdct32x32_rd sse2 avx2 msa/;
 }  # CONFIG_VP9_HIGHBITDEPTH
 }  # CONFIG_VP9_ENCODER
 

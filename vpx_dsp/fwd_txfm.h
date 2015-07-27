@@ -8,6 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VPX_DSP_FWD_TXFM_H_
+#define VPX_DSP_FWD_TXFM_H_
+
 #include "vpx_dsp/txfm_common.h"
 
 static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
@@ -17,3 +20,6 @@ static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
   // assert(INT16_MIN <= rv && rv <= INT16_MAX);
   return rv;
 }
+
+void vp9_fdct32(const tran_high_t *input, tran_high_t *output, int round);
+#endif  // VPX_DSP_FWD_TXFM_H_
