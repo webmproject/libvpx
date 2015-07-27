@@ -212,6 +212,24 @@
     },
     {
       "key": {
+        "uuid": "6d1d7ef6_7a4fd98a",
+        "filename": "vpx_dsp/intrapred.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-27T19:27:27Z",
+      "side": 1,
+      "message": "just use string.h in that case and you should do it in the file where it\u0027s needed, not here.",
+      "parentUuid": "8df6329c_8bfaad36",
+      "revId": "7834eb802ac98006cd624d69b559181d5dd88266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "edc5ee24_18e18ab8",
         "filename": "vpx_dsp/intrapred.h",
         "patchSetId": 20
