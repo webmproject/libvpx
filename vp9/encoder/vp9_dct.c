@@ -11,16 +11,15 @@
 #include <assert.h>
 #include <math.h>
 
-#include "./vpx_config.h"
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_systemdependent.h"
-#include "vp9/encoder/vp9_dct.h"
-#include "vpx_ports/mem.h"
 #include "vpx_dsp/fwd_txfm.h"
+#include "vpx_ports/mem.h"
 
 static void fdct4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t step[4];
