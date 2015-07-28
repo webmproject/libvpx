@@ -50,6 +50,10 @@ static void fdstNxN(const int16_t *input, tran_low_t *output,
       mat2[i * N + j] = inter[i];
   }
   // transpose
+  for (i = 0; i < N; i++)
+    for (j = 0; j < N; j++)
+      mat[i*N + j] = mat2[i + j*N];
+
   switch (N) {
     case 4:
       val = val_2_5;
