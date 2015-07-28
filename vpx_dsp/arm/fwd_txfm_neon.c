@@ -13,7 +13,7 @@
 #include "./vpx_config.h"
 #include "vpx_dsp/txfm_common.h"
 
-void vp9_fdct8x8_neon(const int16_t *input, int16_t *final_output, int stride) {
+void vpx_fdct8x8_neon(const int16_t *input, int16_t *final_output, int stride) {
   int i;
   // stage 1
   int16x8_t input_0 = vshlq_n_s16(vld1q_s16(&input[0 * stride]), 2);
@@ -202,7 +202,7 @@ void vp9_fdct8x8_neon(const int16_t *input, int16_t *final_output, int stride) {
   }
 }
 
-void vp9_fdct8x8_1_neon(const int16_t *input, int16_t *output, int stride) {
+void vpx_fdct8x8_1_neon(const int16_t *input, int16_t *output, int stride) {
   int r;
   int16x8_t sum = vld1q_s16(&input[0]);
   for (r = 1; r < 8; ++r) {

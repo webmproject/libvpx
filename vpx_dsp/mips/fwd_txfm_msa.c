@@ -166,7 +166,7 @@ void fdct16x8_1d_row(int16_t *input, int16_t *output) {
   ST_SH8(tmp4, in4, tmp5, in5, tmp6, in6, tmp7, in7, output + 8, 16);
 }
 
-void vp9_fdct4x4_msa(const int16_t *input, int16_t *output,
+void vpx_fdct4x4_msa(const int16_t *input, int16_t *output,
                      int32_t src_stride) {
   v8i16 in0, in1, in2, in3;
 
@@ -196,7 +196,7 @@ void vp9_fdct4x4_msa(const int16_t *input, int16_t *output,
   ST_SH2(in0, in2, output, 8);
 }
 
-void vp9_fdct8x8_msa(const int16_t *input, int16_t *output,
+void vpx_fdct8x8_msa(const int16_t *input, int16_t *output,
                      int32_t src_stride) {
   v8i16 in0, in1, in2, in3, in4, in5, in6, in7;
 
@@ -215,12 +215,12 @@ void vp9_fdct8x8_msa(const int16_t *input, int16_t *output,
   ST_SH8(in0, in1, in2, in3, in4, in5, in6, in7, output, 8);
 }
 
-void vp9_fdct8x8_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
+void vpx_fdct8x8_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
   out[0] = LD_HADD(input, stride);
   out[1] = 0;
 }
 
-void vp9_fdct16x16_msa(const int16_t *input, int16_t *output,
+void vpx_fdct16x16_msa(const int16_t *input, int16_t *output,
                        int32_t src_stride) {
   int32_t i;
   DECLARE_ALIGNED(32, int16_t, tmp_buf[16 * 16]);
@@ -236,7 +236,7 @@ void vp9_fdct16x16_msa(const int16_t *input, int16_t *output,
   }
 }
 
-void vp9_fdct16x16_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
+void vpx_fdct16x16_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
   out[1] = 0;
 
   out[0] = LD_HADD(input, stride);

@@ -14,7 +14,7 @@
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_dsp/x86/fwd_txfm_sse2.h"
 
-void vp9_fdct4x4_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
+void vpx_fdct4x4_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
   __m128i in0, in1;
   __m128i tmp;
   const __m128i zero = _mm_setzero_si128();
@@ -43,7 +43,7 @@ void vp9_fdct4x4_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
   store_output(&in0, output);
 }
 
-void vp9_fdct8x8_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
+void vpx_fdct8x8_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
   __m128i in0  = _mm_load_si128((const __m128i *)(input + 0 * stride));
   __m128i in1  = _mm_load_si128((const __m128i *)(input + 1 * stride));
   __m128i in2  = _mm_load_si128((const __m128i *)(input + 2 * stride));
@@ -83,7 +83,7 @@ void vp9_fdct8x8_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
   store_output(&in1, output);
 }
 
-void vp9_fdct16x16_1_sse2(const int16_t *input, tran_low_t *output,
+void vpx_fdct16x16_1_sse2(const int16_t *input, tran_low_t *output,
                           int stride) {
   __m128i in0, in1, in2, in3;
   __m128i u0, u1;
@@ -152,7 +152,7 @@ void vp9_fdct16x16_1_sse2(const int16_t *input, tran_low_t *output,
   store_output(&in1, output);
 }
 
-void vp9_fdct32x32_1_sse2(const int16_t *input, tran_low_t *output,
+void vpx_fdct32x32_1_sse2(const int16_t *input, tran_low_t *output,
                           int stride) {
   __m128i in0, in1, in2, in3;
   __m128i u0, u1;
@@ -225,21 +225,21 @@ void vp9_fdct32x32_1_sse2(const int16_t *input, tran_low_t *output,
 }
 
 #define DCT_HIGH_BIT_DEPTH 0
-#define FDCT4x4_2D vp9_fdct4x4_sse2
-#define FDCT8x8_2D vp9_fdct8x8_sse2
-#define FDCT16x16_2D vp9_fdct16x16_sse2
+#define FDCT4x4_2D vpx_fdct4x4_sse2
+#define FDCT8x8_2D vpx_fdct8x8_sse2
+#define FDCT16x16_2D vpx_fdct16x16_sse2
 #include "vpx_dsp/x86/fwd_txfm_impl_sse2.h"
 #undef  FDCT4x4_2D
 #undef  FDCT8x8_2D
 #undef  FDCT16x16_2D
 
-#define FDCT32x32_2D vp9_fdct32x32_rd_sse2
+#define FDCT32x32_2D vpx_fdct32x32_rd_sse2
 #define FDCT32x32_HIGH_PRECISION 0
 #include "vpx_dsp/x86/fwd_dct32x32_impl_sse2.h"
 #undef  FDCT32x32_2D
 #undef  FDCT32x32_HIGH_PRECISION
 
-#define FDCT32x32_2D vp9_fdct32x32_sse2
+#define FDCT32x32_2D vpx_fdct32x32_sse2
 #define FDCT32x32_HIGH_PRECISION 1
 #include "vpx_dsp/x86/fwd_dct32x32_impl_sse2.h"  // NOLINT
 #undef  FDCT32x32_2D
@@ -248,21 +248,21 @@ void vp9_fdct32x32_1_sse2(const int16_t *input, tran_low_t *output,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 #define DCT_HIGH_BIT_DEPTH 1
-#define FDCT4x4_2D vp9_highbd_fdct4x4_sse2
-#define FDCT8x8_2D vp9_highbd_fdct8x8_sse2
-#define FDCT16x16_2D vp9_highbd_fdct16x16_sse2
+#define FDCT4x4_2D vpx_highbd_fdct4x4_sse2
+#define FDCT8x8_2D vpx_highbd_fdct8x8_sse2
+#define FDCT16x16_2D vpx_highbd_fdct16x16_sse2
 #include "vpx_dsp/x86/fwd_txfm_impl_sse2.h" // NOLINT
 #undef  FDCT4x4_2D
 #undef  FDCT8x8_2D
 #undef  FDCT16x16_2D
 
-#define FDCT32x32_2D vp9_highbd_fdct32x32_rd_sse2
+#define FDCT32x32_2D vpx_highbd_fdct32x32_rd_sse2
 #define FDCT32x32_HIGH_PRECISION 0
 #include "vpx_dsp/x86/fwd_dct32x32_impl_sse2.h" // NOLINT
 #undef  FDCT32x32_2D
 #undef  FDCT32x32_HIGH_PRECISION
 
-#define FDCT32x32_2D vp9_highbd_fdct32x32_sse2
+#define FDCT32x32_2D vpx_highbd_fdct32x32_sse2
 #define FDCT32x32_HIGH_PRECISION 1
 #include "vpx_dsp/x86/fwd_dct32x32_impl_sse2.h" // NOLINT
 #undef  FDCT32x32_2D

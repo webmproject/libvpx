@@ -157,7 +157,7 @@ void vp9_fht4x4_sse2(const int16_t *input, tran_low_t *output,
 
   switch (tx_type) {
     case DCT_DCT:
-      vp9_fdct4x4_sse2(input, output, stride);
+      vpx_fdct4x4_sse2(input, output, stride);
       break;
     case ADST_DCT:
       load_buffer_4x4(input, in, stride);
@@ -1141,7 +1141,7 @@ void vp9_fht8x8_sse2(const int16_t *input, tran_low_t *output,
 
   switch (tx_type) {
     case DCT_DCT:
-      vp9_fdct8x8_sse2(input, output, stride);
+      vpx_fdct8x8_sse2(input, output, stride);
       break;
     case ADST_DCT:
       load_buffer_8x8(input, in, stride);
@@ -2028,7 +2028,7 @@ void vp9_fht16x16_sse2(const int16_t *input, tran_low_t *output,
 
   switch (tx_type) {
     case DCT_DCT:
-      vp9_fdct16x16_sse2(input, output, stride);
+      vpx_fdct16x16_sse2(input, output, stride);
       break;
     case ADST_DCT:
       load_buffer_16x16(input, in0, in1, stride);

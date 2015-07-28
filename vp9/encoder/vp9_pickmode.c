@@ -611,7 +611,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
 
         switch (tx_size) {
           case TX_32X32:
-            vp9_fdct32x32_rd(src_diff, coeff, diff_stride);
+            vpx_fdct32x32_rd(src_diff, coeff, diff_stride);
             vp9_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin,
                                   p->round_fp, p->quant_fp, p->quant_shift,
                                   qcoeff, dqcoeff, pd->dequant, eob,
