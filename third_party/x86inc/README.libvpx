@@ -8,3 +8,5 @@ x264/libav's framework for x86 assembly. Contains a variety of macros and
 defines that help automatically allow assembly to work cross-platform.
 
 Local Modifications:
+Get configuration from vpx_config.asm.
+Prefix functions with vpx by default.
