@@ -69,10 +69,13 @@ static void alloc_tree_contexts(VP9_COMMON *cm, PC_TREE *tree,
   alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[0]);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[0]);
 
-  /* TODO(Jbb): for 4x8 and 8x4 these allocated values are not used.
-   * Figure out a better way to do this. */
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[1]);
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[1]);
+  if (num_4x4_blk > 4) {
+    alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[1]);
+    alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[1]);
+  } else {
+    memset(&tree->horizontal[1], 0, sizeof(tree->horizontal[1]));
+    memset(&tree->vertical[1], 0, sizeof(tree->vertical[1]));
+  }
 }
 
 static void free_tree_contexts(PC_TREE *tree) {

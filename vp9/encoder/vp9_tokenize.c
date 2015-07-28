@@ -568,23 +568,24 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 
 struct is_skippable_args {
-  MACROBLOCK *x;
+  uint16_t *eobs;
   int *skippable;
 };
 static void is_skippable(int plane, int block,
                          BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                          void *argv) {
   struct is_skippable_args *args = argv;
+  (void)plane;
   (void)plane_bsize;
   (void)tx_size;
-  args->skippable[0] &= (!args->x->plane[plane].eobs[block]);
+  args->skippable[0] &= (!args->eobs[block]);
 }
 
 // TODO(yaowu): rewrite and optimize this function to remove the usage of
 //              vp9_foreach_transform_block() and simplify is_skippable().
 int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   int result = 1;
-  struct is_skippable_args args = {x, &result};
+  struct is_skippable_args args = {x->plane[plane].eobs, &result};
   vp9_foreach_transformed_block_in_plane(&x->e_mbd, bsize, plane, is_skippable,
                                          &args);
   return result;
@@ -595,14 +596,15 @@ static void has_high_freq_coeff(int plane, int block,
                                 void *argv) {
   struct is_skippable_args *args = argv;
   int eobs = (tx_size == TX_4X4) ? 3 : 10;
+  (void) plane;
   (void) plane_bsize;
 
-  *(args->skippable) |= (args->x->plane[plane].eobs[block] > eobs);
+  *(args->skippable) |= (args->eobs[block] > eobs);
 }
 
 int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   int result = 0;
-  struct is_skippable_args args = {x, &result};
+  struct is_skippable_args args = {x->plane[plane].eobs, &result};
   vp9_foreach_transformed_block_in_plane(&x->e_mbd, bsize, plane,
                                          has_high_freq_coeff, &args);
   return result;
