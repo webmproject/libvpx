@@ -66,10 +66,16 @@
     %endif
 %endif
 
-%ifdef PREFIX
-    %define mangle(x) _ %+ x
-%else
+%ifidn   __OUTPUT_FORMAT__,elf32
     %define mangle(x) x
+%elifidn __OUTPUT_FORMAT__,elf64
+    %define mangle(x) x
+%elifidn __OUTPUT_FORMAT__,x64
+    %define mangle(x) x
+%elifidn __OUTPUT_FORMAT__,win64
+    %define mangle(x) x
+%else
+    %define mangle(x) _ %+ x
 %endif
 
 %macro SECTION_RODATA 0-1 16
