@@ -191,10 +191,10 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes") {
     # no asm yet
 
     add_proto qw/void vp8_filter_by_weight16x16/, "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight";
-    specialize qw/vp8_filter_by_weight16x16 sse2/;
+    specialize qw/vp8_filter_by_weight16x16 sse2 msa/;
 
     add_proto qw/void vp8_filter_by_weight8x8/, "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight";
-    specialize qw/vp8_filter_by_weight8x8 sse2/;
+    specialize qw/vp8_filter_by_weight8x8 sse2 msa/;
 
     add_proto qw/void vp8_filter_by_weight4x4/, "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight";
     # no asm yet

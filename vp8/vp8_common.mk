@@ -122,6 +122,10 @@ VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/reconintra_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/sixtap_filter_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp8_macros_msa.h
 
+ifeq ($(CONFIG_POSTPROC),yes)
+VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/mfqe_msa.c
+endif
+
 # common (c)
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/filter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/loopfilter_arm.c
