@@ -16,3 +16,4 @@ Expand PIC default to macho64 and respect CONFIG_PIC from libvpx
 Catch all elf formats for 'hidden' status and SECTION notes.
 Avoid 'amdnop' when building with nasm.
 Set 'private_extern' visibility for macho targets.
+Copy PIC 'GLOBAL' macros from x86_abi_support.asm
