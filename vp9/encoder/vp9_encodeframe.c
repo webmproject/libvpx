@@ -1059,11 +1059,6 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   if (!output_enabled)
     return;
 
-  if (!segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-    for (i = 0; i < TX_MODES; i++)
-      rdc->tx_select_diff[i] += ctx->tx_rd_diff[i];
-  }
-
 #if CONFIG_INTERNAL_STATS
   if (frame_is_intra_only(cm)) {
     static const int kf_mode_index[] = {
@@ -3869,7 +3864,6 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
-  RD_OPT *const rd_opt = &cpi->rd;
   ThreadData *const td = &cpi->td;
   MACROBLOCK *const x = &td->mb;
   VP9_COMMON *const cm = &cpi->common;
@@ -3883,8 +3877,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(rdc->coef_counts);
   vp9_zero(rdc->comp_pred_diff);
   vp9_zero(rdc->filter_diff);
-  vp9_zero(rdc->tx_select_diff);
-  vp9_zero(rd_opt->tx_select_threshes);
 
   xd->lossless = cm->base_qindex == 0 &&
                  cm->y_dc_delta_q == 0 &&
@@ -4034,7 +4026,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
     int64_t *const mode_thrs = rd_opt->prediction_type_threshes[frame_type];
     int64_t *const filter_thrs = rd_opt->filter_threshes[frame_type];
-    int *const tx_thrs = rd_opt->tx_select_threshes[frame_type];
     const int is_alt_ref = frame_type == ALTREF_FRAME;
 
     /* prediction (compound, single or hybrid) mode selection */
@@ -4061,14 +4052,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
       filter_thrs[i] = (filter_thrs[i] + rdc->filter_diff[i] / cm->MBs) / 2;
-
-    for (i = 0; i < TX_MODES; ++i) {
-      int64_t pd = rdc->tx_select_diff[i];
-      if (i == TX_MODE_SELECT)
-        pd -= RDCOST(cpi->td.mb.rdmult, cpi->td.mb.rddiv, 2048 * (TX_SIZES - 1),
-                     0);
-      tx_thrs[i] = (tx_thrs[i] + (int)(pd / cm->MBs)) / 2;
-    }
 
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
       int single_count_zero = 0;

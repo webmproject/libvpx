@@ -103,8 +103,6 @@ typedef struct RD_OPT {
   int threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
 
   int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
-  // TODO(agrange): can this overflow?
-  int tx_select_threshes[MAX_REF_FRAMES][TX_MODES];
 
   int64_t filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
 
