@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd174afa_7ede8500",
+        "filename": "vpx_dsp/vpx_filter.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-28T23:23:16Z",
+      "side": 1,
+      "message": "These coefficients can stay in vp9 folder, since they are code-specific parameters.",
+      "revId": "7bd6627ae784627dc6e6090e9f83c8f22a2ea90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0dbb223c_03b9fe36",
+        "filename": "vpx_dsp/vpx_filter.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-28T23:23:16Z",
+      "side": 1,
+      "message": "Should vpx_filter_kernels[4] stay in vp9?\n\nThe filter operations take 8-tap coefficients, but don\u0027t need to know how many such coefficient sets available.",
+      "revId": "7bd6627ae784627dc6e6090e9f83c8f22a2ea90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
