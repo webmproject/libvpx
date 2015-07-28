@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2013 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2015 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -7,11 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include <stdlib.h>
 
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
+#include "vpx_dsp/mips/common_dspr2.h"
 
 #if HAVE_DSPR2
 void vp9_h_predictor_16x16_dspr2(uint8_t *dst, ptrdiff_t stride,

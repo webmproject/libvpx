@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2013 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2015 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -7,13 +7,26 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include <stdlib.h>
 
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
+#include "vpx_dsp/mips/common_dspr2.h"
 
 #if HAVE_DSPR2
+uint8_t vpx_ff_cropTbl_a[256 + 2 * CROP_WIDTH];
+uint8_t *vpx_ff_cropTbl;
+
+void vpx_dsputil_static_init(void) {
+  int i;
+
+  for (i = 0; i < 256; i++) vpx_ff_cropTbl_a[i + CROP_WIDTH] = i;
+
+  for (i = 0; i < CROP_WIDTH; i++) {
+    vpx_ff_cropTbl_a[i] = 0;
+    vpx_ff_cropTbl_a[i + CROP_WIDTH + 256] = 255;
+  }
+
+  vpx_ff_cropTbl = &vpx_ff_cropTbl_a[CROP_WIDTH];
+}
+
 void vp9_h_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   int32_t  tmp1, tmp2, tmp3, tmp4;
@@ -91,7 +104,7 @@ void vp9_tm_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
   int32_t  resl;
   int32_t  resr;
   int32_t  top_left;
-  uint8_t  *cm = vp9_ff_cropTbl;
+  uint8_t  *cm = vpx_ff_cropTbl;
 
   __asm__ __volatile__ (
       "ulw             %[resl],       (%[above])                         \n\t"

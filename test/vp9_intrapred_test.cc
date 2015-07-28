@@ -16,7 +16,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
-#include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vpx_mem/vpx_mem.h"
