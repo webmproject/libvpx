@@ -806,7 +806,10 @@ SECTION .note.GNU-stack noalloc noexec nowrite progbits
         %endif
     %endif
 
-    %if ARCH_X86_64 || cpuflag(sse2)
+    %ifdef __NASM_VER__
+        %use smartalign
+        ALIGNMODE k7
+    %elif ARCH_X86_64 || cpuflag(sse2)
         CPU amdnop
     %else
         CPU basicnop
