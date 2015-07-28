@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eda16e0d_d1d186ca",
+        "filename": "vp9/common/mips/dspr2/vp9_itrans16_dspr2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-28T16:29:58Z",
+      "side": 1,
+      "message": "The coefficient constants are now defined in\n\nvpx_dsp/txfm_common.h\n\nvp9_idct.h includes this header file.\n\nIf the compiler only complains about the coefficient definitions, perhaps use txfm_common.h for narrower scope.",
+      "revId": "b1fb6e0365fc00eeddfa69dff3087726db230202",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
