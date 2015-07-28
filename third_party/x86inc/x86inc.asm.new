@@ -691,6 +691,18 @@ BRANCH_INSTR jz, je, jnz, jne, jl, jle, jnl, jnle, jg, jge, jng, jnge, ja, jae, 
         global %2:function %%VISIBILITY
     %elifidn __OUTPUT_FORMAT__,elf64
         global %2:function %%VISIBILITY
+    %elifidn __OUTPUT_FORMAT__,macho32
+        %ifdef __NASM_VER__
+            global %2
+        %else
+            global %2:private_extern
+        %endif
+    %elifidn __OUTPUT_FORMAT__,macho64
+        %ifdef __NASM_VER__
+            global %2
+        %else
+            global %2:private_extern
+        %endif
     %else
         global %2
     %endif
