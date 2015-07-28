@@ -136,6 +136,13 @@ static INLINE uint64_t xgetbv(void) {
 #define xgetbv() 0U  // no AVX for older x64 or unrecognized toolchains.
 #endif
 
+#if defined(_MSC_VER)
+#include <windows.h>
+#if WINAPI_FAMILY_PARTITION(WINAPI_FAMILY_APP)
+#define getenv(x) NULL
+#endif
+#endif
+
 #define HAS_MMX     0x01
 #define HAS_SSE     0x02
 #define HAS_SSE2    0x04
