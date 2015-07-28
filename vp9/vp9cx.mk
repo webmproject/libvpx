@@ -136,7 +136,6 @@ VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_error_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct4x4_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct8x8_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct16x16_msa.c
-VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct32x32_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct_msa.h
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_temporal_filter_msa.c
 

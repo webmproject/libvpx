@@ -10,13 +10,8 @@
 
 #include <assert.h>
 
-#include "./vp9_rtcd.h"
+#include "vp9/common/vp9_enums.h"
 #include "vp9/encoder/mips/msa/vp9_fdct_msa.h"
-
-void vp9_fdct8x8_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
-  out[0] = LD_HADD(input, stride);
-  out[1] = 0;
-}
 
 void vp9_fht8x8_msa(const int16_t *input, int16_t *output, int32_t stride,
                     int32_t tx_type) {

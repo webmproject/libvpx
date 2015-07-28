@@ -201,3 +201,20 @@ void vp9_fdct8x8_neon(const int16_t *input, int16_t *final_output, int stride) {
     vst1q_s16(&final_output[7 * 8], input_7);
   }
 }
+
+void vp9_fdct8x8_1_neon(const int16_t *input, int16_t *output, int stride) {
+  int r;
+  int16x8_t sum = vld1q_s16(&input[0]);
+  for (r = 1; r < 8; ++r) {
+    const int16x8_t input_00 = vld1q_s16(&input[r * stride]);
+    sum = vaddq_s16(sum, input_00);
+  }
+  {
+    const int32x4_t a = vpaddlq_s16(sum);
+    const int64x2_t b = vpaddlq_s32(a);
+    const int32x2_t c = vadd_s32(vreinterpret_s32_s64(vget_low_s64(b)),
+                                 vreinterpret_s32_s64(vget_high_s64(b)));
+    output[0] = vget_lane_s16(vreinterpret_s16_s32(c), 0);
+    output[1] = 0;
+  }
+}
