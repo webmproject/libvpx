@@ -11,29 +11,27 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_config.h"
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vpx/vpx_integer.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/mips/vpx_common_dspr2.h"
+#include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
-#include "vp9/common/vp9_filter.h"
-#include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
-uint8_t vp9_ff_cropTbl_a[256 + 2 * CROP_WIDTH];
-uint8_t *vp9_ff_cropTbl;
+uint8_t vpx_ff_cropTbl_a[256 + 2 * CROP_WIDTH];
+uint8_t *vpx_ff_cropTbl;
 
-void vp9_dsputil_static_init(void) {
+void vpx_dsputil_static_init(void) {
   int i;
 
-  for (i = 0; i < 256; i++) vp9_ff_cropTbl_a[i + CROP_WIDTH] = i;
+  for (i = 0; i < 256; i++) vpx_ff_cropTbl_a[i + CROP_WIDTH] = i;
 
   for (i = 0; i < CROP_WIDTH; i++) {
-    vp9_ff_cropTbl_a[i] = 0;
-    vp9_ff_cropTbl_a[i + CROP_WIDTH + 256] = 255;
+    vpx_ff_cropTbl_a[i] = 0;
+    vpx_ff_cropTbl_a[i + CROP_WIDTH + 256] = 255;
   }
 
-  vp9_ff_cropTbl = &vp9_ff_cropTbl_a[CROP_WIDTH];
+  vpx_ff_cropTbl = &vpx_ff_cropTbl_a[CROP_WIDTH];
 }
 
 static void convolve_horiz_4_transposed_dspr2(const uint8_t *src,
@@ -43,7 +41,7 @@ static void convolve_horiz_4_transposed_dspr2(const uint8_t *src,
                                               const int16_t *filter_x0,
                                               int32_t h) {
   int32_t y;
-  uint8_t *cm = vp9_ff_cropTbl;
+  uint8_t *cm = vpx_ff_cropTbl;
   uint8_t *dst_ptr;
   int32_t vector1b, vector2b, vector3b, vector4b;
   int32_t Temp1, Temp2, Temp3, Temp4;
@@ -159,7 +157,7 @@ static void convolve_horiz_8_transposed_dspr2(const uint8_t *src,
                                               const int16_t *filter_x0,
                                               int32_t h) {
   int32_t y;
-  uint8_t *cm = vp9_ff_cropTbl;
+  uint8_t *cm = vpx_ff_cropTbl;
   uint8_t *dst_ptr;
   uint32_t vector4a = 64;
   int32_t vector1b, vector2b, vector3b, vector4b;
@@ -338,7 +336,7 @@ static void convolve_horiz_16_transposed_dspr2(const uint8_t *src_ptr,
   int32_t c, y;
   const uint8_t *src;
   uint8_t *dst;
-  uint8_t *cm = vp9_ff_cropTbl;
+  uint8_t *cm = vpx_ff_cropTbl;
   uint32_t vector_64 = 64;
   int32_t  filter12, filter34, filter56, filter78;
   int32_t  Temp1, Temp2, Temp3;
@@ -628,7 +626,7 @@ static void convolve_horiz_64_transposed_dspr2(const uint8_t *src_ptr,
   int32_t c, y;
   const uint8_t *src;
   uint8_t *dst;
-  uint8_t *cm = vp9_ff_cropTbl;
+  uint8_t *cm = vpx_ff_cropTbl;
   uint32_t vector_64 = 64;
   int32_t  filter12, filter34, filter56, filter78;
   int32_t  Temp1, Temp2, Temp3;
@@ -945,7 +943,7 @@ void copy_horiz_transposed(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                          uint8_t *dst, ptrdiff_t dst_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
@@ -965,7 +963,7 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
     intermediate_height = h;
 
   if (x_step_q4 != 16 || y_step_q4 != 16)
-    return vp9_convolve8_c(src, src_stride,
+    return vpx_convolve8_c(src, src_stride,
                            dst, dst_stride,
                            filter_x, x_step_q4,
                            filter_y, y_step_q4,
@@ -973,7 +971,7 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
 
   if ((((const int32_t *)filter_x)[1] == 0x800000)
       && (((const int32_t *)filter_y)[1] == 0x800000))
-    return vp9_convolve_copy(src, src_stride,
+    return vpx_convolve_copy(src, src_stride,
                              dst, dst_stride,
                              filter_x, x_step_q4,
                              filter_y, y_step_q4,
@@ -985,7 +983,7 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                           temp, intermediate_height,
                           w, intermediate_height);
   } else if (((const int32_t *)filter_x)[0] == 0) {
-    vp9_convolve2_dspr2(src - src_stride * 3, src_stride,
+    vpx_convolve2_dspr2(src - src_stride * 3, src_stride,
                         temp, intermediate_height,
                         filter_x,
                         w, intermediate_height);
@@ -1034,7 +1032,7 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                           dst, dst_stride,
                           h, w);
   } else if (((const int32_t *)filter_y)[0] == 0) {
-    vp9_convolve2_dspr2(temp + 3, intermediate_height,
+    vpx_convolve2_dspr2(temp + 3, intermediate_height,
                         dst, dst_stride,
                         filter_y,
                         h, w);
@@ -1070,7 +1068,7 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-void vp9_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
                              const int16_t *filter_x, int filter_x_stride,
                              const int16_t *filter_y, int filter_y_stride,

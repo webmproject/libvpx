@@ -419,17 +419,17 @@ static void idct16_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
   int result1, result2, result3, result4;
   const int const_2_power_13 = 8192;
   uint8_t *dest_pix;
-  uint8_t *cm = vp9_ff_cropTbl;
+  uint8_t *cm = vpx_ff_cropTbl;
 
-  /* prefetch vp9_ff_cropTbl */
-  prefetch_load(vp9_ff_cropTbl);
-  prefetch_load(vp9_ff_cropTbl +  32);
-  prefetch_load(vp9_ff_cropTbl +  64);
-  prefetch_load(vp9_ff_cropTbl +  96);
-  prefetch_load(vp9_ff_cropTbl + 128);
-  prefetch_load(vp9_ff_cropTbl + 160);
-  prefetch_load(vp9_ff_cropTbl + 192);
-  prefetch_load(vp9_ff_cropTbl + 224);
+  /* prefetch vpx_ff_cropTbl */
+  prefetch_load(vpx_ff_cropTbl);
+  prefetch_load(vpx_ff_cropTbl +  32);
+  prefetch_load(vpx_ff_cropTbl +  64);
+  prefetch_load(vpx_ff_cropTbl +  96);
+  prefetch_load(vpx_ff_cropTbl + 128);
+  prefetch_load(vpx_ff_cropTbl + 160);
+  prefetch_load(vpx_ff_cropTbl + 192);
+  prefetch_load(vpx_ff_cropTbl + 224);
 
   for (i = 0; i < 16; ++i) {
     dest_pix = (dest + i);
