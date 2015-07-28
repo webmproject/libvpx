@@ -111,7 +111,7 @@ SECTION .text
     cglobal highbd_sub_pixel_variance%1xh, 7, 8, 13, src, src_stride, x_offset, \
                                   y_offset, dst, dst_stride, height, sse
   %endif
-  %define h heightd
+  %define block_height heightd
   %define bilin_filter sseq
 %else
   %if ARCH_X86=1 && CONFIG_PIC=1
@@ -121,7 +121,7 @@ SECTION .text
                                   dst, dst_stride, \
                                   sec, sec_stride, \
                                   height, sse, g_bilin_filter, g_pw_8
-      %define h dword heightm
+      %define block_height dword heightm
       %define sec_str sec_stridemp
 
       ; Store bilin_filter and pw_8 location in stack
@@ -139,7 +139,7 @@ SECTION .text
       cglobal highbd_sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, \
                                 x_offset, y_offset, dst, dst_stride, height, \
                                 sse, g_bilin_filter, g_pw_8
-      %define h heightd
+      %define block_height heightd
 
       ; Store bilin_filter and pw_8 location in stack
       GET_GOT eax
@@ -162,16 +162,16 @@ SECTION .text
                                              sec, sec_stride, \
                                              height, sse
       %if ARCH_X86_64
-      %define h heightd
+      %define block_height heightd
       %define sec_str sec_strideq
       %else
-      %define h dword heightm
+      %define block_height dword heightm
       %define sec_str sec_stridemp
       %endif
     %else
       cglobal highbd_sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, \
                               x_offset, y_offset, dst, dst_stride, height, sse
-      %define h heightd
+      %define block_height heightd
     %endif
 
     %define bilin_filter bilin_filter_m
@@ -183,7 +183,7 @@ SECTION .text
   pxor                 m7, m7           ; sse
 
 %if %1 < 16
-  sar                   h, 1
+  sar                   block_height, 1
 %endif
 %if %2 == 1 ; avg
   shl             sec_str, 1
@@ -232,7 +232,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_zero_y_zero_loop
   STORE_AND_RET
 
@@ -283,7 +283,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_zero_y_half_loop
   STORE_AND_RET
 
@@ -381,7 +381,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_zero_y_other_loop
 %undef filter_y_a
 %undef filter_y_b
@@ -439,7 +439,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_half_y_zero_loop
   STORE_AND_RET
 
@@ -510,7 +510,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_half_y_half_loop
   STORE_AND_RET
 
@@ -626,7 +626,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_half_y_other_loop
 %undef filter_y_a
 %undef filter_y_b
@@ -725,7 +725,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_other_y_zero_loop
 %undef filter_x_a
 %undef filter_x_b
@@ -855,7 +855,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_other_y_half_loop
 %undef filter_x_a
 %undef filter_x_b
@@ -1022,7 +1022,7 @@ SECTION .text
   add                secq, sec_str
 %endif
 %endif
-  dec                   h
+  dec                   block_height
   jg .x_other_y_other_loop
 %undef filter_x_a
 %undef filter_x_b
