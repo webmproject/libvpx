@@ -10,11 +10,13 @@
 
 #include <emmintrin.h>  // SSE2
 
-#include "vp9/encoder/vp9_dct.h"
+#include "vpx_dsp/fwd_txfm.h"
 #include "vpx_dsp/txfm_common.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
-#include "vpx_ports/mem.h"
 
+// TODO(jingning) The high bit-depth version needs re-work for performance.
+// The current SSE2 implementation also causes cross reference to the static
+// functions in the C implementation file.
 #if DCT_HIGH_BIT_DEPTH
 #define ADD_EPI16 _mm_adds_epi16
 #define SUB_EPI16 _mm_subs_epi16

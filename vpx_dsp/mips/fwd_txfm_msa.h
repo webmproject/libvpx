@@ -273,6 +273,85 @@
   out3 = DOT_SHIFT_RIGHT_PCK_H(vec0_m, vec1_m, cnst0_m);           \
 }
 
+#define FDCT_POSTPROC_2V_NEG_H(vec0, vec1) {      \
+  v8i16 tp0_m, tp1_m;                             \
+  v8i16 one_m = __msa_ldi_h(1);                   \
+                                                  \
+  tp0_m = __msa_clti_s_h(vec0, 0);                \
+  tp1_m = __msa_clti_s_h(vec1, 0);                \
+  vec0 += 1;                                      \
+  vec1 += 1;                                      \
+  tp0_m = one_m & tp0_m;                          \
+  tp1_m = one_m & tp1_m;                          \
+  vec0 += tp0_m;                                  \
+  vec1 += tp1_m;                                  \
+  vec0 >>= 2;                                     \
+  vec1 >>= 2;                                     \
+}
+
+#define FDCT32_POSTPROC_NEG_W(vec) {      \
+  v4i32 temp_m;                           \
+  v4i32 one_m = __msa_ldi_w(1);           \
+                                          \
+  temp_m = __msa_clti_s_w(vec, 0);        \
+  vec += 1;                               \
+  temp_m = one_m & temp_m;                \
+  vec += temp_m;                          \
+  vec >>= 2;                              \
+}
+
+#define FDCT32_POSTPROC_2V_POS_H(vec0, vec1) {      \
+  v8i16 tp0_m, tp1_m;                               \
+  v8i16 one = __msa_ldi_h(1);                       \
+                                                    \
+  tp0_m = __msa_clei_s_h(vec0, 0);                  \
+  tp1_m = __msa_clei_s_h(vec1, 0);                  \
+  tp0_m = (v8i16)__msa_xori_b((v16u8)tp0_m, 255);   \
+  tp1_m = (v8i16)__msa_xori_b((v16u8)tp1_m, 255);   \
+  vec0 += 1;                                        \
+  vec1 += 1;                                        \
+  tp0_m = one & tp0_m;                              \
+  tp1_m = one & tp1_m;                              \
+  vec0 += tp0_m;                                    \
+  vec1 += tp1_m;                                    \
+  vec0 >>= 2;                                       \
+  vec1 >>= 2;                                       \
+}
+
+#define DOTP_CONST_PAIR_W(reg0_left, reg1_left, reg0_right,      \
+                          reg1_right, const0, const1,            \
+                          out0, out1, out2, out3) {              \
+  v4i32 s0_m, s1_m, s2_m, s3_m, s4_m, s5_m, s6_m, s7_m;          \
+  v2i64 tp0_m, tp1_m, tp2_m, tp3_m;                              \
+  v4i32 k0_m = __msa_fill_w((int32_t) const0);                   \
+                                                                 \
+  s0_m = __msa_fill_w((int32_t) const1);                         \
+  k0_m = __msa_ilvev_w(s0_m, k0_m);                              \
+                                                                 \
+  ILVRL_W2_SW(-reg1_left, reg0_left, s1_m, s0_m);                \
+  ILVRL_W2_SW(reg0_left, reg1_left, s3_m, s2_m);                 \
+  ILVRL_W2_SW(-reg1_right, reg0_right, s5_m, s4_m);              \
+  ILVRL_W2_SW(reg0_right, reg1_right, s7_m, s6_m);               \
+                                                                 \
+  DOTP_SW2_SD(s0_m, s1_m, k0_m, k0_m, tp0_m, tp1_m);             \
+  DOTP_SW2_SD(s4_m, s5_m, k0_m, k0_m, tp2_m, tp3_m);             \
+  tp0_m = __msa_srari_d(tp0_m, DCT_CONST_BITS);                  \
+  tp1_m = __msa_srari_d(tp1_m, DCT_CONST_BITS);                  \
+  tp2_m = __msa_srari_d(tp2_m, DCT_CONST_BITS);                  \
+  tp3_m = __msa_srari_d(tp3_m, DCT_CONST_BITS);                  \
+  out0 = __msa_pckev_w((v4i32)tp0_m, (v4i32)tp1_m);              \
+  out1 = __msa_pckev_w((v4i32)tp2_m, (v4i32)tp3_m);              \
+                                                                 \
+  DOTP_SW2_SD(s2_m, s3_m, k0_m, k0_m, tp0_m, tp1_m);             \
+  DOTP_SW2_SD(s6_m, s7_m, k0_m, k0_m, tp2_m, tp3_m);             \
+  tp0_m = __msa_srari_d(tp0_m, DCT_CONST_BITS);                  \
+  tp1_m = __msa_srari_d(tp1_m, DCT_CONST_BITS);                  \
+  tp2_m = __msa_srari_d(tp2_m, DCT_CONST_BITS);                  \
+  tp3_m = __msa_srari_d(tp3_m, DCT_CONST_BITS);                  \
+  out2 = __msa_pckev_w((v4i32)tp0_m, (v4i32)tp1_m);              \
+  out3 = __msa_pckev_w((v4i32)tp2_m, (v4i32)tp3_m);              \
+}
+
 void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
                         int32_t src_stride);
 void fdct16x8_1d_row(int16_t *input, int16_t *output);
