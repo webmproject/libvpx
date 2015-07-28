@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6dae5efb_15d496b5",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-07-28T19:55:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed47aeea_b84d6946",
+      "revId": "e23dff670d5de72af5a79651b54154c166cc19e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cdfd8ac1_eb9e8544",
         "filename": "vpx_dsp/vpx_dsp_common.h",
         "patchSetId": 11
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ed1c0e21_7fe1638f",
+        "filename": "vpx_dsp/vpx_dsp_common.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-07-28T19:55:06Z",
+      "side": 1,
+      "message": "Yes, otherwise some files have to include vp9/common/vp9_common.h",
+      "parentUuid": "cdfd8ac1_eb9e8544",
+      "revId": "e23dff670d5de72af5a79651b54154c166cc19e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d1d7ef6_bd1fab1d",
         "filename": "vpx_dsp/vpx_filter.h",
         "patchSetId": 11
@@ -47,6 +83,24 @@
       "writtenOn": "2015-07-27T22:39:31Z",
       "side": 1,
       "message": "these definitions of filter types can stay in vp9/.\n\nit is more likely that the filtering operation will be used in vp10, but the filter types will be different.",
+      "revId": "e23dff670d5de72af5a79651b54154c166cc19e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4db19a56_b79e7043",
+        "filename": "vpx_dsp/vpx_filter.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-07-28T19:55:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d1d7ef6_bd1fab1d",
       "revId": "e23dff670d5de72af5a79651b54154c166cc19e9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
