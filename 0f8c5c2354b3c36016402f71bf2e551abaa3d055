@@ -22,6 +22,30 @@
       "revId": "0f8c5c2354b3c36016402f71bf2e551abaa3d055",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd174afa_1897a91c",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-28T18:14:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ad1696fe_379a7246",
+      "range": {
+        "startLine": 22,
+        "startChar": 22,
+        "endLine": 22,
+        "endChar": 23
+      },
+      "revId": "0f8c5c2354b3c36016402f71bf2e551abaa3d055",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
