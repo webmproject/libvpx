@@ -67,6 +67,8 @@ else ifeq  ($(TARGET_ARCH_ABI),arm64-v8a)
   LOCAL_ARM_MODE := arm
 else ifeq ($(TARGET_ARCH_ABI),x86)
   include $(CONFIG_DIR)libs-x86-android-gcc.mk
+else ifeq ($(TARGET_ARCH_ABI),x86_64)
+  include $(CONFIG_DIR)libs-x86_64-android-gcc.mk
 else ifeq ($(TARGET_ARCH_ABI),mips)
   include $(CONFIG_DIR)libs-mips-android-gcc.mk
 else
