@@ -13,3 +13,4 @@ Prefix functions with vpx by default.
 Manage name mangling (prefixing with '_') manually because 'PREFIX' does not
   exist in libvpx.
 Expand PIC default to macho64 and respect CONFIG_PIC from libvpx
+Catch all elf formats for 'hidden' status and SECTION notes.
