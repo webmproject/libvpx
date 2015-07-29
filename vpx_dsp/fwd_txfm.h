@@ -21,5 +21,5 @@ static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
   return rv;
 }
 
-void vp9_fdct32(const tran_high_t *input, tran_high_t *output, int round);
+void vpx_fdct32(const tran_high_t *input, tran_high_t *output, int round);
 #endif  // VPX_DSP_FWD_TXFM_H_

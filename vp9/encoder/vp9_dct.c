@@ -531,7 +531,7 @@ static const transform_2d FHT_16[] = {
 void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
                   int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
-    vp9_fdct4x4_c(input, output, stride);
+    vpx_fdct4x4_c(input, output, stride);
   } else {
     tran_low_t out[4 * 4];
     int i, j;
@@ -675,7 +675,7 @@ void vp9_fdct8x8_quant_c(const int16_t *input, int stride,
 void vp9_fht8x8_c(const int16_t *input, tran_low_t *output,
                   int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
-    vp9_fdct8x8_c(input, output, stride);
+    vpx_fdct8x8_c(input, output, stride);
   } else {
     tran_low_t out[64];
     int i, j;
@@ -761,7 +761,7 @@ void vp9_fwht4x4_c(const int16_t *input, tran_low_t *output, int stride) {
 void vp9_fht16x16_c(const int16_t *input, tran_low_t *output,
                     int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
-    vp9_fdct16x16_c(input, output, stride);
+    vpx_fdct16x16_c(input, output, stride);
   } else {
     tran_low_t out[256];
     int i, j;

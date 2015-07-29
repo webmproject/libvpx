@@ -83,7 +83,7 @@ void reference_8x8_dct_2d(const int16_t input[kNumCoeffs],
 
 
 void fdct8x8_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
-  vp9_fdct8x8_c(in, out, stride);
+  vpx_fdct8x8_c(in, out, stride);
 }
 
 void fht8x8_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
@@ -658,14 +658,14 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8),
-        make_tuple(&vp9_highbd_fdct8x8_c, &idct8x8_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_highbd_fdct8x8_c, &idct8x8_12, 0, VPX_BITS_12)));
+        make_tuple(&vpx_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8),
+        make_tuple(&vpx_highbd_fdct8x8_c, &idct8x8_10, 0, VPX_BITS_10),
+        make_tuple(&vpx_highbd_fdct8x8_c, &idct8x8_12, 0, VPX_BITS_12)));
 #else
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8)));
+        make_tuple(&vpx_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -698,7 +698,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_neon, &vp9_idct8x8_64_add_neon, 0,
+        make_tuple(&vpx_fdct8x8_neon, &vp9_idct8x8_64_add_neon, 0,
                    VPX_BITS_8)));
 #endif  // HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
@@ -716,7 +716,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_sse2, &vp9_idct8x8_64_add_sse2, 0,
+        make_tuple(&vpx_fdct8x8_sse2, &vp9_idct8x8_64_add_sse2, 0,
                    VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
@@ -731,14 +731,14 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_sse2, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8),
-        make_tuple(&vp9_highbd_fdct8x8_c,
+        make_tuple(&vpx_fdct8x8_sse2, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8),
+        make_tuple(&vpx_highbd_fdct8x8_c,
                    &idct8x8_64_add_10_sse2, 12, VPX_BITS_10),
-        make_tuple(&vp9_highbd_fdct8x8_sse2,
+        make_tuple(&vpx_highbd_fdct8x8_sse2,
                    &idct8x8_64_add_10_sse2, 12, VPX_BITS_10),
-        make_tuple(&vp9_highbd_fdct8x8_c,
+        make_tuple(&vpx_highbd_fdct8x8_c,
                    &idct8x8_64_add_12_sse2, 12, VPX_BITS_12),
-        make_tuple(&vp9_highbd_fdct8x8_sse2,
+        make_tuple(&vpx_highbd_fdct8x8_sse2,
                    &idct8x8_64_add_12_sse2, 12, VPX_BITS_12)));
 
 INSTANTIATE_TEST_CASE_P(
@@ -769,7 +769,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSSE3, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0,
+        make_tuple(&vpx_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0,
                    VPX_BITS_8)));
 #endif
 
@@ -777,7 +777,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     MSA, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_msa, &vp9_idct8x8_64_add_msa, 0, VPX_BITS_8)));
+        make_tuple(&vpx_fdct8x8_msa, &vp9_idct8x8_64_add_msa, 0, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
     MSA, FwdTrans8x8HT,
     ::testing::Values(

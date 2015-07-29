@@ -21,34 +21,34 @@
 #define ADD_EPI16 _mm_adds_epi16
 #define SUB_EPI16 _mm_subs_epi16
 #if FDCT32x32_HIGH_PRECISION
-void vp9_fdct32x32_rows_c(const int16_t *intermediate, tran_low_t *out) {
+void vpx_fdct32x32_rows_c(const int16_t *intermediate, tran_low_t *out) {
     int i, j;
     for (i = 0; i < 32; ++i) {
       tran_high_t temp_in[32], temp_out[32];
       for (j = 0; j < 32; ++j)
         temp_in[j] = intermediate[j * 32 + i];
-      vp9_fdct32(temp_in, temp_out, 0);
+      vpx_fdct32(temp_in, temp_out, 0);
       for (j = 0; j < 32; ++j)
         out[j + i * 32] =
             (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
     }
 }
-  #define HIGH_FDCT32x32_2D_C vp9_highbd_fdct32x32_c
-  #define HIGH_FDCT32x32_2D_ROWS_C vp9_fdct32x32_rows_c
+  #define HIGH_FDCT32x32_2D_C vpx_highbd_fdct32x32_c
+  #define HIGH_FDCT32x32_2D_ROWS_C vpx_fdct32x32_rows_c
 #else
-void vp9_fdct32x32_rd_rows_c(const int16_t *intermediate, tran_low_t *out) {
+void vpx_fdct32x32_rd_rows_c(const int16_t *intermediate, tran_low_t *out) {
     int i, j;
     for (i = 0; i < 32; ++i) {
       tran_high_t temp_in[32], temp_out[32];
       for (j = 0; j < 32; ++j)
         temp_in[j] = intermediate[j * 32 + i];
-      vp9_fdct32(temp_in, temp_out, 1);
+      vpx_fdct32(temp_in, temp_out, 1);
       for (j = 0; j < 32; ++j)
         out[j + i * 32] = (tran_low_t)temp_out[j];
     }
 }
-  #define HIGH_FDCT32x32_2D_C vp9_highbd_fdct32x32_rd_c
-  #define HIGH_FDCT32x32_2D_ROWS_C vp9_fdct32x32_rd_rows_c
+  #define HIGH_FDCT32x32_2D_C vpx_highbd_fdct32x32_rd_c
+  #define HIGH_FDCT32x32_2D_ROWS_C vpx_fdct32x32_rd_rows_c
 #endif  // FDCT32x32_HIGH_PRECISION
 #else
 #define ADD_EPI16 _mm_add_epi16
