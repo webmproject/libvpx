@@ -24,7 +24,6 @@ VP9_CX_SRCS-yes += encoder/vp9_context_tree.h
 VP9_CX_SRCS-yes += encoder/vp9_cost.h
 VP9_CX_SRCS-yes += encoder/vp9_cost.c
 VP9_CX_SRCS-yes += encoder/vp9_dct.c
-VP9_CX_SRCS-yes += encoder/vp9_dct.h
 VP9_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/vp9_denoiser.c
 VP9_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/vp9_denoiser.h
 VP9_CX_SRCS-yes += encoder/vp9_encodeframe.c
