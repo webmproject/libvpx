@@ -16,6 +16,24 @@
       "revId": "a6a4659bea0859dfa663cd8b0e85cb7c7bf3a50e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a0b6c19_7e65293a",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-29T21:52:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2db8e63c_d99a47f6",
+      "revId": "a6a4659bea0859dfa663cd8b0e85cb7c7bf3a50e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
