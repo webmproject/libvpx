@@ -635,7 +635,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
             xd->dst.v_buffer = dst_buffer[2] + recon_uvoffset;
 
             if (xd->mode_info_context->mbmi.ref_frame >= LAST_FRAME) {
-              MV_REFERENCE_FRAME ref = xd->mode_info_context->mbmi.ref_frame;
+              const MV_REFERENCE_FRAME ref = xd->mode_info_context->mbmi.ref_frame;
               xd->pre.y_buffer = ref_buffer[ref][0] + recon_yoffset;
               xd->pre.u_buffer = ref_buffer[ref][1] + recon_uvoffset;
               xd->pre.v_buffer = ref_buffer[ref][2] + recon_uvoffset;
