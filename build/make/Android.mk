@@ -175,7 +175,7 @@ endif
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_scale_rtcd.h
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_dsp_rtcd.h
 
-ifeq ($(TARGET_ARCH_ABI),x86)
+ifneq ($(findstring $(TARGET_ARCH_ABI),x86 x86_64),)
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_config.asm
 endif
 endef
