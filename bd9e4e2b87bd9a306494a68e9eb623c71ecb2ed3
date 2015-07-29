@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2af28c55_835540d3",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-07-29T19:46:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a11e441_5d5a6f00",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a00d8f0_5ec7110f",
         "filename": "vp9/common/x86/vp9_copy_sse2.asm",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-29T19:12:46Z",
       "side": 1,
       "message": "this comment and the next one can be dropped (or use the calculation instead).",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafb1432_c14c6496",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-07-29T19:46:53Z",
+      "side": 1,
+      "message": "dropped",
+      "parentUuid": "8a00d8f0_5ec7110f",
       "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "4aeb4063_2419dc08",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-07-29T19:46:53Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "0a0ea828_3aae9d9d",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a00d8f0_ded201cc",
         "filename": "vp9/common/x86/vp9_copy_sse2.asm",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-07-29T19:12:46Z",
       "side": 1,
       "message": "same comment here",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafb1432_61f6b08a",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-07-29T19:46:53Z",
+      "side": 1,
+      "message": "dropped",
+      "parentUuid": "8a00d8f0_ded201cc",
       "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
