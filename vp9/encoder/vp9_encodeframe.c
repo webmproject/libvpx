@@ -1039,14 +1039,6 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   if (cpi->oxcf.aq_mode)
     vp9_init_plane_quantizers(cpi, x);
 
-  // FIXME(rbultje) I'm pretty sure this should go to the end of this block
-  // (i.e. after the output_enabled)
-  if (bsize < BLOCK_32X32) {
-    if (bsize < BLOCK_16X16)
-      ctx->tx_rd_diff[ALLOW_16X16] = ctx->tx_rd_diff[ALLOW_8X8];
-    ctx->tx_rd_diff[ALLOW_32X32] = ctx->tx_rd_diff[ALLOW_16X16];
-  }
-
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;

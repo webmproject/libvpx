@@ -46,7 +46,6 @@ typedef struct {
   int hybrid_pred_diff;
   int comp_pred_diff;
   int single_pred_diff;
-  int64_t tx_rd_diff[TX_MODES];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
 
   // TODO(jingning) Use RD_COST struct here instead. This involves a boarder
