@@ -124,6 +124,7 @@ VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp8_macros_msa.h
 
 ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/mfqe_msa.c
+VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/postproc_msa.c
 endif
 
 # common (c)

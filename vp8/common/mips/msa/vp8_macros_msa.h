@@ -435,6 +435,19 @@
     ST4x4_UB(in1, in1, 0, 1, 2, 3, pblk_4x8 + 4 * stride, stride);  \
 }
 
+/* Description : Store 8x1 byte block to destination memory from input vector
+   Arguments   : Inputs - in, pdst
+   Details     : Index 0 double word element from 'in' vector is copied to the
+                 GP register and stored to (pdst)
+*/
+#define ST8x1_UB(in, pdst)                  \
+{                                           \
+    uint64_t out0_m;                        \
+                                            \
+    out0_m = __msa_copy_u_d((v2i64)in, 0);  \
+    SD(out0_m, pdst);                       \
+}
+
 /* Description : Store 8x2 byte block to destination memory from input vector
    Arguments   : Inputs - in, pdst, stride
    Details     : Index 0 double word element from 'in' vector is copied to the
@@ -478,6 +491,22 @@
                                                               \
     SD4(out0_m, out1_m, out2_m, out3_m, pblk_8x4_m, stride);  \
 }
+
+/* Description : Immediate number of elements to slide with zero
+   Arguments   : Inputs  - in0, in1, slide_val
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Byte elements from 'zero_m' vector are slid into 'in0' by
+                 value specified in the 'slide_val'
+*/
+#define SLDI_B2_0(RTYPE, in0, in1, out0, out1, slide_val)              \
+{                                                                      \
+    v16i8 zero_m = { 0 };                                              \
+                                                                       \
+    out0 = (RTYPE)__msa_sldi_b((v16i8)zero_m, (v16i8)in0, slide_val);  \
+    out1 = (RTYPE)__msa_sldi_b((v16i8)zero_m, (v16i8)in1, slide_val);  \
+}
+#define SLDI_B2_0_UB(...) SLDI_B2_0(v16u8, __VA_ARGS__)
 
 /* Description : Immediate number of elements to slide
    Arguments   : Inputs  - in0_0, in0_1, in1_0, in1_1, slide_val
@@ -641,6 +670,76 @@
     out_m = __msa_min_s_w((v4i32)max_m, (v4i32)out_m);  \
     out_m;                                              \
 })
+
+/* Description : Horizontal addition of 4 signed word elements of input vector
+   Arguments   : Input  - in       (signed word vector)
+                 Output - sum_m    (i32 sum)
+                 Return Type - signed word (GP)
+   Details     : 4 signed word elements of 'in' vector are added together and
+                 the resulting integer sum is returned
+*/
+#define HADD_SW_S32(in)                             \
+({                                                  \
+    v2i64 res0_m, res1_m;                           \
+    int32_t sum_m;                                  \
+                                                    \
+    res0_m = __msa_hadd_s_d((v4i32)in, (v4i32)in);  \
+    res1_m = __msa_splati_d(res0_m, 1);             \
+    res0_m = res0_m + res1_m;                       \
+    sum_m = __msa_copy_s_w((v4i32)res0_m, 0);       \
+    sum_m;                                          \
+})
+
+/* Description : Horizontal addition of 8 unsigned halfword elements
+   Arguments   : Inputs  - in       (unsigned halfword vector)
+                 Outputs - sum_m    (u32 sum)
+                 Return Type - unsigned word
+   Details     : 8 unsigned halfword elements of input vector are added
+                 together and the resulting integer sum is returned
+*/
+#define HADD_UH_U32(in)                                \
+({                                                     \
+    v4u32 res_m;                                       \
+    v2u64 res0_m, res1_m;                              \
+    uint32_t sum_m;                                    \
+                                                       \
+    res_m = __msa_hadd_u_w((v8u16)in, (v8u16)in);      \
+    res0_m = __msa_hadd_u_d(res_m, res_m);             \
+    res1_m = (v2u64)__msa_splati_d((v2i64)res0_m, 1);  \
+    res0_m = res0_m + res1_m;                          \
+    sum_m = __msa_copy_u_w((v4i32)res0_m, 0);          \
+    sum_m;                                             \
+})
+
+/* Description : Horizontal addition of unsigned byte vector elements
+   Arguments   : Inputs  - in0, in1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each unsigned odd byte element from 'in0' is added to
+                 even unsigned byte element from 'in0' (pairwise) and the
+                 halfword result is written to 'out0'
+*/
+#define HADD_UB2(RTYPE, in0, in1, out0, out1)              \
+{                                                          \
+    out0 = (RTYPE)__msa_hadd_u_h((v16u8)in0, (v16u8)in0);  \
+    out1 = (RTYPE)__msa_hadd_u_h((v16u8)in1, (v16u8)in1);  \
+}
+#define HADD_UB2_UH(...) HADD_UB2(v8u16, __VA_ARGS__)
+
+/* Description : Horizontal subtraction of unsigned byte vector elements
+   Arguments   : Inputs  - in0, in1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each unsigned odd byte element from 'in0' is subtracted from
+                 even unsigned byte element from 'in0' (pairwise) and the
+                 halfword result is written to 'out0'
+*/
+#define HSUB_UB2(RTYPE, in0, in1, out0, out1)              \
+{                                                          \
+    out0 = (RTYPE)__msa_hsub_u_h((v16u8)in0, (v16u8)in0);  \
+    out1 = (RTYPE)__msa_hsub_u_h((v16u8)in1, (v16u8)in1);  \
+}
+#define HSUB_UB2_SH(...) HSUB_UB2(v8i16, __VA_ARGS__)
 
 /* Description : Set element n input vector to GPR value
    Arguments   : Inputs - in0, in1, in2, in3
@@ -864,6 +963,9 @@
     out0 = (RTYPE)__msa_ilvr_b((v16i8)in0, (v16i8)in1);  \
     out1 = (RTYPE)__msa_ilvl_b((v16i8)in0, (v16i8)in1);  \
 }
+#define ILVRL_B2_UB(...) ILVRL_B2(v16u8, __VA_ARGS__)
+#define ILVRL_B2_SB(...) ILVRL_B2(v16i8, __VA_ARGS__)
+#define ILVRL_B2_UH(...) ILVRL_B2(v8u16, __VA_ARGS__)
 #define ILVRL_B2_SH(...) ILVRL_B2(v8i16, __VA_ARGS__)
 
 #define ILVRL_H2(RTYPE, in0, in1, out0, out1)            \
@@ -1194,6 +1296,28 @@
     out2 = in1 - in2;                                            \
     out3 = in0 - in3;                                            \
 }
+
+/* Description : Transpose input 8x8 byte block
+   Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7
+                 Outputs - out0, out1, out2, out3, out4, out5, out6, out7
+                 Return Type - as per RTYPE
+*/
+#define TRANSPOSE8x8_UB(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,   \
+                        out0, out1, out2, out3, out4, out5, out6, out7)  \
+{                                                                        \
+    v16i8 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                \
+    v16i8 tmp4_m, tmp5_m, tmp6_m, tmp7_m;                                \
+                                                                         \
+    ILVR_B4_SB(in2, in0, in3, in1, in6, in4, in7, in5,                   \
+               tmp0_m, tmp1_m, tmp2_m, tmp3_m);                          \
+    ILVRL_B2_SB(tmp1_m, tmp0_m, tmp4_m, tmp5_m);                         \
+    ILVRL_B2_SB(tmp3_m, tmp2_m, tmp6_m, tmp7_m);                         \
+    ILVRL_W2(RTYPE, tmp6_m, tmp4_m, out0, out2);                         \
+    ILVRL_W2(RTYPE, tmp7_m, tmp5_m, out4, out6);                         \
+    SLDI_B2_0(RTYPE, out0, out2, out1, out3, 8);                         \
+    SLDI_B2_0(RTYPE, out4, out6, out5, out7, 8);                         \
+}
+#define TRANSPOSE8x8_UB_UB(...) TRANSPOSE8x8_UB(v16u8, __VA_ARGS__)
 
 /* Description : Transpose 16x4 block into 4x16 with byte elements in vectors
    Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7,
