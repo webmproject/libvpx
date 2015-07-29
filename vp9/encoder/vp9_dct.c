@@ -529,17 +529,6 @@ static const transform_2d FHT_16[] = {
   { fadst16, fadst16 }   // ADST_ADST = 3
 };
 
-void vp9_fdct4x4_1_c(const int16_t *input, tran_low_t *output, int stride) {
-  int r, c;
-  tran_low_t sum = 0;
-  for (r = 0; r < 4; ++r)
-    for (c = 0; c < 4; ++c)
-      sum += input[r * stride + c];
-
-  output[0] = sum << 1;
-  output[1] = 0;
-}
-
 void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
                   int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
@@ -570,17 +559,6 @@ void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
         output[j + i * 4] = (temp_out[j] + 1) >> 2;
     }
   }
-}
-
-void vp9_fdct8x8_1_c(const int16_t *input, tran_low_t *output, int stride) {
-  int r, c;
-  tran_low_t sum = 0;
-  for (r = 0; r < 8; ++r)
-    for (c = 0; c < 8; ++c)
-      sum += input[r * stride + c];
-
-  output[0] = sum;
-  output[1] = 0;
 }
 
 void vp9_fdct8x8_quant_c(const int16_t *input, int stride,
@@ -693,17 +671,6 @@ void vp9_fdct8x8_quant_c(const int16_t *input, int stride,
     }
   }
   *eob_ptr = eob + 1;
-}
-
-void vp9_fdct16x16_1_c(const int16_t *input, tran_low_t *output, int stride) {
-  int r, c;
-  tran_low_t sum = 0;
-  for (r = 0; r < 16; ++r)
-    for (c = 0; c < 16; ++c)
-      sum += input[r * stride + c];
-
-  output[0] = sum >> 1;
-  output[1] = 0;
 }
 
 void vp9_fht8x8_c(const int16_t *input, tran_low_t *output,
@@ -828,16 +795,6 @@ void vp9_highbd_fht4x4_c(const int16_t *input, tran_low_t *output,
   vp9_fht4x4_c(input, output, stride, tx_type);
 }
 
-void vp9_highbd_fdct8x8_1_c(const int16_t *input, tran_low_t *final_output,
-                            int stride) {
-  vp9_fdct8x8_1_c(input, final_output, stride);
-}
-
-void vp9_highbd_fdct16x16_1_c(const int16_t *input, tran_low_t *output,
-                              int stride) {
-  vp9_fdct16x16_1_c(input, output, stride);
-}
-
 void vp9_highbd_fht8x8_c(const int16_t *input, tran_low_t *output,
                          int stride, int tx_type) {
   vp9_fht8x8_c(input, output, stride, tx_type);
@@ -851,10 +808,5 @@ void vp9_highbd_fwht4x4_c(const int16_t *input, tran_low_t *output,
 void vp9_highbd_fht16x16_c(const int16_t *input, tran_low_t *output,
                            int stride, int tx_type) {
   vp9_fht16x16_c(input, output, stride, tx_type);
-}
-
-void vp9_highbd_fdct32x32_1_c(const int16_t *input, tran_low_t *out,
-                              int stride) {
-  vp9_fdct32x32_1_c(input, out, stride);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH

@@ -10,19 +10,9 @@
 
 #include <assert.h>
 
-#include "./vp9_rtcd.h"
+#include "vp9/common/vp9_enums.h"
 #include "vp9/encoder/mips/msa/vp9_fdct_msa.h"
 #include "vpx_dsp/mips/fwd_txfm_msa.h"
-
-void vp9_fdct16x16_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
-  out[1] = 0;
-
-  out[0] = LD_HADD(input, stride);
-  out[0] += LD_HADD(input + 8, stride);
-  out[0] += LD_HADD(input + 16 * 8, stride);
-  out[0] += LD_HADD(input + 16 * 8 + 8, stride);
-  out[0] >>= 1;
-}
 
 static void fadst16_cols_step1_msa(const int16_t *input, int32_t stride,
                                    const int32_t *const0, int16_t *int_buf) {

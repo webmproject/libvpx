@@ -215,6 +215,11 @@ void vp9_fdct8x8_msa(const int16_t *input, int16_t *output,
   ST_SH8(in0, in1, in2, in3, in4, in5, in6, in7, output, 8);
 }
 
+void vp9_fdct8x8_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
+  out[0] = LD_HADD(input, stride);
+  out[1] = 0;
+}
+
 void vp9_fdct16x16_msa(const int16_t *input, int16_t *output,
                        int32_t src_stride) {
   int32_t i;
@@ -229,4 +234,14 @@ void vp9_fdct16x16_msa(const int16_t *input, int16_t *output,
   for (i = 0; i < 2; ++i) {
     fdct16x8_1d_row((&tmp_buf[0] + (128 * i)), (output + (128 * i)));
   }
+}
+
+void vp9_fdct16x16_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
+  out[1] = 0;
+
+  out[0] = LD_HADD(input, stride);
+  out[0] += LD_HADD(input + 8, stride);
+  out[0] += LD_HADD(input + 16 * 8, stride);
+  out[0] += LD_HADD(input + 16 * 8 + 8, stride);
+  out[0] >>= 1;
 }
