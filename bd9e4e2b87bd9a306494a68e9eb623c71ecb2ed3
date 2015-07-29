@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a11e441_5d5a6f00",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-29T19:12:46Z",
+      "side": 1,
+      "message": "the alignment here could be fixed in a followup",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a00d8f0_5ec7110f",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-29T19:12:46Z",
+      "side": 1,
+      "message": "this comment and the next one can be dropped (or use the calculation instead).",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a0ea828_3aae9d9d",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-29T19:12:46Z",
+      "side": 1,
+      "message": "prefetch isn\u0027t conforming to the alignment, not sure if it can and you can keep the line length in bounds",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a00d8f0_ded201cc",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-29T19:12:46Z",
+      "side": 1,
+      "message": "same comment here",
+      "revId": "bd9e4e2b87bd9a306494a68e9eb623c71ecb2ed3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
