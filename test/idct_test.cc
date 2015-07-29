@@ -10,10 +10,11 @@
 
 #include "./vpx_config.h"
 #include "./vp8_rtcd.h"
-#include "test/clear_system_state.h"
-#include "test/register_state_check.h"
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "test/clear_system_state.h"
+#include "test/register_state_check.h"
 #include "vpx/vpx_integer.h"
 
 typedef void (*IdctFunc)(int16_t *input, unsigned char *pred_ptr,

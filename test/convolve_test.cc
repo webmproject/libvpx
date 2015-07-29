@@ -9,14 +9,15 @@
  */
 
 #include <string.h>
-#include "test/acm_random.h"
-#include "test/clear_system_state.h"
-#include "test/register_state_check.h"
-#include "test/util.h"
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
+#include "test/acm_random.h"
+#include "test/clear_system_state.h"
+#include "test/register_state_check.h"
+#include "test/util.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_filter.h"
 #include "vpx_mem/vpx_mem.h"

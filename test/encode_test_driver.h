@@ -13,12 +13,13 @@
 #include <string>
 #include <vector>
 
-#include "./vpx_config.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
-#include "vpx/vpx_encoder.h"
+
+#include "./vpx_config.h"
 #if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 #include "vpx/vp8cx.h"
 #endif
+#include "vpx/vpx_encoder.h"
 
 namespace libvpx_test {
 

@@ -8,22 +8,22 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include <string.h>
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
 #if CONFIG_VP9_ENCODER
 #include "./vp9_rtcd.h"
 #endif
-#include "vpx_mem/vpx_mem.h"
 
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "vpx_mem/vpx_mem.h"
 
 using libvpx_test::ACMRandom;
 
