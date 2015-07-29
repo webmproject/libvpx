@@ -435,6 +435,25 @@
     ST4x4_UB(in1, in1, 0, 1, 2, 3, pblk_4x8 + 4 * stride, stride);  \
 }
 
+/* Description : Store 8x2 byte block to destination memory from input vector
+   Arguments   : Inputs - in, pdst, stride
+   Details     : Index 0 double word element from 'in' vector is copied to the
+                 GP register and stored to (pdst)
+                 Index 1 double word element from 'in' vector is copied to the
+                 GP register and stored to (pdst + stride)
+*/
+#define ST8x2_UB(in, pdst, stride)            \
+{                                             \
+    uint64_t out0_m, out1_m;                  \
+    uint8_t *pblk_8x2_m = (uint8_t *)(pdst);  \
+                                              \
+    out0_m = __msa_copy_u_d((v2i64)in, 0);    \
+    out1_m = __msa_copy_u_d((v2i64)in, 1);    \
+                                              \
+    SD(out0_m, pblk_8x2_m);                   \
+    SD(out1_m, pblk_8x2_m + stride);          \
+}
+
 /* Description : Store 8x4 byte block to destination memory from input
                  vectors
    Arguments   : Inputs - in0, in1, pdst, stride
@@ -622,6 +641,19 @@
     out_m = __msa_min_s_w((v4i32)max_m, (v4i32)out_m);  \
     out_m;                                              \
 })
+
+/* Description : Set element n input vector to GPR value
+   Arguments   : Inputs - in0, in1, in2, in3
+                 Output - out
+                 Return Type - as per RTYPE
+   Details     : Set element 0 in vector 'out' to value specified in 'in0'
+*/
+#define INSERT_D2(RTYPE, in0, in1, out)               \
+{                                                     \
+    out = (RTYPE)__msa_insert_d((v2i64)out, 0, in0);  \
+    out = (RTYPE)__msa_insert_d((v2i64)out, 1, in1);  \
+}
+#define INSERT_D2_SB(...) INSERT_D2(v16i8, __VA_ARGS__)
 
 /* Description : Interleave even byte elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
@@ -1114,6 +1146,20 @@
 {                                                     \
     ADD2(in0, in1, in2, in3, out0, out1);             \
     ADD2(in4, in5, in6, in7, out2, out3);             \
+}
+
+/* Description : Zero extend unsigned byte elements to halfword elements
+   Arguments   : Input   - in          (unsigned byte vector)
+                 Outputs - out0, out1  (unsigned  halfword vectors)
+                 Return Type - signed halfword
+   Details     : Zero extended right half of vector is returned in 'out0'
+                 Zero extended left half of vector is returned in 'out1'
+*/
+#define UNPCK_UB_SH(in, out0, out1)       \
+{                                         \
+    v16i8 zero_m = { 0 };                 \
+                                          \
+    ILVRL_B2_SH(zero_m, in, out0, out1);  \
 }
 
 /* Description : Sign extend halfword elements from input vector and return
