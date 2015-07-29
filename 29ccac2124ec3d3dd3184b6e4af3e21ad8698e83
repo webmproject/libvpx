@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4aeb4063_aa801398",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-29T23:15:19Z",
+      "side": 1,
+      "message": "seems like these 3 could be brought into the top of the loop and the ones at the tail dropped",
+      "revId": "29ccac2124ec3d3dd3184b6e4af3e21ad8698e83",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
