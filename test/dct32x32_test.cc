@@ -12,15 +12,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "test/acm_random.h"
-#include "test/clear_system_state.h"
-#include "test/register_state_check.h"
-#include "test/util.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vp9_rtcd.h"
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
+#include "test/acm_random.h"
+#include "test/clear_system_state.h"
+#include "test/register_state_check.h"
+#include "test/util.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"

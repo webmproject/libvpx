@@ -8,12 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "third_party/googletest/src/include/gtest/gtest.h"
+
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
+#include "test/util.h"
 #include "test/y4m_video_source.h"
 #include "test/yuv_video_source.h"
-#include "test/util.h"
-#include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vp9/decoder/vp9_decoder.h"
 
 typedef vpx_codec_stream_info_t vp9_stream_info_t;
