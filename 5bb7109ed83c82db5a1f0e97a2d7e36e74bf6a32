@@ -16,6 +16,24 @@
       "revId": "5bb7109ed83c82db5a1f0e97a2d7e36e74bf6a32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea24f4a5_fff493fe",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-30T00:53:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a0b6c19_4cd51f2e",
+      "revId": "5bb7109ed83c82db5a1f0e97a2d7e36e74bf6a32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
