@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca2490af_b027563d",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-30T20:06:59Z",
+      "side": 1,
+      "message": "thanks for adding the comments; it looks like this block and 38 could be joined, but it might be better to keep high bitdepth as its own group now",
+      "revId": "b7b033f0d7cc258f8b61364ed5b64b8873f6386c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa33dcf3_4cb9bf65",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-30T20:06:59Z",
+      "side": 1,
+      "message": "these should be excluded too",
+      "revId": "b7b033f0d7cc258f8b61364ed5b64b8873f6386c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
