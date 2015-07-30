@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca4d7087_c5e1faba",
+        "filename": "vp8/encoder/mips/msa/quantize_msa.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-30T19:57:45Z",
+      "side": 1,
+      "message": "I just swapped the order here; should be all right otherwise",
+      "revId": "56aa0da405b072447bf8165650983fdb36d272a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
