@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "caf6504b_d15c34c8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-30T02:13:49Z",
+      "side": 1,
+      "message": "it can be helpful when scanning the history to mark commits like this as \u0027cosmetics: \u0027 to indicate there\u0027s no functional changes...",
+      "revId": "c0cf5d56376e82236ab45082e6c403440d7658a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "caf6504b_51494406",
         "filename": "test/blockiness_test.cc",
         "patchSetId": 4
