@@ -16,6 +16,24 @@
       "revId": "29ccac2124ec3d3dd3184b6e4af3e21ad8698e83",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea24f4a5_85eb0c6e",
+        "filename": "vp9/common/x86/vp9_copy_sse2.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-07-30T12:02:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4aeb4063_aa801398",
+      "revId": "29ccac2124ec3d3dd3184b6e4af3e21ad8698e83",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
