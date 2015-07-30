@@ -237,7 +237,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     total_sse += sum_sse;
 
     // Fast approximate the modelling function.
-    if (cpi->oxcf.speed > 4) {
+    if (cpi->sf.simple_model_rd_from_var) {
       int64_t rate;
       const int64_t square_error = sum_sse;
       int quantizer = (pd->dequant[1] >> 3);
