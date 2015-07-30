@@ -122,6 +122,9 @@ struct macroblock {
 
   // skip forward transform and quantization
   uint8_t skip_txfm[MAX_MB_PLANE << 2];
+  #define SKIP_TXFM_NONE 0
+  #define SKIP_TXFM_AC_DC 1
+  #define SKIP_TXFM_AC_ONLY 2
 
   int64_t bsse[MAX_MB_PLANE << 2];
 

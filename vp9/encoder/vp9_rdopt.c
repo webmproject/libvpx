@@ -207,15 +207,15 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
         x->bsse[(i << 2) + block_idx] = sse;
         sum_sse += sse;
 
-        x->skip_txfm[(i << 2) + block_idx] = 0;
+        x->skip_txfm[(i << 2) + block_idx] = SKIP_TXFM_NONE;
         if (!x->select_tx_size) {
           // Check if all ac coefficients can be quantized to zero.
           if (var < ac_thr || var == 0) {
-            x->skip_txfm[(i << 2) + block_idx] = 2;
+            x->skip_txfm[(i << 2) + block_idx] = SKIP_TXFM_AC_ONLY;
 
             // Check if dc coefficient can be quantized to zero.
             if (sse - var < dc_thr || sse == var) {
-              x->skip_txfm[(i << 2) + block_idx] = 1;
+              x->skip_txfm[(i << 2) + block_idx] = SKIP_TXFM_AC_DC;
 
               if (!sse || (var < low_ac_thr && sse - var < low_dc_thr))
                 low_err_skip = 1;
@@ -500,7 +500,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     dist_block(x, plane, block, tx_size, &dist, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
-    if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
+    if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
+        SKIP_TXFM_NONE) {
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -512,7 +513,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 #else
       dist_block(x, plane, block, tx_size, &dist, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
+    } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
+               SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
@@ -532,6 +534,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
         dist = MAX(0, sse - dc_correct);
       }
     } else {
+      // SKIP_TXFM_AC_DC
       // skip forward transform
       x->plane[plane].eobs[block] = 0;
       sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
@@ -1064,7 +1067,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
   bmode_costs = cpi->y_mode_costs[A][L];
 
-  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   /* Y Search for intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
 
@@ -1170,7 +1173,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
 
-  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     if (!(cpi->sf.intra_uv_mode_mask[max_tx_size] & (1 << mode)))
       continue;
@@ -1208,7 +1211,7 @@ static int64_t rd_sbuv_dcpred(const VP9_COMP *cpi, MACROBLOCK *x,
   int64_t unused;
 
   x->e_mbd.mi[0]->mbmi.uv_mode = DC_PRED;
-  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   super_block_uvrd(cpi, x, rate_tokenonly, distortion,
                    skippable, &unused, bsize, INT64_MAX);
   *rate = *rate_tokenonly + cpi->intra_uv_mode_cost[cm->frame_type][DC_PRED];
@@ -2673,7 +2676,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (is_comp_pred)
       if (single_skippable[this_mode][refs[0]] &&
           single_skippable[this_mode][refs[1]])
-        memset(skip_txfm, 1, sizeof(skip_txfm));
+        memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
 
   if (cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
     // if current pred_error modeled rd is substantially more than the best
@@ -4077,7 +4080,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
         // then dont bother looking at UV
         vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_8X8);
-        memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+        memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
         if (!super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
                               &uv_sse, BLOCK_8X8, tmp_best_rdu))
           continue;

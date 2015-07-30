@@ -611,7 +611,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   if (!x->skip_recode) {
     if (x->quant_fp) {
       // Encoding process for rtc mode
-      if (x->skip_txfm[0] == 1 && plane == 0) {
+      if (x->skip_txfm[0] == SKIP_TXFM_AC_DC && plane == 0) {
         // skip forward transform
         p->eobs[block] = 0;
         *a = *l = 0;
@@ -622,10 +622,10 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     } else {
       if (max_txsize_lookup[plane_bsize] == tx_size) {
         int txfm_blk_index = (plane << 2) + (block >> (tx_size << 1));
-        if (x->skip_txfm[txfm_blk_index] == 0) {
+        if (x->skip_txfm[txfm_blk_index] == SKIP_TXFM_NONE) {
           // full forward transform and quantization
           vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
-        } else if (x->skip_txfm[txfm_blk_index]== 2) {
+        } else if (x->skip_txfm[txfm_blk_index] == SKIP_TXFM_AC_ONLY) {
           // fast path forward transform and quantization
           vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
         } else {

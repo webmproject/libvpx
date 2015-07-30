@@ -341,7 +341,7 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
                          sse32x32, sum32x32);
 
     // Skipping test
-    x->skip_txfm[0] = 0;
+    x->skip_txfm[0] = SKIP_TXFM_NONE;
     for (k = 0; k < num; k++)
       // Check if all ac coefficients can be quantized to zero.
       if (!(var_tx[k] < ac_thr || var == 0)) {
@@ -357,16 +357,16 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
       }
 
     if (ac_test) {
-      x->skip_txfm[0] = 2;
+      x->skip_txfm[0] = SKIP_TXFM_AC_ONLY;
 
       if (dc_test)
-        x->skip_txfm[0] = 1;
+        x->skip_txfm[0] = SKIP_TXFM_AC_DC;
     } else if (dc_test) {
       skip_dc = 1;
     }
   }
 
-  if (x->skip_txfm[0] == 1) {
+  if (x->skip_txfm[0] == SKIP_TXFM_AC_DC) {
     int skip_uv[2] = {0};
     unsigned int var_uv[2];
     unsigned int sse_uv[2];
@@ -501,20 +501,20 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
     const unsigned int sse_tx = sse >> num_blk_log2;
     const unsigned int var_tx = var >> num_blk_log2;
 
-    x->skip_txfm[0] = 0;
+    x->skip_txfm[0] = SKIP_TXFM_NONE;
     // Check if all ac coefficients can be quantized to zero.
     if (var_tx < ac_thr || var == 0) {
-      x->skip_txfm[0] = 2;
+      x->skip_txfm[0] = SKIP_TXFM_AC_ONLY;
       // Check if dc coefficient can be quantized to zero.
       if (sse_tx - var_tx < dc_thr || sse == var)
-        x->skip_txfm[0] = 1;
+        x->skip_txfm[0] = SKIP_TXFM_AC_DC;
     } else {
       if (sse_tx - var_tx < dc_thr || sse == var)
         skip_dc = 1;
     }
   }
 
-  if (x->skip_txfm[0] == 1) {
+  if (x->skip_txfm[0] == SKIP_TXFM_AC_DC) {
     *out_rate_sum = 0;
     *out_dist_sum = sse << 4;
     return;
@@ -1073,7 +1073,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
   RD_COST this_rdc, best_rdc;
-  uint8_t skip_txfm = 0, best_mode_skip_txfm = 0;
+  uint8_t skip_txfm = SKIP_TXFM_NONE, best_mode_skip_txfm = SKIP_TXFM_NONE;
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
@@ -1396,7 +1396,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         } else {
           this_rdc.rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
           this_rdc.dist = this_sse;
-          x->skip_txfm[0] = 1;
+          x->skip_txfm[0] = SKIP_TXFM_AC_DC;
         }
       }
 
@@ -1881,7 +1881,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->mode = xd->mi[0]->bmi[3].as_mode;
   ctx->mic = *(xd->mi[0]);
   ctx->mbmi_ext = *x->mbmi_ext;
-  ctx->skip_txfm[0] = 0;
+  ctx->skip_txfm[0] = SKIP_TXFM_NONE;
   ctx->skip = 0;
   // Dummy assignment for speed -5. No effect in speed -6.
   rd_cost->rdcost = best_rd;
