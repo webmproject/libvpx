@@ -415,6 +415,9 @@ typedef struct SPEED_FEATURES {
 
   // Allow skipping partition search for still image frame
   int allow_partition_search_skip;
+
+  // Fast approximation of vp9_model_rd_from_var_lapndz
+  int simple_model_rd_from_var;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
