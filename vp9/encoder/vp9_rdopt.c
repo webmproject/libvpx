@@ -66,15 +66,12 @@ struct rdcost_block_args {
   MACROBLOCK *x;
   ENTROPY_CONTEXT t_above[16];
   ENTROPY_CONTEXT t_left[16];
-  int rate;
-  int64_t dist;
-  int64_t sse;
   int this_rate;
   int64_t this_dist;
   int64_t this_sse;
   int64_t this_rd;
   int64_t best_rd;
-  int skip;
+  int exit_early;
   int use_fast_coef_costing;
   const scan_order *so;
 };
@@ -429,15 +426,12 @@ static int cost_coeffs(MACROBLOCK *x,
   return cost;
 }
 
+static void dist_block(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
 #if CONFIG_VP9_HIGHBITDEPTH
-static void dist_block(int plane, int block, TX_SIZE tx_size,
-                       struct rdcost_block_args* args, int bd) {
-#else
-static void dist_block(int plane, int block, TX_SIZE tx_size,
-                       struct rdcost_block_args* args) {
+                       int bd,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+                       int64_t *out_dist, int64_t *out_sse) {
   const int ss_txfrm_size = tx_size << 1;
-  MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -446,13 +440,13 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGHBITDEPTH
-  args->dist = vp9_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                                      &this_sse, bd) >> shift;
+  *out_dist = vp9_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                                     &this_sse, bd) >> shift;
 #else
-  args->dist = vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                               &this_sse) >> shift;
+  *out_dist = vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                              &this_sse) >> shift;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  args->sse  = this_sse >> shift;
+  *out_sse = this_sse >> shift;
 
   if (x->skip_encode && !is_inter_block(&xd->mi[0]->mbmi)) {
     // TODO(jingning): tune the model to better capture the distortion.
@@ -463,20 +457,20 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
       p >>= ((xd->bd - 8) * 2);
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    args->dist += (p >> 4);
-    args->sse  += p;
+    *out_dist += (p >> 4);
+    *out_sse  += p;
   }
 }
 
-static void rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
-                       TX_SIZE tx_size, struct rdcost_block_args* args) {
+static int rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
+                      TX_SIZE tx_size, struct rdcost_block_args* args) {
   int x_idx, y_idx;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x_idx, &y_idx);
 
-  args->rate = cost_coeffs(args->x, plane, block, args->t_above + x_idx,
-                           args->t_left + y_idx, tx_size,
-                           args->so->scan, args->so->neighbors,
-                           args->use_fast_coef_costing);
+  return cost_coeffs(args->x, plane, block, args->t_above + x_idx,
+                     args->t_left + y_idx, tx_size,
+                     args->so->scan, args->so->neighbors,
+                     args->use_fast_coef_costing);
 }
 
 static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -486,8 +480,11 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   int64_t rd1, rd2, rd;
+  int rate;
+  int64_t dist;
+  int64_t sse;
 
-  if (args->skip)
+  if (args->exit_early)
     return;
 
   if (!is_inter_block(mbmi)) {
@@ -495,12 +492,12 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     vp9_encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      dist_block(plane, block, tx_size, args, xd->bd);
+      dist_block(x, plane, block, tx_size, xd->bd, &dist, &sse);
     } else {
-      dist_block(plane, block, tx_size, args, 8);
+      dist_block(x, plane, block, tx_size, 8, &dist, &sse);
     }
 #else
-    dist_block(plane, block, tx_size, args);
+    dist_block(x, plane, block, tx_size, &dist, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
     if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
@@ -508,20 +505,20 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        dist_block(plane, block, tx_size, args, xd->bd);
+        dist_block(x, plane, block, tx_size, xd->bd, &dist, &sse);
       } else {
-        dist_block(plane, block, tx_size, args, 8);
+        dist_block(x, plane, block, tx_size, 8, &dist, &sse);
       }
 #else
-      dist_block(plane, block, tx_size, args);
+      dist_block(x, plane, block, tx_size, &dist, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
       vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
-      args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
-      args->dist = args->sse;
+      sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
+      dist = sse;
       if (x->plane[plane].eobs[block]) {
         const int64_t orig_sse = (int64_t)coeff[0] * coeff[0];
         const int64_t resd_sse = coeff[0] - dqcoeff[0];
@@ -532,31 +529,31 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
         if (tx_size != TX_32X32)
           dc_correct >>= 2;
 
-        args->dist = MAX(0, args->sse - dc_correct);
+        dist = MAX(0, sse - dc_correct);
       }
     } else {
       // skip forward transform
       x->plane[plane].eobs[block] = 0;
-      args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
-      args->dist = args->sse;
+      sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
+      dist = sse;
     }
   } else {
     // full forward transform and quantization
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      dist_block(plane, block, tx_size, args, xd->bd);
+      dist_block(x, plane, block, tx_size, xd->bd, &dist, &sse);
     } else {
-      dist_block(plane, block, tx_size, args, 8);
+      dist_block(x, plane, block, tx_size, 8, &dist, &sse);
     }
 #else
-    dist_block(plane, block, tx_size, args);
+    dist_block(x, plane, block, tx_size, &dist, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
-  rate_block(plane, block, plane_bsize, tx_size, args);
-  rd1 = RDCOST(x->rdmult, x->rddiv, args->rate, args->dist);
-  rd2 = RDCOST(x->rdmult, x->rddiv, 0, args->sse);
+  rate = rate_block(plane, block, plane_bsize, tx_size, args);
+  rd1 = RDCOST(x->rdmult, x->rddiv, rate, dist);
+  rd2 = RDCOST(x->rdmult, x->rddiv, 0, sse);
 
   // TODO(jingning): temporarily enabled only for luma component
   rd = MIN(rd1, rd2);
@@ -564,13 +561,13 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     x->zcoeff_blk[tx_size][block] = !x->plane[plane].eobs[block] ||
                                     (rd1 > rd2 && !xd->lossless);
 
-  args->this_rate += args->rate;
-  args->this_dist += args->dist;
-  args->this_sse  += args->sse;
+  args->this_rate += rate;
+  args->this_dist += dist;
+  args->this_sse += sse;
   args->this_rd += rd;
 
   if (args->this_rd > args->best_rd) {
-    args->skip = 1;
+    args->exit_early = 1;
     return;
   }
 }
@@ -598,7 +595,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
                                          block_rd_txfm, &args);
-  if (args.skip) {
+  if (args.exit_early) {
     *rate       = INT_MAX;
     *distortion = INT64_MAX;
     *sse        = INT64_MAX;
