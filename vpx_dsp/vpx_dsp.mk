@@ -32,18 +32,19 @@ DSP_SRCS-yes += bitreader_buffer.h
 endif
 
 # intra predictions
+ifeq ($(CONFIG_VP9),yes)
 DSP_SRCS-yes += intrapred.c
 
 ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
-endif
+endif  # CONFIG_USE_X86INC
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_sse2.asm
-endif
-endif
+endif  # CONFIG_USE_X86INC
+endif  # CONFIG_VP9_HIGHBITDEPTH
 
 DSP_SRCS-$(HAVE_NEON_ASM) += arm/intrapred_neon_asm$(ASM)
 DSP_SRCS-$(HAVE_NEON) += arm/intrapred_neon.c
@@ -51,6 +52,7 @@ DSP_SRCS-$(HAVE_MSA) += mips/intrapred_msa.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred4_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred8_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred16_dspr2.c
+endif  # CONFIG_VP9
 
 # loop filters
 DSP_SRCS-yes += loopfilter.c
