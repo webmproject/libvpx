@@ -551,6 +551,12 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
+  rd = RDCOST(x->rdmult, x->rddiv, 0, dist);
+  if (args->this_rd + rd > args->best_rd) {
+    args->exit_early = 1;
+    return;
+  }
+
   rate = rate_block(plane, block, plane_bsize, tx_size, args);
   rd1 = RDCOST(x->rdmult, x->rddiv, rate, dist);
   rd2 = RDCOST(x->rdmult, x->rddiv, 0, sse);
