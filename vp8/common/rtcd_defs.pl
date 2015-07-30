@@ -167,18 +167,18 @@ $vp8_intra4x4_predict_media=vp8_intra4x4_predict_armv6;
 #
 if (vpx_config("CONFIG_POSTPROC") eq "yes") {
     add_proto qw/void vp8_mbpost_proc_down/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
-    specialize qw/vp8_mbpost_proc_down mmx sse2/;
+    specialize qw/vp8_mbpost_proc_down mmx sse2 msa/;
     $vp8_mbpost_proc_down_sse2=vp8_mbpost_proc_down_xmm;
 
     add_proto qw/void vp8_mbpost_proc_across_ip/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
-    specialize qw/vp8_mbpost_proc_across_ip sse2/;
+    specialize qw/vp8_mbpost_proc_across_ip sse2 msa/;
     $vp8_mbpost_proc_across_ip_sse2=vp8_mbpost_proc_across_ip_xmm;
 
     add_proto qw/void vp8_post_proc_down_and_across_mb_row/, "unsigned char *src, unsigned char *dst, int src_pitch, int dst_pitch, int cols, unsigned char *flimits, int size";
-    specialize qw/vp8_post_proc_down_and_across_mb_row sse2/;
+    specialize qw/vp8_post_proc_down_and_across_mb_row sse2 msa/;
 
     add_proto qw/void vp8_plane_add_noise/, "unsigned char *s, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int w, unsigned int h, int pitch";
-    specialize qw/vp8_plane_add_noise mmx sse2/;
+    specialize qw/vp8_plane_add_noise mmx sse2 msa/;
     $vp8_plane_add_noise_sse2=vp8_plane_add_noise_wmt;
 
     add_proto qw/void vp8_blend_mb_inner/, "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride";
