@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6a11e441_03593487",
+        "filename": "vpx_dsp/vpx_filter.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-07-30T00:09:34Z",
+      "side": 1,
+      "message": "Done.\n\nThe whole file has been moved back to vp9/common/ and renamed as vp9_filter.c.",
+      "parentUuid": "cd174afa_7ede8500",
+      "revId": "7bd6627ae784627dc6e6090e9f83c8f22a2ea90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0dbb223c_03b9fe36",
         "filename": "vpx_dsp/vpx_filter.h",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-28T23:23:16Z",
       "side": 1,
       "message": "Should vpx_filter_kernels[4] stay in vp9?\n\nThe filter operations take 8-tap coefficients, but don\u0027t need to know how many such coefficient sets available.",
+      "revId": "7bd6627ae784627dc6e6090e9f83c8f22a2ea90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a142033_e2451c1b",
+        "filename": "vpx_dsp/vpx_filter.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-07-30T00:09:34Z",
+      "side": 1,
+      "message": "Done.\n\nBoth INTERP_FILTER and vpx_filter_kernels have been moved back to vp9/common/vp9_filter.h and the latter was renamed as vp9_filter_kernels.",
+      "parentUuid": "0dbb223c_03b9fe36",
       "revId": "7bd6627ae784627dc6e6090e9f83c8f22a2ea90d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
