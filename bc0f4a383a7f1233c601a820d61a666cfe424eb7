@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa33dcf3_af8375a4",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3465,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-07-30T22:10:16Z",
+      "side": 1,
+      "message": "It\u0027s good to implement this way.\n\nI might prefer to separate \"mode\" from \"scan_order\" though:\n\n(1) First to obtain \"mode\" as:\nmode \u003d plane \u003d\u003d 0? (tx_size \u003d\u003d TX_4X4 ? ... : mbmi-\u003emode) : mbmi-\u003euv_mode;\n\n(2) Then for \"scan_order\", we may group tx_size \u003c TX_32X32 all together, as:\n\nif (tx_size \u003e\u003d TX_32X32) {\n  scan_order \u003d ...;\n} else {\n  tx_type \u003d tx_size \u003d\u003d TX_4X4 ? ... : ...;\n  scan_order \u003d \u0026vp9_intra_scan_orders[tx_size][tx_type];\n}",
+      "revId": "bc0f4a383a7f1233c601a820d61a666cfe424eb7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
