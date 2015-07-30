@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a2e188f_4eb77325",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-07-30T20:53:49Z",
+      "side": 1,
+      "message": "What do you think of \"defining a new enum type for these constants and use that to declare skip_txfm that type instead of uint8_t\"?",
+      "range": {
+        "startLine": 123,
+        "startChar": 32,
+        "endLine": 123,
+        "endChar": 44
+      },
+      "revId": "61512b3e61f79654b836676aad7c4187fbc3207d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
