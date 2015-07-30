@@ -629,6 +629,31 @@
 }
 #define DPADD_SB4_SH(...) DPADD_SB4(v8i16, __VA_ARGS__)
 
+/* Description : Dot product & addition of halfword vector elements
+   Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Signed halfword elements from 'mult0' are multiplied with
+                 signed halfword elements from 'cnst0' producing a result
+                 twice the size of input i.e. signed word.
+                 The multiplication result of adjacent odd-even elements
+                 are added to the 'out0' vector
+*/
+#define DPADD_SH2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1)             \
+{                                                                            \
+    out0 = (RTYPE)__msa_dpadd_s_w((v4i32)out0, (v8i16)mult0, (v8i16)cnst0);  \
+    out1 = (RTYPE)__msa_dpadd_s_w((v4i32)out1, (v8i16)mult1, (v8i16)cnst1);  \
+}
+#define DPADD_SH2_SW(...) DPADD_SH2(v4i32, __VA_ARGS__)
+
+#define DPADD_SH4(RTYPE, mult0, mult1, mult2, mult3,                   \
+                  cnst0, cnst1, cnst2, cnst3, out0, out1, out2, out3)  \
+{                                                                      \
+    DPADD_SH2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1);          \
+    DPADD_SH2(RTYPE, mult2, mult3, cnst2, cnst3, out2, out3);          \
+}
+#define DPADD_SH4_SW(...) DPADD_SH4(v4i32, __VA_ARGS__)
+
 /* Description : Clips all signed halfword elements of input vector
                  between 0 & 255
    Arguments   : Input  - in
@@ -783,6 +808,7 @@
     out1 = (RTYPE)__msa_ilvev_h((v8i16)in3, (v8i16)in2);  \
 }
 #define ILVEV_H2_UB(...) ILVEV_H2(v16u8, __VA_ARGS__)
+#define ILVEV_H2_SH(...) ILVEV_H2(v8i16, __VA_ARGS__)
 
 /* Description : Interleave even word elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
@@ -1035,6 +1061,24 @@
 #define SPLATI_H3_SB(...) SPLATI_H3(v16i8, __VA_ARGS__)
 #define SPLATI_H3_SH(...) SPLATI_H3(v8i16, __VA_ARGS__)
 
+/* Description : Indexed word element values are replicated to all
+                 elements in output vector
+   Arguments   : Inputs  - in, stidx
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : 'stidx' element value from 'in' vector is replicated to all
+                 elements in 'out0' vector
+                 'stidx + 1' element value from 'in' vector is replicated to all
+                 elements in 'out1' vector
+                 Valid index range for word operation is 0-3
+*/
+#define SPLATI_W2(RTYPE, in, stidx, out0, out1)          \
+{                                                        \
+    out0 = (RTYPE)__msa_splati_w((v4i32)in, stidx);      \
+    out1 = (RTYPE)__msa_splati_w((v4i32)in, (stidx+1));  \
+}
+#define SPLATI_W2_SW(...) SPLATI_W2(v4i32, __VA_ARGS__)
+
 /* Description : Pack even byte elements of vector pairs
    Arguments   : Inputs  - in0, in1, in2, in3
                  Outputs - out0, out1
@@ -1160,6 +1204,21 @@
 }
 #define XORI_B8_128_SB(...) XORI_B8_128(v16i8, __VA_ARGS__)
 
+/* Description : Shift left all elements of vector (generic for all data types)
+   Arguments   : Inputs  - in0, in1, in2, in3, shift
+                 Outputs - in place operation
+                 Return Type - as per input vector RTYPE
+   Details     : Each element of vector 'in0' is left shifted by 'shift' and
+                 the result is written in-place.
+*/
+#define SLLI_4V(in0, in1, in2, in3, shift)  \
+{                                           \
+    in0 = in0 << shift;                     \
+    in1 = in1 << shift;                     \
+    in2 = in2 << shift;                     \
+    in3 = in3 << shift;                     \
+}
+
 /* Description : Arithmetic shift right all elements of vector
                  (generic for all data types)
    Arguments   : Inputs  - in0, in1, in2, in3, shift
@@ -1248,6 +1307,22 @@
 {                                                     \
     ADD2(in0, in1, in2, in3, out0, out1);             \
     ADD2(in4, in5, in6, in7, out2, out3);             \
+}
+
+/* Description : Sign extend halfword elements from right half of the vector
+   Arguments   : Input  - in    (halfword vector)
+                 Output - out   (sign extended word vector)
+                 Return Type - signed word
+   Details     : Sign bit of halfword elements from input vector 'in' is
+                 extracted and interleaved with same vector 'in0' to generate
+                 4 word elements keeping sign intact
+*/
+#define UNPCK_R_SH_SW(in, out)                     \
+{                                                  \
+    v8i16 sign_m;                                  \
+                                                   \
+    sign_m = __msa_clti_s_h((v8i16)in, 0);         \
+    out = (v4i32)__msa_ilvr_h(sign_m, (v8i16)in);  \
 }
 
 /* Description : Zero extend unsigned byte elements to halfword elements
@@ -1399,6 +1474,21 @@
     tmp3_m = (v16u8)__msa_ilvod_h((v8i16)tmp7_m, (v8i16)tmp6_m);             \
     out3 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
     out7 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);               \
+}
+
+/* Description : Transpose 4x4 block with half word elements in vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1, out2, out3
+                 Return Type - signed halfword
+*/
+#define TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, out0, out1, out2, out3)  \
+{                                                                       \
+    v8i16 s0_m, s1_m;                                                   \
+                                                                        \
+    ILVR_H2_SH(in1, in0, in3, in2, s0_m, s1_m);                         \
+    ILVRL_W2_SH(s1_m, s0_m, out0, out2);                                \
+    out1 = (v8i16)__msa_ilvl_d((v2i64)out0, (v2i64)out0);               \
+    out3 = (v8i16)__msa_ilvl_d((v2i64)out0, (v2i64)out2);               \
 }
 
 /* Description : Transpose 8x4 block with half word elements in vectors
