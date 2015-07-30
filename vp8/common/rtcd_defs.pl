@@ -286,10 +286,10 @@ $vp8_short_walsh4x4_media=vp8_short_walsh4x4_armv6;
 # Quantizer
 #
 add_proto qw/void vp8_regular_quantize_b/, "struct block *, struct blockd *";
-specialize qw/vp8_regular_quantize_b sse2 sse4_1/;
+specialize qw/vp8_regular_quantize_b sse2 sse4_1 msa/;
 
 add_proto qw/void vp8_fast_quantize_b/, "struct block *, struct blockd *";
-specialize qw/vp8_fast_quantize_b sse2 ssse3 neon/;
+specialize qw/vp8_fast_quantize_b sse2 ssse3 neon msa/;
 
 #
 # Block subtraction

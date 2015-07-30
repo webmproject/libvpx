@@ -192,4 +192,12 @@ INSTANTIATE_TEST_CASE_P(NEON, QuantizeTest,
                         ::testing::Values(make_tuple(&vp8_fast_quantize_b_neon,
                                                      &vp8_fast_quantize_b_c)));
 #endif  // HAVE_NEON
+
+#if HAVE_MSA
+INSTANTIATE_TEST_CASE_P(
+    MSA, QuantizeTest,
+    ::testing::Values(
+        make_tuple(&vp8_fast_quantize_b_msa, &vp8_fast_quantize_b_c),
+        make_tuple(&vp8_regular_quantize_b_msa, &vp8_regular_quantize_b_c)));
+#endif  // HAVE_MSA
 }  // namespace

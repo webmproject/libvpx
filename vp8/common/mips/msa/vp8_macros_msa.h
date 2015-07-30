@@ -553,6 +553,20 @@
 }
 #define VSHF_B3_SB(...) VSHF_B3(v16i8, __VA_ARGS__)
 
+/* Description : Shuffle halfword vector elements as per mask vector
+   Arguments   : Inputs  - in0, in1, in2, in3, mask0, mask1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : halfword elements from 'in0' & 'in1' are copied selectively to
+                 'out0' as per control vector 'mask0'
+*/
+#define VSHF_H2(RTYPE, in0, in1, in2, in3, mask0, mask1, out0, out1)   \
+{                                                                      \
+    out0 = (RTYPE)__msa_vshf_h((v8i16)mask0, (v8i16)in1, (v8i16)in0);  \
+    out1 = (RTYPE)__msa_vshf_h((v8i16)mask1, (v8i16)in3, (v8i16)in2);  \
+}
+#define VSHF_H2_SH(...) VSHF_H2(v8i16, __VA_ARGS__)
+
 /* Description : Dot product of byte vector elements
    Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
                  Outputs - out0, out1
@@ -603,6 +617,31 @@
     DOTP_SB2(RTYPE, mult2, mult3, cnst2, cnst3, out2, out3);          \
 }
 #define DOTP_SB4_SH(...) DOTP_SB4(v8i16, __VA_ARGS__)
+
+/* Description : Dot product of halfword vector elements
+   Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Signed halfword elements from 'mult0' are multiplied with
+                 signed halfword elements from 'cnst0' producing a result
+                 twice the size of input i.e. signed word.
+                 The multiplication result of adjacent odd-even elements
+                 are added together and written to the 'out0' vector
+*/
+#define DOTP_SH2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1)  \
+{                                                                \
+    out0 = (RTYPE)__msa_dotp_s_w((v8i16)mult0, (v8i16)cnst0);    \
+    out1 = (RTYPE)__msa_dotp_s_w((v8i16)mult1, (v8i16)cnst1);    \
+}
+
+#define DOTP_SH4(RTYPE, mult0, mult1, mult2, mult3,           \
+                 cnst0, cnst1, cnst2, cnst3,                  \
+                 out0, out1, out2, out3)                      \
+{                                                             \
+    DOTP_SH2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1);  \
+    DOTP_SH2(RTYPE, mult2, mult3, cnst2, cnst3, out2, out3);  \
+}
+#define DOTP_SH4_SW(...) DOTP_SH4(v4i32, __VA_ARGS__)
 
 /* Description : Dot product & addition of byte vector elements
    Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
@@ -1307,6 +1346,18 @@
 {                                                     \
     ADD2(in0, in1, in2, in3, out0, out1);             \
     ADD2(in4, in5, in6, in7, out2, out3);             \
+}
+
+/* Description : Subtraction of 2 pairs of vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+   Details     : Each element in 'in1' is subtracted from 'in0' and result is
+                 written to 'out0'.
+*/
+#define SUB2(in0, in1, in2, in3, out0, out1)  \
+{                                             \
+    out0 = in0 - in1;                         \
+    out1 = in2 - in3;                         \
 }
 
 /* Description : Sign extend halfword elements from right half of the vector
