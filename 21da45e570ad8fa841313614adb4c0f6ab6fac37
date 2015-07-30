@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa33dcf3_4fe09109",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-07-30T20:54:42Z",
+      "side": 1,
+      "message": "does this remove files ending in .neon or strip the trailing .neon?",
+      "revId": "21da45e570ad8fa841313614adb4c0f6ab6fac37",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
