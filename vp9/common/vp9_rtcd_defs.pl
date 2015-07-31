@@ -430,7 +430,7 @@ add_proto qw/int16_t vp9_int_pro_col/, "uint8_t const *ref, const int width";
 specialize qw/vp9_int_pro_col sse2 neon/;
 
 add_proto qw/int vp9_vector_var/, "int16_t const *ref, int16_t const *src, const int bwl";
-specialize qw/vp9_vector_var sse2/;
+specialize qw/vp9_vector_var neon sse2/;
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/unsigned int vp9_highbd_avg_8x8/, "const uint8_t *, int p";
