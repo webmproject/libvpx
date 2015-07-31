@@ -760,6 +760,9 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
     struct intra_args arg = {xd, r, mbmi->segment_id};
     vp9_foreach_transformed_block(xd, bsize,
                                   predict_and_reconstruct_intra_block, &arg);
+#if CONFIG_INTERNAL_STATS
+    pbi->sub8x8_intra += less8x8;
+#endif
   } else {
     // Prediction
     dec_build_inter_predictors_sb(pbi, xd, mi_row, mi_col, bsize);
@@ -773,6 +776,10 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
         mbmi->skip = 1;  // skip loopfilter
     }
   }
+
+#if CONFIG_INTERNAL_STATS
+  pbi->sub8x8_inter += less8x8;
+#endif
 
   xd->corrupted |= vp9_reader_has_error(r);
 }
@@ -2016,9 +2023,15 @@ void vp9_decode_frame(VP9Decoder *pbi,
   vp9_zero(cm->counts);
 #if CONFIG_INTERNAL_STATS
   // Reset internal stats
-  pbi->total_block_in_8x8 = 0;
-  pbi->subpel_mc_block_in_4x4 = 0;
-  pbi->intra_block_in_8x8 = 0;
+  if (cm->current_video_frame == 0) {
+    pbi->total_block_in_8x8 = 0;
+    pbi->subpel_mc_block_in_4x4_h = 0;
+    pbi->subpel_mc_block_in_4x4_v = 0;
+    pbi->sub8x8_inter = 0;
+    pbi->sub8x8_intra = 0;
+    pbi->intra_block_in_8x8 = 0;
+    pbi->compound_inter_block_in_8x8 = 0;
+  }
 #endif
 
   xd->corrupted = 0;
@@ -2093,12 +2106,23 @@ void vp9_decode_frame(VP9Decoder *pbi,
   vp9_clear_system_state();
   {
     FILE *pf = fopen("frame_level_stats.stt", "a");
-    double subpel_mc = (double)pbi->subpel_mc_block_in_4x4 /
+    double subpel_mc_h = (double)pbi->subpel_mc_block_in_4x4_h /
+        (double)pbi->total_block_in_8x8;
+    double subpel_mc_v = (double)pbi->subpel_mc_block_in_4x4_v /
         (double)pbi->total_block_in_8x8;
     double intra_mode = (double)pbi->intra_block_in_8x8 /
         (double)pbi->total_block_in_8x8;
-    fprintf(pf, "frame index %d, sub-pel mc %7.3f\tintra mode%7.3f\n",
-            cm->current_video_frame, 25 * subpel_mc, 100 * intra_mode);
+    double compound_block = (double)pbi->compound_inter_block_in_8x8 /
+        (double)pbi->total_block_in_8x8;
+    double sub8x8_inter = (double)pbi->sub8x8_inter /
+        (double)pbi->total_block_in_8x8;
+    double sub8x8_intra = (double)pbi->sub8x8_intra /
+        (double)pbi->total_block_in_8x8;
+
+    fprintf(pf, "frame index %d, sub-pel mc (%7.3f, %7.3f)\tintra mode%7.3f\tcompound inter block%7.3f\t",
+            cm->current_video_frame, 25 * subpel_mc_h, 25 * subpel_mc_v, 100 * intra_mode,
+            100 * compound_block);
+    fprintf(pf, "sub8x8 inter %7.3f intra %7.3f\n", 100 * sub8x8_inter, 100 * sub8x8_intra);
     fclose(pf);
   }
 #endif

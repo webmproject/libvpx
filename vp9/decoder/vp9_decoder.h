@@ -78,13 +78,23 @@ typedef struct VP9Decoder {
 
 #if CONFIG_INTERNAL_STATS
   // total blocks in unit of 8x8 inside the frame.
-  int total_block_in_8x8;
+  int64_t total_block_in_8x8;
+
+  // sub8x8 blocks in unit of 8x8.
+  int64_t sub8x8_inter;
+  int64_t sub8x8_intra;
+
   // number of blocks using 1-D sub-pixel filtering for motion compensated
   // prediction. if a block is using sub-pixel filter in both vertical and
   // horizontal directions, it counts as using 1-D sub-pixel filter twice.
-  int subpel_mc_block_in_4x4;
+  int64_t subpel_mc_block_in_4x4_h;
+  int64_t subpel_mc_block_in_4x4_v;
+
   // nubmer of blocks using intra prediction mode.
-  int intra_block_in_8x8;
+  int64_t intra_block_in_8x8;
+
+  // number of blocks using compound prediction mode.
+  int64_t compound_inter_block_in_8x8;
 #endif
 } VP9Decoder;
 

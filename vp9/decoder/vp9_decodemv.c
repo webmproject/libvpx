@@ -479,6 +479,10 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
   read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
   is_compound = has_second_ref(mbmi);
 
+#if CONFIG_INTERNAL_STATS
+  pbi->compound_inter_block_in_8x8 += is_compound;
+#endif
+
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
     RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
@@ -549,17 +553,17 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
           mi->bmi[j].as_mv[1].as_int = block[1].as_int;
 #if CONFIG_INTERNAL_STATS
         if (mi->bmi[j].as_mv[0].as_mv.row & 0x07)
-          pbi->subpel_mc_block_in_4x4 +=
+          pbi->subpel_mc_block_in_4x4_v +=
               (1 << (num_pels_log2_lookup[bsize] - 4));
         if (mi->bmi[j].as_mv[0].as_mv.col & 0x07)
-          pbi->subpel_mc_block_in_4x4 +=
+          pbi->subpel_mc_block_in_4x4_h +=
               (1 << (num_pels_log2_lookup[bsize] - 4));
         if (is_compound) {
           if (mi->bmi[j].as_mv[1].as_mv.row & 0x07)
-            pbi->subpel_mc_block_in_4x4 +=
+            pbi->subpel_mc_block_in_4x4_v +=
                 (1 << (num_pels_log2_lookup[bsize] - 4));
           if (mi->bmi[j].as_mv[1].as_mv.col & 0x07)
-            pbi->subpel_mc_block_in_4x4 +=
+            pbi->subpel_mc_block_in_4x4_h +=
                 (1 << (num_pels_log2_lookup[bsize] - 4));
         }
 #endif
@@ -579,14 +583,14 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
                                 nearestmv, nearmv, is_compound, allow_hp, r);
 #if CONFIG_INTERNAL_STATS
     if (mbmi->mv[0].as_mv.row & 0x07)
-      pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+      pbi->subpel_mc_block_in_4x4_v += (1 << (num_pels_log2_lookup[bsize] - 4));
     if (mbmi->mv[0].as_mv.col & 0x07)
-      pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+      pbi->subpel_mc_block_in_4x4_h += (1 << (num_pels_log2_lookup[bsize] - 4));
     if (is_compound) {
       if (mbmi->mv[1].as_mv.row & 0x07)
-        pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+        pbi->subpel_mc_block_in_4x4_v += (1 << (num_pels_log2_lookup[bsize] - 4));
       if (mbmi->mv[1].as_mv.col & 0x07)
-        pbi->subpel_mc_block_in_4x4 += (1 << (num_pels_log2_lookup[bsize] - 4));
+        pbi->subpel_mc_block_in_4x4_h += (1 << (num_pels_log2_lookup[bsize] - 4));
     }
 #endif
   }
