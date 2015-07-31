@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0a5ce834_a113928d",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T23:50:36Z",
+      "side": 1,
+      "message": "maximum comes at\n255 * 64 / 32 -\u003e 510",
+      "parentUuid": "ea523422_9bb8ffad",
+      "revId": "36a9a33b900c802aff4a3ca4bf6943c5608ef8dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca2490af_efd290cb",
         "filename": "vp9/encoder/vp9_avg.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-31T23:46:16Z",
       "side": 1,
       "message": "no 1?",
+      "revId": "36a9a33b900c802aff4a3ca4bf6943c5608ef8dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a6260ef_8b29c4bf",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T23:50:36Z",
+      "side": 1,
+      "message": "no. 2 (8-pixel vector) is too small for integral projection based motion search and causes the results unstable.\n\nso the use case only has 16-pixel and up.",
+      "parentUuid": "ca2490af_efd290cb",
       "revId": "36a9a33b900c802aff4a3ca4bf6943c5608ef8dd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
