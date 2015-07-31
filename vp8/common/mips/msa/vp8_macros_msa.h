@@ -24,6 +24,10 @@
 #define LD_UH(...) LD_H(v8u16, __VA_ARGS__)
 #define LD_SH(...) LD_H(v8i16, __VA_ARGS__)
 
+#define LD_W(RTYPE, psrc) *((const RTYPE *)(psrc))
+#define LD_UW(...) LD_W(v4u32, __VA_ARGS__)
+#define LD_SW(...) LD_W(v4i32, __VA_ARGS__)
+
 #define ST_B(RTYPE, in, pdst) *((RTYPE *)(pdst)) = (in)
 #define ST_UB(...) ST_B(v16u8, __VA_ARGS__)
 #define ST_SB(...) ST_B(v16i8, __VA_ARGS__)
@@ -31,6 +35,9 @@
 #define ST_H(RTYPE, in, pdst) *((RTYPE *)(pdst)) = (in)
 #define ST_UH(...) ST_H(v8u16, __VA_ARGS__)
 #define ST_SH(...) ST_H(v8i16, __VA_ARGS__)
+
+#define ST_W(RTYPE, in, pdst) *((RTYPE *)(pdst)) = (in)
+#define ST_SW(...) ST_W(v4i32, __VA_ARGS__)
 
 #if (__mips_isa_rev >= 6)
 #define LW(psrc)                                      \
@@ -337,6 +344,17 @@
 }
 #define LD_SH4(...) LD_H4(v8i16, __VA_ARGS__)
 
+/* Description : Load 2 vectors of signed word elements with stride
+   Arguments   : Inputs  - psrc, stride
+                 Outputs - out0, out1
+                 Return Type - signed word
+*/
+#define LD_SW2(psrc, stride, out0, out1)  \
+{                                         \
+    out0 = LD_SW((psrc));                 \
+    out1 = LD_SW((psrc) + stride);        \
+}
+
 /* Description : Store vectors of 16 byte elements with stride
    Arguments   : Inputs - in0, in1, pdst, stride
    Details     : Store 16 byte elements from 'in0' to (pdst)
@@ -376,6 +394,17 @@
     ST_H(RTYPE, in1, (pdst) + stride);        \
 }
 #define ST_SH2(...) ST_H2(v8i16, __VA_ARGS__)
+
+/* Description : Store vectors of word elements with stride
+   Arguments   : Inputs - in0, in1, pdst, stride
+   Details     : Store 4 word elements from 'in0' to (pdst)
+                 Store 4 word elements from 'in1' to (pdst + stride)
+*/
+#define ST_SW2(in0, in1, pdst, stride)  \
+{                                       \
+    ST_SW(in0, (pdst));                 \
+    ST_SW(in1, (pdst) + stride);        \
+}
 
 /* Description : Store 2x4 byte block to destination memory from input vector
    Arguments   : Inputs - in, stidx, pdst, stride
@@ -1099,6 +1128,38 @@
 #define ILVRL_W2_SH(...) ILVRL_W2(v8i16, __VA_ARGS__)
 #define ILVRL_W2_SW(...) ILVRL_W2(v4i32, __VA_ARGS__)
 
+/* Description : Maximum values between signed elements of vector and
+                 5-bit signed immediate value are copied to the output vector
+   Arguments   : Inputs  - in0, in1, in2, in3, max_val
+                 Outputs - in place operation
+                 Return Type - unsigned halfword
+   Details     : Maximum of signed halfword element values from 'in0' and
+                 'max_val' are written in place
+*/
+#define MAXI_SH2(RTYPE, in0, in1, max_val)               \
+{                                                        \
+    in0 = (RTYPE)__msa_maxi_s_h((v8i16)in0, (max_val));  \
+    in1 = (RTYPE)__msa_maxi_s_h((v8i16)in1, (max_val));  \
+}
+#define MAXI_SH2_SH(...) MAXI_SH2(v8i16, __VA_ARGS__)
+
+/* Description : Saturate the halfword element values to the max
+                 unsigned value of (sat_val + 1) bits
+                 The element data width remains unchanged
+   Arguments   : Inputs  - in0, in1, sat_val
+                 Outputs - in place operation
+                 Return Type - as per RTYPE
+   Details     : Each unsigned halfword element from 'in0' is saturated to the
+                 value generated with (sat_val + 1) bit range.
+                 The results are written in place
+*/
+#define SAT_UH2(RTYPE, in0, in1, sat_val)             \
+{                                                     \
+    in0 = (RTYPE)__msa_sat_u_h((v8u16)in0, sat_val);  \
+    in1 = (RTYPE)__msa_sat_u_h((v8u16)in1, sat_val);  \
+}
+#define SAT_UH2_SH(...) SAT_UH2(v8i16, __VA_ARGS__)
+
 /* Description : Saturate the halfword element values to the max
                  unsigned value of (sat_val + 1) bits
                  The element data width remains unchanged
@@ -1323,6 +1384,29 @@
     in3 = in3 >> shift;                    \
 }
 
+/* Description : Shift right arithmetic rounded words
+   Arguments   : Inputs  - in0, in1, shift
+                 Outputs - in place operation
+                 Return Type - as per RTYPE
+   Details     : Each element of vector 'in0' is shifted right arithmetically by
+                 the number of bits in the corresponding element in the vector
+                 'shift'. The last discarded bit is added to shifted value for
+                 rounding and the result is written in-place.
+                 'shift' is a vector.
+*/
+#define SRAR_W2(RTYPE, in0, in1, shift)                   \
+{                                                         \
+    in0 = (RTYPE)__msa_srar_w((v4i32)in0, (v4i32)shift);  \
+    in1 = (RTYPE)__msa_srar_w((v4i32)in1, (v4i32)shift);  \
+}
+
+#define SRAR_W4(RTYPE, in0, in1, in2, in3, shift)  \
+{                                                  \
+    SRAR_W2(RTYPE, in0, in1, shift);               \
+    SRAR_W2(RTYPE, in2, in3, shift);               \
+}
+#define SRAR_W4_SW(...) SRAR_W4(v4i32, __VA_ARGS__)
+
 /* Description : Shift right arithmetic rounded (immediate)
    Arguments   : Inputs  - in0, in1, shift
                  Outputs - in place operation
@@ -1407,6 +1491,14 @@
 {                                             \
     out0 = in0 - in1;                         \
     out1 = in2 - in3;                         \
+}
+#define SUB4(in0, in1, in2, in3, in4, in5, in6, in7,  \
+             out0, out1, out2, out3)                  \
+{                                                     \
+    out0 = in0 - in1;                                 \
+    out1 = in2 - in3;                                 \
+    out2 = in4 - in5;                                 \
+    out3 = in6 - in7;                                 \
 }
 
 /* Description : Sign extend halfword elements from right half of the vector

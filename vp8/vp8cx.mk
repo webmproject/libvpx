@@ -106,5 +106,10 @@ endif
 VP8_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/dct_msa.c
 VP8_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/encodeopt_msa.c
 VP8_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/quantize_msa.c
+VP8_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/temporal_filter_msa.c
+
+ifeq ($(CONFIG_REALTIME_ONLY),yes)
+VP8_CX_SRCS_REMOVE-$(HAVE_MSA) += encoder/mips/msa/temporal_filter_msa.c
+endif
 
 VP8_CX_SRCS-yes := $(filter-out $(VP8_CX_SRCS_REMOVE-yes),$(VP8_CX_SRCS-yes))
