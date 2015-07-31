@@ -427,9 +427,6 @@ static int cost_coeffs(MACROBLOCK *x,
 }
 
 static void dist_block(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
-#if CONFIG_VP9_HIGHBITDEPTH
-                       int bd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
                        int64_t *out_dist, int64_t *out_sse) {
   const int ss_txfrm_size = tx_size << 1;
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -440,6 +437,7 @@ static void dist_block(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGHBITDEPTH
+  const int bd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? xd->bd : 8;
   *out_dist = vp9_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                      &this_sse, bd) >> shift;
 #else
@@ -451,11 +449,11 @@ static void dist_block(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   if (x->skip_encode && !is_inter_block(&xd->mi[0]->mbmi)) {
     // TODO(jingning): tune the model to better capture the distortion.
     int64_t p = (pd->dequant[1] * pd->dequant[1] *
-                    (1 << ss_txfrm_size)) >> (shift + 2);
+                    (1 << ss_txfrm_size)) >>
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      p >>= ((xd->bd - 8) * 2);
-    }
+                        (shift + 2 + (bd - 8) * 2);
+#else
+                        (shift + 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     *out_dist += (p >> 4);
     *out_sse  += p;
@@ -490,29 +488,13 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   if (!is_inter_block(mbmi)) {
     struct encode_b_args arg = {x, NULL, &mbmi->skip};
     vp9_encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      dist_block(x, plane, block, tx_size, xd->bd, &dist, &sse);
-    } else {
-      dist_block(x, plane, block, tx_size, 8, &dist, &sse);
-    }
-#else
     dist_block(x, plane, block, tx_size, &dist, &sse);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
     if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        dist_block(x, plane, block, tx_size, xd->bd, &dist, &sse);
-      } else {
-        dist_block(x, plane, block, tx_size, 8, &dist, &sse);
-      }
-#else
       dist_block(x, plane, block, tx_size, &dist, &sse);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
                SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
@@ -543,15 +525,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   } else {
     // full forward transform and quantization
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      dist_block(x, plane, block, tx_size, xd->bd, &dist, &sse);
-    } else {
-      dist_block(x, plane, block, tx_size, 8, &dist, &sse);
-    }
-#else
     dist_block(x, plane, block, tx_size, &dist, &sse);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
   rd = RDCOST(x->rdmult, x->rddiv, 0, dist);
