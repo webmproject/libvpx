@@ -913,7 +913,7 @@ void vp9_idct16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
   idct16_cols_add_blk_dspr2(out, dest, dest_stride);
 }
 
-static void iadst16(const int16_t *input, int16_t *output) {
+static void iadst16_dspr2(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15;
 
   int x0 = input[15];
@@ -1110,7 +1110,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
       outptr = out;
 
       for (i = 0; i < 16; ++i) {
-        iadst16(outptr, temp_out);
+        iadst16_dspr2(outptr, temp_out);
 
         for (j = 0; j < 16; ++j)
           dest[j * pitch + i] =
@@ -1127,7 +1127,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
         /* prefetch row */
         prefetch_load((const uint8_t *)(input + 16));
 
-        iadst16(input, outptr);
+        iadst16_dspr2(input, outptr);
         input += 16;
         outptr += 16;
       }
@@ -1147,7 +1147,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
         /* prefetch row */
         prefetch_load((const uint8_t *)(input + 16));
 
-        iadst16(input, outptr);
+        iadst16_dspr2(input, outptr);
         input += 16;
         outptr += 16;
       }
@@ -1155,7 +1155,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
       for (i = 0; i < 16; ++i) {
         for (j = 0; j < 16; ++j)
           temp_in[j] = out[j * 16 + i];
-        iadst16(temp_in, temp_out);
+        iadst16_dspr2(temp_in, temp_out);
         for (j = 0; j < 16; ++j)
           dest[j * pitch + i] =
                     clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
