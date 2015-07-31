@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ea523422_e00a9e28",
+        "filename": "test/idct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T21:45:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a6260ef_f5eb83e7",
+      "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea523422_b55ceac6",
         "filename": "test/idct8x8_test.cc",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-31T20:40:45Z",
       "side": 1,
       "message": "is this the only think the rtcd file is required for?",
+      "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a59ac45_82552ed3",
+        "filename": "test/idct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T21:45:41Z",
+      "side": 1,
+      "message": "I think this test file can be deprecated, since its target has been covered by tests in fdct8x8_test.cc.\n\nIf that was the case, we could remove this file in a separate CL.",
+      "parentUuid": "ea523422_b55ceac6",
       "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "0a5ce834_f6802e04",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T21:45:41Z",
+      "side": 1,
+      "message": "The wrapper functions need these two rtcd files. It select the full/partial inverse transform functions depending on eob value.",
+      "parentUuid": "ea295486_a23dc646",
+      "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a2e188f_1a8c013e",
         "filename": "vp9/common/vp9_idct.h",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2015-07-31T20:40:45Z",
       "side": 1,
       "message": "Are these just declarations? They should exist in the _rtcd.h file in that case, and then you would be able to drop them here.",
+      "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa33dcf3_dbbe7f1b",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T21:45:41Z",
+      "side": 1,
+      "message": "These are wrapper functions and are not defined in rtcd.",
+      "parentUuid": "8a2e188f_1a8c013e",
       "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ca4d7087_fa9a4d43",
+        "filename": "vpx_dsp/arm/idct16x16_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T21:45:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea523422_9587ae98",
+      "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a59ac45_973d6e47",
         "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2015-07-31T20:40:45Z",
       "side": 1,
       "message": "is this header file going to be moved?",
+      "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a5ce834_b67ab694",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-07-31T21:45:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a59ac45_973d6e47",
       "revId": "9c56f6750f430cb781abfc5f22f2308832a732bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
