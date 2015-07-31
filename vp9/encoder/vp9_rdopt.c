@@ -74,6 +74,7 @@ struct rdcost_block_args {
   int exit_early;
   int use_fast_coef_costing;
   const scan_order *so;
+  uint8_t skippable;
 };
 
 #define LAST_NEW_MV_INDEX 6
@@ -544,6 +545,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     args->exit_early = 1;
     return;
   }
+
+  args->skippable &= !x->plane[plane].eobs[block];
 }
 
 static void txfm_rd_in_plane(MACROBLOCK *x,
@@ -559,6 +562,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   args.x = x;
   args.best_rd = ref_best_rd;
   args.use_fast_coef_costing = use_fast_coef_casting;
+  args.skippable = 1;
 
   if (plane == 0)
     xd->mi[0]->mbmi.tx_size = tx_size;
@@ -578,7 +582,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
     *distortion = args.this_dist;
     *rate       = args.this_rate;
     *sse        = args.this_sse;
-    *skippable  = vp9_is_skippable_in_plane(x, bsize, plane);
+    *skippable  = args.skippable;
   }
 }
 
