@@ -193,7 +193,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->use_fast_coef_costing = 1;
     sf->motion_field_mode_search = !boosted;
     sf->partition_search_breakout_rate_thr = 300;
-    sf->simple_model_rd_from_var = 1;
   }
 
   if (speed >= 5) {
@@ -207,6 +206,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     }
     sf->partition_search_breakout_rate_thr = 500;
     sf->mv.reduce_first_step_size = 1;
+    sf->simple_model_rd_from_var = 1;
   }
 }
 
@@ -336,7 +336,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST;
     sf->max_intra_bsize = BLOCK_32X32;
     sf->allow_skip_recode = 1;
-    sf->simple_model_rd_from_var = 1;
   }
 
   if (speed >= 5) {
@@ -363,6 +362,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->use_fast_coef_updates = is_keyframe ? TWO_LOOP : ONE_LOOP_REDUCED;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH;
     sf->tx_size_search_method = is_keyframe ? USE_LARGESTALL : USE_TX_8X8;
+    sf->simple_model_rd_from_var = 1;
 
     if (!is_keyframe) {
       int i;
