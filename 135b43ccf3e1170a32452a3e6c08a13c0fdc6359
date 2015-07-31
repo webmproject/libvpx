@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca2490af_6c2eaec7",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-07-31T21:41:16Z",
+      "side": 1,
+      "message": "these protos could be brought out of the function entirely if need be",
+      "revId": "135b43ccf3e1170a32452a3e6c08a13c0fdc6359",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
