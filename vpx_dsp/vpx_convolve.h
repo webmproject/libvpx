@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VP9_COMMON_VP9_CONVOLVE_H_
-#define VP9_COMMON_VP9_CONVOLVE_H_
+#ifndef VPX_DSP_VPX_CONVOLVE_H_
+#define VPX_DSP_VPX_CONVOLVE_H_
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
@@ -35,4 +35,4 @@ typedef void (*highbd_convolve_fn_t)(const uint8_t *src, ptrdiff_t src_stride,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_CONVOLVE_H_
+#endif  // VPX_DSP_VPX_CONVOLVE_H_

@@ -186,7 +186,7 @@ static void avg_width64_msa(const uint8_t *src, int32_t src_stride,
   }
 }
 
-void vp9_convolve_avg_msa(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve_avg_msa(const uint8_t *src, ptrdiff_t src_stride,
                           uint8_t *dst, ptrdiff_t dst_stride,
                           const int16_t *filter_x, int32_t filter_x_stride,
                           const int16_t *filter_y, int32_t filter_y_stride,

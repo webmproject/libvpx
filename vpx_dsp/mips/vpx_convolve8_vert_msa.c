@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp9_rtcd.h"
-#include "vp9/common/mips/msa/vp9_convolve_msa.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/mips/vpx_convolve_msa.h"
 
 static void common_vt_8t_4w_msa(const uint8_t *src, int32_t src_stride,
                                 uint8_t *dst, int32_t dst_stride,
@@ -650,7 +650,7 @@ static void common_vt_2t_64w_msa(const uint8_t *src, int32_t src_stride,
   }
 }
 
-void vp9_convolve8_vert_msa(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve8_vert_msa(const uint8_t *src, ptrdiff_t src_stride,
                             uint8_t *dst, ptrdiff_t dst_stride,
                             const int16_t *filter_x, int x_step_q4,
                             const int16_t *filter_y, int y_step_q4,
@@ -658,14 +658,14 @@ void vp9_convolve8_vert_msa(const uint8_t *src, ptrdiff_t src_stride,
   int8_t cnt, filt_ver[8];
 
   if (16 != y_step_q4) {
-    vp9_convolve8_vert_c(src, src_stride, dst, dst_stride,
+    vpx_convolve8_vert_c(src, src_stride, dst, dst_stride,
                          filter_x, x_step_q4, filter_y, y_step_q4,
                          w, h);
     return;
   }
 
   if (((const int32_t *)filter_y)[1] == 0x800000) {
-    vp9_convolve_copy(src, src_stride, dst, dst_stride,
+    vpx_convolve_copy(src, src_stride, dst, dst_stride,
                       filter_x, x_step_q4, filter_y, y_step_q4,
                       w, h);
     return;
@@ -703,7 +703,7 @@ void vp9_convolve8_vert_msa(const uint8_t *src, ptrdiff_t src_stride,
                              &filt_ver[3], h);
         break;
       default:
-        vp9_convolve8_vert_c(src, src_stride, dst, dst_stride,
+        vpx_convolve8_vert_c(src, src_stride, dst, dst_stride,
                              filter_x, x_step_q4, filter_y, y_step_q4,
                              w, h);
         break;
@@ -736,7 +736,7 @@ void vp9_convolve8_vert_msa(const uint8_t *src, ptrdiff_t src_stride,
                              filt_ver, h);
         break;
       default:
-        vp9_convolve8_vert_c(src, src_stride, dst, dst_stride,
+        vpx_convolve8_vert_c(src, src_stride, dst, dst_stride,
                              filter_x, x_step_q4, filter_y, y_step_q4,
                              w, h);
         break;

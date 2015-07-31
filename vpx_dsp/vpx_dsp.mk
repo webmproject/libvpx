@@ -54,6 +54,54 @@ DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred8_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred16_dspr2.c
 endif  # CONFIG_VP9
 
+# interpolation filters
+DSP_SRCS-yes += vpx_convolve.c
+DSP_SRCS-yes += vpx_convolve.h
+DSP_SRCS-yes += vpx_filter.h
+
+DSP_SRCS-$(ARCH_X86)$(ARCH_X86_64) += x86/convolve.h
+DSP_SRCS-$(ARCH_X86)$(ARCH_X86_64) += x86/vpx_asm_stubs.c
+DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_subpixel_8t_sse2.asm
+DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_subpixel_bilinear_sse2.asm
+DSP_SRCS-$(HAVE_SSSE3) += x86/vpx_subpixel_8t_ssse3.asm
+DSP_SRCS-$(HAVE_SSSE3) += x86/vpx_subpixel_bilinear_ssse3.asm
+DSP_SRCS-$(HAVE_AVX2)  += x86/vpx_subpixel_8t_intrin_avx2.c
+DSP_SRCS-$(HAVE_SSSE3) += x86/vpx_subpixel_8t_intrin_ssse3.c
+ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_high_subpixel_8t_sse2.asm
+DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_high_subpixel_bilinear_sse2.asm
+endif
+ifeq ($(CONFIG_USE_X86INC),yes)
+DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_convolve_copy_sse2.asm
+endif
+
+ifeq ($(HAVE_NEON_ASM),yes)
+DSP_SRCS-yes += arm/vpx_convolve_copy_neon_asm$(ASM)
+DSP_SRCS-yes += arm/vpx_convolve8_avg_neon_asm$(ASM)
+DSP_SRCS-yes += arm/vpx_convolve8_neon_asm$(ASM)
+DSP_SRCS-yes += arm/vpx_convolve_avg_neon_asm$(ASM)
+DSP_SRCS-yes += arm/vpx_convolve_neon.c
+else
+ifeq ($(HAVE_NEON),yes)
+DSP_SRCS-yes += arm/vpx_convolve_copy_neon.c
+DSP_SRCS-yes += arm/vpx_convolve8_avg_neon.c
+DSP_SRCS-yes += arm/vpx_convolve8_neon.c
+DSP_SRCS-yes += arm/vpx_convolve_avg_neon.c
+DSP_SRCS-yes += arm/vpx_convolve_neon.c
+endif  # HAVE_NEON
+endif  # HAVE_NEON_ASM
+
+# common (msa)
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve8_avg_horiz_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve8_avg_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve8_avg_vert_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve8_horiz_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve8_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve8_vert_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_avg_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_copy_msa.c
+DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_msa.h
+
 # loop filters
 DSP_SRCS-yes += loopfilter.c
 

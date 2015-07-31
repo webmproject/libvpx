@@ -13,19 +13,13 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define FILTER_BITS 7
-
-#define SUBPEL_BITS 4
-#define SUBPEL_MASK ((1 << SUBPEL_BITS) - 1)
-#define SUBPEL_SHIFTS (1 << SUBPEL_BITS)
-#define SUBPEL_TAPS 8
 
 #define EIGHTTAP            0
 #define EIGHTTAP_SMOOTH     1
@@ -36,9 +30,8 @@ extern "C" {
 // 8-tap, 8-tap-smooth, 8-tap-sharp, and switching between the three.
 #define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
 #define SWITCHABLE 4 /* should be the last one */
-typedef uint8_t INTERP_FILTER;
 
-typedef int16_t InterpKernel[SUBPEL_TAPS];
+typedef uint8_t INTERP_FILTER;
 
 extern const InterpKernel *vp9_filter_kernels[4];
 

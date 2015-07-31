@@ -13,14 +13,10 @@ VP9_COMMON_SRCS-yes += vp9_iface_common.h
 VP9_COMMON_SRCS-yes += common/vp9_ppflags.h
 VP9_COMMON_SRCS-yes += common/vp9_alloccommon.c
 VP9_COMMON_SRCS-yes += common/vp9_blockd.c
-VP9_COMMON_SRCS-yes += common/vp9_convolve.c
-VP9_COMMON_SRCS-yes += common/vp9_convolve.h
 VP9_COMMON_SRCS-yes += common/vp9_debugmodes.c
 VP9_COMMON_SRCS-yes += common/vp9_entropy.c
 VP9_COMMON_SRCS-yes += common/vp9_entropymode.c
 VP9_COMMON_SRCS-yes += common/vp9_entropymv.c
-VP9_COMMON_SRCS-yes += common/vp9_filter.c
-VP9_COMMON_SRCS-yes += common/vp9_filter.h
 VP9_COMMON_SRCS-yes += common/vp9_frame_buffers.c
 VP9_COMMON_SRCS-yes += common/vp9_frame_buffers.h
 VP9_COMMON_SRCS-yes += common/vp9_idct.c
@@ -31,6 +27,8 @@ VP9_COMMON_SRCS-yes += common/vp9_entropy.h
 VP9_COMMON_SRCS-yes += common/vp9_entropymode.h
 VP9_COMMON_SRCS-yes += common/vp9_entropymv.h
 VP9_COMMON_SRCS-yes += common/vp9_enums.h
+VP9_COMMON_SRCS-yes += common/vp9_filter.h
+VP9_COMMON_SRCS-yes += common/vp9_filter.c
 VP9_COMMON_SRCS-yes += common/vp9_idct.h
 VP9_COMMON_SRCS-yes += common/vp9_loopfilter.h
 VP9_COMMON_SRCS-yes += common/vp9_thread_common.h
@@ -64,31 +62,14 @@ VP9_COMMON_SRCS-yes += common/vp9_common_data.h
 VP9_COMMON_SRCS-yes += common/vp9_scan.c
 VP9_COMMON_SRCS-yes += common/vp9_scan.h
 
-VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/convolve.h
-VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_asm_stubs.c
 VP9_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/vp9_postproc.h
 VP9_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/vp9_postproc.c
 VP9_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/vp9_mfqe.h
 VP9_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/vp9_mfqe.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpixel_8t_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpixel_bilinear_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_8t_ssse3.asm
-VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_bilinear_ssse3.asm
-VP9_COMMON_SRCS-$(HAVE_AVX2) += common/x86/vp9_subpixel_8t_intrin_avx2.c
-VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_8t_intrin_ssse3.c
 ifeq ($(CONFIG_VP9_POSTPROC),yes)
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_mfqe_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_postproc_sse2.asm
-endif
-
-ifeq ($(CONFIG_USE_X86INC),yes)
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_copy_sse2.asm
-endif
-
-ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_subpixel_8t_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_subpixel_bilinear_sse2.asm
 endif
 
 # common (c)
@@ -113,15 +94,6 @@ VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_itrans32_dspr2.c
 endif
 
 # common (msa)
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_avg_horiz_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_avg_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_avg_vert_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_horiz_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_vert_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve_avg_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve_copy_msa.c
-VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve_msa.h
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_idct4x4_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_idct8x8_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_idct16x16_msa.c
@@ -151,11 +123,6 @@ endif
 # neon with assembly and intrinsics implementations. If both are available
 # prefer assembly.
 ifeq ($(HAVE_NEON_ASM), yes)
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_avg_neon_asm$(ASM)
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_neon_asm$(ASM)
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_avg_neon_asm$(ASM)
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_neon.c
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_1_add_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_add_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_neon.c
@@ -167,11 +134,6 @@ VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct8x8_1_add_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct8x8_add_neon_asm$(ASM)
 else
 ifeq ($(HAVE_NEON), yes)
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_avg_neon.c
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_neon.c
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_avg_neon.c
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_neon.c
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_1_add_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_add_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_neon.c

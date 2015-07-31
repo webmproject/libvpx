@@ -11,11 +11,11 @@
 // Due to a header conflict between math.h and intrinsics includes with ceil()
 // in certain configurations under vs9 this include needs to precede
 // tmmintrin.h.
-#include "./vp9_rtcd.h"
 
 #include <tmmintrin.h>
 
-#include "vp9/common/x86/convolve.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/x86/convolve.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/emmintrin_compat.h"
 
@@ -46,11 +46,11 @@ DECLARE_ALIGNED(16, static const uint8_t, filt4_global[16]) = {
 };
 
 // These are reused by the avx2 intrinsics.
-filter8_1dfunction vp9_filter_block1d8_v8_intrin_ssse3;
-filter8_1dfunction vp9_filter_block1d8_h8_intrin_ssse3;
-filter8_1dfunction vp9_filter_block1d4_h8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d4_h8_intrin_ssse3;
 
-void vp9_filter_block1d4_h8_intrin_ssse3(const uint8_t *src_ptr,
+void vpx_filter_block1d4_h8_intrin_ssse3(const uint8_t *src_ptr,
                                          ptrdiff_t src_pixels_per_line,
                                          uint8_t *output_ptr,
                                          ptrdiff_t output_pitch,
@@ -121,7 +121,7 @@ void vp9_filter_block1d4_h8_intrin_ssse3(const uint8_t *src_ptr,
   }
 }
 
-void vp9_filter_block1d8_h8_intrin_ssse3(const uint8_t *src_ptr,
+void vpx_filter_block1d8_h8_intrin_ssse3(const uint8_t *src_ptr,
                                          ptrdiff_t src_pixels_per_line,
                                          uint8_t *output_ptr,
                                          ptrdiff_t output_pitch,
@@ -201,7 +201,7 @@ void vp9_filter_block1d8_h8_intrin_ssse3(const uint8_t *src_ptr,
   }
 }
 
-static void vp9_filter_block1d16_h8_intrin_ssse3(const uint8_t *src_ptr,
+static void vpx_filter_block1d16_h8_intrin_ssse3(const uint8_t *src_ptr,
                                                  ptrdiff_t src_pixels_per_line,
                                                  uint8_t *output_ptr,
                                                  ptrdiff_t output_pitch,
@@ -318,7 +318,7 @@ static void vp9_filter_block1d16_h8_intrin_ssse3(const uint8_t *src_ptr,
   }
 }
 
-void vp9_filter_block1d8_v8_intrin_ssse3(const uint8_t *src_ptr,
+void vpx_filter_block1d8_v8_intrin_ssse3(const uint8_t *src_ptr,
                                          ptrdiff_t src_pitch,
                                          uint8_t *output_ptr,
                                          ptrdiff_t out_pitch,
@@ -406,7 +406,7 @@ void vp9_filter_block1d8_v8_intrin_ssse3(const uint8_t *src_ptr,
   }
 }
 
-static void vp9_filter_block1d16_v8_intrin_ssse3(const uint8_t *src_ptr,
+static void vpx_filter_block1d16_v8_intrin_ssse3(const uint8_t *src_ptr,
                                                  ptrdiff_t src_pitch,
                                                  uint8_t *output_ptr,
                                                  ptrdiff_t out_pitch,
@@ -522,61 +522,61 @@ static void vp9_filter_block1d16_v8_intrin_ssse3(const uint8_t *src_ptr,
 }
 
 #if ARCH_X86_64
-filter8_1dfunction vp9_filter_block1d16_v8_intrin_ssse3;
-filter8_1dfunction vp9_filter_block1d16_h8_intrin_ssse3;
-filter8_1dfunction vp9_filter_block1d8_v8_intrin_ssse3;
-filter8_1dfunction vp9_filter_block1d8_h8_intrin_ssse3;
-filter8_1dfunction vp9_filter_block1d4_v8_ssse3;
-filter8_1dfunction vp9_filter_block1d4_h8_intrin_ssse3;
-#define vp9_filter_block1d16_v8_ssse3 vp9_filter_block1d16_v8_intrin_ssse3
-#define vp9_filter_block1d16_h8_ssse3 vp9_filter_block1d16_h8_intrin_ssse3
-#define vp9_filter_block1d8_v8_ssse3 vp9_filter_block1d8_v8_intrin_ssse3
-#define vp9_filter_block1d8_h8_ssse3 vp9_filter_block1d8_h8_intrin_ssse3
-#define vp9_filter_block1d4_h8_ssse3 vp9_filter_block1d4_h8_intrin_ssse3
+filter8_1dfunction vpx_filter_block1d16_v8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d16_h8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d4_v8_ssse3;
+filter8_1dfunction vpx_filter_block1d4_h8_intrin_ssse3;
+#define vpx_filter_block1d16_v8_ssse3 vpx_filter_block1d16_v8_intrin_ssse3
+#define vpx_filter_block1d16_h8_ssse3 vpx_filter_block1d16_h8_intrin_ssse3
+#define vpx_filter_block1d8_v8_ssse3 vpx_filter_block1d8_v8_intrin_ssse3
+#define vpx_filter_block1d8_h8_ssse3 vpx_filter_block1d8_h8_intrin_ssse3
+#define vpx_filter_block1d4_h8_ssse3 vpx_filter_block1d4_h8_intrin_ssse3
 #else  // ARCH_X86
-filter8_1dfunction vp9_filter_block1d16_v8_ssse3;
-filter8_1dfunction vp9_filter_block1d16_h8_ssse3;
-filter8_1dfunction vp9_filter_block1d8_v8_ssse3;
-filter8_1dfunction vp9_filter_block1d8_h8_ssse3;
-filter8_1dfunction vp9_filter_block1d4_v8_ssse3;
-filter8_1dfunction vp9_filter_block1d4_h8_ssse3;
+filter8_1dfunction vpx_filter_block1d16_v8_ssse3;
+filter8_1dfunction vpx_filter_block1d16_h8_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v8_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h8_ssse3;
+filter8_1dfunction vpx_filter_block1d4_v8_ssse3;
+filter8_1dfunction vpx_filter_block1d4_h8_ssse3;
 #endif  // ARCH_X86_64
-filter8_1dfunction vp9_filter_block1d16_v8_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d16_h8_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d8_v8_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d8_h8_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d4_v8_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d4_h8_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d16_v8_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d16_h8_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v8_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h8_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d4_v8_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d4_h8_avg_ssse3;
 
-filter8_1dfunction vp9_filter_block1d16_v2_ssse3;
-filter8_1dfunction vp9_filter_block1d16_h2_ssse3;
-filter8_1dfunction vp9_filter_block1d8_v2_ssse3;
-filter8_1dfunction vp9_filter_block1d8_h2_ssse3;
-filter8_1dfunction vp9_filter_block1d4_v2_ssse3;
-filter8_1dfunction vp9_filter_block1d4_h2_ssse3;
-filter8_1dfunction vp9_filter_block1d16_v2_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d16_h2_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d8_v2_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d8_h2_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d4_v2_avg_ssse3;
-filter8_1dfunction vp9_filter_block1d4_h2_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d16_v2_ssse3;
+filter8_1dfunction vpx_filter_block1d16_h2_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v2_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h2_ssse3;
+filter8_1dfunction vpx_filter_block1d4_v2_ssse3;
+filter8_1dfunction vpx_filter_block1d4_h2_ssse3;
+filter8_1dfunction vpx_filter_block1d16_v2_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d16_h2_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v2_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h2_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d4_v2_avg_ssse3;
+filter8_1dfunction vpx_filter_block1d4_h2_avg_ssse3;
 
-// void vp9_convolve8_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                                uint8_t *dst, ptrdiff_t dst_stride,
 //                                const int16_t *filter_x, int x_step_q4,
 //                                const int16_t *filter_y, int y_step_q4,
 //                                int w, int h);
-// void vp9_convolve8_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                               uint8_t *dst, ptrdiff_t dst_stride,
 //                               const int16_t *filter_x, int x_step_q4,
 //                               const int16_t *filter_y, int y_step_q4,
 //                               int w, int h);
-// void vp9_convolve8_avg_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_avg_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                                    uint8_t *dst, ptrdiff_t dst_stride,
 //                                    const int16_t *filter_x, int x_step_q4,
 //                                    const int16_t *filter_y, int y_step_q4,
 //                                    int w, int h);
-// void vp9_convolve8_avg_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_avg_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                                   uint8_t *dst, ptrdiff_t dst_stride,
 //                                   const int16_t *filter_x, int x_step_q4,
 //                                   const int16_t *filter_y, int y_step_q4,
@@ -587,12 +587,12 @@ FUN_CONV_1D(avg_horiz, x_step_q4, filter_x, h, src, avg_, ssse3);
 FUN_CONV_1D(avg_vert, y_step_q4, filter_y, v, src - src_stride * 3, avg_,
             ssse3);
 
-// void vp9_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                          uint8_t *dst, ptrdiff_t dst_stride,
 //                          const int16_t *filter_x, int x_step_q4,
 //                          const int16_t *filter_y, int y_step_q4,
 //                          int w, int h);
-// void vp9_convolve8_avg_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_avg_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                              uint8_t *dst, ptrdiff_t dst_stride,
 //                              const int16_t *filter_x, int x_step_q4,
 //                              const int16_t *filter_y, int y_step_q4,
