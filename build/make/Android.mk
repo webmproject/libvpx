@@ -166,17 +166,19 @@ endif
 
 # Add a dependency to force generation of the RTCD files.
 define rtcd_dep_template
+rtcd_dep_template_SRCS := $(addprefix $(LOCAL_PATH)/, $(LOCAL_SRC_FILES))
+rtcd_dep_template_SRCS := $$(rtcd_dep_template_SRCS:.neon=)
 ifeq ($(CONFIG_VP8), yes)
-$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vp8_rtcd.h
+$$(rtcd_dep_template_SRCS): vp8_rtcd.h
 endif
 ifeq ($(CONFIG_VP9), yes)
-$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vp9_rtcd.h
+$$(rtcd_dep_template_SRCS): vp9_rtcd.h
 endif
-$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_scale_rtcd.h
-$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_dsp_rtcd.h
+$$(rtcd_dep_template_SRCS): vpx_scale_rtcd.h
+$$(rtcd_dep_template_SRCS): vpx_dsp_rtcd.h
 
-ifeq ($(TARGET_ARCH_ABI),x86)
-$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_config.asm
+ifneq ($(findstring $(TARGET_ARCH_ABI),x86 x86_64),)
+$$(rtcd_dep_template_SRCS): vpx_config.asm
 endif
 endef
 
