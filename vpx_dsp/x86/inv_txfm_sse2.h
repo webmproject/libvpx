@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2015 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -8,12 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <assert.h>
+#ifndef VPX_DSP_X86_INV_TXFM_SSE2_H_
+#define VPX_DSP_X86_INV_TXFM_SSE2_H_
+
 #include <emmintrin.h>  // SSE2
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
-#include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_idct.h"
+#include "vpx_dsp/inv_txfm.h"
 
 // perform 8x8 transpose
 static INLINE void array_transpose_8x8(__m128i *in, __m128i *res) {
@@ -172,3 +173,12 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
   RECON_AND_STORE(dest + 14 * stride, in[14]);
   RECON_AND_STORE(dest + 15 * stride, in[15]);
 }
+
+void idct4_sse2(__m128i *in);
+void idct8_sse2(__m128i *in);
+void idct16_sse2(__m128i *in0, __m128i *in1);
+void iadst4_sse2(__m128i *in);
+void iadst8_sse2(__m128i *in);
+void iadst16_sse2(__m128i *in0, __m128i *in1);
+
+#endif  // VPX_DSP_X86_INV_TXFM_SSE2_H_
