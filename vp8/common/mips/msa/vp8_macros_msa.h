@@ -643,6 +643,23 @@
 }
 #define DOTP_SH4_SW(...) DOTP_SH4(v4i32, __VA_ARGS__)
 
+/* Description : Dot product of word vector elements
+   Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Signed word elements from 'mult0' are multiplied with
+                 signed word elements from 'cnst0' producing a result
+                 twice the size of input i.e. signed double word.
+                 The multiplication result of adjacent odd-even elements
+                 are added together and written to the 'out0' vector
+*/
+#define DOTP_SW2(RTYPE, mult0, mult1, cnst0, cnst1, out0, out1)  \
+{                                                                \
+    out0 = (RTYPE)__msa_dotp_s_d((v4i32)mult0, (v4i32)cnst0);    \
+    out1 = (RTYPE)__msa_dotp_s_d((v4i32)mult1, (v4i32)cnst1);    \
+}
+#define DOTP_SW2_SD(...) DOTP_SW2(v2i64, __VA_ARGS__)
+
 /* Description : Dot product & addition of byte vector elements
    Arguments   : Inputs  - mult0, mult1, cnst0, cnst1
                  Outputs - out0, out1
@@ -692,6 +709,23 @@
     DPADD_SH2(RTYPE, mult2, mult3, cnst2, cnst3, out2, out3);          \
 }
 #define DPADD_SH4_SW(...) DPADD_SH4(v4i32, __VA_ARGS__)
+
+/* Description : Dot product & addition of double word vector elements
+   Arguments   : Inputs  - mult0, mult1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each signed word element from 'mult0' is multiplied with itself
+                 producing an intermediate result twice the size of it
+                 i.e. signed double word
+                 The multiplication result of adjacent odd-even elements
+                 are added to the 'out0' vector
+*/
+#define DPADD_SD2(RTYPE, mult0, mult1, out0, out1)                           \
+{                                                                            \
+    out0 = (RTYPE)__msa_dpadd_s_d((v2i64)out0, (v4i32)mult0, (v4i32)mult0);  \
+    out1 = (RTYPE)__msa_dpadd_s_d((v2i64)out1, (v4i32)mult1, (v4i32)mult1);  \
+}
+#define DPADD_SD2_SD(...) DPADD_SD2(v2i64, __VA_ARGS__)
 
 /* Description : Clips all signed halfword elements of input vector
                  between 0 & 255
@@ -804,6 +838,21 @@
     out1 = (RTYPE)__msa_hsub_u_h((v16u8)in1, (v16u8)in1);  \
 }
 #define HSUB_UB2_SH(...) HSUB_UB2(v8i16, __VA_ARGS__)
+
+/* Description : Horizontal subtraction of signed halfword vector elements
+   Arguments   : Inputs  - in0, in1
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Each signed odd halfword element from 'in0' is subtracted from
+                 even signed halfword element from 'in0' (pairwise) and the
+                 word result is written to 'out0'
+*/
+#define HSUB_UH2(RTYPE, in0, in1, out0, out1)              \
+{                                                          \
+    out0 = (RTYPE)__msa_hsub_s_w((v8i16)in0, (v8i16)in0);  \
+    out1 = (RTYPE)__msa_hsub_s_w((v8i16)in1, (v8i16)in1);  \
+}
+#define HSUB_UH2_SW(...) HSUB_UH2(v4i32, __VA_ARGS__)
 
 /* Description : Set element n input vector to GPR value
    Arguments   : Inputs - in0, in1, in2, in3
