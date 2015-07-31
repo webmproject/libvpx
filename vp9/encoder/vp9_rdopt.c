@@ -172,6 +172,12 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   const int shift = 6;
   int rate;
   int64_t dist;
+  const int dequant_shift =
+#if CONFIG_VP9_HIGHBITDEPTH
+      (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
+          xd->bd - 5 :
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+          3;
 
   x->pred_sse[ref] = 0;
 
@@ -237,12 +243,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     if (cpi->sf.simple_model_rd_from_var) {
       int64_t rate;
       const int64_t square_error = sum_sse;
-      int quantizer = (pd->dequant[1] >> 3);
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        quantizer >>= (xd->bd - 8);
-      }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+      int quantizer = (pd->dequant[1] >> dequant_shift);
 
       if (quantizer < 120)
         rate = (square_error * (280 - quantizer)) >> 8;
@@ -252,19 +253,9 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       rate_sum += rate;
       dist_sum += dist;
     } else {
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        vp9_model_rd_from_var_lapndz(sum_sse, num_pels_log2_lookup[bs],
-                                     pd->dequant[1] >> (xd->bd - 5),
-                                     &rate, &dist);
-      } else {
-        vp9_model_rd_from_var_lapndz(sum_sse, num_pels_log2_lookup[bs],
-                                     pd->dequant[1] >> 3, &rate, &dist);
-      }
-#else
       vp9_model_rd_from_var_lapndz(sum_sse, num_pels_log2_lookup[bs],
-                                   pd->dequant[1] >> 3, &rate, &dist);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+                                   pd->dequant[1] >> dequant_shift,
+                                   &rate, &dist);
       rate_sum += rate;
       dist_sum += dist;
     }
