@@ -11,13 +11,11 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_config.h"
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vpx/vpx_integer.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/mips/vpx_common_dspr2.h"
+#include "vpx_dsp/vpx_convolve.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
-#include "vp9/common/vp9_convolve.h"
-#include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
 static void convolve_bi_vert_4_dspr2(const uint8_t *src,
@@ -30,7 +28,7 @@ static void convolve_bi_vert_4_dspr2(const uint8_t *src,
   int32_t       x, y;
   const uint8_t *src_ptr;
   uint8_t       *dst_ptr;
-  uint8_t       *cm = vp9_ff_cropTbl;
+  uint8_t       *cm = vpx_ff_cropTbl;
   uint32_t      vector4a = 64;
   uint32_t      load1, load2;
   uint32_t      p1, p2;
@@ -127,7 +125,7 @@ static void convolve_bi_vert_64_dspr2(const uint8_t *src,
   int32_t       x, y;
   const uint8_t *src_ptr;
   uint8_t       *dst_ptr;
-  uint8_t       *cm = vp9_ff_cropTbl;
+  uint8_t       *cm = vpx_ff_cropTbl;
   uint32_t      vector4a = 64;
   uint32_t      load1, load2;
   uint32_t      p1, p2;
@@ -215,7 +213,7 @@ static void convolve_bi_vert_64_dspr2(const uint8_t *src,
   }
 }
 
-void vp9_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4,
@@ -248,7 +246,7 @@ void vp9_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                   filter_y, h);
         break;
       default:
-        vp9_convolve8_vert_c(src, src_stride,
+        vpx_convolve8_vert_c(src, src_stride,
                              dst, dst_stride,
                              filter_x, x_step_q4,
                              filter_y, y_step_q4,
@@ -256,7 +254,7 @@ void vp9_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         break;
     }
   } else {
-    vp9_convolve8_vert_c(src, src_stride,
+    vpx_convolve8_vert_c(src, src_stride,
                          dst, dst_stride,
                          filter_x, x_step_q4,
                          filter_y, y_step_q4,

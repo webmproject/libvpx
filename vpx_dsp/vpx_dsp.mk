@@ -102,6 +102,19 @@ DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_avg_msa.c
 DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_copy_msa.c
 DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_msa.h
 
+# common (dspr2)
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_common_dspr2.h
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve2_avg_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve2_avg_horiz_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve2_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve2_horiz_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve2_vert_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve8_avg_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve8_avg_horiz_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve8_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve8_horiz_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/vpx_convolve8_vert_dspr2.c
+
 # loop filters
 DSP_SRCS-yes += loopfilter.c
 

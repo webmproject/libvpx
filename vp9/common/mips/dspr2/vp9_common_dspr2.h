@@ -22,7 +22,8 @@ extern "C" {
 #endif
 
 #if HAVE_DSPR2
-extern uint8_t *vp9_ff_cropTbl;
+
+extern uint8_t *vpx_ff_cropTbl;
 
 #define DCT_CONST_ROUND_SHIFT_TWICE_COSPI_16_64(input)                    ({   \
                                                                                \
@@ -52,35 +53,6 @@ extern uint8_t *vp9_ff_cropTbl;
 
 void vp9_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
                                    int dest_stride);
-
-void vp9_convolve2_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
-                               uint8_t *dst, ptrdiff_t dst_stride,
-                               const int16_t *filter_x, int x_step_q4,
-                               const int16_t *filter_y, int y_step_q4,
-                               int w, int h);
-
-void vp9_convolve2_avg_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
-                                   uint8_t *dst, ptrdiff_t dst_stride,
-                                   const int16_t *filter_x, int x_step_q4,
-                                   const int16_t *filter_y, int y_step_q4,
-                                   int w, int h);
-
-void vp9_convolve2_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
-                                  uint8_t *dst, ptrdiff_t dst_stride,
-                                  const int16_t *filter_x, int x_step_q4,
-                                  const int16_t *filter_y, int y_step_q4,
-                                  int w, int h);
-
-void vp9_convolve2_dspr2(const uint8_t *src, ptrdiff_t src_stride,
-                         uint8_t *dst, ptrdiff_t dst_stride,
-                         const int16_t *filter,
-                         int w, int h);
-
-void vp9_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
-                              uint8_t *dst, ptrdiff_t dst_stride,
-                              const int16_t *filter_x, int x_step_q4,
-                              const int16_t *filter_y, int y_step_q4,
-                              int w, int h);
 
 #endif  // #if HAVE_DSPR2
 #ifdef __cplusplus

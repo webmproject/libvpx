@@ -11,13 +11,11 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_config.h"
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vpx/vpx_integer.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/mips/vpx_common_dspr2.h"
+#include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
-#include "vp9/common/vp9_filter.h"
-#include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
 static void convolve_bi_horiz_4_transposed_dspr2(const uint8_t *src,
@@ -27,7 +25,7 @@ static void convolve_bi_horiz_4_transposed_dspr2(const uint8_t *src,
                                                  const int16_t *filter_x0,
                                                  int32_t h) {
   int32_t       y;
-  uint8_t       *cm = vp9_ff_cropTbl;
+  uint8_t       *cm = vpx_ff_cropTbl;
   uint8_t       *dst_ptr;
   int32_t       Temp1, Temp2;
   uint32_t      vector4a = 64;
@@ -117,7 +115,7 @@ static void convolve_bi_horiz_8_transposed_dspr2(const uint8_t *src,
                                                  const int16_t *filter_x0,
                                                  int32_t h) {
   int32_t y;
-  uint8_t *cm = vp9_ff_cropTbl;
+  uint8_t *cm = vpx_ff_cropTbl;
   uint8_t *dst_ptr;
   uint32_t vector4a = 64;
   int32_t Temp1, Temp2, Temp3;
@@ -257,7 +255,7 @@ static void convolve_bi_horiz_16_transposed_dspr2(const uint8_t *src_ptr,
   int32_t       c, y;
   const uint8_t *src;
   uint8_t       *dst;
-  uint8_t       *cm = vp9_ff_cropTbl;
+  uint8_t       *cm = vpx_ff_cropTbl;
   uint32_t      vector_64 = 64;
   int32_t       Temp1, Temp2, Temp3;
   uint32_t      qload1, qload2;
@@ -489,7 +487,7 @@ static void convolve_bi_horiz_64_transposed_dspr2(const uint8_t *src_ptr,
   int32_t       c, y;
   const uint8_t *src;
   uint8_t       *dst;
-  uint8_t       *cm = vp9_ff_cropTbl;
+  uint8_t       *cm = vpx_ff_cropTbl;
   uint32_t      vector_64 = 64;
   int32_t       Temp1, Temp2, Temp3;
   uint32_t      qload1, qload2;
@@ -733,7 +731,7 @@ void convolve_bi_horiz_transposed(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-void vp9_convolve2_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve2_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                          uint8_t *dst, ptrdiff_t dst_stride,
                          const int16_t *filter,
                          int w, int h) {

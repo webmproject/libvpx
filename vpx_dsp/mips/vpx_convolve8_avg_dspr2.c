@@ -11,13 +11,11 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_config.h"
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vpx/vpx_integer.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/mips/vpx_common_dspr2.h"
+#include "vpx_dsp/vpx_convolve.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
-#include "vp9/common/vp9_convolve.h"
-#include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
 static void convolve_avg_vert_4_dspr2(const uint8_t *src,
@@ -30,7 +28,7 @@ static void convolve_avg_vert_4_dspr2(const uint8_t *src,
   int32_t       x, y;
   const uint8_t *src_ptr;
   uint8_t       *dst_ptr;
-  uint8_t       *cm = vp9_ff_cropTbl;
+  uint8_t       *cm = vpx_ff_cropTbl;
   uint32_t      vector4a = 64;
   uint32_t      load1, load2, load3, load4;
   uint32_t      p1, p2;
@@ -191,7 +189,7 @@ static void convolve_avg_vert_64_dspr2(const uint8_t *src,
   int32_t       x, y;
   const uint8_t *src_ptr;
   uint8_t       *dst_ptr;
-  uint8_t       *cm = vp9_ff_cropTbl;
+  uint8_t       *cm = vpx_ff_cropTbl;
   uint32_t      vector4a = 64;
   uint32_t      load1, load2, load3, load4;
   uint32_t      p1, p2;
@@ -344,19 +342,19 @@ static void convolve_avg_vert_64_dspr2(const uint8_t *src,
   }
 }
 
-void vp9_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                   uint8_t *dst, ptrdiff_t dst_stride,
                                   const int16_t *filter_x, int x_step_q4,
                                   const int16_t *filter_y, int y_step_q4,
                                   int w, int h) {
   if (((const int32_t *)filter_y)[1] == 0x800000) {
-    vp9_convolve_avg(src, src_stride,
+    vpx_convolve_avg(src, src_stride,
                      dst, dst_stride,
                      filter_x, x_step_q4,
                      filter_y, y_step_q4,
                      w, h);
   } else if (((const int32_t *)filter_y)[0] == 0) {
-    vp9_convolve2_avg_vert_dspr2(src, src_stride,
+    vpx_convolve2_avg_vert_dspr2(src, src_stride,
                                  dst, dst_stride,
                                  filter_x, x_step_q4,
                                  filter_y, y_step_q4,
@@ -390,7 +388,7 @@ void vp9_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                      filter_y, h);
           break;
         default:
-          vp9_convolve8_avg_vert_c(src, src_stride,
+          vpx_convolve8_avg_vert_c(src, src_stride,
                                    dst, dst_stride,
                                    filter_x, x_step_q4,
                                    filter_y, y_step_q4,
@@ -398,7 +396,7 @@ void vp9_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
           break;
       }
     } else {
-      vp9_convolve8_avg_vert_c(src, src_stride,
+      vpx_convolve8_avg_vert_c(src, src_stride,
                                dst, dst_stride,
                                filter_x, x_step_q4,
                                filter_y, y_step_q4,
@@ -407,7 +405,7 @@ void vp9_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-void vp9_convolve8_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve8_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
                              const int16_t *filter_x, int x_step_q4,
                              const int16_t *filter_y, int y_step_q4,
@@ -423,26 +421,26 @@ void vp9_convolve8_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
     intermediate_height = h;
 
   if (x_step_q4 != 16 || y_step_q4 != 16)
-    return vp9_convolve8_avg_c(src, src_stride,
+    return vpx_convolve8_avg_c(src, src_stride,
                                dst, dst_stride,
                                filter_x, x_step_q4,
                                filter_y, y_step_q4,
                                w, h);
 
-  vp9_convolve8_horiz(src - (src_stride * 3), src_stride,
+  vpx_convolve8_horiz(src - (src_stride * 3), src_stride,
                       temp, 64,
                       filter_x, x_step_q4,
                       filter_y, y_step_q4,
                       w, intermediate_height);
 
-  vp9_convolve8_avg_vert(temp + 64 * 3, 64,
+  vpx_convolve8_avg_vert(temp + 64 * 3, 64,
                          dst, dst_stride,
                          filter_x, x_step_q4,
                          filter_y, y_step_q4,
                          w, h);
 }
 
-void vp9_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void vpx_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                             uint8_t *dst, ptrdiff_t dst_stride,
                             const int16_t *filter_x, int filter_x_stride,
                             const int16_t *filter_y, int filter_y_stride,
