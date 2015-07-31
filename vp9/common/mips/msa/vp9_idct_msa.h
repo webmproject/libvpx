@@ -11,10 +11,10 @@
 #ifndef VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_
 #define VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_
 
-#include "vpx_ports/mem.h"
-#include "vp9/common/vp9_idct.h"
 #include "vpx_dsp/mips/macros_msa.h"
 #include "vpx_dsp/mips/txfm_macros_msa.h"
+#include "vpx_dsp/txfm_common.h"
+#include "vpx_ports/mem.h"
 
 #define VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,               \
                   out0, out1, out2, out3, out4, out5, out6, out7) {     \
