@@ -334,9 +334,9 @@ if (vpx_config("CONFIG_REALTIME_ONLY") ne "yes") {
 #
 if (vpx_config("CONFIG_TEMPORAL_DENOISING") eq "yes") {
     add_proto qw/int vp8_denoiser_filter/, "unsigned char *mc_running_avg_y, int mc_avg_y_stride, unsigned char *running_avg_y, int avg_y_stride, unsigned char *sig, int sig_stride, unsigned int motion_magnitude, int increase_denoising";
-    specialize qw/vp8_denoiser_filter sse2 neon/;
+    specialize qw/vp8_denoiser_filter sse2 neon msa/;
     add_proto qw/int vp8_denoiser_filter_uv/, "unsigned char *mc_running_avg, int mc_avg_stride, unsigned char *running_avg, int avg_stride, unsigned char *sig, int sig_stride, unsigned int motion_magnitude, int increase_denoising";
-    specialize qw/vp8_denoiser_filter_uv sse2 neon/;
+    specialize qw/vp8_denoiser_filter_uv sse2 neon msa/;
 }
 
 # End of encoder only functions
