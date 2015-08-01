@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea523422_2d32ee7a",
+        "filename": "vpx_dsp/arm/idct16x16_neon.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-01T17:52:54Z",
+      "side": 1,
+      "message": "this file contains rtcd functions, so should include an rtcd.h to keep the function signatures in sync",
+      "revId": "e8b133c79c6cf99102020f194513fb3e2feaa322",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a5ce834_219682a3",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-01T17:52:54Z",
+      "side": 1,
+      "message": "this should probably have an rtcd include too",
+      "revId": "e8b133c79c6cf99102020f194513fb3e2feaa322",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
