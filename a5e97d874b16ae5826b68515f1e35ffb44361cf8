@@ -16,6 +16,24 @@
       "revId": "a5e97d874b16ae5826b68515f1e35ffb44361cf8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea295486_e3ebd0e7",
+        "filename": "vpx_dsp/x86/vpx_convolve_copy_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-01T18:57:29Z",
+      "side": 1,
+      "message": "fix is here:\n\nhttps://chromium-review.googlesource.com/290133",
+      "parentUuid": "caec90d0_d0dbc20b",
+      "revId": "a5e97d874b16ae5826b68515f1e35ffb44361cf8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
