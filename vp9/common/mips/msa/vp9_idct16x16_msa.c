@@ -9,7 +9,9 @@
  */
 
 #include <assert.h>
+
 #include "vp9/common/mips/msa/vp9_idct_msa.h"
+#include "vp9/common/vp9_enums.h"
 
 void vp9_idct16_1d_rows_msa(const int16_t *input, int16_t *output) {
   v8i16 loc0, loc1, loc2, loc3;

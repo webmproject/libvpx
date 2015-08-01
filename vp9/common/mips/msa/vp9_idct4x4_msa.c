@@ -9,7 +9,9 @@
  */
 
 #include <assert.h>
+
 #include "vp9/common/mips/msa/vp9_idct_msa.h"
+#include "vp9/common/vp9_enums.h"
 
 void vp9_iwht4x4_16_add_msa(const int16_t *input, uint8_t *dst,
                             int32_t dst_stride) {
