@@ -16,6 +16,24 @@
       "revId": "7dc5a689b4bef3071ac032f3cb53917cf440d3f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eaf154a3_ae9057d5",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-01T01:20:13Z",
+      "side": 1,
+      "message": "a bit mixed in manual unroll + for loop unroll; I\u0027ll leave this as is for now",
+      "parentUuid": "ca2490af_6a0a0e5e",
+      "revId": "7dc5a689b4bef3071ac032f3cb53917cf440d3f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
