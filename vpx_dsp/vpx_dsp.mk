@@ -169,6 +169,43 @@ DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c
 endif  # CONFIG_VP9_ENCODER
 
+# inverse transform
+ifeq ($(CONFIG_VP9),yes)
+DSP_SRCS-yes            += inv_txfm.h
+DSP_SRCS-yes            += inv_txfm.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/inv_txfm_sse2.h
+DSP_SRCS-$(HAVE_SSE2)   += x86/inv_txfm_sse2.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/inv_txfm_sse2.asm
+ifeq ($(ARCH_X86_64),yes)
+ifeq ($(CONFIG_USE_X86INC),yes)
+DSP_SRCS-$(HAVE_SSSE3)  += x86/inv_txfm_ssse3_x86_64.asm
+endif  # CONFIG_USE_X86INC
+endif  # ARCH_X86_64
+
+ifeq ($(HAVE_NEON_ASM),yes)
+DSP_SRCS-yes  += arm/idct4x4_1_add_neon$(ASM)
+DSP_SRCS-yes  += arm/idct4x4_add_neon$(ASM)
+DSP_SRCS-yes  += arm/idct8x8_1_add_neon$(ASM)
+DSP_SRCS-yes  += arm/idct8x8_add_neon$(ASM)
+DSP_SRCS-yes  += arm/idct16x16_1_add_neon$(ASM)
+DSP_SRCS-yes  += arm/idct16x16_add_neon$(ASM)
+DSP_SRCS-yes  += arm/idct32x32_1_add_neon$(ASM)
+DSP_SRCS-yes  += arm/idct32x32_add_neon$(ASM)
+else
+ifeq ($(HAVE_NEON),yes)
+DSP_SRCS-yes  += arm/idct4x4_1_add_neon.c
+DSP_SRCS-yes  += arm/idct4x4_add_neon.c
+DSP_SRCS-yes  += arm/idct8x8_1_add_neon.c
+DSP_SRCS-yes  += arm/idct8x8_add_neon.c
+DSP_SRCS-yes  += arm/idct16x16_1_add_neon.c
+DSP_SRCS-yes  += arm/idct16x16_add_neon.c
+DSP_SRCS-yes  += arm/idct32x32_1_add_neon.c
+DSP_SRCS-yes  += arm/idct32x32_add_neon.c
+endif  # HAVE_NEON
+endif  # HAVE_NEON_ASM
+DSP_SRCS-$(HAVE_NEON)  += arm/idct16x16_neon.c
+endif  # CONFIG_VP9
+
 # quantization
 ifeq ($(CONFIG_VP9_ENCODER),yes)
 DSP_SRCS-yes            += quantize.c

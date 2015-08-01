@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "vp9/common/vp9_idct.h"
+#include "vpx_dsp/inv_txfm.h"
 #include "vpx_ports/mem.h"
 
 void vp9_idct4x4_1_add_neon(
