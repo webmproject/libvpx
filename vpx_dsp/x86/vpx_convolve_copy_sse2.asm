@@ -16,7 +16,7 @@ SECTION .text
 
 %macro convolve_fn 1
 INIT_XMM sse2
-cglobal convolve_%1, 4, 7, 4, src, src_stride, dst, dst_stride, \
+cglobal convolve_%1, 4, 7, 8, src, src_stride, dst, dst_stride, \
                               fx, fxs, fy, fys, w, h
   mov                          r4d, dword wm
   cmp                          r4d, 4
