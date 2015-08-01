@@ -326,7 +326,7 @@ $vp8_diamond_search_sad_sse3=vp8_diamond_search_sadx4;
 #
 if (vpx_config("CONFIG_REALTIME_ONLY") ne "yes") {
     add_proto qw/void vp8_temporal_filter_apply/, "unsigned char *frame1, unsigned int stride, unsigned char *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, unsigned short *count";
-    specialize qw/vp8_temporal_filter_apply sse2/;
+    specialize qw/vp8_temporal_filter_apply sse2 msa/;
 }
 
 #
