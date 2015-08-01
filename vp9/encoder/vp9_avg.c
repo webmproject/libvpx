@@ -155,6 +155,9 @@ int16_t vp9_int_pro_col_c(uint8_t const *ref, const int width) {
   return sum;
 }
 
+// ref: [0 - 510]
+// src: [0 - 510]
+// bwl: {2, 3, 4}
 int vp9_vector_var_c(int16_t const *ref, int16_t const *src,
                      const int bwl) {
   int i;
@@ -162,11 +165,12 @@ int vp9_vector_var_c(int16_t const *ref, int16_t const *src,
   int sse = 0, mean = 0, var;
 
   for (i = 0; i < width; ++i) {
-    int diff = ref[i] - src[i];
-    mean += diff;
-    sse += diff * diff;
+    int diff = ref[i] - src[i];  // diff: dynamic range [-510, 510], 10 bits.
+    mean += diff;                // mean: dynamic range 16 bits.
+    sse += diff * diff;          // sse:  dynamic range 26 bits.
   }
 
+  // (mean * mean): dynamic range 31 bits.
   var = sse - ((mean * mean) >> (bwl + 2));
   return var;
 }
