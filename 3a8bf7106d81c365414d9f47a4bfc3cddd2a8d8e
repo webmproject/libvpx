@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "eaf154a3_710ad25d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-01T02:34:14Z",
+      "side": 1,
+      "message": "I would call this a symbol conflict, not \u0027confusing\u0027",
+      "revId": "3a8bf7106d81c365414d9f47a4bfc3cddd2a8d8e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea523422_a0c26626",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
