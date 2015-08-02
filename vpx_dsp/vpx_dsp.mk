@@ -175,12 +175,12 @@ DSP_SRCS-yes            += inv_txfm.h
 DSP_SRCS-yes            += inv_txfm.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/inv_txfm_sse2.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/inv_txfm_sse2.c
+ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/inv_txfm_sse2.asm
 ifeq ($(ARCH_X86_64),yes)
-ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSSE3)  += x86/inv_txfm_ssse3_x86_64.asm
-endif  # CONFIG_USE_X86INC
 endif  # ARCH_X86_64
+endif  # CONFIG_USE_X86INC
 
 ifeq ($(HAVE_NEON_ASM),yes)
 DSP_SRCS-yes  += arm/idct4x4_1_add_neon$(ASM)
