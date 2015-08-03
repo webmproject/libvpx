@@ -22,9 +22,6 @@ extern "C" {
 #endif
 
 #if HAVE_DSPR2
-
-extern uint8_t *vpx_ff_cropTbl;
-
 #define DCT_CONST_ROUND_SHIFT_TWICE_COSPI_16_64(input)                    ({   \
                                                                                \
   int32_t tmp, out;                                                            \
