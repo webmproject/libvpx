@@ -10,8 +10,8 @@
 
 #include "vpx_dsp/mips/inv_txfm_msa.h"
 
-static void vp9_idct32x8_row_transpose_store(const int16_t *input,
-                                             int16_t *tmp_buf) {
+static void idct32x8_row_transpose_store(const int16_t *input,
+                                         int16_t *tmp_buf) {
   v8i16 m0, m1, m2, m3, m4, m5, m6, m7, n0, n1, n2, n3, n4, n5, n6, n7;
 
   /* 1st & 2nd 8x8 */
@@ -38,8 +38,8 @@ static void vp9_idct32x8_row_transpose_store(const int16_t *input,
   ST_SH4(m6, n6, m7, n7, (tmp_buf + 28 * 8), 8);
 }
 
-static void vp9_idct32x8_row_even_process_store(int16_t *tmp_buf,
-                                                int16_t *tmp_eve_buf) {
+static void idct32x8_row_even_process_store(int16_t *tmp_buf,
+                                            int16_t *tmp_eve_buf) {
   v8i16 vec0, vec1, vec2, vec3, loc0, loc1, loc2, loc3;
   v8i16 reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7;
   v8i16 stp0, stp1, stp2, stp3, stp4, stp5, stp6, stp7;
@@ -122,8 +122,8 @@ static void vp9_idct32x8_row_even_process_store(int16_t *tmp_buf,
   ST_SH(loc3, (tmp_eve_buf + 7 * 8));
 }
 
-static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
-                                               int16_t *tmp_odd_buf) {
+static void idct32x8_row_odd_process_store(int16_t *tmp_buf,
+                                           int16_t *tmp_odd_buf) {
   v8i16 vec0, vec1, vec2, vec3, loc0, loc1, loc2, loc3;
   v8i16 reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7;
 
@@ -240,10 +240,10 @@ static void vp9_idct32x8_row_odd_process_store(int16_t *tmp_buf,
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 12 * 8), 8);
 }
 
-static void vp9_idct_butterfly_transpose_store(int16_t *tmp_buf,
-                                               int16_t *tmp_eve_buf,
-                                               int16_t *tmp_odd_buf,
-                                               int16_t *dst) {
+static void idct_butterfly_transpose_store(int16_t *tmp_buf,
+                                           int16_t *tmp_eve_buf,
+                                           int16_t *tmp_odd_buf,
+                                           int16_t *dst) {
   v8i16 vec0, vec1, vec2, vec3, loc0, loc1, loc2, loc3;
   v8i16 m0, m1, m2, m3, m4, m5, m6, m7, n0, n1, n2, n3, n4, n5, n6, n7;
 
@@ -341,20 +341,20 @@ static void vp9_idct_butterfly_transpose_store(int16_t *tmp_buf,
   ST_SH4(m6, n6, m7, n7, (dst + 24 + 4 * 32), 32);
 }
 
-static void vp9_idct32x8_1d_rows_msa(const int16_t *input, int16_t *output) {
+static void idct32x8_1d_rows_msa(const int16_t *input, int16_t *output) {
   DECLARE_ALIGNED(32, int16_t, tmp_buf[8 * 32]);
   DECLARE_ALIGNED(32, int16_t, tmp_odd_buf[16 * 8]);
   DECLARE_ALIGNED(32, int16_t, tmp_eve_buf[16 * 8]);
 
-  vp9_idct32x8_row_transpose_store(input, &tmp_buf[0]);
-  vp9_idct32x8_row_even_process_store(&tmp_buf[0], &tmp_eve_buf[0]);
-  vp9_idct32x8_row_odd_process_store(&tmp_buf[0], &tmp_odd_buf[0]);
-  vp9_idct_butterfly_transpose_store(&tmp_buf[0], &tmp_eve_buf[0],
-                                     &tmp_odd_buf[0], output);
+  idct32x8_row_transpose_store(input, &tmp_buf[0]);
+  idct32x8_row_even_process_store(&tmp_buf[0], &tmp_eve_buf[0]);
+  idct32x8_row_odd_process_store(&tmp_buf[0], &tmp_odd_buf[0]);
+  idct_butterfly_transpose_store(&tmp_buf[0], &tmp_eve_buf[0],
+                                 &tmp_odd_buf[0], output);
 }
 
-static void vp9_idct8x32_column_even_process_store(int16_t *tmp_buf,
-                                                   int16_t *tmp_eve_buf) {
+static void idct8x32_column_even_process_store(int16_t *tmp_buf,
+                                               int16_t *tmp_eve_buf) {
   v8i16 vec0, vec1, vec2, vec3, loc0, loc1, loc2, loc3;
   v8i16 reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7;
   v8i16 stp0, stp1, stp2, stp3, stp4, stp5, stp6, stp7;
@@ -433,8 +433,8 @@ static void vp9_idct8x32_column_even_process_store(int16_t *tmp_buf,
   ST_SH2(loc2, loc0, (tmp_eve_buf + 8 * 8), 8);
 }
 
-static void vp9_idct8x32_column_odd_process_store(int16_t *tmp_buf,
-                                                  int16_t *tmp_odd_buf) {
+static void idct8x32_column_odd_process_store(int16_t *tmp_buf,
+                                              int16_t *tmp_odd_buf) {
   v8i16 vec0, vec1, vec2, vec3, loc0, loc1, loc2, loc3;
   v8i16 reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7;
 
@@ -540,10 +540,10 @@ static void vp9_idct8x32_column_odd_process_store(int16_t *tmp_buf,
   ST_SH4(loc0, loc1, loc2, loc3, (tmp_odd_buf + 12 * 8), 8);
 }
 
-static void vp9_idct8x32_column_butterfly_addblk(int16_t *tmp_eve_buf,
-                                                 int16_t *tmp_odd_buf,
-                                                 uint8_t *dst,
-                                                 int32_t dst_stride) {
+static void idct8x32_column_butterfly_addblk(int16_t *tmp_eve_buf,
+                                             int16_t *tmp_odd_buf,
+                                             uint8_t *dst,
+                                             int32_t dst_stride) {
   v8i16 vec0, vec1, vec2, vec3, loc0, loc1, loc2, loc3;
   v8i16 m0, m1, m2, m3, m4, m5, m6, m7, n0, n1, n2, n3, n4, n5, n6, n7;
 
@@ -627,18 +627,18 @@ static void vp9_idct8x32_column_butterfly_addblk(int16_t *tmp_eve_buf,
                       n1, n3, n5, n7);
 }
 
-static void vp9_idct8x32_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
-                                               int32_t dst_stride) {
+static void idct8x32_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
+                                           int32_t dst_stride) {
   DECLARE_ALIGNED(32, int16_t, tmp_odd_buf[16 * 8]);
   DECLARE_ALIGNED(32, int16_t, tmp_eve_buf[16 * 8]);
 
-  vp9_idct8x32_column_even_process_store(input, &tmp_eve_buf[0]);
-  vp9_idct8x32_column_odd_process_store(input, &tmp_odd_buf[0]);
-  vp9_idct8x32_column_butterfly_addblk(&tmp_eve_buf[0], &tmp_odd_buf[0],
-                                       dst, dst_stride);
+  idct8x32_column_even_process_store(input, &tmp_eve_buf[0]);
+  idct8x32_column_odd_process_store(input, &tmp_odd_buf[0]);
+  idct8x32_column_butterfly_addblk(&tmp_eve_buf[0], &tmp_odd_buf[0],
+                                   dst, dst_stride);
 }
 
-void vp9_idct32x32_1024_add_msa(const int16_t *input, uint8_t *dst,
+void vpx_idct32x32_1024_add_msa(const int16_t *input, uint8_t *dst,
                                 int32_t dst_stride) {
   int32_t i;
   DECLARE_ALIGNED(32, int16_t, out_arr[32 * 32]);
@@ -647,18 +647,18 @@ void vp9_idct32x32_1024_add_msa(const int16_t *input, uint8_t *dst,
   /* transform rows */
   for (i = 0; i < 4; ++i) {
     /* process 32 * 8 block */
-    vp9_idct32x8_1d_rows_msa((input + (i << 8)), (out_ptr + (i << 8)));
+    idct32x8_1d_rows_msa((input + (i << 8)), (out_ptr + (i << 8)));
   }
 
   /* transform columns */
   for (i = 0; i < 4; ++i) {
     /* process 8 * 32 block */
-    vp9_idct8x32_1d_columns_addblk_msa((out_ptr + (i << 3)), (dst + (i << 3)),
-                                       dst_stride);
+    idct8x32_1d_columns_addblk_msa((out_ptr + (i << 3)), (dst + (i << 3)),
+                                   dst_stride);
   }
 }
 
-void vp9_idct32x32_34_add_msa(const int16_t *input, uint8_t *dst,
+void vpx_idct32x32_34_add_msa(const int16_t *input, uint8_t *dst,
                               int32_t dst_stride) {
   int32_t i;
   DECLARE_ALIGNED(32, int16_t, out_arr[32 * 32]);
@@ -693,17 +693,17 @@ void vp9_idct32x32_34_add_msa(const int16_t *input, uint8_t *dst,
   out_ptr = out_arr;
 
   /* rows: only upper-left 8x8 has non-zero coeff */
-  vp9_idct32x8_1d_rows_msa(input, out_ptr);
+  idct32x8_1d_rows_msa(input, out_ptr);
 
   /* transform columns */
   for (i = 0; i < 4; ++i) {
     /* process 8 * 32 block */
-    vp9_idct8x32_1d_columns_addblk_msa((out_ptr + (i << 3)), (dst + (i << 3)),
-                                       dst_stride);
+    idct8x32_1d_columns_addblk_msa((out_ptr + (i << 3)), (dst + (i << 3)),
+                                   dst_stride);
   }
 }
 
-void vp9_idct32x32_1_add_msa(const int16_t *input, uint8_t *dst,
+void vpx_idct32x32_1_add_msa(const int16_t *input, uint8_t *dst,
                              int32_t dst_stride) {
   int32_t i;
   int16_t out;

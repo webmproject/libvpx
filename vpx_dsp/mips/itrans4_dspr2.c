@@ -14,7 +14,7 @@
 #include "vpx_dsp/txfm_common.h"
 
 #if HAVE_DSPR2
-void vp9_idct4_rows_dspr2(const int16_t *input, int16_t *output) {
+void vpx_idct4_rows_dspr2(const int16_t *input, int16_t *output) {
   int16_t   step_0, step_1, step_2, step_3;
   int       Temp0, Temp1, Temp2, Temp3;
   const int const_2_power_13 = 8192;
@@ -99,7 +99,7 @@ void vp9_idct4_rows_dspr2(const int16_t *input, int16_t *output) {
   }
 }
 
-void vp9_idct4_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
+void vpx_idct4_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
                                      int dest_stride) {
   int16_t   step_0, step_1, step_2, step_3;
   int       Temp0, Temp1, Temp2, Temp3;
@@ -221,7 +221,7 @@ void vp9_idct4_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
   }
 }
 
-void vp9_idct4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
                               int dest_stride) {
   DECLARE_ALIGNED(32, int16_t, out[4 * 4]);
   int16_t *outptr = out;
@@ -235,13 +235,13 @@ void vp9_idct4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // Rows
-  vp9_idct4_rows_dspr2(input, outptr);
+  vpx_idct4_rows_dspr2(input, outptr);
 
   // Columns
-  vp9_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+  vpx_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
-void vp9_idct4x4_1_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct4x4_1_add_dspr2(const int16_t *input, uint8_t *dest,
                              int dest_stride) {
   int       a1, absa1;
   int       r;

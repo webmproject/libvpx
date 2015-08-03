@@ -442,7 +442,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
   }
 }
 
-void vp9_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
                               int dest_stride) {
   DECLARE_ALIGNED(32, int16_t, out[8 * 8]);
   int16_t *outptr = out;
@@ -462,7 +462,7 @@ void vp9_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
   idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
-void vp9_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
                               int dest_stride) {
   DECLARE_ALIGNED(32, int16_t, out[8 * 8]);
   int16_t *outptr = out;
@@ -507,7 +507,7 @@ void vp9_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
   idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
-void vp9_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
                              int dest_stride) {
   uint32_t pos = 45;
   int32_t out;

@@ -7,6 +7,9 @@
 ;  in the file PATENTS.  All contributing project authors may
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
+
+%define program_name vpx
+
 %include "third_party/x86inc/x86inc.asm"
 
 SECTION .text

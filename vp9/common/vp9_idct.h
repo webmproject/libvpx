@@ -44,8 +44,8 @@ void vp9_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
 void vp9_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
-void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride, int
-                       eob);
+void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
+                       int eob);
 void vp9_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob);
 

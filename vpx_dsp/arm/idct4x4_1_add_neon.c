@@ -13,7 +13,7 @@
 #include "vpx_dsp/inv_txfm.h"
 #include "vpx_ports/mem.h"
 
-void vp9_idct4x4_1_add_neon(
+void vpx_idct4x4_1_add_neon(
         int16_t *input,
         uint8_t *dest,
         int dest_stride) {

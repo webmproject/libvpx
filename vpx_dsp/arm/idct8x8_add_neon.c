@@ -238,7 +238,7 @@ static INLINE void IDCT8x8_1D(
     return;
 }
 
-void vp9_idct8x8_64_add_neon(
+void vpx_idct8x8_64_add_neon(
         int16_t *input,
         uint8_t *dest,
         int dest_stride) {
@@ -351,7 +351,7 @@ void vp9_idct8x8_64_add_neon(
     return;
 }
 
-void vp9_idct8x8_12_add_neon(
+void vpx_idct8x8_12_add_neon(
         int16_t *input,
         uint8_t *dest,
         int dest_stride) {
