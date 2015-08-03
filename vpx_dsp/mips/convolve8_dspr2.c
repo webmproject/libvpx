@@ -18,22 +18,6 @@
 #include "vpx_ports/mem.h"
 
 #if HAVE_DSPR2
-uint8_t vpx_ff_cropTbl_a[256 + 2 * CROP_WIDTH];
-uint8_t *vpx_ff_cropTbl;
-
-void vpx_dsputil_static_init(void) {
-  int i;
-
-  for (i = 0; i < 256; i++) vpx_ff_cropTbl_a[i + CROP_WIDTH] = i;
-
-  for (i = 0; i < CROP_WIDTH; i++) {
-    vpx_ff_cropTbl_a[i] = 0;
-    vpx_ff_cropTbl_a[i + CROP_WIDTH + 256] = 255;
-  }
-
-  vpx_ff_cropTbl = &vpx_ff_cropTbl_a[CROP_WIDTH];
-}
-
 static void convolve_horiz_4_transposed_dspr2(const uint8_t *src,
                                               int32_t src_stride,
                                               uint8_t *dst,
