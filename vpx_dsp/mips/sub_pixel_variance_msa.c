@@ -406,14 +406,11 @@ static uint32_t sub_pixel_sse_diff_4width_h_msa(const uint8_t *src,
   v16i8 src0, src1, src2, src3;
   v16i8 mask = { 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8 };
   v8u16 vec0, vec1, vec2, vec3;
-  v8u16 const255;
   v8i16 avg = { 0 };
   v4i32 vec, var = { 0 };
 
   filtval = LH(filter);
   filt0 = (v16u8)__msa_fill_h(filtval);
-
-  const255 = (v8u16)__msa_ldi_h(255);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
     LD_SB4(src, src_stride, src0, src1, src2, src3);
@@ -426,7 +423,6 @@ static uint32_t sub_pixel_sse_diff_4width_h_msa(const uint8_t *src,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0,
                 vec0, vec1, vec2, vec3);
     SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-    MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
     PCKEV_B4_SB(vec0, vec0, vec1, vec1, vec2, vec2, vec3, vec3,
                 src0, src1, src2, src3);
     ILVEV_W2_SB(src0, src1, src2, src3, src0, src2);
@@ -452,14 +448,12 @@ static uint32_t sub_pixel_sse_diff_8width_h_msa(const uint8_t *src,
   v16u8 filt0, out, ref0, ref1, ref2, ref3;
   v16i8 src0, src1, src2, src3;
   v16i8 mask = { 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8 };
-  v8u16 vec0, vec1, vec2, vec3, const255;
+  v8u16 vec0, vec1, vec2, vec3;
   v8i16 avg = { 0 };
   v4i32 vec, var = { 0 };
 
   filtval = LH(filter);
   filt0 = (v16u8)__msa_fill_h(filtval);
-
-  const255 = (v8u16)__msa_ldi_h(255);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
     LD_SB4(src, src_stride, src0, src1, src2, src3);
@@ -473,7 +467,6 @@ static uint32_t sub_pixel_sse_diff_8width_h_msa(const uint8_t *src,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0,
                 vec0, vec1, vec2, vec3);
     SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-    MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
     PCKEV_B4_SB(vec0, vec0, vec1, vec1, vec2, vec2, vec3, vec3,
                 src0, src1, src2, src3);
     out = (v16u8)__msa_ilvev_d((v2i64)src1, (v2i64)src0);
@@ -502,14 +495,11 @@ static uint32_t sub_pixel_sse_diff_16width_h_msa(const uint8_t *src,
   v16u8 dst0, dst1, dst2, dst3, filt0;
   v8u16 vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
   v8u16 out0, out1, out2, out3, out4, out5, out6, out7;
-  v8u16 const255;
   v8i16 avg = { 0 };
   v4i32 vec, var = { 0 };
 
   filtval = LH(filter);
   filt0 = (v16u8)__msa_fill_h(filtval);
-
-  const255 = (v8u16)__msa_ldi_h(255);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
     LD_SB4(src, src_stride, src0, src2, src4, src6);
@@ -528,8 +518,6 @@ static uint32_t sub_pixel_sse_diff_16width_h_msa(const uint8_t *src,
                 out4, out5, out6, out7);
     SRARI_H4_UH(out0, out1, out2, out3, FILTER_BITS);
     SRARI_H4_UH(out4, out5, out6, out7, FILTER_BITS);
-    MIN_UH4_UH(out0, out1, out2, out3, const255);
-    MIN_UH4_UH(out4, out5, out6, out7, const255);
     PCKEV_B4_SB(out1, out0, out3, out2, out5, out4, out7, out6,
                 src0, src1, src2, src3);
     CALC_MSE_AVG_B(src0, dst0, var, avg);
@@ -625,7 +613,6 @@ static uint32_t sub_pixel_sse_diff_4width_v_msa(const uint8_t *src,
     ILVR_D2_UB(src21_r, src10_r, src43_r, src32_r, src2110, src4332);
     DOTP_UB2_UH(src2110, src4332, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
     CALC_MSE_AVG_B(out, ref, var, avg);
     src0 = src4;
@@ -672,7 +659,6 @@ static uint32_t sub_pixel_sse_diff_8width_v_msa(const uint8_t *src,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0,
                 tmp0, tmp1, tmp2, tmp3);
     SRARI_H4_UH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
-    SAT_UH4_UH(tmp0, tmp1, tmp2, tmp3, 7);
     PCKEV_B2_UB(tmp1, tmp0, tmp3, tmp2, src0, src1);
     CALC_MSE_AVG_B(src0, ref0, var, avg);
     CALC_MSE_AVG_B(src1, ref1, var, avg);
@@ -719,23 +705,19 @@ static uint32_t sub_pixel_sse_diff_16width_v_msa(const uint8_t *src,
     ILVL_B2_UB(src1, src0, src2, src1, vec1, vec3);
     DOTP_UB2_UH(vec0, vec1, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out0 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     ILVR_B2_UB(src3, src2, src4, src3, vec4, vec6);
     ILVL_B2_UB(src3, src2, src4, src3, vec5, vec7);
     DOTP_UB2_UH(vec2, vec3, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     out1 = (v16u8)__msa_pckev_b((v16i8)tmp3, (v16i8)tmp2);
 
     DOTP_UB2_UH(vec4, vec5, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out2 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
     DOTP_UB2_UH(vec6, vec7, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     out3 = (v16u8)__msa_pckev_b((v16i8)tmp3, (v16i8)tmp2);
 
     src0 = src4;
@@ -838,7 +820,6 @@ static uint32_t sub_pixel_sse_diff_4width_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
     CALC_MSE_AVG_B(out, ref, var, avg);
     src0 = src4;
@@ -893,7 +874,6 @@ static uint32_t sub_pixel_sse_diff_8width_hv_msa(const uint8_t *src,
     vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
     tmp1 = __msa_dotp_u_h(vec0, filt_vt);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     hz_out1 = HORIZ_2TAP_FILT_UH(src3, src3, mask, filt_hz, FILTER_BITS);
     vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
     tmp2 = __msa_dotp_u_h(vec0, filt_vt);
@@ -901,7 +881,6 @@ static uint32_t sub_pixel_sse_diff_8width_hv_msa(const uint8_t *src,
     vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
     tmp3 = __msa_dotp_u_h(vec0, filt_vt);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_B2_UB(tmp1, tmp0, tmp3, tmp2, out0, out1);
     CALC_MSE_AVG_B(out0, ref0, var, avg);
     CALC_MSE_AVG_B(out1, ref1, var, avg);
@@ -955,7 +934,6 @@ static uint32_t sub_pixel_sse_diff_16width_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     src0 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     hz_out0 = HORIZ_2TAP_FILT_UH(src2, src2, mask, filt_hz, FILTER_BITS);
@@ -963,7 +941,6 @@ static uint32_t sub_pixel_sse_diff_16width_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out1, hz_out0, hz_out3, hz_out2, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     src1 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     hz_out1 = HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS);
@@ -971,7 +948,6 @@ static uint32_t sub_pixel_sse_diff_16width_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     src2 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     hz_out0 = HORIZ_2TAP_FILT_UH(src6, src6, mask, filt_hz, FILTER_BITS);
@@ -979,7 +955,6 @@ static uint32_t sub_pixel_sse_diff_16width_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out1, hz_out0, hz_out3, hz_out2, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     src3 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     CALC_MSE_AVG_B(src0, ref0, var, avg);
@@ -1057,14 +1032,11 @@ static uint32_t sub_pixel_avg_sse_diff_4width_h_msa(const uint8_t *src,
   v16i8 src0, src1, src2, src3;
   v16i8 mask = { 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8 };
   v8u16 vec0, vec1, vec2, vec3;
-  v8u16 const255;
   v8i16 avg = { 0 };
   v4i32 vec, var = { 0 };
 
   filtval = LH(filter);
   filt0 = (v16u8)__msa_fill_h(filtval);
-
-  const255 = (v8u16)__msa_ldi_h(255);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
     LD_SB4(src, src_stride, src0, src1, src2, src3);
@@ -1080,7 +1052,6 @@ static uint32_t sub_pixel_avg_sse_diff_4width_h_msa(const uint8_t *src,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0,
                 vec0, vec1, vec2, vec3);
     SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-    MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
     PCKEV_B4_SB(vec0, vec0, vec1, vec1, vec2, vec2, vec3, vec3,
                 src0, src1, src2, src3);
     ILVEV_W2_SB(src0, src1, src2, src3, src0, src2);
@@ -1110,14 +1081,11 @@ static uint32_t sub_pixel_avg_sse_diff_8width_h_msa(const uint8_t *src,
   v16i8 src0, src1, src2, src3;
   v16i8 mask = { 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8 };
   v8u16 vec0, vec1, vec2, vec3;
-  v8u16 const255;
   v8i16 avg = { 0 };
   v4i32 vec, var = { 0 };
 
   filtval = LH(filter);
   filt0 = (v16u8)__msa_fill_h(filtval);
-
-  const255 = (v8u16)__msa_ldi_h(255);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
     LD_SB4(src, src_stride, src0, src1, src2, src3);
@@ -1131,7 +1099,6 @@ static uint32_t sub_pixel_avg_sse_diff_8width_h_msa(const uint8_t *src,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0,
                 vec0, vec1, vec2, vec3);
     SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-    MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
     PCKEV_B4_SB(vec0, vec0, vec1, vec1, vec2, vec2, vec3, vec3,
                 src0, src1, src2, src3);
     out = (v16u8)__msa_ilvev_d((v2i64)src1, (v2i64)src0);
@@ -1171,14 +1138,11 @@ static uint32_t subpel_avg_ssediff_16w_h_msa(const uint8_t *src,
   v16u8 pred0, pred1, pred2, pred3, filt0;
   v8u16 vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
   v8u16 out0, out1, out2, out3, out4, out5, out6, out7;
-  v8u16 const255;
   v8i16 avg = { 0 };
   v4i32 vec, var = { 0 };
 
   filtval = LH(filter);
   filt0 = (v16u8)__msa_fill_h(filtval);
-
-  const255 = (v8u16)__msa_ldi_h(255);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
     LD_SB4(src, src_stride, src0, src2, src4, src6);
@@ -1199,8 +1163,6 @@ static uint32_t subpel_avg_ssediff_16w_h_msa(const uint8_t *src,
                 out4, out5, out6, out7);
     SRARI_H4_UH(out0, out1, out2, out3, FILTER_BITS);
     SRARI_H4_UH(out4, out5, out6, out7, FILTER_BITS);
-    MIN_UH4_UH(out0, out1, out2, out3, const255);
-    MIN_UH4_UH(out4, out5, out6, out7, const255);
     PCKEV_B4_UB(out1, out0, out3, out2, out5, out4, out7, out6,
                 tmp0, tmp1, tmp2, tmp3);
     AVER_UB4_UB(tmp0, pred0, tmp1, pred1, tmp2, pred2, tmp3, pred3,
@@ -1319,7 +1281,6 @@ static uint32_t sub_pixel_avg_sse_diff_4width_v_msa(const uint8_t *src,
     ILVR_D2_UB(src21_r, src10_r, src43_r, src32_r, src2110, src4332);
     DOTP_UB2_UH(src2110, src4332, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
 
     out = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
     out = __msa_aver_u_b(out, pred);
@@ -1370,7 +1331,6 @@ static uint32_t sub_pixel_avg_sse_diff_8width_v_msa(const uint8_t *src,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0,
                 tmp0, tmp1, tmp2, tmp3);
     SRARI_H4_UH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
-    SAT_UH4_UH(tmp0, tmp1, tmp2, tmp3, 7);
     PCKEV_B2_UB(tmp1, tmp0, tmp3, tmp2, src0, src1);
     AVER_UB2_UB(src0, pred0, src1, pred1, src0, src1);
     CALC_MSE_AVG_B(src0, ref0, var, avg);
@@ -1421,24 +1381,20 @@ static uint32_t subpel_avg_ssediff_16w_v_msa(const uint8_t *src,
     ILVL_B2_UH(src1, src0, src2, src1, vec1, vec3);
     DOTP_UB2_UH(vec0, vec1, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out0 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     ILVR_B2_UH(src3, src2, src4, src3, vec4, vec6);
     ILVL_B2_UH(src3, src2, src4, src3, vec5, vec7);
     DOTP_UB2_UH(vec2, vec3, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     out1 = (v16u8)__msa_pckev_b((v16i8)tmp3, (v16i8)tmp2);
 
     DOTP_UB2_UH(vec4, vec5, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out2 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     DOTP_UB2_UH(vec6, vec7, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     out3 = (v16u8)__msa_pckev_b((v16i8)tmp3, (v16i8)tmp2);
 
     src0 = src4;
@@ -1563,7 +1519,6 @@ static uint32_t sub_pixel_avg_sse_diff_4width_hv_msa(
     ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
     out = __msa_aver_u_b(out, pred);
     CALC_MSE_AVG_B(out, ref, var, avg);
@@ -1620,7 +1575,6 @@ static uint32_t sub_pixel_avg_sse_diff_8width_hv_msa(
     vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
     tmp1 = __msa_dotp_u_h(vec0, filt_vt);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     hz_out1 = HORIZ_2TAP_FILT_UH(src3, src3, mask, filt_hz, FILTER_BITS);
 
     vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
@@ -1631,7 +1585,6 @@ static uint32_t sub_pixel_avg_sse_diff_8width_hv_msa(
     tmp3 = __msa_dotp_u_h(vec0, filt_vt);
 
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_B2_UB(tmp1, tmp0, tmp3, tmp2, out0, out1);
     AVER_UB2_UB(out0, pred0, out1, pred1, out0, out1);
 
@@ -1690,7 +1643,6 @@ static uint32_t subpel_avg_ssediff_16w_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out0 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     hz_out0 = HORIZ_2TAP_FILT_UH(src2, src2, mask, filt_hz, FILTER_BITS);
@@ -1698,7 +1650,6 @@ static uint32_t subpel_avg_ssediff_16w_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out1, hz_out0, hz_out3, hz_out2, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out1 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     hz_out1 = HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS);
@@ -1706,7 +1657,6 @@ static uint32_t subpel_avg_ssediff_16w_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out2 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     hz_out0 = HORIZ_2TAP_FILT_UH(src6, src6, mask, filt_hz, FILTER_BITS);
@@ -1714,7 +1664,6 @@ static uint32_t subpel_avg_ssediff_16w_hv_msa(const uint8_t *src,
     ILVEV_B2_UB(hz_out1, hz_out0, hz_out3, hz_out2, vec0, vec1);
     DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     out3 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
 
     LD_UB4(dst, dst_stride, ref0, ref1, ref2, ref3);

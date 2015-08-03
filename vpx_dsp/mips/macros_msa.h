@@ -1926,7 +1926,6 @@
   tmp0_m = __msa_vshf_b((v16i8)mask, (v16i8)in1, (v16i8)in0);  \
   tmp1_m = __msa_dotp_u_h((v16u8)tmp0_m, (v16u8)coeff);        \
   tmp1_m = (v8u16)__msa_srari_h((v8i16)tmp1_m, shift);         \
-  tmp1_m = __msa_sat_u_h(tmp1_m, shift);                       \
                                                                \
   tmp1_m;                                                      \
 })
