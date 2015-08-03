@@ -1709,7 +1709,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   }
 
   if (cpi->b_calculate_consistency) {
-    cpi->ssim_vars = vpx_malloc(sizeof(*cpi->ssim_vars)*720*480);
+    cpi->ssim_vars = vpx_malloc(sizeof(*cpi->ssim_vars) *
+                                4 * cpi->common.mi_rows * cpi->common.mi_cols);
     cpi->worst_consistency = 100.0;
   }
 
