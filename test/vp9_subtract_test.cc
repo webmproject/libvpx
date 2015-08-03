@@ -101,5 +101,9 @@ INSTANTIATE_TEST_CASE_P(SSE2, VP9SubtractBlockTest,
 INSTANTIATE_TEST_CASE_P(NEON, VP9SubtractBlockTest,
                         ::testing::Values(vpx_subtract_block_neon));
 #endif
+#if HAVE_MSA
+INSTANTIATE_TEST_CASE_P(MSA, VP9SubtractBlockTest,
+                        ::testing::Values(vpx_subtract_block_msa));
+#endif
 
 }  // namespace vp9
