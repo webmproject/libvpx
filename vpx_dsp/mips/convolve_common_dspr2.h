@@ -22,8 +22,6 @@ extern "C" {
 #endif
 
 #if HAVE_DSPR2
-extern uint8_t *vpx_ff_cropTbl;
-
 void vpx_convolve2_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                uint8_t *dst, ptrdiff_t dst_stride,
                                const int16_t *filter_x, int x_step_q4,

@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #include "./vpx_dsp_rtcd.h"
-#include "vpx_dsp/mips/vpx_common_dspr2.h"
+#include "vpx_dsp/mips/convolve_common_dspr2.h"
 #include "vpx_dsp/vpx_convolve.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
