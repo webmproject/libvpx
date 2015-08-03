@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/common/vp9_common.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 void vp9_idct16x16_256_add_neon_pass1(const int16_t *input,
                                       int16_t *output,
