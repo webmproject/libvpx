@@ -324,8 +324,8 @@ endif
 # the makefiles). We may want to revisit this.
 define vcproj_template
 $(1): $($(1:.$(VCPROJ_SFX)=).SRCS) vpx.$(VCPROJ_SFX)
-	@echo "    [vcproj] $$@"
-	$$(GEN_VCPROJ)\
+	$(if $(quiet),@echo "    [vcproj] $$@")
+	$(qexec)$$(GEN_VCPROJ)\
             --exe\
             --target=$$(TOOLCHAIN)\
             --name=$$(@:.$(VCPROJ_SFX)=)\
