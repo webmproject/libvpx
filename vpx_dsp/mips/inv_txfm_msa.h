@@ -8,13 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_
-#define VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_
+#ifndef VPX_DSP_MIPS_INV_TXFM_MSA_H_
+#define VPX_DSP_MIPS_INV_TXFM_MSA_H_
 
 #include "vpx_dsp/mips/macros_msa.h"
 #include "vpx_dsp/mips/txfm_macros_msa.h"
 #include "vpx_dsp/txfm_common.h"
-#include "vpx_ports/mem.h"
 
 #define VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,               \
                   out0, out1, out2, out3, out4, out5, out6, out7) {     \
@@ -401,4 +400,11 @@
   MADD_SHORT(out10, out11, k0_m, k3_m, out10, out11);               \
   MADD_SHORT(out14, out15, k1_m, k2_m, out14, out15);               \
 }
-#endif  /* VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_ */
+
+void vp9_idct16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
+                                      int32_t dst_stride);
+void vp9_idct16_1d_rows_msa(const int16_t *input, int16_t *output);
+void vp9_iadst16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
+                                       int32_t dst_stride);
+void vp9_iadst16_1d_rows_msa(const int16_t *input, int16_t *output);
+#endif  // VPX_DSP_MIPS_INV_TXFM_MSA_H_

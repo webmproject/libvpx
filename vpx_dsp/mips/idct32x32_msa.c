@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/common/mips/msa/vp9_idct_msa.h"
+#include "vpx_dsp/mips/inv_txfm_msa.h"
 
 static void vp9_idct32x8_row_transpose_store(const int16_t *input,
                                              int16_t *tmp_buf) {
