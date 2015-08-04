@@ -34,6 +34,24 @@
       "revId": "56bd33ed876cf7ba5cb5c963bb44ed0d04102dc6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0ff877_d2cc5aad",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 6
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-04T22:38:45Z",
+      "side": 1,
+      "message": "non-Apple version. I had this problem with the existing code when I was trying to build with --enable-pic I think. Probably OK to leave for now as --enable-pic is broken with this nasm due to some ancient bug",
+      "parentUuid": "ca157084_9fa78b06",
+      "revId": "56bd33ed876cf7ba5cb5c963bb44ed0d04102dc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
