@@ -865,7 +865,7 @@ static void idct32_rows_dspr2(const int16_t *input, int16_t *output,
   }
 }
 
-void vp9_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
                                   int dest_stride) {
   DECLARE_ALIGNED(32, int16_t,  out[32 * 32]);
   int16_t *outptr = out;
@@ -882,10 +882,10 @@ void vp9_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
   idct32_rows_dspr2(input, outptr, 32);
 
   // Columns
-  vp9_idct32_cols_add_blk_dspr2(out, dest, dest_stride);
+  vpx_idct32_cols_add_blk_dspr2(out, dest, dest_stride);
 }
 
-void vp9_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
                                 int stride) {
   DECLARE_ALIGNED(32, int16_t,  out[32 * 32]);
   int16_t *outptr = out;
@@ -944,10 +944,10 @@ void vp9_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
   }
 
   // Columns
-  vp9_idct32_cols_add_blk_dspr2(out, dest, stride);
+  vpx_idct32_cols_add_blk_dspr2(out, dest, stride);
 }
 
-void vp9_idct32x32_1_add_dspr2(const int16_t *input, uint8_t *dest,
+void vpx_idct32x32_1_add_dspr2(const int16_t *input, uint8_t *dest,
                                int stride) {
   int       r, out;
   int32_t   a1, absa1;

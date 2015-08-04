@@ -170,7 +170,7 @@ void vpx_fdct8x8_neon(const int16_t *input, int16_t *final_output, int stride) {
     }
   }  // for
   {
-    // from vp9_dct_sse2.c
+    // from vpx_dct_sse2.c
     // Post-condition (division by two)
     //    division of two 16 bits signed numbers using shifts
     //    n / 2 = (n - (n >> 15)) >> 1

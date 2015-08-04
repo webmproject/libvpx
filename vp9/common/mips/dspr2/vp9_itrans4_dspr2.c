@@ -38,11 +38,11 @@ void vp9_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:   // DCT in both horizontal and vertical
-      vp9_idct4_rows_dspr2(input, outptr);
-      vp9_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+      vpx_idct4_rows_dspr2(input, outptr);
+      vpx_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
       break;
     case ADST_DCT:  // ADST in vertical, DCT in horizontal
-      vp9_idct4_rows_dspr2(input, outptr);
+      vpx_idct4_rows_dspr2(input, outptr);
 
       outptr = out;
 
@@ -69,7 +69,7 @@ void vp9_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
           temp_in[i * 4 + j] = out[j * 4 + i];
         }
       }
-      vp9_idct4_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
+      vpx_idct4_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
       break;
     case ADST_ADST:  // ADST in both directions
       for (i = 0; i < 4; ++i) {

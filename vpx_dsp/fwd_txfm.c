@@ -754,7 +754,7 @@ void vpx_fdct32x32_rd_c(const int16_t *input, tran_low_t *out, int stride) {
     for (j = 0; j < 32; ++j)
       // TODO(cd): see quality impact of only doing
       //           output[j * 32 + i] = (temp_out[j] + 1) >> 2;
-      //           PS: also change code in vp9/encoder/x86/vp9_dct_sse2.c
+      //           PS: also change code in vpx_dsp/x86/vpx_dct_sse2.c
       output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
 

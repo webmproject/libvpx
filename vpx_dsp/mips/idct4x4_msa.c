@@ -10,7 +10,7 @@
 
 #include "vpx_dsp/mips/inv_txfm_msa.h"
 
-void vp9_iwht4x4_16_add_msa(const int16_t *input, uint8_t *dst,
+void vpx_iwht4x4_16_add_msa(const int16_t *input, uint8_t *dst,
                             int32_t dst_stride) {
   v8i16 in0, in1, in2, in3;
   v4i32 in0_r, in1_r, in2_r, in3_r, in4_r;
@@ -47,7 +47,7 @@ void vp9_iwht4x4_16_add_msa(const int16_t *input, uint8_t *dst,
   ADDBLK_ST4x4_UB(in0, in3, in1, in2, dst, dst_stride);
 }
 
-void vp9_iwht4x4_1_add_msa(const int16_t *input, uint8_t *dst,
+void vpx_iwht4x4_1_add_msa(const int16_t *input, uint8_t *dst,
                            int32_t dst_stride) {
   int16_t a1, e1;
   v8i16 in1, in0 = { 0 };
@@ -67,7 +67,7 @@ void vp9_iwht4x4_1_add_msa(const int16_t *input, uint8_t *dst,
   ADDBLK_ST4x4_UB(in0, in1, in1, in1, dst, dst_stride);
 }
 
-void vp9_idct4x4_16_add_msa(const int16_t *input, uint8_t *dst,
+void vpx_idct4x4_16_add_msa(const int16_t *input, uint8_t *dst,
                             int32_t dst_stride) {
   v8i16 in0, in1, in2, in3;
 
@@ -84,7 +84,7 @@ void vp9_idct4x4_16_add_msa(const int16_t *input, uint8_t *dst,
   ADDBLK_ST4x4_UB(in0, in1, in2, in3, dst, dst_stride);
 }
 
-void vp9_idct4x4_1_add_msa(const int16_t *input, uint8_t *dst,
+void vpx_idct4x4_1_add_msa(const int16_t *input, uint8_t *dst,
                            int32_t dst_stride) {
   int16_t out;
   v8i16 vec;

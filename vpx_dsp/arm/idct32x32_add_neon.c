@@ -454,7 +454,7 @@ static INLINE void idct32_bands_end_2nd_pass(
     return;
 }
 
-void vp9_idct32x32_1024_add_neon(
+void vpx_idct32x32_1024_add_neon(
         int16_t *input,
         uint8_t *dest,
         int stride) {

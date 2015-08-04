@@ -186,6 +186,7 @@ endif  # ARCH_X86_64
 endif  # CONFIG_USE_X86INC
 
 ifeq ($(HAVE_NEON_ASM),yes)
+DSP_SRCS-yes  += arm/save_reg_neon$(ASM)
 DSP_SRCS-yes  += arm/idct4x4_1_add_neon$(ASM)
 DSP_SRCS-yes  += arm/idct4x4_add_neon$(ASM)
 DSP_SRCS-yes  += arm/idct8x8_1_add_neon$(ASM)

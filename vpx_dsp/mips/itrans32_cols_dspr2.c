@@ -13,7 +13,7 @@
 #include "vpx_dsp/txfm_common.h"
 
 #if HAVE_DSPR2
-void vp9_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
+void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
                                    int dest_stride) {
   int16_t step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6;
   int16_t step1_7, step1_8, step1_9, step1_10, step1_11, step1_12, step1_13;

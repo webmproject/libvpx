@@ -115,7 +115,7 @@ static INLINE void ST_16x8(
     return;
 }
 
-void vp9_idct32x32_1_add_neon(
+void vpx_idct32x32_1_add_neon(
         int16_t *input,
         uint8_t *dest,
         int dest_stride) {

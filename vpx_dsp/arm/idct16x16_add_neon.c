@@ -82,7 +82,7 @@ static INLINE void TRANSPOSE8X8(
     return;
 }
 
-void vp9_idct16x16_256_add_neon_pass1(
+void vpx_idct16x16_256_add_neon_pass1(
         int16_t *in,
         int16_t *out,
         int output_stride) {
@@ -320,7 +320,7 @@ void vp9_idct16x16_256_add_neon_pass1(
     return;
 }
 
-void vp9_idct16x16_256_add_neon_pass2(
+void vpx_idct16x16_256_add_neon_pass2(
         int16_t *src,
         int16_t *out,
         int16_t *pass1Output,
@@ -879,7 +879,7 @@ void vp9_idct16x16_256_add_neon_pass2(
     return;
 }
 
-void vp9_idct16x16_10_add_neon_pass1(
+void vpx_idct16x16_10_add_neon_pass1(
         int16_t *in,
         int16_t *out,
         int output_stride) {
@@ -1017,7 +1017,7 @@ void vp9_idct16x16_10_add_neon_pass1(
     return;
 }
 
-void vp9_idct16x16_10_add_neon_pass2(
+void vpx_idct16x16_10_add_neon_pass2(
         int16_t *src,
         int16_t *out,
         int16_t *pass1Output,
