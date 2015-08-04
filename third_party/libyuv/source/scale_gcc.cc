@@ -573,44 +573,38 @@ void ScaleRowDown38_3_Box_SSSE3(const uint8* src_ptr,
   );
 }
 
+// Reads 16xN bytes and produces 16 shorts at a time.
 void ScaleAddRows_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
                        uint16* dst_ptr, int src_width, int src_height) {
   int tmp_height = 0;
   intptr_t tmp_src = 0;
   asm volatile (
+    "mov       %0,%3                           \n"  // row pointer
+    "mov       %5,%2                           \n"  // height
+    "pxor      %%xmm0,%%xmm0                   \n"  // clear accumulators
+    "pxor      %%xmm1,%%xmm1                   \n"
     "pxor      %%xmm4,%%xmm4                   \n"
-    "sub       $0x1,%5                         \n"
 
     LABELALIGN
   "1:                                          \n"
-    "movdqu    " MEMACCESS(0) ",%%xmm0         \n"
-    "mov       %0,%3                           \n"
-    "add       %6,%0                           \n"
-    "movdqa    %%xmm0,%%xmm1                   \n"
-    "punpcklbw %%xmm4,%%xmm0                   \n"
-    "punpckhbw %%xmm4,%%xmm1                   \n"
-    "mov       %5,%2                           \n"
-    "test      %2,%2                           \n"
-    "je        3f                              \n"
-
-    LABELALIGN
-  "2:                                          \n"
-    "movdqu    " MEMACCESS(0) ",%%xmm2         \n"
-    "add       %6,%0                           \n"
+    "movdqu    " MEMACCESS(3) ",%%xmm2         \n"
+    "add       %6,%3                           \n"
     "movdqa    %%xmm2,%%xmm3                   \n"
     "punpcklbw %%xmm4,%%xmm2                   \n"
     "punpckhbw %%xmm4,%%xmm3                   \n"
     "paddusw   %%xmm2,%%xmm0                   \n"
     "paddusw   %%xmm3,%%xmm1                   \n"
     "sub       $0x1,%2                         \n"
-    "jg        2b                              \n"
+    "jg        1b                              \n"
 
-    LABELALIGN
-  "3:                                          \n"
     "movdqu    %%xmm0," MEMACCESS(1) "         \n"
     "movdqu    %%xmm1," MEMACCESS2(0x10,1) "   \n"
-    "lea       " MEMLEA(0x10,3) ",%0           \n"
     "lea       " MEMLEA(0x20,1) ",%1           \n"
+    "lea       " MEMLEA(0x10,0) ",%0           \n"  // src_ptr += 16
+    "mov       %0,%3                           \n"  // row pointer
+    "mov       %5,%2                           \n"  // height
+    "pxor      %%xmm0,%%xmm0                   \n"  // clear accumulators
+    "pxor      %%xmm1,%%xmm1                   \n"
     "sub       $0x10,%4                        \n"
     "jg        1b                              \n"
   : "+r"(src_ptr),     // %0
@@ -799,8 +793,7 @@ void ScaleARGBRowDown2Box_SSE2(const uint8* src_argb,
 // Reads 4 pixels at a time.
 // Alignment requirement: dst_argb 16 byte aligned.
 void ScaleARGBRowDownEven_SSE2(const uint8* src_argb, ptrdiff_t src_stride,
-                               int src_stepx,
-                               uint8* dst_argb, int dst_width) {
+                               int src_stepx, uint8* dst_argb, int dst_width) {
   intptr_t src_stepx_x4 = (intptr_t)(src_stepx);
   intptr_t src_stepx_x12 = 0;
   asm volatile (
