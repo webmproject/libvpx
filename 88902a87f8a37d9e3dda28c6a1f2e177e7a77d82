@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4acfc072_b6037ec6",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-04T21:55:55Z",
+      "side": 1,
+      "message": "it might be helpful to a reader if you block out these sections with a \u0027libvpx specific\u0027 or similar comment",
+      "revId": "88902a87f8a37d9e3dda28c6a1f2e177e7a77d82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
