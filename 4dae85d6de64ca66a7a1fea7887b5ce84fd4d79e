@@ -34,6 +34,24 @@
       "revId": "4dae85d6de64ca66a7a1fea7887b5ce84fd4d79e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa14bc88_e1aee116",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-08-04T18:18:11Z",
+      "side": 1,
+      "message": "Just checked - it seems vpx_quantize_b and vpx_quantize_b_32x32 are not used in Hignbitdepth case. Maybe we should remove these two here?",
+      "parentUuid": "2ad60c0d_69491d07",
+      "revId": "4dae85d6de64ca66a7a1fea7887b5ce84fd4d79e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
