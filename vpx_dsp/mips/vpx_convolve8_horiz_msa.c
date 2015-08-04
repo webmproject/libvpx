@@ -318,7 +318,7 @@ static void common_hz_2t_4x4_msa(const uint8_t *src, int32_t src_stride,
                                  int8_t *filter) {
   v16i8 src0, src1, src2, src3, mask;
   v16u8 filt0, vec0, vec1, res0, res1;
-  v8u16 vec2, vec3, filt, const255;
+  v8u16 vec2, vec3, filt;
 
   mask = LD_SB(&mc_filt_mask_arr[16]);
 
@@ -326,13 +326,10 @@ static void common_hz_2t_4x4_msa(const uint8_t *src, int32_t src_stride,
   filt = LD_UH(filter);
   filt0 = (v16u8) __msa_splati_h((v8i16) filt, 0);
 
-  const255 = (v8u16) __msa_ldi_h(255);
-
   LD_SB4(src, src_stride, src0, src1, src2, src3);
   VSHF_B2_UB(src0, src1, src2, src3, mask, mask, vec0, vec1);
   DOTP_UB2_UH(vec0, vec1, filt0, filt0, vec2, vec3);
   SRARI_H2_UH(vec2, vec3, FILTER_BITS);
-  MIN_UH2_UH(vec2, vec3, const255);
   PCKEV_B2_UB(vec2, vec2, vec3, vec3, res0, res1);
   ST4x4_UB(res0, res1, 0, 1, 0, 1, dst, dst_stride);
 }
@@ -343,7 +340,7 @@ static void common_hz_2t_4x8_msa(const uint8_t *src, int32_t src_stride,
   v16u8 vec0, vec1, vec2, vec3, filt0;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, mask;
   v16i8 res0, res1, res2, res3;
-  v8u16 vec4, vec5, vec6, vec7, filt, const255;
+  v8u16 vec4, vec5, vec6, vec7, filt;
 
   mask = LD_SB(&mc_filt_mask_arr[16]);
 
@@ -351,15 +348,12 @@ static void common_hz_2t_4x8_msa(const uint8_t *src, int32_t src_stride,
   filt = LD_UH(filter);
   filt0 = (v16u8) __msa_splati_h((v8i16) filt, 0);
 
-  const255 = (v8u16) __msa_ldi_h(255);
-
   LD_SB8(src, src_stride, src0, src1, src2, src3, src4, src5, src6, src7);
   VSHF_B2_UB(src0, src1, src2, src3, mask, mask, vec0, vec1);
   VSHF_B2_UB(src4, src5, src6, src7, mask, mask, vec2, vec3);
   DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, vec4, vec5,
               vec6, vec7);
   SRARI_H4_UH(vec4, vec5, vec6, vec7, FILTER_BITS);
-  MIN_UH4_UH(vec4, vec5, vec6, vec7, const255);
   PCKEV_B4_SB(vec4, vec4, vec5, vec5, vec6, vec6, vec7, vec7, res0, res1,
               res2, res3);
   ST4x4_UB(res0, res1, 0, 1, 0, 1, dst, dst_stride);
@@ -382,7 +376,7 @@ static void common_hz_2t_8x4_msa(const uint8_t *src, int32_t src_stride,
                                  int8_t *filter) {
   v16u8 filt0;
   v16i8 src0, src1, src2, src3, mask;
-  v8u16 vec0, vec1, vec2, vec3, const255, filt;
+  v8u16 vec0, vec1, vec2, vec3, filt;
 
   mask = LD_SB(&mc_filt_mask_arr[0]);
 
@@ -390,15 +384,12 @@ static void common_hz_2t_8x4_msa(const uint8_t *src, int32_t src_stride,
   filt = LD_UH(filter);
   filt0 = (v16u8) __msa_splati_h((v8i16) filt, 0);
 
-  const255 = (v8u16) __msa_ldi_h(255);
-
   LD_SB4(src, src_stride, src0, src1, src2, src3);
   VSHF_B2_UH(src0, src0, src1, src1, mask, mask, vec0, vec1);
   VSHF_B2_UH(src2, src2, src3, src3, mask, mask, vec2, vec3);
   DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, vec0, vec1,
               vec2, vec3);
   SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-  MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
   PCKEV_B2_SB(vec1, vec0, vec3, vec2, src0, src1);
   ST8x4_UB(src0, src1, dst, dst_stride);
 }
@@ -408,15 +399,13 @@ static void common_hz_2t_8x8mult_msa(const uint8_t *src, int32_t src_stride,
                                      int8_t *filter, int32_t height) {
   v16u8 filt0;
   v16i8 src0, src1, src2, src3, mask, out0, out1;
-  v8u16 vec0, vec1, vec2, vec3, filt, const255;
+  v8u16 vec0, vec1, vec2, vec3, filt;
 
   mask = LD_SB(&mc_filt_mask_arr[0]);
 
   /* rearranging filter */
   filt = LD_UH(filter);
   filt0 = (v16u8) __msa_splati_h((v8i16) filt, 0);
-
-  const255 = (v8u16) __msa_ldi_h(255);
 
   LD_SB4(src, src_stride, src0, src1, src2, src3);
   src += (4 * src_stride);
@@ -426,7 +415,6 @@ static void common_hz_2t_8x8mult_msa(const uint8_t *src, int32_t src_stride,
   DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, vec0, vec1,
               vec2, vec3);
   SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-  MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
 
   LD_SB4(src, src_stride, src0, src1, src2, src3);
   src += (4 * src_stride);
@@ -440,7 +428,6 @@ static void common_hz_2t_8x8mult_msa(const uint8_t *src, int32_t src_stride,
   DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, vec0, vec1,
               vec2, vec3);
   SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-  MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
   PCKEV_B2_SB(vec1, vec0, vec3, vec2, out0, out1);
   ST8x4_UB(out0, out1, dst, dst_stride);
   dst += (4 * dst_stride);
@@ -454,7 +441,6 @@ static void common_hz_2t_8x8mult_msa(const uint8_t *src, int32_t src_stride,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, vec0, vec1,
                 vec2, vec3);
     SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-    MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
     LD_SB4(src, src_stride, src0, src1, src2, src3);
     src += (4 * src_stride);
 
@@ -466,7 +452,6 @@ static void common_hz_2t_8x8mult_msa(const uint8_t *src, int32_t src_stride,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, vec0, vec1,
                 vec2, vec3);
     SRARI_H4_UH(vec0, vec1, vec2, vec3, FILTER_BITS);
-    MIN_UH4_UH(vec0, vec1, vec2, vec3, const255);
     PCKEV_B2_SB(vec1, vec0, vec3, vec2, out0, out1);
     ST8x4_UB(out0, out1, dst + 4 * dst_stride, dst_stride);
   }
@@ -488,7 +473,7 @@ static void common_hz_2t_16w_msa(const uint8_t *src, int32_t src_stride,
   uint32_t loop_cnt;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, mask;
   v16u8 filt0, vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
-  v8u16 out0, out1, out2, out3, out4, out5, out6, out7, filt, const255;
+  v8u16 out0, out1, out2, out3, out4, out5, out6, out7, filt;
 
   mask = LD_SB(&mc_filt_mask_arr[0]);
 
@@ -497,8 +482,6 @@ static void common_hz_2t_16w_msa(const uint8_t *src, int32_t src_stride,
   /* rearranging filter */
   filt = LD_UH(filter);
   filt0 = (v16u8) __msa_splati_h((v8i16) filt, 0);
-
-  const255 = (v8u16) __msa_ldi_h(255);
 
   LD_SB4(src, src_stride, src0, src2, src4, src6);
   LD_SB4(src + 8, src_stride, src1, src3, src5, src7);
@@ -514,8 +497,6 @@ static void common_hz_2t_16w_msa(const uint8_t *src, int32_t src_stride,
               out6, out7);
   SRARI_H4_UH(out0, out1, out2, out3, FILTER_BITS);
   SRARI_H4_UH(out4, out5, out6, out7, FILTER_BITS);
-  MIN_UH4_UH(out0, out1, out2, out3, const255);
-  MIN_UH4_UH(out4, out5, out6, out7, const255);
   PCKEV_ST_SB(out0, out1, dst);
   dst += dst_stride;
   PCKEV_ST_SB(out2, out3, dst);
@@ -540,8 +521,6 @@ static void common_hz_2t_16w_msa(const uint8_t *src, int32_t src_stride,
                 out6, out7);
     SRARI_H4_UH(out0, out1, out2, out3, FILTER_BITS);
     SRARI_H4_UH(out4, out5, out6, out7, FILTER_BITS);
-    MIN_UH4_UH(out0, out1, out2, out3, const255);
-    MIN_UH4_UH(out4, out5, out6, out7, const255);
     PCKEV_ST_SB(out0, out1, dst);
     dst += dst_stride;
     PCKEV_ST_SB(out2, out3, dst);
@@ -559,15 +538,13 @@ static void common_hz_2t_32w_msa(const uint8_t *src, int32_t src_stride,
   uint32_t loop_cnt;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, mask;
   v16u8 filt0, vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
-  v8u16 out0, out1, out2, out3, out4, out5, out6, out7, filt, const255;
+  v8u16 out0, out1, out2, out3, out4, out5, out6, out7, filt;
 
   mask = LD_SB(&mc_filt_mask_arr[0]);
 
   /* rearranging filter */
   filt = LD_UH(filter);
   filt0 = (v16u8) __msa_splati_h((v8i16) filt, 0);
-
-  const255 = (v8u16) __msa_ldi_h(255);
 
   for (loop_cnt = height >> 1; loop_cnt--;) {
     src0 = LD_SB(src);
@@ -591,8 +568,6 @@ static void common_hz_2t_32w_msa(const uint8_t *src, int32_t src_stride,
                 out6, out7);
     SRARI_H4_UH(out0, out1, out2, out3, FILTER_BITS);
     SRARI_H4_UH(out4, out5, out6, out7, FILTER_BITS);
-    MIN_UH4_UH(out0, out1, out2, out3, const255);
-    MIN_UH4_UH(out4, out5, out6, out7, const255);
     PCKEV_ST_SB(out0, out1, dst);
     PCKEV_ST_SB(out2, out3, dst + 16);
     dst += dst_stride;
@@ -608,15 +583,13 @@ static void common_hz_2t_64w_msa(const uint8_t *src, int32_t src_stride,
   uint32_t loop_cnt;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, mask;
   v16u8 filt0, vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
-  v8u16 out0, out1, out2, out3, out4, out5, out6, out7, filt, const255;
+  v8u16 out0, out1, out2, out3, out4, out5, out6, out7, filt;
 
   mask = LD_SB(&mc_filt_mask_arr[0]);
 
   /* rearranging filter */
   filt = LD_UH(filter);
   filt0 = (v16u8) __msa_splati_h((v8i16) filt, 0);
-
-  const255 = (v8u16) __msa_ldi_h(255);
 
   for (loop_cnt = height; loop_cnt--;) {
     src0 = LD_SB(src);
@@ -637,8 +610,6 @@ static void common_hz_2t_64w_msa(const uint8_t *src, int32_t src_stride,
                 out6, out7);
     SRARI_H4_UH(out0, out1, out2, out3, FILTER_BITS);
     SRARI_H4_UH(out4, out5, out6, out7, FILTER_BITS);
-    MIN_UH4_UH(out0, out1, out2, out3, const255);
-    MIN_UH4_UH(out4, out5, out6, out7, const255);
     PCKEV_ST_SB(out0, out1, dst);
     PCKEV_ST_SB(out2, out3, dst + 16);
     PCKEV_ST_SB(out4, out5, dst + 32);

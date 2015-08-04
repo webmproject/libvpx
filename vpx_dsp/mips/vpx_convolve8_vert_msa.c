@@ -316,7 +316,6 @@ static void common_vt_2t_4x4_msa(const uint8_t *src, int32_t src_stride,
   ILVR_D2_SB(src21_r, src10_r, src43_r, src32_r, src2110, src4332);
   DOTP_UB2_UH(src2110, src4332, filt0, filt0, tmp0, tmp1);
   SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-  SAT_UH2_UH(tmp0, tmp1, 7);
   src2110 = __msa_pckev_b((v16i8)tmp1, (v16i8)tmp0);
   ST4x4_UB(src2110, src2110, 0, 1, 2, 3, dst, dst_stride);
 }
@@ -349,7 +348,6 @@ static void common_vt_2t_4x8_msa(const uint8_t *src, int32_t src_stride,
   DOTP_UB4_UH(src2110, src4332, src6554, src8776, filt0, filt0, filt0, filt0,
               tmp0, tmp1, tmp2, tmp3);
   SRARI_H4_UH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
-  SAT_UH4_UH(tmp0, tmp1, tmp2, tmp3, 7);
   PCKEV_B2_SB(tmp1, tmp0, tmp3, tmp2, src2110, src4332);
   ST4x4_UB(src2110, src2110, 0, 1, 2, 3, dst, dst_stride);
   ST4x4_UB(src4332, src4332, 0, 1, 2, 3, dst + 4 * dst_stride, dst_stride);
@@ -383,7 +381,6 @@ static void common_vt_2t_8x4_msa(const uint8_t *src, int32_t src_stride,
   DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, tmp0, tmp1,
               tmp2, tmp3);
   SRARI_H4_UH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
-  SAT_UH4_UH(tmp0, tmp1, tmp2, tmp3, 7);
   PCKEV_B2_SB(tmp1, tmp0, tmp3, tmp2, out0, out1);
   ST8x4_UB(out0, out1, dst, dst_stride);
 }
@@ -416,7 +413,6 @@ static void common_vt_2t_8x8mult_msa(const uint8_t *src, int32_t src_stride,
     DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt0, filt0, filt0, filt0, tmp0, tmp1,
                 tmp2, tmp3);
     SRARI_H4_UH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
-    SAT_UH4_UH(tmp0, tmp1, tmp2, tmp3, 7);
     PCKEV_B2_SB(tmp1, tmp0, tmp3, tmp2, out0, out1);
     ST8x4_UB(out0, out1, dst, dst_stride);
     dst += (4 * dst_stride);
@@ -424,7 +420,6 @@ static void common_vt_2t_8x8mult_msa(const uint8_t *src, int32_t src_stride,
     DOTP_UB4_UH(vec4, vec5, vec6, vec7, filt0, filt0, filt0, filt0, tmp0, tmp1,
                 tmp2, tmp3);
     SRARI_H4_UH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
-    SAT_UH4_UH(tmp0, tmp1, tmp2, tmp3, 7);
     PCKEV_B2_SB(tmp1, tmp0, tmp3, tmp2, out0, out1);
     ST8x4_UB(out0, out1, dst, dst_stride);
     dst += (4 * dst_stride);
@@ -467,7 +462,6 @@ static void common_vt_2t_16w_msa(const uint8_t *src, int32_t src_stride,
     ILVL_B2_UB(src1, src0, src2, src1, vec1, vec3);
     DOTP_UB2_UH(vec0, vec1, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst);
     dst += dst_stride;
 
@@ -475,19 +469,16 @@ static void common_vt_2t_16w_msa(const uint8_t *src, int32_t src_stride,
     ILVL_B2_UB(src3, src2, src4, src3, vec5, vec7);
     DOTP_UB2_UH(vec2, vec3, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst);
     dst += dst_stride;
 
     DOTP_UB2_UH(vec4, vec5, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst);
     dst += dst_stride;
 
     DOTP_UB2_UH(vec6, vec7, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst);
     dst += dst_stride;
 
@@ -522,47 +513,39 @@ static void common_vt_2t_32w_msa(const uint8_t *src, int32_t src_stride,
 
     DOTP_UB2_UH(vec0, vec1, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst);
     DOTP_UB2_UH(vec2, vec3, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst + dst_stride);
 
     ILVR_B2_UB(src3, src2, src4, src3, vec4, vec6);
     ILVL_B2_UB(src3, src2, src4, src3, vec5, vec7);
     DOTP_UB2_UH(vec4, vec5, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst + 2 * dst_stride);
 
     DOTP_UB2_UH(vec6, vec7, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst + 3 * dst_stride);
 
     ILVR_B2_UB(src6, src5, src7, src6, vec0, vec2);
     ILVL_B2_UB(src6, src5, src7, src6, vec1, vec3);
     DOTP_UB2_UH(vec0, vec1, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst + 16);
 
     DOTP_UB2_UH(vec2, vec3, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst + 16 + dst_stride);
 
     ILVR_B2_UB(src8, src7, src9, src8, vec4, vec6);
     ILVL_B2_UB(src8, src7, src9, src8, vec5, vec7);
     DOTP_UB2_UH(vec4, vec5, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst + 16 + 2 * dst_stride);
 
     DOTP_UB2_UH(vec6, vec7, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst + 16 + 3 * dst_stride);
     dst += (4 * dst_stride);
 
@@ -598,48 +581,40 @@ static void common_vt_2t_64w_msa(const uint8_t *src, int32_t src_stride,
     ILVL_B2_UB(src1, src0, src2, src1, vec1, vec3);
     DOTP_UB2_UH(vec0, vec1, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst);
 
     DOTP_UB2_UH(vec2, vec3, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst + dst_stride);
 
     ILVR_B2_UB(src4, src3, src5, src4, vec4, vec6);
     ILVL_B2_UB(src4, src3, src5, src4, vec5, vec7);
     DOTP_UB2_UH(vec4, vec5, filt0, filt0, tmp4, tmp5);
     SRARI_H2_UH(tmp4, tmp5, FILTER_BITS);
-    SAT_UH2_UH(tmp4, tmp5, 7);
     PCKEV_ST_SB(tmp4, tmp5, dst + 16);
 
     DOTP_UB2_UH(vec6, vec7, filt0, filt0, tmp6, tmp7);
     SRARI_H2_UH(tmp6, tmp7, FILTER_BITS);
-    SAT_UH2_UH(tmp6, tmp7, 7);
     PCKEV_ST_SB(tmp6, tmp7, dst + 16 + dst_stride);
 
     ILVR_B2_UB(src7, src6, src8, src7, vec0, vec2);
     ILVL_B2_UB(src7, src6, src8, src7, vec1, vec3);
     DOTP_UB2_UH(vec0, vec1, filt0, filt0, tmp0, tmp1);
     SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
-    SAT_UH2_UH(tmp0, tmp1, 7);
     PCKEV_ST_SB(tmp0, tmp1, dst + 32);
 
     DOTP_UB2_UH(vec2, vec3, filt0, filt0, tmp2, tmp3);
     SRARI_H2_UH(tmp2, tmp3, FILTER_BITS);
-    SAT_UH2_UH(tmp2, tmp3, 7);
     PCKEV_ST_SB(tmp2, tmp3, dst + 32 + dst_stride);
 
     ILVR_B2_UB(src10, src9, src11, src10, vec4, vec6);
     ILVL_B2_UB(src10, src9, src11, src10, vec5, vec7);
     DOTP_UB2_UH(vec4, vec5, filt0, filt0, tmp4, tmp5);
     SRARI_H2_UH(tmp4, tmp5, FILTER_BITS);
-    SAT_UH2_UH(tmp4, tmp5, 7);
     PCKEV_ST_SB(tmp4, tmp5, dst + 48);
 
     DOTP_UB2_UH(vec6, vec7, filt0, filt0, tmp6, tmp7);
     SRARI_H2_UH(tmp6, tmp7, FILTER_BITS);
-    SAT_UH2_UH(tmp6, tmp7, 7);
     PCKEV_ST_SB(tmp6, tmp7, dst + 48 + dst_stride);
     dst += (2 * dst_stride);
 
