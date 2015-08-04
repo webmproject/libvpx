@@ -735,7 +735,7 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
       bc = tc;
     }
 
-    if (iters_per_step > 1)
+    if (iters_per_step > 1 && best_idx != -1)
       SECOND_LEVEL_CHECKS;
 
     tr = br;
