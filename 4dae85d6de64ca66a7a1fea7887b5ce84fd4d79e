@@ -52,6 +52,24 @@
       "revId": "4dae85d6de64ca66a7a1fea7887b5ce84fd4d79e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cadad034_11251c34",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-08-04T18:33:34Z",
+      "side": 1,
+      "message": "I was wrong. They are still needed. Thanks.",
+      "parentUuid": "aa14bc88_e1aee116",
+      "revId": "4dae85d6de64ca66a7a1fea7887b5ce84fd4d79e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
