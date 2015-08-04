@@ -65,14 +65,14 @@ IMkvWriter::IMkvWriter() {}
 
 IMkvWriter::~IMkvWriter() {}
 
-bool WriteEbmlHeader(IMkvWriter* writer) {
+bool WriteEbmlHeader(IMkvWriter* writer, uint64 doc_type_version) {
   // Level 0
   uint64 size = EbmlElementSize(kMkvEBMLVersion, 1ULL);
   size += EbmlElementSize(kMkvEBMLReadVersion, 1ULL);
   size += EbmlElementSize(kMkvEBMLMaxIDLength, 4ULL);
   size += EbmlElementSize(kMkvEBMLMaxSizeLength, 8ULL);
   size += EbmlElementSize(kMkvDocType, "webm");
-  size += EbmlElementSize(kMkvDocTypeVersion, 2ULL);
+  size += EbmlElementSize(kMkvDocTypeVersion, doc_type_version);
   size += EbmlElementSize(kMkvDocTypeReadVersion, 2ULL);
 
   if (!WriteEbmlMasterElement(writer, kMkvEBML, size))
@@ -87,12 +87,16 @@ bool WriteEbmlHeader(IMkvWriter* writer) {
     return false;
   if (!WriteEbmlElement(writer, kMkvDocType, "webm"))
     return false;
-  if (!WriteEbmlElement(writer, kMkvDocTypeVersion, 2ULL))
+  if (!WriteEbmlElement(writer, kMkvDocTypeVersion, doc_type_version))
     return false;
   if (!WriteEbmlElement(writer, kMkvDocTypeReadVersion, 2ULL))
     return false;
 
   return true;
+}
+
+bool WriteEbmlHeader(IMkvWriter* writer) {
+  return WriteEbmlHeader(writer, mkvmuxer::Segment::kDefaultDocTypeVersion);
 }
 
 bool ChunkedCopy(mkvparser::IMkvReader* source, mkvmuxer::IMkvWriter* dst,
@@ -127,11 +131,38 @@ Frame::Frame()
       length_(0),
       track_number_(0),
       timestamp_(0),
-      discard_padding_(0) {}
+      discard_padding_(0),
+      reference_block_timestamp_(0),
+      reference_block_timestamp_set_(false) {}
 
 Frame::~Frame() {
   delete[] frame_;
   delete[] additional_;
+}
+
+bool Frame::CopyFrom(const Frame& frame) {
+  delete[] frame_;
+  frame_ = NULL;
+  length_ = 0;
+  if (frame.length() > 0 && frame.frame() != NULL &&
+      !Init(frame.frame(), frame.length())) {
+    return false;
+  }
+  add_id_ = 0;
+  delete[] additional_;
+  additional_ = NULL;
+  additional_length_ = 0;
+  if (frame.additional_length() > 0 && frame.additional() != NULL &&
+      !AddAdditionalData(frame.additional(), frame.additional_length(),
+                         frame.add_id())) {
+    return false;
+  }
+  duration_ = frame.duration();
+  is_key_ = frame.is_key();
+  track_number_ = frame.track_number();
+  timestamp_ = frame.timestamp();
+  discard_padding_ = frame.discard_padding();
+  return true;
 }
 
 bool Frame::Init(const uint8* frame, uint64 length) {
@@ -162,6 +193,32 @@ bool Frame::AddAdditionalData(const uint8* additional, uint64 length,
 
   memcpy(additional_, additional, static_cast<size_t>(additional_length_));
   return true;
+}
+
+bool Frame::IsValid() const {
+  if (length_ == 0 || !frame_) {
+    return false;
+  }
+  if ((additional_length_ != 0 && !additional_) ||
+      (additional_ != NULL && additional_length_ == 0)) {
+    return false;
+  }
+  if (track_number_ == 0 || track_number_ > kMaxTrackNumber) {
+    return false;
+  }
+  if (!CanBeSimpleBlock() && !is_key_ && !reference_block_timestamp_set_) {
+    return false;
+  }
+  return true;
+}
+
+bool Frame::CanBeSimpleBlock() const {
+  return additional_ == NULL && discard_padding_ == 0 && duration_ == 0;
+}
+
+void Frame::set_reference_block_timestamp(int64 reference_block_timestamp) {
+  reference_block_timestamp_ = reference_block_timestamp;
+  reference_block_timestamp_set_ = true;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -271,7 +328,7 @@ bool Cues::AddCue(CuePoint* cue) {
       return false;
 
     CuePoint** const cues =
-        new (std::nothrow) CuePoint* [new_capacity];  // NOLINT
+        new (std::nothrow) CuePoint*[new_capacity];  // NOLINT
     if (!cues)
       return false;
 
@@ -532,7 +589,7 @@ bool Track::AddContentEncoding() {
   const uint32 count = content_encoding_entries_size_ + 1;
 
   ContentEncoding** const content_encoding_entries =
-      new (std::nothrow) ContentEncoding* [count];  // NOLINT
+      new (std::nothrow) ContentEncoding*[count];  // NOLINT
   if (!content_encoding_entries)
     return false;
 
@@ -612,15 +669,15 @@ bool Track::Write(IMkvWriter* writer) const {
   if (!writer)
     return false;
 
+  // mandatory elements without a default value.
+  if (!type_ || !codec_id_)
+    return false;
+
   // |size| may be bigger than what is written out in this function because
   // derived classes may write out more data in the Track element.
   const uint64 payload_size = PayloadSize();
 
   if (!WriteEbmlMasterElement(writer, kMkvTrackEntry, payload_size))
-    return false;
-
-  // |type_| has to be specified before the Track can be written.
-  if (!type_)
     return false;
 
   uint64 size = EbmlElementSize(kMkvTrackNumber, number_);
@@ -793,6 +850,10 @@ VideoTrack::VideoTrack(unsigned int* seed)
     : Track(seed),
       display_height_(0),
       display_width_(0),
+      crop_left_(0),
+      crop_right_(0),
+      crop_top_(0),
+      crop_bottom_(0),
       frame_rate_(0.0),
       height_(0),
       stereo_mode_(0),
@@ -846,27 +907,50 @@ bool VideoTrack::Write(IMkvWriter* writer) const {
     return false;
   if (!WriteEbmlElement(writer, kMkvPixelHeight, height_))
     return false;
-  if (display_width_ > 0)
+  if (display_width_ > 0) {
     if (!WriteEbmlElement(writer, kMkvDisplayWidth, display_width_))
       return false;
-  if (display_height_ > 0)
+  }
+  if (display_height_ > 0) {
     if (!WriteEbmlElement(writer, kMkvDisplayHeight, display_height_))
       return false;
-  if (stereo_mode_ > kMono)
+  }
+  if (crop_left_ > 0) {
+    if (!WriteEbmlElement(writer, kMkvPixelCropLeft, crop_left_))
+      return false;
+  }
+  if (crop_right_ > 0) {
+    if (!WriteEbmlElement(writer, kMkvPixelCropRight, crop_right_))
+      return false;
+  }
+  if (crop_top_ > 0) {
+    if (!WriteEbmlElement(writer, kMkvPixelCropTop, crop_top_))
+      return false;
+  }
+  if (crop_bottom_ > 0) {
+    if (!WriteEbmlElement(writer, kMkvPixelCropBottom, crop_bottom_))
+      return false;
+  }
+  if (stereo_mode_ > kMono) {
     if (!WriteEbmlElement(writer, kMkvStereoMode, stereo_mode_))
       return false;
-  if (alpha_mode_ > kNoAlpha)
+  }
+  if (alpha_mode_ > kNoAlpha) {
     if (!WriteEbmlElement(writer, kMkvAlphaMode, alpha_mode_))
       return false;
-  if (frame_rate_ > 0.0)
+  }
+  if (frame_rate_ > 0.0) {
     if (!WriteEbmlElement(writer, kMkvFrameRate,
-                          static_cast<float>(frame_rate_)))
+                          static_cast<float>(frame_rate_))) {
       return false;
+    }
+  }
 
   const int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64>(size))
+      stop_position - payload_position != static_cast<int64>(size)) {
     return false;
+  }
 
   return true;
 }
@@ -878,6 +962,14 @@ uint64 VideoTrack::VideoPayloadSize() const {
     size += EbmlElementSize(kMkvDisplayWidth, display_width_);
   if (display_height_ > 0)
     size += EbmlElementSize(kMkvDisplayHeight, display_height_);
+  if (crop_left_ > 0)
+    size += EbmlElementSize(kMkvPixelCropLeft, crop_left_);
+  if (crop_right_ > 0)
+    size += EbmlElementSize(kMkvPixelCropRight, crop_right_);
+  if (crop_top_ > 0)
+    size += EbmlElementSize(kMkvPixelCropTop, crop_top_);
+  if (crop_bottom_ > 0)
+    size += EbmlElementSize(kMkvPixelCropBottom, crop_bottom_);
   if (stereo_mode_ > kMono)
     size += EbmlElementSize(kMkvStereoMode, stereo_mode_);
   if (alpha_mode_ > kNoAlpha)
@@ -990,7 +1082,7 @@ bool Tracks::AddTrack(Track* track, int32 number) {
 
   const uint32 count = track_entries_size_ + 1;
 
-  Track** const track_entries = new (std::nothrow) Track* [count];  // NOLINT
+  Track** const track_entries = new (std::nothrow) Track*[count];  // NOLINT
   if (!track_entries)
     return false;
 
@@ -1145,6 +1237,8 @@ Chapter::~Chapter() {}
 
 void Chapter::Init(unsigned int* seed) {
   id_ = NULL;
+  start_timecode_ = 0;
+  end_timecode_ = 0;
   displays_ = NULL;
   displays_size_ = 0;
   displays_count_ = 0;
@@ -1420,11 +1514,242 @@ uint64 Chapters::WriteEdition(IMkvWriter* writer) const {
   return edition_size;
 }
 
+// Tag Class
+
+bool Tag::add_simple_tag(const char* tag_name, const char* tag_string) {
+  if (!ExpandSimpleTagsArray())
+    return false;
+
+  SimpleTag& st = simple_tags_[simple_tags_count_++];
+  st.Init();
+
+  if (!st.set_tag_name(tag_name))
+    return false;
+
+  if (!st.set_tag_string(tag_string))
+    return false;
+
+  return true;
+}
+
+Tag::Tag() {
+  simple_tags_ = NULL;
+  simple_tags_size_ = 0;
+  simple_tags_count_ = 0;
+}
+
+Tag::~Tag() {}
+
+void Tag::ShallowCopy(Tag* dst) const {
+  dst->simple_tags_ = simple_tags_;
+  dst->simple_tags_size_ = simple_tags_size_;
+  dst->simple_tags_count_ = simple_tags_count_;
+}
+
+void Tag::Clear() {
+  while (simple_tags_count_ > 0) {
+    SimpleTag& st = simple_tags_[--simple_tags_count_];
+    st.Clear();
+  }
+
+  delete[] simple_tags_;
+  simple_tags_ = NULL;
+
+  simple_tags_size_ = 0;
+}
+
+bool Tag::ExpandSimpleTagsArray() {
+  if (simple_tags_size_ > simple_tags_count_)
+    return true;  // nothing to do yet
+
+  const int size = (simple_tags_size_ == 0) ? 1 : 2 * simple_tags_size_;
+
+  SimpleTag* const simple_tags = new (std::nothrow) SimpleTag[size];  // NOLINT
+  if (simple_tags == NULL)
+    return false;
+
+  for (int idx = 0; idx < simple_tags_count_; ++idx) {
+    simple_tags[idx] = simple_tags_[idx];  // shallow copy
+  }
+
+  delete[] simple_tags_;
+
+  simple_tags_ = simple_tags;
+  simple_tags_size_ = size;
+
+  return true;
+}
+
+uint64 Tag::Write(IMkvWriter* writer) const {
+  uint64 payload_size = 0;
+
+  for (int idx = 0; idx < simple_tags_count_; ++idx) {
+    const SimpleTag& st = simple_tags_[idx];
+    payload_size += st.Write(NULL);
+  }
+
+  const uint64 tag_size =
+      EbmlMasterElementSize(kMkvTag, payload_size) + payload_size;
+
+  if (writer == NULL)
+    return tag_size;
+
+  const int64 start = writer->Position();
+
+  if (!WriteEbmlMasterElement(writer, kMkvTag, payload_size))
+    return 0;
+
+  for (int idx = 0; idx < simple_tags_count_; ++idx) {
+    const SimpleTag& st = simple_tags_[idx];
+
+    if (!st.Write(writer))
+      return 0;
+  }
+
+  const int64 stop = writer->Position();
+
+  if (stop >= start && uint64(stop - start) != tag_size)
+    return 0;
+
+  return tag_size;
+}
+
+// Tag::SimpleTag
+
+void Tag::SimpleTag::Init() {
+  tag_name_ = NULL;
+  tag_string_ = NULL;
+}
+
+void Tag::SimpleTag::Clear() {
+  StrCpy(NULL, &tag_name_);
+  StrCpy(NULL, &tag_string_);
+}
+
+bool Tag::SimpleTag::set_tag_name(const char* tag_name) {
+  return StrCpy(tag_name, &tag_name_);
+}
+
+bool Tag::SimpleTag::set_tag_string(const char* tag_string) {
+  return StrCpy(tag_string, &tag_string_);
+}
+
+uint64 Tag::SimpleTag::Write(IMkvWriter* writer) const {
+  uint64 payload_size = EbmlElementSize(kMkvTagName, tag_name_);
+
+  payload_size += EbmlElementSize(kMkvTagString, tag_string_);
+
+  const uint64 simple_tag_size =
+      EbmlMasterElementSize(kMkvSimpleTag, payload_size) + payload_size;
+
+  if (writer == NULL)
+    return simple_tag_size;
+
+  const int64 start = writer->Position();
+
+  if (!WriteEbmlMasterElement(writer, kMkvSimpleTag, payload_size))
+    return 0;
+
+  if (!WriteEbmlElement(writer, kMkvTagName, tag_name_))
+    return 0;
+
+  if (!WriteEbmlElement(writer, kMkvTagString, tag_string_))
+    return 0;
+
+  const int64 stop = writer->Position();
+
+  if (stop >= start && uint64(stop - start) != simple_tag_size)
+    return 0;
+
+  return simple_tag_size;
+}
+
+// Tags Class
+
+Tags::Tags() : tags_size_(0), tags_count_(0), tags_(NULL) {}
+
+Tags::~Tags() {
+  while (tags_count_ > 0) {
+    Tag& tag = tags_[--tags_count_];
+    tag.Clear();
+  }
+
+  delete[] tags_;
+  tags_ = NULL;
+}
+
+int Tags::Count() const { return tags_count_; }
+
+Tag* Tags::AddTag() {
+  if (!ExpandTagsArray())
+    return NULL;
+
+  Tag& tag = tags_[tags_count_++];
+
+  return &tag;
+}
+
+bool Tags::Write(IMkvWriter* writer) const {
+  if (writer == NULL)
+    return false;
+
+  uint64 payload_size = 0;
+
+  for (int idx = 0; idx < tags_count_; ++idx) {
+    const Tag& tag = tags_[idx];
+    payload_size += tag.Write(NULL);
+  }
+
+  if (!WriteEbmlMasterElement(writer, kMkvTags, payload_size))
+    return false;
+
+  const int64 start = writer->Position();
+
+  for (int idx = 0; idx < tags_count_; ++idx) {
+    const Tag& tag = tags_[idx];
+
+    const uint64 tag_size = tag.Write(writer);
+    if (tag_size == 0)  // error
+      return 0;
+  }
+
+  const int64 stop = writer->Position();
+
+  if (stop >= start && uint64(stop - start) != payload_size)
+    return false;
+
+  return true;
+}
+
+bool Tags::ExpandTagsArray() {
+  if (tags_size_ > tags_count_)
+    return true;  // nothing to do yet
+
+  const int size = (tags_size_ == 0) ? 1 : 2 * tags_size_;
+
+  Tag* const tags = new (std::nothrow) Tag[size];  // NOLINT
+  if (tags == NULL)
+    return false;
+
+  for (int idx = 0; idx < tags_count_; ++idx) {
+    const Tag& src = tags_[idx];
+    Tag* const dst = tags + idx;
+    src.ShallowCopy(dst);
+  }
+
+  delete[] tags_;
+
+  tags_ = tags;
+  tags_size_ = size;
+
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////
 //
 // Cluster class
 
-Cluster::Cluster(uint64 timecode, int64 cues_pos)
+Cluster::Cluster(uint64 timecode, int64 cues_pos, uint64 timecode_scale)
     : blocks_added_(0),
       finalized_(false),
       header_written_(false),
@@ -1432,6 +1757,7 @@ Cluster::Cluster(uint64 timecode, int64 cues_pos)
       position_for_cues_(cues_pos),
       size_position_(-1),
       timecode_(timecode),
+      timecode_scale_(timecode_scale),
       writer_(NULL) {}
 
 Cluster::~Cluster() {}
@@ -1444,36 +1770,62 @@ bool Cluster::Init(IMkvWriter* ptr_writer) {
   return true;
 }
 
-bool Cluster::AddFrame(const uint8* frame, uint64 length, uint64 track_number,
+bool Cluster::AddFrame(const Frame* const frame) { return DoWriteFrame(frame); }
+
+bool Cluster::AddFrame(const uint8* data, uint64 length, uint64 track_number,
                        uint64 abs_timecode, bool is_key) {
-  return DoWriteBlock(frame, length, track_number, abs_timecode, is_key ? 1 : 0,
-                      &WriteSimpleBlock);
+  Frame frame;
+  if (!frame.Init(data, length))
+    return false;
+  frame.set_track_number(track_number);
+  frame.set_timestamp(abs_timecode);
+  frame.set_is_key(is_key);
+  return DoWriteFrame(&frame);
 }
 
-bool Cluster::AddFrameWithAdditional(const uint8* frame, uint64 length,
+bool Cluster::AddFrameWithAdditional(const uint8* data, uint64 length,
                                      const uint8* additional,
                                      uint64 additional_length, uint64 add_id,
                                      uint64 track_number, uint64 abs_timecode,
                                      bool is_key) {
-  return DoWriteBlockWithAdditional(
-      frame, length, additional, additional_length, add_id, track_number,
-      abs_timecode, is_key ? 1 : 0, &WriteBlockWithAdditional);
+  if (!additional || additional_length == 0) {
+    return false;
+  }
+  Frame frame;
+  if (!frame.Init(data, length) ||
+      !frame.AddAdditionalData(additional, additional_length, add_id)) {
+    return false;
+  }
+  frame.set_track_number(track_number);
+  frame.set_timestamp(abs_timecode);
+  frame.set_is_key(is_key);
+  return DoWriteFrame(&frame);
 }
 
-bool Cluster::AddFrameWithDiscardPadding(const uint8* frame, uint64 length,
+bool Cluster::AddFrameWithDiscardPadding(const uint8* data, uint64 length,
                                          int64 discard_padding,
                                          uint64 track_number,
                                          uint64 abs_timecode, bool is_key) {
-  return DoWriteBlockWithDiscardPadding(
-      frame, length, discard_padding, track_number, abs_timecode,
-      is_key ? 1 : 0, &WriteBlockWithDiscardPadding);
+  Frame frame;
+  if (!frame.Init(data, length))
+    return false;
+  frame.set_discard_padding(discard_padding);
+  frame.set_track_number(track_number);
+  frame.set_timestamp(abs_timecode);
+  frame.set_is_key(is_key);
+  return DoWriteFrame(&frame);
 }
 
-bool Cluster::AddMetadata(const uint8* frame, uint64 length,
-                          uint64 track_number, uint64 abs_timecode,
-                          uint64 duration_timecode) {
-  return DoWriteBlock(frame, length, track_number, abs_timecode,
-                      duration_timecode, &WriteMetadataBlock);
+bool Cluster::AddMetadata(const uint8* data, uint64 length, uint64 track_number,
+                          uint64 abs_timecode, uint64 duration_timecode) {
+  Frame frame;
+  if (!frame.Init(data, length))
+    return false;
+  frame.set_track_number(track_number);
+  frame.set_timestamp(abs_timecode);
+  frame.set_duration(duration_timecode);
+  frame.set_is_key(true);  // All metadata blocks are keyframes.
+  return DoWriteFrame(&frame);
 }
 
 void Cluster::AddPayloadSize(uint64 size) { payload_size_ += size; }
@@ -1506,11 +1858,7 @@ uint64 Cluster::Size() const {
   return element_size;
 }
 
-template <typename Type>
-bool Cluster::PreWriteBlock(Type* write_function) {
-  if (write_function == NULL)
-    return false;
-
+bool Cluster::PreWriteBlock() {
   if (finalized_)
     return false;
 
@@ -1527,10 +1875,6 @@ void Cluster::PostWriteBlock(uint64 element_size) {
   ++blocks_added_;
 }
 
-bool Cluster::IsValidTrackNumber(uint64 track_number) const {
-  return (track_number > 0 && track_number <= 0x7E);
-}
-
 int64 Cluster::GetRelativeTimecode(int64 abs_timecode) const {
   const int64 cluster_timecode = this->Cluster::timecode();
   const int64 rel_timecode =
@@ -1542,79 +1886,14 @@ int64 Cluster::GetRelativeTimecode(int64 abs_timecode) const {
   return rel_timecode;
 }
 
-bool Cluster::DoWriteBlock(const uint8* frame, uint64 length,
-                           uint64 track_number, uint64 abs_timecode,
-                           uint64 generic_arg, WriteBlock write_block) {
-  if (frame == NULL || length == 0)
+bool Cluster::DoWriteFrame(const Frame* const frame) {
+  if (!frame || !frame->IsValid())
     return false;
 
-  if (!IsValidTrackNumber(track_number))
+  if (!PreWriteBlock())
     return false;
 
-  const int64 rel_timecode = GetRelativeTimecode(abs_timecode);
-  if (rel_timecode < 0)
-    return false;
-
-  if (!PreWriteBlock(write_block))
-    return false;
-
-  const uint64 element_size = (*write_block)(
-      writer_, frame, length, track_number, rel_timecode, generic_arg);
-  if (element_size == 0)
-    return false;
-
-  PostWriteBlock(element_size);
-  return true;
-}
-
-bool Cluster::DoWriteBlockWithAdditional(
-    const uint8* frame, uint64 length, const uint8* additional,
-    uint64 additional_length, uint64 add_id, uint64 track_number,
-    uint64 abs_timecode, uint64 generic_arg, WriteBlockAdditional write_block) {
-  if (frame == NULL || length == 0 || additional == NULL ||
-      additional_length == 0)
-    return false;
-
-  if (!IsValidTrackNumber(track_number))
-    return false;
-
-  const int64 rel_timecode = GetRelativeTimecode(abs_timecode);
-  if (rel_timecode < 0)
-    return false;
-
-  if (!PreWriteBlock(write_block))
-    return false;
-
-  const uint64 element_size =
-      (*write_block)(writer_, frame, length, additional, additional_length,
-                     add_id, track_number, rel_timecode, generic_arg);
-  if (element_size == 0)
-    return false;
-
-  PostWriteBlock(element_size);
-  return true;
-}
-
-bool Cluster::DoWriteBlockWithDiscardPadding(
-    const uint8* frame, uint64 length, int64 discard_padding,
-    uint64 track_number, uint64 abs_timecode, uint64 generic_arg,
-    WriteBlockDiscardPadding write_block) {
-  if (frame == NULL || length == 0 || discard_padding <= 0)
-    return false;
-
-  if (!IsValidTrackNumber(track_number))
-    return false;
-
-  const int64 rel_timecode = GetRelativeTimecode(abs_timecode);
-  if (rel_timecode < 0)
-    return false;
-
-  if (!PreWriteBlock(write_block))
-    return false;
-
-  const uint64 element_size =
-      (*write_block)(writer_, frame, length, discard_padding, track_number,
-                     rel_timecode, generic_arg);
+  const uint64 element_size = WriteFrame(writer_, frame, this);
   if (element_size == 0)
     return false;
 
@@ -1860,7 +2139,7 @@ bool SegmentInfo::Write(IMkvWriter* writer) {
   if (duration_ > 0.0)
     size += EbmlElementSize(kMkvDuration, static_cast<float>(duration_));
   if (date_utc_ != LLONG_MIN)
-    size += EbmlDateElementSize(kMkvDateUTC, date_utc_);
+    size += EbmlDateElementSize(kMkvDateUTC);
   size += EbmlElementSize(kMkvMuxingApp, muxing_app_);
   size += EbmlElementSize(kMkvWritingApp, writing_app_);
 
@@ -1966,6 +2245,8 @@ Segment::Segment()
       output_cues_(true),
       payload_pos_(0),
       size_position_(0),
+      doc_type_version_(kDefaultDocTypeVersion),
+      doc_type_version_written_(0),
       writer_cluster_(NULL),
       writer_cues_(NULL),
       writer_header_(NULL) {
@@ -2012,7 +2293,6 @@ Segment::~Segment() {
 
 void Segment::MoveCuesBeforeClustersHelper(uint64 diff, int32 index,
                                            uint64* cues_size) {
-  const uint64 old_cues_size = *cues_size;
   CuePoint* const cue_point = cues_.GetCueByIndex(index);
   if (cue_point == NULL)
     return;
@@ -2020,18 +2300,19 @@ void Segment::MoveCuesBeforeClustersHelper(uint64 diff, int32 index,
   const uint64 cluster_pos = cue_point->cluster_pos() + diff;
   cue_point->set_cluster_pos(cluster_pos);  // update the new cluster position
   // New size of the cue is computed as follows
-  //    Let a = current size of Cues Element
-  //    Let b = Difference in Cue Point's size after this pass
-  //    Let c = Difference in length of Cues Element's size
-  //            (This is computed as CodedSize(a + b) - CodedSize(a)
-  //    Let d = a + b + c. Now d is the new size of the Cues element which is
-  //                       passed on to the next recursive call.
+  //    Let a = current sum of size of all CuePoints
+  //    Let b = Increase in Cue Point's size due to this iteration
+  //    Let c = Increase in size of Cues Element's length due to this iteration
+  //            (This is computed as CodedSize(a + b) - CodedSize(a))
+  //    Let d = b + c. Now d is the |diff| passed to the next recursive call.
+  //    Let e = a + b. Now e is the |cues_size| passed to the next recursive
+  //                   call.
   const uint64 cue_point_size_diff = cue_point->Size() - old_cue_point_size;
   const uint64 cue_size_diff =
       GetCodedUIntSize(*cues_size + cue_point_size_diff) -
       GetCodedUIntSize(*cues_size);
-  *cues_size += cue_point_size_diff + cue_size_diff;
-  diff = *cues_size - old_cues_size;
+  *cues_size += cue_point_size_diff;
+  diff = cue_size_diff + cue_point_size_diff;
   if (diff > 0) {
     for (int32 i = 0; i < cues_.cue_entries_size(); ++i) {
       MoveCuesBeforeClustersHelper(diff, i, cues_size);
@@ -2041,8 +2322,10 @@ void Segment::MoveCuesBeforeClustersHelper(uint64 diff, int32 index,
 
 void Segment::MoveCuesBeforeClusters() {
   const uint64 current_cue_size = cues_.Size();
-  uint64 cue_size = current_cue_size;
-  for (int32 i = 0; i < cues_.cue_entries_size(); i++)
+  uint64 cue_size = 0;
+  for (int32 i = 0; i < cues_.cue_entries_size(); ++i)
+    cue_size += cues_.GetCueByIndex(i)->Size();
+  for (int32 i = 0; i < cues_.cue_entries_size(); ++i)
     MoveCuesBeforeClustersHelper(current_cue_size, i, &cue_size);
 
   // Adjust the Seek Entry to reflect the change in position
@@ -2164,11 +2447,23 @@ bool Segment::Finalize() {
       if (size_position_ == -1)
         return false;
 
-      const int64 pos = writer_header_->Position();
       const int64 segment_size = MaxOffset();
-
       if (segment_size < 1)
         return false;
+
+      const int64 pos = writer_header_->Position();
+      UpdateDocTypeVersion();
+      if (doc_type_version_ != doc_type_version_written_) {
+        if (writer_header_->Position(0))
+          return false;
+
+        if (!WriteEbmlHeader(writer_header_, doc_type_version_))
+          return false;
+        if (writer_header_->Position() != ebml_header_size_)
+          return false;
+
+        doc_type_version_written_ = doc_type_version_;
+      }
 
       if (writer_header_->Position(size_position_))
         return false;
@@ -2209,6 +2504,8 @@ Track* Segment::AddTrack(int32 number) {
 }
 
 Chapter* Segment::AddChapter() { return chapters_.AddChapter(&seed_); }
+
+Tag* Segment::AddTag() { return tags_.AddTag(); }
 
 uint64 Segment::AddVideoTrack(int32 width, int32 height, int32 number) {
   VideoTrack* const track = new (std::nothrow) VideoTrack(&seed_);  // NOLINT
@@ -2264,187 +2561,72 @@ uint64 Segment::AddAudioTrack(int32 sample_rate, int32 channels, int32 number) {
   return track->number();
 }
 
-bool Segment::AddFrame(const uint8* frame, uint64 length, uint64 track_number,
+bool Segment::AddFrame(const uint8* data, uint64 length, uint64 track_number,
                        uint64 timestamp, bool is_key) {
-  if (!frame)
+  if (!data)
     return false;
 
-  if (!CheckHeaderInfo())
+  Frame frame;
+  if (!frame.Init(data, length))
     return false;
-
-  // Check for non-monotonically increasing timestamps.
-  if (timestamp < last_timestamp_)
-    return false;
-
-  // If the segment has a video track hold onto audio frames to make sure the
-  // audio that is associated with the start time of a video key-frame is
-  // muxed into the same cluster.
-  if (has_video_ && tracks_.TrackIsAudio(track_number) && !force_new_cluster_) {
-    Frame* const new_frame = new (std::nothrow) Frame();
-    if (new_frame == NULL || !new_frame->Init(frame, length))
-      return false;
-    new_frame->set_track_number(track_number);
-    new_frame->set_timestamp(timestamp);
-    new_frame->set_is_key(is_key);
-
-    if (!QueueFrame(new_frame))
-      return false;
-
-    return true;
-  }
-
-  if (!DoNewClusterProcessing(track_number, timestamp, is_key))
-    return false;
-
-  if (cluster_list_size_ < 1)
-    return false;
-
-  Cluster* const cluster = cluster_list_[cluster_list_size_ - 1];
-  if (!cluster)
-    return false;
-
-  const uint64 timecode_scale = segment_info_.timecode_scale();
-  const uint64 abs_timecode = timestamp / timecode_scale;
-
-  if (!cluster->AddFrame(frame, length, track_number, abs_timecode, is_key))
-    return false;
-
-  if (new_cuepoint_ && cues_track_ == track_number) {
-    if (!AddCuePoint(timestamp, cues_track_))
-      return false;
-  }
-
-  if (timestamp > last_timestamp_)
-    last_timestamp_ = timestamp;
-
-  return true;
+  frame.set_track_number(track_number);
+  frame.set_timestamp(timestamp);
+  frame.set_is_key(is_key);
+  return AddGenericFrame(&frame);
 }
 
-bool Segment::AddFrameWithAdditional(const uint8* frame, uint64 length,
+bool Segment::AddFrameWithAdditional(const uint8* data, uint64 length,
                                      const uint8* additional,
                                      uint64 additional_length, uint64 add_id,
                                      uint64 track_number, uint64 timestamp,
                                      bool is_key) {
-  if (frame == NULL || additional == NULL)
+  if (!data || !additional)
     return false;
 
-  if (!CheckHeaderInfo())
+  Frame frame;
+  if (!frame.Init(data, length) ||
+      !frame.AddAdditionalData(additional, additional_length, add_id)) {
     return false;
-
-  // Check for non-monotonically increasing timestamps.
-  if (timestamp < last_timestamp_)
-    return false;
-
-  // If the segment has a video track hold onto audio frames to make sure the
-  // audio that is associated with the start time of a video key-frame is
-  // muxed into the same cluster.
-  if (has_video_ && tracks_.TrackIsAudio(track_number) && !force_new_cluster_) {
-    Frame* const new_frame = new (std::nothrow) Frame();
-    if (new_frame == NULL || !new_frame->Init(frame, length))
-      return false;
-    new_frame->set_track_number(track_number);
-    new_frame->set_timestamp(timestamp);
-    new_frame->set_is_key(is_key);
-
-    if (!QueueFrame(new_frame))
-      return false;
-
-    return true;
   }
-
-  if (!DoNewClusterProcessing(track_number, timestamp, is_key))
-    return false;
-
-  if (cluster_list_size_ < 1)
-    return false;
-
-  Cluster* const cluster = cluster_list_[cluster_list_size_ - 1];
-  if (cluster == NULL)
-    return false;
-
-  const uint64 timecode_scale = segment_info_.timecode_scale();
-  const uint64 abs_timecode = timestamp / timecode_scale;
-
-  if (!cluster->AddFrameWithAdditional(frame, length, additional,
-                                       additional_length, add_id, track_number,
-                                       abs_timecode, is_key))
-    return false;
-
-  if (new_cuepoint_ && cues_track_ == track_number) {
-    if (!AddCuePoint(timestamp, cues_track_))
-      return false;
-  }
-
-  if (timestamp > last_timestamp_)
-    last_timestamp_ = timestamp;
-
-  return true;
+  frame.set_track_number(track_number);
+  frame.set_timestamp(timestamp);
+  frame.set_is_key(is_key);
+  return AddGenericFrame(&frame);
 }
 
-bool Segment::AddFrameWithDiscardPadding(const uint8* frame, uint64 length,
+bool Segment::AddFrameWithDiscardPadding(const uint8* data, uint64 length,
                                          int64 discard_padding,
                                          uint64 track_number, uint64 timestamp,
                                          bool is_key) {
-  if (frame == NULL || discard_padding <= 0)
+  if (!data)
     return false;
 
-  if (!CheckHeaderInfo())
+  Frame frame;
+  if (!frame.Init(data, length))
     return false;
-
-  // Check for non-monotonically increasing timestamps.
-  if (timestamp < last_timestamp_)
-    return false;
-
-  // If the segment has a video track hold onto audio frames to make sure the
-  // audio that is associated with the start time of a video key-frame is
-  // muxed into the same cluster.
-  if (has_video_ && tracks_.TrackIsAudio(track_number) && !force_new_cluster_) {
-    Frame* const new_frame = new (std::nothrow) Frame();
-    if (new_frame == NULL || !new_frame->Init(frame, length))
-      return false;
-    new_frame->set_track_number(track_number);
-    new_frame->set_timestamp(timestamp);
-    new_frame->set_is_key(is_key);
-    new_frame->set_discard_padding(discard_padding);
-
-    if (!QueueFrame(new_frame))
-      return false;
-
-    return true;
-  }
-
-  if (!DoNewClusterProcessing(track_number, timestamp, is_key))
-    return false;
-
-  if (cluster_list_size_ < 1)
-    return false;
-
-  Cluster* const cluster = cluster_list_[cluster_list_size_ - 1];
-  if (!cluster)
-    return false;
-
-  const uint64 timecode_scale = segment_info_.timecode_scale();
-  const uint64 abs_timecode = timestamp / timecode_scale;
-
-  if (!cluster->AddFrameWithDiscardPadding(
-          frame, length, discard_padding, track_number, abs_timecode, is_key)) {
-    return false;
-  }
-
-  if (new_cuepoint_ && cues_track_ == track_number) {
-    if (!AddCuePoint(timestamp, cues_track_))
-      return false;
-  }
-
-  if (timestamp > last_timestamp_)
-    last_timestamp_ = timestamp;
-
-  return true;
+  frame.set_discard_padding(discard_padding);
+  frame.set_track_number(track_number);
+  frame.set_timestamp(timestamp);
+  frame.set_is_key(is_key);
+  return AddGenericFrame(&frame);
 }
 
-bool Segment::AddMetadata(const uint8* frame, uint64 length,
-                          uint64 track_number, uint64 timestamp_ns,
-                          uint64 duration_ns) {
+bool Segment::AddMetadata(const uint8* data, uint64 length, uint64 track_number,
+                          uint64 timestamp_ns, uint64 duration_ns) {
+  if (!data)
+    return false;
+
+  Frame frame;
+  if (!frame.Init(data, length))
+    return false;
+  frame.set_track_number(track_number);
+  frame.set_timestamp(timestamp_ns);
+  frame.set_duration(duration_ns);
+  frame.set_is_key(true);  // All metadata blocks are keyframes.
+  return AddGenericFrame(&frame);
+}
+
+bool Segment::AddGenericFrame(const Frame* frame) {
   if (!frame)
     return false;
 
@@ -2452,53 +2634,69 @@ bool Segment::AddMetadata(const uint8* frame, uint64 length,
     return false;
 
   // Check for non-monotonically increasing timestamps.
-  if (timestamp_ns < last_timestamp_)
+  if (frame->timestamp() < last_timestamp_)
     return false;
 
-  if (!DoNewClusterProcessing(track_number, timestamp_ns, true))
+  // Check if the track number is valid.
+  if (!tracks_.GetTrackByNumber(frame->track_number()))
     return false;
+
+  if (frame->discard_padding() != 0)
+    doc_type_version_ = 4;
+
+  // If the segment has a video track hold onto audio frames to make sure the
+  // audio that is associated with the start time of a video key-frame is
+  // muxed into the same cluster.
+  if (has_video_ && tracks_.TrackIsAudio(frame->track_number()) &&
+      !force_new_cluster_) {
+    Frame* const new_frame = new (std::nothrow) Frame();
+    if (!new_frame || !new_frame->CopyFrom(*frame))
+      return false;
+    return QueueFrame(new_frame);
+  }
+
+  if (!DoNewClusterProcessing(frame->track_number(), frame->timestamp(),
+                              frame->is_key())) {
+    return false;
+  }
 
   if (cluster_list_size_ < 1)
     return false;
 
   Cluster* const cluster = cluster_list_[cluster_list_size_ - 1];
-
   if (!cluster)
     return false;
 
-  const uint64 timecode_scale = segment_info_.timecode_scale();
-  const uint64 abs_timecode = timestamp_ns / timecode_scale;
-  const uint64 duration_timecode = duration_ns / timecode_scale;
+  // If the Frame is not a SimpleBlock, then set the reference_block_timestamp
+  // if it is not set already.
+  bool frame_created = false;
+  if (!frame->CanBeSimpleBlock() && !frame->is_key() &&
+      !frame->reference_block_timestamp_set()) {
+    Frame* const new_frame = new (std::nothrow) Frame();
+    if (!new_frame->CopyFrom(*frame))
+      return false;
+    new_frame->set_reference_block_timestamp(
+        last_track_timestamp_[frame->track_number() - 1]);
+    frame = new_frame;
+    frame_created = true;
+  }
 
-  if (!cluster->AddMetadata(frame, length, track_number, abs_timecode,
-                            duration_timecode))
+  if (!cluster->AddFrame(frame))
     return false;
 
-  if (timestamp_ns > last_timestamp_)
-    last_timestamp_ = timestamp_ns;
+  if (new_cuepoint_ && cues_track_ == frame->track_number()) {
+    if (!AddCuePoint(frame->timestamp(), cues_track_))
+      return false;
+  }
+
+  last_timestamp_ = frame->timestamp();
+  last_track_timestamp_[frame->track_number() - 1] = frame->timestamp();
+  last_block_duration_ = frame->duration();
+
+  if (frame_created)
+    delete frame;
 
   return true;
-}
-
-bool Segment::AddGenericFrame(const Frame* frame) {
-  last_block_duration_ = frame->duration();
-  if (!tracks_.TrackIsAudio(frame->track_number()) &&
-      !tracks_.TrackIsVideo(frame->track_number()) && frame->duration() > 0) {
-    return AddMetadata(frame->frame(), frame->length(), frame->track_number(),
-                       frame->timestamp(), frame->duration());
-  } else if (frame->additional() && frame->additional_length() > 0) {
-    return AddFrameWithAdditional(
-        frame->frame(), frame->length(), frame->additional(),
-        frame->additional_length(), frame->add_id(), frame->track_number(),
-        frame->timestamp(), frame->is_key());
-  } else if (frame->discard_padding() > 0) {
-    return AddFrameWithDiscardPadding(
-        frame->frame(), frame->length(), frame->discard_padding(),
-        frame->track_number(), frame->timestamp(), frame->is_key());
-  } else {
-    return AddFrame(frame->frame(), frame->length(), frame->track_number(),
-                    frame->timestamp(), frame->is_key());
-  }
 }
 
 void Segment::OutputCues(bool output_cues) { output_cues_ = output_cues; }
@@ -2598,9 +2796,13 @@ Track* Segment::GetTrackByNumber(uint64 track_number) const {
 }
 
 bool Segment::WriteSegmentHeader() {
+  UpdateDocTypeVersion();
+
   // TODO(fgalligan): Support more than one segment.
-  if (!WriteEbmlHeader(writer_header_))
+  if (!WriteEbmlHeader(writer_header_, doc_type_version_))
     return false;
+  doc_type_version_written_ = doc_type_version_;
+  ebml_header_size_ = static_cast<int32>(writer_header_->Position());
 
   // Write "unknown" (-1) as segment size value. If mode is kFile, Segment
   // will write over duration when the file is finalized.
@@ -2642,6 +2844,13 @@ bool Segment::WriteSegmentHeader() {
     if (!seek_head_.AddSeekEntry(kMkvChapters, MaxOffset()))
       return false;
     if (!chapters_.Write(writer_header_))
+      return false;
+  }
+
+  if (tags_.Count() > 0) {
+    if (!seek_head_.AddSeekEntry(kMkvTags, MaxOffset()))
+      return false;
+    if (!tags_.Write(writer_header_))
       return false;
   }
 
@@ -2740,7 +2949,7 @@ bool Segment::MakeNewCluster(uint64 frame_timestamp_ns) {
     const int32 new_capacity =
         (cluster_list_capacity_ <= 0) ? 1 : cluster_list_capacity_ * 2;
     Cluster** const clusters =
-        new (std::nothrow) Cluster* [new_capacity];  // NOLINT
+        new (std::nothrow) Cluster*[new_capacity];  // NOLINT
     if (!clusters)
       return false;
 
@@ -2796,7 +3005,8 @@ bool Segment::MakeNewCluster(uint64 frame_timestamp_ns) {
 
   Cluster*& cluster = cluster_list_[cluster_list_size_];
   const int64 offset = MaxOffset();
-  cluster = new (std::nothrow) Cluster(cluster_timecode, offset);  // NOLINT
+  cluster = new (std::nothrow) Cluster(cluster_timecode,  // NOLINT
+                                       offset, segment_info_.timecode_scale());
   if (!cluster)
     return false;
 
@@ -2873,6 +3083,19 @@ bool Segment::CheckHeaderInfo() {
   return true;
 }
 
+void Segment::UpdateDocTypeVersion() {
+  for (uint32 index = 0; index < tracks_.track_entries_size(); ++index) {
+    const Track* track = tracks_.GetTrackByIndex(index);
+    if (track == NULL)
+      break;
+    if ((track->codec_delay() || track->seek_pre_roll()) &&
+        doc_type_version_ < 4) {
+      doc_type_version_ = 4;
+      break;
+    }
+  }
+}
+
 bool Segment::UpdateChunkName(const char* ext, char** name) const {
   if (!name || !ext)
     return false;
@@ -2932,7 +3155,7 @@ bool Segment::QueueFrame(Frame* frame) {
     if (new_capacity < 1)
       return false;
 
-    Frame** const frames = new (std::nothrow) Frame* [new_capacity];  // NOLINT
+    Frame** const frames = new (std::nothrow) Frame*[new_capacity];  // NOLINT
     if (!frames)
       return false;
 
@@ -2962,34 +3185,24 @@ int Segment::WriteFramesAll() {
   if (!cluster)
     return -1;
 
-  const uint64 timecode_scale = segment_info_.timecode_scale();
-
   for (int32 i = 0; i < frames_size_; ++i) {
     Frame*& frame = frames_[i];
-    const uint64 frame_timestamp = frame->timestamp();  // ns
-    const uint64 frame_timecode = frame_timestamp / timecode_scale;
-
-    if (frame->discard_padding() > 0) {
-      if (!cluster->AddFrameWithDiscardPadding(
-              frame->frame(), frame->length(), frame->discard_padding(),
-              frame->track_number(), frame_timecode, frame->is_key())) {
-        return -1;
-      }
-    } else {
-      if (!cluster->AddFrame(frame->frame(), frame->length(),
-                             frame->track_number(), frame_timecode,
-                             frame->is_key())) {
-        return -1;
-      }
-    }
+    // TODO(jzern/vigneshv): using Segment::AddGenericFrame here would limit the
+    // places where |doc_type_version_| needs to be updated.
+    if (frame->discard_padding() != 0)
+      doc_type_version_ = 4;
+    if (!cluster->AddFrame(frame))
+      return -1;
 
     if (new_cuepoint_ && cues_track_ == frame->track_number()) {
-      if (!AddCuePoint(frame_timestamp, cues_track_))
+      if (!AddCuePoint(frame->timestamp(), cues_track_))
         return -1;
     }
 
-    if (frame_timestamp > last_timestamp_)
-      last_timestamp_ = frame_timestamp;
+    if (frame->timestamp() > last_timestamp_) {
+      last_timestamp_ = frame->timestamp();
+      last_track_timestamp_[frame->track_number() - 1] = frame->timestamp();
+    }
 
     delete frame;
     frame = NULL;
@@ -3013,7 +3226,6 @@ bool Segment::WriteFramesLessThan(uint64 timestamp) {
     if (!cluster)
       return false;
 
-    const uint64 timecode_scale = segment_info_.timecode_scale();
     int32 shift_left = 0;
 
     // TODO(fgalligan): Change this to use the durations of frames instead of
@@ -3025,33 +3237,22 @@ bool Segment::WriteFramesLessThan(uint64 timestamp) {
         break;
 
       const Frame* const frame_prev = frames_[i - 1];
-      const uint64 frame_timestamp = frame_prev->timestamp();
-      const uint64 frame_timecode = frame_timestamp / timecode_scale;
-      const int64 discard_padding = frame_prev->discard_padding();
-
-      if (discard_padding > 0) {
-        if (!cluster->AddFrameWithDiscardPadding(
-                frame_prev->frame(), frame_prev->length(), discard_padding,
-                frame_prev->track_number(), frame_timecode,
-                frame_prev->is_key())) {
-          return false;
-        }
-      } else {
-        if (!cluster->AddFrame(frame_prev->frame(), frame_prev->length(),
-                               frame_prev->track_number(), frame_timecode,
-                               frame_prev->is_key())) {
-          return false;
-        }
-      }
+      if (frame_prev->discard_padding() != 0)
+        doc_type_version_ = 4;
+      if (!cluster->AddFrame(frame_prev))
+        return false;
 
       if (new_cuepoint_ && cues_track_ == frame_prev->track_number()) {
-        if (!AddCuePoint(frame_timestamp, cues_track_))
+        if (!AddCuePoint(frame_prev->timestamp(), cues_track_))
           return false;
       }
 
       ++shift_left;
-      if (frame_timestamp > last_timestamp_)
-        last_timestamp_ = frame_timestamp;
+      if (frame_prev->timestamp() > last_timestamp_) {
+        last_timestamp_ = frame_prev->timestamp();
+        last_track_timestamp_[frame_prev->track_number() - 1] =
+            frame_prev->timestamp();
+      }
 
       delete frame_prev;
     }

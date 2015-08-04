@@ -398,6 +398,10 @@ class VideoTrack : public Track {
 
   long long GetWidth() const;
   long long GetHeight() const;
+  long long GetDisplayWidth() const;
+  long long GetDisplayHeight() const;
+  long long GetDisplayUnit() const;
+  long long GetStereoMode() const;
   double GetFrameRate() const;
 
   bool VetEntry(const BlockEntry*) const;
@@ -406,6 +410,11 @@ class VideoTrack : public Track {
  private:
   long long m_width;
   long long m_height;
+  long long m_display_width;
+  long long m_display_height;
+  long long m_display_unit;
+  long long m_stereo_mode;
+
   double m_rate;
 };
 
@@ -582,6 +591,85 @@ class Chapters {
   int m_editions_count;
 };
 
+class Tags {
+  Tags(const Tags&);
+  Tags& operator=(const Tags&);
+
+ public:
+  Segment* const m_pSegment;
+  const long long m_start;
+  const long long m_size;
+  const long long m_element_start;
+  const long long m_element_size;
+
+  Tags(Segment*, long long payload_start, long long payload_size,
+       long long element_start, long long element_size);
+
+  ~Tags();
+
+  long Parse();
+
+  class Tag;
+  class SimpleTag;
+
+  class SimpleTag {
+    friend class Tag;
+    SimpleTag();
+    SimpleTag(const SimpleTag&);
+    ~SimpleTag();
+    SimpleTag& operator=(const SimpleTag&);
+
+   public:
+    const char* GetTagName() const;
+    const char* GetTagString() const;
+
+   private:
+    void Init();
+    void ShallowCopy(SimpleTag&) const;
+    void Clear();
+    long Parse(IMkvReader*, long long pos, long long size);
+
+    char* m_tag_name;
+    char* m_tag_string;
+  };
+
+  class Tag {
+    friend class Tags;
+    Tag();
+    Tag(const Tag&);
+    ~Tag();
+    Tag& operator=(const Tag&);
+
+   public:
+    int GetSimpleTagCount() const;
+    const SimpleTag* GetSimpleTag(int index) const;
+
+   private:
+    void Init();
+    void ShallowCopy(Tag&) const;
+    void Clear();
+    long Parse(IMkvReader*, long long pos, long long size);
+
+    long ParseSimpleTag(IMkvReader*, long long pos, long long size);
+    bool ExpandSimpleTagsArray();
+
+    SimpleTag* m_simple_tags;
+    int m_simple_tags_size;
+    int m_simple_tags_count;
+  };
+
+  int GetTagCount() const;
+  const Tag* GetTag(int index) const;
+
+ private:
+  long ParseTag(long long pos, long long size);
+  bool ExpandTagsArray();
+
+  Tag* m_tags;
+  int m_tags_size;
+  int m_tags_count;
+};
+
 class SegmentInfo {
   SegmentInfo(const SegmentInfo&);
   SegmentInfo& operator=(const SegmentInfo&);
@@ -684,7 +772,7 @@ class CuePoint {
   long long m_element_start;
   long long m_element_size;
 
-  void Load(IMkvReader*);
+  bool Load(IMkvReader*);
 
   long long GetTimeCode() const;  // absolute but unscaled
   long long GetTime(const Segment*) const;  // absolute and scaled (ns units)
@@ -697,7 +785,7 @@ class CuePoint {
     // reference = clusters containing req'd referenced blocks
     //  reftime = timecode of the referenced block
 
-    void Parse(IMkvReader*, long long, long long);
+    bool Parse(IMkvReader*, long long, long long);
   };
 
   const TrackPosition* Find(const Track*) const;
@@ -730,14 +818,6 @@ class Cues {
       long long time_ns, const Track*, const CuePoint*&,
       const CuePoint::TrackPosition*&) const;
 
-#if 0
-    bool FindNext(  //upper_bound of time_ns
-        long long time_ns,
-        const Track*,
-        const CuePoint*&,
-        const CuePoint::TrackPosition*&) const;
-#endif
-
   const CuePoint* GetFirst() const;
   const CuePoint* GetLast() const;
   const CuePoint* GetNext(const CuePoint*) const;
@@ -751,7 +831,7 @@ class Cues {
   bool DoneParsing() const;
 
  private:
-  void Init() const;
+  bool Init() const;
   void PreloadCuePoint(long&, long long) const;
 
   mutable CuePoint** m_cue_points;
@@ -877,18 +957,12 @@ class Segment {
   long ParseNext(const Cluster* pCurr, const Cluster*& pNext, long long& pos,
                  long& size);
 
-#if 0
-    //This pair parses one cluster, but only changes the state of the
-    //segment object when the cluster is actually added to the index.
-    long ParseCluster(long long& cluster_pos, long long& new_pos) const;
-    bool AddCluster(long long cluster_pos, long long new_pos);
-#endif
-
   const SeekHead* GetSeekHead() const;
   const Tracks* GetTracks() const;
   const SegmentInfo* GetInfo() const;
   const Cues* GetCues() const;
   const Chapters* GetChapters() const;
+  const Tags* GetTags() const;
 
   long long GetDuration() const;
 
@@ -914,6 +988,7 @@ class Segment {
   Tracks* m_pTracks;
   Cues* m_pCues;
   Chapters* m_pChapters;
+  Tags* m_pTags;
   Cluster** m_clusters;
   long m_clusterCount;  // number of entries for which m_index >= 0
   long m_clusterPreloadCount;  // number of entries for which m_index < 0

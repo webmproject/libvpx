@@ -9,6 +9,7 @@
 #ifndef MKVMUXERUTIL_HPP
 #define MKVMUXERUTIL_HPP
 
+#include "mkvmuxer.hpp"
 #include "mkvmuxertypes.hpp"
 
 namespace mkvmuxer {
@@ -23,6 +24,7 @@ int32 SerializeInt(IMkvWriter* writer, int64 value, int32 size);
 
 // Returns the size in bytes of the element.
 int32 GetUIntSize(uint64 value);
+int32 GetIntSize(int64 value);
 int32 GetCodedUIntSize(uint64 value);
 uint64 EbmlMasterElementSize(uint64 type, uint64 value);
 uint64 EbmlElementSize(uint64 type, int64 value);
@@ -30,7 +32,7 @@ uint64 EbmlElementSize(uint64 type, uint64 value);
 uint64 EbmlElementSize(uint64 type, float value);
 uint64 EbmlElementSize(uint64 type, const char* value);
 uint64 EbmlElementSize(uint64 type, const uint8* value, uint64 size);
-uint64 EbmlDateElementSize(uint64 type, int64 value);
+uint64 EbmlDateElementSize(uint64 type);
 
 // Creates an EBML coded number from |value| and writes it out. The size of
 // the coded number is determined by the value of |value|. |value| must not
@@ -51,73 +53,17 @@ int32 WriteID(IMkvWriter* writer, uint64 type);
 
 // Output an Mkv non-master element. Returns true if the element was written.
 bool WriteEbmlElement(IMkvWriter* writer, uint64 type, uint64 value);
+bool WriteEbmlElement(IMkvWriter* writer, uint64 type, int64 value);
 bool WriteEbmlElement(IMkvWriter* writer, uint64 type, float value);
 bool WriteEbmlElement(IMkvWriter* writer, uint64 type, const char* value);
 bool WriteEbmlElement(IMkvWriter* writer, uint64 type, const uint8* value,
                       uint64 size);
 bool WriteEbmlDateElement(IMkvWriter* writer, uint64 type, int64 value);
 
-// Output an Mkv Simple Block.
-// Inputs:
-//   data:         Pointer to the data.
-//   length:       Length of the data.
-//   track_number: Track to add the data to. Value returned by Add track
-//                  functions.  Only values in the range [1, 126] are
-//                  permitted.
-//   timecode:     Relative timecode of the Block.  Only values in the
-//                  range [0, 2^15) are permitted.
-//   is_key:       Non-zero value specifies that frame is a key frame.
-uint64 WriteSimpleBlock(IMkvWriter* writer, const uint8* data, uint64 length,
-                        uint64 track_number, int64 timecode, uint64 is_key);
-
-// Output a metadata keyframe, using a Block Group element.
-// Inputs:
-//   data:         Pointer to the (meta)data.
-//   length:       Length of the (meta)data.
-//   track_number: Track to add the data to. Value returned by Add track
-//                  functions.  Only values in the range [1, 126] are
-//                  permitted.
-//   timecode      Timecode of frame, relative to cluster timecode.  Only
-//                  values in the range [0, 2^15) are permitted.
-//   duration_timecode  Duration of frame, using timecode units.
-uint64 WriteMetadataBlock(IMkvWriter* writer, const uint8* data, uint64 length,
-                          uint64 track_number, int64 timecode,
-                          uint64 duration_timecode);
-
-// Output an Mkv Block with BlockAdditional data.
-// Inputs:
-//   data:         Pointer to the data.
-//   length:       Length of the data.
-//   additional:   Pointer to the additional data
-//   additional_length: Length of the additional data.
-//   add_id: Value of BlockAddID element.
-//   track_number: Track to add the data to. Value returned by Add track
-//                  functions.  Only values in the range [1, 126] are
-//                  permitted.
-//   timecode:     Relative timecode of the Block.  Only values in the
-//                  range [0, 2^15) are permitted.
-//   is_key:       Non-zero value specifies that frame is a key frame.
-uint64 WriteBlockWithAdditional(IMkvWriter* writer, const uint8* data,
-                                uint64 length, const uint8* additional,
-                                uint64 additional_length, uint64 add_id,
-                                uint64 track_number, int64 timecode,
-                                uint64 is_key);
-
-// Output an Mkv Block with a DiscardPadding element.
-// Inputs:
-//   data:            Pointer to the data.
-//   length:          Length of the data.
-//   discard_padding: DiscardPadding value.
-//   track_number:    Track to add the data to. Value returned by Add track
-//                    functions. Only values in the range [1, 126] are
-//                    permitted.
-//   timecode:        Relative timecode of the Block.  Only values in the
-//                    range [0, 2^15) are permitted.
-//   is_key:          Non-zero value specifies that frame is a key frame.
-uint64 WriteBlockWithDiscardPadding(IMkvWriter* writer, const uint8* data,
-                                    uint64 length, int64 discard_padding,
-                                    uint64 track_number, int64 timecode,
-                                    uint64 is_key);
+// Output a Mkv Frame. It decides the correct element to write (Block vs
+// SimpleBlock) based on the parameters of the Frame.
+uint64 WriteFrame(IMkvWriter* writer, const Frame* const frame,
+                  Cluster* cluster);
 
 // Output a void element. |size| must be the entire size in bytes that will be
 // void. The function will calculate the size of the void header and subtract
