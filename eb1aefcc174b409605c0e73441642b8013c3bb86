@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0ad9483e_744f2e3d",
+        "filename": "third_party/x86inc/README.libvpx",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-04T22:33:07Z",
+      "side": 1,
+      "message": "fair",
+      "parentUuid": "2ad60c0d_4f38d95a",
+      "revId": "eb1aefcc174b409605c0e73441642b8013c3bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a0ff877_f75ce8c7",
         "filename": "third_party/x86inc/x86inc.asm.new",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "4acfc072_6a5bc65b",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-04T22:33:07Z",
+      "side": 1,
+      "message": "true. i\u0027ll see if i can reword it reasonably",
+      "parentUuid": "8a0ff877_f75ce8c7",
+      "revId": "eb1aefcc174b409605c0e73441642b8013c3bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cadad034_57a31486",
         "filename": "third_party/x86inc/x86inc.asm.new",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2015-08-04T21:57:07Z",
       "side": 1,
       "message": "you could also note this is libvpx specific; like the PIC section",
+      "revId": "eb1aefcc174b409605c0e73441642b8013c3bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ad9483e_b448d632",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-04T22:33:07Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "cadad034_57a31486",
       "revId": "eb1aefcc174b409605c0e73441642b8013c3bb86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
