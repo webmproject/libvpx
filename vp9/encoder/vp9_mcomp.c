@@ -703,8 +703,8 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
     }
 
     // Check diagonal sub-pixel position
-    tc = bc + (cost_array[0] < cost_array[1] ? -hstep : hstep);
-    tr = br + (cost_array[2] < cost_array[3] ? -hstep : hstep);
+    tc = bc + (cost_array[0] <= cost_array[1] ? -hstep : hstep);
+    tr = br + (cost_array[2] <= cost_array[3] ? -hstep : hstep);
     if (tc >= minc && tc <= maxc && tr >= minr && tr <= maxr) {
       const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
       MV this_mv = {tr, tc};
