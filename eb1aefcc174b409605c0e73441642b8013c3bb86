@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ad60c0d_4f38d95a",
+        "filename": "third_party/x86inc/README.libvpx",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-04T21:57:07Z",
+      "side": 1,
+      "message": "macho here or mach-o elsewhere for consistency",
+      "revId": "eb1aefcc174b409605c0e73441642b8013c3bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0ff877_f75ce8c7",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-04T21:57:07Z",
+      "side": 1,
+      "message": "this isn\u0027t quite right given the findings",
+      "revId": "eb1aefcc174b409605c0e73441642b8013c3bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cadad034_57a31486",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-04T21:57:07Z",
+      "side": 1,
+      "message": "you could also note this is libvpx specific; like the PIC section",
+      "revId": "eb1aefcc174b409605c0e73441642b8013c3bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
