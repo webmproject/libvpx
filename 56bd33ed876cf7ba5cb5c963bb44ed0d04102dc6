@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a0ff877_9776544b",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 6
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-04T21:56:07Z",
+      "side": 1,
+      "message": "\u0027NASM version 2.11.08 compiled on Jun 23 2015\u0027 would fail with this iirc",
+      "revId": "56bd33ed876cf7ba5cb5c963bb44ed0d04102dc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
