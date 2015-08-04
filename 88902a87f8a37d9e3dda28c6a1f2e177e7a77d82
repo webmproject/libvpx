@@ -34,6 +34,24 @@
       "revId": "88902a87f8a37d9e3dda28c6a1f2e177e7a77d82",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aae91cd1_16ec2c2e",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-04T22:40:12Z",
+      "side": 1,
+      "message": "true, I was just thinking it would help distinguish sections that are different from upstream",
+      "parentUuid": "8a0ff877_32b20e36",
+      "revId": "88902a87f8a37d9e3dda28c6a1f2e177e7a77d82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
