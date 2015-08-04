@@ -214,12 +214,14 @@ DSP_SRCS-$(HAVE_MSA)   += mips/idct8x8_msa.c
 DSP_SRCS-$(HAVE_MSA)   += mips/idct16x16_msa.c
 DSP_SRCS-$(HAVE_MSA)   += mips/idct32x32_msa.c
 
+ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_DSPR2) += mips/inv_txfm_dspr2.h
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans4_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans8_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans16_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans32_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans32_cols_dspr2.c
+endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_VP9
 
 # quantization
