@@ -9,6 +9,8 @@
  */
 
 #include <arm_neon.h>
+#include <assert.h>
+
 #include "./vp9_rtcd.h"
 #include "./vpx_config.h"
 
@@ -113,4 +115,46 @@ int16_t vp9_int_pro_col_neon(uint8_t const *ref, const int width) {
   }
 
   return horizontal_add_u16x8(vec_sum);
+}
+
+// ref, src = [0, 510] - max diff = 16-bits
+// bwl = {2, 3, 4}, width = {16, 32, 64}
+int vp9_vector_var_neon(int16_t const *ref, int16_t const *src, const int bwl) {
+  int width = 4 << bwl;
+  int32x4_t sse = vdupq_n_s32(0);
+  int16x8_t total = vdupq_n_s16(0);
+
+  assert(width >= 8);
+  assert((width % 8) == 0);
+
+  do {
+    const int16x8_t r = vld1q_s16(ref);
+    const int16x8_t s = vld1q_s16(src);
+    const int16x8_t diff = vsubq_s16(r, s);  // [-510, 510], 10 bits.
+    const int16x4_t diff_lo = vget_low_s16(diff);
+    const int16x4_t diff_hi = vget_high_s16(diff);
+    sse = vmlal_s16(sse, diff_lo, diff_lo);  // dynamic range 26 bits.
+    sse = vmlal_s16(sse, diff_hi, diff_hi);
+    total = vaddq_s16(total, diff);  // dynamic range 16 bits.
+
+    ref += 8;
+    src += 8;
+    width -= 8;
+  } while (width != 0);
+
+  {
+    // Note: 'total''s pairwise addition could be implemented similarly to
+    // horizontal_add_u16x8(), but one less vpaddl with 'total' when paired
+    // with the summation of 'sse' performed better on a Cortex-A15.
+    const int32x4_t t0 = vpaddlq_s16(total);  // cascading summation of 'total'
+    const int32x2_t t1 = vadd_s32(vget_low_s32(t0), vget_high_s32(t0));
+    const int32x2_t t2 = vpadd_s32(t1, t1);
+    const int t = vget_lane_s32(t2, 0);
+    const int64x2_t s0 = vpaddlq_s32(sse);  // cascading summation of 'sse'.
+    const int32x2_t s1 = vadd_s32(vreinterpret_s32_s64(vget_low_s64(s0)),
+                                  vreinterpret_s32_s64(vget_high_s64(s0)));
+    const int s = vget_lane_s32(s1, 0);
+    const int shift_factor = bwl + 2;
+    return s - ((t * t) >> shift_factor);
+  }
 }
