@@ -1050,6 +1050,16 @@ static const REF_MODE ref_mode_set[RT_INTER_MODES] = {
     {GOLDEN_FRAME, NEARMV},
     {GOLDEN_FRAME, NEWMV}
 };
+static const REF_MODE ref_mode_set_svc[RT_INTER_MODES] = {
+    {LAST_FRAME, ZEROMV},
+    {GOLDEN_FRAME, ZEROMV},
+    {LAST_FRAME, NEARESTMV},
+    {LAST_FRAME, NEARMV},
+    {GOLDEN_FRAME, NEARESTMV},
+    {GOLDEN_FRAME, NEARMV},
+    {LAST_FRAME, NEWMV},
+    {GOLDEN_FRAME, NEWMV}
+};
 
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
@@ -1203,15 +1213,19 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int mode_rd_thresh;
     int mode_index;
     int i;
-    PREDICTION_MODE this_mode = ref_mode_set[idx].pred_mode;
     int64_t this_sse;
     int is_skippable;
     int this_early_term = 0;
+    PREDICTION_MODE this_mode = ref_mode_set[idx].pred_mode;
+    if (cpi->use_svc)
+      this_mode = ref_mode_set_svc[idx].pred_mode;
 
     if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
       continue;
 
     ref_frame = ref_mode_set[idx].ref_frame;
+    if (cpi->use_svc)
+      ref_frame = ref_mode_set_svc[idx].ref_frame;
     if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
       continue;
     if (const_motion[ref_frame] && this_mode == NEARMV)
@@ -1239,7 +1253,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     if (this_mode == NEWMV) {
-      if (ref_frame > LAST_FRAME) {
+      if (ref_frame > LAST_FRAME && !cpi->use_svc) {
         int tmp_sad;
         int dis, cost_list[5];
 
@@ -1288,6 +1302,21 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       x->pred_mv_sad[LAST_FRAME] = best_pred_sad;
     }
 
+    if (cpi->use_svc) {
+      if (this_mode == NEWMV && ref_frame == GOLDEN_FRAME &&
+          frame_mv[NEWMV][GOLDEN_FRAME].as_int != INVALID_MV) {
+        const int pre_stride = xd->plane[0].pre[0].stride;
+        const uint8_t * const pre_buf = xd->plane[0].pre[0].buf +
+            (frame_mv[NEWMV][GOLDEN_FRAME].as_mv.row >> 3) * pre_stride +
+            (frame_mv[NEWMV][GOLDEN_FRAME].as_mv.col >> 3);
+        best_pred_sad = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf,
+                                               x->plane[0].src.stride,
+                                               pre_buf, pre_stride);
+        x->pred_mv_sad[GOLDEN_FRAME] = best_pred_sad;
+      }
+    }
+
+
     if (this_mode != NEARESTMV &&
         frame_mv[this_mode][ref_frame].as_int ==
             frame_mv[NEARESTMV][ref_frame].as_int)
@@ -1310,7 +1339,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if ((this_mode == NEWMV || filter_ref == SWITCHABLE) && pred_filter_search
-        && (ref_frame == LAST_FRAME)
+        && (ref_frame == LAST_FRAME ||
+            (ref_frame == GOLDEN_FRAME && cpi->use_svc))
         && (((mbmi->mv[0].as_mv.row | mbmi->mv[0].as_mv.col) & 0x07) != 0)) {
       int pf_rate[3];
       int64_t pf_dist[3];
