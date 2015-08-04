@@ -15,7 +15,7 @@
 #include "vpx_ports/mem.h"
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
+void vpx_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
                                 intptr_t count,
                                 int skip_block,
                                 const int16_t *zbin_ptr,
@@ -101,7 +101,7 @@ void vp9_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
 }
 
 
-void vp9_highbd_quantize_b_32x32_sse2(const tran_low_t *coeff_ptr,
+void vpx_highbd_quantize_b_32x32_sse2(const tran_low_t *coeff_ptr,
                                       intptr_t n_coeffs,
                                       int skip_block,
                                       const int16_t *zbin_ptr,

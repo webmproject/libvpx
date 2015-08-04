@@ -199,7 +199,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_highbd_quantize_b(BLOCK_OFFSET(p->coeff, block),
+    vpx_highbd_quantize_b(BLOCK_OFFSET(p->coeff, block),
                           16, x->skip_block,
                           p->zbin, p->round, p->quant, p->quant_shift,
                           BLOCK_OFFSET(p->qcoeff, block),
@@ -209,7 +209,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
     return;
   }
 #endif
-  vp9_quantize_b(BLOCK_OFFSET(p->coeff, block),
+  vpx_quantize_b(BLOCK_OFFSET(p->coeff, block),
                  16, x->skip_block,
                  p->zbin, p->round, p->quant, p->quant_shift,
                  BLOCK_OFFSET(p->qcoeff, block),

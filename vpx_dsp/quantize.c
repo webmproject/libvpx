@@ -11,7 +11,7 @@
 #include "vpx_dsp/quantize.h"
 #include "vpx_mem/vpx_mem.h"
 
-void vp9_quantize_dc(const tran_low_t *coeff_ptr,
+void vpx_quantize_dc(const tran_low_t *coeff_ptr,
                      int n_coeffs, int skip_block,
                      const int16_t *round_ptr, const int16_t quant,
                      tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
@@ -37,7 +37,7 @@ void vp9_quantize_dc(const tran_low_t *coeff_ptr,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_quantize_dc(const tran_low_t *coeff_ptr,
+void vpx_highbd_quantize_dc(const tran_low_t *coeff_ptr,
                             int n_coeffs, int skip_block,
                             const int16_t *round_ptr, const int16_t quant,
                             tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
@@ -62,7 +62,7 @@ void vp9_highbd_quantize_dc(const tran_low_t *coeff_ptr,
 }
 #endif
 
-void vp9_quantize_dc_32x32(const tran_low_t *coeff_ptr, int skip_block,
+void vpx_quantize_dc_32x32(const tran_low_t *coeff_ptr, int skip_block,
                            const int16_t *round_ptr, const int16_t quant,
                            tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                            const int16_t dequant_ptr, uint16_t *eob_ptr) {
@@ -89,7 +89,7 @@ void vp9_quantize_dc_32x32(const tran_low_t *coeff_ptr, int skip_block,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
+void vpx_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
                                   int skip_block,
                                   const int16_t *round_ptr,
                                   const int16_t quant,
@@ -118,7 +118,7 @@ void vp9_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
 }
 #endif
 
-void vp9_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+void vpx_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                       int skip_block,
                       const int16_t *zbin_ptr, const int16_t *round_ptr,
                       const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
@@ -170,7 +170,7 @@ void vp9_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+void vpx_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                              int skip_block, const int16_t *zbin_ptr,
                              const int16_t *round_ptr, const int16_t *quant_ptr,
                              const int16_t *quant_shift_ptr,
@@ -222,7 +222,7 @@ void vp9_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 }
 #endif
 
-void vp9_quantize_b_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+void vpx_quantize_b_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             int skip_block,
                             const int16_t *zbin_ptr, const int16_t *round_ptr,
                             const int16_t *quant_ptr,
@@ -279,7 +279,7 @@ void vp9_quantize_b_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_quantize_b_32x32_c(const tran_low_t *coeff_ptr,
+void vpx_highbd_quantize_b_32x32_c(const tran_low_t *coeff_ptr,
                                    intptr_t n_coeffs, int skip_block,
                                    const int16_t *zbin_ptr,
                                    const int16_t *round_ptr,

@@ -14,7 +14,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 
-void vp9_quantize_b_sse2(const int16_t* coeff_ptr, intptr_t n_coeffs,
+void vpx_quantize_b_sse2(const int16_t* coeff_ptr, intptr_t n_coeffs,
                          int skip_block, const int16_t* zbin_ptr,
                          const int16_t* round_ptr, const int16_t* quant_ptr,
                          const int16_t* quant_shift_ptr, int16_t* qcoeff_ptr,
