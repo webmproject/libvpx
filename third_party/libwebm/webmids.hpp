@@ -133,7 +133,13 @@ enum MkvId {
   kMkvChapterDisplay = 0x80,
   kMkvChapString = 0x85,
   kMkvChapLanguage = 0x437C,
-  kMkvChapCountry = 0x437E
+  kMkvChapCountry = 0x437E,
+  // Tags
+  kMkvTags = 0x1254C367,
+  kMkvTag = 0x7373,
+  kMkvSimpleTag = 0x67C8,
+  kMkvTagName = 0x45A3,
+  kMkvTagString = 0x4487
 };
 
 }  // end namespace mkvmuxer

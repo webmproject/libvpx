@@ -23,6 +23,8 @@ namespace mkvmuxer {
 class MkvWriter;
 class Segment;
 
+const uint64 kMaxTrackNumber = 126;
+
 ///////////////////////////////////////////////////////////////
 // Interface used by the mkvmuxer to write out the Mkv data.
 class IMkvWriter {
@@ -57,6 +59,10 @@ class IMkvWriter {
 
 // Writes out the EBML header for a WebM file. This function must be called
 // before any other libwebm writing functions are called.
+bool WriteEbmlHeader(IMkvWriter* writer, uint64 doc_type_version);
+
+// Deprecated. Writes out EBML header with doc_type_version as
+// kDefaultDocTypeVersion. Exists for backward compatibility.
 bool WriteEbmlHeader(IMkvWriter* writer);
 
 // Copies in Chunk from source to destination between the given byte positions
@@ -70,11 +76,22 @@ class Frame {
   Frame();
   ~Frame();
 
+  // Sets this frame's contents based on |frame|. Returns true on success. On
+  // failure, this frame's existing contents may be lost.
+  bool CopyFrom(const Frame& frame);
+
   // Copies |frame| data into |frame_|. Returns true on success.
   bool Init(const uint8* frame, uint64 length);
 
   // Copies |additional| data into |additional_|. Returns true on success.
   bool AddAdditionalData(const uint8* additional, uint64 length, uint64 add_id);
+
+  // Returns true if the frame has valid parameters.
+  bool IsValid() const;
+
+  // Returns true if the frame can be written as a SimpleBlock based on current
+  // parameters.
+  bool CanBeSimpleBlock() const;
 
   uint64 add_id() const { return add_id_; }
   const uint8* additional() const { return additional_; }
@@ -89,10 +106,15 @@ class Frame {
   uint64 track_number() const { return track_number_; }
   void set_timestamp(uint64 timestamp) { timestamp_ = timestamp; }
   uint64 timestamp() const { return timestamp_; }
-  void set_discard_padding(uint64 discard_padding) {
+  void set_discard_padding(int64 discard_padding) {
     discard_padding_ = discard_padding;
   }
-  uint64 discard_padding() const { return discard_padding_; }
+  int64 discard_padding() const { return discard_padding_; }
+  void set_reference_block_timestamp(int64 reference_block_timestamp);
+  int64 reference_block_timestamp() const { return reference_block_timestamp_; }
+  bool reference_block_timestamp_set() const {
+    return reference_block_timestamp_set_;
+  }
 
  private:
   // Id of the Additional data.
@@ -124,6 +146,14 @@ class Frame {
 
   // Discard padding for the frame.
   int64 discard_padding_;
+
+  // Reference block timestamp.
+  int64 reference_block_timestamp_;
+
+  // Flag indicating if |reference_block_timestamp_| has been set.
+  bool reference_block_timestamp_set_;
+
+  LIBWEBM_DISALLOW_COPY_AND_ASSIGN(Frame);
 };
 
 ///////////////////////////////////////////////////////////////
@@ -422,6 +452,16 @@ class VideoTrack : public Track {
   uint64 display_height() const { return display_height_; }
   void set_display_width(uint64 width) { display_width_ = width; }
   uint64 display_width() const { return display_width_; }
+
+  void set_crop_left(uint64 crop_left) { crop_left_ = crop_left; }
+  uint64 crop_left() const { return crop_left_; }
+  void set_crop_right(uint64 crop_right) { crop_right_ = crop_right; }
+  uint64 crop_right() const { return crop_right_; }
+  void set_crop_top(uint64 crop_top) { crop_top_ = crop_top; }
+  uint64 crop_top() const { return crop_top_; }
+  void set_crop_bottom(uint64 crop_bottom) { crop_bottom_ = crop_bottom; }
+  uint64 crop_bottom() const { return crop_bottom_; }
+
   void set_frame_rate(double frame_rate) { frame_rate_ = frame_rate; }
   double frame_rate() const { return frame_rate_; }
   void set_height(uint64 height) { height_ = height; }
@@ -438,6 +478,10 @@ class VideoTrack : public Track {
   // Video track element names.
   uint64 display_height_;
   uint64 display_width_;
+  uint64 crop_left_;
+  uint64 crop_right_;
+  uint64 crop_top_;
+  uint64 crop_bottom_;
   double frame_rate_;
   uint64 height_;
   uint64 stereo_mode_;
@@ -693,38 +737,148 @@ class Chapters {
 };
 
 ///////////////////////////////////////////////////////////////
+// Tag element
+//
+class Tag {
+ public:
+  bool add_simple_tag(const char* tag_name, const char* tag_string);
+
+ private:
+  // Tags calls Clear and the destructor of Tag
+  friend class Tags;
+
+  // For storage of simple tags
+  class SimpleTag {
+   public:
+    // Establish representation invariant for new SimpleTag object.
+    void Init();
+
+    // Reclaim resources, in anticipation of destruction.
+    void Clear();
+
+    // Copies the title to the |tag_name_| member.  Returns false on
+    // error.
+    bool set_tag_name(const char* tag_name);
+
+    // Copies the language to the |tag_string_| member.  Returns false
+    // on error.
+    bool set_tag_string(const char* tag_string);
+
+    // If |writer| is non-NULL, serialize the SimpleTag sub-element of
+    // the Atom into the stream.  Returns the SimpleTag element size on
+    // success, 0 if error.
+    uint64 Write(IMkvWriter* writer) const;
+
+   private:
+    char* tag_name_;
+    char* tag_string_;
+  };
+
+  Tag();
+  ~Tag();
+
+  // Copies this Tag object to a different one.  This is used when
+  // expanding a plain array of Tag objects (see Tags).
+  void ShallowCopy(Tag* dst) const;
+
+  // Reclaim resources used by this Tag object, pending its
+  // destruction.
+  void Clear();
+
+  // If there is no storage remaining on the |simple_tags_| array for a
+  // new display object, creates a new, longer array and copies the
+  // existing SimpleTag objects to the new array.  Returns false if the
+  // array cannot be expanded.
+  bool ExpandSimpleTagsArray();
+
+  // If |writer| is non-NULL, serialize the Tag sub-element into the
+  // stream.  Returns the total size of the element on success, 0 if
+  // error.
+  uint64 Write(IMkvWriter* writer) const;
+
+  // The Atom element can contain multiple SimpleTag sub-elements
+  SimpleTag* simple_tags_;
+
+  // The physical length (total size) of the |simple_tags_| array.
+  int simple_tags_size_;
+
+  // The logical length (number of active elements) on the |simple_tags_|
+  // array.
+  int simple_tags_count_;
+
+  LIBWEBM_DISALLOW_COPY_AND_ASSIGN(Tag);
+};
+
+///////////////////////////////////////////////////////////////
+// Tags element
+//
+class Tags {
+ public:
+  Tags();
+  ~Tags();
+
+  Tag* AddTag();
+
+  // Returns the number of tags that have been added.
+  int Count() const;
+
+  // Output the Tags element to the writer. Returns true on success.
+  bool Write(IMkvWriter* writer) const;
+
+ private:
+  // Expands the tags_ array if there is not enough space to contain
+  // another tag object.  Returns true on success.
+  bool ExpandTagsArray();
+
+  // Total length of the tags_ array.
+  int tags_size_;
+
+  // Number of active tags on the tags_ array.
+  int tags_count_;
+
+  // Array for storage of tag objects.
+  Tag* tags_;
+
+  LIBWEBM_DISALLOW_COPY_AND_ASSIGN(Tags);
+};
+
+///////////////////////////////////////////////////////////////
 // Cluster element
 //
 // Notes:
 //  |Init| must be called before any other method in this class.
 class Cluster {
  public:
-  Cluster(uint64 timecode, int64 cues_pos);
-  ~Cluster();
-
   // |timecode| is the absolute timecode of the cluster. |cues_pos| is the
   // position for the cluster within the segment that should be written in
-  // the cues element.
+  // the cues element. |timecode_scale| is the timecode scale of the segment.
+  Cluster(uint64 timecode, int64 cues_pos, uint64 timecode_scale);
+  ~Cluster();
+
   bool Init(IMkvWriter* ptr_writer);
 
   // Adds a frame to be output in the file. The frame is written out through
   // |writer_| if successful. Returns true on success.
+  bool AddFrame(const Frame* frame);
+
+  // Adds a frame to be output in the file. The frame is written out through
+  // |writer_| if successful. Returns true on success.
   // Inputs:
-  //   frame: Pointer to the data
+  //   data: Pointer to the data
   //   length: Length of the data
   //   track_number: Track to add the data to. Value returned by Add track
   //                 functions.  The range of allowed values is [1, 126].
   //   timecode:     Absolute (not relative to cluster) timestamp of the
   //                 frame, expressed in timecode units.
   //   is_key:       Flag telling whether or not this frame is a key frame.
-  bool AddFrame(const uint8* frame, uint64 length, uint64 track_number,
+  bool AddFrame(const uint8* data, uint64 length, uint64 track_number,
                 uint64 timecode,  // timecode units (absolute)
                 bool is_key);
 
   // Adds a frame to be output in the file. The frame is written out through
   // |writer_| if successful. Returns true on success.
   // Inputs:
-  //   frame: Pointer to the data
+  //   data: Pointer to the data
   //   length: Length of the data
   //   additional: Pointer to the additional data
   //   additional_length: Length of the additional data
@@ -734,7 +888,7 @@ class Cluster {
   //   abs_timecode: Absolute (not relative to cluster) timestamp of the
   //                 frame, expressed in timecode units.
   //   is_key:       Flag telling whether or not this frame is a key frame.
-  bool AddFrameWithAdditional(const uint8* frame, uint64 length,
+  bool AddFrameWithAdditional(const uint8* data, uint64 length,
                               const uint8* additional, uint64 additional_length,
                               uint64 add_id, uint64 track_number,
                               uint64 abs_timecode, bool is_key);
@@ -742,7 +896,7 @@ class Cluster {
   // Adds a frame to be output in the file. The frame is written out through
   // |writer_| if successful. Returns true on success.
   // Inputs:
-  //   frame: Pointer to the data.
+  //   data: Pointer to the data.
   //   length: Length of the data.
   //   discard_padding: DiscardPadding element value.
   //   track_number: Track to add the data to. Value returned by Add track
@@ -750,14 +904,14 @@ class Cluster {
   //   abs_timecode: Absolute (not relative to cluster) timestamp of the
   //                 frame, expressed in timecode units.
   //   is_key:       Flag telling whether or not this frame is a key frame.
-  bool AddFrameWithDiscardPadding(const uint8* frame, uint64 length,
+  bool AddFrameWithDiscardPadding(const uint8* data, uint64 length,
                                   int64 discard_padding, uint64 track_number,
                                   uint64 abs_timecode, bool is_key);
 
   // Writes a frame of metadata to the output medium; returns true on
   // success.
   // Inputs:
-  //   frame: Pointer to the data
+  //   data: Pointer to the data
   //   length: Length of the data
   //   track_number: Track to add the data to. Value returned by Add track
   //                 functions.  The range of allowed values is [1, 126].
@@ -768,7 +922,7 @@ class Cluster {
   // The metadata frame is written as a block group, with a duration
   // sub-element but no reference time sub-elements (indicating that
   // it is considered a keyframe, per Matroska semantics).
-  bool AddMetadata(const uint8* frame, uint64 length, uint64 track_number,
+  bool AddMetadata(const uint8* data, uint64 length, uint64 track_number,
                    uint64 timecode, uint64 duration);
 
   // Increments the size of the cluster's data in bytes.
@@ -781,75 +935,29 @@ class Cluster {
   // Returns the size in bytes for the entire Cluster element.
   uint64 Size() const;
 
+  // Given |abs_timecode|, calculates timecode relative to most recent timecode.
+  // Returns -1 on failure, or a relative timecode.
+  int64 GetRelativeTimecode(int64 abs_timecode) const;
+
   int64 size_position() const { return size_position_; }
   int32 blocks_added() const { return blocks_added_; }
   uint64 payload_size() const { return payload_size_; }
   int64 position_for_cues() const { return position_for_cues_; }
   uint64 timecode() const { return timecode_; }
+  uint64 timecode_scale() const { return timecode_scale_; }
 
  private:
-  //  Signature that matches either of WriteSimpleBlock or WriteMetadataBlock
-  //  in the muxer utilities package.
-  typedef uint64 (*WriteBlock)(IMkvWriter* writer, const uint8* data,
-                               uint64 length, uint64 track_number,
-                               int64 timecode, uint64 generic_arg);
-
-  //  Signature that matches WriteBlockWithAdditional
-  //  in the muxer utilities package.
-  typedef uint64 (*WriteBlockAdditional)(IMkvWriter* writer, const uint8* data,
-                                         uint64 length, const uint8* additional,
-                                         uint64 add_id,
-                                         uint64 additional_length,
-                                         uint64 track_number, int64 timecode,
-                                         uint64 is_key);
-
-  //  Signature that matches WriteBlockWithDiscardPadding
-  //  in the muxer utilities package.
-  typedef uint64 (*WriteBlockDiscardPadding)(IMkvWriter* writer,
-                                             const uint8* data, uint64 length,
-                                             int64 discard_padding,
-                                             uint64 track_number,
-                                             int64 timecode, uint64 is_key);
-
   // Utility method that confirms that blocks can still be added, and that the
-  // cluster header has been written. Used by |DoWriteBlock*|. Returns true
+  // cluster header has been written. Used by |DoWriteFrame*|. Returns true
   // when successful.
-  template <typename Type>
-  bool PreWriteBlock(Type* write_function);
+  bool PreWriteBlock();
 
-  // Utility method used by the |DoWriteBlock*| methods that handles the book
+  // Utility method used by the |DoWriteFrame*| methods that handles the book
   // keeping required after each block is written.
   void PostWriteBlock(uint64 element_size);
 
-  // To simplify things, we require that there be fewer than 127
-  // tracks -- this allows us to serialize the track number value for
-  // a stream using a single byte, per the Matroska encoding.
-  bool IsValidTrackNumber(uint64 track_number) const;
-
-  // Given |abs_timecode|, calculates timecode relative to most recent timecode.
-  // Returns -1 on failure, or a relative timecode.
-  int64 GetRelativeTimecode(int64 abs_timecode) const;
-
-  //  Used to implement AddFrame and AddMetadata.
-  bool DoWriteBlock(const uint8* frame, uint64 length, uint64 track_number,
-                    uint64 absolute_timecode, uint64 generic_arg,
-                    WriteBlock write_block);
-
-  // Used to implement AddFrameWithAdditional
-  bool DoWriteBlockWithAdditional(const uint8* frame, uint64 length,
-                                  const uint8* additional,
-                                  uint64 additional_length, uint64 add_id,
-                                  uint64 track_number, uint64 absolute_timecode,
-                                  uint64 generic_arg,
-                                  WriteBlockAdditional write_block);
-
-  // Used to implement AddFrameWithDiscardPadding
-  bool DoWriteBlockWithDiscardPadding(const uint8* frame, uint64 length,
-                                      int64 discard_padding,
-                                      uint64 track_number,
-                                      uint64 absolute_timecode,
-                                      uint64 generic_arg,
-                                      WriteBlockDiscardPadding write_block);
+  // Does some verification and calls WriteFrame.
+  bool DoWriteFrame(const Frame* const frame);
 
   // Outputs the Cluster header to |writer_|. Returns true on success.
   bool WriteClusterHeader();
@@ -874,6 +982,9 @@ class Cluster {
 
   // The absolute timecode of the cluster.
   const uint64 timecode_;
+
+  // The timecode scale of the Segment containing the cluster.
+  const uint64 timecode_scale_;
 
   // Pointer to the writer object. Not owned by this class.
   IMkvWriter* writer_;
@@ -996,6 +1107,7 @@ class Segment {
     kBeforeClusters = 0x1  // Position Cues before Clusters
   };
 
+  const static uint32 kDefaultDocTypeVersion = 2;
   const static uint64 kDefaultMaxClusterDuration = 30000000000ULL;
 
   Segment();
@@ -1023,6 +1135,11 @@ class Segment {
   // populate its fields via the Chapter member functions.
   Chapter* AddChapter();
 
+  // Adds an empty tag to the tags of this segment.  Returns
+  // non-NULL on success.  After adding the tag, the caller should
+  // populate its fields via the Tag member functions.
+  Tag* AddTag();
+
   // Adds a cue point to the Cues element. |timestamp| is the time in
   // nanoseconds of the cue's time. |track| is the Track of the Cue. This
   // function must be called after AddFrame to calculate the correct
@@ -1031,19 +1148,19 @@ class Segment {
 
   // Adds a frame to be output in the file. Returns true on success.
   // Inputs:
-  //   frame: Pointer to the data
+  //   data: Pointer to the data
   //   length: Length of the data
   //   track_number: Track to add the data to. Value returned by Add track
   //                 functions.
   //   timestamp:    Timestamp of the frame in nanoseconds from 0.
   //   is_key:       Flag telling whether or not this frame is a key frame.
-  bool AddFrame(const uint8* frame, uint64 length, uint64 track_number,
+  bool AddFrame(const uint8* data, uint64 length, uint64 track_number,
                 uint64 timestamp_ns, bool is_key);
 
   // Writes a frame of metadata to the output medium; returns true on
   // success.
   // Inputs:
-  //   frame: Pointer to the data
+  //   data: Pointer to the data
   //   length: Length of the data
   //   track_number: Track to add the data to. Value returned by Add track
   //                 functions.
@@ -1054,13 +1171,13 @@ class Segment {
   // The metadata frame is written as a block group, with a duration
   // sub-element but no reference time sub-elements (indicating that
   // it is considered a keyframe, per Matroska semantics).
-  bool AddMetadata(const uint8* frame, uint64 length, uint64 track_number,
+  bool AddMetadata(const uint8* data, uint64 length, uint64 track_number,
                    uint64 timestamp_ns, uint64 duration_ns);
 
   // Writes a frame with additional data to the output medium; returns true on
   // success.
   // Inputs:
-  //   frame: Pointer to the data.
+  //   data: Pointer to the data.
   //   length: Length of the data.
   //   additional: Pointer to additional data.
   //   additional_length: Length of additional data.
@@ -1070,7 +1187,7 @@ class Segment {
   //   timestamp:    Absolute timestamp of the frame, expressed in nanosecond
   //                 units.
   //   is_key:       Flag telling whether or not this frame is a key frame.
-  bool AddFrameWithAdditional(const uint8* frame, uint64 length,
+  bool AddFrameWithAdditional(const uint8* data, uint64 length,
                               const uint8* additional, uint64 additional_length,
                               uint64 add_id, uint64 track_number,
                               uint64 timestamp, bool is_key);
@@ -1078,7 +1195,7 @@ class Segment {
   // Writes a frame with DiscardPadding to the output medium; returns true on
   // success.
   // Inputs:
-  //   frame: Pointer to the data.
+  //   data: Pointer to the data.
   //   length: Length of the data.
   //   discard_padding: DiscardPadding element value.
   //   track_number: Track to add the data to. Value returned by Add track
@@ -1086,7 +1203,7 @@ class Segment {
   //   timestamp:    Absolute timestamp of the frame, expressed in nanosecond
   //                 units.
   //   is_key:       Flag telling whether or not this frame is a key frame.
-  bool AddFrameWithDiscardPadding(const uint8* frame, uint64 length,
+  bool AddFrameWithDiscardPadding(const uint8* data, uint64 length,
                                   int64 discard_padding, uint64 track_number,
                                   uint64 timestamp, bool is_key);
 
@@ -1177,6 +1294,9 @@ class Segment {
   // Cues elements.
   bool CheckHeaderInfo();
 
+  // Sets |doc_type_version_| based on the current element requirements.
+  void UpdateDocTypeVersion();
+
   // Sets |name| according to how many chunks have been written. |ext| is the
   // file extension. |name| must be deleted by the calling app. Returns true
   // on success.
@@ -1233,7 +1353,7 @@ class Segment {
   // diff - indicates the difference in size of the Cues element that needs to
   //        accounted for.
   // index - index in the list of Cues which is currently being adjusted.
-  // cue_size - size of the Cues element.
+  // cue_size - sum of size of all the CuePoint elements.
   void MoveCuesBeforeClustersHelper(uint64 diff, int index, uint64* cue_size);
 
   // Seeds the random number generator used to make UIDs.
@@ -1245,6 +1365,7 @@ class Segment {
   SegmentInfo segment_info_;
   Tracks tracks_;
   Chapters chapters_;
+  Tags tags_;
 
   // Number of chunks written.
   int chunk_count_;
@@ -1316,6 +1437,9 @@ class Segment {
   // Last timestamp in nanoseconds added to a cluster.
   uint64 last_timestamp_;
 
+  // Last timestamp in nanoseconds by track number added to a cluster.
+  uint64 last_track_timestamp_[kMaxTrackNumber];
+
   // Maximum time in nanoseconds for a cluster duration. This variable is a
   // guideline and some clusters may have a longer duration. Default is 30
   // seconds.
@@ -1337,11 +1461,22 @@ class Segment {
   // Flag whether or not the muxer should output a Cues element.
   bool output_cues_;
 
+  // The size of the EBML header, used to validate the header if
+  // WriteEbmlHeader() is called more than once.
+  int32 ebml_header_size_;
+
   // The file position of the segment's payload.
   int64 payload_pos_;
 
   // The file position of the element's size.
   int64 size_position_;
+
+  // Current DocTypeVersion (|doc_type_version_|) and that written in
+  // WriteSegmentHeader().
+  // WriteEbmlHeader() will be called from Finalize() if |doc_type_version_|
+  // differs from |doc_type_version_written_|.
+  uint32 doc_type_version_;
+  uint32 doc_type_version_written_;
 
   // Pointer to the writer objects. Not owned by this class.
   IMkvWriter* writer_cluster_;

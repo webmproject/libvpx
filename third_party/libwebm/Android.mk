@@ -1,11 +1,10 @@
-LOCAL_PATH := $(call my-dir)
-include $(CLEAR_VARS)
+LOCAL_PATH:= $(call my-dir)
 
-LOCAL_CPP_EXTENSION := .cpp
-LOCAL_SRC_FILES := mkvmuxer.cpp \
-                   mkvmuxerutil.cpp \
-                   mkvparser.cpp \
-                   mkvreader.cpp \
-                   mkvwriter.cpp
-LOCAL_MODULE := libwebm
+include $(CLEAR_VARS)
+LOCAL_MODULE:= libwebm
+LOCAL_SRC_FILES:= mkvparser.cpp \
+                  mkvreader.cpp \
+                  mkvmuxer.cpp \
+                  mkvmuxerutil.cpp \
+                  mkvwriter.cpp
 include $(BUILD_STATIC_LIBRARY)
