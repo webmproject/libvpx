@@ -3925,7 +3925,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
     vp9_zero(x->zcoeff_blk);
 
-    if (cm->frame_type != KEY_FRAME && cpi->rc.frames_since_golden == 0)
+    if (cm->frame_type != KEY_FRAME &&
+        cpi->rc.frames_since_golden == 0 &&
+        !cpi->use_svc)
       cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
 
     if (sf->partition_search_type == SOURCE_VAR_BASED_PARTITION)

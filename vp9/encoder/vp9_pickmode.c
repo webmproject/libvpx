@@ -1157,12 +1157,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_denoiser_reset_frame_stats(ctx);
 #endif
 
-  if (cpi->rc.frames_since_golden == 0) {
+  if (cpi->rc.frames_since_golden == 0 && !cpi->use_svc) {
     usable_ref_frame = LAST_FRAME;
   } else {
     usable_ref_frame = GOLDEN_FRAME;
   }
-
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
 
