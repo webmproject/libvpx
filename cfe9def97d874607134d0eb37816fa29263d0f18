@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "aae91cd1_e2262269",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-05T01:24:53Z",
+      "side": 1,
+      "message": ",14",
+      "revId": "cfe9def97d874607134d0eb37816fa29263d0f18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aae91cd1_432355af",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-05T01:24:53Z",
+      "side": 1,
+      "message": "when left to update projects on its own (without PlatformToolset) vs2014 will set this to 14.0 as well as setting PlatformToolset. It doesn\u0027t modify projects with PlatformToolset set, however, so we can probably leave this as is for now.",
+      "revId": "cfe9def97d874607134d0eb37816fa29263d0f18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eda16e0d_3799da89",
         "filename": "vp8/common/generic/systemdependent.c",
         "patchSetId": 3
