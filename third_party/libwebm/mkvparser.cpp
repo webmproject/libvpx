@@ -23,7 +23,7 @@ void mkvparser::GetVersion(int& major, int& minor, int& build, int& revision) {
   major = 1;
   minor = 0;
   build = 0;
-  revision = 29;
+  revision = 30;
 }
 
 long long mkvparser::ReadUInt(IMkvReader* pReader, long long pos, long& len) {
@@ -219,8 +219,8 @@ long mkvparser::UnserializeFloat(IMkvReader* pReader, long long pos,
   return 0;
 }
 
-long mkvparser::UnserializeInt(IMkvReader* pReader, long long pos, long size,
-                               long long& result) {
+long mkvparser::UnserializeInt(IMkvReader* pReader, long long pos,
+                               long long size, long long& result) {
   assert(pReader);
   assert(pos >= 0);
   assert(size > 0);

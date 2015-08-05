@@ -32,7 +32,8 @@ long long ReadUInt(IMkvReader*, long long, long&);
 long long UnserializeUInt(IMkvReader*, long long pos, long long size);
 
 long UnserializeFloat(IMkvReader*, long long pos, long long size, double&);
-long UnserializeInt(IMkvReader*, long long pos, long len, long long& result);
+long UnserializeInt(IMkvReader*, long long pos, long long size,
+                    long long& result);
 
 long UnserializeString(IMkvReader*, long long pos, long long size, char*& str);
 
