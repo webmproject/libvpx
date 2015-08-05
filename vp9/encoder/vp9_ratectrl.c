@@ -635,6 +635,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   int adjustment = 0;
   int active_worst_quality;
   int ambient_qp;
+  unsigned int num_frames_weight_key = 5 * cpi->svc.number_temporal_layers;
   if (cm->frame_type == KEY_FRAME)
     return rc->worst_quality;
   // For ambient_qp we use minimum of avg_frame_qindex[KEY_FRAME/INTER_FRAME]
@@ -642,7 +643,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   // to worst_quality and updated with (3/4, 1/4) average in postencode_update.
   // So for first few frames following key, the qp of that key frame is weighted
   // into the active_worst_quality setting.
-  ambient_qp = (cm->current_video_frame < 5) ?
+  ambient_qp = (cm->current_video_frame < num_frames_weight_key) ?
       MIN(rc->avg_frame_qindex[INTER_FRAME], rc->avg_frame_qindex[KEY_FRAME]) :
       rc->avg_frame_qindex[INTER_FRAME];
   active_worst_quality = MIN(rc->worst_quality,
@@ -1286,6 +1287,18 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     rc->last_q[KEY_FRAME] = qindex;
     rc->avg_frame_qindex[KEY_FRAME] =
         ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[KEY_FRAME] + qindex, 2);
+    if (cpi->use_svc) {
+      int i = 0;
+      SVC *svc = &cpi->svc;
+      for (i = 0; i < svc->number_temporal_layers; ++i) {
+        const int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, i,
+                                           svc->number_temporal_layers);
+        LAYER_CONTEXT *lc = &svc->layer_context[layer];
+        RATE_CONTROL *lrc = &lc->rc;
+        lrc->last_q[KEY_FRAME] = rc->last_q[KEY_FRAME];
+        lrc->avg_frame_qindex[KEY_FRAME] = rc->avg_frame_qindex[KEY_FRAME];
+      }
+    }
   } else {
     if (rc->is_src_frame_alt_ref ||
         !(cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) ||
