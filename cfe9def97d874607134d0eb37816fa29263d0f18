@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4ac4207d_fcf9c590",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-05T21:46:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aae91cd1_e2262269",
+      "revId": "cfe9def97d874607134d0eb37816fa29263d0f18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aae91cd1_432355af",
         "filename": "build/make/gen_msvs_vcxproj.sh",
         "patchSetId": 3
