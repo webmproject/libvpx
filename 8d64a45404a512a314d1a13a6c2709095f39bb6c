@@ -46,6 +46,30 @@
       "revId": "8d64a45404a512a314d1a13a6c2709095f39bb6c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a09e4dc_c9227dab",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-06T22:35:06Z",
+      "side": 1,
+      "message": "It only affects chromium build. @johann is working on fixing the dependency issue there. This shouldn\u0027t block the jenkins unit test. And vp8/encoder/ssim.c will be removed right after this CL(?)",
+      "parentUuid": "6a09e4dc_2967b917",
+      "range": {
+        "startLine": 25,
+        "startChar": 37,
+        "endLine": 25,
+        "endChar": 45
+      },
+      "revId": "8d64a45404a512a314d1a13a6c2709095f39bb6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
