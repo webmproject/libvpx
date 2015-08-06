@@ -255,19 +255,6 @@ if ($opts{arch} =~ /x86/) {
 }
 
 #
-# Structured Similarity (SSIM)
-#
-if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
-    $opts{arch} eq "x86_64" and $sse2_on_x86_64 = "sse2";
-
-    add_proto qw/void vp8_ssim_parms_8x8/, "unsigned char *s, int sp, unsigned char *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr";
-    specialize qw/vp8_ssim_parms_8x8/, "$sse2_on_x86_64";
-
-    add_proto qw/void vp8_ssim_parms_16x16/, "unsigned char *s, int sp, unsigned char *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr";
-    specialize qw/vp8_ssim_parms_16x16/, "$sse2_on_x86_64";
-}
-
-#
 # Forward DCT
 #
 add_proto qw/void vp8_short_fdct4x4/, "short *input, short *output, int pitch";
