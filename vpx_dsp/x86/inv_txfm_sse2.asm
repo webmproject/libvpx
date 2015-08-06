@@ -70,8 +70,8 @@ SECTION .text
 %endmacro
 
 %macro ADD_STORE_4P_2X 5  ; src1, src2, tmp1, tmp2, zero
-  movq            m%3,       [outputq]
-  movq            m%4,       [outputq + strideq]
+  movd            m%3,       [outputq]
+  movd            m%4,       [outputq + strideq]
   punpcklbw       m%3,       m%5
   punpcklbw       m%4,       m%5
   paddw           m%1,       m%3
