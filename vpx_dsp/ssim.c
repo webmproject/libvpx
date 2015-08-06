@@ -14,9 +14,9 @@
 #include "vpx_ports/mem.h"
 
 void vpx_ssim_parms_16x16_c(uint8_t *s, int sp, uint8_t *r,
-                            int rp, unsigned long *sum_s, unsigned long *sum_r,
-                            unsigned long *sum_sq_s, unsigned long *sum_sq_r,
-                            unsigned long *sum_sxr) {
+                            int rp, uint32_t *sum_s, uint32_t *sum_r,
+                            uint32_t *sum_sq_s, uint32_t *sum_sq_r,
+                            uint32_t *sum_sxr) {
   int i, j;
   for (i = 0; i < 16; i++, s += sp, r += rp) {
     for (j = 0; j < 16; j++) {
@@ -29,9 +29,9 @@ void vpx_ssim_parms_16x16_c(uint8_t *s, int sp, uint8_t *r,
   }
 }
 void vpx_ssim_parms_8x8_c(uint8_t *s, int sp, uint8_t *r, int rp,
-                          unsigned long *sum_s, unsigned long *sum_r,
-                          unsigned long *sum_sq_s, unsigned long *sum_sq_r,
-                          unsigned long *sum_sxr) {
+                          uint32_t *sum_s, uint32_t *sum_r,
+                          uint32_t *sum_sq_s, uint32_t *sum_sq_r,
+                          uint32_t *sum_sxr) {
   int i, j;
   for (i = 0; i < 8; i++, s += sp, r += rp) {
     for (j = 0; j < 8; j++) {
@@ -65,9 +65,9 @@ void vpx_highbd_ssim_parms_8x8_c(uint16_t *s, int sp, uint16_t *r, int rp,
 static const int64_t cc1 =  26634;  // (64^2*(.01*255)^2
 static const int64_t cc2 = 239708;  // (64^2*(.03*255)^2
 
-static double similarity(unsigned long sum_s, unsigned long sum_r,
-                         unsigned long sum_sq_s, unsigned long sum_sq_r,
-                         unsigned long sum_sxr, int count) {
+static double similarity(uint32_t sum_s, uint32_t sum_r,
+                         uint32_t sum_sq_s, uint32_t sum_sq_r,
+                         uint32_t sum_sxr, int count) {
   int64_t ssim_n, ssim_d;
   int64_t c1, c2;
 
@@ -86,7 +86,7 @@ static double similarity(unsigned long sum_s, unsigned long sum_r,
 }
 
 static double ssim_8x8(uint8_t *s, int sp, uint8_t *r, int rp) {
-  unsigned long sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
+  uint32_t sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
   vpx_ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
                      &sum_sxr);
   return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64);

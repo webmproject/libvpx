@@ -994,10 +994,10 @@ specialize qw/vpx_sad4x4x4d msa/, "$sse_x86inc";
 # Structured Similarity (SSIM)
 #
 if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
-    add_proto qw/void vpx_ssim_parms_8x8/, "uint8_t *s, int sp, uint8_t *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr";
+    add_proto qw/void vpx_ssim_parms_8x8/, "uint8_t *s, int sp, uint8_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
     specialize qw/vpx_ssim_parms_8x8/, "$sse2_x86_64";
 
-    add_proto qw/void vpx_ssim_parms_16x16/, "uint8_t *s, int sp, uint8_t *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr";
+    add_proto qw/void vpx_ssim_parms_16x16/, "uint8_t *s, int sp, uint8_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
     specialize qw/vpx_ssim_parms_16x16/, "$sse2_x86_64";
 }
 

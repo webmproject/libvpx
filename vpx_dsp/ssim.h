@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_ENCODER_VP9_SSIM_H_
-#define VPX_ENCODER_VP9_SSIM_H_
+#ifndef VPX_DSP_SSIM_H_
+#define VPX_DSP_SSIM_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,19 +29,19 @@ void vpx_reset_mmx_state(void);
 // metrics used for calculating ssim, ssim2, dssim, and ssimc
 typedef struct {
   // source sum ( over 8x8 region )
-  uint64_t sum_s;
+  uint32_t sum_s;
 
   // reference sum (over 8x8 region )
-  uint64_t sum_r;
+  uint32_t sum_r;
 
   // source sum squared ( over 8x8 region )
-  uint64_t sum_sq_s;
+  uint32_t sum_sq_s;
 
   // reference sum squared (over 8x8 region )
-  uint64_t sum_sq_r;
+  uint32_t sum_sq_r;
 
   // sum of source times reference (over 8x8 region)
-  uint64_t sum_sxr;
+  uint32_t sum_sxr;
 
   // calculated ssim score between source and reference
   double ssim;
@@ -102,4 +102,4 @@ double vpx_highbd_calc_ssimg(YV12_BUFFER_CONFIG *source,
 }  // extern "C"
 #endif
 
-#endif  // VPX_ENCODER_VP9_SSIM_H_
+#endif  // VPX_DSP_SSIM_H_
