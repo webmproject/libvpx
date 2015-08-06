@@ -109,6 +109,40 @@ endif
 VP9_PREFIX=vp9/
 $(BUILD_PFX)$(VP9_PREFIX)%.c.o: CFLAGS += -Wextra
 
+#  VP10 make file
+ifneq ($(CONFIG_VP10_ENCODER)$(CONFIG_VP10_DECODER),)
+  VP10_PREFIX=vp10/
+  include $(SRC_PATH_BARE)/$(VP10_PREFIX)vp10_common.mk
+endif
+
+ifeq ($(CONFIG_VP10_ENCODER),yes)
+  VP10_PREFIX=vp10/
+  include $(SRC_PATH_BARE)/$(VP10_PREFIX)vp10cx.mk
+  CODEC_SRCS-yes += $(addprefix $(VP10_PREFIX),$(call enabled,VP10_CX_SRCS))
+  CODEC_EXPORTS-yes += $(addprefix $(VP10_PREFIX),$(VP10_CX_EXPORTS))
+  CODEC_SRCS-yes += $(VP10_PREFIX)vp10cx.mk vpx/vp8.h vpx/vp8cx.h
+  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
+  INSTALL-LIBS-$(CONFIG_SPATIAL_SVC) += include/vpx/svc_context.h
+  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP10_PREFIX)/%
+  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
+  CODEC_DOC_SECTIONS += vp9 vp9_encoder
+endif
+
+ifeq ($(CONFIG_VP10_DECODER),yes)
+  VP10_PREFIX=vp10/
+  include $(SRC_PATH_BARE)/$(VP10_PREFIX)vp10dx.mk
+  CODEC_SRCS-yes += $(addprefix $(VP10_PREFIX),$(call enabled,VP10_DX_SRCS))
+  CODEC_EXPORTS-yes += $(addprefix $(VP10_PREFIX),$(VP10_DX_EXPORTS))
+  CODEC_SRCS-yes += $(VP10_PREFIX)vp10dx.mk vpx/vp8.h vpx/vp8dx.h
+  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
+  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP10_PREFIX)/%
+  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
+  CODEC_DOC_SECTIONS += vp9 vp9_decoder
+endif
+
+VP10_PREFIX=vp10/
+$(BUILD_PFX)$(VP10_PREFIX)%.c.o: CFLAGS += -Wextra
+
 ifeq ($(CONFIG_ENCODERS),yes)
   CODEC_DOC_SECTIONS += encoder
 endif

@@ -13,10 +13,10 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx/vpx_encoder.h"
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 #include "vpx/vp8cx.h"
 #endif
-#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER
+#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER || CONFIG_VP10_DECODER
 #include "vpx/vp8dx.h"
 #endif
 
@@ -233,6 +233,8 @@ class VP9CodecFactory : public CodecFactory {
                                                int usage) const {
 #if CONFIG_VP9_ENCODER
     return vpx_codec_enc_config_default(&vpx_codec_vp9_cx_algo, cfg, usage);
+#elif CONFIG_VP10_ENCODER
+    return vpx_codec_enc_config_default(&vpx_codec_vp10_cx_algo, cfg, usage);
 #else
     return VPX_CODEC_INCAPABLE;
 #endif
@@ -251,7 +253,96 @@ const libvpx_test::VP9CodecFactory kVP9;
 #define VP9_INSTANTIATE_TEST_CASE(test, ...)
 #endif  // CONFIG_VP9
 
+/*
+ * VP10 Codec Definitions
+ */
+#if CONFIG_VP10
+class VP10Decoder : public Decoder {
+ public:
+  VP10Decoder(vpx_codec_dec_cfg_t cfg, unsigned long deadline)
+      : Decoder(cfg, deadline) {}
+
+  VP10Decoder(vpx_codec_dec_cfg_t cfg, const vpx_codec_flags_t flag,
+              unsigned long deadline)  // NOLINT
+      : Decoder(cfg, flag, deadline) {}
+
+ protected:
+  virtual vpx_codec_iface_t* CodecInterface() const {
+#if CONFIG_VP10_DECODER
+    return &vpx_codec_vp10_dx_algo;
+#else
+    return NULL;
+#endif
+  }
+};
+
+class VP10Encoder : public Encoder {
+ public:
+  VP10Encoder(vpx_codec_enc_cfg_t cfg, unsigned long deadline,
+              const unsigned long init_flags, TwopassStatsStore *stats)
+      : Encoder(cfg, deadline, init_flags, stats) {}
+
+ protected:
+  virtual vpx_codec_iface_t* CodecInterface() const {
+#if CONFIG_VP10_ENCODER
+    return &vpx_codec_vp10_cx_algo;
+#else
+    return NULL;
+#endif
+  }
+};
+
+class VP10CodecFactory : public CodecFactory {
+ public:
+  VP10CodecFactory() : CodecFactory() {}
+
+  virtual Decoder* CreateDecoder(vpx_codec_dec_cfg_t cfg,
+                                 unsigned long deadline) const {
+    return CreateDecoder(cfg, 0, deadline);
+  }
+
+  virtual Decoder* CreateDecoder(vpx_codec_dec_cfg_t cfg,
+                                 const vpx_codec_flags_t flags,
+                                 unsigned long deadline) const {  // NOLINT
+#if CONFIG_VP10_DECODER
+    return new VP10Decoder(cfg, flags, deadline);
+#else
+    return NULL;
+#endif
+  }
+
+  virtual Encoder* CreateEncoder(vpx_codec_enc_cfg_t cfg,
+                                 unsigned long deadline,
+                                 const unsigned long init_flags,
+                                 TwopassStatsStore *stats) const {
+#if CONFIG_VP10_ENCODER
+    return new VP10Encoder(cfg, deadline, init_flags, stats);
+#else
+    return NULL;
+#endif
+  }
+
+  virtual vpx_codec_err_t DefaultEncoderConfig(vpx_codec_enc_cfg_t *cfg,
+                                               int usage) const {
+#if CONFIG_VP10_ENCODER
+    return vpx_codec_enc_config_default(&vpx_codec_vp10_cx_algo, cfg, usage);
+#else
+    return VPX_CODEC_INCAPABLE;
+#endif
+  }
+};
+
+const libvpx_test::VP10CodecFactory kVP10;
+
+#define VP10_INSTANTIATE_TEST_CASE(test, ...)\
+  INSTANTIATE_TEST_CASE_P(VP10, test, \
+      ::testing::Combine( \
+          ::testing::Values(static_cast<const libvpx_test::CodecFactory*>( \
+               &libvpx_test::kVP10)), \
+          __VA_ARGS__))
+#else
+#define VP10_INSTANTIATE_TEST_CASE(test, ...)
+#endif  // CONFIG_VP10
 
 }  // namespace libvpx_test
-
 #endif  // TEST_CODEC_FACTORY_H_

@@ -32,10 +32,10 @@
 #include "./ivfenc.h"
 #include "./tools_common.h"
 
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 #include "vpx/vp8cx.h"
 #endif
-#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER
+#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER || CONFIG_VP10_ENCODER
 #include "vpx/vp8dx.h"
 #endif
 
@@ -374,7 +374,7 @@ static const int vp8_arg_ctrl_map[] = {
 };
 #endif
 
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 static const arg_def_t cpu_used_vp9 = ARG_DEF(
     NULL, "cpu-used", 1, "CPU Used (-8..8)");
 static const arg_def_t tile_cols = ARG_DEF(
@@ -495,7 +495,7 @@ void usage_exit(void) {
   fprintf(stderr, "\nVP8 Specific Options:\n");
   arg_show_usage(stderr, vp8_args);
 #endif
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
   fprintf(stderr, "\nVP9 Specific Options:\n");
   arg_show_usage(stderr, vp9_args);
 #endif
@@ -745,9 +745,9 @@ static int compare_img(const vpx_image_t *const img1,
 
 #define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
 #define MAX(x,y) ((x)>(y)?(x):(y))
-#if CONFIG_VP8_ENCODER && !CONFIG_VP9_ENCODER
+#if CONFIG_VP8_ENCODER && !(CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER)
 #define ARG_CTRL_CNT_MAX NELEMENTS(vp8_arg_ctrl_map)
-#elif !CONFIG_VP8_ENCODER && CONFIG_VP9_ENCODER
+#elif !CONFIG_VP8_ENCODER && (CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER)
 #define ARG_CTRL_CNT_MAX NELEMENTS(vp9_arg_ctrl_map)
 #else
 #define ARG_CTRL_CNT_MAX MAX(NELEMENTS(vp8_arg_ctrl_map), \
@@ -916,7 +916,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   }
   /* Validate global config */
   if (global->passes == 0) {
-#if CONFIG_VP9_ENCODER
+#if CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
     // Make default VP9 passes = 2 until there is a better quality 1-pass
     // encoder
     if (global->codec != NULL && global->codec->name != NULL)
@@ -1071,6 +1071,13 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
 #endif
 #if CONFIG_VP9_ENCODER
   } else if (strcmp(global->codec->name, "vp9") == 0) {
+    ctrl_args = vp9_args;
+    ctrl_args_map = vp9_arg_ctrl_map;
+#endif
+#if CONFIG_VP10_ENCODER
+  } else if (strcmp(global->codec->name, "vp10") == 0) {
+    // TODO(jingning): Reuse VP9 specific encoder configuration parameters.
+    // Consider to expand this set for VP10 encoder control.
     ctrl_args = vp9_args;
     ctrl_args_map = vp9_arg_ctrl_map;
 #endif
