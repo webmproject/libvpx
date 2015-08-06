@@ -65,7 +65,7 @@ class ConsistencyTestBase : public ::testing::Test {
     vpx_free(reference_data_[1]);
     reference_data_[1] = NULL;
 
-    delete ssim_array_;
+    delete[] ssim_array_;
   }
 
   virtual void TearDown() {
