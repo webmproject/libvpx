@@ -45,6 +45,10 @@ static int get_cpu_count()
 #endif
 #elif defined(_WIN32)
     {
+#if _WIN32_WINNT >= 0x0501
+        SYSTEM_INFO sysinfo;
+        GetNativeSystemInfo(&sysinfo);
+#else
         PGNSI pGNSI;
         SYSTEM_INFO sysinfo;
 
@@ -57,6 +61,7 @@ static int get_cpu_count()
             pGNSI(&sysinfo);
         else
             GetSystemInfo(&sysinfo);
+#endif
 
         core_count = sysinfo.dwNumberOfProcessors;
     }
