@@ -261,17 +261,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_fdct8x8_quant sse2 ssse3 neon/;
 }
 
-#
-# Structured Similarity (SSIM)
-#
-if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
-    add_proto qw/void vp9_ssim_parms_8x8/, "uint8_t *s, int sp, uint8_t *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr";
-    specialize qw/vp9_ssim_parms_8x8/, "$sse2_x86_64";
-
-    add_proto qw/void vp9_ssim_parms_16x16/, "uint8_t *s, int sp, uint8_t *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr";
-    specialize qw/vp9_ssim_parms_16x16/, "$sse2_x86_64";
-}
-
 # fdct functions
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
@@ -329,14 +318,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_highbd_quantize_fp_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vp9_highbd_quantize_fp_32x32/;
-
-  #
-  # Structured Similarity (SSIM)
-  #
-  if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
-    add_proto qw/void vp9_highbd_ssim_parms_8x8/, "uint16_t *s, int sp, uint16_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
-    specialize qw/vp9_highbd_ssim_parms_8x8/;
-  }
 
   # fdct functions
   add_proto qw/void vp9_highbd_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
