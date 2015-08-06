@@ -237,8 +237,7 @@ static void subtract_stats(FIRSTPASS_STATS *section,
 #define MIN_ACTIVE_AREA 0.5
 #define MAX_ACTIVE_AREA 1.0
 static double calculate_active_area(const VP9_COMP *cpi,
-                                    const FIRSTPASS_STATS *this_frame)
-{
+                                    const FIRSTPASS_STATS *this_frame) {
   double active_pct;
 
   active_pct = 1.0 -

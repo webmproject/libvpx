@@ -1704,7 +1704,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
           }
         }
         break;
-      };
+      }
 #endif
     } else if (best_address == in_what) {
       (*num00)++;
