@@ -459,7 +459,10 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   cr->time_for_refresh = 0;
   // Use larger delta-qp (increase rate_ratio_qdelta) for first few (~4)
   // periods of the refresh cycle, after a key frame.
-  if (rc->frames_since_key <  4 * cr->percent_refresh)
+  // Account for larger interval on base layer for temporal layers.
+  if (cr->percent_refresh > 0 &&
+      rc->frames_since_key <  (4 * cpi->svc.number_temporal_layers) *
+      (100 / cr->percent_refresh))
     cr->rate_ratio_qdelta = 3.0;
   else
     cr->rate_ratio_qdelta = 2.0;
