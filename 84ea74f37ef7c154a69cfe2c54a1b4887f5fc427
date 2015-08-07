@@ -16,6 +16,24 @@
       "revId": "84ea74f37ef7c154a69cfe2c54a1b4887f5fc427",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "070ea328_5dedcb82",
+        "filename": "vpx_dsp/psnrhvs.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-08-07T19:00:35Z",
+      "side": 1,
+      "message": "Updating these ones because they are pretty harmless. \n\nIn general I\u0027m trying to make life a little easier for the inliner, ISRA, and the linker while trying to stay as close to the originally imported code as possible.",
+      "parentUuid": "47141b33_82654096",
+      "revId": "84ea74f37ef7c154a69cfe2c54a1b4887f5fc427",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
