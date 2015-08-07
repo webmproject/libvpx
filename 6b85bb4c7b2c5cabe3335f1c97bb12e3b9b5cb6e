@@ -46,6 +46,30 @@
       "revId": "6b85bb4c7b2c5cabe3335f1c97bb12e3b9b5cb6e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "273ac7f6_e0a1e2a9",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-08-07T22:51:18Z",
+      "side": 1,
+      "message": "Make sense. Can you make a short comment here, so that when others read this code they will not get confused or take it as a mistake.",
+      "parentUuid": "a7a8775c_b95643a2",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 1
+      },
+      "revId": "6b85bb4c7b2c5cabe3335f1c97bb12e3b9b5cb6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
