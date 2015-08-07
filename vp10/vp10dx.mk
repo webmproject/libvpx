@@ -15,7 +15,7 @@ VP10_DX_SRCS-no  += $(VP10_COMMON_SRCS-no)
 VP10_DX_SRCS_REMOVE-yes += $(VP10_COMMON_SRCS_REMOVE-yes)
 VP10_DX_SRCS_REMOVE-no  += $(VP10_COMMON_SRCS_REMOVE-no)
 
-VP10_DX_SRCS-yes += vp9_dx_iface.c
+VP10_DX_SRCS-yes += vp10_dx_iface.c
 
 VP10_DX_SRCS-yes += decoder/vp9_decodemv.c
 VP10_DX_SRCS-yes += decoder/vp9_decodeframe.c
