@@ -81,7 +81,8 @@ double vpx_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
 double vpx_calc_fastssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
                          double *ssim_y, double *ssim_u, double *ssim_v);
 
-double vpx_psnrhvs(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
+double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
+                   const YV12_BUFFER_CONFIG *dest,
                    double *ssim_y, double *ssim_u, double *ssim_v);
 
 #if CONFIG_VP9_HIGHBITDEPTH
