@@ -34,6 +34,24 @@
       "revId": "a95f4d961e7b2f606f5e9f39fe3a9209c97ff859",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "273ac7f6_60d79234",
+        "filename": "codereview.settings",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-08-07T22:40:24Z",
+      "side": 1,
+      "message": "I got that much from the change subject. I was wondering what was going on underneath. Anyway, assuming jenkins doesn\u0027t explode I\u0027ll push this into the repo since it\u0027s mostly harmless:\n\n- most libvpx developers won\u0027t have depot_tools\n- those that do are highly unlikely to use git cl unintentionally\n- setting up the for-master alias when making a fresh libvpx clone is a tedious extra step when depot_tools is available",
+      "parentUuid": "67303f13_6264b615",
+      "revId": "a95f4d961e7b2f606f5e9f39fe3a9209c97ff859",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
