@@ -16,6 +16,24 @@
       "revId": "3b8925c667f3a2b2a61346913ece966478cd22bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7242fa6_1c399d8b",
+        "filename": "vp10/vp10_common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-07T18:00:33Z",
+      "side": 1,
+      "message": "The vp9_ prefix in file names has been resolved in next CL.\nhttps://chromium-review.googlesource.com/#/c/291471/\n\nand the function names:\nhttps://chromium-review.googlesource.com/#/c/291463/\n\nI intentionally leave the three make vp10 make file with vp10_ prefix for a short period. Will remove them as well after the VP10 codebase is landed.",
+      "parentUuid": "ea26b49b_cf3295ab",
+      "revId": "3b8925c667f3a2b2a61346913ece966478cd22bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
