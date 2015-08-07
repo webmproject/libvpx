@@ -50,11 +50,6 @@ MV average_split_mvs(const struct macroblockd_plane *pd, const MODE_INFO *mi,
 MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
                              int bw, int bh, int ss_x, int ss_y);
 
-void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
-                                   int bw, int bh,
-                                   int x, int y, int w, int h,
-                                   int mi_x, int mi_y);
-
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize);
 
