@@ -11,6 +11,7 @@
  *  project.
  */
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
