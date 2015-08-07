@@ -1,12 +1,12 @@
 sub vp10_common_forward_decls() {
 print <<EOF
 /*
- * VP9
+ * VP10
  */
 
 #include "vpx/vpx_integer.h"
-#include "vp10/common/vp9_common.h"
-#include "vp10/common/vp9_enums.h"
+#include "vp10/common/common.h"
+#include "vp10/common/enums.h"
 
 struct macroblockd;
 

@@ -16,9 +16,9 @@
 #include "vpx_ports/vpx_once.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vpx_version.h"
-#include "vp10/encoder/vp9_encoder.h"
+#include "vp10/encoder/encoder.h"
 #include "vpx/vp8cx.h"
-#include "vp10/encoder/vp9_firstpass.h"
+#include "vp10/encoder/firstpass.h"
 #include "vp10/vp10_iface_common.h"
 
 struct vp10_extracfg {

@@ -17,17 +17,17 @@ VP10_DX_SRCS_REMOVE-no  += $(VP10_COMMON_SRCS_REMOVE-no)
 
 VP10_DX_SRCS-yes += vp10_dx_iface.c
 
-VP10_DX_SRCS-yes += decoder/vp9_decodemv.c
-VP10_DX_SRCS-yes += decoder/vp9_decodeframe.c
-VP10_DX_SRCS-yes += decoder/vp9_decodeframe.h
-VP10_DX_SRCS-yes += decoder/vp9_detokenize.c
-VP10_DX_SRCS-yes += decoder/vp9_decodemv.h
-VP10_DX_SRCS-yes += decoder/vp9_detokenize.h
-VP10_DX_SRCS-yes += decoder/vp9_dthread.c
-VP10_DX_SRCS-yes += decoder/vp9_dthread.h
-VP10_DX_SRCS-yes += decoder/vp9_decoder.c
-VP10_DX_SRCS-yes += decoder/vp9_decoder.h
-VP10_DX_SRCS-yes += decoder/vp9_dsubexp.c
-VP10_DX_SRCS-yes += decoder/vp9_dsubexp.h
+VP10_DX_SRCS-yes += decoder/decodemv.c
+VP10_DX_SRCS-yes += decoder/decodeframe.c
+VP10_DX_SRCS-yes += decoder/decodeframe.h
+VP10_DX_SRCS-yes += decoder/detokenize.c
+VP10_DX_SRCS-yes += decoder/decodemv.h
+VP10_DX_SRCS-yes += decoder/detokenize.h
+VP10_DX_SRCS-yes += decoder/dthread.c
+VP10_DX_SRCS-yes += decoder/dthread.h
+VP10_DX_SRCS-yes += decoder/decoder.c
+VP10_DX_SRCS-yes += decoder/decoder.h
+VP10_DX_SRCS-yes += decoder/dsubexp.c
+VP10_DX_SRCS-yes += decoder/dsubexp.h
 
 VP10_DX_SRCS-yes := $(filter-out $(VP10_DX_SRCS_REMOVE-yes),$(VP10_DX_SRCS-yes))

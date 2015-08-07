@@ -20,11 +20,11 @@
 #include "vpx_dsp/bitreader_buffer.h"
 #include "vpx_util/vpx_thread.h"
 
-#include "vp10/common/vp9_alloccommon.h"
-#include "vp10/common/vp9_frame_buffers.h"
+#include "vp10/common/alloccommon.h"
+#include "vp10/common/frame_buffers.h"
 
-#include "vp10/decoder/vp9_decoder.h"
-#include "vp10/decoder/vp9_decodeframe.h"
+#include "vp10/decoder/decoder.h"
+#include "vp10/decoder/decodeframe.h"
 
 #include "vp10/vp10_iface_common.h"
 
