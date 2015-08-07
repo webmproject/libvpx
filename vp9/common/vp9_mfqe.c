@@ -120,8 +120,8 @@ static void copy_mem32x32(const uint8_t *src, int src_stride,
                 dst + dst_stride * 16 + 16, dst_stride);
 }
 
-void copy_mem64x64(const uint8_t *src, int src_stride,
-                   uint8_t *dst, int dst_stride) {
+static void copy_mem64x64(const uint8_t *src, int src_stride,
+                          uint8_t *dst, int dst_stride) {
   copy_mem32x32(src, src_stride, dst, dst_stride);
   copy_mem32x32(src + 32, src_stride, dst + 32, dst_stride);
   copy_mem32x32(src + src_stride * 32, src_stride,
