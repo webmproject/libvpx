@@ -2219,7 +2219,6 @@ void vp9_decode_frame(VP9Decoder *pbi,
     } else {
       vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                          "Decode failed. Frame data is corrupted.");
-
     }
   } else {
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);

@@ -560,7 +560,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
                        is_compound, allow_hp, r)) {
           xd->corrupted |= 1;
           break;
-        };
+        }
 
         mi->bmi[j].as_mv[0].as_int = block[0].as_int;
         if (is_compound)

@@ -26,11 +26,11 @@
 #include "vp9/common/vp9_textblit.h"
 
 #if CONFIG_VP9_POSTPROC
-static const short kernel5[] = {
+static const int16_t kernel5[] = {
   1, 1, 4, 1, 1
 };
 
-const short vp9_rv[] = {
+const int16_t vp9_rv[] = {
   8, 5, 2, 2, 8, 12, 4, 9, 8, 3,
   0, 3, 9, 0, 0, 0, 8, 3, 14, 4,
   10, 1, 11, 14, 1, 14, 9, 6, 12, 11,
@@ -320,7 +320,7 @@ void vp9_mbpost_proc_down_c(uint8_t *dst, int pitch,
     int sumsq = 0;
     int sum   = 0;
     uint8_t d[16];
-    const short *rv2 = rv3 + ((c * 17) & 127);
+    const int16_t *rv2 = rv3 + ((c * 17) & 127);
 
     for (i = -8; i <= 6; i++) {
       sumsq += s[i * pitch] * s[i * pitch];
