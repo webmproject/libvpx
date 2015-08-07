@@ -13,8 +13,8 @@
 #include <math.h>
 #include <string.h>
 #include "./vpx_config.h"
-#include "./vp9_rtcd.h"
-#include "vp9/encoder/vp9_ssim.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/ssim.h"
 /* TODO(jbb): High bit depth version of this code needed */
 typedef struct fs_level fs_level;
 typedef struct fs_ctx fs_ctx;
@@ -443,10 +443,10 @@ static double convert_ssim_db(double _ssim, double _weight) {
   return 10 * (log10(_weight) - log10(_weight - _ssim));
 }
 
-double vp9_calc_fastssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
+double vpx_calc_fastssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
                          double *ssim_y, double *ssim_u, double *ssim_v) {
   double ssimv;
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   *ssim_y = calc_ssim(source->y_buffer, source->y_stride, dest->y_buffer,
                       dest->y_stride, source->y_crop_width,

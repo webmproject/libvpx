@@ -22,6 +22,10 @@ DSP_SRCS-yes += bitwriter.h
 DSP_SRCS-yes += bitwriter.c
 DSP_SRCS-yes += bitwriter_buffer.c
 DSP_SRCS-yes += bitwriter_buffer.h
+DSP_SRCS-$(CONFIG_INTERNAL_STATS) += ssim.c
+DSP_SRCS-$(CONFIG_INTERNAL_STATS) += ssim.h
+DSP_SRCS-$(CONFIG_INTERNAL_STATS) += psnrhvs.c
+DSP_SRCS-$(CONFIG_INTERNAL_STATS) += fastssim.c
 endif
 
 ifeq ($(CONFIG_DECODERS),yes)
@@ -294,6 +298,10 @@ DSP_SRCS-$(HAVE_MMX)    += x86/variance_impl_mmx.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_impl_avx2.c
+
+ifeq ($(ARCH_X86_64),yes)
+DSP_SRCS-$(HAVE_SSE2)   += x86/ssim_opt_x86_64.asm
+endif  # ARCH_X86_64
 
 ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/subpel_variance_sse2.asm  # Contains SSE2 and SSSE3

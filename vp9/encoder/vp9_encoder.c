@@ -18,6 +18,9 @@
 #include "./vpx_scale_rtcd.h"
 #include "vpx/internal/vpx_psnr.h"
 #include "vpx_dsp/vpx_filter.h"
+#if CONFIG_INTERNAL_STATS
+#include "vpx_dsp/ssim.h"
+#endif
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
@@ -51,9 +54,6 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_skin_detection.h"
 #include "vp9/encoder/vp9_speed_features.h"
-#if CONFIG_INTERNAL_STATS
-#include "vp9/encoder/vp9_ssim.h"
-#endif
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
 
@@ -4416,13 +4416,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
-            frame_ssim2 = vp9_highbd_calc_ssim(orig, recon, &weight,
+            frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight,
                                                (int)cm->bit_depth);
           } else {
-            frame_ssim2 = vp9_calc_ssim(orig, recon, &weight);
+            frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
           }
 #else
-          frame_ssim2 = vp9_calc_ssim(orig, recon, &weight);
+          frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->worst_ssim= MIN(cpi->worst_ssim, frame_ssim2);
@@ -4431,13 +4431,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
-            frame_ssim2 = vp9_highbd_calc_ssim(
+            frame_ssim2 = vpx_highbd_calc_ssim(
                 orig, &cm->post_proc_buffer, &weight, (int)cm->bit_depth);
           } else {
-            frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+            frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
           }
 #else
-          frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+          frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->summedp_quality += frame_ssim2 * weight;
@@ -4472,7 +4472,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         if (!cm->use_highbitdepth)
 #endif
         {
-          double this_inconsistency = vp9_get_ssim_metrics(
+          double this_inconsistency = vpx_get_ssim_metrics(
               cpi->Source->y_buffer, cpi->Source->y_stride,
               cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
               cpi->Source->y_width, cpi->Source->y_height, cpi->ssim_vars,
@@ -4492,14 +4492,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         double y, u, v, frame_all;
 #if CONFIG_VP9_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          frame_all = vp9_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
+          frame_all = vpx_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
                                             &u, &v, (int)cm->bit_depth);
         } else {
-          frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
+          frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
                                      &v);
         }
 #else
-        frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
+        frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         adjust_image_stat(y, u, v, frame_all, &cpi->ssimg);
       }
@@ -4508,7 +4508,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
       {
         double y, u, v, frame_all;
-        frame_all = vp9_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
+        frame_all = vpx_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
                                       &v);
         adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
         /* TODO(JBB): add 10/12 bit support */
@@ -4518,7 +4518,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
       {
         double y, u, v, frame_all;
-        frame_all = vp9_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
+        frame_all = vpx_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
         adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
       }
     }
