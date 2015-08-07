@@ -16,6 +16,24 @@
       "revId": "a95f4d961e7b2f606f5e9f39fe3a9209c97ff859",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67303f13_6264b615",
+        "filename": "codereview.settings",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1001629
+      },
+      "writtenOn": "2015-08-07T22:33:29Z",
+      "side": 1,
+      "message": "It makes it so that you can run `git cl upload` and have that do the right thing.",
+      "parentUuid": "47333b20_014a0a7b",
+      "revId": "a95f4d961e7b2f606f5e9f39fe3a9209c97ff859",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
