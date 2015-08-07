@@ -444,7 +444,8 @@ static double convert_ssim_db(double _ssim, double _weight) {
   return 10 * (log10(_weight) - log10(_weight - _ssim));
 }
 
-double vpx_calc_fastssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
+double vpx_calc_fastssim(const YV12_BUFFER_CONFIG *source,
+                         const YV12_BUFFER_CONFIG *dest,
                          double *ssim_y, double *ssim_u, double *ssim_v) {
   double ssimv;
   vpx_clear_system_state();
