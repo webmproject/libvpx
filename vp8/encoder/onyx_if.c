@@ -74,26 +74,7 @@ extern const int vp8_gf_interval_table[101];
 
 #if CONFIG_INTERNAL_STATS
 #include "math.h"
-
-extern double vp8_calc_ssim
-(
-    YV12_BUFFER_CONFIG *source,
-    YV12_BUFFER_CONFIG *dest,
-    int lumamask,
-    double *weight
-);
-
-
-extern double vp8_calc_ssimg
-(
-    YV12_BUFFER_CONFIG *source,
-    YV12_BUFFER_CONFIG *dest,
-    double *ssim_y,
-    double *ssim_u,
-    double *ssim_v
-);
-
-
+#include "vpx_dsp/ssim.h"
 #endif
 
 
@@ -5741,8 +5722,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                     cpi->total_sq_error2 += sq_error2;
                     cpi->totalp  += frame_psnr2;
 
-                    frame_ssim2 = vp8_calc_ssim(cpi->Source,
-                      &cm->post_proc_buffer, 1, &weight);
+                    frame_ssim2 = vpx_calc_ssim(cpi->Source,
+                      &cm->post_proc_buffer, &weight);
 
                     cpi->summed_quality += frame_ssim2 * weight;
                     cpi->summed_weights += weight;
@@ -5772,7 +5753,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
             if (cpi->b_calculate_ssimg)
             {
                 double y, u, v, frame_all;
-                frame_all =  vp8_calc_ssimg(cpi->Source, cm->frame_to_show,
+                frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show,
                     &y, &u, &v);
 
                 if (cpi->oxcf.number_of_layers > 1)

@@ -65,7 +65,6 @@ VP8_CX_SRCS-yes += encoder/ratectrl.c
 VP8_CX_SRCS-yes += encoder/rdopt.c
 VP8_CX_SRCS-yes += encoder/segmentation.c
 VP8_CX_SRCS-yes += encoder/segmentation.h
-VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/ssim.c
 VP8_CX_SRCS-yes += encoder/tokenize.c
 VP8_CX_SRCS-yes += encoder/dct_value_cost.h
 VP8_CX_SRCS-yes += encoder/dct_value_tokens.h
@@ -97,7 +96,6 @@ VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/temporal_filter_apply_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp8_enc_stubs_sse2.c
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_mmx.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodeopt.asm
-VP8_CX_SRCS-$(ARCH_X86_64) += encoder/x86/ssim_opt_x86_64.asm
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-$(HAVE_SSE2) += encoder/x86/temporal_filter_apply_sse2.asm
