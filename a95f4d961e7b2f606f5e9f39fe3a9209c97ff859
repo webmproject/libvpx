@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47333b20_014a0a7b",
+        "filename": "codereview.settings",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-08-07T22:30:52Z",
+      "side": 1,
+      "message": "What does this actually do? In libvpx we recommend setting up a remote named for-master with the following settings:\n\n    url \u003d https://chromium-review.googlesource.com/webm/webm-tools\n    push \u003d HEAD:refs/for/master\n\nWhich we then use this way:\n    $ git push for-master\n\n\nSo we don\u0027t have to:\n    $ git push https://chromium-review.googlesource.com/webm/webm-tools HEAD:refs/for/master\n\n\nThis is just another way of doing the same thing, correct?\n\nAlso, the webm/libvpx part of the repo URL, is it inferred based on project name?",
+      "revId": "a95f4d961e7b2f606f5e9f39fe3a9209c97ff859",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
