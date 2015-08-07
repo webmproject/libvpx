@@ -63,10 +63,6 @@ static int sse_diff_thresh(BLOCK_SIZE bs, int increase_denoising,
   }
 }
 
-int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
-}
-
 static int total_adj_weak_thresh(BLOCK_SIZE bs, int increase_denoising) {
   return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
 }
