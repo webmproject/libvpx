@@ -2488,9 +2488,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   // We don't include the cost of the second reference here, because there
-  // are only three options: Last/Golden, ARF/Last or Golden/ARF, or in other
-  // words if you present them in that order, the second one is always known
-  // if the first is known.
+  // are only two options: Last/ARF or Golden/ARF; The second one is always
+  // known, which is ARF.
   //
   // Under some circumstances we discount the cost of new mv mode to encourage
   // initiation of a motion field.
