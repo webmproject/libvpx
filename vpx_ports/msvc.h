@@ -18,5 +18,14 @@
 #  define snprintf _snprintf
 # endif  // _MSC_VER < 1900
 
+#if _MSC_VER < 1800  // VS2013 provides round
+static INLINE double round(double x) {
+  if (x < 0)
+    return ceil(x - 0.5);
+  else
+    return floor(x + 0.5);
+}
+#endif  // _MSC_VER < 1800
+
 #endif  // _MSC_VER
 #endif  // VPX_PORTS_MSVC_H_

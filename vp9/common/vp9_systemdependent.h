@@ -33,16 +33,6 @@ void vpx_reset_mmx_state(void);
 #define vp9_clear_system_state()
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1800
-// round is not defined in MSVC before VS2013.
-static INLINE double round(double x) {
-  if (x < 0)
-    return ceil(x - 0.5);
-  else
-    return floor(x + 0.5);
-}
-#endif
-
 // use GNU builtins where available.
 #if defined(__GNUC__) && \
     ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || __GNUC__ >= 4)
