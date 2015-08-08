@@ -35,11 +35,11 @@ void vpx_reset_mmx_state(void);
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
 // round is not defined in MSVC before VS2013.
-static INLINE int round(double x) {
+static INLINE double round(double x) {
   if (x < 0)
-    return (int)ceil(x - 0.5);
+    return ceil(x - 0.5);
   else
-    return (int)floor(x + 0.5);
+    return floor(x + 0.5);
 }
 #endif
 
