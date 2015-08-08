@@ -19,6 +19,7 @@
 # endif  // _MSC_VER < 1900
 
 #if _MSC_VER < 1800  // VS2013 provides round
+#include <math.h>
 static INLINE double round(double x) {
   if (x < 0)
     return ceil(x - 0.5);
