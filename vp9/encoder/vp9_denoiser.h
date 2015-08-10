@@ -57,7 +57,12 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
                        int border);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising);
+// This function is used by both c and sse2 denoiser implementations.
+// Define it as a static function within the scope where vp9_denoiser.h
+// is referenced.
+static int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising) {
+  return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
+}
 #endif
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser);
