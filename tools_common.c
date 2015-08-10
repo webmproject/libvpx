@@ -130,6 +130,8 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
   return shortread;
 }
 
+#if CONFIG_ENCODERS
+
 static const VpxInterface vpx_encoders[] = {
 #if CONFIG_VP8_ENCODER
   {"vp8", VP8_FOURCC, &vpx_codec_vp8_cx},
@@ -159,6 +161,10 @@ const VpxInterface *get_vpx_encoder_by_name(const char *name) {
 
   return NULL;
 }
+
+#endif  // CONFIG_ENCODERS
+
+#if CONFIG_DECODERS
 
 static const VpxInterface vpx_decoders[] = {
 #if CONFIG_VP8_DECODER
@@ -201,6 +207,8 @@ const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc) {
 
   return NULL;
 }
+
+#endif  // CONFIG_DECODERS
 
 // TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
 // of vpx_image_t support
