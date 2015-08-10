@@ -49,11 +49,11 @@
 ;    int sp,
 ;    unsigned char *r,
 ;    int rp
-;    unsigned long *sum_s,
-;    unsigned long *sum_r,
-;    unsigned long *sum_sq_s,
-;    unsigned long *sum_sq_r,
-;    unsigned long *sum_sxr);
+;    uint32_t *sum_s,
+;    uint32_t *sum_r,
+;    uint32_t *sum_sq_s,
+;    uint32_t *sum_sq_r,
+;    uint32_t *sum_sxr);
 ;
 ; TODO: Use parm passing through structure, probably don't need the pxors
 ; ( calling app will initialize to 0 ) could easily fit everything in sse2
@@ -139,11 +139,11 @@ sym(vpx_ssim_parms_16x16_sse2):
 ;    int sp,
 ;    unsigned char *r,
 ;    int rp
-;    unsigned long *sum_s,
-;    unsigned long *sum_r,
-;    unsigned long *sum_sq_s,
-;    unsigned long *sum_sq_r,
-;    unsigned long *sum_sxr);
+;    uint32_t *sum_s,
+;    uint32_t *sum_r,
+;    uint32_t *sum_sq_s,
+;    uint32_t *sum_sq_r,
+;    uint32_t *sum_sxr);
 ;
 ; TODO: Use parm passing through structure, probably don't need the pxors
 ; ( calling app will initialize to 0 ) could easily fit everything in sse2
