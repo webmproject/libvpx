@@ -16,6 +16,24 @@
       "revId": "c7e9e486b8e0d1cdf5100c7d8a858b4d935910bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67e67f2a_98075d25",
+        "filename": "third_party/x86inc/x86inc.asm.new",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-10T19:02:51Z",
+      "side": 1,
+      "message": "upstream dropped a lot of aout changes ... i\u0027m not sure we want to carry all those changes ourselves",
+      "parentUuid": "87a3737f_462ad4b6",
+      "revId": "c7e9e486b8e0d1cdf5100c7d8a858b4d935910bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
