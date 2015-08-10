@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47c41b7d_19b24b7c",
+        "filename": "vpx_dsp/ssim.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-08-10T15:38:54Z",
+      "side": 1,
+      "message": "There are mixed uses of unsigned int and uint32_t? maybe we could choose one to use consistently, uint32_t?",
+      "range": {
+        "startLine": 98,
+        "startChar": 51,
+        "endLine": 98,
+        "endChar": 53
+      },
+      "revId": "26f4f2dc8edd95c0fb9192d832ca0b601782804b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67e67f2a_528f94b4",
+        "filename": "vpx_dsp/ssim.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-08-10T15:38:54Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 138,
+        "startChar": 60,
+        "endLine": 138,
+        "endChar": 61
+      },
+      "revId": "26f4f2dc8edd95c0fb9192d832ca0b601782804b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
