@@ -87,13 +87,19 @@
     %ifidn __OUTPUT_FORMAT__,macho32
         SECTION .text align=%1
         fakegot:
+    %elifidn __OUTPUT_FORMAT__,aout
+        SECTION .text
     %else
         SECTION .rodata align=%1
     %endif
 %endmacro
 
 %macro SECTION_TEXT 0-1 16
-    SECTION .text align=%1
+    %ifidn __OUTPUT_FORMAT__,aout
+        SECTION .text
+    %else
+        SECTION .text align=%1
+    %endif
 %endmacro
 
 ; PIC macros are copied from vpx_ports/x86_abi_support.asm. The "define PIC"

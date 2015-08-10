@@ -18,3 +18,4 @@ Avoid 'amdnop' when building with nasm.
 Set 'private_extern' visibility for macho targets.
 Copy PIC 'GLOBAL' macros from x86_abi_support.asm
 Use .text instead of .rodata on macho to avoid broken tables in PIC mode.
+Use .text with no alignment for aout
