@@ -14,12 +14,12 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/system_state.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
-#include "vp9/common/vp9_systemdependent.h"
 
 
 static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
@@ -410,7 +410,7 @@ void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
                                golden_ref, cpi->Source);
   }
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   separate_arf_mbs(cpi);
 }

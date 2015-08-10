@@ -17,13 +17,13 @@
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_scale/yv12config.h"
 
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconinter.h"  // vp9_setup_dst_planes()
-#include "vp9/common/vp9_systemdependent.h"
 #include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_encodeframe.h"
@@ -545,7 +545,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   }
 #endif
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   intra_factor = 0.0;
   brightness_factor = 0.0;
@@ -656,7 +656,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       const int mb_index = mb_row * cm->mb_cols + mb_col;
 #endif
 
-      vp9_clear_system_state();
+      vpx_clear_system_state();
 
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
@@ -707,7 +707,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-      vp9_clear_system_state();
+      vpx_clear_system_state();
       log_intra = log(this_error + 1.0);
       if (log_intra < 10.0)
         intra_factor += 1.0 + ((10.0 - log_intra) * 0.05);
@@ -877,7 +877,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 #endif
 
         if (motion_error <= this_error) {
-          vp9_clear_system_state();
+          vpx_clear_system_state();
 
           // Keep a count of cases where the inter and intra were very close
           // and very low. This helps with scene cut detection for example in
@@ -1012,7 +1012,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     x->plane[2].src.buf += uv_mb_height * x->plane[1].src.stride -
                            uv_mb_height * cm->mb_cols;
 
-    vp9_clear_system_state();
+    vpx_clear_system_state();
   }
 
   // Clamp the image start to rows/2. This number of rows is discarded top
@@ -1890,7 +1890,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     vp9_zero(twopass->gf_group);
   }
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
   vp9_zero(next_frame);
 
   // Load stats for the current frame.
@@ -2631,7 +2631,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     return;
   }
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   if (cpi->oxcf.rc_mode == VPX_Q) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;

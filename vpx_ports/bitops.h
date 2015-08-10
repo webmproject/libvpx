@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
-#define VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
+#ifndef VPX_PORTS_BITOPS_H_
+#define VPX_PORTS_BITOPS_H_
 
 #include "vpx_ports/msvc.h"
 
@@ -23,14 +23,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#include "./vpx_config.h"
-#if ARCH_X86 || ARCH_X86_64
-void vpx_reset_mmx_state(void);
-#define vp9_clear_system_state() vpx_reset_mmx_state()
-#else
-#define vp9_clear_system_state()
 #endif
 
 // use GNU builtins where available.
@@ -71,4 +63,4 @@ static INLINE int get_msb(unsigned int n) {
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
+#endif  // VPX_PORTS_BITOPS_H_

@@ -18,14 +18,6 @@ extern "C" {
 #include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 
-// TODO(aconverse): Unify vp8/vp9_clear_system_state
-#if ARCH_X86 || ARCH_X86_64
-void vpx_reset_mmx_state(void);
-#define vpx_clear_system_state() vpx_reset_mmx_state()
-#else
-#define vpx_clear_system_state()
-#endif
-
 // metrics used for calculating ssim, ssim2, dssim, and ssimc
 typedef struct {
   // source sum ( over 8x8 region )

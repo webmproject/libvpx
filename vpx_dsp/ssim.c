@@ -12,6 +12,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ssim.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 
 void vpx_ssim_parms_16x16_c(const uint8_t *s, int sp, const uint8_t *r,
                             int rp, uint32_t *sum_s, uint32_t *sum_r,

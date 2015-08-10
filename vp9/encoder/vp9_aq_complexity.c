@@ -10,6 +10,7 @@
 
 #include <limits.h>
 #include <math.h>
+#include "vpx_ports/system_state.h"
 
 #include "vp9/encoder/vp9_aq_complexity.h"
 #include "vp9/encoder/vp9_aq_variance.h"
@@ -47,7 +48,7 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
   struct segmentation *const seg = &cm->seg;
 
   // Make SURE use of floating point in this function is safe.
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   if (cm->frame_type == KEY_FRAME ||
       cpi->refresh_alt_ref_frame ||
@@ -133,7 +134,7 @@ void vp9_caq_select_segment(VP9_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
     double low_var_thresh;
     const int aq_strength = get_aq_c_strength(cm->base_qindex, cm->bit_depth);
 
-    vp9_clear_system_state();
+    vpx_clear_system_state();
     low_var_thresh = (cpi->oxcf.pass == 2)
       ? MAX(cpi->twopass.mb_av_energy, MIN_DEFAULT_LV_THRESH)
       : DEFAULT_LV_THRESH;

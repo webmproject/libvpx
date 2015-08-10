@@ -17,6 +17,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ssim.h"
+#include "vpx_ports/system_state.h"
 
 #if !defined(M_PI)
 # define M_PI (3.141592653589793238462643)

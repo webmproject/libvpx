@@ -16,6 +16,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ssim.h"
+#include "vpx_ports/system_state.h"
 /* TODO(jbb): High bit depth version of this code needed */
 typedef struct fs_level fs_level;
 typedef struct fs_ctx fs_ctx;

@@ -16,6 +16,7 @@
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
@@ -28,7 +29,6 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_scan.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_encodemb.h"

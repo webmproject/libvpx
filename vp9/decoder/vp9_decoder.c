@@ -17,6 +17,7 @@
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_once.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
@@ -30,7 +31,6 @@
 #endif
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconintra.h"
-#include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_decoder.h"
@@ -365,7 +365,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     decrease_ref_count(cm->new_fb_idx, frame_bufs, pool);
     unlock_buffer_pool(pool);
 
-    vp9_clear_system_state();
+    vpx_clear_system_state();
     return -1;
   }
 
@@ -374,7 +374,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   swap_frame_buffers(pbi);
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   if (!cm->show_existing_frame) {
     cm->last_show_frame = cm->show_frame;
@@ -440,7 +440,7 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   *sd = *cm->frame_to_show;
   ret = 0;
 #endif /*!CONFIG_POSTPROC*/
-  vp9_clear_system_state();
+  vpx_clear_system_state();
   return ret;
 }
 

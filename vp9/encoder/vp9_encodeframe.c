@@ -18,6 +18,7 @@
 
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vpx_ports/system_state.h"
 
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
@@ -29,7 +30,6 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
 
 #include "vp9/encoder/vp9_aq_complexity.h"
@@ -1152,7 +1152,7 @@ static int set_segment_rdmult(VP9_COMP *const cpi,
   int segment_qindex;
   VP9_COMMON *const cm = &cpi->common;
   vp9_init_plane_quantizers(cpi, x);
-  vp9_clear_system_state();
+  vpx_clear_system_state();
   segment_qindex = vp9_get_qindex(&cm->seg, segment_id,
                                   cm->base_qindex);
   return vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
@@ -1173,7 +1173,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
   const AQ_MODE aq_mode = cpi->oxcf.aq_mode;
   int i, orig_rdmult;
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   // Use the lower precision, but faster, 32x32 fdct for mode selection.
   x->use_lp32x32fdct = 1;

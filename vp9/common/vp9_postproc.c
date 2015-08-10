@@ -17,12 +17,12 @@
 #include "./vp9_rtcd.h"
 
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_scale/yv12config.h"
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_postproc.h"
-#include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_textblit.h"
 
 #if CONFIG_VP9_POSTPROC
@@ -544,7 +544,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
   double sigma;
   int ai = a, qi = q, i;
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   sigma = ai + .5 + .6 * (63 - qi) / 63.0;
 
@@ -638,7 +638,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     return 0;
   }
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   // Alloc memory for prev_mip in the first frame.
   if (cm->current_video_frame == 1) {
