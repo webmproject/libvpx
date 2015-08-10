@@ -4085,8 +4085,8 @@ static void check_src_altref(VP9_COMP *cpi,
 }
 
 #if CONFIG_INTERNAL_STATS
-extern double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
-                                 const unsigned char *img2, int img2_pitch,
+extern double vp9_get_blockiness(const uint8_t *img1, int img1_pitch,
+                                 const uint8_t *img2, int img2_pitch,
                                  int width, int height);
 
 static void adjust_image_stat(double y, double u, double v, double all,

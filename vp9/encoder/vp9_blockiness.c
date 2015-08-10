@@ -7,16 +7,9 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include <stdlib.h>
 
-#include "./vp9_rtcd.h"
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
-#include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_filter.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/vpx_convolve.h"
-#include "vpx_dsp/vpx_filter.h"
-#include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"
 
 static int horizontal_filter(const uint8_t *s) {
@@ -55,8 +48,8 @@ static int variance(int sum, int sum_squared, int size) {
 // var_1 = (r0^2+r1^2+r2^2+r3^2) - ((r0 + r1 + r2 + r3) / 4 )^2
 // The returned blockiness is the scaled value
 // Reconstructed blockiness / ( 1 + var_0 + var_1 ) ;
-int blockiness_vertical(const uint8_t *s, int sp, const uint8_t *r, int rp,
-                        int size) {
+static int blockiness_vertical(const uint8_t *s, int sp, const uint8_t *r,
+                               int rp, int size) {
   int s_blockiness = 0;
   int r_blockiness = 0;
   int sum_0 = 0;
@@ -87,8 +80,8 @@ int blockiness_vertical(const uint8_t *s, int sp, const uint8_t *r, int rp,
 
 // Calculate a blockiness level for a horizontal block edge
 // same as above.
-int blockiness_horizontal(const uint8_t *s, int sp, const uint8_t *r, int rp,
-                          int size) {
+static int blockiness_horizontal(const uint8_t *s, int sp, const uint8_t *r,
+                                 int rp, int size) {
   int s_blockiness = 0;
   int r_blockiness = 0;
   int sum_0 = 0;
@@ -119,9 +112,9 @@ int blockiness_horizontal(const uint8_t *s, int sp, const uint8_t *r, int rp,
 
 // This function returns the blockiness for the entire frame currently by
 // looking at all borders in steps of 4.
-double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
-                          const unsigned char *img2, int img2_pitch,
-                          int width, int height ) {
+double vp9_get_blockiness(const uint8_t *img1, int img1_pitch,
+                          const uint8_t *img2, int img2_pitch,
+                          int width, int height) {
   double blockiness = 0;
   int i, j;
   vpx_clear_system_state();
