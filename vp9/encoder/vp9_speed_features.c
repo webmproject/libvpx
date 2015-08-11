@@ -394,6 +394,11 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->adaptive_rd_thresh = 3;
     sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
+    if (cpi->svc.number_temporal_layers > 2 &&
+        cpi->svc.temporal_layer_id == 0) {
+      sf->mv.search_method = NSTEP;
+      sf->mv.fullpel_search_step_param = 6;
+    }
   }
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
