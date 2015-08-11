@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "a716b7fe_94a1c481",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-11T18:25:14Z",
+      "side": 1,
+      "message": "No, in gerrit this is a duplicate of the line below it",
+      "parentUuid": "67ae7ffb_f2ebe89d",
+      "revId": "56f1b7ede319c36105015e95799bec0cbf240d0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7cf2b9d_8fc5e985",
         "filename": "vpx_dsp/vpx_dsp.mk",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "HAVE_SSE sorts before HAVE_SSE2",
       "parentUuid": "c7cf2b9d_8fc5e985",
+      "revId": "56f1b7ede319c36105015e95799bec0cbf240d0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0706a3cf_3779d83b",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-11T18:25:14Z",
+      "side": 1,
+      "message": "yes, but does sad_sse2 sort before or after sad4d_sse2? they\u0027re sorted in opposite directions between HAVE_SSE and HAVE_SSE2 here.",
+      "parentUuid": "c7172bfa_55f3ac5f",
       "revId": "56f1b7ede319c36105015e95799bec0cbf240d0a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
