@@ -16,7 +16,6 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/common/vp9_systemdependent.h"
 
 // TODO(hkuang): Don't need to lock the whole pool after implementing atomic
 // frame reference count.

@@ -16,6 +16,7 @@
 #include "vpx_dsp/bitwriter_buffer.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem_ops.h"
+#include "vpx_ports/system_state.h"
 
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
@@ -23,7 +24,6 @@
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
 
 #include "vp9/encoder/vp9_cost.h"
@@ -1240,7 +1240,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
   data += uncompressed_hdr_size;
 
-  vp9_clear_system_state();
+  vpx_clear_system_state();
 
   first_part_size = write_compressed_header(cpi, data);
   data += first_part_size;

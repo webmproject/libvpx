@@ -19,7 +19,7 @@
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
-#include "vp9/common/vp9_systemdependent.h"
+#include "vpx_ports/bitops.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -11,6 +11,8 @@
 #include <limits.h>
 #include <math.h>
 
+#include "vpx_ports/system_state.h"
+
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 
 #include "vp9/common/vp9_seg_common.h"
@@ -506,7 +508,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     int qindex_delta = 0;
     int qindex2;
     const double q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
-    vp9_clear_system_state();
+    vpx_clear_system_state();
     // Set rate threshold to some multiple (set to 2 for now) of the target
     // rate (target is given by sb64_target_rate and scaled by 256).
     cr->thresh_rate_sb = ((int64_t)(rc->sb64_target_rate) << 8) << 2;

@@ -45,7 +45,6 @@ VP9_COMMON_SRCS-yes += common/vp9_scale.h
 VP9_COMMON_SRCS-yes += common/vp9_scale.c
 VP9_COMMON_SRCS-yes += common/vp9_seg_common.h
 VP9_COMMON_SRCS-yes += common/vp9_seg_common.c
-VP9_COMMON_SRCS-yes += common/vp9_systemdependent.h
 VP9_COMMON_SRCS-yes += common/vp9_textblit.h
 VP9_COMMON_SRCS-yes += common/vp9_tile_common.h
 VP9_COMMON_SRCS-yes += common/vp9_tile_common.c

@@ -11,6 +11,7 @@
 #include <math.h>
 
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 
 #include "vp9/encoder/vp9_aq_variance.h"
 
@@ -19,7 +20,6 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_segmentation.h"
-#include "vp9/common/vp9_systemdependent.h"
 
 #define ENERGY_MIN (-4)
 #define ENERGY_MAX (1)
@@ -56,7 +56,7 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
 
     seg->abs_delta = SEGMENT_DELTADATA;
 
-    vp9_clear_system_state();
+    vpx_clear_system_state();
 
     for (i = 0; i < MAX_SEGMENTS; ++i) {
       int qindex_delta =
@@ -191,7 +191,7 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
 
 double vp9_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   unsigned int var = block_variance(cpi, x, bs);
-  vp9_clear_system_state();
+  vpx_clear_system_state();
   return log(var + 1.0);
 }
 
@@ -199,7 +199,7 @@ double vp9_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
 int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   double energy;
   double energy_midpoint;
-  vp9_clear_system_state();
+  vpx_clear_system_state();
   energy_midpoint =
     (cpi->oxcf.pass == 2) ? cpi->twopass.mb_av_energy : DEFAULT_E_MIDPOINT;
   energy = vp9_log_block_var(cpi, x, bs) - energy_midpoint;
