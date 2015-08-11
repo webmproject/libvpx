@@ -282,6 +282,60 @@ void vpx_convolve_avg_c(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
+void vpx_scaled_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
+                        uint8_t *dst, ptrdiff_t dst_stride,
+                        const int16_t *filter_x, int x_step_q4,
+                        const int16_t *filter_y, int y_step_q4,
+                        int w, int h) {
+  vpx_convolve8_horiz_c(src, src_stride, dst, dst_stride, filter_x, x_step_q4,
+                        filter_y, y_step_q4, w, h);
+}
+
+void vpx_scaled_vert_c(const uint8_t *src, ptrdiff_t src_stride,
+                       uint8_t *dst, ptrdiff_t dst_stride,
+                       const int16_t *filter_x, int x_step_q4,
+                       const int16_t *filter_y, int y_step_q4,
+                       int w, int h) {
+  vpx_convolve8_vert_c(src, src_stride, dst, dst_stride, filter_x, x_step_q4,
+                       filter_y, y_step_q4, w, h);
+}
+
+void vpx_scaled_2d_c(const uint8_t *src, ptrdiff_t src_stride,
+                     uint8_t *dst, ptrdiff_t dst_stride,
+                     const int16_t *filter_x, int x_step_q4,
+                     const int16_t *filter_y, int y_step_q4,
+                     int w, int h) {
+  vpx_convolve8_c(src, src_stride, dst, dst_stride, filter_x, x_step_q4,
+                  filter_y, y_step_q4, w, h);
+}
+
+void vpx_scaled_avg_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
+                            uint8_t *dst, ptrdiff_t dst_stride,
+                            const int16_t *filter_x, int x_step_q4,
+                            const int16_t *filter_y, int y_step_q4,
+                            int w, int h) {
+  vpx_convolve8_avg_horiz_c(src, src_stride, dst, dst_stride, filter_x,
+                            x_step_q4, filter_y, y_step_q4, w, h);
+}
+
+void vpx_scaled_avg_vert_c(const uint8_t *src, ptrdiff_t src_stride,
+                           uint8_t *dst, ptrdiff_t dst_stride,
+                           const int16_t *filter_x, int x_step_q4,
+                           const int16_t *filter_y, int y_step_q4,
+                           int w, int h) {
+  vpx_convolve8_avg_vert_c(src, src_stride, dst, dst_stride, filter_x,
+                           x_step_q4, filter_y, y_step_q4, w, h);
+}
+
+void vpx_scaled_avg_2d_c(const uint8_t *src, ptrdiff_t src_stride,
+                     uint8_t *dst, ptrdiff_t dst_stride,
+                     const int16_t *filter_x, int x_step_q4,
+                     const int16_t *filter_y, int y_step_q4,
+                     int w, int h) {
+  vpx_convolve8_avg_c(src, src_stride, dst, dst_stride, filter_x, x_step_q4,
+                      filter_y, y_step_q4, w, h);
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
 static void highbd_convolve_horiz(const uint8_t *src8, ptrdiff_t src_stride,
                                   uint8_t *dst8, ptrdiff_t dst_stride,
