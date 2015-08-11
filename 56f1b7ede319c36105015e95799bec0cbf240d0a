@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "470c1bee_fc02a515",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-08-11T19:03:04Z",
+      "side": 1,
+      "message": "So what does \"--disable-sse --enable-sse2\" even provide? We already mix and match instructions from lower instruction sets? Is use no code that uses sse ops unless they are mixed with ops from newer instruction sets get anyone anything productive?",
+      "parentUuid": "67ae7ffb_f2ebe89d",
+      "revId": "56f1b7ede319c36105015e95799bec0cbf240d0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7cf2b9d_8fc5e985",
         "filename": "vpx_dsp/vpx_dsp.mk",
         "patchSetId": 1
