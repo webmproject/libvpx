@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "67ae7ffb_f2ebe89d",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-11T18:17:22Z",
+      "side": 1,
+      "message": "it\u0027s HAVE_SSE vs. HAVE_SSE2 they can go to SSE if we disallow --disable-sse --enable-sse2",
+      "parentUuid": "47c41b7d_139ea4eb",
+      "revId": "56f1b7ede319c36105015e95799bec0cbf240d0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7cf2b9d_8fc5e985",
         "filename": "vpx_dsp/vpx_dsp.mk",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-11T15:21:51Z",
       "side": 1,
       "message": "either sse is same order (4d, then regular) or sse2 is reordered (regular, then 4d)",
+      "revId": "56f1b7ede319c36105015e95799bec0cbf240d0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7172bfa_55f3ac5f",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-11T18:17:22Z",
+      "side": 1,
+      "message": "HAVE_SSE sorts before HAVE_SSE2",
+      "parentUuid": "c7cf2b9d_8fc5e985",
       "revId": "56f1b7ede319c36105015e95799bec0cbf240d0a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
