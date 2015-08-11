@@ -31,6 +31,7 @@ typedef void filter8_1dfunction (
                                     const int16_t *filter_x, int x_step_q4, \
                                     const int16_t *filter_y, int y_step_q4, \
                                     int w, int h) { \
+  assert(filter[3] != 128); \
   if (step_q4 == 16 && filter[3] != 128) { \
     if (filter[0] || filter[1] || filter[2]) { \
       while (w >= 16) { \
@@ -102,11 +103,6 @@ typedef void filter8_1dfunction (
       } \
     } \
   } \
-  if (w) { \
-    vpx_scaled_##name(src, src_stride, dst, dst_stride, \
-                      filter_x, x_step_q4, filter_y, y_step_q4, \
-                      w, h); \
-  } \
 }
 
 #define FUN_CONV_2D(avg, opt) \
@@ -115,6 +111,8 @@ void vpx_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
                               const int16_t *filter_x, int x_step_q4, \
                               const int16_t *filter_y, int y_step_q4, \
                               int w, int h) { \
+  assert(filter_x[3] != 128); \
+  assert(filter_y[3] != 128); \
   assert(w <= 64); \
   assert(h <= 64); \
   if (x_step_q4 == 16 && y_step_q4 == 16) { \
@@ -136,9 +134,6 @@ void vpx_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
                                       filter_x, x_step_q4, filter_y, \
                                       y_step_q4, w, h); \
     } \
-  } else { \
-    vpx_scaled_##avg##2d(src, src_stride, dst, dst_stride, \
-                         filter_x, x_step_q4, filter_y, y_step_q4, w, h); \
   } \
 }
 
