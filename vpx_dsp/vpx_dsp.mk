@@ -36,7 +36,7 @@ DSP_SRCS-yes += bitreader_buffer.h
 endif
 
 # intra predictions
-ifeq ($(CONFIG_VP9),yes)
+ifneq ($(filter yes,$(CONFIG_VP9) $(CONFIG_VP10)),)
 DSP_SRCS-yes += intrapred.c
 
 ifeq ($(CONFIG_USE_X86INC),yes)
@@ -56,7 +56,7 @@ DSP_SRCS-$(HAVE_MSA) += mips/intrapred_msa.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred4_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred8_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred16_dspr2.c
-endif  # CONFIG_VP9
+endif  # CONFIG_VP9 || CONFIG_VP10
 
 DSP_SRCS-$(HAVE_DSPR2)  += mips/common_dspr2.h
 DSP_SRCS-$(HAVE_DSPR2)  += mips/common_dspr2.c
@@ -156,7 +156,7 @@ DSP_SRCS-yes            += txfm_common.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/txfm_common_sse2.h
 DSP_SRCS-$(HAVE_MSA)    += mips/txfm_macros_msa.h
 # forward transform
-ifeq ($(CONFIG_VP9_ENCODER),yes)
+ifneq ($(filter yes,$(CONFIG_VP9_ENCODER) $(CONFIG_VP10_ENCODER)),)
 DSP_SRCS-yes            += fwd_txfm.c
 DSP_SRCS-yes            += fwd_txfm.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_sse2.h
@@ -174,10 +174,10 @@ DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c
-endif  # CONFIG_VP9_ENCODER
+endif  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
 # inverse transform
-ifeq ($(CONFIG_VP9),yes)
+ifneq ($(filter yes,$(CONFIG_VP9) $(CONFIG_VP10)),)
 DSP_SRCS-yes            += inv_txfm.h
 DSP_SRCS-yes            += inv_txfm.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/inv_txfm_sse2.h
@@ -227,10 +227,10 @@ DSP_SRCS-$(HAVE_DSPR2) += mips/itrans16_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans32_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans32_cols_dspr2.c
 endif  # CONFIG_VP9_HIGHBITDEPTH
-endif  # CONFIG_VP9
+endif  # CONFIG_VP9 || CONFIG_VP10
 
 # quantization
-ifeq ($(CONFIG_VP9_ENCODER),yes)
+ifneq ($(filter yes, $(CONFIG_VP9_ENCODER) $(CONFIG_VP10_ENCODER)),)
 DSP_SRCS-yes            += quantize.c
 DSP_SRCS-yes            += quantize.h
 
@@ -243,7 +243,7 @@ ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSSE3) += x86/quantize_ssse3_x86_64.asm
 endif
 endif
-endif  # CONFIG_VP9_ENCODER
+endif  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes            += sad.c

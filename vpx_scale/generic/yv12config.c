@@ -114,7 +114,7 @@ int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
   return -2;
 }
 
-#if CONFIG_VP9
+#if CONFIG_VP9 || CONFIG_VP10
 // TODO(jkoleszar): Maybe replace this with struct vpx_image
 
 int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {

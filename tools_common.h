@@ -62,6 +62,7 @@
 
 #define VP8_FOURCC 0x30385056
 #define VP9_FOURCC 0x30395056
+#define VP10_FOURCC 0x303a5056
 
 enum VideoFileType {
   FILE_TYPE_RAW,

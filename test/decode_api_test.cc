@@ -27,6 +27,9 @@ TEST(DecodeAPI, InvalidParams) {
 #if CONFIG_VP9_DECODER
     &vpx_codec_vp9_dx_algo,
 #endif
+#if CONFIG_VP10_DECODER
+    &vpx_codec_vp10_dx_algo,
+#endif
   };
   uint8_t buf[1] = {0};
   vpx_codec_ctx_t dec;

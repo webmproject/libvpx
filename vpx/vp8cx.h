@@ -45,6 +45,14 @@ extern vpx_codec_iface_t  vpx_codec_vp9_cx_algo;
 extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
 /*!@} - end algorithm interface member group*/
 
+/*!\name Algorithm interface for VP10
+ *
+ * This interface provides the capability to encode raw VP9 streams.
+ * @{
+ */
+extern vpx_codec_iface_t  vpx_codec_vp10_cx_algo;
+extern vpx_codec_iface_t *vpx_codec_vp10_cx(void);
+/*!@} - end algorithm interface member group*/
 
 /*
  * Algorithm Flags
