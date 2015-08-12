@@ -54,8 +54,8 @@ static int variance(int sum, int sum_squared, int size) {
 // var_1 = (r0^2+r1^2+r2^2+r3^2) - ((r0 + r1 + r2 + r3) / 4 )^2
 // The returned blockiness is the scaled value
 // Reconstructed blockiness / ( 1 + var_0 + var_1 ) ;
-int blockiness_vertical(const uint8_t *s, int sp, const uint8_t *r, int rp,
-                        int size) {
+static int blockiness_vertical(const uint8_t *s, int sp, const uint8_t *r,
+                               int rp, int size) {
   int s_blockiness = 0;
   int r_blockiness = 0;
   int sum_0 = 0;
@@ -86,8 +86,8 @@ int blockiness_vertical(const uint8_t *s, int sp, const uint8_t *r, int rp,
 
 // Calculate a blockiness level for a horizontal block edge
 // same as above.
-int blockiness_horizontal(const uint8_t *s, int sp, const uint8_t *r, int rp,
-                          int size) {
+static int blockiness_horizontal(const uint8_t *s, int sp, const uint8_t *r,
+                                 int rp, int size) {
   int s_blockiness = 0;
   int r_blockiness = 0;
   int sum_0 = 0;

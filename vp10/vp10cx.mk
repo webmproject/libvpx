@@ -33,7 +33,6 @@ VP10_CX_SRCS-yes += encoder/encodemv.c
 VP10_CX_SRCS-yes += encoder/ethread.h
 VP10_CX_SRCS-yes += encoder/ethread.c
 VP10_CX_SRCS-yes += encoder/extend.c
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/fastssim.c
 VP10_CX_SRCS-yes += encoder/firstpass.c
 VP10_CX_SRCS-yes += encoder/block.h
 VP10_CX_SRCS-yes += encoder/bitstream.h
@@ -57,7 +56,6 @@ VP10_CX_SRCS-yes += encoder/mcomp.c
 VP10_CX_SRCS-yes += encoder/encoder.c
 VP10_CX_SRCS-yes += encoder/picklpf.c
 VP10_CX_SRCS-yes += encoder/picklpf.h
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/psnrhvs.c
 VP10_CX_SRCS-yes += encoder/quantize.c
 VP10_CX_SRCS-yes += encoder/ratectrl.c
 VP10_CX_SRCS-yes += encoder/rd.c
@@ -72,8 +70,6 @@ VP10_CX_SRCS-yes += encoder/subexp.h
 VP10_CX_SRCS-yes += encoder/svc_layercontext.c
 VP10_CX_SRCS-yes += encoder/resize.c
 VP10_CX_SRCS-yes += encoder/resize.h
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/ssim.c
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/ssim.h
 VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/blockiness.c
 
 VP10_CX_SRCS-yes += encoder/tokenize.c
@@ -113,7 +109,6 @@ VP10_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/quantize_ssse3_x86_64.asm
 VP10_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/dct_ssse3_x86_64.asm
 endif
 endif
-VP10_CX_SRCS-$(ARCH_X86_64) += encoder/x86/ssim_opt_x86_64.asm
 
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.c
 VP10_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/dct_ssse3.c

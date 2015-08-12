@@ -14,9 +14,7 @@
 #include <stdio.h>
 
 #include "./vpx_config.h"
-#include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
-#include "vpx_util/vpx_thread.h"
 
 #include "vp10/common/alloccommon.h"
 #include "vp10/common/ppflags.h"
@@ -34,17 +32,20 @@
 #include "vp10/encoder/quantize.h"
 #include "vp10/encoder/ratectrl.h"
 #include "vp10/encoder/rd.h"
-#if CONFIG_INTERNAL_STATS
-#include "vp10/encoder/ssim.h"
-#endif
 #include "vp10/encoder/speed_features.h"
 #include "vp10/encoder/svc_layercontext.h"
 #include "vp10/encoder/tokenize.h"
-#include "vpx_dsp/variance.h"
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #include "vp10/encoder/denoiser.h"
 #endif
+
+#if CONFIG_INTERNAL_STATS
+#include "vpx_dsp/ssim.h"
+#endif
+#include "vpx_dsp/variance.h"
+#include "vpx/internal/vpx_codec_internal.h"
+#include "vpx_util/vpx_thread.h"
 
 #ifdef __cplusplus
 extern "C" {

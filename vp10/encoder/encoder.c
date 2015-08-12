@@ -12,15 +12,7 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include "./vp10_rtcd.h"
 #include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
-#include "./vpx_scale_rtcd.h"
-#include "vpx/internal/vpx_psnr.h"
-#include "vpx_dsp/vpx_filter.h"
-#include "vpx_ports/mem.h"
-#include "vpx_ports/vpx_timer.h"
-#include "vpx_scale/vpx_scale.h"
 
 #include "vp10/common/alloccommon.h"
 #include "vp10/common/filter.h"
@@ -51,11 +43,20 @@
 #include "vp10/encoder/segmentation.h"
 #include "vp10/encoder/skin_detection.h"
 #include "vp10/encoder/speed_features.h"
-#if CONFIG_INTERNAL_STATS
-#include "vp10/encoder/ssim.h"
-#endif
 #include "vp10/encoder/svc_layercontext.h"
 #include "vp10/encoder/temporal_filter.h"
+
+#include "./vp10_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
+#include "./vpx_scale_rtcd.h"
+#include "vpx/internal/vpx_psnr.h"
+#if CONFIG_INTERNAL_STATS
+#include "vpx_dsp/ssim.h"
+#endif
+#include "vpx_dsp/vpx_filter.h"
+#include "vpx_ports/mem.h"
+#include "vpx_ports/vpx_timer.h"
+#include "vpx_scale/vpx_scale.h"
 
 #define AM_SEGMENT_ID_INACTIVE 7
 #define AM_SEGMENT_ID_ACTIVE 0
@@ -4416,13 +4417,13 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
-            frame_ssim2 = vp10_highbd_calc_ssim(orig, recon, &weight,
+            frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight,
                                                (int)cm->bit_depth);
           } else {
-            frame_ssim2 = vp10_calc_ssim(orig, recon, &weight);
+            frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
           }
 #else
-          frame_ssim2 = vp10_calc_ssim(orig, recon, &weight);
+          frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->worst_ssim= MIN(cpi->worst_ssim, frame_ssim2);
@@ -4431,13 +4432,13 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
-            frame_ssim2 = vp10_highbd_calc_ssim(
+            frame_ssim2 = vpx_highbd_calc_ssim(
                 orig, &cm->post_proc_buffer, &weight, (int)cm->bit_depth);
           } else {
-            frame_ssim2 = vp10_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+            frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
           }
 #else
-          frame_ssim2 = vp10_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+          frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->summedp_quality += frame_ssim2 * weight;
@@ -4472,7 +4473,7 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         if (!cm->use_highbitdepth)
 #endif
         {
-          double this_inconsistency = vp10_get_ssim_metrics(
+          double this_inconsistency = vpx_get_ssim_metrics(
               cpi->Source->y_buffer, cpi->Source->y_stride,
               cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
               cpi->Source->y_width, cpi->Source->y_height, cpi->ssim_vars,
@@ -4492,14 +4493,14 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         double y, u, v, frame_all;
 #if CONFIG_VP9_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          frame_all = vp10_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
+          frame_all = vpx_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
                                             &u, &v, (int)cm->bit_depth);
         } else {
-          frame_all = vp10_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
+          frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
                                      &v);
         }
 #else
-        frame_all = vp10_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
+        frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         adjust_image_stat(y, u, v, frame_all, &cpi->ssimg);
       }
@@ -4508,7 +4509,7 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
       {
         double y, u, v, frame_all;
-        frame_all = vp10_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
+        frame_all = vpx_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
                                       &v);
         adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
         /* TODO(JBB): add 10/12 bit support */
@@ -4518,12 +4519,11 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
       {
         double y, u, v, frame_all;
-        frame_all = vp10_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
+        frame_all = vpx_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
         adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
       }
     }
   }
-
 #endif
 
   if (is_two_pass_svc(cpi)) {
