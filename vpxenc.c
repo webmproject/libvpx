@@ -1196,7 +1196,8 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.kf_mode = VPX_KF_DISABLED;
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
     } else if (arg_match(&arg, &test16bitinternalarg, argi)) {
-      if (strcmp(global->codec->name, "vp9") == 0) {
+      if (strcmp(global->codec->name, "vp9") == 0 ||
+          strcmp(global->codec->name, "vp10") == 0) {
         test_16bit_internal = 1;
       }
 #endif
@@ -1230,7 +1231,8 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
     }
   }
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
-  if (strcmp(global->codec->name, "vp9") == 0) {
+  if (strcmp(global->codec->name, "vp9") == 0 ||
+      strcmp(global->codec->name, "vp10") == 0) {
     config->use_16bit_internal = test_16bit_internal |
                                  (config->cfg.g_profile > 1);
   }
@@ -2071,7 +2073,8 @@ int main(int argc, const char **argv_) {
     FOREACH_STREAM(initialize_encoder(stream, &global));
 
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
-    if (strcmp(global.codec->name, "vp9") == 0) {
+    if (strcmp(global.codec->name, "vp9") == 0 ||
+        strcmp(global.codec->name, "vp10") == 0) {
       // Check to see if at least one stream uses 16 bit internal.
       // Currently assume that the bit_depths for all streams using
       // highbitdepth are the same.
