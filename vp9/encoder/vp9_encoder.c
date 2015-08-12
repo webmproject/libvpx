@@ -4547,6 +4547,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         cpi->svc.spatial_layer_to_encode = 0;
     }
   }
+  vpx_clear_system_state();
   return 0;
 }
 
