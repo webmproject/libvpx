@@ -19,7 +19,7 @@
 #include "vp10/encoder/vp9_encoder.h"
 #include "vpx/vp8cx.h"
 #include "vp10/encoder/vp9_firstpass.h"
-#include "vp10/vp9_iface_common.h"
+#include "vp10/vp10_iface_common.h"
 
 struct vp10_extracfg {
   int                         cpu_used;  // available cpu percentage in 1/16

@@ -9,7 +9,7 @@
 ##
 
 VP10_COMMON_SRCS-yes += vp10_common.mk
-VP10_COMMON_SRCS-yes += vp9_iface_common.h
+VP10_COMMON_SRCS-yes += vp10_iface_common.h
 VP10_COMMON_SRCS-yes += common/vp9_ppflags.h
 VP10_COMMON_SRCS-yes += common/vp9_alloccommon.c
 VP10_COMMON_SRCS-yes += common/vp9_blockd.c

@@ -26,7 +26,7 @@
 #include "vp10/decoder/vp9_decoder.h"
 #include "vp10/decoder/vp9_decodeframe.h"
 
-#include "vp10/vp9_iface_common.h"
+#include "vp10/vp10_iface_common.h"
 
 #define VP9_CAP_POSTPROC (CONFIG_VP9_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
 
