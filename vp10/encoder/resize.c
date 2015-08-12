@@ -448,7 +448,7 @@ static void resize_multistep(const uint8_t *const input,
                              uint8_t *buf) {
   int steps;
   if (length == olength) {
-    memcpy(output, input, sizeof(uint8_t) * length);
+    memcpy(output, input, sizeof(output[0]) * length);
     return;
   }
   steps = get_down2_steps(length, olength);
@@ -741,7 +741,7 @@ static void highbd_resize_multistep(const uint16_t *const input,
                                     int bd) {
   int steps;
   if (length == olength) {
-    memcpy(output, input, sizeof(uint16_t) * length);
+    memcpy(output, input, sizeof(output[0]) * length);
     return;
   }
   steps = get_down2_steps(length, olength);

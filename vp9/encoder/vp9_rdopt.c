@@ -3394,7 +3394,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
         if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-               sizeof(uint8_t) * ctx->num_4x4_blk);
+               sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
@@ -4135,7 +4135,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
         if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         memcpy(ctx->zcoeff_blk, x->zcoeff_blk[TX_4X4],
-               sizeof(uint8_t) * ctx->num_4x4_blk);
+               sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
 
         for (i = 0; i < 4; i++)
           best_bmodes[i] = xd->mi[0]->bmi[i];
