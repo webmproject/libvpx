@@ -186,24 +186,24 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
       /* slower path if the block needs border extension */
       if (x0 + 2 * bs <= frame_width) {
         if (right_available && bs == 4) {
-          memcpy(above_row, above_ref, 2 * bs * sizeof(uint16_t));
+          memcpy(above_row, above_ref, 2 * bs * sizeof(above_row[0]));
         } else {
-          memcpy(above_row, above_ref, bs * sizeof(uint16_t));
+          memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
           vpx_memset16(above_row + bs, above_row[bs - 1], bs);
         }
       } else if (x0 + bs <= frame_width) {
         const int r = frame_width - x0;
         if (right_available && bs == 4) {
-          memcpy(above_row, above_ref, r * sizeof(uint16_t));
+          memcpy(above_row, above_ref, r * sizeof(above_row[0]));
           vpx_memset16(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
         } else {
-          memcpy(above_row, above_ref, bs * sizeof(uint16_t));
+          memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
           vpx_memset16(above_row + bs, above_row[bs - 1], bs);
         }
       } else if (x0 <= frame_width) {
         const int r = frame_width - x0;
-        memcpy(above_row, above_ref, r * sizeof(uint16_t));
+        memcpy(above_row, above_ref, r * sizeof(above_row[0]));
         vpx_memset16(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
       }
@@ -214,9 +214,9 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
       if (bs == 4 && right_available && left_available) {
         const_above_row = above_ref;
       } else {
-        memcpy(above_row, above_ref, bs * sizeof(uint16_t));
+        memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
         if (bs == 4 && right_available)
-          memcpy(above_row + bs, above_ref + bs, bs * sizeof(uint16_t));
+          memcpy(above_row + bs, above_ref + bs, bs * sizeof(above_row[0]));
         else
           vpx_memset16(above_row + bs, above_row[bs - 1], bs);
         // TODO(Peter): this value should probably change for high bitdepth

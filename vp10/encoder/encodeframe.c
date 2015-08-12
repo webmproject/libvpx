@@ -1046,7 +1046,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
 
   x->skip = ctx->skip;
   memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
-         sizeof(uint8_t) * ctx->num_4x4_blk);
+         sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
 
   if (!output_enabled)
     return;
