@@ -211,7 +211,7 @@ static const arg_def_t *main_args[] = {
   &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &skip,
   &deadline, &best_dl, &good_dl, &rt_dl,
   &quietarg, &verbosearg, &psnrarg, &use_webm, &use_ivf, &out_part, &q_hist_n,
-  &rate_hist_n, &disable_warnings, &disable_warning_prompt,
+  &rate_hist_n, &disable_warnings, &disable_warning_prompt, &recontest,
   NULL
 };
 
@@ -496,7 +496,15 @@ void usage_exit(void) {
   arg_show_usage(stderr, vp8_args);
 #endif
 #if CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
-  fprintf(stderr, "\nVP9 Specific Options:\n");
+  // TODO(yaowu: split vp9 and vp10 option when necessary.
+  fprintf(stderr, "\n");
+  #if CONFIG_VP9_ENCODER
+    fprintf(stderr, "VP9 ");
+  #endif
+  #if CONFIG_VP10_ENCODER
+    fprintf(stderr, "VP10 ");
+  #endif
+  fprintf(stderr, "Specific Options:\n");
   arg_show_usage(stderr, vp9_args);
 #endif
   fprintf(stderr, "\nStream timebase (--timebase):\n"
