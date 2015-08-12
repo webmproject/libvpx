@@ -3798,6 +3798,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+#if CONFIG_SR_MODE
+    cpi->mb.itxm = lossless ? vp9_iwht4x4 : vp9_idct4x4;
+#endif  // CONFIG_SR_MODE
     vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);

@@ -550,6 +550,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       xd->mi[0].src_mi->mbmi.mode = DC_PRED;
       xd->mi[0].src_mi->mbmi.tx_size = use_dc_pred ?
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
+#if CONFIG_SR_MODE
+      xd->mi[0].src_mi->mbmi.sr = 0;
+#endif  // CONFIG_SR_MODE
 #if CONFIG_TX_SKIP
       xd->mi[0].src_mi->mbmi.tx_skip[0] = 0;
       xd->mi[0].src_mi->mbmi.tx_skip[1] = 0;
@@ -752,6 +755,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
           xd->mi[0].src_mi->mbmi.mode = NEWMV;
           xd->mi[0].src_mi->mbmi.mv[0].as_mv = mv;
           xd->mi[0].src_mi->mbmi.tx_size = TX_4X4;
+#if CONFIG_SR_MODE
+          xd->mi[0].src_mi->mbmi.sr = 0;
+#endif  // CONFIG_SR_MODE
           xd->mi[0].src_mi->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mi[0].src_mi->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);

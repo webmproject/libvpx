@@ -258,6 +258,11 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
   struct macroblockd_plane *pd = &xd->plane[plane];
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
+#if CONFIG_SR_MODE
+  if (xd->mi[0].src_mi->mbmi.sr && plane == 0)
+  // if (xd->mi[0].src_mi->mbmi.sr)
+    tx_size--;
+#endif  // CONFIG_SR_MODE
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0,
                    aoff, loff);
 }
@@ -312,6 +317,23 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const int16_t *scan, *nb;
   const scan_order *so;
   const int ref = is_inter_block(mbmi);
+#if CONFIG_SR_MODE
+  int new_tx_size = (mbmi->sr && plane == 0) ? (tx_size - 1) : tx_size;
+  // int new_tx_size = (mbmi->sr) ? (tx_size - 1) : tx_size;
+  unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
+      cpi->coef_counts[new_tx_size][type][ref];
+  vp9_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+      cpi->common.fc.coef_probs[new_tx_size][type][ref];
+  unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
+      cpi->common.counts.eob_branch[new_tx_size][type][ref];
+#if CONFIG_TX_SKIP
+  const uint8_t *const band = mbmi->tx_skip[plane != 0] ?
+      vp9_coefband_tx_skip : get_band_translate(new_tx_size);
+#else
+  const uint8_t *const band = get_band_translate(new_tx_size);
+#endif  // CONFIG_TX_SKIP
+  const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, new_tx_size);
+#else  // CONFIG_SR_MODE
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       cpi->coef_counts[tx_size][type][ref];
   vp9_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
@@ -325,11 +347,16 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const uint8_t *const band = get_band_translate(tx_size);
 #endif  // CONFIG_TX_SKIP
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
+#endif  // CONFIG_SR_MODE
   const TOKENVALUE *dct_value_tokens;
 
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
-
+#if CONFIG_SR_MODE
+  if (mbmi->sr && plane == 0)
+  // if (mbmi->sr)
+    tx_size--;
+#endif  // CONFIG_SR_MODE
   pt = get_entropy_context(tx_size, pd->above_context + aoff,
                            pd->left_context + loff);
   so = get_scan(xd, tx_size, type, block);

@@ -38,11 +38,22 @@ struct tx_probs {
 
 struct tx_counts {
 #if CONFIG_TX64X64
+  // counter for entropy coding
+  // (In some case, tx_size may be not written to the bitstream)
   unsigned int p64x64[TX_SIZE_CONTEXTS][5];
 #endif
   unsigned int p32x32[TX_SIZE_CONTEXTS][4];
   unsigned int p16x16[TX_SIZE_CONTEXTS][3];
   unsigned int p8x8[TX_SIZE_CONTEXTS][2];
+#if CONFIG_SR_MODE
+  // counter for tx_size actual usage (to determine ALLOW_16X16, etc.)
+#if CONFIG_TX64X64
+  unsigned int real_p64x64[TX_SIZE_CONTEXTS][5];
+#endif  // CONFIG_TX64X64
+  unsigned int real_p32x32[TX_SIZE_CONTEXTS][4];
+  unsigned int real_p16x16[TX_SIZE_CONTEXTS][3];
+  unsigned int real_p8x8[TX_SIZE_CONTEXTS][2];
+#endif  // CONFIG_SR_MODE
 };
 
 typedef struct frame_contexts {
@@ -68,6 +79,12 @@ typedef struct frame_contexts {
   struct tx_probs tx_probs;
   vp9_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
+#if CONFIG_SR_MODE
+  vp9_prob sr_probs[SR_CONTEXTS];
+#if SR_USE_MULTI_F
+  vp9_prob sr_usfilter_probs[SR_USFILTER_CONTEXTS][SR_USFILTER_NUM - 1];
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
 #if CONFIG_INTRABC
   nmv_context ndvc;
 #endif  // CONFIG_INTRABC
@@ -142,6 +159,12 @@ typedef struct {
   struct tx_counts tx;
   unsigned int skip[SKIP_CONTEXTS][2];
   nmv_context_counts mv;
+#if CONFIG_SR_MODE
+  unsigned int sr[SR_CONTEXTS][2];
+#if SR_USE_MULTI_F
+  unsigned int sr_usfilters[SR_USFILTER_CONTEXTS][SR_USFILTER_NUM];
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
 #if CONFIG_INTRABC
   nmv_context_counts dv;
 #endif  // CONFIG_INTRABC
@@ -203,6 +226,9 @@ extern const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
 extern const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 extern const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
+#if CONFIG_SR_MODE && SR_USE_MULTI_F
+extern const vp9_tree_index vp9_sr_usfilter_tree[TREE_SIZE(SR_USFILTER_NUM)];
+#endif  // CONFIG_SR_MODE && SR_USE_MULTI_F
 #if CONFIG_EXT_PARTITION
 extern const vp9_tree_index vp9_ext_partition_tree
                                 [TREE_SIZE(EXT_PARTITION_TYPES)];

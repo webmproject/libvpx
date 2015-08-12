@@ -12,12 +12,33 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_entropymode.h"
 
 #if CONFIG_WEDGE_PARTITION
 static const vp9_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
   192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
 };
 #endif  // CONFIG_WEDGE_PARTITION
+
+#if CONFIG_SR_MODE && SR_USE_MULTI_F
+const vp9_tree_index vp9_sr_usfilter_tree[TREE_SIZE(SR_USFILTER_NUM)] = {
+     2,   4,
+     6,   8,
+    10,  12,
+    14,  16,
+    18,  20,
+    22,  24,
+    26,  28,
+    -0,  -1,
+    -2,  -3,
+    -4,  -5,
+    -6,  -7,
+    -8,  -9,
+    -10, -11,
+    -12, -13,
+    -14, -15,
+};
+#endif  // CONFIG_SR_MODE && SR_USE_MULTI_F
 
 #if CONFIG_INTERINTRA
 static const vp9_prob default_interintra_prob[BLOCK_SIZES] = {
@@ -908,6 +929,43 @@ static const vp9_prob default_skip_probs[SKIP_CONTEXTS] = {
   192, 128, 64
 };
 
+#if CONFIG_SR_MODE
+static const vp9_prob default_sr_probs[SR_CONTEXTS] = {
+    220, 220, 220
+};
+
+#if SR_USE_MULTI_F
+static const vp9_prob default_sr_usfilter_probs[SR_USFILTER_CONTEXTS]
+[SR_USFILTER_NUM - 1] = {
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+  /*  {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},
+    {128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128},*/
+};
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
+
 static const vp9_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                                     [SWITCHABLE_FILTERS - 1] = {
   { 235, 162, },
@@ -928,6 +986,12 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   fc->tx_probs = default_tx_probs;
   vp9_copy(fc->skip_probs, default_skip_probs);
   vp9_copy(fc->inter_mode_probs, default_inter_mode_probs);
+#if CONFIG_SR_MODE
+  vp9_copy(fc->sr_probs, default_sr_probs);
+#if SR_USE_MULTI_F
+  vp9_copy(fc->sr_usfilter_probs, default_sr_usfilter_probs);
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
 #if CONFIG_NEW_INTER
   vp9_copy(fc->inter_compound_mode_probs, default_inter_compound_mode_probs);
 #endif  // CONFIG_NEW_INTER
@@ -1088,6 +1152,16 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 
   for (i = 0; i < SKIP_CONTEXTS; ++i)
     fc->skip_probs[i] = adapt_prob(pre_fc->skip_probs[i], counts->skip[i]);
+
+#if CONFIG_SR_MODE
+  for (i = 0; i < SR_CONTEXTS; i ++)
+    fc->sr_probs[i] = adapt_prob(pre_fc->sr_probs[i], counts->sr[i]);
+#if SR_USE_MULTI_F
+  for (i = 0; i < SR_USFILTER_CONTEXTS; i++)
+    adapt_probs(vp9_sr_usfilter_tree, pre_fc->sr_usfilter_probs[i],
+                counts->sr_usfilters[i], fc->sr_usfilter_probs[i]);
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
 
 #if CONFIG_EXT_TX
   for (i = TX_4X4; i <= TX_16X16; ++i) {

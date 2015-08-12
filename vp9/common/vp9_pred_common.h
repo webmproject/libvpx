@@ -57,6 +57,54 @@ static INLINE vp9_prob vp9_get_skip_prob(const VP9_COMMON *cm,
   return cm->fc.skip_probs[vp9_get_skip_context(xd)];
 }
 
+#if CONFIG_SR_MODE
+#include "vp9/common/vp9_sr_txfm.h"
+static INLINE int vp9_get_sr_context(const MACROBLOCKD *xd,
+                                     BLOCK_SIZE bsize) {
+  TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+  int ctx;
+  (void)xd;
+
+  assert(max_tx_size >= MIN_SR_TX_SIZE &&
+         max_tx_size <= MAX_SR_TX_SIZE);
+  ctx = max_tx_size - MIN_SR_TX_SIZE;
+
+  return ctx;
+}
+
+static INLINE vp9_prob vp9_get_sr_prob(const VP9_COMMON *cm,
+                                       const MACROBLOCKD *xd,
+                                       BLOCK_SIZE bsize) {
+  int sr_ctx = vp9_get_sr_context(xd, bsize);
+  assert(sr_ctx >= 0 && sr_ctx < SR_CONTEXTS);
+  return cm->fc.sr_probs[sr_ctx];
+}
+
+#if SR_USE_MULTI_F
+static INLINE vp9_prob vp9_get_sr_usfilter_context(const MACROBLOCKD *xd) {
+  (void) xd;
+  return 0;
+
+  /*const MODE_INFO *const above_mi = get_above_mi(xd);
+  const MODE_INFO *const left_mi = get_left_mi(xd);
+  int above_sr_ver =
+      (above_mi != NULL && above_mi->mbmi.sr && !above_mi->mbmi.skip) ?
+      idx_to_v(above_mi->mbmi.us_filter_idx) : SR_USFILTER_NUM_D;
+  int left_sr_hor =
+      (left_mi != NULL && left_mi->mbmi.sr && !left_mi->mbmi.skip) ?
+      idx_to_h(left_mi->mbmi.us_filter_idx) : SR_USFILTER_NUM_D;
+  return above_sr_ver * 3 + left_sr_hor;*/
+}
+
+static INLINE const vp9_prob * vp9_get_sr_usfilter_prob(const VP9_COMMON *cm,
+                                                const MACROBLOCKD *xd) {
+  int sr_usfilter_ctx = vp9_get_sr_usfilter_context(xd);
+  assert(sr_usfilter_ctx >= 0 && sr_usfilter_ctx < SR_USFILTER_CONTEXTS);
+  return cm->fc.sr_usfilter_probs[sr_usfilter_ctx];
+}
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
+
 int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
 
 int vp9_get_intra_inter_context(const MACROBLOCKD *xd);
@@ -141,6 +189,27 @@ static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
       return NULL;
   }
 }
+
+#if CONFIG_SR_MODE
+static INLINE unsigned int *get_real_tx_counts(TX_SIZE max_tx_size, int ctx,
+                                          struct tx_counts *tx_counts) {
+  switch (max_tx_size) {
+    case TX_8X8:
+      return tx_counts->real_p8x8[ctx];
+    case TX_16X16:
+      return tx_counts->real_p16x16[ctx];
+    case TX_32X32:
+      return tx_counts->real_p32x32[ctx];
+#if CONFIG_TX64X64
+    case TX_64X64:
+      return tx_counts->real_p64x64[ctx];
+#endif  // CONFIG_TX64X64
+    default:
+      assert(0 && "Invalid max_tx_size.");
+      return NULL;
+  }
+}
+#endif  // CONFIG_SR_MODE
 
 #if CONFIG_COPY_MODE
 int vp9_get_copy_mode_context(const MACROBLOCKD *xd);

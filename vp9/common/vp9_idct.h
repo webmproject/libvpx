@@ -227,3 +227,25 @@ void vp9_idst16x16_add(const tran_low_t *input, uint8_t *dest, int stride);
 #endif
 
 #endif  // VP9_COMMON_VP9_IDCT_H_
+#if CONFIG_SR_MODE
+void vp9_iwht4x4(const tran_low_t *input, int16_t *dest, int stride,
+                 int eob);
+void vp9_idct4x4(const tran_low_t *input, int16_t *dest, int stride,
+                 int eob);
+void vp9_idct8x8(const tran_low_t *input, int16_t *dest, int stride,
+                 int eob);
+void vp9_idct16x16(const tran_low_t *input, int16_t *dest, int stride,
+                   int eob);
+void vp9_idct32x32(const tran_low_t *input, int16_t *dest, int stride,
+                   int eob);
+void vp9_iht4x4(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
+                int stride, int eob);
+void vp9_iht8x8(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
+                int stride, int eob);
+void vp9_iht16x16(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
+                  int stride, int eob);
+#if CONFIG_TX64X64
+void vp9_idct64x64(const tran_low_t *input, int16_t *dest, int stride,
+                   int eob);
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_SR_MODE

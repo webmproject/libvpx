@@ -23,6 +23,9 @@
 #if CONFIG_PALETTE
 #include "vp9/common/vp9_palette.h"
 #endif  // CONFIG_PALETTE
+#if CONFIG_SR_MODE
+#include "vp9/common/vp9_sr_txfm.h"
+#endif  // CONFIG_SR_MODE
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_systemdependent.h"
@@ -44,6 +47,9 @@ static struct vp9_token ext_partition_encodings[EXT_PARTITION_TYPES];
 #endif
 static struct vp9_token partition_encodings[PARTITION_TYPES];
 static struct vp9_token inter_mode_encodings[INTER_MODES];
+#if CONFIG_SR_MODE && SR_USE_MULTI_F
+static struct vp9_token sr_usfilter_encodings[SR_USFILTER_NUM];
+#endif  // CONFIG_SR_MODE && SR_USE_MULTI_F
 #if CONFIG_EXT_TX
 static struct vp9_token ext_tx_encodings[EXT_TX_TYPES];
 #if CONFIG_WAVELETS
@@ -85,6 +91,9 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(ext_partition_encodings, vp9_ext_partition_tree);
 #endif
   vp9_tokens_from_tree(inter_mode_encodings, vp9_inter_mode_tree);
+#if CONFIG_SR_MODE && SR_USE_MULTI_F
+  vp9_tokens_from_tree(sr_usfilter_encodings, vp9_sr_usfilter_tree);
+#endif  // CONFIG_SR_MODE && SR_USE_MULTI_F
 #if CONFIG_EXT_TX
   vp9_tokens_from_tree(ext_tx_encodings, vp9_ext_tx_tree);
 #if CONFIG_WAVELETS
@@ -231,6 +240,54 @@ static void update_skip_probs(VP9_COMMON *cm, vp9_writer *w) {
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     vp9_cond_prob_diff_update(w, &cm->fc.skip_probs[k], cm->counts.skip[k]);
 }
+
+#if CONFIG_SR_MODE
+#if SR_USE_MULTI_F
+static int write_sr_usfilter(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                             const MODE_INFO *mi, vp9_writer *w) {
+  const int f_idx = mi->mbmi.us_filter_idx;
+  assert(f_idx >= 0 && f_idx < SR_USFILTER_NUM);
+  vp9_write_token(w, vp9_sr_usfilter_tree, vp9_get_sr_usfilter_prob(cm, xd),
+                  &sr_usfilter_encodings[f_idx]);
+  return f_idx;
+}
+#endif  // SR_USE_MULTI_F
+
+static int write_sr(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                      int segment_id, const MODE_INFO *mi, vp9_writer *w) {
+  if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP))
+    return 1;
+  else if (is_enable_srmode(mi->mbmi.sb_type)) {
+    const int sr = mi->mbmi.sr;
+    vp9_write(w, sr, vp9_get_sr_prob(cm, xd, mi->mbmi.sb_type));
+#if SR_USE_MULTI_F
+    if (sr) {
+      write_sr_usfilter(cm, xd, mi, w);
+    }
+#endif  // SR_USE_MULTI_F
+    return sr;
+  } else {
+    assert(!mi->mbmi.sr);
+    return 0;
+  }
+}
+
+static void update_sr_probs(VP9_COMMON *cm, vp9_writer *w) {
+  int k;
+  for (k = 0; k < SR_CONTEXTS; ++k)
+    vp9_cond_prob_diff_update(w, &cm->fc.sr_probs[k], cm->counts.sr[k]);
+}
+
+#if SR_USE_MULTI_F
+static void update_sr_usfilter_probs(VP9_COMMON *cm, vp9_writer *w) {
+  int i;
+  for (i = 0; i < SR_USFILTER_CONTEXTS; ++i) {
+    prob_diff_update(vp9_sr_usfilter_tree, cm->fc.sr_usfilter_probs[i],
+                     cm->counts.sr_usfilters[i], SR_USFILTER_NUM, w);
+  }
+}
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
 
 static void update_switchable_interp_probs(VP9_COMMON *cm, vp9_writer *w) {
   int j;
@@ -613,6 +670,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     }
   }
 #endif
+#if CONFIG_SR_MODE
+  if (!(is_inter && skip)) {
+    write_sr(cm, xd, segment_id, mi, w);
+  }
+  if (mbmi->sr && !mbmi->skip) {
+    assert(mbmi->tx_size == max_txsize_lookup[bsize]);
+  }
+#endif  // CONFIG_SR_MODE
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
 #if CONFIG_SUPERTX
       !supertx_enabled &&
@@ -620,6 +685,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_PALETTE
       !mbmi->palette_enabled[0] &&
 #endif  // CONFIG_PALETTE
+#if CONFIG_SR_MODE
+      !mi->mbmi.sr &&
+#endif  // CONFIG_SR_MODE
       !(is_inter &&
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
@@ -898,7 +966,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
   const struct segmentation *const seg = &cm->seg;
   const MODE_INFO *const mi = mi_8x8;
   const MODE_INFO *const above_mi = xd->up_available ?
-      mi_8x8[-xd->mi_stride].src_mi : NULL;
+                                    mi_8x8[-xd->mi_stride].src_mi : NULL;
   const MODE_INFO *const left_mi =
       xd->left_available ? mi_8x8[-1].src_mi : NULL;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -918,6 +986,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
     vp9_write(w, is_intrabc_mode(mbmi->mode), INTRABC_PROB);
   }
 #endif  // CONFIG_INTRABC
+
 #if CONFIG_PALETTE
   if (bsize >= BLOCK_8X8 && cm->allow_palette_mode
 #if CONFIG_INTRABC
@@ -1032,13 +1101,24 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
       }
     }
   }
-
-  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
-      !mbmi->palette_enabled[0])
-#else
-  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
 #endif
+
+#if CONFIG_SR_MODE
+  write_sr(cm, xd, mbmi->segment_id, mi, w);
+  if (mbmi->sr && !mbmi->skip) {
+    assert(mbmi->tx_size == max_txsize_lookup[bsize]);
+  }
+#endif  // CONFIG_SR_MODE
+  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT
+#if CONFIG_PALETTE
+    && !mbmi->palette_enabled[0]
+#endif
+#if CONFIG_SR_MODE
+     && !mi->mbmi.sr
+#endif  // CONFIG_SR_MODE
+    ) {
     write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
+  }
 
 #if CONFIG_TX_SKIP
   if (bsize >= BLOCK_8X8) {
@@ -2398,6 +2478,12 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
   update_coef_probs(cpi, &header_bc);
   update_skip_probs(cm, &header_bc);
+#if CONFIG_SR_MODE
+  update_sr_probs(cm, &header_bc);
+#if SR_USE_MULTI_F
+  update_sr_usfilter_probs(cm, &header_bc);
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
 
   if (!frame_is_intra_only(cm)) {
     int i;

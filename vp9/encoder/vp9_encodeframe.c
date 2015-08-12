@@ -25,6 +25,9 @@
 #if CONFIG_PALETTE
 #include "vp9/common/vp9_palette.h"
 #endif
+#if CONFIG_SR_MODE
+#include "vp9/common/vp9_sr_txfm.h"
+#endif  // CONFIG_SR_MODE
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconintra.h"
@@ -831,8 +834,14 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 
   x->skip = ctx->skip;
+#if CONFIG_SR_MODE
+  vpx_memcpy(x->zcoeff_blk[mbmi->sr ? TX_SIZES : mbmi->tx_size],
+             ctx->zcoeff_blk,
+             sizeof(uint8_t) * ctx->num_4x4_blk);
+#else  // CONFIG_SR_MODE
   vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
              sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif  // CONFIG_SR_MODE
 
   if (!output_enabled)
     return;
@@ -975,8 +984,13 @@ static void update_state_supertx(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 
   x->skip = ctx->skip;
+#if 0  // CONFIG_SR_MODE  // supertx????  // debugtest
+  vpx_memcpy(x->zcoeff_blk[mbmi->sr ? TX_SIZES : mbmi->tx_size],
+             ctx->zcoeff_blk, sizeof(uint8_t) * ctx->num_4x4_blk);
+#else
   vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
              sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif
 
   if (!output_enabled)
     return;
@@ -1329,6 +1343,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
+#if CONFIG_SR_MODE
+  mbmi->sr = 0;
+#endif  // CONFIG_SR_MODE
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -4156,6 +4173,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   x->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+#if CONFIG_SR_MODE
+  x->itxm = xd->lossless ? vp9_iwht4x4 : vp9_idct4x4;
+#endif  // CONFIG_SR_MODE
 
   if (xd->lossless) {
     x->optimize = 0;
@@ -4329,6 +4349,29 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       int count64x64_64x64p = 0;
 
       for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+#if CONFIG_SR_MODE
+        // Since in SR mode, tx_size is not sent.
+        // To decide ALLOW_TX, here is the real tx_size statistics,
+        // but not the statistics for entropy coding
+        count4x4_lp += cm->counts.tx.real_p64x64[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.real_p32x32[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.real_p16x16[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.real_p8x8[i][TX_4X4];
+
+        count8x8_lp += cm->counts.tx.real_p64x64[i][TX_8X8];
+        count8x8_lp += cm->counts.tx.real_p32x32[i][TX_8X8];
+        count8x8_lp += cm->counts.tx.real_p16x16[i][TX_8X8];
+        count8x8_8x8p += cm->counts.tx.real_p8x8[i][TX_8X8];
+
+        count16x16_lp += cm->counts.tx.real_p64x64[i][TX_16X16];
+        count16x16_lp += cm->counts.tx.real_p32x32[i][TX_16X16];
+        count16x16_16x16p += cm->counts.tx.real_p16x16[i][TX_16X16];
+
+        count32x32_lp += cm->counts.tx.real_p64x64[i][TX_32X32];
+        count32x32_32x32p += cm->counts.tx.real_p32x32[i][TX_32X32];
+
+        count64x64_64x64p += cm->counts.tx.real_p64x64[i][TX_64X64];
+#else  // CONFIG_SR_MODE
         count4x4_lp += cm->counts.tx.p64x64[i][TX_4X4];
         count4x4_lp += cm->counts.tx.p32x32[i][TX_4X4];
         count4x4_lp += cm->counts.tx.p16x16[i][TX_4X4];
@@ -4347,6 +4390,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         count32x32_32x32p += cm->counts.tx.p32x32[i][TX_32X32];
 
         count64x64_64x64p += cm->counts.tx.p64x64[i][TX_64X64];
+#endif  // CONFIG_SR_MODE
       }
 
       if (count4x4_lp == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
@@ -4400,6 +4444,19 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       int count32x32_32x32p = 0;
 
       for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+#if CONFIG_SR_MODE
+        count4x4_lp += cm->counts.tx.real_p32x32[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.real_p16x16[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.real_p8x8[i][TX_4X4];
+
+        count8x8_lp += cm->counts.tx.real_p32x32[i][TX_8X8];
+        count8x8_lp += cm->counts.tx.real_p16x16[i][TX_8X8];
+        count8x8_8x8p += cm->counts.tx.real_p8x8[i][TX_8X8];
+
+        count16x16_lp += cm->counts.tx.real_p32x32[i][TX_16X16];
+        count16x16_16x16p += cm->counts.tx.real_p16x16[i][TX_16X16];
+        count32x32_32x32p += cm->counts.tx.real_p32x32[i][TX_32X32];
+#else  // CONFIG_SR_MODE
         count4x4_lp += cm->counts.tx.p32x32[i][TX_4X4];
         count4x4_lp += cm->counts.tx.p16x16[i][TX_4X4];
         count4x4_lp += cm->counts.tx.p8x8[i][TX_4X4];
@@ -4411,6 +4468,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         count16x16_lp += cm->counts.tx.p32x32[i][TX_16X16];
         count16x16_16x16p += cm->counts.tx.p16x16[i][TX_16X16];
         count32x32_32x32p += cm->counts.tx.p32x32[i][TX_32X32];
+#endif  // CONFIG_SR_MODE
       }
 
       if (count4x4_lp == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
@@ -4604,6 +4662,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   }
+
 #if CONFIG_INTRABC
   if (frame_is_intra_only(cm) && output_enabled && bsize >= BLOCK_8X8) {
     cm->intrabc_blocks_signalled++;
@@ -4613,8 +4672,31 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 #endif  // CONFIG_INTRABC
 
   if (output_enabled) {
+#if CONFIG_SR_MODE
+    assert(bsize == mbmi->sb_type);
+    if (is_enable_srmode(bsize) &&
+        !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
+      cm->counts.sr[vp9_get_sr_context(xd, bsize)][mbmi->sr]++;
+#if SR_USE_MULTI_F
+      if (mbmi->sr)
+        cm->counts.sr_usfilters[vp9_get_sr_usfilter_context(xd)]
+                               [mbmi->us_filter_idx]++;
+#endif  // SR_USE_MULTI_F
+    }
+
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
+        !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
+      ++get_real_tx_counts(max_txsize_lookup[bsize],
+                           vp9_get_tx_size_context(xd),
+                           &cm->counts.tx)[mbmi->tx_size];
+    }
+#endif  // CONFIG_SR_MODE
+    if (cm->tx_mode == TX_MODE_SELECT &&
+        mbmi->sb_type >= BLOCK_8X8  &&
+#if CONFIG_SR_MODE
+        !mbmi->sr &&
+#endif  // CONFIG_SR_MODE
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
       ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
                       &cm->counts.tx)[mbmi->tx_size];

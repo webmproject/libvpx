@@ -26,6 +26,9 @@ typedef struct {
 
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
+#if CONFIG_SR_MODE
+  DECLARE_ALIGNED(16, int16_t, src_sr_diff[64 * 64]);
+#endif  // CONFIG_SR_MODE
   tran_low_t *qcoeff;
   tran_low_t *coeff;
   uint16_t *eobs;
@@ -108,7 +111,11 @@ struct macroblock {
   int mv_row_min;
   int mv_row_max;
 
+#if CONFIG_SR_MODE
+  uint8_t zcoeff_blk[TX_SIZES + 1][256];
+#else  // CONFIG_SR_MODE
   uint8_t zcoeff_blk[TX_SIZES][256];
+#endif  // CONFIG_SR_MODE
   int skip;
 
   int encode_breakout;
@@ -141,6 +148,9 @@ struct macroblock {
 
   void (*fwd_txm4x4)(const int16_t *input, tran_low_t *output, int stride);
   void (*itxm_add)(const tran_low_t *input, uint8_t *dest, int stride, int eob);
+#if CONFIG_SR_MODE
+  void (*itxm)(const tran_low_t *input, int16_t *dest, int stride, int eob);
+#endif  // CONFIG_SR_MODE
 #if CONFIG_VP9_HIGHBITDEPTH
   void (*highbd_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
                           int eob, int bd);

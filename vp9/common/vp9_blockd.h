@@ -31,6 +31,23 @@ extern "C" {
 #define SKIP_CONTEXTS 3
 #define INTER_MODE_CONTEXTS 7
 
+#if CONFIG_SR_MODE
+#define SR_CONTEXTS 3  // number of enalbed tx_size for sr mode
+
+#define USE_POST_F 0  // 1: use post filters
+#define SR_USE_MULTI_F 0  // 1: choose from multiple post filters
+
+// SR_USFILTER_NUM_D: Number of 1D filters to choose in the post filter family
+// SR_USFILTER_NUM: Number of combined 2D filters to choose
+// If change this number, please change "idx_to_v","idx_to_h","hv_to_idx",
+// and the prob model ("vp9_sr_usfilter_tree", "default_sr_usfilter_probs")
+#define SR_USFILTER_NUM_D 4
+#define SR_USFILTER_NUM (SR_USFILTER_NUM_D * SR_USFILTER_NUM_D)
+
+#define SR_USFILTER_CONTEXTS 1
+// SR_USFILTER_CONTEXTS: Depends on the post filters of upper and left blocks
+#endif  // CONFIG_SR_MODE
+
 #if CONFIG_COPY_MODE
 #define COPY_MODE_CONTEXTS 5
 #endif  // CONFIG_COPY_MODE
@@ -202,6 +219,10 @@ typedef struct {
 #if CONFIG_FILTERINTRA
   int filterbit, uv_filterbit;
 #endif
+#if CONFIG_SR_MODE
+  int sr;
+  int us_filter_idx;
+#endif  // CONFIG_SR_MODE
   TX_SIZE tx_size;
   int8_t skip;
   int8_t segment_id;

@@ -3803,3 +3803,609 @@ void vp9_highbd_idct64x64_add(const tran_low_t *input, uint8_t *dest,
 }
 #endif  // CONFIG_TX64X64
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#if CONFIG_SR_MODE
+void vp9_iwht4x4_16_c(const tran_low_t *input, int16_t *dest, int stride) {
+/* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
+   0.5 shifts per pixel. */
+  int i;
+  tran_low_t output[16];
+  tran_high_t a1, b1, c1, d1, e1;
+  const tran_low_t *ip = input;
+  tran_low_t *op = output;
+
+  for (i = 0; i < 4; i++) {
+    a1 = ip[0] >> UNIT_QUANT_SHIFT;
+    c1 = ip[1] >> UNIT_QUANT_SHIFT;
+    d1 = ip[2] >> UNIT_QUANT_SHIFT;
+    b1 = ip[3] >> UNIT_QUANT_SHIFT;
+    a1 += c1;
+    d1 -= b1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= b1;
+    d1 += c1;
+    op[0] = WRAPLOW(a1, 8);
+    op[1] = WRAPLOW(b1, 8);
+    op[2] = WRAPLOW(c1, 8);
+    op[3] = WRAPLOW(d1, 8);
+    ip += 4;
+    op += 4;
+  }
+
+  ip = output;
+  for (i = 0; i < 4; i++) {
+    a1 = ip[4 * 0];
+    c1 = ip[4 * 1];
+    d1 = ip[4 * 2];
+    b1 = ip[4 * 3];
+    a1 += c1;
+    d1 -= b1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= b1;
+    d1 += c1;
+    dest[stride * 0] = a1;
+    dest[stride * 1] = b1;
+    dest[stride * 2] = c1;
+    dest[stride * 3] = d1;
+
+    ip++;
+    dest++;
+  }
+}
+
+void vp9_iwht4x4_1_c(const tran_low_t *in, int16_t *dest, int dest_stride) {
+  int i;
+  tran_high_t a1, e1;
+  tran_low_t tmp[4];
+  const tran_low_t *ip = in;
+  tran_low_t *op = tmp;
+
+  a1 = ip[0] >> UNIT_QUANT_SHIFT;
+  e1 = a1 >> 1;
+  a1 -= e1;
+  op[0] = WRAPLOW(a1, 8);
+  op[1] = op[2] = op[3] = WRAPLOW(e1, 8);
+
+  ip = tmp;
+  for (i = 0; i < 4; i++) {
+    e1 = ip[0] >> 1;
+    a1 = ip[0] - e1;
+    dest[dest_stride * 0] = a1;
+    dest[dest_stride * 1] = e1;
+    dest[dest_stride * 2] = e1;
+    dest[dest_stride * 3] = e1;
+    ip++;
+    dest++;
+  }
+}
+
+void vp9_idct4x4_16_c(const tran_low_t *input, int16_t *dest, int stride) {
+  tran_low_t out[4 * 4];
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[4], temp_out[4];
+
+  // Rows
+  for (i = 0; i < 4; ++i) {
+    idct4(input, outptr);
+    input += 4;
+    outptr += 4;
+  }
+
+  // Columns
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j)
+      temp_in[j] = out[j * 4 + i];
+    idct4(temp_in, temp_out);
+    for (j = 0; j < 4; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
+    }
+  }
+}
+
+void vp9_idct4x4_1_c(const tran_low_t *input, int16_t *dest,
+                         int dest_stride) {
+  int i;
+  tran_high_t a1;
+  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), 8);
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64), 8);
+  a1 = ROUND_POWER_OF_TWO(out, 4);
+
+  for (i = 0; i < 4; i++) {
+    dest[0] = a1;
+    dest[1] = a1;
+    dest[2] = a1;
+    dest[3] = a1;
+    dest += dest_stride;
+  }
+}
+
+void vp9_idct8x8_64_c(const tran_low_t *input, int16_t *dest, int stride) {
+  tran_low_t out[8 * 8];
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[8], temp_out[8];
+
+  // First transform rows
+  for (i = 0; i < 8; ++i) {
+    idct8(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    idct8(temp_in, temp_out);
+    for (j = 0; j < 8; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+    }
+  }
+}
+
+void vp9_idct8x8_1_c(const tran_low_t *input, int16_t *dest, int stride) {
+  int i, j;
+  tran_high_t a1;
+  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), 8);
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64), 8);
+  a1 = ROUND_POWER_OF_TWO(out, 5);
+  for (j = 0; j < 8; ++j) {
+    for (i = 0; i < 8; ++i)
+      dest[i] = a1;
+    dest += stride;
+  }
+}
+
+void vp9_iht4x4_16_c(const tran_low_t *input, int16_t *dest, int stride,
+                         int tx_type) {
+  const transform_2d IHT_4[] = {
+      { idct4, idct4  },  // DCT_DCT  = 0
+      { iadst4, idct4  },   // ADST_DCT = 1
+      { idct4, iadst4 },    // DCT_ADST = 2
+      { iadst4, iadst4 }      // ADST_ADST = 3
+  };
+
+  int i, j;
+  tran_low_t out[4 * 4];
+  tran_low_t *outptr = out;
+  tran_low_t temp_in[4], temp_out[4];
+
+  // inverse transform row vectors
+  for (i = 0; i < 4; ++i) {
+    IHT_4[tx_type].rows(input, outptr);
+    input  += 4;
+    outptr += 4;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j)
+      temp_in[j] = out[j * 4 + i];
+    IHT_4[tx_type].cols(temp_in, temp_out);
+    for (j = 0; j < 4; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
+    }
+  }
+}
+
+void vp9_iht8x8_64_c(const tran_low_t *input, int16_t *dest, int stride,
+                         int tx_type) {
+  int i, j;
+  tran_low_t out[8 * 8];
+  tran_low_t *outptr = out;
+  tran_low_t temp_in[8], temp_out[8];
+  const transform_2d ht = IHT_8[tx_type];
+
+  // inverse transform row vectors
+  for (i = 0; i < 8; ++i) {
+    ht.rows(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < 8; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+    }
+  }
+}
+
+void vp9_idct8x8_12_c(const tran_low_t *input, int16_t *dest, int stride) {
+  tran_low_t out[8 * 8] = { 0 };
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[8], temp_out[8];
+
+  // First transform rows
+  // only first 4 row has non-zero coefs
+  for (i = 0; i < 4; ++i) {
+    idct8(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    idct8(temp_in, temp_out);
+    for (j = 0; j < 8; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+    }
+  }
+}
+
+void vp9_idct16x16_256_c(const tran_low_t *input, int16_t *dest,
+                             int stride) {
+  tran_low_t out[16 * 16];
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[16], temp_out[16];
+
+  // First transform rows
+  for (i = 0; i < 16; ++i) {
+    idct16(input, outptr);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j * 16 + i];
+    idct16(temp_in, temp_out);
+    for (j = 0; j < 16; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+    }
+  }
+}
+
+void vp9_iht16x16_256_c(const tran_low_t *input, int16_t *dest, int stride,
+                            int tx_type) {
+  int i, j;
+  tran_low_t out[16 * 16];
+  tran_low_t *outptr = out;
+  tran_low_t temp_in[16], temp_out[16];
+  const transform_2d ht = IHT_16[tx_type];
+
+  // Rows
+  for (i = 0; i < 16; ++i) {
+    ht.rows(input, outptr);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j * 16 + i];
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < 16; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+    }
+  }
+}
+
+void vp9_idct16x16_10_c(const tran_low_t *input, int16_t *dest,
+                            int stride) {
+  tran_low_t out[16 * 16] = { 0 };
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[16], temp_out[16];
+
+  // First transform rows. Since all non-zero dct coefficients are in
+  // upper-left 4x4 area, we only need to calculate first 4 rows here.
+  for (i = 0; i < 4; ++i) {
+    idct16(input, outptr);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j*16 + i];
+    idct16(temp_in, temp_out);
+    for (j = 0; j < 16; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+    }
+  }
+}
+
+void vp9_idct16x16_1_c(const tran_low_t *input, int16_t *dest, int stride) {
+  int i, j;
+  tran_high_t a1;
+  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), 8);
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64), 8);
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+  for (j = 0; j < 16; ++j) {
+    for (i = 0; i < 16; ++i)
+      dest[i] = a1;
+    dest += stride;
+  }
+}
+
+void vp9_idct32x32_1024_c(const tran_low_t *input, int16_t *dest,
+                              int stride) {
+  tran_low_t out[32 * 32];
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[32], temp_out[32];
+
+  // Rows
+  for (i = 0; i < 32; ++i) {
+    int16_t zero_coeff[16];
+    for (j = 0; j < 16; ++j)
+      zero_coeff[j] = input[2 * j] | input[2 * j + 1];
+    for (j = 0; j < 8; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 4; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 2; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+
+    if (zero_coeff[0] | zero_coeff[1])
+      idct32(input, outptr);
+    else
+      vpx_memset(outptr, 0, sizeof(tran_low_t) * 32);
+    input += 32;
+    outptr += 32;
+  }
+
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = out[j * 32 + i];
+    idct32(temp_in, temp_out);
+    for (j = 0; j < 32; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+    }
+  }
+}
+
+void vp9_idct32x32_34_c(const tran_low_t *input, int16_t *dest,
+                            int stride) {
+  tran_low_t out[32 * 32] = {0};
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[32], temp_out[32];
+
+  // Rows
+  // only upper-left 8x8 has non-zero coeff
+  for (i = 0; i < 8; ++i) {
+    idct32(input, outptr);
+    input += 32;
+    outptr += 32;
+  }
+
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = out[j * 32 + i];
+    idct32(temp_in, temp_out);
+    for (j = 0; j < 32; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 6);
+    }
+  }
+}
+
+void vp9_idct32x32_1_c(const tran_low_t *input, int16_t *dest, int stride) {
+  int i, j;
+  tran_high_t a1;
+
+  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), 8);
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64), 8);
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+
+  for (j = 0; j < 32; ++j) {
+    for (i = 0; i < 32; ++i)
+      dest[i] = a1;
+    dest += stride;
+  }
+}
+
+// idct
+void vp9_idct4x4(const tran_low_t *input, int16_t *dest, int stride,
+                     int eob) {
+  if (eob > 1)
+    vp9_idct4x4_16(input, dest, stride);
+  else
+    vp9_idct4x4_1(input, dest, stride);
+}
+
+
+void vp9_iwht4x4(const tran_low_t *input, int16_t *dest, int stride,
+                     int eob) {
+  if (eob > 1)
+    vp9_iwht4x4_16(input, dest, stride);
+  else
+    vp9_iwht4x4_1(input, dest, stride);
+}
+
+void vp9_idct8x8(const tran_low_t *input, int16_t *dest, int stride,
+                     int eob) {
+  // If dc is 1, then input[0] is the reconstructed value, do not need
+  // dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
+
+  // The calculation can be simplified if there are not many non-zero dct
+  // coefficients. Use eobs to decide what to do.
+  // TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
+  // Combine that with code here.
+  if (eob == 1)
+    // DC only DCT coefficient
+    vp9_idct8x8_1(input, dest, stride);
+  else if (eob <= 12)
+    vp9_idct8x8_12(input, dest, stride);
+  else
+    vp9_idct8x8_64(input, dest, stride);
+}
+
+void vp9_idct16x16(const tran_low_t *input, int16_t *dest, int stride,
+                       int eob) {
+  /* The calculation can be simplified if there are not many non-zero dct
+   * coefficients. Use eobs to separate different cases. */
+  if (eob == 1)
+    /* DC only DCT coefficient. */
+    vp9_idct16x16_1(input, dest, stride);
+  else if (eob <= 10)
+    vp9_idct16x16_10(input, dest, stride);
+  else
+    vp9_idct16x16_256(input, dest, stride);
+}
+
+void vp9_idct32x32(const tran_low_t *input, int16_t *dest, int stride,
+                       int eob) {
+  if (eob == 1)
+    vp9_idct32x32_1(input, dest, stride);
+  else if (eob <= 34)
+    // non-zero coeff only in upper-left 8x8
+    vp9_idct32x32_34(input, dest, stride);
+  else
+    vp9_idct32x32_1024(input, dest, stride);
+}
+
+// iht
+void vp9_iht4x4(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
+                    int stride, int eob) {
+  if (tx_type == DCT_DCT) {
+    vp9_idct4x4(input, dest, stride, eob);
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud(dest, stride, 4);
+    vp9_iht4x4_16(input, dest, stride, ADST_DCT);
+    flipud(dest, stride, 4);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr(dest, stride, 4);
+    vp9_iht4x4_16(input, dest, stride, DCT_ADST);
+    fliplr(dest, stride, 4);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud(dest, stride, 4);
+    vp9_iht4x4_16(input, dest, stride, ADST_ADST);
+    fliplrud(dest, stride, 4);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr(dest, stride, 4);
+    vp9_iht4x4_16(input, dest, stride, ADST_ADST);
+    fliplr(dest, stride, 4);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud(dest, stride, 4);
+    vp9_iht4x4_16(input, dest, stride, ADST_ADST);
+    flipud(dest, stride, 4);
+#endif  // CONFIG_EXT_TX
+  } else {
+    vp9_iht4x4_16(input, dest, stride, tx_type);
+  }
+}
+
+void vp9_iht8x8(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
+                    int stride, int eob) {
+  if (tx_type == DCT_DCT) {
+    vp9_idct8x8(input, dest, stride, eob);
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud(dest, stride, 8);
+    vp9_iht8x8_64(input, dest, stride, ADST_DCT);
+    flipud(dest, stride, 8);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr(dest, stride, 8);
+    vp9_iht8x8_64(input, dest, stride, DCT_ADST);
+    fliplr(dest, stride, 8);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud(dest, stride, 8);
+    vp9_iht8x8_64(input, dest, stride, ADST_ADST);
+    fliplrud(dest, stride, 8);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr(dest, stride, 8);
+    vp9_iht8x8_64(input, dest, stride, ADST_ADST);
+    fliplr(dest, stride, 8);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud(dest, stride, 8);
+    vp9_iht8x8_64(input, dest, stride, ADST_ADST);
+    flipud(dest, stride, 8);
+#endif  // CONFIG_EXT_TX
+  } else {
+    vp9_iht8x8_64(input, dest, stride, tx_type);
+  }
+}
+
+void vp9_iht16x16(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
+                      int stride, int eob) {
+  if (tx_type == DCT_DCT) {
+    vp9_idct16x16(input, dest, stride, eob);
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud(dest, stride, 16);
+    vp9_iht16x16_256(input, dest, stride, ADST_DCT);
+    flipud(dest, stride, 16);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr(dest, stride, 16);
+    vp9_iht16x16_256(input, dest, stride, DCT_ADST);
+    fliplr(dest, stride, 16);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud(dest, stride, 16);
+    vp9_iht16x16_256(input, dest, stride, ADST_ADST);
+    fliplrud(dest, stride, 16);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr(dest, stride, 16);
+    vp9_iht16x16_256(input, dest, stride, ADST_ADST);
+    fliplr(dest, stride, 16);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud(dest, stride, 16);
+    vp9_iht16x16_256(input, dest, stride, ADST_ADST);
+    flipud(dest, stride, 16);
+#endif  // CONFIG_EXT_TX
+  } else {
+    vp9_iht16x16_256(input, dest, stride, tx_type);
+  }
+}
+
+#if CONFIG_TX64X64
+void vp9_idct64x64_4096_c(const tran_low_t *input, int16_t *dest,
+                              int stride) {
+  // vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    double out[64 * 64], out2[64 * 64];
+    int i, j;
+    // First transform rows
+    for (i = 0; i < 64; ++i) {
+      double temp_in[64], temp_out[64];
+      for (j = 0; j < 64; ++j)
+        temp_in[j] = input[j + i * 64];
+      butterfly_64_idct_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 64; ++j)
+        out[j + i * 64] = temp_out[j];
+    }
+    // Then transform columns
+    for (i = 0; i < 64; ++i) {
+      double temp_in[64], temp_out[64];
+      for (j = 0; j < 64; ++j)
+        temp_in[j] = out[j * 64 + i];
+      butterfly_64_idct_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 64; ++j)
+        out2[j * 64 + i] = temp_out[j];
+    }
+
+    for (j = 0; j < 64; ++j) {
+      for (i = 0; i < 64; ++i)
+        dest[i] = round(out2[j * 64 + i] / 128);
+      dest += stride;
+    }
+  }
+  // vp9_clear_system_state();  // Make it simd safe : __asm emms;
+}
+
+void vp9_idct64x64(const tran_low_t *input, int16_t *dest,
+                       int stride, int eob) {
+  (void) eob;
+  vp9_idct64x64_4096_c(input, dest, stride);
+}
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_SR_MODE

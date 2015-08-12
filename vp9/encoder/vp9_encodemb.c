@@ -18,6 +18,9 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
+#if CONFIG_SR_MODE
+#include "vp9/common/vp9_sr_txfm.h"
+#endif  // CONFIG_SR_MODE
 
 #include "vp9/encoder/vp9_dct.h"
 #include "vp9/encoder/vp9_encodemb.h"
@@ -147,6 +150,35 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
+#if CONFIG_SR_MODE
+  int b_sr = xd->mi[0].src_mi->mbmi.sr;
+  // TX_SIZE new_tx_size = (b_sr) ? (tx_size - 1) : tx_size;
+  TX_SIZE new_tx_size = (b_sr && plane == 0) ? (tx_size - 1) : tx_size;
+  const int default_eob = 16 << (new_tx_size << 1);
+  const int shift = (new_tx_size >= TX_32X32 ? new_tx_size - TX_16X16 : 0);
+  const int mul = 1 << shift;
+#if CONFIG_TX_SKIP
+  int tx_skip = xd->mi[0].src_mi->mbmi.tx_skip[plane != 0];
+  const int16_t *dequant_ptr = tx_skip ? pd->dequant_pxd : pd->dequant;
+#else
+  const int16_t *dequant_ptr = pd->dequant;
+#endif  // CONFIG_TX_SKIP
+#if CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+  const int use_rect_quant = is_rect_quant_used(&xd->mi[0].src_mi->mbmi, plane);
+#endif  // CONFIG_TX_SKIP
+  const dequant_val_type_nuq *dequant_val = pd->dequant_val_nuq;
+#endif  // CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+  const uint8_t *const band_translate = tx_skip ?
+      vp9_coefband_tx_skip : get_band_translate(new_tx_size);
+#else
+  const uint8_t *const band_translate = get_band_translate(new_tx_size);
+#endif  // CONFIG_TX_SKIP
+  const scan_order *const so = get_scan(xd, new_tx_size, type, block);
+
+#else  // CONFIG_SR_MODE
+
   const int default_eob = 16 << (tx_size << 1);
   const int shift = (tx_size >= TX_32X32 ? tx_size - TX_16X16 : 0);
   const int mul = 1 << shift;
@@ -169,6 +201,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const uint8_t *const band_translate = get_band_translate(tx_size);
 #endif  // CONFIG_TX_SKIP
   const scan_order *const so = get_scan(xd, tx_size, type, block);
+#endif  // CONFIG_SR_MODE
+
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
   int next = eob, sz = 0;
@@ -178,6 +212,12 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   int best, band, pt, i, final_eob;
   const TOKENVALUE *dct_value_tokens;
   const int16_t *dct_value_cost;
+
+#if CONFIG_SR_MODE
+  // if (b_sr)
+  if (b_sr && plane == 0)
+    tx_size--;
+#endif  // CONFIG_SR_MODE
 
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
@@ -1719,25 +1759,50 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+#if CONFIG_SR_MODE
+  int b_sr = xd->mi[0].src_mi->mbmi.sr;
+  int new_tx_size = (b_sr && plane == 0) ? (tx_size - 1) : tx_size;
+  // int new_tx_size = (b_sr) ? (tx_size - 1) : tx_size;
+#endif  // CONFIG_SR_MODE
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
-  const scan_order *const scan_order =
-      mbmi->tx_skip[plane != 0] ? &vp9_default_scan_orders_pxd[tx_size] :
-          &vp9_default_scan_orders[tx_size];
-#else
-  const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+  const scan_order * scan_order = mbmi->tx_skip[plane != 0] ?
+#if CONFIG_SR_MODE
+                            &vp9_default_scan_orders_pxd[new_tx_size] :
+                            &vp9_default_scan_orders[new_tx_size];
+#else  // CONFIG_SR_MODE
+                            &vp9_default_scan_orders_pxd[tx_size] :
+                            &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_SR_MODE
+#else  // CONFIG_TX_SKIP
+#if CONFIG_SR_MODE
+  const scan_order * scan_order = &vp9_default_scan_orders[new_tx_size];
+#else  // CONFIG_SR_MODE
+  const scan_order * scan_order = &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_SR_MODE
 #endif  // CONFIG_TX_SKIP
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint16_t *const eob = &p->eobs[block];
-  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+#if CONFIG_SR_MODE
+  if (b_sr && plane == 0) {
+  // if (b_sr) {
+    diff_stride = 64;
+    src_diff = &p->src_sr_diff[4 * (j * diff_stride + i)];
+    tx_size--;
+  } else {
+    src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+  }
+#else  // CONFIG_SR_MODE
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+#endif  // CONFIG_SR_MODE
 
 #if CONFIG_TX_SKIP
   if (mbmi->tx_skip[plane != 0]) {
@@ -1930,16 +1995,30 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint16_t *const eob = &p->eobs[block];
-  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
 #endif
+#if CONFIG_SR_MODE
+  int b_sr = xd->mi[0].src_mi->mbmi.sr;
+#endif  // CONFIG_SR_MODE
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+#if CONFIG_SR_MODE
+  if (b_sr && plane == 0) {
+  // if (b_sr) {
+    diff_stride = 64;
+    src_diff = &p->src_sr_diff[4 * (j * diff_stride + i)];
+    tx_size--;
+  } else {
+    src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+  }
+#else  // CONFIG_SR_MODE
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+#endif  // CONFIG_SR_MODE
 
 #if CONFIG_TX_SKIP
   if (mbmi->tx_skip[plane != 0]) {
@@ -2108,24 +2187,50 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+#if CONFIG_SR_MODE
+  int b_sr = xd->mi[0].src_mi->mbmi.sr;
+  int new_tx_size = (b_sr && plane == 0) ? (tx_size - 1) : tx_size;
+  // int new_tx_size = (b_sr) ? (tx_size - 1) : tx_size;
+#endif  // CONFIG_SR_MODE
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
-  const scan_order *const scan_order =
-      mbmi->tx_skip[plane != 0] ? &vp9_default_scan_orders_pxd[tx_size] :
-          &vp9_default_scan_orders[tx_size];
-#else
-  const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+  const scan_order * scan_order = mbmi->tx_skip[plane != 0] ?
+#if CONFIG_SR_MODE
+                            &vp9_default_scan_orders_pxd[new_tx_size] :
+                            &vp9_default_scan_orders[new_tx_size];
+#else  // CONFIG_SR_MODE
+                            &vp9_default_scan_orders_pxd[tx_size] :
+                            &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_SR_MODE
+#else  // CONFIG_TX_SKIP
+#if CONFIG_SR_MODE
+  const scan_order * scan_order = &vp9_default_scan_orders[new_tx_size];
+#else  // CONFIG_SR_MODE
+  const scan_order * scan_order = &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_SR_MODE
 #endif  // CONFIG_TX_SKIP
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint16_t *const eob = &p->eobs[block];
-  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
+
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+#if CONFIG_SR_MODE
+  if (b_sr && plane == 0) {
+  // if (b_sr) {
+    diff_stride = 64;
+    src_diff = &p->src_sr_diff[4 * (j * diff_stride + i)];
+    tx_size--;
+  } else {
+    src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+  }
+#else  // CONFIG_SR_MODE
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+#endif  // CONFIG_SR_MODE
 
 #if CONFIG_TX_SKIP
   if (mbmi->tx_skip[plane != 0]) {
@@ -2307,6 +2412,100 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   }
 }
 
+#if CONFIG_SR_MODE
+void sr_downsample(int16_t *src, int src_stride, int16_t *dst, int dst_stride,
+                   int w, int h) {
+  int i, j;
+
+  // First lowpass
+  DECLARE_ALIGNED_ARRAY(16, int16_t, src_lp, 64 * 64);
+  sr_lowpass(src, src_stride, src_lp, 64, w, h);
+
+  // Then take 1 out of 2x2
+  for (i = 0; i < h/2; i ++) {
+    for (j = 0; j < w/2; j ++) {
+      dst[j] = src_lp[j << 1];
+    }
+    dst += dst_stride;
+    src_lp += 2 * 64;
+  }
+}
+
+void inv_trfm_sr(MACROBLOCK * x, TX_SIZE tx_size,
+                 int plane, int block, uint8_t *dst, int dst_stride) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblock_plane *const p = &x->plane[plane];
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, tmp_buf, 64 * 64);
+  int tmp_stride = 64;
+  int bs = 4 << tx_size;
+#if SR_USE_MULTI_F
+  MODE_INFO *const mi = xd->mi[0].src_mi;
+  int f_idx = mi->mbmi.us_filter_idx;
+  int f_hor = idx_to_h(f_idx);
+  int f_ver = idx_to_v(f_idx);
+#endif  // SR_USE_MULTI_F
+
+  if (p->eobs[block] == 0)
+    return;
+
+  tx_size--;
+
+  switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      vp9_idct64x64(dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+      break;
+#endif  // CONFIG_TX64X64
+    case TX_32X32:
+      vp9_idct32x32(dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+      break;
+    case TX_16X16:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
+      vp9_iht16x16(tx_type, dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+#else
+      vp9_idct16x16(dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+#endif
+      break;
+    case TX_8X8:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
+      vp9_iht8x8(tx_type, dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+#else
+      vp9_idct8x8(dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+#endif
+      break;
+    case TX_4X4:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type_4x4(plane, xd, block);
+      if (tx_type == DCT_DCT) {
+        // This is like vp9_short_idct4x4 but has a special case around eob<=1
+        // which is significant (not just an optimization) for the lossless
+        // case.
+        x->itxm(dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+      } else {
+        vp9_iht4x4(tx_type, dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+      }
+#else
+      // This is like vp9_short_idct4x4 but has a special case around eob<=1
+      // which is significant (not just an optimization) for the lossless case.
+      x->itxm(dqcoeff, tmp_buf, tmp_stride, p->eobs[block]);
+#endif
+      break;
+    default:
+      assert(0 && "Invalid transform size");
+      break;
+  }
+#if SR_USE_MULTI_F
+  sr_recon(tmp_buf, tmp_stride, dst, dst_stride, bs, bs, f_hor, f_ver);
+#else  // SR_USE_MULTI_F
+  sr_recon(tmp_buf, tmp_stride, dst, dst_stride, bs, bs);
+#endif  // SR_USE_MULTI_F
+}
+#endif  // CONFIG_SR_MODE
+
 static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
                          TX_SIZE tx_size, void *arg) {
   struct encode_b_args *const args = arg;
@@ -2319,6 +2518,10 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   int i, j;
   uint8_t *dst;
   ENTROPY_CONTEXT *a, *l;
+#if CONFIG_SR_MODE
+  int bs = 4 << tx_size;
+  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
+#endif  // CONFIG_SR_MODE
 #if CONFIG_EXT_TX
   TX_TYPE tx_type;
 #endif
@@ -2334,15 +2537,41 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   if (plane) assert(tx_size != TX_64X64);
 #endif
 
+#if CONFIG_SR_MODE  // Safer to set it all zeros
+    vpx_memset(coeff, 0, bs * bs * sizeof(coeff[0]));
+    vpx_memset(dqcoeff, 0, bs * bs * sizeof(dqcoeff[0]));
+#endif  // CONFIG_SR_MODE
+
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.
+#if CONFIG_SR_MODE  // supertx???  // debugtest
+  if (plane == 0 &&
+    x->zcoeff_blk[xd->mi[0].src_mi->mbmi.sr ? TX_SIZES : tx_size][block]) {
+#else  // CONFIG_SR_MODE
   if (plane == 0 && x->zcoeff_blk[tx_size][block]) {
+#endif  // CONFIG_SR_MODE
     p->eobs[block] = 0;
     *a = *l = 0;
     return;
   }
 
   if (!x->skip_recode) {
+#if CONFIG_SR_MODE
+    if (xd->mi[0].src_mi->mbmi.sr && plane == 0) {
+    // if (xd->mi[0].src_mi->mbmi.sr) {
+      int src_sr_diff_stride = 64;
+      int src_diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+      int16_t *src_sr_diff =
+          (int16_t *)&p->src_sr_diff[4 * (j * src_sr_diff_stride + i)];
+      int16_t *src_diff =
+          (int16_t *)&p->src_diff[4 * (j * src_diff_stride + i)];
+
+      // Downsample
+      sr_downsample(src_diff, src_diff_stride,
+                    src_sr_diff, src_sr_diff_stride, bs, bs);
+      assert(tx_size == max_txsize_lookup[plane_bsize]);
+    }
+#endif  // CONFIG_SR_MODE
     if (max_txsize_lookup[plane_bsize] == tx_size) {
       if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
         // full forward transform and quantization
@@ -2388,7 +2617,12 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     }
   }
 
+#if 0  // CONFIG_SR_MODE
+  if (x->optimize && (!x->skip_recode || !x->skip_optimize) &&
+      !(xd->mi[0].src_mi->mbmi.sr)) {
+#else
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
+#endif
     const int ctx = combine_entropy_contexts(*a, *l);
     *a = *l = optimize_b(x, plane, block, tx_size, ctx) > 0;
   } else {
@@ -2401,6 +2635,13 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   if (x->skip_encode || p->eobs[block] == 0)
     return;
 
+#if CONFIG_SR_MODE
+  if (xd->mi[0].src_mi->mbmi.sr && plane == 0) {
+  // if (xd->mi[0].src_mi->mbmi.sr) {
+    inv_trfm_sr(x, tx_size, plane, block, dst, pd->dst.stride);
+    return;
+  }
+#endif  // CONFIG_SR_MODE
 #if CONFIG_TX_SKIP
   if (mbmi->tx_skip[plane != 0]) {
     int bs = 4 << tx_size;
@@ -2415,7 +2656,6 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
   }
 #endif  // CONFIG_TX_SKIP
-
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
@@ -2607,7 +2847,6 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
       vp9_get_entropy_contexts(bsize, tx_size, pd,
                                ctx.ta[plane], ctx.tl[plane]);
     }
-
     vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
                                            &arg);
   }
@@ -2883,10 +3122,24 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_NEW_QUANT
   const uint8_t* band = get_band_translate(tx_size);
 #endif  // CONFIG_NEW_QUANT
+#if CONFIG_SR_MODE
+  DECLARE_ALIGNED_ARRAY(16, int16_t, tmp_buf, 64 * 64);
+  int tmp_stride = 64;
+  int src_sr_diff_stride = 64;
+  int16_t *src_sr_diff;
+#if SR_USE_MULTI_F
+  int f_idx = mbmi->us_filter_idx;
+  int f_hor = idx_to_h(f_idx);
+  int f_ver = idx_to_v(f_idx);
+#endif  // SR_USE_MULTI_F
+#endif  // CONFIG_SR_MODE
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * (j * dst_stride + i)];
   src = &p->src.buf[4 * (j * src_stride + i)];
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+#if CONFIG_SR_MODE
+  src_sr_diff = (int16_t *)&p->src_sr_diff[4 * (j * src_sr_diff_stride + i)];
+#endif  // CONFIG_SR_MODE
 
 #if CONFIG_FILTERINTRA
   if (mbmi->sb_type < BLOCK_8X8 && plane == 0)
@@ -3483,6 +3736,50 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       if (!x->skip_recode) {
         vp9_subtract_block(64, 64, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
+#if CONFIG_SR_MODE
+        // if (mbmi->sr) {
+        if (mbmi->sr && plane == 0) {
+          int bs = 64;
+          assert(tx_size == max_txsize_lookup[plane_bsize]);
+          sr_downsample(src_diff, diff_stride,
+                        src_sr_diff, src_sr_diff_stride, bs, bs);
+
+          fdct32x32(x->use_lp32x32fdct, src_sr_diff, coeff, src_sr_diff_stride);
+#if CONFIG_NEW_QUANT
+        if (x->quant_fp && plane == 0)
+          vp9_quantize_32x32_fp_nuq(coeff, 1024, x->skip_block,
+                                    p->quant_fp, pd->dequant,
+                                    (const cumbins_type_nuq *)p->cumbins_nuq,
+                                    (const dequant_val_type_nuq *)
+                                    pd->dequant_val_nuq,
+                                    qcoeff, dqcoeff, eob,
+                                    scan_order->scan, band);
+        else
+          vp9_quantize_32x32_nuq(coeff, 1024, x->skip_block,
+                                 p->quant, p->quant_shift, pd->dequant,
+                                 (const cumbins_type_nuq *)p->cumbins_nuq,
+                                 (const dequant_val_type_nuq *)
+                                 pd->dequant_val_nuq,
+                                 qcoeff, dqcoeff, eob,
+                                 scan_order->scan, band);
+#else
+          vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
+                               p->quant, p->quant_shift, qcoeff, dqcoeff,
+                               pd->dequant, eob, scan_order->scan,
+                               scan_order->iscan);
+#endif  // CONFIG_NEW_QUANT
+
+          if (*eob) {
+            vp9_idct32x32(dqcoeff, tmp_buf, tmp_stride, *eob);
+#if SR_USE_MULTI_F
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs,
+                     f_hor, f_ver);
+#else  // SR_USE_MULTI_F
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs);
+#endif  // SR_USE_MULTI_F
+          }
+        } else {
+#endif  // CONFIG_SR_MODE
         vp9_fdct64x64(src_diff, coeff, diff_stride);
 #if CONFIG_NEW_QUANT
         if (x->quant_fp)
@@ -3507,48 +3804,28 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                              pd->dequant, eob, scan_order->scan,
                              scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
+        if (*eob)
+          vp9_idct64x64_add(dqcoeff, dst, dst_stride, *eob);
+#if CONFIG_SR_MODE
+        }
+#endif  // CONFIG_SR_MODE
       }
-      if (!x->skip_encode && *eob)
-        vp9_idct64x64_add(dqcoeff, dst, dst_stride, *eob);
       break;
 #endif  // CONFIG_TX64X64
     case TX_32X32:
       if (!x->skip_recode) {
         vp9_subtract_block(32, 32, src_diff, diff_stride,
-                           src, src_stride, dst, dst_stride);
-        fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-#if CONFIG_NEW_QUANT
-        if (x->quant_fp)
-          vp9_quantize_32x32_fp_nuq(coeff, 1024, x->skip_block,
-                                    p->quant_fp, pd->dequant,
-                                    (const cumbins_type_nuq *)p->cumbins_nuq,
-                                    (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
-                                    qcoeff, dqcoeff, eob,
-                                    scan_order->scan, band);
-        else
-          vp9_quantize_32x32_nuq(coeff, 1024, x->skip_block,
-                                 p->quant, p->quant_shift, pd->dequant,
-                                 (const cumbins_type_nuq *)p->cumbins_nuq,
-                                 (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq,
-                                 qcoeff, dqcoeff, eob,
-                                 scan_order->scan, band);
-#else
-        vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
-                             p->quant, p->quant_shift, qcoeff, dqcoeff,
-                             pd->dequant, eob, scan_order->scan,
-                             scan_order->iscan);
-#endif  // CONFIG_NEW_QUANT
-      }
-      if (!x->skip_encode && *eob)
-        vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
-      break;
-    case TX_16X16:
-      if (!x->skip_recode) {
-        vp9_subtract_block(16, 16, src_diff, diff_stride,
-                           src, src_stride, dst, dst_stride);
-        vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
+                             src, src_stride, dst, dst_stride);
+#if CONFIG_SR_MODE
+        if (mbmi->sr && plane == 0) {
+        // if (mbmi->sr) {
+          int bs = 32;
+          assert(tx_size == max_txsize_lookup[plane_bsize]);
+          sr_downsample(src_diff, diff_stride,
+                        src_sr_diff, src_sr_diff_stride, bs, bs);
+          tx_type = get_tx_type(pd->plane_type, xd);
+          scan_order = &vp9_intra_scan_orders[TX_16X16][tx_type];
+          vp9_fht16x16(src_sr_diff, coeff, src_sr_diff_stride, tx_type);
 #if CONFIG_NEW_QUANT
         if (x->quant_fp)
           vp9_quantize_fp_nuq(coeff, 256, x->skip_block,
@@ -3565,19 +3842,179 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #else
-        vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
-                       p->quant, p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, eob, scan_order->scan,
-                       scan_order->iscan);
+          vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
+                         p->quant, p->quant_shift, qcoeff, dqcoeff,
+                         pd->dequant, eob, scan_order->scan,
+                         scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
+          if (*eob) {
+            vp9_iht16x16(tx_type, dqcoeff, tmp_buf, tmp_stride, *eob);
+#if SR_USE_MULTI_F
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs,
+                     f_hor, f_ver);
+#else  // SR_USE_MULTI_F
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs);
+#endif  // SR_USE_MULTI_F
+          }
+        } else {
+#endif  // CONFIG_SR_MODE
+          fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
+#if CONFIG_NEW_QUANT
+        if (x->quant_fp && plane == 0)
+          vp9_quantize_32x32_fp_nuq(coeff, 1024, x->skip_block,
+                                    p->quant_fp, pd->dequant,
+                                    (const cumbins_type_nuq *)p->cumbins_nuq,
+                                    (const dequant_val_type_nuq *)
+                                    pd->dequant_val_nuq,
+                                    qcoeff, dqcoeff, eob,
+                                    scan_order->scan, band);
+        else
+          vp9_quantize_32x32_nuq(coeff, 1024, x->skip_block,
+                                 p->quant, p->quant_shift, pd->dequant,
+                                 (const cumbins_type_nuq *)p->cumbins_nuq,
+                                 (const dequant_val_type_nuq *)
+                                 pd->dequant_val_nuq,
+                                 qcoeff, dqcoeff, eob,
+                                 scan_order->scan, band);
+#else
+          vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
+                               p->quant, p->quant_shift, qcoeff, dqcoeff,
+                               pd->dequant, eob, scan_order->scan,
+                               scan_order->iscan);
+#endif  // CONFIG_NEW_QUANT
+          if (*eob)
+            vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
+#if CONFIG_SR_MODE
+        }
+#endif  // CONFIG_SR_MODE
       }
-      if (!x->skip_encode && *eob)
-        vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+      break;
+    case TX_16X16:
+      if (!x->skip_recode) {
+        vp9_subtract_block(16, 16, src_diff, diff_stride,
+                             src, src_stride, dst, dst_stride);
+#if CONFIG_SR_MODE
+        if (mbmi->sr && plane == 0) {
+        // if (mbmi->sr) {
+          int bs = 16;
+          assert(tx_size == max_txsize_lookup[plane_bsize]);
+          sr_downsample(src_diff, diff_stride,
+                        src_sr_diff, src_sr_diff_stride, bs, bs);
+          tx_type = get_tx_type(pd->plane_type, xd);
+          scan_order = &vp9_intra_scan_orders[TX_8X8][tx_type];
+          vp9_fht8x8(src_sr_diff, coeff, src_sr_diff_stride, tx_type);
+#if CONFIG_NEW_QUANT
+        if (x->quant_fp)
+          vp9_quantize_fp_nuq(coeff, 64, x->skip_block,
+                              p->quant_fp, pd->dequant,
+                              (const cumbins_type_nuq *)p->cumbins_nuq,
+                              (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                              qcoeff, dqcoeff, eob,
+                              scan_order->scan, band);
+        else
+          vp9_quantize_nuq(coeff, 64, x->skip_block,
+                           p->quant, p->quant_shift, pd->dequant,
+                           (const cumbins_type_nuq *)p->cumbins_nuq,
+                           (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                           qcoeff, dqcoeff, eob,
+                           scan_order->scan, band);
+#else
+          vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
+                         p->quant_shift, qcoeff, dqcoeff,
+                         pd->dequant, eob, scan_order->scan,
+                         scan_order->iscan);
+#endif  // CONFIG_NEW_QUANT
+          if (*eob) {
+            vp9_iht8x8(tx_type, dqcoeff, tmp_buf, tmp_stride, *eob);
+#if SR_USE_MULTI_F
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs,
+                     f_hor, f_ver);
+#else
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs);
+#endif
+          }
+        } else {
+#endif  // CONFIG_SR_MODE
+          vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
+#if CONFIG_NEW_QUANT
+        if (x->quant_fp)
+          vp9_quantize_fp_nuq(coeff, 256, x->skip_block,
+                              p->quant_fp, pd->dequant,
+                              (const cumbins_type_nuq *)p->cumbins_nuq,
+                              (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                              qcoeff, dqcoeff, eob,
+                              scan_order->scan, band);
+        else
+          vp9_quantize_nuq(coeff, 256, x->skip_block,
+                           p->quant, p->quant_shift, pd->dequant,
+                           (const cumbins_type_nuq *)p->cumbins_nuq,
+                           (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                           qcoeff, dqcoeff, eob,
+                           scan_order->scan, band);
+#else
+          vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
+                         p->quant, p->quant_shift, qcoeff, dqcoeff,
+                         pd->dequant, eob, scan_order->scan,
+                         scan_order->iscan);
+#endif  // CONFIG_NEW_QUANT
+          if (*eob)
+            vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+#if CONFIG_SR_MODE
+        }
+#endif  // CONFIG_SR_MODE
+      }
       break;
     case TX_8X8:
       if (!x->skip_recode) {
         vp9_subtract_block(8, 8, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
+#if CONFIG_SR_MODE
+        if (0) {
+        // if (mbmi->sr && plane != 0) {  // used in chroma case
+          int bs = 8;
+          assert(tx_size == max_txsize_lookup[plane_bsize]);
+          sr_downsample(src_diff, diff_stride,
+                        src_sr_diff, src_sr_diff_stride, bs, bs);
+          tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
+          scan_order = &vp9_intra_scan_orders[TX_4X4][tx_type];
+          if (tx_type != DCT_DCT)
+            vp9_fht4x4(src_sr_diff, coeff, src_sr_diff_stride, tx_type);
+          else
+            x->fwd_txm4x4(src_sr_diff, coeff, src_sr_diff_stride);
+#if CONFIG_NEW_QUANT
+          if (x->quant_fp)
+            vp9_quantize_fp_nuq(
+                coeff, 16, x->skip_block, p->quant_fp, pd->dequant,
+                (const cumbins_type_nuq *)p->cumbins_nuq,
+                (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                qcoeff, dqcoeff, eob, scan_order->scan, band);
+          else
+            vp9_quantize_nuq(coeff, 16, x->skip_block,
+                             p->quant, p->quant_shift, pd->dequant,
+                             (const cumbins_type_nuq *)p->cumbins_nuq,
+                             (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                             qcoeff, dqcoeff, eob,
+                             scan_order->scan, band);
+#else
+          vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
+                         p->quant_shift, qcoeff, dqcoeff,
+                         pd->dequant, eob, scan_order->scan,
+                         scan_order->iscan);
+#endif  // CONFIG_NEW_QUANT
+          if (*eob) {
+            if (tx_type == DCT_DCT)
+              x->itxm(dqcoeff, tmp_buf, tmp_stride, *eob);
+            else
+              vp9_iht4x4_16(dqcoeff, tmp_buf, tmp_stride, tx_type);
+#if SR_USE_MULTI_F
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs,
+                     f_hor, f_ver);
+#else
+            sr_recon(tmp_buf, tmp_stride, dst, pd->dst.stride, bs, bs);
+#endif
+          }
+        } else {
+#endif  // CONFIG_SR_MODE
         vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
 #if CONFIG_NEW_QUANT
         if (x->quant_fp)
@@ -3600,9 +4037,12 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
+        if (*eob)
+          vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+#if CONFIG_SR_MODE
       }
-      if (!x->skip_encode && *eob)
-        vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+#endif  // CONFIG_SR_MODE
+      }
       break;
     case TX_4X4:
       if (!x->skip_recode) {

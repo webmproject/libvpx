@@ -48,6 +48,12 @@ void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
+#if CONFIG_SR_MODE
+void inv_trfm_sr(MACROBLOCK * x, TX_SIZE tx_size,
+                 int plane, int block, uint8_t *dst, int dst_stride);
+void sr_downsample(int16_t *src, int src_stride, int16_t *dst, int dst_stride,
+                   int w, int h);
+#endif  // CONFIG_SR_MODE
 #if CONFIG_TX_SKIP
 void vp9_tx_identity_rect(const int16_t *input, tran_low_t *out,
                           int row, int col,
