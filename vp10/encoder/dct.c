@@ -17,7 +17,6 @@
 
 #include "vp10/common/blockd.h"
 #include "vp10/common/idct.h"
-#include "vp10/common/systemdependent.h"
 #include "vpx_dsp/fwd_txfm.h"
 #include "vpx_ports/mem.h"
 

@@ -16,6 +16,7 @@
 #include "vpx_dsp/bitwriter_buffer.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem_ops.h"
+#include "vpx_ports/system_state.h"
 
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymode.h"
@@ -23,7 +24,6 @@
 #include "vp10/common/mvref_common.h"
 #include "vp10/common/pred_common.h"
 #include "vp10/common/seg_common.h"
-#include "vp10/common/systemdependent.h"
 #include "vp10/common/tile_common.h"
 
 #include "vp10/encoder/cost.h"

@@ -45,7 +45,6 @@ VP10_COMMON_SRCS-yes += common/scale.h
 VP10_COMMON_SRCS-yes += common/scale.c
 VP10_COMMON_SRCS-yes += common/seg_common.h
 VP10_COMMON_SRCS-yes += common/seg_common.c
-VP10_COMMON_SRCS-yes += common/systemdependent.h
 VP10_COMMON_SRCS-yes += common/textblit.h
 VP10_COMMON_SRCS-yes += common/tile_common.h
 VP10_COMMON_SRCS-yes += common/tile_common.c

@@ -22,7 +22,6 @@
 #endif
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
-#include "vp10/common/systemdependent.h"
 #include "vp10/common/tile_common.h"
 
 #include "vp10/encoder/aq_complexity.h"
@@ -55,6 +54,7 @@
 #endif
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
 

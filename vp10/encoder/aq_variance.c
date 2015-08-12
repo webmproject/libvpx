@@ -15,11 +15,10 @@
 #include "vp10/encoder/aq_variance.h"
 
 #include "vp10/common/seg_common.h"
-
 #include "vp10/encoder/ratectrl.h"
 #include "vp10/encoder/rd.h"
 #include "vp10/encoder/segmentation.h"
-#include "vp10/common/systemdependent.h"
+#include "vpx_ports/system_state.h"
 
 #define ENERGY_MIN (-4)
 #define ENERGY_MAX (1)

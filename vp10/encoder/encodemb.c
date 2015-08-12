@@ -21,7 +21,6 @@
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
 #include "vp10/common/scan.h"
-#include "vp10/common/systemdependent.h"
 
 #include "vp10/encoder/encodemb.h"
 #include "vp10/encoder/rd.h"

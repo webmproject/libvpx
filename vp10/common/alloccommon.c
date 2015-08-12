@@ -16,7 +16,6 @@
 #include "vp10/common/entropymode.h"
 #include "vp10/common/entropymv.h"
 #include "vp10/common/onyxc_int.h"
-#include "vp10/common/systemdependent.h"
 
 void vp10_set_mb_mi(VP9_COMMON *cm, int width, int height) {
   const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);

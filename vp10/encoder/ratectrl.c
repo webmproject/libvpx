@@ -17,6 +17,7 @@
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 
 #include "vp10/common/alloccommon.h"
 #include "vp10/encoder/aq_cyclicrefresh.h"
@@ -24,7 +25,6 @@
 #include "vp10/common/entropymode.h"
 #include "vp10/common/quant_common.h"
 #include "vp10/common/seg_common.h"
-#include "vp10/common/systemdependent.h"
 
 #include "vp10/encoder/encodemv.h"
 #include "vp10/encoder/ratectrl.h"

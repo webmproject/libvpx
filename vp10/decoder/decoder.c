@@ -17,6 +17,7 @@
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_once.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
@@ -30,7 +31,6 @@
 #endif
 #include "vp10/common/quant_common.h"
 #include "vp10/common/reconintra.h"
-#include "vp10/common/systemdependent.h"
 
 #include "vp10/decoder/decodeframe.h"
 #include "vp10/decoder/decoder.h"

@@ -15,7 +15,6 @@
 #include "vp10/common/onyxc_int.h"
 #include "vp10/common/quant_common.h"
 #include "vp10/common/reconinter.h"
-#include "vp10/common/systemdependent.h"
 #include "vp10/encoder/extend.h"
 #include "vp10/encoder/firstpass.h"
 #include "vp10/encoder/mcomp.h"

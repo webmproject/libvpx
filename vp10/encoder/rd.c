@@ -15,7 +15,9 @@
 #include "./vp10_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/bitops.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 
 #include "vp10/common/common.h"
 #include "vp10/common/entropy.h"
@@ -26,7 +28,6 @@
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
 #include "vp10/common/seg_common.h"
-#include "vp10/common/systemdependent.h"
 
 #include "vp10/encoder/cost.h"
 #include "vp10/encoder/encodemb.h"

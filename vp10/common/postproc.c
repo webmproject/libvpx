@@ -17,12 +17,12 @@
 #include "./vp10_rtcd.h"
 
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_scale/yv12config.h"
 
 #include "vp10/common/onyxc_int.h"
 #include "vp10/common/postproc.h"
-#include "vp10/common/systemdependent.h"
 #include "vp10/common/textblit.h"
 
 #if CONFIG_VP9_POSTPROC

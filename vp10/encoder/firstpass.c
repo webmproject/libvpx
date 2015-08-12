@@ -17,13 +17,13 @@
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_scale/yv12config.h"
 
 #include "vp10/common/entropymv.h"
 #include "vp10/common/quant_common.h"
 #include "vp10/common/reconinter.h"  // vp10_setup_dst_planes()
-#include "vp10/common/systemdependent.h"
 #include "vp10/encoder/aq_variance.h"
 #include "vp10/encoder/block.h"
 #include "vp10/encoder/encodeframe.h"

@@ -14,12 +14,12 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/system_state.h"
 #include "vp10/encoder/segmentation.h"
 #include "vp10/encoder/mcomp.h"
 #include "vp10/common/blockd.h"
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
-#include "vp10/common/systemdependent.h"
 
 
 static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,

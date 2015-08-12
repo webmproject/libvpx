@@ -14,7 +14,6 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vp10/common/blockd.h"
 #include "vp10/common/idct.h"
-#include "vp10/common/systemdependent.h"
 #include "vpx_dsp/inv_txfm.h"
 #include "vpx_ports/mem.h"
 

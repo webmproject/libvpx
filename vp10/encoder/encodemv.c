@@ -12,7 +12,6 @@
 
 #include "vp10/common/common.h"
 #include "vp10/common/entropymode.h"
-#include "vp10/common/systemdependent.h"
 
 #include "vp10/encoder/cost.h"
 #include "vp10/encoder/encodemv.h"
