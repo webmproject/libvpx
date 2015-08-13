@@ -15,7 +15,7 @@
 #include "vpx_util/vpx_thread.h"
 #include "vpx/internal/vpx_codec_internal.h"
 
-struct VP9Common;
+struct VP10Common;
 struct VP10Decoder;
 
 // WorkerData for the FrameWorker thread. It contains all the information of

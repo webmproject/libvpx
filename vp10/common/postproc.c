@@ -623,7 +623,7 @@ static void swap_mi_and_prev_mi(VP10_COMMON *cm) {
   cm->postproc_state.prev_mi = cm->postproc_state.prev_mip + cm->mi_stride + 1;
 }
 
-int vp10_post_proc_frame(struct VP9Common *cm,
+int vp10_post_proc_frame(struct VP10Common *cm,
                         YV12_BUFFER_CONFIG *dest, vp10_ppflags_t *ppflags) {
   const int q = MIN(105, cm->lf.filter_level * 2);
   const int flags = ppflags->post_proc_flag;

@@ -1599,7 +1599,8 @@ void vp10_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
 
 void vp10_loop_filter_data_reset(
     LFWorkerData *lf_data, YV12_BUFFER_CONFIG *frame_buffer,
-    struct VP9Common *cm, const struct macroblockd_plane planes[MAX_MB_PLANE]) {
+    struct VP10Common *cm,
+    const struct macroblockd_plane planes[MAX_MB_PLANE]) {
   lf_data->frame_buffer = frame_buffer;
   lf_data->cm = cm;
   lf_data->start = 0;
