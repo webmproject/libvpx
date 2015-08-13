@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_ONYXC_INT_H_
-#define VP9_COMMON_VP9_ONYXC_INT_H_
+#ifndef VP10_COMMON_ONYXC_INT_H_
+#define VP10_COMMON_ONYXC_INT_H_
 
 #include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
@@ -467,4 +467,4 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_ONYXC_INT_H_
+#endif  // VP10_COMMON_ONYXC_INT_H_

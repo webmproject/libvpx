@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_ENCODEMV_H_
-#define VP9_ENCODER_VP9_ENCODEMV_H_
+#ifndef VP10_ENCODER_ENCODEMV_H_
+#define VP10_ENCODER_ENCODEMV_H_
 
 #include "vp10/encoder/encoder.h"
 
@@ -35,4 +35,4 @@ void vp10_update_mv_count(ThreadData *td);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_ENCODEMV_H_
+#endif  // VP10_ENCODER_ENCODEMV_H_

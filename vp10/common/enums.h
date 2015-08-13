@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_ENUMS_H_
-#define VP9_COMMON_VP9_ENUMS_H_
+#ifndef VP10_COMMON_ENUMS_H_
+#define VP10_COMMON_ENUMS_H_
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
@@ -144,4 +144,4 @@ typedef uint8_t PREDICTION_MODE;
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_ENUMS_H_
+#endif  // VP10_COMMON_ENUMS_H_

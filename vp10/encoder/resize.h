@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_RESIZE_H_
-#define VP9_ENCODER_VP9_RESIZE_H_
+#ifndef VP10_ENCODER_RESIZE_H_
+#define VP10_ENCODER_RESIZE_H_
 
 #include <stdio.h>
 #include "vpx/vpx_integer.h"
@@ -121,4 +121,4 @@ void vp10_highbd_resize_frame444(const uint8_t *const y,
                                 int owidth,
                                 int bd);
 #endif    // CONFIG_VP9_HIGHBITDEPTH
-#endif    // VP9_ENCODER_VP9_RESIZE_H_
+#endif    // VP10_ENCODER_RESIZE_H_

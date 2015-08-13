@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_TILE_COMMON_H_
-#define VP9_COMMON_VP9_TILE_COMMON_H_
+#ifndef VP10_COMMON_TILE_COMMON_H_
+#define VP10_COMMON_TILE_COMMON_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,4 +37,4 @@ void vp10_get_tile_n_bits(int mi_cols,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_TILE_COMMON_H_
+#endif  // VP10_COMMON_TILE_COMMON_H_

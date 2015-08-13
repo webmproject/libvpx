@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_PICKLPF_H_
-#define VP9_ENCODER_VP9_PICKLPF_H_
+#ifndef VP10_ENCODER_PICKLPF_H_
+#define VP10_ENCODER_PICKLPF_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,4 +27,4 @@ void vp10_pick_filter_level(const struct yv12_buffer_config *sd,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_PICKLPF_H_
+#endif  // VP10_ENCODER_PICKLPF_H_

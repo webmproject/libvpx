@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_ENCODEFRAME_H_
-#define VP9_ENCODER_VP9_ENCODEFRAME_H_
+#ifndef VP10_ENCODER_ENCODEFRAME_H_
+#define VP10_ENCODER_ENCODEFRAME_H_
 
 #include "vpx/vpx_integer.h"
 
@@ -46,4 +46,4 @@ void vp10_set_variance_partition_thresholds(struct VP9_COMP *cpi, int q);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_ENCODEFRAME_H_
+#endif  // VP10_ENCODER_ENCODEFRAME_H_

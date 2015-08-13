@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_TREEWRITER_H_
-#define VP9_ENCODER_VP9_TREEWRITER_H_
+#ifndef VP10_ENCODER_TREEWRITER_H_
+#define VP10_ENCODER_TREEWRITER_H_
 
 #include "vpx_dsp/bitwriter.h"
 
@@ -48,4 +48,4 @@ static INLINE void vp10_write_token(vpx_writer *w, const vpx_tree_index *tree,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_TREEWRITER_H_
+#endif  // VP10_ENCODER_TREEWRITER_H_

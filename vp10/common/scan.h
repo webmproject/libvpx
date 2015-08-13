@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_SCAN_H_
-#define VP9_COMMON_VP9_SCAN_H_
+#ifndef VP10_COMMON_SCAN_H_
+#define VP10_COMMON_SCAN_H_
 
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
@@ -54,4 +54,4 @@ static INLINE const scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_SCAN_H_
+#endif  // VP10_COMMON_SCAN_H_

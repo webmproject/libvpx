@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_DECODER_VP9_DECODEMV_H_
-#define VP9_DECODER_VP9_DECODEMV_H_
+#ifndef VP10_DECODER_DECODEMV_H_
+#define VP10_DECODER_DECODEMV_H_
 
 #include "vpx_dsp/bitreader.h"
 
@@ -27,4 +27,4 @@ void vp10_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
 }  // extern "C"
 #endif
 
-#endif  // VP9_DECODER_VP9_DECODEMV_H_
+#endif  // VP10_DECODER_DECODEMV_H_

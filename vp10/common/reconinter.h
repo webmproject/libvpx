@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_RECONINTER_H_
-#define VP9_COMMON_VP9_RECONINTER_H_
+#ifndef VP10_COMMON_RECONINTER_H_
+#define VP10_COMMON_RECONINTER_H_
 
 #include "vp10/common/filter.h"
 #include "vp10/common/onyxc_int.h"
@@ -192,4 +192,4 @@ void vp10_setup_pre_planes(MACROBLOCKD *xd, int idx,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_RECONINTER_H_
+#endif  // VP10_COMMON_RECONINTER_H_

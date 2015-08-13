@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_SEGMENTATION_H_
-#define VP9_ENCODER_VP9_SEGMENTATION_H_
+#ifndef VP10_ENCODER_SEGMENTATION_H_
+#define VP10_ENCODER_SEGMENTATION_H_
 
 #include "vp10/common/blockd.h"
 #include "vp10/encoder/encoder.h"
@@ -50,4 +50,4 @@ void vp10_reset_segment_features(struct segmentation *seg);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_SEGMENTATION_H_
+#endif  // VP10_ENCODER_SEGMENTATION_H_

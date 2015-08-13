@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_SUBEXP_H_
-#define VP9_ENCODER_VP9_SUBEXP_H_
+#ifndef VP10_ENCODER_SUBEXP_H_
+#define VP10_ENCODER_SUBEXP_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,4 +41,4 @@ int vp10_prob_diff_update_savings_search_model(const unsigned int *ct,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_SUBEXP_H_
+#endif  // VP10_ENCODER_SUBEXP_H_

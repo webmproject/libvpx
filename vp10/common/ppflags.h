@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_PPFLAGS_H_
-#define VP9_COMMON_VP9_PPFLAGS_H_
+#ifndef VP10_COMMON_PPFLAGS_H_
+#define VP10_COMMON_PPFLAGS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,4 +40,4 @@ typedef struct {
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_PPFLAGS_H_
+#endif  // VP10_COMMON_PPFLAGS_H_

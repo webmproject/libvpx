@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
-#define VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
+#ifndef VP10_ENCODER_AQ_CYCLICREFRESH_H_
+#define VP10_ENCODER_AQ_CYCLICREFRESH_H_
 
 #include "vp10/common/blockd.h"
 
@@ -95,4 +95,4 @@ static INLINE int cyclic_refresh_segment_id(int segment_id) {
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
+#endif  // VP10_ENCODER_AQ_CYCLICREFRESH_H_

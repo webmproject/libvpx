@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_PRED_COMMON_H_
-#define VP9_COMMON_VP9_PRED_COMMON_H_
+#ifndef VP10_COMMON_PRED_COMMON_H_
+#define VP10_COMMON_PRED_COMMON_H_
 
 #include "vp10/common/blockd.h"
 #include "vp10/common/onyxc_int.h"
@@ -167,4 +167,4 @@ static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_PRED_COMMON_H_
+#endif  // VP10_COMMON_PRED_COMMON_H_

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_DECODER_VP9_DSUBEXP_H_
-#define VP9_DECODER_VP9_DSUBEXP_H_
+#ifndef VP10_DECODER_DSUBEXP_H_
+#define VP10_DECODER_DSUBEXP_H_
 
 #include "vpx_dsp/bitreader.h"
 
@@ -24,4 +24,4 @@ void vp10_diff_update_prob(vpx_reader *r, vpx_prob* p);
 }  // extern "C"
 #endif
 
-#endif  // VP9_DECODER_VP9_DSUBEXP_H_
+#endif  // VP10_DECODER_DSUBEXP_H_

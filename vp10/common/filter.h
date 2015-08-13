@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_FILTER_H_
-#define VP9_COMMON_VP9_FILTER_H_
+#ifndef VP10_COMMON_FILTER_H_
+#define VP10_COMMON_FILTER_H_
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
@@ -39,4 +39,4 @@ extern const InterpKernel *vp10_filter_kernels[4];
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_FILTER_H_
+#endif  // VP10_COMMON_FILTER_H_

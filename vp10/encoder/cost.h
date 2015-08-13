@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_COST_H_
-#define VP9_ENCODER_VP9_COST_H_
+#ifndef VP10_ENCODER_COST_H_
+#define VP10_ENCODER_COST_H_
 
 #include "vpx_dsp/prob.h"
 
@@ -52,4 +52,4 @@ void vp10_cost_tokens_skip(int *costs, const vpx_prob *probs, vpx_tree tree);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_COST_H_
+#endif  // VP10_ENCODER_COST_H_

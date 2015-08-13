@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_TOKENIZE_H_
-#define VP9_ENCODER_VP9_TOKENIZE_H_
+#ifndef VP10_ENCODER_TOKENIZE_H_
+#define VP10_ENCODER_TOKENIZE_H_
 
 #include "vp10/common/entropy.h"
 
@@ -109,4 +109,4 @@ static INLINE int16_t vp10_get_token(int v) {
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_TOKENIZE_H_
+#endif  // VP10_ENCODER_TOKENIZE_H_

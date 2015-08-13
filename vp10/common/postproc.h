@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_COMMON_VP9_POSTPROC_H_
-#define VP9_COMMON_VP9_POSTPROC_H_
+#ifndef VP10_COMMON_POSTPROC_H_
+#define VP10_COMMON_POSTPROC_H_
 
 #include "vpx_ports/mem.h"
 #include "vpx_scale/yv12config.h"
@@ -50,4 +50,4 @@ void vp10_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q)
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_POSTPROC_H_
+#endif  // VP10_COMMON_POSTPROC_H_

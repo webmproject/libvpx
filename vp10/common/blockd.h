@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_COMMON_VP9_BLOCKD_H_
-#define VP9_COMMON_VP9_BLOCKD_H_
+#ifndef VP10_COMMON_BLOCKD_H_
+#define VP10_COMMON_BLOCKD_H_
 
 #include "./vpx_config.h"
 
@@ -315,4 +315,4 @@ void vp10_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_BLOCKD_H_
+#endif  // VP10_COMMON_BLOCKD_H_

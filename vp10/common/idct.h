@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_IDCT_H_
-#define VP9_COMMON_VP9_IDCT_H_
+#ifndef VP10_COMMON_IDCT_H_
+#define VP10_COMMON_IDCT_H_
 
 #include <assert.h>
 
@@ -78,4 +78,4 @@ void vp10_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_IDCT_H_
+#endif  // VP10_COMMON_IDCT_H_

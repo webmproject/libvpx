@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_COMMON_VP9_ALLOCCOMMON_H_
-#define VP9_COMMON_VP9_ALLOCCOMMON_H_
+#ifndef VP10_COMMON_ALLOCCOMMON_H_
+#define VP10_COMMON_ALLOCCOMMON_H_
 
 #define INVALID_IDX -1  // Invalid buffer index.
 
@@ -41,4 +41,4 @@ void vp10_swap_current_and_last_seg_map(struct VP9Common *cm);
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_ALLOCCOMMON_H_
+#endif  // VP10_COMMON_ALLOCCOMMON_H_

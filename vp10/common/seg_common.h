@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_SEG_COMMON_H_
-#define VP9_COMMON_VP9_SEG_COMMON_H_
+#ifndef VP10_COMMON_SEG_COMMON_H_
+#define VP10_COMMON_SEG_COMMON_H_
 
 #include "vpx_dsp/prob.h"
 
@@ -82,5 +82,5 @@ extern const vpx_tree_index vp10_segment_tree[TREE_SIZE(MAX_SEGMENTS)];
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_SEG_COMMON_H_
+#endif  // VP10_COMMON_SEG_COMMON_H_
 

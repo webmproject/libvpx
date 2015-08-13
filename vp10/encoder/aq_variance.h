@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_AQ_VARIANCE_H_
-#define VP9_ENCODER_VP9_AQ_VARIANCE_H_
+#ifndef VP10_ENCODER_AQ_VARIANCE_H_
+#define VP10_ENCODER_AQ_VARIANCE_H_
 
 #include "vp10/encoder/encoder.h"
 
@@ -28,4 +28,4 @@ double vp10_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_AQ_VARIANCE_H_
+#endif  // VP10_ENCODER_AQ_VARIANCE_H_
