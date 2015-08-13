@@ -35,11 +35,11 @@ struct postproc_state {
   DECLARE_ALIGNED(16, char, bothclamp[16]);
 };
 
-struct VP9Common;
+struct VP10Common;
 
 #define MFQE_PRECISION 4
 
-int vp10_post_proc_frame(struct VP9Common *cm,
+int vp10_post_proc_frame(struct VP10Common *cm,
                         YV12_BUFFER_CONFIG *dest, vp10_ppflags_t *flags);
 
 void vp10_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q);

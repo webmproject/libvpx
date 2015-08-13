@@ -18,24 +18,24 @@
 extern "C" {
 #endif
 
-struct VP9Common;
+struct VP10Common;
 struct BufferPool;
 
-void vp10_remove_common(struct VP9Common *cm);
+void vp10_remove_common(struct VP10Common *cm);
 
-int vp10_alloc_context_buffers(struct VP9Common *cm, int width, int height);
-void vp10_init_context_buffers(struct VP9Common *cm);
-void vp10_free_context_buffers(struct VP9Common *cm);
+int vp10_alloc_context_buffers(struct VP10Common *cm, int width, int height);
+void vp10_init_context_buffers(struct VP10Common *cm);
+void vp10_free_context_buffers(struct VP10Common *cm);
 
 void vp10_free_ref_frame_buffers(struct BufferPool *pool);
-void vp10_free_postproc_buffers(struct VP9Common *cm);
+void vp10_free_postproc_buffers(struct VP10Common *cm);
 
-int vp10_alloc_state_buffers(struct VP9Common *cm, int width, int height);
-void vp10_free_state_buffers(struct VP9Common *cm);
+int vp10_alloc_state_buffers(struct VP10Common *cm, int width, int height);
+void vp10_free_state_buffers(struct VP10Common *cm);
 
-void vp10_set_mb_mi(struct VP9Common *cm, int width, int height);
+void vp10_set_mb_mi(struct VP10Common *cm, int width, int height);
 
-void vp10_swap_current_and_last_seg_map(struct VP9Common *cm);
+void vp10_swap_current_and_last_seg_map(struct VP10Common *cm);
 
 #ifdef __cplusplus
 }  // extern "C"

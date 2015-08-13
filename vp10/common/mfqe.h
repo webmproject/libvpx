@@ -22,7 +22,7 @@ extern "C" {
 // the motion of the blocks and other conditions such as the SAD of
 // the current block and correlated block, the variance of the block
 // difference, etc.
-void vp10_mfqe(struct VP9Common *cm);
+void vp10_mfqe(struct VP10Common *cm);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -14,7 +14,7 @@
 #include "vp10/common/loopfilter.h"
 #include "vpx_util/vpx_thread.h"
 
-struct VP9Common;
+struct VP10Common;
 struct FRAME_COUNTS;
 
 // Loopfilter row synchronization
@@ -36,7 +36,7 @@ typedef struct VP9LfSyncData {
 } VP9LfSync;
 
 // Allocate memory for loopfilter row synchronization.
-void vp10_loop_filter_alloc(VP9LfSync *lf_sync, struct VP9Common *cm, int rows,
+void vp10_loop_filter_alloc(VP9LfSync *lf_sync, struct VP10Common *cm, int rows,
                            int width, int num_workers);
 
 // Deallocate loopfilter synchronization related mutex and data.
@@ -44,14 +44,14 @@ void vp10_loop_filter_dealloc(VP9LfSync *lf_sync);
 
 // Multi-threaded loopfilter that uses the tile threads.
 void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
-                              struct VP9Common *cm,
+                              struct VP10Common *cm,
                               struct macroblockd_plane planes[MAX_MB_PLANE],
                               int frame_filter_level,
                               int y_only, int partial_frame,
                               VPxWorker *workers, int num_workers,
                               VP9LfSync *lf_sync);
 
-void vp10_accumulate_frame_counts(struct VP9Common *cm,
+void vp10_accumulate_frame_counts(struct VP10Common *cm,
                                  struct FRAME_COUNTS *counts, int is_dec);
 
 #endif  // VP10_COMMON_LOOPFILTER_THREAD_H_

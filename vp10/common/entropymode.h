@@ -26,7 +26,7 @@ extern "C" {
 
 #define INTER_OFFSET(mode) ((mode) - NEARESTMV)
 
-struct VP9Common;
+struct VP10Common;
 
 struct tx_probs {
   vpx_prob p32x32[TX_SIZE_CONTEXTS][TX_SIZES - 1];
@@ -89,9 +89,9 @@ extern const vpx_tree_index vp10_partition_tree[TREE_SIZE(PARTITION_TYPES)];
 extern const vpx_tree_index vp10_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
 
-void vp10_setup_past_independence(struct VP9Common *cm);
+void vp10_setup_past_independence(struct VP10Common *cm);
 
-void vp10_adapt_mode_probs(struct VP9Common *cm);
+void vp10_adapt_mode_probs(struct VP10Common *cm);
 
 void vp10_tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]);

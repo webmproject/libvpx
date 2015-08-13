@@ -132,9 +132,9 @@ typedef unsigned int vp10_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
 
-struct VP9Common;
-void vp10_default_coef_probs(struct VP9Common *cm);
-void vp10_adapt_coef_probs(struct VP9Common *cm);
+struct VP10Common;
+void vp10_default_coef_probs(struct VP10Common *cm);
+void vp10_adapt_coef_probs(struct VP10Common *cm);
 
 // This is the index in the scan order beyond which all coefficients for
 // 8x8 transform and above are in the top band.

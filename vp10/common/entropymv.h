@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-struct VP9Common;
+struct VP10Common;
 
-void vp10_init_mv_probs(struct VP9Common *cm);
+void vp10_init_mv_probs(struct VP10Common *cm);
 
-void vp10_adapt_mv_probs(struct VP9Common *cm, int usehp);
+void vp10_adapt_mv_probs(struct VP10Common *cm, int usehp);
 int vp10_use_mv_hp(const MV *ref);
 
 #define MV_UPDATE_PROB 252

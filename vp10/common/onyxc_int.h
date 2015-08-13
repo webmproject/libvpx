@@ -103,7 +103,7 @@ typedef struct BufferPool {
   InternalFrameBufferList int_frame_buffers;
 } BufferPool;
 
-typedef struct VP9Common {
+typedef struct VP10Common {
   struct vpx_internal_error_info  error;
   vpx_color_space_t color_space;
   int width;
@@ -195,9 +195,9 @@ typedef struct VP9Common {
   MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 
   // Separate mi functions between encoder and decoder.
-  int (*alloc_mi)(struct VP9Common *cm, int mi_size);
-  void (*free_mi)(struct VP9Common *cm);
-  void (*setup_mi)(struct VP9Common *cm);
+  int (*alloc_mi)(struct VP10Common *cm, int mi_size);
+  void (*free_mi)(struct VP10Common *cm);
+  void (*setup_mi)(struct VP10Common *cm);
 
   // Grid of pointers to 8x8 MODE_INFO structs.  Any 8x8 not in the visible
   // area will be NULL.
