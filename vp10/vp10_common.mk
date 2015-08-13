@@ -56,7 +56,6 @@ VP10_COMMON_SRCS-yes += common/quant_common.c
 VP10_COMMON_SRCS-yes += common/reconinter.c
 VP10_COMMON_SRCS-yes += common/reconintra.c
 VP10_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
-VP10_COMMON_SRCS-yes += common/common_data.c
 VP10_COMMON_SRCS-yes += common/common_data.h
 VP10_COMMON_SRCS-yes += common/scan.c
 VP10_COMMON_SRCS-yes += common/scan.h
