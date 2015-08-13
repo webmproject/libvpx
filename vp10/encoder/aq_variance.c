@@ -42,7 +42,7 @@ unsigned int vp10_vaq_segment_id(int energy) {
   return SEGMENT_ID(energy);
 }
 
-void vp10_vaq_frame_setup(VP9_COMP *cpi) {
+void vp10_vaq_frame_setup(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
   struct segmentation *seg = &cm->seg;
   int i;
@@ -137,7 +137,7 @@ static void aq_highbd_8_variance(const uint8_t *a8, int  a_stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
+static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bs) {
   MACROBLOCKD *xd = &x->e_mbd;
   unsigned int var, sse;
@@ -188,14 +188,14 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-double vp10_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
+double vp10_log_block_var(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   unsigned int var = block_variance(cpi, x, bs);
   vpx_clear_system_state();
   return log(var + 1.0);
 }
 
 #define DEFAULT_E_MIDPOINT 10.0
-int vp10_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
+int vp10_block_energy(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   double energy;
   double energy_midpoint;
   vpx_clear_system_state();

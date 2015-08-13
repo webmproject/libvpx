@@ -24,7 +24,7 @@
 #include "vp10/encoder/picklpf.h"
 #include "vp10/encoder/quantize.h"
 
-static int get_max_filter_level(const VP9_COMP *cpi) {
+static int get_max_filter_level(const VP10_COMP *cpi) {
   if (cpi->oxcf.pass == 2) {
     return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
                                                  : MAX_LOOP_FILTER;
@@ -35,7 +35,7 @@ static int get_max_filter_level(const VP9_COMP *cpi) {
 
 
 static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
-                                VP9_COMP *const cpi,
+                                VP10_COMP *const cpi,
                                 int filt_level, int partial_frame) {
   VP10_COMMON *const cm = &cpi->common;
   int64_t filt_err;
@@ -64,7 +64,7 @@ static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
   return filt_err;
 }
 
-static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
+static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
                                int partial_frame) {
   const VP10_COMMON *const cm = &cpi->common;
   const struct loopfilter *const lf = &cm->lf;
@@ -146,7 +146,7 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   return filt_best;
 }
 
-void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
+void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
                            LPF_PICK_METHOD method) {
   VP10_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;

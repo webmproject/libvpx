@@ -154,7 +154,7 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   }
 }
 
-static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
+static void model_rd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bsize,
                             MACROBLOCK *x, MACROBLOCKD *xd,
                             int *out_rate_sum, int64_t *out_dist_sum,
                             int *skip_txfm_sb, int64_t *skip_sse_sb) {
@@ -586,7 +586,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   }
 }
 
-static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
+static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
                                    int *rate, int64_t *distortion,
                                    int *skip, int64_t *sse,
                                    int64_t ref_best_rd,
@@ -604,7 +604,7 @@ static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
                    mbmi->tx_size, cpi->sf.use_fast_coef_costing);
 }
 
-static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
+static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                                    int *rate,
                                    int64_t *distortion,
                                    int *skip,
@@ -685,7 +685,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   *psse       = sse[mbmi->tx_size];
 }
 
-static void super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
+static void super_block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
                             int64_t *distortion, int *skip,
                             int64_t *psse, BLOCK_SIZE bs,
                             int64_t ref_best_rd) {
@@ -725,7 +725,7 @@ static int conditional_skipintra(PREDICTION_MODE mode,
   return 0;
 }
 
-static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x,
+static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                      int row, int col,
                                      PREDICTION_MODE *best_mode,
                                      const int *bmode_costs,
@@ -955,7 +955,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
-static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
+static int64_t rd_pick_intra_sub_8x8_y_mode(VP10_COMP *cpi, MACROBLOCK *mb,
                                             int *rate, int *rate_y,
                                             int64_t *distortion,
                                             int64_t best_rd) {
@@ -1023,7 +1023,7 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
 }
 
 // This function is used only for intra_only frames
-static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
+static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                       int *rate, int *rate_tokenonly,
                                       int64_t *distortion, int *skippable,
                                       BLOCK_SIZE bsize,
@@ -1085,7 +1085,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 // Return value 0: early termination triggered, no valid rd cost available;
 //              1: rd cost values are valid.
-static int super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x,
+static int super_block_uvrd(const VP10_COMP *cpi, MACROBLOCK *x,
                             int *rate, int64_t *distortion, int *skippable,
                             int64_t *sse, BLOCK_SIZE bsize,
                             int64_t ref_best_rd) {
@@ -1136,7 +1136,7 @@ static int super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x,
   return is_cost_valid;
 }
 
-static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
+static int64_t rd_pick_intra_sbuv_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                        PICK_MODE_CONTEXT *ctx,
                                        int *rate, int *rate_tokenonly,
                                        int64_t *distortion, int *skippable,
@@ -1178,7 +1178,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
-static int64_t rd_sbuv_dcpred(const VP9_COMP *cpi, MACROBLOCK *x,
+static int64_t rd_sbuv_dcpred(const VP10_COMP *cpi, MACROBLOCK *x,
                               int *rate, int *rate_tokenonly,
                               int64_t *distortion, int *skippable,
                               BLOCK_SIZE bsize) {
@@ -1193,7 +1193,7 @@ static int64_t rd_sbuv_dcpred(const VP9_COMP *cpi, MACROBLOCK *x,
   return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
-static void choose_intra_uv_mode(VP9_COMP *cpi, MACROBLOCK *const x,
+static void choose_intra_uv_mode(VP10_COMP *cpi, MACROBLOCK *const x,
                                  PICK_MODE_CONTEXT *ctx,
                                  BLOCK_SIZE bsize, TX_SIZE max_tx_size,
                                  int *rate_uv, int *rate_uv_tokenonly,
@@ -1214,13 +1214,13 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, MACROBLOCK *const x,
   *mode_uv = x->e_mbd.mi[0]->mbmi.uv_mode;
 }
 
-static int cost_mv_ref(const VP9_COMP *cpi, PREDICTION_MODE mode,
+static int cost_mv_ref(const VP10_COMP *cpi, PREDICTION_MODE mode,
                        int mode_context) {
   assert(is_inter_mode(mode));
   return cpi->inter_mode_cost[mode_context][INTER_OFFSET(mode)];
 }
 
-static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
+static int set_and_cost_bmi_mvs(VP10_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                                 int i,
                                 PREDICTION_MODE mode, int_mv this_mv[2],
                                 int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
@@ -1276,7 +1276,7 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
             thismvcost;
 }
 
-static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
+static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
                                        MACROBLOCK *x,
                                        int64_t best_yrd,
                                        int i,
@@ -1460,7 +1460,7 @@ static INLINE int mv_has_subpel(const MV *mv) {
 // Check if NEARESTMV/NEARMV/ZEROMV is the cheapest way encode zero motion.
 // TODO(aconverse): Find out if this is still productive then clean up or remove
 static int check_best_zero_mv(
-    const VP9_COMP *cpi, const uint8_t mode_context[MAX_REF_FRAMES],
+    const VP10_COMP *cpi, const uint8_t mode_context[MAX_REF_FRAMES],
     int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES], int this_mode,
     const MV_REFERENCE_FRAME ref_frames[2]) {
   if ((this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
@@ -1494,7 +1494,7 @@ static int check_best_zero_mv(
   return 1;
 }
 
-static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                 BLOCK_SIZE bsize,
                                 int_mv *frame_mv,
                                 int mi_row, int mi_col,
@@ -1678,7 +1678,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
+static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                         int_mv *best_ref_mv,
                                         int_mv *second_best_ref_mv,
                                         int64_t best_rd, int *returntotrate,
@@ -2144,7 +2144,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
          sizeof(*best_filter_diff) * SWITCHABLE_FILTER_CONTEXTS);
 }
 
-static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
+static void setup_buffer_inter(VP10_COMP *cpi, MACROBLOCK *x,
                                MV_REFERENCE_FRAME ref_frame,
                                BLOCK_SIZE block_size,
                                int mi_row, int mi_col,
@@ -2182,7 +2182,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                 ref_frame, block_size);
 }
 
-static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE bsize,
                                  int mi_row, int mi_col,
                                  int_mv *tmp_mv, int *rate_mv) {
@@ -2328,7 +2328,7 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
 // However, once established that vector may be usable through the nearest and
 // near mv modes to reduce distortion in subsequent blocks and also improve
 // visual quality.
-static int discount_newmv_test(const VP9_COMP *cpi,
+static int discount_newmv_test(const VP10_COMP *cpi,
                                int this_mode,
                                int_mv this_mv,
                                int_mv (*mode_mv)[MAX_REF_FRAMES],
@@ -2342,7 +2342,7 @@ static int discount_newmv_test(const VP9_COMP *cpi,
            (mode_mv[NEARMV][ref_frame].as_int == INVALID_MV)));
 }
 
-static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
+static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE bsize,
                                  int *rate2, int64_t *distortion,
                                  int *skippable,
@@ -2720,7 +2720,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return 0;  // The rate-distortion cost will be re-calculated by caller.
 }
 
-void vp10_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
+void vp10_rd_pick_intra_mode_sb(VP10_COMP *cpi, MACROBLOCK *x,
                                RD_COST *rd_cost, BLOCK_SIZE bsize,
                                PICK_MODE_CONTEXT *ctx, int64_t best_rd) {
   VP10_COMMON *const cm = &cpi->common;
@@ -2777,7 +2777,7 @@ void vp10_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #define LOW_VAR_THRESH 16
 #define VLOW_ADJ_MAX 25
 #define VHIGH_ADJ_MAX 8
-static void rd_variance_adjustment(VP9_COMP *cpi,
+static void rd_variance_adjustment(VP10_COMP *cpi,
                                    MACROBLOCK *x,
                                    BLOCK_SIZE bsize,
                                    int64_t *this_rd,
@@ -2833,7 +2833,7 @@ static void rd_variance_adjustment(VP9_COMP *cpi,
 
 
 // Do we have an internal image edge (e.g. formatting bars).
-int vp10_internal_image_edge(VP9_COMP *cpi) {
+int vp10_internal_image_edge(VP10_COMP *cpi) {
   return (cpi->oxcf.pass == 2) &&
     ((cpi->twopass.this_frame_stats.inactive_zone_rows > 0) ||
     (cpi->twopass.this_frame_stats.inactive_zone_cols > 0));
@@ -2842,7 +2842,7 @@ int vp10_internal_image_edge(VP9_COMP *cpi) {
 // Checks to see if a super block is on a horizontal image edge.
 // In most cases this is the "real" edge unless there are formatting
 // bars embedded in the stream.
-int vp10_active_h_edge(VP9_COMP *cpi, int mi_row, int mi_step) {
+int vp10_active_h_edge(VP10_COMP *cpi, int mi_row, int mi_step) {
   int top_edge = 0;
   int bottom_edge = cpi->common.mi_rows;
   int is_active_h_edge = 0;
@@ -2869,7 +2869,7 @@ int vp10_active_h_edge(VP9_COMP *cpi, int mi_row, int mi_step) {
 // Checks to see if a super block is on a vertical image edge.
 // In most cases this is the "real" edge unless there are formatting
 // bars embedded in the stream.
-int vp10_active_v_edge(VP9_COMP *cpi, int mi_col, int mi_step) {
+int vp10_active_v_edge(VP10_COMP *cpi, int mi_col, int mi_step) {
   int left_edge = 0;
   int right_edge = cpi->common.mi_cols;
   int is_active_v_edge = 0;
@@ -2896,13 +2896,13 @@ int vp10_active_v_edge(VP9_COMP *cpi, int mi_col, int mi_step) {
 // Checks to see if a super block is at the edge of the active image.
 // In most cases this is the "real" edge unless there are formatting
 // bars embedded in the stream.
-int vp10_active_edge_sb(VP9_COMP *cpi,
+int vp10_active_edge_sb(VP10_COMP *cpi,
                        int mi_row, int mi_col) {
   return vp10_active_h_edge(cpi, mi_row, MI_BLOCK_SIZE) ||
          vp10_active_v_edge(cpi, mi_col, MI_BLOCK_SIZE);
 }
 
-void vp10_rd_pick_inter_mode_sb(VP9_COMP *cpi,
+void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                TileDataEnc *tile_data,
                                MACROBLOCK *x,
                                int mi_row, int mi_col,
@@ -3582,7 +3582,7 @@ void vp10_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                        best_filter_diff, best_mode_skippable);
 }
 
-void vp10_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
+void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
                                         TileDataEnc *tile_data,
                                         MACROBLOCK *x,
                                         RD_COST *rd_cost,
@@ -3682,7 +3682,7 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
                        best_pred_diff, best_filter_diff, 0);
 }
 
-void vp10_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
+void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
                                    TileDataEnc *tile_data,
                                    MACROBLOCK *x,
                                    int mi_row, int mi_col,

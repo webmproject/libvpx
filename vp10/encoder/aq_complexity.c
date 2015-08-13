@@ -43,7 +43,7 @@ static int get_aq_c_strength(int q_index, vpx_bit_depth_t bit_depth) {
   return (base_quant > 10) + (base_quant > 25);
 }
 
-void vp10_setup_in_frame_q_adj(VP9_COMP *cpi) {
+void vp10_setup_in_frame_q_adj(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   struct segmentation *const seg = &cm->seg;
 
@@ -110,7 +110,7 @@ void vp10_setup_in_frame_q_adj(VP9_COMP *cpi) {
 // Select a segment for the current block.
 // The choice of segment for a block depends on the ratio of the projected
 // bits for the block vs a target average and its spatial complexity.
-void vp10_caq_select_segment(VP9_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
+void vp10_caq_select_segment(VP10_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
                             int mi_row, int mi_col, int projected_rate) {
   VP10_COMMON *const cm = &cpi->common;
 

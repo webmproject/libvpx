@@ -234,7 +234,7 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   }
 }
 
-static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
+static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
                                 vpx_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
@@ -374,7 +374,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   write_intra_mode(w, mbmi->uv_mode, vp10_kf_uv_mode_prob[mbmi->mode]);
 }
 
-static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
+static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
                           vpx_writer *w, TOKENEXTRA **tok,
                           const TOKENEXTRA *const tok_end,
                           int mi_row, int mi_col) {
@@ -424,7 +424,7 @@ static void write_partition(const VP10_COMMON *const cm,
   }
 }
 
-static void write_modes_sb(VP9_COMP *cpi,
+static void write_modes_sb(VP10_COMP *cpi,
                            const TileInfo *const tile, vpx_writer *w,
                            TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
@@ -482,7 +482,7 @@ static void write_modes_sb(VP9_COMP *cpi,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
-static void write_modes(VP9_COMP *cpi,
+static void write_modes(VP10_COMP *cpi,
                         const TileInfo *const tile, vpx_writer *w,
                         TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
   const VP10_COMMON *const cm = &cpi->common;
@@ -501,7 +501,7 @@ static void write_modes(VP9_COMP *cpi,
   }
 }
 
-static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size,
+static void build_tree_distribution(VP10_COMP *cpi, TX_SIZE tx_size,
                                     vp10_coeff_stats *coef_branch_ct,
                                     vp10_coeff_probs_model *coef_probs) {
   vp10_coeff_count *coef_counts = cpi->td.rd_counts.coef_counts[tx_size];
@@ -528,7 +528,7 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size,
   }
 }
 
-static void update_coef_probs_common(vpx_writer* const bc, VP9_COMP *cpi,
+static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
                                      TX_SIZE tx_size,
                                      vp10_coeff_stats *frame_branch_ct,
                                      vp10_coeff_probs_model *new_coef_probs) {
@@ -673,7 +673,7 @@ static void update_coef_probs_common(vpx_writer* const bc, VP9_COMP *cpi,
   }
 }
 
-static void update_coef_probs(VP9_COMP *cpi, vpx_writer* w) {
+static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
@@ -900,7 +900,7 @@ static void write_tile_info(const VP10_COMMON *const cm,
     vpx_wb_write_bit(wb, cm->log2_tile_rows != 1);
 }
 
-static int get_refresh_mask(VP9_COMP *cpi) {
+static int get_refresh_mask(VP10_COMP *cpi) {
   if (vp10_preserve_existing_gf(cpi)) {
     // We have decided to preserve the previously existing golden frame as our
     // new ARF frame. However, in the short term we leave it in the GF slot and,
@@ -926,7 +926,7 @@ static int get_refresh_mask(VP9_COMP *cpi) {
   }
 }
 
-static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
+static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
   VP10_COMMON *const cm = &cpi->common;
   vpx_writer residual_bc;
   int tile_row, tile_col;
@@ -987,7 +987,7 @@ static void write_frame_size(const VP10_COMMON *cm,
   write_display_size(cm, wb);
 }
 
-static void write_frame_size_with_refs(VP9_COMP *cpi,
+static void write_frame_size_with_refs(VP10_COMP *cpi,
                                        struct vpx_write_bit_buffer *wb) {
   VP10_COMMON *const cm = &cpi->common;
   int found = 0;
@@ -1074,7 +1074,7 @@ static void write_bitdepth_colorspace_sampling(
   }
 }
 
-static void write_uncompressed_header(VP9_COMP *cpi,
+static void write_uncompressed_header(VP10_COMP *cpi,
                                       struct vpx_write_bit_buffer *wb) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
@@ -1150,7 +1150,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   write_tile_info(cm, wb);
 }
 
-static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
+static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   FRAME_CONTEXT *const fc = cm->fc;
@@ -1227,7 +1227,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   return header_bc.pos;
 }
 
-void vp10_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
+void vp10_pack_bitstream(VP10_COMP *cpi, uint8_t *dest, size_t *size) {
   uint8_t *data = dest;
   size_t first_part_size, uncompressed_hdr_size;
   struct vpx_write_bit_buffer wb = {data, 0};

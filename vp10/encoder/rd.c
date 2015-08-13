@@ -65,7 +65,7 @@ static const uint8_t rd_thresh_block_size_factor[BLOCK_SIZES] = {
   2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32
 };
 
-static void fill_mode_costs(VP9_COMP *cpi) {
+static void fill_mode_costs(VP10_COMP *cpi) {
   const FRAME_CONTEXT *const fc = cpi->common.fc;
   int i, j;
 
@@ -148,7 +148,7 @@ static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
   128, 144, 128, 128, 144
 };
 
-int vp10_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
+int vp10_compute_rd_mult(const VP10_COMP *cpi, int qindex) {
   const int64_t q = vp10_dc_quant(qindex, 0, cpi->common.bit_depth);
 #if CONFIG_VP9_HIGHBITDEPTH
   int64_t rdmult = 0;
@@ -205,7 +205,7 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
   return MAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
 
-void vp10_initialize_me_consts(VP9_COMP *cpi, MACROBLOCK *x, int qindex) {
+void vp10_initialize_me_consts(VP10_COMP *cpi, MACROBLOCK *x, int qindex) {
 #if CONFIG_VP9_HIGHBITDEPTH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
@@ -262,7 +262,7 @@ static void set_block_thresholds(const VP10_COMMON *cm, RD_OPT *rd) {
   }
 }
 
-void vp10_initialize_rd_consts(VP9_COMP *cpi) {
+void vp10_initialize_rd_consts(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
@@ -449,7 +449,7 @@ void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
   }
 }
 
-void vp10_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
+void vp10_mv_pred(VP10_COMP *cpi, MACROBLOCK *x,
                  uint8_t *ref_y_buffer, int ref_y_stride,
                  int ref_frame, BLOCK_SIZE block_size) {
   int i;
@@ -541,7 +541,7 @@ int16_t* vp10_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
   return base + vp10_raster_block_offset(plane_bsize, raster_block, stride);
 }
 
-YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const VP9_COMP *cpi,
+YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const VP10_COMP *cpi,
                                              int ref_frame) {
   const VP10_COMMON *const cm = &cpi->common;
   const int scaled_idx = cpi->scaled_ref_idx[ref_frame - 1];
@@ -551,14 +551,15 @@ YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const VP9_COMP *cpi,
           &cm->buffer_pool->frame_bufs[scaled_idx].buf : NULL;
 }
 
-int vp10_get_switchable_rate(const VP9_COMP *cpi, const MACROBLOCKD *const xd) {
+int vp10_get_switchable_rate(const VP10_COMP *cpi,
+                             const MACROBLOCKD *const xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const int ctx = vp10_get_pred_context_switchable_interp(xd);
   return SWITCHABLE_INTERP_RATE_FACTOR *
              cpi->switchable_interp_costs[ctx][mbmi->interp_filter];
 }
 
-void vp10_set_rd_speed_thresholds(VP9_COMP *cpi) {
+void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   int i;
   RD_OPT *const rd = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
@@ -612,7 +613,7 @@ void vp10_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_D63_PRED] += 2500;
 }
 
-void vp10_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
+void vp10_set_rd_speed_thresholds_sub8x8(VP10_COMP *cpi) {
   static const int thresh_mult[2][MAX_REFS] =
       {{2500, 2500, 2500, 4500, 4500, 2500},
        {2000, 2000, 2000, 4000, 4000, 2000}};

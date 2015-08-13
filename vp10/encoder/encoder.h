@@ -289,7 +289,7 @@ typedef struct IMAGE_STAT {
   double worst;
 } ImageStat;
 
-typedef struct VP9_COMP {
+typedef struct VP10_COMP {
   QUANTS quants;
   ThreadData td;
   MB_MODE_INFO_EXT *mbmi_ext_base;
@@ -501,62 +501,62 @@ typedef struct VP9_COMP {
   VPxWorker *workers;
   struct EncWorkerData *tile_thr_data;
   VP9LfSync lf_row_sync;
-} VP9_COMP;
+} VP10_COMP;
 
 void vp10_initialize_enc(void);
 
-struct VP9_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
+struct VP10_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
                                        BufferPool *const pool);
-void vp10_remove_compressor(VP9_COMP *cpi);
+void vp10_remove_compressor(VP10_COMP *cpi);
 
-void vp10_change_config(VP9_COMP *cpi, const VP9EncoderConfig *oxcf);
+void vp10_change_config(VP10_COMP *cpi, const VP9EncoderConfig *oxcf);
 
   // receive a frames worth of data. caller can assume that a copy of this
   // frame is made and not just a copy of the pointer..
-int vp10_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
+int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time_stamp);
 
-int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
+int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush);
 
-int vp10_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
+int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
                               vp10_ppflags_t *flags);
 
-int vp10_use_as_reference(VP9_COMP *cpi, int ref_frame_flags);
+int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags);
 
-void vp10_update_reference(VP9_COMP *cpi, int ref_frame_flags);
+void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags);
 
-int vp10_copy_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_copy_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd);
 
-int vp10_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_set_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd);
 
-int vp10_update_entropy(VP9_COMP *cpi, int update);
+int vp10_update_entropy(VP10_COMP *cpi, int update);
 
-int vp10_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
+int vp10_set_active_map(VP10_COMP *cpi, unsigned char *map, int rows, int cols);
 
-int vp10_get_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
+int vp10_get_active_map(VP10_COMP *cpi, unsigned char *map, int rows, int cols);
 
-int vp10_set_internal_size(VP9_COMP *cpi,
+int vp10_set_internal_size(VP10_COMP *cpi,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
 
-int vp10_set_size_literal(VP9_COMP *cpi, unsigned int width,
+int vp10_set_size_literal(VP10_COMP *cpi, unsigned int width,
                          unsigned int height);
 
-void vp10_set_svc(VP9_COMP *cpi, int use_svc);
+void vp10_set_svc(VP10_COMP *cpi, int use_svc);
 
-int vp10_get_quantizer(struct VP9_COMP *cpi);
+int vp10_get_quantizer(struct VP10_COMP *cpi);
 
-static INLINE int frame_is_kf_gf_arf(const VP9_COMP *cpi) {
+static INLINE int frame_is_kf_gf_arf(const VP10_COMP *cpi) {
   return frame_is_intra_only(&cpi->common) ||
          cpi->refresh_alt_ref_frame ||
          (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref);
 }
 
-static INLINE int get_ref_frame_map_idx(const VP9_COMP *cpi,
+static INLINE int get_ref_frame_map_idx(const VP10_COMP *cpi,
                                         MV_REFERENCE_FRAME ref_frame) {
   if (ref_frame == LAST_FRAME) {
     return cpi->lst_fb_idx;
@@ -567,7 +567,7 @@ static INLINE int get_ref_frame_map_idx(const VP9_COMP *cpi,
   }
 }
 
-static INLINE int get_ref_frame_buf_idx(const VP9_COMP *const cpi,
+static INLINE int get_ref_frame_buf_idx(const VP10_COMP *const cpi,
                                         int ref_frame) {
   const VP10_COMMON *const cm = &cpi->common;
   const int map_idx = get_ref_frame_map_idx(cpi, ref_frame);
@@ -575,7 +575,7 @@ static INLINE int get_ref_frame_buf_idx(const VP9_COMP *const cpi,
 }
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
-    VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
+    VP10_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
   VP10_COMMON *const cm = &cpi->common;
   const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
   return
@@ -606,13 +606,13 @@ int64_t vp10_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-void vp10_alloc_compressor_data(VP9_COMP *cpi);
+void vp10_alloc_compressor_data(VP10_COMP *cpi);
 
-void vp10_scale_references(VP9_COMP *cpi);
+void vp10_scale_references(VP10_COMP *cpi);
 
-void vp10_update_reference_frames(VP9_COMP *cpi);
+void vp10_update_reference_frames(VP10_COMP *cpi);
 
-void vp10_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
+void vp10_set_high_precision_mv(VP10_COMP *cpi, int allow_high_precision_mv);
 
 YV12_BUFFER_CONFIG *vp10_scale_if_required_fast(VP10_COMMON *cm,
                                                YV12_BUFFER_CONFIG *unscaled,
@@ -622,17 +622,17 @@ YV12_BUFFER_CONFIG *vp10_scale_if_required(VP10_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
                                           YV12_BUFFER_CONFIG *scaled);
 
-void vp10_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
+void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags);
 
-static INLINE int is_two_pass_svc(const struct VP9_COMP *const cpi) {
+static INLINE int is_two_pass_svc(const struct VP10_COMP *const cpi) {
   return cpi->use_svc && cpi->oxcf.pass != 0;
 }
 
-static INLINE int is_one_pass_cbr_svc(const struct VP9_COMP *const cpi) {
+static INLINE int is_one_pass_cbr_svc(const struct VP10_COMP *const cpi) {
   return (cpi->use_svc && cpi->oxcf.pass == 0);
 }
 
-static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
+static INLINE int is_altref_enabled(const VP10_COMP *const cpi) {
   return cpi->oxcf.mode != REALTIME && cpi->oxcf.lag_in_frames > 0 &&
          (cpi->oxcf.enable_auto_arf &&
           (!is_two_pass_svc(cpi) ||
@@ -652,11 +652,11 @@ static INLINE int get_chessboard_index(const int frame_index) {
   return frame_index & 0x1;
 }
 
-static INLINE int *cond_cost_list(const struct VP9_COMP *cpi, int *cost_list) {
+static INLINE int *cond_cost_list(const struct VP10_COMP *cpi, int *cost_list) {
   return cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL;
 }
 
-void vp10_new_framerate(VP9_COMP *cpi, double framerate);
+void vp10_new_framerate(VP10_COMP *cpi, double framerate);
 
 #define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))
 

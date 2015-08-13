@@ -18,17 +18,17 @@ extern "C" {
 
 #include "vp10/common/enums.h"
 
-struct VP9_COMP;
+struct VP10_COMP;
 struct macroblock;
 
 // Select a segment for the current Block.
-void vp10_caq_select_segment(struct VP9_COMP *cpi, struct macroblock *,
+void vp10_caq_select_segment(struct VP10_COMP *cpi, struct macroblock *,
                             BLOCK_SIZE bs,
                             int mi_row, int mi_col, int projected_rate);
 
 // This function sets up a set of segments with delta Q values around
 // the baseline frame quantizer.
-void vp10_setup_in_frame_q_adj(struct VP9_COMP *cpi);
+void vp10_setup_in_frame_q_adj(struct VP10_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"

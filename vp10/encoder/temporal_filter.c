@@ -210,7 +210,7 @@ void vp10_highbd_temporal_filter_apply_c(uint8_t *frame1_8,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
+static int temporal_filter_find_matching_mb_c(VP10_COMP *cpi,
                                               uint8_t *arf_frame_buf,
                                               uint8_t *frame_ptr_buf,
                                               int stride) {
@@ -267,7 +267,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   return bestsme;
 }
 
-static void temporal_filter_iterate_c(VP9_COMP *cpi,
+static void temporal_filter_iterate_c(VP10_COMP *cpi,
                                       YV12_BUFFER_CONFIG **frames,
                                       int frame_count,
                                       int alt_ref_index,
@@ -588,7 +588,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
 }
 
 // Apply buffer limits and context specific adjustments to arnr filter.
-static void adjust_arnr_filter(VP9_COMP *cpi,
+static void adjust_arnr_filter(VP10_COMP *cpi,
                                int distance, int group_boost,
                                int *arnr_frames, int *arnr_strength) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -651,7 +651,7 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
   *arnr_strength = strength;
 }
 
-void vp10_temporal_filter(VP9_COMP *cpi, int distance) {
+void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;

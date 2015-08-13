@@ -123,20 +123,21 @@ void vp10_rd_cost_init(RD_COST *rd_cost);
 
 struct TileInfo;
 struct TileDataEnc;
-struct VP9_COMP;
+struct VP10_COMP;
 struct macroblock;
 
-int vp10_compute_rd_mult(const struct VP9_COMP *cpi, int qindex);
+int vp10_compute_rd_mult(const struct VP10_COMP *cpi, int qindex);
 
-void vp10_initialize_rd_consts(struct VP9_COMP *cpi);
+void vp10_initialize_rd_consts(struct VP10_COMP *cpi);
 
-void vp10_initialize_me_consts(struct VP9_COMP *cpi, MACROBLOCK *x, int qindex);
+void vp10_initialize_me_consts(struct VP10_COMP *cpi,
+                               MACROBLOCK *x, int qindex);
 
 void vp10_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
                                   unsigned int qstep, int *rate,
                                   int64_t *dist);
 
-int vp10_get_switchable_rate(const struct VP9_COMP *cpi,
+int vp10_get_switchable_rate(const struct VP10_COMP *cpi,
                             const MACROBLOCKD *const xd);
 
 int vp10_raster_block_offset(BLOCK_SIZE plane_bsize,
@@ -145,7 +146,7 @@ int vp10_raster_block_offset(BLOCK_SIZE plane_bsize,
 int16_t* vp10_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
                                        int raster_block, int16_t *base);
 
-YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const struct VP9_COMP *cpi,
+YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const struct VP10_COMP *cpi,
                                              int ref_frame);
 
 void vp10_init_me_luts(void);
@@ -155,9 +156,9 @@ void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
                               ENTROPY_CONTEXT t_above[16],
                               ENTROPY_CONTEXT t_left[16]);
 
-void vp10_set_rd_speed_thresholds(struct VP9_COMP *cpi);
+void vp10_set_rd_speed_thresholds(struct VP10_COMP *cpi);
 
-void vp10_set_rd_speed_thresholds_sub8x8(struct VP9_COMP *cpi);
+void vp10_set_rd_speed_thresholds_sub8x8(struct VP10_COMP *cpi);
 
 void vp10_update_rd_thresh_fact(int (*fact)[MAX_MODES], int rd_thresh,
                                int bsize, int best_mode_index);
@@ -167,7 +168,7 @@ static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
     return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;
 }
 
-void vp10_mv_pred(struct VP9_COMP *cpi, MACROBLOCK *x,
+void vp10_mv_pred(struct VP10_COMP *cpi, MACROBLOCK *x,
                  uint8_t *ref_y_buffer, int ref_y_stride,
                  int ref_frame, BLOCK_SIZE block_size);
 

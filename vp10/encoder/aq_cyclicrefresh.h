@@ -27,7 +27,7 @@ extern "C" {
 // Maximum rate target ratio for setting segment delta-qp.
 #define CR_MAX_RATE_TARGET_RATIO 4.0
 
-struct VP9_COMP;
+struct VP10_COMP;
 
 struct CYCLIC_REFRESH;
 typedef struct CYCLIC_REFRESH CYCLIC_REFRESH;
@@ -38,44 +38,44 @@ void vp10_cyclic_refresh_free(CYCLIC_REFRESH *cr);
 
 // Estimate the bits, incorporating the delta-q from segment 1, after encoding
 // the frame.
-int vp10_cyclic_refresh_estimate_bits_at_q(const struct VP9_COMP *cpi,
+int vp10_cyclic_refresh_estimate_bits_at_q(const struct VP10_COMP *cpi,
                                           double correction_factor);
 
 // Estimate the bits per mb, for a given q = i and a corresponding delta-q
 // (for segment 1), prior to encoding the frame.
-int vp10_cyclic_refresh_rc_bits_per_mb(const struct VP9_COMP *cpi, int i,
+int vp10_cyclic_refresh_rc_bits_per_mb(const struct VP10_COMP *cpi, int i,
                                       double correction_factor);
 
 // Prior to coding a given prediction block, of size bsize at (mi_row, mi_col),
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
-void vp10_cyclic_refresh_update_segment(struct VP9_COMP *const cpi,
+void vp10_cyclic_refresh_update_segment(struct VP10_COMP *const cpi,
                                        MB_MODE_INFO *const mbmi,
                                        int mi_row, int mi_col, BLOCK_SIZE bsize,
                                        int64_t rate, int64_t dist, int skip);
 
 // Update the segmentation map, and related quantities: cyclic refresh map,
 // refresh sb_index, and target number of blocks to be refreshed.
-void vp10_cyclic_refresh_update__map(struct VP9_COMP *const cpi);
+void vp10_cyclic_refresh_update__map(struct VP10_COMP *const cpi);
 
 // Update the actual number of blocks that were applied the segment delta q.
-void vp10_cyclic_refresh_postencode(struct VP9_COMP *const cpi);
+void vp10_cyclic_refresh_postencode(struct VP10_COMP *const cpi);
 
 // Set golden frame update interval, for non-svc 1 pass CBR mode.
-void vp10_cyclic_refresh_set_golden_update(struct VP9_COMP *const cpi);
+void vp10_cyclic_refresh_set_golden_update(struct VP10_COMP *const cpi);
 
 // Check if we should not update golden reference, based on past refresh stats.
-void vp10_cyclic_refresh_check_golden_update(struct VP9_COMP *const cpi);
+void vp10_cyclic_refresh_check_golden_update(struct VP10_COMP *const cpi);
 
 // Set/update global/frame level refresh parameters.
-void vp10_cyclic_refresh_update_parameters(struct VP9_COMP *const cpi);
+void vp10_cyclic_refresh_update_parameters(struct VP10_COMP *const cpi);
 
 // Setup cyclic background refresh: set delta q and segmentation map.
-void vp10_cyclic_refresh_setup(struct VP9_COMP *const cpi);
+void vp10_cyclic_refresh_setup(struct VP10_COMP *const cpi);
 
 int vp10_cyclic_refresh_get_rdmult(const CYCLIC_REFRESH *cr);
 
-void vp10_cyclic_refresh_reset_resize(struct VP9_COMP *const cpi);
+void vp10_cyclic_refresh_reset_resize(struct VP10_COMP *const cpi);
 
 static INLINE int cyclic_refresh_segment_id_boosted(int segment_id) {
   return segment_id == CR_SEGMENT_ID_BOOST1 ||

@@ -78,7 +78,7 @@ struct vpx_codec_alg_priv {
   vpx_codec_enc_cfg_t     cfg;
   struct vp10_extracfg     extra_cfg;
   VP9EncoderConfig        oxcf;
-  VP9_COMP               *cpi;
+  VP10_COMP               *cpi;
   unsigned char          *cx_data;
   size_t                  cx_data_sz;
   unsigned char          *pending_cx_data;
@@ -934,7 +934,7 @@ static int64_t ticks_to_timebase_units(const vpx_rational_t *timebase,
   return (n * timebase->den + round) / timebase->num / TICKS_PER_SEC;
 }
 
-static vpx_codec_frame_flags_t get_frame_pkt_flags(const VP9_COMP *cpi,
+static vpx_codec_frame_flags_t get_frame_pkt_flags(const VP10_COMP *cpi,
                                                    unsigned int lib_flags) {
   vpx_codec_frame_flags_t flags = lib_flags << 16;
 
@@ -959,7 +959,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
                                       vpx_enc_frame_flags_t flags,
                                       unsigned long deadline) {
   vpx_codec_err_t res = VPX_CODEC_OK;
-  VP9_COMP *const cpi = ctx->cpi;
+  VP10_COMP *const cpi = ctx->cpi;
   const vpx_rational_t *const timebase = &ctx->cfg.g_timebase;
   size_t data_sz;
 
@@ -1359,7 +1359,7 @@ static vpx_codec_err_t ctrl_set_svc(vpx_codec_alg_priv_t *ctx, va_list args) {
 static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
                                              va_list args) {
   vpx_svc_layer_id_t *const data = va_arg(args, vpx_svc_layer_id_t *);
-  VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
+  VP10_COMP *const cpi = (VP10_COMP *)ctx->cpi;
   SVC *const svc = &cpi->svc;
 
   svc->spatial_layer_id = data->spatial_layer_id;
@@ -1379,7 +1379,7 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t ctrl_get_svc_layer_id(vpx_codec_alg_priv_t *ctx,
                                              va_list args) {
   vpx_svc_layer_id_t *data = va_arg(args, vpx_svc_layer_id_t *);
-  VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
+  VP10_COMP *const cpi = (VP10_COMP *)ctx->cpi;
   SVC *const svc = &cpi->svc;
 
   data->spatial_layer_id = svc->spatial_layer_id;
@@ -1390,7 +1390,7 @@ static vpx_codec_err_t ctrl_get_svc_layer_id(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
                                                va_list args) {
-  VP9_COMP *const cpi = ctx->cpi;
+  VP10_COMP *const cpi = ctx->cpi;
   vpx_svc_extra_cfg_t *const params = va_arg(args, vpx_svc_extra_cfg_t *);
   int sl, tl;
 

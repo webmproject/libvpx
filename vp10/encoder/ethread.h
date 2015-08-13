@@ -11,15 +11,15 @@
 #ifndef VP10_ENCODER_ETHREAD_H_
 #define VP10_ENCODER_ETHREAD_H_
 
-struct VP9_COMP;
+struct VP10_COMP;
 struct ThreadData;
 
 typedef struct EncWorkerData {
-  struct VP9_COMP *cpi;
+  struct VP10_COMP *cpi;
   struct ThreadData *td;
   int start;
 } EncWorkerData;
 
-void vp10_encode_tiles_mt(struct VP9_COMP *cpi);
+void vp10_encode_tiles_mt(struct VP10_COMP *cpi);
 
 #endif  // VP10_ENCODER_ETHREAD_H_

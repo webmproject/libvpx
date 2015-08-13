@@ -121,7 +121,7 @@ static int mv_refs_rt(const VP10_COMMON *cm, const MACROBLOCK *x,
   return const_motion;
 }
 
-static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+static int combined_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                   BLOCK_SIZE bsize, int mi_row, int mi_col,
                                   int_mv *tmp_mv, int *rate_mv,
                                   int64_t best_rd_sofar) {
@@ -252,7 +252,7 @@ static void calculate_variance(int bw, int bh, TX_SIZE tx_size,
   }
 }
 
-static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
+static void model_rd_for_sb_y_large(VP10_COMP *cpi, BLOCK_SIZE bsize,
                                     MACROBLOCK *x, MACROBLOCKD *xd,
                                     int *out_rate_sum, int64_t *out_dist_sum,
                                     unsigned int *var_y, unsigned int *sse_y,
@@ -449,7 +449,7 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *out_dist_sum += dist << 4;
 }
 
-static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
+static void model_rd_for_sb_y(VP10_COMP *cpi, BLOCK_SIZE bsize,
                               MACROBLOCK *x, MACROBLOCKD *xd,
                               int *out_rate_sum, int64_t *out_dist_sum,
                               unsigned int *var_y, unsigned int *sse_y) {
@@ -561,7 +561,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
+static void block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
                       int *skippable, int64_t *sse, int plane,
                       BLOCK_SIZE bsize, TX_SIZE tx_size) {
   MACROBLOCKD *xd = &x->e_mbd;
@@ -574,7 +574,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
   return;
 }
 #else
-static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
+static void block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
                       int *skippable, int64_t *sse, int plane,
                       BLOCK_SIZE bsize, TX_SIZE tx_size) {
   MACROBLOCKD *xd = &x->e_mbd;
@@ -687,7 +687,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
 }
 #endif
 
-static void model_rd_for_sb_uv(VP9_COMP *cpi, BLOCK_SIZE bsize,
+static void model_rd_for_sb_uv(VP10_COMP *cpi, BLOCK_SIZE bsize,
                                MACROBLOCK *x, MACROBLOCKD *xd,
                                int *out_rate_sum, int64_t *out_dist_sum,
                                unsigned int *var_y, unsigned int *sse_y) {
@@ -769,7 +769,7 @@ static void free_pred_buffer(PRED_BUFFER *p) {
     p->in_use = 0;
 }
 
-static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
+static void encode_breakout_test(VP10_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
                                  MV_REFERENCE_FRAME ref_frame,
                                  PREDICTION_MODE this_mode,
@@ -869,7 +869,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 struct estimate_block_intra_args {
-  VP9_COMP *cpi;
+  VP10_COMP *cpi;
   MACROBLOCK *x;
   PREDICTION_MODE mode;
   int rate;
@@ -879,7 +879,7 @@ struct estimate_block_intra_args {
 static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                  TX_SIZE tx_size, void *arg) {
   struct estimate_block_intra_args* const args = arg;
-  VP9_COMP *const cpi = args->cpi;
+  VP10_COMP *const cpi = args->cpi;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *const p = &x->plane[0];
@@ -950,7 +950,7 @@ static int mode_offset(const PREDICTION_MODE mode) {
   }
 }
 
-static INLINE void update_thresh_freq_fact(VP9_COMP *cpi,
+static INLINE void update_thresh_freq_fact(VP10_COMP *cpi,
                                            TileDataEnc *tile_data,
                                            BLOCK_SIZE bsize,
                                            MV_REFERENCE_FRAME ref_frame,
@@ -965,7 +965,7 @@ static INLINE void update_thresh_freq_fact(VP9_COMP *cpi,
         cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
 }
 
-void vp10_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
+void vp10_pick_intra_mode(VP10_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -1053,7 +1053,7 @@ static const REF_MODE ref_mode_set[RT_INTER_MODES] = {
 
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
-void vp10_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
+void vp10_pick_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                          TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
@@ -1621,7 +1621,7 @@ void vp10_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   *rd_cost = best_rdc;
 }
 
-void vp10_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
+void vp10_pick_inter_mode_sub8x8(VP10_COMP *cpi, MACROBLOCK *x,
                                 int mi_row, int mi_col, RD_COST *rd_cost,
                                 BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
   VP10_COMMON *const cm = &cpi->common;

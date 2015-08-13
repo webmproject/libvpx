@@ -19,10 +19,10 @@ extern "C" {
 #endif
 
 unsigned int vp10_vaq_segment_id(int energy);
-void vp10_vaq_frame_setup(VP9_COMP *cpi);
+void vp10_vaq_frame_setup(VP10_COMP *cpi);
 
-int vp10_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
-double vp10_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
+int vp10_block_energy(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
+double vp10_log_block_var(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
 
 #ifdef __cplusplus
 }  // extern "C"

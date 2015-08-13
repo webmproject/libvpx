@@ -32,7 +32,7 @@ static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
 }
 
 static int enc_worker_hook(EncWorkerData *const thread_data, void *unused) {
-  VP9_COMP *const cpi = thread_data->cpi;
+  VP10_COMP *const cpi = thread_data->cpi;
   const VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -51,7 +51,7 @@ static int enc_worker_hook(EncWorkerData *const thread_data, void *unused) {
   return 0;
 }
 
-static int get_max_tile_cols(VP9_COMP *cpi) {
+static int get_max_tile_cols(VP10_COMP *cpi) {
   const int aligned_width = ALIGN_POWER_OF_TWO(cpi->oxcf.width, MI_SIZE_LOG2);
   int mi_cols = aligned_width >> MI_SIZE_LOG2;
   int min_log2_tile_cols, max_log2_tile_cols;
@@ -63,7 +63,7 @@ static int get_max_tile_cols(VP9_COMP *cpi) {
   return (1 << log2_tile_cols);
 }
 
-void vp10_encode_tiles_mt(VP9_COMP *cpi) {
+void vp10_encode_tiles_mt(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();

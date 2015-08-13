@@ -29,9 +29,9 @@ typedef struct {
   MBGRAPH_MB_STATS *mb_stats;
 } MBGRAPH_FRAME_STATS;
 
-struct VP9_COMP;
+struct VP10_COMP;
 
-void vp10_update_mbgraph_stats(struct VP9_COMP *cpi);
+void vp10_update_mbgraph_stats(struct VP10_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"

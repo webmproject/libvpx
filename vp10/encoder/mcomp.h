@@ -61,7 +61,7 @@ int vp10_get_mvpred_av_var(const MACROBLOCK *x,
                           const vp9_variance_fn_ptr_t *vfp,
                           int use_mvcost);
 
-struct VP9_COMP;
+struct VP10_COMP;
 struct SPEED_FEATURES;
 
 int vp10_init_search_range(int size);
@@ -73,7 +73,7 @@ int vp10_refining_search_sad(const struct macroblock *x,
                             const struct mv *center_mv);
 
 // Runs sequence of diamond searches in smaller steps for RD.
-int vp10_full_pixel_diamond(const struct VP9_COMP *cpi, MACROBLOCK *x,
+int vp10_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,
                            int *cost_list,
@@ -81,7 +81,7 @@ int vp10_full_pixel_diamond(const struct VP9_COMP *cpi, MACROBLOCK *x,
                            const MV *ref_mv, MV *dst_mv);
 
 // Perform integral projection based motion estimation.
-unsigned int vp10_int_pro_motion_estimation(const struct VP9_COMP *cpi,
+unsigned int vp10_int_pro_motion_estimation(const struct VP10_COMP *cpi,
                                            MACROBLOCK *x,
                                            BLOCK_SIZE bsize,
                                            int mi_row, int mi_col);
@@ -149,9 +149,9 @@ int vp10_refining_search_8p_c(const MACROBLOCK *x,
                              const vp9_variance_fn_ptr_t *fn_ptr,
                              const MV *center_mv, const uint8_t *second_pred);
 
-struct VP9_COMP;
+struct VP10_COMP;
 
-int vp10_full_pixel_search(struct VP9_COMP *cpi, MACROBLOCK *x,
+int vp10_full_pixel_search(struct VP10_COMP *cpi, MACROBLOCK *x,
                           BLOCK_SIZE bsize, MV *mvp_full,
                           int step_param, int error_per_bit,
                           int *cost_list,
