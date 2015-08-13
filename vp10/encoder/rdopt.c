@@ -799,24 +799,24 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
           if (xd->lossless) {
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
             const scan_order *so = get_scan(TX_4X4, tx_type);
-            vp10_highbd_fwht4x4(src_diff, coeff, 8);
+            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
+                                     vp10_highbd_fwht4x4);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
             ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
-            vp10_highbd_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
-                                   dst, dst_stride,
-                                   p->eobs[block], xd->bd);
+            vp10_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
+                                         dst, dst_stride, p->eobs[block],
+                                         xd->bd, DCT_DCT,
+                                         vp10_highbd_iwht4x4_add);
           } else {
             int64_t unused;
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
             const scan_order *so = get_scan(TX_4X4, tx_type);
-            if (tx_type == DCT_DCT)
-              vpx_highbd_fdct4x4(src_diff, coeff, 8);
-            else
-              vp10_highbd_fht4x4(src_diff, coeff, 8, tx_type);
+            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, tx_type,
+                                     vpx_highbd_fdct4x4);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
             ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                                  so->scan, so->neighbors,
@@ -826,8 +826,10 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                 16, &unused, xd->bd) >> 2;
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
-            vp10_highbd_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
-                                  dst, dst_stride, p->eobs[block], xd->bd);
+            vp10_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
+                                         dst, dst_stride, p->eobs[block],
+                                         xd->bd, tx_type,
+                                         vp10_highbd_idct4x4_add);
           }
         }
       }
@@ -902,20 +904,21 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
         if (xd->lossless) {
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
           const scan_order *so = get_scan(TX_4X4, tx_type);
-          vp10_fwht4x4(src_diff, coeff, 8);
+          vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, vp10_fwht4x4);
           vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
           ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                                so->scan, so->neighbors,
                                cpi->sf.use_fast_coef_costing);
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
-          vp10_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, dst_stride,
-                          p->eobs[block]);
+          vp10_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
+                                dst, dst_stride, p->eobs[block], DCT_DCT,
+                                vp10_iwht4x4_add);
         } else {
           int64_t unused;
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
           const scan_order *so = get_scan(TX_4X4, tx_type);
-          vp10_fht4x4(src_diff, coeff, 8, tx_type);
+          vp10_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, vpx_fdct4x4);
           vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
           ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                              so->scan, so->neighbors,
@@ -924,8 +927,9 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                         16, &unused) >> 2;
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
-          vp10_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
-                         dst, dst_stride, p->eobs[block]);
+          vp10_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
+                                dst, dst_stride, p->eobs[block], tx_type,
+                                vp10_idct4x4_add);
         }
       }
     }
