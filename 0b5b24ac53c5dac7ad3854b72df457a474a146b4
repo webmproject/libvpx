@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "64367de0_c1e0ccb8",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-08-13T04:44:33Z",
+      "side": 1,
+      "message": "It seems that y_mode and tx_type are calculated two times in these functions.",
+      "range": {
+        "startLine": 385,
+        "startChar": 72,
+        "endLine": 385,
+        "endChar": 74
+      },
+      "revId": "0b5b24ac53c5dac7ad3854b72df457a474a146b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
