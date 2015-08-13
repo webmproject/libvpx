@@ -454,7 +454,7 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
 }
 
 static INLINE void check_resync(vpx_codec_alg_priv_t *const ctx,
-                                const VP9Decoder *const pbi) {
+                                const VP10Decoder *const pbi) {
   // Clear resync flag if worker got a key frame or intra only frame.
   if (ctx->need_resync == 1 && pbi->need_resync == 0 &&
       (pbi->common.intra_only || pbi->common.frame_type == KEY_FRAME))

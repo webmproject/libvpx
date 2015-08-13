@@ -37,7 +37,7 @@ typedef struct TileData {
 } TileData;
 
 typedef struct TileWorkerData {
-  struct VP9Decoder *pbi;
+  struct VP10Decoder *pbi;
   vpx_reader bit_reader;
   FRAME_COUNTS counts;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
@@ -46,7 +46,7 @@ typedef struct TileWorkerData {
   struct vpx_internal_error_info error_info;
 } TileWorkerData;
 
-typedef struct VP9Decoder {
+typedef struct VP10Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
   DECLARE_ALIGNED(16, VP10_COMMON, common);
@@ -80,15 +80,15 @@ typedef struct VP9Decoder {
   int inv_tile_order;
   int need_resync;  // wait for key/intra-only frame.
   int hold_ref_buf;  // hold the reference buffer.
-} VP9Decoder;
+} VP10Decoder;
 
-int vp10_receive_compressed_data(struct VP9Decoder *pbi,
+int vp10_receive_compressed_data(struct VP10Decoder *pbi,
                                 size_t size, const uint8_t **dest);
 
-int vp10_get_raw_frame(struct VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
+int vp10_get_raw_frame(struct VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd,
                       vp10_ppflags_t *flags);
 
-vpx_codec_err_t vp10_copy_reference_dec(struct VP9Decoder *pbi,
+vpx_codec_err_t vp10_copy_reference_dec(struct VP10Decoder *pbi,
                                        VP9_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd);
 
@@ -115,9 +115,9 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
                                            vpx_decrypt_cb decrypt_cb,
                                            void *decrypt_state);
 
-struct VP9Decoder *vp10_decoder_create(BufferPool *const pool);
+struct VP10Decoder *vp10_decoder_create(BufferPool *const pool);
 
-void vp10_decoder_remove(struct VP9Decoder *pbi);
+void vp10_decoder_remove(struct VP10Decoder *pbi);
 
 static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,
                                       BufferPool *const pool) {

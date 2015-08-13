@@ -16,12 +16,12 @@
 #include "vpx/internal/vpx_codec_internal.h"
 
 struct VP9Common;
-struct VP9Decoder;
+struct VP10Decoder;
 
 // WorkerData for the FrameWorker thread. It contains all the information of
 // the worker and decode structures for decoding a frame.
 typedef struct FrameWorkerData {
-  struct VP9Decoder *pbi;
+  struct VP10Decoder *pbi;
   const uint8_t *data;
   const uint8_t *data_end;
   size_t data_size;

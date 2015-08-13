@@ -551,7 +551,7 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
+static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                                        int plane, int bw, int bh, int x,
                                        int y, int w, int h, int mi_x, int mi_y,
                                        const InterpKernel *kernel,
@@ -703,7 +703,7 @@ static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
-static void dec_build_inter_predictors_sb(VP9Decoder *const pbi,
+static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
                                           MACROBLOCKD *xd,
                                           int mi_row, int mi_col) {
   int plane;
@@ -811,7 +811,7 @@ static MB_MODE_INFO *set_offsets(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   return &xd->mi[0]->mbmi;
 }
 
-static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
+static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                          int mi_row, int mi_col,
                          vpx_reader *r, BLOCK_SIZE bsize,
                          int bwl, int bhl) {
@@ -947,7 +947,7 @@ static PARTITION_TYPE read_partition(MACROBLOCKD *xd, int mi_row, int mi_col,
 }
 
 // TODO(slavarnway): eliminate bsize and subsize in future commits
-static void decode_partition(VP9Decoder *const pbi, MACROBLOCKD *const xd,
+static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                              int mi_row, int mi_col,
                              vpx_reader* r, BLOCK_SIZE bsize, int n4x4_l2) {
   VP10_COMMON *const cm = &pbi->common;
@@ -1402,7 +1402,7 @@ static void get_tile_buffer(const uint8_t *const data_end,
   *data += size;
 }
 
-static void get_tile_buffers(VP9Decoder *pbi,
+static void get_tile_buffers(VP10Decoder *pbi,
                              const uint8_t *data, const uint8_t *data_end,
                              int tile_cols, int tile_rows,
                              TileBuffer (*tile_buffers)[1 << 6]) {
@@ -1419,7 +1419,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
   }
 }
 
-static const uint8_t *decode_tiles(VP9Decoder *pbi,
+static const uint8_t *decode_tiles(VP10Decoder *pbi,
                                    const uint8_t *data,
                                    const uint8_t *data_end) {
   VP10_COMMON *const cm = &pbi->common;
@@ -1595,7 +1595,7 @@ static int compare_tile_buffers(const void *a, const void *b) {
   return (int)(buf2->size - buf1->size);
 }
 
-static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
+static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
                                       const uint8_t *data,
                                       const uint8_t *data_end) {
   VP10_COMMON *const cm = &pbi->common;
@@ -1802,7 +1802,7 @@ static void read_bitdepth_colorspace_sampling(
   }
 }
 
-static size_t read_uncompressed_header(VP9Decoder *pbi,
+static size_t read_uncompressed_header(VP10Decoder *pbi,
                                        struct vpx_read_bit_buffer *rb) {
   VP10_COMMON *const cm = &pbi->common;
   BufferPool *const pool = cm->buffer_pool;
@@ -2004,7 +2004,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   return sz;
 }
 
-static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
+static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP10_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -2094,7 +2094,7 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
 #endif  // NDEBUG
 
 static struct vpx_read_bit_buffer *init_read_bit_buffer(
-    VP9Decoder *pbi,
+    VP10Decoder *pbi,
     struct vpx_read_bit_buffer *rb,
     const uint8_t *data,
     const uint8_t *data_end,
@@ -2136,7 +2136,7 @@ BITSTREAM_PROFILE vp10_read_profile(struct vpx_read_bit_buffer *rb) {
   return (BITSTREAM_PROFILE) profile;
 }
 
-void vp10_decode_frame(VP9Decoder *pbi,
+void vp10_decode_frame(VP10Decoder *pbi,
                       const uint8_t *data, const uint8_t *data_end,
                       const uint8_t **p_data_end) {
   VP10_COMMON *const cm = &pbi->common;

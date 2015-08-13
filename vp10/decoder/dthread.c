@@ -77,7 +77,7 @@ void vp10_frameworker_wait(VPxWorker *const worker, RefCntBuffer *const ref_buf,
     VPxWorker *const ref_worker = ref_buf->frame_worker_owner;
     FrameWorkerData *const ref_worker_data =
         (FrameWorkerData *)ref_worker->data1;
-    const VP9Decoder *const pbi = ref_worker_data->pbi;
+    const VP10Decoder *const pbi = ref_worker_data->pbi;
 
 #ifdef DEBUG_THREAD
     {
