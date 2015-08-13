@@ -475,12 +475,12 @@ static int read_is_inter_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 static void fpm_sync(void *const data, int mi_row) {
-  VP9Decoder *const pbi = (VP9Decoder *)data;
+  VP10Decoder *const pbi = (VP10Decoder *)data;
   vp10_frameworker_wait(pbi->frame_worker_owner, pbi->common.prev_frame,
                        mi_row << MI_BLOCK_SIZE_LOG2);
 }
 
-static void read_inter_block_mode_info(VP9Decoder *const pbi,
+static void read_inter_block_mode_info(VP10Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        MODE_INFO *const mi,
                                        int mi_row, int mi_col, vpx_reader *r) {
@@ -583,7 +583,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
   }
 }
 
-static void read_inter_frame_mode_info(VP9Decoder *const pbi,
+static void read_inter_frame_mode_info(VP10Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        int mi_row, int mi_col, vpx_reader *r) {
   VP10_COMMON *const cm = &pbi->common;
@@ -604,7 +604,7 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
     read_intra_block_mode_info(cm, xd, mi, r);
 }
 
-void vp10_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
+void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
                         int mi_row, int mi_col, vpx_reader *r,
                         int x_mis, int y_mis) {
   VP10_COMMON *const cm = &pbi->common;

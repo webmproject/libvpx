@@ -73,8 +73,8 @@ static void vp10_dec_free_mi(VP10_COMMON *cm) {
   cm->mi_grid_base = NULL;
 }
 
-VP9Decoder *vp10_decoder_create(BufferPool *const pool) {
-  VP9Decoder *volatile const pbi = vpx_memalign(32, sizeof(*pbi));
+VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
+  VP10Decoder *volatile const pbi = vpx_memalign(32, sizeof(*pbi));
   VP10_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
 
   if (!cm)
@@ -123,7 +123,7 @@ VP9Decoder *vp10_decoder_create(BufferPool *const pool) {
   return pbi;
 }
 
-void vp10_decoder_remove(VP9Decoder *pbi) {
+void vp10_decoder_remove(VP10Decoder *pbi) {
   int i;
 
   vpx_get_worker_interface()->end(&pbi->lf_worker);
@@ -150,7 +150,7 @@ static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
            a->uv_height == b->uv_height && a->uv_width == b->uv_width;
 }
 
-vpx_codec_err_t vp10_copy_reference_dec(VP9Decoder *pbi,
+vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
                                        VP9_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd) {
   VP10_COMMON *cm = &pbi->common;
@@ -228,7 +228,7 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
 }
 
 /* If any buffer updating is signaled it should be done here. */
-static void swap_frame_buffers(VP9Decoder *pbi) {
+static void swap_frame_buffers(VP10Decoder *pbi) {
   int ref_index = 0, mask;
   VP10_COMMON *const cm = &pbi->common;
   BufferPool *const pool = cm->buffer_pool;
@@ -269,7 +269,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     cm->frame_refs[ref_index].idx = -1;
 }
 
-int vp10_receive_compressed_data(VP9Decoder *pbi,
+int vp10_receive_compressed_data(VP10Decoder *pbi,
                                 size_t size, const uint8_t **psource) {
   VP10_COMMON *volatile const cm = &pbi->common;
   BufferPool *volatile const pool = cm->buffer_pool;
@@ -410,7 +410,7 @@ int vp10_receive_compressed_data(VP9Decoder *pbi,
   return retcode;
 }
 
-int vp10_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
+int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd,
                       vp10_ppflags_t *flags) {
   VP10_COMMON *const cm = &pbi->common;
   int ret = -1;
