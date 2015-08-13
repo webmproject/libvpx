@@ -646,66 +646,60 @@ void vpx_convolve2_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                const int16_t *filter_x, int x_step_q4,
                                const int16_t *filter_y, int y_step_q4,
                                int w, int h) {
-  if (16 == x_step_q4) {
-    uint32_t pos = 38;
+  uint32_t pos = 38;
 
-    prefetch_load((const uint8_t *)filter_x);
+  assert(x_step_q4 == 16);
 
-    /* bit positon for extract from acc */
-    __asm__ __volatile__ (
-      "wrdsp      %[pos],     1           \n\t"
-      :
-      : [pos] "r" (pos)
-    );
+  prefetch_load((const uint8_t *)filter_x);
 
-    /* prefetch data to cache memory */
-    prefetch_load(src);
-    prefetch_load(src + 32);
-    prefetch_store(dst);
+  /* bit positon for extract from acc */
+  __asm__ __volatile__ (
+    "wrdsp      %[pos],     1           \n\t"
+    :
+    : [pos] "r" (pos)
+  );
 
-    switch (w) {
-      case 4:
-        convolve_bi_horiz_4_dspr2(src, (int32_t)src_stride,
-                                  dst, (int32_t)dst_stride,
-                                  filter_x, (int32_t)h);
-        break;
-      case 8:
-        convolve_bi_horiz_8_dspr2(src, (int32_t)src_stride,
-                                  dst, (int32_t)dst_stride,
-                                  filter_x, (int32_t)h);
-        break;
-      case 16:
-        convolve_bi_horiz_16_dspr2(src, (int32_t)src_stride,
-                                   dst, (int32_t)dst_stride,
-                                   filter_x, (int32_t)h, 1);
-        break;
-      case 32:
-        convolve_bi_horiz_16_dspr2(src, (int32_t)src_stride,
-                                   dst, (int32_t)dst_stride,
-                                   filter_x, (int32_t)h, 2);
-        break;
-      case 64:
-        prefetch_load(src + 64);
-        prefetch_store(dst + 32);
+  /* prefetch data to cache memory */
+  prefetch_load(src);
+  prefetch_load(src + 32);
+  prefetch_store(dst);
 
-        convolve_bi_horiz_64_dspr2(src, (int32_t)src_stride,
-                                   dst, (int32_t)dst_stride,
-                                   filter_x, (int32_t)h);
-        break;
-      default:
-        vpx_convolve8_horiz_c(src, src_stride,
-                              dst, dst_stride,
-                              filter_x, x_step_q4,
-                              filter_y, y_step_q4,
-                              w, h);
-        break;
-    }
-  } else {
-    vpx_convolve8_horiz_c(src, src_stride,
-                          dst, dst_stride,
-                          filter_x, x_step_q4,
-                          filter_y, y_step_q4,
-                          w, h);
+  switch (w) {
+    case 4:
+      convolve_bi_horiz_4_dspr2(src, (int32_t)src_stride,
+                                dst, (int32_t)dst_stride,
+                                filter_x, (int32_t)h);
+      break;
+    case 8:
+      convolve_bi_horiz_8_dspr2(src, (int32_t)src_stride,
+                                dst, (int32_t)dst_stride,
+                                filter_x, (int32_t)h);
+      break;
+    case 16:
+      convolve_bi_horiz_16_dspr2(src, (int32_t)src_stride,
+                                 dst, (int32_t)dst_stride,
+                                 filter_x, (int32_t)h, 1);
+      break;
+    case 32:
+      convolve_bi_horiz_16_dspr2(src, (int32_t)src_stride,
+                                 dst, (int32_t)dst_stride,
+                                 filter_x, (int32_t)h, 2);
+      break;
+    case 64:
+      prefetch_load(src + 64);
+      prefetch_store(dst + 32);
+
+      convolve_bi_horiz_64_dspr2(src, (int32_t)src_stride,
+                                 dst, (int32_t)dst_stride,
+                                 filter_x, (int32_t)h);
+      break;
+    default:
+      vpx_convolve8_horiz_c(src, src_stride,
+                            dst, dst_stride,
+                            filter_x, x_step_q4,
+                            filter_y, y_step_q4,
+                            w, h);
+      break;
   }
 }
 #endif

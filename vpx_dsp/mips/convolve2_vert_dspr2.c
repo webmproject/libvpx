@@ -218,47 +218,41 @@ void vpx_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4,
                               int w, int h) {
-  if (16 == y_step_q4) {
-    uint32_t pos = 38;
+  uint32_t pos = 38;
 
-    /* bit positon for extract from acc */
-    __asm__ __volatile__ (
-      "wrdsp      %[pos],     1           \n\t"
-      :
-      : [pos] "r" (pos)
-    );
+  assert(y_step_q4 == 16);
 
-    prefetch_store(dst);
+  /* bit positon for extract from acc */
+  __asm__ __volatile__ (
+    "wrdsp      %[pos],     1           \n\t"
+    :
+    : [pos] "r" (pos)
+  );
 
-    switch (w) {
-      case 4 :
-      case 8 :
-      case 16 :
-      case 32 :
-        convolve_bi_vert_4_dspr2(src, src_stride,
-                                 dst, dst_stride,
-                                 filter_y, w, h);
-        break;
-      case 64 :
-        prefetch_store(dst + 32);
-        convolve_bi_vert_64_dspr2(src, src_stride,
-                                  dst, dst_stride,
-                                  filter_y, h);
-        break;
-      default:
-        vpx_convolve8_vert_c(src, src_stride,
-                             dst, dst_stride,
-                             filter_x, x_step_q4,
-                             filter_y, y_step_q4,
-                             w, h);
-        break;
-    }
-  } else {
-    vpx_convolve8_vert_c(src, src_stride,
-                         dst, dst_stride,
-                         filter_x, x_step_q4,
-                         filter_y, y_step_q4,
-                         w, h);
+  prefetch_store(dst);
+
+  switch (w) {
+    case 4 :
+    case 8 :
+    case 16 :
+    case 32 :
+      convolve_bi_vert_4_dspr2(src, src_stride,
+                               dst, dst_stride,
+                               filter_y, w, h);
+      break;
+    case 64 :
+      prefetch_store(dst + 32);
+      convolve_bi_vert_64_dspr2(src, src_stride,
+                                dst, dst_stride,
+                                filter_y, h);
+      break;
+    default:
+      vpx_convolve8_vert_c(src, src_stride,
+                           dst, dst_stride,
+                           filter_x, x_step_q4,
+                           filter_y, y_step_q4,
+                           w, h);
+      break;
   }
 }
 #endif
