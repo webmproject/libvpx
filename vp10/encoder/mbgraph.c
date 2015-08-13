@@ -180,7 +180,7 @@ static void update_mbgraph_mb_stats
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int intra_error;
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
 
   // FIXME in practice we're completely ignoring chroma here
   x->plane[0].src.buf = buf->y_buffer + mb_y_offset;
@@ -234,7 +234,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
                                        YV12_BUFFER_CONFIG *alt_ref) {
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   int mb_col, mb_row, offset = 0;
   int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
@@ -297,7 +297,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
 
 // void separate_arf_mbs_byzz
 static void separate_arf_mbs(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   int mb_col, mb_row, offset, i;
   int mi_row, mi_col;
   int ncnt[4] = { 0 };
@@ -375,7 +375,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
 }
 
 void vp10_update_mbgraph_stats(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   int i, n_frames = vp10_lookahead_depth(cpi->lookahead);
   YV12_BUFFER_CONFIG *golden_ref = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
 

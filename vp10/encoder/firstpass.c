@@ -143,7 +143,7 @@ static void output_stats(FIRSTPASS_STATS *stats,
 }
 
 #if CONFIG_FP_MB_STATS
-static void output_fpmb_stats(uint8_t *this_frame_mb_stats, VP9_COMMON *cm,
+static void output_fpmb_stats(uint8_t *this_frame_mb_stats, VP10_COMMON *cm,
                          struct vpx_codec_pkt_list *pktlist) {
   struct vpx_codec_cx_pkt pkt;
   pkt.kind = VPX_CODEC_FPMB_STATS_PKT;
@@ -454,7 +454,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static BLOCK_SIZE get_bsize(const VP9_COMMON *cm, int mb_row, int mb_col) {
+static BLOCK_SIZE get_bsize(const VP10_COMMON *cm, int mb_row, int mb_col) {
   if (2 * mb_col + 1 < cm->mi_cols) {
     return 2 * mb_row + 1 < cm->mi_rows ? BLOCK_16X16
                                         : BLOCK_16X8;
@@ -478,7 +478,7 @@ static int find_fp_qindex(vpx_bit_depth_t bit_depth) {
 }
 
 static void set_first_pass_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
        (cpi->frame_flags & FRAMEFLAGS_KEY))) {
@@ -495,7 +495,7 @@ static void set_first_pass_params(VP9_COMP *cpi) {
 void vp10_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->td.mb;
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   TileInfo tile;
   struct macroblock_plane *const p = x->plane;
@@ -1239,7 +1239,7 @@ static void setup_rf_level_maxq(VP9_COMP *cpi) {
 }
 
 void vp10_init_subsampling(VP9_COMP *cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   const int w = cm->width;
   const int h = cm->height;
@@ -1842,7 +1842,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
 // Analyse and define a gf/arf group.
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
   TWO_PASS *const twopass = &cpi->twopass;
@@ -2578,7 +2578,7 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
 }
 
 void vp10_rc_get_second_pass_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;

@@ -76,7 +76,7 @@ static void prob_diff_update(const vpx_tree_index *tree,
     vp10_cond_prob_diff_update(w, &probs[i], branch_ct[i]);
 }
 
-static void write_selected_tx_size(const VP9_COMMON *cm,
+static void write_selected_tx_size(const VP10_COMMON *cm,
                                    const MACROBLOCKD *xd, vpx_writer *w) {
   TX_SIZE tx_size = xd->mi[0]->mbmi.tx_size;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
@@ -91,7 +91,7 @@ static void write_selected_tx_size(const VP9_COMMON *cm,
   }
 }
 
-static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static int write_skip(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                       int segment_id, const MODE_INFO *mi, vpx_writer *w) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
@@ -102,7 +102,7 @@ static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   }
 }
 
-static void update_skip_probs(VP9_COMMON *cm, vpx_writer *w,
+static void update_skip_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
   int k;
 
@@ -110,7 +110,7 @@ static void update_skip_probs(VP9_COMMON *cm, vpx_writer *w,
     vp10_cond_prob_diff_update(w, &cm->fc->skip_probs[k], counts->skip[k]);
 }
 
-static void update_switchable_interp_probs(VP9_COMMON *cm, vpx_writer *w,
+static void update_switchable_interp_probs(VP10_COMMON *cm, vpx_writer *w,
                                            FRAME_COUNTS *counts) {
   int j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
@@ -199,7 +199,7 @@ static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
 }
 
 // This function encodes the reference frame
-static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                              vpx_writer *w) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const int is_compound = has_second_ref(mbmi);
@@ -236,7 +236,7 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                                 vpx_writer *w) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
   const MACROBLOCK *const x = &cpi->td.mb;
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -338,7 +338,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   }
 }
 
-static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                               MODE_INFO **mi_8x8, vpx_writer *w) {
   const struct segmentation *const seg = &cm->seg;
   const MODE_INFO *const mi = mi_8x8[0];
@@ -378,7 +378,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
                           vpx_writer *w, TOKENEXTRA **tok,
                           const TOKENEXTRA *const tok_end,
                           int mi_row, int mi_col) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   MODE_INFO *m;
 
@@ -402,7 +402,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   pack_mb_tokens(w, tok, tok_end, cm->bit_depth);
 }
 
-static void write_partition(const VP9_COMMON *const cm,
+static void write_partition(const VP10_COMMON *const cm,
                             const MACROBLOCKD *const xd,
                             int hbs, int mi_row, int mi_col,
                             PARTITION_TYPE p, BLOCK_SIZE bsize, vpx_writer *w) {
@@ -428,7 +428,7 @@ static void write_modes_sb(VP9_COMP *cpi,
                            const TileInfo *const tile, vpx_writer *w,
                            TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
   const int bsl = b_width_log2_lookup[bsize];
@@ -485,7 +485,7 @@ static void write_modes_sb(VP9_COMP *cpi,
 static void write_modes(VP9_COMP *cpi,
                         const TileInfo *const tile, vpx_writer *w,
                         TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int mi_row, mi_col;
 
@@ -742,7 +742,7 @@ static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
   }
 }
 
-static void encode_quantization(const VP9_COMMON *const cm,
+static void encode_quantization(const VP10_COMMON *const cm,
                                 struct vpx_write_bit_buffer *wb) {
   vpx_wb_write_literal(wb, cm->base_qindex, QINDEX_BITS);
   write_delta_q(wb, cm->y_dc_delta_q);
@@ -750,7 +750,7 @@ static void encode_quantization(const VP9_COMMON *const cm,
   write_delta_q(wb, cm->uv_ac_delta_q);
 }
 
-static void encode_segmentation(VP9_COMMON *cm, MACROBLOCKD *xd,
+static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
                                 struct vpx_write_bit_buffer *wb) {
   int i, j;
 
@@ -812,7 +812,7 @@ static void encode_segmentation(VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-static void encode_txfm_probs(VP9_COMMON *cm, vpx_writer *w,
+static void encode_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
   // Mode
   vpx_write_literal(w, MIN(cm->tx_mode, ALLOW_32X32), 2);
@@ -858,7 +858,7 @@ static void write_interp_filter(INTERP_FILTER filter,
     vpx_wb_write_literal(wb, filter_to_literal[filter], 2);
 }
 
-static void fix_interp_filter(VP9_COMMON *cm, FRAME_COUNTS *counts) {
+static void fix_interp_filter(VP10_COMMON *cm, FRAME_COUNTS *counts) {
   if (cm->interp_filter == SWITCHABLE) {
     // Check to see if only one of the filters is actually used
     int count[SWITCHABLE_FILTERS];
@@ -881,7 +881,7 @@ static void fix_interp_filter(VP9_COMMON *cm, FRAME_COUNTS *counts) {
   }
 }
 
-static void write_tile_info(const VP9_COMMON *const cm,
+static void write_tile_info(const VP10_COMMON *const cm,
                             struct vpx_write_bit_buffer *wb) {
   int min_log2_tile_cols, max_log2_tile_cols, ones;
   vp10_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
@@ -927,7 +927,7 @@ static int get_refresh_mask(VP9_COMP *cpi) {
 }
 
 static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   vpx_writer residual_bc;
   int tile_row, tile_col;
   TOKENEXTRA *tok_end;
@@ -968,7 +968,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   return total_size;
 }
 
-static void write_display_size(const VP9_COMMON *cm,
+static void write_display_size(const VP10_COMMON *cm,
                                struct vpx_write_bit_buffer *wb) {
   const int scaling_active = cm->width != cm->display_width ||
                              cm->height != cm->display_height;
@@ -979,7 +979,7 @@ static void write_display_size(const VP9_COMMON *cm,
   }
 }
 
-static void write_frame_size(const VP9_COMMON *cm,
+static void write_frame_size(const VP10_COMMON *cm,
                              struct vpx_write_bit_buffer *wb) {
   vpx_wb_write_literal(wb, cm->width - 1, 16);
   vpx_wb_write_literal(wb, cm->height - 1, 16);
@@ -989,7 +989,7 @@ static void write_frame_size(const VP9_COMMON *cm,
 
 static void write_frame_size_with_refs(VP9_COMP *cpi,
                                        struct vpx_write_bit_buffer *wb) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   int found = 0;
 
   MV_REFERENCE_FRAME ref_frame;
@@ -1052,7 +1052,7 @@ static void write_profile(BITSTREAM_PROFILE profile,
 }
 
 static void write_bitdepth_colorspace_sampling(
-    VP9_COMMON *const cm, struct vpx_write_bit_buffer *wb) {
+    VP10_COMMON *const cm, struct vpx_write_bit_buffer *wb) {
   if (cm->profile >= PROFILE_2) {
     assert(cm->bit_depth > VPX_BITS_8);
     vpx_wb_write_bit(wb, cm->bit_depth == VPX_BITS_10 ? 0 : 1);
@@ -1076,7 +1076,7 @@ static void write_bitdepth_colorspace_sampling(
 
 static void write_uncompressed_header(VP9_COMP *cpi,
                                       struct vpx_write_bit_buffer *wb) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
   vpx_wb_write_literal(wb, VP9_FRAME_MARKER, 2);
@@ -1151,7 +1151,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 }
 
 static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = cpi->td.counts;

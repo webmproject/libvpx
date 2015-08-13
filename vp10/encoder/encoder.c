@@ -229,7 +229,7 @@ void vp10_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
 }
 
 static void setup_frame(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   // Set up entropy context depending on frame type. The decoder mandates
   // the use of the default context, index 0, for keyframes and inter
   // frames where the error_resilient_mode or intra_only flag is set. For
@@ -253,7 +253,7 @@ static void setup_frame(VP9_COMP *cpi) {
   }
 }
 
-static void vp10_enc_setup_mi(VP9_COMMON *cm) {
+static void vp10_enc_setup_mi(VP10_COMMON *cm) {
   int i;
   cm->mi = cm->mip + cm->mi_stride + 1;
   memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
@@ -271,7 +271,7 @@ static void vp10_enc_setup_mi(VP9_COMMON *cm) {
          cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
-static int vp10_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
+static int vp10_enc_alloc_mi(VP10_COMMON *cm, int mi_size) {
   cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
   if (!cm->mip)
     return 1;
@@ -290,7 +290,7 @@ static int vp10_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
   return 0;
 }
 
-static void vp10_enc_free_mi(VP9_COMMON *cm) {
+static void vp10_enc_free_mi(VP10_COMMON *cm) {
   vpx_free(cm->mip);
   cm->mip = NULL;
   vpx_free(cm->prev_mip);
@@ -301,7 +301,7 @@ static void vp10_enc_free_mi(VP9_COMMON *cm) {
   cm->prev_mi_grid_base = NULL;
 }
 
-static void vp10_swap_mi_and_prev_mi(VP9_COMMON *cm) {
+static void vp10_swap_mi_and_prev_mi(VP10_COMMON *cm) {
   // Current mip will be the prev_mip for the next frame.
   MODE_INFO **temp_base = cm->prev_mi_grid_base;
   MODE_INFO *temp = cm->prev_mip;
@@ -335,7 +335,7 @@ void vp10_initialize_enc(void) {
 }
 
 static void dealloc_compressor_data(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   int i;
 
   vpx_free(cpi->mbmi_ext_base);
@@ -417,7 +417,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
 static void save_coding_context(VP9_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
 
   // Stores a snapshot of key state variables which can subsequently be
   // restored with a call to vp10_restore_coding_context. These functions are
@@ -447,7 +447,7 @@ static void save_coding_context(VP9_COMP *cpi) {
 
 static void restore_coding_context(VP9_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
 
   // Restore key state variables to the snapshot state stored in the
   // previous call to vp10_save_coding_context.
@@ -473,7 +473,7 @@ static void restore_coding_context(VP9_COMP *cpi) {
 }
 
 static void configure_static_seg_features(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   struct segmentation *const seg = &cm->seg;
 
@@ -597,7 +597,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 }
 
 static void update_reference_segmentation_map(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MODE_INFO **mi_8x8_ptr = cm->mi_grid_visible;
   uint8_t *cache_ptr = cm->last_frame_seg_map;
   int row, col;
@@ -613,7 +613,7 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
 }
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
 
   if (!cpi->lookahead)
@@ -641,7 +641,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
 }
 
 static void alloc_util_frame_buffers(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   if (vp9_realloc_frame_buffer(&cpi->last_frame_uf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
@@ -678,7 +678,7 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
 
 
 static int alloc_context_buffers_ext(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
   int mi_size = cm->mi_cols * cm->mi_rows;
 
   cpi->mbmi_ext_base = vpx_calloc(mi_size, sizeof(*cpi->mbmi_ext_base));
@@ -689,7 +689,7 @@ static int alloc_context_buffers_ext(VP9_COMP *cpi) {
 }
 
 void vp10_alloc_compressor_data(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
 
   vp10_alloc_context_buffers(cm, cm->width, cm->height);
 
@@ -712,7 +712,7 @@ void vp10_new_framerate(VP9_COMP *cpi, double framerate) {
 }
 
 static void set_tile_limits(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   int min_log2_tile_cols, max_log2_tile_cols;
   vp10_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
@@ -730,7 +730,7 @@ static void set_tile_limits(VP9_COMP *cpi) {
 }
 
 static void update_frame_size(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
   vp10_set_mb_mi(cm, cm->width, cm->height);
@@ -763,7 +763,7 @@ static void init_buffer_indices(VP9_COMP *cpi) {
 }
 
 static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
   cpi->framerate = oxcf->init_framerate;
@@ -1018,7 +1018,7 @@ MAKE_BFP_SAD8_WRAPPER(vpx_highbd_sad4x4x8)
 MAKE_BFP_SAD4D_WRAPPER(vpx_highbd_sad4x4x4d)
 
 static void  highbd_set_var_fns(VP9_COMP *const cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   if (cm->use_highbitdepth) {
     switch (cm->bit_depth) {
       case VPX_BITS_8:
@@ -1426,7 +1426,7 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static void realloc_segmentation_maps(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   // Create the encoder segmentation map and set all entries to 0
   vpx_free(cpi->segmentation_map);
@@ -1452,7 +1452,7 @@ static void realloc_segmentation_maps(VP9_COMP *cpi) {
 }
 
 void vp10_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
   if (cm->profile != oxcf->profile)
@@ -1594,7 +1594,7 @@ VP9_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
   VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
-  VP9_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
+  VP10_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
 
   if (!cm)
     return NULL;
@@ -1918,7 +1918,7 @@ VP9_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 
 void vp10_remove_compressor(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   unsigned int i;
   int t;
 
@@ -2450,7 +2450,7 @@ void vp10_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
 #endif
 
 #ifdef OUTPUT_YUV_REC
-void vp10_write_yuv_rec_frame(VP9_COMMON *cm) {
+void vp10_write_yuv_rec_frame(VP10_COMMON *cm) {
   YV12_BUFFER_CONFIG *s = cm->frame_to_show;
   uint8_t *src = s->y_buffer;
   int h = cm->height;
@@ -2660,7 +2660,7 @@ static int recode_loop_test(VP9_COMP *cpi,
 }
 
 void vp10_update_reference_frames(VP9_COMP *cpi) {
-  VP9_COMMON * const cm = &cpi->common;
+  VP10_COMMON * const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
 
   // At this point the new frame has been encoded.
@@ -2741,7 +2741,7 @@ void vp10_update_reference_frames(VP9_COMP *cpi) {
 #endif
 }
 
-static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
+static void loopfilter_frame(VP9_COMP *cpi, VP10_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->td.mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
   if (xd->lossless) {
@@ -2772,7 +2772,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   vp9_extend_frame_inner_borders(cm->frame_to_show);
 }
 
-static INLINE void alloc_frame_mvs(const VP9_COMMON *cm,
+static INLINE void alloc_frame_mvs(const VP10_COMMON *cm,
                                    int buffer_idx) {
   RefCntBuffer *const new_fb_ptr = &cm->buffer_pool->frame_bufs[buffer_idx];
   if (new_fb_ptr->mvs == NULL ||
@@ -2788,7 +2788,7 @@ static INLINE void alloc_frame_mvs(const VP9_COMMON *cm,
 }
 
 void vp10_scale_references(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
   const VP9_REFFRAME ref_mask[3] = {VP9_LAST_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG};
 
@@ -2870,7 +2870,7 @@ void vp10_scale_references(VP9_COMP *cpi) {
 }
 
 static void release_scaled_references(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
   int i;
   if (cpi->oxcf.pass == 0 && !cpi->use_svc) {
     // Only release scaled references under certain conditions:
@@ -2929,7 +2929,7 @@ static void full_to_model_counts(vp10_coeff_count_model *model_count,
 
 #if 0 && CONFIG_INTERNAL_STATS
 static void output_frame_level_debug_stats(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   FILE *const f = fopen("tmp.stt", cm->current_video_frame ? "a" : "w");
   int64_t recon_err;
 
@@ -2997,7 +2997,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 #endif
 
 static void set_mv_search_params(VP9_COMP *cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const unsigned int max_mv_def = MIN(cm->width, cm->height);
 
   // Default based on max resolution.
@@ -3030,7 +3030,7 @@ static void set_size_independent_vars(VP9_COMP *cpi) {
 
 static void set_size_dependent_vars(VP9_COMP *cpi, int *q,
                                     int *bottom_index, int *top_index) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
 
   // Setup variables that depend on the dimensions of the frame.
@@ -3088,7 +3088,7 @@ static void init_motion_estimation(VP9_COMP *cpi) {
 
 static void set_frame_size(VP9_COMP *cpi) {
   int ref_frame;
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
@@ -3182,7 +3182,7 @@ static void set_frame_size(VP9_COMP *cpi) {
 }
 
 static void encode_without_recode_loop(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;  // Dummy variables.
 
   vpx_clear_system_state();
@@ -3255,7 +3255,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
 static void encode_with_recode_loop(VP9_COMP *cpi,
                                     size_t *size,
                                     uint8_t *dest) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int bottom_index, top_index;
   int loop_count = 0;
@@ -3555,7 +3555,7 @@ static void set_ext_overrides(VP9_COMP *cpi) {
   }
 }
 
-YV12_BUFFER_CONFIG *vp10_scale_if_required_fast(VP9_COMMON *cm,
+YV12_BUFFER_CONFIG *vp10_scale_if_required_fast(VP10_COMMON *cm,
                                                YV12_BUFFER_CONFIG *unscaled,
                                                YV12_BUFFER_CONFIG *scaled) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
@@ -3570,7 +3570,7 @@ YV12_BUFFER_CONFIG *vp10_scale_if_required_fast(VP9_COMMON *cm,
   }
 }
 
-YV12_BUFFER_CONFIG *vp10_scale_if_required(VP9_COMMON *cm,
+YV12_BUFFER_CONFIG *vp10_scale_if_required(VP10_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
                                           YV12_BUFFER_CONFIG *scaled) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
@@ -3587,7 +3587,7 @@ YV12_BUFFER_CONFIG *vp10_scale_if_required(VP9_COMMON *cm,
 }
 
 static void set_arf_sign_bias(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   int arf_sign_bias;
 
   if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
@@ -3632,7 +3632,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       size_t *size,
                                       uint8_t *dest,
                                       unsigned int *frame_flags) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   struct segmentation *const seg = &cm->seg;
   TX_SIZE t;
@@ -3890,7 +3890,7 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size,
     vp10_twopass_postencode_update(cpi);
 }
 
-static void init_ref_frame_bufs(VP9_COMMON *cm) {
+static void init_ref_frame_bufs(VP10_COMMON *cm) {
   int i;
   BufferPool *const pool = cm->buffer_pool;
   cm->new_fb_idx = INVALID_IDX;
@@ -3905,7 +3905,7 @@ static void check_initial_width(VP9_COMP *cpi,
                                 int use_highbitdepth,
 #endif
                                 int subsampling_x, int subsampling_y) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   if (!cpi->initial_width ||
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -3933,7 +3933,7 @@ static void check_initial_width(VP9_COMP *cpi,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 static void setup_denoiser_buffer(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   if (cpi->oxcf.noise_sensitivity > 0 &&
       !cpi->denoiser.frame_buffer_initialized) {
     vp10_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
@@ -3949,7 +3949,7 @@ static void setup_denoiser_buffer(VP9_COMP *cpi) {
 int vp10_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
   struct vpx_usec_timer timer;
   int res = 0;
   const int subsampling_x = sd->subsampling_x;
@@ -3993,7 +3993,7 @@ int vp10_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
 
 
 static int frame_is_reference(const VP9_COMP *cpi) {
-  const VP9_COMMON *cm = &cpi->common;
+  const VP10_COMMON *cm = &cpi->common;
 
   return cm->frame_type == KEY_FRAME ||
          cpi->refresh_last_frame ||
@@ -4104,7 +4104,7 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
   RATE_CONTROL *const rc = &cpi->rc;
   struct vpx_usec_timer  cmptimer;
@@ -4553,7 +4553,7 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 int vp10_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
                               vp10_ppflags_t *flags) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
 #if !CONFIG_VP9_POSTPROC
   (void)flags;
 #endif
@@ -4583,7 +4583,7 @@ int vp10_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
 
 int vp10_set_internal_size(VP9_COMP *cpi,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
   int hr = 0, hs = 0, vr = 0, vs = 0;
 
   if (horiz_mode > ONETWO || vert_mode > ONETWO)
@@ -4605,7 +4605,7 @@ int vp10_set_internal_size(VP9_COMP *cpi,
 
 int vp10_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
 #if CONFIG_VP9_HIGHBITDEPTH
   check_initial_width(cpi, cm->use_highbitdepth, 1, 1);
 #else

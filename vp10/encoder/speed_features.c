@@ -27,7 +27,7 @@ static int frame_is_boosted(const VP9_COMP *cpi) {
 // partly on the screen area that over which they propogate. Propogation is
 // limited by transform block size but the screen area take up by a given block
 // size will be larger for a small image format stretched to full screen.
-static BLOCK_SIZE set_partition_min_limit(VP9_COMMON *const cm) {
+static BLOCK_SIZE set_partition_min_limit(VP10_COMMON *const cm) {
   unsigned int screen_area = (cm->width * cm->height);
 
   // Select block size based on image format size.
@@ -46,7 +46,7 @@ static BLOCK_SIZE set_partition_min_limit(VP9_COMMON *const cm) {
 static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
                                                        SPEED_FEATURES *sf,
                                                        int speed) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   if (speed >= 1) {
     if (MIN(cm->width, cm->height) >= 720) {
@@ -108,7 +108,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 }
 
-static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
+static void set_good_speed_feature(VP9_COMP *cpi, VP10_COMMON *cm,
                                    SPEED_FEATURES *sf, int speed) {
   const int boosted = frame_is_boosted(cpi);
 
@@ -212,7 +212,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
 
 static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
     SPEED_FEATURES *sf, int speed) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   if (speed >= 1) {
     if (MIN(cm->width, cm->height) >= 720) {
@@ -248,7 +248,7 @@ static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
 
 static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
                                  int speed, vp9e_tune_content content) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   const int is_keyframe = cm->frame_type == KEY_FRAME;
   const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
   sf->static_segmentation = 0;
@@ -433,7 +433,7 @@ void vp10_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
 
 void vp10_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int i;

@@ -249,7 +249,7 @@ static int get_qzbin_factor(int q, vpx_bit_depth_t bit_depth) {
 }
 
 void vp10_init_quantizer(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   QUANTS *const quants = &cpi->quants;
   int i, q, quant;
 
@@ -305,7 +305,7 @@ void vp10_init_quantizer(VP9_COMP *cpi) {
 }
 
 void vp10_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   QUANTS *const quants = &cpi->quants;
   const int segment_id = xd->mi[0]->mbmi.segment_id;
@@ -352,7 +352,7 @@ void vp10_frame_init_quantizer(VP9_COMP *cpi) {
   vp10_init_plane_quantizers(cpi, &cpi->td.mb);
 }
 
-void vp10_set_quantizer(VP9_COMMON *cm, int q) {
+void vp10_set_quantizer(VP10_COMMON *cm, int q) {
   // quantizer has to be reinitialized with vp10_init_quantizer() if any
   // delta_q changes.
   cm->base_qindex = q;

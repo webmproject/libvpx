@@ -257,7 +257,7 @@ static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
 
 // Update the buffer level: leaky bucket model.
 static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
   // Non-viewable frames are a special case and are treated as pure overhead.
@@ -443,7 +443,7 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
 }
 
 void vp10_rc_update_rate_correction_factors(VP9_COMP *cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   int correction_factor = 100;
   double rate_correction_factor = get_rate_correction_factor(cpi);
   double adjustment_limit;
@@ -515,7 +515,7 @@ void vp10_rc_update_rate_correction_factors(VP9_COMP *cpi) {
 
 int vp10_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
                       int active_best_quality, int active_worst_quality) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   int q = active_worst_quality;
   int last_error = INT_MAX;
   int i, target_bits_per_mb, bits_per_mb_at_this_q;
@@ -627,7 +627,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   // If buffer is below the optimal level, let the active_worst_quality go from
   // ambient Q (at buffer = optimal level) to worst_quality level
   // (at buffer = critical level).
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *rc = &cpi->rc;
   // Buffer level below which we push active_worst to worst_quality.
   int64_t critical_level = rc->optimal_buffer_level >> 3;
@@ -680,7 +680,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
 static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
                                              int *bottom_index,
                                              int *top_index) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_cbr(cpi);
@@ -812,7 +812,7 @@ static int get_active_cq_level(const RATE_CONTROL *rc,
 static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                                              int *bottom_index,
                                              int *top_index) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int cq_level = get_active_cq_level(rc, oxcf);
@@ -970,7 +970,7 @@ int vp10_frame_type_qdelta(const VP9_COMP *cpi, int rf_level, int q) {
   };
   static const FRAME_TYPE frame_type[RATE_FACTOR_LEVELS] =
       {INTER_FRAME, INTER_FRAME, INTER_FRAME, INTER_FRAME, KEY_FRAME};
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   int qdelta = vp10_compute_qdelta_by_rate(&cpi->rc, frame_type[rf_level],
                                           q, rate_factor_deltas[rf_level],
                                           cm->bit_depth);
@@ -981,7 +981,7 @@ int vp10_frame_type_qdelta(const VP9_COMP *cpi, int rf_level, int q) {
 static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
                                          int *bottom_index,
                                          int *top_index) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
@@ -1210,7 +1210,7 @@ void vp10_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
 }
 
 void vp10_rc_set_frame_target(VP9_COMP *cpi, int target) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
   rc->this_frame_target = target;
@@ -1266,7 +1266,7 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
 }
 
 void vp10_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   const int qindex = cm->base_qindex;
@@ -1399,7 +1399,7 @@ static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
 }
 
 void vp10_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target;
   // TODO(yaowu): replace the "auto_key && 0" below with proper decision logic.
@@ -1529,7 +1529,7 @@ static void reset_temporal_layer_to_zero(VP9_COMP *cpi) {
 }
 
 void vp10_rc_get_svc_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target = rc->avg_frame_bandwidth;
   const int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
@@ -1591,7 +1591,7 @@ void vp10_rc_get_svc_params(VP9_COMP *cpi) {
 }
 
 void vp10_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target;
   // TODO(yaowu): replace the "auto_key && 0" below with proper decision logic.
@@ -1716,7 +1716,7 @@ void vp10_rc_set_gf_interval_range(const VP9_COMP *const cpi,
 }
 
 void vp10_rc_update_framerate(VP9_COMP *cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   int vbr_max_bits;
@@ -1799,7 +1799,7 @@ void vp10_set_target_rate(VP9_COMP *cpi) {
 // Check if we should resize, based on average QP from past x frames.
 // Only allow for resize at most one scale down for now, scaling factor is 2.
 int vp10_resize_one_pass_cbr(VP9_COMP *cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int resize_now = 0;
   cpi->resize_scale_num = 1;

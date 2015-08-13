@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-static INLINE int get_segment_id(const VP9_COMMON *cm,
+static INLINE int get_segment_id(const VP10_COMMON *cm,
                                  const uint8_t *segment_ids,
                                  BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
@@ -60,7 +60,7 @@ static INLINE int vp10_get_skip_context(const MACROBLOCKD *xd) {
   return above_skip + left_skip;
 }
 
-static INLINE vpx_prob vp10_get_skip_prob(const VP9_COMMON *cm,
+static INLINE vpx_prob vp10_get_skip_prob(const VP10_COMMON *cm,
                                          const MACROBLOCKD *xd) {
   return cm->fc->skip_probs[vp10_get_skip_context(xd)];
 }
@@ -69,22 +69,23 @@ int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
 
 int vp10_get_intra_inter_context(const MACROBLOCKD *xd);
 
-static INLINE vpx_prob vp10_get_intra_inter_prob(const VP9_COMMON *cm,
+static INLINE vpx_prob vp10_get_intra_inter_prob(const VP10_COMMON *cm,
                                                 const MACROBLOCKD *xd) {
   return cm->fc->intra_inter_prob[vp10_get_intra_inter_context(xd)];
 }
 
-int vp10_get_reference_mode_context(const VP9_COMMON *cm, const MACROBLOCKD *xd);
+int vp10_get_reference_mode_context(const VP10_COMMON *cm,
+                                    const MACROBLOCKD *xd);
 
-static INLINE vpx_prob vp10_get_reference_mode_prob(const VP9_COMMON *cm,
+static INLINE vpx_prob vp10_get_reference_mode_prob(const VP10_COMMON *cm,
                                                    const MACROBLOCKD *xd) {
   return cm->fc->comp_inter_prob[vp10_get_reference_mode_context(cm, xd)];
 }
 
-int vp10_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
+int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
                                     const MACROBLOCKD *xd);
 
-static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p(const VP9_COMMON *cm,
+static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p(const VP10_COMMON *cm,
                                                     const MACROBLOCKD *xd) {
   const int pred_context = vp10_get_pred_context_comp_ref_p(cm, xd);
   return cm->fc->comp_ref_prob[pred_context];
@@ -92,14 +93,14 @@ static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p(const VP9_COMMON *cm,
 
 int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
 
-static INLINE vpx_prob vp10_get_pred_prob_single_ref_p1(const VP9_COMMON *cm,
+static INLINE vpx_prob vp10_get_pred_prob_single_ref_p1(const VP10_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
   return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p1(xd)][0];
 }
 
 int vp10_get_pred_context_single_ref_p2(const MACROBLOCKD *xd);
 
-static INLINE vpx_prob vp10_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
+static INLINE vpx_prob vp10_get_pred_prob_single_ref_p2(const VP10_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
   return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p2(xd)][1];
 }

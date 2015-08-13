@@ -37,7 +37,7 @@ static int get_max_filter_level(const VP9_COMP *cpi) {
 static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
                                 VP9_COMP *const cpi,
                                 int filt_level, int partial_frame) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   int64_t filt_err;
 
   if (cpi->num_workers > 1)
@@ -66,7 +66,7 @@ static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
 
 static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
                                int partial_frame) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const struct loopfilter *const lf = &cm->lf;
   const int min_filter_level = 0;
   const int max_filter_level = get_max_filter_level(cpi);
@@ -148,7 +148,7 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 
 void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
                            LPF_PICK_METHOD method) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
 
   lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0

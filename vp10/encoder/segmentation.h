@@ -42,7 +42,7 @@ void vp10_clear_segdata(struct segmentation *seg,
 void vp10_set_segment_data(struct segmentation *seg, signed char *feature_data,
                           unsigned char abs_delta);
 
-void vp10_choose_segmap_coding_method(VP9_COMMON *cm, MACROBLOCKD *xd);
+void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd);
 
 void vp10_reset_segment_features(struct segmentation *seg);
 

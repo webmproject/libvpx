@@ -160,7 +160,7 @@ static void write_mv_update(const vpx_tree_index *tree,
     update_mv(w, branch_ct[i], &probs[i], MV_UPDATE_PROB);
 }
 
-void vp10_write_nmv_probs(VP9_COMMON *cm, int usehp, vpx_writer *w,
+void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vpx_writer *w,
                          nmv_context_counts *const counts) {
   int i, j;
   nmv_context *const mvc = &cm->fc->nmvc;

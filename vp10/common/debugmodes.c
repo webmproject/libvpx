@@ -13,7 +13,7 @@
 #include "vp10/common/blockd.h"
 #include "vp10/common/onyxc_int.h"
 
-static void log_frame_info(VP9_COMMON *cm, const char *str, FILE *f) {
+static void log_frame_info(VP10_COMMON *cm, const char *str, FILE *f) {
   fprintf(f, "%s", str);
   fprintf(f, "(Frame %d, Show:%d, Q:%d): \n", cm->current_video_frame,
           cm->show_frame, cm->base_qindex);
@@ -22,7 +22,7 @@ static void log_frame_info(VP9_COMMON *cm, const char *str, FILE *f) {
  * and uses the passed in member offset to print out the value of an integer
  * for each mbmi member value in the mi structure.
  */
-static void print_mi_data(VP9_COMMON *cm, FILE *file, const char *descriptor,
+static void print_mi_data(VP10_COMMON *cm, FILE *file, const char *descriptor,
                           size_t member_offset) {
   int mi_row, mi_col;
   MODE_INFO **mi = cm->mi_grid_visible;
@@ -45,7 +45,7 @@ static void print_mi_data(VP9_COMMON *cm, FILE *file, const char *descriptor,
   fprintf(file, "\n");
 }
 
-void vp10_print_modes_and_motion_vectors(VP9_COMMON *cm, const char *file) {
+void vp10_print_modes_and_motion_vectors(VP10_COMMON *cm, const char *file) {
   int mi_row;
   int mi_col;
   FILE *mvs = fopen(file, "a");

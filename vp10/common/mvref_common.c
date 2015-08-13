@@ -13,7 +13,7 @@
 
 // This function searches the neighbourhood of a given MB/SB
 // to try and find candidate reference vectors.
-static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                              MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                              int_mv *mv_ref_list,
                              int block, int mi_row, int mi_col,
@@ -146,7 +146,7 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
 }
 
-void vp10_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col,
@@ -179,7 +179,7 @@ void vp10_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
   *near_mv = mvlist[1];
 }
 
-void vp10_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
+void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
                                    int block, int ref, int mi_row, int mi_col,
                                    int_mv *nearest_mv, int_mv *near_mv,
                                    uint8_t *mode_context) {

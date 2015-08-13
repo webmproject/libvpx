@@ -26,7 +26,7 @@ static PREDICTION_MODE read_intra_mode(vpx_reader *r, const vpx_prob *p) {
   return (PREDICTION_MODE)vpx_read_tree(r, vp10_intra_mode_tree, p);
 }
 
-static PREDICTION_MODE read_intra_mode_y(VP9_COMMON *cm, MACROBLOCKD *xd,
+static PREDICTION_MODE read_intra_mode_y(VP10_COMMON *cm, MACROBLOCKD *xd,
                                          vpx_reader *r, int size_group) {
   const PREDICTION_MODE y_mode =
       read_intra_mode(r, cm->fc->y_mode_prob[size_group]);
@@ -36,7 +36,7 @@ static PREDICTION_MODE read_intra_mode_y(VP9_COMMON *cm, MACROBLOCKD *xd,
   return y_mode;
 }
 
-static PREDICTION_MODE read_intra_mode_uv(VP9_COMMON *cm, MACROBLOCKD *xd,
+static PREDICTION_MODE read_intra_mode_uv(VP10_COMMON *cm, MACROBLOCKD *xd,
                                           vpx_reader *r,
                                           PREDICTION_MODE y_mode) {
   const PREDICTION_MODE uv_mode = read_intra_mode(r,
@@ -47,7 +47,7 @@ static PREDICTION_MODE read_intra_mode_uv(VP9_COMMON *cm, MACROBLOCKD *xd,
   return uv_mode;
 }
 
-static PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, MACROBLOCKD *xd,
+static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
                                        vpx_reader *r, int ctx) {
   const int mode = vpx_read_tree(r, vp10_inter_mode_tree,
                                  cm->fc->inter_mode_probs[ctx]);
@@ -62,7 +62,7 @@ static int read_segment_id(vpx_reader *r, const struct segmentation *seg) {
   return vpx_read_tree(r, vp10_segment_tree, seg->tree_probs);
 }
 
-static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
+static TX_SIZE read_selected_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
                                      TX_SIZE max_tx_size, vpx_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
   const int ctx = get_tx_size_context(xd);
@@ -79,7 +79,7 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   return (TX_SIZE)tx_size;
 }
 
-static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
+static TX_SIZE read_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
                             int allow_select, vpx_reader *r) {
   TX_MODE tx_mode = cm->tx_mode;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
@@ -90,7 +90,7 @@ static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
     return MIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
 }
 
-static int dec_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
+static int dec_get_segment_id(const VP10_COMMON *cm, const uint8_t *segment_ids,
                               int mi_offset, int x_mis, int y_mis) {
   int x, y, segment_id = INT_MAX;
 
@@ -103,7 +103,7 @@ static int dec_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
   return segment_id;
 }
 
-static void set_segment_id(VP9_COMMON *cm, int mi_offset,
+static void set_segment_id(VP10_COMMON *cm, int mi_offset,
                            int x_mis, int y_mis, int segment_id) {
   int x, y;
 
@@ -114,7 +114,7 @@ static void set_segment_id(VP9_COMMON *cm, int mi_offset,
       cm->current_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
 }
 
-static void copy_segment_id(const VP9_COMMON *cm,
+static void copy_segment_id(const VP10_COMMON *cm,
                            const uint8_t *last_segment_ids,
                            uint8_t *current_segment_ids,
                            int mi_offset, int x_mis, int y_mis) {
@@ -126,7 +126,7 @@ static void copy_segment_id(const VP9_COMMON *cm,
           last_segment_ids[mi_offset + y * cm->mi_cols + x] : 0;
 }
 
-static int read_intra_segment_id(VP9_COMMON *const cm, int mi_offset,
+static int read_intra_segment_id(VP10_COMMON *const cm, int mi_offset,
                                  int x_mis, int y_mis,
                                  vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
@@ -146,7 +146,7 @@ static int read_intra_segment_id(VP9_COMMON *const cm, int mi_offset,
   return segment_id;
 }
 
-static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col, vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -184,7 +184,7 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   return segment_id;
 }
 
-static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
+static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd,
                      int segment_id, vpx_reader *r) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
@@ -198,7 +198,7 @@ static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
   }
 }
 
-static void read_intra_frame_mode_info(VP9_COMMON *const cm,
+static void read_intra_frame_mode_info(VP10_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        int mi_row, int mi_col, vpx_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
@@ -302,7 +302,7 @@ static INLINE void read_mv(vpx_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
-static REFERENCE_MODE read_block_reference_mode(VP9_COMMON *cm,
+static REFERENCE_MODE read_block_reference_mode(VP10_COMMON *cm,
                                                 const MACROBLOCKD *xd,
                                                 vpx_reader *r) {
   if (cm->reference_mode == REFERENCE_MODE_SELECT) {
@@ -319,7 +319,7 @@ static REFERENCE_MODE read_block_reference_mode(VP9_COMMON *cm,
 }
 
 // Read the referncence frame
-static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                             vpx_reader *r,
                             int segment_id, MV_REFERENCE_FRAME ref_frame[2]) {
   FRAME_CONTEXT *const fc = cm->fc;
@@ -364,7 +364,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 
 static INLINE INTERP_FILTER read_switchable_interp_filter(
-    VP9_COMMON *const cm, MACROBLOCKD *const xd,
+    VP10_COMMON *const cm, MACROBLOCKD *const xd,
     vpx_reader *r) {
   const int ctx = vp10_get_pred_context_switchable_interp(xd);
   const INTERP_FILTER type =
@@ -376,7 +376,7 @@ static INLINE INTERP_FILTER read_switchable_interp_filter(
   return type;
 }
 
-static void read_intra_block_mode_info(VP9_COMMON *const cm,
+static void read_intra_block_mode_info(VP10_COMMON *const cm,
                                        MACROBLOCKD *const xd, MODE_INFO *mi,
                                        vpx_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -416,7 +416,7 @@ static INLINE int is_mv_valid(const MV *mv) {
          mv->col > MV_LOW && mv->col < MV_UPP;
 }
 
-static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
+static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
                             PREDICTION_MODE mode,
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
@@ -460,7 +460,7 @@ static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
   return ret;
 }
 
-static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+static int read_is_inter_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                int segment_id, vpx_reader *r) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     return get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) != INTRA_FRAME;
@@ -484,7 +484,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        MODE_INFO *const mi,
                                        int mi_row, int mi_col, vpx_reader *r) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
@@ -586,7 +586,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
 static void read_inter_frame_mode_info(VP9Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        int mi_row, int mi_col, vpx_reader *r) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   int inter_block;
@@ -607,7 +607,7 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
 void vp10_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
                         int mi_row, int mi_col, vpx_reader *r,
                         int x_mis, int y_mis) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
   MV_REF* frame_mvs = cm->cur_frame->mvs + mi_row * cm->mi_cols + mi_col;
   int w, h;

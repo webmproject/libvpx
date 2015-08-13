@@ -139,8 +139,8 @@ void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
 #if CONFIG_MULTITHREAD
   FrameWorkerData *const src_worker_data = (FrameWorkerData *)src_worker->data1;
   FrameWorkerData *const dst_worker_data = (FrameWorkerData *)dst_worker->data1;
-  VP9_COMMON *const src_cm = &src_worker_data->pbi->common;
-  VP9_COMMON *const dst_cm = &dst_worker_data->pbi->common;
+  VP10_COMMON *const src_cm = &src_worker_data->pbi->common;
+  VP10_COMMON *const dst_cm = &dst_worker_data->pbi->common;
   int i;
 
   // Wait until source frame's context is ready.

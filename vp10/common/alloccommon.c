@@ -17,7 +17,7 @@
 #include "vp10/common/entropymv.h"
 #include "vp10/common/onyxc_int.h"
 
-void vp10_set_mb_mi(VP9_COMMON *cm, int width, int height) {
+void vp10_set_mb_mi(VP10_COMMON *cm, int width, int height) {
   const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
 
@@ -30,7 +30,7 @@ void vp10_set_mb_mi(VP9_COMMON *cm, int width, int height) {
   cm->MBs = cm->mb_rows * cm->mb_cols;
 }
 
-static int alloc_seg_map(VP9_COMMON *cm, int seg_map_size) {
+static int alloc_seg_map(VP10_COMMON *cm, int seg_map_size) {
   int i;
 
   for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
@@ -51,7 +51,7 @@ static int alloc_seg_map(VP9_COMMON *cm, int seg_map_size) {
   return 0;
 }
 
-static void free_seg_map(VP9_COMMON *cm) {
+static void free_seg_map(VP10_COMMON *cm) {
   int i;
 
   for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
@@ -81,7 +81,7 @@ void vp10_free_ref_frame_buffers(BufferPool *pool) {
   }
 }
 
-void vp10_free_postproc_buffers(VP9_COMMON *cm) {
+void vp10_free_postproc_buffers(VP10_COMMON *cm) {
 #if CONFIG_VP9_POSTPROC
   vp9_free_frame_buffer(&cm->post_proc_buffer);
   vp9_free_frame_buffer(&cm->post_proc_buffer_int);
@@ -90,7 +90,7 @@ void vp10_free_postproc_buffers(VP9_COMMON *cm) {
 #endif
 }
 
-void vp10_free_context_buffers(VP9_COMMON *cm) {
+void vp10_free_context_buffers(VP10_COMMON *cm) {
   cm->free_mi(cm);
   free_seg_map(cm);
   vpx_free(cm->above_context);
@@ -99,7 +99,7 @@ void vp10_free_context_buffers(VP9_COMMON *cm) {
   cm->above_seg_context = NULL;
 }
 
-int vp10_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
+int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
   int new_mi_size;
 
   vp10_set_mb_mi(cm, width, height);
@@ -138,7 +138,7 @@ int vp10_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
   return 1;
 }
 
-void vp10_remove_common(VP9_COMMON *cm) {
+void vp10_remove_common(VP10_COMMON *cm) {
   vp10_free_context_buffers(cm);
 
   vpx_free(cm->fc);
@@ -147,13 +147,13 @@ void vp10_remove_common(VP9_COMMON *cm) {
   cm->frame_contexts = NULL;
 }
 
-void vp10_init_context_buffers(VP9_COMMON *cm) {
+void vp10_init_context_buffers(VP10_COMMON *cm) {
   cm->setup_mi(cm);
   if (cm->last_frame_seg_map && !cm->frame_parallel_decode)
     memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
 }
 
-void vp10_swap_current_and_last_seg_map(VP9_COMMON *cm) {
+void vp10_swap_current_and_last_seg_map(VP10_COMMON *cm) {
   // Swap indices.
   const int tmp = cm->seg_map_idx;
   cm->seg_map_idx = cm->prev_seg_map_idx;

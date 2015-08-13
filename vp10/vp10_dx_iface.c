@@ -281,7 +281,7 @@ static void init_buffer_callbacks(vpx_codec_alg_priv_t *ctx) {
   for (i = 0; i < ctx->num_frame_workers; ++i) {
     VPxWorker *const worker = &ctx->frame_workers[i];
     FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
-    VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+    VP10_COMMON *const cm = &frame_worker_data->pbi->common;
     BufferPool *const pool = cm->buffer_pool;
 
     cm->new_fb_idx = INVALID_IDX;
@@ -567,7 +567,7 @@ static void wait_worker_and_cache_frame(vpx_codec_alg_priv_t *ctx) {
   check_resync(ctx, frame_worker_data->pbi);
 
   if (vp10_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
-    VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+    VP10_COMMON *const cm = &frame_worker_data->pbi->common;
     RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
     ctx->frame_cache[ctx->frame_cache_write].fb_idx = cm->new_fb_idx;
     yuvconfig2image(&ctx->frame_cache[ctx->frame_cache_write].img, &sd,
@@ -764,7 +764,7 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
           check_resync(ctx, frame_worker_data->pbi);
         }
         if (vp10_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
-          VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+          VP10_COMMON *const cm = &frame_worker_data->pbi->common;
           RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
           release_last_output_frame(ctx);
           ctx->last_show_frame = frame_worker_data->pbi->common.new_fb_idx;
@@ -965,7 +965,7 @@ static vpx_codec_err_t ctrl_get_frame_size(vpx_codec_alg_priv_t *ctx,
       VPxWorker *const worker = ctx->frame_workers;
       FrameWorkerData *const frame_worker_data =
           (FrameWorkerData *)worker->data1;
-      const VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+      const VP10_COMMON *const cm = &frame_worker_data->pbi->common;
       frame_size[0] = cm->width;
       frame_size[1] = cm->height;
       return VPX_CODEC_OK;
@@ -992,7 +992,7 @@ static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
       VPxWorker *const worker = ctx->frame_workers;
       FrameWorkerData *const frame_worker_data =
           (FrameWorkerData *)worker->data1;
-      const VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+      const VP10_COMMON *const cm = &frame_worker_data->pbi->common;
       display_size[0] = cm->display_width;
       display_size[1] = cm->display_height;
       return VPX_CODEC_OK;
@@ -1013,7 +1013,7 @@ static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
     if (worker) {
       FrameWorkerData *const frame_worker_data =
           (FrameWorkerData *)worker->data1;
-      const VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+      const VP10_COMMON *const cm = &frame_worker_data->pbi->common;
       *bit_depth = cm->bit_depth;
       return VPX_CODEC_OK;
     } else {

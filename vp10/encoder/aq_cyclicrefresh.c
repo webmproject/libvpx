@@ -85,7 +85,7 @@ void vp10_cyclic_refresh_free(CYCLIC_REFRESH *cr) {
 }
 
 // Check if we should turn off cyclic refresh based on bitrate condition.
-static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
+static int apply_cyclic_refresh_bitrate(const VP10_COMMON *cm,
                                         const RATE_CONTROL *rc) {
   // Turn off cyclic refresh if bits available per frame is not sufficiently
   // larger than bit cost of segmentation. Segment map bit cost should scale
@@ -155,7 +155,7 @@ static int compute_deltaq(const VP9_COMP *cpi, int q, double rate_factor) {
 // (called from rc_update_rate_correction_factors()).
 int vp10_cyclic_refresh_estimate_bits_at_q(const VP9_COMP *cpi,
                                           double correction_factor) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   int estimated_bits;
   int mbs = cm->MBs;
@@ -186,7 +186,7 @@ int vp10_cyclic_refresh_estimate_bits_at_q(const VP9_COMP *cpi,
 // to 1/CR_SEGMENT_ID_BOOST1 (refresh) for each superblock, prior to encoding.
 int vp10_cyclic_refresh_rc_bits_per_mb(const VP9_COMP *cpi, int i,
                                       double correction_factor) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   int bits_per_mb;
   int num8x8bl = cm->MBs << 2;
@@ -216,7 +216,7 @@ void vp10_cyclic_refresh_update_segment(VP9_COMP *const cpi,
                                        int64_t rate,
                                        int64_t dist,
                                        int skip) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
@@ -274,7 +274,7 @@ void vp10_cyclic_refresh_update_segment(VP9_COMP *const cpi,
 
 // Update the actual number of blocks that were applied the segment delta q.
 void vp10_cyclic_refresh_postencode(VP9_COMP *const cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   unsigned char *const seg_map = cpi->segmentation_map;
   int mi_row, mi_col;
@@ -309,7 +309,7 @@ void vp10_cyclic_refresh_set_golden_update(VP9_COMP *const cpi) {
 // golden reference is to be updated check if we should NOT update the golden
 // ref.
 void vp10_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   int mi_row, mi_col;
   double fraction_low = 0.0;
@@ -381,7 +381,7 @@ void vp10_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
 // Blocks labeled as BOOST1 may later get set to BOOST2 (during the
 // encoding of the superblock).
 static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   unsigned char *const seg_map = cpi->segmentation_map;
   int i, block_count, bl_index, sb_rows, sb_cols, sbs_in_frame;
@@ -451,7 +451,7 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
 // Set cyclic refresh parameters.
 void vp10_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   cr->percent_refresh = 10;
   cr->max_qdelta_perc = 50;
@@ -476,7 +476,7 @@ void vp10_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
 
 // Setup cyclic background refresh: set delta q and segmentation map.
 void vp10_cyclic_refresh_setup(VP9_COMP *const cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   struct segmentation *const seg = &cm->seg;
@@ -560,7 +560,7 @@ int vp10_cyclic_refresh_get_rdmult(const CYCLIC_REFRESH *cr) {
 }
 
 void vp10_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   memset(cr->map, 0, cm->mi_rows * cm->mi_cols);
   cr->sb_index = 0;

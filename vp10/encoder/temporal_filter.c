@@ -652,7 +652,7 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
 }
 
 void vp10_temporal_filter(VP9_COMP *cpi, int distance) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int frame;

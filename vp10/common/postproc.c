@@ -612,7 +612,7 @@ void vp10_plane_add_noise_c(uint8_t *start, char *noise,
   }
 }
 
-static void swap_mi_and_prev_mi(VP9_COMMON *cm) {
+static void swap_mi_and_prev_mi(VP10_COMMON *cm) {
   // Current mip will be the prev_mip for the next frame.
   MODE_INFO *temp = cm->postproc_state.prev_mip;
   cm->postproc_state.prev_mip = cm->mip;
