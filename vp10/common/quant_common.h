@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_QUANT_COMMON_H_
-#define VP9_COMMON_VP9_QUANT_COMMON_H_
+#ifndef VP10_COMMON_QUANT_COMMON_H_
+#define VP10_COMMON_QUANT_COMMON_H_
 
 #include "vpx/vpx_codec.h"
 #include "vp10/common/seg_common.h"
@@ -33,4 +33,4 @@ int vp10_get_qindex(const struct segmentation *seg, int segment_id,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_QUANT_COMMON_H_
+#endif  // VP10_COMMON_QUANT_COMMON_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_LOOPFILTER_THREAD_H_
-#define VP9_COMMON_VP9_LOOPFILTER_THREAD_H_
+#ifndef VP10_COMMON_LOOPFILTER_THREAD_H_
+#define VP10_COMMON_LOOPFILTER_THREAD_H_
 #include "./vpx_config.h"
 #include "vp10/common/loopfilter.h"
 #include "vpx_util/vpx_thread.h"
@@ -54,4 +54,4 @@ void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
 void vp10_accumulate_frame_counts(struct VP9Common *cm,
                                  struct FRAME_COUNTS *counts, int is_dec);
 
-#endif  // VP9_COMMON_VP9_LOOPFILTER_THREAD_H_
+#endif  // VP10_COMMON_LOOPFILTER_THREAD_H_

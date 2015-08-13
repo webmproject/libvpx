@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_BLOCK_H_
-#define VP9_ENCODER_VP9_BLOCK_H_
+#ifndef VP10_ENCODER_BLOCK_H_
+#define VP10_ENCODER_BLOCK_H_
 
 #include "vp10/common/entropymv.h"
 #include "vp10/common/entropy.h"
@@ -147,4 +147,4 @@ struct macroblock {
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_BLOCK_H_
+#endif  // VP10_ENCODER_BLOCK_H_

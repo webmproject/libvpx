@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_SPEED_FEATURES_H_
-#define VP9_ENCODER_VP9_SPEED_FEATURES_H_
+#ifndef VP10_ENCODER_SPEED_FEATURES_H_
+#define VP10_ENCODER_SPEED_FEATURES_H_
 
 #include "vp10/common/enums.h"
 
@@ -429,4 +429,4 @@ void vp10_set_speed_features_framesize_dependent(struct VP9_COMP *cpi);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_SPEED_FEATURES_H_
+#endif  // VP10_ENCODER_SPEED_FEATURES_H_

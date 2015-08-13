@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_ENTROPYMODE_H_
-#define VP9_COMMON_VP9_ENTROPYMODE_H_
+#ifndef VP10_COMMON_ENTROPYMODE_H_
+#define VP10_COMMON_ENTROPYMODE_H_
 
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymv.h"
@@ -104,4 +104,4 @@ void vp10_tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_ENTROPYMODE_H_
+#endif  // VP10_COMMON_ENTROPYMODE_H_

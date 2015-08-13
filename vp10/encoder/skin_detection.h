@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_SKIN_MAP_H_
-#define VP9_ENCODER_VP9_SKIN_MAP_H_
+#ifndef VP10_ENCODER_SKIN_MAP_H_
+#define VP10_ENCODER_SKIN_MAP_H_
 
 #include "vp10/common/blockd.h"
 
@@ -32,4 +32,4 @@ void vp10_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_SKIN_MAP_H_
+#endif  // VP10_ENCODER_SKIN_MAP_H_

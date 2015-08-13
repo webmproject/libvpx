@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_FIRSTPASS_H_
-#define VP9_ENCODER_VP9_FIRSTPASS_H_
+#ifndef VP10_ENCODER_FIRSTPASS_H_
+#define VP10_ENCODER_FIRSTPASS_H_
 
 #include "vp10/encoder/lookahead.h"
 #include "vp10/encoder/ratectrl.h"
@@ -163,4 +163,4 @@ void vp10_calculate_coded_size(struct VP9_COMP *cpi,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_FIRSTPASS_H_
+#endif  // VP10_ENCODER_FIRSTPASS_H_

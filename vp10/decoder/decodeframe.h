@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_DECODER_VP9_DECODEFRAME_H_
-#define VP9_DECODER_VP9_DECODEFRAME_H_
+#ifndef VP10_DECODER_DECODEFRAME_H_
+#define VP10_DECODER_DECODEFRAME_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,4 +32,4 @@ void vp10_decode_frame(struct VP9Decoder *pbi,
 }  // extern "C"
 #endif
 
-#endif  // VP9_DECODER_VP9_DECODEFRAME_H_
+#endif  // VP10_DECODER_DECODEFRAME_H_

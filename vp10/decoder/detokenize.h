@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_DECODER_VP9_DETOKENIZE_H_
-#define VP9_DECODER_VP9_DETOKENIZE_H_
+#ifndef VP10_DECODER_DETOKENIZE_H_
+#define VP10_DECODER_DETOKENIZE_H_
 
 #include "vpx_dsp/bitreader.h"
 #include "vp10/decoder/decoder.h"
@@ -30,4 +30,4 @@ int vp10_decode_block_tokens(MACROBLOCKD *xd,
 }  // extern "C"
 #endif
 
-#endif  // VP9_DECODER_VP9_DETOKENIZE_H_
+#endif  // VP10_DECODER_DETOKENIZE_H_

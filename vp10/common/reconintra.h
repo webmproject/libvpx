@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_RECONINTRA_H_
-#define VP9_COMMON_VP9_RECONINTRA_H_
+#ifndef VP10_COMMON_RECONINTRA_H_
+#define VP10_COMMON_RECONINTRA_H_
 
 #include "vpx/vpx_integer.h"
 #include "vp10/common/blockd.h"
@@ -29,4 +29,4 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_RECONINTRA_H_
+#endif  // VP10_COMMON_RECONINTRA_H_

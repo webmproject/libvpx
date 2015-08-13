@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_COMMON_VP9_ENTROPYMV_H_
-#define VP9_COMMON_VP9_ENTROPYMV_H_
+#ifndef VP10_COMMON_ENTROPYMV_H_
+#define VP10_COMMON_ENTROPYMV_H_
 
 #include "./vpx_config.h"
 
@@ -130,4 +130,4 @@ void vp10_inc_mv(const MV *mv, nmv_context_counts *mvctx);
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_ENTROPYMV_H_
+#endif  // VP10_COMMON_ENTROPYMV_H_

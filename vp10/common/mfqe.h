@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_MFQE_H_
-#define VP9_COMMON_VP9_MFQE_H_
+#ifndef VP10_COMMON_MFQE_H_
+#define VP10_COMMON_MFQE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,4 +28,4 @@ void vp10_mfqe(struct VP9Common *cm);
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_MFQE_H_
+#endif  // VP10_COMMON_MFQE_H_

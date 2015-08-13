@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_DECODER_VP9_DTHREAD_H_
-#define VP9_DECODER_VP9_DTHREAD_H_
+#ifndef VP10_DECODER_DTHREAD_H_
+#define VP10_DECODER_DTHREAD_H_
 
 #include "./vpx_config.h"
 #include "vpx_util/vpx_thread.h"
@@ -63,4 +63,4 @@ void vp10_frameworker_broadcast(RefCntBuffer *const buf, int row);
 void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
                                   VPxWorker *const src_worker);
 
-#endif  // VP9_DECODER_VP9_DTHREAD_H_
+#endif  // VP10_DECODER_DTHREAD_H_

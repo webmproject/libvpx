@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_TEXTBLIT_H_
-#define VP9_COMMON_VP9_TEXTBLIT_H_
+#ifndef VP10_COMMON_TEXTBLIT_H_
+#define VP10_COMMON_TEXTBLIT_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,4 +24,4 @@ void vp10_blit_line(int x0, int x1, int y0, int y1, unsigned char *image,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_TEXTBLIT_H_
+#endif  // VP10_COMMON_TEXTBLIT_H_

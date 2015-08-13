@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_CONTEXT_TREE_H_
-#define VP9_ENCODER_VP9_CONTEXT_TREE_H_
+#ifndef VP10_ENCODER_CONTEXT_TREE_H_
+#define VP10_ENCODER_CONTEXT_TREE_H_
 
 #include "vp10/common/blockd.h"
 #include "vp10/encoder/block.h"
@@ -84,4 +84,4 @@ typedef struct PC_TREE {
 void vp10_setup_pc_tree(struct VP9Common *cm, struct ThreadData *td);
 void vp10_free_pc_tree(struct ThreadData *td);
 
-#endif /* VP9_ENCODER_VP9_CONTEXT_TREE_H_ */
+#endif /* VP10_ENCODER_CONTEXT_TREE_H_ */

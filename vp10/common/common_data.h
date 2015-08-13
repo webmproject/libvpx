@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_COMMON_DATA_H_
-#define VP9_COMMON_VP9_COMMON_DATA_H_
+#ifndef VP10_COMMON_COMMON_DATA_H_
+#define VP10_COMMON_COMMON_DATA_H_
 
 #include "vp10/common/enums.h"
 #include "vpx/vpx_integer.h"
@@ -171,4 +171,4 @@ static const struct {
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_COMMON_DATA_H_
+#endif  // VP10_COMMON_COMMON_DATA_H_

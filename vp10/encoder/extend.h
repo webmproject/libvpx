@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_EXTEND_H_
-#define VP9_ENCODER_VP9_EXTEND_H_
+#ifndef VP10_ENCODER_EXTEND_H_
+#define VP10_ENCODER_EXTEND_H_
 
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
@@ -30,4 +30,4 @@ void vp10_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_EXTEND_H_
+#endif  // VP10_ENCODER_EXTEND_H_

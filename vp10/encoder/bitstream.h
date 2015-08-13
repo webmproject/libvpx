@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_BITSTREAM_H_
-#define VP9_ENCODER_VP9_BITSTREAM_H_
+#ifndef VP10_ENCODER_BITSTREAM_H_
+#define VP10_ENCODER_BITSTREAM_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +34,4 @@ static INLINE int vp10_preserve_existing_gf(VP9_COMP *cpi) {
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_BITSTREAM_H_
+#endif  // VP10_ENCODER_BITSTREAM_H_

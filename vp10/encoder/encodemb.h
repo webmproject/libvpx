@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_ENCODEMB_H_
-#define VP9_ENCODER_VP9_ENCODEMB_H_
+#ifndef VP10_ENCODER_ENCODEMB_H_
+#define VP10_ENCODER_ENCODEMB_H_
 
 #include "./vpx_config.h"
 #include "vp10/encoder/block.h"
@@ -43,4 +43,4 @@ void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_ENCODEMB_H_
+#endif  // VP10_ENCODER_ENCODEMB_H_

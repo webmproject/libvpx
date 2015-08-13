@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_ETHREAD_H_
-#define VP9_ENCODER_VP9_ETHREAD_H_
+#ifndef VP10_ENCODER_ETHREAD_H_
+#define VP10_ENCODER_ETHREAD_H_
 
 struct VP9_COMP;
 struct ThreadData;
@@ -22,4 +22,4 @@ typedef struct EncWorkerData {
 
 void vp10_encode_tiles_mt(struct VP9_COMP *cpi);
 
-#endif  // VP9_ENCODER_VP9_ETHREAD_H_
+#endif  // VP10_ENCODER_ETHREAD_H_

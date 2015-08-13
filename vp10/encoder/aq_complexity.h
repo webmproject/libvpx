@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_AQ_COMPLEXITY_H_
-#define VP9_ENCODER_VP9_AQ_COMPLEXITY_H_
+#ifndef VP10_ENCODER_AQ_COMPLEXITY_H_
+#define VP10_ENCODER_AQ_COMPLEXITY_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +34,4 @@ void vp10_setup_in_frame_q_adj(struct VP9_COMP *cpi);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_AQ_COMPLEXITY_H_
+#endif  // VP10_ENCODER_AQ_COMPLEXITY_H_

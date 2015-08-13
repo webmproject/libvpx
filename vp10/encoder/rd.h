@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_RD_H_
-#define VP9_ENCODER_VP9_RD_H_
+#ifndef VP10_ENCODER_RD_H_
+#define VP10_ENCODER_RD_H_
 
 #include <limits.h>
 
@@ -185,4 +185,4 @@ int vp10_get_intra_cost_penalty(int qindex, int qdelta,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_RD_H_
+#endif  // VP10_ENCODER_RD_H_

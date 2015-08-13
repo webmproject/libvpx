@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_RDOPT_H_
-#define VP9_ENCODER_VP9_RDOPT_H_
+#ifndef VP10_ENCODER_RDOPT_H_
+#define VP10_ENCODER_RDOPT_H_
 
 #include "vp10/common/blockd.h"
 
@@ -71,4 +71,4 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_RDOPT_H_
+#endif  // VP10_ENCODER_RDOPT_H_

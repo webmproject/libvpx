@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VP9_VP9_IFACE_COMMON_H_
-#define VP9_VP9_IFACE_COMMON_H_
+#ifndef VP10_VP10_IFACE_COMMON_H_
+#define VP10_VP10_IFACE_COMMON_H_
 
 #include "vpx_ports/mem.h"
 
@@ -127,4 +127,4 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   return VPX_CODEC_OK;
 }
 
-#endif  // VP9_VP9_IFACE_COMMON_H_
+#endif  // VP10_VP10_IFACE_COMMON_H_

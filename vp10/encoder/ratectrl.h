@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_RATECTRL_H_
-#define VP9_ENCODER_VP9_RATECTRL_H_
+#ifndef VP10_ENCODER_RATECTRL_H_
+#define VP10_ENCODER_RATECTRL_H_
 
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
@@ -260,4 +260,4 @@ int vp10_resize_one_pass_cbr(struct VP9_COMP *cpi);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_RATECTRL_H_
+#endif  // VP10_ENCODER_RATECTRL_H_

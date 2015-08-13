@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_ENTROPY_H_
-#define VP9_COMMON_VP9_ENTROPY_H_
+#ifndef VP10_COMMON_ENTROPY_H_
+#define VP10_COMMON_ENTROPY_H_
 
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/prob.h"
@@ -212,4 +212,4 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_ENTROPY_H_
+#endif  // VP10_COMMON_ENTROPY_H_
