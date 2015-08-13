@@ -44,7 +44,7 @@ static int get_aq_c_strength(int q_index, vpx_bit_depth_t bit_depth) {
 }
 
 void vp10_setup_in_frame_q_adj(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   struct segmentation *const seg = &cm->seg;
 
   // Make SURE use of floating point in this function is safe.
@@ -112,7 +112,7 @@ void vp10_setup_in_frame_q_adj(VP9_COMP *cpi) {
 // bits for the block vs a target average and its spatial complexity.
 void vp10_caq_select_segment(VP9_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
                             int mi_row, int mi_col, int projected_rate) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];

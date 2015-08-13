@@ -48,14 +48,14 @@ static void initialize_dec(void) {
   }
 }
 
-static void vp10_dec_setup_mi(VP9_COMMON *cm) {
+static void vp10_dec_setup_mi(VP10_COMMON *cm) {
   cm->mi = cm->mip + cm->mi_stride + 1;
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
   memset(cm->mi_grid_base, 0,
          cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
-static int vp10_dec_alloc_mi(VP9_COMMON *cm, int mi_size) {
+static int vp10_dec_alloc_mi(VP10_COMMON *cm, int mi_size) {
   cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
   if (!cm->mip)
     return 1;
@@ -66,7 +66,7 @@ static int vp10_dec_alloc_mi(VP9_COMMON *cm, int mi_size) {
   return 0;
 }
 
-static void vp10_dec_free_mi(VP9_COMMON *cm) {
+static void vp10_dec_free_mi(VP10_COMMON *cm) {
   vpx_free(cm->mip);
   cm->mip = NULL;
   vpx_free(cm->mi_grid_base);
@@ -75,7 +75,7 @@ static void vp10_dec_free_mi(VP9_COMMON *cm) {
 
 VP9Decoder *vp10_decoder_create(BufferPool *const pool) {
   VP9Decoder *volatile const pbi = vpx_memalign(32, sizeof(*pbi));
-  VP9_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
+  VP10_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
 
   if (!cm)
     return NULL;
@@ -153,7 +153,7 @@ static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
 vpx_codec_err_t vp10_copy_reference_dec(VP9Decoder *pbi,
                                        VP9_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd) {
-  VP9_COMMON *cm = &pbi->common;
+  VP10_COMMON *cm = &pbi->common;
 
   /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
    * encoder is using the frame buffers for. This is just a stub to keep the
@@ -181,7 +181,7 @@ vpx_codec_err_t vp10_copy_reference_dec(VP9Decoder *pbi,
 }
 
 
-vpx_codec_err_t vp10_set_reference_dec(VP9_COMMON *cm,
+vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
                                       VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
   RefBuffer *ref_buf = NULL;
@@ -230,7 +230,7 @@ vpx_codec_err_t vp10_set_reference_dec(VP9_COMMON *cm,
 /* If any buffer updating is signaled it should be done here. */
 static void swap_frame_buffers(VP9Decoder *pbi) {
   int ref_index = 0, mask;
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
@@ -271,7 +271,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
 
 int vp10_receive_compressed_data(VP9Decoder *pbi,
                                 size_t size, const uint8_t **psource) {
-  VP9_COMMON *volatile const cm = &pbi->common;
+  VP10_COMMON *volatile const cm = &pbi->common;
   BufferPool *volatile const pool = cm->buffer_pool;
   RefCntBuffer *volatile const frame_bufs = cm->buffer_pool->frame_bufs;
   const uint8_t *source = *psource;
@@ -412,7 +412,7 @@ int vp10_receive_compressed_data(VP9Decoder *pbi,
 
 int vp10_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
                       vp10_ppflags_t *flags) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   int ret = -1;
 #if !CONFIG_VP9_POSTPROC
   (void)*flags;

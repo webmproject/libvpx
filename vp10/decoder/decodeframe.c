@@ -44,7 +44,7 @@
 
 #define MAX_VP9_HEADER_SIZE 80
 
-static int is_compound_reference_allowed(const VP9_COMMON *cm) {
+static int is_compound_reference_allowed(const VP10_COMMON *cm) {
   int i;
   for (i = 1; i < REFS_PER_FRAME; ++i)
     if (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1])
@@ -53,7 +53,7 @@ static int is_compound_reference_allowed(const VP9_COMMON *cm) {
   return 0;
 }
 
-static void setup_compound_reference_mode(VP9_COMMON *cm) {
+static void setup_compound_reference_mode(VP10_COMMON *cm) {
   if (cm->ref_frame_sign_bias[LAST_FRAME] ==
           cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
     cm->comp_fixed_ref = ALTREF_FRAME;
@@ -117,7 +117,7 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
       vp10_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
 }
 
-static REFERENCE_MODE read_frame_reference_mode(const VP9_COMMON *cm,
+static REFERENCE_MODE read_frame_reference_mode(const VP10_COMMON *cm,
                                                 vpx_reader *r) {
   if (is_compound_reference_allowed(cm)) {
     return vpx_read_bit(r) ? (vpx_read_bit(r) ? REFERENCE_MODE_SELECT
@@ -128,7 +128,7 @@ static REFERENCE_MODE read_frame_reference_mode(const VP9_COMMON *cm,
   }
 }
 
-static void read_frame_reference_mode_probs(VP9_COMMON *cm, vpx_reader *r) {
+static void read_frame_reference_mode_probs(VP10_COMMON *cm, vpx_reader *r) {
   FRAME_CONTEXT *const fc = cm->fc;
   int i;
 
@@ -781,7 +781,7 @@ static void set_plane_n4(MACROBLOCKD *const xd, int bw, int bh, int bwl,
   }
 }
 
-static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+static MB_MODE_INFO *set_offsets(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
                                  int bw, int bh, int x_mis, int y_mis,
                                  int bwl, int bhl) {
@@ -815,7 +815,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
                          int mi_row, int mi_col,
                          vpx_reader *r, BLOCK_SIZE bsize,
                          int bwl, int bhl) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   const int less8x8 = bsize < BLOCK_8X8;
   const int bw = 1 << (bwl - 1);
   const int bh = 1 << (bhl - 1);
@@ -950,7 +950,7 @@ static PARTITION_TYPE read_partition(MACROBLOCKD *xd, int mi_row, int mi_col,
 static void decode_partition(VP9Decoder *const pbi, MACROBLOCKD *const xd,
                              int mi_row, int mi_col,
                              vpx_reader* r, BLOCK_SIZE bsize, int n4x4_l2) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   const int n8x8_l2 = n4x4_l2 - 1;
   const int num_8x8_wh = 1 << n8x8_l2;
   const int hbs = num_8x8_wh >> 1;
@@ -1127,7 +1127,7 @@ static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
   return vpx_rb_read_bit(rb) ? vpx_rb_read_signed_literal(rb, 4) : 0;
 }
 
-static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+static void setup_quantization(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                struct vpx_read_bit_buffer *rb) {
   cm->base_qindex = vpx_rb_read_literal(rb, QINDEX_BITS);
   cm->y_dc_delta_q = read_delta_q(rb);
@@ -1144,7 +1144,7 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 #endif
 }
 
-static void setup_segmentation_dequant(VP9_COMMON *const cm) {
+static void setup_segmentation_dequant(VP10_COMMON *const cm) {
   // Build y/uv dequant values based on segmentation.
   if (cm->seg.enabled) {
     int i;
@@ -1180,14 +1180,15 @@ static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
                              : literal_to_filter[vpx_rb_read_literal(rb, 2)];
 }
 
-static void setup_display_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+static void setup_display_size(VP10_COMMON *cm,
+                               struct vpx_read_bit_buffer *rb) {
   cm->display_width = cm->width;
   cm->display_height = cm->height;
   if (vpx_rb_read_bit(rb))
     vp10_read_frame_size(rb, &cm->display_width, &cm->display_height);
 }
 
-static void resize_mv_buffer(VP9_COMMON *cm) {
+static void resize_mv_buffer(VP10_COMMON *cm) {
   vpx_free(cm->cur_frame->mvs);
   cm->cur_frame->mi_rows = cm->mi_rows;
   cm->cur_frame->mi_cols = cm->mi_cols;
@@ -1195,7 +1196,7 @@ static void resize_mv_buffer(VP9_COMMON *cm) {
                                             sizeof(*cm->cur_frame->mvs));
 }
 
-static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
+static void resize_context_buffers(VP10_COMMON *cm, int width, int height) {
 #if CONFIG_SIZE_LIMIT
   if (width > DECODE_WIDTH_LIMIT || height > DECODE_HEIGHT_LIMIT)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
@@ -1227,7 +1228,7 @@ static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
   }
 }
 
-static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   int width, height;
   BufferPool *const pool = cm->buffer_pool;
   vp10_read_frame_size(rb, &width, &height);
@@ -1265,7 +1266,7 @@ static INLINE int valid_ref_frame_img_fmt(vpx_bit_depth_t ref_bit_depth,
          ref_yss == this_yss;
 }
 
-static void setup_frame_size_with_refs(VP9_COMMON *cm,
+static void setup_frame_size_with_refs(VP10_COMMON *cm,
                                        struct vpx_read_bit_buffer *rb) {
   int width, height;
   int found = 0, i;
@@ -1338,7 +1339,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   pool->frame_bufs[cm->new_fb_idx].buf.color_space = cm->color_space;
 }
 
-static void setup_tile_info(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+static void setup_tile_info(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   int min_log2_tile_cols, max_log2_tile_cols, max_ones;
   vp10_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
@@ -1421,7 +1422,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
 static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,
                                    const uint8_t *data_end) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -1597,7 +1598,7 @@ static int compare_tile_buffers(const void *a, const void *b) {
 static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
                                       const uint8_t *data,
                                       const uint8_t *data_end) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   const uint8_t *bit_reader_end = NULL;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
@@ -1754,12 +1755,12 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 }
 
 static void error_handler(void *data) {
-  VP9_COMMON *const cm = (VP9_COMMON *)data;
+  VP10_COMMON *const cm = (VP10_COMMON *)data;
   vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
 }
 
 static void read_bitdepth_colorspace_sampling(
-    VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+    VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
     cm->bit_depth = vpx_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1803,7 +1804,7 @@ static void read_bitdepth_colorspace_sampling(
 
 static size_t read_uncompressed_header(VP9Decoder *pbi,
                                        struct vpx_read_bit_buffer *rb) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = pool->frame_bufs;
   int i, mask, ref_index = 0;
@@ -2005,7 +2006,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
 static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   FRAME_CONTEXT *const fc = cm->fc;
   vpx_reader r;
@@ -2060,7 +2061,7 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
 #else  // !NDEBUG
 // Counts should only be incremented when frame_parallel_decoding_mode and
 // error_resilient_mode are disabled.
-static void debug_check_frame_counts(const VP9_COMMON *const cm) {
+static void debug_check_frame_counts(const VP10_COMMON *const cm) {
   FRAME_COUNTS zero_counts;
   vp10_zero(zero_counts);
   assert(cm->frame_parallel_decoding_mode || cm->error_resilient_mode);
@@ -2138,7 +2139,7 @@ BITSTREAM_PROFILE vp10_read_profile(struct vpx_read_bit_buffer *rb) {
 void vp10_decode_frame(VP9Decoder *pbi,
                       const uint8_t *data, const uint8_t *data_end,
                       const uint8_t **p_data_end) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP10_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   struct vpx_read_bit_buffer rb;
   int context_updated = 0;

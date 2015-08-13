@@ -88,7 +88,7 @@ static INLINE void sync_write(VP9LfSync *const lf_sync, int r, int c,
 // Implement row loopfiltering for each thread.
 static INLINE
 void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
-                             VP9_COMMON *const cm,
+                             VP10_COMMON *const cm,
                              struct macroblockd_plane planes[MAX_MB_PLANE],
                              int start, int stop, int y_only,
                              VP9LfSync *const lf_sync) {
@@ -154,7 +154,7 @@ static int loop_filter_row_worker(VP9LfSync *const lf_sync,
 }
 
 static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
-                                VP9_COMMON *cm,
+                                VP10_COMMON *cm,
                                 struct macroblockd_plane planes[MAX_MB_PLANE],
                                 int start, int stop, int y_only,
                                 VPxWorker *workers, int nworkers,
@@ -214,7 +214,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
 }
 
 void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
-                              VP9_COMMON *cm,
+                              VP10_COMMON *cm,
                               struct macroblockd_plane planes[MAX_MB_PLANE],
                               int frame_filter_level,
                               int y_only, int partial_frame,
@@ -253,7 +253,7 @@ static INLINE int get_sync_range(int width) {
 }
 
 // Allocate memory for lf row synchronization
-void vp10_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
+void vp10_loop_filter_alloc(VP9LfSync *lf_sync, VP10_COMMON *cm, int rows,
                            int width, int num_workers) {
   lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
@@ -317,7 +317,7 @@ void vp10_loop_filter_dealloc(VP9LfSync *lf_sync) {
 }
 
 // Accumulate frame counts.
-void vp10_accumulate_frame_counts(VP9_COMMON *cm, FRAME_COUNTS *counts,
+void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
                                  int is_dec) {
   int i, j, k, l, m;
 

@@ -612,7 +612,7 @@ int vp10_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 
 void vp10_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                      int dry_run, BLOCK_SIZE bsize) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;

@@ -43,7 +43,7 @@ unsigned int vp10_vaq_segment_id(int energy) {
 }
 
 void vp10_vaq_frame_setup(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+  VP10_COMMON *cm = &cpi->common;
   struct segmentation *seg = &cm->seg;
   int i;
 

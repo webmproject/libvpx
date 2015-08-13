@@ -106,7 +106,7 @@ static int cost_segmap(int *segcounts, vpx_prob *probs) {
   return cost;
 }
 
-static void count_segs(const VP9_COMMON *cm, MACROBLOCKD *xd,
+static void count_segs(const VP10_COMMON *cm, MACROBLOCKD *xd,
                        const TileInfo *tile, MODE_INFO **mi,
                        int *no_pred_segcounts,
                        int (*temporal_predictor_count)[2],
@@ -145,7 +145,7 @@ static void count_segs(const VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-static void count_segs_sb(const VP9_COMMON *cm, MACROBLOCKD *xd,
+static void count_segs_sb(const VP10_COMMON *cm, MACROBLOCKD *xd,
                           const TileInfo *tile, MODE_INFO **mi,
                           int *no_pred_segcounts,
                           int (*temporal_predictor_count)[2],
@@ -195,7 +195,7 @@ static void count_segs_sb(const VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-void vp10_choose_segmap_coding_method(VP9_COMMON *cm, MACROBLOCKD *xd) {
+void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
   struct segmentation *seg = &cm->seg;
 
   int no_pred_cost;

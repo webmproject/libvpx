@@ -214,7 +214,7 @@ static int mfqe_decision(MODE_INFO *mi, BLOCK_SIZE cur_bs) {
 }
 
 // Process each partiton in a super block, recursively.
-static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
+static void mfqe_partition(VP10_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
                            const uint8_t *y, const uint8_t *u,
                            const uint8_t *v, int y_stride, int uv_stride,
                            uint8_t *yd, uint8_t *ud, uint8_t *vd,
@@ -349,7 +349,7 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
   }
 }
 
-void vp10_mfqe(VP9_COMMON *cm) {
+void vp10_mfqe(VP10_COMMON *cm) {
   int mi_row, mi_col;
   // Current decoded frame.
   const YV12_BUFFER_CONFIG *show = cm->frame_to_show;

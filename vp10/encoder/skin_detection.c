@@ -52,7 +52,7 @@ int vp10_skin_pixel(const uint8_t y, const uint8_t cb, const uint8_t cr) {
 // For viewing skin map on input source.
 void vp10_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
   int i, j, mi_row, mi_col;
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   uint8_t *y;
   const uint8_t *src_y = cpi->Source->y_buffer;
   const uint8_t *src_u = cpi->Source->u_buffer;

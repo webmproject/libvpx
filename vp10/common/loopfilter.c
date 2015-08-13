@@ -236,7 +236,7 @@ static uint8_t get_filter_level(const loop_filter_info_n *lfi_n,
                    [mode_lf_lut[mbmi->mode]];
 }
 
-void vp10_loop_filter_init(VP9_COMMON *cm) {
+void vp10_loop_filter_init(VP10_COMMON *cm) {
   loop_filter_info_n *lfi = &cm->lf_info;
   struct loopfilter *lf = &cm->lf;
   int lvl;
@@ -250,7 +250,7 @@ void vp10_loop_filter_init(VP9_COMMON *cm) {
     memset(lfi->lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
 }
 
-void vp10_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
+void vp10_loop_filter_frame_init(VP10_COMMON *cm, int default_filt_lvl) {
   int seg_id;
   // n_shift is the multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
@@ -827,7 +827,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
 // TODO(JBB): This function only works for yv12.
-void vp10_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
+void vp10_setup_mask(VP10_COMMON *const cm, const int mi_row, const int mi_col,
                     MODE_INFO **mi, const int mode_info_stride,
                     LOOP_FILTER_MASK *lfm) {
   int idx_32, idx_16, idx_8;
@@ -1151,7 +1151,7 @@ static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-void vp10_filter_block_plane_non420(VP9_COMMON *cm,
+void vp10_filter_block_plane_non420(VP10_COMMON *cm,
                                    struct macroblockd_plane *plane,
                                    MODE_INFO **mi_8x8,
                                    int mi_row, int mi_col) {
@@ -1328,7 +1328,7 @@ void vp10_filter_block_plane_non420(VP9_COMMON *cm,
   }
 }
 
-void vp10_filter_block_plane_ss00(VP9_COMMON *const cm,
+void vp10_filter_block_plane_ss00(VP10_COMMON *const cm,
                                  struct macroblockd_plane *const plane,
                                  int mi_row,
                                  LOOP_FILTER_MASK *lfm) {
@@ -1420,7 +1420,7 @@ void vp10_filter_block_plane_ss00(VP9_COMMON *const cm,
   }
 }
 
-void vp10_filter_block_plane_ss11(VP9_COMMON *const cm,
+void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
                                  struct macroblockd_plane *const plane,
                                  int mi_row,
                                  LOOP_FILTER_MASK *lfm) {
@@ -1529,7 +1529,7 @@ void vp10_filter_block_plane_ss11(VP9_COMMON *const cm,
 }
 
 void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
-                          VP9_COMMON *cm,
+                          VP10_COMMON *cm,
                           struct macroblockd_plane planes[MAX_MB_PLANE],
                           int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
@@ -1578,7 +1578,7 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
 }
 
 void vp10_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
-                           VP9_COMMON *cm, MACROBLOCKD *xd,
+                           VP10_COMMON *cm, MACROBLOCKD *xd,
                            int frame_filter_level,
                            int y_only, int partial_frame) {
   int start_mi_row, end_mi_row, mi_rows_to_filter;

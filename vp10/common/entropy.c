@@ -753,7 +753,7 @@ void vp10_model_to_full_probs(const vpx_prob *model, vpx_prob *full) {
   extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 
-void vp10_default_coef_probs(VP9_COMMON *cm) {
+void vp10_default_coef_probs(VP10_COMMON *cm) {
   vp10_copy(cm->fc->coef_probs[TX_4X4], default_coef_probs_4x4);
   vp10_copy(cm->fc->coef_probs[TX_8X8], default_coef_probs_8x8);
   vp10_copy(cm->fc->coef_probs[TX_16X16], default_coef_probs_16x16);
@@ -767,7 +767,7 @@ void vp10_default_coef_probs(VP9_COMMON *cm) {
 #define COEF_COUNT_SAT_AFTER_KEY 24
 #define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
 
-static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
+static void adapt_coef_probs(VP10_COMMON *cm, TX_SIZE tx_size,
                              unsigned int count_sat,
                              unsigned int update_factor) {
   const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
@@ -798,7 +798,7 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
         }
 }
 
-void vp10_adapt_coef_probs(VP9_COMMON *cm) {
+void vp10_adapt_coef_probs(VP10_COMMON *cm) {
   TX_SIZE t;
   unsigned int count_sat, update_factor;
 

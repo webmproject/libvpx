@@ -39,7 +39,7 @@ typedef struct {
   int in_use;
 } PRED_BUFFER;
 
-static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCK *x,
+static int mv_refs_rt(const VP10_COMMON *cm, const MACROBLOCK *x,
                       const MACROBLOCKD *xd,
                       const TileInfo *const tile,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
@@ -1016,7 +1016,7 @@ void vp10_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   *rd_cost = best_rdc;
 }
 
-static void init_ref_frame_cost(VP9_COMMON *const cm,
+static void init_ref_frame_cost(VP10_COMMON *const cm,
                                 MACROBLOCKD *const xd,
                                 int ref_frame_cost[MAX_REF_FRAMES]) {
   vpx_prob intra_inter_p = vp10_get_intra_inter_prob(cm, xd);
@@ -1057,7 +1057,7 @@ void vp10_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
   TileInfo *const tile_info = &tile_data->tile_info;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -1624,7 +1624,7 @@ void vp10_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 void vp10_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                 int mi_row, int mi_col, RD_COST *rd_cost,
                                 BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;

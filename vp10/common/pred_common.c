@@ -61,7 +61,7 @@ int vp10_get_intra_inter_context(const MACROBLOCKD *xd) {
   }
 }
 
-int vp10_get_reference_mode_context(const VP9_COMMON *cm,
+int vp10_get_reference_mode_context(const VP10_COMMON *cm,
                                    const MACROBLOCKD *xd) {
   int ctx;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
@@ -104,7 +104,7 @@ int vp10_get_reference_mode_context(const VP9_COMMON *cm,
 }
 
 // Returns a context number for the given MB prediction signal
-int vp10_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
+int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
                                     const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;

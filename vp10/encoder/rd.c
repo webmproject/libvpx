@@ -230,7 +230,7 @@ void vp10_initialize_me_consts(VP9_COMP *cpi, MACROBLOCK *x, int qindex) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
-static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
+static void set_block_thresholds(const VP10_COMMON *cm, RD_OPT *rd) {
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
@@ -263,7 +263,7 @@ static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
 }
 
 void vp10_initialize_rd_consts(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   RD_OPT *const rd = &cpi->rd;
@@ -543,7 +543,7 @@ int16_t* vp10_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
 
 YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const VP9_COMP *cpi,
                                              int ref_frame) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const int scaled_idx = cpi->scaled_ref_idx[ref_frame - 1];
   const int ref_idx = get_ref_frame_buf_idx(cpi, ref_frame);
   return

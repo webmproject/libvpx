@@ -21,17 +21,17 @@ static int get_tile_offset(int idx, int mis, int log2) {
   return MIN(offset, mis);
 }
 
-void vp10_tile_set_row(TileInfo *tile, const VP9_COMMON *cm, int row) {
+void vp10_tile_set_row(TileInfo *tile, const VP10_COMMON *cm, int row) {
   tile->mi_row_start = get_tile_offset(row, cm->mi_rows, cm->log2_tile_rows);
   tile->mi_row_end = get_tile_offset(row + 1, cm->mi_rows, cm->log2_tile_rows);
 }
 
-void vp10_tile_set_col(TileInfo *tile, const VP9_COMMON *cm, int col) {
+void vp10_tile_set_col(TileInfo *tile, const VP10_COMMON *cm, int col) {
   tile->mi_col_start = get_tile_offset(col, cm->mi_cols, cm->log2_tile_cols);
   tile->mi_col_end = get_tile_offset(col + 1, cm->mi_cols, cm->log2_tile_cols);
 }
 
-void vp10_tile_init(TileInfo *tile, const VP9_COMMON *cm, int row, int col) {
+void vp10_tile_init(TileInfo *tile, const VP10_COMMON *cm, int row, int col) {
   vp10_tile_set_row(tile, cm, row);
   vp10_tile_set_col(tile, cm, col);
 }

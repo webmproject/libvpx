@@ -295,7 +295,7 @@ typedef struct VP9_COMP {
   MB_MODE_INFO_EXT *mbmi_ext_base;
   DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
-  VP9_COMMON common;
+  VP10_COMMON common;
   VP9EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *alt_ref_source;
@@ -569,14 +569,14 @@ static INLINE int get_ref_frame_map_idx(const VP9_COMP *cpi,
 
 static INLINE int get_ref_frame_buf_idx(const VP9_COMP *const cpi,
                                         int ref_frame) {
-  const VP9_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   const int map_idx = get_ref_frame_map_idx(cpi, ref_frame);
   return (map_idx != INVALID_IDX) ? cm->ref_frame_map[map_idx] : INVALID_IDX;
 }
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
     VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
   return
       buf_idx != INVALID_IDX ? &cm->buffer_pool->frame_bufs[buf_idx].buf : NULL;
@@ -614,11 +614,11 @@ void vp10_update_reference_frames(VP9_COMP *cpi);
 
 void vp10_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
 
-YV12_BUFFER_CONFIG *vp10_scale_if_required_fast(VP9_COMMON *cm,
+YV12_BUFFER_CONFIG *vp10_scale_if_required_fast(VP10_COMMON *cm,
                                                YV12_BUFFER_CONFIG *unscaled,
                                                YV12_BUFFER_CONFIG *scaled);
 
-YV12_BUFFER_CONFIG *vp10_scale_if_required(VP9_COMMON *cm,
+YV12_BUFFER_CONFIG *vp10_scale_if_required(VP10_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
                                           YV12_BUFFER_CONFIG *scaled);
 
@@ -639,7 +639,7 @@ static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
            cpi->oxcf.ss_enable_auto_arf[cpi->svc.spatial_layer_id]));
 }
 
-static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
+static INLINE void set_ref_ptrs(VP10_COMMON *cm, MACROBLOCKD *xd,
                                 MV_REFERENCE_FRAME ref0,
                                 MV_REFERENCE_FRAME ref1) {
   xd->block_refs[0] = &cm->frame_refs[ref0 >= LAST_FRAME ? ref0 - LAST_FRAME

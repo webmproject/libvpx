@@ -275,7 +275,7 @@ typedef struct VP9Common {
   PARTITION_CONTEXT *above_seg_context;
   ENTROPY_CONTEXT *above_context;
   int above_context_alloc_cols;
-} VP9_COMMON;
+} VP10_COMMON;
 
 // TODO(hkuang): Don't need to lock the whole pool after implementing atomic
 // frame reference count.
@@ -295,7 +295,7 @@ static void unlock_buffer_pool(BufferPool *const pool) {
 #endif
 }
 
-static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {
+static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP10_COMMON *cm, int index) {
   if (index < 0 || index >= REF_FRAMES)
     return NULL;
   if (cm->ref_frame_map[index] < 0)
@@ -304,11 +304,11 @@ static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {
   return &cm->buffer_pool->frame_bufs[cm->ref_frame_map[index]].buf;
 }
 
-static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
+static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(VP10_COMMON *cm) {
   return &cm->buffer_pool->frame_bufs[cm->new_fb_idx].buf;
 }
 
-static INLINE int get_free_fb(VP9_COMMON *cm) {
+static INLINE int get_free_fb(VP10_COMMON *cm) {
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
   int i;
 
@@ -343,11 +343,11 @@ static INLINE int mi_cols_aligned_to_sb(int n_mis) {
   return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
 }
 
-static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
+static INLINE int frame_is_intra_only(const VP10_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME || cm->intra_only;
 }
 
-static INLINE void set_partition_probs(const VP9_COMMON *const cm,
+static INLINE void set_partition_probs(const VP10_COMMON *const cm,
                                        MACROBLOCKD *const xd) {
   xd->partition_probs =
       frame_is_intra_only(cm) ?
@@ -355,7 +355,7 @@ static INLINE void set_partition_probs(const VP9_COMMON *const cm,
           (const vpx_prob (*)[PARTITION_TYPES - 1])cm->fc->partition_prob;
 }
 
-static INLINE void vp10_init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd,
+static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
                                         tran_low_t *dqcoeff) {
   int i;
 

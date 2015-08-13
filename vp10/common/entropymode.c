@@ -334,7 +334,7 @@ const vpx_tree_index vp10_switchable_interp_tree
   -EIGHTTAP_SMOOTH, -EIGHTTAP_SHARP
 };
 
-void vp10_adapt_mode_probs(VP9_COMMON *cm) {
+void vp10_adapt_mode_probs(VP10_COMMON *cm) {
   int i, j;
   FRAME_CONTEXT *fc = cm->fc;
   const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
@@ -420,7 +420,7 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
   lf->mode_deltas[1] = 0;
 }
 
-void vp10_setup_past_independence(VP9_COMMON *cm) {
+void vp10_setup_past_independence(VP10_COMMON *cm) {
   // Reset the segment feature data to the default stats:
   // Features disabled, 0, with delta coding (Default state).
   struct loopfilter *const lf = &cm->lf;
