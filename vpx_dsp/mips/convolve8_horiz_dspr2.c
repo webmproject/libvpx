@@ -842,13 +842,9 @@ void vpx_convolve8_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                const int16_t *filter_y, int y_step_q4,
                                int w, int h) {
   assert(x_step_q4 == 16);
-  if (((const int32_t *)filter_x)[1] == 0x800000) {
-    vpx_convolve_copy(src, src_stride,
-                      dst, dst_stride,
-                      filter_x, x_step_q4,
-                      filter_y, y_step_q4,
-                      w, h);
-  } else if (((const int32_t *)filter_x)[0] == 0) {
+  assert(((const int32_t *)filter_x)[1] != 0x800000);
+
+  if (((const int32_t *)filter_x)[0] == 0) {
     vpx_convolve2_horiz_dspr2(src, src_stride,
                               dst, dst_stride,
                               filter_x, x_step_q4,

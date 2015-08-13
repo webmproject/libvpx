@@ -348,13 +348,9 @@ void vpx_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                   const int16_t *filter_y, int y_step_q4,
                                   int w, int h) {
   assert(y_step_q4 == 16);
-  if (((const int32_t *)filter_y)[1] == 0x800000) {
-    vpx_convolve_avg(src, src_stride,
-                     dst, dst_stride,
-                     filter_x, x_step_q4,
-                     filter_y, y_step_q4,
-                     w, h);
-  } else if (((const int32_t *)filter_y)[0] == 0) {
+  assert(((const int32_t *)filter_y)[1] != 0x800000);
+
+  if (((const int32_t *)filter_y)[0] == 0) {
     vpx_convolve2_avg_vert_dspr2(src, src_stride,
                                  dst, dst_stride,
                                  filter_x, x_step_q4,
