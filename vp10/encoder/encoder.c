@@ -115,7 +115,7 @@ static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
 
 // Mark all inactive blocks as active. Other segmentation features may be set
 // so memset cannot be used, instead only inactive blocks should be reset.
-static void suppress_active_map(VP9_COMP *cpi) {
+static void suppress_active_map(VP10_COMP *cpi) {
   unsigned char *const seg_map = cpi->segmentation_map;
   int i;
   if (cpi->active_map.enabled || cpi->active_map.update)
@@ -124,7 +124,7 @@ static void suppress_active_map(VP9_COMP *cpi) {
         seg_map[i] = AM_SEGMENT_ID_ACTIVE;
 }
 
-static void apply_active_map(VP9_COMP *cpi) {
+static void apply_active_map(VP10_COMP *cpi) {
   struct segmentation *const seg = &cpi->common.seg;
   unsigned char *const seg_map = cpi->segmentation_map;
   const unsigned char *const active_map = cpi->active_map.map;
@@ -160,7 +160,7 @@ static void apply_active_map(VP9_COMP *cpi) {
   }
 }
 
-int vp10_set_active_map(VP9_COMP* cpi,
+int vp10_set_active_map(VP10_COMP* cpi,
                        unsigned char* new_map_16x16,
                        int rows,
                        int cols) {
@@ -189,7 +189,7 @@ int vp10_set_active_map(VP9_COMP* cpi,
   }
 }
 
-int vp10_get_active_map(VP9_COMP* cpi,
+int vp10_get_active_map(VP10_COMP* cpi,
                        unsigned char* new_map_16x16,
                        int rows,
                        int cols) {
@@ -216,7 +216,7 @@ int vp10_get_active_map(VP9_COMP* cpi,
   }
 }
 
-void vp10_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
+void vp10_set_high_precision_mv(VP10_COMP *cpi, int allow_high_precision_mv) {
   MACROBLOCK *const mb = &cpi->td.mb;
   cpi->common.allow_high_precision_mv = allow_high_precision_mv;
   if (cpi->common.allow_high_precision_mv) {
@@ -228,7 +228,7 @@ void vp10_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
   }
 }
 
-static void setup_frame(VP9_COMP *cpi) {
+static void setup_frame(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   // Set up entropy context depending on frame type. The decoder mandates
   // the use of the default context, index 0, for keyframes and inter
@@ -334,7 +334,7 @@ void vp10_initialize_enc(void) {
   }
 }
 
-static void dealloc_compressor_data(VP9_COMP *cpi) {
+static void dealloc_compressor_data(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   int i;
 
@@ -415,7 +415,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
 }
 
-static void save_coding_context(VP9_COMP *cpi) {
+static void save_coding_context(VP10_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
   VP10_COMMON *cm = &cpi->common;
 
@@ -445,7 +445,7 @@ static void save_coding_context(VP9_COMP *cpi) {
   cc->fc = *cm->fc;
 }
 
-static void restore_coding_context(VP9_COMP *cpi) {
+static void restore_coding_context(VP10_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
   VP10_COMMON *cm = &cpi->common;
 
@@ -472,7 +472,7 @@ static void restore_coding_context(VP9_COMP *cpi) {
   *cm->fc = cc->fc;
 }
 
-static void configure_static_seg_features(VP9_COMP *cpi) {
+static void configure_static_seg_features(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   struct segmentation *const seg = &cm->seg;
@@ -596,7 +596,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
   }
 }
 
-static void update_reference_segmentation_map(VP9_COMP *cpi) {
+static void update_reference_segmentation_map(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   MODE_INFO **mi_8x8_ptr = cm->mi_grid_visible;
   uint8_t *cache_ptr = cm->last_frame_seg_map;
@@ -612,7 +612,7 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
   }
 }
 
-static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
+static void alloc_raw_frame_buffers(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
 
@@ -640,7 +640,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
                        "Failed to allocate altref buffer");
 }
 
-static void alloc_util_frame_buffers(VP9_COMP *cpi) {
+static void alloc_util_frame_buffers(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   if (vp9_realloc_frame_buffer(&cpi->last_frame_uf,
                                cm->width, cm->height,
@@ -677,7 +677,7 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
 }
 
 
-static int alloc_context_buffers_ext(VP9_COMP *cpi) {
+static int alloc_context_buffers_ext(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
   int mi_size = cm->mi_cols * cm->mi_rows;
 
@@ -688,7 +688,7 @@ static int alloc_context_buffers_ext(VP9_COMP *cpi) {
   return 0;
 }
 
-void vp10_alloc_compressor_data(VP9_COMP *cpi) {
+void vp10_alloc_compressor_data(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
 
   vp10_alloc_context_buffers(cm, cm->width, cm->height);
@@ -706,12 +706,12 @@ void vp10_alloc_compressor_data(VP9_COMP *cpi) {
   vp10_setup_pc_tree(&cpi->common, &cpi->td);
 }
 
-void vp10_new_framerate(VP9_COMP *cpi, double framerate) {
+void vp10_new_framerate(VP10_COMP *cpi, double framerate) {
   cpi->framerate = framerate < 0.1 ? 30 : framerate;
   vp10_rc_update_framerate(cpi);
 }
 
-static void set_tile_limits(VP9_COMP *cpi) {
+static void set_tile_limits(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
 
   int min_log2_tile_cols, max_log2_tile_cols;
@@ -729,7 +729,7 @@ static void set_tile_limits(VP9_COMP *cpi) {
   }
 }
 
-static void update_frame_size(VP9_COMP *cpi) {
+static void update_frame_size(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
@@ -756,13 +756,13 @@ static void update_frame_size(VP9_COMP *cpi) {
   }
 }
 
-static void init_buffer_indices(VP9_COMP *cpi) {
+static void init_buffer_indices(VP10_COMP *cpi) {
   cpi->lst_fb_idx = 0;
   cpi->gld_fb_idx = 1;
   cpi->alt_fb_idx = 2;
 }
 
-static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
+static void init_config(struct VP10_COMP *cpi, VP9EncoderConfig *oxcf) {
   VP10_COMMON *const cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
@@ -1017,7 +1017,7 @@ MAKE_BFP_SAD3_WRAPPER(vpx_highbd_sad4x4x3)
 MAKE_BFP_SAD8_WRAPPER(vpx_highbd_sad4x4x8)
 MAKE_BFP_SAD4D_WRAPPER(vpx_highbd_sad4x4x4d)
 
-static void  highbd_set_var_fns(VP9_COMP *const cpi) {
+static void  highbd_set_var_fns(VP10_COMP *const cpi) {
   VP10_COMMON *const cm = &cpi->common;
   if (cm->use_highbitdepth) {
     switch (cm->bit_depth) {
@@ -1425,7 +1425,7 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void realloc_segmentation_maps(VP9_COMP *cpi) {
+static void realloc_segmentation_maps(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
 
   // Create the encoder segmentation map and set all entries to 0
@@ -1451,7 +1451,7 @@ static void realloc_segmentation_maps(VP9_COMP *cpi) {
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 }
 
-void vp10_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
+void vp10_change_config(struct VP10_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
@@ -1590,10 +1590,10 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 }
 
 
-VP9_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
+VP10_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
-  VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
+  VP10_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP10_COMP));
   VP10_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
 
   if (!cm)
@@ -1917,7 +1917,7 @@ VP9_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
 #define SNPRINT2(H, T, V) \
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 
-void vp10_remove_compressor(VP9_COMP *cpi) {
+void vp10_remove_compressor(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   unsigned int i;
   int t;
@@ -2337,7 +2337,7 @@ static void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void generate_psnr_packet(VP9_COMP *cpi) {
+static void generate_psnr_packet(VP10_COMP *cpi) {
   struct vpx_codec_cx_pkt pkt;
   int i;
   PSNR_STATS psnr;
@@ -2361,7 +2361,7 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
     vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
 
-int vp10_use_as_reference(VP9_COMP *cpi, int ref_frame_flags) {
+int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags) {
   if (ref_frame_flags > 7)
     return -1;
 
@@ -2369,14 +2369,14 @@ int vp10_use_as_reference(VP9_COMP *cpi, int ref_frame_flags) {
   return 0;
 }
 
-void vp10_update_reference(VP9_COMP *cpi, int ref_frame_flags) {
+void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags) {
   cpi->ext_refresh_golden_frame = (ref_frame_flags & VP9_GOLD_FLAG) != 0;
   cpi->ext_refresh_alt_ref_frame = (ref_frame_flags & VP9_ALT_FLAG) != 0;
   cpi->ext_refresh_last_frame = (ref_frame_flags & VP9_LAST_FLAG) != 0;
   cpi->ext_refresh_frame_flags_pending = 1;
 }
 
-static YV12_BUFFER_CONFIG *get_vp10_ref_frame_buffer(VP9_COMP *cpi,
+static YV12_BUFFER_CONFIG *get_vp10_ref_frame_buffer(VP10_COMP *cpi,
                                 VP9_REFFRAME ref_frame_flag) {
   MV_REFERENCE_FRAME ref_frame = NONE;
   if (ref_frame_flag == VP9_LAST_FLAG)
@@ -2389,7 +2389,7 @@ static YV12_BUFFER_CONFIG *get_vp10_ref_frame_buffer(VP9_COMP *cpi,
   return ref_frame == NONE ? NULL : get_ref_frame_buffer(cpi, ref_frame);
 }
 
-int vp10_copy_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_copy_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp10_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
@@ -2400,7 +2400,7 @@ int vp10_copy_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
   }
 }
 
-int vp10_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_set_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp10_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
@@ -2411,7 +2411,7 @@ int vp10_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
   }
 }
 
-int vp10_update_entropy(VP9_COMP * cpi, int update) {
+int vp10_update_entropy(VP10_COMP * cpi, int update) {
   cpi->ext_refresh_frame_context = update;
   cpi->ext_refresh_frame_context_pending = 1;
   return 0;
@@ -2606,7 +2606,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   vp9_extend_frame_borders(dst);
 }
 
-static int scale_down(VP9_COMP *cpi, int q) {
+static int scale_down(VP10_COMP *cpi, int q) {
   RATE_CONTROL *const rc = &cpi->rc;
   GF_GROUP *const gf_group = &cpi->twopass.gf_group;
   int scale = 0;
@@ -2623,7 +2623,7 @@ static int scale_down(VP9_COMP *cpi, int q) {
 
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
-static int recode_loop_test(VP9_COMP *cpi,
+static int recode_loop_test(VP10_COMP *cpi,
                             int high_limit, int low_limit,
                             int q, int maxq, int minq) {
   const RATE_CONTROL *const rc = &cpi->rc;
@@ -2659,7 +2659,7 @@ static int recode_loop_test(VP9_COMP *cpi,
   return force_recode;
 }
 
-void vp10_update_reference_frames(VP9_COMP *cpi) {
+void vp10_update_reference_frames(VP10_COMP *cpi) {
   VP10_COMMON * const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
 
@@ -2741,7 +2741,7 @@ void vp10_update_reference_frames(VP9_COMP *cpi) {
 #endif
 }
 
-static void loopfilter_frame(VP9_COMP *cpi, VP10_COMMON *cm) {
+static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->td.mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
   if (xd->lossless) {
@@ -2787,7 +2787,7 @@ static INLINE void alloc_frame_mvs(const VP10_COMMON *cm,
   }
 }
 
-void vp10_scale_references(VP9_COMP *cpi) {
+void vp10_scale_references(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
   const VP9_REFFRAME ref_mask[3] = {VP9_LAST_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG};
@@ -2869,7 +2869,7 @@ void vp10_scale_references(VP9_COMP *cpi) {
   }
 }
 
-static void release_scaled_references(VP9_COMP *cpi) {
+static void release_scaled_references(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
   int i;
   if (cpi->oxcf.pass == 0 && !cpi->use_svc) {
@@ -2928,7 +2928,7 @@ static void full_to_model_counts(vp10_coeff_count_model *model_count,
 }
 
 #if 0 && CONFIG_INTERNAL_STATS
-static void output_frame_level_debug_stats(VP9_COMP *cpi) {
+static void output_frame_level_debug_stats(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   FILE *const f = fopen("tmp.stt", cm->current_video_frame ? "a" : "w");
   int64_t recon_err;
@@ -2996,7 +2996,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 }
 #endif
 
-static void set_mv_search_params(VP9_COMP *cpi) {
+static void set_mv_search_params(VP10_COMP *cpi) {
   const VP10_COMMON *const cm = &cpi->common;
   const unsigned int max_mv_def = MIN(cm->width, cm->height);
 
@@ -3021,14 +3021,14 @@ static void set_mv_search_params(VP9_COMP *cpi) {
   }
 }
 
-static void set_size_independent_vars(VP9_COMP *cpi) {
+static void set_size_independent_vars(VP10_COMP *cpi) {
   vp10_set_speed_features_framesize_independent(cpi);
   vp10_set_rd_speed_thresholds(cpi);
   vp10_set_rd_speed_thresholds_sub8x8(cpi);
   cpi->common.interp_filter = cpi->sf.default_interp_filter;
 }
 
-static void set_size_dependent_vars(VP9_COMP *cpi, int *q,
+static void set_size_dependent_vars(VP10_COMP *cpi, int *q,
                                     int *bottom_index, int *top_index) {
   VP10_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -3076,7 +3076,7 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q,
 #endif  // CONFIG_VP9_POSTPROC
 }
 
-static void init_motion_estimation(VP9_COMP *cpi) {
+static void init_motion_estimation(VP10_COMP *cpi) {
   int y_stride = cpi->scaled_source.y_stride;
 
   if (cpi->sf.mv.search_method == NSTEP) {
@@ -3086,7 +3086,7 @@ static void init_motion_estimation(VP9_COMP *cpi) {
   }
 }
 
-static void set_frame_size(VP9_COMP *cpi) {
+static void set_frame_size(VP10_COMP *cpi) {
   int ref_frame;
   VP10_COMMON *const cm = &cpi->common;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -3181,7 +3181,7 @@ static void set_frame_size(VP9_COMP *cpi) {
   set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
 }
 
-static void encode_without_recode_loop(VP9_COMP *cpi) {
+static void encode_without_recode_loop(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;  // Dummy variables.
 
@@ -3252,7 +3252,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
   vpx_clear_system_state();
 }
 
-static void encode_with_recode_loop(VP9_COMP *cpi,
+static void encode_with_recode_loop(VP10_COMP *cpi,
                                     size_t *size,
                                     uint8_t *dest) {
   VP10_COMMON *const cm = &cpi->common;
@@ -3514,7 +3514,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
   } while (loop);
 }
 
-static int get_ref_frame_flags(const VP9_COMP *cpi) {
+static int get_ref_frame_flags(const VP10_COMP *cpi) {
   const int *const map = cpi->common.ref_frame_map;
   const int gold_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idx];
   const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idx];
@@ -3538,7 +3538,7 @@ static int get_ref_frame_flags(const VP9_COMP *cpi) {
   return flags;
 }
 
-static void set_ext_overrides(VP9_COMP *cpi) {
+static void set_ext_overrides(VP10_COMP *cpi) {
   // Overrides the defaults with the externally supplied values with
   // vp10_update_reference() and vp10_update_entropy() calls
   // Note: The overrides are valid only for the next frame passed
@@ -3586,7 +3586,7 @@ YV12_BUFFER_CONFIG *vp10_scale_if_required(VP10_COMMON *cm,
   }
 }
 
-static void set_arf_sign_bias(VP9_COMP *cpi) {
+static void set_arf_sign_bias(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   int arf_sign_bias;
 
@@ -3602,7 +3602,7 @@ static void set_arf_sign_bias(VP9_COMP *cpi) {
   cm->ref_frame_sign_bias[ALTREF_FRAME] = arf_sign_bias;
 }
 
-static int setup_interp_filter_search_mask(VP9_COMP *cpi) {
+static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
   INTERP_FILTER ifilter;
   int ref_total[MAX_REF_FRAMES] = {0};
   MV_REFERENCE_FRAME ref;
@@ -3628,7 +3628,7 @@ static int setup_interp_filter_search_mask(VP9_COMP *cpi) {
   return mask;
 }
 
-static void encode_frame_to_data_rate(VP9_COMP *cpi,
+static void encode_frame_to_data_rate(VP10_COMP *cpi,
                                       size_t *size,
                                       uint8_t *dest,
                                       unsigned int *frame_flags) {
@@ -3865,13 +3865,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                cm->frame_type;
 }
 
-static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
+static void SvcEncode(VP10_COMP *cpi, size_t *size, uint8_t *dest,
                       unsigned int *frame_flags) {
   vp10_rc_get_svc_params(cpi);
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
 
-static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
+static void Pass0Encode(VP10_COMP *cpi, size_t *size, uint8_t *dest,
                         unsigned int *frame_flags) {
   if (cpi->oxcf.rc_mode == VPX_CBR) {
     vp10_rc_get_one_pass_cbr_params(cpi);
@@ -3881,7 +3881,7 @@ static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
 
-static void Pass2Encode(VP9_COMP *cpi, size_t *size,
+static void Pass2Encode(VP10_COMP *cpi, size_t *size,
                         uint8_t *dest, unsigned int *frame_flags) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
@@ -3900,7 +3900,7 @@ static void init_ref_frame_bufs(VP10_COMMON *cm) {
   }
 }
 
-static void check_initial_width(VP9_COMP *cpi,
+static void check_initial_width(VP10_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
                                 int use_highbitdepth,
 #endif
@@ -3932,7 +3932,7 @@ static void check_initial_width(VP9_COMP *cpi,
 }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-static void setup_denoiser_buffer(VP9_COMP *cpi) {
+static void setup_denoiser_buffer(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   if (cpi->oxcf.noise_sensitivity > 0 &&
       !cpi->denoiser.frame_buffer_initialized) {
@@ -3946,7 +3946,7 @@ static void setup_denoiser_buffer(VP9_COMP *cpi) {
 }
 #endif
 
-int vp10_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
+int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
   VP10_COMMON *cm = &cpi->common;
@@ -3992,7 +3992,7 @@ int vp10_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
 }
 
 
-static int frame_is_reference(const VP9_COMP *cpi) {
+static int frame_is_reference(const VP10_COMP *cpi) {
   const VP10_COMMON *cm = &cpi->common;
 
   return cm->frame_type == KEY_FRAME ||
@@ -4005,7 +4005,7 @@ static int frame_is_reference(const VP9_COMP *cpi) {
          cm->seg.update_data;
 }
 
-static void adjust_frame_rate(VP9_COMP *cpi,
+static void adjust_frame_rate(VP10_COMP *cpi,
                               const struct lookahead_entry *source) {
   int64_t this_duration;
   int step = 0;
@@ -4046,7 +4046,7 @@ static void adjust_frame_rate(VP9_COMP *cpi,
 
 // Returns 0 if this is not an alt ref else the offset of the source frame
 // used as the arf midpoint.
-static int get_arf_src_index(VP9_COMP *cpi) {
+static int get_arf_src_index(VP10_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int arf_src_index = 0;
   if (is_altref_enabled(cpi)) {
@@ -4062,7 +4062,7 @@ static int get_arf_src_index(VP9_COMP *cpi) {
   return arf_src_index;
 }
 
-static void check_src_altref(VP9_COMP *cpi,
+static void check_src_altref(VP10_COMP *cpi,
                              const struct lookahead_entry *source) {
   RATE_CONTROL *const rc = &cpi->rc;
 
@@ -4100,7 +4100,7 @@ static void adjust_image_stat(double y, double u, double v, double all,
 }
 #endif  // CONFIG_INTERNAL_STATS
 
-int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
+int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -4551,7 +4551,7 @@ int vp10_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   return 0;
 }
 
-int vp10_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
+int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
                               vp10_ppflags_t *flags) {
   VP10_COMMON *cm = &cpi->common;
 #if !CONFIG_VP9_POSTPROC
@@ -4581,7 +4581,7 @@ int vp10_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
   }
 }
 
-int vp10_set_internal_size(VP9_COMP *cpi,
+int vp10_set_internal_size(VP10_COMP *cpi,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
   VP10_COMMON *cm = &cpi->common;
   int hr = 0, hs = 0, vr = 0, vs = 0;
@@ -4603,7 +4603,7 @@ int vp10_set_internal_size(VP9_COMP *cpi,
   return 0;
 }
 
-int vp10_set_size_literal(VP9_COMP *cpi, unsigned int width,
+int vp10_set_size_literal(VP10_COMP *cpi, unsigned int width,
                          unsigned int height) {
   VP10_COMMON *cm = &cpi->common;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -4639,7 +4639,7 @@ int vp10_set_size_literal(VP9_COMP *cpi, unsigned int width,
   return 0;
 }
 
-void vp10_set_svc(VP9_COMP *cpi, int use_svc) {
+void vp10_set_svc(VP10_COMP *cpi, int use_svc) {
   cpi->use_svc = use_svc;
   return;
 }
@@ -4666,11 +4666,11 @@ int64_t vp10_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-int vp10_get_quantizer(VP9_COMP *cpi) {
+int vp10_get_quantizer(VP10_COMP *cpi) {
   return cpi->common.base_qindex;
 }
 
-void vp10_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags) {
+void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags) {
   if (flags & (VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF |
                VP8_EFLAG_NO_REF_ARF)) {
     int ref = 7;

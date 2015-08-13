@@ -143,8 +143,9 @@ static void output_stats(FIRSTPASS_STATS *stats,
 }
 
 #if CONFIG_FP_MB_STATS
-static void output_fpmb_stats(uint8_t *this_frame_mb_stats, VP10_COMMON *cm,
-                         struct vpx_codec_pkt_list *pktlist) {
+static void output_fpmb_stats(uint8_t *this_frame_mb_stats,
+                              VP10_COMMON *cm,
+                              struct vpx_codec_pkt_list *pktlist) {
   struct vpx_codec_cx_pkt pkt;
   pkt.kind = VPX_CODEC_FPMB_STATS_PKT;
   pkt.data.firstpass_mb_stats.buf = this_frame_mb_stats;
@@ -236,7 +237,7 @@ static void subtract_stats(FIRSTPASS_STATS *section,
 // bars and partially discounts other 0 energy areas.
 #define MIN_ACTIVE_AREA 0.5
 #define MAX_ACTIVE_AREA 1.0
-static double calculate_active_area(const VP9_COMP *cpi,
+static double calculate_active_area(const VP10_COMP *cpi,
                                     const FIRSTPASS_STATS *this_frame)
 {
   double active_pct;
@@ -250,7 +251,7 @@ static double calculate_active_area(const VP9_COMP *cpi,
 // Calculate a modified Error used in distributing bits between easier and
 // harder frames.
 #define ACT_AREA_CORRECTION 0.5
-static double calculate_modified_err(const VP9_COMP *cpi,
+static double calculate_modified_err(const VP10_COMP *cpi,
                                      const TWO_PASS *twopass,
                                      const VP9EncoderConfig *oxcf,
                                      const FIRSTPASS_STATS *this_frame) {
@@ -286,11 +287,11 @@ static int frame_max_bits(const RATE_CONTROL *rc,
   return (int)max_bits;
 }
 
-void vp10_init_first_pass(VP9_COMP *cpi) {
+void vp10_init_first_pass(VP10_COMP *cpi) {
   zero_stats(&cpi->twopass.total_stats);
 }
 
-void vp10_end_first_pass(VP9_COMP *cpi) {
+void vp10_end_first_pass(VP10_COMP *cpi) {
   if (is_two_pass_svc(cpi)) {
     int i;
     for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
@@ -380,7 +381,7 @@ static unsigned int highbd_get_prediction_error(BLOCK_SIZE bsize,
 
 // Refine the motion search range according to the frame dimension
 // for first pass test.
-static int get_search_range(const VP9_COMP *cpi) {
+static int get_search_range(const VP10_COMP *cpi) {
   int sr = 0;
   const int dim = MIN(cpi->initial_width, cpi->initial_height);
 
@@ -389,7 +390,7 @@ static int get_search_range(const VP9_COMP *cpi) {
   return sr;
 }
 
-static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+static void first_pass_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                      const MV *ref_mv, MV *best_mv,
                                      int *best_motion_err) {
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -477,7 +478,7 @@ static int find_fp_qindex(vpx_bit_depth_t bit_depth) {
   return i;
 }
 
-static void set_first_pass_params(VP9_COMP *cpi) {
+static void set_first_pass_params(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
@@ -492,7 +493,7 @@ static void set_first_pass_params(VP9_COMP *cpi) {
 
 #define UL_INTRA_THRESH 50
 #define INVALID_ROW -1
-void vp10_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
+void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->td.mb;
   VP10_COMMON *const cm = &cpi->common;
@@ -1176,7 +1177,7 @@ static double calc_correction_factor(double err_per_mb,
 // increased size and hence coding cost of motion vectors.
 #define EDIV_SIZE_FACTOR 800
 
-static int get_twopass_worst_quality(const VP9_COMP *cpi,
+static int get_twopass_worst_quality(const VP10_COMP *cpi,
                                      const double section_err,
                                      double inactive_zone,
                                      int section_target_bandwidth,
@@ -1229,7 +1230,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
   }
 }
 
-static void setup_rf_level_maxq(VP9_COMP *cpi) {
+static void setup_rf_level_maxq(VP10_COMP *cpi) {
   int i;
   RATE_CONTROL *const rc = &cpi->rc;
   for (i = INTER_NORMAL; i < RATE_FACTOR_LEVELS; ++i) {
@@ -1238,7 +1239,7 @@ static void setup_rf_level_maxq(VP9_COMP *cpi) {
   }
 }
 
-void vp10_init_subsampling(VP9_COMP *cpi) {
+void vp10_init_subsampling(VP10_COMP *cpi) {
   const VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   const int w = cm->width;
@@ -1254,7 +1255,7 @@ void vp10_init_subsampling(VP9_COMP *cpi) {
   setup_rf_level_maxq(cpi);
 }
 
-void vp10_calculate_coded_size(VP9_COMP *cpi,
+void vp10_calculate_coded_size(VP10_COMP *cpi,
                           int *scaled_frame_width,
                           int *scaled_frame_height) {
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1262,7 +1263,7 @@ void vp10_calculate_coded_size(VP9_COMP *cpi,
   *scaled_frame_height = rc->frame_height[rc->frame_size_selector];
 }
 
-void vp10_init_second_pass(VP9_COMP *cpi) {
+void vp10_init_second_pass(VP10_COMP *cpi) {
   SVC *const svc = &cpi->svc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int is_two_pass_svc = (svc->number_spatial_layers > 1) ||
@@ -1344,7 +1345,7 @@ void vp10_init_second_pass(VP9_COMP *cpi) {
 #define LOW_SR_DIFF_TRHESH 0.1
 #define SR_DIFF_MAX 128.0
 
-static double get_sr_decay_rate(const VP9_COMP *cpi,
+static double get_sr_decay_rate(const VP10_COMP *cpi,
                                 const FIRSTPASS_STATS *frame) {
   const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
                       ? cpi->initial_mbs : cpi->common.MBs;
@@ -1375,7 +1376,7 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
 
 // This function gives an estimate of how badly we believe the prediction
 // quality is decaying from frame to frame.
-static double get_zero_motion_factor(const VP9_COMP *cpi,
+static double get_zero_motion_factor(const VP10_COMP *cpi,
                                      const FIRSTPASS_STATS *frame) {
   const double zero_motion_pct = frame->pcnt_inter -
                                  frame->pcnt_motion;
@@ -1385,7 +1386,7 @@ static double get_zero_motion_factor(const VP9_COMP *cpi,
 
 #define ZM_POWER_FACTOR 0.75
 
-static double get_prediction_decay_rate(const VP9_COMP *cpi,
+static double get_prediction_decay_rate(const VP10_COMP *cpi,
                                         const FIRSTPASS_STATS *next_frame) {
   const double sr_decay_rate = get_sr_decay_rate(cpi, next_frame);
   const double zero_motion_factor =
@@ -1399,7 +1400,7 @@ static double get_prediction_decay_rate(const VP9_COMP *cpi,
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
-static int detect_transition_to_still(VP9_COMP *cpi,
+static int detect_transition_to_still(VP10_COMP *cpi,
                                       int frame_interval, int still_interval,
                                       double loop_decay_rate,
                                       double last_decay_rate) {
@@ -1476,7 +1477,7 @@ static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
 }
 
 #define BASELINE_ERR_PER_MB 1000.0
-static double calc_frame_boost(VP9_COMP *cpi,
+static double calc_frame_boost(VP10_COMP *cpi,
                                const FIRSTPASS_STATS *this_frame,
                                double this_frame_mv_in_out,
                                double max_boost) {
@@ -1508,7 +1509,7 @@ static double calc_frame_boost(VP9_COMP *cpi,
   return MIN(frame_boost, max_boost * boost_q_correction);
 }
 
-static int calc_arf_boost(VP9_COMP *cpi, int offset,
+static int calc_arf_boost(VP10_COMP *cpi, int offset,
                           int f_frames, int b_frames,
                           int *f_boost, int *b_boost) {
   TWO_PASS *const twopass = &cpi->twopass;
@@ -1619,7 +1620,7 @@ static int calculate_section_intra_ratio(const FIRSTPASS_STATS *begin,
 }
 
 // Calculate the total bits to allocate in this GF/ARF group.
-static int64_t calculate_total_gf_group_bits(VP9_COMP *cpi,
+static int64_t calculate_total_gf_group_bits(VP10_COMP *cpi,
                                              double gf_group_err) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const TWO_PASS *const twopass = &cpi->twopass;
@@ -1680,7 +1681,7 @@ static void get_arf_buffer_indices(unsigned char *arf_buffer_indices) {
   arf_buffer_indices[1] = ARF_SLOT2;
 }
 
-static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
+static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
                                    double group_error, int gf_arf_bits) {
   RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -1841,7 +1842,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 }
 
 // Analyse and define a gf/arf group.
-static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void define_gf_group(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -2261,7 +2262,7 @@ static int test_candidate_kf(TWO_PASS *twopass,
   return is_viable_kf;
 }
 
-static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void find_next_key_frame(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
@@ -2511,7 +2512,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 }
 
 // Define the reference buffers that will be updated post encode.
-static void configure_buffer_updates(VP9_COMP *cpi) {
+static void configure_buffer_updates(VP10_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
 
   cpi->rc.is_src_frame_alt_ref = 0;
@@ -2558,7 +2559,7 @@ static void configure_buffer_updates(VP9_COMP *cpi) {
   }
 }
 
-static int is_skippable_frame(const VP9_COMP *cpi) {
+static int is_skippable_frame(const VP10_COMP *cpi) {
   // If the current frame does not have non-zero motion vector detected in the
   // first  pass, and so do its previous and forward frames, then this frame
   // can be skipped for partition check, and the partition size is assigned
@@ -2577,7 +2578,7 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
     twopass->stats_in->pcnt_inter - twopass->stats_in->pcnt_motion == 1);
 }
 
-void vp10_rc_get_second_pass_params(VP9_COMP *cpi) {
+void vp10_rc_get_second_pass_params(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
@@ -2760,7 +2761,7 @@ void vp10_rc_get_second_pass_params(VP9_COMP *cpi) {
 #define MINQ_ADJ_LIMIT 48
 #define MINQ_ADJ_LIMIT_CQ 20
 #define HIGH_UNDERSHOOT_RATIO 2
-void vp10_twopass_postencode_update(VP9_COMP *cpi) {
+void vp10_twopass_postencode_update(VP10_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
   const int bits_used = rc->base_frame_target;

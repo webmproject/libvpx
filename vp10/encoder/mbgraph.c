@@ -22,7 +22,7 @@
 #include "vp10/common/reconintra.h"
 
 
-static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
+static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
                                               const MV *ref_mv,
                                               MV *dst_mv,
                                               int mb_row,
@@ -81,7 +81,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                       xd->plane[0].dst.buf, xd->plane[0].dst.stride);
 }
 
-static int do_16x16_motion_search(VP9_COMP *cpi, const MV *ref_mv,
+static int do_16x16_motion_search(VP10_COMP *cpi, const MV *ref_mv,
                                   int_mv *dst_mv, int mb_row, int mb_col) {
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -119,7 +119,7 @@ static int do_16x16_motion_search(VP9_COMP *cpi, const MV *ref_mv,
   return err;
 }
 
-static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
+static int do_16x16_zerozero_search(VP10_COMP *cpi, int_mv *dst_mv) {
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err;
@@ -133,7 +133,7 @@ static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
 
   return err;
 }
-static int find_best_16x16_intra(VP9_COMP *cpi, PREDICTION_MODE *pbest_mode) {
+static int find_best_16x16_intra(VP10_COMP *cpi, PREDICTION_MODE *pbest_mode) {
   MACROBLOCK   *const x  = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   PREDICTION_MODE best_mode = -1, mode;
@@ -167,7 +167,7 @@ static int find_best_16x16_intra(VP9_COMP *cpi, PREDICTION_MODE *pbest_mode) {
 
 static void update_mbgraph_mb_stats
 (
-  VP9_COMP *cpi,
+  VP10_COMP *cpi,
   MBGRAPH_MB_STATS *stats,
   YV12_BUFFER_CONFIG *buf,
   int mb_y_offset,
@@ -227,7 +227,7 @@ static void update_mbgraph_mb_stats
   }
 }
 
-static void update_mbgraph_frame_stats(VP9_COMP *cpi,
+static void update_mbgraph_frame_stats(VP10_COMP *cpi,
                                        MBGRAPH_FRAME_STATS *stats,
                                        YV12_BUFFER_CONFIG *buf,
                                        YV12_BUFFER_CONFIG *golden_ref,
@@ -296,7 +296,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
 }
 
 // void separate_arf_mbs_byzz
-static void separate_arf_mbs(VP9_COMP *cpi) {
+static void separate_arf_mbs(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   int mb_col, mb_row, offset, i;
   int mi_row, mi_col;
@@ -374,7 +374,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
   vpx_free(arf_not_zz);
 }
 
-void vp10_update_mbgraph_stats(VP9_COMP *cpi) {
+void vp10_update_mbgraph_stats(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   int i, n_frames = vp10_lookahead_depth(cpi->lookahead);
   YV12_BUFFER_CONFIG *golden_ref = get_ref_frame_buffer(cpi, GOLDEN_FRAME);

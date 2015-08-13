@@ -23,7 +23,7 @@ void vp10_entropy_mv_init(void);
 void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vpx_writer *w,
                          nmv_context_counts *const counts);
 
-void vp10_encode_mv(VP9_COMP *cpi, vpx_writer* w, const MV* mv, const MV* ref,
+void vp10_encode_mv(VP10_COMP *cpi, vpx_writer* w, const MV* mv, const MV* ref,
                    const nmv_context* mvctx, int usehp);
 
 void vp10_build_nmv_cost_table(int *mvjoint, int *mvcost[2],

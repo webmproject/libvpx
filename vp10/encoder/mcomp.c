@@ -1786,7 +1786,7 @@ static const MV search_pos[4] = {
     {-1, 0}, {0, -1}, {0, 1}, {1, 0},
 };
 
-unsigned int vp10_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
+unsigned int vp10_int_pro_motion_estimation(const VP10_COMP *cpi, MACROBLOCK *x,
                                            BLOCK_SIZE bsize,
                                            int mi_row, int mi_col) {
   MACROBLOCKD *xd = &x->e_mbd;
@@ -1925,7 +1925,7 @@ unsigned int vp10_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-int vp10_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
+int vp10_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,
                            int *cost_list,
@@ -2302,7 +2302,7 @@ int vp10_refining_search_8p_c(const MACROBLOCK *x,
   return best_sad;
 }
 
-int vp10_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
+int vp10_full_pixel_search(VP10_COMP *cpi, MACROBLOCK *x,
                           BLOCK_SIZE bsize, MV *mvp_full,
                           int step_param, int error_per_bit,
                           int *cost_list,

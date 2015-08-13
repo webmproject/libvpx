@@ -14,7 +14,7 @@
 #include "vp10/common/blockd.h"
 #include "vp10/encoder/block.h"
 
-struct VP9_COMP;
+struct VP10_COMP;
 struct VP9Common;
 struct ThreadData;
 

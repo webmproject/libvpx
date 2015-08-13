@@ -18,7 +18,7 @@
 #define SMALL_FRAME_WIDTH  16
 #define SMALL_FRAME_HEIGHT 16
 
-void vp10_init_layer_context(VP9_COMP *const cpi) {
+void vp10_init_layer_context(VP10_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int sl, tl;
@@ -103,7 +103,7 @@ void vp10_init_layer_context(VP9_COMP *const cpi) {
 }
 
 // Update the layer context from a change_config() call.
-void vp10_update_layer_context_change_config(VP9_COMP *const cpi,
+void vp10_update_layer_context_change_config(VP10_COMP *const cpi,
                                             const int target_bandwidth) {
   SVC *const svc = &cpi->svc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -191,7 +191,7 @@ void vp10_update_layer_context_change_config(VP9_COMP *const cpi,
   }
 }
 
-static LAYER_CONTEXT *get_layer_context(VP9_COMP *const cpi) {
+static LAYER_CONTEXT *get_layer_context(VP10_COMP *const cpi) {
   if (is_one_pass_cbr_svc(cpi))
     return &cpi->svc.layer_context[cpi->svc.spatial_layer_id *
         cpi->svc.number_temporal_layers + cpi->svc.temporal_layer_id];
@@ -202,7 +202,7 @@ static LAYER_CONTEXT *get_layer_context(VP9_COMP *const cpi) {
              &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
 }
 
-void vp10_update_temporal_layer_framerate(VP9_COMP *const cpi) {
+void vp10_update_temporal_layer_framerate(VP10_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(cpi);
@@ -229,7 +229,8 @@ void vp10_update_temporal_layer_framerate(VP9_COMP *const cpi) {
   }
 }
 
-void vp10_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
+void vp10_update_spatial_layer_framerate(VP10_COMP *const cpi,
+                                         double framerate) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(cpi);
   RATE_CONTROL *const lrc = &lc->rc;
@@ -243,7 +244,7 @@ void vp10_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) 
   vp10_rc_set_gf_interval_range(cpi, lrc);
 }
 
-void vp10_restore_layer_context(VP9_COMP *const cpi) {
+void vp10_restore_layer_context(VP10_COMP *const cpi) {
   LAYER_CONTEXT *const lc = get_layer_context(cpi);
   const int old_frame_since_key = cpi->rc.frames_since_key;
   const int old_frame_to_key = cpi->rc.frames_to_key;
@@ -260,7 +261,7 @@ void vp10_restore_layer_context(VP9_COMP *const cpi) {
   }
 }
 
-void vp10_save_layer_context(VP9_COMP *const cpi) {
+void vp10_save_layer_context(VP10_COMP *const cpi) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(cpi);
 
@@ -270,7 +271,7 @@ void vp10_save_layer_context(VP9_COMP *const cpi) {
   lc->alt_ref_source = cpi->alt_ref_source;
 }
 
-void vp10_init_second_pass_spatial_svc(VP9_COMP *cpi) {
+void vp10_init_second_pass_spatial_svc(VP10_COMP *cpi) {
   SVC *const svc = &cpi->svc;
   int i;
 
@@ -286,7 +287,7 @@ void vp10_init_second_pass_spatial_svc(VP9_COMP *cpi) {
   svc->spatial_layer_id = 0;
 }
 
-void vp10_inc_frame_in_layer(VP9_COMP *const cpi) {
+void vp10_inc_frame_in_layer(VP10_COMP *const cpi) {
   LAYER_CONTEXT *const lc =
       &cpi->svc.layer_context[cpi->svc.spatial_layer_id *
                               cpi->svc.number_temporal_layers];
@@ -294,7 +295,7 @@ void vp10_inc_frame_in_layer(VP9_COMP *const cpi) {
   ++lc->frames_from_key_frame;
 }
 
-int vp10_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
+int vp10_is_upper_layer_key_frame(const VP10_COMP *const cpi) {
   return is_two_pass_svc(cpi) &&
          cpi->svc.spatial_layer_id > 0 &&
          cpi->svc.layer_context[cpi->svc.spatial_layer_id *
@@ -324,7 +325,7 @@ static void get_layer_resolution(const int width_org, const int height_org,
 // The function sets proper ref_frame_flags, buffer indices, and buffer update
 // variables for temporal layering mode 3 - that does 0-2-1-2 temporal layering
 // scheme.
-static void set_flags_and_fb_idx_for_temporal_mode3(VP9_COMP *const cpi) {
+static void set_flags_and_fb_idx_for_temporal_mode3(VP10_COMP *const cpi) {
   int frame_num_within_temporal_struct = 0;
   int spatial_id, temporal_id;
   spatial_id = cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
@@ -411,7 +412,7 @@ static void set_flags_and_fb_idx_for_temporal_mode3(VP9_COMP *const cpi) {
 // The function sets proper ref_frame_flags, buffer indices, and buffer update
 // variables for temporal layering mode 2 - that does 0-1-0-1 temporal layering
 // scheme.
-static void set_flags_and_fb_idx_for_temporal_mode2(VP9_COMP *const cpi) {
+static void set_flags_and_fb_idx_for_temporal_mode2(VP10_COMP *const cpi) {
   int spatial_id, temporal_id;
   spatial_id = cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
   temporal_id = cpi->svc.temporal_layer_id =
@@ -457,7 +458,7 @@ static void set_flags_and_fb_idx_for_temporal_mode2(VP9_COMP *const cpi) {
 // The function sets proper ref_frame_flags, buffer indices, and buffer update
 // variables for temporal layering mode 0 - that has no temporal layering.
 static void set_flags_and_fb_idx_for_temporal_mode_noLayering(
-    VP9_COMP *const cpi) {
+    VP10_COMP *const cpi) {
   int spatial_id;
   spatial_id = cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
   cpi->ext_refresh_last_frame =
@@ -478,7 +479,7 @@ static void set_flags_and_fb_idx_for_temporal_mode_noLayering(
     cpi->gld_fb_idx = 0;
 }
 
-int vp10_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
+int vp10_one_pass_cbr_svc_start_layer(VP10_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc = NULL;
 
@@ -516,7 +517,7 @@ int vp10_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
 }
 
 #if CONFIG_SPATIAL_SVC
-int vp10_svc_start_frame(VP9_COMP *const cpi) {
+int vp10_svc_start_frame(VP10_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc;
   struct lookahead_entry *buf;
@@ -628,7 +629,7 @@ int vp10_svc_start_frame(VP9_COMP *const cpi) {
 
 #endif
 
-struct lookahead_entry *vp10_svc_lookahead_pop(VP9_COMP *const cpi,
+struct lookahead_entry *vp10_svc_lookahead_pop(VP10_COMP *const cpi,
                                               struct lookahead_ctx *ctx,
                                               int drain) {
   struct lookahead_entry *buf = NULL;

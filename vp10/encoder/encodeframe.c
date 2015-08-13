@@ -46,7 +46,7 @@
 #include "vp10/encoder/segmentation.h"
 #include "vp10/encoder/tokenize.h"
 
-static void encode_superblock(VP9_COMP *cpi, ThreadData * td,
+static void encode_superblock(VP10_COMP *cpi, ThreadData * td,
                               TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize,
                               PICK_MODE_CONTEXT *ctx);
@@ -101,7 +101,7 @@ static const uint16_t VP9_HIGH_VAR_OFFS_12[64] = {
 };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-unsigned int vp10_get_sby_perpixel_variance(VP9_COMP *cpi,
+unsigned int vp10_get_sby_perpixel_variance(VP10_COMP *cpi,
                                            const struct buf_2d *ref,
                                            BLOCK_SIZE bs) {
   unsigned int sse;
@@ -112,7 +112,7 @@ unsigned int vp10_get_sby_perpixel_variance(VP9_COMP *cpi,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 unsigned int vp10_high_get_sby_perpixel_variance(
-    VP9_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
+    VP10_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
   unsigned int var, sse;
   switch (bd) {
     case 10:
@@ -136,7 +136,7 @@ unsigned int vp10_high_get_sby_perpixel_variance(
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
+static unsigned int get_sby_perpixel_diff_variance(VP10_COMP *cpi,
                                                    const struct buf_2d *ref,
                                                    int mi_row, int mi_col,
                                                    BLOCK_SIZE bs) {
@@ -151,7 +151,8 @@ static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
-static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi, MACROBLOCK *x,
+static BLOCK_SIZE get_rd_var_based_fixed_partition(VP10_COMP *cpi,
+                                                   MACROBLOCK *x,
                                                    int mi_row,
                                                    int mi_col) {
   unsigned int var = get_sby_perpixel_diff_variance(cpi, &x->plane[0].src,
@@ -180,7 +181,7 @@ static INLINE void set_mode_info_offsets(VP10_COMMON *const cm,
   x->mbmi_ext = x->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 }
 
-static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
+static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
                         MACROBLOCK *const x, int mi_row, int mi_col,
                         BLOCK_SIZE bsize) {
   VP10_COMMON *const cm = &cpi->common;
@@ -250,7 +251,7 @@ static void duplicate_mode_info_in_sb(VP10_COMMON *cm, MACROBLOCKD *xd,
     }
 }
 
-static void set_block_size(VP9_COMP * const cpi,
+static void set_block_size(VP10_COMP * const cpi,
                            MACROBLOCK *const x,
                            MACROBLOCKD *const xd,
                            int mi_row, int mi_col,
@@ -386,7 +387,7 @@ static void fill_variance_tree(void *data, BLOCK_SIZE bsize) {
                   &node.part_variances->none);
 }
 
-static int set_vt_partitioning(VP9_COMP *cpi,
+static int set_vt_partitioning(VP10_COMP *cpi,
                                MACROBLOCK *const x,
                                MACROBLOCKD *const xd,
                                void *data,
@@ -476,7 +477,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
 // 0 - threshold_64x64, 1 - threshold_32x32, 2 - threshold_16x16,
 // 3 - vbp_threshold_8x8. vbp_threshold_8x8 (to split to 4x4 partition) is
 // currently only used on key frame.
-static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
+static void set_vbp_thresholds(VP10_COMP *cpi, int64_t thresholds[], int q) {
   VP10_COMMON *const cm = &cpi->common;
   const int is_key_frame = (cm->frame_type == KEY_FRAME);
   const int threshold_multiplier = is_key_frame ? 20 : 1;
@@ -502,7 +503,7 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
   }
 }
 
-void vp10_set_variance_partition_thresholds(VP9_COMP *cpi, int q) {
+void vp10_set_variance_partition_thresholds(VP10_COMP *cpi, int q) {
   VP10_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
   const int is_key_frame = (cm->frame_type == KEY_FRAME);
@@ -649,7 +650,7 @@ static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
 
 // This function chooses partitioning based on the variance between source and
 // reconstructed last, where variance is computed for down-sampled inputs.
-static int choose_partitioning(VP9_COMP *cpi,
+static int choose_partitioning(VP10_COMP *cpi,
                                 const TileInfo *const tile,
                                 MACROBLOCK *x,
                                 int mi_row, int mi_col) {
@@ -961,7 +962,7 @@ static int choose_partitioning(VP9_COMP *cpi,
   return 0;
 }
 
-static void update_state(VP9_COMP *cpi, ThreadData *td,
+static void update_state(VP10_COMP *cpi, ThreadData *td,
                          PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
                          int output_enabled) {
@@ -1146,7 +1147,7 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   vp10_rd_cost_init(rd_cost);
 }
 
-static int set_segment_rdmult(VP9_COMP *const cpi,
+static int set_segment_rdmult(VP10_COMP *const cpi,
                                MACROBLOCK *const x,
                                int8_t segment_id) {
   int segment_qindex;
@@ -1158,7 +1159,7 @@ static int set_segment_rdmult(VP9_COMP *const cpi,
   return vp10_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
 }
 
-static void rd_pick_sb_modes(VP9_COMP *cpi,
+static void rd_pick_sb_modes(VP10_COMP *cpi,
                              TileDataEnc *tile_data,
                              MACROBLOCK *const x,
                              int mi_row, int mi_col, RD_COST *rd_cost,
@@ -1396,7 +1397,7 @@ static void save_context(MACROBLOCK *const x, int mi_row, int mi_col,
          sizeof(xd->left_seg_context[0]) * mi_height);
 }
 
-static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
+static void encode_b(VP10_COMP *cpi, const TileInfo *const tile,
                      ThreadData *td,
                      TOKENEXTRA **tp, int mi_row, int mi_col,
                      int output_enabled, BLOCK_SIZE bsize,
@@ -1414,7 +1415,7 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static void encode_sb(VP9_COMP *cpi, ThreadData *td,
+static void encode_sb(VP10_COMP *cpi, ThreadData *td,
                       const TileInfo *const tile,
                       TOKENEXTRA **tp, int mi_row, int mi_col,
                       int output_enabled, BLOCK_SIZE bsize,
@@ -1529,7 +1530,7 @@ static void set_partial_b64x64_partition(MODE_INFO *mi, int mis,
 // However, at the bottom and right borders of the image the requested size
 // may not be allowed in which case this code attempts to choose the largest
 // allowable partition.
-static void set_fixed_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
+static void set_fixed_partitioning(VP10_COMP *cpi, const TileInfo *const tile,
                                    MODE_INFO **mi_8x8, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize) {
   VP10_COMMON *const cm = &cpi->common;
@@ -1574,7 +1575,7 @@ static const struct {
     {4, 4}, {4, 6}, {6, 4}, {6, 6},
 };
 
-static void set_source_var_based_partition(VP9_COMP *cpi,
+static void set_source_var_based_partition(VP10_COMP *cpi,
                                            const TileInfo *const tile,
                                            MACROBLOCK *const x,
                                            MODE_INFO **mi_8x8,
@@ -1660,7 +1661,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
   }
 }
 
-static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
+static void update_state_rt(VP10_COMP *cpi, ThreadData *td,
                             PICK_MODE_CONTEXT *ctx,
                             int mi_row, int mi_col, int bsize) {
   VP10_COMMON *const cm = &cpi->common;
@@ -1727,7 +1728,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   x->skip_txfm[0] = mbmi->segment_id ? 0 : ctx->skip_txfm[0];
 }
 
-static void encode_b_rt(VP9_COMP *cpi, ThreadData *td,
+static void encode_b_rt(VP10_COMP *cpi, ThreadData *td,
                         const TileInfo *const tile,
                         TOKENEXTRA **tp, int mi_row, int mi_col,
                         int output_enabled, BLOCK_SIZE bsize,
@@ -1751,7 +1752,7 @@ static void encode_b_rt(VP9_COMP *cpi, ThreadData *td,
   (*tp)++;
 }
 
-static void encode_sb_rt(VP9_COMP *cpi, ThreadData *td,
+static void encode_sb_rt(VP10_COMP *cpi, ThreadData *td,
                          const TileInfo *const tile,
                          TOKENEXTRA **tp, int mi_row, int mi_col,
                          int output_enabled, BLOCK_SIZE bsize,
@@ -1823,7 +1824,7 @@ static void encode_sb_rt(VP9_COMP *cpi, ThreadData *td,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
-static void rd_use_partition(VP9_COMP *cpi,
+static void rd_use_partition(VP10_COMP *cpi,
                              ThreadData *td,
                              TileDataEnc *tile_data,
                              MODE_INFO **mi_8x8, TOKENEXTRA **tp,
@@ -2150,7 +2151,7 @@ static const BLOCK_SIZE next_square_size[BLOCK_SIZES] = {
 
 // Look at neighboring blocks and set a min and max partition size based on
 // what they chose.
-static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
+static void rd_auto_partition_range(VP10_COMP *cpi, const TileInfo *const tile,
                                     MACROBLOCKD *const xd,
                                     int mi_row, int mi_col,
                                     BLOCK_SIZE *min_block_size,
@@ -2336,7 +2337,7 @@ static INLINE int get_motion_inconsistency(MOTION_DIRECTION this_mv,
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
-static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
+static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
                               TileDataEnc *tile_data,
                               TOKENEXTRA **tp, int mi_row, int mi_col,
                               BLOCK_SIZE bsize, RD_COST *rd_cost,
@@ -2749,7 +2750,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   }
 }
 
-static void encode_rd_sb_row(VP9_COMP *cpi,
+static void encode_rd_sb_row(VP10_COMP *cpi,
                              ThreadData *td,
                              TileDataEnc *tile_data,
                              int mi_row,
@@ -2834,7 +2835,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
   }
 }
 
-static void init_encode_frame_mb_context(VP9_COMP *cpi) {
+static void init_encode_frame_mb_context(VP10_COMP *cpi) {
   MACROBLOCK *const x = &cpi->td.mb;
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -2854,7 +2855,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
          sizeof(*xd->above_seg_context) * aligned_mi_cols);
 }
 
-static int check_dual_ref_flags(VP9_COMP *cpi) {
+static int check_dual_ref_flags(VP10_COMP *cpi) {
   const int ref_flags = cpi->ref_frame_flags;
 
   if (segfeature_active(&cpi->common.seg, 1, SEG_LVL_REF_FRAME)) {
@@ -2878,7 +2879,7 @@ static void reset_skip_tx_size(VP10_COMMON *cm, TX_SIZE max_tx_size) {
   }
 }
 
-static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
+static MV_REFERENCE_FRAME get_frame_type(const VP10_COMP *cpi) {
   if (frame_is_intra_only(&cpi->common))
     return INTRA_FRAME;
   else if (cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame)
@@ -2889,7 +2890,7 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
     return LAST_FRAME;
 }
 
-static TX_MODE select_tx_mode(const VP9_COMP *cpi, MACROBLOCKD *const xd) {
+static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
   if (xd->lossless)
     return ONLY_4X4;
   if (cpi->common.frame_type == KEY_FRAME &&
@@ -2904,7 +2905,7 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi, MACROBLOCKD *const xd) {
     return cpi->common.tx_mode;
 }
 
-static void hybrid_intra_mode_search(VP9_COMP *cpi, MACROBLOCK *const x,
+static void hybrid_intra_mode_search(VP10_COMP *cpi, MACROBLOCK *const x,
                                      RD_COST *rd_cost, BLOCK_SIZE bsize,
                                      PICK_MODE_CONTEXT *ctx) {
   if (bsize < BLOCK_16X16)
@@ -2913,7 +2914,7 @@ static void hybrid_intra_mode_search(VP9_COMP *cpi, MACROBLOCK *const x,
     vp10_pick_intra_mode(cpi, x, rd_cost, bsize, ctx);
 }
 
-static void nonrd_pick_sb_modes(VP9_COMP *cpi,
+static void nonrd_pick_sb_modes(VP10_COMP *cpi,
                                 TileDataEnc *tile_data, MACROBLOCK *const x,
                                 int mi_row, int mi_col, RD_COST *rd_cost,
                                 BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
@@ -3026,7 +3027,7 @@ static void pred_pixel_ready_reset(PC_TREE *pc_tree, BLOCK_SIZE bsize) {
   }
 }
 
-static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
+static void nonrd_pick_partition(VP10_COMP *cpi, ThreadData *td,
                                  TileDataEnc *tile_data,
                                  TOKENEXTRA **tp, int mi_row,
                                  int mi_col, BLOCK_SIZE bsize, RD_COST *rd_cost,
@@ -3280,7 +3281,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   }
 }
 
-static void nonrd_select_partition(VP9_COMP *cpi,
+static void nonrd_select_partition(VP10_COMP *cpi,
                                    ThreadData *td,
                                    TileDataEnc *tile_data,
                                    MODE_INFO **mi,
@@ -3419,7 +3420,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
 }
 
 
-static void nonrd_use_partition(VP9_COMP *cpi,
+static void nonrd_use_partition(VP10_COMP *cpi,
                                 ThreadData *td,
                                 TileDataEnc *tile_data,
                                 MODE_INFO **mi,
@@ -3535,7 +3536,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
-static void encode_nonrd_sb_row(VP9_COMP *cpi,
+static void encode_nonrd_sb_row(VP10_COMP *cpi,
                                 ThreadData *td,
                                 TileDataEnc *tile_data,
                                 int mi_row,
@@ -3635,7 +3636,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
 }
 // end RTC play code
 
-static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
+static int set_var_thresh_from_histogram(VP10_COMP *cpi) {
   const SPEED_FEATURES *const sf = &cpi->sf;
   const VP10_COMMON *const cm = &cpi->common;
 
@@ -3719,7 +3720,7 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
   return sf->search_type_check_frequency;
 }
 
-static void source_var_based_partition_search_method(VP9_COMP *cpi) {
+static void source_var_based_partition_search_method(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
 
@@ -3761,7 +3762,7 @@ static int get_skip_encode_frame(const VP10_COMMON *cm, ThreadData *const td) {
          cm->show_frame;
 }
 
-void vp10_init_tile_data(VP9_COMP *cpi) {
+void vp10_init_tile_data(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -3803,7 +3804,7 @@ void vp10_init_tile_data(VP9_COMP *cpi) {
   }
 }
 
-void vp10_encode_tile(VP9_COMP *cpi, ThreadData *td,
+void vp10_encode_tile(VP10_COMP *cpi, ThreadData *td,
                      int tile_row, int tile_col) {
   VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -3826,7 +3827,7 @@ void vp10_encode_tile(VP9_COMP *cpi, ThreadData *td,
       allocated_tokens(*tile_info));
 }
 
-static void encode_tiles(VP9_COMP *cpi) {
+static void encode_tiles(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -3854,7 +3855,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 }
 #endif
 
-static void encode_frame_internal(VP9_COMP *cpi) {
+static void encode_frame_internal(VP10_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   ThreadData *const td = &cpi->td;
   MACROBLOCK *const x = &td->mb;
@@ -3979,7 +3980,7 @@ static INTERP_FILTER get_interp_filter(
   }
 }
 
-void vp10_encode_frame(VP9_COMP *cpi) {
+void vp10_encode_frame(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
 
   // In the longer term the encoder should be generalized to match the
@@ -4122,7 +4123,7 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   ++counts->uv_mode[y_mode][uv_mode];
 }
 
-static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
+static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
                               TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize,
                               PICK_MODE_CONTEXT *ctx) {

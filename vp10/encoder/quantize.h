@@ -40,14 +40,14 @@ typedef struct {
 void vp10_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan);
 
-struct VP9_COMP;
+struct VP10_COMP;
 struct VP9Common;
 
-void vp10_frame_init_quantizer(struct VP9_COMP *cpi);
+void vp10_frame_init_quantizer(struct VP10_COMP *cpi);
 
-void vp10_init_plane_quantizers(struct VP9_COMP *cpi, MACROBLOCK *x);
+void vp10_init_plane_quantizers(struct VP10_COMP *cpi, MACROBLOCK *x);
 
-void vp10_init_quantizer(struct VP9_COMP *cpi);
+void vp10_init_quantizer(struct VP10_COMP *cpi);
 
 void vp10_set_quantizer(struct VP9Common *cm, int q);
 

@@ -420,10 +420,10 @@ typedef struct SPEED_FEATURES {
   int simple_model_rd_from_var;
 } SPEED_FEATURES;
 
-struct VP9_COMP;
+struct VP10_COMP;
 
-void vp10_set_speed_features_framesize_independent(struct VP9_COMP *cpi);
-void vp10_set_speed_features_framesize_dependent(struct VP9_COMP *cpi);
+void vp10_set_speed_features_framesize_independent(struct VP10_COMP *cpi);
+void vp10_set_speed_features_framesize_dependent(struct VP10_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -438,7 +438,7 @@ const struct vp10_token vp10_coef_encodings[ENTROPY_TOKENS] = {
 
 
 struct tokenize_b_args {
-  VP9_COMP *cpi;
+  VP10_COMP *cpi;
   ThreadData *td;
   TOKENEXTRA **tp;
 };
@@ -490,7 +490,7 @@ static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
-  VP9_COMP *cpi = args->cpi;
+  VP10_COMP *cpi = args->cpi;
   ThreadData *const td = args->td;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -610,7 +610,7 @@ int vp10_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   return result;
 }
 
-void vp10_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
+void vp10_tokenize_sb(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                      int dry_run, BLOCK_SIZE bsize) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;

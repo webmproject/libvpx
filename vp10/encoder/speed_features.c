@@ -17,7 +17,7 @@
 
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
-static int frame_is_boosted(const VP9_COMP *cpi) {
+static int frame_is_boosted(const VP10_COMP *cpi) {
   return frame_is_kf_gf_arf(cpi) || vp10_is_upper_layer_key_frame(cpi);
 }
 
@@ -43,7 +43,7 @@ static BLOCK_SIZE set_partition_min_limit(VP10_COMMON *const cm) {
   }
 }
 
-static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
+static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
                                                        SPEED_FEATURES *sf,
                                                        int speed) {
   VP10_COMMON *const cm = &cpi->common;
@@ -108,7 +108,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 }
 
-static void set_good_speed_feature(VP9_COMP *cpi, VP10_COMMON *cm,
+static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
                                    SPEED_FEATURES *sf, int speed) {
   const int boosted = frame_is_boosted(cpi);
 
@@ -210,7 +210,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP10_COMMON *cm,
   }
 }
 
-static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
+static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
     SPEED_FEATURES *sf, int speed) {
   VP10_COMMON *const cm = &cpi->common;
 
@@ -246,7 +246,7 @@ static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 }
 
-static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
+static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
                                  int speed, vp9e_tune_content content) {
   VP10_COMMON *const cm = &cpi->common;
   const int is_keyframe = cm->frame_type == KEY_FRAME;
@@ -402,7 +402,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 }
 
-void vp10_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
+void vp10_set_speed_features_framesize_dependent(VP10_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RD_OPT *const rd = &cpi->rd;
@@ -431,7 +431,7 @@ void vp10_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   }
 }
 
-void vp10_set_speed_features_framesize_independent(VP9_COMP *cpi) {
+void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;

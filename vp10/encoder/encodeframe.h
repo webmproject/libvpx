@@ -20,7 +20,7 @@ extern "C" {
 
 struct macroblock;
 struct yv12_buffer_config;
-struct VP9_COMP;
+struct VP10_COMP;
 struct ThreadData;
 
 // Constants used in SOURCE_VAR_BASED_PARTITION
@@ -34,13 +34,13 @@ void vp10_setup_src_planes(struct macroblock *x,
                           const struct yv12_buffer_config *src,
                           int mi_row, int mi_col);
 
-void vp10_encode_frame(struct VP9_COMP *cpi);
+void vp10_encode_frame(struct VP10_COMP *cpi);
 
-void vp10_init_tile_data(struct VP9_COMP *cpi);
-void vp10_encode_tile(struct VP9_COMP *cpi, struct ThreadData *td,
+void vp10_init_tile_data(struct VP10_COMP *cpi);
+void vp10_encode_tile(struct VP10_COMP *cpi, struct ThreadData *td,
                      int tile_row, int tile_col);
 
-void vp10_set_variance_partition_thresholds(struct VP9_COMP *cpi, int q);
+void vp10_set_variance_partition_thresholds(struct VP10_COMP *cpi, int q);
 
 #ifdef __cplusplus
 }  // extern "C"

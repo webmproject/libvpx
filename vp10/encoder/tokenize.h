@@ -48,10 +48,10 @@ extern const struct vp10_token vp10_coef_encodings[];
 int vp10_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 int vp10_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
-struct VP9_COMP;
+struct VP10_COMP;
 struct ThreadData;
 
-void vp10_tokenize_sb(struct VP9_COMP *cpi, struct ThreadData *td,
+void vp10_tokenize_sb(struct VP10_COMP *cpi, struct ThreadData *td,
                      TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
 
 extern const int16_t *vp10_dct_value_cost_ptr;

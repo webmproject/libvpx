@@ -72,48 +72,48 @@ typedef struct {
   VP9E_TEMPORAL_LAYERING_MODE temporal_layering_mode;
 } SVC;
 
-struct VP9_COMP;
+struct VP10_COMP;
 
 // Initialize layer context data from init_config().
-void vp10_init_layer_context(struct VP9_COMP *const cpi);
+void vp10_init_layer_context(struct VP10_COMP *const cpi);
 
 // Update the layer context from a change_config() call.
-void vp10_update_layer_context_change_config(struct VP9_COMP *const cpi,
+void vp10_update_layer_context_change_config(struct VP10_COMP *const cpi,
                                             const int target_bandwidth);
 
 // Prior to encoding the frame, update framerate-related quantities
 // for the current temporal layer.
-void vp10_update_temporal_layer_framerate(struct VP9_COMP *const cpi);
+void vp10_update_temporal_layer_framerate(struct VP10_COMP *const cpi);
 
 // Update framerate-related quantities for the current spatial layer.
-void vp10_update_spatial_layer_framerate(struct VP9_COMP *const cpi,
+void vp10_update_spatial_layer_framerate(struct VP10_COMP *const cpi,
                                         double framerate);
 
 // Prior to encoding the frame, set the layer context, for the current layer
 // to be encoded, to the cpi struct.
-void vp10_restore_layer_context(struct VP9_COMP *const cpi);
+void vp10_restore_layer_context(struct VP10_COMP *const cpi);
 
 // Save the layer context after encoding the frame.
-void vp10_save_layer_context(struct VP9_COMP *const cpi);
+void vp10_save_layer_context(struct VP10_COMP *const cpi);
 
 // Initialize second pass rc for spatial svc.
-void vp10_init_second_pass_spatial_svc(struct VP9_COMP *cpi);
+void vp10_init_second_pass_spatial_svc(struct VP10_COMP *cpi);
 
 // Increment number of video frames in layer
-void vp10_inc_frame_in_layer(struct VP9_COMP *const cpi);
+void vp10_inc_frame_in_layer(struct VP10_COMP *const cpi);
 
 // Check if current layer is key frame in spatial upper layer
-int vp10_is_upper_layer_key_frame(const struct VP9_COMP *const cpi);
+int vp10_is_upper_layer_key_frame(const struct VP10_COMP *const cpi);
 
 // Get the next source buffer to encode
-struct lookahead_entry *vp10_svc_lookahead_pop(struct VP9_COMP *const cpi,
+struct lookahead_entry *vp10_svc_lookahead_pop(struct VP10_COMP *const cpi,
                                               struct lookahead_ctx *ctx,
                                               int drain);
 
 // Start a frame and initialize svc parameters
-int vp10_svc_start_frame(struct VP9_COMP *const cpi);
+int vp10_svc_start_frame(struct VP10_COMP *const cpi);
 
-int vp10_one_pass_cbr_svc_start_layer(struct VP9_COMP *const cpi);
+int vp10_one_pass_cbr_svc_start_layer(struct VP10_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
