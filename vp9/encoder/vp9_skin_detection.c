@@ -61,10 +61,10 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
   const int src_uvstride = cpi->Source->uv_stride;
   YV12_BUFFER_CONFIG skinmap;
   memset(&skinmap, 0, sizeof(YV12_BUFFER_CONFIG));
-  if (vp9_alloc_frame_buffer(&skinmap, cm->width, cm->height,
+  if (vpx_alloc_frame_buffer(&skinmap, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
                                VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment)) {
-      vp9_free_frame_buffer(&skinmap);
+      vpx_free_frame_buffer(&skinmap);
       return;
   }
   memset(skinmap.buffer_alloc, 128, skinmap.frame_size);
@@ -99,6 +99,6 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
     src_v += (src_uvstride << 2) - ((cm->mi_cols - 1) << 2);
   }
   vp9_write_yuv_frame_420(&skinmap, yuv_skinmap_file);
-  vp9_free_frame_buffer(&skinmap);
+  vpx_free_frame_buffer(&skinmap);
 }
 #endif

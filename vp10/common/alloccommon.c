@@ -77,14 +77,14 @@ void vp10_free_ref_frame_buffers(BufferPool *pool) {
     }
     vpx_free(pool->frame_bufs[i].mvs);
     pool->frame_bufs[i].mvs = NULL;
-    vp9_free_frame_buffer(&pool->frame_bufs[i].buf);
+    vpx_free_frame_buffer(&pool->frame_bufs[i].buf);
   }
 }
 
 void vp10_free_postproc_buffers(VP10_COMMON *cm) {
 #if CONFIG_VP9_POSTPROC
-  vp9_free_frame_buffer(&cm->post_proc_buffer);
-  vp9_free_frame_buffer(&cm->post_proc_buffer_int);
+  vpx_free_frame_buffer(&cm->post_proc_buffer);
+  vpx_free_frame_buffer(&cm->post_proc_buffer_int);
 #else
   (void)cm;
 #endif

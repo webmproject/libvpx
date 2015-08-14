@@ -1114,7 +1114,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
     ++twopass->sr_update_lag;
   }
 
-  vp9_extend_frame_borders(new_yv12);
+  vpx_extend_frame_borders(new_yv12);
 
   if (lc != NULL) {
     vp10_update_reference_frames(cpi);

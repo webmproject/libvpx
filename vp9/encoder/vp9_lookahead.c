@@ -38,7 +38,7 @@ void vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
       unsigned int i;
 
       for (i = 0; i < ctx->max_sz; i++)
-        vp9_free_frame_buffer(&ctx->buf[i].img);
+        vpx_free_frame_buffer(&ctx->buf[i].img);
       free(ctx->buf);
     }
     free(ctx);
@@ -72,7 +72,7 @@ struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
     if (!ctx->buf)
       goto bail;
     for (i = 0; i < depth; i++)
-      if (vp9_alloc_frame_buffer(&ctx->buf[i].img,
+      if (vpx_alloc_frame_buffer(&ctx->buf[i].img,
                                  width, height, subsampling_x, subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                  use_highbitdepth,
@@ -172,7 +172,7 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
     if (larger_dimensions) {
       YV12_BUFFER_CONFIG new_img;
       memset(&new_img, 0, sizeof(new_img));
-      if (vp9_alloc_frame_buffer(&new_img,
+      if (vpx_alloc_frame_buffer(&new_img,
                                  width, height, subsampling_x, subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                  use_highbitdepth,
@@ -180,7 +180,7 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
                                  VP9_ENC_BORDER_IN_PIXELS,
                                  0))
           return 1;
-      vp9_free_frame_buffer(&buf->img);
+      vpx_free_frame_buffer(&buf->img);
       buf->img = new_img;
     } else if (new_dimensions) {
       buf->img.y_crop_width = src->y_crop_width;

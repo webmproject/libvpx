@@ -1235,7 +1235,7 @@ static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   setup_display_size(cm, rb);
 
   lock_buffer_pool(pool);
-  if (vp9_realloc_frame_buffer(
+  if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
           cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1316,7 +1316,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   setup_display_size(cm, rb);
 
   lock_buffer_pool(pool);
-  if (vp9_realloc_frame_buffer(
+  if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
           cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH

@@ -381,10 +381,10 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 #endif
   vp9_free_context_buffers(cm);
 
-  vp9_free_frame_buffer(&cpi->last_frame_uf);
-  vp9_free_frame_buffer(&cpi->scaled_source);
-  vp9_free_frame_buffer(&cpi->scaled_last_source);
-  vp9_free_frame_buffer(&cpi->alt_ref_buffer);
+  vpx_free_frame_buffer(&cpi->last_frame_uf);
+  vpx_free_frame_buffer(&cpi->scaled_source);
+  vpx_free_frame_buffer(&cpi->scaled_last_source);
+  vpx_free_frame_buffer(&cpi->alt_ref_buffer);
   vp9_lookahead_destroy(cpi->lookahead);
 
   vpx_free(cpi->tile_tok[0][0]);
@@ -405,12 +405,12 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   }
 
   for (i = 0; i < MAX_LAG_BUFFERS; ++i) {
-    vp9_free_frame_buffer(&cpi->svc.scaled_frames[i]);
+    vpx_free_frame_buffer(&cpi->svc.scaled_frames[i]);
   }
   memset(&cpi->svc.scaled_frames[0], 0,
          MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
 
-  vp9_free_frame_buffer(&cpi->svc.empty_frame.img);
+  vpx_free_frame_buffer(&cpi->svc.empty_frame.img);
   memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
 }
 
@@ -627,7 +627,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
                        "Failed to allocate lag buffers");
 
   // TODO(agrange) Check if ARF is enabled and skip allocation if not.
-  if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
+  if (vpx_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                oxcf->width, oxcf->height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -641,7 +641,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
 
 static void alloc_util_frame_buffers(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  if (vp9_realloc_frame_buffer(&cpi->last_frame_uf,
+  if (vpx_realloc_frame_buffer(&cpi->last_frame_uf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -652,7 +652,7 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
 
-  if (vp9_realloc_frame_buffer(&cpi->scaled_source,
+  if (vpx_realloc_frame_buffer(&cpi->scaled_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -663,7 +663,7 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
-  if (vp9_realloc_frame_buffer(&cpi->scaled_last_source,
+  if (vpx_realloc_frame_buffer(&cpi->scaled_last_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -742,7 +742,7 @@ static void update_frame_size(VP9_COMP *cpi) {
   set_tile_limits(cpi);
 
   if (is_two_pass_svc(cpi)) {
-    if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
+    if (vpx_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -2547,7 +2547,7 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
                      dsts[i], dst_heights[i], dst_widths[i], dst_strides[i]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   }
-  vp9_extend_frame_borders(dst);
+  vpx_extend_frame_borders(dst);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -2602,7 +2602,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
     }
   }
 
-  vp9_extend_frame_borders(dst);
+  vpx_extend_frame_borders(dst);
 }
 
 static int scale_down(VP9_COMP *cpi, int q) {
@@ -2768,7 +2768,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
       vp9_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
   }
 
-  vp9_extend_frame_inner_borders(cm->frame_to_show);
+  vpx_extend_frame_inner_borders(cm->frame_to_show);
 }
 
 static INLINE void alloc_frame_mvs(const VP9_COMMON *cm,
@@ -2818,7 +2818,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
         if (force_scaling ||
             new_fb_ptr->buf.y_crop_width != cm->width ||
             new_fb_ptr->buf.y_crop_height != cm->height) {
-          vp9_realloc_frame_buffer(&new_fb_ptr->buf,
+          vpx_realloc_frame_buffer(&new_fb_ptr->buf,
                                    cm->width, cm->height,
                                    cm->subsampling_x, cm->subsampling_y,
                                    cm->use_highbitdepth,
@@ -2843,7 +2843,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
         if (force_scaling ||
             new_fb_ptr->buf.y_crop_width != cm->width ||
             new_fb_ptr->buf.y_crop_height != cm->height) {
-          vp9_realloc_frame_buffer(&new_fb_ptr->buf,
+          vpx_realloc_frame_buffer(&new_fb_ptr->buf,
                                    cm->width, cm->height,
                                    cm->subsampling_x, cm->subsampling_y,
                                    VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
@@ -3138,7 +3138,7 @@ static void set_frame_size(VP9_COMP *cpi) {
   alloc_frame_mvs(cm, cm->new_fb_idx);
 
   // Reset the frame pointers to the current frame size.
-  vp9_realloc_frame_buffer(get_frame_new_buffer(cm),
+  vpx_realloc_frame_buffer(get_frame_new_buffer(cm),
                            cm->width, cm->height,
                            cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -3171,7 +3171,7 @@ static void set_frame_size(VP9_COMP *cpi) {
                                         cm->width, cm->height);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       if (vp9_is_scaled(&ref_buf->sf))
-        vp9_extend_frame_borders(buf);
+        vpx_extend_frame_borders(buf);
     } else {
       ref_buf->buf = NULL;
     }
@@ -3562,7 +3562,7 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required_fast(VP9_COMMON *cm,
     // For 2x2 scaling down.
     vpx_scale_frame(unscaled, scaled, unscaled->y_buffer, 9, 2, 1,
                     2, 1, 0);
-    vp9_extend_frame_borders(scaled);
+    vpx_extend_frame_borders(scaled);
     return scaled;
   } else {
     return unscaled;
@@ -4178,7 +4178,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       if (oxcf->arnr_max_frames > 0) {
         // Produce the filtered ARF frame.
         vp9_temporal_filter(cpi, arf_src_index);
-        vp9_extend_frame_borders(&cpi->alt_ref_buffer);
+        vpx_extend_frame_borders(&cpi->alt_ref_buffer);
         force_src_buffer = &cpi->alt_ref_buffer;
       }
 
@@ -4385,7 +4385,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           PSNR_STATS psnr2;
           double frame_ssim2 = 0, weight = 0;
 #if CONFIG_VP9_POSTPROC
-          if (vp9_alloc_frame_buffer(&cm->post_proc_buffer,
+          if (vpx_alloc_frame_buffer(&cm->post_proc_buffer,
                                      recon->y_crop_width, recon->y_crop_height,
                                      cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH

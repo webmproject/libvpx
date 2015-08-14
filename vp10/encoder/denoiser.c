@@ -435,7 +435,7 @@ int vp10_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
   assert(denoiser != NULL);
 
   for (i = 0; i < MAX_REF_FRAMES; ++i) {
-    fail = vp9_alloc_frame_buffer(&denoiser->running_avg_y[i], width, height,
+    fail = vpx_alloc_frame_buffer(&denoiser->running_avg_y[i], width, height,
                                   ssx, ssy,
 #if CONFIG_VP9_HIGHBITDEPTH
                                   use_highbitdepth,
@@ -450,7 +450,7 @@ int vp10_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 #endif
   }
 
-  fail = vp9_alloc_frame_buffer(&denoiser->mc_running_avg_y, width, height,
+  fail = vpx_alloc_frame_buffer(&denoiser->mc_running_avg_y, width, height,
                                 ssx, ssy,
 #if CONFIG_VP9_HIGHBITDEPTH
                                 use_highbitdepth,
@@ -476,9 +476,9 @@ void vp10_denoiser_free(VP9_DENOISER *denoiser) {
     return;
   }
   for (i = 0; i < MAX_REF_FRAMES; ++i) {
-    vp9_free_frame_buffer(&denoiser->running_avg_y[i]);
+    vpx_free_frame_buffer(&denoiser->running_avg_y[i]);
   }
-  vp9_free_frame_buffer(&denoiser->mc_running_avg_y);
+  vpx_free_frame_buffer(&denoiser->mc_running_avg_y);
 }
 
 #ifdef OUTPUT_YUV_DENOISED

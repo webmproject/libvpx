@@ -117,7 +117,7 @@ int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 #if CONFIG_VP9 || CONFIG_VP10
 // TODO(jkoleszar): Maybe replace this with struct vpx_image
 
-int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
+int vpx_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   if (ybf) {
     if (ybf->buffer_alloc_sz > 0) {
       vpx_free(ybf->buffer_alloc);
@@ -134,7 +134,7 @@ int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   return 0;
 }
 
-int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                              int width, int height,
                              int ss_x, int ss_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -282,7 +282,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
   return -2;
 }
 
-int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+int vpx_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                            int width, int height,
                            int ss_x, int ss_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -291,8 +291,8 @@ int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                            int border,
                            int byte_alignment) {
   if (ybf) {
-    vp9_free_frame_buffer(ybf);
-    return vp9_realloc_frame_buffer(ybf, width, height, ss_x, ss_y,
+    vpx_free_frame_buffer(ybf);
+    return vpx_realloc_frame_buffer(ybf, width, height, ss_x, ss_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                     use_highbitdepth,
 #endif
