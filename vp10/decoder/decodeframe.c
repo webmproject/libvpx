@@ -2117,9 +2117,9 @@ static struct vpx_read_bit_buffer *init_read_bit_buffer(
 //------------------------------------------------------------------------------
 
 int vp10_read_sync_code(struct vpx_read_bit_buffer *const rb) {
-  return vpx_rb_read_literal(rb, 8) == VP9_SYNC_CODE_0 &&
-         vpx_rb_read_literal(rb, 8) == VP9_SYNC_CODE_1 &&
-         vpx_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
+  return vpx_rb_read_literal(rb, 8) == VP10_SYNC_CODE_0 &&
+         vpx_rb_read_literal(rb, 8) == VP10_SYNC_CODE_1 &&
+         vpx_rb_read_literal(rb, 8) == VP10_SYNC_CODE_2;
 }
 
 void vp10_read_frame_size(struct vpx_read_bit_buffer *rb,
