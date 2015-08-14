@@ -1209,7 +1209,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Structured Similarity (SSIM)
   #
   if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
-    add_proto qw/void vpx_highbd_ssim_parms_8x8/, "uint16_t *s, int sp, uint16_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
+    add_proto qw/void vpx_highbd_ssim_parms_8x8/, "const uint16_t *s, int sp, const uint16_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
     specialize qw/vpx_highbd_ssim_parms_8x8/;
   }
 }  # CONFIG_VP9_HIGHBITDEPTH
