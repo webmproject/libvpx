@@ -533,6 +533,7 @@ class Tracks {
   static const char kVorbisCodecId[];
   static const char kVp8CodecId[];
   static const char kVp9CodecId[];
+  static const char kVp10CodecId[];
 
   Tracks();
   ~Tracks();
