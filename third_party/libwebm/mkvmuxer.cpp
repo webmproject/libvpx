@@ -1045,6 +1045,7 @@ const char Tracks::kOpusCodecId[] = "A_OPUS";
 const char Tracks::kVorbisCodecId[] = "A_VORBIS";
 const char Tracks::kVp8CodecId[] = "V_VP8";
 const char Tracks::kVp9CodecId[] = "V_VP9";
+const char Tracks::kVp10CodecId[] = "V_VP10";
 
 Tracks::Tracks() : track_entries_(NULL), track_entries_size_(0) {}
 
