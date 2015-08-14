@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/mips/vpx_convolve_msa.h"
 
@@ -639,19 +640,8 @@ void vpx_convolve8_avg_vert_msa(const uint8_t *src, ptrdiff_t src_stride,
                                 int w, int h) {
   int8_t cnt, filt_ver[8];
 
-  if (16 != y_step_q4) {
-    vpx_convolve8_avg_vert_c(src, src_stride, dst, dst_stride,
-                             filter_x, x_step_q4, filter_y, y_step_q4,
-                             w, h);
-    return;
-  }
-
-  if (((const int32_t *)filter_y)[1] == 0x800000) {
-    vpx_convolve_avg(src, src_stride, dst, dst_stride,
-                     filter_x, x_step_q4, filter_y, y_step_q4,
-                     w, h);
-    return;
-  }
+  assert(y_step_q4 == 16);
+  assert(((const int32_t *)filter_y)[1] != 0x800000);
 
   for (cnt = 0; cnt < 8; ++cnt) {
     filt_ver[cnt] = filter_y[cnt];

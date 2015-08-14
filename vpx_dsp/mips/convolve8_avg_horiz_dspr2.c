@@ -957,79 +957,68 @@ void vpx_convolve8_avg_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                    const int16_t *filter_x, int x_step_q4,
                                    const int16_t *filter_y, int y_step_q4,
                                    int w, int h) {
-  if (((const int32_t *)filter_x)[1] == 0x800000) {
-    vpx_convolve_avg(src, src_stride,
-                     dst, dst_stride,
-                     filter_x, x_step_q4,
-                     filter_y, y_step_q4,
-                     w, h);
-  } else if (((const int32_t *)filter_x)[0] == 0) {
+  assert(x_step_q4 == 16);
+  assert(((const int32_t *)filter_x)[1] != 0x800000);
+
+  if (((const int32_t *)filter_x)[0] == 0) {
     vpx_convolve2_avg_horiz_dspr2(src, src_stride,
                                   dst, dst_stride,
                                   filter_x, x_step_q4,
                                   filter_y, y_step_q4,
                                   w, h);
   } else {
-    if (16 == x_step_q4) {
-      uint32_t pos = 38;
+    uint32_t pos = 38;
 
-      src -= 3;
+    src -= 3;
 
-      /* bit positon for extract from acc */
-      __asm__ __volatile__ (
-        "wrdsp      %[pos],     1           \n\t"
-        :
-        : [pos] "r" (pos)
-      );
+    /* bit positon for extract from acc */
+    __asm__ __volatile__ (
+      "wrdsp      %[pos],     1           \n\t"
+      :
+      : [pos] "r" (pos)
+    );
 
-      /* prefetch data to cache memory */
-      prefetch_load(src);
-      prefetch_load(src + 32);
-      prefetch_store(dst);
+    /* prefetch data to cache memory */
+    prefetch_load(src);
+    prefetch_load(src + 32);
+    prefetch_store(dst);
 
-      switch (w) {
-        case 4:
-          convolve_avg_horiz_4_dspr2(src, src_stride,
-                                     dst, dst_stride,
-                                     filter_x, h);
-          break;
-        case 8:
-          convolve_avg_horiz_8_dspr2(src, src_stride,
-                                     dst, dst_stride,
-                                     filter_x, h);
-          break;
-        case 16:
-          convolve_avg_horiz_16_dspr2(src, src_stride,
-                                      dst, dst_stride,
-                                      filter_x, h, 1);
-          break;
-        case 32:
-          convolve_avg_horiz_16_dspr2(src, src_stride,
-                                      dst, dst_stride,
-                                      filter_x, h, 2);
-          break;
-        case 64:
-          prefetch_load(src + 64);
-          prefetch_store(dst + 32);
-
-          convolve_avg_horiz_64_dspr2(src, src_stride,
-                                      dst, dst_stride,
-                                      filter_x, h);
-          break;
-        default:
-          vpx_convolve8_avg_horiz_c(src + 3, src_stride,
+    switch (w) {
+      case 4:
+        convolve_avg_horiz_4_dspr2(src, src_stride,
+                                   dst, dst_stride,
+                                   filter_x, h);
+        break;
+      case 8:
+        convolve_avg_horiz_8_dspr2(src, src_stride,
+                                   dst, dst_stride,
+                                   filter_x, h);
+        break;
+      case 16:
+        convolve_avg_horiz_16_dspr2(src, src_stride,
                                     dst, dst_stride,
-                                    filter_x, x_step_q4,
-                                    filter_y, y_step_q4,
-                                    w, h);
-          break;
-      }
-    } else {
-      vpx_convolve8_avg_horiz_c(src, src_stride,
-                                dst, dst_stride,
-                                filter_x, x_step_q4,
-                                filter_y, y_step_q4,
-                                w, h);
+                                    filter_x, h, 1);
+        break;
+      case 32:
+        convolve_avg_horiz_16_dspr2(src, src_stride,
+                                    dst, dst_stride,
+                                    filter_x, h, 2);
+        break;
+      case 64:
+        prefetch_load(src + 64);
+        prefetch_store(dst + 32);
+
+        convolve_avg_horiz_64_dspr2(src, src_stride,
+                                    dst, dst_stride,
+                                    filter_x, h);
+        break;
+      default:
+        vpx_convolve8_avg_horiz_c(src + 3, src_stride,
+                                  dst, dst_stride,
+                                  filter_x, x_step_q4,
+                                  filter_y, y_step_q4,
+                                  w, h);
+        break;
     }
   }
 }

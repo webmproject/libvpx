@@ -333,60 +333,49 @@ void vpx_convolve8_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4,
                               int w, int h) {
-  if (((const int32_t *)filter_y)[1] == 0x800000) {
-    vpx_convolve_copy(src, src_stride,
-                      dst, dst_stride,
-                      filter_x, x_step_q4,
-                      filter_y, y_step_q4,
-                      w, h);
-  } else if (((const int32_t *)filter_y)[0] == 0) {
+  assert(y_step_q4 == 16);
+  assert(((const int32_t *)filter_y)[1] != 0x800000);
+
+  if (((const int32_t *)filter_y)[0] == 0) {
     vpx_convolve2_vert_dspr2(src, src_stride,
                              dst, dst_stride,
                              filter_x, x_step_q4,
                              filter_y, y_step_q4,
                              w, h);
   } else {
-    if (16 == y_step_q4) {
-      uint32_t pos = 38;
+    uint32_t pos = 38;
 
-      /* bit positon for extract from acc */
-      __asm__ __volatile__ (
-        "wrdsp      %[pos],     1           \n\t"
-        :
-        : [pos] "r" (pos)
-      );
+    /* bit positon for extract from acc */
+    __asm__ __volatile__ (
+      "wrdsp      %[pos],     1           \n\t"
+      :
+      : [pos] "r" (pos)
+    );
 
-      prefetch_store(dst);
+    prefetch_store(dst);
 
-      switch (w) {
-        case 4 :
-        case 8 :
-        case 16 :
-        case 32 :
-          convolve_vert_4_dspr2(src, src_stride,
-                                dst, dst_stride,
-                                filter_y, w, h);
-          break;
-        case 64 :
-          prefetch_store(dst + 32);
-          convolve_vert_64_dspr2(src, src_stride,
-                                 dst, dst_stride,
-                                 filter_y, h);
-          break;
-        default:
-          vpx_convolve8_vert_c(src, src_stride,
+    switch (w) {
+      case 4 :
+      case 8 :
+      case 16 :
+      case 32 :
+        convolve_vert_4_dspr2(src, src_stride,
+                              dst, dst_stride,
+                              filter_y, w, h);
+        break;
+      case 64 :
+        prefetch_store(dst + 32);
+        convolve_vert_64_dspr2(src, src_stride,
                                dst, dst_stride,
-                               filter_x, x_step_q4,
-                               filter_y, y_step_q4,
-                               w, h);
-          break;
-      }
-    } else {
-      vpx_convolve8_vert_c(src, src_stride,
-                           dst, dst_stride,
-                           filter_x, x_step_q4,
-                           filter_y, y_step_q4,
-                           w, h);
+                               filter_y, h);
+        break;
+      default:
+        vpx_convolve8_vert_c(src, src_stride,
+                             dst, dst_stride,
+                             filter_x, x_step_q4,
+                             filter_y, y_step_q4,
+                             w, h);
+        break;
     }
   }
 }

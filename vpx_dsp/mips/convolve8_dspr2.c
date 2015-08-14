@@ -936,6 +936,12 @@ void vpx_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
   int32_t intermediate_height = ((h * y_step_q4) >> 4) + 7;
   uint32_t pos = 38;
 
+  assert(x_step_q4 == 16);
+  assert(y_step_q4 == 16);
+  assert(((const int32_t *)filter_x)[1] != 0x800000);
+  assert(((const int32_t *)filter_y)[1] != 0x800000);
+
+
   /* bit positon for extract from acc */
   __asm__ __volatile__ (
     "wrdsp      %[pos],     1           \n\t"
@@ -945,21 +951,6 @@ void vpx_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
 
   if (intermediate_height < h)
     intermediate_height = h;
-
-  if (x_step_q4 != 16 || y_step_q4 != 16)
-    return vpx_convolve8_c(src, src_stride,
-                           dst, dst_stride,
-                           filter_x, x_step_q4,
-                           filter_y, y_step_q4,
-                           w, h);
-
-  if ((((const int32_t *)filter_x)[1] == 0x800000)
-      && (((const int32_t *)filter_y)[1] == 0x800000))
-    return vpx_convolve_copy(src, src_stride,
-                             dst, dst_stride,
-                             filter_x, x_step_q4,
-                             filter_y, y_step_q4,
-                             w, h);
 
   /* copy the src to dst */
   if (filter_x[3] == 0x80) {
