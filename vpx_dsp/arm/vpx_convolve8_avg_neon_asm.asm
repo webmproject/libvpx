@@ -19,8 +19,6 @@
 
     EXPORT  |vpx_convolve8_avg_horiz_neon|
     EXPORT  |vpx_convolve8_avg_vert_neon|
-    IMPORT  |vpx_convolve8_avg_horiz_c|
-    IMPORT  |vpx_convolve8_avg_vert_c|
     ARM
     REQUIRE8
     PRESERVE8
@@ -52,10 +50,6 @@
 ; sp[]int h
 
 |vpx_convolve8_avg_horiz_neon| PROC
-    ldr             r12, [sp, #4]           ; x_step_q4
-    cmp             r12, #16
-    bne             vpx_convolve8_avg_horiz_c
-
     push            {r4-r10, lr}
 
     sub             r0, r0, #3              ; adjust for taps
@@ -184,10 +178,6 @@ vpx_convolve8_avg_loop_horiz
     ENDP
 
 |vpx_convolve8_avg_vert_neon| PROC
-    ldr             r12, [sp, #12]
-    cmp             r12, #16
-    bne             vpx_convolve8_avg_vert_c
-
     push            {r4-r8, lr}
 
     ; adjust for taps

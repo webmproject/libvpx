@@ -9,22 +9,12 @@
  */
 
 #include <arm_neon.h>
+#include <assert.h>
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
-
-void vpx_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
-                           uint8_t *dst, ptrdiff_t dst_stride,
-                           const int16_t *filter_x, int x_step_q4,
-                           const int16_t *filter_y, int y_step_q4,
-                           int w, int h);
-void vpx_convolve8_vert_c(const uint8_t *src, ptrdiff_t src_stride,
-                           uint8_t *dst, ptrdiff_t dst_stride,
-                           const int16_t *filter_x, int x_step_q4,
-                           const int16_t *filter_y, int y_step_q4,
-                           int w, int h);
 
 static INLINE int32x4_t MULTIPLY_BY_Q0(
     int16x4_t dsrc0,
@@ -82,12 +72,7 @@ void vpx_convolve8_horiz_neon(
   uint16x4x2_t d0x2u16, d1x2u16;
   uint32x4x2_t q0x2u32;
 
-  if (x_step_q4 != 16) {
-    vpx_convolve8_horiz_c(src, src_stride, dst, dst_stride,
-                          filter_x, x_step_q4,
-                          filter_y, y_step_q4, w, h);
-    return;
-  }
+  assert(x_step_q4 == 16);
 
   q0s16 = vld1q_s16(filter_x);
 
@@ -255,12 +240,7 @@ void vpx_convolve8_vert_neon(
   uint16x8_t q1u16, q2u16, q8u16, q9u16, q10u16, q11u16, q12u16, q13u16;
   int32x4_t q1s32, q2s32, q14s32, q15s32;
 
-  if (y_step_q4 != 16) {
-    vpx_convolve8_vert_c(src, src_stride, dst, dst_stride,
-                         filter_x, x_step_q4,
-                         filter_y, y_step_q4, w, h);
-    return;
-  }
+  assert(y_step_q4 == 16);
 
   src -= src_stride * 3;
   q0s16 = vld1q_s16(filter_y);
