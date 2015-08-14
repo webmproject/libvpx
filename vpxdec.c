@@ -89,7 +89,7 @@ static const arg_def_t fb_arg = ARG_DEF(
     NULL, "frame-buffers", 1, "Number of frame buffers to use");
 static const arg_def_t md5arg = ARG_DEF(
     NULL, "md5", 0, "Compute the MD5 sum of the decoded frame");
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
 static const arg_def_t outbitdeptharg = ARG_DEF(
     NULL, "output-bit-depth", 1, "Output bit-depth for decoded frames");
 #endif
@@ -99,7 +99,7 @@ static const arg_def_t *all_args[] = {
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
   &threadsarg, &frameparallelarg, &verbosearg, &scalearg, &fb_arg,
   &md5arg, &error_concealment, &continuearg,
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
   &outbitdeptharg,
 #endif
   NULL
@@ -136,7 +136,7 @@ static const arg_def_t *vp8_pp_args[] = {
 #if CONFIG_LIBYUV
 static INLINE int libyuv_scale(vpx_image_t *src, vpx_image_t *dst,
                                   FilterModeEnum mode) {
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
   if (src->fmt == VPX_IMG_FMT_I42016) {
     assert(dst->fmt == VPX_IMG_FMT_I42016);
     return I420Scale_16((uint16_t*)src->planes[VPX_PLANE_Y],
@@ -293,7 +293,7 @@ static void update_image_md5(const vpx_image_t *img, const int planes[3],
 static void write_image_file(const vpx_image_t *img, const int planes[3],
                              FILE *file) {
   int i, y;
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
   const int bytes_per_sample = ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
 #else
   const int bytes_per_sample = 1;
@@ -527,7 +527,7 @@ static FILE *open_outfile(const char *name) {
   }
 }
 
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
 static int img_shifted_realloc_required(const vpx_image_t *img,
                                         const vpx_image_t *shifted,
                                         vpx_img_fmt_t required_fmt) {
@@ -561,7 +561,7 @@ static int main_loop(int argc, const char **argv_) {
   int                     opt_yv12 = 0;
   int                     opt_i420 = 0;
   vpx_codec_dec_cfg_t     cfg = {0, 0, 0};
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
   int                     output_bit_depth = 0;
 #endif
 #if CONFIG_VP8_DECODER
@@ -575,7 +575,7 @@ static int main_loop(int argc, const char **argv_) {
   int                     dec_flags = 0;
   int                     do_scale = 0;
   vpx_image_t             *scaled_img = NULL;
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
   vpx_image_t             *img_shifted = NULL;
 #endif
   int                     frame_avail, got_data, flush_decoder = 0;
@@ -618,7 +618,7 @@ static int main_loop(int argc, const char **argv_) {
       use_y4m = 0;
       flipuv = 1;
       opt_yv12 = 1;
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
       output_bit_depth = 8;  // For yv12 8-bit depth output is assumed
 #endif
     } else if (arg_match(&arg, &use_i420, argi)) {
@@ -657,7 +657,7 @@ static int main_loop(int argc, const char **argv_) {
       num_external_frame_buffers = arg_parse_uint(&arg);
     else if (arg_match(&arg, &continuearg, argi))
       keep_going = 1;
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
     else if (arg_match(&arg, &outbitdeptharg, argi)) {
       output_bit_depth = arg_parse_uint(&arg);
     }
@@ -988,7 +988,7 @@ static int main_loop(int argc, const char **argv_) {
 #endif
         }
       }
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
       // Default to codec bit depth if output bit depth not set
       if (!output_bit_depth) {
         output_bit_depth = img->bit_depth;
@@ -1125,7 +1125,7 @@ fail:
     free(buf);
 
   if (scaled_img) vpx_img_free(scaled_img);
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
   if (img_shifted) vpx_img_free(img_shifted);
 #endif
 
