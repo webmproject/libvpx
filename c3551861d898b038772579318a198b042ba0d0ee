@@ -34,6 +34,24 @@
       "revId": "c3551861d898b038772579318a198b042ba0d0ee",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4a9e95f_34849ee9",
+        "filename": "vpx_mem/vpx_mem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-08-14T19:39:56Z",
+      "side": 1,
+      "message": "I guess this is the intent?\n#if (CONFIG_VP9 || CONFIG_VP10) \u0026\u0026 CONFIG_VP9_HIGHBITDEPTH\nProbably better to be explicit here with the ().",
+      "parentUuid": "a4a8755c_d3e67ed5",
+      "revId": "c3551861d898b038772579318a198b042ba0d0ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
