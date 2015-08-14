@@ -60,10 +60,10 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
                        "Failed to allocate "#lval); \
   } while (0)
 #endif
-
-#define VP9_SYNC_CODE_0 0x49
-#define VP9_SYNC_CODE_1 0x83
-#define VP9_SYNC_CODE_2 0x42
+// TODO(yaowu: validate the usage of these codes or develop new ones.)
+#define VP10_SYNC_CODE_0 0x49
+#define VP10_SYNC_CODE_1 0x83
+#define VP10_SYNC_CODE_2 0x43
 
 #define VP9_FRAME_MARKER 0x2
 

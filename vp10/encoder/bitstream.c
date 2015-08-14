@@ -1026,9 +1026,9 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
 }
 
 static void write_sync_code(struct vpx_write_bit_buffer *wb) {
-  vpx_wb_write_literal(wb, VP9_SYNC_CODE_0, 8);
-  vpx_wb_write_literal(wb, VP9_SYNC_CODE_1, 8);
-  vpx_wb_write_literal(wb, VP9_SYNC_CODE_2, 8);
+  vpx_wb_write_literal(wb, VP10_SYNC_CODE_0, 8);
+  vpx_wb_write_literal(wb, VP10_SYNC_CODE_1, 8);
+  vpx_wb_write_literal(wb, VP10_SYNC_CODE_2, 8);
 }
 
 static void write_profile(BITSTREAM_PROFILE profile,
