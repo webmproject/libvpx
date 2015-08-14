@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4a9e95f_94a312b3",
+        "filename": "vpx_mem/vpx_mem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-14T19:00:29Z",
+      "side": 1,
+      "message": "probably better to change it to just CONFIG_VP9_HIGHBITDEPTH and rename VP9_HIGHBITDEPTH if it will apply to both codecs.",
+      "revId": "c3551861d898b038772579318a198b042ba0d0ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
