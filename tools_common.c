@@ -133,16 +133,16 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
 #if CONFIG_ENCODERS
 
 static const VpxInterface vpx_encoders[] = {
+#if CONFIG_VP10_ENCODER
+  {"vp10", VP10_FOURCC, &vpx_codec_vp10_cx},
+#endif
+
 #if CONFIG_VP8_ENCODER
   {"vp8", VP8_FOURCC, &vpx_codec_vp8_cx},
 #endif
 
 #if CONFIG_VP9_ENCODER
   {"vp9", VP9_FOURCC, &vpx_codec_vp9_cx},
-#endif
-
-#if CONFIG_VP10_ENCODER
-  {"vp10", VP10_FOURCC, &vpx_codec_vp10_cx},
 #endif
 };
 
