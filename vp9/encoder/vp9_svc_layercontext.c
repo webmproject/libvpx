@@ -28,7 +28,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->temporal_layer_id = 0;
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
-    if (vp9_realloc_frame_buffer(&cpi->svc.empty_frame.img,
+    if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
                                  SMALL_FRAME_WIDTH, SMALL_FRAME_HEIGHT,
                                  cpi->common.subsampling_x,
                                  cpi->common.subsampling_y,

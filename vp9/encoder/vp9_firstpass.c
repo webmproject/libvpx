@@ -1112,7 +1112,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     ++twopass->sr_update_lag;
   }
 
-  vp9_extend_frame_borders(new_yv12);
+  vpx_extend_frame_borders(new_yv12);
 
   if (lc != NULL) {
     vp9_update_reference_frames(cpi);

@@ -659,7 +659,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
       const int width = ALIGN_POWER_OF_TWO(cm->width, 4);
       const int height = ALIGN_POWER_OF_TWO(cm->height, 4);
 
-      if (vp9_alloc_frame_buffer(&cm->post_proc_buffer_int, width, height,
+      if (vpx_alloc_frame_buffer(&cm->post_proc_buffer_int, width, height,
                                  cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                  cm->use_highbitdepth,
@@ -677,7 +677,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     }
   }
 
-  if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
+  if (vpx_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
