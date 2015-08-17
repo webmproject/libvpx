@@ -452,9 +452,6 @@ static const arg_def_t *vp9_args[] = {
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
   &noise_sens, &tune_content, &input_color_space,
   &min_gf_interval, &max_gf_interval,
-#if CONFIG_VP9_HIGHBITDEPTH
-  &bitdeptharg, &inbitdeptharg,
-#endif
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
