@@ -121,7 +121,7 @@ typedef enum {
   RESIZE_DYNAMIC = 2  // Coded size of each frame is determined by the codec.
 } RESIZE_TYPE;
 
-typedef struct VP9EncoderConfig {
+typedef struct VP10EncoderConfig {
   BITSTREAM_PROFILE profile;
   vpx_bit_depth_t bit_depth;     // Codec bit-depth.
   int width;  // width of data passed to the compressor
@@ -240,9 +240,9 @@ typedef struct VP9EncoderConfig {
 #endif
   vpx_color_space_t color_space;
   VP9E_TEMPORAL_LAYERING_MODE temporal_layering_mode;
-} VP9EncoderConfig;
+} VP10EncoderConfig;
 
-static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
+static INLINE int is_lossless_requested(const VP10EncoderConfig *cfg) {
   return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
 }
 
@@ -296,7 +296,7 @@ typedef struct VP10_COMP {
   DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
   VP10_COMMON common;
-  VP9EncoderConfig oxcf;
+  VP10EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *alt_ref_source;
 
@@ -505,11 +505,11 @@ typedef struct VP10_COMP {
 
 void vp10_initialize_enc(void);
 
-struct VP10_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
+struct VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
                                        BufferPool *const pool);
 void vp10_remove_compressor(VP10_COMP *cpi);
 
-void vp10_change_config(VP10_COMP *cpi, const VP9EncoderConfig *oxcf);
+void vp10_change_config(VP10_COMP *cpi, const VP10EncoderConfig *oxcf);
 
   // receive a frames worth of data. caller can assume that a copy of this
   // frame is made and not just a copy of the pointer..

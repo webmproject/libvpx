@@ -614,7 +614,7 @@ static void update_reference_segmentation_map(VP10_COMP *cpi) {
 
 static void alloc_raw_frame_buffers(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *oxcf = &cpi->oxcf;
 
   if (!cpi->lookahead)
     cpi->lookahead = vp10_lookahead_init(oxcf->width, oxcf->height,
@@ -762,7 +762,7 @@ static void init_buffer_indices(VP10_COMP *cpi) {
   cpi->alt_fb_idx = 2;
 }
 
-static void init_config(struct VP10_COMP *cpi, VP9EncoderConfig *oxcf) {
+static void init_config(struct VP10_COMP *cpi, VP10EncoderConfig *oxcf) {
   VP10_COMMON *const cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
@@ -806,7 +806,7 @@ static void init_config(struct VP10_COMP *cpi, VP9EncoderConfig *oxcf) {
 }
 
 static void set_rc_buffer_sizes(RATE_CONTROL *rc,
-                                const VP9EncoderConfig *oxcf) {
+                                const VP10EncoderConfig *oxcf) {
   const int64_t bandwidth = oxcf->target_bandwidth;
   const int64_t starting = oxcf->starting_buffer_level_ms;
   const int64_t optimal = oxcf->optimal_buffer_level_ms;
@@ -1451,7 +1451,7 @@ static void realloc_segmentation_maps(VP10_COMP *cpi) {
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 }
 
-void vp10_change_config(struct VP10_COMP *cpi, const VP9EncoderConfig *oxcf) {
+void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
@@ -1590,7 +1590,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 }
 
 
-VP10_COMP *vp10_create_compressor(VP9EncoderConfig *oxcf,
+VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
   VP10_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP10_COMP));
@@ -2627,7 +2627,7 @@ static int recode_loop_test(VP10_COMP *cpi,
                             int high_limit, int low_limit,
                             int q, int maxq, int minq) {
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   const int frame_is_kfgfarf = frame_is_kf_gf_arf(cpi);
   int force_recode = 0;
 
@@ -3031,7 +3031,7 @@ static void set_size_independent_vars(VP10_COMP *cpi) {
 static void set_size_dependent_vars(VP10_COMP *cpi, int *q,
                                     int *bottom_index, int *top_index) {
   VP10_COMMON *const cm = &cpi->common;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
 
   // Setup variables that depend on the dimensions of the frame.
   vp10_set_speed_features_framesize_dependent(cpi);
@@ -3089,7 +3089,7 @@ static void init_motion_estimation(VP10_COMP *cpi) {
 static void set_frame_size(VP10_COMP *cpi) {
   int ref_frame;
   VP10_COMMON *const cm = &cpi->common;
-  VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  VP10EncoderConfig *const oxcf = &cpi->oxcf;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
   if (oxcf->pass == 2 &&
@@ -3633,7 +3633,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
                                       uint8_t *dest,
                                       unsigned int *frame_flags) {
   VP10_COMMON *const cm = &cpi->common;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   struct segmentation *const seg = &cm->seg;
   TX_SIZE t;
 
@@ -4103,7 +4103,7 @@ static void adjust_image_stat(double y, double u, double v, double all,
 int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   VP10_COMMON *const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
   RATE_CONTROL *const rc = &cpi->rc;

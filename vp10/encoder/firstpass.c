@@ -253,7 +253,7 @@ static double calculate_active_area(const VP10_COMP *cpi,
 #define ACT_AREA_CORRECTION 0.5
 static double calculate_modified_err(const VP10_COMP *cpi,
                                      const TWO_PASS *twopass,
-                                     const VP9EncoderConfig *oxcf,
+                                     const VP10EncoderConfig *oxcf,
                                      const FIRSTPASS_STATS *this_frame) {
   const FIRSTPASS_STATS *const stats = &twopass->total_stats;
   const double av_weight = stats->weight / stats->count;
@@ -276,7 +276,7 @@ static double calculate_modified_err(const VP10_COMP *cpi,
 
 // This function returns the maximum target rate per frame.
 static int frame_max_bits(const RATE_CONTROL *rc,
-                          const VP9EncoderConfig *oxcf) {
+                          const VP10EncoderConfig *oxcf) {
   int64_t max_bits = ((int64_t)rc->avg_frame_bandwidth *
                           (int64_t)oxcf->two_pass_vbrmax_section) / 100;
   if (max_bits < 0)
@@ -1183,7 +1183,7 @@ static int get_twopass_worst_quality(const VP10_COMP *cpi,
                                      int section_target_bandwidth,
                                      double group_weight_factor) {
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
 
   inactive_zone = fclamp(inactive_zone, 0.0, 1.0);
 
@@ -1265,7 +1265,7 @@ void vp10_calculate_coded_size(VP10_COMP *cpi,
 
 void vp10_init_second_pass(VP10_COMP *cpi) {
   SVC *const svc = &cpi->svc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   const int is_two_pass_svc = (svc->number_spatial_layers > 1) ||
                               (svc->number_temporal_layers > 1);
   TWO_PASS *const twopass = is_two_pass_svc ?
@@ -1684,7 +1684,7 @@ static void get_arf_buffer_indices(unsigned char *arf_buffer_indices) {
 static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
                                    double group_error, int gf_arf_bits) {
   RATE_CONTROL *const rc = &cpi->rc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
   FIRSTPASS_STATS frame_stats;
@@ -1845,7 +1845,7 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
 static void define_gf_group(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
-  VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  VP10EncoderConfig *const oxcf = &cpi->oxcf;
   TWO_PASS *const twopass = &cpi->twopass;
   FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
@@ -2267,7 +2267,7 @@ static void find_next_key_frame(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   const FIRSTPASS_STATS first_frame = *this_frame;
   const FIRSTPASS_STATS *const start_position = twopass->stats_in;
   FIRSTPASS_STATS next_frame;

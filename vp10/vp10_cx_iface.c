@@ -76,12 +76,12 @@ static struct vp10_extracfg default_extra_cfg = {
 struct vpx_codec_alg_priv {
   vpx_codec_priv_t        base;
   vpx_codec_enc_cfg_t     cfg;
-  struct vp10_extracfg     extra_cfg;
-  VP9EncoderConfig        oxcf;
+  struct vp10_extracfg    extra_cfg;
+  VP10EncoderConfig       oxcf;
   VP10_COMP               *cpi;
-  unsigned char          *cx_data;
+  unsigned char           *cx_data;
   size_t                  cx_data_sz;
-  unsigned char          *pending_cx_data;
+  unsigned char           *pending_cx_data;
   size_t                  pending_cx_data_sz;
   int                     pending_frame_count;
   size_t                  pending_frame_sizes[8];
@@ -90,7 +90,7 @@ struct vpx_codec_alg_priv {
   vpx_enc_frame_flags_t   next_frame_flags;
   vp8_postproc_cfg_t      preview_ppcfg;
   vpx_codec_pkt_list_decl(256) pkt_list;
-  unsigned int                 fixed_kf_cntr;
+  unsigned int            fixed_kf_cntr;
   vpx_codec_priv_output_cx_pkt_cb_pair_t output_cx_pkt_cb;
   // BufferPool that holds all reference frames.
   BufferPool              *buffer_pool;
@@ -377,7 +377,7 @@ static int get_image_bps(const vpx_image_t *img) {
 }
 
 static vpx_codec_err_t set_encoder_config(
-  VP9EncoderConfig *oxcf,
+  VP10EncoderConfig *oxcf,
   const vpx_codec_enc_cfg_t *cfg,
   const struct vp10_extracfg *extra_cfg) {
   const int is_vbr = cfg->rc_end_usage == VPX_VBR;
