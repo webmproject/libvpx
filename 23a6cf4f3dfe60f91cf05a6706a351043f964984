@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c471e91c_8b99f187",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "you can bring the \u0027{\u0027 up to the next line and maybe align all the \u0027\\\u0027s horizontally, they\u0027re a bit ragged right now",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4aeed64_b0289536",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 629,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "you can fix the fourth in new code, everything else later",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4434d7f_74ac65f8",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 724,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "this and the next could become do/while if you\u0027re guaranteed that x,y \u003e\u003d 8",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4434d7f_f4f6b502",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04806112_d03e3240",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1045,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "could join this with the line above",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64591d73_5a122a18",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1175,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "const",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4a8755c_dadd2a00",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1176,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "indent should be 4",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4a9e95f_07092d36",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1231,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T22:12:11Z",
+      "side": 1,
+      "message": "these 3 lines can go",
+      "revId": "23a6cf4f3dfe60f91cf05a6706a351043f964984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
