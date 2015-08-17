@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4a9e95f_24ed47b2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "you can drop the WIP now",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64591d73_97a65b96",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "this needs to be removed/relocated",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b861a5_06e4cfca",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "this is common to the file, but the naming could be corrected in a followup (should be lower with \u0027_\u0027)",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64591d73_d7af3367",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "fourth",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "243ac5f6_b5471224",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "this looks wrong; should be ...22 23 32 33... no?",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04806112_4dfd4ddf",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 689,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "static",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c471e91c_4851bfdf",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "as discussed offline, some of these __m64 might be able to be combined to 1 register; could be looked at as a followup.",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4fb1585_e1254c5f",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "are you guaranteed to have this alignment?",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4a8755c_3fd3104b",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 828,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-17T19:42:51Z",
+      "side": 1,
+      "message": "static",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
