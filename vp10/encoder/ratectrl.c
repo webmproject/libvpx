@@ -198,7 +198,7 @@ int vp10_estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
 
 int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *oxcf = &cpi->oxcf;
   const int min_frame_target = MAX(rc->min_frame_bandwidth,
                                    rc->avg_frame_bandwidth >> 5);
   if (target < min_frame_target)
@@ -223,7 +223,7 @@ int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
 
 int vp10_rc_clamp_iframe_target_size(const VP10_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *oxcf = &cpi->oxcf;
   if (oxcf->rc_max_intra_bitrate_pct) {
     const int max_rate = rc->avg_frame_bandwidth *
                              oxcf->rc_max_intra_bitrate_pct / 100;
@@ -301,7 +301,7 @@ int vp10_rc_get_default_max_gf_interval(double framerate, int min_gf_interval) {
   return MAX(interval, min_gf_interval);
 }
 
-void vp10_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
+void vp10_rc_init(const VP10EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   int i;
 
   if (pass == 0 && oxcf->rc_mode == VPX_CBR) {
@@ -359,7 +359,7 @@ void vp10_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
 }
 
 int vp10_rc_drop_frame(VP10_COMP *cpi) {
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
   if (!oxcf->drop_frames_water_mark) {
@@ -796,7 +796,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
 }
 
 static int get_active_cq_level(const RATE_CONTROL *rc,
-                               const VP9EncoderConfig *const oxcf) {
+                               const VP10EncoderConfig *const oxcf) {
   static const double cq_adjust_threshold = 0.1;
   int active_cq_level = oxcf->cq_level;
   if (oxcf->rc_mode == VPX_CQ &&
@@ -814,7 +814,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
                                              int *top_index) {
   const VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   const int cq_level = get_active_cq_level(rc, oxcf);
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_vbr(cpi);
@@ -983,7 +983,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
                                          int *top_index) {
   const VP10_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   const int cq_level = get_active_cq_level(rc, oxcf);
   int active_best_quality;
@@ -1267,7 +1267,7 @@ static void update_golden_frame_stats(VP10_COMP *cpi) {
 
 void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
   const VP10_COMMON *const cm = &cpi->common;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   const int qindex = cm->base_qindex;
 
@@ -1439,7 +1439,7 @@ void vp10_rc_get_one_pass_vbr_params(VP10_COMP *cpi) {
 }
 
 static int calc_pframe_target_size_one_pass_cbr(const VP10_COMP *cpi) {
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   const SVC *const svc = &cpi->svc;
   const int64_t diff = rc->optimal_buffer_level - rc->buffer_level;
@@ -1487,7 +1487,7 @@ static int calc_pframe_target_size_one_pass_cbr(const VP10_COMP *cpi) {
 
 static int calc_iframe_target_size_one_pass_cbr(const VP10_COMP *cpi) {
   const RATE_CONTROL *rc = &cpi->rc;
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *oxcf = &cpi->oxcf;
   const SVC *const svc = &cpi->svc;
   int target;
   if (cpi->common.current_video_frame == 0) {
@@ -1688,7 +1688,7 @@ int vp10_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
 
 void vp10_rc_set_gf_interval_range(const VP10_COMP *const cpi,
                                   RATE_CONTROL *const rc) {
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
 
   // Set Maximum gf/arf interval
   rc->max_gf_interval = oxcf->max_gf_interval;
@@ -1717,7 +1717,7 @@ void vp10_rc_set_gf_interval_range(const VP10_COMP *const cpi,
 
 void vp10_rc_update_framerate(VP10_COMP *cpi) {
   const VP10_COMMON *const cm = &cpi->common;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   int vbr_max_bits;
 

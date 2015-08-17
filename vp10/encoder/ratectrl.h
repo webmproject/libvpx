@@ -145,9 +145,9 @@ typedef struct {
 } RATE_CONTROL;
 
 struct VP10_COMP;
-struct VP9EncoderConfig;
+struct VP10EncoderConfig;
 
-void vp10_rc_init(const struct VP9EncoderConfig *oxcf, int pass,
+void vp10_rc_init(const struct VP10EncoderConfig *oxcf, int pass,
                  RATE_CONTROL *rc);
 
 int vp10_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,

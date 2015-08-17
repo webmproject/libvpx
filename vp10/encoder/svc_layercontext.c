@@ -20,7 +20,7 @@
 
 void vp10_init_layer_context(VP10_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   int sl, tl;
   int alt_ref_idx = svc->number_spatial_layers;
 
@@ -106,7 +106,7 @@ void vp10_init_layer_context(VP10_COMP *const cpi) {
 void vp10_update_layer_context_change_config(VP10_COMP *const cpi,
                                             const int target_bandwidth) {
   SVC *const svc = &cpi->svc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   const RATE_CONTROL *const rc = &cpi->rc;
   int sl, tl, layer = 0, spatial_layer_target;
   float bitrate_alloc = 1.0;
@@ -204,7 +204,7 @@ static LAYER_CONTEXT *get_layer_context(VP10_COMP *const cpi) {
 
 void vp10_update_temporal_layer_framerate(VP10_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(cpi);
   RATE_CONTROL *const lrc = &lc->rc;
   // Index into spatial+temporal arrays.
@@ -231,7 +231,7 @@ void vp10_update_temporal_layer_framerate(VP10_COMP *const cpi) {
 
 void vp10_update_spatial_layer_framerate(VP10_COMP *const cpi,
                                          double framerate) {
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(cpi);
   RATE_CONTROL *const lrc = &lc->rc;
 
@@ -262,7 +262,7 @@ void vp10_restore_layer_context(VP10_COMP *const cpi) {
 }
 
 void vp10_save_layer_context(VP10_COMP *const cpi) {
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(cpi);
 
   lc->rc = cpi->rc;

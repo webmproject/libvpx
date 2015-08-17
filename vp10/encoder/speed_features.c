@@ -404,7 +404,7 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
 
 void vp10_set_speed_features_framesize_dependent(VP10_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   RD_OPT *const rd = &cpi->rd;
   int i;
 
@@ -435,7 +435,7 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   int i;
 
   // best quality defaults

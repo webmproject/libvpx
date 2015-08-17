@@ -591,7 +591,7 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
 static void adjust_arnr_filter(VP10_COMP *cpi,
                                int distance, int group_boost,
                                int *arnr_frames, int *arnr_strength) {
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
   const int frames_after_arf =
       vp10_lookahead_depth(cpi->lookahead) - distance - 1;
   int frames_fwd = (cpi->oxcf.arnr_max_frames - 1) >> 1;
