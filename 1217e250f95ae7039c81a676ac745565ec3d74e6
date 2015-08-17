@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e41a6db3_86caaac1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4a9e95f_24ed47b2",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64591d73_97a65b96",
         "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-17T19:42:51Z",
       "side": 1,
       "message": "this needs to be removed/relocated",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e41a6db3_06087a9d",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "64591d73_97a65b96",
       "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "24d6450d_20648a98",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "Cut/paste from above filter functions.  Will fix in followup.",
+      "parentUuid": "04b861a5_06e4cfca",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64591d73_d7af3367",
         "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2015-08-17T19:42:51Z",
       "side": 1,
       "message": "fourth",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24d6450d_0026a66a",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "More cut/pasting.  Can correct in followup.",
+      "parentUuid": "64591d73_d7af3367",
       "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "24d6450d_007f861c",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "yep... fixed",
+      "parentUuid": "243ac5f6_b5471224",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04806112_4dfd4ddf",
         "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
         "patchSetId": 10
@@ -98,6 +188,24 @@
       "writtenOn": "2015-08-17T19:42:51Z",
       "side": 1,
       "message": "static",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24d6450d_e028e237",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 689,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04806112_4dfd4ddf",
       "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "c4156984_4bbf19f8",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "agreed.",
+      "parentUuid": "c471e91c_4851bfdf",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4fb1585_e1254c5f",
         "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
         "patchSetId": 10
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "24d6450d_c02bde31",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "yep.  movq will work on unaligned addresses.",
+      "parentUuid": "a4fb1585_e1254c5f",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4a8755c_3fd3104b",
         "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
         "patchSetId": 10
@@ -149,6 +293,24 @@
       "writtenOn": "2015-08-17T19:42:51Z",
       "side": 1,
       "message": "static",
+      "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4979553_4cd47fe9",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 828,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-17T20:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4a8755c_3fd3104b",
       "revId": "1217e250f95ae7039c81a676ac745565ec3d74e6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
