@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a4979553_cc0f8fe9",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-18T22:14:03Z",
+      "side": 1,
+      "message": "You will over process data.  (by design)  Instead of checking for muliple of 8 and dropping to c code, I decided to process the extra data.  This can be revisted in the future if it shows to be too much overhead.",
+      "parentUuid": "e4434d7f_55e160b9",
+      "revId": "d1c1362287396f6ca3a0205ac3d0755655077131",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04806112_dc92c928",
         "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-18T20:04:50Z",
       "side": 1,
       "message": "I\u0027d prefer not to put in new code with known issues, but given additional renaming will be done, do as you like",
+      "revId": "d1c1362287396f6ca3a0205ac3d0755655077131",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0424e1f1_f03b514d",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-08-18T22:14:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04806112_dc92c928",
       "revId": "d1c1362287396f6ca3a0205ac3d0755655077131",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
