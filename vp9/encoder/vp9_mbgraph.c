@@ -29,7 +29,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               int mb_col) {
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  const MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
+  MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
+  const SEARCH_METHODS old_search_method = mv_sf->search_method;
   const vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
 
   const int tmp_col_min = x->mv_col_min;
@@ -48,10 +49,11 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   ref_full.col = ref_mv->col >> 3;
   ref_full.row = ref_mv->row >> 3;
 
-  /*cpi->sf.search_method == HEX*/
-  vp9_hex_search(x, &ref_full, step_param, x->errorperbit, 0,
-                 cond_cost_list(cpi, cost_list),
-                 &v_fn_ptr, 0, ref_mv, dst_mv);
+  mv_sf->search_method = HEX;
+  vp9_full_pixel_search(cpi, x, BLOCK_16X16, &ref_full, step_param,
+                        x->errorperbit, cond_cost_list(cpi, cost_list), ref_mv,
+                        dst_mv, 0, 0);
+  mv_sf->search_method = old_search_method;
 
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
