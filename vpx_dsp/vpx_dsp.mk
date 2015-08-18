@@ -149,6 +149,13 @@ DSP_SRCS-$(HAVE_MSA)    += mips/loopfilter_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/loopfilter_16_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/loopfilter_8_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/loopfilter_4_msa.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_filters_dspr2.h
+DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_filters_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_macros_dspr2.h
+DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_masks_dspr2.h
+DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_mb_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_mb_horiz_dspr2.c
+DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_mb_vert_dspr2.c
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_loopfilter_sse2.c
