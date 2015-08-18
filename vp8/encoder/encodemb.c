@@ -14,7 +14,7 @@
 #include "vp8_rtcd.h"
 #include "encodemb.h"
 #include "vp8/common/reconinter.h"
-#include "quantize.h"
+#include "vp8/encoder/quantize.h"
 #include "tokenize.h"
 #include "vp8/common/invtrans.h"
 #include "vpx_mem/vpx_mem.h"

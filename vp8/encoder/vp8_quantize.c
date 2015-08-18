@@ -13,7 +13,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 #include "onyx_int.h"
-#include "quantize.h"
+#include "vp8/encoder/quantize.h"
 #include "vp8/common/quant_common.h"
 
 void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
