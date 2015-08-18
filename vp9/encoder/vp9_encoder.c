@@ -686,7 +686,7 @@ static int alloc_context_buffers_ext(VP9_COMP *cpi) {
   return 0;
 }
 
-void vp9_alloc_compressor_data(VP9_COMP *cpi) {
+static void alloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
   vp9_alloc_context_buffers(cm, cm->width, cm->height);
@@ -775,7 +775,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
 
   cm->width = oxcf->width;
   cm->height = oxcf->height;
-  vp9_alloc_compressor_data(cpi);
+  alloc_compressor_data(cpi);
 
   cpi->svc.temporal_layering_mode = oxcf->temporal_layering_mode;
 
@@ -1510,7 +1510,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   if (cpi->initial_width) {
     if (cm->width > cpi->initial_width || cm->height > cpi->initial_height) {
       vp9_free_context_buffers(cm);
-      vp9_alloc_compressor_data(cpi);
+      alloc_compressor_data(cpi);
       realloc_segmentation_maps(cpi);
       cpi->initial_width = cpi->initial_height = 0;
     }
