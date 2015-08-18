@@ -218,24 +218,16 @@ static const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   ADST_ADST,  // TM
 };
 
-static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
-                                  const MACROBLOCKD *xd) {
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
-    return DCT_DCT;
-
-  return intra_mode_to_tx_type_lookup[mbmi->mode];
-}
-
-static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
-                                      const MACROBLOCKD *xd, int ib) {
+static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
+                                  int block_idx) {
   const MODE_INFO *const mi = xd->mi[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi) ||
+      mbmi->tx_size >= TX_32X32)
     return DCT_DCT;
 
-  return intra_mode_to_tx_type_lookup[get_y_mode(mi, ib)];
+  return intra_mode_to_tx_type_lookup[get_y_mode(mi, block_idx)];
 }
 
 void vp10_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);

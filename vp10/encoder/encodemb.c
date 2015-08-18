@@ -104,7 +104,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int mul = 1 + (tx_size == TX_32X32);
   const int16_t *dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
-  const scan_order *const so = get_scan(xd, tx_size, type, block);
+  TX_TYPE tx_type = get_tx_type(type, xd, block);
+  const scan_order *const so = get_scan(tx_size, tx_type);
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
   int next = eob, sz = 0;
@@ -327,7 +328,9 @@ void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const scan_order *const scan_order = &vp10_default_scan_orders[tx_size];
+  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+  TX_TYPE tx_type = get_tx_type(plane_type, xd, block);
+  const scan_order *const scan_order = get_scan(tx_size, tx_type);
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -498,7 +501,9 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const scan_order *const scan_order = &vp10_default_scan_orders[tx_size];
+  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+  TX_TYPE tx_type = get_tx_type(plane_type, xd, block);
+  const scan_order *const scan_order = get_scan(tx_size, tx_type);
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -772,8 +777,9 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   tran_low_t *coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  const scan_order *scan_order;
-  TX_TYPE tx_type = DCT_DCT;
+  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+  TX_TYPE tx_type = get_tx_type(plane_type, xd, block);
+  const scan_order *const scan_order = get_scan(tx_size, tx_type);
   PREDICTION_MODE mode;
   const int bwl = b_width_log2_lookup[plane_bsize];
   const int diff_stride = 4 * (1 << bwl);
@@ -788,20 +794,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src = &p->src.buf[4 * (j * src_stride + i)];
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
-  if (tx_size == TX_4X4) {
-    tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
-    scan_order = &vp10_scan_orders[TX_4X4][tx_type];
-    mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
-  } else {
-    mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
-    if (tx_size == TX_32X32) {
-      scan_order = &vp10_default_scan_orders[TX_32X32];
-    } else {
-      tx_type = get_tx_type(pd->plane_type, xd);
-      scan_order = &vp10_scan_orders[tx_size][tx_type];
-    }
-  }
-
+  mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
   vp10_predict_intra_block(xd, bwl, tx_size, mode, x->skip_encode ? src : dst,
                           x->skip_encode ? src_stride : dst_stride,
                           dst, dst_stride, i, j, plane);

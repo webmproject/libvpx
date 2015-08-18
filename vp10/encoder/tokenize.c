@@ -507,7 +507,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
-  const scan_order *so;
+  const TX_TYPE tx_type = get_tx_type(type, xd, block);
+  const scan_order *const so = get_scan(tx_size, tx_type);
   const int ref = is_inter_block(mbmi);
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       td->rd_counts.coef_counts[tx_size][type][ref];
@@ -524,7 +525,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   pt = get_entropy_context(tx_size, pd->above_context + aoff,
                            pd->left_context + loff);
-  so = get_scan(xd, tx_size, type, block);
   scan = so->scan;
   nb = so->neighbors;
   c = 0;

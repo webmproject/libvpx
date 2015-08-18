@@ -370,7 +370,9 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
                                                 TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   PREDICTION_MODE mode = (plane == 0) ? mbmi->mode : mbmi->uv_mode;
+  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   uint8_t *dst;
+  int block_idx = (row << 1) + col;
   dst = &pd->dst.buf[4 * row * pd->dst.stride + 4 * col];
 
   if (mbmi->sb_type < BLOCK_8X8)
@@ -382,12 +384,10 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
                           col, row, plane);
 
   if (!mbmi->skip) {
-    const TX_TYPE tx_type = (plane || xd->lossless) ?
-        DCT_DCT : intra_mode_to_tx_type_lookup[mode];
-    const scan_order *sc = (plane || xd->lossless) ?
-        &vp10_default_scan_orders[tx_size] : &vp10_scan_orders[tx_size][tx_type];
+    TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx);
+    const scan_order *sc = get_scan(tx_size, tx_type);
     const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size,
-                                            r, mbmi->segment_id);
+                                             r, mbmi->segment_id);
     inverse_transform_block_intra(xd, plane, tx_type, tx_size,
                                   dst, pd->dst.stride, eob);
   }
@@ -397,7 +397,10 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd, vpx_reader *r,
                                    MB_MODE_INFO *const mbmi, int plane,
                                    int row, int col, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const scan_order *sc = &vp10_default_scan_orders[tx_size];
+  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+  int block_idx = (row << 1) + col;
+  TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx);
+  const scan_order *sc = get_scan(tx_size, tx_type);
   const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size, r,
                                           mbmi->segment_id);
 
