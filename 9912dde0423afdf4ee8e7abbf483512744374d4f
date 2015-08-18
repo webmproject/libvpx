@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4a8755c_b9ee397e",
+        "filename": "vp9/encoder/vp9_skin_detection.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-08-18T18:39:46Z",
+      "side": 1,
+      "message": "Please don\u0027t use log2(). It is floating point and C99.",
+      "revId": "9912dde0423afdf4ee8e7abbf483512744374d4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
