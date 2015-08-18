@@ -46,6 +46,30 @@
       "revId": "667c9e5f7341bd338322c1f38466d1a20869d142",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4a8755c_bf693970",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 1922,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-08-18T22:43:10Z",
+      "side": 1,
+      "message": "ok, changed it uint64_t anyway to be safe",
+      "parentUuid": "a4fb1585_38077e5a",
+      "range": {
+        "startLine": 1922,
+        "startChar": 4,
+        "endLine": 1922,
+        "endChar": 15
+      },
+      "revId": "667c9e5f7341bd338322c1f38466d1a20869d142",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
