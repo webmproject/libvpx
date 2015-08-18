@@ -19,8 +19,8 @@
 extern "C" {
 #endif
 
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define VPXMIN(x, y) (((x) < (y)) ? (x) : (y))
+#define VPXMAX(x, y) (((x) > (y)) ? (x) : (y))
 
 #if CONFIG_VP9_HIGHBITDEPTH
 // Note:

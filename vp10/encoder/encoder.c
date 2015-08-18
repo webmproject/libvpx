@@ -1492,8 +1492,8 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
 
   // Under a configuration change, where maximum_buffer_size may change,
   // keep buffer level clipped to the maximum allowed buffer size.
-  rc->bits_off_target = MIN(rc->bits_off_target, rc->maximum_buffer_size);
-  rc->buffer_level = MIN(rc->buffer_level, rc->maximum_buffer_size);
+  rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
+  rc->buffer_level = VPXMIN(rc->buffer_level, rc->maximum_buffer_size);
 
   // Set up frame rate and related parameters rate control values.
   vp10_new_framerate(cpi, cpi->framerate);
@@ -2615,7 +2615,7 @@ static int scale_down(VP10_COMP *cpi, int q) {
   if (rc->frame_size_selector == UNSCALED &&
       q >= rc->rf_level_maxq[gf_group->rf_level[gf_group->index]]) {
     const int max_size_thresh = (int)(rate_thresh_mult[SCALE_STEP1]
-        * MAX(rc->this_frame_target, rc->avg_frame_bandwidth));
+        * VPXMAX(rc->this_frame_target, rc->avg_frame_bandwidth));
     scale = rc->projected_frame_size > max_size_thresh ? 1 : 0;
   }
   return scale;
@@ -2998,7 +2998,7 @@ static void output_frame_level_debug_stats(VP10_COMP *cpi) {
 
 static void set_mv_search_params(VP10_COMP *cpi) {
   const VP10_COMMON *const cm = &cpi->common;
-  const unsigned int max_mv_def = MIN(cm->width, cm->height);
+  const unsigned int max_mv_def = VPXMIN(cm->width, cm->height);
 
   // Default based on max resolution.
   cpi->mv_step_param = vp10_init_search_range(max_mv_def);
@@ -3013,8 +3013,8 @@ static void set_mv_search_params(VP10_COMP *cpi) {
         // Allow mv_steps to correspond to twice the max mv magnitude found
         // in the previous frame, capped by the default max_mv_magnitude based
         // on resolution.
-        cpi->mv_step_param =
-            vp10_init_search_range(MIN(max_mv_def, 2 * cpi->max_mv_magnitude));
+        cpi->mv_step_param = vp10_init_search_range(
+            VPXMIN(max_mv_def, 2 * cpi->max_mv_magnitude));
       }
       cpi->max_mv_magnitude = 0;
     }
@@ -3386,7 +3386,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
 
           // Adjust Q
           q = (int)((q * high_err_target) / kf_err);
-          q = MIN(q, (q_high + q_low) >> 1);
+          q = VPXMIN(q, (q_high + q_low) >> 1);
         } else if (kf_err < low_err_target &&
                    rc->projected_frame_size >= frame_under_shoot_limit) {
           // The key frame is much better than the previous frame
@@ -3395,7 +3395,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
 
           // Adjust Q
           q = (int)((q * low_err_target) / kf_err);
-          q = MIN(q, (q_high + q_low + 1) >> 1);
+          q = VPXMIN(q, (q_high + q_low + 1) >> 1);
         }
 
         // Clamp Q to upper and lower limits:
@@ -3404,7 +3404,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
         loop = q != last_q;
       } else if (recode_loop_test(
           cpi, frame_over_shoot_limit, frame_under_shoot_limit,
-          q, MAX(q_high, top_index), bottom_index)) {
+          q, VPXMAX(q_high, top_index), bottom_index)) {
         // Is the projected frame size out of range and are we allowed
         // to attempt to recode.
         int last_q = q;
@@ -3446,12 +3446,12 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
             vp10_rc_update_rate_correction_factors(cpi);
 
             q = vp10_rc_regulate_q(cpi, rc->this_frame_target,
-                                   bottom_index, MAX(q_high, top_index));
+                                   bottom_index, VPXMAX(q_high, top_index));
 
             while (q < q_low && retries < 10) {
               vp10_rc_update_rate_correction_factors(cpi);
               q = vp10_rc_regulate_q(cpi, rc->this_frame_target,
-                                     bottom_index, MAX(q_high, top_index));
+                                     bottom_index, VPXMAX(q_high, top_index));
               retries++;
             }
           }
@@ -4030,8 +4030,8 @@ static void adjust_frame_rate(VP10_COMP *cpi,
       // Average this frame's rate into the last second's average
       // frame rate. If we haven't seen 1 second yet, then average
       // over the whole interval seen.
-      const double interval = MIN((double)(source->ts_end
-                                   - cpi->first_time_stamp_ever), 10000000.0);
+      const double interval = VPXMIN(
+          (double)(source->ts_end - cpi->first_time_stamp_ever), 10000000.0);
       double avg_duration = 10000000.0 / cpi->framerate;
       avg_duration *= (interval - avg_duration + this_duration);
       avg_duration /= interval;
@@ -4095,7 +4095,7 @@ static void adjust_image_stat(double y, double u, double v, double all,
   s->stat[U] += u;
   s->stat[V] += v;
   s->stat[ALL] += all;
-  s->worst = MIN(s->worst, all);
+  s->worst = VPXMIN(s->worst, all);
 }
 #endif  // CONFIG_INTERNAL_STATS
 
@@ -4425,7 +4425,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-          cpi->worst_ssim= MIN(cpi->worst_ssim, frame_ssim2);
+          cpi->worst_ssim= VPXMIN(cpi->worst_ssim, frame_ssim2);
           cpi->summed_quality += frame_ssim2 * weight;
           cpi->summed_weights += weight;
 
@@ -4462,7 +4462,8 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
               cpi->Source->y_buffer, cpi->Source->y_stride,
               cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
               cpi->Source->y_width, cpi->Source->y_height);
-          cpi->worst_blockiness = MAX(cpi->worst_blockiness, frame_blockiness);
+          cpi->worst_blockiness =
+              VPXMAX(cpi->worst_blockiness, frame_blockiness);
           cpi->total_blockiness += frame_blockiness;
         }
       }
@@ -4482,8 +4483,8 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           double consistency = vpx_sse_to_psnr(samples, peak,
                                              (double)cpi->total_inconsistency);
           if (consistency > 0.0)
-            cpi->worst_consistency = MIN(cpi->worst_consistency,
-                                         consistency);
+            cpi->worst_consistency =
+                VPXMIN(cpi->worst_consistency, consistency);
           cpi->total_inconsistency += this_inconsistency;
         }
       }

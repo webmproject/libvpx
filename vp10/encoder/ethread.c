@@ -67,7 +67,7 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
-  const int num_workers = MIN(cpi->oxcf.max_threads, tile_cols);
+  const int num_workers = VPXMIN(cpi->oxcf.max_threads, tile_cols);
   int i;
 
   vp10_init_tile_data(cpi);
@@ -80,7 +80,7 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
     // resolution.
     if (cpi->use_svc) {
       int max_tile_cols = get_max_tile_cols(cpi);
-      allocated_workers = MIN(cpi->oxcf.max_threads, max_tile_cols);
+      allocated_workers = VPXMIN(cpi->oxcf.max_threads, max_tile_cols);
     }
 
     CHECK_MEM_ERROR(cm, cpi->workers,

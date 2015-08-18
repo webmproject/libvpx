@@ -242,7 +242,7 @@ static int temporal_filter_find_matching_mb_c(VP10_COMP *cpi,
   xd->plane[0].pre[0].stride = stride;
 
   step_param = mv_sf->reduce_first_step_size;
-  step_param = MIN(step_param, MAX_MVSEARCH_STEPS - 2);
+  step_param = VPXMIN(step_param, MAX_MVSEARCH_STEPS - 2);
 
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   vp10_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,

@@ -815,7 +815,7 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
 static void encode_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
   // Mode
-  vpx_write_literal(w, MIN(cm->tx_mode, ALLOW_32X32), 2);
+  vpx_write_literal(w, VPXMIN(cm->tx_mode, ALLOW_32X32), 2);
   if (cm->tx_mode >= ALLOW_32X32)
     vpx_write_bit(w, cm->tx_mode == TX_MODE_SELECT);
 

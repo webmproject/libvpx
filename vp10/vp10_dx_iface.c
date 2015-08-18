@@ -183,7 +183,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
   si->w = si->h = 0;
 
   if (decrypt_cb) {
-    data_sz = MIN(sizeof(clear_buffer), data_sz);
+    data_sz = VPXMIN(sizeof(clear_buffer), data_sz);
     decrypt_cb(decrypt_state, data, clear_buffer, data_sz);
     data = clear_buffer;
   }

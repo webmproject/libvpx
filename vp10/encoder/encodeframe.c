@@ -978,8 +978,8 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
   const struct segmentation *const seg = &cm->seg;
   const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type];
   const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type];
-  const int x_mis = MIN(bw, cm->mi_cols - mi_col);
-  const int y_mis = MIN(bh, cm->mi_rows - mi_row);
+  const int x_mis = VPXMIN(bw, cm->mi_cols - mi_col);
+  const int y_mis = VPXMIN(bh, cm->mi_rows - mi_row);
   MV_REF *const frame_mvs =
       cm->cur_frame->mvs + mi_row * cm->mi_cols + mi_col;
   int w, h;
@@ -1131,8 +1131,8 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
 
   mbmi->sb_type = bsize;
   mbmi->mode = ZEROMV;
-  mbmi->tx_size = MIN(max_txsize_lookup[bsize],
-                      tx_mode_to_biggest_tx_size[tx_mode]);
+  mbmi->tx_size = VPXMIN(max_txsize_lookup[bsize],
+                         tx_mode_to_biggest_tx_size[tx_mode]);
   mbmi->skip = 1;
   mbmi->uv_mode = DC_PRED;
   mbmi->ref_frame[0] = LAST_FRAME;
@@ -1495,7 +1495,7 @@ static BLOCK_SIZE find_partition_size(BLOCK_SIZE bsize,
                                       int rows_left, int cols_left,
                                       int *bh, int *bw) {
   if (rows_left <= 0 || cols_left <= 0) {
-    return MIN(bsize, BLOCK_8X8);
+    return VPXMIN(bsize, BLOCK_8X8);
   } else {
     for (; bsize > 0; bsize -= 3) {
       *bh = num_8x8_blocks_high_lookup[bsize];
@@ -1869,8 +1869,8 @@ static void get_sb_partition_size_range(MACROBLOCKD *xd, MODE_INFO **mi_8x8,
       MODE_INFO *mi = mi_8x8[index+j];
       BLOCK_SIZE sb_type = mi ? mi->mbmi.sb_type : 0;
       bs_hist[sb_type]++;
-      *min_block_size = MIN(*min_block_size, sb_type);
-      *max_block_size = MAX(*max_block_size, sb_type);
+      *min_block_size = VPXMIN(*min_block_size, sb_type);
+      *max_block_size = VPXMAX(*max_block_size, sb_type);
     }
     index += xd->mi_stride;
   }
@@ -1947,8 +1947,8 @@ static void rd_auto_partition_range(VP10_COMP *cpi, const TileInfo *const tile,
   if (vp10_active_edge_sb(cpi, mi_row, mi_col)) {
     min_size = BLOCK_4X4;
   } else {
-    min_size = MIN(cpi->sf.rd_auto_partition_min_limit,
-                   MIN(min_size, max_size));
+    min_size =
+        VPXMIN(cpi->sf.rd_auto_partition_min_limit, VPXMIN(min_size, max_size));
   }
 
   // When use_square_partition_only is true, make sure at least one square
@@ -1984,8 +1984,8 @@ static void set_partition_range(VP10_COMMON *cm, MACROBLOCKD *xd,
       for (idx = 0; idx < mi_width; ++idx) {
         mi = prev_mi[idy * cm->mi_stride + idx];
         bs = mi ? mi->mbmi.sb_type : bsize;
-        min_size = MIN(min_size, bs);
-        max_size = MAX(max_size, bs);
+        min_size = VPXMIN(min_size, bs);
+        max_size = VPXMAX(max_size, bs);
       }
     }
   }
@@ -1994,8 +1994,8 @@ static void set_partition_range(VP10_COMMON *cm, MACROBLOCKD *xd,
     for (idy = 0; idy < mi_height; ++idy) {
       mi = xd->mi[idy * cm->mi_stride - 1];
       bs = mi ? mi->mbmi.sb_type : bsize;
-      min_size = MIN(min_size, bs);
-      max_size = MAX(max_size, bs);
+      min_size = VPXMIN(min_size, bs);
+      max_size = VPXMAX(max_size, bs);
     }
   }
 
@@ -2003,8 +2003,8 @@ static void set_partition_range(VP10_COMMON *cm, MACROBLOCKD *xd,
     for (idx = 0; idx < mi_width; ++idx) {
       mi = xd->mi[idx - cm->mi_stride];
       bs = mi ? mi->mbmi.sb_type : bsize;
-      min_size = MIN(min_size, bs);
-      max_size = MAX(max_size, bs);
+      min_size = VPXMIN(min_size, bs);
+      max_size = VPXMAX(max_size, bs);
     }
   }
 
@@ -2169,9 +2169,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     int mb_row = mi_row >> 1;
     int mb_col = mi_col >> 1;
     int mb_row_end =
-        MIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
+        VPXMIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
     int mb_col_end =
-        MIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
+        VPXMIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
     int r, c;
 
     // compute a complexity measure, basically measure inconsistency of motion
@@ -2260,9 +2260,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
           int mb_row = mi_row >> 1;
           int mb_col = mi_col >> 1;
           int mb_row_end =
-              MIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
+              VPXMIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
           int mb_col_end =
-              MIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
+              VPXMIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
           int r, c;
 
           int skip = 1;
@@ -2887,7 +2887,7 @@ static void encode_frame_internal(VP10_COMP *cpi) {
 #endif
 
     // If allowed, encoding tiles in parallel with one thread handling one tile.
-    if (MIN(cpi->oxcf.max_threads, 1 << cm->log2_tile_cols) > 1)
+    if (VPXMIN(cpi->oxcf.max_threads, 1 << cm->log2_tile_cols) > 1)
       vp10_encode_tiles_mt(cpi);
     else
       encode_tiles(cpi);
@@ -3102,10 +3102,10 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
     int plane;
     mbmi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-      vp10_encode_intra_block_plane(x, MAX(bsize, BLOCK_8X8), plane);
+      vp10_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
       sum_intra_stats(td->counts, mi);
-    vp10_tokenize_sb(cpi, td, t, !output_enabled, MAX(bsize, BLOCK_8X8));
+    vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
   } else {
     int ref;
     const int is_compound = has_second_ref(mbmi);
@@ -3118,12 +3118,14 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
                            &xd->block_refs[ref]->sf);
     }
     if (!(cpi->sf.reuse_inter_pred_sby && ctx->pred_pixel_ready) || seg_skip)
-      vp10_build_inter_predictors_sby(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
+      vp10_build_inter_predictors_sby(xd, mi_row, mi_col,
+                                      VPXMAX(bsize, BLOCK_8X8));
 
-    vp10_build_inter_predictors_sbuv(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
+    vp10_build_inter_predictors_sbuv(xd, mi_row, mi_col,
+                                     VPXMAX(bsize, BLOCK_8X8));
 
-    vp10_encode_sb(x, MAX(bsize, BLOCK_8X8));
-    vp10_tokenize_sb(cpi, td, t, !output_enabled, MAX(bsize, BLOCK_8X8));
+    vp10_encode_sb(x, VPXMAX(bsize, BLOCK_8X8));
+    vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
   }
 
   if (output_enabled) {
@@ -3137,8 +3139,8 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       TX_SIZE tx_size;
       // The new intra coding scheme requires no change of transform size
       if (is_inter_block(&mi->mbmi)) {
-        tx_size = MIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
-                      max_txsize_lookup[bsize]);
+        tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
+                         max_txsize_lookup[bsize]);
       } else {
         tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
       }

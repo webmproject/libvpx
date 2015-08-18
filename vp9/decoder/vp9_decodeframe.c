@@ -658,7 +658,7 @@ static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
     // pixels of each superblock row can be changed by next superblock row.
     if (pbi->frame_parallel_decode)
       vp9_frameworker_wait(pbi->frame_worker_owner, ref_frame_buf,
-                           MAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
+                           VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
 
     // Skip border extension if block is inside the frame.
     if (x0 < 0 || x0 > frame_width - 1 || x1 < 0 || x1 > frame_width - 1 ||
@@ -686,7 +686,7 @@ static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
      if (pbi->frame_parallel_decode) {
        const int y1 = (y0_16 + (h - 1) * ys) >> SUBPEL_BITS;
        vp9_frameworker_wait(pbi->frame_worker_owner, ref_frame_buf,
-                            MAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
+                            VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
      }
   }
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -757,8 +757,8 @@ static void dec_build_inter_predictors_sb(VP9Decoder *const pbi,
 static INLINE TX_SIZE dec_get_uv_tx_size(const MB_MODE_INFO *mbmi,
                                          int n4_wl, int n4_hl) {
   // get minimum log2 num4x4s dimension
-  const int x = MIN(n4_wl, n4_hl);
-  return MIN(mbmi->tx_size,  x);
+  const int x = VPXMIN(n4_wl, n4_hl);
+  return VPXMIN(mbmi->tx_size,  x);
 }
 
 static INLINE void dec_reset_skip_context(MACROBLOCKD *xd) {
@@ -819,8 +819,8 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   const int less8x8 = bsize < BLOCK_8X8;
   const int bw = 1 << (bwl - 1);
   const int bh = 1 << (bhl - 1);
-  const int x_mis = MIN(bw, cm->mi_cols - mi_col);
-  const int y_mis = MIN(bh, cm->mi_rows - mi_row);
+  const int x_mis = VPXMIN(bw, cm->mi_cols - mi_col);
+  const int y_mis = VPXMIN(bh, cm->mi_rows - mi_row);
 
   MB_MODE_INFO *mbmi = set_offsets(cm, xd, bsize, mi_row, mi_col,
                                    bw, bh, x_mis, y_mis, bwl, bhl);
@@ -1603,7 +1603,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
-  const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
+  const int num_workers = VPXMIN(pbi->max_threads & ~1, tile_cols);
   TileBuffer tile_buffers[1][1 << 6];
   int n;
   int final_worker = -1;
@@ -1670,7 +1670,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     int group_start = 0;
     while (group_start < tile_cols) {
       const TileBuffer largest = tile_buffers[0][group_start];
-      const int group_end = MIN(group_start + num_workers, tile_cols) - 1;
+      const int group_end = VPXMIN(group_start + num_workers, tile_cols) - 1;
       memmove(tile_buffers[0] + group_start, tile_buffers[0] + group_start + 1,
               (group_end - group_start) * sizeof(tile_buffers[0][0]));
       tile_buffers[0][group_end] = largest;
@@ -2102,7 +2102,7 @@ static struct vpx_read_bit_buffer *init_read_bit_buffer(
   rb->error_handler = error_handler;
   rb->error_handler_data = &pbi->common;
   if (pbi->decrypt_cb) {
-    const int n = (int)MIN(MAX_VP9_HEADER_SIZE, data_end - data);
+    const int n = (int)VPXMIN(MAX_VP9_HEADER_SIZE, data_end - data);
     pbi->decrypt_cb(pbi->decrypt_state, data, clear_data, n);
     rb->bit_buffer = clear_data;
     rb->bit_buffer_end = clear_data + n;

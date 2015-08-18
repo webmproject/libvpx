@@ -216,8 +216,8 @@ void vp10_encode_mv(VP10_COMP* cpi, vpx_writer* w,
   // If auto_mv_step_size is enabled then keep track of the largest
   // motion vector component used.
   if (cpi->sf.mv.auto_mv_step_size) {
-    unsigned int maxv = MAX(abs(mv->row), abs(mv->col)) >> 3;
-    cpi->max_mv_magnitude = MAX(maxv, cpi->max_mv_magnitude);
+    unsigned int maxv = VPXMAX(abs(mv->row), abs(mv->col)) >> 3;
+    cpi->max_mv_magnitude = VPXMAX(maxv, cpi->max_mv_magnitude);
   }
 }
 
