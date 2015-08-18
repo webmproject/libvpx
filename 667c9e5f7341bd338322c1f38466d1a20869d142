@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04b861a5_b9839d5b",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 1922,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-08-18T21:59:52Z",
+      "side": 1,
+      "message": "It seems like for large images (e.g. 1920x1200) this is likely to overflow.",
+      "range": {
+        "startLine": 1922,
+        "startChar": 4,
+        "endLine": 1922,
+        "endChar": 15
+      },
+      "revId": "667c9e5f7341bd338322c1f38466d1a20869d142",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
