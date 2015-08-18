@@ -20,7 +20,7 @@
 #include "vp8/common/onyxc_int.h"
 #include "vpx_dsp/variance.h"
 #include "encodemb.h"
-#include "quantize.h"
+#include "vp8/encoder/quantize.h"
 #include "vp8/common/entropy.h"
 #include "vp8/common/threading.h"
 #include "vpx_ports/mem.h"

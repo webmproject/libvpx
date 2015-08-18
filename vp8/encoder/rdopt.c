@@ -28,7 +28,7 @@
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/quant_common.h"
 #include "encodemb.h"
-#include "quantize.h"
+#include "vp8/encoder/quantize.h"
 #include "vpx_dsp/variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
