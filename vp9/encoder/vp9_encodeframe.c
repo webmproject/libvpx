@@ -717,7 +717,8 @@ static int choose_partitioning(VP9_COMP *cpi,
       yv12_g = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
     }
 
-    if (yv12_g && yv12_g != yv12) {
+    if (yv12_g && yv12_g != yv12 &&
+       (cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
       vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
                            &cm->frame_refs[GOLDEN_FRAME - 1].sf);
       y_sad_g = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf,
