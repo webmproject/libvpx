@@ -80,4 +80,7 @@ TEST_P(BordersTest, TestLowBitrate) {
 
 VP9_INSTANTIATE_TEST_CASE(BordersTest, ::testing::Values(
     ::libvpx_test::kTwoPassGood));
+
+VP10_INSTANTIATE_TEST_CASE(BordersTest, ::testing::Values(
+    ::libvpx_test::kTwoPassGood));
 }  // namespace

@@ -18,11 +18,11 @@
 #include "test/y4m_video_source.h"
 
 namespace {
-class VP9EncoderThreadTest
+class VPxEncoderThreadTest
     : public ::libvpx_test::EncoderTest,
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
-  VP9EncoderThreadTest()
+  VPxEncoderThreadTest()
       : EncoderTest(GET_PARAM(0)),
         encoder_initialized_(false),
         tiles_(2),
@@ -36,7 +36,7 @@ class VP9EncoderThreadTest
 
     md5_.clear();
   }
-  virtual ~VP9EncoderThreadTest() {
+  virtual ~VPxEncoderThreadTest() {
     delete decoder_;
   }
 
@@ -105,7 +105,7 @@ class VP9EncoderThreadTest
   std::vector<std::string> md5_;
 };
 
-TEST_P(VP9EncoderThreadTest, EncoderResultTest) {
+TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   std::vector<std::string> single_thr_md5, multi_thr_md5;
 
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 20);
@@ -130,8 +130,13 @@ TEST_P(VP9EncoderThreadTest, EncoderResultTest) {
 }
 
 VP9_INSTANTIATE_TEST_CASE(
-    VP9EncoderThreadTest,
+    VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
                       ::libvpx_test::kRealTime),
     ::testing::Range(1, 9));
+
+VP10_INSTANTIATE_TEST_CASE(
+    VPxEncoderThreadTest,
+    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
+    ::testing::Range(1, 3));
 }  // namespace

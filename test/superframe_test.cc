@@ -94,4 +94,7 @@ TEST_P(SuperframeTest, TestSuperframeIndexIsOptional) {
 
 VP9_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Values(
     ::libvpx_test::kTwoPassGood));
+
+VP10_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Values(
+    ::libvpx_test::kTwoPassGood));
 }  // namespace

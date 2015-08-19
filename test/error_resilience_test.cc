@@ -583,4 +583,5 @@ VP8_INSTANTIATE_TEST_CASE(ErrorResilienceTestLarge, ONE_PASS_TEST_MODES);
 VP8_INSTANTIATE_TEST_CASE(ErrorResilienceTestLargeCodecControls,
                           ONE_PASS_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(ErrorResilienceTestLarge, ONE_PASS_TEST_MODES);
+VP10_INSTANTIATE_TEST_CASE(ErrorResilienceTestLarge, ONE_PASS_TEST_MODES);
 }  // namespace

@@ -104,4 +104,5 @@ TEST_P(TileIndependenceTest, MD5Match) {
 
 VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1));
 
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1));
 }  // namespace

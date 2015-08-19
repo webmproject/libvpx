@@ -229,4 +229,10 @@ VP9_INSTANTIATE_TEST_CASE(
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kEncodeVectors),
     ::testing::ValuesIn(kMinArfVectors));
+
+VP10_INSTANTIATE_TEST_CASE(
+    ArfFreqTest,
+    ::testing::ValuesIn(kTestVectors),
+    ::testing::ValuesIn(kEncodeVectors),
+    ::testing::ValuesIn(kMinArfVectors));
 }  // namespace

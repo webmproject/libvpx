@@ -187,4 +187,9 @@ VP9_INSTANTIATE_TEST_CASE(
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kCpuUsedVectors));
 
+VP10_INSTANTIATE_TEST_CASE(
+    EndToEndTestLarge,
+    ::testing::ValuesIn(kEncodingModeVectors),
+    ::testing::ValuesIn(kTestVectors),
+    ::testing::ValuesIn(kCpuUsedVectors));
 }  // namespace
