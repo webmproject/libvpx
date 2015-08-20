@@ -61,7 +61,7 @@ typedef struct {
   unsigned char *last_frame_seg_map_copy;
 
   // 0 = Intra, Last, GF, ARF
-  signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
+  signed char last_ref_lf_deltas[MAX_REF_FRAMES];
   // 0 = ZERO_MV, MV
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 

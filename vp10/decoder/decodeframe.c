@@ -1112,7 +1112,7 @@ static void setup_loopfilter(struct loopfilter *lf,
     if (lf->mode_ref_delta_update) {
       int i;
 
-      for (i = 0; i < MAX_REF_LF_DELTAS; i++)
+      for (i = 0; i < MAX_REF_FRAMES; i++)
         if (vpx_rb_read_bit(rb))
           lf->ref_deltas[i] = vpx_rb_read_signed_literal(rb, 6);
 

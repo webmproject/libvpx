@@ -26,7 +26,6 @@ extern "C" {
 
 #define SIMD_WIDTH 16
 
-#define MAX_REF_LF_DELTAS       4
 #define MAX_MODE_LF_DELTAS      2
 
 enum lf_path {
@@ -45,8 +44,8 @@ struct loopfilter {
   uint8_t mode_ref_delta_update;
 
   // 0 = Intra, Last, GF, ARF
-  signed char ref_deltas[MAX_REF_LF_DELTAS];
-  signed char last_ref_deltas[MAX_REF_LF_DELTAS];
+  signed char ref_deltas[MAX_REF_FRAMES];
+  signed char last_ref_deltas[MAX_REF_FRAMES];
 
   // 0 = ZERO_MV, MV
   signed char mode_deltas[MAX_MODE_LF_DELTAS];
