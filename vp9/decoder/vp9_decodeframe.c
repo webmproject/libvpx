@@ -1746,7 +1746,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       for (i = 0; i < num_workers; ++i) {
         TileWorkerData *const tile_data =
             (TileWorkerData*)pbi->tile_workers[i].data1;
-        vp9_accumulate_frame_counts(cm, &tile_data->counts, 1);
+        vp9_accumulate_frame_counts(&cm->counts, &tile_data->counts, 1);
       }
     }
   }

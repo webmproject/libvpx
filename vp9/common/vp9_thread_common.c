@@ -318,21 +318,21 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync) {
 }
 
 // Accumulate frame counts.
-void vp9_accumulate_frame_counts(VP9_COMMON *cm, FRAME_COUNTS *counts,
-                                 int is_dec) {
+void vp9_accumulate_frame_counts(FRAME_COUNTS *accum,
+                                 const FRAME_COUNTS *counts, int is_dec) {
   int i, j, k, l, m;
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     for (j = 0; j < INTRA_MODES; j++)
-      cm->counts.y_mode[i][j] += counts->y_mode[i][j];
+      accum->y_mode[i][j] += counts->y_mode[i][j];
 
   for (i = 0; i < INTRA_MODES; i++)
     for (j = 0; j < INTRA_MODES; j++)
-      cm->counts.uv_mode[i][j] += counts->uv_mode[i][j];
+      accum->uv_mode[i][j] += counts->uv_mode[i][j];
 
   for (i = 0; i < PARTITION_CONTEXTS; i++)
     for (j = 0; j < PARTITION_TYPES; j++)
-      cm->counts.partition[i][j] += counts->partition[i][j];
+      accum->partition[i][j] += counts->partition[i][j];
 
   if (is_dec) {
     int n;
@@ -341,10 +341,10 @@ void vp9_accumulate_frame_counts(VP9_COMMON *cm, FRAME_COUNTS *counts,
         for (k = 0; k < REF_TYPES; k++)
           for (l = 0; l < COEF_BANDS; l++)
             for (m = 0; m < COEFF_CONTEXTS; m++) {
-              cm->counts.eob_branch[i][j][k][l][m] +=
+              accum->eob_branch[i][j][k][l][m] +=
                   counts->eob_branch[i][j][k][l][m];
               for (n = 0; n < UNCONSTRAINED_NODES + 1; n++)
-                cm->counts.coef[i][j][k][l][m][n] +=
+                accum->coef[i][j][k][l][m][n] +=
                     counts->coef[i][j][k][l][m][n];
             }
   } else {
@@ -353,64 +353,64 @@ void vp9_accumulate_frame_counts(VP9_COMMON *cm, FRAME_COUNTS *counts,
         for (k = 0; k < REF_TYPES; k++)
           for (l = 0; l < COEF_BANDS; l++)
             for (m = 0; m < COEFF_CONTEXTS; m++)
-              cm->counts.eob_branch[i][j][k][l][m] +=
+              accum->eob_branch[i][j][k][l][m] +=
                   counts->eob_branch[i][j][k][l][m];
-                // In the encoder, cm->counts.coef is only updated at frame
+                // In the encoder, coef is only updated at frame
                 // level, so not need to accumulate it here.
                 // for (n = 0; n < UNCONSTRAINED_NODES + 1; n++)
-                //   cm->counts.coef[i][j][k][l][m][n] +=
+                //   accum->coef[i][j][k][l][m][n] +=
                 //       counts->coef[i][j][k][l][m][n];
   }
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
     for (j = 0; j < SWITCHABLE_FILTERS; j++)
-      cm->counts.switchable_interp[i][j] += counts->switchable_interp[i][j];
+      accum->switchable_interp[i][j] += counts->switchable_interp[i][j];
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     for (j = 0; j < INTER_MODES; j++)
-      cm->counts.inter_mode[i][j] += counts->inter_mode[i][j];
+      accum->inter_mode[i][j] += counts->inter_mode[i][j];
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      cm->counts.intra_inter[i][j] += counts->intra_inter[i][j];
+      accum->intra_inter[i][j] += counts->intra_inter[i][j];
 
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      cm->counts.comp_inter[i][j] += counts->comp_inter[i][j];
+      accum->comp_inter[i][j] += counts->comp_inter[i][j];
 
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
       for (k = 0; k < 2; k++)
-      cm->counts.single_ref[i][j][k] += counts->single_ref[i][j][k];
+      accum->single_ref[i][j][k] += counts->single_ref[i][j][k];
 
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      cm->counts.comp_ref[i][j] += counts->comp_ref[i][j];
+      accum->comp_ref[i][j] += counts->comp_ref[i][j];
 
   for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
     for (j = 0; j < TX_SIZES; j++)
-      cm->counts.tx.p32x32[i][j] += counts->tx.p32x32[i][j];
+      accum->tx.p32x32[i][j] += counts->tx.p32x32[i][j];
 
     for (j = 0; j < TX_SIZES - 1; j++)
-      cm->counts.tx.p16x16[i][j] += counts->tx.p16x16[i][j];
+      accum->tx.p16x16[i][j] += counts->tx.p16x16[i][j];
 
     for (j = 0; j < TX_SIZES - 2; j++)
-      cm->counts.tx.p8x8[i][j] += counts->tx.p8x8[i][j];
+      accum->tx.p8x8[i][j] += counts->tx.p8x8[i][j];
   }
 
   for (i = 0; i < TX_SIZES; i++)
-    cm->counts.tx.tx_totals[i] += counts->tx.tx_totals[i];
+    accum->tx.tx_totals[i] += counts->tx.tx_totals[i];
 
   for (i = 0; i < SKIP_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      cm->counts.skip[i][j] += counts->skip[i][j];
+      accum->skip[i][j] += counts->skip[i][j];
 
   for (i = 0; i < MV_JOINTS; i++)
-    cm->counts.mv.joints[i] += counts->mv.joints[i];
+    accum->mv.joints[i] += counts->mv.joints[i];
 
   for (k = 0; k < 2; k++) {
-    nmv_component_counts *comps = &cm->counts.mv.comps[k];
-    nmv_component_counts *comps_t = &counts->mv.comps[k];
+    nmv_component_counts *const comps = &accum->mv.comps[k];
+    const nmv_component_counts *const comps_t = &counts->mv.comps[k];
 
     for (i = 0; i < 2; i++) {
       comps->sign[i] += comps_t->sign[i];
