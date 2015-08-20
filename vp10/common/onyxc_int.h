@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-#define REFS_PER_FRAME 3
+#define REFS_PER_FRAME (ALTREF_FRAME - LAST_FRAME + 1)
 
 #define REF_FRAMES_LOG2 3
 #define REF_FRAMES (1 << REF_FRAMES_LOG2)
