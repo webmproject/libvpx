@@ -1643,9 +1643,14 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   // Reset tile decoding hook
   for (n = 0; n < num_workers; ++n) {
     VPxWorker *const worker = &pbi->tile_workers[n];
+    TileWorkerData *const tile_data = &pbi->tile_worker_data[n];
     winterface->sync(worker);
+    tile_data->pbi = pbi;
+    tile_data->xd = pbi->mb;
+    tile_data->xd.counts =
+        cm->frame_parallel_decoding_mode ? NULL : &tile_data->counts;
     worker->hook = (VPxWorkerHook)tile_worker_hook;
-    worker->data1 = &pbi->tile_worker_data[n];
+    worker->data1 = tile_data;
     worker->data2 = &pbi->tile_worker_info[n];
   }
 
@@ -1699,11 +1704,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       TileInfo *const tile = (TileInfo*)worker->data2;
       TileBuffer *const buf = &tile_buffers[0][n];
 
-      tile_data->pbi = pbi;
-      tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
-      tile_data->xd.counts = cm->frame_parallel_decoding_mode ?
-                             0 : &tile_data->counts;
       vp9_zero(tile_data->dqcoeff);
       vp9_tile_init(tile, cm, 0, buf->col);
       vp9_tile_init(&tile_data->xd.tile, cm, 0, buf->col);
