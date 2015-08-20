@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "04806112_359cd349",
+        "filename": "test/vp9_encoder_parms_get_to_decoder.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-20T01:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04806112_152c2f98",
+      "revId": "2f40a51214b6ce1f95d0537baa881b0f0323fa0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4a9e95f_6820e5a1",
         "filename": "test/vp9_lossless_test.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-20T00:56:52Z",
       "side": 1,
       "message": "fix indent",
+      "revId": "2f40a51214b6ce1f95d0537baa881b0f0323fa0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04b861a5_e283995a",
+        "filename": "test/vp9_lossless_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-20T01:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4a9e95f_6820e5a1",
       "revId": "2f40a51214b6ce1f95d0537baa881b0f0323fa0c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
