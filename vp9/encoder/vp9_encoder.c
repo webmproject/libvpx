@@ -24,7 +24,6 @@
 #include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_timer.h"
-#include "vpx_scale/vpx_scale.h"
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_filter.h"
@@ -3192,27 +3191,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
 
   set_frame_size(cpi);
 
-  // For 1 pass CBR under dynamic resize mode: use faster scaling for source.
-  // Only for 2x2 scaling for now.
-  if (cpi->oxcf.pass == 0 &&
-      cpi->oxcf.rc_mode == VPX_CBR &&
-      cpi->oxcf.resize_mode == RESIZE_DYNAMIC &&
-      cpi->un_scaled_source->y_width == (cm->width << 1) &&
-      cpi->un_scaled_source->y_height == (cm->height << 1)) {
-    cpi->Source = vp9_scale_if_required_fast(cm,
-                                             cpi->un_scaled_source,
-                                             &cpi->scaled_source);
-    if (cpi->unscaled_last_source != NULL)
-       cpi->Last_Source = vp9_scale_if_required_fast(cm,
-                                                     cpi->unscaled_last_source,
-                                                     &cpi->scaled_last_source);
-  } else {
-    cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
-                                        &cpi->scaled_source);
-    if (cpi->unscaled_last_source != NULL)
-      cpi->Last_Source = vp9_scale_if_required(cm, cpi->unscaled_last_source,
-                                               &cpi->scaled_last_source);
-  }
+  cpi->Source = vp9_scale_if_required(cm,
+                                      cpi->un_scaled_source,
+                                      &cpi->scaled_source);
+  if (cpi->unscaled_last_source != NULL)
+    cpi->Last_Source = vp9_scale_if_required(cm,
+                                             cpi->unscaled_last_source,
+                                             &cpi->scaled_last_source);
 
   if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
@@ -3597,30 +3582,25 @@ static void set_ext_overrides(VP9_COMP *cpi) {
   }
 }
 
-YV12_BUFFER_CONFIG *vp9_scale_if_required_fast(VP9_COMMON *cm,
-                                               YV12_BUFFER_CONFIG *unscaled,
-                                               YV12_BUFFER_CONFIG *scaled) {
-  if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
-      cm->mi_rows * MI_SIZE != unscaled->y_height) {
-    // For 2x2 scaling down.
-    vpx_scale_frame(unscaled, scaled, unscaled->y_buffer, 9, 2, 1,
-                    2, 1, 0);
-    vpx_extend_frame_borders(scaled);
-    return scaled;
-  } else {
-    return unscaled;
-  }
-}
-
 YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
                                           YV12_BUFFER_CONFIG *scaled) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGHBITDEPTH
-    scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
+    if (unscaled->y_width == (scaled->y_width << 1) &&
+        unscaled->y_height == (scaled->y_height << 1))
+      scale_and_extend_frame(unscaled, scaled, (int)cm->bit_depth);
+    else
+      scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
 #else
-    scale_and_extend_frame_nonnormative(unscaled, scaled);
+    // Use the faster normative (convolve8) scaling filter: for now only for
+    // scaling factor of 2.
+    if (unscaled->y_width == (scaled->y_width << 1) &&
+        unscaled->y_height == (scaled->y_height << 1))
+      scale_and_extend_frame(unscaled, scaled);
+    else
+      scale_and_extend_frame_nonnormative(unscaled, scaled);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     return scaled;
   } else {
