@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "048f817d_2f3cc945",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-08-20T16:35:39Z",
+      "side": 1,
+      "message": "Are we using the same value for all layers?",
+      "range": {
+        "startLine": 529,
+        "startChar": 63,
+        "endLine": 529,
+        "endChar": 64
+      },
+      "revId": "a38c06ef040c9fd78b561ef0f95a100971c1d959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
