@@ -206,9 +206,15 @@ typedef enum {
   NONE = -1,
   INTRA_FRAME = 0,
   LAST_FRAME = 1,
+#if CONFIG_MULTI_REF
+  LAST2_FRAME = 2,
+  GOLDEN_FRAME = 3,
+  ALTREF_FRAME = 4,
+#else
   GOLDEN_FRAME = 2,
   ALTREF_FRAME = 3,
-  MAX_REF_FRAMES = 4
+#endif  // CONFIG_MULTI_REF
+  MAX_REF_FRAMES
 } MV_REFERENCE_FRAME;
 
 // This structure now relates to 8x8 block regions.

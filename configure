@@ -306,6 +306,7 @@ EXPERIMENT_LIST="
     qctx_tprobs
     dst1
     sr_mode
+    multi_ref
 "
 CONFIG_LIST="
     external_build

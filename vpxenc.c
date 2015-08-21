@@ -1768,14 +1768,11 @@ static void test_decode(struct stream_state  *stream,
   if (!compare_img(&enc_img, &dec_img)) {
     int y[4], u[4], v[4];
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
-    if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH)
       find_mismatch_high(&enc_img, &dec_img, y, u, v);
-    } else {
-      find_mismatch(&enc_img, &dec_img, y, u, v);
-    }
-#else
-    find_mismatch(&enc_img, &dec_img, y, u, v);
+    else
 #endif
+      find_mismatch(&enc_img, &dec_img, y, u, v);
     stream->decoder.err = 1;
     warn_or_exit_on_error(&stream->decoder, fatal == TEST_DECODE_FATAL,
                           "Stream %d: Encode/decode mismatch on frame %d at"

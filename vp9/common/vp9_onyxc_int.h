@@ -30,7 +30,11 @@
 extern "C" {
 #endif
 
+#if CONFIG_MULTI_REF
+#define REFS_PER_FRAME 4
+#else
 #define REFS_PER_FRAME 3
+#endif  // CONFIG_MULTI_REF
 
 #define REF_FRAMES_LOG2 3
 #define REF_FRAMES (1 << REF_FRAMES_LOG2)
@@ -185,7 +189,11 @@ typedef struct VP9Common {
   // Context probabilities for reference frame prediction
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;
+#if CONFIG_MULTI_REF
+  MV_REFERENCE_FRAME comp_var_ref[3];
+#else
   MV_REFERENCE_FRAME comp_var_ref[2];
+#endif  // CONFIG_MULTI_REF
   REFERENCE_MODE reference_mode;
 
   FRAME_CONTEXT fc;  /* this frame entropy */

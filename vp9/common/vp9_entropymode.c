@@ -415,6 +415,24 @@ static const vp9_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
   239, 183, 119,  96,  41
 };
 
+#if CONFIG_MULTI_REF
+// TODO(zoeliu): To adjust the initial prob values.
+static const vp9_prob default_comp_ref_p[REF_CONTEXTS][2] = {
+  {  33,  16 },
+  {  77,  74 },
+  { 142, 142 },
+  { 172, 170 },
+  { 238, 247 }
+};
+
+static const vp9_prob default_single_ref_p[REF_CONTEXTS][3] = {
+  {  33,  16,  16 },
+  {  77,  74,  74 },
+  { 142, 142, 142 },
+  { 172, 170, 170 },
+  { 238, 247, 247 }
+};
+#else
 static const vp9_prob default_comp_ref_p[REF_CONTEXTS] = {
   50, 126, 123, 221, 226
 };
@@ -426,6 +444,7 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
   { 172, 170 },
   { 238, 247 }
 };
+#endif  // CONFIG_MULTI_REF
 
 static const struct tx_probs default_tx_probs = {
 #if CONFIG_TX64X64
@@ -1064,13 +1083,26 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
     fc->comp_inter_prob[i] = adapt_prob(pre_fc->comp_inter_prob[i],
                                         counts->comp_inter[i]);
-  for (i = 0; i < REF_CONTEXTS; i++)
+  for (i = 0; i < REF_CONTEXTS; i++) {
+#if CONFIG_MULTI_REF
+    for (j = 0; j < 2; j++)
+      fc->comp_ref_prob[i][j] = adapt_prob(pre_fc->comp_ref_prob[i][j],
+                                           counts->comp_ref[i][j]);
+#else
     fc->comp_ref_prob[i] = adapt_prob(pre_fc->comp_ref_prob[i],
                                       counts->comp_ref[i]);
-  for (i = 0; i < REF_CONTEXTS; i++)
+#endif  // CONFIG_MULTI_REF
+  }
+
+  for (i = 0; i < REF_CONTEXTS; i++) {
+#if CONFIG_MULTI_REF
+    for (j = 0; j < 3; j++)
+#else
     for (j = 0; j < 2; j++)
+#endif  // CONFIG_MULTI_REF
       fc->single_ref_prob[i][j] = adapt_prob(pre_fc->single_ref_prob[i][j],
                                              counts->single_ref[i][j]);
+  }
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     adapt_probs(vp9_inter_mode_tree, pre_fc->inter_mode_probs[i],
@@ -1258,6 +1290,9 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
 
   lf->ref_deltas[INTRA_FRAME] = 1;
   lf->ref_deltas[LAST_FRAME] = 0;
+#if CONFIG_MULTI_REF
+  lf->ref_deltas[LAST2_FRAME] = lf->ref_deltas[LAST_FRAME];
+#endif  // CONFIG_MULTI_REF
   lf->ref_deltas[GOLDEN_FRAME] = -1;
   lf->ref_deltas[ALTREF_FRAME] = -1;
 

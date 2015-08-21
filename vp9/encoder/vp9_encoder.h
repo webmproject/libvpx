@@ -97,6 +97,7 @@ typedef enum {
   REALTIME
 } MODE;
 
+// TODO(zoeliu): What is this - FRAMETYPE_FLAGS?
 typedef enum {
   FRAMEFLAGS_KEY    = 1 << 0,
   FRAMEFLAGS_GOLDEN = 1 << 1,
@@ -234,17 +235,27 @@ typedef struct VP9_COMP {
   // For a still frame, this flag is set to 1 to skip partition search.
   int partition_search_skippable_frame;
 
-  int scaled_ref_idx[3];
+  int scaled_ref_idx[REFS_PER_FRAME];
   int lst_fb_idx;
+#if CONFIG_MULTI_REF
+  int lst2_fb_idx;
+#endif  // CONFIG_MULTI_REF
   int gld_fb_idx;
   int alt_fb_idx;
 
   int refresh_last_frame;
+#if CONFIG_MULTI_REF
+  int refresh_last2_frame;
+#endif  // CONFIG_MULTI_REF
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
 
   int ext_refresh_frame_flags_pending;
+
   int ext_refresh_last_frame;
+#if CONFIG_MULTI_REF
+  int ext_refresh_last2_frame;
+#endif  // CONFIG_MULTI_REF
   int ext_refresh_golden_frame;
   int ext_refresh_alt_ref_frame;
 
@@ -481,6 +492,10 @@ static INLINE int get_ref_frame_idx(const VP9_COMP *cpi,
                                     MV_REFERENCE_FRAME ref_frame) {
   if (ref_frame == LAST_FRAME) {
     return cpi->lst_fb_idx;
+#if CONFIG_MULTI_REF
+  } else if (ref_frame == LAST2_FRAME) {
+    return cpi->lst2_fb_idx;
+#endif  // CONFIG_MULTI_REF
   } else if (ref_frame == GOLDEN_FRAME) {
     return cpi->gld_fb_idx;
   } else {

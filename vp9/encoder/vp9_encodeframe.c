@@ -1522,14 +1522,34 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
                             [has_second_ref(mbmi)]++;
 
         if (has_second_ref(mbmi)) {
+#if CONFIG_MULTI_REF
+          counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)][0]
+                          [ref0 == GOLDEN_FRAME]++;
+          if (ref0 != GOLDEN_FRAME) {
+            counts->comp_ref[vp9_get_pred_context_comp_ref_p1(cm, xd)][1]
+                            [ref0 == LAST_FRAME]++;
+          }
+#else
           counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)]
                           [ref0 == GOLDEN_FRAME]++;
+#endif  // CONFIG_MULTI_REF
         } else {
+#if CONFIG_MULTI_REF
+          counts->single_ref[vp9_get_pred_context_single_ref_p1(xd)][0]
+                            [ref0 != LAST_FRAME && ref0 != LAST2_FRAME]++;
+          if (ref0 != LAST_FRAME && ref0 != LAST2_FRAME)
+            counts->single_ref[vp9_get_pred_context_single_ref_p2(xd)][1]
+                              [ref0 != GOLDEN_FRAME]++;
+          else
+            counts->single_ref[vp9_get_pred_context_single_ref_p3(xd)][2]
+                              [ref0 != LAST_FRAME]++;
+#else
           counts->single_ref[vp9_get_pred_context_single_ref_p1(xd)][0]
                             [ref0 != LAST_FRAME]++;
           if (ref0 != LAST_FRAME)
             counts->single_ref[vp9_get_pred_context_single_ref_p2(xd)][1]
                               [ref0 != GOLDEN_FRAME]++;
+#endif  // CONFIG_MULTI_REF
         }
       }
     }
@@ -3853,8 +3873,13 @@ static int check_dual_ref_flags(VP9_COMP *cpi) {
   if (vp9_segfeature_active(&cpi->common.seg, 1, SEG_LVL_REF_FRAME)) {
     return 0;
   } else {
-    return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG)
-        + !!(ref_flags & VP9_ALT_FLAG)) >= 2;
+#if CONFIG_MULTI_REF
+    return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG) +
+            !!(ref_flags & VP9_ALT_FLAG) + !!(ref_flags & VP9_LAST2_FLAG)) >= 2;
+#else
+    return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG) +
+            !!(ref_flags & VP9_ALT_FLAG)) >= 2;
+#endif  // CONFIG_MULTI_REF
   }
 }
 
@@ -3879,6 +3904,8 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
   else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
     return GOLDEN_FRAME;
   else
+    // TODO(zoeliu): To investigate whether a frame_type of LAST2_FRAME needs to
+    // be analyzed here to decide on the reference mode.
     return LAST_FRAME;
 }
 
@@ -4270,7 +4297,12 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cm->allow_comp_inter_inter = 1;
       cm->comp_fixed_ref = ALTREF_FRAME;
       cm->comp_var_ref[0] = LAST_FRAME;
+#if CONFIG_MULTI_REF
+      cm->comp_var_ref[1] = LAST2_FRAME;
+      cm->comp_var_ref[2] = GOLDEN_FRAME;
+#else
       cm->comp_var_ref[1] = GOLDEN_FRAME;
+#endif  // CONFIG_MULTI_REF
     }
   }
 
@@ -4281,9 +4313,12 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     // either compound, single or hybrid prediction as per whatever has
     // worked best for that type of frame in the past.
     // It also predicts whether another coding mode would have worked
-    // better that this coding mode. If that is the case, it remembers
+    // better than this coding mode. If that is the case, it remembers
     // that for subsequent frames.
     // It does the same analysis for transform size selection also.
+    //
+    // TODO(zoeliu): To investigate whether a frame_type of LAST2_FRAME needs to
+    // be analyzed here to decide on the reference mode.
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
     int64_t *const mode_thrs = rd_opt->prediction_type_threshes[frame_type];
     int64_t *const filter_thrs = rd_opt->filter_threshes[frame_type];

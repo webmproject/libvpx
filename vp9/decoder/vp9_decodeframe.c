@@ -56,16 +56,27 @@ static int is_compound_reference_allowed(const VP9_COMMON *cm) {
 
 static void setup_compound_reference_mode(VP9_COMMON *cm) {
   if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-          cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
+      cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
     cm->comp_fixed_ref = ALTREF_FRAME;
     cm->comp_var_ref[0] = LAST_FRAME;
+#if CONFIG_MULTI_REF
+    cm->comp_var_ref[1] = LAST2_FRAME;
+    cm->comp_var_ref[2] = GOLDEN_FRAME;
+#else
     cm->comp_var_ref[1] = GOLDEN_FRAME;
+#endif  // CONFIG_MULTI_REF
   } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-                 cm->ref_frame_sign_bias[ALTREF_FRAME]) {
+             cm->ref_frame_sign_bias[ALTREF_FRAME]) {
+#if CONFIG_MULTI_REF
+    assert(0);
+#endif  // CONFIG_MULTI_REF
     cm->comp_fixed_ref = GOLDEN_FRAME;
     cm->comp_var_ref[0] = LAST_FRAME;
     cm->comp_var_ref[1] = ALTREF_FRAME;
-  } else {
+  } else {  // same sign bias for GOLDEN / ALTREF
+#if CONFIG_MULTI_REF
+    assert(0);
+#endif  // CONFIG_MULTI_REF
     cm->comp_fixed_ref = LAST_FRAME;
     cm->comp_var_ref[0] = GOLDEN_FRAME;
     cm->comp_var_ref[1] = ALTREF_FRAME;
@@ -163,11 +174,20 @@ static void read_frame_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
     for (i = 0; i < REF_CONTEXTS; ++i) {
       vp9_diff_update_prob(r, &fc->single_ref_prob[i][0]);
       vp9_diff_update_prob(r, &fc->single_ref_prob[i][1]);
+#if CONFIG_MULTI_REF
+      vp9_diff_update_prob(r, &fc->single_ref_prob[i][2]);
+#endif  // CONFIG_MULTI_REF
     }
 
   if (cm->reference_mode != SINGLE_REFERENCE)
-    for (i = 0; i < REF_CONTEXTS; ++i)
+    for (i = 0; i < REF_CONTEXTS; ++i) {
+#if CONFIG_MULTI_REF
+      vp9_diff_update_prob(r, &fc->comp_ref_prob[i][0]);
+      vp9_diff_update_prob(r, &fc->comp_ref_prob[i][1]);
+#else
       vp9_diff_update_prob(r, &fc->comp_ref_prob[i]);
+#endif  // CONFIG_MULTI_REF
+    }
 }
 
 static void update_mv_probs(vp9_prob *p, int n, vp9_reader *r) {
@@ -2789,12 +2809,22 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
           vp9_zero(tile_data->xd.left_seg_context);
           for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
                mi_col += MI_BLOCK_SIZE) {
+            /*
+            printf("\n============================================\n");
+            printf("decode_tiles(): current_video_frame=%d, "
+                   "mi_row=%d, mi_col=%d\n",
+                   cm->current_video_frame, mi_row, mi_col);
+            */
             decode_partition(tile_data->cm, &tile_data->xd, &tile,
 #if CONFIG_SUPERTX
                              0,
 #endif
                              mi_row, mi_col,
                              &tile_data->bit_reader, BLOCK_64X64);
+            /*
+            printf("tile_data->xd.corrupted=%d\n", tile_data->xd.corrupted);
+            printf("============================================\n");
+            */
           }
           pbi->mb.corrupted |= tile_data->xd.corrupted;
         }
@@ -3111,6 +3141,14 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
                          "Invalid frame sync code");
 
     read_bitdepth_colorspace_sampling(cm, rb);
+#if CONFIG_MULTI_REF
+    // TODO(zoeliu): When current frame is a KEY_FRAME, after the decoding of
+    // the frame, LAST2_FRAME should not get refreshed. However, if so, error
+    // will occur when decoding the next INTER_FRAME, during
+    // read_uncompressed_header(), specifically, during
+    // set_frame_size_with_refs(). This needs to be further investigated and
+    // fixed in the right way.
+#endif  // COFNIG_MULTI_REF
     pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
     for (i = 0; i < REFS_PER_FRAME; ++i) {
