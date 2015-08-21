@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4750d3f_825eeabb",
+        "filename": "vp10/common/scan.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-21T00:37:28Z",
+      "side": 1,
+      "message": "probably a good idea to make tx_type constant parameter in get_scan(), instead of changing this inside.",
+      "revId": "a26d8fe6e3dfd85d6bc75e4b506e0891596a7181",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
