@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4700952_3cde3dfc",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-08-21T19:15:49Z",
+      "side": 1,
+      "message": "Prefers to remove the duplicate code between #if - #else - #endif. Instead, may use \n#if\nif {\n...\n} else {\n#endif\n...\n#if\n}\n#endif\nso that the common code is being shared.",
+      "revId": "6c23d7fd01b7b27f80821ed82252ef038504f14c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
