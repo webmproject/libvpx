@@ -707,7 +707,7 @@ static void encode_loopfilter(struct loopfilter *lf,
   if (lf->mode_ref_delta_enabled) {
     vpx_wb_write_bit(wb, lf->mode_ref_delta_update);
     if (lf->mode_ref_delta_update) {
-      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
+      for (i = 0; i < MAX_REF_FRAMES; i++) {
         const int delta = lf->ref_deltas[i];
         const int changed = delta != lf->last_ref_deltas[i];
         vpx_wb_write_bit(wb, changed);

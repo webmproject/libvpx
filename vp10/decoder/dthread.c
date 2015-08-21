@@ -177,7 +177,7 @@ void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
          (MAX_LOOP_FILTER + 1) * sizeof(loop_filter_thresh));
   dst_cm->lf.last_sharpness_level = src_cm->lf.sharpness_level;
   dst_cm->lf.filter_level = src_cm->lf.filter_level;
-  memcpy(dst_cm->lf.ref_deltas, src_cm->lf.ref_deltas, MAX_REF_LF_DELTAS);
+  memcpy(dst_cm->lf.ref_deltas, src_cm->lf.ref_deltas, MAX_REF_FRAMES);
   memcpy(dst_cm->lf.mode_deltas, src_cm->lf.mode_deltas, MAX_MODE_LF_DELTAS);
   dst_cm->seg = src_cm->seg;
   memcpy(dst_cm->frame_contexts, src_cm->frame_contexts,
