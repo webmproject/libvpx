@@ -600,7 +600,9 @@ static void block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
   for (r = 0; r < max_blocks_high; r += block_step) {
     for (c = 0; c < num_4x4_w; c += block_step) {
       if (c < max_blocks_wide) {
-        const scan_order *const scan_order = &vp10_default_scan_orders[tx_size];
+        PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+        TX_TYPE tx_type = get_tx_type(plane_type, xd, block);
+        const scan_order *const scan_order = get_scan(tx_size, tx_type);
         tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
         tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
         tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
