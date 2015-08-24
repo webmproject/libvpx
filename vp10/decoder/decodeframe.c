@@ -188,7 +188,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
                                           uint8_t *dst, int stride,
                                           int eob, int block) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block);
+  TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
   if (eob > 0) {
     tran_low_t *const dqcoeff = pd->dqcoeff;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -347,7 +347,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
                           col, row, plane);
 
   if (!mbmi->skip) {
-    TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx);
+    TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
     const scan_order *sc = get_scan(tx_size, tx_type);
     const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size,
                                              r, mbmi->segment_id);
@@ -362,7 +362,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd, vpx_reader *r,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   int block_idx = (row << 1) + col;
-  TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx);
+  TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
   const scan_order *sc = get_scan(tx_size, tx_type);
   const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size, r,
                                           mbmi->segment_id);
