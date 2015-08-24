@@ -217,7 +217,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
           return;
       }
     } else {
-#else  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
@@ -237,7 +237,6 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
           assert(0 && "Invalid transform size");
           return;
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_VP9_HIGHBITDEPTH
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -289,7 +288,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
           return;
       }
     } else {
-#else  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
@@ -309,7 +308,6 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
           assert(0 && "Invalid transform size");
           return;
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_VP9_HIGHBITDEPTH
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
