@@ -2697,13 +2697,61 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   }
 
   if (cpi->refresh_last_frame) {
+#if CONFIG_FULL_BUFFER_TEST
+    int ref_index;
+
+    if (cm->frame_type == KEY_FRAME) {
+      cpi->lst_fb_idx = 0;
+      ref_index = cm->ref_frame_map[cpi->lst_fb_idx];
+      if (ref_index >= 0 && pool->frame_bufs[ref_index].ref_count > 0)
+        pool->frame_bufs[ref_index].ref_count--;
+
+      cm->ref_frame_map[cpi->lst_fb_idx] = cm->new_fb_idx;
+
+      pool->frame_bufs[cm->new_fb_idx].ref_count++;
+    } else {
+      if (cpi->lst_fb_idx == 0)
+        cpi->lst_fb_idx = 3;
+      else if (cpi->lst_fb_idx == 7)
+        cpi->lst_fb_idx = 0;
+      else
+        ++cpi->lst_fb_idx;
+
+      ref_index = cm->ref_frame_map[cpi->lst_fb_idx];
+      if (ref_index >= 0 && pool->frame_bufs[ref_index].ref_count > 0)
+        pool->frame_bufs[ref_index].ref_count--;
+
+      ref_index = cm->ref_frame_map[cpi->lst_fb_idx];
+      cm->ref_frame_map[cpi->lst_fb_idx] = cm->new_fb_idx;
+      pool->frame_bufs[cm->new_fb_idx].ref_count++;
+    }
+#else
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
+#endif
+
     if (!cpi->rc.is_src_frame_alt_ref)
       memcpy(cpi->interp_filter_selected[LAST_FRAME],
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
   }
+
+#if CONFIG_FULL_BUFFER_TEST
+//  {
+//    int k;
+//    fprintf(stderr, "\nEecode frame index %d, is_show_frame %d, new_fb_idx %d\n",
+//            cm->current_video_frame, cm->show_frame, cm->new_fb_idx);
+//    for (k = 0; k < 8; ++k)
+//      fprintf(stderr, "%d  ", cm->ref_frame_map[k]);
+//    fprintf(stderr, "\n");
+//    if (cm->frame_type == KEY_FRAME)
+//      fprintf(stderr, "key frame\n\n");
+//
+//    for (k = 0; k < 16; ++k)
+//      fprintf(stderr, "%d  ", pool->frame_bufs[cm->new_fb_idx].buf.y_buffer[k]);
+//  }
+#endif
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_denoiser_update_frame_info(&cpi->denoiser,
@@ -4196,6 +4244,26 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   } else if (oxcf->pass == 1) {
     set_frame_size(cpi);
   }
+
+#if CONFIG_FULL_BUFFER_TEST
+  if (cm->current_video_frame > 12 && oxcf->pass == 2) {
+    int mod_idx = cm->current_video_frame & 0x3F;
+    if (mod_idx > 12 && mod_idx < 20) {
+      cpi->refresh_last_frame = 0;
+
+      if (cpi->common.frame_type == KEY_FRAME) {
+        cpi->lst_fb_idx = 0;
+      } else {
+        if (cpi->lst_fb_idx == 0)
+          cpi->lst_fb_idx = 3;
+        else if (cpi->lst_fb_idx == 7)
+          cpi->lst_fb_idx = 0;
+        else
+          ++cpi->lst_fb_idx;
+      }
+    }
+  }
+#endif
 
   for (i = 0; i < MAX_REF_FRAMES; ++i)
     cpi->scaled_ref_idx[i] = INVALID_IDX;

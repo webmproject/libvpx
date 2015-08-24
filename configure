@@ -251,6 +251,7 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     spatial_svc
     fp_mb_stats
+    full_buffer_test
     emulate_hardware
 "
 CONFIG_LIST="
