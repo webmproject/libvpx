@@ -3270,6 +3270,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
       cm->frame_type != KEY_FRAME &&
       !cpi->use_svc &&
+      cpi->ext_refresh_frame_flags_pending == 0 &&
       (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR))
     vp9_cyclic_refresh_check_golden_update(cpi);
 
@@ -3578,7 +3579,6 @@ static void set_ext_overrides(VP9_COMP *cpi) {
     cpi->refresh_last_frame = cpi->ext_refresh_last_frame;
     cpi->refresh_golden_frame = cpi->ext_refresh_golden_frame;
     cpi->refresh_alt_ref_frame = cpi->ext_refresh_alt_ref_frame;
-    cpi->ext_refresh_frame_flags_pending = 0;
   }
 }
 
@@ -3747,6 +3747,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
       ++cm->current_video_frame;
+      cpi->ext_refresh_frame_flags_pending = 0;
       return;
     }
   }
@@ -3827,6 +3828,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       vp9_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
   }
+
+  cpi->ext_refresh_frame_flags_pending = 0;
 
   if (cpi->refresh_golden_frame == 1)
     cpi->frame_flags |= FRAMEFLAGS_GOLDEN;
