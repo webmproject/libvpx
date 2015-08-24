@@ -177,6 +177,8 @@ int vp10_compute_rd_mult(const VP10_COMP *cpi, int qindex) {
     rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
     rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
   }
+  if (rdmult < 1)
+    rdmult = 1;
   return (int)rdmult;
 }
 
