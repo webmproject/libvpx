@@ -15,7 +15,7 @@
 #include "vp9/encoder/vp9_extend.h"
 
 #define SMALL_FRAME_FB_IDX 7
-#define SMALL_FRAME_WIDTH  16
+#define SMALL_FRAME_WIDTH  32
 #define SMALL_FRAME_HEIGHT 16
 
 void vp9_init_layer_context(VP9_COMP *const cpi) {
