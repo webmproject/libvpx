@@ -646,22 +646,29 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   for (n = start_tx; n >= end_tx; n--) {
+    int r_tx_size = 0;
+    for (m = 0; m <= n - (n == (int) max_tx_size); m++) {
+      if (m == n)
+        r_tx_size += vp10_cost_zero(tx_probs[m]);
+      else
+        r_tx_size += vp10_cost_one(tx_probs[m]);
+    }
     txfm_rd_in_plane(x, &r[n][0], &d[n], &s[n],
                      &sse[n], ref_best_rd, 0, bs, n,
                      cpi->sf.use_fast_coef_costing);
     r[n][1] = r[n][0];
     if (r[n][0] < INT_MAX) {
-      for (m = 0; m <= n - (n == (int) max_tx_size); m++) {
-        if (m == n)
-          r[n][1] += vp10_cost_zero(tx_probs[m]);
-        else
-          r[n][1] += vp10_cost_one(tx_probs[m]);
-      }
+      r[n][1] += r_tx_size;
     }
-    if (d[n] == INT64_MAX) {
+    if (d[n] == INT64_MAX || r[n][0] == INT_MAX) {
       rd[n][0] = rd[n][1] = INT64_MAX;
     } else if (s[n]) {
-      rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]);
+      if (is_inter_block(mbmi)) {
+        rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, sse[n]);
+      } else {
+        rd[n][0] = RDCOST(x->rdmult, x->rddiv, s1, sse[n]);
+        rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1 + r_tx_size, sse[n]);
+      }
     } else {
       rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]);
       rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
