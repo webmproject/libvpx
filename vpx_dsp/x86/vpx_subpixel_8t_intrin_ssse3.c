@@ -203,6 +203,7 @@ void vpx_filter_block1d8_h8_intrin_ssse3(const uint8_t *src_ptr,
   }
 }
 
+#if ARCH_X86_64
 static void vpx_filter_block1d16_h8_intrin_ssse3(const uint8_t *src_ptr,
                                                  ptrdiff_t src_pixels_per_line,
                                                  uint8_t *output_ptr,
@@ -319,6 +320,7 @@ static void vpx_filter_block1d16_h8_intrin_ssse3(const uint8_t *src_ptr,
     output_ptr+=output_pitch;
   }
 }
+#endif  // ARCH_X86_64
 
 void vpx_filter_block1d8_v8_intrin_ssse3(const uint8_t *src_ptr,
                                          ptrdiff_t src_pitch,
@@ -408,6 +410,7 @@ void vpx_filter_block1d8_v8_intrin_ssse3(const uint8_t *src_ptr,
   }
 }
 
+#if ARCH_X86_64
 static void vpx_filter_block1d16_v8_intrin_ssse3(const uint8_t *src_ptr,
                                                  ptrdiff_t src_pitch,
                                                  uint8_t *output_ptr,
@@ -522,6 +525,7 @@ static void vpx_filter_block1d16_v8_intrin_ssse3(const uint8_t *src_ptr,
     output_ptr+=out_pitch;
   }
 }
+#endif  // ARCH_X86_64
 
 #if ARCH_X86_64
 filter8_1dfunction vpx_filter_block1d16_v8_intrin_ssse3;
