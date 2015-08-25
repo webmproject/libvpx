@@ -16,6 +16,23 @@
       "revId": "df01460394bbb839a161eb8c0a34b4c979bc984b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "048f817d_c2b94715",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 13
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-08-25T04:07:13Z",
+      "side": 1,
+      "message": "All registers (xmm1 - xmm15) are used in the code, but they are not saved here. (?)",
+      "revId": "df01460394bbb839a161eb8c0a34b4c979bc984b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
