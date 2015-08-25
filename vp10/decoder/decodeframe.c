@@ -780,7 +780,7 @@ static MB_MODE_INFO *set_offsets(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 
 static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                          int mi_row, int mi_col,
-                         vpx_reader *r, BLOCK_SIZE bsize,
+                         vpx_reader *r, vpx_reader *tok, BLOCK_SIZE bsize,
                          int bwl, int bhl) {
   VP10_COMMON *const cm = &pbi->common;
   const int less8x8 = bsize < BLOCK_8X8;
@@ -824,7 +824,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
       for (row = 0; row < max_blocks_high; row += step)
         for (col = 0; col < max_blocks_wide; col += step)
-          predict_and_reconstruct_intra_block(xd, r, mbmi, plane,
+          predict_and_reconstruct_intra_block(xd, tok, mbmi, plane,
                                               row, col, tx_size);
     }
   } else {
@@ -852,7 +852,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
-            eobtotal += reconstruct_inter_block(xd, r, mbmi, plane, row, col,
+            eobtotal += reconstruct_inter_block(xd, tok, mbmi, plane, row, col,
                                                 tx_size);
       }
 
@@ -916,7 +916,8 @@ static PARTITION_TYPE read_partition(MACROBLOCKD *xd, int mi_row, int mi_col,
 // TODO(slavarnway): eliminate bsize and subsize in future commits
 static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                              int mi_row, int mi_col,
-                             vpx_reader* r, BLOCK_SIZE bsize, int n4x4_l2) {
+                             vpx_reader* r, vpx_reader *tok,
+                             BLOCK_SIZE bsize, int n4x4_l2) {
   VP10_COMMON *const cm = &pbi->common;
   const int n8x8_l2 = n4x4_l2 - 1;
   const int num_8x8_wh = 1 << n8x8_l2;
@@ -936,29 +937,29 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     // calculate bmode block dimensions (log 2)
     xd->bmode_blocks_wl = 1 >> !!(partition & PARTITION_VERT);
     xd->bmode_blocks_hl = 1 >> !!(partition & PARTITION_HORZ);
-    decode_block(pbi, xd, mi_row, mi_col, r, subsize, 1, 1);
+    decode_block(pbi, xd, mi_row, mi_col, r, tok, subsize, 1, 1);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        decode_block(pbi, xd, mi_row, mi_col, r, subsize, n4x4_l2, n4x4_l2);
+        decode_block(pbi, xd, mi_row, mi_col, r, tok, subsize, n4x4_l2, n4x4_l2);
         break;
       case PARTITION_HORZ:
-        decode_block(pbi, xd, mi_row, mi_col, r, subsize, n4x4_l2, n8x8_l2);
+        decode_block(pbi, xd, mi_row, mi_col, r, tok, subsize, n4x4_l2, n8x8_l2);
         if (has_rows)
-          decode_block(pbi, xd, mi_row + hbs, mi_col, r, subsize, n4x4_l2,
+          decode_block(pbi, xd, mi_row + hbs, mi_col, r, tok, subsize, n4x4_l2,
                        n8x8_l2);
         break;
       case PARTITION_VERT:
-        decode_block(pbi, xd, mi_row, mi_col, r, subsize, n8x8_l2, n4x4_l2);
+        decode_block(pbi, xd, mi_row, mi_col, r, tok, subsize, n8x8_l2, n4x4_l2);
         if (has_cols)
-          decode_block(pbi, xd, mi_row, mi_col + hbs, r, subsize, n8x8_l2,
+          decode_block(pbi, xd, mi_row, mi_col + hbs, r, tok, subsize, n8x8_l2,
                        n4x4_l2);
         break;
       case PARTITION_SPLIT:
-        decode_partition(pbi, xd, mi_row, mi_col, r, subsize, n8x8_l2);
-        decode_partition(pbi, xd, mi_row, mi_col + hbs, r, subsize, n8x8_l2);
-        decode_partition(pbi, xd, mi_row + hbs, mi_col, r, subsize, n8x8_l2);
-        decode_partition(pbi, xd, mi_row + hbs, mi_col + hbs, r, subsize,
+        decode_partition(pbi, xd, mi_row, mi_col, r, tok, subsize, n8x8_l2);
+        decode_partition(pbi, xd, mi_row, mi_col + hbs, r, tok, subsize, n8x8_l2);
+        decode_partition(pbi, xd, mi_row + hbs, mi_col, r, tok, subsize, n8x8_l2);
+        decode_partition(pbi, xd, mi_row + hbs, mi_col + hbs, r, tok, subsize,
                          n8x8_l2);
         break;
       default:
@@ -1449,6 +1450,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
       const TileBuffer *const buf = &tile_buffers[tile_row][tile_col];
+      size_t token_offset;
+
       tile_data = pbi->tile_data + tile_cols * tile_row + tile_col;
       tile_data->cm = cm;
       tile_data->xd = pbi->mb;
@@ -1457,8 +1460,19 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
                              NULL : &cm->counts;
       vp10_zero(tile_data->dqcoeff);
       vp10_tile_init(&tile_data->xd.tile, tile_data->cm, tile_row, tile_col);
-      setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
+      if (buf->size < 4 || !read_is_valid(buf->data, buf->size, data_end))
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Truncated packet or corrupt tile length");
+      token_offset = mem_get_be32(buf->data);
+      if (token_offset > buf->size - 4)
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Truncated packet or corrupt tile length");
+      setup_token_decoder(buf->data + 4, data_end, token_offset, &cm->error,
                           &tile_data->bit_reader, pbi->decrypt_cb,
+                          pbi->decrypt_state);
+      setup_token_decoder(buf->data + (4 + token_offset), data_end,
+                          buf->size - (4 + token_offset), &cm->error,
+                          &tile_data->token_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
       vp10_init_macroblockd(cm, &tile_data->xd, tile_data->dqcoeff);
     }
@@ -1479,7 +1493,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
         for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
              mi_col += MI_BLOCK_SIZE) {
           decode_partition(pbi, &tile_data->xd, mi_row,
-                           mi_col, &tile_data->bit_reader, BLOCK_64X64, 4);
+                           mi_col, &tile_data->bit_reader,
+                           &tile_data->token_reader, BLOCK_64X64, 4);
         }
         pbi->mb.corrupted |= tile_data->xd.corrupted;
         if (pbi->mb.corrupted)
@@ -1529,7 +1544,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
 
   if (pbi->frame_parallel_decode)
     vp10_frameworker_broadcast(pbi->cur_buf, INT_MAX);
-  return vpx_reader_find_end(&tile_data->bit_reader);
+  return vpx_reader_find_end(&tile_data->token_reader);
 }
 
 static int tile_worker_hook(TileWorkerData *const tile_data,
@@ -1553,6 +1568,7 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
          mi_col += MI_BLOCK_SIZE) {
       decode_partition(tile_data->pbi, &tile_data->xd,
                        mi_row, mi_col, &tile_data->bit_reader,
+                       &tile_data->token_reader,
                        BLOCK_64X64, 4);
     }
   }
@@ -1583,6 +1599,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
   assert(tile_cols <= (1 << 6));
   assert(tile_rows == 1);
   (void)tile_rows;
+  abort();  // Tile parsing broken
 
   // TODO(jzern): See if we can remove the restriction of passing in max
   // threads to the decoder.

@@ -376,8 +376,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 }
 
 static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
-                          vpx_writer *w, TOKENEXTRA **tok,
-                          const TOKENEXTRA *const tok_end,
+                          vpx_writer *w,
                           int mi_row, int mi_col) {
   const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
@@ -398,9 +397,6 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   } else {
     pack_inter_mode_mvs(cpi, m, w);
   }
-
-  assert(*tok < tok_end);
-  pack_mb_tokens(w, tok, tok_end, cm->bit_depth);
 }
 
 static void write_partition(const VP10_COMMON *const cm,
@@ -427,7 +423,6 @@ static void write_partition(const VP10_COMMON *const cm,
 
 static void write_modes_sb(VP10_COMP *cpi,
                            const TileInfo *const tile, vpx_writer *w,
-                           TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
   const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
@@ -447,30 +442,27 @@ static void write_modes_sb(VP10_COMP *cpi,
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
   subsize = get_subsize(bsize, partition);
   if (subsize < BLOCK_8X8) {
-    write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+    write_modes_b(cpi, tile, w, mi_row, mi_col);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, mi_row, mi_col);
         break;
       case PARTITION_HORZ:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, mi_row, mi_col);
         if (mi_row + bs < cm->mi_rows)
-          write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
+          write_modes_b(cpi, tile, w, mi_row + bs, mi_col);
         break;
       case PARTITION_VERT:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, mi_row, mi_col);
         if (mi_col + bs < cm->mi_cols)
-          write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
+          write_modes_b(cpi, tile, w, mi_row, mi_col + bs);
         break;
       case PARTITION_SPLIT:
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col, subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs,
-                       subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col,
-                       subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col + bs,
-                       subsize);
+        write_modes_sb(cpi, tile, w, mi_row, mi_col, subsize);
+        write_modes_sb(cpi, tile, w, mi_row, mi_col + bs, subsize);
+        write_modes_sb(cpi, tile, w, mi_row + bs, mi_col, subsize);
+        write_modes_sb(cpi, tile, w, mi_row + bs, mi_col + bs, subsize);
         break;
       default:
         assert(0);
@@ -484,8 +476,7 @@ static void write_modes_sb(VP10_COMP *cpi,
 }
 
 static void write_modes(VP10_COMP *cpi,
-                        const TileInfo *const tile, vpx_writer *w,
-                        TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
+                        const TileInfo *const tile, vpx_writer *w) {
   const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int mi_row, mi_col;
@@ -497,7 +488,7 @@ static void write_modes(VP10_COMP *cpi,
     vp10_zero(xd->left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
-      write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col,
+      write_modes_sb(cpi, tile, w, mi_row, mi_col,
                      BLOCK_64X64);
   }
 }
@@ -935,7 +926,8 @@ static int get_refresh_mask(VP10_COMP *cpi) {
 
 static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
   VP10_COMMON *const cm = &cpi->common;
-  vpx_writer residual_bc;
+  vpx_writer mode_bc;
+  vpx_writer token_bc;
   int tile_row, tile_col;
   TOKENEXTRA *tok_end;
   size_t total_size = 0;
@@ -948,27 +940,32 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       int tile_idx = tile_row * tile_cols + tile_col;
+      int put_tile_size = tile_col < tile_cols - 1 || tile_row < tile_rows - 1;
+      uint8_t *const mode_data_start = data_ptr + total_size + (put_tile_size ? 8 : 4);
       TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
 
       tok_end = cpi->tile_tok[tile_row][tile_col] +
           cpi->tok_count[tile_row][tile_col];
 
-      if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1)
-        vpx_start_encode(&residual_bc, data_ptr + total_size + 4);
-      else
-        vpx_start_encode(&residual_bc, data_ptr + total_size);
+      vpx_start_encode(&mode_bc, mode_data_start);
 
-      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info,
-                  &residual_bc, &tok, tok_end);
+      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &mode_bc);
+      vpx_stop_encode(&mode_bc);
+      vpx_start_encode(&token_bc, mode_data_start + mode_bc.pos);
+      while (tok < tok_end) {
+        pack_mb_tokens(&token_bc, &tok, tok_end, cm->bit_depth);
+      }
       assert(tok == tok_end);
-      vpx_stop_encode(&residual_bc);
-      if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
+      vpx_stop_encode(&token_bc);
+      if (put_tile_size) {
         // size of this tile
-        mem_put_be32(data_ptr + total_size, residual_bc.pos);
+        mem_put_be32(data_ptr + total_size, 4 + mode_bc.pos + token_bc.pos);
         total_size += 4;
       }
+      // put where the token section begins
+      mem_put_be32(data_ptr + total_size, mode_bc.pos);
 
-      total_size += residual_bc.pos;
+      total_size += 4 + mode_bc.pos + token_bc.pos;
     }
   }
 
