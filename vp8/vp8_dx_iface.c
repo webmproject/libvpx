@@ -42,8 +42,6 @@ typedef enum
 } mem_seg_id_t;
 #define NELEMENTS(x) ((int)(sizeof(x)/sizeof(x[0])))
 
-static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t);
-
 struct vpx_codec_alg_priv
 {
     vpx_codec_priv_t        base;
@@ -67,18 +65,6 @@ struct vpx_codec_alg_priv
     void                    *user_priv;
     FRAGMENT_DATA           fragments;
 };
-
-static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t flags)
-{
-    /* Although this declaration is constant, we can't use it in the requested
-     * segments list because we want to define the requested segments list
-     * before defining the private type (so that the number of memory maps is
-     * known)
-     */
-    (void)si;
-    (void)flags;
-    return sizeof(vpx_codec_alg_priv_t);
-}
 
 static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
 {
