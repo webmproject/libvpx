@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "048f817d_67798de6",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 10
+      },
+      "lineNbr": 1232,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-08-25T03:52:40Z",
+      "side": 1,
+      "message": "Use \u003c\u003d80 characters.",
+      "revId": "f40057b95bbe2fd638dabf44a6c03e02c909a811",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
