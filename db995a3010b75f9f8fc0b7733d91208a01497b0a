@@ -34,6 +34,24 @@
       "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4700952_7bbe02ac",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001629
+      },
+      "writtenOn": "2015-08-26T00:55:03Z",
+      "side": 1,
+      "message": "clients who care about this probably build with -fvisiblity\u003dhidden / a .def file, right? (Well, external clients probably don\u0027t call these inline functions at all, I guess.)\n\nIn what cases is INLINE not set? It\u0027s part of C99, and while MSVC doesn\u0027t support C99 yet, it does support __inline.",
+      "parentUuid": "c42ba915_665baecd",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
