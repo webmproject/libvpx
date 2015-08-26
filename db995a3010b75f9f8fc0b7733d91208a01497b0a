@@ -127,6 +127,24 @@
     },
     {
       "key": {
+        "uuid": "e4750d3f_43955395",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001629
+      },
+      "writtenOn": "2015-08-26T17:56:09Z",
+      "side": 1,
+      "message": "At least some of vpx\u0027s headers are included from Chromium\u0027s C++ source files, but you\u0027re right that this file isn\u0027t. So the __cplusplus-dependent INLINE macro change I proposed above would be useful for that case.\n\n(It looks like clang\u0027s -Wunused-function also warns about \"static inline\" for .c files, which seems like a compiler bug – currently that warning is only useful for C++ code apparently. I\u0027ll try to get that fixed. Until then, building libvpx itself with -Wno-unused-function is a workaround for that.)",
+      "parentUuid": "c42ba915_2cc035f8",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4750d3f_911ce8f6",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 1
