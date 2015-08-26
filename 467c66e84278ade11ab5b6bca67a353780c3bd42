@@ -16,6 +16,24 @@
       "revId": "467c66e84278ade11ab5b6bca67a353780c3bd42",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c42ba915_c6a6420c",
+        "filename": "vp8/common/onyx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-26T01:06:23Z",
+      "side": 1,
+      "message": "I don\u0027t think so. If you remove the static then there will be multiple global functions. Further the bulk of libvpx uses static INLINE this one and a few others were just an oversight.",
+      "parentUuid": "84253145_6e93852e",
+      "revId": "467c66e84278ade11ab5b6bca67a353780c3bd42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
