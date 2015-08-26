@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e430ad80_73528c62",
+        "filename": "vp8/encoder/rdopt.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-26T17:31:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "048f817d_073afc7f",
+      "revId": "aed7fbd7606bd62260fd0d6a516afc7b02232ffc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4700952_9bbdee1e",
         "filename": "vp8/encoder/treewriter.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-26T05:41:20Z",
       "side": 1,
       "message": "these could really go, but OK for now",
+      "revId": "aed7fbd7606bd62260fd0d6a516afc7b02232ffc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4700952_1bb6dd77",
+        "filename": "vp8/encoder/treewriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-26T17:31:58Z",
+      "side": 1,
+      "message": "the vp8_ prefix?",
+      "parentUuid": "c4700952_9bbdee1e",
       "revId": "aed7fbd7606bd62260fd0d6a516afc7b02232ffc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
