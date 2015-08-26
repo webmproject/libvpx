@@ -69,6 +69,24 @@
       "revId": "aed7fbd7606bd62260fd0d6a516afc7b02232ffc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4485f957_bfad3970",
+        "filename": "vp8/encoder/treewriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-26T17:43:18Z",
+      "side": 1,
+      "message": "no the functions themselves; not for this change and I don\u0027t like removing prefixes from non-trivial inlines. if the prefix is more precise (these aren\u0027t) then you have a better idea of the origin of the function",
+      "parentUuid": "c4700952_1bb6dd77",
+      "revId": "aed7fbd7606bd62260fd0d6a516afc7b02232ffc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
