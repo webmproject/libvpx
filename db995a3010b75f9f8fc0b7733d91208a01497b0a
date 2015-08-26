@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "248c8586_33d9756a",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001629
+      },
+      "writtenOn": "2015-08-26T17:42:51Z",
+      "side": 1,
+      "message": "Are you sure about the c89 thing? It looks like you define INLINE to inline for gcc ( https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libvpx/source/libvpx/vpx/vpx_integer.h\u0026l\u003d24 ), and that spelling isn\u0027t supported in c89 (it needs to be __inline__ there). Oh, I guess with -std\u003dgnu89 the inline spelling is supported.\n\nBut it looks like c99 \n\nMaybe something like this could work?\n\n#ifdef __cplusplus\n#define INLINE inline\n#else\n#define INLINE static inline\n#endif\n\n(and then you\u0027d only write INLINE on your functions)\n\nThis seems to do the right thing with all of gnu89 C, C99, and C++, and it gets rid of the warning, and it causes the function to not have a separate copy in each C++ TU that uses the inline function.",
+      "parentUuid": "248c8586_3895d496",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4750d3f_911ce8f6",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 1
