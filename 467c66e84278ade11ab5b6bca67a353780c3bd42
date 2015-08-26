@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84253145_6e93852e",
+        "filename": "vp8/common/onyx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1001629
+      },
+      "writtenOn": "2015-08-26T00:07:25Z",
+      "side": 1,
+      "message": "Sorry, I should\u0027ve looked at the diff too. It needs to be INLINE instead of static, not in addition to static, else the warning will still fire.",
+      "revId": "467c66e84278ade11ab5b6bca67a353780c3bd42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
