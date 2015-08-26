@@ -34,6 +34,24 @@
       "revId": "467c66e84278ade11ab5b6bca67a353780c3bd42",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84253145_2e034d87",
+        "filename": "vp8/common/onyx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1001629
+      },
+      "writtenOn": "2015-08-26T01:14:39Z",
+      "side": 1,
+      "message": "At least in C++, inline functions go into a comdat (i.e. only one of the functions will be kept by the linker) and this will work. I\u0027m pretty sure that the C99 inline semantics say that this works too. I haven\u0027t tested what __inline does with msvc in c files though.",
+      "parentUuid": "c42ba915_c6a6420c",
+      "revId": "467c66e84278ade11ab5b6bca67a353780c3bd42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
