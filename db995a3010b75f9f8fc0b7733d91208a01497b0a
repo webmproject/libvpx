@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "248c8586_3895d496",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-26T17:21:57Z",
+      "side": 1,
+      "message": "Talked to James about this. While it\u0027s true you don\u0027t need the static in c++ (and probably c99) we actually target c89. Mozilla went through and changed all the vp8 decoder comments to /* */ style instead of // (or the other way around, I forget)\n\nBut I was definitely wrong about the undefined INLINE problem. That shouldn\u0027t happen.",
+      "parentUuid": "048f817d_a768d0e8",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4750d3f_911ce8f6",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 1
@@ -84,6 +102,24 @@
       "writtenOn": "2015-08-26T05:44:44Z",
       "side": 1,
       "message": "alignment is off",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4700952_7b0da1ef",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-26T17:21:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4750d3f_911ce8f6",
       "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
