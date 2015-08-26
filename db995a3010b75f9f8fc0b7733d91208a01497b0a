@@ -16,6 +16,24 @@
       "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c42ba915_665baecd",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-26T00:27:22Z",
+      "side": 1,
+      "message": "I don\u0027t think that\u0027s true. We still want static visibility, and in some cases INLINE is unset so we definitely don\u0027t want to fall back to globally visible functions.",
+      "parentUuid": "a47f9520_87a02eef",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
