@@ -109,6 +109,24 @@
     },
     {
       "key": {
+        "uuid": "c42ba915_2cc035f8",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-26T17:46:56Z",
+      "side": 1,
+      "message": "this code has no chance of building as c++, but the rest is a good suggestion based on the flags passed to the compiler. you\u0027re right gnu89/c90 is probably a better way to look at it. at this point mozilla has likely relaxed or is stripping the comments because /* */ aren\u0027t enforced.",
+      "parentUuid": "248c8586_33d9756a",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4750d3f_911ce8f6",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 1
