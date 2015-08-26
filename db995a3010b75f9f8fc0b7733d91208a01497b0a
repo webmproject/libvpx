@@ -70,6 +70,23 @@
       "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4750d3f_911ce8f6",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-26T05:44:44Z",
+      "side": 1,
+      "message": "alignment is off",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
