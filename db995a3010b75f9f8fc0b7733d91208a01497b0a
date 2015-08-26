@@ -52,6 +52,24 @@
       "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "048f817d_a768d0e8",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-26T01:01:32Z",
+      "side": 1,
+      "message": "Hmm I\u0027m probably wrong about having INLINE unset. I could\u0027ve sworn that was a thing but we only have MSVC - force inline and an \u0027else\u0027 condition for regular inline. So static may not be required.",
+      "parentUuid": "c4700952_7bbe02ac",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
