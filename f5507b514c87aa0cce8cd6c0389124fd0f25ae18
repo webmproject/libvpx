@@ -22,6 +22,30 @@
       "revId": "f5507b514c87aa0cce8cd6c0389124fd0f25ae18",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4485f957_1fc005f8",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-26T18:03:25Z",
+      "side": 1,
+      "message": "I left those because they\u0027re logically different - one is for the function definition and the other is for setting up the pointers. Because the function is so long if they are not repeated here then I thought it could be confusing.",
+      "parentUuid": "048f817d_4a83295d",
+      "range": {
+        "startLine": 528,
+        "startChar": 0,
+        "endLine": 530,
+        "endChar": 15
+      },
+      "revId": "f5507b514c87aa0cce8cd6c0389124fd0f25ae18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
