@@ -52,6 +52,24 @@
       "revId": "467c66e84278ade11ab5b6bca67a353780c3bd42",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "248c8586_dd659a10",
+        "filename": "vp8/common/onyx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-26T01:17:56Z",
+      "side": 1,
+      "message": "true, but libvpx isn\u0027t always built as c99. your point is valid for the same warning under test/ though",
+      "parentUuid": "84253145_2e034d87",
+      "revId": "467c66e84278ade11ab5b6bca67a353780c3bd42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
