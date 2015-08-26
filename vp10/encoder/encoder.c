@@ -3341,8 +3341,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
     // to recode.
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
       save_coding_context(cpi);
-      if (!cpi->sf.use_nonrd_pick_mode)
-        vp10_pack_bitstream(cpi, dest, size);
+      vp10_pack_bitstream(cpi, dest, size);
 
       rc->projected_frame_size = (int)(*size) << 3;
       restore_coding_context(cpi);

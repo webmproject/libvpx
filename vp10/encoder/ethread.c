@@ -146,23 +146,6 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
       memcpy(thread_data->td->counts, &cpi->common.counts,
              sizeof(cpi->common.counts));
     }
-
-    // Handle use_nonrd_pick_mode case.
-    if (cpi->sf.use_nonrd_pick_mode) {
-      MACROBLOCK *const x = &thread_data->td->mb;
-      MACROBLOCKD *const xd = &x->e_mbd;
-      struct macroblock_plane *const p = x->plane;
-      struct macroblockd_plane *const pd = xd->plane;
-      PICK_MODE_CONTEXT *ctx = &thread_data->td->pc_root->none;
-      int j;
-
-      for (j = 0; j < MAX_MB_PLANE; ++j) {
-        p[j].coeff = ctx->coeff_pbuf[j][0];
-        p[j].qcoeff = ctx->qcoeff_pbuf[j][0];
-        pd[j].dqcoeff = ctx->dqcoeff_pbuf[j][0];
-        p[j].eobs = ctx->eobs_pbuf[j][0];
-      }
-    }
   }
 
   // Encode a frame

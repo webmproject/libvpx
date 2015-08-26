@@ -285,8 +285,7 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
   set_block_thresholds(cm, rd);
   set_partition_probs(cm, xd);
 
-  if (!cpi->sf.use_nonrd_pick_mode || cm->frame_type == KEY_FRAME)
-    fill_token_costs(x->token_costs, cm->fc->coef_probs);
+  fill_token_costs(x->token_costs, cm->fc->coef_probs);
 
   if (cpi->sf.partition_search_type != VAR_BASED_PARTITION ||
       cm->frame_type == KEY_FRAME) {
@@ -295,20 +294,17 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
                       vp10_partition_tree);
   }
 
-  if (!cpi->sf.use_nonrd_pick_mode || (cm->current_video_frame & 0x07) == 1 ||
-      cm->frame_type == KEY_FRAME) {
-    fill_mode_costs(cpi);
+  fill_mode_costs(cpi);
 
-    if (!frame_is_intra_only(cm)) {
-      vp10_build_nmv_cost_table(x->nmvjointcost,
-                               cm->allow_high_precision_mv ? x->nmvcost_hp
-                                                           : x->nmvcost,
-                               &cm->fc->nmvc, cm->allow_high_precision_mv);
+  if (!frame_is_intra_only(cm)) {
+    vp10_build_nmv_cost_table(x->nmvjointcost,
+                             cm->allow_high_precision_mv ? x->nmvcost_hp
+                                                         : x->nmvcost,
+                             &cm->fc->nmvc, cm->allow_high_precision_mv);
 
-      for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-        vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
-                        cm->fc->inter_mode_probs[i], vp10_inter_mode_tree);
-    }
+    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+      vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
+                      cm->fc->inter_mode_probs[i], vp10_inter_mode_tree);
   }
 }
 

@@ -1180,15 +1180,7 @@ int vp10_rc_pick_q_and_bounds(const VP10_COMP *cpi,
   } else {
     q = rc_pick_q_and_bounds_two_pass(cpi, bottom_index, top_index);
   }
-  if (cpi->sf.use_nonrd_pick_mode) {
-    if (cpi->sf.force_frame_boost == 1)
-      q -= cpi->sf.max_delta_qindex;
 
-    if (q < *bottom_index)
-      *bottom_index = q;
-    else if (q > *top_index)
-      *top_index = q;
-  }
   return q;
 }
 

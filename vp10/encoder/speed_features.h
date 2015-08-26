@@ -141,7 +141,7 @@ typedef enum {
 } INTERP_FILTER_MASK;
 
 typedef enum {
-  // Search partitions using RD/NONRD criterion
+  // Search partitions using RD criterion
   SEARCH_PARTITION,
 
   // Always use a fixed size partition
@@ -362,9 +362,6 @@ typedef struct SPEED_FEATURES {
   // This feature limits the number of coefficients updates we actually do
   // by only looking at counts from 1/2 the bands.
   FAST_COEFF_UPDATE use_fast_coef_updates;
-
-  // This flag controls the use of non-RD mode decision.
-  int use_nonrd_pick_mode;
 
   // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
   // modes are used in order from LSB to MSB for each BLOCK_SIZE.
