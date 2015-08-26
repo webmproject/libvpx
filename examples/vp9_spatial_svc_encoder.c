@@ -635,6 +635,9 @@ int main(int argc, const char **argv) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
   if (svc_ctx.threads)
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (svc_ctx.threads >> 1));
+  if (svc_ctx.speed >= 5)
+    vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
+
 
   // Encode frames
   while (!end_of_stream) {
