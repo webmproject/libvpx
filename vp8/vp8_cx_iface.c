@@ -879,7 +879,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     }
     ctx->control_frame_flags = 0;
 
-    res = set_reference_and_update(ctx, flags);
+    if (!res)
+        res = set_reference_and_update(ctx, flags);
 
     /* Handle fixed keyframe intervals */
     if (ctx->cfg.kf_mode == VPX_KF_AUTO

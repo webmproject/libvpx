@@ -113,8 +113,6 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
 
   if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING) {
     for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
-      spatial_layer_target = 0;
-
       for (tl = 0; tl < oxcf->ts_number_layers; ++tl) {
         layer = LAYER_IDS_TO_IDX(sl, tl, oxcf->ts_number_layers);
         svc->layer_context[layer].target_bandwidth =
