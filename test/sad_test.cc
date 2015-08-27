@@ -22,6 +22,7 @@
 #endif
 #include "vpx/vpx_codec.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/mem.h"
 
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"

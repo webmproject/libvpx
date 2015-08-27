@@ -16,8 +16,9 @@
 #include <assert.h>
 
 #include "./vpx_config.h"
-#include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/mem.h"
 #include "vp9/common/vp9_systemdependent.h"
 
 #ifdef __cplusplus
@@ -26,12 +27,6 @@ extern "C" {
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
-
-#define ROUND_POWER_OF_TWO(value, n) \
-    (((value) + (1 << ((n) - 1))) >> (n))
-
-#define ALIGN_POWER_OF_TWO(value, n) \
-    (((value) + ((1 << (n)) - 1)) & ~((1 << (n)) - 1))
 
 // Only need this for fixed-size arrays, for structs just assign.
 #define vp9_copy(dest, src) {            \
@@ -82,9 +77,6 @@ static INLINE uint16_t clip_pixel_highbd(int val, int bd) {
 // tran_high_t is the datatype used for intermediate transform stages.
 typedef int64_t tran_high_t;
 typedef int32_t tran_low_t;
-
-#define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uintptr_t)x) << 1))
-#define CONVERT_TO_BYTEPTR(x) ((uint8_t*)(((uintptr_t)x) >> 1 ))
 
 #else
 

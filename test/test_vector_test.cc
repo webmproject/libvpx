@@ -97,13 +97,18 @@ TEST_P(TestVectorTest, MD5Match) {
   delete video;
 }
 
+#if CONFIG_VP8_DECODER
 VP8_INSTANTIATE_TEST_CASE(TestVectorTest,
                           ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
                                               libvpx_test::kVP8TestVectors +
                                               libvpx_test::kNumVP8TestVectors));
+#endif  // CONFIG_VP8_DECODER
+
+#if CONFIG_VP9_DECODER
 VP9_INSTANTIATE_TEST_CASE(TestVectorTest,
                           ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
                                               libvpx_test::kVP9TestVectors +
                                               libvpx_test::kNumVP9TestVectors));
+#endif  // CONFIG_VP9_DECODER
 
 }  // namespace
