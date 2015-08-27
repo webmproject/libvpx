@@ -145,6 +145,24 @@
     },
     {
       "key": {
+        "uuid": "048f817d_c0aa9508",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-27T20:04:49Z",
+      "side": 1,
+      "message": "OK thanks. There are 2 inline definitions actually \u003e.\u003c; one from a public header (VPX_INLINE) which is non-config based where the suggestion would help the C++ sources. The other for the codec sources comes from vpx_config.h which could do better detection via the toolchain.",
+      "parentUuid": "e4750d3f_43955395",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4750d3f_911ce8f6",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 1
