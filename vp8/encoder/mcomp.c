@@ -223,14 +223,14 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     unsigned int quarteriters = 4;
     int thismse;
 
-    int minc = MAX(x->mv_col_min * 4,
-                   (ref_mv->as_mv.col >> 1) - ((1 << mvlong_width) - 1));
-    int maxc = MIN(x->mv_col_max * 4,
-                   (ref_mv->as_mv.col >> 1) + ((1 << mvlong_width) - 1));
-    int minr = MAX(x->mv_row_min * 4,
-                   (ref_mv->as_mv.row >> 1) - ((1 << mvlong_width) - 1));
-    int maxr = MIN(x->mv_row_max * 4,
-                   (ref_mv->as_mv.row >> 1) + ((1 << mvlong_width) - 1));
+    int minc = VPXMAX(x->mv_col_min * 4,
+                      (ref_mv->as_mv.col >> 1) - ((1 << mvlong_width) - 1));
+    int maxc = VPXMIN(x->mv_col_max * 4,
+                      (ref_mv->as_mv.col >> 1) + ((1 << mvlong_width) - 1));
+    int minr = VPXMAX(x->mv_row_min * 4,
+                      (ref_mv->as_mv.row >> 1) - ((1 << mvlong_width) - 1));
+    int maxr = VPXMIN(x->mv_row_max * 4,
+                      (ref_mv->as_mv.row >> 1) + ((1 << mvlong_width) - 1));
 
     int y_stride;
     int offset;

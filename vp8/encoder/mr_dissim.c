@@ -192,11 +192,13 @@ void vp8_cal_dissimilarity(VP8_COMP *cpi)
                                 }
                             }
 
-                            mmvx = MAX(abs(min_mvx - here->mbmi.mv.as_mv.row),
-                                       abs(max_mvx - here->mbmi.mv.as_mv.row));
-                            mmvy = MAX(abs(min_mvy - here->mbmi.mv.as_mv.col),
-                                       abs(max_mvy - here->mbmi.mv.as_mv.col));
-                            dissim = MAX(mmvx, mmvy);
+                            mmvx = VPXMAX(
+                                abs(min_mvx - here->mbmi.mv.as_mv.row),
+                                abs(max_mvx - here->mbmi.mv.as_mv.row));
+                            mmvy = VPXMAX(
+                                abs(min_mvy - here->mbmi.mv.as_mv.col),
+                                abs(max_mvy - here->mbmi.mv.as_mv.col));
+                            dissim = VPXMAX(mmvx, mmvy);
                         }
                     }
 

@@ -72,7 +72,7 @@ static int macroblock_corner_grad(unsigned char* signal, int stride,
   int y2 = signal[offsetx * stride + offsety + sgny];
   int y3 = signal[(offsetx + sgnx) * stride + offsety];
   int y4 = signal[(offsetx + sgnx) * stride + offsety + sgny];
-  return MAX(MAX(abs(y1 - y2), abs(y1 - y3)), abs(y1 - y4));
+  return VPXMAX(VPXMAX(abs(y1 - y2), abs(y1 - y3)), abs(y1 - y4));
 }
 
 static int check_dot_artifact_candidate(VP8_COMP *cpi,
@@ -1136,8 +1136,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_MULTI_RES_ENCODING
             if (parent_ref_valid && (parent_ref_frame == this_ref_frame) &&
                 dissim <= 2 &&
-                MAX(abs(best_ref_mv.as_mv.row - parent_ref_mv.as_mv.row),
-                    abs(best_ref_mv.as_mv.col - parent_ref_mv.as_mv.col)) <= 4)
+                VPXMAX(abs(best_ref_mv.as_mv.row - parent_ref_mv.as_mv.row),
+                       abs(best_ref_mv.as_mv.col - parent_ref_mv.as_mv.col)) <=
+                    4)
             {
                 d->bmi.mv.as_int = mvp_full.as_int;
                 mode_mv[NEWMV].as_int = mvp_full.as_int;

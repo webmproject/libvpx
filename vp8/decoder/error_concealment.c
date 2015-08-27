@@ -16,6 +16,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/common.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 #define FLOOR(x,q) ((x) & -(1 << (q)))
 
@@ -93,13 +94,13 @@ static void assign_overlap(OVERLAP_NODE* overlaps,
  */
 static int block_overlap(int b1_row, int b1_col, int b2_row, int b2_col)
 {
-    const int int_top = MAX(b1_row, b2_row); // top
-    const int int_left = MAX(b1_col, b2_col); // left
+    const int int_top = VPXMAX(b1_row, b2_row); // top
+    const int int_left = VPXMAX(b1_col, b2_col); // left
     /* Since each block is 4x4 pixels, adding 4 (Q3) to the left/top edge
      * gives us the right/bottom edge.
      */
-    const int int_right = MIN(b1_col + (4<<3), b2_col + (4<<3)); // right
-    const int int_bottom = MIN(b1_row + (4<<3), b2_row + (4<<3)); // bottom
+    const int int_right = VPXMIN(b1_col + (4<<3), b2_col + (4<<3)); // right
+    const int int_bottom = VPXMIN(b1_row + (4<<3), b2_row + (4<<3)); // bottom
     return (int_bottom - int_top) * (int_right - int_left);
 }
 
@@ -124,7 +125,7 @@ static void calculate_overlaps_mb(B_OVERLAP *b_overlaps, union b_mode_info *bmi,
     /* If the block partly overlaps any previous MB, these coordinates
      * can be < 0. We don't want to access blocks in previous MBs.
      */
-    const int blk_idx = MAX(rel_ol_blk_row,0) * 4 + MAX(rel_ol_blk_col,0);
+    const int blk_idx = VPXMAX(rel_ol_blk_row,0) * 4 + VPXMAX(rel_ol_blk_col,0);
     /* Upper left overlapping block */
     B_OVERLAP *b_ol_ul = &(b_overlaps[blk_idx]);
 
@@ -132,8 +133,8 @@ static void calculate_overlaps_mb(B_OVERLAP *b_overlaps, union b_mode_info *bmi,
      * which the motion compensated block overlaps
      */
     /* Avoid calculating overlaps for blocks in later MBs */
-    int end_row = MIN(4 + mb_row * 4 - first_blk_row, 2);
-    int end_col = MIN(4 + mb_col * 4 - first_blk_col, 2);
+    int end_row = VPXMIN(4 + mb_row * 4 - first_blk_row, 2);
+    int end_col = VPXMIN(4 + mb_col * 4 - first_blk_col, 2);
     int row, col;
 
     /* Check if new_row and new_col are evenly divisible by 4 (Q3),
@@ -208,8 +209,8 @@ void vp8_calculate_overlaps(MB_OVERLAP *overlap_ul,
     overlap_mb_row = FLOOR((overlap_b_row << 3) / 4, 3) >> 3;
     overlap_mb_col = FLOOR((overlap_b_col << 3) / 4, 3) >> 3;
 
-    end_row = MIN(mb_rows - overlap_mb_row, 2);
-    end_col = MIN(mb_cols - overlap_mb_col, 2);
+    end_row = VPXMIN(mb_rows - overlap_mb_row, 2);
+    end_col = VPXMIN(mb_cols - overlap_mb_col, 2);
 
     /* Don't calculate overlap for MBs we don't overlap */
     /* Check if the new block row starts at the last block row of the MB */

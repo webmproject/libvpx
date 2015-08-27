@@ -166,7 +166,7 @@ static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
         const uint8_t *clear = data;
         if (decrypt_cb)
         {
-            int n = MIN(sizeof(clear_buffer), data_sz);
+            int n = VPXMIN(sizeof(clear_buffer), data_sz);
             decrypt_cb(decrypt_state, data, clear_buffer, n);
             clear = clear_buffer;
         }

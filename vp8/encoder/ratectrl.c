@@ -22,6 +22,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/systemdependent.h"
 #include "encodemv.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 
 #define MIN_BPB_FACTOR          0.01
@@ -380,7 +381,8 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
         int initial_boost = 32; /* |3.0 * per_frame_bandwidth| */
         /* Boost depends somewhat on frame rate: only used for 1 layer case. */
         if (cpi->oxcf.number_of_layers == 1) {
-          kf_boost = MAX(initial_boost, (int)(2 * cpi->output_framerate - 16));
+          kf_boost = VPXMAX(initial_boost,
+                            (int)(2 * cpi->output_framerate - 16));
         }
         else {
           /* Initial factor: set target size to: |3.0 * per_frame_bandwidth|. */
