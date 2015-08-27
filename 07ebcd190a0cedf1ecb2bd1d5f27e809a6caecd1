@@ -16,6 +16,29 @@
       "revId": "07ebcd190a0cedf1ecb2bd1d5f27e809a6caecd1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "046221c0_3dad176f",
+        "filename": "vpx_dsp/inv_txfm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-08-27T21:56:04Z",
+      "side": 1,
+      "message": "remove \"-odd half\" since now it is full graph for this stage.",
+      "range": {
+        "startLine": 187,
+        "startChar": 18,
+        "endLine": 187,
+        "endChar": 22
+      },
+      "revId": "07ebcd190a0cedf1ecb2bd1d5f27e809a6caecd1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
