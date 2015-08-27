@@ -1694,6 +1694,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       for (i = 0; i < REF_FRAMES; ++i)
         cm->next_ref_frame_map[i] = cm->ref_frame_map[i];
     }
+
     return 0;
   }
 
@@ -1805,6 +1806,17 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   // This flag will be overridden by the call to vp9_setup_past_independence
   // below, forcing the use of context 0 for those frame types.
   cm->frame_context_idx = vp9_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
+
+#if CONFIG_FULL_BUFFER_TEST
+  {
+    int k;
+    fprintf(stderr, "\nDecode frame index %d, is_show_frame %d, new_fb_idx %d\n",
+            cm->current_video_frame, cm->show_frame, cm->new_fb_idx);
+    for (k = 0; k < 8; ++k)
+      fprintf(stderr, "%d  ", cm->ref_frame_map[k]);
+    fprintf(stderr, "\n");
+  }
+#endif
 
   // Generate next_ref_frame_map.
   lock_buffer_pool(pool);

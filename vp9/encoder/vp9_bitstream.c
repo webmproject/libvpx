@@ -897,6 +897,21 @@ static void write_tile_info(const VP9_COMMON *const cm,
 }
 
 static int get_refresh_mask(VP9_COMP *cpi) {
+  int lst_fb_idx = cpi->lst_fb_idx;
+
+#if CONFIG_FULL_BUFFER_TEST
+  if (cpi->common.frame_type == KEY_FRAME) {
+    lst_fb_idx = 0;
+  } else {
+    if (cpi->lst_fb_idx == 0)
+      lst_fb_idx = 3;
+    else if (cpi->lst_fb_idx == 7)
+      lst_fb_idx = 0;
+    else
+      lst_fb_idx = cpi->lst_fb_idx + 1;
+  }
+#endif
+
   if (vp9_preserve_existing_gf(cpi)) {
     // We have decided to preserve the previously existing golden frame as our
     // new ARF frame. However, in the short term we leave it in the GF slot and,
@@ -908,7 +923,7 @@ static int get_refresh_mask(VP9_COMP *cpi) {
     // Note: This is highly specific to the use of ARF as a forward reference,
     // and this needs to be generalized as other uses are implemented
     // (like RTC/temporal scalability).
-    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+    return (cpi->refresh_last_frame << lst_fb_idx) |
            (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {
     int arf_idx = cpi->alt_fb_idx;
@@ -916,7 +931,7 @@ static int get_refresh_mask(VP9_COMP *cpi) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       arf_idx = gf_group->arf_update_idx[gf_group->index];
     }
-    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+    return (cpi->refresh_last_frame << lst_fb_idx) |
            (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
            (cpi->refresh_alt_ref_frame << arf_idx);
   }
