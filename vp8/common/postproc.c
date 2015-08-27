@@ -675,6 +675,7 @@ void vp8_blend_b_c (unsigned char *y, unsigned char *u, unsigned char *v,
     }
 }
 
+#if CONFIG_POSTPROC_VISUALIZER
 static void constrain_line (int x_0, int *x_1, int y_0, int *y_1, int width, int height)
 {
     int dx;
@@ -717,6 +718,7 @@ static void constrain_line (int x_0, int *x_1, int y_0, int *y_1, int width, int
             *x_1 = ((0-y_0)*dx)/dy + x_0;
     }
 }
+#endif  // CONFIG_POSTPROC_VISUALIZER
 
 #if CONFIG_POSTPROC
 int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags)
