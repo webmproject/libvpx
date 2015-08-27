@@ -76,13 +76,6 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
   if (cpi->num_workers == 0) {
     int allocated_workers = num_workers;
 
-    // While using SVC, we need to allocate threads according to the highest
-    // resolution.
-    if (cpi->use_svc) {
-      int max_tile_cols = get_max_tile_cols(cpi);
-      allocated_workers = VPXMIN(cpi->oxcf.max_threads, max_tile_cols);
-    }
-
     CHECK_MEM_ERROR(cm, cpi->workers,
                     vpx_malloc(allocated_workers * sizeof(*cpi->workers)));
 

@@ -695,11 +695,7 @@ static int choose_partitioning(VP10_COMP *cpi,
   s = x->plane[0].src.buf;
   sp = x->plane[0].src.stride;
 
-  if (!is_key_frame && !(is_one_pass_cbr_svc(cpi) &&
-      cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
-    // In the case of spatial/temporal scalable coding, the assumption here is
-    // that the temporal reference frame will always be of type LAST_FRAME.
-    // TODO(marpan): If that assumption is broken, we need to revisit this code.
+  if (!is_key_frame) {
     MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
     unsigned int uv_sad;
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
@@ -710,12 +706,7 @@ static int choose_partitioning(VP10_COMP *cpi,
         + (mi_col + 4 < cm->mi_cols) * 2 + (mi_row + 4 < cm->mi_rows);
 
     assert(yv12 != NULL);
-
-    if (!(is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id)) {
-      // For now, GOLDEN will not be used for non-zero spatial layers, since
-      // it may not be a temporal reference.
-      yv12_g = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
-    }
+    yv12_g = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
 
     if (yv12_g && yv12_g != yv12) {
       vp10_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
@@ -851,9 +842,7 @@ static int choose_partitioning(VP10_COMP *cpi,
           }
         }
       }
-      // TODO(marpan): There is an issue with variance based on 4x4 average in
-      // svc mode, don't allow it for now.
-      if (is_key_frame || (low_res && !cpi->use_svc &&
+      if (is_key_frame || (low_res &&
           vt.split[i].split[j].part_variances.none.variance >
           (thresholds[1] << 1))) {
         force_split[split_index] = 0;

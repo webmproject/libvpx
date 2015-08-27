@@ -996,18 +996,7 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi, ref_frame);
 
-    // Set "found" to 0 for temporal svc and for spatial svc key frame
-    if (cpi->use_svc &&
-        ((cpi->svc.number_temporal_layers > 1 &&
-         cpi->oxcf.rc_mode == VPX_CBR) ||
-        (cpi->svc.number_spatial_layers > 1 &&
-         cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame) ||
-        (is_two_pass_svc(cpi) &&
-         cpi->svc.encode_empty_frame_state == ENCODING &&
-         cpi->svc.layer_context[0].frames_from_key_frame <
-         cpi->svc.number_temporal_layers + 1))) {
-      found = 0;
-    } else if (cfg != NULL) {
+  if (cfg != NULL) {
       found = cm->width == cfg->y_crop_width &&
               cm->height == cfg->y_crop_height;
     }
@@ -1093,14 +1082,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
     write_bitdepth_colorspace_sampling(cm, wb);
     write_frame_size(cm, wb);
   } else {
-    // In spatial svc if it's not error_resilient_mode then we need to code all
-    // visible frames as invisible. But we need to keep the show_frame flag so
-    // that the publisher could know whether it is supposed to be visible.
-    // So we will code the show_frame flag as it is. Then code the intra_only
-    // bit here. This will make the bitstream incompatible. In the player we
-    // will change to show_frame flag to 0, then add an one byte frame with
-    // show_existing_frame flag which tells the decoder which frame we want to
-    // show.
     if (!cm->show_frame)
       vpx_wb_write_bit(wb, cm->intra_only);
 

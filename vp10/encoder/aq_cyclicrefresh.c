@@ -291,7 +291,7 @@ void vp10_cyclic_refresh_postencode(VP10_COMP *const cpi) {
     }
 }
 
-// Set golden frame update interval, for non-svc 1 pass CBR mode.
+// Set golden frame update interval, for 1 pass CBR mode.
 void vp10_cyclic_refresh_set_golden_update(VP10_COMP *const cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
@@ -484,10 +484,7 @@ void vp10_cyclic_refresh_setup(VP10_COMP *const cpi) {
   if (cm->current_video_frame == 0)
     cr->low_content_avg = 0.0;
   // Don't apply refresh on key frame or enhancement layer frames.
-  if (!apply_cyclic_refresh ||
-      (cm->frame_type == KEY_FRAME) ||
-      (cpi->svc.temporal_layer_id > 0) ||
-      (cpi->svc.spatial_layer_id > 0)) {
+  if (!apply_cyclic_refresh || cm->frame_type == KEY_FRAME) {
     // Set segmentation map to 0 and disable.
     unsigned char *const seg_map = cpi->segmentation_map;
     memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
