@@ -308,6 +308,8 @@ DSP_SRCS-$(HAVE_MMX)    += x86/variance_mmx.c
 DSP_SRCS-$(HAVE_MMX)    += x86/variance_impl_mmx.asm
 DSP_SRCS-$(HAVE_SSE)    += x86/variance_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
+DSP_SRCS-$(HAVE_SSE2)   += x86/halfpix_variance_sse2.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/halfpix_variance_impl_sse2.asm
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_impl_avx2.c
 

@@ -1373,13 +1373,13 @@ add_proto qw/uint32_t vpx_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, i
 # Specialty Subpixel
 #
 add_proto qw/uint32_t vpx_variance_halfpixvar16x16_h/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, uint32_t *sse";
-  specialize qw/vpx_variance_halfpixvar16x16_h mmx media/;
+  specialize qw/vpx_variance_halfpixvar16x16_h mmx sse2 media/;
 
 add_proto qw/uint32_t vpx_variance_halfpixvar16x16_v/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, uint32_t *sse";
-  specialize qw/vpx_variance_halfpixvar16x16_v mmx media/;
+  specialize qw/vpx_variance_halfpixvar16x16_v mmx sse2 media/;
 
 add_proto qw/uint32_t vpx_variance_halfpixvar16x16_hv/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, uint32_t *sse";
-  specialize qw/vpx_variance_halfpixvar16x16_hv mmx media/;
+  specialize qw/vpx_variance_halfpixvar16x16_hv mmx sse2 media/;
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/unsigned int vpx_highbd_12_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
