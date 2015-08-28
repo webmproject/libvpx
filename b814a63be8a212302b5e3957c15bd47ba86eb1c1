@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "048f817d_798280a5",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-28T02:11:30Z",
+      "side": 1,
+      "message": "this is a bit of a hack, though similar things are done elsewhere. a local copy could be made given the structure isn\u0027t too large.",
+      "revId": "b814a63be8a212302b5e3957c15bd47ba86eb1c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
