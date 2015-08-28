@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "849451c2_7db4ea68",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-08-28T21:04:23Z",
+      "side": 1,
+      "message": "Do we ever use these?",
+      "revId": "aa02644ac6da28aed974943a9757f986a0beb7d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84253145_5a075526",
+        "filename": "vp10/common/idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-08-28T21:04:23Z",
+      "side": 1,
+      "message": "Can this condition ever happen? It seems like we assign DCT_DCT here regardless.",
+      "revId": "aa02644ac6da28aed974943a9757f986a0beb7d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84253145_1a0a3d2c",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-08-28T21:04:23Z",
+      "side": 1,
+      "message": "see analogous idct comment",
+      "revId": "aa02644ac6da28aed974943a9757f986a0beb7d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
