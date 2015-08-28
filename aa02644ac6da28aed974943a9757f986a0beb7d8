@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "c4700952_c4e70dd0",
+        "filename": "vp10/common/idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-08-28T21:29:36Z",
+      "side": 1,
+      "message": "This is because we currently don\u0027t have alternative transforms for size 32x32. I will make some changes to clear it up.",
+      "parentUuid": "84253145_5a075526",
+      "revId": "aa02644ac6da28aed974943a9757f986a0beb7d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84253145_1a0a3d2c",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 1
