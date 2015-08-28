@@ -18,7 +18,7 @@
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
 static int frame_is_boosted(const VP10_COMP *cpi) {
-  return frame_is_kf_gf_arf(cpi) || vp10_is_upper_layer_key_frame(cpi);
+  return frame_is_kf_gf_arf(cpi);
 }
 
 // Sets a partition size down to which the auto partition code will always
@@ -284,8 +284,7 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     // pred_mv_sad will not be set (since vp10_mv_pred will not
     // be called).
     // TODO(marpan/agrange): Fix this condition.
-    sf->reference_masking = (cpi->oxcf.resize_mode != RESIZE_DYNAMIC &&
-                             cpi->svc.number_spatial_layers == 1) ? 1 : 0;
+    sf->reference_masking = (cpi->oxcf.resize_mode != RESIZE_DYNAMIC) ? 1 : 0;
 
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;

@@ -652,9 +652,7 @@ static void adjust_arnr_filter(VP10_COMP *cpi,
 }
 
 void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
-  VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
-  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int frame;
   int frames_to_blur;
   int start_frame;
@@ -681,67 +679,21 @@ void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
   if (frames_to_blur > 0) {
     // Setup scaling factors. Scaling on each of the arnr frames is not
     // supported.
-    if (cpi->use_svc) {
-      // In spatial svc the scaling factors might be less then 1/2.
-      // So we will use non-normative scaling.
-      int frame_used = 0;
+    // ARF is produced at the native frame size and resized when coded.
 #if CONFIG_VP9_HIGHBITDEPTH
-      vp10_setup_scale_factors_for_frame(
-          &sf,
-          get_frame_new_buffer(cm)->y_crop_width,
-          get_frame_new_buffer(cm)->y_crop_height,
-          get_frame_new_buffer(cm)->y_crop_width,
-          get_frame_new_buffer(cm)->y_crop_height,
-          cm->use_highbitdepth);
+    vp10_setup_scale_factors_for_frame(&sf,
+                                      frames[0]->y_crop_width,
+                                      frames[0]->y_crop_height,
+                                      frames[0]->y_crop_width,
+                                      frames[0]->y_crop_height,
+                                      cm->use_highbitdepth);
 #else
-      vp10_setup_scale_factors_for_frame(
-          &sf,
-          get_frame_new_buffer(cm)->y_crop_width,
-          get_frame_new_buffer(cm)->y_crop_height,
-          get_frame_new_buffer(cm)->y_crop_width,
-          get_frame_new_buffer(cm)->y_crop_height);
+    vp10_setup_scale_factors_for_frame(&sf,
+                                      frames[0]->y_crop_width,
+                                      frames[0]->y_crop_height,
+                                      frames[0]->y_crop_width,
+                                      frames[0]->y_crop_height);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-      for (frame = 0; frame < frames_to_blur; ++frame) {
-        if (cm->mi_cols * MI_SIZE != frames[frame]->y_width ||
-            cm->mi_rows * MI_SIZE != frames[frame]->y_height) {
-          if (vpx_realloc_frame_buffer(&cpi->svc.scaled_frames[frame_used],
-                                       cm->width, cm->height,
-                                       cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                                       cm->use_highbitdepth,
-#endif
-                                       VP9_ENC_BORDER_IN_PIXELS,
-                                       cm->byte_alignment,
-                                       NULL, NULL, NULL)) {
-            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                               "Failed to reallocate alt_ref_buffer");
-          }
-          frames[frame] = vp10_scale_if_required(
-              cm, frames[frame], &cpi->svc.scaled_frames[frame_used]);
-          ++frame_used;
-        }
-      }
-      cm->mi = cm->mip + cm->mi_stride + 1;
-      xd->mi = cm->mi_grid_visible;
-      xd->mi[0] = cm->mi;
-    } else {
-      // ARF is produced at the native frame size and resized when coded.
-#if CONFIG_VP9_HIGHBITDEPTH
-      vp10_setup_scale_factors_for_frame(&sf,
-                                        frames[0]->y_crop_width,
-                                        frames[0]->y_crop_height,
-                                        frames[0]->y_crop_width,
-                                        frames[0]->y_crop_height,
-                                        cm->use_highbitdepth);
-#else
-      vp10_setup_scale_factors_for_frame(&sf,
-                                        frames[0]->y_crop_width,
-                                        frames[0]->y_crop_height,
-                                        frames[0]->y_crop_width,
-                                        frames[0]->y_crop_height);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    }
   }
 
   temporal_filter_iterate_c(cpi, frames, frames_to_blur,
