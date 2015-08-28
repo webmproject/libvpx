@@ -813,9 +813,18 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     // Check if current macroblock is in skin area.
     {
-    const int y = x->src.y_buffer[7 * x->src.y_stride + 7];
-    const int cb = x->src.u_buffer[3 * x->src.uv_stride + 3];
-    const int cr = x->src.v_buffer[3 * x->src.uv_stride + 3];
+    const int y = (x->src.y_buffer[7 * x->src.y_stride + 7] +
+        x->src.y_buffer[7 * x->src.y_stride + 8] +
+        x->src.y_buffer[8 * x->src.y_stride + 7] +
+        x->src.y_buffer[8 * x->src.y_stride + 8]) >> 2;
+    const int cb = (x->src.u_buffer[3 * x->src.uv_stride + 3] +
+        x->src.u_buffer[3 * x->src.uv_stride + 4] +
+        x->src.u_buffer[4 * x->src.uv_stride + 3] +
+        x->src.u_buffer[4 * x->src.uv_stride + 4]) >> 2;
+    const int cr = (x->src.v_buffer[3 * x->src.uv_stride + 3] +
+        x->src.v_buffer[3 * x->src.uv_stride + 4] +
+        x->src.v_buffer[4 * x->src.uv_stride + 3] +
+        x->src.v_buffer[4 * x->src.uv_stride + 4]) >> 2;
     x->is_skin = 0;
     if (!cpi->oxcf.screen_content_mode)
       x->is_skin = is_skin_color(y, cb, cr);
