@@ -163,6 +163,24 @@
     },
     {
       "key": {
+        "uuid": "849451c2_53c0ff94",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1001629
+      },
+      "writtenOn": "2015-08-29T23:21:23Z",
+      "side": 1,
+      "message": "After some more checking, it looks like clang does _not_ warn on static inline functions that are in .h files (I did my testing with them in the .cc file), so this patch should be enough for Chromium without the change I suggested. Thanks!",
+      "parentUuid": "048f817d_c0aa9508",
+      "revId": "db995a3010b75f9f8fc0b7733d91208a01497b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4750d3f_911ce8f6",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 1
