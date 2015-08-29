@@ -686,7 +686,7 @@ void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
                                       frames[0]->y_crop_height,
                                       frames[0]->y_crop_width,
                                       frames[0]->y_crop_height,
-                                      cm->use_highbitdepth);
+                                      cpi->common.use_highbitdepth);
 #else
     vp10_setup_scale_factors_for_frame(&sf,
                                       frames[0]->y_crop_width,
