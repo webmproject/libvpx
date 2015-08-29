@@ -1237,7 +1237,7 @@ static void setup_rf_level_maxq(VP9_COMP *cpi) {
   }
 }
 
-void vp9_init_subsampling(VP9_COMP *cpi) {
+static void init_subsampling(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   const int w = cm->width;
@@ -1332,7 +1332,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   twopass->last_kfgroup_zeromotion_pct = 100;
 
   if (oxcf->resize_mode != RESIZE_NONE) {
-    vp9_init_subsampling(cpi);
+    init_subsampling(cpi);
   }
 }
 

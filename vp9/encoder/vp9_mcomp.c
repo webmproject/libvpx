@@ -1371,15 +1371,15 @@ int vp9_get_mvpred_av_var(const MACROBLOCK *x,
                                  x->mvcost, x->errorperbit) : 0);
 }
 
-int vp9_hex_search(const MACROBLOCK *x,
-                   MV *ref_mv,
-                   int search_param,
-                   int sad_per_bit,
-                   int do_init_search,
-                   int *cost_list,
-                   const vp9_variance_fn_ptr_t *vfp,
-                   int use_mvcost,
-                   const MV *center_mv, MV *best_mv) {
+static int hex_search(const MACROBLOCK *x,
+                      MV *ref_mv,
+                      int search_param,
+                      int sad_per_bit,
+                      int do_init_search,
+                      int *cost_list,
+                      const vp9_variance_fn_ptr_t *vfp,
+                      int use_mvcost,
+                      const MV *center_mv, MV *best_mv) {
   // First scale has 8-closest points, the rest have 6 points in hex shape
   // at increasing scales
   static const int hex_num_candidates[MAX_PATTERN_SCALES] = {
@@ -1406,16 +1406,16 @@ int vp9_hex_search(const MACROBLOCK *x,
                             hex_num_candidates, hex_candidates);
 }
 
-int vp9_bigdia_search(const MACROBLOCK *x,
-                      MV *ref_mv,
-                      int search_param,
-                      int sad_per_bit,
-                      int do_init_search,
-                      int *cost_list,
-                      const vp9_variance_fn_ptr_t *vfp,
-                      int use_mvcost,
-                      const MV *center_mv,
-                      MV *best_mv) {
+static int bigdia_search(const MACROBLOCK *x,
+                         MV *ref_mv,
+                         int search_param,
+                         int sad_per_bit,
+                         int do_init_search,
+                         int *cost_list,
+                         const vp9_variance_fn_ptr_t *vfp,
+                         int use_mvcost,
+                         const MV *center_mv,
+                         MV *best_mv) {
   // First scale has 4-closest points, the rest have 8 points in diamond
   // shape at increasing scales
   static const int bigdia_num_candidates[MAX_PATTERN_SCALES] = {
@@ -1448,16 +1448,16 @@ int vp9_bigdia_search(const MACROBLOCK *x,
                                 bigdia_num_candidates, bigdia_candidates);
 }
 
-int vp9_square_search(const MACROBLOCK *x,
-                      MV *ref_mv,
-                      int search_param,
-                      int sad_per_bit,
-                      int do_init_search,
-                      int *cost_list,
-                      const vp9_variance_fn_ptr_t *vfp,
-                      int use_mvcost,
-                      const MV *center_mv,
-                      MV *best_mv) {
+static int square_search(const MACROBLOCK *x,
+                         MV *ref_mv,
+                         int search_param,
+                         int sad_per_bit,
+                         int do_init_search,
+                         int *cost_list,
+                         const vp9_variance_fn_ptr_t *vfp,
+                         int use_mvcost,
+                         const MV *center_mv,
+                         MV *best_mv) {
   // All scales have 8 closest points in square shape
   static const int square_num_candidates[MAX_PATTERN_SCALES] = {
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
@@ -1490,32 +1490,32 @@ int vp9_square_search(const MACROBLOCK *x,
                             square_num_candidates, square_candidates);
 }
 
-int vp9_fast_hex_search(const MACROBLOCK *x,
-                        MV *ref_mv,
-                        int search_param,
-                        int sad_per_bit,
-                        int do_init_search,  // must be zero for fast_hex
-                        int *cost_list,
-                        const vp9_variance_fn_ptr_t *vfp,
-                        int use_mvcost,
-                        const MV *center_mv,
-                        MV *best_mv) {
-  return vp9_hex_search(x, ref_mv, VPXMAX(MAX_MVSEARCH_STEPS - 2, search_param),
-                        sad_per_bit, do_init_search, cost_list, vfp, use_mvcost,
-                        center_mv, best_mv);
+static int fast_hex_search(const MACROBLOCK *x,
+                           MV *ref_mv,
+                           int search_param,
+                           int sad_per_bit,
+                           int do_init_search,  // must be zero for fast_hex
+                           int *cost_list,
+                           const vp9_variance_fn_ptr_t *vfp,
+                           int use_mvcost,
+                           const MV *center_mv,
+                           MV *best_mv) {
+  return hex_search(x, ref_mv, VPXMAX(MAX_MVSEARCH_STEPS - 2, search_param),
+                    sad_per_bit, do_init_search, cost_list, vfp, use_mvcost,
+                    center_mv, best_mv);
 }
 
-int vp9_fast_dia_search(const MACROBLOCK *x,
-                        MV *ref_mv,
-                        int search_param,
-                        int sad_per_bit,
-                        int do_init_search,
-                        int *cost_list,
-                        const vp9_variance_fn_ptr_t *vfp,
-                        int use_mvcost,
-                        const MV *center_mv,
-                        MV *best_mv) {
-  return vp9_bigdia_search(
+static int fast_dia_search(const MACROBLOCK *x,
+                           MV *ref_mv,
+                           int search_param,
+                           int sad_per_bit,
+                           int do_init_search,
+                           int *cost_list,
+                           const vp9_variance_fn_ptr_t *vfp,
+                           int use_mvcost,
+                           const MV *center_mv,
+                           MV *best_mv) {
+  return bigdia_search(
       x, ref_mv, VPXMAX(MAX_MVSEARCH_STEPS - 2, search_param), sad_per_bit,
       do_init_search, cost_list, vfp, use_mvcost, center_mv, best_mv);
 }
@@ -1946,15 +1946,16 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   return best_sad;
 }
 
+// Runs sequence of diamond searches in smaller steps for RD.
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
-                           MV *mvp_full, int step_param,
-                           int sadpb, int further_steps, int do_refine,
-                           int *cost_list,
-                           const vp9_variance_fn_ptr_t *fn_ptr,
-                           const MV *ref_mv, MV *dst_mv) {
+static int full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
+                              MV *mvp_full, int step_param,
+                              int sadpb, int further_steps, int do_refine,
+                              int *cost_list,
+                              const vp9_variance_fn_ptr_t *fn_ptr,
+                              const MV *ref_mv, MV *dst_mv) {
   MV temp_mv;
   int thissme, n, num00 = 0;
   int bestsme = cpi->diamond_search_sad(x, &cpi->ss_cfg, mvp_full, &temp_mv,
@@ -2346,29 +2347,29 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   switch (method) {
     case FAST_DIAMOND:
-      var = vp9_fast_dia_search(x, mvp_full, step_param, error_per_bit, 0,
-                                cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = fast_dia_search(x, mvp_full, step_param, error_per_bit, 0,
+                            cost_list, fn_ptr, 1, ref_mv, tmp_mv);
       break;
     case FAST_HEX:
-      var = vp9_fast_hex_search(x, mvp_full, step_param, error_per_bit, 0,
-                                cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = fast_hex_search(x, mvp_full, step_param, error_per_bit, 0,
+                            cost_list, fn_ptr, 1, ref_mv, tmp_mv);
       break;
     case HEX:
-      var = vp9_hex_search(x, mvp_full, step_param, error_per_bit, 1,
-                           cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = hex_search(x, mvp_full, step_param, error_per_bit, 1,
+                       cost_list, fn_ptr, 1, ref_mv, tmp_mv);
       break;
     case SQUARE:
-      var = vp9_square_search(x, mvp_full, step_param, error_per_bit, 1,
-                              cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = square_search(x, mvp_full, step_param, error_per_bit, 1,
+                          cost_list, fn_ptr, 1, ref_mv, tmp_mv);
       break;
     case BIGDIA:
-      var = vp9_bigdia_search(x, mvp_full, step_param, error_per_bit, 1,
-                              cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = bigdia_search(x, mvp_full, step_param, error_per_bit, 1,
+                          cost_list, fn_ptr, 1, ref_mv, tmp_mv);
       break;
     case NSTEP:
-      var = vp9_full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
-                                   MAX_MVSEARCH_STEPS - 1 - step_param,
-                                   1, cost_list, fn_ptr, ref_mv, tmp_mv);
+      var = full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
+                               MAX_MVSEARCH_STEPS - 1 - step_param,
+                               1, cost_list, fn_ptr, ref_mv, tmp_mv);
       break;
     default:
       assert(0 && "Invalid search method.");
