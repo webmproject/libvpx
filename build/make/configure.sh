@@ -1083,6 +1083,7 @@ EOF
         os2)
           disable_feature pic
           AS=${AS:-nasm}
+          add_ldflags -Zhigh-mem
           ;;
       esac
 
