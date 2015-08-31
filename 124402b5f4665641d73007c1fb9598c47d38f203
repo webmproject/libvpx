@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8429b287_0e23abe8",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 880,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-31T17:55:39Z",
+      "side": 1,
+      "message": "this moves it out of the INIT_CPUFLAGS block?",
+      "revId": "124402b5f4665641d73007c1fb9598c47d38f203",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
