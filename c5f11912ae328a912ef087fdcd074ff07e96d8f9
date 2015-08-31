@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e486eed4_4453a0dd",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-08-31T21:49:37Z",
+      "side": 1,
+      "message": "This is the only one chromium didn\u0027t like",
+      "range": {
+        "startLine": 16,
+        "startChar": 18,
+        "endLine": 16,
+        "endChar": 32
+      },
+      "revId": "c5f11912ae328a912ef087fdcd074ff07e96d8f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
