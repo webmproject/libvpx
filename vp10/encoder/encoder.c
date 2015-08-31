@@ -51,6 +51,7 @@
 #if CONFIG_INTERNAL_STATS
 #include "vpx_dsp/ssim.h"
 #endif
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"

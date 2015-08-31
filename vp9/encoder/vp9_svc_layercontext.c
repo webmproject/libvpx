@@ -13,6 +13,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_extend.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 #define SMALL_FRAME_FB_IDX 7
 #define SMALL_FRAME_WIDTH  32

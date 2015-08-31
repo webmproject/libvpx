@@ -18,6 +18,7 @@
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_dsp/bitreader_buffer.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_util/vpx_thread.h"
 
 #include "vp10/common/alloccommon.h"

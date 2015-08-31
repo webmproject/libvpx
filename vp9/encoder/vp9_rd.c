@@ -14,6 +14,7 @@
 
 #include "./vp9_rtcd.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/bitops.h"
 #include "vpx_ports/mem.h"

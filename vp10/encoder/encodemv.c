@@ -16,6 +16,8 @@
 #include "vp10/encoder/cost.h"
 #include "vp10/encoder/encodemv.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
+
 static struct vp10_token mv_joint_encodings[MV_JOINTS];
 static struct vp10_token mv_class_encodings[MV_CLASSES];
 static struct vp10_token mv_fp_encodings[MV_FP_SIZE];

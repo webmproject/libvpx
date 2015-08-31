@@ -22,6 +22,7 @@
 #include "common/common.h"
 #include "common/onyxd.h"
 #include "decoder/onyxd_int.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "decoder/error_concealment.h"

@@ -22,6 +22,8 @@
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_decodeframe.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
+
 static PREDICTION_MODE read_intra_mode(vpx_reader *r, const vpx_prob *p) {
   return (PREDICTION_MODE)vpx_read_tree(r, vp9_intra_mode_tree, p);
 }

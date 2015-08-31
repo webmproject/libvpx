@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 #include "vp10/common/reconinter.h"

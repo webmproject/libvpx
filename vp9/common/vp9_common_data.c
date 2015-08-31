@@ -9,6 +9,7 @@
  */
 
 #include "vp9/common/vp9_common_data.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 // Log 2 conversion lookup tables for block width and height
 const uint8_t b_width_log2_lookup[BLOCK_SIZES] =

@@ -16,6 +16,8 @@
 #include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_encodemv.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
+
 static struct vp9_token mv_joint_encodings[MV_JOINTS];
 static struct vp9_token mv_class_encodings[MV_CLASSES];
 static struct vp9_token mv_fp_encodings[MV_FP_SIZE];

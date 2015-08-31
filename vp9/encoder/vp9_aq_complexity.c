@@ -10,6 +10,7 @@
 
 #include <limits.h>
 #include <math.h>
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/system_state.h"
 
 #include "vp9/encoder/vp9_aq_complexity.h"

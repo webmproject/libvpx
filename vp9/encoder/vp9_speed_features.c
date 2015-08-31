@@ -13,6 +13,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_rdopt.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 
 // Intra only frames, golden frames (except alt ref overlays) and

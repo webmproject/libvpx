@@ -16,6 +16,7 @@
 #include "./vpx_scale_rtcd.h"
 #include "./vp10_rtcd.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_scale/vpx_scale.h"

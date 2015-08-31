@@ -25,6 +25,7 @@
 #include "vpx_dsp/variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #if CONFIG_TEMPORAL_DENOISING
 #include "denoising.h"

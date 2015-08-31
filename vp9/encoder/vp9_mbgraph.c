@@ -13,6 +13,7 @@
 #include "./vp9_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/system_state.h"
 #include "vp9/encoder/vp9_segmentation.h"

@@ -17,6 +17,7 @@
 
 #include "vpx_dsp/bitreader_buffer.h"
 #include "vpx_dsp/bitreader.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/mem_ops.h"

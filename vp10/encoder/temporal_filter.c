@@ -23,6 +23,7 @@
 #include "vp10/encoder/ratectrl.h"
 #include "vp10/encoder/segmentation.h"
 #include "vp10/encoder/temporal_filter.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"

@@ -14,6 +14,7 @@
 #include "vp10/encoder/speed_features.h"
 #include "vp10/encoder/rdopt.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality

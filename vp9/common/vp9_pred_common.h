@@ -13,6 +13,7 @@
 
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 #ifdef __cplusplus
 extern "C" {

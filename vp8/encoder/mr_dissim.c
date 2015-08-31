@@ -13,6 +13,7 @@
 #include "vpx_config.h"
 #include "onyx_int.h"
 #include "mr_dissim.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
 #include "vp8/common/common.h"

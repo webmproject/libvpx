@@ -11,6 +11,7 @@
 #include "vp10/encoder/encodeframe.h"
 #include "vp10/encoder/encoder.h"
 #include "vp10/encoder/ethread.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
   int i, j, k, l, m, n;

@@ -13,6 +13,7 @@
 #include "vp10/common/loopfilter.h"
 #include "vp10/common/onyxc_int.h"
 #include "vp10/common/reconinter.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 

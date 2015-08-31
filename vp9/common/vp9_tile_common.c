@@ -9,8 +9,8 @@
  */
 
 #include "vp9/common/vp9_tile_common.h"
-
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 #define MIN_TILE_WIDTH_B64 4
 #define MAX_TILE_WIDTH_B64 64
