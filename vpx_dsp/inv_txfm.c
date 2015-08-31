@@ -170,16 +170,25 @@ void idct8_c(const tran_low_t *input, tran_low_t *output) {
   step1[5] = WRAPLOW(dct_const_round_shift(temp1), 8);
   step1[6] = WRAPLOW(dct_const_round_shift(temp2), 8);
 
-  // stage 2 & stage 3 - even half
-  idct4_c(step1, step1);
-
-  // stage 2 - odd half
+  // stage 2
+  temp1 = (step1[0] + step1[2]) * cospi_16_64;
+  temp2 = (step1[0] - step1[2]) * cospi_16_64;
+  step2[0] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[1] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = step1[1] * cospi_24_64 - step1[3] * cospi_8_64;
+  temp2 = step1[1] * cospi_8_64 + step1[3] * cospi_24_64;
+  step2[2] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[3] = WRAPLOW(dct_const_round_shift(temp2), 8);
   step2[4] = WRAPLOW(step1[4] + step1[5], 8);
   step2[5] = WRAPLOW(step1[4] - step1[5], 8);
   step2[6] = WRAPLOW(-step1[6] + step1[7], 8);
   step2[7] = WRAPLOW(step1[6] + step1[7], 8);
 
-  // stage 3 -odd half
+  // stage 3
+  step1[0] = WRAPLOW(step2[0] + step2[3], 8);
+  step1[1] = WRAPLOW(step2[1] + step2[2], 8);
+  step1[2] = WRAPLOW(step2[1] - step2[2], 8);
+  step1[3] = WRAPLOW(step2[0] - step2[3], 8);
   step1[4] = step2[4];
   temp1 = (step2[6] - step2[5]) * cospi_16_64;
   temp2 = (step2[5] + step2[6]) * cospi_16_64;
