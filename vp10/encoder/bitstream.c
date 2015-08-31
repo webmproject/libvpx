@@ -996,7 +996,7 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi, ref_frame);
 
-  if (cfg != NULL) {
+    if (cfg != NULL) {
       found = cm->width == cfg->y_crop_width &&
               cm->height == cfg->y_crop_height;
     }
