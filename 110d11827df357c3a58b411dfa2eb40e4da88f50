@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0484e2ca_823d1aaa",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-08-31T19:29:51Z",
+      "side": 1,
+      "message": "you should change the test instantiation, otherwise you\u0027ll wipe this out in mixed codec builds",
+      "revId": "110d11827df357c3a58b411dfa2eb40e4da88f50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
