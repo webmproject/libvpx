@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8497f201_de5ea55d",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-31T19:08:23Z",
+      "side": 1,
+      "message": "single empty line above file bottom",
+      "revId": "3cd2093ce0ba2ce321934ffbacb79de719980a67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "045f8228_8a954bbf",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-31T19:08:23Z",
+      "side": 1,
+      "message": "take out \u0027\\\u0027s",
+      "revId": "3cd2093ce0ba2ce321934ffbacb79de719980a67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
