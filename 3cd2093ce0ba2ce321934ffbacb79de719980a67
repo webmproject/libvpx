@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "84529221_866c2a8d",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-08-31T19:15:01Z",
+      "side": 1,
+      "message": "Can consider to create a class that provides a general test functions and reads in fdct4/fdct8/fdct16/fdct32, as well as the dimension, as input arguments. So that we don\u0027t need to repeat the same function content multiple times and it will be easier to scale up with more unit tests added.",
+      "revId": "3cd2093ce0ba2ce321934ffbacb79de719980a67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8497f201_de5ea55d",
         "filename": "test/vp10_dct_test.cc",
         "patchSetId": 5
