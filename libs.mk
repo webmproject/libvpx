@@ -53,7 +53,7 @@ CODEC_SRCS-yes += $(addprefix vpx_dsp/,$(call enabled,DSP_SRCS))
 include $(SRC_PATH_BARE)/vpx_util/vpx_util.mk
 CODEC_SRCS-yes += $(addprefix vpx_util/,$(call enabled,UTIL_SRCS))
 
-ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
+ifeq ($(CONFIG_VP8),yes)
   VP8_PREFIX=vp8/
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
 endif
