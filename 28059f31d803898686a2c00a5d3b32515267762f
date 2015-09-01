@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0484e2ca_4bf40d01",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-01T01:17:34Z",
+      "side": 1,
+      "message": "protected comes before private and you need to add a newline between sections",
+      "revId": "28059f31d803898686a2c00a5d3b32515267762f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_ebd88192",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-01T01:17:34Z",
+      "side": 1,
+      "message": "should be a bool",
+      "revId": "28059f31d803898686a2c00a5d3b32515267762f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_03159276",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-01T01:17:34Z",
+      "side": 1,
+      "message": "just return immediately rather than indent the whole block",
+      "revId": "28059f31d803898686a2c00a5d3b32515267762f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
