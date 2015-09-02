@@ -1416,6 +1416,20 @@ static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
+                                                     va_list args) {
+  VP9_COMP *const cpi = ctx->cpi;
+  vpx_svc_ref_frame_config_t *data = va_arg(args, vpx_svc_ref_frame_config_t *);
+  int sl;
+  for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
+    cpi->svc.ext_frame_flags[sl] = data->frame_flags[sl];
+    cpi->svc.ext_lst_fb_idx[sl] = data->lst_fb_idx[sl];
+    cpi->svc.ext_gld_fb_idx[sl] = data->gld_fb_idx[sl];
+    cpi->svc.ext_alt_fb_idx[sl] = data->alt_fb_idx[sl];
+  }
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t ctrl_register_cx_callback(vpx_codec_alg_priv_t *ctx,
                                                  va_list args) {
   vpx_codec_priv_output_cx_pkt_cb_pair_t *cbp =
@@ -1487,6 +1501,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_NOISE_SENSITIVITY,        ctrl_set_noise_sensitivity},
   {VP9E_SET_MIN_GF_INTERVAL,          ctrl_set_min_gf_interval},
   {VP9E_SET_MAX_GF_INTERVAL,          ctrl_set_max_gf_interval},
+  {VP9E_SET_SVC_REF_FRAME_CONFIG,     ctrl_set_svc_ref_frame_config},
 
   // Getters
   {VP8E_GET_LAST_QUANTIZER,           ctrl_get_quantizer},
