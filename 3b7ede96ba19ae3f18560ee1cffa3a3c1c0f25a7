@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0484e2ca_93d6c32f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-02T22:51:12Z",
+      "side": 1,
+      "message": "you should have forced the split. I was about to make the same comment. A commit should try to do 1 thing and when possible leave unnecessary cosmetics to a later commit.\n\nthe order usually goes like:\n- fix / function change #1\n...\n- cosmetics",
+      "parentUuid": "84f1b2a4_b1c27a6c",
+      "range": {
+        "startLine": 12,
+        "startChar": 42,
+        "endLine": 12,
+        "endChar": 44
+      },
+      "revId": "3b7ede96ba19ae3f18560ee1cffa3a3c1c0f25a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6492fe15_32857690",
         "filename": "test/vp10_dct_test.cc",
         "patchSetId": 9
