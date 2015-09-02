@@ -52,18 +52,6 @@ static int enc_worker_hook(EncWorkerData *const thread_data, void *unused) {
   return 0;
 }
 
-static int get_max_tile_cols(VP10_COMP *cpi) {
-  const int aligned_width = ALIGN_POWER_OF_TWO(cpi->oxcf.width, MI_SIZE_LOG2);
-  int mi_cols = aligned_width >> MI_SIZE_LOG2;
-  int min_log2_tile_cols, max_log2_tile_cols;
-  int log2_tile_cols;
-
-  vp10_get_tile_n_bits(mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
-  log2_tile_cols = clamp(cpi->oxcf.tile_columns,
-                   min_log2_tile_cols, max_log2_tile_cols);
-  return (1 << log2_tile_cols);
-}
-
 void vp10_encode_tiles_mt(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;

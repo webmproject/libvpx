@@ -238,19 +238,6 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
   xd->tile = *tile;
 }
 
-static void duplicate_mode_info_in_sb(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                      int mi_row, int mi_col,
-                                      BLOCK_SIZE bsize) {
-  const int block_width = num_8x8_blocks_wide_lookup[bsize];
-  const int block_height = num_8x8_blocks_high_lookup[bsize];
-  int i, j;
-  for (j = 0; j < block_height; ++j)
-    for (i = 0; i < block_width; ++i) {
-      if (mi_row + j < cm->mi_rows && mi_col + i < cm->mi_cols)
-        xd->mi[j * xd->mi_stride + i] = xd->mi[0];
-    }
-}
-
 static void set_block_size(VP10_COMP * const cpi,
                            MACROBLOCK *const x,
                            MACROBLOCKD *const xd,
@@ -1104,36 +1091,6 @@ void vp10_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
     setup_pred_plane(&x->plane[i].src, buffers[i], strides[i], mi_row, mi_col,
                      NULL, x->e_mbd.plane[i].subsampling_x,
                      x->e_mbd.plane[i].subsampling_y);
-}
-
-static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
-                                   RD_COST *rd_cost, BLOCK_SIZE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  INTERP_FILTER filter_ref;
-
-  if (xd->up_available)
-    filter_ref = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
-  else if (xd->left_available)
-    filter_ref = xd->mi[-1]->mbmi.interp_filter;
-  else
-    filter_ref = EIGHTTAP;
-
-  mbmi->sb_type = bsize;
-  mbmi->mode = ZEROMV;
-  mbmi->tx_size = VPXMIN(max_txsize_lookup[bsize],
-                         tx_mode_to_biggest_tx_size[tx_mode]);
-  mbmi->skip = 1;
-  mbmi->uv_mode = DC_PRED;
-  mbmi->ref_frame[0] = LAST_FRAME;
-  mbmi->ref_frame[1] = NONE;
-  mbmi->mv[0].as_int = 0;
-  mbmi->interp_filter = filter_ref;
-
-  xd->mi[0]->bmi[0].as_mv[0].as_int = 0;
-  x->skip = 1;
-
-  vp10_rd_cost_init(rd_cost);
 }
 
 static int set_segment_rdmult(VP10_COMP *const cpi,
@@ -2626,83 +2583,6 @@ static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
     return TX_MODE_SELECT;
   else
     return cpi->common.tx_mode;
-}
-
-static void fill_mode_info_sb(VP10_COMMON *cm, MACROBLOCK *x,
-                              int mi_row, int mi_col,
-                              BLOCK_SIZE bsize,
-                              PC_TREE *pc_tree) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
-  PARTITION_TYPE partition = pc_tree->partitioning;
-  BLOCK_SIZE subsize = get_subsize(bsize, partition);
-
-  assert(bsize >= BLOCK_8X8);
-
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
-    return;
-
-  switch (partition) {
-    case PARTITION_NONE:
-      set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
-      *(xd->mi[0]) = pc_tree->none.mic;
-      *(x->mbmi_ext) = pc_tree->none.mbmi_ext;
-      duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
-      break;
-    case PARTITION_VERT:
-      set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
-      *(xd->mi[0]) = pc_tree->vertical[0].mic;
-      *(x->mbmi_ext) = pc_tree->vertical[0].mbmi_ext;
-      duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, subsize);
-
-      if (mi_col + hbs < cm->mi_cols) {
-        set_mode_info_offsets(cm, x, xd, mi_row, mi_col + hbs);
-        *(xd->mi[0]) = pc_tree->vertical[1].mic;
-        *(x->mbmi_ext) = pc_tree->vertical[1].mbmi_ext;
-        duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col + hbs, subsize);
-      }
-      break;
-    case PARTITION_HORZ:
-      set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
-      *(xd->mi[0]) = pc_tree->horizontal[0].mic;
-      *(x->mbmi_ext) = pc_tree->horizontal[0].mbmi_ext;
-      duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, subsize);
-      if (mi_row + hbs < cm->mi_rows) {
-        set_mode_info_offsets(cm, x, xd, mi_row + hbs, mi_col);
-        *(xd->mi[0]) = pc_tree->horizontal[1].mic;
-        *(x->mbmi_ext) = pc_tree->horizontal[1].mbmi_ext;
-        duplicate_mode_info_in_sb(cm, xd, mi_row + hbs, mi_col, subsize);
-      }
-      break;
-    case PARTITION_SPLIT: {
-      fill_mode_info_sb(cm, x, mi_row, mi_col, subsize, pc_tree->split[0]);
-      fill_mode_info_sb(cm, x, mi_row, mi_col + hbs, subsize,
-                        pc_tree->split[1]);
-      fill_mode_info_sb(cm, x, mi_row + hbs, mi_col, subsize,
-                        pc_tree->split[2]);
-      fill_mode_info_sb(cm, x, mi_row + hbs, mi_col + hbs, subsize,
-                        pc_tree->split[3]);
-      break;
-    }
-    default:
-      break;
-  }
-}
-
-// Reset the prediction pixel ready flag recursively.
-static void pred_pixel_ready_reset(PC_TREE *pc_tree, BLOCK_SIZE bsize) {
-  pc_tree->none.pred_pixel_ready = 0;
-  pc_tree->horizontal[0].pred_pixel_ready = 0;
-  pc_tree->horizontal[1].pred_pixel_ready = 0;
-  pc_tree->vertical[0].pred_pixel_ready = 0;
-  pc_tree->vertical[1].pred_pixel_ready = 0;
-
-  if (bsize > BLOCK_8X8) {
-    BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_SPLIT);
-    int i;
-    for (i = 0; i < 4; ++i)
-      pred_pixel_ready_reset(pc_tree->split[i], subsize);
-  }
 }
 
 static int get_skip_encode_frame(const VP10_COMMON *cm, ThreadData *const td) {

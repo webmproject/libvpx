@@ -590,7 +590,9 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_lpf_horizontal_16_sse2, &vpx_lpf_horizontal_16_c, 8, 1),
         make_tuple(&vpx_lpf_horizontal_16_sse2, &vpx_lpf_horizontal_16_c, 8, 2),
         make_tuple(&vpx_lpf_vertical_8_sse2, &vpx_lpf_vertical_8_c, 8, 1),
-        make_tuple(&wrapper_vertical_16_sse2, &wrapper_vertical_16_c, 8, 1)));
+        make_tuple(&wrapper_vertical_16_sse2, &wrapper_vertical_16_c, 8, 1),
+        make_tuple(&wrapper_vertical_16_dual_sse2,
+                   &wrapper_vertical_16_dual_c, 8, 1)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif
 

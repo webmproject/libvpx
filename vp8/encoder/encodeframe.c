@@ -700,6 +700,7 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
     vp8_zero(x->count_mb_ref_frame_usage);
 }
 
+#if CONFIG_MULTITHREAD
 static void sum_coef_counts(MACROBLOCK *x, MACROBLOCK *x_thread)
 {
     int i = 0;
@@ -729,6 +730,7 @@ static void sum_coef_counts(MACROBLOCK *x, MACROBLOCK *x_thread)
     }
     while (++i < BLOCK_TYPES);
 }
+#endif  // CONFIG_MULTITHREAD
 
 void vp8_encode_frame(VP8_COMP *cpi)
 {
@@ -927,7 +929,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
         }
         else
-#endif
+#endif  // CONFIG_MULTITHREAD
         {
 
             /* for each macroblock row in image */
