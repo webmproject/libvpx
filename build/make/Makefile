@@ -140,6 +140,8 @@ $(BUILD_PFX)%_avx.c.d: CFLAGS += -mavx $(STACKREALIGN)
 $(BUILD_PFX)%_avx.c.o: CFLAGS += -mavx $(STACKREALIGN)
 $(BUILD_PFX)%_avx2.c.d: CFLAGS += -mavx2 $(STACKREALIGN)
 $(BUILD_PFX)%_avx2.c.o: CFLAGS += -mavx2 $(STACKREALIGN)
+$(BUILD_PFX)%vp9_reconintra.c.d: CFLAGS += $(STACKREALIGN)
+$(BUILD_PFX)%vp9_reconintra.c.o: CFLAGS += $(STACKREALIGN)
 
 $(BUILD_PFX)%.c.d: %.c
 	$(if $(quiet),@echo "    [DEP] $@")

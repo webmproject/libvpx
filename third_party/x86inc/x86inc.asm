@@ -876,6 +876,10 @@ SECTION .note.GNU-stack noalloc noexec nowrite progbits
 %define    cpuflag(x) ((cpuflags & (cpuflags_ %+ x)) == (cpuflags_ %+ x))
 %define notcpuflag(x) ((cpuflags & (cpuflags_ %+ x)) != (cpuflags_ %+ x))
 
+%ifdef __NASM_VER__
+    %use smartalign
+%endif
+
 ; Takes an arbitrary number of cpuflags from the above list.
 ; All subsequent functions (up to the next INIT_CPUFLAGS) is built for the specified cpu.
 ; You shouldn't need to invoke this macro directly, it's a subroutine for INIT_MMX &co.
@@ -912,7 +916,6 @@ SECTION .note.GNU-stack noalloc noexec nowrite progbits
     %endif
 
     %ifdef __NASM_VER__
-        %use smartalign
         ALIGNMODE k7
     %elif ARCH_X86_64 || cpuflag(sse2)
         CPU amdnop
