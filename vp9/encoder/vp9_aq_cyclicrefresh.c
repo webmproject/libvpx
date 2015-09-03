@@ -235,6 +235,12 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
       if (!is_inter_block(mbmi) || !skip)
         cr->last_coded_q_map[map_offset] = clamp(
             cm->base_qindex + cr->qindex_delta[mbmi->segment_id], 0, MAXQ);
+      else if (is_inter_block(mbmi) && skip) {
+        cr->last_coded_q_map[map_offset] = VPXMIN(
+            clamp(cm->base_qindex + cr->qindex_delta[mbmi->segment_id],
+                  0, MAXQ),
+            cr->last_coded_q_map[map_offset]);
+      }
     }
 }
 
