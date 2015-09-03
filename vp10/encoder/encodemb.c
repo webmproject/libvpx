@@ -105,7 +105,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int16_t *dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
   TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
-  const scan_order *const so = get_scan(tx_size, tx_type);
+  const scan_order *const so =
+      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
   int next = eob, sz = 0;
@@ -301,6 +302,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   final_eob++;
 
   mb->plane[plane].eobs[block] = final_eob;
+  assert(final_eob <= default_eob);
   return final_eob;
 }
 
@@ -323,183 +325,75 @@ static INLINE void highbd_fdct32x32(int rd_transform, const int16_t *src,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
-                        BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  const struct macroblock_plane *const p = &x->plane[plane];
-  const struct macroblockd_plane *const pd = &xd->plane[plane];
-  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
-  TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
-  const scan_order *const scan_order = get_scan(tx_size, tx_type);
-  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
-  tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
-  tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  uint16_t *const eob = &p->eobs[block];
-  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
-  int i, j;
-  const int16_t *src_diff;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
-  src_diff = &p->src_diff[4 * (j * diff_stride + i)];
-
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    switch (tx_size) {
-      case TX_32X32:
-        highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-        vp10_highbd_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin,
-                                     p->round_fp, p->quant_fp, p->quant_shift,
-                                     qcoeff, dqcoeff, pd->dequant,
-                                     eob, scan_order->scan,
-                                     scan_order->iscan);
-        break;
-      case TX_16X16:
-        vpx_highbd_fdct16x16(src_diff, coeff, diff_stride);
-        vp10_highbd_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
-                               p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                               pd->dequant, eob,
-                               scan_order->scan, scan_order->iscan);
-        break;
-      case TX_8X8:
-        vpx_highbd_fdct8x8(src_diff, coeff, diff_stride);
-        vp10_highbd_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
-                               p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                               pd->dequant, eob,
-                               scan_order->scan, scan_order->iscan);
-        break;
-      case TX_4X4:
-        x->fwd_txm4x4(src_diff, coeff, diff_stride);
-        vp10_highbd_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
-                               p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                               pd->dequant, eob,
-                               scan_order->scan, scan_order->iscan);
-        break;
-      default:
-        assert(0);
-    }
-    return;
-  }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  switch (tx_size) {
-    case TX_32X32:
-      fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-      vp10_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin, p->round_fp,
-                            p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                            pd->dequant, eob, scan_order->scan,
-                            scan_order->iscan);
-      break;
-    case TX_16X16:
-      vpx_fdct16x16(src_diff, coeff, diff_stride);
-      vp10_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
-                      p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                      pd->dequant, eob,
-                      scan_order->scan, scan_order->iscan);
-      break;
-    case TX_8X8:
-      vp10_fdct8x8_quant(src_diff, diff_stride, coeff, 64,
-                        x->skip_block, p->zbin, p->round_fp,
-                        p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                        pd->dequant, eob,
-                        scan_order->scan, scan_order->iscan);
-      break;
-    case TX_4X4:
-      x->fwd_txm4x4(src_diff, coeff, diff_stride);
-      vp10_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
-                      p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                      pd->dequant, eob,
-                      scan_order->scan, scan_order->iscan);
-      break;
-    default:
-      assert(0);
-      break;
+#if CONFIG_EXT_TX
+static void copy_block(const int16_t *src, int src_stride, int l,
+                       int16_t *dest, int dest_stride) {
+  int i;
+  for (i = 0; i < l; ++i) {
+    memcpy(dest + dest_stride * i, src + src_stride * i,
+           l * sizeof(int16_t));
   }
 }
 
-void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
-                        BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  const struct macroblock_plane *const p = &x->plane[plane];
-  const struct macroblockd_plane *const pd = &xd->plane[plane];
-  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
-  tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
-  tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  uint16_t *const eob = &p->eobs[block];
-  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+static void fliplr(int16_t *dest, int stride, int l) {
   int i, j;
-  const int16_t *src_diff;
-
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
-  src_diff = &p->src_diff[4 * (j * diff_stride + i)];
-
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    switch (tx_size) {
-      case TX_32X32:
-        vpx_highbd_fdct32x32_1(src_diff, coeff, diff_stride);
-        vpx_highbd_quantize_dc_32x32(coeff, x->skip_block, p->round,
-                                     p->quant_fp[0], qcoeff, dqcoeff,
-                                     pd->dequant[0], eob);
-        break;
-      case TX_16X16:
-        vpx_highbd_fdct16x16_1(src_diff, coeff, diff_stride);
-        vpx_highbd_quantize_dc(coeff, 256, x->skip_block, p->round,
-                               p->quant_fp[0], qcoeff, dqcoeff,
-                               pd->dequant[0], eob);
-        break;
-      case TX_8X8:
-        vpx_highbd_fdct8x8_1(src_diff, coeff, diff_stride);
-        vpx_highbd_quantize_dc(coeff, 64, x->skip_block, p->round,
-                               p->quant_fp[0], qcoeff, dqcoeff,
-                               pd->dequant[0], eob);
-        break;
-      case TX_4X4:
-        x->fwd_txm4x4(src_diff, coeff, diff_stride);
-        vpx_highbd_quantize_dc(coeff, 16, x->skip_block, p->round,
-                               p->quant_fp[0], qcoeff, dqcoeff,
-                               pd->dequant[0], eob);
-        break;
-      default:
-        assert(0);
+  for (i = 0; i < l; ++i) {
+    for (j = 0; j < l / 2; ++j) {
+      const int16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[i * stride + l - 1 - j];
+      dest[i * stride + l - 1 - j] = tmp;
     }
-    return;
-  }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  switch (tx_size) {
-    case TX_32X32:
-      vpx_fdct32x32_1(src_diff, coeff, diff_stride);
-      vpx_quantize_dc_32x32(coeff, x->skip_block, p->round,
-                            p->quant_fp[0], qcoeff, dqcoeff,
-                            pd->dequant[0], eob);
-      break;
-    case TX_16X16:
-      vpx_fdct16x16_1(src_diff, coeff, diff_stride);
-      vpx_quantize_dc(coeff, 256, x->skip_block, p->round,
-                     p->quant_fp[0], qcoeff, dqcoeff,
-                     pd->dequant[0], eob);
-      break;
-    case TX_8X8:
-      vpx_fdct8x8_1(src_diff, coeff, diff_stride);
-      vpx_quantize_dc(coeff, 64, x->skip_block, p->round,
-                      p->quant_fp[0], qcoeff, dqcoeff,
-                      pd->dequant[0], eob);
-      break;
-    case TX_4X4:
-      x->fwd_txm4x4(src_diff, coeff, diff_stride);
-      vpx_quantize_dc(coeff, 16, x->skip_block, p->round,
-                      p->quant_fp[0], qcoeff, dqcoeff,
-                      pd->dequant[0], eob);
-      break;
-    default:
-      assert(0);
-      break;
   }
 }
+
+static void flipud(int16_t *dest, int stride, int l) {
+  int i, j;
+  for (j = 0; j < l; ++j) {
+    for (i = 0; i < l / 2; ++i) {
+      const int16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
+      dest[(l - 1 - i) * stride + j] = tmp;
+    }
+  }
+}
+
+static void fliplrud(int16_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l / 2; ++i) {
+    for (j = 0; j < l; ++j) {
+      const int16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
+      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+static void copy_fliplr(const int16_t *src, int src_stride, int l,
+                          int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, dest, dest_stride);
+  fliplr(dest, dest_stride, l);
+}
+
+static void copy_flipud(const int16_t *src, int src_stride, int l,
+                          int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, dest, dest_stride);
+  flipud(dest, dest_stride, l);
+}
+
+static void copy_fliplrud(const int16_t *src, int src_stride, int l,
+                            int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, dest, dest_stride);
+  fliplrud(dest, dest_stride, l);
+}
+#endif  // CONFIG_EXT_TX
 
 void vp10_fwd_txfm_4x4(const int16_t *src_diff,
                        tran_low_t *coeff, int diff_stride, TX_TYPE tx_type,
                        void (*fwd_txm4x4)(const int16_t *input,
-                           tran_low_t *output, int stride)) {
+                                          tran_low_t *output, int stride)) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[16];
+#endif  // CONFIG_EXT_TX
   switch (tx_type) {
     case DCT_DCT:
       fwd_txm4x4(src_diff, coeff, diff_stride);
@@ -509,6 +403,28 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff,
     case ADST_ADST:
       vp10_fht4x4(src_diff, coeff, diff_stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_fht4x4(src_diff2, coeff, 4, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_fht4x4(src_diff2, coeff, 4, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_fht4x4(src_diff2, coeff, 4, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_fht4x4(src_diff2, coeff, 4, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_fht4x4(src_diff2, coeff, 4, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -517,6 +433,9 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff,
 
 static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
                          int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[64];
+#endif  // CONFIG_EXT_TX
   switch (tx_type) {
     case DCT_DCT:
     case ADST_DCT:
@@ -524,6 +443,68 @@ static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_ADST:
       vp10_fht8x8(src_diff, coeff, diff_stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void fwd_txfm_8x8_1(const int16_t *src_diff, tran_low_t *coeff,
+                           int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[64];
+#endif  // CONFIG_EXT_TX
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vpx_fdct8x8_1(src_diff, coeff, diff_stride);
+      break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -532,6 +513,9 @@ static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
 
 static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
                            int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[256];
+#endif  // CONFIG_EXT_TX
   switch (tx_type) {
     case DCT_DCT:
     case ADST_DCT:
@@ -539,6 +523,68 @@ static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_ADST:
       vp10_fht16x16(src_diff, coeff, diff_stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void fwd_txfm_16x16_1(const int16_t *src_diff, tran_low_t *coeff,
+                             int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[256];
+#endif  // CONFIG_EXT_TX
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vpx_fdct16x16_1(src_diff, coeff, diff_stride);
+      break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -563,11 +609,32 @@ static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
   }
 }
 
+static void fwd_txfm_32x32_1(const int16_t *src_diff,
+                             tran_low_t *coeff, int diff_stride,
+                             TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+      vpx_fdct32x32_1(src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      assert(0);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                               int diff_stride, TX_TYPE tx_type,
                               void (*highbd_fwd_txm4x4)(const int16_t *input,
                                   tran_low_t *output, int stride)) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[16];
+#endif  // CONFIG_EXT_TX
   switch (tx_type) {
     case DCT_DCT:
       highbd_fwd_txm4x4(src_diff, coeff, diff_stride);
@@ -577,6 +644,28 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_ADST:
       vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_highbd_fht4x4(src_diff2, coeff, 4, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_highbd_fht4x4(src_diff2, coeff, 4, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_highbd_fht4x4(src_diff2, coeff, 4, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_highbd_fht4x4(src_diff2, coeff, 4, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_highbd_fht4x4(src_diff2, coeff, 4, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -584,7 +673,10 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
 }
 
 static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
-                         int diff_stride, TX_TYPE tx_type) {
+                                int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[64];
+#endif  // CONFIG_EXT_TX
   switch (tx_type) {
     case DCT_DCT:
       vpx_highbd_fdct8x8(src_diff, coeff, diff_stride);
@@ -594,6 +686,70 @@ static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_ADST:
       vp10_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void highbd_fwd_txfm_8x8_1(const int16_t *src_diff, tran_low_t *coeff,
+                                  int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[64];
+#endif  // CONFIG_EXT_TX
+  switch (tx_type) {
+    case DCT_DCT:
+      vpx_highbd_fdct8x8_1(src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vp10_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
+      break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -601,7 +757,10 @@ static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
 }
 
 static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
-                           int diff_stride, TX_TYPE tx_type) {
+                                  int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[256];
+#endif  // CONFIG_EXT_TX
   switch (tx_type) {
     case DCT_DCT:
       vpx_highbd_fdct16x16(src_diff, coeff, diff_stride);
@@ -611,6 +770,70 @@ static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_ADST:
       vp10_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void highbd_fwd_txfm_16x16_1(const int16_t *src_diff, tran_low_t *coeff,
+                                    int diff_stride, TX_TYPE tx_type) {
+#if CONFIG_EXT_TX
+  int16_t src_diff2[256];
+#endif  // CONFIG_EXT_TX
+  switch (tx_type) {
+    case DCT_DCT:
+      vpx_highbd_fdct16x16_1(src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vp10_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
+      break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_DCT);
+      break;
+    case DCT_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, DCT_ADST);
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case ADST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case FLIPADST_ADST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -634,7 +857,206 @@ static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
       break;
   }
 }
+
+static void highbd_fwd_txfm_32x32_1(const int16_t *src_diff,
+                                    tran_low_t *coeff, int diff_stride,
+                                    TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+      vpx_highbd_fdct32x32_1(src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      assert(0);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
+                        BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  const struct macroblock_plane *const p = &x->plane[plane];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+  TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
+  const scan_order *const scan_order =
+      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
+  tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+  uint16_t *const eob = &p->eobs[block];
+  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  int i, j;
+  const int16_t *src_diff;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+  src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    switch (tx_size) {
+      case TX_32X32:
+        highbd_fwd_txfm_32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride,
+                              tx_type);
+        vp10_highbd_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin,
+                                      p->round_fp, p->quant_fp, p->quant_shift,
+                                      qcoeff, dqcoeff, pd->dequant,
+                                      eob, scan_order->scan,
+                                      scan_order->iscan);
+        break;
+      case TX_16X16:
+        highbd_fwd_txfm_16x16(src_diff, coeff, diff_stride, tx_type);
+        vp10_highbd_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
+                                p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                                pd->dequant, eob,
+                                scan_order->scan, scan_order->iscan);
+        break;
+      case TX_8X8:
+        highbd_fwd_txfm_8x8(src_diff, coeff, diff_stride, tx_type);
+        vp10_highbd_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
+                                p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                                pd->dequant, eob,
+                                scan_order->scan, scan_order->iscan);
+        break;
+      case TX_4X4:
+        vp10_highbd_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
+                                 x->fwd_txm4x4);
+        vp10_highbd_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
+                                p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                                pd->dequant, eob,
+                                scan_order->scan, scan_order->iscan);
+        break;
+      default:
+        assert(0);
+    }
+    return;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  switch (tx_size) {
+    case TX_32X32:
+      fwd_txfm_32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride, tx_type);
+      vp10_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin, p->round_fp,
+                             p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                             pd->dequant, eob, scan_order->scan,
+                             scan_order->iscan);
+      break;
+    case TX_16X16:
+      fwd_txfm_16x16(src_diff, coeff, diff_stride, tx_type);
+      vp10_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
+                       p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, eob,
+                       scan_order->scan, scan_order->iscan);
+      break;
+    case TX_8X8:
+      fwd_txfm_8x8(src_diff, coeff, diff_stride, tx_type);
+      vp10_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
+                       p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, eob,
+                       scan_order->scan, scan_order->iscan);
+      break;
+    case TX_4X4:
+      vp10_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
+                        x->fwd_txm4x4);
+      vp10_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
+                       p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, eob,
+                       scan_order->scan, scan_order->iscan);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
+void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
+                        BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  const struct macroblock_plane *const p = &x->plane[plane];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+  TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
+  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
+  tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+  uint16_t *const eob = &p->eobs[block];
+  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  int i, j;
+  const int16_t *src_diff;
+
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+  src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    switch (tx_size) {
+      case TX_32X32:
+        highbd_fwd_txfm_32x32_1(src_diff, coeff, diff_stride, tx_type);
+        vpx_highbd_quantize_dc_32x32(coeff, x->skip_block, p->round,
+                                     p->quant_fp[0], qcoeff, dqcoeff,
+                                     pd->dequant[0], eob);
+        break;
+      case TX_16X16:
+        highbd_fwd_txfm_16x16_1(src_diff, coeff, diff_stride, tx_type);
+        vpx_highbd_quantize_dc(coeff, 256, x->skip_block, p->round,
+                               p->quant_fp[0], qcoeff, dqcoeff,
+                               pd->dequant[0], eob);
+        break;
+      case TX_8X8:
+        highbd_fwd_txfm_8x8_1(src_diff, coeff, diff_stride, tx_type);
+        vpx_highbd_quantize_dc(coeff, 64, x->skip_block, p->round,
+                               p->quant_fp[0], qcoeff, dqcoeff,
+                               pd->dequant[0], eob);
+        break;
+      case TX_4X4:
+        vp10_highbd_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
+                                 x->fwd_txm4x4);
+        vpx_highbd_quantize_dc(coeff, 16, x->skip_block, p->round,
+                               p->quant_fp[0], qcoeff, dqcoeff,
+                               pd->dequant[0], eob);
+        break;
+      default:
+        assert(0);
+    }
+    return;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  switch (tx_size) {
+    case TX_32X32:
+      fwd_txfm_32x32_1(src_diff, coeff, diff_stride, tx_type);
+      vpx_quantize_dc_32x32(coeff, x->skip_block, p->round,
+                            p->quant_fp[0], qcoeff, dqcoeff,
+                            pd->dequant[0], eob);
+      break;
+    case TX_16X16:
+      fwd_txfm_16x16_1(src_diff, coeff, diff_stride, tx_type);
+      vpx_quantize_dc(coeff, 256, x->skip_block, p->round,
+                     p->quant_fp[0], qcoeff, dqcoeff,
+                     pd->dequant[0], eob);
+      break;
+    case TX_8X8:
+      fwd_txfm_8x8_1(src_diff, coeff, diff_stride, tx_type);
+      vpx_quantize_dc(coeff, 64, x->skip_block, p->round,
+                      p->quant_fp[0], qcoeff, dqcoeff,
+                      pd->dequant[0], eob);
+      break;
+    case TX_4X4:
+      vp10_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
+                        x->fwd_txm4x4);
+      vpx_quantize_dc(coeff, 16, x->skip_block, p->round,
+                      p->quant_fp[0], qcoeff, dqcoeff,
+                      pd->dequant[0], eob);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
 
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
@@ -643,7 +1065,8 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
-  const scan_order *const scan_order = get_scan(tx_size, tx_type);
+  const scan_order *const scan_order =
+      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -659,7 +1082,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
      switch (tx_size) {
       case TX_32X32:
         highbd_fwd_txfm_32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride,
-                         tx_type);
+                              tx_type);
         vpx_highbd_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin,
                                     p->round, p->quant, p->quant_shift, qcoeff,
                                     dqcoeff, pd->dequant, eob,
@@ -885,7 +1308,7 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
 void vp10_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize) {
   vp10_subtract_plane(x, bsize, 0);
   vp10_foreach_transformed_block_in_plane(&x->e_mbd, bsize, 0,
-                                         encode_block_pass1, x);
+                                          encode_block_pass1, x);
 }
 
 void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
@@ -929,7 +1352,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
-  const scan_order *const scan_order = get_scan(tx_size, tx_type);
+  const scan_order *const scan_order = get_scan(tx_size, tx_type, 0);
   PREDICTION_MODE mode;
   const int bwl = b_width_log2_lookup[plane_bsize];
   const int diff_stride = 4 * (1 << bwl);

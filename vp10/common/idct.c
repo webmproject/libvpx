@@ -57,6 +57,74 @@ static const transform_2d IHT_8[] = {
   { iadst8_c, iadst8_c }   // ADST_ADST = 3
 };
 
+#if CONFIG_EXT_TX
+void fliplr(uint8_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l; ++i) {
+    for (j = 0; j < l / 2; ++j) {
+      const uint8_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[i * stride + l - 1 - j];
+      dest[i * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+void flipud(uint8_t *dest, int stride, int l) {
+  int i, j;
+  for (j = 0; j < l; ++j) {
+    for (i = 0; i < l / 2; ++i) {
+      const uint8_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
+      dest[(l - 1 - i) * stride + j] = tmp;
+    }
+  }
+}
+
+void fliplrud(uint8_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l / 2; ++i) {
+    for (j = 0; j < l; ++j) {
+      const uint8_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
+      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+void fliplr16(uint16_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l; ++i) {
+    for (j = 0; j < l / 2; ++j) {
+      const uint16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[i * stride + l - 1 - j];
+      dest[i * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+void flipud16(uint16_t *dest, int stride, int l) {
+  int i, j;
+  for (j = 0; j < l; ++j) {
+    for (i = 0; i < l / 2; ++i) {
+      const uint16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
+      dest[(l - 1 - i) * stride + j] = tmp;
+    }
+  }
+}
+
+void fliplrud16(uint16_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l / 2; ++i) {
+    for (j = 0; j < l; ++j) {
+      const uint16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
+      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+#endif  // CONFIG_EXT_TX
+
 void vp10_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   int i, j;
@@ -178,10 +246,11 @@ void vp10_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
     vpx_idct32x32_1024_add(input, dest, stride);
 }
 
-void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
-                           int stride, int eob, TX_TYPE tx_type,
-                           void (*itxm_add_4x4)(const tran_low_t *input,
-                               uint8_t *dest, int stride, int eob)) {
+void vp10_inv_txfm_add_4x4(
+    const tran_low_t *input, uint8_t *dest,
+    int stride, int eob, TX_TYPE tx_type,
+    void (*itxm_add_4x4)(const tran_low_t *input,
+                         uint8_t *dest, int stride, int eob)) {
   switch (tx_type) {
     case DCT_DCT:
       itxm_add_4x4(input, dest, stride, eob);
@@ -191,6 +260,33 @@ void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
     case ADST_ADST:
       vp10_iht4x4_16_add(input, dest, stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      flipud(dest, stride, 4);
+      vp10_iht4x4_16_add(input, dest, stride, ADST_DCT);
+      flipud(dest, stride, 4);
+      break;
+    case DCT_FLIPADST:
+      fliplr(dest, stride, 4);
+      vp10_iht4x4_16_add(input, dest, stride, DCT_ADST);
+      fliplr(dest, stride, 4);
+      break;
+    case FLIPADST_FLIPADST:
+      fliplrud(dest, stride, 4);
+      vp10_iht4x4_16_add(input, dest, stride, ADST_ADST);
+      fliplrud(dest, stride, 4);
+      break;
+    case ADST_FLIPADST:
+      fliplr(dest, stride, 4);
+      vp10_iht4x4_16_add(input, dest, stride, ADST_ADST);
+      fliplr(dest, stride, 4);
+      break;
+    case FLIPADST_ADST:
+      flipud(dest, stride, 4);
+      vp10_iht4x4_16_add(input, dest, stride, ADST_ADST);
+      flipud(dest, stride, 4);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -208,6 +304,33 @@ void vp10_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
     case ADST_ADST:
       vp10_iht8x8_64_add(input, dest, stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      flipud(dest, stride, 8);
+      vp10_iht8x8_64_add(input, dest, stride, ADST_DCT);
+      flipud(dest, stride, 8);
+      break;
+    case DCT_FLIPADST:
+      fliplr(dest, stride, 8);
+      vp10_iht8x8_64_add(input, dest, stride, DCT_ADST);
+      fliplr(dest, stride, 8);
+      break;
+    case FLIPADST_FLIPADST:
+      fliplrud(dest, stride, 8);
+      vp10_iht8x8_64_add(input, dest, stride, ADST_ADST);
+      fliplrud(dest, stride, 8);
+      break;
+    case ADST_FLIPADST:
+      fliplr(dest, stride, 8);
+      vp10_iht8x8_64_add(input, dest, stride, ADST_ADST);
+      fliplr(dest, stride, 8);
+      break;
+    case FLIPADST_ADST:
+      flipud(dest, stride, 8);
+      vp10_iht8x8_64_add(input, dest, stride, ADST_ADST);
+      flipud(dest, stride, 8);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -225,6 +348,33 @@ void vp10_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
     case ADST_ADST:
       vp10_iht16x16_256_add(input, dest, stride, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      flipud(dest, stride, 16);
+      vp10_iht16x16_256_add(input, dest, stride, ADST_DCT);
+      flipud(dest, stride, 16);
+      break;
+    case DCT_FLIPADST:
+      fliplr(dest, stride, 16);
+      vp10_iht16x16_256_add(input, dest, stride, DCT_ADST);
+      fliplr(dest, stride, 16);
+      break;
+    case FLIPADST_FLIPADST:
+      fliplrud(dest, stride, 16);
+      vp10_iht16x16_256_add(input, dest, stride, ADST_ADST);
+      fliplrud(dest, stride, 16);
+      break;
+    case ADST_FLIPADST:
+      fliplr(dest, stride, 16);
+      vp10_iht16x16_256_add(input, dest, stride, ADST_ADST);
+      fliplr(dest, stride, 16);
+      break;
+    case FLIPADST_ADST:
+      flipud(dest, stride, 16);
+      vp10_iht16x16_256_add(input, dest, stride, ADST_ADST);
+      flipud(dest, stride, 16);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -430,6 +580,33 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
     case ADST_ADST:
       vp10_highbd_iht4x4_16_add(input, dest, stride, tx_type, bd);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      vp10_highbd_iht4x4_16_add(input, dest, stride, ADST_DCT, bd);
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      break;
+    case DCT_FLIPADST:
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      vp10_highbd_iht4x4_16_add(input, dest, stride, DCT_ADST, bd);
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      break;
+    case FLIPADST_FLIPADST:
+      fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      vp10_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
+      fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      break;
+    case ADST_FLIPADST:
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      vp10_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      break;
+    case FLIPADST_ADST:
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      vp10_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -448,6 +625,33 @@ void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
     case ADST_ADST:
       vp10_highbd_iht8x8_64_add(input, dest, stride, tx_type, bd);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      vp10_highbd_iht8x8_64_add(input, dest, stride, ADST_DCT, bd);
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      break;
+    case DCT_FLIPADST:
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      vp10_highbd_iht8x8_64_add(input, dest, stride, DCT_ADST, bd);
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      break;
+    case FLIPADST_FLIPADST:
+      fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      vp10_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
+      fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      break;
+    case ADST_FLIPADST:
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      vp10_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      break;
+    case FLIPADST_ADST:
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      vp10_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -466,6 +670,33 @@ void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
     case ADST_ADST:
       vp10_highbd_iht16x16_256_add(input, dest, stride, tx_type, bd);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      vp10_highbd_iht16x16_256_add(input, dest, stride, ADST_DCT, bd);
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      break;
+    case DCT_FLIPADST:
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      vp10_highbd_iht16x16_256_add(input, dest, stride, DCT_ADST, bd);
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      break;
+    case FLIPADST_FLIPADST:
+      fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      vp10_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
+      fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      break;
+    case ADST_FLIPADST:
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      vp10_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
+      fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      break;
+    case FLIPADST_ADST:
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      vp10_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
+      flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;

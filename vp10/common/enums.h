@@ -94,8 +94,32 @@ typedef enum {
   ADST_DCT  = 1,                      // ADST in vertical, DCT in horizontal
   DCT_ADST  = 2,                      // DCT  in vertical, ADST in horizontal
   ADST_ADST = 3,                      // ADST in both directions
-  TX_TYPES = 4
+  TX_TYPES,
+#if CONFIG_EXT_TX
+  FLIPADST_DCT = 4,
+  DCT_FLIPADST = 5,
+  FLIPADST_FLIPADST = 6,
+  ADST_FLIPADST = 7,
+  FLIPADST_ADST = 8,
+  TOTAL_TX_TYPES,
+#endif  // CONFIG_EXT_TX
 } TX_TYPE;
+
+#if CONFIG_EXT_TX
+#define EXT_TX_SIZES   3  // number of sizes that use extended transforms
+typedef enum {
+  NORM = 0,
+  ALT1 = 1,
+  ALT2 = 2,
+  ALT3 = 3,
+  ALT4 = 4,
+  ALT5 = 5,
+  ALT6 = 6,
+  ALT7 = 7,
+  ALT8 = 8,
+  EXT_TX_TYPES
+} EXT_TX_TYPE;
+#endif  // CONFIG_EXT_TX
 
 typedef enum {
   VP9_LAST_FLAG = 1 << 0,

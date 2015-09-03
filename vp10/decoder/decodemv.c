@@ -597,6 +597,22 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
+#if CONFIG_EXT_TX
+    if (inter_block &&
+        mbmi->tx_size <= TX_16X16 &&
+        cm->base_qindex > 0 &&
+        mbmi->sb_type >= BLOCK_8X8 &&
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+        !mbmi->skip) {
+      mbmi->ext_txfrm = vpx_read_tree(r,
+                                      vp10_ext_tx_tree,
+                                      cm->fc->ext_tx_prob[mbmi->tx_size]);
+      if (!cm->frame_parallel_decoding_mode)
+        ++cm->counts.ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
+    } else {
+      mbmi->ext_txfrm = NORM;
+    }
+#endif  // CONFIG_EXT_TX
 
   if (inter_block)
     read_inter_block_mode_info(pbi, xd, mi, mi_row, mi_col, r);

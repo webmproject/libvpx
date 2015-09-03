@@ -471,6 +471,9 @@ typedef struct VP10_COMP {
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
+#if CONFIG_EXT_TX
+  int ext_tx_costs[EXT_TX_SIZES][EXT_TX_TYPES];
+#endif  // CONFIG_EXT_TX
 
   int multi_arf_allowed;
   int multi_arf_enabled;

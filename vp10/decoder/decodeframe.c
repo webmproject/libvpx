@@ -348,7 +348,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-    const scan_order *sc = get_scan(tx_size, tx_type);
+    const scan_order *sc = get_scan(tx_size, tx_type, 0);
     const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size,
                                              r, mbmi->segment_id);
     inverse_transform_block_intra(xd, plane, tx_type, tx_size,
@@ -363,7 +363,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd, vpx_reader *r,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-  const scan_order *sc = get_scan(tx_size, tx_type);
+  const scan_order *sc = get_scan(tx_size, tx_type, 1);
   const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size, r,
                                           mbmi->segment_id);
 
@@ -1970,6 +1970,17 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   return sz;
 }
 
+#if CONFIG_EXT_TX
+static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
+  int i, j;
+  if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    for (j = TX_4X4; j <= TX_16X16; ++j)
+      for (i = 0; i < EXT_TX_TYPES - 1; ++i)
+        vp10_diff_update_prob(r, &fc->ext_tx_prob[j][i]);
+  }
+}
+#endif  // CONFIG_EXT_TX
+
 static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP10_COMMON *const cm = &pbi->common;
@@ -2017,6 +2028,9 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
         vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);
 
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
+#if CONFIG_EXT_TX
+    read_ext_tx_probs(fc, &r);
+#endif
   }
 
   return vpx_reader_has_error(&r);
@@ -2056,6 +2070,10 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
   assert(!memcmp(&cm->counts.tx, &zero_counts.tx, sizeof(cm->counts.tx)));
   assert(!memcmp(cm->counts.skip, zero_counts.skip, sizeof(cm->counts.skip)));
   assert(!memcmp(&cm->counts.mv, &zero_counts.mv, sizeof(cm->counts.mv)));
+#if CONFIG_EXT_TX
+  assert(!memcmp(cm->counts.ext_tx, zero_counts.ext_tx,
+                 sizeof(cm->counts.ext_tx)));
+#endif  // CONFIG_EXT_TX
 }
 #endif  // NDEBUG
 

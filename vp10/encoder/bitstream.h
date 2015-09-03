@@ -20,6 +20,8 @@ extern "C" {
 
 void vp10_pack_bitstream(VP10_COMP *cpi, uint8_t *dest, size_t *size);
 
+void vp10_encode_token_init();
+
 static INLINE int vp10_preserve_existing_gf(VP10_COMP *cpi) {
   return !cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
          cpi->rc.is_src_frame_alt_ref &&

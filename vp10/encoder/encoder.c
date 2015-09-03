@@ -330,6 +330,7 @@ void vp10_initialize_enc(void) {
     vp10_rc_init_minq_luts();
     vp10_entropy_mv_init();
     vp10_temporal_filter_init();
+    vp10_encode_token_init();
     init_done = 1;
   }
 }

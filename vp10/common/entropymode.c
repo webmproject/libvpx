@@ -314,6 +314,25 @@ static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
   { 149, 144, },
 };
 
+#if CONFIG_EXT_TX
+const vpx_tree_index vp10_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)] = {
+  -NORM, 2,
+  4, 10,
+  6, 8,
+  -ALT1, -ALT2,
+  -ALT3, -ALT4,
+  12, 14,
+  -ALT5, -ALT6,
+  -ALT7, -ALT8,
+};
+
+static const vpx_prob default_ext_tx_prob[EXT_TX_SIZES][EXT_TX_TYPES - 1] = {
+  { 240, 128, 128, 128, 128, 128, 128, 128 },
+  { 208, 128, 128, 128, 128, 128, 128, 128 },
+  { 176, 128, 128, 128, 128, 128, 128, 128 },
+};
+#endif  // CONFIG_EXT_TX
+
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->uv_mode_prob, default_if_uv_probs);
   vp10_copy(fc->y_mode_prob, default_if_y_probs);
@@ -326,6 +345,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   fc->tx_probs = default_tx_probs;
   vp10_copy(fc->skip_probs, default_skip_probs);
   vp10_copy(fc->inter_mode_probs, default_inter_mode_probs);
+#if CONFIG_EXT_TX
+  vp10_copy(fc->ext_tx_prob, default_ext_tx_prob);
+#endif  // CONFIG_EXT_TX
 }
 
 const vpx_tree_index vp10_switchable_interp_tree
@@ -405,6 +427,13 @@ void vp10_adapt_mode_probs(VP10_COMMON *cm) {
   for (i = 0; i < SKIP_CONTEXTS; ++i)
     fc->skip_probs[i] = mode_mv_merge_probs(
         pre_fc->skip_probs[i], counts->skip[i]);
+
+#if CONFIG_EXT_TX
+  for (i = TX_4X4; i <= TX_16X16; ++i) {
+    vpx_tree_merge_probs(vp10_ext_tx_tree, pre_fc->ext_tx_prob[i],
+                         counts->ext_tx[i], fc->ext_tx_prob[i]);
+  }
+#endif  // CONFIG_EXT_TX
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

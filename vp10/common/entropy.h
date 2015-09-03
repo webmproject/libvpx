@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 #define DIFF_UPDATE_PROB 252
+#define GROUP_DIFF_UPDATE_PROB 252
 
 // Coefficient token alphabet
 #define ZERO_TOKEN      0   // 0     Extra Bits 0+0
