@@ -852,11 +852,9 @@ static void encode_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
 
 static void write_interp_filter(INTERP_FILTER filter,
                                 struct vpx_write_bit_buffer *wb) {
-  const int filter_to_literal[] = { 1, 0, 2, 3 };
-
   vpx_wb_write_bit(wb, filter == SWITCHABLE);
   if (filter != SWITCHABLE)
-    vpx_wb_write_literal(wb, filter_to_literal[filter], 2);
+    vpx_wb_write_literal(wb, filter, 2);
 }
 
 static void fix_interp_filter(VP10_COMMON *cm, FRAME_COUNTS *counts) {

@@ -1139,12 +1139,7 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
 }
 
 static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
-  const INTERP_FILTER literal_to_filter[] = { EIGHTTAP_SMOOTH,
-                                              EIGHTTAP,
-                                              EIGHTTAP_SHARP,
-                                              BILINEAR };
-  return vpx_rb_read_bit(rb) ? SWITCHABLE
-                             : literal_to_filter[vpx_rb_read_literal(rb, 2)];
+  return vpx_rb_read_bit(rb) ? SWITCHABLE : vpx_rb_read_literal(rb, 2);
 }
 
 static void setup_display_size(VP10_COMMON *cm,
