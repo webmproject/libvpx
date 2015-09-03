@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e486eed4_4fababbe",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-03T21:45:34Z",
+      "side": 1,
+      "message": "Instead of defining another enum, can we just use TX_TYPE? In that way, we can also get rid of ext_tx_to_txtype mapping.",
+      "revId": "2550263480a4a14a185c6c9d17837b48b3aa4bb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "240f267a_e9137120",
+        "filename": "vp10/common/enums.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-03T21:45:34Z",
+      "side": 1,
+      "message": "Having both TX_TYPES and TOTOAL_TX_TYPES is a little confusing. Maybe only one is enough, e.g. set TX_TYPES as 4 without EXT_TX; 9 with EXT_TX.",
+      "range": {
+        "startLine": 105,
+        "startChar": 11,
+        "endLine": 105,
+        "endChar": 24
+      },
+      "revId": "2550263480a4a14a185c6c9d17837b48b3aa4bb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64159e82_8e1d9f2a",
+        "filename": "vp10/common/scan.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 729,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-03T21:45:34Z",
+      "side": 1,
+      "message": "scan order is still completely depending on tranform size and type. So vp10_inter_scan_orders and vp10_scan_orders can be combined. Similarly, get_scan and get_inter_scan can be combined.",
+      "range": {
+        "startLine": 729,
+        "startChar": 4,
+        "endLine": 729,
+        "endChar": 17
+      },
+      "revId": "2550263480a4a14a185c6c9d17837b48b3aa4bb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
