@@ -463,7 +463,5 @@ void vp10_setup_past_independence(VP10_COMMON *cm) {
     memset(cm->prev_mip, 0,
            cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->prev_mip));
 
-  vp10_zero(cm->ref_frame_sign_bias);
-
   cm->frame_context_idx = 0;
 }
