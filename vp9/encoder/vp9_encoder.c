@@ -1453,6 +1453,8 @@ static void realloc_segmentation_maps(VP9_COMP *cpi) {
 void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
+  int last_w = cpi->oxcf.width;
+  int last_h = cpi->oxcf.height;
 
   if (cm->profile != oxcf->profile)
     cm->profile = oxcf->profile;
@@ -1505,8 +1507,10 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cm->display_width = cpi->oxcf.width;
   cm->display_height = cpi->oxcf.height;
-  cm->width = cpi->oxcf.width;
-  cm->height = cpi->oxcf.height;
+  if (last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) {
+    cm->width = cpi->oxcf.width;
+    cm->height = cpi->oxcf.height;
+  }
 
   if (cpi->initial_width) {
     if (cm->width > cpi->initial_width || cm->height > cpi->initial_height) {
