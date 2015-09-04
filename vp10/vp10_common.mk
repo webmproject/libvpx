@@ -19,7 +19,6 @@ VP10_COMMON_SRCS-yes += common/entropymode.c
 VP10_COMMON_SRCS-yes += common/entropymv.c
 VP10_COMMON_SRCS-yes += common/frame_buffers.c
 VP10_COMMON_SRCS-yes += common/frame_buffers.h
-VP10_COMMON_SRCS-yes += common/idct.c
 VP10_COMMON_SRCS-yes += common/alloccommon.h
 VP10_COMMON_SRCS-yes += common/blockd.h
 VP10_COMMON_SRCS-yes += common/common.h
@@ -30,6 +29,9 @@ VP10_COMMON_SRCS-yes += common/enums.h
 VP10_COMMON_SRCS-yes += common/filter.h
 VP10_COMMON_SRCS-yes += common/filter.c
 VP10_COMMON_SRCS-yes += common/idct.h
+VP10_COMMON_SRCS-yes += common/idct.c
+VP10_COMMON_SRCS-yes += common/vp10_inv_txfm.h
+VP10_COMMON_SRCS-yes += common/vp10_inv_txfm.c
 VP10_COMMON_SRCS-yes += common/loopfilter.h
 VP10_COMMON_SRCS-yes += common/thread_common.h
 VP10_COMMON_SRCS-yes += common/mv.h
@@ -90,5 +92,8 @@ ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht4x4_add_neon.c
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht8x8_add_neon.c
 endif
+
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_inv_txfm_sse2.c
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_inv_txfm_sse2.h
 
 $(eval $(call rtcd_h_template,vp10_rtcd,vp10/common/vp10_rtcd_defs.pl))
