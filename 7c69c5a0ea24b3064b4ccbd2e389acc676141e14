@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6492fe15_15fb7f82",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "there\u0027s no guarantee that CONFIG_COEFFICIENT_RANGE_CHECKING will be true in all situations. if you want to ensure the test is running as expected you should include vpx_config.h (at line 14) and #undef CONFIG_COEFFICIENT_RANGE_CHECKING then #define CONFIG_COEFFICIENT_RANGE_CHECKING 1 before including the .c; vpx_config.h has a header guard so this shouldn\u0027t produce any redefinition warnings.",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_b93e4554",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "indent is 2 on a new block",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_944e7b34",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "members come after functions:\n\nhttps://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Declaration_Order",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6492fe15_35f8fb82",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "variables are lowercase + \u0027_\u0027:\n\nhttps://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Variable_Names",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_535fd559",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "does this need to be virtual?",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0484e2ca_d94309dc",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "you should explicitly include new",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_54480326",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "in this project \u0027*\u0027 is associated with the variable not the type",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "240f267a_37d68031",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "indent is 4 on continued lines (use constructor formatting here)",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_3445870d",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "indent is 2 here:\n\nhttps://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Class_Format",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "240f267a_17db8459",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "add a space after ()",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84529221_14428b04",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8497f201_1312ad8e",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "rename this to bit",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04cce27b_b7a8da5b",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:48:31Z",
+      "side": 1,
+      "message": "this, and many others, are a cosmetic change; in general changes that have nothing to do with the subject of the patch should not be added to keep the line count down and simplify the review.\nthings like this can be done in a follow-up clearly marked as \u0027cosmetics: ...\u0027",
+      "revId": "7c69c5a0ea24b3064b4ccbd2e389acc676141e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
