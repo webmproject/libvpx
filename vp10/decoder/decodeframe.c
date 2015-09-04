@@ -1012,8 +1012,9 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
       read_coef_probs_common(fc->coef_probs[tx_size], r);
 }
 
-static void setup_segmentation(struct segmentation *seg,
+static void setup_segmentation(VP10_COMMON *const cm,
                                struct vpx_read_bit_buffer *rb) {
+  struct segmentation *const seg = &cm->seg;
   int i, j;
 
   seg->update_map = 0;
@@ -1024,13 +1025,21 @@ static void setup_segmentation(struct segmentation *seg,
     return;
 
   // Segmentation map update
-  seg->update_map = vpx_rb_read_bit(rb);
+  if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
+    seg->update_map = 1;
+  } else {
+    seg->update_map = vpx_rb_read_bit(rb);
+  }
   if (seg->update_map) {
     for (i = 0; i < SEG_TREE_PROBS; i++)
       seg->tree_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
                                                : MAX_PROB;
 
-    seg->temporal_update = vpx_rb_read_bit(rb);
+    if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
+      seg->temporal_update = 0;
+    } else {
+      seg->temporal_update = vpx_rb_read_bit(rb);
+    }
     if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++)
         seg->pred_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
@@ -1953,7 +1962,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 
   setup_loopfilter(&cm->lf, rb);
   setup_quantization(cm, &pbi->mb, rb);
-  setup_segmentation(&cm->seg, rb);
+  setup_segmentation(cm, rb);
   setup_segmentation_dequant(cm);
 
   setup_tile_info(cm, rb);

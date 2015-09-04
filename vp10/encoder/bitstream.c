@@ -762,7 +762,11 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
     return;
 
   // Segmentation map
-  vpx_wb_write_bit(wb, seg->update_map);
+  if (!frame_is_intra_only(cm) && !cm->error_resilient_mode) {
+    vpx_wb_write_bit(wb, seg->update_map);
+  } else {
+    assert(seg->update_map == 1);
+  }
   if (seg->update_map) {
     // Select the coding strategy (temporal or spatial)
     vp10_choose_segmap_coding_method(cm, xd);
@@ -776,7 +780,11 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
     }
 
     // Write out the chosen coding method.
-    vpx_wb_write_bit(wb, seg->temporal_update);
+    if (!frame_is_intra_only(cm) && !cm->error_resilient_mode) {
+      vpx_wb_write_bit(wb, seg->temporal_update);
+    } else {
+      assert(seg->temporal_update == 0);
+    }
     if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++) {
         const int prob = seg->pred_probs[i];

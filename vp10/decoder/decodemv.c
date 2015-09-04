@@ -116,6 +116,22 @@ static void set_segment_id(VP10_COMMON *cm, int mi_offset,
       cm->current_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
 }
 
+static int read_intra_segment_id(VP10_COMMON *const cm, int mi_offset,
+                                 int x_mis, int y_mis,
+                                 vpx_reader *r) {
+  struct segmentation *const seg = &cm->seg;
+  int segment_id;
+
+  if (!seg->enabled)
+    return 0;  // Default for disabled segmentation
+
+  assert(seg->update_map && !seg->temporal_update);
+
+  segment_id = read_segment_id(r, seg);
+  set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
+  return segment_id;
+}
+
 static void copy_segment_id(const VP10_COMMON *cm,
                            const uint8_t *last_segment_ids,
                            uint8_t *current_segment_ids,
@@ -126,26 +142,6 @@ static void copy_segment_id(const VP10_COMMON *cm,
     for (x = 0; x < x_mis; x++)
       current_segment_ids[mi_offset + y * cm->mi_cols + x] =  last_segment_ids ?
           last_segment_ids[mi_offset + y * cm->mi_cols + x] : 0;
-}
-
-static int read_intra_segment_id(VP10_COMMON *const cm, int mi_offset,
-                                 int x_mis, int y_mis,
-                                 vpx_reader *r) {
-  struct segmentation *const seg = &cm->seg;
-  int segment_id;
-
-  if (!seg->enabled)
-    return 0;  // Default for disabled segmentation
-
-  if (!seg->update_map) {
-    copy_segment_id(cm, cm->last_frame_seg_map, cm->current_frame_seg_map,
-                    mi_offset, x_mis, y_mis);
-    return 0;
-  }
-
-  segment_id = read_segment_id(r, seg);
-  set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
-  return segment_id;
 }
 
 static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
