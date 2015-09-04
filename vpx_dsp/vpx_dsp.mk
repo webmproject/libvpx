@@ -43,6 +43,7 @@ ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
+DSP_SRCS-$(HAVE_SSSE3) += x86/vpx_subpixel_8t_ssse3.asm
 endif  # CONFIG_USE_X86INC
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
