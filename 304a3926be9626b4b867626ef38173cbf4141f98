@@ -16,6 +16,24 @@
       "revId": "304a3926be9626b4b867626ef38173cbf4141f98",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "240f267a_57be9ceb",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_ssse3.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-04T03:36:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6492fe15_55f107a0",
+      "revId": "304a3926be9626b4b867626ef38173cbf4141f98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
