@@ -1738,14 +1738,15 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       bit_reader_end = vpx_reader_find_end(&tile_data->bit_reader);
       final_worker = -1;
     }
+  }
 
-    // Accumulate thread frame counts.
-    if (n >= tile_cols && !cm->frame_parallel_decoding_mode) {
-      for (i = 0; i < num_workers; ++i) {
-        TileWorkerData *const tile_data =
-            (TileWorkerData*)pbi->tile_workers[i].data1;
-        vp9_accumulate_frame_counts(&cm->counts, &tile_data->counts, 1);
-      }
+  // Accumulate thread frame counts.
+  if (!cm->frame_parallel_decoding_mode) {
+    int i;
+    for (i = 0; i < num_workers; ++i) {
+      TileWorkerData *const tile_data =
+          (TileWorkerData*)pbi->tile_workers[i].data1;
+      vp9_accumulate_frame_counts(&cm->counts, &tile_data->counts, 1);
     }
   }
 
