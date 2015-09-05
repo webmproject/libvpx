@@ -355,7 +355,7 @@ static INLINE void flatmask5(uint32_t p4, uint32_t p3,
       /* flat & flatmask4(thresh, p3, p2, p1, p0, q0, q1, q2, q3) */
       "and            %[flat1],  %[flat3],        %[flat1]     \n\t"
 
-      : [c] "=&r" (c), [r_k] "=&r" (r_k), [r] "=&r" (r), 
+      : [c] "=&r" (c), [r_k] "=&r" (r_k), [r] "=&r" (r),
         [r_flat] "=&r" (r_flat), [flat1] "=&r" (flat1), [flat3] "=&r" (flat3)
       : [p4] "r" (p4), [p3] "r" (p3), [p2] "r" (p2),
         [p1] "r" (p1), [p0] "r" (p0), [q0] "r" (q0), [q1] "r" (q1),
