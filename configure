@@ -252,6 +252,7 @@ EXPERIMENT_LIST="
     spatial_svc
     fp_mb_stats
     full_buffer_test
+    internal_resize
     emulate_hardware
 "
 CONFIG_LIST="

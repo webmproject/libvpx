@@ -775,11 +775,11 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter
     }
-  }
 
 #if CONFIG_INTERNAL_STATS
   pbi->sub8x8_inter += less8x8;
 #endif
+  }
 
   xd->corrupted |= vp9_reader_has_error(r);
 }
@@ -2061,6 +2061,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
   if (pbi->frame_parallel_decode && cm->frame_parallel_decoding_mode) {
     VP9Worker *const worker = pbi->frame_worker_owner;
     FrameWorkerData *const frame_worker_data = worker->data1;
+
     if (cm->refresh_frame_context) {
       context_updated = 1;
       cm->frame_contexts[cm->frame_context_idx] = *cm->fc;

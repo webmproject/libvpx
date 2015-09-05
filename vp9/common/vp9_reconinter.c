@@ -168,9 +168,9 @@ MV average_split_mvs(const struct macroblockd_plane *pd,
 }
 
 void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
-                                   int bw, int bh,
-                                   int x, int y, int w, int h,
-                                   int mi_x, int mi_y) {
+                            int bw, int bh,
+                            int x, int y, int w, int h,
+                            int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0];
   const int is_compound = has_second_ref(&mi->mbmi);
@@ -201,7 +201,20 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     const int is_scaled = vp9_is_scaled(sf);
 
     if (is_scaled) {
-      pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, sf);
+      // Co-ordinate of containing block to pixel precision.
+      int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
+      int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
+
+      if (plane == 0)
+        pre_buf->buf = xd->block_refs[ref]->buf->y_buffer;
+      else if (plane == 1)
+        pre_buf->buf = xd->block_refs[ref]->buf->u_buffer;
+      else
+        pre_buf->buf = xd->block_refs[ref]->buf->v_buffer;
+
+      pre_buf->buf += scaled_buffer_offset(x_start + x, y_start + y,
+                                           pre_buf->stride, sf);
+      pre = pre_buf->buf;
       scaled_mv = vp9_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
       xs = sf->x_step_q4;
       ys = sf->y_step_q4;

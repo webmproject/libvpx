@@ -3071,6 +3071,17 @@ static void set_frame_size(VP9_COMP *cpi) {
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
+#if CONFIG_INTERNAL_RESIZE
+  if (oxcf->pass == 2 && oxcf->resize_mode == RESIZE_DYNAMIC) {
+    if ((cm->current_video_frame % 5) == 2) {
+      cpi->resize_pending = 1;
+      cpi->rc.frame_size_selector = (cm->current_video_frame / 5) & 0x01;
+    } else {
+      cpi->resize_pending = 0;
+    }
+  }
+#endif
+
   if (oxcf->pass == 2 &&
       oxcf->rc_mode == VPX_VBR &&
       ((oxcf->resize_mode == RESIZE_FIXED && cm->current_video_frame == 0) ||
@@ -3082,6 +3093,11 @@ static void set_frame_size(VP9_COMP *cpi) {
     vp9_set_size_literal(cpi, oxcf->scaled_frame_width,
                          oxcf->scaled_frame_height);
   }
+
+#if CONFIG_INTERNAL_RESIZE
+  fprintf(stderr, "%d %d\n", oxcf->scaled_frame_width,
+          oxcf->scaled_frame_height);
+#endif
 
   if (oxcf->pass == 0 &&
       oxcf->rc_mode == VPX_CBR &&

@@ -48,8 +48,9 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
 
   if (speed >= 1) {
     if (MIN(cm->width, cm->height) >= 720) {
-      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
-                                              : DISABLE_ALL_INTER_SPLIT;
+//      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+//                                              : DISABLE_ALL_INTER_SPLIT;
+//      sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
       sf->partition_search_breakout_dist_thr = (1 << 23);
     } else {
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
