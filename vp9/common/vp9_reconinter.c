@@ -187,7 +187,19 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     const int is_scaled = vp9_is_scaled(sf);
 
     if (is_scaled) {
-      pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, sf);
+      // Co-ordinate of containing block to pixel precision.
+      const int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
+      const int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
+      if (plane == 0)
+        pre_buf->buf = xd->block_refs[ref]->buf->y_buffer;
+      else if (plane == 1)
+        pre_buf->buf = xd->block_refs[ref]->buf->u_buffer;
+      else
+        pre_buf->buf = xd->block_refs[ref]->buf->v_buffer;
+
+      pre_buf->buf += scaled_buffer_offset(x_start + x, y_start + y,
+                                           pre_buf->stride, sf);
+      pre = pre_buf->buf;
       scaled_mv = vp9_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
       xs = sf->x_step_q4;
       ys = sf->y_step_q4;
