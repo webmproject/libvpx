@@ -527,6 +527,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                                        struct buf_2d *dst_buf, const MV* mv,
                                        RefCntBuffer *ref_frame_buf,
                                        int is_scaled, int ref) {
+  VP10_COMMON *const cm = &pbi->common;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
   MV32 scaled_mv;
@@ -623,7 +624,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
 
     // Wait until reference block is ready. Pad 7 more pixels as last 7
     // pixels of each superblock row can be changed by next superblock row.
-    if (pbi->frame_parallel_decode)
+    if (cm->frame_parallel_decode)
       vp10_frameworker_wait(pbi->frame_worker_owner, ref_frame_buf,
                             VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
 
@@ -650,7 +651,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
   } else {
     // Wait until reference block is ready. Pad 7 more pixels as last 7
     // pixels of each superblock row can be changed by next superblock row.
-     if (pbi->frame_parallel_decode) {
+     if (cm->frame_parallel_decode) {
        const int y1 = (y0_16 + (h - 1) * ys) >> SUBPEL_BITS;
        vp10_frameworker_wait(pbi->frame_worker_owner, ref_frame_buf,
                              VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
@@ -1509,7 +1510,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
       // After loopfiltering, the last 7 row pixels in each superblock row may
       // still be changed by the longest loopfilter of the next superblock
       // row.
-      if (pbi->frame_parallel_decode)
+      if (cm->frame_parallel_decode)
         vp10_frameworker_broadcast(pbi->cur_buf,
                                   mi_row << MI_BLOCK_SIZE_LOG2);
     }
@@ -1527,7 +1528,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   // Get last tile data.
   tile_data = pbi->tile_data + tile_cols * tile_rows - 1;
 
-  if (pbi->frame_parallel_decode)
+  if (cm->frame_parallel_decode)
     vp10_frameworker_broadcast(pbi->cur_buf, INT_MAX);
   return vpx_reader_find_end(&tile_data->bit_reader);
 }
@@ -1817,7 +1818,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
     cm->lf.filter_level = 0;
     cm->show_frame = 1;
 
-    if (pbi->frame_parallel_decode) {
+    if (cm->frame_parallel_decode) {
       for (i = 0; i < REF_FRAMES; ++i)
         cm->next_ref_frame_map[i] = cm->ref_frame_map[i];
     }
@@ -2186,7 +2187,7 @@ void vp10_decode_frame(VP10Decoder *pbi,
 
   // If encoded in frame parallel mode, frame context is ready after decoding
   // the frame header.
-  if (pbi->frame_parallel_decode && cm->frame_parallel_decoding_mode) {
+  if (cm->frame_parallel_decode && cm->frame_parallel_decoding_mode) {
     VPxWorker *const worker = pbi->frame_worker_owner;
     FrameWorkerData *const frame_worker_data = worker->data1;
     if (cm->refresh_frame_context) {

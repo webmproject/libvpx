@@ -233,8 +233,6 @@ typedef struct VP10Common {
   struct loopfilter lf;
   struct segmentation seg;
 
-  // TODO(hkuang): Remove this as it is the same as frame_parallel_decode
-  // in pbi.
   int frame_parallel_decode;  // frame-based threading.
 
   // Context probabilities for reference frame prediction

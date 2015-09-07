@@ -332,7 +332,7 @@ static int frame_worker_hook(void *arg1, void *arg2) {
                                   &data);
   frame_worker_data->data_end = data;
 
-  if (frame_worker_data->pbi->frame_parallel_decode) {
+  if (frame_worker_data->pbi->common.frame_parallel_decode) {
     // In frame parallel decoding, a worker thread must successfully decode all
     // the compressed data.
     if (frame_worker_data->result != 0 ||
@@ -433,7 +433,6 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
         (ctx->frame_parallel_decode == 0) ? ctx->cfg.threads : 0;
 
     frame_worker_data->pbi->inv_tile_order = ctx->invert_tile_order;
-    frame_worker_data->pbi->frame_parallel_decode = ctx->frame_parallel_decode;
     frame_worker_data->pbi->common.frame_parallel_decode =
         ctx->frame_parallel_decode;
     worker->hook = (VPxWorkerHook)frame_worker_hook;
