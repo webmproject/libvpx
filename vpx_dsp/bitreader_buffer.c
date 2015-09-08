@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "./vpx_config.h"
 #include "./bitreader_buffer.h"
 
 size_t vpx_rb_bytes_read(struct vpx_read_bit_buffer *rb) {
@@ -38,4 +39,15 @@ int vpx_rb_read_signed_literal(struct vpx_read_bit_buffer *rb,
                                int bits) {
   const int value = vpx_rb_read_literal(rb, bits);
   return vpx_rb_read_bit(rb) ? -value : value;
+}
+
+int vpx_rb_read_inv_signed_literal(struct vpx_read_bit_buffer *rb,
+                                   int bits) {
+#if CONFIG_MISC_FIXES
+  const int nbits = sizeof(unsigned) * 8 - bits - 1;
+  const unsigned value = vpx_rb_read_literal(rb, bits + 1) << nbits;
+  return ((int) value) >> nbits;
+#else
+  return vpx_rb_read_signed_literal(rb, bits);
+#endif
 }

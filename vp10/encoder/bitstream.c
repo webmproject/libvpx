@@ -714,8 +714,7 @@ static void encode_loopfilter(struct loopfilter *lf,
         vpx_wb_write_bit(wb, changed);
         if (changed) {
           lf->last_ref_deltas[i] = delta;
-          vpx_wb_write_literal(wb, abs(delta) & 0x3F, 6);
-          vpx_wb_write_bit(wb, delta < 0);
+          vpx_wb_write_inv_signed_literal(wb, delta, 6);
         }
       }
 
@@ -725,8 +724,7 @@ static void encode_loopfilter(struct loopfilter *lf,
         vpx_wb_write_bit(wb, changed);
         if (changed) {
           lf->last_mode_deltas[i] = delta;
-          vpx_wb_write_literal(wb, abs(delta) & 0x3F, 6);
-          vpx_wb_write_bit(wb, delta < 0);
+          vpx_wb_write_inv_signed_literal(wb, delta, 6);
         }
       }
     }
@@ -736,8 +734,7 @@ static void encode_loopfilter(struct loopfilter *lf,
 static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
   if (delta_q != 0) {
     vpx_wb_write_bit(wb, 1);
-    vpx_wb_write_literal(wb, abs(delta_q), 4);
-    vpx_wb_write_bit(wb, delta_q < 0);
+    vpx_wb_write_inv_signed_literal(wb, delta_q, 4);
   } else {
     vpx_wb_write_bit(wb, 0);
   }

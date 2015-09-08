@@ -1095,17 +1095,17 @@ static void setup_loopfilter(struct loopfilter *lf,
 
       for (i = 0; i < MAX_REF_FRAMES; i++)
         if (vpx_rb_read_bit(rb))
-          lf->ref_deltas[i] = vpx_rb_read_signed_literal(rb, 6);
+          lf->ref_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++)
         if (vpx_rb_read_bit(rb))
-          lf->mode_deltas[i] = vpx_rb_read_signed_literal(rb, 6);
+          lf->mode_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
     }
   }
 }
 
 static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
-  return vpx_rb_read_bit(rb) ? vpx_rb_read_signed_literal(rb, 4) : 0;
+  return vpx_rb_read_bit(rb) ? vpx_rb_read_inv_signed_literal(rb, 4) : 0;
 }
 
 static void setup_quantization(VP10_COMMON *const cm, MACROBLOCKD *const xd,
