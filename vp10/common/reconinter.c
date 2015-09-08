@@ -143,11 +143,11 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
     const int bh = 4 * num_4x4_h;
 
     if (xd->mi[0]->mbmi.sb_type < BLOCK_8X8) {
-      int i = 0, x, y;
+      int x, y;
       assert(bsize == BLOCK_8X8);
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
-           build_inter_predictors(xd, plane, i++, bw, bh,
+           build_inter_predictors(xd, plane, y * 2 + x, bw, bh,
                                   4 * x, 4 * y, 4, 4, mi_x, mi_y);
     } else {
       build_inter_predictors(xd, plane, 0, bw, bh,
