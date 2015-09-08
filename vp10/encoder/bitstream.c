@@ -818,14 +818,25 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-static void encode_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
+#if CONFIG_MISC_FIXES
+static void write_txfm_mode(TX_MODE mode, struct vpx_write_bit_buffer *wb) {
+  vpx_wb_write_bit(wb, mode == TX_MODE_SELECT);
+  if (mode != TX_MODE_SELECT)
+    vpx_wb_write_literal(wb, mode, 2);
+}
+#endif
+
+static void update_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
+#if !CONFIG_MISC_FIXES
   // Mode
   vpx_write_literal(w, VPXMIN(cm->tx_mode, ALLOW_32X32), 2);
   if (cm->tx_mode >= ALLOW_32X32)
     vpx_write_bit(w, cm->tx_mode == TX_MODE_SELECT);
 
   // Probabilities
+#endif
+
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
     unsigned int ct_8x8p[TX_SIZES - 3][2];
@@ -1154,24 +1165,32 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   encode_loopfilter(&cm->lf, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
+#if CONFIG_MISC_FIXES
+  if (xd->lossless)
+    cm->tx_mode = TX_4X4;
+  else
+    write_txfm_mode(cm->tx_mode, wb);
+#endif
 
   write_tile_info(cm, wb);
 }
 
 static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   VP10_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = cpi->td.counts;
   vpx_writer header_bc;
 
   vpx_start_encode(&header_bc, data);
 
-  if (xd->lossless)
-    cm->tx_mode = ONLY_4X4;
+#if !CONFIG_MISC_FIXES
+  if (cpi->td.mb.e_mbd.lossless)
+    cm->tx_mode = TX_4X4;
   else
-    encode_txfm_probs(cm, &header_bc, counts);
-
+    update_txfm_probs(cm, &header_bc, counts);
+#else
+  update_txfm_probs(cm, &header_bc, counts);
+#endif
   update_coef_probs(cpi, &header_bc);
   update_skip_probs(cm, &header_bc, counts);
 

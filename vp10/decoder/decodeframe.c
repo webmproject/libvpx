@@ -81,12 +81,18 @@ static int decode_unsigned_max(struct vpx_read_bit_buffer *rb, int max) {
   return data > max ? max : data;
 }
 
+#if CONFIG_MISC_FIXES
+static TX_MODE read_tx_mode(struct vpx_read_bit_buffer *rb) {
+  return vpx_rb_read_bit(rb) ? TX_MODE_SELECT : vpx_rb_read_literal(rb, 2);
+}
+#else
 static TX_MODE read_tx_mode(vpx_reader *r) {
   TX_MODE tx_mode = vpx_read_literal(r, 2);
   if (tx_mode == ALLOW_32X32)
     tx_mode += vpx_read_bit(r);
   return tx_mode;
 }
+#endif
 
 static void read_tx_mode_probs(struct tx_probs *tx_probs, vpx_reader *r) {
   int i, j;
@@ -1787,6 +1793,9 @@ static void read_bitdepth_colorspace_sampling(
 static size_t read_uncompressed_header(VP10Decoder *pbi,
                                        struct vpx_read_bit_buffer *rb) {
   VP10_COMMON *const cm = &pbi->common;
+#if CONFIG_MISC_FIXES
+  MACROBLOCKD *const xd = &pbi->mb;
+#endif
   BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = pool->frame_bufs;
   int i, mask, ref_index = 0;
@@ -2011,6 +2020,9 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   setup_quantization(cm, &pbi->mb, rb);
   setup_segmentation(cm, rb);
   setup_segmentation_dequant(cm);
+#if CONFIG_MISC_FIXES
+  cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(rb);
+#endif
 
   setup_tile_info(cm, rb);
   sz = vpx_rb_read_literal(rb, 16);
@@ -2025,7 +2037,9 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP10_COMMON *const cm = &pbi->common;
+#if !CONFIG_MISC_FIXES
   MACROBLOCKD *const xd = &pbi->mb;
+#endif
   FRAME_CONTEXT *const fc = cm->fc;
   vpx_reader r;
   int k;
@@ -2035,7 +2049,9 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 
+#if !CONFIG_MISC_FIXES
   cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
+#endif
   if (cm->tx_mode == TX_MODE_SELECT)
     read_tx_mode_probs(&fc->tx_probs, &r);
   read_coef_probs(fc, cm->tx_mode, &r);
