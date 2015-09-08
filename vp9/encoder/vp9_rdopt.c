@@ -3786,6 +3786,12 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
     int early_term = 0;
+    struct buf_2d backup_yv12[2][MAX_MB_PLANE];
+    const YV12_BUFFER_CONFIG *scaled_ref_frame[2] = {
+        vp9_get_scaled_ref_frame(cpi, vp9_ref_order[ref_index].ref_frame[0]),
+        vp9_get_scaled_ref_frame(cpi, vp9_ref_order[ref_index].ref_frame[1])
+    };
+    int ref;
 
     ref_frame = vp9_ref_order[ref_index].ref_frame[0];
     second_ref_frame = vp9_ref_order[ref_index].ref_frame[1];
@@ -3842,16 +3848,6 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
           best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
     }
-
-    // TODO(jingning, jkoleszar): scaling reference frame not supported for
-    // sub8x8 blocks.
-    if (ref_frame > INTRA_FRAME &&
-        vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf))
-      continue;
-
-    if (second_ref_frame > INTRA_FRAME &&
-        vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf))
-      continue;
 
     if (comp_pred)
       mode_excluded = cm->reference_mode == SINGLE_REFERENCE;
@@ -3930,6 +3926,19 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
       BEST_SEG_INFO bsi[SWITCHABLE_FILTERS];
       int pred_exists = 0;
       int uv_skippable;
+
+      for (ref = 0; ref < 2; ++ref) {
+        if (scaled_ref_frame[ref]) {
+          int i;
+          // Swap out the reference frame for a version that's been scaled to
+          // match the resolution of the current frame, allowing the existing
+          // motion search code to be used without additional modifications.
+          for (i = 0; i < MAX_MB_PLANE; i++)
+            backup_yv12[ref][i] = xd->plane[i].pre[ref];
+          vp9_setup_pre_planes(xd, ref, scaled_ref_frame[ref], mi_row, mi_col,
+                               NULL);
+        }
+      }
 
       this_rd_thresh = (ref_frame == LAST_FRAME) ?
           rd_opt->threshes[segment_id][bsize][THR_LAST] :
@@ -4064,13 +4073,30 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
                                         BLOCK_8X8);
         memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
         if (!super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
-                              &uv_sse, BLOCK_8X8, tmp_best_rdu))
+                              &uv_sse, BLOCK_8X8, tmp_best_rdu)) {
+          for (ref = 0; ref < 2; ++ref) {
+            if (scaled_ref_frame[ref]) {
+              int i;
+              for (i = 0; i < MAX_MB_PLANE; ++i)
+                xd->plane[i].pre[ref] = backup_yv12[ref][i];
+            }
+          }
           continue;
+        }
 
         rate2 += rate_uv;
         distortion2 += distortion_uv;
         skippable = skippable && uv_skippable;
         total_sse += uv_sse;
+      }
+    }
+
+    for (ref = 0; ref < 2; ++ref) {
+      if (scaled_ref_frame[ref]) {
+        // Restore the prediction frame pointers to their unscaled versions.
+        int i;
+        for (i = 0; i < MAX_MB_PLANE; ++i)
+          xd->plane[i].pre[ref] = backup_yv12[ref][i];
       }
     }
 
