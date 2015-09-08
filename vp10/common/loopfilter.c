@@ -754,8 +754,13 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
 
   // If the block has no coefficients and is not intra we skip applying
   // the loop filter on block edges.
+#if CONFIG_MISC_FIXES
+  if ((mbmi->skip || mbmi->has_no_coeffs) && is_inter_block(mbmi))
+    return;
+#else
   if (mbmi->skip && is_inter_block(mbmi))
     return;
+#endif
 
   // Here we are adding a mask for the transform size. The transform
   // size mask is set to be correct for a 64x64 prediction block size. We
@@ -812,8 +817,13 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
   *above_y |= above_prediction_mask[block_size] << shift_y;
   *left_y |= left_prediction_mask[block_size] << shift_y;
 
+#if CONFIG_MISC_FIXES
+  if ((mbmi->skip || mbmi->has_no_coeffs) && is_inter_block(mbmi))
+    return;
+#else
   if (mbmi->skip && is_inter_block(mbmi))
     return;
+#endif
 
   *above_y |= (size_mask[block_size] &
                above_64x64_txform_mask[tx_size_y]) << shift_y;

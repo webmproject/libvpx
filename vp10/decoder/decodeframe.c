@@ -858,7 +858,11 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       }
 
       if (!less8x8 && eobtotal == 0)
+#if CONFIG_MISC_FIXES
+        mbmi->has_no_coeffs = 1;  // skip loopfilter
+#else
         mbmi->skip = 1;  // skip loopfilter
+#endif
     }
   }
 
