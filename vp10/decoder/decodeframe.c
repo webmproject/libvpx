@@ -1454,8 +1454,9 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
       tile_data->cm = cm;
       tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
-      tile_data->xd.counts = cm->frame_parallel_decoding_mode ?
-                             NULL : &cm->counts;
+      tile_data->xd.counts =
+          cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD ?
+              &cm->counts : NULL;
       vp10_zero(tile_data->dqcoeff);
       vp10_tile_init(&tile_data->xd.tile, tile_data->cm, tile_row, tile_col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
@@ -1652,7 +1653,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
   }
 
   // Initialize thread frame counts.
-  if (!cm->frame_parallel_decoding_mode) {
+  if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     int i;
 
     for (i = 0; i < num_workers; ++i) {
@@ -1674,8 +1675,9 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
       tile_data->pbi = pbi;
       tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
-      tile_data->xd.counts = cm->frame_parallel_decoding_mode ?
-                             0 : &tile_data->counts;
+      tile_data->xd.counts =
+          cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD ?
+              &tile_data->counts : NULL;
       vp10_zero(tile_data->dqcoeff);
       vp10_tile_init(tile, cm, 0, buf->col);
       vp10_tile_init(&tile_data->xd.tile, cm, 0, buf->col);
@@ -1714,7 +1716,8 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
     }
 
     // Accumulate thread frame counts.
-    if (n >= tile_cols && !cm->frame_parallel_decoding_mode) {
+    if (n >= tile_cols &&
+        cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
       for (i = 0; i < num_workers; ++i) {
         TileWorkerData *const tile_data =
             (TileWorkerData*)pbi->tile_workers[i].data1;
@@ -1948,11 +1951,20 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   }
 
   if (!cm->error_resilient_mode) {
-    cm->refresh_frame_context = vpx_rb_read_bit(rb);
-    cm->frame_parallel_decoding_mode = vpx_rb_read_bit(rb);
+    cm->refresh_frame_context =
+        vpx_rb_read_bit(rb) ? REFRESH_FRAME_CONTEXT_FORWARD
+                            : REFRESH_FRAME_CONTEXT_OFF;
+    if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_FORWARD) {
+        cm->refresh_frame_context =
+            vpx_rb_read_bit(rb) ? REFRESH_FRAME_CONTEXT_FORWARD
+                                : REFRESH_FRAME_CONTEXT_BACKWARD;
+#if !CONFIG_MISC_FIXES
+    } else {
+      vpx_rb_read_bit(rb);  // parallel decoding mode flag
+#endif
+    }
   } else {
-    cm->refresh_frame_context = 0;
-    cm->frame_parallel_decoding_mode = 1;
+    cm->refresh_frame_context = REFRESH_FRAME_CONTEXT_OFF;
   }
 
   // This flag will be overridden by the call to vp10_setup_past_independence
@@ -2187,10 +2199,11 @@ void vp10_decode_frame(VP10Decoder *pbi,
 
   // If encoded in frame parallel mode, frame context is ready after decoding
   // the frame header.
-  if (cm->frame_parallel_decode && cm->frame_parallel_decoding_mode) {
+  if (cm->frame_parallel_decode &&
+      cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_BACKWARD) {
     VPxWorker *const worker = pbi->frame_worker_owner;
     FrameWorkerData *const frame_worker_data = worker->data1;
-    if (cm->refresh_frame_context) {
+    if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_FORWARD) {
       context_updated = 1;
       cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
     }
@@ -2224,7 +2237,7 @@ void vp10_decode_frame(VP10Decoder *pbi,
   }
 
   if (!xd->corrupted) {
-    if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
+    if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
       vp10_adapt_coef_probs(cm);
 
       if (!frame_is_intra_only(cm)) {
@@ -2240,6 +2253,7 @@ void vp10_decode_frame(VP10Decoder *pbi,
   }
 
   // Non frame parallel update frame context here.
-  if (cm->refresh_frame_context && !context_updated)
+  if (cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF &&
+      !context_updated)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
 }
