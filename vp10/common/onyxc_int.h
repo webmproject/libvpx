@@ -57,6 +57,12 @@ typedef enum {
   REFERENCE_MODES       = 3,
 } REFERENCE_MODE;
 
+typedef enum {
+  RESET_FRAME_CONTEXT_NONE = 0,
+  RESET_FRAME_CONTEXT_CURRENT = 1,
+  RESET_FRAME_CONTEXT_ALL = 2,
+} RESET_FRAME_CONTEXT_MODE;
+
 typedef struct {
   int_mv mv[2];
   MV_REFERENCE_FRAME ref_frame[2];
@@ -161,10 +167,8 @@ typedef struct VP10Common {
 
   int allow_high_precision_mv;
 
-  // Flag signaling that the frame context should be reset to default values.
-  // 0 or 1 implies don't reset, 2 reset just the context specified in the
-  // frame header, 3 reset all contexts.
-  int reset_frame_context;
+  // Flag signaling which frame contexts should be reset to default values.
+  RESET_FRAME_CONTEXT_MODE reset_frame_context;
 
   // MBs, mb_rows/cols is in 16-pixel units; mi_rows/cols is in
   // MODE_INFO (8-pixel) units.

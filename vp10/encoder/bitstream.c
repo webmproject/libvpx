@@ -1092,8 +1092,25 @@ static void write_uncompressed_header(VP10_COMP *cpi,
     if (!cm->show_frame)
       vpx_wb_write_bit(wb, cm->intra_only);
 
-    if (!cm->error_resilient_mode)
-      vpx_wb_write_literal(wb, cm->reset_frame_context, 2);
+    if (!cm->error_resilient_mode) {
+#if CONFIG_MISC_FIXES
+      if (cm->intra_only) {
+        vpx_wb_write_bit(wb,
+                         cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL);
+      } else {
+        vpx_wb_write_bit(wb,
+                         cm->reset_frame_context != RESET_FRAME_CONTEXT_NONE);
+        if (cm->reset_frame_context != RESET_FRAME_CONTEXT_NONE)
+          vpx_wb_write_bit(wb,
+                           cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL);
+      }
+#else
+      static const int reset_frame_context_conv_tbl[3] = { 0, 2, 3 };
+
+      vpx_wb_write_literal(wb,
+          reset_frame_context_conv_tbl[cm->reset_frame_context], 2);
+#endif
+    }
 
     if (cm->intra_only) {
       write_sync_code(wb);
