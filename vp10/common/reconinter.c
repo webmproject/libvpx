@@ -135,20 +135,26 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
   const int mi_x = mi_col * MI_SIZE;
   const int mi_y = mi_row * MI_SIZE;
   for (plane = plane_from; plane <= plane_to; ++plane) {
-    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
-                                                        &xd->plane[plane]);
-    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
-    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
-    const int bw = 4 * num_4x4_w;
-    const int bh = 4 * num_4x4_h;
+    const struct macroblockd_plane *pd = &xd->plane[plane];
+    const int bw = 4 * num_4x4_blocks_wide_lookup[bsize] >> pd->subsampling_x;
+    const int bh = 4 * num_4x4_blocks_high_lookup[bsize] >> pd->subsampling_y;
 
     if (xd->mi[0]->mbmi.sb_type < BLOCK_8X8) {
+      const PARTITION_TYPE bp = bsize - xd->mi[0]->mbmi.sb_type;
+      const int have_vsplit = bp != PARTITION_HORZ;
+      const int have_hsplit = bp != PARTITION_VERT;
+      const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
+      const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
+      const int pw = 8 >> (have_vsplit | pd->subsampling_x);
+      const int ph = 8 >> (have_hsplit | pd->subsampling_y);
       int x, y;
+      assert(bp != PARTITION_NONE && bp < PARTITION_TYPES);
       assert(bsize == BLOCK_8X8);
+      assert(pw * num_4x4_w == bw && ph * num_4x4_h == bh);
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
            build_inter_predictors(xd, plane, y * 2 + x, bw, bh,
-                                  4 * x, 4 * y, 4, 4, mi_x, mi_y);
+                                  4 * x, 4 * y, pw, ph, mi_x, mi_y);
     } else {
       build_inter_predictors(xd, plane, 0, bw, bh,
                              0, 0, bw, bh, mi_x, mi_y);

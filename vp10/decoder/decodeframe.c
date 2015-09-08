@@ -707,12 +707,19 @@ static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
       const int is_scaled = vp10_is_scaled(sf);
 
       if (sb_type < BLOCK_8X8) {
+        const PARTITION_TYPE bp = BLOCK_8X8 - sb_type;
+        const int have_vsplit = bp != PARTITION_HORZ;
+        const int have_hsplit = bp != PARTITION_VERT;
+        const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
+        const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
+        const int pw = 8 >> (have_vsplit | pd->subsampling_x);
+        const int ph = 8 >> (have_hsplit | pd->subsampling_y);
         int x, y;
         for (y = 0; y < num_4x4_h; ++y) {
           for (x = 0; x < num_4x4_w; ++x) {
             const MV mv = average_split_mvs(pd, mi, ref, y * 2 + x);
             dec_build_inter_predictors(pbi, xd, plane, n4w_x4, n4h_x4,
-                                       4 * x, 4 * y, 4, 4, mi_x, mi_y, kernel,
+                                       4 * x, 4 * y, pw, ph, mi_x, mi_y, kernel,
                                        sf, pre_buf, dst_buf, &mv,
                                        ref_frame_buf, is_scaled, ref);
           }
