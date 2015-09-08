@@ -180,8 +180,9 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
         ADD_MV_REF_LIST(scale_mv((mbmi), 0, ref_frame, ref_sign_bias), \
                         refmv_count, mv_ref_list, Done); \
       if (has_second_ref(mbmi) && \
-          (mbmi)->ref_frame[1] != ref_frame && \
-          (mbmi)->mv[1].as_int != (mbmi)->mv[0].as_int) \
+          (CONFIG_MISC_FIXES || \
+           (mbmi)->mv[1].as_int != (mbmi)->mv[0].as_int) && \
+          (mbmi)->ref_frame[1] != ref_frame) \
         ADD_MV_REF_LIST(scale_mv((mbmi), 1, ref_frame, ref_sign_bias), \
                         refmv_count, mv_ref_list, Done); \
     } \
