@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84d4522f_b68c88fd",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-08T19:32:17Z",
+      "side": 1,
+      "message": "you probably should include vpx_integer for these types",
+      "range": {
+        "startLine": 52,
+        "startChar": 2,
+        "endLine": 52,
+        "endChar": 9
+      },
+      "revId": "c17b442f9bf1032b07343042b6241dedc23de374",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
