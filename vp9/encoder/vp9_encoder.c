@@ -412,6 +412,8 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vpx_free_frame_buffer(&cpi->svc.empty_frame.img);
   memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
+
+  vp9_free_svc_cyclic_refresh(cpi);
 }
 
 static void save_coding_context(VP9_COMP *cpi) {

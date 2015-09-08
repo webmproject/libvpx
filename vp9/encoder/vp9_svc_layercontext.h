@@ -41,6 +41,10 @@ typedef struct {
   int has_alt_frame;
   size_t layer_size;
   struct vpx_psnr_pkt psnr_pkt;
+  // Cyclic refresh parameters (aq-mode=3), that need to be updated per-frame.
+  int sb_index;
+  signed char *map;
+  uint8_t *last_coded_q_map;
 } LAYER_CONTEXT;
 
 typedef struct {
@@ -114,6 +118,8 @@ struct lookahead_entry *vp9_svc_lookahead_pop(struct VP9_COMP *const cpi,
 int vp9_svc_start_frame(struct VP9_COMP *const cpi);
 
 int vp9_one_pass_cbr_svc_start_layer(struct VP9_COMP *const cpi);
+
+void vp9_free_svc_cyclic_refresh(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"

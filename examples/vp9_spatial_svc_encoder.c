@@ -80,6 +80,8 @@ static const arg_def_t rc_end_usage_arg =
     ARG_DEF(NULL, "rc-end-usage", 1, "0 - 3: VBR, CBR, CQ, Q");
 static const arg_def_t speed_arg =
     ARG_DEF("sp", "speed", 1, "speed configuration");
+static const arg_def_t aqmode_arg =
+    ARG_DEF("aq", "aqmode", 1, "aq-mode off/on");
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static const struct arg_enum_list bitdepth_enum[] = {
@@ -101,7 +103,7 @@ static const arg_def_t *svc_args[] = {
   &kf_dist_arg,       &scale_factors_arg, &passes_arg,      &pass_arg,
   &fpf_name_arg,      &min_q_arg,         &max_q_arg,       &min_bitrate_arg,
   &max_bitrate_arg,   &temporal_layers_arg, &temporal_layering_mode_arg,
-  &lag_in_frame_arg,  &threads_arg,
+  &lag_in_frame_arg,  &threads_arg,       &aqmode_arg,
 #if OUTPUT_RC_STATS
   &output_rc_stats_arg,
 #endif
@@ -221,6 +223,8 @@ static void parse_command_line(int argc, const char **argv_,
 #endif
     } else if (arg_match(&arg, &speed_arg, argi)) {
       svc_ctx->speed = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &aqmode_arg, argi)) {
+      svc_ctx->aqmode = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &threads_arg, argi)) {
       svc_ctx->threads = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &temporal_layering_mode_arg, argi)) {
@@ -635,7 +639,7 @@ int main(int argc, const char **argv) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
   if (svc_ctx.threads)
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (svc_ctx.threads >> 1));
-  if (svc_ctx.speed >= 5)
+  if (svc_ctx.speed >= 5 && svc_ctx.aqmode == 1)
     vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
 
 
