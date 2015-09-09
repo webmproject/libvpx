@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4bdd6e7_a0bd60ef",
+        "filename": "test/test.mk",
+        "patchSetId": 15
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "try to avoid adding unnecessary whitespace changes, this line can go",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24c9e69c_fcd53d24",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "math.h should come before stdlib.h; each section C/C++/other/ours should be sorted",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04c1426c_233dd8f1",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "drop the ./ from the 2 test/ includes",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24c9e69c_dcda8154",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "here too, this should be vpx_ports/msvc.h",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4bdd6e7_80c37c72",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "drop the ./",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4ef2afe_c6f3bb18",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "if you meant to align these 2 with the ones above drop one space before the \u0027\u003d\u0027",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "244c8613_5b978308",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "continued lines are indented 4 spaces",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24c9e69c_9cd40926",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "join this line with the one above",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c34e74_22027414",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T03:30:34Z",
+      "side": 1,
+      "message": "here and in many places: why not just swap these?",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
