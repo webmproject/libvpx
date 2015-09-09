@@ -477,10 +477,10 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   if (enc_cfg->rc_end_usage == VPX_CBR) {
     enc_cfg->rc_resize_allowed = 0;
     enc_cfg->rc_min_quantizer = 2;
-    enc_cfg->rc_max_quantizer = 63;
+    enc_cfg->rc_max_quantizer = 56;
     enc_cfg->rc_undershoot_pct = 50;
     enc_cfg->rc_overshoot_pct = 50;
-    enc_cfg->rc_buf_initial_sz = 20;
+    enc_cfg->rc_buf_initial_sz = 500;
     enc_cfg->rc_buf_optimal_sz = 600;
     enc_cfg->rc_buf_sz = 1000;
   }
@@ -494,10 +494,10 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     svc_log(svc_ctx, SVC_LOG_ERROR, "svc_enc_init error\n");
     return res;
   }
-
-  vpx_codec_control(codec_ctx, VP9E_SET_SVC, 1);
-  vpx_codec_control(codec_ctx, VP9E_SET_SVC_PARAMETERS, &si->svc_params);
-
+  if (svc_ctx->spatial_layers > 1 || svc_ctx->temporal_layers > 1) {
+    vpx_codec_control(codec_ctx, VP9E_SET_SVC, 1);
+    vpx_codec_control(codec_ctx, VP9E_SET_SVC_PARAMETERS, &si->svc_params);
+  }
   return VPX_CODEC_OK;
 }
 
