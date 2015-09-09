@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4c34e74_7fbda73b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T00:32:53Z",
+      "side": 1,
+      "message": "single-file?",
+      "revId": "3d781079678eff4a964608320b7629731f3b181e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4e8aef8_57ee64ef",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T00:32:53Z",
+      "side": 1,
+      "message": "unless -output-bit-depth is explicitly set",
+      "revId": "3d781079678eff4a964608320b7629731f3b181e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_57288e19",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 993,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T00:32:53Z",
+      "side": 1,
+      "message": "this is made worse because it\u0027s being defaulted elsewhere by some other condition. seems like it can still be overridden",
+      "revId": "3d781079678eff4a964608320b7629731f3b181e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
