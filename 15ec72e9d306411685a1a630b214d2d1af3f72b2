@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4e8aef8_37e40013",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2015-09-09T00:32:12Z",
+      "side": 1,
+      "message": "temporal enhancement layer frames.",
+      "range": {
+        "startLine": 455,
+        "startChar": 41,
+        "endLine": 455,
+        "endChar": 65
+      },
+      "revId": "15ec72e9d306411685a1a630b214d2d1af3f72b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04e6a228_d8016546",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2015-09-09T00:32:12Z",
+      "side": 1,
+      "message": "So cyclic refresh won\u0027t be applied to temporal svc but with only 1 spatial layer case?",
+      "range": {
+        "startLine": 105,
+        "startChar": 10,
+        "endLine": 105,
+        "endChar": 36
+      },
+      "revId": "15ec72e9d306411685a1a630b214d2d1af3f72b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84d4522f_bc5a291a",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2015-09-09T00:32:12Z",
+      "side": 1,
+      "message": "Can we just swap pointers to avoid memcpy?",
+      "range": {
+        "startLine": 289,
+        "startChar": 4,
+        "endLine": 289,
+        "endChar": 36
+      },
+      "revId": "15ec72e9d306411685a1a630b214d2d1af3f72b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
