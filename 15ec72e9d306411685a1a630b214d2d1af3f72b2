@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e4c34e74_023e5055",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-09-09T18:34:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4e8aef8_37e40013",
+      "range": {
+        "startLine": 455,
+        "startChar": 41,
+        "endLine": 455,
+        "endChar": 65
+      },
+      "revId": "15ec72e9d306411685a1a630b214d2d1af3f72b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04e6a228_d8016546",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 9
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "e4c34e74_c2ee1831",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-09-09T18:34:45Z",
+      "side": 1,
+      "message": "cyclic_refresh/cr will still be applied to temporal svc with 1 spatial layer. But if we have 1 spatial layer, since cr is only applied to base temporal layer, there is no need to update any cyclic_refresh parameters for layer context (and hence no need to alloc..).",
+      "parentUuid": "04e6a228_d8016546",
+      "range": {
+        "startLine": 105,
+        "startChar": 10,
+        "endLine": 105,
+        "endChar": 36
+      },
+      "revId": "15ec72e9d306411685a1a630b214d2d1af3f72b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84d4522f_bc5a291a",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 9
@@ -59,6 +107,30 @@
       "writtenOn": "2015-09-09T00:32:12Z",
       "side": 1,
       "message": "Can we just swap pointers to avoid memcpy?",
+      "range": {
+        "startLine": 289,
+        "startChar": 4,
+        "endLine": 289,
+        "endChar": 36
+      },
+      "revId": "15ec72e9d306411685a1a630b214d2d1af3f72b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c34e74_0dfd61a8",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-09-09T18:34:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84d4522f_bc5a291a",
       "range": {
         "startLine": 289,
         "startChar": 4,
