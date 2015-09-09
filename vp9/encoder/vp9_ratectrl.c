@@ -1850,7 +1850,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
         resize_now = 1;
         cpi->resize_state = 1;
       } else if (cpi->resize_state == 1 &&
-                 avg_qp < 40 * cpi->rc.worst_quality / 100) {
+                 avg_qp < 50 * cpi->rc.worst_quality / 100) {
         resize_now = -1;
         cpi->resize_state = 0;
       }
