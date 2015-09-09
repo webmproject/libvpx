@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4bdd6e7_5dab0bbf",
+        "filename": "test/test.mk",
+        "patchSetId": 13
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c34e74_2266f433",
+        "filename": "test/test.mk",
+        "patchSetId": 13
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "this should be within the ifeq(); maybe around line 168 (after vp8, vp9 to keep the logical order)",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44cedaa4_1a66bd33",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "I think you want math.h for cos() too",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4e8aef8_7745e834",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "add:\n#include \"vpx_ports/msvc.h\"  // for round()\n\nthe other tests should do this too rather than (incorrectly) reimplementing it",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c34e74_e236bc1a",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "this comment is redundant, you can drop it",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04c1426c_e34fe0a8",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "this should be aligned with the \u0027(\u0027 of abs; instead break after the first \u0027(\u0027 and indent 4:\n\n        EXPECT_LE(\n            abs(output[ni] - static_cast\u003ctran_low_t\u003e(round(ref_output[ni]))),\n            max_error_);",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4ef2afe_469b4bdb",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "fwd_txfm_",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "244c8613_dbe633ea",
+        "filename": "test/vp10_dct_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "fwd_txfm_ref_",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c34e74_0299b070",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-09T02:15:14Z",
+      "side": 1,
+      "message": "rename \u0027bitNum\u0027 to \u0027bit\u0027",
+      "revId": "685aa580434c82f2d8a3dd95d56b610fba3c8858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
