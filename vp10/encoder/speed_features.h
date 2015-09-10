@@ -314,8 +314,6 @@ typedef struct SPEED_FEATURES {
 
   int cb_partition_search;
 
-  int motion_field_mode_search;
-
   int alt_ref_search_fp;
 
   // Fast quantization process path
