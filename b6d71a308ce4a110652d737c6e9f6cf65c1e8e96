@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84d4522f_abc1b98c",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3930,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-10T02:44:33Z",
+      "side": 1,
+      "message": "this could be aligned if possible or you could bring the condition down to the next line and indent the rest. this looks somewhat consistent with the nearby code so is fine for now",
+      "revId": "b6d71a308ce4a110652d737c6e9f6cf65c1e8e96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
