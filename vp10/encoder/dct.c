@@ -20,6 +20,84 @@
 #include "vpx_dsp/fwd_txfm.h"
 #include "vpx_ports/mem.h"
 
+#if CONFIG_EXT_TX
+void fdst4(const tran_low_t *input, tran_low_t *output) {
+  static const int N = 4;
+  static const int sinvalue_lookup_table[] = {
+    9630, 15582
+  };
+  static const int mult = 14654;  // sqrt(4/5)
+  int i, j;
+  for (i = 0; i < N; i++) {
+    int64_t sum = 0;
+    for (j = 0; j < N; j++) {
+      int idx = (i + 1) * (j + 1);
+      int sign = 0;
+      if (idx > N + 1) {
+        sign = (idx / (N + 1)) & 1;
+        idx %= (N + 1);
+      }
+      idx = idx > N + 1 - idx ? N + 1 - idx : idx;
+      if (idx == 0) continue;
+      idx--;
+      sum += (int64_t)input[j] * sinvalue_lookup_table[idx] * (sign ? -1 : 1);
+    }
+    output[i] = (sum * mult) >> (2 * DCT_CONST_BITS);
+  }
+}
+
+void fdst8(const tran_low_t *input, tran_low_t *output) {
+  static const int N = 8;
+  static const int sinvalue_lookup_table[] = {
+    5604, 10531, 14189, 16135
+  };
+  static const int mult = 15447;  // 2*sqrt(2/9)
+  int i, j;
+  for (i = 0; i < N; i++) {
+    int64_t sum = 0;
+    for (j = 0; j < N; j++) {
+      int idx = (i + 1) * (j + 1);
+      int sign = 0;
+      if (idx > N + 1) {
+        sign = (idx / (N + 1)) & 1;
+        idx %= (N + 1);
+      }
+      idx = idx > N + 1 - idx ? N + 1 - idx : idx;
+      if (idx == 0) continue;
+      idx--;
+      sum += (int64_t)input[j] * sinvalue_lookup_table[idx] * (sign ? -1 : 1);
+    }
+    output[i] = (sum * mult) >> (2 * DCT_CONST_BITS);
+  }
+}
+
+void fdst16(const tran_low_t *input, tran_low_t *output) {
+  static const int N = 16;
+  static const int sinvalue_lookup_table[] = {
+    3011,  5919,  8625, 11038,
+    13075, 14666, 15759, 16314
+  };
+  static const int mult = 15895;  // 2*sqrt(4/17)
+  int i, j;
+  for (i = 0; i < N; i++) {
+    int64_t sum = 0;
+    for (j = 0; j < N; j++) {
+      int idx = (i + 1) * (j + 1);
+      int sign = 0;
+      if (idx > N + 1) {
+        sign = (idx / (N + 1)) & 1;
+        idx %= (N + 1);
+      }
+      idx = idx > N + 1 - idx ? N + 1 - idx : idx;
+      if (idx == 0) continue;
+      idx--;
+      sum += (int64_t)input[j] * sinvalue_lookup_table[idx] * (sign ? -1 : 1);
+    }
+    output[i] = (sum * mult) >> (2 * DCT_CONST_BITS);
+  }
+}
+#endif  // CONFIG_EXT_TX
+
 static void fdct4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t step[4];
   tran_high_t temp1, temp2;
@@ -510,25 +588,67 @@ static const transform_2d FHT_4[] = {
   { fdct4,  fdct4  },  // DCT_DCT  = 0
   { fadst4, fdct4  },  // ADST_DCT = 1
   { fdct4,  fadst4 },  // DCT_ADST = 2
-  { fadst4, fadst4 }   // ADST_ADST = 3
+  { fadst4, fadst4 },  // ADST_ADST = 3
+#if CONFIG_EXT_TX
+  { fadst4, fdct4  },  // FLIPADST_DCT = 4
+  { fdct4,  fadst4 },  // DCT_FLIPADST = 5
+  { fadst4, fadst4 },  // FLIPADST_FLIPADST = 6
+  { fadst4, fadst4 },  // ADST_FLIPADST = 7
+  { fadst4, fadst4 },  // FLIPADST_ADST = 8
+  { fdst4,  fdst4  },  // DST_DST = 9
+  { fdst4,  fdct4  },  // DST_DCT = 10
+  { fdct4,  fdst4  },  // DCT_DST = 11
+  { fdst4,  fadst4 },  // DST_ADST = 12
+  { fadst4, fdst4  },  // ADST_DST = 13
+  { fdst4,  fadst4 },  // DST_FLIPADST = 14
+  { fadst4, fdst4  },  // FLIPADST_DST = 15
+#endif  // CONFIG_EXT_TX
 };
 
 static const transform_2d FHT_8[] = {
   { fdct8,  fdct8  },  // DCT_DCT  = 0
   { fadst8, fdct8  },  // ADST_DCT = 1
   { fdct8,  fadst8 },  // DCT_ADST = 2
-  { fadst8, fadst8 }   // ADST_ADST = 3
+  { fadst8, fadst8 },  // ADST_ADST = 3
+#if CONFIG_EXT_TX
+  { fadst8, fdct8  },  // FLIPADST_DCT = 4
+  { fdct8,  fadst8 },  // DCT_FLIPADST = 5
+  { fadst8, fadst8 },  // FLIPADST_FLIPADST = 6
+  { fadst8, fadst8 },  // ADST_FLIPADST = 7
+  { fadst8, fadst8 },  // FLIPADST_ADST = 8
+  { fdst8,  fdst8  },  // DST_DST = 9
+  { fdst8,  fdct8  },  // DST_DCT = 10
+  { fdct8,  fdst8  },  // DCT_DST = 11
+  { fdst8,  fadst8 },  // DST_ADST = 12
+  { fadst8, fdst8  },  // ADST_DST = 13
+  { fdst8,  fadst8 },  // DST_FLIPADST = 14
+  { fadst8, fdst8  },  // FLIPADST_DST = 15
+#endif  // CONFIG_EXT_TX
 };
 
 static const transform_2d FHT_16[] = {
   { fdct16,  fdct16  },  // DCT_DCT  = 0
   { fadst16, fdct16  },  // ADST_DCT = 1
   { fdct16,  fadst16 },  // DCT_ADST = 2
-  { fadst16, fadst16 }   // ADST_ADST = 3
+  { fadst16, fadst16 },  // ADST_ADST = 3
+#if CONFIG_EXT_TX
+  { fadst16, fdct16  },  // FLIPADST_DCT = 4
+  { fdct16,  fadst16 },  // DCT_FLIPADST = 5
+  { fadst16, fadst16 },  // FLIPADST_FLIPADST = 6
+  { fadst16, fadst16 },  // ADST_FLIPADST = 7
+  { fadst16, fadst16 },  // FLIPADST_ADST = 8
+  { fdst16,  fdst16  },  // DST_DST = 9
+  { fdst16,  fdct16  },  // DST_DCT = 10
+  { fdct16,  fdst16  },  // DCT_DST = 11
+  { fdst16,  fadst16 },  // DST_ADST = 12
+  { fadst16, fdst16  },  // ADST_DST = 13
+  { fdst16,  fadst16 },  // DST_FLIPADST = 14
+  { fadst16, fdst16  },  // FLIPADST_DST = 15
+#endif  // CONFIG_EXT_TX
 };
 
 void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
-                  int stride, int tx_type) {
+                   int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
     vpx_fdct4x4_c(input, output, stride);
   } else {
@@ -560,15 +680,15 @@ void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
 }
 
 void vp10_fdct8x8_quant_c(const int16_t *input, int stride,
-                         tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                         int skip_block,
-                         const int16_t *zbin_ptr, const int16_t *round_ptr,
-                         const int16_t *quant_ptr,
-                         const int16_t *quant_shift_ptr,
-                         tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-                         const int16_t *dequant_ptr,
-                         uint16_t *eob_ptr,
-                         const int16_t *scan, const int16_t *iscan) {
+                          tran_low_t *coeff_ptr, intptr_t n_coeffs,
+                          int skip_block,
+                          const int16_t *zbin_ptr, const int16_t *round_ptr,
+                          const int16_t *quant_ptr,
+                          const int16_t *quant_shift_ptr,
+                          tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                          const int16_t *dequant_ptr,
+                          uint16_t *eob_ptr,
+                          const int16_t *scan, const int16_t *iscan) {
   int eob = -1;
 
   int i, j;
@@ -672,7 +792,7 @@ void vp10_fdct8x8_quant_c(const int16_t *input, int stride,
 }
 
 void vp10_fht8x8_c(const int16_t *input, tran_low_t *output,
-                  int stride, int tx_type) {
+                   int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
     vpx_fdct8x8_c(input, output, stride);
   } else {
@@ -758,7 +878,7 @@ void vp10_fwht4x4_c(const int16_t *input, tran_low_t *output, int stride) {
 }
 
 void vp10_fht16x16_c(const int16_t *input, tran_low_t *output,
-                    int stride, int tx_type) {
+                     int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
     vpx_fdct16x16_c(input, output, stride);
   } else {

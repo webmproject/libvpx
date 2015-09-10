@@ -424,6 +424,22 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff,
       copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
       vp10_fht4x4(src_diff2, coeff, 4, ADST_ADST);
       break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_fht4x4_c(src_diff2, coeff, 4, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_fht4x4_c(src_diff2, coeff, 4, ADST_DST);
+      break;
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
@@ -463,6 +479,22 @@ static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_ADST:
       copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
       vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8_c(src_diff2, coeff, 8, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8_c(src_diff2, coeff, 8, ADST_DST);
       break;
 #endif  // CONFIG_EXT_TX
     default:
@@ -504,6 +536,22 @@ static void fwd_txfm_8x8_1(const int16_t *src_diff, tran_low_t *coeff,
       copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
       vp10_fht8x8(src_diff2, coeff, 8, ADST_ADST);
       break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8_c(src_diff2, coeff, 8, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_fht8x8_c(src_diff2, coeff, 8, ADST_DST);
+      break;
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
@@ -544,6 +592,22 @@ static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
       copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
       vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
       break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16_c(src_diff2, coeff, 16, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16_c(src_diff2, coeff, 16, ADST_DST);
+      break;
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
@@ -583,6 +647,22 @@ static void fwd_txfm_16x16_1(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_ADST:
       copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
       vp10_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16_c(src_diff2, coeff, 16, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_fht16x16_c(src_diff2, coeff, 16, ADST_DST);
       break;
 #endif  // CONFIG_EXT_TX
     default:
@@ -665,6 +745,22 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
       copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
       vp10_highbd_fht4x4(src_diff2, coeff, 4, ADST_ADST);
       break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_highbd_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_highbd_fht4x4_c(src_diff2, coeff, 4, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
+      vp10_highbd_fht4x4_c(src_diff2, coeff, 4, ADST_DST);
+      break;
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
@@ -706,6 +802,22 @@ static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_ADST:
       copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
       vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
+      break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_highbd_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8_c(src_diff2, coeff, 8, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8_c(src_diff2, coeff, 8, ADST_DST);
       break;
 #endif  // CONFIG_EXT_TX
     default:
@@ -749,6 +861,22 @@ static void highbd_fwd_txfm_8x8_1(const int16_t *src_diff, tran_low_t *coeff,
       copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
       vp10_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
       break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_highbd_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8_c(src_diff2, coeff, 8, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
+      vp10_highbd_fht8x8_c(src_diff2, coeff, 8, ADST_DST);
+      break;
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
@@ -791,6 +919,22 @@ static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
       copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
       vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
       break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_highbd_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16_c(src_diff2, coeff, 16, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16_c(src_diff2, coeff, 16, ADST_DST);
+      break;
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
@@ -832,6 +976,22 @@ static void highbd_fwd_txfm_16x16_1(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_ADST:
       copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
       vp10_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
+      break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      // Use C version since DST exists only in C
+      vp10_highbd_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case DST_FLIPADST:
+      copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16_c(src_diff2, coeff, 16, DST_ADST);
+      break;
+    case FLIPADST_DST:
+      copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
+      vp10_highbd_fht16x16_c(src_diff2, coeff, 16, ADST_DST);
       break;
 #endif  // CONFIG_EXT_TX
     default:
