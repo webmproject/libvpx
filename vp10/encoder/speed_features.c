@@ -192,7 +192,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->use_lp32x32fdct = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;
-    sf->motion_field_mode_search = !boosted;
     sf->partition_search_breakout_rate_thr = 300;
   }
 
@@ -457,7 +456,6 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->adaptive_mode_search = 0;
   sf->cb_pred_filter_search = 0;
   sf->cb_partition_search = 0;
-  sf->motion_field_mode_search = 0;
   sf->alt_ref_search_fp = 0;
   sf->use_quant_fp = 0;
   sf->reference_masking = 0;

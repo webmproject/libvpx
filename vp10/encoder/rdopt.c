@@ -2912,14 +2912,13 @@ int vp10_active_edge_sb(VP10_COMP *cpi,
 }
 
 void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
-                               TileDataEnc *tile_data,
-                               MACROBLOCK *x,
-                               int mi_row, int mi_col,
-                               RD_COST *rd_cost, BLOCK_SIZE bsize,
-                               PICK_MODE_CONTEXT *ctx,
-                               int64_t best_rd_so_far) {
+                                TileDataEnc *tile_data,
+                                MACROBLOCK *x,
+                                int mi_row, int mi_col,
+                                RD_COST *rd_cost, BLOCK_SIZE bsize,
+                                PICK_MODE_CONTEXT *ctx,
+                                int64_t best_rd_so_far) {
   VP10_COMMON *const cm = &cpi->common;
-  TileInfo *const tile_info = &tile_data->tile_info;
   RD_OPT *const rd_opt = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3151,55 +3150,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
     if (best_rd < mode_threshold[mode_index])
       continue;
-
-    if (sf->motion_field_mode_search) {
-      const int mi_width  = VPXMIN(num_8x8_blocks_wide_lookup[bsize],
-                                   tile_info->mi_col_end - mi_col);
-      const int mi_height = VPXMIN(num_8x8_blocks_high_lookup[bsize],
-                                   tile_info->mi_row_end - mi_row);
-      const int bsl = mi_width_log2_lookup[bsize];
-      int cb_partition_search_ctrl = (((mi_row + mi_col) >> bsl)
-          + get_chessboard_index(cm->current_video_frame)) & 0x1;
-      MB_MODE_INFO *ref_mbmi;
-      int const_motion = 1;
-      int skip_ref_frame = !cb_partition_search_ctrl;
-      MV_REFERENCE_FRAME rf = NONE;
-      int_mv ref_mv;
-      ref_mv.as_int = INVALID_MV;
-
-      if ((mi_row - 1) >= tile_info->mi_row_start) {
-        ref_mv = xd->mi[-xd->mi_stride]->mbmi.mv[0];
-        rf = xd->mi[-xd->mi_stride]->mbmi.ref_frame[0];
-        for (i = 0; i < mi_width; ++i) {
-          ref_mbmi = &xd->mi[-xd->mi_stride + i]->mbmi;
-          const_motion &= (ref_mv.as_int == ref_mbmi->mv[0].as_int) &&
-                          (ref_frame == ref_mbmi->ref_frame[0]);
-          skip_ref_frame &= (rf == ref_mbmi->ref_frame[0]);
-        }
-      }
-
-      if ((mi_col - 1) >= tile_info->mi_col_start) {
-        if (ref_mv.as_int == INVALID_MV)
-          ref_mv = xd->mi[-1]->mbmi.mv[0];
-        if (rf == NONE)
-          rf = xd->mi[-1]->mbmi.ref_frame[0];
-        for (i = 0; i < mi_height; ++i) {
-          ref_mbmi = &xd->mi[i * xd->mi_stride - 1]->mbmi;
-          const_motion &= (ref_mv.as_int == ref_mbmi->mv[0].as_int) &&
-                          (ref_frame == ref_mbmi->ref_frame[0]);
-          skip_ref_frame &= (rf == ref_mbmi->ref_frame[0]);
-        }
-      }
-
-      if (skip_ref_frame && this_mode != NEARESTMV && this_mode != NEWMV)
-        if (rf > INTRA_FRAME)
-          if (ref_frame != rf)
-            continue;
-
-      if (const_motion)
-        if (this_mode == NEARMV || this_mode == ZEROMV)
-          continue;
-    }
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
