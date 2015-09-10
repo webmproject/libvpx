@@ -248,9 +248,6 @@ typedef struct SPEED_FEATURES {
   // of the best so far.
   int mode_skip_start;
 
-  // TODO(JBB): Remove this.
-  int reference_masking;
-
   PARTITION_SEARCH_TYPE partition_search_type;
 
   // Used if partition_search_type = FIXED_SIZE_PARTITION
