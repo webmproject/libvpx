@@ -728,13 +728,6 @@ process_common_toolchain() {
   # Handle darwin variants. Newer SDKs allow targeting older
   # platforms, so use the newest one available.
   case ${toolchain} in
-    arm*-darwin*)
-      ios_sdk_dir="$(show_darwin_sdk_path iphoneos)"
-      if [ -d "${ios_sdk_dir}" ]; then
-        add_cflags  "-isysroot ${ios_sdk_dir}"
-        add_ldflags "-isysroot ${ios_sdk_dir}"
-      fi
-      ;;
     *-darwin*)
       osx_sdk_dir="$(show_darwin_sdk_path macosx)"
       if [ -d "${osx_sdk_dir}" ]; then
@@ -810,14 +803,7 @@ process_common_toolchain() {
           if disabled neon && enabled neon_asm; then
             die "Disabling neon while keeping neon-asm is not supported"
           fi
-          case ${toolchain} in
-            *-darwin*)
-              # Neon is guaranteed on iOS 6+ devices, while old media extensions
-              # no longer assemble with iOS 9 SDK
-              ;;
-            *)
-              soft_enable media
-          esac
+          soft_enable media
           ;;
         armv6)
           soft_enable media
