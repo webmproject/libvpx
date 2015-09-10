@@ -45,22 +45,20 @@ struct EncodeParameters {
 };
 
 const EncodeParameters kVP9EncodeParameterSet[] = {
-    {0, 0, 0, 1, 0, VPX_CS_BT_601},
-    {0, 0, 0, 0, 0, VPX_CS_BT_709},
-    {0, 0, 1, 0, 0, VPX_CS_BT_2020},
-    {0, 2, 0, 0, 1, VPX_CS_UNKNOWN},
-    // TODO(JBB): Test profiles (requires more work).
+  {0, 0, 0, 1, 0, VPX_CS_BT_601},
+  {0, 0, 0, 0, 0, VPX_CS_BT_709},
+  {0, 0, 1, 0, 0, VPX_CS_BT_2020},
+  {0, 2, 0, 0, 1, VPX_CS_UNKNOWN},
+  // TODO(JBB): Test profiles (requires more work).
 };
 
 class VpxEncoderParmsGetToDecoder
     : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<EncodeParameters, \
+      public ::libvpx_test::CodecTestWith2Params<EncodeParameters,
                                                  EncodePerfTestVideo> {
  protected:
   VpxEncoderParmsGetToDecoder()
-      : EncoderTest(GET_PARAM(0)),
-        encode_parms(GET_PARAM(1)) {
-  }
+      : EncoderTest(GET_PARAM(0)), encode_parms(GET_PARAM(1)) {}
 
   virtual ~VpxEncoderParmsGetToDecoder() {}
 
@@ -92,10 +90,10 @@ class VpxEncoderParmsGetToDecoder
   }
 
   virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
-                                  const libvpx_test::VideoSource& video,
+                                  const libvpx_test::VideoSource &video,
                                   libvpx_test::Decoder *decoder) {
-    vpx_codec_ctx_t* vp9_decoder = decoder->GetDecoder();
-    vpx_codec_alg_priv_t* priv =
+    vpx_codec_ctx_t *const vp9_decoder = decoder->GetDecoder();
+    vpx_codec_alg_priv_t *const priv =
         reinterpret_cast<vpx_codec_alg_priv_t *>(vp9_decoder->priv);
     FrameWorkerData *const worker_data =
         reinterpret_cast<FrameWorkerData *>(priv->frame_workers[0].data1);
@@ -138,11 +136,10 @@ TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   ASSERT_TRUE(video != NULL);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(video));
-  delete(video);
+  delete video;
 }
 
-VP9_INSTANTIATE_TEST_CASE(
-    VpxEncoderParmsGetToDecoder,
-    ::testing::ValuesIn(kVP9EncodeParameterSet),
-    ::testing::ValuesIn(kVP9EncodePerfTestVectors));
+VP9_INSTANTIATE_TEST_CASE(VpxEncoderParmsGetToDecoder,
+                          ::testing::ValuesIn(kVP9EncodeParameterSet),
+                          ::testing::ValuesIn(kVP9EncodePerfTestVectors));
 }  // namespace
