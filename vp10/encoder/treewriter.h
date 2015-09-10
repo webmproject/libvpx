@@ -12,6 +12,7 @@
 #define VP10_ENCODER_TREEWRITER_H_
 
 #include "vpx_dsp/bitwriter.h"
+#include "vp10/common/ans.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,8 +31,10 @@ void vp10_tokens_from_tree(struct vp10_token*, const vpx_tree_index *);
 
 // TODO: CHECK MAX REVERSIBLE TREE SIZE, security concerns
 #define VP10_TOKEN_SCRATCH_LEN 32
-static INLINE void vp10_write_tree_r(vpx_writer *w, const vpx_tree_index *tree,
-                                     const vpx_prob *probs, int bits, int len,
+static INLINE void vp10_write_tree_r(struct AnsCoder *const ans,
+                                     const vpx_tree_index *const tree,
+                                     const vpx_prob *const probs,
+                                     int bits, int len,
                                      vpx_tree_index tidx) {
   int i;
   struct { uint8_t bit; vpx_prob prob; } scratch[VP10_TOKEN_SCRATCH_LEN];
@@ -45,7 +48,7 @@ static INLINE void vp10_write_tree_r(vpx_writer *w, const vpx_tree_index *tree,
     tidx = tree[tidx + bit];
   }
   for (i = len; i >= 0; --i) {
-    vpx_write(w, scratch[i].bit, scratch[i].prob);
+    rabs_write(ans, scratch[i].bit, scratch[i].prob);
   }
 }
 #undef VP10_TOKEN_SCRATCH_LEN

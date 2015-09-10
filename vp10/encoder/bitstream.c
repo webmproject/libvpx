@@ -195,10 +195,10 @@ static void pack_mb_tokens(vpx_writer *w,
 
 // This function serializes the tokens backwards both in token order and
 // bit order in each token.
-static void pack_mb_tokens_r(vpx_writer *w,
-                             const TOKENEXTRA *const start,
-                             const TOKENEXTRA *const stop,
-                             vpx_bit_depth_t bit_depth) {
+static void pack_mb_tokens_ans(struct AnsCoder *const ans,
+                               const TOKENEXTRA *const start,
+                               const TOKENEXTRA *const stop,
+                               vpx_bit_depth_t bit_depth) {
   const TOKENEXTRA *p;
 
   for (p = stop; p >= start; --p) {
@@ -228,8 +228,8 @@ static void pack_mb_tokens_r(vpx_writer *w,
     if (b->base_val) {
       const int e = p->extra, l = b->len;
       if (l) {
-        vpx_write_bit(w, e & 1);
-        vp10_write_tree_r(w, b->tree, b->prob, e >> 1, l, 0);
+        rabs_write(ans, e & 1, 128);
+        vp10_write_tree_r(ans, b->tree, b->prob, e >> 1, l, 0);
       }
     }
 
@@ -246,12 +246,12 @@ static void pack_mb_tokens_r(vpx_writer *w,
     if (t >= TWO_TOKEN && t < EOB_TOKEN) {
       int len = UNCONSTRAINED_NODES - p->skip_eob_node;
       int bits = v >> (n - len);
-      vp10_write_tree_r(w, vp10_coef_con_tree,
+      vp10_write_tree_r(ans, vp10_coef_con_tree,
                      vp10_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
                      v, n - len, 0);
-      vp10_write_tree_r(w, vp10_coef_tree, p->context_tree, bits, len, i);
+      vp10_write_tree_r(ans, vp10_coef_tree, p->context_tree, bits, len, i);
     } else {
-      vp10_write_tree_r(w, vp10_coef_tree, p->context_tree, v, n, i);
+      vp10_write_tree_r(ans, vp10_coef_tree, p->context_tree, v, n, i);
     }
   }
   }
@@ -990,7 +990,7 @@ static int get_refresh_mask(VP10_COMP *cpi) {
 static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
   VP10_COMMON *const cm = &cpi->common;
   vpx_writer mode_bc;
-  vpx_writer token_bc;
+  struct AnsCoder token_ans;
   int tile_row, tile_col;
   TOKENEXTRA *tok_end;
   size_t total_size = 0;
@@ -1004,7 +1004,9 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       int tile_idx = tile_row * tile_cols + tile_col;
       int put_tile_size = tile_col < tile_cols - 1 || tile_row < tile_rows - 1;
-      uint8_t *const mode_data_start = data_ptr + total_size + (put_tile_size ? 8 : 4);
+      uint8_t *const mode_data_start =
+          data_ptr + total_size + (put_tile_size ? 8 : 4);
+      int token_section_size;
       TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
 
       tok_end = cpi->tile_tok[tile_row][tile_col] +
@@ -1014,21 +1016,19 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
 
       write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &mode_bc);
       vpx_stop_encode(&mode_bc);
-      vpx_start_encode(&token_bc, mode_data_start + mode_bc.pos);
-      while (tok < tok_end) {
-        pack_mb_tokens(&token_bc, &tok, tok_end, cm->bit_depth);
-      }
-      assert(tok == tok_end);
-      vpx_stop_encode(&token_bc);
+      ans_write_init(&token_ans, mode_data_start + mode_bc.pos);
+      pack_mb_tokens_ans(&token_ans, tok, tok_end, cm->bit_depth);
+      token_section_size = ans_write_end(&token_ans);
       if (put_tile_size) {
         // size of this tile
-        mem_put_be32(data_ptr + total_size, 4 + mode_bc.pos + token_bc.pos);
+        mem_put_be32(data_ptr + total_size,
+                     4 + mode_bc.pos + token_section_size);
         total_size += 4;
       }
       // put where the token section begins
       mem_put_be32(data_ptr + total_size, mode_bc.pos);
 
-      total_size += 4 + mode_bc.pos + token_bc.pos;
+      total_size += 4 + mode_bc.pos + token_section_size;
     }
   }
 
