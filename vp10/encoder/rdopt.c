@@ -438,19 +438,6 @@ static void dist_block(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
                               &this_sse) >> shift;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   *out_sse = this_sse >> shift;
-
-  if (x->skip_encode && !is_inter_block(&xd->mi[0]->mbmi)) {
-    // TODO(jingning): tune the model to better capture the distortion.
-    int64_t p = (pd->dequant[1] * pd->dequant[1] *
-                    (1 << ss_txfrm_size)) >>
-#if CONFIG_VP9_HIGHBITDEPTH
-                        (shift + 2 + (bd - 8) * 2);
-#else
-                        (shift + 2);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    *out_dist += (p >> 4);
-    *out_sse  += p;
-  }
 }
 
 static int rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -903,9 +890,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             vp10_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
         tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         xd->mi[0]->bmi[block].as_mode = mode;
-        vp10_predict_intra_block(xd, 1, TX_4X4, mode,
-                                x->skip_encode ? src : dst,
-                                x->skip_encode ? src_stride : dst_stride,
+        vp10_predict_intra_block(xd, 1, TX_4X4, mode, dst, dst_stride,
                                 dst, dst_stride, col + idx, row + idy, 0);
         vpx_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
 
@@ -961,7 +946,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
     {}
   }
 
-  if (best_rd >= rd_thresh || x->skip_encode)
+  if (best_rd >= rd_thresh)
     return best_rd;
 
   for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
@@ -2739,7 +2724,6 @@ void vp10_rd_pick_intra_mode_sb(VP10_COMP *cpi, MACROBLOCK *x,
   int y_skip = 0, uv_skip = 0;
   int64_t dist_y = 0, dist_uv = 0;
   TX_SIZE max_uv_tx_size;
-  x->skip_encode = 0;
   ctx->skip = 0;
   xd->mi[0]->mbmi.ref_frame[0] = INTRA_FRAME;
   xd->mi[0]->mbmi.ref_frame[1] = NONE;
@@ -2968,8 +2952,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
 
   vp10_zero(best_mbmode);
-
-  x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     filter_cache[i] = INT64_MAX;
@@ -3563,8 +3545,6 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   int rate2 = 0;
   const int64_t distortion2 = 0;
 
-  x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
-
   estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
 
@@ -3688,7 +3668,6 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
   int internal_active_edge =
     vp10_active_edge_sb(cpi, mi_row, mi_col) && vp10_internal_image_edge(cpi);
 
-  x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   memset(x->zcoeff_blk[TX_4X4], 0, 4);
   vp10_zero(best_mbmode);
 

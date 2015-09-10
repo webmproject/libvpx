@@ -223,11 +223,6 @@ typedef struct SPEED_FEATURES {
   // mode to be evaluated. A high value means we will be faster.
   int adaptive_rd_thresh;
 
-  // Enables skipping the reconstruction step (idct, recon) in the
-  // intermediate steps assuming the last frame didn't have too many intra
-  // blocks and the q is less than a threshold.
-  int skip_encode_sb;
-  int skip_encode_frame;
   // Speed feature to allow or disallow skipping of recode at block
   // level within a frame.
   int allow_skip_recode;
