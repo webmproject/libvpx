@@ -3622,6 +3622,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     cpi->refresh_last_frame = 1;
 
   cm->frame_to_show = get_frame_new_buffer(cm);
+  cm->frame_to_show->color_space = cm->color_space;
 
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
