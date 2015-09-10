@@ -301,7 +301,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     sf->use_square_partition_only = 1;
     sf->disable_filter_search_var_thresh = 100;
     sf->use_uv_intra_rd_estimate = 1;
-    sf->skip_encode_sb = 1;
     sf->mv.subpel_iters_per_step = 1;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
@@ -384,7 +383,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     // Turn on this to use non-RD key frame coding mode.
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
-    sf->skip_encode_sb = 0;
   }
 
   if (speed >= 7) {
@@ -481,7 +479,6 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
     sf->intra_uv_mode_mask[i] = INTRA_ALL;
   }
   sf->use_rd_breakout = 0;
-  sf->skip_encode_sb = 0;
   sf->use_uv_intra_rd_estimate = 0;
   sf->allow_skip_recode = 0;
   sf->lpf_pick = LPF_PICK_FROM_FULL_IMAGE;

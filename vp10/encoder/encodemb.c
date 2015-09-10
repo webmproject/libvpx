@@ -797,7 +797,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   if (p->eobs[block])
     *(args->skip) = 0;
 
-  if (x->skip_encode || p->eobs[block] == 0)
+  if (p->eobs[block] == 0)
     return;
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -945,8 +945,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
   mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
-  vp10_predict_intra_block(xd, bwl, tx_size, mode, x->skip_encode ? src : dst,
-                          x->skip_encode ? src_stride : dst_stride,
+  vp10_predict_intra_block(xd, bwl, tx_size, mode, dst, dst_stride,
                           dst, dst_stride, i, j, plane);
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1036,7 +1035,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                              pd->dequant, eob, scan_order->scan,
                              scan_order->iscan);
       }
-      if (!x->skip_encode && *eob)
+      if (*eob)
         vp10_inv_txfm_add_32x32(dqcoeff, dst, dst_stride, *eob, tx_type);
       break;
     case TX_16X16:
@@ -1049,7 +1048,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (!x->skip_encode && *eob)
+      if (*eob)
         vp10_inv_txfm_add_16x16(dqcoeff, dst, dst_stride, *eob, tx_type);
       break;
     case TX_8X8:
@@ -1062,7 +1061,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (!x->skip_encode && *eob)
+      if (*eob)
         vp10_inv_txfm_add_8x8(dqcoeff, dst, dst_stride, *eob, tx_type);
       break;
     case TX_4X4:
@@ -1076,7 +1075,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        scan_order->iscan);
       }
 
-      if (!x->skip_encode && *eob) {
+      if (*eob) {
         // this is like vp10_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.

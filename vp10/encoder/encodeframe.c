@@ -2585,20 +2585,6 @@ static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
     return cpi->common.tx_mode;
 }
 
-static int get_skip_encode_frame(const VP10_COMMON *cm, ThreadData *const td) {
-  unsigned int intra_count = 0, inter_count = 0;
-  int j;
-
-  for (j = 0; j < INTRA_INTER_CONTEXTS; ++j) {
-    intra_count += td->counts->intra_inter[j][0];
-    inter_count += td->counts->intra_inter[j][1];
-  }
-
-  return (intra_count << 2) < inter_count &&
-         cm->frame_type != KEY_FRAME &&
-         cm->show_frame;
-}
-
 void vp10_init_tile_data(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -2690,7 +2676,6 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #endif
 
 static void encode_frame_internal(VP10_COMP *cpi) {
-  SPEED_FEATURES *const sf = &cpi->sf;
   ThreadData *const td = &cpi->td;
   MACROBLOCK *const x = &td->mb;
   VP10_COMMON *const cm = &cpi->common;
@@ -2765,9 +2750,6 @@ static void encode_frame_internal(VP10_COMP *cpi) {
     vpx_usec_timer_mark(&emr_timer);
     cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);
   }
-
-  sf->skip_encode_frame = sf->skip_encode_sb ?
-      get_skip_encode_frame(cm, td) : 0;
 
 #if 0
   // Keep record of the total distortion this time around for future use
@@ -2962,11 +2944,6 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
   x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
-  x->skip_encode = (!output_enabled && cpi->sf.skip_encode_frame &&
-                    x->q_index < QIDX_SKIP_THRESH);
-
-  if (x->skip_encode)
-    return;
 
   if (!is_inter_block(mbmi)) {
     int plane;
