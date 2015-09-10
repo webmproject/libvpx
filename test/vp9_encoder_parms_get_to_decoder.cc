@@ -18,10 +18,6 @@
 
 #include "vp9/vp9_dx_iface.c"
 
-static vpx_codec_alg_priv_t *get_alg_priv(vpx_codec_ctx_t *ctx) {
-  return (vpx_codec_alg_priv_t *)ctx->priv;
-}
-
 namespace {
 
 const int kCpuUsed = 2;
@@ -100,7 +96,7 @@ class VpxEncoderParmsGetToDecoder
                                   libvpx_test::Decoder *decoder) {
     vpx_codec_ctx_t* vp9_decoder = decoder->GetDecoder();
     vpx_codec_alg_priv_t* priv =
-        (vpx_codec_alg_priv_t*) get_alg_priv(vp9_decoder);
+        reinterpret_cast<vpx_codec_alg_priv_t *>(vp9_decoder->priv);
     FrameWorkerData *const worker_data =
         reinterpret_cast<FrameWorkerData *>(priv->frame_workers[0].data1);
     VP9_COMMON *const common = &worker_data->pbi->common;
