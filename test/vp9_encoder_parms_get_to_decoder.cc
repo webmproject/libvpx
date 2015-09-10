@@ -106,23 +106,23 @@ class VpxEncoderParmsGetToDecoder
     VP9_COMMON *const common = &worker_data->pbi->common;
 
     if (encode_parms.lossless) {
-      EXPECT_EQ(common->base_qindex, 0);
-      EXPECT_EQ(common->y_dc_delta_q, 0);
-      EXPECT_EQ(common->uv_dc_delta_q, 0);
-      EXPECT_EQ(common->uv_ac_delta_q, 0);
-      EXPECT_EQ(common->tx_mode, ONLY_4X4);
+      EXPECT_EQ(0, common->base_qindex);
+      EXPECT_EQ(0, common->y_dc_delta_q);
+      EXPECT_EQ(0, common->uv_dc_delta_q);
+      EXPECT_EQ(0, common->uv_ac_delta_q);
+      EXPECT_EQ(ONLY_4X4, common->tx_mode);
     }
-    EXPECT_EQ(common->error_resilient_mode, encode_parms.error_resilient);
+    EXPECT_EQ(encode_parms.error_resilient, common->error_resilient_mode);
     if (encode_parms.error_resilient) {
-      EXPECT_EQ(common->frame_parallel_decoding_mode, 1);
-      EXPECT_EQ(common->use_prev_frame_mvs, 0);
+      EXPECT_EQ(1, common->frame_parallel_decoding_mode);
+      EXPECT_EQ(0, common->use_prev_frame_mvs);
     } else {
-      EXPECT_EQ(common->frame_parallel_decoding_mode,
-                encode_parms.frame_parallel);
+      EXPECT_EQ(encode_parms.frame_parallel,
+                common->frame_parallel_decoding_mode);
     }
-    EXPECT_EQ(common->color_space, encode_parms.cs);
-    EXPECT_EQ(common->log2_tile_cols, encode_parms.tile_cols);
-    EXPECT_EQ(common->log2_tile_rows, encode_parms.tile_rows);
+    EXPECT_EQ(encode_parms.cs, common->color_space);
+    EXPECT_EQ(encode_parms.tile_cols, common->log2_tile_cols);
+    EXPECT_EQ(encode_parms.tile_rows, common->log2_tile_rows);
 
     EXPECT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
     return VPX_CODEC_OK == res_dec;
