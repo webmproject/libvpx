@@ -17,27 +17,7 @@
 #include "test/yuv_video_source.h"
 #include "vp9/decoder/vp9_decoder.h"
 
-typedef vpx_codec_stream_info_t vp9_stream_info_t;
-struct vpx_codec_alg_priv {
-  vpx_codec_priv_t        base;
-  vpx_codec_dec_cfg_t     cfg;
-  vp9_stream_info_t       si;
-  struct VP9Decoder      *pbi;
-  int                     postproc_cfg_set;
-  vp8_postproc_cfg_t      postproc_cfg;
-  vpx_decrypt_cb          decrypt_cb;
-  void                   *decrypt_state;
-  vpx_image_t             img;
-  int                     img_avail;
-  int                     flushed;
-  int                     invert_tile_order;
-  int                     frame_parallel_decode;
-
-  // External frame buffer info to save for VP9 common.
-  void *ext_priv;  // Private data associated with the external frame buffers.
-  vpx_get_frame_buffer_cb_fn_t get_ext_fb_cb;
-  vpx_release_frame_buffer_cb_fn_t release_ext_fb_cb;
-};
+#include "vp9/vp9_dx_iface.c"
 
 static vpx_codec_alg_priv_t *get_alg_priv(vpx_codec_ctx_t *ctx) {
   return (vpx_codec_alg_priv_t *)ctx->priv;
@@ -131,9 +111,9 @@ class VpxEncoderParmsGetToDecoder
     vpx_codec_ctx_t* vp9_decoder = decoder->GetDecoder();
     vpx_codec_alg_priv_t* priv =
         (vpx_codec_alg_priv_t*) get_alg_priv(vp9_decoder);
-
-    VP9Decoder* pbi = priv->pbi;
-    VP9_COMMON* common = &pbi->common;
+    FrameWorkerData *const worker_data =
+        reinterpret_cast<FrameWorkerData *>(priv->frame_workers[0].data1);
+    VP9_COMMON *const common = &worker_data->pbi->common;
 
     if (encode_parms.lossless) {
       EXPECT_EQ(common->base_qindex, 0);
@@ -164,9 +144,7 @@ class VpxEncoderParmsGetToDecoder
   EncodeParameters encode_parms;
 };
 
-// TODO(hkuang): This test conflicts with frame parallel decode. So disable it
-// for now until fix.
-TEST_P(VpxEncoderParmsGetToDecoder, DISABLED_BitstreamParms) {
+TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
   libvpx_test::VideoSource *video;
