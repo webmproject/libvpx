@@ -88,7 +88,8 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (!ctx->priv) {
-    vpx_codec_alg_priv_t *const priv = vpx_calloc(1, sizeof(*priv));
+    vpx_codec_alg_priv_t *const priv =
+        (vpx_codec_alg_priv_t *)vpx_calloc(1, sizeof(*priv));
     if (priv == NULL)
       return VPX_CODEC_MEM_ERROR;
 
