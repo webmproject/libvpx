@@ -14,7 +14,6 @@
 #include "test/encode_test_driver.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "test/yuv_video_source.h"
 #include "vp9/decoder/vp9_decoder.h"
 
 #include "vp9/vp9_dx_iface.c"
@@ -25,7 +24,6 @@ static vpx_codec_alg_priv_t *get_alg_priv(vpx_codec_ctx_t *ctx) {
 
 namespace {
 
-const unsigned int kFramerate = 50;
 const int kCpuUsed = 2;
 
 struct EncodePerfTestVideo {
@@ -57,14 +55,6 @@ const EncodeParameters kVP9EncodeParameterSet[] = {
     {0, 2, 0, 0, 1, VPX_CS_UNKNOWN},
     // TODO(JBB): Test profiles (requires more work).
 };
-
-int is_extension_y4m(const char *filename) {
-  const char *dot = strrchr(filename, '.');
-  if (!dot || dot == filename)
-    return 0;
-  else
-    return !strcmp(dot, ".y4m");
-}
 
 class VpxEncoderParmsGetToDecoder
     : public ::libvpx_test::EncoderTest,
@@ -147,18 +137,9 @@ class VpxEncoderParmsGetToDecoder
 TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
-  libvpx_test::VideoSource *video;
-  if (is_extension_y4m(test_video_.name)) {
-    video = new libvpx_test::Y4mVideoSource(test_video_.name,
-                                            0, test_video_.frames);
-  } else {
-    video = new libvpx_test::YUVVideoSource(test_video_.name,
-                                            VPX_IMG_FMT_I420,
-                                            test_video_.width,
-                                            test_video_.height,
-                                            kFramerate, 1, 0,
-                                            test_video_.frames);
-  }
+  libvpx_test::VideoSource *const video =
+      new libvpx_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames);
+  ASSERT_TRUE(video != NULL);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(video));
   delete(video);
