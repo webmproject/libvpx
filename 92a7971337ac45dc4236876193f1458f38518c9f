@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44cedaa4_6e73b370",
+        "filename": "test/test.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-09-10T18:25:31Z",
+      "side": 1,
+      "message": "CONFIG_VP10_ENCODER -\u003e CONFIG_VP10\n\nThe inverse transform unit tests should be on when either encoder or decoder is on.",
+      "revId": "92a7971337ac45dc4236876193f1458f38518c9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84d4522f_60429b06",
+        "filename": "vp10/common/idct.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-09-10T18:25:31Z",
+      "side": 1,
+      "message": "This will route to vp10_idct8x8_64_add_sse2() in default compiler configuration on most x86 machines.\n\nIf you want to do experiments in C functions first, remember to turn off the sse2 setting in vp10_rtcd_defs.pl.",
+      "revId": "92a7971337ac45dc4236876193f1458f38518c9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
