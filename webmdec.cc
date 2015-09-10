@@ -94,7 +94,7 @@ int file_is_webm(struct WebmInputContext *webm_ctx,
     }
   }
 
-  if (video_track == NULL) {
+  if (video_track == NULL || video_track->GetCodecId() == NULL) {
     rewind_and_reset(webm_ctx, vpx_ctx);
     return 0;
   }
