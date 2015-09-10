@@ -528,7 +528,7 @@ class Tracks {
  public:
   // Audio and video type defined by the Matroska specs.
   enum { kVideo = 0x1, kAudio = 0x2 };
-  // Opus, Vorbis, VP8, and VP9 codec ids defined by the Matroska specs.
+
   static const char kOpusCodecId[];
   static const char kVorbisCodecId[];
   static const char kVp8CodecId[];
