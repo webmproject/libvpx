@@ -148,9 +148,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->tx_size_search_method = frame_is_boosted(cpi) ? USE_FULL_RD
                                                       : USE_LARGESTALL;
 
-    // Reference masking is not supported in dynamic scaling mode.
-    sf->reference_masking = cpi->oxcf.resize_mode != RESIZE_DYNAMIC ? 1 : 0;
-
     sf->mode_search_skip_flags = (cm->frame_type == KEY_FRAME) ? 0 :
                                  FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
@@ -279,13 +276,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
                                  FLAG_SKIP_COMP_BESTINTRA |
                                  FLAG_SKIP_INTRA_LOWVAR;
     sf->adaptive_pred_interp_filter = 2;
-
-    // Disable reference masking if using spatial scaling since
-    // pred_mv_sad will not be set (since vp10_mv_pred will not
-    // be called).
-    // TODO(marpan/agrange): Fix this condition.
-    sf->reference_masking = (cpi->oxcf.resize_mode != RESIZE_DYNAMIC) ? 1 : 0;
-
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
@@ -456,7 +446,6 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->cb_partition_search = 0;
   sf->alt_ref_search_fp = 0;
   sf->use_quant_fp = 0;
-  sf->reference_masking = 0;
   sf->partition_search_type = SEARCH_PARTITION;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;

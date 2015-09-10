@@ -2994,7 +2994,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       // are masked out.
       ref_frame_skip_mask[0] |= (1 << ref_frame);
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
-    } else if (sf->reference_masking) {
+    } else {
       for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
         // Skip fixed mv modes for poor references
         if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
