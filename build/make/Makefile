@@ -287,7 +287,7 @@ define archive_template
 # for creating them.
 $(1):
 	$(if $(quiet),@echo "    [AR] $$@")
-	$(qexec)$$(AR) $$(ARFLAGS) $$@ $$?
+	$(qexec)$$(AR) $$(ARFLAGS) $$@ $$^
 endef
 
 define so_template
