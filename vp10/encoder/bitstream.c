@@ -193,6 +193,69 @@ static void pack_mb_tokens(vpx_writer *w,
   *tp = p + (p->token == EOSB_TOKEN);
 }
 
+// This function serializes the tokens backwards both in token order and
+// bit order in each token.
+static void pack_mb_tokens_r(vpx_writer *w,
+                             const TOKENEXTRA *const start,
+                             const TOKENEXTRA *const stop,
+                             vpx_bit_depth_t bit_depth) {
+  const TOKENEXTRA *p;
+
+  for (p = stop; p >= start; --p) {
+    const int t = p->token;
+    //TODO: remove EOSB_TOKEN
+    if (t != EOSB_TOKEN) {
+    const struct vp10_token *const a = &vp10_coef_encodings[t];
+    int i = 0;
+    int v = a->value;
+    int n = a->len;
+#if CONFIG_VP9_HIGHBITDEPTH
+    const vp10_extra_bit *b;
+    if (bit_depth == VPX_BITS_12)
+      b = &vp10_extra_bits_high12[t];
+    else if (bit_depth == VPX_BITS_10)
+      b = &vp10_extra_bits_high10[t];
+    else
+      b = &vp10_extra_bits[t];
+#else
+    const vp10_extra_bit *const b = &vp10_extra_bits[t];
+    (void) bit_depth;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+    // TODO: Replace this with serializing whole tokens at a time
+
+    // Write extra bits first
+    if (b->base_val) {
+      const int e = p->extra, l = b->len;
+      if (l) {
+        vpx_write_bit(w, e & 1);
+        vp10_write_tree_r(w, b->tree, b->prob, e >> 1, l, 0);
+      }
+    }
+
+    /* skip one or two nodes */
+    if (p->skip_eob_node) {
+      n -= p->skip_eob_node;
+      i = 2 * p->skip_eob_node;
+    }
+
+    // If we have a token that's in the constrained set, the coefficient tree
+    // is split into two treed writes.  The first treed write takes care of the
+    // unconstrained nodes.  The second treed write takes care of the
+    // constrained nodes.
+    if (t >= TWO_TOKEN && t < EOB_TOKEN) {
+      int len = UNCONSTRAINED_NODES - p->skip_eob_node;
+      int bits = v >> (n - len);
+      vp10_write_tree_r(w, vp10_coef_con_tree,
+                     vp10_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
+                     v, n - len, 0);
+      vp10_write_tree_r(w, vp10_coef_tree, p->context_tree, bits, len, i);
+    } else {
+      vp10_write_tree_r(w, vp10_coef_tree, p->context_tree, v, n, i);
+    }
+  }
+  }
+}
 static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
                              int segment_id) {
   if (seg->enabled && seg->update_map)

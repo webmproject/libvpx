@@ -28,6 +28,28 @@ struct vp10_token {
 
 void vp10_tokens_from_tree(struct vp10_token*, const vpx_tree_index *);
 
+// TODO: CHECK MAX REVERSIBLE TREE SIZE, security concerns
+#define VP10_TOKEN_SCRATCH_LEN 32
+static INLINE void vp10_write_tree_r(vpx_writer *w, const vpx_tree_index *tree,
+                                     const vpx_prob *probs, int bits, int len,
+                                     vpx_tree_index tidx) {
+  int i;
+  struct { uint8_t bit; vpx_prob prob; } scratch[VP10_TOKEN_SCRATCH_LEN];
+  // assert(len < VP10_TOKEN_SCRATCH_LEN);
+
+  for (i = 0; i < len; ++i) {
+    const int bit = bits & 1;
+    bits >>= 1;
+    scratch[i].bit = bit;
+    scratch[i].prob = probs[tidx >> 1];
+    tidx = tree[tidx + bit];
+  }
+  for (i = len; i >= 0; --i) {
+    vpx_write(w, scratch[i].bit, scratch[i].prob);
+  }
+}
+#undef VP10_TOKEN_SCRATCH_LEN
+
 static INLINE void vp10_write_tree(vpx_writer *w, const vpx_tree_index *tree,
                                   const vpx_prob *probs, int bits, int len,
                                   vpx_tree_index i) {
