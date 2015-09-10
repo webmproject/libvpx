@@ -278,6 +278,24 @@
       "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64cf5e9f_f43c31ad",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-10T01:24:19Z",
+      "side": 1,
+      "message": "in general the bias should be for readability. it\u0027s more natural to swap them. if nothing else something like this should come in a separate change list to reduce the size of the patch",
+      "parentUuid": "a4bdd6e7_6bee09f0",
+      "revId": "dd61c837ab7874a00b51f61c297d9e74e8174441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
