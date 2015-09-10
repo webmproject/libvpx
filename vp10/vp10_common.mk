@@ -59,6 +59,8 @@ VP10_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
 VP10_COMMON_SRCS-yes += common/common_data.h
 VP10_COMMON_SRCS-yes += common/scan.c
 VP10_COMMON_SRCS-yes += common/scan.h
+VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm.h
+VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm.c
 
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.h
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.c
@@ -85,6 +87,9 @@ VP10_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/mfqe_msa.c
 endif
 
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_intrin_sse2.c
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm_sse2.c
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_dct32x32_impl_sse2.h
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm_impl_sse2.h
 
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht4x4_add_neon.c
