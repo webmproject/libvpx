@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
 #include <limits.h>
 
 #include "vpx/vpx_encoder.h"
@@ -201,7 +200,7 @@ static void pack_mb_tokens_ans(struct AnsCoder *const ans,
                                vpx_bit_depth_t bit_depth) {
   const TOKENEXTRA *p;
 
-  for (p = stop; p >= start; --p) {
+  for (p = stop - 1; p >= start; --p) {
     const int t = p->token;
     //TODO: remove EOSB_TOKEN
     if (t != EOSB_TOKEN) {
@@ -227,8 +226,8 @@ static void pack_mb_tokens_ans(struct AnsCoder *const ans,
     // Write extra bits first
     if (b->base_val) {
       const int e = p->extra, l = b->len;
+      rabs_write(ans, e & 1, 128);
       if (l) {
-        rabs_write(ans, e & 1, 128);
         vp10_write_tree_r(ans, b->tree, b->prob, e >> 1, l, 0);
       }
     }

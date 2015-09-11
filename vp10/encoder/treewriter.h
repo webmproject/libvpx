@@ -40,14 +40,13 @@ static INLINE void vp10_write_tree_r(struct AnsCoder *const ans,
   struct { uint8_t bit; vpx_prob prob; } scratch[VP10_TOKEN_SCRATCH_LEN];
   // assert(len < VP10_TOKEN_SCRATCH_LEN);
 
-  for (i = 0; i < len; ++i) {
-    const int bit = bits & 1;
-    bits >>= 1;
+  for (i = len - 1; i >= 0; --i) {
+    const int bit = (bits >> i) & 1;
     scratch[i].bit = bit;
     scratch[i].prob = probs[tidx >> 1];
     tidx = tree[tidx + bit];
   }
-  for (i = len; i >= 0; --i) {
+  for (i = 0; i < len; ++i) {
     rabs_write(ans, scratch[i].bit, scratch[i].prob);
   }
 }
