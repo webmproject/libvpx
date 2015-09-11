@@ -34,6 +34,24 @@
       "revId": "500ec6b43e0474a70cf8bbd3c58cccd89636546c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4b72a4b_5332b68a",
+        "filename": "vp9/encoder/vp9_ratectrl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-11T19:57:15Z",
+      "side": 1,
+      "message": "this is done in many other places. I\u0027d prefer to keep the typedef in one place for now",
+      "parentUuid": "24a64628_eed2df91",
+      "revId": "500ec6b43e0474a70cf8bbd3c58cccd89636546c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
