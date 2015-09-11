@@ -962,7 +962,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                       qcoeff, dqcoeff, pd->dequant, eob,
                                       scan_order->scan, scan_order->iscan);
         }
-        if (!x->skip_encode && *eob)
+        if (*eob)
           vp10_highbd_inv_txfm_add_32x32(dqcoeff, dst, dst_stride, *eob, xd->bd,
                                          tx_type);
         break;
@@ -976,7 +976,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 pd->dequant, eob,
                                 scan_order->scan, scan_order->iscan);
         }
-        if (!x->skip_encode && *eob)
+        if (*eob)
           vp10_highbd_inv_txfm_add_16x16(dqcoeff, dst, dst_stride, *eob, xd->bd,
                                          tx_type);
         break;
@@ -990,7 +990,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 pd->dequant, eob,
                                 scan_order->scan, scan_order->iscan);
         }
-        if (!x->skip_encode && *eob)
+        if (*eob)
           vp10_highbd_inv_txfm_add_8x8(dqcoeff, dst, dst_stride, *eob, xd->bd,
                                        tx_type);
         break;
@@ -1006,7 +1006,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 scan_order->scan, scan_order->iscan);
         }
 
-        if (!x->skip_encode && *eob)
+        if (*eob)
           // this is like vp10_short_idct4x4 but has a special case around
           // eob<=1 which is significant (not just an optimization) for the
           // lossless case.
