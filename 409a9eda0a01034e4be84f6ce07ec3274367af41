@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "848ff2ac_e1bce014",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-11T23:34:07Z",
+      "side": 1,
+      "message": "you appear to be missing {}s around the if",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_4059109b",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-11T23:34:07Z",
+      "side": 1,
+      "message": "is this useful? I\u0027d expect some check around this value",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_0067085c",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-11T23:34:07Z",
+      "side": 1,
+      "message": "newline between sections:\n\nhttps://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Class_Format",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e467cecb_3c427d2e",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-11T23:34:07Z",
+      "side": 1,
+      "message": "this looks like dead code",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
