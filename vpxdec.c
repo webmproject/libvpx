@@ -618,9 +618,6 @@ static int main_loop(int argc, const char **argv_) {
       use_y4m = 0;
       flipuv = 1;
       opt_yv12 = 1;
-#if CONFIG_VP9_HIGHBITDEPTH
-      output_bit_depth = 8;  // For yv12 8-bit depth output is assumed
-#endif
     } else if (arg_match(&arg, &use_i420, argi)) {
       use_y4m = 0;
       flipuv = 0;
