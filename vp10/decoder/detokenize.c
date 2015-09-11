@@ -11,6 +11,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
+#include "vp10/common/ans.h"
 #include "vp10/common/blockd.h"
 #include "vp10/common/common.h"
 #include "vp10/common/entropy.h"
@@ -38,18 +39,31 @@
        ++coef_counts[band][ctx][token];                     \
   } while (0)
 
-static INLINE int read_coeff(const vpx_prob *probs, int n, vpx_reader *r) {
+
+static INLINE int rabs_read_tree(struct AnsDecoder *const ans,
+                                 const vpx_tree_index *const tree,
+                                 const vpx_prob *const probs) {
+  vpx_tree_index i = 0;
+
+  while ((i = tree[i + rabs_read(ans, probs[i >> 1])]) > 0)
+    continue;
+
+  return -i;
+}
+
+static INLINE int read_coeff(const vpx_prob *const probs, int n,
+                             struct AnsDecoder *const ans) {
   int i, val = 0;
   for (i = 0; i < n; ++i)
-    val = (val << 1) | vpx_read(r, probs[i]);
+    val = (val << 1) | rabs_read(ans, probs[i]);
   return val;
 }
 
-static int decode_coefs(const MACROBLOCKD *xd,
+static int decode_coefs(const MACROBLOCKD *const xd,
                         PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
-                        vpx_reader *r) {
+                        struct AnsDecoder *const ans) {
   FRAME_COUNTS *counts = xd->counts;
   const int max_eob = 16 << (tx_size << 1);
   const FRAME_CONTEXT *const fc = xd->fc;
@@ -117,12 +131,12 @@ static int decode_coefs(const MACROBLOCKD *xd,
     prob = coef_probs[band][ctx];
     if (counts)
       ++eob_branch_count[band][ctx];
-    if (!vpx_read(r, prob[EOB_CONTEXT_NODE])) {
+    if (!rabs_read(ans, prob[EOB_CONTEXT_NODE])) {
       INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
     }
 
-    while (!vpx_read(r, prob[ZERO_CONTEXT_NODE])) {
+    while (!rabs_read(ans, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       dqv = dq[1];
       token_cache[scan[c]] = 0;
@@ -134,14 +148,14 @@ static int decode_coefs(const MACROBLOCKD *xd,
       prob = coef_probs[band][ctx];
     }
 
-    if (!vpx_read(r, prob[ONE_CONTEXT_NODE])) {
+    if (!rabs_read(ans, prob[ONE_CONTEXT_NODE])) {
       INCREMENT_COUNT(ONE_TOKEN);
       token = ONE_TOKEN;
       val = 1;
     } else {
       INCREMENT_COUNT(TWO_TOKEN);
-      token = vpx_read_tree(r, vp10_coef_con_tree,
-                            vp10_pareto8_full[prob[PIVOT_NODE] - 1]);
+      token = rabs_read_tree(ans, vp10_coef_con_tree,
+                             vp10_pareto8_full[prob[PIVOT_NODE] - 1]);
       switch (token) {
         case TWO_TOKEN:
         case THREE_TOKEN:
@@ -149,38 +163,38 @@ static int decode_coefs(const MACROBLOCKD *xd,
           val = token;
           break;
         case CATEGORY1_TOKEN:
-          val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, r);
+          val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, ans);
           break;
         case CATEGORY2_TOKEN:
-          val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, r);
+          val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, ans);
           break;
         case CATEGORY3_TOKEN:
-          val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, r);
+          val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, ans);
           break;
         case CATEGORY4_TOKEN:
-          val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, r);
+          val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, ans);
           break;
         case CATEGORY5_TOKEN:
-          val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, r);
+          val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, ans);
           break;
         case CATEGORY6_TOKEN:
 #if CONFIG_VP9_HIGHBITDEPTH
           switch (xd->bd) {
             case VPX_BITS_8:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, ans);
               break;
             case VPX_BITS_10:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 16, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 16, ans);
               break;
             case VPX_BITS_12:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 18, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 18, ans);
               break;
             default:
               assert(0);
               return -1;
           }
 #else
-          val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+          val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, ans);
 #endif
           break;
       }
@@ -188,13 +202,13 @@ static int decode_coefs(const MACROBLOCKD *xd,
     v = (val * dqv) >> dq_shift;
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
-    dqcoeff[scan[c]] = highbd_check_range((vpx_read_bit(r) ? -v : v),
+    dqcoeff[scan[c]] = highbd_check_range((rabs_read(ans, 128) ? -v : v),
                                           xd->bd);
 #else
-    dqcoeff[scan[c]] = check_range(vpx_read_bit(r) ? -v : v);
+    dqcoeff[scan[c]] = check_range(rabs_read(ans, 128) ? -v : v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else
-    dqcoeff[scan[c]] = vpx_read_bit(r) ? -v : v;
+    dqcoeff[scan[c]] = rabs_read(ans, 128) ? -v : v;
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
     token_cache[scan[c]] = vp10_pt_energy_class[token];
     ++c;
@@ -250,11 +264,12 @@ void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
   }
 }
 
-int vp10_decode_block_tokens(MACROBLOCKD *xd,
-                            int plane, const scan_order *sc,
-                            int x, int y,
-                            TX_SIZE tx_size, vpx_reader *r,
-                            int seg_id) {
+int vp10_decode_block_tokens(MACROBLOCKD *const xd,
+                             int plane, const scan_order *sc,
+                             int x, int y,
+                             TX_SIZE tx_size,
+                             struct AnsDecoder *const r,
+                             int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,

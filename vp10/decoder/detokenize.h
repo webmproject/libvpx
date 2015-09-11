@@ -12,7 +12,6 @@
 #ifndef VP10_DECODER_DETOKENIZE_H_
 #define VP10_DECODER_DETOKENIZE_H_
 
-#include "vpx_dsp/bitreader.h"
 #include "vp10/decoder/decoder.h"
 #include "vp10/common/scan.h"
 
@@ -20,10 +19,13 @@
 extern "C" {
 #endif
 
-int vp10_decode_block_tokens(MACROBLOCKD *xd,
+struct AnsDecoder;
+
+int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                             int plane, const scan_order *sc,
                             int x, int y,
-                            TX_SIZE tx_size, vpx_reader *r,
+                            TX_SIZE tx_size,
+                            struct AnsDecoder *const r,
                             int seg_id);
 
 #ifdef __cplusplus

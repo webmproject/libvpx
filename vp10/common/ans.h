@@ -34,6 +34,12 @@ struct AnsCoder {
   uint32_t state;
 };
 
+struct AnsDecoder {
+  const uint8_t *buf;
+  int buf_offset;
+  uint32_t state;
+};
+
 typedef uint8_t AnsP8;
 #define ans_p8_precision 256
 #define ans_p8_shift 8
@@ -69,7 +75,7 @@ static inline void rabs_write(struct AnsCoder *ans, int val, AnsP8 p0) {
   ans->state = quot * ans_p8_precision + rem + (val ? 0 : p);
 }
 
-static inline int rabs_read(struct AnsCoder *ans, AnsP8 p0) {
+static inline int rabs_read(struct AnsDecoder *ans, AnsP8 p0) {
   int val;
   unsigned l_s;
   const AnsP8 p = ans_p8_precision - p0;
@@ -81,6 +87,21 @@ static inline int rabs_read(struct AnsCoder *ans, AnsP8 p0) {
   ans->state = (ans->state / ans_p8_precision) * l_s +
                ans->state % ans_p8_precision - (!val * p);
   return val;
+}
+
+static inline int ans_read_init(struct AnsDecoder *const ans,
+                                 const uint8_t *const buf,
+                                 int offset) {
+  if (offset < 3)
+    return 1;
+  ans->buf = buf;
+  ans->buf_offset = offset - 3;
+  ans->state = mem_get_be24(buf + offset - 3);
+  return 0;
+}
+
+static inline int ans_read_end(struct AnsDecoder *const ans) {
+  return ans->state == l_base;
 }
 #undef ANS_DIVREM
 #ifdef __cplusplus
