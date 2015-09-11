@@ -190,7 +190,7 @@ string DecodeFile(const string& filename, int num_threads) {
 void DecodeFiles(const FileList files[]) {
   for (const FileList *iter = files; iter->name != NULL; ++iter) {
     SCOPED_TRACE(iter->name);
-    for (int t = 2; t <= 8; ++t) {
+    for (int t = 1; t <= 8; ++t) {
       EXPECT_EQ(iter->expected_md5, DecodeFile(iter->name, t))
           << "threads = " << t;
     }
@@ -302,6 +302,19 @@ TEST(VP9DecodeMultiThreadedTest, Decode3) {
       "ae96f21f21b6370cc0125621b441fc52" },
     { "vp90-2-14-resize-fp-tiles-8-4.webm",
       "3eb4f24f10640d42218f7fd7b9fd30d4" },
+    { NULL, NULL }
+  };
+
+  DecodeFiles(files);
+}
+
+TEST(VP9DecodeMultiThreadedTest, Decode4) {
+  static const FileList files[] = {
+    { "vp90-2-08-tile_1x2.webm", "570b4a5d5a70d58b5359671668328a16" },
+    { "vp90-2-08-tile_1x4.webm", "988d86049e884c66909d2d163a09841a" },
+    { "vp90-2-08-tile_1x8.webm", "0941902a52e9092cb010905eab16364c" },
+    { "vp90-2-08-tile-4x1.webm", "06505aade6647c583c8e00a2f582266f" },
+    { "vp90-2-08-tile-4x4.webm", "85c2299892460d76e2c600502d52bfe2" },
     { NULL, NULL }
   };
 
