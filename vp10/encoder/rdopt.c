@@ -54,7 +54,7 @@
 #define NEW_MV_DISCOUNT_FACTOR  8
 
 #if CONFIG_EXT_TX
-const double ext_tx_th = 0.99;
+const double ext_tx_th = 0.98;
 #endif
 
 typedef struct {
@@ -2736,7 +2736,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       int64_t distortion_y_tx;
       int dummy;
       int64_t best_rdcost_tx = INT64_MAX;
-      int best_ext_tx = NORM;
+      int best_ext_tx = -1;
 
       for (i = NORM; i < EXT_TX_TYPES; i++) {
         mbmi->ext_txfrm = i;
@@ -2747,7 +2747,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         rdcost_tx = RDCOST(x->rdmult, x->rddiv, rate_y_tx, distortion_y_tx);
         rdcost_tx = MIN(rdcost_tx, RDCOST(x->rdmult, x->rddiv, 0, *psse));
         assert(rdcost_tx >= 0);
-        if (rdcost_tx < best_rdcost_tx * ext_tx_th) {
+        if (rdcost_tx <
+            (best_ext_tx == NORM ? ext_tx_th : 1) * best_rdcost_tx) {
           best_ext_tx = i;
           best_rdcost_tx = rdcost_tx;
         }

@@ -23,10 +23,10 @@
 #if CONFIG_EXT_TX
 void fdst4(const tran_low_t *input, tran_low_t *output) {
   static const int N = 4;
-  static const int sinvalue_lookup_table[] = {
-    9630, 15582
+  // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
+  static const int32_t sinvalue_lookup[] = {
+    141124871, 228344838,
   };
-  static const int mult = 14654;  // sqrt(4/5)
   int i, j;
   for (i = 0; i < N; i++) {
     int64_t sum = 0;
@@ -40,18 +40,18 @@ void fdst4(const tran_low_t *input, tran_low_t *output) {
       idx = idx > N + 1 - idx ? N + 1 - idx : idx;
       if (idx == 0) continue;
       idx--;
-      sum += (int64_t)input[j] * sinvalue_lookup_table[idx] * (sign ? -1 : 1);
+      sum += (int64_t)input[j] * sinvalue_lookup[idx] * (sign ? -1 : 1);
     }
-    output[i] = (sum * mult) >> (2 * DCT_CONST_BITS);
+    output[i] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
   }
 }
 
 void fdst8(const tran_low_t *input, tran_low_t *output) {
   static const int N = 8;
-  static const int sinvalue_lookup_table[] = {
-    5604, 10531, 14189, 16135
+  // {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)} * sqrt(2/9) * 2
+  static const int sinvalue_lookup[] = {
+    86559612, 162678858, 219176632, 249238470
   };
-  static const int mult = 15447;  // 2*sqrt(2/9)
   int i, j;
   for (i = 0; i < N; i++) {
     int64_t sum = 0;
@@ -65,19 +65,19 @@ void fdst8(const tran_low_t *input, tran_low_t *output) {
       idx = idx > N + 1 - idx ? N + 1 - idx : idx;
       if (idx == 0) continue;
       idx--;
-      sum += (int64_t)input[j] * sinvalue_lookup_table[idx] * (sign ? -1 : 1);
+      sum += (int64_t)input[j] * sinvalue_lookup[idx] * (sign ? -1 : 1);
     }
-    output[i] = (sum * mult) >> (2 * DCT_CONST_BITS);
+    output[i] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
   }
 }
 
 void fdst16(const tran_low_t *input, tran_low_t *output) {
   static const int N = 16;
-  static const int sinvalue_lookup_table[] = {
-    3011,  5919,  8625, 11038,
-    13075, 14666, 15759, 16314
+  // {sin(pi/17), sin(pi*2/17, ..., sin(pi*8/17)} * sqrt(2/17) * 2 * sqrt(2)
+  static const int sinvalue_lookup[] = {
+    47852167, 94074787, 137093803, 175444254,
+    207820161, 233119001, 250479254, 259309736
   };
-  static const int mult = 15895;  // 2*sqrt(4/17)
   int i, j;
   for (i = 0; i < N; i++) {
     int64_t sum = 0;
@@ -91,9 +91,9 @@ void fdst16(const tran_low_t *input, tran_low_t *output) {
       idx = idx > N + 1 - idx ? N + 1 - idx : idx;
       if (idx == 0) continue;
       idx--;
-      sum += (int64_t)input[j] * sinvalue_lookup_table[idx] * (sign ? -1 : 1);
+      sum += (int64_t)input[j] * sinvalue_lookup[idx] * (sign ? -1 : 1);
     }
-    output[i] = (sum * mult) >> (2 * DCT_CONST_BITS);
+    output[i] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
   }
 }
 #endif  // CONFIG_EXT_TX

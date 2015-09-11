@@ -231,14 +231,14 @@ static const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
 
 static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
   DCT_DCT,
+  ADST_DCT,
+  DCT_ADST,
   ADST_ADST,
+  FLIPADST_DCT,
+  DCT_FLIPADST,
   FLIPADST_FLIPADST,
   ADST_FLIPADST,
   FLIPADST_ADST,
-  ADST_DCT,
-  DCT_ADST,
-  FLIPADST_DCT,
-  DCT_FLIPADST,
   DST_DST,
   DST_DCT,
   DCT_DST,
