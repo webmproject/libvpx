@@ -784,9 +784,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                                                   p->src_diff);
           tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
           xd->mi[0]->bmi[block].as_mode = mode;
-          vp10_predict_intra_block(xd, 1, TX_4X4, mode,
-                                  x->skip_encode ? src : dst,
-                                  x->skip_encode ? src_stride : dst_stride,
+          vp10_predict_intra_block(xd, 1, TX_4X4, mode, dst, dst_stride,
                                   dst, dst_stride,
                                   col + idx, row + idy, 0);
           vpx_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride,
@@ -849,7 +847,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
     next_highbd:
       {}
     }
-    if (best_rd >= rd_thresh || x->skip_encode)
+    if (best_rd >= rd_thresh)
       return best_rd;
 
     for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy) {
