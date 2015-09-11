@@ -235,13 +235,13 @@ TEST(VPxWorkerThreadTest, TestSerialInterface) {
   EXPECT_EQ(expected_md5, DecodeFile(filename, 2));
 }
 
-TEST(VP9DecodeMultiThreadedTest, Decode) {
+TEST(VP9DecodeMultiThreadedTest, NoTilesNonFrameParallel) {
   // no tiles or frame parallel; this exercises loop filter threading.
   EXPECT_EQ("b35a1b707b28e82be025d960aba039bc",
             DecodeFile("vp90-2-03-size-226x226.webm", 2));
 }
 
-TEST(VP9DecodeMultiThreadedTest, Decode2) {
+TEST(VP9DecodeMultiThreadedTest, FrameParallel) {
   static const FileList files[] = {
     { "vp90-2-08-tile_1x2_frame_parallel.webm",
       "68ede6abd66bae0a2edf2eb9232241b6" },
@@ -255,8 +255,7 @@ TEST(VP9DecodeMultiThreadedTest, Decode2) {
   DecodeFiles(files);
 }
 
-// Test tile quantity changes within one file.
-TEST(VP9DecodeMultiThreadedTest, Decode3) {
+TEST(VP9DecodeMultiThreadedTest, FrameParallelResize) {
   static const FileList files[] = {
     { "vp90-2-14-resize-fp-tiles-1-16.webm",
       "0cd5e632c326297e975f38949c31ea94" },
@@ -308,7 +307,7 @@ TEST(VP9DecodeMultiThreadedTest, Decode3) {
   DecodeFiles(files);
 }
 
-TEST(VP9DecodeMultiThreadedTest, Decode4) {
+TEST(VP9DecodeMultiThreadedTest, NonFrameParallel) {
   static const FileList files[] = {
     { "vp90-2-08-tile_1x2.webm", "570b4a5d5a70d58b5359671668328a16" },
     { "vp90-2-08-tile_1x4.webm", "988d86049e884c66909d2d163a09841a" },
