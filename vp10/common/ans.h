@@ -55,7 +55,7 @@ static inline void ans_write_init(struct AnsCoder *const ans,
 }
 
 static inline int ans_write_end(struct AnsCoder *const ans) {
-  mem_put_be24(ans->buf + ans->buf_offset, ans->state);
+  mem_put_le24(ans->buf + ans->buf_offset, ans->state);
   return ans->buf_offset + 3;
 }
 
@@ -96,7 +96,7 @@ static inline int ans_read_init(struct AnsDecoder *const ans,
     return 1;
   ans->buf = buf;
   ans->buf_offset = offset - 3;
-  ans->state = mem_get_be24(buf + offset - 3);
+  ans->state = mem_get_le24(buf + offset - 3);
   return 0;
 }
 
