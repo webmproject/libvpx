@@ -807,8 +807,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
               goto next_highbd;
             vp10_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
                                          dst, dst_stride, p->eobs[block],
-                                         xd->bd, DCT_DCT,
-                                         vp10_highbd_iwht4x4_add);
+                                         xd->bd, DCT_DCT, 1);
           } else {
             int64_t unused;
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
@@ -825,8 +824,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
               goto next_highbd;
             vp10_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
                                          dst, dst_stride, p->eobs[block],
-                                         xd->bd, tx_type,
-                                         vp10_highbd_idct4x4_add);
+                                         xd->bd, tx_type, 0);
           }
         }
       }
@@ -907,8 +905,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
           vp10_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
-                                dst, dst_stride, p->eobs[block], DCT_DCT,
-                                vp10_iwht4x4_add);
+                                dst, dst_stride, p->eobs[block], DCT_DCT, 1);
         } else {
           int64_t unused;
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
@@ -923,8 +920,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
           vp10_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
-                                dst, dst_stride, p->eobs[block], tx_type,
-                                vp10_idct4x4_add);
+                                dst, dst_stride, p->eobs[block], tx_type, 0);
         }
       }
     }

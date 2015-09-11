@@ -841,7 +841,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         // case.
         vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, pd->dst.stride,
                                      p->eobs[block], xd->bd, tx_type,
-                                     x->highbd_itxm_add);
+                                     xd->lossless);
         break;
       default:
         assert(0 && "Invalid transform size");
@@ -870,7 +870,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       // which is significant (not just an optimization) for the lossless
       // case.
       vp10_inv_txfm_add_4x4(dqcoeff, dst, pd->dst.stride, p->eobs[block],
-                            tx_type, x->itxm_add);
+                            tx_type, xd->lossless);
       break;
     default:
       assert(0 && "Invalid transform size");
@@ -895,11 +895,21 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
   if (p->eobs[block] > 0) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-       x->highbd_itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block], xd->bd);
-       return;
+      if (xd->lossless) {
+        vp10_highbd_iwht4x4_add(dqcoeff, dst, pd->dst.stride,
+                                p->eobs[block], xd->bd);
+      } else {
+        vp10_highbd_idct4x4_add(dqcoeff, dst, pd->dst.stride,
+                                p->eobs[block], xd->bd);
+      }
+      return;
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+    if (xd->lossless) {
+      vp10_iwht4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+    } else {
+      vp10_idct4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+    }
   }
 }
 
@@ -1032,7 +1042,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           // eob<=1 which is significant (not just an optimization) for the
           // lossless case.
           vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, dst_stride, *eob, xd->bd,
-                                       tx_type, x->highbd_itxm_add);
+                                       tx_type, xd->lossless);
         break;
       default:
         assert(0);
@@ -1101,7 +1111,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         // which is significant (not just an optimization) for the lossless
         // case.
         vp10_inv_txfm_add_4x4(dqcoeff, dst, dst_stride, *eob, tx_type,
-                              x->itxm_add);
+                              xd->lossless);
       }
       break;
     default:
