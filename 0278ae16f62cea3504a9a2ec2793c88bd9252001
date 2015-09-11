@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4ef2afe_aea5fb1a",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-11T02:26:58Z",
+      "side": 0,
+      "message": "the casts should stay. in high-bitdepth mode there\u0027s an implicit conversion being made, that should be made explicit with a cast, some toolchains (notably msvc) will produce warnings otherwise. some projects are intolerant of them, so this would prevent the inclusion of the code.",
+      "revId": "0278ae16f62cea3504a9a2ec2793c88bd9252001",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
