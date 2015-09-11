@@ -10,6 +10,7 @@
 
 #include <emmintrin.h>  // SSE2
 
+#include "./vp10_rtcd.h"
 #include "vp10/common/vp10_fwd_txfm.h"
 #include "vpx_dsp/txfm_common.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
