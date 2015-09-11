@@ -737,21 +737,33 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
 
 #if CONFIG_INTERINTRA
   rd->thresh_mult[THR_COMP_INTERINTRA_ZEROL   ] += 1500;
+#if CONFIG_MULTI_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_ZEROL2  ] += 1500;
+#endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_ZEROG   ] += 1500;
   rd->thresh_mult[THR_COMP_INTERINTRA_ZEROA   ] += 1500;
 
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTL] += 1500;
+#if CONFIG_MULTI_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTL2] += 1500;
+#endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTG] += 1500;
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTA] += 1500;
 
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARL   ] += 1500;
+#if CONFIG_MULTI_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARL2  ] += 1500;
+#endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARG   ] += 1500;
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARA   ] += 1500;
 
   rd->thresh_mult[THR_COMP_INTERINTRA_NEWL    ] += 2000;
+#if CONFIG_MULTI_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEWL2   ] += 2000;
+#endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEWG    ] += 2000;
   rd->thresh_mult[THR_COMP_INTERINTRA_NEWA    ] += 2000;
-#endif
+#endif  // CONFIG_INTERINTRA
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
