@@ -50,6 +50,24 @@
       "revId": "3d781079678eff4a964608320b7629731f3b181e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4580a44_579ff69c",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 993,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-09-11T21:51:54Z",
+      "side": 1,
+      "message": "You mean --yv12, right? Yes, I noticed that, I\u0027m not quite sure what to do with it (other than not to use that option for my personal testing :) ). I can remove it, basically make --yv12 analogous to --i420 with flipped UV planes, but I guess I don\u0027t understand why that code to default it to 8 specifically for --yv12 was added in the first place...",
+      "parentUuid": "44cedaa4_57288e19",
+      "revId": "3d781079678eff4a964608320b7629731f3b181e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
