@@ -382,7 +382,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 6) {
-    // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = VAR_BASED_PARTITION;
     // Turn on this to use non-RD key frame coding mode.
     sf->use_nonrd_pick_mode = 1;
