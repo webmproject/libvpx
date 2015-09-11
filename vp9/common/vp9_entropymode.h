@@ -74,13 +74,8 @@ typedef struct frame_contexts {
 #endif  // CONFIG_NEW_INTER
   vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
-#if CONFIG_MULTI_REF
-  vp9_prob single_ref_prob[REF_CONTEXTS][3];
-  vp9_prob comp_ref_prob[REF_CONTEXTS][2];
-#else
-  vp9_prob single_ref_prob[REF_CONTEXTS][2];
-  vp9_prob comp_ref_prob[REF_CONTEXTS];
-#endif  // CONFIG_MULTI_REF
+  vp9_prob single_ref_probs[REF_CONTEXTS][SINGLE_REFS - 1];
+  vp9_prob comp_ref_probs[REF_CONTEXTS][COMP_REFS - 1];
   struct tx_probs tx_probs;
   vp9_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
@@ -159,13 +154,8 @@ typedef struct {
 #endif  // CONFIG_NEW_INTER
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
-#if CONFIG_MULTI_REF
-  unsigned int single_ref[REF_CONTEXTS][3][2];
-  unsigned int comp_ref[REF_CONTEXTS][2][2];
-#else
-  unsigned int single_ref[REF_CONTEXTS][2][2];
-  unsigned int comp_ref[REF_CONTEXTS][2];
-#endif  // CONFIG_MULTI_REF
+  unsigned int single_ref[REF_CONTEXTS][SINGLE_REFS-1][2];
+  unsigned int comp_ref[REF_CONTEXTS][COMP_REFS-1][2];
   struct tx_counts tx;
   unsigned int skip[SKIP_CONTEXTS][2];
   nmv_context_counts mv;

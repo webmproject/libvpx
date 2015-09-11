@@ -66,6 +66,14 @@ extern "C" {
 #define COMP_INTER_CONTEXTS 5
 #define REF_CONTEXTS 5
 
+#if CONFIG_MULTI_REF
+#define SINGLE_REFS 4
+#define COMP_REFS 3
+#else
+#define SINGLE_REFS 3
+#define COMP_REFS 2
+#endif  // CONFIG_MULTI_REF
+
 typedef enum {
   PLANE_TYPE_Y  = 0,
   PLANE_TYPE_UV = 1,

@@ -127,11 +127,7 @@ int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
 static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p(const VP9_COMMON *cm,
                                                     const MACROBLOCKD *xd) {
   const int pred_context = vp9_get_pred_context_comp_ref_p(cm, xd);
-#if CONFIG_MULTI_REF
-  return cm->fc.comp_ref_prob[pred_context][0];
-#else
-  return cm->fc.comp_ref_prob[pred_context];
-#endif  // CONFIG_MULTI_REF
+  return cm->fc.comp_ref_probs[pred_context][0];
 }
 
 #if CONFIG_MULTI_REF
@@ -141,7 +137,7 @@ int vp9_get_pred_context_comp_ref_p1(const VP9_COMMON *cm,
 static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p1(const VP9_COMMON *cm,
                                                      const MACROBLOCKD *xd) {
   const int pred_context = vp9_get_pred_context_comp_ref_p1(cm, xd);
-  return cm->fc.comp_ref_prob[pred_context][1];
+  return cm->fc.comp_ref_probs[pred_context][1];
 }
 #endif  // CONFIG_MULTI_REF
 
@@ -149,14 +145,14 @@ int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_single_ref_p1(const VP9_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
-  return cm->fc.single_ref_prob[vp9_get_pred_context_single_ref_p1(xd)][0];
+  return cm->fc.single_ref_probs[vp9_get_pred_context_single_ref_p1(xd)][0];
 }
 
 int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
-  return cm->fc.single_ref_prob[vp9_get_pred_context_single_ref_p2(xd)][1];
+  return cm->fc.single_ref_probs[vp9_get_pred_context_single_ref_p2(xd)][1];
 }
 
 #if CONFIG_MULTI_REF
@@ -164,7 +160,7 @@ int vp9_get_pred_context_single_ref_p3(const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_single_ref_p3(const VP9_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
-  return cm->fc.single_ref_prob[vp9_get_pred_context_single_ref_p3(xd)][2];
+  return cm->fc.single_ref_probs[vp9_get_pred_context_single_ref_p3(xd)][2];
 }
 #endif  // CONFIG_MULTI_REF
 

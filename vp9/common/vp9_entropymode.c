@@ -415,36 +415,60 @@ static const vp9_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
   239, 183, 119,  96,  41
 };
 
+static const vp9_prob default_single_ref_probs[REF_CONTEXTS][SINGLE_REFS - 1] =
+{
 #if CONFIG_MULTI_REF
-// TODO(zoeliu): To adjust the initial prob values.
-static const vp9_prob default_comp_ref_p[REF_CONTEXTS][2] = {
-  {  33,  16 },
-  {  77,  74 },
-  { 142, 142 },
-  { 172, 170 },
-  { 238, 247 }
-};
-
-static const vp9_prob default_single_ref_p[REF_CONTEXTS][3] = {
+  // TODO(zoeliu): To adjust the initial prob values.
   {  33,  16,  16 },
   {  77,  74,  74 },
   { 142, 142, 142 },
   { 172, 170, 170 },
   { 238, 247, 247 }
-};
 #else
-static const vp9_prob default_comp_ref_p[REF_CONTEXTS] = {
-  50, 126, 123, 221, 226
-};
-
-static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
   {  33,  16 },
   {  77,  74 },
   { 142, 142 },
   { 172, 170 },
   { 238, 247 }
-};
 #endif  // CONFIG_MULTI_REF
+};
+
+static const vp9_prob default_comp_ref_probs[REF_CONTEXTS][COMP_REFS - 1] = {
+#if CONFIG_MULTI_REF
+  // TODO(zoeliu): To adjust the initial prob values.
+  {  33,  16 },
+  {  77,  74 },
+  { 142, 142 },
+  { 172, 170 },
+  { 238, 247 }
+#else
+  { 50 }, { 126 }, { 123 }, { 221 }, { 226 }
+#endif  // CONFIG_MULTI_REF
+};
+
+/*
+// TODO(zoeliu): Tree structure may be introduced when all bits of the encoding
+// of either the compound or the single references share the same contexts.
+const vp9_tree_index vp9_comp_ref_tree[TREE_SIZE(COMP_REFS)] = {
+#if CONFIG_MULTI_REF
+  -REF_OFFSET(GOLDEN_FRAME), 2,
+  -REF_OFFSET(LAST_FRAME), -REF_OFFSET(LAST2_FRAME)
+#else
+  -REF_OFFSET(GOLDEN_FRAME), -REF_OFFSET(LAST_FRAME)
+#endif  // CONFIG_MULTI_REF
+};
+
+const vp9_tree_index vp9_single_ref_tree[TREE_SIZE(SINGLE_REFS)] = {
+#if CONFIG_MULTI_REF
+  2, 4,
+  -REF_OFFSET(ALTREF_FRAME), -REF_OFFSET(GOLDEN_FRAME),
+  -REF_OFFSET(LAST2_FRAME), -REF_OFFSET(LAST_FRAME)
+#else
+  2, -REF_OFFSET(LAST_FRAME),
+  -REF_OFFSET(ALTREF_FRAME), -REF_OFFSET(GOLDEN_FRAME)
+#endif  // CONFIG_MULTI_REF
+};
+*/
 
 static const struct tx_probs default_tx_probs = {
 #if CONFIG_TX64X64
@@ -1000,8 +1024,8 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->partition_prob, default_partition_probs);
   vp9_copy(fc->intra_inter_prob, default_intra_inter_p);
   vp9_copy(fc->comp_inter_prob, default_comp_inter_p);
-  vp9_copy(fc->comp_ref_prob, default_comp_ref_p);
-  vp9_copy(fc->single_ref_prob, default_single_ref_p);
+  vp9_copy(fc->single_ref_probs, default_single_ref_probs);
+  vp9_copy(fc->comp_ref_probs, default_comp_ref_probs);
   fc->tx_probs = default_tx_probs;
   vp9_copy(fc->skip_probs, default_skip_probs);
   vp9_copy(fc->inter_mode_probs, default_inter_mode_probs);
@@ -1083,25 +1107,19 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
     fc->comp_inter_prob[i] = adapt_prob(pre_fc->comp_inter_prob[i],
                                         counts->comp_inter[i]);
+
   for (i = 0; i < REF_CONTEXTS; i++) {
-#if CONFIG_MULTI_REF
-    for (j = 0; j < 2; j++)
-      fc->comp_ref_prob[i][j] = adapt_prob(pre_fc->comp_ref_prob[i][j],
-                                           counts->comp_ref[i][j]);
-#else
-    fc->comp_ref_prob[i] = adapt_prob(pre_fc->comp_ref_prob[i],
-                                      counts->comp_ref[i]);
-#endif  // CONFIG_MULTI_REF
+    for (j = 0; j < (SINGLE_REFS - 1); j++) {
+      fc->single_ref_probs[i][j] = adapt_prob(pre_fc->single_ref_probs[i][j],
+                                              counts->single_ref[i][j]);
+    }
   }
 
   for (i = 0; i < REF_CONTEXTS; i++) {
-#if CONFIG_MULTI_REF
-    for (j = 0; j < 3; j++)
-#else
-    for (j = 0; j < 2; j++)
-#endif  // CONFIG_MULTI_REF
-      fc->single_ref_prob[i][j] = adapt_prob(pre_fc->single_ref_prob[i][j],
-                                             counts->single_ref[i][j]);
+    for (j = 0; j < (COMP_REFS - 1); j++) {
+      fc->comp_ref_probs[i][j] = adapt_prob(pre_fc->comp_ref_probs[i][j],
+                                            counts->comp_ref[i][j]);
+    }
   }
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)

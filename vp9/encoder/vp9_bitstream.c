@@ -2516,7 +2516,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 #endif  // CONFIG_SR_MODE
 
   if (!frame_is_intra_only(cm)) {
-    int i;
+    int i, j;
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
       prob_diff_update(vp9_inter_mode_tree, cm->fc.inter_mode_probs[i],
                        cm->counts.inter_mode[i], INTER_MODES, &header_bc);
@@ -2551,28 +2551,19 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
-        vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][0],
-                                  cm->counts.single_ref[i][0]);
-        vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][1],
-                                  cm->counts.single_ref[i][1]);
-#if CONFIG_MULTI_REF
-        vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][2],
-                                  cm->counts.single_ref[i][2]);
-#endif  // CONFIG_MULTI_REF
+        for (j = 0; j < (SINGLE_REFS - 1); j++) {
+          vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_probs[i][j],
+                                    cm->counts.single_ref[i][j]);
+        }
       }
     }
 
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
-#if CONFIG_MULTI_REF
-        vp9_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i][0],
-                                  cm->counts.comp_ref[i][0]);
-        vp9_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i][1],
-                                  cm->counts.comp_ref[i][1]);
-#else
-        vp9_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i],
-                                  cm->counts.comp_ref[i]);
-#endif  // CONFIG_MULTI_REF
+        for (j = 0; j < (COMP_REFS - 1); j++) {
+          vp9_cond_prob_diff_update(&header_bc, &fc->comp_ref_probs[i][j],
+                                    cm->counts.comp_ref[i][j]);
+        }
       }
     }
 

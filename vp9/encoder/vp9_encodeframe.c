@@ -1522,16 +1522,13 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
                             [has_second_ref(mbmi)]++;
 
         if (has_second_ref(mbmi)) {
-#if CONFIG_MULTI_REF
           counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)][0]
                           [ref0 == GOLDEN_FRAME]++;
+#if CONFIG_MULTI_REF
           if (ref0 != GOLDEN_FRAME) {
             counts->comp_ref[vp9_get_pred_context_comp_ref_p1(cm, xd)][1]
                             [ref0 == LAST_FRAME]++;
           }
-#else
-          counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)]
-                          [ref0 == GOLDEN_FRAME]++;
 #endif  // CONFIG_MULTI_REF
         } else {
 #if CONFIG_MULTI_REF
