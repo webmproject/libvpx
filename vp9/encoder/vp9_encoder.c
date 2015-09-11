@@ -3201,7 +3201,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   cpi->Source = vp9_scale_if_required(cm,
                                       cpi->un_scaled_source,
                                       &cpi->scaled_source);
-  if (cpi->unscaled_last_source != NULL)
+
+  // Avoid scaling last_source unless its needed.
+  // Last source is currently only used for screen-content mode,
+  // or if partition_search_type == SOURCE_VAR_BASED_PARTITION.
+  if (cpi->unscaled_last_source != NULL &&
+      (cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
+      cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION))
     cpi->Last_Source = vp9_scale_if_required(cm,
                                              cpi->unscaled_last_source,
                                              &cpi->scaled_last_source);
