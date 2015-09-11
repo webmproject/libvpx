@@ -16,6 +16,24 @@
       "revId": "500ec6b43e0474a70cf8bbd3c58cccd89636546c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24a64628_eed2df91",
+        "filename": "vp9/encoder/vp9_ratectrl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-09-11T18:41:16Z",
+      "side": 1,
+      "message": "Yes. But isn\u0027t it better to have the function signature the same with C file by duplicating the typedef?",
+      "parentUuid": "24a64628_8e7fdb3f",
+      "revId": "500ec6b43e0474a70cf8bbd3c58cccd89636546c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
