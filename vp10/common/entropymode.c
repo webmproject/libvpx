@@ -448,12 +448,12 @@ void vp10_setup_past_independence(VP10_COMMON *cm) {
   vp10_init_mv_probs(cm);
   cm->fc->initialized = 1;
 
-  if (cm->frame_type == KEY_FRAME ||
-      cm->error_resilient_mode || cm->reset_frame_context == 3) {
+  if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode ||
+      cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL) {
     // Reset all frame contexts.
     for (i = 0; i < FRAME_CONTEXTS; ++i)
       cm->frame_contexts[i] = *cm->fc;
-  } else if (cm->reset_frame_context == 2) {
+  } else if (cm->reset_frame_context == RESET_FRAME_CONTEXT_CURRENT) {
     // Reset only the frame context specified in the frame header.
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
   }

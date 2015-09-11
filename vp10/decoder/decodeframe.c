@@ -1849,8 +1849,33 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   } else {
     cm->intra_only = cm->show_frame ? 0 : vpx_rb_read_bit(rb);
 
-    cm->reset_frame_context = cm->error_resilient_mode ?
-        0 : vpx_rb_read_literal(rb, 2);
+    if (cm->error_resilient_mode) {
+        cm->reset_frame_context = RESET_FRAME_CONTEXT_ALL;
+    } else {
+#if CONFIG_MISC_FIXES
+      if (cm->intra_only) {
+          cm->reset_frame_context =
+              vpx_rb_read_bit(rb) ? RESET_FRAME_CONTEXT_ALL
+                                  : RESET_FRAME_CONTEXT_CURRENT;
+      } else {
+          cm->reset_frame_context =
+              vpx_rb_read_bit(rb) ? RESET_FRAME_CONTEXT_CURRENT
+                                  : RESET_FRAME_CONTEXT_NONE;
+          if (cm->reset_frame_context == RESET_FRAME_CONTEXT_CURRENT)
+            cm->reset_frame_context =
+                  vpx_rb_read_bit(rb) ? RESET_FRAME_CONTEXT_ALL
+                                      : RESET_FRAME_CONTEXT_CURRENT;
+      }
+#else
+      static const RESET_FRAME_CONTEXT_MODE reset_frame_context_conv_tbl[4] = {
+        RESET_FRAME_CONTEXT_NONE, RESET_FRAME_CONTEXT_NONE,
+        RESET_FRAME_CONTEXT_CURRENT, RESET_FRAME_CONTEXT_ALL
+      };
+
+      cm->reset_frame_context =
+          reset_frame_context_conv_tbl[vpx_rb_read_literal(rb, 2)];
+#endif
+    }
 
     if (cm->intra_only) {
       if (!vp10_read_sync_code(rb))

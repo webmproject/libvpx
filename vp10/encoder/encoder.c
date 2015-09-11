@@ -1422,7 +1422,7 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
   cm->refresh_frame_context = 1;
-  cm->reset_frame_context = 0;
+  cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
 
   vp10_reset_segment_features(&cm->seg);
   vp10_set_high_precision_mv(cpi, 0);
@@ -3554,11 +3554,11 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     // By default, encoder assumes decoder can use prev_mi.
     if (cm->error_resilient_mode) {
       cm->frame_parallel_decoding_mode = 1;
-      cm->reset_frame_context = 0;
+      cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
       cm->refresh_frame_context = 0;
     } else if (cm->intra_only) {
       // Only reset the current context.
-      cm->reset_frame_context = 2;
+      cm->reset_frame_context = RESET_FRAME_CONTEXT_CURRENT;
     }
   }
 
@@ -3955,7 +3955,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
     cpi->multi_arf_allowed = 0;
 
   // Normal defaults
-  cm->reset_frame_context = 0;
+  cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
   cm->refresh_frame_context = 1;
 
   cpi->refresh_last_frame = 1;
