@@ -73,6 +73,7 @@ Build options:
   --target=TARGET             target platform tuple [generic-gnu]
   --cpu=CPU                   optimize for a specific cpu rather than a family
   --extra-cflags=ECFLAGS      add ECFLAGS to CFLAGS [$CFLAGS]
+  --extra-cxxflags=ECXXFLAGS  add ECXXFLAGS to CXXFLAGS [$CXXFLAGS]
   ${toggle_extra_warnings}    emit harmless warnings (always non-fatal)
   ${toggle_werror}            treat warnings as errors, if possible
                               (not available with all compilers)
@@ -337,6 +338,10 @@ check_add_cflags() {
   check_cflags "$@" && add_cflags_only "$@"
 }
 
+check_add_cxxflags() {
+  check_cxxflags "$@" && add_cxxflags_only "$@"
+}
+
 check_add_asflags() {
   log add_asflags "$@"
   add_asflags "$@"
@@ -502,6 +507,9 @@ process_common_cmdline() {
         ;;
       --extra-cflags=*)
         extra_cflags="${optval}"
+        ;;
+      --extra-cxxflags=*)
+        extra_cxxflags="${optval}"
         ;;
       --enable-?*|--disable-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
