@@ -8,6 +8,11 @@
 
 #include "mkvparser.hpp"
 
+#if defined(_MSC_VER) && _MSC_VER < 1800
+#include <float.h>  // _isnan() / _finite()
+#define MSC_COMPAT
+#endif
+
 #include <cassert>
 #include <climits>
 #include <cmath>
@@ -23,6 +28,14 @@
 
 namespace mkvparser {
 
+#ifdef MSC_COMPAT
+inline bool isnan(double val) { return !!_isnan(val); }
+inline bool isinf(double val) { return !_finite(val); }
+#else
+inline bool isnan(double val) { return std::isnan(val); }
+inline bool isinf(double val) { return std::isinf(val); }
+#endif  // MSC_COMPAT
+
 IMkvReader::~IMkvReader() {}
 
 template<typename Type> Type* SafeArrayAlloc(unsigned long long num_elements,
@@ -34,8 +47,10 @@ template<typename Type> Type* SafeArrayAlloc(unsigned long long num_elements,
   const unsigned long long num_bytes = num_elements * element_size;
   if (element_size > (kMaxAllocSize / num_elements))
     return NULL;
+  if (num_bytes != static_cast<size_t>(num_bytes))
+    return NULL;
 
-  return new (std::nothrow) Type[num_bytes];
+  return new (std::nothrow) Type[static_cast<size_t>(num_bytes)];
 }
 
 void GetVersion(int& major, int& minor, int& build, int& revision) {
@@ -267,7 +282,7 @@ long UnserializeFloat(IMkvReader* pReader, long long pos, long long size_,
     result = d;
   }
 
-  if (std::isinf(result) || std::isnan(result))
+  if (mkvparser::isinf(result) || mkvparser::isnan(result))
     return E_FILE_FORMAT_INVALID;
 
   return 0;
@@ -322,7 +337,7 @@ long UnserializeString(IMkvReader* pReader, long long pos, long long size,
 
   unsigned char* const buf = reinterpret_cast<unsigned char*>(str);
 
-  const long status = pReader->Read(pos, size, buf);
+  const long status = pReader->Read(pos, static_cast<long>(size), buf);
 
   if (status) {
     delete[] str;
@@ -361,10 +376,10 @@ long ParseElementHeader(IMkvReader* pReader, long long& pos,
     return E_FILE_FORMAT_INVALID;
   }
 
-  // Avoid rolling over pos when very close to LONG_LONG_MAX.
+  // Avoid rolling over pos when very close to LLONG_MAX.
   const unsigned long long rollover_check =
       static_cast<unsigned long long>(pos) + len;
-  if (rollover_check > LONG_LONG_MAX)
+  if (rollover_check > LLONG_MAX)
     return E_FILE_FORMAT_INVALID;
 
   pos += len;  // consume length of size
@@ -443,13 +458,13 @@ bool Match(IMkvReader* pReader, long long& pos, unsigned long expected_id,
 
   unsigned long long rollover_check =
       static_cast<unsigned long long>(pos) + len;
-  if (rollover_check > LONG_LONG_MAX)
+  if (rollover_check > LLONG_MAX)
     return false;
 
   pos += len;  // consume length of size of payload
 
   rollover_check = static_cast<unsigned long long>(pos) + size;
-  if (rollover_check > LONG_LONG_MAX)
+  if (rollover_check > LLONG_MAX)
     return false;
 
   if ((pos + size) > available)
@@ -508,7 +523,7 @@ long long EBMLHeader::Parse(IMkvReader* pReader, long long& pos) {
   long long end = (available >= 1024) ? 1024 : available;
 
   // Scan until we find what looks like the first byte of the EBML header.
-  const int kMaxScanBytes = (available >= 1024) ? 1024 : available;
+  const long long kMaxScanBytes = (available >= 1024) ? 1024 : available;
   const unsigned char kEbmlByte0 = 0x1A;
   unsigned char scan_byte = 0;
 
@@ -832,9 +847,9 @@ long long Segment::ParseHeaders() {
     long long pos = m_pos;
     const long long element_start = pos;
 
-    // Avoid rolling over pos when very close to LONG_LONG_MAX.
+    // Avoid rolling over pos when very close to LLONG_MAX.
     unsigned long long rollover_check = pos + 1ULL;
-    if (rollover_check > LONG_LONG_MAX)
+    if (rollover_check > LLONG_MAX)
       return E_FILE_FORMAT_INVALID;
 
     if ((pos + 1) > available)
@@ -898,9 +913,9 @@ long long Segment::ParseHeaders() {
 
     pos += len;  // consume length of size of element
 
-    // Avoid rolling over pos when very close to LONG_LONG_MAX.
+    // Avoid rolling over pos when very close to LLONG_MAX.
     rollover_check = static_cast<unsigned long long>(pos) + size;
-    if (rollover_check > LONG_LONG_MAX)
+    if (rollover_check > LLONG_MAX)
       return E_FILE_FORMAT_INVALID;
 
     const long long element_size = size + pos - element_start;
@@ -4020,7 +4035,7 @@ long SegmentInfo::Parse() {
   }
 
   const double rollover_check = m_duration * m_timecodeScale;
-  if (rollover_check > LONG_LONG_MAX)
+  if (rollover_check > LLONG_MAX)
     return E_FILE_FORMAT_INVALID;
 
   if (pos != stop)
