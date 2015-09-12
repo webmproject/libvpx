@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "249486c0_c1da8654",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1747,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-09-12T00:14:29Z",
+      "side": 1,
+      "message": "Maybe another macro or inline function could be defined e.g.\nstatic INLINE int is_dst_related(tx_type) {\n  return (tx_type \u003d\u003d DST_DST || ...);\n}",
+      "revId": "6737092abaaaae94df8cb51d59ac2be8982227bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_23fb2e83",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-09-12T00:14:29Z",
+      "side": 1,
+      "message": "May we learn what is the motivation to duplicate the code in the 3 functions: vp9_fdst4, vp9_fdst8, and vp9_fdst16? Just for better performance in speed?",
+      "revId": "6737092abaaaae94df8cb51d59ac2be8982227bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a46156bd_1a5219a9",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-09-12T00:14:29Z",
+      "side": 1,
+      "message": "idx \u003d MIN(idx, N + 1 - idx);",
+      "revId": "6737092abaaaae94df8cb51d59ac2be8982227bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6473de94_789ebd23",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-09-12T00:14:29Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "6737092abaaaae94df8cb51d59ac2be8982227bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "249486c0_e154e23f",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-09-12T00:14:29Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "6737092abaaaae94df8cb51d59ac2be8982227bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c45e4afd_5e9e45cc",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-09-12T00:14:29Z",
+      "side": 1,
+      "message": "Same as previous comment that better to define an inline function to return a binary value to determine whether these are true or not.",
+      "revId": "6737092abaaaae94df8cb51d59ac2be8982227bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
