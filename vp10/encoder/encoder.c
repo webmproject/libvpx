@@ -1421,7 +1421,10 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
 
   cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
-  cm->refresh_frame_context = 1;
+  cm->refresh_frame_context =
+      oxcf->error_resilient_mode ? REFRESH_FRAME_CONTEXT_OFF :
+          oxcf->frame_parallel_decoding_mode ? REFRESH_FRAME_CONTEXT_FORWARD
+                                             : REFRESH_FRAME_CONTEXT_BACKWARD;
   cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
 
   vp10_reset_segment_features(&cm->seg);
@@ -3549,13 +3552,11 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     cpi->rc.source_alt_ref_active = 0;
 
     cm->error_resilient_mode = oxcf->error_resilient_mode;
-    cm->frame_parallel_decoding_mode = oxcf->frame_parallel_decoding_mode;
 
     // By default, encoder assumes decoder can use prev_mi.
     if (cm->error_resilient_mode) {
-      cm->frame_parallel_decoding_mode = 1;
       cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
-      cm->refresh_frame_context = 0;
+      cm->refresh_frame_context = REFRESH_FRAME_CONTEXT_OFF;
     } else if (cm->intra_only) {
       // Only reset the current context.
       cm->reset_frame_context = RESET_FRAME_CONTEXT_CURRENT;
@@ -3641,11 +3642,11 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     full_to_model_counts(cpi->td.counts->coef[t],
                          cpi->td.rd_counts.coef_counts[t]);
 
-  if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode)
+  if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD)
     vp10_adapt_coef_probs(cm);
 
   if (!frame_is_intra_only(cm)) {
-    if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
+    if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
       vp10_adapt_mode_probs(cm);
       vp10_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
@@ -3828,7 +3829,7 @@ static int frame_is_reference(const VP10_COMP *cpi) {
          cpi->refresh_last_frame ||
          cpi->refresh_golden_frame ||
          cpi->refresh_alt_ref_frame ||
-         cm->refresh_frame_context ||
+         cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF ||
          cm->lf.mode_ref_delta_update ||
          cm->seg.update_map ||
          cm->seg.update_data;
@@ -3956,7 +3957,10 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
   // Normal defaults
   cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
-  cm->refresh_frame_context = 1;
+  cm->refresh_frame_context =
+      oxcf->error_resilient_mode ? REFRESH_FRAME_CONTEXT_OFF :
+          oxcf->frame_parallel_decoding_mode ? REFRESH_FRAME_CONTEXT_FORWARD
+                                             : REFRESH_FRAME_CONTEXT_BACKWARD;
 
   cpi->refresh_last_frame = 1;
   cpi->refresh_golden_frame = 0;
@@ -4100,7 +4104,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
     Pass0Encode(cpi, size, dest, frame_flags);
   }
 
-  if (cm->refresh_frame_context)
+  if (cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
 
   // No frame encoded, or frame was dropped, release scaled references.
