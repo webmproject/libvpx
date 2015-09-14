@@ -3200,7 +3200,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
 
   cpi->Source = vp9_scale_if_required(cm,
                                       cpi->un_scaled_source,
-                                      &cpi->scaled_source);
+                                      &cpi->scaled_source,
+                                      (cpi->oxcf.pass == 0));
 
   // Avoid scaling last_source unless its needed.
   // Last source is currently only used for screen-content mode,
@@ -3210,7 +3211,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
       cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION))
     cpi->Last_Source = vp9_scale_if_required(cm,
                                              cpi->unscaled_last_source,
-                                             &cpi->scaled_last_source);
+                                             &cpi->scaled_last_source,
+                                             (cpi->oxcf.pass == 0));
 
   if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
@@ -3342,11 +3344,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     }
 
     cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
-                                      &cpi->scaled_source);
+                                      &cpi->scaled_source,
+                                      (cpi->oxcf.pass == 0));
 
     if (cpi->unscaled_last_source != NULL)
       cpi->Last_Source = vp9_scale_if_required(cm, cpi->unscaled_last_source,
-                                               &cpi->scaled_last_source);
+                                               &cpi->scaled_last_source,
+                                               (cpi->oxcf.pass == 0));
 
     if (frame_is_intra_only(cm) == 0) {
       if (loop_count > 0) {
@@ -3597,20 +3601,17 @@ static void set_ext_overrides(VP9_COMP *cpi) {
 
 YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
-                                          YV12_BUFFER_CONFIG *scaled) {
+                                          YV12_BUFFER_CONFIG *scaled,
+                                          int use_normative_scaler) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (unscaled->y_width == (scaled->y_width << 1) &&
-        unscaled->y_height == (scaled->y_height << 1))
+    if (use_normative_scaler)
       scale_and_extend_frame(unscaled, scaled, (int)cm->bit_depth);
     else
       scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
 #else
-    // Use the faster normative (convolve8) scaling filter: for now only for
-    // scaling factor of 2.
-    if (unscaled->y_width == (scaled->y_width << 1) &&
-        unscaled->y_height == (scaled->y_height << 1))
+    if (use_normative_scaler)
       scale_and_extend_frame(unscaled, scaled);
     else
       scale_and_extend_frame_nonnormative(unscaled, scaled);

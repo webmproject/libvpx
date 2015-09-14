@@ -613,7 +613,8 @@ void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
 
 YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
-                                          YV12_BUFFER_CONFIG *scaled);
+                                          YV12_BUFFER_CONFIG *scaled,
+                                          int use_normative_scaler);
 
 void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
 
