@@ -75,17 +75,37 @@ static inline void rabs_write(struct AnsCoder *ans, int val, AnsP8 p0) {
   ans->state = quot * ans_p8_precision + rem + (val ? 0 : p);
 }
 
+#define ANS_IMPL1 0
+#define UNPREDICTABLE(x) x
 static inline int rabs_read(struct AnsDecoder *ans, AnsP8 p0) {
   int val;
+#if ANS_IMPL1
   unsigned l_s;
+#else
+  unsigned quot, rem, x, xn;
+#endif
   const AnsP8 p = ans_p8_precision - p0;
   if (ans->state < l_base) {
     ans->state = ans->state * io_base + ans->buf[--ans->buf_offset];
   }
+#if ANS_IMPL1
   val = ans->state % ans_p8_precision < p;
   l_s = val ? p : p0;
   ans->state = (ans->state / ans_p8_precision) * l_s +
                ans->state % ans_p8_precision - (!val * p);
+#else
+  x = ans->state;
+  quot = x / ans_p8_precision;
+  rem = x % ans_p8_precision;
+  xn = quot * p;
+  val = rem < p;
+  if (UNPREDICTABLE(val)) {
+  ans->state = xn + rem;
+  } else {
+  //ans->state = quot * p0 + rem - p;
+  ans->state = x - xn - p;
+  }
+#endif
   return val;
 }
 
