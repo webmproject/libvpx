@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6473de94_de841996",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-09-14T18:08:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "848ff2ac_e1bce014",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "648afea0_4059109b",
         "filename": "test/resize_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-11T23:34:07Z",
       "side": 1,
       "message": "is this useful? I\u0027d expect some check around this value",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648afea0_8cf8afb3",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-09-14T18:08:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "648afea0_4059109b",
       "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "a9420f4a_d2e78219",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-09-14T18:08:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "648afea0_0067085c",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e467cecb_3c427d2e",
         "filename": "test/resize_test.cc",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2015-09-11T23:34:07Z",
       "side": 1,
       "message": "this looks like dead code",
+      "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c45e4afd_926d2c8a",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-09-14T18:08:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e467cecb_3c427d2e",
       "revId": "409a9eda0a01034e4be84f6ce07ec3274367af41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
