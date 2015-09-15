@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9420f4a_09471d89",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-15T16:53:20Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "a9413528db585e0b7b85ab3ca0fe84963a287e7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
