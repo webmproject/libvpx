@@ -1005,6 +1005,9 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
     p[i].eobs = ctx->eobs_pbuf[i][2];
   }
 
+  for (i = 0; i < 2; ++i)
+    pd[i].color_index_map = ctx->color_index_map[i];
+
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
   for (y = 0; y < mi_height; y++)
@@ -1136,6 +1139,19 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][0];
     p[i].eobs = ctx->eobs_pbuf[i][0];
   }
+
+  if (cm->current_video_frame == 0 && cm->allow_screen_content_tools) {
+    for (i = 0; i < 2; ++i) {
+      if (ctx->color_index_map[i] == 0) {
+        CHECK_MEM_ERROR(cm, ctx->color_index_map[i],
+                        vpx_memalign(16, (ctx->num_4x4_blk << 4) *
+                                     sizeof(*ctx->color_index_map[i])));
+      }
+    }
+  }
+  for (i = 0; i < 2; ++i)
+    pd[i].color_index_map = ctx->color_index_map[i];
+
   ctx->is_coded = 0;
   ctx->skippable = 0;
   ctx->pred_pixel_ready = 0;
@@ -2938,6 +2954,16 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       vp10_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
       sum_intra_stats(td->counts, mi);
+
+    if (bsize >= BLOCK_8X8 && output_enabled) {
+      if (mbmi->palette_mode_info.palette_size[0] > 0) {
+        mbmi->palette_mode_info.palette_first_color_idx[0] =
+            xd->plane[0].color_index_map[0];
+        // TODO(huisu): this increases the use of token buffer. Needs stretch
+        // test to verify.
+        vp10_tokenize_palette_sb(td, bsize, 0, t);
+      }
+    }
     vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
   } else {
     int ref;
