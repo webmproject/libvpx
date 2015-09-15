@@ -15,6 +15,10 @@
 #include "vpx_util/vpx_thread.h"
 #include "vpx/internal/vpx_codec_internal.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct VP9Common;
 struct VP9Decoder;
 
@@ -62,5 +66,9 @@ void vp9_frameworker_broadcast(RefCntBuffer *const buf, int row);
 // Copy necessary decoding context from src worker to dst worker.
 void vp9_frameworker_copy_context(VPxWorker *const dst_worker,
                                   VPxWorker *const src_worker);
+
+#ifdef __cplusplus
+}    // extern "C"
+#endif
 
 #endif  // VP9_DECODER_VP9_DTHREAD_H_

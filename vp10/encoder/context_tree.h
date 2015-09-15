@@ -14,6 +14,10 @@
 #include "vp10/common/blockd.h"
 #include "vp10/encoder/block.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct VP10_COMP;
 struct VP10Common;
 struct ThreadData;
@@ -83,5 +87,9 @@ typedef struct PC_TREE {
 
 void vp10_setup_pc_tree(struct VP10Common *cm, struct ThreadData *td);
 void vp10_free_pc_tree(struct ThreadData *td);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif /* VP10_ENCODER_CONTEXT_TREE_H_ */
