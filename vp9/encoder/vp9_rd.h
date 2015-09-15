@@ -37,6 +37,8 @@ extern "C" {
 
 #define INVALID_MV 0x80008000
 
+#if CONFIG_MULTI_REF
+
 #if CONFIG_NEW_INTER
 
 #if CONFIG_INTERINTRA
@@ -54,6 +56,28 @@ extern "C" {
 #endif  // CONFIG_INTERINTRA
 
 #endif  // CONFIG_NEW_INTER
+
+#else  // CONFIG_MULTI_REF
+
+#if CONFIG_NEW_INTER
+
+#if CONFIG_INTERINTRA
+#define MAX_MODES 55
+#else  // CONFIG_INTERINTRA
+#define MAX_MODES 43
+#endif  // CONFIG_INTERINTRA
+
+#else   // CONFIG_NEW_INTER
+
+#if CONFIG_INTERINTRA
+#define MAX_MODES 42
+#else  // CONFIG_INTERINTRA
+#define MAX_MODES 30
+#endif  // CONFIG_INTERINTRA
+
+#endif  // CONFIG_NEW_INTER
+
+#endif  // CONFIG_MULTI_REF
 
 #if CONFIG_MULTI_REF
 #define MAX_REFS  8
