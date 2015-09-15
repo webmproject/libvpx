@@ -504,6 +504,14 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
                                cpi->svc.number_temporal_layers +
                                cpi->svc.temporal_layer_id];
 
+  // Setting the worst/best_quality via the encoder control: SET_SVC_PARAMETERS,
+  // only for non-BYPASS mode for now.
+  if (cpi->svc.temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+    RATE_CONTROL *const lrc = &lc->rc;
+    lrc->worst_quality = vp9_quantizer_to_qindex(lc->max_q);
+    lrc->best_quality =  vp9_quantizer_to_qindex(lc->min_q);
+  }
+
   get_layer_resolution(cpi->oxcf.width, cpi->oxcf.height,
                        lc->scaling_factor_num, lc->scaling_factor_den,
                        &width, &height);
