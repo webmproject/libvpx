@@ -2073,7 +2073,8 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 static void debug_check_frame_counts(const VP10_COMMON *const cm) {
   FRAME_COUNTS zero_counts;
   vp10_zero(zero_counts);
-  assert(cm->frame_parallel_decoding_mode || cm->error_resilient_mode);
+  assert(cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_BACKWARD ||
+         cm->error_resilient_mode);
   assert(!memcmp(cm->counts.y_mode, zero_counts.y_mode,
                  sizeof(cm->counts.y_mode)));
   assert(!memcmp(cm->counts.uv_mode, zero_counts.uv_mode,
