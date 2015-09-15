@@ -1354,7 +1354,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
-  if (!cpi->use_svc) {
+  if (!cpi->use_svc || is_two_pass_svc(cpi)) {
     if (is_altref_enabled(cpi) && cpi->refresh_alt_ref_frame &&
         (cm->frame_type != KEY_FRAME))
       // Update the alternate reference frame stats as appropriate.
