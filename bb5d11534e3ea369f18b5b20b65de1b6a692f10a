@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0465c2c3_3567e75c",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-16T00:37:58Z",
+      "side": 1,
+      "message": "you should clear change_bitrate_ here, no?",
+      "revId": "bb5d11534e3ea369f18b5b20b65de1b6a692f10a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
