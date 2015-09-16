@@ -239,7 +239,7 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
     const MV *ref = &mbmi_ext->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
     const MV diff = {mvs[i].as_mv.row - ref->row,
                      mvs[i].as_mv.col - ref->col};
-    vp10_inc_mv(&diff, counts);
+    vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
   }
 }
 

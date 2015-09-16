@@ -294,7 +294,7 @@ static INLINE void read_mv(vpx_reader *r, MV *mv, const MV *ref,
   if (mv_joint_horizontal(joint_type))
     diff.col = read_mv_component(r, &ctx->comps[1], use_hp);
 
-  vp10_inc_mv(&diff, counts);
+  vp10_inc_mv(&diff, counts, use_hp);
 
   mv->row = ref->row + diff.row;
   mv->col = ref->col + diff.col;
