@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "e467cecb_2505f9d6",
+        "filename": "test/active_map_refresh_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-16T04:15:47Z",
+      "side": 1,
+      "message": "Right now this is the only place where we restore the subclass.",
+      "parentUuid": "8478d270_b1a5c7e8",
+      "revId": "0e87fed66a94d21cd79937731d2268db9b65dfc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9420f4a_d8c55cc6",
         "filename": "test/y4m_video_source.h",
         "patchSetId": 6
