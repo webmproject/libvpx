@@ -82,6 +82,29 @@ static const tran_high_t sinpi_2_9 = 9929;
 static const tran_high_t sinpi_3_9 = 13377;
 static const tran_high_t sinpi_4_9 = 15212;
 
+#if CONFIG_EXT_TX
+#if CONFIG_DST1
+static const int32_t dst_lookup4[] = {
+  // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
+  // at precision of 2 * DCT_CONST_BITS bits
+  141124871, 228344838,
+};
+
+static const int32_t dst_lookup8[] = {
+  // {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)} * sqrt(2/9) * 2
+  // at precision of 2 * DCT_CONST_BITS bits
+  86559612, 162678858, 219176632, 249238470
+};
+
+static const int32_t dst_lookup16[] = {
+  // {sin(pi/17), sin(pi*2/17, ..., sin(pi*8/17)} * sqrt(2/17) * 2 * sqrt(2)
+  // at precision of 2 * DCT_CONST_BITS bits
+  47852167, 94074787, 137093803, 175444254,
+  207820161, 233119001, 250479254, 259309736
+};
+#endif  // CONFIG_DST1
+#endif  // CONFIG_EXT_TX
+
 static INLINE tran_low_t check_range(tran_high_t input) {
 #if CONFIG_VP9_HIGHBITDEPTH
   // For valid highbitdepth VP9 streams, intermediate stage coefficients will

@@ -75,7 +75,7 @@
 #define MIN_EARLY_TERM_INDEX    3
 
 #if CONFIG_EXT_TX
-const double ext_tx_th = 0.99;
+const double ext_tx_th = 0.98;
 #endif
 
 typedef struct {
@@ -1224,6 +1224,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
     } else if (s[n]) {
       if (is_inter_block(mbmi)) {
         rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, sse[n]);
+        r[n][1] -= r_tx_size;
       } else {
 #if CONFIG_SR_MODE
         rd[n][0] = RDCOST(x->rdmult, x->rddiv, s1 + sr0, sse[n]);
@@ -5873,7 +5874,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int64_t distortion_y_tx;
       int dummy;
       int64_t best_rdcost_tx = INT64_MAX;
-      int best_ext_tx = NORM;
+      int best_ext_tx = -1;
 
       for (i = NORM; i < EXT_TX_TYPES; i++) {
         mbmi->ext_txfrm = i;
@@ -5884,7 +5885,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         rdcost_tx = RDCOST(x->rdmult, x->rddiv, rate_y_tx, distortion_y_tx);
         rdcost_tx = MIN(rdcost_tx, RDCOST(x->rdmult, x->rddiv, 0, *psse));
         assert(rdcost_tx >= 0);
-        if (rdcost_tx < best_rdcost_tx * ext_tx_th) {
+        if (rdcost_tx <
+            best_rdcost_tx * (best_ext_tx == NORM ? ext_tx_th : 1)) {
           best_ext_tx = i;
           best_rdcost_tx = rdcost_tx;
         }
@@ -7702,7 +7704,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
 #if CONFIG_EXT_TX
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-      if (tx_type == NORM || this_rd < (bestrd_tx * ext_tx_th)) {
+      if (tx_type == NORM ||
+          this_rd < bestrd_tx * (best_tx_type == NORM ? ext_tx_th : 1.0)) {
         bestrd_tx = this_rd;
         best_tx_type = tx_type;
         best_tx_size = mbmi->tx_size;
