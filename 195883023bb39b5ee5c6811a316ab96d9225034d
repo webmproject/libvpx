@@ -70,6 +70,30 @@
       "revId": "195883023bb39b5ee5c6811a316ab96d9225034d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e44c2e60_1a1861b0",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-09-16T20:57:13Z",
+      "side": 1,
+      "message": "yes, disabling is the other option. it seems like it\u0027s stable enough that any failures in the future should be enough to block everything, instead of hiding it by disabling x86inc",
+      "parentUuid": "648afea0_95fa6fe2",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 55
+      },
+      "revId": "195883023bb39b5ee5c6811a316ab96d9225034d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
