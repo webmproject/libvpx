@@ -228,6 +228,7 @@ typedef struct VP10EncoderConfig {
   int use_highbitdepth;
 #endif
   vpx_color_space_t color_space;
+  int color_range;
 } VP10EncoderConfig;
 
 static INLINE int is_lossless_requested(const VP10EncoderConfig *cfg) {

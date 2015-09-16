@@ -82,6 +82,7 @@ extern "C" {
   typedef struct vpx_image {
     vpx_img_fmt_t fmt; /**< Image Format */
     vpx_color_space_t cs; /**< Color Space */
+    int range; /**< Limited (0) vs. Full-range (1) sample data */
 
     /* Image storage dimensions */
     unsigned int  w;           /**< Stored image width */

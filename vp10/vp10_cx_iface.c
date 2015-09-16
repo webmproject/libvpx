@@ -45,6 +45,7 @@ struct vp10_extracfg {
   vpx_bit_depth_t             bit_depth;
   vp9e_tune_content           content;
   vpx_color_space_t           color_space;
+  int                         color_range;
 };
 
 static struct vp10_extracfg default_extra_cfg = {
@@ -71,6 +72,7 @@ static struct vp10_extracfg default_extra_cfg = {
   VPX_BITS_8,                 // Bit depth
   VP9E_CONTENT_DEFAULT,       // content
   VPX_CS_UNKNOWN,             // color space
+  0,                          // color range
 };
 
 struct vpx_codec_alg_priv {
@@ -255,6 +257,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     ERROR("Codec bit-depth 8 not supported in profile > 1");
   }
   RANGE_CHECK(extra_cfg, color_space, VPX_CS_UNKNOWN, VPX_CS_SRGB);
+  RANGE_CHECK(extra_cfg, color_range, 0, 1);
   return VPX_CODEC_OK;
 }
 
@@ -398,6 +401,7 @@ static vpx_codec_err_t set_encoder_config(
 #endif
 
   oxcf->color_space = extra_cfg->color_space;
+  oxcf->color_range = extra_cfg->color_range;
   oxcf->arnr_max_frames = extra_cfg->arnr_max_frames;
   oxcf->arnr_strength   = extra_cfg->arnr_strength;
   oxcf->min_gf_interval = extra_cfg->min_gf_interval;
@@ -1221,6 +1225,13 @@ static vpx_codec_err_t ctrl_set_color_space(vpx_codec_alg_priv_t *ctx,
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
+static vpx_codec_err_t ctrl_set_color_range(vpx_codec_alg_priv_t *ctx,
+                                            va_list args) {
+  struct vp10_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.color_range = CAST(VP9E_SET_COLOR_RANGE, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,                ctrl_copy_reference},
   {VP8E_UPD_ENTROPY,                  ctrl_update_entropy},
@@ -1254,6 +1265,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_REGISTER_CX_CALLBACK,         ctrl_register_cx_callback},
   {VP9E_SET_TUNE_CONTENT,             ctrl_set_tune_content},
   {VP9E_SET_COLOR_SPACE,              ctrl_set_color_space},
+  {VP9E_SET_COLOR_RANGE,              ctrl_set_color_range},
   {VP9E_SET_NOISE_SENSITIVITY,        ctrl_set_noise_sensitivity},
   {VP9E_SET_MIN_GF_INTERVAL,          ctrl_set_min_gf_interval},
   {VP9E_SET_MAX_GF_INTERVAL,          ctrl_set_max_gf_interval},

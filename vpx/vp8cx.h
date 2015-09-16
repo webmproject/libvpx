@@ -547,6 +547,15 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_GET_ACTIVEMAP,
+
+  /*!\brief Codec control function to set color range bit.
+   * \note Valid ranges: 0..1, default is 0
+   *                     0 = Limited range (16..235 or HBD equivalent)
+   *                     1 = Full range (0..255 or HBD equivalent)
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_COLOR_RANGE,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -757,6 +766,13 @@ VPX_CTRL_USE_TYPE(VP9E_SET_MAX_GF_INTERVAL,  unsigned int)
 #define VPX_CTRL_VP9E_SET_MAX_GF_INTERVAL
 
 VPX_CTRL_USE_TYPE(VP9E_GET_ACTIVEMAP, vpx_active_map_t *)
+
+/*!\brief
+ *
+ * TODO(rbultje) : add support of the control in ffmpeg
+ */
+#define VPX_CTRL_VP9E_SET_COLOR_RANGE
+VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_RANGE, int)
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus
 }  // extern "C"
