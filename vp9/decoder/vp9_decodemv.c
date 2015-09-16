@@ -784,31 +784,61 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
         ref_frame[!idx] = cm->comp_var_ref[bit1 ? 0 : 1];
       } else {
+#if CONFIG_LAST3_REF
+        const int ctx2 = vp9_get_pred_context_comp_ref_p2(cm, xd);
+        const int bit2 = vp9_read(r, fc->comp_ref_probs[ctx2][2]);
+
+        if (!cm->frame_parallel_decoding_mode)
+          ++counts->comp_ref[ctx2][2][bit2];
+
+        ref_frame[!idx] = cm->comp_var_ref[bit2 ? 3 : 2];
+#else  // CONFIG_LAST3_REF
         ref_frame[!idx] = cm->comp_var_ref[2];
+#endif  // CONFIG_LAST3_REF
       }
-#else
+#else  // CONFIG_MULTI_REF
       ref_frame[!idx] = cm->comp_var_ref[bit];
 #endif  // CONFIG_MULTI_REF
     } else if (mode == SINGLE_REFERENCE) {
 #if CONFIG_MULTI_REF
       const int ctx0 = vp9_get_pred_context_single_ref_p1(xd);
       const int bit0 = vp9_read(r, fc->single_ref_probs[ctx0][0]);
+
       if (!cm->frame_parallel_decoding_mode)
         ++counts->single_ref[ctx0][0][bit0];
+
       if (bit0) {
         const int ctx1 = vp9_get_pred_context_single_ref_p2(xd);
         const int bit1 = vp9_read(r, fc->single_ref_probs[ctx1][1]);
+
         if (!cm->frame_parallel_decoding_mode)
           ++counts->single_ref[ctx1][1][bit1];
+
         ref_frame[0] = bit1 ? ALTREF_FRAME : GOLDEN_FRAME;
       } else {
         const int ctx2 = vp9_get_pred_context_single_ref_p3(xd);
         const int bit2 = vp9_read(r, fc->single_ref_probs[ctx2][2]);
+
         if (!cm->frame_parallel_decoding_mode)
           ++counts->single_ref[ctx2][2][bit2];
+
+#if CONFIG_LAST3_REF
+        if (bit2) {
+          ref_frame[0] = LAST3_FRAME;
+        } else {
+          const int ctx3 = vp9_get_pred_context_single_ref_p4(xd);
+          const int bit3 = vp9_read(r, fc->single_ref_probs[ctx3][3]);
+
+          if (!cm->frame_parallel_decoding_mode)
+            ++counts->single_ref[ctx3][3][bit3];
+
+          ref_frame[0] = bit3 ? LAST2_FRAME : LAST_FRAME;
+        }
+#else  // CONFIG_LAST3_REF
         ref_frame[0] = bit2 ? LAST2_FRAME : LAST_FRAME;
+#endif  // CONFIG_LAST3_REF
       }
-#else
+#else  // CONFIG_MULTI_REF
       const int ctx0 = vp9_get_pred_context_single_ref_p1(xd);
       const int bit0 = vp9_read(r, fc->single_ref_probs[ctx0][0]);
       if (!cm->frame_parallel_decoding_mode)

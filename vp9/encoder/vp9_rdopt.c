@@ -50,6 +50,26 @@
 
 #if CONFIG_MULTI_REF
 
+#if CONFIG_LAST3_REF
+
+#define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << LAST2_FRAME) | (1 << INTRA_FRAME) | \
+                                 (1 << LAST3_FRAME))
+#define LAST2_FRAME_MODE_MASK   ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << LAST_FRAME) | (1 << INTRA_FRAME) | \
+                                 (1 << LAST3_FRAME))
+#define LAST3_FRAME_MODE_MASK   ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << LAST_FRAME) | (1 << INTRA_FRAME) | \
+                                 (1 << LAST2_FRAME))
+#define GOLDEN_FRAME_MODE_MASK  ((1 << LAST_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << LAST2_FRAME) | (1 << INTRA_FRAME) | \
+                                 (1 << LAST3_FRAME))
+#define ALT_REF_MODE_MASK       ((1 << LAST_FRAME) | (1 << GOLDEN_FRAME) | \
+                                 (1 << LAST2_FRAME) | (1 << INTRA_FRAME) | \
+                                 (1 << LAST3_FRAME))
+
+#else  // CONFIG_LAST3_REF
+
 #define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
                                  (1 << LAST2_FRAME) | (1 << INTRA_FRAME))
 #define LAST2_FRAME_MODE_MASK   ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
@@ -59,7 +79,9 @@
 #define ALT_REF_MODE_MASK       ((1 << LAST_FRAME) | (1 << GOLDEN_FRAME) | \
                                  (1 << LAST2_FRAME) | (1 << INTRA_FRAME))
 
-#else
+#endif  // CONFIG_LAST3_REF
+
+#else  // CONFIG_MULTI_REF
 
 #define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
                                  (1 << INTRA_FRAME))
@@ -108,6 +130,9 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARESTMV, {LAST_FRAME,   NONE}},
 #if CONFIG_MULTI_REF
   {NEARESTMV, {LAST2_FRAME,  NONE}},
+#if CONFIG_LAST3_REF
+  {NEARESTMV, {LAST3_FRAME,  NONE}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {NEARESTMV, {ALTREF_FRAME, NONE}},
   {NEARESTMV, {GOLDEN_FRAME, NONE}},
@@ -117,6 +142,9 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEWMV,     {LAST_FRAME,   NONE}},
 #if CONFIG_MULTI_REF
   {NEWMV,     {LAST2_FRAME,  NONE}},
+#if CONFIG_LAST3_REF
+  {NEWMV,     {LAST3_FRAME,  NONE}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {NEWMV,     {ALTREF_FRAME, NONE}},
   {NEWMV,     {GOLDEN_FRAME, NONE}},
@@ -125,6 +153,9 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEW2MV, {LAST_FRAME,   NONE}},
 #if CONFIG_MULTI_REF
   {NEW2MV, {LAST2_FRAME,  NONE}},
+#if CONFIG_LAST3_REF
+  {NEW2MV, {LAST3_FRAME,  NONE}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {NEW2MV, {ALTREF_FRAME, NONE}},
   {NEW2MV, {GOLDEN_FRAME, NONE}},
@@ -133,6 +164,9 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARMV,    {LAST_FRAME,   NONE}},
 #if CONFIG_MULTI_REF
   {NEARMV,    {LAST2_FRAME,  NONE}},
+#if CONFIG_LAST3_REF
+  {NEARMV,    {LAST3_FRAME,  NONE}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {NEARMV,    {ALTREF_FRAME, NONE}},
   {NEARMV,    {GOLDEN_FRAME, NONE}},
@@ -140,6 +174,9 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    {LAST_FRAME,   NONE}},
 #if CONFIG_MULTI_REF
   {ZEROMV,    {LAST2_FRAME,  NONE}},
+#if CONFIG_LAST3_REF
+  {ZEROMV,    {LAST3_FRAME,  NONE}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {ZEROMV,    {GOLDEN_FRAME, NONE}},
   {ZEROMV,    {ALTREF_FRAME, NONE}},
@@ -148,14 +185,22 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEAREST_NEARESTMV, {LAST_FRAME,   ALTREF_FRAME}},
 #if CONFIG_MULTI_REF
   {NEAREST_NEARESTMV, {LAST2_FRAME,  ALTREF_FRAME}},
+#if CONFIG_LAST3_REF
+  {NEAREST_NEARESTMV, {LAST3_FRAME,  ALTREF_FRAME}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {NEAREST_NEARESTMV, {GOLDEN_FRAME, ALTREF_FRAME}},
+
 #else  // CONFIG_NEW_INTER
   {NEARESTMV, {LAST_FRAME,   ALTREF_FRAME}},
 #if CONFIG_MULTI_REF
   {NEARESTMV, {LAST2_FRAME,  ALTREF_FRAME}},
+#if CONFIG_LAST3_REF
+  {NEARESTMV, {LAST3_FRAME,  ALTREF_FRAME}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {NEARESTMV, {GOLDEN_FRAME, ALTREF_FRAME}},
+
 #endif  // CONFIG_NEW_INTER
   {TM_PRED,   {INTRA_FRAME,  NONE}},
 
@@ -193,6 +238,21 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 
   {NEW_NEWMV,      {LAST2_FRAME,  ALTREF_FRAME}},
   {ZERO_ZEROMV,    {LAST2_FRAME,  ALTREF_FRAME}},
+
+#if CONFIG_LAST3_REF
+  {NEAR_NEARESTMV, {LAST3_FRAME,  ALTREF_FRAME}},
+  {NEAREST_NEARMV, {LAST3_FRAME,  ALTREF_FRAME}},
+
+  {NEW_NEARESTMV,  {LAST3_FRAME,  ALTREF_FRAME}},
+  {NEAREST_NEWMV,  {LAST3_FRAME,  ALTREF_FRAME}},
+
+  {NEW_NEARMV,     {LAST3_FRAME,  ALTREF_FRAME}},
+  {NEAR_NEWMV,     {LAST3_FRAME,  ALTREF_FRAME}},
+
+  {NEW_NEWMV,      {LAST3_FRAME,  ALTREF_FRAME}},
+  {ZERO_ZEROMV,    {LAST3_FRAME,  ALTREF_FRAME}},
+#endif  // CONFIG_LAST3_REF
+
 #endif  // CONFIG_MULTI_REF
 
 #else  /// CONFIG_NEW_INTER
@@ -208,6 +268,12 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARMV,    {LAST2_FRAME,  ALTREF_FRAME}},
   {NEWMV,     {LAST2_FRAME,  ALTREF_FRAME}},
   {ZEROMV,    {LAST2_FRAME,  ALTREF_FRAME}},
+
+#if CONFIG_LAST3_REF
+  {NEARMV,    {LAST3_FRAME,  ALTREF_FRAME}},
+  {NEWMV,     {LAST3_FRAME,  ALTREF_FRAME}},
+  {ZEROMV,    {LAST3_FRAME,  ALTREF_FRAME}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
 #endif  // CONFIG_NEW_INTER
@@ -232,6 +298,13 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARESTMV, {LAST2_FRAME,  INTRA_FRAME}},
   {NEARMV,    {LAST2_FRAME,  INTRA_FRAME}},
   {NEWMV,     {LAST2_FRAME,  INTRA_FRAME}},
+
+#if CONFIG_LAST3_REF
+  {ZEROMV,    {LAST3_FRAME,  INTRA_FRAME}},
+  {NEARESTMV, {LAST3_FRAME,  INTRA_FRAME}},
+  {NEARMV,    {LAST3_FRAME,  INTRA_FRAME}},
+  {NEWMV,     {LAST3_FRAME,  INTRA_FRAME}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
   {ZEROMV,    {GOLDEN_FRAME, INTRA_FRAME}},
@@ -250,12 +323,18 @@ static const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
   {{LAST_FRAME,   NONE}},
 #if CONFIG_MULTI_REF
   {{LAST2_FRAME,  NONE}},
+#if CONFIG_LAST3_REF
+  {{LAST3_FRAME,  NONE}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {{GOLDEN_FRAME, NONE}},
   {{ALTREF_FRAME, NONE}},
   {{LAST_FRAME,   ALTREF_FRAME}},
 #if CONFIG_MULTI_REF
   {{LAST2_FRAME,  ALTREF_FRAME}},
+#if CONFIG_LAST3_REF
+  {{LAST3_FRAME,  ALTREF_FRAME}},
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   {{GOLDEN_FRAME, ALTREF_FRAME}},
   {{INTRA_FRAME,  NONE}},
@@ -4369,6 +4448,9 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
       vp9_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
 #if CONFIG_MULTI_REF
       vp9_prob ref_single_p3 = vp9_get_pred_prob_single_ref_p3(cm, xd);
+#if CONFIG_LAST3_REF
+      vp9_prob ref_single_p4 = vp9_get_pred_prob_single_ref_p4(cm, xd);
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
@@ -4378,10 +4460,30 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
       ref_costs_single[LAST_FRAME] =
 #if CONFIG_MULTI_REF
           ref_costs_single[LAST2_FRAME] =
+#if CONFIG_LAST3_REF
+          ref_costs_single[LAST3_FRAME] =
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
           ref_costs_single[GOLDEN_FRAME] =
           ref_costs_single[ALTREF_FRAME] = base_cost;
+
 #if CONFIG_MULTI_REF
+#if CONFIG_LAST3_REF
+      ref_costs_single[LAST_FRAME]   += vp9_cost_bit(ref_single_p1, 0);
+      ref_costs_single[LAST2_FRAME]  += vp9_cost_bit(ref_single_p1, 0);
+      ref_costs_single[LAST3_FRAME]  += vp9_cost_bit(ref_single_p1, 0);
+      ref_costs_single[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p1, 1);
+      ref_costs_single[ALTREF_FRAME] += vp9_cost_bit(ref_single_p1, 1);
+
+      ref_costs_single[LAST_FRAME]   += vp9_cost_bit(ref_single_p3, 0);
+      ref_costs_single[LAST2_FRAME]  += vp9_cost_bit(ref_single_p3, 0);
+      ref_costs_single[LAST3_FRAME]  += vp9_cost_bit(ref_single_p3, 1);
+      ref_costs_single[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p2, 0);
+      ref_costs_single[ALTREF_FRAME] += vp9_cost_bit(ref_single_p2, 1);
+
+      ref_costs_single[LAST_FRAME]   += vp9_cost_bit(ref_single_p4, 0);
+      ref_costs_single[LAST2_FRAME]  += vp9_cost_bit(ref_single_p4, 1);
+#else  // CONFIG_LAST3_REF
       ref_costs_single[LAST_FRAME]   += vp9_cost_bit(ref_single_p1, 0);
       ref_costs_single[LAST2_FRAME]  += vp9_cost_bit(ref_single_p1, 0);
       ref_costs_single[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p1, 1);
@@ -4390,7 +4492,8 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
       ref_costs_single[LAST2_FRAME]  += vp9_cost_bit(ref_single_p3, 1);
       ref_costs_single[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p2, 0);
       ref_costs_single[ALTREF_FRAME] += vp9_cost_bit(ref_single_p2, 1);
-#else
+#endif  // CONFIG_LAST3_REF
+#else  // CONFIG_MULTI_REF
       ref_costs_single[LAST_FRAME]   += vp9_cost_bit(ref_single_p1, 0);
       ref_costs_single[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p1, 1);
       ref_costs_single[ALTREF_FRAME] += vp9_cost_bit(ref_single_p1, 1);
@@ -4401,6 +4504,9 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
       ref_costs_single[LAST_FRAME]   = 512;
 #if CONFIG_MULTI_REF
       ref_costs_single[LAST2_FRAME]  = 512;
+#if CONFIG_LAST3_REF
+      ref_costs_single[LAST3_FRAME]  = 512;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
       ref_costs_single[GOLDEN_FRAME] = 512;
       ref_costs_single[ALTREF_FRAME] = 512;
@@ -4410,23 +4516,55 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
       vp9_prob ref_comp_p  = vp9_get_pred_prob_comp_ref_p(cm, xd);
 #if CONFIG_MULTI_REF
       vp9_prob ref_comp_p1 = vp9_get_pred_prob_comp_ref_p1(cm, xd);
+#if CONFIG_LAST3_REF
+      vp9_prob ref_comp_p2 = vp9_get_pred_prob_comp_ref_p2(cm, xd);
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
       if (cm->reference_mode == REFERENCE_MODE_SELECT)
         base_cost += vp9_cost_bit(comp_inter_p, 1);
 
-      ref_costs_comp[LAST_FRAME]   = base_cost + vp9_cost_bit(ref_comp_p, 0);
+      ref_costs_comp[LAST_FRAME] =
 #if CONFIG_MULTI_REF
-      ref_costs_comp[LAST_FRAME]   = base_cost + vp9_cost_bit(ref_comp_p1, 1);
-      ref_costs_comp[LAST2_FRAME]  = base_cost + vp9_cost_bit(ref_comp_p, 0);
-      ref_costs_comp[LAST2_FRAME]  = base_cost + vp9_cost_bit(ref_comp_p1, 0);
+          ref_costs_comp[LAST2_FRAME] =
+#if CONFIG_LAST3_REF
+          ref_costs_comp[LAST3_FRAME] =
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
-      ref_costs_comp[GOLDEN_FRAME] = base_cost + vp9_cost_bit(ref_comp_p, 1);
+          ref_costs_comp[GOLDEN_FRAME] =
+          ref_costs_comp[ALTREF_FRAME] = base_cost;
+
+#if CONFIG_MULTI_REF
+#if CONFIG_LAST3_REF
+      ref_costs_comp[LAST_FRAME]   += vp9_cost_bit(ref_comp_p, 0);
+      ref_costs_comp[LAST2_FRAME]  += vp9_cost_bit(ref_comp_p, 0);
+      ref_costs_comp[LAST3_FRAME]  += vp9_cost_bit(ref_comp_p, 1);
+      ref_costs_comp[GOLDEN_FRAME] += vp9_cost_bit(ref_comp_p, 1);
+
+      ref_costs_comp[LAST_FRAME]   += vp9_cost_bit(ref_comp_p1, 1);
+      ref_costs_comp[LAST2_FRAME]  += vp9_cost_bit(ref_comp_p1, 0);
+      ref_costs_comp[LAST3_FRAME]  += vp9_cost_bit(ref_comp_p2, 0);
+      ref_costs_comp[GOLDEN_FRAME] += vp9_cost_bit(ref_comp_p2, 1);
+#else  // CONFIG_LAST3_REF
+      ref_costs_comp[LAST_FRAME]   += vp9_cost_bit(ref_comp_p, 0);
+      ref_costs_comp[LAST2_FRAME]  += vp9_cost_bit(ref_comp_p, 0);
+      ref_costs_comp[GOLDEN_FRAME] += vp9_cost_bit(ref_comp_p, 1);
+
+      ref_costs_comp[LAST_FRAME]   += vp9_cost_bit(ref_comp_p1, 1);
+      ref_costs_comp[LAST2_FRAME]  += vp9_cost_bit(ref_comp_p1, 0);
+#endif  // CONFIG_LAST3_REF
+#else  // CONFIG_MULTI_REF
+      ref_costs_comp[LAST_FRAME]   += vp9_cost_bit(ref_comp_p, 0);
+      ref_costs_comp[GOLDEN_FRAME] += vp9_cost_bit(ref_comp_p, 1);
+#endif  // CONFIG_MULTI_REF
     } else {
       ref_costs_comp[LAST_FRAME]   = 512;
 #if CONFIG_MULTI_REF
       ref_costs_comp[LAST2_FRAME]  = 512;
+#if CONFIG_LAST3_REF
+      ref_costs_comp[LAST3_FRAME]  = 512;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
       ref_costs_comp[GOLDEN_FRAME] = 512;
     }
@@ -6503,13 +6641,18 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_NEW_INTER
   INTERP_FILTER single_inter_filter[MB_MODE_COUNT][MAX_REF_FRAMES];
   int single_skippable[MB_MODE_COUNT][MAX_REF_FRAMES];
+  static const int flag_list[REFS_PER_FRAME + 1] = {
+    0,
+    VP9_LAST_FLAG,
 #if CONFIG_MULTI_REF
-  static const int flag_list[5] = {
-    0, VP9_LAST_FLAG, VP9_LAST2_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG };
-#else
-  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                    VP9_ALT_FLAG };
+    VP9_LAST2_FLAG,
+#if CONFIG_LAST3_REF
+    VP9_LAST3_FLAG,
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
+    VP9_GOLD_FLAG,
+    VP9_ALT_FLAG
+  };
   int64_t best_rd = best_rd_so_far;
   int64_t best_tx_rd[TX_MODES];
   int64_t best_tx_diff[TX_MODES];
@@ -6684,12 +6827,14 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // because they may result in zero-zero MVs but be cheaper.
     if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
       int_mv zmv;
+      ref_frame_skip_mask[0] = (1 << LAST_FRAME) |
 #if CONFIG_MULTI_REF
-      ref_frame_skip_mask[0] = (1 << LAST_FRAME) | (1 << LAST2_FRAME) |
-                               (1 << GOLDEN_FRAME);
-#else
-      ref_frame_skip_mask[0] = (1 << LAST_FRAME) | (1 << GOLDEN_FRAME);
+                               (1 << LAST2_FRAME) |
+#if CONFIG_LAST3_REF
+                               (1 << LAST3_FRAME) |
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
+                               (1 << GOLDEN_FRAME);
       ref_frame_skip_mask[1] = SECOND_REF_FRAME_MASK;
       mode_skip_mask[ALTREF_FRAME] = ~INTER_NEAREST_NEAR_ZERO;
 #if CONFIG_GLOBAL_MOTION
@@ -6842,6 +6987,12 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           ref_frame_skip_mask[0] |= LAST2_FRAME_MODE_MASK;
           ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
           break;
+#if CONFIG_LAST3_REF
+        case LAST3_FRAME:
+          ref_frame_skip_mask[0] |= LAST3_FRAME_MODE_MASK;
+          ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+          break;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
         case GOLDEN_FRAME:
           ref_frame_skip_mask[0] |= GOLDEN_FRAME_MODE_MASK;
@@ -6867,6 +7018,12 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_MULTI_REF
     if (cm->last_frame_type == KEY_FRAME && ref_frame == LAST2_FRAME)
       continue;
+
+#if CONFIG_LAST3_REF
+    if ((cm->frame_before_last_type == KEY_FRAME ||
+         cm->last_frame_type == KEY_FRAME) && ref_frame == LAST3_FRAME)
+      continue;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
     // Test best rd so far against threshold for trying this mode.
@@ -8224,13 +8381,18 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned char segment_id = mbmi->segment_id;
   int comp_pred, i;
   struct buf_2d yv12_mb[MAX_REF_FRAMES][MAX_MB_PLANE];
+  static const int flag_list[REFS_PER_FRAME + 1] = {
+    0,
+    VP9_LAST_FLAG,
 #if CONFIG_MULTI_REF
-  static const int flag_list[5] = {
-    0, VP9_LAST_FLAG, VP9_LAST2_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG };
-#else
-  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                    VP9_ALT_FLAG };
+    VP9_LAST2_FLAG,
+#if CONFIG_LAST3_REF
+    VP9_LAST3_FLAG,
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
+    VP9_GOLD_FLAG,
+    VP9_ALT_FLAG
+  };
   int64_t best_rd = best_rd_so_far;
   int64_t best_yrd = best_rd_so_far;  // FIXME(rbultje) more precise
   static const int64_t best_tx_diff[TX_MODES] = { 0 };
@@ -8360,6 +8522,12 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_MULTI_REF
     if (cm->last_frame_type == KEY_FRAME && ref_frame == LAST2_FRAME)
       continue;
+
+#if CONFIG_LAST3_REF
+    if ((cm->frame_before_last_type == KEY_FRAME ||
+         cm->last_frame_type == KEY_FRAME) && ref_frame == LAST3_FRAME)
+      continue;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
     // Look at the reference frame of the best mode so far and set the
@@ -8370,38 +8538,62 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           case INTRA_FRAME:
             break;
           case LAST_FRAME:
-#if CONFIG_MULTI_REF
             ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) |
-                (1 << ALTREF_FRAME) | (1 << LAST2_FRAME);
-#else
-            ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME);
+#if CONFIG_MULTI_REF
+                                      (1 << LAST2_FRAME) |
+#if CONFIG_LAST3_REF
+                                      (1 << LAST3_FRAME) |
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
+                                      (1 << ALTREF_FRAME);
             ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
             break;
+
 #if CONFIG_MULTI_REF
           case LAST2_FRAME:
-            ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) |
-                (1 << ALTREF_FRAME) | (1 << LAST_FRAME);
-            ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
-            break;
-#endif  // CONFIG_MULTI_REF
-          case GOLDEN_FRAME:
-#if CONFIG_MULTI_REF
             ref_frame_skip_mask[0] |= (1 << LAST_FRAME) |
-                (1 << ALTREF_FRAME) | (1 << LAST2_FRAME);
-#else
-            ref_frame_skip_mask[0] |= (1 << LAST_FRAME) | (1 << ALTREF_FRAME);
-#endif  // CONFIG_MULTI_REF
+#if CONFIG_LAST3_REF
+                                      (1 << LAST3_FRAME) |
+#endif  // CONFIG_LAST3_REF
+                                      (1 << GOLDEN_FRAME) |
+                                      (1 << ALTREF_FRAME);
             ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
             break;
-          case ALTREF_FRAME:
-#if CONFIG_MULTI_REF
-            ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) |
-                (1 << LAST_FRAME) | (1 << LAST2_FRAME);
-#else
-            ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) | (1 << LAST_FRAME);
-#endif  // CONFIG_MULTI_REF
+
+#if CONFIG_LAST3_REF
+          case LAST3_FRAME:
+            ref_frame_skip_mask[0] |= (1 << LAST_FRAME) |
+                                      (1 << LAST2_FRAME) |
+                                      (1 << GOLDEN_FRAME) |
+                                      (1 << ALTREF_FRAME);
+            ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
             break;
+#endif  // CONFIG_LAST3_REF
+#endif  // CONFIG_MULTI_REF
+
+          case GOLDEN_FRAME:
+            ref_frame_skip_mask[0] |= (1 << LAST_FRAME) |
+#if CONFIG_LAST3_REF
+                                      (1 << LAST2_FRAME) |
+#if CONFIG_MULTI_REF
+                                      (1 << LAST3_FRAME) |
+#endif  // CONFIG_MULTI_REF
+#endif  // CONFIG_LAST3_REF
+                                      (1 << ALTREF_FRAME);
+            ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+            break;
+
+          case ALTREF_FRAME:
+            ref_frame_skip_mask[0] |= (1 << LAST_FRAME) |
+#if CONFIG_LAST3_REF
+                                      (1 << LAST2_FRAME) |
+#if CONFIG_MULTI_REF
+                                      (1 << LAST3_FRAME) |
+#endif  // CONFIG_MULTI_REF
+#endif  // CONFIG_LAST3_REF
+                                      (1 << GOLDEN_FRAME);
+            break;
+
           case NONE:
           case MAX_REF_FRAMES:
             assert(0 && "Invalid Reference frame");
@@ -8537,6 +8729,10 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_MULTI_REF
       this_rd_thresh = (ref_frame == LAST2_FRAME) ?
       rd_opt->threshes[segment_id][bsize][THR_LAST2] : this_rd_thresh;
+#if CONFIG_LAST3_REF
+      this_rd_thresh = (ref_frame == LAST3_FRAME) ?
+      rd_opt->threshes[segment_id][bsize][THR_LAST3] : this_rd_thresh;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
       this_rd_thresh = (ref_frame == GOLDEN_FRAME) ?
       rd_opt->threshes[segment_id][bsize][THR_GOLD] : this_rd_thresh;

@@ -31,7 +31,11 @@ extern "C" {
 #endif
 
 #if CONFIG_MULTI_REF
+#if CONFIG_LAST3_REF
+#define REFS_PER_FRAME 5
+#else
 #define REFS_PER_FRAME 4
+#endif  // CONFIG_LAST3_REF
 #else
 #define REFS_PER_FRAME 3
 #endif  // CONFIG_MULTI_REF
@@ -129,6 +133,10 @@ typedef struct VP9Common {
 
   FRAME_TYPE last_frame_type;  /* last frame's frame type for motion search.*/
   FRAME_TYPE frame_type;
+#if CONFIG_MULTI_REF && CONFIG_LAST3_REF
+  // frame type for the frame before the last
+  FRAME_TYPE frame_before_last_type;
+#endif  // CONFIG_MULTI_REF && CONFIG_LAST3_REF
 
   int show_frame;
   int last_show_frame;
@@ -190,7 +198,11 @@ typedef struct VP9Common {
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;
 #if CONFIG_MULTI_REF
+#if CONFIG_LAST3_REF
+  MV_REFERENCE_FRAME comp_var_ref[4];
+#else
   MV_REFERENCE_FRAME comp_var_ref[3];
+#endif  // CONFIG_LAST3_REF
 #else
   MV_REFERENCE_FRAME comp_var_ref[2];
 #endif  // CONFIG_MULTI_REF

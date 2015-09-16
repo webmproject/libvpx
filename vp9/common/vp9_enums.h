@@ -196,8 +196,14 @@ typedef enum {
   VP9_LAST_FLAG = 1 << 0,
 #if CONFIG_MULTI_REF
   VP9_LAST2_FLAG = 1 << 1,
+#if CONFIG_LAST3_REF
+  VP9_LAST3_FLAG = 1 << 2,
+  VP9_GOLD_FLAG = 1 << 3,
+  VP9_ALT_FLAG = 1 << 4,
+#else
   VP9_GOLD_FLAG = 1 << 2,
   VP9_ALT_FLAG = 1 << 3,
+#endif  // CONFIG_LAST3_REF
 #else
   VP9_GOLD_FLAG = 1 << 1,
   VP9_ALT_FLAG = 1 << 2,

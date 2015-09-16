@@ -158,11 +158,20 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
 #if CONFIG_MULTI_REF
   } else if (ref_frame_flag == VP9_LAST2_FLAG) {
     ref_buf = &cm->frame_refs[1];
+#if CONFIG_LAST3_REF
+  } else if (ref_frame_flag == VP9_LAST3_FLAG) {
+    ref_buf = &cm->frame_refs[2];
+  } else if (ref_frame_flag == VP9_GOLD_FLAG) {
+    ref_buf = &cm->frame_refs[3];
+  } else if (ref_frame_flag == VP9_ALT_FLAG) {
+    ref_buf = &cm->frame_refs[4];
+#else  // CONFIG_LAST3_REF
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
     ref_buf = &cm->frame_refs[2];
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
     ref_buf = &cm->frame_refs[3];
-#else
+#endif  // CONFIG_LAST3_REF
+#else  // CONFIG_MULTI_REF
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
     ref_buf = &cm->frame_refs[1];
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
@@ -222,19 +231,43 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     // (2) The only exception is that when current frame is a KEY_FRAME, where
     //     all the frames in the frame buffer (cm->frame_bufs) get refreshed.
     if ((mask & 1) &&
-        ((ref_index != 1) || (cm->frame_type == KEY_FRAME))) {
-#else
+#if CONFIG_LAST3_REF
+        (cm->frame_type == KEY_FRAME || (ref_index != 1 && ref_index != 2))
+#else  // CONFIG_LAST3_REF
+        (cm->frame_type == KEY_FRAME || ref_index != 1)
+#endif  // CONFIG_LAST3_REF
+        ) {
+#else  // CONFIG_MULTI_REF
     if (mask & 1) {
 #endif  // CONFIG_MULTI_REF
       const int old_idx = cm->ref_frame_map[ref_index];
 
 #if CONFIG_MULTI_REF
       if ((ref_index == 0) && (mask & 2) && (cm->frame_type != KEY_FRAME)) {
-        // If current is LAST_FRAME and LAST2_FRAME needs to get refreshed
+        // If current is LAST_FRAME, and LAST2_FRAME needs to get refreshed
         // as well, then LAST2_FRAME should get handled first.
         const int ref_index_last2 = ref_index + 1;
-        const int old_buf_idx_last2 =
-            cm->ref_frame_map[ref_index_last2];
+        const int old_buf_idx_last2 = cm->ref_frame_map[ref_index_last2];
+
+#if CONFIG_LAST3_REF
+        if (mask & 4) {
+          // If current is LAST_FRAME, and both LAST2_FRAME and LAST3_FRAME need
+          // to get refreshed as well, then LAST3_FRAME should get handled first
+          // followed by the handling of LAST2_FRAME.
+          const int ref_index_last3 = ref_index_last2 + 1;
+          const int old_buf_idx_last3 = cm->ref_frame_map[ref_index_last3];
+
+          ref_cnt_fb(cm->frame_bufs,
+                     &cm->ref_frame_map[ref_index_last3],
+                     cm->ref_frame_map[ref_index_last2]);
+          if (old_buf_idx_last3 >= 0 &&
+              cm->frame_bufs[old_buf_idx_last3].ref_count == 0) {
+            cm->release_fb_cb(
+                cm->cb_priv,
+                &cm->frame_bufs[old_buf_idx_last3].raw_frame_buffer);
+          }
+        }
+#endif  // CONFIG_LAST3_REF
 
         ref_cnt_fb(cm->frame_bufs,
                    &cm->ref_frame_map[ref_index_last2],

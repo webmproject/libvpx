@@ -139,6 +139,17 @@ static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p1(const VP9_COMMON *cm,
   const int pred_context = vp9_get_pred_context_comp_ref_p1(cm, xd);
   return cm->fc.comp_ref_probs[pred_context][1];
 }
+
+#if CONFIG_LAST3_REF
+int vp9_get_pred_context_comp_ref_p2(const VP9_COMMON *cm,
+                                     const MACROBLOCKD *xd);
+
+static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p2(const VP9_COMMON *cm,
+                                                     const MACROBLOCKD *xd) {
+  const int pred_context = vp9_get_pred_context_comp_ref_p2(cm, xd);
+  return cm->fc.comp_ref_probs[pred_context][2];
+}
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
 int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
@@ -162,6 +173,15 @@ static INLINE vp9_prob vp9_get_pred_prob_single_ref_p3(const VP9_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
   return cm->fc.single_ref_probs[vp9_get_pred_context_single_ref_p3(xd)][2];
 }
+
+#if CONFIG_LAST3_REF
+int vp9_get_pred_context_single_ref_p4(const MACROBLOCKD *xd);
+
+static INLINE vp9_prob vp9_get_pred_prob_single_ref_p4(const VP9_COMMON *cm,
+                                                       const MACROBLOCKD *xd) {
+  return cm->fc.single_ref_probs[vp9_get_pred_context_single_ref_p4(xd)][3];
+}
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
 int vp9_get_tx_size_context(const MACROBLOCKD *xd);

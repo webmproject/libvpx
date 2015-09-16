@@ -495,27 +495,50 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
 
     if (is_compound) {
+#if CONFIG_MULTI_REF && CONFIG_LAST3_REF
+      const int bit = (mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                       mbmi->ref_frame[0] == LAST3_FRAME);
+#else
       const int bit = mbmi->ref_frame[0] == GOLDEN_FRAME;
+#endif  // CONFIG_MULTI_REF && CONFIG_LAST3_REF
       vp9_write(w, bit, vp9_get_pred_prob_comp_ref_p(cm, xd));
+
 #if CONFIG_MULTI_REF
       if (!bit) {
         const int bit1 = mbmi->ref_frame[0] == LAST_FRAME;
         vp9_write(w, bit1, vp9_get_pred_prob_comp_ref_p1(cm, xd));
+#if CONFIG_LAST3_REF
+      } else {
+        const int bit2 = mbmi->ref_frame[0] == GOLDEN_FRAME;
+        vp9_write(w, bit2, vp9_get_pred_prob_comp_ref_p2(cm, xd));
+#endif  // CONFIG_LAST3_REF
       }
 #endif  // CONFIG_MULTI_REF
     } else {
 #if CONFIG_MULTI_REF
-      const int bit0 = !(mbmi->ref_frame[0] == LAST_FRAME ||
-                         mbmi->ref_frame[0] == LAST2_FRAME);
+      const int bit0 = (mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                        mbmi->ref_frame[0] == ALTREF_FRAME);
       vp9_write(w, bit0, vp9_get_pred_prob_single_ref_p1(cm, xd));
+
       if (bit0) {
         const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
         vp9_write(w, bit1, vp9_get_pred_prob_single_ref_p2(cm, xd));
       } else {
+#if CONFIG_LAST3_REF
+        const int bit2 = mbmi->ref_frame[0] == LAST3_FRAME;
+#else  // CONFIG_LAST3_REF
         const int bit2 = mbmi->ref_frame[0] != LAST_FRAME;
+#endif  // CONFIG_LAST3_REF
         vp9_write(w, bit2, vp9_get_pred_prob_single_ref_p3(cm, xd));
+
+#if CONFIG_LAST3_REF
+        if (!bit2) {
+          const int bit3 = mbmi->ref_frame[0] != LAST_FRAME;
+          vp9_write(w, bit3, vp9_get_pred_prob_single_ref_p4(cm, xd));
+        }
+#endif  // CONFIG_LAST3_REF
       }
-#else
+#else  // CONFIG_MULTI_REF
       const int bit0 = mbmi->ref_frame[0] != LAST_FRAME;
       vp9_write(w, bit0, vp9_get_pred_prob_single_ref_p1(cm, xd));
       if (bit0) {
@@ -2160,6 +2183,9 @@ static int get_refresh_mask(VP9_COMP *cpi) {
     return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
 #if CONFIG_MULTI_REF
            (cpi->refresh_last2_frame << cpi->lst2_fb_idx) |
+#if CONFIG_LAST3_REF
+           (cpi->refresh_last3_frame << cpi->lst3_fb_idx) |
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
            (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {
@@ -2171,6 +2197,9 @@ static int get_refresh_mask(VP9_COMP *cpi) {
     return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
 #if CONFIG_MULTI_REF
            (cpi->refresh_last2_frame << cpi->lst2_fb_idx) |
+#if CONFIG_LAST3_REF
+           (cpi->refresh_last3_frame << cpi->lst3_fb_idx) |
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
            (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
            (cpi->refresh_alt_ref_frame << arf_idx);
@@ -2378,6 +2407,9 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 #if CONFIG_MULTI_REF
   cpi->refresh_last2_frame =
       (cm->frame_type == KEY_FRAME || cpi->refresh_last_frame) ? 1 : 0;
+#if CONFIG_LAST3_REF
+  cpi->refresh_last3_frame = cpi->refresh_last2_frame ? 1 : 0;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
   if (cm->frame_type == KEY_FRAME) {

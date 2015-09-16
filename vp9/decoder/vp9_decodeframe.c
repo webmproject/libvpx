@@ -61,7 +61,12 @@ static void setup_compound_reference_mode(VP9_COMMON *cm) {
     cm->comp_var_ref[0] = LAST_FRAME;
 #if CONFIG_MULTI_REF
     cm->comp_var_ref[1] = LAST2_FRAME;
+#if CONFIG_LAST3_REF
+    cm->comp_var_ref[2] = LAST3_FRAME;
+    cm->comp_var_ref[3] = GOLDEN_FRAME;
+#else
     cm->comp_var_ref[2] = GOLDEN_FRAME;
+#endif  // CONFIG_LAST3_REF
 #else
     cm->comp_var_ref[1] = GOLDEN_FRAME;
 #endif  // CONFIG_MULTI_REF
@@ -3097,6 +3102,9 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   size_t sz;
   int i;
 
+#if CONFIG_MULTI_REF && CONFIG_LAST3_REF
+  cm->frame_before_last_type = cm->last_frame_type;
+#endif  // CONFIG_MULTI_REF && CONFIG_LAST3_REF
   cm->last_frame_type = cm->frame_type;
 
   if (vp9_rb_read_literal(rb, 2) != VP9_FRAME_MARKER)

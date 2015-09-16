@@ -629,6 +629,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
     rd->thresh_mult[THR_NEARESTMV] = 300;
 #if CONFIG_MULTI_REF
     rd->thresh_mult[THR_NEARESTL2] = 300;
+#if CONFIG_LAST3_REF
+    rd->thresh_mult[THR_NEARESTL3] = 300;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
     rd->thresh_mult[THR_NEARESTG] = 300;
     rd->thresh_mult[THR_NEARESTA] = 300;
@@ -636,6 +639,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
     rd->thresh_mult[THR_NEARESTMV] = 0;
 #if CONFIG_MULTI_REF
     rd->thresh_mult[THR_NEARESTL2] = 0;
+#if CONFIG_LAST3_REF
+    rd->thresh_mult[THR_NEARESTL3] = 0;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
     rd->thresh_mult[THR_NEARESTG] = 0;
     rd->thresh_mult[THR_NEARESTA] = 0;
@@ -646,6 +652,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_NEWMV] += 1000;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_NEWL2] += 1000;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_NEWL3] += 1000;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_NEWG] += 1000;
   rd->thresh_mult[THR_NEWA] += 1000;
@@ -654,6 +663,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_NEW2MV] += 1000;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_NEW2L2] += 1000;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_NEW2L3] += 1000;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_NEW2G] += 1000;
   rd->thresh_mult[THR_NEW2A] += 1000;
@@ -662,6 +674,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_NEARMV] += 1000;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_NEARL2] += 1000;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_NEARL3] += 1000;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_NEARG] += 1000;
   rd->thresh_mult[THR_NEARA] += 1000;
@@ -671,6 +686,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_ZEROMV] += 2000;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_ZEROL2] += 2000;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_ZEROL3] += 2000;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_ZEROG] += 2000;
   rd->thresh_mult[THR_ZEROA] += 2000;
@@ -705,6 +723,19 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEW_NEARL2A] += 1700;
   rd->thresh_mult[THR_COMP_NEW_NEWL2A] += 2000;
   rd->thresh_mult[THR_COMP_ZERO_ZEROL2A] += 2500;
+
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTL3A] += 1000;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARL3A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTL3A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAREST_NEWL3A] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTL3A] += 1500;
+  rd->thresh_mult[THR_COMP_NEAR_NEWL3A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARL3A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEWL3A] += 2000;
+  rd->thresh_mult[THR_COMP_ZERO_ZEROL3A] += 2500;
+
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
 #else  // CONFIG_NEW_INTER
@@ -722,6 +753,14 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEARL2A] += 1500;
   rd->thresh_mult[THR_COMP_NEWL2A] += 2000;
   rd->thresh_mult[THR_COMP_ZEROL2A] += 2500;
+
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_COMP_NEARESTL3A] += 1000;
+  rd->thresh_mult[THR_COMP_NEARL3A] += 1500;
+  rd->thresh_mult[THR_COMP_NEWL3A] += 2000;
+  rd->thresh_mult[THR_COMP_ZEROL3A] += 2500;
+
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
 
 #endif  // CONFIG_NEW_INTER
@@ -739,6 +778,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_COMP_INTERINTRA_ZEROL   ] += 1500;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_ZEROL2  ] += 1500;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_ZEROL3  ] += 1500;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_ZEROG   ] += 1500;
   rd->thresh_mult[THR_COMP_INTERINTRA_ZEROA   ] += 1500;
@@ -746,6 +788,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTL] += 1500;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTL2] += 1500;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTL3] += 1500;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTG] += 1500;
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTA] += 1500;
@@ -753,6 +798,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARL   ] += 1500;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARL2  ] += 1500;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARL3  ] += 1500;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARG   ] += 1500;
   rd->thresh_mult[THR_COMP_INTERINTRA_NEARA   ] += 1500;
@@ -760,6 +808,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_COMP_INTERINTRA_NEWL    ] += 2000;
 #if CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEWL2   ] += 2000;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEWL3   ] += 2000;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult[THR_COMP_INTERINTRA_NEWG    ] += 2000;
   rd->thresh_mult[THR_COMP_INTERINTRA_NEWA    ] += 2000;
@@ -777,6 +828,9 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   rd->thresh_mult_sub8x8[THR_LAST] += 2500;
 #if CONFIG_MULTI_REF
   rd->thresh_mult_sub8x8[THR_LAST2] += 2500;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult_sub8x8[THR_LAST3] += 2500;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult_sub8x8[THR_GOLD] += 2500;
   rd->thresh_mult_sub8x8[THR_ALTR] += 2500;
@@ -784,6 +838,9 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   rd->thresh_mult_sub8x8[THR_COMP_LA] += 4500;
 #if CONFIG_MULTI_REF
   rd->thresh_mult_sub8x8[THR_COMP_L2A] += 4500;
+#if CONFIG_LAST3_REF
+  rd->thresh_mult_sub8x8[THR_COMP_L3A] += 4500;
+#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   rd->thresh_mult_sub8x8[THR_COMP_GA] += 4500;
 

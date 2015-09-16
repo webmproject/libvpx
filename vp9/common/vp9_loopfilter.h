@@ -27,7 +27,11 @@ extern "C" {
 #define SIMD_WIDTH 16
 
 #if CONFIG_MULTI_REF
+#if CONFIG_LAST3_REF
+#define MAX_REF_LF_DELTAS       6
+#else
 #define MAX_REF_LF_DELTAS       5
+#endif  // CONFIG_LAST3_REF
 #else
 #define MAX_REF_LF_DELTAS       4
 #endif  // CONFIG_MULTI_REF
