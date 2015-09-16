@@ -3118,7 +3118,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const scan_order *scan_order;
-  TX_TYPE tx_type = DCT_DCT;
+  TX_TYPE tx_type =
+      (tx_size >= TX_32X32 ? get_tx_type_large : get_tx_type)
+      (plane == 0 ? PLANE_TYPE_Y : PLANE_TYPE_UV, xd);
   PREDICTION_MODE mode;
 #if CONFIG_FILTERINTRA
   int fbit = 0;

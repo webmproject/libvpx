@@ -582,42 +582,55 @@ static INLINE TX_TYPE get_tx_type_large(PLANE_TYPE plane_type,
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
+  (void) plane_type;
 
 #if CONFIG_EXT_TX
-  if (plane_type != PLANE_TYPE_Y || xd->lossless)
+  if (xd->lossless)
       return DCT_DCT;
 
   if (is_inter_block(mbmi)) {
     return ext_tx_to_txtype[mbmi->ext_txfrm];
   }
-#else
+#if CONFIG_INTRABC
+  if (is_intrabc_mode(mbmi->mode))
+    return DCT_DCT;
+#endif  // CONFIG_INTRABC
+  return intra_mode_to_tx_type_lookup[plane_type == PLANE_TYPE_Y ?
+      mbmi->mode : mbmi->uv_mode];
+#else   // CONFIG_EXT_TX
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
     return DCT_DCT;
-#endif  // CONFIG_EXT_TX
 #if CONFIG_INTRABC
   if (is_intrabc_mode(mbmi->mode))
     return DCT_DCT;
 #endif  // CONFIG_INTRABC
   return intra_mode_to_tx_type_lookup[mbmi->mode];
+#endif  // CONFIG_EXT_TX
 }
 
 static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
   const MODE_INFO *const mi = xd->mi[0].src_mi;
   PREDICTION_MODE mode;
+  (void) plane_type;
 
 #if CONFIG_EXT_TX
-  if (plane_type != PLANE_TYPE_Y || xd->lossless)
+  if (xd->lossless)
       return DCT_DCT;
 
   if (is_inter_block(&mi->mbmi)) {
     return ext_tx_to_txtype[mi->mbmi.ext_txfrm];
   }
-#else
+  mode = get_y_mode(mi, ib);
+#if CONFIG_INTRABC
+  if (is_intrabc_mode(mode))
+    return DCT_DCT;
+#endif  // CONFIG_INTRABC
+  return intra_mode_to_tx_type_lookup[plane_type == PLANE_TYPE_Y ?
+      mode : mi->mbmi.uv_mode];
+#else   // CONFIG_EXT_TX
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
     return DCT_DCT;
-#endif
-
   mode = get_y_mode(mi, ib);
 #if CONFIG_INTRABC
   if (is_intrabc_mode(mode))
@@ -625,6 +638,7 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
 #endif  // CONFIG_INTRABC
 
   return intra_mode_to_tx_type_lookup[mode];
+#endif  // CONFIG_EXT_TX
 }
 
 void vp9_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);
