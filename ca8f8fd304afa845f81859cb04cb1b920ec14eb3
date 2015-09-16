@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c45e4afd_10e4aa9f",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-16T02:59:08Z",
+      "side": 1,
+      "message": "if the tests grow you may want to put this in the constructor or DefaultConfig() for convenience",
+      "revId": "ca8f8fd304afa845f81859cb04cb1b920ec14eb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
