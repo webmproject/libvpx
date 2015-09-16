@@ -129,6 +129,7 @@ typedef struct BufferPool {
 typedef struct VP10Common {
   struct vpx_internal_error_info  error;
   vpx_color_space_t color_space;
+  int color_range;
   int width;
   int height;
   int display_width;
