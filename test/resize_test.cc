@@ -273,6 +273,12 @@ class ResizeInternalRealtimeTest : public ::libvpx_test::EncoderTest,
       encoder->Control(VP9E_SET_AQ_MODE, 3);
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
     }
+
+    if (change_bitrate_ && video->frame() == 120) {
+      change_bitrate_ = false;
+      cfg_.rc_target_bitrate = 500;
+      encoder->Config(&cfg_);
+    }
   }
 
   virtual void SetUp() {
@@ -312,15 +318,17 @@ class ResizeInternalRealtimeTest : public ::libvpx_test::EncoderTest,
 
   std::vector< FrameInfo > frame_info_list_;
   int set_cpu_used_;
+  bool change_bitrate_;
 };
 
 // Verify the dynamic resizer behavior for real time, 1 pass CBR mode.
 // Run at low bitrate, with resize_allowed = 1, and verify that we get
 // one resize down event.
-TEST_P(ResizeInternalRealtimeTest, TestInternalRealtimeResizeDown) {
+TEST_P(ResizeInternalRealtimeTest, TestInternalResizeDown) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 299);
   DefaultConfig();
+  change_bitrate_ = false;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   unsigned int last_w = cfg_.g_w;
@@ -340,6 +348,45 @@ TEST_P(ResizeInternalRealtimeTest, TestInternalRealtimeResizeDown) {
 
   // Verify that we get 1 resize down event in this test.
   ASSERT_EQ(1, resize_count) << "Resizing should occur.";
+}
+
+// Verify the dynamic resizer behavior for real time, 1 pass CBR mode.
+// Start at low target bitrate, raise the bitrate in the middle of the clip,
+// scaling-up should occur after bitrate changed.
+TEST_P(ResizeInternalRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 299);
+  DefaultConfig();
+  change_bitrate_ = true;
+  // Disable dropped frames.
+  cfg_.rc_dropframe_thresh = 0;
+  // Starting bitrate low.
+  cfg_.rc_target_bitrate = 100;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+
+  unsigned int last_w = cfg_.g_w;
+  unsigned int last_h = cfg_.g_h;
+  int resize_count = 0;
+  for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
+       info != frame_info_list_.end(); ++info) {
+    if (info->w != last_w || info->h != last_h) {
+      resize_count++;
+      if (resize_count == 1) {
+        // Verify that resize down occurs.
+        ASSERT_LT(info->w, last_w);
+        ASSERT_LT(info->h, last_h);
+      } else if (resize_count == 2) {
+        // Verify that resize up occurs.
+        ASSERT_GT(info->w, last_w);
+        ASSERT_GT(info->h, last_h);
+      }
+      last_w = info->w;
+      last_h = info->h;
+    }
+  }
+
+  // Verify that we get 2 resize events in this test.
+  ASSERT_EQ(2, resize_count) << "Resizing should occur twice.";
 }
 
 vpx_img_fmt_t CspForFrameNumber(int frame) {
