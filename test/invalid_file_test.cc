@@ -145,7 +145,7 @@ TEST_P(InvalidFileInvalidPeekTest, ReturnCode) {
 }
 
 const DecodeParam kVP9InvalidFileInvalidPeekTests[] = {
-  {1, "invalid-vp90-01-v2.webm"},
+  {1, "invalid-vp90-01-v3.webm"},
 };
 
 VP9_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,

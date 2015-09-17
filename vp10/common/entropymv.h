@@ -124,7 +124,7 @@ typedef struct {
   nmv_component_counts comps[2];
 } nmv_context_counts;
 
-void vp10_inc_mv(const MV *mv, nmv_context_counts *mvctx);
+void vp10_inc_mv(const MV *mv, nmv_context_counts *mvctx, const int usehp);
 
 #ifdef __cplusplus
 }  // extern "C"

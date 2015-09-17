@@ -22,6 +22,8 @@
 #include "vp10/decoder/decodemv.h"
 #include "vp10/decoder/decodeframe.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
+
 static PREDICTION_MODE read_intra_mode(vpx_reader *r, const vpx_prob *p) {
   return (PREDICTION_MODE)vpx_read_tree(r, vp10_intra_mode_tree, p);
 }
@@ -87,7 +89,7 @@ static TX_SIZE read_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
     return read_selected_tx_size(cm, xd, max_tx_size, r);
   else
-    return MIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
+    return VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
 }
 
 static int dec_get_segment_id(const VP10_COMMON *cm, const uint8_t *segment_ids,
@@ -96,8 +98,8 @@ static int dec_get_segment_id(const VP10_COMMON *cm, const uint8_t *segment_ids,
 
   for (y = 0; y < y_mis; y++)
     for (x = 0; x < x_mis; x++)
-      segment_id = MIN(segment_id,
-                       segment_ids[mi_offset + y * cm->mi_cols + x]);
+      segment_id =
+          VPXMIN(segment_id, segment_ids[mi_offset + y * cm->mi_cols + x]);
 
   assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
   return segment_id;
@@ -114,6 +116,22 @@ static void set_segment_id(VP10_COMMON *cm, int mi_offset,
       cm->current_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
 }
 
+static int read_intra_segment_id(VP10_COMMON *const cm, int mi_offset,
+                                 int x_mis, int y_mis,
+                                 vpx_reader *r) {
+  struct segmentation *const seg = &cm->seg;
+  int segment_id;
+
+  if (!seg->enabled)
+    return 0;  // Default for disabled segmentation
+
+  assert(seg->update_map && !seg->temporal_update);
+
+  segment_id = read_segment_id(r, seg);
+  set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
+  return segment_id;
+}
+
 static void copy_segment_id(const VP10_COMMON *cm,
                            const uint8_t *last_segment_ids,
                            uint8_t *current_segment_ids,
@@ -126,26 +144,6 @@ static void copy_segment_id(const VP10_COMMON *cm,
           last_segment_ids[mi_offset + y * cm->mi_cols + x] : 0;
 }
 
-static int read_intra_segment_id(VP10_COMMON *const cm, int mi_offset,
-                                 int x_mis, int y_mis,
-                                 vpx_reader *r) {
-  struct segmentation *const seg = &cm->seg;
-  int segment_id;
-
-  if (!seg->enabled)
-    return 0;  // Default for disabled segmentation
-
-  if (!seg->update_map) {
-    copy_segment_id(cm, cm->last_frame_seg_map, cm->current_frame_seg_map,
-                    mi_offset, x_mis, y_mis);
-    return 0;
-  }
-
-  segment_id = read_segment_id(r, seg);
-  set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
-  return segment_id;
-}
-
 static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col, vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
@@ -156,8 +154,8 @@ static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   const int bh = xd->plane[0].n4_h >> 1;
 
   // TODO(slavarnway): move x_mis, y_mis into xd ?????
-  const int x_mis = MIN(cm->mi_cols - mi_col, bw);
-  const int y_mis = MIN(cm->mi_rows - mi_row, bh);
+  const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
+  const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
@@ -212,8 +210,8 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
   const int bh = xd->plane[0].n4_h >> 1;
 
   // TODO(slavarnway): move x_mis, y_mis into xd ?????
-  const int x_mis = MIN(cm->mi_cols - mi_col, bw);
-  const int y_mis = MIN(cm->mi_rows - mi_row, bh);
+  const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
+  const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
   mbmi->segment_id = read_intra_segment_id(cm, mi_offset, x_mis, y_mis, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
@@ -296,7 +294,7 @@ static INLINE void read_mv(vpx_reader *r, MV *mv, const MV *ref,
   if (mv_joint_horizontal(joint_type))
     diff.col = read_mv_component(r, &ctx->comps[1], use_hp);
 
-  vp10_inc_mv(&diff, counts);
+  vp10_inc_mv(&diff, counts, use_hp);
 
   mv->row = ref->row + diff.row;
   mv->col = ref->col + diff.col;
@@ -604,11 +602,12 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
         mbmi->sb_type >= BLOCK_8X8 &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
         !mbmi->skip) {
+      FRAME_COUNTS *counts = xd->counts;
       mbmi->ext_txfrm = vpx_read_tree(r,
                                       vp10_ext_tx_tree,
                                       cm->fc->ext_tx_prob[mbmi->tx_size]);
-      if (!cm->frame_parallel_decoding_mode)
-        ++cm->counts.ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
+      if (counts)
+        ++counts->ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
     } else {
       mbmi->ext_txfrm = NORM;
     }

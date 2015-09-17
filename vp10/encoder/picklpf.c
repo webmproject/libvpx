@@ -13,6 +13,7 @@
 
 #include "./vpx_scale_rtcd.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
@@ -92,8 +93,8 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
   ss_err[filt_mid] = best_err;
 
   while (filter_step > 0) {
-    const int filt_high = MIN(filt_mid + filter_step, max_filter_level);
-    const int filt_low = MAX(filt_mid - filter_step, min_filter_level);
+    const int filt_high = VPXMIN(filt_mid + filter_step, max_filter_level);
+    const int filt_low = VPXMAX(filt_mid - filter_step, min_filter_level);
 
     // Bias against raising loop filter in favor of lowering it.
     int64_t bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;

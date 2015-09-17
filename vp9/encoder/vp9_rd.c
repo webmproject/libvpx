@@ -14,6 +14,7 @@
 
 #include "./vp9_rtcd.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/bitops.h"
 #include "vpx_ports/mem.h"
@@ -172,7 +173,7 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
-    const int boost_index = MIN(15, (cpi->rc.gfu_boost / 100));
+    const int boost_index = VPXMIN(15, (cpi->rc.gfu_boost / 100));
 
     rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
     rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
@@ -204,7 +205,7 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
   q = vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   // TODO(debargha): Adjust the function below.
-  return MAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
+  return VPXMAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, MACROBLOCK *x, int qindex) {
@@ -404,7 +405,7 @@ void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n_log2,
     static const uint32_t MAX_XSQ_Q10 = 245727;
     const uint64_t xsq_q10_64 =
         (((uint64_t)qstep * qstep << (n_log2 + 10)) + (var >> 1)) / var;
-    const int xsq_q10 = (int)MIN(xsq_q10_64, MAX_XSQ_Q10);
+    const int xsq_q10 = (int)VPXMIN(xsq_q10_64, MAX_XSQ_Q10);
     model_rd_norm(xsq_q10, &r_q10, &d_q10);
     *rate = ((r_q10 << n_log2) + 2) >> 2;
     *dist = (var * (int64_t)d_q10 + 512) >> 10;
@@ -485,7 +486,7 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     fp_row = (this_mv->row + 3 + (this_mv->row >= 0)) >> 3;
     fp_col = (this_mv->col + 3 + (this_mv->col >= 0)) >> 3;
-    max_mv = MAX(max_mv, MAX(abs(this_mv->row), abs(this_mv->col)) >> 3);
+    max_mv = VPXMAX(max_mv, VPXMAX(abs(this_mv->row), abs(this_mv->col)) >> 3);
 
     if (fp_row ==0 && fp_col == 0 && zero_seen)
       continue;
@@ -629,16 +630,15 @@ void vp9_update_rd_thresh_fact(int (*factor_buf)[MAX_MODES], int rd_thresh,
     const int top_mode = bsize < BLOCK_8X8 ? MAX_REFS : MAX_MODES;
     int mode;
     for (mode = 0; mode < top_mode; ++mode) {
-      const BLOCK_SIZE min_size = MAX(bsize - 1, BLOCK_4X4);
-      const BLOCK_SIZE max_size = MIN(bsize + 2, BLOCK_64X64);
+      const BLOCK_SIZE min_size = VPXMAX(bsize - 1, BLOCK_4X4);
+      const BLOCK_SIZE max_size = VPXMIN(bsize + 2, BLOCK_64X64);
       BLOCK_SIZE bs;
       for (bs = min_size; bs <= max_size; ++bs) {
         int *const fact = &factor_buf[bs][mode];
         if (mode == best_mode_index) {
           *fact -= (*fact >> 4);
         } else {
-          *fact = MIN(*fact + RD_THRESH_INC,
-                      rd_thresh * RD_THRESH_MAX_FACT);
+          *fact = VPXMIN(*fact + RD_THRESH_INC, rd_thresh * RD_THRESH_MAX_FACT);
         }
       }
     }

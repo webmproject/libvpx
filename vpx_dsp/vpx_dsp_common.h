@@ -13,14 +13,15 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define VPXMIN(x, y) (((x) < (y)) ? (x) : (y))
+#define VPXMAX(x, y) (((x) > (y)) ? (x) : (y))
 
 #if CONFIG_VP9_HIGHBITDEPTH
 // Note:

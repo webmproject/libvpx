@@ -16,6 +16,8 @@
 #include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_encodemv.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
+
 static struct vp9_token mv_joint_encodings[MV_JOINTS];
 static struct vp9_token mv_class_encodings[MV_CLASSES];
 static struct vp9_token mv_fp_encodings[MV_FP_SIZE];
@@ -216,8 +218,8 @@ void vp9_encode_mv(VP9_COMP* cpi, vpx_writer* w,
   // If auto_mv_step_size is enabled then keep track of the largest
   // motion vector component used.
   if (cpi->sf.mv.auto_mv_step_size) {
-    unsigned int maxv = MAX(abs(mv->row), abs(mv->col)) >> 3;
-    cpi->max_mv_magnitude = MAX(maxv, cpi->max_mv_magnitude);
+    unsigned int maxv = VPXMAX(abs(mv->row), abs(mv->col)) >> 3;
+    cpi->max_mv_magnitude = VPXMAX(maxv, cpi->max_mv_magnitude);
   }
 }
 

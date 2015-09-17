@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
@@ -111,10 +112,12 @@ void vp10_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   // Motion estimation may use src block variance with the block size up
   // to 64x64, so the right and bottom need to be extended to 64 multiple
   // or up to 16, whichever is greater.
-  const int er_y = MAX(src->y_width + 16, ALIGN_POWER_OF_TWO(src->y_width, 6))
-      - src->y_crop_width;
-  const int eb_y = MAX(src->y_height + 16, ALIGN_POWER_OF_TWO(src->y_height, 6))
-      - src->y_crop_height;
+  const int er_y =
+      VPXMAX(src->y_width + 16, ALIGN_POWER_OF_TWO(src->y_width, 6)) -
+      src->y_crop_width;
+  const int eb_y =
+      VPXMAX(src->y_height + 16, ALIGN_POWER_OF_TWO(src->y_height, 6)) -
+      src->y_crop_height;
   const int uv_width_subsampling = (src->uv_width != src->y_width);
   const int uv_height_subsampling = (src->uv_height != src->y_height);
   const int et_uv = et_y >> uv_height_subsampling;

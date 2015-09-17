@@ -16,6 +16,7 @@
 #include "vp10/encoder/encodeframe.h"
 #include "vp10/common/seg_common.h"
 #include "vp10/encoder/segmentation.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/system_state.h"
 
 #define AQ_C_SEGMENTS  5
@@ -117,8 +118,8 @@ void vp10_caq_select_segment(VP10_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
   const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
-  const int xmis = MIN(cm->mi_cols - mi_col, num_8x8_blocks_wide_lookup[bs]);
-  const int ymis = MIN(cm->mi_rows - mi_row, num_8x8_blocks_high_lookup[bs]);
+  const int xmis = VPXMIN(cm->mi_cols - mi_col, num_8x8_blocks_wide_lookup[bs]);
+  const int ymis = VPXMIN(cm->mi_rows - mi_row, num_8x8_blocks_high_lookup[bs]);
   int x, y;
   int i;
   unsigned char segment;
@@ -136,7 +137,7 @@ void vp10_caq_select_segment(VP10_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
 
     vpx_clear_system_state();
     low_var_thresh = (cpi->oxcf.pass == 2)
-      ? MAX(cpi->twopass.mb_av_energy, MIN_DEFAULT_LV_THRESH)
+      ? VPXMAX(cpi->twopass.mb_av_energy, MIN_DEFAULT_LV_THRESH)
       : DEFAULT_LV_THRESH;
 
     vp10_setup_src_planes(mb, cpi->Source, mi_row, mi_col);

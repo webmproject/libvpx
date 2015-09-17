@@ -18,6 +18,7 @@
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_dsp/bitreader_buffer.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_util/vpx_thread.h"
 
 #include "vp9/common/vp9_alloccommon.h"
@@ -87,7 +88,8 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (!ctx->priv) {
-    vpx_codec_alg_priv_t *const priv = vpx_calloc(1, sizeof(*priv));
+    vpx_codec_alg_priv_t *const priv =
+        (vpx_codec_alg_priv_t *)vpx_calloc(1, sizeof(*priv));
     if (priv == NULL)
       return VPX_CODEC_MEM_ERROR;
 
@@ -183,7 +185,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
   si->w = si->h = 0;
 
   if (decrypt_cb) {
-    data_sz = MIN(sizeof(clear_buffer), data_sz);
+    data_sz = VPXMIN(sizeof(clear_buffer), data_sz);
     decrypt_cb(decrypt_state, data, clear_buffer, data_sz);
     data = clear_buffer;
   }

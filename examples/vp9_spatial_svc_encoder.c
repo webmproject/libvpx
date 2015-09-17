@@ -25,6 +25,7 @@
 #include "../tools_common.h"
 #include "../video_writer.h"
 
+#include "../vpx_ports/vpx_timer.h"
 #include "vpx/svc_context.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
@@ -79,6 +80,8 @@ static const arg_def_t rc_end_usage_arg =
     ARG_DEF(NULL, "rc-end-usage", 1, "0 - 3: VBR, CBR, CQ, Q");
 static const arg_def_t speed_arg =
     ARG_DEF("sp", "speed", 1, "speed configuration");
+static const arg_def_t aqmode_arg =
+    ARG_DEF("aq", "aqmode", 1, "aq-mode off/on");
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static const struct arg_enum_list bitdepth_enum[] = {
@@ -100,7 +103,7 @@ static const arg_def_t *svc_args[] = {
   &kf_dist_arg,       &scale_factors_arg, &passes_arg,      &pass_arg,
   &fpf_name_arg,      &min_q_arg,         &max_q_arg,       &min_bitrate_arg,
   &max_bitrate_arg,   &temporal_layers_arg, &temporal_layering_mode_arg,
-  &lag_in_frame_arg,  &threads_arg,
+  &lag_in_frame_arg,  &threads_arg,       &aqmode_arg,
 #if OUTPUT_RC_STATS
   &output_rc_stats_arg,
 #endif
@@ -220,6 +223,8 @@ static void parse_command_line(int argc, const char **argv_,
 #endif
     } else if (arg_match(&arg, &speed_arg, argi)) {
       svc_ctx->speed = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &aqmode_arg, argi)) {
+      svc_ctx->aqmode = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &threads_arg, argi)) {
       svc_ctx->threads = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &temporal_layering_mode_arg, argi)) {
@@ -564,6 +569,8 @@ int main(int argc, const char **argv) {
   double sum_bitrate2 = 0.0;
   double framerate  = 30.0;
 #endif
+  struct vpx_usec_timer timer;
+  int64_t cx_time = 0;
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
   exec_name = argv[0];
@@ -632,6 +639,9 @@ int main(int argc, const char **argv) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
   if (svc_ctx.threads)
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (svc_ctx.threads >> 1));
+  if (svc_ctx.speed >= 5 && svc_ctx.aqmode == 1)
+    vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
+
 
   // Encode frames
   while (!end_of_stream) {
@@ -643,9 +653,12 @@ int main(int argc, const char **argv) {
       end_of_stream = 1;
     }
 
+    vpx_usec_timer_start(&timer);
     res = vpx_svc_encode(&svc_ctx, &codec, (end_of_stream ? NULL : &raw),
                          pts, frame_duration, svc_ctx.speed >= 5 ?
                          VPX_DL_REALTIME : VPX_DL_GOOD_QUALITY);
+    vpx_usec_timer_mark(&timer);
+    cx_time += vpx_usec_timer_elapsed(&timer);
 
     printf("%s", vpx_svc_get_message(&svc_ctx));
     if (res != VPX_CODEC_OK) {
@@ -784,6 +797,10 @@ int main(int argc, const char **argv) {
     }
   }
 #endif
+  printf("Frame cnt and encoding time/FPS stats for encoding: %d %f %f \n",
+         frame_cnt,
+         1000 * (float)cx_time / (double)(frame_cnt * 1000000),
+         1000000 * (double)frame_cnt / (double)cx_time);
   vpx_img_free(&raw);
   // display average size, psnr
   printf("%s", vpx_svc_dump_statistics(&svc_ctx));

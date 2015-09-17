@@ -618,9 +618,6 @@ static int main_loop(int argc, const char **argv_) {
       use_y4m = 0;
       flipuv = 1;
       opt_yv12 = 1;
-#if CONFIG_VP9_HIGHBITDEPTH
-      output_bit_depth = 8;  // For yv12 8-bit depth output is assumed
-#endif
     } else if (arg_match(&arg, &use_i420, argi)) {
       use_y4m = 0;
       flipuv = 0;
@@ -990,11 +987,11 @@ static int main_loop(int argc, const char **argv_) {
       }
 #if CONFIG_VP9_HIGHBITDEPTH
       // Default to codec bit depth if output bit depth not set
-      if (!output_bit_depth) {
+      if (!output_bit_depth && single_file && !do_md5) {
         output_bit_depth = img->bit_depth;
       }
       // Shift up or down if necessary
-      if (output_bit_depth != img->bit_depth) {
+      if (output_bit_depth != 0 && output_bit_depth != img->bit_depth) {
         const vpx_img_fmt_t shifted_fmt = output_bit_depth == 8 ?
             img->fmt ^ (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) :
             img->fmt | VPX_IMG_FMT_HIGHBITDEPTH;

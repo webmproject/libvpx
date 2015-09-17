@@ -13,6 +13,7 @@
 #include "./vp10_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/system_state.h"
 #include "vp10/encoder/segmentation.h"
@@ -41,7 +42,7 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
 
   // Further step/diamond searches as necessary
   int step_param = mv_sf->reduce_first_step_size;
-  step_param = MIN(step_param, MAX_MVSEARCH_STEPS - 2);
+  step_param = VPXMIN(step_param, MAX_MVSEARCH_STEPS - 2);
 
   vp10_set_mv_search_range(x, ref_mv);
 

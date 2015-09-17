@@ -9,7 +9,9 @@
  */
 
 #include <limits.h>
+#include <stdlib.h>
 
+#include "./vpx_config.h"
 #include "./bitwriter_buffer.h"
 
 size_t vpx_wb_bytes_written(const struct vpx_write_bit_buffer *wb) {
@@ -33,4 +35,14 @@ void vpx_wb_write_literal(struct vpx_write_bit_buffer *wb, int data, int bits) {
   int bit;
   for (bit = bits - 1; bit >= 0; bit--)
     vpx_wb_write_bit(wb, (data >> bit) & 1);
+}
+
+void vpx_wb_write_inv_signed_literal(struct vpx_write_bit_buffer *wb,
+                                     int data, int bits) {
+#if CONFIG_MISC_FIXES
+  vpx_wb_write_literal(wb, data, bits + 1);
+#else
+  vpx_wb_write_literal(wb, abs(data), bits);
+  vpx_wb_write_bit(wb, data < 0);
+#endif
 }

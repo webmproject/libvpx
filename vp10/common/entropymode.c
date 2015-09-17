@@ -484,12 +484,12 @@ void vp10_setup_past_independence(VP10_COMMON *cm) {
   vp10_init_mv_probs(cm);
   cm->fc->initialized = 1;
 
-  if (cm->frame_type == KEY_FRAME ||
-      cm->error_resilient_mode || cm->reset_frame_context == 3) {
+  if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode ||
+      cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL) {
     // Reset all frame contexts.
     for (i = 0; i < FRAME_CONTEXTS; ++i)
       cm->frame_contexts[i] = *cm->fc;
-  } else if (cm->reset_frame_context == 2) {
+  } else if (cm->reset_frame_context == RESET_FRAME_CONTEXT_CURRENT) {
     // Reset only the frame context specified in the frame header.
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
   }
@@ -498,8 +498,6 @@ void vp10_setup_past_independence(VP10_COMMON *cm) {
   if (frame_is_intra_only(cm) && cm->prev_mip && !cm->frame_parallel_decode)
     memset(cm->prev_mip, 0,
            cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->prev_mip));
-
-  vp10_zero(cm->ref_frame_sign_bias);
 
   cm->frame_context_idx = 0;
 }

@@ -9,8 +9,8 @@
  */
 
 #include "vp10/common/tile_common.h"
-
 #include "vp10/common/onyxc_int.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 #define MIN_TILE_WIDTH_B64 4
 #define MAX_TILE_WIDTH_B64 64
@@ -18,7 +18,7 @@
 static int get_tile_offset(int idx, int mis, int log2) {
   const int sb_cols = mi_cols_aligned_to_sb(mis) >> MI_BLOCK_SIZE_LOG2;
   const int offset = ((idx * sb_cols) >> log2) << MI_BLOCK_SIZE_LOG2;
-  return MIN(offset, mis);
+  return VPXMIN(offset, mis);
 }
 
 void vp10_tile_set_row(TileInfo *tile, const VP10_COMMON *cm, int row) {

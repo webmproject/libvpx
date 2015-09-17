@@ -141,7 +141,7 @@ typedef enum {
 } INTERP_FILTER_MASK;
 
 typedef enum {
-  // Search partitions using RD/NONRD criterion
+  // Search partitions using RD criterion
   SEARCH_PARTITION,
 
   // Always use a fixed size partition
@@ -223,11 +223,6 @@ typedef struct SPEED_FEATURES {
   // mode to be evaluated. A high value means we will be faster.
   int adaptive_rd_thresh;
 
-  // Enables skipping the reconstruction step (idct, recon) in the
-  // intermediate steps assuming the last frame didn't have too many intra
-  // blocks and the q is less than a threshold.
-  int skip_encode_sb;
-  int skip_encode_frame;
   // Speed feature to allow or disallow skipping of recode at block
   // level within a frame.
   int allow_skip_recode;
@@ -252,9 +247,6 @@ typedef struct SPEED_FEATURES {
   // checking modes for reference frames that don't match the reference frame
   // of the best so far.
   int mode_skip_start;
-
-  // TODO(JBB): Remove this.
-  int reference_masking;
 
   PARTITION_SEARCH_TYPE partition_search_type;
 
@@ -314,8 +306,6 @@ typedef struct SPEED_FEATURES {
 
   int cb_partition_search;
 
-  int motion_field_mode_search;
-
   int alt_ref_search_fp;
 
   // Fast quantization process path
@@ -362,9 +352,6 @@ typedef struct SPEED_FEATURES {
   // This feature limits the number of coefficients updates we actually do
   // by only looking at counts from 1/2 the bands.
   FAST_COEFF_UPDATE use_fast_coef_updates;
-
-  // This flag controls the use of non-RD mode decision.
-  int use_nonrd_pick_mode;
 
   // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
   // modes are used in order from LSB to MSB for each BLOCK_SIZE.

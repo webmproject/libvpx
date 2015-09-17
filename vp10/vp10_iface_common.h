@@ -37,6 +37,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
     }
   }
   img->cs = yv12->color_space;
+  img->range = yv12->color_range;
   img->bit_depth = 8;
   img->w = yv12->y_stride;
   img->h = ALIGN_POWER_OF_TWO(yv12->y_height + 2 * VP9_ENC_BORDER_IN_PIXELS, 3);
@@ -56,7 +57,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
   if (yv12->flags & YV12_FLAG_HIGHBITDEPTH) {
     // vpx_image_t uses byte strides and a pointer to the first byte
     // of the image.
-    img->fmt |= VPX_IMG_FMT_HIGHBITDEPTH;
+    img->fmt = (vpx_img_fmt_t)(img->fmt | VPX_IMG_FMT_HIGHBITDEPTH);
     img->bit_depth = yv12->bit_depth;
     img->planes[VPX_PLANE_Y] = (uint8_t*)CONVERT_TO_SHORTPTR(yv12->y_buffer);
     img->planes[VPX_PLANE_U] = (uint8_t*)CONVERT_TO_SHORTPTR(yv12->u_buffer);
@@ -96,6 +97,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   yv12->y_stride = img->stride[VPX_PLANE_Y];
   yv12->uv_stride = img->stride[VPX_PLANE_U];
   yv12->color_space = img->cs;
+  yv12->color_range = img->range;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {

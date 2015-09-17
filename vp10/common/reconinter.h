@@ -34,14 +34,14 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void high_inter_predictor(const uint8_t *src, int src_stride,
-                                 uint8_t *dst, int dst_stride,
-                                 const int subpel_x,
-                                 const int subpel_y,
-                                 const struct scale_factors *sf,
-                                 int w, int h, int ref,
-                                 const InterpKernel *kernel,
-                                 int xs, int ys, int bd) {
+static INLINE void high_inter_predictor(const uint8_t *src, int src_stride,
+                                        uint8_t *dst, int dst_stride,
+                                        const int subpel_x,
+                                        const int subpel_y,
+                                        const struct scale_factors *sf,
+                                        int w, int h, int ref,
+                                        const InterpKernel *kernel,
+                                        int xs, int ys, int bd) {
   sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
@@ -77,8 +77,9 @@ static MV mi_mv_pred_q2(const MODE_INFO *mi, int idx, int block0, int block1) {
 }
 
 // TODO(jkoleszar): yet another mv clamping function :-(
-static MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
-                                    int bw, int bh, int ss_x, int ss_y) {
+static INLINE MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd,
+                                           const MV *src_mv,
+                                           int bw, int bh, int ss_x, int ss_y) {
   // If the MV points so far into the UMV border that no visible pixels
   // are used for reconstruction, the subpel part of the MV can be
   // discarded and the MV limited to 16 pixels with equivalent results.
@@ -102,8 +103,8 @@ static MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
   return clamped_mv;
 }
 
-static MV average_split_mvs(const struct macroblockd_plane *pd,
-                            const MODE_INFO *mi, int ref, int block) {
+static INLINE MV average_split_mvs(const struct macroblockd_plane *pd,
+                                   const MODE_INFO *mi, int ref, int block) {
   const int ss_idx = ((pd->subsampling_x > 0) << 1) | (pd->subsampling_y > 0);
   MV res = {0, 0};
   switch (ss_idx) {

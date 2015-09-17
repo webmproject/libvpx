@@ -14,11 +14,12 @@
 #include "vp10/encoder/speed_features.h"
 #include "vp10/encoder/rdopt.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
 static int frame_is_boosted(const VP10_COMP *cpi) {
-  return frame_is_kf_gf_arf(cpi) || vp10_is_upper_layer_key_frame(cpi);
+  return frame_is_kf_gf_arf(cpi);
 }
 
 // Sets a partition size down to which the auto partition code will always
@@ -49,7 +50,7 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   VP10_COMMON *const cm = &cpi->common;
 
   if (speed >= 1) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
       sf->partition_search_breakout_dist_thr = (1 << 23);
@@ -60,7 +61,7 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 2) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
       sf->adaptive_pred_interp_filter = 0;
@@ -75,7 +76,7 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 3) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
       sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
       sf->partition_search_breakout_dist_thr = (1 << 25);
@@ -99,7 +100,7 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 4) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->partition_search_breakout_dist_thr = (1 << 26);
     } else {
       sf->partition_search_breakout_dist_thr = (1 << 24);
@@ -147,9 +148,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->tx_size_search_method = frame_is_boosted(cpi) ? USE_FULL_RD
                                                       : USE_LARGESTALL;
 
-    // Reference masking is not supported in dynamic scaling mode.
-    sf->reference_masking = cpi->oxcf.resize_mode != RESIZE_DYNAMIC ? 1 : 0;
-
     sf->mode_search_skip_flags = (cm->frame_type == KEY_FRAME) ? 0 :
                                  FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
@@ -191,7 +189,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->use_lp32x32fdct = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;
-    sf->motion_field_mode_search = !boosted;
     sf->partition_search_breakout_rate_thr = 300;
   }
 
@@ -215,7 +212,7 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
   VP10_COMMON *const cm = &cpi->common;
 
   if (speed >= 1) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
     } else {
@@ -224,7 +221,7 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 2) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
     } else {
@@ -233,7 +230,7 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 5) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->partition_search_breakout_dist_thr = (1 << 25);
     } else {
       sf->partition_search_breakout_dist_thr = (1 << 23);
@@ -241,7 +238,7 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 7) {
-    sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
+    sf->encode_breakout_thresh = (VPXMIN(cm->width, cm->height) >= 720) ?
         800 : 300;
   }
 }
@@ -279,14 +276,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
                                  FLAG_SKIP_COMP_BESTINTRA |
                                  FLAG_SKIP_INTRA_LOWVAR;
     sf->adaptive_pred_interp_filter = 2;
-
-    // Disable reference masking if using spatial scaling since
-    // pred_mv_sad will not be set (since vp10_mv_pred will not
-    // be called).
-    // TODO(marpan/agrange): Fix this condition.
-    sf->reference_masking = (cpi->oxcf.resize_mode != RESIZE_DYNAMIC &&
-                             cpi->svc.number_spatial_layers == 1) ? 1 : 0;
-
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
@@ -302,7 +291,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     sf->use_square_partition_only = 1;
     sf->disable_filter_search_var_thresh = 100;
     sf->use_uv_intra_rd_estimate = 1;
-    sf->skip_encode_sb = 1;
     sf->mv.subpel_iters_per_step = 1;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
@@ -348,7 +336,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
         (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = is_keyframe ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
-    sf->use_nonrd_pick_mode = 1;
     sf->allow_skip_recode = 0;
     sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
@@ -384,10 +371,8 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = VAR_BASED_PARTITION;
     // Turn on this to use non-RD key frame coding mode.
-    sf->use_nonrd_pick_mode = 1;
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
-    sf->skip_encode_sb = 0;
   }
 
   if (speed >= 7) {
@@ -459,10 +444,8 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->adaptive_mode_search = 0;
   sf->cb_pred_filter_search = 0;
   sf->cb_partition_search = 0;
-  sf->motion_field_mode_search = 0;
   sf->alt_ref_search_fp = 0;
   sf->use_quant_fp = 0;
-  sf->reference_masking = 0;
   sf->partition_search_type = SEARCH_PARTITION;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
@@ -485,7 +468,6 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
     sf->intra_uv_mode_mask[i] = INTRA_ALL;
   }
   sf->use_rd_breakout = 0;
-  sf->skip_encode_sb = 0;
   sf->use_uv_intra_rd_estimate = 0;
   sf->allow_skip_recode = 0;
   sf->lpf_pick = LPF_PICK_FROM_FULL_IMAGE;
@@ -493,7 +475,6 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->use_fast_coef_costing = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
   sf->schedule_mode_search = 0;
-  sf->use_nonrd_pick_mode = 0;
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->inter_mode_mask[i] = INTER_ALL;
   sf->max_intra_bsize = BLOCK_64X64;

@@ -16,6 +16,7 @@
 #include "./vpx_scale_rtcd.h"
 #include "./vp9_rtcd.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_scale/vpx_scale.h"
@@ -625,7 +626,7 @@ static void swap_mi_and_prev_mi(VP9_COMMON *cm) {
 
 int vp9_post_proc_frame(struct VP9Common *cm,
                         YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *ppflags) {
-  const int q = MIN(105, cm->lf.filter_level * 2);
+  const int q = VPXMIN(105, cm->lf.filter_level * 2);
   const int flags = ppflags->post_proc_flag;
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;

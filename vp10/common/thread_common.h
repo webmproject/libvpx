@@ -14,6 +14,10 @@
 #include "vp10/common/loopfilter.h"
 #include "vpx_util/vpx_thread.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct VP10Common;
 struct FRAME_COUNTS;
 
@@ -53,5 +57,9 @@ void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
 
 void vp10_accumulate_frame_counts(struct VP10Common *cm,
                                  struct FRAME_COUNTS *counts, int is_dec);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP10_COMMON_LOOPFILTER_THREAD_H_

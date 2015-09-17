@@ -24,12 +24,7 @@ void vp10_encode_token_init();
 
 static INLINE int vp10_preserve_existing_gf(VP10_COMP *cpi) {
   return !cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
-         cpi->rc.is_src_frame_alt_ref &&
-         (!cpi->use_svc ||      // Add spatial svc base layer case here
-          (is_two_pass_svc(cpi) &&
-           cpi->svc.spatial_layer_id == 0 &&
-           cpi->svc.layer_context[0].gold_ref_idx >=0 &&
-           cpi->oxcf.ss_enable_auto_arf[0]));
+         cpi->rc.is_src_frame_alt_ref;
 }
 
 #ifdef __cplusplus

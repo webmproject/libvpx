@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 #include "vp10/common/reconinter.h"
@@ -124,10 +125,10 @@ int vp10_denoiser_filter_c(const uint8_t *sig, int sig_stride,
             adj = adj_val[2];
         }
         if (diff > 0) {
-          avg[c] = MIN(UINT8_MAX, sig[c] + adj);
+          avg[c] = VPXMIN(UINT8_MAX, sig[c] + adj);
           total_adj += adj;
         } else {
-          avg[c] = MAX(0, sig[c] - adj);
+          avg[c] = VPXMAX(0, sig[c] - adj);
           total_adj -= adj;
         }
       }
@@ -164,13 +165,13 @@ int vp10_denoiser_filter_c(const uint8_t *sig, int sig_stride,
         // Diff positive means we made positive adjustment above
         // (in first try/attempt), so now make negative adjustment to bring
         // denoised signal down.
-        avg[c] = MAX(0, avg[c] - adj);
+        avg[c] = VPXMAX(0, avg[c] - adj);
         total_adj -= adj;
       } else {
         // Diff negative means we made negative adjustment above
         // (in first try/attempt), so now make positive adjustment to bring
         // denoised signal up.
-        avg[c] = MIN(UINT8_MAX, avg[c] + adj);
+        avg[c] = VPXMIN(UINT8_MAX, avg[c] + adj);
         total_adj += adj;
       }
     }

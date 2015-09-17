@@ -22,6 +22,7 @@
 #include "common/common.h"
 #include "common/onyxd.h"
 #include "decoder/onyxd_int.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "decoder/error_concealment.h"
@@ -41,8 +42,6 @@ typedef enum
     VP8_SEG_MAX
 } mem_seg_id_t;
 #define NELEMENTS(x) ((int)(sizeof(x)/sizeof(x[0])))
-
-static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t);
 
 struct vpx_codec_alg_priv
 {
@@ -67,18 +66,6 @@ struct vpx_codec_alg_priv
     void                    *user_priv;
     FRAGMENT_DATA           fragments;
 };
-
-static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t flags)
-{
-    /* Although this declaration is constant, we can't use it in the requested
-     * segments list because we want to define the requested segments list
-     * before defining the private type (so that the number of memory maps is
-     * known)
-     */
-    (void)si;
-    (void)flags;
-    return sizeof(vpx_codec_alg_priv_t);
-}
 
 static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
 {
@@ -180,7 +167,7 @@ static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
         const uint8_t *clear = data;
         if (decrypt_cb)
         {
-            int n = MIN(sizeof(clear_buffer), data_sz);
+            int n = VPXMIN(sizeof(clear_buffer), data_sz);
             decrypt_cb(decrypt_state, data, clear_buffer, n);
             clear = clear_buffer;
         }

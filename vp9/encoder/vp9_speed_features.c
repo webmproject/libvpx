@@ -13,6 +13,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_rdopt.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 
 // Intra only frames, golden frames (except alt ref overlays) and
@@ -49,7 +50,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
 
   if (speed >= 1) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
       sf->partition_search_breakout_dist_thr = (1 << 23);
@@ -60,7 +61,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 
   if (speed >= 2) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
       sf->adaptive_pred_interp_filter = 0;
@@ -75,7 +76,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 
   if (speed >= 3) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
       sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
       sf->partition_search_breakout_dist_thr = (1 << 25);
@@ -99,7 +100,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 
   if (speed >= 4) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->partition_search_breakout_dist_thr = (1 << 26);
     } else {
       sf->partition_search_breakout_dist_thr = (1 << 24);
@@ -215,7 +216,7 @@ static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
 
   if (speed >= 1) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
     } else {
@@ -224,7 +225,7 @@ static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 
   if (speed >= 2) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
     } else {
@@ -233,7 +234,7 @@ static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 
   if (speed >= 5) {
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->partition_search_breakout_dist_thr = (1 << 25);
     } else {
       sf->partition_search_breakout_dist_thr = (1 << 23);
@@ -241,7 +242,7 @@ static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 
   if (speed >= 7) {
-    sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
+    sf->encode_breakout_thresh = (VPXMIN(cm->width, cm->height) >= 720) ?
         800 : 300;
   }
 }
@@ -381,7 +382,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 6) {
-    // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = VAR_BASED_PARTITION;
     // Turn on this to use non-RD key frame coding mode.
     sf->use_nonrd_pick_mode = 1;

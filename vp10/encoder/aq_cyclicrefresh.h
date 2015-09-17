@@ -61,7 +61,7 @@ void vp10_cyclic_refresh_update__map(struct VP10_COMP *const cpi);
 // Update the actual number of blocks that were applied the segment delta q.
 void vp10_cyclic_refresh_postencode(struct VP10_COMP *const cpi);
 
-// Set golden frame update interval, for non-svc 1 pass CBR mode.
+// Set golden frame update interval, for 1 pass CBR mode.
 void vp10_cyclic_refresh_set_golden_update(struct VP10_COMP *const cpi);
 
 // Check if we should not update golden reference, based on past refresh stats.

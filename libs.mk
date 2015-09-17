@@ -53,7 +53,7 @@ CODEC_SRCS-yes += $(addprefix vpx_dsp/,$(call enabled,DSP_SRCS))
 include $(SRC_PATH_BARE)/vpx_util/vpx_util.mk
 CODEC_SRCS-yes += $(addprefix vpx_util/,$(call enabled,UTIL_SRCS))
 
-ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
+ifeq ($(CONFIG_VP8),yes)
   VP8_PREFIX=vp8/
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
 endif
@@ -76,7 +76,7 @@ ifeq ($(CONFIG_VP8_DECODER),yes)
   CODEC_DOC_SECTIONS += vp8 vp8_decoder
 endif
 
-ifneq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),)
+ifeq ($(CONFIG_VP9),yes)
   VP9_PREFIX=vp9/
   include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9_common.mk
 endif
@@ -110,7 +110,7 @@ VP9_PREFIX=vp9/
 $(BUILD_PFX)$(VP9_PREFIX)%.c.o: CFLAGS += -Wextra
 
 #  VP10 make file
-ifneq ($(CONFIG_VP10_ENCODER)$(CONFIG_VP10_DECODER),)
+ifeq ($(CONFIG_VP10),yes)
   VP10_PREFIX=vp10/
   include $(SRC_PATH_BARE)/$(VP10_PREFIX)vp10_common.mk
 endif

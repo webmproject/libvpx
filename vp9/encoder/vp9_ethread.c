@@ -11,6 +11,7 @@
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_ethread.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
   int i, j, k, l, m, n;
@@ -67,7 +68,7 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
-  const int num_workers = MIN(cpi->oxcf.max_threads, tile_cols);
+  const int num_workers = VPXMIN(cpi->oxcf.max_threads, tile_cols);
   int i;
 
   vp9_init_tile_data(cpi);
@@ -80,7 +81,7 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
     // resolution.
     if (cpi->use_svc) {
       int max_tile_cols = get_max_tile_cols(cpi);
-      allocated_workers = MIN(cpi->oxcf.max_threads, max_tile_cols);
+      allocated_workers = VPXMIN(cpi->oxcf.max_threads, max_tile_cols);
     }
 
     CHECK_MEM_ERROR(cm, cpi->workers,

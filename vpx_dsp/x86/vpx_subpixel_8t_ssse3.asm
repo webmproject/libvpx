@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+;  Copyright (c) 2015 The WebM project authors. All Rights Reserved.
 ;
 ;  Use of this source code is governed by a BSD-style license
 ;  that can be found in the LICENSE file in the root of the source
@@ -8,1064 +8,662 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
+%include "third_party/x86inc/x86inc.asm"
 
-%include "vpx_ports/x86_abi_support.asm"
+SECTION_RODATA
+pw_64:    times 8 dw 64
 
-%macro VERTx4 1
-    mov         rdx, arg(5)                 ;filter ptr
-    mov         rsi, arg(0)                 ;src_ptr
-    mov         rdi, arg(2)                 ;output_ptr
-    mov         rcx, 0x0400040
+; %define USE_PMULHRSW
+; NOTE: pmulhrsw has a latency of 5 cycles.  Tests showed a performance loss
+; when using this instruction.
 
-    movdqa      xmm4, [rdx]                 ;load filters
-    movq        xmm5, rcx
-    packsswb    xmm4, xmm4
-    pshuflw     xmm0, xmm4, 0b              ;k0_k1
-    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
-    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
-    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
-
-    punpcklqdq  xmm0, xmm0
-    punpcklqdq  xmm1, xmm1
-    punpcklqdq  xmm2, xmm2
-    punpcklqdq  xmm3, xmm3
-
-    movdqa      k0k1, xmm0
-    movdqa      k2k3, xmm1
-    pshufd      xmm5, xmm5, 0
-    movdqa      k4k5, xmm2
-    movdqa      k6k7, xmm3
-    movdqa      krd, xmm5
-
-    movsxd      rdx, DWORD PTR arg(1)       ;pixels_per_line
-
-%if ABI_IS_32BIT=0
-    movsxd      r8, DWORD PTR arg(3)        ;out_pitch
-%endif
-    mov         rax, rsi
-    movsxd      rcx, DWORD PTR arg(4)       ;output_height
-    add         rax, rdx
-
-    lea         rbx, [rdx + rdx*4]
-    add         rbx, rdx                    ;pitch * 6
-
-.loop:
-    movd        xmm0, [rsi]                 ;A
-    movd        xmm1, [rsi + rdx]           ;B
-    movd        xmm2, [rsi + rdx * 2]       ;C
-    movd        xmm3, [rax + rdx * 2]       ;D
-    movd        xmm4, [rsi + rdx * 4]       ;E
-    movd        xmm5, [rax + rdx * 4]       ;F
-
-    punpcklbw   xmm0, xmm1                  ;A B
-    punpcklbw   xmm2, xmm3                  ;C D
-    punpcklbw   xmm4, xmm5                  ;E F
-
-    movd        xmm6, [rsi + rbx]           ;G
-    movd        xmm7, [rax + rbx]           ;H
-
-    pmaddubsw   xmm0, k0k1
-    pmaddubsw   xmm2, k2k3
-    punpcklbw   xmm6, xmm7                  ;G H
-    pmaddubsw   xmm4, k4k5
-    pmaddubsw   xmm6, k6k7
-
-    movdqa      xmm1, xmm2
-    paddsw      xmm0, xmm6
-    pmaxsw      xmm2, xmm4
-    pminsw      xmm4, xmm1
-    paddsw      xmm0, xmm4
-    paddsw      xmm0, xmm2
-
-    paddsw      xmm0, krd
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
-
-    add         rsi,  rdx
-    add         rax,  rdx
-%if %1
-    movd        xmm1, [rdi]
-    pavgb       xmm0, xmm1
-%endif
-    movd        [rdi], xmm0
-
-%if ABI_IS_32BIT
-    add         rdi, DWORD PTR arg(3)       ;out_pitch
+SECTION .text
+%if ARCH_X86_64
+  %define LOCAL_VARS_SIZE 16*4
 %else
-    add         rdi, r8
+  %define LOCAL_VARS_SIZE 16*6
 %endif
-    dec         rcx
-    jnz         .loop
+
+%macro SETUP_LOCAL_VARS 0
+    ; TODO(slavarnway): using xmm registers for these on ARCH_X86_64 +
+    ; pmaddubsw has a higher latency on some platforms, this might be eased by
+    ; interleaving the instructions.
+    %define    k0k1  [rsp + 16*0]
+    %define    k2k3  [rsp + 16*1]
+    %define    k4k5  [rsp + 16*2]
+    %define    k6k7  [rsp + 16*3]
+    packsswb     m4, m4
+    ; TODO(slavarnway): multiple pshufb instructions had a higher latency on
+    ; some platforms.
+    pshuflw      m0, m4, 0b              ;k0_k1
+    pshuflw      m1, m4, 01010101b       ;k2_k3
+    pshuflw      m2, m4, 10101010b       ;k4_k5
+    pshuflw      m3, m4, 11111111b       ;k6_k7
+    punpcklqdq   m0, m0
+    punpcklqdq   m1, m1
+    punpcklqdq   m2, m2
+    punpcklqdq   m3, m3
+    mova       k0k1, m0
+    mova       k2k3, m1
+    mova       k4k5, m2
+    mova       k6k7, m3
+%if ARCH_X86_64
+    %define     krd  m12
+    %define     tmp  m13
+    mova        krd, [GLOBAL(pw_64)]
+%else
+    %define     tmp  [rsp + 16*4]
+    %define     krd  [rsp + 16*5]
+%if CONFIG_PIC=0
+    mova         m6, [GLOBAL(pw_64)]
+%else
+    ; build constants without accessing global memory
+    pcmpeqb      m6, m6                  ;all ones
+    psrlw        m6, 15
+    psllw        m6, 6                   ;aka pw_64
+%endif
+    mova        krd, m6
+%endif
 %endm
 
-%macro VERTx8 1
-    mov         rdx, arg(5)                 ;filter ptr
-    mov         rsi, arg(0)                 ;src_ptr
-    mov         rdi, arg(2)                 ;output_ptr
-    mov         rcx, 0x0400040
-
-    movdqa      xmm4, [rdx]                 ;load filters
-    movq        xmm5, rcx
-    packsswb    xmm4, xmm4
-    pshuflw     xmm0, xmm4, 0b              ;k0_k1
-    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
-    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
-    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
-
-    punpcklqdq  xmm0, xmm0
-    punpcklqdq  xmm1, xmm1
-    punpcklqdq  xmm2, xmm2
-    punpcklqdq  xmm3, xmm3
-
-    movdqa      k0k1, xmm0
-    movdqa      k2k3, xmm1
-    pshufd      xmm5, xmm5, 0
-    movdqa      k4k5, xmm2
-    movdqa      k6k7, xmm3
-    movdqa      krd, xmm5
-
-    movsxd      rdx, DWORD PTR arg(1)       ;pixels_per_line
-
-%if ABI_IS_32BIT=0
-    movsxd      r8, DWORD PTR arg(3)        ;out_pitch
-%endif
-    mov         rax, rsi
-    movsxd      rcx, DWORD PTR arg(4)       ;output_height
-    add         rax, rdx
-
-    lea         rbx, [rdx + rdx*4]
-    add         rbx, rdx                    ;pitch * 6
-
-.loop:
-    movq        xmm0, [rsi]                 ;A
-    movq        xmm1, [rsi + rdx]           ;B
-    movq        xmm2, [rsi + rdx * 2]       ;C
-    movq        xmm3, [rax + rdx * 2]       ;D
-    movq        xmm4, [rsi + rdx * 4]       ;E
-    movq        xmm5, [rax + rdx * 4]       ;F
-
-    punpcklbw   xmm0, xmm1                  ;A B
-    punpcklbw   xmm2, xmm3                  ;C D
-    punpcklbw   xmm4, xmm5                  ;E F
-
-    movq        xmm6, [rsi + rbx]           ;G
-    movq        xmm7, [rax + rbx]           ;H
-
-    pmaddubsw   xmm0, k0k1
-    pmaddubsw   xmm2, k2k3
-    punpcklbw   xmm6, xmm7                  ;G H
-    pmaddubsw   xmm4, k4k5
-    pmaddubsw   xmm6, k6k7
-
-    paddsw      xmm0, xmm6
-    movdqa      xmm1, xmm2
-    pmaxsw      xmm2, xmm4
-    pminsw      xmm4, xmm1
-    paddsw      xmm0, xmm4
-    paddsw      xmm0, xmm2
-
-    paddsw      xmm0, krd
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
-
-    add         rsi,  rdx
-    add         rax,  rdx
-%if %1
-    movq        xmm1, [rdi]
-    pavgb       xmm0, xmm1
-%endif
-    movq        [rdi], xmm0
-
-%if ABI_IS_32BIT
-    add         rdi, DWORD PTR arg(3)       ;out_pitch
-%else
-    add         rdi, r8
-%endif
-    dec         rcx
-    jnz         .loop
-%endm
-
-
-%macro VERTx16 1
-    mov         rdx, arg(5)                 ;filter ptr
-    mov         rsi, arg(0)                 ;src_ptr
-    mov         rdi, arg(2)                 ;output_ptr
-    mov         rcx, 0x0400040
-
-    movdqa      xmm4, [rdx]                 ;load filters
-    movq        xmm5, rcx
-    packsswb    xmm4, xmm4
-    pshuflw     xmm0, xmm4, 0b              ;k0_k1
-    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
-    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
-    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
-
-    punpcklqdq  xmm0, xmm0
-    punpcklqdq  xmm1, xmm1
-    punpcklqdq  xmm2, xmm2
-    punpcklqdq  xmm3, xmm3
-
-    movdqa      k0k1, xmm0
-    movdqa      k2k3, xmm1
-    pshufd      xmm5, xmm5, 0
-    movdqa      k4k5, xmm2
-    movdqa      k6k7, xmm3
-    movdqa      krd, xmm5
-
-    movsxd      rdx, DWORD PTR arg(1)       ;pixels_per_line
-
-%if ABI_IS_32BIT=0
-    movsxd      r8, DWORD PTR arg(3)        ;out_pitch
-%endif
-    mov         rax, rsi
-    movsxd      rcx, DWORD PTR arg(4)       ;output_height
-    add         rax, rdx
-
-    lea         rbx, [rdx + rdx*4]
-    add         rbx, rdx                    ;pitch * 6
-
-.loop:
-    movq        xmm0, [rsi]                 ;A
-    movq        xmm1, [rsi + rdx]           ;B
-    movq        xmm2, [rsi + rdx * 2]       ;C
-    movq        xmm3, [rax + rdx * 2]       ;D
-    movq        xmm4, [rsi + rdx * 4]       ;E
-    movq        xmm5, [rax + rdx * 4]       ;F
-
-    punpcklbw   xmm0, xmm1                  ;A B
-    punpcklbw   xmm2, xmm3                  ;C D
-    punpcklbw   xmm4, xmm5                  ;E F
-
-    movq        xmm6, [rsi + rbx]           ;G
-    movq        xmm7, [rax + rbx]           ;H
-
-    pmaddubsw   xmm0, k0k1
-    pmaddubsw   xmm2, k2k3
-    punpcklbw   xmm6, xmm7                  ;G H
-    pmaddubsw   xmm4, k4k5
-    pmaddubsw   xmm6, k6k7
-
-    paddsw      xmm0, xmm6
-    movdqa      xmm1, xmm2
-    pmaxsw      xmm2, xmm4
-    pminsw      xmm4, xmm1
-    paddsw      xmm0, xmm4
-    paddsw      xmm0, xmm2
-
-    paddsw      xmm0, krd
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
-%if %1
-    movq        xmm1, [rdi]
-    pavgb       xmm0, xmm1
-%endif
-    movq        [rdi], xmm0
-
-    movq        xmm0, [rsi + 8]             ;A
-    movq        xmm1, [rsi + rdx + 8]       ;B
-    movq        xmm2, [rsi + rdx * 2 + 8]   ;C
-    movq        xmm3, [rax + rdx * 2 + 8]   ;D
-    movq        xmm4, [rsi + rdx * 4 + 8]   ;E
-    movq        xmm5, [rax + rdx * 4 + 8]   ;F
-
-    punpcklbw   xmm0, xmm1                  ;A B
-    punpcklbw   xmm2, xmm3                  ;C D
-    punpcklbw   xmm4, xmm5                  ;E F
-
-    movq        xmm6, [rsi + rbx + 8]       ;G
-    movq        xmm7, [rax + rbx + 8]       ;H
-    punpcklbw   xmm6, xmm7                  ;G H
-
-    pmaddubsw   xmm0, k0k1
-    pmaddubsw   xmm2, k2k3
-    pmaddubsw   xmm4, k4k5
-    pmaddubsw   xmm6, k6k7
-
-    paddsw      xmm0, xmm6
-    movdqa      xmm1, xmm2
-    pmaxsw      xmm2, xmm4
-    pminsw      xmm4, xmm1
-    paddsw      xmm0, xmm4
-    paddsw      xmm0, xmm2
-
-    paddsw      xmm0, krd
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
-
-    add         rsi,  rdx
-    add         rax,  rdx
-%if %1
-    movq    xmm1, [rdi+8]
-    pavgb   xmm0, xmm1
-%endif
-
-    movq        [rdi+8], xmm0
-
-%if ABI_IS_32BIT
-    add         rdi, DWORD PTR arg(3)       ;out_pitch
-%else
-    add         rdi, r8
-%endif
-    dec         rcx
-    jnz         .loop
-%endm
-
-;void vpx_filter_block1d8_v8_ssse3
-;(
-;    unsigned char *src_ptr,
-;    unsigned int   src_pitch,
-;    unsigned char *output_ptr,
-;    unsigned int   out_pitch,
-;    unsigned int   output_height,
-;    short *filter
-;)
-global sym(vpx_filter_block1d4_v8_ssse3) PRIVATE
-sym(vpx_filter_block1d4_v8_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    push        rsi
-    push        rdi
-    push        rbx
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    VERTx4 0
-
-    add rsp, 16*5
-    pop rsp
-    pop rbx
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;void vpx_filter_block1d8_v8_ssse3
-;(
-;    unsigned char *src_ptr,
-;    unsigned int   src_pitch,
-;    unsigned char *output_ptr,
-;    unsigned int   out_pitch,
-;    unsigned int   output_height,
-;    short *filter
-;)
-global sym(vpx_filter_block1d8_v8_ssse3) PRIVATE
-sym(vpx_filter_block1d8_v8_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    push        rsi
-    push        rdi
-    push        rbx
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    VERTx8 0
-
-    add rsp, 16*5
-    pop rsp
-    pop rbx
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;void vpx_filter_block1d16_v8_ssse3
-;(
-;    unsigned char *src_ptr,
-;    unsigned int   src_pitch,
-;    unsigned char *output_ptr,
-;    unsigned int   out_pitch,
-;    unsigned int   output_height,
-;    short *filter
-;)
-global sym(vpx_filter_block1d16_v8_ssse3) PRIVATE
-sym(vpx_filter_block1d16_v8_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    push        rsi
-    push        rdi
-    push        rbx
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    VERTx16 0
-
-    add rsp, 16*5
-    pop rsp
-    pop rbx
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-global sym(vpx_filter_block1d4_v8_avg_ssse3) PRIVATE
-sym(vpx_filter_block1d4_v8_avg_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    push        rsi
-    push        rdi
-    push        rbx
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    VERTx4 1
-
-    add rsp, 16*5
-    pop rsp
-    pop rbx
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-global sym(vpx_filter_block1d8_v8_avg_ssse3) PRIVATE
-sym(vpx_filter_block1d8_v8_avg_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    push        rsi
-    push        rdi
-    push        rbx
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    VERTx8 1
-
-    add rsp, 16*5
-    pop rsp
-    pop rbx
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-global sym(vpx_filter_block1d16_v8_avg_ssse3) PRIVATE
-sym(vpx_filter_block1d16_v8_avg_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    push        rsi
-    push        rdi
-    push        rbx
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    VERTx16 1
-
-    add rsp, 16*5
-    pop rsp
-    pop rbx
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %macro HORIZx4_ROW 2
-    movdqa      %2,   %1
-    pshufb      %1,   [GLOBAL(shuf_t0t1)]
-    pshufb      %2,   [GLOBAL(shuf_t2t3)]
-    pmaddubsw   %1,   k0k1k4k5
-    pmaddubsw   %2,   k2k3k6k7
+    mova      %2, %1
+    punpcklbw %1, %1
+    punpckhbw %2, %2
 
-    movdqa      xmm4, %1
-    movdqa      xmm5, %2
-    psrldq      %1,   8
-    psrldq      %2,   8
-    movdqa      xmm6, xmm5
+    mova      m3, %2
+    palignr   %2, %1, 1
+    palignr   m3, %1, 5
 
-    paddsw      xmm4, %2
-    pmaxsw      xmm5, %1
-    pminsw      %1, xmm6
-    paddsw      %1, xmm4
-    paddsw      %1, xmm5
+    pmaddubsw %2, k0k1k4k5
+    pmaddubsw m3, k2k3k6k7
 
-    paddsw      %1,   krd
-    psraw       %1,   7
-    packuswb    %1,   %1
+    mova      m4, %2
+    mova      m5, m3
+    psrldq    %2, 8
+    psrldq    m3, 8
+    mova      m6, m5
+
+    paddsw    m4, m3
+    pmaxsw    m5, %2
+    pminsw    %2, m6
+    paddsw    %2, m4
+    paddsw    %2, m5
+    paddsw    %2, krd
+    psraw     %2, 7
+    packuswb  %2, %2
 %endm
 
-%macro HORIZx4 1
-    mov         rdx, arg(5)                 ;filter ptr
-    mov         rsi, arg(0)                 ;src_ptr
-    mov         rdi, arg(2)                 ;output_ptr
-    mov         rcx, 0x0400040
-
-    movdqa      xmm4, [rdx]                 ;load filters
-    movq        xmm5, rcx
-    packsswb    xmm4, xmm4
-    pshuflw     xmm6, xmm4, 0b              ;k0_k1
-    pshufhw     xmm6, xmm6, 10101010b       ;k0_k1_k4_k5
-    pshuflw     xmm7, xmm4, 01010101b       ;k2_k3
-    pshufhw     xmm7, xmm7, 11111111b       ;k2_k3_k6_k7
-    pshufd      xmm5, xmm5, 0               ;rounding
-
-    movdqa      k0k1k4k5, xmm6
-    movdqa      k2k3k6k7, xmm7
-    movdqa      krd, xmm5
-
-    movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
-    movsxd      rdx, dword ptr arg(3)       ;output_pitch
-    movsxd      rcx, dword ptr arg(4)       ;output_height
-    shr         rcx, 1
-.loop:
-    ;Do two rows once
-    movq        xmm0,   [rsi - 3]           ;load src
-    movq        xmm1,   [rsi + 5]
-    movq        xmm2,   [rsi + rax - 3]
-    movq        xmm3,   [rsi + rax + 5]
-    punpcklqdq  xmm0,   xmm1
-    punpcklqdq  xmm2,   xmm3
-
-    HORIZx4_ROW xmm0,   xmm1
-    HORIZx4_ROW xmm2,   xmm3
-%if %1
-    movd        xmm1,   [rdi]
-    pavgb       xmm0,   xmm1
-    movd        xmm3,   [rdi + rdx]
-    pavgb       xmm2,   xmm3
+;-------------------------------------------------------------------------------
+%macro SUBPIX_HFILTER4 1
+cglobal filter_block1d4_%1, 6, 6+(ARCH_X86_64*2), 11, LOCAL_VARS_SIZE, \
+                            src, sstride, dst, dstride, height, filter
+    mova                m4, [filterq]
+    packsswb            m4, m4
+%if ARCH_X86_64
+    %define       k0k1k4k5 m8
+    %define       k2k3k6k7 m9
+    %define            krd m10
+    %define    orig_height r7
+    mova               krd, [GLOBAL(pw_64)]
+    pshuflw       k0k1k4k5, m4, 0b              ;k0_k1
+    pshufhw       k0k1k4k5, k0k1k4k5, 10101010b ;k0_k1_k4_k5
+    pshuflw       k2k3k6k7, m4, 01010101b       ;k2_k3
+    pshufhw       k2k3k6k7, k2k3k6k7, 11111111b ;k2_k3_k6_k7
+%else
+    %define       k0k1k4k5 [rsp + 16*0]
+    %define       k2k3k6k7 [rsp + 16*1]
+    %define            krd [rsp + 16*2]
+    %define    orig_height [rsp + 16*3]
+    pshuflw             m6, m4, 0b              ;k0_k1
+    pshufhw             m6, m6, 10101010b       ;k0_k1_k4_k5
+    pshuflw             m7, m4, 01010101b       ;k2_k3
+    pshufhw             m7, m7, 11111111b       ;k2_k3_k6_k7
+%if CONFIG_PIC=0
+    mova                m1, [GLOBAL(pw_64)]
+%else
+    ; build constants without accessing global memory
+    pcmpeqb             m1, m1                  ;all ones
+    psrlw               m1, 15
+    psllw               m1, 6                   ;aka pw_64
 %endif
-    movd        [rdi],  xmm0
-    movd        [rdi +rdx],  xmm2
+    mova          k0k1k4k5, m6
+    mova          k2k3k6k7, m7
+    mova               krd, m1
+%endif
+    mov        orig_height, heightq
+    shr            heightq, 1
+.loop:
+    ;Do two rows at once
+    movh                m0, [srcq - 3]
+    movh                m1, [srcq + 5]
+    punpcklqdq          m0, m1
+    mova                m1, m0
+    movh                m2, [srcq + sstrideq - 3]
+    movh                m3, [srcq + sstrideq + 5]
+    punpcklqdq          m2, m3
+    mova                m3, m2
+    punpcklbw           m0, m0
+    punpckhbw           m1, m1
+    punpcklbw           m2, m2
+    punpckhbw           m3, m3
+    mova                m4, m1
+    palignr             m4, m0,  1
+    pmaddubsw           m4, k0k1k4k5
+    palignr             m1, m0,  5
+    pmaddubsw           m1, k2k3k6k7
+    mova                m7, m3
+    palignr             m7, m2,  1
+    pmaddubsw           m7, k0k1k4k5
+    palignr             m3, m2,  5
+    pmaddubsw           m3, k2k3k6k7
+    mova                m0, m4
+    mova                m5, m1
+    mova                m2, m7
+    psrldq              m4, 8
+    psrldq              m1, 8
+    mova                m6, m5
+    paddsw              m0, m1
+    mova                m1, m3
+    psrldq              m7, 8
+    psrldq              m3, 8
+    paddsw              m2, m3
+    mova                m3, m1
+    pmaxsw              m5, m4
+    pminsw              m4, m6
+    paddsw              m4, m0
+    paddsw              m4, m5
+    pmaxsw              m1, m7
+    pminsw              m7, m3
+    paddsw              m7, m2
+    paddsw              m7, m1
 
-    lea         rsi,    [rsi + rax]
-    prefetcht0  [rsi + 4 * rax - 3]
-    lea         rsi,    [rsi + rax]
-    lea         rdi,    [rdi + 2 * rdx]
-    prefetcht0  [rsi + 2 * rax - 3]
+    paddsw              m4, krd
+    psraw               m4, 7
+    packuswb            m4, m4
+    paddsw              m7, krd
+    psraw               m7, 7
+    packuswb            m7, m7
 
-    dec         rcx
-    jnz         .loop
+%ifidn %1, h8_avg
+    movd                m0, [dstq]
+    pavgb               m4, m0
+    movd                m2, [dstq + dstrideq]
+    pavgb               m7, m2
+%endif
+    movd            [dstq], m4
+    movd [dstq + dstrideq], m7
+
+    lea               srcq, [srcq + sstrideq        ]
+    prefetcht0              [srcq + 4 * sstrideq - 3]
+    lea               srcq, [srcq + sstrideq        ]
+    lea               dstq, [dstq + 2 * dstrideq    ]
+    prefetcht0              [srcq + 2 * sstrideq - 3]
+
+    dec            heightq
+    jnz              .loop
 
     ; Do last row if output_height is odd
-    movsxd      rcx,    dword ptr arg(4)       ;output_height
-    and         rcx,    1
-    je          .done
+    mov            heightq, orig_height
+    and            heightq, 1
+    je               .done
 
-    movq        xmm0,   [rsi - 3]    ; load src
-    movq        xmm1,   [rsi + 5]
-    punpcklqdq  xmm0,   xmm1
+    movh                m0, [srcq - 3]    ; load src
+    movh                m1, [srcq + 5]
+    punpcklqdq          m0, m1
 
-    HORIZx4_ROW xmm0, xmm1
-%if %1
-    movd        xmm1,   [rdi]
-    pavgb       xmm0,   xmm1
+    HORIZx4_ROW         m0, m1
+%ifidn %1, h8_avg
+    movd                m0, [dstq]
+    pavgb               m1, m0
 %endif
-    movd        [rdi],  xmm0
+    movd            [dstq], m1
 .done
+    RET
 %endm
 
-%macro HORIZx8_ROW 4
-    movdqa      %2,   %1
-    movdqa      %3,   %1
-    movdqa      %4,   %1
+%macro HORIZx8_ROW 5
+    mova        %2, %1
+    punpcklbw   %1, %1
+    punpckhbw   %2, %2
 
-    pshufb      %1,   [GLOBAL(shuf_t0t1)]
-    pshufb      %2,   [GLOBAL(shuf_t2t3)]
-    pshufb      %3,   [GLOBAL(shuf_t4t5)]
-    pshufb      %4,   [GLOBAL(shuf_t6t7)]
+    mova        %3, %2
+    mova        %4, %2
+    mova        %5, %2
 
-    pmaddubsw   %1,   k0k1
-    pmaddubsw   %2,   k2k3
-    pmaddubsw   %3,   k4k5
-    pmaddubsw   %4,   k6k7
+    palignr     %2, %1, 1
+    palignr     %3, %1, 5
+    palignr     %4, %1, 9
+    palignr     %5, %1, 13
 
-    paddsw      %1,   %4
-    movdqa      %4,   %2
-    pmaxsw      %2,   %3
-    pminsw      %3,   %4
-    paddsw      %1,   %3
-    paddsw      %1,   %2
+    pmaddubsw   %2, k0k1
+    pmaddubsw   %3, k2k3
+    pmaddubsw   %4, k4k5
+    pmaddubsw   %5, k6k7
 
-    paddsw      %1,   krd
-    psraw       %1,   7
-    packuswb    %1,   %1
+    paddsw      %2, %5
+    mova        %1, %3
+    pminsw      %3, %4
+    pmaxsw      %1, %4
+    paddsw      %2, %3
+    paddsw      %1, %2
+    paddsw      %1, krd
+    psraw       %1, 7
+    packuswb    %1, %1
 %endm
 
-%macro HORIZx8 1
-    mov         rdx, arg(5)                 ;filter ptr
-    mov         rsi, arg(0)                 ;src_ptr
-    mov         rdi, arg(2)                 ;output_ptr
-    mov         rcx, 0x0400040
-
-    movdqa      xmm4, [rdx]                 ;load filters
-    movq        xmm5, rcx
-    packsswb    xmm4, xmm4
-    pshuflw     xmm0, xmm4, 0b              ;k0_k1
-    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
-    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
-    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
-
-    punpcklqdq  xmm0, xmm0
-    punpcklqdq  xmm1, xmm1
-    punpcklqdq  xmm2, xmm2
-    punpcklqdq  xmm3, xmm3
-
-    movdqa      k0k1, xmm0
-    movdqa      k2k3, xmm1
-    pshufd      xmm5, xmm5, 0
-    movdqa      k4k5, xmm2
-    movdqa      k6k7, xmm3
-    movdqa      krd, xmm5
-
-    movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
-    movsxd      rdx, dword ptr arg(3)       ;output_pitch
-    movsxd      rcx, dword ptr arg(4)       ;output_height
-    shr         rcx, 1
+;-------------------------------------------------------------------------------
+%macro SUBPIX_HFILTER8 1
+cglobal filter_block1d8_%1, 6, 6+(ARCH_X86_64*1), 13, LOCAL_VARS_SIZE, \
+                            src, sstride, dst, dstride, height, filter
+    mova                 m4, [filterq]
+    SETUP_LOCAL_VARS
+%if ARCH_X86_64
+    %define     orig_height r7
+%else
+    %define     orig_height heightmp
+%endif
+    mov         orig_height, heightq
+    shr             heightq, 1
 
 .loop:
-    movq        xmm0,   [rsi - 3]           ;load src
-    movq        xmm3,   [rsi + 5]
-    movq        xmm4,   [rsi + rax - 3]
-    movq        xmm7,   [rsi + rax + 5]
-    punpcklqdq  xmm0,   xmm3
-    punpcklqdq  xmm4,   xmm7
+    movh                 m0, [srcq - 3]
+    movh                 m3, [srcq + 5]
+    movh                 m4, [srcq + sstrideq - 3]
+    movh                 m7, [srcq + sstrideq + 5]
+    punpcklqdq           m0, m3
+    mova                 m1, m0
+    punpcklbw            m0, m0
+    punpckhbw            m1, m1
+    mova                 m5, m1
+    palignr              m5, m0, 13
+    pmaddubsw            m5, k6k7
+    mova                 m2, m1
+    mova                 m3, m1
+    palignr              m1, m0, 1
+    pmaddubsw            m1, k0k1
+    punpcklqdq           m4, m7
+    mova                 m6, m4
+    punpcklbw            m4, m4
+    palignr              m2, m0, 5
+    punpckhbw            m6, m6
+    palignr              m3, m0, 9
+    mova                 m7, m6
+    pmaddubsw            m2, k2k3
+    pmaddubsw            m3, k4k5
 
-    HORIZx8_ROW xmm0, xmm1, xmm2, xmm3
-    HORIZx8_ROW xmm4, xmm5, xmm6, xmm7
-%if %1
-    movq        xmm1,   [rdi]
-    movq        xmm2,   [rdi + rdx]
-    pavgb       xmm0,   xmm1
-    pavgb       xmm4,   xmm2
+    palignr              m7, m4, 13
+    paddsw               m1, m5
+    mova                 m5, m6
+    mova                 m0, m2
+    palignr              m5, m4, 5
+    pminsw               m2, m3
+    pmaddubsw            m7, k6k7
+    pmaxsw               m3, m0
+    paddsw               m1, m2
+    mova                 m0, m6
+    palignr              m6, m4, 1
+    pmaddubsw            m5, k2k3
+    paddsw               m1, m3
+    pmaddubsw            m6, k0k1
+    palignr              m0, m4, 9
+    paddsw               m1, krd
+    pmaddubsw            m0, k4k5
+    mova                 m4, m5
+    psraw                m1, 7
+    pminsw               m5, m0
+    paddsw               m6, m7
+    packuswb             m1, m1
+
+    paddsw               m6, m5
+    pmaxsw               m0, m4
+    paddsw               m6, m0
+    paddsw               m6, krd
+    psraw                m6, 7
+    packuswb             m6, m6
+
+%ifidn %1, h8_avg
+    movh                 m0, [dstq]
+    movh                 m2, [dstq + dstrideq]
+    pavgb                m1, m0
+    pavgb                m6, m2
 %endif
-    movq        [rdi],  xmm0
-    movq        [rdi + rdx],  xmm4
+    movh             [dstq], m1
+    movh  [dstq + dstrideq], m6
 
-    lea         rsi,    [rsi + rax]
-    prefetcht0  [rsi + 4 * rax - 3]
-    lea         rsi,    [rsi + rax]
-    lea         rdi,    [rdi + 2 * rdx]
-    prefetcht0  [rsi + 2 * rax - 3]
-    dec         rcx
-    jnz         .loop
+    lea                srcq, [srcq + sstrideq        ]
+    prefetcht0               [srcq + 4 * sstrideq - 3]
+    lea                srcq, [srcq + sstrideq        ]
+    lea                dstq, [dstq + 2 * dstrideq    ]
+    prefetcht0               [srcq + 2 * sstrideq - 3]
+    dec             heightq
+    jnz             .loop
 
     ;Do last row if output_height is odd
-    movsxd      rcx,    dword ptr arg(4)    ;output_height
-    and         rcx,    1
-    je          .done
+    mov             heightq, orig_height
+    and             heightq, 1
+    je                .done
 
-    movq        xmm0,   [rsi - 3]
-    movq        xmm3,   [rsi + 5]
-    punpcklqdq  xmm0,   xmm3
+    movh                 m0, [srcq - 3]
+    movh                 m3, [srcq + 5]
+    punpcklqdq           m0, m3
 
-    HORIZx8_ROW xmm0, xmm1, xmm2, xmm3
-%if %1
-    movq        xmm1,   [rdi]
-    pavgb       xmm0,   xmm1
+    HORIZx8_ROW          m0, m1, m2, m3, m4
+
+%ifidn %1, h8_avg
+    movh                 m1, [dstq]
+    pavgb                m0, m1
 %endif
-    movq        [rdi],  xmm0
-.done
+    movh             [dstq], m0
+.done:
+    RET
 %endm
 
-%macro HORIZx16 1
-    mov         rdx, arg(5)                 ;filter ptr
-    mov         rsi, arg(0)                 ;src_ptr
-    mov         rdi, arg(2)                 ;output_ptr
-    mov         rcx, 0x0400040
+;-------------------------------------------------------------------------------
+%macro SUBPIX_HFILTER16 1
+cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*0), 13, LOCAL_VARS_SIZE, \
+                             src, sstride, dst, dstride, height, filter
+    mova          m4, [filterq]
+    SETUP_LOCAL_VARS
+.loop:
+    prefetcht0        [srcq + 2 * sstrideq -3]
 
-    movdqa      xmm4, [rdx]                 ;load filters
-    movq        xmm5, rcx
-    packsswb    xmm4, xmm4
-    pshuflw     xmm0, xmm4, 0b              ;k0_k1
-    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
-    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
-    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
+    movh          m0, [srcq -  3]
+    movh          m4, [srcq +  5]
+    movh          m6, [srcq + 13]
+    punpcklqdq    m0, m4
+    mova          m7, m0
+    punpckhbw     m0, m0
+    mova          m1, m0
+    punpcklqdq    m4, m6
+    mova          m3, m0
+    punpcklbw     m7, m7
 
-    punpcklqdq  xmm0, xmm0
-    punpcklqdq  xmm1, xmm1
-    punpcklqdq  xmm2, xmm2
-    punpcklqdq  xmm3, xmm3
+    palignr       m3, m7, 13
+    mova          m2, m0
+    pmaddubsw     m3, k6k7
+    palignr       m0, m7, 1
+    pmaddubsw     m0, k0k1
+    palignr       m1, m7, 5
+    pmaddubsw     m1, k2k3
+    palignr       m2, m7, 9
+    pmaddubsw     m2, k4k5
+    paddsw        m0, m3
+    mova          m3, m4
+    punpckhbw     m4, m4
+    mova          m5, m4
+    punpcklbw     m3, m3
+    mova          m7, m4
+    palignr       m5, m3, 5
+    mova          m6, m4
+    palignr       m4, m3, 1
+    pmaddubsw     m4, k0k1
+    pmaddubsw     m5, k2k3
+    palignr       m6, m3, 9
+    pmaddubsw     m6, k4k5
+    palignr       m7, m3, 13
+    pmaddubsw     m7, k6k7
 
-    movdqa      k0k1, xmm0
-    movdqa      k2k3, xmm1
-    pshufd      xmm5, xmm5, 0
-    movdqa      k4k5, xmm2
-    movdqa      k6k7, xmm3
-    movdqa      krd, xmm5
+    mova          m3, m1
+    pmaxsw        m1, m2
+    pminsw        m2, m3
+    paddsw        m0, m2
+    paddsw        m0, m1
+    paddsw        m4, m7
+    mova          m7, m5
+    pmaxsw        m5, m6
+    pminsw        m6, m7
+    paddsw        m4, m6
+    paddsw        m4, m5
+    paddsw        m0, krd
+    paddsw        m4, krd
+    psraw         m0, 7
+    psraw         m4, 7
+    packuswb      m0, m4
+%ifidn %1, h8_avg
+    mova          m1, [dstq]
+    pavgb         m0, m1
+%endif
+    lea         srcq, [srcq + sstrideq]
+    mova      [dstq], m0
+    lea         dstq, [dstq + dstrideq]
+    dec      heightq
+    jnz        .loop
+    RET
+%endm
 
-    movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
-    movsxd      rdx, dword ptr arg(3)       ;output_pitch
-    movsxd      rcx, dword ptr arg(4)       ;output_height
+INIT_XMM ssse3
+SUBPIX_HFILTER16 h8
+SUBPIX_HFILTER16 h8_avg
+SUBPIX_HFILTER8  h8
+SUBPIX_HFILTER8  h8_avg
+SUBPIX_HFILTER4  h8
+SUBPIX_HFILTER4  h8_avg
+
+;-------------------------------------------------------------------------------
+%macro SUBPIX_VFILTER 2
+cglobal filter_block1d%2_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
+                             src, sstride, dst, dstride, height, filter
+    mova          m4, [filterq]
+    SETUP_LOCAL_VARS
+%if ARCH_X86_64
+    %define      src1q r7
+    %define  sstride6q r8
+    %define dst_stride dstrideq
+%else
+    %define      src1q filterq
+    %define  sstride6q dstrideq
+    %define dst_stride dstridemp
+%endif
+    mov       src1q, srcq
+    add       src1q, sstrideq
+    lea   sstride6q, [sstrideq + sstrideq * 4]
+    add   sstride6q, sstrideq                   ;pitch * 6
+
+%ifidn %2, 8
+    %define movx movh
+%else
+    %define movx movd
+%endif
+.loop:
+    movx         m0, [srcq                ]     ;A
+    movx         m1, [srcq + sstrideq     ]     ;B
+    punpcklbw    m0, m1                         ;A B
+    movx         m2, [srcq + sstrideq * 2 ]     ;C
+    pmaddubsw    m0, k0k1
+    mova         m6, m2
+    movx         m3, [src1q + sstrideq * 2]     ;D
+    punpcklbw    m2, m3                         ;C D
+    pmaddubsw    m2, k2k3
+    movx         m4, [srcq + sstrideq * 4 ]     ;E
+    mova         m7, m4
+    movx         m5, [src1q + sstrideq * 4]     ;F
+    punpcklbw    m4, m5                         ;E F
+    pmaddubsw    m4, k4k5
+    punpcklbw    m1, m6                         ;A B next iter
+    movx         m6, [srcq + sstride6q    ]     ;G
+    punpcklbw    m5, m6                         ;E F next iter
+    punpcklbw    m3, m7                         ;C D next iter
+    pmaddubsw    m5, k4k5
+    movx         m7, [src1q + sstride6q   ]     ;H
+    punpcklbw    m6, m7                         ;G H
+    pmaddubsw    m6, k6k7
+    mova        tmp, m2
+    pmaddubsw    m3, k2k3
+    pmaddubsw    m1, k0k1
+    pmaxsw       m2, m4
+    paddsw       m0, m6
+    movx         m6, [srcq + sstrideq * 8 ]     ;H next iter
+    punpcklbw    m7, m6
+    pmaddubsw    m7, k6k7
+    pminsw       m4, tmp
+    paddsw       m0, m4
+    mova         m4, m3
+    paddsw       m0, m2
+    pminsw       m3, m5
+    pmaxsw       m5, m4
+    paddsw       m0, krd
+    psraw        m0, 7
+    paddsw       m1, m7
+    packuswb     m0, m0
+
+    paddsw       m1, m3
+    paddsw       m1, m5
+    paddsw       m1, krd
+    psraw        m1, 7
+    lea        srcq, [srcq + sstrideq * 2 ]
+    lea       src1q, [src1q + sstrideq * 2]
+    packuswb     m1, m1
+
+%ifidn %1, v8_avg
+    movx         m2, [dstq]
+    pavgb        m0, m2
+%endif
+    movx     [dstq], m0
+    add        dstq, dst_stride
+%ifidn %1, v8_avg
+    movx         m3, [dstq]
+    pavgb        m1, m3
+%endif
+    movx     [dstq], m1
+    add        dstq, dst_stride
+    sub     heightq, 2
+    cmp     heightq, 1
+    jg        .loop
+
+    cmp     heightq, 0
+    je        .done
+
+    movx         m0, [srcq                ]     ;A
+    movx         m1, [srcq + sstrideq     ]     ;B
+    movx         m6, [srcq + sstride6q    ]     ;G
+    punpcklbw    m0, m1                         ;A B
+    movx         m7, [rax + sstride6q     ]     ;H
+    pmaddubsw    m0, k0k1
+    movx         m2, [srcq + sstrideq * 2 ]     ;C
+    punpcklbw    m6, m7                         ;G H
+    movx         m3, [rax + sstrideq * 2  ]     ;D
+    pmaddubsw    m6, k6k7
+    movx         m4, [srcq + sstrideq * 4 ]     ;E
+    punpcklbw    m2, m3                         ;C D
+    movx         m5, [src1q + sstrideq * 4]     ;F
+    punpcklbw    m4, m5                         ;E F
+    pmaddubsw    m2, k2k3
+    pmaddubsw    m4, k4k5
+    paddsw       m0, m6
+    mova         m1, m2
+    pmaxsw       m2, m4
+    pminsw       m4, m1
+    paddsw       m0, m4
+    paddsw       m0, m2
+    paddsw       m0, krd
+    psraw        m0, 7
+    packuswb     m0, m0
+%ifidn %1, v8_avg
+    movx         m1, [dstq]
+    pavgb        m0, m1
+%endif
+    movx     [dstq], m0
+.done:
+    RET
+%endm
+
+;-------------------------------------------------------------------------------
+%macro SUBPIX_VFILTER16 1
+cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*2), 13, LOCAL_VARS_SIZE, \
+                             src, sstride, dst, dstride, height, filter
+
+    mova          m4, [filterq]
+    SETUP_LOCAL_VARS
+%if ARCH_X86_64
+    %define      src1q r7
+    %define  sstride6q r8
+    %define dst_stride dstrideq
+%else
+    %define      src1q filterq
+    %define  sstride6q dstrideq
+    %define dst_stride dstridemp
+%endif
+    mov        src1q, srcq
+    add        src1q, sstrideq
+    lea    sstride6q, [sstrideq + sstrideq * 4]
+    add    sstride6q, sstrideq                   ;pitch * 6
 
 .loop:
-    prefetcht0  [rsi + 2 * rax -3]
+    movh          m0, [srcq                ]     ;A
+    movh          m1, [srcq + sstrideq     ]     ;B
+    movh          m2, [srcq + sstrideq * 2 ]     ;C
+    movh          m3, [src1q + sstrideq * 2]     ;D
+    movh          m4, [srcq + sstrideq * 4 ]     ;E
+    movh          m5, [src1q + sstrideq * 4]     ;F
 
-    movq        xmm0,   [rsi - 3]           ;load src data
-    movq        xmm4,   [rsi + 5]
-    movq        xmm6,   [rsi + 13]
-    punpcklqdq  xmm0,   xmm4
-    punpcklqdq  xmm4,   xmm6
-
-    movdqa      xmm7,   xmm0
-
-    punpcklbw   xmm7,   xmm7
-    punpckhbw   xmm0,   xmm0
-    movdqa      xmm1,   xmm0
-    movdqa      xmm2,   xmm0
-    movdqa      xmm3,   xmm0
-
-    palignr     xmm0,   xmm7, 1
-    palignr     xmm1,   xmm7, 5
-    pmaddubsw   xmm0,   k0k1
-    palignr     xmm2,   xmm7, 9
-    pmaddubsw   xmm1,   k2k3
-    palignr     xmm3,   xmm7, 13
-
-    pmaddubsw   xmm2,   k4k5
-    pmaddubsw   xmm3,   k6k7
-    paddsw      xmm0,   xmm3
-
-    movdqa      xmm3,   xmm4
-    punpcklbw   xmm3,   xmm3
-    punpckhbw   xmm4,   xmm4
-
-    movdqa      xmm5,   xmm4
-    movdqa      xmm6,   xmm4
-    movdqa      xmm7,   xmm4
-
-    palignr     xmm4,   xmm3, 1
-    palignr     xmm5,   xmm3, 5
-    palignr     xmm6,   xmm3, 9
-    palignr     xmm7,   xmm3, 13
-
-    movdqa      xmm3,   xmm1
-    pmaddubsw   xmm4,   k0k1
-    pmaxsw      xmm1,   xmm2
-    pmaddubsw   xmm5,   k2k3
-    pminsw      xmm2,   xmm3
-    pmaddubsw   xmm6,   k4k5
-    paddsw      xmm0,   xmm2
-    pmaddubsw   xmm7,   k6k7
-    paddsw      xmm0,   xmm1
-
-    paddsw      xmm4,   xmm7
-    movdqa      xmm7,   xmm5
-    pmaxsw      xmm5,   xmm6
-    pminsw      xmm6,   xmm7
-    paddsw      xmm4,   xmm6
-    paddsw      xmm4,   xmm5
-
-    paddsw      xmm0,   krd
-    paddsw      xmm4,   krd
-    psraw       xmm0,   7
-    psraw       xmm4,   7
-    packuswb    xmm0,   xmm0
-    packuswb    xmm4,   xmm4
-    punpcklqdq  xmm0,   xmm4
-%if %1
-    movdqa      xmm1,   [rdi]
-    pavgb       xmm0,   xmm1
+    punpcklbw     m0, m1                         ;A B
+    movh          m6, [srcq + sstride6q]         ;G
+    punpcklbw     m2, m3                         ;C D
+    movh          m7, [src1q + sstride6q]        ;H
+    punpcklbw     m4, m5                         ;E F
+    pmaddubsw     m0, k0k1
+    movh          m3, [srcq + 8]                 ;A
+    pmaddubsw     m2, k2k3
+    punpcklbw     m6, m7                         ;G H
+    movh          m5, [srcq + sstrideq + 8]      ;B
+    pmaddubsw     m4, k4k5
+    punpcklbw     m3, m5                         ;A B
+    movh          m7, [srcq + sstrideq * 2 + 8]  ;C
+    pmaddubsw     m6, k6k7
+    mova          m1, m2
+    movh          m5, [src1q + sstrideq * 2 + 8] ;D
+    pmaxsw        m2, m4
+    punpcklbw     m7, m5                         ;C D
+    pminsw        m4, m1
+    paddsw        m0, m6
+    pmaddubsw     m3, k0k1
+    movh          m1, [srcq + sstrideq * 4 + 8]  ;E
+    paddsw        m0, m4
+    pmaddubsw     m7, k2k3
+    movh          m6, [src1q + sstrideq * 4 + 8] ;F
+    punpcklbw     m1, m6                         ;E F
+    paddsw        m0, m2
+    paddsw        m0, krd
+    movh          m2, [srcq + sstride6q + 8]     ;G
+    pmaddubsw     m1, k4k5
+    movh          m5, [src1q + sstride6q + 8]    ;H
+    psraw         m0, 7
+    punpcklbw     m2, m5                         ;G H
+    packuswb      m0, m0
+    pmaddubsw     m2, k6k7
+%ifidn %1, v8_avg
+    movh          m4, [dstq]
+    pavgb         m0, m4
 %endif
+    movh      [dstq], m0
+    mova          m6, m7
+    pmaxsw        m7, m1
+    pminsw        m1, m6
+    paddsw        m3, m2
+    paddsw        m3, m1
+    paddsw        m3, m7
+    paddsw        m3, krd
+    psraw         m3, 7
+    packuswb      m3, m3
 
-    lea         rsi,    [rsi + rax]
-    movdqa      [rdi],  xmm0
-
-    lea         rdi,    [rdi + rdx]
-    dec         rcx
-    jnz         .loop
+    add         srcq, sstrideq
+    add        src1q, sstrideq
+%ifidn %1, v8_avg
+    movh          m1, [dstq + 8]
+    pavgb         m3, m1
+%endif
+    movh  [dstq + 8], m3
+    add         dstq, dst_stride
+    dec      heightq
+    jnz        .loop
+    RET
 %endm
 
-;void vpx_filter_block1d4_h8_ssse3
-;(
-;    unsigned char  *src_ptr,
-;    unsigned int    src_pixels_per_line,
-;    unsigned char  *output_ptr,
-;    unsigned int    output_pitch,
-;    unsigned int    output_height,
-;    short *filter
-;)
-global sym(vpx_filter_block1d4_h8_ssse3) PRIVATE
-sym(vpx_filter_block1d4_h8_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 3
-    %define k0k1k4k5 [rsp + 16 * 0]
-    %define k2k3k6k7 [rsp + 16 * 1]
-    %define krd      [rsp + 16 * 2]
-
-    HORIZx4 0
-
-    add rsp, 16 * 3
-    pop rsp
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;void vpx_filter_block1d8_h8_ssse3
-;(
-;    unsigned char  *src_ptr,
-;    unsigned int    src_pixels_per_line,
-;    unsigned char  *output_ptr,
-;    unsigned int    output_pitch,
-;    unsigned int    output_height,
-;    short *filter
-;)
-global sym(vpx_filter_block1d8_h8_ssse3) PRIVATE
-sym(vpx_filter_block1d8_h8_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    HORIZx8 0
-
-    add rsp, 16*5
-    pop rsp
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-;void vpx_filter_block1d16_h8_ssse3
-;(
-;    unsigned char  *src_ptr,
-;    unsigned int    src_pixels_per_line,
-;    unsigned char  *output_ptr,
-;    unsigned int    output_pitch,
-;    unsigned int    output_height,
-;    short *filter
-;)
-global sym(vpx_filter_block1d16_h8_ssse3) PRIVATE
-sym(vpx_filter_block1d16_h8_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    HORIZx16 0
-
-    add rsp, 16*5
-    pop rsp
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-global sym(vpx_filter_block1d4_h8_avg_ssse3) PRIVATE
-sym(vpx_filter_block1d4_h8_avg_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 3
-    %define k0k1k4k5 [rsp + 16 * 0]
-    %define k2k3k6k7 [rsp + 16 * 1]
-    %define krd      [rsp + 16 * 2]
-
-    HORIZx4 1
-
-    add rsp, 16 * 3
-    pop rsp
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-global sym(vpx_filter_block1d8_h8_avg_ssse3) PRIVATE
-sym(vpx_filter_block1d8_h8_avg_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    HORIZx8 1
-
-    add rsp, 16*5
-    pop rsp
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-global sym(vpx_filter_block1d16_h8_avg_ssse3) PRIVATE
-sym(vpx_filter_block1d16_h8_avg_ssse3):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM 7
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
-    HORIZx16 1
-
-    add rsp, 16*5
-    pop rsp
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    RESTORE_XMM
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-SECTION_RODATA
-align 16
-shuf_t0t1:
-    db  0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8
-align 16
-shuf_t2t3:
-    db  2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10
-align 16
-shuf_t4t5:
-    db  4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12
-align 16
-shuf_t6t7:
-    db  6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14
+INIT_XMM ssse3
+SUBPIX_VFILTER16     v8
+SUBPIX_VFILTER16 v8_avg
+SUBPIX_VFILTER       v8, 8
+SUBPIX_VFILTER   v8_avg, 8
+SUBPIX_VFILTER       v8, 4
+SUBPIX_VFILTER   v8_avg, 4

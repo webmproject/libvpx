@@ -237,7 +237,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
         RANGE_CHECK_HI(cfg, ts_periodicity, 16);
 
         for (i=1; i<cfg->ts_number_layers; i++)
-            if (cfg->ts_target_bitrate[i] <= cfg->ts_target_bitrate[i-1] && 
+            if (cfg->ts_target_bitrate[i] <= cfg->ts_target_bitrate[i-1] &&
                 cfg->rc_target_bitrate > 0)
                 ERROR("ts_target_bitrate entries are not strictly increasing");
 
@@ -879,7 +879,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     }
     ctx->control_frame_flags = 0;
 
-    res = set_reference_and_update(ctx, flags);
+    if (!res)
+        res = set_reference_and_update(ctx, flags);
 
     /* Handle fixed keyframe intervals */
     if (ctx->cfg.kf_mode == VPX_KF_AUTO

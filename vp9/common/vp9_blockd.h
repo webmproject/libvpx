@@ -14,6 +14,7 @@
 
 #include "./vpx_config.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 #include "vpx_scale/yv12config.h"
 
@@ -235,7 +236,7 @@ static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
     return TX_4X4;
   } else {
     const BLOCK_SIZE plane_bsize = ss_size_lookup[bsize][xss][yss];
-    return MIN(y_tx_size, max_txsize_lookup[plane_bsize]);
+    return VPXMIN(y_tx_size, max_txsize_lookup[plane_bsize]);
   }
 }
 

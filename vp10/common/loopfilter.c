@@ -13,6 +13,7 @@
 #include "vp10/common/loopfilter.h"
 #include "vp10/common/onyxc_int.h"
 #include "vp10/common/reconinter.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
@@ -753,8 +754,13 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
 
   // If the block has no coefficients and is not intra we skip applying
   // the loop filter on block edges.
+#if CONFIG_MISC_FIXES
+  if ((mbmi->skip || mbmi->has_no_coeffs) && is_inter_block(mbmi))
+    return;
+#else
   if (mbmi->skip && is_inter_block(mbmi))
     return;
+#endif
 
   // Here we are adding a mask for the transform size. The transform
   // size mask is set to be correct for a 64x64 prediction block size. We
@@ -811,8 +817,13 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
   *above_y |= above_prediction_mask[block_size] << shift_y;
   *left_y |= left_prediction_mask[block_size] << shift_y;
 
+#if CONFIG_MISC_FIXES
+  if ((mbmi->skip || mbmi->has_no_coeffs) && is_inter_block(mbmi))
+    return;
+#else
   if (mbmi->skip && is_inter_block(mbmi))
     return;
+#endif
 
   *above_y |= (size_mask[block_size] &
                above_64x64_txform_mask[tx_size_y]) << shift_y;
@@ -1588,7 +1599,7 @@ void vp10_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
   if (partial_frame && cm->mi_rows > 8) {
     start_mi_row = cm->mi_rows >> 1;
     start_mi_row &= 0xfffffff8;
-    mi_rows_to_filter = MAX(cm->mi_rows / 8, 8);
+    mi_rows_to_filter = VPXMAX(cm->mi_rows / 8, 8);
   }
   end_mi_row = start_mi_row + mi_rows_to_filter;
   vp10_loop_filter_frame_init(cm, frame_filter_level);

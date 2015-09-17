@@ -15,6 +15,7 @@
 #include "vp10/encoder/aq_cyclicrefresh.h"
 #include "vp10/encoder/ratectrl.h"
 #include "vp10/encoder/segmentation.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/system_state.h"
 
 struct CYCLIC_REFRESH {
@@ -220,8 +221,8 @@ void vp10_cyclic_refresh_update_segment(VP10_COMP *const cpi,
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
-  const int xmis = MIN(cm->mi_cols - mi_col, bw);
-  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
+  const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
   const int block_index = mi_row * cm->mi_cols + mi_col;
   const int refresh_this_block = candidate_refresh_aq(cr, mbmi, rate, dist,
                                                       bsize);
@@ -291,7 +292,7 @@ void vp10_cyclic_refresh_postencode(VP10_COMP *const cpi) {
     }
 }
 
-// Set golden frame update interval, for non-svc 1 pass CBR mode.
+// Set golden frame update interval, for 1 pass CBR mode.
 void vp10_cyclic_refresh_set_golden_update(VP10_COMP *const cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
@@ -413,10 +414,10 @@ static void cyclic_refresh_update_map(VP10_COMP *const cpi) {
     assert(mi_col >= 0 && mi_col < cm->mi_cols);
     bl_index = mi_row * cm->mi_cols + mi_col;
     // Loop through all 8x8 blocks in superblock and update map.
-    xmis = MIN(cm->mi_cols - mi_col,
-               num_8x8_blocks_wide_lookup[BLOCK_64X64]);
-    ymis = MIN(cm->mi_rows - mi_row,
-               num_8x8_blocks_high_lookup[BLOCK_64X64]);
+    xmis =
+        VPXMIN(cm->mi_cols - mi_col, num_8x8_blocks_wide_lookup[BLOCK_64X64]);
+    ymis =
+        VPXMIN(cm->mi_rows - mi_row, num_8x8_blocks_high_lookup[BLOCK_64X64]);
     for (y = 0; y < ymis; y++) {
       for (x = 0; x < xmis; x++) {
         const int bl_index2 = bl_index + y * cm->mi_cols + x;
@@ -484,10 +485,7 @@ void vp10_cyclic_refresh_setup(VP10_COMP *const cpi) {
   if (cm->current_video_frame == 0)
     cr->low_content_avg = 0.0;
   // Don't apply refresh on key frame or enhancement layer frames.
-  if (!apply_cyclic_refresh ||
-      (cm->frame_type == KEY_FRAME) ||
-      (cpi->svc.temporal_layer_id > 0) ||
-      (cpi->svc.spatial_layer_id > 0)) {
+  if (!apply_cyclic_refresh || cm->frame_type == KEY_FRAME) {
     // Set segmentation map to 0 and disable.
     unsigned char *const seg_map = cpi->segmentation_map;
     memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
@@ -545,8 +543,9 @@ void vp10_cyclic_refresh_setup(VP10_COMP *const cpi) {
 
     // Set a more aggressive (higher) q delta for segment BOOST2.
     qindex_delta = compute_deltaq(
-        cpi, cm->base_qindex, MIN(CR_MAX_RATE_TARGET_RATIO,
-        0.1 * cr->rate_boost_fac * cr->rate_ratio_qdelta));
+        cpi, cm->base_qindex,
+        VPXMIN(CR_MAX_RATE_TARGET_RATIO,
+               0.1 * cr->rate_boost_fac * cr->rate_ratio_qdelta));
     cr->qindex_delta[2] = qindex_delta;
     vp10_set_segdata(seg, CR_SEGMENT_ID_BOOST2, SEG_LVL_ALT_Q, qindex_delta);
 

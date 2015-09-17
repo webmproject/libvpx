@@ -28,6 +28,8 @@ void vpx_wb_write_bit(struct vpx_write_bit_buffer *wb, int bit);
 
 void vpx_wb_write_literal(struct vpx_write_bit_buffer *wb, int data, int bits);
 
+void vpx_wb_write_inv_signed_literal(struct vpx_write_bit_buffer *wb, int data,
+                                     int bits);
 
 #ifdef __cplusplus
 }  // extern "C"

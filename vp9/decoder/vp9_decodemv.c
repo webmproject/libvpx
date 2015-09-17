@@ -22,6 +22,8 @@
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_decodeframe.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
+
 static PREDICTION_MODE read_intra_mode(vpx_reader *r, const vpx_prob *p) {
   return (PREDICTION_MODE)vpx_read_tree(r, vp9_intra_mode_tree, p);
 }
@@ -87,7 +89,7 @@ static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
     return read_selected_tx_size(cm, xd, max_tx_size, r);
   else
-    return MIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
+    return VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
 }
 
 static int dec_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
@@ -96,8 +98,8 @@ static int dec_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
 
   for (y = 0; y < y_mis; y++)
     for (x = 0; x < x_mis; x++)
-      segment_id = MIN(segment_id,
-                       segment_ids[mi_offset + y * cm->mi_cols + x]);
+      segment_id =
+          VPXMIN(segment_id, segment_ids[mi_offset + y * cm->mi_cols + x]);
 
   assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
   return segment_id;
@@ -156,8 +158,8 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int bh = xd->plane[0].n4_h >> 1;
 
   // TODO(slavarnway): move x_mis, y_mis into xd ?????
-  const int x_mis = MIN(cm->mi_cols - mi_col, bw);
-  const int y_mis = MIN(cm->mi_rows - mi_row, bh);
+  const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
+  const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
@@ -212,8 +214,8 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   const int bh = xd->plane[0].n4_h >> 1;
 
   // TODO(slavarnway): move x_mis, y_mis into xd ?????
-  const int x_mis = MIN(cm->mi_cols - mi_col, bw);
-  const int y_mis = MIN(cm->mi_rows - mi_row, bh);
+  const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
+  const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
   mbmi->segment_id = read_intra_segment_id(cm, mi_offset, x_mis, y_mis, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);

@@ -11,6 +11,7 @@
 
 #include "dboolhuff.h"
 #include "vp8/common/common.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 int vp8dx_start_decode(BOOL_DECODER *br,
                        const unsigned char *source,
@@ -48,7 +49,7 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br)
     unsigned char decrypted[sizeof(VP8_BD_VALUE) + 1];
 
     if (br->decrypt_cb) {
-        size_t n = MIN(sizeof(decrypted), bytes_left);
+        size_t n = VPXMIN(sizeof(decrypted), bytes_left);
         br->decrypt_cb(br->decrypt_state, bufptr, decrypted, (int)n);
         bufptr = decrypted;
     }

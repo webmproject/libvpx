@@ -40,30 +40,6 @@ static int round(double x) {
 #endif
 
 const int kNumCoeffs = 256;
-const double PI = 3.1415926535898;
-void reference2_16x16_idct_2d(double *input, double *output) {
-  double x;
-  for (int l = 0; l < 16; ++l) {
-    for (int k = 0; k < 16; ++k) {
-      double s = 0;
-      for (int i = 0; i < 16; ++i) {
-        for (int j = 0; j < 16; ++j) {
-          x = cos(PI * j * (l + 0.5) / 16.0) *
-              cos(PI * i * (k + 0.5) / 16.0) *
-              input[i * 16 + j] / 256;
-          if (i != 0)
-            x *= sqrt(2.0);
-          if (j != 0)
-            x *= sqrt(2.0);
-          s += x;
-        }
-      }
-      output[k*16+l] = s;
-    }
-  }
-}
-
-
 const double C1 = 0.995184726672197;
 const double C2 = 0.98078528040323;
 const double C3 = 0.956940335732209;

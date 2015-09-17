@@ -43,6 +43,7 @@ ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
+DSP_SRCS-$(HAVE_SSSE3) += x86/vpx_subpixel_8t_ssse3.asm
 endif  # CONFIG_USE_X86INC
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
@@ -308,6 +309,8 @@ DSP_SRCS-$(HAVE_MMX)    += x86/variance_mmx.c
 DSP_SRCS-$(HAVE_MMX)    += x86/variance_impl_mmx.asm
 DSP_SRCS-$(HAVE_SSE)    += x86/variance_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
+DSP_SRCS-$(HAVE_SSE2)   += x86/halfpix_variance_sse2.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/halfpix_variance_impl_sse2.asm
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_impl_avx2.c
 

@@ -48,7 +48,7 @@ static std::string GetDataPath() {
 #undef TO_STRING
 #undef STRINGIFY
 
-static FILE *OpenTestDataFile(const std::string& file_name) {
+inline FILE *OpenTestDataFile(const std::string& file_name) {
   const std::string path_to_source = GetDataPath() + "/" + file_name;
   return fopen(path_to_source.c_str(), "rb");
 }

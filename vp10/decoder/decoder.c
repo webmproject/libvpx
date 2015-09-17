@@ -258,7 +258,7 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   pbi->hold_ref_buf = 0;
   cm->frame_to_show = get_frame_new_buffer(cm);
 
-  if (!pbi->frame_parallel_decode || !cm->show_frame) {
+  if (!cm->frame_parallel_decode || !cm->show_frame) {
     lock_buffer_pool(pool);
     --frame_bufs[cm->new_fb_idx].ref_count;
     unlock_buffer_pool(pool);
@@ -297,7 +297,7 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
 
   // Check if the previous frame was a frame without any references to it.
   // Release frame buffer if not decoding in frame parallel mode.
-  if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0
+  if (!cm->frame_parallel_decode && cm->new_fb_idx >= 0
       && frame_bufs[cm->new_fb_idx].ref_count == 0)
     pool->release_fb_cb(pool->cb_priv,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
@@ -310,7 +310,7 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
   cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
 
   pbi->hold_ref_buf = 0;
-  if (pbi->frame_parallel_decode) {
+  if (cm->frame_parallel_decode) {
     VPxWorker *const worker = pbi->frame_worker_owner;
     vp10_frameworker_lock_stats(worker);
     frame_bufs[cm->new_fb_idx].frame_worker_owner = worker;
@@ -379,12 +379,12 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
   if (!cm->show_existing_frame) {
     cm->last_show_frame = cm->show_frame;
     cm->prev_frame = cm->cur_frame;
-    if (cm->seg.enabled && !pbi->frame_parallel_decode)
+    if (cm->seg.enabled && !cm->frame_parallel_decode)
       vp10_swap_current_and_last_seg_map(cm);
   }
 
   // Update progress in frame parallel decode.
-  if (pbi->frame_parallel_decode) {
+  if (cm->frame_parallel_decode) {
     // Need to lock the mutex here as another thread may
     // be accessing this buffer.
     VPxWorker *const worker = pbi->frame_worker_owner;

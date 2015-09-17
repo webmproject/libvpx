@@ -161,17 +161,19 @@ static void inc_mv_component(int v, nmv_component_counts *comp_counts,
   }
 }
 
-void vp10_inc_mv(const MV *mv, nmv_context_counts *counts) {
+void vp10_inc_mv(const MV *mv, nmv_context_counts *counts, const int usehp) {
   if (counts != NULL) {
     const MV_JOINT_TYPE j = vp10_get_mv_joint(mv);
     ++counts->joints[j];
 
     if (mv_joint_vertical(j)) {
-      inc_mv_component(mv->row, &counts->comps[0], 1, 1);
+      inc_mv_component(mv->row, &counts->comps[0], 1,
+                       !CONFIG_MISC_FIXES || usehp);
     }
 
     if (mv_joint_horizontal(j)) {
-      inc_mv_component(mv->col, &counts->comps[1], 1, 1);
+      inc_mv_component(mv->col, &counts->comps[1], 1,
+                       !CONFIG_MISC_FIXES || usehp);
     }
   }
 }
