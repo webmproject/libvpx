@@ -69,6 +69,24 @@
       "revId": "bc99151a86c10f7585e6eb2bceff0cd6ff318967",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49fb5386_cce16f05",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-17T19:13:07Z",
+      "side": 1,
+      "message": "I must have had a typo earlier. I\u0027ll check with that change",
+      "parentUuid": "c9582344_e81a9337",
+      "revId": "bc99151a86c10f7585e6eb2bceff0cd6ff318967",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
