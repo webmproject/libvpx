@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c9ae6393_5b4fb730",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-09-17T23:36:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "49c27358_97f9268a",
+      "revId": "b6b14af38219e826f02ce4dc5b0a6e52dfde41df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "099a3b78_35e3fa9b",
         "filename": "vp10/common/scan.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-09-17T23:26:53Z",
       "side": 1,
       "message": "This array is no longer needed, right?",
+      "revId": "b6b14af38219e826f02ce4dc5b0a6e52dfde41df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e99c0776_57b884fd",
+        "filename": "vp10/common/scan.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-09-17T23:36:49Z",
+      "side": 1,
+      "message": "There is a test that fails without this array.",
+      "parentUuid": "099a3b78_35e3fa9b",
       "revId": "b6b14af38219e826f02ce4dc5b0a6e52dfde41df",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
