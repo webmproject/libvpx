@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9b76fb4_87ca062b",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-17T14:30:13Z",
+      "side": 1,
+      "message": "if this is like the version from origin/nextgen it can overflow wildly on fuzzed files.",
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9b76fb4_e7cd0246",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 657,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-17T14:30:13Z",
+      "side": 1,
+      "message": "This triggers decoding fuzzed files",
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0984fbca_2554583e",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2975,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-17T14:30:13Z",
+      "side": 1,
+      "message": "asan reports this alloc leaking",
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c98d83f4_e318acb1",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-17T14:30:13Z",
+      "side": 1,
+      "message": "In general alloc\u0027ing per mode trial leads to poor performance",
+      "range": {
+        "startLine": 756,
+        "startChar": 19,
+        "endLine": 756,
+        "endChar": 29
+      },
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
