@@ -74,6 +74,12 @@ typedef struct {
   // Indicates what sort of temporal layering is used.
   // Currently, this only works for CBR mode.
   VP9E_TEMPORAL_LAYERING_MODE temporal_layering_mode;
+  // Frame flags and buffer indexes for each spatial layer, set by the
+  // application (external settings).
+  int ext_frame_flags[VPX_MAX_LAYERS];
+  int ext_lst_fb_idx[VPX_MAX_LAYERS];
+  int ext_gld_fb_idx[VPX_MAX_LAYERS];
+  int ext_alt_fb_idx[VPX_MAX_LAYERS];
 } SVC;
 
 struct VP9_COMP;

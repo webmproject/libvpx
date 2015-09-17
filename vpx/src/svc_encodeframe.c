@@ -339,7 +339,8 @@ void assign_layer_bitrates(const SvcContext *svc_ctx,
               (spatial_layer_target >> 1) + (spatial_layer_target >> 2);
           enc_cfg->layer_target_bitrate[sl * svc_ctx->temporal_layers + 2] =
               spatial_layer_target;
-        } else if (svc_ctx->temporal_layering_mode == 2) {
+        } else if (svc_ctx->temporal_layering_mode == 2 ||
+                   svc_ctx->temporal_layering_mode == 1) {
           enc_cfg->layer_target_bitrate[sl * svc_ctx->temporal_layers] =
               spatial_layer_target * 2 / 3;
           enc_cfg->layer_target_bitrate[sl * svc_ctx->temporal_layers + 1] =
@@ -417,7 +418,8 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   // si->svc_params.temporal_layering_mode = svc_ctx->temporal_layering_mode;
   if (svc_ctx->temporal_layering_mode == 3) {
     svc_ctx->temporal_layers = 3;
-  } else if (svc_ctx->temporal_layering_mode == 2) {
+  } else if (svc_ctx->temporal_layering_mode == 2 ||
+             svc_ctx->temporal_layering_mode == 1) {
     svc_ctx->temporal_layers = 2;
   }
 
