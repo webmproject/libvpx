@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89f1cba4_6e5dcfd9",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-17T19:55:56Z",
+      "side": 1,
+      "message": "Can add assert(tx_type \u003d\u003d DCT_DCT) here as well.",
+      "revId": "1ec79f191e77ee32dae37e1f95473bbb19ee0a9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
