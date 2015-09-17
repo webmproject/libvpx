@@ -386,8 +386,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
   m = xd->mi[0];
 
-  cpi->td.mb.mbmi_ext = cpi->td.mb.mbmi_ext_base +
-      (mi_row * cm->mi_cols + mi_col);
+  cpi->td.mb.mbmi_ext = cpi->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 
   set_mi_row_col(xd, tile,
                  mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],

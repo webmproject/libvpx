@@ -58,7 +58,6 @@ struct macroblock {
 
   MACROBLOCKD e_mbd;
   MB_MODE_INFO_EXT *mbmi_ext;
-  MB_MODE_INFO_EXT *mbmi_ext_base;
   int skip_block;
   int select_tx_size;
   int skip_recode;
