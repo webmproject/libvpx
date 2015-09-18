@@ -41,13 +41,22 @@ TARGETS="arm64-darwin-gcc
 build_target() {
   local target="$1"
   local old_pwd="$(pwd)"
+  local target_specific_flags=""
 
   vlog "***Building target: ${target}***"
+
+  case "${target}" in
+    x86-*)
+      target_specific_flags="--enable-pic"
+      vlog "Enabled PIC for ${target}"
+      ;;
+  esac
 
   mkdir "${target}"
   cd "${target}"
   eval "${LIBVPX_SOURCE_DIR}/configure" --target="${target}" \
-    ${CONFIGURE_ARGS} ${EXTRA_CONFIGURE_ARGS} ${devnull}
+    ${CONFIGURE_ARGS} ${EXTRA_CONFIGURE_ARGS} ${target_specific_flags} \
+    ${devnull}
   export DIST_DIR
   eval make -j ${MAKE_JOBS} dist ${devnull}
   cd "${old_pwd}"
