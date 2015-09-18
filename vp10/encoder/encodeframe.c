@@ -170,15 +170,16 @@ static BLOCK_SIZE get_rd_var_based_fixed_partition(VP10_COMP *cpi,
 
 // Lighter version of set_offsets that only sets the mode info
 // pointers.
-static INLINE void set_mode_info_offsets(VP10_COMMON *const cm,
+static INLINE void set_mode_info_offsets(VP10_COMP *const cpi,
                                          MACROBLOCK *const x,
                                          MACROBLOCKD *const xd,
                                          int mi_row,
                                          int mi_col) {
+  VP10_COMMON *const cm = &cpi->common;
   const int idx_str = xd->mi_stride * mi_row + mi_col;
   xd->mi = cm->mi_grid_visible + idx_str;
   xd->mi[0] = cm->mi + idx_str;
-  x->mbmi_ext = x->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
+  x->mbmi_ext = cpi->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 }
 
 static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
@@ -193,7 +194,7 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
 
   set_skip_context(xd, mi_row, mi_col);
 
-  set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
+  set_mode_info_offsets(cpi, x, xd, mi_row, mi_col);
 
   mbmi = &xd->mi[0]->mbmi;
 
@@ -244,7 +245,7 @@ static void set_block_size(VP10_COMP * const cpi,
                            int mi_row, int mi_col,
                            BLOCK_SIZE bsize) {
   if (cpi->common.mi_cols > mi_col && cpi->common.mi_rows > mi_row) {
-    set_mode_info_offsets(&cpi->common, x, xd, mi_row, mi_col);
+    set_mode_info_offsets(cpi, x, xd, mi_row, mi_col);
     xd->mi[0]->mbmi.sb_type = bsize;
   }
 }
