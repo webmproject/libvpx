@@ -625,6 +625,11 @@ show_darwin_sdk_path() {
     xcodebuild -sdk $1 -version Path 2>/dev/null
 }
 
+# Print the major version number of the Darwin SDK specified by $1.
+show_darwin_sdk_major_version() {
+  xcrun --sdk $1 --show-sdk-version 2>/dev/null | cut -d. -f1
+}
+
 process_common_toolchain() {
   if [ -z "$toolchain" ]; then
     gcctarget="${CHOST:-$(gcc -dumpmachine 2> /dev/null)}"
@@ -736,7 +741,14 @@ process_common_toolchain() {
   # Handle darwin variants. Newer SDKs allow targeting older
   # platforms, so use the newest one available.
   case ${toolchain} in
-    *-darwin*)
+    arm*-darwin*)
+      iphoneos_sdk_dir="$(show_darwin_sdk_path iphoneos)"
+      if [ -d "${iphoneos_sdk_dir}" ]; then
+        add_cflags  "-isysroot ${iphoneos_sdk_dir}"
+        add_ldflags "-isysroot ${iphoneos_sdk_dir}"
+      fi
+      ;;
+    x86*-darwin*)
       osx_sdk_dir="$(show_darwin_sdk_path macosx)"
       if [ -d "${osx_sdk_dir}" ]; then
         add_cflags  "-isysroot ${osx_sdk_dir}"
@@ -811,10 +823,36 @@ process_common_toolchain() {
           if disabled neon && enabled neon_asm; then
             die "Disabling neon while keeping neon-asm is not supported"
           fi
-          soft_enable media
+          case ${toolchain} in
+            # Apple iOS SDKs no longer support armv6 as of the version 9
+            # release (coincides with release of Xcode 7). Only enable media
+            # when using earlier SDK releases.
+            *-darwin*)
+              if [ "$(show_darwin_sdk_major_version iphoneos)" -lt 9 ]; then
+                soft_enable media
+              else
+                soft_disable media
+                RTCD_OPTIONS="${RTCD_OPTIONS}--disable-media "
+              fi
+              ;;
+            *)
+              soft_enable media
+              ;;
+          esac
           ;;
         armv6)
-          soft_enable media
+          case ${toolchain} in
+            *-darwin*)
+              if [ "$(show_darwin_sdk_major_version iphoneos)" -lt 9 ]; then
+                soft_enable media
+              else
+                die "Your iOS SDK does not support armv6."
+              fi
+              ;;
+            *)
+              soft_enable media
+              ;;
+          esac
           ;;
       esac
 
