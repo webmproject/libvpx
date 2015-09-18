@@ -199,6 +199,8 @@ cat << EOF
     --show-build-output: Show output from each library build.
     --targets <targets>: Override default target list. Defaults:
          ${TARGETS}
+    --test-link: Confirms all targets can be linked. Functionally identical to
+                 passing --enable-examples via --extra-configure-args.
     --verbose: Output information about the environment and each stage of the
                build.
 EOF
@@ -236,6 +238,9 @@ while [ -n "$1" ]; do
       ;;
     --show-build-output)
       devnull=
+      ;;
+    --test-link)
+      EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --enable-examples"
       ;;
     --targets)
       TARGETS="$2"
