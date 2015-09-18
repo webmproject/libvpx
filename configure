@@ -723,6 +723,10 @@ EOF
         check_add_cflags ${extra_cflags} || \
         die "Requested extra CFLAGS '${extra_cflags}' not supported by compiler"
     fi
+    if [ -n "${extra_cxxflags}" ]; then
+        check_add_cxxflags ${extra_cxxflags} || \
+        die "Requested extra CXXFLAGS '${extra_cxxflags}' not supported by compiler"
+    fi
 }
 
 
