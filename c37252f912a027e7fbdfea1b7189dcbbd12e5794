@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69dad736_6614df50",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-19T00:48:00Z",
+      "side": 1,
+      "message": "if there is work to be done the normal form is TODO(username):. if it\u0027s just a general comment you don\u0027t need to add your name (it\u0027s available in git blame anyway)",
+      "revId": "c37252f912a027e7fbdfea1b7189dcbbd12e5794",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
