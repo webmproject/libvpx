@@ -308,6 +308,7 @@ EXPERIMENT_LIST="
     sr_mode
     multi_ref
     last3_ref
+    last4_ref
 "
 CONFIG_LIST="
     external_build

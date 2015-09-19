@@ -28,11 +28,15 @@ extern "C" {
 
 #if CONFIG_MULTI_REF
 #if CONFIG_LAST3_REF
+#if CONFIG_LAST4_REF
+#define MAX_REF_LF_DELTAS       7
+#else  // CONFIG_LAST4_REF
 #define MAX_REF_LF_DELTAS       6
-#else
+#endif  // CONFIG_LAST4_REF
+#else  // CONFIG_LAST3_REF
 #define MAX_REF_LF_DELTAS       5
 #endif  // CONFIG_LAST3_REF
-#else
+#else  // CONFIG_MULTI_REF
 #define MAX_REF_LF_DELTAS       4
 #endif  // CONFIG_MULTI_REF
 
@@ -112,7 +116,10 @@ struct loopfilter {
   uint8_t mode_ref_delta_enabled;
   uint8_t mode_ref_delta_update;
 
-  // 0 = Intra, Last, Last2(CONFIG_MULTI_REF), GF, ARF
+  // 0 = Intra, Last, Last2(CONFIG_MULTI_REF),
+  // Last3(CONFIG_LAST3_REF),
+  // Last4(CONFIG_LAST4_REF),
+  // GF, ARF
   signed char ref_deltas[MAX_REF_LF_DELTAS];
   signed char last_ref_deltas[MAX_REF_LF_DELTAS];
 

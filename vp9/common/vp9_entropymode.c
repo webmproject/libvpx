@@ -420,19 +420,27 @@ static const vp9_prob default_single_ref_probs[REF_CONTEXTS][SINGLE_REFS - 1] =
 #if CONFIG_MULTI_REF
   // TODO(zoeliu): To adjust the initial prob values.
 #if CONFIG_LAST3_REF
+#if CONFIG_LAST4_REF
+  {  33,  16,  16,  16,  16 },
+  {  77,  74,  74,  74,  74 },
+  { 142, 142, 142, 142, 142 },
+  { 172, 170, 170, 170, 170 },
+  { 238, 247, 247, 247, 247 }
+#else  // CONFIG_LAST4_REF
   {  33,  16,  16,  16 },
   {  77,  74,  74,  74 },
   { 142, 142, 142, 142 },
   { 172, 170, 170, 170 },
   { 238, 247, 247, 247 }
-#else
+#endif  // CONFIG_LAST4_REF
+#else  // CONFIG_LAST3_REF
   {  33,  16,  16 },
   {  77,  74,  74 },
   { 142, 142, 142 },
   { 172, 170, 170 },
   { 238, 247, 247 }
 #endif  // CONFIG_LAST3_REF
-#else
+#else  // CONFIG_MULTI_REF
   {  33,  16 },
   {  77,  74 },
   { 142, 142 },
@@ -445,19 +453,27 @@ static const vp9_prob default_comp_ref_probs[REF_CONTEXTS][COMP_REFS - 1] = {
 #if CONFIG_MULTI_REF
   // TODO(zoeliu): To adjust the initial prob values.
 #if CONFIG_LAST3_REF
+#if CONFIG_LAST4_REF
+  {  33,  16,  16,  16 },
+  {  77,  74,  74,  74 },
+  { 142, 142, 142, 142 },
+  { 172, 170, 170, 170 },
+  { 238, 247, 247, 247 }
+#else  // CONFIG_LAST4_REF
   {  33,  16,  16 },
   {  77,  74,  74 },
   { 142, 142, 142 },
   { 172, 170, 170 },
   { 238, 247, 247 }
-#else
+#endif  // CONFIG_LAST4_REF
+#else  // CONFIG_LAST3_REF
   {  33,  16 },
   {  77,  74 },
   { 142, 142 },
   { 172, 170 },
   { 238, 247 }
 #endif  // CONFIG_LAST3_REF
-#else
+#else  // CONFIG_MULTI_REF
   { 50 }, { 126 }, { 123 }, { 221 }, { 226 }
 #endif  // CONFIG_MULTI_REF
 };
@@ -1333,6 +1349,9 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
   lf->ref_deltas[LAST2_FRAME] = lf->ref_deltas[LAST_FRAME];
 #if CONFIG_LAST3_REF
   lf->ref_deltas[LAST3_FRAME] = lf->ref_deltas[LAST_FRAME];
+#if CONFIG_LAST4_REF
+  lf->ref_deltas[LAST4_FRAME] = lf->ref_deltas[LAST_FRAME];
+#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   lf->ref_deltas[GOLDEN_FRAME] = -1;
