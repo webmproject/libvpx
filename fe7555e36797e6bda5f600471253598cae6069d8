@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89ab8b9d_01252cee",
+        "filename": "vp10/encoder/dct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-19T15:24:11Z",
+      "side": 1,
+      "message": "please add vp10_ prefixes to avoid symbol conflicts",
+      "range": {
+        "startLine": 19,
+        "startChar": 5,
+        "endLine": 19,
+        "endChar": 10
+      },
+      "revId": "fe7555e36797e6bda5f600471253598cae6069d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
