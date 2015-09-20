@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "8902ab8b_c6e182bb",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-20T10:10:15Z",
+      "side": 1,
+      "message": "What going on here? If everything after the first column unused can you set use 0 so they are clearly invalid to the reader.",
+      "range": {
+        "startLine": 346,
+        "startChar": 0,
+        "endLine": 347,
+        "endChar": 46
+      },
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9b76fb4_87ca062b",
         "filename": "vp10/common/entropymode.c",
         "patchSetId": 8
