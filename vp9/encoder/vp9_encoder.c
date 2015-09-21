@@ -1517,7 +1517,10 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   }
 
   if (cpi->initial_width) {
-    if (cm->width > cpi->initial_width || cm->height > cpi->initial_height) {
+    int new_mi_size = 0;
+    vp9_set_mb_mi(cm, cm->width, cm->height);
+    new_mi_size = cm->mi_stride * calc_mi_size(cm->mi_rows);
+    if (cm->mi_alloc_size < new_mi_size) {
       vp9_free_context_buffers(cm);
       alloc_compressor_data(cpi);
       realloc_segmentation_maps(cpi);
@@ -4642,8 +4645,10 @@ int vp9_set_internal_size(VP9_COMP *cpi,
   // always go to the next whole number
   cm->width = (hs - 1 + cpi->oxcf.width * hr) / hs;
   cm->height = (vs - 1 + cpi->oxcf.height * vr) / vs;
-  assert(cm->width <= cpi->initial_width);
-  assert(cm->height <= cpi->initial_height);
+  if (cm->current_video_frame) {
+    assert(cm->width <= cpi->initial_width);
+    assert(cm->height <= cpi->initial_height);
+  }
 
   update_frame_size(cpi);
 
