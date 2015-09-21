@@ -23,6 +23,7 @@ VP10_CX_SRCS-yes += encoder/context_tree.c
 VP10_CX_SRCS-yes += encoder/context_tree.h
 VP10_CX_SRCS-yes += encoder/cost.h
 VP10_CX_SRCS-yes += encoder/cost.c
+VP10_CX_SRCS-yes += encoder/dct.h
 VP10_CX_SRCS-yes += encoder/dct.c
 VP10_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/denoiser.c
 VP10_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/denoiser.h

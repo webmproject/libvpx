@@ -34,7 +34,7 @@ static INLINE void range_check(const tran_low_t *input, const int size,
 #endif
 }
 
-static void fdct4(const tran_low_t *input, tran_low_t *output) {
+void vp10_fdct4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[4];
 
@@ -70,7 +70,7 @@ static void fdct4(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 4, 13);
 }
 
-static void fdct8(const tran_low_t *input, tran_low_t *output) {
+void vp10_fdct8(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[8];
 
@@ -148,7 +148,7 @@ static void fdct8(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 8, 14);
 }
 
-static void fdct16(const tran_low_t *input, tran_low_t *output) {
+void vp10_fdct16(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[16];
 
@@ -322,7 +322,8 @@ static void fdct16(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 16, 16);
 }
 
-static void fdct32(const tran_low_t *input, tran_low_t *output) {
+// TODO(angiebird): Unify this with vp10_fwd_txfm.c: vp10_fdct32
+void vp10_fdct32_local(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[32];
 
@@ -995,24 +996,24 @@ static void fadst16(const tran_low_t *input, tran_low_t *output) {
 }
 
 static const transform_2d FHT_4[] = {
-  { fdct4,  fdct4  },  // DCT_DCT  = 0
-  { fadst4, fdct4  },  // ADST_DCT = 1
-  { fdct4,  fadst4 },  // DCT_ADST = 2
-  { fadst4, fadst4 }   // ADST_ADST = 3
+  { vp10_fdct4, vp10_fdct4 },  // DCT_DCT  = 0
+  { fadst4,     vp10_fdct4 },  // ADST_DCT = 1
+  { vp10_fdct4, fadst4     },  // DCT_ADST = 2
+  { fadst4,     fadst4     }   // ADST_ADST = 3
 };
 
 static const transform_2d FHT_8[] = {
-  { fdct8,  fdct8  },  // DCT_DCT  = 0
-  { fadst8, fdct8  },  // ADST_DCT = 1
-  { fdct8,  fadst8 },  // DCT_ADST = 2
-  { fadst8, fadst8 }   // ADST_ADST = 3
+  { vp10_fdct8, vp10_fdct8 },  // DCT_DCT  = 0
+  { fadst8,     vp10_fdct8 },  // ADST_DCT = 1
+  { vp10_fdct8, fadst8     },  // DCT_ADST = 2
+  { fadst8,     fadst8     }   // ADST_ADST = 3
 };
 
 static const transform_2d FHT_16[] = {
-  { fdct16,  fdct16  },  // DCT_DCT  = 0
-  { fadst16, fdct16  },  // ADST_DCT = 1
-  { fdct16,  fadst16 },  // DCT_ADST = 2
-  { fadst16, fadst16 }   // ADST_ADST = 3
+  { vp10_fdct16, vp10_fdct16 },  // DCT_DCT  = 0
+  { fadst16,     vp10_fdct16 },  // ADST_DCT = 1
+  { vp10_fdct16, fadst16     },  // DCT_ADST = 2
+  { fadst16,     fadst16     }   // ADST_ADST = 3
 };
 
 void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
@@ -1123,7 +1124,7 @@ void vp10_fdct8x8_quant_c(const int16_t *input, int stride,
 
   // Rows
   for (i = 0; i < 8; ++i) {
-    fdct8(&intermediate[i * 8], &coeff_ptr[i * 8]);
+    vp10_fdct8(&intermediate[i * 8], &coeff_ptr[i * 8]);
     for (j = 0; j < 8; ++j)
       coeff_ptr[j + i * 8] /= 2;
   }

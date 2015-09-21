@@ -17,10 +17,7 @@
 #include "test/util.h"
 #include "./vpx_config.h"
 #include "vpx_ports/msvc.h"
-
-#undef CONFIG_COEFFICIENT_RANGE_CHECKING
-#define CONFIG_COEFFICIENT_RANGE_CHECKING 1
-#include "vp10/encoder/dct.c"
+#include "vp10/encoder/dct.h"
 
 using libvpx_test::ACMRandom;
 
@@ -105,8 +102,8 @@ TEST_P(Vp10FwdTxfm, RunFwdAccuracyCheck) {
 INSTANTIATE_TEST_CASE_P(
     C, Vp10FwdTxfm,
     ::testing::Values(
-        FdctParam(&fdct4, &reference_dct_1d, 4, 1),
-        FdctParam(&fdct8, &reference_dct_1d, 8, 1),
-        FdctParam(&fdct16, &reference_dct_1d, 16, 2),
-        FdctParam(&fdct32, &reference_dct_1d, 32, 4)));
+        FdctParam(&vp10_fdct4, &reference_dct_1d, 4, 1),
+        FdctParam(&vp10_fdct8, &reference_dct_1d, 8, 1),
+        FdctParam(&vp10_fdct16, &reference_dct_1d, 16, 2),
+        FdctParam(&vp10_fdct32_local, &reference_dct_1d, 32, 4)));
 }  // namespace
