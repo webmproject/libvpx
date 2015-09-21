@@ -797,7 +797,7 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
     } else if (above_intra || left_intra) {  // intra/inter or inter/intra
       const MB_MODE_INFO *edge_mbmi = above_intra ? left_mbmi : above_mbmi;
       if (!has_second_ref(edge_mbmi)) {
-        if (CHECK_LAST_OR_LAST2(edge_mbmi->ref_frame[0]))
+        if (CHECK_LAST_LAST2_LAST3(edge_mbmi->ref_frame[0]))
           pred_context = 3;
         else
           pred_context = 4 * (edge_mbmi->ref_frame[0] == GOLDEN_FRAME);
@@ -833,11 +833,12 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
         else
           pred_context = 1 + 2 * (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
       } else {
-        if (CHECK_LAST_OR_LAST2(above0) && CHECK_LAST_OR_LAST2(left0)) {
+        if (CHECK_LAST_LAST2_LAST3(above0) && CHECK_LAST_LAST2_LAST3(left0)) {
           pred_context = 2 + (above0 == left0);
-        } else if (CHECK_LAST_OR_LAST2(above0) || CHECK_LAST_OR_LAST2(left0)) {
-          const MV_REFERENCE_FRAME edge0 = CHECK_LAST_OR_LAST2(above0) ? left0
-                                                                       : above0;
+        } else if (CHECK_LAST_LAST2_LAST3(above0) ||
+                   CHECK_LAST_LAST2_LAST3(left0)) {
+          const MV_REFERENCE_FRAME edge0 =
+              CHECK_LAST_LAST2_LAST3(above0) ? left0 : above0;
           pred_context = 4 * (edge0 == GOLDEN_FRAME);
         } else {
           pred_context = 2 * (above0 == GOLDEN_FRAME) +
@@ -849,7 +850,7 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
     const MB_MODE_INFO *edge_mbmi = has_above ? above_mbmi : left_mbmi;
 
     if (!is_inter_block(edge_mbmi) ||
-        (CHECK_LAST_OR_LAST2(edge_mbmi->ref_frame[0]) &&
+        (CHECK_LAST_LAST2_LAST3(edge_mbmi->ref_frame[0]) &&
          !has_second_ref(edge_mbmi)))
       pred_context = 2;
     else if (!has_second_ref(edge_mbmi))
