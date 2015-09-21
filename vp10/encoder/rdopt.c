@@ -1273,6 +1273,7 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
                                        int64_t *distortion, int64_t *sse,
                                        ENTROPY_CONTEXT *ta,
                                        ENTROPY_CONTEXT *tl,
+                                       int ir, int ic,
                                        int mi_row, int mi_col) {
   int k;
   MACROBLOCKD *xd = &x->e_mbd;
@@ -1283,49 +1284,16 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   const int width = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int height = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   int idx, idy;
-
   const uint8_t *const src =
       &p->src.buf[vp10_raster_block_offset(BLOCK_8X8, i, p->src.stride)];
   uint8_t *const dst = &pd->dst.buf[vp10_raster_block_offset(BLOCK_8X8, i,
                                                             pd->dst.stride)];
   int64_t thisdistortion = 0, thissse = 0;
-  int thisrate = 0, ref;
+  int thisrate = 0;
   TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, i);
   const scan_order *so = get_scan(TX_4X4, tx_type);
-  const int is_compound = has_second_ref(&mi->mbmi);
-  const InterpKernel *kernel = vp10_filter_kernels[mi->mbmi.interp_filter];
 
-  for (ref = 0; ref < 1 + is_compound; ++ref) {
-    const uint8_t *pre = &pd->pre[ref].buf[vp10_raster_block_offset(BLOCK_8X8, i,
-                                               pd->pre[ref].stride)];
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp10_highbd_build_inter_predictor(pre, pd->pre[ref].stride,
-                                     dst, pd->dst.stride,
-                                     &mi->bmi[i].as_mv[ref].as_mv,
-                                     &xd->block_refs[ref]->sf, width, height,
-                                     ref, kernel, MV_PRECISION_Q3,
-                                     mi_col * MI_SIZE + 4 * (i % 2),
-                                     mi_row * MI_SIZE + 4 * (i / 2), xd->bd);
-  } else {
-    vp10_build_inter_predictor(pre, pd->pre[ref].stride,
-                              dst, pd->dst.stride,
-                              &mi->bmi[i].as_mv[ref].as_mv,
-                              &xd->block_refs[ref]->sf, width, height, ref,
-                              kernel, MV_PRECISION_Q3,
-                              mi_col * MI_SIZE + 4 * (i % 2),
-                              mi_row * MI_SIZE + 4 * (i / 2));
-  }
-#else
-    vp10_build_inter_predictor(pre, pd->pre[ref].stride,
-                              dst, pd->dst.stride,
-                              &mi->bmi[i].as_mv[ref].as_mv,
-                              &xd->block_refs[ref]->sf, width, height, ref,
-                              kernel, MV_PRECISION_Q3,
-                              mi_col * MI_SIZE + 4 * (i % 2),
-                              mi_row * MI_SIZE + 4 * (i / 2));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  }
+  vp10_build_inter_predictor_sub8x8(xd, 0, i, ir, ic, mi_row, mi_col);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -1965,6 +1933,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                     &bsi->rdstat[i][mode_idx].bsse,
                                     bsi->rdstat[i][mode_idx].ta,
                                     bsi->rdstat[i][mode_idx].tl,
+                                    idy, idx,
                                     mi_row, mi_col);
         if (bsi->rdstat[i][mode_idx].brdcost < INT64_MAX) {
           bsi->rdstat[i][mode_idx].brdcost += RDCOST(x->rdmult, x->rddiv,
