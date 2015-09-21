@@ -8573,24 +8573,24 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
           case GOLDEN_FRAME:
             ref_frame_skip_mask[0] |= (1 << LAST_FRAME) |
-#if CONFIG_LAST3_REF
-                                      (1 << LAST2_FRAME) |
 #if CONFIG_MULTI_REF
+                                      (1 << LAST2_FRAME) |
+#if CONFIG_LAST3_REF
                                       (1 << LAST3_FRAME) |
-#endif  // CONFIG_MULTI_REF
 #endif  // CONFIG_LAST3_REF
+#endif  // CONFIG_MULTI_REF
                                       (1 << ALTREF_FRAME);
             ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
             break;
 
           case ALTREF_FRAME:
             ref_frame_skip_mask[0] |= (1 << LAST_FRAME) |
-#if CONFIG_LAST3_REF
-                                      (1 << LAST2_FRAME) |
 #if CONFIG_MULTI_REF
+                                      (1 << LAST2_FRAME) |
+#if CONFIG_LAST3_REF
                                       (1 << LAST3_FRAME) |
-#endif  // CONFIG_MULTI_REF
 #endif  // CONFIG_LAST3_REF
+#endif  // CONFIG_MULTI_REF
                                       (1 << GOLDEN_FRAME);
             break;
 

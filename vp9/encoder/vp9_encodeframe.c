@@ -1522,8 +1522,7 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
                             [has_second_ref(mbmi)]++;
 
         if (has_second_ref(mbmi)) {
-#if CONFIG_MULTI_REF
-#if CONFIG_LAST3_REF
+#if CONFIG_MULTI_REF && CONFIG_LAST3_REF
           const int bit = (ref0 == GOLDEN_FRAME || ref0 == LAST3_FRAME);
           counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)][0][bit]++;
           if (!bit) {
@@ -1533,15 +1532,16 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
             counts->comp_ref[vp9_get_pred_context_comp_ref_p2(cm, xd)][2]
                             [ref0 == GOLDEN_FRAME]++;
           }
-#else  // CONFIG_LAST3_REF
+#else  // CONFIG_MULTI_REF && CONFIG_LAST3_REF
           counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)][0]
                           [ref0 == GOLDEN_FRAME]++;
+#if  CONFIG_MULTI_REF
           if (ref0 != GOLDEN_FRAME) {
             counts->comp_ref[vp9_get_pred_context_comp_ref_p1(cm, xd)][1]
                             [ref0 == LAST_FRAME]++;
           }
-#endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
+#endif  // CONFIG_MULTI_REF && CONFIG_LAST3_REF
         } else {
 #if CONFIG_MULTI_REF
           const int bit = (ref0 == ALTREF_FRAME || ref0 == GOLDEN_FRAME);
