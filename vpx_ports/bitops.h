@@ -11,6 +11,8 @@
 #ifndef VPX_PORTS_BITOPS_H_
 #define VPX_PORTS_BITOPS_H_
 
+#include <assert.h>
+
 #include "vpx_ports/msvc.h"
 
 #ifdef _MSC_VER
@@ -25,10 +27,15 @@
 extern "C" {
 #endif
 
+// These versions of get_msb() are only valid when n != 0 because all
+// of the optimized versions are undefined when n == 0:
+// https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html
+
 // use GNU builtins where available.
 #if defined(__GNUC__) && \
     ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || __GNUC__ >= 4)
 static INLINE int get_msb(unsigned int n) {
+  assert(n != 0);
   return 31 ^ __builtin_clz(n);
 }
 #elif defined(USE_MSC_INTRINSICS)
@@ -36,6 +43,7 @@ static INLINE int get_msb(unsigned int n) {
 
 static INLINE int get_msb(unsigned int n) {
   unsigned long first_set_bit;
+  assert(n != 0);
   _BitScanReverse(&first_set_bit, n);
   return first_set_bit;
 }
@@ -46,6 +54,8 @@ static INLINE int get_msb(unsigned int n) {
   int log = 0;
   unsigned int value = n;
   int i;
+
+  assert(n != 0);
 
   for (i = 4; i >= 0; --i) {
     const int shift = (1 << i);
