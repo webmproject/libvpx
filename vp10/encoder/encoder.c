@@ -4086,19 +4086,14 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (oxcf->pass == 1) {
-    const int lossless = is_lossless_requested(oxcf);
+    cpi->td.mb.e_mbd.lossless = is_lossless_requested(oxcf);
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->oxcf.use_highbitdepth)
-      cpi->td.mb.fwd_txm4x4 = lossless ?
-          vp10_highbd_fwht4x4 : vpx_highbd_fdct4x4;
-    else
-      cpi->td.mb.fwd_txm4x4 = lossless ? vp10_fwht4x4 : vpx_fdct4x4;
-    cpi->td.mb.highbd_itxm_add = lossless ? vp10_highbd_iwht4x4_add :
-                                         vp10_highbd_idct4x4_add;
-#else
-    cpi->td.mb.fwd_txm4x4 = lossless ? vp10_fwht4x4 : vpx_fdct4x4;
+    cpi->td.mb.highbd_itxm_add =
+        cpi->td.mb.e_mbd.lossless ? vp10_highbd_iwht4x4_add
+                                  : vp10_highbd_idct4x4_add;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    cpi->td.mb.itxm_add = lossless ? vp10_iwht4x4_add : vp10_idct4x4_add;
+    cpi->td.mb.itxm_add = cpi->td.mb.e_mbd.lossless ? vp10_iwht4x4_add
+                                                    : vp10_idct4x4_add;
     vp10_first_pass(cpi, source);
   } else if (oxcf->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);

@@ -2697,14 +2697,8 @@ static void encode_frame_internal(VP10_COMP *cpi) {
                  cm->uv_ac_delta_q == 0;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (cm->use_highbitdepth)
-    x->fwd_txm4x4 = xd->lossless ? vp10_highbd_fwht4x4 : vpx_highbd_fdct4x4;
-  else
-    x->fwd_txm4x4 = xd->lossless ? vp10_fwht4x4 : vpx_fdct4x4;
   x->highbd_itxm_add = xd->lossless ? vp10_highbd_iwht4x4_add :
                                       vp10_highbd_idct4x4_add;
-#else
-  x->fwd_txm4x4 = xd->lossless ? vp10_fwht4x4 : vpx_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   x->itxm_add = xd->lossless ? vp10_iwht4x4_add : vp10_idct4x4_add;
 

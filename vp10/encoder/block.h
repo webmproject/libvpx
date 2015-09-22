@@ -133,7 +133,6 @@ struct macroblock {
   // the visual quality at the boundary of moving color objects.
   uint8_t color_sensitivity[2];
 
-  void (*fwd_txm4x4)(const int16_t *input, tran_low_t *output, int stride);
   void (*itxm_add)(const tran_low_t *input, uint8_t *dest, int stride, int eob);
 #if CONFIG_VP9_HIGHBITDEPTH
   void (*highbd_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
