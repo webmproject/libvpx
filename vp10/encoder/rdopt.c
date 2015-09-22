@@ -698,6 +698,9 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
       rd = RDCOST(x->rdmult, x->rddiv, r + s0, d);
     }
 
+    if (is_inter_block(mbmi) && !xd->lossless && !s)
+      rd = VPXMIN(rd, RDCOST(x->rdmult, x->rddiv, s1, sse));
+
     // Early termination in transform size search.
     if (cpi->sf.tx_size_search_breakout &&
         (rd== INT64_MAX ||
