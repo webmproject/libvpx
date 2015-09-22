@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89470bec_12555ceb",
+        "filename": "vpx_ports/bitops.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1128439
+      },
+      "writtenOn": "2015-09-22T00:15:36Z",
+      "side": 1,
+      "message": "Nit: spelling error in optimized.\nI\u0027d be more opinionated and say that they are undefined because the underlying instruction is broken/undefined, but that\u0027s just me, and you could say that *all* of the optimized versions are undefined when n \u003d\u003d 0.",
+      "revId": "fdf3ecfd812568ae525cf2e7ac3deaff80d55f41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
