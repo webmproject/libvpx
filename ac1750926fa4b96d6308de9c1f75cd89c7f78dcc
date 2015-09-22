@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c9a3c3b1_b75c478d",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-22T19:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8902ab8b_c6e182bb",
+      "range": {
+        "startLine": 346,
+        "startChar": 0,
+        "endLine": 347,
+        "endChar": 46
+      },
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9b76fb4_87ca062b",
         "filename": "vp10/common/entropymode.c",
         "patchSetId": 8
@@ -71,6 +95,24 @@
       "writtenOn": "2015-09-17T14:30:13Z",
       "side": 1,
       "message": "This triggers decoding fuzzed files",
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9ae6393_985f8a09",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 657,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-22T19:42:23Z",
+      "side": 1,
+      "message": "Isn\u0027t it suppose to trigger assertion fail when the bitstream is invalid to decode? Or should we do this: \"if (color_ctx \u003e\u003d PALETTE_COLOR_CONTEXTS) color_ctx \u003d 0;\"?",
+      "parentUuid": "a9b76fb4_e7cd0246",
       "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -148,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "099a3b78_b27e1577",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-22T19:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89762b11_e69c5e2b",
+      "range": {
+        "startLine": 230,
+        "startChar": 4,
+        "endLine": 230,
+        "endChar": 58
+      },
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0984fbca_2554583e",
         "filename": "vp10/encoder/encodeframe.c",
         "patchSetId": 8
@@ -165,6 +231,24 @@
     },
     {
       "key": {
+        "uuid": "c9ae6393_986a2ab2",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2975,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-22T19:42:23Z",
+      "side": 1,
+      "message": "Done.\nI was not able to reproduce this. On my local test, there is always a LeakSanitizer memory leak warning, even for current VP9 head. So I don\u0027t think the warning is due to this patch. We need to figure out the cause of the warning though.\nAnyway, after redesigning, the palette color tokens are written into token buffer, so this memory allocation is no longer needed.",
+      "parentUuid": "0984fbca_2554583e",
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c98d83f4_e318acb1",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 8
@@ -176,6 +260,30 @@
       "writtenOn": "2015-09-17T14:30:13Z",
       "side": 1,
       "message": "In general alloc\u0027ing per mode trial leads to poor performance",
+      "range": {
+        "startLine": 756,
+        "startChar": 19,
+        "endLine": 756,
+        "endChar": 29
+      },
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c91663dc_3298a0f5",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-22T19:42:23Z",
+      "side": 1,
+      "message": "Done.\n\nThis buffer is now moved to macroblock, allocated only once for each sequence.",
+      "parentUuid": "c98d83f4_e318acb1",
       "range": {
         "startLine": 756,
         "startChar": 19,
