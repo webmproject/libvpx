@@ -635,6 +635,11 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   TX_SIZE best_tx = max_tx_size;
   int start_tx, end_tx;
   const int tx_select = cm->tx_mode == TX_MODE_SELECT;
+#if CONFIG_EXT_TX
+  int tx_type, best_tx_type = NORM;
+  int start_tx_type, end_tx_type;
+#endif  // CONFIG_EXT_TX
+
 
   const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
   assert(skip_prob > 0);
@@ -656,70 +661,97 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   *skip       = 0;
   *psse       = INT64_MAX;
 
-  for (n = start_tx; n >= end_tx; --n) {
-    int r_tx_size = 0;
-    for (m = 0; m <= n - (n == (int) max_tx_size); ++m) {
-      if (m == n)
-        r_tx_size += vp10_cost_zero(tx_probs[m]);
-      else
-        r_tx_size += vp10_cost_one(tx_probs[m]);
-    }
 #if CONFIG_EXT_TX
-    if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(n)) {
-      r = INT_MAX;
-      d = INT64_MAX;
-    } else {
+  start_tx_type = NORM;
+  if (is_inter_block(mbmi) && bs >= BLOCK_8X8 && !xd->lossless)
+    end_tx_type = EXT_TX_TYPES - 1;
+  else
+    end_tx_type = NORM;
+
+  for (tx_type = start_tx_type; tx_type <= end_tx_type; ++tx_type) {
+    mbmi->ext_txfrm = tx_type;
 #endif  // CONFIG_EXT_TX
-    txfm_rd_in_plane(x, &r, &d, &s,
-                     &sse, ref_best_rd, 0, bs, n,
-                     cpi->sf.use_fast_coef_costing);
+    for (n = start_tx; n >= end_tx; --n) {
+      int r_tx_size = 0;
+
 #if CONFIG_EXT_TX
-    }
-    if (is_inter_block(mbmi) && bs >= BLOCK_8X8 &&
-        !xd->lossless && r != INT_MAX)
-      r += cpi->ext_tx_costs[n][mbmi->ext_txfrm];
+      if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(n))
+        continue;
 #endif  // CONFIG_EXT_TX
 
-    if (r == INT_MAX)
-      continue;
-
-    if (tx_select)
-      r += r_tx_size;
-
-    if (s) {
-      if (is_inter_block(mbmi)) {
-        rd = RDCOST(x->rdmult, x->rddiv, s1, sse);
-        if (tx_select)
-          r -= r_tx_size;
-      } else {
-        rd =  RDCOST(x->rdmult, x->rddiv, s1 + r_tx_size * tx_select, sse);
+      for (m = 0; m <= n - (n == (int) max_tx_size); ++m) {
+        if (m == n)
+          r_tx_size += vp10_cost_zero(tx_probs[m]);
+        else
+          r_tx_size += vp10_cost_one(tx_probs[m]);
       }
-    } else {
-      rd = RDCOST(x->rdmult, x->rddiv, r + s0, d);
+
+      txfm_rd_in_plane(x, &r, &d, &s,
+                       &sse, ref_best_rd, 0, bs, n,
+                       cpi->sf.use_fast_coef_costing);
+#if CONFIG_EXT_TX
+      if (is_inter_block(mbmi) && bs >= BLOCK_8X8 &&
+          !xd->lossless && r != INT_MAX)
+        r += cpi->ext_tx_costs[n][mbmi->ext_txfrm];
+#endif  // CONFIG_EXT_TX
+
+      if (r == INT_MAX)
+        continue;
+
+      if (tx_select)
+        r += r_tx_size;
+
+      if (s) {
+        if (is_inter_block(mbmi)) {
+          rd = RDCOST(x->rdmult, x->rddiv, s1, sse);
+          if (tx_select)
+            r -= r_tx_size;
+        } else {
+          rd =  RDCOST(x->rdmult, x->rddiv, s1 + r_tx_size * tx_select, sse);
+        }
+      } else {
+        rd = RDCOST(x->rdmult, x->rddiv, r + s0, d);
+      }
+
+      if (is_inter_block(mbmi) && !xd->lossless && !s)
+        rd = VPXMIN(rd, RDCOST(x->rdmult, x->rddiv, s1, sse));
+
+      // Early termination in transform size search.
+      if (cpi->sf.tx_size_search_breakout &&
+          (rd== INT64_MAX ||
+              (n < (int) max_tx_size && rd > last_rd) ||
+              s == 1))
+        break;
+
+      last_rd = rd;
+#if CONFIG_EXT_TX
+      if (rd < (is_inter_block(mbmi) &&
+          (best_tx_type == NORM) ? ext_tx_th : 1) * best_rd) {
+#else
+      if (rd < best_rd) {
+#endif  // CONFIG_EXT_TX
+        best_tx = n;
+        best_rd = rd;
+        *distortion = d;
+        *rate       = r;
+        *skip       = s;
+        *psse       = sse;
+#if CONFIG_EXT_TX
+        best_tx_type = mbmi->ext_txfrm;
+#endif  // CONFIG_EXT_TX
+      }
     }
-
-    if (is_inter_block(mbmi) && !xd->lossless && !s)
-      rd = VPXMIN(rd, RDCOST(x->rdmult, x->rddiv, s1, sse));
-
-    // Early termination in transform size search.
-    if (cpi->sf.tx_size_search_breakout &&
-        (rd== INT64_MAX ||
-        (n < (int) max_tx_size && rd > last_rd) ||
-        s == 1))
-      break;
-
-    last_rd = rd;
-    if (rd < best_rd) {
-      best_tx = n;
-      best_rd = rd;
-      *distortion = d;
-      *rate       = r;
-      *skip       = s;
-      *psse       = sse;
-    }
+#if CONFIG_EXT_TX
   }
+#endif  // CONFIG_EXT_TX
 
   mbmi->tx_size = best_tx;
+#if CONFIG_EXT_TX
+  mbmi->ext_txfrm = best_tx_type;
+  txfm_rd_in_plane(x, &r, &d, &s,
+                   &sse, ref_best_rd, 0, bs, best_tx,
+                   cpi->sf.use_fast_coef_costing);
+#endif  // CONFIG_EXT_TX
 }
 
 static void super_block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
@@ -2707,37 +2739,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
     // Y cost and distortion
     vp10_subtract_plane(x, bsize, 0);
-#if CONFIG_EXT_TX
-    if (xd->lossless) {
-      mbmi->ext_txfrm = NORM;
-    } else {
-      int64_t rdcost_tx;
-      int rate_y_tx;
-      int64_t distortion_y_tx;
-      int dummy;
-      int64_t best_rdcost_tx = INT64_MAX;
-      int best_ext_tx = -1;
-
-      for (i = NORM; i < EXT_TX_TYPES; i++) {
-        mbmi->ext_txfrm = i;
-        super_block_yrd(cpi, x, &rate_y_tx, &distortion_y_tx, &dummy, psse,
-                        bsize, INT64_MAX);
-        assert(rate_y_tx != INT_MAX);
-        assert(rate_y_tx >= 0);
-        rdcost_tx = RDCOST(x->rdmult, x->rddiv, rate_y_tx, distortion_y_tx);
-        rdcost_tx = VPXMIN(rdcost_tx, RDCOST(x->rdmult, x->rddiv, 0, *psse));
-        assert(rdcost_tx >= 0);
-        if (rdcost_tx <
-            (best_ext_tx == NORM ? ext_tx_th : 1) * best_rdcost_tx) {
-          best_ext_tx = i;
-          best_rdcost_tx = rdcost_tx;
-        }
-      }
-      if (mbmi->tx_size > TX_16X16)
-        assert(best_ext_tx == NORM);
-      mbmi->ext_txfrm = best_ext_tx;
-    }
-#endif  // CONFIG_EXT_TX
 
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                     bsize, ref_best_rd);
