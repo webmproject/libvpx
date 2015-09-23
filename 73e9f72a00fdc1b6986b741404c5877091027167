@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a905afc4_da5361dd",
+        "filename": "vp10/vp10_iface_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-23T15:06:15Z",
+      "side": 1,
+      "message": "Would it be easier to explain if the mapping is the following: \ncrop_with and crop_height -\u003e p_w and p_h\ndisplay_width and display_height -\u003e d_w and d_h?\nthen basically, crop_width and crop_height is the physical dimension of in number of pixels for the image, and the image is intended to be displayed at display_width and display_height?",
+      "range": {
+        "startLine": 47,
+        "startChar": 33,
+        "endLine": 47,
+        "endChar": 34
+      },
+      "revId": "73e9f72a00fdc1b6986b741404c5877091027167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2911bf09_f932afd6",
+        "filename": "vp9/vp9_iface_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-23T15:06:15Z",
+      "side": 1,
+      "message": "Would it be easier to explain if the mapping is the following: \ncrop_with and crop_height -\u003e p_w and p_h\ndisplay_width and display_height -\u003e d_w and d_h?\n\nthen basically, crop_width and crop_height is the physical dimension of in number of pixels for the image, and the image is intended to be displayed at display_width and display_height?",
+      "range": {
+        "startLine": 47,
+        "startChar": 33,
+        "endLine": 47,
+        "endChar": 34
+      },
+      "revId": "73e9f72a00fdc1b6986b741404c5877091027167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9b08755_77b248cd",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-23T15:06:15Z",
+      "side": 1,
+      "message": "the control is used to set \"display_width\" and \"display_height\", it would be less confusing if we name this accordingly.",
+      "range": {
+        "startLine": 574,
+        "startChar": 24,
+        "endLine": 574,
+        "endChar": 25
+      },
+      "revId": "73e9f72a00fdc1b6986b741404c5877091027167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9ba0f35_d2d6a285",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 724,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-23T15:06:15Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 724,
+        "startChar": 21,
+        "endLine": 724,
+        "endChar": 22
+      },
+      "revId": "73e9f72a00fdc1b6986b741404c5877091027167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
