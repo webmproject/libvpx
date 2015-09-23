@@ -201,6 +201,10 @@ disabled(){
   eval test "x\$$1" = "xno"
 }
 
+# Iterates through positional parameters, checks to confirm the parameter has
+# not been explicitly (force) disabled, and enables the setting controlled by
+# the parameter when the setting is not disabled.
+# Note: Does NOT alter RTCD generation options ($RTCD_OPTIONS).
 soft_enable() {
   for var in $*; do
     if ! disabled $var; then
@@ -210,6 +214,10 @@ soft_enable() {
   done
 }
 
+# Iterates through positional parameters, checks to confirm the parameter has
+# not been explicitly (force) enabled, and disables the setting controlled by
+# the parameter when the setting is not enabled.
+# Note: Does NOT alter RTCD generation options ($RTCD_OPTIONS).
 soft_disable() {
   for var in $*; do
     if ! enabled $var; then
