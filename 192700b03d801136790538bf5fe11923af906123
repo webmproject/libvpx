@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "691737fc_9b29f3cb",
+        "filename": "vp10/common/loopfilter.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-23T15:41:56Z",
+      "side": 1,
+      "message": "Maybe comment to make it clear that 0 is for row and 1 is for col? or use two variables here: int_4x4_uv_r and int_4x4_uv_c?",
+      "range": {
+        "startLine": 85,
+        "startChar": 11,
+        "endLine": 85,
+        "endChar": 28
+      },
+      "revId": "192700b03d801136790538bf5fe11923af906123",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "691737fc_5bf75bc2",
+        "filename": "vp10/common/loopfilter.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-23T15:41:56Z",
+      "side": 1,
+      "message": "do you mean the following?\n#if CONFIG_MISC_FIXES\n  uint16_t int_4x4_uv_masked[2];\n#else\n  uint16_t int_4x4_uv;\n#endif",
+      "range": {
+        "startLine": 83,
+        "startChar": 1,
+        "endLine": 86,
+        "endChar": 6
+      },
+      "revId": "192700b03d801136790538bf5fe11923af906123",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
