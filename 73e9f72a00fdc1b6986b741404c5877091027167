@@ -91,6 +91,29 @@
       "revId": "73e9f72a00fdc1b6986b741404c5877091027167",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9b08755_3a5d4588",
+        "filename": "vpx/vpx_image.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-23T19:03:28Z",
+      "side": 1,
+      "message": "Another suggestion for consideration: \n\nchange comments here to \"cropped image width\" and cropped image height\" to reflect the fact these are dimensions after cropping. The comments then reflects what are stored in these variables, consistent with what they are set\n\n\nWe shall have a bit more freedom on the names the new pair, it would better if the name of the variables project the meaning of \"intended rendering width and intended rendering height\".",
+      "range": {
+        "startLine": 93,
+        "startChar": 52,
+        "endLine": 93,
+        "endChar": 54
+      },
+      "revId": "73e9f72a00fdc1b6986b741404c5877091027167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
