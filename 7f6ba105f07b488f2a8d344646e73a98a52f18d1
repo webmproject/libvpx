@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "691737fc_7e96853c",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-09-23T18:47:58Z",
+      "side": 1,
+      "message": "it would probably be nice to define all meaningful script globals here, and add some comments about what they do... on my todo list it goes.",
+      "revId": "7f6ba105f07b488f2a8d344646e73a98a52f18d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
