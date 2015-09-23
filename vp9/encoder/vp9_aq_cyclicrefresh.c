@@ -447,7 +447,7 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
     cr->rate_boost_fac = 10;
   } else {
     cr->motion_thresh = 32;
-    cr->rate_boost_fac = 17;
+    cr->rate_boost_fac = 15;
   }
   if (cpi->svc.spatial_layer_id > 0) {
     cr->motion_thresh = 4;
