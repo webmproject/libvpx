@@ -402,6 +402,10 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
     if (refresh_last_frame) {
 #if CONFIG_MULTI_REF
 #if CONFIG_LAST3_REF
+#if CONFIG_LAST4_REF
+      copy_frame(denoiser->running_avg_y[LAST4_FRAME],
+                 denoiser->running_avg_y[LAST3_FRAME]);
+#endif  // CONFIG_LAST4_REF
       copy_frame(denoiser->running_avg_y[LAST3_FRAME],
                  denoiser->running_avg_y[LAST2_FRAME]);
 #endif  // CONFIG_LAST3_REF

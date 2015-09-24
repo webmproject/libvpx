@@ -241,6 +241,9 @@ typedef struct VP9_COMP {
   int lst2_fb_idx;
 #if CONFIG_LAST3_REF
   int lst3_fb_idx;
+#if CONFIG_LAST4_REF
+  int lst4_fb_idx;
+#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   int gld_fb_idx;
@@ -251,6 +254,9 @@ typedef struct VP9_COMP {
   int refresh_last2_frame;
 #if CONFIG_LAST3_REF
   int refresh_last3_frame;
+#if CONFIG_LAST4_REF
+  int refresh_last4_frame;
+#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   int refresh_golden_frame;
@@ -263,6 +269,9 @@ typedef struct VP9_COMP {
   int ext_refresh_last2_frame;
 #if CONFIG_LAST3_REF
   int ext_refresh_last3_frame;
+#if CONFIG_LAST4_REF
+  int ext_refresh_last4_frame;
+#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   int ext_refresh_golden_frame;
@@ -507,6 +516,10 @@ static INLINE int get_ref_frame_idx(const VP9_COMP *cpi,
 #if CONFIG_LAST3_REF
   } else if (ref_frame == LAST3_FRAME) {
     return cpi->lst3_fb_idx;
+#if CONFIG_LAST4_REF
+  } else if (ref_frame == LAST4_FRAME) {
+    return cpi->lst4_fb_idx;
+#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_LAST3_REF
 #endif  // CONFIG_MULTI_REF
   } else if (ref_frame == GOLDEN_FRAME) {

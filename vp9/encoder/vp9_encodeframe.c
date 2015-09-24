@@ -1523,7 +1523,12 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
 
         if (has_second_ref(mbmi)) {
 #if CONFIG_MULTI_REF && CONFIG_LAST3_REF
+#if CONFIG_LAST4_REF
+          const int bit = (ref0 == GOLDEN_FRAME || ref0 == LAST3_FRAME ||
+                           ref0 == LAST4_FRAME);
+#else  // CONFIG_LAST4_REF
           const int bit = (ref0 == GOLDEN_FRAME || ref0 == LAST3_FRAME);
+#endif  // CONFIG_LAST4_REF
           counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)][0][bit]++;
           if (!bit) {
             counts->comp_ref[vp9_get_pred_context_comp_ref_p1(cm, xd)][1]
@@ -1531,6 +1536,12 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
           } else {
             counts->comp_ref[vp9_get_pred_context_comp_ref_p2(cm, xd)][2]
                             [ref0 == GOLDEN_FRAME]++;
+#if CONFIG_LAST4_REF
+            if (ref0 != GOLDEN_FRAME) {
+              counts->comp_ref[vp9_get_pred_context_comp_ref_p3(cm, xd)][3]
+                              [ref0 == LAST3_FRAME]++;
+            }
+#endif  // CONFIG_LAST4_REF
           }
 #else  // CONFIG_MULTI_REF && CONFIG_LAST3_REF
           counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)][0]
@@ -1551,11 +1562,17 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
                               [ref0 != GOLDEN_FRAME]++;
           } else {
 #if CONFIG_LAST3_REF
+            const int bit1 = !(ref0 == LAST2_FRAME || ref0 == LAST_FRAME);
             counts->single_ref[vp9_get_pred_context_single_ref_p3(xd)][2]
-                              [ref0 == LAST3_FRAME]++;
-            if (ref0 != LAST3_FRAME) {
+                              [bit1]++;
+            if (!bit1) {
               counts->single_ref[vp9_get_pred_context_single_ref_p4(xd)][3]
                                 [ref0 != LAST_FRAME]++;
+#if CONFIG_LAST4_REF
+            } else {
+              counts->single_ref[vp9_get_pred_context_single_ref_p5(xd)][4]
+                                [ref0 != LAST3_FRAME]++;
+#endif  // CONFIG_LAST4_REF
             }
 #else   // CONFIG_LAST3_REF
             counts->single_ref[vp9_get_pred_context_single_ref_p3(xd)][2]
@@ -3892,19 +3909,18 @@ static int check_dual_ref_flags(VP9_COMP *cpi) {
   if (vp9_segfeature_active(&cpi->common.seg, 1, SEG_LVL_REF_FRAME)) {
     return 0;
   } else {
+    return (!!(ref_flags & VP9_GOLD_FLAG) +
+            !!(ref_flags & VP9_LAST_FLAG) +
 #if CONFIG_MULTI_REF
+            !!(ref_flags & VP9_LAST2_FLAG) +
 #if CONFIG_LAST3_REF
-    return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG) +
-            !!(ref_flags & VP9_ALT_FLAG) + !!(ref_flags & VP9_LAST2_FLAG) +
-            !!(ref_flags & VP9_LAST3_FLAG)) >= 2;
-#else  // CONFIG_LAST3_REF
-    return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG) +
-            !!(ref_flags & VP9_ALT_FLAG) + !!(ref_flags & VP9_LAST2_FLAG)) >= 2;
+            !!(ref_flags & VP9_LAST3_FLAG) +
+#if CONFIG_LAST4_REF
+            !!(ref_flags & VP9_LAST4_FLAG) +
+#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_LAST3_REF
-#else  // CONFIG_MULTI_REF
-    return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG) +
-            !!(ref_flags & VP9_ALT_FLAG)) >= 2;
 #endif  // CONFIG_MULTI_REF
+            !!(ref_flags & VP9_ALT_FLAG)) >= 2;
   }
 }
 
@@ -4326,7 +4342,12 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cm->comp_var_ref[1] = LAST2_FRAME;
 #if CONFIG_LAST3_REF
       cm->comp_var_ref[2] = LAST3_FRAME;
+#if CONFIG_LAST4_REF
+      cm->comp_var_ref[3] = LAST4_FRAME;
+      cm->comp_var_ref[4] = GOLDEN_FRAME;
+#else  // CONFIG_LAST4_REF
       cm->comp_var_ref[3] = GOLDEN_FRAME;
+#endif  // CONFIG_LAST4_REF
 #else  // CONFIG_LAST3_REF
       cm->comp_var_ref[2] = GOLDEN_FRAME;
 #endif  // CONFIG_LAST3_REF
