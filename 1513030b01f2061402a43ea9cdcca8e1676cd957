@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e4c398b_0a2f1fc0",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T16:12:14Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 244,
+        "startChar": 50,
+        "endLine": 244,
+        "endChar": 62
+      },
+      "revId": "1513030b01f2061402a43ea9cdcca8e1676cd957",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce582944_8e955f2d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T16:12:14Z",
+      "side": 1,
+      "message": "this is always true. Do you mean \u0027\u0026\u0026\u0027?\nMaybe \u0027abs(mv.col) \u003c 8\u0027 would be more readable",
+      "range": {
+        "startLine": 275,
+        "startChar": 10,
+        "endLine": 275,
+        "endChar": 37
+      },
+      "revId": "1513030b01f2061402a43ea9cdcca8e1676cd957",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
