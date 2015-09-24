@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "6e4d7d85_1424e247",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T23:19:37Z",
+      "side": 1,
+      "message": "I\u0027m reading this as a 50:50 chance of choosing PALETTE_COLOR_TWO and \u0026vp10_palette_color_tree[6]. Is that correct?",
+      "range": {
+        "startLine": 347,
+        "startChar": 15,
+        "endLine": 347,
+        "endChar": 18
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ae5bf53d_dc72e9d8",
         "filename": "vp10/encoder/palette.c",
         "patchSetId": 9
