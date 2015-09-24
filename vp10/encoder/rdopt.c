@@ -700,19 +700,19 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
 
   for (tx_type = start_tx_type; tx_type <= end_tx_type; ++tx_type) {
     mbmi->ext_txfrm = tx_type;
+    // TODO(huisu): clean up the logic.
+    if (mbmi->ext_txfrm >= ALT11 && mbmi->ext_txfrm < ALT16 &&
+        best_tx_type == NORM) {
+      tx_type = ALT16 - 1;
+      continue;
+    }
 #endif  // CONFIG_EXT_TX
     for (n = start_tx; n >= end_tx; --n) {
       int r_tx_size = 0;
 
 #if CONFIG_EXT_TX
-      if (is_inter_block(mbmi)) {
-        if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(n)) {
-          continue;
-        } else if (mbmi->ext_txfrm >= ALT11 && best_tx_type == NORM) {
-          // Terminate if the best so far is still NORM
-          break;
-        }
-      }
+      if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(n))
+        continue;
 #endif  // CONFIG_EXT_TX
 
       for (m = 0; m <= n - (n == (int) max_tx_size); ++m) {
@@ -727,7 +727,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                        cpi->sf.use_fast_coef_costing);
 #if CONFIG_EXT_TX
       if (is_inter_block(mbmi) && bs >= BLOCK_8X8 &&
-          !xd->lossless && r != INT_MAX)
+          !xd->lossless && r != INT_MAX && n < TX_32X32)
         r += cpi->ext_tx_costs[n][mbmi->ext_txfrm];
 #endif  // CONFIG_EXT_TX
 
@@ -783,7 +783,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
 
   mbmi->tx_size = best_tx;
 #if CONFIG_EXT_TX
-  mbmi->ext_txfrm = best_tx_type > -1 ? best_tx_type : NORM;
+  mbmi->ext_txfrm = best_tx_type;
   txfm_rd_in_plane(x, &r, &d, &s,
                    &sse, ref_best_rd, 0, bs, best_tx,
                    cpi->sf.use_fast_coef_costing);
