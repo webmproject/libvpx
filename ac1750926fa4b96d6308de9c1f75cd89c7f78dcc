@@ -119,6 +119,24 @@
     },
     {
       "key": {
+        "uuid": "ce582944_8e6c3fff",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 657,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T16:26:52Z",
+      "side": 1,
+      "message": "The decoder should return an error on an invalid bitstream. \n\"if (color_ctx \u003e\u003d PALETTE_COLOR_CONTEXTS) color_ctx \u003d 0;\" is okay for now, but we should add a todo to find a way to avoid wasting the bits.",
+      "parentUuid": "c9ae6393_985f8a09",
+      "revId": "ac1750926fa4b96d6308de9c1f75cd89c7f78dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89762b11_e69c5e2b",
         "filename": "vp10/decoder/decodemv.c",
         "patchSetId": 8
