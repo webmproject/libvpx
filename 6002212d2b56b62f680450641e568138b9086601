@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce582944_313932a1",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-09-24T20:12:04Z",
+      "side": 1,
+      "message": "ahh is that why the previous xcode change failed? soft_disable media?\n\nseems like it should be updating RTCD_OPTIONS ...",
+      "range": {
+        "startLine": 207,
+        "startChar": 47,
+        "endLine": 207,
+        "endChar": 49
+      },
+      "revId": "6002212d2b56b62f680450641e568138b9086601",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
