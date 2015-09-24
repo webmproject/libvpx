@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ae5bf53d_dc72e9d8",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T23:08:25Z",
+      "side": 1,
+      "message": "Why 256? Up to 256 colors? Up to 256 pixels? Other?",
+      "range": {
+        "startLine": 44,
+        "startChar": 12,
+        "endLine": 44,
+        "endChar": 15
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee616dea_e3e4ee18",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T23:08:25Z",
+      "side": 1,
+      "message": "count is [256] but index is int32. Is there a danger of overflowing?",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 19
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4c398b_93634625",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T23:08:25Z",
+      "side": 1,
+      "message": "rand() is not required to be re-entrant. Add a TODO to replace this.",
+      "range": {
+        "startLine": 60,
+        "startChar": 42,
+        "endLine": 60,
+        "endChar": 46
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_1903f7d6",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-24T23:08:25Z",
+      "side": 1,
+      "message": "Can this be narrowed to PALETTE_MAX_SIZE?",
+      "range": {
+        "startLine": 87,
+        "startChar": 23,
+        "endLine": 87,
+        "endChar": 26
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
