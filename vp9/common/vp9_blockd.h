@@ -176,7 +176,6 @@ typedef struct macroblockd {
   int mb_to_bottom_edge;
 
   FRAME_CONTEXT *fc;
-  int frame_parallel_decoding_mode;
 
   /* pointers to reference frames */
   RefBuffer *block_refs[2];
