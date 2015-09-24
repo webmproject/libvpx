@@ -22,6 +22,30 @@
       "revId": "6002212d2b56b62f680450641e568138b9086601",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae5bf53d_21244248",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-09-24T22:24:26Z",
+      "side": 1,
+      "message": "Partly: the original iOS 9 fix was to omit the \"soft_enable media\" line when doing an an arm*darwin* build, but that\u0027s not enough because the RTCD generation code is going to do it\u0027s thing unless explicitly told otherwise, resulting in undef symbol errors for _armv6 and _media functions.\n\nThis comment attempts to head that situation off in the hope that anyone calling these functions will at least read their function comments (ha).\n\nTaking a stab at it. Having this RTCD_OPTIONS\u003d\"${RTCD_OPTIONS} --disable-media \" hanging out in a random place in configure.sh sucks, but so do a lot of things about configure.sh.",
+      "parentUuid": "ce582944_313932a1",
+      "range": {
+        "startLine": 207,
+        "startChar": 47,
+        "endLine": 207,
+        "endChar": 49
+      },
+      "revId": "6002212d2b56b62f680450641e568138b9086601",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
