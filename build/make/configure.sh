@@ -1214,7 +1214,8 @@ EOF
               && AS=""
           fi
           [ "${AS}" = auto ] || [ -z "${AS}" ] \
-            && die "Neither yasm nor nasm have been found"
+            && die "Neither yasm nor nasm have been found." \
+                   "See the prerequisites section in the README for more info."
           ;;
       esac
       log_echo "  using $AS"
