@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0e5fa128_f95dc387",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-25T18:25:45Z",
+      "side": 1,
+      "message": "Normally, this line of probs is never used. In case of two palette colors, the context index should never be 2. So the numbers in this line do not really matter.",
+      "parentUuid": "6e4d7d85_1424e247",
+      "range": {
+        "startLine": 347,
+        "startChar": 15,
+        "endLine": 347,
+        "endChar": 18
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ae5bf53d_dc72e9d8",
         "filename": "vp10/encoder/palette.c",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-24T23:08:25Z",
       "side": 1,
       "message": "Why 256? Up to 256 colors? Up to 256 pixels? Other?",
+      "range": {
+        "startLine": 44,
+        "startChar": 12,
+        "endLine": 44,
+        "endChar": 15
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e52b121_15973e81",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-25T18:25:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ae5bf53d_dc72e9d8",
       "range": {
         "startLine": 44,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2e470569_3bc6a236",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-25T18:25:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee616dea_e3e4ee18",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 19
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4e4c398b_93634625",
         "filename": "vp10/encoder/palette.c",
         "patchSetId": 9
@@ -82,6 +154,30 @@
       "writtenOn": "2015-09-24T23:08:25Z",
       "side": 1,
       "message": "rand() is not required to be re-entrant. Add a TODO to replace this.",
+      "range": {
+        "startLine": 60,
+        "startChar": 42,
+        "endLine": 60,
+        "endChar": 46
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee86cdd4_bb75e791",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-25T18:25:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e4c398b_93634625",
       "range": {
         "startLine": 60,
         "startChar": 42,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "ae5bf53d_c9190882",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-25T18:25:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e5fa128_1903f7d6",
+      "range": {
+        "startLine": 87,
+        "startChar": 23,
+        "endLine": 87,
+        "endChar": 26
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee616dea_e32aae5b",
         "filename": "vp10/encoder/palette.h",
         "patchSetId": 9
@@ -128,6 +248,30 @@
       "writtenOn": "2015-09-24T23:47:12Z",
       "side": 1,
       "message": "Nit: capital VP",
+      "range": {
+        "startLine": 25,
+        "startChar": 18,
+        "endLine": 25,
+        "endChar": 20
+      },
+      "revId": "aef1d7cb140421040c83d5cb728a8b3d4c814bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e4d7d85_310b6b30",
+        "filename": "vp10/encoder/palette.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-25T18:25:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee616dea_e32aae5b",
       "range": {
         "startLine": 25,
         "startChar": 18,
