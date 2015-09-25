@@ -3816,8 +3816,8 @@ void vp9_highbd_idct64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
 
     for (j = 0; j < 64; ++j) {
       for (i = 0; i < 64; ++i)
-        dest[j * stride + i] = highbd_clip_pixel_add(
-            dest[j * 64 + i], round(out2[j * 64 + i] / 128), bd);
+        dest[i] = highbd_clip_pixel_add(
+            dest[i], round(out2[j * 64 + i] / 128), bd);
       dest += stride;
     }
   }
