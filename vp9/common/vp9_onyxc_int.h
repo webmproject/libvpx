@@ -31,15 +31,11 @@ extern "C" {
 #endif
 
 #if CONFIG_MULTI_REF
-#if CONFIG_LAST3_REF
 #if CONFIG_LAST4_REF
 #define REFS_PER_FRAME 6
 #else  // CONFIG_LAST4_REF
 #define REFS_PER_FRAME 5
 #endif  // CONFIG_LAST4_REF
-#else  // CONFIG_LAST3_REF
-#define REFS_PER_FRAME 4
-#endif  // CONFIG_LAST3_REF
 #else  // CONFIG_MULTI_REF
 #define REFS_PER_FRAME 3
 #endif  // CONFIG_MULTI_REF
@@ -137,14 +133,14 @@ typedef struct VP9Common {
 
   FRAME_TYPE last_frame_type;  /* last frame's frame type for motion search.*/
   FRAME_TYPE frame_type;
-#if CONFIG_MULTI_REF && CONFIG_LAST3_REF
+#if CONFIG_MULTI_REF
   // frame type for the frame before the last
   FRAME_TYPE last2_frame_type;
 #if CONFIG_LAST4_REF
   // frame type for the frame two frames before the last
   FRAME_TYPE last3_frame_type;
 #endif  // CONFIG_LAST4_REF
-#endif  // CONFIG_MULTI_REF && CONFIG_LAST3_REF
+#endif  // CONFIG_MULTI_REF
 
   int show_frame;
   int last_show_frame;
@@ -206,15 +202,11 @@ typedef struct VP9Common {
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;
 #if CONFIG_MULTI_REF
-#if CONFIG_LAST3_REF
 #if CONFIG_LAST4_REF
   MV_REFERENCE_FRAME comp_var_ref[5];
 #else  // CONFIG_LAST4_REF
   MV_REFERENCE_FRAME comp_var_ref[4];
 #endif  // CONFIG_LAST4_REF
-#else  // CONFIG_LAST3_REF
-  MV_REFERENCE_FRAME comp_var_ref[3];
-#endif  // CONFIG_LAST3_REF
 #else  // CONFIG_MULTI_REF
   MV_REFERENCE_FRAME comp_var_ref[2];
 #endif  // CONFIG_MULTI_REF

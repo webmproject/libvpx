@@ -68,8 +68,6 @@ extern "C" {
 
 #if CONFIG_MULTI_REF
 
-#if CONFIG_LAST3_REF
-
 #if CONFIG_LAST4_REF
 #define SINGLE_REFS 6
 #define COMP_REFS 5
@@ -77,13 +75,6 @@ extern "C" {
 #define SINGLE_REFS 5
 #define COMP_REFS 4
 #endif  // CONFIG_LAST4_REF
-
-#else  // LAST3_REF
-
-#define SINGLE_REFS 4
-#define COMP_REFS 3
-
-#endif  // CONFIG_LAST3_REF
 
 #else  // CONFIG_MULTI_REF
 #define SINGLE_REFS 3
@@ -232,21 +223,15 @@ typedef enum {
   LAST_FRAME = 1,
 #if CONFIG_MULTI_REF
   LAST2_FRAME = 2,
-#if CONFIG_LAST3_REF
-#if CONFIG_LAST4_REF
   LAST3_FRAME = 3,
+#if CONFIG_LAST4_REF
   LAST4_FRAME = 4,
   GOLDEN_FRAME = 5,
   ALTREF_FRAME = 6,
 #else  // CONFIG_LAST4_REF
-  LAST3_FRAME = 3,
   GOLDEN_FRAME = 4,
   ALTREF_FRAME = 5,
 #endif  // CONFIG_LAST4_REF
-#else  // CONFIG_LAST3_REF
-  GOLDEN_FRAME = 3,
-  ALTREF_FRAME = 4,
-#endif  // CONFIG_LAST3_REF
 #else  // CONFIG_MULTI_REF
   GOLDEN_FRAME = 2,
   ALTREF_FRAME = 3,
