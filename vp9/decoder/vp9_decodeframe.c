@@ -543,12 +543,12 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                                       xd->bd);
               break;
             case TX_32X32:
-              tx_type = DCT_DCT;
+              tx_type = get_tx_type_large(plane_type, xd);
               vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
               break;
 #if CONFIG_TX64X64
             case TX_64X64:
-              tx_type = DCT_DCT;
+              tx_type = get_tx_type_large(plane_type, xd);
               vp9_highbd_idct64x64_add(dqcoeff, dst, stride, eob, xd->bd);
               break;
 #endif  // CONFIG_TX64X64

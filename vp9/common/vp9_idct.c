@@ -3788,8 +3788,9 @@ void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
 }
 
 #if CONFIG_TX64X64
-void vp9_highbd_idct64x64_4096_add_c(const tran_low_t *input, uint8_t *dest,
+void vp9_highbd_idct64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
                                      int stride, int bd) {
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
   // vp9_clear_system_state();  // Make it simd safe : __asm emms;
   {
     double out[64 * 64], out2[64 * 64];
