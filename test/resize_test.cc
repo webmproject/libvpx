@@ -196,13 +196,27 @@ class ResizeInternalTest : public ResizeTest {
 
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                                   libvpx_test::Encoder *encoder) {
-    if (video->frame() == kStepDownFrame) {
-      struct vpx_scaling_mode mode = {VP8E_FOURFIVE, VP8E_THREEFIVE};
-      encoder->Control(VP8E_SET_SCALEMODE, &mode);
-    }
-    if (video->frame() == kStepUpFrame) {
-      struct vpx_scaling_mode mode = {VP8E_NORMAL, VP8E_NORMAL};
-      encoder->Control(VP8E_SET_SCALEMODE, &mode);
+    if (change_config_) {
+      int new_q = 60;
+      if (video->frame() == 0) {
+        struct vpx_scaling_mode mode = {VP8E_ONETWO, VP8E_ONETWO};
+        encoder->Control(VP8E_SET_SCALEMODE, &mode);
+      }
+      if (video->frame() == 1) {
+        struct vpx_scaling_mode mode = {VP8E_NORMAL, VP8E_NORMAL};
+        encoder->Control(VP8E_SET_SCALEMODE, &mode);
+        cfg_.rc_min_quantizer = cfg_.rc_max_quantizer = new_q;
+        encoder->Config(&cfg_);
+      }
+    } else {
+      if (video->frame() == kStepDownFrame) {
+        struct vpx_scaling_mode mode = {VP8E_FOURFIVE, VP8E_THREEFIVE};
+        encoder->Control(VP8E_SET_SCALEMODE, &mode);
+      }
+      if (video->frame() == kStepUpFrame) {
+        struct vpx_scaling_mode mode = {VP8E_NORMAL, VP8E_NORMAL};
+        encoder->Control(VP8E_SET_SCALEMODE, &mode);
+      }
     }
   }
 
@@ -227,6 +241,7 @@ class ResizeInternalTest : public ResizeTest {
 #endif
 
   double frame0_psnr_;
+  bool change_config_;
 #if WRITE_COMPRESSED_STREAM
   FILE *outfile_;
   unsigned int out_frames_;
@@ -237,6 +252,7 @@ TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 10);
   init_flags_ = VPX_CODEC_USE_PSNR;
+  change_config_ = false;
 
   // q picked such that initial keyframe on this clip is ~30dB PSNR
   cfg_.rc_min_quantizer = cfg_.rc_max_quantizer = 48;
@@ -259,6 +275,15 @@ TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
       EXPECT_EQ(288U, info->h) << "Frame " << pts << " had unexpected height";
     }
   }
+}
+
+TEST_P(ResizeInternalTest, TestInternalResizeChangeConfig) {
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 10);
+  cfg_.g_w = 352;
+  cfg_.g_h = 288;
+  change_config_ = true;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
 class ResizeInternalRealtimeTest : public ::libvpx_test::EncoderTest,
