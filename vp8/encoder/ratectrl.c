@@ -1596,6 +1596,10 @@ int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
       // Drop this frame: advance frame counters, and set force_maxqp flag.
       cpi->common.current_video_frame++;
       cpi->frames_since_key++;
+      // Adjust rate correction factor upwards.
+      cpi->rate_correction_factor *= 2.0;
+      if (cpi->rate_correction_factor > MAX_BPB_FACTOR)
+        cpi->rate_correction_factor = MAX_BPB_FACTOR;
       // Flag to indicate we will force next frame to be encoded at max QP.
       cpi->force_maxqp = 1;
       return 1;
