@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e2e2591_d4facd38",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "I\u0027m concerned that there is a way to fall to an illegal tree state (or illegal color if we copied 255 everywhere). Is there a reason to to flip the tree. I.e.:\n\n  -PALETTE_COLOR_EIGHT, 2,\n  -PALETTE_COLOR_SEVEN, 4,\n  -PALETTE_COLOR_SIX, 6,\n  -PALETTE_COLOR_FIVE, 8,\n  -PALETTE_COLOR_FOUR, 10,\n  -PALETTE_COLOR_THREE, 12,\n  -PALETTE_COLOR_TWO, -PALETTE_COLOR_ONE\n\nThen you can just start with \u0026vp10_palette_color_tree[2*(PALETTE_COLORS - current_colors)]? \n\nAlternatively have one tree for each palette size either as constants or it should be trivial to generate it on the fly.",
+      "range": {
+        "startLine": 345,
+        "startChar": 15,
+        "endLine": 345,
+        "endChar": 18
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e470569_15be12e7",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "If these rows are illegal can you zero them out? Same for other palette sizes.",
+      "range": {
+        "startLine": 347,
+        "startChar": 0,
+        "endLine": 360,
+        "endChar": 46
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_ca50d8f5",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "nit missing space",
+      "range": {
+        "startLine": 30,
+        "startChar": 6,
+        "endLine": 30,
+        "endChar": 8
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_aa24848d",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "You can use an assert here, because l \u003d\u003d 0, isn\u0027t just illegal, it\u0027s logically impossible.",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 13
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee86cdd4_6a39c6b6",
+        "filename": "vp10/decoder/detokenize.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "Nit: drop the extra space.",
+      "range": {
+        "startLine": 23,
+        "startChar": 55,
+        "endLine": 23,
+        "endChar": 56
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e2e2591_54ac9d0a",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "Thanks for unwasting these bits. I don\u0027t think \"uniform\" is a good name though because small values are fewer bits. These are essentially VLC codes.",
+      "range": {
+        "startLine": 54,
+        "startChar": 19,
+        "endLine": 54,
+        "endChar": 32
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee616dea_e69e3721",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1439,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "Nit: Space before \u0027\u003d\u0027",
+      "range": {
+        "startLine": 1439,
+        "startChar": 17,
+        "endLine": 1439,
+        "endChar": 18
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee616dea_26956ffe",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1450,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "These are all temporaries used in the per-block visitor, correct?\n\nIf so toss them all in a struct and do a single allocation. You\u0027ll get better memory locality and it will be trivial to move the other big buffers in.",
+      "range": {
+        "startLine": 1440,
+        "startChar": 0,
+        "endLine": 1450,
+        "endChar": 72
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e470569_31692332",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "You really shouldn\u0027t be doing any allocations inside a per-block visitor. See my comment in encoder.c for my suggestion for an easy fix.",
+      "range": {
+        "startLine": 91,
+        "startChar": 16,
+        "endLine": 91,
+        "endChar": 28
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae5bf53d_3f69f231",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-26T00:12:40Z",
+      "side": 1,
+      "message": "I think \"1 \u003c\u003c 12\" would be more clear.",
+      "range": {
+        "startLine": 168,
+        "startChar": 16,
+        "endLine": 168,
+        "endChar": 20
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
