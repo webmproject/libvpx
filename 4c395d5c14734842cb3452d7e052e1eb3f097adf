@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e52b121_4def6ac0",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1481,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-09-26T02:47:20Z",
+      "side": 1,
+      "message": "with some work I think you\u0027d only need 1 \u0027tile_worker_data\u0027 and the alloc could be shared with the one in _mt. this loop could be interleaved with the decode loop.\nlet\u0027s leave this for now until there\u0027s a follow up or the work in _mt is done.",
+      "revId": "4c395d5c14734842cb3452d7e052e1eb3f097adf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
