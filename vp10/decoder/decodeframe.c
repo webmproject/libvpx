@@ -203,9 +203,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, xd->bd,
-                                       tx_type, xd->lossless ?
-                                           vp10_highbd_iwht4x4_add :
-                                           vp10_highbd_idct4x4_add);
+                                       tx_type, xd->lossless);
           break;
         case TX_8X8:
           vp10_highbd_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, xd->bd,
@@ -228,8 +226,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
-                                xd->lossless ? vp10_iwht4x4_add :
-                                    vp10_idct4x4_add);
+                                xd->lossless);
           break;
         case TX_8X8:
           vp10_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, tx_type);
@@ -274,9 +271,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, xd->bd,
-                                       tx_type, xd->lossless ?
-                                           vp10_highbd_iwht4x4_add :
-                                           vp10_highbd_idct4x4_add);
+                                       tx_type, xd->lossless);
           break;
         case TX_8X8:
           vp10_highbd_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, xd->bd,
@@ -299,8 +294,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
-                                xd->lossless ? vp10_iwht4x4_add :
-                                    vp10_idct4x4_add);
+                                xd->lossless);
           break;
         case TX_8X8:
           vp10_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, tx_type);

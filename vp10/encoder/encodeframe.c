@@ -2696,12 +2696,6 @@ static void encode_frame_internal(VP10_COMP *cpi) {
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  x->highbd_itxm_add = xd->lossless ? vp10_highbd_iwht4x4_add :
-                                      vp10_highbd_idct4x4_add;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  x->itxm_add = xd->lossless ? vp10_iwht4x4_add : vp10_idct4x4_add;
-
   if (xd->lossless)
     x->optimize = 0;
 
