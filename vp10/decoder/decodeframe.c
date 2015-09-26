@@ -124,6 +124,18 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
       vp10_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
 }
 
+#if CONFIG_MISC_FIXES
+static REFERENCE_MODE read_frame_reference_mode(const VP10_COMMON *cm,
+    struct vpx_read_bit_buffer *rb) {
+  if (is_compound_reference_allowed(cm)) {
+    return vpx_rb_read_bit(rb) ? REFERENCE_MODE_SELECT
+                               : (vpx_rb_read_bit(rb) ? COMPOUND_REFERENCE
+                                                      : SINGLE_REFERENCE);
+  } else {
+    return SINGLE_REFERENCE;
+  }
+}
+#else
 static REFERENCE_MODE read_frame_reference_mode(const VP10_COMMON *cm,
                                                 vpx_reader *r) {
   if (is_compound_reference_allowed(cm)) {
@@ -134,6 +146,7 @@ static REFERENCE_MODE read_frame_reference_mode(const VP10_COMMON *cm,
     return SINGLE_REFERENCE;
   }
 }
+#endif
 
 static void read_frame_reference_mode_probs(VP10_COMMON *cm, vpx_reader *r) {
   FRAME_CONTEXT *const fc = cm->fc;
@@ -2023,6 +2036,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   setup_segmentation_dequant(cm);
 #if CONFIG_MISC_FIXES
   cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(rb);
+  cm->reference_mode = read_frame_reference_mode(cm, rb);
 #endif
 
   setup_tile_info(cm, rb);
@@ -2072,7 +2086,9 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       vp10_diff_update_prob(&r, &fc->intra_inter_prob[i]);
 
+#if !CONFIG_MISC_FIXES
     cm->reference_mode = read_frame_reference_mode(cm, &r);
+#endif
     if (cm->reference_mode != SINGLE_REFERENCE)
       setup_compound_reference_mode(cm);
     read_frame_reference_mode_probs(cm, &r);
