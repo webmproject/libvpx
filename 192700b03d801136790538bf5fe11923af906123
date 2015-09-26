@@ -45,6 +45,30 @@
       "revId": "192700b03d801136790538bf5fe11923af906123",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "73ee4a38_7dca1788",
+        "filename": "vp10/common/loopfilter.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-09-26T00:27:48Z",
+      "side": 1,
+      "message": "OK, made this somewhat clearer, this was indeed somewhat confusing.",
+      "parentUuid": "691737fc_5bf75bc2",
+      "range": {
+        "startLine": 83,
+        "startChar": 1,
+        "endLine": 86,
+        "endChar": 6
+      },
+      "revId": "192700b03d801136790538bf5fe11923af906123",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
