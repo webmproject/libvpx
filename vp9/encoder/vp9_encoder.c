@@ -1509,8 +1509,13 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cm->interp_filter = cpi->sf.default_interp_filter;
 
-  cm->render_width = cpi->oxcf.width;
-  cm->render_height = cpi->oxcf.height;
+  if (cpi->oxcf.render_width > 0 && cpi->oxcf.render_height > 0) {
+    cm->render_width = cpi->oxcf.render_width;
+    cm->render_height = cpi->oxcf.render_height;
+  } else {
+    cm->render_width = cpi->oxcf.width;
+    cm->render_height = cpi->oxcf.height;
+  }
   if (last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) {
     cm->width = cpi->oxcf.width;
     cm->height = cpi->oxcf.height;
@@ -3823,6 +3828,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cm->frame_to_show = get_frame_new_buffer(cm);
   cm->frame_to_show->color_space = cm->color_space;
   cm->frame_to_show->color_range = cm->color_range;
+  cm->frame_to_show->render_width  = cm->render_width;
+  cm->frame_to_show->render_height = cm->render_height;
 
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);

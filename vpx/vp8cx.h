@@ -564,6 +564,14 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
   */
   VP9E_SET_SVC_REF_FRAME_CONFIG,
+
+  /*!\brief Codec control function to set intended rendering image size.
+   *
+   * By default, this is identical to the image size in pixels.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_RENDER_SIZE,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -798,6 +806,13 @@ VPX_CTRL_USE_TYPE(VP9E_GET_ACTIVEMAP, vpx_active_map_t *)
 VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_RANGE, int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
+
+/*!\brief
+ *
+ * TODO(rbultje) : add support of the control in ffmpeg
+ */
+#define VPX_CTRL_VP9E_SET_RENDER_SIZE
+VPX_CTRL_USE_TYPE(VP9E_SET_RENDER_SIZE, int *)
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus
 }  // extern "C"

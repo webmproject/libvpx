@@ -246,8 +246,8 @@ static void yuvconfig2image(vpx_image_t               *img,
     img->fmt = VPX_IMG_FMT_I420;
     img->w = yv12->y_stride;
     img->h = (yv12->y_height + 2 * VP8BORDERINPIXELS + 15) & ~15;
-    img->d_w = yv12->y_width;
-    img->d_h = yv12->y_height;
+    img->d_w = img->r_w = yv12->y_width;
+    img->d_h = img->r_h = yv12->y_height;
     img->x_chroma_shift = 1;
     img->y_chroma_shift = 1;
     img->planes[VPX_PLANE_Y] = yv12->y_buffer;
