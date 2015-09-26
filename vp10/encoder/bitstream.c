@@ -982,14 +982,14 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
   return total_size;
 }
 
-static void write_display_size(const VP10_COMMON *cm,
-                               struct vpx_write_bit_buffer *wb) {
-  const int scaling_active = cm->width != cm->display_width ||
-                             cm->height != cm->display_height;
+static void write_render_size(const VP10_COMMON *cm,
+                              struct vpx_write_bit_buffer *wb) {
+  const int scaling_active = cm->width != cm->render_width ||
+                             cm->height != cm->render_height;
   vpx_wb_write_bit(wb, scaling_active);
   if (scaling_active) {
-    vpx_wb_write_literal(wb, cm->display_width - 1, 16);
-    vpx_wb_write_literal(wb, cm->display_height - 1, 16);
+    vpx_wb_write_literal(wb, cm->render_width - 1, 16);
+    vpx_wb_write_literal(wb, cm->render_height - 1, 16);
   }
 }
 
@@ -998,7 +998,7 @@ static void write_frame_size(const VP10_COMMON *cm,
   vpx_wb_write_literal(wb, cm->width - 1, 16);
   vpx_wb_write_literal(wb, cm->height - 1, 16);
 
-  write_display_size(cm, wb);
+  write_render_size(cm, wb);
 }
 
 static void write_frame_size_with_refs(VP10_COMP *cpi,
@@ -1025,7 +1025,7 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
     vpx_wb_write_literal(wb, cm->height - 1, 16);
   }
 
-  write_display_size(cm, wb);
+  write_render_size(cm, wb);
 }
 
 static void write_sync_code(struct vpx_write_bit_buffer *wb) {
