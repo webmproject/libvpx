@@ -1930,14 +1930,15 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 
 void vp9_remove_compressor(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP9_COMMON *cm;
   unsigned int i;
   int t;
 
   if (!cpi)
     return;
 
-  if (cpi && (cm->current_video_frame > 0)) {
+  cm = &cpi->common;
+  if (cm->current_video_frame > 0) {
 #if CONFIG_INTERNAL_STATS
     vpx_clear_system_state();
 

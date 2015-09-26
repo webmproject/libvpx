@@ -1820,14 +1820,15 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 
 void vp10_remove_compressor(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
+  VP10_COMMON *cm;
   unsigned int i;
   int t;
 
   if (!cpi)
     return;
 
-  if (cpi && (cm->current_video_frame > 0)) {
+  cm = &cpi->common;
+  if (cm->current_video_frame > 0) {
 #if CONFIG_INTERNAL_STATS
     vpx_clear_system_state();
 
