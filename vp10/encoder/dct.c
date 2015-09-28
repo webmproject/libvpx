@@ -322,6 +322,7 @@ static void fdct16(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 16, 16);
 }
 
+/* #TODO(angiebird): Unify this with vp10_fwd_txfm.c: vp10_fdct32
 static void fdct32(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[32];
@@ -719,6 +720,7 @@ static void fdct32(const tran_low_t *input, tran_low_t *output) {
 
   range_check(output, 32, 18);
 }
+*/
 
 static void fadst4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x0, x1, x2, x3;
