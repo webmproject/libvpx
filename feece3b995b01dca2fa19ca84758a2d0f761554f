@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "ee86cdd4_23bc493d",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-28T21:23:48Z",
+      "side": 1,
+      "message": "You can\u0027t rely asserts to check for valid bitstreams in the decoder.",
+      "parentUuid": "ae5bf53d_ff2c7560",
+      "range": {
+        "startLine": 345,
+        "startChar": 15,
+        "endLine": 345,
+        "endChar": 18
+      },
+      "revId": "feece3b995b01dca2fa19ca84758a2d0f761554f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e470569_15be12e7",
         "filename": "vp10/common/entropymode.c",
         "patchSetId": 10
