@@ -15,6 +15,7 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/inv_txfm.h"
+#include "vpx_dsp/x86/txfm_common_sse2.h"
 
 // perform 8x8 transpose
 static INLINE void array_transpose_8x8(__m128i *in, __m128i *res) {
@@ -89,24 +90,35 @@ static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
   res0[15] = tbuf[7];
 }
 
-static INLINE void load_buffer_8x16(const int16_t *input, __m128i *in) {
-  in[0]  = _mm_load_si128((const __m128i *)(input + 0 * 16));
-  in[1]  = _mm_load_si128((const __m128i *)(input + 1 * 16));
-  in[2]  = _mm_load_si128((const __m128i *)(input + 2 * 16));
-  in[3]  = _mm_load_si128((const __m128i *)(input + 3 * 16));
-  in[4]  = _mm_load_si128((const __m128i *)(input + 4 * 16));
-  in[5]  = _mm_load_si128((const __m128i *)(input + 5 * 16));
-  in[6]  = _mm_load_si128((const __m128i *)(input + 6 * 16));
-  in[7]  = _mm_load_si128((const __m128i *)(input + 7 * 16));
+// Function to allow 8 bit optimisations to be used when profile 0 is used with
+// highbitdepth enabled
+static INLINE __m128i load_input_data(const tran_low_t *data) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  return octa_set_epi16(data[0], data[1], data[2], data[3], data[4], data[5],
+      data[6], data[7]);
+#else
+  return _mm_load_si128((const __m128i *)data);
+#endif
+}
 
-  in[8]  = _mm_load_si128((const __m128i *)(input + 8 * 16));
-  in[9]  = _mm_load_si128((const __m128i *)(input + 9 * 16));
-  in[10]  = _mm_load_si128((const __m128i *)(input + 10 * 16));
-  in[11]  = _mm_load_si128((const __m128i *)(input + 11 * 16));
-  in[12]  = _mm_load_si128((const __m128i *)(input + 12 * 16));
-  in[13]  = _mm_load_si128((const __m128i *)(input + 13 * 16));
-  in[14]  = _mm_load_si128((const __m128i *)(input + 14 * 16));
-  in[15]  = _mm_load_si128((const __m128i *)(input + 15 * 16));
+static INLINE void load_buffer_8x16(const tran_low_t *input, __m128i *in) {
+  in[0]  = load_input_data(input + 0 * 16);
+  in[1]  = load_input_data(input + 1 * 16);
+  in[2]  = load_input_data(input + 2 * 16);
+  in[3]  = load_input_data(input + 3 * 16);
+  in[4]  = load_input_data(input + 4 * 16);
+  in[5]  = load_input_data(input + 5 * 16);
+  in[6]  = load_input_data(input + 6 * 16);
+  in[7]  = load_input_data(input + 7 * 16);
+
+  in[8]  = load_input_data(input + 8 * 16);
+  in[9]  = load_input_data(input + 9 * 16);
+  in[10]  = load_input_data(input + 10 * 16);
+  in[11]  = load_input_data(input + 11 * 16);
+  in[12]  = load_input_data(input + 12 * 16);
+  in[13]  = load_input_data(input + 13 * 16);
+  in[14]  = load_input_data(input + 14 * 16);
+  in[15]  = load_input_data(input + 15 * 16);
 }
 
 #define RECON_AND_STORE(dest, in_x) \
