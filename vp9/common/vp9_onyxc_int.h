@@ -115,8 +115,8 @@ typedef struct VP9Common {
   int color_range;
   int width;
   int height;
-  int display_width;
-  int display_height;
+  int render_width;
+  int render_height;
   int last_width;
   int last_height;
 

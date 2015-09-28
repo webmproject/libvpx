@@ -1176,12 +1176,12 @@ static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
   return vpx_rb_read_bit(rb) ? SWITCHABLE : vpx_rb_read_literal(rb, 2);
 }
 
-static void setup_display_size(VP10_COMMON *cm,
-                               struct vpx_read_bit_buffer *rb) {
-  cm->display_width = cm->width;
-  cm->display_height = cm->height;
+static void setup_render_size(VP10_COMMON *cm,
+                              struct vpx_read_bit_buffer *rb) {
+  cm->render_width = cm->width;
+  cm->render_height = cm->height;
   if (vpx_rb_read_bit(rb))
-    vp10_read_frame_size(rb, &cm->display_width, &cm->display_height);
+    vp10_read_frame_size(rb, &cm->render_width, &cm->render_height);
 }
 
 static void resize_mv_buffer(VP10_COMMON *cm) {
@@ -1229,7 +1229,7 @@ static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   BufferPool *const pool = cm->buffer_pool;
   vp10_read_frame_size(rb, &width, &height);
   resize_context_buffers(cm, width, height);
-  setup_display_size(cm, rb);
+  setup_render_size(cm, rb);
 
   lock_buffer_pool(pool);
   if (vpx_realloc_frame_buffer(
@@ -1311,7 +1311,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   }
 
   resize_context_buffers(cm, width, height);
-  setup_display_size(cm, rb);
+  setup_render_size(cm, rb);
 
   lock_buffer_pool(pool);
   if (vpx_realloc_frame_buffer(

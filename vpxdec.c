@@ -953,22 +953,22 @@ static int main_loop(int argc, const char **argv_) {
           // these is set to 0, use the display size set in the first frame
           // header. If that is unavailable, use the raw decoded size of the
           // first decoded frame.
-          int display_width = vpx_input_ctx.width;
-          int display_height = vpx_input_ctx.height;
-          if (!display_width || !display_height) {
-            int display_size[2];
+          int render_width = vpx_input_ctx.width;
+          int render_height = vpx_input_ctx.height;
+          if (!render_width || !render_height) {
+            int render_size[2];
             if (vpx_codec_control(&decoder, VP9D_GET_DISPLAY_SIZE,
-                                  display_size)) {
+                                  render_size)) {
               // As last resort use size of first frame as display size.
-              display_width = img->d_w;
-              display_height = img->d_h;
+              render_width = img->d_w;
+              render_height = img->d_h;
             } else {
-              display_width = display_size[0];
-              display_height = display_size[1];
+              render_width = render_size[0];
+              render_height = render_size[1];
             }
           }
-          scaled_img = vpx_img_alloc(NULL, img->fmt, display_width,
-                                     display_height, 16);
+          scaled_img = vpx_img_alloc(NULL, img->fmt, render_width,
+                                     render_height, 16);
           scaled_img->bit_depth = img->bit_depth;
         }
 

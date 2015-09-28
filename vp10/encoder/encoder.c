@@ -1455,8 +1455,8 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
 
   cm->interp_filter = cpi->sf.default_interp_filter;
 
-  cm->display_width = cpi->oxcf.width;
-  cm->display_height = cpi->oxcf.height;
+  cm->render_width = cpi->oxcf.width;
+  cm->render_height = cpi->oxcf.height;
   cm->width = cpi->oxcf.width;
   cm->height = cpi->oxcf.height;
 
