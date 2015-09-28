@@ -42,6 +42,7 @@ struct EncodeParameters {
   int32_t frame_parallel;
   int32_t color_range;
   vpx_color_space_t cs;
+  int render_size[2];
   // TODO(JBB): quantizers / bitrate
 };
 
@@ -49,7 +50,7 @@ const EncodeParameters kVP9EncodeParameterSet[] = {
   {0, 0, 0, 1, 0, 0, VPX_CS_BT_601},
   {0, 0, 0, 0, 0, 1, VPX_CS_BT_709},
   {0, 0, 1, 0, 0, 1, VPX_CS_BT_2020},
-  {0, 2, 0, 0, 1, 0, VPX_CS_UNKNOWN},
+  {0, 2, 0, 0, 1, 0, VPX_CS_UNKNOWN, { 640, 480 }},
   // TODO(JBB): Test profiles (requires more work).
 };
 
@@ -88,6 +89,8 @@ class VpxEncoderParmsGetToDecoder
       encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
       encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
       encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+      if (encode_parms.render_size[0] > 0 && encode_parms.render_size[1] > 0)
+        encoder->Control(VP9E_SET_RENDER_SIZE, encode_parms.render_size);
     }
   }
 
@@ -118,6 +121,10 @@ class VpxEncoderParmsGetToDecoder
     }
     EXPECT_EQ(encode_parms.color_range, common->color_range);
     EXPECT_EQ(encode_parms.cs, common->color_space);
+    if (encode_parms.render_size[0] > 0 && encode_parms.render_size[1] > 0) {
+      EXPECT_EQ(encode_parms.render_size[0], common->render_width);
+      EXPECT_EQ(encode_parms.render_size[1], common->render_height);
+    }
     EXPECT_EQ(encode_parms.tile_cols, common->log2_tile_cols);
     EXPECT_EQ(encode_parms.tile_rows, common->log2_tile_rows);
 
