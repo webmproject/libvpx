@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ae5bf53d_9fea19af",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1597,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-09-28T19:08:17Z",
+      "side": 1,
+      "message": "const int target_size \u003d ...",
+      "range": {
+        "startLine": 1597,
+        "startChar": 10,
+        "endLine": 1597,
+        "endChar": 21
+      },
+      "revId": "45f0a35753ed09247bd24fddb26d448362edab59",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e4d7d85_7d88925b",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1615,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-09-28T19:08:17Z",
+      "side": 1,
+      "message": "indent should be 2 spaces",
+      "range": {
+        "startLine": 1615,
+        "startChar": 0,
+        "endLine": 1615,
+        "endChar": 10
+      },
+      "revId": "45f0a35753ed09247bd24fddb26d448362edab59",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e5fa128_408167eb",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1618,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-09-28T19:08:17Z",
+      "side": 1,
+      "message": "indent should be 2 spaces",
+      "range": {
+        "startLine": 1618,
+        "startChar": 6,
+        "endLine": 1618,
+        "endChar": 9
+      },
+      "revId": "45f0a35753ed09247bd24fddb26d448362edab59",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
