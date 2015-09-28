@@ -128,6 +128,53 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   }
 }
 
+void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
+                                       int i, int ir, int ic,
+                                       int mi_row, int mi_col) {
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  MODE_INFO *const mi = xd->mi[0];
+  const BLOCK_SIZE plane_bsize = get_plane_block_size(mi->mbmi.sb_type, pd);
+  const int width = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  const int height = 4 * num_4x4_blocks_high_lookup[plane_bsize];
+
+  uint8_t *const dst = &pd->dst.buf[(ir * pd->dst.stride + ic) << 2];
+  int ref;
+  const int is_compound = has_second_ref(&mi->mbmi);
+  const InterpKernel *kernel = vp10_filter_kernels[mi->mbmi.interp_filter];
+
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
+    const uint8_t *pre =
+        &pd->pre[ref].buf[(ir * pd->pre[ref].stride + ic) << 2];
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    vp10_highbd_build_inter_predictor(pre, pd->pre[ref].stride,
+                                      dst, pd->dst.stride,
+                                      &mi->bmi[i].as_mv[ref].as_mv,
+                                      &xd->block_refs[ref]->sf, width, height,
+                                      ref, kernel, MV_PRECISION_Q3,
+                                      mi_col * MI_SIZE + 4 * ic,
+                                      mi_row * MI_SIZE + 4 * ir, xd->bd);
+  } else {
+    vp10_build_inter_predictor(pre, pd->pre[ref].stride,
+                               dst, pd->dst.stride,
+                               &mi->bmi[i].as_mv[ref].as_mv,
+                               &xd->block_refs[ref]->sf, width, height, ref,
+                               kernel, MV_PRECISION_Q3,
+                               mi_col * MI_SIZE + 4 * ic,
+                               mi_row * MI_SIZE + 4 * ir);
+  }
+#else
+    vp10_build_inter_predictor(pre, pd->pre[ref].stride,
+                               dst, pd->dst.stride,
+                               &mi->bmi[i].as_mv[ref].as_mv,
+                               &xd->block_refs[ref]->sf, width, height, ref,
+                               kernel, MV_PRECISION_Q3,
+                               mi_col * MI_SIZE + 4 * ic,
+                               mi_row * MI_SIZE + 4 * ir);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
+}
+
 static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
                                               int mi_row, int mi_col,
                                               int plane_from, int plane_to) {

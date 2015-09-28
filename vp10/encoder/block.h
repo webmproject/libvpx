@@ -58,7 +58,6 @@ struct macroblock {
 
   MACROBLOCKD e_mbd;
   MB_MODE_INFO_EXT *mbmi_ext;
-  MB_MODE_INFO_EXT *mbmi_ext_base;
   int skip_block;
   int select_tx_size;
   int skip_recode;
@@ -133,13 +132,6 @@ struct macroblock {
   // Strong color activity detection. Used in RTC coding mode to enhance
   // the visual quality at the boundary of moving color objects.
   uint8_t color_sensitivity[2];
-
-  void (*fwd_txm4x4)(const int16_t *input, tran_low_t *output, int stride);
-  void (*itxm_add)(const tran_low_t *input, uint8_t *dest, int stride, int eob);
-#if CONFIG_VP9_HIGHBITDEPTH
-  void (*highbd_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
-                          int eob, int bd);
-#endif
 };
 
 #ifdef __cplusplus

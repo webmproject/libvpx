@@ -4213,5 +4213,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     }
     ++td->counts->tx.tx_totals[mbmi->tx_size];
     ++td->counts->tx.tx_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
+    if (cm->seg.enabled && cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+      vp9_cyclic_refresh_update_sb_postencode(cpi, mbmi, mi_row, mi_col, bsize);
   }
 }

@@ -20,6 +20,20 @@
 #include "vpx_dsp/fwd_txfm.h"
 #include "vpx_ports/mem.h"
 
+static INLINE void range_check(const tran_low_t *input, const int size,
+                               const int bit) {
+#if CONFIG_COEFFICIENT_RANGE_CHECKING
+  int i;
+  for (i = 0; i < size; ++i) {
+    assert(abs(input[i]) < (1 << bit));
+  }
+#else
+  (void)input;
+  (void)size;
+  (void)bit;
+#endif
+}
+
 #if CONFIG_EXT_TX
 void fdst4(const tran_low_t *input, tran_low_t *output) {
   static const int N = 4;
@@ -97,20 +111,6 @@ void fdst16(const tran_low_t *input, tran_low_t *output) {
   }
 }
 #endif  // CONFIG_EXT_TX
-
-static INLINE void range_check(const tran_low_t *input, const int size,
-                               const int bit) {
-#if CONFIG_COEFFICIENT_RANGE_CHECKING
-  int i;
-  for (i = 0; i < size; ++i) {
-    assert(abs(input[i]) < (1 << bit));
-  }
-#else
-  (void)input;
-  (void)size;
-  (void)bit;
-#endif
-}
 
 static void fdct4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
@@ -400,6 +400,7 @@ static void fdct16(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 16, 16);
 }
 
+/* #TODO(angiebird): Unify this with vp10_fwd_txfm.c: vp10_fdct32
 static void fdct32(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[32];
@@ -797,6 +798,7 @@ static void fdct32(const tran_low_t *input, tran_low_t *output) {
 
   range_check(output, 32, 18);
 }
+*/
 
 static void fadst4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x0, x1, x2, x3;

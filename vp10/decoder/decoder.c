@@ -126,6 +126,9 @@ VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
 void vp10_decoder_remove(VP10Decoder *pbi) {
   int i;
 
+  if (!pbi)
+    return;
+
   vpx_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->tile_data);

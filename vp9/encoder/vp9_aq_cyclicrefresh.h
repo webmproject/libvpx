@@ -51,6 +51,8 @@ struct CYCLIC_REFRESH {
   signed char *map;
   // Map of the last q a block was coded at.
   uint8_t *last_coded_q_map;
+  // Count on how many consecutive times a block uses ZER0MV for encoding.
+  uint8_t *consec_zero_mv;
   // Thresholds applied to the projected rate/distortion of the coding block,
   // when deciding whether block should be refreshed.
   int64_t thresh_rate_sb;
@@ -91,6 +93,11 @@ void vp9_cyclic_refresh_update_segment(struct VP9_COMP *const cpi,
                                        MB_MODE_INFO *const mbmi,
                                        int mi_row, int mi_col, BLOCK_SIZE bsize,
                                        int64_t rate, int64_t dist, int skip);
+
+void vp9_cyclic_refresh_update_sb_postencode(struct VP9_COMP *const cpi,
+                                             const MB_MODE_INFO *const mbmi,
+                                             int mi_row, int mi_col,
+                                             BLOCK_SIZE bsize);
 
 // Update the segmentation map, and related quantities: cyclic refresh map,
 // refresh sb_index, and target number of blocks to be refreshed.

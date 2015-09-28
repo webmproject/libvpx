@@ -447,20 +447,21 @@ void vp10_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
     vpx_idct32x32_1024_add(input, dest, stride);
 }
 
-void vp10_inv_txfm_add_4x4(
-    const tran_low_t *input, uint8_t *dest,
-    int stride, int eob, TX_TYPE tx_type,
-    void (*itxm_add_4x4)(const tran_low_t *input,
-                         uint8_t *dest, int stride, int eob)) {
-  switch (tx_type) {
-    case DCT_DCT:
-      itxm_add_4x4(input, dest, stride, eob);
-      break;
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      vp10_iht4x4_16_add(input, dest, stride, tx_type);
-      break;
+void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
+                           int stride, int eob, TX_TYPE tx_type, int lossless) {
+  if (lossless) {
+    assert(tx_type == DCT_DCT);
+    vp10_iwht4x4_add(input, dest, stride, eob);
+  } else {
+    switch (tx_type) {
+      case DCT_DCT:
+        vp10_idct4x4_add(input, dest, stride, eob);
+        break;
+      case ADST_DCT:
+      case DCT_ADST:
+      case ADST_ADST:
+        vp10_iht4x4_16_add(input, dest, stride, tx_type);
+        break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
       flipud(dest, stride, 4);
@@ -506,9 +507,10 @@ void vp10_inv_txfm_add_4x4(
       fliplr(dest, stride, 4);
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0);
-      break;
+      default:
+        assert(0);
+        break;
+    }
   }
 }
 
@@ -865,18 +867,20 @@ void vp10_highbd_idct32x32_add(const tran_low_t *input, uint8_t *dest,
 
 void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
                                   int stride, int eob, int bd, TX_TYPE tx_type,
-                                  void (*highbd_itxm_add_4x4)
-                                  (const tran_low_t *input, uint8_t *dest,
-                                      int stride, int eob, int bd)) {
-  switch (tx_type) {
-    case DCT_DCT:
-      highbd_itxm_add_4x4(input, dest, stride, eob, bd);
-      break;
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      vp10_highbd_iht4x4_16_add(input, dest, stride, tx_type, bd);
-      break;
+                                  int lossless) {
+  if (lossless) {
+    assert(tx_type == DCT_DCT);
+    vp10_highbd_iwht4x4_add(input, dest, stride, eob, bd);
+  } else {
+    switch (tx_type) {
+      case DCT_DCT:
+        vp10_highbd_idct4x4_add(input, dest, stride, eob, bd);
+        break;
+      case ADST_DCT:
+      case DCT_ADST:
+      case ADST_ADST:
+         vp10_highbd_iht4x4_16_add(input, dest, stride, tx_type, bd);
+         break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
       flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
@@ -922,9 +926,10 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
       fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0);
-      break;
+      default:
+        assert(0);
+        break;
+    }
   }
 }
 

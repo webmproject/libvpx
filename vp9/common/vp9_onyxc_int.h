@@ -115,8 +115,8 @@ typedef struct VP9Common {
   int color_range;
   int width;
   int height;
-  int display_width;
-  int display_height;
+  int render_width;
+  int render_height;
   int last_width;
   int last_height;
 
@@ -364,7 +364,6 @@ static INLINE void vp9_init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd,
       memcpy(xd->plane[i].seg_dequant, cm->uv_dequant, sizeof(cm->uv_dequant));
     }
     xd->fc = cm->fc;
-    xd->frame_parallel_decoding_mode = cm->frame_parallel_decoding_mode;
   }
 
   xd->above_seg_context = cm->above_seg_context;

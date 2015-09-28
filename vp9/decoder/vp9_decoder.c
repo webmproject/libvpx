@@ -126,6 +126,9 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
 void vp9_decoder_remove(VP9Decoder *pbi) {
   int i;
 
+  if (!pbi)
+    return;
+
   vpx_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->tile_data);
@@ -134,7 +137,6 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
     vpx_get_worker_interface()->end(worker);
   }
   vpx_free(pbi->tile_worker_data);
-  vpx_free(pbi->tile_worker_info);
   vpx_free(pbi->tile_workers);
 
   if (pbi->num_tile_workers > 0) {

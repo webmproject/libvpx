@@ -541,13 +541,21 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
     set_flags_and_fb_idx_for_temporal_mode2(cpi);
   } else if (cpi->svc.temporal_layering_mode ==
       VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
-    // VP9E_TEMPORAL_LAYERING_MODE_BYPASS :
-    // if the code goes here, it means the encoder will be relying on the
-    // flags from outside for layering.
-    // However, since when spatial+temporal layering is used, the buffer indices
-    // cannot be derived automatically, the bypass mode will only work when the
-    // number of spatial layers equals 1.
-    assert(cpi->svc.number_spatial_layers == 1);
+    // In the BYPASS/flexible mode, the encoder is relying on the application
+    // to specify, for each spatial layer, the flags and buffer indices for the
+    // layering.
+    // Note that the check (cpi->ext_refresh_frame_flags_pending == 0) is
+    // needed to support the case where the frame flags may be passed in via
+    // vpx_codec_encode(), which can be used for the temporal-only svc case.
+    if (cpi->ext_refresh_frame_flags_pending == 0) {
+      int sl;
+      cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
+      sl = cpi->svc.spatial_layer_id;
+      vp9_apply_encoding_flags(cpi, cpi->svc.ext_frame_flags[sl]);
+      cpi->lst_fb_idx = cpi->svc.ext_lst_fb_idx[sl];
+      cpi->gld_fb_idx = cpi->svc.ext_gld_fb_idx[sl];
+      cpi->alt_fb_idx = cpi->svc.ext_alt_fb_idx[sl];
+    }
   }
 
   lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id *

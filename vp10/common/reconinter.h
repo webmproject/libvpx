@@ -131,6 +131,10 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                    int x, int y, int w, int h,
                                    int mi_x, int mi_y);
 
+void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
+                                       int i, int ir, int ic,
+                                       int mi_row, int mi_col);
+
 void vp10_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize);
 

@@ -1181,11 +1181,11 @@ static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
                              : literal_to_filter[vpx_rb_read_literal(rb, 2)];
 }
 
-static void setup_display_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
-  cm->display_width = cm->width;
-  cm->display_height = cm->height;
+static void setup_render_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+  cm->render_width = cm->width;
+  cm->render_height = cm->height;
   if (vpx_rb_read_bit(rb))
-    vp9_read_frame_size(rb, &cm->display_width, &cm->display_height);
+    vp9_read_frame_size(rb, &cm->render_width, &cm->render_height);
 }
 
 static void resize_mv_buffer(VP9_COMMON *cm) {
@@ -1233,7 +1233,7 @@ static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   BufferPool *const pool = cm->buffer_pool;
   vp9_read_frame_size(rb, &width, &height);
   resize_context_buffers(cm, width, height);
-  setup_display_size(cm, rb);
+  setup_render_size(cm, rb);
 
   lock_buffer_pool(pool);
   if (vpx_realloc_frame_buffer(
@@ -1257,6 +1257,8 @@ static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   pool->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
   pool->frame_bufs[cm->new_fb_idx].buf.color_space = cm->color_space;
   pool->frame_bufs[cm->new_fb_idx].buf.color_range = cm->color_range;
+  pool->frame_bufs[cm->new_fb_idx].buf.render_width  = cm->render_width;
+  pool->frame_bufs[cm->new_fb_idx].buf.render_height = cm->render_height;
 }
 
 static INLINE int valid_ref_frame_img_fmt(vpx_bit_depth_t ref_bit_depth,
@@ -1315,7 +1317,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   }
 
   resize_context_buffers(cm, width, height);
-  setup_display_size(cm, rb);
+  setup_render_size(cm, rb);
 
   lock_buffer_pool(pool);
   if (vpx_realloc_frame_buffer(
@@ -1339,6 +1341,8 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   pool->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
   pool->frame_bufs[cm->new_fb_idx].buf.color_space = cm->color_space;
   pool->frame_bufs[cm->new_fb_idx].buf.color_range = cm->color_range;
+  pool->frame_bufs[cm->new_fb_idx].buf.render_width  = cm->render_width;
+  pool->frame_bufs[cm->new_fb_idx].buf.render_height = cm->render_height;
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
@@ -1563,9 +1567,10 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   return vpx_reader_find_end(&tile_data->bit_reader);
 }
 
-static int tile_worker_hook(TileWorkerData *const tile_data,
-                            const TileInfo *const tile) {
+static int tile_worker_hook(TileWorkerData *const tile_data, void *unused) {
+  const TileInfo *const tile = &tile_data->xd.tile;
   int mi_row, mi_col;
+  (void)unused;
 
   if (setjmp(tile_data->error_info.jmp)) {
     tile_data->error_info.setjmp = 0;
@@ -1628,8 +1633,6 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     CHECK_MEM_ERROR(cm, pbi->tile_worker_data,
                     vpx_memalign(32, num_threads *
                                  sizeof(*pbi->tile_worker_data)));
-    CHECK_MEM_ERROR(cm, pbi->tile_worker_info,
-                    vpx_malloc(num_threads * sizeof(*pbi->tile_worker_info)));
     for (i = 0; i < num_threads; ++i) {
       VPxWorker *const worker = &pbi->tile_workers[i];
       ++pbi->num_tile_workers;
@@ -1645,10 +1648,15 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   // Reset tile decoding hook
   for (n = 0; n < num_workers; ++n) {
     VPxWorker *const worker = &pbi->tile_workers[n];
+    TileWorkerData *const tile_data = &pbi->tile_worker_data[n];
     winterface->sync(worker);
+    tile_data->pbi = pbi;
+    tile_data->xd = pbi->mb;
+    tile_data->xd.counts =
+        cm->frame_parallel_decoding_mode ? NULL : &tile_data->counts;
     worker->hook = (VPxWorkerHook)tile_worker_hook;
-    worker->data1 = &pbi->tile_worker_data[n];
-    worker->data2 = &pbi->tile_worker_info[n];
+    worker->data1 = tile_data;
+    worker->data2 = NULL;
   }
 
   // Note: this memset assumes above_context[0], [1] and [2]
@@ -1698,16 +1706,10 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     for (i = 0; i < num_workers && n < tile_cols; ++i) {
       VPxWorker *const worker = &pbi->tile_workers[i];
       TileWorkerData *const tile_data = (TileWorkerData*)worker->data1;
-      TileInfo *const tile = (TileInfo*)worker->data2;
       TileBuffer *const buf = &tile_buffers[0][n];
 
-      tile_data->pbi = pbi;
-      tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
-      tile_data->xd.counts = cm->frame_parallel_decoding_mode ?
-                             0 : &tile_data->counts;
       vp9_zero(tile_data->dqcoeff);
-      vp9_tile_init(tile, cm, 0, buf->col);
       vp9_tile_init(&tile_data->xd.tile, cm, 0, buf->col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader, pbi->decrypt_cb,
@@ -1742,14 +1744,15 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       bit_reader_end = vpx_reader_find_end(&tile_data->bit_reader);
       final_worker = -1;
     }
+  }
 
-    // Accumulate thread frame counts.
-    if (n >= tile_cols && !cm->frame_parallel_decoding_mode) {
-      for (i = 0; i < num_workers; ++i) {
-        TileWorkerData *const tile_data =
-            (TileWorkerData*)pbi->tile_workers[i].data1;
-        vp9_accumulate_frame_counts(cm, &tile_data->counts, 1);
-      }
+  // Accumulate thread frame counts.
+  if (!cm->frame_parallel_decoding_mode) {
+    int i;
+    for (i = 0; i < num_workers; ++i) {
+      TileWorkerData *const tile_data =
+          (TileWorkerData*)pbi->tile_workers[i].data1;
+      vp9_accumulate_frame_counts(&cm->counts, &tile_data->counts, 1);
     }
   }
 
@@ -1949,6 +1952,8 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 #endif
   get_frame_new_buffer(cm)->color_space = cm->color_space;
   get_frame_new_buffer(cm)->color_range = cm->color_range;
+  get_frame_new_buffer(cm)->render_width  = cm->render_width;
+  get_frame_new_buffer(cm)->render_height = cm->render_height;
 
   if (pbi->need_resync) {
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,

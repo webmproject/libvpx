@@ -711,7 +711,6 @@ static void update_frame_size(VP10_COMP *cpi) {
   vp10_set_mb_mi(cm, cm->width, cm->height);
   vp10_init_context_buffers(cm);
   vp10_init_macroblockd(cm, xd, NULL);
-  cpi->td.mb.mbmi_ext_base = cpi->mbmi_ext_base;
   memset(cpi->mbmi_ext_base, 0,
          cm->mi_rows * cm->mi_cols * sizeof(*cpi->mbmi_ext_base));
 
@@ -1457,8 +1456,13 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
 
   cm->interp_filter = cpi->sf.default_interp_filter;
 
-  cm->display_width = cpi->oxcf.width;
-  cm->display_height = cpi->oxcf.height;
+  if (cpi->oxcf.render_width > 0 && cpi->oxcf.render_height > 0) {
+    cm->render_width = cpi->oxcf.render_width;
+    cm->render_height = cpi->oxcf.render_height;
+  } else {
+    cm->render_width = cpi->oxcf.width;
+    cm->render_height = cpi->oxcf.height;
+  }
   cm->width = cpi->oxcf.width;
   cm->height = cpi->oxcf.height;
 
@@ -1822,14 +1826,15 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 
 void vp10_remove_compressor(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
+  VP10_COMMON *cm;
   unsigned int i;
   int t;
 
   if (!cpi)
     return;
 
-  if (cpi && (cm->current_video_frame > 0)) {
+  cm = &cpi->common;
+  if (cm->current_video_frame > 0) {
 #if CONFIG_INTERNAL_STATS
     vpx_clear_system_state();
 
@@ -3628,6 +3633,8 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   cm->frame_to_show = get_frame_new_buffer(cm);
   cm->frame_to_show->color_space = cm->color_space;
   cm->frame_to_show->color_range = cm->color_range;
+  cm->frame_to_show->render_width  = cm->render_width;
+  cm->frame_to_show->render_height = cm->render_height;
 
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
@@ -4088,19 +4095,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (oxcf->pass == 1) {
-    const int lossless = is_lossless_requested(oxcf);
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->oxcf.use_highbitdepth)
-      cpi->td.mb.fwd_txm4x4 = lossless ?
-          vp10_highbd_fwht4x4 : vpx_highbd_fdct4x4;
-    else
-      cpi->td.mb.fwd_txm4x4 = lossless ? vp10_fwht4x4 : vpx_fdct4x4;
-    cpi->td.mb.highbd_itxm_add = lossless ? vp10_highbd_iwht4x4_add :
-                                         vp10_highbd_idct4x4_add;
-#else
-    cpi->td.mb.fwd_txm4x4 = lossless ? vp10_fwht4x4 : vpx_fdct4x4;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    cpi->td.mb.itxm_add = lossless ? vp10_iwht4x4_add : vp10_idct4x4_add;
+    cpi->td.mb.e_mbd.lossless = is_lossless_requested(oxcf);
     vp10_first_pass(cpi, source);
   } else if (oxcf->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);

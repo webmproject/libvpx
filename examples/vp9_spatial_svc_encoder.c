@@ -544,6 +544,59 @@ vpx_codec_err_t parse_superframe_index(const uint8_t *data,
 }
 #endif
 
+// Example pattern for spatial layers and 2 temporal layers used in the
+// bypass/flexible mode. The pattern corresponds to the pattern
+// VP9E_TEMPORAL_LAYERING_MODE_0101 (temporal_layering_mode == 2) used in
+// non-flexible mode.
+void set_frame_flags_bypass_mode(int sl, int tl, int num_spatial_layers,
+                                 int is_key_frame,
+                                 vpx_svc_ref_frame_config_t *ref_frame_config) {
+  for (sl = 0; sl < num_spatial_layers; ++sl) {
+    if (!tl) {
+      if (!sl) {
+        ref_frame_config->frame_flags[sl] = VP8_EFLAG_NO_REF_GF |
+                                            VP8_EFLAG_NO_REF_ARF |
+                                            VP8_EFLAG_NO_UPD_GF |
+                                            VP8_EFLAG_NO_UPD_ARF;
+      } else {
+        if (is_key_frame) {
+          ref_frame_config->frame_flags[sl] = VP8_EFLAG_NO_REF_LAST |
+                                              VP8_EFLAG_NO_REF_ARF |
+                                              VP8_EFLAG_NO_UPD_GF |
+                                              VP8_EFLAG_NO_UPD_ARF;
+        } else {
+        ref_frame_config->frame_flags[sl] = VP8_EFLAG_NO_REF_ARF |
+                                            VP8_EFLAG_NO_UPD_GF |
+                                            VP8_EFLAG_NO_UPD_ARF;
+        }
+      }
+    } else if (tl == 1) {
+      if (!sl) {
+        ref_frame_config->frame_flags[sl] = VP8_EFLAG_NO_REF_GF |
+                                            VP8_EFLAG_NO_REF_ARF |
+                                            VP8_EFLAG_NO_UPD_LAST |
+                                            VP8_EFLAG_NO_UPD_GF;
+      } else {
+        ref_frame_config->frame_flags[sl] = VP8_EFLAG_NO_REF_ARF |
+                                            VP8_EFLAG_NO_UPD_LAST |
+                                            VP8_EFLAG_NO_UPD_GF;
+      }
+    }
+    if (tl == 0) {
+      ref_frame_config->lst_fb_idx[sl] = sl;
+      if (sl)
+        ref_frame_config->gld_fb_idx[sl] = sl - 1;
+      else
+        ref_frame_config->gld_fb_idx[sl] = 0;
+      ref_frame_config->alt_fb_idx[sl] = 0;
+    } else if (tl == 1) {
+      ref_frame_config->lst_fb_idx[sl] = sl;
+      ref_frame_config->gld_fb_idx[sl] = num_spatial_layers + sl - 1;
+      ref_frame_config->alt_fb_idx[sl] = num_spatial_layers + sl;
+    }
+  }
+}
+
 int main(int argc, const char **argv) {
   AppInput app_input = {0};
   VpxVideoWriter *writer = NULL;
@@ -564,6 +617,7 @@ int main(int argc, const char **argv) {
   VpxVideoWriter *outfile[VPX_TS_MAX_LAYERS] = {NULL};
   struct RateControlStats rc;
   vpx_svc_layer_id_t layer_id;
+  vpx_svc_ref_frame_config_t ref_frame_config;
   int sl, tl;
   double sum_bitrate = 0.0;
   double sum_bitrate2 = 0.0;
@@ -651,6 +705,30 @@ int main(int argc, const char **argv) {
       // We need one extra vpx_svc_encode call at end of stream to flush
       // encoder and get remaining data
       end_of_stream = 1;
+    }
+
+    // For BYPASS/FLEXIBLE mode, set the frame flags (reference and updates)
+    // and the buffer indices for each spatial layer of the current
+    // (super)frame to be encoded. The temporal layer_id for the current frame
+    // also needs to be set.
+    // TODO(marpan): Should rename the "VP9E_TEMPORAL_LAYERING_MODE_BYPASS"
+    // mode to "VP9E_LAYERING_MODE_BYPASS".
+    if (svc_ctx.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+      // Example for 2 temporal layers.
+      if (frame_cnt % 2 == 0)
+        layer_id.temporal_layer_id = 0;
+      else
+        layer_id.temporal_layer_id = 1;
+      // Note that we only set the temporal layer_id, since we are calling
+      // the encode for the whole superframe. The encoder will internally loop
+      // over all the spatial layers for the current superframe.
+      vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id);
+      set_frame_flags_bypass_mode(sl, layer_id.temporal_layer_id,
+                                  svc_ctx.spatial_layers,
+                                  frame_cnt == 0,
+                                  &ref_frame_config);
+      vpx_codec_control(&codec, VP9E_SET_SVC_REF_FRAME_CONFIG,
+                        &ref_frame_config);
     }
 
     vpx_usec_timer_start(&timer);

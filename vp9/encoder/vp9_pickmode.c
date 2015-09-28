@@ -1238,10 +1238,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (const_motion[ref_frame] && this_mode == NEARMV)
       continue;
 
-    i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
-    if ((cpi->ref_frame_flags & flag_list[i]) && sf->reference_masking)
-      if (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[i] << 1))
-        ref_frame_skip_mask |= (1 << ref_frame);
+    if (!(this_mode == ZEROMV && ref_frame == LAST_FRAME)) {
+      i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
+      if ((cpi->ref_frame_flags & flag_list[i]) && sf->reference_masking)
+        if (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[i] << 1))
+          ref_frame_skip_mask |= (1 << ref_frame);
+    }
     if (ref_frame_skip_mask & (1 << ref_frame))
       continue;
 
@@ -1530,11 +1532,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
        bsize <= cpi->sf.max_intra_bsize)) {
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
-    const TX_SIZE intra_tx_size =
-        VPXMIN(max_txsize_lookup[bsize],
-               tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
     int i;
     TX_SIZE best_intra_tx_size = TX_SIZES;
+    TX_SIZE intra_tx_size =
+        VPXMIN(max_txsize_lookup[bsize],
+               tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+    if (cpi->oxcf.content != VP9E_CONTENT_SCREEN && intra_tx_size > TX_16X16)
+      intra_tx_size = TX_16X16;
 
     if (reuse_inter_pred && best_pred != NULL) {
       if (best_pred->data == orig_dst.buf) {

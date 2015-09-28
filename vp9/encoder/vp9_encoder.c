@@ -1509,15 +1509,23 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cm->interp_filter = cpi->sf.default_interp_filter;
 
-  cm->display_width = cpi->oxcf.width;
-  cm->display_height = cpi->oxcf.height;
+  if (cpi->oxcf.render_width > 0 && cpi->oxcf.render_height > 0) {
+    cm->render_width = cpi->oxcf.render_width;
+    cm->render_height = cpi->oxcf.render_height;
+  } else {
+    cm->render_width = cpi->oxcf.width;
+    cm->render_height = cpi->oxcf.height;
+  }
   if (last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) {
     cm->width = cpi->oxcf.width;
     cm->height = cpi->oxcf.height;
   }
 
   if (cpi->initial_width) {
-    if (cm->width > cpi->initial_width || cm->height > cpi->initial_height) {
+    int new_mi_size = 0;
+    vp9_set_mb_mi(cm, cm->width, cm->height);
+    new_mi_size = cm->mi_stride * calc_mi_size(cm->mi_rows);
+    if (cm->mi_alloc_size < new_mi_size) {
       vp9_free_context_buffers(cm);
       alloc_compressor_data(cpi);
       realloc_segmentation_maps(cpi);
@@ -1927,14 +1935,15 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 
 void vp9_remove_compressor(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+  VP9_COMMON *cm;
   unsigned int i;
   int t;
 
   if (!cpi)
     return;
 
-  if (cpi && (cm->current_video_frame > 0)) {
+  cm = &cpi->common;
+  if (cm->current_video_frame > 0) {
 #if CONFIG_INTERNAL_STATS
     vpx_clear_system_state();
 
@@ -3820,6 +3829,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cm->frame_to_show = get_frame_new_buffer(cm);
   cm->frame_to_show->color_space = cm->color_space;
   cm->frame_to_show->color_range = cm->color_range;
+  cm->frame_to_show->render_width  = cm->render_width;
+  cm->frame_to_show->render_height = cm->render_height;
 
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
@@ -4642,8 +4653,10 @@ int vp9_set_internal_size(VP9_COMP *cpi,
   // always go to the next whole number
   cm->width = (hs - 1 + cpi->oxcf.width * hr) / hs;
   cm->height = (vs - 1 + cpi->oxcf.height * vr) / vs;
-  assert(cm->width <= cpi->initial_width);
-  assert(cm->height <= cpi->initial_height);
+  if (cm->current_video_frame) {
+    assert(cm->width <= cpi->initial_width);
+    assert(cm->height <= cpi->initial_height);
+  }
 
   update_frame_size(cpi);
 
