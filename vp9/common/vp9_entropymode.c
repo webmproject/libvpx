@@ -488,8 +488,8 @@ const vp9_tree_index vp9_single_ref_tree[TREE_SIZE(SINGLE_REFS)] = {
 
 static const struct tx_probs default_tx_probs = {
 #if CONFIG_TX64X64
-  { { 1, 3, 136, 192 },
-    { 1, 4, 52,  128 } },
+  { { 1, 3, 136, 208 },
+    { 1, 4, 52,  168 } },
 #endif
 
   { { 3, 136, 37 },
