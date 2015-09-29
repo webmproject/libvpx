@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f86a1765_8d970586",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-29T20:59:09Z",
+      "side": 0,
+      "message": "I\u0027m not sure if line 66, 89, and 92-93 should be deleted. Maybe Deb could verify.",
+      "revId": "07154b021617794bf37eed3e020ca39035155587",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
