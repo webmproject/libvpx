@@ -40,6 +40,8 @@ static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
   VP9_COMMON *const cm = &cpi->common;
   int64_t filt_err;
 
+  vp9_build_mask_frame(cm, filt_level, partial_frame);
+
   if (cpi->num_workers > 1)
     vp9_loop_filter_frame_mt(cm->frame_to_show, cm, cpi->td.mb.e_mbd.plane,
                              filt_level, 1, partial_frame,
