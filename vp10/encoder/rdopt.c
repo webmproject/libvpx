@@ -640,7 +640,6 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   int start_tx_type, end_tx_type;
 #endif  // CONFIG_EXT_TX
 
-
   const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
   assert(skip_prob > 0);
   s0 = vp10_cost_bit(skip_prob, 0);
@@ -675,8 +674,14 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
       int r_tx_size = 0;
 
 #if CONFIG_EXT_TX
-      if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(n))
-        continue;
+      if (is_inter_block(mbmi)) {
+        if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(n)) {
+          continue;
+        } else if (mbmi->ext_txfrm >= ALT11 && best_tx_type == NORM) {
+          // Terminate if the best so far is still NORM
+          break;
+        }
+      }
 #endif  // CONFIG_EXT_TX
 
       for (m = 0; m <= n - (n == (int) max_tx_size); ++m) {
@@ -725,8 +730,8 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
 
       last_rd = rd;
 #if CONFIG_EXT_TX
-      if (rd < (is_inter_block(mbmi) &&
-          (best_tx_type == NORM) ? ext_tx_th : 1) * best_rd) {
+      if (rd < (is_inter_block(mbmi) && best_tx_type == NORM ? ext_tx_th : 1) *
+          best_rd) {
 #else
       if (rd < best_rd) {
 #endif  // CONFIG_EXT_TX
@@ -747,7 +752,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
 
   mbmi->tx_size = best_tx;
 #if CONFIG_EXT_TX
-  mbmi->ext_txfrm = best_tx_type;
+  mbmi->ext_txfrm = best_tx_type > -1 ? best_tx_type : NORM;
   txfm_rd_in_plane(x, &r, &d, &s,
                    &sse, ref_best_rd, 0, bs, best_tx,
                    cpi->sf.use_fast_coef_costing);
