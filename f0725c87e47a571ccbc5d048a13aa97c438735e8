@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f86a1765_70d2a875",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-29T22:13:07Z",
+      "side": 1,
+      "message": "These should be removed.",
+      "revId": "f0725c87e47a571ccbc5d048a13aa97c438735e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f86a1765_10dfac7c",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-29T22:13:07Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "f0725c87e47a571ccbc5d048a13aa97c438735e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15197672_b39bf8f5",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-29T22:13:07Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "f0725c87e47a571ccbc5d048a13aa97c438735e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae5bf53d_7b81b0eb",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-29T22:13:07Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "f0725c87e47a571ccbc5d048a13aa97c438735e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
