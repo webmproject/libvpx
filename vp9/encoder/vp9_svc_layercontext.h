@@ -45,6 +45,7 @@ typedef struct {
   int sb_index;
   signed char *map;
   uint8_t *last_coded_q_map;
+  uint8_t *consec_zero_mv;
 } LAYER_CONTEXT;
 
 typedef struct {
