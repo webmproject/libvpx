@@ -164,21 +164,38 @@ static void update_switchable_interp_probs(VP10_COMMON *cm, vpx_writer *w,
 static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
   const int savings_thresh = vp10_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              vp10_cost_zero(GROUP_DIFF_UPDATE_PROB);
-  int i;
+  int i, j;
   int savings = 0;
   int do_update = 0;
   for (i = TX_4X4; i <= TX_16X16; ++i) {
     savings += prob_diff_update_savings(
-        vp10_ext_tx_tree, cm->fc->ext_tx_prob[i],
-        cm->counts.ext_tx[i], EXT_TX_TYPES);
+        vp10_ext_tx_tree, cm->fc->inter_ext_tx_prob[i],
+        cm->counts.inter_ext_tx[i], EXT_TX_TYPES);
   }
   do_update = savings > savings_thresh;
   vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
   if (do_update) {
     for (i = TX_4X4; i <= TX_16X16; ++i) {
-      prob_diff_update(vp10_ext_tx_tree, cm->fc->ext_tx_prob[i],
-                       cm->counts.ext_tx[i], EXT_TX_TYPES, w);
+      prob_diff_update(vp10_ext_tx_tree, cm->fc->inter_ext_tx_prob[i],
+                       cm->counts.inter_ext_tx[i], EXT_TX_TYPES, w);
     }
+  }
+
+  savings = 0;
+  do_update = 0;
+
+  for (i = TX_4X4; i <= TX_16X16; ++i)
+    for (j = 0; j < INTRA_MODES; ++j)
+      savings += prob_diff_update_savings(
+          vp10_ext_tx_tree, cm->fc->intra_ext_tx_prob[i][j],
+          cm->counts.intra_ext_tx[i][j], EXT_TX_TYPES);
+  do_update = savings > savings_thresh;
+  vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
+  if (do_update) {
+    for (i = TX_4X4; i <= TX_16X16; ++i)
+      for (j = 0; j < INTRA_MODES; ++j)
+        prob_diff_update(vp10_ext_tx_tree, cm->fc->intra_ext_tx_prob[i][j],
+                         cm->counts.intra_ext_tx[i][j], EXT_TX_TYPES, w);
   }
 }
 #endif  // CONFIG_EXT_TX
@@ -337,18 +354,6 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     write_selected_tx_size(cm, xd, w);
   }
 
-#if CONFIG_EXT_TX
-  if (is_inter &&
-      mbmi->tx_size <= TX_16X16 &&
-      cm->base_qindex > 0 &&
-      bsize >= BLOCK_8X8 &&
-      !mbmi->skip &&
-      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-    vp10_write_token(w, vp10_ext_tx_tree, cm->fc->ext_tx_prob[mbmi->tx_size],
-                     &ext_tx_encodings[mbmi->ext_txfrm]);
-  }
-#endif  // CONFIG_EXT_TX
-
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
       write_intra_mode(w, mode, cm->fc->y_mode_prob[size_group_lookup[bsize]]);
@@ -412,6 +417,21 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
       }
     }
   }
+
+#if CONFIG_EXT_TX
+  if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
+      bsize >= BLOCK_8X8 && !mbmi->skip &&
+      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+    if (is_inter)
+      vp10_write_token(w, vp10_ext_tx_tree,
+                       cm->fc->inter_ext_tx_prob[mbmi->tx_size],
+                       &ext_tx_encodings[mbmi->ext_txfrm]);
+    else
+      vp10_write_token(w, vp10_ext_tx_tree,
+                       cm->fc->intra_ext_tx_prob[mbmi->tx_size][mbmi->mode],
+                       &ext_tx_encodings[mbmi->ext_txfrm]);
+  }
+#endif  // CONFIG_EXT_TX
 }
 
 static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
@@ -448,6 +468,16 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   }
 
   write_intra_mode(w, mbmi->uv_mode, vp10_kf_uv_mode_prob[mbmi->mode]);
+
+#if CONFIG_EXT_TX
+  if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
+      bsize >= BLOCK_8X8 && !mbmi->skip &&
+      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+    vp10_write_token(w, vp10_ext_tx_tree,
+                     cm->fc->intra_ext_tx_prob[mbmi->tx_size][mbmi->mode],
+                     &ext_tx_encodings[mbmi->ext_txfrm]);
+  }
+#endif  // CONFIG_EXT_TX
 }
 
 static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
