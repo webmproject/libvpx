@@ -16,6 +16,24 @@
       "revId": "07154b021617794bf37eed3e020ca39035155587",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15197672_b399b86f",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-09-29T21:19:58Z",
+      "side": 0,
+      "message": "it is clearly a bad merge, fixed now in patch 8.",
+      "parentUuid": "f86a1765_8d970586",
+      "revId": "07154b021617794bf37eed3e020ca39035155587",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
