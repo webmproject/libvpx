@@ -358,7 +358,7 @@ static INLINE void vp9_init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd,
     xd->above_context[i] = cm->above_context +
         i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
 
-    if (xd->plane[i].plane_type == PLANE_TYPE_Y) {
+    if (get_plane_type(i) == PLANE_TYPE_Y) {
       memcpy(xd->plane[i].seg_dequant, cm->y_dequant, sizeof(cm->y_dequant));
     } else {
       memcpy(xd->plane[i].seg_dequant, cm->uv_dequant, sizeof(cm->uv_dequant));

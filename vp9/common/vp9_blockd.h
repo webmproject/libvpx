@@ -120,7 +120,6 @@ struct buf_2d {
 
 struct macroblockd_plane {
   tran_low_t *dqcoeff;
-  PLANE_TYPE plane_type;
   int subsampling_x;
   int subsampling_y;
   struct buf_2d dst;
@@ -199,6 +198,10 @@ typedef struct macroblockd {
 
   struct vpx_internal_error_info *error_info;
 } MACROBLOCKD;
+
+static INLINE PLANE_TYPE get_plane_type(int plane) {
+  return (PLANE_TYPE)(plane > 0);
+}
 
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
                                      PARTITION_TYPE partition) {
