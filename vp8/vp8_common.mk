@@ -45,6 +45,7 @@ VP8_COMMON_SRCS-yes += common/mv.h
 VP8_COMMON_SRCS-yes += common/onyxc_int.h
 VP8_COMMON_SRCS-yes += common/quant_common.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
+VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
 VP8_COMMON_SRCS-yes += common/rtcd.c
 VP8_COMMON_SRCS-yes += common/rtcd_defs.pl

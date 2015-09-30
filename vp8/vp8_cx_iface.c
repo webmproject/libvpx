@@ -17,6 +17,7 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/vpx_once.h"
 #include "vp8/encoder/onyx_int.h"
 #include "vpx/vp8cx.h"
 #include "vp8/encoder/firstpass.h"
@@ -692,6 +693,8 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
             ctx->priv->enc.total_encoders   = mr_cfg->mr_total_resolutions;
         else
             ctx->priv->enc.total_encoders   = 1;
+
+        once(vp8_initialize_enc);
 
         res = validate_config(priv, &priv->cfg, &priv->vp8_cfg, 0);
 

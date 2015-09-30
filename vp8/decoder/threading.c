@@ -24,6 +24,7 @@
 #include "detokenize.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/reconinter.h"
+#include "vp8/common/reconintra.h"
 #include "vp8/common/setupintrarecon.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "error_concealment.h"
