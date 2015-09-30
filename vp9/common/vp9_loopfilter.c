@@ -1196,9 +1196,7 @@ void vp9_filter_block_plane_non420(VP9_COMMON *cm,
       const int block_edge_above = (num_4x4_blocks_high_lookup[sb_type] > 1) ?
           !(r & (num_8x8_blocks_high_lookup[sb_type] - 1)) : 1;
       const int skip_this_r = skip_this && !block_edge_above;
-      const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
-                            ? get_uv_tx_size(&mi[0].mbmi, plane)
-                            : mi[0].mbmi.tx_size;
+      const TX_SIZE tx_size = get_uv_tx_size(&mi[0].mbmi, plane);
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
@@ -1446,11 +1444,9 @@ void vp9_filter_block_plane_ss11(VP9_COMMON *const cm,
 
   // Vertical pass: do 2 rows at one time
   for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += 4) {
-    if (plane->plane_type == 1) {
-      for (c = 0; c < (MI_BLOCK_SIZE >> 1); c++) {
-        lfl_uv[(r << 1) + c] = lfm->lfl_y[(r << 3) + (c << 1)];
-        lfl_uv[((r + 2) << 1) + c] = lfm->lfl_y[((r + 2) << 3) + (c << 1)];
-      }
+    for (c = 0; c < (MI_BLOCK_SIZE >> 1); c++) {
+      lfl_uv[(r << 1) + c] = lfm->lfl_y[(r << 3) + (c << 1)];
+      lfl_uv[((r + 2) << 1) + c] = lfm->lfl_y[((r + 2) << 3) + (c << 1)];
     }
 
     {
