@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "15a33681_2c6697ad",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-30T23:26:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d55b5e6b_edc38d1a",
+      "range": {
+        "startLine": 390,
+        "startChar": 12,
+        "endLine": 390,
+        "endChar": 22
+      },
+      "revId": "fc89919ecc87c3380588c9145a8ea34f661c8649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "354d9aaf_c21b0637",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2015-09-30T22:59:27Z",
       "side": 1,
       "message": "const?",
+      "range": {
+        "startLine": 393,
+        "startChar": 0,
+        "endLine": 393,
+        "endChar": 30
+      },
+      "revId": "fc89919ecc87c3380588c9145a8ea34f661c8649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "953c86f3_d3475442",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-30T23:26:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "354d9aaf_c21b0637",
       "range": {
         "startLine": 393,
         "startChar": 0,
