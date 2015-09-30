@@ -590,16 +590,47 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
   const TX_SIZE largest_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+#if CONFIG_EXT_TX
+  int tx_type, best_tx_type = NORM;
+  int r, s;
+  int64_t d, psse, this_rd, best_rd = INT64_MAX;
+  vpx_prob skip_prob = vp10_get_skip_prob(cm, xd);
+  int  s0 = vp10_cost_bit(skip_prob, 0);
+  int  s1 = vp10_cost_bit(skip_prob, 1);
+#endif  // CONFIG_EXT_TX
 
   mbmi->tx_size = VPXMIN(max_tx_size, largest_tx_size);
 #if CONFIG_EXT_TX
-  if (mbmi->ext_txfrm >= GET_EXT_TX_TYPES(mbmi->tx_size)) {
-    *rate = INT_MAX;
-    *distortion = INT64_MAX;
-    *sse = INT64_MAX;
-    *skip = 0;
-    return;
+  if (is_inter_block(mbmi) && bs >= BLOCK_8X8 && !xd->lossless) {
+    for (tx_type = NORM; tx_type < EXT_TX_TYPES - 1; ++tx_type) {
+      if (tx_type >= GET_EXT_TX_TYPES(mbmi->tx_size))
+        continue;
+
+      mbmi->ext_txfrm = tx_type;
+      txfm_rd_in_plane(x, &r, &d, &s,
+                       &psse, ref_best_rd, 0, bs, mbmi->tx_size,
+                       cpi->sf.use_fast_coef_costing);
+
+      if (r == INT_MAX)
+        continue;
+      if (mbmi->tx_size <= TX_16X16)
+        r += cpi->ext_tx_costs[mbmi->tx_size][mbmi->ext_txfrm];
+
+      if (s)
+        this_rd = RDCOST(x->rdmult, x->rddiv, s1, psse);
+      else
+        this_rd = RDCOST(x->rdmult, x->rddiv, r + s0, d);
+      if (is_inter_block(mbmi) && !xd->lossless && !s)
+        this_rd = VPXMIN(this_rd, RDCOST(x->rdmult, x->rddiv, s1, psse));
+
+      if (this_rd < ((best_tx_type == NORM) ? ext_tx_th : 1) * best_rd) {
+        best_rd = this_rd;
+        best_tx_type = mbmi->ext_txfrm;
+      }
+    }
   }
+
+  mbmi->ext_txfrm = best_tx_type;
 #endif  // CONFIG_EXT_TX
 
   txfm_rd_in_plane(x, rate, distortion, skip,
