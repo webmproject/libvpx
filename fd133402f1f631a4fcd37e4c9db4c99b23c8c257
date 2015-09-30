@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5398a03_e69f3ac8",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-09-30T22:24:02Z",
+      "side": 0,
+      "message": "This is fine. I\u0027ll probably delete all v6/media asm after 1.5.0 (been saying this for a while ...)",
+      "revId": "fd133402f1f631a4fcd37e4c9db4c99b23c8c257",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
