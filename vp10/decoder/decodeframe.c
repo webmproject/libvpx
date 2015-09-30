@@ -1370,6 +1370,15 @@ static void setup_tile_info(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   cm->log2_tile_rows = vpx_rb_read_bit(rb);
   if (cm->log2_tile_rows)
     cm->log2_tile_rows += vpx_rb_read_bit(rb);
+
+#if CONFIG_MISC_FIXES
+  // tile size magnitude
+  if (cm->log2_tile_rows > 0 || cm->log2_tile_cols > 0) {
+    cm->tile_sz_mag = vpx_rb_read_literal(rb, 2);
+  }
+#else
+  cm->tile_sz_mag = 3;
+#endif
 }
 
 typedef struct TileBuffer {
@@ -1378,10 +1387,27 @@ typedef struct TileBuffer {
   int col;  // only used with multi-threaded decoding
 } TileBuffer;
 
+static int mem_get_varsize(const uint8_t *data, const int mag) {
+  switch (mag) {
+    case 0:
+      return data[0];
+    case 1:
+      return mem_get_le16(data);
+    case 2:
+      return mem_get_le24(data);
+    case 3:
+      return mem_get_le32(data);
+  }
+
+  assert("Invalid tile size marker value" && 0);
+
+  return -1;
+}
+
 // Reads the next tile returning its size and adjusting '*data' accordingly
 // based on 'is_last'.
 static void get_tile_buffer(const uint8_t *const data_end,
-                            int is_last,
+                            const int tile_sz_mag, int is_last,
                             struct vpx_internal_error_info *error_info,
                             const uint8_t **data,
                             vpx_decrypt_cb decrypt_cb, void *decrypt_state,
@@ -1395,12 +1421,12 @@ static void get_tile_buffer(const uint8_t *const data_end,
 
     if (decrypt_cb) {
       uint8_t be_data[4];
-      decrypt_cb(decrypt_state, *data, be_data, 4);
-      size = mem_get_be32(be_data);
+      decrypt_cb(decrypt_state, *data, be_data, tile_sz_mag + 1);
+      size = mem_get_varsize(be_data, tile_sz_mag);
     } else {
-      size = mem_get_be32(*data);
+      size = mem_get_varsize(*data, tile_sz_mag);
     }
-    *data += 4;
+    *data += tile_sz_mag + 1;
 
     if (size > (size_t)(data_end - *data))
       vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
@@ -1426,7 +1452,8 @@ static void get_tile_buffers(VP10Decoder *pbi,
       const int is_last = (r == tile_rows - 1) && (c == tile_cols - 1);
       TileBuffer *const buf = &tile_buffers[r][c];
       buf->col = c;
-      get_tile_buffer(data_end, is_last, &pbi->common.error, &data,
+      get_tile_buffer(data_end, pbi->common.tile_sz_mag,
+                      is_last, &pbi->common.error, &data,
                       pbi->decrypt_cb, pbi->decrypt_state, buf);
     }
   }

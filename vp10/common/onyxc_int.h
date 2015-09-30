@@ -279,6 +279,7 @@ typedef struct VP10Common {
   int error_resilient_mode;
 
   int log2_tile_cols, log2_tile_rows;
+  int tile_sz_mag;
   int byte_alignment;
   int skip_loop_filter;
 

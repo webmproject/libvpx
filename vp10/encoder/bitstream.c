@@ -940,7 +940,8 @@ static int get_refresh_mask(VP10_COMP *cpi) {
   }
 }
 
-static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
+static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
+                           unsigned int *max_tile_sz) {
   VP10_COMMON *const cm = &cpi->common;
   vpx_writer residual_bc;
   int tile_row, tile_col;
@@ -948,6 +949,7 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
   size_t total_size = 0;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
+  unsigned int max_tile = 0;
 
   memset(cm->above_seg_context, 0,
          sizeof(*cm->above_seg_context) * mi_cols_aligned_to_sb(cm->mi_cols));
@@ -971,13 +973,15 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr) {
       vpx_stop_encode(&residual_bc);
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
         // size of this tile
-        mem_put_be32(data_ptr + total_size, residual_bc.pos);
+        mem_put_le32(data_ptr + total_size, residual_bc.pos);
+        max_tile = max_tile > residual_bc.pos ? max_tile : residual_bc.pos;
         total_size += 4;
       }
 
       total_size += residual_bc.pos;
     }
   }
+  *max_tile_sz = max_tile;
 
   return total_size;
 }
@@ -1278,15 +1282,62 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   return header_bc.pos;
 }
 
-void vp10_pack_bitstream(VP10_COMP *cpi, uint8_t *dest, size_t *size) {
+#if CONFIG_MISC_FIXES
+static int remux_tiles(uint8_t *dest, const int sz,
+                       const int n_tiles, const int mag) {
+  int rpos = 0, wpos = 0, n;
+
+  for (n = 0; n < n_tiles; n++) {
+    int tile_sz;
+
+    if (n == n_tiles - 1) {
+      tile_sz = sz - rpos;
+    } else {
+      tile_sz = mem_get_le32(&dest[rpos]);
+      rpos += 4;
+      switch (mag) {
+        case 0:
+          dest[wpos] = tile_sz;
+          break;
+        case 1:
+          mem_put_le16(&dest[wpos], tile_sz);
+          break;
+        case 2:
+          mem_put_le24(&dest[wpos], tile_sz);
+          break;
+        case 3:  // remuxing should only happen if mag < 3
+        default:
+          assert("Invalid value for tile size magnitude" && 0);
+      }
+      wpos += mag + 1;
+    }
+
+    memmove(&dest[wpos], &dest[rpos], tile_sz);
+    wpos += tile_sz;
+    rpos += tile_sz;
+  }
+
+  assert(rpos > wpos);
+  assert(rpos == sz);
+
+  return wpos;
+}
+#endif
+
+void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
+  VP10_COMMON *const cm = &cpi->common;
   uint8_t *data = dest;
   size_t first_part_size, uncompressed_hdr_size;
   struct vpx_write_bit_buffer wb = {data, 0};
   struct vpx_write_bit_buffer saved_wb;
+  unsigned int max_tile, data_sz;
+  const int n_log2_tiles = cm->log2_tile_rows + cm->log2_tile_cols;
+  const int have_tiles = n_log2_tiles > 0;
 
   write_uncompressed_header(cpi, &wb);
   saved_wb = wb;
-  vpx_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
+  // don't know in advance first part. size
+  vpx_wb_write_literal(&wb, 0, 16 + have_tiles * 2);
 
   uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
   data += uncompressed_hdr_size;
@@ -1295,10 +1346,32 @@ void vp10_pack_bitstream(VP10_COMP *cpi, uint8_t *dest, size_t *size) {
 
   first_part_size = write_compressed_header(cpi, data);
   data += first_part_size;
+
+  data_sz = encode_tiles(cpi, data, &max_tile);
+#if CONFIG_MISC_FIXES
+  if (max_tile > 0) {
+    int mag;
+    unsigned int mask;
+
+    // Choose the (tile size) magnitude
+    for (mag = 0, mask = 0xff; mag < 4; mag++) {
+      if (max_tile <= mask)
+        break;
+      mask <<= 8;
+      mask |= 0xff;
+    }
+    assert(n_log2_tiles > 0);
+    vpx_wb_write_literal(&saved_wb, mag, 2);
+    if (mag < 3)
+      data_sz = remux_tiles(data, data_sz, 1 << n_log2_tiles, mag);
+  } else {
+    assert(n_log2_tiles == 0);
+  }
+#endif
+  data += data_sz;
+
   // TODO(jbb): Figure out what to do if first_part_size > 16 bits.
   vpx_wb_write_literal(&saved_wb, (int)first_part_size, 16);
-
-  data += encode_tiles(cpi, data);
 
   *size = data - dest;
 }
