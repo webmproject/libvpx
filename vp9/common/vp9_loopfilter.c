@@ -1737,7 +1737,7 @@ void vp9_loop_filter_data_reset(
   memcpy(lf_data->planes, planes, sizeof(lf_data->planes));
 }
 
-void vp9_reset_lfm(VP9_COMMON *cm) {
+void vp9_reset_lfm(VP9_COMMON *const cm) {
   if (cm->lf.filter_level) {
     memset(cm->lf.lfm, 0,
            ((cm->mi_rows + (MI_BLOCK_SIZE - 1)) >> 3) * cm->lf.lfm_stride *
