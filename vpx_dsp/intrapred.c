@@ -518,6 +518,21 @@ static INLINE void highbd_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+static INLINE void highbd_d45e_predictor(uint16_t *dst, ptrdiff_t stride,
+                                         int bs, const uint16_t *above,
+                                         const uint16_t *left, int bd) {
+  int r, c;
+  (void) left;
+  (void) bd;
+  for (r = 0; r < bs; ++r) {
+    for (c = 0; c < bs; ++c) {
+      dst[c] = AVG3(above[r + c], above[r + c + 1],
+                    above[r + c + 1 + (r + c + 2 < 8)]);
+    }
+    dst += stride;
+  }
+}
+
 static INLINE void highbd_d117_predictor(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
@@ -766,4 +781,7 @@ intra_pred_allsizes(dc_128)
 intra_pred_allsizes(dc_left)
 intra_pred_allsizes(dc_top)
 intra_pred_allsizes(dc)
+#if CONFIG_VP9_HIGHBITDEPTH && CONFIG_MISC_FIXES
+intra_pred_highbd_sized(d45e, 4)
+#endif
 #undef intra_pred_allsizes

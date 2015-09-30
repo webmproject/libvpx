@@ -55,16 +55,24 @@ static intra_high_pred_fn dc_pred_high[2][2][4];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static void vp10_init_intra_predictors_internal(void) {
-#define INIT_ALL_SIZES(p, type) \
-  p[TX_4X4] = vpx_##type##_predictor_4x4; \
+#define INIT_NO_4X4(p, type) \
   p[TX_8X8] = vpx_##type##_predictor_8x8; \
   p[TX_16X16] = vpx_##type##_predictor_16x16; \
   p[TX_32X32] = vpx_##type##_predictor_32x32
 
+#define INIT_ALL_SIZES(p, type) \
+  p[TX_4X4] = vpx_##type##_predictor_4x4; \
+  INIT_NO_4X4(p, type)
+
   INIT_ALL_SIZES(pred[V_PRED], v);
   INIT_ALL_SIZES(pred[H_PRED], h);
   INIT_ALL_SIZES(pred[D207_PRED], d207);
+#if CONFIG_MISC_FIXES
+  pred[D45_PRED][TX_4X4] = vpx_d45e_predictor_4x4;
+  INIT_NO_4X4(pred[D45_PRED], d45);
+#else
   INIT_ALL_SIZES(pred[D45_PRED], d45);
+#endif
   INIT_ALL_SIZES(pred[D63_PRED], d63);
   INIT_ALL_SIZES(pred[D117_PRED], d117);
   INIT_ALL_SIZES(pred[D135_PRED], d135);
@@ -80,7 +88,12 @@ static void vp10_init_intra_predictors_internal(void) {
   INIT_ALL_SIZES(pred_high[V_PRED], highbd_v);
   INIT_ALL_SIZES(pred_high[H_PRED], highbd_h);
   INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207);
+#if CONFIG_MISC_FIXES
+  pred_high[D45_PRED][TX_4X4] = vpx_highbd_d45e_predictor_4x4;
+  INIT_NO_4X4(pred_high[D45_PRED], highbd_d45);
+#else
   INIT_ALL_SIZES(pred_high[D45_PRED], highbd_d45);
+#endif
   INIT_ALL_SIZES(pred_high[D63_PRED], highbd_d63);
   INIT_ALL_SIZES(pred_high[D117_PRED], highbd_d117);
   INIT_ALL_SIZES(pred_high[D135_PRED], highbd_d135);
