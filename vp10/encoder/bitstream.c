@@ -67,6 +67,18 @@ static void write_inter_mode(vpx_writer *w, PREDICTION_MODE mode,
                   &inter_mode_encodings[INTER_OFFSET(mode)]);
 }
 
+
+static void write_inv_signed_literal(struct vpx_write_bit_buffer *wb,
+                                     int data, int bits) {
+#if CONFIG_MISC_FIXES
+  vpx_wb_write_literal(wb, data, bits + 1);
+#else
+  vpx_wb_write_literal(wb, abs(data), bits);
+  vpx_wb_write_bit(wb, data < 0);
+#endif
+}
+
+
 static void encode_unsigned_max(struct vpx_write_bit_buffer *wb,
                                 int data, int max) {
   vpx_wb_write_literal(wb, data, get_unsigned_bits(max));
@@ -776,7 +788,7 @@ static void encode_loopfilter(struct loopfilter *lf,
         vpx_wb_write_bit(wb, changed);
         if (changed) {
           lf->last_ref_deltas[i] = delta;
-          vpx_wb_write_inv_signed_literal(wb, delta, 6);
+          write_inv_signed_literal(wb, delta, 6);
         }
       }
 
@@ -786,7 +798,7 @@ static void encode_loopfilter(struct loopfilter *lf,
         vpx_wb_write_bit(wb, changed);
         if (changed) {
           lf->last_mode_deltas[i] = delta;
-          vpx_wb_write_inv_signed_literal(wb, delta, 6);
+          write_inv_signed_literal(wb, delta, 6);
         }
       }
     }
@@ -796,7 +808,7 @@ static void encode_loopfilter(struct loopfilter *lf,
 static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
   if (delta_q != 0) {
     vpx_wb_write_bit(wb, 1);
-    vpx_wb_write_inv_signed_literal(wb, delta_q, 4);
+    write_inv_signed_literal(wb, delta_q, 4);
   } else {
     vpx_wb_write_bit(wb, 0);
   }

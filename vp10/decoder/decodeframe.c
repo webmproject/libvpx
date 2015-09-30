@@ -76,6 +76,19 @@ static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
   return len != 0 && len <= (size_t)(end - start);
 }
 
+
+static int read_inv_signed_literal(struct vpx_read_bit_buffer *rb,
+                                   int bits) {
+#if CONFIG_MISC_FIXES
+  const int nbits = sizeof(unsigned) * 8 - bits - 1;
+  const unsigned value = vpx_rb_read_literal(rb, bits + 1) << nbits;
+  return ((int) value) >> nbits;
+#else
+  return vpx_rb_read_signed_literal(rb, bits);
+#endif
+}
+
+
 static int decode_unsigned_max(struct vpx_read_bit_buffer *rb, int max) {
   const int data = vpx_rb_read_literal(rb, get_unsigned_bits(max));
   return data > max ? max : data;
@@ -1115,17 +1128,17 @@ static void setup_loopfilter(struct loopfilter *lf,
 
       for (i = 0; i < MAX_REF_FRAMES; i++)
         if (vpx_rb_read_bit(rb))
-          lf->ref_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
+          lf->ref_deltas[i] = read_inv_signed_literal(rb, 6);
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++)
         if (vpx_rb_read_bit(rb))
-          lf->mode_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
+          lf->mode_deltas[i] = read_inv_signed_literal(rb, 6);
     }
   }
 }
 
 static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
-  return vpx_rb_read_bit(rb) ? vpx_rb_read_inv_signed_literal(rb, 4) : 0;
+  return vpx_rb_read_bit(rb) ? read_inv_signed_literal(rb, 4) : 0;
 }
 
 static void setup_quantization(VP10_COMMON *const cm, MACROBLOCKD *const xd,

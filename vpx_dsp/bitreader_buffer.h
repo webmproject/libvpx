@@ -38,8 +38,6 @@ int vpx_rb_read_literal(struct vpx_read_bit_buffer *rb, int bits);
 
 int vpx_rb_read_signed_literal(struct vpx_read_bit_buffer *rb, int bits);
 
-int vpx_rb_read_inv_signed_literal(struct vpx_read_bit_buffer *rb, int bits);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
