@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "d55b5e6b_7c3735c4",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2969,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-30T17:04:10Z",
+      "side": 1,
+      "message": "\"TODO\" to match the style guide",
+      "range": {
+        "startLine": 2969,
+        "startChar": 11,
+        "endLine": 2969,
+        "endChar": 17
+      },
+      "revId": "dd523954e0d42439970330680b45c1ca77573a5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d55b5e6b_1c743997",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 2
@@ -13,6 +36,29 @@
       "writtenOn": "2015-09-30T16:50:01Z",
       "side": 1,
       "message": "Not sure whether above line should be within the #if-#endif w.r.t CONFIG_PALETTE, as\ncm-\u003eallow_screen_content_tools has been defined outside the scope of CONFIG_PALETTE.",
+      "revId": "dd523954e0d42439970330680b45c1ca77573a5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1548969f_5e6351d4",
+        "filename": "vp10/encoder/ethread.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-09-30T17:04:10Z",
+      "side": 1,
+      "message": "Nit: \u0027*x \u003d\u0027",
+      "range": {
+        "startLine": 102,
+        "startChar": 21,
+        "endLine": 102,
+        "endChar": 24
+      },
       "revId": "dd523954e0d42439970330680b45c1ca77573a5f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
