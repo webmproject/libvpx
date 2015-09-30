@@ -16,6 +16,7 @@
 #include "vpx_ports/vpx_once.h"
 #include "blockd.h"
 #include "vp8/common/reconintra.h"
+#include "vp8/common/reconintra4x4.h"
 
 enum {
     SIZE_16,
@@ -43,6 +44,7 @@ static void vp8_init_intra_predictors_internal(void)
 
     INIT_SIZE(16);
     INIT_SIZE(8);
+    vp8_init_intra4x4_predictors_internal();
 }
 
 void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x,

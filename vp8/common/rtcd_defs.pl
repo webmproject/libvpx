@@ -152,10 +152,6 @@ specialize qw/vp8_copy_mem8x4 mmx media neon dspr2 msa/;
 $vp8_copy_mem8x4_media=vp8_copy_mem8x4_v6;
 $vp8_copy_mem8x4_dspr2=vp8_copy_mem8x4_dspr2;
 
-add_proto qw/void vp8_intra4x4_predict/, "unsigned char *Above, unsigned char *yleft, int left_stride, int b_mode, unsigned char *dst, int dst_stride, unsigned char top_left";
-specialize qw/vp8_intra4x4_predict media/;
-$vp8_intra4x4_predict_media=vp8_intra4x4_predict_armv6;
-
 #
 # Postproc
 #
