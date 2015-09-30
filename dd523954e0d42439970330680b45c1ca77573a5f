@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "9555663b_bae6ed19",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1438,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-09-30T17:26:22Z",
+      "side": 1,
+      "message": "The allow_screen_content_tools flag is defined outside #if because I think some other experiments may also use it. It\u0027s only one bit overhead per sequence, so almost no impact on performance.",
+      "parentUuid": "d55b5e6b_1c743997",
+      "revId": "dd523954e0d42439970330680b45c1ca77573a5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1548969f_5e6351d4",
         "filename": "vp10/encoder/ethread.c",
         "patchSetId": 2
