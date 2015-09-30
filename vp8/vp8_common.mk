@@ -89,7 +89,6 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/copy_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_blk_sse2.c
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idctllm_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/recon_sse2.asm
-VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/recon_wrapper_sse2.c
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/subpixel_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/iwalsh_sse2.asm
@@ -119,7 +118,6 @@ VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/bilinear_filter_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/copymem_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/loopfilter_filters_msa.c
-VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/reconintra_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/sixtap_filter_msa.c
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp8_macros_msa.h
 
@@ -166,7 +164,6 @@ VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp8_loopfilter_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/loopfiltersimplehorizontaledge_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/loopfiltersimpleverticaledge_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/mbloopfilter_neon.c
-VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/reconintra_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/shortidct4x4llm_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/sixtappredict_neon.c
 
