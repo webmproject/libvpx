@@ -776,7 +776,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   // an 8x8 in that the internal ones can be skipped and don't depend on
   // the prediction block size.
   if (tx_size_y == TX_4X4)
-    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffffULL) << shift_y;
+    *int_4x4_y |= size_mask[block_size] << shift_y;
 
   if (tx_size_uv == TX_4X4)
     *int_4x4_uv |= (size_mask_uv[block_size] & 0xffff) << shift_uv;
@@ -822,7 +822,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
               left_64x64_txform_mask[tx_size_y]) << shift_y;
 
   if (tx_size_y == TX_4X4)
-    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffffULL) << shift_y;
+    *int_4x4_y |= size_mask[block_size] << shift_y;
 }
 
 void vp9_adjust_mask(VP9_COMMON *const cm, const int mi_row,
@@ -1720,7 +1720,7 @@ void vp9_build_mask(VP9_COMMON *cm, const MB_MODE_INFO *mbmi, int mi_row,
   // differ from the 4x4 boundaries on the outside edge of an 8x8 in that the
   // internal ones can be skipped and don't depend on the prediction block size.
   if (tx_size_y == TX_4X4)
-    *int_4x4_y |= (size_mask[block_size] & -1ULL) << shift_y;
+    *int_4x4_y |= size_mask[block_size] << shift_y;
 
   if (build_uv && tx_size_uv == TX_4X4)
     *int_4x4_uv |= (size_mask_uv[block_size] & 0xffff) << shift_uv;
