@@ -72,7 +72,7 @@ class ActiveMapRefreshTest
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     ::libvpx_test::Y4mVideoSource *y4m_video =
-        dynamic_cast<libvpx_test::Y4mVideoSource *>(video);
+        static_cast<libvpx_test::Y4mVideoSource *>(video);
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP9E_SET_AQ_MODE, kAqModeCyclicRefresh);
