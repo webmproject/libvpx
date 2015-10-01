@@ -733,7 +733,7 @@ static void encode_loopfilter(struct loopfilter *lf,
 static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
   if (delta_q != 0) {
     vpx_wb_write_bit(wb, 1);
-    vpx_wb_write_inv_signed_literal(wb, delta_q, 4);
+    vpx_wb_write_inv_signed_literal(wb, delta_q, CONFIG_MISC_FIXES ? 6 : 4);
   } else {
     vpx_wb_write_bit(wb, 0);
   }
