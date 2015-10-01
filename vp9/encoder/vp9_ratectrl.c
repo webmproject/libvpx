@@ -1595,7 +1595,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       cpi->ref_frame_flags &= (~VP9_ALT_FLAG);
     } else if (is_one_pass_cbr_svc(cpi)) {
       LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
-      if (cpi->svc.spatial_layer_id == 0) {
+      if (cpi->svc.spatial_layer_id == cpi->svc.first_spatial_layer_to_encode) {
         lc->is_key_frame = 0;
       } else {
         lc->is_key_frame =

@@ -1372,17 +1372,20 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
   SVC *const svc = &cpi->svc;
 
-  svc->spatial_layer_id = data->spatial_layer_id;
+  svc->first_spatial_layer_to_encode = data->spatial_layer_id;
   svc->temporal_layer_id = data->temporal_layer_id;
   // Checks on valid layer_id input.
   if (svc->temporal_layer_id < 0 ||
       svc->temporal_layer_id >= (int)ctx->cfg.ts_number_layers) {
     return VPX_CODEC_INVALID_PARAM;
   }
-  if (svc->spatial_layer_id < 0 ||
-      svc->spatial_layer_id >= (int)ctx->cfg.ss_number_layers) {
+  if (svc->first_spatial_layer_to_encode < 0 ||
+      svc->first_spatial_layer_to_encode >= (int)ctx->cfg.ss_number_layers) {
     return VPX_CODEC_INVALID_PARAM;
   }
+  // First spatial layer to encode not implemented for two-pass.
+  if (is_two_pass_svc(cpi) && svc->first_spatial_layer_to_encode > 0)
+    return VPX_CODEC_INVALID_PARAM;
   return VPX_CODEC_OK;
 }
 
