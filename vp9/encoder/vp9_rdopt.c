@@ -341,8 +341,7 @@ static int cost_coeffs(MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   const struct macroblock_plane *p = &x->plane[plane];
-  const struct macroblockd_plane *pd = &xd->plane[plane];
-  const PLANE_TYPE type = pd->plane_type;
+  const PLANE_TYPE type = get_plane_type(plane);
   const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = p->eobs[block];
   const tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
@@ -358,8 +357,8 @@ static int cost_coeffs(MACROBLOCK *x,
 #endif
 
   // Check for consistency of tx_size with mode info
-  assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
-                              : get_uv_tx_size(mbmi, pd) == tx_size);
+  assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size :
+         get_uv_tx_size(mbmi, &xd->plane[plane]) == tx_size);
 
   if (eob == 0) {
     // single eob token
@@ -570,7 +569,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
 
   vp9_get_entropy_contexts(bsize, tx_size, pd, args.t_above, args.t_left);
 
-  args.so = get_scan(xd, tx_size, pd->plane_type, 0);
+  args.so = get_scan(xd, tx_size, get_plane_type(plane), 0);
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
                                          block_rd_txfm, &args);

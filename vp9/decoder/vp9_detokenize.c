@@ -259,7 +259,7 @@ int vp9_decode_block_tokens(MACROBLOCKD *xd,
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
-  const int eob = decode_coefs(xd, pd->plane_type,
+  const int eob = decode_coefs(xd, get_plane_type(plane),
                                pd->dqcoeff, tx_size,
                                dequant, ctx, sc->scan, sc->neighbors, r);
   dec_set_contexts(xd, pd, tx_size, eob > 0, x, y);
