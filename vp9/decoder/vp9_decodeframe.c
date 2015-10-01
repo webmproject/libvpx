@@ -1570,14 +1570,13 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 // On entry 'tile_data->data_end' points to the end of the input frame, on exit
 // it is updated to reflect the bitreader position of the final tile column if
 // present in the tile buffer group or NULL otherwise.
-static int tile_worker_hook(TileWorkerData *const tile_data, void *unused) {
+static int tile_worker_hook(TileWorkerData *const tile_data,
+                            VP9Decoder *const pbi) {
   TileInfo *const tile = &tile_data->xd.tile;
-  VP9Decoder *const pbi = tile_data->pbi;
   const int final_col = (1 << pbi->common.log2_tile_cols) - 1;
   const uint8_t *volatile bit_reader_end = NULL;
   volatile int n = tile_data->buf_start;
   tile_data->error_info.setjmp = 1;
-  (void)unused;
 
   if (setjmp(tile_data->error_info.jmp)) {
     tile_data->error_info.setjmp = 0;
@@ -1605,9 +1604,8 @@ static int tile_worker_hook(TileWorkerData *const tile_data, void *unused) {
       vp9_zero(tile_data->xd.left_seg_context);
       for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
            mi_col += MI_BLOCK_SIZE) {
-        decode_partition(tile_data->pbi, &tile_data->xd,
-                         mi_row, mi_col, &tile_data->bit_reader,
-                         BLOCK_64X64, 4);
+        decode_partition(pbi, &tile_data->xd, mi_row, mi_col,
+                         &tile_data->bit_reader, BLOCK_64X64, 4);
       }
     }
 
@@ -1671,13 +1669,12 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     VPxWorker *const worker = &pbi->tile_workers[n];
     TileWorkerData *const tile_data = &pbi->tile_worker_data[n];
     winterface->sync(worker);
-    tile_data->pbi = pbi;
     tile_data->xd = pbi->mb;
     tile_data->xd.counts =
         cm->frame_parallel_decoding_mode ? NULL : &tile_data->counts;
     worker->hook = (VPxWorkerHook)tile_worker_hook;
     worker->data1 = tile_data;
-    worker->data2 = NULL;
+    worker->data2 = pbi;
   }
 
   // Note: this memset assumes above_context[0], [1] and [2]
