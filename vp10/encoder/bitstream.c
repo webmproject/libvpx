@@ -122,8 +122,11 @@ static void update_switchable_interp_probs(VP10_COMMON *cm, vpx_writer *w,
 
 static void pack_mb_tokens(vpx_writer *w,
                            TOKENEXTRA **tp, const TOKENEXTRA *const stop,
-                           vpx_bit_depth_t bit_depth) {
+                           vpx_bit_depth_t bit_depth, const TX_SIZE tx) {
   TOKENEXTRA *p = *tp;
+#if !CONFIG_MISC_FIXES
+  (void) tx;
+#endif
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
@@ -171,6 +174,12 @@ static void pack_mb_tokens(vpx_writer *w,
 
     if (b->base_val) {
       const int e = p->extra, l = b->len;
+#if CONFIG_MISC_FIXES
+      int skip_bits =
+          (b->base_val == CAT6_MIN_VAL) ? TX_SIZES - 1 - tx : 0;
+#else
+      int skip_bits = 0;
+#endif
 
       if (l) {
         const unsigned char *pb = b->prob;
@@ -180,7 +189,12 @@ static void pack_mb_tokens(vpx_writer *w,
 
         do {
           const int bb = (v >> --n) & 1;
-          vpx_write(w, bb, pb[i >> 1]);
+          if (skip_bits) {
+            skip_bits--;
+            assert(!bb);
+          } else {
+            vpx_write(w, bb, pb[i >> 1]);
+          }
           i = b->tree[i + bb];
         } while (n);
       }
@@ -190,7 +204,7 @@ static void pack_mb_tokens(vpx_writer *w,
     ++p;
   }
 
-  *tp = p + (p->token == EOSB_TOKEN);
+  *tp = p;
 }
 
 static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
@@ -382,6 +396,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   MODE_INFO *m;
+  int plane;
 
   xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
   m = xd->mi[0];
@@ -398,8 +413,16 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
     pack_inter_mode_mvs(cpi, m, w);
   }
 
-  assert(*tok < tok_end);
-  pack_mb_tokens(w, tok, tok_end, cm->bit_depth);
+  if (!m->mbmi.skip) {
+    assert(*tok < tok_end);
+    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+      TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
+                         : m->mbmi.tx_size;
+      pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+      assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
+      (*tok)++;
+    }
+  }
 }
 
 static void write_partition(const VP10_COMMON *const cm,
