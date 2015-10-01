@@ -2330,9 +2330,15 @@ void vp10_decode_frame(VP10Decoder *pbi,
   if (!xd->corrupted) {
     if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
       vp10_adapt_coef_probs(cm);
+#if CONFIG_MISC_FIXES
+      vp10_adapt_intra_frame_probs(cm);
+#endif
 
       if (!frame_is_intra_only(cm)) {
-        vp10_adapt_mode_probs(cm);
+#if !CONFIG_MISC_FIXES
+        vp10_adapt_intra_frame_probs(cm);
+#endif
+        vp10_adapt_inter_frame_probs(cm);
         vp10_adapt_mv_probs(cm, cm->allow_high_precision_mv);
       }
     } else {

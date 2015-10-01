@@ -91,7 +91,8 @@ extern const vpx_tree_index vp10_switchable_interp_tree
 
 void vp10_setup_past_independence(struct VP10Common *cm);
 
-void vp10_adapt_mode_probs(struct VP10Common *cm);
+void vp10_adapt_intra_frame_probs(struct VP10Common *cm);
+void vp10_adapt_inter_frame_probs(struct VP10Common *cm);
 
 void vp10_tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]);

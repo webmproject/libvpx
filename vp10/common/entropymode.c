@@ -334,7 +334,7 @@ const vpx_tree_index vp10_switchable_interp_tree
   -EIGHTTAP_SMOOTH, -EIGHTTAP_SHARP
 };
 
-void vp10_adapt_mode_probs(VP10_COMMON *cm) {
+void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
   int i, j;
   FRAME_CONTEXT *fc = cm->fc;
   const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
@@ -377,6 +377,13 @@ void vp10_adapt_mode_probs(VP10_COMMON *cm) {
                            counts->switchable_interp[i],
                            fc->switchable_interp_prob[i]);
   }
+}
+
+void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
+  int i;
+  FRAME_CONTEXT *fc = cm->fc;
+  const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
+  const FRAME_COUNTS *counts = &cm->counts;
 
   if (cm->tx_mode == TX_MODE_SELECT) {
     int j;

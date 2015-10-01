@@ -3653,12 +3653,19 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     full_to_model_counts(cpi->td.counts->coef[t],
                          cpi->td.rd_counts.coef_counts[t]);
 
-  if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD)
+  if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     vp10_adapt_coef_probs(cm);
+#if CONFIG_MISC_FIXES
+    vp10_adapt_intra_frame_probs(cm);
+#else
+    if (!frame_is_intra_only(cm))
+      vp10_adapt_intra_frame_probs(cm);
+#endif
+  }
 
   if (!frame_is_intra_only(cm)) {
     if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
-      vp10_adapt_mode_probs(cm);
+      vp10_adapt_inter_frame_probs(cm);
       vp10_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
   }
