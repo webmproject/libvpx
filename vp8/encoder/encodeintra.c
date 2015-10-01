@@ -13,6 +13,7 @@
 #include "vp8_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vp8/encoder/quantize.h"
+#include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
 #include "encodemb.h"
 #include "vp8/common/invtrans.h"

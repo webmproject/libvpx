@@ -716,6 +716,8 @@ typedef struct VP8_COMP
     } rd_costs;
 } VP8_COMP;
 
+void vp8_initialize_enc(void);
+
 void vp8_alloc_compressor_data(VP8_COMP *cpi);
 int vp8_reverse_trans(int x);
 void vp8_new_framerate(VP8_COMP *cpi, double framerate);

@@ -24,6 +24,7 @@
 #include "pickinter.h"
 #include "vp8/common/entropymode.h"
 #include "vp8/common/reconinter.h"
+#include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/quant_common.h"
