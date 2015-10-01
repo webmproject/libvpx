@@ -1820,7 +1820,7 @@ void vp9_set_target_rate(VP9_COMP *cpi) {
 int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
-  int resize_now = 0;
+  RESIZE_ACTION resize_action = NO_RESIZE;
   cpi->resize_scale_num = 1;
   cpi->resize_scale_den = 1;
   // Don't resize on key frame; reset the counters on key frame.
@@ -1840,18 +1840,32 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
     // Check for resize action every "window" frames.
     if (cpi->resize_count >= window) {
       int avg_qp = cpi->resize_avg_qp / cpi->resize_count;
-      // Resize down if buffer level has underflowed sufficent amount in past
-      // window, and we are at original resolution.
+      // Resize down if buffer level has underflowed sufficient amount in past
+      // window, and we are at original or 3/4 of original resolution.
       // Resize back up if average QP is low, and we are currently in a resized
-      // down state.
-      if (cpi->resize_state == 0 &&
-          cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
-        resize_now = 1;
-        cpi->resize_state = 1;
-      } else if (cpi->resize_state == 1 &&
-                 avg_qp < 50 * cpi->rc.worst_quality / 100) {
-        resize_now = -1;
-        cpi->resize_state = 0;
+      // down state, i.e. 1/2 or 3/4 of original resolution.
+      // Currently, use a flag to turn 3/4 resizing feature on/off.
+      if (cpi->resize_buffer_underflow > (cpi->resize_count >> 1)) {
+        resize_action = DOWN_ONEHALF;
+        cpi->resize_state = ONE_HALF;
+      } else if (cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
+        if (cpi->resize_state == THREE_QUARTER || ONEHALFONLY_RESIZE) {
+          resize_action = DOWN_ONEHALF;
+          cpi->resize_state = ONE_HALF;
+        } else if (cpi->resize_state == ORIG) {
+          resize_action = DOWN_THREEFOUR;
+          cpi->resize_state = THREE_QUARTER;
+        }
+      } else if (avg_qp < 60 * cpi->rc.worst_quality / 100) {
+        if (cpi->resize_state == THREE_QUARTER ||
+            avg_qp < 40 * cpi->rc.worst_quality / 100 ||
+            ONEHALFONLY_RESIZE) {
+          resize_action = UP_ORIG;
+          cpi->resize_state = ORIG;
+        } else if (cpi->resize_state == ONE_HALF) {
+          resize_action = UP_THREEFOUR;
+          cpi->resize_state = THREE_QUARTER;
+        }
       }
       // Reset for next window measurement.
       cpi->resize_avg_qp = 0;
@@ -1861,14 +1875,21 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   }
   // If decision is to resize, reset some quantities, and check is we should
   // reduce rate correction factor,
-  if (resize_now != 0) {
+  if (resize_action != NO_RESIZE) {
     int target_bits_per_frame;
     int active_worst_quality;
     int qindex;
     int tot_scale_change;
-    // For now, resize is by 1/2 x 1/2.
-    cpi->resize_scale_num = 1;
-    cpi->resize_scale_den = 2;
+    if (resize_action == DOWN_THREEFOUR || resize_action == UP_THREEFOUR) {
+      cpi->resize_scale_num = 3;
+      cpi->resize_scale_den = 4;
+    } else if (resize_action == DOWN_ONEHALF) {
+      cpi->resize_scale_num = 1;
+      cpi->resize_scale_den = 2;
+    } else {  // UP_ORIG or anything else
+      cpi->resize_scale_num = 1;
+      cpi->resize_scale_den = 1;
+    }
     tot_scale_change = (cpi->resize_scale_den * cpi->resize_scale_den) /
         (cpi->resize_scale_num * cpi->resize_scale_num);
     // Reset buffer level to optimal, update target size.
@@ -1880,7 +1901,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
       vp9_cyclic_refresh_reset_resize(cpi);
     // Get the projected qindex, based on the scaled target frame size (scaled
     // so target_bits_per_mb in vp9_rc_regulate_q will be correct target).
-    target_bits_per_frame = (resize_now == 1) ?
+    target_bits_per_frame = (resize_action >= 0) ?
         rc->this_frame_target * tot_scale_change :
         rc->this_frame_target / tot_scale_change;
     active_worst_quality = calc_active_worst_quality_one_pass_cbr(cpi);
@@ -1891,19 +1912,19 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
     // If resize is down, check if projected q index is close to worst_quality,
     // and if so, reduce the rate correction factor (since likely can afford
     // lower q for resized frame).
-    if (resize_now == 1 &&
+    if (resize_action > 0 &&
         qindex > 90 * cpi->rc.worst_quality / 100) {
       rc->rate_correction_factors[INTER_NORMAL] *= 0.85;
     }
     // If resize is back up, check if projected q index is too much above the
     // current base_qindex, and if so, reduce the rate correction factor
     // (since prefer to keep q for resized frame at least close to previous q).
-    if (resize_now == -1 &&
+    if (resize_action < 0 &&
        qindex > 130 * cm->base_qindex / 100) {
       rc->rate_correction_factors[INTER_NORMAL] *= 0.9;
     }
   }
-  return resize_now;
+  return resize_action;
 }
 
 // Compute average source sad (temporal sad: between current source and
