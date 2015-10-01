@@ -55,7 +55,7 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x,
                                       int y_stride)
 {
     MB_PREDICTION_MODE mode = x->mode_info_context->mbmi.mode;
-    unsigned char yleft_col[16];
+    DECLARE_ALIGNED(16, uint8_t, yleft_col[16]);
     int i;
     intra_pred_fn fn;
 
