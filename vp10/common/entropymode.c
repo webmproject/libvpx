@@ -316,7 +316,7 @@ static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
 
 #if CONFIG_EXT_TX
 const vpx_tree_index vp10_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)] = {
-  -ALT16, 2
+  -ALT16, 2,
   -NORM, 4,
   -ALT15, 6,
   8, 18,
