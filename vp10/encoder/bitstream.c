@@ -1013,6 +1013,10 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
     if (cfg != NULL) {
       found = cm->width == cfg->y_crop_width &&
               cm->height == cfg->y_crop_height;
+#if CONFIG_MISC_FIXES
+      found &= cm->render_width == cfg->render_width &&
+               cm->render_height == cfg->render_height;
+#endif
     }
     vpx_wb_write_bit(wb, found);
     if (found) {
@@ -1023,9 +1027,15 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
   if (!found) {
     vpx_wb_write_literal(wb, cm->width - 1, 16);
     vpx_wb_write_literal(wb, cm->height - 1, 16);
+
+#if CONFIG_MISC_FIXES
+    write_render_size(cm, wb);
+#endif
   }
 
+#if !CONFIG_MISC_FIXES
   write_render_size(cm, wb);
+#endif
 }
 
 static void write_sync_code(struct vpx_write_bit_buffer *wb) {

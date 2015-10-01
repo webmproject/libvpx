@@ -1276,13 +1276,21 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
       width = buf->y_crop_width;
       height = buf->y_crop_height;
+#if CONFIG_MISC_FIXES
+      cm->render_width = buf->render_width;
+      cm->render_height = buf->render_height;
+#endif
       found = 1;
       break;
     }
   }
 
-  if (!found)
+  if (!found) {
     vp10_read_frame_size(rb, &width, &height);
+#if CONFIG_MISC_FIXES
+    setup_render_size(cm, rb);
+#endif
+  }
 
   if (width <= 0 || height <= 0)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
@@ -1313,7 +1321,9 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   }
 
   resize_context_buffers(cm, width, height);
+#if !CONFIG_MISC_FIXES
   setup_render_size(cm, rb);
+#endif
 
   lock_buffer_pool(pool);
   if (vpx_realloc_frame_buffer(
