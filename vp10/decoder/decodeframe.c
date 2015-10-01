@@ -2145,6 +2145,12 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
       for (i = 0; i < INTRA_MODES - 1; ++i)
         vp10_diff_update_prob(&r, &fc->y_mode_prob[j][i]);
 
+#if CONFIG_MISC_FIXES
+    for (j = 0; j < INTRA_MODES; j++)
+      for (i = 0; i < INTRA_MODES - 1; ++i)
+        vp10_diff_update_prob(&r, &fc->uv_mode_prob[j][i]);
+#endif
+
     for (j = 0; j < PARTITION_CONTEXTS; ++j)
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
         vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);

@@ -1291,6 +1291,12 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
       prob_diff_update(vp10_intra_mode_tree, cm->fc->y_mode_prob[i],
                        counts->y_mode[i], INTRA_MODES, &header_bc);
 
+#if CONFIG_MISC_FIXES
+    for (i = 0; i < INTRA_MODES; ++i)
+      prob_diff_update(vp10_intra_mode_tree, cm->fc->uv_mode_prob[i],
+                       counts->uv_mode[i], INTRA_MODES, &header_bc);
+#endif
+
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
       prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
                        counts->partition[i], PARTITION_TYPES, &header_bc);
