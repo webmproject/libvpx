@@ -133,7 +133,6 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int frame_width, frame_height;
   int x0, y0;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  //  int base=128;
   int base = 128 << (bd - 8);
   // 127 127 127 .. 127 127 127 127 127 127
   // 129  A   B  ..  Y   Z
