@@ -85,16 +85,26 @@ specialize qw/vp9_filter_by_weight8x8 sse2 msa/;
 # dct
 #
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
-  # Note as optimized versions of these functions are added we need to add a check to ensure
-  # that when CONFIG_EMULATE_HARDWARE is on, it defaults to the C versions only.
-  add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-  specialize qw/vp9_iht4x4_16_add/;
+  # Force C versions if CONFIG_EMULATE_HARDWARE is 1
+  if (vpx_config("CONFIG_EMULATE_HARDWARE") eq "yes") {
+    add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
+    specialize qw/vp9_iht4x4_16_add/;
 
-  add_proto qw/void vp9_iht8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-  specialize qw/vp9_iht8x8_64_add/;
+    add_proto qw/void vp9_iht8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
+    specialize qw/vp9_iht8x8_64_add/;
 
-  add_proto qw/void vp9_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
-  specialize qw/vp9_iht16x16_256_add/;
+    add_proto qw/void vp9_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+    specialize qw/vp9_iht16x16_256_add/;
+  } else {
+    add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
+    specialize qw/vp9_iht4x4_16_add sse2/;
+
+    add_proto qw/void vp9_iht8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
+    specialize qw/vp9_iht8x8_64_add sse2/;
+
+    add_proto qw/void vp9_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+    specialize qw/vp9_iht16x16_256_add sse2/;
+  }
 } else {
   # Force C versions if CONFIG_EMULATE_HARDWARE is 1
   if (vpx_config("CONFIG_EMULATE_HARDWARE") eq "yes") {
