@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1548969f_1d49c6fb",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-10-02T17:09:22Z",
+      "side": 1,
+      "message": "Had a fruitful discussion with Hui offline. Thanks! Will have a new patch coming up.",
+      "parentUuid": "354d9aaf_6354b1f5",
+      "revId": "1e19ff60625c7c2c9bd0f05f7d6bbb8365a09d8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "953c86f3_2bad64cc",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 1
