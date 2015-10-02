@@ -12,14 +12,14 @@
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"
 
-void vp10_iht4x4_16_add_sse2(const int16_t *input, uint8_t *dest, int stride,
-                            int tx_type) {
+void vp10_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
+                             int tx_type) {
   __m128i in[2];
   const __m128i zero = _mm_setzero_si128();
   const __m128i eight = _mm_set1_epi16(8);
 
-  in[0] = _mm_loadu_si128((const __m128i *)(input));
-  in[1] = _mm_loadu_si128((const __m128i *)(input + 8));
+  in[0] = load_input_data(input);
+  in[1] = load_input_data(input + 8);
 
   switch (tx_type) {
     case 0:  // DCT_DCT
@@ -77,21 +77,21 @@ void vp10_iht4x4_16_add_sse2(const int16_t *input, uint8_t *dest, int stride,
   }
 }
 
-void vp10_iht8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride,
-                            int tx_type) {
+void vp10_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
+                             int tx_type) {
   __m128i in[8];
   const __m128i zero = _mm_setzero_si128();
   const __m128i final_rounding = _mm_set1_epi16(1 << 4);
 
   // load input data
-  in[0] = _mm_load_si128((const __m128i *)input);
-  in[1] = _mm_load_si128((const __m128i *)(input + 8 * 1));
-  in[2] = _mm_load_si128((const __m128i *)(input + 8 * 2));
-  in[3] = _mm_load_si128((const __m128i *)(input + 8 * 3));
-  in[4] = _mm_load_si128((const __m128i *)(input + 8 * 4));
-  in[5] = _mm_load_si128((const __m128i *)(input + 8 * 5));
-  in[6] = _mm_load_si128((const __m128i *)(input + 8 * 6));
-  in[7] = _mm_load_si128((const __m128i *)(input + 8 * 7));
+  in[0] = load_input_data(input);
+  in[1] = load_input_data(input + 8 * 1);
+  in[2] = load_input_data(input + 8 * 2);
+  in[3] = load_input_data(input + 8 * 3);
+  in[4] = load_input_data(input + 8 * 4);
+  in[5] = load_input_data(input + 8 * 5);
+  in[6] = load_input_data(input + 8 * 6);
+  in[7] = load_input_data(input + 8 * 7);
 
   switch (tx_type) {
     case 0:  // DCT_DCT
@@ -144,8 +144,8 @@ void vp10_iht8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride,
   RECON_AND_STORE(dest + 7 * stride, in[7]);
 }
 
-void vp10_iht16x16_256_add_sse2(const int16_t *input, uint8_t *dest, int stride,
-                               int tx_type) {
+void vp10_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
+                                int stride, int tx_type) {
   __m128i in0[16], in1[16];
 
   load_buffer_8x16(input, in0);
