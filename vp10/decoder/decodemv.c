@@ -249,11 +249,11 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
     if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
         mbmi->sb_type >= BLOCK_8X8 && !mbmi->skip &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      mbmi->ext_txfrm =
-          vpx_read_tree(r, vp10_ext_tx_tree,
-                        cm->fc->intra_ext_tx_prob[mbmi->tx_size][mbmi->mode]);
+      mbmi->tx_type =
+          vpx_read_tree(r, vp10_tx_type_tree,
+                        cm->fc->intra_tx_type_prob[mbmi->tx_size][mbmi->mode]);
     } else {
-      mbmi->ext_txfrm = NORM;
+      mbmi->tx_type = DCT_DCT;
     }
 #endif  // CONFIG_EXT_TX
 }
@@ -620,22 +620,22 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
       FRAME_COUNTS *counts = xd->counts;
 
       if (inter_block)
-        mbmi->ext_txfrm =
-            vpx_read_tree(r, vp10_ext_tx_tree,
-                          cm->fc->inter_ext_tx_prob[mbmi->tx_size]);
+        mbmi->tx_type =
+            vpx_read_tree(r, vp10_tx_type_tree,
+                          cm->fc->inter_tx_type_prob[mbmi->tx_size]);
       else
-        mbmi->ext_txfrm =
-            vpx_read_tree(r, vp10_ext_tx_tree,
-                          cm->fc->intra_ext_tx_prob[mbmi->tx_size][mbmi->mode]);
+        mbmi->tx_type = vpx_read_tree(r, vp10_tx_type_tree,
+                                      cm->fc->intra_tx_type_prob
+                                      [mbmi->tx_size][mbmi->mode]);
 
       if (counts) {
         if (inter_block)
-          ++counts->inter_ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
+          ++counts->inter_tx_type[mbmi->tx_size][mbmi->tx_type];
         else
-          ++counts->intra_ext_tx[mbmi->tx_size][mbmi->mode][mbmi->ext_txfrm];
+          ++counts->intra_tx_type[mbmi->tx_size][mbmi->mode][mbmi->tx_type];
       }
     } else {
-      mbmi->ext_txfrm = NORM;
+      mbmi->tx_type = DCT_DCT;
     }
 #endif  // CONFIG_EXT_TX
 }

@@ -2073,15 +2073,15 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   int i, j, k;
   if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
     for (i = TX_4X4; i <= TX_16X16; ++i)
-      for (j = 0; j < EXT_TX_TYPES - 1; ++j)
-        vp10_diff_update_prob(r, &fc->inter_ext_tx_prob[i][j]);
+      for (j = 0; j < TX_TYPES - 1; ++j)
+        vp10_diff_update_prob(r, &fc->inter_tx_type_prob[i][j]);
   }
 
   if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
     for (i = TX_4X4; i <= TX_16X16; ++i)
       for (j = 0; j < INTRA_MODES; ++j)
-        for (k = 0; k < EXT_TX_TYPES - 1; ++k)
-          vp10_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k]);
+        for (k = 0; k < TX_TYPES - 1; ++k)
+          vp10_diff_update_prob(r, &fc->intra_tx_type_prob[i][j][k]);
   }
 }
 #endif  // CONFIG_EXT_TX

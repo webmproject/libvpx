@@ -2993,9 +2993,9 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
         bsize >= BLOCK_8X8 && !mbmi->skip &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       if (is_inter_block(mbmi))
-        ++td->counts->inter_ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
+        ++td->counts->inter_tx_type[mbmi->tx_size][mbmi->tx_type];
       else
-        ++td->counts->intra_ext_tx[mbmi->tx_size][mbmi->mode][mbmi->ext_txfrm];
+        ++td->counts->intra_tx_type[mbmi->tx_size][mbmi->mode][mbmi->tx_type];
     }
 #endif  // CONFIG_EXT_TX
   }
