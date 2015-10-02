@@ -3130,26 +3130,19 @@ static void set_frame_size(VP9_COMP *cpi) {
   if (oxcf->pass == 0 &&
       oxcf->rc_mode == VPX_CBR &&
       !cpi->use_svc &&
-      oxcf->resize_mode == RESIZE_DYNAMIC) {
-      if (cpi->resize_pending == 1) {
-        oxcf->scaled_frame_width =
-            (cm->width * cpi->resize_scale_num) / cpi->resize_scale_den;
-        oxcf->scaled_frame_height =
-            (cm->height * cpi->resize_scale_num) /cpi->resize_scale_den;
-      } else if (cpi->resize_pending == -1) {
-        // Go back up to original size.
-        oxcf->scaled_frame_width = oxcf->width;
-        oxcf->scaled_frame_height = oxcf->height;
-      }
-      if (cpi->resize_pending != 0) {
-        // There has been a change in frame size.
-        vp9_set_size_literal(cpi,
-                             oxcf->scaled_frame_width,
-                             oxcf->scaled_frame_height);
+      oxcf->resize_mode == RESIZE_DYNAMIC &&
+      cpi->resize_pending != 0) {
+    oxcf->scaled_frame_width =
+        (oxcf->width * cpi->resize_scale_num) / cpi->resize_scale_den;
+    oxcf->scaled_frame_height =
+        (oxcf->height * cpi->resize_scale_num) /cpi->resize_scale_den;
+    // There has been a change in frame size.
+    vp9_set_size_literal(cpi,
+                         oxcf->scaled_frame_width,
+                         oxcf->scaled_frame_height);
 
-        // TODO(agrange) Scale cpi->max_mv_magnitude if frame-size has changed.
-        set_mv_search_params(cpi);
-      }
+    // TODO(agrange) Scale cpi->max_mv_magnitude if frame-size has changed.
+    set_mv_search_params(cpi);
   }
 
   if ((oxcf->pass == 2) &&
