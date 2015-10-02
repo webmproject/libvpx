@@ -16,6 +16,23 @@
       "revId": "1e19ff60625c7c2c9bd0f05f7d6bbb8365a09d8b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "953c86f3_2bad64cc",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3502,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-02T16:55:38Z",
+      "side": 1,
+      "message": "refs[0]",
+      "revId": "1e19ff60625c7c2c9bd0f05f7d6bbb8365a09d8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
