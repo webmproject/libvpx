@@ -26,7 +26,7 @@ extern "C" {
 
 #define MIN_GF_INTERVAL     4
 #define MAX_GF_INTERVAL     16
-#define ONEHALFONLY_RESIZE  1
+#define ONEHALFONLY_RESIZE  0
 
 typedef enum {
   INTER_NORMAL = 0,
