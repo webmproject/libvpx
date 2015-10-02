@@ -17,10 +17,6 @@
 extern "C" {
 #endif
 
-#define LEFT_TOP_MARGIN ((VP9_ENC_BORDER_IN_PIXELS - VP9_INTERP_EXTEND) << 3)
-#define RIGHT_BOTTOM_MARGIN ((VP9_ENC_BORDER_IN_PIXELS -\
-                                VP9_INTERP_EXTEND) << 3)
-
 #define MVREF_NEIGHBOURS 8
 
 typedef struct position {
@@ -200,14 +196,6 @@ static INLINE int is_inside(const TileInfo *const tile,
            mi_col + mi_pos->col >= tile->mi_col_end);
 }
 
-// TODO(jingning): this mv clamping function should be block size dependent.
-static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
-  clamp_mv(mv, xd->mb_to_left_edge - LEFT_TOP_MARGIN,
-               xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-               xd->mb_to_top_edge - LEFT_TOP_MARGIN,
-               xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
-}
-
 typedef void (*find_mv_refs_sync)(void *const data, int mi_row);
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
@@ -218,7 +206,7 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 // check a list of motion vectors by sad score using a number rows of pixels
 // above and a number cols of pixels in the left to select the one with best
 // score to use as ref motion vector
-void vp10_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
+void vp10_find_best_ref_mvs(int allow_hp,
                            int_mv *mvlist, int_mv *nearest_mv, int_mv *near_mv);
 
 void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,

@@ -2142,9 +2142,9 @@ static void setup_buffer_inter(VP10_COMP *cpi, MACROBLOCK *x,
                    NULL, NULL, mbmi_ext->mode_context);
 
   // Candidate refinement carried out at encoder and decoder
-  vp10_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
-                        &frame_nearest_mv[ref_frame],
-                        &frame_near_mv[ref_frame]);
+  vp10_find_best_ref_mvs(cm->allow_high_precision_mv, candidates,
+                         &frame_nearest_mv[ref_frame],
+                         &frame_near_mv[ref_frame]);
 
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
@@ -2313,6 +2313,18 @@ static int discount_newmv_test(const VP10_COMP *cpi,
            (mode_mv[NEARESTMV][ref_frame].as_int == INVALID_MV)) &&
           ((mode_mv[NEARMV][ref_frame].as_int == 0) ||
            (mode_mv[NEARMV][ref_frame].as_int == INVALID_MV)));
+}
+
+#define LEFT_TOP_MARGIN ((VP9_ENC_BORDER_IN_PIXELS - VP9_INTERP_EXTEND) << 3)
+#define RIGHT_BOTTOM_MARGIN ((VP9_ENC_BORDER_IN_PIXELS -\
+                                VP9_INTERP_EXTEND) << 3)
+
+// TODO(jingning): this mv clamping function should be block size dependent.
+static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
+  clamp_mv(mv, xd->mb_to_left_edge - LEFT_TOP_MARGIN,
+               xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+               xd->mb_to_top_edge - LEFT_TOP_MARGIN,
+               xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
 
 static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,

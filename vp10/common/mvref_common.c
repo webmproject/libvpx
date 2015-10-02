@@ -168,14 +168,13 @@ static void lower_mv_precision(MV *mv, int allow_hp) {
   }
 }
 
-void vp10_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
+void vp10_find_best_ref_mvs(int allow_hp,
                            int_mv *mvlist, int_mv *nearest_mv,
                            int_mv *near_mv) {
   int i;
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
     lower_mv_precision(&mvlist[i].as_mv, allow_hp);
-    clamp_mv2(&mvlist[i].as_mv, xd);
   }
   *nearest_mv = mvlist[0];
   *near_mv = mvlist[1];

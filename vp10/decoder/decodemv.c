@@ -523,8 +523,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
     for (ref = 0; ref < 1 + is_compound; ++ref) {
-      vp10_find_best_ref_mvs(xd, allow_hp, ref_mvs[mbmi->ref_frame[ref]],
-                            &nearestmv[ref], &nearmv[ref]);
+      vp10_find_best_ref_mvs(allow_hp, ref_mvs[mbmi->ref_frame[ref]],
+                             &nearestmv[ref], &nearmv[ref]);
     }
   }
 
