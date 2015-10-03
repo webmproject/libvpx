@@ -5706,10 +5706,21 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (have_newmv_in_inter_mode(this_mode)) {
       int_mv tmp_mv[2];
       int rate_mvs[2], tmp_rate_mv = 0;
+      uint8_t pred0[8192 * 3], pred1[8192 * 3];
+      uint8_t *preds0[3] = {pred0, pred0 + 8192, pred0 + 16384};
+      uint8_t *preds1[3] = {pred1, pred1 + 8192, pred1 + 16384};
+      int strides[3] = {64, 64, 64};
+      vp9_build_inter_predictors_for_planes_single_buf(
+          xd, bsize, mi_row, mi_col, 0, preds0, strides);
+      vp9_build_inter_predictors_for_planes_single_buf(
+          xd, bsize, mi_row, mi_col, 1, preds1, strides);
+
       // TODO(spencere, debargha): Reimplement to make this run faster
       for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
         mbmi->interinter_wedge_index = wedge_index;
-        vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+        vp9_build_wedge_inter_predictor_from_buf(xd, bsize, mi_row, mi_col,
+                                                 preds0, strides,
+                                                 preds1, strides);
         model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum, NULL, NULL);
         rd = RDCOST(x->rdmult, x->rddiv, rs + rate_mv_tmp + rate_sum, dist_sum);
         if (rd < best_rd_wedge) {
@@ -5769,9 +5780,19 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->mv[1].as_int = cur_mv[1].as_int;
       }
     } else {
+      uint8_t pred0[8192 * 3], pred1[8192 * 3];
+      uint8_t *preds0[3] = {pred0, pred0 + 8192, pred0 + 16384};
+      uint8_t *preds1[3] = {pred1, pred1 + 8192, pred1 + 16384};
+      int strides[3] = {64, 64, 64};
+      vp9_build_inter_predictors_for_planes_single_buf(
+          xd, bsize, mi_row, mi_col, 0, preds0, strides);
+      vp9_build_inter_predictors_for_planes_single_buf(
+          xd, bsize, mi_row, mi_col, 1, preds1, strides);
       for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
         mbmi->interinter_wedge_index = wedge_index;
-        vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+        vp9_build_wedge_inter_predictor_from_buf(xd, bsize, mi_row, mi_col,
+                                                 preds0, strides,
+                                                 preds1, strides);
         model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum, NULL, NULL);
         rd = RDCOST(x->rdmult, x->rddiv, rs + rate_mv_tmp + rate_sum, dist_sum);
         if (rd < best_rd_wedge) {

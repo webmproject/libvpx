@@ -1805,3 +1805,375 @@ void vp9_setup_pre_planes(MACROBLOCKD *xd, int idx,
     }
   }
 }
+
+#if CONFIG_WEDGE_PARTITION
+// Builds the inter-predictor for the single ref case
+// for use in the encoder to search the wedges efficiently.
+static void build_inter_predictors_single_buf(MACROBLOCKD *xd,
+                                              int plane, int block,
+                                              int bw, int bh,
+                                              int x, int y, int w, int h,
+                                              int mi_x, int mi_y, int ref,
+                                              uint8_t *const ext_dst,
+                                              int ext_dst_stride) {
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const MODE_INFO *mi = xd->mi[0].src_mi;
+#if CONFIG_INTRABC
+  const int is_intrabc = is_intrabc_mode(mi->mbmi.mode);
+#endif  // CONFIG_INTRABC
+  const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
+#if CONFIG_GLOBAL_MOTION
+  Global_Motion_Params *gm;
+  int is_global;
+  gm = &xd->global_motion[mi->mbmi.ref_frame[ref]][0];
+#endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_INTRABC
+  assert(!is_intrabc || mi->mbmi.interp_filter == BILINEAR);
+#endif  // CONFIG_INTRABC
+
+  const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
+  struct buf_2d *const dst_buf = &pd->dst;
+  struct buf_2d *const pre_buf =
+#if CONFIG_INTRABC
+      is_intrabc ? dst_buf :
+#endif  // CONFIG_INTRABC
+      &pd->pre[ref];
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint8_t *const dst =
+      (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH ?
+      CONVERT_TO_BYTEPTR(ext_dst) : ext_dst) + ext_dst_stride * y + x;
+#else
+  uint8_t *const dst = ext_dst + ext_dst_stride * y + x;
+#endif
+  const MV mv = mi->mbmi.sb_type < BLOCK_8X8
+      ? average_split_mvs(pd, mi, ref, block)
+      : mi->mbmi.mv[ref].as_mv;
+
+  // TODO(jkoleszar): This clamping is done in the incorrect place for the
+  // scaling case. It needs to be done on the scaled MV, not the pre-scaling
+  // MV. Note however that it performs the subsampling aware scaling so
+  // that the result is always q4.
+  // mv_precision precision is MV_PRECISION_Q4.
+  const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
+                                             pd->subsampling_x,
+                                             pd->subsampling_y);
+
+  uint8_t *pre;
+  MV32 scaled_mv;
+  int xs, ys, subpel_x, subpel_y;
+  const int is_scaled = vp9_is_scaled(sf);
+  (void) dst_buf;
+
+#if CONFIG_GLOBAL_MOTION
+  is_global = (get_y_mode(mi, block) == ZEROMV &&
+#if CONFIG_INTRABC
+               !is_intrabc &&
+#endif
+               get_gmtype(gm) == GLOBAL_ROTZOOM);
+#endif  // CONFIG_GLOBAL_MOTION
+
+  if (is_scaled) {
+#if CONFIG_INTRABC
+    assert(!is_intrabc);
+#endif  // CONFIG_INTRABC
+    pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, sf);
+    scaled_mv = vp9_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
+    xs = sf->x_step_q4;
+    ys = sf->y_step_q4;
+  } else {
+    pre = pre_buf->buf + (y * pre_buf->stride + x);
+    scaled_mv.row = mv_q4.row;
+    scaled_mv.col = mv_q4.col;
+    xs = ys = 16;
+  }
+  subpel_x = scaled_mv.col & SUBPEL_MASK;
+  subpel_y = scaled_mv.row & SUBPEL_MASK;
+  pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
+      + (scaled_mv.col >> SUBPEL_BITS);
+
+#if CONFIG_GLOBAL_MOTION
+  if (is_global) {
+    vp9_warp_plane(gm, pre_buf->buf0,
+                   pre_buf->width, pre_buf->height, pre_buf->stride, dst,
+                   (mi_x >> pd->subsampling_x) + x,
+                   (mi_y >> pd->subsampling_y) + y, w, h, ext_dst_stride,
+                   pd->subsampling_x, pd->subsampling_y, xs, ys);
+  } else {
+#endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      highbd_inter_predictor(pre, pre_buf->stride, dst, ext_dst_stride,
+                             subpel_x, subpel_y, sf, w, h, 0, kernel,
+                             xs, ys, xd->bd);
+    } else {
+      inter_predictor(pre, pre_buf->stride, dst, ext_dst_stride,
+                      subpel_x, subpel_y, sf, w, h, 0, kernel, xs, ys);
+    }
+#else
+    inter_predictor(pre, pre_buf->stride, dst, ext_dst_stride,
+                    subpel_x, subpel_y, sf, w, h, 0, kernel, xs, ys);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_GLOBAL_MOTION
+  }
+#endif  // CONFIG_GLOBAL_MOTION
+}
+
+void vp9_build_inter_predictors_for_planes_single_buf(
+    MACROBLOCKD *xd, BLOCK_SIZE bsize,
+    int mi_row, int mi_col, int ref,
+    uint8_t *ext_dst[3], int ext_dst_stride[3]) {
+  const int plane_from = 0;
+  const int plane_to = 2;
+  int plane;
+  const int mi_x = mi_col * MI_SIZE;
+  const int mi_y = mi_row * MI_SIZE;
+  for (plane = plane_from; plane <= plane_to; ++plane) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
+
+    if (xd->mi[0].src_mi->mbmi.sb_type < BLOCK_8X8) {
+      int i = 0, x, y;
+      assert(bsize == BLOCK_8X8);
+      for (y = 0; y < num_4x4_h; ++y)
+        for (x = 0; x < num_4x4_w; ++x)
+          build_inter_predictors_single_buf(xd, plane, i++, bw, bh,
+                                            4 * x, 4 * y, 4, 4,
+                                            mi_x, mi_y, ref,
+                                            ext_dst[plane],
+                                            ext_dst_stride[plane]);
+    } else {
+      build_inter_predictors_single_buf(xd, plane, 0, bw, bh,
+                                        0, 0, bw, bh,
+                                        mi_x, mi_y, ref,
+                                        ext_dst[plane],
+                                        ext_dst_stride[plane]);
+    }
+  }
+}
+
+static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
+                                                 int block, int bw, int bh,
+                                                 int x, int y, int w, int h,
+#if CONFIG_SUPERTX
+                                                 int wedge_offset_x,
+                                                 int wedge_offset_y,
+#endif  // CONFIG_SUPERTX
+                                                 int mi_x, int mi_y,
+                                                 uint8_t *ext_dst0,
+                                                 int ext_dst_stride0,
+                                                 uint8_t *ext_dst1,
+                                                 int ext_dst_stride1) {
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const MODE_INFO *mi = xd->mi[0].src_mi;
+  const int is_compound = has_second_ref(&mi->mbmi);
+#if CONFIG_INTRABC
+  const int is_intrabc = is_intrabc_mode(mi->mbmi.mode);
+#endif  // CONFIG_INTRABC
+  int ref;
+#if CONFIG_GLOBAL_MOTION
+  Global_Motion_Params *gm[2];
+  gm[0] = &xd->global_motion[mi->mbmi.ref_frame[0]][0];
+  if (is_compound)
+    gm[1] = &xd->global_motion[mi->mbmi.ref_frame[1]][0];
+#endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_INTRABC
+  assert(!is_intrabc || mi->mbmi.interp_filter == BILINEAR);
+#endif  // CONFIG_INTRABC
+  (void) block;
+  (void) bw;
+  (void) bh;
+  (void) mi_x;
+  (void) mi_y;
+
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
+    struct buf_2d *const dst_buf = &pd->dst;
+    uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
+#if CONFIG_GLOBAL_MOTION
+    const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
+    const int is_scaled = vp9_is_scaled(sf);
+    int xs, ys;
+    struct buf_2d *const pre_buf =
+#if CONFIG_INTRABC
+        is_intrabc ? dst_buf :
+#endif  // CONFIG_INTRABC
+        &pd->pre[ref];
+
+    int is_global = (get_y_mode(mi, block) == ZEROMV &&
+#if CONFIG_INTRABC
+                     !is_intrabc &&
+#endif
+                     get_gmtype(gm[ref]) == GLOBAL_ROTZOOM);
+
+    if (is_scaled) {
+#if CONFIG_INTRABC
+      assert(!is_intrabc);
+#endif  // CONFIG_INTRABC
+      xs = sf->x_step_q4;
+      ys = sf->y_step_q4;
+    } else {
+      xs = ys = 16;
+    }
+#endif  // CONFIG_GLOBAL_MOTION
+
+    if (ref && get_wedge_bits(mi->mbmi.sb_type)
+        && mi->mbmi.use_wedge_interinter) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      uint8_t tmp_dst_[8192];
+      uint8_t *tmp_dst =
+          (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
+          CONVERT_TO_BYTEPTR(tmp_dst_) : tmp_dst_;
+#else
+      uint8_t tmp_dst[4096];
+#endif
+#if CONFIG_GLOBAL_MOTION
+      if (is_global) {
+        vp9_warp_plane(gm[ref], pre_buf->buf0,
+                       pre_buf->width, pre_buf->height, pre_buf->stride,
+                       tmp_dst, (mi_x >> pd->subsampling_x) + x,
+                       (mi_y >> pd->subsampling_y) + y, w, h, 64,
+                       pd->subsampling_x, pd->subsampling_y, xs, ys);
+      } else {
+#endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+          int k;
+          for (k = 0; k < h; ++k)
+            vpx_memcpy(tmp_dst_ + 128 * k, ext_dst1 + ext_dst_stride1 * 2 * k,
+                       w * 2);
+        } else {
+          int k;
+          for (k = 0; k < h; ++k)
+            vpx_memcpy(tmp_dst_ + 64 * k, ext_dst1 + ext_dst_stride1 * k, w);
+        }
+#else
+        {
+          int k;
+          for (k = 0; k < h; ++k)
+            vpx_memcpy(tmp_dst + 64 * k, ext_dst1 + ext_dst_stride1 * k, w);
+        }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_GLOBAL_MOTION
+      }
+#endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_SUPERTX
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        build_masked_compound_extend_highbd(
+            dst, dst_buf->stride, tmp_dst, 64, plane,
+            mi->mbmi.interinter_wedge_index,
+            mi->mbmi.sb_type,
+            wedge_offset_x, wedge_offset_y, h, w);
+      } else {
+        build_masked_compound_extend(
+            dst, dst_buf->stride, tmp_dst, 64, plane,
+            mi->mbmi.interinter_wedge_index,
+            mi->mbmi.sb_type,
+            wedge_offset_x, wedge_offset_y, h, w);
+      }
+#else
+      build_masked_compound_extend(dst, dst_buf->stride, tmp_dst, 64, plane,
+                                   mi->mbmi.interinter_wedge_index,
+                                   mi->mbmi.sb_type,
+                                   wedge_offset_x, wedge_offset_y, h, w);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#else   // CONFIG_SUPERTX
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        build_masked_compound_highbd(dst, dst_buf->stride, tmp_dst, 64,
+                                     mi->mbmi.interinter_wedge_index,
+                                     mi->mbmi.sb_type, h, w);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
+                              mi->mbmi.interinter_wedge_index,
+                              mi->mbmi.sb_type, h, w);
+#endif  // CONFIG_SUPERTX
+    } else {
+#if CONFIG_GLOBAL_MOTION
+      if (is_global) {
+        vp9_warp_plane(gm[ref], pre_buf->buf0,
+                       pre_buf->width, pre_buf->height, pre_buf->stride, dst,
+                       (mi_x >> pd->subsampling_x) + x,
+                       (mi_y >> pd->subsampling_y) + y, w, h, dst_buf->stride,
+                       pd->subsampling_x, pd->subsampling_y, xs, ys);
+      } else {
+#endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+          int k;
+          for (k = 0; k < h; ++k)
+            vpx_memcpy(CONVERT_TO_SHORTPTR(dst + dst_buf->stride * k),
+                       ext_dst0 + ext_dst_stride0 * 2 * k, w * 2);
+        } else {
+          int k;
+          for (k = 0; k < h; ++k)
+            vpx_memcpy(dst + dst_buf->stride * k,
+                       ext_dst0 + ext_dst_stride0 * k, w);
+        }
+#else
+        {
+          int k;
+          for (k = 0; k < h; ++k)
+            vpx_memcpy(dst + dst_buf->stride * k,
+                       ext_dst0 + ext_dst_stride0 * k, w);
+        }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_GLOBAL_MOTION
+      }
+#endif  // CONFIG_GLOBAL_MOTION
+    }
+  }
+}
+
+void vp9_build_wedge_inter_predictor_from_buf(
+    MACROBLOCKD *xd, BLOCK_SIZE bsize,
+    int mi_row, int mi_col,
+    uint8_t *ext_dst0[3], int ext_dst_stride0[3],
+    uint8_t *ext_dst1[3], int ext_dst_stride1[3]) {
+  const int plane_from = 0;
+  const int plane_to = 2;
+  int plane;
+  const int mi_x = mi_col * MI_SIZE;
+  const int mi_y = mi_row * MI_SIZE;
+  for (plane = plane_from; plane <= plane_to; ++plane) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
+
+    if (xd->mi[0].src_mi->mbmi.sb_type < BLOCK_8X8) {
+      int i = 0, x, y;
+      assert(bsize == BLOCK_8X8);
+      for (y = 0; y < num_4x4_h; ++y)
+        for (x = 0; x < num_4x4_w; ++x)
+          build_wedge_inter_predictor_from_buf(xd, plane, i++, bw, bh,
+                                               4 * x, 4 * y, 4, 4,
+#if CONFIG_SUPERTX
+                                               0, 0,
+#endif
+                                               mi_x, mi_y,
+                                               ext_dst0[plane],
+                                               ext_dst_stride0[plane],
+                                               ext_dst1[plane],
+                                               ext_dst_stride1[plane]);
+    } else {
+      build_wedge_inter_predictor_from_buf(xd, plane, 0, bw, bh,
+                                           0, 0, bw, bh,
+#if CONFIG_SUPERTX
+                                           0, 0,
+#endif
+                                           mi_x, mi_y,
+                                           ext_dst0[plane],
+                                           ext_dst_stride0[plane],
+                                           ext_dst1[plane],
+                                           ext_dst_stride1[plane]);
+    }
+  }
+}
+#endif  // CONFIG_WEDGE_PARTITION
