@@ -16,6 +16,24 @@
       "revId": "23d1c06268e884ee65d3d67943c62c26a7e369b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab804cc5_5c4615e8",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3485,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-05T22:27:16Z",
+      "side": 1,
+      "message": "I misread. this improves the store pattern avoiding 4 column-wise stores",
+      "parentUuid": "4b9c302a_44a164e5",
+      "revId": "23d1c06268e884ee65d3d67943c62c26a7e369b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
