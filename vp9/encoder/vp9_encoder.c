@@ -2756,7 +2756,8 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
                                    cpi->common.frame_type,
                                    cpi->refresh_alt_ref_frame,
                                    cpi->refresh_golden_frame,
-                                   cpi->refresh_last_frame);
+                                   cpi->refresh_last_frame,
+                                   cpi->resize_pending);
   }
 #endif
 }
@@ -3099,6 +3100,21 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q,
 #endif  // CONFIG_VP9_POSTPROC
 }
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+static void setup_denoiser_buffer(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (cpi->oxcf.noise_sensitivity > 0 &&
+      !cpi->denoiser.frame_buffer_initialized) {
+    vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
+                       cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                       cm->use_highbitdepth,
+#endif
+                       VP9_ENC_BORDER_IN_PIXELS);
+  }
+}
+#endif
+
 static void init_motion_estimation(VP9_COMP *cpi) {
   int y_stride = cpi->scaled_source.y_stride;
 
@@ -3143,6 +3159,17 @@ static void set_frame_size(VP9_COMP *cpi) {
 
     // TODO(agrange) Scale cpi->max_mv_magnitude if frame-size has changed.
     set_mv_search_params(cpi);
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+    // Reset the denoiser on the resized frame.
+    if (cpi->oxcf.noise_sensitivity > 0) {
+      vp9_denoiser_free(&(cpi->denoiser));
+      setup_denoiser_buffer(cpi);
+      // Dynamic resize is only triggered for non-SVC, so we can force
+      // golden frame update here as temporary fix to denoiser.
+      cpi->refresh_golden_frame = 1;
+    }
+#endif
   }
 
   if ((oxcf->pass == 2) &&
@@ -3982,21 +4009,6 @@ static void check_initial_width(VP9_COMP *cpi,
     cpi->initial_mbs = cm->MBs;
   }
 }
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-static void setup_denoiser_buffer(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      !cpi->denoiser.frame_buffer_initialized) {
-    vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
-                       cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                       cm->use_highbitdepth,
-#endif
-                       VP9_ENC_BORDER_IN_PIXELS);
-  }
-}
-#endif
 
 int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
