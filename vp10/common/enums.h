@@ -114,26 +114,6 @@ typedef enum {
 
 #if CONFIG_EXT_TX
 #define EXT_TX_SIZES   3  // number of sizes that use extended transforms
-typedef enum {
-  NORM = 0,
-  ALT1 = 1,
-  ALT2 = 2,
-  ALT3 = 3,
-  ALT4 = 4,
-  ALT5 = 5,
-  ALT6 = 6,
-  ALT7 = 7,
-  ALT8 = 8,
-  ALT9 = 9,
-  ALT10 = 10,
-  ALT11 = 11,
-  ALT12 = 12,
-  ALT13 = 13,
-  ALT14 = 14,
-  ALT15 = 15,
-  ALT16 = 16,
-  EXT_TX_TYPES
-} EXT_TX_TYPE;
 #endif  // CONFIG_EXT_TX
 
 typedef enum {

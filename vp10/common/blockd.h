@@ -32,6 +32,11 @@ extern "C" {
 
 #define MAX_MB_PLANE 3
 
+#if CONFIG_EXT_TX
+#define GET_TX_TYPES(tx_size) \
+    ((tx_size) >= TX_32X32 ? 1 : TX_TYPES)
+#endif  // CONFIG_EXT_TX
+
 typedef enum {
   KEY_FRAME = 0,
   INTER_FRAME = 1,
@@ -83,8 +88,8 @@ typedef struct {
   INTERP_FILTER interp_filter;
   MV_REFERENCE_FRAME ref_frame[2];
 #if CONFIG_EXT_TX
-  EXT_TX_TYPE ext_txfrm;
-#endif
+  TX_TYPE tx_type;
+#endif  // CONFIG_EXT_TX
 
   // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
   int_mv mv[2];
@@ -224,42 +229,6 @@ static const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   ADST_ADST,  // TM
 };
 
-#if CONFIG_EXT_TX
-#define GET_EXT_TX_TYPES(tx_size) \
-    ((tx_size) >= TX_32X32 ? 1 : EXT_TX_TYPES)
-#define GET_EXT_TX_TREE(tx_size) \
-    ((tx_size) >= TX_32X32 ? NULL : vp10_ext_tx_tree)
-#define GET_EXT_TX_ENCODINGS(tx_size) \
-    ((tx_size) >= TX_32X32 ? NULL : ext_tx_encodings)
-
-static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
-  DCT_DCT,
-  ADST_DCT,
-  DCT_ADST,
-  ADST_ADST,
-  FLIPADST_DCT,
-  DCT_FLIPADST,
-  FLIPADST_FLIPADST,
-  ADST_FLIPADST,
-  FLIPADST_ADST,
-  DST_DCT,
-  DCT_DST,
-  DST_ADST,
-  ADST_DST,
-  DST_FLIPADST,
-  FLIPADST_DST,
-  DST_DST,
-  IDTX,
-};
-#endif  // CONFIG_EXT_TX
-
-static INLINE TX_TYPE get_tx_type_large(PLANE_TYPE plane_type,
-                                        const MACROBLOCKD *xd) {
-  (void) plane_type;
-  (void) xd;
-  return DCT_DCT;
-}
-
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd,
                                   int block_idx, TX_SIZE tx_size) {
@@ -271,7 +240,7 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
     return DCT_DCT;
   if (mbmi->sb_type >= BLOCK_8X8) {
     if (plane_type == PLANE_TYPE_Y || is_inter_block(mbmi))
-      return ext_tx_to_txtype[mbmi->ext_txfrm];
+      return mbmi->tx_type;
   }
 
   if (is_inter_block(mbmi))

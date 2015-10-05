@@ -86,11 +86,11 @@ static void fill_mode_costs(VP10_COMP *cpi) {
                     fc->switchable_interp_prob[i], vp10_switchable_interp_tree);
 #if CONFIG_EXT_TX
   for (i = TX_4X4; i <= TX_16X16; ++i) {
-    vp10_cost_tokens(cpi->inter_ext_tx_costs[i], fc->inter_ext_tx_prob[i],
-                     vp10_ext_tx_tree);
+    vp10_cost_tokens(cpi->inter_tx_type_costs[i], fc->inter_tx_type_prob[i],
+                     vp10_tx_type_tree);
     for (j = 0; j < INTRA_MODES; ++j)
-      vp10_cost_tokens(cpi->intra_ext_tx_costs[i][j],
-                       fc->intra_ext_tx_prob[i][j], vp10_ext_tx_tree);
+      vp10_cost_tokens(cpi->intra_tx_type_costs[i][j],
+                       fc->intra_tx_type_prob[i][j], vp10_tx_type_tree);
   }
 #endif  // CONFIG_EXT_TX
 }
