@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b9c302a_44a164e5",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3485,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-05T22:18:35Z",
+      "side": 1,
+      "message": "the c-code over stores too. so we only need the first 8 here?",
+      "revId": "23d1c06268e884ee65d3d67943c62c26a7e369b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
