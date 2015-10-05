@@ -269,11 +269,16 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
 #if CONFIG_EXT_TX
   if (xd->lossless || tx_size >= TX_32X32)
     return DCT_DCT;
-  if (is_inter_block(&mi->mbmi)) {
-    return ext_tx_to_txtype[mi->mbmi.ext_txfrm];
+  if (mbmi->sb_type >= BLOCK_8X8) {
+    if (plane_type == PLANE_TYPE_Y || is_inter_block(mbmi))
+      return ext_tx_to_txtype[mbmi->ext_txfrm];
   }
-  return intra_mode_to_tx_type_lookup[plane_type == PLANE_TYPE_Y ?
-      get_y_mode(mi, block_idx) : mbmi->uv_mode];
+
+  if (is_inter_block(mbmi))
+    return DCT_DCT;
+  else
+    return intra_mode_to_tx_type_lookup[plane_type == PLANE_TYPE_Y ?
+        get_y_mode(mi, block_idx) : mbmi->uv_mode];
 #else
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi) ||
       tx_size >= TX_32X32)

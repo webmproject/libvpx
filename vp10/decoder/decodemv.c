@@ -244,6 +244,18 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
   }
 
   mbmi->uv_mode = read_intra_mode(r, vp10_kf_uv_mode_prob[mbmi->mode]);
+
+#if CONFIG_EXT_TX
+    if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
+        mbmi->sb_type >= BLOCK_8X8 && !mbmi->skip &&
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      mbmi->ext_txfrm =
+          vpx_read_tree(r, vp10_ext_tx_tree,
+                        cm->fc->intra_ext_tx_prob[mbmi->tx_size][mbmi->mode]);
+    } else {
+      mbmi->ext_txfrm = NORM;
+    }
+#endif  // CONFIG_EXT_TX
 }
 
 static int read_mv_component(vpx_reader *r,
@@ -595,28 +607,37 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
-#if CONFIG_EXT_TX
-    if (inter_block &&
-        mbmi->tx_size <= TX_16X16 &&
-        cm->base_qindex > 0 &&
-        mbmi->sb_type >= BLOCK_8X8 &&
-        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
-        !mbmi->skip) {
-      FRAME_COUNTS *counts = xd->counts;
-      mbmi->ext_txfrm = vpx_read_tree(r,
-                                      vp10_ext_tx_tree,
-                                      cm->fc->ext_tx_prob[mbmi->tx_size]);
-      if (counts)
-        ++counts->ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
-    } else {
-      mbmi->ext_txfrm = NORM;
-    }
-#endif  // CONFIG_EXT_TX
 
   if (inter_block)
     read_inter_block_mode_info(pbi, xd, mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(cm, xd, mi, r);
+
+#if CONFIG_EXT_TX
+    if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
+        mbmi->sb_type >= BLOCK_8X8 && !mbmi->skip &&
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      FRAME_COUNTS *counts = xd->counts;
+
+      if (inter_block)
+        mbmi->ext_txfrm =
+            vpx_read_tree(r, vp10_ext_tx_tree,
+                          cm->fc->inter_ext_tx_prob[mbmi->tx_size]);
+      else
+        mbmi->ext_txfrm =
+            vpx_read_tree(r, vp10_ext_tx_tree,
+                          cm->fc->intra_ext_tx_prob[mbmi->tx_size][mbmi->mode]);
+
+      if (counts) {
+        if (inter_block)
+          ++counts->inter_ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
+        else
+          ++counts->intra_ext_tx[mbmi->tx_size][mbmi->mode][mbmi->ext_txfrm];
+      }
+    } else {
+      mbmi->ext_txfrm = NORM;
+    }
+#endif  // CONFIG_EXT_TX
 }
 
 void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
