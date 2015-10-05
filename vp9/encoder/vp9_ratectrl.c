@@ -271,6 +271,13 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
 
   // Clip the buffer level to the maximum specified buffer size.
   rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
+
+  // For screen-content mode, and if frame-dropper is off, don't let buffer
+  // level go below threshold, given here as -rc->maximum_ buffer_size.
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+      cpi->oxcf.drop_frames_water_mark == 0)
+    rc->bits_off_target = VPXMAX(rc->bits_off_target, -rc->maximum_buffer_size);
+
   rc->buffer_level = rc->bits_off_target;
 
   if (is_one_pass_cbr_svc(cpi)) {
