@@ -1852,18 +1852,20 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
       // Resize back up if average QP is low, and we are currently in a resized
       // down state, i.e. 1/2 or 3/4 of original resolution.
       // Currently, use a flag to turn 3/4 resizing feature on/off.
-      if (cpi->resize_buffer_underflow > (cpi->resize_count >> 1)) {
+      if (cpi->resize_state == ORIG &&
+          cpi->resize_buffer_underflow > (cpi->resize_count >> 1)) {
         resize_action = DOWN_ONEHALF;
         cpi->resize_state = ONE_HALF;
       } else if (cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
-        if (cpi->resize_state == THREE_QUARTER || ONEHALFONLY_RESIZE) {
+        if (cpi->resize_state == THREE_QUARTER) {
           resize_action = DOWN_ONEHALF;
           cpi->resize_state = ONE_HALF;
         } else if (cpi->resize_state == ORIG) {
-          resize_action = DOWN_THREEFOUR;
-          cpi->resize_state = THREE_QUARTER;
+          resize_action = ONEHALFONLY_RESIZE ? DOWN_ONEHALF : DOWN_THREEFOUR;
+          cpi->resize_state = ONEHALFONLY_RESIZE ? ONE_HALF : THREE_QUARTER;
         }
-      } else if (avg_qp < 60 * cpi->rc.worst_quality / 100) {
+      } else if (cpi->resize_state != ORIG &&
+                 avg_qp < 60 * cpi->rc.worst_quality / 100) {
         if (cpi->resize_state == THREE_QUARTER ||
             avg_qp < 40 * cpi->rc.worst_quality / 100 ||
             ONEHALFONLY_RESIZE) {
