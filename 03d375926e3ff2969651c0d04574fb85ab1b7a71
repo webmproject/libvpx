@@ -22,6 +22,30 @@
       "revId": "03d375926e3ff2969651c0d04574fb85ab1b7a71",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bc0e816_adc11d60",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-05T17:41:27Z",
+      "side": 1,
+      "message": "the base_val was increased by 1 for each txsize that was added in vp9. So another way of saying it is that for each increase in txsize, you need one more bit. We simply hardcoded tx32 bits for all token sets, and this changes it to make it txsz dependent, i.e. code one bit less for each decrease in txsz.\n\nIf you want it the other way around, then the simple math tells us that the size of coefficients (output of fdct) after each fdct_1d is increased by log2(N/2), or log2(N) per fdct. We also add 3 bits \"floating point precision\", 2 of which are later removed in quantization. So for fdct4x4, you get (after fdct2d+quant, i.e. coded coefficients) 2+3-2\u003d3 bits added on top of 8+sign \u003d 11+sign, and for tx8/16/32 you get 12-14+sign, assuming a quantizer of 1.0.",
+      "parentUuid": "2b6d3ced_7a2af94f",
+      "range": {
+        "startLine": 178,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 64
+      },
+      "revId": "03d375926e3ff2969651c0d04574fb85ab1b7a71",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
