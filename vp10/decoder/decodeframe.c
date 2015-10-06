@@ -1125,7 +1125,8 @@ static void setup_loopfilter(struct loopfilter *lf,
 }
 
 static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
-  return vpx_rb_read_bit(rb) ? vpx_rb_read_inv_signed_literal(rb, 4) : 0;
+  return vpx_rb_read_bit(rb) ?
+      vpx_rb_read_inv_signed_literal(rb, CONFIG_MISC_FIXES ? 6 : 4) : 0;
 }
 
 static void setup_quantization(VP10_COMMON *const cm, MACROBLOCKD *const xd,
