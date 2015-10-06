@@ -434,10 +434,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Sub Pixel Filters
   #
   add_proto qw/void vpx_highbd_convolve_copy/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-  specialize qw/vpx_highbd_convolve_copy/;
+  specialize qw/vpx_highbd_convolve_copy/, "$sse2_x86inc";
 
   add_proto qw/void vpx_highbd_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-  specialize qw/vpx_highbd_convolve_avg/;
+  specialize qw/vpx_highbd_convolve_avg/, "$sse2_x86inc";
 
   add_proto qw/void vpx_highbd_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
   specialize qw/vpx_highbd_convolve8/, "$sse2_x86_64";
