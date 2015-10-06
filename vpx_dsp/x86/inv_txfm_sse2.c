@@ -3474,7 +3474,7 @@ void vpx_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest,
                               int stride) {
   __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
-  int a, i;
+  int a, j;
 
   a = dct_const_round_shift(input[0] * cospi_16_64);
   a = dct_const_round_shift(a * cospi_16_64);
@@ -3482,12 +3482,11 @@ void vpx_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   dc_value = _mm_set1_epi16(a);
 
-  for (i = 0; i < 4; ++i) {
-    int j;
-    for (j = 0; j < 32; ++j) {
-      RECON_AND_STORE(dest + j * stride, dc_value);
-    }
-    dest += 8;
+  for (j = 0; j < 32; ++j) {
+    RECON_AND_STORE(dest +  0 + j * stride, dc_value);
+    RECON_AND_STORE(dest +  8 + j * stride, dc_value);
+    RECON_AND_STORE(dest + 16 + j * stride, dc_value);
+    RECON_AND_STORE(dest + 24 + j * stride, dc_value);
   }
 }
 
