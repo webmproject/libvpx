@@ -94,6 +94,15 @@ void vp9_generate_masked_weight(int wedge_index, BLOCK_SIZE sb_type,
                                 int h, int w, uint8_t *mask, int stride);
 void vp9_generate_hard_mask(int wedge_index, BLOCK_SIZE sb_type,
                             int h, int w, uint8_t *mask, int stride);
+void vp9_build_inter_predictors_for_planes_single_buf(
+    MACROBLOCKD *xd, BLOCK_SIZE bsize,
+    int mi_row, int mi_col, int ref,
+    uint8_t *ext_dst[3], int ext_dst_stride[3]);
+void vp9_build_wedge_inter_predictor_from_buf(
+    MACROBLOCKD *xd, BLOCK_SIZE bsize,
+    int mi_row, int mi_col,
+    uint8_t *ext_dst0[3], int ext_dst_stride0[3],
+    uint8_t *ext_dst1[3], int ext_dst_stride1[3]);
 #endif  // CONFIG_WEDGE_PARTITION
 
 #if CONFIG_SUPERTX
