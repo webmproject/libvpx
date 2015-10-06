@@ -64,6 +64,36 @@ static int read_segment_id(vpx_reader *r, const struct segmentation *seg) {
   return vpx_read_tree(r, vp10_segment_tree, seg->tree_probs);
 }
 
+#if CONFIG_VAR_TX
+static void read_tx_size_inter(VP10_COMMON *cm, MB_MODE_INFO *mbmi,
+                               TX_SIZE tx_size, int mi_row, int mi_col,
+                               vpx_reader *r) {
+  int is_split = vpx_read_bit(r);
+
+  if (is_split) {
+    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+    int bsl = mi_width_log2_lookup[bsize];
+    int i;
+    if (tx_size == TX_8X8) {
+      mbmi->tx_size = TX_4X4;
+      return;
+    }
+
+    assert(bsl > 0);
+    --bsl;
+    for (i = 0; i < 4; ++i) {
+      int offsetr = mi_row + ((i >> 1) << bsl);
+      int offsetc = mi_col + ((i & 0x01) << bsl);
+      if (offsetr >= cm->mi_rows || offsetc >= cm->mi_cols)
+        continue;
+      read_tx_size_inter(cm, mbmi, tx_size - 1, offsetr, offsetc, r);
+    }
+  } else {
+    mbmi->tx_size = tx_size;
+  }
+}
+#endif
+
 static TX_SIZE read_selected_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
                                      TX_SIZE max_tx_size, vpx_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
@@ -600,13 +630,39 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   int inter_block;
+#if CONFIG_VAR_TX
+  BLOCK_SIZE bsize = mbmi->sb_type;
+#endif
 
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;
   mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
+
+#if CONFIG_VAR_TX
+  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
+      !mbmi->skip && inter_block) {
+    const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+    const int txb_size = txsize_to_bsize[max_tx_size];
+    const int bs = num_8x8_blocks_wide_lookup[txb_size];
+    const int width  = num_8x8_blocks_wide_lookup[bsize];
+    const int height = num_8x8_blocks_high_lookup[bsize];
+    int idx, idy;
+    for (idy = 0; idy < height; idy += bs)
+      for (idx = 0; idx < width; idx += bs)
+        read_tx_size_inter(cm, mbmi, max_tx_size,
+                           mi_row + idy, mi_col + idx, r);
+    if (xd->counts) {
+      const int ctx = get_tx_size_context(xd);
+      ++get_tx_counts(max_tx_size, ctx, &xd->counts->tx)[mbmi->tx_size];
+    }
+  } else {
+    mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
+  }
+#else
   mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
+#endif
 
   if (inter_block)
     read_inter_block_mode_info(pbi, xd, mi, mi_row, mi_col, r);

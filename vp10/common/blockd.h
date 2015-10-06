@@ -74,6 +74,11 @@ typedef struct {
   BLOCK_SIZE sb_type;
   PREDICTION_MODE mode;
   TX_SIZE tx_size;
+#if CONFIG_VAR_TX
+  // TODO(jingning): This effectively assigned 64 entries for each 8x8 block.
+  // Apparently it takes much more space than needed.
+  TX_SIZE inter_tx_size[64];
+#endif
   int8_t skip;
 #if CONFIG_MISC_FIXES
   int8_t has_no_coeffs;
