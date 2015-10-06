@@ -75,21 +75,6 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high12[18]);
 
 #define EOB_MODEL_TOKEN 3
 
-typedef struct {
-  const vpx_tree_index *tree;
-  const vpx_prob *prob;
-  int len;
-  int base_val;
-  const int16_t *cost;
-} vp9_extra_bit;
-
-// indexed by token value
-extern const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS];
-#if CONFIG_VP9_HIGHBITDEPTH
-extern const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS];
-extern const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
 #define DCT_MAX_VALUE           16384
 #if CONFIG_VP9_HIGHBITDEPTH
 #define DCT_MAX_VALUE_HIGH10    65536

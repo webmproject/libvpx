@@ -176,12 +176,10 @@ static void pack_mb_tokens(vpx_writer *w,
         const unsigned char *pb = b->prob;
         int v = e >> 1;
         int n = l;              /* number of bits in v, assumed nonzero */
-        int i = 0;
 
         do {
           const int bb = (v >> --n) & 1;
-          vpx_write(w, bb, pb[i >> 1]);
-          i = b->tree[i + bb];
+          vpx_write(w, bb, *pb++);
         } while (n);
       }
 
