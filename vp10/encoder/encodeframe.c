@@ -2962,7 +2962,12 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
                                      VPXMAX(bsize, BLOCK_8X8));
 
     vp10_encode_sb(x, VPXMAX(bsize, BLOCK_8X8));
+#if CONFIG_VAR_TX
+    vp10_tokenize_sb_inter(cpi, td, t, !output_enabled,
+                           mi_row, mi_col, VPXMAX(bsize, BLOCK_8X8));
+#else
     vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
+#endif
   }
 
   if (output_enabled) {

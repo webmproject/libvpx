@@ -383,6 +383,61 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
   }
 }
 
+#if CONFIG_VAR_TX
+static void decode_reconstruct_tx(MACROBLOCKD *const xd, vpx_reader *r,
+                                  MB_MODE_INFO *const mbmi,
+                                  int plane, BLOCK_SIZE plane_bsize,
+                                  int block, int blk_row, int blk_col,
+                                  TX_SIZE tx_size, int *eob_total) {
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type,
+                          pd->subsampling_x, pd->subsampling_y) : mbmi->tx_size;
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+    return;
+
+  if (tx_size == plane_tx_size) {
+    PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+    TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
+    const scan_order *sc = get_scan(tx_size, tx_type, 1);
+    const int eob = vp10_decode_block_tokens(xd, plane, sc,
+                                             blk_col, blk_row, tx_size,
+                                             r, mbmi->segment_id);
+    inverse_transform_block_inter(xd, plane, tx_size,
+        &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col],
+        pd->dst.stride, eob, block);
+    *eob_total += eob;
+  } else {
+    const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+    int bsl = b_width_log2_lookup[bsize];
+    int i;
+
+    assert(bsl > 0);
+    --bsl;
+
+    for (i = 0; i < 4; ++i) {
+      const int offsetr = blk_row + ((i >> 1) << bsl);
+      const int offsetc = blk_col + ((i & 0x01) << bsl);
+      int step = 1 << (2 * (tx_size - 1));
+
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
+        continue;
+
+      decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize, block + i * step,
+                            offsetr, offsetc, tx_size - 1, eob_total);
+    }
+  }
+}
+#endif
+
 static int reconstruct_inter_block(MACROBLOCKD *const xd, vpx_reader *r,
                                    MB_MODE_INFO *const mbmi, int plane,
                                    int row, int col, TX_SIZE tx_size) {
@@ -872,13 +927,31 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
       for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
         const struct macroblockd_plane *const pd = &xd->plane[plane];
+        const int num_4x4_w = pd->n4_w;
+        const int num_4x4_h = pd->n4_h;
+        int row, col;
+#if CONFIG_VAR_TX
+        // TODO(jingning): This can be simplified for decoder performance.
+        const BLOCK_SIZE plane_bsize =
+            get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), pd);
+        const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+        const int txb_size = txsize_to_bsize[max_tx_size];
+        int bw = num_4x4_blocks_wide_lookup[txb_size];
+        int block = 0;
+        const int step = 1 << (max_tx_size << 1);
+
+        for (row = 0; row < num_4x4_h; row += bw) {
+          for (col = 0; col < num_4x4_w; col += bw) {
+            decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize,
+                                  block, row, col, max_tx_size, &eobtotal);
+            block += step;
+          }
+        }
+#else
         const TX_SIZE tx_size =
             plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
                     : mbmi->tx_size;
-        const int num_4x4_w = pd->n4_w;
-        const int num_4x4_h = pd->n4_h;
         const int step = (1 << tx_size);
-        int row, col;
         const int max_blocks_wide = num_4x4_w + (xd->mb_to_right_edge >= 0 ?
             0 : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
         const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ?
@@ -888,6 +961,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
           for (col = 0; col < max_blocks_wide; col += step)
             eobtotal += reconstruct_inter_block(xd, r, mbmi, plane, row, col,
                                                 tx_size);
+#endif
       }
 
       if (!less8x8 && eobtotal == 0)

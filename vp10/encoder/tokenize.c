@@ -613,6 +613,112 @@ int vp10_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   return result;
 }
 
+#if CONFIG_VAR_TX
+void tokenize_tx(ThreadData *td, TOKENEXTRA **t,
+                 int dry_run, TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
+                 int blk_row, int blk_col, int block, int plane,
+                 void *arg) {
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type,
+                          pd->subsampling_x, pd->subsampling_y) : mbmi->tx_size;
+
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+    return;
+
+  if (tx_size == plane_tx_size) {
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
+    BLOCK_SIZE plane_bsize = get_plane_block_size(mbmi->sb_type, pd);
+    if (!dry_run)
+      tokenize_b(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
+    else
+      set_entropy_context_b(plane, block, blk_row, blk_col,
+                            plane_bsize, tx_size, arg);
+  } else {
+    const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+    int bsl = b_width_log2_lookup[bsize];
+    int i;
+
+    assert(bsl > 0);
+    --bsl;
+
+    for (i = 0; i < 4; ++i) {
+      const int offsetr = blk_row + ((i >> 1) << bsl);
+      const int offsetc = blk_col + ((i & 0x01) << bsl);
+      int step = 1 << (2 * (tx_size - 1));
+
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
+        continue;
+
+      tokenize_tx(td, t, dry_run, tx_size - 1, plane_bsize,
+                  offsetr, offsetc, block + i * step, plane, arg);
+    }
+  }
+}
+
+void vp10_tokenize_sb_inter(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
+                            int dry_run, int mi_row, int mi_col,
+                            BLOCK_SIZE bsize) {
+  VP10_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  TOKENEXTRA *t_backup = *t;
+  const int ctx = vp10_get_skip_context(xd);
+  const int skip_inc = !segfeature_active(&cm->seg, mbmi->segment_id,
+                                          SEG_LVL_SKIP);
+  struct tokenize_b_args arg = {cpi, td, t};
+  int plane;
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
+  if (mbmi->skip) {
+    if (!dry_run)
+      td->counts->skip[ctx][1] += skip_inc;
+    reset_skip_context(xd, bsize);
+    if (dry_run)
+      *t = t_backup;
+    return;
+  }
+
+  if (!dry_run)
+    td->counts->skip[ctx][0] += skip_inc;
+  else
+    *t = t_backup;
+
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+    const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
+    const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+    int txb_size = txsize_to_bsize[max_tx_size];
+    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    int idx, idy;
+    int block = 0;
+    int step = 1 << (max_tx_size * 2);
+
+    for (idy = 0; idy < mi_height; idy += bh) {
+      for (idx = 0; idx < mi_width; idx += bh) {
+        tokenize_tx(td, t, dry_run, max_tx_size, plane_bsize, idy, idx,
+                    block, plane, &arg);
+        block += step;
+      }
+    }
+  }
+}
+#endif
+
 void vp10_tokenize_sb(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                      int dry_run, BLOCK_SIZE bsize) {
   VP10_COMMON *const cm = &cpi->common;

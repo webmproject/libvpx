@@ -1376,11 +1376,13 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.
-  if (x->zcoeff_blk[tx_size][block] && plane == 0) {
-    p->eobs[block] = 0;
-    *a = *l = 0;
-    return;
-  }
+  // Turn this back on when the rate-distortion loop is synchronized with
+  // the recursive transform block coding.
+//  if (x->zcoeff_blk[tx_size][block] && plane == 0) {
+//    p->eobs[block] = 0;
+//    *a = *l = 0;
+//    return;
+//  }
 
   if (!x->skip_recode) {
     if (x->quant_fp) {
@@ -1488,6 +1490,57 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   }
 }
 
+#if CONFIG_VAR_TX
+static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
+                               BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                               void *arg) {
+  struct encode_b_args *const args = arg;
+  MACROBLOCK *const x = args->x;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type,
+                          pd->subsampling_x, pd->subsampling_y) : mbmi->tx_size;
+
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+    return;
+
+  if (tx_size == plane_tx_size) {
+    encode_block(plane, block, blk_row, blk_col, plane_bsize,
+                 tx_size, arg);
+  } else {
+    const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+    int bsl = b_width_log2_lookup[bsize];
+    int i;
+
+    assert(bsl > 0);
+    --bsl;
+
+    for (i = 0; i < 4; ++i) {
+      const int offsetr = blk_row + ((i >> 1) << bsl);
+      const int offsetc = blk_col + ((i & 0x01) << bsl);
+      int step = 1 << (2 * (tx_size - 1));
+
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
+        continue;
+
+      encode_block_inter(plane, block + i * step, offsetr, offsetc,
+                         plane_bsize, tx_size - 1, arg);
+    }
+  }
+}
+#endif
+
 static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
                                BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
@@ -1541,6 +1594,19 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     return;
 
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+#if CONFIG_VAR_TX
+    // TODO(jingning): Clean this up.
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+    const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
+    const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+    int txb_size = txsize_to_bsize[max_tx_size];
+    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    int idx, idy;
+    int block = 0;
+    int step = 1 << (max_tx_size * 2);
+#endif
     if (!x->skip_recode)
       vp10_subtract_plane(x, bsize, plane);
 
@@ -1548,11 +1614,21 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
       const struct macroblockd_plane* const pd = &xd->plane[plane];
       const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
       vp10_get_entropy_contexts(bsize, tx_size, pd,
-                               ctx.ta[plane], ctx.tl[plane]);
+                                ctx.ta[plane], ctx.tl[plane]);
     }
 
+#if CONFIG_VAR_TX
+    for (idy = 0; idy < mi_height; idy += bh) {
+      for (idx = 0; idx < mi_width; idx += bh) {
+        encode_block_inter(plane, block, idy, idx, plane_bsize,
+                           max_tx_size, &arg);
+        block += step;
+      }
+    }
+#else
     vp10_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
-                                           &arg);
+                                            &arg);
+#endif
   }
 }
 
