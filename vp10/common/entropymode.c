@@ -955,6 +955,10 @@ static const struct segmentation_probs default_seg_probs = {
 };
 #endif
 
+#if CONFIG_EXT_INTRA
+static  const vpx_prob default_ext_intra_probs[2] = {200, 200};
+#endif  // CONFIG_EXT_INTRA
+
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->uv_mode_prob, default_uv_probs);
   vp10_copy(fc->y_mode_prob, default_if_y_probs);
@@ -978,6 +982,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->seg.tree_probs, default_seg_probs.tree_probs);
   vp10_copy(fc->seg.pred_probs, default_seg_probs.pred_probs);
 #endif
+#if CONFIG_EXT_INTRA
+  vp10_copy(fc->ext_intra_probs, default_ext_intra_probs);
+#endif  // CONFIG_EXT_INTRA
 }
 
 const vpx_tree_index vp10_switchable_interp_tree
@@ -1119,6 +1126,12 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
     vpx_tree_merge_probs(vp10_partition_tree, pre_fc->partition_prob[i],
                          counts->partition[i], fc->partition_prob[i]);
 #endif
+#if CONFIG_EXT_INTRA
+  for (i = 0; i < PLANE_TYPES; ++i) {
+    fc->ext_intra_probs[i] = mode_mv_merge_probs(
+              pre_fc->ext_intra_probs[i], counts->ext_intra[i]);
+  }
+#endif  // CONFIG_EXT_INTRA
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {
