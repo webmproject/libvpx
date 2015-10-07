@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "105c2963_c24bf840",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-07T18:16:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d03c51f4_1339bc0d",
+      "range": {
+        "startLine": 390,
+        "startChar": 30,
+        "endLine": 390,
+        "endChar": 35
+      },
+      "revId": "6ffa1639979de453486a24ce3ecc29bd610bbb7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90673931_24775c62",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-07T18:12:26Z",
       "side": 1,
       "message": "put () around additions...",
+      "range": {
+        "startLine": 391,
+        "startChar": 29,
+        "endLine": 391,
+        "endChar": 30
+      },
+      "revId": "6ffa1639979de453486a24ce3ecc29bd610bbb7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "704d65ae_90df84ea",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-07T18:16:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90673931_24775c62",
       "range": {
         "startLine": 391,
         "startChar": 29,
