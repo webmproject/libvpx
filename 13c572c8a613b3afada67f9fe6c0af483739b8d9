@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30592d74_691c91ad",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-07T15:56:44Z",
+      "side": 1,
+      "message": "does this have to be int? what is the expected value range, i.e. max number of base color to be used? we shall use smaller int, such as uint8, or unit16 if possible to reduce the size of this structure.",
+      "range": {
+        "startLine": 68,
+        "startChar": 2,
+        "endLine": 68,
+        "endChar": 5
+      },
+      "revId": "13c572c8a613b3afada67f9fe6c0af483739b8d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90673931_09699973",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-07T15:56:44Z",
+      "side": 1,
+      "message": "If it is used by encoder only, please add a TODO here indicating this needs to be moved to encoder.",
+      "range": {
+        "startLine": 76,
+        "startChar": 2,
+        "endLine": 76,
+        "endChar": 9
+      },
+      "revId": "13c572c8a613b3afada67f9fe6c0af483739b8d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "704d65ae_c54030f9",
+        "filename": "vp10/common/entropymode.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-07T15:56:44Z",
+      "side": 1,
+      "message": "what is this 10? Can we define this with a meaningful macro?\nsimilarly for the 3.",
+      "range": {
+        "startLine": 89,
+        "startChar": 55,
+        "endLine": 89,
+        "endChar": 57
+      },
+      "revId": "13c572c8a613b3afada67f9fe6c0af483739b8d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0435d80_478a64eb",
+        "filename": "vp10/common/entropymode.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-07T15:56:44Z",
+      "side": 1,
+      "message": "Do we have to include this in this header file? The downside of including static array in header is that it will have duplicated storage in every c file that includes this header.",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 6
+      },
+      "revId": "13c572c8a613b3afada67f9fe6c0af483739b8d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0435d80_87946c10",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-07T15:56:44Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 389,
+        "startChar": 4,
+        "endLine": 389,
+        "endChar": 7
+      },
+      "revId": "13c572c8a613b3afada67f9fe6c0af483739b8d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1001893d_37a320f5",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-07T15:56:44Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 390,
+        "startChar": 4,
+        "endLine": 390,
+        "endChar": 7
+      },
+      "revId": "13c572c8a613b3afada67f9fe6c0af483739b8d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
