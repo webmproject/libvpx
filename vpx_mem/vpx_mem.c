@@ -93,7 +93,7 @@ void vpx_free(void *memblk) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void *vpx_memset16(void *dest, int val, size_t length) {
-  int i;
+  size_t i;
   void *orig = dest;
   uint16_t *dest16 = dest;
   for (i = 0; i < length; i++)
