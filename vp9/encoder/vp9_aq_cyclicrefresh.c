@@ -395,6 +395,7 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
   unsigned char *const seg_map = cpi->segmentation_map;
   int i, block_count, bl_index, sb_rows, sb_cols, sbs_in_frame;
   int xmis, ymis, x, y;
+  int consec_zero_mv_thresh = 0;
   memset(seg_map, CR_SEGMENT_ID_BASE, cm->mi_rows * cm->mi_cols);
   sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
   sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
@@ -407,6 +408,9 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
   assert(cr->sb_index < sbs_in_frame);
   i = cr->sb_index;
   cr->target_num_seg_blocks = 0;
+  if (cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
+      cr->percent_refresh > 0)
+    consec_zero_mv_thresh = 10 * (100 / cr->percent_refresh);
   do {
     int sum_map = 0;
     // Get the mi_row/mi_col corresponding to superblock index i.
@@ -416,9 +420,6 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
     int mi_col = sb_col_index * MI_BLOCK_SIZE;
     int qindex_thresh =
         vp9_get_qindex(&cm->seg, CR_SEGMENT_ID_BOOST2, cm->base_qindex);
-    int consec_zero_mv_thresh =
-        cpi->oxcf.content == VP9E_CONTENT_SCREEN ? 0
-        : 10 * (100 / cr->percent_refresh);
     assert(mi_row >= 0 && mi_row < cm->mi_rows);
     assert(mi_col >= 0 && mi_col < cm->mi_cols);
     bl_index = mi_row * cm->mi_cols + mi_col;
