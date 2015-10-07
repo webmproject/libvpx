@@ -562,7 +562,7 @@ static int main_loop(int argc, const char **argv_) {
   int                     opt_i420 = 0;
   vpx_codec_dec_cfg_t     cfg = {0, 0, 0};
 #if CONFIG_VP9_HIGHBITDEPTH
-  int                     output_bit_depth = 0;
+  unsigned int            output_bit_depth = 0;
 #endif
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
