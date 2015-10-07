@@ -1268,7 +1268,8 @@ void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
 }
 
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
-                     BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
+                      int blk_row, int blk_col,
+                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -1281,10 +1282,8 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint16_t *const eob = &p->eobs[block];
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
-  int i, j;
   const int16_t *src_diff;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
-  src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+  src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -1403,7 +1402,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         int txfm_blk_index = (plane << 2) + (block >> (tx_size << 1));
         if (x->skip_txfm[txfm_blk_index] == SKIP_TXFM_NONE) {
           // full forward transform and quantization
-          vp10_xform_quant(x, plane, block, plane_bsize, tx_size);
+          vp10_xform_quant(x, plane, block, j, i, plane_bsize, tx_size);
         } else if (x->skip_txfm[txfm_blk_index] == SKIP_TXFM_AC_ONLY) {
           // fast path forward transform and quantization
           vp10_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
@@ -1414,7 +1413,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
           return;
         }
       } else {
-        vp10_xform_quant(x, plane, block, plane_bsize, tx_size);
+        vp10_xform_quant(x, plane, block, j, i, plane_bsize, tx_size);
       }
     }
   }
@@ -1501,7 +1500,7 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
 
-  vp10_xform_quant(x, plane, block, plane_bsize, tx_size);
+  vp10_xform_quant(x, plane, block, j, i, plane_bsize, tx_size);
 
   if (p->eobs[block] > 0) {
 #if CONFIG_VP9_HIGHBITDEPTH

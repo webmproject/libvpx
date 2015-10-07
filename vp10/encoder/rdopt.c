@@ -465,6 +465,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   int rate;
   int64_t dist;
   int64_t sse;
+  int i, j;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
 
   if (args->exit_early)
     return;
@@ -477,7 +479,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
-      vp10_xform_quant(x, plane, block, plane_bsize, tx_size);
+      vp10_xform_quant(x, plane, block, j, i, plane_bsize, tx_size);
       dist_block(x, plane, block, tx_size, &dist, &sse);
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
                SKIP_TXFM_AC_ONLY) {
@@ -508,7 +510,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     }
   } else {
     // full forward transform and quantization
-    vp10_xform_quant(x, plane, block, plane_bsize, tx_size);
+    vp10_xform_quant(x, plane, block, j, i, plane_bsize, tx_size);
     dist_block(x, plane, block, tx_size, &dist, &sse);
   }
 

@@ -30,7 +30,8 @@ void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
 void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
-                     BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
+                      int blk_row, int blk_col,
+                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
 
 void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
