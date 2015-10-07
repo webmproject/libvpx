@@ -43,7 +43,6 @@ typedef struct TileBuffer {
 } TileBuffer;
 
 typedef struct TileWorkerData {
-  struct VP9Decoder *pbi;
   const uint8_t *data_end;
   int buf_start, buf_end;  // pbi->tile_buffers to decode, inclusive
   vpx_reader bit_reader;
