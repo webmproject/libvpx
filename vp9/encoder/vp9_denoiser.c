@@ -387,18 +387,34 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
     return;
   }
 
-  /* For non key frames */
-  if (refresh_alt_ref_frame) {
-    swap_frame_buffer(&denoiser->running_avg_y[ALTREF_FRAME],
-                      &denoiser->running_avg_y[INTRA_FRAME]);
-  }
-  if (refresh_golden_frame) {
-    swap_frame_buffer(&denoiser->running_avg_y[GOLDEN_FRAME],
-                      &denoiser->running_avg_y[INTRA_FRAME]);
-  }
-  if (refresh_last_frame) {
-    swap_frame_buffer(&denoiser->running_avg_y[LAST_FRAME],
-                      &denoiser->running_avg_y[INTRA_FRAME]);
+  // If more than one refresh occurs, must copy frame buffer.
+  if ((refresh_alt_ref_frame + refresh_golden_frame + refresh_last_frame)
+      > 1) {
+    if (refresh_alt_ref_frame) {
+      copy_frame(denoiser->running_avg_y[ALTREF_FRAME],
+                 denoiser->running_avg_y[INTRA_FRAME]);
+    }
+    if (refresh_golden_frame) {
+      copy_frame(denoiser->running_avg_y[GOLDEN_FRAME],
+                 denoiser->running_avg_y[INTRA_FRAME]);
+    }
+    if (refresh_last_frame) {
+      copy_frame(denoiser->running_avg_y[LAST_FRAME],
+                 denoiser->running_avg_y[INTRA_FRAME]);
+    }
+  } else {
+    if (refresh_alt_ref_frame) {
+      swap_frame_buffer(&denoiser->running_avg_y[ALTREF_FRAME],
+                        &denoiser->running_avg_y[INTRA_FRAME]);
+    }
+    if (refresh_golden_frame) {
+      swap_frame_buffer(&denoiser->running_avg_y[GOLDEN_FRAME],
+                        &denoiser->running_avg_y[INTRA_FRAME]);
+    }
+    if (refresh_last_frame) {
+      swap_frame_buffer(&denoiser->running_avg_y[LAST_FRAME],
+                        &denoiser->running_avg_y[INTRA_FRAME]);
+    }
   }
 }
 
