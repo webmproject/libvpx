@@ -98,12 +98,13 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
       uint8_t ysource4 = src_y[(ypos + 1) * src_ystride + (ypos + 1)];
       uint8_t usource4 = src_u[(uvpos + 1) * src_uvstride + (uvpos  + 1)];
       uint8_t vsource4 = src_v[(uvpos + 1) * src_uvstride + (uvpos +  1)];
+      int is_skin = 0;
       if (mode_filter == 1) {
         ysource = (ysource + ysource2 + ysource3 + ysource4) >> 2;
         usource = (usource + usource2 + usource3 + usource4) >> 2;
         vsource = (vsource + vsource2 + vsource3 + vsource4) >> 2;
       }
-      const int is_skin = vp9_skin_pixel(ysource, usource, vsource);
+      is_skin = vp9_skin_pixel(ysource, usource, vsource);
       for (i = 0; i < y_bsize; i++) {
         for (j = 0; j < y_bsize; j++) {
           if (is_skin)
