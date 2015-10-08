@@ -1643,7 +1643,6 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   if (pbi->num_tile_workers == 0) {
     const int num_threads = pbi->max_threads;
-    int i;
     CHECK_MEM_ERROR(cm, pbi->tile_workers,
                     vpx_malloc(num_threads * sizeof(*pbi->tile_workers)));
     // Ensure tile data offsets will be properly aligned. This may fail on
@@ -1652,12 +1651,12 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     CHECK_MEM_ERROR(cm, pbi->tile_worker_data,
                     vpx_memalign(32, num_threads *
                                  sizeof(*pbi->tile_worker_data)));
-    for (i = 0; i < num_threads; ++i) {
-      VPxWorker *const worker = &pbi->tile_workers[i];
+    for (n = 0; n < num_threads; ++n) {
+      VPxWorker *const worker = &pbi->tile_workers[n];
       ++pbi->num_tile_workers;
 
       winterface->init(worker);
-      if (i < num_threads - 1 && !winterface->reset(worker)) {
+      if (n < num_threads - 1 && !winterface->reset(worker)) {
         vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                            "Tile decoder thread creation failed");
       }
@@ -1720,11 +1719,9 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   // Initialize thread frame counts.
   if (!cm->frame_parallel_decoding_mode) {
-    int i;
-
-    for (i = 0; i < num_workers; ++i) {
+    for (n = 0; n < num_workers; ++n) {
       TileWorkerData *const tile_data =
-          (TileWorkerData*)pbi->tile_workers[i].data1;
+          (TileWorkerData*)pbi->tile_workers[n].data1;
       vp9_zero(tile_data->counts);
     }
   }
@@ -1767,10 +1764,9 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   // Accumulate thread frame counts.
   if (!cm->frame_parallel_decoding_mode) {
-    int i;
-    for (i = 0; i < num_workers; ++i) {
+    for (n = 0; n < num_workers; ++n) {
       TileWorkerData *const tile_data =
-          (TileWorkerData*)pbi->tile_workers[i].data1;
+          (TileWorkerData*)pbi->tile_workers[n].data1;
       vp9_accumulate_frame_counts(&cm->counts, &tile_data->counts, 1);
     }
   }
