@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "5061411e_2bbe043f",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-08T21:39:24Z",
+      "side": 1,
+      "message": "OK, now I got it.. The nameing of \"aoff\" and \"loff\" in vp10_predict_intra_block was a little confusing to me, and I thought x is vertical.",
+      "parentUuid": "057f894d_c1fb62a9",
+      "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "504861a0_2739150e",
         "filename": "vp10/common/reconintra.c",
         "patchSetId": 8
@@ -137,6 +155,24 @@
       "side": 1,
       "message": "I think you\u0027re right about hl (thanks for noticing!), I\u0027m not sure why you\u0027d want the 2 * step or \u003c\u003d in there, can you explain?",
       "parentUuid": "704d65ae_06efbbe0",
+      "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d00a915c_3177a362",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-08T21:39:24Z",
+      "side": 1,
+      "message": "(mi_row \u003c\u003c (hl + !ssy)) + y + step \u003c (8 \u003c\u003c !ss_y) is probably right. My previous thought is to make sure the whole bottom left edge is within bound.",
+      "parentUuid": "25d72d80_6af537af",
       "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
