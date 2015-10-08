@@ -2781,6 +2781,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                     bsize, ref_best_rd);
 
+#if CONFIG_VAR_TX
+    for (i = 0; i < 64; ++i)
+      mbmi->inter_tx_size[i] = mbmi->tx_size;
+#endif
+
     if (*rate_y == INT_MAX) {
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
@@ -3931,6 +3936,11 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
       if (comp_pred)
         xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
     }
+
+#if CONFIG_VAR_TX
+    for (i = 0; i < 64; ++i)
+      mbmi->inter_tx_size[i] = mbmi->tx_size;
+#endif
 
     if (ref_frame == INTRA_FRAME) {
       int rate;

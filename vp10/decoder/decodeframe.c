@@ -390,9 +390,12 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, vpx_reader *r,
                                   int block, int blk_row, int blk_col,
                                   TX_SIZE tx_size, int *eob_total) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
+               (blk_col >> (1 - pd->subsampling_x));
   TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type,
-                          pd->subsampling_x, pd->subsampling_y) : mbmi->tx_size;
+      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], mbmi->sb_type,
+                          pd->subsampling_x, pd->subsampling_y) :
+      mbmi->inter_tx_size[tx_idx];
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
 
@@ -935,7 +938,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
         const BLOCK_SIZE plane_bsize =
             get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), pd);
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-        const int txb_size = txsize_to_bsize[max_tx_size];
+        const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
         int bw = num_4x4_blocks_wide_lookup[txb_size];
         int block = 0;
         const int step = 1 << (max_tx_size << 1);
@@ -2178,6 +2181,7 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 #if !CONFIG_MISC_FIXES
   cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
 #endif
+
   if (cm->tx_mode == TX_MODE_SELECT)
     read_tx_mode_probs(&fc->tx_probs, &r);
   read_coef_probs(fc, cm->tx_mode, &r);

@@ -119,14 +119,26 @@ static int prob_diff_update_savings(const vpx_tree_index *tree,
 
 #if CONFIG_VAR_TX
 static void write_tx_size_inter(const VP10_COMMON *cm,
+                                const MACROBLOCKD *xd,
                                 const MB_MODE_INFO *mbmi,
-                                TX_SIZE tx_size, int mi_row, int mi_col,
+                                TX_SIZE tx_size, int blk_row, int blk_col,
                                 vpx_writer *w) {
-  if (tx_size == mbmi->tx_size) {
+  const int tx_idx = (blk_row >> 1) * 8 + (blk_col >> 1);
+  int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> 5;
+  if (xd->mb_to_right_edge < 0)
+     max_blocks_wide += xd->mb_to_right_edge >> 5;
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+     return;
+
+  if (tx_size == mbmi->inter_tx_size[tx_idx]) {
     vpx_write_bit(w, 0);
   } else {
     const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bsl = mi_width_log2_lookup[bsize];
+    int bsl = b_width_log2_lookup[bsize];
     int i;
     vpx_write_bit(w, 1);
 
@@ -136,11 +148,9 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
     assert(bsl > 0);
     --bsl;
     for (i = 0; i < 4; ++i) {
-      int offsetr = mi_row + ((i >> 1) << bsl);
-      int offsetc = mi_col + ((i & 0x01) << bsl);
-      if (offsetr >= cm->mi_rows || offsetc >= cm->mi_cols)
-        continue;
-      write_tx_size_inter(cm, mbmi, tx_size - 1, offsetr, offsetc, w);
+      int offsetr = blk_row + ((i >> 1) << bsl);
+      int offsetc = blk_col + ((i & 0x01) << bsl);
+      write_tx_size_inter(cm, xd, mbmi, tx_size - 1, offsetr, offsetc, w);
     }
   }
 }
@@ -345,9 +355,6 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 }
 
 static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
-#if CONFIG_VAR_TX
-                                int mi_row, int mi_col,
-#endif
                                 vpx_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
@@ -387,14 +394,13 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     if (is_inter) {  // This implies skip flag is 0.
       const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
       const int txb_size = txsize_to_bsize[max_tx_size];
-      const int bs = num_8x8_blocks_wide_lookup[txb_size];
-      const int width  = num_8x8_blocks_wide_lookup[bsize];
-      const int height = num_8x8_blocks_high_lookup[bsize];
+      const int bs = num_4x4_blocks_wide_lookup[txb_size];
+      const int width  = num_4x4_blocks_wide_lookup[bsize];
+      const int height = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
       for (idy = 0; idy < height; idy += bs)
         for (idx = 0; idx < width; idx += bs)
-          write_tx_size_inter(cm, mbmi, max_tx_size,
-                              mi_row + idy, mi_col + idx, w);
+          write_tx_size_inter(cm, xd, mbmi, max_tx_size, idy, idx, w);
     } else {
       write_selected_tx_size(cm, xd, w);
     }
@@ -549,11 +555,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cm, xd, xd->mi, w);
   } else {
-#if CONFIG_VAR_TX
-    pack_inter_mode_mvs(cpi, m, mi_row, mi_col, w);
-#else
     pack_inter_mode_mvs(cpi, m, w);
-#endif
   }
 
   assert(*tok < tok_end);

@@ -1500,9 +1500,11 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
 
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int blk_idx = ((blk_row >> 1) << 3) + (blk_col >> 1);
   TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type,
-                          pd->subsampling_x, pd->subsampling_y) : mbmi->tx_size;
+      get_uv_tx_size_impl(mbmi->inter_tx_size[blk_idx], mbmi->sb_type,
+                          pd->subsampling_x, pd->subsampling_y) :
+      mbmi->inter_tx_size[blk_idx];
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -1601,8 +1603,8 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
     const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
     const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-    int txb_size = txsize_to_bsize[max_tx_size];
-    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+    const int bh = num_4x4_blocks_wide_lookup[txb_size];
     int idx, idy;
     int block = 0;
     int step = 1 << (max_tx_size * 2);
