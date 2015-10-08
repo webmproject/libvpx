@@ -69,11 +69,9 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %if CONFIG_VP9_HIGHBITDEPTH
   ; coeff stored as 32bit numbers & require 16bit numbers
   mova                            m9, [  coeffq+ncoeffq*4+ 0]
-  mova                            m6, [  coeffq+ncoeffq*4+16]
+  packssdw                        m9, [  coeffq+ncoeffq*4+16]
   mova                           m10, [  coeffq+ncoeffq*4+32]
-  mova                           m11, [  coeffq+ncoeffq*4+48]
-  packssdw                        m9, m6 ; m9 = c[i]
-  packssdw                       m10, m11 ; m10 = c[i]
+  packssdw                       m10, [  coeffq+ncoeffq*4+48]
 %else
   mova                            m9, [  coeffq+ncoeffq*2+ 0] ; m9 = c[i]
   mova                           m10, [  coeffq+ncoeffq*2+16] ; m10 = c[i]
@@ -171,11 +169,9 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %if CONFIG_VP9_HIGHBITDEPTH
   ; pack coeff from 32bit to 16bit array
   mova                            m9, [  coeffq+ncoeffq*4+ 0]
-  mova                            m6, [  coeffq+ncoeffq*4+16]
+  packssdw                        m9, [  coeffq+ncoeffq*4+16]
   mova                           m10, [  coeffq+ncoeffq*4+32]
-  mova                           m11, [  coeffq+ncoeffq*4+48]
-  packssdw                        m9, m6 ; m9 = c[i]
-  packssdw                       m10, m11 ; m10 = c[i]
+  packssdw                       m10, [  coeffq+ncoeffq*4+48]
 %else
   mova                            m9, [  coeffq+ncoeffq*2+ 0] ; m9 = c[i]
   mova                           m10, [  coeffq+ncoeffq*2+16] ; m10 = c[i]
