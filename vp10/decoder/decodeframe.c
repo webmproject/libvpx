@@ -170,8 +170,12 @@ static void read_frame_reference_mode_probs(VP10_COMMON *cm, vpx_reader *r) {
 static void update_mv_probs(vpx_prob *p, int n, vpx_reader *r) {
   int i;
   for (i = 0; i < n; ++i)
+#if CONFIG_MISC_FIXES
+    vp10_diff_update_prob(r, &p[i]);
+#else
     if (vpx_read(r, MV_UPDATE_PROB))
       p[i] = (vpx_read_literal(r, 7) << 1) | 1;
+#endif
 }
 
 static void read_mv_probs(nmv_context *ctx, int allow_hp, vpx_reader *r) {
