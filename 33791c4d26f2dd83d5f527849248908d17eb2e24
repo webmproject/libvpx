@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "105c2963_6e977383",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-08T20:56:07Z",
+      "side": 1,
+      "message": "Just to clarify, x is the offset in the vertical direction, i.e. row offset, right?",
+      "parentUuid": "25d72d80_0ae8fbda",
+      "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "504861a0_2739150e",
         "filename": "vp10/common/reconintra.c",
         "patchSetId": 8
