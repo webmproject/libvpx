@@ -1201,6 +1201,188 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
+#if CONFIG_VAR_TX
+static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x,
+                        int blk_row, int blk_col, int plane, int block,
+                        TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
+                        ENTROPY_CONTEXT *above_ctx, ENTROPY_CONTEXT *left_ctx,
+                        int *rate, int64_t *dist, int64_t *bsse, int *skip) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
+               (blk_col >> (1 - pd->subsampling_x));
+  TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], plane_bsize, 0, 0) :
+      mbmi->inter_tx_size[tx_idx];
+
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+    return;
+
+  if (tx_size == plane_tx_size) {
+    const int ss_txfrm_size = tx_size << 1;
+    const struct macroblock_plane *const p = &x->plane[plane];
+    int64_t this_sse;
+    int shift = tx_size == TX_32X32 ? 0 : 2;
+    tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
+    tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+    ENTROPY_CONTEXT *ta = above_ctx + blk_col;
+    ENTROPY_CONTEXT *tl = left_ctx + blk_row;
+    PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
+    TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
+    const scan_order *const scan_order =
+        get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+    int i;
+
+    vp10_xform_quant(x, plane, block, blk_row, blk_col,
+                     plane_bsize, tx_size);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+    *dist += vp10_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                                     &this_sse, xd->bd) >> shift;
+#else
+    *dist += vp10_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                              &this_sse) >> shift;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    *bsse += this_sse >> shift;
+
+    switch (tx_size) {
+      case TX_4X4:
+        break;
+      case TX_8X8:
+        ta[0] = !!*(const uint16_t *)&ta[0];
+        tl[0] = !!*(const uint16_t *)&tl[0];
+        break;
+      case TX_16X16:
+        ta[0] = !!*(const uint32_t *)&ta[0];
+        tl[0] = !!*(const uint32_t *)&tl[0];
+        break;
+      case TX_32X32:
+        ta[0] = !!*(const uint64_t *)&ta[0];
+        tl[0] = !!*(const uint64_t *)&tl[0];
+        break;
+      default:
+        assert(0 && "Invalid transform size.");
+        break;
+    }
+
+    *rate += cost_coeffs(x, plane, block, ta, tl, tx_size,
+                         scan_order->scan, scan_order->neighbors, 0);
+
+    for (i = 0; i < (1 << tx_size); ++i) {
+      ta[i] = ta[0];
+      tl[i] = tl[0];
+    }
+    *skip &= (p->eobs[block] == 0);
+  } else {
+    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+    int bsl = b_width_log2_lookup[bsize];
+    int step = 1 << (2 * (tx_size - 1));
+    int i;
+
+    assert(bsl > 0);
+    --bsl;
+
+    for (i = 0; i < 4; ++i) {
+      int offsetr = (i >> 1) << bsl;
+      int offsetc = (i & 0x01) << bsl;
+      tx_block_rd(cpi, x, blk_row + offsetr, blk_col + offsetc, plane,
+                  block + i * step, tx_size - 1, plane_bsize,
+                  above_ctx, left_ctx, rate, dist, bsse, skip);
+    }
+  }
+}
+
+// Return value 0: early termination triggered, no valid rd cost available;
+//              1: rd cost values are valid.
+static int inter_block_uvrd(const VP10_COMP *cpi, MACROBLOCK *x,
+                            int *rate, int64_t *distortion, int *skippable,
+                            int64_t *sse, BLOCK_SIZE bsize,
+                            int64_t ref_best_rd) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  int plane;
+  int is_cost_valid = 1;
+  int64_t this_rd;
+
+  if (ref_best_rd < 0)
+    is_cost_valid = 0;
+
+  if (is_inter_block(mbmi) && is_cost_valid) {
+    int plane;
+    for (plane = 1; plane < MAX_MB_PLANE; ++plane)
+      vp10_subtract_plane(x, bsize, plane);
+  }
+
+  *rate = 0;
+  *distortion = 0;
+  *sse = 0;
+  *skippable = 1;
+
+  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+    const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
+    BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
+    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    int idx, idy;
+    int block = 0;
+    int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
+    int pnrate = 0, pnskip = 1;
+    int64_t pndist = 0, pnsse = 0;
+    ENTROPY_CONTEXT ta[16], tl[16];
+
+    vp10_get_entropy_contexts(bsize, TX_4X4, pd, ta, tl);
+
+    for (idy = 0; idy < mi_height; idy += bh) {
+      for (idx = 0; idx < mi_width; idx += bh) {
+        tx_block_rd(cpi, x, idy, idx, plane, block,
+                    max_txsize_lookup[plane_bsize], plane_bsize, ta, tl,
+                    &pnrate, &pndist, &pnsse, &pnskip);
+        block += step;
+      }
+    }
+
+    if (pnrate == INT_MAX) {
+      is_cost_valid = 0;
+      break;
+    }
+
+    *rate += pnrate;
+    *distortion += pndist;
+    *sse += pnsse;
+    *skippable &= pnskip;
+
+    this_rd = VPXMIN(RDCOST(x->rdmult, x->rddiv, *rate, *distortion),
+                     RDCOST(x->rdmult, x->rddiv, 0, *sse));
+
+    if (this_rd > ref_best_rd) {
+      is_cost_valid = 0;
+      break;
+    }
+  }
+
+  if (!is_cost_valid) {
+    // reset cost value
+    *rate = INT_MAX;
+    *distortion = INT64_MAX;
+    *sse = INT64_MAX;
+    *skippable = 0;
+  }
+
+  return is_cost_valid;
+}
+#endif
+
 // Return value 0: early termination triggered, no valid rd cost available;
 //              1: rd cost values are valid.
 static int super_block_uvrd(const VP10_COMP *cpi, MACROBLOCK *x,
@@ -2799,8 +2981,13 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     rdcosty = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
     rdcosty = VPXMIN(rdcosty, RDCOST(x->rdmult, x->rddiv, 0, *psse));
 
+#if CONFIG_VAR_TX
+    if (!inter_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
+                          &sseuv, bsize, ref_best_rd - rdcosty)) {
+#else
     if (!super_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
                           &sseuv, bsize, ref_best_rd - rdcosty)) {
+#endif
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
       restore_dst_buf(xd, orig_dst, orig_dst_stride);
@@ -4112,10 +4299,15 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
         vp10_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_8X8);
         memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
+#if CONFIG_VAR_TX
+        if (!inter_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
+                              &uv_sse, BLOCK_8X8, tmp_best_rdu))
+          continue;
+#else
         if (!super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
                               &uv_sse, BLOCK_8X8, tmp_best_rdu))
           continue;
-
+#endif
         rate2 += rate_uv;
         distortion2 += distortion_uv;
         skippable = skippable && uv_skippable;

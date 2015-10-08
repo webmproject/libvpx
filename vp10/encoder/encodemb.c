@@ -1370,6 +1370,9 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   uint8_t *dst;
   ENTROPY_CONTEXT *a, *l;
   TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
+#if CONFIG_VAR_TX
+  int i;
+#endif
   dst = &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col];
   a = &ctx->ta[plane][blk_col];
   l = &ctx->tl[plane][blk_row];
@@ -1421,11 +1424,40 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   }
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
-    const int ctx = combine_entropy_contexts(*a, *l);
+    int ctx;
+#if CONFIG_VAR_TX
+    switch (tx_size) {
+      case TX_4X4:
+        break;
+      case TX_8X8:
+        a[0] = !!*(const uint16_t *)&a[0];
+        l[0] = !!*(const uint16_t *)&l[0];
+        break;
+      case TX_16X16:
+        a[0] = !!*(const uint32_t *)&a[0];
+        l[0] = !!*(const uint32_t *)&l[0];
+        break;
+      case TX_32X32:
+        a[0] = !!*(const uint64_t *)&a[0];
+        l[0] = !!*(const uint64_t *)&l[0];
+        break;
+      default:
+        assert(0 && "Invalid transform size.");
+        break;
+    }
+#endif
+    ctx = combine_entropy_contexts(*a, *l);
     *a = *l = optimize_b(x, plane, block, tx_size, ctx) > 0;
   } else {
     *a = *l = p->eobs[block] > 0;
   }
+
+#if CONFIG_VAR_TX
+  for (i = 0; i < (1 << tx_size); ++i) {
+    a[i] = a[0];
+    l[i] = l[0];
+  }
+#endif
 
   if (p->eobs[block])
     *(args->skip) = 0;
@@ -1613,10 +1645,15 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
       vp10_subtract_plane(x, bsize, plane);
 
     if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
+#if CONFIG_VAR_TX
+      vp10_get_entropy_contexts(bsize, TX_4X4, pd,
+                                ctx.ta[plane], ctx.tl[plane]);
+#else
       const struct macroblockd_plane* const pd = &xd->plane[plane];
       const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
       vp10_get_entropy_contexts(bsize, tx_size, pd,
                                 ctx.ta[plane], ctx.tl[plane]);
+#endif
     }
 
 #if CONFIG_VAR_TX
