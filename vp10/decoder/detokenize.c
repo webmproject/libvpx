@@ -163,26 +163,33 @@ static int decode_coefs(const MACROBLOCKD *xd,
         case CATEGORY5_TOKEN:
           val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, r);
           break;
-        case CATEGORY6_TOKEN:
+        case CATEGORY6_TOKEN: {
+#if CONFIG_MISC_FIXES
+          const int skip_bits = TX_SIZES - 1 - tx_size;
+#else
+          const int skip_bits = 0;
+#endif
+          const uint8_t *cat6p = cat6_prob + skip_bits;
 #if CONFIG_VP9_HIGHBITDEPTH
           switch (xd->bd) {
             case VPX_BITS_8:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
               break;
             case VPX_BITS_10:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 16, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, r);
               break;
             case VPX_BITS_12:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 18, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, r);
               break;
             default:
               assert(0);
               return -1;
           }
 #else
-          val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+          val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
 #endif
           break;
+        }
       }
     }
     v = (val * dqv) >> dq_shift;

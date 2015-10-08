@@ -1356,9 +1356,6 @@ static void encode_b(VP10_COMP *cpi, const TileInfo *const tile,
 
   if (output_enabled) {
     update_stats(&cpi->common, td);
-
-    (*tp)->token = EOSB_TOKEN;
-    (*tp)++;
   }
 }
 
