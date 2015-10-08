@@ -12,6 +12,7 @@
 #define VP9_ENCODER_DENOISER_H_
 
 #include "vp9/encoder/vp9_block.h"
+#include "vp9/encoder/vp9_skin_detection.h"
 #include "vpx_scale/yv12config.h"
 
 #ifdef __cplusplus
