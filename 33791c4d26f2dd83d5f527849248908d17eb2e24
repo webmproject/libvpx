@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "25d72d80_0ae8fbda",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-08T20:07:50Z",
+      "side": 1,
+      "message": "no the intention here is x; for a set of tx blocks in a partition P of size NxM where e.g N\u003dM\u003d4:\n\nABCD\nEFGH\nIJKL\nMNOP\n\nand the additional requirement that the reconstruction is done in scan order, we can assure that these always have right:\n\nABC, EFG, IJK, MNO\n\nThis line tests ABC, and the line below (155) tests EFG/IJK/MNO.\n\nThe rest of the code deals with detecting D.",
+      "parentUuid": "b0435d80_08f18855",
+      "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "504861a0_2739150e",
         "filename": "vp10/common/reconintra.c",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-08T19:26:44Z",
       "side": 1,
       "message": "ditto",
+      "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e585158b_a0a49ae4",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-08T20:07:50Z",
+      "side": 1,
+      "message": "See above comment.",
+      "parentUuid": "504861a0_2739150e",
       "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "25d72d80_6af537af",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-08T20:07:50Z",
+      "side": 1,
+      "message": "I think you\u0027re right about hl (thanks for noticing!), I\u0027m not sure why you\u0027d want the 2 * step or \u003c\u003d in there, can you explain?",
+      "parentUuid": "704d65ae_06efbbe0",
+      "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d00a915c_2ea8e2cb",
         "filename": "vp10/common/reconintra.c",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-08T19:26:44Z",
       "side": 1,
       "message": "This does not make sense to me.",
+      "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "057f894d_21b96e07",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-08T20:07:50Z",
+      "side": 1,
+      "message": "Imagine the same situation as above, reconstructed in scan order:\n\nABCD\nEFGH\nIJKL\nMNOP\n\nAbove code takes care of all kind of edge handling. x\u003d0, so our block is either A, E, I or M. What we\u0027re saying here is that if the block is A, E or I, bottomleft is always available, because partitions themselves are decomposed in quadtree order. That is, for the following partition sets:\n\nAB\nCD\n\nor\n\nEF\n\nif we are B or D or F, A/C/E was always reconstructed before us, and has the same height as us. Therefore, since we\u0027re not the bottom block, the bottomleft of the current block is always available in A/C/E reconstruction data, so we return 1.",
+      "parentUuid": "d00a915c_2ea8e2cb",
       "revId": "33791c4d26f2dd83d5f527849248908d17eb2e24",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
