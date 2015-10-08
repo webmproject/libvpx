@@ -22,6 +22,30 @@
       "revId": "66bf68697591047c46543ecdb72da61e1d3dd62a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e55355fb_5089ec61",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-08T23:15:59Z",
+      "side": 0,
+      "message": "\"p \u003d 0 ? p : p - 1\" is logically \"p \u003d (0 ? p : p - 1)\" which reduces to \"p \u003d p - 1\", and removing the dead store just becomes \"p - 1\".\n\nWe never call this function with p \u003d 0. for New p we guard it with    \n   if (newp \u003c 1 || newp \u003e 255)\n        continue;\n\nFor oldp we start with fixed tables and can only evolve to newp. Despite being in common, this is only used by the encoder and can\u0027t change the bitstream behavior.",
+      "parentUuid": "45426131_ee267ff0",
+      "range": {
+        "startLine": 746,
+        "startChar": 50,
+        "endLine": 746,
+        "endChar": 52
+      },
+      "revId": "66bf68697591047c46543ecdb72da61e1d3dd62a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
