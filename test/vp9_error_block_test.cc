@@ -136,7 +136,23 @@ TEST_P(ErrorBlockTest, ExtremeValues) {
 
 using std::tr1::make_tuple;
 
-#if HAVE_SSE2
+#if CONFIG_USE_X86INC && HAVE_SSE2
+int64_t wrap_vp9_highbd_block_error_8bit_sse2(const tran_low_t *coeff,
+                                              const tran_low_t *dqcoeff,
+                                              intptr_t block_size,
+                                              int64_t *ssz, int bps) {
+  assert(bps == 8);
+  return vp9_highbd_block_error_8bit_sse2(coeff, dqcoeff, block_size, ssz);
+}
+
+int64_t wrap_vp9_highbd_block_error_8bit_c(const tran_low_t *coeff,
+                                           const tran_low_t *dqcoeff,
+                                           intptr_t block_size,
+                                           int64_t *ssz, int bps) {
+  assert(bps == 8);
+  return vp9_highbd_block_error_8bit_c(coeff, dqcoeff, block_size, ssz);
+}
+
 INSTANTIATE_TEST_CASE_P(
     SSE2, ErrorBlockTest,
     ::testing::Values(
@@ -145,7 +161,9 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_highbd_block_error_sse2,
                    &vp9_highbd_block_error_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_block_error_sse2,
-                   &vp9_highbd_block_error_c, VPX_BITS_8)));
+                   &vp9_highbd_block_error_c, VPX_BITS_8),
+        make_tuple(&wrap_vp9_highbd_block_error_8bit_sse2,
+                   &wrap_vp9_highbd_block_error_8bit_c, VPX_BITS_8)));
 #endif  // HAVE_SSE2
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace
