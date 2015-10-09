@@ -165,6 +165,70 @@ static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
   }
 }
 
+#if CONFIG_VAR_TX
+static void update_tx_counts(VP10_COMMON *cm, MACROBLOCKD *xd,
+                             MB_MODE_INFO *mbmi, BLOCK_SIZE plane_bsize,
+                             TX_SIZE tx_size, int blk_row, int blk_col,
+                             TX_SIZE max_tx_size, int ctx,
+                             struct tx_counts *tx_counts) {
+  const struct macroblockd_plane *const pd = &xd->plane[0];
+  const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
+               (blk_col >> (1 - pd->subsampling_x));
+  TX_SIZE plane_tx_size = mbmi->inter_tx_size[tx_idx];
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+    return;
+
+  if (tx_size == plane_tx_size) {
+    ++get_tx_counts(max_tx_size, ctx, tx_counts)[tx_size];
+  } else {
+    int bsl = b_width_log2_lookup[bsize];
+    int i;
+
+    assert(bsl > 0);
+    --bsl;
+
+    for (i = 0; i < 4; ++i) {
+      const int offsetr = blk_row + ((i >> 1) << bsl);
+      const int offsetc = blk_col + ((i & 0x01) << bsl);
+
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
+        continue;
+      update_tx_counts(cm, xd, mbmi, plane_bsize,
+                       tx_size - 1, offsetr, offsetc,
+                       max_tx_size, ctx, tx_counts);
+    }
+  }
+}
+
+static INLINE void inter_block_tx_count_update(VP10_COMMON *cm,
+                                               MACROBLOCKD *xd,
+                                               MB_MODE_INFO *mbmi,
+                                               BLOCK_SIZE plane_bsize,
+                                               int ctx,
+                                               struct tx_counts *tx_counts) {
+  const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
+  const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
+  TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+  BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+  int bh = num_4x4_blocks_wide_lookup[txb_size];
+  int idx, idy;
+
+  for (idy = 0; idy < mi_height; idy += bh)
+    for (idx = 0; idx < mi_width; idx += bh)
+      update_tx_counts(cm, xd, mbmi, plane_bsize, max_tx_size, idy, idx,
+                       max_tx_size, ctx, tx_counts);
+}
+#endif
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

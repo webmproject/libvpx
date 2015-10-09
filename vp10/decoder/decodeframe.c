@@ -390,11 +390,11 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, vpx_reader *r,
                                   int block, int blk_row, int blk_col,
                                   TX_SIZE tx_size, int *eob_total) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
   int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
                (blk_col >> (1 - pd->subsampling_x));
   TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], mbmi->sb_type,
-                          pd->subsampling_x, pd->subsampling_y) :
+      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], bsize, 0, 0) :
       mbmi->inter_tx_size[tx_idx];
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -419,7 +419,6 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, vpx_reader *r,
         pd->dst.stride, eob, block);
     *eob_total += eob;
   } else {
-    const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_width_log2_lookup[bsize];
     int i;
 

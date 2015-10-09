@@ -622,10 +622,11 @@ void tokenize_tx(ThreadData *td, TOKENEXTRA **t,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int blk_idx = ((blk_row >> 1) << 3) + (blk_col >> 1);
+  const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+  int blk_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
+                (blk_col >> (1 - pd->subsampling_x));
   TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->inter_tx_size[blk_idx], mbmi->sb_type,
-                          pd->subsampling_x, pd->subsampling_y) :
+      get_uv_tx_size_impl(mbmi->inter_tx_size[blk_idx], bsize, 0, 0) :
       mbmi->inter_tx_size[blk_idx];
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
@@ -647,7 +648,6 @@ void tokenize_tx(ThreadData *td, TOKENEXTRA **t,
       set_entropy_context_b(plane, block, blk_row, blk_col,
                             plane_bsize, tx_size, arg);
   } else {
-    const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_width_log2_lookup[bsize];
     int i;
 
