@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eaba42ed_b8cb59d6",
+        "filename": "vpx_dsp/x86/vpx_convolve_copy_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-09T17:43:59Z",
+      "side": 1,
+      "message": "alignment is off on the pavg replacement from here down in the file",
+      "revId": "4119d872814a6a5953063bd943eb7f4e1387ec27",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
