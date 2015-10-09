@@ -16,6 +16,24 @@
       "revId": "4119d872814a6a5953063bd943eb7f4e1387ec27",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8538d9b1_360ffe71",
+        "filename": "vpx_dsp/x86/vpx_convolve_copy_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-09T18:50:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eaba42ed_b8cb59d6",
+      "revId": "4119d872814a6a5953063bd943eb7f4e1387ec27",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
