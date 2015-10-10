@@ -16,6 +16,23 @@
       "revId": "60d7cbe7f023b884c7a13968646a2026d6fe9834",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "054dc959_8508723f",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-10T00:32:57Z",
+      "side": 1,
+      "message": "when should we drop the deprecated controls?",
+      "revId": "60d7cbe7f023b884c7a13968646a2026d6fe9834",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
