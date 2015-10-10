@@ -1572,7 +1572,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 // present in the tile buffer group or NULL otherwise.
 static int tile_worker_hook(TileWorkerData *const tile_data,
                             VP9Decoder *const pbi) {
-  TileInfo *const tile = &tile_data->xd.tile;
+  TileInfo *volatile tile = &tile_data->xd.tile;
   const int final_col = (1 << pbi->common.log2_tile_cols) - 1;
   const uint8_t *volatile bit_reader_end = NULL;
   volatile int n = tile_data->buf_start;
