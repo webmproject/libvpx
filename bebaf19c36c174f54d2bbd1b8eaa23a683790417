@@ -22,6 +22,23 @@
       "revId": "bebaf19c36c174f54d2bbd1b8eaa23a683790417",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8538d9b1_2201741c",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 3665,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-12T18:34:29Z",
+      "side": 1,
+      "message": "vp10_adapt_intra_mode_probs(cm) is called in line 3659 and here in vp10_adapt_inter_mode_probs(cm). So it is called twice in total for inter frames?",
+      "revId": "bebaf19c36c174f54d2bbd1b8eaa23a683790417",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
