@@ -146,7 +146,7 @@ static int find_best_16x16_intra(VP10_COMP *cpi, PREDICTION_MODE *pbest_mode) {
     unsigned int err;
 
     xd->mi[0]->mbmi.mode = mode;
-    vp10_predict_intra_block(xd, 2, TX_16X16, mode,
+    vp10_predict_intra_block(xd, 2, 2, TX_16X16, mode,
                             x->plane[0].src.buf, x->plane[0].src.stride,
                             xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                             0, 0, 0);
