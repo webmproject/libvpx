@@ -2423,7 +2423,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
   }
 
   if (bsize == BLOCK_64X64) {
-    assert(tp_orig < *tp);
+    assert(tp_orig < *tp || (tp_orig == *tp && xd->mi[0]->mbmi.skip));
     assert(best_rdc.rate < INT_MAX);
     assert(best_rdc.dist < INT64_MAX);
   } else {

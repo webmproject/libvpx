@@ -572,8 +572,8 @@ static INLINE int get_token_alloc(int mb_rows, int mb_cols) {
   // 32x32 transform crossing a boundary at a multiple of 16.
   // mb_rows, cols are in units of 16 pixels. We assume 3 planes all at full
   // resolution. We assume up to 1 token per pixel, and then allow
-  // a head room of 4.
-  return mb_rows * mb_cols * (16 * 16 * 3 + 4);
+  // a head room of 1 EOSB token per 8x8 block per plane.
+  return mb_rows * mb_cols * (16 * 16 + 4) * 3;
 }
 
 // Get the allocated token size for a tile. It does the same calculation as in
