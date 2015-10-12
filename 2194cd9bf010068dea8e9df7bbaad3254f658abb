@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfb7aeb4_a7662a0e",
+        "filename": "vp10/encoder/tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-12T16:47:35Z",
+      "side": 1,
+      "message": "I see this construction all over the patch and it looks funny. Why are you translating the the tx size to the 4:4:4 uv tx size?",
+      "range": {
+        "startLine": 628,
+        "startChar": 63,
+        "endLine": 628,
+        "endChar": 67
+      },
+      "revId": "2194cd9bf010068dea8e9df7bbaad3254f658abb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
