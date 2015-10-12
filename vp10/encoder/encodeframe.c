@@ -2430,7 +2430,6 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
   (void) best_rd;
   *rd_cost = best_rdc;
 
-
   if (best_rdc.rate < INT_MAX && best_rdc.dist < INT64_MAX &&
       pc_tree->index != 3) {
     int output_enabled = (bsize == BLOCK_64X64);
@@ -3057,13 +3056,19 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
     ++td->counts->tx.tx_totals[mbmi->tx_size];
     ++td->counts->tx.tx_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
 #if CONFIG_EXT_TX
-    if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
-        bsize >= BLOCK_8X8 && !mbmi->skip &&
+    if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter_block(mbmi)) > 1 &&
+        cm->base_qindex > 0 && !mbmi->skip &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      if (is_inter_block(mbmi))
-        ++td->counts->inter_tx_type[mbmi->tx_size][mbmi->tx_type];
-      else
-        ++td->counts->intra_tx_type[mbmi->tx_size][mbmi->mode][mbmi->tx_type];
+      int eset = get_ext_tx_set(mbmi->tx_size, bsize,
+                                is_inter_block(mbmi));
+      if (eset > 0) {
+        if (is_inter_block(mbmi)) {
+          ++td->counts->inter_ext_tx[eset][mbmi->tx_size][mbmi->tx_type];
+        } else {
+          ++td->counts->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode]
+              [mbmi->tx_type];
+        }
+      }
     }
 #endif  // CONFIG_EXT_TX
   }

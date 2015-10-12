@@ -2224,17 +2224,26 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 #if CONFIG_EXT_TX
 static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   int i, j, k;
-  if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
-    for (i = TX_4X4; i <= TX_16X16; ++i)
-      for (j = 0; j < TX_TYPES - 1; ++j)
-        vp10_diff_update_prob(r, &fc->inter_tx_type_prob[i][j]);
+  int s;
+  for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
+    if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
+      for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+        if (!use_inter_ext_tx_for_tx[s][i]) continue;
+        for (j = 0; j < num_ext_tx_set_inter[s] - 1; ++j)
+          vp10_diff_update_prob(r, &fc->inter_ext_tx_prob[s][i][j]);
+      }
+    }
   }
 
-  if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
-    for (i = TX_4X4; i <= TX_16X16; ++i)
-      for (j = 0; j < INTRA_MODES; ++j)
-        for (k = 0; k < TX_TYPES - 1; ++k)
-          vp10_diff_update_prob(r, &fc->intra_tx_type_prob[i][j][k]);
+  for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
+    if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
+      for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+        if (!use_intra_ext_tx_for_tx[s][i]) continue;
+        for (j = 0; j < INTRA_MODES; ++j)
+          for (k = 0; k < num_ext_tx_set_intra[s] - 1; ++k)
+            vp10_diff_update_prob(r, &fc->intra_ext_tx_prob[s][i][j][k]);
+      }
+    }
   }
 }
 #endif  // CONFIG_EXT_TX
@@ -2365,11 +2374,11 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
   assert(!memcmp(&cm->counts.mv, &zero_counts.mv, sizeof(cm->counts.mv)));
 
 #if CONFIG_EXT_TX
-  assert(!memcmp(cm->counts.inter_tx_type,
-                 zero_counts.inter_tx_type, sizeof(cm->counts.inter_tx_type)));
-  assert(!memcmp(cm->counts.intra_tx_type,
-                 zero_counts.intra_tx_type, sizeof(cm->counts.intra_tx_type)));
-#endif
+  assert(!memcmp(cm->counts.inter_ext_tx, zero_counts.inter_ext_tx,
+                 sizeof(cm->counts.inter_ext_tx)));
+  assert(!memcmp(cm->counts.intra_ext_tx, zero_counts.intra_ext_tx,
+                 sizeof(cm->counts.intra_ext_tx)));
+#endif  // CONFIG_EXT_TX
 }
 #endif  // NDEBUG
 

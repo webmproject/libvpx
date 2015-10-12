@@ -13,6 +13,7 @@
 #include "./vp10_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vp10/common/blockd.h"
+#include "vp10/common/enums.h"
 #include "vp10/common/idct.h"
 #include "vpx_dsp/inv_txfm.h"
 #include "vpx_ports/mem.h"
@@ -864,6 +865,11 @@ void vp10_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
     case DCT_DCT:
       vp10_idct32x32_add(input, dest, stride, eob);
       break;
+#if CONFIG_EXT_TX
+    case IDTX:
+      inv_idtx_add_c(input, dest, stride, 32);
+      break;
+#endif  // CONFIG_EXT_TX
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
@@ -1295,6 +1301,11 @@ void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
     case DCT_DCT:
       vp10_highbd_idct32x32_add(input, dest, stride, eob, bd);
       break;
+#if CONFIG_EXT_TX
+    case IDTX:
+      highbd_inv_idtx_add_c(input, dest, stride, 32, bd);
+      break;
+#endif  // CONFIG_EXT_TX
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
