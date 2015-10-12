@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3fa3be81_a3bffa35",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-12T18:28:24Z",
+      "side": 1,
+      "message": "This probably should be renamed to better describe what it does. \n\nintra_mode can be understood as modes like DC/H/V...",
+      "range": {
+        "startLine": 386,
+        "startChar": 5,
+        "endLine": 386,
+        "endChar": 32
+      },
+      "revId": "bebaf19c36c174f54d2bbd1b8eaa23a683790417",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
