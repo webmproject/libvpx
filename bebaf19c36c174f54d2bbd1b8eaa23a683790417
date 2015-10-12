@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5fe952ce_3cf671c0",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-12T18:55:11Z",
+      "side": 1,
+      "message": "Yes, I\u0027ll rename to inter/intra frame probs.",
+      "parentUuid": "3fa3be81_a3bffa35",
+      "range": {
+        "startLine": 386,
+        "startChar": 5,
+        "endLine": 386,
+        "endChar": 32
+      },
+      "revId": "bebaf19c36c174f54d2bbd1b8eaa23a683790417",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8538d9b1_2201741c",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 9
@@ -36,6 +60,24 @@
       "writtenOn": "2015-10-12T18:34:29Z",
       "side": 1,
       "message": "vp10_adapt_intra_mode_probs(cm) is called in line 3659 and here in vp10_adapt_inter_mode_probs(cm). So it is called twice in total for inter frames?",
+      "revId": "bebaf19c36c174f54d2bbd1b8eaa23a683790417",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ffb766e1_f9d4171f",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 3665,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-12T18:55:11Z",
+      "side": 1,
+      "message": "One is under #if CONFIG_MISC_FIXES, and one is under if !CONFIG_MISC_FIXES. I agree it\u0027s a bit confusing, I think I tried to make the code look like how it worked previously and that\u0027s not very useful anymore.",
+      "parentUuid": "8538d9b1_2201741c",
       "revId": "bebaf19c36c174f54d2bbd1b8eaa23a683790417",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
