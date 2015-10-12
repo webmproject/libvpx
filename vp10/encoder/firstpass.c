@@ -614,6 +614,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
                      cm->mi_rows, cm->mi_cols);
 
       // Do intra 16x16 prediction.
+      xd->mi[0]->mbmi.segment_id = 0;
       xd->mi[0]->mbmi.mode = DC_PRED;
       xd->mi[0]->mbmi.tx_size = use_dc_pred ?
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;

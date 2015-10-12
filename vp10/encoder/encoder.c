@@ -2663,7 +2663,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
 static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->td.mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
-  if (xd->lossless) {
+  if (is_lossless_requested(&cpi->oxcf)) {
       lf->filter_level = 0;
   } else {
     struct vpx_usec_timer timer;
@@ -4119,7 +4119,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (oxcf->pass == 1) {
-    cpi->td.mb.e_mbd.lossless = is_lossless_requested(oxcf);
+    cpi->td.mb.e_mbd.lossless[0] = is_lossless_requested(oxcf);
     vp10_first_pass(cpi, source);
   } else if (oxcf->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);

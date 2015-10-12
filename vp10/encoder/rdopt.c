@@ -533,7 +533,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   rd = VPXMIN(rd1, rd2);
   if (plane == 0)
     x->zcoeff_blk[tx_size][block] = !x->plane[plane].eobs[block] ||
-                                    (rd1 > rd2 && !xd->lossless);
+        (rd1 > rd2 && !xd->lossless[mbmi->segment_id]);
 
   args->this_rate += rate;
   args->this_dist += dist;
@@ -599,6 +599,21 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
 
   mbmi->tx_size = VPXMIN(max_tx_size, largest_tx_size);
+
+  txfm_rd_in_plane(x, rate, distortion, skip,
+                   sse, ref_best_rd, 0, bs,
+                   mbmi->tx_size, cpi->sf.use_fast_coef_costing);
+}
+
+static void choose_smallest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
+                                    int *rate, int64_t *distortion,
+                                    int *skip, int64_t *sse,
+                                    int64_t ref_best_rd,
+                                    BLOCK_SIZE bs) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+
+  mbmi->tx_size = TX_4X4;
 
   txfm_rd_in_plane(x, rate, distortion, skip,
                    sse, ref_best_rd, 0, bs,
@@ -674,7 +689,8 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
       rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
     }
 
-    if (is_inter_block(mbmi) && !xd->lossless && !s[n] && sse[n] != INT64_MAX) {
+    if (is_inter_block(mbmi) && !xd->lossless[mbmi->segment_id] &&
+        !s[n] && sse[n] != INT64_MAX) {
       rd[n][0] = VPXMIN(rd[n][0], RDCOST(x->rdmult, x->rddiv, s1, sse[n]));
       rd[n][1] = VPXMIN(rd[n][1], RDCOST(x->rdmult, x->rddiv, s1, sse[n]));
     }
@@ -709,7 +725,11 @@ static void super_block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
 
   assert(bs == xd->mi[0]->mbmi.sb_type);
 
-  if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
+  if (CONFIG_MISC_FIXES && xd->lossless[xd->mi[0]->mbmi.segment_id]) {
+    choose_smallest_tx_size(cpi, x, rate, distortion, skip, ret_sse,
+                            ref_best_rd, bs);
+  } else if (cpi->sf.tx_size_search_method == USE_LARGESTALL ||
+             xd->lossless[xd->mi[0]->mbmi.segment_id]) {
     choose_largest_tx_size(cpi, x, rate, distortion, skip, ret_sse, ref_best_rd,
                            bs);
   } else {
@@ -963,7 +983,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                   col + idx, row + idy, 0);
           vpx_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride,
                                     dst, dst_stride, xd->bd);
-          if (xd->lossless) {
+          if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
             const scan_order *so = get_scan(TX_4X4, tx_type);
             vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1);
@@ -1062,7 +1082,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                 dst, dst_stride, col + idx, row + idy, 0);
         vpx_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
 
-        if (xd->lossless) {
+        if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block);
           const scan_order *so = get_scan(TX_4X4, tx_type);
           vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1);
@@ -1497,12 +1517,13 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    fwd_txm4x4 = xd->lossless ? vp10_highbd_fwht4x4 : vpx_highbd_fdct4x4;
+    fwd_txm4x4 = xd->lossless[mi->mbmi.segment_id] ? vp10_highbd_fwht4x4
+                                                   : vpx_highbd_fdct4x4;
   } else {
-    fwd_txm4x4 = xd->lossless ? vp10_fwht4x4 : vpx_fdct4x4;
+    fwd_txm4x4 = xd->lossless[mi->mbmi.segment_id] ? vp10_fwht4x4 : vpx_fdct4x4;
   }
 #else
-  fwd_txm4x4 = xd->lossless ? vp10_fwht4x4 : vpx_fdct4x4;
+  fwd_txm4x4 = xd->lossless[mi->mbmi.segment_id] ? vp10_fwht4x4 : vpx_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -3460,7 +3481,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         // Cost the skip mb case
         rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
-      } else if (ref_frame != INTRA_FRAME && !xd->lossless) {
+      } else if (ref_frame != INTRA_FRAME && !xd->lossless[mbmi->segment_id]) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
@@ -4215,7 +4236,7 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
       // Skip is never coded at the segment level for sub8x8 blocks and instead
       // always coded in the bitstream at the mode info level.
 
-      if (ref_frame != INTRA_FRAME && !xd->lossless) {
+      if (ref_frame != INTRA_FRAME && !xd->lossless[mbmi->segment_id]) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.

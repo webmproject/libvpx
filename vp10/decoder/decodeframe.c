@@ -213,6 +213,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
                                           int eob, int block) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block);
+  const int seg_id = xd->mi[0]->mbmi.segment_id;
   if (eob > 0) {
     tran_low_t *const dqcoeff = pd->dqcoeff;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -220,7 +221,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, xd->bd,
-                                       tx_type, xd->lossless);
+                                       tx_type, xd->lossless[seg_id]);
           break;
         case TX_8X8:
           vp10_highbd_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, xd->bd,
@@ -243,7 +244,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
-                                xd->lossless);
+                                xd->lossless[seg_id]);
           break;
         case TX_8X8:
           vp10_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, tx_type);
@@ -281,6 +282,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
                                           uint8_t *dst, int stride,
                                           int eob) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int seg_id = xd->mi[0]->mbmi.segment_id;
   if (eob > 0) {
     tran_low_t *const dqcoeff = pd->dqcoeff;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -288,7 +290,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, xd->bd,
-                                       tx_type, xd->lossless);
+                                       tx_type, xd->lossless[seg_id]);
           break;
         case TX_8X8:
           vp10_highbd_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, xd->bd,
@@ -311,7 +313,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
-                                xd->lossless);
+                                xd->lossless[seg_id]);
           break;
         case TX_8X8:
           vp10_inv_txfm_add_8x8(dqcoeff, dst, stride, eob, tx_type);
@@ -1144,15 +1146,26 @@ static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
 
 static void setup_quantization(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                struct vpx_read_bit_buffer *rb) {
+  int i;
+
   cm->base_qindex = vpx_rb_read_literal(rb, QINDEX_BITS);
   cm->y_dc_delta_q = read_delta_q(rb);
   cm->uv_dc_delta_q = read_delta_q(rb);
   cm->uv_ac_delta_q = read_delta_q(rb);
   cm->dequant_bit_depth = cm->bit_depth;
-  xd->lossless = cm->base_qindex == 0 &&
-                 cm->y_dc_delta_q == 0 &&
-                 cm->uv_dc_delta_q == 0 &&
-                 cm->uv_ac_delta_q == 0;
+  for (i = 0; i < (cm->seg.enabled ? MAX_SEGMENTS : 1); ++i) {
+#if CONFIG_MISC_FIXES
+    const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
+#endif
+    xd->lossless[i] = cm->y_dc_delta_q == 0 &&
+#if CONFIG_MISC_FIXES
+                      qindex == 0 &&
+#else
+                      cm->base_qindex == 0 &&
+#endif
+                      cm->uv_dc_delta_q == 0 &&
+                      cm->uv_ac_delta_q == 0;
+  }
 
 #if CONFIG_VP9_HIGHBITDEPTH
   xd->bd = (int)cm->bit_depth;
@@ -2098,7 +2111,8 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   setup_segmentation(cm, rb);
   setup_segmentation_dequant(cm);
 #if CONFIG_MISC_FIXES
-  cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(rb);
+  cm->tx_mode = (!cm->seg.enabled && xd->lossless[0]) ? ONLY_4X4
+                                                      : read_tx_mode(rb);
   cm->reference_mode = read_frame_reference_mode(cm, rb);
 #endif
 
@@ -2128,7 +2142,7 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
                        "Failed to allocate bool decoder 0");
 
 #if !CONFIG_MISC_FIXES
-  cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
+  cm->tx_mode = xd->lossless[0] ? ONLY_4X4 : read_tx_mode(&r);
 #endif
   if (cm->tx_mode == TX_MODE_SELECT)
     read_tx_mode_probs(&fc->tx_probs, &r);
