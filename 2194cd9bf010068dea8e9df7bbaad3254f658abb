@@ -22,6 +22,30 @@
       "revId": "2194cd9bf010068dea8e9df7bbaad3254f658abb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfb462b2_a8a91b51",
+        "filename": "vp10/encoder/tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-10-12T16:54:26Z",
+      "side": 1,
+      "message": "The chroma component tx size parsing is a bit tricky in this context. I am exploring various possibilities to see which one makes best sense.\n\nI will clean this up when things get stable.",
+      "parentUuid": "bfb7aeb4_a7662a0e",
+      "range": {
+        "startLine": 628,
+        "startChar": 63,
+        "endLine": 628,
+        "endChar": 67
+      },
+      "revId": "2194cd9bf010068dea8e9df7bbaad3254f658abb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
