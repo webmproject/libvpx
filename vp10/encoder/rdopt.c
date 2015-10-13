@@ -1288,7 +1288,8 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
                             TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
                             ENTROPY_CONTEXT *ta, ENTROPY_CONTEXT *tl,
                             int *rate, int64_t *dist,
-                            int64_t *bsse, int *skip) {
+                            int64_t *bsse, int *skip,
+                            int64_t ref_best_rd, int *is_cost_valid) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
@@ -1306,7 +1307,12 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   int64_t sum_rd = INT64_MAX;
   int sum_rate = vp10_cost_bit(128, 1);
   int all_skip = 1;
-  TX_SIZE swap_tx_size = TX_SIZES;
+  int tmp_eob = 0;
+
+  if (ref_best_rd < 0) {
+    *is_cost_valid = 0;
+    return;
+  }
 
   switch (tx_size) {
     case TX_4X4:
@@ -1344,6 +1350,16 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
     return;
 
+  if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
+    mbmi->inter_tx_size[tx_idx] = tx_size;
+    tx_block_rd_b(x, tx_size, blk_row, blk_col, plane, block,
+                  plane_bsize, coeff_ctx, rate, dist, bsse, skip);
+    if (tx_size > TX_4X4)
+      *rate += vp10_cost_bit(128, 0);
+    this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
+    tmp_eob = p->eobs[block];
+  }
+
   if (tx_size > TX_4X4) {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_height_log2_lookup[bsize];
@@ -1353,6 +1369,8 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     int64_t this_dist;
     int64_t this_bsse;
     int this_skip;
+    int this_cost_valid = 1;
+    int64_t tmp_rd = 0;
 
     --bsl;
     for (i = 0; i < 4; ++i) {
@@ -1361,36 +1379,30 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       select_tx_block(cpi, x, blk_row + offsetr, blk_col + offsetc,
                       plane, block + i * sub_step, tx_size - 1,
                       plane_bsize, ta, tl, &this_rate, &this_dist,
-                      &this_bsse, &this_skip);
+                      &this_bsse, &this_skip,
+                      ref_best_rd - tmp_rd, &this_cost_valid);
       sum_rate += this_rate;
       sum_dist += this_dist;
       sum_bsse += this_bsse;
       all_skip &= this_skip;
+      tmp_rd += RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
+      if (this_rd < tmp_rd)
+        break;
     }
-    sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-  }
-
-  if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
-    swap_tx_size = mbmi->inter_tx_size[tx_idx];
-    mbmi->inter_tx_size[tx_idx] = tx_size;
-
-    tx_block_rd_b(x, tx_size, blk_row, blk_col, plane, block,
-                  plane_bsize, coeff_ctx, rate, dist, bsse, skip);
-    if (tx_size > TX_4X4)
-      *rate += vp10_cost_bit(128, 0);
-    this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
+    if (this_cost_valid)
+      sum_rd = tmp_rd;
   }
 
   if (this_rd < sum_rd) {
     for (i = 0; i < (1 << tx_size); ++i)
-      pta[i] = ptl[i] = !(p->eobs[block] == 0);
+      pta[i] = ptl[i] = !(tmp_eob == 0);
+    mbmi->inter_tx_size[tx_idx] = tx_size;
     mbmi->tx_size = tx_size;
   } else {
     *rate = sum_rate;
     *dist = sum_dist;
     *bsse = sum_bsse;
     *skip = all_skip;
-    mbmi->inter_tx_size[tx_idx] = swap_tx_size;
   }
 }
 
@@ -1400,7 +1412,7 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
                             int64_t ref_best_rd) {
   MACROBLOCKD *const xd = &x->e_mbd;
   int is_cost_valid = 1;
-  int64_t this_rd;
+  int64_t this_rd = 0;
 
   if (ref_best_rd < 0)
     is_cost_valid = 0;
@@ -1431,12 +1443,14 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
       for (idx = 0; idx < mi_width; idx += bh) {
         select_tx_block(cpi, x, idy, idx, 0, block,
                         max_txsize_lookup[plane_bsize], plane_bsize,
-                        ctxa, ctxl, &pnrate, &pndist, &pnsse, &pnskip);
+                        ctxa, ctxl, &pnrate, &pndist, &pnsse, &pnskip,
+                        ref_best_rd - this_rd, &is_cost_valid);
         *rate += pnrate;
         *distortion += pndist;
         *sse += pnsse;
         *skippable &= pnskip;
-
+        this_rd += VPXMIN(RDCOST(x->rdmult, x->rddiv, pnrate, pndist),
+                          RDCOST(x->rdmult, x->rddiv, 0, pnsse));
         block += step;
       }
     }
