@@ -2003,16 +2003,59 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi,
   int thresh_rate = rc->avg_frame_bandwidth * 10;
   if (cm->base_qindex < thresh_qp &&
       frame_size > thresh_rate) {
+    double rate_correction_factor =
+        cpi->rc.rate_correction_factors[INTER_NORMAL];
+    const int target_size = cpi->rc.avg_frame_bandwidth;
+    double new_correction_factor;
+    int target_bits_per_mb;
+    double q2;
+    int enumerator;
     // Force a re-encode, and for now use max-QP.
     *q = cpi->rc.worst_quality;
-    // Adjust avg_frame_qindex and buffer_level, as these parameters will affect
-    // QP selection for subsequent frames. If they have settled down to a very
-    // different (low QP) state, then not re-adjusting them may cause next
-    // frame to select low QP and overshoot again.
-    // TODO(marpan): Check if rate correction factor should also be adjusted.
+    // Adjust avg_frame_qindex, buffer_level, and rate correction factors, as
+    // these parameters will affect QP selection for subsequent frames. If they
+    // have settled down to a very different (low QP) state, then not adjusting
+    // them may cause next frame to select low QP and overshoot again.
     cpi->rc.avg_frame_qindex[INTER_FRAME] = *q;
     rc->buffer_level = rc->optimal_buffer_level;
     rc->bits_off_target = rc->optimal_buffer_level;
+    // Reset rate under/over-shoot flags.
+    cpi->rc.rc_1_frame = 0;
+    cpi->rc.rc_2_frame = 0;
+    // Adjust rate correction factor.
+    target_bits_per_mb = ((uint64_t)target_size << BPER_MB_NORMBITS) / cm->MBs;
+    // Rate correction factor based on target_bits_per_mb and qp (==max_QP).
+    // This comes from the inverse computation of vp9_rc_bits_per_mb().
+    q2 = vp9_convert_qindex_to_q(*q, cm->bit_depth);
+    enumerator = 1800000;  // Factor for inter frame.
+    enumerator += (int)(enumerator * q2) >> 12;
+    new_correction_factor = (double)target_bits_per_mb * q2 / enumerator;
+    if (new_correction_factor > rate_correction_factor) {
+      rate_correction_factor =
+          VPXMIN(2.0 * rate_correction_factor, new_correction_factor);
+      if (rate_correction_factor > MAX_BPB_FACTOR)
+        rate_correction_factor = MAX_BPB_FACTOR;
+      cpi->rc.rate_correction_factors[INTER_NORMAL] = rate_correction_factor;
+    }
+    // For temporal layers, reset the rate control parametes across all
+    // temporal layers.
+    if (cpi->use_svc) {
+      int i = 0;
+      SVC *svc = &cpi->svc;
+      for (i = 0; i < svc->number_temporal_layers; ++i) {
+        const int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, i,
+                                           svc->number_temporal_layers);
+        LAYER_CONTEXT *lc = &svc->layer_context[layer];
+        RATE_CONTROL *lrc = &lc->rc;
+        lrc->avg_frame_qindex[INTER_FRAME] = *q;
+        lrc->buffer_level = rc->optimal_buffer_level;
+        lrc->bits_off_target = rc->optimal_buffer_level;
+        lrc->rc_1_frame = 0;
+        lrc->rc_2_frame = 0;
+        lrc->rate_correction_factors[INTER_NORMAL] =
+            rate_correction_factor;
+      }
+    }
     return 1;
   } else {
     return 0;
