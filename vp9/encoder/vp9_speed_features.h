@@ -267,6 +267,7 @@ typedef struct SPEED_FEATURES {
 
   // Disable testing non square partitions. (eg 16x32)
   int use_square_partition_only;
+  BLOCK_SIZE use_square_only_threshold;
 
   // Sets min and max partition sizes for this 64x64 region based on the
   // same 64x64 in last encoded frame, and the left and above neighbor.
