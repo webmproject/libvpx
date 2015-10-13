@@ -1286,7 +1286,6 @@ static void tx_block_rd_b(MACROBLOCK *x, TX_SIZE tx_size,
 static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
                             int blk_row, int blk_col, int plane, int block,
                             TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
-                            BLOCK_SIZE txb_bsize,
                             ENTROPY_CONTEXT *ta, ENTROPY_CONTEXT *tl,
                             int *rate, int64_t *dist,
                             int64_t *bsse, int *skip) {
@@ -1299,34 +1298,38 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
   int64_t this_rd = INT64_MAX;
-  ENTROPY_CONTEXT ctxa[16], ctxl[16];
   ENTROPY_CONTEXT *pta = ta + blk_col;
   ENTROPY_CONTEXT *ptl = tl + blk_row;
+  ENTROPY_CONTEXT stxa = 0, stxl = 0;
   int coeff_ctx, i;
-
-  memcpy(ctxa, ta, sizeof(ENTROPY_CONTEXT) * max_blocks_wide);
-  memcpy(ctxl, tl, sizeof(ENTROPY_CONTEXT) * max_blocks_high);
+  int64_t sum_dist = 0, sum_bsse = 0;
+  int64_t sum_rd = INT64_MAX;
+  int sum_rate = vp10_cost_bit(128, 1);
+  int all_skip = 1;
+  TX_SIZE swap_tx_size = TX_SIZES;
 
   switch (tx_size) {
     case TX_4X4:
+      stxa = pta[0];
+      stxl = ptl[0];
       break;
     case TX_8X8:
-      pta[0] = !!*(const uint16_t *)&pta[0];
-      ptl[0] = !!*(const uint16_t *)&ptl[0];
+      stxa = !!*(const uint16_t *)&pta[0];
+      stxl = !!*(const uint16_t *)&ptl[0];
       break;
     case TX_16X16:
-      pta[0] = !!*(const uint32_t *)&pta[0];
-      ptl[0] = !!*(const uint32_t *)&ptl[0];
+      stxa = !!*(const uint32_t *)&pta[0];
+      stxl = !!*(const uint32_t *)&ptl[0];
       break;
     case TX_32X32:
-      pta[0] = !!*(const uint64_t *)&pta[0];
-      ptl[0] = !!*(const uint64_t *)&ptl[0];
+      stxa = !!*(const uint64_t *)&pta[0];
+      stxl = !!*(const uint64_t *)&ptl[0];
       break;
     default:
       assert(0 && "Invalid transform size.");
       break;
   }
-  coeff_ctx = combine_entropy_contexts(pta[0], ptl[0]);
+  coeff_ctx = combine_entropy_contexts(stxa, stxl);
 
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
@@ -1341,38 +1344,23 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
     return;
 
-  mbmi->inter_tx_size[tx_idx] = tx_size;
-  mbmi->tx_size = tx_size;
-
-  if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
-    tx_block_rd_b(x, tx_size, blk_row, blk_col, plane, block,
-                  plane_bsize, coeff_ctx, rate, dist, bsse, skip);
-    if (tx_size > TX_4X4)
-      *rate += vp10_cost_bit(128, 0);
-    this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
-    for (i = 0; i < (1 << tx_size); ++i) {
-      pta[i] = !(p->eobs[block] == 0);
-      ptl[i] = !(p->eobs[block] == 0);
-    }
-  }
-
   if (tx_size > TX_4X4) {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bh = num_4x4_blocks_high_lookup[bsize];
+    int bsl = b_height_log2_lookup[bsize];
     int sub_step = 1 << (2 * (tx_size - 1));
     int i;
-    int this_rate, sum_rate = vp10_cost_bit(128, 1);
-    int64_t this_dist, sum_dist = 0;
-    int64_t this_bsse, sum_bsse = 0;
-    int this_skip, all_skip = 1;
-    int64_t sum_rd;
+    int this_rate;
+    int64_t this_dist;
+    int64_t this_bsse;
+    int this_skip;
+
+    --bsl;
     for (i = 0; i < 4; ++i) {
-      int offsetr = (i >> 1) * bh / 2;
-      int offsetc = (i & 0x01) * bh / 2;
+      int offsetr = (i >> 1) << bsl;
+      int offsetc = (i & 0x01) << bsl;
       select_tx_block(cpi, x, blk_row + offsetr, blk_col + offsetc,
                       plane, block + i * sub_step, tx_size - 1,
-                      plane_bsize, txsize_to_bsize[tx_size - 1],
-                      ctxa, ctxl, &this_rate, &this_dist,
+                      plane_bsize, ta, tl, &this_rate, &this_dist,
                       &this_bsse, &this_skip);
       sum_rate += this_rate;
       sum_dist += this_dist;
@@ -1380,24 +1368,29 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       all_skip &= this_skip;
     }
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
+  }
 
-    if (this_rd < sum_rd) {
-      int idx, idy;
-      for (idy = blk_row; idy < blk_row + bh; idy += 2)
-        for (idx = blk_col; idx < blk_col + bh; idx += 2)
-          mbmi->inter_tx_size[(idy / 2) * 8 + (idx / 2)] = tx_size;
-      mbmi->tx_size = tx_size;
-    } else {
-      *rate = sum_rate;
-      *dist = sum_dist;
-      *bsse = sum_bsse;
-      *skip = all_skip;
+  if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
+    swap_tx_size = mbmi->inter_tx_size[tx_idx];
+    mbmi->inter_tx_size[tx_idx] = tx_size;
 
-      memcpy(pta, ctxa + (blk_col >> pd->subsampling_x),
-          sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide_lookup[txb_bsize]);
-      memcpy(ptl, ctxl + (blk_row >> pd->subsampling_y),
-          sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high_lookup[txb_bsize]);
-    }
+    tx_block_rd_b(x, tx_size, blk_row, blk_col, plane, block,
+                  plane_bsize, coeff_ctx, rate, dist, bsse, skip);
+    if (tx_size > TX_4X4)
+      *rate += vp10_cost_bit(128, 0);
+    this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
+  }
+
+  if (this_rd < sum_rd) {
+    for (i = 0; i < (1 << tx_size); ++i)
+      pta[i] = ptl[i] = !(p->eobs[block] == 0);
+    mbmi->tx_size = tx_size;
+  } else {
+    *rate = sum_rate;
+    *dist = sum_dist;
+    *bsse = sum_bsse;
+    *skip = all_skip;
+    mbmi->inter_tx_size[tx_idx] = swap_tx_size;
   }
 }
 
@@ -1437,7 +1430,7 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         select_tx_block(cpi, x, idy, idx, 0, block,
-                        max_txsize_lookup[plane_bsize], plane_bsize, txb_size,
+                        max_txsize_lookup[plane_bsize], plane_bsize,
                         ctxa, ctxl, &pnrate, &pndist, &pnsse, &pnskip);
         *rate += pnrate;
         *distortion += pndist;

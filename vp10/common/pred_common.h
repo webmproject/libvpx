@@ -189,6 +189,7 @@ static void update_tx_counts(VP10_COMMON *cm, MACROBLOCKD *xd,
 
   if (tx_size == plane_tx_size) {
     ++get_tx_counts(max_tx_size, ctx, tx_counts)[tx_size];
+    mbmi->tx_size = tx_size;
   } else {
     int bsl = b_width_log2_lookup[bsize];
     int i;
