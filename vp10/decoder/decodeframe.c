@@ -847,6 +847,9 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ?
           0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
 
+      if (plane <= 1 && mbmi->palette_mode_info.palette_size[plane])
+          vp10_decode_palette_tokens(xd, plane, r);
+
       for (row = 0; row < max_blocks_high; row += step)
         for (col = 0; col < max_blocks_wide; col += step)
           predict_and_reconstruct_intra_block(xd, r, mbmi, plane,
@@ -1535,6 +1538,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
       vp10_init_macroblockd(cm, &tile_data->xd, tile_data->dqcoeff);
+      tile_data->xd.plane[0].color_index_map = tile_data->color_index_map[0];
+      tile_data->xd.plane[1].color_index_map = tile_data->color_index_map[1];
     }
   }
 
@@ -1757,6 +1762,8 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
       vp10_init_macroblockd(cm, &tile_data->xd, tile_data->dqcoeff);
+      tile_data->xd.plane[0].color_index_map = tile_data->color_index_map[0];
+      tile_data->xd.plane[1].color_index_map = tile_data->color_index_map[1];
 
       worker->had_error = 0;
       if (i == num_workers - 1 || n == tile_cols - 1) {
@@ -1926,6 +1933,8 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
       pbi->need_resync = 0;
     }
+    if (cm->current_video_frame == 0)
+      cm->allow_screen_content_tools = vpx_rb_read_bit(rb);
   } else {
     cm->intra_only = cm->show_frame ? 0 : vpx_rb_read_bit(rb);
 
