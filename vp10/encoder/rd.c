@@ -76,9 +76,7 @@ static void fill_mode_costs(VP10_COMP *cpi) {
                       vp10_intra_mode_tree);
 
   vp10_cost_tokens(cpi->mbmode_cost, fc->y_mode_prob[1], vp10_intra_mode_tree);
-  vp10_cost_tokens(cpi->intra_uv_mode_cost[KEY_FRAME],
-                  vp10_kf_uv_mode_prob[TM_PRED], vp10_intra_mode_tree);
-  vp10_cost_tokens(cpi->intra_uv_mode_cost[INTER_FRAME],
+  vp10_cost_tokens(cpi->intra_uv_mode_cost,
                   fc->uv_mode_prob[TM_PRED], vp10_intra_mode_tree);
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
@@ -287,7 +285,6 @@ static void set_block_thresholds(const VP10_COMMON *cm, RD_OPT *rd) {
 void vp10_initialize_rd_consts(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
-  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   RD_OPT *const rd = &cpi->rd;
   int i;
 
@@ -303,14 +300,13 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
                        cm->frame_type != KEY_FRAME) ? 0 : 1;
 
   set_block_thresholds(cm, rd);
-  set_partition_probs(cm, xd);
 
   fill_token_costs(x->token_costs, cm->fc->coef_probs);
 
   if (cpi->sf.partition_search_type != VAR_BASED_PARTITION ||
       cm->frame_type == KEY_FRAME) {
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
-      vp10_cost_tokens(cpi->partition_cost[i], get_partition_probs(xd, i),
+      vp10_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
                       vp10_partition_tree);
   }
 

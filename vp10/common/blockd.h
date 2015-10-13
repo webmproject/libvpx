@@ -186,8 +186,6 @@ typedef struct macroblockd {
   int up_available;
   int left_available;
 
-  const vpx_prob (*partition_probs)[PARTITION_TYPES - 1];
-
   /* Distance of MB away from frame edges */
   int mb_to_left_edge;
   int mb_to_right_edge;

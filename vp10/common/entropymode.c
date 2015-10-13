@@ -127,6 +127,7 @@ const vpx_prob vp10_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = 
   }
 };
 
+#if !CONFIG_MISC_FIXES
 const vpx_prob vp10_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1] = {
   { 144,  11,  54, 157, 195, 130,  46,  58, 108 },  // y = dc
   { 118,  15, 123, 148, 131, 101,  44,  93, 131 },  // y = v
@@ -139,6 +140,7 @@ const vpx_prob vp10_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1] = {
   { 116,  12,  64, 120, 140, 125,  49, 115, 121 },  // y = d63
   { 102,  19,  66, 162, 182, 122,  35,  59, 128 }   // y = tm
 };
+#endif
 
 static const vpx_prob default_if_y_probs[BLOCK_SIZE_GROUPS][INTRA_MODES - 1] = {
   {  65,  32,  18, 144, 162, 194,  41,  51,  98 },  // block_size < 8x8
@@ -147,7 +149,7 @@ static const vpx_prob default_if_y_probs[BLOCK_SIZE_GROUPS][INTRA_MODES - 1] = {
   { 221, 135,  38, 194, 248, 121,  96,  85,  29 }   // block_size >= 32x32
 };
 
-static const vpx_prob default_if_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
+static const vpx_prob default_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
   { 120,   7,  76, 176, 208, 126,  28,  54, 103 },  // y = dc
   {  48,  12, 154, 155, 139,  90,  34, 117, 119 },  // y = v
   {  67,   6,  25, 204, 243, 158,  13,  21,  96 },  // y = h
@@ -160,6 +162,7 @@ static const vpx_prob default_if_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
   { 101,  21, 107, 181, 192, 103,  19,  67, 125 }   // y = tm
 };
 
+#if !CONFIG_MISC_FIXES
 const vpx_prob vp10_kf_partition_probs[PARTITION_CONTEXTS]
                                      [PARTITION_TYPES - 1] = {
   // 8x8 -> 4x4
@@ -183,6 +186,7 @@ const vpx_prob vp10_kf_partition_probs[PARTITION_CONTEXTS]
   {  57,  15,   9 },  // l split, a not split
   {  12,   3,   3 },  // a/l both split
 };
+#endif
 
 static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
                                              [PARTITION_TYPES - 1] = {
@@ -755,7 +759,7 @@ static const struct segmentation_probs default_seg_probs = {
 #endif
 
 static void init_mode_probs(FRAME_CONTEXT *fc) {
-  vp10_copy(fc->uv_mode_prob, default_if_uv_probs);
+  vp10_copy(fc->uv_mode_prob, default_uv_probs);
   vp10_copy(fc->y_mode_prob, default_if_y_probs);
   vp10_copy(fc->switchable_interp_prob, default_switchable_interp_prob);
   vp10_copy(fc->partition_prob, default_partition_probs);
@@ -806,6 +810,7 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
     vpx_tree_merge_probs(vp10_intra_mode_tree, pre_fc->y_mode_prob[i],
                 counts->y_mode[i], fc->y_mode_prob[i]);
 
+#if !CONFIG_MISC_FIXES
   for (i = 0; i < INTRA_MODES; ++i)
     vpx_tree_merge_probs(vp10_intra_mode_tree, pre_fc->uv_mode_prob[i],
                          counts->uv_mode[i], fc->uv_mode_prob[i]);
@@ -813,6 +818,7 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
   for (i = 0; i < PARTITION_CONTEXTS; i++)
     vpx_tree_merge_probs(vp10_partition_tree, pre_fc->partition_prob[i],
                          counts->partition[i], fc->partition_prob[i]);
+#endif
 
   if (cm->interp_filter == SWITCHABLE) {
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
@@ -869,6 +875,14 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
     vpx_tree_merge_probs(vp10_segment_tree, pre_fc->seg.tree_probs,
                          counts->seg.tree_total, fc->seg.tree_probs);
   }
+
+  for (i = 0; i < INTRA_MODES; ++i)
+    vpx_tree_merge_probs(vp10_intra_mode_tree, pre_fc->uv_mode_prob[i],
+                         counts->uv_mode[i], fc->uv_mode_prob[i]);
+
+  for (i = 0; i < PARTITION_CONTEXTS; i++)
+    vpx_tree_merge_probs(vp10_partition_tree, pre_fc->partition_prob[i],
+                         counts->partition[i], fc->partition_prob[i]);
 #endif
 }
 

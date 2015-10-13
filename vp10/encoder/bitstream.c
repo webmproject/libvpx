@@ -470,7 +470,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     }
   }
 
-  write_intra_mode(w, mbmi->uv_mode, vp10_kf_uv_mode_prob[mbmi->mode]);
+  write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mbmi->mode]);
 
   if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools &&
       mbmi->mode == DC_PRED)
@@ -525,7 +525,7 @@ static void write_partition(const VP10_COMMON *const cm,
                             int hbs, int mi_row, int mi_col,
                             PARTITION_TYPE p, BLOCK_SIZE bsize, vpx_writer *w) {
   const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
-  const vpx_prob *const probs = xd->partition_probs[ctx];
+  const vpx_prob *const probs = cm->fc->partition_prob[ctx];
   const int has_rows = (mi_row + hbs) < cm->mi_rows;
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
@@ -603,11 +603,8 @@ static void write_modes_sb(VP10_COMP *cpi,
 static void write_modes(VP10_COMP *cpi,
                         const TileInfo *const tile, vpx_writer *w,
                         TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
-  const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int mi_row, mi_col;
-
-  set_partition_probs(cm, xd);
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
@@ -1350,6 +1347,7 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = cpi->td.counts;
   vpx_writer header_bc;
+  int i;
 
   vpx_start_encode(&header_bc, data);
 
@@ -1365,11 +1363,17 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   update_skip_probs(cm, &header_bc, counts);
 #if CONFIG_MISC_FIXES
   update_seg_probs(cpi, &header_bc);
+
+  for (i = 0; i < INTRA_MODES; ++i)
+    prob_diff_update(vp10_intra_mode_tree, fc->uv_mode_prob[i],
+                     counts->uv_mode[i], INTRA_MODES, &header_bc);
+
+  for (i = 0; i < PARTITION_CONTEXTS; ++i)
+    prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
+                     counts->partition[i], PARTITION_TYPES, &header_bc);
 #endif
 
   if (!frame_is_intra_only(cm)) {
-    int i;
-
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
       prob_diff_update(vp10_inter_mode_tree, cm->fc->inter_mode_probs[i],
                        counts->inter_mode[i], INTER_MODES, &header_bc);
@@ -1420,15 +1424,11 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
       prob_diff_update(vp10_intra_mode_tree, cm->fc->y_mode_prob[i],
                        counts->y_mode[i], INTRA_MODES, &header_bc);
 
-#if CONFIG_MISC_FIXES
-    for (i = 0; i < INTRA_MODES; ++i)
-      prob_diff_update(vp10_intra_mode_tree, cm->fc->uv_mode_prob[i],
-                       counts->uv_mode[i], INTRA_MODES, &header_bc);
-#endif
-
+#if !CONFIG_MISC_FIXES
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
       prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
                        counts->partition[i], PARTITION_TYPES, &header_bc);
+#endif
 
     vp10_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc,
                         &counts->mv);
