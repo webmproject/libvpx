@@ -1355,10 +1355,10 @@ static int remux_tiles(uint8_t *dest, const int sz,
 
 void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
   uint8_t *data = dest;
-  size_t first_part_size, uncompressed_hdr_size;
+  size_t first_part_size, uncompressed_hdr_size, data_sz;
   struct vpx_write_bit_buffer wb = {data, 0};
   struct vpx_write_bit_buffer saved_wb;
-  unsigned int max_tile, data_sz;
+  unsigned int max_tile;
 #if CONFIG_MISC_FIXES
   VP10_COMMON *const cm = &cpi->common;
   const int n_log2_tiles = cm->log2_tile_rows + cm->log2_tile_cols;
