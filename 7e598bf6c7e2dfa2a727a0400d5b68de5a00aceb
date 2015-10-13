@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "dfb462b2_45f95d34",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-13T23:15:43Z",
+      "side": 1,
+      "message": "this looks like it should have another level of ()s. you want (apple \u0026\u0026 (\u003c\u003d4.2 || \u003d\u003d5.0)) where now you have (apple \u0026\u0026 \u003c\u003d4.2 || \u003d\u003d5.0)",
+      "revId": "7e598bf6c7e2dfa2a727a0400d5b68de5a00aceb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ff32061b_db148b12",
         "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_avx2.c",
         "patchSetId": 3
