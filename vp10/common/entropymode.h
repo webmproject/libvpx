@@ -14,6 +14,7 @@
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymv.h"
 #include "vp10/common/filter.h"
+#include "vp10/common/seg_common.h"
 #include "vpx_dsp/vpx_filter.h"
 
 #ifdef __cplusplus
@@ -47,6 +48,12 @@ struct tx_counts {
   unsigned int tx_totals[TX_SIZES];
 };
 
+struct seg_counts {
+  unsigned int tree_total[MAX_SEGMENTS];
+  unsigned int tree_mispred[MAX_SEGMENTS];
+  unsigned int pred[PREDICTION_PROBS][2];
+};
+
 typedef struct frame_contexts {
   vpx_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
   vpx_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
@@ -62,6 +69,9 @@ typedef struct frame_contexts {
   struct tx_probs tx_probs;
   vpx_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
+#if CONFIG_MISC_FIXES
+  struct segmentation_probs seg;
+#endif
   int initialized;
 } FRAME_CONTEXT;
 
@@ -82,6 +92,9 @@ typedef struct FRAME_COUNTS {
   struct tx_counts tx;
   unsigned int skip[SKIP_CONTEXTS][2];
   nmv_context_counts mv;
+#if CONFIG_MISC_FIXES
+  struct seg_counts seg;
+#endif
 } FRAME_COUNTS;
 
 extern const vpx_prob vp10_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];

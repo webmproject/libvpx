@@ -1047,6 +1047,9 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
 static void setup_segmentation(VP10_COMMON *const cm,
                                struct vpx_read_bit_buffer *rb) {
   struct segmentation *const seg = &cm->seg;
+#if !CONFIG_MISC_FIXES
+  struct segmentation_probs *const segp = &cm->segp;
+#endif
   int i, j;
 
   seg->update_map = 0;
@@ -1063,23 +1066,26 @@ static void setup_segmentation(VP10_COMMON *const cm,
     seg->update_map = vpx_rb_read_bit(rb);
   }
   if (seg->update_map) {
+#if !CONFIG_MISC_FIXES
     for (i = 0; i < SEG_TREE_PROBS; i++)
-      seg->tree_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
-                                               : MAX_PROB;
-
+      segp->tree_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
+                                                : MAX_PROB;
+#endif
     if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
       seg->temporal_update = 0;
     } else {
       seg->temporal_update = vpx_rb_read_bit(rb);
     }
+#if !CONFIG_MISC_FIXES
     if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++)
-        seg->pred_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
-                                                 : MAX_PROB;
+        segp->pred_probs[i] = vpx_rb_read_bit(rb) ? vpx_rb_read_literal(rb, 8)
+                                                  : MAX_PROB;
     } else {
       for (i = 0; i < PREDICTION_PROBS; i++)
-        seg->pred_probs[i] = MAX_PROB;
+        segp->pred_probs[i] = MAX_PROB;
     }
+#endif
   }
 
   // Segmentation data update
@@ -2130,6 +2136,17 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     vp10_diff_update_prob(&r, &fc->skip_probs[k]);
+
+#if CONFIG_MISC_FIXES
+  if (cm->seg.enabled) {
+    if (cm->seg.temporal_update) {
+      for (k = 0; k < PREDICTION_PROBS; k++)
+        vp10_diff_update_prob(&r, &cm->fc->seg.pred_probs[k]);
+    }
+    for (k = 0; k < MAX_SEGMENTS - 1; k++)
+      vp10_diff_update_prob(&r, &cm->fc->seg.tree_probs[k]);
+  }
+#endif
 
   if (!frame_is_intra_only(cm)) {
     nmv_context *const nmvc = &fc->nmvc;

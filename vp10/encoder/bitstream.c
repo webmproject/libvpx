@@ -251,9 +251,10 @@ static void pack_mb_tokens(vpx_writer *w,
 }
 
 static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
+                             const struct segmentation_probs *segp,
                              int segment_id) {
   if (seg->enabled && seg->update_map)
-    vp10_write_tree(w, vp10_segment_tree, seg->tree_probs, segment_id, 3, 0);
+    vp10_write_tree(w, vp10_segment_tree, segp->tree_probs, segment_id, 3, 0);
 }
 
 // This function encodes the reference frame
@@ -299,6 +300,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
   const MACROBLOCK *const x = &cpi->td.mb;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
+#if CONFIG_MISC_FIXES
+  const struct segmentation_probs *const segp = &cm->fc->seg;
+#else
+  const struct segmentation_probs *const segp = &cm->segp;
+#endif
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
   const PREDICTION_MODE mode = mbmi->mode;
@@ -312,12 +318,12 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
   if (seg->update_map) {
     if (seg->temporal_update) {
       const int pred_flag = mbmi->seg_id_predicted;
-      vpx_prob pred_prob = vp10_get_pred_prob_seg_id(seg, xd);
+      vpx_prob pred_prob = vp10_get_pred_prob_seg_id(segp, xd);
       vpx_write(w, pred_flag, pred_prob);
       if (!pred_flag)
-        write_segment_id(w, seg, segment_id);
+        write_segment_id(w, seg, segp, segment_id);
     } else {
-      write_segment_id(w, seg, segment_id);
+      write_segment_id(w, seg, segp, segment_id);
     }
   }
 
@@ -429,6 +435,11 @@ static void write_palette_mode_info(const VP10_COMMON *cm,
 static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                               MODE_INFO **mi_8x8, vpx_writer *w) {
   const struct segmentation *const seg = &cm->seg;
+#if CONFIG_MISC_FIXES
+  const struct segmentation_probs *const segp = &cm->fc->seg;
+#else
+  const struct segmentation_probs *const segp = &cm->segp;
+#endif
   const MODE_INFO *const mi = mi_8x8[0];
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
@@ -436,7 +447,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   const BLOCK_SIZE bsize = mbmi->sb_type;
 
   if (seg->update_map)
-    write_segment_id(w, seg, mbmi->segment_id);
+    write_segment_id(w, seg, segp, mbmi->segment_id);
 
   write_skip(cm, xd, mbmi->segment_id, mi, w);
 
@@ -859,6 +870,9 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
   int i, j;
 
   const struct segmentation *seg = &cm->seg;
+#if !CONFIG_MISC_FIXES
+  const struct segmentation_probs *segp = &cm->segp;
+#endif
 
   vpx_wb_write_bit(wb, seg->enabled);
   if (!seg->enabled)
@@ -873,14 +887,16 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (seg->update_map) {
     // Select the coding strategy (temporal or spatial)
     vp10_choose_segmap_coding_method(cm, xd);
+#if !CONFIG_MISC_FIXES
     // Write out probabilities used to decode unpredicted  macro-block segments
     for (i = 0; i < SEG_TREE_PROBS; i++) {
-      const int prob = seg->tree_probs[i];
+      const int prob = segp->tree_probs[i];
       const int update = prob != MAX_PROB;
       vpx_wb_write_bit(wb, update);
       if (update)
         vpx_wb_write_literal(wb, prob, 8);
     }
+#endif
 
     // Write out the chosen coding method.
     if (!frame_is_intra_only(cm) && !cm->error_resilient_mode) {
@@ -888,15 +904,18 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
     } else {
       assert(seg->temporal_update == 0);
     }
+
+#if !CONFIG_MISC_FIXES
     if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++) {
-        const int prob = seg->pred_probs[i];
+        const int prob = segp->pred_probs[i];
         const int update = prob != MAX_PROB;
         vpx_wb_write_bit(wb, update);
         if (update)
           vpx_wb_write_literal(wb, prob, 8);
       }
     }
+#endif
   }
 
   // Segmentation data
@@ -925,6 +944,27 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 #if CONFIG_MISC_FIXES
+static void update_seg_probs(VP10_COMP *cpi, vpx_writer *w) {
+  VP10_COMMON *cm = &cpi->common;
+
+  if (!cpi->common.seg.enabled)
+    return;
+
+  if (cpi->common.seg.temporal_update) {
+    int i;
+
+    for (i = 0; i < PREDICTION_PROBS; i++)
+      vp10_cond_prob_diff_update(w, &cm->fc->seg.pred_probs[i],
+          cm->counts.seg.pred[i]);
+
+    prob_diff_update(vp10_segment_tree, cm->fc->seg.tree_probs,
+        cm->counts.seg.tree_mispred, MAX_SEGMENTS, w);
+  } else {
+    prob_diff_update(vp10_segment_tree, cm->fc->seg.tree_probs,
+        cm->counts.seg.tree_total, MAX_SEGMENTS, w);
+  }
+}
+
 static void write_txfm_mode(TX_MODE mode, struct vpx_write_bit_buffer *wb) {
   vpx_wb_write_bit(wb, mode == TX_MODE_SELECT);
   if (mode != TX_MODE_SELECT)
@@ -1323,6 +1363,9 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 #endif
   update_coef_probs(cpi, &header_bc);
   update_skip_probs(cm, &header_bc, counts);
+#if CONFIG_MISC_FIXES
+  update_seg_probs(cpi, &header_bc);
+#endif
 
   if (!frame_is_intra_only(cm)) {
     int i;

@@ -746,6 +746,14 @@ static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
   { 149, 144, },
 };
 
+#if CONFIG_MISC_FIXES
+// FIXME(someone) need real defaults here
+static const struct segmentation_probs default_seg_probs = {
+  { 128, 128, 128, 128, 128, 128, 128 },
+  { 128, 128, 128 },
+};
+#endif
+
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->uv_mode_prob, default_if_uv_probs);
   vp10_copy(fc->y_mode_prob, default_if_y_probs);
@@ -758,6 +766,10 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   fc->tx_probs = default_tx_probs;
   vp10_copy(fc->skip_probs, default_skip_probs);
   vp10_copy(fc->inter_mode_probs, default_inter_mode_probs);
+#if CONFIG_MISC_FIXES
+  vp10_copy(fc->seg.tree_probs, default_seg_probs.tree_probs);
+  vp10_copy(fc->seg.pred_probs, default_seg_probs.pred_probs);
+#endif
 }
 
 const vpx_tree_index vp10_switchable_interp_tree
@@ -844,6 +856,20 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
   for (i = 0; i < SKIP_CONTEXTS; ++i)
     fc->skip_probs[i] = mode_mv_merge_probs(
         pre_fc->skip_probs[i], counts->skip[i]);
+
+#if CONFIG_MISC_FIXES
+  if (cm->seg.temporal_update) {
+    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+      fc->seg.pred_probs[i] = mode_mv_merge_probs(pre_fc->seg.pred_probs[i],
+                                                  counts->seg.pred[i]);
+
+    vpx_tree_merge_probs(vp10_segment_tree, pre_fc->seg.tree_probs,
+                         counts->seg.tree_mispred, fc->seg.tree_probs);
+  } else {
+    vpx_tree_merge_probs(vp10_segment_tree, pre_fc->seg.tree_probs,
+                         counts->seg.tree_total, fc->seg.tree_probs);
+  }
+#endif
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

@@ -418,7 +418,9 @@ static void save_coding_context(VP10_COMP *cpi) {
   memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
          MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
 
-  vp10_copy(cc->segment_pred_probs, cm->seg.pred_probs);
+#if !CONFIG_MISC_FIXES
+  vp10_copy(cc->segment_pred_probs, cm->segp.pred_probs);
+#endif
 
   memcpy(cpi->coding_context.last_frame_seg_map_copy,
          cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
@@ -444,7 +446,9 @@ static void restore_coding_context(VP10_COMP *cpi) {
   memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
          MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
 
-  vp10_copy(cm->seg.pred_probs, cc->segment_pred_probs);
+#if !CONFIG_MISC_FIXES
+  vp10_copy(cm->segp.pred_probs, cc->segment_pred_probs);
+#endif
 
   memcpy(cm->last_frame_seg_map,
          cpi->coding_context.last_frame_seg_map_copy,
@@ -1440,7 +1444,7 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
     }
   }
 
-  vp10_reset_segment_features(&cm->seg);
+  vp10_reset_segment_features(cm);
   vp10_set_high_precision_mv(cpi, 0);
 
   {
@@ -3561,7 +3565,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   // Set various flags etc to special state if it is a key frame.
   if (frame_is_intra_only(cm)) {
     // Reset the loop filter deltas and segmentation map.
-    vp10_reset_segment_features(&cm->seg);
+    vp10_reset_segment_features(cm);
 
     // If segmentation is enabled force a map update for key frames.
     if (seg->enabled) {
