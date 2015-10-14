@@ -242,15 +242,22 @@ static void pack_mb_tokens_ans(struct AnsCoder *const ans,
     // is split into two treed writes.  The first treed write takes care of the
     // unconstrained nodes.  The second treed write takes care of the
     // constrained nodes.
-    if (t >= TWO_TOKEN && t < EOB_TOKEN) {
-      int len = UNCONSTRAINED_NODES - p->skip_eob_node;
-      int bits = v >> (n - len);
-      vp10_write_tree_r(ans, vp10_coef_con_tree,
-                     vp10_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
-                     v, n - len, 0);
-      vp10_write_tree_r(ans, vp10_coef_tree, p->context_tree, bits, len, i);
-    } else {
+    if (t == EOB_TOKEN || t == ZERO_TOKEN) {
       vp10_write_tree_r(ans, vp10_coef_tree, p->context_tree, v, n, i);
+    } else {
+      struct rans_sym s;
+      int j;
+      int len = 2 - p->skip_eob_node;  // Write <EOBF>?<ZEROF>
+      int bits = v >> (n - len);
+      const vpx_prob *token_probs =
+          vp10_pareto8_token_probs[p->context_tree[PIVOT_NODE] - 1];
+      s.cum_prob = 0;
+      for (j = ONE_TOKEN; j < t; ++j) {
+        s.cum_prob += token_probs[j - ONE_TOKEN];
+      }
+      s.prob = token_probs[t - ONE_TOKEN];
+      rans_stream_encode(ans, &s);
+      vp10_write_tree_r(ans, vp10_coef_tree, p->context_tree, bits, len, i);
     }
   }
   }

@@ -109,6 +109,77 @@ static inline int rabs_read(struct AnsDecoder *ans, AnsP8 p0) {
   return val;
 }
 
+struct rans_sym {
+  AnsP8 prob;
+  AnsP8 cum_prob;  // not-inclusive
+};
+
+struct rans_dec_sym {
+  uint8_t val;
+  AnsP8 prob;
+  AnsP8 cum_prob;  // not-inclusive
+};
+
+static inline void rans_build_dec_tab(const AnsP8 token_probs[], struct rans_dec_sym dec_tab[]) {
+  int val = 0;
+  int cum_prob = 0;
+  int sym_end = token_probs[0];
+  int i;
+  for (i = 0; i < 256; ++i) {
+    if (i == sym_end) {
+      ++val;
+      cum_prob = sym_end;
+      sym_end += token_probs[val];
+    }
+    dec_tab[i].val = val;
+    dec_tab[i].prob = token_probs[val];
+    dec_tab[i].cum_prob = cum_prob;
+  }
+}
+
+#define DBG_RANS 0
+// rANS with normalization
+// sym->prob takes the place of l_s from the paper
+// ans_p8_precision is m
+static inline void rans_stream_encode(struct AnsCoder *ans, const struct rans_sym *const sym) {
+  const AnsP8 p = sym->prob;
+//  const unsigned int s0 = ans->state;
+  while (ans->state >= l_base / ans_p8_precision * io_base * p) {
+    ans->buf[ans->buf_offset++] = ans->state % io_base;
+    ans->state /= io_base;
+  }
+#if DBG_RANS
+  unsigned state0 = ans->state;
+#endif
+  ans->state = (ans->state / p) * ans_p8_precision + ans->state % p + sym->cum_prob;
+#if DBG_RANS
+  fprintf(stderr, "C(val = [%02x %02x], %x) = %x\n", sym->cum_prob, sym->prob, state0, ans->state);
+#endif
+}
+
+static inline int rans_stream_decode(struct AnsDecoder *ans,
+                                     const struct rans_dec_sym tab[]) {
+  unsigned rem;
+  unsigned quo;
+  int val;
+//  const unsigned int s0 = ans->state;
+  if (ans->state < l_base) {
+    ans->state = ans->state * io_base + ans->buf[--ans->buf_offset];
+  }
+#if DBG_RANS
+  unsigned state0 = ans->state;
+#endif
+  quo = ans->state / ans_p8_precision;
+  rem = ans->state % ans_p8_precision;
+  val = tab[rem].val;
+
+  ans->state = quo * tab[rem].prob + rem - tab[rem].cum_prob;
+#if DBG_RANS
+  fprintf(stderr, "D(%x) = (%d = [%02x %02x], %x)\n", state0, val, tab[rem].cum_prob, tab[rem].prob, ans->state);
+#endif
+  return val;
+}
+
 static inline int ans_read_init(struct AnsDecoder *const ans,
                                  const uint8_t *const buf,
                                  int offset) {

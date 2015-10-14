@@ -85,6 +85,7 @@ static int decode_coefs(const MACROBLOCKD *const xd,
   const uint8_t *cat4_prob;
   const uint8_t *cat5_prob;
   const uint8_t *cat6_prob;
+  struct rans_dec_sym dec_tab[256];
 
   if (counts) {
     coef_counts = counts->coef[tx_size][type][ref];
@@ -148,56 +149,53 @@ static int decode_coefs(const MACROBLOCKD *const xd,
       prob = coef_probs[band][ctx];
     }
 
-    if (!rabs_read(ans, prob[ONE_CONTEXT_NODE])) {
-      INCREMENT_COUNT(ONE_TOKEN);
-      token = ONE_TOKEN;
-      val = 1;
-    } else {
-      INCREMENT_COUNT(TWO_TOKEN);
-      token = rabs_read_tree(ans, vp10_coef_con_tree,
-                             vp10_pareto8_full[prob[PIVOT_NODE] - 1]);
-      switch (token) {
-        case TWO_TOKEN:
-        case THREE_TOKEN:
-        case FOUR_TOKEN:
-          val = token;
-          break;
-        case CATEGORY1_TOKEN:
-          val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, ans);
-          break;
-        case CATEGORY2_TOKEN:
-          val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, ans);
-          break;
-        case CATEGORY3_TOKEN:
-          val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, ans);
-          break;
-        case CATEGORY4_TOKEN:
-          val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, ans);
-          break;
-        case CATEGORY5_TOKEN:
-          val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, ans);
-          break;
-        case CATEGORY6_TOKEN:
+    // TODO: precompute dec_tab
+    unsigned state = ans->state;
+    rans_build_dec_tab(vp10_pareto8_token_probs[prob[PIVOT_NODE] - 1], dec_tab);
+    token = ONE_TOKEN + rans_stream_decode(ans, dec_tab);
+    INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
+    switch (token) {
+      case ONE_TOKEN:
+      case TWO_TOKEN:
+      case THREE_TOKEN:
+      case FOUR_TOKEN:
+        val = token;
+        break;
+      case CATEGORY1_TOKEN:
+        val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, ans);
+        break;
+      case CATEGORY2_TOKEN:
+        val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, ans);
+        break;
+      case CATEGORY3_TOKEN:
+        val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, ans);
+        break;
+      case CATEGORY4_TOKEN:
+        val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, ans);
+        break;
+      case CATEGORY5_TOKEN:
+        val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, ans);
+        break;
+      case CATEGORY6_TOKEN:
 #if CONFIG_VP9_HIGHBITDEPTH
-          switch (xd->bd) {
-            case VPX_BITS_8:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, ans);
-              break;
-            case VPX_BITS_10:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 16, ans);
-              break;
-            case VPX_BITS_12:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 18, ans);
-              break;
-            default:
-              assert(0);
-              return -1;
-          }
+        switch (xd->bd) {
+          case VPX_BITS_8:
+            val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, ans);
+            break;
+          case VPX_BITS_10:
+            val = CAT6_MIN_VAL + read_coeff(cat6_prob, 16, ans);
+            break;
+          case VPX_BITS_12:
+            val = CAT6_MIN_VAL + read_coeff(cat6_prob, 18, ans);
+            break;
+          default:
+            assert(0);
+            return -1;
+        }
 #else
-          val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, ans);
+        val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, ans);
 #endif
-          break;
-      }
+        break;
     }
     v = (val * dqv) >> dq_shift;
 #if CONFIG_COEFFICIENT_RANGE_CHECKING

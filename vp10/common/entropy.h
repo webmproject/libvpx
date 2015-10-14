@@ -162,6 +162,7 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 #define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
 extern const vpx_tree_index vp10_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
 extern const vpx_prob vp10_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
+extern const vpx_prob vp10_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2];
 
 typedef vpx_prob vp10_coeff_probs_model[REF_TYPES][COEF_BANDS]
                                       [COEFF_CONTEXTS][UNCONSTRAINED_NODES];
