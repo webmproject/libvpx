@@ -34,6 +34,24 @@
       "revId": "5ce49a39d7c3b85d53661d52faae4078ed70a330",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fa9b65d_53ce07ba",
+        "filename": "vpx_util/endian_inl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-14T20:34:27Z",
+      "side": 1,
+      "message": "Sure, but autoconf doesn\u0027t work for places where you configure in one environment and build in another. Granted, Chromium is the only current example I\u0027m aware of.\n\nThe reporter in the bug said it works for old xcode.",
+      "parentUuid": "1f30ba11_1deee470",
+      "revId": "5ce49a39d7c3b85d53661d52faae4078ed70a330",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
