@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7fa9b65d_18d18cde",
+        "filename": "vpx_util/endian_inl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-14T17:48:00Z",
+      "side": 1,
+      "message": "seems like this might be useful for webp. not sure they needed to add it for the 32/64 versions:\nhttps://chromium.googlesource.com/skia/+/139491fbaa6fc926456a246bb28e09848e0e48f5/third_party/libwebp/webp/config.h\nhttp://clang.llvm.org/docs/LanguageExtensions.html",
+      "revId": "5ce49a39d7c3b85d53661d52faae4078ed70a330",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
