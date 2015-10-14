@@ -16,6 +16,24 @@
       "revId": "4e2f0dbb2b425d8b910ab7904d0d4d3e9c26a1ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff8686d4_64f104c7",
+        "filename": "vp10/encoder/x86/dct_mmx.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-14T10:43:18Z",
+      "side": 1,
+      "message": "It could be integrated into RET, but doing so would have the following consequences:\n\n1. If RET is not the last statement in your function, then it would result in setting the symbol size incorrectly. In reality however it is likely a RET will always be the last thing in your function. (I can imagine cases when it isn\u0027t, but those mostly have to do with code size savings, which we probably do not care about in assembly code(?).) \n\n2. If you have multiple RET in a function, it would cause macro local symbol pollution (similar to what the other patch tries to avoid with the branch instruction macros). This is because yasm does not seem to allow the use oc \u0027$\u0027 as part of the size expression, so you have to put down a label.",
+      "parentUuid": "dfb462b2_23a0e163",
+      "revId": "4e2f0dbb2b425d8b910ab7904d0d4d3e9c26a1ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
