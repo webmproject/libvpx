@@ -846,7 +846,7 @@ void rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         for (i = 0; i < k; ++i)
-          pmi->palette_colors[i] = clip_pixel(round(centroids[i]));
+          pmi->palette_colors[i] = clip_pixel((int)round(centroids[i]));
       pmi->palette_size[0] = k;
 
       vp10_calc_indices(data, centroids, indices, rows * cols, k, 1);
