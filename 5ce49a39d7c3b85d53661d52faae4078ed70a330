@@ -16,6 +16,24 @@
       "revId": "5ce49a39d7c3b85d53661d52faae4078ed70a330",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_1deee470",
+        "filename": "vpx_util/endian_inl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-14T19:38:51Z",
+      "side": 1,
+      "message": "I\u0027ll check it out, for the most part on OS X we\u0027re using autoconf for detection with this as a fallback.",
+      "parentUuid": "7fa9b65d_18d18cde",
+      "revId": "5ce49a39d7c3b85d53661d52faae4078ed70a330",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
