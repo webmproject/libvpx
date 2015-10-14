@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f2b7617_499251e3",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1208,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-14T16:11:42Z",
+      "side": 1,
+      "message": "Should be\ncpi-\u003ecommon.allow_screen_content_tools ? x-\u003epalette_buffer-\u003ebest_palette_color_map : NULL;",
+      "revId": "487f7d8651a1c68360a840e35cbe96e041ca51a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
