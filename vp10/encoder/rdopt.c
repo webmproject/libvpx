@@ -1204,7 +1204,8 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   TX_SIZE best_tx = TX_4X4;
   int *bmode_costs;
   PALETTE_MODE_INFO palette_mode_info;
-  uint8_t *best_palette_color_map = x->palette_buffer->best_palette_color_map;
+  uint8_t *best_palette_color_map =  cpi->common.allow_screen_content_tools ?
+       x->palette_buffer->best_palette_color_map : NULL;
   int rows = 4 * num_4x4_blocks_high_lookup[bsize];
   int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
   int palette_ctx = 0;

@@ -2422,11 +2422,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     do_split &= bsize > min_size;
   }
 
-  if (cpi->sf.use_square_partition_only &&
-      (bsize > cpi->sf.use_square_only_threshold)) {
-    if (!vp9_active_h_edge(cpi, mi_row, mi_step) || x->e_mbd.lossless)
+  if (cpi->sf.use_square_partition_only) {
       partition_horz_allowed &= force_horz_split;
-    if (!vp9_active_v_edge(cpi, mi_row, mi_step) || x->e_mbd.lossless)
       partition_vert_allowed &= force_vert_split;
   }
 
