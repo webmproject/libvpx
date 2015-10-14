@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfb462b2_23a0e163",
+        "filename": "vp10/encoder/x86/dct_mmx.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-14T07:21:55Z",
+      "side": 1,
+      "message": "this is a bit unfortunate and will likely be forgotten on new code. could this be integrated into the RET macros?",
+      "revId": "4e2f0dbb2b425d8b910ab7904d0d4d3e9c26a1ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
