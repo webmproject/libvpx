@@ -160,6 +160,10 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
   const int tx_idx = (blk_row >> 1) * 8 + (blk_col >> 1);
   int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  int ctx = txfm_partition_context(xd->above_txfm_context + (blk_col >> 1),
+                                   xd->left_txfm_context + (blk_row >> 1),
+                                   tx_size);
+
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> 5;
   if (xd->mb_to_right_edge < 0)
@@ -169,15 +173,20 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
      return;
 
   if (tx_size == mbmi->inter_tx_size[tx_idx]) {
-    vpx_write_bit(w, 0);
+    vpx_write(w, 0, cm->fc->txfm_partition_prob[ctx]);
+    txfm_partition_update(xd->above_txfm_context + (blk_col >> 1),
+                          xd->left_txfm_context + (blk_row >> 1), tx_size);
   } else {
     const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_width_log2_lookup[bsize];
     int i;
-    vpx_write_bit(w, 1);
+    vpx_write(w, 1, cm->fc->txfm_partition_prob[ctx]);
 
-    if (tx_size == TX_8X8)
+    if (tx_size == TX_8X8) {
+      txfm_partition_update(xd->above_txfm_context + (blk_col >> 1),
+                            xd->left_txfm_context + (blk_row >> 1), TX_4X4);
       return;
+    }
 
     assert(bsl > 0);
     --bsl;
@@ -187,6 +196,14 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
       write_tx_size_inter(cm, xd, mbmi, tx_size - 1, offsetr, offsetc, w);
     }
   }
+}
+
+static void update_txfm_partition_probs(VP10_COMMON *cm, vpx_writer *w,
+                                        FRAME_COUNTS *counts) {
+  int k;
+  for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
+    vp10_cond_prob_diff_update(w, &cm->fc->txfm_partition_prob[k],
+                               counts->txfm_partition[k]);
 }
 #endif
 
@@ -498,8 +515,8 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
                                 vpx_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
-  const MACROBLOCK *const x = &cpi->td.mb;
-  const MACROBLOCKD *const xd = &x->e_mbd;
+  const MACROBLOCK *x = &cpi->td.mb;
+  const MACROBLOCKD *xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
 #if CONFIG_MISC_FIXES
   const struct segmentation_probs *const segp = &cm->fc->seg;
@@ -750,6 +767,10 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cm, xd, xd->mi, w);
   } else {
+#if CONFIG_VAR_TX
+    xd->above_txfm_context = cm->above_txfm_context + mi_col;
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+#endif
     pack_inter_mode_mvs(cpi, m, w);
   }
 
@@ -897,6 +918,9 @@ static void write_modes(VP10_COMP *cpi,
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     vp10_zero(xd->left_seg_context);
+#if CONFIG_VAR_TX
+    vp10_zero(xd->left_txfm_context_buffer);
+#endif
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
       write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col,
@@ -1385,6 +1409,10 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
 
   memset(cm->above_seg_context, 0,
          sizeof(*cm->above_seg_context) * mi_cols_aligned_to_sb(cm->mi_cols));
+#if CONFIG_VAR_TX
+  memset(cm->above_txfm_context, 0,
+         sizeof(*cm->above_txfm_context) * mi_cols_aligned_to_sb(cm->mi_cols));
+#endif
 
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
@@ -1659,6 +1687,11 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   update_txfm_probs(cm, &header_bc, counts);
 #endif
   update_coef_probs(cpi, &header_bc);
+
+#if CONFIG_VAR_TX
+  update_txfm_partition_probs(cm, &header_bc, counts);
+#endif
+
   update_skip_probs(cm, &header_bc, counts);
 #if CONFIG_MISC_FIXES
   update_seg_probs(cpi, &header_bc);

@@ -97,6 +97,10 @@ void vp10_free_context_buffers(VP10_COMMON *cm) {
   cm->above_context = NULL;
   vpx_free(cm->above_seg_context);
   cm->above_seg_context = NULL;
+#if CONFIG_VAR_TX
+  vpx_free(cm->above_txfm_context);
+  cm->above_txfm_context = NULL;
+#endif
 }
 
 int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
@@ -128,6 +132,14 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
     cm->above_seg_context = (PARTITION_CONTEXT *)vpx_calloc(
         mi_cols_aligned_to_sb(cm->mi_cols), sizeof(*cm->above_seg_context));
     if (!cm->above_seg_context) goto fail;
+
+#if CONFIG_VAR_TX
+    vpx_free(cm->above_txfm_context);
+    cm->above_txfm_context = (TXFM_CONTEXT *)vpx_calloc(
+        mi_cols_aligned_to_sb(cm->mi_cols), sizeof(*cm->above_txfm_context));
+    if (!cm->above_txfm_context) goto fail;
+#endif
+
     cm->above_context_alloc_cols = cm->mi_cols;
   }
 

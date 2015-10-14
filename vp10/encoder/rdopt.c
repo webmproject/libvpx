@@ -1708,6 +1708,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
                             int blk_row, int blk_col, int plane, int block,
                             TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
                             ENTROPY_CONTEXT *ta, ENTROPY_CONTEXT *tl,
+                            TXFM_CONTEXT *tx_above, TXFM_CONTEXT *tx_left,
                             int *rate, int64_t *dist,
                             int64_t *bsse, int *skip,
                             int64_t ref_best_rd, int *is_cost_valid) {
@@ -1724,9 +1725,12 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   ENTROPY_CONTEXT *ptl = tl + blk_row;
   ENTROPY_CONTEXT stxa = 0, stxl = 0;
   int coeff_ctx, i;
+  int ctx = txfm_partition_context(tx_above + (blk_col >> 1),
+                                   tx_left + (blk_row >> 1), tx_size);
+
   int64_t sum_dist = 0, sum_bsse = 0;
   int64_t sum_rd = INT64_MAX;
-  int sum_rate = vp10_cost_bit(128, 1);
+  int sum_rate = vp10_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 1);
   int all_skip = 1;
   int tmp_eob = 0;
 
@@ -1776,7 +1780,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                   plane_bsize, coeff_ctx, rate, dist, bsse, skip);
     if (tx_size > TX_4X4)
-      *rate += vp10_cost_bit(128, 0);
+      *rate += vp10_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 0);
     this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
     tmp_eob = p->eobs[block];
   }
@@ -1799,7 +1803,8 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       int offsetc = (i & 0x01) << bsl;
       select_tx_block(cpi, x, blk_row + offsetr, blk_col + offsetc,
                       plane, block + i * sub_step, tx_size - 1,
-                      plane_bsize, ta, tl, &this_rate, &this_dist,
+                      plane_bsize, ta, tl, tx_above, tx_left,
+                      &this_rate, &this_dist,
                       &this_bsse, &this_skip,
                       ref_best_rd - tmp_rd, &this_cost_valid);
       sum_rate += this_rate;
@@ -1818,6 +1823,8 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     int idx, idy;
     for (i = 0; i < (1 << tx_size); ++i)
       pta[i] = ptl[i] = !(tmp_eob == 0);
+    txfm_partition_update(tx_above + (blk_col >> 1),
+                          tx_left + (blk_row >> 1), tx_size);
     mbmi->inter_tx_size[tx_idx] = tx_size;
 
     for (idy = 0; idy < (1 << tx_size) / 2; ++idy)
@@ -1867,17 +1874,23 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     int block = 0;
     int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
     ENTROPY_CONTEXT ctxa[16], ctxl[16];
+    TXFM_CONTEXT tx_above[8], tx_left[8];
 
     int pnrate = 0, pnskip = 1;
     int64_t pndist = 0, pnsse = 0;
 
     vp10_get_entropy_contexts(bsize, TX_4X4, pd, ctxa, ctxl);
+    memcpy(tx_above, xd->above_txfm_context,
+           sizeof(TXFM_CONTEXT) * (mi_width >> 1));
+    memcpy(tx_left, xd->left_txfm_context,
+           sizeof(TXFM_CONTEXT) * (mi_height >> 1));
 
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         select_tx_block(cpi, x, idy, idx, 0, block,
                         max_txsize_lookup[plane_bsize], plane_bsize,
-                        ctxa, ctxl, &pnrate, &pndist, &pnsse, &pnskip,
+                        ctxa, ctxl, tx_above, tx_left,
+                        &pnrate, &pndist, &pnsse, &pnskip,
                         ref_best_rd - this_rd, &is_cost_valid);
         *rate += pnrate;
         *distortion += pndist;

@@ -1619,6 +1619,11 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   memset(cm->above_seg_context, 0,
          sizeof(*cm->above_seg_context) * aligned_cols);
 
+#if CONFIG_VAR_TX
+  memset(cm->above_txfm_context, 0,
+         sizeof(*cm->above_txfm_context) * aligned_cols);
+#endif
+
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
   if (pbi->tile_data == NULL ||
@@ -1665,6 +1670,9 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
         vp10_tile_set_col(&tile, tile_data->cm, col);
         vp10_zero(tile_data->xd.left_context);
         vp10_zero(tile_data->xd.left_seg_context);
+#if CONFIG_VAR_TX
+        vp10_zero(tile_data->xd.left_txfm_context_buffer);
+#endif
         for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
              mi_col += MI_BLOCK_SIZE) {
           decode_partition(pbi, &tile_data->xd, mi_row,
@@ -1738,6 +1746,9 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
        mi_row += MI_BLOCK_SIZE) {
     vp10_zero(tile_data->xd.left_context);
     vp10_zero(tile_data->xd.left_seg_context);
+#if CONFIG_VAR_TX
+    vp10_zero(tile_data->xd.left_txfm_context_buffer);
+#endif
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
       decode_partition(tile_data->pbi, &tile_data->xd,
@@ -1815,7 +1826,10 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
          sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_mi_cols);
   memset(cm->above_seg_context, 0,
          sizeof(*cm->above_seg_context) * aligned_mi_cols);
-
+#if CONFIG_VAR_TX
+  memset(cm->above_txfm_context, 0,
+         sizeof(*cm->above_txfm_context) * aligned_mi_cols);
+#endif
   // Load tile data into tile_buffers
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
@@ -2269,6 +2283,11 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
   if (cm->tx_mode == TX_MODE_SELECT)
     read_tx_mode_probs(&fc->tx_probs, &r);
   read_coef_probs(fc, cm->tx_mode, &r);
+
+#if CONFIG_VAR_TX
+  for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
+    vp10_diff_update_prob(&r, &fc->txfm_partition_prob[k]);
+#endif
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     vp10_diff_update_prob(&r, &fc->skip_probs[k]);

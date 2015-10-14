@@ -187,6 +187,11 @@ typedef uint8_t PREDICTION_MODE;
 #define COMP_INTER_CONTEXTS 5
 #define REF_CONTEXTS 5
 
+#if CONFIG_VAR_TX
+#define TXFM_PARTITION_CONTEXTS 9
+typedef TX_SIZE TXFM_CONTEXT;
+#endif
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

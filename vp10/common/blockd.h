@@ -216,6 +216,12 @@ typedef struct macroblockd {
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT left_seg_context[8];
 
+#if CONFIG_VAR_TX
+  TXFM_CONTEXT *above_txfm_context;
+  TXFM_CONTEXT *left_txfm_context;
+  TXFM_CONTEXT left_txfm_context_buffer[8];
+#endif
+
 #if CONFIG_VP9_HIGHBITDEPTH
   /* Bit depth: 8, 10, 12 */
   int bd;
