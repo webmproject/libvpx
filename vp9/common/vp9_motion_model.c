@@ -91,7 +91,34 @@ void projectPointsHomography(double *mat, double *points,
 
 #define clip_pixel(v) ((v) < 0 ? 0 : ((v) > 255 ? 255 : (v)))
 
-static unsigned char bilinear(unsigned char *ref, double x, double y,
+double getCubicValue(double p[4], double x) {
+  return p[1] + 0.5 * x * (p[2] - p[0]
+          + x * (2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3]
+          + x * (3.0 * (p[1] - p[2]) + p[3] - p[0])));
+}
+
+void get_subcolumn(unsigned char *ref, double col[4],
+                   int stride, int x, int y_start) {
+  int i;
+  for (i = 0; i < 4; ++i) {
+    col[i] = ref[(i + y_start) * stride + x];
+  }
+}
+
+double bicubic(unsigned char *ref, double x, double y, int stride) {
+  double arr[4];
+  int k;
+  int i = (int) x;
+  int j = (int) y;
+  for (k = 0; k < 4; ++k) {
+    double arr_temp[4];
+    get_subcolumn(ref, arr_temp, stride, i + k - 1, j - 1);
+    arr[k] = getCubicValue(arr_temp, y - j);
+  }
+  return getCubicValue(arr, x - i);
+}
+
+static unsigned char interpolate(unsigned char *ref, double x, double y,
                               int width, int height, int stride) {
   if (x < 0 && y < 0) return ref[0];
   else if (x < 0 && y > height - 1)
@@ -101,27 +128,53 @@ static unsigned char bilinear(unsigned char *ref, double x, double y,
   else if (x > width - 1 && y > height - 1)
     return ref[(height - 1) * stride + (width - 1)];
   else if (x < 0) {
+    int v;
     int i = (int) y;
     double a = y - i;
-    int v = (int)(ref[i * stride] * (1 - a) + ref[(i + 1) * stride] * a + 0.5);
+    if (y > 1 && y < height - 2) {
+      double arr[4];
+      get_subcolumn(ref, arr, stride, 0, i - 1);
+      return clip_pixel(getCubicValue(arr, a));
+    }
+    v = (int)(ref[i * stride] * (1 - a) + ref[(i + 1) * stride] * a + 0.5);
     return clip_pixel(v);
   } else if (y < 0) {
+    int v;
     int j = (int) x;
     double b = x - j;
-    int v = (int)(ref[j] * (1 - b) + ref[j + 1] * b + 0.5);
+    if (x > 1 && x < width - 2) {
+      double arr[4] = {ref[j - 1], ref[j], ref[j + 1], ref[j + 2]};
+      return clip_pixel(getCubicValue(arr, b));
+    }
+    v = (int)(ref[j] * (1 - b) + ref[j + 1] * b + 0.5);
     return clip_pixel(v);
   } else if (x > width - 1) {
+    int v;
     int i = (int) y;
     double a = y - i;
-    int v = (int)(ref[i * stride + width - 1] * (1 - a) +
+    if (y > 1 && y < height - 2) {
+      double arr[4];
+      get_subcolumn(ref, arr, stride, width - 1, i - 1);
+      return clip_pixel(getCubicValue(arr, a));
+    }
+    v = (int)(ref[i * stride + width - 1] * (1 - a) +
                   ref[(i + 1) * stride + width - 1] * a + 0.5);
     return clip_pixel(v);
   } else if (y > height - 1) {
+    int v;
     int j = (int) x;
     double b = x - j;
-    int v = (int)(ref[(height - 1) * stride + j] * (1 - b) +
+    if (x > 1 && x < width - 2) {
+      int row = (height - 1) * stride;
+      double arr[4] = {ref[row + j - 1], ref[row + j],
+                      ref[row + j + 1], ref[row + j + 2]};
+      return clip_pixel(getCubicValue(arr, b));
+    }
+    v = (int)(ref[(height - 1) * stride + j] * (1 - b) +
                   ref[(height - 1) * stride + j + 1] * b + 0.5);
     return clip_pixel(v);
+  } else if (x > 1 && y > 1 && x < width -2 && y < height -2) {
+    return clip_pixel(bicubic(ref, x, y, stride));
   } else {
     int i = (int) y;
     int j = (int) x;
@@ -158,11 +211,10 @@ static void WarpImage(TransformationType type, double *H,
       out[0] *= x_scale / 16.0;
       out[1] *= y_scale / 16.0;
       pred[(j - p_col) + (i - p_row) * p_stride] =
-          bilinear(ref, out[0], out[1], width, height, stride);
+          interpolate(ref, out[0], out[1], width, height, stride);
     }
   }
 }
-
 // Computes the ratio of the warp error to the zero motion error
 double vp9_warp_erroradv_unq(TransformationType type, double *H,
                              unsigned char *ref,
@@ -205,7 +257,7 @@ double vp9_warp_erroradv_unq(TransformationType type, double *H,
       out[1] = subsampling_row ? (out[1] - 0.5) / 2.0 : out[1];
       out[0] *= x_scale / 16.0;
       out[1] *= y_scale / 16.0;
-      pred = bilinear(ref, out[0], out[1], width, height, stride);
+      pred = interpolate(ref, out[0], out[1], width, height, stride);
       err = pred - src[(j - p_col) + (i - p_row) * p_stride];
       sumerr += err * err;
       projectPoints(H_z, in, out_z, 1, 2, 2);
@@ -213,7 +265,7 @@ double vp9_warp_erroradv_unq(TransformationType type, double *H,
       out_z[1] = subsampling_row ? (out_z[1] - 0.5) / 2.0 : out_z[1];
       out_z[0] *= x_scale / 16.0;
       out_z[1] *= y_scale / 16.0;
-      pred_z = bilinear(ref, out_z[0], out_z[1], width, height, stride);
+      pred_z = interpolate(ref, out_z[0], out_z[1], width, height, stride);
       err_z = pred_z - src[(j - p_col) + (i - p_row) * p_stride];
       sumerr_z += err_z * err_z;
     }
