@@ -1933,7 +1933,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
       pbi->need_resync = 0;
     }
-    if (cm->current_video_frame == 0)
+    if (frame_is_intra_only(cm))
       cm->allow_screen_content_tools = vpx_rb_read_bit(rb);
   } else {
     cm->intra_only = cm->show_frame ? 0 : vpx_rb_read_bit(rb);

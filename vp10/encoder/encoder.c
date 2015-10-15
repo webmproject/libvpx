@@ -1945,11 +1945,11 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 
     // Deallocate allocated thread data.
     if (t < cpi->num_workers - 1) {
+      if (cpi->common.allow_screen_content_tools)
+        vpx_free(thread_data->td->mb.palette_buffer);
       vpx_free(thread_data->td->counts);
       vp10_free_pc_tree(thread_data->td);
       vpx_free(thread_data->td);
-      if (cpi->common.allow_screen_content_tools)
-        vpx_free(thread_data->td->mb.palette_buffer);
     }
   }
   vpx_free(cpi->tile_thr_data);

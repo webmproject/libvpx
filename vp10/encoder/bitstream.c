@@ -1217,7 +1217,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
     write_sync_code(wb);
     write_bitdepth_colorspace_sampling(cm, wb);
     write_frame_size(cm, wb);
-    if (cm->current_video_frame == 0)
+    if (frame_is_intra_only(cm))
       vpx_wb_write_bit(wb, cm->allow_screen_content_tools);
   } else {
     if (!cm->show_frame)
