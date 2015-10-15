@@ -231,9 +231,6 @@ static const int mode_lf_lut[MB_MODE_COUNT] = {
 #if CONFIG_LOOP_POSTFILTER
 
 #define BILATERAL_WEIGHT_BITS 4
-static const int bilateral_weight = (1 << BILATERAL_WEIGHT_BITS) - 1;
-static const int bilateral_weight_round = 1 << (BILATERAL_WEIGHT_BITS - 1);
-
 static double bilateral_filters_r_kf[BILATERAL_LEVELS_KF + 1][513];
 static double bilateral_filters_r[BILATERAL_LEVELS + 1][513];
 static double bilateral_filters_s_kf[BILATERAL_LEVELS_KF + 1]
