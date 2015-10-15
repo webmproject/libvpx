@@ -571,6 +571,10 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     cr->qindex_delta[2] = qindex_delta;
     vp9_set_segdata(seg, CR_SEGMENT_ID_BOOST2, SEG_LVL_ALT_Q, qindex_delta);
 
+    // Reset if resoluton change has occurred.
+    if (cpi->resize_pending != 0)
+      vp9_cyclic_refresh_reset_resize(cpi);
+
     // Update the segmentation and refresh map.
     cyclic_refresh_update_map(cpi);
   }

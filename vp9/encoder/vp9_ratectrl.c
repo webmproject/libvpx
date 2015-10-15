@@ -1905,9 +1905,6 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
     rc->buffer_level = rc->optimal_buffer_level;
     rc->bits_off_target = rc->optimal_buffer_level;
     rc->this_frame_target = calc_pframe_target_size_one_pass_cbr(cpi);
-    // Reset cyclic refresh parameters.
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
-      vp9_cyclic_refresh_reset_resize(cpi);
     // Get the projected qindex, based on the scaled target frame size (scaled
     // so target_bits_per_mb in vp9_rc_regulate_q will be correct target).
     target_bits_per_frame = (resize_action >= 0) ?
