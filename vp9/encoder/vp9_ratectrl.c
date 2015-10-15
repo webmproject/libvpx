@@ -1828,6 +1828,8 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   RESIZE_ACTION resize_action = NO_RESIZE;
+  int avg_qp_thr1 = 70;
+  int avg_qp_thr2 = 50;
   cpi->resize_scale_num = 1;
   cpi->resize_scale_den = 1;
   // Don't resize on key frame; reset the counters on key frame.
@@ -1836,6 +1838,15 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
     cpi->resize_count = 0;
     return 0;
   }
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  // If denoiser is on, apply a smaller qp threshold.
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    avg_qp_thr1 = 60;
+    avg_qp_thr2 = 40;
+  }
+#endif
+
   // Resize based on average buffer underflow and QP over some window.
   // Ignore samples close to key frame, since QP is usually high after key.
   if (cpi->rc.frames_since_key > 1 * cpi->framerate) {
@@ -1852,11 +1863,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
       // Resize back up if average QP is low, and we are currently in a resized
       // down state, i.e. 1/2 or 3/4 of original resolution.
       // Currently, use a flag to turn 3/4 resizing feature on/off.
-      if (cpi->resize_state == ORIG &&
-          cpi->resize_buffer_underflow > (cpi->resize_count >> 1)) {
-        resize_action = DOWN_ONEHALF;
-        cpi->resize_state = ONE_HALF;
-      } else if (cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
+      if (cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
         if (cpi->resize_state == THREE_QUARTER) {
           resize_action = DOWN_ONEHALF;
           cpi->resize_state = ONE_HALF;
@@ -1865,9 +1872,9 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
           cpi->resize_state = ONEHALFONLY_RESIZE ? ONE_HALF : THREE_QUARTER;
         }
       } else if (cpi->resize_state != ORIG &&
-                 avg_qp < 60 * cpi->rc.worst_quality / 100) {
+                 avg_qp < avg_qp_thr1 * cpi->rc.worst_quality / 100) {
         if (cpi->resize_state == THREE_QUARTER ||
-            avg_qp < 40 * cpi->rc.worst_quality / 100 ||
+            avg_qp < avg_qp_thr2 * cpi->rc.worst_quality / 100 ||
             ONEHALFONLY_RESIZE) {
           resize_action = UP_ORIG;
           cpi->resize_state = ORIG;
