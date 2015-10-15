@@ -19,6 +19,7 @@
 #include "vpx_util/vpx_thread.h"
 
 #include "vp10/common/ans.h"
+#include "vp10/common/entropy.h"
 #include "vp10/common/thread_common.h"
 #include "vp10/common/onyxc_int.h"
 #include "vp10/common/ppflags.h"
@@ -83,6 +84,7 @@ typedef struct VP10Decoder {
   int inv_tile_order;
   int need_resync;  // wait for key/intra-only frame.
   int hold_ref_buf;  // hold the reference buffer.
+  struct rans_dec_sym token_tab[COEFF_PROB_MODELS - 1][256];
 } VP10Decoder;
 
 int vp10_receive_compressed_data(struct VP10Decoder *pbi,

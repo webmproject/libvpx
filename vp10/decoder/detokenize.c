@@ -60,6 +60,7 @@ static INLINE int read_coeff(const vpx_prob *const probs, int n,
 }
 
 static int decode_coefs(const MACROBLOCKD *const xd,
+                        const struct rans_dec_sym (*const token_tab)[256],
                         PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
@@ -85,7 +86,6 @@ static int decode_coefs(const MACROBLOCKD *const xd,
   const uint8_t *cat4_prob;
   const uint8_t *cat5_prob;
   const uint8_t *cat6_prob;
-  struct rans_dec_sym dec_tab[256];
 
   if (counts) {
     coef_counts = counts->coef[tx_size][type][ref];
@@ -149,10 +149,8 @@ static int decode_coefs(const MACROBLOCKD *const xd,
       prob = coef_probs[band][ctx];
     }
 
-    // TODO: precompute dec_tab
-    unsigned state = ans->state;
-    rans_build_dec_tab(vp10_pareto8_token_probs[prob[PIVOT_NODE] - 1], dec_tab);
-    token = ONE_TOKEN + rans_stream_decode(ans, dec_tab);
+    token = ONE_TOKEN +
+        rans_stream_decode(ans, token_tab[prob[PIVOT_NODE] - 1]);
     INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
     switch (token) {
       case ONE_TOKEN:
@@ -263,6 +261,7 @@ void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
 }
 
 int vp10_decode_block_tokens(MACROBLOCKD *const xd,
+                             const struct rans_dec_sym (*const token_tab)[256],
                              int plane, const scan_order *sc,
                              int x, int y,
                              TX_SIZE tx_size,
@@ -272,7 +271,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
-  const int eob = decode_coefs(xd, pd->plane_type,
+  const int eob = decode_coefs(xd, token_tab, pd->plane_type,
                                pd->dqcoeff, tx_size,
                                dequant, ctx, sc->scan, sc->neighbors, r);
   dec_set_contexts(xd, pd, tx_size, eob > 0, x, y);

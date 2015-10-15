@@ -327,6 +327,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
 }
 
 static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
+                        const struct rans_dec_sym (*const token_tab)[256],
                                                 struct AnsDecoder *const r,
                                                 MB_MODE_INFO *const mbmi,
                                                 int plane,
@@ -350,7 +351,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx);
     const scan_order *sc = get_scan(tx_size, tx_type);
-    const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size,
+    const int eob = vp10_decode_block_tokens(xd, token_tab, plane, sc, col, row, tx_size,
                                              r, mbmi->segment_id);
     inverse_transform_block_intra(xd, plane, tx_type, tx_size,
                                   dst, pd->dst.stride, eob);
@@ -358,6 +359,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 }
 
 static int reconstruct_inter_block(MACROBLOCKD *const xd,
+                        const struct rans_dec_sym (*const token_tab)[256],
                                    struct AnsDecoder *const r,
                                    MB_MODE_INFO *const mbmi, int plane,
                                    int row, int col, TX_SIZE tx_size) {
@@ -366,7 +368,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx);
   const scan_order *sc = get_scan(tx_size, tx_type);
-  const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size, r,
+  const int eob = vp10_decode_block_tokens(xd, token_tab, plane, sc, col, row, tx_size, r,
                                           mbmi->segment_id);
 
   inverse_transform_block_inter(xd, plane, tx_size,
@@ -826,7 +828,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
       for (row = 0; row < max_blocks_high; row += step)
         for (col = 0; col < max_blocks_wide; col += step)
-          predict_and_reconstruct_intra_block(xd, tok, mbmi, plane,
+          predict_and_reconstruct_intra_block(xd, pbi->token_tab, tok, mbmi, plane,
                                               row, col, tx_size);
     }
   } else {
@@ -854,7 +856,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
-            eobtotal += reconstruct_inter_block(xd, tok, mbmi, plane, row, col,
+            eobtotal += reconstruct_inter_block(xd, pbi->token_tab, tok, mbmi, plane, row, col,
                                                 tx_size);
       }
 
