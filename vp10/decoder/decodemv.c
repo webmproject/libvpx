@@ -787,8 +787,7 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
                            idy, idx, r);
     if (xd->counts) {
       const int ctx = get_tx_size_context(xd);
-      inter_block_tx_count_update(cm, xd, mbmi, bsize,
-                                  ctx, &xd->counts->tx);
+      ++get_tx_counts(max_tx_size, ctx, &xd->counts->tx)[mbmi->tx_size];
     }
   } else {
     mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
