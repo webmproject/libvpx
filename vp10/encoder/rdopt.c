@@ -1733,6 +1733,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   int sum_rate = vp10_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 1);
   int all_skip = 1;
   int tmp_eob = 0;
+  int zero_blk_rate;
 
   if (ref_best_rd < 0) {
     *is_cost_valid = 0;
@@ -1775,10 +1776,27 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
     return;
 
+  zero_blk_rate =
+      x->token_costs[tx_size][pd->plane_type][1][0][0][coeff_ctx][EOB_TOKEN];
+
   if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
     mbmi->inter_tx_size[tx_idx] = tx_size;
     tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                   plane_bsize, coeff_ctx, rate, dist, bsse, skip);
+
+    if (RDCOST(x->rdmult, x->rddiv, *rate, *dist) >=
+        RDCOST(x->rdmult, x->rddiv, zero_blk_rate, *bsse) && (*skip == 0) &&
+        !xd->lossless[mbmi->segment_id]) {
+      *rate = zero_blk_rate;
+      *dist = *bsse;
+      *skip = 1;
+      x->blk_skip[plane][blk_row * max_blocks_wide + blk_col] = 1;
+      p->eobs[block] = 0;
+    } else {
+      x->blk_skip[plane][blk_row * max_blocks_wide + blk_col] = 0;
+      *skip = 0;
+    }
+
     if (tx_size > TX_4X4)
       *rate += vp10_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 0);
     this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
@@ -1833,6 +1851,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->tx_size = tx_size;
     if (this_rd == INT64_MAX)
       *is_cost_valid = 0;
+    x->blk_skip[plane][blk_row * max_blocks_wide + blk_col] = *skip;
   } else {
     *rate = sum_rate;
     *dist = sum_dist;
@@ -4368,8 +4387,15 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
+
+#if CONFIG_VAR_TX
+        for (i = 0; i < MAX_MB_PLANE; ++i)
+          memcpy(ctx->blk_skip[i], x->blk_skip[i],
+                 sizeof(uint8_t) * ctx->num_4x4_blk);
+#else
         memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
+#endif
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
@@ -5120,8 +5146,14 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
         best_skip2 = this_skip2;
         if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
+
+#if CONFIG_VAR_TX
+        for (i = 0; i < MAX_MB_PLANE; ++i)
+          memset(ctx->blk_skip[i], 0, sizeof(uint8_t) * ctx->num_4x4_blk);
+#else
         memcpy(ctx->zcoeff_blk, x->zcoeff_blk[TX_4X4],
                sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
+#endif
 
         for (i = 0; i < 4; i++)
           best_bmodes[i] = xd->mi[0]->bmi[i];

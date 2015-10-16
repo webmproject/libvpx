@@ -111,6 +111,9 @@ struct macroblock {
   // Notes transform blocks where no coefficents are coded.
   // Set during mode selection. Read during block encoding.
   uint8_t zcoeff_blk[TX_SIZES][256];
+#if CONFIG_VAR_TX
+  uint8_t blk_skip[MAX_MB_PLANE][256];
+#endif
 
   int skip;
 

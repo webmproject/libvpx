@@ -28,6 +28,10 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
   CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
                   vpx_calloc(num_blk, sizeof(uint8_t)));
   for (i = 0; i < MAX_MB_PLANE; ++i) {
+#if CONFIG_VAR_TX
+    CHECK_MEM_ERROR(cm, ctx->blk_skip[i],
+                    vpx_calloc(num_blk, sizeof(uint8_t)));
+#endif
     for (k = 0; k < 3; ++k) {
       CHECK_MEM_ERROR(cm, ctx->coeff[i][k],
                       vpx_memalign(32, num_pix * sizeof(*ctx->coeff[i][k])));
@@ -50,6 +54,10 @@ static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
   vpx_free(ctx->zcoeff_blk);
   ctx->zcoeff_blk = 0;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
+#if CONFIG_VAR_TX
+    vpx_free(ctx->blk_skip[i]);
+    ctx->blk_skip[i] = 0;
+#endif
     for (k = 0; k < 3; ++k) {
       vpx_free(ctx->coeff[i][k]);
       ctx->coeff[i][k] = 0;
