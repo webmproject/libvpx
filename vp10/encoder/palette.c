@@ -8,14 +8,15 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
 #include "vp10/encoder/palette.h"
 
 static double calc_dist(const double *p1, const double *p2, int dim) {
   double dist = 0;
   int i = 0;
 
-  for (i = 0; i < dim; i++) {
-    dist = dist + (p1[i] - p2[i]) * (p1[i] - p2[i]);
+  for (i = 0; i < dim; ++i) {
+    dist = dist + (p1[i] - round(p2[i])) * (p1[i] - round(p2[i]));
   }
   return dist;
 }
@@ -25,10 +26,10 @@ void vp10_calc_indices(const double *data, const double *centroids,
   int i, j;
   double min_dist, this_dist;
 
-  for (i = 0; i < n; i++) {
+  for (i = 0; i < n; ++i) {
     min_dist = calc_dist(data + i * dim, centroids, dim);
     indices[i] = 0;
-    for (j = 1; j < k; j++) {
+    for (j = 1; j < k; ++j) {
       this_dist = calc_dist(data + i * dim, centroids + j * dim, dim);
       if (this_dist < min_dist) {
         min_dist = this_dist;
@@ -47,23 +48,23 @@ static void calc_centroids(const double *data, double *centroids,
   memset(count, 0, sizeof(count[0]) * k);
   memset(centroids, 0, sizeof(centroids[0]) * k * dim);
 
-  for (i = 0; i < n; i++) {
+  for (i = 0; i < n; ++i) {
     index = indices[i];
     assert(index < k);
-    count[index]++;
-    for (j = 0; j < dim; j++) {
+    ++count[index];
+    for (j = 0; j < dim; ++j) {
       centroids[index * dim + j] += data[i * dim + j];
     }
   }
 
-  for (i = 0; i < k; i++) {
+  for (i = 0; i < k; ++i) {
     if (count[i] == 0) {
       // TODO(huisu): replace rand() with something else.
       memcpy(centroids + i * dim, data + (rand() % n) * dim,
                  sizeof(centroids[0]) * dim);
     } else {
       const double norm = 1.0 / count[i];
-      for (j = 0; j < dim; j++)
+      for (j = 0; j < dim; ++j)
         centroids[i * dim + j] *= norm;
     }
   }
@@ -75,7 +76,7 @@ static double calc_total_dist(const double *data, const double *centroids,
   int i;
   (void) k;
 
-  for (i = 0; i < n; i++)
+  for (i = 0; i < n; ++i)
     dist += calc_dist(data + i * dim, centroids + indices[i] * dim, dim);
 
   return dist;
@@ -107,7 +108,7 @@ int vp10_k_means(const double *data, double *centroids, uint8_t *indices,
     memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
     memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
     pre_dist = this_dist;
-    i++;
+    ++i;
   }
 
   return i;
@@ -169,7 +170,7 @@ int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
   for (r = 0; r < rows; ++r) {
     for (c = 0; c < cols; ++c) {
       val = src[r * stride + c];
-      val_count[val]++;
+      ++val_count[val];
     }
   }
 

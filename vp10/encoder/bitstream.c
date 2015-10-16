@@ -48,7 +48,7 @@ static const struct vp10_token palette_size_encodings[] = {
     {0, 1}, {2, 2}, {6, 3}, {14, 4}, {30, 5}, {62, 6}, {63, 6},
 };
 static const struct vp10_token
-palette_color_encodings[PALETTE_MAX_SIZE - 1][8] = {
+palette_color_encodings[PALETTE_MAX_SIZE - 1][PALETTE_MAX_SIZE] = {
     {{0, 1}, {1, 1}},  // 2 colors
     {{0, 1}, {2, 2}, {3, 2}},  // 3 colors
     {{0, 1}, {2, 2}, {6, 3}, {7, 3}},  // 4 colors

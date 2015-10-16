@@ -285,7 +285,8 @@ const vpx_tree_index vp10_palette_size_tree[TREE_SIZE(PALETTE_SIZES)] = {
 };
 
 // TODO(huisu): tune these probs
-const vpx_prob vp10_default_palette_y_size_prob[10][PALETTE_SIZES - 1] = {
+const vpx_prob
+vp10_default_palette_y_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1] = {
     {  96,  89, 100,  64,  77, 130},
     {  22,  15,  44,  16,  34,  82},
     {  30,  19,  57,  18,  38,  86},
@@ -298,7 +299,8 @@ const vpx_prob vp10_default_palette_y_size_prob[10][PALETTE_SIZES - 1] = {
     {  98, 105, 142,  63,  64, 152},
 };
 
-const vpx_prob vp10_default_palette_uv_size_prob[10][PALETTE_SIZES - 1] = {
+const vpx_prob
+vp10_default_palette_uv_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1] = {
     { 160, 196, 228, 213, 175, 230},
     {  87, 148, 208, 141, 166, 163},
     {  72, 151, 204, 139, 155, 161},
@@ -311,7 +313,9 @@ const vpx_prob vp10_default_palette_uv_size_prob[10][PALETTE_SIZES - 1] = {
     {  72,  55,  66,  68,  79, 107},
 };
 
-const vpx_prob vp10_default_palette_y_mode_prob[10][3] = {
+const vpx_prob
+vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES][PALETTE_Y_MODE_CONTEXTS]
+                                                      = {
     { 240,  180,  100, },
     { 240,  180,  100, },
     { 240,  180,  100, },

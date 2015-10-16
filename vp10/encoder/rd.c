@@ -85,7 +85,7 @@ static void fill_mode_costs(VP10_COMP *cpi) {
     vp10_cost_tokens(cpi->switchable_interp_costs[i],
                     fc->switchable_interp_prob[i], vp10_switchable_interp_tree);
 
-  for (i = 0; i < 10; ++i) {
+  for (i = 0; i < PALETTE_BLOCK_SIZES; ++i) {
     vp10_cost_tokens(cpi->palette_y_size_cost[i],
                      vp10_default_palette_y_size_prob[i],
                      vp10_palette_size_tree);
