@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d90802ae_8b9dd1a5",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-16T21:31:52Z",
+      "side": 1,
+      "message": "change to \"if (xd-\u003elossless || !use_ext_tx(mbmi-\u003etx_size, mbmi-\u003esb_type))\" to avoid mismatch.",
+      "revId": "3524f48fbeb9d121932bd1f706edfc44692a06dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
