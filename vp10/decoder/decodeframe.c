@@ -1683,6 +1683,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
             vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                                "Failed to decode tile data");
       }
+#if !CONFIG_VAR_TX
       // Loopfilter one row.
       if (cm->lf.filter_level && !cm->skip_loop_filter) {
         const int lf_start = mi_row - MI_BLOCK_SIZE;
@@ -1709,10 +1710,15 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
       if (cm->frame_parallel_decode)
         vp10_frameworker_broadcast(pbi->cur_buf,
                                   mi_row << MI_BLOCK_SIZE_LOG2);
+#endif
     }
   }
 
   // Loopfilter remaining rows in the frame.
+#if CONFIG_VAR_TX
+  vp10_loop_filter_frame(get_frame_new_buffer(cm), cm, &pbi->mb,
+                         cm->lf.filter_level, 0, 0);
+#else
   if (cm->lf.filter_level && !cm->skip_loop_filter) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     winterface->sync(&pbi->lf_worker);
@@ -1720,6 +1726,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
     lf_data->stop = cm->mi_rows;
     winterface->execute(&pbi->lf_worker);
   }
+#endif
 
   // Get last tile data.
   tile_data = pbi->tile_data + tile_cols * tile_rows - 1;

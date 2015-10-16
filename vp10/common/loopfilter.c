@@ -1183,9 +1183,9 @@ static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp10_filter_block_plane_non420(VP10_COMMON *cm,
-                                   struct macroblockd_plane *plane,
-                                   MODE_INFO **mi_8x8,
-                                   int mi_row, int mi_col) {
+                                    struct macroblockd_plane *plane,
+                                    MODE_INFO **mi_8x8,
+                                    int mi_row, int mi_col) {
   const int ss_x = plane->subsampling_x;
   const int ss_y = plane->subsampling_y;
   const int row_step = 1 << ss_y;
@@ -1209,16 +1209,21 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
     // Determine the vertical edges that need filtering
     for (c = 0; c < MI_BLOCK_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
       const MODE_INFO *mi = mi_8x8[c];
-      const BLOCK_SIZE sb_type = mi[0].mbmi.sb_type;
-      const int skip_this = mi[0].mbmi.skip && is_inter_block(&mi[0].mbmi);
+      const MB_MODE_INFO *mbmi = &mi[0].mbmi;
+      const BLOCK_SIZE sb_type = mbmi->sb_type;
+      const int skip_this = mbmi->skip && is_inter_block(mbmi);
+      const int blk_row = r & (num_8x8_blocks_high_lookup[sb_type] - 1);
+      const int blk_col = c & (num_8x8_blocks_wide_lookup[sb_type] - 1);
+
       // left edge of current unit is block/partition edge -> no skip
       const int block_edge_left = (num_4x4_blocks_wide_lookup[sb_type] > 1) ?
-          !(c & (num_8x8_blocks_wide_lookup[sb_type] - 1)) : 1;
+          !blk_col : 1;
       const int skip_this_c = skip_this && !block_edge_left;
       // top edge of current unit is block/partition edge -> no skip
       const int block_edge_above = (num_4x4_blocks_high_lookup[sb_type] > 1) ?
-          !(r & (num_8x8_blocks_high_lookup[sb_type] - 1)) : 1;
+          !blk_row : 1;
       const int skip_this_r = skip_this && !block_edge_above;
+
       const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
                             ? get_uv_tx_size(&mi[0].mbmi, plane)
                             : mi[0].mbmi.tx_size;
@@ -1227,7 +1232,7 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
 
       // Filter level can vary per MI
       if (!(lfl[(r << 3) + (c >> ss_x)] =
-            get_filter_level(&cm->lf_info, &mi[0].mbmi)))
+            get_filter_level(&cm->lf_info, mbmi)))
         continue;
 
       // Build masks based on the transform size of each block
@@ -1568,13 +1573,14 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
 }
 
 void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
-                          VP10_COMMON *cm,
-                          struct macroblockd_plane planes[MAX_MB_PLANE],
-                          int start, int stop, int y_only) {
+                           VP10_COMMON *cm,
+                           struct macroblockd_plane planes[MAX_MB_PLANE],
+                           int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
+  int mi_row, mi_col;
+#if !CONFIG_VAR_TX
   enum lf_path path;
   LOOP_FILTER_MASK lfm;
-  int mi_row, mi_col;
 
   if (y_only)
     path = LF_PATH_444;
@@ -1584,6 +1590,7 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
     path = LF_PATH_444;
   else
     path = LF_PATH_SLOW;
+#endif
 
   for (mi_row = start; mi_row < stop; mi_row += MI_BLOCK_SIZE) {
     MODE_INFO **mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
@@ -1593,10 +1600,14 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
 
       vp10_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
+#if CONFIG_VAR_TX
+      for (plane = 0; plane < num_planes; ++plane)
+        vp10_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
+                                       mi_row, mi_col);
+#else
       // TODO(JBB): Make setup_mask work for non 420.
       vp10_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
                      &lfm);
-
       vp10_filter_block_plane_ss00(cm, &planes[0], mi_row, &lfm);
       for (plane = 1; plane < num_planes; ++plane) {
         switch (path) {
@@ -1612,6 +1623,7 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
             break;
         }
       }
+#endif
     }
   }
 }

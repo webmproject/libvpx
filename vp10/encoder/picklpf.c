@@ -41,6 +41,10 @@ static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
   VP10_COMMON *const cm = &cpi->common;
   int64_t filt_err;
 
+#if CONFIG_VAR_TX
+  vp10_loop_filter_frame(cm->frame_to_show, cm, &cpi->td.mb.e_mbd, filt_level,
+                        1, partial_frame);
+#else
   if (cpi->num_workers > 1)
     vp10_loop_filter_frame_mt(cm->frame_to_show, cm, cpi->td.mb.e_mbd.plane,
                              filt_level, 1, partial_frame,
@@ -48,6 +52,7 @@ static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
   else
     vp10_loop_filter_frame(cm->frame_to_show, cm, &cpi->td.mb.e_mbd, filt_level,
                           1, partial_frame);
+#endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
