@@ -771,6 +771,8 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
   inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
 
 #if CONFIG_VAR_TX
+  xd->above_txfm_context = cm->above_txfm_context + mi_col;
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !mbmi->skip && inter_block) {
     const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
@@ -779,8 +781,6 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
     const int width  = num_4x4_blocks_wide_lookup[bsize];
     const int height = num_4x4_blocks_high_lookup[bsize];
     int idx, idy;
-    xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
     for (idy = 0; idy < height; idy += bs)
       for (idx = 0; idx < width; idx += bs)
         read_tx_size_inter(cm, xd, mbmi, xd->counts, max_tx_size,
@@ -800,6 +800,9 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
         for (idx = 0; idx < width; ++idx)
           mbmi->inter_tx_size[(idy >> 1) * 8 + (idx >> 1)] = mbmi->tx_size;
     }
+
+    set_txfm_ctx(xd->left_txfm_context, mbmi->tx_size, xd->n8_h);
+    set_txfm_ctx(xd->above_txfm_context, mbmi->tx_size, xd->n8_w);
   }
 #else
   mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
