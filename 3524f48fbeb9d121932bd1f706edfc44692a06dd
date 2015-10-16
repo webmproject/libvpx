@@ -16,6 +16,69 @@
       "revId": "3524f48fbeb9d121932bd1f706edfc44692a06dd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99020a8c_ec0fbf47",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-16T21:59:47Z",
+      "side": 1,
+      "message": "\"get_ext_tx_types\" is called in line 619 (in use_ext_tx()) and 622, seems a little redundant.",
+      "revId": "3524f48fbeb9d121932bd1f706edfc44692a06dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f91146d4_f2f2fec9",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-16T21:59:47Z",
+      "side": 1,
+      "message": "Instead of using if-else, we can put the trees in to an array, e.g. vp10_tx_type_trees[TX_TYPE_TIERS], where TX_TYPE_TIERS should be 3 currently. Then we can access these trees using a tx_type tier index. It also applies for the probabilities, bit costs, ext_tx_type_used etc.",
+      "range": {
+        "startLine": 627,
+        "startChar": 7,
+        "endLine": 645,
+        "endChar": 9
+      },
+      "revId": "3524f48fbeb9d121932bd1f706edfc44692a06dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39de7e5b_51b2f41e",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-16T21:59:47Z",
+      "side": 1,
+      "message": "This can be refactored as something like \"write_tx_type\"; similarly for reading tx_tpye in decoder.",
+      "range": {
+        "startLine": 464,
+        "startChar": 0,
+        "endLine": 489,
+        "endChar": 24
+      },
+      "revId": "3524f48fbeb9d121932bd1f706edfc44692a06dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
