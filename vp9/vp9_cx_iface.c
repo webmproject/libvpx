@@ -45,7 +45,7 @@ struct vp9_extracfg {
   vpx_bit_depth_t             bit_depth;
   vp9e_tune_content           content;
   vpx_color_space_t           color_space;
-  int                         color_range;
+  vpx_color_range_t           color_range;
   int                         render_width;
   int                         render_height;
 };
@@ -327,7 +327,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     ERROR("Codec bit-depth 8 not supported in profile > 1");
   }
   RANGE_CHECK(extra_cfg, color_space, VPX_CS_UNKNOWN, VPX_CS_SRGB);
-  RANGE_CHECK(extra_cfg, color_range, 0, 2);
+  RANGE_CHECK(extra_cfg, color_range,
+              VPX_CR_STUDIO_RANGE, VPX_CR_FULL_RANGE);
   return VPX_CODEC_OK;
 }
 
