@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "99020a8c_86c6ea77",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-10-16T16:14:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0435d80_68ff6c21",
+      "range": {
+        "startLine": 422,
+        "startChar": 7,
+        "endLine": 422,
+        "endChar": 47
+      },
+      "revId": "169101655fe979353fcc60ed18372c90fab62f9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5061411e_105d3555",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-08T18:19:18Z",
       "side": 1,
       "message": "These two lines should have indention of 4 spaces.\nqindex_thresh \u003d\n    cpi-\u003eoxcf.content \u003d\u003d VP9E_CONTENT_SCREEN\n        ? vp9_get_qindex(\u0026cm-\u003eseg, CR_SEGMENT_ID_BOOST2, cm-\u003ebase_qindex)\n        : vp9_get_qindex(\u0026cm-\u003eseg, CR_SEGMENT_ID_BOOST1, cm-\u003ebase_qindex);",
+      "range": {
+        "startLine": 423,
+        "startChar": 0,
+        "endLine": 424,
+        "endChar": 73
+      },
+      "revId": "169101655fe979353fcc60ed18372c90fab62f9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9f26ee4_affc199d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-10-16T16:14:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5061411e_105d3555",
       "range": {
         "startLine": 423,
         "startChar": 0,
