@@ -3250,6 +3250,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
                                              &cpi->scaled_last_source,
                                              (cpi->oxcf.pass == 0));
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  if (cpi->oxcf.noise_sensitivity > 0 &&
+      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+    vp9_denoiser_update_noise_estimate(cpi);
+  }
+#endif
+
   if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
       cpi->resize_state == 0 &&
