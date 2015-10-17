@@ -303,6 +303,7 @@ typedef struct VP10Common {
   ENTROPY_CONTEXT *above_context;
 #if CONFIG_VAR_TX
   TXFM_CONTEXT *above_txfm_context;
+  TXFM_CONTEXT left_txfm_context[8];
 #endif
   int above_context_alloc_cols;
 

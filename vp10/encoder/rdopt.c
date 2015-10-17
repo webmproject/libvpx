@@ -514,7 +514,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     int dst_stride = xd->plane[plane].dst.stride;
     unsigned int tmp_sse;
     PREDICTION_MODE mode = (plane == 0) ?
-            get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
+        get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
 
 #if CONFIG_VP9_HIGHBITDEPTH
     vp10_encode_block_intra(plane, block, blk_row, blk_col,
