@@ -1989,6 +1989,9 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       if (!vp10_read_sync_code(rb))
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "Invalid frame sync code");
+#if CONFIG_MISC_FIXES
+      read_bitdepth_colorspace_sampling(cm, rb);
+#else
       if (cm->profile > PROFILE_0) {
         read_bitdepth_colorspace_sampling(cm, rb);
       } else {
@@ -2004,6 +2007,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
         cm->use_highbitdepth = 0;
 #endif
       }
+#endif
 
       pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
