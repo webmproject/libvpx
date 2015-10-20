@@ -141,29 +141,11 @@ extern vpx_codec_iface_t *vpx_codec_vp10_cx(void);
  * \sa #vpx_codec_control
  */
 enum vp8e_enc_control_id {
-  /*!\brief Codec control function to set mode of entropy update in encoder.
-   *
-   * Supported in codecs: VP8, VP9
-   */
-  VP8E_UPD_ENTROPY           = 5,
-
-  /*!\brief Codec control function to set reference update mode in encoder.
-   *
-   * Supported in codecs: VP8, VP9
-   */
-  VP8E_UPD_REFERENCE,
-
-  /*!\brief Codec control function to set which reference frame encoder can use.
-   *
-   * Supported in codecs: VP8, VP9
-   */
-  VP8E_USE_REFERENCE,
-
   /*!\brief Codec control function to pass an ROI map to encoder.
    *
    * Supported in codecs: VP8, VP9
    */
-  VP8E_SET_ROI_MAP,
+  VP8E_SET_ROI_MAP           = 8,
 
   /*!\brief Codec control function to pass an Active map to encoder.
    *
@@ -720,17 +702,6 @@ typedef struct vpx_svc_ref_frame_config {
  * additional common controls are defined in vp8.h
  *
  */
-
-
-/* These controls have been deprecated in favor of the flags parameter to
- * vpx_codec_encode(). See the definition of VP8_EFLAG_* above.
- */
-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_ENTROPY,            int)
-#define VPX_CTRL_VP8E_UPD_ENTROPY
-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_REFERENCE,          int)
-#define VPX_CTRL_VP8E_UPD_REFERENCE
-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_USE_REFERENCE,          int)
-#define VPX_CTRL_VP8E_USE_REFERENCE
 
 VPX_CTRL_USE_TYPE(VP8E_SET_FRAME_FLAGS,        int)
 #define VPX_CTRL_VP8E_SET_FRAME_FLAGS

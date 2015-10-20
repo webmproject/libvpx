@@ -1267,30 +1267,6 @@ static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
   }
 }
 
-static vpx_codec_err_t ctrl_update_entropy(vpx_codec_alg_priv_t *ctx,
-                                           va_list args) {
-  const int update = va_arg(args, int);
-
-  vp9_update_entropy(ctx->cpi, update);
-  return VPX_CODEC_OK;
-}
-
-static vpx_codec_err_t ctrl_update_reference(vpx_codec_alg_priv_t *ctx,
-                                             va_list args) {
-  const int ref_frame_flags = va_arg(args, int);
-
-  vp9_update_reference(ctx->cpi, ref_frame_flags);
-  return VPX_CODEC_OK;
-}
-
-static vpx_codec_err_t ctrl_use_reference(vpx_codec_alg_priv_t *ctx,
-                                          va_list args) {
-  const int reference_flag = va_arg(args, int);
-
-  vp9_use_as_reference(ctx->cpi, reference_flag);
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t ctrl_set_roi_map(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
   (void)ctx;
@@ -1483,9 +1459,6 @@ static vpx_codec_err_t ctrl_set_render_size(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,                ctrl_copy_reference},
-  {VP8E_UPD_ENTROPY,                  ctrl_update_entropy},
-  {VP8E_UPD_REFERENCE,                ctrl_update_reference},
-  {VP8E_USE_REFERENCE,                ctrl_use_reference},
 
   // Setters
   {VP8_SET_REFERENCE,                 ctrl_set_reference},
