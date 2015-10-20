@@ -325,7 +325,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
                                    get_y_mode_probs(mi, above_mi, left_mi, 0));
   }
 
-  mbmi->uv_mode = read_intra_mode(r, vp10_kf_uv_mode_prob[mbmi->mode]);
+  mbmi->uv_mode = read_intra_mode_uv(cm, xd, r, mbmi->mode);
 
   mbmi->palette_mode_info.palette_size[0] = 0;
   mbmi->palette_mode_info.palette_size[1] = 0;

@@ -922,11 +922,11 @@ static INLINE void dec_update_partition_context(MACROBLOCKD *xd,
   memset(left_ctx, partition_context_lookup[subsize].left, bw);
 }
 
-static PARTITION_TYPE read_partition(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                     vpx_reader *r,
+static PARTITION_TYPE read_partition(VP10_COMMON *cm, MACROBLOCKD *xd,
+                                     int mi_row, int mi_col, vpx_reader *r,
                                      int has_rows, int has_cols, int bsl) {
   const int ctx = dec_partition_plane_context(xd, mi_row, mi_col, bsl);
-  const vpx_prob *const probs = get_partition_probs(xd, ctx);
+  const vpx_prob *const probs = cm->fc->partition_prob[ctx];
   FRAME_COUNTS *counts = xd->counts;
   PARTITION_TYPE p;
 
@@ -961,7 +961,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  partition = read_partition(xd, mi_row, mi_col, r, has_rows, has_cols,
+  partition = read_partition(cm, xd, mi_row, mi_col, r, has_rows, has_cols,
                              n8x8_l2);
   subsize = subsize_lookup[partition][bsize];  // get_subsize(bsize, partition);
   if (!hbs) {
@@ -2120,7 +2120,7 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 #endif
   FRAME_CONTEXT *const fc = cm->fc;
   vpx_reader r;
-  int k;
+  int k, i, j;
 
   if (vpx_reader_init(&r, data, partition_size, pbi->decrypt_cb,
                       pbi->decrypt_state))
@@ -2146,11 +2146,18 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     for (k = 0; k < MAX_SEGMENTS - 1; k++)
       vp10_diff_update_prob(&r, &cm->fc->seg.tree_probs[k]);
   }
+
+  for (j = 0; j < INTRA_MODES; j++)
+    for (i = 0; i < INTRA_MODES - 1; ++i)
+      vp10_diff_update_prob(&r, &fc->uv_mode_prob[j][i]);
+
+  for (j = 0; j < PARTITION_CONTEXTS; ++j)
+    for (i = 0; i < PARTITION_TYPES - 1; ++i)
+      vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);
 #endif
 
   if (!frame_is_intra_only(cm)) {
     nmv_context *const nmvc = &fc->nmvc;
-    int i, j;
 
     read_inter_mode_probs(fc, &r);
 
@@ -2171,15 +2178,11 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
       for (i = 0; i < INTRA_MODES - 1; ++i)
         vp10_diff_update_prob(&r, &fc->y_mode_prob[j][i]);
 
-#if CONFIG_MISC_FIXES
-    for (j = 0; j < INTRA_MODES; j++)
-      for (i = 0; i < INTRA_MODES - 1; ++i)
-        vp10_diff_update_prob(&r, &fc->uv_mode_prob[j][i]);
-#endif
-
+#if !CONFIG_MISC_FIXES
     for (j = 0; j < PARTITION_CONTEXTS; ++j)
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
         vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);
+#endif
 
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
   }
