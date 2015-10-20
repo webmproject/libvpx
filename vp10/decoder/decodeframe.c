@@ -1448,9 +1448,9 @@ static void get_tile_buffer(const uint8_t *const data_end,
     if (decrypt_cb) {
       uint8_t be_data[4];
       decrypt_cb(decrypt_state, *data, be_data, tile_sz_mag + 1);
-      size = mem_get_varsize(be_data, tile_sz_mag);
+      size = mem_get_varsize(be_data, tile_sz_mag) + CONFIG_MISC_FIXES;
     } else {
-      size = mem_get_varsize(*data, tile_sz_mag);
+      size = mem_get_varsize(*data, tile_sz_mag) + CONFIG_MISC_FIXES;
     }
     *data += tile_sz_mag + 1;
 

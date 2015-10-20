@@ -506,6 +506,7 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
 
         for (j = 0; j < mag; ++j)
           this_sz |= (*x++) << (j * 8);
+        this_sz += CONFIG_MISC_FIXES;
         sizes[i] = this_sz;
 #if CONFIG_MISC_FIXES
         frame_sz_sum += this_sz;
