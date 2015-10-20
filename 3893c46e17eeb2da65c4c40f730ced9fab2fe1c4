@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39de7e5b_f782ebfe",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-10-20T20:01:57Z",
+      "side": 1,
+      "message": "Why not use punpckldq like you did in .highprec section?",
+      "range": {
+        "startLine": 69,
+        "startChar": 69,
+        "endLine": 69,
+        "endChar": 73
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ec2e3d_6b240cc4",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-10-20T20:01:57Z",
+      "side": 1,
+      "message": "pshufd may be slow on some platforms. Should a shift work here?",
+      "range": {
+        "startLine": 90,
+        "startChar": 22,
+        "endLine": 90,
+        "endChar": 25
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39111e0a_c711cedb",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-10-20T20:01:57Z",
+      "side": 1,
+      "message": "There are only 4 arguments. ssz should be in register already. (?)",
+      "range": {
+        "startLine": 91,
+        "startChar": 17,
+        "endLine": 91,
+        "endChar": 20
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
