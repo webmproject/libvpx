@@ -708,8 +708,10 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int mi_col = -xd->mb_to_left_edge >> 6;
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int right_available =
+      mi_col + (bw >> !pd->subsampling_x) < xd->tile.mi_col_end;
   const int have_right = vp10_has_right(bsize, mi_row, mi_col,
-                                        xd->mb_to_right_edge > 0,
+                                        right_available,
                                         tx_size, loff, aoff,
                                         pd->subsampling_x);
   const int have_bottom = vp10_has_bottom(bsize, mi_row, mi_col,
