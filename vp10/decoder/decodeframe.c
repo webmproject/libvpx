@@ -2156,7 +2156,15 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
       vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);
 #endif
 
-  if (!frame_is_intra_only(cm)) {
+  if (frame_is_intra_only(cm)) {
+    vp10_copy(cm->kf_y_prob, vp10_kf_y_mode_prob);
+#if CONFIG_MISC_FIXES
+    for (k = 0; k < INTRA_MODES; k++)
+      for (j = 0; j < INTRA_MODES; j++)
+        for (i = 0; i < INTRA_MODES - 1; ++i)
+          vp10_diff_update_prob(&r, &cm->kf_y_prob[k][j][i]);
+#endif
+  } else {
     nmv_context *const nmvc = &fc->nmvc;
 
     read_inter_mode_probs(fc, &r);

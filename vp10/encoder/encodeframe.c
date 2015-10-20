@@ -2900,7 +2900,9 @@ void vp10_encode_frame(VP10_COMP *cpi) {
   }
 }
 
-static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
+static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi,
+                            const MODE_INFO *above_mi, const MODE_INFO *left_mi,
+                            const int intraonly) {
   const PREDICTION_MODE y_mode = mi->mbmi.mode;
   const PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
@@ -2910,10 +2912,25 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
     for (idy = 0; idy < 2; idy += num_4x4_h)
-      for (idx = 0; idx < 2; idx += num_4x4_w)
-        ++counts->y_mode[0][mi->bmi[idy * 2 + idx].as_mode];
+      for (idx = 0; idx < 2; idx += num_4x4_w) {
+        const int bidx = idy * 2 + idx;
+        const PREDICTION_MODE bmode = mi->bmi[bidx].as_mode;
+        if (intraonly) {
+          const PREDICTION_MODE a = vp10_above_block_mode(mi, above_mi, bidx);
+          const PREDICTION_MODE l = vp10_left_block_mode(mi, left_mi, bidx);
+          ++counts->kf_y_mode[a][l][bmode];
+        } else {
+          ++counts->y_mode[0][bmode];
+        }
+      }
   } else {
-    ++counts->y_mode[size_group_lookup[bsize]][y_mode];
+    if (intraonly) {
+      const PREDICTION_MODE above = vp10_above_block_mode(mi, above_mi, 0);
+      const PREDICTION_MODE left = vp10_left_block_mode(mi, left_mi, 0);
+      ++counts->kf_y_mode[above][left][y_mode];
+    } else {
+      ++counts->y_mode[size_group_lookup[bsize]][y_mode];
+    }
   }
 
   ++counts->uv_mode[y_mode][uv_mode];
@@ -2953,7 +2970,8 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
       vp10_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
-      sum_intra_stats(td->counts, mi);
+      sum_intra_stats(td->counts, mi, xd->above_mi, xd->left_mi,
+                      frame_is_intra_only(cm));
 
     if (bsize >= BLOCK_8X8 && output_enabled) {
       if (mbmi->palette_mode_info.palette_size[0] > 0) {

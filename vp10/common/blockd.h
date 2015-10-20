@@ -282,15 +282,6 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
   }
 }
 
-static INLINE const vpx_prob *get_y_mode_probs(const MODE_INFO *mi,
-                                               const MODE_INFO *above_mi,
-                                               const MODE_INFO *left_mi,
-                                               int block) {
-  const PREDICTION_MODE above = vp10_above_block_mode(mi, above_mi, block);
-  const PREDICTION_MODE left = vp10_left_block_mode(mi, left_mi, block);
-  return vp10_kf_y_mode_prob[above][left];
-}
-
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   BLOCK_SIZE plane_bsize,
                                                   TX_SIZE tx_size,

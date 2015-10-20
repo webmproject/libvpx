@@ -455,7 +455,8 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     write_selected_tx_size(cm, xd, w);
 
   if (bsize >= BLOCK_8X8) {
-    write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
+    write_intra_mode(w, mbmi->mode,
+                     get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -465,7 +466,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int block = idy * 2 + idx;
         write_intra_mode(w, mi->bmi[block].as_mode,
-                         get_y_mode_probs(mi, above_mi, left_mi, block));
+                         get_y_mode_probs(cm, mi, above_mi, left_mi, block));
       }
     }
   }
@@ -1348,6 +1349,9 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   FRAME_COUNTS *counts = cpi->td.counts;
   vpx_writer header_bc;
   int i;
+#if CONFIG_MISC_FIXES
+  int j;
+#endif
 
   vpx_start_encode(&header_bc, data);
 
@@ -1373,7 +1377,15 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
                      counts->partition[i], PARTITION_TYPES, &header_bc);
 #endif
 
-  if (!frame_is_intra_only(cm)) {
+  if (frame_is_intra_only(cm)) {
+    vp10_copy(cm->kf_y_prob, vp10_kf_y_mode_prob);
+#if CONFIG_MISC_FIXES
+    for (i = 0; i < INTRA_MODES; ++i)
+      for (j = 0; j < INTRA_MODES; ++j)
+        prob_diff_update(vp10_intra_mode_tree, cm->kf_y_prob[i][j],
+                         counts->kf_y_mode[i][j], INTRA_MODES, &header_bc);
+#endif
+  } else {
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
       prob_diff_update(vp10_inter_mode_tree, cm->fc->inter_mode_probs[i],
                        counts->inter_mode[i], INTER_MODES, &header_bc);
