@@ -1326,7 +1326,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
 #if CONFIG_MISC_FIXES
-  if (xd->lossless)
+  if (!cm->seg.enabled && xd->lossless[0])
     cm->tx_mode = TX_4X4;
   else
     write_txfm_mode(cm->tx_mode, wb);
@@ -1356,7 +1356,7 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   vpx_start_encode(&header_bc, data);
 
 #if !CONFIG_MISC_FIXES
-  if (cpi->td.mb.e_mbd.lossless)
+  if (cpi->td.mb.e_mbd.lossless[0])
     cm->tx_mode = TX_4X4;
   else
     update_txfm_probs(cm, &header_bc, counts);

@@ -2203,7 +2203,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
         // terminated for current branch of the partition search tree.
         // The dist & rate thresholds are set to 0 at speed 0 to disable the
         // early termination at that speed.
-        if (!x->e_mbd.lossless &&
+        if (!x->e_mbd.lossless[xd->mi[0]->mbmi.segment_id] &&
             (ctx->skippable && best_rdc.dist < dist_breakout_thr &&
             best_rdc.rate < rate_breakout_thr)) {
           do_split = 0;
@@ -2588,7 +2588,7 @@ static MV_REFERENCE_FRAME get_frame_type(const VP10_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
-  if (xd->lossless)
+  if (!cpi->common.seg.enabled && xd->lossless[0])
     return ONLY_4X4;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
@@ -2695,6 +2695,7 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   RD_COUNTS *const rdc = &cpi->td.rd_counts;
+  int i;
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
@@ -2704,12 +2705,21 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   vp10_zero(rdc->comp_pred_diff);
   vp10_zero(rdc->filter_diff);
 
-  xd->lossless = cm->base_qindex == 0 &&
-                 cm->y_dc_delta_q == 0 &&
-                 cm->uv_dc_delta_q == 0 &&
-                 cm->uv_ac_delta_q == 0;
+  for (i = 0; i < (cm->seg.enabled ? MAX_SEGMENTS : 1); ++i) {
+#if CONFIG_MISC_FIXES
+    const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
+#endif
+    xd->lossless[i] = cm->y_dc_delta_q == 0 &&
+#if CONFIG_MISC_FIXES
+                      qindex == 0 &&
+#else
+                      cm->base_qindex == 0 &&
+#endif
+                      cm->uv_dc_delta_q == 0 &&
+                      cm->uv_ac_delta_q == 0;
+  }
 
-  if (xd->lossless)
+  if (!cm->seg.enabled && xd->lossless[0])
     x->optimize = 0;
 
   cm->tx_mode = select_tx_mode(cpi, xd);

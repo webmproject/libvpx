@@ -211,7 +211,7 @@ typedef struct macroblockd {
   int bd;
 #endif
 
-  int lossless;
+  int lossless[MAX_SEGMENTS];
   int corrupted;
 
   struct vpx_internal_error_info *error_info;
@@ -240,8 +240,8 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi) ||
-      mbmi->tx_size >= TX_32X32)
+  if (plane_type != PLANE_TYPE_Y || xd->lossless[mbmi->segment_id] ||
+      is_inter_block(mbmi) || mbmi->tx_size >= TX_32X32)
     return DCT_DCT;
 
   return intra_mode_to_tx_type_lookup[get_y_mode(mi, block_idx)];
