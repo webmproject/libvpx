@@ -963,6 +963,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const scan_order *const scan_order = get_scan(tx_size, tx_type);
   PREDICTION_MODE mode;
   const int bwl = b_width_log2_lookup[plane_bsize];
+  const int bhl = b_height_log2_lookup[plane_bsize];
   const int diff_stride = 4 * (1 << bwl);
   uint8_t *src, *dst;
   int16_t *src_diff;
@@ -976,7 +977,7 @@ void vp10_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
   mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
-  vp10_predict_intra_block(xd, bwl, tx_size, mode, dst, dst_stride,
+  vp10_predict_intra_block(xd, bwl, bhl, tx_size, mode, dst, dst_stride,
                           dst, dst_stride, i, j, plane);
 
 #if CONFIG_VP9_HIGHBITDEPTH

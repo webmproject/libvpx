@@ -958,7 +958,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                                                   p->src_diff);
           tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
           xd->mi[0]->bmi[block].as_mode = mode;
-          vp10_predict_intra_block(xd, 1, TX_4X4, mode, dst, dst_stride,
+          vp10_predict_intra_block(xd, 1, 1, TX_4X4, mode, dst, dst_stride,
                                   dst, dst_stride,
                                   col + idx, row + idy, 0);
           vpx_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride,
@@ -1058,7 +1058,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             vp10_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
         tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         xd->mi[0]->bmi[block].as_mode = mode;
-        vp10_predict_intra_block(xd, 1, TX_4X4, mode, dst, dst_stride,
+        vp10_predict_intra_block(xd, 1, 1, TX_4X4, mode, dst, dst_stride,
                                 dst, dst_stride, col + idx, row + idy, 0);
         vpx_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
 
