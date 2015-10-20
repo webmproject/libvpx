@@ -841,7 +841,8 @@ void rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       vp10_k_means(data, centroids, indices, pre_indices, rows * cols,
                    n, 1, max_itr);
       vp10_insertion_sort(centroids, n);
-
+      for (i = 0; i < n; ++i)
+        centroids[i] = round(centroids[i]);
       // remove duplicates
       i = 1;
       k = n;
