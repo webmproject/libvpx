@@ -73,8 +73,9 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
   return NEARESTMV + mode;
 }
 
-static int read_segment_id(vpx_reader *r, const struct segmentation *seg) {
-  return vpx_read_tree(r, vp10_segment_tree, seg->tree_probs);
+static int read_segment_id(vpx_reader *r,
+    const struct segmentation_probs *segp) {
+  return vpx_read_tree(r, vp10_segment_tree, segp->tree_probs);
 }
 
 static TX_SIZE read_selected_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
@@ -129,18 +130,32 @@ static void set_segment_id(VP10_COMMON *cm, int mi_offset,
       cm->current_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
 }
 
-static int read_intra_segment_id(VP10_COMMON *const cm, int mi_offset,
-                                 int x_mis, int y_mis,
+static int read_intra_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
+                                 int mi_offset, int x_mis, int y_mis,
                                  vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
+#if CONFIG_MISC_FIXES
+  FRAME_COUNTS *counts = xd->counts;
+  struct segmentation_probs *const segp = &cm->fc->seg;
+#else
+  struct segmentation_probs *const segp = &cm->segp;
+#endif
   int segment_id;
+
+#if !CONFIG_MISC_FIXES
+  (void) xd;
+#endif
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
 
   assert(seg->update_map && !seg->temporal_update);
 
-  segment_id = read_segment_id(r, seg);
+  segment_id = read_segment_id(r, segp);
+#if CONFIG_MISC_FIXES
+  if (counts)
+    ++counts->seg.tree_total[segment_id];
+#endif
   set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;
 }
@@ -160,6 +175,12 @@ static void copy_segment_id(const VP10_COMMON *cm,
 static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col, vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
+#if CONFIG_MISC_FIXES
+  FRAME_COUNTS *counts = xd->counts;
+  struct segmentation_probs *const segp = &cm->fc->seg;
+#else
+  struct segmentation_probs *const segp = &cm->segp;
+#endif
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   int predicted_segment_id, segment_id;
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
@@ -184,12 +205,28 @@ static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   }
 
   if (seg->temporal_update) {
-    const vpx_prob pred_prob = vp10_get_pred_prob_seg_id(seg, xd);
+    const int ctx = vp10_get_pred_context_seg_id(xd);
+    const vpx_prob pred_prob = segp->pred_probs[ctx];
     mbmi->seg_id_predicted = vpx_read(r, pred_prob);
-    segment_id = mbmi->seg_id_predicted ? predicted_segment_id
-                                        : read_segment_id(r, seg);
+#if CONFIG_MISC_FIXES
+    if (counts)
+      ++counts->seg.pred[ctx][mbmi->seg_id_predicted];
+#endif
+    if (mbmi->seg_id_predicted) {
+      segment_id = predicted_segment_id;
+    } else {
+      segment_id = read_segment_id(r, segp);
+#if CONFIG_MISC_FIXES
+      if (counts)
+        ++counts->seg.tree_mispred[segment_id];
+#endif
+    }
   } else {
-    segment_id = read_segment_id(r, seg);
+    segment_id = read_segment_id(r, segp);
+#if CONFIG_MISC_FIXES
+    if (counts)
+      ++counts->seg.tree_total[segment_id];
+#endif
   }
   set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;
@@ -258,7 +295,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
   const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
   const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
-  mbmi->segment_id = read_intra_segment_id(cm, mi_offset, x_mis, y_mis, r);
+  mbmi->segment_id = read_intra_segment_id(cm, xd, mi_offset, x_mis, y_mis, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;

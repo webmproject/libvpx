@@ -254,6 +254,9 @@ typedef struct VP10Common {
 
   struct loopfilter lf;
   struct segmentation seg;
+#if !CONFIG_MISC_FIXES
+  struct segmentation_probs segp;
+#endif
 
   int frame_parallel_decode;  // frame-based threading.
 
