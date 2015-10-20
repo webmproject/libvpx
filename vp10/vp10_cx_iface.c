@@ -795,7 +795,7 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   marker |= ctx->pending_frame_count - 1;
 #if CONFIG_MISC_FIXES
   for (i = 0; i < ctx->pending_frame_count - 1; i++) {
-    const size_t frame_sz = (unsigned int) ctx->pending_frame_sizes[i];
+    const size_t frame_sz = (unsigned int) ctx->pending_frame_sizes[i] - 1;
     max_frame_sz = frame_sz > max_frame_sz ? frame_sz : max_frame_sz;
   }
 #endif
@@ -836,8 +836,10 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
 
     *x++ = marker;
     for (i = 0; i < ctx->pending_frame_count - CONFIG_MISC_FIXES; i++) {
-      unsigned int this_sz = (unsigned int)ctx->pending_frame_sizes[i];
+      unsigned int this_sz;
 
+      assert(ctx->pending_frame_sizes[i] > 0);
+      this_sz = (unsigned int)ctx->pending_frame_sizes[i] - CONFIG_MISC_FIXES;
       for (j = 0; j <= mag; j++) {
         *x++ = this_sz & 0xff;
         this_sz >>= 8;

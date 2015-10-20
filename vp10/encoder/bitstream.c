@@ -1117,9 +1117,13 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
       assert(tok == tok_end);
       vpx_stop_encode(&residual_bc);
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
+        unsigned int tile_sz;
+
         // size of this tile
-        mem_put_le32(data_ptr + total_size, residual_bc.pos);
-        max_tile = max_tile > residual_bc.pos ? max_tile : residual_bc.pos;
+        assert(residual_bc.pos > 0);
+        tile_sz = residual_bc.pos - CONFIG_MISC_FIXES;
+        mem_put_le32(data_ptr + total_size, tile_sz);
+        max_tile = max_tile > tile_sz ? max_tile : tile_sz;
         total_size += 4;
       }
 
