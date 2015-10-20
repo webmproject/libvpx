@@ -119,13 +119,26 @@ static const int idx_n_column_to_subblock[4][2] = {
 };
 
 // clamp_mv_ref
+#if CONFIG_MISC_FIXES
+#define MV_BORDER (8 << 3)  // Allow 8 pels in 1/8th pel units
+#else
 #define MV_BORDER (16 << 3)  // Allow 16 pels in 1/8th pel units
+#endif
 
-static INLINE void clamp_mv_ref(MV *mv, const MACROBLOCKD *xd) {
+static INLINE void clamp_mv_ref(MV *mv, int bw, int bh, const MACROBLOCKD *xd) {
+#if CONFIG_MISC_FIXES
+  clamp_mv(mv, xd->mb_to_left_edge - bw * 8 - MV_BORDER,
+               xd->mb_to_right_edge + bw * 8 + MV_BORDER,
+               xd->mb_to_top_edge - bh * 8 - MV_BORDER,
+               xd->mb_to_bottom_edge + bh * 8 + MV_BORDER);
+#else
+  (void) bw;
+  (void) bh;
   clamp_mv(mv, xd->mb_to_left_edge - MV_BORDER,
                xd->mb_to_right_edge + MV_BORDER,
                xd->mb_to_top_edge - MV_BORDER,
                xd->mb_to_bottom_edge + MV_BORDER);
+#endif
 }
 
 // This function returns either the appropriate sub block or block's mv

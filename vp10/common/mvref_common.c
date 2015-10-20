@@ -27,6 +27,8 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   const MV_REF *const  prev_frame_mvs = cm->use_prev_frame_mvs ?
       cm->prev_frame->mvs + mi_row * cm->mi_cols + mi_col : NULL;
   const TileInfo *const tile = &xd->tile;
+  const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type] << 3;
+  const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type] << 3;
 
   // Blank the reference vector list
   memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
@@ -145,7 +147,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   // Clamp vectors
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
-    clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
+    clamp_mv_ref(&mv_ref_list[i].as_mv, bw, bh, xd);
 }
 
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
