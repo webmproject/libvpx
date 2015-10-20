@@ -16,6 +16,24 @@
       "revId": "c07f48f1ec86219fdd72c67c297b3f67d17f116d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9ef22fe_b36fe22a",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1120,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-20T18:49:53Z",
+      "side": 1,
+      "message": "Done (indeed, it can never be zero).",
+      "parentUuid": "b9f26ee4_7bacaa73",
+      "revId": "c07f48f1ec86219fdd72c67c297b3f67d17f116d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
