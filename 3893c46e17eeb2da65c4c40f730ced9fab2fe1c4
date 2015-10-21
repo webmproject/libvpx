@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "b956eeeb_b2bf7e99",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-10-21T18:21:41Z",
+      "side": 1,
+      "message": "It is alright to focus on 64bit, but, 32bit build is still supported. Actually, there were several patches targeting 32bit performance improvement (especially on Atom devices) submitted by Intel this year.",
+      "parentUuid": "5947b23e_ec184bbe",
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ec2e3d_6b240cc4",
         "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
         "patchSetId": 3
@@ -113,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "f935c6bb_4c95cf36",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-10-21T18:21:41Z",
+      "side": 1,
+      "message": "These instructions may have latency issues on small-core system.",
+      "parentUuid": "391bde5c_23e42a02",
+      "range": {
+        "startLine": 90,
+        "startChar": 22,
+        "endLine": 90,
+        "endChar": 25
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39111e0a_c711cedb",
         "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
         "patchSetId": 3
@@ -148,6 +190,30 @@
       "side": 1,
       "message": "The cglobal line at the top only specifies that there are 3 arguments, so the 4th would not be loaded. Also note that on 32 bit x86 builds all parameters are passed on the stack, so ssz is not in a register at this point (at least on platforms that x86inc supports that is).",
       "parentUuid": "39111e0a_c711cedb",
+      "range": {
+        "startLine": 91,
+        "startChar": 17,
+        "endLine": 91,
+        "endChar": 20
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b956eeeb_72cd1641",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-10-21T18:21:41Z",
+      "side": 1,
+      "message": "Even for 32bit, x86inc ABI loads arguments(the first 7) to registers. It is up to you to decide what to do.",
+      "parentUuid": "391bde5c_83195ec5",
       "range": {
         "startLine": 91,
         "startChar": 17,
