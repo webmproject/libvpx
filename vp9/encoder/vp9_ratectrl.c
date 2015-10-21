@@ -1816,6 +1816,11 @@ void vp9_set_target_rate(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int target_rate = rc->base_frame_target;
 
+  if (cpi->common.frame_type == KEY_FRAME)
+    target_rate = vp9_rc_clamp_iframe_target_size(cpi, target_rate);
+  else
+    target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
+
   // Correction to rate target based on prior over or under shoot.
   if (cpi->oxcf.rc_mode == VPX_VBR || cpi->oxcf.rc_mode == VPX_CQ)
     vbr_rate_correction(cpi, &target_rate);
