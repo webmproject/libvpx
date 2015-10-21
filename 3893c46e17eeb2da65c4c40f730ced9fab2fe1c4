@@ -25,6 +25,47 @@
     },
     {
       "key": {
+        "uuid": "16e8a964_a205de53",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-21T10:13:22Z",
+      "side": 1,
+      "message": "I am using:\n pblendw\n psrlw\ninstead of:\n punpckldq\n punpckhdq\n\nOn Sandy/Ivy Bridge there is now difference, but Haswell/Skylake has only 1 vector permute (shuffle) unit so 2 punpck cannot issue in parallel in these later machines, while blendw and shift can issue in parallel (shit uses the vector ALU, blendw uses the vector permute unit) on all 4 of these micro-architectures.",
+      "parentUuid": "39de7e5b_f782ebfe",
+      "range": {
+        "startLine": 69,
+        "startChar": 69,
+        "endLine": 69,
+        "endChar": 73
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5947b23e_ec184bbe",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-21T10:13:22Z",
+      "side": 1,
+      "message": "As you have noted I have not payed a great deal of attention to the 32 bit only code. How much do we care about the performante of the 32 bit x86 build?",
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ec2e3d_6b240cc4",
         "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
         "patchSetId": 3
@@ -48,6 +89,30 @@
     },
     {
       "key": {
+        "uuid": "391bde5c_23e42a02",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-21T10:13:22Z",
+      "side": 1,
+      "message": "Shift would work, but in fact the appropriate instruction is pextrd edx, xm0, 0x1 (from SSE4.1) now that whe are up to AVX.\n\nOut of profiessional curiosity only: How is pshufd \u0027slow\u0027?",
+      "parentUuid": "b9ec2e3d_6b240cc4",
+      "range": {
+        "startLine": 90,
+        "startChar": 22,
+        "endLine": 90,
+        "endChar": 25
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39111e0a_c711cedb",
         "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
         "patchSetId": 3
@@ -59,6 +124,30 @@
       "writtenOn": "2015-10-20T20:01:57Z",
       "side": 1,
       "message": "There are only 4 arguments. ssz should be in register already. (?)",
+      "range": {
+        "startLine": 91,
+        "startChar": 17,
+        "endLine": 91,
+        "endChar": 20
+      },
+      "revId": "3893c46e17eeb2da65c4c40f730ced9fab2fe1c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "391bde5c_83195ec5",
+        "filename": "vp9/encoder/x86/vp9_highbd_error_avx.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-21T10:13:22Z",
+      "side": 1,
+      "message": "The cglobal line at the top only specifies that there are 3 arguments, so the 4th would not be loaded. Also note that on 32 bit x86 builds all parameters are passed on the stack, so ssz is not in a register at this point (at least on platforms that x86inc supports that is).",
+      "parentUuid": "39111e0a_c711cedb",
       "range": {
         "startLine": 91,
         "startChar": 17,
