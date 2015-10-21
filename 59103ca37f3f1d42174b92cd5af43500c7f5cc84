@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19337ad8_de25e5e2",
+        "filename": "test/superframe_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-21T23:43:32Z",
+      "side": 1,
+      "message": "you could use Combine() to condense this to a test parameter I think.\n\nhttps://code.google.com/p/googletest/wiki/AdvancedGuide",
+      "revId": "59103ca37f3f1d42174b92cd5af43500c7f5cc84",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
