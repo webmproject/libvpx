@@ -2444,7 +2444,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if ((i <= rc->max_gf_interval) ||
         ((i <= (rc->max_gf_interval * 4)) && (decay_accumulator > 0.5))) {
       const double frame_boost =
-        calc_frame_boost(cpi, this_frame, 0, KF_MAX_BOOST);
+        calc_frame_boost(cpi, &next_frame, 0, KF_MAX_BOOST);
 
       // How fast is prediction quality decaying.
       if (!detect_flash(twopass, 0)) {
