@@ -265,7 +265,6 @@ EXPERIMENT_LIST="
     fp_mb_stats
     emulate_hardware
     misc_fixes
-    universal_hp
     ext_ipred_bltr
 "
 CONFIG_LIST="

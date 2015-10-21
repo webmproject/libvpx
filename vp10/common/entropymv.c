@@ -128,7 +128,7 @@ MV_CLASS_TYPE vp10_get_mv_class(int z, int *offset) {
 }
 
 int vp10_use_mv_hp(const MV *ref) {
-#if CONFIG_UNIVERSAL_HP
+#if CONFIG_MISC_FIXES
   (void) ref;
   return 1;
 #else
