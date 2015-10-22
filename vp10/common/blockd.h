@@ -257,7 +257,7 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
 #if CONFIG_EXT_TX
-  if (xd->lossless || tx_size >= TX_32X32)
+  if ( xd->lossless[mbmi->segment_id] || tx_size >= TX_32X32)
     return DCT_DCT;
   if (mbmi->sb_type >= BLOCK_8X8) {
     if (plane_type == PLANE_TYPE_Y || is_inter_block(mbmi))
