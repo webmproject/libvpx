@@ -56,7 +56,7 @@ typedef struct yv12_buffer_config {
   int subsampling_y;
   unsigned int bit_depth;
   vpx_color_space_t color_space;
-  int color_range;
+  vpx_color_range_t color_range;
   int render_width;
   int render_height;
 

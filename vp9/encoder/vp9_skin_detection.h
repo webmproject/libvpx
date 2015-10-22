@@ -25,7 +25,8 @@ int vp9_skin_pixel(const uint8_t y, const uint8_t cb, const uint8_t cr);
 
 #ifdef OUTPUT_YUV_SKINMAP
 // For viewing skin map on input source.
-void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file);
+void vp9_compute_skin_map(struct VP9_COMP *const cpi, FILE *yuv_skinmap_file);
+extern void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f);
 #endif
 
 #ifdef __cplusplus

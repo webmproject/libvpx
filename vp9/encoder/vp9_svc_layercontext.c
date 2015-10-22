@@ -30,6 +30,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 
   svc->spatial_layer_id = 0;
   svc->temporal_layer_id = 0;
+  svc->first_spatial_layer_to_encode = 0;
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
     if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
@@ -55,7 +56,6 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       int layer = LAYER_IDS_TO_IDX(sl, tl, oxcf->ts_number_layers);
       LAYER_CONTEXT *const lc = &svc->layer_context[layer];
       RATE_CONTROL *const lrc = &lc->rc;
-      size_t last_coded_q_map_size;
       int i;
       lc->current_video_frame_in_layer = 0;
       lc->layer_size = 0;
@@ -105,14 +105,18 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       // Cyclic refresh is only applied on base temporal layer.
       if (oxcf->ss_number_layers > 1 &&
           tl == 0) {
+        size_t last_coded_q_map_size;
+        size_t consec_zero_mv_size;
         lc->sb_index = 0;
         lc->map = vpx_malloc(mi_rows * mi_cols * sizeof(signed char));
         memset(lc->map, 0, mi_rows * mi_cols);
-        last_coded_q_map_size =
-            mi_rows * mi_cols * sizeof(uint8_t);
+        last_coded_q_map_size = mi_rows * mi_cols * sizeof(uint8_t);
         lc->last_coded_q_map = vpx_malloc(last_coded_q_map_size);
         assert(MAXQ <= 255);
         memset(lc->last_coded_q_map, MAXQ, last_coded_q_map_size);
+        consec_zero_mv_size = mi_rows * mi_cols * sizeof(uint8_t);
+        lc->consec_zero_mv = vpx_malloc(consec_zero_mv_size);
+        memset(lc->consec_zero_mv, 0, consec_zero_mv_size);
        }
     }
   }
@@ -286,10 +290,13 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
     CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
     signed char *temp = cr->map;
     uint8_t *temp2 = cr->last_coded_q_map;
+    uint8_t *temp3 = cr->consec_zero_mv;
     cr->map = lc->map;
     lc->map = temp;
     cr->last_coded_q_map = lc->last_coded_q_map;
     lc->last_coded_q_map = temp2;
+    cr->consec_zero_mv = lc->consec_zero_mv;
+    lc->consec_zero_mv = temp3;
     cr->sb_index = lc->sb_index;
   }
 }
@@ -311,10 +318,13 @@ void vp9_save_layer_context(VP9_COMP *const cpi) {
     CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
     signed char *temp = lc->map;
     uint8_t *temp2 = lc->last_coded_q_map;
+    uint8_t *temp3 = lc->consec_zero_mv;
     lc->map = cr->map;
     cr->map = temp;
     lc->last_coded_q_map = cr->last_coded_q_map;
     cr->last_coded_q_map = temp2;
+    lc->consec_zero_mv = cr->consec_zero_mv;
+    cr->consec_zero_mv = temp3;
     lc->sb_index = cr->sb_index;
   }
 }
@@ -721,6 +731,8 @@ void vp9_free_svc_cyclic_refresh(VP9_COMP *const cpi) {
           vpx_free(lc->map);
         if (lc->last_coded_q_map)
           vpx_free(lc->last_coded_q_map);
+        if (lc->consec_zero_mv)
+          vpx_free(lc->consec_zero_mv);
     }
   }
 }

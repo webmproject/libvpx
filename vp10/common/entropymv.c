@@ -128,8 +128,13 @@ MV_CLASS_TYPE vp10_get_mv_class(int z, int *offset) {
 }
 
 int vp10_use_mv_hp(const MV *ref) {
+#if CONFIG_UNIVERSAL_HP
+  (void) ref;
+  return 1;
+#else
   return (abs(ref->row) >> 3) < COMPANDED_MVREF_THRESH &&
          (abs(ref->col) >> 3) < COMPANDED_MVREF_THRESH;
+#endif
 }
 
 static void inc_mv_component(int v, nmv_component_counts *comp_counts,

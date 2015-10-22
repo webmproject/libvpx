@@ -191,7 +191,7 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
       for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++) {
           float err;
-          err = fabs(dct_s_coef[i * 8 + j] - dct_d_coef[i * 8 + j]);
+          err = fabs((float)(dct_s_coef[i * 8 + j] - dct_d_coef[i * 8 + j]));
           if (i != 0 || j != 0)
             err = err < s_mask / mask[i][j] ? 0 : err - s_mask / mask[i][j];
           ret += (err * _csf[i][j]) * (err * _csf[i][j]);

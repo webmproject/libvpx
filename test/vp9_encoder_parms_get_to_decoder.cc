@@ -40,17 +40,17 @@ struct EncodeParameters {
   int32_t lossless;
   int32_t error_resilient;
   int32_t frame_parallel;
-  int32_t color_range;
+  vpx_color_range_t color_range;
   vpx_color_space_t cs;
   int render_size[2];
   // TODO(JBB): quantizers / bitrate
 };
 
 const EncodeParameters kVP9EncodeParameterSet[] = {
-  {0, 0, 0, 1, 0, 0, VPX_CS_BT_601},
-  {0, 0, 0, 0, 0, 1, VPX_CS_BT_709},
-  {0, 0, 1, 0, 0, 1, VPX_CS_BT_2020},
-  {0, 2, 0, 0, 1, 0, VPX_CS_UNKNOWN, { 640, 480 }},
+  {0, 0, 0, 1, 0, VPX_CR_STUDIO_RANGE, VPX_CS_BT_601},
+  {0, 0, 0, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_709},
+  {0, 0, 1, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_2020},
+  {0, 2, 0, 0, 1, VPX_CR_STUDIO_RANGE, VPX_CS_UNKNOWN, { 640, 480 }},
   // TODO(JBB): Test profiles (requires more work).
 };
 

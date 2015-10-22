@@ -109,29 +109,27 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
   for (mi_row = start; mi_row < stop;
        mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
     MODE_INFO **const mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
+    LOOP_FILTER_MASK *lfm = get_lfm(&cm->lf, mi_row, 0);
 
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE, ++lfm) {
       const int r = mi_row >> MI_BLOCK_SIZE_LOG2;
       const int c = mi_col >> MI_BLOCK_SIZE_LOG2;
-      LOOP_FILTER_MASK lfm;
       int plane;
 
       sync_read(lf_sync, r, c);
 
       vp9_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
-      // TODO(JBB): Make setup_mask work for non 420.
-      vp9_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
-                     &lfm);
+      vp9_adjust_mask(cm, mi_row, mi_col, lfm);
 
-      vp9_filter_block_plane_ss00(cm, &planes[0], mi_row, &lfm);
+      vp9_filter_block_plane_ss00(cm, &planes[0], mi_row, lfm);
       for (plane = 1; plane < num_planes; ++plane) {
         switch (path) {
           case LF_PATH_420:
-            vp9_filter_block_plane_ss11(cm, &planes[plane], mi_row, &lfm);
+            vp9_filter_block_plane_ss11(cm, &planes[plane], mi_row, lfm);
             break;
           case LF_PATH_444:
-            vp9_filter_block_plane_ss00(cm, &planes[plane], mi_row, &lfm);
+            vp9_filter_block_plane_ss00(cm, &planes[plane], mi_row, lfm);
             break;
           case LF_PATH_SLOW:
             vp9_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,

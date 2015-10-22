@@ -163,26 +163,33 @@ static int decode_coefs(const MACROBLOCKD *xd,
         case CATEGORY5_TOKEN:
           val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, r);
           break;
-        case CATEGORY6_TOKEN:
+        case CATEGORY6_TOKEN: {
+#if CONFIG_MISC_FIXES
+          const int skip_bits = TX_SIZES - 1 - tx_size;
+#else
+          const int skip_bits = 0;
+#endif
+          const uint8_t *cat6p = cat6_prob + skip_bits;
 #if CONFIG_VP9_HIGHBITDEPTH
           switch (xd->bd) {
             case VPX_BITS_8:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
               break;
             case VPX_BITS_10:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 16, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, r);
               break;
             case VPX_BITS_12:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 18, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, r);
               break;
             default:
               assert(0);
               return -1;
           }
 #else
-          val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+          val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
 #endif
           break;
+        }
       }
     }
     v = (val * dqv) >> dq_shift;
@@ -247,6 +254,33 @@ void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
       l[i] = 0;
   } else {
     memset(l, has_eob, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+  }
+}
+
+void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
+                                vpx_reader *r) {
+  MODE_INFO *const mi = xd->mi[0];
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
+  int rows = 4 * num_4x4_blocks_high_lookup[bsize];
+  int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+  int color_idx, color_ctx, color_order[PALETTE_MAX_SIZE];
+  int n = mbmi->palette_mode_info.palette_size[plane != 0];
+  int i, j;
+  uint8_t *color_map = xd->plane[plane].color_index_map;
+  const vpx_prob (* prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
+      plane ? vp10_default_palette_uv_color_prob :
+          vp10_default_palette_y_color_prob;
+
+  for (i = 0; i < rows; ++i) {
+    for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
+      color_ctx = vp10_get_palette_color_context(color_map, cols, i, j, n,
+                                                 color_order);
+      color_idx = vpx_read_tree(r, vp10_palette_color_tree[n - 2],
+                                prob[n - 2][color_ctx]);
+      assert(color_idx >= 0 && color_idx < n);
+      color_map[i * cols + j] = color_order[color_idx];
+    }
   }
 }
 

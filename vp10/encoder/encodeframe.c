@@ -1005,6 +1005,9 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
     p[i].eobs = ctx->eobs_pbuf[i][2];
   }
 
+  for (i = 0; i < 2; ++i)
+    pd[i].color_index_map = ctx->color_index_map[i];
+
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
   for (y = 0; y < mi_height; y++)
@@ -1136,6 +1139,19 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][0];
     p[i].eobs = ctx->eobs_pbuf[i][0];
   }
+
+  if (cm->current_video_frame == 0 && cm->allow_screen_content_tools) {
+    for (i = 0; i < 2; ++i) {
+      if (ctx->color_index_map[i] == 0) {
+        CHECK_MEM_ERROR(cm, ctx->color_index_map[i],
+                        vpx_memalign(16, (ctx->num_4x4_blk << 4) *
+                                     sizeof(*ctx->color_index_map[i])));
+      }
+    }
+  }
+  for (i = 0; i < 2; ++i)
+    pd[i].color_index_map = ctx->color_index_map[i];
+
   ctx->is_coded = 0;
   ctx->skippable = 0;
   ctx->pred_pixel_ready = 0;
@@ -1356,9 +1372,6 @@ static void encode_b(VP10_COMP *cpi, const TileInfo *const tile,
 
   if (output_enabled) {
     update_stats(&cpi->common, td);
-
-    (*tp)->token = EOSB_TOKEN;
-    (*tp)++;
   }
 }
 
@@ -2190,7 +2203,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
         // terminated for current branch of the partition search tree.
         // The dist & rate thresholds are set to 0 at speed 0 to disable the
         // early termination at that speed.
-        if (!x->e_mbd.lossless &&
+        if (!x->e_mbd.lossless[xd->mi[0]->mbmi.segment_id] &&
             (ctx->skippable && best_rdc.dist < dist_breakout_thr &&
             best_rdc.rate < rate_breakout_thr)) {
           do_split = 0;
@@ -2426,7 +2439,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
   }
 
   if (bsize == BLOCK_64X64) {
-    assert(tp_orig < *tp);
+    assert(tp_orig < *tp || (tp_orig == *tp && xd->mi[0]->mbmi.skip));
     assert(best_rdc.rate < INT_MAX);
     assert(best_rdc.dist < INT64_MAX);
   } else {
@@ -2575,9 +2588,8 @@ static MV_REFERENCE_FRAME get_frame_type(const VP10_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
-  if (xd->lossless)
+  if (!cpi->common.seg.enabled && xd->lossless[0])
     return ONLY_4X4;
-
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
   else if (cpi->sf.tx_size_search_method == USE_FULL_RD||
@@ -2683,6 +2695,7 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   RD_COUNTS *const rdc = &cpi->td.rd_counts;
+  int i;
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
@@ -2692,12 +2705,21 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   vp10_zero(rdc->comp_pred_diff);
   vp10_zero(rdc->filter_diff);
 
-  xd->lossless = cm->base_qindex == 0 &&
-                 cm->y_dc_delta_q == 0 &&
-                 cm->uv_dc_delta_q == 0 &&
-                 cm->uv_ac_delta_q == 0;
+  for (i = 0; i < (cm->seg.enabled ? MAX_SEGMENTS : 1); ++i) {
+#if CONFIG_MISC_FIXES
+    const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
+#endif
+    xd->lossless[i] = cm->y_dc_delta_q == 0 &&
+#if CONFIG_MISC_FIXES
+                      qindex == 0 &&
+#else
+                      cm->base_qindex == 0 &&
+#endif
+                      cm->uv_dc_delta_q == 0 &&
+                      cm->uv_ac_delta_q == 0;
+  }
 
-  if (xd->lossless)
+  if (!cm->seg.enabled && xd->lossless[0])
     x->optimize = 0;
 
   cm->tx_mode = select_tx_mode(cpi, xd);
@@ -2888,7 +2910,9 @@ void vp10_encode_frame(VP10_COMP *cpi) {
   }
 }
 
-static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
+static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi,
+                            const MODE_INFO *above_mi, const MODE_INFO *left_mi,
+                            const int intraonly) {
   const PREDICTION_MODE y_mode = mi->mbmi.mode;
   const PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
@@ -2898,10 +2922,25 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
     for (idy = 0; idy < 2; idy += num_4x4_h)
-      for (idx = 0; idx < 2; idx += num_4x4_w)
-        ++counts->y_mode[0][mi->bmi[idy * 2 + idx].as_mode];
+      for (idx = 0; idx < 2; idx += num_4x4_w) {
+        const int bidx = idy * 2 + idx;
+        const PREDICTION_MODE bmode = mi->bmi[bidx].as_mode;
+        if (intraonly) {
+          const PREDICTION_MODE a = vp10_above_block_mode(mi, above_mi, bidx);
+          const PREDICTION_MODE l = vp10_left_block_mode(mi, left_mi, bidx);
+          ++counts->kf_y_mode[a][l][bmode];
+        } else {
+          ++counts->y_mode[0][bmode];
+        }
+      }
   } else {
-    ++counts->y_mode[size_group_lookup[bsize]][y_mode];
+    if (intraonly) {
+      const PREDICTION_MODE above = vp10_above_block_mode(mi, above_mi, 0);
+      const PREDICTION_MODE left = vp10_left_block_mode(mi, left_mi, 0);
+      ++counts->kf_y_mode[above][left][y_mode];
+    } else {
+      ++counts->y_mode[size_group_lookup[bsize]][y_mode];
+    }
   }
 
   ++counts->uv_mode[y_mode][uv_mode];
@@ -2941,7 +2980,18 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
       vp10_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
-      sum_intra_stats(td->counts, mi);
+      sum_intra_stats(td->counts, mi, xd->above_mi, xd->left_mi,
+                      frame_is_intra_only(cm));
+
+    if (bsize >= BLOCK_8X8 && output_enabled) {
+      if (mbmi->palette_mode_info.palette_size[0] > 0) {
+        mbmi->palette_mode_info.palette_first_color_idx[0] =
+            xd->plane[0].color_index_map[0];
+        // TODO(huisu): this increases the use of token buffer. Needs stretch
+        // test to verify.
+        vp10_tokenize_palette_sb(td, bsize, 0, t);
+      }
+    }
     vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
   } else {
     int ref;

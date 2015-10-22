@@ -31,6 +31,7 @@
 #include "vp8/common/postproc.h"
 #endif
 #include "vpx_mem/vpx_mem.h"
+#include "vp8/common/reconintra.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
@@ -422,6 +423,16 @@ static void setup_features(VP8_COMP *cpi)
 
 static void dealloc_raw_frame_buffers(VP8_COMP *cpi);
 
+void vp8_initialize_enc(void)
+{
+    static volatile int init_done = 0;
+
+    if (!init_done) {
+        vpx_dsp_rtcd();
+        vp8_init_intra_predictors();
+        init_done = 1;
+    }
+}
 
 static void dealloc_compressor_data(VP8_COMP *cpi)
 {

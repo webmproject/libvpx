@@ -20,7 +20,7 @@ extern "C" {
 
 void vp10_init_intra_predictors(void);
 
-void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in,
+void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
                              TX_SIZE tx_size, PREDICTION_MODE mode,
                              const uint8_t *ref, int ref_stride,
                              uint8_t *dst, int dst_stride,

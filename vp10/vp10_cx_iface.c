@@ -91,7 +91,9 @@ struct vpx_codec_alg_priv {
   size_t                  pending_cx_data_sz;
   int                     pending_frame_count;
   size_t                  pending_frame_sizes[8];
+#if !CONFIG_MISC_FIXES
   size_t                  pending_frame_magnitude;
+#endif
   vpx_image_t             preview_img;
   vpx_enc_frame_flags_t   next_frame_flags;
   vp8_postproc_cfg_t      preview_ppcfg;
@@ -781,24 +783,39 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   uint8_t marker = 0xc0;
   unsigned int mask;
   int mag, index_sz;
+#if CONFIG_MISC_FIXES
+  int i;
+  size_t max_frame_sz = 0;
+#endif
 
   assert(ctx->pending_frame_count);
   assert(ctx->pending_frame_count <= 8);
 
   // Add the number of frames to the marker byte
   marker |= ctx->pending_frame_count - 1;
+#if CONFIG_MISC_FIXES
+  for (i = 0; i < ctx->pending_frame_count - 1; i++) {
+    const size_t frame_sz = (unsigned int) ctx->pending_frame_sizes[i] - 1;
+    max_frame_sz = frame_sz > max_frame_sz ? frame_sz : max_frame_sz;
+  }
+#endif
 
   // Choose the magnitude
   for (mag = 0, mask = 0xff; mag < 4; mag++) {
+#if CONFIG_MISC_FIXES
+    if (max_frame_sz <= mask)
+      break;
+#else
     if (ctx->pending_frame_magnitude < mask)
       break;
+#endif
     mask <<= 8;
     mask |= 0xff;
   }
   marker |= mag << 3;
 
   // Write the index
-  index_sz = 2 + (mag + 1) * ctx->pending_frame_count;
+  index_sz = 2 + (mag + 1) * (ctx->pending_frame_count - CONFIG_MISC_FIXES);
   if (ctx->pending_cx_data_sz + index_sz < ctx->cx_data_sz) {
     uint8_t *x = ctx->pending_cx_data + ctx->pending_cx_data_sz;
     int i, j;
@@ -818,9 +835,11 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
 #endif
 
     *x++ = marker;
-    for (i = 0; i < ctx->pending_frame_count; i++) {
-      unsigned int this_sz = (unsigned int)ctx->pending_frame_sizes[i];
+    for (i = 0; i < ctx->pending_frame_count - CONFIG_MISC_FIXES; i++) {
+      unsigned int this_sz;
 
+      assert(ctx->pending_frame_sizes[i] > 0);
+      this_sz = (unsigned int)ctx->pending_frame_sizes[i] - CONFIG_MISC_FIXES;
       for (j = 0; j <= mag; j++) {
         *x++ = this_sz & 0xff;
         this_sz >>= 8;
@@ -974,7 +993,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
             ctx->pending_cx_data = cx_data;
           ctx->pending_cx_data_sz += size;
           ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+#if !CONFIG_MISC_FIXES
           ctx->pending_frame_magnitude |= size;
+#endif
           cx_data += size;
           cx_data_sz -= size;
 
@@ -991,7 +1012,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
             ctx->pending_cx_data = NULL;
             ctx->pending_cx_data_sz = 0;
             ctx->pending_frame_count = 0;
+#if !CONFIG_MISC_FIXES
             ctx->pending_frame_magnitude = 0;
+#endif
             ctx->output_cx_pkt_cb.output_cx_pkt(
                 &pkt, ctx->output_cx_pkt_cb.user_priv);
           }
@@ -1008,7 +1031,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
         if (ctx->pending_cx_data) {
           ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+#if !CONFIG_MISC_FIXES
           ctx->pending_frame_magnitude |= size;
+#endif
           ctx->pending_cx_data_sz += size;
           // write the superframe only for the case when
           if (!ctx->output_cx_pkt_cb.output_cx_pkt)
@@ -1018,7 +1043,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
           ctx->pending_cx_data = NULL;
           ctx->pending_cx_data_sz = 0;
           ctx->pending_frame_count = 0;
+#if !CONFIG_MISC_FIXES
           ctx->pending_frame_magnitude = 0;
+#endif
         } else {
           pkt.data.frame.buf = cx_data;
           pkt.data.frame.sz  = size;
@@ -1129,30 +1156,6 @@ static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
   }
 }
 
-static vpx_codec_err_t ctrl_update_entropy(vpx_codec_alg_priv_t *ctx,
-                                           va_list args) {
-  const int update = va_arg(args, int);
-
-  vp10_update_entropy(ctx->cpi, update);
-  return VPX_CODEC_OK;
-}
-
-static vpx_codec_err_t ctrl_update_reference(vpx_codec_alg_priv_t *ctx,
-                                             va_list args) {
-  const int ref_frame_flags = va_arg(args, int);
-
-  vp10_update_reference(ctx->cpi, ref_frame_flags);
-  return VPX_CODEC_OK;
-}
-
-static vpx_codec_err_t ctrl_use_reference(vpx_codec_alg_priv_t *ctx,
-                                          va_list args) {
-  const int reference_flag = va_arg(args, int);
-
-  vp10_use_as_reference(ctx->cpi, reference_flag);
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t ctrl_set_roi_map(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
   (void)ctx;
@@ -1249,9 +1252,6 @@ static vpx_codec_err_t ctrl_set_render_size(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,                ctrl_copy_reference},
-  {VP8E_UPD_ENTROPY,                  ctrl_update_entropy},
-  {VP8E_UPD_REFERENCE,                ctrl_update_reference},
-  {VP8E_USE_REFERENCE,                ctrl_use_reference},
 
   // Setters
   {VP8_SET_REFERENCE,                 ctrl_set_reference},

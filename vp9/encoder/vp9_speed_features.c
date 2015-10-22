@@ -113,8 +113,14 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
                                    SPEED_FEATURES *sf, int speed) {
   const int boosted = frame_is_boosted(cpi);
 
+  sf->partition_search_breakout_dist_thr = (1 << 20);
+  sf->partition_search_breakout_rate_thr = 80;
+  sf->tx_size_search_breakout = 1;
   sf->adaptive_rd_thresh = 1;
   sf->allow_skip_recode = 1;
+  sf->less_rectangular_check = 1;
+  sf->use_square_partition_only = !frame_is_boosted(cpi);
+  sf->use_square_only_threshold = BLOCK_16X16;
 
   if (speed >= 1) {
     if ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
@@ -123,6 +129,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     } else {
       sf->use_square_partition_only = !frame_is_intra_only(cm);
     }
+    sf->use_square_only_threshold = BLOCK_4X4;
 
     sf->less_rectangular_check  = 1;
 
@@ -139,9 +146,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
-
-    sf->tx_size_search_breakout = 1;
-    sf->partition_search_breakout_rate_thr = 80;
   }
 
   if (speed >= 2) {
@@ -471,6 +475,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->partition_search_type = SEARCH_PARTITION;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
+  sf->use_square_only_threshold = BLOCK_SIZES;
   sf->auto_min_max_partition_size = NOT_IN_USE;
   sf->rd_auto_partition_min_limit = BLOCK_4X4;
   sf->default_max_partition_size = BLOCK_64X64;

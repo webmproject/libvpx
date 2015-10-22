@@ -48,9 +48,9 @@ static INLINE int vp10_get_pred_context_seg_id(const MACROBLOCKD *xd) {
   return above_sip + left_sip;
 }
 
-static INLINE vpx_prob vp10_get_pred_prob_seg_id(const struct segmentation *seg,
-                                                const MACROBLOCKD *xd) {
-  return seg->pred_probs[vp10_get_pred_context_seg_id(xd)];
+static INLINE vpx_prob vp10_get_pred_prob_seg_id(
+    const struct segmentation_probs *segp, const MACROBLOCKD *xd) {
+  return segp->pred_probs[vp10_get_pred_context_seg_id(xd)];
 }
 
 static INLINE int vp10_get_skip_context(const MACROBLOCKD *xd) {

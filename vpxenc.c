@@ -1996,7 +1996,7 @@ int main(int argc, const char **argv_) {
     usage_exit();
 
   /* Decide if other chroma subsamplings than 4:2:0 are supported */
-  if (global.codec->fourcc == VP9_FOURCC)
+  if (global.codec->fourcc == VP9_FOURCC || global.codec->fourcc == VP10_FOURCC)
     input.only_i420 = 0;
 
   for (pass = global.pass ? global.pass - 1 : 0; pass < global.passes; pass++) {

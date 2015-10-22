@@ -42,11 +42,13 @@ struct segmentation {
   uint8_t abs_delta;
   uint8_t temporal_update;
 
-  vpx_prob tree_probs[SEG_TREE_PROBS];
-  vpx_prob pred_probs[PREDICTION_PROBS];
-
   int16_t feature_data[MAX_SEGMENTS][SEG_LVL_MAX];
   unsigned int feature_mask[MAX_SEGMENTS];
+};
+
+struct segmentation_probs {
+  vpx_prob tree_probs[SEG_TREE_PROBS];
+  vpx_prob pred_probs[PREDICTION_PROBS];
 };
 
 static INLINE int segfeature_active(const struct segmentation *seg,

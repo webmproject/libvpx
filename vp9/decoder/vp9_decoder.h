@@ -36,8 +36,15 @@ typedef struct TileData {
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
 } TileData;
 
+typedef struct TileBuffer {
+  const uint8_t *data;
+  size_t size;
+  int col;  // only used with multi-threaded decoding
+} TileBuffer;
+
 typedef struct TileWorkerData {
-  struct VP9Decoder *pbi;
+  const uint8_t *data_end;
+  int buf_start, buf_end;  // pbi->tile_buffers to decode, inclusive
   vpx_reader bit_reader;
   FRAME_COUNTS counts;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
@@ -65,6 +72,7 @@ typedef struct VP9Decoder {
   VPxWorker lf_worker;
   VPxWorker *tile_workers;
   TileWorkerData *tile_worker_data;
+  TileBuffer tile_buffers[64];
   int num_tile_workers;
 
   TileData *tile_data;

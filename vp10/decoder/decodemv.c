@@ -24,6 +24,19 @@
 
 #include "vpx_dsp/vpx_dsp_common.h"
 
+static INLINE int read_uniform(vpx_reader *r, int n) {
+  int l = get_unsigned_bits(n);
+  int m = (1 << l) - n;
+  int v = vpx_read_literal(r, l-1);
+
+  assert(l != 0);
+
+  if (v < m)
+    return v;
+  else
+    return (v << 1) - m + vpx_read_literal(r, 1);
+}
+
 static PREDICTION_MODE read_intra_mode(vpx_reader *r, const vpx_prob *p) {
   return (PREDICTION_MODE)vpx_read_tree(r, vp10_intra_mode_tree, p);
 }
@@ -60,8 +73,9 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
   return NEARESTMV + mode;
 }
 
-static int read_segment_id(vpx_reader *r, const struct segmentation *seg) {
-  return vpx_read_tree(r, vp10_segment_tree, seg->tree_probs);
+static int read_segment_id(vpx_reader *r,
+    const struct segmentation_probs *segp) {
+  return vpx_read_tree(r, vp10_segment_tree, segp->tree_probs);
 }
 
 #if CONFIG_VAR_TX
@@ -159,18 +173,32 @@ static void set_segment_id(VP10_COMMON *cm, int mi_offset,
       cm->current_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
 }
 
-static int read_intra_segment_id(VP10_COMMON *const cm, int mi_offset,
-                                 int x_mis, int y_mis,
+static int read_intra_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
+                                 int mi_offset, int x_mis, int y_mis,
                                  vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
+#if CONFIG_MISC_FIXES
+  FRAME_COUNTS *counts = xd->counts;
+  struct segmentation_probs *const segp = &cm->fc->seg;
+#else
+  struct segmentation_probs *const segp = &cm->segp;
+#endif
   int segment_id;
+
+#if !CONFIG_MISC_FIXES
+  (void) xd;
+#endif
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
 
   assert(seg->update_map && !seg->temporal_update);
 
-  segment_id = read_segment_id(r, seg);
+  segment_id = read_segment_id(r, segp);
+#if CONFIG_MISC_FIXES
+  if (counts)
+    ++counts->seg.tree_total[segment_id];
+#endif
   set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;
 }
@@ -190,6 +218,12 @@ static void copy_segment_id(const VP10_COMMON *cm,
 static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col, vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
+#if CONFIG_MISC_FIXES
+  FRAME_COUNTS *counts = xd->counts;
+  struct segmentation_probs *const segp = &cm->fc->seg;
+#else
+  struct segmentation_probs *const segp = &cm->segp;
+#endif
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   int predicted_segment_id, segment_id;
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
@@ -214,12 +248,28 @@ static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   }
 
   if (seg->temporal_update) {
-    const vpx_prob pred_prob = vp10_get_pred_prob_seg_id(seg, xd);
+    const int ctx = vp10_get_pred_context_seg_id(xd);
+    const vpx_prob pred_prob = segp->pred_probs[ctx];
     mbmi->seg_id_predicted = vpx_read(r, pred_prob);
-    segment_id = mbmi->seg_id_predicted ? predicted_segment_id
-                                        : read_segment_id(r, seg);
+#if CONFIG_MISC_FIXES
+    if (counts)
+      ++counts->seg.pred[ctx][mbmi->seg_id_predicted];
+#endif
+    if (mbmi->seg_id_predicted) {
+      segment_id = predicted_segment_id;
+    } else {
+      segment_id = read_segment_id(r, segp);
+#if CONFIG_MISC_FIXES
+      if (counts)
+        ++counts->seg.tree_mispred[segment_id];
+#endif
+    }
   } else {
-    segment_id = read_segment_id(r, seg);
+    segment_id = read_segment_id(r, segp);
+#if CONFIG_MISC_FIXES
+    if (counts)
+      ++counts->seg.tree_total[segment_id];
+#endif
   }
   set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;
@@ -236,6 +286,38 @@ static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd,
     if (counts)
       ++counts->skip[ctx][skip];
     return skip;
+  }
+}
+
+static void read_palette_mode_info(VP10_COMMON *const cm,
+                                   MACROBLOCKD *const xd,
+                                   vpx_reader *r) {
+  MODE_INFO *const mi = xd->mi[0];
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const MODE_INFO *above_mi = xd->above_mi;
+  const MODE_INFO *left_mi  = xd->left_mi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
+  int i, palette_ctx = 0;
+
+  if (above_mi)
+    palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
+  if (left_mi)
+    palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
+  if (vpx_read(r, vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
+                                                   [palette_ctx])) {
+    int n;
+    PALETTE_MODE_INFO *pmi = &mbmi->palette_mode_info;
+
+    pmi->palette_size[0] =
+        vpx_read_tree(r, vp10_palette_size_tree,
+                      vp10_default_palette_y_size_prob[bsize - BLOCK_8X8]) + 2;
+    n = pmi->palette_size[0];
+
+    for (i = 0; i < n; ++i)
+      pmi->palette_colors[i] = vpx_read_literal(r, cm->bit_depth);
+
+    xd->plane[0].color_index_map[0] = read_uniform(r, n);
+    assert(xd->plane[0].color_index_map[0] < n);
   }
 }
 
@@ -256,7 +338,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
   const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
   const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
-  mbmi->segment_id = read_intra_segment_id(cm, mi_offset, x_mis, y_mis, r);
+  mbmi->segment_id = read_intra_segment_id(cm, xd, mi_offset, x_mis, y_mis, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
@@ -266,27 +348,34 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
     case BLOCK_4X4:
       for (i = 0; i < 4; ++i)
         mi->bmi[i].as_mode =
-            read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, i));
+            read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, i));
       mbmi->mode = mi->bmi[3].as_mode;
       break;
     case BLOCK_4X8:
       mi->bmi[0].as_mode = mi->bmi[2].as_mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 0));
+          read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
       mi->bmi[1].as_mode = mi->bmi[3].as_mode = mbmi->mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 1));
+          read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 1));
       break;
     case BLOCK_8X4:
       mi->bmi[0].as_mode = mi->bmi[1].as_mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 0));
+          read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
       mi->bmi[2].as_mode = mi->bmi[3].as_mode = mbmi->mode =
-          read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 2));
+          read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 2));
       break;
     default:
       mbmi->mode = read_intra_mode(r,
-                                   get_y_mode_probs(mi, above_mi, left_mi, 0));
+          get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
   }
 
-  mbmi->uv_mode = read_intra_mode(r, vp10_kf_uv_mode_prob[mbmi->mode]);
+  mbmi->uv_mode = read_intra_mode_uv(cm, xd, r, mbmi->mode);
+
+  mbmi->palette_mode_info.palette_size[0] = 0;
+  mbmi->palette_mode_info.palette_size[1] = 0;
+  if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools &&
+      mbmi->mode == DC_PRED)
+    read_palette_mode_info(cm, xd, r);
+  
 
 #if CONFIG_EXT_TX
     if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
@@ -462,6 +551,9 @@ static void read_intra_block_mode_info(VP10_COMMON *const cm,
   }
 
   mbmi->uv_mode = read_intra_mode_uv(cm, xd, r, mbmi->mode);
+
+  mbmi->palette_mode_info.palette_size[0] = 0;
+  mbmi->palette_mode_info.palette_size[1] = 0;
 }
 
 static INLINE int is_mv_valid(const MV *mv) {
@@ -578,8 +670,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
     for (ref = 0; ref < 1 + is_compound; ++ref) {
-      vp10_find_best_ref_mvs(xd, allow_hp, ref_mvs[mbmi->ref_frame[ref]],
-                            &nearestmv[ref], &nearmv[ref]);
+      vp10_find_best_ref_mvs(allow_hp, ref_mvs[mbmi->ref_frame[ref]],
+                             &nearestmv[ref], &nearmv[ref]);
     }
   }
 

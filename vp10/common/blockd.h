@@ -68,6 +68,20 @@ typedef struct {
 #define MAX_REF_FRAMES  4
 typedef int8_t MV_REFERENCE_FRAME;
 
+typedef struct {
+  // Number of base colors for Y (0) and UV (1)
+  uint8_t palette_size[2];
+  // Value of base colors for Y, U, and V
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t palette_colors[3 * PALETTE_MAX_SIZE];
+#else
+  uint8_t palette_colors[3 * PALETTE_MAX_SIZE];
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  // Only used by encoder to store the color index of the top left pixel.
+  // TODO(huisu): move this to encoder
+  uint8_t palette_first_color_idx[2];
+} PALETTE_MODE_INFO;
+
 // This structure now relates to 8x8 block regions.
 typedef struct {
   // Common for both INTER and INTRA blocks
@@ -88,6 +102,7 @@ typedef struct {
 
   // Only for INTRA blocks
   PREDICTION_MODE uv_mode;
+  PALETTE_MODE_INFO palette_mode_info;
 
   // Only for INTER blocks
   INTERP_FILTER interp_filter;
@@ -144,6 +159,7 @@ struct macroblockd_plane {
   ENTROPY_CONTEXT *above_context;
   ENTROPY_CONTEXT *left_context;
   int16_t seg_dequant[MAX_SEGMENTS][2];
+  uint8_t *color_index_map;
 
   // number of 4x4s in current block
   uint16_t n4_w, n4_h;
@@ -210,7 +226,7 @@ typedef struct macroblockd {
   int bd;
 #endif
 
-  int lossless;
+  int lossless[MAX_SEGMENTS];
   int corrupted;
 
   struct vpx_internal_error_info *error_info;
@@ -254,8 +270,8 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
     return intra_mode_to_tx_type_lookup[plane_type == PLANE_TYPE_Y ?
         get_y_mode(mi, block_idx) : mbmi->uv_mode];
 #else
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi) ||
-      tx_size >= TX_32X32)
+  if (plane_type != PLANE_TYPE_Y || xd->lossless[mbmi->segment_id] ||
+       is_inter_block(mbmi) || tx_size >= TX_32X32)
     return DCT_DCT;
   return intra_mode_to_tx_type_lookup[get_y_mode(mi, block_idx)];
 #endif  // CONFIG_EXT_TX
@@ -294,15 +310,6 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
     memset(pd->left_context, 0,
            sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high_lookup[plane_bsize]);
   }
-}
-
-static INLINE const vpx_prob *get_y_mode_probs(const MODE_INFO *mi,
-                                               const MODE_INFO *above_mi,
-                                               const MODE_INFO *left_mi,
-                                               int block) {
-  const PREDICTION_MODE above = vp10_above_block_mode(mi, above_mi, block);
-  const PREDICTION_MODE left = vp10_left_block_mode(mi, left_mi, block);
-  return vp10_kf_y_mode_prob[above][left];
 }
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,

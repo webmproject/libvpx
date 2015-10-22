@@ -391,6 +391,9 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
 
   vp10_free_pc_tree(&cpi->td);
 
+  if (cpi->common.allow_screen_content_tools)
+    vpx_free(cpi->td.mb.palette_buffer);
+
   if (cpi->source_diff_var != NULL) {
     vpx_free(cpi->source_diff_var);
     cpi->source_diff_var = NULL;
@@ -416,7 +419,9 @@ static void save_coding_context(VP10_COMP *cpi) {
   memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
          MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
 
-  vp10_copy(cc->segment_pred_probs, cm->seg.pred_probs);
+#if !CONFIG_MISC_FIXES
+  vp10_copy(cc->segment_pred_probs, cm->segp.pred_probs);
+#endif
 
   memcpy(cpi->coding_context.last_frame_seg_map_copy,
          cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
@@ -442,7 +447,9 @@ static void restore_coding_context(VP10_COMP *cpi) {
   memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
          MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
 
-  vp10_copy(cm->seg.pred_probs, cc->segment_pred_probs);
+#if !CONFIG_MISC_FIXES
+  vp10_copy(cm->segp.pred_probs, cc->segment_pred_probs);
+#endif
 
   memcpy(cm->last_frame_seg_map,
          cpi->coding_context.last_frame_seg_map_copy,
@@ -1429,7 +1436,16 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
                                              : REFRESH_FRAME_CONTEXT_BACKWARD;
   cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
 
-  vp10_reset_segment_features(&cm->seg);
+  cm->allow_screen_content_tools = (cpi->oxcf.content == VP9E_CONTENT_SCREEN);
+  if (cm->allow_screen_content_tools) {
+    MACROBLOCK *x = &cpi->td.mb;
+    if (x->palette_buffer == 0) {
+      CHECK_MEM_ERROR(cm, x->palette_buffer,
+                      vpx_memalign(16, sizeof(*x->palette_buffer)));
+    }
+  }
+
+  vp10_reset_segment_features(cm);
   vp10_set_high_precision_mv(cpi, 0);
 
   {
@@ -1934,6 +1950,8 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 
     // Deallocate allocated thread data.
     if (t < cpi->num_workers - 1) {
+      if (cpi->common.allow_screen_content_tools)
+        vpx_free(thread_data->td->mb.palette_buffer);
       vpx_free(thread_data->td->counts);
       vp10_free_pc_tree(thread_data->td);
       vpx_free(thread_data->td);
@@ -2646,7 +2664,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
 static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->td.mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
-  if (xd->lossless) {
+  if (is_lossless_requested(&cpi->oxcf)) {
       lf->filter_level = 0;
   } else {
     struct vpx_usec_timer timer;
@@ -3548,7 +3566,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   // Set various flags etc to special state if it is a key frame.
   if (frame_is_intra_only(cm)) {
     // Reset the loop filter deltas and segmentation map.
-    vp10_reset_segment_features(&cm->seg);
+    vp10_reset_segment_features(cm);
 
     // If segmentation is enabled force a map update for key frames.
     if (seg->enabled) {
@@ -3654,12 +3672,19 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     full_to_model_counts(cpi->td.counts->coef[t],
                          cpi->td.rd_counts.coef_counts[t]);
 
-  if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD)
+  if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     vp10_adapt_coef_probs(cm);
+#if CONFIG_MISC_FIXES
+    vp10_adapt_intra_frame_probs(cm);
+#else
+    if (!frame_is_intra_only(cm))
+      vp10_adapt_intra_frame_probs(cm);
+#endif
+  }
 
   if (!frame_is_intra_only(cm)) {
     if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
-      vp10_adapt_mode_probs(cm);
+      vp10_adapt_inter_frame_probs(cm);
       vp10_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
   }
@@ -4095,7 +4120,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (oxcf->pass == 1) {
-    cpi->td.mb.e_mbd.lossless = is_lossless_requested(oxcf);
+    cpi->td.mb.e_mbd.lossless[0] = is_lossless_requested(oxcf);
     vp10_first_pass(cpi, source);
   } else if (oxcf->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);

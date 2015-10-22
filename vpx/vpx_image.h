@@ -78,11 +78,17 @@ extern "C" {
     VPX_CS_SRGB       = 7   /**< sRGB */
   } vpx_color_space_t; /**< alias for enum vpx_color_space */
 
+  /*!\brief List of supported color range */
+  typedef enum vpx_color_range {
+    VPX_CR_STUDIO_RANGE = 0,    /**< Y [16..235], UV [16..240] */
+    VPX_CR_FULL_RANGE   = 1     /**< YUV/RGB [0..255] */
+  } vpx_color_range_t; /**< alias for enum vpx_color_range */
+
   /**\brief Image Descriptor */
   typedef struct vpx_image {
     vpx_img_fmt_t fmt; /**< Image Format */
     vpx_color_space_t cs; /**< Color Space */
-    int range; /**< Limited (0) vs. Full-range (1) sample data */
+    vpx_color_range_t range; /**< Color Range */
 
     /* Image storage dimensions */
     unsigned int  w;           /**< Stored image width */

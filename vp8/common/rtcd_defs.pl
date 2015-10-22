@@ -152,16 +152,6 @@ specialize qw/vp8_copy_mem8x4 mmx media neon dspr2 msa/;
 $vp8_copy_mem8x4_media=vp8_copy_mem8x4_v6;
 $vp8_copy_mem8x4_dspr2=vp8_copy_mem8x4_dspr2;
 
-add_proto qw/void vp8_build_intra_predictors_mby_s/, "struct macroblockd *x, unsigned char * yabove_row, unsigned char * yleft, int left_stride, unsigned char * ypred_ptr, int y_stride";
-specialize qw/vp8_build_intra_predictors_mby_s sse2 ssse3 neon msa/;
-
-add_proto qw/void vp8_build_intra_predictors_mbuv_s/, "struct macroblockd *x, unsigned char * uabove_row, unsigned char * vabove_row,  unsigned char *uleft, unsigned char *vleft, int left_stride, unsigned char * upred_ptr, unsigned char * vpred_ptr, int pred_stride";
-specialize qw/vp8_build_intra_predictors_mbuv_s sse2 ssse3 neon msa/;
-
-add_proto qw/void vp8_intra4x4_predict/, "unsigned char *Above, unsigned char *yleft, int left_stride, int b_mode, unsigned char *dst, int dst_stride, unsigned char top_left";
-specialize qw/vp8_intra4x4_predict media/;
-$vp8_intra4x4_predict_media=vp8_intra4x4_predict_armv6;
-
 #
 # Postproc
 #

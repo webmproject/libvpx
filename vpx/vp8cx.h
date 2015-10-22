@@ -141,29 +141,11 @@ extern vpx_codec_iface_t *vpx_codec_vp10_cx(void);
  * \sa #vpx_codec_control
  */
 enum vp8e_enc_control_id {
-  /*!\brief Codec control function to set mode of entropy update in encoder.
-   *
-   * Supported in codecs: VP8, VP9
-   */
-  VP8E_UPD_ENTROPY           = 5,
-
-  /*!\brief Codec control function to set reference update mode in encoder.
-   *
-   * Supported in codecs: VP8, VP9
-   */
-  VP8E_UPD_REFERENCE,
-
-  /*!\brief Codec control function to set which reference frame encoder can use.
-   *
-   * Supported in codecs: VP8, VP9
-   */
-  VP8E_USE_REFERENCE,
-
   /*!\brief Codec control function to pass an ROI map to encoder.
    *
    * Supported in codecs: VP8, VP9
    */
-  VP8E_SET_ROI_MAP,
+  VP8E_SET_ROI_MAP           = 8,
 
   /*!\brief Codec control function to pass an Active map to encoder.
    *
@@ -713,6 +695,7 @@ typedef struct vpx_svc_ref_frame_config {
   int alt_fb_idx[VPX_TS_MAX_LAYERS];  /**< Altref buffer index. */
 } vpx_svc_ref_frame_config_t;
 
+/*!\cond */
 /*!\brief VP8 encoder control function parameter type
  *
  * Defines the data types that VP8E control functions take. Note that
@@ -720,92 +703,108 @@ typedef struct vpx_svc_ref_frame_config {
  *
  */
 
-
-/* These controls have been deprecated in favor of the flags parameter to
- * vpx_codec_encode(). See the definition of VP8_EFLAG_* above.
- */
-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_ENTROPY,            int)
-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_REFERENCE,          int)
-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_USE_REFERENCE,          int)
-
 VPX_CTRL_USE_TYPE(VP8E_SET_FRAME_FLAGS,        int)
+#define VPX_CTRL_VP8E_SET_FRAME_FLAGS
 VPX_CTRL_USE_TYPE(VP8E_SET_TEMPORAL_LAYER_ID,  int)
+#define VPX_CTRL_VP8E_SET_TEMPORAL_LAYER_ID
 VPX_CTRL_USE_TYPE(VP8E_SET_ROI_MAP,            vpx_roi_map_t *)
+#define VPX_CTRL_VP8E_SET_ROI_MAP
 VPX_CTRL_USE_TYPE(VP8E_SET_ACTIVEMAP,          vpx_active_map_t *)
+#define VPX_CTRL_VP8E_SET_ACTIVEMAP
 VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
+#define VPX_CTRL_VP8E_SET_SCALEMODE
 
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC,                int)
+#define VPX_CTRL_VP9E_SET_SVC
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_PARAMETERS,     void *)
+#define VPX_CTRL_VP9E_SET_SVC_PARAMETERS
 VPX_CTRL_USE_TYPE(VP9E_REGISTER_CX_CALLBACK,   void *)
+#define VPX_CTRL_VP9E_REGISTER_CX_CALLBACK
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_LAYER_ID,       vpx_svc_layer_id_t *)
+#define VPX_CTRL_VP9E_SET_SVC_LAYER_ID
 
 VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
+#define VPX_CTRL_VP8E_SET_CPUUSED
 VPX_CTRL_USE_TYPE(VP8E_SET_ENABLEAUTOALTREF,   unsigned int)
+#define VPX_CTRL_VP8E_SET_ENABLEAUTOALTREF
 VPX_CTRL_USE_TYPE(VP8E_SET_NOISE_SENSITIVITY,  unsigned int)
+#define VPX_CTRL_VP8E_SET_NOISE_SENSITIVITY
 VPX_CTRL_USE_TYPE(VP8E_SET_SHARPNESS,          unsigned int)
+#define VPX_CTRL_VP8E_SET_SHARPNESS
 VPX_CTRL_USE_TYPE(VP8E_SET_STATIC_THRESHOLD,   unsigned int)
+#define VPX_CTRL_VP8E_SET_STATIC_THRESHOLD
 VPX_CTRL_USE_TYPE(VP8E_SET_TOKEN_PARTITIONS,   int) /* vp8e_token_partitions */
+#define VPX_CTRL_VP8E_SET_TOKEN_PARTITIONS
 
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_MAXFRAMES,     unsigned int)
+#define VPX_CTRL_VP8E_SET_ARNR_MAXFRAMES
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_STRENGTH,     unsigned int)
+#define VPX_CTRL_VP8E_SET_ARNR_STRENGTH
 VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_SET_ARNR_TYPE,     unsigned int)
+#define VPX_CTRL_VP8E_SET_ARNR_TYPE
 VPX_CTRL_USE_TYPE(VP8E_SET_TUNING,             int) /* vp8e_tuning */
+#define VPX_CTRL_VP8E_SET_TUNING
 VPX_CTRL_USE_TYPE(VP8E_SET_CQ_LEVEL,      unsigned int)
+#define VPX_CTRL_VP8E_SET_CQ_LEVEL
 
 VPX_CTRL_USE_TYPE(VP9E_SET_TILE_COLUMNS,  int)
+#define VPX_CTRL_VP9E_SET_TILE_COLUMNS
 VPX_CTRL_USE_TYPE(VP9E_SET_TILE_ROWS,  int)
+#define VPX_CTRL_VP9E_SET_TILE_ROWS
 
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
+#define VPX_CTRL_VP8E_GET_LAST_QUANTIZER
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
+#define VPX_CTRL_VP8E_GET_LAST_QUANTIZER_64
 VPX_CTRL_USE_TYPE(VP9E_GET_SVC_LAYER_ID,  vpx_svc_layer_id_t *)
+#define VPX_CTRL_VP9E_GET_SVC_LAYER_ID
 
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
+#define VPX_CTRL_VP8E_SET_MAX_INTRA_BITRATE_PCT
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTER_BITRATE_PCT, unsigned int)
+#define VPX_CTRL_VP8E_SET_MAX_INTER_BITRATE_PCT
 
 VPX_CTRL_USE_TYPE(VP8E_SET_SCREEN_CONTENT_MODE, unsigned int)
+#define VPX_CTRL_VP8E_SET_SCREEN_CONTENT_MODE
 
 VPX_CTRL_USE_TYPE(VP9E_SET_GF_CBR_BOOST_PCT, unsigned int)
+#define VPX_CTRL_VP9E_SET_GF_CBR_BOOST_PCT
 
 VPX_CTRL_USE_TYPE(VP9E_SET_LOSSLESS, unsigned int)
+#define VPX_CTRL_VP9E_SET_LOSSLESS
 
 VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PARALLEL_DECODING, unsigned int)
+#define VPX_CTRL_VP9E_SET_FRAME_PARALLEL_DECODING
 
 VPX_CTRL_USE_TYPE(VP9E_SET_AQ_MODE, unsigned int)
+#define VPX_CTRL_VP9E_SET_AQ_MODE
 
 VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PERIODIC_BOOST, unsigned int)
+#define VPX_CTRL_VP9E_SET_FRAME_PERIODIC_BOOST
 
 VPX_CTRL_USE_TYPE(VP9E_SET_NOISE_SENSITIVITY,  unsigned int)
+#define VPX_CTRL_VP9E_SET_NOISE_SENSITIVITY
 
 VPX_CTRL_USE_TYPE(VP9E_SET_TUNE_CONTENT, int) /* vp9e_tune_content */
+#define VPX_CTRL_VP9E_SET_TUNE_CONTENT
 
 VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_SPACE, int)
+#define VPX_CTRL_VP9E_SET_COLOR_SPACE
 
 VPX_CTRL_USE_TYPE(VP9E_SET_MIN_GF_INTERVAL,  unsigned int)
-
-/*!\brief
- *
- * TODO(debargha) : add support of the control in ffmpeg
- */
 #define VPX_CTRL_VP9E_SET_MIN_GF_INTERVAL
 
-
 VPX_CTRL_USE_TYPE(VP9E_SET_MAX_GF_INTERVAL,  unsigned int)
-/*!\brief
- *
- * TODO(debargha) : add support of the control in ffmpeg
- */
 #define VPX_CTRL_VP9E_SET_MAX_GF_INTERVAL
 
 VPX_CTRL_USE_TYPE(VP9E_GET_ACTIVEMAP, vpx_active_map_t *)
+#define VPX_CTRL_VP9E_GET_ACTIVEMAP
 
-/*!\brief
- *
- * TODO(rbultje) : add support of the control in ffmpeg
- */
-#define VPX_CTRL_VP9E_SET_COLOR_RANGE
 VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_RANGE, int)
+#define VPX_CTRL_VP9E_SET_COLOR_RANGE
 
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
+#define VPX_CTRL_VP9E_SET_SVC_REF_FRAME_CONFIG
 
 /*!\brief
  *
@@ -813,6 +812,7 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
  */
 #define VPX_CTRL_VP9E_SET_RENDER_SIZE
 VPX_CTRL_USE_TYPE(VP9E_SET_RENDER_SIZE, int *)
+/*!\endcond */
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus
 }  // extern "C"

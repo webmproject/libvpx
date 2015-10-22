@@ -291,7 +291,6 @@ void vpx_filter_block1d8_v8_intrin_ssse3(const uint8_t *src_ptr,
   }
 }
 
-
 filter8_1dfunction vpx_filter_block1d16_v8_ssse3;
 filter8_1dfunction vpx_filter_block1d16_h8_ssse3;
 filter8_1dfunction vpx_filter_block1d8_v8_ssse3;

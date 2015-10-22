@@ -201,7 +201,7 @@ const SixtapPredictFunc sixtap_16x16_neon = vp8_sixtap_predict16x16_neon;
 const SixtapPredictFunc sixtap_8x8_neon = vp8_sixtap_predict8x8_neon;
 const SixtapPredictFunc sixtap_8x4_neon = vp8_sixtap_predict8x4_neon;
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_NEON, SixtapPredictTest, ::testing::Values(
+    NEON, SixtapPredictTest, ::testing::Values(
         make_tuple(16, 16, sixtap_16x16_neon),
         make_tuple(8, 8, sixtap_8x8_neon),
         make_tuple(8, 4, sixtap_8x4_neon)));

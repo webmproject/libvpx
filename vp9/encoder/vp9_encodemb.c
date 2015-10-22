@@ -99,7 +99,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int eob = p->eobs[block];
-  const PLANE_TYPE type = pd->plane_type;
+  const PLANE_TYPE type = get_plane_type(plane);
   const int default_eob = 16 << (tx_size << 1);
   const int mul = 1 + (tx_size == TX_32X32);
   const int16_t *dequant_ptr = pd->dequant;
@@ -789,7 +789,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
   if (tx_size == TX_4X4) {
-    tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
+    tx_type = get_tx_type_4x4(get_plane_type(plane), xd, block);
     scan_order = &vp9_scan_orders[TX_4X4][tx_type];
     mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
   } else {
@@ -797,7 +797,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     if (tx_size == TX_32X32) {
       scan_order = &vp9_default_scan_orders[TX_32X32];
     } else {
-      tx_type = get_tx_type(pd->plane_type, xd);
+      tx_type = get_tx_type(get_plane_type(plane), xd);
       scan_order = &vp9_scan_orders[tx_size][tx_type];
     }
   }

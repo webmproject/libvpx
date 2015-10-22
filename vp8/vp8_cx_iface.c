@@ -17,6 +17,7 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/vpx_once.h"
 #include "vp8/encoder/onyx_int.h"
 #include "vpx/vp8cx.h"
 #include "vp8/encoder/firstpass.h"
@@ -693,6 +694,8 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
         else
             ctx->priv->enc.total_encoders   = 1;
 
+        once(vp8_initialize_enc);
+
         res = validate_config(priv, &priv->cfg, &priv->vp8_cfg, 0);
 
         if (!res)
@@ -1274,9 +1277,6 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
     {VP8_SET_REFERENCE,                 vp8e_set_reference},
     {VP8_COPY_REFERENCE,                vp8e_get_reference},
     {VP8_SET_POSTPROC,                  vp8e_set_previewpp},
-    {VP8E_UPD_ENTROPY,                  vp8e_update_entropy},
-    {VP8E_UPD_REFERENCE,                vp8e_update_reference},
-    {VP8E_USE_REFERENCE,                vp8e_use_reference},
     {VP8E_SET_FRAME_FLAGS,              vp8e_set_frame_flags},
     {VP8E_SET_TEMPORAL_LAYER_ID,        vp8e_set_temporal_layer_id},
     {VP8E_SET_ROI_MAP,                  vp8e_set_roi_map},

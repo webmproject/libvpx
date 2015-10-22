@@ -665,7 +665,7 @@ void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
       flipud(dest, stride, 4);
       vp10_iht4x4_16_add(input, dest, stride, ADST_DCT);
       flipud(dest, stride, 4);
-      break;
+        break;
     case DCT_FLIPADST:
       fliplr(dest, stride, 4);
       vp10_iht4x4_16_add(input, dest, stride, DCT_ADST);
@@ -1093,7 +1093,7 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
       flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
       vp10_highbd_iht4x4_16_add(input, dest, stride, ADST_DCT, bd);
       flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-      break;
+         break;
     case DCT_FLIPADST:
       fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
       vp10_highbd_iht4x4_16_add(input, dest, stride, DCT_ADST, bd);

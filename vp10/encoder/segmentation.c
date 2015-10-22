@@ -18,6 +18,7 @@
 
 #include "vp10/encoder/cost.h"
 #include "vp10/encoder/segmentation.h"
+#include "vp10/encoder/subexp.h"
 
 void vp10_enable_segmentation(struct segmentation *seg) {
   seg->enabled = 1;
@@ -49,24 +50,40 @@ void vp10_clear_segdata(struct segmentation *seg, int segment_id,
 }
 
 // Based on set of segment counts calculate a probability tree
-static void calc_segtree_probs(int *segcounts, vpx_prob *segment_tree_probs) {
+static void calc_segtree_probs(unsigned *segcounts,
+    vpx_prob *segment_tree_probs, const vpx_prob *cur_tree_probs) {
   // Work out probabilities of each segment
-  const int c01 = segcounts[0] + segcounts[1];
-  const int c23 = segcounts[2] + segcounts[3];
-  const int c45 = segcounts[4] + segcounts[5];
-  const int c67 = segcounts[6] + segcounts[7];
+  const unsigned cc[4] = {
+    segcounts[0] + segcounts[1], segcounts[2] + segcounts[3],
+    segcounts[4] + segcounts[5], segcounts[6] + segcounts[7]
+  };
+  const unsigned ccc[2] = { cc[0] + cc[1], cc[2] + cc[3] };
+#if CONFIG_MISC_FIXES
+  int i;
+#endif
 
-  segment_tree_probs[0] = get_binary_prob(c01 + c23, c45 + c67);
-  segment_tree_probs[1] = get_binary_prob(c01, c23);
-  segment_tree_probs[2] = get_binary_prob(c45, c67);
+  segment_tree_probs[0] = get_binary_prob(ccc[0], ccc[1]);
+  segment_tree_probs[1] = get_binary_prob(cc[0], cc[1]);
+  segment_tree_probs[2] = get_binary_prob(cc[2], cc[3]);
   segment_tree_probs[3] = get_binary_prob(segcounts[0], segcounts[1]);
   segment_tree_probs[4] = get_binary_prob(segcounts[2], segcounts[3]);
   segment_tree_probs[5] = get_binary_prob(segcounts[4], segcounts[5]);
   segment_tree_probs[6] = get_binary_prob(segcounts[6], segcounts[7]);
+
+#if CONFIG_MISC_FIXES
+  for (i = 0; i < 7; i++) {
+    const unsigned *ct = i == 0 ? ccc : i < 3 ? cc + (i & 2)
+        : segcounts + (i - 3) * 2;
+    vp10_prob_diff_update_savings_search(ct,
+        cur_tree_probs[i], &segment_tree_probs[i], DIFF_UPDATE_PROB);
+  }
+#else
+  (void) cur_tree_probs;
+#endif
 }
 
 // Based on set of segment counts and probabilities calculate a cost estimate
-static int cost_segmap(int *segcounts, vpx_prob *probs) {
+static int cost_segmap(unsigned *segcounts, vpx_prob *probs) {
   const int c01 = segcounts[0] + segcounts[1];
   const int c23 = segcounts[2] + segcounts[3];
   const int c45 = segcounts[4] + segcounts[5];
@@ -108,9 +125,9 @@ static int cost_segmap(int *segcounts, vpx_prob *probs) {
 
 static void count_segs(const VP10_COMMON *cm, MACROBLOCKD *xd,
                        const TileInfo *tile, MODE_INFO **mi,
-                       int *no_pred_segcounts,
-                       int (*temporal_predictor_count)[2],
-                       int *t_unpred_seg_counts,
+                       unsigned *no_pred_segcounts,
+                       unsigned (*temporal_predictor_count)[2],
+                       unsigned *t_unpred_seg_counts,
                        int bw, int bh, int mi_row, int mi_col) {
   int segment_id;
 
@@ -147,9 +164,9 @@ static void count_segs(const VP10_COMMON *cm, MACROBLOCKD *xd,
 
 static void count_segs_sb(const VP10_COMMON *cm, MACROBLOCKD *xd,
                           const TileInfo *tile, MODE_INFO **mi,
-                          int *no_pred_segcounts,
-                          int (*temporal_predictor_count)[2],
-                          int *t_unpred_seg_counts,
+                          unsigned *no_pred_segcounts,
+                          unsigned (*temporal_predictor_count)[2],
+                          unsigned *t_unpred_seg_counts,
                           int mi_row, int mi_col,
                           BLOCK_SIZE bsize) {
   const int mis = cm->mi_stride;
@@ -197,24 +214,39 @@ static void count_segs_sb(const VP10_COMMON *cm, MACROBLOCKD *xd,
 
 void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
   struct segmentation *seg = &cm->seg;
+#if CONFIG_MISC_FIXES
+  struct segmentation_probs *segp = &cm->fc->seg;
+#else
+  struct segmentation_probs *segp = &cm->segp;
+#endif
 
   int no_pred_cost;
   int t_pred_cost = INT_MAX;
 
   int i, tile_col, mi_row, mi_col;
 
-  int temporal_predictor_count[PREDICTION_PROBS][2] = { { 0 } };
-  int no_pred_segcounts[MAX_SEGMENTS] = { 0 };
-  int t_unpred_seg_counts[MAX_SEGMENTS] = { 0 };
+#if CONFIG_MISC_FIXES
+  unsigned (*temporal_predictor_count)[2] = cm->counts.seg.pred;
+  unsigned *no_pred_segcounts = cm->counts.seg.tree_total;
+  unsigned *t_unpred_seg_counts = cm->counts.seg.tree_mispred;
+#else
+  unsigned temporal_predictor_count[PREDICTION_PROBS][2] = { { 0 } };
+  unsigned no_pred_segcounts[MAX_SEGMENTS] = { 0 };
+  unsigned t_unpred_seg_counts[MAX_SEGMENTS] = { 0 };
+#endif
 
   vpx_prob no_pred_tree[SEG_TREE_PROBS];
   vpx_prob t_pred_tree[SEG_TREE_PROBS];
   vpx_prob t_nopred_prob[PREDICTION_PROBS];
 
+#if CONFIG_MISC_FIXES
+  (void) xd;
+#else
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
-  memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
-  memset(seg->pred_probs, 255, sizeof(seg->pred_probs));
+  memset(segp->tree_probs, 255, sizeof(segp->tree_probs));
+  memset(segp->pred_probs, 255, sizeof(segp->pred_probs));
+#endif
 
   // First of all generate stats regarding how well the last segment map
   // predicts this one
@@ -237,14 +269,14 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
 
   // Work out probability tree for coding segments without prediction
   // and the cost.
-  calc_segtree_probs(no_pred_segcounts, no_pred_tree);
+  calc_segtree_probs(no_pred_segcounts, no_pred_tree, segp->tree_probs);
   no_pred_cost = cost_segmap(no_pred_segcounts, no_pred_tree);
 
   // Key frames cannot use temporal prediction
   if (!frame_is_intra_only(cm)) {
     // Work out probability tree for coding those segments not
     // predicted using the temporal method and the cost.
-    calc_segtree_probs(t_unpred_seg_counts, t_pred_tree);
+    calc_segtree_probs(t_unpred_seg_counts, t_pred_tree, segp->tree_probs);
     t_pred_cost = cost_segmap(t_unpred_seg_counts, t_pred_tree);
 
     // Add in the cost of the signaling for each prediction context.
@@ -252,7 +284,13 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
       const int count0 = temporal_predictor_count[i][0];
       const int count1 = temporal_predictor_count[i][1];
 
+#if CONFIG_MISC_FIXES
+      vp10_prob_diff_update_savings_search(temporal_predictor_count[i],
+                                           segp->pred_probs[i],
+                                           &t_nopred_prob[i], DIFF_UPDATE_PROB);
+#else
       t_nopred_prob[i] = get_binary_prob(count0, count1);
+#endif
 
       // Add in the predictor signaling cost
       t_pred_cost += count0 * vp10_cost_zero(t_nopred_prob[i]) +
@@ -263,19 +301,30 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
   // Now choose which coding method to use.
   if (t_pred_cost < no_pred_cost) {
     seg->temporal_update = 1;
-    memcpy(seg->tree_probs, t_pred_tree, sizeof(t_pred_tree));
-    memcpy(seg->pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
+#if !CONFIG_MISC_FIXES
+    memcpy(segp->tree_probs, t_pred_tree, sizeof(t_pred_tree));
+    memcpy(segp->pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
+#endif
   } else {
     seg->temporal_update = 0;
-    memcpy(seg->tree_probs, no_pred_tree, sizeof(no_pred_tree));
+#if !CONFIG_MISC_FIXES
+    memcpy(segp->tree_probs, no_pred_tree, sizeof(no_pred_tree));
+#endif
   }
 }
 
-void vp10_reset_segment_features(struct segmentation *seg) {
+void vp10_reset_segment_features(VP10_COMMON *cm) {
+  struct segmentation *seg = &cm->seg;
+#if !CONFIG_MISC_FIXES
+  struct segmentation_probs *segp = &cm->segp;
+#endif
+
   // Set up default state for MB feature flags
   seg->enabled = 0;
   seg->update_map = 0;
   seg->update_data = 0;
-  memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
+#if !CONFIG_MISC_FIXES
+  memset(segp->tree_probs, 255, sizeof(segp->tree_probs));
+#endif
   vp10_clearall_segfeatures(seg);
 }

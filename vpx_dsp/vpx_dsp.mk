@@ -36,7 +36,6 @@ DSP_SRCS-yes += bitreader_buffer.h
 endif
 
 # intra predictions
-ifneq ($(filter yes,$(CONFIG_VP9) $(CONFIG_VP10)),)
 DSP_SRCS-yes += intrapred.c
 
 ifeq ($(CONFIG_USE_X86INC),yes)
@@ -59,7 +58,6 @@ DSP_SRCS-$(HAVE_MSA) += mips/intrapred_msa.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred4_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred8_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/intrapred16_dspr2.c
-endif  # CONFIG_VP9 || CONFIG_VP10
 
 DSP_SRCS-$(HAVE_DSPR2)  += mips/common_dspr2.h
 DSP_SRCS-$(HAVE_DSPR2)  += mips/common_dspr2.c
