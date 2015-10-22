@@ -21,7 +21,7 @@
 #include "vp10/common/reconintra.h"
 #include "vp10/common/onyxc_int.h"
 
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
 enum {
   NEED_LEFT = 1 << 1,
   NEED_ABOVE = 1 << 2,
@@ -63,7 +63,7 @@ static const uint8_t extend_modes[INTRA_MODES] = {
 };
 #endif
 
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
 static const uint8_t orders_64x64[1] = { 0 };
 static const uint8_t orders_64x32[2] = { 0, 1 };
 static const uint8_t orders_32x64[2] = { 0, 1 };
@@ -216,18 +216,13 @@ static void vp10_init_intra_predictors_internal(void) {
 
   INIT_ALL_SIZES(pred[V_PRED], v);
   INIT_ALL_SIZES(pred[H_PRED], h);
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   INIT_ALL_SIZES(pred[D207_PRED], d207e);
   INIT_ALL_SIZES(pred[D45_PRED], d45e);
   INIT_ALL_SIZES(pred[D63_PRED], d63e);
 #else
   INIT_ALL_SIZES(pred[D207_PRED], d207);
-#if CONFIG_MISC_FIXES
-  pred[D45_PRED][TX_4X4] = vpx_d45e_predictor_4x4;
-  INIT_NO_4X4(pred[D45_PRED], d45);
-#else
   INIT_ALL_SIZES(pred[D45_PRED], d45);
-#endif
   INIT_ALL_SIZES(pred[D63_PRED], d63);
 #endif
   INIT_ALL_SIZES(pred[D117_PRED], d117);
@@ -243,18 +238,13 @@ static void vp10_init_intra_predictors_internal(void) {
 #if CONFIG_VP9_HIGHBITDEPTH
   INIT_ALL_SIZES(pred_high[V_PRED], highbd_v);
   INIT_ALL_SIZES(pred_high[H_PRED], highbd_h);
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207e);
   INIT_ALL_SIZES(pred_high[D45_PRED], highbd_d45e);
   INIT_ALL_SIZES(pred_high[D63_PRED], highbd_d63);
 #else
   INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207);
-#if CONFIG_MISC_FIXES
-  pred_high[D45_PRED][TX_4X4] = vpx_highbd_d45e_predictor_4x4;
-  INIT_NO_4X4(pred_high[D45_PRED], highbd_d45);
-#else
   INIT_ALL_SIZES(pred_high[D45_PRED], highbd_d45);
-#endif
   INIT_ALL_SIZES(pred_high[D63_PRED], highbd_d63);
 #endif
   INIT_ALL_SIZES(pred_high[D117_PRED], highbd_d117);
@@ -271,7 +261,7 @@ static void vp10_init_intra_predictors_internal(void) {
 #undef intra_pred_allsizes
 }
 
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
 static inline void memset16(uint16_t *dst, int val, int n) {
   while (n--)
     *dst++ = val;
@@ -286,7 +276,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
                                         int dst_stride,
                                         PREDICTION_MODE mode,
                                         TX_SIZE tx_size,
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
                                         int n_top_px, int n_topright_px,
                                         int n_left_px, int n_bottomleft_px,
 #else
@@ -299,7 +289,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int i;
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   DECLARE_ALIGNED(16, uint16_t, left_col[32]);
 #else
   DECLARE_ALIGNED(16, uint16_t, left_col[64]);
@@ -308,7 +298,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   uint16_t *above_row = above_data + 16;
   const uint16_t *const_above_row = above_row;
   const int bs = 4 << tx_size;
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   const uint16_t *above_ref = ref - ref_stride;
 #else
   int frame_width, frame_height;
@@ -322,7 +312,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   // 129  E   F  ..  U   V
   // 129  G   H  ..  S   T   T   T   T   T
 
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   (void) x;
   (void) y;
   (void) plane;
@@ -460,7 +450,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 
   // predict
   if (mode == DC_PRED) {
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
     dc_pred_high[n_left_px > 0][n_top_px > 0][tx_size](dst, dst_stride,
                                                        const_above_row,
                                                        left_col, xd->bd);
@@ -479,7 +469,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
                                    int ref_stride, uint8_t *dst, int dst_stride,
                                    PREDICTION_MODE mode, TX_SIZE tx_size,
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
                                    int n_top_px, int n_topright_px,
                                    int n_left_px, int n_bottomleft_px,
 #else
@@ -488,7 +478,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 #endif
                                    int x, int y, int plane) {
   int i;
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   DECLARE_ALIGNED(16, uint8_t, left_col[64]);
   const uint8_t *above_ref = ref - ref_stride;
 #else
@@ -509,7 +499,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   // 129  G   H  ..  S   T   T   T   T   T
   // ..
 
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   (void) xd;
   (void) x;
   (void) y;
@@ -535,7 +525,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
   // NEED_LEFT
   if (extend_modes[mode] & NEED_LEFT) {
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
     const int need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
     i = 0;
     if (n_left_px > 0) {
@@ -578,7 +568,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
   // NEED_ABOVE
   if (extend_modes[mode] & NEED_ABOVE) {
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
     const int need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
     if (n_top_px > 0) {
       memcpy(above_row, above_ref, n_top_px);
@@ -621,7 +611,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 #endif
   }
 
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   if (extend_modes[mode] & NEED_ABOVELEFT) {
     above_row[-1] = n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : 129) : 127;
   }
@@ -675,7 +665,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
   // predict
   if (mode == DC_PRED) {
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
     dc_pred[n_left_px > 0][n_top_px > 0][tx_size](dst, dst_stride,
                                                   const_above_row, left_col);
 #else
@@ -695,13 +685,13 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int txw = (1 << tx_size);
   const int have_top = loff || xd->up_available;
   const int have_left = aoff || xd->left_available;
-#if !CONFIG_EXT_IPRED_BLTR
+#if !CONFIG_MISC_FIXES
   const int bw = (1 << bwl_in);
   const int have_right = (aoff + txw) < bw;
 #endif
   const int x = aoff * 4;
   const int y = loff * 4;
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
   const int bw = VPXMAX(2, 1 << bwl_in);
   const int bh = VPXMAX(2, 1 << bhl_in);
   const int mi_row = -xd->mb_to_top_edge >> 6;
