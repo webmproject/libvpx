@@ -2807,6 +2807,8 @@ void vp10_encode_frame(VP10_COMP *cpi) {
       cm->comp_var_ref[0] = LAST_FRAME;
       cm->comp_var_ref[1] = GOLDEN_FRAME;
     }
+  } else {
+    cpi->allow_comp_inter_inter = 0;
   }
 
   if (cpi->sf.frame_parameter_update) {
