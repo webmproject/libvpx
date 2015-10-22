@@ -943,9 +943,19 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
           if (xd->lossless) {
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
             const scan_order *so = get_scan(TX_4X4, tx_type, 0);
+#if CONFIG_VAR_TX
+            const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
+                                                           *(templ + idy));
+#endif
             vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+            ratey += cost_coeffs(x, 0, block,
+#if CONFIG_VAR_TX
+                                 coeff_ctx,
+#else
+                                 tempa + idx, templ + idy,
+#endif
+                                 TX_4X4,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
@@ -957,9 +967,19 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             int64_t unused;
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
             const scan_order *so = get_scan(TX_4X4, tx_type, 0);
+#if CONFIG_VAR_TX
+            const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
+                                                           *(templ + idy));
+#endif
             vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, 0);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+            ratey += cost_coeffs(x, 0, block,
+#if CONFIG_VAR_TX
+                                 coeff_ctx,
+#else
+                                 tempa + idx, templ + idy,
+#endif
+                                 TX_4X4,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
             distortion += vp10_highbd_block_error(
