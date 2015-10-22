@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3942fe30_94a34af0",
+        "filename": "test/superframe_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-22T05:31:27Z",
+      "side": 1,
+      "message": "trivial lint thing here",
+      "revId": "aa1125655519965c2c5bd2f99966d23ff6180d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
