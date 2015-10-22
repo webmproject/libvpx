@@ -30,8 +30,10 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type] << 3;
   const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type] << 3;
 
+#if !CONFIG_MISC_FIXES
   // Blank the reference vector list
   memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+#endif
 
   // The nearest 2 blocks are treated differently
   // if the size < 8x8 we get the mv from the bmi substructure,
@@ -48,10 +50,10 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
       if (candidate->ref_frame[0] == ref_frame)
         ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block),
-                        refmv_count, mv_ref_list, Done);
+                        refmv_count, mv_ref_list, bw, bh, xd, Done);
       else if (candidate->ref_frame[1] == ref_frame)
         ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block),
-                        refmv_count, mv_ref_list, Done);
+                        refmv_count, mv_ref_list, bw, bh, xd, Done);
     }
   }
 
@@ -66,9 +68,11 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
       different_ref_found = 1;
 
       if (candidate->ref_frame[0] == ref_frame)
-        ADD_MV_REF_LIST(candidate->mv[0], refmv_count, mv_ref_list, Done);
+        ADD_MV_REF_LIST(candidate->mv[0], refmv_count, mv_ref_list,
+                        bw, bh, xd, Done);
       else if (candidate->ref_frame[1] == ref_frame)
-        ADD_MV_REF_LIST(candidate->mv[1], refmv_count, mv_ref_list, Done);
+        ADD_MV_REF_LIST(candidate->mv[1], refmv_count, mv_ref_list,
+                        bw, bh, xd, Done);
     }
   }
 
@@ -90,9 +94,11 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     }
 
     if (prev_frame_mvs->ref_frame[0] == ref_frame) {
-      ADD_MV_REF_LIST(prev_frame_mvs->mv[0], refmv_count, mv_ref_list, Done);
+      ADD_MV_REF_LIST(prev_frame_mvs->mv[0], refmv_count, mv_ref_list,
+                      bw, bh, xd, Done);
     } else if (prev_frame_mvs->ref_frame[1] == ref_frame) {
-      ADD_MV_REF_LIST(prev_frame_mvs->mv[1], refmv_count, mv_ref_list, Done);
+      ADD_MV_REF_LIST(prev_frame_mvs->mv[1], refmv_count, mv_ref_list,
+                      bw, bh, xd, Done);
     }
   }
 
@@ -108,7 +114,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
         // If the candidate is INTRA we don't want to consider its mv.
         IF_DIFF_REF_FRAME_ADD_MV(candidate, ref_frame, ref_sign_bias,
-                                 refmv_count, mv_ref_list, Done);
+                                 refmv_count, mv_ref_list, bw, bh, xd, Done);
       }
     }
   }
@@ -123,7 +129,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
         mv.as_mv.row *= -1;
         mv.as_mv.col *= -1;
       }
-      ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, Done);
+      ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, bw, bh, xd, Done);
     }
 
     if (prev_frame_mvs->ref_frame[1] > INTRA_FRAME &&
@@ -137,7 +143,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
         mv.as_mv.row *= -1;
         mv.as_mv.col *= -1;
       }
-      ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, Done);
+      ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, bw, bh, xd, Done);
     }
   }
 
@@ -145,9 +151,14 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   mode_context[ref_frame] = counter_to_context[context_counter];
 
+#if CONFIG_MISC_FIXES
+  for (i = refmv_count; i < MAX_MV_REF_CANDIDATES; ++i)
+      mv_ref_list[i].as_int = 0;
+#else
   // Clamp vectors
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
     clamp_mv_ref(&mv_ref_list[i].as_mv, bw, bh, xd);
+#endif
 }
 
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
