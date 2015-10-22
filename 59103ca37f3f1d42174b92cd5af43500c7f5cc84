@@ -16,6 +16,24 @@
       "revId": "59103ca37f3f1d42174b92cd5af43500c7f5cc84",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d92c827d_28096b00",
+        "filename": "test/superframe_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-22T02:28:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19337ad8_de25e5e2",
+      "revId": "59103ca37f3f1d42174b92cd5af43500c7f5cc84",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
