@@ -1442,6 +1442,10 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   *sse = 0;
   *skippable = 1;
 
+#if CONFIG_EXT_TX
+  xd->mi[0]->mbmi.tx_type = DCT_DCT;
+#endif
+
   if (is_cost_valid) {
     const struct macroblockd_plane *const pd = &xd->plane[0];
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
