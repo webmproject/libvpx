@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6699de6_3a7ebd9c",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1223,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-10-22T21:17:41Z",
+      "side": 1,
+      "message": "xd-\u003elossless[xd-\u003emi[0]-\u003embmi.segment_id]",
+      "revId": "66192250a5644cb25b2fae1c772767466a6f07b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
