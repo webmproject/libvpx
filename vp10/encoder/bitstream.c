@@ -1471,17 +1471,17 @@ static int remux_tiles(uint8_t *dest, const int sz,
     if (n == n_tiles - 1) {
       tile_sz = sz - rpos;
     } else {
-      tile_sz = mem_get_le32(&dest[rpos]);
+      tile_sz = mem_get_le32(&dest[rpos]) + 1;
       rpos += 4;
       switch (mag) {
         case 0:
-          dest[wpos] = tile_sz;
+          dest[wpos] = tile_sz - 1;
           break;
         case 1:
-          mem_put_le16(&dest[wpos], tile_sz);
+          mem_put_le16(&dest[wpos], tile_sz - 1);
           break;
         case 2:
-          mem_put_le24(&dest[wpos], tile_sz);
+          mem_put_le24(&dest[wpos], tile_sz - 1);
           break;
         case 3:  // remuxing should only happen if mag < 3
         default:
