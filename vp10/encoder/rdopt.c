@@ -1635,9 +1635,14 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   if (this_rd < sum_rd) {
+    int idx, idy;
     for (i = 0; i < (1 << tx_size); ++i)
       pta[i] = ptl[i] = !(tmp_eob == 0);
     mbmi->inter_tx_size[tx_idx] = tx_size;
+
+    for (idy = 0; idy < (1 << tx_size) / 2; ++idy)
+      for (idx = 0; idx < (1 << tx_size) / 2; ++idx)
+        mbmi->inter_tx_size[tx_idx + (idy << 3) + idx] = tx_size;
     mbmi->tx_size = tx_size;
   } else {
     *rate = sum_rate;

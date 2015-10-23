@@ -115,7 +115,11 @@ static void read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
       read_tx_size_inter(cm, xd, mbmi, tx_size - 1, offsetr, offsetc, r);
     }
   } else {
+    int idx, idy;
     mbmi->inter_tx_size[tx_idx] = tx_size;
+    for (idy = 0; idy < (1 << tx_size) / 2; ++idy)
+      for (idx = 0; idx < (1 << tx_size) / 2; ++idx)
+        mbmi->inter_tx_size[tx_idx + (idy << 3) + idx] = tx_size;
     mbmi->tx_size = mbmi->inter_tx_size[tx_idx];
   }
 }
