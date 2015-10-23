@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d953a2fb_e425c2e2",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-23T23:18:02Z",
+      "side": 1,
+      "message": "I don\u0027t have any better solution either.",
+      "parentUuid": "99784a71_c5b28469",
+      "range": {
+        "startLine": 91,
+        "startChar": 24,
+        "endLine": 91,
+        "endChar": 38
+      },
+      "revId": "7b72308437d64b9af8b2ca8cd3febe37059ebfb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9618ebd_d1916422",
         "filename": "test/test_vectors.cc",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-22T17:08:01Z",
       "side": 1,
       "message": "All the vector\u0027s naming are wrong. Please consult Frank on how to name these vectors that with resolution change. For example, vp90_2_02_size_320x180_05_resize_12_21_encode_speed_5 goes from 320x190 to 160x90 which is not reflected from the name. And this will bring confusion for people.",
+      "range": {
+        "startLine": 198,
+        "startChar": 26,
+        "endLine": 198,
+        "endChar": 28
+      },
+      "revId": "7b72308437d64b9af8b2ca8cd3febe37059ebfb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96df3923_643bfe64",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-23T23:18:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9618ebd_d1916422",
       "range": {
         "startLine": 198,
         "startChar": 26,
