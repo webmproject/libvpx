@@ -46,6 +46,30 @@
       "revId": "7460798ba5666e25258a05f1dc7ad462cb3f1b19",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6d8bd3b_bf9c3736",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1427,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-23T18:26:04Z",
+      "side": 1,
+      "message": "I\u0027m not entirely sure what I want, I\u0027m trying to figure out some of the norms this time around. It\u0027s true that results with this change can be compared to computed RD information from older revisions, but if this part of the experiment were stripped out for say streamability concerns, then we could easily wind up going back to the vp9 behavior but with reversed endianness which seems suboptimal.",
+      "parentUuid": "36f68d9e_0b635dd1",
+      "range": {
+        "startLine": 1427,
+        "startChar": 0,
+        "endLine": 1427,
+        "endChar": 49
+      },
+      "revId": "7460798ba5666e25258a05f1dc7ad462cb3f1b19",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
