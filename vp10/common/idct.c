@@ -239,6 +239,10 @@ void highbd_idst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   int64_t s12 = (input[1] + input[2]);
   int64_t d12 = (input[1] - input[2]);
 
+#if !CONFIG_EMULATE_HARDWARE
+  (void)bd;
+#endif
+
   sum = s03 * sinvalue_lookup[0] + s12 * sinvalue_lookup[1];
   output[0] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), bd);
   sum = d03 * sinvalue_lookup[1] + d12 * sinvalue_lookup[0];
@@ -263,6 +267,10 @@ void highbd_idst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   int64_t d25 = (input[2] - input[5]);
   int64_t s34 = (input[3] + input[4]);
   int64_t d34 = (input[3] - input[4]);
+
+#if !CONFIG_EMULATE_HARDWARE
+  (void)bd;
+#endif
 
   sum = s07 * sinvalue_lookup[0] + s16 * sinvalue_lookup[1] +
         s25 * sinvalue_lookup[2] + s34 * sinvalue_lookup[3];
@@ -311,6 +319,11 @@ void highbd_idst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
   int64_t d69  = (input[6] - input[9]);
   int64_t s78  = (input[7] + input[8]);
   int64_t d78  = (input[7] - input[8]);
+
+#if !CONFIG_EMULATE_HARDWARE
+  (void)bd;
+#endif
+
   sum = s015 * sinvalue_lookup[0] + s114 * sinvalue_lookup[1] +
         s213 * sinvalue_lookup[2] + s312 * sinvalue_lookup[3] +
         s411 * sinvalue_lookup[4] + s510 * sinvalue_lookup[5] +
