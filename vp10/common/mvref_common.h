@@ -164,36 +164,41 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
   return mv;
 }
 
+#if CONFIG_MISC_FIXES
+#define CLIP_IN_ADD(mv, bw, bh, xd) clamp_mv_ref(mv, bw, bh, xd)
+#else
+#define CLIP_IN_ADD(mv, bw, bh, xd) do {} while (0)
+#endif
+
 // This macro is used to add a motion vector mv_ref list if it isn't
 // already in the list.  If it's the second motion vector it will also
 // skip all additional processing and jump to done!
-#define ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, Done) \
+#define ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, bw, bh, xd, Done) \
   do { \
-    if (refmv_count) { \
-      if ((mv).as_int != (mv_ref_list)[0].as_int) { \
-        (mv_ref_list)[(refmv_count)] = (mv); \
+    (mv_ref_list)[(refmv_count)] = (mv); \
+    CLIP_IN_ADD(&(mv_ref_list)[(refmv_count)].as_mv, (bw), (bh), (xd)); \
+    if (refmv_count && (mv_ref_list)[1].as_int != (mv_ref_list)[0].as_int) { \
+        (refmv_count) = 2; \
         goto Done; \
-      } \
-    } else { \
-      (mv_ref_list)[(refmv_count)++] = (mv); \
     } \
+    (refmv_count) = 1; \
   } while (0)
 
 // If either reference frame is different, not INTRA, and they
 // are different from each other scale and add the mv to our list.
 #define IF_DIFF_REF_FRAME_ADD_MV(mbmi, ref_frame, ref_sign_bias, refmv_count, \
-                                 mv_ref_list, Done) \
+                                 mv_ref_list, bw, bh, xd, Done) \
   do { \
     if (is_inter_block(mbmi)) { \
       if ((mbmi)->ref_frame[0] != ref_frame) \
         ADD_MV_REF_LIST(scale_mv((mbmi), 0, ref_frame, ref_sign_bias), \
-                        refmv_count, mv_ref_list, Done); \
+                        refmv_count, mv_ref_list, bw, bh, xd, Done); \
       if (has_second_ref(mbmi) && \
           (CONFIG_MISC_FIXES || \
            (mbmi)->mv[1].as_int != (mbmi)->mv[0].as_int) && \
           (mbmi)->ref_frame[1] != ref_frame) \
         ADD_MV_REF_LIST(scale_mv((mbmi), 1, ref_frame, ref_sign_bias), \
-                        refmv_count, mv_ref_list, Done); \
+                        refmv_count, mv_ref_list, bw, bh, xd, Done); \
     } \
   } while (0)
 
