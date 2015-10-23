@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "f6b795e1_19962b4c",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-23T18:29:41Z",
+      "side": 1,
+      "message": "What about change it to sth like denoiser-\u003edenoising?\nBased on the suggestion here: https://big.corp.google.com/~jmcmaster/testing/2015/07/episode-387-improving-readability-with.html",
+      "range": {
+        "startLine": 331,
+        "startChar": 27,
+        "endLine": 331,
+        "endChar": 50
+      },
+      "revId": "d162934bdca89b156194732226746993356344ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56e941ce_3c84b10b",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-23T18:29:41Z",
+      "side": 1,
+      "message": "Same with above",
+      "range": {
+        "startLine": 348,
+        "startChar": 6,
+        "endLine": 348,
+        "endChar": 29
+      },
+      "revId": "d162934bdca89b156194732226746993356344ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6d53101_e0d0e2da",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 7
@@ -18,6 +64,29 @@
         "startChar": 2,
         "endLine": 516,
         "endChar": 3
+      },
+      "revId": "d162934bdca89b156194732226746993356344ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6d53101_205e4a0b",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-23T18:29:41Z",
+      "side": 1,
+      "message": "Same with above",
+      "range": {
+        "startLine": 532,
+        "startChar": 2,
+        "endLine": 532,
+        "endChar": 24
       },
       "revId": "d162934bdca89b156194732226746993356344ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
