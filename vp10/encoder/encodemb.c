@@ -1132,7 +1132,7 @@ void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
         break;
       case TX_4X4:
         vp10_highbd_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
-                                 xd->lossless[mbmi->segment_id]);
+                                 xd->lossless[xd->mi[0]->mbmi.segment_id]);
         vp10_highbd_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
                                 p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                                 pd->dequant, eob,
