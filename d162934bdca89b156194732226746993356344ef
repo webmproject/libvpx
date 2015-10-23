@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6d53101_e0d0e2da",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-23T18:22:14Z",
+      "side": 1,
+      "message": "What about:\n  fail |\u003d vpx_alloc_frame_buffer(...);\nAnd then remove the first\n  if (fail) {\n    vp9_denoiser_free(denoiser);\n    return 1;\n  }",
+      "range": {
+        "startLine": 507,
+        "startChar": 2,
+        "endLine": 516,
+        "endChar": 3
+      },
+      "revId": "d162934bdca89b156194732226746993356344ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
