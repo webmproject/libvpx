@@ -379,14 +379,6 @@ static INLINE int frame_is_intra_only(const VP10_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME || cm->intra_only;
 }
 
-static INLINE void set_partition_probs(const VP10_COMMON *const cm,
-                                       MACROBLOCKD *const xd) {
-  xd->partition_probs =
-      frame_is_intra_only(cm) ?
-          &vp10_kf_partition_probs[0] :
-          (const vpx_prob (*)[PARTITION_TYPES - 1])cm->fc->partition_prob;
-}
-
 static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
                                         tran_low_t *dqcoeff) {
   int i;
@@ -407,13 +399,6 @@ static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
   xd->above_seg_context = cm->above_seg_context;
   xd->mi_stride = cm->mi_stride;
   xd->error_info = &cm->error;
-
-  set_partition_probs(cm, xd);
-}
-
-static INLINE const vpx_prob* get_partition_probs(const MACROBLOCKD *xd,
-                                                  int ctx) {
-  return xd->partition_probs[ctx];
 }
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {

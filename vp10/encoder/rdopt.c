@@ -637,7 +637,8 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
 
   mbmi->tx_size = VPXMIN(max_tx_size, largest_tx_size);
 #if CONFIG_EXT_TX
-  if (is_inter_block(mbmi) && bs >= BLOCK_8X8 && !xd->lossless) {
+  if (is_inter_block(mbmi) && bs >= BLOCK_8X8 &&
+      !xd->lossless[mbmi->segment_id]) {
     for (tx_type = DCT_DCT; tx_type < TX_TYPES - 1; ++tx_type) {
       if (mbmi->tx_type >= DST_ADST && mbmi->tx_type < IDTX &&
           best_tx_type == DCT_DCT) {
@@ -666,7 +667,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
         this_rd = RDCOST(x->rdmult, x->rddiv, s1, psse);
       else
         this_rd = RDCOST(x->rdmult, x->rddiv, r + s0, d);
-      if (is_inter_block(mbmi) && !xd->lossless && !s)
+      if (is_inter_block(mbmi) && !xd->lossless[mbmi->segment_id] && !s)
         this_rd = VPXMIN(this_rd, RDCOST(x->rdmult, x->rddiv, s1, psse));
 
       if (this_rd < ((best_tx_type == DCT_DCT) ? ext_tx_th : 1) * best_rd) {
@@ -685,7 +686,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_EXT_TX
   if (bs >= BLOCK_8X8 && mbmi->tx_size <= TX_16X16 &&
-      !xd->lossless && *rate != INT_MAX) {
+      !xd->lossless[mbmi->segment_id] && *rate != INT_MAX) {
     if (is_inter_block(mbmi))
       *rate += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
     else
@@ -758,7 +759,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_EXT_TX
   start_tx_type = DCT_DCT;
-  if (bs >= BLOCK_8X8 && !xd->lossless)
+  if (bs >= BLOCK_8X8 && !xd->lossless[mbmi->segment_id])
     end_tx_type = TX_TYPES - 1;
   else
     end_tx_type = DCT_DCT;
@@ -791,7 +792,8 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                        &sse, ref_best_rd, 0, bs, n,
                        cpi->sf.use_fast_coef_costing);
 #if CONFIG_EXT_TX
-      if (bs >= BLOCK_8X8 && !xd->lossless && r != INT_MAX && n < TX_32X32) {
+      if (bs >= BLOCK_8X8 && !xd->lossless[mbmi->segment_id] &&
+          r != INT_MAX && n < TX_32X32) {
         if (is_inter_block(mbmi))
           r += cpi->inter_tx_type_costs[n][mbmi->tx_type];
         else
@@ -817,11 +819,11 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
         rd = RDCOST(x->rdmult, x->rddiv, r + s0, d);
       }
 
-      if (is_inter_block(mbmi) && !xd->lossless && !s)
+      if (is_inter_block(mbmi) && !xd->lossless[mbmi->segment_id] && !s)
         rd = VPXMIN(rd, RDCOST(x->rdmult, x->rddiv, s1, sse));
 
       // Early termination in transform size search.
-      if (cpi->sf.tx_size_search_breakout &&
+      if (0 && cpi->sf.tx_size_search_breakout &&
           (rd== INT64_MAX ||
               (n < (int) max_tx_size && rd > last_rd) ||
               s == 1))

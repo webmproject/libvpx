@@ -1132,7 +1132,7 @@ void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
         break;
       case TX_4X4:
         vp10_highbd_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
-                                 xd->lossless);
+                                 xd->lossless[mbmi->segment_id]);
         vp10_highbd_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
                                 p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                                 pd->dequant, eob,
@@ -1220,7 +1220,7 @@ void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
         break;
       case TX_4X4:
         vp10_highbd_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
-                                 xd->lossless);
+                                 xd->lossless[xd->mi[0]->mbmi.segment_id]);
         vpx_highbd_quantize_dc(coeff, 16, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff,
                                pd->dequant[0], eob);
@@ -1592,7 +1592,7 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
   if (p->eobs[block] > 0) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      if (xd->lossless) {
+      if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
         vp10_highbd_iwht4x4_add(dqcoeff, dst, pd->dst.stride,
                                 p->eobs[block], xd->bd);
       } else {
@@ -1602,7 +1602,7 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
       return;
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    if (xd->lossless) {
+    if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
       vp10_iwht4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
     } else {
       vp10_idct4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);

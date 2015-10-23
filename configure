@@ -267,6 +267,7 @@ EXPERIMENT_LIST="
     var_tx
     ext_tx
     misc_fixes
+    ext_intra
     universal_hp
 "
 CONFIG_LIST="

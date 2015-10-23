@@ -973,6 +973,7 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
 
 #if CONFIG_EXT_TX
   for (i = TX_4X4; i <= TX_16X16; ++i) {
+    int j;
     vpx_tree_merge_probs(vp10_tx_type_tree, pre_fc->inter_tx_type_prob[i],
                          counts->inter_tx_type[i], fc->inter_tx_type_prob[i]);
 
