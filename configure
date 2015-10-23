@@ -268,7 +268,6 @@ EXPERIMENT_LIST="
     ext_tx
     misc_fixes
     ext_intra
-    universal_hp
 "
 CONFIG_LIST="
     dependency_tracking

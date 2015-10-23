@@ -832,7 +832,7 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 intra_pred_no_4x4(d207)
 intra_pred_no_4x4(d63)
 intra_pred_no_4x4(d45)
-#if CONFIG_EXT_IPRED_BLTR
+#if CONFIG_MISC_FIXES
 intra_pred_allsizes(d207e)
 intra_pred_allsizes(d63e)
 intra_pred_no_4x4(d45e)
@@ -847,7 +847,4 @@ intra_pred_allsizes(dc_128)
 intra_pred_allsizes(dc_left)
 intra_pred_allsizes(dc_top)
 intra_pred_allsizes(dc)
-#if CONFIG_VP9_HIGHBITDEPTH && CONFIG_MISC_FIXES && !CONFIG_EXT_IPRED_BLTR
-intra_pred_highbd_sized(d45e, 4)
-#endif
 #undef intra_pred_allsizes

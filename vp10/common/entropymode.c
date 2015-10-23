@@ -985,7 +985,7 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
 #endif  // CONFIG_EXT_TX
 #if CONFIG_MISC_FIXES
   if (cm->seg.temporal_update) {
-    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+    for (i = 0; i < PREDICTION_PROBS; i++)
       fc->seg.pred_probs[i] = mode_mv_merge_probs(pre_fc->seg.pred_probs[i],
                                                   counts->seg.pred[i]);
 
