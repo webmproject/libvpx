@@ -22,6 +22,30 @@
       "revId": "7460798ba5666e25258a05f1dc7ad462cb3f1b19",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36f68d9e_0b635dd1",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1427,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-10-23T18:14:19Z",
+      "side": 1,
+      "message": "Sort of. The basic idea was that you guys typically don\u0027t want these kind of changes to affect your baseline results, and although strictly speaking the file (md5) changes, the size of the file doesn\u0027t, so your tools don\u0027t need a new baseline. (Also, this is only with tiling enabled, I believe you guys typically don\u0027t use tiles in your tests.)\n\nBut if you\u0027d like it to be under #if CONFIG_MISC, I can change that.",
+      "parentUuid": "76dac536_dd1e6b74",
+      "range": {
+        "startLine": 1427,
+        "startChar": 0,
+        "endLine": 1427,
+        "endChar": 49
+      },
+      "revId": "7460798ba5666e25258a05f1dc7ad462cb3f1b19",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
