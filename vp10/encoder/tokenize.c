@@ -742,13 +742,17 @@ void vp10_tokenize_sb_inter(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     int idx, idy;
     int block = 0;
     int step = 1 << (max_tx_size * 2);
-
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         tokenize_tx(td, t, dry_run, max_tx_size, plane_bsize, idy, idx,
                     block, plane, &arg);
         block += step;
       }
+    }
+
+    if (!dry_run) {
+      (*t)->token = EOSB_TOKEN;
+      (*t)++;
     }
   }
 }
