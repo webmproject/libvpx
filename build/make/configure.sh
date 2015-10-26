@@ -1207,24 +1207,28 @@ EOF
       check_gcc_machine_option avx
       check_gcc_machine_option avx2
 
-      case "${AS}" in
-        auto|"")
-          which nasm >/dev/null 2>&1 && AS=nasm
-          which yasm >/dev/null 2>&1 && AS=yasm
-          if [ "${AS}" = nasm ] ; then
-            # Apple ships version 0.98 of nasm through at least Xcode 6. Revisit
-            # this check if they start shipping a compatible version.
-            apple=`nasm -v | grep "Apple"`
-            [ -n "${apple}" ] \
-              && echo "Unsupported version of nasm: ${apple}" \
-              && AS=""
-          fi
-          [ "${AS}" = auto ] || [ -z "${AS}" ] \
-            && die "Neither yasm nor nasm have been found." \
-                   "See the prerequisites section in the README for more info."
-          ;;
-      esac
-      log_echo "  using $AS"
+      if enabled external_build; then
+        log_echo "  skipping assembler detection"
+      else
+        case "${AS}" in
+          auto|"")
+            which nasm >/dev/null 2>&1 && AS=nasm
+            which yasm >/dev/null 2>&1 && AS=yasm
+            if [ "${AS}" = nasm ] ; then
+              # Apple ships version 0.98 of nasm through at least Xcode 6. Revisit
+              # this check if they start shipping a compatible version.
+              apple=`nasm -v | grep "Apple"`
+              [ -n "${apple}" ] \
+                && echo "Unsupported version of nasm: ${apple}" \
+                && AS=""
+            fi
+            [ "${AS}" = auto ] || [ -z "${AS}" ] \
+              && die "Neither yasm nor nasm have been found." \
+                     "See the prerequisites section in the README for more info."
+            ;;
+        esac
+        log_echo "  using $AS"
+      fi
       [ "${AS##*/}" = nasm ] && add_asflags -Ox
       AS_SFX=.asm
       case  ${tgt_os} in
