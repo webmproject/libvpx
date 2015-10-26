@@ -39,12 +39,20 @@ void vp10_calc_indices(const double *data, const double *centroids,
   }
 }
 
+// Generate a random number in the range [0, 32768).
+static unsigned int lcg_rand16(unsigned int *state) {
+  *state = *state * 1103515245 + 12345;
+  return *state / 65536 % 32768;
+}
+
 static void calc_centroids(const double *data, double *centroids,
                            const uint8_t *indices, int n, int k, int dim) {
   int i, j, index;
   int count[PALETTE_MAX_SIZE];
+  unsigned int rand_state = data[0];
 
-  srand((unsigned int) data[0]);
+  assert(n <= 32768);
+
   memset(count, 0, sizeof(count[0]) * k);
   memset(centroids, 0, sizeof(centroids[0]) * k * dim);
 
@@ -59,8 +67,7 @@ static void calc_centroids(const double *data, double *centroids,
 
   for (i = 0; i < k; ++i) {
     if (count[i] == 0) {
-      // TODO(huisu): replace rand() with something else.
-      memcpy(centroids + i * dim, data + (rand() % n) * dim,
+      memcpy(centroids + i * dim, data + (lcg_rand16(&rand_state) % n) * dim,
                  sizeof(centroids[0]) * dim);
     } else {
       const double norm = 1.0 / count[i];
