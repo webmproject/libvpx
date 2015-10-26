@@ -29,9 +29,16 @@ typedef enum vp9_denoiser_decision {
 typedef struct vp9_denoiser {
   YV12_BUFFER_CONFIG running_avg_y[MAX_REF_FRAMES];
   YV12_BUFFER_CONFIG mc_running_avg_y;
+  YV12_BUFFER_CONFIG last_source;
   int increase_denoising;
   int frame_buffer_initialized;
+  int no_denoising;
+  int noise_estimate;
+  int thresh_noise_estimate;
+  int noise_estimate_count;
 } VP9_DENOISER;
+
+struct VP9_COMP;
 
 void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     YV12_BUFFER_CONFIG src,
@@ -68,6 +75,12 @@ static int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising) {
 #endif
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser);
+
+void vp9_denoiser_init_noise_estimate(VP9_DENOISER *denoiser,
+                                      int width,
+                                      int height);
+
+void vp9_denoiser_update_noise_estimate(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
