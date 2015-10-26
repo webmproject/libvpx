@@ -137,6 +137,6 @@ VP9_INSTANTIATE_TEST_CASE(
 
 VP10_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
-    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(1, 3));
+    ::testing::Values(::libvpx_test::kTwoPassGood),
+    ::testing::Range(0, 1));
 }  // namespace
