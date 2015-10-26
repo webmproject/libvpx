@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16b509da_f4389895",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-26T18:03:51Z",
+      "side": 1,
+      "message": "do you mean \u0027that cover (small) resolutions\u0027?",
+      "revId": "59fc8a5150d01b02d19705a38fb7507d24eb63d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d48537_50043297",
+        "filename": "test/test-data.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-26T18:03:51Z",
+      "side": 1,
+      "message": "there\u0027s a space before \u0027.md5\u0027 probably causing the download breakage.",
+      "revId": "59fc8a5150d01b02d19705a38fb7507d24eb63d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
