@@ -770,13 +770,11 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
   } else {
     mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
     if (inter_block) {
-      const BLOCK_SIZE txb_size = txsize_to_bsize[mbmi->tx_size];
-      const int bs = num_4x4_blocks_wide_lookup[txb_size];
       const int width  = num_4x4_blocks_wide_lookup[bsize];
       const int height = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
-      for (idy = 0; idy < height; idy += bs)
-        for (idx = 0; idx < width; idx += bs)
+      for (idy = 0; idy < height; ++idy)
+        for (idx = 0; idx < width; ++idx)
           mbmi->inter_tx_size[(idy >> 1) * 8 + (idx >> 1)] = mbmi->tx_size;
     }
   }
