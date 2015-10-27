@@ -32,6 +32,8 @@ void vp10_fadst8_new(const int32_t *input, int32_t *output,
                      const int8_t *cos_bit, const int8_t *stage_range);
 void vp10_fadst16_new(const int32_t *input, int32_t *output,
                       const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fadst32_new(const int32_t *input, int32_t *output,
+                      const int8_t *cos_bit, const int8_t *stage_range);
 
 #ifdef __cplusplus
 }
