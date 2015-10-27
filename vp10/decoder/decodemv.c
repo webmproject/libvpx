@@ -379,15 +379,17 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
   if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools &&
       mbmi->mode == DC_PRED)
     read_palette_mode_info(cm, xd, r);
-  
 
 #if CONFIG_EXT_TX
     if (mbmi->tx_size <= TX_16X16 && cm->base_qindex > 0 &&
         mbmi->sb_type >= BLOCK_8X8 && !mbmi->skip &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      FRAME_COUNTS *counts = xd->counts;
       mbmi->tx_type =
           vpx_read_tree(r, vp10_tx_type_tree,
                         cm->fc->intra_tx_type_prob[mbmi->tx_size][mbmi->mode]);
+      if (counts)
+        ++counts->intra_tx_type[mbmi->tx_size][mbmi->mode][mbmi->tx_type];
     } else {
       mbmi->tx_type = DCT_DCT;
     }
