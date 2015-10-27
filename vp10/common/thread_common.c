@@ -435,6 +435,17 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
       comps->fp[i] += comps_t->fp[i];
   }
 
+#if CONFIG_EXT_TX
+  for (i = 0; i < EXT_TX_SIZES; i++)
+    for (j = 0; j < TX_TYPES; j++)
+      cm->counts.inter_tx_type[i][j] += counts->inter_tx_type[i][j];
+
+  for (i = 0; i < EXT_TX_SIZES; i++)
+    for (j = 0; j < INTRA_MODES; j++)
+      for (k = 0; k < TX_TYPES; k++)
+        cm->counts.intra_tx_type[i][j][k] += counts->intra_tx_type[i][j][k];
+#endif
+
 #if CONFIG_MISC_FIXES
   for (i = 0; i < PREDICTION_PROBS; i++)
     for (j = 0; j < 2; j++)
