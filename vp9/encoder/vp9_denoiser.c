@@ -323,7 +323,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   struct buf_2d src = mb->plane[0].src;
   int is_skin = 0;
 
-  if (bs <= BLOCK_16X16 && denoiser->denoising_on) {
+  if (bs <= BLOCK_16X16 && denoiser->denoising_level >= kMedium) {
     // Take center pixel in block to determine is_skin.
     const int y_width_shift = (4 << b_width_log2_lookup[bs]) >> 1;
     const int y_height_shift = (4 << b_height_log2_lookup[bs]) >> 1;
@@ -340,7 +340,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
     is_skin = vp9_skin_pixel(ysource, usource, vsource);
   }
 
-  if (denoiser->denoising_on)
+  if (denoiser->denoising_level >= kMedium)
     decision = perform_motion_compensation(denoiser, mb, bs,
                                            denoiser->increase_denoising,
                                            mi_row, mi_col, ctx,
@@ -523,8 +523,8 @@ void vp9_denoiser_init_noise_estimate(VP9_DENOISER *denoiser,
                                       int height) {
   // Denoiser is off by default, i.e., no denoising is performed.
   // Noise level is measured periodically, and if observed to be above
-  // thresh_noise_estimate, then denoising is performed, i.e., denoising_on = 1.
-  denoiser->denoising_on = 0;
+  // thresh_noise_estimate, then denoising is performed.
+  denoiser->denoising_level = kLow;
   denoiser->noise_estimate = 0;
   denoiser->noise_estimate_count = 0;
   denoiser->thresh_noise_estimate = 20;
@@ -651,10 +651,15 @@ void vp9_denoiser_update_noise_estimate(VP9_COMP *const cpi) {
       if (cpi->denoiser.noise_estimate_count == num_frames_estimate) {
         // Reset counter and check noise level condition.
         cpi->denoiser.noise_estimate_count = 0;
-       if (cpi->denoiser.noise_estimate > cpi->denoiser.thresh_noise_estimate)
-         cpi->denoiser.denoising_on = 1;
-       else
-         cpi->denoiser.denoising_on = 0;
+        if (cpi->denoiser.noise_estimate >
+            (cpi->denoiser.thresh_noise_estimate << 1))
+          cpi->denoiser.denoising_level = kHigh;
+        else
+          if (cpi->denoiser.noise_estimate >
+              cpi->denoiser.thresh_noise_estimate)
+            cpi->denoiser.denoising_level = kMedium;
+          else
+            cpi->denoiser.denoising_level = kLow;
       }
     }
   }

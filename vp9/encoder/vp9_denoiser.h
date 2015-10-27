@@ -26,13 +26,19 @@ typedef enum vp9_denoiser_decision {
   FILTER_BLOCK
 } VP9_DENOISER_DECISION;
 
+typedef enum vp9_denoiser_level {
+  kLow,
+  kMedium,
+  kHigh
+} VP9_DENOISER_LEVEL;
+
 typedef struct vp9_denoiser {
   YV12_BUFFER_CONFIG running_avg_y[MAX_REF_FRAMES];
   YV12_BUFFER_CONFIG mc_running_avg_y;
   YV12_BUFFER_CONFIG last_source;
   int increase_denoising;
   int frame_buffer_initialized;
-  int denoising_on;
+  VP9_DENOISER_LEVEL denoising_level;
   int noise_estimate;
   int thresh_noise_estimate;
   int noise_estimate_count;
