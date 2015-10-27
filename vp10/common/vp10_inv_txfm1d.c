@@ -698,3 +698,68 @@ void vp10_idct32_new(const int32_t *input, int32_t *output,
   bf1[31] = bf0[0] - bf0[31];
   range_check(stage, input, bf1, size, stage_range[stage]);
 }
+
+void vp10_iadst4_new(const int32_t *input, int32_t *output,
+                     const int8_t *cos_bit, const int8_t *stage_range) {
+  const int32_t size = 4;
+  const int32_t *cospi;
+
+  int32_t stage = 0;
+  int32_t *bf0, *bf1;
+  int32_t step[4];
+
+  // stage 0;
+  range_check(stage, input, input, size, stage_range[stage]);
+
+  // stage 1;
+  stage++;
+  bf1 = output;
+  bf1[0] = input[0];
+  bf1[1] = -input[3];
+  bf1[2] = -input[1];
+  bf1[3] = input[2];
+  range_check(stage, input, bf1, size, stage_range[stage]);
+
+  // stage 2
+  stage++;
+  cospi = cospi_arr[cos_bit[stage] - cos_bit_min];
+  bf0 = output;
+  bf1 = step;
+  bf1[0] = bf0[0];
+  bf1[1] = bf0[1];
+  bf1[2] = half_btf(cospi[32], bf0[2], cospi[32], bf0[3], cos_bit[stage]);
+  bf1[3] = half_btf(cospi[32], bf0[2], -cospi[32], bf0[3], cos_bit[stage]);
+  range_check(stage, input, bf1, size, stage_range[stage]);
+
+  // stage 3
+  stage++;
+  cospi = cospi_arr[cos_bit[stage] - cos_bit_min];
+  bf0 = step;
+  bf1 = output;
+  bf1[0] = bf0[0] + bf0[2];
+  bf1[1] = bf0[1] + bf0[3];
+  bf1[2] = bf0[0] - bf0[2];
+  bf1[3] = bf0[1] - bf0[3];
+  range_check(stage, input, bf1, size, stage_range[stage]);
+
+  // stage 4
+  stage++;
+  cospi = cospi_arr[cos_bit[stage] - cos_bit_min];
+  bf0 = output;
+  bf1 = step;
+  bf1[0] = half_btf(cospi[8], bf0[0], cospi[56], bf0[1], cos_bit[stage]);
+  bf1[1] = half_btf(cospi[56], bf0[0], -cospi[8], bf0[1], cos_bit[stage]);
+  bf1[2] = half_btf(cospi[40], bf0[2], cospi[24], bf0[3], cos_bit[stage]);
+  bf1[3] = half_btf(cospi[24], bf0[2], -cospi[40], bf0[3], cos_bit[stage]);
+  range_check(stage, input, bf1, size, stage_range[stage]);
+
+  // stage 5
+  stage++;
+  bf0 = step;
+  bf1 = output;
+  bf1[0] = bf0[1];
+  bf1[1] = bf0[2];
+  bf1[2] = bf0[3];
+  bf1[3] = bf0[0];
+  range_check(stage, input, bf1, size, stage_range[stage]);
+}
