@@ -49,7 +49,7 @@ static void calc_centroids(const double *data, double *centroids,
                            const uint8_t *indices, int n, int k, int dim) {
   int i, j, index;
   int count[PALETTE_MAX_SIZE];
-  unsigned int rand_state = data[0];
+  unsigned int rand_state = (unsigned int)data[0];
 
   assert(n <= 32768);
 
