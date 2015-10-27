@@ -22,6 +22,30 @@
       "revId": "8868b93c6180a2331ebafbe859c0aec31398a976",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6d53101_4a41a4d3",
+        "filename": "vp10/encoder/subexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-27T19:13:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76880537_d061e213",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 39
+      },
+      "revId": "8868b93c6180a2331ebafbe859c0aec31398a976",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
