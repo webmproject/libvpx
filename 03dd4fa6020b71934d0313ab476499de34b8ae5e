@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56e941ce_c32be51a",
+        "filename": "vp9/encoder/vp9_subexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-27T17:58:54Z",
+      "side": 1,
+      "message": "how come this is a global static?",
+      "range": {
+        "startLine": 19,
+        "startChar": 21,
+        "endLine": 19,
+        "endChar": 32
+      },
+      "revId": "03dd4fa6020b71934d0313ab476499de34b8ae5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36e4cdf6_93fcc79d",
+        "filename": "vp9/encoder/vp9_subexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-27T17:58:54Z",
+      "side": 1,
+      "message": "and this is in the function?",
+      "range": {
+        "startLine": 49,
+        "startChar": 22,
+        "endLine": 49,
+        "endChar": 23
+      },
+      "revId": "03dd4fa6020b71934d0313ab476499de34b8ae5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56e941ce_434195d3",
+        "filename": "vp9/encoder/vp9_subexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-27T17:58:54Z",
+      "side": 1,
+      "message": "update_bits is only used here, should it be static to the function?",
+      "range": {
+        "startLine": 83,
+        "startChar": 9,
+        "endLine": 83,
+        "endChar": 20
+      },
+      "revId": "03dd4fa6020b71934d0313ab476499de34b8ae5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
