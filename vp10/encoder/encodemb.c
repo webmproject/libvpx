@@ -323,6 +323,151 @@ static INLINE void highbd_fdct32x32(int rd_transform, const int16_t *src,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
+                       int diff_stride, TX_TYPE tx_type, int lossless) {
+  if (lossless) {
+    vp10_fwht4x4(src_diff, coeff, diff_stride);
+  } else {
+    switch (tx_type) {
+      case DCT_DCT:
+        vpx_fdct4x4(src_diff, coeff, diff_stride);
+        break;
+      case ADST_DCT:
+      case DCT_ADST:
+      case ADST_ADST:
+        vp10_fht4x4(src_diff, coeff, diff_stride, tx_type);
+        break;
+      default:
+        assert(0);
+        break;
+    }
+  }
+}
+
+static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
+                         int diff_stride, TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vp10_fht8x8(src_diff, coeff, diff_stride, tx_type);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
+                           int diff_stride, TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vp10_fht16x16(src_diff, coeff, diff_stride, tx_type);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
+                           tran_low_t *coeff, int diff_stride,
+                           TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+      fdct32x32(rd_transform, src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      assert(0);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
+                              int diff_stride, TX_TYPE tx_type, int lossless) {
+  if (lossless) {
+    assert(tx_type == DCT_DCT);
+    vp10_highbd_fwht4x4(src_diff, coeff, diff_stride);
+  } else {
+    switch (tx_type) {
+      case DCT_DCT:
+        vpx_highbd_fdct4x4(src_diff, coeff, diff_stride);
+        break;
+      case ADST_DCT:
+      case DCT_ADST:
+      case ADST_ADST:
+        vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+        break;
+      default:
+        assert(0);
+        break;
+    }
+  }
+}
+
+static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
+                         int diff_stride, TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+      vpx_highbd_fdct8x8(src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vp10_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
+                           int diff_stride, TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+      vpx_highbd_fdct16x16(src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      vp10_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
+static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
+                                  tran_low_t *coeff, int diff_stride,
+                                  TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+      highbd_fdct32x32(rd_transform, src_diff, coeff, diff_stride);
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      assert(0);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
                          int blk_row, int blk_col,
                          BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
@@ -509,150 +654,7 @@ void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
   }
 }
 
-void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
-                       int diff_stride, TX_TYPE tx_type, int lossless) {
-  if (lossless) {
-    vp10_fwht4x4(src_diff, coeff, diff_stride);
-  } else {
-    switch (tx_type) {
-      case DCT_DCT:
-        vpx_fdct4x4(src_diff, coeff, diff_stride);
-        break;
-      case ADST_DCT:
-      case DCT_ADST:
-      case ADST_ADST:
-        vp10_fht4x4(src_diff, coeff, diff_stride, tx_type);
-        break;
-      default:
-        assert(0);
-        break;
-    }
-  }
-}
 
-static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
-                         int diff_stride, TX_TYPE tx_type) {
-  switch (tx_type) {
-    case DCT_DCT:
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      vp10_fht8x8(src_diff, coeff, diff_stride, tx_type);
-      break;
-    default:
-      assert(0);
-      break;
-  }
-}
-
-static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
-                           int diff_stride, TX_TYPE tx_type) {
-  switch (tx_type) {
-    case DCT_DCT:
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      vp10_fht16x16(src_diff, coeff, diff_stride, tx_type);
-      break;
-    default:
-      assert(0);
-      break;
-  }
-}
-
-static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
-                           tran_low_t *coeff, int diff_stride,
-                           TX_TYPE tx_type) {
-  switch (tx_type) {
-    case DCT_DCT:
-      fdct32x32(rd_transform, src_diff, coeff, diff_stride);
-      break;
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      assert(0);
-      break;
-    default:
-      assert(0);
-      break;
-  }
-}
-
-#if CONFIG_VP9_HIGHBITDEPTH
-void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
-                              int diff_stride, TX_TYPE tx_type, int lossless) {
-  if (lossless) {
-    assert(tx_type == DCT_DCT);
-    vp10_highbd_fwht4x4(src_diff, coeff, diff_stride);
-  } else {
-    switch (tx_type) {
-      case DCT_DCT:
-        vpx_highbd_fdct4x4(src_diff, coeff, diff_stride);
-        break;
-      case ADST_DCT:
-      case DCT_ADST:
-      case ADST_ADST:
-        vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
-        break;
-      default:
-        assert(0);
-        break;
-    }
-  }
-}
-
-static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
-                         int diff_stride, TX_TYPE tx_type) {
-  switch (tx_type) {
-    case DCT_DCT:
-      vpx_highbd_fdct8x8(src_diff, coeff, diff_stride);
-      break;
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      vp10_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
-      break;
-    default:
-      assert(0);
-      break;
-  }
-}
-
-static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
-                           int diff_stride, TX_TYPE tx_type) {
-  switch (tx_type) {
-    case DCT_DCT:
-      vpx_highbd_fdct16x16(src_diff, coeff, diff_stride);
-      break;
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      vp10_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
-      break;
-    default:
-      assert(0);
-      break;
-  }
-}
-
-static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
-                                  tran_low_t *coeff, int diff_stride,
-                                  TX_TYPE tx_type) {
-  switch (tx_type) {
-    case DCT_DCT:
-      highbd_fdct32x32(rd_transform, src_diff, coeff, diff_stride);
-      break;
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      assert(0);
-      break;
-    default:
-      assert(0);
-      break;
-  }
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
                       int blk_row, int blk_col,
