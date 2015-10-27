@@ -21,6 +21,8 @@ void vp10_idct4_new(const int32_t *input, int32_t *output,
                     const int8_t *cos_bit, const int8_t *stage_range);
 void vp10_idct8_new(const int32_t *input, int32_t *output,
                     const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_idct16_new(const int32_t *input, int32_t *output,
+                     const int8_t *cos_bit, const int8_t *stage_range);
 
 #ifdef __cplusplus
 }
