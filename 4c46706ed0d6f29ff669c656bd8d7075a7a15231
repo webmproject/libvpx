@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b640bdd4_9ff3b30d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-27T21:41:37Z",
+      "side": 1,
+      "message": "you could add a little more detail in the body of the commit message. I assume these are documented elsewhere.",
+      "revId": "4c46706ed0d6f29ff669c656bd8d7075a7a15231",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
