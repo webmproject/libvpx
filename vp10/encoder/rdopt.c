@@ -1614,7 +1614,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     int64_t tmp_rd = 0;
 
     --bsl;
-    for (i = 0; i < 4; ++i) {
+    for (i = 0; i < 4 && this_cost_valid; ++i) {
       int offsetr = (i >> 1) << bsl;
       int offsetc = (i & 0x01) << bsl;
       select_tx_block(cpi, x, blk_row + offsetr, blk_col + offsetc,
@@ -1644,11 +1644,15 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       for (idx = 0; idx < (1 << tx_size) / 2; ++idx)
         mbmi->inter_tx_size[tx_idx + (idy << 3) + idx] = tx_size;
     mbmi->tx_size = tx_size;
+    if (this_rd == INT64_MAX)
+      *is_cost_valid = 0;
   } else {
     *rate = sum_rate;
     *dist = sum_dist;
     *bsse = sum_bsse;
     *skip = all_skip;
+    if (sum_rd == INT64_MAX)
+      *is_cost_valid = 0;
   }
 }
 
