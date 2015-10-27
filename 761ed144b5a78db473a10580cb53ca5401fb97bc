@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6ceb575_3e33c091",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-27T17:39:03Z",
+      "side": 1,
+      "message": "shall the type be VP9_DENOISER_LEVEL as defined above?",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 41,
+        "endChar": 5
+      },
+      "revId": "761ed144b5a78db473a10580cb53ca5401fb97bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
