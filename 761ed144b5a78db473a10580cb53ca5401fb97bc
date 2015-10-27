@@ -22,6 +22,30 @@
       "revId": "761ed144b5a78db473a10580cb53ca5401fb97bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6ae1193_1559831a",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-10-27T17:46:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f6ceb575_3e33c091",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 41,
+        "endChar": 5
+      },
+      "revId": "761ed144b5a78db473a10580cb53ca5401fb97bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
