@@ -554,7 +554,6 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   int16_t token;
   EXTRABIT extra;
-
   pt = get_entropy_context(tx_size, pd->above_context + blk_col,
                            pd->left_context + blk_row);
   scan = so->scan;

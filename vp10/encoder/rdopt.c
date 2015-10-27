@@ -512,7 +512,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
-      vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
+      vp10_xform_quant(x, plane, block, blk_row, blk_col,
+                       plane_bsize, tx_size);
       dist_block(x, plane, block, tx_size, &dist, &sse);
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
                SKIP_TXFM_AC_ONLY) {

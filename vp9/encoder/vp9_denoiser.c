@@ -21,12 +21,7 @@
 #include "vp9/encoder/vp9_denoiser.h"
 #include "vp9/encoder/vp9_encoder.h"
 
-/* The VP9 denoiser is a work-in-progress. It currently is only designed to work
- * with speed 6, though it (inexplicably) seems to also work with speed 5 (one
- * would need to modify the source code in vp9_pickmode.c and vp9_encoder.c to
- * make the calls to the vp9_denoiser_* functions when in speed 5).
- *
- * The implementation is very similar to that of the VP8 denoiser. While
+/* The VP9 denoiser is similar to that of the VP8 denoiser. While
  * choosing the motion vectors / reference frames, the denoiser is run, and if
  * it did not modify the signal to much, the denoised block is copied to the
  * signal.
@@ -328,7 +323,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   struct buf_2d src = mb->plane[0].src;
   int is_skin = 0;
 
-  if (bs <= BLOCK_16X16 && !denoiser->no_denoising) {
+  if (bs <= BLOCK_16X16 && denoiser->denoising_on) {
     // Take center pixel in block to determine is_skin.
     const int y_width_shift = (4 << b_width_log2_lookup[bs]) >> 1;
     const int y_height_shift = (4 << b_height_log2_lookup[bs]) >> 1;
@@ -345,7 +340,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
     is_skin = vp9_skin_pixel(ysource, usource, vsource);
   }
 
-  if (!denoiser->no_denoising)
+  if (denoiser->denoising_on)
     decision = perform_motion_compensation(denoiser, mb, bs,
                                            denoiser->increase_denoising,
                                            mi_row, mi_col, ctx,
@@ -528,8 +523,8 @@ void vp9_denoiser_init_noise_estimate(VP9_DENOISER *denoiser,
                                       int height) {
   // Denoiser is off by default, i.e., no denoising is performed.
   // Noise level is measured periodically, and if observed to be above
-  // thresh_noise_estimate, then denoising is performed, i.e., no_denoising = 0.
-  denoiser->no_denoising = 1;
+  // thresh_noise_estimate, then denoising is performed, i.e., denoising_on = 1.
+  denoiser->denoising_on = 0;
   denoiser->noise_estimate = 0;
   denoiser->noise_estimate_count = 0;
   denoiser->thresh_noise_estimate = 20;
@@ -657,9 +652,9 @@ void vp9_denoiser_update_noise_estimate(VP9_COMP *const cpi) {
         // Reset counter and check noise level condition.
         cpi->denoiser.noise_estimate_count = 0;
        if (cpi->denoiser.noise_estimate > cpi->denoiser.thresh_noise_estimate)
-         cpi->denoiser.no_denoising = 0;
+         cpi->denoiser.denoising_on = 1;
        else
-         cpi->denoiser.no_denoising = 1;
+         cpi->denoiser.denoising_on = 0;
       }
     }
   }

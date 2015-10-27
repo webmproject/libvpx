@@ -32,7 +32,7 @@ typedef struct vp9_denoiser {
   YV12_BUFFER_CONFIG last_source;
   int increase_denoising;
   int frame_buffer_initialized;
-  int no_denoising;
+  int denoising_on;
   int noise_estimate;
   int thresh_noise_estimate;
   int noise_estimate_count;

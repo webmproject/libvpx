@@ -296,30 +296,11 @@ int64_t vp9_highbd_block_error_8bit_c(const tran_low_t *coeff,
                                       const tran_low_t *dqcoeff,
                                       intptr_t block_size,
                                       int64_t *ssz) {
-  int i;
-  int32_t c, d;
-  int64_t error = 0, sqcoeff = 0;
-  int16_t diff;
-
-  const int32_t hi = 0x00007fff;
-  const int32_t lo = 0xffff8000;
-
-  for (i = 0; i < block_size; i++) {
-    c = coeff[i];
-    d = dqcoeff[i];
-
-    // Saturate to 16 bits
-    c = (c > hi) ? hi : ((c < lo) ? lo : c);
-    d = (d > hi) ? hi : ((d < lo) ? lo : d);
-
-    diff = d - c;
-    error +=  diff * diff;
-    sqcoeff += c * c;
-  }
-  assert(error >= 0 && sqcoeff >= 0);
-
-  *ssz = sqcoeff;
-  return error;
+  // Note that the C versions of these 2 functions (vp9_block_error and
+  // vp9_highbd_block_error_8bit are the same, but the optimized assembly
+  // routines are not compatible in the non high bitdepth configuration, so
+  // they still cannot share the same name.
+  return vp9_block_error_c(coeff, dqcoeff, block_size, ssz);
 }
 
 static int64_t vp9_highbd_block_error_dispatch(const tran_low_t *coeff,

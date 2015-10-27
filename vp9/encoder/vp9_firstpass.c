@@ -1183,10 +1183,13 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
                                      double group_weight_factor) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  // Clamp the target rate to VBR min / max limts.
+  const int target_rate =
+      vp9_rc_clamp_pframe_target_size(cpi, section_target_bandwidth);
 
   inactive_zone = fclamp(inactive_zone, 0.0, 1.0);
 
-  if (section_target_bandwidth <= 0) {
+  if (target_rate <= 0) {
     return rc->worst_quality;  // Highest value allowed
   } else {
     const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
@@ -1195,7 +1198,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const double av_err_per_mb = section_err / active_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
     const double ediv_size_correction = (double)num_mbs / EDIV_SIZE_FACTOR;
-    const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
+    const int target_norm_bits_per_mb = ((uint64_t)target_rate <<
                                          BPER_MB_NORMBITS) / active_mbs;
 
     int q;
@@ -2444,7 +2447,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if ((i <= rc->max_gf_interval) ||
         ((i <= (rc->max_gf_interval * 4)) && (decay_accumulator > 0.5))) {
       const double frame_boost =
-        calc_frame_boost(cpi, this_frame, 0, KF_MAX_BOOST);
+        calc_frame_boost(cpi, &next_frame, 0, KF_MAX_BOOST);
 
       // How fast is prediction quality decaying.
       if (!detect_flash(twopass, 0)) {
@@ -2737,11 +2740,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   }
 
   target_rate = gf_group->bit_allocation[gf_group->index];
-  if (cpi->common.frame_type == KEY_FRAME)
-    target_rate = vp9_rc_clamp_iframe_target_size(cpi, target_rate);
-  else
-    target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
-
   rc->base_frame_target = target_rate;
 
   {
