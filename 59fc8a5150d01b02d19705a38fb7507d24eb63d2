@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f6ceb575_83dab5d2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-10-27T03:57:38Z",
+      "side": 1,
+      "message": "Try to say the added new resolutions are not covered by the existing test clips yet. But I change the name of the commit.",
+      "parentUuid": "16b509da_f4389895",
+      "revId": "59fc8a5150d01b02d19705a38fb7507d24eb63d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d48537_50043297",
         "filename": "test/test-data.mk",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-26T18:03:51Z",
       "side": 1,
       "message": "there\u0027s a space before \u0027.md5\u0027 probably causing the download breakage.",
+      "revId": "59fc8a5150d01b02d19705a38fb7507d24eb63d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6b795e1_b388f8ec",
+        "filename": "test/test-data.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-10-27T03:57:38Z",
+      "side": 1,
+      "message": "Thanks. That is one of the problems.",
+      "parentUuid": "76d48537_50043297",
       "revId": "59fc8a5150d01b02d19705a38fb7507d24eb63d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
