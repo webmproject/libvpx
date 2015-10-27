@@ -68,6 +68,30 @@
       "revId": "03dd4fa6020b71934d0313ab476499de34b8ae5e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6ceb575_997ea633",
+        "filename": "vp9/encoder/vp9_subexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-27T19:13:31Z",
+      "side": 1,
+      "message": "I don\u0027t have a good idea why one is in the function and one is in the file. Both have file only linkage wind up in ROdata. Sticking big tables in the middle of functions can hurt readability, I\u0027m not sure what\u0027s preferred here.",
+      "parentUuid": "56e941ce_434195d3",
+      "range": {
+        "startLine": 83,
+        "startChar": 9,
+        "endLine": 83,
+        "endChar": 20
+      },
+      "revId": "03dd4fa6020b71934d0313ab476499de34b8ae5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
