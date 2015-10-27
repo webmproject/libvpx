@@ -370,8 +370,9 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
-
-  if (!oxcf->drop_frames_water_mark) {
+  if (!oxcf->drop_frames_water_mark ||
+      (is_one_pass_cbr_svc(cpi) &&
+       cpi->svc.spatial_layer_id > cpi->svc.first_spatial_layer_to_encode)) {
     return 0;
   } else {
     if (rc->buffer_level < 0) {
