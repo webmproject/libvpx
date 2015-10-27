@@ -22,6 +22,30 @@
       "revId": "4fb2ba2861fffd8fca7dffbaf761d2bf2998df4f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7642c5df_80ab585b",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3806,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-10-27T22:35:51Z",
+      "side": 1,
+      "message": "The condition (is_one_pass_cbr_svc(cpi) \u0026\u0026 cpi-\u003esvc.rc_drop_superframe \u003d\u003d 1) is to force drop for current spatial layer (because we have already decided on first_spatial_layer to drop superframe).\n\nThe setting on line 3810 is for the case where vp9_rc_drop_frame(cpi) is true, which can only happen on first_spatial_layer.\n\nProbably better way to show this, but haven\u0027t found it yet...",
+      "parentUuid": "b640bdd4_e21a68b6",
+      "range": {
+        "startLine": 3806,
+        "startChar": 37,
+        "endLine": 3806,
+        "endChar": 69
+      },
+      "revId": "4fb2ba2861fffd8fca7dffbaf761d2bf2998df4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
