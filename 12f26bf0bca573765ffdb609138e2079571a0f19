@@ -16,6 +16,24 @@
       "revId": "12f26bf0bca573765ffdb609138e2079571a0f19",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76c565cc_08e12784",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1210,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-28T19:18:47Z",
+      "side": 1,
+      "message": "Ahh, maybe call any MSVS build an \"external build\"? There are some tricky things about that, apparently external builds don\u0027t create the RTCD files",
+      "parentUuid": "56fce1c4_6ddd0d41",
+      "revId": "12f26bf0bca573765ffdb609138e2079571a0f19",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
