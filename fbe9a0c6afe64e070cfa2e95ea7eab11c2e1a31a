@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "769c85d8_d6f7ba3e",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-28T22:38:28Z",
+      "side": 1,
+      "message": "this can actually be a part of the protected section, no need for it to be public. protected is used as a convenient way to access things in a gtest.",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76c565cc_2e3b4bb4",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-28T22:38:28Z",
+      "side": 1,
+      "message": "you should add the filename to this output, otherwise this will be duplicated for each one, but without any mention of which vectors are being skipped",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6d0d18a_2e3b53b4",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-28T22:38:28Z",
+      "side": 1,
+      "message": "I\u0027d say RESIZE_TEST_VECTORS",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36a68d28_347396d5",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-28T22:38:28Z",
+      "side": 1,
+      "message": "add a newline here",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
