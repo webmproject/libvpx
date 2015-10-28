@@ -31,6 +31,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->spatial_layer_id = 0;
   svc->temporal_layer_id = 0;
   svc->first_spatial_layer_to_encode = 0;
+  svc->rc_drop_superframe = 0;
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
     if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
@@ -567,6 +568,9 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
       cpi->alt_fb_idx = cpi->svc.ext_alt_fb_idx[sl];
     }
   }
+
+  if (cpi->svc.spatial_layer_id == cpi->svc.first_spatial_layer_to_encode)
+    cpi->svc.rc_drop_superframe = 0;
 
   lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id *
                                cpi->svc.number_temporal_layers +
