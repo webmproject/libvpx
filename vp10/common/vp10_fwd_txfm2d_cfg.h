@@ -276,4 +276,92 @@ static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_adst_32 = {
     .txfm_func_col = vp10_fadst32_new,
     .txfm_func_row = vp10_fadst32_new};
 
+//  ---------------- config fwd_adst_dct_4 ----------------
+static int8_t fwd_shift_adst_dct_4[3] = {5, -4, 1};
+static int8_t fwd_stage_range_col_adst_dct_4[6] = {16, 16, 17, 18, 18, 18};
+static int8_t fwd_stage_range_row_adst_dct_4[4] = {14, 15, 15, 15};
+static int8_t fwd_cos_bit_col_adst_dct_4[6] = {15, 15, 15, 14, 14, 14};
+static int8_t fwd_cos_bit_row_adst_dct_4[4] = {15, 15, 15, 15};
+
+static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_4 = {
+    .txfm_size = 4,
+    .stage_num_col = 6,
+    .stage_num_row = 4,
+
+    .shift = fwd_shift_adst_dct_4,
+    .stage_range_col = fwd_stage_range_col_adst_dct_4,
+    .stage_range_row = fwd_stage_range_row_adst_dct_4,
+    .cos_bit_col = fwd_cos_bit_col_adst_dct_4,
+    .cos_bit_row = fwd_cos_bit_row_adst_dct_4,
+    .txfm_func_col = vp10_fadst4_new,
+    .txfm_func_row = vp10_fdct4_new};
+
+//  ---------------- config fwd_adst_dct_8 ----------------
+static int8_t fwd_shift_adst_dct_8[3] = {5, 1, -5};
+static int8_t fwd_stage_range_col_adst_dct_8[8] = {16, 16, 17, 18,
+                                                   18, 19, 19, 19};
+static int8_t fwd_stage_range_row_adst_dct_8[6] = {20, 21, 22, 22, 22, 22};
+static int8_t fwd_cos_bit_col_adst_dct_8[8] = {15, 15, 15, 14, 14, 13, 13, 13};
+static int8_t fwd_cos_bit_row_adst_dct_8[6] = {12, 11, 10, 10, 10, 10};
+
+static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_8 = {
+    .txfm_size = 8,
+    .stage_num_col = 8,
+    .stage_num_row = 6,
+
+    .shift = fwd_shift_adst_dct_8,
+    .stage_range_col = fwd_stage_range_col_adst_dct_8,
+    .stage_range_row = fwd_stage_range_row_adst_dct_8,
+    .cos_bit_col = fwd_cos_bit_col_adst_dct_8,
+    .cos_bit_row = fwd_cos_bit_row_adst_dct_8,
+    .txfm_func_col = vp10_fadst8_new,
+    .txfm_func_row = vp10_fdct8_new};
+
+//  ---------------- config fwd_adst_dct_16 ----------------
+static int8_t fwd_shift_adst_dct_16[3] = {4, -3, -1};
+static int8_t fwd_stage_range_col_adst_dct_16[10] = {15, 15, 16, 17, 17,
+                                                     18, 18, 19, 19, 19};
+static int8_t fwd_stage_range_row_adst_dct_16[8] = {16, 17, 18, 19,
+                                                    19, 19, 19, 19};
+static int8_t fwd_cos_bit_col_adst_dct_16[10] = {15, 15, 15, 15, 15,
+                                                 14, 14, 13, 13, 13};
+static int8_t fwd_cos_bit_row_adst_dct_16[8] = {15, 15, 14, 13, 13, 13, 13, 13};
+
+static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_16 = {
+    .txfm_size = 16,
+    .stage_num_col = 10,
+    .stage_num_row = 8,
+
+    .shift = fwd_shift_adst_dct_16,
+    .stage_range_col = fwd_stage_range_col_adst_dct_16,
+    .stage_range_row = fwd_stage_range_row_adst_dct_16,
+    .cos_bit_col = fwd_cos_bit_col_adst_dct_16,
+    .cos_bit_row = fwd_cos_bit_row_adst_dct_16,
+    .txfm_func_col = vp10_fadst16_new,
+    .txfm_func_row = vp10_fdct16_new};
+
+//  ---------------- config fwd_adst_dct_32 ----------------
+static int8_t fwd_shift_adst_dct_32[3] = {5, -4, -2};
+static int8_t fwd_stage_range_col_adst_dct_32[12] = {16, 16, 17, 18, 18, 19,
+                                                     19, 20, 20, 21, 21, 21};
+static int8_t fwd_stage_range_row_adst_dct_32[10] = {17, 18, 19, 20, 21,
+                                                     21, 21, 21, 21, 21};
+static int8_t fwd_cos_bit_col_adst_dct_32[12] = {15, 15, 15, 14, 14, 13,
+                                                 13, 12, 12, 11, 11, 11};
+static int8_t fwd_cos_bit_row_adst_dct_32[10] = {15, 14, 13, 12, 11,
+                                                 11, 11, 11, 11, 11};
+
+static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_32 = {
+    .txfm_size = 32,
+    .stage_num_col = 12,
+    .stage_num_row = 10,
+
+    .shift = fwd_shift_adst_dct_32,
+    .stage_range_col = fwd_stage_range_col_adst_dct_32,
+    .stage_range_row = fwd_stage_range_row_adst_dct_32,
+    .cos_bit_col = fwd_cos_bit_col_adst_dct_32,
+    .cos_bit_row = fwd_cos_bit_row_adst_dct_32,
+    .txfm_func_col = vp10_fadst32_new,
+    .txfm_func_row = vp10_fdct32_new};
+
 #endif  // VP10_FWD_TXFM2D_CFG_H_
