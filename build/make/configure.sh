@@ -979,8 +979,10 @@ EOF
                 awk '{ print $1 }' | tail -1`
           fi
 
-          add_cflags "--sysroot=${alt_libc}"
-          add_ldflags "--sysroot=${alt_libc}"
+          if [ -d "${alt_libc}" ]; then
+            add_cflags "--sysroot=${alt_libc}"
+            add_ldflags "--sysroot=${alt_libc}"
+          fi
 
           # linker flag that routes around a CPU bug in some
           # Cortex-A8 implementations (NDK Dev Guide)
