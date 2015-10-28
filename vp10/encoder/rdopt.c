@@ -4055,7 +4055,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                       NULL, bsize, best_rd);
       if (rate_y == INT_MAX)
         continue;
-
       uv_tx = get_uv_tx_size_impl(mbmi->tx_size, bsize, pd->subsampling_x,
                                   pd->subsampling_y);
       if (rate_uv_intra[uv_tx] == INT_MAX) {

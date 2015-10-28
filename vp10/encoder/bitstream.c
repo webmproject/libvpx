@@ -286,6 +286,10 @@ static void pack_mb_tokens(vpx_writer *w,
                            TOKENEXTRA **tp, const TOKENEXTRA *const stop,
                            vpx_bit_depth_t bit_depth, const TX_SIZE tx) {
   TOKENEXTRA *p = *tp;
+#if CONFIG_VAR_TX
+  int count = 0;
+  const int seg_eob = 16 << (1 << tx);
+#endif
 #if !CONFIG_MISC_FIXES
   (void) tx;
 #endif
@@ -364,10 +368,67 @@ static void pack_mb_tokens(vpx_writer *w,
       vpx_write_bit(w, e & 1);
     }
     ++p;
+
+#if CONFIG_VAR_TX
+    ++count;
+    if (t == EOB_TOKEN || count == seg_eob)
+      break;
+#endif
   }
 
   *tp = p;
 }
+
+#if CONFIG_VAR_TX
+static void pack_txb_tokens(vpx_writer *w,
+                           TOKENEXTRA **tp, const TOKENEXTRA *const tok_end,
+                           MACROBLOCKD *xd, MB_MODE_INFO *mbmi, int plane,
+                           BLOCK_SIZE plane_bsize,
+                           vpx_bit_depth_t bit_depth,
+                           int block,
+                           int blk_row, int blk_col, TX_SIZE tx_size) {
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
+               (blk_col >> (1 - pd->subsampling_x));
+  TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], bsize, 0, 0) :
+      mbmi->inter_tx_size[tx_idx];
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+    return;
+
+  if (tx_size == plane_tx_size) {
+    pack_mb_tokens(w, tp, tok_end, bit_depth, tx_size);
+  } else {
+    int bsl = b_width_log2_lookup[bsize];
+    int i;
+
+    assert(bsl > 0);
+    --bsl;
+
+    for (i = 0; i < 4; ++i) {
+      const int offsetr = blk_row + ((i >> 1) << bsl);
+      const int offsetc = blk_col + ((i & 0x01) << bsl);
+      int step = 1 << (2 * (tx_size - 1));
+
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
+        continue;
+
+      pack_txb_tokens(w, tp, tok_end, xd, mbmi, plane,
+                      plane_bsize, bit_depth, block + i * step,
+                      offsetr, offsetc, tx_size - 1);
+    }
+  }
+}
+#endif
 
 static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
                              const struct segmentation_probs *segp,
@@ -673,9 +734,45 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   if (!m->mbmi.skip) {
     assert(*tok < tok_end);
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+#if CONFIG_VAR_TX
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+      MB_MODE_INFO *mbmi = &m->mbmi;
+      BLOCK_SIZE bsize = mbmi->sb_type;
+      const BLOCK_SIZE plane_bsize =
+          get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), pd);
+
+      const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+      const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+      int row, col;
+
+      if (is_inter_block(mbmi)) {
+        const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+        const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+        int bw = num_4x4_blocks_wide_lookup[txb_size];
+        int block = 0;
+        const int step = 1 << (max_tx_size << 1);
+        for (row = 0; row < num_4x4_h; row += bw) {
+          for (col = 0; col < num_4x4_w; col += bw) {
+            pack_txb_tokens(w, tok, tok_end, xd, mbmi, plane, plane_bsize,
+                            cm->bit_depth, block, row, col, max_tx_size);
+            block += step;
+          }
+        }
+      } else {
+        TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
+                           : m->mbmi.tx_size;
+        BLOCK_SIZE txb_size = txsize_to_bsize[tx];
+        int bw = num_4x4_blocks_wide_lookup[txb_size];
+
+        for (row = 0; row < num_4x4_h; row += bw)
+          for (col = 0; col < num_4x4_w; col += bw)
+            pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+      }
+#else
       TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                          : m->mbmi.tx_size;
       pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+#endif
       assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
       (*tok)++;
     }
