@@ -58,3 +58,27 @@ void vp10_fwd_txfm2d_4x4(const int16_t *input, int32_t *output,
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
+
+void vp10_fwd_txfm2d_8x8(const int16_t *input, int32_t *output,
+                         const int stride, const TXFM_2D_CFG *cfg,
+                         const int bd) {
+  int txfm_buf[8 * 8 + 8 + 8];
+  (void)bd;
+  fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
+}
+
+void vp10_fwd_txfm2d_16x16(const int16_t *input, int32_t *output,
+                           const int stride, const TXFM_2D_CFG *cfg,
+                           const int bd) {
+  int txfm_buf[16 * 16 + 16 + 16];
+  (void)bd;
+  fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
+}
+
+void vp10_fwd_txfm2d_32x32(const int16_t *input, int32_t *output,
+                           const int stride, const TXFM_2D_CFG *cfg,
+                           const int bd) {
+  int txfm_buf[32 * 32 + 32 + 32];
+  (void)bd;
+  fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
+}
