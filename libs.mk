@@ -260,7 +260,7 @@ OBJS-yes += $(LIBVPX_OBJS)
 LIBS-$(if yes,$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
-SO_VERSION_MAJOR := 2
+SO_VERSION_MAJOR := 3
 SO_VERSION_MINOR := 0
 SO_VERSION_PATCH := 0
 ifeq ($(filter darwin%,$(TGT_OS)),$(TGT_OS))
