@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f6d955b5_fdfbafa2",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-28T22:46:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "769c85d8_d6f7ba3e",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76c565cc_2e3b4bb4",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-28T22:38:28Z",
       "side": 1,
       "message": "you should add the filename to this output, otherwise this will be duplicated for each one, but without any mention of which vectors are being skipped",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76c565cc_0ee12f84",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-28T22:46:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76c565cc_2e3b4bb4",
       "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "d6d0d18a_0ee12f84",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-28T22:46:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6d0d18a_2e3b53b4",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36a68d28_347396d5",
         "filename": "test/test_vectors.cc",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-28T22:38:28Z",
       "side": 1,
       "message": "add a newline here",
+      "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56c4e1d1_6d5c2d0c",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-28T22:46:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36a68d28_347396d5",
       "revId": "fbe9a0c6afe64e070cfa2e95ea7eab11c2e1a31a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
