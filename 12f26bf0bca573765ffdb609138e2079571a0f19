@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56fce1c4_6ddd0d41",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1210,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-10-28T01:40:11Z",
+      "side": 1,
+      "message": "msvs was already avoiding this via the workaround on line 1170, maybe some of this could be cleaned up in a future commit",
+      "revId": "12f26bf0bca573765ffdb609138e2079571a0f19",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
