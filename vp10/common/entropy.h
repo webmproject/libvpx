@@ -153,7 +153,7 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 // 1, 3, 5, 7, ..., 253, 255
 // In between probabilities are interpolated linearly
 
-#define COEFF_PROB_MODELS 255
+#define COEFF_PROB_MODELS 256
 
 #define UNCONSTRAINED_NODES         3
 
