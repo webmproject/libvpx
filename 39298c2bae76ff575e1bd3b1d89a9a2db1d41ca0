@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7621e584_8e109f68",
+        "filename": "vp10/common/vp10_inv_txfm1d.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-10-29T02:48:54Z",
+      "side": 1,
+      "message": "In case that the range check is failed, does the encoder/decoder just end with an error?",
+      "range": {
+        "startLine": 52,
+        "startChar": 58,
+        "endLine": 52,
+        "endChar": 61
+      },
+      "revId": "39298c2bae76ff575e1bd3b1d89a9a2db1d41ca0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
