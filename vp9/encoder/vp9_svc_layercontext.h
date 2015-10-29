@@ -56,6 +56,7 @@ typedef struct {
 
   int spatial_layer_to_encode;
   int first_spatial_layer_to_encode;
+  int rc_drop_superframe;
 
   // Workaround for multiple frame contexts
   enum {
