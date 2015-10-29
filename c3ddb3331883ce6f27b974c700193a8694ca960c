@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "562a227b_71fe925f",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-10-29T23:04:45Z",
+      "side": 1,
+      "message": "can we provide the exact meaning of the values too, for example, 1: true, 0: false?",
+      "range": {
+        "startLine": 385,
+        "startChar": 41,
+        "endLine": 385,
+        "endChar": 47
+      },
+      "revId": "c3ddb3331883ce6f27b974c700193a8694ca960c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
