@@ -22,6 +22,30 @@
       "revId": "989193c797722dd2a37d481ab7cbd01a5d37270f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "161fca56_d7d3fe51",
+        "filename": "vp10/common/entropy.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-29T23:03:26Z",
+      "side": 1,
+      "message": "p \u003d 0 doesn\u0027t make sense. The right thing to do is never to call this with p \u003d 0. But since every time I attempt that I keep breaking first pass, I decided to just make the current behavior clear and not deceptive. (see all the attempts at the reverted CL https://chromium-review.googlesource.com/#/c/304862/ )",
+      "parentUuid": "96401a44_306c88a0",
+      "range": {
+        "startLine": 747,
+        "startChar": 40,
+        "endLine": 747,
+        "endChar": 41
+      },
+      "revId": "989193c797722dd2a37d481ab7cbd01a5d37270f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
