@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b6d35d95_9b48bba0",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-10-29T06:32:11Z",
+      "side": 1,
+      "message": "removed this function and using get_ext_tx_types() \u003e 1 instead.",
+      "parentUuid": "56ab01f0_3507129f",
+      "range": {
+        "startLine": 275,
+        "startChar": 0,
+        "endLine": 278,
+        "endChar": 1
+      },
+      "revId": "25932969b60855a3a8b4a15c73d446940560c38c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56c4e1d1_53fe2ec8",
         "filename": "vp10/common/blockd.h",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-29T04:42:52Z",
       "side": 1,
       "message": "Are these ever used?",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 290,
+        "endChar": 2
+      },
+      "revId": "25932969b60855a3a8b4a15c73d446940560c38c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96cad9dc_150c9e7d",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-10-29T06:32:11Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "56c4e1d1_53fe2ec8",
       "range": {
         "startLine": 280,
         "startChar": 0,
