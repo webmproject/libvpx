@@ -14,9 +14,7 @@
 #include "test/encode_test_driver.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "vp9/decoder/vp9_decoder.h"
-
-#include "vp9/vp9_dx_iface.c"
+#include "vp9/vp9_dx_iface.h"
 
 namespace {
 

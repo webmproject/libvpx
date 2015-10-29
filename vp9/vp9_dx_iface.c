@@ -24,61 +24,12 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_frame_buffers.h"
 
-#include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_decodeframe.h"
 
+#include "vp9/vp9_dx_iface.h"
 #include "vp9/vp9_iface_common.h"
 
 #define VP9_CAP_POSTPROC (CONFIG_VP9_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
-
-typedef vpx_codec_stream_info_t vp9_stream_info_t;
-
-// This limit is due to framebuffer numbers.
-// TODO(hkuang): Remove this limit after implementing ondemand framebuffers.
-#define FRAME_CACHE_SIZE 6   // Cache maximum 6 decoded frames.
-
-typedef struct cache_frame {
-  int fb_idx;
-  vpx_image_t img;
-} cache_frame;
-
-struct vpx_codec_alg_priv {
-  vpx_codec_priv_t        base;
-  vpx_codec_dec_cfg_t     cfg;
-  vp9_stream_info_t       si;
-  int                     postproc_cfg_set;
-  vp8_postproc_cfg_t      postproc_cfg;
-  vpx_decrypt_cb          decrypt_cb;
-  void                    *decrypt_state;
-  vpx_image_t             img;
-  int                     img_avail;
-  int                     flushed;
-  int                     invert_tile_order;
-  int                     last_show_frame;  // Index of last output frame.
-  int                     byte_alignment;
-  int                     skip_loop_filter;
-
-  // Frame parallel related.
-  int                     frame_parallel_decode;  // frame-based threading.
-  VPxWorker               *frame_workers;
-  int                     num_frame_workers;
-  int                     next_submit_worker_id;
-  int                     last_submit_worker_id;
-  int                     next_output_worker_id;
-  int                     available_threads;
-  cache_frame             frame_cache[FRAME_CACHE_SIZE];
-  int                     frame_cache_write;
-  int                     frame_cache_read;
-  int                     num_cache_frames;
-  int                     need_resync;      // wait for key/intra-only frame
-  // BufferPool that holds all reference frames. Shared by all the FrameWorkers.
-  BufferPool              *buffer_pool;
-
-  // External frame buffer info to save for VP9 common.
-  void *ext_priv;  // Private data associated with the external frame buffers.
-  vpx_get_frame_buffer_cb_fn_t get_ext_fb_cb;
-  vpx_release_frame_buffer_cb_fn_t release_ext_fb_cb;
-};
 
 static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
                                     vpx_codec_priv_enc_mr_cfg_t *data) {
