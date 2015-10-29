@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "760e462a_d7bc1c8a",
+        "filename": "vp10/common/vp10_fwd_txfm1d.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2015-10-29T21:14:58Z",
+      "side": 1,
+      "message": "Done\nI will also fix same problem of dct in other size.",
+      "parentUuid": "76c565cc_99c0cb89",
+      "revId": "d897df23fb516ea0e90733ac512f3be64a276ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6d955b5_b88dc579",
         "filename": "vp10/common/vp10_txfm.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-29T02:14:31Z",
       "side": 1,
       "message": "should the comment be cos(M_PI * / 64) (?) since the angular resolution is up to (pi/64)",
+      "revId": "d897df23fb516ea0e90733ac512f3be64a276ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6399ed2_31549005",
+        "filename": "vp10/common/vp10_txfm.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2015-10-29T21:14:58Z",
+      "side": 1,
+      "message": "I was thinking about use 128 so that we could expand to adst32 and dct64 easily in case that we will use it in future.",
+      "parentUuid": "f6d955b5_b88dc579",
       "revId": "d897df23fb516ea0e90733ac512f3be64a276ea4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
