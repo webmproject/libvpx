@@ -22,6 +22,30 @@
       "revId": "965a8dea0bab30e2003e70305ca70abb09b7845d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f67eb54f_6194563d",
+        "filename": "vp9/encoder/vp9_mcomp.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-29T00:29:21Z",
+      "side": 1,
+      "message": "I could, but I prefer not to. \u0027intptr_t\u0027 is an integer type which is the same bit width as pointers, so you can just add it to pointer types using SIMD adds straight. Using \u0027int\u0027 (which is 32 bits in both x86 and x86_64), you have to unpack them into 64 bits first on the 64 bit build which is an overhead.",
+      "parentUuid": "7621e584_8ba411fa",
+      "range": {
+        "startLine": 37,
+        "startChar": 2,
+        "endLine": 37,
+        "endChar": 10
+      },
+      "revId": "965a8dea0bab30e2003e70305ca70abb09b7845d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
