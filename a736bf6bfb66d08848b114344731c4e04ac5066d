@@ -16,6 +16,24 @@
       "revId": "a736bf6bfb66d08848b114344731c4e04ac5066d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96781971_799a43e1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-10-29T19:58:14Z",
+      "side": 1,
+      "message": "What I meant here was I was only checking on a vp8 + vp9 build because I don\u0027t want to waste time seeing if the linker is deduping these.",
+      "parentUuid": "7642c5df_60ddec40",
+      "revId": "a736bf6bfb66d08848b114344731c4e04ac5066d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
