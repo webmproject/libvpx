@@ -436,15 +436,25 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
   }
 
 #if CONFIG_EXT_TX
-  for (i = 0; i < EXT_TX_SIZES; i++)
-    for (j = 0; j < TX_TYPES; j++)
-      cm->counts.inter_tx_type[i][j] += counts->inter_tx_type[i][j];
-
-  for (i = 0; i < EXT_TX_SIZES; i++)
-    for (j = 0; j < INTRA_MODES; j++)
-      for (k = 0; k < TX_TYPES; k++)
-        cm->counts.intra_tx_type[i][j][k] += counts->intra_tx_type[i][j][k];
-#endif
+  for (i = 0; i < EXT_TX_SIZES; i++) {
+    int s, k;
+    for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
+      if (use_inter_ext_tx_for_tx[s][i]) {
+        for (k = 0; k < TX_TYPES; k++)
+          cm->counts.inter_ext_tx[s][i][k] += counts->inter_ext_tx[s][i][k];
+      }
+    }
+    for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
+      if (use_intra_ext_tx_for_tx[s][i]) {
+        int j;
+        for (j = 0; j < INTRA_MODES; ++j)
+          for (k = 0; k < TX_TYPES; k++)
+            cm->counts.intra_ext_tx[s][i][j][k] +=
+                counts->intra_ext_tx[s][i][j][k];
+      }
+    }
+  }
+#endif  // CONFIG_EXT_TX
 
 #if CONFIG_MISC_FIXES
   for (i = 0; i < PREDICTION_PROBS; i++)
