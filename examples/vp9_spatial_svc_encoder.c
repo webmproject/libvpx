@@ -408,7 +408,10 @@ static void set_rate_control_stats(struct RateControlStats *rc,
     for (tl = 0; tl < cfg->ts_number_layers; ++tl) {
       const int layer = sl * cfg->ts_number_layers + tl;
       const int tlayer0 = sl * cfg->ts_number_layers;
-      rc->layer_framerate[layer] =
+      if (cfg->ts_number_layers == 1)
+        rc->layer_framerate[layer] = framerate;
+      else
+        rc->layer_framerate[layer] =
           framerate / cfg->ts_rate_decimator[tl];
       if (tl > 0) {
         rc->layer_pfb[layer] = 1000.0 *
@@ -714,6 +717,7 @@ int main(int argc, const char **argv) {
     // TODO(marpan): Should rename the "VP9E_TEMPORAL_LAYERING_MODE_BYPASS"
     // mode to "VP9E_LAYERING_MODE_BYPASS".
     if (svc_ctx.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+      layer_id.spatial_layer_id = 0;
       // Example for 2 temporal layers.
       if (frame_cnt % 2 == 0)
         layer_id.temporal_layer_id = 0;
@@ -729,6 +733,12 @@ int main(int argc, const char **argv) {
                                   &ref_frame_config);
       vpx_codec_control(&codec, VP9E_SET_SVC_REF_FRAME_CONFIG,
                         &ref_frame_config);
+      // Keep track of input frames, to account for frame drops in rate control
+      // stats/metrics.
+      for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+        ++rc.layer_input_frames[sl * enc_cfg.ts_number_layers +
+                                layer_id.temporal_layer_id];
+      }
     }
 
     vpx_usec_timer_start(&timer);
@@ -761,9 +771,16 @@ int main(int argc, const char **argv) {
               vpx_codec_control(&codec, VP9E_GET_SVC_LAYER_ID, &layer_id);
               parse_superframe_index(cx_pkt->data.frame.buf,
                                      cx_pkt->data.frame.sz, sizes, &count);
-              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                ++rc.layer_input_frames[sl * enc_cfg.ts_number_layers +
-                                        layer_id.temporal_layer_id];
+              // Note computing input_layer_frames here won't account for frame
+              // drops in rate control stats.
+              // TODO(marpan): Fix this for non-bypass mode so we can get stats
+              // for dropped frames.
+              if (svc_ctx.temporal_layering_mode !=
+                  VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+                for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                  ++rc.layer_input_frames[sl * enc_cfg.ts_number_layers +
+                                         layer_id.temporal_layer_id];
+                }
               }
               for (tl = layer_id.temporal_layer_id;
                   tl < enc_cfg.ts_number_layers; ++tl) {
@@ -854,6 +871,16 @@ int main(int argc, const char **argv) {
       pts += frame_duration;
     }
   }
+
+  // Compensate for the extra frame count for the bypass mode.
+  if (svc_ctx.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+    for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+      const int layer = sl * enc_cfg.ts_number_layers +
+          layer_id.temporal_layer_id;
+      --rc.layer_input_frames[layer];
+    }
+  }
+
   printf("Processed %d frames\n", frame_cnt);
   fclose(infile);
 #if OUTPUT_RC_STATS
