@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+#include "vp9/common/vp9_enums.h"
+
 struct VP9Decoder;
 struct vpx_read_bit_buffer;
 
