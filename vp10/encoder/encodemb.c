@@ -1393,6 +1393,7 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
 #if CONFIG_VAR_TX
   int i;
+  const int bwl = b_width_log2_lookup[plane_bsize];
 #endif
   dst = &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col];
   a = &ctx->ta[plane][blk_col];
@@ -1408,7 +1409,12 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 //    return;
 //  }
 
+#if CONFIG_VAR_TX
+  if (!x->skip_recode &&
+      x->blk_skip[plane][(blk_row << bwl) + blk_col] == 0) {
+#else
   if (!x->skip_recode) {
+#endif
     if (x->quant_fp) {
       // Encoding process for rtc mode
       if (x->skip_txfm[0] == SKIP_TXFM_AC_DC && plane == 0) {
@@ -1435,7 +1441,9 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
           // skip forward transform
           p->eobs[block] = 0;
           *a = *l = 0;
+#if !CONFIG_VAR_TX
           return;
+#endif
         }
       } else {
         vp10_xform_quant(x, plane, block, blk_row, blk_col,
@@ -1443,6 +1451,12 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
       }
     }
   }
+#if CONFIG_VAR_TX
+  else {
+    if (!x->skip_recode)
+      p->eobs[block] = 0;
+  }
+#endif
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
     int ctx;
