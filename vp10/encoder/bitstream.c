@@ -38,8 +38,13 @@
 static const struct vp10_token intra_mode_encodings[INTRA_MODES] = {
   {0, 1}, {6, 3}, {28, 5}, {30, 5}, {58, 6}, {59, 6}, {126, 7}, {127, 7},
   {62, 6}, {2, 2}};
+#if CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
+static const struct vp10_token switchable_interp_encodings[SWITCHABLE_FILTERS] =
+  {{0, 1}, {4, 3}, {3, 2}, {5, 3}};
+#else
 static const struct vp10_token switchable_interp_encodings[SWITCHABLE_FILTERS] =
   {{0, 1}, {2, 2}, {3, 2}};
+#endif  // CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
 static const struct vp10_token partition_encodings[PARTITION_TYPES] =
   {{0, 1}, {2, 2}, {6, 3}, {7, 3}};
 static const struct vp10_token inter_mode_encodings[INTER_MODES] =
@@ -548,6 +553,28 @@ static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
 }
 #endif  // CONFIG_EXT_INTRA
 
+static void write_switchable_interp_filter(VP10_COMP *cpi,
+                                           const MACROBLOCKD *xd,
+                                           vpx_writer *w) {
+  VP10_COMMON *const cm = &cpi->common;
+  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  if (cm->interp_filter == SWITCHABLE) {
+    const int ctx = vp10_get_pred_context_switchable_interp(xd);
+#if CONFIG_EXT_INTERP
+    if (!vp10_is_interp_needed(xd)) {
+      // if (mbmi->interp_filter != EIGHTTAP)
+      //   printf("Error [%d]\n", mbmi->sb_type);
+      assert(mbmi->interp_filter == EIGHTTAP);
+      return;
+    }
+#endif
+    vp10_write_token(w, vp10_switchable_interp_tree,
+                     cm->fc->switchable_interp_prob[ctx],
+                     &switchable_interp_encodings[mbmi->interp_filter]);
+    ++cpi->interp_filter_selected[0][mbmi->interp_filter];
+  }
+}
+
 static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
                                 vpx_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
@@ -645,15 +672,9 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
       }
     }
 
-    if (cm->interp_filter == SWITCHABLE) {
-      const int ctx = vp10_get_pred_context_switchable_interp(xd);
-      vp10_write_token(w, vp10_switchable_interp_tree,
-                      cm->fc->switchable_interp_prob[ctx],
-                      &switchable_interp_encodings[mbmi->interp_filter]);
-      ++cpi->interp_filter_selected[0][mbmi->interp_filter];
-    } else {
-      assert(mbmi->interp_filter == cm->interp_filter);
-    }
+#if !CONFIG_EXT_INTERP
+    write_switchable_interp_filter(cpi, xd, w);
+#endif  // !CONFIG_EXT_INTERP
 
     if (bsize < BLOCK_8X8) {
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -680,6 +701,9 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
                         allow_hp);
       }
     }
+#if CONFIG_EXT_INTERP
+    write_switchable_interp_filter(cpi, xd, w);
+#endif  // CONFIG_EXT_INTERP
   }
 
 #if CONFIG_EXT_TX
@@ -1051,7 +1075,6 @@ static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
         }
       }
 
-      // printf("Update %d %d, savings %d\n", update[0], update[1], savings);
       /* Is coef updated at all */
       if (update[1] == 0 || savings < 0) {
         vpx_write_bit(bc, 0);
@@ -1377,7 +1400,7 @@ static void write_interp_filter(INTERP_FILTER filter,
                                 struct vpx_write_bit_buffer *wb) {
   vpx_wb_write_bit(wb, filter == SWITCHABLE);
   if (filter != SWITCHABLE)
-    vpx_wb_write_literal(wb, filter, 2);
+    vpx_wb_write_literal(wb, filter, 2 + CONFIG_EXT_INTERP);
 }
 
 static void fix_interp_filter(VP10_COMMON *cm, FRAME_COUNTS *counts) {

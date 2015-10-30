@@ -24,16 +24,24 @@ extern "C" {
 #define EIGHTTAP            0
 #define EIGHTTAP_SMOOTH     1
 #define EIGHTTAP_SHARP      2
+
+#if CONFIG_EXT_INTERP
+#define SUPPORT_NONINTERPOLATING_FILTERS 0  /* turn it on for experimentation */
+#define EIGHTTAP_SMOOTH2    3
+#define SWITCHABLE_FILTERS  4 /* Number of switchable filters */
+#else
 #define SWITCHABLE_FILTERS  3 /* Number of switchable filters */
-#define BILINEAR            3
+#endif  // CONFIG_EXT_INTERP
 // The codec can operate in four possible inter prediction filter mode:
 // 8-tap, 8-tap-smooth, 8-tap-sharp, and switching between the three.
+
+#define BILINEAR            (SWITCHABLE_FILTERS)
+#define SWITCHABLE          (SWITCHABLE_FILTERS + 1)  /* the last one */
 #define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
-#define SWITCHABLE 4 /* should be the last one */
 
 typedef uint8_t INTERP_FILTER;
 
-extern const InterpKernel *vp10_filter_kernels[4];
+extern const InterpKernel *vp10_filter_kernels[SWITCHABLE_FILTERS + 1];
 
 #ifdef __cplusplus
 }  // extern "C"

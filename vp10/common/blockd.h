@@ -38,6 +38,13 @@ typedef enum {
   FRAME_TYPES,
 } FRAME_TYPE;
 
+#if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+#define IsInterpolatingFilter(filter) \
+    (vp10_filter_kernels[filter][0][SUBPEL_TAPS / 2 - 1] == 128)
+#else
+#define IsInterpolatingFilter(filter)  (1)
+#endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }

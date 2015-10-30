@@ -28,9 +28,22 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
                                    int w, int h, int ref,
                                    const InterpKernel *kernel,
                                    int xs, int ys) {
+#if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+  if (kernel[0][SUBPEL_TAPS / 2 - 1] == 128) {
+    // Interpolating filter
+    sf->predict[subpel_x != 0][subpel_y != 0][ref](
+        src, src_stride, dst, dst_stride,
+        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+  } else {
+    sf->predict_ni[subpel_x != 0][subpel_y != 0][ref](
+        src, src_stride, dst, dst_stride,
+        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+  }
+#else
   sf->predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+#endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -42,9 +55,22 @@ static INLINE void high_inter_predictor(const uint8_t *src, int src_stride,
                                         int w, int h, int ref,
                                         const InterpKernel *kernel,
                                         int xs, int ys, int bd) {
+#if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+  if (kernel[0][SUBPEL_TAPS / 2 - 1] == 128) {
+    // Interpolating filter
+    sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
+        src, src_stride, dst, dst_stride,
+        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+  } else {
+    sf->highbd_predict_ni[subpel_x != 0][subpel_y != 0][ref](
+        src, src_stride, dst, dst_stride,
+        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+  }
+#else
   sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+#endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -192,7 +218,6 @@ void vp10_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
 void vp10_setup_pre_planes(MACROBLOCKD *xd, int idx,
                           const YV12_BUFFER_CONFIG *src, int mi_row, int mi_col,
                           const struct scale_factors *sf);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

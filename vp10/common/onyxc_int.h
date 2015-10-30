@@ -20,6 +20,7 @@
 #include "vp10/common/entropymv.h"
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymode.h"
+#include "vp10/common/mv.h"
 #include "vp10/common/frame_buffers.h"
 #include "vp10/common/quant_common.h"
 #include "vp10/common/tile_common.h"
@@ -530,6 +531,54 @@ static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
   return (tx_size - 1) * 3 + above + left;
 }
 #endif
+
+#if CONFIG_EXT_INTERP
+static INLINE int vp10_is_interp_needed(const MACROBLOCKD *const xd) {
+  MODE_INFO *const mi = xd->mi[0];
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
+  const int is_compound = has_second_ref(mbmi);
+  int intpel_mv;
+
+#if SUPPORT_NONINTERPOLATING_FILTERS
+  // TODO(debargha): This is is currently only for experimentation
+  // with non-interpolating filters. Remove later.
+  // If any of the filters are non-interpolating, then indicate the
+  // interpolation filter always.
+  int i;
+  for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
+    if (!IsInterpolatingFilter(i)) return 1;
+  }
+#endif
+
+  // For scaled references, interpolation filter is indicated all the time.
+  if (vp10_is_scaled(&xd->block_refs[0]->sf))
+    return 1;
+  if (is_compound && vp10_is_scaled(&xd->block_refs[1]->sf))
+    return 1;
+
+  if (bsize < BLOCK_8X8) {
+    intpel_mv =
+        !mv_has_subpel(&mi->bmi[0].as_mv[0].as_mv) &&
+        !mv_has_subpel(&mi->bmi[1].as_mv[0].as_mv) &&
+        !mv_has_subpel(&mi->bmi[2].as_mv[0].as_mv) &&
+        !mv_has_subpel(&mi->bmi[3].as_mv[0].as_mv);
+    if (is_compound && intpel_mv) {
+      intpel_mv &=
+          !mv_has_subpel(&mi->bmi[0].as_mv[1].as_mv) &&
+          !mv_has_subpel(&mi->bmi[1].as_mv[1].as_mv) &&
+          !mv_has_subpel(&mi->bmi[2].as_mv[1].as_mv) &&
+          !mv_has_subpel(&mi->bmi[3].as_mv[1].as_mv);
+    }
+  } else {
+    intpel_mv = !mv_has_subpel(&mbmi->mv[0].as_mv);
+    if (is_compound && intpel_mv) {
+      intpel_mv &= !mv_has_subpel(&mbmi->mv[1].as_mv);
+    }
+  }
+  return !intpel_mv;
+}
+#endif  // CONFIG_EXT_INTERP
 
 #ifdef __cplusplus
 }  // extern "C"

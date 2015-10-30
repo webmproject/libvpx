@@ -589,8 +589,11 @@ int vp10_get_switchable_rate(const VP10_COMP *cpi,
                              const MACROBLOCKD *const xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const int ctx = vp10_get_pred_context_switchable_interp(xd);
+#if CONFIG_EXT_INTERP
+  if (!vp10_is_interp_needed(xd)) return 0;
+#endif  // CONFIG_EXT_INTERP
   return SWITCHABLE_INTERP_RATE_FACTOR *
-             cpi->switchable_interp_costs[ctx][mbmi->interp_filter];
+      cpi->switchable_interp_costs[ctx][mbmi->interp_filter];
 }
 
 void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {

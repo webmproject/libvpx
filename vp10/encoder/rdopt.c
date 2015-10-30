@@ -2945,10 +2945,6 @@ static INLINE void mi_buf_restore(MACROBLOCK *x, struct buf_2d orig_src,
     x->e_mbd.plane[0].pre[1] = orig_pre[1];
 }
 
-static INLINE int mv_has_subpel(const MV *mv) {
-  return (mv->row & 0x0F) || (mv->col & 0x0F);
-}
-
 // Check if NEARESTMV/NEARMV/ZEROMV is the cheapest way encode zero motion.
 // TODO(aconverse): Find out if this is still productive then clean up or remove
 static int check_best_zero_mv(
@@ -3041,11 +3037,11 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   // frame we must use a unit scaling factor during mode selection.
 #if CONFIG_VP9_HIGHBITDEPTH
   vp10_setup_scale_factors_for_frame(&sf, cm->width, cm->height,
-                                    cm->width, cm->height,
-                                    cm->use_highbitdepth);
+                                     cm->width, cm->height,
+                                     cm->use_highbitdepth);
 #else
   vp10_setup_scale_factors_for_frame(&sf, cm->width, cm->height,
-                                    cm->width, cm->height);
+                                     cm->width, cm->height);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Allow joint search multiple times iteratively for each reference frame
@@ -4030,6 +4026,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (cm->interp_filter != BILINEAR) {
     if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
       best_filter = EIGHTTAP;
+#if CONFIG_EXT_INTERP
+    } else if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE) {
+      best_filter = EIGHTTAP;
+#endif
     } else if (best_filter == SWITCHABLE) {
       int newbest;
       int tmp_rate_sum = 0;
@@ -4045,7 +4045,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         rs = vp10_get_switchable_rate(cpi, xd);
         rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
 
-        if (i > 0 && intpel_mv) {
+        if (i > 0 && intpel_mv && IsInterpolatingFilter(i)) {
           rd = RDCOST(x->rdmult, x->rddiv, tmp_rate_sum, tmp_dist_sum);
           filter_cache[i] = rd;
           filter_cache[SWITCHABLE_FILTERS] =
@@ -4067,7 +4067,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                (!i || best_needs_copy)) ||
               (cm->interp_filter != SWITCHABLE &&
                (cm->interp_filter == mbmi->interp_filter ||
-                (i == 0 && intpel_mv)))) {
+                (i == 0 && intpel_mv && IsInterpolatingFilter(i))))) {
             restore_dst_buf(xd, orig_dst, orig_dst_stride);
           } else {
             for (j = 0; j < MAX_MB_PLANE; j++) {
@@ -4087,7 +4087,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
             rd += rs_rd;
           *mask_filter = VPXMAX(*mask_filter, rd);
 
-          if (i == 0 && intpel_mv) {
+          if (i == 0 && intpel_mv && IsInterpolatingFilter(i)) {
             tmp_rate_sum = rate_sum;
             tmp_dist_sum = dist_sum;
           }
@@ -4104,7 +4104,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         if (newbest) {
           best_rd = rd;
           best_filter = mbmi->interp_filter;
-          if (cm->interp_filter == SWITCHABLE && i && !intpel_mv)
+          if (cm->interp_filter == SWITCHABLE && i &&
+              !(intpel_mv && IsInterpolatingFilter(i)))
             best_needs_copy = !best_needs_copy;
         }
 
@@ -4123,6 +4124,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       restore_dst_buf(xd, orig_dst, orig_dst_stride);
     }
   }
+
   // Set the appropriate filter
   mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
       cm->interp_filter : best_filter;
@@ -4840,6 +4842,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                   single_newmv, single_inter_filter,
                                   single_skippable, &total_sse, best_rd,
                                   &mask_filter, filter_cache);
+
       if (this_rd == INT64_MAX)
         continue;
 
@@ -4864,6 +4867,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         // Cost the skip mb case
         rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
+
       } else if (ref_frame != INTRA_FRAME && !xd->lossless[mbmi->segment_id]) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
@@ -5175,6 +5179,9 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   if (cm->interp_filter != BILINEAR) {
     best_filter = EIGHTTAP;
     if (cm->interp_filter == SWITCHABLE &&
+#if CONFIG_EXT_INTERP
+        vp10_is_interp_needed(xd) &&
+#endif  // CONFIG_EXT_INTERP
         x->source_variance >= cpi->sf.disable_filter_search_var_thresh) {
       int rs;
       int best_rs = INT_MAX;
@@ -5516,7 +5523,11 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
                                               (int) this_rd_thresh, seg_mvs,
                                               bsi, switchable_filter_index,
                                               mi_row, mi_col);
-
+#if CONFIG_EXT_INTERP
+            if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
+                mbmi->interp_filter != EIGHTTAP)  // invalid configuration
+              continue;
+#endif  // CONFIG_EXT_INTERP
             if (tmp_rd == INT64_MAX)
               continue;
             rs = vp10_get_switchable_rate(cpi, xd);
@@ -5570,15 +5581,30 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
 
       mbmi->interp_filter = (cm->interp_filter == SWITCHABLE ?
                              tmp_best_filter : cm->interp_filter);
+
+
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
-        // switchable list (bilinear, 6-tap) is indicated at the frame level
+        // switchable list (bilinear) is indicated at the frame level
         tmp_rd = rd_pick_best_sub8x8_mode(cpi, x,
                                           &x->mbmi_ext->ref_mvs[ref_frame][0],
                                           second_ref, best_yrd, &rate, &rate_y,
                                           &distortion, &skippable, &total_sse,
                                           (int) this_rd_thresh, seg_mvs, bsi, 0,
                                           mi_row, mi_col);
+#if CONFIG_EXT_INTERP
+        if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
+            mbmi->interp_filter != EIGHTTAP) {
+          mbmi->interp_filter = EIGHTTAP;
+          tmp_rd = rd_pick_best_sub8x8_mode(
+              cpi, x,
+              &x->mbmi_ext->ref_mvs[ref_frame][0],
+              second_ref, best_yrd, &rate, &rate_y,
+              &distortion, &skippable, &total_sse,
+              (int) this_rd_thresh, seg_mvs, bsi, 0,
+              mi_row, mi_col);
+        }
+#endif  // CONFIG_EXT_INTERP
         if (tmp_rd == INT64_MAX)
           continue;
       } else {

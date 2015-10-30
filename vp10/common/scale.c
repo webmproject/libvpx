@@ -46,15 +46,15 @@ MV32 vp10_scale_mv(const MV *mv, int x, int y, const struct scale_factors *sf) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
-                                       int other_w, int other_h,
-                                       int this_w, int this_h,
-                                       int use_highbd) {
+                                        int other_w, int other_h,
+                                        int this_w, int this_h,
+                                        int use_highbd) {
 #else
 void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
-                                       int other_w, int other_h,
-                                       int this_w, int this_h) {
+                                        int other_w, int other_h,
+                                        int this_w, int this_h) {
 #endif
-  if (!valid_ref_frame_size(other_w, other_h, this_w, this_h)) {
+    if (!valid_ref_frame_size(other_w, other_h, this_w, this_h)) {
     sf->x_scale_fp = REF_INVALID_SCALE;
     sf->y_scale_fp = REF_INVALID_SCALE;
     return;
@@ -79,6 +79,16 @@ void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
   // applied in one direction only, and not at all for 0,0, seems to give the
   // best quality, but it may be worth trying an additional mode that does
   // do the filtering on full-pel.
+#if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+  sf->predict_ni[0][0][0] = vpx_convolve8_c;
+  sf->predict_ni[0][0][1] = vpx_convolve8_avg_c;
+  sf->predict_ni[0][1][0] = vpx_convolve8_c;
+  sf->predict_ni[0][1][1] = vpx_convolve8_avg_c;
+  sf->predict_ni[1][0][0] = vpx_convolve8_c;
+  sf->predict_ni[1][0][1] = vpx_convolve8_avg_c;
+  sf->predict_ni[1][1][0] = vpx_convolve8;
+  sf->predict_ni[1][1][1] = vpx_convolve8_avg;
+#endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   if (sf->x_step_q4 == 16) {
     if (sf->y_step_q4 == 16) {
       // No scaling in either direction.
@@ -119,8 +129,19 @@ void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
   // 2D subpel motion always gets filtered in both directions
   sf->predict[1][1][0] = vpx_convolve8;
   sf->predict[1][1][1] = vpx_convolve8_avg;
+
 #if CONFIG_VP9_HIGHBITDEPTH
   if (use_highbd) {
+#if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+    sf->highbd_predict_ni[0][0][0] = vpx_highbd_convolve8_c;
+    sf->highbd_predict_ni[0][0][1] = vpx_highbd_convolve8_avg_c;
+    sf->highbd_predict_ni[0][1][0] = vpx_highbd_convolve8_c;
+    sf->highbd_predict_ni[0][1][1] = vpx_highbd_convolve8_avg_c;
+    sf->highbd_predict_ni[1][0][0] = vpx_highbd_convolve8_c;
+    sf->highbd_predict_ni[1][0][1] = vpx_highbd_convolve8_avg_c;
+    sf->highbd_predict_ni[1][1][0] = vpx_highbd_convolve8;
+    sf->highbd_predict_ni[1][1][1] = vpx_highbd_convolve8_avg;
+#endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
     if (sf->x_step_q4 == 16) {
       if (sf->y_step_q4 == 16) {
         // No scaling in either direction.
@@ -162,5 +183,5 @@ void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
     sf->highbd_predict[1][1][0] = vpx_highbd_convolve8;
     sf->highbd_predict[1][1][1] = vpx_highbd_convolve8_avg;
   }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }

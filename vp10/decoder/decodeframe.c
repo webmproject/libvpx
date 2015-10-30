@@ -625,6 +625,9 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
   int xs, ys, x0, y0, x0_16, y0_16, frame_width, frame_height,
       buf_stride, subpel_x, subpel_y;
   uint8_t *ref_frame, *buf_ptr;
+#if CONFIG_EXT_INTERP
+  const int i_filter = IsInterpolatingFilter(xd->mi[0]->mbmi.interp_filter);
+#endif  // CONFIG_EXT_INTERP
 
   // Get reference frame pointer, width and height.
   if (plane == 0) {
@@ -694,6 +697,9 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
   // Do border extension if there is motion or the
   // width/height is not a multiple of 8 pixels.
   if (is_scaled || scaled_mv.col || scaled_mv.row ||
+#if CONFIG_EXT_INTERP
+      !i_filter ||
+#endif
       (frame_width & 0x7) || (frame_height & 0x7)) {
     int y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;
 
@@ -701,13 +707,21 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
     int x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
     int x_pad = 0, y_pad = 0;
 
-    if (subpel_x || (sf->x_step_q4 != SUBPEL_SHIFTS)) {
+    if (subpel_x ||
+#if CONFIG_EXT_INTERP
+        !i_filter ||
+#endif
+        (sf->x_step_q4 != SUBPEL_SHIFTS)) {
       x0 -= VP9_INTERP_EXTEND - 1;
       x1 += VP9_INTERP_EXTEND;
       x_pad = 1;
     }
 
-    if (subpel_y || (sf->y_step_q4 != SUBPEL_SHIFTS)) {
+    if (subpel_y ||
+#if CONFIG_EXT_INTERP
+        !i_filter ||
+#endif
+        (sf->y_step_q4 != SUBPEL_SHIFTS)) {
       y0 -= VP9_INTERP_EXTEND - 1;
       y1 += VP9_INTERP_EXTEND;
       y_pad = 1;
@@ -1296,7 +1310,8 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
 }
 
 static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
-  return vpx_rb_read_bit(rb) ? SWITCHABLE : vpx_rb_read_literal(rb, 2);
+  return vpx_rb_read_bit(rb) ?
+      SWITCHABLE : vpx_rb_read_literal(rb, 2 + CONFIG_EXT_INTERP);
 }
 
 static void setup_render_size(VP10_COMMON *cm,
