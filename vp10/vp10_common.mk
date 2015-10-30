@@ -63,6 +63,9 @@ VP10_COMMON_SRCS-yes += common/scan.c
 VP10_COMMON_SRCS-yes += common/scan.h
 VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm.h
 VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm.c
+VP10_COMMON_SRCS-yes += common/vp10_txfm.h
+VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm1d.h
+VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm1d.c
 
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.h
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.c
