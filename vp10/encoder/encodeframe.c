@@ -3272,12 +3272,11 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       int x, y;
       TX_SIZE tx_size;
       // The new intra coding scheme requires no change of transform size
-      if (is_inter_block(&mi->mbmi)) {
+      if (is_inter_block(&mi->mbmi))
         tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
                          max_txsize_lookup[bsize]);
-      } else {
+      else
         tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
-      }
 
       for (y = 0; y < mi_height; y++)
         for (x = 0; x < mi_width; x++)
@@ -3306,8 +3305,21 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 
 #if CONFIG_VAR_TX
   if (cm->tx_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_8X8 &&
-      is_inter_block(mbmi) && !(mbmi->skip || seg_skip) &&
-      !output_enabled)
-    tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
+      is_inter_block(mbmi) && !(mbmi->skip || seg_skip)) {
+    if (!output_enabled)
+      tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
+  } else {
+    TX_SIZE tx_size;
+    // The new intra coding scheme requires no change of transform size
+    if (is_inter_block(mbmi))
+      tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
+                       max_txsize_lookup[bsize]);
+    else
+      tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
+
+    mbmi->tx_size = tx_size;
+    set_txfm_ctx(xd->left_txfm_context, tx_size, xd->n8_h);
+    set_txfm_ctx(xd->above_txfm_context, tx_size, xd->n8_w);
+  }
 #endif
 }

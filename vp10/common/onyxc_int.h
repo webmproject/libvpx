@@ -452,6 +452,11 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
     xd->left_mi = NULL;
     xd->left_mbmi = NULL;
   }
+
+#if CONFIG_VAR_TX
+  xd->n8_h = bh;
+  xd->n8_w = bw;
+#endif
 }
 
 static INLINE const vpx_prob *get_y_mode_probs(const VP10_COMMON *cm,
@@ -496,6 +501,14 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
 }
 
 #if CONFIG_VAR_TX
+static INLINE void set_txfm_ctx(TXFM_CONTEXT *txfm_ctx,
+                                TX_SIZE tx_size,
+                                int len) {
+  int i;
+  for (i = 0; i < len; ++i)
+    txfm_ctx[i] = tx_size;
+}
+
 static INLINE void txfm_partition_update(TXFM_CONTEXT *above_ctx,
                                          TXFM_CONTEXT *left_ctx,
                                          TX_SIZE tx_size) {
