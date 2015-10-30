@@ -22,6 +22,30 @@
       "revId": "05b21c1830782935859e156cf305cb31185f8484",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5625c29e_59c847a1",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-10-30T01:04:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96401a44_73fe9a5f",
+      "range": {
+        "startLine": 567,
+        "startChar": 0,
+        "endLine": 573,
+        "endChar": 52
+      },
+      "revId": "05b21c1830782935859e156cf305cb31185f8484",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
