@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b6627eec_e9d9754d",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-30T09:02:57Z",
+      "side": 1,
+      "message": "Ok, that was my paranoia combined with my unfamiliarity with the codebase and the use of SIMD pointer arithmetic in the loop, will remove in a minute.",
+      "parentUuid": "562a227b_912c5ed5",
+      "range": {
+        "startLine": 17,
+        "startChar": 16,
+        "endLine": 17,
+        "endChar": 17
+      },
+      "revId": "8fd0415160aac0d41608db7495c598ad34705d4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "562a227b_7189f20d",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-29T22:45:05Z",
       "side": 1,
       "message": "#include \"vpx_ports/mem.h\"",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 34,
+        "endChar": 26
+      },
+      "revId": "8fd0415160aac0d41608db7495c598ad34705d4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "167c2956_a25c9eda",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-10-30T09:02:57Z",
+      "side": 1,
+      "message": "Agreed, will fix.",
+      "parentUuid": "562a227b_7189f20d",
       "range": {
         "startLine": 34,
         "startChar": 8,
