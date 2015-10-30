@@ -382,7 +382,7 @@ static const arg_def_t tile_cols = ARG_DEF(
 static const arg_def_t tile_rows = ARG_DEF(
     NULL, "tile-rows", 1, "Number of tile rows to use, log2");
 static const arg_def_t lossless = ARG_DEF(
-    NULL, "lossless", 1, "Lossless mode");
+    NULL, "lossless", 1, "Lossless mode (0: false (default), 1: true)");
 static const arg_def_t frame_parallel_decoding = ARG_DEF(
     NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
 static const arg_def_t aq_mode = ARG_DEF(

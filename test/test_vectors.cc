@@ -52,6 +52,31 @@ const char *const kVP8TestVectors[] = {
 const int kNumVP8TestVectors = NELEMENTS(kVP8TestVectors);
 #endif  // CONFIG_VP8_DECODER
 #if CONFIG_VP9_DECODER
+#define RESIZE_TEST_VECTORS "vp90-2-21-resize_inter_320x180_5_1-2.webm", \
+  "vp90-2-21-resize_inter_320x180_5_3-4.webm", \
+  "vp90-2-21-resize_inter_320x180_7_1-2.webm", \
+  "vp90-2-21-resize_inter_320x180_7_3-4.webm", \
+  "vp90-2-21-resize_inter_320x240_5_1-2.webm", \
+  "vp90-2-21-resize_inter_320x240_5_3-4.webm", \
+  "vp90-2-21-resize_inter_320x240_7_1-2.webm", \
+  "vp90-2-21-resize_inter_320x240_7_3-4.webm", \
+  "vp90-2-21-resize_inter_640x360_5_1-2.webm", \
+  "vp90-2-21-resize_inter_640x360_5_3-4.webm", \
+  "vp90-2-21-resize_inter_640x360_7_1-2.webm", \
+  "vp90-2-21-resize_inter_640x360_7_3-4.webm", \
+  "vp90-2-21-resize_inter_640x480_5_1-2.webm", \
+  "vp90-2-21-resize_inter_640x480_5_3-4.webm", \
+  "vp90-2-21-resize_inter_640x480_7_1-2.webm", \
+  "vp90-2-21-resize_inter_640x480_7_3-4.webm", \
+  "vp90-2-21-resize_inter_1280x720_5_1-2.webm", \
+  "vp90-2-21-resize_inter_1280x720_5_3-4.webm", \
+  "vp90-2-21-resize_inter_1280x720_7_1-2.webm", \
+  "vp90-2-21-resize_inter_1280x720_7_3-4.webm", \
+  "vp90-2-21-resize_inter_1920x1080_5_1-2.webm", \
+  "vp90-2-21-resize_inter_1920x1080_5_3-4.webm", \
+  "vp90-2-21-resize_inter_1920x1080_7_1-2.webm", \
+  "vp90-2-21-resize_inter_1920x1080_7_3-4.webm",
+
 const char *const kVP9TestVectors[] = {
   "vp90-2-00-quantizer-00.webm", "vp90-2-00-quantizer-01.webm",
   "vp90-2-00-quantizer-02.webm", "vp90-2-00-quantizer-03.webm",
@@ -210,10 +235,16 @@ const char *const kVP9TestVectors[] = {
   "vp93-2-20-10bit-yuv422.webm", "vp93-2-20-12bit-yuv422.webm",
   "vp93-2-20-10bit-yuv440.webm", "vp93-2-20-12bit-yuv440.webm",
   "vp93-2-20-10bit-yuv444.webm", "vp93-2-20-12bit-yuv444.webm",
-#endif  // CONFIG_VP9_HIGHBITDEPTH`
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   "vp90-2-20-big_superframe-01.webm", "vp90-2-20-big_superframe-02.webm",
+  RESIZE_TEST_VECTORS
 };
 const int kNumVP9TestVectors = NELEMENTS(kVP9TestVectors);
+const char *const kVP9TestVectorsResize[] = {
+  RESIZE_TEST_VECTORS
+};
+const int kNumVP9TestVectorsResize = NELEMENTS(kVP9TestVectorsResize);
+#undef RESIZE_TEST_VECTORS
 #endif  // CONFIG_VP9_DECODER
 
 }  // namespace libvpx_test
