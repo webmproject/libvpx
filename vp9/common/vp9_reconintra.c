@@ -133,6 +133,9 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int frame_width, frame_height;
   int x0, y0;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int need_left = extend_modes[mode] & NEED_LEFT;
+  const int need_above = extend_modes[mode] & NEED_ABOVE;
+  const int need_aboveright = extend_modes[mode] & NEED_ABOVERIGHT;
   int base = 128 << (bd - 8);
   // 127 127 127 .. 127 127 127 127 127 127
   // 129  A   B  ..  Y   Z
@@ -153,79 +156,110 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   x0 = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x)) + x;
   y0 = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y)) + y;
 
-  // left
-  if (left_available) {
-    if (xd->mb_to_bottom_edge < 0) {
-      /* slower path if the block needs border extension */
-      if (y0 + bs <= frame_height) {
+  // NEED_LEFT
+  if (need_left) {
+    if (left_available) {
+      if (xd->mb_to_bottom_edge < 0) {
+        /* slower path if the block needs border extension */
+        if (y0 + bs <= frame_height) {
+          for (i = 0; i < bs; ++i)
+            left_col[i] = ref[i * ref_stride - 1];
+        } else {
+          const int extend_bottom = frame_height - y0;
+          for (i = 0; i < extend_bottom; ++i)
+            left_col[i] = ref[i * ref_stride - 1];
+          for (; i < bs; ++i)
+            left_col[i] = ref[(extend_bottom - 1) * ref_stride - 1];
+        }
+      } else {
+        /* faster path if the block does not need extension */
         for (i = 0; i < bs; ++i)
           left_col[i] = ref[i * ref_stride - 1];
-      } else {
-        const int extend_bottom = frame_height - y0;
-        for (i = 0; i < extend_bottom; ++i)
-          left_col[i] = ref[i * ref_stride - 1];
-        for (; i < bs; ++i)
-          left_col[i] = ref[(extend_bottom - 1) * ref_stride - 1];
       }
     } else {
-      /* faster path if the block does not need extension */
-      for (i = 0; i < bs; ++i)
-        left_col[i] = ref[i * ref_stride - 1];
+      // TODO(Peter): this value should probably change for high bitdepth
+      vpx_memset16(left_col, base + 1, bs);
     }
-  } else {
-    // TODO(Peter): this value should probably change for high bitdepth
-    vpx_memset16(left_col, base + 1, bs);
   }
 
-  // TODO(hkuang) do not extend 2*bs pixels for all modes.
-  // above
-  if (up_available) {
-    const uint16_t *above_ref = ref - ref_stride;
-    if (xd->mb_to_right_edge < 0) {
-      /* slower path if the block needs border extension */
-      if (x0 + 2 * bs <= frame_width) {
-        if (right_available && bs == 4) {
-          memcpy(above_row, above_ref, 2 * bs * sizeof(above_row[0]));
+  // NEED_ABOVE
+  if (need_above) {
+    if (up_available) {
+      const uint16_t *above_ref = ref - ref_stride;
+      if (xd->mb_to_right_edge < 0) {
+        /* slower path if the block needs border extension */
+        if (x0 + bs <= frame_width) {
+          memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
+        } else if (x0 <= frame_width) {
+          const int r = frame_width - x0;
+          memcpy(above_row, above_ref, r * sizeof(above_row[0]));
+          vpx_memset16(above_row + r, above_row[r - 1], x0 + bs - frame_width);
+        }
+      } else {
+        /* faster path if the block does not need extension */
+        if (bs == 4 && right_available && left_available) {
+          const_above_row = above_ref;
         } else {
           memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
-          vpx_memset16(above_row + bs, above_row[bs - 1], bs);
         }
-      } else if (x0 + bs <= frame_width) {
-        const int r = frame_width - x0;
-        if (right_available && bs == 4) {
+      }
+      above_row[-1] = left_available ? above_ref[-1] : (base + 1);
+    } else {
+      vpx_memset16(above_row, base - 1, bs);
+      above_row[-1] = base - 1;
+    }
+  }
+
+  // NEED_ABOVERIGHT
+  if (need_aboveright) {
+    if (up_available) {
+      const uint16_t *above_ref = ref - ref_stride;
+      if (xd->mb_to_right_edge < 0) {
+        /* slower path if the block needs border extension */
+        if (x0 + 2 * bs <= frame_width) {
+          if (right_available && bs == 4) {
+            memcpy(above_row, above_ref, 2 * bs * sizeof(above_row[0]));
+          } else {
+            memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
+            vpx_memset16(above_row + bs, above_row[bs - 1], bs);
+          }
+        } else if (x0 + bs <= frame_width) {
+          const int r = frame_width - x0;
+          if (right_available && bs == 4) {
+            memcpy(above_row, above_ref, r * sizeof(above_row[0]));
+            vpx_memset16(above_row + r, above_row[r - 1],
+                         x0 + 2 * bs - frame_width);
+          } else {
+            memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
+            vpx_memset16(above_row + bs, above_row[bs - 1], bs);
+          }
+        } else if (x0 <= frame_width) {
+          const int r = frame_width - x0;
           memcpy(above_row, above_ref, r * sizeof(above_row[0]));
           vpx_memset16(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
+        }
+        // TODO(Peter) this value should probably change for high bitdepth
+        above_row[-1] = left_available ? above_ref[-1] : (base + 1);
+      } else {
+        /* faster path if the block does not need extension */
+        if (bs == 4 && right_available && left_available) {
+          const_above_row = above_ref;
         } else {
           memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
-          vpx_memset16(above_row + bs, above_row[bs - 1], bs);
+          if (bs == 4 && right_available)
+            memcpy(above_row + bs, above_ref + bs, bs * sizeof(above_row[0]));
+          else
+            vpx_memset16(above_row + bs, above_row[bs - 1], bs);
+          // TODO(Peter): this value should probably change for high bitdepth
+          above_row[-1] = left_available ? above_ref[-1] : (base + 1);
         }
-      } else if (x0 <= frame_width) {
-        const int r = frame_width - x0;
-        memcpy(above_row, above_ref, r * sizeof(above_row[0]));
-        vpx_memset16(above_row + r, above_row[r - 1],
-                       x0 + 2 * bs - frame_width);
       }
-      // TODO(Peter) this value should probably change for high bitdepth
-      above_row[-1] = left_available ? above_ref[-1] : (base+1);
     } else {
-      /* faster path if the block does not need extension */
-      if (bs == 4 && right_available && left_available) {
-        const_above_row = above_ref;
-      } else {
-        memcpy(above_row, above_ref, bs * sizeof(above_row[0]));
-        if (bs == 4 && right_available)
-          memcpy(above_row + bs, above_ref + bs, bs * sizeof(above_row[0]));
-        else
-          vpx_memset16(above_row + bs, above_row[bs - 1], bs);
-        // TODO(Peter): this value should probably change for high bitdepth
-        above_row[-1] = left_available ? above_ref[-1] : (base+1);
-      }
+      vpx_memset16(above_row, base - 1, bs * 2);
+      // TODO(Peter): this value should probably change for high bitdepth
+      above_row[-1] = base - 1;
     }
-  } else {
-    vpx_memset16(above_row, base - 1, bs * 2);
-    // TODO(Peter): this value should probably change for high bitdepth
-    above_row[-1] = base - 1;
   }
 
   // predict
