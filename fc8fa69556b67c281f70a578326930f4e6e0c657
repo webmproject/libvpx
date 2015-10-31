@@ -16,6 +16,24 @@
       "revId": "fc8fa69556b67c281f70a578326930f4e6e0c657",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36204e91_8ac0b7a2",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-10-31T00:44:33Z",
+      "side": 1,
+      "message": "Fixed. Will do memset only when memory_sanitizer is on.",
+      "parentUuid": "760e462a_4bf98539",
+      "revId": "fc8fa69556b67c281f70a578326930f4e6e0c657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
