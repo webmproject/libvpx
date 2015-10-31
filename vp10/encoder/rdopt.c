@@ -1784,8 +1784,8 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                   plane_bsize, coeff_ctx, rate, dist, bsse, skip);
 
-    if (RDCOST(x->rdmult, x->rddiv, *rate, *dist) >=
-        RDCOST(x->rdmult, x->rddiv, zero_blk_rate, *bsse) && (*skip == 0) &&
+    if ((RDCOST(x->rdmult, x->rddiv, *rate, *dist) >=
+         RDCOST(x->rdmult, x->rddiv, zero_blk_rate, *bsse) || *skip == 1) &&
         !xd->lossless[mbmi->segment_id]) {
       *rate = zero_blk_rate;
       *dist = *bsse;
