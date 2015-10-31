@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "760e462a_4bf98539",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-10-31T00:11:40Z",
+      "side": 1,
+      "message": "I think Frank left this out because it\u0027s expensive and using the uninitialized memory is harmless.",
+      "revId": "fc8fa69556b67c281f70a578326930f4e6e0c657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
