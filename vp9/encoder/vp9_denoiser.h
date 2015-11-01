@@ -27,9 +27,9 @@ typedef enum vp9_denoiser_decision {
 } VP9_DENOISER_DECISION;
 
 typedef enum vp9_denoiser_level {
-  kLow,
-  kMedium,
-  kHigh
+  kDenLow,
+  kDenMedium,
+  kDenHigh
 } VP9_DENOISER_LEVEL;
 
 typedef struct vp9_denoiser {
@@ -39,9 +39,6 @@ typedef struct vp9_denoiser {
   int increase_denoising;
   int frame_buffer_initialized;
   VP9_DENOISER_LEVEL denoising_level;
-  int noise_estimate;
-  int thresh_noise_estimate;
-  int noise_estimate_count;
 } VP9_DENOISER;
 
 struct VP9_COMP;
@@ -82,11 +79,8 @@ static int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising) {
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser);
 
-void vp9_denoiser_init_noise_estimate(VP9_DENOISER *denoiser,
-                                      int width,
-                                      int height);
-
-void vp9_denoiser_update_noise_estimate(struct VP9_COMP *const cpi);
+void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser,
+                                  int noise_level);
 
 #ifdef __cplusplus
 }  // extern "C"
