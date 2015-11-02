@@ -268,6 +268,9 @@ EXPERIMENT_LIST="
     ext_tx
     misc_fixes
     ext_intra
+    ext_inter
+    ext_interp
+    ext_refs
 "
 CONFIG_LIST="
     dependency_tracking
