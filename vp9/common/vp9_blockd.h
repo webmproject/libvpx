@@ -423,30 +423,34 @@ typedef struct macroblockd {
   /* pointer to current frame */
   const YV12_BUFFER_CONFIG *cur_buf;
 
+  // The size of mc_buf contains a x2 for each dimension because the image may
+  // be no less than 2x smaller
   /* mc buffer */
-  DECLARE_ALIGNED(16, uint8_t, mc_buf[80 * 2 * 80 * 2]);
-
+  DECLARE_ALIGNED(16, uint8_t, mc_buf[(CODING_UNIT_SIZE + 16) * 2 *
+                                      (CODING_UNIT_SIZE + 16) * 2]);
 #if CONFIG_VP9_HIGHBITDEPTH
   /* Bit depth: 8, 10, 12 */
   int bd;
-  DECLARE_ALIGNED(16, uint16_t, mc_buf_high[80 * 2 * 80 * 2]);
+  DECLARE_ALIGNED(16, uint16_t, mc_buf_high[(CODING_UNIT_SIZE + 16) * 2 *
+                                            (CODING_UNIT_SIZE + 16) * 2]);
 #endif
 
   int lossless;
 
   int corrupted;
 
-  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_MB_PLANE][64 * 64]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_MB_PLANE][CODING_UNIT_SIZE *
+                                                        CODING_UNIT_SIZE]);
 #if CONFIG_PALETTE
   DECLARE_ALIGNED(16, uint8_t, color_index_map[2][64 * 64]);
   DECLARE_ALIGNED(16, uint8_t, palette_map_buffer[64 * 64]);
 #endif  // CONFIG_PALETTE
 
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
-  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
+  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][2 * MI_BLOCK_SIZE];
 
   PARTITION_CONTEXT *above_seg_context;
-  PARTITION_CONTEXT left_seg_context[8];
+  PARTITION_CONTEXT left_seg_context[MI_BLOCK_SIZE];
 #if CONFIG_GLOBAL_MOTION
   Global_Motion_Params (*global_motion)[MAX_GLOBAL_MOTION_MODELS];
 #endif  // CONFIG_GLOBAL_MOTION

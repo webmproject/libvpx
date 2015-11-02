@@ -17,13 +17,18 @@
 extern "C" {
 #endif
 
+#define CODING_UNIT_SIZE_LOG2 6
+
+#define CODING_UNIT_SIZE (1 << CODING_UNIT_SIZE_LOG2)
+
 #define MI_SIZE_LOG2 3
-#define MI_BLOCK_SIZE_LOG2 (6 - MI_SIZE_LOG2)  // 64 = 2^6
+#define MI_BLOCK_SIZE_LOG2 (CODING_UNIT_SIZE_LOG2 - MI_SIZE_LOG2)
 
 #define MI_SIZE (1 << MI_SIZE_LOG2)  // pixels per mi-unit
 #define MI_BLOCK_SIZE (1 << MI_BLOCK_SIZE_LOG2)  // mi-units per max block
 
 #define MI_MASK (MI_BLOCK_SIZE - 1)
+#define MI_MASK_2 (MI_BLOCK_SIZE * 2 - 1)
 
 // Bitstream profiles indicated by 2-3 bits in the uncompressed header.
 // 00: Profile 0.  8-bit 4:2:0 only.
@@ -55,7 +60,8 @@ typedef enum BLOCK_SIZE {
   BLOCK_64X32,
   BLOCK_64X64,
   BLOCK_SIZES,
-  BLOCK_INVALID = BLOCK_SIZES
+  BLOCK_INVALID = BLOCK_SIZES,
+  BLOCK_LARGEST = BLOCK_SIZES - 1
 } BLOCK_SIZE;
 
 #if CONFIG_EXT_PARTITION

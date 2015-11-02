@@ -2438,7 +2438,7 @@ void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   {
-    uint8_t intrapredictor[4096];
+    uint8_t intrapredictor[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
     build_intra_predictors_for_interintra(
         xd, xd->plane[0].dst.buf, xd->plane[0].dst.stride,
         intrapredictor, bw,
@@ -2502,8 +2502,8 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   {
-    uint8_t uintrapredictor[4096];
-    uint8_t vintrapredictor[4096];
+    uint8_t uintrapredictor[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
+    uint8_t vintrapredictor[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
     build_intra_predictors_for_interintra(
         xd, xd->plane[1].dst.buf, xd->plane[1].dst.stride,
         uintrapredictor, bw,

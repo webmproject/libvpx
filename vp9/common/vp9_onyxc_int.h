@@ -339,7 +339,7 @@ static INLINE const vp9_prob* get_partition_probs(const VP9_COMMON *cm,
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
   const int above_idx = mi_col * 2;
-  const int left_idx = (mi_row * 2) & 15;
+  const int left_idx = (mi_row * 2) & MI_MASK_2;
   int i;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblockd_plane *const pd = &xd->plane[i];

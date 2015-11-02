@@ -666,7 +666,7 @@ static int is_right_available(BLOCK_SIZE bsize,
                                  b_height_log2_lookup[bsize]);
   int block[4] = {0};
 
-  if (bsize == BLOCK_64X64)
+  if (bsize == BLOCK_LARGEST)
     return 1;
   mi_row = mi_row % 8;
   mi_col = mi_col % 8;
