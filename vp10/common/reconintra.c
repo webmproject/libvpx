@@ -685,10 +685,6 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int txw = (1 << tx_size);
   const int have_top = loff || xd->up_available;
   const int have_left = aoff || xd->left_available;
-#if !CONFIG_MISC_FIXES
-  const int bw = (1 << bwl_in);
-  const int have_right = (aoff + txw) < bw;
-#endif
   const int x = aoff * 4;
   const int y = loff * 4;
 #if CONFIG_MISC_FIXES
@@ -715,6 +711,10 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   int xr = (xd->mb_to_right_edge >> (3 + pd->subsampling_x)) + (wpx - x - txpx);
   int yd =
       (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y)) + (hpx - y - txpx);
+#else
+  const int bw = (1 << bwl_in);
+  const int have_right = (aoff + txw) < bw;
+#endif  // CONFIG_MISC_FIXES
 
   if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
     const int bs = 4 * (1 << tx_size);
@@ -750,6 +750,7 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
     return;
   }
 
+#if CONFIG_MISC_FIXES
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     build_intra_predictors_high(xd, ref, ref_stride, dst, dst_stride, mode,
@@ -769,7 +770,7 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
                          have_left ? VPXMIN(txpx, yd + txpx) : 0,
                          have_bottom && have_left ? VPXMIN(txpx, yd) : 0,
                          x, y, plane);
-#else
+#else  // CONFIG_MISC_FIXES
   (void) bhl_in;
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -781,7 +782,7 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
 #endif
   build_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode, tx_size,
                          have_top, have_left, have_right, x, y, plane);
-#endif
+#endif  // CONFIG_MISC_FIXES
 }
 
 void vp10_init_intra_predictors(void) {
