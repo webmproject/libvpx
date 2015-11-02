@@ -223,6 +223,7 @@ typedef struct macroblockd {
 
   // dimension in the unit of 8x8 block of the current block
   int16_t n8_w, n8_h;
+  TX_SIZE max_tx_size;
 #endif
 
 #if CONFIG_VP9_HIGHBITDEPTH

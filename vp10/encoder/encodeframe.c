@@ -199,6 +199,7 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
   xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->max_tx_size = max_txsize_lookup[bsize];
 #endif
 
   mbmi = &xd->mi[0]->mbmi;
