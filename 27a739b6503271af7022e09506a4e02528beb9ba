@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6195673_3f50c207",
+        "filename": "vp10/common/vp10_fwd_txfm1d.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-11-02T19:27:39Z",
+      "side": 1,
+      "message": "May need to be removed as you did before. This cleanup can be done in a future patch.",
+      "range": {
+        "startLine": 809,
+        "startChar": 2,
+        "endLine": 809,
+        "endChar": 7
+      },
+      "revId": "27a739b6503271af7022e09506a4e02528beb9ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "765c8636_41e3b658",
+        "filename": "vp10/common/vp10_fwd_txfm1d.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 839,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-11-02T19:27:39Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 839,
+        "startChar": 2,
+        "endLine": 839,
+        "endChar": 7
+      },
+      "revId": "27a739b6503271af7022e09506a4e02528beb9ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
