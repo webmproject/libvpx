@@ -108,7 +108,7 @@ class VPxEncoderThreadTest
 TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   std::vector<std::string> single_thr_md5, multi_thr_md5;
 
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 20);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 18);
 
   cfg_.rc_target_bitrate = 1000;
 
@@ -138,5 +138,5 @@ VP9_INSTANTIATE_TEST_CASE(
 VP10_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(0, 9));
+    ::testing::Range(1, 2));
 }  // namespace

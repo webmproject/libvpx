@@ -78,19 +78,19 @@ int is_extension_y4m(const char *filename) {
     return !strcmp(dot, ".y4m");
 }
 
-class ArfFreqTest
+class ArfFreqTestLarge
     : public ::libvpx_test::EncoderTest,
       public ::libvpx_test::CodecTestWith3Params<TestVideoParam, \
                                                  TestEncodeParam, int> {
  protected:
-  ArfFreqTest()
+  ArfFreqTestLarge()
       : EncoderTest(GET_PARAM(0)),
         test_video_param_(GET_PARAM(1)),
         test_encode_param_(GET_PARAM(2)),
         min_arf_requested_(GET_PARAM(3)) {
   }
 
-  virtual ~ArfFreqTest() {}
+  virtual ~ArfFreqTestLarge() {}
 
   virtual void SetUp() {
     InitializeConfig();
@@ -190,7 +190,7 @@ class ArfFreqTest
   int run_of_visible_frames_;
 };
 
-TEST_P(ArfFreqTest, MinArfFreqTest) {
+TEST_P(ArfFreqTestLarge, MinArfFreqTest) {
   cfg_.rc_target_bitrate = kBitrate;
   cfg_.g_error_resilient = 0;
   cfg_.g_profile = test_video_param_.profile;
@@ -225,26 +225,26 @@ TEST_P(ArfFreqTest, MinArfFreqTest) {
 }
 
 VP9_INSTANTIATE_TEST_CASE(
-    ArfFreqTest,
+    ArfFreqTestLarge,
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kEncodeVectors),
     ::testing::ValuesIn(kMinArfVectors));
 
 #if CONFIG_VP9_HIGHBITDEPTH
-# if CONFIG_VP10_ENCODER
+#if CONFIG_VP10_ENCODER
 // TODO(angiebird): 25-29 fail in high bitdepth mode.
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_VP10, ArfFreqTest,
+    DISABLED_VP10, ArfFreqTestLarge,
     ::testing::Combine(
         ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
             &libvpx_test::kVP10)),
         ::testing::ValuesIn(kTestVectors),
         ::testing::ValuesIn(kEncodeVectors),
         ::testing::ValuesIn(kMinArfVectors)));
-# endif  // CONFIG_VP10_ENCODER
+#endif  // CONFIG_VP10_ENCODER
 #else
 VP10_INSTANTIATE_TEST_CASE(
-    ArfFreqTest,
+    ArfFreqTestLarge,
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kEncodeVectors),
     ::testing::ValuesIn(kMinArfVectors));
