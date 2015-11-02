@@ -121,9 +121,28 @@ static void inter_predictor(const uint8_t *src, int src_stride,
                             int w, int h, int ref,
                             const InterpKernel *kernel,
                             int xs, int ys) {
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  int i, j;
+  for (j = 0; j < h; j += 64) {
+    int y = subpel_y + j * ys;
+    int frac_y = y & SUBPEL_MASK;
+    int floor_y = y >> SUBPEL_BITS;
+    for (i = 0; i < w; i += 64) {
+      int x = subpel_x + i * xs;
+      int frac_x = x & SUBPEL_MASK;
+      int floor_x = x >> SUBPEL_BITS;
+      sf->predict[frac_x != 0][frac_y != 0][ref](
+          src + floor_y * src_stride + floor_x, src_stride,
+          dst + j * dst_stride + i, dst_stride,
+          kernel[frac_x], xs, kernel[frac_y], ys,
+          w < 64 ? w : 64, h < 64 ? h : 64);
+    }
+  }
+#else
   sf->predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+#endif
 }
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
@@ -156,9 +175,28 @@ static void highbd_inter_predictor(const uint8_t *src, int src_stride,
                                    int w, int h, int ref,
                                    const InterpKernel *kernel,
                                    int xs, int ys, int bd) {
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  int i, j;
+  for (j = 0; j < h; j += 64) {
+    int y = subpel_y + j * ys;
+    int frac_y = y & SUBPEL_MASK;
+    int floor_y = y >> SUBPEL_BITS;
+    for (i = 0; i < w; i += 64) {
+      int x = subpel_x + i * xs;
+      int frac_x = x & SUBPEL_MASK;
+      int floor_x = x >> SUBPEL_BITS;
+      sf->highbd_predict[frac_x != 0][frac_y != 0][ref](
+          src + floor_y * src_stride + floor_x, src_stride,
+          dst + j * dst_stride + i, dst_stride,
+          kernel[frac_x], xs, kernel[frac_y], ys,
+          w < 64 ? w : 64, h < 64 ? h : 64, bd);
+    }
+  }
+#else
   sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+#endif
 }
 
 void vp9_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
@@ -2028,7 +2066,7 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
           CONVERT_TO_BYTEPTR(tmp_dst_) : tmp_dst_;
 #else
       uint8_t tmp_dst[4096];
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_GLOBAL_MOTION
       if (is_global) {
         vp9_warp_plane(gm[ref], pre_buf->buf0,

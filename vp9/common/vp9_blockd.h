@@ -512,9 +512,15 @@ static INLINE TX_SIZE bsize_to_tx_size(BLOCK_SIZE bsize) {
     TX_32X32, TX_32X32, TX_32X32,
 #if CONFIG_TX64X64
     TX_64X64
+#if CONFIG_EXT_CODING_UNIT_SIZE
+    , TX_64X64, TX_64X64, TX_64X64
+#endif  // CONFIG_EXT_CODING_UNIT_SIZE
 #else
     TX_32X32
-#endif
+#if CONFIG_EXT_CODING_UNIT_SIZE
+    , TX_32X32, TX_32X32, TX_32X32
+#endif  // CONFIG_EXT_CODING_UNIT_SIZE
+#endif  // CONFIG_TX64X64
   };
   return bsize_to_tx_size_lookup[bsize];
 }

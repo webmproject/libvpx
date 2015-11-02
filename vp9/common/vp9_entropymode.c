@@ -236,6 +236,13 @@ const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
   {  68,  11,  27, 128, 128, 128, 128 },  // a split, l not split
   {  57,  15,   9, 128, 128, 128, 128 },  // l split, a not split
   {  12,   3,   3, 128, 128, 128, 128 },  // a/l both split
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  // 128x128 -> 64x64
+  { 174,  35,  49, 128, 128, 128, 128 },  // a/l both not split
+  {  68,  11,  27, 128, 128, 128, 128 },  // a split, l not split
+  {  57,  15,   9, 128, 128, 128, 128 },  // l split, a not split
+  {  12,   3,   3, 128, 128, 128, 128 },  // a/l both split
+#endif
 };
 
 static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
@@ -260,6 +267,13 @@ static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
   {  72,  16,  44, 128, 128, 128, 128 },  // a split, l not split
   {  58,  32,  12, 128, 128, 128, 128 },  // l split, a not split
   {  10,   7,   6, 128, 128, 128, 128 },  // a/l both split
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  // 128x128 -> 64x64lit
+  { 222,  34,  30, 128, 128, 128, 128 },  // a/l both not split
+  {  72,  16,  44, 128, 128, 128, 128 },  // a split, l not split
+  {  58,  32,  12, 128, 128, 128, 128 },  // l split, a not split
+  {  10,   7,   6, 128, 128, 128, 128 },  // a/l both split
+#endif
 };
 #else
 const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
@@ -284,6 +298,13 @@ const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
   {  68,  11,  27 },  // a split, l not split
   {  57,  15,   9 },  // l split, a not split
   {  12,   3,   3 },  // a/l both split
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  // 128x128 -> 64x64
+  { 174,  35,  49 },  // a/l both not split
+  {  68,  11,  27 },  // a split, l not split
+  {  57,  15,   9 },  // l split, a not split
+  {  12,   3,   3 },  // a/l both split
+#endif
 };
 
 static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
@@ -308,8 +329,15 @@ static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
   {  72,  16,  44 },  // a split, l not split
   {  58,  32,  12 },  // l split, a not split
   {  10,   7,   6 },  // a/l both split
-};
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  // 128x128 -> 64x64
+  { 222,  34,  30 },  // a/l both not split
+  {  72,  16,  44 },  // a split, l not split
+  {  58,  32,  12 },  // l split, a not split
+  {  10,   7,   6 },  // a/l both split
 #endif
+};
+#endif  // CONFIG_EXT_PARTITION
 
 static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [INTER_MODES - 1] = {

@@ -130,7 +130,15 @@ static const POSITION mv_ref_blocks[BLOCK_SIZES][MVREF_NEIGHBOURS] = {
   // 64X32
   {{-1, 0}, {0, -1}, {-1, 4}, {2, -1}, {-1, -1}, {-3, 0}, {0, -3}, {-1, 2}},
   // 64X64
-  {{-1, 3}, {3, -1}, {-1, 4}, {4, -1}, {-1, -1}, {-1, 0}, {0, -1}, {-1, 6}}
+  {{-1, 3}, {3, -1}, {-1, 4}, {4, -1}, {-1, -1}, {-1, 0}, {0, -1}, {-1, 6}},
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  // 64x128
+  {{0, -1}, {-1, 0}, {4, -1}, {-1, 2}, {-1, -1}, {0, -3}, {-3, 0}, {2, -1}},
+  // 128x64
+  {{-1, 0}, {0, -1}, {-1, 4}, {2, -1}, {-1, -1}, {-3, 0}, {0, -3}, {-1, 2}},
+  // 128x128
+  {{-1, 3}, {3, -1}, {-1, 4}, {4, -1}, {-1, -1}, {-1, 0}, {0, -1}, {-1, 6}},
+#endif
 };
 
 static const int idx_n_column_to_subblock[4][2] = {
@@ -221,7 +229,11 @@ static const int idx_to_subblock_topright_topleft[2][3] = {
 #endif  // CONFIG_NEWMVREF
 
 // clamp_mv_ref
+#if CONFIG_EXT_CODING_UNIT_SIZE
+#define MV_BORDER (32 << 3)  // Allow 32 pels in 1/8th pel units
+#else
 #define MV_BORDER (16 << 3)  // Allow 16 pels in 1/8th pel units
+#endif
 
 static INLINE void clamp_mv_ref(MV *mv, const MACROBLOCKD *xd) {
   clamp_mv(mv, xd->mb_to_left_edge - MV_BORDER,

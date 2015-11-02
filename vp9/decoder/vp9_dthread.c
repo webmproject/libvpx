@@ -109,6 +109,11 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
       sync_read(lf_sync, r, c);
 
       vp9_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
+#if CONFIG_EXT_CODING_UNIT_SIZE
+      printf("STOPPING: This code has not been modified to work with the "
+             "extended coding unit size experiment");
+      exit(EXIT_FAILURE);
+#endif
       vp9_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride, &lfm);
 
       for (plane = 0; plane < num_planes; ++plane) {

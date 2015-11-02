@@ -17,7 +17,11 @@
 extern "C" {
 #endif
 
+#if CONFIG_EXT_CODING_UNIT_SIZE
+#define CODING_UNIT_SIZE_LOG2 7
+#else
 #define CODING_UNIT_SIZE_LOG2 6
+#endif
 
 #define CODING_UNIT_SIZE (1 << CODING_UNIT_SIZE_LOG2)
 
@@ -59,6 +63,11 @@ typedef enum BLOCK_SIZE {
   BLOCK_32X64,
   BLOCK_64X32,
   BLOCK_64X64,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  BLOCK_64X128,
+  BLOCK_128X64,
+  BLOCK_128X128,
+#endif  // CONFIG_EXT_CODING_UNIT_SIZE
   BLOCK_SIZES,
   BLOCK_INVALID = BLOCK_SIZES,
   BLOCK_LARGEST = BLOCK_SIZES - 1
@@ -91,7 +100,11 @@ typedef enum PARTITION_TYPE {
 
 typedef char PARTITION_CONTEXT;
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
+#if CONFIG_EXT_CODING_UNIT_SIZE
+#define PARTITION_CONTEXTS (5 * PARTITION_PLOFFSET)
+#else
 #define PARTITION_CONTEXTS (4 * PARTITION_PLOFFSET)
+#endif
 
 // block transform size
 typedef enum {
