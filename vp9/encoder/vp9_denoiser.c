@@ -569,7 +569,8 @@ void vp9_denoiser_update_noise_estimate(VP9_COMP *const cpi) {
   // Estimate of noise level every frame_period frames.
   // Estimate is between current source and last source.
   if (cm->current_video_frame % frame_period != 0 ||
-     cpi->denoiser.last_source.y_buffer == NULL) {
+     cpi->denoiser.last_source.y_buffer == NULL ||
+     cpi->resize_pending != 0) {
     copy_frame(&cpi->denoiser.last_source, cpi->Source);
     return;
   } else {
