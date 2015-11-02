@@ -34,6 +34,24 @@
       "revId": "fc8fa69556b67c281f70a578326930f4e6e0c657",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "765c8636_76f55eef",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-11-02T17:06:31Z",
+      "side": 1,
+      "message": "Yeah this was a huge perf loss which had no effect.",
+      "parentUuid": "36204e91_8ac0b7a2",
+      "revId": "fc8fa69556b67c281f70a578326930f4e6e0c657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
