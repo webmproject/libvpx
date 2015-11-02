@@ -35,6 +35,7 @@
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_mcomp.h"
+#include "vp9/encoder/vp9_noise_estimate.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
@@ -489,6 +490,8 @@ typedef struct VP9_COMP {
   int resize_avg_qp;
   int resize_buffer_underflow;
   int resize_count;
+
+  NOISE_ESTIMATE noise_estimate;
 
   // VAR_BASED_PARTITION thresholds
   // 0 - threshold_64x64; 1 - threshold_32x32;

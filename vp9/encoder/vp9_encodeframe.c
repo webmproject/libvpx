@@ -489,16 +489,14 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
     thresholds[2] = threshold_base >> 2;
     thresholds[3] = threshold_base << 2;
   } else {
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    // Increase base variance threshold is estimated noise level is high.
-    if (cpi->denoiser.denoising_level == kHigh)
-      threshold_base = threshold_base << 2;
-    else
-      if (cpi->denoiser.denoising_level == kMedium)
-        threshold_base = threshold_base << 1;
-  }
-#endif
+    // Increase base variance threshold if estimated noise level is high.
+    if (cpi->noise_estimate.enabled) {
+      if (cpi->noise_estimate.level == kHigh)
+        threshold_base = threshold_base << 2;
+      else
+        if (cpi->noise_estimate.level == kMedium)
+          threshold_base = threshold_base << 1;
+    }
     thresholds[1] = threshold_base;
     if (cm->width <= 352 && cm->height <= 288) {
       thresholds[0] = threshold_base >> 2;

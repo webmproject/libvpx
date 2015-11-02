@@ -1073,12 +1073,9 @@ int set_intra_cost_penalty(const VP9_COMP *const cpi, BLOCK_SIZE bsize) {
   // Reduce the intra cost penalty for small blocks (<=16x16).
   int reduction_fac =
       (bsize <= BLOCK_16X16) ? ((bsize <= BLOCK_8X8) ? 4 : 2) : 0;
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      cpi->denoiser.denoising_level == kHigh)
+  if (cpi->noise_estimate.enabled && cpi->noise_estimate.level == kHigh)
      // Don't reduce intra cost penalty if estimated noise level is high.
      reduction_fac = 0;
-#endif
   return vp9_get_intra_cost_penalty(
       cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth) >> reduction_fac;
 }
