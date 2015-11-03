@@ -18,16 +18,37 @@
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"
 
+// Reverse the 8 16 bit words in __m128i
+static INLINE __m128i mm_reverse_epi16(const __m128i x) {
+  const __m128i a = _mm_shufflelo_epi16(x, 0x1b);
+  const __m128i b = _mm_shufflehi_epi16(a, 0x1b);
+  return _mm_shuffle_epi32(b, 0x4e);
+}
+
 static INLINE void load_buffer_4x4(const int16_t *input, __m128i *in,
-                                   int stride) {
+                                   int stride, int flipud, int fliplr) {
   const __m128i k__nonzero_bias_a = _mm_setr_epi16(0, 1, 1, 1, 1, 1, 1, 1);
   const __m128i k__nonzero_bias_b = _mm_setr_epi16(1, 0, 0, 0, 0, 0, 0, 0);
   __m128i mask;
 
-  in[0] = _mm_loadl_epi64((const __m128i *)(input + 0 * stride));
-  in[1] = _mm_loadl_epi64((const __m128i *)(input + 1 * stride));
-  in[2] = _mm_loadl_epi64((const __m128i *)(input + 2 * stride));
-  in[3] = _mm_loadl_epi64((const __m128i *)(input + 3 * stride));
+  if (!flipud) {
+    in[0] = _mm_loadl_epi64((const __m128i *)(input + 0 * stride));
+    in[1] = _mm_loadl_epi64((const __m128i *)(input + 1 * stride));
+    in[2] = _mm_loadl_epi64((const __m128i *)(input + 2 * stride));
+    in[3] = _mm_loadl_epi64((const __m128i *)(input + 3 * stride));
+  } else {
+    in[0] = _mm_loadl_epi64((const __m128i *)(input + 3 * stride));
+    in[1] = _mm_loadl_epi64((const __m128i *)(input + 2 * stride));
+    in[2] = _mm_loadl_epi64((const __m128i *)(input + 1 * stride));
+    in[3] = _mm_loadl_epi64((const __m128i *)(input + 0 * stride));
+  }
+
+  if (fliplr) {
+    in[0] = _mm_shufflelo_epi16(in[0], 0x1b);
+    in[1] = _mm_shufflelo_epi16(in[1], 0x1b);
+    in[2] = _mm_shufflelo_epi16(in[2], 0x1b);
+    in[3] = _mm_shufflelo_epi16(in[3], 0x1b);
+  }
 
   in[0] = _mm_slli_epi16(in[0], 4);
   in[1] = _mm_slli_epi16(in[1], 4);
@@ -160,23 +181,55 @@ void vp10_fht4x4_sse2(const int16_t *input, tran_low_t *output,
       vpx_fdct4x4_sse2(input, output, stride);
       break;
     case ADST_DCT:
-      load_buffer_4x4(input, in, stride);
+      load_buffer_4x4(input, in, stride, 0, 0);
       fadst4_sse2(in);
       fdct4_sse2(in);
       write_buffer_4x4(output, in);
       break;
     case DCT_ADST:
-      load_buffer_4x4(input, in, stride);
+      load_buffer_4x4(input, in, stride, 0, 0);
       fdct4_sse2(in);
       fadst4_sse2(in);
       write_buffer_4x4(output, in);
       break;
     case ADST_ADST:
-      load_buffer_4x4(input, in, stride);
+      load_buffer_4x4(input, in, stride, 0, 0);
       fadst4_sse2(in);
       fadst4_sse2(in);
       write_buffer_4x4(output, in);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      load_buffer_4x4(input, in, stride, 1, 0);
+      fadst4_sse2(in);
+      fdct4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case DCT_FLIPADST:
+      load_buffer_4x4(input, in, stride, 0, 1);
+      fdct4_sse2(in);
+      fadst4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case FLIPADST_FLIPADST:
+      load_buffer_4x4(input, in, stride, 1, 1);
+      fadst4_sse2(in);
+      fadst4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case ADST_FLIPADST:
+      load_buffer_4x4(input, in, stride, 0, 1);
+      fadst4_sse2(in);
+      fadst4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case FLIPADST_ADST:
+      load_buffer_4x4(input, in, stride, 1, 0);
+      fadst4_sse2(in);
+      fadst4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+#endif  // CONFIG_EXT_TX
    default:
      assert(0);
      break;
@@ -627,15 +680,37 @@ void vp10_fdct8x8_quant_sse2(const int16_t *input, int stride,
 
 // load 8x8 array
 static INLINE void load_buffer_8x8(const int16_t *input, __m128i *in,
-                                   int stride) {
-  in[0]  = _mm_load_si128((const __m128i *)(input + 0 * stride));
-  in[1]  = _mm_load_si128((const __m128i *)(input + 1 * stride));
-  in[2]  = _mm_load_si128((const __m128i *)(input + 2 * stride));
-  in[3]  = _mm_load_si128((const __m128i *)(input + 3 * stride));
-  in[4]  = _mm_load_si128((const __m128i *)(input + 4 * stride));
-  in[5]  = _mm_load_si128((const __m128i *)(input + 5 * stride));
-  in[6]  = _mm_load_si128((const __m128i *)(input + 6 * stride));
-  in[7]  = _mm_load_si128((const __m128i *)(input + 7 * stride));
+                                   int stride, int flipud, int fliplr) {
+  if (!flipud) {
+    in[0]  = _mm_load_si128((const __m128i *)(input + 0 * stride));
+    in[1]  = _mm_load_si128((const __m128i *)(input + 1 * stride));
+    in[2]  = _mm_load_si128((const __m128i *)(input + 2 * stride));
+    in[3]  = _mm_load_si128((const __m128i *)(input + 3 * stride));
+    in[4]  = _mm_load_si128((const __m128i *)(input + 4 * stride));
+    in[5]  = _mm_load_si128((const __m128i *)(input + 5 * stride));
+    in[6]  = _mm_load_si128((const __m128i *)(input + 6 * stride));
+    in[7]  = _mm_load_si128((const __m128i *)(input + 7 * stride));
+  } else {
+    in[0]  = _mm_load_si128((const __m128i *)(input + 7 * stride));
+    in[1]  = _mm_load_si128((const __m128i *)(input + 6 * stride));
+    in[2]  = _mm_load_si128((const __m128i *)(input + 5 * stride));
+    in[3]  = _mm_load_si128((const __m128i *)(input + 4 * stride));
+    in[4]  = _mm_load_si128((const __m128i *)(input + 3 * stride));
+    in[5]  = _mm_load_si128((const __m128i *)(input + 2 * stride));
+    in[6]  = _mm_load_si128((const __m128i *)(input + 1 * stride));
+    in[7]  = _mm_load_si128((const __m128i *)(input + 0 * stride));
+  }
+
+  if (fliplr) {
+    in[0] = mm_reverse_epi16(in[0]);
+    in[1] = mm_reverse_epi16(in[1]);
+    in[2] = mm_reverse_epi16(in[2]);
+    in[3] = mm_reverse_epi16(in[3]);
+    in[4] = mm_reverse_epi16(in[4]);
+    in[5] = mm_reverse_epi16(in[5]);
+    in[6] = mm_reverse_epi16(in[6]);
+    in[7] = mm_reverse_epi16(in[7]);
+  }
 
   in[0] = _mm_slli_epi16(in[0], 2);
   in[1] = _mm_slli_epi16(in[1], 2);
@@ -1144,26 +1219,63 @@ void vp10_fht8x8_sse2(const int16_t *input, tran_low_t *output,
       vpx_fdct8x8_sse2(input, output, stride);
       break;
     case ADST_DCT:
-      load_buffer_8x8(input, in, stride);
+      load_buffer_8x8(input, in, stride, 0, 0);
       fadst8_sse2(in);
       fdct8_sse2(in);
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
       break;
     case DCT_ADST:
-      load_buffer_8x8(input, in, stride);
+      load_buffer_8x8(input, in, stride, 0, 0);
       fdct8_sse2(in);
       fadst8_sse2(in);
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
       break;
     case ADST_ADST:
-      load_buffer_8x8(input, in, stride);
+      load_buffer_8x8(input, in, stride, 0, 0);
       fadst8_sse2(in);
       fadst8_sse2(in);
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      load_buffer_8x8(input, in, stride, 1, 0);
+      fadst8_sse2(in);
+      fdct8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case DCT_FLIPADST:
+      load_buffer_8x8(input, in, stride, 0, 1);
+      fdct8_sse2(in);
+      fadst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case FLIPADST_FLIPADST:
+      load_buffer_8x8(input, in, stride, 1, 1);
+      fadst8_sse2(in);
+      fadst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case ADST_FLIPADST:
+      load_buffer_8x8(input, in, stride, 0, 1);
+      fadst8_sse2(in);
+      fadst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case FLIPADST_ADST:
+      load_buffer_8x8(input, in, stride, 1, 0);
+      fadst8_sse2(in);
+      fadst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
@@ -1171,15 +1283,37 @@ void vp10_fht8x8_sse2(const int16_t *input, tran_low_t *output,
 }
 
 static INLINE void load_buffer_16x16(const int16_t* input, __m128i *in0,
-                                     __m128i *in1, int stride) {
-  // load first 8 columns
-  load_buffer_8x8(input, in0, stride);
-  load_buffer_8x8(input + 8 * stride, in0 + 8, stride);
+                                     __m128i *in1, int stride,
+                                     int flipud, int fliplr) {
+  // Load 4 8x8 blocks
+  const int16_t *topL = input;
+  const int16_t *topR = input + 8;
+  const int16_t *botL = input + 8 * stride;
+  const int16_t *botR = input + 8 * stride + 8;
 
-  input += 8;
+  const int16_t *tmp;
+
+  if (flipud) {
+    // Swap left columns
+    tmp = topL; topL = botL; botL = tmp;
+    // Swap right columns
+    tmp = topR; topR = botR; botR = tmp;
+  }
+
+  if (fliplr) {
+    // Swap top rows
+    tmp = topL; topL = topR; topR = tmp;
+    // Swap bottom rows
+    tmp = botL; botL = botR; botR = tmp;
+  }
+
+  // load first 8 columns
+  load_buffer_8x8(topL, in0,     stride, flipud, fliplr);
+  load_buffer_8x8(botL, in0 + 8, stride, flipud, fliplr);
+
   // load second 8 columns
-  load_buffer_8x8(input, in1, stride);
-  load_buffer_8x8(input + 8 * stride, in1 + 8, stride);
+  load_buffer_8x8(topR, in1,     stride, flipud, fliplr);
+  load_buffer_8x8(botR, in1 + 8, stride, flipud, fliplr);
 }
 
 static INLINE void write_buffer_16x16(tran_low_t *output, __m128i *in0,
@@ -2031,26 +2165,63 @@ void vp10_fht16x16_sse2(const int16_t *input, tran_low_t *output,
       vpx_fdct16x16_sse2(input, output, stride);
       break;
     case ADST_DCT:
-      load_buffer_16x16(input, in0, in1, stride);
+      load_buffer_16x16(input, in0, in1, stride, 0, 0);
       fadst16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
       fdct16_sse2(in0, in1);
       write_buffer_16x16(output, in0, in1, 16);
       break;
     case DCT_ADST:
-      load_buffer_16x16(input, in0, in1, stride);
+      load_buffer_16x16(input, in0, in1, stride, 0, 0);
       fdct16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
       fadst16_sse2(in0, in1);
       write_buffer_16x16(output, in0, in1, 16);
       break;
     case ADST_ADST:
-      load_buffer_16x16(input, in0, in1, stride);
+      load_buffer_16x16(input, in0, in1, stride, 0, 0);
       fadst16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
       fadst16_sse2(in0, in1);
       write_buffer_16x16(output, in0, in1, 16);
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      load_buffer_16x16(input, in0, in1, stride, 1, 0);
+      fadst16_sse2(in0, in1);
+      right_shift_16x16(in0, in1);
+      fdct16_sse2(in0, in1);
+      write_buffer_16x16(output, in0, in1, 16);
+      break;
+    case DCT_FLIPADST:
+      load_buffer_16x16(input, in0, in1, stride, 0, 1);
+      fdct16_sse2(in0, in1);
+      right_shift_16x16(in0, in1);
+      fadst16_sse2(in0, in1);
+      write_buffer_16x16(output, in0, in1, 16);
+      break;
+    case FLIPADST_FLIPADST:
+      load_buffer_16x16(input, in0, in1, stride, 1, 1);
+      fadst16_sse2(in0, in1);
+      right_shift_16x16(in0, in1);
+      fadst16_sse2(in0, in1);
+      write_buffer_16x16(output, in0, in1, 16);
+      break;
+    case ADST_FLIPADST:
+      load_buffer_16x16(input, in0, in1, stride, 0, 1);
+      fadst16_sse2(in0, in1);
+      right_shift_16x16(in0, in1);
+      fadst16_sse2(in0, in1);
+      write_buffer_16x16(output, in0, in1, 16);
+      break;
+    case FLIPADST_ADST:
+      load_buffer_16x16(input, in0, in1, stride, 1, 0);
+      fadst16_sse2(in0, in1);
+      right_shift_16x16(in0, in1);
+      fadst16_sse2(in0, in1);
+      write_buffer_16x16(output, in0, in1, 16);
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
       break;
