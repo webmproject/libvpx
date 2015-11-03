@@ -538,7 +538,7 @@ TEST_P(DatarateTestVP9Large, ChangingDropFrameThresh) {
         << " The first dropped frame for drop_thresh " << i
         << " > first dropped frame for drop_thresh "
         << i - kDropFrameThreshTestStep;
-    ASSERT_GE(num_drops_, last_num_drops * 0.90)
+    ASSERT_GE(num_drops_, last_num_drops * 0.85)
         << " The number of dropped frames for drop_thresh " << i
         << " < number of dropped frames for drop_thresh "
         << i - kDropFrameThreshTestStep;
