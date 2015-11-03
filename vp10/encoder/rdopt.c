@@ -1948,6 +1948,9 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   int s0 = vp10_cost_bit(skip_prob, 0);
   int s1 = vp10_cost_bit(skip_prob, 1);
   TX_SIZE best_tx_size[64];
+  TX_SIZE best_tx = TX_SIZES;
+  uint8_t best_blk_skip[256];
+  const int n4 = 1 << (num_pels_log2_lookup[bsize] - 4);
   int idx, idy;
 
   *distortion = INT64_MAX;
@@ -2017,6 +2020,8 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
       *skippable  = this_skip;
       *sse        = this_sse;
       best_tx_type = mbmi->tx_type;
+      best_tx = mbmi->tx_size;
+      memcpy(best_blk_skip, x->blk_skip[0], sizeof(best_blk_skip[0]) * n4);
       for (idy = 0; idy < xd->n8_h; ++idy)
         for (idx = 0; idx < xd->n8_w; ++idx)
           best_tx_size[idy * 8 + idx] = mbmi->inter_tx_size[idy * 8 + idx];
@@ -2024,27 +2029,11 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   mbmi->tx_type = best_tx_type;
-
   for (idy = 0; idy < xd->n8_h; ++idy)
     for (idx = 0; idx < xd->n8_w; ++idx)
       mbmi->inter_tx_size[idy * 8 + idx] = best_tx_size[idy * 8 + idx];
-
-  inter_block_yrd(cpi, x, rate, distortion, skippable, sse,
-                  bsize, ref_best_rd);
-
-  if (get_ext_tx_types(max_tx_size, bsize, is_inter) > 1 &&
-      !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
-      *rate != INT_MAX) {
-    if (is_inter) {
-      if (ext_tx_set > 0)
-        *rate += cpi->inter_tx_type_costs[ext_tx_set]
-                                     [max_tx_size][mbmi->tx_type];
-    } else {
-      if (ext_tx_set > 0)
-        *rate += cpi->intra_tx_type_costs[ext_tx_set][max_tx_size]
-                                     [mbmi->mode][mbmi->tx_type];
-    }
-  }
+  mbmi->tx_size = best_tx;
+  memcpy(x->blk_skip[0], best_blk_skip, sizeof(best_blk_skip[0]) * n4);
 }
 #endif
 
