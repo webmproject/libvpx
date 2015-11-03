@@ -1947,11 +1947,15 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   vpx_prob skip_prob = vp10_get_skip_prob(cm, xd);
   int s0 = vp10_cost_bit(skip_prob, 0);
   int s1 = vp10_cost_bit(skip_prob, 1);
+  TX_SIZE best_tx_size[64];
+  int idx, idy;
 
   *distortion = INT64_MAX;
   *rate       = INT_MAX;
   *skippable  = 0;
   *sse        = INT64_MAX;
+
+  ext_tx_set = get_ext_tx_set(max_tx_size, bsize, is_inter);
 
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
     int this_rate = 0;
@@ -1959,7 +1963,6 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     int64_t this_dist = 0;
     int64_t this_sse  = 0;
 
-    ext_tx_set = get_ext_tx_set(max_tx_size, bsize, is_inter);
     if (is_inter) {
       if (!ext_tx_used_inter[ext_tx_set][tx_type])
         continue;
@@ -1986,10 +1989,10 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
       if (is_inter) {
         if (ext_tx_set > 0)
           this_rate += cpi->inter_tx_type_costs[ext_tx_set]
-                                       [mbmi->tx_size][mbmi->tx_type];
+                                       [max_tx_size][mbmi->tx_type];
       } else {
         if (ext_tx_set > 0)
-          this_rate += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size]
+          this_rate += cpi->intra_tx_type_costs[ext_tx_set][max_tx_size]
                                        [mbmi->mode][mbmi->tx_type];
       }
     }
@@ -2014,12 +2017,34 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
       *skippable  = this_skip;
       *sse        = this_sse;
       best_tx_type = mbmi->tx_type;
+      for (idy = 0; idy < xd->n8_h; ++idy)
+        for (idx = 0; idx < xd->n8_w; ++idx)
+          best_tx_size[idy * 8 + idx] = mbmi->inter_tx_size[idy * 8 + idx];
     }
   }
 
   mbmi->tx_type = best_tx_type;
+
+  for (idy = 0; idy < xd->n8_h; ++idy)
+    for (idx = 0; idx < xd->n8_w; ++idx)
+      mbmi->inter_tx_size[idy * 8 + idx] = best_tx_size[idy * 8 + idx];
+
   inter_block_yrd(cpi, x, rate, distortion, skippable, sse,
                   bsize, ref_best_rd);
+
+  if (get_ext_tx_types(max_tx_size, bsize, is_inter) > 1 &&
+      !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
+      *rate != INT_MAX) {
+    if (is_inter) {
+      if (ext_tx_set > 0)
+        *rate += cpi->inter_tx_type_costs[ext_tx_set]
+                                     [max_tx_size][mbmi->tx_type];
+    } else {
+      if (ext_tx_set > 0)
+        *rate += cpi->intra_tx_type_costs[ext_tx_set][max_tx_size]
+                                     [mbmi->mode][mbmi->tx_type];
+    }
+  }
 }
 #endif
 
