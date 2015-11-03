@@ -22,6 +22,30 @@
       "revId": "4c1e77dc3ddfdbe2210ce9cc9f5fd81b0b18793e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "568142c7_369a58e3",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-03T16:54:43Z",
+      "side": 1,
+      "message": "Ah, sorry, I did not notice that. New patch set uploaded.",
+      "parentUuid": "7643a650_2e4c2253",
+      "range": {
+        "startLine": 26,
+        "startChar": 14,
+        "endLine": 26,
+        "endChar": 17
+      },
+      "revId": "4c1e77dc3ddfdbe2210ce9cc9f5fd81b0b18793e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
