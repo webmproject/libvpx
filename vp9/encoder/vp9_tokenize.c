@@ -375,32 +375,32 @@ const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
 
 #if CONFIG_VP9_HIGHBITDEPTH
 const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
-  {0, 0, 0, zero_cost},                                 // ZERO
-  {0, 0, 1, one_cost},                                  // ONE
-  {0, 0, 2, two_cost},                                  // TWO
-  {0, 0, 3, three_cost},                                // THREE
-  {0, 0, 4, four_cost},                                 // FOUR
-  {vp9_cat1_prob_high10, 1,  CAT1_MIN_VAL, cat1_cost},  // CAT1
-  {vp9_cat2_prob_high10, 2,  CAT2_MIN_VAL, cat2_cost},  // CAT2
-  {vp9_cat3_prob_high10, 3,  CAT3_MIN_VAL, cat3_cost},  // CAT3
-  {vp9_cat4_prob_high10, 4,  CAT4_MIN_VAL, cat4_cost},  // CAT4
-  {vp9_cat5_prob_high10, 5,  CAT5_MIN_VAL, cat5_cost},  // CAT5
-  {vp9_cat6_prob_high10, 16, CAT6_MIN_VAL, 0},          // CAT6
-  {0, 0, 0, zero_cost}                                  // EOB
+  {0, 0, 0, zero_cost},                             // ZERO
+  {0, 0, 1, one_cost},                              // ONE
+  {0, 0, 2, two_cost},                              // TWO
+  {0, 0, 3, three_cost},                            // THREE
+  {0, 0, 4, four_cost},                             // FOUR
+  {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},     // CAT1
+  {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},     // CAT2
+  {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},     // CAT3
+  {vp9_cat4_prob, 4,  CAT4_MIN_VAL, cat4_cost},     // CAT4
+  {vp9_cat5_prob, 5,  CAT5_MIN_VAL, cat5_cost},     // CAT5
+  {vp9_cat6_prob_high12 + 2, 16, CAT6_MIN_VAL, 0},  // CAT6
+  {0, 0, 0, zero_cost}                              // EOB
 };
 const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
-  {0, 0, 0, zero_cost},                                 // ZERO
-  {0, 0, 1, one_cost},                                  // ONE
-  {0, 0, 2, two_cost},                                  // TWO
-  {0, 0, 3, three_cost},                                // THREE
-  {0, 0, 4, four_cost},                                 // FOUR
-  {vp9_cat1_prob_high12, 1,  CAT1_MIN_VAL, cat1_cost},  // CAT1
-  {vp9_cat2_prob_high12, 2,  CAT2_MIN_VAL, cat2_cost},  // CAT2
-  {vp9_cat3_prob_high12, 3,  CAT3_MIN_VAL, cat3_cost},  // CAT3
-  {vp9_cat4_prob_high12, 4,  CAT4_MIN_VAL, cat4_cost},  // CAT4
-  {vp9_cat5_prob_high12, 5,  CAT5_MIN_VAL, cat5_cost},  // CAT5
-  {vp9_cat6_prob_high12, 18, CAT6_MIN_VAL, 0},          // CAT6
-  {0, 0, 0, zero_cost}                                  // EOB
+  {0, 0, 0, zero_cost},                          // ZERO
+  {0, 0, 1, one_cost},                           // ONE
+  {0, 0, 2, two_cost},                           // TWO
+  {0, 0, 3, three_cost},                         // THREE
+  {0, 0, 4, four_cost},                          // FOUR
+  {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},  // CAT1
+  {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},  // CAT2
+  {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},  // CAT3
+  {vp9_cat4_prob, 4,  CAT4_MIN_VAL, cat4_cost},  // CAT4
+  {vp9_cat5_prob, 5,  CAT5_MIN_VAL, cat5_cost},  // CAT5
+  {vp9_cat6_prob_high12, 18, CAT6_MIN_VAL, 0},   // CAT6
+  {0, 0, 0, zero_cost}                           // EOB
 };
 #endif
 
