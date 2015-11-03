@@ -323,7 +323,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   struct buf_2d src = mb->plane[0].src;
   int is_skin = 0;
 
-  if (bs <= BLOCK_16X16 && denoiser->denoising_level >= kMedium) {
+  if (bs <= BLOCK_16X16 && denoiser->denoising_level >= kDenMedium) {
     // Take center pixel in block to determine is_skin.
     const int y_width_shift = (4 << b_width_log2_lookup[bs]) >> 1;
     const int y_height_shift = (4 << b_height_log2_lookup[bs]) >> 1;
@@ -343,13 +343,13 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   mv_col = ctx->best_sse_mv.as_mv.col;
   mv_row = ctx->best_sse_mv.as_mv.row;
   motion_magnitude = mv_row * mv_row + mv_col * mv_col;
-  if (denoiser->denoising_level == kHigh && motion_magnitude < 16) {
+  if (denoiser->denoising_level == kDenHigh && motion_magnitude < 16) {
     denoiser->increase_denoising = 1;
   } else {
     denoiser->increase_denoising = 0;
   }
 
-  if (denoiser->denoising_level >= kMedium)
+  if (denoiser->denoising_level >= kDenMedium)
     decision = perform_motion_compensation(denoiser, mb, bs,
                                            denoiser->increase_denoising,
                                            mi_row, mi_col, ctx,
@@ -524,25 +524,7 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 #endif
   denoiser->increase_denoising = 0;
   denoiser->frame_buffer_initialized = 1;
-  vp9_denoiser_init_noise_estimate(denoiser, width, height);
   return 0;
-}
-
-void vp9_denoiser_init_noise_estimate(VP9_DENOISER *denoiser,
-                                      int width,
-                                      int height) {
-  // Denoiser is off by default, i.e., no denoising is performed.
-  // Noise level is measured periodically, and if observed to be above
-  // thresh_noise_estimate, then denoising is performed.
-  denoiser->denoising_level = kLow;
-  denoiser->noise_estimate = 0;
-  denoiser->noise_estimate_count = 0;
-  denoiser->thresh_noise_estimate = 20;
-  if (width * height >= 1920 * 1080) {
-    denoiser->thresh_noise_estimate = 70;
-  } else if (width * height >= 1280 * 720) {
-    denoiser->thresh_noise_estimate = 40;
-  }
 }
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser) {
@@ -558,122 +540,9 @@ void vp9_denoiser_free(VP9_DENOISER *denoiser) {
   vpx_free_frame_buffer(&denoiser->last_source);
 }
 
-void vp9_denoiser_update_noise_estimate(VP9_COMP *const cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
-  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-  int frame_period = 10;
-  int thresh_consec_zeromv = 8;
-  unsigned int thresh_sum_diff = 128;
-  int num_frames_estimate = 20;
-  int min_blocks_estimate = cm->mi_rows * cm->mi_cols >> 7;
-  // Estimate of noise level every frame_period frames.
-  // Estimate is between current source and last source.
-  if (cm->current_video_frame % frame_period != 0 ||
-     cpi->denoiser.last_source.y_buffer == NULL) {
-    copy_frame(&cpi->denoiser.last_source, cpi->Source);
-    return;
-  } else {
-    int num_samples = 0;
-    uint64_t avg_est = 0;
-    int bsize = BLOCK_16X16;
-    static const unsigned char const_source[16] = {
-         128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-         128, 128};
-    // Loop over sub-sample of 16x16 blocks of frame, and for blocks that have
-    // been encoded as zero/small mv at least x consecutive frames, compute
-    // the variance to update estimate of noise in the source.
-    const uint8_t *src_y = cpi->Source->y_buffer;
-    const int src_ystride = cpi->Source->y_stride;
-    const uint8_t *last_src_y = cpi->denoiser.last_source.y_buffer;
-    const int last_src_ystride = cpi->denoiser.last_source.y_stride;
-    const uint8_t *src_u = cpi->Source->u_buffer;
-    const uint8_t *src_v = cpi->Source->v_buffer;
-    const int src_uvstride = cpi->Source->uv_stride;
-    const int y_width_shift = (4 << b_width_log2_lookup[bsize]) >> 1;
-    const int y_height_shift = (4 << b_height_log2_lookup[bsize]) >> 1;
-    const int uv_width_shift = y_width_shift >> 1;
-    const int uv_height_shift = y_height_shift >> 1;
-    int mi_row, mi_col;
-    for (mi_row = 0; mi_row < cm->mi_rows; mi_row ++) {
-      for (mi_col = 0; mi_col < cm->mi_cols; mi_col ++) {
-        // 16x16 blocks, 1/4 sample of frame.
-        if (mi_row % 4 == 0 && mi_col % 4 == 0) {
-          int bl_index = mi_row * cm->mi_cols + mi_col;
-          int bl_index1 = bl_index + 1;
-          int bl_index2 = bl_index + cm->mi_cols;
-          int bl_index3 = bl_index2 + 1;
-          // Only consider blocks that are likely steady background. i.e, have
-          // been encoded as zero/low motion x (= thresh_consec_zeromv) frames
-          // in a row. consec_zero_mv[] defined for 8x8 blocks, so consider all
-          // 4 sub-blocks for 16x16 block. Also, avoid skin blocks.
-          const uint8_t ysource =
-            src_y[y_height_shift * src_ystride + y_width_shift];
-          const uint8_t usource =
-            src_u[uv_height_shift * src_uvstride + uv_width_shift];
-          const uint8_t vsource =
-            src_v[uv_height_shift * src_uvstride + uv_width_shift];
-          int is_skin = vp9_skin_pixel(ysource, usource, vsource);
-          if (cr->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
-              cr->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&
-              cr->consec_zero_mv[bl_index2] > thresh_consec_zeromv &&
-              cr->consec_zero_mv[bl_index3] > thresh_consec_zeromv &&
-              !is_skin) {
-            // Compute variance.
-            unsigned int sse;
-            unsigned int variance = cpi->fn_ptr[bsize].vf(src_y,
-                                                          src_ystride,
-                                                          last_src_y,
-                                                          last_src_ystride,
-                                                          &sse);
-            // Only consider this block as valid for noise measurement if the
-            // average term (sse - variance = N * avg^{2}, N = 16X16) of the
-            // temporal residual is small (avoid effects from lighting change).
-            if ((sse - variance) < thresh_sum_diff) {
-              unsigned int sse2;
-              const unsigned int spatial_variance =
-                  cpi->fn_ptr[bsize].vf(src_y, src_ystride, const_source,
-                                        0, &sse2);
-              avg_est += variance / (10 + spatial_variance);
-              num_samples++;
-            }
-          }
-        }
-        src_y += 8;
-        last_src_y += 8;
-        src_u += 4;
-        src_v += 4;
-      }
-      src_y += (src_ystride << 3) - (cm->mi_cols << 3);
-      last_src_y += (last_src_ystride << 3) - (cm->mi_cols << 3);
-      src_u += (src_uvstride << 2) - (cm->mi_cols << 2);
-      src_v += (src_uvstride << 2) - (cm->mi_cols << 2);
-    }
-    // Update noise estimate if we have at a minimum number of block samples,
-    // and avg_est > 0 (avg_est == 0 can happen if the application inputs
-    // duplicate frames).
-    if (num_samples > min_blocks_estimate && avg_est > 0) {
-      // Normalize.
-      avg_est = (avg_est << 8) / num_samples;
-      // Update noise estimate.
-      cpi->denoiser.noise_estimate =  (3 * cpi->denoiser.noise_estimate +
-          avg_est) >> 2;
-      cpi->denoiser.noise_estimate_count++;
-      if (cpi->denoiser.noise_estimate_count == num_frames_estimate) {
-        // Reset counter and check noise level condition.
-        cpi->denoiser.noise_estimate_count = 0;
-        if (cpi->denoiser.noise_estimate >
-            (cpi->denoiser.thresh_noise_estimate << 1))
-          cpi->denoiser.denoising_level = kHigh;
-        else
-          if (cpi->denoiser.noise_estimate >
-              cpi->denoiser.thresh_noise_estimate)
-            cpi->denoiser.denoising_level = kMedium;
-          else
-            cpi->denoiser.denoising_level = kLow;
-      }
-    }
-  }
-  copy_frame(&cpi->denoiser.last_source, cpi->Source);
+void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser,
+                                  int noise_level) {
+  denoiser->denoising_level = noise_level;
 }
 
 #ifdef OUTPUT_YUV_DENOISED

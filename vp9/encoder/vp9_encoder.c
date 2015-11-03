@@ -47,6 +47,7 @@
 #include "vp9/encoder/vp9_ethread.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"
+#include "vp9/encoder/vp9_noise_estimate.h"
 #include "vp9/encoder/vp9_picklpf.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
@@ -805,6 +806,8 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   cpi->ref_frame_flags = 0;
 
   init_buffer_indices(cpi);
+
+  vp9_noise_estimate_init(&cpi->noise_estimate, cm->width, cm->height);
 }
 
 static void set_rc_buffer_sizes(RATE_CONTROL *rc,
@@ -3160,6 +3163,7 @@ static void set_frame_size(VP9_COMP *cpi) {
     // TODO(agrange) Scale cpi->max_mv_magnitude if frame-size has changed.
     set_mv_search_params(cpi);
 
+    vp9_noise_estimate_init(&cpi->noise_estimate, cm->width, cm->height);
 #if CONFIG_VP9_TEMPORAL_DENOISING
     // Reset the denoiser on the resized frame.
     if (cpi->oxcf.noise_sensitivity > 0) {
@@ -3241,21 +3245,18 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
 
   // Avoid scaling last_source unless its needed.
   // Last source is currently only used for screen-content mode,
-  // or if partition_search_type == SOURCE_VAR_BASED_PARTITION.
+  // if partition_search_type == SOURCE_VAR_BASED_PARTITION, or if noise
+  // estimation is enabled.
   if (cpi->unscaled_last_source != NULL &&
       (cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
-      cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION))
+      cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION ||
+      cpi->noise_estimate.enabled))
     cpi->Last_Source = vp9_scale_if_required(cm,
                                              cpi->unscaled_last_source,
                                              &cpi->scaled_last_source,
                                              (cpi->oxcf.pass == 0));
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-    vp9_denoiser_update_noise_estimate(cpi);
-  }
-#endif
+  vp9_update_noise_estimate(cpi);
 
   if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
