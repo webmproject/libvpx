@@ -779,14 +779,20 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
                                  struct buf_2d yv12_mb[][MAX_MB_PLANE],
                                  int *rate, int64_t *dist) {
   MACROBLOCKD *xd = &x->e_mbd;
-
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
   unsigned int var = var_y, sse = sse_y;
   // Skipping threshold for ac.
   unsigned int thresh_ac;
   // Skipping threshold for dc.
   unsigned int thresh_dc;
-  if (x->encode_breakout > 0) {
+  int motion_low = 1;
+  if (mbmi->mv[0].as_mv.row > 64 ||
+      mbmi->mv[0].as_mv.row < -64 ||
+      mbmi->mv[0].as_mv.col > 64 ||
+      mbmi->mv[0].as_mv.col < -64)
+    motion_low = 0;
+  if (x->encode_breakout > 0 && motion_low == 1) {
     // Set a maximum for threshold to avoid big PSNR loss in low bit rate
     // case. Use extreme low threshold for static frames to limit
     // skipping.
