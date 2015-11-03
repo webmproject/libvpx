@@ -326,7 +326,7 @@ static void pack_mb_tokens(vpx_writer *w,
   TOKENEXTRA *p = *tp;
 #if CONFIG_VAR_TX
   int count = 0;
-  const int seg_eob = 16 << (1 << tx);
+  const int seg_eob = 16 << (tx << 1);
 #endif
 #if !CONFIG_MISC_FIXES
   (void) tx;
