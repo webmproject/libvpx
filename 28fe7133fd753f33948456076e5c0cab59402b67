@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56c6a231_d71bd65b",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2024,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-11-04T17:02:40Z",
+      "side": 1,
+      "message": "Better to use sizeof(best_blk_skip[0]).",
+      "range": {
+        "startLine": 2024,
+        "startChar": 51,
+        "endLine": 2024,
+        "endChar": 58
+      },
+      "revId": "28fe7133fd753f33948456076e5c0cab59402b67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6bb729e_131c16a6",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2036,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-11-04T17:02:40Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2036,
+        "startChar": 47,
+        "endLine": 2036,
+        "endChar": 55
+      },
+      "revId": "28fe7133fd753f33948456076e5c0cab59402b67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
