@@ -779,14 +779,20 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
                                  struct buf_2d yv12_mb[][MAX_MB_PLANE],
                                  int *rate, int64_t *dist) {
   MACROBLOCKD *xd = &x->e_mbd;
-
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
   unsigned int var = var_y, sse = sse_y;
   // Skipping threshold for ac.
   unsigned int thresh_ac;
   // Skipping threshold for dc.
   unsigned int thresh_dc;
-  if (x->encode_breakout > 0) {
+  int motion_low = 1;
+  if (mbmi->mv[0].as_mv.row > 64 ||
+      mbmi->mv[0].as_mv.row < -64 ||
+      mbmi->mv[0].as_mv.col > 64 ||
+      mbmi->mv[0].as_mv.col < -64)
+    motion_low = 0;
+  if (x->encode_breakout > 0 && motion_low == 1) {
     // Set a maximum for threshold to avoid big PSNR loss in low bit rate
     // case. Use extreme low threshold for static frames to limit
     // skipping.
@@ -1476,6 +1482,20 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             this_mode)];
     this_rdc.rate += ref_frame_cost[ref_frame];
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
+
+    // Bias against non-zero (above some threshold) motion for large blocks.
+    // This is temporary fix to avoid selection of large mv for big blocks.
+    if (cpi->oxcf.speed > 5 &&
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
+        (frame_mv[this_mode][ref_frame].as_mv.row > 64 ||
+        frame_mv[this_mode][ref_frame].as_mv.row < -64 ||
+        frame_mv[this_mode][ref_frame].as_mv.col > 64 ||
+        frame_mv[this_mode][ref_frame].as_mv.col < -64)) {
+      if (bsize == BLOCK_64X64)
+        this_rdc.rdcost = this_rdc.rdcost << 1;
+      else if (bsize >= BLOCK_32X32)
+        this_rdc.rdcost = 3 * this_rdc.rdcost >> 1;
+    }
 
     // Skipping checking: test to see if this block can be reconstructed by
     // prediction only.

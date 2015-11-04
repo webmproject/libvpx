@@ -186,7 +186,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
       // Normalize.
       avg_est = (avg_est << 8) / num_samples;
       // Update noise estimate.
-      ne->value = (3 * ne->value + avg_est) >> 2;
+      ne->value = (int)((3 * ne->value + avg_est) >> 2);
       ne->count++;
       if (ne->count == num_frames_estimate) {
         // Reset counter and check noise level condition.
