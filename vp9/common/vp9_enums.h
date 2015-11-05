@@ -118,6 +118,11 @@ typedef enum {
   TX_SIZES
 } TX_SIZE;
 
+#define MAX_TX_SIZE_LOG2 (TX_SIZES + 1)
+#define MAX_MIN_TX_IN_BLOCK_LOG2 MAX((CODING_UNIT_SIZE_LOG2 - \
+                                      MAX_TX_SIZE_LOG2), 1)
+#define MAX_MIN_TX_IN_BLOCK (1 << MAX_MIN_TX_IN_BLOCK_LOG2)
+
 // frame transform mode
 typedef enum {
   ONLY_4X4            = 0,        // only 4x4 transform used

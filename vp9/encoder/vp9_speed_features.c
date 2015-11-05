@@ -340,7 +340,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
   sf->auto_min_max_partition_size = NOT_IN_USE;
-  sf->max_partition_size = BLOCK_64X64;
+  sf->max_partition_size = BLOCK_LARGEST;
   sf->min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
   sf->last_partitioning_redo_frequency = 4;

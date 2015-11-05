@@ -476,18 +476,18 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
         var = cpi->fn_ptr[unit_size].vf(src, p->src.stride,
                                         dst, pd->dst.stride, &sse);
-        x->bsse[(i << 2) + block_idx] = sse;
+        x->bsse[(i << MAX_MIN_TX_IN_BLOCK) + block_idx] = sse;
         sum_sse += sse;
 
-        x->skip_txfm[(i << 2) + block_idx] = 0;
+        x->skip_txfm[(i << MAX_MIN_TX_IN_BLOCK) + block_idx] = 0;
         if (!x->select_tx_size) {
           // Check if all ac coefficients can be quantized to zero.
           if (var < ac_thr || var == 0) {
-            x->skip_txfm[(i << 2) + block_idx] = 2;
+            x->skip_txfm[(i << MAX_MIN_TX_IN_BLOCK) + block_idx] = 2;
 
             // Check if dc coefficient can be quantized to zero.
             if (sse - var < dc_thr || sse == var) {
-              x->skip_txfm[(i << 2) + block_idx] = 1;
+              x->skip_txfm[(i << MAX_MIN_TX_IN_BLOCK) + block_idx] = 1;
 
               if (!sse || (var < low_ac_thr && sse - var < low_dc_thr))
                 low_err_skip = 1;
@@ -971,7 +971,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       }
 #endif  // CONFIG_SR_MODE
 
-    if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
+    if (x->skip_txfm[(plane << MAX_MIN_TX_IN_BLOCK) +
+            (block >> (tx_size << 1))] == 0) {
       // full forward transform and quantization
 #if CONFIG_NEW_QUANT
       if (x->quant_fp)
@@ -1004,7 +1005,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_SR_MODE
       }
 #endif  // CONFIG_SR_MODE
-    } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
+    } else if (x->skip_txfm[(plane << MAX_MIN_TX_IN_BLOCK) +
+            (block >> (tx_size << 1))] == 2) {
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
@@ -1030,7 +1032,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
                          tx_size, args, tmp_buf, tmp_stride);
       } else {
 #endif  // CONFIG_SR_MODE
-        args->sse = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
+        args->sse = x->bsse[(plane << MAX_MIN_TX_IN_BLOCK) +
+                (block >> (tx_size << 1))] << 4;
         args->dist = args->sse;
         if (x->plane[plane].eobs[block]) {
           int64_t dc_correct = coeff[0] * coeff[0] -
@@ -1052,7 +1055,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     } else {
       // skip forward transform
       x->plane[plane].eobs[block] = 0;
-      args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
+      args->sse  = x->bsse[(plane << MAX_MIN_TX_IN_BLOCK) +
+              (block >> (tx_size << 1))] << 4;
       args->dist = args->sse;
     }
   } else {
@@ -2102,8 +2106,8 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int i;
   int_mv cur_dv;
   int64_t rd;
-  uint8_t skip_txfm[MAX_MB_PLANE << 2] = {0};
-  int64_t bsse[MAX_MB_PLANE << 2] = {0};
+  uint8_t skip_txfm[MAX_MB_PLANE << MAX_MIN_TX_IN_BLOCK] = {0};
+  int64_t bsse[MAX_MB_PLANE << MAX_MIN_TX_IN_BLOCK] = {0};
 
   int skip_txfm_sb = 0;
   int64_t skip_sse_sb = INT64_MAX;
@@ -3579,8 +3583,9 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
 
   for (idy = 0; idy < num_4x4_blocks_high; ++idy)
     for (idx = 0; idx < num_4x4_blocks_wide; ++idx)
-      vpx_memcpy(&mic->bmi[i + idy * 2 + idx],
-                 &mic->bmi[i], sizeof(mic->bmi[i]));
+      if (idx || idy)
+        vpx_memcpy(&mic->bmi[i + idy * 2 + idx],
+                   &mic->bmi[i], sizeof(mic->bmi[i]));
 
   return cost_mv_ref(cpi, mode,
                      mbmi->mode_context[mbmi->ref_frame[0]]) + thismvcost;
@@ -4783,8 +4788,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     step_param = cpi->mv_step_param;
   }
 
-  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64) {
-    int boffset = 2 * (b_width_log2_lookup[BLOCK_64X64] -
+  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_LARGEST) {
+    int boffset = 2 * (b_width_log2_lookup[BLOCK_LARGEST] -
           MIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
     step_param = MAX(step_param, boffset);
   }
@@ -5108,9 +5113,9 @@ static void do_masked_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   // TODO(debargha): is show_frame needed here?
-  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64 &&
+  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_LARGEST &&
       cm->show_frame) {
-    int boffset = 2 * (b_width_log2_lookup[BLOCK_64X64] -
+    int boffset = 2 * (b_width_log2_lookup[BLOCK_LARGEST] -
           MIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
     step_param = MAX(step_param, boffset);
   }
@@ -5274,13 +5279,16 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv single_newmv[MAX_REF_FRAMES];
 #endif  // CONFIG_NEW_INTER
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, tmp_buf16, MAX_MB_PLANE * 64 * 64);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf8, MAX_MB_PLANE * 64 * 64);
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, tmp_buf16, MAX_MB_PLANE *
+                        CODING_UNIT_SIZE * CODING_UNIT_SIZE);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf8, MAX_MB_PLANE *
+                        CODING_UNIT_SIZE * CODING_UNIT_SIZE);
   uint8_t *tmp_buf;
 #else
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAX_MB_PLANE * 64 * 64);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAX_MB_PLANE *
+                        CODING_UNIT_SIZE * CODING_UNIT_SIZE);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  const int tmp_buf_sz = 64 * 64;
+  const int tmp_buf_sz = CODING_UNIT_SIZE * CODING_UNIT_SIZE;
   int pred_exists = 0;
   int intpel_mv;
   int64_t rd, tmp_rd, best_rd = INT64_MAX;
@@ -5292,8 +5300,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int rate_mv_tmp = 0;
 #endif  // CONFIG_INTERINTRA || CONFIG_WEDGE_PARTITION
   INTERP_FILTER best_filter = SWITCHABLE;
-  uint8_t skip_txfm[MAX_MB_PLANE << 2] = {0};
-  int64_t bsse[MAX_MB_PLANE << 2] = {0};
+  uint8_t skip_txfm[MAX_MB_PLANE << MAX_MIN_TX_IN_BLOCK] = {0};
+  int64_t bsse[MAX_MB_PLANE << MAX_MIN_TX_IN_BLOCK] = {0};
 
   int bsl = mi_width_log2_lookup[bsize];
   int pred_filter_search = cpi->sf.cb_pred_filter_search ?
@@ -5631,7 +5639,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           } else {
             for (j = 0; j < MAX_MB_PLANE; j++) {
               xd->plane[j].dst.buf = tmp_buf + j * tmp_buf_sz;
-              xd->plane[j].dst.stride = 64;
+              xd->plane[j].dst.stride = CODING_UNIT_SIZE;
             }
           }
           vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
@@ -5996,7 +6004,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // again temporarily set the buffers to local memory to prevent a memcpy
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = tmp_buf + i * tmp_buf_sz;
-        xd->plane[i].dst.stride = 64;
+        xd->plane[i].dst.stride = CODING_UNIT_SIZE;
       }
     }
     rd = tmp_rd + RDCOST(x->rdmult, x->rddiv, rs, 0);
@@ -6695,7 +6703,7 @@ static void update_rd_thresh_fact(VP9_COMP *cpi, int bsize,
     int mode;
     for (mode = 0; mode < top_mode; ++mode) {
       const BLOCK_SIZE min_size = MAX(bsize - 1, BLOCK_4X4);
-      const BLOCK_SIZE max_size = MIN(bsize + 2, BLOCK_64X64);
+      const BLOCK_SIZE max_size = MIN(bsize + 2, BLOCK_LARGEST);
       BLOCK_SIZE bs;
       for (bs = min_size; bs <= max_size; ++bs) {
         int *const fact = &cpi->rd.thresh_freq_fact[bs][mode];
@@ -7902,7 +7910,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     TX_SIZE best_tx_size;
     int rate2_tx, this_skip2_tx = 0;
     int64_t distortion2_tx, bestrd_tx = INT64_MAX;
-    uint8_t tmp_zcoeff_blk[256];
+    uint8_t tmp_zcoeff_blk[(CODING_UNIT_SIZE * CODING_UNIT_SIZE) / 16];
 #endif  // CONFIG_EXT_TX
 
     *mbmi = *inter_ref_list[copy_mode - REF0];

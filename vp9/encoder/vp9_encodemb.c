@@ -32,8 +32,8 @@
 #endif
 
 struct optimize_ctx {
-  ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
-  ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
+  ENTROPY_CONTEXT ta[MAX_MB_PLANE][(CODING_UNIT_SIZE >> 2)];
+  ENTROPY_CONTEXT tl[MAX_MB_PLANE][(CODING_UNIT_SIZE >> 2)];
 };
 
 struct encode_b_args {
@@ -2585,7 +2585,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     }
 #endif  // CONFIG_SR_MODE
     if (max_txsize_lookup[plane_bsize] == tx_size) {
-      if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
+      if (x->skip_txfm[(plane << MAX_MIN_TX_IN_BLOCK) +
+              (block >> (tx_size << 1))] == 0) {
         // full forward transform and quantization
 #if CONFIG_NEW_QUANT
         if (x->quant_fp)
@@ -2598,7 +2599,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         else
           vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 #endif  // CONFIG_NEW_QUANT
-      } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
+      } else if (x->skip_txfm[(plane << MAX_MIN_TX_IN_BLOCK) +
+              (block >> (tx_size << 1))] == 2) {
         // fast path forward transform and quantization
 #if CONFIG_NEW_QUANT
         if (x->quant_fp)

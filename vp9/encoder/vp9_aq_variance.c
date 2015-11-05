@@ -33,9 +33,11 @@ static int segment_id[MAX_SEGMENTS] = { 5, 3, 1, 0, 2, 4, 6, 7 };
 #define RDMULT_RATIO(i) rdmult_ratio[(i) - ENERGY_MIN]
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
-DECLARE_ALIGNED(16, static const uint8_t, vp9_64_zeros[64]) = {0};
+DECLARE_ALIGNED(16, static const uint8_t,
+                vp9_coding_unit_size_zeros[CODING_UNIT_SIZE]) = {0};
 #if CONFIG_VP9_HIGHBITDEPTH
-DECLARE_ALIGNED(16, static const uint16_t, vp9_highbd_64_zeros[64]) = {0};
+DECLARE_ALIGNED(16, static const uint16_t,
+                vp9_highbd_coding_unit_size_zeros[CODING_UNIT_SIZE]) = {0};
 #endif
 
 unsigned int vp9_vaq_segment_id(int energy) {
@@ -132,36 +134,34 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       highbd_variance(x->plane[0].src.buf, x->plane[0].src.stride,
-                      CONVERT_TO_BYTEPTR(vp9_highbd_64_zeros), 0, bw, bh,
-                      &sse, &avg);
+                      CONVERT_TO_BYTEPTR(vp9_highbd_coding_unit_size_zeros), 0,
+                      bw, bh, &sse, &avg);
       sse >>= 2 * (xd->bd - 8);
       avg >>= (xd->bd - 8);
     } else {
       variance(x->plane[0].src.buf, x->plane[0].src.stride,
-               vp9_64_zeros, 0, bw, bh, &sse, &avg);
+               vp9_coding_unit_size_zeros, 0, bw, bh, &sse, &avg);
     }
 #else
     variance(x->plane[0].src.buf, x->plane[0].src.stride,
-             vp9_64_zeros, 0, bw, bh, &sse, &avg);
+             vp9_coding_unit_size_zeros, 0, bw, bh, &sse, &avg);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     var = sse - (((int64_t)avg * avg) / (bw * bh));
     return (256 * var) / (bw * bh);
   } else {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
-                               x->plane[0].src.stride,
-                               CONVERT_TO_BYTEPTR(vp9_highbd_64_zeros),
-                               0, &sse);
+      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf, x->plane[0].src.stride,
+              CONVERT_TO_BYTEPTR(vp9_highbd_coding_unit_size_zeros), 0, &sse);
     } else {
       var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                                x->plane[0].src.stride,
-                               vp9_64_zeros, 0, &sse);
+                               vp9_coding_unit_size_zeros, 0, &sse);
     }
 #else
     var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                              x->plane[0].src.stride,
-                             vp9_64_zeros, 0, &sse);
+                             vp9_coding_unit_size_zeros, 0, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     return (256 * var) >> num_pels_log2_lookup[bs];
   }

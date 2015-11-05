@@ -25,7 +25,7 @@ typedef struct {
 } diff;
 
 struct macroblock_plane {
-  DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
+  DECLARE_ALIGNED(16, int16_t, src_diff[CODING_UNIT_SIZE * CODING_UNIT_SIZE]);
 #if CONFIG_SR_MODE
   DECLARE_ALIGNED(16, int16_t, src_sr_diff[64 * 64]);
 #endif  // CONFIG_SR_MODE
@@ -111,10 +111,11 @@ struct macroblock {
   int mv_row_min;
   int mv_row_max;
 
+  // Second dimension of zcoeff_blk is maximum number of 4x4s in a superblock
 #if CONFIG_SR_MODE
-  uint8_t zcoeff_blk[TX_SIZES + 1][256];
+  uint8_t zcoeff_blk[TX_SIZES + 1][(CODING_UNIT_SIZE * CODING_UNIT_SIZE) >> 4];
 #else  // CONFIG_SR_MODE
-  uint8_t zcoeff_blk[TX_SIZES][256];
+  uint8_t zcoeff_blk[TX_SIZES][(CODING_UNIT_SIZE * CODING_UNIT_SIZE) >> 4];
 #endif  // CONFIG_SR_MODE
   int skip;
 
@@ -139,9 +140,9 @@ struct macroblock {
   int quant_fp;
 
   // skip forward transform and quantization
-  uint8_t skip_txfm[MAX_MB_PLANE << 2];
+  uint8_t skip_txfm[MAX_MB_PLANE << MAX_MIN_TX_IN_BLOCK];
 
-  int64_t bsse[MAX_MB_PLANE << 2];
+  int64_t bsse[MAX_MB_PLANE << MAX_MIN_TX_IN_BLOCK];
 
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];

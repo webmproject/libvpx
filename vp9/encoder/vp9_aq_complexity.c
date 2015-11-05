@@ -100,8 +100,8 @@ void vp9_select_in_frame_q_segment(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
-  const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
+  const int bw = num_8x8_blocks_wide_lookup[BLOCK_LARGEST];
+  const int bh = num_8x8_blocks_high_lookup[BLOCK_LARGEST];
   const int xmis = MIN(cm->mi_cols - mi_col, bw);
   const int ymis = MIN(cm->mi_rows - mi_row, bh);
   int complexity_metric = 64;

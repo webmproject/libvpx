@@ -183,7 +183,7 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, VP9_COMP *cpi) {
 
   // Each node has 4 leaf nodes, fill each block_size level of the tree
   // from leafs to the root.
-  for (nodes = 16; nodes > 0; nodes >>= 2) {
+  for (nodes = leaf_nodes >> 2; nodes > 0; nodes >>= 2) {
     for (i = 0; i < nodes; ++i) {
       PC_TREE *const tree = &cpi->pc_tree[pc_tree_index];
       alloc_tree_contexts(cm, tree, 4 << (2 * square_index));
@@ -200,10 +200,11 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, VP9_COMP *cpi) {
 
 void vp9_free_pc_tree(VP9_COMP *cpi) {
   const int tree_nodes = 64 + 16 + 4 + 1;
+  const int leaf_nodes = 64;
   int i;
 
   // Set up all 4x4 mode contexts
-  for (i = 0; i < 64; ++i)
+  for (i = 0; i < leaf_nodes; ++i)
     free_mode_context(&cpi->leaf_tree[i]);
 
   // Sets up all the leaf nodes in the tree.

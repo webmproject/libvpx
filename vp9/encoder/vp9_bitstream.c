@@ -1563,7 +1563,7 @@ static void write_modes(VP9_COMP *cpi,
 #if CONFIG_SUPERTX
                      0,
 #endif
-                     mi_row, mi_col, BLOCK_64X64);
+                     mi_row, mi_col, BLOCK_LARGEST);
   }
 }
 
