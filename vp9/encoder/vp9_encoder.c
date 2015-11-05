@@ -1570,7 +1570,30 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 #endif
 #define log2f(x) (log (x) / (float) M_LOG2_E)
 
+/***********************************************************************
+ * Read before modifying 'cal_nmvjointsadcost' or 'cal_nmvsadcosts'    *
+ ***********************************************************************
+ * The following 2 functions ('cal_nmvjointsadcost' and                *
+ * 'cal_nmvsadcosts') are used to calculate cost lookup tables         *
+ * used by 'vp9_diamond_search_sad'. The C implementation of the       *
+ * function is generic, but the AVX intrinsics optimised version       *
+ * relies on the following properties of the computed tables:          *
+ * For cal_nmvjointsadcost:                                            *
+ *   - mvjointsadcost[1] == mvjointsadcost[2] == mvjointsadcost[3]     *
+ * For cal_nmvsadcosts:                                                *
+ *   - For all i: mvsadcost[0][i] == mvsadcost[1][i]                   *
+ *         (Equal costs for both components)                           *
+ *   - For all i: mvsadcost[0][i] == mvsadcost[0][-i]                  *
+ *         (Cost function is even)                                     *
+ * If these do not hold, then the AVX optimised version of the         *
+ * 'vp9_diamond_search_sad' function cannot be used as it is, in which *
+ * case you can revert to using the C function instead.                *
+ ***********************************************************************/
+
 static void cal_nmvjointsadcost(int *mvjointsadcost) {
+  /*********************************************************************
+   * Warning: Read the comments above before modifying this function   *
+   *********************************************************************/
   mvjointsadcost[0] = 600;
   mvjointsadcost[1] = 300;
   mvjointsadcost[2] = 300;
@@ -1578,6 +1601,9 @@ static void cal_nmvjointsadcost(int *mvjointsadcost) {
 }
 
 static void cal_nmvsadcosts(int *mvsadcost[2]) {
+  /*********************************************************************
+   * Warning: Read the comments above before modifying this function   *
+   *********************************************************************/
   int i = 1;
 
   mvsadcost[0][0] = 0;
@@ -1739,6 +1765,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   cpi->first_time_stamp_ever = INT64_MAX;
 
+  /*********************************************************************
+   * Warning: Read the comments around 'cal_nmvjointsadcost' and       *
+   * 'cal_nmvsadcosts' before modifying how these tables are computed. *
+   *********************************************************************/
   cal_nmvjointsadcost(cpi->td.mb.nmvjointsadcost);
   cpi->td.mb.nmvcost[0] = &cpi->nmvcosts[0][MV_MAX];
   cpi->td.mb.nmvcost[1] = &cpi->nmvcosts[1][MV_MAX];
