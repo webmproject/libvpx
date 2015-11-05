@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b686fe2b_d27f1a42",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-11-05T02:53:01Z",
+      "side": 1,
+      "message": "remove or comment out",
+      "range": {
+        "startLine": 528,
+        "startChar": 6,
+        "endLine": 529,
+        "endChar": 46
+      },
+      "revId": "6927cf64a611eff641e6eff72c3ace93c5f5f167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "568ea242_829aaae0",
+        "filename": "vpx_dsp/vpx_convolve.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-11-05T02:53:01Z",
+      "side": 1,
+      "message": "not needed",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 18
+      },
+      "revId": "6927cf64a611eff641e6eff72c3ace93c5f5f167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
