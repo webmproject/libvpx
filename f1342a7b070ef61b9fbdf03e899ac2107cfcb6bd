@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b69d1e72_e5e0de19",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-05T20:32:46Z",
+      "side": 1,
+      "message": "this isn\u0027t universally available with visual studio:\n\nhttps://chromium-review.googlesource.com/#/c/302455/",
+      "revId": "f1342a7b070ef61b9fbdf03e899ac2107cfcb6bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
