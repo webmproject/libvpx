@@ -101,8 +101,11 @@ static int mvsad_err_cost(const MACROBLOCK *x, const MV *mv, const MV *ref,
 }
 
 void vp9_init_dsmotion_compensation(search_site_config *cfg, int stride) {
-  int len;
-  int ss_count = 0;
+  int len, ss_count = 1;
+
+  cfg->ss_mv[0].col = 0;
+  cfg->ss_mv[0].row = 0;
+  cfg->ss_os[0] = 0;
 
   for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
     // Generate offsets for 4 search sites per step.
@@ -114,13 +117,16 @@ void vp9_init_dsmotion_compensation(search_site_config *cfg, int stride) {
     }
   }
 
+  cfg->ss_count = ss_count;
   cfg->searches_per_step = 4;
-  cfg->total_steps = ss_count / cfg->searches_per_step;
 }
 
 void vp9_init3smotion_compensation(search_site_config *cfg, int stride) {
-  int len;
-  int ss_count = 0;
+  int len, ss_count = 1;
+
+  cfg->ss_mv[0].col = 0;
+  cfg->ss_mv[0].row = 0;
+  cfg->ss_os[0] = 0;
 
   for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
     // Generate offsets for 8 search sites per step.
@@ -135,8 +141,8 @@ void vp9_init3smotion_compensation(search_site_config *cfg, int stride) {
     }
   }
 
+  cfg->ss_count = ss_count;
   cfg->searches_per_step = 8;
-  cfg->total_steps = ss_count / cfg->searches_per_step;
 }
 
 /*
@@ -1606,8 +1612,8 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   const uint8_t *best_address;
 
   unsigned int bestsad = INT_MAX;
-  int best_site = -1;
-  int last_site = -1;
+  int best_site = 0;
+  int last_site = 0;
 
   int ref_row;
   int ref_col;
@@ -1620,7 +1626,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
 //  const search_site *ss = &cfg->ss[search_param * cfg->searches_per_step];
   const MV *ss_mv = &cfg->ss_mv[search_param * cfg->searches_per_step];
   const intptr_t *ss_os = &cfg->ss_os[search_param * cfg->searches_per_step];
-  const int tot_steps = (cfg->total_steps) - search_param;
+  const int tot_steps = (cfg->ss_count / cfg->searches_per_step) - search_param;
 
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
@@ -1638,7 +1644,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride)
                 + mvsad_err_cost(x, best_mv, &fcenter_mv, sad_per_bit);
 
-  i = 0;
+  i = 1;
 
   for (step = 0; step < tot_steps; step++) {
     int all_in = 1, t;
