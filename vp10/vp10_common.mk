@@ -70,6 +70,7 @@ VP10_COMMON_SRCS-yes += common/vp10_inv_txfm1d.h
 VP10_COMMON_SRCS-yes += common/vp10_inv_txfm1d.c
 VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm2d.h
 VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm2d.c
+VP10_COMMON_SRCS-yes += common/vp10_fwd_txfm2d_cfg.h
 
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.h
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.c
