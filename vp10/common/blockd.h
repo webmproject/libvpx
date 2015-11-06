@@ -77,6 +77,15 @@ typedef struct {
   uint8_t palette_first_color_idx[2];
 } PALETTE_MODE_INFO;
 
+#if CONFIG_EXT_INTRA
+typedef struct {
+  // 1: an ext intra mode is used; 0: otherwise.
+  uint8_t use_ext_intra_mode[PLANE_TYPES];
+  EXT_INTRA_MODE ext_intra_mode[PLANE_TYPES];
+  uint8_t ext_intra_angle[PLANE_TYPES];
+} EXT_INTRA_MODE_INFO;
+#endif  // CONFIG_EXT_INTRA
+
 // This structure now relates to 8x8 block regions.
 typedef struct {
   // Common for both INTER and INTRA blocks
@@ -105,6 +114,10 @@ typedef struct {
 #if CONFIG_EXT_TX
   TX_TYPE tx_type;
 #endif  // CONFIG_EXT_TX
+
+#if CONFIG_EXT_INTRA
+  EXT_INTRA_MODE_INFO ext_intra_mode_info;
+#endif  // CONFIG_EXT_INTRA
 
   // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
   int_mv mv[2];
@@ -307,11 +320,72 @@ static const int ext_tx_used_inter[EXT_TX_SETS_INTER][TX_TYPES] = {
 };
 #endif  // CONFIG_EXT_TX
 
+#if CONFIG_EXT_INTRA
+// 0: use both directional and filter modes; 1: use directional modes only.
+#define DR_ONLY 0
+// 0: use slow exhaustive search; 1: use fast sub-optimal search.
+#define ANGLE_FAST_SEARCH 1
+// A parameter to adjust early termination in the fast search of angles.
+#define RD_ADJUSTER 1.4
+// Number of different angles that are supported
+#define EXT_INTRA_ANGLES 128
+
+static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
+  DCT_DCT,    // FILTER_DC
+  ADST_DCT,   // FILTER_V
+  DCT_ADST,   // FILTER_H
+  DCT_DCT,    // FILTER_D45
+  ADST_ADST,  // FILTER_D135
+  ADST_DCT,   // FILTER_D117
+  DCT_ADST,   // FILTER_D153
+  DCT_ADST,   // FILTER_D207
+  ADST_DCT,   // FILTER_D63
+  ADST_ADST,  // FILTER_TM
+};
+
+// Maps the angle index to the actual prediction angle (in degrees).
+// Angle index is in the range [0, EXT_INTRA_ANGLES); the actual prediction
+// angle is in the range (0, 270).
+static INLINE int prediction_angle_map(int angle_in) {
+  return (10 + 2 * angle_in);
+}
+#endif  // CONFIG_EXT_INTRA
+
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd,
                                   int block_idx, TX_SIZE tx_size) {
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
+#if CONFIG_EXT_INTRA
+  const int use_ext_intra_mode_info =
+      mbmi->ext_intra_mode_info.use_ext_intra_mode[plane_type];
+  const EXT_INTRA_MODE ext_intra_mode =
+      mbmi->ext_intra_mode_info.ext_intra_mode[plane_type];
+
+  if (!is_inter_block(mbmi) && use_ext_intra_mode_info) {
+    if (!xd->lossless[mbmi->segment_id] && tx_size < TX_32X32
+#if CONFIG_EXT_TX
+        && !(mbmi->sb_type >= BLOCK_8X8 && plane_type == PLANE_TYPE_Y)
+#endif  // CONFIG_EXT_TX
+    ) {
+      if (ext_intra_mode > FILTER_TM_PRED) {
+        int angle = mbmi->ext_intra_mode_info.ext_intra_angle[plane_type];
+        angle = prediction_angle_map(angle);
+        assert(angle > 0 && angle < 270);
+        if (angle == 135)
+          return ADST_ADST;
+        else if (angle < 45 || angle > 225)
+          return DCT_DCT;
+        else if (angle < 135)
+          return ADST_DCT;
+        else
+          return DCT_ADST;
+      } else {
+        return filter_intra_mode_to_tx_type_lookup[ext_intra_mode];
+      }
+    }
+  }
+#endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_EXT_TX
 #if USE_IDTX_FOR_32X32
@@ -328,7 +402,6 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
       // UV Inter only
       return (mbmi->tx_type == IDTX && tx_size == TX_32X32 ?
               DCT_DCT : mbmi->tx_type);
-      // return mbmi->tx_type;
   }
 
   // Sub8x8-Inter/Intra OR UV-Intra

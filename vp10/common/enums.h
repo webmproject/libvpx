@@ -156,6 +156,25 @@ typedef enum {
   PALETTE_COLORS
 } PALETTE_COLOR;
 
+#if CONFIG_EXT_INTRA
+typedef enum {
+  FILTER_DC_PRED,
+  FILTER_V_PRED,
+  FILTER_H_PRED,
+  FILTER_D45_PRED,
+  FILTER_D135_PRED,
+  FILTER_D117_PRED,
+  FILTER_D153_PRED,
+  FILTER_D207_PRED,
+  FILTER_D63_PRED,
+  FILTER_TM_PRED,
+  EXT_DR_PRED,
+  EXT_INTRA_MODES,
+} EXT_INTRA_MODE;
+
+#define FILTER_INTRA_MODES (FILTER_TM_PRED + 1)
+#endif  // CONFIG_EXT_INTRA
+
 #define DC_PRED    0       // Average of above and left pixels
 #define V_PRED     1       // Vertical
 #define H_PRED     2       // Horizontal

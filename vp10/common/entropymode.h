@@ -32,6 +32,10 @@ extern "C" {
 #define PALETTE_BLOCK_SIZES (BLOCK_64X64 - BLOCK_8X8 + 1)
 #define PALETTE_Y_MODE_CONTEXTS 3
 
+#if CONFIG_EXT_INTRA
+// Probability that an ext_intra mode is a directional prediction mode
+#define DR_EXT_INTRA_PROB 144
+#endif  // CONFIG_EXT_INTRA
 
 struct VP10Common;
 
@@ -72,6 +76,7 @@ typedef struct frame_contexts {
 #endif
   vpx_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
+  int initialized;
 #if CONFIG_EXT_TX
   vpx_prob inter_ext_tx_prob[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES - 1];
   vpx_prob intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
@@ -80,7 +85,9 @@ typedef struct frame_contexts {
 #if CONFIG_MISC_FIXES
   struct segmentation_probs seg;
 #endif
-  int initialized;
+#if CONFIG_EXT_INTRA
+  vpx_prob ext_intra_probs[PLANE_TYPES];
+#endif  // CONFIG_EXT_INTRA
 } FRAME_CONTEXT;
 
 typedef struct FRAME_COUNTS {
@@ -112,6 +119,9 @@ typedef struct FRAME_COUNTS {
 #if CONFIG_MISC_FIXES
   struct seg_counts seg;
 #endif
+#if CONFIG_EXT_INTRA
+  unsigned int ext_intra[PLANE_TYPES][2];
+#endif  // CONFIG_EXT_INTRA
 } FRAME_COUNTS;
 
 extern const vpx_prob vp10_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
