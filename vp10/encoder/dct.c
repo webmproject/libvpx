@@ -1161,6 +1161,106 @@ static void fadst16(const tran_low_t *input, tran_low_t *output) {
   output[15] = (tran_low_t)-x1;
 }
 
+#if CONFIG_EXT_TX
+static void copy_block(const int16_t *src, int src_stride, int l,
+                       int16_t *dest, int dest_stride) {
+  int i;
+  for (i = 0; i < l; ++i) {
+    memcpy(dest + dest_stride * i, src + src_stride * i,
+           l * sizeof(int16_t));
+  }
+}
+
+static void fliplr(int16_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l; ++i) {
+    for (j = 0; j < l / 2; ++j) {
+      const int16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[i * stride + l - 1 - j];
+      dest[i * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+static void flipud(int16_t *dest, int stride, int l) {
+  int i, j;
+  for (j = 0; j < l; ++j) {
+    for (i = 0; i < l / 2; ++i) {
+      const int16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
+      dest[(l - 1 - i) * stride + j] = tmp;
+    }
+  }
+}
+
+static void fliplrud(int16_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l / 2; ++i) {
+    for (j = 0; j < l; ++j) {
+      const int16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
+      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+static void copy_fliplr(const int16_t *src, int src_stride, int l,
+                          int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, dest, dest_stride);
+  fliplr(dest, dest_stride, l);
+}
+
+static void copy_flipud(const int16_t *src, int src_stride, int l,
+                          int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, dest, dest_stride);
+  flipud(dest, dest_stride, l);
+}
+
+static void copy_fliplrud(const int16_t *src, int src_stride, int l,
+                            int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, dest, dest_stride);
+  fliplrud(dest, dest_stride, l);
+}
+
+static void maybe_flip_input(const int16_t **src, int *src_stride, int l,
+                             int16_t *buff, int tx_type) {
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      break;
+    case FLIPADST_DCT:
+    case FLIPADST_ADST:
+    case FLIPADST_DST:
+      copy_flipud(*src, *src_stride, l, buff, l);
+      *src = buff;
+      *src_stride = l;
+      break;
+    case DCT_FLIPADST:
+    case ADST_FLIPADST:
+    case DST_FLIPADST:
+      copy_fliplr(*src, *src_stride, l, buff, l);
+      *src = buff;
+      *src_stride = l;
+      break;
+    case FLIPADST_FLIPADST:
+      copy_fliplrud(*src, *src_stride, l, buff, l);
+      *src = buff;
+      *src_stride = l;
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+#endif  // CONFIG_EXT_TX
+
 static const transform_2d FHT_4[] = {
   { fdct4,  fdct4  },  // DCT_DCT           = 0,
   { fadst4, fdct4  },  // ADST_DCT          = 1,
@@ -1233,6 +1333,11 @@ void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
     int i, j;
     tran_low_t temp_in[4], temp_out[4];
     const transform_2d ht = FHT_4[tx_type];
+
+#if CONFIG_EXT_TX
+    int16_t flipped_input[4 * 4];
+    maybe_flip_input(&input, &stride, 4, flipped_input, tx_type);
+#endif
 
     // Columns
     for (i = 0; i < 4; ++i) {
@@ -1378,6 +1483,11 @@ void vp10_fht8x8_c(const int16_t *input, tran_low_t *output,
     tran_low_t temp_in[8], temp_out[8];
     const transform_2d ht = FHT_8[tx_type];
 
+#if CONFIG_EXT_TX
+    int16_t flipped_input[8 * 8];
+    maybe_flip_input(&input, &stride, 8, flipped_input, tx_type);
+#endif
+
     // Columns
     for (i = 0; i < 8; ++i) {
       for (j = 0; j < 8; ++j)
@@ -1463,6 +1573,11 @@ void vp10_fht16x16_c(const int16_t *input, tran_low_t *output,
     int i, j;
     tran_low_t temp_in[16], temp_out[16];
     const transform_2d ht = FHT_16[tx_type];
+
+#if CONFIG_EXT_TX
+    int16_t flipped_input[16 * 16];
+    maybe_flip_input(&input, &stride, 16, flipped_input, tx_type);
+#endif
 
     // Columns
     for (i = 0; i < 16; ++i) {
