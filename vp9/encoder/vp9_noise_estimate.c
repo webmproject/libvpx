@@ -28,11 +28,11 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
   ne->level = kLow;
   ne->value = 0;
   ne->count = 0;
-  ne->thresh = 20;
+  ne->thresh = 90;
   if (width * height >= 1920 * 1080) {
-    ne->thresh = 70;
+    ne->thresh = 200;
   } else if (width * height >= 1280 * 720) {
-    ne->thresh = 40;
+    ne->thresh = 130;
   }
 }
 
@@ -55,8 +55,8 @@ int enable_noise_estimation(VP9_COMP *const cpi) {
       cpi->resize_state == ORIG &&
       !cpi->use_svc &&
       cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
-      cpi->common.width > 352 &&
-      cpi->common.height > 288)
+      cpi->common.width >= 640 &&
+      cpi->common.height >= 480)
     return 1;
   else
     return 0;
@@ -86,6 +86,8 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   int frame_period = 10;
   int thresh_consec_zeromv = 8;
   unsigned int thresh_sum_diff = 128;
+  unsigned int thresh_sum_spatial = (200 * 200) << 8;
+  unsigned int thresh_spatial_var = (32 * 32) << 8;
   int num_frames_estimate = 20;
   int min_blocks_estimate = cm->mi_rows * cm->mi_cols >> 7;
   // Estimate is between current source and last source.
@@ -108,8 +110,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     uint64_t avg_est = 0;
     int bsize = BLOCK_16X16;
     static const unsigned char const_source[16] = {
-         128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-         128, 128};
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     // Loop over sub-sample of 16x16 blocks of frame, and for blocks that have
     // been encoded as zero/small mv at least x consecutive frames, compute
     // the variance to update estimate of noise in the source.
@@ -164,8 +165,12 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
               const unsigned int spatial_variance =
                   cpi->fn_ptr[bsize].vf(src_y, src_ystride, const_source,
                                         0, &sse2);
-              avg_est += variance / (10 + spatial_variance);
-              num_samples++;
+              // Avoid blocks with high brightness and high spatial variance.
+              if ((sse2 - spatial_variance) < thresh_sum_spatial &&
+                  spatial_variance < thresh_spatial_var) {
+                avg_est += variance / ((spatial_variance >> 9) + 1);
+                num_samples++;
+              }
             }
           }
         }
@@ -184,7 +189,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     // duplicate frames).
     if (num_samples > min_blocks_estimate && avg_est > 0) {
       // Normalize.
-      avg_est = (avg_est << 8) / num_samples;
+      avg_est = avg_est / num_samples;
       // Update noise estimate.
       ne->value = (int)((3 * ne->value + avg_est) >> 2);
       ne->count++;
