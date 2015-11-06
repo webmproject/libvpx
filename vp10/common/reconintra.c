@@ -934,9 +934,6 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int x0, y0;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
 #endif
-  const int need_left = extend_modes[mode] & NEED_LEFT;
-  const int need_above = extend_modes[mode] & NEED_ABOVE;
-  const int need_aboveright = extend_modes[mode] & NEED_ABOVERIGHT;
   int base = 128 << (bd - 8);
   // 127 127 127 .. 127 127 127 127 127 127
   // 129  A   B  ..  Y   Z
