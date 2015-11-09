@@ -1979,6 +1979,8 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   if (!cm->error_resilient_mode) {
     cm->refresh_frame_context = vpx_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vpx_rb_read_bit(rb);
+    if (!cm->frame_parallel_decoding_mode)
+      vp9_zero(cm->counts);
   } else {
     cm->refresh_frame_context = 0;
     cm->frame_parallel_decoding_mode = 1;
@@ -2201,8 +2203,6 @@ void vp9_decode_frame(VP9Decoder *pbi,
   if (!cm->fc->initialized)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Uninitialized entropy context.");
-
-  vp9_zero(cm->counts);
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
