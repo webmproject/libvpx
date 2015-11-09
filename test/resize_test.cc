@@ -378,13 +378,9 @@ TEST_P(ResizeInternalRealtimeTest, TestInternalResizeDown) {
 // Verify the dynamic resizer behavior for real time, 1 pass CBR mode.
 // Start at low target bitrate, raise the bitrate in the middle of the clip,
 // scaling-up should occur after bitrate changed.
-// TODO(jackychen): Find a longer clip to enable this test. Logic for
-// resizing in 1 pass CBR requires longer sequence to test resize down
-// and back up again.
-TEST_P(ResizeInternalRealtimeTest,
-       DISABLED_TestInternalResizeDownUpChangeBitRate) {
+TEST_P(ResizeInternalRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 299);
+                                       30, 1, 0, 359);
   DefaultConfig();
   change_bitrate_ = true;
   // Disable dropped frames.
