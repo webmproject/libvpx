@@ -123,72 +123,66 @@ static void update_switchable_interp_probs(VP9_COMMON *cm, vpx_writer *w,
 static void pack_mb_tokens(vpx_writer *w,
                            TOKENEXTRA **tp, const TOKENEXTRA *const stop,
                            vpx_bit_depth_t bit_depth) {
-  TOKENEXTRA *p = *tp;
-
-  while (p < stop && p->token != EOSB_TOKEN) {
-    const int t = p->token;
-    const struct vp9_token *const a = &vp9_coef_encodings[t];
-    int i = 0;
-    int v = a->value;
-    int n = a->len;
+  const TOKENEXTRA *p;
+  const vp9_extra_bit *const extra_bits =
 #if CONFIG_VP9_HIGHBITDEPTH
-    const vp9_extra_bit *b;
-    if (bit_depth == VPX_BITS_12)
-      b = &vp9_extra_bits_high12[t];
-    else if (bit_depth == VPX_BITS_10)
-      b = &vp9_extra_bits_high10[t];
-    else
-      b = &vp9_extra_bits[t];
+    (bit_depth == VPX_BITS_12) ? vp9_extra_bits_high12 :
+    (bit_depth == VPX_BITS_10) ? vp9_extra_bits_high10 :
+    vp9_extra_bits;
 #else
-    const vp9_extra_bit *const b = &vp9_extra_bits[t];
+    vp9_extra_bits;
     (void) bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-    /* skip one or two nodes */
-    if (p->skip_eob_node) {
-      n -= p->skip_eob_node;
-      i = 2 * p->skip_eob_node;
+  for (p = *tp; p < stop && p->token != EOSB_TOKEN; ++p) {
+    if (p->token == EOB_TOKEN) {
+      vpx_write(w, 0, p->context_tree[0]);
+      continue;
     }
-
-    // TODO(jbb): expanding this can lead to big gains.  It allows
-    // much better branch prediction and would enable us to avoid numerous
-    // lookups and compares.
-
-    // If we have a token that's in the constrained set, the coefficient tree
-    // is split into two treed writes.  The first treed write takes care of the
-    // unconstrained nodes.  The second treed write takes care of the
-    // constrained nodes.
-    if (t >= TWO_TOKEN && t < EOB_TOKEN) {
-      int len = UNCONSTRAINED_NODES - p->skip_eob_node;
-      int bits = v >> (n - len);
-      vp9_write_tree(w, vp9_coef_tree, p->context_tree, bits, len, i);
-      vp9_write_tree(w, vp9_coef_con_tree,
-                     vp9_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
-                     v, n - len, 0);
-    } else {
-      vp9_write_tree(w, vp9_coef_tree, p->context_tree, v, n, i);
-    }
-
-    if (b->base_val) {
-      const int e = p->extra, l = b->len;
-
-      if (l) {
-        const unsigned char *pb = b->prob;
-        int v = e >> 1;
-        int n = l;              /* number of bits in v, assumed nonzero */
-
-        do {
-          const int bb = (v >> --n) & 1;
-          vpx_write(w, bb, *pb++);
-        } while (n);
+    vpx_write(w, 1, p->context_tree[0]);
+    while (p->token == ZERO_TOKEN) {
+      vpx_write(w, 0, p->context_tree[1]);
+      ++p;
+      if (p == stop || p->token == EOSB_TOKEN) {
+        *tp = (TOKENEXTRA*)(uintptr_t)p + (p->token == EOSB_TOKEN);
+        return;
       }
-
-      vpx_write_bit(w, e & 1);
     }
-    ++p;
-  }
 
-  *tp = p + (p->token == EOSB_TOKEN);
+    {
+      const int t = p->token;
+      const vpx_prob *const context_tree = p->context_tree;
+      assert(t != ZERO_TOKEN);
+      assert(t != EOB_TOKEN);
+      assert(t != EOSB_TOKEN);
+      vpx_write(w, 1, context_tree[1]);
+      if (t == ONE_TOKEN) {
+        vpx_write(w, 0, context_tree[2]);
+        vpx_write_bit(w, p->extra & 1);
+      } else {  // t >= TWO_TOKEN && t < EOB_TOKEN
+        const struct vp9_token *const a = &vp9_coef_encodings[t];
+        const int v = a->value;
+        const int n = a->len;
+        const int e = p->extra;
+        vpx_write(w, 1, context_tree[2]);
+        vp9_write_tree(w, vp9_coef_con_tree,
+                       vp9_pareto8_full[context_tree[PIVOT_NODE] - 1], v,
+                       n - UNCONSTRAINED_NODES, 0);
+        if (t >= CATEGORY1_TOKEN) {
+          const vp9_extra_bit *const b = &extra_bits[t];
+          const unsigned char *pb = b->prob;
+          int v = e >> 1;
+          int n = b->len;  // number of bits in v, assumed nonzero
+          do {
+            const int bb = (v >> --n) & 1;
+            vpx_write(w, bb, *pb++);
+          } while (n);
+        }
+        vpx_write_bit(w, e & 1);
+      }
+    }
+  }
+  *tp = (TOKENEXTRA*)(uintptr_t)p + (p->token == EOSB_TOKEN);
 }
 
 static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
