@@ -22,6 +22,30 @@
       "revId": "3f9858e9b719777f2d85d9b0aabddaad5e424220",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16ac2a06_2cd7d341",
+        "filename": "vp10/common/vp10_inv_txfm1d.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2015-11-09T23:46:05Z",
+      "side": 1,
+      "message": "CONFIG_COEFFICIENT_RANGE_CHECKING is mainly for debug purpose. Therefore, it is important to have stage and input information. So I suggest to keep stage and input arguments.\n\nget_max_bit() is used by unit test as well.",
+      "parentUuid": "568ea242_bf1b385c",
+      "range": {
+        "startLine": 13,
+        "startChar": 62,
+        "endLine": 13,
+        "endChar": 63
+      },
+      "revId": "3f9858e9b719777f2d85d9b0aabddaad5e424220",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
