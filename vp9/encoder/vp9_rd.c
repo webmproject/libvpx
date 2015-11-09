@@ -76,10 +76,12 @@ static void fill_mode_costs(VP9_COMP *cpi) {
                       vp9_intra_mode_tree);
 
   vp9_cost_tokens(cpi->mbmode_cost, fc->y_mode_prob[1], vp9_intra_mode_tree);
-  vp9_cost_tokens(cpi->intra_uv_mode_cost[KEY_FRAME],
-                  vp9_kf_uv_mode_prob[TM_PRED], vp9_intra_mode_tree);
-  vp9_cost_tokens(cpi->intra_uv_mode_cost[INTER_FRAME],
-                  fc->uv_mode_prob[TM_PRED], vp9_intra_mode_tree);
+  for (i = 0; i < INTRA_MODES; ++i) {
+    vp9_cost_tokens(cpi->intra_uv_mode_cost[KEY_FRAME][i],
+                    vp9_kf_uv_mode_prob[i], vp9_intra_mode_tree);
+    vp9_cost_tokens(cpi->intra_uv_mode_cost[INTER_FRAME][i],
+                    fc->uv_mode_prob[i], vp9_intra_mode_tree);
+  }
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     vp9_cost_tokens(cpi->switchable_interp_costs[i],
