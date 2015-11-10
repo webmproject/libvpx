@@ -243,7 +243,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     decrease_ref_count(old_idx, frame_bufs, pool);
 
     // Release the reference frame in reference map.
-    if ((mask & 1) && old_idx >= 0) {
+    if (mask & 1) {
       decrease_ref_count(old_idx, frame_bufs, pool);
     }
     cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
@@ -350,7 +350,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
         decrease_ref_count(old_idx, frame_bufs, pool);
 
         // Release the reference frame in reference map.
-        if ((mask & 1) && old_idx >= 0) {
+        if (mask & 1) {
           decrease_ref_count(old_idx, frame_bufs, pool);
         }
         ++ref_index;
