@@ -827,7 +827,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vpx_idct32x32_1024_add sse2 neon dspr2 msa/;
 
     add_proto qw/void vpx_idct32x32_34_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vpx_idct32x32_34_add sse2 neon_asm dspr2 msa/;
+    specialize qw/vpx_idct32x32_34_add sse2 neon_asm dspr2 msa/, "$ssse3_x86_64_x86inc";
     # Need to add 34 eob idct32x32 neon implementation.
     $vpx_idct32x32_34_add_neon_asm=vpx_idct32x32_1024_add_neon;
 
