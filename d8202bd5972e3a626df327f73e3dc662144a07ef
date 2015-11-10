@@ -16,6 +16,24 @@
       "revId": "d8202bd5972e3a626df327f73e3dc662144a07ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569062ca_be3f5907",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-10T12:08:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56cb02e2_ec301f98",
+      "revId": "d8202bd5972e3a626df327f73e3dc662144a07ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
