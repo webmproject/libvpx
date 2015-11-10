@@ -29,6 +29,8 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
   ne->value = 0;
   ne->count = 0;
   ne->thresh = 90;
+  ne->last_w = 0;
+  ne->last_h = 0;
   if (width * height >= 1920 * 1080) {
     ne->thresh = 200;
   } else if (width * height >= 1280 * 720) {
@@ -100,11 +102,17 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   ne->enabled = enable_noise_estimation(cpi);
   if (!ne->enabled ||
       cm->current_video_frame % frame_period != 0 ||
-      last_source == NULL) {
+      last_source == NULL ||
+      ne->last_w != cm->width ||
+      ne->last_h != cm->height) {
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0)
     copy_frame(&cpi->denoiser.last_source, cpi->Source);
 #endif
+    if (last_source != NULL) {
+      ne->last_w = cm->width;
+      ne->last_h = cm->height;
+    }
     return;
   } else {
     int num_samples = 0;
@@ -185,6 +193,8 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
       src_u += (src_uvstride << 2) - (cm->mi_cols << 2);
       src_v += (src_uvstride << 2) - (cm->mi_cols << 2);
     }
+    ne->last_w = cm->width;
+    ne->last_h = cm->height;
     // Update noise estimate if we have at a minimum number of block samples,
     // and avg_est > 0 (avg_est == 0 can happen if the application inputs
     // duplicate frames).

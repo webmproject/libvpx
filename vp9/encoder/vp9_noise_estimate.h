@@ -35,6 +35,8 @@ typedef struct noise_estimate {
   int value;
   int thresh;
   int count;
+  int last_w;
+  int last_h;
 } NOISE_ESTIMATE;
 
 struct VP9_COMP;
