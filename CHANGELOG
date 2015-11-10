@@ -1,7 +1,19 @@
-xxxx-yy-zz v1.4.0 "Changes for next release"
-  vpxenc is changed to use VP9 by default.
-  Encoder controls added for 1 pass SVC.
-  Decoder control to toggle on/off loopfilter.
+2015-11-09 v1.5.0 "Javan Whistling Duck"
+  This release improves upon the VP9 encoder and speeds up the encoding and
+  decoding processes.
+
+  - Upgrading:
+    This release is ABI incompatible with 1.4.0. It drops deprecated VP8
+    controls and adds a variety of VP9 controls for testing.
+
+    The vpxenc utility now prefers VP9 by default.
+
+  - Enhancements:
+    Faster VP9 encoding and decoding
+    Smaller library size by combining functions used by VP8 and VP9
+
+  - Bug Fixes:
+    A variety of fuzzing issues
 
 2015-04-03 v1.4.0 "Indian Runner Duck"
   This release includes significant improvements to the VP9 codec.
