@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96d1fa8e_cbfc2964",
+        "filename": "vp10/common/vp10_inv_txfm2d_cfg.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-11-10T01:06:18Z",
+      "side": 1,
+      "message": "add const for const variables in this file too",
+      "range": {
+        "startLine": 284,
+        "startChar": 61,
+        "endLine": 284,
+        "endChar": 63
+      },
+      "revId": "af67b7212c9e44e2c700249670f434a28c39e39e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
