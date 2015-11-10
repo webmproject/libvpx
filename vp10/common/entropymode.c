@@ -967,7 +967,7 @@ static const struct segmentation_probs default_seg_probs = {
 #endif
 
 #if CONFIG_EXT_INTRA
-static  const vpx_prob default_ext_intra_probs[2] = {200, 200};
+static  const vpx_prob default_ext_intra_probs[2] = {230, 230};
 #endif  // CONFIG_EXT_INTRA
 
 static void init_mode_probs(FRAME_CONTEXT *fc) {
