@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16c50ace_5ea0f55e",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1623,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "drop the ()s while you\u0027re here",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b0e2f2a_9d8243e3",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "there\u0027s no avx here, are you seeing a benefit in compiling this with it though?",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16ac2a06_81d7a86d",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "are these showing any benefit? if so what toolchain + platform?",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7689e6a7_aec56763",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "indent is off, this should be aligned with joint_cost",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_5e7d9148",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "designated initializers was supported by gnu toolchains, then added as part of c99; we\u0027re probably getting lucky that visual studio 2013 is the base for this file.\nI prefer to avoid spreading this, however. Can you rework these please?",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_82eb2ecd",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "alignment is off",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b0e2f2a_bd5e2751",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "drop the horizontal whitespace here and 103",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_9030952b",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "this and 104 should be \u0027const uint8_t *const ...\u0027",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56cb02e2_b045d54a",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "you could instead say see the function-level documentation for the additional prerequisites",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6a6b626_2538827b",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "alignment is off",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_82020e4b",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "alignment is off",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_fee28553",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "alignment is off",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_dee7c161",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "the extra whitespace before the variable names is unnecessary",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7689e6a7_0ec5735e",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "you could join this with the declaration, similarly for v_cost_32_d",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16c50ace_7ea3316d",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "I think you can join some or all of this group with their declarations",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "369daed4_5c21297a",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-11T04:10:42Z",
+      "side": 1,
+      "message": "drop 1 space before the \u0027\u003d\u0027",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
