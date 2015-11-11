@@ -1483,18 +1483,30 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     this_rdc.rate += ref_frame_cost[ref_frame];
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
 
-    // Bias against non-zero (above some threshold) motion for large blocks.
-    // This is temporary fix to avoid selection of large mv for big blocks.
-    if (cpi->oxcf.speed > 5 &&
-        cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
-        (frame_mv[this_mode][ref_frame].as_mv.row > 64 ||
-        frame_mv[this_mode][ref_frame].as_mv.row < -64 ||
-        frame_mv[this_mode][ref_frame].as_mv.col > 64 ||
-        frame_mv[this_mode][ref_frame].as_mv.col < -64)) {
-      if (bsize == BLOCK_64X64)
-        this_rdc.rdcost = this_rdc.rdcost << 1;
-      else if (bsize >= BLOCK_32X32)
-        this_rdc.rdcost = 3 * this_rdc.rdcost >> 1;
+    if (cpi->oxcf.speed >= 5 &&
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN) {
+      // Bias against non-zero (above some threshold) motion for large blocks.
+      // This is temporary fix to avoid selection of large mv for big blocks.
+      if (frame_mv[this_mode][ref_frame].as_mv.row > 64 ||
+          frame_mv[this_mode][ref_frame].as_mv.row < -64 ||
+          frame_mv[this_mode][ref_frame].as_mv.col > 64 ||
+          frame_mv[this_mode][ref_frame].as_mv.col < -64) {
+        if (bsize == BLOCK_64X64)
+          this_rdc.rdcost = this_rdc.rdcost << 1;
+        else if (bsize >= BLOCK_32X32)
+          this_rdc.rdcost = 3 * this_rdc.rdcost >> 1;
+      }
+      // If noise estimation is enabled, and estimated level is above threshold,
+      // add a bias to LAST reference with small motion, for large blocks.
+      if (cpi->noise_estimate.enabled &&
+          cpi->noise_estimate.level >= kMedium &&
+          bsize >= BLOCK_32X32 &&
+          ref_frame == LAST_FRAME &&
+          frame_mv[this_mode][ref_frame].as_mv.row < 8 &&
+          frame_mv[this_mode][ref_frame].as_mv.row > -8 &&
+          frame_mv[this_mode][ref_frame].as_mv.col < 8 &&
+          frame_mv[this_mode][ref_frame].as_mv.col > -8)
+        this_rdc.rdcost = 7 * this_rdc.rdcost >> 3;
     }
 
     // Skipping checking: test to see if this block can be reconstructed by

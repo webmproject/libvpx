@@ -286,11 +286,11 @@ TEST_P(ResizeInternalTest, TestInternalResizeChangeConfig) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-class ResizeInternalRealtimeTest : public ::libvpx_test::EncoderTest,
+class ResizeRealtimeTest : public ::libvpx_test::EncoderTest,
   public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
-  ResizeInternalRealtimeTest() : EncoderTest(GET_PARAM(0)) {}
-  virtual ~ResizeInternalRealtimeTest() {}
+  ResizeRealtimeTest() : EncoderTest(GET_PARAM(0)) {}
+  virtual ~ResizeRealtimeTest() {}
 
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                                   libvpx_test::Encoder *encoder) {
@@ -318,8 +318,6 @@ class ResizeInternalRealtimeTest : public ::libvpx_test::EncoderTest,
   }
 
   void DefaultConfig() {
-    cfg_.g_w = 352;
-    cfg_.g_h = 288;
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_buf_optimal_sz = 600;
     cfg_.rc_buf_sz = 1000;
@@ -346,13 +344,34 @@ class ResizeInternalRealtimeTest : public ::libvpx_test::EncoderTest,
   bool change_bitrate_;
 };
 
+TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
+  ResizingVideoSource video;
+  DefaultConfig();
+  change_bitrate_ = false;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+
+  for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
+       info != frame_info_list_.end(); ++info) {
+    const unsigned int frame = static_cast<unsigned>(info->pts);
+    const unsigned int expected_w = ScaleForFrameNumber(frame, kInitialWidth);
+    const unsigned int expected_h = ScaleForFrameNumber(frame, kInitialHeight);
+
+    EXPECT_EQ(expected_w, info->w)
+        << "Frame " << frame << " had unexpected width";
+    EXPECT_EQ(expected_h, info->h)
+        << "Frame " << frame << " had unexpected height";
+  }
+}
+
 // Verify the dynamic resizer behavior for real time, 1 pass CBR mode.
 // Run at low bitrate, with resize_allowed = 1, and verify that we get
 // one resize down event.
-TEST_P(ResizeInternalRealtimeTest, TestInternalResizeDown) {
+TEST_P(ResizeRealtimeTest, TestInternalResizeDown) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 299);
   DefaultConfig();
+  cfg_.g_w = 352;
+  cfg_.g_h = 288;
   change_bitrate_ = false;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
@@ -378,10 +397,12 @@ TEST_P(ResizeInternalRealtimeTest, TestInternalResizeDown) {
 // Verify the dynamic resizer behavior for real time, 1 pass CBR mode.
 // Start at low target bitrate, raise the bitrate in the middle of the clip,
 // scaling-up should occur after bitrate changed.
-TEST_P(ResizeInternalRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
+TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 299);
+                                       30, 1, 0, 359);
   DefaultConfig();
+  cfg_.g_w = 352;
+  cfg_.g_h = 288;
   change_bitrate_ = true;
   // Disable dropped frames.
   cfg_.rc_dropframe_thresh = 0;
@@ -524,7 +545,7 @@ VP9_INSTANTIATE_TEST_CASE(ResizeTest,
                           ::testing::Values(::libvpx_test::kRealTime));
 VP9_INSTANTIATE_TEST_CASE(ResizeInternalTest,
                           ::testing::Values(::libvpx_test::kOnePassBest));
-VP9_INSTANTIATE_TEST_CASE(ResizeInternalRealtimeTest,
+VP9_INSTANTIATE_TEST_CASE(ResizeRealtimeTest,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(5, 9));
 VP9_INSTANTIATE_TEST_CASE(ResizeCspTest,
