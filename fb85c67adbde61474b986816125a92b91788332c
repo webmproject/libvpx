@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "169a6aee_3cca71c7",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1623,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16c50ace_5ea0f55e",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7b0e2f2a_9d8243e3",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "there\u0027s no avx here, are you seeing a benefit in compiling this with it though?",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96865a95_00bf061f",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "With AVX comes VEX encoding, which lets you use the non destructive 3 operand format SIMD instruction, so instead of\n  mov  dst, src0\n  vpor dst, src1\nyou can write:\n  vpor dst, src0, src1\n\nIvy Bride and newer Intel processors can eliminate most (but not all) of these mov instructions in the front-end, but Sandy Bridge (which I am told most of your corporate compute is based on) cannot. On Sandy Bridge, the 3 operand format will reduce your dynamic instruction count, which given that the eliminated instructions are register to register movs, should translate into direct throughput gain.",
+      "parentUuid": "7b0e2f2a_9d8243e3",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "56278298_660aaefe",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "It does guide GCC and Clang on how to order basic blocks, which can help branch prediction if the branch is not in the branch target buffer (BTB), in which case it is predicted using a static algorithm. The Intel documents are not very verbose, but see section 3.4.1.3 in the Intel optimization guide for more detail if you are interested:\nhttp://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-optimization-manual.pdf\n\nAdding these makes up to 0.5% difference in the whole encoder on my tests. It should apply to all newer Intel processors (Sandy Bridge onwards), I have tested on Broadwell with GCC 4.8.4.",
+      "parentUuid": "16ac2a06_81d7a86d",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7689e6a7_aec56763",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "indent is off, this should be aligned with joint_cost",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_9c8aa592",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7689e6a7_aec56763",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "368beea4_7d3cf7bd",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Good point. I have factored the packing out into an inline function.",
+      "parentUuid": "b6da7ea7_5e7d9148",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96d1fa8e_82eb2ecd",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "alignment is off",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96865a95_40d4ae3a",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96d1fa8e_82eb2ecd",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "db11db43_fa2f0961",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Ok, though I find aligning related identifier names is much easier to read so I will reorder them too.",
+      "parentUuid": "7b0e2f2a_bd5e2751",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d4867d_9030952b",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "this and 104 should be \u0027const uint8_t *const ...\u0027",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36220e8b_c5fefad2",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76d4867d_9030952b",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "db11db43_da2c456f",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56cb02e2_b045d54a",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6a6b626_2538827b",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -166,6 +328,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "alignment is off",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_5ca9fdfb",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f6a6b626_2538827b",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "f6bf9630_4307869b",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96d1fa8e_82020e4b",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6da7ea7_fee28553",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -200,6 +398,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "alignment is off",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_463bf2a7",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6da7ea7_fee28553",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "d67c5259_c241a21e",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6da7ea7_dee7c161",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7689e6a7_0ec5735e",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -234,6 +468,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "you could join this with the declaration, similarly for v_cost_32_d",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36220e8b_25e6ee45",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7689e6a7_0ec5735e",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "f6bf9630_23becaf1",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "I think it is clearer and easier to understand without the type declarations intermixed, so I would prefer to leave it as is.",
+      "parentUuid": "16c50ace_7ea3316d",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "369daed4_5c21297a",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
@@ -268,6 +538,24 @@
       "writtenOn": "2015-11-11T04:10:42Z",
       "side": 1,
       "message": "drop 1 space before the \u0027\u003d\u0027",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b67fde4b_24b33c12",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T13:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "369daed4_5c21297a",
       "revId": "fb85c67adbde61474b986816125a92b91788332c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
