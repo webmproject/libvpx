@@ -212,8 +212,10 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
         else
           if (ne->value > ne->thresh)
             ne->level = kMedium;
-          else
+          else if (ne->value > (ne->thresh >> 1))
             ne->level = kLow;
+          else
+            ne->level = kLowLow;
       }
     }
   }
