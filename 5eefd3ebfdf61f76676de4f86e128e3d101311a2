@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b67fde4b_041398a6",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2015-11-11T14:08:02Z",
+      "side": 1,
+      "message": "Ok, Clang does not pick up on the C89 declaration ordering as strictly as GCC so this caught me out.. I think it\u0027s clearer this way as opposed to intermixing the statements with the declarations and hence having to reorder them.",
+      "revId": "5eefd3ebfdf61f76676de4f86e128e3d101311a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
