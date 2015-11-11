@@ -912,9 +912,9 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
       if (cpi->sf.tx_size_search_breakout &&
           (rd == INT64_MAX ||
 #if CONFIG_EXT_TX
-           (s == 1 && tx_type != DCT_DCT) ||
+           (s == 1 && tx_type != DCT_DCT && n < start_tx) ||
 #else
-           (s == 1) ||
+           (s == 1 && n < start_tx) ||
 #endif
            (n < (int) max_tx_size && rd > last_rd)))
         break;
