@@ -323,7 +323,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   struct buf_2d src = mb->plane[0].src;
   int is_skin = 0;
 
-  if (bs <= BLOCK_16X16 && denoiser->denoising_level >= kDenMedium) {
+  if (bs <= BLOCK_16X16 && denoiser->denoising_level >= kDenLow) {
     // Take center pixel in block to determine is_skin.
     const int y_width_shift = (4 << b_width_log2_lookup[bs]) >> 1;
     const int y_height_shift = (4 << b_height_log2_lookup[bs]) >> 1;
@@ -349,7 +349,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
     denoiser->increase_denoising = 0;
   }
 
-  if (denoiser->denoising_level >= kDenMedium)
+  if (denoiser->denoising_level >= kDenLow)
     decision = perform_motion_compensation(denoiser, mb, bs,
                                            denoiser->increase_denoising,
                                            mi_row, mi_col, ctx,
@@ -524,6 +524,7 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 #endif
   denoiser->increase_denoising = 0;
   denoiser->frame_buffer_initialized = 1;
+  denoiser->denoising_level = kDenLow;
   return 0;
 }
 
