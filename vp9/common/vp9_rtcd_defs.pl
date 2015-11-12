@@ -1566,14 +1566,9 @@ if (vpx_config("CONFIG_WEDGE_PARTITION") eq "yes") {
 }
 # ENCODEMB INVOKE
 
-if (vpx_config("CONFIG_EXT_CODING_UNIT_SIZE") eq "yes") {
-add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
-specialize qw/vp9_subtract_block/;
+  add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
+  specialize qw/vp9_subtract_block neon/, "$sse2_x86inc";
 
-}else{
-add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
-specialize qw/vp9_subtract_block neon/, "$sse2_x86inc";
-}
 #
 # Denoiser
 #
