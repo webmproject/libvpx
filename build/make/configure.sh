@@ -862,10 +862,6 @@ EOF
                     check_add_cflags -mfpu=neon #-ftree-vectorize
                     check_add_asflags -mfpu=neon
                 fi
-
-                if [ -z "${tune_cpu}" ]; then
-                    tune_cpu=cortex-a8
-                fi
             else
                 check_add_cflags -march=${tgt_isa}
                 check_add_asflags -march=${tgt_isa}
