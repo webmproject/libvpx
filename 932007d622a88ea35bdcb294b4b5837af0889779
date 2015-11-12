@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f66dd6b4_d9c51311",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-12T22:46:08Z",
+      "side": 1,
+      "message": "These are here so you can try different configurations against the test streams.",
+      "parentUuid": "16c50ace_3fbd3084",
+      "revId": "932007d622a88ea35bdcb294b4b5837af0889779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b2597a9_f3d5e839",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-12T22:25:27Z",
       "side": 1,
       "message": "can you add notes at these pmulhrsw sites about the overflows you\u0027re seeing in these unrealistic streams?",
+      "revId": "932007d622a88ea35bdcb294b4b5837af0889779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56794272_99771f20",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-12T22:46:08Z",
+      "side": 1,
+      "message": "I only have the one test stream.  Once we run this against all of the test streams, we will have a  better idea which pmul is overflowing.  From the limited testing that I did, enabling TEST_A works.  Enabling TEST_B produces incorrect md5.",
+      "parentUuid": "3b2597a9_f3d5e839",
       "revId": "932007d622a88ea35bdcb294b4b5837af0889779",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
