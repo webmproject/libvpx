@@ -26,6 +26,14 @@
 extern "C" {
 #endif
 
+#if CONFIG_INTERNAL_STATS
+#define BR_MOVING_AVERAGE_SIZE 4
+typedef struct BR_DATA {
+  int64_t bit_rate[BR_MOVING_AVERAGE_SIZE];
+  int index;
+} BR_DATA;
+#endif
+
 // TODO(hkuang): combine this with TileWorkerData.
 typedef struct TileData {
   VP9_COMMON *cm;
@@ -95,6 +103,10 @@ typedef struct VP9Decoder {
 
   // number of blocks using compound prediction mode.
   int64_t compound_inter_block_in_8x8;
+
+  // peak N-frame-average bit rate
+  int64_t peak_average_br;
+  BR_DATA br_data;
 #endif
 } VP9Decoder;
 

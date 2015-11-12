@@ -2004,6 +2004,9 @@ void vp9_decode_frame(VP9Decoder *pbi,
       init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int tile_cols = 1 << cm->log2_tile_cols;
+#if CONFIG_INTERNAL_STATS
+  const int64_t data_size = data_end - data;
+#endif
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
   xd->cur_buf = new_fb;
 
@@ -2036,6 +2039,11 @@ void vp9_decode_frame(VP9Decoder *pbi,
 #if CONFIG_INTERNAL_STATS
   // Reset internal stats
   if (cm->current_video_frame == 0) {
+    int i;
+    for (i = 0; i < BR_MOVING_AVERAGE_SIZE; ++i)
+      pbi->br_data.bit_rate[i] = 0;
+    pbi->br_data.index = 0;
+    pbi->peak_average_br = 0;
     pbi->total_block_in_8x8 = 0;
     pbi->subpel_mc_block_in_4x4_h = 0;
     pbi->subpel_mc_block_in_4x4_v = 0;
@@ -2119,6 +2127,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
   vp9_clear_system_state();
   {
     FILE *pf = fopen("frame_level_stats.stt", "a");
+    int i;
     double subpel_mc_h = (double)pbi->subpel_mc_block_in_4x4_h /
         (double)pbi->total_block_in_8x8;
     double subpel_mc_v = (double)pbi->subpel_mc_block_in_4x4_v /
@@ -2131,11 +2140,24 @@ void vp9_decode_frame(VP9Decoder *pbi,
         (double)pbi->total_block_in_8x8;
     double sub8x8_intra = (double)pbi->sub8x8_intra /
         (double)pbi->total_block_in_8x8;
+    double average_bit_rate = 0;
+
+    pbi->br_data.bit_rate[pbi->br_data.index] = data_size;
+    ++pbi->br_data.index;
+    if (pbi->br_data.index >= BR_MOVING_AVERAGE_SIZE)
+      pbi->br_data.index = 0;
+    for (i = 0; i < BR_MOVING_AVERAGE_SIZE; ++i) {
+      average_bit_rate += (double)pbi->br_data.bit_rate[i];
+    }
+    average_bit_rate /= BR_MOVING_AVERAGE_SIZE;
+    if ((int64_t)average_bit_rate > pbi->peak_average_br)
+      pbi->peak_average_br = (int64_t)average_bit_rate;
 
     fprintf(pf, "frame index %d, sub-pel mc (%7.3f, %7.3f)\tintra mode%7.3f\tcompound inter block%7.3f\t",
             cm->current_video_frame, 25 * subpel_mc_h, 25 * subpel_mc_v, 100 * intra_mode,
             100 * compound_block);
-    fprintf(pf, "sub8x8 inter %7.3f intra %7.3f\n", 100 * sub8x8_inter, 100 * sub8x8_intra);
+    fprintf(pf, "sub8x8 inter %7.3f intra %7.3f average-br %7.3f peak-average-br %7.3f\n",
+            100 * sub8x8_inter, 100 * sub8x8_intra, average_bit_rate, (double)pbi->peak_average_br / 1000);
     fclose(pf);
   }
 #endif
