@@ -63,8 +63,8 @@ typedef struct frame_contexts {
   vpx_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
   vpx_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vpx_prob comp_inter_prob[COMP_INTER_CONTEXTS];
-  vpx_prob single_ref_prob[REF_CONTEXTS][2];
-  vpx_prob comp_ref_prob[REF_CONTEXTS];
+  vpx_prob single_ref_prob[REF_CONTEXTS][SINGLE_REFS-1];
+  vpx_prob comp_ref_prob[REF_CONTEXTS][COMP_REFS-1];
   struct tx_probs tx_probs;
 #if CONFIG_VAR_TX
   vpx_prob txfm_partition_prob[TXFM_PARTITION_CONTEXTS];
@@ -96,8 +96,8 @@ typedef struct FRAME_COUNTS {
   unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
-  unsigned int single_ref[REF_CONTEXTS][2][2];
-  unsigned int comp_ref[REF_CONTEXTS][2];
+  unsigned int single_ref[REF_CONTEXTS][SINGLE_REFS-1][2];
+  unsigned int comp_ref[REF_CONTEXTS][COMP_REFS-1][2];
   struct tx_counts tx;
 #if CONFIG_VAR_TX
   unsigned int txfm_partition[TXFM_PARTITION_CONTEXTS][2];

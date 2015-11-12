@@ -43,7 +43,8 @@ struct loopfilter {
   uint8_t mode_ref_delta_enabled;
   uint8_t mode_ref_delta_update;
 
-  // 0 = Intra, Last, GF, ARF
+  // 0 = Intra, Last, Last2+Last3+LAST4(CONFIG_EXT_REFS),
+  // GF, ARF
   signed char ref_deltas[MAX_REF_FRAMES];
   signed char last_ref_deltas[MAX_REF_FRAMES];
 

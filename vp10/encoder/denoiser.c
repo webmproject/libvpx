@@ -398,6 +398,14 @@ void vp10_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                       &denoiser->running_avg_y[INTRA_FRAME]);
   }
   if (refresh_last_frame) {
+#if CONFIG_EXT_REFS
+    swap_frame_buffer(&denoiser->running_avg_y[LAST4_FRAME],
+                      &denoiser->running_avg_y[LAST3_FRAME]);
+    swap_frame_buffer(&denoiser->running_avg_y[LAST3_FRAME],
+                      &denoiser->running_avg_y[LAST2_FRAME]);
+    swap_frame_buffer(&denoiser->running_avg_y[LAST2_FRAME],
+                      &denoiser->running_avg_y[LAST_FRAME]);
+#endif  // CONFIG_EXT_REFS
     swap_frame_buffer(&denoiser->running_avg_y[LAST_FRAME],
                       &denoiser->running_avg_y[INTRA_FRAME]);
   }

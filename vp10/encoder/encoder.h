@@ -304,15 +304,30 @@ typedef struct VP10_COMP {
 
   int scaled_ref_idx[MAX_REF_FRAMES];
   int lst_fb_idx;
+#if CONFIG_EXT_REFS
+  int lst2_fb_idx;
+  int lst3_fb_idx;
+  int lst4_fb_idx;
+#endif  // CONFIG_EXT_REFS
   int gld_fb_idx;
   int alt_fb_idx;
 
   int refresh_last_frame;
+#if CONFIG_EXT_REFS
+  int refresh_last2_frame;
+  int refresh_last3_frame;
+  int refresh_last4_frame;
+#endif  // CONFIG_EXT_REFS
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
 
   int ext_refresh_frame_flags_pending;
   int ext_refresh_last_frame;
+#if CONFIG_EXT_REFS
+  int ext_refresh_last2_frame;
+  int ext_refresh_last3_frame;
+  int ext_refresh_last4_frame;
+#endif  // CONFIG_EXT_REFS
   int ext_refresh_golden_frame;
   int ext_refresh_alt_ref_frame;
 
@@ -554,6 +569,14 @@ static INLINE int get_ref_frame_map_idx(const VP10_COMP *cpi,
                                         MV_REFERENCE_FRAME ref_frame) {
   if (ref_frame == LAST_FRAME) {
     return cpi->lst_fb_idx;
+#if CONFIG_EXT_REFS
+  } else if (ref_frame == LAST2_FRAME) {
+    return cpi->lst2_fb_idx;
+  } else if (ref_frame == LAST3_FRAME) {
+    return cpi->lst3_fb_idx;
+  } else if (ref_frame == LAST4_FRAME) {
+    return cpi->lst4_fb_idx;
+#endif  // CONFIG_EXT_REFS
   } else if (ref_frame == GOLDEN_FRAME) {
     return cpi->gld_fb_idx;
   } else {

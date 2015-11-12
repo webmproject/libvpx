@@ -4047,7 +4047,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     // either compound, single or hybrid prediction as per whatever has
     // worked best for that type of frame in the past.
     // It also predicts whether another coding mode would have worked
-    // better that this coding mode. If that is the case, it remembers
+    // better than this coding mode. If that is the case, it remembers
     // that for subsequent frames.
     // It does the same analysis for transform size selection also.
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
