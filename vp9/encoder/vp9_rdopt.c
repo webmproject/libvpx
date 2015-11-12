@@ -457,8 +457,10 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     // low enough so that we can skip the mode search.
     const int64_t low_dc_thr = MIN(50, dc_thr >> 2);
     const int64_t low_ac_thr = MIN(80, ac_thr >> 2);
-    int bw = 1 << (b_width_log2_lookup[bs] - b_width_log2_lookup[unit_size]);
-    int bh = 1 << (b_height_log2_lookup[bs] - b_width_log2_lookup[unit_size]);
+    int bw_shift = (b_width_log2_lookup[bs] - b_width_log2_lookup[unit_size]);
+    int bh_shift = (b_height_log2_lookup[bs] - b_width_log2_lookup[unit_size]);
+    int bw = 1 << bw_shift;
+    int bh = 1 << bh_shift;
     int idx, idy;
     int lw = b_width_log2_lookup[unit_size] + 2;
     int lh = b_height_log2_lookup[unit_size] + 2;
@@ -469,7 +471,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       for (idx = 0; idx < bw; ++idx) {
         uint8_t *src = p->src.buf + (idy * p->src.stride << lh) + (idx << lw);
         uint8_t *dst = pd->dst.buf + (idy * pd->dst.stride << lh) + (idx << lh);
-        int block_idx = (idy << 1) + idx;
+        int block_idx = (idy << bw_shift) + idx;
         int low_err_skip = 0;
 
         var = cpi->fn_ptr[unit_size].vf(src, p->src.stride,
