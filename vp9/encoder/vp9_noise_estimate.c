@@ -88,7 +88,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   // Estimate of noise level every frame_period frames.
   int frame_period = 10;
   int thresh_consec_zeromv = 8;
-  unsigned int thresh_sum_diff = 128;
+  unsigned int thresh_sum_diff = 80;
   unsigned int thresh_sum_spatial = (200 * 200) << 8;
   unsigned int thresh_spatial_var = (32 * 32) << 8;
   int num_frames_estimate = 20;
@@ -135,6 +135,17 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     const int uv_width_shift = y_width_shift >> 1;
     const int uv_height_shift = y_height_shift >> 1;
     int mi_row, mi_col;
+    int num_low_motion = 0;
+    int frame_low_motion = 1;
+    for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
+      for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
+        int bl_index = mi_row * cm->mi_cols + mi_col;
+        if (cr->consec_zero_mv[bl_index] > thresh_consec_zeromv)
+          num_low_motion++;
+      }
+    }
+    if (num_low_motion < ((5 * cm->mi_rows * cm->mi_cols) >> 3))
+      frame_low_motion = 1;
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
         // 16x16 blocks, 1/4 sample of frame.
@@ -154,7 +165,8 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
           const uint8_t vsource =
             src_v[uv_height_shift * src_uvstride + uv_width_shift];
           int is_skin = vp9_skin_pixel(ysource, usource, vsource);
-          if (cr->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
+          if (frame_low_motion &&
+              cr->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
               cr->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&
               cr->consec_zero_mv[bl_index2] > thresh_consec_zeromv &&
               cr->consec_zero_mv[bl_index3] > thresh_consec_zeromv &&
@@ -202,7 +214,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
       // Normalize.
       avg_est = avg_est / num_samples;
       // Update noise estimate.
-      ne->value = (int)((3 * ne->value + avg_est) >> 2);
+      ne->value = (int)((7 * ne->value + avg_est) >> 3);
       ne->count++;
       if (ne->count == num_frames_estimate) {
         // Reset counter and check noise level condition.
