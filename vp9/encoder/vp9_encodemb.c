@@ -557,66 +557,6 @@ static INLINE void highbd_fdct32x32(int rd_transform, const int16_t *src,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_EXT_TX
-static void copy_block(const int16_t *src, int src_stride, int l,
-                       int16_t *dest, int dest_stride) {
-  int i;
-  for (i = 0; i < l; ++i) {
-    vpx_memcpy(dest + dest_stride * i, src + src_stride * i,
-               l * sizeof(int16_t));
-  }
-}
-
-static void fliplr(int16_t *dest, int stride, int l) {
-  int i, j;
-  for (i = 0; i < l; ++i) {
-    for (j = 0; j < l / 2; ++j) {
-      const int16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[i * stride + l - 1 - j];
-      dest[i * stride + l - 1 - j] = tmp;
-    }
-  }
-}
-
-static void flipud(int16_t *dest, int stride, int l) {
-  int i, j;
-  for (j = 0; j < l; ++j) {
-    for (i = 0; i < l / 2; ++i) {
-      const int16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
-      dest[(l - 1 - i) * stride + j] = tmp;
-    }
-  }
-}
-
-static void fliplrud(int16_t *dest, int stride, int l) {
-  int i, j;
-  for (i = 0; i < l / 2; ++i) {
-    for (j = 0; j < l; ++j) {
-      const int16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
-      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
-    }
-  }
-}
-
-static void copy_fliplr(const int16_t *src, int src_stride, int l,
-                          int16_t *dest, int dest_stride) {
-  copy_block(src, src_stride, l, dest, dest_stride);
-  fliplr(dest, dest_stride, l);
-}
-
-static void copy_flipud(const int16_t *src, int src_stride, int l,
-                          int16_t *dest, int dest_stride) {
-  copy_block(src, src_stride, l, dest, dest_stride);
-  flipud(dest, dest_stride, l);
-}
-
-static void copy_fliplrud(const int16_t *src, int src_stride, int l,
-                            int16_t *dest, int dest_stride) {
-  copy_block(src, src_stride, l, dest, dest_stride);
-  fliplrud(dest, dest_stride, l);
-}
-
 #if CONFIG_WAVELETS
 static void forw_tx32x32(MACROBLOCK *x, int plane,
                          const int16_t *src_diff, int diff_stride,
@@ -649,7 +589,6 @@ static void forw_tx16x16(MACROBLOCK *x, int plane,
                          const int16_t *src_diff, int diff_stride,
                          tran_low_t *const coeff) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int16_t src_diff2[256];
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_fdct16x16(src_diff, coeff, diff_stride);
@@ -657,21 +596,6 @@ static void forw_tx16x16(MACROBLOCK *x, int plane,
   } else if (is_dst_used(tx_type)) {
     vp9_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
 #endif  // CONFIG_DST1
-  } else if (tx_type == FLIPADST_DCT) {
-    copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_fht16x16(src_diff2, coeff, 16, ADST_DCT);
-  } else if (tx_type == DCT_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_fht16x16(src_diff2, coeff, 16, DCT_ADST);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    copy_fliplrud(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_fht16x16(src_diff2, coeff, 16, ADST_ADST);
-  } else if (tx_type == ADST_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_fht16x16(src_diff2, coeff, 16, ADST_ADST);
-  } else if (tx_type == FLIPADST_ADST) {
-    copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_fht16x16(src_diff2, coeff, 16, ADST_ADST);
   } else {
     vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
   }
@@ -681,7 +605,6 @@ static void forw_tx8x8(MACROBLOCK *x, int plane,
                        const int16_t *src_diff, int diff_stride,
                        tran_low_t *const coeff) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int16_t src_diff2[64];
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_fdct8x8(src_diff, coeff, diff_stride);
@@ -689,21 +612,6 @@ static void forw_tx8x8(MACROBLOCK *x, int plane,
   } else if (is_dst_used(tx_type)) {
     vp9_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
 #endif  // CONFIG_DST1
-  } else if (tx_type == FLIPADST_DCT) {
-    copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_fht8x8(src_diff2, coeff, 8, ADST_DCT);
-  } else if (tx_type == DCT_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_fht8x8(src_diff2, coeff, 8, DCT_ADST);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    copy_fliplrud(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_fht8x8(src_diff2, coeff, 8, ADST_ADST);
-  } else if (tx_type == ADST_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_fht8x8(src_diff2, coeff, 8, ADST_ADST);
-  } else if (tx_type == FLIPADST_ADST) {
-    copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_fht8x8(src_diff2, coeff, 8, ADST_ADST);
   } else {
     vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
   }
@@ -713,7 +621,6 @@ static void forw_tx4x4(MACROBLOCK *x, int plane, int block,
                        const int16_t *src_diff, int diff_stride,
                        tran_low_t *const coeff) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int16_t src_diff2[16];
   TX_TYPE tx_type = get_tx_type_4x4(plane, xd, block);
   if (tx_type == DCT_DCT) {
     x->fwd_txm4x4(src_diff, coeff, diff_stride);
@@ -721,21 +628,6 @@ static void forw_tx4x4(MACROBLOCK *x, int plane, int block,
   } else if (is_dst_used(tx_type)) {
     vp9_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
 #endif  // CONFIG_DST1
-  } else if (tx_type == FLIPADST_DCT) {
-    copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_fht4x4(src_diff2, coeff, 4, ADST_DCT);
-  } else if (tx_type == DCT_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_fht4x4(src_diff2, coeff, 4, DCT_ADST);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    copy_fliplrud(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_fht4x4(src_diff2, coeff, 4, ADST_ADST);
-  } else if (tx_type == ADST_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_fht4x4(src_diff2, coeff, 4, ADST_ADST);
-  } else if (tx_type == FLIPADST_ADST) {
-    copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_fht4x4(src_diff2, coeff, 4, ADST_ADST);
   } else {
     vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
   }
@@ -746,7 +638,6 @@ static void highbd_forw_tx16x16(MACROBLOCK *x, int plane,
                                 const int16_t *src_diff, int diff_stride,
                                 tran_low_t *const coeff) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int16_t src_diff2[256];
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
@@ -754,21 +645,6 @@ static void highbd_forw_tx16x16(MACROBLOCK *x, int plane,
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
 #endif  // CONFIG_DST1
-  } else if (tx_type == FLIPADST_DCT) {
-    copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_highbd_fht16x16(src_diff2, coeff, 16, ADST_DCT);
-  } else if (tx_type == DCT_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_highbd_fht16x16(src_diff2, coeff, 16, DCT_ADST);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    copy_fliplrud(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
-  } else if (tx_type == ADST_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
-  } else if (tx_type == FLIPADST_ADST) {
-    copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
-    vp9_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
   } else {
     vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
   }
@@ -778,7 +654,6 @@ static void highbd_forw_tx8x8(MACROBLOCK *x, int plane,
                               const int16_t *src_diff, int diff_stride,
                               tran_low_t *const coeff) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int16_t src_diff2[64];
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
@@ -786,21 +661,6 @@ static void highbd_forw_tx8x8(MACROBLOCK *x, int plane,
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
 #endif  // CONFIG_DST1
-  } else if (tx_type == FLIPADST_DCT) {
-    copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_highbd_fht8x8(src_diff2, coeff, 8, ADST_DCT);
-  } else if (tx_type == DCT_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_highbd_fht8x8(src_diff2, coeff, 8, DCT_ADST);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    copy_fliplrud(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
-  } else if (tx_type == ADST_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
-  } else if (tx_type == FLIPADST_ADST) {
-    copy_flipud(src_diff, diff_stride, 8, src_diff2, 8);
-    vp9_highbd_fht8x8(src_diff2, coeff, 8, ADST_ADST);
   } else {
     vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
   }
@@ -810,7 +670,6 @@ static void highbd_forw_tx4x4(MACROBLOCK *x, int plane, int block,
                               const int16_t *src_diff, int diff_stride,
                               tran_low_t *const coeff) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int16_t src_diff2[16];
   TX_TYPE tx_type = get_tx_type_4x4(plane, xd, block);
   if (tx_type == DCT_DCT) {
     x->fwd_txm4x4(src_diff, coeff, diff_stride);
@@ -818,21 +677,6 @@ static void highbd_forw_tx4x4(MACROBLOCK *x, int plane, int block,
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
 #endif  // CONFIG_DST1
-  } else if (tx_type == FLIPADST_DCT) {
-    copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_highbd_fht4x4(src_diff2, coeff, 4, ADST_DCT);
-  } else if (tx_type == DCT_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_highbd_fht4x4(src_diff2, coeff, 4, DCT_ADST);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    copy_fliplrud(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_highbd_fht4x4(src_diff2, coeff, 4, ADST_ADST);
-  } else if (tx_type == ADST_FLIPADST) {
-    copy_fliplr(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_highbd_fht4x4(src_diff2, coeff, 4, ADST_ADST);
-  } else if (tx_type == FLIPADST_ADST) {
-    copy_flipud(src_diff, diff_stride, 4, src_diff2, 4);
-    vp9_highbd_fht4x4(src_diff2, coeff, 4, ADST_ADST);
   } else {
     vp9_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
   }
