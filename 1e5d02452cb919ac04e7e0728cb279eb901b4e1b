@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "76d4867d_a256264f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-11-13T07:43:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76d4867d_9f8c1959",
+      "range": {
+        "startLine": 7,
+        "startChar": 26,
+        "endLine": 7,
+        "endChar": 32
+      },
+      "revId": "1e5d02452cb919ac04e7e0728cb279eb901b4e1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b3453db_bbd5f368",
         "filename": "vp9/encoder/vp9_noise_estimate.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-13T05:32:45Z",
       "side": 1,
       "message": "don\u0027t we want to have shorter window on start-up?",
+      "range": {
+        "startLine": 94,
+        "startChar": 6,
+        "endLine": 94,
+        "endChar": 25
+      },
+      "revId": "1e5d02452cb919ac04e7e0728cb279eb901b4e1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_c2599a84",
+        "filename": "vp9/encoder/vp9_noise_estimate.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-11-13T07:43:23Z",
+      "side": 1,
+      "message": "Fixed. 20 at start-up and change to 40 after that.",
+      "parentUuid": "1b3453db_bbd5f368",
       "range": {
         "startLine": 94,
         "startChar": 6,
