@@ -36,6 +36,7 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
   } else if (width * height >= 1280 * 720) {
     ne->thresh = 130;
   }
+  ne->num_frames_estimate = 20;
 }
 
 int enable_noise_estimation(VP9_COMP *const cpi) {
@@ -91,7 +92,6 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   unsigned int thresh_sum_diff = 100;
   unsigned int thresh_sum_spatial = (200 * 200) << 8;
   unsigned int thresh_spatial_var = (32 * 32) << 8;
-  int num_frames_estimate = 20;
   int min_blocks_estimate = cm->mi_rows * cm->mi_cols >> 7;
   // Estimate is between current source and last source.
   YV12_BUFFER_CONFIG *last_source = cpi->Last_Source;
@@ -216,9 +216,9 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
       // Update noise estimate.
       ne->value = (int)((15 * ne->value + avg_est) >> 4);
       ne->count++;
-      if (ne->count == num_frames_estimate) {
+      if (ne->count == ne->num_frames_estimate) {
         // Reset counter and check noise level condition.
-        num_frames_estimate = 40;
+        ne->num_frames_estimate = 30;
         ne->count = 0;
         if (ne->value > (ne->thresh << 1))
           ne->level = kHigh;
