@@ -87,6 +87,24 @@
       "revId": "932007d622a88ea35bdcb294b4b5837af0889779",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b532b27_c680e21f",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-13T02:44:43Z",
+      "side": 1,
+      "message": "C/E/H seem to have issues",
+      "parentUuid": "5b532b27_a65e0651",
+      "revId": "932007d622a88ea35bdcb294b4b5837af0889779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
