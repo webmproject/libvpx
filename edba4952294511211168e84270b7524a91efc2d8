@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b2597a9_a2138441",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 3844,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-11-13T21:11:51Z",
+      "side": 1,
+      "message": "These 2 lines may only need to be done once per frame. In multi-thread case, each thread gets a copy of MB. Maybe move them to encode_frame_internal().",
+      "range": {
+        "startLine": 3844,
+        "startChar": 61,
+        "endLine": 3844,
+        "endChar": 62
+      },
+      "revId": "edba4952294511211168e84270b7524a91efc2d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
