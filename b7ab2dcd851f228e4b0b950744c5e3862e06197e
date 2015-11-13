@@ -22,6 +22,30 @@
       "revId": "b7ab2dcd851f228e4b0b950744c5e3862e06197e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b532b27_0ce73b66",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-11-13T20:25:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb3987d2_f32cc36e",
+      "range": {
+        "startLine": 524,
+        "startChar": 10,
+        "endLine": 524,
+        "endChar": 11
+      },
+      "revId": "b7ab2dcd851f228e4b0b950744c5e3862e06197e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
