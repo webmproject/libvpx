@@ -253,6 +253,20 @@ VAR(64, 64)
 SUBPIX_VAR(64, 64)
 SUBPIX_AVG_VAR(64, 64)
 
+#if CONFIG_EXT_CODING_UNIT_SIZE
+VAR(64, 128)
+SUBPIX_VAR(64, 128)
+SUBPIX_AVG_VAR(64, 128)
+
+VAR(128, 64)
+SUBPIX_VAR(128, 64)
+SUBPIX_AVG_VAR(128, 64)
+
+VAR(128, 128)
+SUBPIX_VAR(128, 128)
+SUBPIX_AVG_VAR(128, 128)
+#endif
+
 void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
                        int height, const uint8_t *ref, int ref_stride) {
   int i, j;
@@ -631,6 +645,20 @@ HIGHBD_SUBPIX_AVG_VAR(64, 32)
 HIGHBD_VAR(64, 64)
 HIGHBD_SUBPIX_VAR(64, 64)
 HIGHBD_SUBPIX_AVG_VAR(64, 64)
+
+#if CONFIG_EXT_CODING_UNIT_SIZE
+HIGHBD_VAR(64, 128)
+HIGHBD_SUBPIX_VAR(64, 128)
+HIGHBD_SUBPIX_AVG_VAR(64, 128)
+
+HIGHBD_VAR(128, 64)
+HIGHBD_SUBPIX_VAR(128, 64)
+HIGHBD_SUBPIX_AVG_VAR(128, 64)
+
+HIGHBD_VAR(128, 128)
+HIGHBD_SUBPIX_VAR(128, 128)
+HIGHBD_SUBPIX_AVG_VAR(128, 128)
+#endif
 
 void vp9_highbd_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred8,
                               int width, int height, const uint8_t *ref8,

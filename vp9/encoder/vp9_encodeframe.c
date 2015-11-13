@@ -114,6 +114,16 @@ static const uint8_t VP9_VAR_OFFS[CODING_UNIT_SIZE] = {
     128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+#endif
 };
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -126,6 +136,16 @@ static const uint16_t VP9_HIGH_VAR_OFFS_8[CODING_UNIT_SIZE] = {
     128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128
+#endif
 };
 
 static const uint16_t VP9_HIGH_VAR_OFFS_10[CODING_UNIT_SIZE] = {
@@ -137,6 +157,16 @@ static const uint16_t VP9_HIGH_VAR_OFFS_10[CODING_UNIT_SIZE] = {
     128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
     128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
     128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4
+#endif
 };
 
 static const uint16_t VP9_HIGH_VAR_OFFS_12[CODING_UNIT_SIZE] = {
@@ -148,6 +178,16 @@ static const uint16_t VP9_HIGH_VAR_OFFS_12[CODING_UNIT_SIZE] = {
     128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
     128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
     128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16
+#endif
 };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -432,6 +472,13 @@ typedef struct {
   v32x32 split[4];
 } v64x64;
 
+#if CONFIG_EXT_CODING_UNIT_SIZE
+typedef struct {
+  partition_variance part_variances;
+  v64x64 split[4];
+} v128x128;
+#endif
+
 typedef struct {
   partition_variance *part_variances;
   var *split[4];
@@ -441,6 +488,9 @@ typedef enum {
   V16X16,
   V32X32,
   V64X64,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  V128X128,
+#endif
 } TREE_LEVEL;
 
 static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
@@ -448,6 +498,15 @@ static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
   node->part_variances = NULL;
   vpx_memset(node->split, 0, sizeof(node->split));
   switch (bsize) {
+#if CONFIG_EXT_CODING_UNIT_SIZE
+    case BLOCK_128X128: {
+      v128x128 *vt = (v128x128 *) data;
+      node->part_variances = &vt->part_variances;
+      for (i = 0; i < 4; i++)
+        node->split[i] = &vt->split[i].part_variances.none;
+      break;
+    }
+#endif
     case BLOCK_64X64: {
       v64x64 *vt = (v64x64 *) data;
       node->part_variances = &vt->part_variances;
@@ -600,6 +659,10 @@ static void choose_partitioning(VP9_COMP *cpi,
   vp9_clear_system_state();
   vp9_zero(vt);
   set_offsets(cpi, tile, mi_row, mi_col, BLOCK_LARGEST);
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  printf("Not yet implemented: choose_partitioning\n");
+  exit(-1);
+#endif
 
   if (xd->mb_to_right_edge < 0)
     pixels_wide += (xd->mb_to_right_edge >> 3);
@@ -2024,8 +2087,8 @@ static void rd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
   int i, pl;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE subsize;
-  ENTROPY_CONTEXT l[(CODING_UNIT_SIZE / 4) * MAX_MB_PLANE];
-  ENTROPY_CONTEXT a[(CODING_UNIT_SIZE / 4) * MAX_MB_PLANE];
+  ENTROPY_CONTEXT l[(CODING_UNIT_SIZE >> 2) * MAX_MB_PLANE];
+  ENTROPY_CONTEXT a[(CODING_UNIT_SIZE >> 2) * MAX_MB_PLANE];
   PARTITION_CONTEXT sl[CODING_UNIT_SIZE >> 3], sa[CODING_UNIT_SIZE >> 3];
   RD_COST last_part_rdc, none_rdc, chosen_rdc;
   BLOCK_SIZE sub_subsize = BLOCK_4X4;
@@ -2275,8 +2338,8 @@ static void rd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
       int rt_nocoef = 0;
 #endif
-      ENTROPY_CONTEXT l[(CODING_UNIT_SIZE / 4) * MAX_MB_PLANE];
-      ENTROPY_CONTEXT a[(CODING_UNIT_SIZE / 4) * MAX_MB_PLANE];
+      ENTROPY_CONTEXT l[(CODING_UNIT_SIZE >> 2) * MAX_MB_PLANE];
+      ENTROPY_CONTEXT a[(CODING_UNIT_SIZE >> 2) * MAX_MB_PLANE];
       PARTITION_CONTEXT sl[CODING_UNIT_SIZE >> 3], sa[CODING_UNIT_SIZE >> 3];
 
       if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
@@ -2385,7 +2448,10 @@ static const BLOCK_SIZE min_partition_size[BLOCK_SIZES] = {
   BLOCK_4X4,   BLOCK_4X4,   BLOCK_4X4,
   BLOCK_8X8,   BLOCK_8X8,   BLOCK_8X8,
   BLOCK_16X16, BLOCK_16X16, BLOCK_16X16,
-  BLOCK_16X16
+  BLOCK_16X16,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  BLOCK_16X16, BLOCK_16X16, BLOCK_16X16
+#endif
 };
 
 static const BLOCK_SIZE max_partition_size[BLOCK_SIZES] = {
@@ -2393,7 +2459,10 @@ static const BLOCK_SIZE max_partition_size[BLOCK_SIZES] = {
   BLOCK_16X16, BLOCK_32X32, BLOCK_32X32,
   BLOCK_32X32, BLOCK_64X64, BLOCK_64X64,
   BLOCK_64X64, BLOCK_64X64, BLOCK_64X64,
-  BLOCK_64X64
+  BLOCK_64X64,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  BLOCK_64X64, BLOCK_64X64, BLOCK_128X128
+#endif
 };
 
 // Look at all the mode_info entries for blocks that are part of this
@@ -2431,7 +2500,10 @@ static const BLOCK_SIZE next_square_size[BLOCK_SIZES] = {
   BLOCK_8X8, BLOCK_8X8, BLOCK_8X8,
   BLOCK_16X16, BLOCK_16X16, BLOCK_16X16,
   BLOCK_32X32, BLOCK_32X32, BLOCK_32X32,
-  BLOCK_64X64
+  BLOCK_64X64,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  BLOCK_64X64, BLOCK_64X64, BLOCK_128X128
+#endif
 };
 
 // Look at neighboring blocks and set a min and max partition size based on
@@ -2869,8 +2941,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int mi_step = num_8x8_blocks_wide_lookup[bsize] / 2;
-  ENTROPY_CONTEXT l[(CODING_UNIT_SIZE / 4) * MAX_MB_PLANE];
-  ENTROPY_CONTEXT a[(CODING_UNIT_SIZE / 4) * MAX_MB_PLANE];
+  ENTROPY_CONTEXT l[(CODING_UNIT_SIZE >> 2) * MAX_MB_PLANE];
+  ENTROPY_CONTEXT a[(CODING_UNIT_SIZE >> 2) * MAX_MB_PLANE];
   PARTITION_CONTEXT sl[CODING_UNIT_SIZE >> 3], sa[CODING_UNIT_SIZE >> 3];
   TOKENEXTRA *tp_orig = *tp;
   PICK_MODE_CONTEXT *ctx = &pc_tree->none;
@@ -3799,7 +3871,11 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   SPEED_FEATURES *const sf = &cpi->sf;
   int mi_col;
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  const int leaf_nodes = 64 * 4;
+#else
   const int leaf_nodes = 64;
+#endif
 
   // Initialize the left context for the new SB row
   vpx_memset(&xd->left_context, 0, sizeof(xd->left_context));

@@ -16,6 +16,9 @@ static const BLOCK_SIZE square[] = {
   BLOCK_16X16,
   BLOCK_32X32,
   BLOCK_64X64,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  BLOCK_128X128,
+#endif
 };
 
 static void alloc_mode_context(VP9_COMMON *cm, int num_4x4_blk,
@@ -144,8 +147,13 @@ static void free_tree_contexts(PC_TREE *tree) {
 // represents the state of our search.
 void vp9_setup_pc_tree(VP9_COMMON *cm, VP9_COMP *cpi) {
   int i, j;
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  const int leaf_nodes = 64 * 4;
+  const int tree_nodes = 64 * 4 + 64 + 16 + 4 + 1;
+#else
   const int leaf_nodes = 64;
   const int tree_nodes = 64 + 16 + 4 + 1;
+#endif
   int pc_tree_index = 0;
   PC_TREE *this_pc;
   PICK_MODE_CONTEXT *this_leaf;
@@ -199,8 +207,13 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, VP9_COMP *cpi) {
 }
 
 void vp9_free_pc_tree(VP9_COMP *cpi) {
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  const int tree_nodes = 64 * 4 + 64 + 16 + 4 + 1;
+  const int leaf_nodes = 64 * 4;
+#else
   const int tree_nodes = 64 + 16 + 4 + 1;
   const int leaf_nodes = 64;
+#endif
   int i;
 
   // Set up all 4x4 mode contexts

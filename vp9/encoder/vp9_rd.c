@@ -61,7 +61,10 @@ void vp9_rd_cost_init(RD_COST *rd_cost) {
 // This table is used to correct for block size.
 // The factors here are << 2 (2 = x0.5, 32 = x8 etc).
 static const uint8_t rd_thresh_block_size_factor[BLOCK_SIZES] = {
-  2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32
+  2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  48, 48, 64
+#endif
 };
 
 static void fill_mode_costs(VP9_COMP *cpi) {
