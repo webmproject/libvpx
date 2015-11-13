@@ -32,11 +32,6 @@ extern "C" {
 #define PALETTE_BLOCK_SIZES (BLOCK_64X64 - BLOCK_8X8 + 1)
 #define PALETTE_Y_MODE_CONTEXTS 3
 
-#if CONFIG_EXT_INTRA
-// Probability that an ext_intra mode is a directional prediction mode
-#define DR_EXT_INTRA_PROB 144
-#endif  // CONFIG_EXT_INTRA
-
 struct VP10Common;
 
 struct tx_probs {

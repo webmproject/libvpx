@@ -405,32 +405,11 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-static INLINE void v_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
-                               const uint8_t *above, const uint8_t *left) {
-  int r;
-  (void) left;
-
-  for (r = 0; r < bs; r++) {
-    memcpy(dst, above, bs);
-    dst += stride;
-  }
-}
-
-static INLINE void h_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
-                               const uint8_t *above, const uint8_t *left) {
-  int r;
-  (void) above;
-
-  for (r = 0; r < bs; r++) {
-    memset(dst, left[r], bs);
-    dst += stride;
-  }
-}
-
-static void dr_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
                          const uint8_t *above, const uint8_t *left, int angle) {
   double t = 0;
   int dx, dy;
+  int bs = 4 << tx_size;
 
   if (angle != 90 && angle != 180)
     t = tan(angle * PI / 180.0);
@@ -448,9 +427,9 @@ static void dr_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dy = -((int)(256 * t));
     dr_prediction_z3(dst, stride, bs, above, left, dx, dy);
   } else if (angle == 90) {
-    v_predictor(dst, stride, bs, above, left);
+    pred[V_PRED][tx_size](dst, stride, above, left);
   } else if (angle == 180) {
-    h_predictor(dst, stride, bs, above, left);
+    pred[H_PRED][tx_size](dst, stride, above, left);
   }
 }
 
@@ -915,11 +894,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int i;
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-#if CONFIG_MISC_FIXES
-  DECLARE_ALIGNED(16, uint16_t, left_col[32]);
-#else
   DECLARE_ALIGNED(16, uint16_t, left_col[64]);
-#endif
   DECLARE_ALIGNED(16, uint16_t, above_data[64 + 16]);
   uint16_t *above_row = above_data + 16;
   const uint16_t *const_above_row = above_row;
@@ -946,37 +921,38 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
       &xd->mi[0]->mbmi.ext_intra_mode_info;
   const EXT_INTRA_MODE ext_intra_mode =
       ext_intra_mode_info->ext_intra_mode[plane != 0];
-  const int angle =
-      prediction_angle_map(ext_intra_mode_info->ext_intra_angle[plane != 0]);
+  int p_angle = 0;
+
+  if (mode != DC_PRED && mode != TM_PRED &&
+      xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+    p_angle = mode_to_angle_map[mode] +
+        xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
+#if CONFIG_MISC_FIXES
+    if (p_angle <= 90)
+      need_above = 1, need_left = 0;
+    else if (p_angle < 180)
+      need_above = 1, need_left = 1;
+    else
+      need_above = 0, need_left = 1;
+#else
+    if (p_angle < 90)
+      need_above = 0, need_aboveright = 1, need_left = 0;
+    else if (p_angle == 90)
+      need_above = 1, need_aboveright = 0, need_left = 0;
+    else if (p_angle < 180)
+      need_above = 1, need_aboveright = 0, need_left = 1;
+    else
+      need_above = 0, need_aboveright = 0, need_left = 1;
+#endif  // CONFIG_MISC_FIXES
+  }
 
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
     EXT_INTRA_MODE ext_intra_mode =
         ext_intra_mode_info->ext_intra_mode[plane != 0];
-    if (ext_intra_mode <= FILTER_TM_PRED) {
-      need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
-      need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
-      need_aboveright =
-          ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVERIGHT;
-    } else {
-      assert(angle > 0 && angle < 270);
-#if CONFIG_MISC_FIXES
-      if (angle <= 90)
-        need_above = 1, need_left = 0;
-      else if (angle < 180)
-        need_above = 1, need_left = 1;
-      else
-        need_above = 0, need_left = 1;
-#else
-      if (angle < 90)
-        need_above = 0, need_aboveright = 1, need_left = 0;
-      else if (angle == 90)
-        need_above = 1, need_aboveright = 0, need_left = 0;
-      else if (angle < 180)
-        need_above = 1, need_aboveright = 0, need_left = 1;
-      else
-        need_above = 0, need_aboveright = 0, need_left = 1;
-#endif  // CONFIG_MISC_FIXES
-    }
+    need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
+    need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
+    need_aboveright =
+        ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVERIGHT;
   }
 #endif  // CONFIG_EXT_INTRA
 
@@ -993,10 +969,10 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 #if CONFIG_EXT_INTRA
     int need_bottom;
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-      if (ext_intra_mode <= FILTER_TM_PRED)
         need_bottom = 0;
-      else
-        need_bottom = angle > 180;
+    } else if (mode != DC_PRED && mode != TM_PRED &&
+        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+        need_bottom = p_angle > 180;
     } else {
       need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
     }
@@ -1024,10 +1000,10 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 #if CONFIG_EXT_INTRA
     int need_right;
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-      if (ext_intra_mode <= FILTER_TM_PRED)
-        need_right = 1;
-      else
-        need_right = angle < 90;
+      need_right = 1;
+    } else if (mode != DC_PRED && mode != TM_PRED &&
+        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+      need_right = p_angle < 90;
     } else {
       need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
     }
@@ -1052,7 +1028,9 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   (void)need_aboveright;
 #if CONFIG_EXT_INTRA
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0] ||
-      (extend_modes[mode] & NEED_ABOVELEFT)) {
+      (extend_modes[mode] & NEED_ABOVELEFT) ||
+      (mode != DC_PRED && mode != TM_PRED &&
+        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
     above_row[-1] = n_top_px > 0 ?
         (n_left_px > 0 ? above_ref[-1] : base + 1) : base - 1;
   }
@@ -1185,13 +1163,15 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 
 #if CONFIG_EXT_INTRA
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    if (ext_intra_mode <= FILTER_TM_PRED)
-      highbd_filter_intra_predictors[ext_intra_mode](dst, dst_stride, bs,
-                                                     const_above_row, left_col,
-                                                     bd);
-    else
-      highbd_dr_predictor(dst, dst_stride, bs, const_above_row, left_col,
-                          angle, bd);
+    highbd_filter_intra_predictors[ext_intra_mode](dst, dst_stride, bs,
+        const_above_row, left_col, bd);
+    return;
+  }
+
+  if (mode != DC_PRED && mode != TM_PRED &&
+      xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+    highbd_dr_predictor(dst, dst_stride, bs, const_above_row, left_col,
+                        p_angle, bd);
     return;
   }
 #endif  // CONFIG_EXT_INTRA
@@ -1247,37 +1227,39 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
       &xd->mi[0]->mbmi.ext_intra_mode_info;
   const EXT_INTRA_MODE ext_intra_mode =
       ext_intra_mode_info->ext_intra_mode[plane != 0];
-  const int angle =
-      prediction_angle_map(ext_intra_mode_info->ext_intra_angle[plane != 0]);
+  int p_angle = 0;
+
+  if (mode != DC_PRED && mode != TM_PRED &&
+      xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+    p_angle = mode_to_angle_map[mode] +
+        xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
+
+#if CONFIG_MISC_FIXES
+    if (p_angle <= 90)
+      need_above = 1, need_left = 0;
+    else if (p_angle < 180)
+      need_above = 1, need_left = 1;
+    else
+      need_above = 0, need_left = 1;
+#else
+    if (p_angle < 90)
+      need_above = 0, need_aboveright = 1, need_left = 0;
+    else if (p_angle == 90)
+      need_above = 1, need_aboveright = 0, need_left = 0;
+    else if (p_angle < 180)
+      need_above = 1, need_aboveright = 0, need_left = 1;
+    else
+      need_above = 0, need_aboveright = 0, need_left = 1;
+#endif  // CONFIG_MISC_FIXES
+  }
 
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
     EXT_INTRA_MODE ext_intra_mode =
         ext_intra_mode_info->ext_intra_mode[plane != 0];
-    if (ext_intra_mode <= FILTER_TM_PRED) {
-      need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
-      need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
-      need_aboveright =
-          ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVERIGHT;
-    } else {
-      assert(angle > 0 && angle < 270);
-#if CONFIG_MISC_FIXES
-      if (angle <= 90)
-        need_above = 1, need_left = 0;
-      else if (angle < 180)
-        need_above = 1, need_left = 1;
-      else
-        need_above = 0, need_left = 1;
-#else
-      if (angle < 90)
-        need_above = 0, need_aboveright = 1, need_left = 0;
-      else if (angle == 90)
-        need_above = 1, need_aboveright = 0, need_left = 0;
-      else if (angle < 180)
-        need_above = 1, need_aboveright = 0, need_left = 1;
-      else
-        need_above = 0, need_aboveright = 0, need_left = 1;
-#endif  // CONFIG_MISC_FIXES
-    }
+    need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
+    need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
+    need_aboveright =
+        ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVERIGHT;
   }
 #endif  // CONFIG_EXT_INTRA
 
@@ -1318,10 +1300,10 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 #if CONFIG_EXT_INTRA
     int need_bottom;
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-      if (ext_intra_mode <= FILTER_TM_PRED)
-        need_bottom = 0;
-      else
-        need_bottom = angle > 180;
+      need_bottom = 0;
+    } else if (mode != DC_PRED && mode != TM_PRED &&
+        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+      need_bottom = p_angle > 180;
     } else {
       need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
     }
@@ -1373,10 +1355,10 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 #if CONFIG_EXT_INTRA
     int need_right;
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-      if (ext_intra_mode <= FILTER_TM_PRED)
-        need_right = 1;
-      else
-        need_right = angle < 90;
+      need_right = 1;
+    } else if (mode != DC_PRED && mode != TM_PRED &&
+        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+      need_right = p_angle < 90;
     } else {
       need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
     }
@@ -1428,7 +1410,9 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   (void)need_aboveright;
 #if CONFIG_EXT_INTRA
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0] ||
-      (extend_modes[mode] & NEED_ABOVELEFT)) {
+      (extend_modes[mode] & NEED_ABOVELEFT) ||
+      (mode != DC_PRED && mode != TM_PRED &&
+          xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
     above_row[-1] = n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : 129) : 127;
   }
 #else
@@ -1486,11 +1470,14 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
 #if CONFIG_EXT_INTRA
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    if (ext_intra_mode <= FILTER_TM_PRED)
-      filter_intra_predictors[ext_intra_mode](dst, dst_stride, bs,
-                                              const_above_row, left_col);
-    else
-      dr_predictor(dst, dst_stride, bs, const_above_row, left_col, angle);
+    filter_intra_predictors[ext_intra_mode](dst, dst_stride, bs,
+        const_above_row, left_col);
+    return;
+  }
+
+  if (mode != DC_PRED && mode != TM_PRED &&
+      xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+    dr_predictor(dst, dst_stride, tx_size, const_above_row, left_col, p_angle);
     return;
   }
 #endif  // CONFIG_EXT_INTRA
@@ -1510,10 +1497,10 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 }
 
 void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
-                             TX_SIZE tx_size, PREDICTION_MODE mode,
-                             const uint8_t *ref, int ref_stride,
-                             uint8_t *dst, int dst_stride,
-                             int aoff, int loff, int plane) {
+                              TX_SIZE tx_size, PREDICTION_MODE mode,
+                              const uint8_t *ref, int ref_stride,
+                              uint8_t *dst, int dst_stride,
+                              int aoff, int loff, int plane) {
   const int txw = (1 << tx_size);
   const int have_top = loff || xd->up_available;
   const int have_left = aoff || xd->left_available;
