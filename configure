@@ -273,6 +273,7 @@ EXPERIMENT_LIST="
     ext_inter
     ext_interp
     ext_refs
+    supertx
 "
 CONFIG_LIST="
     dependency_tracking
