@@ -22,6 +22,29 @@
       "revId": "1e5d02452cb919ac04e7e0728cb279eb901b4e1b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_bbd5f368",
+        "filename": "vp9/encoder/vp9_noise_estimate.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-11-13T05:32:45Z",
+      "side": 1,
+      "message": "don\u0027t we want to have shorter window on start-up?",
+      "range": {
+        "startLine": 94,
+        "startChar": 6,
+        "endLine": 94,
+        "endChar": 25
+      },
+      "revId": "1e5d02452cb919ac04e7e0728cb279eb901b4e1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
