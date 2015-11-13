@@ -121,8 +121,8 @@ typedef struct {
 
 struct rdcost_block_args {
   MACROBLOCK *x;
-  ENTROPY_CONTEXT t_above[16];
-  ENTROPY_CONTEXT t_left[16];
+  ENTROPY_CONTEXT t_above[(CODING_UNIT_SIZE >> 2)];
+  ENTROPY_CONTEXT t_left[(CODING_UNIT_SIZE >> 2)];
   int rate;
   int64_t dist;
   int64_t sse;
