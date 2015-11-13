@@ -407,7 +407,7 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
   // Disable dropped frames.
   cfg_.rc_dropframe_thresh = 0;
   // Starting bitrate low.
-  cfg_.rc_target_bitrate = 100;
+  cfg_.rc_target_bitrate = 90;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   unsigned int last_w = cfg_.g_w;

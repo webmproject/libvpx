@@ -429,12 +429,10 @@ testdata:: $(LIBVPX_TEST_DATA)
           if [ -n "$${sha1sum}" ]; then\
             set -e;\
             echo "Checking test data:";\
-            if [ -n "$(LIBVPX_TEST_DATA)" ]; then\
-                for f in $(call enabled,LIBVPX_TEST_DATA); do\
-                    grep $$f $(SRC_PATH_BARE)/test/test-data.sha1 |\
-                        (cd $(LIBVPX_TEST_DATA_PATH); $${sha1sum} -c);\
-                done; \
-            fi; \
+            for f in $(call enabled,LIBVPX_TEST_DATA); do\
+                grep $$f $(SRC_PATH_BARE)/test/test-data.sha1 |\
+                    (cd $(LIBVPX_TEST_DATA_PATH); $${sha1sum} -c);\
+            done; \
         else\
             echo "Skipping test data integrity check, sha1sum not found.";\
         fi
