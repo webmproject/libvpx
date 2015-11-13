@@ -592,10 +592,8 @@ static void forw_tx16x16(MACROBLOCK *x, int plane,
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_fdct16x16(src_diff, coeff, diff_stride);
-#if CONFIG_DST1
   } else if (is_dst_used(tx_type)) {
     vp9_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
-#endif  // CONFIG_DST1
   } else {
     vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
   }
@@ -608,10 +606,8 @@ static void forw_tx8x8(MACROBLOCK *x, int plane,
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_fdct8x8(src_diff, coeff, diff_stride);
-#if CONFIG_DST1
   } else if (is_dst_used(tx_type)) {
     vp9_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
-#endif  // CONFIG_DST1
   } else {
     vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
   }
@@ -624,10 +620,8 @@ static void forw_tx4x4(MACROBLOCK *x, int plane, int block,
   TX_TYPE tx_type = get_tx_type_4x4(plane, xd, block);
   if (tx_type == DCT_DCT) {
     x->fwd_txm4x4(src_diff, coeff, diff_stride);
-#if CONFIG_DST1
   } else if (is_dst_used(tx_type)) {
     vp9_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
-#endif  // CONFIG_DST1
   } else {
     vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
   }
@@ -641,10 +635,8 @@ static void highbd_forw_tx16x16(MACROBLOCK *x, int plane,
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
-#if CONFIG_DST1
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
-#endif  // CONFIG_DST1
   } else {
     vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
   }
@@ -657,10 +649,8 @@ static void highbd_forw_tx8x8(MACROBLOCK *x, int plane,
   TX_TYPE tx_type = get_tx_type(plane, xd);
   if (tx_type == DCT_DCT) {
     vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
-#if CONFIG_DST1
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
-#endif  // CONFIG_DST1
   } else {
     vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
   }
@@ -673,10 +663,8 @@ static void highbd_forw_tx4x4(MACROBLOCK *x, int plane, int block,
   TX_TYPE tx_type = get_tx_type_4x4(plane, xd, block);
   if (tx_type == DCT_DCT) {
     x->fwd_txm4x4(src_diff, coeff, diff_stride);
-#if CONFIG_DST1
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
-#endif  // CONFIG_DST1
   } else {
     vp9_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
   }

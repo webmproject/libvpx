@@ -83,7 +83,6 @@ static const tran_high_t sinpi_3_9 = 13377;
 static const tran_high_t sinpi_4_9 = 15212;
 
 #if CONFIG_EXT_TX
-#if CONFIG_DST1
 static const int32_t dst_lookup4[] = {
   // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
   // at precision of 2 * DCT_CONST_BITS bits
@@ -102,7 +101,6 @@ static const int32_t dst_lookup16[] = {
   47852167, 94074787, 137093803, 175444254,
   207820161, 233119001, 250479254, 259309736
 };
-#endif  // CONFIG_DST1
 #endif  // CONFIG_EXT_TX
 
 static INLINE tran_low_t check_range(tran_high_t input) {
@@ -238,12 +236,10 @@ void vp9_highbd_tx_identity_add(const tran_low_t *input, uint8_t *dest,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_TX_SKIP
 
-#if CONFIG_DST1
 void vp9_dst1d_type1(int64_t *in, int64_t *out, int N);
 void vp9_idst4x4_add(const tran_low_t *input, uint8_t *dest, int stride);
 void vp9_idst8x8_add(const tran_low_t *input, uint8_t *dest, int stride);
 void vp9_idst16x16_add(const tran_low_t *input, uint8_t *dest, int stride);
-#endif
 
 #ifdef __cplusplus
 }  // extern "C"

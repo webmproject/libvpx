@@ -559,7 +559,6 @@ static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
   FLIPADST_FLIPADST,
   ADST_FLIPADST,
   FLIPADST_ADST,
-#if CONFIG_DST1
   DST_DST,
   DST_DCT,
   DCT_DST,
@@ -567,17 +566,14 @@ static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
   ADST_DST,
   DST_FLIPADST,
   FLIPADST_DST,
-#endif  // CONFIG_DST1
 };
 
-#if CONFIG_DST1
 static INLINE int is_dst_used(TX_TYPE tx_type) {
   return (tx_type == DST_DST ||
           tx_type == DST_DCT || tx_type == DCT_DST ||
           tx_type == DST_ADST || tx_type == ADST_DST ||
           tx_type == DST_FLIPADST || tx_type == FLIPADST_DST);
 }
-#endif  // CONFIG_DST1
 
 #if CONFIG_WAVELETS
 static TX_TYPE ext_tx_to_txtype_large[EXT_TX_TYPES_LARGE] = {

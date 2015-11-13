@@ -305,7 +305,6 @@ EXPERIMENT_LIST="
     wavelets
     ext_partition
     qctx_tprobs
-    dst1
     sr_mode
     multi_ref
     last4_ref
