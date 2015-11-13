@@ -128,7 +128,7 @@ void vp9_decoder_remove(struct VP9Decoder *pbi);
 
 static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,
                                       BufferPool *const pool) {
-  if (idx >= 0) {
+  if (idx >= 0 && frame_bufs[idx].ref_count > 0) {
     --frame_bufs[idx].ref_count;
     // A worker may only get a free framebuffer index when calling get_free_fb.
     // But the private buffer is not set up until finish decoding header.
