@@ -460,9 +460,16 @@ int vp9_denoiser_filter_sse2(const uint8_t *sig, int sig_stride,
                                  avg, avg_stride,
                                  increase_denoising,
                                  bs, motion_magnitude);
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  } else if (bs == BLOCK_16X8 || bs == BLOCK_16X16 || bs == BLOCK_16X32 ||
+             bs == BLOCK_32X16 || bs == BLOCK_32X32 || bs == BLOCK_32X64 ||
+             bs == BLOCK_64X32 || bs == BLOCK_64X64 || bs == BLOCK_64X128 ||
+             bs == BLOCK_128X64 || bs == BLOCK_128X128) {
+#else
   } else if (bs == BLOCK_16X8 || bs == BLOCK_16X16 || bs == BLOCK_16X32 ||
              bs == BLOCK_32X16|| bs == BLOCK_32X32 || bs == BLOCK_32X64 ||
              bs == BLOCK_64X32 || bs == BLOCK_64X64) {
+#endif
     return vp9_denoiser_64_32_16xM_sse2(sig, sig_stride,
                                         mc_avg, mc_avg_stride,
                                         avg, avg_stride,

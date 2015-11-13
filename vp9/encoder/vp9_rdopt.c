@@ -7910,7 +7910,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     TX_SIZE best_tx_size;
     int rate2_tx, this_skip2_tx = 0;
     int64_t distortion2_tx, bestrd_tx = INT64_MAX;
-    uint8_t tmp_zcoeff_blk[(CODING_UNIT_SIZE * CODING_UNIT_SIZE) / 16];
+    uint8_t tmp_zcoeff_blk[(CODING_UNIT_SIZE * CODING_UNIT_SIZE) >> 4];
 #endif  // CONFIG_EXT_TX
 
     *mbmi = *inter_ref_list[copy_mode - REF0];

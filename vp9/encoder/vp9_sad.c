@@ -66,6 +66,22 @@ void vp9_sad##m##x##n##x4d_c(const uint8_t *src, int src_stride, \
     sads[i] = vp9_sad##m##x##n##_c(src, src_stride, refs[i], ref_stride); \
 }
 
+#if CONFIG_EXT_CODING_UNIT_SIZE
+// 128x128
+sadMxN(128, 128)
+sadMxNxK(128, 128, 3)
+sadMxNxK(128, 128, 8)
+sadMxNx4D(128, 128)
+
+// 128x64
+sadMxN(128, 64)
+sadMxNx4D(128, 64)
+
+// 64x128
+sadMxN(64, 128)
+sadMxNx4D(64, 128)
+#endif
+
 // 64x64
 sadMxN(64, 64)
 sadMxNxK(64, 64, 3)
@@ -204,6 +220,22 @@ void vp9_highbd_sad##m##x##n##x4d_c(const uint8_t *src, int src_stride, \
                                           ref_stride); \
   }  \
 }
+
+#if CONFIG_EXT_CODING_UNIT_SIZE
+// 128x128
+highbd_sadMxN(128, 128)
+highbd_sadMxNxK(128, 128, 3)
+highbd_sadMxNxK(128, 128, 8)
+highbd_sadMxNx4D(128, 128)
+
+// 128x64
+highbd_sadMxN(128, 64)
+highbd_sadMxNx4D(128, 64)
+
+// 64x128
+highbd_sadMxN(64, 128)
+highbd_sadMxNx4D(64, 128)
+#endif
 
 // 64x64
 highbd_sadMxN(64, 64)
