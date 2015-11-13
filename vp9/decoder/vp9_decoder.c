@@ -160,19 +160,12 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
     ref_buf = &cm->frame_refs[1];
   } else if (ref_frame_flag == VP9_LAST3_FLAG) {
     ref_buf = &cm->frame_refs[2];
-#if CONFIG_LAST4_REF
   } else if (ref_frame_flag == VP9_LAST4_FLAG) {
     ref_buf = &cm->frame_refs[3];
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
     ref_buf = &cm->frame_refs[4];
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
     ref_buf = &cm->frame_refs[5];
-#else  // CONFIG_LAST4_REF
-  } else if (ref_frame_flag == VP9_GOLD_FLAG) {
-    ref_buf = &cm->frame_refs[3];
-  } else if (ref_frame_flag == VP9_ALT_FLAG) {
-    ref_buf = &cm->frame_refs[4];
-#endif  // CONFIG_LAST4_REF
 #else  // CONFIG_MULTI_REF
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
     ref_buf = &cm->frame_refs[1];
@@ -233,12 +226,8 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     // (2) The only exception is that when current frame is a KEY_FRAME, where
     //     all the frames in the frame buffer (cm->frame_bufs) get refreshed.
     if ((mask & 1) &&
-#if CONFIG_LAST4_REF
         (cm->frame_type == KEY_FRAME ||
          (ref_index != 1 && ref_index != 2 && ref_index != 3))
-#else  // CONFIG_LAST4_REF
-        (cm->frame_type == KEY_FRAME || (ref_index != 1 && ref_index != 2))
-#endif  // CONFIG_LAST4_REF
         ) {
 #else  // CONFIG_MULTI_REF
     if (mask & 1) {
@@ -259,7 +248,6 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
           const int ref_index_last3 = ref_index_last2 + 1;
           const int old_buf_idx_last3 = cm->ref_frame_map[ref_index_last3];
 
-#if CONFIG_LAST4_REF
           if (mask & 8) {
             // If current is LAST_FRAME, and LAST2, LAST3 and LAST4 all need to
             // get refreshed as well, then LAST4_FRAME should get handled first
@@ -277,7 +265,6 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
                   &cm->frame_bufs[old_buf_idx_last4].raw_frame_buffer);
             }
           }
-#endif  // CONFIG_LAST4_REF
 
           ref_cnt_fb(cm->frame_bufs,
                      &cm->ref_frame_map[ref_index_last3],

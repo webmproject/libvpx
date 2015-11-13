@@ -790,7 +790,6 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         if (!cm->frame_parallel_decoding_mode)
           ++counts->comp_ref[ctx2][2][bit2];
 
-#if CONFIG_LAST4_REF
         if (!bit2) {
           const int ctx3 = vp9_get_pred_context_comp_ref_p3(cm, xd);
           const int bit3 = vp9_read(r, fc->comp_ref_probs[ctx3][3]);
@@ -802,9 +801,6 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         } else {
           ref_frame[!idx] = cm->comp_var_ref[4];
         }
-#else  // CONFIG_LAST4_REF
-        ref_frame[!idx] = cm->comp_var_ref[bit2 ? 3 : 2];
-#endif  // CONFIG_LAST4_REF
       }
 #else  // CONFIG_MULTI_REF
       ref_frame[!idx] = cm->comp_var_ref[bit];
@@ -833,7 +829,6 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
           ++counts->single_ref[ctx2][2][bit2];
 
         if (bit2) {
-#if CONFIG_LAST4_REF
           const int ctx4 = vp9_get_pred_context_single_ref_p5(xd);
           const int bit4 = vp9_read(r, fc->single_ref_probs[ctx4][4]);
 
@@ -841,9 +836,6 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
             ++counts->single_ref[ctx4][4][bit4];
 
           ref_frame[0] = bit4 ? LAST4_FRAME : LAST3_FRAME;
-#else  // CONFIG_LAST4_REF
-          ref_frame[0] = LAST3_FRAME;
-#endif  // CONFIG_LAST4_REF
         } else {
           const int ctx3 = vp9_get_pred_context_single_ref_p4(xd);
           const int bit3 = vp9_read(r, fc->single_ref_probs[ctx3][3]);

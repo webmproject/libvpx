@@ -149,7 +149,6 @@ static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p2(const VP9_COMMON *cm,
   return cm->fc.comp_ref_probs[pred_context][2];
 }
 
-#if CONFIG_LAST4_REF
 int vp9_get_pred_context_comp_ref_p3(const VP9_COMMON *cm,
                                      const MACROBLOCKD *xd);
 
@@ -158,7 +157,6 @@ static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p3(const VP9_COMMON *cm,
   const int pred_context = vp9_get_pred_context_comp_ref_p3(cm, xd);
   return cm->fc.comp_ref_probs[pred_context][3];
 }
-#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_MULTI_REF
 
 int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
@@ -190,14 +188,12 @@ static INLINE vp9_prob vp9_get_pred_prob_single_ref_p4(const VP9_COMMON *cm,
   return cm->fc.single_ref_probs[vp9_get_pred_context_single_ref_p4(xd)][3];
 }
 
-#if CONFIG_LAST4_REF
 int vp9_get_pred_context_single_ref_p5(const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_single_ref_p5(const VP9_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
   return cm->fc.single_ref_probs[vp9_get_pred_context_single_ref_p5(xd)][4];
 }
-#endif  // CONFIG_LAST4_REF
 #endif  // CONFIG_MULTI_REF
 
 int vp9_get_tx_size_context(const MACROBLOCKD *xd);
