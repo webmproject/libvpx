@@ -69,6 +69,24 @@
       "revId": "932007d622a88ea35bdcb294b4b5837af0889779",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b532b27_a65e0651",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-13T00:06:15Z",
+      "side": 1,
+      "message": "both TEST_A and TEST_B fail on a wider set.",
+      "parentUuid": "56794272_99771f20",
+      "revId": "932007d622a88ea35bdcb294b4b5837af0889779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
