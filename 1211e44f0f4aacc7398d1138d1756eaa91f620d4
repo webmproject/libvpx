@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6da7ea7_d18de61a",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-11-13T22:09:41Z",
+      "side": 1,
+      "message": "CHECK_GOLDEN_OR_LAST3 should be removed as well. Sorry that this is a flaw in the original code that should have been included within the none-LAST4 case.",
+      "revId": "1211e44f0f4aacc7398d1138d1756eaa91f620d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
