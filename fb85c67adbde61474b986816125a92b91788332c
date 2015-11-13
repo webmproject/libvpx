@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "fb2e9f8f_bff39f96",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-13T06:29:08Z",
+      "side": 1,
+      "message": "right, I have seen this myself with other code, I was wondering if you had measured it in this case.",
+      "parentUuid": "96865a95_00bf061f",
+      "revId": "fb85c67adbde61474b986816125a92b91788332c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16ac2a06_81d7a86d",
         "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
         "patchSetId": 3
