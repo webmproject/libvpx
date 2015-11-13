@@ -16,6 +16,59 @@
 #include "vp9/common/vp9_idct.h"
 
 #if CONFIG_EXT_TX
+#define FLIPUD_PTR(dest, stride, size) do {     \
+    (dest) = (dest) + ((size) - 1) * (stride);  \
+    (stride) = - (stride);                      \
+} while (0)
+
+static void maybe_flip_strides(uint8_t **dst, int *dstride,
+                               tran_low_t **src, int *sstride,
+                               int tx_type, int size) {
+  // Note that the transpose of src will be added to dst. In order to LR
+  // flip the addends (in dst coordinates), we UD flip the src. To UD flip
+  // the addends, we UD flip the dst.
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      break;
+    case FLIPADST_DCT:
+    case FLIPADST_ADST:
+      // flip UD
+      FLIPUD_PTR(*dst, *dstride, size);
+      break;
+    case DCT_FLIPADST:
+    case ADST_FLIPADST:
+      // flip LR
+      FLIPUD_PTR(*src, *sstride, size);
+      break;
+    case FLIPADST_FLIPADST:
+      // flip UD
+      FLIPUD_PTR(*dst, *dstride, size);
+      // flip LR
+      FLIPUD_PTR(*src, *sstride, size);
+      break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      break;
+    case DST_FLIPADST:
+      // flip LR
+      FLIPUD_PTR(*src, *sstride, size);
+      break;
+    case FLIPADST_DST:
+      // flip UD
+      FLIPUD_PTR(*dst, *dstride, size);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
 void idst4(const tran_low_t *input, tran_low_t *output) {
   // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
@@ -635,25 +688,41 @@ void vp9_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
   };
 
   int i, j;
-  tran_low_t out[4 * 4];
-  tran_low_t *outptr = out;
-  tran_low_t temp_in[4], temp_out[4];
+  tran_low_t tmp;
+  tran_low_t out[4][4];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 4;
 
   // inverse transform row vectors
   for (i = 0; i < 4; ++i) {
-    IHT_4[tx_type].rows(input, outptr);
+    IHT_4[tx_type].rows(input, out[i]);
     input  += 4;
-    outptr += 4;
+  }
+
+  // transpose
+  for (i = 1 ; i < 4; i++) {
+    for (j = 0; j < i; j++) {
+            tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
   }
 
   // inverse transform column vectors
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j * 4 + i];
-    IHT_4[tx_type].cols(temp_in, temp_out);
+    IHT_4[tx_type].cols(out[i], out[i]);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 4);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j) {
-      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
-                                            ROUND_POWER_OF_TWO(temp_out[j], 4));
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 4));
     }
   }
 }
@@ -756,97 +825,44 @@ static const transform_2d IHT_8[] = {
 #endif  // CONFIG_EXT_TX
 };
 
-#if CONFIG_EXT_TX
-void fliplr(uint8_t *dest, int stride, int l) {
-  int i, j;
-  for (i = 0; i < l; ++i) {
-    for (j = 0; j < l / 2; ++j) {
-      const uint8_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[i * stride + l - 1 - j];
-      dest[i * stride + l - 1 - j] = tmp;
-    }
-  }
-}
-
-void flipud(uint8_t *dest, int stride, int l) {
-  int i, j;
-  for (j = 0; j < l; ++j) {
-    for (i = 0; i < l / 2; ++i) {
-      const uint8_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
-      dest[(l - 1 - i) * stride + j] = tmp;
-    }
-  }
-}
-
-void fliplrud(uint8_t *dest, int stride, int l) {
-  int i, j;
-  for (i = 0; i < l / 2; ++i) {
-    for (j = 0; j < l; ++j) {
-      const uint8_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
-      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
-    }
-  }
-}
-
-void fliplr16(uint16_t *dest, int stride, int l) {
-  int i, j;
-  for (i = 0; i < l; ++i) {
-    for (j = 0; j < l / 2; ++j) {
-      const uint16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[i * stride + l - 1 - j];
-      dest[i * stride + l - 1 - j] = tmp;
-    }
-  }
-}
-
-void flipud16(uint16_t *dest, int stride, int l) {
-  int i, j;
-  for (j = 0; j < l; ++j) {
-    for (i = 0; i < l / 2; ++i) {
-      const uint16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
-      dest[(l - 1 - i) * stride + j] = tmp;
-    }
-  }
-}
-
-void fliplrud16(uint16_t *dest, int stride, int l) {
-  int i, j;
-  for (i = 0; i < l / 2; ++i) {
-    for (j = 0; j < l; ++j) {
-      const uint16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
-      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
-    }
-  }
-}
-#endif  // CONFIG_EXT_TX
-
 void vp9_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   int i, j;
-  tran_low_t out[8 * 8];
-  tran_low_t *outptr = out;
-  tran_low_t temp_in[8], temp_out[8];
-  const transform_2d ht = IHT_8[tx_type];
+  tran_low_t tmp;
+  tran_low_t out[8][8];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 8;
 
   // inverse transform row vectors
   for (i = 0; i < 8; ++i) {
-    ht.rows(input, outptr);
-    input += 8;
-    outptr += 8;
+    IHT_8[tx_type].rows(input, out[i]);
+    input  += 8;
+  }
+
+  // transpose
+  for (i = 1 ; i < 8; i++) {
+    for (j = 0; j < i; j++) {
+            tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
   }
 
   // inverse transform column vectors
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
-    ht.cols(temp_in, temp_out);
+    IHT_8[tx_type].cols(out[i], out[i]);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 8);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j) {
-      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
-                                            ROUND_POWER_OF_TWO(temp_out[j], 5));
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 5));
     }
   }
 }
@@ -1291,26 +1307,41 @@ static const transform_2d IHT_16[] = {
 void vp9_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                             int tx_type) {
   int i, j;
-  tran_low_t out[16 * 16];
-  tran_low_t *outptr = out;
-  tran_low_t temp_in[16], temp_out[16];
-  const transform_2d ht = IHT_16[tx_type];
+  tran_low_t tmp;
+  tran_low_t out[16][16];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 16;
 
-  // Rows
+  // inverse transform row vectors
   for (i = 0; i < 16; ++i) {
-    ht.rows(input, outptr);
-    input += 16;
-    outptr += 16;
+    IHT_16[tx_type].rows(input, out[i]);
+    input  += 16;
   }
 
-  // Columns
+  // transpose
+  for (i = 1 ; i < 16; i++) {
+    for (j = 0; j < i; j++) {
+            tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
+  }
+
+  // inverse transform column vectors
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j * 16 + i];
-    ht.cols(temp_in, temp_out);
+    IHT_16[tx_type].cols(out[i], out[i]);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 16);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j) {
-      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
-                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 6));
     }
   }
 }
@@ -1911,26 +1942,6 @@ void vp9_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_iht4x4_16_add_c(input, dest, stride, tx_type);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud(dest, stride, 4);
-    vp9_iht4x4_16_add(input, dest, stride, ADST_DCT);
-    flipud(dest, stride, 4);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr(dest, stride, 4);
-    vp9_iht4x4_16_add(input, dest, stride, DCT_ADST);
-    fliplr(dest, stride, 4);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud(dest, stride, 4);
-    vp9_iht4x4_16_add(input, dest, stride, ADST_ADST);
-    fliplrud(dest, stride, 4);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr(dest, stride, 4);
-    vp9_iht4x4_16_add(input, dest, stride, ADST_ADST);
-    fliplr(dest, stride, 4);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud(dest, stride, 4);
-    vp9_iht4x4_16_add(input, dest, stride, ADST_ADST);
-    flipud(dest, stride, 4);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_iht4x4_16_add(input, dest, stride, tx_type);
@@ -1944,26 +1955,6 @@ void vp9_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_iht8x8_64_add_c(input, dest, stride, tx_type);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud(dest, stride, 8);
-    vp9_iht8x8_64_add(input, dest, stride, ADST_DCT);
-    flipud(dest, stride, 8);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr(dest, stride, 8);
-    vp9_iht8x8_64_add(input, dest, stride, DCT_ADST);
-    fliplr(dest, stride, 8);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud(dest, stride, 8);
-    vp9_iht8x8_64_add(input, dest, stride, ADST_ADST);
-    fliplrud(dest, stride, 8);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr(dest, stride, 8);
-    vp9_iht8x8_64_add(input, dest, stride, ADST_ADST);
-    fliplr(dest, stride, 8);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud(dest, stride, 8);
-    vp9_iht8x8_64_add(input, dest, stride, ADST_ADST);
-    flipud(dest, stride, 8);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_iht8x8_64_add(input, dest, stride, tx_type);
@@ -1977,26 +1968,6 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_iht16x16_256_add_c(input, dest, stride, tx_type);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud(dest, stride, 16);
-    vp9_iht16x16_256_add(input, dest, stride, ADST_DCT);
-    flipud(dest, stride, 16);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr(dest, stride, 16);
-    vp9_iht16x16_256_add(input, dest, stride, DCT_ADST);
-    fliplr(dest, stride, 16);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud(dest, stride, 16);
-    vp9_iht16x16_256_add(input, dest, stride, ADST_ADST);
-    fliplrud(dest, stride, 16);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr(dest, stride, 16);
-    vp9_iht16x16_256_add(input, dest, stride, ADST_ADST);
-    fliplr(dest, stride, 16);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud(dest, stride, 16);
-    vp9_iht16x16_256_add(input, dest, stride, ADST_ADST);
-    flipud(dest, stride, 16);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_iht16x16_256_add(input, dest, stride, tx_type);
@@ -2775,7 +2746,7 @@ static void highbd_iadst4(const tran_low_t *input, tran_low_t *output, int bd) {
 
 void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
-  const highbd_transform_2d IHT_4[] = {
+  const highbd_transform_2d HIGH_IHT_4[] = {
     { vp9_highbd_idct4, vp9_highbd_idct4  },    // DCT_DCT  = 0
     { highbd_iadst4, vp9_highbd_idct4 },    // ADST_DCT = 1
     { vp9_highbd_idct4, highbd_iadst4 },    // DCT_ADST = 2
@@ -2798,25 +2769,43 @@ void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
   int i, j;
-  tran_low_t out[4 * 4];
-  tran_low_t *outptr = out;
-  tran_low_t temp_in[4], temp_out[4];
+  tran_low_t tmp;
+  tran_low_t out[4][4];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 4;
 
-  // Inverse transform row vectors.
+  // inverse transform row vectors
   for (i = 0; i < 4; ++i) {
-    IHT_4[tx_type].rows(input, outptr, bd);
+    HIGH_IHT_4[tx_type].rows(input, out[i], bd);
     input  += 4;
-    outptr += 4;
   }
 
-  // Inverse transform column vectors.
+  // transpose
+  for (i = 1 ; i < 4; i++) {
+    for (j = 0; j < i; j++) {
+            tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
+  }
+
+  // inverse transform column vectors
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j * 4 + i];
-    IHT_4[tx_type].cols(temp_in, temp_out, bd);
+    HIGH_IHT_4[tx_type].cols(out[i], out[i], bd);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides((uint8_t**)&dest,
+                     &stride, &outp, &outstride, tx_type, 4 * 2);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j) {
-      dest[j * stride + i] = highbd_clip_pixel_add(
-          dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 4), bd);
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = highbd_clip_pixel_add(dest[d],
+                                      ROUND_POWER_OF_TWO(outp[s], 4), bd);
     }
   }
 }
@@ -2921,28 +2910,46 @@ static const highbd_transform_2d HIGH_IHT_8[] = {
 
 void vp9_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
-  int i, j;
-  tran_low_t out[8 * 8];
-  tran_low_t *outptr = out;
-  tran_low_t temp_in[8], temp_out[8];
-  const highbd_transform_2d ht = HIGH_IHT_8[tx_type];
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
-  // Inverse transform row vectors.
+  int i, j;
+  tran_low_t tmp;
+  tran_low_t out[8][8];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 8;
+
+  // inverse transform row vectors
   for (i = 0; i < 8; ++i) {
-    ht.rows(input, outptr, bd);
-    input += 8;
-    outptr += 8;
+    HIGH_IHT_8[tx_type].rows(input, out[i], bd);
+    input  += 8;
   }
 
-  // Inverse transform column vectors.
+  // transpose
+  for (i = 1 ; i < 8; i++) {
+    for (j = 0; j < i; j++) {
+            tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
+  }
+
+  // inverse transform column vectors
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
-    ht.cols(temp_in, temp_out, bd);
+    HIGH_IHT_8[tx_type].cols(out[i], out[i], bd);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides((uint8_t**)&dest,
+                     &stride, &outp, &outstride, tx_type, 8 * 2);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j) {
-      dest[j * stride + i] = highbd_clip_pixel_add(
-          dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 5), bd);
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = highbd_clip_pixel_add(dest[d],
+                                      ROUND_POWER_OF_TWO(outp[s], 5), bd);
     }
   }
 }
@@ -3361,28 +3368,46 @@ static const highbd_transform_2d HIGH_IHT_16[] = {
 
 void vp9_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
                                    int stride, int tx_type, int bd) {
-  int i, j;
-  tran_low_t out[16 * 16];
-  tran_low_t *outptr = out;
-  tran_low_t temp_in[16], temp_out[16];
-  const highbd_transform_2d ht = HIGH_IHT_16[tx_type];
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
-  // Rows
+  int i, j;
+  tran_low_t tmp;
+  tran_low_t out[16][16];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 16;
+
+  // inverse transform row vectors
   for (i = 0; i < 16; ++i) {
-    ht.rows(input, outptr, bd);
-    input += 16;
-    outptr += 16;
+    HIGH_IHT_16[tx_type].rows(input, out[i], bd);
+    input  += 16;
   }
 
-  // Columns
+  // transpose
+  for (i = 1 ; i < 16; i++) {
+    for (j = 0; j < i; j++) {
+            tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
+  }
+
+  // inverse transform column vectors
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j * 16 + i];
-    ht.cols(temp_in, temp_out, bd);
+    HIGH_IHT_16[tx_type].cols(out[i], out[i], bd);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides((uint8_t**)&dest, &stride,
+                     &outp, &outstride, tx_type, 16 * 2);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j) {
-      dest[j * stride + i] = highbd_clip_pixel_add(
-          dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 6), bd);
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = highbd_clip_pixel_add(dest[d],
+                                      ROUND_POWER_OF_TWO(outp[s], 6), bd);
     }
   }
 }
@@ -3954,26 +3979,6 @@ void vp9_highbd_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_iht4x4_16_add_c(input, dest, stride, tx_type, bd);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_DCT, bd);
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-    vp9_highbd_iht4x4_16_add(input, dest, stride, DCT_ADST, bd);
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
-    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
-    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_highbd_iht4x4_16_add(input, dest, stride, tx_type, bd);
@@ -3987,26 +3992,6 @@ void vp9_highbd_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_iht8x8_64_add_c(input, dest, stride, tx_type, bd);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_DCT, bd);
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-    vp9_highbd_iht8x8_64_add(input, dest, stride, DCT_ADST, bd);
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
-    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
-    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_highbd_iht8x8_64_add(input, dest, stride, tx_type, bd);
@@ -4020,26 +4005,6 @@ void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_highbd_iht16x16_256_add_c(input, dest, stride, tx_type, bd);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_DCT, bd);
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-    vp9_highbd_iht16x16_256_add(input, dest, stride, DCT_ADST, bd);
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
-    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
-    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
-    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
-    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_highbd_iht16x16_256_add(input, dest, stride, tx_type, bd);
@@ -4276,6 +4241,19 @@ void vp9_iht4x4_16_c(const tran_low_t *input, int16_t *dest, int stride,
   tran_low_t *outptr = out;
   tran_low_t temp_in[4], temp_out[4];
 
+  // FIXME: If the SR_MODE experiment is resurrected, then this function must
+  // be fixed to handle the FLIPADST cases by actually flipping its output
+  // See the other vp9_iht*add_c functions
+#if CONFIG_EXT_TX
+  assert(tx_type != FLIPADST_DCT);
+  assert(tx_type != DCT_FLIPADST);
+  assert(tx_type != FLIPADST_FLIPADST);
+  assert(tx_type != ADST_FLIPADST);
+  assert(tx_type != FLIPADST_ADST);
+  assert(tx_type != DST_FLIPADST);
+  assert(tx_type != FLIPADST_DST);
+#endif  // CONFIG_EXT_TX
+
   // inverse transform row vectors
   for (i = 0; i < 4; ++i) {
     IHT_4[tx_type].rows(input, outptr);
@@ -4301,6 +4279,19 @@ void vp9_iht8x8_64_c(const tran_low_t *input, int16_t *dest, int stride,
   tran_low_t *outptr = out;
   tran_low_t temp_in[8], temp_out[8];
   const transform_2d ht = IHT_8[tx_type];
+
+  // FIXME: If the SR_MODE experiment is resurrected, then this function must
+  // be fixed to handle the FLIPADST cases by actually flipping its output
+  // See the other vp9_iht*add_c functions
+#if CONFIG_EXT_TX
+  assert(tx_type != FLIPADST_DCT);
+  assert(tx_type != DCT_FLIPADST);
+  assert(tx_type != FLIPADST_FLIPADST);
+  assert(tx_type != ADST_FLIPADST);
+  assert(tx_type != FLIPADST_ADST);
+  assert(tx_type != DST_FLIPADST);
+  assert(tx_type != FLIPADST_DST);
+#endif  // CONFIG_EXT_TX
 
   // inverse transform row vectors
   for (i = 0; i < 8; ++i) {
@@ -4377,6 +4368,19 @@ void vp9_iht16x16_256_c(const tran_low_t *input, int16_t *dest, int stride,
   tran_low_t *outptr = out;
   tran_low_t temp_in[16], temp_out[16];
   const transform_2d ht = IHT_16[tx_type];
+
+  // FIXME: If the SR_MODE experiment is resurrected, then this function must
+  // be fixed to handle the FLIPADST cases by actually flipping its output
+  // See the other vp9_iht*add_c functions
+#if CONFIG_EXT_TX
+  assert(tx_type != FLIPADST_DCT);
+  assert(tx_type != DCT_FLIPADST);
+  assert(tx_type != FLIPADST_FLIPADST);
+  assert(tx_type != ADST_FLIPADST);
+  assert(tx_type != FLIPADST_ADST);
+  assert(tx_type != DST_FLIPADST);
+  assert(tx_type != FLIPADST_DST);
+#endif  // CONFIG_EXT_TX
 
   // Rows
   for (i = 0; i < 16; ++i) {
@@ -4582,26 +4586,6 @@ void vp9_iht4x4(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_iht4x4_16_c(input, dest, stride, tx_type);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud(dest, stride, 4);
-    vp9_iht4x4_16(input, dest, stride, ADST_DCT);
-    flipud(dest, stride, 4);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr(dest, stride, 4);
-    vp9_iht4x4_16(input, dest, stride, DCT_ADST);
-    fliplr(dest, stride, 4);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud(dest, stride, 4);
-    vp9_iht4x4_16(input, dest, stride, ADST_ADST);
-    fliplrud(dest, stride, 4);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr(dest, stride, 4);
-    vp9_iht4x4_16(input, dest, stride, ADST_ADST);
-    fliplr(dest, stride, 4);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud(dest, stride, 4);
-    vp9_iht4x4_16(input, dest, stride, ADST_ADST);
-    flipud(dest, stride, 4);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_iht4x4_16(input, dest, stride, tx_type);
@@ -4615,26 +4599,6 @@ void vp9_iht8x8(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_iht8x8_64_c(input, dest, stride, tx_type);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud(dest, stride, 8);
-    vp9_iht8x8_64(input, dest, stride, ADST_DCT);
-    flipud(dest, stride, 8);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr(dest, stride, 8);
-    vp9_iht8x8_64(input, dest, stride, DCT_ADST);
-    fliplr(dest, stride, 8);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud(dest, stride, 8);
-    vp9_iht8x8_64(input, dest, stride, ADST_ADST);
-    fliplrud(dest, stride, 8);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr(dest, stride, 8);
-    vp9_iht8x8_64(input, dest, stride, ADST_ADST);
-    fliplr(dest, stride, 8);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud(dest, stride, 8);
-    vp9_iht8x8_64(input, dest, stride, ADST_ADST);
-    flipud(dest, stride, 8);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_iht8x8_64(input, dest, stride, tx_type);
@@ -4648,26 +4612,6 @@ void vp9_iht16x16(TX_TYPE tx_type, const tran_low_t *input, int16_t *dest,
 #if CONFIG_EXT_TX
   } else if (is_dst_used(tx_type)) {
     vp9_iht16x16_256_c(input, dest, stride, tx_type);
-  } else if (tx_type == FLIPADST_DCT) {
-    flipud(dest, stride, 16);
-    vp9_iht16x16_256(input, dest, stride, ADST_DCT);
-    flipud(dest, stride, 16);
-  } else if (tx_type == DCT_FLIPADST) {
-    fliplr(dest, stride, 16);
-    vp9_iht16x16_256(input, dest, stride, DCT_ADST);
-    fliplr(dest, stride, 16);
-  } else if (tx_type == FLIPADST_FLIPADST) {
-    fliplrud(dest, stride, 16);
-    vp9_iht16x16_256(input, dest, stride, ADST_ADST);
-    fliplrud(dest, stride, 16);
-  } else if (tx_type == ADST_FLIPADST) {
-    fliplr(dest, stride, 16);
-    vp9_iht16x16_256(input, dest, stride, ADST_ADST);
-    fliplr(dest, stride, 16);
-  } else if (tx_type == FLIPADST_ADST) {
-    flipud(dest, stride, 16);
-    vp9_iht16x16_256(input, dest, stride, ADST_ADST);
-    flipud(dest, stride, 16);
 #endif  // CONFIG_EXT_TX
   } else {
     vp9_iht16x16_256(input, dest, stride, tx_type);
