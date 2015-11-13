@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb3987d2_f32cc36e",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-11-13T19:42:29Z",
+      "side": 1,
+      "message": "prefer to use #if !ALLOW_FILTER_INTRA_MODES",
+      "range": {
+        "startLine": 524,
+        "startChar": 10,
+        "endLine": 524,
+        "endChar": 11
+      },
+      "revId": "b7ab2dcd851f228e4b0b950744c5e3862e06197e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
