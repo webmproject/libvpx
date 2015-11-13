@@ -28,7 +28,6 @@ static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
 }
 
 #if CONFIG_EXT_TX
-#if CONFIG_DST1
 void vp9_fdst4(const tran_low_t *input, tran_low_t *output) {
   // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
@@ -191,7 +190,6 @@ void vp9_fdst16(const tran_low_t *input, tran_low_t *output) {
         d69  * sinvalue_lookup[6] - d78  * sinvalue_lookup[7];
   output[15] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
 }
-#endif  // CONFIG_DST1
 #endif  // CONFIG_EXT_TX
 
 void vp9_fdct4(const tran_low_t *input, tran_low_t *output) {
@@ -417,7 +415,6 @@ static void maybe_flip_input(const int16_t **src, int *src_stride, int l,
       *src = buff;
       *src_stride = l;
       break;
-#if CONFIG_DST1
     case DST_DST:
     case DCT_DST:
     case DST_DCT:
@@ -434,7 +431,6 @@ static void maybe_flip_input(const int16_t **src, int *src_stride, int l,
       *src = buff;
       *src_stride = l;
       break;
-#endif  // CONFIG_DST1
     default:
       assert(0);
       break;

@@ -148,7 +148,6 @@ typedef enum {
   FLIPADST_FLIPADST = 6,
   ADST_FLIPADST = 7,
   FLIPADST_ADST = 8,
-#if CONFIG_DST1
   DST_DST = 9,
   DST_DCT = 10,
   DCT_DST = 11,
@@ -156,7 +155,6 @@ typedef enum {
   ADST_DST = 13,
   DST_FLIPADST = 14,
   FLIPADST_DST = 15,
-#endif  // CONFIG_DST1
 #if CONFIG_WAVELETS
   WAVELET1_DCT_DCT,
 #endif  // CONFIG_WAVELETS
@@ -178,7 +176,6 @@ typedef enum {
   ALT6 = 6,
   ALT7 = 7,
   ALT8 = 8,
-#if CONFIG_DST1
   ALT9 = 9,
   ALT10 = 10,
   ALT11 = 11,
@@ -186,7 +183,6 @@ typedef enum {
   ALT13 = 13,
   ALT14 = 14,
   ALT15 = 15,
-#endif  // CONFIG_DST1
   EXT_TX_TYPES
 } EXT_TX_TYPE;
 #endif  // CONFIG_EXT_TX
