@@ -307,7 +307,6 @@ EXPERIMENT_LIST="
     qctx_tprobs
     sr_mode
     multi_ref
-    last4_ref
     ext_coding_unit_size
 "
 CONFIG_LIST="
