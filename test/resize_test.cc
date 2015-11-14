@@ -407,7 +407,7 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
   // Disable dropped frames.
   cfg_.rc_dropframe_thresh = 0;
   // Starting bitrate low.
-  cfg_.rc_target_bitrate = 90;
+  cfg_.rc_target_bitrate = 80;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   unsigned int last_w = cfg_.g_w;
@@ -432,7 +432,7 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
   }
 
   // Verify that we get 2 resize events in this test.
-  ASSERT_EQ(2, resize_count) << "Resizing should occur twice.";
+  ASSERT_EQ(resize_count, 2) << "Resizing should occur twice.";
 }
 
 vpx_img_fmt_t CspForFrameNumber(int frame) {
