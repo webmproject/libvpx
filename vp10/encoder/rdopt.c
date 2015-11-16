@@ -4277,10 +4277,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                       bsize, ref_best_rd);
 #endif
     } else {
+      int idx, idy;
       super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                       bsize, ref_best_rd);
-      for (i = 0; i < 64; ++i)
-        mbmi->inter_tx_size[i] = mbmi->tx_size;
+      for (idy = 0; idy < xd->n8_h; ++idy)
+        for (idx = 0; idx < xd->n8_w; ++idx)
+          mbmi->inter_tx_size[idy * 8 + idx] = mbmi->tx_size;
     }
 #else
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
@@ -5549,8 +5551,7 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
     }
 
 #if CONFIG_VAR_TX
-    for (i = 0; i < 64; ++i)
-      mbmi->inter_tx_size[i] = mbmi->tx_size;
+    mbmi->inter_tx_size[0] = mbmi->tx_size;
 #endif
 
     if (ref_frame == INTRA_FRAME) {
