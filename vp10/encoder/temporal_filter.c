@@ -135,15 +135,38 @@ void vp10_temporal_filter_apply_c(uint8_t *frame1,
 
   for (i = 0, k = 0; i < block_height; i++) {
     for (j = 0; j < block_width; j++, k++) {
-      int src_byte = frame1[byte];
-      int pixel_value = *frame2++;
+      int pixel_value = *frame2;
 
-      modifier   = src_byte - pixel_value;
-      // This is an integer approximation of:
-      // float coeff = (3.0 * modifer * modifier) / pow(2, strength);
-      // modifier =  (int)roundf(coeff > 16 ? 0 : 16-coeff);
-      modifier  *= modifier;
-      modifier  *= 3;
+      // non-local mean approach
+      int diff_sse[9] = { 0 };
+      int idx, idy, index = 0;
+
+      for (idy = -1; idy <= 1; ++idy) {
+        for (idx = -1; idx <= 1; ++idx) {
+          int row = i + idy;
+          int col = j + idx;
+
+          if (row >= 0 && row < (int)block_height &&
+              col >= 0 && col < (int)block_width) {
+            int diff = frame1[byte + idy * (int)stride + idx] -
+                frame2[idy * (int)block_width + idx];
+            diff_sse[index] = diff * diff;
+            ++index;
+          }
+        }
+      }
+
+      assert(index > 0);
+
+      modifier = 0;
+      for (idx = 0; idx < 9; ++idx)
+        modifier += diff_sse[idx];
+
+      modifier *= 3;
+      modifier /= index;
+
+      ++frame2;
+
       modifier  += rounding;
       modifier >>= strength;
 
@@ -416,16 +439,16 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
           }
 #else
           // Apply the filter (YUV)
-          vp10_temporal_filter_apply(f->y_buffer + mb_y_offset, f->y_stride,
+          vp10_temporal_filter_apply_c(f->y_buffer + mb_y_offset, f->y_stride,
                                     predictor, 16, 16,
                                     strength, filter_weight,
                                     accumulator, count);
-          vp10_temporal_filter_apply(f->u_buffer + mb_uv_offset, f->uv_stride,
+          vp10_temporal_filter_apply_c(f->u_buffer + mb_uv_offset, f->uv_stride,
                                     predictor + 256,
                                     mb_uv_width, mb_uv_height, strength,
                                     filter_weight, accumulator + 256,
                                     count + 256);
-          vp10_temporal_filter_apply(f->v_buffer + mb_uv_offset, f->uv_stride,
+          vp10_temporal_filter_apply_c(f->v_buffer + mb_uv_offset, f->uv_stride,
                                     predictor + 512,
                                     mb_uv_width, mb_uv_height, strength,
                                     filter_weight, accumulator + 512,
