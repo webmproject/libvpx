@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5b2a4b7b_3f356886",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-17T00:32:42Z",
+      "side": 1,
+      "message": "ssse3 isn\u0027t a direct replacement, so I believe the point being made here is that it could be deleted in another change or replaced by sse2 first, which is the baseline we\u0027re trying to achieve at the moment. also given the unrolled loop in the ssse3 did you try that with this or an sse2 version?",
+      "parentUuid": "5b2a4b7b_841c0f48",
+      "revId": "ced0a34886e424d26c11e9d942a07d6581873546",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1648aa4e_3b052355",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 3
