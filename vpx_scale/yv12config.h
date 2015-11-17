@@ -21,7 +21,11 @@ extern "C" {
 #include "vpx/vpx_integer.h"
 
 #define VP8BORDERINPIXELS           32
+#if CONFIG_EXT_CODING_UNIT_SIZE
+#define VP9INNERBORDERINPIXELS      160
+#else
 #define VP9INNERBORDERINPIXELS      96
+#endif
 #define VP9_INTERP_EXTEND           4
 #define VP9_ENC_BORDER_IN_PIXELS    160
 #define VP9_DEC_BORDER_IN_PIXELS    (CODING_UNIT_SIZE / 2)
