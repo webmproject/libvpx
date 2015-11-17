@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5b532b27_1b976f2c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "Updated in patch set 2.",
+      "parentUuid": "5b25eb9e_33d11f4e",
+      "revId": "499847fa0af897a7a8427702631eb665dd5c1710",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b3453db_56fee1d3",
         "filename": "test/test_intra_pred_speed.cc",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-14T19:57:55Z",
       "side": 1,
       "message": "most lines are kept to 80 characters or less\n\nhttps://google.github.io/styleguide/cppguide.html#Line_Length",
+      "revId": "499847fa0af897a7a8427702631eb665dd5c1710",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_b15be737",
+        "filename": "test/test_intra_pred_speed.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "Updated in patch set 2.",
+      "parentUuid": "1b3453db_56fee1d3",
       "revId": "499847fa0af897a7a8427702631eb665dd5c1710",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3b2597a9_ca090240",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "Updated in patch set 2.",
+      "parentUuid": "1b3453db_3603559e",
+      "revId": "499847fa0af897a7a8427702631eb665dd5c1710",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b25eb9e_53cc9bb3",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "76d4867d_b8d12e23",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "Updated in patch set 2.",
+      "parentUuid": "5b25eb9e_53cc9bb3",
+      "revId": "499847fa0af897a7a8427702631eb665dd5c1710",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d4867d_42c5a55d",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2015-11-14T19:57:55Z",
       "side": 1,
       "message": "delete all the trailing whitespace",
+      "revId": "499847fa0af897a7a8427702631eb665dd5c1710",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_298656cc",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "Updated in patch set 2.",
+      "parentUuid": "76d4867d_42c5a55d",
       "revId": "499847fa0af897a7a8427702631eb665dd5c1710",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
