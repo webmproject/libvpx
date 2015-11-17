@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5b2a4b7b_841c0f48",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "Since SSE3 instruction is used in the modification, this function is relocated to intrapred_ssse3.asm",
+      "parentUuid": "36392eb5_7321987a",
+      "revId": "ced0a34886e424d26c11e9d942a07d6581873546",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1648aa4e_3b052355",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "5b25eb9e_4cccf83a",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "fixed in set 4.",
+      "parentUuid": "1648aa4e_3b052355",
+      "revId": "ced0a34886e424d26c11e9d942a07d6581873546",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96549ae5_ff4f0b66",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-16T20:32:51Z",
       "side": 1,
       "message": "same",
+      "revId": "ced0a34886e424d26c11e9d942a07d6581873546",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b6aafda_b7b8a8e9",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:11:51Z",
+      "side": 1,
+      "message": "fixed in set 4.",
+      "parentUuid": "96549ae5_ff4f0b66",
       "revId": "ced0a34886e424d26c11e9d942a07d6581873546",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
