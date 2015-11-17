@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "fb75bfb9_679eda7a",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T22:52:44Z",
+      "side": 1,
+      "message": "Below are some stats collected from my local x86-64 machine. \n\n- Original is with loop and implemented with SSE. Left neighbor is read multiple times. Run time in ./test_intra_pred_speed is ~480 ms. \n\n- By unrolling the loop, still with SSE, run time reduced to ~410 ms, or 15% speed up.  \n\n- By reading the left neighbor only once, with loop, with SSE, run time reduced to ~420 ms, or 15% speed up. \n\n- By combining the two above (unrolling loop and one time read of left,) with SSE, run time down to 370 ms, or 23% speed up. \n\n- One more step by reducing the memory access to above, with SSE2, run time down to ~350 ms, or 28% speed up. \n\nThe result of SSE2+unrolling is slightly better than what is previously observed in patch set 5 with SSSE3 implementation. Therefore, I checked it in as patch set 6 for review.",
+      "parentUuid": "5b2a4b7b_3f356886",
+      "revId": "ced0a34886e424d26c11e9d942a07d6581873546",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1648aa4e_3b052355",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 3
