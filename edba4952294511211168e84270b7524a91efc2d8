@@ -22,6 +22,30 @@
       "revId": "edba4952294511211168e84270b7524a91efc2d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db11db43_40ccc2b3",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 3844,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-11-17T17:06:54Z",
+      "side": 1,
+      "message": "Are you sure? Each thread has a copy of mb but the pointers in that copy need to be set to point to the different thread specific counters. I.e. \u0026td-\u003erd_counts.m_search_count. So we have to wait till these are themselves set up / created which appears to be in vp9_encode_tiles_mt() for the multi-threaded case.\n\nI think this is something I previously tried and the correct thread data structure was not available.",
+      "parentUuid": "3b2597a9_a2138441",
+      "range": {
+        "startLine": 3844,
+        "startChar": 61,
+        "endLine": 3844,
+        "endChar": 62
+      },
+      "revId": "edba4952294511211168e84270b7524a91efc2d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
