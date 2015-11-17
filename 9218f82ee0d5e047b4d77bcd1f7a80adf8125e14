@@ -16,6 +16,24 @@
       "revId": "9218f82ee0d5e047b4d77bcd1f7a80adf8125e14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_072db968",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-17T00:31:47Z",
+      "side": 1,
+      "message": "changed to RET in set 5. Unrolling helps, together with reducing the mem read at [leftq].",
+      "parentUuid": "fb2e9f8f_aadc7a61",
+      "revId": "9218f82ee0d5e047b4d77bcd1f7a80adf8125e14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
