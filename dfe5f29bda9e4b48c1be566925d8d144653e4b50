@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96d1fa8e_f4d616e7",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-17T00:32:42Z",
+      "side": 1,
+      "message": "delete this trailing whitespace. git diff/show --check can be used to find these locally.",
+      "revId": "dfe5f29bda9e4b48c1be566925d8d144653e4b50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_62735734",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-17T00:32:42Z",
+      "side": 1,
+      "message": "was there a visible difference in performance in the unrolled loop?",
+      "revId": "dfe5f29bda9e4b48c1be566925d8d144653e4b50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
