@@ -459,9 +459,7 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
   // an invalid bitstream and need to return an error.
 
   uint8_t marker;
-#if CONFIG_MISC_FIXES
   size_t frame_sz_sum = 0;
-#endif
 
   assert(data_sz);
   marker = read_marker(decrypt_cb, decrypt_state, data + data_sz - 1);
@@ -470,7 +468,7 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
   if ((marker & 0xe0) == 0xc0) {
     const uint32_t frames = (marker & 0x7) + 1;
     const uint32_t mag = ((marker >> 3) & 0x3) + 1;
-    const size_t index_sz = 2 + mag * (frames - CONFIG_MISC_FIXES);
+    const size_t index_sz = 2 + mag * (frames - 1);
 
     // This chunk is marked as having a superframe index but doesn't have
     // enough data for it, thus it's an invalid superframe index.
@@ -501,20 +499,16 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
         x = clear_buffer;
       }
 
-      for (i = 0; i < frames - CONFIG_MISC_FIXES; ++i) {
+      for (i = 0; i < frames - 1; ++i) {
         uint32_t this_sz = 0;
 
         for (j = 0; j < mag; ++j)
           this_sz |= (*x++) << (j * 8);
-        this_sz += CONFIG_MISC_FIXES;
+        this_sz += 1;
         sizes[i] = this_sz;
-#if CONFIG_MISC_FIXES
         frame_sz_sum += this_sz;
-#endif
       }
-#if CONFIG_MISC_FIXES
       sizes[i] = data_sz - index_sz - frame_sz_sum;
-#endif
       *count = frames;
     }
   }

@@ -30,11 +30,6 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type] << 3;
   const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type] << 3;
 
-#if !CONFIG_MISC_FIXES
-  // Blank the reference vector list
-  memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
-#endif
-
   // The nearest 2 blocks are treated differently
   // if the size < 8x8 we get the mv from the bmi substructure,
   // and we also need to keep a mode count.
@@ -133,9 +128,6 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     }
 
     if (prev_frame_mvs->ref_frame[1] > INTRA_FRAME &&
-#if !CONFIG_MISC_FIXES
-        prev_frame_mvs->mv[1].as_int != prev_frame_mvs->mv[0].as_int &&
-#endif
         prev_frame_mvs->ref_frame[1] != ref_frame) {
       int_mv mv = prev_frame_mvs->mv[1];
       if (ref_sign_bias[prev_frame_mvs->ref_frame[1]] !=
@@ -148,17 +140,9 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   }
 
  Done:
-
   mode_context[ref_frame] = counter_to_context[context_counter];
-
-#if CONFIG_MISC_FIXES
   for (i = refmv_count; i < MAX_MV_REF_CANDIDATES; ++i)
       mv_ref_list[i].as_int = 0;
-#else
-  // Clamp vectors
-  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
-    clamp_mv_ref(&mv_ref_list[i].as_mv, bw, bh, xd);
-#endif
 }
 
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,

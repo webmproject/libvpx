@@ -2818,15 +2818,9 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   vp10_zero(rdc->filter_diff);
 
   for (i = 0; i < (cm->seg.enabled ? MAX_SEGMENTS : 1); ++i) {
-#if CONFIG_MISC_FIXES
     const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
-#endif
     xd->lossless[i] = cm->y_dc_delta_q == 0 &&
-#if CONFIG_MISC_FIXES
                       qindex == 0 &&
-#else
-                      cm->base_qindex == 0 &&
-#endif
                       cm->uv_dc_delta_q == 0 &&
                       cm->uv_ac_delta_q == 0;
   }
