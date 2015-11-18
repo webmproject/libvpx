@@ -16,6 +16,24 @@
       "revId": "2635573a7f2e4bbd259379acf91efb97d983359f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b816bc7_ebe71142",
+        "filename": "vpx_ports/vpx_once.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1001218
+      },
+      "writtenOn": "2015-11-18T22:27:31Z",
+      "side": 1,
+      "message": "https://msdn.microsoft.com/en-us/library/w7wd1177%28v\u003dvs.120%29.aspx says, \"Zero initializaton is performed...At program startup, for all named variables that have static duration. These variables may later be initialized again.\"\n\nThe 2015 version of this page has the same text. Of course it\u0027s not clear if the \u0027may\u0027 applies to constexp initializers or just dynamic ones, but I think this is out of date.\n\nhttps://msdn.microsoft.com/en-us/library/s1sb61xd%28v\u003dvs.120%29.aspx says, \"Assigning a value to a static local variable in a multithreaded application is not thread safe and we do not recommend it as a programming practice.\"\n\nThere doesn\u0027t seem to be a Visual Studio 2015 version of that page, but see the \u0027Magic statics\u0027 line on https://msdn.microsoft.com/en-US/library/hh567368%28v\u003dvs.140%29.aspx\n\nC++11 added a locking requirement for local static initialization which addresses the problem either way. \"If control enters the declaration concurrently while the variable is being initialized, the concurrent execution shall wait for completion of the initialization.\" Sec. 6.7(4) or http://en.cppreference.com/w/cpp/language/storage_duration#Static_local_variables\n\nI believe the \u0027magic statics\u0027 feature refers to support for this new C++11 behaviour, so by documention at least, it\u0027s only supported in VS 2015 and later.\n\nWe confirmed VS2015 generates appropriate code, but didn\u0027t try to demonstrate racy initialization with VS2013 or earlier.",
+      "parentUuid": "76d4867d_acbd6b85",
+      "revId": "2635573a7f2e4bbd259379acf91efb97d983359f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
