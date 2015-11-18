@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "db847bce_4ef89035",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-18T19:10:47Z",
+      "side": 1,
+      "message": "one load + shift is 3%-5% faster in ./test_intra_pred_speed on the two x86-64 units I have.",
+      "parentUuid": "5b25eb9e_8d30c797",
+      "revId": "c627bcf4789b0bfb25be304e73963319a18d6bb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b25eb9e_4d3aaf75",
         "filename": "vpx_dsp/x86/intrapred_sse2.asm",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "5b25eb9e_13be1880",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-18T19:10:47Z",
+      "side": 1,
+      "message": "will add comments.",
+      "parentUuid": "5b25eb9e_4d3aaf75",
+      "revId": "c627bcf4789b0bfb25be304e73963319a18d6bb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b2597a9_af17df24",
         "filename": "vpx_dsp/x86/intrapred_sse2.asm",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-18T02:10:41Z",
       "side": 1,
       "message": "same here m4 \u003d left[0], left[1], etc.",
+      "revId": "c627bcf4789b0bfb25be304e73963319a18d6bb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_5672567f",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-18T19:10:47Z",
+      "side": 1,
+      "message": "will add comments.",
+      "parentUuid": "3b2597a9_af17df24",
       "revId": "c627bcf4789b0bfb25be304e73963319a18d6bb6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
