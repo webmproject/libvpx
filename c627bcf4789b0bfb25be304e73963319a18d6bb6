@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b25eb9e_8d30c797",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-18T02:10:41Z",
+      "side": 1,
+      "message": "note this only is guaranteed to work because above is extended. was there a noticeable difference between the 2 contiguous loads and the one load + shift?",
+      "revId": "c627bcf4789b0bfb25be304e73963319a18d6bb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_4d3aaf75",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-18T02:10:41Z",
+      "side": 1,
+      "message": "this module isn\u0027t very good about this, but it can be helpful to readers to leave notes about register layout and the result of significant operations, e.g.,\n\n; above - above_left",
+      "revId": "c627bcf4789b0bfb25be304e73963319a18d6bb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b2597a9_af17df24",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-18T02:10:41Z",
+      "side": 1,
+      "message": "same here m4 \u003d left[0], left[1], etc.",
+      "revId": "c627bcf4789b0bfb25be304e73963319a18d6bb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
