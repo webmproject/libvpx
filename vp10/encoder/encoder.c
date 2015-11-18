@@ -419,10 +419,6 @@ static void save_coding_context(VP10_COMP *cpi) {
   memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
          MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
 
-#if !CONFIG_MISC_FIXES
-  vp10_copy(cc->segment_pred_probs, cm->segp.pred_probs);
-#endif
-
   memcpy(cpi->coding_context.last_frame_seg_map_copy,
          cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
 
@@ -446,10 +442,6 @@ static void restore_coding_context(VP10_COMP *cpi) {
          MV_VALS * sizeof(*cc->nmvcosts_hp[0]));
   memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
          MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
-
-#if !CONFIG_MISC_FIXES
-  vp10_copy(cm->segp.pred_probs, cc->segment_pred_probs);
-#endif
 
   memcpy(cm->last_frame_seg_map,
          cpi->coding_context.last_frame_seg_map_copy,
@@ -3677,12 +3669,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
 
   if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     vp10_adapt_coef_probs(cm);
-#if CONFIG_MISC_FIXES
     vp10_adapt_intra_frame_probs(cm);
-#else
-    if (!frame_is_intra_only(cm))
-      vp10_adapt_intra_frame_probs(cm);
-#endif
   }
 
   if (!frame_is_intra_only(cm)) {

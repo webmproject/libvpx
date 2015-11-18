@@ -832,11 +832,6 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 intra_pred_no_4x4(d207)
 intra_pred_no_4x4(d63)
 intra_pred_no_4x4(d45)
-#if CONFIG_MISC_FIXES
-intra_pred_allsizes(d207e)
-intra_pred_allsizes(d63e)
-intra_pred_no_4x4(d45e)
-#endif
 intra_pred_no_4x4(d117)
 intra_pred_no_4x4(d135)
 intra_pred_no_4x4(d153)

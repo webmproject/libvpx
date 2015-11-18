@@ -196,17 +196,9 @@ static int read_intra_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_offset, int x_mis, int y_mis,
                                  vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
-#if CONFIG_MISC_FIXES
   FRAME_COUNTS *counts = xd->counts;
   struct segmentation_probs *const segp = &cm->fc->seg;
-#else
-  struct segmentation_probs *const segp = &cm->segp;
-#endif
   int segment_id;
-
-#if !CONFIG_MISC_FIXES
-  (void) xd;
-#endif
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
@@ -214,10 +206,8 @@ static int read_intra_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   assert(seg->update_map && !seg->temporal_update);
 
   segment_id = read_segment_id(r, segp);
-#if CONFIG_MISC_FIXES
   if (counts)
     ++counts->seg.tree_total[segment_id];
-#endif
   set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;
 }
@@ -237,12 +227,8 @@ static void copy_segment_id(const VP10_COMMON *cm,
 static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col, vpx_reader *r) {
   struct segmentation *const seg = &cm->seg;
-#if CONFIG_MISC_FIXES
   FRAME_COUNTS *counts = xd->counts;
   struct segmentation_probs *const segp = &cm->fc->seg;
-#else
-  struct segmentation_probs *const segp = &cm->segp;
-#endif
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   int predicted_segment_id, segment_id;
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
@@ -270,25 +256,19 @@ static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
     const int ctx = vp10_get_pred_context_seg_id(xd);
     const vpx_prob pred_prob = segp->pred_probs[ctx];
     mbmi->seg_id_predicted = vpx_read(r, pred_prob);
-#if CONFIG_MISC_FIXES
     if (counts)
       ++counts->seg.pred[ctx][mbmi->seg_id_predicted];
-#endif
     if (mbmi->seg_id_predicted) {
       segment_id = predicted_segment_id;
     } else {
       segment_id = read_segment_id(r, segp);
-#if CONFIG_MISC_FIXES
       if (counts)
         ++counts->seg.tree_mispred[segment_id];
-#endif
     }
   } else {
     segment_id = read_segment_id(r, segp);
-#if CONFIG_MISC_FIXES
     if (counts)
       ++counts->seg.tree_total[segment_id];
-#endif
   }
   set_segment_id(cm, mi_offset, x_mis, y_mis, segment_id);
   return segment_id;

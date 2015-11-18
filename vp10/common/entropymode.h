@@ -77,9 +77,7 @@ typedef struct frame_contexts {
   vpx_prob intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
                             [TX_TYPES - 1];
 #endif  // CONFIG_EXT_TX
-#if CONFIG_MISC_FIXES
   struct segmentation_probs seg;
-#endif
 #if CONFIG_EXT_INTRA
   vpx_prob ext_intra_probs[PLANE_TYPES];
 #endif  // CONFIG_EXT_INTRA
@@ -111,9 +109,7 @@ typedef struct FRAME_COUNTS {
   unsigned int intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
                            [TX_TYPES];
 #endif  // CONFIG_EXT_TX
-#if CONFIG_MISC_FIXES
   struct seg_counts seg;
-#endif
 #if CONFIG_EXT_INTRA
   unsigned int ext_intra[PLANE_TYPES][2];
 #endif  // CONFIG_EXT_INTRA
@@ -121,11 +117,6 @@ typedef struct FRAME_COUNTS {
 
 extern const vpx_prob vp10_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
                                         [INTRA_MODES - 1];
-#if !CONFIG_MISC_FIXES
-extern const vpx_prob vp10_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-extern const vpx_prob vp10_kf_partition_probs[PARTITION_CONTEXTS]
-                                            [PARTITION_TYPES - 1];
-#endif
 extern const vpx_prob
 vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES][PALETTE_Y_MODE_CONTEXTS];
 extern const vpx_prob

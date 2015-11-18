@@ -106,18 +106,6 @@ static void write_inter_mode(vpx_writer *w, PREDICTION_MODE mode,
                   &inter_mode_encodings[INTER_OFFSET(mode)]);
 }
 
-
-static void write_inv_signed_literal(struct vpx_write_bit_buffer *wb,
-                                     int data, int bits) {
-#if CONFIG_MISC_FIXES
-  vpx_wb_write_literal(wb, data, bits + 1);
-#else
-  vpx_wb_write_literal(wb, abs(data), bits);
-  vpx_wb_write_bit(wb, data < 0);
-#endif
-}
-
-
 static void encode_unsigned_max(struct vpx_write_bit_buffer *wb,
                                 int data, int max) {
   vpx_wb_write_literal(wb, data, get_unsigned_bits(max));
@@ -333,9 +321,6 @@ static void pack_mb_tokens(vpx_writer *w,
   int count = 0;
   const int seg_eob = 16 << (tx << 1);
 #endif
-#if !CONFIG_MISC_FIXES
-  (void) tx;
-#endif
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
@@ -383,12 +368,8 @@ static void pack_mb_tokens(vpx_writer *w,
 
     if (b->base_val) {
       const int e = p->extra, l = b->len;
-#if CONFIG_MISC_FIXES
       int skip_bits =
           (b->base_val == CAT6_MIN_VAL) ? TX_SIZES - 1 - tx : 0;
-#else
-      int skip_bits = 0;
-#endif
 
       if (l) {
         const unsigned char *pb = b->prob;
@@ -571,11 +552,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
   const MACROBLOCK *x = &cpi->td.mb;
   const MACROBLOCKD *xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
-#if CONFIG_MISC_FIXES
   const struct segmentation_probs *const segp = &cm->fc->seg;
-#else
-  const struct segmentation_probs *const segp = &cm->segp;
-#endif
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
   const PREDICTION_MODE mode = mbmi->mode;
@@ -760,11 +737,7 @@ static void write_palette_mode_info(const VP10_COMMON *cm,
 static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                               MODE_INFO **mi_8x8, vpx_writer *w) {
   const struct segmentation *const seg = &cm->seg;
-#if CONFIG_MISC_FIXES
   const struct segmentation_probs *const segp = &cm->fc->seg;
-#else
-  const struct segmentation_probs *const segp = &cm->segp;
-#endif
   const MODE_INFO *const mi = mi_8x8[0];
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
@@ -1246,7 +1219,7 @@ static void encode_loopfilter(struct loopfilter *lf,
 static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
   if (delta_q != 0) {
     vpx_wb_write_bit(wb, 1);
-    vpx_wb_write_inv_signed_literal(wb, delta_q, CONFIG_MISC_FIXES ? 6 : 4);
+    vpx_wb_write_inv_signed_literal(wb, delta_q, 6);
   } else {
     vpx_wb_write_bit(wb, 0);
   }
@@ -1263,11 +1236,7 @@ static void encode_quantization(const VP10_COMMON *const cm,
 static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
                                 struct vpx_write_bit_buffer *wb) {
   int i, j;
-
   const struct segmentation *seg = &cm->seg;
-#if !CONFIG_MISC_FIXES
-  const struct segmentation_probs *segp = &cm->segp;
-#endif
 
   vpx_wb_write_bit(wb, seg->enabled);
   if (!seg->enabled)
@@ -1282,16 +1251,6 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (seg->update_map) {
     // Select the coding strategy (temporal or spatial)
     vp10_choose_segmap_coding_method(cm, xd);
-#if !CONFIG_MISC_FIXES
-    // Write out probabilities used to decode unpredicted  macro-block segments
-    for (i = 0; i < SEG_TREE_PROBS; i++) {
-      const int prob = segp->tree_probs[i];
-      const int update = prob != MAX_PROB;
-      vpx_wb_write_bit(wb, update);
-      if (update)
-        vpx_wb_write_literal(wb, prob, 8);
-    }
-#endif
 
     // Write out the chosen coding method.
     if (!frame_is_intra_only(cm) && !cm->error_resilient_mode) {
@@ -1299,18 +1258,6 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
     } else {
       assert(seg->temporal_update == 0);
     }
-
-#if !CONFIG_MISC_FIXES
-    if (seg->temporal_update) {
-      for (i = 0; i < PREDICTION_PROBS; i++) {
-        const int prob = segp->pred_probs[i];
-        const int update = prob != MAX_PROB;
-        vpx_wb_write_bit(wb, update);
-        if (update)
-          vpx_wb_write_literal(wb, prob, 8);
-      }
-    }
-#endif
   }
 
   // Segmentation data
@@ -1338,7 +1285,6 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-#if CONFIG_MISC_FIXES
 static void update_seg_probs(VP10_COMP *cpi, vpx_writer *w) {
   VP10_COMMON *cm = &cpi->common;
 
@@ -1365,19 +1311,9 @@ static void write_txfm_mode(TX_MODE mode, struct vpx_write_bit_buffer *wb) {
   if (mode != TX_MODE_SELECT)
     vpx_wb_write_literal(wb, mode, 2);
 }
-#endif
 
 static void update_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
-#if !CONFIG_MISC_FIXES
-  // Mode
-  vpx_write_literal(w, VPXMIN(cm->tx_mode, ALLOW_32X32), 2);
-  if (cm->tx_mode >= ALLOW_32X32)
-    vpx_write_bit(w, cm->tx_mode == TX_MODE_SELECT);
-
-  // Probabilities
-#endif
-
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
     unsigned int ct_8x8p[TX_SIZES - 3][2];
@@ -1522,7 +1458,7 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
 
         // size of this tile
         assert(residual_bc.pos > 0);
-        tile_sz = residual_bc.pos - CONFIG_MISC_FIXES;
+        tile_sz = residual_bc.pos - 1;
         mem_put_le32(data_ptr + total_size, tile_sz);
         max_tile = max_tile > tile_sz ? max_tile : tile_sz;
         total_size += 4;
@@ -1567,10 +1503,8 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
     if (cfg != NULL) {
       found = cm->width == cfg->y_crop_width &&
               cm->height == cfg->y_crop_height;
-#if CONFIG_MISC_FIXES
       found &= cm->render_width == cfg->render_width &&
                cm->render_height == cfg->render_height;
-#endif
     }
     vpx_wb_write_bit(wb, found);
     if (found) {
@@ -1581,15 +1515,8 @@ static void write_frame_size_with_refs(VP10_COMP *cpi,
   if (!found) {
     vpx_wb_write_literal(wb, cm->width - 1, 16);
     vpx_wb_write_literal(wb, cm->height - 1, 16);
-
-#if CONFIG_MISC_FIXES
     write_render_size(cm, wb);
-#endif
   }
-
-#if !CONFIG_MISC_FIXES
-  write_render_size(cm, wb);
-#endif
 }
 
 static void write_sync_code(struct vpx_write_bit_buffer *wb) {
@@ -1667,7 +1594,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
       vpx_wb_write_bit(wb, cm->intra_only);
 
     if (!cm->error_resilient_mode) {
-#if CONFIG_MISC_FIXES
       if (cm->intra_only) {
         vpx_wb_write_bit(wb,
                          cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL);
@@ -1678,25 +1604,11 @@ static void write_uncompressed_header(VP10_COMP *cpi,
           vpx_wb_write_bit(wb,
                            cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL);
       }
-#else
-      static const int reset_frame_context_conv_tbl[3] = { 0, 2, 3 };
-
-      vpx_wb_write_literal(wb,
-          reset_frame_context_conv_tbl[cm->reset_frame_context], 2);
-#endif
     }
 
     if (cm->intra_only) {
       write_sync_code(wb);
-
-#if CONFIG_MISC_FIXES
       write_bitdepth_colorspace_sampling(cm, wb);
-#else
-      // Note for profile 0, 420 8bpp is assumed.
-      if (cm->profile > PROFILE_0) {
-        write_bitdepth_colorspace_sampling(cm, wb);
-      }
-#endif
 
       vpx_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
       write_frame_size(cm, wb);
@@ -1722,11 +1634,9 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   if (!cm->error_resilient_mode) {
     vpx_wb_write_bit(wb,
                      cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF);
-#if CONFIG_MISC_FIXES
     if (cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF)
-#endif
       vpx_wb_write_bit(wb, cm->refresh_frame_context !=
-                               REFRESH_FRAME_CONTEXT_BACKWARD);
+          REFRESH_FRAME_CONTEXT_BACKWARD);
   }
 
   vpx_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);
@@ -1734,7 +1644,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   encode_loopfilter(&cm->lf, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
-#if CONFIG_MISC_FIXES
   if (!cm->seg.enabled && xd->lossless[0])
     cm->tx_mode = TX_4X4;
   else
@@ -1747,7 +1656,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
     if (!use_hybrid_pred)
       vpx_wb_write_bit(wb, use_compound_pred);
   }
-#endif
 
   write_tile_info(cm, wb);
 }
@@ -1757,21 +1665,10 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = cpi->td.counts;
   vpx_writer header_bc;
-  int i;
-#if CONFIG_MISC_FIXES
-  int j;
-#endif
+  int i, j;
 
   vpx_start_encode(&header_bc, data);
-
-#if !CONFIG_MISC_FIXES
-  if (cpi->td.mb.e_mbd.lossless[0])
-    cm->tx_mode = TX_4X4;
-  else
-    update_txfm_probs(cm, &header_bc, counts);
-#else
   update_txfm_probs(cm, &header_bc, counts);
-#endif
   update_coef_probs(cpi, &header_bc);
 
 #if CONFIG_VAR_TX
@@ -1779,7 +1676,6 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 #endif
 
   update_skip_probs(cm, &header_bc, counts);
-#if CONFIG_MISC_FIXES
   update_seg_probs(cpi, &header_bc);
 
   for (i = 0; i < INTRA_MODES; ++i)
@@ -1789,16 +1685,13 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   for (i = 0; i < PARTITION_CONTEXTS; ++i)
     prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
                      counts->partition[i], PARTITION_TYPES, &header_bc);
-#endif
 
   if (frame_is_intra_only(cm)) {
     vp10_copy(cm->kf_y_prob, vp10_kf_y_mode_prob);
-#if CONFIG_MISC_FIXES
     for (i = 0; i < INTRA_MODES; ++i)
       for (j = 0; j < INTRA_MODES; ++j)
         prob_diff_update(vp10_intra_mode_tree, cm->kf_y_prob[i][j],
                          counts->kf_y_mode[i][j], INTRA_MODES, &header_bc);
-#endif
   } else {
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
       prob_diff_update(vp10_inter_mode_tree, cm->fc->inter_mode_probs[i],
@@ -1813,23 +1706,10 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 
     if (cpi->allow_comp_inter_inter) {
       const int use_hybrid_pred = cm->reference_mode == REFERENCE_MODE_SELECT;
-#if !CONFIG_MISC_FIXES
-      const int use_compound_pred = cm->reference_mode != SINGLE_REFERENCE;
-
-      vpx_write_bit(&header_bc, use_compound_pred);
-      if (use_compound_pred) {
-        vpx_write_bit(&header_bc, use_hybrid_pred);
-        if (use_hybrid_pred)
-          for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-            vp10_cond_prob_diff_update(&header_bc, &fc->comp_inter_prob[i],
-                                      counts->comp_inter[i]);
-      }
-#else
       if (use_hybrid_pred)
         for (i = 0; i < COMP_INTER_CONTEXTS; i++)
           vp10_cond_prob_diff_update(&header_bc, &fc->comp_inter_prob[i],
                                      counts->comp_inter[i]);
-#endif
     }
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
@@ -1850,12 +1730,6 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
       prob_diff_update(vp10_intra_mode_tree, cm->fc->y_mode_prob[i],
                        counts->y_mode[i], INTRA_MODES, &header_bc);
 
-#if !CONFIG_MISC_FIXES
-    for (i = 0; i < PARTITION_CONTEXTS; ++i)
-      prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
-                       counts->partition[i], PARTITION_TYPES, &header_bc);
-#endif
-
     vp10_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc,
                         &counts->mv);
 #if CONFIG_EXT_TX
@@ -1869,7 +1743,6 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   return header_bc.pos;
 }
 
-#if CONFIG_MISC_FIXES
 static int remux_tiles(uint8_t *dest, const int sz,
                        const int n_tiles, const int mag) {
   int rpos = 0, wpos = 0, n;
@@ -1909,7 +1782,6 @@ static int remux_tiles(uint8_t *dest, const int sz,
 
   return wpos;
 }
-#endif
 
 void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
   uint8_t *data = dest;
@@ -1917,14 +1789,9 @@ void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
   struct vpx_write_bit_buffer wb = {data, 0};
   struct vpx_write_bit_buffer saved_wb;
   unsigned int max_tile;
-#if CONFIG_MISC_FIXES
   VP10_COMMON *const cm = &cpi->common;
   const int n_log2_tiles = cm->log2_tile_rows + cm->log2_tile_cols;
   const int have_tiles = n_log2_tiles > 0;
-#else
-  const int have_tiles = 0;  // we have tiles, but we don't want to write a
-                             // tile size marker in the header
-#endif
 
   write_uncompressed_header(cpi, &wb);
   saved_wb = wb;
@@ -1940,7 +1807,6 @@ void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
   data += first_part_size;
 
   data_sz = encode_tiles(cpi, data, &max_tile);
-#if CONFIG_MISC_FIXES
   if (max_tile > 0) {
     int mag;
     unsigned int mask;
@@ -1959,7 +1825,6 @@ void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
   } else {
     assert(n_log2_tiles == 0);
   }
-#endif
   data += data_sz;
 
   // TODO(jbb): Figure out what to do if first_part_size > 16 bits.

@@ -55,10 +55,6 @@ typedef struct {
   int nmvcosts[2][MV_VALS];
   int nmvcosts_hp[2][MV_VALS];
 
-#if !CONFIG_MISC_FIXES
-  vpx_prob segment_pred_probs[PREDICTION_PROBS];
-#endif
-
   unsigned char *last_frame_seg_map_copy;
 
   // 0 = Intra, Last, GF, ARF
