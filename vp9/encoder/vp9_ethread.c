@@ -30,6 +30,10 @@ static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
             for (n = 0; n < ENTROPY_TOKENS; n++)
               td->rd_counts.coef_counts[i][j][k][l][m][n] +=
                   td_t->rd_counts.coef_counts[i][j][k][l][m][n];
+
+  // Counts of all motion searches and exhuastive mesh searches.
+  td->rd_counts.m_search_count += td_t->rd_counts.m_search_count;
+  td->rd_counts.ex_search_count += td_t->rd_counts.ex_search_count;
 }
 
 static int enc_worker_hook(EncWorkerData *const thread_data, void *unused) {

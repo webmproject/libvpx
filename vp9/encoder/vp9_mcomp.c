@@ -1517,69 +1517,83 @@ static int fast_dia_search(const MACROBLOCK *x,
 
 #undef CHECK_BETTER
 
-int vp9_full_range_search_c(const MACROBLOCK *x,
-                            const search_site_config *cfg,
-                            MV *ref_mv, MV *best_mv,
-                            int search_param, int sad_per_bit, int *num00,
-                            const vp9_variance_fn_ptr_t *fn_ptr,
-                            const MV *center_mv) {
+// Exhuastive motion search around a given centre position with a given
+// step size.
+static int exhuastive_mesh_search(const MACROBLOCK *x,
+                                  MV *ref_mv, MV *best_mv,
+                                  int range, int step, int sad_per_bit,
+                                  const vp9_variance_fn_ptr_t *fn_ptr,
+                                  const MV *center_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
-  const int range = 64;
-  const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
+  MV fcenter_mv = {center_mv->row, center_mv->col};
   unsigned int best_sad = INT_MAX;
   int r, c, i;
   int start_col, end_col, start_row, end_row;
+  int col_step = (step > 1) ? step : 4;
 
-  // The cfg and search_param parameters are not used in this search variant
-  (void)cfg;
-  (void)search_param;
+  assert(step >= 1);
 
-  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
-  *best_mv = *ref_mv;
-  *num00 = 11;
+  clamp_mv(&fcenter_mv, x->mv_col_min, x->mv_col_max,
+           x->mv_row_min, x->mv_row_max);
+  *best_mv = fcenter_mv;
   best_sad = fn_ptr->sdf(what->buf, what->stride,
-                         get_buf_from_mv(in_what, ref_mv), in_what->stride) +
-                 mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
-  start_row = VPXMAX(-range, x->mv_row_min - ref_mv->row);
-  start_col = VPXMAX(-range, x->mv_col_min - ref_mv->col);
-  end_row = VPXMIN(range, x->mv_row_max - ref_mv->row);
-  end_col = VPXMIN(range, x->mv_col_max - ref_mv->col);
+             get_buf_from_mv(in_what, &fcenter_mv), in_what->stride) +
+             mvsad_err_cost(x, &fcenter_mv, ref_mv, sad_per_bit);
+  start_row = VPXMAX(-range, x->mv_row_min - fcenter_mv.row);
+  start_col = VPXMAX(-range, x->mv_col_min - fcenter_mv.col);
+  end_row = VPXMIN(range, x->mv_row_max - fcenter_mv.row);
+  end_col = VPXMIN(range, x->mv_col_max - fcenter_mv.col);
 
-  for (r = start_row; r <= end_row; ++r) {
-    for (c = start_col; c <= end_col; c += 4) {
-      if (c + 3 <= end_col) {
-        unsigned int sads[4];
-        const uint8_t *addrs[4];
-        for (i = 0; i < 4; ++i) {
-          const MV mv = {ref_mv->row + r, ref_mv->col + c + i};
-          addrs[i] = get_buf_from_mv(in_what, &mv);
-        }
-
-        fn_ptr->sdx4df(what->buf, what->stride, addrs, in_what->stride, sads);
-
-        for (i = 0; i < 4; ++i) {
-          if (sads[i] < best_sad) {
-            const MV mv = {ref_mv->row + r, ref_mv->col + c + i};
-            const unsigned int sad = sads[i] +
-                mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
-            if (sad < best_sad) {
-              best_sad = sad;
-              *best_mv = mv;
-            }
+  for (r = start_row; r <= end_row; r += step) {
+    for (c = start_col; c <= end_col; c += col_step) {
+      // Step > 1 means we are not checking every location in this pass.
+      if (step > 1) {
+        const MV mv = {fcenter_mv.row + r, fcenter_mv.col + c};
+        unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
+                           get_buf_from_mv(in_what, &mv), in_what->stride);
+        if (sad < best_sad) {
+          sad += mvsad_err_cost(x, &mv, ref_mv, sad_per_bit);
+          if (sad < best_sad) {
+            best_sad = sad;
+            *best_mv = mv;
           }
         }
       } else {
-        for (i = 0; i < end_col - c; ++i) {
-          const MV mv = {ref_mv->row + r, ref_mv->col + c + i};
-          unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
-              get_buf_from_mv(in_what, &mv), in_what->stride);
-          if (sad < best_sad) {
-            sad += mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
+        // 4 sads in a single call if we are checking every location
+        if (c + 3 <= end_col) {
+          unsigned int sads[4];
+          const uint8_t *addrs[4];
+          for (i = 0; i < 4; ++i) {
+            const MV mv = {fcenter_mv.row + r, fcenter_mv.col + c + i};
+            addrs[i] = get_buf_from_mv(in_what, &mv);
+          }
+          fn_ptr->sdx4df(what->buf, what->stride, addrs,
+                         in_what->stride, sads);
+
+          for (i = 0; i < 4; ++i) {
+            if (sads[i] < best_sad) {
+              const MV mv = {fcenter_mv.row + r, fcenter_mv.col + c + i};
+              const unsigned int sad = sads[i] +
+                  mvsad_err_cost(x, &mv, ref_mv, sad_per_bit);
+              if (sad < best_sad) {
+                best_sad = sad;
+                *best_mv = mv;
+              }
+            }
+          }
+        } else {
+          for (i = 0; i < end_col - c; ++i) {
+            const MV mv = {fcenter_mv.row + r, fcenter_mv.col + c + i};
+            unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
+                get_buf_from_mv(in_what, &mv), in_what->stride);
             if (sad < best_sad) {
-              best_sad = sad;
-              *best_mv = mv;
+              sad += mvsad_err_cost(x, &mv, ref_mv, sad_per_bit);
+              if (sad < best_sad) {
+                best_sad = sad;
+                *best_mv = mv;
+              }
             }
           }
         }
@@ -2011,6 +2025,70 @@ static int full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
   return bestsme;
 }
 
+#define MIN_RANGE 7
+#define MAX_RANGE 256
+#define MIN_INTERVAL 1
+// Runs an limited range exhaustive mesh search using a pattern set
+// according to the encode speed profile.
+static int full_pixel_exhaustive(VP9_COMP *cpi, MACROBLOCK *x,
+                                 MV *centre_mv_full, int sadpb,  int *cost_list,
+                                 const vp9_variance_fn_ptr_t *fn_ptr,
+                                 const MV *ref_mv, MV *dst_mv) {
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  MV temp_mv = {centre_mv_full->row, centre_mv_full->col};
+  MV f_ref_mv = {ref_mv->row >> 3, ref_mv->col >> 3};
+  int bestsme;
+  int i;
+  int interval = sf->mesh_patterns[0].interval;
+  int range = sf->mesh_patterns[0].range;
+  int baseline_interval_divisor;
+
+  // Keep track of number of exhaustive calls (this frame in this thread).
+  ++(*x->ex_search_count_ptr);
+
+  // Trap illegal values for interval and range for this function.
+  if ((range < MIN_RANGE) || (range > MAX_RANGE) ||
+      (interval < MIN_INTERVAL) || (interval > range))
+    return INT_MAX;
+
+  baseline_interval_divisor = range / interval;
+
+  // Check size of proposed first range against magnitude of the centre
+  // value used as a starting point.
+  range = VPXMAX(range, (5 * VPXMAX(abs(temp_mv.row), abs(temp_mv.col))) / 4);
+  range = VPXMIN(range, MAX_RANGE);
+  interval = VPXMAX(interval, range / baseline_interval_divisor);
+
+  // initial search
+  bestsme = exhuastive_mesh_search(x, &f_ref_mv, &temp_mv, range,
+                                  interval, sadpb, fn_ptr, &temp_mv);
+
+  if ((interval > MIN_INTERVAL) && (range > MIN_RANGE)) {
+    // Progressive searches with range and step size decreasing each time
+    // till we reach a step size of 1. Then break out.
+    for (i = 1; i < MAX_MESH_STEP; ++i) {
+      // First pass with coarser step and longer range
+      bestsme = exhuastive_mesh_search(x, &f_ref_mv, &temp_mv,
+                                       sf->mesh_patterns[i].range,
+                                       sf->mesh_patterns[i].interval,
+                                       sadpb, fn_ptr, &temp_mv);
+
+      if (sf->mesh_patterns[i].interval == 1)
+        break;
+    }
+  }
+
+  if (bestsme < INT_MAX)
+    bestsme = vp9_get_mvpred_var(x, &temp_mv, ref_mv, fn_ptr, 1);
+  *dst_mv = temp_mv;
+
+  // Return cost list.
+  if (cost_list) {
+    calc_int_cost_list(x, ref_mv, sadpb, fn_ptr, dst_mv, cost_list);
+  }
+  return bestsme;
+}
+
 int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
                           int sad_per_bit, int distance,
                           const vp9_variance_fn_ptr_t *fn_ptr,
@@ -2324,6 +2402,18 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
   return best_sad;
 }
 
+#define MIN_EX_SEARCH_LIMIT 128
+static int is_exhaustive_allowed(VP9_COMP *cpi, MACROBLOCK *x) {
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  const int max_ex = VPXMAX(MIN_EX_SEARCH_LIMIT,
+      (*x->m_search_count_ptr * sf->max_exaustive_pct) / 100);
+
+  return sf->allow_exhaustive_searches &&
+      (sf->exhaustive_searches_thresh < INT_MAX) &&
+      (*x->ex_search_count_ptr <= max_ex) &&
+      !cpi->rc.is_src_frame_alt_ref;
+}
+
 int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
                           BLOCK_SIZE bsize, MV *mvp_full,
                           int step_param, int error_per_bit,
@@ -2341,6 +2431,9 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
     cost_list[3] = INT_MAX;
     cost_list[4] = INT_MAX;
   }
+
+  // Keep track of number of searches (this frame in this thread).
+  ++(*x->m_search_count_ptr);
 
   switch (method) {
     case FAST_DIAMOND:
@@ -2367,6 +2460,27 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
       var = full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
                                MAX_MVSEARCH_STEPS - 1 - step_param,
                                1, cost_list, fn_ptr, ref_mv, tmp_mv);
+
+      // Should we allow a follow on exhaustive search?
+      if (is_exhaustive_allowed(cpi, x)) {
+        int64_t exhuastive_thr = sf->exhaustive_searches_thresh;
+        exhuastive_thr >>= 8 - (b_width_log2_lookup[bsize] +
+                                b_height_log2_lookup[bsize]);
+
+        // Threshold variance for an exhaustive full search.
+        if (var > exhuastive_thr) {
+            int var_ex;
+          MV tmp_mv_ex;
+          var_ex = full_pixel_exhaustive(cpi, x, tmp_mv,
+                                         error_per_bit, cost_list, fn_ptr,
+                                         ref_mv, &tmp_mv_ex);
+
+          if (var_ex < var) {
+            var = var_ex;
+            *tmp_mv = tmp_mv_ex;
+          }
+        }
+      }
       break;
     default:
       assert(0 && "Invalid search method.");
