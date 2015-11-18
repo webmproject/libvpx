@@ -195,6 +195,13 @@ typedef struct MV_SPEED_FEATURES {
   int fullpel_search_step_param;
 } MV_SPEED_FEATURES;
 
+#define MAX_MESH_STEP 6
+
+typedef struct MESH_PATTERN {
+  int range;
+  int interval;
+} MESH_PATTERN;
+
 typedef struct SPEED_FEATURES {
   MV_SPEED_FEATURES mv;
 
@@ -298,6 +305,18 @@ typedef struct SPEED_FEATURES {
   // This allows us to use motion search at other sizes as a starting
   // point for this motion search and limits the search range around it.
   int adaptive_motion_search;
+
+  // Flag for allowing some use of exhaustive searches;
+  int allow_exhaustive_searches;
+
+  // Threshold for allowing exhaistive motion search.
+  int exhaustive_searches_thresh;
+
+  // Maximum number of exhaustive searches for a frame.
+  int max_exaustive_pct;
+
+  // Pattern to be used for any exhaustive mesh searches.
+  MESH_PATTERN mesh_patterns[MAX_MESH_STEP];
 
   int schedule_mode_search;
 
