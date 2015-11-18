@@ -422,7 +422,8 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
 #if CONFIG_EXT_TX
     if (get_ext_tx_types(mbmi->tx_size, mbmi->sb_type, 0) > 1 &&
         cm->base_qindex > 0 && !mbmi->skip &&
-        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+        ALLOW_INTRA_EXT_TX) {
       FRAME_COUNTS *counts = xd->counts;
       int eset = get_ext_tx_set(mbmi->tx_size, mbmi->sb_type, 0);
       if (eset > 0) {
@@ -887,7 +888,7 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
           if (counts)
             ++counts->inter_ext_tx[eset][mbmi->tx_size][mbmi->tx_type];
         }
-      } else {
+      } else if (ALLOW_INTRA_EXT_TX) {
         if (eset > 0) {
           mbmi->tx_type = vpx_read_tree(r, vp10_ext_tx_intra_tree[eset],
                                         cm->fc->intra_ext_tx_prob[eset]
