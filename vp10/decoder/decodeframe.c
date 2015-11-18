@@ -2155,7 +2155,7 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
     if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-        if (!use_inter_ext_tx_for_tx[s][i]) continue;
+        if (!use_inter_ext_tx_for_txsize[s][i]) continue;
         for (j = 0; j < num_ext_tx_set_inter[s] - 1; ++j)
           vp10_diff_update_prob(r, &fc->inter_ext_tx_prob[s][i][j]);
       }
@@ -2165,7 +2165,7 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
     if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-        if (!use_intra_ext_tx_for_tx[s][i]) continue;
+        if (!use_intra_ext_tx_for_txsize[s][i]) continue;
         for (j = 0; j < INTRA_MODES; ++j)
           for (k = 0; k < num_ext_tx_set_intra[s] - 1; ++k)
             vp10_diff_update_prob(r, &fc->intra_ext_tx_prob[s][i][j][k]);
