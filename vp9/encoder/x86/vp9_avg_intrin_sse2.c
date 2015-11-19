@@ -283,7 +283,9 @@ void vp9_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
   }
 }
 
-int16_t vp9_satd_sse2(const int16_t *coeff, int length) {
+// TODO(jingning): the sum needs to be accumulated in 32-bits to avoid rollover.
+#if 0
+int vp9_satd_sse2(const int16_t *coeff, int length) {
   int i;
   __m128i sum = _mm_load_si128((const __m128i *)coeff);
   __m128i sign = _mm_srai_epi16(sum, 15);
@@ -309,6 +311,7 @@ int16_t vp9_satd_sse2(const int16_t *coeff, int length) {
 
   return _mm_extract_epi16(sum, 0);
 }
+#endif
 
 void vp9_int_pro_row_sse2(int16_t *hbuf, uint8_t const*ref,
                           const int ref_stride, const int height) {

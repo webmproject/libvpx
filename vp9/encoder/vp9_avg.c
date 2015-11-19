@@ -117,14 +117,14 @@ void vp9_hadamard_16x16_c(int16_t const *src_diff, int src_stride,
 
 // coeff: 16 bits, dynamic range [-32640, 32640].
 // length: value range {16, 64, 256, 1024}.
-int16_t vp9_satd_c(const int16_t *coeff, int length) {
+int vp9_satd_c(const int16_t *coeff, int length) {
   int i;
   int satd = 0;
   for (i = 0; i < length; ++i)
     satd += abs(coeff[i]);
 
   // satd: 26 bits, dynamic range [-32640 * 1024, 32640 * 1024]
-  return (int16_t)satd;
+  return satd;
 }
 
 // Integer projection onto row vectors.
