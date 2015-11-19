@@ -329,7 +329,7 @@ DECLS(ssse3, ssse3);
 #undef DECLS
 #undef DECL
 
-#define FN(w, h, wf, wlog2, hlog2, opt, cast) \
+#define FN(w, h, wf, wlog2, hlog2, opt, cast_prod, cast) \
 unsigned int vpx_sub_pixel_variance##w##x##h##_##opt(const uint8_t *src, \
                                                      int src_stride, \
                                                      int x_offset, \
@@ -365,23 +365,23 @@ unsigned int vpx_sub_pixel_variance##w##x##h##_##opt(const uint8_t *src, \
     } \
   } \
   *sse_ptr = sse; \
-  return sse - ((cast se * se) >> (wlog2 + hlog2)); \
+  return sse - (cast_prod (cast se * se) >> (wlog2 + hlog2)); \
 }
 
 #define FNS(opt1, opt2) \
-FN(64, 64, 16, 6, 6, opt1, (int64_t)); \
-FN(64, 32, 16, 6, 5, opt1, (int64_t)); \
-FN(32, 64, 16, 5, 6, opt1, (int64_t)); \
-FN(32, 32, 16, 5, 5, opt1, (int64_t)); \
-FN(32, 16, 16, 5, 4, opt1, (int64_t)); \
-FN(16, 32, 16, 4, 5, opt1, (int64_t)); \
-FN(16, 16, 16, 4, 4, opt1, (uint32_t)); \
-FN(16,  8, 16, 4, 3, opt1, (uint32_t)); \
-FN(8,  16,  8, 3, 4, opt1, (uint32_t)); \
-FN(8,   8,  8, 3, 3, opt1, (uint32_t)); \
-FN(8,   4,  8, 3, 2, opt1, (uint32_t)); \
-FN(4,   8,  4, 2, 3, opt2, (uint32_t)); \
-FN(4,   4,  4, 2, 2, opt2, (uint32_t))
+FN(64, 64, 16, 6, 6, opt1, (int64_t), (int64_t)); \
+FN(64, 32, 16, 6, 5, opt1, (int64_t), (int64_t)); \
+FN(32, 64, 16, 5, 6, opt1, (int64_t), (int64_t)); \
+FN(32, 32, 16, 5, 5, opt1, (int64_t), (int64_t)); \
+FN(32, 16, 16, 5, 4, opt1, (int64_t), (int64_t)); \
+FN(16, 32, 16, 4, 5, opt1, (int64_t), (int64_t)); \
+FN(16, 16, 16, 4, 4, opt1, (uint32_t), (int64_t)); \
+FN(16,  8, 16, 4, 3, opt1, (int32_t), (int32_t)); \
+FN(8,  16,  8, 3, 4, opt1, (int32_t), (int32_t)); \
+FN(8,   8,  8, 3, 3, opt1, (int32_t), (int32_t)); \
+FN(8,   4,  8, 3, 2, opt1, (int32_t), (int32_t)); \
+FN(4,   8,  4, 2, 3, opt2, (int32_t), (int32_t)); \
+FN(4,   4,  4, 2, 2, opt2, (int32_t), (int32_t))
 
 FNS(sse2, sse);
 FNS(ssse3, ssse3);
@@ -410,7 +410,7 @@ DECLS(ssse3, ssse3);
 #undef DECL
 #undef DECLS
 
-#define FN(w, h, wf, wlog2, hlog2, opt, cast) \
+#define FN(w, h, wf, wlog2, hlog2, opt, cast_prod, cast) \
 unsigned int vpx_sub_pixel_avg_variance##w##x##h##_##opt(const uint8_t *src, \
                                                          int src_stride, \
                                                          int x_offset, \
@@ -451,23 +451,23 @@ unsigned int vpx_sub_pixel_avg_variance##w##x##h##_##opt(const uint8_t *src, \
     } \
   } \
   *sseptr = sse; \
-  return sse - ((cast se * se) >> (wlog2 + hlog2)); \
+  return sse - (cast_prod (cast se * se) >> (wlog2 + hlog2)); \
 }
 
 #define FNS(opt1, opt2) \
-FN(64, 64, 16, 6, 6, opt1, (int64_t)); \
-FN(64, 32, 16, 6, 5, opt1, (int64_t)); \
-FN(32, 64, 16, 5, 6, opt1, (int64_t)); \
-FN(32, 32, 16, 5, 5, opt1, (int64_t)); \
-FN(32, 16, 16, 5, 4, opt1, (int64_t)); \
-FN(16, 32, 16, 4, 5, opt1, (int64_t)); \
-FN(16, 16, 16, 4, 4, opt1, (uint32_t)); \
-FN(16,  8, 16, 4, 3, opt1, (uint32_t)); \
-FN(8,  16,  8, 3, 4, opt1, (uint32_t)); \
-FN(8,   8,  8, 3, 3, opt1, (uint32_t)); \
-FN(8,   4,  8, 3, 2, opt1, (uint32_t)); \
-FN(4,   8,  4, 2, 3, opt2, (uint32_t)); \
-FN(4,   4,  4, 2, 2, opt2, (uint32_t))
+FN(64, 64, 16, 6, 6, opt1, (int64_t), (int64_t)); \
+FN(64, 32, 16, 6, 5, opt1, (int64_t), (int64_t)); \
+FN(32, 64, 16, 5, 6, opt1, (int64_t), (int64_t)); \
+FN(32, 32, 16, 5, 5, opt1, (int64_t), (int64_t)); \
+FN(32, 16, 16, 5, 4, opt1, (int64_t), (int64_t)); \
+FN(16, 32, 16, 4, 5, opt1, (int64_t), (int64_t)); \
+FN(16, 16, 16, 4, 4, opt1, (uint32_t), (int64_t)); \
+FN(16,  8, 16, 4, 3, opt1, (uint32_t), (int32_t)); \
+FN(8,  16,  8, 3, 4, opt1, (uint32_t), (int32_t)); \
+FN(8,   8,  8, 3, 3, opt1, (uint32_t), (int32_t)); \
+FN(8,   4,  8, 3, 2, opt1, (uint32_t), (int32_t)); \
+FN(4,   8,  4, 2, 3, opt2, (uint32_t), (int32_t)); \
+FN(4,   4,  4, 2, 2, opt2, (uint32_t), (int32_t))
 
 FNS(sse2, sse);
 FNS(ssse3, ssse3);
