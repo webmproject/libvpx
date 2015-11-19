@@ -693,7 +693,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         vp10_write_token(w, vp10_ext_tx_inter_tree[eset],
                          cm->fc->inter_ext_tx_prob[eset][mbmi->tx_size],
                          &ext_tx_inter_encodings[eset][mbmi->tx_type]);
-    } else {
+    } else if (ALLOW_INTRA_EXT_TX) {
       if (eset > 0)
         vp10_write_token(
             w, vp10_ext_tx_intra_tree[eset],
@@ -790,7 +790,8 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_EXT_TX
   if (get_ext_tx_types(mbmi->tx_size, bsize, 0) > 1 &&
       cm->base_qindex > 0 && !mbmi->skip &&
-      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+      ALLOW_INTRA_EXT_TX) {
     int eset = get_ext_tx_set(mbmi->tx_size, bsize, 0);
     if (eset > 0)
       vp10_write_token(

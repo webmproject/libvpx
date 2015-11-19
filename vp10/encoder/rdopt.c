@@ -691,6 +691,10 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
         if (!ext_tx_used_inter[ext_tx_set][tx_type])
           continue;
       } else {
+        if (!ALLOW_INTRA_EXT_TX && bs >= BLOCK_8X8) {
+          if (tx_type != intra_mode_to_tx_type_lookup[mbmi->mode])
+            continue;
+        }
         if (!ext_tx_used_intra[ext_tx_set][tx_type])
           continue;
       }
@@ -719,7 +723,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
             r += cpi->inter_tx_type_costs[ext_tx_set]
                                          [mbmi->tx_size][mbmi->tx_type];
         } else {
-          if (ext_tx_set > 0)
+          if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
             r += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size]
                                          [mbmi->mode][mbmi->tx_type];
         }
@@ -754,12 +758,16 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
   if (get_ext_tx_types(mbmi->tx_size, bs, is_inter) > 1 &&
       !xd->lossless[mbmi->segment_id] && *rate != INT_MAX) {
     int ext_tx_set = get_ext_tx_set(mbmi->tx_size, bs, is_inter);
-    if (is_inter)
-      *rate += cpi->inter_tx_type_costs[ext_tx_set][mbmi->tx_size]
-                                       [mbmi->tx_type];
-    else
-      *rate += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size]
-                                       [mbmi->mode][mbmi->tx_type];
+    if (is_inter) {
+      if (ext_tx_set > 0)
+        *rate += cpi->inter_tx_type_costs[ext_tx_set][mbmi->tx_size]
+                                                      [mbmi->tx_type];
+    } else {
+      if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
+        *rate +=
+            cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size]
+                                                 [mbmi->mode][mbmi->tx_type];
+    }
   }
 #endif  // CONFIG_EXT_TX
 }
@@ -849,6 +857,10 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
         if (!ext_tx_used_inter[ext_tx_set][tx_type])
           continue;
       } else {
+        if (!ALLOW_INTRA_EXT_TX && bs >= BLOCK_8X8) {
+          if (tx_type != intra_mode_to_tx_type_lookup[mbmi->mode])
+            continue;
+        }
         if (!ext_tx_used_intra[ext_tx_set][tx_type])
           continue;
       }
@@ -874,7 +886,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
             r += cpi->inter_tx_type_costs[ext_tx_set]
                                          [mbmi->tx_size][mbmi->tx_type];
         } else {
-          if (ext_tx_set > 0)
+          if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
             r += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size]
                                          [mbmi->mode][mbmi->tx_type];
         }
@@ -2227,6 +2239,10 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
       if (!ext_tx_used_inter[ext_tx_set][tx_type])
         continue;
     } else {
+      if (!ALLOW_INTRA_EXT_TX && bsize >= BLOCK_8X8) {
+        if (tx_type != intra_mode_to_tx_type_lookup[mbmi->mode])
+          continue;
+      }
       if (!ext_tx_used_intra[ext_tx_set][tx_type])
         continue;
     }
@@ -2251,7 +2267,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
           this_rate += cpi->inter_tx_type_costs[ext_tx_set]
                                        [max_tx_size][mbmi->tx_type];
       } else {
-        if (ext_tx_set > 0)
+        if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
           this_rate += cpi->intra_tx_type_costs[ext_tx_set][max_tx_size]
                                        [mbmi->mode][mbmi->tx_type];
       }

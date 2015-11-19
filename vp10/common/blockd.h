@@ -274,6 +274,8 @@ static const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
 };
 
 #if CONFIG_EXT_TX
+#define ALLOW_INTRA_EXT_TX 1
+
 static const int num_ext_tx_set_inter[EXT_TX_SETS_INTER] = {
   1, 17, 10, 2
 };
@@ -368,7 +370,8 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
       return DCT_DCT;
 
 #if CONFIG_EXT_TX
-    if (mbmi->sb_type >= BLOCK_8X8 && plane_type == PLANE_TYPE_Y)
+    if (mbmi->sb_type >= BLOCK_8X8 && plane_type == PLANE_TYPE_Y &&
+        ALLOW_INTRA_EXT_TX)
       return mbmi->tx_type;
 #endif  // CONFIG_EXT_TX
 
@@ -405,8 +408,10 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
 #endif
     return DCT_DCT;
   if (mbmi->sb_type >= BLOCK_8X8) {
-    if (plane_type == PLANE_TYPE_Y)
+    if (plane_type == PLANE_TYPE_Y) {
+      if (is_inter_block(mbmi) || ALLOW_INTRA_EXT_TX)
       return mbmi->tx_type;
+    }
     if (is_inter_block(mbmi))
       // UV Inter only
       return (mbmi->tx_type == IDTX && tx_size == TX_32X32 ?
