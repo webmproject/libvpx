@@ -171,7 +171,7 @@ unsigned int vpx_variance4x4_sse2(const unsigned char *src, int src_stride,
                                   unsigned int *sse) {
   int sum;
   get4x4var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
-  return *sse - (((unsigned int)sum * sum) >> 4);
+  return *sse - ((sum * sum) >> 4);
 }
 
 unsigned int vpx_variance8x4_sse2(const uint8_t *src, int src_stride,
@@ -180,7 +180,7 @@ unsigned int vpx_variance8x4_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 8, 4,
                 sse, &sum, get4x4var_sse2, 4);
-  return *sse - (((unsigned int)sum * sum) >> 5);
+  return *sse - ((sum * sum) >> 5);
 }
 
 unsigned int vpx_variance4x8_sse2(const uint8_t *src, int src_stride,
@@ -189,7 +189,7 @@ unsigned int vpx_variance4x8_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 4, 8,
                 sse, &sum, get4x4var_sse2, 4);
-  return *sse - (((unsigned int)sum * sum) >> 5);
+  return *sse - ((sum * sum) >> 5);
 }
 
 unsigned int vpx_variance8x8_sse2(const unsigned char *src, int src_stride,
@@ -197,7 +197,7 @@ unsigned int vpx_variance8x8_sse2(const unsigned char *src, int src_stride,
                                   unsigned int *sse) {
   int sum;
   vpx_get8x8var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
-  return *sse - (((unsigned int)sum * sum) >> 6);
+  return *sse - ((sum * sum) >> 6);
 }
 
 unsigned int vpx_variance16x8_sse2(const unsigned char *src, int src_stride,
@@ -206,7 +206,7 @@ unsigned int vpx_variance16x8_sse2(const unsigned char *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 16, 8,
                 sse, &sum, vpx_get8x8var_sse2, 8);
-  return *sse - (((unsigned int)sum * sum) >> 7);
+  return *sse - ((sum * sum) >> 7);
 }
 
 unsigned int vpx_variance8x16_sse2(const unsigned char *src, int src_stride,
@@ -215,7 +215,7 @@ unsigned int vpx_variance8x16_sse2(const unsigned char *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 8, 16,
                 sse, &sum, vpx_get8x8var_sse2, 8);
-  return *sse - (((unsigned int)sum * sum) >> 7);
+  return *sse - ((sum * sum) >> 7);
 }
 
 unsigned int vpx_variance16x16_sse2(const unsigned char *src, int src_stride,
