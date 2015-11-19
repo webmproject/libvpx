@@ -17,17 +17,17 @@
 
 // Mesh search patters for various speed settings
 static MESH_PATTERN best_quality_mesh_pattern[MAX_MESH_STEP] =
-    {{64, 4}, {28, 2}, {15, 1}, {7, 1}, {1, 1}, {1, 1}};
+    {{64, 4}, {28, 2}, {15, 1}, {7, 1}};
 
 #define MAX_MESH_SPEED 5  // Max speed setting for mesh motion method
 static MESH_PATTERN good_quality_mesh_patterns[MAX_MESH_SPEED + 1]
                                               [MAX_MESH_STEP] =
-    {{{64, 8}, {28, 4}, {15, 1}, {7, 1}, {3, 1}, {2, 1}},
-     {{64, 8}, {28, 4}, {15, 1}, {7, 1}, {3, 1}, {2, 1}},
-     {{64, 8},  {14, 2}, {7, 1},  {7, 1}, {3, 1}, {2, 1}},
-     {{64, 16}, {24, 8}, {12, 4}, {7, 1}, {3, 1 }, {2, 1 }},
-     {{64, 16}, {24, 8}, {12, 4}, {7, 1}, {3, 1 }, {2, 1 }},
-     {{64, 16}, {24, 8}, {12, 4}, {7, 1}, {3, 1 }, {2, 1 }},
+    {{{64, 8}, {28, 4}, {15, 1}, {7, 1}},
+     {{64, 8}, {28, 4}, {15, 1}, {7, 1}},
+     {{64, 8},  {14, 2}, {7, 1},  {7, 1}},
+     {{64, 16}, {24, 8}, {12, 4}, {7, 1}},
+     {{64, 16}, {24, 8}, {12, 4}, {7, 1}},
+     {{64, 16}, {24, 8}, {12, 4}, {7, 1}},
     };
 static unsigned char good_quality_max_mesh_pct[MAX_MESH_SPEED + 1] =
     {50, 25, 15, 5, 1, 1};
@@ -478,7 +478,6 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->mv.auto_mv_step_size = 0;
   sf->mv.fullpel_search_step_param = 6;
   sf->comp_inter_joint_search_thresh = BLOCK_4X4;
-  sf->adaptive_rd_thresh = 0;
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
@@ -534,10 +533,13 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   // Recode loop tolerance %.
   sf->recode_tolerance = 25;
   sf->default_interp_filter = SWITCHABLE;
-  sf->tx_size_search_breakout = 0;
-  sf->partition_search_breakout_dist_thr = 0;
-  sf->partition_search_breakout_rate_thr = 0;
   sf->simple_model_rd_from_var = 0;
+
+  // Some speed-up features even for best quality as minimal impact on quality.
+  sf->adaptive_rd_thresh = 1;
+  sf->tx_size_search_breakout = 1;
+  sf->partition_search_breakout_dist_thr = (1 << 19);
+  sf->partition_search_breakout_rate_thr = 80;
 
   if (oxcf->mode == REALTIME)
     set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);

@@ -195,7 +195,7 @@ typedef struct MV_SPEED_FEATURES {
   int fullpel_search_step_param;
 } MV_SPEED_FEATURES;
 
-#define MAX_MESH_STEP 6
+#define MAX_MESH_STEP 4
 
 typedef struct MESH_PATTERN {
   int range;
