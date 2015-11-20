@@ -210,7 +210,7 @@ add_proto qw/void vp9_hadamard_16x16/, "int16_t const *src_diff, int src_stride,
 specialize qw/vp9_hadamard_16x16 sse2/;
 
 add_proto qw/int vp9_satd/, "const int16_t *coeff, int length";
-specialize qw/vp9_satd sse2/;
+specialize qw/vp9_satd sse2 neon/;
 
 add_proto qw/void vp9_int_pro_row/, "int16_t *hbuf, uint8_t const *ref, const int ref_stride, const int height";
 specialize qw/vp9_int_pro_row sse2 neon/;
