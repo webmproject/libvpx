@@ -356,6 +356,14 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(16, &vp9_int_pro_col_sse2, &vp9_int_pro_col_c),
         make_tuple(32, &vp9_int_pro_col_sse2, &vp9_int_pro_col_c),
         make_tuple(64, &vp9_int_pro_col_sse2, &vp9_int_pro_col_c)));
+
+INSTANTIATE_TEST_CASE_P(
+    SSE2, SatdTest,
+    ::testing::Values(
+        make_tuple(16, &vp9_satd_sse2),
+        make_tuple(64, &vp9_satd_sse2),
+        make_tuple(256, &vp9_satd_sse2),
+        make_tuple(1024, &vp9_satd_sse2)));
 #endif
 
 #if HAVE_NEON
