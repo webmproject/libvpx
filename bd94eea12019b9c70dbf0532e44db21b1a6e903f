@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b167790_08d247dc",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-20T22:34:41Z",
+      "side": 1,
+      "message": "this might benefit by being unrolled by 1, NEON does. I can revisit later.",
+      "revId": "bd94eea12019b9c70dbf0532e44db21b1a6e903f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
