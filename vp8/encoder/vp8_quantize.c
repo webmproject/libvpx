@@ -227,12 +227,12 @@ static void invert_quant(int improved_quant, short *quant,
     if(improved_quant)
     {
         unsigned t;
-        int l;
+        int l, m;
         t = d;
         for(l = 0; t > 1; l++)
             t>>=1;
-        t = 1 + (1<<(16+l))/d;
-        *quant = (short)(t - (1<<16));
+        m = 1 + (1<<(16+l))/d;
+        *quant = (short)(m - (1<<16));
         *shift = l;
         /* use multiplication and constant shift by 16 */
         *shift = 1 << (16 - *shift);
