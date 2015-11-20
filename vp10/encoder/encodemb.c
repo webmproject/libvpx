@@ -588,7 +588,7 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint8_t *dst;
   ENTROPY_CONTEXT *a, *l;
-  TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
+  INV_TXFM_PARAM inv_txfm_param;
 #if CONFIG_VAR_TX
   int i;
   const int bwl = b_width_log2_lookup[plane_bsize];
@@ -697,62 +697,21 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 
   if (p->eobs[block] == 0)
     return;
+
+  // inverse transform parameters
+  inv_txfm_param.tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
+  inv_txfm_param.tx_size = tx_size;
+  inv_txfm_param.eob = p->eobs[block];
+  inv_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
+
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    switch (tx_size) {
-      case TX_32X32:
-        vp10_highbd_inv_txfm_add_32x32(dqcoeff, dst, pd->dst.stride,
-                                       p->eobs[block], xd->bd, tx_type);
-        break;
-      case TX_16X16:
-        vp10_highbd_inv_txfm_add_16x16(dqcoeff, dst, pd->dst.stride,
-                                       p->eobs[block], xd->bd, tx_type);
-        break;
-      case TX_8X8:
-        vp10_highbd_inv_txfm_add_8x8(dqcoeff, dst, pd->dst.stride,
-                                     p->eobs[block], xd->bd, tx_type);
-        break;
-      case TX_4X4:
-        // this is like vp10_short_idct4x4 but has a special case around eob<=1
-        // which is significant (not just an optimization) for the lossless
-        // case.
-        vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, pd->dst.stride,
-                                     p->eobs[block], xd->bd, tx_type,
-                                     xd->lossless[xd->mi[0]->mbmi.segment_id]);
-        break;
-      default:
-        assert(0 && "Invalid transform size");
-        break;
-    }
-
+    inv_txfm_param.bd = xd->bd;
+    highbd_inv_txfm_add(dqcoeff, dst, pd->dst.stride, &inv_txfm_param);
     return;
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  switch (tx_size) {
-    case TX_32X32:
-      vp10_inv_txfm_add_32x32(dqcoeff, dst, pd->dst.stride, p->eobs[block],
-                              tx_type);
-      break;
-    case TX_16X16:
-      vp10_inv_txfm_add_16x16(dqcoeff, dst, pd->dst.stride, p->eobs[block],
-                              tx_type);
-      break;
-    case TX_8X8:
-      vp10_inv_txfm_add_8x8(dqcoeff, dst, pd->dst.stride, p->eobs[block],
-                            tx_type);
-      break;
-    case TX_4X4:
-      // this is like vp10_short_idct4x4 but has a special case around eob<=1
-      // which is significant (not just an optimization) for the lossless
-      // case.
-      vp10_inv_txfm_add_4x4(dqcoeff, dst, pd->dst.stride, p->eobs[block],
-                            tx_type, xd->lossless[xd->mi[0]->mbmi.segment_id]);
-      break;
-    default:
-      assert(0 && "Invalid transform size");
-      break;
-  }
+  inv_txfm_add(dqcoeff, dst, pd->dst.stride, &inv_txfm_param);
 }
 
 #if CONFIG_VAR_TX
@@ -932,6 +891,9 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   int tx1d_size = get_tx1d_size(tx_size);
 
   FWD_TXFM_PARAM fwd_txfm_param;
+  INV_TXFM_PARAM inv_txfm_param;
+
+  // foward transform parameters
   fwd_txfm_param.tx_type = tx_type;
   fwd_txfm_param.tx_size = tx_size;
   fwd_txfm_param.fwd_txfm_opt = FWD_TXFM_OPT_NORMAL;
@@ -945,6 +907,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
   vp10_predict_intra_block(xd, bwl, bhl, tx_size, mode, dst, dst_stride,
                            dst, dst_stride, blk_col, blk_row, plane);
+
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -960,9 +923,6 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                                       qcoeff, dqcoeff, pd->dequant, eob,
                                       scan_order->scan, scan_order->iscan);
         }
-        if (*eob)
-          vp10_highbd_inv_txfm_add_32x32(dqcoeff, dst, dst_stride, *eob, xd->bd,
-                                         tx_type);
         break;
       case TX_16X16:
         if (!x->skip_recode) {
@@ -971,9 +931,6 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                                 pd->dequant, eob,
                                 scan_order->scan, scan_order->iscan);
         }
-        if (*eob)
-          vp10_highbd_inv_txfm_add_16x16(dqcoeff, dst, dst_stride, *eob, xd->bd,
-                                         tx_type);
         break;
       case TX_8X8:
         if (!x->skip_recode) {
@@ -982,9 +939,6 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                                 pd->dequant, eob,
                                 scan_order->scan, scan_order->iscan);
         }
-        if (*eob)
-          vp10_highbd_inv_txfm_add_8x8(dqcoeff, dst, dst_stride, *eob, xd->bd,
-                                       tx_type);
         break;
       case TX_4X4:
         if (!x->skip_recode) {
@@ -993,20 +947,22 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                                 pd->dequant, eob,
                                 scan_order->scan, scan_order->iscan);
         }
-
-        if (*eob)
-          // this is like vp10_short_idct4x4 but has a special case around
-          // eob<=1 which is significant (not just an optimization) for the
-          // lossless case.
-          vp10_highbd_inv_txfm_add_4x4(dqcoeff, dst, dst_stride, *eob, xd->bd,
-                                       tx_type, xd->lossless[mbmi->segment_id]);
         break;
       default:
         assert(0);
         return;
     }
-    if (*eob)
+    if (*eob) {
+      // inverse transform parameters
+      inv_txfm_param.tx_type = tx_type;
+      inv_txfm_param.tx_size = tx_size;
+      inv_txfm_param.eob = *eob;
+      inv_txfm_param.lossless = xd->lossless[mbmi->segment_id];
+      inv_txfm_param.bd = xd->bd;
+
+      highbd_inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
       *(args->skip) = 0;
+    }
     return;
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -1023,8 +979,6 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                              pd->dequant, eob, scan_order->scan,
                              scan_order->iscan);
       }
-      if (*eob)
-        vp10_inv_txfm_add_32x32(dqcoeff, dst, dst_stride, *eob, tx_type);
       break;
     case TX_16X16:
       if (!x->skip_recode) {
@@ -1033,8 +987,6 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (*eob)
-        vp10_inv_txfm_add_16x16(dqcoeff, dst, dst_stride, *eob, tx_type);
       break;
     case TX_8X8:
       if (!x->skip_recode) {
@@ -1043,8 +995,6 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (*eob)
-        vp10_inv_txfm_add_8x8(dqcoeff, dst, dst_stride, *eob, tx_type);
       break;
     case TX_4X4:
       if (!x->skip_recode) {
@@ -1053,21 +1003,21 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-
-      if (*eob) {
-        // this is like vp10_short_idct4x4 but has a special case around eob<=1
-        // which is significant (not just an optimization) for the lossless
-        // case.
-        vp10_inv_txfm_add_4x4(dqcoeff, dst, dst_stride, *eob, tx_type,
-                              xd->lossless[xd->mi[0]->mbmi.segment_id]);
-      }
       break;
     default:
       assert(0);
       break;
   }
-  if (*eob)
+  if (*eob) {
+    // inverse transform parameters
+    inv_txfm_param.tx_type = tx_type;
+    inv_txfm_param.tx_size = tx_size;
+    inv_txfm_param.eob = *eob;
+    inv_txfm_param.lossless = xd->lossless[mbmi->segment_id];
+
+    inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
     *(args->skip) = 0;
+  }
 }
 
 void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {

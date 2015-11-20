@@ -24,6 +24,16 @@
 extern "C" {
 #endif
 
+typedef struct INV_TXFM_PARAM {
+  TX_TYPE tx_type;
+  TX_SIZE tx_size;
+  int eob;
+  int lossless;
+#if CONFIG_VP9_HIGHBITDEPTH
+  int bd;
+#endif
+} INV_TXFM_PARAM;
+
 typedef void (*transform_1d)(const tran_low_t*, tran_low_t*);
 
 typedef struct {
@@ -51,7 +61,8 @@ void vp10_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
                              int stride, int eob, TX_TYPE tx_type);
 void vp10_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
                              int stride, int eob, TX_TYPE tx_type);
-
+void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
+                  INV_TXFM_PARAM *inv_txfm_param);
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                             int eob, int bd);
@@ -74,6 +85,8 @@ void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
 void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
                                     int stride, int eob, int bd,
                                     TX_TYPE tx_type);
+void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
+                         INV_TXFM_PARAM *inv_txfm_param);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #ifdef __cplusplus
 }  // extern "C"

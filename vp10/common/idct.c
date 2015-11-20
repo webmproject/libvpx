@@ -1244,3 +1244,66 @@ void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
+                  INV_TXFM_PARAM *inv_txfm_param) {
+  const TX_TYPE tx_type = inv_txfm_param->tx_type;
+  const TX_SIZE tx_size = inv_txfm_param->tx_size;
+  const int eob = inv_txfm_param->eob;
+  const int lossless = inv_txfm_param->lossless;
+
+  switch (tx_size) {
+    case TX_32X32:
+      vp10_inv_txfm_add_32x32(input, dest, stride, eob, tx_type);
+      break;
+    case TX_16X16:
+      vp10_inv_txfm_add_16x16(input, dest, stride, eob, tx_type);
+      break;
+    case TX_8X8:
+      vp10_inv_txfm_add_8x8(input, dest, stride, eob, tx_type);
+      break;
+    case TX_4X4:
+      // this is like vp10_short_idct4x4 but has a special case around eob<=1
+      // which is significant (not just an optimization) for the lossless
+      // case.
+      vp10_inv_txfm_add_4x4(input, dest, stride, eob, tx_type,
+                            lossless);
+      break;
+    default:
+      assert(0 && "Invalid transform size");
+      break;
+  }
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
+                         INV_TXFM_PARAM *inv_txfm_param) {
+  const TX_TYPE tx_type = inv_txfm_param->tx_type;
+  const TX_SIZE tx_size = inv_txfm_param->tx_size;
+  const int eob = inv_txfm_param->eob;
+  const int bd = inv_txfm_param->bd;
+  const int lossless = inv_txfm_param->lossless;
+
+  switch (tx_size) {
+    case TX_32X32:
+      vp10_highbd_inv_txfm_add_32x32(input, dest, stride, eob, bd, tx_type);
+      break;
+    case TX_16X16:
+      vp10_highbd_inv_txfm_add_16x16(input, dest, stride, eob, bd, tx_type);
+      break;
+    case TX_8X8:
+      vp10_highbd_inv_txfm_add_8x8(input, dest, stride, eob, bd, tx_type);
+      break;
+    case TX_4X4:
+      // this is like vp10_short_idct4x4 but has a special case around eob<=1
+      // which is significant (not just an optimization) for the lossless
+      // case.
+      vp10_highbd_inv_txfm_add_4x4(input, dest, stride, eob, bd, tx_type,
+                                   lossless);
+      break;
+    default:
+      assert(0 && "Invalid transform size");
+      break;
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
