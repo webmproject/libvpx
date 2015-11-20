@@ -151,17 +151,17 @@ typedef void (*TxfmFunc)(const int32_t *input, int32_t *output,
                          const int8_t *cos_bit, const int8_t *stage_range);
 
 typedef struct TXFM_2D_CFG {
-  int txfm_size;
-  int stage_num_col;
-  int stage_num_row;
+  const int txfm_size;
+  const int stage_num_col;
+  const int stage_num_row;
 
-  int8_t *shift;
-  int8_t *stage_range_col;
-  int8_t *stage_range_row;
-  int8_t *cos_bit_col;
-  int8_t *cos_bit_row;
-  TxfmFunc txfm_func_col;
-  TxfmFunc txfm_func_row;
+  const int8_t *shift;
+  const int8_t *stage_range_col;
+  const int8_t *stage_range_row;
+  const int8_t *cos_bit_col;
+  const int8_t *cos_bit_row;
+  const TxfmFunc txfm_func_col;
+  const TxfmFunc txfm_func_row;
 } TXFM_2D_CFG;
 
 #endif  // VP10_TXFM_H_
