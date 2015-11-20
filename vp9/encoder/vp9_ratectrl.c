@@ -1558,7 +1558,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target = rc->avg_frame_bandwidth;
-  const int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
+  int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
       cpi->svc.temporal_layer_id, cpi->svc.number_temporal_layers);
 
   if ((cm->current_video_frame == 0) ||
@@ -1573,8 +1573,10 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       cpi->ref_frame_flags &=
           (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
     } else if (is_one_pass_cbr_svc(cpi)) {
-      cpi->svc.layer_context[layer].is_key_frame = 1;
       reset_temporal_layer_to_zero(cpi);
+      layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
+           cpi->svc.temporal_layer_id, cpi->svc.number_temporal_layers);
+      cpi->svc.layer_context[layer].is_key_frame = 1;
       cpi->ref_frame_flags &=
                 (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
       // Assumption here is that LAST_FRAME is being updated for a keyframe.
