@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b2123e5_eb8d2d55",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-20T23:26:58Z",
+      "side": 1,
+      "message": "note this is faster than load/abs/addl/accum",
+      "revId": "dc9a487608dd4355cc8751d2a67f6515e0e50932",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_ae1057d9",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-20T23:26:58Z",
+      "side": 1,
+      "message": "using 2 separate accumulators in the loop really hurt length\u003d16, but didn\u0027t help on the others either",
+      "revId": "dc9a487608dd4355cc8751d2a67f6515e0e50932",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
