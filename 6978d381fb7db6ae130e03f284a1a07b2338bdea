@@ -16,6 +16,24 @@
       "revId": "6978d381fb7db6ae130e03f284a1a07b2338bdea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_674a0c5a",
+        "filename": "test/vp9_avg_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-20T22:36:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db271bf3_caab03da",
+      "revId": "6978d381fb7db6ae130e03f284a1a07b2338bdea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
