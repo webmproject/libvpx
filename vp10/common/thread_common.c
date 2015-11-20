@@ -477,6 +477,15 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
   }
 #endif  // CONFIG_EXT_TX
 
+#if CONFIG_SUPERTX
+  for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; i++)
+    for (j = 0; j < TX_SIZES; j++)
+      for (k = 0; k < 2; k++)
+        cm->counts.supertx[i][j][k] += counts->supertx[i][j][k];
+  for (i = 0; i < TX_SIZES; i++)
+    cm->counts.supertx_size[i] += counts->supertx_size[i];
+#endif  // CONFIG_SUPERTX
+
   for (i = 0; i < PREDICTION_PROBS; i++)
     for (j = 0; j < 2; j++)
       cm->counts.seg.pred[i][j] += counts->seg.pred[i][j];

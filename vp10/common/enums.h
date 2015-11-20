@@ -246,6 +246,11 @@ typedef TX_SIZE TXFM_CONTEXT;
 #define COMP_REFS 2
 #endif  // CONFIG_EXT_REFS
 
+#if CONFIG_SUPERTX
+#define PARTITION_SUPERTX_CONTEXTS 2
+#define MAX_SUPERTX_BLOCK_SIZE BLOCK_32X32
+#endif  // CONFIG_SUPERTX
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

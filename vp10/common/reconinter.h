@@ -153,25 +153,39 @@ static INLINE MV average_split_mvs(const struct macroblockd_plane *pd,
 }
 
 void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
-                                   int bw, int bh,
-                                   int x, int y, int w, int h,
-                                   int mi_x, int mi_y);
+                            int bw, int bh,
+                            int x, int y, int w, int h,
+                            int mi_x, int mi_y);
 
 void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
                                        int i, int ir, int ic,
                                        int mi_row, int mi_col);
 
 void vp10_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                    BLOCK_SIZE bsize);
-
-void vp10_build_inter_predictors_sbp(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                    BLOCK_SIZE bsize, int plane);
-
-void vp10_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
                                      BLOCK_SIZE bsize);
 
+void vp10_build_inter_predictors_sbp(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                     BLOCK_SIZE bsize, int plane);
+
+void vp10_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                      BLOCK_SIZE bsize);
+
 void vp10_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                   BLOCK_SIZE bsize);
+                                    BLOCK_SIZE bsize);
+
+#if CONFIG_SUPERTX
+void vp10_build_inter_predictors_sb_sub8x8(MACROBLOCKD *xd,
+                                           int mi_row, int mi_col,
+                                           BLOCK_SIZE bsize, int block);
+struct macroblockd_plane;
+void vp10_build_masked_inter_predictor_complex(
+    MACROBLOCKD *xd,
+    uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
+    const struct macroblockd_plane *pd, int mi_row, int mi_col,
+    int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
+    PARTITION_TYPE partition, int plane);
+
+#endif  // CONFIG_SUPERTX
 
 void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,

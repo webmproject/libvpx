@@ -264,3 +264,227 @@ void vp10_setup_pre_planes(MACROBLOCKD *xd, int idx,
     }
   }
 }
+
+#if CONFIG_SUPERTX
+static const uint8_t mask_8[8] = {
+  64, 64, 62, 52, 12,  2,  0,  0
+};
+
+static const uint8_t mask_16[16] = {
+  63, 62, 60, 58, 55, 50, 43, 36, 28, 21, 14, 9, 6, 4, 2, 1
+};
+
+static const uint8_t mask_32[32] = {
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 63, 61, 57, 52, 45, 36,
+  28, 19, 12,  7,  3,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+};
+
+static const uint8_t mask_8_uv[8] = {
+  64, 64, 62, 52,  12,  2,  0,  0
+};
+
+static const uint8_t mask_16_uv[16] = {
+  64, 64, 64, 64, 61, 53, 45, 36, 28, 19, 11, 3, 0,  0,  0,  0
+};
+
+static const uint8_t mask_32_uv[32] = {
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 60, 54, 46, 36,
+  28, 18, 10,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+};
+
+static void generate_1dmask(int length, uint8_t *mask, int plane) {
+  switch (length) {
+    case 8:
+      memcpy(mask, plane ? mask_8_uv : mask_8, length);
+      break;
+    case 16:
+      memcpy(mask, plane ? mask_16_uv : mask_16, length);
+      break;
+    case 32:
+      memcpy(mask, plane ? mask_32_uv : mask_32, length);
+      break;
+    default:
+      assert(0);
+  }
+}
+
+
+void vp10_build_masked_inter_predictor_complex(
+    MACROBLOCKD *xd,
+    uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
+    const struct macroblockd_plane *pd, int mi_row, int mi_col,
+    int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
+    PARTITION_TYPE partition, int plane) {
+  int i, j;
+  uint8_t mask[MAXTXLEN];
+  int top_w = 4 << b_width_log2_lookup[top_bsize],
+      top_h = 4 << b_height_log2_lookup[top_bsize];
+  int w = 4 << b_width_log2_lookup[bsize], h = 4 << b_height_log2_lookup[bsize];
+  int w_offset = (mi_col - mi_col_ori) << 3,
+      h_offset = (mi_row - mi_row_ori) << 3;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t *dst16= CONVERT_TO_SHORTPTR(dst);
+  uint16_t *dst216 = CONVERT_TO_SHORTPTR(dst2);
+  int b_hdb = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  top_w >>= pd->subsampling_x;
+  top_h >>= pd->subsampling_y;
+  w >>= pd->subsampling_x;
+  h >>= pd->subsampling_y;
+  w_offset >>= pd->subsampling_x;
+  h_offset >>= pd->subsampling_y;
+
+  switch (partition) {
+    case PARTITION_HORZ:
+    {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (b_hdb) {
+        uint16_t *dst_tmp = dst16 + h_offset * dst_stride;
+        uint16_t *dst2_tmp = dst216 + h_offset * dst2_stride;
+        generate_1dmask(h, mask + h_offset,
+                        plane && xd->plane[plane].subsampling_y);
+
+        for (i = h_offset; i < h_offset + h; i++) {
+          for (j = 0; j < top_w; j++) {
+            const int m = mask[i];  assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+
+        for (; i < top_h; i ++) {
+          memcpy(dst_tmp, dst2_tmp, top_w * sizeof(uint16_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+      } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        uint8_t *dst_tmp = dst + h_offset * dst_stride;
+        uint8_t *dst2_tmp = dst2 + h_offset * dst2_stride;
+        generate_1dmask(h, mask + h_offset,
+                        plane && xd->plane[plane].subsampling_y);
+
+        for (i = h_offset; i < h_offset + h; i++) {
+          for (j = 0; j < top_w; j++) {
+            const int m = mask[i];  assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+
+        for (; i < top_h; i ++) {
+          memcpy(dst_tmp, dst2_tmp, top_w * sizeof(uint8_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+#if CONFIG_VP9_HIGHBITDEPTH
+      }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    }
+
+      break;
+    case PARTITION_VERT:
+    {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (b_hdb) {
+        uint16_t *dst_tmp = dst16;
+        uint16_t *dst2_tmp = dst216;
+        generate_1dmask(w, mask + w_offset,
+                        plane && xd->plane[plane].subsampling_x);
+
+        for (i = 0; i < top_h; i++) {
+          for (j = w_offset; j < w_offset + w; j++) {
+            const int m = mask[j];   assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+          memcpy(dst_tmp + j, dst2_tmp + j,
+                     (top_w - w_offset - w) * sizeof(uint16_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+      } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        uint8_t *dst_tmp = dst;
+        uint8_t *dst2_tmp = dst2;
+        generate_1dmask(w, mask + w_offset,
+                        plane && xd->plane[plane].subsampling_x);
+
+        for (i = 0; i < top_h; i++) {
+          for (j = w_offset; j < w_offset + w; j++) {
+            const int m = mask[j];   assert(m >= 0 && m <= 64);
+            if (m == 64)
+              continue;
+
+            if (m == 0)
+              dst_tmp[j] = dst2_tmp[j];
+            else
+              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+          }
+            memcpy(dst_tmp + j, dst2_tmp + j,
+                       (top_w - w_offset - w) * sizeof(uint8_t));
+          dst_tmp += dst_stride;
+          dst2_tmp += dst2_stride;
+        }
+#if CONFIG_VP9_HIGHBITDEPTH
+      }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    }
+      break;
+    default:
+      assert(0);
+  }
+  (void) xd;
+}
+
+void vp10_build_inter_predictors_sb_sub8x8(MACROBLOCKD *xd,
+                                           int mi_row, int mi_col,
+                                           BLOCK_SIZE bsize, int block) {
+  // Prediction function used in supertx:
+  // Use the mv at current block (which is less than 8x8)
+  // to get prediction of a block located at (mi_row, mi_col) at size of bsize
+  // bsize can be larger than 8x8.
+  // block (0-3): the sub8x8 location of current block
+  int plane;
+  const int mi_x = mi_col * MI_SIZE;
+  const int mi_y = mi_row * MI_SIZE;
+
+  // For sub8x8 uv:
+  // Skip uv prediction in supertx except the first block (block = 0)
+  int max_plane = block ? 1 : MAX_MB_PLANE;
+
+  for (plane = 0; plane < max_plane; plane++) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
+
+    build_inter_predictors(xd, plane, block, bw, bh,
+                           0, 0, bw, bh,
+                           mi_x, mi_y);
+  }
+}
+#endif  // CONFIG_SUPERTX

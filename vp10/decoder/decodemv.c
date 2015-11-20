@@ -929,98 +929,117 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 
 static void read_inter_frame_mode_info(VP10Decoder *const pbi,
                                        MACROBLOCKD *const xd,
+#if CONFIG_SUPERTX
+                                       int supertx_enabled,
+#endif  // CONFIG_SUPERTX
                                        int mi_row, int mi_col, vpx_reader *r) {
   VP10_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  int inter_block;
+  int inter_block = 1;
 #if CONFIG_VAR_TX
   BLOCK_SIZE bsize = mbmi->sb_type;
-#endif
+#endif  // CONFIG_VAR_TX
+#if CONFIG_SUPERTX
+  (void) supertx_enabled;
+#endif  // CONFIG_SUPERTX
 
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;
   mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
-  mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
-  inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
+#if CONFIG_SUPERTX
+  if (!supertx_enabled) {
+#endif  // CONFIG_SUPERTX
+    mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
+    inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
 
 #if CONFIG_VAR_TX
-  xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
-  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
-      !mbmi->skip && inter_block) {
-    const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-    const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-    const int bs = num_4x4_blocks_wide_lookup[txb_size];
-    const int width  = num_4x4_blocks_wide_lookup[bsize];
-    const int height = num_4x4_blocks_high_lookup[bsize];
-    int idx, idy;
-    for (idy = 0; idy < height; idy += bs)
-      for (idx = 0; idx < width; idx += bs)
-        read_tx_size_inter(cm, xd, mbmi, xd->counts, max_tx_size,
-                           idy, idx, r);
-    if (xd->counts) {
-      const int ctx = get_tx_size_context(xd);
-      ++get_tx_counts(max_tx_size, ctx, &xd->counts->tx)[mbmi->tx_size];
-    }
-  } else {
-    mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
-    if (inter_block) {
+    xd->above_txfm_context = cm->above_txfm_context + mi_col;
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+    if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
+        !mbmi->skip && inter_block) {
+      const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+      const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+      const int bs = num_4x4_blocks_wide_lookup[txb_size];
       const int width  = num_4x4_blocks_wide_lookup[bsize];
       const int height = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
-      for (idy = 0; idy < height; ++idy)
-        for (idx = 0; idx < width; ++idx)
-          mbmi->inter_tx_size[(idy >> 1) * 8 + (idx >> 1)] = mbmi->tx_size;
-    }
+      for (idy = 0; idy < height; idy += bs)
+        for (idx = 0; idx < width; idx += bs)
+          read_tx_size_inter(cm, xd, mbmi, xd->counts, max_tx_size,
+                             idy, idx, r);
+      if (xd->counts) {
+        const int ctx = get_tx_size_context(xd);
+        ++get_tx_counts(max_tx_size, ctx, &xd->counts->tx)[mbmi->tx_size];
+      }
+    } else {
+      mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
+      if (inter_block) {
+        const int width  = num_4x4_blocks_wide_lookup[bsize];
+        const int height = num_4x4_blocks_high_lookup[bsize];
+        int idx, idy;
+        for (idy = 0; idy < height; ++idy)
+          for (idx = 0; idx < width; ++idx)
+            mbmi->inter_tx_size[(idy >> 1) * 8 + (idx >> 1)] = mbmi->tx_size;
+      }
 
-    set_txfm_ctx(xd->left_txfm_context, mbmi->tx_size, xd->n8_h);
-    set_txfm_ctx(xd->above_txfm_context, mbmi->tx_size, xd->n8_w);
-  }
+      set_txfm_ctx(xd->left_txfm_context, mbmi->tx_size, xd->n8_h);
+      set_txfm_ctx(xd->above_txfm_context, mbmi->tx_size, xd->n8_w);
+    }
 #else
-  mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
-#endif
+    mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
+#endif  // CONFIG_VAR_TX
+#if CONFIG_SUPERTX
+  }
+#endif  // CONFIG_SUPERTX
 
   if (inter_block)
-    read_inter_block_mode_info(pbi, xd, mi, mi_row, mi_col, r);
+    read_inter_block_mode_info(pbi, xd,
+                               mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(cm, xd, mi, r);
 
 #if CONFIG_EXT_TX
-    if (get_ext_tx_types(mbmi->tx_size, mbmi->sb_type, inter_block) > 1 &&
-        cm->base_qindex > 0 && !mbmi->skip &&
-        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      int eset = get_ext_tx_set(mbmi->tx_size, mbmi->sb_type,
-                                inter_block);
-      FRAME_COUNTS *counts = xd->counts;
+  if (get_ext_tx_types(mbmi->tx_size, mbmi->sb_type, inter_block) > 1 &&
+      cm->base_qindex > 0 && !mbmi->skip &&
+#if CONFIG_SUPERTX
+      !supertx_enabled &&
+#endif  // CONFIG_SUPERTX
+      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+    int eset = get_ext_tx_set(mbmi->tx_size, mbmi->sb_type,
+                              inter_block);
+    FRAME_COUNTS *counts = xd->counts;
 
-      if (inter_block) {
-        if (eset > 0) {
-          mbmi->tx_type =
-              vpx_read_tree(r, vp10_ext_tx_inter_tree[eset],
-                            cm->fc->inter_ext_tx_prob[eset][mbmi->tx_size]);
-          if (counts)
-            ++counts->inter_ext_tx[eset][mbmi->tx_size][mbmi->tx_type];
-        }
-      } else if (ALLOW_INTRA_EXT_TX) {
-        if (eset > 0) {
-          mbmi->tx_type = vpx_read_tree(r, vp10_ext_tx_intra_tree[eset],
-                                        cm->fc->intra_ext_tx_prob[eset]
-                                        [mbmi->tx_size][mbmi->mode]);
-          if (counts)
-            ++counts->intra_ext_tx[eset][mbmi->tx_size]
-                                  [mbmi->mode][mbmi->tx_type];
-        }
+    if (inter_block) {
+      if (eset > 0) {
+        mbmi->tx_type =
+            vpx_read_tree(r, vp10_ext_tx_inter_tree[eset],
+                          cm->fc->inter_ext_tx_prob[eset][mbmi->tx_size]);
+        if (counts)
+          ++counts->inter_ext_tx[eset][mbmi->tx_size][mbmi->tx_type];
       }
-    } else {
-      mbmi->tx_type = DCT_DCT;
+    } else if (ALLOW_INTRA_EXT_TX) {
+      if (eset > 0) {
+        mbmi->tx_type = vpx_read_tree(r, vp10_ext_tx_intra_tree[eset],
+                                      cm->fc->intra_ext_tx_prob[eset]
+                                        [mbmi->tx_size][mbmi->mode]);
+        if (counts)
+          ++counts->intra_ext_tx[eset][mbmi->tx_size]
+                                [mbmi->mode][mbmi->tx_type];
+      }
     }
+  } else {
+    mbmi->tx_type = DCT_DCT;
+  }
 #endif  // CONFIG_EXT_TX
 }
 
 void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
-                        int mi_row, int mi_col, vpx_reader *r,
-                        int x_mis, int y_mis) {
+#if CONFIG_SUPERTX
+                         int supertx_enabled,
+#endif  // CONFIG_SUPERTX
+                         int mi_row, int mi_col, vpx_reader *r,
+                         int x_mis, int y_mis) {
   VP10_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
   MV_REF* frame_mvs = cm->cur_frame->mvs + mi_row * cm->mi_cols + mi_col;
@@ -1039,7 +1058,11 @@ void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
     }
 #endif
   } else {
-    read_inter_frame_mode_info(pbi, xd, mi_row, mi_col, r);
+    read_inter_frame_mode_info(pbi, xd,
+#if CONFIG_SUPERTX
+                               supertx_enabled,
+#endif  // CONFIG_SUPERTX
+                               mi_row, mi_col, r);
     for (h = 0; h < y_mis; ++h) {
       MV_REF *const frame_mv = frame_mvs + h * cm->mi_cols;
       for (w = 0; w < x_mis; ++w) {

@@ -787,10 +787,18 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
 // we only update u and v masks on the first block.
 static void build_y_mask(const loop_filter_info_n *const lfi_n,
                          const MODE_INFO *mi, const int shift_y,
+#if CONFIG_SUPERTX
+                         int supertx_enabled,
+#endif  // CONFIG_SUPERTX
                          LOOP_FILTER_MASK *lfm) {
   const MB_MODE_INFO *mbmi = &mi->mbmi;
-  const BLOCK_SIZE block_size = mbmi->sb_type;
   const TX_SIZE tx_size_y = mbmi->tx_size;
+#if CONFIG_SUPERTX
+  const BLOCK_SIZE block_size =
+      supertx_enabled ? (BLOCK_SIZE)(3 * tx_size_y) : mbmi->sb_type;
+#else
+  const BLOCK_SIZE block_size = mbmi->sb_type;
+#endif
   const int filter_level = get_filter_level(lfi_n, mbmi);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
@@ -899,6 +907,10 @@ void vp10_setup_mask(VP10_COMMON *const cm, const int mi_row, const int mi_col,
             break;
           case BLOCK_32X16:
             build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
+#if CONFIG_SUPERTX
+            if (supertx_enabled(&mip[0]->mbmi))
+              break;
+#endif
             if (mi_32_row_offset + 2 >= max_rows)
               continue;
             mip2 = mip + mode_info_stride * 2;
@@ -906,12 +918,22 @@ void vp10_setup_mask(VP10_COMMON *const cm, const int mi_row, const int mi_col,
             break;
           case BLOCK_16X32:
             build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
+#if CONFIG_SUPERTX
+            if (supertx_enabled(&mip[0]->mbmi))
+              break;
+#endif
             if (mi_32_col_offset + 2 >= max_cols)
               continue;
             mip2 = mip + 2;
             build_masks(lfi_n, mip2[0], shift_y + 2, shift_uv + 1, lfm);
             break;
           default:
+#if CONFIG_SUPERTX
+            if (mip[0]->mbmi.tx_size == TX_32X32) {
+              build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
+              break;
+            }
+#endif
             for (idx_16 = 0; idx_16 < 4; mip += offset_16[idx_16], ++idx_16) {
               const int shift_y = shift_32_y[idx_32] + shift_16_y[idx_16];
               const int shift_uv = shift_32_uv[idx_32] + shift_16_uv[idx_16];
@@ -928,23 +950,45 @@ void vp10_setup_mask(VP10_COMMON *const cm, const int mi_row, const int mi_col,
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   break;
                 case BLOCK_16X8:
+#if CONFIG_SUPERTX
+                  if (supertx_enabled(&mip[0]->mbmi))
+                    break;
+#endif
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   if (mi_16_row_offset + 1 >= max_rows)
                     continue;
                   mip2 = mip + mode_info_stride;
-                  build_y_mask(lfi_n, mip2[0], shift_y+8, lfm);
+                  build_y_mask(lfi_n, mip2[0], shift_y+8,
+#if CONFIG_SUPERTX
+                               0,
+#endif
+                               lfm);
                   break;
                 case BLOCK_8X16:
+#if CONFIG_SUPERTX
+                  if (supertx_enabled(&mip[0]->mbmi))
+                    break;
+#endif
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   if (mi_16_col_offset +1 >= max_cols)
                     continue;
                   mip2 = mip + 1;
-                  build_y_mask(lfi_n, mip2[0], shift_y+1, lfm);
+                  build_y_mask(lfi_n, mip2[0], shift_y+1,
+#if CONFIG_SUPERTX
+                               0,
+#endif
+                               lfm);
                   break;
                 default: {
                   const int shift_y = shift_32_y[idx_32] +
                                       shift_16_y[idx_16] +
                                       shift_8_y[0];
+#if CONFIG_SUPERTX
+                  if (mip[0]->mbmi.tx_size == TX_16X16) {
+                    build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
+                    break;
+                  }
+#endif
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   mip += offset[0];
                   for (idx_8 = 1; idx_8 < 4; mip += offset[idx_8], ++idx_8) {
@@ -959,7 +1003,11 @@ void vp10_setup_mask(VP10_COMMON *const cm, const int mi_row, const int mi_col,
                     if (mi_8_col_offset >= max_cols ||
                         mi_8_row_offset >= max_rows)
                       continue;
-                    build_y_mask(lfi_n, mip[0], shift_y, lfm);
+                    build_y_mask(lfi_n, mip[0], shift_y,
+#if CONFIG_SUPERTX
+                                 supertx_enabled(&mip[0]->mbmi),
+#endif
+                                 lfm);
                   }
                   break;
                 }

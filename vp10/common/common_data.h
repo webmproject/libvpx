@@ -170,6 +170,21 @@ static const struct {
   {0,  0 },  // 64X64 - {0b0000, 0b0000}
 };
 
+#if CONFIG_SUPERTX
+static const TX_SIZE uvsupertx_size_lookup[TX_SIZES][2][2] = {
+  //  ss_x == 0 ss_x == 0   ss_x == 1 ss_x == 1
+  //  ss_y == 0 ss_y == 1   ss_y == 0 ss_y == 1
+  {{TX_4X4,   TX_4X4},   {TX_4X4,   TX_4X4}},
+  {{TX_8X8,   TX_4X4},   {TX_4X4,   TX_4X4}},
+  {{TX_16X16, TX_8X8},   {TX_8X8,   TX_8X8}},
+  {{TX_32X32, TX_16X16}, {TX_16X16, TX_16X16}},
+};
+
+static const int partition_supertx_context_lookup[PARTITION_TYPES] = {
+  -1, 0, 0, 1
+};
+#endif  // CONFIG_SUPERTX
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

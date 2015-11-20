@@ -33,6 +33,9 @@ typedef enum VP10_XFORM_QUANT {
 } VP10_XFORM_QUANT;
 
 void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize);
+#if CONFIG_SUPERTX
+void vp10_encode_sb_supertx(MACROBLOCK *x, BLOCK_SIZE bsize);
+#endif  // CONFIG_SUPERTX
 void vp10_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize);
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
                       int blk_row, int blk_col,

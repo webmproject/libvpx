@@ -45,6 +45,8 @@ typedef enum {
 #define IsInterpolatingFilter(filter)  (1)
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
 
+#define MAXTXLEN 32
+
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
@@ -291,6 +293,14 @@ static const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   ADST_ADST,  // TM
 };
 
+#if CONFIG_SUPERTX
+static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
+  return (int)mbmi->tx_size >
+      VPXMIN(b_width_log2_lookup[mbmi->sb_type],
+             b_height_log2_lookup[mbmi->sb_type]);
+}
+#endif  // CONFIG_SUPERTX
+
 #if CONFIG_EXT_TX
 #define ALLOW_INTRA_EXT_TX 1
 
@@ -469,8 +479,18 @@ static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
 
 static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi,
                                      const struct macroblockd_plane *pd) {
+#if CONFIG_SUPERTX
+  if (!supertx_enabled(mbmi)) {
+    return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, pd->subsampling_x,
+                               pd->subsampling_y);
+  } else {
+    return uvsupertx_size_lookup[mbmi->tx_size][pd->subsampling_x]
+                                               [pd->subsampling_y];
+  }
+#else
   return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, pd->subsampling_x,
                              pd->subsampling_y);
+#endif  // CONFIG_SUPERTX
 }
 
 static INLINE BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,

@@ -43,6 +43,9 @@ void vp10_rd_pick_inter_mode_sb(struct VP10_COMP *cpi,
                                struct macroblock *x,
                                int mi_row, int mi_col,
                                struct RD_COST *rd_cost,
+#if CONFIG_SUPERTX
+                               int *returnrate_nocoef,
+#endif  // CONFIG_SUPERTX
                                BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
                                int64_t best_rd_so_far);
 
@@ -60,12 +63,27 @@ int vp10_active_v_edge(struct VP10_COMP *cpi, int mi_col, int mi_step);
 int vp10_active_edge_sb(struct VP10_COMP *cpi, int mi_row, int mi_col);
 
 void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
-                                   struct TileDataEnc *tile_data,
-                                   struct macroblock *x,
-                                   int mi_row, int mi_col,
-                                   struct RD_COST *rd_cost,
-                                   BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
-                                   int64_t best_rd_so_far);
+                                    struct TileDataEnc *tile_data,
+                                    struct macroblock *x,
+                                    int mi_row, int mi_col,
+                                    struct RD_COST *rd_cost,
+#if CONFIG_SUPERTX
+                                    int *returnrate_nocoef,
+#endif  // CONFIG_SUPERTX
+                                    BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
+                                    int64_t best_rd_so_far);
+
+#if CONFIG_SUPERTX
+void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
+#if CONFIG_VAR_TX
+                                   const VP10_COMP *cpi,
+#endif  // CONFIG_VAR_TX
+                                   int *rate, int64_t *distortion,
+                                   int *skippable, int64_t *sse,
+                                   int64_t ref_best_rd, int plane,
+                                   BLOCK_SIZE bsize, TX_SIZE tx_size,
+                                   int use_fast_coef_casting);
+#endif  // CONFIG_SUPERTX
 
 #ifdef __cplusplus
 }  // extern "C"

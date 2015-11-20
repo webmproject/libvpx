@@ -1174,6 +1174,14 @@ default_intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES]
 };
 #endif  // CONFIG_EXT_TX
 
+#if CONFIG_SUPERTX
+static const vpx_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
+                                          [TX_SIZES] = {
+  { 1, 160, 160, 170 },
+  { 1, 200, 200, 210 },
+};
+#endif  // CONFIG_SUPERTX
+
 // FIXME(someone) need real defaults here
 static const struct segmentation_probs default_seg_probs = {
   { 128, 128, 128, 128, 128, 128, 128 },
@@ -1208,6 +1216,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
   vp10_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
 #endif  // CONFIG_EXT_TX
+#if CONFIG_SUPERTX
+  vp10_copy(fc->supertx_prob, default_supertx_prob);
+#endif  // CONFIG_SUPERTX
   vp10_copy(fc->seg.tree_probs, default_seg_probs.tree_probs);
   vp10_copy(fc->seg.pred_probs, default_seg_probs.pred_probs);
 #if CONFIG_EXT_INTRA
@@ -1345,6 +1356,16 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
     }
   }
 #endif  // CONFIG_EXT_TX
+
+#if CONFIG_SUPERTX
+  for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
+    int j;
+    for (j = 1; j < TX_SIZES; ++j) {
+      fc->supertx_prob[i][j] = mode_mv_merge_probs(pre_fc->supertx_prob[i][j],
+                                                   counts->supertx[i][j]);
+    }
+  }
+#endif  // CONFIG_SUPERTX
 
   if (cm->seg.temporal_update) {
     for (i = 0; i < PREDICTION_PROBS; i++)

@@ -457,11 +457,11 @@ static int cost_coeffs(MACROBLOCK *x,
   const int16_t *cat6_high_cost = vp10_get_high_cost_table(8);
 #endif
 
-#if !CONFIG_VAR_TX
+#if !CONFIG_VAR_TX && !CONFIG_SUPERTX
   // Check for consistency of tx_size with mode info
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                               : get_uv_tx_size(mbmi, pd) == tx_size);
-#endif
+#endif  // !CONFIG_VAR_TX && !CONFIG_SUPERTX
 
   if (eob == 0) {
     // single eob token
@@ -731,6 +731,54 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
     *skippable  = args.skippable;
   }
 }
+
+#if CONFIG_SUPERTX
+void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
+#if CONFIG_VAR_TX
+                                   const VP10_COMP *cpi,
+#endif
+                                   int *rate, int64_t *distortion,
+                                   int *skippable, int64_t *sse,
+                                   int64_t ref_best_rd, int plane,
+                                   BLOCK_SIZE bsize, TX_SIZE tx_size,
+                                   int use_fast_coef_casting) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  struct rdcost_block_args args;
+  TX_TYPE tx_type;
+
+  vp10_zero(args);
+  args.x = x;
+#if CONFIG_VAR_TX
+  args.cpi = cpi;
+#endif
+  args.best_rd = ref_best_rd;
+  args.use_fast_coef_costing = use_fast_coef_casting;
+
+  if (plane == 0)
+    xd->mi[0]->mbmi.tx_size = tx_size;
+
+  vp10_get_entropy_contexts(bsize, tx_size, pd, args.t_above, args.t_left);
+
+  tx_type = get_tx_type(pd->plane_type, xd, 0, tx_size);
+  args.so = get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+
+  block_rd_txfm(plane, 0, 0, 0, get_plane_block_size(bsize, pd),
+                tx_size, &args);
+
+  if (args.exit_early) {
+    *rate       = INT_MAX;
+    *distortion = INT64_MAX;
+    *sse        = INT64_MAX;
+    *skippable  = 0;
+  } else {
+    *distortion = args.this_dist;
+    *rate       = args.this_rate;
+    *sse        = args.this_sse;
+    *skippable  = !x->plane[plane].eobs[0];
+  }
+}
+#endif  // CONFIG_SUPERTX
 
 static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
                                    int *rate, int64_t *distortion,
@@ -4855,7 +4903,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                 TileDataEnc *tile_data,
                                 MACROBLOCK *x,
                                 int mi_row, int mi_col,
-                                RD_COST *rd_cost, BLOCK_SIZE bsize,
+                                RD_COST *rd_cost,
+#if CONFIG_SUPERTX
+                                int *returnrate_nocoef,
+#endif  // CONFIG_SUPERTX
+                                BLOCK_SIZE bsize,
                                 PICK_MODE_CONTEXT *ctx,
                                 int64_t best_rd_so_far) {
   VP10_COMMON *const cm = &cpi->common;
@@ -4954,6 +5006,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   }
 
   rd_cost->rate = INT_MAX;
+#if CONFIG_SUPERTX
+  *returnrate_nocoef = INT_MAX;
+#endif  // CONFIG_SUPERTX
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
@@ -5375,7 +5430,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       if (skippable) {
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
-
+        rate_y = 0;
+        rate_uv = 0;
         // Cost the skip mb case
         rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
 
@@ -5391,6 +5447,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
           assert(total_sse >= 0);
           rate2 -= (rate_y + rate_uv);
           this_skip2 = 1;
+          rate_y = 0;
+          rate_uv = 0;
         }
       } else {
         // Add in the cost of the no skip flag.
@@ -5437,6 +5495,15 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         }
 
         rd_cost->rate = rate2;
+#if CONFIG_SUPERTX
+        *returnrate_nocoef = rate2 - rate_y - rate_uv;
+        if (!disable_skip) {
+          *returnrate_nocoef -= vp10_cost_bit(vp10_get_skip_prob(cm, xd),
+                                              skippable || this_skip2);
+        }
+        *returnrate_nocoef -= vp10_cost_bit(vp10_get_intra_inter_prob(cm, xd),
+                                            mbmi->ref_frame[0] != INTRA_FRAME);
+#endif  // CONFIG_SUPERTX
         rd_cost->dist = distortion2;
         rd_cost->rdcost = this_rd;
         best_rd = this_rd;
@@ -5760,14 +5827,17 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
                        best_pred_diff, best_filter_diff, 0);
 }
 
-void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
-                                   TileDataEnc *tile_data,
-                                   MACROBLOCK *x,
-                                   int mi_row, int mi_col,
-                                   RD_COST *rd_cost,
-                                   BLOCK_SIZE bsize,
-                                   PICK_MODE_CONTEXT *ctx,
-                                   int64_t best_rd_so_far) {
+void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
+                                    TileDataEnc *tile_data,
+                                    struct macroblock *x,
+                                    int mi_row, int mi_col,
+                                    struct RD_COST *rd_cost,
+#if CONFIG_SUPERTX
+                                    int *returnrate_nocoef,
+#endif  // CONFIG_SUPERTX
+                                    BLOCK_SIZE bsize,
+                                    PICK_MODE_CONTEXT *ctx,
+                                    int64_t best_rd_so_far) {
   VP10_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
@@ -5816,6 +5886,11 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
   int internal_active_edge =
     vp10_active_edge_sb(cpi, mi_row, mi_col) && vp10_internal_image_edge(cpi);
 
+#if CONFIG_SUPERTX
+  best_rd_so_far = INT64_MAX;
+  best_rd = best_rd_so_far;
+  best_yrd = best_rd_so_far;
+#endif  // CONFIG_SUPERTX
   memset(x->zcoeff_blk[TX_4X4], 0, 4);
   vp10_zero(best_mbmode);
 
@@ -5843,6 +5918,9 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
   rate_uv_intra = INT_MAX;
 
   rd_cost->rate = INT_MAX;
+#if CONFIG_SUPERTX
+  *returnrate_nocoef = INT_MAX;
+#endif
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
@@ -6300,6 +6378,15 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
         }
 
         rd_cost->rate = rate2;
+#if CONFIG_SUPERTX
+        *returnrate_nocoef = rate2 - rate_y - rate_uv;
+        if (!disable_skip)
+          *returnrate_nocoef -= vp10_cost_bit(vp10_get_skip_prob(cm, xd),
+                                              this_skip2);
+        *returnrate_nocoef -= vp10_cost_bit(vp10_get_intra_inter_prob(cm, xd),
+                                            mbmi->ref_frame[0] != INTRA_FRAME);
+        assert(*returnrate_nocoef > 0);
+#endif  // CONFIG_SUPERTX
         rd_cost->dist = distortion2;
         rd_cost->rdcost = this_rd;
         best_rd = this_rd;
@@ -6402,6 +6489,9 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
   if (best_rd >= best_rd_so_far) {
     rd_cost->rate = INT_MAX;
     rd_cost->rdcost = INT64_MAX;
+#if CONFIG_SUPERTX
+    *returnrate_nocoef = INT_MAX;
+#endif  // CONFIG_SUPERTX
     return;
   }
 
@@ -6422,6 +6512,9 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
     rd_cost->rate = INT_MAX;
     rd_cost->dist = INT64_MAX;
     rd_cost->rdcost = INT64_MAX;
+#if CONFIG_SUPERTX
+    *returnrate_nocoef = INT_MAX;
+#endif  // CONFIG_SUPERTX
     return;
   }
 
