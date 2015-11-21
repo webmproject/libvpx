@@ -4440,9 +4440,9 @@ static void rd_variance_adjustment(VP10_COMP *cpi,
       ? (source_variance - recon_variance)
       : (recon_variance - source_variance);
 
-    var_error = (200 * source_variance * recon_variance) /
-      ((source_variance * source_variance) +
-       (recon_variance * recon_variance));
+    var_error = ((int64_t)200 * source_variance * recon_variance) /
+      (((int64_t)source_variance * source_variance) +
+       ((int64_t)recon_variance * recon_variance));
     var_error = 100 - var_error;
   }
 

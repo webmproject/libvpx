@@ -60,6 +60,7 @@ typedef struct {
 #if CONFIG_VP9_TEMPORAL_DENOISING
   unsigned int newmv_sse;
   unsigned int zeromv_sse;
+  unsigned int zeromv_lastref_sse;
   PREDICTION_MODE best_sse_inter_mode;
   int_mv best_sse_mv;
   MV_REFERENCE_FRAME best_reference_frame;
