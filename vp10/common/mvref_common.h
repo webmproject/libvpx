@@ -24,13 +24,6 @@ typedef struct position {
   int col;
 } POSITION;
 
-#if CONFIG_REF_MV
-typedef struct candidate_mv {
-  int_mv this_mv;
-  int weight;
-} CANDIDATE_MV;
-#endif
-
 typedef enum {
   BOTH_ZERO = 0,
   ZERO_PLUS_PREDICTED = 1,
@@ -204,10 +197,14 @@ static INLINE int is_inside(const TileInfo *const tile,
 
 typedef void (*find_mv_refs_sync)(void *const data, int mi_row);
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
-                      MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
-                      int_mv *mv_ref_list, int mi_row, int mi_col,
-                      find_mv_refs_sync sync, void *const data,
-                      uint8_t *mode_context);
+                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+#if CONFIG_REF_MV
+                       uint8_t *ref_mv_count,
+                       CANDIDATE_MV *ref_mv_stack,
+#endif
+                       int_mv *mv_ref_list, int mi_row, int mi_col,
+                       find_mv_refs_sync sync, void *const data,
+                       uint8_t *mode_context);
 
 // check a list of motion vectors by sad score using a number rows of pixels
 // above and a number cols of pixels in the left to select the one with best
