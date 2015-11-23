@@ -452,10 +452,8 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
     xd->left_mbmi = NULL;
   }
 
-#if CONFIG_VAR_TX
   xd->n8_h = bh;
   xd->n8_w = bw;
-#endif
 }
 
 static INLINE const vpx_prob *get_y_mode_probs(const VP10_COMMON *cm,

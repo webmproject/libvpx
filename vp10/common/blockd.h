@@ -239,10 +239,11 @@ typedef struct macroblockd {
   TXFM_CONTEXT *left_txfm_context;
   TXFM_CONTEXT left_txfm_context_buffer[8];
 
-  // dimension in the unit of 8x8 block of the current block
-  int16_t n8_w, n8_h;
   TX_SIZE max_tx_size;
 #endif
+
+  // dimension in the unit of 8x8 block of the current block
+  uint8_t n8_w, n8_h;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   /* Bit depth: 8, 10, 12 */
