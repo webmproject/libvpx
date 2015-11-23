@@ -24,6 +24,13 @@ typedef struct position {
   int col;
 } POSITION;
 
+#if CONFIG_REF_MV
+typedef struct candidate_mv {
+  int_mv this_mv;
+  int weight;
+} CANDIDATE_MV;
+#endif
+
 typedef enum {
   BOTH_ZERO = 0,
   ZERO_PLUS_PREDICTED = 1,
