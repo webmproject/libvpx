@@ -148,6 +148,10 @@ ifeq ($(CONFIG_VP9)$(CONFIG_WEDGE_PARTITION),yesyes)
 LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_variance_test.cc
 endif
 
+ifeq ($(CONFIG_VP9)$(CONFIG_WEDGE_PARTITION),yesyes)
+LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
+endif
+
 endif # VP9
 
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += sad_test.cc
