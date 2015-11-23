@@ -69,6 +69,57 @@ static void maybe_flip_strides(uint8_t **dst, int *dstride,
   }
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+
+static void maybe_flip_strides16(uint16_t **dst, int *dstride,
+                                 tran_low_t **src, int *sstride,
+                                 int tx_type, int size) {
+  // Note that the transpose of src will be added to dst. In order to LR
+  // flip the addends (in dst coordinates), we UD flip the src. To UD flip
+  // the addends, we UD flip the dst.
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      break;
+    case FLIPADST_DCT:
+    case FLIPADST_ADST:
+      // flip UD
+      FLIPUD_PTR(*dst, *dstride, size);
+      break;
+    case DCT_FLIPADST:
+    case ADST_FLIPADST:
+      // flip LR
+      FLIPUD_PTR(*src, *sstride, size);
+      break;
+    case FLIPADST_FLIPADST:
+      // flip UD
+      FLIPUD_PTR(*dst, *dstride, size);
+      // flip LR
+      FLIPUD_PTR(*src, *sstride, size);
+      break;
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+      break;
+    case DST_FLIPADST:
+      // flip LR
+      FLIPUD_PTR(*src, *sstride, size);
+      break;
+    case FLIPADST_DST:
+      // flip UD
+      FLIPUD_PTR(*dst, *dstride, size);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+#endif
+
 void idst4(const tran_low_t *input, tran_low_t *output) {
   // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
@@ -2795,8 +2846,7 @@ void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides((uint8_t**)&dest,
-                     &stride, &outp, &outstride, tx_type, 4 * 2);
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 4);
 #endif
 
   // Sum with the destination
@@ -2939,8 +2989,7 @@ void vp9_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides((uint8_t**)&dest,
-                     &stride, &outp, &outstride, tx_type, 8 * 2);
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 8);
 #endif
 
   // Sum with the destination
@@ -3397,8 +3446,7 @@ void vp9_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides((uint8_t**)&dest, &stride,
-                     &outp, &outstride, tx_type, 16 * 2);
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 16);
 #endif
 
   // Sum with the destination
