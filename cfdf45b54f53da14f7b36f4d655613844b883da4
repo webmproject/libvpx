@@ -16,6 +16,24 @@
       "revId": "cfdf45b54f53da14f7b36f4d655613844b883da4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_85929639",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-23T22:31:07Z",
+      "side": 1,
+      "message": "This may be taken care of by modifying the number of params from 2, 4, 3 to 4, 5, 3. With --target\u003dx86-linux-gcc, build passes, and test result also matches.",
+      "parentUuid": "bb9d0772_94102ada",
+      "revId": "cfdf45b54f53da14f7b36f4d655613844b883da4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
