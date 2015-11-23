@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb9d0772_94102ada",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-23T14:18:08Z",
+      "side": 1,
+      "message": "I\u0027m assuming not having the following will have issues with 32 bit builds:\nmovifnidn          leftq, leftmp\n\nsee https://chromium-review.googlesource.com/#/c/313812/1",
+      "revId": "cfdf45b54f53da14f7b36f4d655613844b883da4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
