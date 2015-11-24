@@ -36,20 +36,6 @@ const vpx_prob vp9_cat6_prob[] = {
     254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
 };
 #if CONFIG_VP9_HIGHBITDEPTH
-const vpx_prob vp9_cat1_prob_high10[] = { 159 };
-const vpx_prob vp9_cat2_prob_high10[] = { 165, 145 };
-const vpx_prob vp9_cat3_prob_high10[] = { 173, 148, 140 };
-const vpx_prob vp9_cat4_prob_high10[] = { 176, 155, 140, 135 };
-const vpx_prob vp9_cat5_prob_high10[] = { 180, 157, 141, 134, 130 };
-const vpx_prob vp9_cat6_prob_high10[] = {
-    255, 255, 254, 254, 254, 252, 249, 243,
-    230, 196, 177, 153, 140, 133, 130, 129
-};
-const vpx_prob vp9_cat1_prob_high12[] = { 159 };
-const vpx_prob vp9_cat2_prob_high12[] = { 165, 145 };
-const vpx_prob vp9_cat3_prob_high12[] = { 173, 148, 140 };
-const vpx_prob vp9_cat4_prob_high12[] = { 176, 155, 140, 135 };
-const vpx_prob vp9_cat5_prob_high12[] = { 180, 157, 141, 134, 130 };
 const vpx_prob vp9_cat6_prob_high12[] = {
     255, 255, 255, 255, 254, 254, 254, 252, 249,
     243, 230, 196, 177, 153, 140, 133, 130, 129
