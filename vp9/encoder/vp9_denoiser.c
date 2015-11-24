@@ -458,6 +458,7 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
 void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {
   ctx->zeromv_sse = UINT_MAX;
   ctx->newmv_sse = UINT_MAX;
+  ctx->zeromv_lastref_sse = UINT_MAX;
 }
 
 void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi, unsigned int sse,
