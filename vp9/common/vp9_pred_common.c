@@ -192,6 +192,7 @@ int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
   const int has_above = xd->up_available;
   const int has_left = xd->left_available;
+
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.

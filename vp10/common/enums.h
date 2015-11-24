@@ -123,8 +123,16 @@ typedef enum {
 
 typedef enum {
   VP9_LAST_FLAG = 1 << 0,
+#if CONFIG_EXT_REFS
+  VP9_LAST2_FLAG = 1 << 1,
+  VP9_LAST3_FLAG = 1 << 2,
+  VP9_LAST4_FLAG = 1 << 3,
+  VP9_GOLD_FLAG = 1 << 4,
+  VP9_ALT_FLAG = 1 << 5,
+#else
   VP9_GOLD_FLAG = 1 << 1,
   VP9_ALT_FLAG = 1 << 2,
+#endif  // CONFIG_EXT_REFS
 } VP9_REFFRAME;
 
 typedef enum {
@@ -209,6 +217,14 @@ typedef uint8_t PREDICTION_MODE;
 #define TXFM_PARTITION_CONTEXTS 9
 typedef TX_SIZE TXFM_CONTEXT;
 #endif
+
+#if CONFIG_EXT_REFS
+#define SINGLE_REFS 6
+#define COMP_REFS 5
+#else
+#define SINGLE_REFS 3
+#define COMP_REFS 2
+#endif  // CONFIG_EXT_REFS
 
 #ifdef __cplusplus
 }  // extern "C"

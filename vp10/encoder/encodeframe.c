@@ -1282,14 +1282,51 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td) {
                             [has_second_ref(mbmi)]++;
 
         if (has_second_ref(mbmi)) {
-          counts->comp_ref[vp10_get_pred_context_comp_ref_p(cm, xd)]
+#if CONFIG_EXT_REFS
+          const int bit = (ref0 == GOLDEN_FRAME || ref0 == LAST3_FRAME ||
+                           ref0 == LAST4_FRAME);
+          counts->comp_ref[vp10_get_pred_context_comp_ref_p(cm, xd)][0][bit]++;
+          if (!bit) {
+            counts->comp_ref[vp10_get_pred_context_comp_ref_p1(cm, xd)][1]
+                            [ref0 == LAST_FRAME]++;
+          } else {
+            counts->comp_ref[vp10_get_pred_context_comp_ref_p2(cm, xd)][2]
+                            [ref0 == GOLDEN_FRAME]++;
+            if (ref0 != GOLDEN_FRAME) {
+              counts->comp_ref[vp10_get_pred_context_comp_ref_p3(cm, xd)][3]
+                              [ref0 == LAST3_FRAME]++;
+            }
+          }
+#else
+          counts->comp_ref[vp10_get_pred_context_comp_ref_p(cm, xd)][0]
                           [ref0 == GOLDEN_FRAME]++;
+#endif  // CONFIG_EXT_REFS
         } else {
+#if CONFIG_EXT_REFS
+          const int bit = (ref0 == ALTREF_FRAME || ref0 == GOLDEN_FRAME);
+          counts->single_ref[vp10_get_pred_context_single_ref_p1(xd)][0][bit]++;
+          if (bit) {
+            counts->single_ref[vp10_get_pred_context_single_ref_p2(xd)][1]
+                              [ref0 != GOLDEN_FRAME]++;
+          } else {
+            const int bit1 = !(ref0 == LAST2_FRAME || ref0 == LAST_FRAME);
+            counts->single_ref[vp10_get_pred_context_single_ref_p3(xd)][2]
+                              [bit1]++;
+            if (!bit1) {
+              counts->single_ref[vp10_get_pred_context_single_ref_p4(xd)][3]
+                                [ref0 != LAST_FRAME]++;
+            } else {
+              counts->single_ref[vp10_get_pred_context_single_ref_p5(xd)][4]
+                                [ref0 != LAST3_FRAME]++;
+            }
+          }
+#else
           counts->single_ref[vp10_get_pred_context_single_ref_p1(xd)][0]
                             [ref0 != LAST_FRAME]++;
           if (ref0 != LAST_FRAME)
             counts->single_ref[vp10_get_pred_context_single_ref_p2(xd)][1]
                               [ref0 != GOLDEN_FRAME]++;
+#endif  // CONFIG_EXT_REFS
         }
       }
     }
@@ -2670,8 +2707,14 @@ static int check_dual_ref_flags(VP10_COMP *cpi) {
   if (segfeature_active(&cpi->common.seg, 1, SEG_LVL_REF_FRAME)) {
     return 0;
   } else {
-    return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG)
-        + !!(ref_flags & VP9_ALT_FLAG)) >= 2;
+    return (!!(ref_flags & VP9_GOLD_FLAG) +
+            !!(ref_flags & VP9_LAST_FLAG) +
+#if CONFIG_EXT_REFS
+            !!(ref_flags & VP9_LAST2_FLAG) +
+            !!(ref_flags & VP9_LAST3_FLAG) +
+            !!(ref_flags & VP9_LAST4_FLAG) +
+#endif  // CONFIG_EXT_REFS
+            !!(ref_flags & VP9_ALT_FLAG)) >= 2;
   }
 }
 
@@ -2696,6 +2739,8 @@ static MV_REFERENCE_FRAME get_frame_type(const VP10_COMP *cpi) {
   else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
     return GOLDEN_FRAME;
   else
+    // TODO(zoeliu): TO investigate whether a frame_type other than
+    // INTRA/ALTREF/GOLDEN/LAST needs to be specified seperately.
     return LAST_FRAME;
 }
 
@@ -2914,7 +2959,14 @@ void vp10_encode_frame(VP10_COMP *cpi) {
       cpi->allow_comp_inter_inter = 1;
       cm->comp_fixed_ref = ALTREF_FRAME;
       cm->comp_var_ref[0] = LAST_FRAME;
+#if CONFIG_EXT_REFS
+      cm->comp_var_ref[1] = LAST2_FRAME;
+      cm->comp_var_ref[2] = LAST3_FRAME;
+      cm->comp_var_ref[3] = LAST4_FRAME;
+      cm->comp_var_ref[4] = GOLDEN_FRAME;
+#else
       cm->comp_var_ref[1] = GOLDEN_FRAME;
+#endif  // CONFIG_EXT_REFS
     }
   } else {
     cpi->allow_comp_inter_inter = 0;
@@ -2930,9 +2982,12 @@ void vp10_encode_frame(VP10_COMP *cpi) {
     // either compound, single or hybrid prediction as per whatever has
     // worked best for that type of frame in the past.
     // It also predicts whether another coding mode would have worked
-    // better that this coding mode. If that is the case, it remembers
+    // better than this coding mode. If that is the case, it remembers
     // that for subsequent frames.
     // It does the same analysis for transform size selection also.
+    //
+    // TODO(zoeliu): TO investigate whether a frame_type other than
+    // INTRA/ALTREF/GOLDEN/LAST needs to be specified seperately.
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
     int64_t *const mode_thrs = rd_opt->prediction_type_threshes[frame_type];
     int64_t *const filter_thrs = rd_opt->filter_threshes[frame_type];

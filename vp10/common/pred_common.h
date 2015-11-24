@@ -87,24 +87,76 @@ int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
                                     const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p(const VP10_COMMON *cm,
-                                                    const MACROBLOCKD *xd) {
+                                                     const MACROBLOCKD *xd) {
   const int pred_context = vp10_get_pred_context_comp_ref_p(cm, xd);
-  return cm->fc->comp_ref_prob[pred_context];
+  return cm->fc->comp_ref_prob[pred_context][0];
 }
+
+#if CONFIG_EXT_REFS
+int vp10_get_pred_context_comp_ref_p1(const VP10_COMMON *cm,
+                                      const MACROBLOCKD *xd);
+
+static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p1(const VP10_COMMON *cm,
+                                                     const MACROBLOCKD *xd) {
+  const int pred_context = vp10_get_pred_context_comp_ref_p1(cm, xd);
+  return cm->fc->comp_ref_prob[pred_context][1];
+}
+
+int vp10_get_pred_context_comp_ref_p2(const VP10_COMMON *cm,
+                                      const MACROBLOCKD *xd);
+
+static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p2(const VP10_COMMON *cm,
+                                                     const MACROBLOCKD *xd) {
+  const int pred_context = vp10_get_pred_context_comp_ref_p2(cm, xd);
+  return cm->fc->comp_ref_prob[pred_context][2];
+}
+
+int vp10_get_pred_context_comp_ref_p3(const VP10_COMMON *cm,
+                                      const MACROBLOCKD *xd);
+
+static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p3(const VP10_COMMON *cm,
+                                                     const MACROBLOCKD *xd) {
+  const int pred_context = vp10_get_pred_context_comp_ref_p3(cm, xd);
+  return cm->fc->comp_ref_prob[pred_context][3];
+}
+#endif  // CONFIG_EXT_REFS
 
 int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_single_ref_p1(const VP10_COMMON *cm,
-                                                       const MACROBLOCKD *xd) {
+                                                        const MACROBLOCKD *xd) {
   return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p1(xd)][0];
 }
 
 int vp10_get_pred_context_single_ref_p2(const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_single_ref_p2(const VP10_COMMON *cm,
-                                                       const MACROBLOCKD *xd) {
+                                                        const MACROBLOCKD *xd) {
   return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p2(xd)][1];
 }
+
+#if CONFIG_EXT_REFS
+int vp10_get_pred_context_single_ref_p3(const MACROBLOCKD *xd);
+
+static INLINE vpx_prob vp10_get_pred_prob_single_ref_p3(const VP10_COMMON *cm,
+                                                        const MACROBLOCKD *xd) {
+  return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p3(xd)][2];
+}
+
+int vp10_get_pred_context_single_ref_p4(const MACROBLOCKD *xd);
+
+static INLINE vpx_prob vp10_get_pred_prob_single_ref_p4(const VP10_COMMON *cm,
+                                                        const MACROBLOCKD *xd) {
+  return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p4(xd)][3];
+}
+
+int vp10_get_pred_context_single_ref_p5(const MACROBLOCKD *xd);
+
+static INLINE vpx_prob vp10_get_pred_prob_single_ref_p5(const VP10_COMMON *cm,
+                                                        const MACROBLOCKD *xd) {
+  return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p5(xd)][4];
+}
+#endif  // CONFIG_EXT_REFS
 
 // Returns a context number for the given MB prediction signal
 // The mode info data structure has a one element border above and to the

@@ -590,6 +590,12 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
 
   rd->thresh_mult[THR_NEARMV] += 1000;
   rd->thresh_mult[THR_NEARA] += 1000;
+  rd->thresh_mult[THR_NEARG] += 1000;
+
+  rd->thresh_mult[THR_ZEROMV] += 2000;
+  rd->thresh_mult[THR_ZEROG] += 2000;
+  rd->thresh_mult[THR_ZEROA] += 2000;
+
   rd->thresh_mult[THR_COMP_NEARESTLA] += 1000;
   rd->thresh_mult[THR_COMP_NEARESTGA] += 1000;
 
@@ -597,13 +603,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
 
   rd->thresh_mult[THR_COMP_NEARLA] += 1500;
   rd->thresh_mult[THR_COMP_NEWLA] += 2000;
-  rd->thresh_mult[THR_NEARG] += 1000;
   rd->thresh_mult[THR_COMP_NEARGA] += 1500;
   rd->thresh_mult[THR_COMP_NEWGA] += 2000;
 
-  rd->thresh_mult[THR_ZEROMV] += 2000;
-  rd->thresh_mult[THR_ZEROG] += 2000;
-  rd->thresh_mult[THR_ZEROA] += 2000;
   rd->thresh_mult[THR_COMP_ZEROLA] += 2500;
   rd->thresh_mult[THR_COMP_ZEROGA] += 2500;
 
@@ -618,9 +620,10 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
-  static const int thresh_mult[2][MAX_REFS] =
-      {{2500, 2500, 2500, 4500, 4500, 2500},
-       {2000, 2000, 2000, 4000, 4000, 2000}};
+  static const int thresh_mult[2][MAX_REFS] = {
+    {2500, 2500, 2500, 4500, 4500, 2500},
+    {2000, 2000, 2000, 4000, 4000, 2000}
+  };
   RD_OPT *const rd = &cpi->rd;
   const int idx = cpi->oxcf.mode == BEST;
   memcpy(rd->thresh_mult_sub8x8, thresh_mult[idx], sizeof(thresh_mult[idx]));

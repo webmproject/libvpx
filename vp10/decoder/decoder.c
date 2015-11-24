@@ -196,10 +196,23 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
   // later commit that adds VP9-specific controls for this functionality.
   if (ref_frame_flag == VP9_LAST_FLAG) {
     ref_buf = &cm->frame_refs[0];
+#if CONFIG_EXT_REFS
+  } else if (ref_frame_flag == VP9_LAST2_FLAG) {
+    ref_buf = &cm->frame_refs[1];
+  } else if (ref_frame_flag == VP9_LAST3_FLAG) {
+    ref_buf = &cm->frame_refs[2];
+  } else if (ref_frame_flag == VP9_LAST4_FLAG) {
+    ref_buf = &cm->frame_refs[3];
+  } else if (ref_frame_flag == VP9_GOLD_FLAG) {
+    ref_buf = &cm->frame_refs[4];
+  } else if (ref_frame_flag == VP9_ALT_FLAG) {
+    ref_buf = &cm->frame_refs[5];
+#else
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
     ref_buf = &cm->frame_refs[1];
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
     ref_buf = &cm->frame_refs[2];
+#endif  // CONFIG_EXT_REFS
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
@@ -243,10 +256,10 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
     // Current thread releases the holding of reference frame.
     decrease_ref_count(old_idx, frame_bufs, pool);
 
-    // Release the reference frame in reference map.
-    if ((mask & 1) && old_idx >= 0) {
+    // Release the reference frame holding in the reference map for the decoding
+    // of the next frame.
+    if (mask & 1)
       decrease_ref_count(old_idx, frame_bufs, pool);
-    }
     cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
     ++ref_index;
   }
@@ -268,7 +281,7 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   }
 
   // Invalidate these references until the next frame starts.
-  for (ref_index = 0; ref_index < 3; ref_index++)
+  for (ref_index = 0; ref_index < REFS_PER_FRAME; ref_index++)
     cm->frame_refs[ref_index].idx = -1;
 }
 
@@ -326,7 +339,6 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
     pbi->cur_buf = &frame_bufs[cm->new_fb_idx];
   }
 
-
   if (setjmp(cm->error.jmp)) {
     const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
     int i;
@@ -350,10 +362,10 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
         // Current thread releases the holding of reference frame.
         decrease_ref_count(old_idx, frame_bufs, pool);
 
-        // Release the reference frame in reference map.
-        if ((mask & 1) && old_idx >= 0) {
+       // Release the reference frame holding in the reference map for the
+       // decoding of the next frame.
+       if (mask & 1)
           decrease_ref_count(old_idx, frame_bufs, pool);
-        }
         ++ref_index;
       }
 

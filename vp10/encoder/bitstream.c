@@ -484,15 +484,58 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     }
 
     if (is_compound) {
-      vpx_write(w, mbmi->ref_frame[0] == GOLDEN_FRAME,
-                vp10_get_pred_prob_comp_ref_p(cm, xd));
+#if CONFIG_EXT_REFS
+      const int bit = (mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                       mbmi->ref_frame[0] == LAST3_FRAME ||
+                       mbmi->ref_frame[0] == LAST4_FRAME);
+#else
+      const int bit = mbmi->ref_frame[0] == GOLDEN_FRAME;
+#endif  // CONFIG_EXT_REFS
+      vpx_write(w, bit, vp10_get_pred_prob_comp_ref_p(cm, xd));
+
+#if CONFIG_EXT_REFS
+      if (!bit) {
+        const int bit1 = mbmi->ref_frame[0] == LAST_FRAME;
+        vpx_write(w, bit1, vp10_get_pred_prob_comp_ref_p1(cm, xd));
+      } else {
+        const int bit2 = mbmi->ref_frame[0] == GOLDEN_FRAME;
+        vpx_write(w, bit2, vp10_get_pred_prob_comp_ref_p2(cm, xd));
+        if (!bit2) {
+          const int bit3 = mbmi->ref_frame[0] == LAST3_FRAME;
+          vpx_write(w, bit3, vp10_get_pred_prob_comp_ref_p3(cm, xd));
+        }
+      }
+#endif  // CONFIG_EXT_REFS
     } else {
+#if CONFIG_EXT_REFS
+      const int bit0 = (mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                        mbmi->ref_frame[0] == ALTREF_FRAME);
+      vpx_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
+
+      if (bit0) {
+        const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
+        vpx_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
+      } else {
+        const int bit2 = (mbmi->ref_frame[0] == LAST3_FRAME ||
+                          mbmi->ref_frame[0] == LAST4_FRAME);
+        vpx_write(w, bit2, vp10_get_pred_prob_single_ref_p3(cm, xd));
+
+        if (!bit2) {
+          const int bit3 = mbmi->ref_frame[0] != LAST_FRAME;
+          vpx_write(w, bit3, vp10_get_pred_prob_single_ref_p4(cm, xd));
+        } else {
+          const int bit4 = mbmi->ref_frame[0] != LAST3_FRAME;
+          vpx_write(w, bit4, vp10_get_pred_prob_single_ref_p5(cm, xd));
+        }
+      }
+#else
       const int bit0 = mbmi->ref_frame[0] != LAST_FRAME;
       vpx_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
       if (bit0) {
         const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
         vpx_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
       }
+#endif  // CONFIG_EXT_REFS
     }
   }
 }
@@ -1406,6 +1449,11 @@ static int get_refresh_mask(VP10_COMP *cpi) {
     // and this needs to be generalized as other uses are implemented
     // (like RTC/temporal scalability).
     return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+#if CONFIG_EXT_REFS
+           (cpi->refresh_last2_frame << cpi->lst2_fb_idx) |
+           (cpi->refresh_last3_frame << cpi->lst3_fb_idx) |
+           (cpi->refresh_last4_frame << cpi->lst4_fb_idx) |
+#endif  // CONFIG_EXT_REFS
            (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {
     int arf_idx = cpi->alt_fb_idx;
@@ -1414,6 +1462,11 @@ static int get_refresh_mask(VP10_COMP *cpi) {
       arf_idx = gf_group->arf_update_idx[gf_group->index];
     }
     return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+#if CONFIG_EXT_REFS
+           (cpi->refresh_last2_frame << cpi->lst2_fb_idx) |
+           (cpi->refresh_last3_frame << cpi->lst3_fb_idx) |
+           (cpi->refresh_last4_frame << cpi->lst4_fb_idx) |
+#endif  // CONFIG_EXT_REFS
            (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
            (cpi->refresh_alt_ref_frame << arf_idx);
   }
@@ -1584,6 +1637,13 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   vpx_wb_write_bit(wb, cm->show_frame);
   vpx_wb_write_bit(wb, cm->error_resilient_mode);
 
+#if CONFIG_EXT_REFS
+  cpi->refresh_last2_frame =
+      (cm->frame_type == KEY_FRAME || cpi->refresh_last_frame) ? 1 : 0;
+  cpi->refresh_last3_frame = cpi->refresh_last2_frame ? 1 : 0;
+  cpi->refresh_last4_frame = cpi->refresh_last3_frame ? 1 : 0;
+#endif  // CONFIG_EXT_REFS
+
   if (cm->frame_type == KEY_FRAME) {
     write_sync_code(wb);
     write_bitdepth_colorspace_sampling(cm, wb);
@@ -1715,17 +1775,21 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
-        vp10_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][0],
-                                  counts->single_ref[i][0]);
-        vp10_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][1],
-                                  counts->single_ref[i][1]);
+        for (j = 0; j < (SINGLE_REFS - 1); j ++) {
+          vp10_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][j],
+                                     counts->single_ref[i][j]);
+        }
       }
     }
 
-    if (cm->reference_mode != SINGLE_REFERENCE)
-      for (i = 0; i < REF_CONTEXTS; i++)
-        vp10_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i],
-                                  counts->comp_ref[i]);
+    if (cm->reference_mode != SINGLE_REFERENCE) {
+      for (i = 0; i < REF_CONTEXTS; i++) {
+        for (j = 0; j < (COMP_REFS - 1); j ++) {
+          vp10_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i][j],
+                                     counts->comp_ref[i][j]);
+        }
+      }
+    }
 
     for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
       prob_diff_update(vp10_intra_mode_tree, cm->fc->y_mode_prob[i],

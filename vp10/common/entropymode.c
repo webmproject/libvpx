@@ -215,16 +215,33 @@ static const vpx_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
   239, 183, 119,  96,  41
 };
 
-static const vpx_prob default_comp_ref_p[REF_CONTEXTS] = {
-  50, 126, 123, 221, 226
+static const vpx_prob default_comp_ref_p[REF_CONTEXTS][COMP_REFS - 1] = {
+#if CONFIG_EXT_REFS
+  // TODO(zoeliu): To adjust the initial prob values.
+  {  33,  16,  16,  16 },
+  {  77,  74,  74,  74 },
+  { 142, 142, 142, 142 },
+  { 172, 170, 170, 170 },
+  { 238, 247, 247, 247 }
+#else
+  { 50 }, { 126 }, { 123 }, { 221 }, { 226 }
+#endif  // CONFIG_EXT_REFS
 };
 
-static const vpx_prob default_single_ref_p[REF_CONTEXTS][2] = {
+static const vpx_prob default_single_ref_p[REF_CONTEXTS][SINGLE_REFS - 1] = {
+#if CONFIG_EXT_REFS
+  {  33,  16,  16,  16,  16 },
+  {  77,  74,  74,  74,  74 },
+  { 142, 142, 142, 142, 142 },
+  { 172, 170, 170, 170, 170 },
+  { 238, 247, 247, 247, 247 }
+#else
   {  33,  16 },
   {  77,  74 },
   { 142, 142 },
   { 172, 170 },
   { 238, 247 }
+#endif  // CONFIG_EXT_REFS
 };
 
 static const struct tx_probs default_tx_probs = {
@@ -1109,10 +1126,11 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
     fc->comp_inter_prob[i] = mode_mv_merge_probs(pre_fc->comp_inter_prob[i],
                                                  counts->comp_inter[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
-    fc->comp_ref_prob[i] = mode_mv_merge_probs(pre_fc->comp_ref_prob[i],
-                                               counts->comp_ref[i]);
+    for (j = 0; j < (COMP_REFS - 1); j++)
+      fc->comp_ref_prob[i][j] = mode_mv_merge_probs(pre_fc->comp_ref_prob[i][j],
+                                                    counts->comp_ref[i][j]);
   for (i = 0; i < REF_CONTEXTS; i++)
-    for (j = 0; j < 2; j++)
+    for (j = 0; j < (SINGLE_REFS - 1); j++)
       fc->single_ref_prob[i][j] = mode_mv_merge_probs(
           pre_fc->single_ref_prob[i][j], counts->single_ref[i][j]);
 
@@ -1233,6 +1251,11 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
 
   lf->ref_deltas[INTRA_FRAME] = 1;
   lf->ref_deltas[LAST_FRAME] = 0;
+#if CONFIG_EXT_REFS
+  lf->ref_deltas[LAST2_FRAME] = lf->ref_deltas[LAST_FRAME];
+  lf->ref_deltas[LAST3_FRAME] = lf->ref_deltas[LAST_FRAME];
+  lf->ref_deltas[LAST4_FRAME] = lf->ref_deltas[LAST_FRAME];
+#endif  // CONFIG_EXT_REFS
   lf->ref_deltas[GOLDEN_FRAME] = -1;
   lf->ref_deltas[ALTREF_FRAME] = -1;
 

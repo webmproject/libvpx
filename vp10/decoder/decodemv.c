@@ -534,12 +534,68 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
     if (mode == COMPOUND_REFERENCE) {
       const int idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
       const int ctx = vp10_get_pred_context_comp_ref_p(cm, xd);
-      const int bit = vpx_read(r, fc->comp_ref_prob[ctx]);
+      const int bit = vpx_read(r, fc->comp_ref_prob[ctx][0]);
       if (counts)
-        ++counts->comp_ref[ctx][bit];
+        ++counts->comp_ref[ctx][0][bit];
       ref_frame[idx] = cm->comp_fixed_ref;
+
+#if CONFIG_EXT_REFS
+      if (!bit) {
+        const int ctx1 = vp10_get_pred_context_comp_ref_p1(cm, xd);
+        const int bit1 = vpx_read(r, fc->comp_ref_prob[ctx1][1]);
+        if (counts)
+          ++counts->comp_ref[ctx1][1][bit1];
+        ref_frame[!idx] = cm->comp_var_ref[bit1 ? 0 : 1];
+      } else {
+        const int ctx2 = vp10_get_pred_context_comp_ref_p2(cm, xd);
+        const int bit2 = vpx_read(r, fc->comp_ref_prob[ctx2][2]);
+        if (counts)
+          ++counts->comp_ref[ctx2][2][bit2];
+        if (!bit2) {
+          const int ctx3 = vp10_get_pred_context_comp_ref_p3(cm, xd);
+          const int bit3 = vpx_read(r, fc->comp_ref_prob[ctx3][3]);
+          if (counts)
+            ++counts->comp_ref[ctx3][3][bit3];
+          ref_frame[!idx] = cm->comp_var_ref[bit3 ? 2 : 3];
+        } else {
+          ref_frame[!idx] = cm->comp_var_ref[4];
+        }
+      }
+#else
       ref_frame[!idx] = cm->comp_var_ref[bit];
+#endif  // CONFIG_EXT_REFS
     } else if (mode == SINGLE_REFERENCE) {
+#if CONFIG_EXT_REFS
+      const int ctx0 = vp10_get_pred_context_single_ref_p1(xd);
+      const int bit0 = vpx_read(r, fc->single_ref_prob[ctx0][0]);
+      if (counts)
+        ++counts->single_ref[ctx0][0][bit0];
+      if (bit0) {
+        const int ctx1 = vp10_get_pred_context_single_ref_p2(xd);
+        const int bit1 = vpx_read(r, fc->single_ref_prob[ctx1][1]);
+        if (counts)
+          ++counts->single_ref[ctx1][1][bit1];
+        ref_frame[0] = bit1 ? ALTREF_FRAME : GOLDEN_FRAME;
+      } else {
+        const int ctx2 = vp10_get_pred_context_single_ref_p3(xd);
+        const int bit2 = vpx_read(r, fc->single_ref_prob[ctx2][2]);
+        if (counts)
+          ++counts->single_ref[ctx2][2][bit2];
+        if (bit2) {
+          const int ctx4 = vp10_get_pred_context_single_ref_p5(xd);
+          const int bit4 = vpx_read(r, fc->single_ref_prob[ctx4][4]);
+          if (counts)
+            ++counts->single_ref[ctx4][4][bit4];
+          ref_frame[0] = bit4 ? LAST4_FRAME : LAST3_FRAME;
+        } else {
+          const int ctx3 = vp10_get_pred_context_single_ref_p4(xd);
+          const int bit3 = vpx_read(r, fc->single_ref_prob[ctx3][3]);
+          if (counts)
+            ++counts->single_ref[ctx3][3][bit3];
+          ref_frame[0] = bit3 ? LAST2_FRAME : LAST_FRAME;
+        }
+      }
+#else
       const int ctx0 = vp10_get_pred_context_single_ref_p1(xd);
       const int bit0 = vpx_read(r, fc->single_ref_prob[ctx0][0]);
       if (counts)
@@ -553,6 +609,7 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
       } else {
         ref_frame[0] = LAST_FRAME;
       }
+#endif  // CONFIG_EXT_REFS
 
       ref_frame[1] = NONE;
     } else {
