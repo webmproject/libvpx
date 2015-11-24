@@ -1252,7 +1252,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (const_motion[ref_frame] && this_mode == NEARMV)
       continue;
 
-    if (!(this_mode == ZEROMV && ref_frame == LAST_FRAME)) {
+    if (!(frame_mv[this_mode][ref_frame].as_int == 0 &&
+        ref_frame == LAST_FRAME)) {
       i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
       if ((cpi->ref_frame_flags & flag_list[i]) && sf->reference_masking)
         if (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[i] << 1))
