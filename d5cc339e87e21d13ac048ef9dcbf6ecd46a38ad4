@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbc4277e_bffd7fd7",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-11-24T18:13:40Z",
+      "side": 1,
+      "message": "I wonder if doing ROUND_ZERO for the sum and not for the sse will unnecessarily skew the distortion. I would have thought using ROUND_ZERO for both would be more natural.\nis it possible to run a quick test with that to see if there is any difference in performance?\n\nAnother option is to use:\n*sum \u003d ROUND_ZERO_POWER_OF_TWO(*sum, 2);\nsse_long \u003d VPXMAX((int64_t)(*sum) * (int64_t)(*sum),\n                   sse_long);\n*sse \u003d (uint32_t)ROUND_POWER_OF_TWO(sse_long, 4)",
+      "range": {
+        "startLine": 311,
+        "startChar": 40,
+        "endLine": 311,
+        "endChar": 42
+      },
+      "revId": "d5cc339e87e21d13ac048ef9dcbf6ecd46a38ad4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_82fe08d1",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-11-24T18:13:40Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "d5cc339e87e21d13ac048ef9dcbf6ecd46a38ad4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
