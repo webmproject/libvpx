@@ -153,15 +153,13 @@ static void scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 }
 
 static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
-                              MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                              MV_REFERENCE_FRAME ref_frame,
                               uint8_t *refmv_count,
                               CANDIDATE_MV *ref_mv_stack,
                               int_mv *mv_ref_list,
                               int block, int mi_row, int mi_col,
                               uint8_t *mode_context) {
   int idx, nearest_refmv_count = 0;
-  const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type] << 3;
-  const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type] << 3;
 
   CANDIDATE_MV tmp_mv;
   int len, nr_len;
@@ -233,7 +231,8 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *refmv_count); ++idx) {
     mv_ref_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
-    clamp_mv_ref(&mv_ref_list[idx].as_mv, bw, bh, xd);
+    clamp_mv_ref(&mv_ref_list[idx].as_mv,
+                 xd->n8_w << 3, xd->n8_h << 3, xd);
   }
 }
 #endif
@@ -386,7 +385,7 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                    mi_row, mi_col, sync, data, mode_context);
 
 #if CONFIG_REF_MV
-  setup_ref_mv_list(cm, xd, mi, ref_frame, ref_mv_count, ref_mv_stack,
+  setup_ref_mv_list(cm, xd, ref_frame, ref_mv_count, ref_mv_stack,
                     mv_ref_list, -1, mi_row, mi_col, mode_context);
 #endif
 }
