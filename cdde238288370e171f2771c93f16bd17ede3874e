@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db271bf3_311ccf46",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T18:59:59Z",
+      "side": 1,
+      "message": "as discussed offline, setting the parameter count correctly is nice when you need all of them, but in this case the value passed for line is not used (like in most of the functions).\ndecreasing the number and using movifnidn reduces the amount of mov\u0027s in the prologue so is a better choice here.",
+      "revId": "cdde238288370e171f2771c93f16bd17ede3874e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
