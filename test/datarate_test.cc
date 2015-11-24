@@ -770,7 +770,7 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest,
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 0) {
       int i;
-      for (i = 0; i < 2; ++i) {
+      for (i = 0; i < VPX_MAX_LAYERS; ++i) {
         svc_params_.max_quantizers[i] = 63;
         svc_params_.min_quantizers[i] = 0;
       }

@@ -368,7 +368,7 @@ cglobal idct8x8_12_add, 3, 5, 13, input, output, stride
 %define idx30 16 * 6
 %define idx31 16 * 7
 
-%macro IDCT32X32_34x 4
+%macro IDCT32X32_34 4
   ; FROM idct32x32_add_neon.asm
   ;
   ; Instead of doing the transforms stage by stage, it is done by loading
@@ -571,9 +571,7 @@ cglobal idct8x8_12_add, 3, 5, 13, input, output, stride
   ; BLOCK D STAGE 4 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   mova                 m0, [rsp + transposed_in + 16 *  0]
   mova                m10, [pw_11585x2]
-  mova                 m7, m0
   pmulhrsw             m0, m10  ; stp1_1
-  pmulhrsw             m7, m10  ; stp1_0
 
   mova                m14, m11 ; stp1_4
   mova                m13, m12 ; stp1_7
@@ -587,6 +585,7 @@ cglobal idct8x8_12_add, 3, 5, 13, input, output, stride
   BUTTERFLY_4X         13,    14,  11585, 11585,  m8,  9,  10 ; stp1_5, stp1_6
   SWAP 13, 14
 %endif
+  mova                 m7, m0 ; stp1_0 = stp1_1
   mova                 m4, m0 ; stp1_1
   mova                 m2, m7 ; stp1_0
 
@@ -752,7 +751,7 @@ idct32x32_34_transpose:
 
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
 
-  IDCT32X32_34x 16*0, 16*32, 16*64, 16*96
+  IDCT32X32_34  16*0, 16*32, 16*64, 16*96
   lea            stp, [stp + 16 * 8]
   mov             r6, 4
   lea            stp, [rsp + pass_one_start]
@@ -774,7 +773,7 @@ idct32x32_34_transpose_2:
 
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
 
-  IDCT32X32_34x 16*0, 16*8, 16*16, 16*24
+  IDCT32X32_34  16*0, 16*8, 16*16, 16*24
 
   lea            stp, [stp + 16 * 32]
   add             r9, 16 * 32
