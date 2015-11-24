@@ -290,7 +290,7 @@ static const int num_ext_tx_set_inter[EXT_TX_SETS_INTER] = {
   1, 17, 10, 2
 };
 static const int num_ext_tx_set_intra[EXT_TX_SETS_INTRA] = {
-  1, 17,
+  1, 17, 10
 };
 
 #define USE_IDTX_FOR_32X32 0
@@ -303,7 +303,7 @@ static INLINE int get_ext_tx_set(TX_SIZE tx_size, BLOCK_SIZE bs,
 #else
   if (tx_size == TX_32X32) return 0;
 #endif
-  return 1;
+  return tx_size == TX_16X16 ? 2 : 1;
 }
 
 static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
@@ -312,23 +312,27 @@ static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
   return is_inter ? num_ext_tx_set_inter[set] : num_ext_tx_set_intra[set];
 }
 
-static const int use_intra_ext_tx_for_tx[EXT_TX_SETS_INTRA][TX_SIZES] = {
+static const int use_intra_ext_tx_for_txsize[EXT_TX_SETS_INTRA][TX_SIZES] = {
   { 0, 0, 0, 0, },  // unused
-  { 1, 1, 1, 0, },
+  { 1, 1, 0, 0, },
+  { 0, 0, 1, 0, },
 };
 
-static const int use_inter_ext_tx_for_tx[EXT_TX_SETS_INTER][TX_SIZES] = {
+static const int use_inter_ext_tx_for_txsize[EXT_TX_SETS_INTER][TX_SIZES] = {
   { 0, 0, 0, 0, },  // unused
-  { 1, 1, 1, 0, },
-  { 0, 0, 0, 0, },
+  { 1, 1, 0, 0, },
+  { 0, 0, 1, 0, },
   { 0, 0, 0, USE_IDTX_FOR_32X32, },
 };
 
+// Transform types used in each intra set
 static const int ext_tx_used_intra[EXT_TX_SETS_INTRA][TX_TYPES] = {
   { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
   { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, },
 };
 
+// Transform types used in each inter set
 static const int ext_tx_used_inter[EXT_TX_SETS_INTER][TX_TYPES] = {
   { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
   { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },

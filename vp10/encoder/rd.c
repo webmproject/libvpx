@@ -106,14 +106,14 @@ static void fill_mode_costs(VP10_COMP *cpi) {
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     int s;
     for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
-      if (use_inter_ext_tx_for_tx[s][i]) {
+      if (use_inter_ext_tx_for_txsize[s][i]) {
         vp10_cost_tokens(cpi->inter_tx_type_costs[s][i],
                          fc->inter_ext_tx_prob[s][i],
                          vp10_ext_tx_inter_tree[s]);
       }
     }
     for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
-      if (use_intra_ext_tx_for_tx[s][i]) {
+      if (use_intra_ext_tx_for_txsize[s][i]) {
         for (j = 0; j < INTRA_MODES; ++j)
           vp10_cost_tokens(cpi->intra_tx_type_costs[s][i][j],
                            fc->intra_ext_tx_prob[s][i][j],

@@ -446,13 +446,13 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
   for (i = 0; i < EXT_TX_SIZES; i++) {
     int s, k;
     for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
-      if (use_inter_ext_tx_for_tx[s][i]) {
+      if (use_inter_ext_tx_for_txsize[s][i]) {
         for (k = 0; k < TX_TYPES; k++)
           cm->counts.inter_ext_tx[s][i][k] += counts->inter_ext_tx[s][i][k];
       }
     }
     for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
-      if (use_intra_ext_tx_for_tx[s][i]) {
+      if (use_intra_ext_tx_for_txsize[s][i]) {
         int j;
         for (j = 0; j < INTRA_MODES; ++j)
           for (k = 0; k < TX_TYPES; k++)
