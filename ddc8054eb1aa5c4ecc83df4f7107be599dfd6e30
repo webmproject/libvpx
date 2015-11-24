@@ -16,6 +16,24 @@
       "revId": "ddc8054eb1aa5c4ecc83df4f7107be599dfd6e30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db271bf3_27764de5",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-24T23:23:40Z",
+      "side": 1,
+      "message": "This is for calculating the address of line 2 and line 3, since the loop is unrolled. \n\nIf we reuse the dst, we may need define another stride3q, and line 531 and 532 would be like \n  movd     [dstq+strideq*2 ], m2\n  movd     [dstq+stride3q  ], m3\n \nBoth implementation have similar performance.",
+      "parentUuid": "bbc4277e_8d1df151",
+      "revId": "ddc8054eb1aa5c4ecc83df4f7107be599dfd6e30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
