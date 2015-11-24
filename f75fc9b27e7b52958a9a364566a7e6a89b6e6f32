@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b153384_ce4dd4bf",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:07:51Z",
+      "side": 1,
+      "message": "previously the shuffle was duplicating to all lanes with \u00270\u0027, do you really need another table? it should be fine to set all the lanes, no?",
+      "revId": "f75fc9b27e7b52958a9a364566a7e6a89b6e6f32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
