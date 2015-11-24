@@ -516,6 +516,22 @@ cglobal v_predictor_32x32, 3, 4, 2, dst, stride, above
   REP_RET
 
 INIT_XMM sse2
+cglobal h_predictor_4x4, 2, 4, 4, dst, stride, line, left
+  movifnidn          leftq, leftmp
+  movd                  m0, [leftq]
+  punpcklbw             m0, m0
+  punpcklbw             m0, m0
+  pshufd                m1, m0, 0x1
+  movd      [dstq        ], m0
+  movd      [dstq+strideq], m1
+  pshufd                m2, m0, 0x2
+  lea                 dstq, [dstq+strideq*2]
+  pshufd                m3, m0, 0x3
+  movd      [dstq        ], m2
+  movd      [dstq+strideq], m3
+  RET
+
+INIT_XMM sse2
 cglobal tm_predictor_4x4, 4, 4, 5, dst, stride, above, left
   pxor                  m1, m1
   movq                  m0, [aboveq-1]; [63:0] tl t1 t2 t3 t4 x x x
