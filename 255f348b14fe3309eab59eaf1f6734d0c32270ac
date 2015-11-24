@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db271bf3_714e4715",
+        "filename": "vp10/common/mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-11-24T19:50:05Z",
+      "side": 1,
+      "message": "are both len and weight consts?",
+      "range": {
+        "startLine": 33,
+        "startChar": 6,
+        "endLine": 35,
+        "endChar": 22
+      },
+      "revId": "255f348b14fe3309eab59eaf1f6734d0c32270ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_f69eb120",
+        "filename": "vp10/common/mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-11-24T19:50:05Z",
+      "side": 1,
+      "message": "Similar code is repeated, can we do a loop or otherwise refactor to avoid duplicate?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 7
+      },
+      "revId": "255f348b14fe3309eab59eaf1f6734d0c32270ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db271bf3_7103e79c",
+        "filename": "vp10/common/mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-11-24T19:50:05Z",
+      "side": 1,
+      "message": "similarly to the one above comment, can we reduce code duplication?",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 144,
+        "endChar": 1
+      },
+      "revId": "255f348b14fe3309eab59eaf1f6734d0c32270ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_a215641b",
+        "filename": "vp10/common/mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-11-24T19:50:05Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 146,
+        "startChar": 0,
+        "endLine": 201,
+        "endChar": 1
+      },
+      "revId": "255f348b14fe3309eab59eaf1f6734d0c32270ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
