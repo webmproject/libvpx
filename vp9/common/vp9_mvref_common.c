@@ -662,18 +662,19 @@ static int is_right_available(BLOCK_SIZE bsize,
                               PARTITION_TYPE partition,
 #endif
                               int mi_row, int mi_col) {
-  int depth, max_depth = 4 - MIN(b_width_log2_lookup[bsize],
-                                 b_height_log2_lookup[bsize]);
-  int block[4] = {0};
+  int depth, max_depth = (CODING_UNIT_SIZE_LOG2 - 2) -
+          MIN(b_width_log2_lookup[bsize], b_height_log2_lookup[bsize]);
+  int block[(CODING_UNIT_SIZE_LOG2 - 2)] = {0};
 
   if (bsize == BLOCK_LARGEST)
     return 1;
-  mi_row = mi_row % 8;
-  mi_col = mi_col % 8;
+  mi_row = mi_row % MI_BLOCK_SIZE;
+  mi_col = mi_col % MI_BLOCK_SIZE;
   for (depth = 1; depth <= max_depth; depth++) {
-    block[depth] = (mi_row >> (3 - depth)) * 2 + (mi_col >> (3 - depth));
-    mi_row = mi_row % (8 >> depth);
-    mi_col = mi_col % (8 >> depth);
+    block[depth] = (mi_row >> (MI_BLOCK_SIZE_LOG2 - depth)) * 2 +
+                   (mi_col >> (MI_BLOCK_SIZE_LOG2 - depth));
+    mi_row = mi_row % (MI_BLOCK_SIZE >> depth);
+    mi_col = mi_col % (MI_BLOCK_SIZE >> depth);
   }
 
   if (b_width_log2_lookup[bsize] < b_height_log2_lookup[bsize]) {
@@ -724,14 +725,16 @@ int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
                                  PARTITION_TYPE partition,
 #endif
                                  int mi_row, int mi_col,
-                                 MB_MODE_INFO *ref_list[18]) {
+                                 MB_MODE_INFO *ref_list[2 *
+                                                        (MI_BLOCK_SIZE + 1)]) {
   int bw = 4 << b_width_log2_lookup[bsize];
   int bh = 4 << b_height_log2_lookup[bsize];
   int row_offset, col_offset;
   int mi_offset;
   MB_MODE_INFO *ref_mbmi;
   int ref_index, ref_num = 0;
-  int row_offset_cand[18], col_offset_cand[18];
+  int row_offset_cand[2 * (MI_BLOCK_SIZE + 1)];
+  int col_offset_cand[2 * (MI_BLOCK_SIZE + 1)];
   int offset_num = 0, i, switchflag;
   int is_sec_rec = is_second_rec(mi_row, mi_col, bsize);
 
@@ -740,23 +743,25 @@ int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
     offset_num++;
   }
   if (is_sec_rec != 1) {
-    row_offset_cand[offset_num] = bh / 16; col_offset_cand[offset_num] = -1;
+    row_offset_cand[offset_num] = bh / (2 * MI_SIZE);
+    col_offset_cand[offset_num] = -1;
     offset_num++;
   }
 
-  row_offset = bh / 8 - 1;
+  row_offset = bh / MI_SIZE - 1;
   col_offset = 1;
   if (is_sec_rec < 2)
     switchflag = 1;
   else
     switchflag = 0;
-  while ((is_sec_rec == 0 && ((row_offset >=0) || col_offset < (bw / 8 + 1))) ||
-         (is_sec_rec == 1 && col_offset < (bw / 8 + 1)) ||
+  while ((is_sec_rec == 0 && ((row_offset >=0) ||
+                              col_offset < (bw / MI_SIZE + 1))) ||
+         (is_sec_rec == 1 && col_offset < (bw / MI_SIZE + 1)) ||
          (is_sec_rec == 2 && row_offset >=0)) {
     switch (switchflag) {
       case 0:
         if (row_offset >= 0) {
-          if (row_offset != bh / 16) {
+          if (row_offset != bh / (2 * MI_SIZE)) {
             row_offset_cand[offset_num] = row_offset;
             col_offset_cand[offset_num] = -1;
             offset_num++;
@@ -765,7 +770,7 @@ int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
         }
         break;
       case 1:
-        if (col_offset < (bw / 8 + 1)) {
+        if (col_offset < (bw / MI_SIZE + 1)) {
           row_offset_cand[offset_num] = -1;
           col_offset_cand[offset_num] = col_offset;
           offset_num++;
@@ -785,8 +790,8 @@ int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
   for (i = 0; i < offset_num; i++) {
     row_offset = row_offset_cand[i];
     col_offset = col_offset_cand[i];
-    if ((col_offset < (bw / 8) ||
-        (col_offset == (bw / 8) && is_right_available(bsize,
+    if ((col_offset < (bw / MI_SIZE) ||
+        (col_offset == (bw / MI_SIZE) && is_right_available(bsize,
 #if CONFIG_EXT_PARTITION
                                                       partition,
 #endif

@@ -1454,7 +1454,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
   int inter_block;
 #if CONFIG_COPY_MODE
   int num_candidate = 0;
-  MB_MODE_INFO *inter_ref_list[18] = {NULL};
+  MB_MODE_INFO *inter_ref_list[2 * (MI_BLOCK_SIZE + 1)] = {NULL};
 #endif
 #if CONFIG_SUPERTX
   (void) supertx_enabled;

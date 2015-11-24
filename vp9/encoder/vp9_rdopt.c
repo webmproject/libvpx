@@ -6723,7 +6723,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_COPY_MODE
   COPY_MODE copy_mode;
   int inter_ref_count;
-  MB_MODE_INFO *inter_ref_list[18];
+  MB_MODE_INFO *inter_ref_list[2 * (MI_BLOCK_SIZE + 1)];
   int copy_mode_context = vp9_get_copy_mode_context(xd);
   int orig_segment_id = mbmi->segment_id;
 #endif  // CONFIG_COPY_MODE
