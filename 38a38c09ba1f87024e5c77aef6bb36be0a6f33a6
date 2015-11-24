@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3bed97ca_59d6d6ea",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:17:13Z",
+      "side": 1,
+      "message": "4x4 is doing 1 load and a shift, any benefit to that here?",
+      "revId": "38a38c09ba1f87024e5c77aef6bb36be0a6f33a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_d1e9f7a6",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:17:13Z",
+      "side": 1,
+      "message": "some comments like the 4x4 would be good",
+      "revId": "38a38c09ba1f87024e5c77aef6bb36be0a6f33a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
