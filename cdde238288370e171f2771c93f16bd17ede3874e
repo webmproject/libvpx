@@ -16,6 +16,24 @@
       "revId": "cdde238288370e171f2771c93f16bd17ede3874e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db271bf3_940f6978",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-24T20:46:40Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. It is updated in set 4.",
+      "parentUuid": "db271bf3_311ccf46",
+      "revId": "cdde238288370e171f2771c93f16bd17ede3874e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
