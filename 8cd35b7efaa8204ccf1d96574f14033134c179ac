@@ -22,6 +22,30 @@
       "revId": "8cd35b7efaa8204ccf1d96574f14033134c179ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_8e92ba39",
+        "filename": "vp10/common/enums.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-11-24T20:22:41Z",
+      "side": 1,
+      "message": "Currently they are equal. In the future we may add some new intra modes, then EXT_INTRA_MODES will be larger than FILTER_INTRA_MODES.",
+      "parentUuid": "1b153384_b96c234f",
+      "range": {
+        "startLine": 193,
+        "startChar": 46,
+        "endLine": 193,
+        "endChar": 47
+      },
+      "revId": "8cd35b7efaa8204ccf1d96574f14033134c179ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
