@@ -16,6 +16,24 @@
       "revId": "f75fc9b27e7b52958a9a364566a7e6a89b6e6f32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb2a67bd_352e7b82",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-24T23:34:41Z",
+      "side": 1,
+      "message": "That\u0027s to reduce 1 movd and 1 pshufb per 2 pixels in [left].",
+      "parentUuid": "1b153384_ce4dd4bf",
+      "revId": "f75fc9b27e7b52958a9a364566a7e6a89b6e6f32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
