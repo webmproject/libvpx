@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb2a67bd_d5971f08",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:30:27Z",
+      "side": 1,
+      "message": "should be left-justified",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb05f0b_90650225",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:30:27Z",
+      "side": 1,
+      "message": "should you reorder this to follow the more natural 1/7/9/15 load order?",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_2da5c51f",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:30:27Z",
+      "side": 1,
+      "message": "maybe as a followup, do you think it would be clearer if all the regs were named rather than coding some here as a number and others (m8) as an explicit reg?",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb05f0b_f0032625",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:30:27Z",
+      "side": 1,
+      "message": "not really an issue, but there\u0027s a mix in the pattern here: elsewhere it\u0027s 1,2,1,2 here and 982 1,2,2,1",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2123e5_fe215e7c",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-24T23:30:27Z",
+      "side": 1,
+      "message": "this line can go",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
