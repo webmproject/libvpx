@@ -786,8 +786,13 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                          "Reference frame has invalid dimensions");
     vp10_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col,
                          &ref_buf->sf);
-    vp10_find_mv_refs(cm, xd, mi, frame, ref_mvs[frame],
-                     mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
+    vp10_find_mv_refs(cm, xd, mi, frame,
+#if CONFIG_REF_MV
+                      &xd->ref_mv_count[frame],
+                      xd->ref_mv_stack[frame],
+#endif
+                      ref_mvs[frame],
+                      mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
 
   if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {

@@ -17,7 +17,7 @@ static void scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                           const MV_REFERENCE_FRAME ref_frame,
                           int row_offset,
                           CANDIDATE_MV *ref_mv_stack,
-                          int *refmv_count) {
+                          uint8_t *refmv_count) {
   const TileInfo *const tile = &xd->tile;
   int i;
 
@@ -66,7 +66,7 @@ static void scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                           const MV_REFERENCE_FRAME ref_frame,
                           int col_offset,
                           CANDIDATE_MV *ref_mv_stack,
-                          int *refmv_count) {
+                          uint8_t *refmv_count) {
   const TileInfo *const tile = &xd->tile;
   int i;
 
@@ -115,7 +115,7 @@ static void scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                           const MV_REFERENCE_FRAME ref_frame,
                           int row_offset, int col_offset,
                           CANDIDATE_MV *ref_mv_stack,
-                          int *refmv_count) {
+                          uint8_t *refmv_count) {
   const TileInfo *const tile = &xd->tile;
   POSITION mi_pos;
 
@@ -154,29 +154,30 @@ static void scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
 static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                               MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                              uint8_t *refmv_count,
+                              CANDIDATE_MV *ref_mv_stack,
                               int_mv *mv_ref_list,
                               int block, int mi_row, int mi_col,
                               uint8_t *mode_context) {
-  int idx, refmv_count = 0, nearest_refmv_count = 0;
+  int idx, nearest_refmv_count = 0;
   const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type] << 3;
   const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type] << 3;
 
-  CANDIDATE_MV ref_mv_stack[MAX_REF_MV_STACK_SIZE];
   CANDIDATE_MV tmp_mv;
   int len, nr_len;
 
   (void) mode_context;
 
-  memset(ref_mv_stack, 0, sizeof(ref_mv_stack));
+  *refmv_count = 0;
 
   // Scan the first above row mode info.
   scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -1, ref_mv_stack, &refmv_count);
+                -1, ref_mv_stack, refmv_count);
   // Scan the first left column mode info.
   scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -1, ref_mv_stack, &refmv_count);
+                -1, ref_mv_stack, refmv_count);
 
-  nearest_refmv_count = refmv_count;
+  nearest_refmv_count = *refmv_count;
 
   // Analyze the top-left corner block mode info.
 //  scan_blk_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
@@ -184,22 +185,22 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   // Scan the second outer area.
   scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -2, ref_mv_stack, &refmv_count);
+                -2, ref_mv_stack, refmv_count);
   scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -2, ref_mv_stack, &refmv_count);
+                -2, ref_mv_stack, refmv_count);
 
   // Scan the third outer area.
   scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -3, ref_mv_stack, &refmv_count);
+                -3, ref_mv_stack, refmv_count);
   scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -3, ref_mv_stack, &refmv_count);
+                -3, ref_mv_stack, refmv_count);
 
   // Scan the fourth outer area.
   scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -4, ref_mv_stack, &refmv_count);
+                -4, ref_mv_stack, refmv_count);
   // Scan the third left row mode info.
   scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-                -4, ref_mv_stack, &refmv_count);
+                -4, ref_mv_stack, refmv_count);
 
   // Rank the likelihood and assign nearest and near mvs.
   len = nearest_refmv_count;
@@ -216,7 +217,7 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     len = nr_len;
   }
 
-  len = refmv_count;
+  len = *refmv_count;
   while (len > nearest_refmv_count) {
     nr_len = nearest_refmv_count;
     for (idx = nearest_refmv_count + 1; idx < len; ++idx) {
@@ -230,7 +231,7 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     len = nr_len;
   }
 
-  for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, refmv_count); ++idx) {
+  for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *refmv_count); ++idx) {
     mv_ref_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
     clamp_mv_ref(&mv_ref_list[idx].as_mv, bw, bh, xd);
   }
@@ -373,6 +374,10 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+#if CONFIG_REF_MV
+                      uint8_t *ref_mv_count,
+                      CANDIDATE_MV *ref_mv_stack,
+#endif
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col,
                       find_mv_refs_sync sync, void *const data,
@@ -381,8 +386,8 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                    mi_row, mi_col, sync, data, mode_context);
 
 #if CONFIG_REF_MV
-  setup_ref_mv_list(cm, xd, mi, ref_frame, mv_ref_list, -1,
-                    mi_row, mi_col, mode_context);
+  setup_ref_mv_list(cm, xd, mi, ref_frame, ref_mv_count, ref_mv_stack,
+                    mv_ref_list, -1, mi_row, mi_col, mode_context);
 #endif
 }
 

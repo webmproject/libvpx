@@ -3902,8 +3902,13 @@ static void setup_buffer_inter(
   vp10_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col, sf, sf);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
-  vp10_find_mv_refs(cm, xd, mi, ref_frame, candidates, mi_row, mi_col,
-                   NULL, NULL, mbmi_ext->mode_context);
+  vp10_find_mv_refs(cm, xd, mi, ref_frame,
+#if CONFIG_REF_MV
+                    &mbmi_ext->ref_mv_count[ref_frame],
+                    mbmi_ext->ref_mv_stack[ref_frame],
+#endif
+                    candidates, mi_row, mi_col,
+                    NULL, NULL, mbmi_ext->mode_context);
 
   // Candidate refinement carried out at encoder and decoder
   vp10_find_best_ref_mvs(cm->allow_high_precision_mv, candidates,
