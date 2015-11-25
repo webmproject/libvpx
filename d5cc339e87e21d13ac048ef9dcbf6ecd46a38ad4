@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9bbbe3f1_fe289977",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-11-25T00:31:50Z",
+      "side": 1,
+      "message": "Rounding both toward zero has similarly neutral metrics. since it\u0027s unsigned, rounding sse_long toward zero should have no computational overhead and actually remove one addition. \n\nI understand how the VPXMAX approach prevents the value from going negative but it feels very unnatural to me. Do you have any other context for that approach?",
+      "parentUuid": "bbc4277e_bffd7fd7",
+      "range": {
+        "startLine": 311,
+        "startChar": 40,
+        "endLine": 311,
+        "endChar": 42
+      },
+      "revId": "d5cc339e87e21d13ac048ef9dcbf6ecd46a38ad4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3bed97ca_82fe08d1",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 2
