@@ -834,12 +834,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
         b_mode = read_inter_mode(cm, xd, r, inter_mode_ctx[mbmi->ref_frame[0]]);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
-          uint8_t dummy_mode_ctx[MAX_REF_FRAMES];
           for (ref = 0; ref < 1 + is_compound; ++ref)
             vp10_append_sub8x8_mvs_for_idx(cm, xd, j, ref, mi_row, mi_col,
                                           &nearest_sub8x8[ref],
-                                          &near_sub8x8[ref],
-                                          dummy_mode_ctx);
+                                          &near_sub8x8[ref]);
         }
 
         if (!assign_mv(cm, xd, b_mode, block, nearestmv,

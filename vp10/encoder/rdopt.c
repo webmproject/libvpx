@@ -3410,8 +3410,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
         frame_mv[ZEROMV][frame].as_int = 0;
         vp10_append_sub8x8_mvs_for_idx(cm, xd, i, ref, mi_row, mi_col,
                                       &frame_mv[NEARESTMV][frame],
-                                      &frame_mv[NEARMV][frame],
-                                      mbmi_ext->mode_context);
+                                      &frame_mv[NEARMV][frame]);
       }
 
       // search for the best motion vector on this segment
