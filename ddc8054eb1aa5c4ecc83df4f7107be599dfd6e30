@@ -34,6 +34,24 @@
       "revId": "ddc8054eb1aa5c4ecc83df4f7107be599dfd6e30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_7135a385",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-25T00:44:06Z",
+      "side": 1,
+      "message": "yes the reverted change was like this I believe. if they\u0027re equal then just relocate the lea",
+      "parentUuid": "db271bf3_27764de5",
+      "revId": "ddc8054eb1aa5c4ecc83df4f7107be599dfd6e30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
