@@ -317,13 +317,15 @@ typedef enum QUANT_FUNC {
   QUANT_FUNC_LAST = 4
 } QUANT_FUNC;
 
-static VP10_QUANT_FACADE quant_func_ls[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] =
-    {{vp10_quantize_fp_facade, vp10_quantize_fp_32x32_facade,
-      vp10_highbd_quantize_fp_facade, vp10_highbd_quantize_fp_32x32_facade},
-     {vp10_quantize_b_facade, vp10_quantize_b_32x32_facade,
-      vp10_highbd_quantize_b_facade, vp10_highbd_quantize_b_32x32_facade},
-     {vp10_quantize_dc_facade, vp10_quantize_dc_32x32_facade,
-      vp10_highbd_quantize_dc_facade, vp10_highbd_quantize_dc_32x32_facade}};
+static VP10_QUANT_FACADE
+    quant_func_list[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] = {
+        {vp10_quantize_fp_facade, vp10_quantize_fp_32x32_facade,
+         vp10_highbd_quantize_fp_facade, vp10_highbd_quantize_fp_32x32_facade},
+        {vp10_quantize_b_facade, vp10_quantize_b_32x32_facade,
+         vp10_highbd_quantize_b_facade, vp10_highbd_quantize_b_32x32_facade},
+        {vp10_quantize_dc_facade, vp10_quantize_dc_32x32_facade,
+         vp10_highbd_quantize_dc_facade, vp10_highbd_quantize_dc_32x32_facade},
+        {NULL, NULL, NULL, NULL}};
 
 #else
 typedef enum QUANT_FUNC {
@@ -332,15 +334,17 @@ typedef enum QUANT_FUNC {
   QUANT_FUNC_LAST = 2
 } QUANT_FUNC;
 
-static VP10_QUANT_FACADE quant_func_ls[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] =
-    {{vp10_quantize_fp_facade, vp10_quantize_fp_32x32_facade},
-     {vp10_quantize_b_facade, vp10_quantize_b_32x32_facade},
-     {vp10_quantize_dc_facade, vp10_quantize_dc_32x32_facade}};
-
+static VP10_QUANT_FACADE
+    quant_func_list[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] = {
+        {vp10_quantize_fp_facade, vp10_quantize_fp_32x32_facade},
+        {vp10_quantize_b_facade, vp10_quantize_b_32x32_facade},
+        {vp10_quantize_dc_facade, vp10_quantize_dc_32x32_facade},
+        {NULL, NULL}};
 #endif
 
-static FWD_TXFM_OPT fwd_txfm_opt_ls[VP10_XFORM_QUANT_LAST] = {
-    FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_DC};
+static FWD_TXFM_OPT fwd_txfm_opt_list[VP10_XFORM_QUANT_LAST] = {
+    FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_DC,
+    FWD_TXFM_OPT_NORMAL};
 
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
                       int blk_col, BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
@@ -364,7 +368,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   FWD_TXFM_PARAM fwd_txfm_param;
   fwd_txfm_param.tx_type = get_tx_type(plane_type, xd, block, tx_size);
   fwd_txfm_param.tx_size = tx_size;
-  fwd_txfm_param.fwd_txfm_opt = fwd_txfm_opt_ls[xform_quant_idx];
+  fwd_txfm_param.fwd_txfm_opt = fwd_txfm_opt_list[xform_quant_idx];
   fwd_txfm_param.rd_transform = x->use_lp32x32fdct;
   fwd_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
@@ -373,30 +377,34 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
-    if (x->skip_block) {
-      vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
-    } else {
-      if (tx_size == TX_32X32)
-        quant_func_ls[xform_quant_idx][QUANT_FUNC_HIGHBD_32](
-            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
-      else
-        quant_func_ls[xform_quant_idx][QUANT_FUNC_HIGHBD](
-            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+    if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
+      if (x->skip_block) {
+        vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
+      } else {
+        if (tx_size == TX_32X32)
+          quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD_32](
+              coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+        else
+          quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD](
+              coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+      }
     }
     return;
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
-  if (x->skip_block) {
-    vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
-  } else {
-    if (tx_size == TX_32X32)
-      quant_func_ls[xform_quant_idx][QUANT_FUNC_LOWBD_32](
-          coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
-    else
-      quant_func_ls[xform_quant_idx][QUANT_FUNC_LOWBD](
-          coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+  if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
+    if (x->skip_block) {
+      vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
+    } else {
+      if (tx_size == TX_32X32)
+        quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD_32](
+            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+      else
+        quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD](
+            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+    }
   }
 }
 
@@ -697,12 +705,9 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  tran_low_t *coeff = BLOCK_OFFSET(p->coeff, block);
-  tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   const TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
-  const scan_order *const scan_order = get_scan(tx_size, tx_type, 0);
   PREDICTION_MODE mode;
   const int bwl = b_width_log2_lookup[plane_bsize];
   const int bhl = b_height_log2_lookup[plane_bsize];
@@ -713,134 +718,54 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
 
-  int tx1d_size = get_tx1d_size(tx_size);
+  const int tx1d_size = get_tx1d_size(tx_size);
 
-  FWD_TXFM_PARAM fwd_txfm_param;
   INV_TXFM_PARAM inv_txfm_param;
-
-  // foward transform parameters
-  fwd_txfm_param.tx_type = tx_type;
-  fwd_txfm_param.tx_size = tx_size;
-  fwd_txfm_param.fwd_txfm_opt = FWD_TXFM_OPT_NORMAL;
-  fwd_txfm_param.rd_transform = x->use_lp32x32fdct;
-  fwd_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
   dst = &pd->dst.buf[4 * (blk_row * dst_stride + blk_col)];
   src = &p->src.buf[4 * (blk_row * src_stride + blk_col)];
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
   mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
-  vp10_predict_intra_block(xd, bwl, bhl, tx_size, mode, dst, dst_stride,
-                           dst, dst_stride, blk_col, blk_row, plane);
-
-
+  vp10_predict_intra_block(xd, bwl, bhl, tx_size, mode, dst, dst_stride, dst,
+                           dst_stride, blk_col, blk_row, plane);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vpx_highbd_subtract_block(tx1d_size, tx1d_size, src_diff, diff_stride,
-                              src, src_stride, dst, dst_stride, xd->bd);
-    highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
-
-    switch (tx_size) {
-      case TX_32X32:
-        if (!x->skip_recode) {
-          vpx_highbd_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin,
-                                      p->round, p->quant, p->quant_shift,
-                                      qcoeff, dqcoeff, pd->dequant, eob,
-                                      scan_order->scan, scan_order->iscan);
-        }
-        break;
-      case TX_16X16:
-        if (!x->skip_recode) {
-          vpx_highbd_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
-                                p->quant, p->quant_shift, qcoeff, dqcoeff,
-                                pd->dequant, eob,
-                                scan_order->scan, scan_order->iscan);
-        }
-        break;
-      case TX_8X8:
-        if (!x->skip_recode) {
-          vpx_highbd_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
-                                p->quant, p->quant_shift, qcoeff, dqcoeff,
-                                pd->dequant, eob,
-                                scan_order->scan, scan_order->iscan);
-        }
-        break;
-      case TX_4X4:
-        if (!x->skip_recode) {
-          vpx_highbd_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
-                                p->quant, p->quant_shift, qcoeff, dqcoeff,
-                                pd->dequant, eob,
-                                scan_order->scan, scan_order->iscan);
-        }
-        break;
-      default:
-        assert(0);
-        return;
-    }
-    if (*eob) {
-      // inverse transform parameters
-      inv_txfm_param.tx_type = tx_type;
-      inv_txfm_param.tx_size = tx_size;
-      inv_txfm_param.eob = *eob;
-      inv_txfm_param.lossless = xd->lossless[mbmi->segment_id];
-      inv_txfm_param.bd = xd->bd;
-
-      highbd_inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
-      *(args->skip) = 0;
-    }
-    return;
+    vpx_highbd_subtract_block(tx1d_size, tx1d_size, src_diff, diff_stride, src,
+                              src_stride, dst, dst_stride, xd->bd);
+  } else {
+    vpx_subtract_block(tx1d_size, tx1d_size, src_diff, diff_stride, src,
+                       src_stride, dst, dst_stride);
   }
+#else
+  vpx_subtract_block(tx1d_size, tx1d_size, src_diff, diff_stride, src,
+                     src_stride, dst, dst_stride);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-  vpx_subtract_block(tx1d_size, tx1d_size, src_diff, diff_stride,
-                     src, src_stride, dst, dst_stride);
-  fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
+  if (!x->skip_recode)
+    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+                     VP10_XFORM_QUANT_B);
+  else
+    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+                     VP10_XFORM_QUANT_SKIP_QUANT);
 
-  switch (tx_size) {
-    case TX_32X32:
-      if (!x->skip_recode) {
-        vpx_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
-                             p->quant, p->quant_shift, qcoeff, dqcoeff,
-                             pd->dequant, eob, scan_order->scan,
-                             scan_order->iscan);
-      }
-      break;
-    case TX_16X16:
-      if (!x->skip_recode) {
-        vpx_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
-                       p->quant, p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, eob, scan_order->scan,
-                       scan_order->iscan);
-      }
-      break;
-    case TX_8X8:
-      if (!x->skip_recode) {
-        vpx_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
-                       p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, eob, scan_order->scan,
-                       scan_order->iscan);
-      }
-      break;
-    case TX_4X4:
-      if (!x->skip_recode) {
-        vpx_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
-                       p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, eob, scan_order->scan,
-                       scan_order->iscan);
-      }
-      break;
-    default:
-      assert(0);
-      break;
-  }
   if (*eob) {
-    // inverse transform parameters
+    // inverse transform
     inv_txfm_param.tx_type = tx_type;
     inv_txfm_param.tx_size = tx_size;
     inv_txfm_param.eob = *eob;
     inv_txfm_param.lossless = xd->lossless[mbmi->segment_id];
-
+#if CONFIG_VP9_HIGHBITDEPTH
+    inv_txfm_param.bd = xd->bd;
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      highbd_inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
+    } else {
+      inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
+    }
+#else
     inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
     *(args->skip) = 0;
   }
 }
