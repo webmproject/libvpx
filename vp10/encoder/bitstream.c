@@ -325,7 +325,6 @@ static void pack_mb_tokens(vpx_writer *w,
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
     const struct vp10_token *const a = &vp10_coef_encodings[t];
-    int i = 0;
     int v = a->value;
     int n = a->len;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -342,28 +341,24 @@ static void pack_mb_tokens(vpx_writer *w,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     /* skip one or two nodes */
-    if (p->skip_eob_node) {
+    if (p->skip_eob_node)
       n -= p->skip_eob_node;
-      i = 2 * p->skip_eob_node;
-    }
+    else
+      vpx_write(w, t != EOB_TOKEN, p->context_tree[0]);
 
-    // TODO(jbb): expanding this can lead to big gains.  It allows
-    // much better branch prediction and would enable us to avoid numerous
-    // lookups and compares.
+    if (t != EOB_TOKEN) {
+      vpx_write(w, t != ZERO_TOKEN, p->context_tree[1]);
 
-    // If we have a token that's in the constrained set, the coefficient tree
-    // is split into two treed writes.  The first treed write takes care of the
-    // unconstrained nodes.  The second treed write takes care of the
-    // constrained nodes.
-    if (t >= TWO_TOKEN && t < EOB_TOKEN) {
-      int len = UNCONSTRAINED_NODES - p->skip_eob_node;
-      int bits = v >> (n - len);
-      vp10_write_tree(w, vp10_coef_tree, p->context_tree, bits, len, i);
-      vp10_write_tree(w, vp10_coef_con_tree,
-                     vp10_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
-                     v, n - len, 0);
-    } else {
-      vp10_write_tree(w, vp10_coef_tree, p->context_tree, v, n, i);
+      if (t != ZERO_TOKEN) {
+        vpx_write(w, t != ONE_TOKEN, p->context_tree[2]);
+
+        if (t != ONE_TOKEN) {
+          int len = UNCONSTRAINED_NODES - p->skip_eob_node;
+          vp10_write_tree(w, vp10_coef_con_tree,
+                          vp10_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
+                          v, n - len, 0);
+        }
+      }
     }
 
     if (b->base_val) {
