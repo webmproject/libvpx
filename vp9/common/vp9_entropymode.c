@@ -1422,3 +1422,119 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
 #endif  // CONFIG_TX64X64
 #endif  // CONFIG_TX_SKIP
 }
+
+#if CONFIG_ROW_TILE
+void vp9_dec_setup_past_independence(VP9_COMMON *cm,
+                                     int dec_tile_row, int dec_tile_col) {
+  const int tile_rows = cm->tile_rows;
+  const int tile_cols = cm->tile_cols;
+  // Reset the segment feature data to the default stats:
+  // Features disabled, 0, with delta coding (Default state).
+  struct loopfilter *const lf = &cm->lf;
+
+  int i;
+  vp9_clearall_segfeatures(&cm->seg);
+  cm->seg.abs_delta = SEGMENT_DELTADATA;
+  if (cm->last_frame_seg_map)
+    vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
+
+  // Reset the mode ref deltas for loop filter
+  vp9_zero(lf->last_ref_deltas);
+  vp9_zero(lf->last_mode_deltas);
+  set_default_lf_deltas(lf);
+
+  // To force update of the sharpness
+  lf->last_sharpness_level = -1;
+#if CONFIG_LOOP_POSTFILTER
+  lf->bilateral_level = 0;
+  lf->last_bilateral_level = 0;
+#endif
+
+  vp9_default_coef_probs(cm);
+  vp9_init_mode_probs(&cm->fc);
+  vp9_init_mv_probs(cm);
+
+  if (cm->frame_type == KEY_FRAME ||
+      cm->error_resilient_mode || cm->reset_frame_context == 3) {
+    // Reset all frame contexts.
+    for (i = 0; i < FRAME_CONTEXTS; ++i)
+      cm->frame_contexts[i] = cm->fc;
+  } else if (cm->reset_frame_context == 2) {
+    // Reset only the frame context specified in the frame header.
+    cm->frame_contexts[cm->frame_context_idx] = cm->fc;
+  }
+
+  if (frame_is_intra_only(cm))
+    vpx_memset(cm->prev_mip, 0, cm->mi_stride * (cm->mi_rows + 1) *
+                                    sizeof(*cm->prev_mip));
+
+  // Memset mi info of actually decoded tiles.
+  if (dec_tile_col == -1 && dec_tile_row == -1) {
+    // Decode 1 whole frame.
+    vpx_memset(cm->mip, 0,
+               cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+  } else {
+    TileInfo tile;
+    MODE_INFO *mi_t;
+    int tile_col, tile_row;
+    int r;
+
+    if (dec_tile_col >= 0 && dec_tile_row >= 0) {
+      // Only decode 1 tile.
+      tile_col = MIN(dec_tile_col, tile_cols - 1);
+      tile_row = MIN(dec_tile_row, tile_rows - 1);
+
+      vp9_tile_init(&tile, cm, tile_row, tile_col);
+      mi_t = cm->mi + cm->mi_stride * tile.mi_row_start + tile.mi_col_start;
+      for (r = 0; r < cm->tile_height; r++) {
+        vpx_memset(mi_t, 0, cm->tile_width * sizeof(*cm->mip));
+        mi_t += cm->mi_stride;
+      }
+    } else if (dec_tile_row >= 0) {
+      // Only decode 1 row of tiles.
+      tile_col = 0;
+      tile_row = MIN(dec_tile_row, tile_rows - 1);
+      vp9_tile_init(&tile, cm, tile_row, tile_col);
+
+      assert(tile.mi_col_start == 0);
+      mi_t = cm->mip + cm->mi_stride * (tile.mi_row_start + 1);
+      vpx_memset(mi_t, 0, cm->mi_stride * cm->tile_height * sizeof(*cm->mip));
+    } else if (dec_tile_col >= 0) {
+      // Only decode 1 column of tiles.
+      tile_col = MIN(dec_tile_col, tile_cols - 1);
+      tile_row = 0;
+      vp9_tile_init(&tile, cm, tile_row, tile_col);
+
+      assert(tile.mi_row_start == 0);
+      mi_t = cm->mip + tile.mi_col_start + 1;
+      for (r = 0; r < cm->mi_rows + 1; r++) {
+        vpx_memset(mi_t, 0, cm->tile_width * sizeof(*cm->mip));
+        mi_t += cm->mi_stride;
+      }
+    }
+  }
+
+  vp9_zero(cm->ref_frame_sign_bias);
+
+  cm->frame_context_idx = 0;
+
+#if CONFIG_TX_SKIP
+  memset(vp9_coefband_tx_skip, TX_SKIP_COEFF_BAND,
+         sizeof(vp9_coefband_tx_skip[0]) * MAX_NUM_COEFS);
+
+  init_pxd_scan_orders(vp9_default_scan_pxd_4x4, vp9_default_iscan_pxd_4x4,
+                       vp9_default_scan_pxd_4x4_neighbors, 4);
+  init_pxd_scan_orders(vp9_default_scan_pxd_8x8, vp9_default_iscan_pxd_8x8,
+                       vp9_default_scan_pxd_8x8_neighbors, 8);
+  init_pxd_scan_orders(vp9_default_scan_pxd_16x16, vp9_default_iscan_pxd_16x16,
+                       vp9_default_scan_pxd_16x16_neighbors, 16);
+  init_pxd_scan_orders(vp9_default_scan_pxd_32x32, vp9_default_iscan_pxd_32x32,
+                       vp9_default_scan_pxd_32x32_neighbors, 32);
+
+#if CONFIG_TX64X64
+  init_pxd_scan_orders(vp9_default_scan_pxd_64x64, vp9_default_iscan_pxd_64x64,
+                       vp9_default_scan_pxd_64x64_neighbors, 64);
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_TX_SKIP
+}
+#endif

@@ -3245,8 +3245,13 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   // below, forcing the use of context 0 for those frame types.
   cm->frame_context_idx = vp9_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
 
-  if (frame_is_intra_only(cm) || cm->error_resilient_mode)
-      vp9_setup_past_independence(cm);
+  if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
+#if CONFIG_ROW_TILE
+    vp9_dec_setup_past_independence(cm, pbi->dec_tile_row, pbi->dec_tile_col);
+#else
+    vp9_setup_past_independence(cm);
+#endif
+  }
 
   setup_loopfilter(cm, rb);
   setup_quantization(cm, &pbi->mb, rb);
