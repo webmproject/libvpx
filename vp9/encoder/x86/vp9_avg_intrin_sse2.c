@@ -283,31 +283,30 @@ void vp9_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
   }
 }
 
-int16_t vp9_satd_sse2(const int16_t *coeff, int length) {
+int vp9_satd_sse2(const int16_t *coeff, int length) {
   int i;
-  __m128i sum = _mm_load_si128((const __m128i *)coeff);
-  __m128i sign = _mm_srai_epi16(sum, 15);
-  __m128i val = _mm_xor_si128(sum, sign);
-  sum = _mm_sub_epi16(val, sign);
-  coeff += 8;
+  const __m128i zero = _mm_setzero_si128();
+  __m128i accum = zero;
 
-  for (i = 8; i < length; i += 8) {
-    __m128i src_line = _mm_load_si128((const __m128i *)coeff);
-    sign = _mm_srai_epi16(src_line, 15);
-    val = _mm_xor_si128(src_line, sign);
-    val = _mm_sub_epi16(val, sign);
-    sum = _mm_add_epi16(sum, val);
+  for (i = 0; i < length; i += 8) {
+    const __m128i src_line = _mm_load_si128((const __m128i *)coeff);
+    const __m128i inv = _mm_sub_epi16(zero, src_line);
+    const __m128i abs = _mm_max_epi16(src_line, inv);  // abs(src_line)
+    const __m128i abs_lo = _mm_unpacklo_epi16(abs, zero);
+    const __m128i abs_hi = _mm_unpackhi_epi16(abs, zero);
+    const __m128i sum = _mm_add_epi32(abs_lo, abs_hi);
+    accum = _mm_add_epi32(accum, sum);
     coeff += 8;
   }
 
-  val = _mm_srli_si128(sum, 8);
-  sum = _mm_add_epi16(sum, val);
-  val = _mm_srli_epi64(sum, 32);
-  sum = _mm_add_epi16(sum, val);
-  val = _mm_srli_epi32(sum, 16);
-  sum = _mm_add_epi16(sum, val);
+  {  // cascading summation of accum
+    __m128i hi = _mm_srli_si128(accum, 8);
+    accum = _mm_add_epi32(accum, hi);
+    hi = _mm_srli_epi64(accum, 32);
+    accum = _mm_add_epi32(accum, hi);
+  }
 
-  return _mm_extract_epi16(sum, 0);
+  return _mm_cvtsi128_si32(accum);
 }
 
 void vp9_int_pro_row_sse2(int16_t *hbuf, uint8_t const*ref,
