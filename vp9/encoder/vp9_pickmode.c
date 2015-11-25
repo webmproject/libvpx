@@ -1143,6 +1143,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int best_pred_sad = INT_MAX;
   int best_early_term = 0;
   int ref_frame_cost[MAX_REF_FRAMES];
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  int64_t zero_last_cost_orig = INT64_MAX;
+#endif
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
 
@@ -1524,8 +1527,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-    if (cpi->oxcf.noise_sensitivity > 0)
+    if (cpi->oxcf.noise_sensitivity > 0) {
       vp9_denoiser_update_frame_stats(mbmi, sse_y, this_mode, ctx);
+      // Keep track of zero_last cost.
+      if (ref_frame == LAST_FRAME && frame_mv[this_mode][ref_frame].as_int == 0)
+        zero_last_cost_orig = this_rdc.rdcost;
+    }
 #else
     (void)ctx;
 #endif
@@ -1682,6 +1689,54 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
   }
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  if (cpi->oxcf.noise_sensitivity > 0 &&
+      cpi->resize_pending == 0) {
+    VP9_DENOISER_DECISION decision = COPY_BLOCK;
+    vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col,
+                         VPXMAX(BLOCK_8X8, bsize), ctx, &decision);
+    // If INTRA mode was selected, re-evaluate ZEROMV on denoised result.
+    // Only do this under noise conditions, and if rdcost of ZEROMV on
+    // original source is not significantly higher than rdcost of INTRA MODE.
+    if (best_ref_frame == INTRA_FRAME &&
+        decision == FILTER_BLOCK &&
+        cpi->noise_estimate.enabled &&
+        cpi->noise_estimate.level > kLow &&
+        zero_last_cost_orig < (best_rdc.rdcost << 2) &&
+        !reuse_inter_pred) {
+      // Check if we should pick ZEROMV on denoised signal.
+      int rate = 0;
+      int64_t dist = 0;
+      mbmi->mode = ZEROMV;
+      mbmi->ref_frame[0] = LAST_FRAME;
+      mbmi->ref_frame[1] = NONE;
+      mbmi->mv[0].as_int = 0;
+      mbmi->interp_filter = EIGHTTAP;
+      vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+      model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
+      this_rdc.rate = rate + ref_frame_cost[LAST_FRAME] +
+          cpi->inter_mode_cost[x->mbmi_ext->mode_context[LAST_FRAME]]
+                              [INTER_OFFSET(ZEROMV)];
+      this_rdc.dist = dist;
+      this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, rate, dist);
+      // Switch to ZEROMV if the rdcost for ZEROMV on denoised source
+      // is lower than INTRA (on original source).
+      if (this_rdc.rdcost > best_rdc.rdcost) {
+        this_rdc = best_rdc;
+        mbmi->mode = best_mode;
+        mbmi->ref_frame[0] = best_ref_frame;
+        mbmi->mv[0].as_int = INVALID_MV;
+        mbmi->interp_filter = best_pred_filter;
+        mbmi->tx_size = best_tx_size;
+        x->skip_txfm[0] = best_mode_skip_txfm;
+      } else {
+        best_ref_frame = LAST_FRAME;
+        best_rdc = this_rdc;
+      }
+    }
+  }
+#endif
 
   if (cpi->sf.adaptive_rd_thresh) {
     THR_MODES best_mode_idx = mode_idx[best_ref_frame][mode_offset(mbmi->mode)];
