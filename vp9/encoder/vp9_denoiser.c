@@ -316,7 +316,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
 
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs,
-                          PICK_MODE_CONTEXT *ctx) {
+                          PICK_MODE_CONTEXT *ctx,
+                          VP9_DENOISER_DECISION *denoiser_decision) {
   int mv_col, mv_row;
   int motion_magnitude = 0;
   VP9_DENOISER_DECISION decision = COPY_BLOCK;
@@ -380,6 +381,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                       num_4x4_blocks_wide_lookup[bs] << 2,
                       num_4x4_blocks_high_lookup[bs] << 2);
   }
+  *denoiser_decision = decision;
 }
 
 static void copy_frame(YV12_BUFFER_CONFIG * const dest,
@@ -458,6 +460,7 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
 void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {
   ctx->zeromv_sse = UINT_MAX;
   ctx->newmv_sse = UINT_MAX;
+  ctx->zeromv_lastref_sse = UINT_MAX;
 }
 
 void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi, unsigned int sse,

@@ -1208,14 +1208,20 @@ EOF
       soft_enable runtime_cpu_detect
       # We can't use 'check_cflags' until the compiler is configured and CC is
       # populated.
-      check_gcc_machine_option mmx
-      check_gcc_machine_option sse
-      check_gcc_machine_option sse2
-      check_gcc_machine_option sse3
-      check_gcc_machine_option ssse3
-      check_gcc_machine_option sse4 sse4_1
-      check_gcc_machine_option avx
-      check_gcc_machine_option avx2
+      for ext in ${ARCH_EXT_LIST_X86}; do
+        # disable higher order extensions to simplify asm dependencies
+        if [ "$disable_exts" = "yes" ]; then
+          if ! disabled $ext; then
+            RTCD_OPTIONS="${RTCD_OPTIONS}--disable-${ext} "
+            disable_feature $ext
+          fi
+        elif disabled $ext; then
+          disable_exts="yes"
+        else
+          # use the shortened version for the flag: sse4_1 -> sse4
+          check_gcc_machine_option ${ext%_*} $ext
+        fi
+      done
 
       if enabled external_build; then
         log_echo "  skipping assembler detection"

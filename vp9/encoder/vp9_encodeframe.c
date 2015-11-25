@@ -1746,16 +1746,6 @@ static void encode_b_rt(VP9_COMP *cpi, ThreadData *td,
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
   update_state_rt(cpi, td, ctx, mi_row, mi_col, bsize);
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      output_enabled &&
-      cpi->common.frame_type != KEY_FRAME &&
-      cpi->resize_pending == 0) {
-    vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col,
-                         VPXMAX(BLOCK_8X8, bsize), ctx);
-  }
-#endif
-
   encode_superblock(cpi, td, tp, output_enabled, mi_row, mi_col, bsize, ctx);
   update_stats(&cpi->common, td);
 

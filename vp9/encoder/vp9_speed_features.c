@@ -380,6 +380,16 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->adaptive_rd_thresh = 2;
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
+    // TODO(marpan): When denoising, we may re-evaluate the mode selection and
+    // this seems to cause problems when reuse_inter_pred_sby is enabled.
+    // Disabling reuse_inter_pred_sby for now (under denoising conditions), and
+    // will look into re-enabling it.
+#if CONFIG_VP9_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity > 0 &&
+        cpi->noise_estimate.enabled &&
+        cpi->noise_estimate.level > kLow)
+      sf->reuse_inter_pred_sby = 0;
+#endif
     sf->partition_search_breakout_rate_thr = 200;
     sf->coeff_prob_appx_step = 4;
     sf->use_fast_coef_updates = is_keyframe ? TWO_LOOP : ONE_LOOP_REDUCED;
