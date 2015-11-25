@@ -94,7 +94,7 @@ endif
 ifeq ($(CONFIG_SHARED),)
 
 ## VP8
-ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
+ifeq ($(CONFIG_VP8),yes)
 
 # These tests require both the encoder and decoder to be built.
 ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),yesyes)
@@ -120,7 +120,7 @@ endif
 endif # VP8
 
 ## VP9
-ifneq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),)
+ifeq ($(CONFIG_VP9),yes)
 
 # These tests require both the encoder and decoder to be built.
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),yesyes)
@@ -133,9 +133,9 @@ LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_encoder_parms_get_to_decoder.cc
 endif
 
-LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += convolve_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += lpf_8_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += vp9_intrapred_test.cc
+LIBVPX_TEST_SRCS-yes                   += convolve_test.cc
+LIBVPX_TEST_SRCS-yes                   += lpf_8_test.cc
+LIBVPX_TEST_SRCS-yes                   += vp9_intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_decrypt_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_thread_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
@@ -152,7 +152,6 @@ ifeq ($(CONFIG_VP9_ENCODER),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_SPATIAL_SVC) += svc_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += blockiness_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += consistency_test.cc
-
 endif
 
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_TEMPORAL_DENOISING),yesyes)
