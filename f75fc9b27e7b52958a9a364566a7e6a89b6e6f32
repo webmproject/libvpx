@@ -52,6 +52,24 @@
       "revId": "f75fc9b27e7b52958a9a364566a7e6a89b6e6f32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b8ecb42_7422e0e5",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-25T19:14:14Z",
+      "side": 1,
+      "message": "Would something like this help the small core machines?\n  movifnidn          leftq, leftmp\n  mov                lineq, -2\n  mova                  m0, [GLOBAL(pb_01) ]\n  mova                  m3, [GLOBAL(pb_23) ]\n  DEFINE_ARGS  dst, stride, line, left, stride3\n  lea             stride3q, [strideq*3]\n.loop:\n  movd                  m1, [leftq         ]\n  mova                  m2, m1\n  pshufb                m1, m0\n  pshufb                m2, m3\n  lea                leftq, [leftq+4       ]\n  inc                lineq\n  movq    [dstq          ], m1\n  movhps  [dstq+strideq  ], m1\n  movq    [dstq+strideq*2], m2\n  movhps  [dstq+stride3q ], m2\n  lea                 dstq, [dstq+strideq*4]\n  jnz .loop",
+      "parentUuid": "9b2123e5_99c79c19",
+      "revId": "f75fc9b27e7b52958a9a364566a7e6a89b6e6f32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
