@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "db9abb77_5817d5d3",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-25T02:38:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb2a67bd_d5971f08",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb05f0b_90650225",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
         "patchSetId": 3
@@ -47,6 +65,24 @@
       "writtenOn": "2015-11-24T23:30:27Z",
       "side": 1,
       "message": "should you reorder this to follow the more natural 1/7/9/15 load order?",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b8ecb42_71359285",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-25T02:38:23Z",
+      "side": 1,
+      "message": "This code started from the _1024 macro, then pruned.  I will take a look at changing the order.  I\u0027m assuming you would like the order in the other blocks changed as well.",
+      "parentUuid": "fbb05f0b_90650225",
       "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "7ba70fc0_d243a2ef",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-25T02:38:23Z",
+      "side": 1,
+      "message": "I re-used an existing macro.  Not sure why it was done this way, but we can change in a followup.",
+      "parentUuid": "bbc4277e_2da5c51f",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb05f0b_f0032625",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
         "patchSetId": 3
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "3b89173b_70358e85",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-25T02:38:23Z",
+      "side": 1,
+      "message": "When I was dual debugging this code with the intrinsic version, I cut/paste the intrinsic vars and used as comments.   The number after the \"_\" is really what is important.  I should rename all of the comments to \"stp_xx\".  Should I fix here or wait until all of the idct32x32s are submitted and change in a followup?  All will have the same comment issue.",
+      "parentUuid": "fbb05f0b_f0032625",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b2123e5_fe215e7c",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
         "patchSetId": 3
@@ -98,6 +170,24 @@
       "writtenOn": "2015-11-24T23:30:27Z",
       "side": 1,
       "message": "this line can go",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ba70fc0_52bb3232",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-11-25T02:38:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b2123e5_fe215e7c",
       "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
