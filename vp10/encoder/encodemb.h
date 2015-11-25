@@ -23,17 +23,20 @@ struct encode_b_args {
   struct optimize_ctx *ctx;
   int8_t *skip;
 };
+
+typedef enum VP10_XFORM_QUANT {
+  VP10_XFORM_QUANT_FP = 0,
+  VP10_XFORM_QUANT_B = 1,
+  VP10_XFORM_QUANT_DC = 2,
+  VP10_XFORM_QUANT_LAST = 3
+} VP10_XFORM_QUANT;
+
 void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize);
 void vp10_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize);
-void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
-                         int blk_row, int blk_col,
-                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
-void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
-                         int blk_row, int blk_col,
-                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
                       int blk_row, int blk_col,
-                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
+                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                      VP10_XFORM_QUANT xform_quant_idx);
 
 void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 

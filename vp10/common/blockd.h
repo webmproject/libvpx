@@ -171,7 +171,7 @@ struct buf_2d {
   int stride;
 };
 
-struct macroblockd_plane {
+typedef struct macroblockd_plane {
   tran_low_t *dqcoeff;
   PLANE_TYPE plane_type;
   int subsampling_x;
@@ -190,7 +190,7 @@ struct macroblockd_plane {
 
   // encoder
   const int16_t *dequant;
-};
+} MACROBLOCKD_PLANE;
 
 #define BLOCK_OFFSET(x, i) ((x) + (i) * 16)
 
