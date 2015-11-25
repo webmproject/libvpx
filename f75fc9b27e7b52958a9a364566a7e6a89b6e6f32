@@ -34,6 +34,24 @@
       "revId": "f75fc9b27e7b52958a9a364566a7e6a89b6e6f32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2123e5_99c79c19",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-25T01:37:34Z",
+      "side": 1,
+      "message": "I see. I missed what you were doing later with movhps",
+      "parentUuid": "bb2a67bd_352e7b82",
+      "revId": "f75fc9b27e7b52958a9a364566a7e6a89b6e6f32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
