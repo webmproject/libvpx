@@ -130,7 +130,7 @@ add_proto qw/void vpx_d63e_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, co
 specialize qw/vpx_d63e_predictor_8x8/;
 
 add_proto qw/void vpx_h_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_h_predictor_8x8 neon dspr2 msa/, "$ssse3_x86inc";
+specialize qw/vpx_h_predictor_8x8 neon dspr2 msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_d117_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_d117_predictor_8x8/;

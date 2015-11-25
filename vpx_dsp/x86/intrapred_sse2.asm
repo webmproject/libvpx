@@ -534,6 +534,29 @@ cglobal h_predictor_4x4, 2, 4, 4, dst, stride, line, left
   RET
 
 INIT_XMM sse2
+cglobal h_predictor_8x8, 2, 5, 3, dst, stride, line, left
+  movifnidn          leftq, leftmp
+  mov                lineq, -2
+  DEFINE_ARGS  dst, stride, line, left, stride3
+  lea             stride3q, [strideq*3]
+  movq                  m0, [leftq    ]
+  punpcklbw             m0, m0              ; l1 l1 l2 l2 ... l8 l8
+.loop:
+  pshuflw               m1, m0, 0x0         ; l1 l1 l1 l1 l1 l1 l1 l1
+  pshuflw               m2, m0, 0x55        ; l2 l2 l2 l2 l2 l2 l2 l2
+  movq      [dstq        ], m1
+  movq      [dstq+strideq], m2
+  pshuflw               m1, m0, 0xaa
+  pshuflw               m2, m0, 0xff
+  movq    [dstq+strideq*2], m1
+  movq    [dstq+stride3q ], m2
+  pshufd                m0, m0, 0xe         ; [63:0] l5 l5 l6 l6 l7 l7 l8 l8
+  inc                lineq
+  lea                 dstq, [dstq+strideq*4]
+  jnz .loop
+  REP_RET
+
+INIT_XMM sse2
 cglobal tm_predictor_4x4, 4, 4, 5, dst, stride, above, left
   pxor                  m1, m1
   movq                  m0, [aboveq-1]; [63:0] tl t1 t2 t3 t4 x x x
