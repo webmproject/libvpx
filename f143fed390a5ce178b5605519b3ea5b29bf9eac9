@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9b2123e5_198e0c51",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-25T04:34:09Z",
+      "side": 1,
+      "message": "might as well make a pass while you\u0027re here",
+      "parentUuid": "5b8ecb42_71359285",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbc4277e_2da5c51f",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
         "patchSetId": 3
@@ -124,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "1b153384_61167128",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-25T04:34:09Z",
+      "side": 1,
+      "message": "worth a look later at least",
+      "parentUuid": "7ba70fc0_d243a2ef",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb05f0b_f0032625",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
         "patchSetId": 3
@@ -153,6 +189,24 @@
       "side": 1,
       "message": "When I was dual debugging this code with the intrinsic version, I cut/paste the intrinsic vars and used as comments.   The number after the \"_\" is really what is important.  I should rename all of the comments to \"stp_xx\".  Should I fix here or wait until all of the idct32x32s are submitted and change in a followup?  All will have the same comment issue.",
       "parentUuid": "fbb05f0b_f0032625",
+      "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2123e5_b980a01e",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-25T04:34:09Z",
+      "side": 1,
+      "message": "a follow-up is fine, this is harmless",
+      "parentUuid": "3b89173b_70358e85",
       "revId": "f143fed390a5ce178b5605519b3ea5b29bf9eac9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
