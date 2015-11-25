@@ -234,6 +234,16 @@ ARCH_LIST="
     x86
     x86_64
 "
+ARCH_EXT_LIST_X86="
+    mmx
+    sse
+    sse2
+    sse3
+    ssse3
+    sse4_1
+    avx
+    avx2
+"
 ARCH_EXT_LIST="
     edsp
     media
@@ -245,14 +255,7 @@ ARCH_EXT_LIST="
     msa
     mips64
 
-    mmx
-    sse
-    sse2
-    sse3
-    ssse3
-    sse4_1
-    avx
-    avx2
+    ${ARCH_EXT_LIST_X86}
 "
 HAVE_LIST="
     ${ARCH_EXT_LIST}
