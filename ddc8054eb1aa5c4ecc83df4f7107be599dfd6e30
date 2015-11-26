@@ -52,6 +52,24 @@
       "revId": "ddc8054eb1aa5c4ecc83df4f7107be599dfd6e30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_620bc7a9",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-26T03:22:14Z",
+      "side": 1,
+      "message": "I think it\u0027s simpler if you avoid the dst2q assuming the previous iteration is equivalent performance-wise",
+      "parentUuid": "3b167790_7135a385",
+      "revId": "ddc8054eb1aa5c4ecc83df4f7107be599dfd6e30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
