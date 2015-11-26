@@ -16,6 +16,24 @@
       "revId": "2d23a4e1bb342c00628ddf268b940079f83c0993",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb2a67bd_41040d2e",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-11-26T01:42:01Z",
+      "side": 1,
+      "message": "Fixed in set 7. \nTotal args should be 5 as defined in line 522. Previous set of 4 leads to run-time crash with --target\u003dx86-linux-gcc.",
+      "parentUuid": "5bd5eb28_3c0cd916",
+      "revId": "2d23a4e1bb342c00628ddf268b940079f83c0993",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
