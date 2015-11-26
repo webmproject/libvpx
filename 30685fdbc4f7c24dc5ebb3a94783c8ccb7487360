@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbb05f0b_3ab60817",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-11-26T03:20:49Z",
+      "side": 1,
+      "message": "this and the lea at the tail is unfortunate but I don\u0027t think another branch target at the beginning would universally help. this is neutral on most, but shows some improvement on silvermont",
+      "revId": "30685fdbc4f7c24dc5ebb3a94783c8ccb7487360",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
