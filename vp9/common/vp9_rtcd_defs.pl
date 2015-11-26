@@ -1563,6 +1563,35 @@ if (vpx_config("CONFIG_WEDGE_PARTITION") eq "yes") {
 
   add_proto qw/unsigned int vp9_masked_sad4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *mask, int mask_stride";
   specialize qw/vp9_masked_sad4x4/;
+
+  if (vpx_config("CONFIG_EXT_CODING_UNIT_SIZE") eq "yes") {
+    add_proto qw/unsigned int vp9_masked_variance128x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+    specialize qw/vp9_masked_variance128x128/;
+
+    add_proto qw/unsigned int vp9_masked_variance128x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+    specialize qw/vp9_masdctked_variance128x64/;
+
+    add_proto qw/unsigned int vp9_masked_variance64x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+    specialize qw/vp9_masked_variance64x128/;
+
+    add_proto qw/unsigned int vp9_masked_sub_pixel_variance128x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+    specialize qw/vp9_masked_sub_pixel_variance128x128/;
+
+    add_proto qw/unsigned int vp9_masked_sub_pixel_variance128x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+    specialize qw/vp9_masked_sub_pixel_variance128x64/;
+
+    add_proto qw/unsigned int vp9_masked_sub_pixel_variance64x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+    specialize qw/vp9_masked_sub_pixel_variance64x128/;
+
+    add_proto qw/unsigned int vp9_masked_sad128x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *mask, int mask_stride";
+    specialize qw/vp9_masked_sad128x128/;
+
+    add_proto qw/unsigned int vp9_masked_sad128x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride";
+    specialize qw/vp9_masked_sad128x64/;
+
+    add_proto qw/unsigned int vp9_masked_sad64x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride";
+    specialize qw/vp9_masked_sad64x128/;
+  }
 }
 # ENCODEMB INVOKE
 
@@ -2797,6 +2826,71 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/unsigned int vp9_highbd_masked_sad4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *mask, int mask_stride";
     specialize qw/vp9_highbd_masked_sad4x4/;
+
+    if (vpx_config("CONFIG_EXT_CODING_UNIT_SIZE") eq "yes") {
+      add_proto qw/unsigned int vp9_highbd_masked_variance128x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_masked_variance128x128/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_variance128x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_masked_variance128x64/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_variance64x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_masked_variance64x128/;
+
+      add_proto qw/unsigned int vp9_highbd_10_masked_variance128x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_variance128x128/;
+
+      add_proto qw/unsigned int vp9_highbd_10_masked_variance128x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_variance128x64/;
+
+      add_proto qw/unsigned int vp9_highbd_10_masked_variance64x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_variance64x128/;
+
+      add_proto qw/unsigned int vp9_highbd_12_masked_variance128x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_variance128x128/;
+
+      add_proto qw/unsigned int vp9_highbd_12_masked_variance128x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_variance128x64/;
+
+      add_proto qw/unsigned int vp9_highbd_12_masked_variance64x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_variance64x128/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_sub_pixel_variance128x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_masked_sub_pixel_variance128x128/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_sub_pixel_variance128x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_masked_sub_pixel_variance128x64/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_sub_pixel_variance64x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_masked_sub_pixel_variance64x128/;
+
+      add_proto qw/unsigned int vp9_highbd_10_masked_sub_pixel_variance128x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_sub_pixel_variance128x128/;
+
+      add_proto qw/unsigned int vp9_highbd_10_masked_sub_pixel_variance128x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_sub_pixel_variance128x64/;
+
+      add_proto qw/unsigned int vp9_highbd_10_masked_sub_pixel_variance64x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_10_masked_sub_pixel_variance64x128/;
+
+      add_proto qw/unsigned int vp9_highbd_12_masked_sub_pixel_variance128x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_12_masked_sub_pixel_variance128x128/;
+
+      add_proto qw/unsigned int vp9_highbd_12_masked_sub_pixel_variance128x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_12_masked_sub_pixel_variance128x64/;
+
+      add_proto qw/unsigned int vp9_highbd_12_masked_sub_pixel_variance64x128/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *m, int m_stride, unsigned int *sse";
+      specialize qw/vp9_highbd_12_masked_sub_pixel_variance64x128/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_sad128x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *mask, int mask_stride";
+      specialize qw/vp9_highbd_masked_sad128x128/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_sad128x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride";
+      specialize qw/vp9_highbd_masked_sad128x64/;
+
+      add_proto qw/unsigned int vp9_highbd_masked_sad64x128/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride";
+      specialize qw/vp9_highbd_masked_sad64x128/;
+    }
   }
 
   # ENCODEMB INVOKE

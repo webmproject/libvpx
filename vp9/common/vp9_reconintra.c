@@ -1443,6 +1443,7 @@ static INLINE TX_SIZE blocklen_to_txsize(int bs) {
       return TX_32X32;
       break;
     case 64:
+    case 128:
     default:
 #if CONFIG_TX64X64
       return TX_64X64;
@@ -1768,7 +1769,7 @@ static void combine_interintra(PREDICTION_MODE mode,
 
 #if CONFIG_WEDGE_PARTITION
   if (use_wedge_interintra && get_wedge_bits(bsize)) {
-    uint8_t mask[4096];
+    uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
     vp9_generate_masked_weight_interintra(wedge_index, bsize, bh, bw, mask, bw);
     for (i = 0; i < bh; ++i) {
       for (j = 0; j < bw; ++j) {
@@ -1917,7 +1918,7 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
 
 #if CONFIG_WEDGE_PARTITION
   if (use_wedge_interintra && get_wedge_bits(bsize)) {
-    uint8_t mask[4096];
+    uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
     vp9_generate_masked_weight_interintra(wedge_index, bsize, bh, bw, mask, bw);
     for (i = 0; i < bh; ++i) {
       for (j = 0; j < bw; ++j) {
@@ -2418,7 +2419,8 @@ void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
   int bh = 4 << b_height_log2_lookup[bsize];
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, intrapredictor, 4096);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, intrapredictor, CODING_UNIT_SIZE *
+                          CODING_UNIT_SIZE);
     build_intra_predictors_for_interintra_highbd(
         xd, xd->plane[0].dst.buf, xd->plane[0].dst.stride,
         CONVERT_TO_BYTEPTR(intrapredictor), bw,
@@ -2466,8 +2468,10 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
   int bh = 4 << b_height_log2_lookup[uvbsize];
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, uintrapredictor, 4096);
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, vintrapredictor, 4096);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, uintrapredictor, CODING_UNIT_SIZE *
+                          CODING_UNIT_SIZE);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, vintrapredictor, CODING_UNIT_SIZE *
+                          CODING_UNIT_SIZE);
     build_intra_predictors_for_interintra_highbd(
         xd, xd->plane[1].dst.buf, xd->plane[1].dst.stride,
         CONVERT_TO_BYTEPTR(uintrapredictor), bw,

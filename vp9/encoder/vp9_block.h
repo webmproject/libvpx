@@ -157,8 +157,10 @@ struct macroblock {
                           int eob, int bd);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_PALETTE
-  DECLARE_ALIGNED(16, double, kmeans_data_buffer[MAX_MB_PLANE * 64 * 64]);
-  DECLARE_ALIGNED(16, int, kmeans_indices_buffer[64 * 64]);
+  DECLARE_ALIGNED(16, double, kmeans_data_buffer[MAX_MB_PLANE *
+                                          CODING_UNIT_SIZE * CODING_UNIT_SIZE]);
+  DECLARE_ALIGNED(16, int, kmeans_indices_buffer[CODING_UNIT_SIZE *
+                                                 CODING_UNIT_SIZE]);
 #endif  // CONFIG_PALETTE
 };
 

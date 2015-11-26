@@ -336,6 +336,11 @@ unsigned int vp9_masked_sad##m##x##n##_c(const uint8_t *src, int src_stride, \
   return masked_sad(src, src_stride, ref, ref_stride, msk, msk_stride, m, n); \
 }
 
+#if CONFIG_EXT_CODING_UNIT_SIZE
+MASKSADMxN(128, 128)
+MASKSADMxN(128, 64)
+MASKSADMxN(64, 128)
+#endif
 MASKSADMxN(64, 64)
 MASKSADMxN(64, 32)
 MASKSADMxN(32, 64)
@@ -373,7 +378,7 @@ static INLINE unsigned int highbd_masked_sad(const uint8_t *a8, int a_stride,
   return sad;
 }
 
-#define highbd_MASKSADMxN(m, n) \
+#define HIGHBD_MASKSADMXN(m, n) \
 unsigned int vp9_highbd_masked_sad##m##x##n##_c(const uint8_t *src, \
                                                 int src_stride, \
                                                 const uint8_t *ref, \
@@ -384,18 +389,23 @@ unsigned int vp9_highbd_masked_sad##m##x##n##_c(const uint8_t *src, \
                            msk, msk_stride, m, n); \
 }
 
-highbd_MASKSADMxN(64, 64)
-highbd_MASKSADMxN(64, 32)
-highbd_MASKSADMxN(32, 64)
-highbd_MASKSADMxN(32, 32)
-highbd_MASKSADMxN(32, 16)
-highbd_MASKSADMxN(16, 32)
-highbd_MASKSADMxN(16, 16)
-highbd_MASKSADMxN(16, 8)
-highbd_MASKSADMxN(8, 16)
-highbd_MASKSADMxN(8, 8)
-highbd_MASKSADMxN(8, 4)
-highbd_MASKSADMxN(4, 8)
-highbd_MASKSADMxN(4, 4)
+#if CONFIG_EXT_CODING_UNIT_SIZE
+HIGHBD_MASKSADMXN(128, 128)
+HIGHBD_MASKSADMXN(128, 64)
+HIGHBD_MASKSADMXN(64, 128)
+#endif
+HIGHBD_MASKSADMXN(64, 64)
+HIGHBD_MASKSADMXN(64, 32)
+HIGHBD_MASKSADMXN(32, 64)
+HIGHBD_MASKSADMXN(32, 32)
+HIGHBD_MASKSADMXN(32, 16)
+HIGHBD_MASKSADMXN(16, 32)
+HIGHBD_MASKSADMXN(16, 16)
+HIGHBD_MASKSADMXN(16, 8)
+HIGHBD_MASKSADMXN(8, 16)
+HIGHBD_MASKSADMXN(8, 8)
+HIGHBD_MASKSADMXN(8, 4)
+HIGHBD_MASKSADMXN(4, 8)
+HIGHBD_MASKSADMXN(4, 4)
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_WEDGE_PARTITION

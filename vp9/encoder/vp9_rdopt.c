@@ -2481,9 +2481,11 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     vpx_memset(x->kmeans_data_buffer, 0,
-               sizeof(x->kmeans_data_buffer[0] * 4096));
+               sizeof(x->kmeans_data_buffer[0] * CODING_UNIT_SIZE *
+               CODING_UNIT_SIZE));
     vpx_memset(x->kmeans_indices_buffer, 0,
-               sizeof(x->kmeans_indices_buffer[0] * 4096));
+               sizeof(x->kmeans_indices_buffer[0] * CODING_UNIT_SIZE *
+               CODING_UNIT_SIZE));
     mic->mbmi.palette_enabled[0] = 1;
     vp9_cost_tokens(palette_size_cost,
                     cpi->common.fc.palette_size_prob[bsize - BLOCK_8X8],
@@ -5114,8 +5116,8 @@ static void do_masked_motion_search_indexed(VP9_COMP *cpi, MACROBLOCK *x,
   int w = (4 << b_width_log2_lookup[sb_type]);
   int h = (4 << b_height_log2_lookup[sb_type]);
   int i, j;
-  uint8_t mask[4096];
-  int mask_stride = 64;
+  uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
+  int mask_stride = CODING_UNIT_SIZE;
 
   vp9_generate_masked_weight(wedge_index, sb_type, h, w, mask, mask_stride);
   // vp9_generate_hard_mask(wedge_index, sb_type, h, w, mask, mask_stride);
@@ -5628,10 +5630,15 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (have_newmv_in_inter_mode(this_mode)) {
       int_mv tmp_mv[2];
       int rate_mvs[2], tmp_rate_mv = 0;
-      uint8_t pred0[8192 * 3], pred1[8192 * 3];
-      uint8_t *preds0[3] = {pred0, pred0 + 8192, pred0 + 16384};
-      uint8_t *preds1[3] = {pred1, pred1 + 8192, pred1 + 16384};
-      int strides[3] = {64, 64, 64};
+      uint8_t pred0[2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE * 3];
+      uint8_t pred1[2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE * 3];
+      uint8_t *preds0[3] = {pred0,
+                            pred0 + 2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE,
+                            pred0 + 4 * CODING_UNIT_SIZE * CODING_UNIT_SIZE};
+      uint8_t *preds1[3] = {pred1,
+                            pred1 + 2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE,
+                            pred1 + 4 * CODING_UNIT_SIZE * CODING_UNIT_SIZE};
+      int strides[3] = {CODING_UNIT_SIZE, CODING_UNIT_SIZE, CODING_UNIT_SIZE};
       vp9_build_inter_predictors_for_planes_single_buf(
           xd, bsize, mi_row, mi_col, 0, preds0, strides);
       vp9_build_inter_predictors_for_planes_single_buf(
@@ -5702,10 +5709,15 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->mv[1].as_int = cur_mv[1].as_int;
       }
     } else {
-      uint8_t pred0[8192 * 3], pred1[8192 * 3];
-      uint8_t *preds0[3] = {pred0, pred0 + 8192, pred0 + 16384};
-      uint8_t *preds1[3] = {pred1, pred1 + 8192, pred1 + 16384};
-      int strides[3] = {64, 64, 64};
+      uint8_t pred0[2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE * 3];
+      uint8_t pred1[2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE * 3];
+      uint8_t *preds0[3] = {pred0,
+                            pred0 + 2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE,
+                            pred0 + 4 * CODING_UNIT_SIZE * CODING_UNIT_SIZE};
+      uint8_t *preds1[3] = {pred1,
+                            pred1 + 2 * CODING_UNIT_SIZE * CODING_UNIT_SIZE,
+                            pred1 + 4 * CODING_UNIT_SIZE * CODING_UNIT_SIZE};
+      int strides[3] = {CODING_UNIT_SIZE, CODING_UNIT_SIZE, CODING_UNIT_SIZE};
       vp9_build_inter_predictors_for_planes_single_buf(
           xd, bsize, mi_row, mi_col, 0, preds0, strides);
       vp9_build_inter_predictors_for_planes_single_buf(
@@ -5761,7 +5773,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #ifdef WEDGE_INTERINTRA_REFINE_SEARCH
     int bw = 4 << b_width_log2_lookup[mbmi->sb_type],
         bh = 4 << b_height_log2_lookup[mbmi->sb_type];
-    uint8_t mask[4096];
+    uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
     int_mv tmp_mv;
     int tmp_rate_mv = 0;
 #endif  // WEDGE_INTERINTRA_REFINE_SEARCH
@@ -5769,7 +5781,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->ref_frame[1] = NONE;
     for (j = 0; j < MAX_MB_PLANE; j++) {
       xd->plane[j].dst.buf = tmp_buf + j * tmp_buf_sz;
-      xd->plane[j].dst.stride = 64;
+      xd->plane[j].dst.stride = CODING_UNIT_SIZE;
     }
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
     restore_dst_buf(xd, orig_dst, orig_dst_stride);
@@ -5781,8 +5793,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       mbmi->interintra_uv_mode = interintra_mode;
       rmode = cpi->mbmode_cost[mbmi->interintra_mode];
       vp9_build_interintra_predictors(xd, tmp_buf, tmp_buf + tmp_buf_sz,
-                                      tmp_buf + 2 * tmp_buf_sz, 64, 64, 64,
-                                      bsize);
+                                      tmp_buf + 2 * tmp_buf_sz,
+                                      CODING_UNIT_SIZE, CODING_UNIT_SIZE,
+                                      CODING_UNIT_SIZE, bsize);
       model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
                       &skip_txfm_sb, &skip_sse_sb);
       rd = RDCOST(x->rdmult, x->rddiv, rmode + rate_sum, dist_sum);
@@ -5799,8 +5812,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (wedge_bits) {
       mbmi->use_wedge_interintra = 0;
       vp9_build_interintra_predictors(xd, tmp_buf, tmp_buf + tmp_buf_sz,
-                                      tmp_buf + 2 * tmp_buf_sz, 64, 64, 64,
-                                      bsize);
+                                      tmp_buf + 2 * tmp_buf_sz,
+                                      CODING_UNIT_SIZE, CODING_UNIT_SIZE,
+                                      CODING_UNIT_SIZE, bsize);
       model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum, NULL, NULL);
       rwedge = vp9_cost_bit(cm->fc.wedge_interintra_prob[bsize], 0);
       rd = RDCOST(x->rdmult, x->rddiv,
@@ -5815,8 +5829,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->interintra_wedge_index = wedge_index;
         mbmi->interintra_uv_wedge_index = wedge_index;
         vp9_build_interintra_predictors(xd, tmp_buf, tmp_buf + tmp_buf_sz,
-                                       tmp_buf + 2 * tmp_buf_sz, 64, 64, 64,
-                                       bsize);
+                                       tmp_buf + 2 * tmp_buf_sz,
+                                      CODING_UNIT_SIZE, CODING_UNIT_SIZE,
+                                      CODING_UNIT_SIZE, bsize);
         model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum, NULL, NULL);
         rd = RDCOST(x->rdmult, x->rddiv,
                     rmode + rate_mv_tmp + rwedge + rate_sum, dist_sum);
@@ -6186,7 +6201,8 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   const uint8_t *src_y = x->plane[0].src.buf;
   const uint8_t *src_u = x->plane[1].src.buf;
   const uint8_t *src_v = x->plane[2].src.buf;
-  uint8_t palette_color_map_copy[4096], best_palette_color_map[4096];
+  uint8_t palette_color_map_copy[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
+  uint8_t best_palette_color_map[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
   int rows = 4 * num_4x4_blocks_high_lookup[bsize];
   int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
   int src_stride_y = x->plane[0].src.stride;
@@ -6255,9 +6271,11 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       vpx_memcpy(palette_color_map_copy, xd->plane[0].color_index_map,
                  rows * cols * sizeof(xd->plane[0].color_index_map[0]));
     vpx_memset(x->kmeans_data_buffer, 0,
-               sizeof(x->kmeans_data_buffer[0]) * 3 * 4096);
+               sizeof(x->kmeans_data_buffer[0]) * 3 * CODING_UNIT_SIZE *
+               CODING_UNIT_SIZE);
     vpx_memset(xd->palette_map_buffer, 0,
-               sizeof(xd->palette_map_buffer[0]) * 4096);
+               sizeof(xd->palette_map_buffer[0]) * CODING_UNIT_SIZE *
+               CODING_UNIT_SIZE);
     vpx_memset(centroids, 0, sizeof(centroids[0]) * 3 * PALETTE_MAX_SIZE);
     vp9_cost_tokens(palette_size_cost,
                     cpi->common.fc.palette_size_prob[bsize - BLOCK_8X8],
@@ -6738,11 +6756,11 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
   uint16_t best_palette[PALETTE_MAX_SIZE];
   uint16_t palette_colors_uv[TX_SIZES][2 * PALETTE_MAX_SIZE];
-  uint16_t palette_color_map_uv[TX_SIZES][4096];
+  uint16_t palette_color_map_uv[TX_SIZES][CODING_UNIT_SIZE * CODING_UNIT_SIZE];
 #else
   uint8_t best_palette[PALETTE_MAX_SIZE];
   uint8_t palette_colors_uv[TX_SIZES][2 * PALETTE_MAX_SIZE];
-  uint8_t palette_color_map_uv[TX_SIZES][4096];
+  uint8_t palette_color_map_uv[TX_SIZES][CODING_UNIT_SIZE * CODING_UNIT_SIZE];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   const MODE_INFO *above_mi = xd->up_available ?
       xd->mi[-xd->mi_stride].src_mi : NULL;
@@ -8056,9 +8074,11 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
 #endif
       vpx_memset(x->kmeans_data_buffer, 0,
-                 sizeof(x->kmeans_data_buffer[0] * 4096));
+                 sizeof(x->kmeans_data_buffer[0] * CODING_UNIT_SIZE *
+                 CODING_UNIT_SIZE));
       vpx_memset(x->kmeans_indices_buffer, 0,
-                 sizeof(x->kmeans_indices_buffer[0] * 4096));
+                 sizeof(x->kmeans_indices_buffer[0] * CODING_UNIT_SIZE *
+                 CODING_UNIT_SIZE));
       mbmi->palette_enabled[0] = 1;
       vp9_cost_tokens(palette_size_cost,
                       cpi->common.fc.palette_size_prob[bsize - BLOCK_8X8],

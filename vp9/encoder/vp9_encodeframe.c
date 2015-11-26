@@ -2995,7 +2995,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
 
 #if CONFIG_PALETTE
-  if (bsize == BLOCK_64X64) {
+  if (bsize == BLOCK_LARGEST) {
     c = &pc_tree->current;
     c->palette_buf_size = cm->current_palette_size;
     vpx_memcpy(c->palette_colors_buf, cm->current_palette_colors,

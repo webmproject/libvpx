@@ -626,7 +626,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   if (!is_inter && bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
     int n, i, j, k, rows, cols, palette_ctx, color_ctx;
     int color_new_idx = -1, color_order[PALETTE_MAX_SIZE];
-    uint8_t buffer[4096];
+    uint8_t buffer[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
     const MODE_INFO *above_mi = xd->up_available ?
         xd->mi[-xd->mi_stride].src_mi : NULL;
     const MODE_INFO *left_mi = xd->left_available ?
@@ -1039,7 +1039,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
       ) {
     int n, m1, m2, i, j, k, rows, cols, palette_ctx, color_ctx;
     int color_new_idx = -1, color_order[PALETTE_MAX_SIZE];
-    uint8_t buffer[4096];
+    uint8_t buffer[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
 
     palette_ctx = 0;
     if (above_mi)

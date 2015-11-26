@@ -876,6 +876,11 @@ static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
                 m, m_stride) >> 4; \
 }
 
+#if CONFIG_EXT_CODING_UNIT_SIZE
+MAKE_MBFP_SAD_WRAPPER(vp9_highbd_masked_sad128x128)
+MAKE_MBFP_SAD_WRAPPER(vp9_highbd_masked_sad128x64)
+MAKE_MBFP_SAD_WRAPPER(vp9_highbd_masked_sad64x128)
+#endif
 MAKE_MBFP_SAD_WRAPPER(vp9_highbd_masked_sad64x64)
 MAKE_MBFP_SAD_WRAPPER(vp9_highbd_masked_sad64x32)
 MAKE_MBFP_SAD_WRAPPER(vp9_highbd_masked_sad32x64)
@@ -1059,6 +1064,20 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
 #endif
 
 #if CONFIG_WEDGE_PARTITION
+#if CONFIG_EXT_CODING_UNIT_SIZE
+        HIGHBD_MBFP(BLOCK_128X128,
+                    vp9_highbd_masked_sad128x128_bits8,
+                    vp9_highbd_masked_variance128x128,
+                    vp9_highbd_masked_sub_pixel_variance128x128)
+        HIGHBD_MBFP(BLOCK_128X64,
+                    vp9_highbd_masked_sad128x64_bits8,
+                    vp9_highbd_masked_variance128x64,
+                    vp9_highbd_masked_sub_pixel_variance128x64)
+        HIGHBD_MBFP(BLOCK_64X128,
+                    vp9_highbd_masked_sad64x128_bits8,
+                    vp9_highbd_masked_variance64x128,
+                    vp9_highbd_masked_sub_pixel_variance64x128)
+#endif  // CONFIG_EXT_CODING_UNIT_SIZE
         HIGHBD_MBFP(BLOCK_64X64,
                     vp9_highbd_masked_sad64x64_bits8,
                     vp9_highbd_masked_variance64x64,
@@ -1278,6 +1297,20 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
 #endif
 
 #if CONFIG_WEDGE_PARTITION
+#if CONFIG_EXT_CODING_UNIT_SIZE
+        HIGHBD_MBFP(BLOCK_128X128,
+                    vp9_highbd_masked_sad128x128_bits10,
+                    vp9_highbd_10_masked_variance128x128,
+                    vp9_highbd_10_masked_sub_pixel_variance128x128)
+        HIGHBD_MBFP(BLOCK_128X64,
+                    vp9_highbd_masked_sad128x64_bits10,
+                    vp9_highbd_10_masked_variance128x64,
+                    vp9_highbd_10_masked_sub_pixel_variance128x64)
+        HIGHBD_MBFP(BLOCK_64X128,
+                    vp9_highbd_masked_sad64x128_bits10,
+                    vp9_highbd_10_masked_variance64x128,
+                    vp9_highbd_10_masked_sub_pixel_variance64x128)
+#endif  // CONFIG_EXT_CODING_UNIT_SIZE
         HIGHBD_MBFP(BLOCK_64X64,
                     vp9_highbd_masked_sad64x64_bits10,
                     vp9_highbd_10_masked_variance64x64,
@@ -1497,6 +1530,20 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
 #endif
 
 #if CONFIG_WEDGE_PARTITION
+#if CONFIG_EXT_CODING_UNIT_SIZE
+        HIGHBD_MBFP(BLOCK_128X128,
+                    vp9_highbd_masked_sad128x128_bits12,
+                    vp9_highbd_12_masked_variance128x128,
+                    vp9_highbd_12_masked_sub_pixel_variance128x128)
+        HIGHBD_MBFP(BLOCK_128X64,
+                    vp9_highbd_masked_sad128x64_bits12,
+                    vp9_highbd_12_masked_variance128x64,
+                    vp9_highbd_12_masked_sub_pixel_variance128x64)
+        HIGHBD_MBFP(BLOCK_64X128,
+                    vp9_highbd_masked_sad64x128_bits12,
+                    vp9_highbd_12_masked_variance64x128,
+                    vp9_highbd_12_masked_sub_pixel_variance64x128)
+#endif  // CONFIG_EXT_CODING_UNIT_SIZE
         HIGHBD_MBFP(BLOCK_64X64,
                     vp9_highbd_masked_sad64x64_bits12,
                     vp9_highbd_12_masked_variance64x64,
@@ -1995,6 +2042,14 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->fn_ptr[BT].mvf             = MVF;  \
   cpi->fn_ptr[BT].msvf            = MSVF;
 
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  MBFP(BLOCK_128X128, vp9_masked_sad128x128, vp9_masked_variance128x128,
+       vp9_masked_sub_pixel_variance128x128)
+  MBFP(BLOCK_128X64, vp9_masked_sad128x64, vp9_masked_variance128x64,
+         vp9_masked_sub_pixel_variance128x64)
+  MBFP(BLOCK_64X128, vp9_masked_sad64x128, vp9_masked_variance64x128,
+         vp9_masked_sub_pixel_variance64x128)
+#endif
   MBFP(BLOCK_64X64, vp9_masked_sad64x64, vp9_masked_variance64x64,
        vp9_masked_sub_pixel_variance64x64)
   MBFP(BLOCK_64X32, vp9_masked_sad64x32, vp9_masked_variance64x32,

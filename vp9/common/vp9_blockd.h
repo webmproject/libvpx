@@ -432,8 +432,10 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_MB_PLANE][CODING_UNIT_SIZE *
                                                         CODING_UNIT_SIZE]);
 #if CONFIG_PALETTE
-  DECLARE_ALIGNED(16, uint8_t, color_index_map[2][64 * 64]);
-  DECLARE_ALIGNED(16, uint8_t, palette_map_buffer[64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, color_index_map[2][CODING_UNIT_SIZE *
+                                                  CODING_UNIT_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, palette_map_buffer[CODING_UNIT_SIZE *
+                                                  CODING_UNIT_SIZE]);
 #endif  // CONFIG_PALETTE
 
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];

@@ -2770,7 +2770,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
                          0,
 #endif
                          mi_row, mi_col,
-                         &tile_data->bit_reader, BLOCK_64X64);
+                         &tile_data->bit_reader, BLOCK_LARGEST);
       }
       pbi->mb.corrupted |= tile_data->xd.corrupted;
     }

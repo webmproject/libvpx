@@ -16,7 +16,10 @@
 
 #if CONFIG_WEDGE_PARTITION
 static const vp9_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
-  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  192, 192, 192
+#endif
 };
 #endif  // CONFIG_WEDGE_PARTITION
 
@@ -42,11 +45,17 @@ const vp9_tree_index vp9_sr_usfilter_tree[TREE_SIZE(SR_USFILTER_NUM)] = {
 
 #if CONFIG_INTERINTRA
 static const vp9_prob default_interintra_prob[BLOCK_SIZES] = {
-  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  192, 192, 192
+#endif
 };
 #if CONFIG_WEDGE_PARTITION
 static const vp9_prob default_wedge_interintra_prob[BLOCK_SIZES] = {
-  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+#if CONFIG_EXT_CODING_UNIT_SIZE
+  192, 192, 192
+#endif
 };
 #endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
