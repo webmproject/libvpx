@@ -34,24 +34,6 @@ sh_b2333: db 2, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 SECTION .text
 
 INIT_XMM ssse3
-cglobal h_predictor_16x16, 2, 4, 3, dst, stride, line, left
-  movifnidn          leftq, leftmp
-  add                leftq, 16
-  mov                lineq, -8
-  pxor                  m0, m0
-.loop:
-  movd                  m1, [leftq+lineq*2  ]
-  movd                  m2, [leftq+lineq*2+1]
-  pshufb                m1, m0
-  pshufb                m2, m0
-  mova      [dstq        ], m1
-  mova      [dstq+strideq], m2
-  lea                 dstq, [dstq+strideq*2]
-  inc                lineq
-  jnz .loop
-  REP_RET
-
-INIT_XMM ssse3
 cglobal h_predictor_32x32, 2, 4, 3, dst, stride, line, left
   movifnidn          leftq, leftmp
   add                leftq, 32
