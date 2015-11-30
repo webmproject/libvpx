@@ -843,7 +843,8 @@ static int choose_partitioning(VP9_COMP *cpi,
           force_split[split_index] = 1;
           force_split[i + 1] = 1;
           force_split[0] = 1;
-        } else if (vt.split[i].split[j].part_variances.none.variance >
+        } else if (cpi->oxcf.speed < 8 &&
+                   vt.split[i].split[j].part_variances.none.variance >
                    thresholds[1] &&
                    !cyclic_refresh_segment_id_boosted(segment_id)) {
           // We have some nominal amount of 16x16 variance (based on average),
