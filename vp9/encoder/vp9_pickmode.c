@@ -1703,8 +1703,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         decision == FILTER_BLOCK &&
         cpi->noise_estimate.enabled &&
         cpi->noise_estimate.level > kLow &&
-        zero_last_cost_orig < (best_rdc.rdcost << 2) &&
-        !reuse_inter_pred) {
+        zero_last_cost_orig < (best_rdc.rdcost << 2)) {
       // Check if we should pick ZEROMV on denoised signal.
       int rate = 0;
       int64_t dist = 0;
@@ -1713,6 +1712,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       mbmi->ref_frame[1] = NONE;
       mbmi->mv[0].as_int = 0;
       mbmi->interp_filter = EIGHTTAP;
+      xd->plane[0].pre[0] = yv12_mb[LAST_FRAME][0];
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
       model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
       this_rdc.rate = rate + ref_frame_cost[LAST_FRAME] +
