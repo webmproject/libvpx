@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ba24b12_912d3e87",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2015-12-01T21:45:50Z",
+      "side": 1,
+      "message": "I can\u0027t see what this means. Do you want to exclude the case that both cpi-\u003esvc.number_temporal_layers and cpi-\u003esvc.number_spatial_layers \u003e 1?",
+      "range": {
+        "startLine": 282,
+        "startChar": 7,
+        "endLine": 283,
+        "endChar": 43
+      },
+      "revId": "4702754b976dab62ed7985fd716dcb75682561d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
