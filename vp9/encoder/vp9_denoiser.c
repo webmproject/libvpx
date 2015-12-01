@@ -194,7 +194,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
                                                          int mi_col,
                                                          PICK_MODE_CONTEXT *ctx,
                                                          int motion_magnitude,
-                                                         int is_skin) {
+                                                         int is_skin,
+                                                         int *zeromv_filter) {
   int mv_col, mv_row;
   int sse_diff = ctx->zeromv_sse - ctx->newmv_sse;
   MV_REFERENCE_FRAME frame;
@@ -237,6 +238,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     mbmi->mv[0].as_int = 0;
     ctx->best_sse_inter_mode = ZEROMV;
     ctx->best_sse_mv.as_int = 0;
+    *zeromv_filter = 1;
   }
 
   if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
@@ -320,6 +322,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           VP9_DENOISER_DECISION *denoiser_decision) {
   int mv_col, mv_row;
   int motion_magnitude = 0;
+  int zeromv_filter = 0;
   VP9_DENOISER_DECISION decision = COPY_BLOCK;
   YV12_BUFFER_CONFIG avg = denoiser->running_avg_y[INTRA_FRAME];
   YV12_BUFFER_CONFIG mc_avg = denoiser->mc_running_avg_y;
@@ -360,7 +363,8 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                                            denoiser->increase_denoising,
                                            mi_row, mi_col, ctx,
                                            motion_magnitude,
-                                           is_skin);
+                                           is_skin,
+                                           &zeromv_filter);
 
   if (decision == FILTER_BLOCK) {
     decision = vp9_denoiser_filter(src.buf, src.stride,
@@ -382,6 +386,8 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                       num_4x4_blocks_high_lookup[bs] << 2);
   }
   *denoiser_decision = decision;
+  if (decision == FILTER_BLOCK && zeromv_filter == 1)
+    *denoiser_decision = FILTER_ZEROMV_BLOCK;
 }
 
 static void copy_frame(YV12_BUFFER_CONFIG * const dest,
