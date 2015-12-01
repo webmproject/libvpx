@@ -25,7 +25,7 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
                              int width,
                              int height) {
   ne->enabled = 0;
-  ne->level = kLow;
+  ne->level = kLowLow;
   ne->value = 0;
   ne->count = 0;
   ne->thresh = 90;
@@ -220,22 +220,25 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
         // Reset counter and check noise level condition.
         ne->num_frames_estimate = 30;
         ne->count = 0;
-        if (ne->value > (ne->thresh << 1))
+        if (ne->value > (ne->thresh << 1)) {
           ne->level = kHigh;
-        else
+        } else {
           if (ne->value > ne->thresh)
             ne->level = kMedium;
           else if (ne->value > (ne->thresh >> 1))
             ne->level = kLow;
           else
             ne->level = kLowLow;
+        }
+#if CONFIG_VP9_TEMPORAL_DENOISING
+        if (cpi->oxcf.noise_sensitivity > 0)
+          vp9_denoiser_set_noise_level(&cpi->denoiser, ne->level);
+#endif
       }
     }
   }
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
+  if (cpi->oxcf.noise_sensitivity > 0)
     copy_frame(&cpi->denoiser.last_source, cpi->Source);
-    vp9_denoiser_set_noise_level(&cpi->denoiser, ne->level);
-  }
 #endif
 }
