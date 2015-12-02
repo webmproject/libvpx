@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9bb8433f_39871381",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-02T03:59:17Z",
+      "side": 1,
+      "message": "note this and the next pshufd could be shifts instead if xmm1 was given 0x9 for instance. in practice I think they\u0027re both cheap.",
+      "revId": "9d29d7628062d8db6795c73eccbbbf2c3df41e00",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
