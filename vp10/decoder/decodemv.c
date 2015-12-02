@@ -63,7 +63,49 @@ static PREDICTION_MODE read_intra_mode_uv(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                       vpx_reader *r, int ctx) {
+                                       vpx_reader *r, uint8_t ctx) {
+#if CONFIG_REF_MV
+  FRAME_COUNTS *counts = xd->counts;
+  uint8_t mode_ctx = ctx & NEWMV_CTX_MASK;
+  vpx_prob mode_prob = cm->fc->newmv_prob[mode_ctx];
+
+  if (vpx_read(r, mode_prob) == 0) {
+    if (counts)
+      ++counts->newmv_mode[mode_ctx][0];
+    return NEWMV;
+  }
+  if (counts)
+    ++counts->newmv_mode[mode_ctx][1];
+
+  mode_ctx = (ctx >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
+
+  if (mode_ctx > 1)
+    assert(0);
+
+  mode_prob = cm->fc->zeromv_prob[mode_ctx];
+  if (vpx_read(r, mode_prob) == 0) {
+    if (counts)
+      ++counts->zeromv_mode[mode_ctx][0];
+    return ZEROMV;
+  }
+  if (counts)
+    ++counts->zeromv_mode[mode_ctx][1];
+
+  mode_ctx = (ctx >> REFMV_OFFSET);
+  mode_prob = cm->fc->refmv_prob[mode_ctx];
+  if (vpx_read(r, mode_prob) == 0) {
+    if (counts)
+      ++counts->refmv_mode[mode_ctx][0];
+    return NEARESTMV;
+  } else {
+    if (counts)
+      ++counts->refmv_mode[mode_ctx][1];
+    return NEARMV;
+  }
+
+  // Invalid prediction mode.
+  assert(0);
+#else
   const int mode = vpx_read_tree(r, vp10_inter_mode_tree,
                                  cm->fc->inter_mode_probs[ctx]);
   FRAME_COUNTS *counts = xd->counts;
@@ -71,6 +113,7 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
     ++counts->inter_mode[ctx][mode];
 
   return NEARESTMV + mode;
+#endif
 }
 
 static int read_segment_id(vpx_reader *r,

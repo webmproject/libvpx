@@ -202,6 +202,19 @@ typedef enum {
 #define INTER_MODES (1 + NEWMV - NEARESTMV)
 
 #define SKIP_CONTEXTS 3
+
+#if CONFIG_REF_MV
+#define NEWMV_MODE_CONTEXTS  6
+#define ZEROMV_MODE_CONTEXTS 2
+#define REFMV_MODE_CONTEXTS  3
+
+#define ZEROMV_OFFSET 3
+#define REFMV_OFFSET  4
+
+#define NEWMV_CTX_MASK ((1 << ZEROMV_OFFSET) - 1)
+#define ZEROMV_CTX_MASK ((1 << (REFMV_OFFSET - ZEROMV_OFFSET)) - 1)
+#endif
+
 #define INTER_MODE_CONTEXTS 7
 
 /* Segment Feature Masks */

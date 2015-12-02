@@ -1257,6 +1257,29 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   ctx->dist = rd_cost->dist;
 }
 
+#if CONFIG_REF_MV
+static void update_inter_mode_stats(FRAME_COUNTS *counts,
+                                    PREDICTION_MODE mode,
+                                    uint8_t mode_context) {
+  uint8_t mode_ctx = mode_context & NEWMV_CTX_MASK;
+  if (mode == NEWMV) {
+    ++counts->newmv_mode[mode_ctx][0];
+    return;
+  } else {
+    ++counts->newmv_mode[mode_ctx][1];
+    mode_ctx = (mode_context >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
+    if (mode == ZEROMV) {
+      ++counts->zeromv_mode[mode_ctx][0];
+      return;
+    } else {
+      ++counts->zeromv_mode[mode_ctx][1];
+      mode_ctx = (mode_context >> REFMV_OFFSET);
+      ++counts->refmv_mode[mode_ctx][mode != NEARESTMV];
+    }
+  }
+}
+#endif
+
 static void update_stats(VP10_COMMON *cm, ThreadData *td) {
   const MACROBLOCK *x = &td->mb;
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -1335,7 +1358,11 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td) {
       const int mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
+#if CONFIG_REF_MV
+        update_inter_mode_stats(counts, mode, mode_ctx);
+#else
         ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
+#endif
       } else {
         const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
         const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -1344,7 +1371,11 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td) {
           for (idx = 0; idx < 2; idx += num_4x4_w) {
             const int j = idy * 2 + idx;
             const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
+#if CONFIG_REF_MV
+            update_inter_mode_stats(counts, b_mode, mode_ctx);
+#else
             ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
+#endif
           }
         }
       }

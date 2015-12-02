@@ -171,6 +171,20 @@ static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
   {  10,   7,   6 },  // a/l both split
 };
 
+#if CONFIG_REF_MV
+static const vpx_prob default_newmv_prob[NEWMV_MODE_CONTEXTS] = {
+    230, 190, 150, 110, 70, 30,
+};
+
+static const vpx_prob default_zeromv_prob[ZEROMV_MODE_CONTEXTS] = {
+    192, 64,
+};
+
+static const vpx_prob default_refmv_prob[REFMV_MODE_CONTEXTS] = {
+    180, 230, 128
+};
+#endif
+
 static const vpx_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [INTER_MODES - 1] = {
   {2,       173,   34},  // 0 = both zero mv
@@ -1184,6 +1198,11 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->txfm_partition_prob, default_txfm_partition_probs);
 #endif
   vp10_copy(fc->skip_probs, default_skip_probs);
+#if CONFIG_REF_MV
+  vp10_copy(fc->newmv_prob, default_newmv_prob);
+  vp10_copy(fc->zeromv_prob, default_zeromv_prob);
+  vp10_copy(fc->refmv_prob, default_refmv_prob);
+#endif
   vp10_copy(fc->inter_mode_probs, default_inter_mode_probs);
 #if CONFIG_EXT_TX
   vp10_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
@@ -1232,9 +1251,21 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
       fc->single_ref_prob[i][j] = mode_mv_merge_probs(
           pre_fc->single_ref_prob[i][j], counts->single_ref[i][j]);
 
+#if CONFIG_REF_MV
+  for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
+    fc->newmv_prob[i] = mode_mv_merge_probs(pre_fc->newmv_prob[i],
+                                            counts->newmv_mode[i]);
+  for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i)
+    fc->zeromv_prob[i] = mode_mv_merge_probs(pre_fc->zeromv_prob[i],
+                                             counts->zeromv_mode[i]);
+  for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
+    fc->refmv_prob[i] = mode_mv_merge_probs(pre_fc->refmv_prob[i],
+                                            counts->refmv_mode[i]);
+#else
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     vpx_tree_merge_probs(vp10_inter_mode_tree, pre_fc->inter_mode_probs[i],
                 counts->inter_mode[i], fc->inter_mode_probs[i]);
+#endif
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     vpx_tree_merge_probs(vp10_intra_mode_tree, pre_fc->y_mode_prob[i],

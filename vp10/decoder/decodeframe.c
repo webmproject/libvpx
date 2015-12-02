@@ -124,10 +124,20 @@ static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
 }
 
 static void read_inter_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
-  int i, j;
+  int i;
+#if CONFIG_REF_MV
+  for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
+    vp10_diff_update_prob(r, &fc->newmv_prob[i]);
+  for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i)
+    vp10_diff_update_prob(r, &fc->zeromv_prob[i]);
+  for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
+    vp10_diff_update_prob(r, &fc->refmv_prob[i]);
+#else
+  int j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
     for (j = 0; j < INTER_MODES - 1; ++j)
       vp10_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
+#endif
 }
 
 static REFERENCE_MODE read_frame_reference_mode(const VP10_COMMON *cm,
