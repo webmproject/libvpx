@@ -22,6 +22,30 @@
       "revId": "30e325a94b08a37ae6842f7185e2c07981759574",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bac5306_12794cd7",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2015-12-02T00:45:55Z",
+      "side": 1,
+      "message": "My original intention is to add a general parameter. This parameter can be treated as a pointer, integer or any other 32-bit data structure. On one hand, different types of transform can treat this parameter in different ways.\nOn the other hand, the transform interface remain the same which will make the code flow cleaner.\n\nHowever, our transform function doesn\u0027t need customized parameter for now, so I change it back in the next change list on top of this one.",
+      "parentUuid": "7bf38fea_cf53ddbf",
+      "range": {
+        "startLine": 393,
+        "startChar": 59,
+        "endLine": 393,
+        "endChar": 65
+      },
+      "revId": "30e325a94b08a37ae6842f7185e2c07981759574",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
