@@ -16,12 +16,17 @@
 #include <stdlib.h>
 #include <memory.h>
 
+typedef struct {
+  double x, y;
+  double rx, ry;
+} correspondence;
+
 int determine_correspondence(unsigned char *frm,
                              int *frm_corners, int num_frm_corners,
                              unsigned char *ref,
                              int *ref_corners, int num_ref_corners,
                              int width, int height,
                              int frm_stride, int ref_stride,
-                             int *correspondence_pts);
+                             double *correspondence_pts);
 
 #endif  // VP9_ENCODER_VP9_CORNER_MATCH_H

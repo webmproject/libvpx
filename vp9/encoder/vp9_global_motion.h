@@ -28,6 +28,14 @@ static const int CONFIDENCE_THRESHOLD = 1.0;
 
 INLINE ransacType get_ransacType(TransformationType type);
 
+// Searches around each parameter and seeks to minimize MSE  between
+// the warped frame produced from the set of parameters and the frame being
+// approximated.
+void refine_param(TransformationType type, unsigned char *frm,
+                  unsigned char *ref, double *H,
+                  int param_index, int width, int height,
+                  int stride, int n_refinements);
+
 // Returns number of models actually returned: 1 - if success, 0 - if failure
 int vp9_compute_global_motion_single_feature_based(struct VP9_COMP *cpi,
                                                    TransformationType type,
@@ -57,6 +65,15 @@ int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
                                                  YV12_BUFFER_CONFIG *ref,
                                                  BLOCK_SIZE bsize,
                                                  double *H);
+
+int vp9_compute_global_motion_multiple_optical_flow(struct VP9_COMP *cpi,
+                                                    TransformationType type,
+                                                    YV12_BUFFER_CONFIG *frm,
+                                                    YV12_BUFFER_CONFIG *ref,
+                                                    int max_models,
+                                                    double inlier_prob,
+                                                    double *H);
+
 
 // Returns number of models actually returned: 1+ - #models, 0 - if failure
 // max_models is the maximum number of models returned

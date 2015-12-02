@@ -24,11 +24,6 @@
 
 #define THRESHOLD_NCC   0.80
 
-typedef struct {
-  int x, y;
-  int rx, ry;
-} correspondence;
-
 static double compute_variance(unsigned char *im, int stride,
                                int x, int y, double *mean) {
   double sum = 0.0;
@@ -121,8 +116,8 @@ static void improve_correspondence(unsigned char *frm, unsigned char *ref,
         }
       }
     }
-    correspondences[i].rx += best_x;
-    correspondences[i].ry += best_y;
+    correspondences[i].rx += (double) best_x;
+    correspondences[i].ry += (double) best_y;
   }
   for (i = 0; i < num_correspondences; ++i) {
     double template_norm = compute_variance(
@@ -164,7 +159,7 @@ int determine_correspondence(unsigned char *frm,
                              int *ref_corners, int num_ref_corners,
                              int width, int height,
                              int frm_stride, int ref_stride,
-                             int *correspondence_pts) {
+                             double *correspondence_pts) {
   // Debargha: Improve this to include 2-way match
   int i, j;
   correspondence *correspondences = (correspondence *)correspondence_pts;
@@ -203,18 +198,12 @@ int determine_correspondence(unsigned char *frm,
       }
     }
     if (best_match_ncc > THRESHOLD_NCC) {
-      correspondences[num_correspondences].x = frm_corners[2 * i];
-      correspondences[num_correspondences].y = frm_corners[2 * i + 1];
-      correspondences[num_correspondences].rx = ref_corners[2 * best_match_j];
-      correspondences[num_correspondences].ry =
+      correspondences[num_correspondences].x = (double) frm_corners[2 * i];
+      correspondences[num_correspondences].y = (double) frm_corners[2 * i + 1];
+      correspondences[num_correspondences].rx = (double)
+          ref_corners[2 * best_match_j];
+      correspondences[num_correspondences].ry = (double)
           ref_corners[2 * best_match_j + 1];
-      /*
-      printf("  %d %d %d %d\n",
-             correspondences[num_correspondences].x,
-             correspondences[num_correspondences].y,
-             correspondences[num_correspondences].rx,
-             correspondences[num_correspondences].ry);
-             */
       num_correspondences++;
     }
   }
