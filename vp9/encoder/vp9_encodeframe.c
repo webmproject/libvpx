@@ -843,7 +843,8 @@ static int choose_partitioning(VP9_COMP *cpi,
           force_split[split_index] = 1;
           force_split[i + 1] = 1;
           force_split[0] = 1;
-        } else if (vt.split[i].split[j].part_variances.none.variance >
+        } else if (cpi->oxcf.speed < 8 &&
+                   vt.split[i].split[j].part_variances.none.variance >
                    thresholds[1] &&
                    !cyclic_refresh_segment_id_boosted(segment_id)) {
           // We have some nominal amount of 16x16 variance (based on average),
@@ -2422,8 +2423,15 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   if (cpi->sf.use_square_partition_only &&
       bsize > cpi->sf.use_square_only_threshold) {
+    if (cpi->use_svc) {
+      if (!vp9_active_h_edge(cpi, mi_row, mi_step) || x->e_mbd.lossless)
+        partition_horz_allowed &= force_horz_split;
+      if (!vp9_active_v_edge(cpi, mi_row, mi_step) || x->e_mbd.lossless)
+        partition_vert_allowed &= force_vert_split;
+    } else {
       partition_horz_allowed &= force_horz_split;
       partition_vert_allowed &= force_vert_split;
+    }
   }
 
   save_context(x, mi_row, mi_col, a, l, sa, sl, bsize);

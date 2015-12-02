@@ -3682,12 +3682,16 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (use_normative_scaler)
+    if (use_normative_scaler &&
+        unscaled->y_width <= (scaled->y_width << 1) &&
+        unscaled->y_height <= (scaled->y_height << 1))
       scale_and_extend_frame(unscaled, scaled, (int)cm->bit_depth);
     else
       scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
 #else
-    if (use_normative_scaler)
+    if (use_normative_scaler &&
+        unscaled->y_width <= (scaled->y_width << 1) &&
+        unscaled->y_height <= (scaled->y_height << 1))
       scale_and_extend_frame(unscaled, scaled);
     else
       scale_and_extend_frame_nonnormative(unscaled, scaled);
