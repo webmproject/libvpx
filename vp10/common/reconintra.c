@@ -103,11 +103,12 @@ static const uint8_t *const orders[BLOCK_SIZES] = {
 static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
                           int right_available,
                           TX_SIZE txsz, int y, int x, int ss_x) {
+  const int wl = mi_width_log2_lookup[bsize];
+  const int w = VPXMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
+  const int step = 1 << txsz;
+
   if (y == 0) {
-    int wl = mi_width_log2_lookup[bsize];
-    int hl = mi_height_log2_lookup[bsize];
-    int w = 1 << (wl + 1 - ss_x);
-    int step = 1 << txsz;
+    const int hl = mi_height_log2_lookup[bsize];
     const uint8_t *order = orders[bsize];
     int my_order, tr_order;
 
@@ -128,10 +129,6 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
 
     return my_order > tr_order && right_available;
   } else {
-    int wl = mi_width_log2_lookup[bsize];
-    int w = 1 << (wl + 1 - ss_x);
-    int step = 1 << txsz;
-
     return x + step < w;
   }
 }
@@ -140,10 +137,10 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
                            int bottom_available, TX_SIZE txsz,
                            int y, int x, int ss_y) {
   if (x == 0) {
-    int wl = mi_width_log2_lookup[bsize];
-    int hl = mi_height_log2_lookup[bsize];
-    int h = 1 << (hl + 1 - ss_y);
-    int step = 1 << txsz;
+    const int wl = mi_width_log2_lookup[bsize];
+    const int hl = mi_height_log2_lookup[bsize];
+    const int h = 1 << (hl + 1 - ss_y);
+    const int step = 1 << txsz;
     const uint8_t *order = orders[bsize];
     int my_order, bl_order;
 
@@ -1147,8 +1144,8 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int y = loff * 4;
   const int bw = VPXMAX(2, 1 << bwl_in);
   const int bh = VPXMAX(2, 1 << bhl_in);
-  const int mi_row = -xd->mb_to_top_edge >> 6;
-  const int mi_col = -xd->mb_to_left_edge >> 6;
+  const int mi_row = -xd->mb_to_top_edge >> (3 + MI_SIZE_LOG2);
+  const int mi_col = -xd->mb_to_left_edge >> (3 + MI_SIZE_LOG2);
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int right_available =
@@ -1164,10 +1161,14 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int wpx = 4 * bw;
   const int hpx = 4 * bh;
   const int txpx = 4 * txw;
-
-  int xr = (xd->mb_to_right_edge >> (3 + pd->subsampling_x)) + (wpx - x - txpx);
-  int yd =
-      (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y)) + (hpx - y - txpx);
+  // Distance between the right edge of this prediction block to
+  // the frame right edge
+  const int xr = (xd->mb_to_right_edge >> (3 + pd->subsampling_x)) +
+      (wpx - x - txpx);
+  // Distance between the bottom edge of this prediction block to
+  // the frame bottom edge
+  const int yd = (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y)) +
+      (hpx - y - txpx);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
