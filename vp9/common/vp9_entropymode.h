@@ -257,6 +257,10 @@ extern const vp9_tree_index vp9_inter_compound_mode_tree
 #endif  // CONFIG_NEW_INTER
 
 void vp9_setup_past_independence(struct VP9Common *cm);
+#if CONFIG_ROW_TILE
+void vp9_dec_setup_past_independence(struct VP9Common *cm,
+                                     int dec_tile_row, int dec_tile_col);
+#endif
 
 void vp9_init_mode_probs(FRAME_CONTEXT *fc);
 
