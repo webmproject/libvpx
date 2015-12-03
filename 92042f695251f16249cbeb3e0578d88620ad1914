@@ -16,6 +16,24 @@
       "revId": "92042f695251f16249cbeb3e0578d88620ad1914",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40f7b847_9d6243e8",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-12-03T18:14:23Z",
+      "side": 1,
+      "message": "Left is read at line 51:\n    movifnidn          leftq, leftmp\n\nIf it is 4,5,2, in 32 bits environment, one more instruction \n    mov    0x14(%esp),%edx\nis generated to fetch the unused above.",
+      "parentUuid": "bbda67a7_8c036726",
+      "revId": "92042f695251f16249cbeb3e0578d88620ad1914",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
