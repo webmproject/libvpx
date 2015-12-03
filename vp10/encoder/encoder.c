@@ -717,14 +717,14 @@ static void update_frame_size(VP10_COMP *cpi) {
 }
 
 static void init_buffer_indices(VP10_COMP *cpi) {
-  cpi->lst_fb_idx = 0;
 #if CONFIG_EXT_REFS
-  cpi->lst2_fb_idx = 1;
-  cpi->lst3_fb_idx = 2;
-  cpi->lst4_fb_idx = 3;
-  cpi->gld_fb_idx = 4;
-  cpi->alt_fb_idx = 5;
+  int fb_idx;
+  for (fb_idx = 0; fb_idx < LAST_REF_FRAMES; ++fb_idx)
+    cpi->lst_fb_idxes[fb_idx] = fb_idx;
+  cpi->gld_fb_idx = LAST_REF_FRAMES;
+  cpi->alt_fb_idx = cpi->gld_fb_idx + 1;
 #else
+  cpi->lst_fb_idx = 0;
   cpi->gld_fb_idx = 1;
   cpi->alt_fb_idx = 2;
 #endif  // CONFIG_EXT_REFS
@@ -752,6 +752,10 @@ static void init_config(struct VP10_COMP *cpi, VP10EncoderConfig *oxcf) {
   cpi->td.counts = &cm->counts;
 
   // change includes all joint functionality
+#if CONFIG_EXT_REFS
+  cpi->last_ref_to_refresh = LAST_FRAME;
+#endif  // CONFIG_EXT_REFS
+
   vp10_change_config(cpi, oxcf);
 
   cpi->static_mb_pct = 0;
@@ -1409,6 +1413,9 @@ static void realloc_segmentation_maps(VP10_COMP *cpi) {
 void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
+#if CONFIG_EXT_REFS
+  int ref_frame;
+#endif  // CONFIG_EXT_REFS
 
   if (cm->profile != oxcf->profile)
     cm->profile = oxcf->profile;
@@ -1433,11 +1440,16 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   }
 
   cpi->refresh_golden_frame = 0;
-  cpi->refresh_last_frame = 1;
+
 #if CONFIG_EXT_REFS
-  cpi->refresh_last2_frame = 0;
-  cpi->refresh_last3_frame = 0;
-  cpi->refresh_last4_frame = 0;
+  for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
+    if (ref_frame == cpi->last_ref_to_refresh)
+      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 1;
+    else
+      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 0;
+  }
+#else
+  cpi->refresh_last_frame = 1;
 #endif  // CONFIG_EXT_REFS
 
   cm->refresh_frame_context =
@@ -2307,11 +2319,13 @@ int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags) {
 void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags) {
   cpi->ext_refresh_golden_frame = (ref_frame_flags & VP9_GOLD_FLAG) != 0;
   cpi->ext_refresh_alt_ref_frame = (ref_frame_flags & VP9_ALT_FLAG) != 0;
-  cpi->ext_refresh_last_frame = (ref_frame_flags & VP9_LAST_FLAG) != 0;
 #if CONFIG_EXT_REFS
-  cpi->ext_refresh_last2_frame = (ref_frame_flags & VP9_LAST2_FLAG) != 0;
-  cpi->ext_refresh_last3_frame = (ref_frame_flags & VP9_LAST3_FLAG) != 0;
-  cpi->ext_refresh_last4_frame = (ref_frame_flags & VP9_LAST4_FLAG) != 0;
+  cpi->ext_refresh_last_frames[0] = (ref_frame_flags & VP9_LAST_FLAG) != 0;
+  cpi->ext_refresh_last_frames[1] = (ref_frame_flags & VP9_LAST2_FLAG) != 0;
+  cpi->ext_refresh_last_frames[2] = (ref_frame_flags & VP9_LAST3_FLAG) != 0;
+  cpi->ext_refresh_last_frames[3] = (ref_frame_flags & VP9_LAST4_FLAG) != 0;
+#else
+  cpi->ext_refresh_last_frame = (ref_frame_flags & VP9_LAST_FLAG) != 0;
 #endif  // CONFIG_EXT_REFS
   cpi->ext_refresh_frame_flags_pending = 1;
 }
@@ -2610,6 +2624,9 @@ static int recode_loop_test(VP10_COMP *cpi,
 void vp10_update_reference_frames(VP10_COMP *cpi) {
   VP10_COMMON * const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
+#if CONFIG_EXT_REFS
+  int ref_frame;
+#endif  // CONFIG_EXT_REFS
 
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
@@ -2664,92 +2681,49 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     }
   }
 
-  if (cpi->refresh_last_frame) {
 #if CONFIG_EXT_REFS
-    if (cpi->refresh_last2_frame) {
-      if (cpi->refresh_last3_frame) {
-        if (cpi->refresh_last4_frame) {
-          if (cm->frame_type == KEY_FRAME)
-            ref_cnt_fb(pool->frame_bufs,
-                       &cm->ref_frame_map[cpi->lst4_fb_idx],
-                       cm->new_fb_idx);
-          else
-            ref_cnt_fb(pool->frame_bufs,
-                       &cm->ref_frame_map[cpi->lst4_fb_idx],
-                       cm->ref_frame_map[cpi->lst3_fb_idx]);
-        }
-
-        if (cm->frame_type == KEY_FRAME)
-          ref_cnt_fb(pool->frame_bufs,
-                     &cm->ref_frame_map[cpi->lst3_fb_idx],
-                     cm->new_fb_idx);
-        else
-          ref_cnt_fb(pool->frame_bufs,
-                     &cm->ref_frame_map[cpi->lst3_fb_idx],
-                     cm->ref_frame_map[cpi->lst2_fb_idx]);
+  for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
+    const int ref_idx = ref_frame - LAST_FRAME;
+    if (cpi->refresh_last_frames[ref_idx]) {
+      ref_cnt_fb(pool->frame_bufs,
+                 &cm->ref_frame_map[cpi->lst_fb_idxes[ref_idx]],
+                 cm->new_fb_idx);
+      if (!cpi->rc.is_src_frame_alt_ref) {
+        memcpy(cpi->interp_filter_selected[ref_frame],
+               cpi->interp_filter_selected[0],
+               sizeof(cpi->interp_filter_selected[0]));
       }
-
-      if (cm->frame_type == KEY_FRAME)
-        ref_cnt_fb(pool->frame_bufs,
-                   &cm->ref_frame_map[cpi->lst2_fb_idx],
-                   cm->new_fb_idx);
-      else
-        ref_cnt_fb(pool->frame_bufs,
-                   &cm->ref_frame_map[cpi->lst2_fb_idx],
-                   cm->ref_frame_map[cpi->lst_fb_idx]);
     }
-#endif  // CONFIG_EXT_REFS
+  }
+  // NOTE: The order for the refreshing of the 4 last reference frames are:
+  // LAST_FRAME -> LAST2_FRAME -> LAST3_FRAME -> LAST4_FRAME -> LAST_FRAME
+  cpi->last_ref_to_refresh += 1;
+  if (cpi->last_ref_to_refresh == LAST4_FRAME)
+    cpi->last_ref_to_refresh = LAST_FRAME;
+#else
+  if (cpi->refresh_last_frame) {
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
-
     if (!cpi->rc.is_src_frame_alt_ref) {
-#if CONFIG_EXT_REFS
-      if (cpi->refresh_last2_frame) {
-        if (cpi->refresh_last3_frame) {
-          if (cpi->refresh_last4_frame) {
-            if (cm->frame_type == KEY_FRAME)
-              memcpy(cpi->interp_filter_selected[LAST4_FRAME],
-                     cpi->interp_filter_selected[0],
-                     sizeof(cpi->interp_filter_selected[0]));
-            else
-              memcpy(cpi->interp_filter_selected[LAST4_FRAME],
-                     cpi->interp_filter_selected[LAST3_FRAME],
-                     sizeof(cpi->interp_filter_selected[LAST3_FRAME]));
-          }
-
-          if (cm->frame_type == KEY_FRAME)
-            memcpy(cpi->interp_filter_selected[LAST3_FRAME],
-                   cpi->interp_filter_selected[0],
-                   sizeof(cpi->interp_filter_selected[0]));
-          else
-            memcpy(cpi->interp_filter_selected[LAST3_FRAME],
-                   cpi->interp_filter_selected[LAST2_FRAME],
-                   sizeof(cpi->interp_filter_selected[LAST2_FRAME]));
-        }
-
-        if (cm->frame_type == KEY_FRAME)
-          memcpy(cpi->interp_filter_selected[LAST2_FRAME],
-                 cpi->interp_filter_selected[0],
-                 sizeof(cpi->interp_filter_selected[0]));
-        else
-          memcpy(cpi->interp_filter_selected[LAST2_FRAME],
-                 cpi->interp_filter_selected[LAST_FRAME],
-                 sizeof(cpi->interp_filter_selected[LAST_FRAME]));
-      }
-#endif  // CONFIG_EXT_REFS
       memcpy(cpi->interp_filter_selected[LAST_FRAME],
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
     }
   }
+#endif  // CONFIG_EXT_REFS
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp10_denoiser_update_frame_info(&cpi->denoiser,
                                    *cpi->Source,
                                    cpi->common.frame_type,
+#if CONFIG_EXT_REFS
+                                   cpi->refresh_last_frames,
+#else
+                                   cpi->refresh_last_frame,
+#endif  // CONFIG_EXT_REFS
                                    cpi->refresh_alt_ref_frame,
-                                   cpi->refresh_golden_frame,
-                                   cpi->refresh_last_frame);
+                                   cpi->refresh_golden_frame);
   }
 #endif
 }
@@ -2902,14 +2876,14 @@ static void release_scaled_references(VP10_COMP *cpi) {
     // Only release scaled references under certain conditions:
     // if reference will be updated, or if scaled reference has same resolution.
     int refresh[REFS_PER_FRAME];
-    refresh[0] = (cpi->refresh_last_frame) ? 1 : 0;
 #if CONFIG_EXT_REFS
-    refresh[1] = (cpi->refresh_last2_frame) ? 1 : 0;
-    refresh[2] = (cpi->refresh_last3_frame) ? 1 : 0;
-    refresh[3] = (cpi->refresh_last4_frame) ? 1 : 0;
+    for (i = LAST_FRAME; i <= LAST4_FRAME; ++i)
+      refresh[i - LAST_FRAME] =
+          (cpi->refresh_last_frames[i - LAST_FRAME]) ? 1 : 0;
     refresh[4] = (cpi->refresh_golden_frame) ? 1 : 0;
     refresh[5] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
 #else
+    refresh[0] = (cpi->refresh_last_frame) ? 1 : 0;
     refresh[1] = (cpi->refresh_golden_frame) ? 1 : 0;
     refresh[2] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
 #endif  // CONFIG_EXT_REFS
@@ -3545,26 +3519,36 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
 
 static int get_ref_frame_flags(const VP10_COMP *cpi) {
   const int *const map = cpi->common.ref_frame_map;
-  const int gold_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idx];
-  const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idx];
-  const int gold_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
 
 #if CONFIG_EXT_REFS
-  const int last2_is_last = map[cpi->lst2_fb_idx] == map[cpi->lst_fb_idx];
-  const int gld_is_last2 = map[cpi->gld_fb_idx] == map[cpi->lst2_fb_idx];
-  const int alt_is_last2 = map[cpi->alt_fb_idx] == map[cpi->lst2_fb_idx];
+  const int gld_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[0]];
+  const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[0]];
 
-  const int last3_is_last = map[cpi->lst3_fb_idx] == map[cpi->lst_fb_idx];
-  const int last3_is_last2 = map[cpi->lst3_fb_idx] == map[cpi->lst2_fb_idx];
-  const int gld_is_last3 = map[cpi->gld_fb_idx] == map[cpi->lst3_fb_idx];
-  const int alt_is_last3 = map[cpi->alt_fb_idx] == map[cpi->lst3_fb_idx];
+  const int last2_is_last =
+      map[cpi->lst_fb_idxes[1]] == map[cpi->lst_fb_idxes[0]];
+  const int gld_is_last2 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[1]];
+  const int alt_is_last2 = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[1]];
 
-  const int last4_is_last = map[cpi->lst4_fb_idx] == map[cpi->lst_fb_idx];
-  const int last4_is_last2 = map[cpi->lst4_fb_idx] == map[cpi->lst2_fb_idx];
-  const int last4_is_last3 = map[cpi->lst4_fb_idx] == map[cpi->lst3_fb_idx];
-  const int gld_is_last4 = map[cpi->gld_fb_idx] == map[cpi->lst4_fb_idx];
-  const int alt_is_last4 = map[cpi->alt_fb_idx] == map[cpi->lst4_fb_idx];
+  const int last3_is_last =
+      map[cpi->lst_fb_idxes[2]] == map[cpi->lst_fb_idxes[0]];
+  const int last3_is_last2 =
+      map[cpi->lst_fb_idxes[2]] == map[cpi->lst_fb_idxes[1]];
+  const int gld_is_last3 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[2]];
+  const int alt_is_last3 = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[2]];
+
+  const int last4_is_last =
+      map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[0]];
+  const int last4_is_last2 =
+      map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[1]];
+  const int last4_is_last3 =
+      map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[2]];
+  const int gld_is_last4 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[3]];
+  const int alt_is_last4 = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[3]];
+#else
+  const int gld_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idx];
+  const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idx];
 #endif  // CONFIG_EXT_REFS
+  const int gld_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
 
   int flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
 #if CONFIG_EXT_REFS
@@ -3573,7 +3557,7 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   flags |= VP9_LAST4_FLAG;
 #endif  // CONFIG_EXT_REFS
 
-  if (gold_is_last)
+  if (gld_is_last)
     flags &= ~VP9_GOLD_FLAG;
 
   if (cpi->rc.frames_till_gf_update_due == INT_MAX)
@@ -3582,35 +3566,23 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   if (alt_is_last)
     flags &= ~VP9_ALT_FLAG;
 
-  if (gold_is_alt)
+  if (gld_is_alt)
     flags &= ~VP9_ALT_FLAG;
 
 #if CONFIG_EXT_REFS
   if (last4_is_last || last4_is_last2 || last4_is_last3)
     flags &= ~VP9_LAST4_FLAG;
 
-  if (gld_is_last4)
-    flags &= ~VP9_GOLD_FLAG;
-
-  if (alt_is_last4)
-    flags &= ~VP9_ALT_FLAG;
-
   if (last3_is_last || last3_is_last2)
     flags &= ~VP9_LAST3_FLAG;
-
-  if (gld_is_last3)
-    flags &= ~VP9_GOLD_FLAG;
-
-  if (alt_is_last3)
-    flags &= ~VP9_ALT_FLAG;
 
   if (last2_is_last)
     flags &= ~VP9_LAST2_FLAG;
 
-  if (gld_is_last2)
+  if (gld_is_last4 || gld_is_last3 || gld_is_last2)
     flags &= ~VP9_GOLD_FLAG;
 
-  if (alt_is_last2)
+  if (alt_is_last4 || alt_is_last3 || alt_is_last2)
     flags &= ~VP9_ALT_FLAG;
 #endif  // CONFIG_EXT_REFS
 
@@ -3627,11 +3599,14 @@ static void set_ext_overrides(VP10_COMP *cpi) {
     cpi->ext_refresh_frame_context_pending = 0;
   }
   if (cpi->ext_refresh_frame_flags_pending) {
-    cpi->refresh_last_frame = cpi->ext_refresh_last_frame;
 #if CONFIG_EXT_REFS
-    cpi->refresh_last2_frame = cpi->ext_refresh_last2_frame;
-    cpi->refresh_last3_frame = cpi->ext_refresh_last3_frame;
-    cpi->refresh_last4_frame = cpi->ext_refresh_last4_frame;
+    int ref_frame;
+    for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
+      cpi->refresh_last_frames[ref_frame - LAST_FRAME] =
+          cpi->ext_refresh_last_frames[ref_frame - LAST_FRAME];
+    }
+#else
+    cpi->refresh_last_frame = cpi->ext_refresh_last_frame;
 #endif  // CONFIG_EXT_REFS
     cpi->refresh_golden_frame = cpi->ext_refresh_golden_frame;
     cpi->refresh_alt_ref_frame = cpi->ext_refresh_alt_ref_frame;
@@ -3828,8 +3803,16 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   }
 
   // If the encoder forced a KEY_FRAME decision
-  if (cm->frame_type == KEY_FRAME)
+  if (cm->frame_type == KEY_FRAME) {
+#if CONFIG_EXT_REFS
+    int ref_frame;
+    for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame)
+      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 1;
+    cpi->last_ref_to_refresh = LAST_FRAME;
+#else
     cpi->refresh_last_frame = 1;
+#endif  // CONFIG_EXT_REFS
+  }
 
   cm->frame_to_show = get_frame_new_buffer(cm);
   cm->frame_to_show->color_space = cm->color_space;
@@ -4045,11 +4028,13 @@ static int frame_is_reference(const VP10_COMP *cpi) {
   const VP10_COMMON *cm = &cpi->common;
 
   return cm->frame_type == KEY_FRAME ||
-         cpi->refresh_last_frame ||
 #if CONFIG_EXT_REFS
-         cpi->refresh_last2_frame ||
-         cpi->refresh_last3_frame ||
-         cpi->refresh_last4_frame ||
+         cpi->refresh_last_frames[LAST_FRAME - LAST_FRAME] ||
+         cpi->refresh_last_frames[LAST2_FRAME - LAST_FRAME] ||
+         cpi->refresh_last_frames[LAST3_FRAME - LAST_FRAME] ||
+         cpi->refresh_last_frames[LAST4_FRAME - LAST_FRAME] ||
+#else
+         cpi->refresh_last_frame ||
 #endif  // CONFIG_EXT_REFS
          cpi->refresh_golden_frame ||
          cpi->refresh_alt_ref_frame ||
@@ -4130,12 +4115,21 @@ static void check_src_altref(VP10_COMP *cpi,
   }
 
   if (rc->is_src_frame_alt_ref) {
+#if CONFIG_EXT_REFS
+    int ref_frame;
+#endif  // CONFIG_EXT_REFS
+
     // Current frame is an ARF overlay frame.
     cpi->alt_ref_source = NULL;
 
     // Don't refresh the last buffer for an ARF overlay frame. It will
     // become the GF so preserve last as an alternative prediction option.
+#if CONFIG_EXT_REFS
+    for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame)
+      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 0;
+#else
     cpi->refresh_last_frame = 0;
+#endif  // CONFIG_EXT_REFS
   }
 }
 
@@ -4186,11 +4180,15 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           oxcf->frame_parallel_decoding_mode ? REFRESH_FRAME_CONTEXT_FORWARD
                                              : REFRESH_FRAME_CONTEXT_BACKWARD;
 
-  cpi->refresh_last_frame = 1;
 #if CONFIG_EXT_REFS
-  cpi->refresh_last2_frame = 0;
-  cpi->refresh_last3_frame = 0;
-  cpi->refresh_last4_frame = 0;
+  for (i = LAST_FRAME; i <= LAST4_FRAME; ++i) {
+    if (i == cpi->last_ref_to_refresh)
+      cpi->refresh_last_frames[i - LAST_FRAME] = 1;
+    else
+      cpi->refresh_last_frames[i - LAST_FRAME] = 0;
+  }
+#else
+  cpi->refresh_last_frame = 1;
 #endif  // CONFIG_EXT_REFS
   cpi->refresh_golden_frame = 0;
   cpi->refresh_alt_ref_frame = 0;
@@ -4215,17 +4213,15 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
       cm->intra_only = 0;
       cpi->refresh_alt_ref_frame = 1;
       cpi->refresh_golden_frame = 0;
-      cpi->refresh_last_frame = 0;
 #if CONFIG_EXT_REFS
-      cpi->refresh_last2_frame = 0;
-      cpi->refresh_last3_frame = 0;
-      cpi->refresh_last4_frame = 0;
+      for (i = LAST_FRAME; i <= LAST4_FRAME; ++i)
+        cpi->refresh_last_frames[i - LAST_FRAME] = 0;
+#else
+      cpi->refresh_last_frame = 0;
 #endif  // CONFIG_EXT_REFS
       rc->is_src_frame_alt_ref = 0;
-      rc->source_alt_ref_pending = 0;
-    } else {
-      rc->source_alt_ref_pending = 0;
     }
+    rc->source_alt_ref_pending = 0;
   }
 
   if (!source) {

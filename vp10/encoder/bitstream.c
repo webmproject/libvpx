@@ -1483,6 +1483,16 @@ static void write_tile_info(const VP10_COMMON *const cm,
 }
 
 static int get_refresh_mask(VP10_COMP *cpi) {
+#if CONFIG_EXT_REFS
+  int refresh_mask = 0;
+  int ref_frame;
+
+  for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
+    refresh_mask |= (cpi->refresh_last_frames[ref_frame - LAST_FRAME] <<
+                     cpi->lst_fb_idxes[ref_frame - LAST_FRAME]);
+  }
+#endif  // CONFIG_EXT_REFS
+
   if (vp10_preserve_existing_gf(cpi)) {
     // We have decided to preserve the previously existing golden frame as our
     // new ARF frame. However, in the short term we leave it in the GF slot and,
@@ -1494,11 +1504,10 @@ static int get_refresh_mask(VP10_COMP *cpi) {
     // Note: This is highly specific to the use of ARF as a forward reference,
     // and this needs to be generalized as other uses are implemented
     // (like RTC/temporal scalability).
-    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
 #if CONFIG_EXT_REFS
-           (cpi->refresh_last2_frame << cpi->lst2_fb_idx) |
-           (cpi->refresh_last3_frame << cpi->lst3_fb_idx) |
-           (cpi->refresh_last4_frame << cpi->lst4_fb_idx) |
+    return refresh_mask |
+#else
+    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
 #endif  // CONFIG_EXT_REFS
            (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {
@@ -1507,11 +1516,10 @@ static int get_refresh_mask(VP10_COMP *cpi) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       arf_idx = gf_group->arf_update_idx[gf_group->index];
     }
-    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
 #if CONFIG_EXT_REFS
-           (cpi->refresh_last2_frame << cpi->lst2_fb_idx) |
-           (cpi->refresh_last3_frame << cpi->lst3_fb_idx) |
-           (cpi->refresh_last4_frame << cpi->lst4_fb_idx) |
+    return refresh_mask |
+#else
+    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
 #endif  // CONFIG_EXT_REFS
            (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
            (cpi->refresh_alt_ref_frame << arf_idx);
@@ -1682,13 +1690,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   vpx_wb_write_bit(wb, cm->frame_type);
   vpx_wb_write_bit(wb, cm->show_frame);
   vpx_wb_write_bit(wb, cm->error_resilient_mode);
-
-#if CONFIG_EXT_REFS
-  cpi->refresh_last2_frame =
-      (cm->frame_type == KEY_FRAME || cpi->refresh_last_frame) ? 1 : 0;
-  cpi->refresh_last3_frame = cpi->refresh_last2_frame ? 1 : 0;
-  cpi->refresh_last4_frame = cpi->refresh_last3_frame ? 1 : 0;
-#endif  // CONFIG_EXT_REFS
 
   if (cm->frame_type == KEY_FRAME) {
     write_sync_code(wb);

@@ -2130,64 +2130,15 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   // Generate next_ref_frame_map.
   lock_buffer_pool(pool);
   for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
-#if CONFIG_EXT_REFS
-// TODO(zoeliu): To move the following #define's to a header file
-#define PBI_LST_FB_IDX  0
-#define PBI_LST2_FB_IDX 1
-#define PBI_LST3_FB_IDX 2
-#define PBI_LST4_FB_IDX 3
-#define PBI_GLD_FB_IDX  4
-#define PBI_ALT_FB_IDX  5
-    // NOTE(zoeliu):
-    // (1) When ref_index == PBI_LST2_FB_IDX and the corresponding mask bit is
-    //     set, it indicates that LAST2_FRAME shall be refreshed, but keep in
-    //     mind that this has already been handled when LAST_FRAME is being
-    //     refreshed, i.e., when ref_index == PBI_LST_FB_IDX and the mask bit
-    //     is being set correspondingly;
-    // (2) The only exception is that when current frame is a KEY_FRAME, where
-    //     all the frames in the frame buffer shall get refreshed;
-    // (3) Similar handling for when ref_index == PBI_LST3_FB_IDX or when
-    //     ref_indx == PBI_LST4_FB_IDX.
-    if ((mask & 1) &&
-        (cm->frame_type == KEY_FRAME || (ref_index != PBI_LST2_FB_IDX &&
-                                         ref_index != PBI_LST3_FB_IDX &&
-                                         ref_index != PBI_LST4_FB_IDX))) {
-      // The reference frame map for the decoding of the next frame is updated
-      // and held by either current thread or possibly another decoder thread.
-      if (cm->frame_type != KEY_FRAME && ref_index == PBI_LST_FB_IDX &&
-          (mask & (1 << PBI_LST2_FB_IDX))) {
-        if (mask & (1 << PBI_LST3_FB_IDX)) {
-          if (mask & (1 << PBI_LST4_FB_IDX)) {
-            cm->next_ref_frame_map[PBI_LST4_FB_IDX] =
-                cm->next_ref_frame_map[PBI_LST3_FB_IDX];
-            ++frame_bufs[cm->next_ref_frame_map[PBI_LST3_FB_IDX]].ref_count;
-          }
-          cm->next_ref_frame_map[PBI_LST3_FB_IDX] =
-              cm->next_ref_frame_map[PBI_LST2_FB_IDX];
-          ++frame_bufs[cm->next_ref_frame_map[PBI_LST2_FB_IDX]].ref_count;
-        }
-        cm->next_ref_frame_map[PBI_LST2_FB_IDX] =
-            cm->next_ref_frame_map[PBI_LST_FB_IDX];
-        ++frame_bufs[cm->next_ref_frame_map[PBI_LST_FB_IDX]].ref_count;
-      }
-      cm->next_ref_frame_map[ref_index] = cm->new_fb_idx;
-      ++frame_bufs[cm->new_fb_idx].ref_count;
-    } else if (!(mask & 1)) {
-      cm->next_ref_frame_map[ref_index] = cm->ref_frame_map[ref_index];
-    }
-#else
     if (mask & 1) {
       cm->next_ref_frame_map[ref_index] = cm->new_fb_idx;
       ++frame_bufs[cm->new_fb_idx].ref_count;
     } else {
       cm->next_ref_frame_map[ref_index] = cm->ref_frame_map[ref_index];
     }
-#endif  // CONFIG_EXT_REFS
-
     // Current thread holds the reference frame.
     if (cm->ref_frame_map[ref_index] >= 0)
       ++frame_bufs[cm->ref_frame_map[ref_index]].ref_count;
-
     ++ref_index;
   }
 

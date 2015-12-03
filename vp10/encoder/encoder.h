@@ -304,31 +304,32 @@ typedef struct VP10_COMP {
   // For a still frame, this flag is set to 1 to skip partition search.
   int partition_search_skippable_frame;
 
-  int scaled_ref_idx[MAX_REF_FRAMES];
-  int lst_fb_idx;
 #if CONFIG_EXT_REFS
-  int lst2_fb_idx;
-  int lst3_fb_idx;
-  int lst4_fb_idx;
+  int last_ref_to_refresh;
+#endif  // CONFIG_EXT_REFS
+
+  int scaled_ref_idx[MAX_REF_FRAMES];
+#if CONFIG_EXT_REFS
+  int lst_fb_idxes[LAST_REF_FRAMES];
+#else
+  int lst_fb_idx;
 #endif  // CONFIG_EXT_REFS
   int gld_fb_idx;
   int alt_fb_idx;
 
-  int refresh_last_frame;
 #if CONFIG_EXT_REFS
-  int refresh_last2_frame;
-  int refresh_last3_frame;
-  int refresh_last4_frame;
+  int refresh_last_frames[LAST_REF_FRAMES];
+#else
+  int refresh_last_frame;
 #endif  // CONFIG_EXT_REFS
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
 
   int ext_refresh_frame_flags_pending;
-  int ext_refresh_last_frame;
 #if CONFIG_EXT_REFS
-  int ext_refresh_last2_frame;
-  int ext_refresh_last3_frame;
-  int ext_refresh_last4_frame;
+  int ext_refresh_last_frames[LAST_REF_FRAMES];
+#else
+  int ext_refresh_last_frame;
 #endif  // CONFIG_EXT_REFS
   int ext_refresh_golden_frame;
   int ext_refresh_alt_ref_frame;
@@ -575,21 +576,17 @@ static INLINE int frame_is_kf_gf_arf(const VP10_COMP *cpi) {
 
 static INLINE int get_ref_frame_map_idx(const VP10_COMP *cpi,
                                         MV_REFERENCE_FRAME ref_frame) {
-  if (ref_frame == LAST_FRAME) {
-    return cpi->lst_fb_idx;
 #if CONFIG_EXT_REFS
-  } else if (ref_frame == LAST2_FRAME) {
-    return cpi->lst2_fb_idx;
-  } else if (ref_frame == LAST3_FRAME) {
-    return cpi->lst3_fb_idx;
-  } else if (ref_frame == LAST4_FRAME) {
-    return cpi->lst4_fb_idx;
+  if (ref_frame >= LAST_FRAME && ref_frame <= LAST4_FRAME)
+    return cpi->lst_fb_idxes[ref_frame - 1];
+#else
+  if (ref_frame == LAST_FRAME)
+    return cpi->lst_fb_idx;
 #endif  // CONFIG_EXT_REFS
-  } else if (ref_frame == GOLDEN_FRAME) {
+  else if (ref_frame == GOLDEN_FRAME)
     return cpi->gld_fb_idx;
-  } else {
+  else
     return cpi->alt_fb_idx;
-  }
 }
 
 static INLINE int get_ref_frame_buf_idx(const VP10_COMP *const cpi,

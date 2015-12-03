@@ -5126,20 +5126,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     if (mode_skip_mask[ref_frame] & (1 << this_mode))
       continue;
 
-#if CONFIG_EXT_REFS
-    if (cm->last_frame_type == KEY_FRAME && ref_frame == LAST2_FRAME)
-      continue;
-
-    if ((cm->last2_frame_type == KEY_FRAME ||
-         cm->last_frame_type == KEY_FRAME) && ref_frame == LAST3_FRAME)
-      continue;
-
-    if ((cm->last3_frame_type == KEY_FRAME ||
-         cm->last2_frame_type == KEY_FRAME ||
-         cm->last_frame_type == KEY_FRAME) && ref_frame == LAST4_FRAME)
-      continue;
-#endif  // CONFIG_EXT_REFS
-
     // Test best rd so far against threshold for trying this mode.
     if (best_mode_skippable && sf->schedule_mode_search)
       mode_threshold[mode_index] <<= 1;
@@ -5888,20 +5874,6 @@ void vp10_rd_pick_inter_mode_sub8x8(VP10_COMP *cpi,
 
     ref_frame = vp10_ref_order[ref_index].ref_frame[0];
     second_ref_frame = vp10_ref_order[ref_index].ref_frame[1];
-
-#if CONFIG_EXT_REFS
-    if (cm->last_frame_type == KEY_FRAME && ref_frame == LAST2_FRAME)
-      continue;
-
-    if ((cm->last2_frame_type == KEY_FRAME ||
-         cm->last_frame_type == KEY_FRAME) && ref_frame == LAST3_FRAME)
-      continue;
-
-    if ((cm->last3_frame_type == KEY_FRAME ||
-         cm->last2_frame_type == KEY_FRAME ||
-         cm->last_frame_type == KEY_FRAME) && ref_frame == LAST4_FRAME)
-      continue;
-#endif  // CONFIG_EXT_REFS
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.

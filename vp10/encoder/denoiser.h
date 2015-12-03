@@ -35,9 +35,13 @@ typedef struct vp10_denoiser {
 void vp10_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     YV12_BUFFER_CONFIG src,
                                     FRAME_TYPE frame_type,
+#if CONFIG_EXT_REFS
+                                    int refresh_last_frames[LAST_REF_FRAMES],
+#else
+                                    int refresh_last_frame,
+#endif  // CONFIG_EXT_REFS
                                     int refresh_alt_ref_frame,
-                                    int refresh_golden_frame,
-                                    int refresh_last_frame);
+                                    int refresh_golden_frame);
 
 void vp10_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs,
