@@ -51,9 +51,6 @@ int vp10_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 struct VP10_COMP;
 struct ThreadData;
 
-void vp10_tokenize_palette_sb(struct ThreadData *const td,
-                              BLOCK_SIZE bsize, int plane,
-                              TOKENEXTRA **t);
 void vp10_tokenize_sb(struct VP10_COMP *cpi, struct ThreadData *td,
                      TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
 

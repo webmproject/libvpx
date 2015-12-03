@@ -257,33 +257,6 @@ void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
   }
 }
 
-void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
-                                vpx_reader *r) {
-  MODE_INFO *const mi = xd->mi[0];
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
-  int rows = 4 * num_4x4_blocks_high_lookup[bsize];
-  int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
-  int color_idx, color_ctx, color_order[PALETTE_MAX_SIZE];
-  int n = mbmi->palette_mode_info.palette_size[plane != 0];
-  int i, j;
-  uint8_t *color_map = xd->plane[plane].color_index_map;
-  const vpx_prob (* prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
-      plane ? vp10_default_palette_uv_color_prob :
-          vp10_default_palette_y_color_prob;
-
-  for (i = 0; i < rows; ++i) {
-    for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
-      color_ctx = vp10_get_palette_color_context(color_map, cols, i, j, n,
-                                                 color_order);
-      color_idx = vpx_read_tree(r, vp10_palette_color_tree[n - 2],
-                                prob[n - 2][color_ctx]);
-      assert(color_idx >= 0 && color_idx < n);
-      color_map[i * cols + j] = color_order[color_idx];
-    }
-  }
-}
-
 int vp10_decode_block_tokens(MACROBLOCKD *xd,
                             int plane, const scan_order *sc,
                             int x, int y,

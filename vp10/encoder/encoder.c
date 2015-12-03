@@ -390,9 +390,6 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
 
   vp10_free_pc_tree(&cpi->td);
 
-  if (cpi->common.allow_screen_content_tools)
-    vpx_free(cpi->td.mb.palette_buffer);
-
   if (cpi->source_diff_var != NULL) {
     vpx_free(cpi->source_diff_var);
     cpi->source_diff_var = NULL;
@@ -1435,15 +1432,6 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
                                              : REFRESH_FRAME_CONTEXT_BACKWARD;
   cm->reset_frame_context = RESET_FRAME_CONTEXT_NONE;
 
-  cm->allow_screen_content_tools = (cpi->oxcf.content == VP9E_CONTENT_SCREEN);
-  if (cm->allow_screen_content_tools) {
-    MACROBLOCK *x = &cpi->td.mb;
-    if (x->palette_buffer == 0) {
-      CHECK_MEM_ERROR(cm, x->palette_buffer,
-                      vpx_memalign(16, sizeof(*x->palette_buffer)));
-    }
-  }
-
   vp10_reset_segment_features(cm);
   vp10_set_high_precision_mv(cpi, 0);
 
@@ -1949,8 +1937,6 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 
     // Deallocate allocated thread data.
     if (t < cpi->num_workers - 1) {
-      if (cpi->common.allow_screen_content_tools)
-        vpx_free(thread_data->td->mb.palette_buffer);
       vpx_free(thread_data->td->counts);
       vp10_free_pc_tree(thread_data->td);
       vpx_free(thread_data->td);

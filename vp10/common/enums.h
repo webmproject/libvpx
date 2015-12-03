@@ -109,29 +109,6 @@ typedef enum {
   PLANE_TYPES
 } PLANE_TYPE;
 
-typedef enum {
-  TWO_COLORS,
-  THREE_COLORS,
-  FOUR_COLORS,
-  FIVE_COLORS,
-  SIX_COLORS,
-  SEVEN_COLORS,
-  EIGHT_COLORS,
-  PALETTE_SIZES
-} PALETTE_SIZE;
-
-typedef enum {
-  PALETTE_COLOR_ONE,
-  PALETTE_COLOR_TWO,
-  PALETTE_COLOR_THREE,
-  PALETTE_COLOR_FOUR,
-  PALETTE_COLOR_FIVE,
-  PALETTE_COLOR_SIX,
-  PALETTE_COLOR_SEVEN,
-  PALETTE_COLOR_EIGHT,
-  PALETTE_COLORS
-} PALETTE_COLOR;
-
 #define DC_PRED    0       // Average of above and left pixels
 #define V_PRED     1       // Vertical
 #define H_PRED     2       // Horizontal

@@ -27,12 +27,6 @@ extern "C" {
 
 #define INTER_OFFSET(mode) ((mode) - NEARESTMV)
 
-#define PALETTE_COLOR_CONTEXTS 16
-#define PALETTE_MAX_SIZE 8
-#define PALETTE_BLOCK_SIZES (BLOCK_64X64 - BLOCK_8X8 + 1)
-#define PALETTE_Y_MODE_CONTEXTS 3
-
-
 struct VP10Common;
 
 struct tx_probs {
@@ -105,25 +99,12 @@ extern const vpx_prob vp10_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
 extern const vpx_prob vp10_kf_partition_probs[PARTITION_CONTEXTS]
                                             [PARTITION_TYPES - 1];
 #endif
-extern const vpx_prob
-vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES][PALETTE_Y_MODE_CONTEXTS];
-extern const vpx_prob
-vp10_default_palette_y_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
-extern const vpx_prob
-vp10_default_palette_uv_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
-extern const vpx_prob vp10_default_palette_y_color_prob
-[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
-extern const vpx_prob vp10_default_palette_uv_color_prob
-[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
 
 extern const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vpx_tree_index vp10_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 extern const vpx_tree_index vp10_partition_tree[TREE_SIZE(PARTITION_TYPES)];
 extern const vpx_tree_index vp10_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
-extern const vpx_tree_index vp10_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
-extern const vpx_tree_index
-vp10_palette_color_tree[PALETTE_MAX_SIZE - 1][TREE_SIZE(PALETTE_COLORS)];
 
 
 void vp10_setup_past_independence(struct VP10Common *cm);
@@ -146,9 +127,6 @@ static INLINE int vp10_ceil_log2(int n) {
   }
   return i;
 }
-
-int vp10_get_palette_color_context(const uint8_t *color_map, int cols,
-                                   int r, int c, int n, int *color_order);
 
 #ifdef __cplusplus
 }  // extern "C"

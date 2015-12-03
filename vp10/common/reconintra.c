@@ -753,40 +753,6 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int have_right = (aoff + txw) < bw;
 #endif  // CONFIG_MISC_FIXES
 
-  if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
-    const int bs = 4 * (1 << tx_size);
-    const int stride = 4 * (1 << bwl_in);
-    int r, c;
-    uint8_t *map = NULL;
-#if CONFIG_VP9_HIGHBITDEPTH
-    uint16_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
-        plane * PALETTE_MAX_SIZE;
-#else
-    uint8_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
-        plane * PALETTE_MAX_SIZE;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-    map = xd->plane[plane != 0].color_index_map;
-
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
-      for (r = 0; r < bs; ++r)
-        for (c = 0; c < bs; ++c)
-          dst16[r * dst_stride + c] =
-              palette[map[(r + y) * stride + c + x]];
-    } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-      for (r = 0; r < bs; ++r)
-        for (c = 0; c < bs; ++c)
-          dst[r * dst_stride + c] = palette[map[(r + y) * stride + c + x]];
-#if CONFIG_VP9_HIGHBITDEPTH
-    }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-    return;
-  }
-
 #if CONFIG_MISC_FIXES
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {

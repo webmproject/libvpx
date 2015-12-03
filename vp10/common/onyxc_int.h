@@ -185,8 +185,6 @@ typedef struct VP10Common {
 
   int allow_high_precision_mv;
 
-  int allow_screen_content_tools;
-
   // Flag signaling which frame contexts should be reset to default values.
   RESET_FRAME_CONTEXT_MODE reset_frame_context;
 

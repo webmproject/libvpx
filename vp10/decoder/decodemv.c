@@ -246,38 +246,6 @@ static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd,
   }
 }
 
-static void read_palette_mode_info(VP10_COMMON *const cm,
-                                   MACROBLOCKD *const xd,
-                                   vpx_reader *r) {
-  MODE_INFO *const mi = xd->mi[0];
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const MODE_INFO *above_mi = xd->above_mi;
-  const MODE_INFO *left_mi  = xd->left_mi;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
-  int i, palette_ctx = 0;
-
-  if (above_mi)
-    palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-  if (left_mi)
-    palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-  if (vpx_read(r, vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
-                                                   [palette_ctx])) {
-    int n;
-    PALETTE_MODE_INFO *pmi = &mbmi->palette_mode_info;
-
-    pmi->palette_size[0] =
-        vpx_read_tree(r, vp10_palette_size_tree,
-                      vp10_default_palette_y_size_prob[bsize - BLOCK_8X8]) + 2;
-    n = pmi->palette_size[0];
-
-    for (i = 0; i < n; ++i)
-      pmi->palette_colors[i] = vpx_read_literal(r, cm->bit_depth);
-
-    xd->plane[0].color_index_map[0] = read_uniform(r, n);
-    assert(xd->plane[0].color_index_map[0] < n);
-  }
-}
-
 static void read_intra_frame_mode_info(VP10_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        int mi_row, int mi_col, vpx_reader *r) {
@@ -326,12 +294,6 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
   }
 
   mbmi->uv_mode = read_intra_mode_uv(cm, xd, r, mbmi->mode);
-
-  mbmi->palette_mode_info.palette_size[0] = 0;
-  mbmi->palette_mode_info.palette_size[1] = 0;
-  if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools &&
-      mbmi->mode == DC_PRED)
-    read_palette_mode_info(cm, xd, r);
 }
 
 static int read_mv_component(vpx_reader *r,
@@ -495,9 +457,6 @@ static void read_intra_block_mode_info(VP10_COMMON *const cm,
   }
 
   mbmi->uv_mode = read_intra_mode_uv(cm, xd, r, mbmi->mode);
-
-  mbmi->palette_mode_info.palette_size[0] = 0;
-  mbmi->palette_mode_info.palette_size[1] = 0;
 }
 
 static INLINE int is_mv_valid(const MV *mv) {
