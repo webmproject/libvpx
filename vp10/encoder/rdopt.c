@@ -35,6 +35,7 @@
 #include "vp10/encoder/encodemb.h"
 #include "vp10/encoder/encodemv.h"
 #include "vp10/encoder/encoder.h"
+#include "vp10/encoder/hybrid_fwd_txfm.h"
 #include "vp10/encoder/mcomp.h"
 #include "vp10/encoder/palette.h"
 #include "vp10/encoder/quantize.h"
