@@ -788,19 +788,19 @@ void highbd_masked_variance64(const uint8_t *a8, int  a_stride,
                               const uint8_t *b8, int  b_stride,
                               const uint8_t *m, int  m_stride,
                               int  w, int  h,
-                              unsigned int *sse, int *sum) {
+                              uint64_t *sse64, int *sum) {
   int i, j;
   uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   uint16_t *b = CONVERT_TO_SHORTPTR(b8);
 
   int64_t sum64 = 0;
-  uint64_t sse64 = 0;
+  *sse64 = 0;
 
   for (i = 0; i < h; i++) {
     for (j = 0; j < w; j++) {
       const int diff = (a[j] - b[j]) * (m[j]);
       sum64 += diff;
-      sse64 += diff * diff;
+      *sse64 += (int64_t)diff * diff;
     }
 
     a += a_stride;
@@ -808,7 +808,7 @@ void highbd_masked_variance64(const uint8_t *a8, int  a_stride,
     m += m_stride;
   }
   *sum = (sum64 >= 0) ? ((sum64 + 31) >> 6) : -((-sum64 + 31) >> 6);
-  *sse = (sse64 + 2047) >> 12;
+  *sse64 = (*sse64 + 2047) >> 12;
 }
 
 void highbd_masked_variance(const uint8_t *a8, int  a_stride,
@@ -816,8 +816,10 @@ void highbd_masked_variance(const uint8_t *a8, int  a_stride,
                             const uint8_t *m, int  m_stride,
                             int  w, int  h,
                             unsigned int *sse, int *sum) {
+  uint64_t sse64;
   highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
-                           w, h, sse, sum);
+                           w, h, &sse64, sum);
+  *sse = (unsigned int)sse64;
 }
 
 void highbd_10_masked_variance(const uint8_t *a8, int  a_stride,
@@ -825,10 +827,11 @@ void highbd_10_masked_variance(const uint8_t *a8, int  a_stride,
                                const uint8_t *m, int  m_stride,
                                int  w, int  h,
                                unsigned int *sse, int *sum) {
+  uint64_t sse64;
   highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
-                           w, h, sse, sum);
+                           w, h, &sse64, sum);
   *sum = ROUND_POWER_OF_TWO(*sum, 2);
-  *sse = ROUND_POWER_OF_TWO(*sse, 4);
+  *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 4);
 }
 
 void highbd_12_masked_variance(const uint8_t *a8, int  a_stride,
@@ -836,10 +839,11 @@ void highbd_12_masked_variance(const uint8_t *a8, int  a_stride,
                                const uint8_t *m, int  m_stride,
                                int  w, int  h,
                                unsigned int *sse, int *sum) {
+  uint64_t sse64;
   highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
-                           w, h, sse, sum);
+                           w, h, &sse64, sum);
   *sum = ROUND_POWER_OF_TWO(*sum, 4);
-  *sse = ROUND_POWER_OF_TWO(*sse, 8);
+  *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 8);
 }
 
 #define HIGHBD_MASK_VAR(W, H) \
