@@ -1703,7 +1703,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         decision == FILTER_BLOCK &&
         cpi->noise_estimate.enabled &&
         cpi->noise_estimate.level > kLow &&
-        zero_last_cost_orig < (best_rdc.rdcost << 2)) {
+        zero_last_cost_orig < (best_rdc.rdcost << 3)) {
       // Check if we should pick ZEROMV on denoised signal.
       int rate = 0;
       int64_t dist = 0;
