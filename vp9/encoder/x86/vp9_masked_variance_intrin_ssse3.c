@@ -346,6 +346,15 @@ MASKED_VAR4XH(8)
 // Sub pixel versions
 //////////////////////////////////////////////////////////////////////////////
 
+typedef __m128i (*filter_fn_t)(__m128i v_a_b, __m128i v_b_b,
+                                    __m128i v_filter_b);
+
+static INLINE __m128i apply_filter8(const __m128i v_a_b, const __m128i v_b_b,
+                                    const __m128i v_filter_b) {
+  (void) v_filter_b;
+  return _mm_avg_epu8(v_a_b, v_b_b);
+}
+
 static INLINE __m128i apply_filter(const __m128i v_a_b, const __m128i v_b_b,
                                    const __m128i v_filter_b) {
   const __m128i v_rounding_w = _mm_set1_epi16(1 << (FILTER_BITS - 1));
@@ -438,51 +447,10 @@ static INLINE int calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
 
 
 // Functions for width (W) >= 16
-unsigned int vp9_masked_subpel_varWxH_xzero_yhalf(
-        const uint8_t *src, int src_stride,
-        const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
-  int i, j;
-  __m128i v_src0_b, v_src1_b, v_res_b, v_dst_b, v_msk_b;
-  __m128i v_sum_d = _mm_setzero_si128();
-  __m128i v_sse_q = _mm_setzero_si128();
-  for (j = 0; j < w; j += 16) {
-    // Load the first row ready
-    v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
-    // Process 2 rows at a time
-    for (i = 0; i < h; i += 2) {
-      // Load the next row apply the filter
-      v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + src_stride));
-      v_res_b = _mm_avg_epu8(v_src0_b, v_src1_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j));
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-
-      // Load the next row apply the filter
-      v_src0_b = _mm_loadu_si128((const __m128i*)(src + j + src_stride * 2));
-      v_res_b = _mm_avg_epu8(v_src1_b, v_src0_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j + dst_stride));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j + msk_stride));
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-      // Move onto the next block of rows
-      src += src_stride * 2;
-      dst += dst_stride * 2;
-      msk += msk_stride * 2;
-    }
-    // Reset to the top of the block
-    src -= src_stride * h;
-    dst -= dst_stride * h;
-    msk -= msk_stride * h;
-  }
-  return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
-}
-
-unsigned int vp9_masked_subpel_varWxH_xzero_yother(
+unsigned int vp9_masked_subpel_varWxH_xzero(
         const uint8_t *src, int src_stride, int  yoffset,
         const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
+        unsigned int *sse, int w, int h, filter_fn_t filter_fn) {
   int i, j;
   __m128i v_src0_b, v_src1_b, v_res_b, v_dst_b, v_msk_b;
   __m128i v_sum_d = _mm_setzero_si128();
@@ -497,7 +465,7 @@ unsigned int vp9_masked_subpel_varWxH_xzero_yother(
     for (i = 0; i < h; i += 2) {
       // Load the next row apply the filter
       v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + src_stride));
-      v_res_b = apply_filter(v_src0_b, v_src1_b, v_filter_b);
+      v_res_b = filter_fn(v_src0_b, v_src1_b, v_filter_b);
       // Load the dst and msk for the variance calculation
       v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
       v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j));
@@ -505,7 +473,7 @@ unsigned int vp9_masked_subpel_varWxH_xzero_yother(
 
       // Load the next row apply the filter
       v_src0_b = _mm_loadu_si128((const __m128i*)(src + j + src_stride * 2));
-      v_res_b = apply_filter(v_src1_b, v_src0_b, v_filter_b);
+      v_res_b = filter_fn(v_src1_b, v_src0_b, v_filter_b);
       // Load the dst and msk for the variance calculation
       v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j + dst_stride));
       v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j + msk_stride));
@@ -522,138 +490,10 @@ unsigned int vp9_masked_subpel_varWxH_xzero_yother(
   }
   return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
 }
-unsigned int vp9_masked_subpel_varWxH_xhalf_yzero(
-        const uint8_t *src, int src_stride,
-        const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
-  int i, j;
-  __m128i v_src0_b, v_src1_b, v_res_b, v_dst_b, v_msk_b;
-  __m128i v_sum_d = _mm_setzero_si128();
-  __m128i v_sse_q = _mm_setzero_si128();
-  for (i = 0; i < h; i++) {
-    for (j = 0; j < w; j += 16) {
-      // Load this row & apply the filter to them
-      v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
-      v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + 1));
-      v_res_b = _mm_avg_epu8(v_src0_b, v_src1_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j));
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-    }
-    src += src_stride;
-    dst += dst_stride;
-    msk += msk_stride;
-  }
-  return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
-}
-unsigned int vp9_masked_subpel_varWxH_xhalf_yhalf(
-        const uint8_t *src, int src_stride,
-        const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
-  int i, j;
-  __m128i v_src0_b, v_src1_b, v_src2_b, v_src3_b, v_avg0_b, v_avg1_b;
-  __m128i v_res_b, v_dst_b, v_msk_b;
-  __m128i v_sum_d = _mm_setzero_si128();
-  __m128i v_sse_q = _mm_setzero_si128();
-  for (j = 0; j < w; j += 16) {
-    // Load the first row ready
-    v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
-    v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + 1));
-    v_avg0_b = _mm_avg_epu8(v_src0_b, v_src1_b);
-    // Process 2 rows at a time
-    for (i = 0; i < h; i += 2) {
-      // Load the next row & apply the filter
-      v_src2_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j));
-      v_src3_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j + 1));
-      v_avg1_b = _mm_avg_epu8(v_src2_b, v_src3_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j));
-      // Complete the calculation for this row and add it to the running total
-      v_res_b = _mm_avg_epu8(v_avg0_b, v_avg1_b);
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-
-      // Load the next row & apply the filter
-      v_src0_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 + j));
-      v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 +
-                                                  j + 1));
-      v_avg0_b = _mm_avg_epu8(v_src0_b, v_src1_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + dst_stride + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + msk_stride + j));
-      // Complete the calculation for this row and add it to the running total
-      v_res_b = _mm_avg_epu8(v_avg1_b, v_avg0_b);
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-      // Move onto the next block of rows
-      src += src_stride * 2;
-      dst += dst_stride * 2;
-      msk += msk_stride * 2;
-    }
-    // Reset to the top of the block
-    src -= src_stride * h;
-    dst -= dst_stride * h;
-    msk -= msk_stride * h;
-  }
-  return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
-}
-unsigned int vp9_masked_subpel_varWxH_xhalf_yother(
-        const uint8_t *src, int src_stride, int yoffset,
-        const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
-  int i, j;
-  __m128i v_src0_b, v_src1_b, v_src2_b, v_src3_b, v_avg0_b, v_avg1_b;
-  __m128i v_res_b, v_dst_b, v_msk_b;
-  __m128i v_sum_d = _mm_setzero_si128();
-  __m128i v_sse_q = _mm_setzero_si128();
-  const __m128i v_filter_b = _mm_set1_epi16((
-        BILINEAR_FILTERS_2TAP(yoffset)[1] << 8) +
-        BILINEAR_FILTERS_2TAP(yoffset)[0]);
-  for (j = 0; j < w; j += 16) {
-    // Load the first row ready
-    v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
-    v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + 1));
-    v_avg0_b = _mm_avg_epu8(v_src0_b, v_src1_b);
-    // Process 2 rows at a time
-    for (i = 0; i < h; i += 2) {
-      // Load the next row & apply the filter
-      v_src2_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j));
-      v_src3_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j + 1));
-      v_avg1_b = _mm_avg_epu8(v_src2_b, v_src3_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j));
-      // Complete the calculation for this row and add it to the running total
-      v_res_b = apply_filter(v_avg0_b, v_avg1_b, v_filter_b);
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-
-      // Load the next row & apply the filter
-      v_src0_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 + j));
-      v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 +
-                                                  j + 1));
-      v_avg0_b = _mm_avg_epu8(v_src0_b, v_src1_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + dst_stride + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + msk_stride + j));
-      // Complete the calculation for this row and add it to the running total
-      v_res_b = apply_filter(v_avg1_b, v_avg0_b, v_filter_b);
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-      // Move onto the next block of rows
-      src += src_stride * 2;
-      dst += dst_stride * 2;
-      msk += msk_stride * 2;
-    }
-    // Reset to the top of the block
-    src -= src_stride * h;
-    dst -= dst_stride * h;
-    msk -= msk_stride * h;
-  }
-  return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
-}
-unsigned int vp9_masked_subpel_varWxH_xother_yzero(
+unsigned int vp9_masked_subpel_varWxH_yzero(
         const uint8_t *src, int src_stride, int xoffset,
         const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
+        unsigned int *sse, int w, int h, filter_fn_t filter_fn) {
   int i, j;
   __m128i v_src0_b, v_src1_b, v_res_b, v_dst_b, v_msk_b;
   __m128i v_sum_d = _mm_setzero_si128();
@@ -666,7 +506,7 @@ unsigned int vp9_masked_subpel_varWxH_xother_yzero(
       // Load this row and one below & apply the filter to them
       v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
       v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + 1));
-      v_res_b = apply_filter(v_src0_b, v_src1_b, v_filter_b);
+      v_res_b = filter_fn(v_src0_b, v_src1_b, v_filter_b);
 
       // Load the dst and msk for the variance calculation
       v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
@@ -679,63 +519,11 @@ unsigned int vp9_masked_subpel_varWxH_xother_yzero(
   }
   return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
 }
-unsigned int vp9_masked_subpel_varWxH_xother_yhalf(
-        const uint8_t *src, int src_stride, int xoffset,
-        const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
-  int i, j;
-  __m128i v_src0_b, v_src1_b, v_src2_b, v_src3_b;
-  __m128i v_filtered0_b, v_filtered1_b, v_res_b, v_dst_b, v_msk_b;
-  __m128i v_sum_d = _mm_setzero_si128();
-  __m128i v_sse_q = _mm_setzero_si128();
-  const __m128i v_filter_b = _mm_set1_epi16((
-        BILINEAR_FILTERS_2TAP(xoffset)[1] << 8) +
-        BILINEAR_FILTERS_2TAP(xoffset)[0]);
-  for (j = 0; j < w; j += 16) {
-    // Load the first row ready
-    v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
-    v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + 1));
-    v_filtered0_b = apply_filter(v_src0_b, v_src1_b, v_filter_b);
-    // Process 2 rows at a time
-    for (i = 0; i < h; i += 2) {
-      // Load the next row & apply the filter
-      v_src2_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j));
-      v_src3_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j + 1));
-      v_filtered1_b = apply_filter(v_src2_b, v_src3_b, v_filter_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j));
-      // Complete the calculation for this row and add it to the running total
-      v_res_b = _mm_avg_epu8(v_filtered0_b, v_filtered1_b);
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-
-      // Load the next row & apply the filter
-      v_src0_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 + j));
-      v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 +
-                                                  j + 1));
-      v_filtered0_b = apply_filter(v_src0_b, v_src1_b, v_filter_b);
-      // Load the dst and msk for the variance calculation
-      v_dst_b = _mm_loadu_si128((const __m128i*)(dst + dst_stride + j));
-      v_msk_b = _mm_loadu_si128((const __m128i*)(msk + msk_stride + j));
-      // Complete the calculation for this row and add it to the running total
-      v_res_b = _mm_avg_epu8(v_filtered1_b, v_filtered0_b);
-      sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
-      // Move onto the next block of rows
-      src += src_stride * 2;
-      dst += dst_stride * 2;
-      msk += msk_stride * 2;
-    }
-    // Reset to the top of the block
-    src -= src_stride * h;
-    dst -= dst_stride * h;
-    msk -= msk_stride * h;
-  }
-  return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
-}
-unsigned int vp9_masked_subpel_varWxH_xother_yother(
+unsigned int vp9_masked_subpel_varWxH_xnonzero_ynonzero(
         const uint8_t *src, int src_stride, int xoffset, int yoffset,
         const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
-        unsigned int *sse, int w, int h) {
+        unsigned int *sse, int w, int h, filter_fn_t xfilter_fn,
+        filter_fn_t yfilter_fn) {
   int i, j;
   __m128i v_src0_b, v_src1_b, v_src2_b, v_src3_b;
   __m128i v_filtered0_b, v_filtered1_b, v_res_b, v_dst_b, v_msk_b;
@@ -751,30 +539,30 @@ unsigned int vp9_masked_subpel_varWxH_xother_yother(
     // Load the first row ready
     v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
     v_src1_b = _mm_loadu_si128((const __m128i*)(src + j + 1));
-    v_filtered0_b = apply_filter(v_src0_b, v_src1_b, v_filterx_b);
+    v_filtered0_b = xfilter_fn(v_src0_b, v_src1_b, v_filterx_b);
     // Process 2 rows at a time
     for (i = 0; i < h; i += 2) {
       // Load the next row & apply the filter
       v_src2_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j));
       v_src3_b = _mm_loadu_si128((const __m128i*)(src + src_stride + j + 1));
-      v_filtered1_b = apply_filter(v_src2_b, v_src3_b, v_filterx_b);
+      v_filtered1_b = xfilter_fn(v_src2_b, v_src3_b, v_filterx_b);
       // Load the dst and msk for the variance calculation
       v_dst_b = _mm_loadu_si128((const __m128i*)(dst + j));
       v_msk_b = _mm_loadu_si128((const __m128i*)(msk + j));
       // Complete the calculation for this row and add it to the running total
-      v_res_b = apply_filter(v_filtered0_b, v_filtered1_b, v_filtery_b);
+      v_res_b = yfilter_fn(v_filtered0_b, v_filtered1_b, v_filtery_b);
       sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
 
       // Load the next row & apply the filter
       v_src0_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 + j));
       v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 2 +
                                                   j + 1));
-      v_filtered0_b = apply_filter(v_src0_b, v_src1_b, v_filterx_b);
+      v_filtered0_b = xfilter_fn(v_src0_b, v_src1_b, v_filterx_b);
       // Load the dst and msk for the variance calculation
       v_dst_b = _mm_loadu_si128((const __m128i*)(dst + dst_stride + j));
       v_msk_b = _mm_loadu_si128((const __m128i*)(msk + msk_stride + j));
       // Complete the calculation for this row and add it to the running total
-      v_res_b = apply_filter(v_filtered1_b, v_filtered0_b, v_filtery_b);
+      v_res_b = yfilter_fn(v_filtered1_b, v_filtered0_b, v_filtery_b);
       sum_and_sse(v_res_b, v_dst_b, v_msk_b, &v_sum_d, &v_sse_q);
       // Move onto the next block of rows
       src += src_stride * 2;
@@ -1246,48 +1034,40 @@ unsigned int vp9_masked_sub_pixel_variance##W##x##H##_ssse3(                   \
                                                   dst, dst_stride,             \
                                                   msk, msk_stride, sse);       \
     else if (yoffset == 8)                                                     \
-      return vp9_masked_subpel_varWxH_xzero_yhalf(src, src_stride,             \
-                                                  dst, dst_stride,             \
-                                                  msk, msk_stride,             \
-                                                  sse, W, H);                  \
+      return vp9_masked_subpel_varWxH_xzero(src, src_stride, 8,                \
+                                            dst, dst_stride, msk, msk_stride,  \
+                                            sse, W, H, apply_filter8);         \
     else                                                                       \
-      return vp9_masked_subpel_varWxH_xzero_yother(src, src_stride, yoffset,   \
-                                                   dst, dst_stride,            \
-                                                   msk, msk_stride,            \
-                                                   sse, W, H);                 \
+      return vp9_masked_subpel_varWxH_xzero(src, src_stride, yoffset,          \
+                                            dst, dst_stride, msk, msk_stride,  \
+                                            sse, W, H, apply_filter);          \
+  } else if (yoffset == 0) {                                                   \
+    if (xoffset == 8)                                                          \
+      return vp9_masked_subpel_varWxH_yzero(src, src_stride, 8,                \
+                                            dst, dst_stride, msk, msk_stride,  \
+                                            sse, W, H, apply_filter8);         \
+    else                                                                       \
+      return vp9_masked_subpel_varWxH_yzero(src, src_stride, xoffset,          \
+                                            dst, dst_stride, msk, msk_stride,  \
+                                            sse, W, H, apply_filter);          \
   } else if (xoffset == 8) {                                                   \
-    if (yoffset == 0)                                                          \
-      return vp9_masked_subpel_varWxH_xhalf_yzero(src, src_stride,             \
-                                                  dst, dst_stride,             \
-                                                  msk, msk_stride,             \
-                                                  sse, W, H);                  \
-    else if (yoffset == 8)                                                     \
-      return vp9_masked_subpel_varWxH_xhalf_yhalf(src, src_stride,             \
-                                                  dst, dst_stride,             \
-                                                  msk, msk_stride,             \
-                                                  sse, W, H);                  \
+    if (yoffset == 8)                                                          \
+      return vp9_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
+              8, 8, dst, dst_stride, msk, msk_stride, sse, W, H,               \
+              apply_filter8, apply_filter8);                                   \
     else                                                                       \
-      return vp9_masked_subpel_varWxH_xhalf_yother(src, src_stride, yoffset,   \
-                                                   dst, dst_stride,            \
-                                                   msk, msk_stride,            \
-                                                   sse, W, H);                 \
+      return vp9_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
+              8, yoffset, dst, dst_stride, msk, msk_stride, sse, W, H,         \
+              apply_filter8, apply_filter);                                    \
   } else {                                                                     \
-    if (yoffset == 0)                                                          \
-      return vp9_masked_subpel_varWxH_xother_yzero(src, src_stride, xoffset,   \
-                                                   dst, dst_stride,            \
-                                                   msk, msk_stride,            \
-                                                   sse, W, H);                 \
-    else if (yoffset == 8)                                                     \
-      return vp9_masked_subpel_varWxH_xother_yhalf(src, src_stride, xoffset,   \
-                                                   dst, dst_stride,            \
-                                                   msk, msk_stride,            \
-                                                   sse, W, H);                 \
+    if (yoffset == 8)                                                          \
+      return vp9_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
+              xoffset, 8, dst, dst_stride, msk, msk_stride, sse, W, H,         \
+              apply_filter, apply_filter8);                                    \
     else                                                                       \
-      return vp9_masked_subpel_varWxH_xother_yother(src, src_stride,           \
-                                                    xoffset, yoffset,          \
-                                                    dst, dst_stride,           \
-                                                    msk, msk_stride,           \
-                                                   sse, W, H);                 \
+      return vp9_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
+              xoffset, yoffset, dst, dst_stride, msk, msk_stride, sse, W, H,   \
+              apply_filter, apply_filter);                                     \
   }                                                                            \
 }
 
