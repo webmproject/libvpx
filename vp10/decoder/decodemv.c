@@ -974,6 +974,16 @@ void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
 
   if (frame_is_intra_only(cm)) {
     read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
+#if CONFIG_REF_MV
+    for (h = 0; h < y_mis; ++h) {
+      MV_REF *const frame_mv = frame_mvs + h * cm->mi_cols;
+      for (w = 0; w < x_mis; ++w) {
+        MV_REF *const mv = frame_mv + w;
+        mv->ref_frame[0] = NONE;
+        mv->ref_frame[1] = NONE;
+      }
+    }
+#endif
   } else {
     read_inter_frame_mode_info(pbi, xd, mi_row, mi_col, r);
     for (h = 0; h < y_mis; ++h) {

@@ -148,7 +148,7 @@ static void scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
           ++(*refmv_count);
         }
 
-        if (candidate_mi->mbmi.sb_type < BLOCK_8X8) {
+        if (candidate_mi->mbmi.sb_type < BLOCK_8X8 && block >= 0) {
           int alt_block = 3 - block;
           this_refmv =
               get_sub_block_mv(candidate_mi, ref, mi_pos.col, alt_block);
@@ -171,6 +171,42 @@ static void scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   }  // Analyze a single 8x8 block motion information.
 }
 
+static int has_top_right(const MACROBLOCKD *xd,
+                         int mi_row, int mi_col, int bs) {
+  int is_second_rect = 0;
+  int has_tr = !((mi_row & bs) & (bs * 2 - 1)) ||
+               !((mi_col & bs) & (bs * 2 - 1));
+
+  // Filter out partial right-most boundaries
+  if ((mi_col & bs) & (bs * 2 - 1)) {
+    if (((mi_col & (2 * bs)) & (bs * 4 - 1)) &&
+        ((mi_row & (2 * bs)) & (bs * 4 - 1)))
+      has_tr = 0;
+  }
+
+  if (has_tr)
+    if (((mi_col + xd->n8_w) & 0x07) == 0)
+      if ((mi_row & 0x07) > 0)
+        has_tr = 0;
+
+  if (xd->n8_w < xd->n8_h) {
+    if (mi_col & (xd->n8_h - 1))
+      is_second_rect = 1;
+
+    if (!is_second_rect)
+      has_tr = 1;
+  }
+
+  if (xd->n8_w > xd->n8_h) {
+    if (mi_row & (xd->n8_w - 1))
+      is_second_rect = 1;
+
+    if (is_second_rect)
+      has_tr = 0;
+  }
+  return has_tr;
+}
+
 static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                               MV_REFERENCE_FRAME ref_frame,
                               uint8_t *refmv_count,
@@ -183,6 +219,13 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   CANDIDATE_MV tmp_mv;
   int len, nr_len;
 
+  const MV_REF *const prev_frame_mvs = cm->use_prev_frame_mvs ?
+      cm->prev_frame->mvs + mi_row * cm->mi_cols + mi_col : NULL;
+
+  int bs = VPXMAX(xd->n8_w, xd->n8_h);
+  int has_tr = has_top_right(xd, mi_row, mi_col, bs);
+
+
   (void) mode_context;
 
   *refmv_count = 0;
@@ -194,11 +237,36 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
                 -1, ref_mv_stack, refmv_count);
 
+  // Check top-right boundary
+  if (has_tr)
+    scan_blk_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+                  -1, 1, ref_mv_stack, refmv_count);
+
   nearest_refmv_count = *refmv_count;
+
+  if (prev_frame_mvs && cm->show_frame && cm->last_show_frame) {
+    int ref;
+    for (ref = 0; ref < 2; ++ref) {
+      if (prev_frame_mvs->ref_frame[ref] == ref_frame) {
+        for (idx = 0; idx < nearest_refmv_count; ++idx)
+          if (prev_frame_mvs->mv[ref].as_int ==
+              ref_mv_stack[idx].this_mv.as_int)
+            break;
+
+        if (idx == nearest_refmv_count &&
+            nearest_refmv_count < MAX_REF_MV_STACK_SIZE) {
+          ref_mv_stack[idx].this_mv.as_int = prev_frame_mvs->mv[ref].as_int;
+          ref_mv_stack[idx].weight = 1;
+          ++(*refmv_count);
+          ++nearest_refmv_count;
+        }
+      }
+    }
+  }
 
   // Analyze the top-left corner block mode info.
 //  scan_blk_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
-//                -1, -1, ref_mv_stack, &refmv_count);
+//                -1, -1, ref_mv_stack, refmv_count);
 
   // Scan the second outer area.
   scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
