@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "204d6487_8d2a09b9",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-04T01:55:47Z",
+      "side": 1,
+      "message": "this would probably be faster if you loaded lanes, e.g., vld1_lane_u32(), then add 2 followed by the horizontal sum",
+      "revId": "4284f4d67bcee634f04deb6e0fc57645067d6408",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
