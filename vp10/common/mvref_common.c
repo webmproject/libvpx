@@ -242,7 +242,7 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   int bs = VPXMAX(xd->n8_w, xd->n8_h);
   int has_tr = has_top_right(xd, mi_row, mi_col, bs);
 
-
+  mode_context[ref_frame] = 0;
   *refmv_count = 0;
 
   // Scan the first above row mode info.
@@ -258,29 +258,6 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                                  -1, 1, ref_mv_stack, refmv_count);
 
   nearest_refmv_count = *refmv_count;
-
-  mode_context[ref_frame] = 0;
-  switch (nearest_refmv_count) {
-    case 0:
-      mode_context[ref_frame] = 0;
-      break;
-
-    case 1:
-      mode_context[ref_frame] = (newmv_count > 0) ? 1 : 2;
-      mode_context[ref_frame] += (1 << REFMV_OFFSET);
-      break;
-
-    case 2:
-    default:
-      if (newmv_count >= 2)
-        mode_context[ref_frame] = 3;
-      else if (newmv_count == 1)
-        mode_context[ref_frame] = 4;
-      else
-        mode_context[ref_frame] = 5;
-      mode_context[ref_frame] += (2 << REFMV_OFFSET);
-      break;
-  }
 
   if (prev_frame_mvs_base && cm->show_frame && cm->last_show_frame) {
     int ref;
@@ -349,6 +326,39 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   // Scan the third left row mode info.
   scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
                 -4, ref_mv_stack, refmv_count);
+
+  switch (nearest_refmv_count) {
+    case 0:
+      mode_context[ref_frame] |= 0;
+      if (*refmv_count >= 1)
+        mode_context[ref_frame] |= 1;
+
+      if (*refmv_count == 1)
+        mode_context[ref_frame] |= (1 << REFMV_OFFSET);
+      else if (*refmv_count >= 2)
+        mode_context[ref_frame] |= (2 << REFMV_OFFSET);
+      break;
+    case 1:
+      mode_context[ref_frame] |= (newmv_count > 0) ? 2 : 3;
+
+      if (*refmv_count == 1)
+        mode_context[ref_frame] |= (3 << REFMV_OFFSET);
+      else if (*refmv_count >= 2)
+        mode_context[ref_frame] |= (4 << REFMV_OFFSET);
+      break;
+
+    case 2:
+    default:
+      if (newmv_count >= 2)
+        mode_context[ref_frame] |= 4;
+      else if (newmv_count == 1)
+        mode_context[ref_frame] |= 5;
+      else
+        mode_context[ref_frame] |= 6;
+
+      mode_context[ref_frame] |= (5 << REFMV_OFFSET);
+      break;
+  }
 
   // Rank the likelihood and assign nearest and near mvs.
   len = nearest_refmv_count;
