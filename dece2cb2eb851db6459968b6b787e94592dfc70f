@@ -16,6 +16,24 @@
       "revId": "dece2cb2eb851db6459968b6b787e94592dfc70f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8091b00f_a5a62a2d",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2015-12-04T00:08:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fba69f26_74b999ec",
+      "revId": "dece2cb2eb851db6459968b6b787e94592dfc70f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
