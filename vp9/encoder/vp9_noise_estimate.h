@@ -47,6 +47,8 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
                              int width,
                              int height);
 
+NOISE_LEVEL vp9_noise_estimate_extract_level(NOISE_ESTIMATE *const ne);
+
 void vp9_update_noise_estimate(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
