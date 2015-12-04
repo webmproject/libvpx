@@ -85,7 +85,7 @@ cglobal dc_top_predictor_4x4, 3, 5, 2, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
+INIT_XMM sse2
 cglobal dc_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
@@ -99,8 +99,8 @@ cglobal dc_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
   paddw                 m0, m2
   paddw                 m0, [GLOBAL(pw_8)]
   psraw                 m0, 4
-  pshufw                m0, m0, 0x0
-  packuswb              m0, m0
+  punpcklbw             m0, m0
+  pshuflw               m0, m0, 0x0
   movq    [dstq          ], m0
   movq    [dstq+strideq  ], m0
   movq    [dstq+strideq*2], m0
@@ -114,8 +114,8 @@ cglobal dc_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
-cglobal dc_top_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
+INIT_XMM sse2
+cglobal dc_top_predictor_8x8, 3, 5, 2, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   pxor                  m1, m1
@@ -125,8 +125,8 @@ cglobal dc_top_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
   psadbw                m0, m1
   paddw                 m0, [GLOBAL(pw2_8)]
   psraw                 m0, 3
-  pshufw                m0, m0, 0x0
-  packuswb              m0, m0
+  punpcklbw             m0, m0
+  pshuflw               m0, m0, 0x0
   movq    [dstq          ], m0
   movq    [dstq+strideq  ], m0
   movq    [dstq+strideq*2], m0
@@ -140,10 +140,11 @@ cglobal dc_top_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
-cglobal dc_left_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
+INIT_XMM sse2
+cglobal dc_left_predictor_8x8, 2, 5, 2, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
+  movifnidn          leftq, leftmp
   pxor                  m1, m1
   movq                  m0, [leftq]
   DEFINE_ARGS dst, stride, stride3
@@ -151,8 +152,8 @@ cglobal dc_left_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
   psadbw                m0, m1
   paddw                 m0, [GLOBAL(pw2_8)]
   psraw                 m0, 3
-  pshufw                m0, m0, 0x0
-  packuswb              m0, m0
+  punpcklbw             m0, m0
+  pshuflw               m0, m0, 0x0
   movq    [dstq          ], m0
   movq    [dstq+strideq  ], m0
   movq    [dstq+strideq*2], m0
@@ -180,8 +181,8 @@ cglobal dc_128_predictor_4x4, 2, 5, 1, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
-cglobal dc_128_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
+INIT_XMM sse2
+cglobal dc_128_predictor_8x8, 2, 5, 1, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   DEFINE_ARGS dst, stride, stride3
@@ -463,7 +464,7 @@ cglobal v_predictor_4x4, 3, 3, 1, dst, stride, above
   movd      [dstq+strideq], m0
   RET
 
-INIT_MMX sse
+INIT_XMM sse2
 cglobal v_predictor_8x8, 3, 3, 1, dst, stride, above
   movq                  m0, [aboveq]
   DEFINE_ARGS dst, stride, stride3
