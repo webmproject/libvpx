@@ -23,7 +23,7 @@ pw2_32:  times 8 dw 16
 
 SECTION .text
 
-INIT_MMX sse
+INIT_XMM sse2
 cglobal dc_predictor_4x4, 4, 5, 2, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
@@ -33,7 +33,7 @@ cglobal dc_predictor_4x4, 4, 5, 2, dst, stride, above, left, goffset
   psadbw                m0, m1
   paddw                 m0, [GLOBAL(pw_4)]
   psraw                 m0, 3
-  pshufw                m0, m0, 0x0
+  pshuflw               m0, m0, 0x0
   packuswb              m0, m0
   movd      [dstq        ], m0
   movd      [dstq+strideq], m0
@@ -44,16 +44,17 @@ cglobal dc_predictor_4x4, 4, 5, 2, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
-cglobal dc_left_predictor_4x4, 4, 5, 2, dst, stride, above, left, goffset
+INIT_XMM sse2
+cglobal dc_left_predictor_4x4, 2, 5, 2, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
+  movifnidn          leftq, leftmp
   pxor                  m1, m1
   movd                  m0, [leftq]
   psadbw                m0, m1
   paddw                 m0, [GLOBAL(pw2_4)]
   psraw                 m0, 2
-  pshufw                m0, m0, 0x0
+  pshuflw               m0, m0, 0x0
   packuswb              m0, m0
   movd      [dstq        ], m0
   movd      [dstq+strideq], m0
@@ -64,8 +65,8 @@ cglobal dc_left_predictor_4x4, 4, 5, 2, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
-cglobal dc_top_predictor_4x4, 4, 5, 2, dst, stride, above, left, goffset
+INIT_XMM sse2
+cglobal dc_top_predictor_4x4, 3, 5, 2, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   pxor                  m1, m1
@@ -73,7 +74,7 @@ cglobal dc_top_predictor_4x4, 4, 5, 2, dst, stride, above, left, goffset
   psadbw                m0, m1
   paddw                 m0, [GLOBAL(pw2_4)]
   psraw                 m0, 2
-  pshufw                m0, m0, 0x0
+  pshuflw               m0, m0, 0x0
   packuswb              m0, m0
   movd      [dstq        ], m0
   movd      [dstq+strideq], m0
@@ -165,8 +166,8 @@ cglobal dc_left_predictor_8x8, 4, 5, 3, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
-cglobal dc_128_predictor_4x4, 4, 5, 3, dst, stride, above, left, goffset
+INIT_XMM sse2
+cglobal dc_128_predictor_4x4, 2, 5, 1, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   DEFINE_ARGS dst, stride, stride3
@@ -452,7 +453,7 @@ cglobal dc_128_predictor_32x32, 4, 5, 3, dst, stride, above, left, goffset
   RESTORE_GOT
   RET
 
-INIT_MMX sse
+INIT_XMM sse2
 cglobal v_predictor_4x4, 3, 3, 1, dst, stride, above
   movd                  m0, [aboveq]
   movd      [dstq        ], m0
