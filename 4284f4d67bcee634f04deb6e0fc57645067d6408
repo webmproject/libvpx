@@ -16,6 +16,24 @@
       "revId": "4284f4d67bcee634f04deb6e0fc57645067d6408",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "404ed883_1f6f5b98",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-12-05T01:21:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "204d6487_8d2a09b9",
+      "revId": "4284f4d67bcee634f04deb6e0fc57645067d6408",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
