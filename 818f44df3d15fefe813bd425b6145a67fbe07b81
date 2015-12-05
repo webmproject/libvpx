@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e06d0cee_a4a2abbd",
+        "filename": "test/test.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-05T02:39:24Z",
+      "side": 1,
+      "message": "yeah that\u0027s in the next patchset",
+      "parentUuid": "e0842cce_bc90816c",
+      "range": {
+        "startLine": 138,
+        "startChar": 19,
+        "endLine": 138,
+        "endChar": 29
+      },
+      "revId": "818f44df3d15fefe813bd425b6145a67fbe07b81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "009dc025_105dd2c5",
         "filename": "test/test.mk",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-05T01:22:26Z",
       "side": 1,
       "message": "worth starting a VP10 block like for VP8/9?",
+      "range": {
+        "startLine": 165,
+        "startChar": 3,
+        "endLine": 165,
+        "endChar": 7
+      },
+      "revId": "818f44df3d15fefe813bd425b6145a67fbe07b81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e06d0cee_44a70fcf",
+        "filename": "test/test.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-05T02:39:24Z",
+      "side": 1,
+      "message": "may as well for consistency",
+      "parentUuid": "009dc025_105dd2c5",
       "range": {
         "startLine": 165,
         "startChar": 3,
