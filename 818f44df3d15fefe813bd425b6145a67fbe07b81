@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "404ed883_da80b168",
+        "filename": "test/test.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-05T02:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e06d0cee_44a70fcf",
+      "range": {
+        "startLine": 165,
+        "startChar": 3,
+        "endLine": 165,
+        "endChar": 7
+      },
+      "revId": "818f44df3d15fefe813bd425b6145a67fbe07b81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "80561044_7d744f18",
         "filename": "test/test.mk",
         "patchSetId": 2
@@ -119,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "e06d0cee_e4b743f6",
+        "filename": "test/test.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-05T02:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80561044_7d744f18",
+      "range": {
+        "startLine": 167,
+        "startChar": 19,
+        "endLine": 167,
+        "endChar": 30
+      },
+      "revId": "818f44df3d15fefe813bd425b6145a67fbe07b81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "404ed883_1afbe969",
         "filename": "test/test.mk",
         "patchSetId": 2
@@ -130,6 +178,30 @@
       "writtenOn": "2015-12-05T01:22:26Z",
       "side": 1,
       "message": "## Common functions (or some comment to separate from VP10)",
+      "range": {
+        "startLine": 170,
+        "startChar": 16,
+        "endLine": 170,
+        "endChar": 19
+      },
+      "revId": "818f44df3d15fefe813bd425b6145a67fbe07b81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e06d0cee_84c44769",
+        "filename": "test/test.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-05T02:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "404ed883_1afbe969",
       "range": {
         "startLine": 170,
         "startChar": 16,
