@@ -1094,6 +1094,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
+  const SVC *const svc = &cpi->svc;
   TileInfo *const tile_info = &tile_data->tile_info;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -1143,6 +1144,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int best_pred_sad = INT_MAX;
   int best_early_term = 0;
   int ref_frame_cost[MAX_REF_FRAMES];
+  int svc_force_zero_mode[3] = {0};
 #if CONFIG_VP9_TEMPORAL_DENOISING
   int64_t zero_last_cost_orig = INT64_MAX;
 #endif
@@ -1196,6 +1198,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   } else {
     usable_ref_frame = GOLDEN_FRAME;
   }
+
+  // If the reference is temporally aligned with current superframe
+  // (e.g., spatial reference within superframe), constrain the inter mode:
+  // for now only test zero motion.
+  if (cpi->use_svc && svc ->force_zero_mode_spatial_ref) {
+    if (svc->ref_frame_index[cpi->lst_fb_idx] == svc->current_superframe)
+      svc_force_zero_mode[LAST_FRAME - 1] = 1;
+    if (svc->ref_frame_index[cpi->gld_fb_idx] == svc->current_superframe)
+      svc_force_zero_mode[GOLDEN_FRAME - 1] = 1;
+  }
+
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
 
@@ -1248,8 +1261,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     ref_frame = ref_mode_set[idx].ref_frame;
-    if (cpi->use_svc)
+    if (cpi->use_svc) {
       ref_frame = ref_mode_set_svc[idx].ref_frame;
+      if (svc_force_zero_mode[ref_frame - 1] &&
+          frame_mv[this_mode][ref_frame].as_int != 0)
+        continue;
+    }
+
     if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
       continue;
     if (const_motion[ref_frame] && this_mode == NEARMV)
