@@ -204,7 +204,7 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #endif
                        int_mv *mv_ref_list, int mi_row, int mi_col,
                        find_mv_refs_sync sync, void *const data,
-                       uint8_t *mode_context);
+                       int16_t *mode_context);
 
 // check a list of motion vectors by sad score using a number rows of pixels
 // above and a number cols of pixels in the left to select the one with best

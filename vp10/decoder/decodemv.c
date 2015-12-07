@@ -63,10 +63,10 @@ static PREDICTION_MODE read_intra_mode_uv(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                       vpx_reader *r, uint8_t ctx) {
+                                       vpx_reader *r, int16_t ctx) {
 #if CONFIG_REF_MV
   FRAME_COUNTS *counts = xd->counts;
-  uint8_t mode_ctx = ctx & NEWMV_CTX_MASK;
+  int16_t mode_ctx = ctx & NEWMV_CTX_MASK;
   vpx_prob mode_prob = cm->fc->newmv_prob[mode_ctx];
 
   if (vpx_read(r, mode_prob) == 0) {
@@ -77,10 +77,10 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (counts)
     ++counts->newmv_mode[mode_ctx][1];
 
-  mode_ctx = (ctx >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
+  if (ctx & (1 << ALL_ZERO_FLAG_OFFSET))
+    return ZEROMV;
 
-  if (mode_ctx > 1)
-    assert(0);
+  mode_ctx = (ctx >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
 
   mode_prob = cm->fc->zeromv_prob[mode_ctx];
   if (vpx_read(r, mode_prob) == 0) {
@@ -91,11 +91,13 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (counts)
     ++counts->zeromv_mode[mode_ctx][1];
 
-  mode_ctx = (ctx >> REFMV_OFFSET);
+  mode_ctx = (ctx >> REFMV_OFFSET) & REFMV_CTX_MASK;
   mode_prob = cm->fc->refmv_prob[mode_ctx];
+
   if (vpx_read(r, mode_prob) == 0) {
     if (counts)
       ++counts->refmv_mode[mode_ctx][0];
+
     return NEARESTMV;
   } else {
     if (counts)
@@ -814,7 +816,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   int_mv nearestmv[2], nearmv[2];
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int ref, is_compound;
-  uint8_t inter_mode_ctx[MAX_REF_FRAMES];
+  int16_t inter_mode_ctx[MAX_REF_FRAMES];
+  int16_t mode_ctx = 0;
 
   read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
   is_compound = has_second_ref(mbmi);
@@ -838,6 +841,15 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                       mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
 
+  mode_ctx = inter_mode_ctx[mbmi->ref_frame[0]];
+
+#if CONFIG_REF_MV
+  if (mbmi->ref_frame[1] > NONE)
+    mode_ctx &= (inter_mode_ctx[mbmi->ref_frame[1]] | 0x00ff);
+  if (bsize < BLOCK_8X8)
+    mode_ctx &= 0x00ff;
+#endif
+
   if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     mbmi->mode = ZEROMV;
     if (bsize < BLOCK_8X8) {
@@ -847,8 +859,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     }
   } else {
     if (bsize >= BLOCK_8X8)
-      mbmi->mode = read_inter_mode(cm, xd, r,
-                                   inter_mode_ctx[mbmi->ref_frame[0]]);
+      mbmi->mode = read_inter_mode(cm, xd, r, mode_ctx);
   }
 
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
@@ -874,7 +885,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         int_mv block[2];
         const int j = idy * 2 + idx;
-        b_mode = read_inter_mode(cm, xd, r, inter_mode_ctx[mbmi->ref_frame[0]]);
+        b_mode = read_inter_mode(cm, xd, r, mode_ctx);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
           for (ref = 0; ref < 1 + is_compound; ++ref)

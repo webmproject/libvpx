@@ -460,6 +460,16 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
 
   xd->n8_h = bh;
   xd->n8_w = bw;
+#if CONFIG_REF_MV
+  xd->is_sec_rect = 0;
+  if (xd->n8_w < xd->n8_h)
+    if (mi_col & (xd->n8_h - 1))
+      xd->is_sec_rect = 1;
+
+  if (xd->n8_w > xd->n8_h)
+    if (mi_row & (xd->n8_w - 1))
+      xd->is_sec_rect = 1;
+#endif
 }
 
 static INLINE const vpx_prob *get_y_mode_probs(const VP10_COMMON *cm,

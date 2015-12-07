@@ -1260,20 +1260,25 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
 #if CONFIG_REF_MV
 static void update_inter_mode_stats(FRAME_COUNTS *counts,
                                     PREDICTION_MODE mode,
-                                    uint8_t mode_context) {
-  uint8_t mode_ctx = mode_context & NEWMV_CTX_MASK;
+                                    int16_t mode_context) {
+  int16_t mode_ctx = mode_context & NEWMV_CTX_MASK;
   if (mode == NEWMV) {
     ++counts->newmv_mode[mode_ctx][0];
     return;
   } else {
     ++counts->newmv_mode[mode_ctx][1];
+
+    if (mode_context & (1 << ALL_ZERO_FLAG_OFFSET)) {
+      return;
+    }
+
     mode_ctx = (mode_context >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
     if (mode == ZEROMV) {
       ++counts->zeromv_mode[mode_ctx][0];
       return;
     } else {
       ++counts->zeromv_mode[mode_ctx][1];
-      mode_ctx = (mode_context >> REFMV_OFFSET);
+      mode_ctx = (mode_context >> REFMV_OFFSET) & REFMV_CTX_MASK;
       ++counts->refmv_mode[mode_ctx][mode != NEARESTMV];
     }
   }
@@ -1355,10 +1360,12 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td) {
     }
     if (inter_block &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      const int mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
+      int16_t mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
 #if CONFIG_REF_MV
+        if (mbmi->ref_frame[1] > NONE)
+          mode_ctx &= (mbmi_ext->mode_context[mbmi->ref_frame[1]] | 0x00ff);
         update_inter_mode_stats(counts, mode, mode_ctx);
 #else
         ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
@@ -1372,6 +1379,7 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td) {
             const int j = idy * 2 + idx;
             const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
 #if CONFIG_REF_MV
+            mode_ctx &= 0x00ff;
             update_inter_mode_stats(counts, b_mode, mode_ctx);
 #else
             ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
