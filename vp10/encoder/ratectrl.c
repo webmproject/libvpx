@@ -1210,8 +1210,12 @@ static void update_golden_frame_stats(VP10_COMP *cpi) {
     rc->frames_since_golden = 0;
 
     // If we are not using alt ref in the up and coming group clear the arf
-    // active flag.
-    if (!rc->source_alt_ref_pending) {
+    // active flag. In multi arf group case, if the index is not 0 then
+    // we are overlaying a mid group arf so should not reset the flag.
+    if (cpi->oxcf.pass == 2) {
+      if (!rc->source_alt_ref_pending && (cpi->twopass.gf_group.index == 0))
+        rc->source_alt_ref_active = 0;
+    } else if (!rc->source_alt_ref_pending) {
       rc->source_alt_ref_active = 0;
     }
 
