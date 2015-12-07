@@ -20,8 +20,6 @@
 extern "C" {
 #endif
 
-void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
-                                vpx_reader *r);
 int vp10_decode_block_tokens(MACROBLOCKD *xd,
                             int plane, const scan_order *sc,
                             int x, int y,

@@ -83,25 +83,6 @@ static void fill_mode_costs(VP10_COMP *cpi) {
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     vp10_cost_tokens(cpi->switchable_interp_costs[i],
                     fc->switchable_interp_prob[i], vp10_switchable_interp_tree);
-
-  for (i = 0; i < PALETTE_BLOCK_SIZES; ++i) {
-    vp10_cost_tokens(cpi->palette_y_size_cost[i],
-                     vp10_default_palette_y_size_prob[i],
-                     vp10_palette_size_tree);
-    vp10_cost_tokens(cpi->palette_uv_size_cost[i],
-                     vp10_default_palette_uv_size_prob[i],
-                     vp10_palette_size_tree);
-  }
-
-  for (i = 0; i < PALETTE_MAX_SIZE - 1; ++i)
-    for (j = 0; j < PALETTE_COLOR_CONTEXTS; ++j) {
-      vp10_cost_tokens(cpi->palette_y_color_cost[i][j],
-                       vp10_default_palette_y_color_prob[i][j],
-                       vp10_palette_color_tree[i]);
-      vp10_cost_tokens(cpi->palette_uv_color_cost[i][j],
-                       vp10_default_palette_uv_color_prob[i][j],
-                       vp10_palette_color_tree[i]);
-    }
 #if CONFIG_EXT_TX
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     int s;

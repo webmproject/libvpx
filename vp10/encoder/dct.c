@@ -22,7 +22,10 @@
 
 static INLINE void range_check(const tran_low_t *input, const int size,
                                const int bit) {
-#if CONFIG_COEFFICIENT_RANGE_CHECKING
+#if 0  // CONFIG_COEFFICIENT_RANGE_CHECKING
+// TODO(angiebird): the range_check is not used because the bit range
+// in fdct# is not correct. Since we are going to merge in a new version
+// of fdct# from nextgenv2, we won't fix the incorrect bit range now.
   int i;
   for (i = 0; i < size; ++i) {
     assert(abs(input[i]) < (1 << bit));
@@ -487,7 +490,7 @@ static void fdct16(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 16, 16);
 }
 
-/* #TODO(angiebird): Unify this with vp10_fwd_txfm.c: vp10_fdct32
+/* TODO(angiebird): Unify this with vp10_fwd_txfm.c: vp10_fdct32
 static void fdct32(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[32];

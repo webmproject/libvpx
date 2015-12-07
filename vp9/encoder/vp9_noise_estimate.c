@@ -82,6 +82,21 @@ static void copy_frame(YV12_BUFFER_CONFIG * const dest,
   }
 }
 
+NOISE_LEVEL vp9_noise_estimate_extract_level(NOISE_ESTIMATE *const ne) {
+  int noise_level = kLowLow;
+  if (ne->value > (ne->thresh << 1)) {
+    noise_level = kHigh;
+  } else {
+    if (ne->value > ne->thresh)
+      noise_level = kMedium;
+    else if (ne->value > (ne->thresh >> 1))
+      noise_level = kLow;
+    else
+      noise_level = kLowLow;
+  }
+  return noise_level;
+}
+
 void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
@@ -220,16 +235,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
         // Reset counter and check noise level condition.
         ne->num_frames_estimate = 30;
         ne->count = 0;
-        if (ne->value > (ne->thresh << 1)) {
-          ne->level = kHigh;
-        } else {
-          if (ne->value > ne->thresh)
-            ne->level = kMedium;
-          else if (ne->value > (ne->thresh >> 1))
-            ne->level = kLow;
-          else
-            ne->level = kLowLow;
-        }
+        ne->level = vp9_noise_estimate_extract_level(ne);
 #if CONFIG_VP9_TEMPORAL_DENOISING
         if (cpi->oxcf.noise_sensitivity > 0)
           vp9_denoiser_set_noise_level(&cpi->denoiser, ne->level);

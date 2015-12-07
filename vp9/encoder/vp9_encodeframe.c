@@ -401,7 +401,6 @@ static int set_vt_partitioning(VP9_COMP *cpi,
   variance_node vt;
   const int block_width = num_8x8_blocks_wide_lookup[bsize];
   const int block_height = num_8x8_blocks_high_lookup[bsize];
-  const int low_res = (cm->width <= 352 && cm->height <= 288);
 
   assert(block_height == block_width);
   tree_to_node(data, bsize, &vt);
@@ -414,7 +413,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
   // No check for vert/horiz split as too few samples for variance.
   if (bsize == bsize_min) {
     // Variance already computed to set the force_split.
-    if (low_res || cm->frame_type == KEY_FRAME)
+    if (cm->frame_type == KEY_FRAME)
       get_variance(&vt.part_variances->none);
     if (mi_col + block_width / 2 < cm->mi_cols &&
         mi_row + block_height / 2 < cm->mi_rows &&
@@ -425,7 +424,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
     return 0;
   } else if (bsize > bsize_min) {
     // Variance already computed to set the force_split.
-    if (low_res || cm->frame_type == KEY_FRAME)
+    if (cm->frame_type == KEY_FRAME)
       get_variance(&vt.part_variances->none);
     // For key frame: take split for bsize above 32X32 or very high variance.
     if (cm->frame_type == KEY_FRAME &&
@@ -489,13 +488,14 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
     thresholds[2] = threshold_base >> 2;
     thresholds[3] = threshold_base << 2;
   } else {
-    // Increase base variance threshold if estimated noise level is high.
+    // Increase base variance threshold based on  estimated noise level.
     if (cpi->noise_estimate.enabled) {
-      if (cpi->noise_estimate.level == kHigh)
+      NOISE_LEVEL noise_level = vp9_noise_estimate_extract_level(
+          &cpi->noise_estimate);
+      if (noise_level == kHigh)
         threshold_base = 3 * threshold_base;
-      else
-        if (cpi->noise_estimate.level == kMedium)
-          threshold_base = threshold_base << 1;
+      else if (noise_level == kMedium)
+        threshold_base = threshold_base << 1;
     }
     if (cm->width <= 352 && cm->height <= 288) {
       thresholds[0] = threshold_base >> 3;
@@ -897,6 +897,14 @@ static int choose_partitioning(VP9_COMP *cpi,
         for (m = 0; m < 4; m++)
           fill_variance_tree(&vtemp->split[m], BLOCK_8X8);
         fill_variance_tree(vtemp, BLOCK_16X16);
+        // If variance of this 16x16 block is above the threshold, force block
+        // to split. This also forces a split on the upper levels.
+        get_variance(&vtemp->part_variances.none);
+        if (vtemp->part_variances.none.variance > thresholds[2]) {
+          force_split[5 + i2 + j] = 1;
+          force_split[i + 1] = 1;
+          force_split[0] = 1;
+        }
       }
     }
     fill_variance_tree(&vt.split[i], BLOCK_32X32);
