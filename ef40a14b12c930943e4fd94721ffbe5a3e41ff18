@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a0af948e_f86251e8",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-12-07T18:07:48Z",
+      "side": 1,
+      "message": "If you could structure this in a way that doesn\u0027t keeps braces balanced that would be great. (Two \u0027{\u0027 match the same \u0027}\u0027)",
+      "range": {
+        "startLine": 224,
+        "startChar": 11,
+        "endLine": 229,
+        "endChar": 5
+      },
+      "revId": "ef40a14b12c930943e4fd94721ffbe5a3e41ff18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
