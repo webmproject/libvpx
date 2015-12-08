@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00622024_16c6da97",
+        "filename": "vp10/common/entropymode.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2015-12-08T11:20:55Z",
+      "side": 1,
+      "message": "Should the array length for supertx_size be TX_SIZES?",
+      "revId": "72bbd79ee412963a15c2598b8bd1e9c36eecb90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "601bdcb8_464b9206",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1206,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2015-12-08T11:20:55Z",
+      "side": 1,
+      "message": "Should this function also have some dependency on CONFIG_SUPERTX?",
+      "revId": "72bbd79ee412963a15c2598b8bd1e9c36eecb90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4016d890_257ace07",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1666,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2015-12-08T11:20:55Z",
+      "side": 1,
+      "message": "Should this be !frame_is_intra_only(cm)?\n\nAs far as I understand, the supertx probabilities are not sent in the compressed_header for intra_only frames, but the supertx symbol is still being read.",
+      "revId": "72bbd79ee412963a15c2598b8bd1e9c36eecb90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
