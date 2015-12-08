@@ -16,6 +16,24 @@
       "revId": "89a1efa4c436c58c101c8b3de866e3014be7d77a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60c91c79_bf6a7b32",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-12-08T03:07:38Z",
+      "side": 1,
+      "message": "It\u0027s modified in change 31672. \n\nIn SSE2, punpckldq requires a 128b reg, which conflicts with the leftq definition in vp8 c code. add one extra movd to read leftq will help solving this issue.",
+      "parentUuid": "40933818_bc039851",
+      "revId": "89a1efa4c436c58c101c8b3de866e3014be7d77a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
