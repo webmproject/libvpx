@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60c91c79_3ffcabd9",
+        "filename": "tools/gen_authors.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-08T02:13:19Z",
+      "side": 1,
+      "message": "--use-mailmap would have worked",
+      "revId": "9fde1f2ee3cc149ec45a01942f9898f5f80648e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
