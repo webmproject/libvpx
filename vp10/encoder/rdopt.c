@@ -1783,7 +1783,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
             seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV) {
           MV *const new_mv = &mode_mv[NEWMV][0].as_mv;
           int step_param = 0;
-          int thissme, bestsme = INT_MAX;
+          int bestsme = INT_MAX;
           int sadpb = x->sadperbit4;
           MV mvp_full;
           int max_mv;
@@ -1837,27 +1837,6 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
               cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL,
               &bsi->ref_mv[0]->as_mv, new_mv,
               INT_MAX, 1);
-
-          // Should we do a full search (best quality only)
-          if (cpi->oxcf.mode == BEST) {
-            int_mv *const best_mv = &mi->bmi[i].as_mv[0];
-            /* Check if mvp_full is within the range. */
-            clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
-                     x->mv_row_min, x->mv_row_max);
-            thissme = cpi->full_search_sad(x, &mvp_full,
-                                           sadpb, 16, &cpi->fn_ptr[bsize],
-                                           &bsi->ref_mv[0]->as_mv,
-                                           &best_mv->as_mv);
-            cost_list[1] = cost_list[2] = cost_list[3] = cost_list[4] = INT_MAX;
-            if (thissme < bestsme) {
-              bestsme = thissme;
-              *new_mv = best_mv->as_mv;
-            } else {
-              // The full search result is actually worse so re-instate the
-              // previous best vector
-              best_mv->as_mv = *new_mv;
-            }
-          }
 
           if (bestsme < INT_MAX) {
             int distortion;
