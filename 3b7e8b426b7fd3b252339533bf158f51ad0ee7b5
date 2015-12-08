@@ -16,6 +16,23 @@
       "revId": "3b7e8b426b7fd3b252339533bf158f51ad0ee7b5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0feec6e_b5842ac5",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2015-12-08T14:47:10Z",
+      "side": 1,
+      "message": "Where is xd-\u003emi initialized?  Should this be calling set_offsets_supertx before doing the pointer assignment?",
+      "revId": "3b7e8b426b7fd3b252339533bf158f51ad0ee7b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
