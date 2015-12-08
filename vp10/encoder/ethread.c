@@ -128,6 +128,13 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
       memcpy(thread_data->td->counts, &cpi->common.counts,
              sizeof(cpi->common.counts));
     }
+
+    // Allocate buffers used by palette coding mode.
+    if (cpi->common.allow_screen_content_tools && i < num_workers - 1) {
+        MACROBLOCK *x = &thread_data->td->mb;
+        CHECK_MEM_ERROR(cm, x->palette_buffer,
+                        vpx_memalign(16, sizeof(*x->palette_buffer)));
+    }
   }
 
   // Encode a frame

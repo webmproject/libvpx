@@ -59,6 +59,13 @@ typedef struct {
 #endif
 } MB_MODE_INFO_EXT;
 
+typedef struct {
+  uint8_t best_palette_color_map[4096];
+  double kmeans_data_buf[4096];
+  uint8_t kmeans_indices_buf[4096];
+  uint8_t kmeans_pre_indices_buf[4096];
+} PALETTE_BUFFER;
+
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
   struct macroblock_plane plane[MAX_MB_PLANE];
@@ -98,6 +105,8 @@ struct macroblock {
   int *nmvsadcost[2];
   int *nmvsadcost_hp[2];
   int **mvsadcost;
+
+  PALETTE_BUFFER *palette_buffer;
 
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders
