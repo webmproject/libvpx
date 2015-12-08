@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a0af948e_ace25bf2",
+        "filename": ".mailmap",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-08T02:12:31Z",
+      "side": 0,
+      "message": "you stripped the wrong one; cf., git shortlog -e",
+      "revId": "16a4fab9e2c6d80c08183bf0cc27a3e0b9bd2346",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
