@@ -50,6 +50,40 @@
       "revId": "72bbd79ee412963a15c2598b8bd1e9c36eecb90d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c001e83e_14909a2f",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 992,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2015-12-08T11:57:21Z",
+      "side": 1,
+      "message": "the vp10_ext_tx_tree no longer exists in the rest of the code.  It seems to have split into an inter and intra version.  Presumably this version should be using the inter versions?",
+      "revId": "72bbd79ee412963a15c2598b8bd1e9c36eecb90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00622024_167ffaf7",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2988,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2015-12-08T11:57:21Z",
+      "side": 1,
+      "message": "These calls to restore_context will fail to compile with CONFIG_VAR_TX enabled.\nFrom examining similar code the fix is probably something like:\n\n#if CONFIG_VAR_TX\n    xd-\u003eabove_txfm_context \u003d cm-\u003eabove_txfm_context + mi_col;\n    xd-\u003eleft_txfm_context \u003d xd-\u003eleft_txfm_context_buffer + (mi_row \u0026 0x07);\n    restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);\n#else\n    restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);\n#endif\n\nbut I haven\u0027t really understood what the xd-\u003eabove_txfm_context line is doing so I am not sure whether this is correct.\n\nNote there are many similar calls to restore_context in this file which will need the same fix.",
+      "revId": "72bbd79ee412963a15c2598b8bd1e9c36eecb90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
