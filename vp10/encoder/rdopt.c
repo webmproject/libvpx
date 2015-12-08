@@ -2078,7 +2078,12 @@ static void tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   int src_stride = p->src.stride;
   uint8_t *src = &p->src.buf[4 * blk_row * src_stride + 4 * blk_col];
   uint8_t *dst = &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col];
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint16_t, rec_buffer_alloc_16[32 * 32]);
+  uint8_t *rec_buffer;
+#else
   DECLARE_ALIGNED(16, uint8_t, rec_buffer[32 * 32]);
+#endif
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -2090,8 +2095,20 @@ static void tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 
   vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    rec_buffer = CONVERT_TO_BYTEPTR(rec_buffer_alloc_16);
+    vpx_highbd_convolve_copy(dst, pd->dst.stride, rec_buffer, 32,
+                             NULL, 0, NULL, 0, bh, bh, xd->bd);
+  } else {
+    rec_buffer = (uint8_t *)rec_buffer_alloc_16;
+    vpx_convolve_copy(dst, pd->dst.stride, rec_buffer, 32,
+                      NULL, 0, NULL, 0, bh, bh);
+  }
+#else
   vpx_convolve_copy(dst, pd->dst.stride, rec_buffer, 32,
                     NULL, 0, NULL, 0, bh, bh);
+#endif
 
   if (blk_row + (bh >> 2) > max_blocks_high ||
       blk_col + (bh >> 2) > max_blocks_wide) {
