@@ -29,11 +29,14 @@ SCRIPT_DIR=$(dirname "$0")
 LIBVPX_SOURCE_DIR=$(cd ${SCRIPT_DIR}/../..; pwd)
 LIPO=$(xcrun -sdk iphoneos${SDK} -find lipo)
 ORIG_PWD="$(pwd)"
-TARGETS="arm64-darwin-gcc
-         armv7-darwin-gcc
-         armv7s-darwin-gcc
-         x86-iphonesimulator-gcc
-         x86_64-iphonesimulator-gcc"
+ARM_TARGETS="arm64-darwin-gcc
+             armv7-darwin-gcc
+             armv7s-darwin-gcc"
+SIM_TARGETS="x86-iphonesimulator-gcc
+             x86_64-iphonesimulator-gcc"
+OSX_TARGETS="x86-darwin15-gcc
+             x86_64-darwin15-gcc"
+TARGETS="${ARM_TARGETS} ${SIM_TARGETS}"
 
 # Configures for the target specified by $1, and invokes make with the dist
 # target using $DIST_DIR as the distribution output directory.
@@ -197,15 +200,27 @@ cleanup() {
   fi
 }
 
+print_list() {
+  local indent="$1"
+  shift
+  local list="$@"
+  for entry in ${list}; do
+    echo "${indent}${entry}"
+  done
+}
+
 iosbuild_usage() {
 cat << EOF
   Usage: ${0##*/} [arguments]
     --help: Display this message and exit.
     --extra-configure-args <args>: Extra args to pass when configuring libvpx.
+    --macosx: Uses darwin15 targets instead of iphonesimulator targets for x86
+              and x86_64. Allows linking to framework when builds target MacOSX
+              instead of iOS.
     --preserve-build-output: Do not delete the build directory.
     --show-build-output: Show output from each library build.
     --targets <targets>: Override default target list. Defaults:
-         ${TARGETS}
+$(print_list "        " ${TARGETS})
     --test-link: Confirms all targets can be linked. Functionally identical to
                  passing --enable-examples via --extra-configure-args.
     --verbose: Output information about the environment and each stage of the
@@ -249,6 +264,9 @@ while [ -n "$1" ]; do
       TARGETS="$2"
       shift
       ;;
+    --macosx)
+      TARGETS="${ARM_TARGETS} ${OSX_TARGETS}"
+      ;;
     --verbose)
       VERBOSE=yes
       ;;
@@ -273,10 +291,12 @@ cat << EOF
   MAKEFLAGS=${MAKEFLAGS}
   ORIG_PWD=${ORIG_PWD}
   PRESERVE_BUILD_OUTPUT=${PRESERVE_BUILD_OUTPUT}
-  TARGETS="${TARGETS}"
+  TARGETS="$(print_list "" ${TARGETS})"
+  OSX_TARGETS="${OSX_TARGETS}"
+  SIM_TARGETS="${SIM_TARGETS}"
 EOF
 fi
 
 build_framework "${TARGETS}"
 echo "Successfully built '${FRAMEWORK_DIR}' for:"
-echo "         ${TARGETS}"
+print_list "" ${TARGETS}
