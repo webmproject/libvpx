@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "00f940fe_3e9b6535",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-12-09T00:58:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40efb832_23aeaea8",
+      "revId": "a72eb23e46dbe6c15d9b6d46a8e16b5790887f49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0054e0af_2615d822",
         "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-09T00:47:44Z",
       "side": 1,
       "message": "these casts are wrong; use vreinterpret_u8_u32()",
+      "revId": "a72eb23e46dbe6c15d9b6d46a8e16b5790887f49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80ed303a_42665431",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-12-09T00:58:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0054e0af_2615d822",
       "revId": "a72eb23e46dbe6c15d9b6d46a8e16b5790887f49",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
