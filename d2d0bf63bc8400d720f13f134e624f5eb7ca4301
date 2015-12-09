@@ -16,6 +16,24 @@
       "revId": "d2d0bf63bc8400d720f13f134e624f5eb7ca4301",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05487277_a3b03a49",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-12-09T18:38:32Z",
+      "side": 1,
+      "message": "Originally it was movq/movhps. Later on I tried movhps/movq, and it gives a couple of ms gain in ./test_intra_pred_speed.",
+      "parentUuid": "60a2fc12_8e1a3bb9",
+      "revId": "d2d0bf63bc8400d720f13f134e624f5eb7ca4301",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
