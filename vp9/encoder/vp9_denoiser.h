@@ -23,7 +23,8 @@ extern "C" {
 
 typedef enum vp9_denoiser_decision {
   COPY_BLOCK,
-  FILTER_BLOCK
+  FILTER_BLOCK,
+  FILTER_ZEROMV_BLOCK
 } VP9_DENOISER_DECISION;
 
 typedef enum vp9_denoiser_level {
