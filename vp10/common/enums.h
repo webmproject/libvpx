@@ -207,7 +207,7 @@ typedef enum {
 #if CONFIG_REF_MV
 #define NEWMV_MODE_CONTEXTS  7
 #define ZEROMV_MODE_CONTEXTS 2
-#define REFMV_MODE_CONTEXTS  8
+#define REFMV_MODE_CONTEXTS  9
 
 #define ZEROMV_OFFSET 3
 #define REFMV_OFFSET  4
@@ -219,6 +219,7 @@ typedef enum {
 #define ALL_ZERO_FLAG_OFFSET   8
 #define SKIP_NEARESTMV_OFFSET  9
 #define SKIP_NEARMV_OFFSET    10
+#define SKIP_NEARESTMV_SUB8X8_OFFSET 11
 #endif
 
 #define INTER_MODE_CONTEXTS 7

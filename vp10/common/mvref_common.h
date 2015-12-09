@@ -195,6 +195,29 @@ static INLINE int is_inside(const TileInfo *const tile,
            mi_col + mi_pos->col >= tile->mi_col_end);
 }
 
+#if CONFIG_REF_MV
+static int16_t vp10_mode_context_analyzer(const int16_t *const mode_context,
+                                          const MV_REFERENCE_FRAME *const rf,
+                                          BLOCK_SIZE bsize, int block) {
+  int16_t mode_ctx = 0;
+  if (block >= 0) {
+    mode_ctx = mode_context[rf[0]] & 0x00ff;
+
+    if (block > 0 && bsize < BLOCK_8X8 && bsize > BLOCK_4X4)
+      mode_ctx |= (1 << SKIP_NEARESTMV_SUB8X8_OFFSET);
+
+    return mode_ctx;
+  }
+
+  if (rf[1] > INTRA_FRAME)
+    return mode_context[rf[0]] & (mode_context[rf[1]] | 0x00ff);
+  else if (rf[0] != ALTREF_FRAME)
+    return mode_context[rf[0]] & ~(mode_context[ALTREF_FRAME] & 0xfe00);
+  else
+    return mode_context[rf[0]];
+}
+#endif
+
 typedef void (*find_mv_refs_sync)(void *const data, int mi_row);
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                        MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,

@@ -92,6 +92,14 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
     ++counts->zeromv_mode[mode_ctx][1];
 
   mode_ctx = (ctx >> REFMV_OFFSET) & REFMV_CTX_MASK;
+
+  if (ctx & (1 << SKIP_NEARESTMV_OFFSET))
+    mode_ctx = 6;
+  if (ctx & (1 << SKIP_NEARMV_OFFSET))
+    mode_ctx = 7;
+  if (ctx & (1 << SKIP_NEARESTMV_SUB8X8_OFFSET))
+    mode_ctx = 8;
+
   mode_prob = cm->fc->refmv_prob[mode_ctx];
 
   if (vpx_read(r, mode_prob) == 0) {
@@ -820,12 +828,13 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   int ref, is_compound;
   int16_t inter_mode_ctx[MAX_REF_FRAMES];
   int16_t mode_ctx = 0;
+  MV_REFERENCE_FRAME ref_frame;
 
   read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
   is_compound = has_second_ref(mbmi);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
-    const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
+    MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
     RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
 
     xd->block_refs[ref] = ref_buf;
@@ -834,22 +843,23 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                          "Reference frame has invalid dimensions");
     vp10_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col,
                          &ref_buf->sf);
-    vp10_find_mv_refs(cm, xd, mi, frame,
+  }
+
+  for (ref_frame = LAST_FRAME; ref_frame < MAX_REF_FRAMES; ++ref_frame) {
+    vp10_find_mv_refs(cm, xd, mi, ref_frame,
 #if CONFIG_REF_MV
-                      &xd->ref_mv_count[frame],
-                      xd->ref_mv_stack[frame],
+                      &xd->ref_mv_count[ref_frame],
+                      xd->ref_mv_stack[ref_frame],
 #endif
-                      ref_mvs[frame],
+                      ref_mvs[ref_frame],
                       mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
 
   mode_ctx = inter_mode_ctx[mbmi->ref_frame[0]];
 
 #if CONFIG_REF_MV
-  if (mbmi->ref_frame[1] > NONE)
-    mode_ctx &= (inter_mode_ctx[mbmi->ref_frame[1]] | 0x00ff);
-  if (bsize < BLOCK_8X8)
-    mode_ctx &= 0x00ff;
+  mode_ctx = vp10_mode_context_analyzer(inter_mode_ctx,
+                                        mbmi->ref_frame, bsize, -1);
 #endif
 
   if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
@@ -887,6 +897,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         int_mv block[2];
         const int j = idy * 2 + idx;
+#if CONFIG_REF_MV
+        mode_ctx = vp10_mode_context_analyzer(inter_mode_ctx,  mbmi->ref_frame,
+                                              bsize, j);
+#endif
         b_mode = read_inter_mode(cm, xd, r, mode_ctx);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {

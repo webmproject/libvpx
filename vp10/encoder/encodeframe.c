@@ -1687,6 +1687,14 @@ static void update_inter_mode_stats(FRAME_COUNTS *counts,
     } else {
       ++counts->zeromv_mode[mode_ctx][1];
       mode_ctx = (mode_context >> REFMV_OFFSET) & REFMV_CTX_MASK;
+
+      if (mode_context & (1 << SKIP_NEARESTMV_OFFSET))
+        mode_ctx = 6;
+      if (mode_context & (1 << SKIP_NEARMV_OFFSET))
+        mode_ctx = 7;
+      if (mode_context & (1 << SKIP_NEARESTMV_SUB8X8_OFFSET))
+        mode_ctx = 8;
+
       ++counts->refmv_mode[mode_ctx][mode != NEARESTMV];
     }
   }
@@ -1779,8 +1787,8 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
 #if CONFIG_REF_MV
-        if (mbmi->ref_frame[1] > NONE)
-          mode_ctx &= (mbmi_ext->mode_context[mbmi->ref_frame[1]] | 0x00ff);
+        mode_ctx = vp10_mode_context_analyzer(mbmi_ext->mode_context,
+                                              mbmi->ref_frame, bsize, -1);
         update_inter_mode_stats(counts, mode, mode_ctx);
 #else
         ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
@@ -1794,7 +1802,8 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
             const int j = idy * 2 + idx;
             const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
 #if CONFIG_REF_MV
-            mode_ctx &= 0x00ff;
+            mode_ctx = vp10_mode_context_analyzer(mbmi_ext->mode_context,
+                                                  mbmi->ref_frame, bsize, j);
             update_inter_mode_stats(counts, b_mode, mode_ctx);
 #else
             ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];

@@ -216,7 +216,7 @@ static int has_top_right(const MACROBLOCKD *xd,
 }
 
 static void handle_sec_rect_block(const MB_MODE_INFO * const candidate,
-                                  uint8_t *refmv_count,
+                                  uint8_t refmv_count,
                                   CANDIDATE_MV *ref_mv_stack,
                                   MV_REFERENCE_FRAME ref_frame,
                                   int16_t *mode_context) {
@@ -224,7 +224,7 @@ static void handle_sec_rect_block(const MB_MODE_INFO * const candidate,
 
   for (rf = 0; rf < 2; ++rf) {
     if (candidate->ref_frame[rf] == ref_frame) {
-      const int list_range = VPXMIN(*refmv_count, MAX_MV_REF_CANDIDATES);
+      const int list_range = VPXMIN(refmv_count, MAX_MV_REF_CANDIDATES);
 
       const int_mv pred_mv = candidate->mv[rf];
       for (idx = 0; idx < list_range; ++idx)
@@ -232,15 +232,10 @@ static void handle_sec_rect_block(const MB_MODE_INFO * const candidate,
           break;
 
       if (idx < list_range) {
-        mode_context[ref_frame] &= ~(0x0f << REFMV_OFFSET);
-
-        if (idx == 0) {
+        if (idx == 0)
           mode_context[ref_frame] |= (1 << SKIP_NEARESTMV_OFFSET);
-          mode_context[ref_frame] |= (6 << REFMV_OFFSET);
-        } else if (idx == 1) {
+        else if (idx == 1)
           mode_context[ref_frame] |= (1 << SKIP_NEARMV_OFFSET);
-          mode_context[ref_frame] |= (7 << REFMV_OFFSET);
-        }
       }
     }
   }
@@ -417,14 +412,14 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     if (xd->n8_w < xd->n8_h) {
       const MODE_INFO *const candidate_mi = xd->mi[-1];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
-      handle_sec_rect_block(candidate, refmv_count, ref_mv_stack,
+      handle_sec_rect_block(candidate, nearest_refmv_count, ref_mv_stack,
                             ref_frame, mode_context);
     }
 
     if (xd->n8_w > xd->n8_h) {
       const MODE_INFO *const candidate_mi = xd->mi[-xd->mi_stride];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
-      handle_sec_rect_block(candidate, refmv_count, ref_mv_stack,
+      handle_sec_rect_block(candidate, nearest_refmv_count, ref_mv_stack,
                             ref_frame, mode_context);
     }
   }

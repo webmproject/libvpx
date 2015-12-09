@@ -181,7 +181,7 @@ static const vpx_prob default_zeromv_prob[ZEROMV_MODE_CONTEXTS] = {
 };
 
 static const vpx_prob default_refmv_prob[REFMV_MODE_CONTEXTS] = {
-    220, 220, 200, 200, 180, 128, 1, 250,
+    220, 220, 200, 200, 180, 128, 30, 220, 30,
 };
 #endif
 
