@@ -1696,11 +1696,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     VP9_DENOISER_DECISION decision = COPY_BLOCK;
     vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col,
                          VPXMAX(BLOCK_8X8, bsize), ctx, &decision);
-    // If INTRA mode was selected, re-evaluate ZEROMV on denoised result.
-    // Only do this under noise conditions, and if rdcost of ZEROMV on
-    // original source is not significantly higher than rdcost of INTRA MODE.
-    if (best_ref_frame == INTRA_FRAME &&
-        decision == FILTER_BLOCK &&
+    // If INTRA or GOLDEN reference was selected, re-evaluate ZEROMV on denoised
+    // result. Only do this under noise conditions, and if rdcost of ZEROMV on
+    // original source is not significantly higher than rdcost of best mode.
+    if (((best_ref_frame == INTRA_FRAME && decision >= FILTER_BLOCK) ||
+        (best_ref_frame == GOLDEN_FRAME && decision == FILTER_ZEROMV_BLOCK)) &&
         cpi->noise_estimate.enabled &&
         cpi->noise_estimate.level > kLow &&
         zero_last_cost_orig < (best_rdc.rdcost << 3)) {
@@ -1721,13 +1721,21 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       this_rdc.dist = dist;
       this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, rate, dist);
       // Switch to ZEROMV if the rdcost for ZEROMV on denoised source
-      // is lower than INTRA (on original source).
+      // is lower than best_ref mode (on original source).
       if (this_rdc.rdcost > best_rdc.rdcost) {
         this_rdc = best_rdc;
         mbmi->mode = best_mode;
         mbmi->ref_frame[0] = best_ref_frame;
-        mbmi->mv[0].as_int = INVALID_MV;
         mbmi->interp_filter = best_pred_filter;
+        if (best_ref_frame == INTRA_FRAME)
+          mbmi->mv[0].as_int = INVALID_MV;
+        else if (best_ref_frame == GOLDEN_FRAME) {
+          mbmi->mv[0].as_int = frame_mv[best_mode][best_ref_frame].as_int;
+          if (reuse_inter_pred) {
+            xd->plane[0].pre[0] = yv12_mb[GOLDEN_FRAME][0];
+            vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+          }
+        }
         mbmi->tx_size = best_tx_size;
         x->skip_txfm[0] = best_mode_skip_txfm;
       } else {
