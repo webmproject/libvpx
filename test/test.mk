@@ -92,10 +92,9 @@ endif
 ## shared library builds don't make these functions accessible.
 ##
 ifeq ($(CONFIG_SHARED),)
-LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += lpf_8_test.cc
 
 ## VP8
-ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
+ifeq ($(CONFIG_VP8),yes)
 
 # These tests require both the encoder and decoder to be built.
 ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),yesyes)
@@ -105,10 +104,10 @@ endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += vp8_decrypt_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += quantize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += set_roi.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += quantize_test.cc
 
 LIBVPX_TEST_SRCS-yes                   += idct_test.cc
 LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
@@ -121,7 +120,7 @@ endif
 endif # VP8
 
 ## VP9
-ifneq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),)
+ifeq ($(CONFIG_VP9),yes)
 
 # These tests require both the encoder and decoder to be built.
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),yesyes)
@@ -134,25 +133,25 @@ LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_encoder_parms_get_to_decoder.cc
 endif
 
-LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += convolve_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_thread_test.cc
+LIBVPX_TEST_SRCS-yes                   += convolve_test.cc
+LIBVPX_TEST_SRCS-yes                   += lpf_8_test.cc
+LIBVPX_TEST_SRCS-yes                   += vp9_intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_decrypt_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_thread_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct32x32_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_avg_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_error_block_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += vp9_intrapred_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
 
 ifeq ($(CONFIG_VP9_ENCODER),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_SPATIAL_SVC) += svc_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += blockiness_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += consistency_test.cc
-
 endif
 
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_TEMPORAL_DENOISING),yesyes)
@@ -162,14 +161,19 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_arf_freq_test.cc
 
 endif # VP9
 
-LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += sad_test.cc
-
-TEST_INTRA_PRED_SPEED_SRCS-$(CONFIG_VP9) := test_intra_pred_speed.cc
-TEST_INTRA_PRED_SPEED_SRCS-$(CONFIG_VP9) += ../md5_utils.h ../md5_utils.c
-
 ## VP10
+ifeq ($(CONFIG_VP10),yes)
+
+LIBVPX_TEST_SRCS-yes                    += vp10_inv_txfm_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_dct_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_inv_txfm_test.cc
+
+endif # VP10
+
+## Multi-codec / unconditional whitebox tests.
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
+
+TEST_INTRA_PRED_SPEED_SRCS-yes := test_intra_pred_speed.cc
+TEST_INTRA_PRED_SPEED_SRCS-yes += ../md5_utils.h ../md5_utils.c
 
 endif # CONFIG_SHARED
 
