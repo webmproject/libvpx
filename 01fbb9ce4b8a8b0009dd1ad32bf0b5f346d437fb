@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20fe44e6_bf13f335",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-09T01:05:59Z",
+      "side": 1,
+      "message": "sum doesn\u0027t need to be initialized it\u0027s set at line 35",
+      "revId": "01fbb9ce4b8a8b0009dd1ad32bf0b5f346d437fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20fe44e6_9f18b753",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-09T01:05:59Z",
+      "side": 1,
+      "message": "this could be 1 line I think",
+      "revId": "01fbb9ce4b8a8b0009dd1ad32bf0b5f346d437fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
