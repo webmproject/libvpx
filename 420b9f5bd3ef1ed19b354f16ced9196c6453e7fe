@@ -16,6 +16,24 @@
       "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "254d7687_7370cabe",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-12-10T18:15:25Z",
+      "side": 0,
+      "message": "Yes, the loop is unrolled from 16 to 8. \n\nSSSE3 implementation processes 2 pixels in the left neighbor per loop, while the SSE2 version processes 4 pixels from a movd per loop. Thus the number of loop is reduced from 16 to 8, and number of movd is reduced from 32 to 8.",
+      "parentUuid": "a5408643_7371fa79",
+      "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
