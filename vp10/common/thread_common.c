@@ -366,6 +366,20 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
     for (j = 0; j < SWITCHABLE_FILTERS; j++)
       cm->counts.switchable_interp[i][j] += counts->switchable_interp[i][j];
 
+#if CONFIG_REF_MV
+  for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
+    for (j = 0; j < 2; ++j)
+      cm->counts.newmv_mode[i][j] += counts->newmv_mode[i][j];
+
+  for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i)
+    for (j = 0; j < 2; ++j)
+      cm->counts.zeromv_mode[i][j] += counts->zeromv_mode[i][j];
+
+  for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
+    for (j = 0; j < 2; ++j)
+      cm->counts.refmv_mode[i][j] += counts->refmv_mode[i][j];
+#endif
+
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     for (j = 0; j < INTER_MODES; j++)
       cm->counts.inter_mode[i][j] += counts->inter_mode[i][j];

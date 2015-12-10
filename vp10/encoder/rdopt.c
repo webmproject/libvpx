@@ -3025,9 +3025,33 @@ static void choose_intra_uv_mode(VP10_COMP *cpi, MACROBLOCK *const x,
 }
 
 static int cost_mv_ref(const VP10_COMP *cpi, PREDICTION_MODE mode,
-                       int mode_context) {
+                       uint8_t mode_context) {
+#if CONFIG_REF_MV
+  int mode_cost = 0;
+  uint8_t mode_ctx = mode_context & NEWMV_CTX_MASK;
+
+  assert(is_inter_mode(mode));
+
+  if (mode == NEWMV) {
+    mode_cost = cpi->newmv_mode_cost[mode_ctx][0];
+    return mode_cost;
+  } else {
+    mode_cost = cpi->newmv_mode_cost[mode_ctx][1];
+    mode_ctx = (mode_context >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
+    if (mode == ZEROMV) {
+      mode_cost += cpi->zeromv_mode_cost[mode_ctx][0];
+      return mode_cost;
+    } else {
+      mode_cost += cpi->zeromv_mode_cost[mode_ctx][1];
+      mode_ctx = (mode_context >> REFMV_OFFSET);
+      mode_cost += cpi->refmv_mode_cost[mode_ctx][mode != NEARESTMV];
+      return mode_cost;
+    }
+  }
+#else
   assert(is_inter_mode(mode));
   return cpi->inter_mode_cost[mode_context][INTER_OFFSET(mode)];
+#endif
 }
 
 static int set_and_cost_bmi_mvs(VP10_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,

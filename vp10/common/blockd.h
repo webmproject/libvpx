@@ -133,8 +133,8 @@ typedef struct {
   int8_t angle_delta[2];
 #endif  // CONFIG_EXT_INTRA
 
-  // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
   int_mv mv[2];
+  int_mv pred_mv[2];
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
