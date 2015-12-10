@@ -2834,7 +2834,6 @@ void vp9_scale_references(VP9_COMP *cpi) {
         if (cm->new_fb_idx == INVALID_IDX)
           return;
         new_fb_ptr = &pool->frame_bufs[new_fb];
-        cm->cur_frame = &pool->frame_bufs[new_fb];
         vp9_realloc_frame_buffer(&pool->frame_bufs[new_fb].buf,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
@@ -3073,9 +3072,9 @@ static void set_frame_size(VP9_COMP *cpi) {
 
 #if CONFIG_INTERNAL_RESIZE
   if (oxcf->pass == 2 && oxcf->resize_mode == RESIZE_DYNAMIC) {
-    if ((cm->current_video_frame % 5) == 2) {
+    if ((cm->current_video_frame % 15) == 3) {
       cpi->resize_pending = 1;
-      cpi->rc.frame_size_selector = (cm->current_video_frame / 5) & 0x01;
+      cpi->rc.frame_size_selector = (cm->current_video_frame / 15) & 0x01;
     } else {
       cpi->resize_pending = 0;
     }
