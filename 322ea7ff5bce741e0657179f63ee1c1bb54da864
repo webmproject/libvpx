@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65984e34_78a9a1ba",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-10T23:06:27Z",
+      "side": 1,
+      "message": "for now this works as there are checks for 32-bit+pic. was that the intent (of the unused) GET_GOT_SAVE_ARG?",
+      "revId": "322ea7ff5bce741e0657179f63ee1c1bb54da864",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
