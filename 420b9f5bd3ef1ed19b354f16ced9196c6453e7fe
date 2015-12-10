@@ -70,6 +70,24 @@
       "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5408643_f3128ade",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-10T19:08:41Z",
+      "side": 0,
+      "message": "Thanks for the info.",
+      "parentUuid": "a5596647_578ff613",
+      "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
