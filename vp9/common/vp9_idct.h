@@ -82,27 +82,6 @@ static const tran_high_t sinpi_2_9 = 9929;
 static const tran_high_t sinpi_3_9 = 13377;
 static const tran_high_t sinpi_4_9 = 15212;
 
-#if CONFIG_EXT_TX
-static const int32_t dst_lookup4[] = {
-  // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
-  // at precision of 2 * DCT_CONST_BITS bits
-  141124871, 228344838,
-};
-
-static const int32_t dst_lookup8[] = {
-  // {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)} * sqrt(2/9) * 2
-  // at precision of 2 * DCT_CONST_BITS bits
-  86559612, 162678858, 219176632, 249238470
-};
-
-static const int32_t dst_lookup16[] = {
-  // {sin(pi/17), sin(pi*2/17, ..., sin(pi*8/17)} * sqrt(2/17) * 2 * sqrt(2)
-  // at precision of 2 * DCT_CONST_BITS bits
-  47852167, 94074787, 137093803, 175444254,
-  207820161, 233119001, 250479254, 259309736
-};
-#endif  // CONFIG_EXT_TX
-
 static INLINE tran_low_t check_range(tran_high_t input) {
 #if CONFIG_VP9_HIGHBITDEPTH
   // For valid highbitdepth VP9 streams, intermediate stage coefficients will
@@ -168,6 +147,220 @@ static INLINE uint8_t clip_pixel_add(uint8_t dest, tran_high_t trans) {
   trans = WRAPLOW(trans, 8);
   return clip_pixel(WRAPLOW(dest + trans, 8));
 }
+
+#if CONFIG_EXT_TX
+#define USE_DST2 1
+
+#if USE_DST2
+static const tran_high_t Tx4[4 * 4] = {
+  // dst2
+  6270,  15137,  15137,   6270,
+  11585,  11585, -11585, -11585,
+  15137,  -6270,  -6270,  15137,
+  11585, -11585,  11585, -11585,
+};
+
+static const tran_high_t Tx8[8 * 8] = {
+  // dst2
+  3196,   9102,  13623,  16069,  16069,  13623,   9102,   3196,
+  6270,  15137,  15137,   6270,  -6270, -15137, -15137,  -6270,
+  9102,  16069,   3196, -13623, -13623,   3196,  16069,   9102,
+  11585,  11585, -11585, -11585,  11585,  11585, -11585, -11585,
+  13623,   3196, -16069,   9102,   9102, -16069,   3196,  13623,
+  15137,  -6270,  -6270,  15137, -15137,   6270,   6270, -15137,
+  16069, -13623,   9102,  -3196,  -3196,   9102, -13623,  16069,
+  11585, -11585,  11585, -11585,  11585, -11585,  11585, -11585,
+};
+
+static const tran_high_t Tx16[16 * 16] = {
+  // dst2
+  1606,   4756,   7723,  10394,  12665,  14449,  15679,  16305,
+  16305,  15679,  14449,  12665,  10394,   7723,   4756,   1606,
+  3196,   9102,  13623,  16069,  16069,  13623,   9102,   3196,
+  -3196,  -9102, -13623, -16069, -16069, -13623,  -9102,  -3196,
+  4756,  12665,  16305,  14449,   7723,  -1606, -10394, -15679,
+  -15679, -10394,  -1606,   7723,  14449,  16305,  12665,   4756,
+  6270,  15137,  15137,   6270,  -6270, -15137, -15137,  -6270,
+  6270,  15137,  15137,   6270,  -6270, -15137, -15137,  -6270,
+  7723,  16305,  10394,  -4756, -15679, -12665,   1606,  14449,
+  14449,   1606, -12665, -15679,  -4756,  10394,  16305,   7723,
+  9102,  16069,   3196, -13623, -13623,   3196,  16069,   9102,
+  -9102, -16069,  -3196,  13623,  13623,  -3196, -16069,  -9102,
+  10394,  14449,  -4756, -16305,  -1606,  15679,   7723, -12665,
+  -12665,   7723,  15679,  -1606, -16305,  -4756,  14449,  10394,
+  11585,  11585, -11585, -11585,  11585,  11585, -11585, -11585,
+  11585,  11585, -11585, -11585,  11585,  11585, -11585, -11585,
+  12665,   7723, -15679,  -1606,  16305,  -4756, -14449,  10394,
+  10394, -14449,  -4756,  16305,  -1606, -15679,   7723,  12665,
+  13623,   3196, -16069,   9102,   9102, -16069,   3196,  13623,
+  -13623,  -3196,  16069,  -9102,  -9102,  16069,  -3196, -13623,
+  14449,  -1606, -12665,  15679,  -4756, -10394,  16305,  -7723,
+  -7723,  16305, -10394,  -4756,  15679, -12665,  -1606,  14449,
+  15137,  -6270,  -6270,  15137, -15137,   6270,   6270, -15137,
+  15137,  -6270,  -6270,  15137, -15137,   6270,   6270, -15137,
+  15679, -10394,   1606,   7723, -14449,  16305, -12665,   4756,
+  4756, -12665,  16305, -14449,   7723,   1606, -10394,  15679,
+  16069, -13623,   9102,  -3196,  -3196,   9102, -13623,  16069,
+  -16069,  13623,  -9102,   3196,   3196,  -9102,  13623, -16069,
+  16305, -15679,  14449, -12665,  10394,  -7723,   4756,  -1606,
+  -1606,   4756,  -7723,  10394, -12665,  14449, -15679,  16305,
+  11585, -11585,  11585, -11585,  11585, -11585,  11585, -11585,
+  11585, -11585,  11585, -11585,  11585, -11585,  11585, -11585,
+};
+#endif  // USE_DST2
+
+static INLINE void vp9_fgentx4(const tran_low_t *input, tran_low_t *output,
+                               const tran_high_t *T) {
+  tran_high_t sum;
+  int i;
+  const tran_high_t *Tx = T;
+  for (i = 0; i < 4; ++i, Tx += 4) {
+    sum = Tx[0] * input[0] + Tx[1] * input[1] +
+          Tx[2] * input[2] + Tx[3] * input[3];
+    output[i] = ROUND_POWER_OF_TWO(sum, DCT_CONST_BITS);
+  }
+}
+
+static INLINE void vp9_fgentx8(const tran_low_t *input, tran_low_t *output,
+                               const tran_high_t *T) {
+  tran_high_t sum;
+  int i;
+  const tran_high_t *Tx = T;
+  for (i = 0; i < 8; ++i, Tx += 8) {
+    sum = Tx[0] * input[0] + Tx[1] * input[1] +
+          Tx[2] * input[2] + Tx[3] * input[3] +
+          Tx[4] * input[4] + Tx[5] * input[5] +
+          Tx[6] * input[6] + Tx[7] * input[7];
+    output[i] = ROUND_POWER_OF_TWO(sum, DCT_CONST_BITS);
+  }
+}
+
+static INLINE void vp9_fgentx16(const tran_low_t *input, tran_low_t *output,
+                                const tran_high_t *T) {
+  tran_high_t sum;
+  int i;
+  const tran_high_t *Tx = T;
+  for (i = 0; i < 16; ++i, Tx += 16) {
+    sum = Tx[0] * input[0] + Tx[1] * input[1] +
+          Tx[2] * input[2] + Tx[3] * input[3] +
+          Tx[4] * input[4] + Tx[5] * input[5] +
+          Tx[6] * input[6] + Tx[7] * input[7] +
+          Tx[8] * input[8] + Tx[9] * input[9] +
+          Tx[10] * input[10] + Tx[11] * input[11] +
+          Tx[12] * input[12] + Tx[13] * input[13] +
+          Tx[14] * input[14] + Tx[15] * input[15];
+    output[i] = ROUND_POWER_OF_TWO(sum, DCT_CONST_BITS);
+  }
+}
+
+static INLINE void vp9_igentx4(const tran_low_t *input, tran_low_t *output,
+                               const tran_high_t *T) {
+  tran_high_t sum[4];
+  int i;
+  const tran_high_t *Tx = T;
+  for (i = 0; i < 4; ++i, ++Tx) {
+    sum[i] = Tx[0] * input[0] + Tx[4] * input[1] +
+             Tx[8] * input[2] + Tx[12] * input[3];
+  }
+  for (i = 0; i < 4; ++i) {
+    output[i] = WRAPLOW(ROUND_POWER_OF_TWO(sum[i], DCT_CONST_BITS), 8);
+  }
+}
+
+static INLINE void vp9_igentx8(const tran_low_t *input, tran_low_t *output,
+                               const tran_high_t *T) {
+  tran_high_t sum[8];
+  int i;
+  const tran_high_t *Tx = T;
+  for (i = 0; i < 8; ++i, ++Tx) {
+    sum[i] = Tx[0] * input[0] + Tx[8] * input[1] +
+             Tx[16] * input[2] + Tx[24] * input[3] +
+             Tx[32] * input[4] + Tx[40] * input[5] +
+             Tx[48] * input[6] + Tx[56] * input[7];
+  }
+  for (i = 0; i < 8; ++i) {
+    output[i] = WRAPLOW(ROUND_POWER_OF_TWO(sum[i], DCT_CONST_BITS), 8);
+  }
+}
+
+static INLINE void vp9_igentx16(const tran_low_t *input, tran_low_t *output,
+                                const tran_high_t *T) {
+  tran_high_t sum[16];
+  int i;
+  const tran_high_t *Tx = T;
+  for (i = 0; i < 16; ++i, ++Tx) {
+    sum[i] = Tx[0] * input[0] + Tx[16] * input[1] +
+             Tx[32] * input[2] + Tx[48] * input[3] +
+             Tx[64] * input[4] + Tx[80] * input[5] +
+             Tx[96] * input[6] + Tx[112] * input[7] +
+             Tx[128] * input[8] + Tx[144] * input[9] +
+             Tx[160] * input[10] + Tx[176] * input[11] +
+             Tx[192] * input[12] + Tx[208] * input[13] +
+             Tx[224] * input[14] + Tx[240] * input[15];
+  }
+  for (i = 0; i < 16; ++i) {
+    output[i] = WRAPLOW(ROUND_POWER_OF_TWO(sum[i], DCT_CONST_BITS), 8);
+  }
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE void vp9_highbd_igentx4(const tran_low_t *input,
+                                      tran_low_t *output,
+                                      int bd, const tran_high_t *T) {
+  tran_high_t sum[4];
+  int i;
+  const tran_high_t *Tx = T;
+  (void) bd;
+  for (i = 0; i < 4; ++i, Tx += 1) {
+    sum[i] = Tx[0] * input[0] + Tx[4] * input[1] +
+             Tx[8] * input[2] + Tx[12] * input[3];
+  }
+  for (i = 0; i < 4; ++i) {
+    output[i] = WRAPLOW(ROUND_POWER_OF_TWO(sum[i], DCT_CONST_BITS), bd);
+  }
+}
+
+static INLINE void vp9_highbd_igentx8(const tran_low_t *input,
+                                      tran_low_t *output,
+                                      int bd, const tran_high_t *T) {
+  tran_high_t sum[8];
+  int i;
+  const tran_high_t *Tx = T;
+  (void) bd;
+  for (i = 0; i < 8; ++i, Tx += 1) {
+    sum[i] = Tx[0] * input[0] + Tx[8] * input[1] +
+             Tx[16] * input[2] + Tx[24] * input[3] +
+             Tx[32] * input[4] + Tx[40] * input[5] +
+             Tx[48] * input[6] + Tx[56] * input[7];
+  }
+  for (i = 0; i < 8; ++i) {
+    output[i] = WRAPLOW(ROUND_POWER_OF_TWO(sum[i], DCT_CONST_BITS), bd);
+  }
+}
+
+static INLINE void vp9_highbd_igentx16(const tran_low_t *input,
+                                       tran_low_t *output,
+                                       int bd, const tran_high_t *T) {
+  tran_high_t sum[16];
+  int i;
+  const tran_high_t *Tx = T;
+  (void) bd;
+  for (i = 0; i < 16; ++i, Tx += 1) {
+    sum[i] = Tx[0] * input[0] + Tx[16] * input[1] +
+             Tx[32] * input[2] + Tx[48] * input[3] +
+             Tx[64] * input[4] + Tx[80] * input[5] +
+             Tx[96] * input[6] + Tx[112] * input[7] +
+             Tx[128] * input[8] + Tx[144] * input[9] +
+             Tx[160] * input[10] + Tx[176] * input[11] +
+             Tx[192] * input[12] + Tx[208] * input[13] +
+             Tx[224] * input[14] + Tx[240] * input[15];
+  }
+  for (i = 0; i < 16; ++i) {
+    output[i] = WRAPLOW(ROUND_POWER_OF_TWO(sum[i], DCT_CONST_BITS), bd);
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_EXT_TX
 
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);

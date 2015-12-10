@@ -1874,9 +1874,6 @@ static void build_inter_predictors_single_buf(MACROBLOCKD *xd,
   int is_global;
   gm = &xd->global_motion[mi->mbmi.ref_frame[ref]][0];
 #endif  // CONFIG_GLOBAL_MOTION
-#if CONFIG_INTRABC
-  assert(!is_intrabc || mi->mbmi.interp_filter == BILINEAR);
-#endif  // CONFIG_INTRABC
 
   const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
   struct buf_2d *const dst_buf = &pd->dst;
@@ -1910,6 +1907,9 @@ static void build_inter_predictors_single_buf(MACROBLOCKD *xd,
   int xs, ys, subpel_x, subpel_y;
   const int is_scaled = vp9_is_scaled(sf);
   (void) dst_buf;
+#if CONFIG_INTRABC
+  assert(!is_intrabc || mi->mbmi.interp_filter == BILINEAR);
+#endif  // CONFIG_INTRABC
 
 #if CONFIG_GLOBAL_MOTION
   is_global = (get_y_mode(mi, block) == ZEROMV &&
@@ -2017,10 +2017,10 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0].src_mi;
   const int is_compound = has_second_ref(&mi->mbmi);
+  int ref;
 #if CONFIG_INTRABC
   const int is_intrabc = is_intrabc_mode(mi->mbmi.mode);
 #endif  // CONFIG_INTRABC
-  int ref;
 #if CONFIG_GLOBAL_MOTION
   Global_Motion_Params *gm[2];
   gm[0] = &xd->global_motion[mi->mbmi.ref_frame[0]][0];
