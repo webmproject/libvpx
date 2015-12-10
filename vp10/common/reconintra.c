@@ -338,7 +338,7 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
       y = r * 256 - x * dy;
       base = y >> 8;
       shift = y - base * 256;
-      if (base < bs - 1) {
+      if (base < 2 * bs - 1) {
         val =
             (left[base] * (256 - shift) + left[base + 1] * shift + 128) >> 8;
         dst[c] = clip_pixel(val);
@@ -625,7 +625,7 @@ static void highbd_dr_prediction_z3(uint16_t *dst, ptrdiff_t stride, int bs,
       y = r * 256 - x * dy;
       base = y >> 8;
       shift = y - base * 256;
-      if (base < bs - 1) {
+      if (base < 2 * bs - 1) {
         val =
             (left[base] * (256 - shift) + left[base + 1] * shift + 128) >> 8;
         dst[c] = clip_pixel_highbd(val, bd);
