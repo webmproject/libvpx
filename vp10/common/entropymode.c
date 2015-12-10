@@ -173,7 +173,7 @@ static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
 
 #if CONFIG_REF_MV
 static const vpx_prob default_newmv_prob[NEWMV_MODE_CONTEXTS] = {
-    230, 190, 150, 110, 70, 30,
+    200, 180, 150, 150, 110, 70, 60,
 };
 
 static const vpx_prob default_zeromv_prob[ZEROMV_MODE_CONTEXTS] = {
@@ -181,7 +181,7 @@ static const vpx_prob default_zeromv_prob[ZEROMV_MODE_CONTEXTS] = {
 };
 
 static const vpx_prob default_refmv_prob[REFMV_MODE_CONTEXTS] = {
-    180, 230, 128
+    220, 220, 200, 200, 180, 128,
 };
 #endif
 
