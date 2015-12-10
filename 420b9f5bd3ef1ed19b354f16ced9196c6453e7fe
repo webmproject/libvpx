@@ -34,6 +34,24 @@
       "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "059dd225_5b7063be",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-10T18:29:02Z",
+      "side": 0,
+      "message": "Sorry, I should have been more clear.  Did you try unrolling the ssse3 version?  Am curious if the performance gain on the big core is due to the loop unrolling.",
+      "parentUuid": "254d7687_7370cabe",
+      "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
