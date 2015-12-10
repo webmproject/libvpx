@@ -262,7 +262,7 @@ static void vp10_init_intra_predictors_internal(void) {
 }
 
 #if CONFIG_MISC_FIXES
-static inline void memset16(uint16_t *dst, int val, int n) {
+static INLINE void memset16(uint16_t *dst, int val, int n) {
   while (n--)
     *dst++ = val;
 }

@@ -1155,7 +1155,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     x->source_variance =
         vp10_high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
-                                           bsize, xd->bd);
+                                            bsize, xd->bd);
   } else {
     x->source_variance =
       vp10_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
@@ -2579,7 +2579,7 @@ static MV_REFERENCE_FRAME get_frame_type(const VP10_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
-  if (!cpi->common.seg.enabled && xd->lossless[0])
+  if (xd->lossless[0])
     return ONLY_4X4;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
@@ -2702,16 +2702,12 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   rdc->m_search_count = 0;   // Count of motion search hits.
   rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
-  for (i = 0; i < (cm->seg.enabled ? MAX_SEGMENTS : 1); ++i) {
-#if CONFIG_MISC_FIXES
-    const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
-#endif
-    xd->lossless[i] = cm->y_dc_delta_q == 0 &&
-#if CONFIG_MISC_FIXES
-                      qindex == 0 &&
-#else
-                      cm->base_qindex == 0 &&
-#endif
+  for (i = 0; i < MAX_SEGMENTS; ++i) {
+    const int qindex = CONFIG_MISC_FIXES && cm->seg.enabled ?
+                       vp10_get_qindex(&cm->seg, i, cm->base_qindex) :
+                       cm->base_qindex;
+    xd->lossless[i] = qindex == 0 &&
+                      cm->y_dc_delta_q == 0 &&
                       cm->uv_dc_delta_q == 0 &&
                       cm->uv_ac_delta_q == 0;
   }
