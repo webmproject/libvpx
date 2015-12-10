@@ -1152,16 +1152,12 @@ static void setup_quantization(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   cm->uv_dc_delta_q = read_delta_q(rb);
   cm->uv_ac_delta_q = read_delta_q(rb);
   cm->dequant_bit_depth = cm->bit_depth;
-  for (i = 0; i < (cm->seg.enabled ? MAX_SEGMENTS : 1); ++i) {
-#if CONFIG_MISC_FIXES
-    const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
-#endif
-    xd->lossless[i] = cm->y_dc_delta_q == 0 &&
-#if CONFIG_MISC_FIXES
-                      qindex == 0 &&
-#else
-                      cm->base_qindex == 0 &&
-#endif
+  for (i = 0; i < MAX_SEGMENTS; ++i) {
+    const int qindex = CONFIG_MISC_FIXES && cm->seg.enabled ?
+                       vp10_get_qindex(&cm->seg, i, cm->base_qindex) :
+                       cm->base_qindex;
+    xd->lossless[i] = qindex == 0 &&
+                      cm->y_dc_delta_q == 0 &&
                       cm->uv_dc_delta_q == 0 &&
                       cm->uv_ac_delta_q == 0;
   }
