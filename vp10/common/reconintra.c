@@ -192,9 +192,9 @@ static void vp10_init_intra_predictors_internal(void) {
 
   INIT_ALL_SIZES(pred[V_PRED], v);
   INIT_ALL_SIZES(pred[H_PRED], h);
-  INIT_ALL_SIZES(pred[D207_PRED], d207);
-  INIT_ALL_SIZES(pred[D45_PRED], d45);
-  INIT_ALL_SIZES(pred[D63_PRED], d63);
+  INIT_ALL_SIZES(pred[D207_PRED], d207e);
+  INIT_ALL_SIZES(pred[D45_PRED], d45e);
+  INIT_ALL_SIZES(pred[D63_PRED], d63e);
   INIT_ALL_SIZES(pred[D117_PRED], d117);
   INIT_ALL_SIZES(pred[D135_PRED], d135);
   INIT_ALL_SIZES(pred[D153_PRED], d153);
@@ -208,9 +208,9 @@ static void vp10_init_intra_predictors_internal(void) {
 #if CONFIG_VP9_HIGHBITDEPTH
   INIT_ALL_SIZES(pred_high[V_PRED], highbd_v);
   INIT_ALL_SIZES(pred_high[H_PRED], highbd_h);
-  INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207);
-  INIT_ALL_SIZES(pred_high[D45_PRED], highbd_d45);
-  INIT_ALL_SIZES(pred_high[D63_PRED], highbd_d63);
+  INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207e);
+  INIT_ALL_SIZES(pred_high[D45_PRED], highbd_d45e);
+  INIT_ALL_SIZES(pred_high[D63_PRED], highbd_d63e);
   INIT_ALL_SIZES(pred_high[D117_PRED], highbd_d117);
   INIT_ALL_SIZES(pred_high[D135_PRED], highbd_d135);
   INIT_ALL_SIZES(pred_high[D153_PRED], highbd_d153);

@@ -23,7 +23,7 @@ static int inv_recenter_nonneg(int v, int m) {
 
 static int decode_uniform(vpx_reader *r) {
   const int l = 8;
-  const int m = (1 << l) - 192;
+  const int m = (1 << l) - 190;
   const int v = vpx_read_literal(r, l - 1);
   return v < m ?  v : (v << 1) - m + vpx_read_bit(r);
 }

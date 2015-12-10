@@ -85,7 +85,7 @@ static int prob_diff_update_cost(vpx_prob newp, vpx_prob oldp) {
 
 static void encode_uniform(vpx_writer *w, int v) {
   const int l = 8;
-  const int m = (1 << l) - 192;
+  const int m = (1 << l) - 190;
   if (v < m) {
     vpx_write_literal(w, v, l - 1);
   } else {
