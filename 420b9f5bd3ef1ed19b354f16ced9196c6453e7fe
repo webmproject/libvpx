@@ -52,6 +52,24 @@
       "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5596647_578ff613",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-12-10T18:48:55Z",
+      "side": 0,
+      "message": "The gain is from the unrolling on the big core. \n\nI tried similar 8 loop scheme with SSSE3 (1 movd (input) + 4 pshufb + 8 mova (output)), the performance number is the same as that of the modified SSE2 version.",
+      "parentUuid": "059dd225_5b7063be",
+      "revId": "420b9f5bd3ef1ed19b354f16ced9196c6453e7fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
