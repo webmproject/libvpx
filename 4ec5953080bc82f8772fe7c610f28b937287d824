@@ -16,6 +16,24 @@
       "revId": "4ec5953080bc82f8772fe7c610f28b937287d824",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65984e34_73c302b2",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-12-11T00:31:36Z",
+      "side": 1,
+      "message": "m2[127:64] will not affect the result. After movhlps, m2[63:16] \u003d m0[63:16] \u003d 0, and the result at line 250 will be in m0[15:0]. This gets duplicated 8 times as word and packed to 16 bytes from line 251 to 253.",
+      "parentUuid": "454eea83_ff311fc7",
+      "revId": "4ec5953080bc82f8772fe7c610f28b937287d824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
