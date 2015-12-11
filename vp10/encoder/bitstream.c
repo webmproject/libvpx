@@ -1473,7 +1473,7 @@ void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
     assert(n_log2_tiles > 0);
     vpx_wb_write_literal(&saved_wb, mag, 2);
     if (mag < 3)
-      data_sz = (int)remux_tiles(data, data_sz, 1 << n_log2_tiles, mag);
+      data_sz = remux_tiles(data, (int)data_sz, 1 << n_log2_tiles, mag);
   } else {
     assert(n_log2_tiles == 0);
   }
