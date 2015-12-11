@@ -119,7 +119,7 @@
 %if ABI_IS_32BIT
     %if CONFIG_PIC=1
         %ifidn __OUTPUT_FORMAT__,elf32
-            %define GET_GOT_SAVE_ARG 1
+            %define GET_GOT_DEFINED 1
             %define WRT_PLT wrt ..plt
             %macro GET_GOT 1
                 extern _GLOBAL_OFFSET_TABLE_
@@ -138,7 +138,7 @@
                 %define RESTORE_GOT pop %1
             %endmacro
         %elifidn __OUTPUT_FORMAT__,macho32
-            %define GET_GOT_SAVE_ARG 1
+            %define GET_GOT_DEFINED 1
             %macro GET_GOT 1
                 push %1
                 call %%get_got
@@ -149,6 +149,8 @@
                 %undef RESTORE_GOT
                 %define RESTORE_GOT pop %1
             %endmacro
+        %else
+            %define GET_GOT_DEFINED 0
         %endif
     %endif
 

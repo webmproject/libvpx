@@ -139,8 +139,10 @@ SECTION .text
       %define sec_str sec_stridemp
 
       ;Store bilin_filter and pw_8 location in stack
-      GET_GOT eax
-      add esp, 4                ; restore esp
+      %if GET_GOT_DEFINED == 1
+        GET_GOT eax
+        add esp, 4                ; restore esp
+      %endif
 
       lea ecx, [GLOBAL(bilin_filter_m)]
       mov g_bilin_filterm, ecx
@@ -156,8 +158,10 @@ SECTION .text
       %define block_height heightd
 
       ;Store bilin_filter and pw_8 location in stack
-      GET_GOT eax
-      add esp, 4                ; restore esp
+      %if GET_GOT_DEFINED == 1
+        GET_GOT eax
+        add esp, 4                ; restore esp
+      %endif
 
       lea ecx, [GLOBAL(bilin_filter_m)]
       mov g_bilin_filterm, ecx

@@ -1181,7 +1181,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     x->source_variance =
         vp10_high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
-                                           bsize, xd->bd);
+                                            bsize, xd->bd);
   } else {
     x->source_variance =
       vp10_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
@@ -2776,7 +2776,7 @@ static MV_REFERENCE_FRAME get_frame_type(const VP10_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
-  if (!cpi->common.seg.enabled && xd->lossless[0])
+  if (xd->lossless[0])
     return ONLY_4X4;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
@@ -2839,6 +2839,10 @@ void vp10_encode_tile(VP10_COMP *cpi, ThreadData *td,
   TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
   int mi_row;
 
+  // Set up pointers to per thread motion search counters.
+  td->mb.m_search_count_ptr = &td->rd_counts.m_search_count;
+  td->mb.ex_search_count_ptr = &td->rd_counts.ex_search_count;
+
   for (mi_row = tile_info->mi_row_start; mi_row < tile_info->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
@@ -2892,11 +2896,15 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   vp10_zero(rdc->coef_counts);
   vp10_zero(rdc->comp_pred_diff);
   vp10_zero(rdc->filter_diff);
+  rdc->m_search_count = 0;   // Count of motion search hits.
+  rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
-  for (i = 0; i < (cm->seg.enabled ? MAX_SEGMENTS : 1); ++i) {
-    const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
-    xd->lossless[i] = cm->y_dc_delta_q == 0 &&
-                      qindex == 0 &&
+  for (i = 0; i < MAX_SEGMENTS; ++i) {
+    const int qindex = CONFIG_MISC_FIXES && cm->seg.enabled ?
+                       vp10_get_qindex(&cm->seg, i, cm->base_qindex) :
+                       cm->base_qindex;
+    xd->lossless[i] = qindex == 0 &&
+                      cm->y_dc_delta_q == 0 &&
                       cm->uv_dc_delta_q == 0 &&
                       cm->uv_ac_delta_q == 0;
   }

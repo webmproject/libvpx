@@ -47,9 +47,9 @@ cglobal dc_predictor_4x4, 4, 5, 3, dst, stride, above, left, goffset
 
 INIT_XMM sse2
 cglobal dc_left_predictor_4x4, 2, 5, 2, dst, stride, above, left, goffset
+  movifnidn          leftq, leftmp
   GET_GOT     goffsetq
 
-  movifnidn          leftq, leftmp
   pxor                  m1, m1
   movd                  m0, [leftq]
   psadbw                m0, m1
@@ -143,9 +143,9 @@ cglobal dc_top_predictor_8x8, 3, 5, 2, dst, stride, above, left, goffset
 
 INIT_XMM sse2
 cglobal dc_left_predictor_8x8, 2, 5, 2, dst, stride, above, left, goffset
+  movifnidn          leftq, leftmp
   GET_GOT     goffsetq
 
-  movifnidn          leftq, leftmp
   pxor                  m1, m1
   movq                  m0, [leftq]
   DEFINE_ARGS dst, stride, stride3
@@ -239,14 +239,11 @@ cglobal dc_top_predictor_16x16, 4, 5, 3, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   pxor                  m1, m1
-  pxor                  m2, m2
   mova                  m0, [aboveq]
   DEFINE_ARGS dst, stride, stride3, lines4
   lea             stride3q, [strideq*3]
   mov              lines4d, 4
   psadbw                m0, m1
-  psadbw                m2, m1
-  paddw                 m0, m2
   movhlps               m2, m0
   paddw                 m0, m2
   paddw                 m0, [GLOBAL(pw2_16)]
@@ -271,14 +268,11 @@ cglobal dc_left_predictor_16x16, 4, 5, 3, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   pxor                  m1, m1
-  pxor                  m2, m2
   mova                  m0, [leftq]
   DEFINE_ARGS dst, stride, stride3, lines4
   lea             stride3q, [strideq*3]
   mov              lines4d, 4
   psadbw                m0, m1
-  psadbw                m2, m1
-  paddw                 m0, m2
   movhlps               m2, m0
   paddw                 m0, m2
   paddw                 m0, [GLOBAL(pw2_16)]
