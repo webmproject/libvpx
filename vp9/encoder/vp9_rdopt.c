@@ -1359,11 +1359,25 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
-    const uint8_t *pre = &pd->pre[ref].buf[vp9_raster_block_offset(BLOCK_8X8, i,
-                                               pd->pre[ref].stride)];
+    const int bw = b_width_log2_lookup[BLOCK_8X8];
+    const int h = 4 * (i >> bw);
+    const int w = 4 * (i & ((1 << bw) - 1));
+    const struct scale_factors *sf = &xd->block_refs[ref]->sf;
+    int y_stride = pd->pre[ref].stride;
+    uint8_t *pre = pd->pre[ref].buf + (h * pd->pre[ref].stride + w);
+
+    if (vp9_is_scaled(sf)) {
+      const int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
+      const int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
+
+      y_stride = xd->block_refs[ref]->buf->y_stride;
+      pre = xd->block_refs[ref]->buf->y_buffer;
+      pre += scaled_buffer_offset(x_start + w, y_start + h,
+                                  y_stride, sf);
+    }
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_highbd_build_inter_predictor(pre, pd->pre[ref].stride,
+    vp9_highbd_build_inter_predictor(pre, y_stride,
                                      dst, pd->dst.stride,
                                      &mi->bmi[i].as_mv[ref].as_mv,
                                      &xd->block_refs[ref]->sf, width, height,
@@ -1371,7 +1385,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                                      mi_col * MI_SIZE + 4 * (i % 2),
                                      mi_row * MI_SIZE + 4 * (i / 2), xd->bd);
   } else {
-    vp9_build_inter_predictor(pre, pd->pre[ref].stride,
+    vp9_build_inter_predictor(pre, y_stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
                               &xd->block_refs[ref]->sf, width, height, ref,
@@ -1380,7 +1394,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                               mi_row * MI_SIZE + 4 * (i / 2));
   }
 #else
-    vp9_build_inter_predictor(pre, pd->pre[ref].stride,
+    vp9_build_inter_predictor(pre, y_stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
                               &xd->block_refs[ref]->sf, width, height, ref,
