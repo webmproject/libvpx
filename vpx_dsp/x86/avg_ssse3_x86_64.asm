@@ -8,11 +8,11 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-%define private_prefix vp10
+%define private_prefix vpx
 
 %include "third_party/x86inc/x86inc.asm"
 
-; This file provides SSSE3 version of the forward transformation. Part
+; This file provides SSSE3 version of the hadamard transformation. Part
 ; of the macro definitions are originally derived from the ffmpeg project.
 ; The current version applies to x86 64-bit only.
 

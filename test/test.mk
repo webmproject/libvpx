@@ -143,7 +143,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct32x32_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_avg_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_error_block_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
@@ -170,6 +169,11 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_dct_test.cc
 endif # VP10
 
 ## Multi-codec / unconditional whitebox tests.
+
+ifeq ($(findstring yes,$(CONFIG_VP9_ENCODER)$(CONFIG_VP10_ENCODER)),yes)
+LIBVPX_TEST_SRCS-yes += avg_test.cc
+endif
+
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
 
 TEST_INTRA_PRED_SPEED_SRCS-yes := test_intra_pred_speed.cc

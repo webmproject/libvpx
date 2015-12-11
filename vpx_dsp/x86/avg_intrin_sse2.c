@@ -10,10 +10,10 @@
 
 #include <emmintrin.h>
 
-#include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
 
-void vp9_minmax_8x8_sse2(const uint8_t *s, int p, const uint8_t *d, int dp,
+void vpx_minmax_8x8_sse2(const uint8_t *s, int p, const uint8_t *d, int dp,
                          int *min, int *max) {
   __m128i u0, s0, d0, diff, maxabsdiff, minabsdiff, negdiff, absdiff0, absdiff;
   u0  = _mm_setzero_si128();
@@ -91,7 +91,7 @@ void vp9_minmax_8x8_sse2(const uint8_t *s, int p, const uint8_t *d, int dp,
   *min = _mm_extract_epi16(minabsdiff, 0);
 }
 
-unsigned int vp9_avg_8x8_sse2(const uint8_t *s, int p) {
+unsigned int vpx_avg_8x8_sse2(const uint8_t *s, int p) {
   __m128i s0, s1, u0;
   unsigned int avg = 0;
   u0  = _mm_setzero_si128();
@@ -118,7 +118,7 @@ unsigned int vp9_avg_8x8_sse2(const uint8_t *s, int p) {
   return (avg + 32) >> 6;
 }
 
-unsigned int vp9_avg_4x4_sse2(const uint8_t *s, int p) {
+unsigned int vpx_avg_4x4_sse2(const uint8_t *s, int p) {
   __m128i s0, s1, u0;
   unsigned int avg = 0;
   u0  = _mm_setzero_si128();
@@ -212,7 +212,7 @@ static void hadamard_col8_sse2(__m128i *in, int iter) {
   }
 }
 
-void vp9_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
+void vpx_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
                            int16_t *coeff) {
   __m128i src[8];
   src[0] = _mm_load_si128((const __m128i *)src_diff);
@@ -244,13 +244,13 @@ void vp9_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
   _mm_store_si128((__m128i *)coeff, src[7]);
 }
 
-void vp9_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
+void vpx_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
                              int16_t *coeff) {
   int idx;
   for (idx = 0; idx < 4; ++idx) {
     int16_t const *src_ptr = src_diff + (idx >> 1) * 8 * src_stride
                                 + (idx & 0x01) * 8;
-    vp9_hadamard_8x8_sse2(src_ptr, src_stride, coeff + idx * 64);
+    vpx_hadamard_8x8_sse2(src_ptr, src_stride, coeff + idx * 64);
   }
 
   for (idx = 0; idx < 64; idx += 8) {
@@ -283,7 +283,7 @@ void vp9_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
   }
 }
 
-int vp9_satd_sse2(const int16_t *coeff, int length) {
+int vpx_satd_sse2(const int16_t *coeff, int length) {
   int i;
   const __m128i zero = _mm_setzero_si128();
   __m128i accum = zero;
@@ -309,7 +309,7 @@ int vp9_satd_sse2(const int16_t *coeff, int length) {
   return _mm_cvtsi128_si32(accum);
 }
 
-void vp9_int_pro_row_sse2(int16_t *hbuf, uint8_t const*ref,
+void vpx_int_pro_row_sse2(int16_t *hbuf, uint8_t const*ref,
                           const int ref_stride, const int height) {
   int idx;
   __m128i zero = _mm_setzero_si128();
@@ -358,7 +358,7 @@ void vp9_int_pro_row_sse2(int16_t *hbuf, uint8_t const*ref,
   _mm_storeu_si128((__m128i *)hbuf, s1);
 }
 
-int16_t vp9_int_pro_col_sse2(uint8_t const *ref, const int width) {
+int16_t vpx_int_pro_col_sse2(uint8_t const *ref, const int width) {
   __m128i zero = _mm_setzero_si128();
   __m128i src_line = _mm_load_si128((const __m128i *)ref);
   __m128i s0 = _mm_sad_epu8(src_line, zero);
@@ -378,7 +378,7 @@ int16_t vp9_int_pro_col_sse2(uint8_t const *ref, const int width) {
   return _mm_extract_epi16(s0, 0);
 }
 
-int vp9_vector_var_sse2(int16_t const *ref, int16_t const *src,
+int vpx_vector_var_sse2(int16_t const *ref, int16_t const *src,
                         const int bwl) {
   int idx;
   int width = 4 << bwl;
