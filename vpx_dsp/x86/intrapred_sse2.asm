@@ -47,9 +47,9 @@ cglobal dc_predictor_4x4, 4, 5, 3, dst, stride, above, left, goffset
 
 INIT_XMM sse2
 cglobal dc_left_predictor_4x4, 2, 5, 2, dst, stride, above, left, goffset
+  movifnidn          leftq, leftmp
   GET_GOT     goffsetq
 
-  movifnidn          leftq, leftmp
   pxor                  m1, m1
   movd                  m0, [leftq]
   psadbw                m0, m1
@@ -143,9 +143,9 @@ cglobal dc_top_predictor_8x8, 3, 5, 2, dst, stride, above, left, goffset
 
 INIT_XMM sse2
 cglobal dc_left_predictor_8x8, 2, 5, 2, dst, stride, above, left, goffset
+  movifnidn          leftq, leftmp
   GET_GOT     goffsetq
 
-  movifnidn          leftq, leftmp
   pxor                  m1, m1
   movq                  m0, [leftq]
   DEFINE_ARGS dst, stride, stride3
