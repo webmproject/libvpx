@@ -621,15 +621,15 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
-                       plane_bsize, tx_size);
+                       plane_bsize, tx_size, VP10_XFORM_QUANT_B);
       dist_block(x, plane, block, tx_size, &dist, &sse);
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
                SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
-      vp10_xform_quant_dc(x, plane, block, blk_row, blk_col,
-                          plane_bsize, tx_size);
+      vp10_xform_quant(x, plane, block, blk_row, blk_col,
+                          plane_bsize, tx_size, VP10_XFORM_QUANT_DC);
       sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       dist = sse;
       if (x->plane[plane].eobs[block]) {
@@ -653,7 +653,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     }
   } else {
     // full forward transform and quantization
-    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
+    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+                     VP10_XFORM_QUANT_B);
     dist_block(x, plane, block, tx_size, &dist, &sse);
   }
 
@@ -2093,7 +2094,8 @@ static void tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   if (xd->mb_to_right_edge < 0)
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
-  vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
+  vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+                   VP10_XFORM_QUANT_B);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {

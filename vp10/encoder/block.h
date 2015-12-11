@@ -27,7 +27,7 @@ typedef struct {
   unsigned int var;
 } diff;
 
-struct macroblock_plane {
+typedef struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
   tran_low_t *qcoeff;
   tran_low_t *coeff;
@@ -43,7 +43,7 @@ struct macroblock_plane {
   int16_t *round;
 
   int64_t quant_thred[2];
-};
+} MACROBLOCK_PLANE;
 
 /* The [2] dimension is for whether we skip the EOB node (i.e. if previous
  * coefficient in this block was zero) or not. */
