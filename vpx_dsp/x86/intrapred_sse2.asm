@@ -663,39 +663,40 @@ cglobal tm_predictor_8x8, 4, 4, 5, dst, stride, above, left
   REP_RET
 
 INIT_XMM sse2
-cglobal tm_predictor_16x16, 4, 4, 7, dst, stride, above, left
+cglobal tm_predictor_16x16, 4, 5, 8, dst, stride, above, left
   pxor                  m1, m1
-  movd                  m2, [aboveq-1]
-  mova                  m0, [aboveq]
-  punpcklbw             m2, m1
+  mova                  m2, [aboveq-16];
+  mova                  m0, [aboveq]   ; t1 t2 ... t16 [byte]
+  punpckhbw             m2, m1         ; [127:112] tl [word]
   punpckhbw             m4, m0, m1
-  punpcklbw             m0, m1
-  pshuflw               m2, m2, 0x0
-  DEFINE_ARGS dst, stride, line, left
+  punpcklbw             m0, m1         ; m0:m4 t1 t2 ... t16 [word]
+  DEFINE_ARGS dst, stride, line, left, stride8
   mov                lineq, -8
-  punpcklqdq            m2, m2
-  add                leftq, 16
+  pshufhw               m2, m2, 0xff
+  mova                  m3, [leftq]    ; l1 l2 ... l16 [byte]
+  punpckhqdq            m2, m2         ; tl repeated 8 times [word]
   psubw                 m0, m2
-  psubw                 m4, m2
+  psubw                 m4, m2         ; m0:m4 t1-tl t2-tl ... t16-tl [word]
+  punpckhbw             m5, m3, m1
+  punpcklbw             m3, m1         ; m3:m5 l1 l2 ... l16 [word]
+  lea             stride8q, [strideq*8]
 .loop:
-  movd                  m2, [leftq+lineq*2]
-  movd                  m3, [leftq+lineq*2+1]
-  punpcklbw             m2, m1
-  punpcklbw             m3, m1
-  pshuflw               m2, m2, 0x0
-  pshuflw               m3, m3, 0x0
-  punpcklqdq            m2, m2
-  punpcklqdq            m3, m3
-  paddw                 m5, m2, m0
-  paddw                 m6, m3, m0
-  paddw                 m2, m4
-  paddw                 m3, m4
-  packuswb              m5, m2
-  packuswb              m6, m3
-  mova      [dstq        ], m5
-  mova      [dstq+strideq], m6
-  lea                 dstq, [dstq+strideq*2]
+  pshuflw               m6, m3, 0x0
+  pshuflw               m7, m5, 0x0
+  punpcklqdq            m6, m6         ; l1 repeated 8 times [word]
+  punpcklqdq            m7, m7         ; l8 repeated 8 times [word]
+  paddw                 m1, m6, m0
+  paddw                 m6, m4         ; m1:m6 ti-tl+l1 [i=1,15] [word]
+  psrldq                m5, 2
+  packuswb              m1, m6
+  mova     [dstq         ], m1
+  paddw                 m1, m7, m0
+  paddw                 m7, m4         ; m1:m7 ti-tl+l8 [i=1,15] [word]
+  psrldq                m3, 2
+  packuswb              m1, m7
+  mova     [dstq+stride8q], m1
   inc                lineq
+  lea                 dstq, [dstq+strideq]
   jnz .loop
   REP_RET
 
