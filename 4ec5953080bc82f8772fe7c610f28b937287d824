@@ -34,6 +34,24 @@
       "revId": "4ec5953080bc82f8772fe7c610f28b937287d824",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "855c6237_103625e0",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-12-11T02:50:44Z",
+      "side": 1,
+      "message": "thanks, I didn\u0027t follow it all the way through.",
+      "parentUuid": "65984e34_73c302b2",
+      "revId": "4ec5953080bc82f8772fe7c610f28b937287d824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
