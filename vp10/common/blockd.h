@@ -83,6 +83,10 @@ typedef struct {
 
 typedef int8_t MV_REFERENCE_FRAME;
 
+#if CONFIG_REF_MV
+#define MODE_CTX_REF_FRAMES (MAX_REF_FRAMES + (ALTREF_FRAME - LAST_FRAME))
+#endif
+
 typedef struct {
   // Number of base colors for Y (0) and UV (1)
   uint8_t palette_size[2];

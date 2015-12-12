@@ -12,9 +12,122 @@
 #include "vp10/common/mvref_common.h"
 
 #if CONFIG_REF_MV
+static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
+                                    const MB_MODE_INFO *const candidate,
+                                    const MV_REFERENCE_FRAME rf[2],
+                                    uint8_t *refmv_count,
+                                    CANDIDATE_MV *ref_mv_stack,
+                                    int len, int block, int col) {
+  const int weight = len;
+  int index = 0, ref;
+  int newmv_count = 0;
+
+  if (rf[1] == NONE) {
+    // single reference frame
+    for (ref = 0; ref < 2; ++ref) {
+      if (candidate->ref_frame[ref] == rf[0]) {
+        int_mv this_refmv =
+            get_sub_block_mv(candidate_mi, ref, col, block);
+        for (index = 0; index < *refmv_count; ++index)
+          if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int)
+            break;
+
+        if (index < *refmv_count)
+          ref_mv_stack[index].weight += 2 * weight;
+
+        // Add a new item to the list.
+        if (index == *refmv_count) {
+          ref_mv_stack[index].this_mv = this_refmv;
+          ref_mv_stack[index].weight = 2 * weight;
+          ++(*refmv_count);
+
+          if (candidate->mode == NEWMV)
+            ++newmv_count;
+        }
+
+        if (candidate_mi->mbmi.sb_type < BLOCK_8X8 && block >= 0) {
+          int alt_block = 3 - block;
+          this_refmv =
+              get_sub_block_mv(candidate_mi, ref, col, alt_block);
+          for (index = 0; index < *refmv_count; ++index)
+            if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int)
+              break;
+
+          if (index < *refmv_count)
+            ref_mv_stack[index].weight += weight;
+
+          // Add a new item to the list.
+          if (index == *refmv_count) {
+            ref_mv_stack[index].this_mv = this_refmv;
+            ref_mv_stack[index].weight = weight;
+            ++(*refmv_count);
+
+            if (candidate->mode == NEWMV)
+              ++newmv_count;
+          }
+        }
+      }
+    }
+  } else {
+    // compound reference frame
+    if (candidate->ref_frame[0] == rf[0] &&
+        candidate->ref_frame[1] == rf[1]) {
+      int_mv this_refmv[2] = {
+          get_sub_block_mv(candidate_mi, 0, col, block),
+          get_sub_block_mv(candidate_mi, 1, col, block)
+      };
+
+      for (index = 0; index < *refmv_count; ++index)
+        if ((ref_mv_stack[index].this_mv.as_int == this_refmv[0].as_int) &&
+            (ref_mv_stack[index].comp_mv.as_int == this_refmv[1].as_int))
+          break;
+
+      if (index < *refmv_count)
+        ref_mv_stack[index].weight += 2 * weight;
+
+      // Add a new item to the list.
+      if (index == *refmv_count) {
+        ref_mv_stack[index].this_mv = this_refmv[0];
+        ref_mv_stack[index].comp_mv = this_refmv[1];
+        ref_mv_stack[index].weight = 2 * weight;
+        ++(*refmv_count);
+
+        if (candidate->mode == NEWMV)
+          ++newmv_count;
+      }
+
+      if (candidate_mi->mbmi.sb_type < BLOCK_8X8 && block >= 0) {
+        int alt_block = 3 - block;
+        this_refmv[0] = get_sub_block_mv(candidate_mi, 0, col, alt_block);
+        this_refmv[1] = get_sub_block_mv(candidate_mi, 1, col, alt_block);
+
+        for (index = 0; index < *refmv_count; ++index)
+          if (ref_mv_stack[index].this_mv.as_int == this_refmv[0].as_int &&
+              ref_mv_stack[index].comp_mv.as_int == this_refmv[1].as_int)
+            break;
+
+        if (index < *refmv_count)
+          ref_mv_stack[index].weight += weight;
+
+        // Add a new item to the list.
+        if (index == *refmv_count) {
+          ref_mv_stack[index].this_mv = this_refmv[0];
+          ref_mv_stack[index].comp_mv = this_refmv[1];
+          ref_mv_stack[index].weight = weight;
+          ++(*refmv_count);
+
+          if (candidate->mode == NEWMV)
+            ++newmv_count;
+        }
+      }
+    }
+  }
+  return newmv_count;
+}
+
 static uint8_t scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                              const int mi_row, const int mi_col, int block,
-                             const MV_REFERENCE_FRAME ref_frame,
+                             const MV_REFERENCE_FRAME rf[2],
                              int row_offset,
                              CANDIDATE_MV *ref_mv_stack,
                              uint8_t *refmv_count) {
@@ -33,31 +146,10 @@ static uint8_t scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       const int len = VPXMIN(xd->n8_w,
                              num_8x8_blocks_wide_lookup[candidate->sb_type]);
-      const int weight = len;
-      int index = 0, ref;
 
-      for (ref = 0; ref < 2; ++ref) {
-        if (candidate->ref_frame[ref] == ref_frame) {
-          int_mv this_refmv =
-              get_sub_block_mv(candidate_mi, ref, mi_pos.col, block);
-          for (index = 0; index < *refmv_count; ++index)
-            if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int)
-              break;
-
-          if (index < *refmv_count)
-            ref_mv_stack[index].weight += weight;
-
-          // Add a new item to the list.
-          if (index == *refmv_count) {
-            ref_mv_stack[index].this_mv = this_refmv;
-            ref_mv_stack[index].weight = weight;
-            ++(*refmv_count);
-
-            if (candidate->mode == NEWMV)
-              ++newmv_count;
-          }
-        }
-      }
+      newmv_count += add_ref_mv_candidate(candidate_mi, candidate, rf,
+                                          refmv_count, ref_mv_stack, len,
+                                          block, mi_pos.col);
       i += len;
     } else {
       ++i;
@@ -69,7 +161,7 @@ static uint8_t scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
 static uint8_t scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                              const int mi_row, const int mi_col, int block,
-                             const MV_REFERENCE_FRAME ref_frame,
+                             const MV_REFERENCE_FRAME rf[2],
                              int col_offset,
                              CANDIDATE_MV *ref_mv_stack,
                              uint8_t *refmv_count) {
@@ -88,30 +180,10 @@ static uint8_t scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       const int len = VPXMIN(xd->n8_h,
                        num_8x8_blocks_high_lookup[candidate->sb_type]);
-      const int weight = len;
-      int index = 0, ref;
 
-      for (ref = 0; ref < 2; ++ref) {
-        if (candidate->ref_frame[ref] == ref_frame) {
-          int_mv this_refmv =
-              get_sub_block_mv(candidate_mi, ref, mi_pos.col, block);
-          for (index = 0; index < *refmv_count; ++index)
-            if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int)
-              break;
-
-          if (index < *refmv_count)
-            ref_mv_stack[index].weight += weight;
-
-          if (index == *refmv_count) {
-            ref_mv_stack[index].this_mv = this_refmv;
-            ref_mv_stack[index].weight = weight;
-            ++(*refmv_count);
-
-            if (candidate->mode == NEWMV)
-              ++newmv_count;
-          }
-        }
-      }
+      newmv_count += add_ref_mv_candidate(candidate_mi, candidate, rf,
+                                          refmv_count, ref_mv_stack, len,
+                                          block, mi_pos.col);
       i += len;
     } else {
       ++i;
@@ -123,7 +195,7 @@ static uint8_t scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
 static uint8_t scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                              const int mi_row, const int mi_col, int block,
-                             const MV_REFERENCE_FRAME ref_frame,
+                             const MV_REFERENCE_FRAME rf[2],
                              int row_offset, int col_offset,
                              CANDIDATE_MV *ref_mv_stack,
                              uint8_t *refmv_count) {
@@ -140,49 +212,10 @@ static uint8_t scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
         xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
     const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
     const int len = 1;
-    const int weight = len;
-    int index = 0, ref;
 
-    for (ref = 0; ref < 2; ++ref) {
-      if (candidate->ref_frame[ref] == ref_frame) {
-        int_mv this_refmv =
-            get_sub_block_mv(candidate_mi, ref, mi_pos.col, block);
-        for (index = 0; index < *refmv_count; ++index)
-          if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int)
-            break;
-
-        if (index < *refmv_count)
-          ref_mv_stack[index].weight += weight;
-
-        if (index == *refmv_count) {
-          ref_mv_stack[index].this_mv = this_refmv;
-          ref_mv_stack[index].weight = weight;
-          ++(*refmv_count);
-
-          if (candidate->mode == NEWMV)
-            ++newmv_count;
-        }
-
-        if (candidate_mi->mbmi.sb_type < BLOCK_8X8 && block >= 0) {
-          int alt_block = 3 - block;
-          this_refmv =
-              get_sub_block_mv(candidate_mi, ref, mi_pos.col, alt_block);
-          for (index = 0; index < *refmv_count; ++index)
-            if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int)
-              break;
-
-          if (index < *refmv_count)
-            ref_mv_stack[index].weight += weight;
-
-          // Add a new item to the list.
-          if (index == *refmv_count) {
-            ref_mv_stack[index].this_mv = this_refmv;
-            ref_mv_stack[index].weight = weight;
-            ++(*refmv_count);
-          }
-        }
-      }
-    }
+    newmv_count += add_ref_mv_candidate(candidate_mi, candidate, rf,
+                                        refmv_count, ref_mv_stack, len,
+                                        block, mi_pos.col);
   }  // Analyze a single 8x8 block motion information.
   return newmv_count;
 }
@@ -260,19 +293,22 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   int bs = VPXMAX(xd->n8_w, xd->n8_h);
   int has_tr = has_top_right(xd, mi_row, mi_col, bs);
 
+  MV_REFERENCE_FRAME rf[2];
+  vp10_set_ref_frame(rf, ref_frame);
+
   mode_context[ref_frame] = 0;
   *refmv_count = 0;
 
   // Scan the first above row mode info.
-  newmv_count = scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  newmv_count = scan_row_mbmi(cm, xd, mi_row, mi_col, block, rf,
                               -1, ref_mv_stack, refmv_count);
   // Scan the first left column mode info.
-  newmv_count += scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  newmv_count += scan_col_mbmi(cm, xd, mi_row, mi_col, block, rf,
                                -1, ref_mv_stack, refmv_count);
 
   // Check top-right boundary
   if (has_tr)
-    newmv_count += scan_blk_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+    newmv_count += scan_blk_mbmi(cm, xd, mi_row, mi_col, block, rf,
                                  -1, 1, ref_mv_stack, refmv_count);
 
   nearest_refmv_count = *refmv_count;
@@ -301,12 +337,12 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                 break;
 
             if (idx < *refmv_count)
-              ref_mv_stack[idx].weight += 1;
+              ref_mv_stack[idx].weight += 2;
 
             if (idx == *refmv_count &&
                 *refmv_count < MAX_REF_MV_STACK_SIZE) {
               ref_mv_stack[idx].this_mv.as_int = prev_frame_mvs->mv[ref].as_int;
-              ref_mv_stack[idx].weight = 1;
+              ref_mv_stack[idx].weight = 2;
               ++(*refmv_count);
 
               if (abs(ref_mv_stack[idx].this_mv.as_mv.row) >= 8 ||
@@ -327,22 +363,22 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 //                -1, -1, ref_mv_stack, refmv_count);
 
   // Scan the second outer area.
-  scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  scan_row_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 -2, ref_mv_stack, refmv_count);
-  scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  scan_col_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 -2, ref_mv_stack, refmv_count);
 
   // Scan the third outer area.
-  scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  scan_row_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 -3, ref_mv_stack, refmv_count);
-  scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  scan_col_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 -3, ref_mv_stack, refmv_count);
 
   // Scan the fourth outer area.
-  scan_row_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  scan_row_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 -4, ref_mv_stack, refmv_count);
   // Scan the third left row mode info.
-  scan_col_mbmi(cm, xd, mi_row, mi_col, block, ref_frame,
+  scan_col_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 -4, ref_mv_stack, refmv_count);
 
   switch (nearest_refmv_count) {
@@ -630,6 +666,7 @@ void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
   CANDIDATE_MV tmp_mv;
   uint8_t ref_mv_count = 0, idx;
   uint8_t above_count = 0, left_count = 0;
+  MV_REFERENCE_FRAME rf[2] = { mi->mbmi.ref_frame[ref], NONE };
 #endif
 
   assert(MAX_MV_REF_CANDIDATES == 2);
@@ -638,11 +675,11 @@ void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
                    mi_row, mi_col, NULL, NULL, NULL);
 
 #if CONFIG_REF_MV
-  scan_blk_mbmi(cm, xd, mi_row, mi_col, block, mi->mbmi.ref_frame[ref],
+  scan_blk_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 -1, 0, ref_mv_stack, &ref_mv_count);
   above_count = ref_mv_count;
 
-  scan_blk_mbmi(cm, xd, mi_row, mi_col, block, mi->mbmi.ref_frame[ref],
+  scan_blk_mbmi(cm, xd, mi_row, mi_col, block, rf,
                 0, -1, ref_mv_stack, &ref_mv_count);
   left_count = ref_mv_count - above_count;
 
