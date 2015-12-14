@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05107294_d738cca8",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-12-14T22:54:37Z",
+      "side": 1,
+      "message": "can we just use: else if (noise_level \u003d\u003d kLow) ..",
+      "range": {
+        "startLine": 499,
+        "startChar": 39,
+        "endLine": 499,
+        "endChar": 41
+      },
+      "revId": "78db6fb0e8d2d0120f4df75765b4e2c633426a95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
