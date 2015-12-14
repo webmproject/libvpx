@@ -241,7 +241,7 @@ add_proto qw/void vpx_v_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, con
 specialize qw/vpx_v_predictor_32x32 neon msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_tm_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_tm_predictor_32x32 neon msa/, "$sse2_x86_64_x86inc";
+specialize qw/vpx_tm_predictor_32x32 neon msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_dc_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_dc_predictor_32x32 msa neon/, "$sse2_x86inc";

@@ -700,9 +700,8 @@ cglobal tm_predictor_16x16, 4, 5, 8, dst, stride, above, left
   jnz .loop
   REP_RET
 
-%if ARCH_X86_64
 INIT_XMM sse2
-cglobal tm_predictor_32x32, 4, 4, 10, dst, stride, above, left
+cglobal tm_predictor_32x32, 4, 4, 8, dst, stride, above, left
   pxor                  m1, m1
   movd                  m2, [aboveq-1]
   mova                  m0, [aboveq]
@@ -723,31 +722,29 @@ cglobal tm_predictor_32x32, 4, 4, 10, dst, stride, above, left
   psubw                 m5, m2
 .loop:
   movd                  m2, [leftq+lineq*2]
-  movd                  m6, [leftq+lineq*2+1]
+  pxor                  m1, m1
   punpcklbw             m2, m1
-  punpcklbw             m6, m1
+  pshuflw               m7, m2, 0x55
   pshuflw               m2, m2, 0x0
-  pshuflw               m6, m6, 0x0
   punpcklqdq            m2, m2
-  punpcklqdq            m6, m6
-  paddw                 m7, m2, m0
-  paddw                 m8, m2, m3
-  paddw                 m9, m2, m4
-  paddw                 m2, m5
-  packuswb              m7, m8
-  packuswb              m9, m2
-  paddw                 m2, m6, m0
-  paddw                 m8, m6, m3
-  mova   [dstq           ], m7
-  paddw                 m7, m6, m4
-  paddw                 m6, m5
-  mova   [dstq        +16], m9
-  packuswb              m2, m8
-  packuswb              m7, m6
-  mova   [dstq+strideq   ], m2
-  mova   [dstq+strideq+16], m7
+  punpcklqdq            m7, m7
+  paddw                 m6, m2, m3
+  paddw                 m1, m2, m0
+  packuswb              m1, m6
+  mova   [dstq           ], m1
+  paddw                 m6, m2, m5
+  paddw                 m1, m2, m4
+  packuswb              m1, m6
+  mova   [dstq+16        ], m1
+  paddw                 m6, m7, m3
+  paddw                 m1, m7, m0
+  packuswb              m1, m6
+  mova   [dstq+strideq   ], m1
+  paddw                 m6, m7, m5
+  paddw                 m1, m7, m4
+  packuswb              m1, m6
+  mova   [dstq+strideq+16], m1
   lea                 dstq, [dstq+strideq*2]
   inc                lineq
   jnz .loop
   REP_RET
-%endif
