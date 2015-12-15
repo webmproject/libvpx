@@ -24,7 +24,6 @@ extern "C" {
 #endif
 
 typedef enum noise_level {
-  kUnknown,
   kLowLow,
   kLow,
   kMedium,

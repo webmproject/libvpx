@@ -496,7 +496,7 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
         threshold_base = 3 * threshold_base;
       else if (noise_level == kMedium)
         threshold_base = threshold_base << 1;
-      else if (noise_level == kLowLow)
+      else if (noise_level < kLow)
         threshold_base = (7 * threshold_base) >> 3;
     }
     if (cm->width <= 352 && cm->height <= 288) {
