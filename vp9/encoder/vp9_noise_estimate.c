@@ -25,7 +25,7 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
                              int width,
                              int height) {
   ne->enabled = 0;
-  ne->level = kLowLow;
+  ne->level = kUnknown;
   ne->value = 0;
   ne->count = 0;
   ne->thresh = 90;
@@ -83,7 +83,7 @@ static void copy_frame(YV12_BUFFER_CONFIG * const dest,
 }
 
 NOISE_LEVEL vp9_noise_estimate_extract_level(NOISE_ESTIMATE *const ne) {
-  int noise_level = kLowLow;
+  int noise_level = kUnknown;
   if (ne->value > (ne->thresh << 1)) {
     noise_level = kHigh;
   } else {
