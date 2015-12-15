@@ -1254,7 +1254,7 @@ void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
     rc->avg_frame_qindex[KEY_FRAME] =
         ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[KEY_FRAME] + qindex, 2);
   } else {
-    if (rc->is_src_frame_alt_ref ||
+    if (!rc->is_src_frame_alt_ref &&
         !(cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
       rc->last_q[INTER_FRAME] = qindex;
       rc->avg_frame_qindex[INTER_FRAME] =
