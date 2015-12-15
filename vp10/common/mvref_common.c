@@ -189,7 +189,6 @@ static uint8_t scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
 static int has_top_right(const MACROBLOCKD *xd,
                          int mi_row, int mi_col, int bs) {
-  int is_second_rect = 0;
   int has_tr = !((mi_row & bs) & (bs * 2 - 1)) ||
                !((mi_col & bs) & (bs * 2 - 1));
 
@@ -205,22 +204,46 @@ static int has_top_right(const MACROBLOCKD *xd,
       if ((mi_row & 0x07) > 0)
         has_tr = 0;
 
-  if (xd->n8_w < xd->n8_h) {
-    if (mi_col & (xd->n8_h - 1))
-      is_second_rect = 1;
-
-    if (!is_second_rect)
+  if (xd->n8_w < xd->n8_h)
+    if (!xd->is_sec_rect)
       has_tr = 1;
-  }
 
-  if (xd->n8_w > xd->n8_h) {
-    if (mi_row & (xd->n8_w - 1))
-      is_second_rect = 1;
-
-    if (is_second_rect)
+  if (xd->n8_w > xd->n8_h)
+    if (xd->is_sec_rect)
       has_tr = 0;
-  }
+
   return has_tr;
+}
+
+static void handle_sec_rect_block(const MB_MODE_INFO * const candidate,
+                                  uint8_t *refmv_count,
+                                  CANDIDATE_MV *ref_mv_stack,
+                                  MV_REFERENCE_FRAME ref_frame,
+                                  int16_t *mode_context) {
+  int rf, idx;
+
+  for (rf = 0; rf < 2; ++rf) {
+    if (candidate->ref_frame[rf] == ref_frame) {
+      const int list_range = VPXMIN(*refmv_count, MAX_MV_REF_CANDIDATES);
+
+      const int_mv pred_mv = candidate->mv[rf];
+      for (idx = 0; idx < list_range; ++idx)
+        if (pred_mv.as_int == ref_mv_stack[idx].this_mv.as_int)
+          break;
+
+      if (idx < list_range) {
+        mode_context[ref_frame] &= ~(0x0f << REFMV_OFFSET);
+
+        if (idx == 0) {
+          mode_context[ref_frame] |= (1 << SKIP_NEARESTMV_OFFSET);
+          mode_context[ref_frame] |= (6 << REFMV_OFFSET);
+        } else if (idx == 1) {
+          mode_context[ref_frame] |= (1 << SKIP_NEARMV_OFFSET);
+          mode_context[ref_frame] |= (7 << REFMV_OFFSET);
+        }
+      }
+    }
+  }
 }
 
 static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
@@ -229,7 +252,7 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                               CANDIDATE_MV *ref_mv_stack,
                               int_mv *mv_ref_list,
                               int block, int mi_row, int mi_col,
-                              uint8_t *mode_context) {
+                              int16_t *mode_context) {
   int idx, nearest_refmv_count = 0;
   uint8_t newmv_count = 0;
 
@@ -389,6 +412,23 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     len = nr_len;
   }
 
+  // TODO(jingning): Clean-up needed.
+  if (xd->is_sec_rect) {
+    if (xd->n8_w < xd->n8_h) {
+      const MODE_INFO *const candidate_mi = xd->mi[-1];
+      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
+      handle_sec_rect_block(candidate, refmv_count, ref_mv_stack,
+                            ref_frame, mode_context);
+    }
+
+    if (xd->n8_w > xd->n8_h) {
+      const MODE_INFO *const candidate_mi = xd->mi[-xd->mi_stride];
+      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
+      handle_sec_rect_block(candidate, refmv_count, ref_mv_stack,
+                            ref_frame, mode_context);
+    }
+  }
+
   for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *refmv_count); ++idx) {
     mv_ref_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
     clamp_mv_ref(&mv_ref_list[idx].as_mv,
@@ -404,7 +444,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                              int_mv *mv_ref_list,
                              int block, int mi_row, int mi_col,
                              find_mv_refs_sync sync, void *const data,
-                             uint8_t *mode_context) {
+                             int16_t *mode_context) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
@@ -541,13 +581,23 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col,
                       find_mv_refs_sync sync, void *const data,
-                      uint8_t *mode_context) {
+                      int16_t *mode_context) {
+#if CONFIG_REF_MV
+  int idx, all_zero = 1;
+#endif
   find_mv_refs_idx(cm, xd, mi, ref_frame, mv_ref_list, -1,
                    mi_row, mi_col, sync, data, mode_context);
 
 #if CONFIG_REF_MV
   setup_ref_mv_list(cm, xd, ref_frame, ref_mv_count, ref_mv_stack,
                     mv_ref_list, -1, mi_row, mi_col, mode_context);
+
+  for (idx = 0; idx < MAX_MV_REF_CANDIDATES; ++idx)
+    if (mv_ref_list[idx].as_int != 0)
+      all_zero = 0;
+
+  if (all_zero)
+    mode_context[ref_frame] |= (1 << ALL_ZERO_FLAG_OFFSET);
 #endif
 }
 

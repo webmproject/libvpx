@@ -257,6 +257,7 @@ typedef struct macroblockd {
 #if CONFIG_REF_MV
   uint8_t ref_mv_count[MAX_REF_FRAMES];
   CANDIDATE_MV ref_mv_stack[MAX_REF_FRAMES][MAX_REF_MV_STACK_SIZE];
+  uint8_t is_sec_rect;
 #endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
