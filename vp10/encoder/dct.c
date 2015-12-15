@@ -39,6 +39,24 @@ static INLINE void range_check(const tran_low_t *input, const int size,
 
 #if CONFIG_EXT_TX
 void fdst4(const tran_low_t *input, tran_low_t *output) {
+#if USE_DST2
+  tran_high_t step[4];
+  tran_high_t temp1, temp2;
+
+  step[0] = input[0] - input[3];
+  step[1] = -input[1] + input[2];
+  step[2] = -input[1] - input[2];
+  step[3] = input[0] + input[3];
+
+  temp1 = (step[0] + step[1]) * cospi_16_64;
+  temp2 = (step[0] - step[1]) * cospi_16_64;
+  output[3] = fdct_round_shift(temp1);
+  output[1] = fdct_round_shift(temp2);
+  temp1 = step[2] * cospi_24_64 + step[3] * cospi_8_64;
+  temp2 = -step[2] * cospi_8_64 + step[3] * cospi_24_64;
+  output[2] = fdct_round_shift(temp1);
+  output[0] = fdct_round_shift(temp2);
+#else
   // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
     141124871, 228344838,
@@ -56,9 +74,60 @@ void fdst4(const tran_low_t *input, tran_low_t *output) {
   output[2] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
   sum = d03 * sinvalue_lookup[0] - d12 * sinvalue_lookup[1];
   output[3] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
+#endif  // USE_DST2
 }
 
 void fdst8(const tran_low_t *input, tran_low_t *output) {
+#if USE_DST2
+  tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;  // canbe16
+  tran_high_t t0, t1, t2, t3;                  // needs32
+  tran_high_t x0, x1, x2, x3;                  // canbe16
+
+  // stage 1
+  s0 = input[0] - input[7];
+  s1 = -input[1] + input[6];
+  s2 = input[2] - input[5];
+  s3 = -input[3] + input[4];
+  s4 = -input[3] - input[4];
+  s5 = input[2] + input[5];
+  s6 = -input[1] - input[6];
+  s7 = input[0] + input[7];
+
+  x0 = s0 + s3;
+  x1 = s1 + s2;
+  x2 = s1 - s2;
+  x3 = s0 - s3;
+  t0 = (x0 + x1) * cospi_16_64;
+  t1 = (x0 - x1) * cospi_16_64;
+  t2 =  x2 * cospi_24_64 + x3 *  cospi_8_64;
+  t3 = -x2 * cospi_8_64  + x3 * cospi_24_64;
+  output[7] = fdct_round_shift(t0);
+  output[5] = fdct_round_shift(t2);
+  output[3] = fdct_round_shift(t1);
+  output[1] = fdct_round_shift(t3);
+
+  // Stage 2
+  t0 = (s6 - s5) * cospi_16_64;
+  t1 = (s6 + s5) * cospi_16_64;
+  t2 = fdct_round_shift(t0);
+  t3 = fdct_round_shift(t1);
+
+  // Stage 3
+  x0 = s4 + t2;
+  x1 = s4 - t2;
+  x2 = s7 - t3;
+  x3 = s7 + t3;
+
+  // Stage 4
+  t0 = x0 * cospi_28_64 + x3 *   cospi_4_64;
+  t1 = x1 * cospi_12_64 + x2 *  cospi_20_64;
+  t2 = x2 * cospi_12_64 + x1 * -cospi_20_64;
+  t3 = x3 * cospi_28_64 + x0 *  -cospi_4_64;
+  output[6] = fdct_round_shift(t0);
+  output[4] = fdct_round_shift(t2);
+  output[2] = fdct_round_shift(t1);
+  output[0] = fdct_round_shift(t3);
+#else
   // {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)} * sqrt(2/9) * 2
   static const int sinvalue_lookup[] = {
     86559612, 162678858, 219176632, 249238470
@@ -94,9 +163,150 @@ void fdst8(const tran_low_t *input, tran_low_t *output) {
   sum = d07 * sinvalue_lookup[0] - d16 * sinvalue_lookup[1] +
         d25 * sinvalue_lookup[2] - d34 * sinvalue_lookup[3];
   output[7] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
+#endif  // USE_DST2
 }
 
 void fdst16(const tran_low_t *input, tran_low_t *output) {
+#if USE_DST2
+  tran_high_t step1[8];      // canbe16
+  tran_high_t step2[8];      // canbe16
+  tran_high_t step3[8];      // canbe16
+  tran_high_t in[8];         // canbe16
+  tran_high_t temp1, temp2;  // needs32
+
+  // step 1
+  in[0] = input[0] - input[15];
+  in[1] = -input[1] + input[14];
+  in[2] = input[2] - input[13];
+  in[3] = -input[3] + input[12];
+  in[4] = input[4] - input[11];
+  in[5] = -input[5] + input[10];
+  in[6] = input[6] - input[ 9];
+  in[7] = -input[7] + input[ 8];
+
+  step1[0] = -input[7] - input[ 8];
+  step1[1] = input[6] + input[ 9];
+  step1[2] = -input[5] - input[10];
+  step1[3] = input[4] + input[11];
+  step1[4] = -input[3] - input[12];
+  step1[5] = input[2] + input[13];
+  step1[6] = -input[1] - input[14];
+  step1[7] = input[0] + input[15];
+
+  // fdct8(step, step);
+  {
+    tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;  // canbe16
+    tran_high_t t0, t1, t2, t3;                  // needs32
+    tran_high_t x0, x1, x2, x3;                  // canbe16
+
+    // stage 1
+    s0 = in[0] + in[7];
+    s1 = in[1] + in[6];
+    s2 = in[2] + in[5];
+    s3 = in[3] + in[4];
+    s4 = in[3] - in[4];
+    s5 = in[2] - in[5];
+    s6 = in[1] - in[6];
+    s7 = in[0] - in[7];
+
+    // fdct4(step, step);
+    x0 = s0 + s3;
+    x1 = s1 + s2;
+    x2 = s1 - s2;
+    x3 = s0 - s3;
+    t0 = (x0 + x1) * cospi_16_64;
+    t1 = (x0 - x1) * cospi_16_64;
+    t2 = x3 * cospi_8_64  + x2 * cospi_24_64;
+    t3 = x3 * cospi_24_64 - x2 * cospi_8_64;
+    output[15] = fdct_round_shift(t0);
+    output[11] = fdct_round_shift(t2);
+    output[7] = fdct_round_shift(t1);
+    output[3] = fdct_round_shift(t3);
+
+    // Stage 2
+    t0 = (s6 - s5) * cospi_16_64;
+    t1 = (s6 + s5) * cospi_16_64;
+    t2 = fdct_round_shift(t0);
+    t3 = fdct_round_shift(t1);
+
+    // Stage 3
+    x0 = s4 + t2;
+    x1 = s4 - t2;
+    x2 = s7 - t3;
+    x3 = s7 + t3;
+
+    // Stage 4
+    t0 = x0 * cospi_28_64 + x3 *   cospi_4_64;
+    t1 = x1 * cospi_12_64 + x2 *  cospi_20_64;
+    t2 = x2 * cospi_12_64 + x1 * -cospi_20_64;
+    t3 = x3 * cospi_28_64 + x0 *  -cospi_4_64;
+    output[13] = fdct_round_shift(t0);
+    output[9] = fdct_round_shift(t2);
+    output[5] = fdct_round_shift(t1);
+    output[1] = fdct_round_shift(t3);
+  }
+
+  // step 2
+  temp1 = (step1[5] - step1[2]) * cospi_16_64;
+  temp2 = (step1[4] - step1[3]) * cospi_16_64;
+  step2[2] = fdct_round_shift(temp1);
+  step2[3] = fdct_round_shift(temp2);
+  temp1 = (step1[4] + step1[3]) * cospi_16_64;
+  temp2 = (step1[5] + step1[2]) * cospi_16_64;
+  step2[4] = fdct_round_shift(temp1);
+  step2[5] = fdct_round_shift(temp2);
+
+  // step 3
+  step3[0] = step1[0] + step2[3];
+  step3[1] = step1[1] + step2[2];
+  step3[2] = step1[1] - step2[2];
+  step3[3] = step1[0] - step2[3];
+  step3[4] = step1[7] - step2[4];
+  step3[5] = step1[6] - step2[5];
+  step3[6] = step1[6] + step2[5];
+  step3[7] = step1[7] + step2[4];
+
+  // step 4
+  temp1 = step3[1] *  -cospi_8_64 + step3[6] * cospi_24_64;
+  temp2 = step3[2] * cospi_24_64 + step3[5] *  cospi_8_64;
+  step2[1] = fdct_round_shift(temp1);
+  step2[2] = fdct_round_shift(temp2);
+  temp1 = step3[2] * cospi_8_64 - step3[5] * cospi_24_64;
+  temp2 = step3[1] * cospi_24_64 + step3[6] *  cospi_8_64;
+  step2[5] = fdct_round_shift(temp1);
+  step2[6] = fdct_round_shift(temp2);
+
+  // step 5
+  step1[0] = step3[0] + step2[1];
+  step1[1] = step3[0] - step2[1];
+  step1[2] = step3[3] + step2[2];
+  step1[3] = step3[3] - step2[2];
+  step1[4] = step3[4] - step2[5];
+  step1[5] = step3[4] + step2[5];
+  step1[6] = step3[7] - step2[6];
+  step1[7] = step3[7] + step2[6];
+
+  // step 6
+  temp1 = step1[0] * cospi_30_64 + step1[7] *  cospi_2_64;
+  temp2 = step1[1] * cospi_14_64 + step1[6] * cospi_18_64;
+  output[14] = fdct_round_shift(temp1);
+  output[6] = fdct_round_shift(temp2);
+
+  temp1 = step1[2] * cospi_22_64 + step1[5] * cospi_10_64;
+  temp2 = step1[3] *  cospi_6_64 + step1[4] * cospi_26_64;
+  output[10] = fdct_round_shift(temp1);
+  output[2] = fdct_round_shift(temp2);
+
+  temp1 = step1[3] * -cospi_26_64 + step1[4] *  cospi_6_64;
+  temp2 = step1[2] * -cospi_10_64 + step1[5] * cospi_22_64;
+  output[12] = fdct_round_shift(temp1);
+  output[4] = fdct_round_shift(temp2);
+
+  temp1 = step1[1] * -cospi_18_64 + step1[6] * cospi_14_64;
+  temp2 = step1[0] *  -cospi_2_64 + step1[7] * cospi_30_64;
+  output[8] = fdct_round_shift(temp1);
+  output[0] = fdct_round_shift(temp2);
+#else
   // {sin(pi/17), sin(pi*2/17, ..., sin(pi*8/17)} * sqrt(2/17) * 2 * sqrt(2)
   static const int sinvalue_lookup[] = {
     47852167, 94074787, 137093803, 175444254,
@@ -199,6 +409,7 @@ void fdst16(const tran_low_t *input, tran_low_t *output) {
         d411 * sinvalue_lookup[4] - d510 * sinvalue_lookup[5] +
         d69  * sinvalue_lookup[6] - d78  * sinvalue_lookup[7];
   output[15] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
+#endif  // USE_DST2
 }
 #endif  // CONFIG_EXT_TX
 

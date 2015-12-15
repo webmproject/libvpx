@@ -20,6 +20,25 @@
 
 #if CONFIG_EXT_TX
 void idst4_c(const tran_low_t *input, tran_low_t *output) {
+#if USE_DST2
+  tran_low_t step[4];
+  tran_high_t temp1, temp2;
+  // stage 1
+  temp1 = (input[3] + input[1]) * cospi_16_64;
+  temp2 = (input[3] - input[1]) * cospi_16_64;
+  step[0] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step[1] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = input[2] * cospi_24_64 - input[0] * cospi_8_64;
+  temp2 = input[2] * cospi_8_64 + input[0] * cospi_24_64;
+  step[2] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step[3] = WRAPLOW(dct_const_round_shift(temp2), 8);
+
+  // stage 2
+  output[0] = WRAPLOW(step[0] + step[3], 8);
+  output[1] = WRAPLOW(-step[1] - step[2], 8);
+  output[2] = WRAPLOW(step[1] - step[2], 8);
+  output[3] = WRAPLOW(step[3] - step[0], 8);
+#else
   // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
     141124871, 228344838,
@@ -37,9 +56,64 @@ void idst4_c(const tran_low_t *input, tran_low_t *output) {
   output[2] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), 8);
   sum = d03 * sinvalue_lookup[0] - d12 * sinvalue_lookup[1];
   output[3] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), 8);
+#endif  // USE_DST2
 }
 
 void idst8_c(const tran_low_t *input, tran_low_t *output) {
+#if USE_DST2
+  // vp9_igentx8(input, output, Tx8);
+  tran_low_t step1[8], step2[8];
+  tran_high_t temp1, temp2;
+  // stage 1
+  step1[0] = input[7];
+  step1[2] = input[3];
+  step1[1] = input[5];
+  step1[3] = input[1];
+  temp1 = input[6] * cospi_28_64 - input[0] * cospi_4_64;
+  temp2 = input[6] * cospi_4_64 + input[0] * cospi_28_64;
+  step1[4] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step1[7] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = input[2] * cospi_12_64 - input[4] * cospi_20_64;
+  temp2 = input[2] * cospi_20_64 + input[4] * cospi_12_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), 8);
+
+  // stage 2
+  temp1 = (step1[0] + step1[2]) * cospi_16_64;
+  temp2 = (step1[0] - step1[2]) * cospi_16_64;
+  step2[0] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[1] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = step1[1] * cospi_24_64 - step1[3] * cospi_8_64;
+  temp2 = step1[1] * cospi_8_64 + step1[3] * cospi_24_64;
+  step2[2] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[3] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  step2[4] = WRAPLOW(step1[4] + step1[5], 8);
+  step2[5] = WRAPLOW(step1[4] - step1[5], 8);
+  step2[6] = WRAPLOW(-step1[6] + step1[7], 8);
+  step2[7] = WRAPLOW(step1[6] + step1[7], 8);
+
+  // stage 3
+  step1[0] = WRAPLOW(step2[0] + step2[3], 8);
+  step1[1] = WRAPLOW(step2[1] + step2[2], 8);
+  step1[2] = WRAPLOW(step2[1] - step2[2], 8);
+  step1[3] = WRAPLOW(step2[0] - step2[3], 8);
+  step1[4] = step2[4];
+  temp1 = (step2[6] - step2[5]) * cospi_16_64;
+  temp2 = (step2[5] + step2[6]) * cospi_16_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  step1[7] = step2[7];
+
+  // stage 4
+  output[0] = WRAPLOW(step1[0] + step1[7], 8);
+  output[1] = WRAPLOW(-step1[1] - step1[6], 8);
+  output[2] = WRAPLOW(step1[2] + step1[5], 8);
+  output[3] = WRAPLOW(-step1[3] - step1[4], 8);
+  output[4] = WRAPLOW(step1[3] - step1[4], 8);
+  output[5] = WRAPLOW(-step1[2] + step1[5], 8);
+  output[6] = WRAPLOW(step1[1] - step1[6], 8);
+  output[7] = WRAPLOW(-step1[0] + step1[7], 8);
+#else
   // {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)} * sqrt(2/9) * 2
   static const int32_t sinvalue_lookup[] = {
     86559612, 162678858, 219176632, 249238470
@@ -75,9 +149,174 @@ void idst8_c(const tran_low_t *input, tran_low_t *output) {
   sum = d07 * sinvalue_lookup[0] - d16 * sinvalue_lookup[1] +
         d25 * sinvalue_lookup[2] - d34 * sinvalue_lookup[3];
   output[7] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), 8);
+#endif  // USE_DST2
 }
 
 void idst16_c(const tran_low_t *input, tran_low_t *output) {
+#if USE_DST2
+  tran_low_t step1[16], step2[16];
+  tran_high_t temp1, temp2;
+
+  // stage 1
+  step1[0] = input[15];
+  step1[1] = input[7];
+  step1[2] = input[11];
+  step1[3] = input[3];
+  step1[4] = input[13];
+  step1[5] = input[5];
+  step1[6] = input[9];
+  step1[7] = input[1];
+  step1[8] = input[14];
+  step1[9] = input[6];
+  step1[10] = input[10];
+  step1[11] = input[2];
+  step1[12] = input[12];
+  step1[13] = input[4];
+  step1[14] = input[8];
+  step1[15] = input[0];
+
+  // stage 2
+  step2[0] = step1[0];
+  step2[1] = step1[1];
+  step2[2] = step1[2];
+  step2[3] = step1[3];
+  step2[4] = step1[4];
+  step2[5] = step1[5];
+  step2[6] = step1[6];
+  step2[7] = step1[7];
+
+  temp1 = step1[8] * cospi_30_64 - step1[15] * cospi_2_64;
+  temp2 = step1[8] * cospi_2_64 + step1[15] * cospi_30_64;
+  step2[8] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[15] = WRAPLOW(dct_const_round_shift(temp2), 8);
+
+  temp1 = step1[9] * cospi_14_64 - step1[14] * cospi_18_64;
+  temp2 = step1[9] * cospi_18_64 + step1[14] * cospi_14_64;
+  step2[9] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[14] = WRAPLOW(dct_const_round_shift(temp2), 8);
+
+  temp1 = step1[10] * cospi_22_64 - step1[13] * cospi_10_64;
+  temp2 = step1[10] * cospi_10_64 + step1[13] * cospi_22_64;
+  step2[10] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[13] = WRAPLOW(dct_const_round_shift(temp2), 8);
+
+  temp1 = step1[11] * cospi_6_64 - step1[12] * cospi_26_64;
+  temp2 = step1[11] * cospi_26_64 + step1[12] * cospi_6_64;
+  step2[11] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[12] = WRAPLOW(dct_const_round_shift(temp2), 8);
+
+  // stage 3
+  step1[0] = step2[0];
+  step1[1] = step2[1];
+  step1[2] = step2[2];
+  step1[3] = step2[3];
+
+  temp1 = step2[4] * cospi_28_64 - step2[7] * cospi_4_64;
+  temp2 = step2[4] * cospi_4_64 + step2[7] * cospi_28_64;
+  step1[4] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step1[7] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = step2[5] * cospi_12_64 - step2[6] * cospi_20_64;
+  temp2 = step2[5] * cospi_20_64 + step2[6] * cospi_12_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), 8);
+
+  step1[8] = WRAPLOW(step2[8] + step2[9], 8);
+  step1[9] = WRAPLOW(step2[8] - step2[9], 8);
+  step1[10] = WRAPLOW(-step2[10] + step2[11], 8);
+  step1[11] = WRAPLOW(step2[10] + step2[11], 8);
+  step1[12] = WRAPLOW(step2[12] + step2[13], 8);
+  step1[13] = WRAPLOW(step2[12] - step2[13], 8);
+  step1[14] = WRAPLOW(-step2[14] + step2[15], 8);
+  step1[15] = WRAPLOW(step2[14] + step2[15], 8);
+
+  // stage 4
+  temp1 = (step1[0] + step1[1]) * cospi_16_64;
+  temp2 = (step1[0] - step1[1]) * cospi_16_64;
+  step2[0] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[1] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
+  temp2 = step1[2] * cospi_8_64 + step1[3] * cospi_24_64;
+  step2[2] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[3] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  step2[4] = WRAPLOW(step1[4] + step1[5], 8);
+  step2[5] = WRAPLOW(step1[4] - step1[5], 8);
+  step2[6] = WRAPLOW(-step1[6] + step1[7], 8);
+  step2[7] = WRAPLOW(step1[6] + step1[7], 8);
+
+  step2[8] = step1[8];
+  step2[15] = step1[15];
+  temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64;
+  temp2 = step1[9] * cospi_24_64 + step1[14] * cospi_8_64;
+  step2[9] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[14] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = -step1[10] * cospi_24_64 - step1[13] * cospi_8_64;
+  temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64;
+  step2[10] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[13] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  step2[11] = step1[11];
+  step2[12] = step1[12];
+
+  // stage 5
+  step1[0] = WRAPLOW(step2[0] + step2[3], 8);
+  step1[1] = WRAPLOW(step2[1] + step2[2], 8);
+  step1[2] = WRAPLOW(step2[1] - step2[2], 8);
+  step1[3] = WRAPLOW(step2[0] - step2[3], 8);
+  step1[4] = step2[4];
+  temp1 = (step2[6] - step2[5]) * cospi_16_64;
+  temp2 = (step2[5] + step2[6]) * cospi_16_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  step1[7] = step2[7];
+
+  step1[8] = WRAPLOW(step2[8] + step2[11], 8);
+  step1[9] = WRAPLOW(step2[9] + step2[10], 8);
+  step1[10] = WRAPLOW(step2[9] - step2[10], 8);
+  step1[11] = WRAPLOW(step2[8] - step2[11], 8);
+  step1[12] = WRAPLOW(-step2[12] + step2[15], 8);
+  step1[13] = WRAPLOW(-step2[13] + step2[14], 8);
+  step1[14] = WRAPLOW(step2[13] + step2[14], 8);
+  step1[15] = WRAPLOW(step2[12] + step2[15], 8);
+
+  // stage 6
+  step2[0] = WRAPLOW(step1[0] + step1[7], 8);
+  step2[1] = WRAPLOW(step1[1] + step1[6], 8);
+  step2[2] = WRAPLOW(step1[2] + step1[5], 8);
+  step2[3] = WRAPLOW(step1[3] + step1[4], 8);
+  step2[4] = WRAPLOW(step1[3] - step1[4], 8);
+  step2[5] = WRAPLOW(step1[2] - step1[5], 8);
+  step2[6] = WRAPLOW(step1[1] - step1[6], 8);
+  step2[7] = WRAPLOW(step1[0] - step1[7], 8);
+  step2[8] = step1[8];
+  step2[9] = step1[9];
+  temp1 = (-step1[10] + step1[13]) * cospi_16_64;
+  temp2 = (step1[10] + step1[13]) * cospi_16_64;
+  step2[10] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[13] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  temp1 = (-step1[11] + step1[12]) * cospi_16_64;
+  temp2 = (step1[11] + step1[12]) * cospi_16_64;
+  step2[11] = WRAPLOW(dct_const_round_shift(temp1), 8);
+  step2[12] = WRAPLOW(dct_const_round_shift(temp2), 8);
+  step2[14] = step1[14];
+  step2[15] = step1[15];
+
+  // stage 7
+  output[0] = WRAPLOW(step2[0] + step2[15], 8);
+  output[1] = WRAPLOW(-step2[1] - step2[14], 8);
+  output[2] = WRAPLOW(step2[2] + step2[13], 8);
+  output[3] = WRAPLOW(-step2[3] - step2[12], 8);
+  output[4] = WRAPLOW(step2[4] + step2[11], 8);
+  output[5] = WRAPLOW(-step2[5] - step2[10], 8);
+  output[6] = WRAPLOW(step2[6] + step2[9], 8);
+  output[7] = WRAPLOW(-step2[7] - step2[8], 8);
+  output[8] = WRAPLOW(step2[7] - step2[8], 8);
+  output[9] = WRAPLOW(-step2[6] + step2[9], 8);
+  output[10] = WRAPLOW(step2[5] - step2[10], 8);
+  output[11] = WRAPLOW(-step2[4] + step2[11], 8);
+  output[12] = WRAPLOW(step2[3] - step2[12], 8);
+  output[13] = WRAPLOW(-step2[2] + step2[13], 8);
+  output[14] = WRAPLOW(step2[1] - step2[14], 8);
+  output[15] = WRAPLOW(-step2[0] + step2[15], 8);
+#else
   // {sin(pi/17), sin(pi*2/17, ..., sin(pi*8/17)} * sqrt(2/17) * 2 * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
     47852167, 94074787, 137093803, 175444254,
@@ -180,6 +419,7 @@ void idst16_c(const tran_low_t *input, tran_low_t *output) {
         d411 * sinvalue_lookup[4] - d510 * sinvalue_lookup[5] +
         d69  * sinvalue_lookup[6] - d78  * sinvalue_lookup[7];
   output[15] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), 8);
+#endif  // USE_DST2
 }
 
 // Inverse identiy transform and add.
@@ -243,6 +483,26 @@ static void maybe_flip_strides(uint8_t **dst, int *dstride,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void highbd_idst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
+#if USE_DST2
+  tran_low_t step[4];
+  tran_high_t temp1, temp2;
+  (void) bd;
+  // stage 1
+  temp1 = (input[3] + input[1]) * cospi_16_64;
+  temp2 = (input[3] - input[1]) * cospi_16_64;
+  step[0] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step[1] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  temp1 = input[2] * cospi_24_64 - input[0] * cospi_8_64;
+  temp2 = input[2] * cospi_8_64 + input[0] * cospi_24_64;
+  step[2] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step[3] = WRAPLOW(dct_const_round_shift(temp2), bd);
+
+  // stage 2
+  output[0] = WRAPLOW(step[0] + step[3], bd);
+  output[1] = WRAPLOW(-step[1] - step[2], bd);
+  output[2] = WRAPLOW(step[1] - step[2], bd);
+  output[3] = WRAPLOW(step[3] - step[0], bd);
+#else
   // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
     141124871, 228344838,
@@ -265,9 +525,64 @@ void highbd_idst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   output[2] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), bd);
   sum = d03 * sinvalue_lookup[0] - d12 * sinvalue_lookup[1];
   output[3] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), bd);
+#endif  // USE_DST2
 }
 
 void highbd_idst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
+#if USE_DST2
+  tran_low_t step1[8], step2[8];
+  tran_high_t temp1, temp2;
+  (void) bd;
+  // stage 1
+  step1[0] = input[7];
+  step1[2] = input[3];
+  step1[1] = input[5];
+  step1[3] = input[1];
+  temp1 = input[6] * cospi_28_64 - input[0] * cospi_4_64;
+  temp2 = input[6] * cospi_4_64 + input[0] * cospi_28_64;
+  step1[4] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[7] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  temp1 = input[2] * cospi_12_64 - input[4] * cospi_20_64;
+  temp2 = input[2] * cospi_20_64 + input[4] * cospi_12_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+
+  // stage 2
+  temp1 = (step1[0] + step1[2]) * cospi_16_64;
+  temp2 = (step1[0] - step1[2]) * cospi_16_64;
+  step2[0] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[1] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  temp1 = step1[1] * cospi_24_64 - step1[3] * cospi_8_64;
+  temp2 = step1[1] * cospi_8_64 + step1[3] * cospi_24_64;
+  step2[2] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[3] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[4] = WRAPLOW(step1[4] + step1[5], bd);
+  step2[5] = WRAPLOW(step1[4] - step1[5], bd);
+  step2[6] = WRAPLOW(-step1[6] + step1[7], bd);
+  step2[7] = WRAPLOW(step1[6] + step1[7], bd);
+
+  // stage 3
+  step1[0] = WRAPLOW(step2[0] + step2[3], bd);
+  step1[1] = WRAPLOW(step2[1] + step2[2], bd);
+  step1[2] = WRAPLOW(step2[1] - step2[2], bd);
+  step1[3] = WRAPLOW(step2[0] - step2[3], bd);
+  step1[4] = step2[4];
+  temp1 = (step2[6] - step2[5]) * cospi_16_64;
+  temp2 = (step2[5] + step2[6]) * cospi_16_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[7] = step2[7];
+
+  // stage 4
+  output[0] = WRAPLOW(step1[0] + step1[7], bd);
+  output[1] = WRAPLOW(-step1[1] - step1[6], bd);
+  output[2] = WRAPLOW(step1[2] + step1[5], bd);
+  output[3] = WRAPLOW(-step1[3] - step1[4], bd);
+  output[4] = WRAPLOW(step1[3] - step1[4], bd);
+  output[5] = WRAPLOW(-step1[2] + step1[5], bd);
+  output[6] = WRAPLOW(step1[1] - step1[6], bd);
+  output[7] = WRAPLOW(-step1[0] + step1[7], bd);
+#else
   // {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)} * sqrt(2/9) * 2
   static const int32_t sinvalue_lookup[] = {
     86559612, 162678858, 219176632, 249238470
@@ -308,9 +623,176 @@ void highbd_idst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   sum = d07 * sinvalue_lookup[0] - d16 * sinvalue_lookup[1] +
         d25 * sinvalue_lookup[2] - d34 * sinvalue_lookup[3];
   output[7] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), bd);
+#endif  // USE_DST2
 }
 
 void highbd_idst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
+#if USE_DST2
+  // vp9_highbd_igentx16(input, output, bd, Tx16);
+  tran_low_t step1[16], step2[16];
+  tran_high_t temp1, temp2;
+  (void) bd;
+
+  // stage 1
+  step1[0] = input[15];
+  step1[1] = input[7];
+  step1[2] = input[11];
+  step1[3] = input[3];
+  step1[4] = input[13];
+  step1[5] = input[5];
+  step1[6] = input[9];
+  step1[7] = input[1];
+  step1[8] = input[14];
+  step1[9] = input[6];
+  step1[10] = input[10];
+  step1[11] = input[2];
+  step1[12] = input[12];
+  step1[13] = input[4];
+  step1[14] = input[8];
+  step1[15] = input[0];
+
+  // stage 2
+  step2[0] = step1[0];
+  step2[1] = step1[1];
+  step2[2] = step1[2];
+  step2[3] = step1[3];
+  step2[4] = step1[4];
+  step2[5] = step1[5];
+  step2[6] = step1[6];
+  step2[7] = step1[7];
+
+  temp1 = step1[8] * cospi_30_64 - step1[15] * cospi_2_64;
+  temp2 = step1[8] * cospi_2_64 + step1[15] * cospi_30_64;
+  step2[8] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[15] = WRAPLOW(dct_const_round_shift(temp2), bd);
+
+  temp1 = step1[9] * cospi_14_64 - step1[14] * cospi_18_64;
+  temp2 = step1[9] * cospi_18_64 + step1[14] * cospi_14_64;
+  step2[9] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[14] = WRAPLOW(dct_const_round_shift(temp2), bd);
+
+  temp1 = step1[10] * cospi_22_64 - step1[13] * cospi_10_64;
+  temp2 = step1[10] * cospi_10_64 + step1[13] * cospi_22_64;
+  step2[10] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[13] = WRAPLOW(dct_const_round_shift(temp2), bd);
+
+  temp1 = step1[11] * cospi_6_64 - step1[12] * cospi_26_64;
+  temp2 = step1[11] * cospi_26_64 + step1[12] * cospi_6_64;
+  step2[11] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[12] = WRAPLOW(dct_const_round_shift(temp2), bd);
+
+  // stage 3
+  step1[0] = step2[0];
+  step1[1] = step2[1];
+  step1[2] = step2[2];
+  step1[3] = step2[3];
+
+  temp1 = step2[4] * cospi_28_64 - step2[7] * cospi_4_64;
+  temp2 = step2[4] * cospi_4_64 + step2[7] * cospi_28_64;
+  step1[4] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[7] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  temp1 = step2[5] * cospi_12_64 - step2[6] * cospi_20_64;
+  temp2 = step2[5] * cospi_20_64 + step2[6] * cospi_12_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+
+  step1[8] = WRAPLOW(step2[8] + step2[9], bd);
+  step1[9] = WRAPLOW(step2[8] - step2[9], bd);
+  step1[10] = WRAPLOW(-step2[10] + step2[11], bd);
+  step1[11] = WRAPLOW(step2[10] + step2[11], bd);
+  step1[12] = WRAPLOW(step2[12] + step2[13], bd);
+  step1[13] = WRAPLOW(step2[12] - step2[13], bd);
+  step1[14] = WRAPLOW(-step2[14] + step2[15], bd);
+  step1[15] = WRAPLOW(step2[14] + step2[15], bd);
+
+  // stage 4
+  temp1 = (step1[0] + step1[1]) * cospi_16_64;
+  temp2 = (step1[0] - step1[1]) * cospi_16_64;
+  step2[0] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[1] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  temp1 = step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
+  temp2 = step1[2] * cospi_8_64 + step1[3] * cospi_24_64;
+  step2[2] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[3] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[4] = WRAPLOW(step1[4] + step1[5], bd);
+  step2[5] = WRAPLOW(step1[4] - step1[5], bd);
+  step2[6] = WRAPLOW(-step1[6] + step1[7], bd);
+  step2[7] = WRAPLOW(step1[6] + step1[7], bd);
+
+  step2[8] = step1[8];
+  step2[15] = step1[15];
+  temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64;
+  temp2 = step1[9] * cospi_24_64 + step1[14] * cospi_8_64;
+  step2[9] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[14] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  temp1 = -step1[10] * cospi_24_64 - step1[13] * cospi_8_64;
+  temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64;
+  step2[10] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[13] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[11] = step1[11];
+  step2[12] = step1[12];
+
+  // stage 5
+  step1[0] = WRAPLOW(step2[0] + step2[3], bd);
+  step1[1] = WRAPLOW(step2[1] + step2[2], bd);
+  step1[2] = WRAPLOW(step2[1] - step2[2], bd);
+  step1[3] = WRAPLOW(step2[0] - step2[3], bd);
+  step1[4] = step2[4];
+  temp1 = (step2[6] - step2[5]) * cospi_16_64;
+  temp2 = (step2[5] + step2[6]) * cospi_16_64;
+  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[7] = step2[7];
+
+  step1[8] = WRAPLOW(step2[8] + step2[11], bd);
+  step1[9] = WRAPLOW(step2[9] + step2[10], bd);
+  step1[10] = WRAPLOW(step2[9] - step2[10], bd);
+  step1[11] = WRAPLOW(step2[8] - step2[11], bd);
+  step1[12] = WRAPLOW(-step2[12] + step2[15], bd);
+  step1[13] = WRAPLOW(-step2[13] + step2[14], bd);
+  step1[14] = WRAPLOW(step2[13] + step2[14], bd);
+  step1[15] = WRAPLOW(step2[12] + step2[15], bd);
+
+  // stage 6
+  step2[0] = WRAPLOW(step1[0] + step1[7], bd);
+  step2[1] = WRAPLOW(step1[1] + step1[6], bd);
+  step2[2] = WRAPLOW(step1[2] + step1[5], bd);
+  step2[3] = WRAPLOW(step1[3] + step1[4], bd);
+  step2[4] = WRAPLOW(step1[3] - step1[4], bd);
+  step2[5] = WRAPLOW(step1[2] - step1[5], bd);
+  step2[6] = WRAPLOW(step1[1] - step1[6], bd);
+  step2[7] = WRAPLOW(step1[0] - step1[7], bd);
+  step2[8] = step1[8];
+  step2[9] = step1[9];
+  temp1 = (-step1[10] + step1[13]) * cospi_16_64;
+  temp2 = (step1[10] + step1[13]) * cospi_16_64;
+  step2[10] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[13] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  temp1 = (-step1[11] + step1[12]) * cospi_16_64;
+  temp2 = (step1[11] + step1[12]) * cospi_16_64;
+  step2[11] = WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[12] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[14] = step1[14];
+  step2[15] = step1[15];
+
+  // stage 7
+  output[0] = WRAPLOW(step2[0] + step2[15], bd);
+  output[1] = WRAPLOW(-step2[1] - step2[14], bd);
+  output[2] = WRAPLOW(step2[2] + step2[13], bd);
+  output[3] = WRAPLOW(-step2[3] - step2[12], bd);
+  output[4] = WRAPLOW(step2[4] + step2[11], bd);
+  output[5] = WRAPLOW(-step2[5] - step2[10], bd);
+  output[6] = WRAPLOW(step2[6] + step2[9], bd);
+  output[7] = WRAPLOW(-step2[7] - step2[8], bd);
+  output[8] = WRAPLOW(step2[7] - step2[8], bd);
+  output[9] = WRAPLOW(-step2[6] + step2[9], bd);
+  output[10] = WRAPLOW(step2[5] - step2[10], bd);
+  output[11] = WRAPLOW(-step2[4] + step2[11], bd);
+  output[12] = WRAPLOW(step2[3] - step2[12], bd);
+  output[13] = WRAPLOW(-step2[2] + step2[13], bd);
+  output[14] = WRAPLOW(step2[1] - step2[14], bd);
+  output[15] = WRAPLOW(-step2[0] + step2[15], bd);
+#else
   // {sin(pi/17), sin(pi*2/17, ..., sin(pi*8/17)} * sqrt(2/17) * 2 * sqrt(2)
   static const int32_t sinvalue_lookup[] = {
     47852167, 94074787, 137093803, 175444254,
@@ -418,6 +900,7 @@ void highbd_idst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
         d411 * sinvalue_lookup[4] - d510 * sinvalue_lookup[5] +
         d69  * sinvalue_lookup[6] - d78  * sinvalue_lookup[7];
   output[15] = WRAPLOW(ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS)), bd);
+#endif  // USE_DST2
 }
 
 static void highbd_inv_idtx_add_c(const tran_low_t *input, uint8_t *dest8,
