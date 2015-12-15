@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "45db4a39_72257e9e",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1263,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-12-15T04:52:21Z",
+      "side": 1,
+      "message": "You are correct. I did this because at this point the tx_mode is set based on lossless[0] in select_txfm_mode() in encoder, making this one to be consistent with select_txfm_mode(), so encoding and bitstream packing is consistent.",
+      "parentUuid": "853d42f0_8211fc9e",
+      "range": {
+        "startLine": 1263,
+        "startChar": 10,
+        "endLine": 1263,
+        "endChar": 18
+      },
+      "revId": "b8a028be0459b6d1579a948df43c9d61f4581c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "45898a39_30c5c68c",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 1
@@ -53,6 +77,30 @@
       "writtenOn": "2015-12-15T03:07:56Z",
       "side": 1,
       "message": "Are you sure that\u0027s right? I thought in all segmentation modes (refresh, complexity, aq), segid was selected before the actual r/d loop and this would work...",
+      "range": {
+        "startLine": 728,
+        "startChar": 31,
+        "endLine": 728,
+        "endChar": 39
+      },
+      "revId": "b8a028be0459b6d1579a948df43c9d61f4581c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25ead6c4_2ba62586",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-12-15T04:52:21Z",
+      "side": 1,
+      "message": "same here, because in select_tx_mode() called by encode_frame_internal, the tx_mode for the frame is set by lossless[0], this is to make them consistent.",
+      "parentUuid": "45898a39_30c5c68c",
       "range": {
         "startLine": 728,
         "startChar": 31,
