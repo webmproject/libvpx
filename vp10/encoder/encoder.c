@@ -1422,7 +1422,11 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   cpi->td.mb.e_mbd.bd = (int)cm->bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-  rc->baseline_gf_interval = (MIN_GF_INTERVAL + MAX_GF_INTERVAL) / 2;
+  if ((oxcf->pass == 0) && (oxcf->rc_mode == VPX_Q)) {
+    rc->baseline_gf_interval = FIXED_GF_INTERVAL;
+  } else {
+    rc->baseline_gf_interval = (MIN_GF_INTERVAL + MAX_GF_INTERVAL) / 2;
+  }
 
   cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
