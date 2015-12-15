@@ -1313,9 +1313,9 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
       }
     }
   } else {
-    if (rc->is_src_frame_alt_ref ||
-        !(cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) ||
-        (cpi->use_svc && oxcf->rc_mode == VPX_CBR)) {
+    if ((cpi->use_svc && oxcf->rc_mode == VPX_CBR) ||
+        (!rc->is_src_frame_alt_ref &&
+         !(cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
       rc->last_q[INTER_FRAME] = qindex;
       rc->avg_frame_qindex[INTER_FRAME] =
         ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[INTER_FRAME] + qindex, 2);
