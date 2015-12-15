@@ -576,6 +576,34 @@ cglobal h_predictor_16x16, 2, 5, 3, dst, stride, line, left
   REP_RET
 
 INIT_XMM sse2
+cglobal h_predictor_32x32, 2, 5, 3, dst, stride, line, left
+  movifnidn              leftq, leftmp
+  mov                    lineq, -8
+  DEFINE_ARGS dst, stride, line, left, stride3
+  lea                 stride3q, [strideq*3]
+.loop:
+  movd                      m0, [leftq]
+  punpcklbw                 m0, m0
+  punpcklbw                 m0, m0              ; l1 to l4 each repeated 4 times
+  pshufd                m1, m0, 0x0             ; l1 repeated 16 times
+  pshufd                m2, m0, 0x55            ; l2 repeated 16 times
+  mova     [dstq             ], m1
+  mova     [dstq+16          ], m1
+  mova     [dstq+strideq     ], m2
+  mova     [dstq+strideq+16  ], m2
+  pshufd                m1, m0, 0xaa
+  pshufd                m2, m0, 0xff
+  mova     [dstq+strideq*2   ], m1
+  mova     [dstq+strideq*2+16], m1
+  mova     [dstq+stride3q    ], m2
+  mova     [dstq+stride3q+16 ], m2
+  inc                    lineq
+  lea                    leftq, [leftq+4       ]
+  lea                     dstq, [dstq+strideq*4]
+  jnz .loop
+  REP_RET
+
+INIT_XMM sse2
 cglobal tm_predictor_4x4, 4, 4, 5, dst, stride, above, left
   pxor                  m1, m1
   movq                  m0, [aboveq-1]; [63:0] tl t1 t2 t3 t4 x x x
@@ -635,45 +663,45 @@ cglobal tm_predictor_8x8, 4, 4, 5, dst, stride, above, left
   REP_RET
 
 INIT_XMM sse2
-cglobal tm_predictor_16x16, 4, 4, 7, dst, stride, above, left
+cglobal tm_predictor_16x16, 4, 5, 8, dst, stride, above, left
   pxor                  m1, m1
-  movd                  m2, [aboveq-1]
-  mova                  m0, [aboveq]
-  punpcklbw             m2, m1
+  mova                  m2, [aboveq-16];
+  mova                  m0, [aboveq]   ; t1 t2 ... t16 [byte]
+  punpckhbw             m2, m1         ; [127:112] tl [word]
   punpckhbw             m4, m0, m1
-  punpcklbw             m0, m1
-  pshuflw               m2, m2, 0x0
-  DEFINE_ARGS dst, stride, line, left
+  punpcklbw             m0, m1         ; m0:m4 t1 t2 ... t16 [word]
+  DEFINE_ARGS dst, stride, line, left, stride8
   mov                lineq, -8
-  punpcklqdq            m2, m2
-  add                leftq, 16
+  pshufhw               m2, m2, 0xff
+  mova                  m3, [leftq]    ; l1 l2 ... l16 [byte]
+  punpckhqdq            m2, m2         ; tl repeated 8 times [word]
   psubw                 m0, m2
-  psubw                 m4, m2
+  psubw                 m4, m2         ; m0:m4 t1-tl t2-tl ... t16-tl [word]
+  punpckhbw             m5, m3, m1
+  punpcklbw             m3, m1         ; m3:m5 l1 l2 ... l16 [word]
+  lea             stride8q, [strideq*8]
 .loop:
-  movd                  m2, [leftq+lineq*2]
-  movd                  m3, [leftq+lineq*2+1]
-  punpcklbw             m2, m1
-  punpcklbw             m3, m1
-  pshuflw               m2, m2, 0x0
-  pshuflw               m3, m3, 0x0
-  punpcklqdq            m2, m2
-  punpcklqdq            m3, m3
-  paddw                 m5, m2, m0
-  paddw                 m6, m3, m0
-  paddw                 m2, m4
-  paddw                 m3, m4
-  packuswb              m5, m2
-  packuswb              m6, m3
-  mova      [dstq        ], m5
-  mova      [dstq+strideq], m6
-  lea                 dstq, [dstq+strideq*2]
+  pshuflw               m6, m3, 0x0
+  pshuflw               m7, m5, 0x0
+  punpcklqdq            m6, m6         ; l1 repeated 8 times [word]
+  punpcklqdq            m7, m7         ; l8 repeated 8 times [word]
+  paddw                 m1, m6, m0
+  paddw                 m6, m4         ; m1:m6 ti-tl+l1 [i=1,15] [word]
+  psrldq                m5, 2
+  packuswb              m1, m6
+  mova     [dstq         ], m1
+  paddw                 m1, m7, m0
+  paddw                 m7, m4         ; m1:m7 ti-tl+l8 [i=1,15] [word]
+  psrldq                m3, 2
+  packuswb              m1, m7
+  mova     [dstq+stride8q], m1
   inc                lineq
+  lea                 dstq, [dstq+strideq]
   jnz .loop
   REP_RET
 
-%if ARCH_X86_64
 INIT_XMM sse2
-cglobal tm_predictor_32x32, 4, 4, 10, dst, stride, above, left
+cglobal tm_predictor_32x32, 4, 4, 8, dst, stride, above, left
   pxor                  m1, m1
   movd                  m2, [aboveq-1]
   mova                  m0, [aboveq]
@@ -694,31 +722,29 @@ cglobal tm_predictor_32x32, 4, 4, 10, dst, stride, above, left
   psubw                 m5, m2
 .loop:
   movd                  m2, [leftq+lineq*2]
-  movd                  m6, [leftq+lineq*2+1]
+  pxor                  m1, m1
   punpcklbw             m2, m1
-  punpcklbw             m6, m1
+  pshuflw               m7, m2, 0x55
   pshuflw               m2, m2, 0x0
-  pshuflw               m6, m6, 0x0
   punpcklqdq            m2, m2
-  punpcklqdq            m6, m6
-  paddw                 m7, m2, m0
-  paddw                 m8, m2, m3
-  paddw                 m9, m2, m4
-  paddw                 m2, m5
-  packuswb              m7, m8
-  packuswb              m9, m2
-  paddw                 m2, m6, m0
-  paddw                 m8, m6, m3
-  mova   [dstq           ], m7
-  paddw                 m7, m6, m4
-  paddw                 m6, m5
-  mova   [dstq        +16], m9
-  packuswb              m2, m8
-  packuswb              m7, m6
-  mova   [dstq+strideq   ], m2
-  mova   [dstq+strideq+16], m7
+  punpcklqdq            m7, m7
+  paddw                 m6, m2, m3
+  paddw                 m1, m2, m0
+  packuswb              m1, m6
+  mova   [dstq           ], m1
+  paddw                 m6, m2, m5
+  paddw                 m1, m2, m4
+  packuswb              m1, m6
+  mova   [dstq+16        ], m1
+  paddw                 m6, m7, m3
+  paddw                 m1, m7, m0
+  packuswb              m1, m6
+  mova   [dstq+strideq   ], m1
+  paddw                 m6, m7, m5
+  paddw                 m1, m7, m4
+  packuswb              m1, m6
+  mova   [dstq+strideq+16], m1
   lea                 dstq, [dstq+strideq*2]
   inc                lineq
   jnz .loop
   REP_RET
-%endif

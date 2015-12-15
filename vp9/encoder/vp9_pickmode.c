@@ -619,14 +619,14 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
                                   scan_order->scan, scan_order->iscan);
             break;
           case TX_16X16:
-            vp9_hadamard_16x16(src_diff, diff_stride, (int16_t *)coeff);
+            vpx_hadamard_16x16(src_diff, diff_stride, (int16_t *)coeff);
             vp9_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
                             p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                             pd->dequant, eob,
                             scan_order->scan, scan_order->iscan);
             break;
           case TX_8X8:
-            vp9_hadamard_8x8(src_diff, diff_stride, (int16_t *)coeff);
+            vpx_hadamard_8x8(src_diff, diff_stride, (int16_t *)coeff);
             vp9_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
                             p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                             pd->dequant, eob,
@@ -673,7 +673,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
         if (*eob == 1)
           *rate += (int)abs(qcoeff[0]);
         else if (*eob > 1)
-          *rate += vp9_satd((const int16_t *)qcoeff, step << 4);
+          *rate += vpx_satd((const int16_t *)qcoeff, step << 4);
 
         *dist += vp9_block_error_fp(coeff, dqcoeff, step << 4) >> shift;
       }

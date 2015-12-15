@@ -226,7 +226,7 @@ add_proto qw/void vpx_d63e_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, 
 specialize qw/vpx_d63e_predictor_32x32/;
 
 add_proto qw/void vpx_h_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_h_predictor_32x32 neon msa/, "$ssse3_x86inc";
+specialize qw/vpx_h_predictor_32x32 neon msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_d117_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_d117_predictor_32x32/;
@@ -241,7 +241,7 @@ add_proto qw/void vpx_v_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, con
 specialize qw/vpx_v_predictor_32x32 neon msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_tm_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_tm_predictor_32x32 neon msa/, "$sse2_x86_64_x86inc";
+specialize qw/vpx_tm_predictor_32x32 neon msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_dc_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_dc_predictor_32x32 msa neon/, "$sse2_x86inc";
@@ -998,6 +998,35 @@ specialize qw/vpx_sad4x4 mmx neon msa/, "$sse_x86inc";
 #
 # Avg
 #
+if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
+  add_proto qw/unsigned int vpx_avg_8x8/, "const uint8_t *, int p";
+  specialize qw/vpx_avg_8x8 sse2 neon msa/;
+
+  add_proto qw/unsigned int vpx_avg_4x4/, "const uint8_t *, int p";
+  specialize qw/vpx_avg_4x4 sse2 neon msa/;
+
+  add_proto qw/void vpx_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
+  specialize qw/vpx_minmax_8x8 sse2/;
+
+  add_proto qw/void vpx_hadamard_8x8/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
+  specialize qw/vpx_hadamard_8x8 sse2/, "$ssse3_x86_64_x86inc";
+
+  add_proto qw/void vpx_hadamard_16x16/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
+  specialize qw/vpx_hadamard_16x16 sse2/;
+
+  add_proto qw/int vpx_satd/, "const int16_t *coeff, int length";
+  specialize qw/vpx_satd sse2 neon/;
+
+  add_proto qw/void vpx_int_pro_row/, "int16_t *hbuf, uint8_t const *ref, const int ref_stride, const int height";
+  specialize qw/vpx_int_pro_row sse2 neon/;
+
+  add_proto qw/int16_t vpx_int_pro_col/, "uint8_t const *ref, const int width";
+  specialize qw/vpx_int_pro_col sse2 neon/;
+
+  add_proto qw/int vpx_vector_var/, "int16_t const *ref, int16_t const *src, const int bwl";
+  specialize qw/vpx_vector_var neon sse2/;
+}  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+
 add_proto qw/unsigned int vpx_sad64x64_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vpx_sad64x64_avg avx2 msa/, "$sse2_x86inc";
 
@@ -1195,6 +1224,13 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   #
   # Avg
   #
+  add_proto qw/unsigned int vpx_highbd_avg_8x8/, "const uint8_t *, int p";
+  specialize qw/vpx_highbd_avg_8x8/;
+  add_proto qw/unsigned int vpx_highbd_avg_4x4/, "const uint8_t *, int p";
+  specialize qw/vpx_highbd_avg_4x4/;
+  add_proto qw/void vpx_highbd_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
+  specialize qw/vpx_highbd_minmax_8x8/;
+
   add_proto qw/unsigned int vpx_highbd_sad64x64_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
   specialize qw/vpx_highbd_sad64x64_avg/, "$sse2_x86inc";
 

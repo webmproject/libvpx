@@ -496,6 +496,8 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
         threshold_base = 3 * threshold_base;
       else if (noise_level == kMedium)
         threshold_base = threshold_base << 1;
+      else if (noise_level == kLowLow)
+        threshold_base = (7 * threshold_base) >> 3;
     }
     if (cm->width <= 352 && cm->height <= 288) {
       thresholds[0] = threshold_base >> 3;
@@ -556,16 +558,16 @@ static int compute_minmax_8x8(const uint8_t *s, int sp, const uint8_t *d,
     if (x8_idx < pixels_wide && y8_idx < pixels_high) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
-        vp9_highbd_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
+        vpx_highbd_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
                               d + y8_idx * dp + x8_idx, dp,
                               &min, &max);
       } else {
-        vp9_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
+        vpx_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
                        d + y8_idx * dp + x8_idx, dp,
                        &min, &max);
       }
 #else
-      vp9_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
+      vpx_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
                      d + y8_idx * dp + x8_idx, dp,
                      &min, &max);
 #endif
@@ -597,18 +599,18 @@ static void fill_variance_4x4avg(const uint8_t *s, int sp, const uint8_t *d,
       int d_avg = 128;
 #if CONFIG_VP9_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
-        s_avg = vp9_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+        s_avg = vpx_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_highbd_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+          d_avg = vpx_highbd_avg_4x4(d + y4_idx * dp + x4_idx, dp);
       } else {
-        s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+        s_avg = vpx_avg_4x4(s + y4_idx * sp + x4_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+          d_avg = vpx_avg_4x4(d + y4_idx * dp + x4_idx, dp);
       }
 #else
-      s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+      s_avg = vpx_avg_4x4(s + y4_idx * sp + x4_idx, sp);
       if (!is_key_frame)
-        d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+        d_avg = vpx_avg_4x4(d + y4_idx * dp + x4_idx, dp);
 #endif
       sum = s_avg - d_avg;
       sse = sum * sum;
@@ -636,18 +638,18 @@ static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
       int d_avg = 128;
 #if CONFIG_VP9_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
-        s_avg = vp9_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+        s_avg = vpx_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+          d_avg = vpx_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
       } else {
-        s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+        s_avg = vpx_avg_8x8(s + y8_idx * sp + x8_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+          d_avg = vpx_avg_8x8(d + y8_idx * dp + x8_idx, dp);
       }
 #else
-      s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+      s_avg = vpx_avg_8x8(s + y8_idx * sp + x8_idx, sp);
       if (!is_key_frame)
-        d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+        d_avg = vpx_avg_8x8(d + y8_idx * dp + x8_idx, dp);
 #endif
       sum = s_avg - d_avg;
       sse = sum * sum;
@@ -668,6 +670,8 @@ static int choose_partitioning(VP9_COMP *cpi,
   v64x64 vt;
   v16x16 vt2[16];
   int force_split[21];
+  int avg_32x32;
+  int avg_16x16[4];
   uint8_t *s;
   const uint8_t *d;
   int sp;
@@ -819,6 +823,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     const int y32_idx = ((i >> 1) << 5);
     const int i2 = i << 2;
     force_split[i + 1] = 0;
+    avg_16x16[i] = 0;
     for (j = 0; j < 4; j++) {
       const int x16_idx = x32_idx + ((j & 1) << 4);
       const int y16_idx = y32_idx + ((j >> 1) << 4);
@@ -836,6 +841,7 @@ static int choose_partitioning(VP9_COMP *cpi,
                             is_key_frame);
         fill_variance_tree(&vt.split[i].split[j], BLOCK_16X16);
         get_variance(&vt.split[i].split[j].part_variances.none);
+        avg_16x16[i] += vt.split[i].split[j].part_variances.none.variance;
         if (vt.split[i].split[j].part_variances.none.variance >
             thresholds[2]) {
           // 16X16 variance is above threshold for split, so force split to 8x8
@@ -888,6 +894,7 @@ static int choose_partitioning(VP9_COMP *cpi,
   }
 
   // Fill the rest of the variance tree by summing split partition values.
+  avg_32x32 = 0;
   for (i = 0; i < 4; i++) {
     const int i2 = i << 2;
     for (j = 0; j < 4; j++) {
@@ -908,19 +915,30 @@ static int choose_partitioning(VP9_COMP *cpi,
       }
     }
     fill_variance_tree(&vt.split[i], BLOCK_32X32);
-    // If variance of this 32x32 block is above the threshold, force the block
-    // to split. This also forces a split on the upper (64x64) level.
+    // If variance of this 32x32 block is above the threshold, or if its above
+    // (some threshold of) the average variance over the sub-16x16 blocks, then
+    // force this block to split. This also forces a split on the upper
+    // (64x64) level.
     if (!force_split[i + 1]) {
       get_variance(&vt.split[i].part_variances.none);
-      if (vt.split[i].part_variances.none.variance > thresholds[1]) {
+      if (vt.split[i].part_variances.none.variance > thresholds[1] ||
+          (!is_key_frame &&
+          vt.split[i].part_variances.none.variance > (thresholds[1] >> 1) &&
+          vt.split[i].part_variances.none.variance > (avg_16x16[i] >> 1))) {
         force_split[i + 1] = 1;
         force_split[0] = 1;
       }
+      avg_32x32 += vt.split[i].part_variances.none.variance;
     }
   }
   if (!force_split[0]) {
     fill_variance_tree(&vt, BLOCK_64X64);
     get_variance(&vt.part_variances.none);
+    // If variance of this 64x64 block is above (some threshold of) the average
+    // variance over the sub-32x32 blocks, then force this block to split.
+    if (!is_key_frame &&
+        vt.part_variances.none.variance > (3 * avg_32x32) >> 3)
+      force_split[0] = 1;
   }
 
   // Now go through the entire structure, splitting every block size until

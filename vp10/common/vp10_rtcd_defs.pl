@@ -351,42 +351,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 #
 if (vpx_config("CONFIG_VP10_ENCODER") eq "yes") {
 
-add_proto qw/unsigned int vp10_avg_8x8/, "const uint8_t *, int p";
-specialize qw/vp10_avg_8x8 sse2 neon msa/;
-
-add_proto qw/unsigned int vp10_avg_4x4/, "const uint8_t *, int p";
-specialize qw/vp10_avg_4x4 sse2 msa/;
-
-add_proto qw/void vp10_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
-specialize qw/vp10_minmax_8x8 sse2/;
-
-add_proto qw/void vp10_hadamard_8x8/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
-specialize qw/vp10_hadamard_8x8 sse2/, "$ssse3_x86_64_x86inc";
-
-add_proto qw/void vp10_hadamard_16x16/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
-specialize qw/vp10_hadamard_16x16 sse2/;
-
-add_proto qw/int16_t vp10_satd/, "const int16_t *coeff, int length";
-specialize qw/vp10_satd sse2/;
-
-add_proto qw/void vp10_int_pro_row/, "int16_t *hbuf, uint8_t const *ref, const int ref_stride, const int height";
-specialize qw/vp10_int_pro_row sse2 neon/;
-
-add_proto qw/int16_t vp10_int_pro_col/, "uint8_t const *ref, const int width";
-specialize qw/vp10_int_pro_col sse2 neon/;
-
-add_proto qw/int vp10_vector_var/, "int16_t const *ref, int16_t const *src, const int bwl";
-specialize qw/vp10_vector_var neon sse2/;
-
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
-  add_proto qw/unsigned int vp10_highbd_avg_8x8/, "const uint8_t *, int p";
-  specialize qw/vp10_highbd_avg_8x8/;
-  add_proto qw/unsigned int vp10_highbd_avg_4x4/, "const uint8_t *, int p";
-  specialize qw/vp10_highbd_avg_4x4/;
-  add_proto qw/void vp10_highbd_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
-  specialize qw/vp10_highbd_minmax_8x8/;
-}
-
 # ENCODEMB INVOKE
 
 #
