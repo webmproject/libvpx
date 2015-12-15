@@ -66,6 +66,30 @@
     },
     {
       "key": {
+        "uuid": "05b1520d_fb20afe2",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1263,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-12-15T12:36:51Z",
+      "side": 1,
+      "message": "I can look at this if you want. I\u0027d prefer to fix this correctly, ideally we make the frame-wide txmode selection independent of losslessness (except if segmentation is disabled), and enforce tx4x4-only-for-lossless on a per-block basis depending on its segment ID and whether that segment is losslessly coded. What options do you use to reproduce the mismatch during encoding? I\u0027ll try --aq-mode\u003d1 but it didn\u0027t give me mismatches before...",
+      "parentUuid": "45db4a39_72257e9e",
+      "range": {
+        "startLine": 1263,
+        "startChar": 10,
+        "endLine": 1263,
+        "endChar": 18
+      },
+      "revId": "b8a028be0459b6d1579a948df43c9d61f4581c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "45898a39_30c5c68c",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 1
