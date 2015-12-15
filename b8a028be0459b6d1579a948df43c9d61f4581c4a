@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "853d42f0_8211fc9e",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1263,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-12-15T03:07:56Z",
+      "side": 1,
+      "message": "So, the idea here was that lossless is a per-segment thing. The problem right now is that segid0 could be lossless, but segid1 isn\u0027t, and then we\u0027d still force tx4x4 on all segments...",
+      "range": {
+        "startLine": 1263,
+        "startChar": 10,
+        "endLine": 1263,
+        "endChar": 18
+      },
+      "revId": "b8a028be0459b6d1579a948df43c9d61f4581c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45898a39_30c5c68c",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2015-12-15T03:07:56Z",
+      "side": 1,
+      "message": "Are you sure that\u0027s right? I thought in all segmentation modes (refresh, complexity, aq), segid was selected before the actual r/d loop and this would work...",
+      "range": {
+        "startLine": 728,
+        "startChar": 31,
+        "endLine": 728,
+        "endChar": 39
+      },
+      "revId": "b8a028be0459b6d1579a948df43c9d61f4581c4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
