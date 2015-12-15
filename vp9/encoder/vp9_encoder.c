@@ -2793,6 +2793,22 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
                                    cpi->resize_pending);
   }
 #endif
+  if (is_one_pass_cbr_svc(cpi)) {
+    // Keep track of frame index for each reference frame.
+    SVC *const svc = &cpi->svc;
+    if (cm->frame_type == KEY_FRAME) {
+      svc->ref_frame_index[cpi->lst_fb_idx] = svc->current_superframe;
+      svc->ref_frame_index[cpi->gld_fb_idx] = svc->current_superframe;
+      svc->ref_frame_index[cpi->alt_fb_idx] = svc->current_superframe;
+    } else {
+      if (cpi->refresh_last_frame)
+        svc->ref_frame_index[cpi->lst_fb_idx] = svc->current_superframe;
+      if (cpi->refresh_golden_frame)
+        svc->ref_frame_index[cpi->gld_fb_idx] = svc->current_superframe;
+      if (cpi->refresh_alt_ref_frame)
+        svc->ref_frame_index[cpi->alt_fb_idx] = svc->current_superframe;
+    }
+  }
 }
 
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {

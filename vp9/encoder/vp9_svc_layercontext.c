@@ -25,13 +25,17 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int mi_rows = cpi->common.mi_rows;
   int mi_cols = cpi->common.mi_cols;
-  int sl, tl;
+  int sl, tl, i;
   int alt_ref_idx = svc->number_spatial_layers;
 
   svc->spatial_layer_id = 0;
   svc->temporal_layer_id = 0;
   svc->first_spatial_layer_to_encode = 0;
   svc->rc_drop_superframe = 0;
+  svc->force_zero_mode_spatial_ref = 0;
+  svc->current_superframe = 0;
+  for (i = 0; i < REF_FRAMES; ++i)
+    svc->ref_frame_index[i] = -1;
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
     if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
@@ -353,6 +357,8 @@ void vp9_inc_frame_in_layer(VP9_COMP *const cpi) {
                               cpi->svc.number_temporal_layers];
   ++lc->current_video_frame_in_layer;
   ++lc->frames_from_key_frame;
+  if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)
+    ++cpi->svc.current_superframe;
 }
 
 int vp9_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
@@ -542,6 +548,7 @@ static void set_flags_and_fb_idx_for_temporal_mode_noLayering(
 int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc = NULL;
+  cpi->svc.force_zero_mode_spatial_ref = 1;
 
   if (cpi->svc.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0212) {
     set_flags_and_fb_idx_for_temporal_mode3(cpi);
