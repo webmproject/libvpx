@@ -897,18 +897,17 @@ static void write_txfm_mode(TX_MODE mode, struct vpx_write_bit_buffer *wb) {
   if (mode != TX_MODE_SELECT)
     vpx_wb_write_literal(wb, mode, 2);
 }
+#else
+static void write_txfm_mode(TX_MODE mode, struct vpx_writer *wb) {
+  vpx_write_literal(wb, VPXMIN(mode, ALLOW_32X32), 2);
+  if (mode >= ALLOW_32X32)
+    vpx_write_bit(wb, mode == TX_MODE_SELECT);
+}
 #endif
+
 
 static void update_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
-#if !CONFIG_MISC_FIXES
-  // Mode
-  vpx_write_literal(w, VPXMIN(cm->tx_mode, ALLOW_32X32), 2);
-  if (cm->tx_mode >= ALLOW_32X32)
-    vpx_write_bit(w, cm->tx_mode == TX_MODE_SELECT);
-
-  // Probabilities
-#endif
 
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
@@ -1261,7 +1260,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
 #if CONFIG_MISC_FIXES
-  if (!cm->seg.enabled && xd->lossless[0])
+  if (xd->lossless[0])
     cm->tx_mode = TX_4X4;
   else
     write_txfm_mode(cm->tx_mode, wb);
@@ -1291,10 +1290,12 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   vpx_start_encode(&header_bc, data);
 
 #if !CONFIG_MISC_FIXES
-  if (cpi->td.mb.e_mbd.lossless[0])
+  if (cpi->td.mb.e_mbd.lossless[0]) {
     cm->tx_mode = TX_4X4;
-  else
+  } else {
+    write_txfm_mode(cm->tx_mode, &header_bc);
     update_txfm_probs(cm, &header_bc, counts);
+  }
 #else
   update_txfm_probs(cm, &header_bc, counts);
 #endif
