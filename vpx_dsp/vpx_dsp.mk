@@ -252,6 +252,18 @@ DSP_SRCS-$(HAVE_SSSE3)  += x86/quantize_ssse3_x86_64.asm
 DSP_SRCS-$(HAVE_AVX)    += x86/quantize_avx_x86_64.asm
 endif
 endif
+
+# avg
+DSP_SRCS-yes           += avg.c
+DSP_SRCS-$(HAVE_SSE2)  += x86/avg_intrin_sse2.c
+DSP_SRCS-$(HAVE_NEON)  += arm/avg_neon.c
+DSP_SRCS-$(HAVE_MSA)   += mips/avg_msa.c
+ifeq ($(ARCH_X86_64),yes)
+ifeq ($(CONFIG_USE_X86INC),yes)
+DSP_SRCS-$(HAVE_SSSE3) += x86/avg_ssse3_x86_64.asm
+endif
+endif
+
 endif  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
 ifeq ($(CONFIG_ENCODERS),yes)

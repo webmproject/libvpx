@@ -7,11 +7,12 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include "./vp10_rtcd.h"
-#include "vp10/common/common.h"
+#include <stdlib.h>
+
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
 
-unsigned int vp10_avg_8x8_c(const uint8_t *s, int p) {
+unsigned int vpx_avg_8x8_c(const uint8_t *s, int p) {
   int i, j;
   int sum = 0;
   for (i = 0; i < 8; ++i, s+=p)
@@ -20,7 +21,7 @@ unsigned int vp10_avg_8x8_c(const uint8_t *s, int p) {
   return (sum + 32) >> 6;
 }
 
-unsigned int vp10_avg_4x4_c(const uint8_t *s, int p) {
+unsigned int vpx_avg_4x4_c(const uint8_t *s, int p) {
   int i, j;
   int sum = 0;
   for (i = 0; i < 4; ++i, s+=p)
@@ -61,7 +62,7 @@ static void hadamard_col8(const int16_t *src_diff, int src_stride,
   coeff[5] = c3 - c7;
 }
 
-void vp10_hadamard_8x8_c(int16_t const *src_diff, int src_stride,
+void vpx_hadamard_8x8_c(int16_t const *src_diff, int src_stride,
                         int16_t *coeff) {
   int idx;
   int16_t buffer[64];
@@ -84,14 +85,14 @@ void vp10_hadamard_8x8_c(int16_t const *src_diff, int src_stride,
 }
 
 // In place 16x16 2D Hadamard transform
-void vp10_hadamard_16x16_c(int16_t const *src_diff, int src_stride,
+void vpx_hadamard_16x16_c(int16_t const *src_diff, int src_stride,
                           int16_t *coeff) {
   int idx;
   for (idx = 0; idx < 4; ++idx) {
     // src_diff: 9 bit, dynamic range [-255, 255]
     int16_t const *src_ptr = src_diff + (idx >> 1) * 8 * src_stride
                                 + (idx & 0x01) * 8;
-    vp10_hadamard_8x8_c(src_ptr, src_stride, coeff + idx * 64);
+    vpx_hadamard_8x8_c(src_ptr, src_stride, coeff + idx * 64);
   }
 
   // coeff: 15 bit, dynamic range [-16320, 16320]
@@ -117,19 +118,19 @@ void vp10_hadamard_16x16_c(int16_t const *src_diff, int src_stride,
 
 // coeff: 16 bits, dynamic range [-32640, 32640].
 // length: value range {16, 64, 256, 1024}.
-int16_t vp10_satd_c(const int16_t *coeff, int length) {
+int vpx_satd_c(const int16_t *coeff, int length) {
   int i;
   int satd = 0;
   for (i = 0; i < length; ++i)
     satd += abs(coeff[i]);
 
   // satd: 26 bits, dynamic range [-32640 * 1024, 32640 * 1024]
-  return (int16_t)satd;
+  return satd;
 }
 
 // Integer projection onto row vectors.
 // height: value range {16, 32, 64}.
-void vp10_int_pro_row_c(int16_t hbuf[16], uint8_t const *ref,
+void vpx_int_pro_row_c(int16_t hbuf[16], uint8_t const *ref,
                        const int ref_stride, const int height) {
   int idx;
   const int norm_factor = height >> 1;
@@ -146,7 +147,7 @@ void vp10_int_pro_row_c(int16_t hbuf[16], uint8_t const *ref,
 }
 
 // width: value range {16, 32, 64}.
-int16_t vp10_int_pro_col_c(uint8_t const *ref, const int width) {
+int16_t vpx_int_pro_col_c(uint8_t const *ref, const int width) {
   int idx;
   int16_t sum = 0;
   // sum: 14 bit, dynamic range [0, 16320]
@@ -158,7 +159,7 @@ int16_t vp10_int_pro_col_c(uint8_t const *ref, const int width) {
 // ref: [0 - 510]
 // src: [0 - 510]
 // bwl: {2, 3, 4}
-int vp10_vector_var_c(int16_t const *ref, int16_t const *src,
+int vpx_vector_var_c(int16_t const *ref, int16_t const *src,
                      const int bwl) {
   int i;
   int width = 4 << bwl;
@@ -175,7 +176,7 @@ int vp10_vector_var_c(int16_t const *ref, int16_t const *src,
   return var;
 }
 
-void vp10_minmax_8x8_c(const uint8_t *s, int p, const uint8_t *d, int dp,
+void vpx_minmax_8x8_c(const uint8_t *s, int p, const uint8_t *d, int dp,
                       int *min, int *max) {
   int i, j;
   *min = 255;
@@ -190,7 +191,7 @@ void vp10_minmax_8x8_c(const uint8_t *s, int p, const uint8_t *d, int dp,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-unsigned int vp10_highbd_avg_8x8_c(const uint8_t *s8, int p) {
+unsigned int vpx_highbd_avg_8x8_c(const uint8_t *s8, int p) {
   int i, j;
   int sum = 0;
   const uint16_t* s = CONVERT_TO_SHORTPTR(s8);
@@ -200,7 +201,7 @@ unsigned int vp10_highbd_avg_8x8_c(const uint8_t *s8, int p) {
   return (sum + 32) >> 6;
 }
 
-unsigned int vp10_highbd_avg_4x4_c(const uint8_t *s8, int p) {
+unsigned int vpx_highbd_avg_4x4_c(const uint8_t *s8, int p) {
   int i, j;
   int sum = 0;
   const uint16_t* s = CONVERT_TO_SHORTPTR(s8);
@@ -210,7 +211,7 @@ unsigned int vp10_highbd_avg_4x4_c(const uint8_t *s8, int p) {
   return (sum + 8) >> 4;
 }
 
-void vp10_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,
+void vpx_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,
                              int dp, int *min, int *max) {
   int i, j;
   const uint16_t* s = CONVERT_TO_SHORTPTR(s8);

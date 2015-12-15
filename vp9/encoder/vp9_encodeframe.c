@@ -558,16 +558,16 @@ static int compute_minmax_8x8(const uint8_t *s, int sp, const uint8_t *d,
     if (x8_idx < pixels_wide && y8_idx < pixels_high) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
-        vp9_highbd_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
+        vpx_highbd_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
                               d + y8_idx * dp + x8_idx, dp,
                               &min, &max);
       } else {
-        vp9_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
+        vpx_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
                        d + y8_idx * dp + x8_idx, dp,
                        &min, &max);
       }
 #else
-      vp9_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
+      vpx_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
                      d + y8_idx * dp + x8_idx, dp,
                      &min, &max);
 #endif
@@ -599,18 +599,18 @@ static void fill_variance_4x4avg(const uint8_t *s, int sp, const uint8_t *d,
       int d_avg = 128;
 #if CONFIG_VP9_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
-        s_avg = vp9_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+        s_avg = vpx_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_highbd_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+          d_avg = vpx_highbd_avg_4x4(d + y4_idx * dp + x4_idx, dp);
       } else {
-        s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+        s_avg = vpx_avg_4x4(s + y4_idx * sp + x4_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+          d_avg = vpx_avg_4x4(d + y4_idx * dp + x4_idx, dp);
       }
 #else
-      s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+      s_avg = vpx_avg_4x4(s + y4_idx * sp + x4_idx, sp);
       if (!is_key_frame)
-        d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+        d_avg = vpx_avg_4x4(d + y4_idx * dp + x4_idx, dp);
 #endif
       sum = s_avg - d_avg;
       sse = sum * sum;
@@ -638,18 +638,18 @@ static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
       int d_avg = 128;
 #if CONFIG_VP9_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
-        s_avg = vp9_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+        s_avg = vpx_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+          d_avg = vpx_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
       } else {
-        s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+        s_avg = vpx_avg_8x8(s + y8_idx * sp + x8_idx, sp);
         if (!is_key_frame)
-          d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+          d_avg = vpx_avg_8x8(d + y8_idx * dp + x8_idx, dp);
       }
 #else
-      s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+      s_avg = vpx_avg_8x8(s + y8_idx * sp + x8_idx, sp);
       if (!is_key_frame)
-        d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+        d_avg = vpx_avg_8x8(d + y8_idx * dp + x8_idx, dp);
 #endif
       sum = s_avg - d_avg;
       sse = sum * sum;

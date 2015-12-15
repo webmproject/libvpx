@@ -17,7 +17,6 @@ VP10_CX_SRCS_REMOVE-no  += $(VP10_COMMON_SRCS_REMOVE-no)
 
 VP10_CX_SRCS-yes += vp10_cx_iface.c
 
-VP10_CX_SRCS-yes += encoder/avg.c
 VP10_CX_SRCS-yes += encoder/bitstream.c
 VP10_CX_SRCS-yes += encoder/context_tree.c
 VP10_CX_SRCS-yes += encoder/context_tree.h
@@ -87,7 +86,6 @@ VP10_CX_SRCS-yes += encoder/temporal_filter.h
 VP10_CX_SRCS-yes += encoder/mbgraph.c
 VP10_CX_SRCS-yes += encoder/mbgraph.h
 
-VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/avg_intrin_sse2.c
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/temporal_filter_apply_sse2.asm
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/quantize_sse2.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
@@ -102,7 +100,6 @@ endif
 ifeq ($(ARCH_X86_64),yes)
 ifeq ($(CONFIG_USE_X86INC),yes)
 VP10_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/quantize_ssse3_x86_64.asm
-VP10_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/dct_ssse3_x86_64.asm
 endif
 endif
 
@@ -119,10 +116,8 @@ ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP10_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/dct_neon.c
 VP10_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/error_neon.c
 endif
-VP10_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/avg_neon.c
 VP10_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/quantize_neon.c
 
-VP10_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/avg_msa.c
 VP10_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/error_msa.c
 VP10_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/fdct4x4_msa.c
 VP10_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/fdct8x8_msa.c
