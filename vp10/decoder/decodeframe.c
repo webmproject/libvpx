@@ -1150,10 +1150,6 @@ static void setup_quantization(VP10_COMMON *const cm,
   cm->uv_dc_delta_q = read_delta_q(rb);
   cm->uv_ac_delta_q = read_delta_q(rb);
   cm->dequant_bit_depth = cm->bit_depth;
-
-#if CONFIG_VP9_HIGHBITDEPTH
-  xd->bd = (int)cm->bit_depth;
-#endif
 }
 
 static void setup_segmentation_dequant(VP10_COMMON *const cm) {
@@ -2092,6 +2088,10 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 
   setup_loopfilter(&cm->lf, rb);
   setup_quantization(cm, rb);
+#if CONFIG_VP9_HIGHBITDEPTH
+  xd->bd = (int)cm->bit_depth;
+#endif
+
   setup_segmentation(cm, rb);
 
   {
