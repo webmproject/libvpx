@@ -165,6 +165,7 @@ ifeq ($(CONFIG_VP10),yes)
 
 LIBVPX_TEST_SRCS-yes                    += vp10_inv_txfm_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_dct_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_ANS)          += vp10_ans_test.cc
 
 endif # VP10
 
