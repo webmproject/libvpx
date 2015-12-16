@@ -26,6 +26,7 @@ extern "C" {
 
 #define MIN_GF_INTERVAL     4
 #define MAX_GF_INTERVAL     16
+#define FIXED_GF_INTERVAL   8    // Used in some testing modes only
 #define ONEHALFONLY_RESIZE  0
 
 typedef enum {

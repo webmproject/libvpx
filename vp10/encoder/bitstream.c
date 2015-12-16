@@ -1401,6 +1401,7 @@ static void write_txfm_mode(TX_MODE mode, struct vpx_write_bit_buffer *wb) {
     vpx_wb_write_literal(wb, mode, 2);
 }
 
+
 static void update_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
   if (cm->tx_mode == TX_MODE_SELECT) {
@@ -1750,7 +1751,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   encode_loopfilter(&cm->lf, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
-  if (!cm->seg.enabled && xd->lossless[0])
+  if (xd->lossless[0])
     cm->tx_mode = TX_4X4;
   else
     write_txfm_mode(cm->tx_mode, wb);

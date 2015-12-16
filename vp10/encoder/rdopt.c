@@ -1050,7 +1050,7 @@ static void super_block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
 
   assert(bs == xd->mi[0]->mbmi.sb_type);
 
-  if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
+  if (xd->lossless[0]) {
     choose_smallest_tx_size(cpi, x, rate, distortion, skip, ret_sse,
                             ref_best_rd, bs);
   } else if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {

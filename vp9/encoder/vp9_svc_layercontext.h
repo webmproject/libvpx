@@ -83,6 +83,9 @@ typedef struct {
   int ext_lst_fb_idx[VPX_MAX_LAYERS];
   int ext_gld_fb_idx[VPX_MAX_LAYERS];
   int ext_alt_fb_idx[VPX_MAX_LAYERS];
+  int ref_frame_index[REF_FRAMES];
+  int force_zero_mode_spatial_ref;
+  int current_superframe;
 } SVC;
 
 struct VP9_COMP;
