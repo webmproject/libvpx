@@ -113,6 +113,7 @@ typedef enum {
 } TX_TYPE;
 
 #if CONFIG_EXT_TX
+#define USE_DST2           1
 #define EXT_TX_SIZES       3  // number of sizes that use extended transforms
 #define EXT_TX_SETS_INTER  4  // Sets of transform selections for INTER
 #define EXT_TX_SETS_INTRA  3  // Sets of transform selections for INTRA
