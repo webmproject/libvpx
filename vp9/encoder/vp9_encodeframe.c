@@ -892,7 +892,6 @@ static int choose_partitioning(VP9_COMP *cpi,
       }
     }
   }
-
   // Fill the rest of the variance tree by summing split partition values.
   avg_32x32 = 0;
   for (i = 0; i < 4; i++) {
@@ -937,7 +936,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     // If variance of this 64x64 block is above (some threshold of) the average
     // variance over the sub-32x32 blocks, then force this block to split.
     if (!is_key_frame &&
-        vt.part_variances.none.variance > (3 * avg_32x32) >> 3)
+        vt.part_variances.none.variance > (5 * avg_32x32) >> 4)
       force_split[0] = 1;
   }
 
