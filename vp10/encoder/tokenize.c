@@ -431,11 +431,12 @@ const vp10_extra_bit vp10_extra_bits_high12[ENTROPY_TOKENS] = {
 };
 #endif
 
+#if !CONFIG_ANS
 const struct vp10_token vp10_coef_encodings[ENTROPY_TOKENS] = {
   {2, 2}, {6, 3}, {28, 5}, {58, 6}, {59, 6}, {60, 6}, {61, 6}, {124, 7},
   {125, 7}, {126, 7}, {127, 7}, {0, 1}
 };
-
+#endif  // !CONFIG_ANS
 
 struct tokenize_b_args {
   VP10_COMP *cpi;
@@ -783,6 +784,14 @@ void vp10_tokenize_sb(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       vp10_foreach_transformed_block_in_plane(xd, bsize, plane, tokenize_b,
                                               &arg);
       (*t)->token = EOSB_TOKEN;
+#if CONFIG_ANS
+      // TODO(aconverse): clip the number of bits in tokenize_b
+      // Smuggle TX_SIZE in the unused extrabits field so the ANS encoder
+      // knows the maximum number of extrabits to write at the end of the block
+      // (where it starts).
+      (*t)->extra = (EXTRABIT)(plane ? get_uv_tx_size(mbmi, &xd->plane[plane])
+                                     : mbmi->tx_size);
+#endif  // CONFIG_ANS
       (*t)++;
     }
   } else {

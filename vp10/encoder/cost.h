@@ -48,6 +48,11 @@ static INLINE int treed_cost(vpx_tree tree, const vpx_prob *probs,
 void vp10_cost_tokens(int *costs, const vpx_prob *probs, vpx_tree tree);
 void vp10_cost_tokens_skip(int *costs, const vpx_prob *probs, vpx_tree tree);
 
+#if CONFIG_ANS
+void vp10_cost_tokens_ans(int *costs, const vpx_prob *tree_probs,
+                          const vpx_prob *token_probs, int skip_eob);
+#endif
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
