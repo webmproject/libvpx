@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e5099ede_7a3cd99b",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1269,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-12-17T15:58:36Z",
+      "side": 1,
+      "message": "If this is a constant segment map why does it need to be configured each key frame. Of course it will need to be signalled each key frame but that is separate.",
+      "range": {
+        "startLine": 1269,
+        "startChar": 25,
+        "endLine": 1269,
+        "endChar": 45
+      },
+      "revId": "a68bb3aacbc9e43761cf6e837613aba9153843d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
