@@ -16,6 +16,24 @@
       "revId": "34174966f20e03b678dce7524d1cfccae4a36644",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05a79224_9fa0a3b9",
+        "filename": "vpx_dsp/x86/sad_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1139914
+      },
+      "writtenOn": "2015-12-17T19:11:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c5dadaa8_af729ded",
+      "revId": "34174966f20e03b678dce7524d1cfccae4a36644",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
