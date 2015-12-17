@@ -700,16 +700,6 @@ const SadMxNParam mmx_tests[] = {
 INSTANTIATE_TEST_CASE_P(MMX, SADTest, ::testing::ValuesIn(mmx_tests));
 #endif  // HAVE_MMX
 
-#if HAVE_SSE
-#if CONFIG_USE_X86INC
-const SadMxNx4Param x4d_sse_tests[] = {
-  make_tuple(4, 8, &vpx_sad4x8x4d_sse, -1),
-  make_tuple(4, 4, &vpx_sad4x4x4d_sse, -1),
-};
-INSTANTIATE_TEST_CASE_P(SSE, SADx4Test, ::testing::ValuesIn(x4d_sse_tests));
-#endif  // CONFIG_USE_X86INC
-#endif  // HAVE_SSE
-
 #if HAVE_SSE2
 #if CONFIG_USE_X86INC
 const SadMxNParam sse2_tests[] = {
@@ -828,6 +818,8 @@ const SadMxNx4Param x4d_sse2_tests[] = {
   make_tuple(8, 16, &vpx_sad8x16x4d_sse2, -1),
   make_tuple(8, 8, &vpx_sad8x8x4d_sse2, -1),
   make_tuple(8, 4, &vpx_sad8x4x4d_sse2, -1),
+  make_tuple(4, 8, &vpx_sad4x8x4d_sse2, -1),
+  make_tuple(4, 4, &vpx_sad4x4x4d_sse2, -1),
 #if CONFIG_VP9_HIGHBITDEPTH
   make_tuple(64, 64, &vpx_highbd_sad64x64x4d_sse2, 8),
   make_tuple(64, 32, &vpx_highbd_sad64x32x4d_sse2, 8),
