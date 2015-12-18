@@ -17,24 +17,20 @@ pw_16: times 4 dd 16
 pw_32: times 4 dd 32
 
 SECTION .text
-INIT_MMX sse
+INIT_XMM sse2
 cglobal highbd_dc_predictor_4x4, 4, 5, 4, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   movq                  m0, [aboveq]
   movq                  m2, [leftq]
-  DEFINE_ARGS dst, stride, one
-  mov                 oned, 0x0001
-  pxor                  m1, m1
-  movd                  m3, oned
-  pshufw                m3, m3, 0x0
   paddw                 m0, m2
-  pmaddwd               m0, m3
-  packssdw              m0, m1
-  pmaddwd               m0, m3
+  pshuflw               m1, m0, 0xe
+  paddw                 m0, m1
+  pshuflw               m1, m0, 0x1
+  paddw                 m0, m1
   paddw                 m0, [GLOBAL(pw_4)]
   psraw                 m0, 3
-  pshufw                m0, m0, 0x0
+  pshuflw               m0, m0, 0x0
   movq    [dstq          ], m0
   movq    [dstq+strideq*2], m0
   lea                 dstq, [dstq+strideq*4]
