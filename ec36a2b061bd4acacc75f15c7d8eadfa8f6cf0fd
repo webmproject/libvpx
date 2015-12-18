@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a2f9f8d_2ea8a7af",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1512,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-12-18T00:39:10Z",
+      "side": 1,
+      "message": "This is hard to read with config flags mixed with incomplete lines. I suggest you use an interim variable to make #if #else #endif to be a bit cleaner.",
+      "range": {
+        "startLine": 1507,
+        "startChar": 0,
+        "endLine": 1512,
+        "endChar": 58
+      },
+      "revId": "ec36a2b061bd4acacc75f15c7d8eadfa8f6cf0fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2517a8_507952ce",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1526,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-12-18T00:39:10Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 1519,
+        "startChar": 0,
+        "endLine": 1526,
+        "endChar": 3
+      },
+      "revId": "ec36a2b061bd4acacc75f15c7d8eadfa8f6cf0fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
