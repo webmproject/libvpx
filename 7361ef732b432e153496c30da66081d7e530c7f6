@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca62e7ed_2f6e6d06",
+        "filename": "vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-12-18T17:36:37Z",
+      "side": 1,
+      "message": "After modifying the c code, do you still need to modify assembly code?",
+      "range": {
+        "startLine": 82,
+        "startChar": 27,
+        "endLine": 82,
+        "endChar": 39
+      },
+      "revId": "7361ef732b432e153496c30da66081d7e530c7f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
