@@ -29,13 +29,6 @@
 #include <math.h>
 #include <assert.h>
 #include <sys/time.h>
-#if USE_POSIX_MMAP
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#endif
 #include "vpx_ports/vpx_timer.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
