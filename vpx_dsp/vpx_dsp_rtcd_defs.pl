@@ -990,10 +990,10 @@ add_proto qw/unsigned int vpx_sad8x4/, "const uint8_t *src_ptr, int src_stride, 
 specialize qw/vpx_sad8x4 msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad4x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad4x8 msa/, "$sse_x86inc";
+specialize qw/vpx_sad4x8 msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad4x4/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad4x4 mmx neon msa/, "$sse_x86inc";
+specialize qw/vpx_sad4x4 mmx neon msa/, "$sse2_x86inc";
 
 #
 # Avg
@@ -1061,10 +1061,10 @@ add_proto qw/unsigned int vpx_sad8x4_avg/, "const uint8_t *src_ptr, int src_stri
 specialize qw/vpx_sad8x4_avg msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad4x8_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad4x8_avg msa/, "$sse_x86inc";
+specialize qw/vpx_sad4x8_avg msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad4x4_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad4x4_avg msa/, "$sse_x86inc";
+specialize qw/vpx_sad4x4_avg msa/, "$sse2_x86inc";
 
 #
 # Multi-block SAD, comparing a reference to N blocks 1 pixel apart horizontally

@@ -680,9 +680,13 @@ static int choose_partitioning(VP9_COMP *cpi,
   int64_t thresholds[4] = {cpi->vbp_thresholds[0], cpi->vbp_thresholds[1],
       cpi->vbp_thresholds[2], cpi->vbp_thresholds[3]};
 
+  // For the variance computation under SVC mode, we treat the frame as key if
+  // the reference (base layer frame) is key frame (i.e., is_key_frame == 1).
+  const int is_key_frame = (cm->frame_type == KEY_FRAME ||
+      (is_one_pass_cbr_svc(cpi) &&
+      cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame));
   // Always use 4x4 partition for key frame.
-  const int is_key_frame = (cm->frame_type == KEY_FRAME);
-  const int use_4x4_partition = is_key_frame;
+  const int use_4x4_partition = cm->frame_type == KEY_FRAME;
   const int low_res = (cm->width <= 352 && cm->height <= 288);
   int variance4x4downsample[16];
 
@@ -708,8 +712,7 @@ static int choose_partitioning(VP9_COMP *cpi,
   s = x->plane[0].src.buf;
   sp = x->plane[0].src.stride;
 
-  if (!is_key_frame && !(is_one_pass_cbr_svc(cpi) &&
-      cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
+  if (!is_key_frame) {
     // In the case of spatial/temporal scalable coding, the assumption here is
     // that the temporal reference frame will always be of type LAST_FRAME.
     // TODO(marpan): If that assumption is broken, we need to revisit this code.
@@ -868,9 +871,7 @@ static int choose_partitioning(VP9_COMP *cpi,
           }
         }
       }
-      // TODO(marpan): There is an issue with variance based on 4x4 average in
-      // svc mode, don't allow it for now.
-      if (is_key_frame || (low_res && !cpi->use_svc &&
+      if (is_key_frame || (low_res &&
           vt.split[i].split[j].part_variances.none.variance >
           (thresholds[1] << 1))) {
         force_split[split_index] = 0;
@@ -892,7 +893,6 @@ static int choose_partitioning(VP9_COMP *cpi,
       }
     }
   }
-
   // Fill the rest of the variance tree by summing split partition values.
   avg_32x32 = 0;
   for (i = 0; i < 4; i++) {
@@ -937,7 +937,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     // If variance of this 64x64 block is above (some threshold of) the average
     // variance over the sub-32x32 blocks, then force this block to split.
     if (!is_key_frame &&
-        vt.part_variances.none.variance > (3 * avg_32x32) >> 3)
+        vt.part_variances.none.variance > (5 * avg_32x32) >> 4)
       force_split[0] = 1;
   }
 

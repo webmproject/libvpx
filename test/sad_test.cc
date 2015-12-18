@@ -702,18 +702,6 @@ INSTANTIATE_TEST_CASE_P(MMX, SADTest, ::testing::ValuesIn(mmx_tests));
 
 #if HAVE_SSE
 #if CONFIG_USE_X86INC
-const SadMxNParam sse_tests[] = {
-  make_tuple(4, 8, &vpx_sad4x8_sse, -1),
-  make_tuple(4, 4, &vpx_sad4x4_sse, -1),
-};
-INSTANTIATE_TEST_CASE_P(SSE, SADTest, ::testing::ValuesIn(sse_tests));
-
-const SadMxNAvgParam avg_sse_tests[] = {
-  make_tuple(4, 8, &vpx_sad4x8_avg_sse, -1),
-  make_tuple(4, 4, &vpx_sad4x4_avg_sse, -1),
-};
-INSTANTIATE_TEST_CASE_P(SSE, SADavgTest, ::testing::ValuesIn(avg_sse_tests));
-
 const SadMxNx4Param x4d_sse_tests[] = {
   make_tuple(4, 8, &vpx_sad4x8x4d_sse, -1),
   make_tuple(4, 4, &vpx_sad4x4x4d_sse, -1),
@@ -736,6 +724,8 @@ const SadMxNParam sse2_tests[] = {
   make_tuple(8, 16, &vpx_sad8x16_sse2, -1),
   make_tuple(8, 8, &vpx_sad8x8_sse2, -1),
   make_tuple(8, 4, &vpx_sad8x4_sse2, -1),
+  make_tuple(4, 8, &vpx_sad4x8_sse2, -1),
+  make_tuple(4, 4, &vpx_sad4x4_sse2, -1),
 #if CONFIG_VP9_HIGHBITDEPTH
   make_tuple(64, 64, &vpx_highbd_sad64x64_sse2, 8),
   make_tuple(64, 32, &vpx_highbd_sad64x32_sse2, 8),
@@ -786,6 +776,8 @@ const SadMxNAvgParam avg_sse2_tests[] = {
   make_tuple(8, 16, &vpx_sad8x16_avg_sse2, -1),
   make_tuple(8, 8, &vpx_sad8x8_avg_sse2, -1),
   make_tuple(8, 4, &vpx_sad8x4_avg_sse2, -1),
+  make_tuple(4, 8, &vpx_sad4x8_avg_sse2, -1),
+  make_tuple(4, 4, &vpx_sad4x4_avg_sse2, -1),
 #if CONFIG_VP9_HIGHBITDEPTH
   make_tuple(64, 64, &vpx_highbd_sad64x64_avg_sse2, 8),
   make_tuple(64, 32, &vpx_highbd_sad64x32_avg_sse2, 8),

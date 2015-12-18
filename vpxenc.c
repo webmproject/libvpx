@@ -2060,9 +2060,11 @@ int main(int argc, const char **argv_) {
 
 #if !CONFIG_WEBM_IO
     FOREACH_STREAM({
-      stream->config.write_webm = 0;
-      warn("vpxenc was compiled without WebM container support."
-           "Producing IVF output");
+      if (stream->config.write_webm) {
+        stream->config.write_webm = 0;
+        warn("vpxenc was compiled without WebM container support."
+             "Producing IVF output");
+      }
     });
 #endif
 
