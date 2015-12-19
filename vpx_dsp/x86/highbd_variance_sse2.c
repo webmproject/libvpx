@@ -243,13 +243,18 @@ unsigned int vpx_highbd_12_mse8x8_sse2(const uint8_t *src8, int src_stride,
 }
 
 #if CONFIG_USE_X86INC
+// The 2 unused parameters are place holders for PIC enabled build.
+// These definitions are for functions defined in
+// highbd_subpel_variance_impl_sse2.asm
 #define DECL(w, opt) \
   int vpx_highbd_sub_pixel_variance##w##xh_##opt(const uint16_t *src, \
                                                  ptrdiff_t src_stride, \
                                                  int x_offset, int y_offset, \
                                                  const uint16_t *dst, \
                                                  ptrdiff_t dst_stride, \
-                                                 int height, unsigned int *sse);
+                                                 int height, \
+                                                 unsigned int *sse, \
+                                                 void *unused0, void *unused);
 #define DECLS(opt1, opt2) \
   DECL(8, opt1); \
   DECL(16, opt1)
@@ -274,7 +279,7 @@ uint32_t vpx_highbd_8_sub_pixel_variance##w##x##h##_##opt(const uint8_t *src8, \
   int se = vpx_highbd_sub_pixel_variance##wf##xh_##opt(src, src_stride, \
                                                        x_offset, y_offset, \
                                                        dst, dst_stride, h, \
-                                                       &sse); \
+                                                       &sse, NULL, NULL); \
   if (w > wf) { \
     unsigned int sse2; \
     int se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt(src + 16, \
@@ -282,19 +287,20 @@ uint32_t vpx_highbd_8_sub_pixel_variance##w##x##h##_##opt(const uint8_t *src8, \
                                                           x_offset, y_offset, \
                                                           dst + 16, \
                                                           dst_stride, \
-                                                          h, &sse2); \
+                                                          h, &sse2, \
+                                                          NULL, NULL); \
     se += se2; \
     sse += sse2; \
     if (w > wf * 2) { \
       se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt(src + 32, src_stride, \
                                                         x_offset, y_offset, \
                                                         dst + 32, dst_stride, \
-                                                        h, &sse2); \
+                                                        h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
       se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt( \
           src + 48, src_stride, x_offset, y_offset, \
-          dst + 48, dst_stride, h, &sse2); \
+          dst + 48, dst_stride, h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
     } \
@@ -312,7 +318,7 @@ uint32_t vpx_highbd_10_sub_pixel_variance##w##x##h##_##opt( \
   int se = vpx_highbd_sub_pixel_variance##wf##xh_##opt(src, src_stride, \
                                                        x_offset, y_offset, \
                                                        dst, dst_stride, \
-                                                       h, &sse); \
+                                                       h, &sse, NULL, NULL); \
   if (w > wf) { \
     uint32_t sse2; \
     int se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt(src + 16, \
@@ -320,20 +326,21 @@ uint32_t vpx_highbd_10_sub_pixel_variance##w##x##h##_##opt( \
                                                           x_offset, y_offset, \
                                                           dst + 16, \
                                                           dst_stride, \
-                                                          h, &sse2); \
+                                                          h, &sse2, \
+                                                          NULL, NULL); \
     se += se2; \
     sse += sse2; \
     if (w > wf * 2) { \
       se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt(src + 32, src_stride, \
                                                         x_offset, y_offset, \
                                                         dst + 32, dst_stride, \
-                                                        h, &sse2); \
+                                                        h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
       se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt(src + 48, src_stride, \
                                                         x_offset, y_offset, \
                                                         dst + 48, dst_stride, \
-                                                        h, &sse2); \
+                                                        h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
     } \
@@ -359,27 +366,27 @@ uint32_t vpx_highbd_12_sub_pixel_variance##w##x##h##_##opt( \
     int se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt( \
         src + (start_row * src_stride), src_stride, \
         x_offset, y_offset, dst + (start_row * dst_stride), \
-        dst_stride, height, &sse2); \
+        dst_stride, height, &sse2, NULL, NULL); \
     se += se2; \
     long_sse += sse2; \
     if (w > wf) { \
       se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt( \
           src + 16 + (start_row * src_stride), src_stride, \
           x_offset, y_offset, dst + 16 + (start_row * dst_stride), \
-          dst_stride, height, &sse2); \
+          dst_stride, height, &sse2, NULL, NULL); \
       se += se2; \
       long_sse += sse2; \
       if (w > wf * 2) { \
         se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt( \
             src + 32 + (start_row * src_stride), src_stride, \
             x_offset, y_offset, dst + 32 + (start_row * dst_stride), \
-            dst_stride, height, &sse2); \
+            dst_stride, height, &sse2, NULL, NULL); \
         se += se2; \
         long_sse += sse2; \
         se2 = vpx_highbd_sub_pixel_variance##wf##xh_##opt( \
             src + 48 + (start_row * src_stride), src_stride, \
             x_offset, y_offset, dst + 48 + (start_row * dst_stride), \
-            dst_stride, height, &sse2); \
+            dst_stride, height, &sse2, NULL, NULL); \
         se += se2; \
         long_sse += sse2; \
       }\
@@ -410,6 +417,7 @@ FNS(sse2, sse);
 #undef FNS
 #undef FN
 
+// The 2 unused parameters are place holders for PIC enabled build.
 #define DECL(w, opt) \
 int vpx_highbd_sub_pixel_avg_variance##w##xh_##opt(const uint16_t *src, \
                                                    ptrdiff_t src_stride, \
@@ -419,7 +427,8 @@ int vpx_highbd_sub_pixel_avg_variance##w##xh_##opt(const uint16_t *src, \
                                                    const uint16_t *sec, \
                                                    ptrdiff_t sec_stride, \
                                                    int height, \
-                                                   unsigned int *sse);
+                                                   unsigned int *sse, \
+                                                   void *unused0, void *unused);
 #define DECLS(opt1) \
 DECL(16, opt1) \
 DECL(8, opt1)
@@ -439,23 +448,23 @@ uint32_t vpx_highbd_8_sub_pixel_avg_variance##w##x##h##_##opt( \
   uint16_t *sec = CONVERT_TO_SHORTPTR(sec8); \
   int se = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                src, src_stride, x_offset, \
-               y_offset, dst, dst_stride, sec, w, h, &sse); \
+               y_offset, dst, dst_stride, sec, w, h, &sse, NULL, NULL); \
   if (w > wf) { \
     uint32_t sse2; \
     int se2 = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                   src + 16, src_stride, x_offset, y_offset, \
-                  dst + 16, dst_stride, sec + 16, w, h, &sse2); \
+                  dst + 16, dst_stride, sec + 16, w, h, &sse2, NULL, NULL); \
     se += se2; \
     sse += sse2; \
     if (w > wf * 2) { \
       se2 = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                 src + 32, src_stride, x_offset, y_offset, \
-                dst + 32, dst_stride, sec + 32, w, h, &sse2); \
+                dst + 32, dst_stride, sec + 32, w, h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
       se2 = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                 src + 48, src_stride, x_offset, y_offset, \
-                dst + 48, dst_stride, sec + 48, w, h, &sse2); \
+                dst + 48, dst_stride, sec + 48, w, h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
     } \
@@ -475,14 +484,15 @@ uint32_t vpx_highbd_10_sub_pixel_avg_variance##w##x##h##_##opt( \
   int se = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                                             src, src_stride, x_offset, \
                                             y_offset, dst, dst_stride, \
-                                            sec, w, h, &sse); \
+                                            sec, w, h, &sse, NULL, NULL); \
   if (w > wf) { \
     uint32_t sse2; \
     int se2 = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                                             src + 16, src_stride, \
                                             x_offset, y_offset, \
                                             dst + 16, dst_stride, \
-                                            sec + 16, w, h, &sse2); \
+                                            sec + 16, w, h, &sse2, \
+                                            NULL, NULL); \
     se += se2; \
     sse += sse2; \
     if (w > wf * 2) { \
@@ -490,14 +500,16 @@ uint32_t vpx_highbd_10_sub_pixel_avg_variance##w##x##h##_##opt( \
                                             src + 32, src_stride, \
                                             x_offset, y_offset, \
                                             dst + 32, dst_stride, \
-                                            sec + 32, w, h, &sse2); \
+                                            sec + 32, w, h, &sse2, \
+                                            NULL, NULL); \
       se += se2; \
       sse += sse2; \
       se2 = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                                             src + 48, src_stride, \
                                             x_offset, y_offset, \
                                             dst + 48, dst_stride, \
-                                            sec + 48, w, h, &sse2); \
+                                            sec + 48, w, h, &sse2, \
+                                            NULL, NULL); \
       se += se2; \
       sse += sse2; \
     } \
@@ -525,7 +537,7 @@ uint32_t vpx_highbd_12_sub_pixel_avg_variance##w##x##h##_##opt( \
     int se2 = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                 src + (start_row * src_stride), src_stride, x_offset, \
                 y_offset, dst + (start_row * dst_stride), dst_stride, \
-                sec + (start_row * w), w, height, &sse2); \
+                sec + (start_row * w), w, height, &sse2, NULL, NULL); \
     se += se2; \
     long_sse += sse2; \
     if (w > wf) { \
@@ -533,7 +545,7 @@ uint32_t vpx_highbd_12_sub_pixel_avg_variance##w##x##h##_##opt( \
                 src + 16 + (start_row * src_stride), src_stride, \
                 x_offset, y_offset, \
                 dst + 16 + (start_row * dst_stride), dst_stride, \
-                sec + 16 + (start_row * w), w, height, &sse2); \
+                sec + 16 + (start_row * w), w, height, &sse2, NULL, NULL); \
       se += se2; \
       long_sse += sse2; \
       if (w > wf * 2) { \
@@ -541,14 +553,14 @@ uint32_t vpx_highbd_12_sub_pixel_avg_variance##w##x##h##_##opt( \
                 src + 32 + (start_row * src_stride), src_stride, \
                 x_offset, y_offset, \
                 dst + 32 + (start_row * dst_stride), dst_stride, \
-                sec + 32 + (start_row * w), w, height, &sse2); \
+                sec + 32 + (start_row * w), w, height, &sse2, NULL, NULL); \
         se += se2; \
         long_sse += sse2; \
         se2 = vpx_highbd_sub_pixel_avg_variance##wf##xh_##opt( \
                 src + 48 + (start_row * src_stride), src_stride, \
                 x_offset, y_offset, \
                 dst + 48 + (start_row * dst_stride), dst_stride, \
-                sec + 48 + (start_row * w), w, height, &sse2); \
+                sec + 48 + (start_row * w), w, height, &sse2, NULL, NULL); \
         se += se2; \
         long_sse += sse2; \
       } \

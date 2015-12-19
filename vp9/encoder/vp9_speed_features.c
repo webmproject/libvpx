@@ -394,7 +394,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
           sf->intra_y_mode_bsize_mask[i] = INTRA_DC_TM_H_V;
       } else {
         for (i = 0; i < BLOCK_SIZES; ++i)
-          if (i >= BLOCK_16X16)
+          if (i > BLOCK_16X16)
             sf->intra_y_mode_bsize_mask[i] = INTRA_DC;
           else
             // Use H and V intra mode for block sizes <= 16X16.

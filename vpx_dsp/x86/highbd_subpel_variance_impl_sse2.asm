@@ -79,17 +79,10 @@ SECTION .text
 
 %macro INC_SRC_BY_SRC_STRIDE  0
 %if ARCH_X86=1 && CONFIG_PIC=1
-  lea                srcq, [srcq + src_stridemp*2]
+  add                srcq, src_stridemp
+  add                srcq, src_stridemp
 %else
   lea                srcq, [srcq + src_strideq*2]
-%endif
-%endmacro
-
-%macro INC_SRC_BY_SRC_2STRIDE  0
-%if ARCH_X86=1 && CONFIG_PIC=1
-  lea                srcq, [srcq + src_stridemp*4]
-%else
-  lea                srcq, [srcq + src_strideq*4]
 %endif
 %endmacro
 
@@ -984,8 +977,9 @@ SECTION .text
 .x_other_y_other_loop:
   movu                 m2, [srcq]
   movu                 m4, [srcq+2]
-  movu                 m3, [srcq+src_strideq*2]
-  movu                 m5, [srcq+src_strideq*2+2]
+  INC_SRC_BY_SRC_STRIDE
+  movu                 m3, [srcq]
+  movu                 m5, [srcq+2]
   pmullw               m2, filter_x_a
   pmullw               m4, filter_x_b
   paddw                m2, filter_rnd
@@ -1018,7 +1012,7 @@ SECTION .text
   SUM_SSE              m0, m2, m4, m3, m6, m7
   mova                 m0, m5
 
-  INC_SRC_BY_SRC_2STRIDE
+  INC_SRC_BY_SRC_STRIDE
   lea                dstq, [dstq + dst_strideq * 4]
 %if %2 == 1 ; avg
   add                secq, sec_str
