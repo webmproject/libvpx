@@ -17,7 +17,7 @@ SECTION .text
 %if %3 == 5
 cglobal sad%1x%2, 4, %3, 5, src, src_stride, ref, ref_stride, n_rows
 %else ; %3 == 7
-cglobal sad%1x%2, 4, %3, 5, src, src_stride, ref, ref_stride, \
+cglobal sad%1x%2, 4, %3, 6, src, src_stride, ref, ref_stride, \
                             src_stride3, ref_stride3, n_rows
 %endif ; %3 == 5/7
 %else ; avg
@@ -25,7 +25,7 @@ cglobal sad%1x%2, 4, %3, 5, src, src_stride, ref, ref_stride, \
 cglobal sad%1x%2_avg, 5, 1 + %3, 5, src, src_stride, ref, ref_stride, \
                                     second_pred, n_rows
 %else ; %3 == 7
-cglobal sad%1x%2_avg, 5, ARCH_X86_64 + %3, 5, src, src_stride, \
+cglobal sad%1x%2_avg, 5, ARCH_X86_64 + %3, 6, src, src_stride, \
                                               ref, ref_stride, \
                                               second_pred, \
                                               src_stride3, ref_stride3
@@ -244,9 +244,9 @@ SAD8XN  4, 1 ; sad8x4_avg_sse2
   movd                  m2, [srcq]
   movd                  m5, [srcq+src_strideq]
   movd                  m4, [srcq+src_strideq*2]
-  movd                  m6, [srcq+src_stride3q]
+  movd                  m3, [srcq+src_stride3q]
   punpckldq             m2, m5
-  punpckldq             m4, m6
+  punpckldq             m4, m3
   movlhps               m2, m4
   psadbw                m1, m2
   lea                 refq, [refq+ref_strideq*4]
