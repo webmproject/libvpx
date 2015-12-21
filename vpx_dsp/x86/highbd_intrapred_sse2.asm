@@ -183,7 +183,7 @@ cglobal highbd_dc_predictor_32x32, 4, 5, 9, dst, stride, above, left, goffset
   REP_RET
 %endif
 
-INIT_MMX sse
+INIT_XMM sse2
 cglobal highbd_v_predictor_4x4, 3, 3, 1, dst, stride, above
   movq                  m0, [aboveq]
   movq    [dstq          ], m0

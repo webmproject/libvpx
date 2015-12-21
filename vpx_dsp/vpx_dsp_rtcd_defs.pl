@@ -288,7 +288,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_d153_predictor_4x4/;
 
   add_proto qw/void vpx_highbd_v_predictor_4x4/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
-  specialize qw/vpx_highbd_v_predictor_4x4/, "$sse_x86inc";
+  specialize qw/vpx_highbd_v_predictor_4x4/, "$sse2_x86inc";
 
   add_proto qw/void vpx_highbd_tm_predictor_4x4/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vpx_highbd_tm_predictor_4x4/, "$sse_x86inc";
