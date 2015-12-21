@@ -1483,14 +1483,15 @@ static void write_tile_info(const VP10_COMMON *const cm,
 }
 
 static int get_refresh_mask(VP10_COMP *cpi) {
-#if CONFIG_EXT_REFS
   int refresh_mask = 0;
+#if CONFIG_EXT_REFS
   int ref_frame;
-
   for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
     refresh_mask |= (cpi->refresh_last_frames[ref_frame - LAST_FRAME] <<
                      cpi->lst_fb_idxes[ref_frame - LAST_FRAME]);
   }
+#else
+  refresh_mask = cpi->refresh_last_frame << cpi->lst_fb_idx;
 #endif  // CONFIG_EXT_REFS
 
   if (vp10_preserve_existing_gf(cpi)) {
@@ -1504,23 +1505,14 @@ static int get_refresh_mask(VP10_COMP *cpi) {
     // Note: This is highly specific to the use of ARF as a forward reference,
     // and this needs to be generalized as other uses are implemented
     // (like RTC/temporal scalability).
-#if CONFIG_EXT_REFS
-    return refresh_mask |
-#else
-    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
-#endif  // CONFIG_EXT_REFS
-           (cpi->refresh_golden_frame << cpi->alt_fb_idx);
+    return refresh_mask | (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {
     int arf_idx = cpi->alt_fb_idx;
     if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       arf_idx = gf_group->arf_update_idx[gf_group->index];
     }
-#if CONFIG_EXT_REFS
     return refresh_mask |
-#else
-    return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
-#endif  // CONFIG_EXT_REFS
            (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
            (cpi->refresh_alt_ref_frame << arf_idx);
   }
