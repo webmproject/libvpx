@@ -191,7 +191,8 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
                                        BLOCK_SIZE bsize,
                                        int64_t rate,
                                        int64_t dist,
-                                       int skip) {
+                                       int skip,
+                                       struct macroblock_plane *const p) {
   const VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
@@ -199,11 +200,32 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
   const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
   const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
   const int block_index = mi_row * cm->mi_cols + mi_col;
-  const int refresh_this_block = candidate_refresh_aq(cr, mbmi, rate, dist,
-                                                      bsize);
+  int refresh_this_block = candidate_refresh_aq(cr, mbmi, rate, dist, bsize);
   // Default is to not update the refresh map.
   int new_map_value = cr->map[block_index];
   int x = 0; int y = 0;
+
+  int is_skin = 0;
+  if (refresh_this_block == 0 &&
+      bsize <= BLOCK_16X16 &&
+      cpi->oxcf.content != VP9E_CONTENT_SCREEN) {
+    // Take center pixel in block to determine is_skin.
+    const int y_width_shift = (4 << b_width_log2_lookup[bsize]) >> 1;
+    const int y_height_shift = (4 << b_height_log2_lookup[bsize]) >> 1;
+    const int uv_width_shift = y_width_shift >> 1;
+    const int uv_height_shift = y_height_shift >> 1;
+    const int stride = p[0].src.stride;
+    const int strideuv = p[1].src.stride;
+    const uint8_t ysource =
+        p[0].src.buf[y_height_shift * stride + y_width_shift];
+    const uint8_t usource =
+        p[1].src.buf[uv_height_shift * strideuv + uv_width_shift];
+    const uint8_t vsource =
+        p[2].src.buf[uv_height_shift * strideuv + uv_width_shift];
+    is_skin = vp9_skin_pixel(ysource, usource, vsource);
+    if (is_skin)
+      refresh_this_block = 1;
+  }
 
   // If this block is labeled for refresh, check if we should reset the
   // segment_id.
