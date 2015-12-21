@@ -162,6 +162,8 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, VP9IntraPredTest,
 #else
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, VP9IntraPredTest,
                         ::testing::Values(
+                            make_tuple(&vpx_highbd_dc_predictor_32x32_sse2,
+                                       &vpx_highbd_dc_predictor_32x32_c, 32, 8),
                             make_tuple(&vpx_highbd_dc_predictor_4x4_sse2,
                                        &vpx_highbd_dc_predictor_4x4_c, 4, 8),
                             make_tuple(&vpx_highbd_dc_predictor_8x8_sse2,
@@ -218,6 +220,9 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, VP9IntraPredTest,
 #else
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, VP9IntraPredTest,
                         ::testing::Values(
+                            make_tuple(&vpx_highbd_dc_predictor_32x32_sse2,
+                                       &vpx_highbd_dc_predictor_32x32_c, 32,
+                                       10),
                             make_tuple(&vpx_highbd_dc_predictor_4x4_sse2,
                                        &vpx_highbd_dc_predictor_4x4_c, 4, 10),
                             make_tuple(&vpx_highbd_dc_predictor_8x8_sse2,
@@ -275,6 +280,9 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, VP9IntraPredTest,
 #else
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, VP9IntraPredTest,
                         ::testing::Values(
+                            make_tuple(&vpx_highbd_dc_predictor_32x32_sse2,
+                                       &vpx_highbd_dc_predictor_32x32_c, 32,
+                                       12),
                             make_tuple(&vpx_highbd_dc_predictor_4x4_sse2,
                                        &vpx_highbd_dc_predictor_4x4_c, 4, 12),
                             make_tuple(&vpx_highbd_dc_predictor_8x8_sse2,

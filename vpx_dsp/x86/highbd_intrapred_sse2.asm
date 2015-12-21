@@ -118,30 +118,29 @@ cglobal highbd_dc_predictor_16x16, 4, 5, 5, dst, stride, above, left, goffset
   RESTORE_GOT
   REP_RET
 
-%if ARCH_X86_64
 INIT_XMM sse2
-cglobal highbd_dc_predictor_32x32, 4, 5, 9, dst, stride, above, left, goffset
+cglobal highbd_dc_predictor_32x32, 4, 5, 7, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
-  pxor                  m1, m1
   mova                  m0, [aboveq]
   mova                  m2, [aboveq+16]
   mova                  m3, [aboveq+32]
   mova                  m4, [aboveq+48]
-  mova                  m5, [leftq]
-  mova                  m6, [leftq+16]
-  mova                  m7, [leftq+32]
-  mova                  m8, [leftq+48]
+  paddw                 m0, m2
+  paddw                 m3, m4
+  mova                  m2, [leftq]
+  mova                  m4, [leftq+16]
+  mova                  m5, [leftq+32]
+  mova                  m6, [leftq+48]
+  paddw                 m2, m4
+  paddw                 m5, m6
+  paddw                 m0, m3
+  paddw                 m2, m5
+  pxor                  m1, m1
+  paddw                 m0, m2
   DEFINE_ARGS dst, stride, stride3, lines4
   lea             stride3q, [strideq*3]
   mov              lines4d, 8
-  paddw                 m0, m2
-  paddw                 m0, m3
-  paddw                 m0, m4
-  paddw                 m0, m5
-  paddw                 m0, m6
-  paddw                 m0, m7
-  paddw                 m0, m8
   movhlps               m2, m0
   paddw                 m0, m2
   punpcklwd             m0, m1
@@ -177,7 +176,6 @@ cglobal highbd_dc_predictor_32x32, 4, 5, 9, dst, stride, above, left, goffset
 
   RESTORE_GOT
   REP_RET
-%endif
 
 INIT_XMM sse2
 cglobal highbd_v_predictor_4x4, 3, 3, 1, dst, stride, above
