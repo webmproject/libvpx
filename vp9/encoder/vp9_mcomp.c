@@ -2077,7 +2077,7 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
 int vp9_find_best_masked_sub_pixel_tree(const MACROBLOCK *x,
-                                        uint8_t *mask, int mask_stride,
+                                        const uint8_t *mask, int mask_stride,
                                         MV *bestmv, const MV *ref_mv,
                                         int allow_hp,
                                         int error_per_bit,
@@ -2173,7 +2173,7 @@ int vp9_find_best_masked_sub_pixel_tree(const MACROBLOCK *x,
 #undef CHECK_BETTER
 
 int vp9_get_masked_mvpred_var(const MACROBLOCK *x,
-                              uint8_t *mask, int mask_stride,
+                              const uint8_t *mask, int mask_stride,
                               const MV *best_mv, const MV *center_mv,
                               const vp9_variance_fn_ptr_t *vfp,
                               int use_mvcost, int is_second) {
@@ -2191,7 +2191,7 @@ int vp9_get_masked_mvpred_var(const MACROBLOCK *x,
 }
 
 int vp9_masked_refining_search_sad_c(const MACROBLOCK *x,
-                                     uint8_t *mask, int mask_stride,
+                                     const uint8_t *mask, int mask_stride,
                                      MV *ref_mv, int error_per_bit,
                                      int search_range,
                                      const vp9_variance_fn_ptr_t *fn_ptr,
@@ -2238,7 +2238,7 @@ int vp9_masked_refining_search_sad_c(const MACROBLOCK *x,
 
 int vp9_masked_diamond_search_sad_c(const MACROBLOCK *x,
                                     const search_site_config *cfg,
-                                    uint8_t *mask, int mask_stride,
+                                    const uint8_t *mask, int mask_stride,
                                     MV *ref_mv, MV *best_mv,
                                     int search_param,
                                     int sad_per_bit, int *num00,
@@ -2329,7 +2329,7 @@ int vp9_masked_diamond_search_sad_c(const MACROBLOCK *x,
 }
 
 int vp9_masked_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
-                                  uint8_t *mask, int mask_stride,
+                                  const uint8_t *mask, int mask_stride,
                                   MV *mvp_full, int step_param,
                                   int sadpb, int further_steps, int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,

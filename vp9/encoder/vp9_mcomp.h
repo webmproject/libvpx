@@ -148,7 +148,7 @@ int vp9_full_pixel_search(struct VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_WEDGE_PARTITION
 int vp9_find_best_masked_sub_pixel_tree(const MACROBLOCK *x,
-                                        uint8_t *mask, int mask_stride,
+                                        const uint8_t *mask, int mask_stride,
                                         MV *bestmv, const MV *ref_mv,
                                         int allow_hp,
                                         int error_per_bit,
@@ -159,7 +159,7 @@ int vp9_find_best_masked_sub_pixel_tree(const MACROBLOCK *x,
                                         int *distortion,
                                         unsigned int *sse1, int is_second);
 int vp9_masked_full_pixel_diamond(const struct VP9_COMP *cpi, MACROBLOCK *x,
-                                  uint8_t *mask, int mask_stride,
+                                  const uint8_t *mask, int mask_stride,
                                   MV *mvp_full, int step_param,
                                   int sadpb, int further_steps, int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,

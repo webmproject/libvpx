@@ -303,15 +303,15 @@ static MV average_split_mvs(const struct macroblockd_plane *pd,
 static int get_masked_weight(int m) {
   #define SMOOTHER_LEN  32
   static const uint8_t smoothfn[2 * SMOOTHER_LEN + 1] = {
-      0,  0,  0,  0,  0,  0,  0,  0,
-      0,  0,  0,  0,  0,  1,  1,  1,
-      1,  1,  2,  2,  3,  4,  5,  6,
-      8,  9, 12, 14, 17, 21, 24, 28,
-      32,
-      36, 40, 43, 47, 50, 52, 55, 56,
-      58, 59, 60, 61, 62, 62, 63, 63,
-      63, 63, 63, 64, 64, 64, 64, 64,
-      64, 64, 64, 64, 64, 64, 64, 64,
+    0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  1,  1,  1,
+    1,  1,  2,  2,  3,  4,  5,  6,
+    8,  9, 12, 14, 17, 21, 24, 28,
+    32,
+    36, 40, 43, 47, 50, 52, 55, 56,
+    58, 59, 60, 61, 62, 62, 63, 63,
+    63, 63, 63, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64,
   };
   if (m < -SMOOTHER_LEN)
     return 0;
@@ -321,8 +321,93 @@ static int get_masked_weight(int m) {
     return smoothfn[m + SMOOTHER_LEN];
 }
 
-static int get_hard_mask(int m) {
-  return 1 << WEDGE_WEIGHT_BITS * (m > 0);
+// [negative][transpose][reverse]
+DECLARE_ALIGNED(16, static uint8_t,
+                wedge_mask_obl[2][2][2][MASK_MASTER_SIZE * MASK_MASTER_SIZE]);
+// [negative][transpose]
+DECLARE_ALIGNED(16, static uint8_t,
+                wedge_mask_str[2][2][MASK_MASTER_SIZE * MASK_MASTER_SIZE]);
+
+void vp9_init_wedge_masks() {
+  int i, j;
+  const int w = MASK_MASTER_SIZE;
+  const int h = MASK_MASTER_SIZE;
+  const int stride = MASK_MASTER_STRIDE;
+  const int a[4] = {2, 1, 2, 2};
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (2 * j + 1 - (a[2] * w) / 2);
+      int y = (2 * i + 1 - (a[3] * h) / 2);
+      int m = (a[0] * x + a[1] * y) / 2;
+      wedge_mask_obl[0][0][0][i * stride + j] =
+          wedge_mask_obl[0][1][0][j * stride + i] =
+          wedge_mask_obl[0][0][1][i * stride + w - 1 - j] =
+          wedge_mask_obl[0][1][1][(w - 1 - j) * stride + i] =
+          get_masked_weight(m);
+      wedge_mask_obl[1][0][0][i * stride + j] =
+          wedge_mask_obl[1][1][0][j * stride + i] =
+          wedge_mask_obl[1][0][1][i * stride + w - 1 - j] =
+          wedge_mask_obl[1][1][1][(w - 1 - j) * stride + i] =
+          (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(m);
+      wedge_mask_str[0][0][i * stride + j] =
+          wedge_mask_str[0][1][j * stride + i] =
+          get_masked_weight(x);
+      wedge_mask_str[1][0][i * stride + j] =
+          wedge_mask_str[1][1][j * stride + i] =
+          (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(x);
+    }
+}
+
+static void get_wedge_mask_from_array(const int *a,
+                                      int h, int w,
+                                      uint8_t *mask, int stride) {
+  const int woff = (a[2] * w) >> 2;
+  const int hoff = (a[3] * h) >> 2;
+  const int oblique = (abs(a[0]) + abs(a[1]) == 3);
+  const uint8_t *master;
+  int transpose, reverse, negative;
+  int i;
+
+  if (oblique) {
+    negative = (a[0] < 0);
+    transpose = (abs(a[0]) == 1);
+    reverse = (a[0] < 0) ^ (a[1] < 0);
+  } else {
+    negative = (a[0] < 0 || a[1] < 0);
+    transpose = (a[0] == 0);
+    reverse = 0;
+  }
+  master = (oblique ?
+            wedge_mask_obl[negative][transpose][reverse] :
+            wedge_mask_str[negative][transpose]) +
+      MASK_MASTER_STRIDE * (MASK_MASTER_SIZE / 2 - hoff) +
+      MASK_MASTER_SIZE / 2 - woff;
+  for (i = 0; i < h; ++i)
+    vpx_memcpy(mask + i * stride, master + i * MASK_MASTER_STRIDE, w);
+}
+
+static const uint8_t *get_wedge_mask_inplace(const int *a,
+                                             int h, int w) {
+  const int woff = (a[2] * w) >> 2;
+  const int hoff = (a[3] * h) >> 2;
+  const int oblique = (abs(a[0]) + abs(a[1]) == 3);
+  const uint8_t *master;
+  int transpose, reverse, negative;
+  if (oblique) {
+    negative = (a[0] < 0);
+    transpose = (abs(a[0]) == 1);
+    reverse = (a[0] < 0) ^ (a[1] < 0);
+  } else {
+    negative = (a[0] < 0 || a[1] < 0);
+    transpose = (a[0] == 0);
+    reverse = 0;
+  }
+  master = (oblique ?
+            wedge_mask_obl[negative][transpose][reverse] :
+            wedge_mask_str[negative][transpose]) +
+      MASK_MASTER_STRIDE * (MASK_MASTER_SIZE / 2 - hoff) +
+      MASK_MASTER_SIZE / 2 - woff;
+  return master;
 }
 
 // Equation of line: f(x, y) = a[0]*(x - a[2]*w/4) + a[1]*(y - a[3]*h/4) = 0
@@ -333,10 +418,10 @@ static const int wedge_params_sml[1 << WEDGE_BITS_SML][4] = {
   { 1, -2, 2, 2},
   {-2,  1, 2, 2},
   { 2, -1, 2, 2},
-  { 2,  1, 2, 2},
   {-2, -1, 2, 2},
-  { 1,  2, 2, 2},
+  { 2,  1, 2, 2},
   {-1, -2, 2, 2},
+  { 1,  2, 2, 2},
 };
 
 static const int wedge_params_med_hgtw[1 << WEDGE_BITS_MED][4] = {
@@ -344,19 +429,19 @@ static const int wedge_params_med_hgtw[1 << WEDGE_BITS_MED][4] = {
   { 1, -2, 2, 2},
   {-2,  1, 2, 2},
   { 2, -1, 2, 2},
-  { 2,  1, 2, 2},
   {-2, -1, 2, 2},
-  { 1,  2, 2, 2},
+  { 2,  1, 2, 2},
   {-1, -2, 2, 2},
+  { 1,  2, 2, 2},
 
   {-1,  2, 2, 1},
   { 1, -2, 2, 1},
   {-1,  2, 2, 3},
   { 1, -2, 2, 3},
-  { 1,  2, 2, 1},
   {-1, -2, 2, 1},
-  { 1,  2, 2, 3},
+  { 1,  2, 2, 1},
   {-1, -2, 2, 3},
+  { 1,  2, 2, 3},
 };
 
 static const int wedge_params_med_hltw[1 << WEDGE_BITS_MED][4] = {
@@ -364,19 +449,19 @@ static const int wedge_params_med_hltw[1 << WEDGE_BITS_MED][4] = {
   { 1, -2, 2, 2},
   {-2,  1, 2, 2},
   { 2, -1, 2, 2},
-  { 2,  1, 2, 2},
   {-2, -1, 2, 2},
-  { 1,  2, 2, 2},
+  { 2,  1, 2, 2},
   {-1, -2, 2, 2},
+  { 1,  2, 2, 2},
 
   {-2,  1, 1, 2},
   { 2, -1, 1, 2},
   {-2,  1, 3, 2},
   { 2, -1, 3, 2},
-  { 2,  1, 1, 2},
   {-2, -1, 1, 2},
-  { 2,  1, 3, 2},
+  { 2,  1, 1, 2},
   {-2, -1, 3, 2},
+  { 2,  1, 3, 2},
 };
 
 static const int wedge_params_med_heqw[1 << WEDGE_BITS_MED][4] = {
@@ -384,19 +469,19 @@ static const int wedge_params_med_heqw[1 << WEDGE_BITS_MED][4] = {
   { 1, -2, 2, 2},
   {-2,  1, 2, 2},
   { 2, -1, 2, 2},
-  { 2,  1, 2, 2},
   {-2, -1, 2, 2},
-  { 1,  2, 2, 2},
+  { 2,  1, 2, 2},
   {-1, -2, 2, 2},
+  { 1,  2, 2, 2},
 
-  { 0,  2, 0, 1},
   { 0, -2, 0, 1},
-  { 0,  2, 0, 3},
+  { 0,  2, 0, 1},
   { 0, -2, 0, 3},
-  { 2,  0, 1, 0},
+  { 0,  2, 0, 3},
   {-2,  0, 1, 0},
-  { 2,  0, 3, 0},
+  { 2,  0, 1, 0},
   {-2,  0, 3, 0},
+  { 2,  0, 3, 0},
 };
 
 static const int wedge_params_big_hgtw[1 << WEDGE_BITS_BIG][4] = {
@@ -404,37 +489,37 @@ static const int wedge_params_big_hgtw[1 << WEDGE_BITS_BIG][4] = {
   { 1, -2, 2, 2},
   {-2,  1, 2, 2},
   { 2, -1, 2, 2},
-  { 2,  1, 2, 2},
   {-2, -1, 2, 2},
-  { 1,  2, 2, 2},
+  { 2,  1, 2, 2},
   {-1, -2, 2, 2},
+  { 1,  2, 2, 2},
 
   {-1,  2, 2, 1},
   { 1, -2, 2, 1},
   {-1,  2, 2, 3},
   { 1, -2, 2, 3},
-  { 1,  2, 2, 1},
   {-1, -2, 2, 1},
-  { 1,  2, 2, 3},
+  { 1,  2, 2, 1},
   {-1, -2, 2, 3},
+  { 1,  2, 2, 3},
 
   {-2,  1, 1, 2},
   { 2, -1, 1, 2},
   {-2,  1, 3, 2},
   { 2, -1, 3, 2},
-  { 2,  1, 1, 2},
   {-2, -1, 1, 2},
-  { 2,  1, 3, 2},
+  { 2,  1, 1, 2},
   {-2, -1, 3, 2},
+  { 2,  1, 3, 2},
 
-  { 0,  2, 0, 1},
   { 0, -2, 0, 1},
-  { 0,  2, 0, 2},
+  { 0,  2, 0, 1},
   { 0, -2, 0, 2},
-  { 0,  2, 0, 3},
+  { 0,  2, 0, 2},
   { 0, -2, 0, 3},
-  { 2,  0, 2, 0},
+  { 0,  2, 0, 3},
   {-2,  0, 2, 0},
+  { 2,  0, 2, 0},
 };
 
 static const int wedge_params_big_hltw[1 << WEDGE_BITS_BIG][4] = {
@@ -442,37 +527,37 @@ static const int wedge_params_big_hltw[1 << WEDGE_BITS_BIG][4] = {
   { 1, -2, 2, 2},
   {-2,  1, 2, 2},
   { 2, -1, 2, 2},
-  { 2,  1, 2, 2},
   {-2, -1, 2, 2},
-  { 1,  2, 2, 2},
+  { 2,  1, 2, 2},
   {-1, -2, 2, 2},
+  { 1,  2, 2, 2},
 
   {-1,  2, 2, 1},
   { 1, -2, 2, 1},
   {-1,  2, 2, 3},
   { 1, -2, 2, 3},
-  { 1,  2, 2, 1},
   {-1, -2, 2, 1},
-  { 1,  2, 2, 3},
+  { 1,  2, 2, 1},
   {-1, -2, 2, 3},
+  { 1,  2, 2, 3},
 
   {-2,  1, 1, 2},
   { 2, -1, 1, 2},
   {-2,  1, 3, 2},
   { 2, -1, 3, 2},
-  { 2,  1, 1, 2},
   {-2, -1, 1, 2},
-  { 2,  1, 3, 2},
+  { 2,  1, 1, 2},
   {-2, -1, 3, 2},
+  { 2,  1, 3, 2},
 
-  { 0,  2, 0, 2},
   { 0, -2, 0, 2},
-  { 2,  0, 1, 0},
+  { 0,  2, 0, 2},
   {-2,  0, 1, 0},
-  { 2,  0, 2, 0},
+  { 2,  0, 1, 0},
   {-2,  0, 2, 0},
-  { 2,  0, 3, 0},
+  { 2,  0, 2, 0},
   {-2,  0, 3, 0},
+  { 2,  0, 3, 0},
 };
 
 static const int wedge_params_big_heqw[1 << WEDGE_BITS_BIG][4] = {
@@ -480,37 +565,37 @@ static const int wedge_params_big_heqw[1 << WEDGE_BITS_BIG][4] = {
   { 1, -2, 2, 2},
   {-2,  1, 2, 2},
   { 2, -1, 2, 2},
-  { 2,  1, 2, 2},
   {-2, -1, 2, 2},
-  { 1,  2, 2, 2},
+  { 2,  1, 2, 2},
   {-1, -2, 2, 2},
+  { 1,  2, 2, 2},
 
   {-1,  2, 2, 1},
   { 1, -2, 2, 1},
   {-1,  2, 2, 3},
   { 1, -2, 2, 3},
-  { 1,  2, 2, 1},
   {-1, -2, 2, 1},
-  { 1,  2, 2, 3},
+  { 1,  2, 2, 1},
   {-1, -2, 2, 3},
+  { 1,  2, 2, 3},
 
   {-2,  1, 1, 2},
   { 2, -1, 1, 2},
   {-2,  1, 3, 2},
   { 2, -1, 3, 2},
-  { 2,  1, 1, 2},
   {-2, -1, 1, 2},
-  { 2,  1, 3, 2},
+  { 2,  1, 1, 2},
   {-2, -1, 3, 2},
+  { 2,  1, 3, 2},
 
-  { 0,  2, 0, 1},
   { 0, -2, 0, 1},
-  { 0,  2, 0, 3},
+  { 0,  2, 0, 1},
   { 0, -2, 0, 3},
-  { 2,  0, 1, 0},
+  { 0,  2, 0, 3},
   {-2,  0, 1, 0},
-  { 2,  0, 3, 0},
+  { 2,  0, 1, 0},
   {-2,  0, 3, 0},
+  { 2,  0, 3, 0},
 };
 
 static const int *get_wedge_params(int wedge_index,
@@ -544,34 +629,40 @@ static const int *get_wedge_params(int wedge_index,
   return a;
 }
 
-void vp9_generate_masked_weight(int wedge_index,
-                                BLOCK_SIZE sb_type,
-                                int h, int w,
-                                uint8_t *mask, int stride) {
-  int i, j;
+const uint8_t *vp9_get_soft_mask(int wedge_index,
+                                 BLOCK_SIZE sb_type,
+                                 int h, int w) {
   const int *a = get_wedge_params(wedge_index, sb_type, h, w);
-  if (!a) return;
-  for (i = 0; i < h; ++i)
-    for (j = 0; j < w; ++j) {
-      int x = (j - (a[2] * w) / 4);
-      int y = (i - (a[3] * h) / 4);
-      int m = a[0] * x + a[1] * y;
-      mask[i * stride + j] = get_masked_weight(m);
-    }
+  if (a) {
+    return get_wedge_mask_inplace(a, h, w);
+  } else {
+    return NULL;
+  }
 }
 
+// To be deprecated
+void vp9_generate_soft_mask(int wedge_index,
+                            BLOCK_SIZE sb_type,
+                            int h, int w,
+                            uint8_t *mask, int stride) {
+  const int *a = get_wedge_params(wedge_index, sb_type, h, w);
+  if (a) {
+    get_wedge_mask_from_array(a, h, w, mask, stride);
+  }
+}
+
+// To be deprecated
 void vp9_generate_hard_mask(int wedge_index, BLOCK_SIZE sb_type,
                             int h, int w, uint8_t *mask, int stride) {
   int i, j;
   const int *a = get_wedge_params(wedge_index, sb_type, h, w);
-  if (!a) return;
-  for (i = 0; i < h; ++i)
-    for (j = 0; j < w; ++j) {
-      int x = (j - (a[2] * w) / 4);
-      int y = (i - (a[3] * h) / 4);
-      int m = a[0] * x + a[1] * y;
-      mask[i * stride + j] = get_hard_mask(m);
-    }
+  if (a) {
+    get_wedge_mask_from_array(a, h, w, mask, stride);
+    for (i = 0; i < h; ++i)
+      for (j = 0; j < w; ++j) {
+        mask[i * stride + j] = mask[i * stride + j] > 0;
+      }
+  }
 }
 
 static void build_masked_compound(uint8_t *dst, int dst_stride,
@@ -579,12 +670,10 @@ static void build_masked_compound(uint8_t *dst, int dst_stride,
                                   int wedge_index, BLOCK_SIZE sb_type,
                                   int h, int w) {
   int i, j;
-  uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
-  vp9_generate_masked_weight(wedge_index, sb_type, h, w, mask,
-                             CODING_UNIT_SIZE);
+  const uint8_t *mask = vp9_get_soft_mask(wedge_index, sb_type, h, w);
   for (i = 0; i < h; ++i)
     for (j = 0; j < w; ++j) {
-      int m = mask[i * CODING_UNIT_SIZE + j];
+      int m = mask[i * MASK_MASTER_STRIDE + j];
       dst[i * dst_stride + j] = (dst[i * dst_stride + j] * m +
                                  dst2[i * dst2_stride + j] *
                                  ((1 << WEDGE_WEIGHT_BITS) - m) +
@@ -599,14 +688,12 @@ static void build_masked_compound_highbd(uint8_t *dst_8, int dst_stride,
                                          int wedge_index, BLOCK_SIZE sb_type,
                                          int h, int w) {
   int i, j;
-  uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
+  const uint8_t *mask = vp9_get_soft_mask(wedge_index, sb_type, h, w);
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst_8);
   uint16_t *dst2 = CONVERT_TO_SHORTPTR(dst2_8);
-  vp9_generate_masked_weight(wedge_index, sb_type, h, w, mask,
-                             CODING_UNIT_SIZE);
   for (i = 0; i < h; ++i)
     for (j = 0; j < w; ++j) {
-      int m = mask[i * CODING_UNIT_SIZE + j];
+      int m = mask[i * MASK_MASTER_STRIDE + j];
       dst[i * dst_stride + j] = (dst[i * dst_stride + j] * m +
                                  dst2[i * dst2_stride + j] *
                                  ((1 << WEDGE_WEIGHT_BITS) - m) +
@@ -617,10 +704,31 @@ static void build_masked_compound_highbd(uint8_t *dst_8, int dst_stride,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_SUPERTX
-void generate_masked_weight_extend(int wedge_index, int plane,
-                                   BLOCK_SIZE sb_type, int h, int w,
-                                   int wedge_offset_x, int wedge_offset_y,
-                                   uint8_t *mask, int stride) {
+const uint8_t *get_soft_mask_extend(int wedge_index, int plane,
+                                    BLOCK_SIZE sb_type,
+                                    int h, int w,
+                                    int wedge_offset_y,
+                                    int wedge_offset_x) {
+  int subh = (plane ? 2 : 4) << b_height_log2_lookup[sb_type];
+  int subw = (plane ? 2 : 4) << b_width_log2_lookup[sb_type];
+  const int *a = get_wedge_params(wedge_index, sb_type, subh, subw);
+  (void) h;
+  (void) w;
+  if (a) {
+    const uint8_t *mask = get_wedge_mask_inplace(a, subh, subw);
+    mask -= (wedge_offset_x + wedge_offset_y * MASK_MASTER_STRIDE);
+    return mask;
+  } else {
+    return NULL;
+  }
+}
+
+// To be deprecated
+static void generate_soft_mask_extend(int wedge_index, int plane,
+                                      BLOCK_SIZE sb_type, int h, int w,
+                                      int wedge_offset_y,
+                                      int wedge_offset_x,
+                                      uint8_t *mask, int stride) {
   int i, j;
   int subh = (plane ? 2 : 4) << b_height_log2_lookup[sb_type];
   int subw = (plane ? 2 : 4) << b_width_log2_lookup[sb_type];
@@ -628,9 +736,9 @@ void generate_masked_weight_extend(int wedge_index, int plane,
   if (!a) return;
   for (i = 0; i < h; ++i)
     for (j = 0; j < w; ++j) {
-      int x = (j - (a[2] * subw) / 4 - wedge_offset_x);
-      int y = (i - (a[3] * subh) / 4 - wedge_offset_y);
-      int m = a[0] * x + a[1] * y;
+      int x = (2 * j + 1 - (a[2] * subw) / 2 - 2 * wedge_offset_x);
+      int y = (2 * i + 1 - (a[3] * subh) / 2 - 2 * wedge_offset_y);
+      int m = (a[0] * x + a[1] * y) / 2;
       mask[i * stride + j] = get_masked_weight(m);
     }
 }
@@ -639,16 +747,14 @@ static void build_masked_compound_extend(uint8_t *dst, int dst_stride,
                                          uint8_t *dst2, int dst2_stride,
                                          int plane,
                                          int wedge_index, BLOCK_SIZE sb_type,
-                                         int wedge_offset_x, int wedge_offset_y,
+                                         int wedge_offset_y, int wedge_offset_x,
                                          int h, int w) {
   int i, j;
-  uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
-  generate_masked_weight_extend(wedge_index, plane, sb_type, h, w,
-                                wedge_offset_x, wedge_offset_y, mask,
-                                CODING_UNIT_SIZE);
+  const uint8_t *mask = get_soft_mask_extend(
+     wedge_index, plane, sb_type, h, w, wedge_offset_y, wedge_offset_x);
   for (i = 0; i < h; ++i)
     for (j = 0; j < w; ++j) {
-      int m = mask[i * CODING_UNIT_SIZE + j];
+      int m = mask[i * MASK_MASTER_STRIDE + j];
       dst[i * dst_stride + j] = (dst[i * dst_stride + j] * m +
                                  dst2[i * dst2_stride + j] *
                                  ((1 << WEDGE_WEIGHT_BITS) - m) +
@@ -662,18 +768,16 @@ static void build_masked_compound_extend_highbd(
     uint8_t *dst_8, int dst_stride,
     uint8_t *dst2_8, int dst2_stride, int plane,
     int wedge_index, BLOCK_SIZE sb_type,
-    int wedge_offset_x, int wedge_offset_y,
+    int wedge_offset_y, int wedge_offset_x,
     int h, int w) {
   int i, j;
-  uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
+  const uint8_t *mask = get_soft_mask_extend(
+      wedge_index, plane, sb_type, h, w, wedge_offset_y, wedge_offset_x);
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst_8);
   uint16_t *dst2 = CONVERT_TO_SHORTPTR(dst2_8);
-  generate_masked_weight_extend(wedge_index, plane, sb_type, h, w,
-                                wedge_offset_x, wedge_offset_y, mask,
-                                CODING_UNIT_SIZE);
   for (i = 0; i < h; ++i)
     for (j = 0; j < w; ++j) {
-      int m = mask[i * CODING_UNIT_SIZE + j];
+      int m = mask[i * MASK_MASTER_STRIDE + j];
       dst[i * dst_stride + j] = (dst[i * dst_stride + j] * m +
                                  dst2[i * dst2_stride + j] *
                                  ((1 << WEDGE_WEIGHT_BITS) - m) +
@@ -808,20 +912,20 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
             dst, dst_buf->stride, tmp_dst, CODING_UNIT_SIZE, plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.sb_type,
-            wedge_offset_x, wedge_offset_y, h, w);
+            wedge_offset_y, wedge_offset_x, h, w);
       } else {
         build_masked_compound_extend(
             dst, dst_buf->stride, tmp_dst, CODING_UNIT_SIZE, plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.sb_type,
-            wedge_offset_x, wedge_offset_y, h, w);
+            wedge_offset_y, wedge_offset_x, h, w);
       }
 #else
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst,
                                    CODING_UNIT_SIZE, plane,
                                    mi->mbmi.interinter_wedge_index,
                                    mi->mbmi.sb_type,
-                                   wedge_offset_x, wedge_offset_y, h, w);
+                                   wedge_offset_y, wedge_offset_x, h, w);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else   // CONFIG_SUPERTX
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1559,20 +1663,20 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
             dst, dst_buf->stride, tmp_dst, CODING_UNIT_SIZE, plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.sb_type,
-            wedge_offset_x, wedge_offset_y, h, w);
+            wedge_offset_y, wedge_offset_x, h, w);
       } else {
         build_masked_compound_extend(dst, dst_buf->stride, tmp_dst,
                                      CODING_UNIT_SIZE, plane,
                                      mi->mbmi.interinter_wedge_index,
                                      mi->mbmi.sb_type,
-                                     wedge_offset_x, wedge_offset_y, h, w);
+                                     wedge_offset_y, wedge_offset_x, h, w);
       }
 #else
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst,
                                    CODING_UNIT_SIZE, plane,
                                    mi->mbmi.interinter_wedge_index,
                                    mi->mbmi.sb_type,
-                                   wedge_offset_x, wedge_offset_y, h, w);
+                                   wedge_offset_y, wedge_offset_x, h, w);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else   // CONFIG_SUPERTX
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -2115,20 +2219,20 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
             dst, dst_buf->stride, tmp_dst, CODING_UNIT_SIZE, plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.sb_type,
-            wedge_offset_x, wedge_offset_y, h, w);
+            wedge_offset_y, wedge_offset_x, h, w);
       } else {
         build_masked_compound_extend(
             dst, dst_buf->stride, tmp_dst, CODING_UNIT_SIZE, plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.sb_type,
-            wedge_offset_x, wedge_offset_y, h, w);
+            wedge_offset_y, wedge_offset_x, h, w);
       }
 #else
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst,
                                    CODING_UNIT_SIZE, plane,
                                    mi->mbmi.interinter_wedge_index,
                                    mi->mbmi.sb_type,
-                                   wedge_offset_x, wedge_offset_y, h, w);
+                                   wedge_offset_y, wedge_offset_x, h, w);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else   // CONFIG_SUPERTX
 #if CONFIG_VP9_HIGHBITDEPTH
