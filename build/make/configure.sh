@@ -877,7 +877,7 @@ process_common_toolchain() {
 
       case ${tgt_cc} in
         gcc)
-          CROSS=${CROSS:-arm-none-linux-gnueabi-}
+          CROSS=${CROSS-arm-none-linux-gnueabi-}
           link_with_cc=gcc
           setup_gnu_toolchain
           arch_int=${tgt_isa##armv}
@@ -1135,7 +1135,7 @@ EOF
           CC=${CC:-${CROSS}gcc}
           CXX=${CXX:-${CROSS}g++}
           LD=${LD:-${CROSS}gcc}
-          CROSS=${CROSS:-g}
+          CROSS=${CROSS-g}
           ;;
         os2)
           disable_feature pic
