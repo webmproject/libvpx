@@ -338,61 +338,54 @@ cglobal highbd_tm_predictor_8x8, 5, 6, 5, dst, stride, above, left, bps, one
   jnz .loop
   REP_RET
 
-%if ARCH_X86_64
 INIT_XMM sse2
-cglobal highbd_tm_predictor_16x16, 5, 6, 9, dst, stride, above, left, bps, one
+cglobal highbd_tm_predictor_16x16, 5, 5, 8, dst, stride, above, left, bps
   movd                  m2, [aboveq-2]
   mova                  m0, [aboveq]
   mova                  m1, [aboveq+16]
   pshuflw               m2, m2, 0x0
   ; Get the values to compute the maximum value at this bit depth
-  mov                 oned, 1
-  pxor                  m7, m7
-  pxor                  m8, m8
-  pinsrw                m7, oned, 0
-  pinsrw                m8, bpsd, 0
-  pshuflw               m7, m7, 0x0
-  DEFINE_ARGS dst, stride, line, left
-  punpcklqdq            m7, m7
-  mov                lineq, -8
-  mova                  m5, m7
+  pcmpeqw               m3, m3
+  movd                  m4, bpsd
   punpcklqdq            m2, m2
-  psllw                 m7, m8
-  add                leftq, 32
-  psubw                 m7, m5 ; max possible value
-  pxor                  m8, m8 ; min possible value
+  psllw                 m3, m4
+  pcmpeqw               m5, m5
+  pxor                  m4, m4         ; min possible value
+  pxor                  m3, m5         ; max possible value
+  DEFINE_ARGS dst, stride, line, left
+  mov                lineq, -8
   psubw                 m0, m2
   psubw                 m1, m2
 .loop:
-  movd                  m2, [leftq+lineq*4]
-  movd                  m3, [leftq+lineq*4+2]
-  pshuflw               m2, m2, 0x0
-  pshuflw               m3, m3, 0x0
-  punpcklqdq            m2, m2
-  punpcklqdq            m3, m3
-  paddw                 m4, m2, m0
-  paddw                 m5, m3, m0
+  movd                  m7, [leftq]
+  pshuflw               m5, m7, 0x0
+  pshuflw               m2, m7, 0x55
+  punpcklqdq            m5, m5         ; l1 l1 l1 l1 l1 l1 l1 l1
+  punpcklqdq            m2, m2         ; l2 l2 l2 l2 l2 l2 l2 l2
+  paddw                 m6, m5, m0     ; t1-tl+l1 to t4-tl+l1
+  paddw                 m5, m1         ; t5-tl+l1 to t8-tl+l1
+  pminsw                m6, m3
+  pminsw                m5, m3
+  pmaxsw                m6, m4         ; Clamp to the bit-depth
+  pmaxsw                m5, m4
+  mova   [dstq           ], m6
+  mova   [dstq        +16], m5
+  paddw                 m6, m2, m0
   paddw                 m2, m1
-  paddw                 m3, m1
-  ;Clamp to the bit-depth
-  pminsw                m4, m7
-  pminsw                m5, m7
-  pminsw                m2, m7
-  pminsw                m3, m7
-  pmaxsw                m4, m8
-  pmaxsw                m5, m8
-  pmaxsw                m2, m8
-  pmaxsw                m3, m8
-  ;Store the values
-  mova   [dstq             ], m4
-  mova   [dstq+strideq*2   ], m5
-  mova   [dstq          +16], m2
-  mova   [dstq+strideq*2+16], m3
+  pminsw                m6, m3
+  pminsw                m2, m3
+  pmaxsw                m6, m4
+  pmaxsw                m2, m4
+  mova   [dstq+strideq*2 ], m6
+  mova [dstq+strideq*2+16], m2
   lea                 dstq, [dstq+strideq*4]
   inc                lineq
+  lea                leftq, [leftq+4]
+
   jnz .loop
   REP_RET
 
+%if ARCH_X86_64
 INIT_XMM sse2
 cglobal highbd_tm_predictor_32x32, 5, 6, 12, dst, stride, above, left, bps, one
   movd                  m0, [aboveq-2]
