@@ -1045,7 +1045,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
       vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0]->mbmi, mi_row,
                                         mi_col, bsize, ctx->rate, ctx->dist,
-                                        x->skip);
+                                        x->skip, p);
     }
   }
 
@@ -1705,6 +1705,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  struct macroblock_plane *const p = x->plane;
   const struct segmentation *const seg = &cm->seg;
   const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type];
   const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type];
@@ -1725,7 +1726,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
     } else {
     // Setting segmentation map for cyclic_refresh.
       vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize,
-                                        ctx->rate, ctx->dist, x->skip);
+                                        ctx->rate, ctx->dist, x->skip, p);
     }
     vp9_init_plane_quantizers(cpi, x);
   }
