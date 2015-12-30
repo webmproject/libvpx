@@ -1528,7 +1528,7 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP10_COMP *cpi, MACROBLOCK *mb,
   int tot_rate_y = 0;
   int64_t total_rd = 0;
   ENTROPY_CONTEXT t_above[4], t_left[4];
-  const int *bmode_costs = cpi->mbmode_cost;
+  const int *bmode_costs = cpi->mbmode_cost[0];
 
   memcpy(t_above, xd->plane[0].above_context, sizeof(t_above));
   memcpy(t_left, xd->plane[0].left_context, sizeof(t_left));
@@ -4911,6 +4911,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #endif  // CONFIG_EXT_INTRA
   const int intra_cost_penalty = vp10_get_intra_cost_penalty(
       cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
+  const int * const intra_mode_cost =
+      cpi->mbmode_cost[size_group_lookup[bsize]];
   int best_skip2 = 0;
   uint8_t ref_frame_skip_mask[2] = { 0 };
   uint16_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
@@ -5259,7 +5261,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         if (directional_mode_skip_mask[mbmi->mode])
           continue;
         rate_overhead = write_uniform_cost(2 * MAX_ANGLE_DELTAS + 1, 0) +
-            cpi->mbmode_cost[mbmi->mode];
+            intra_mode_cost[mbmi->mode];
         rate_y = INT_MAX;
         this_rd =
             rd_pick_intra_angle_sby(cpi, x, &rate_dummy, &rate_y, &distortion_y,
@@ -5277,8 +5279,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         MB_MODE_INFO mbmi_copy = *mbmi;
 
         if (rate_y != INT_MAX) {
-          int this_rate = rate_y +
-              cpi->mbmode_cost[mbmi->mode] +
+          int this_rate = rate_y + intra_mode_cost[mbmi->mode] +
               vp10_cost_bit(cm->fc->ext_intra_probs[0], 0);
           this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, distortion_y);
         } else {
@@ -5287,7 +5288,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         if (!rd_pick_ext_intra_sby(cpi, x, &rate_dummy, &rate_y, &distortion_y,
                                    &skippable, bsize,
-                                   cpi->mbmode_cost[mbmi->mode], &this_rd))
+                                   intra_mode_cost[mbmi->mode], &this_rd))
           *mbmi = mbmi_copy;
       }
 #else
@@ -5323,7 +5324,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       }
 #endif  // CONFIG_EXT_INTRA
 
-      rate2 = rate_y + cpi->mbmode_cost[mbmi->mode] + rate_uv_intra[uv_tx];
+      rate2 = rate_y + intra_mode_cost[mbmi->mode] + rate_uv_intra[uv_tx];
 #if CONFIG_EXT_INTRA
       if (is_directional_mode)
         rate2 += write_uniform_cost(2 * MAX_ANGLE_DELTAS + 1,
