@@ -3158,7 +3158,7 @@ static void set_frame_size(VP10_COMP *cpi) {
   init_motion_estimation(cpi);
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-    RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
+    RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - LAST_FRAME];
     const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
 
     ref_buf->idx = buf_idx;
