@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a3d4ff0_822d7c3b",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-31T15:17:28Z",
+      "side": 1,
+      "message": "remove whitespace at the end",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca33c71e_c1a2e215",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-31T15:17:28Z",
+      "side": 1,
+      "message": "delete",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca33c71e_a19fded3",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-31T15:17:28Z",
+      "side": 1,
+      "message": "GET_GOT is empty for 64 bit...  not necessary here",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca5ca766_7ca575bf",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-31T15:17:28Z",
+      "side": 1,
+      "message": "move to the above %if ARCH_x86 and use GET_GOT_DEFINED instead of CONFIG_PIC\nalso you might want to add a comment here",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a3fd7e8_207bc459",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-31T15:17:28Z",
+      "side": 1,
+      "message": "change pq2 to p2q.  The \"q\" is not part of the p variable name, but signals how to access the variable.",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea308b14_625f96f7",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-31T15:17:28Z",
+      "side": 1,
+      "message": "align commas with group below",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0aa4ff85_c60b24ae",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-12-31T15:17:28Z",
+      "side": 1,
+      "message": "RESTORE_GOT is empty for both cases.  You are overriding the pop above, so should be able to remove this code.",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
