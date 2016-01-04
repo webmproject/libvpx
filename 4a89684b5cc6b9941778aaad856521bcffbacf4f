@@ -88,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "ca33c71e_21f62ef8",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-04T19:29:07Z",
+      "side": 1,
+      "message": "Line 122 in x86inc.asm.  It was updated on 12/10/15.",
+      "parentUuid": "ea27abf2_9143fb27",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a3fd7e8_207bc459",
         "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
         "patchSetId": 6
