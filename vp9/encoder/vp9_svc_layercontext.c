@@ -36,6 +36,12 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->current_superframe = 0;
   for (i = 0; i < REF_FRAMES; ++i)
     svc->ref_frame_index[i] = -1;
+  for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
+    cpi->svc.ext_frame_flags[sl] = 0;
+    cpi->svc.ext_lst_fb_idx[sl] = 0;
+    cpi->svc.ext_gld_fb_idx[sl] = 1;
+    cpi->svc.ext_alt_fb_idx[sl] = 2;
+  }
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
     if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
@@ -566,6 +572,8 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
     // Note that the check (cpi->ext_refresh_frame_flags_pending == 0) is
     // needed to support the case where the frame flags may be passed in via
     // vpx_codec_encode(), which can be used for the temporal-only svc case.
+    // TODO(marpan): Consider adding an enc_config parameter to better handle
+    // this case.
     if (cpi->ext_refresh_frame_flags_pending == 0) {
       int sl;
       cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
