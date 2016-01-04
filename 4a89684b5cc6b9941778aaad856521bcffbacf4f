@@ -124,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "6a6d7b10_39faeb65",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-04T22:15:20Z",
+      "side": 1,
+      "message": "ok... I didn\u0027t noticed that.  Seems to me, it should be defined.  I\u0027ll check into why it was added.  You could add the following to x86inc.asm:\n\n%ifndef GET_GOT_DEFINED\n    %define GET_GOT_DEFINED 0\n%endif",
+      "parentUuid": "eafecb6e_b922607b",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a3fd7e8_207bc459",
         "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
         "patchSetId": 6
