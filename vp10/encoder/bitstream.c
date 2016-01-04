@@ -1261,7 +1261,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
 #if CONFIG_MISC_FIXES
-  if (xd->lossless[0])
+  if (!cm->seg.enabled && xd->lossless[0])
     cm->tx_mode = TX_4X4;
   else
     write_txfm_mode(cm->tx_mode, wb);
