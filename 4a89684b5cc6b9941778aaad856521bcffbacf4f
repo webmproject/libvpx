@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "ea27abf2_9143fb27",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2016-01-04T18:57:50Z",
+      "side": 1,
+      "message": "I didnt find any GET_GOT_DEFINED in vpx_config.asm or x86inc.asm\nfrom what I saw on x86inc.asm  GET_GOT macro is supported even when CONFIG_PIC\u003d0",
+      "parentUuid": "ca5ca766_7ca575bf",
+      "revId": "4a89684b5cc6b9941778aaad856521bcffbacf4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a3fd7e8_207bc459",
         "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
         "patchSetId": 6
