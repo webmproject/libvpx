@@ -468,7 +468,7 @@ typedef struct VP10_COMP {
 
   search_site_config ss_cfg;
 
-  int mbmode_cost[INTRA_MODES];
+  int mbmode_cost[BLOCK_SIZE_GROUPS][INTRA_MODES];
 #if CONFIG_REF_MV
   int newmv_mode_cost[NEWMV_MODE_CONTEXTS][2];
   int zeromv_mode_cost[ZEROMV_MODE_CONTEXTS][2];
