@@ -303,7 +303,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     vpx_write(w, is_inter, vp10_get_intra_inter_prob(cm, xd));
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
-      !(is_inter && skip)) {
+      !(is_inter && skip) && !xd->lossless[segment_id]) {
     write_selected_tx_size(cm, xd, w);
   }
 
@@ -391,7 +391,8 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   write_skip(cm, xd, mbmi->segment_id, mi, w);
 
-  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
+  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
+      !xd->lossless[mbmi->segment_id])
     write_selected_tx_size(cm, xd, w);
 
   if (bsize >= BLOCK_8X8) {

@@ -100,6 +100,8 @@ static TX_SIZE read_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
   TX_MODE tx_mode = cm->tx_mode;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+  if (xd->lossless[xd->mi[0]->mbmi.segment_id])
+    return TX_4X4;
   if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
     return read_selected_tx_size(cm, xd, max_tx_size, r);
   else
