@@ -16,6 +16,24 @@
       "revId": "7394d67a23e3703162c4cf3857952dc380614db5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a52a3ad_5cd69d21",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-05T06:16:22Z",
+      "side": 1,
+      "message": "Removed. \nSorry I was looking at the read_inter_frame_mode_info function.",
+      "parentUuid": "aabbf3f0_fe2539ea",
+      "revId": "7394d67a23e3703162c4cf3857952dc380614db5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
