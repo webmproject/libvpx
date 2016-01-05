@@ -48,6 +48,20 @@ int vp9_skin_pixel(const uint8_t y, const uint8_t cb, const uint8_t cr) {
     return (evaluate_skin_color_difference(cb, cr) < skin_threshold);
 }
 
+int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
+                           int stride, int strideuv, int bsize) {
+  // Take center pixel in block to determine is_skin.
+  const int y_width_shift = (4 << b_width_log2_lookup[bsize]) >> 1;
+  const int y_height_shift = (4 << b_height_log2_lookup[bsize]) >> 1;
+  const int uv_width_shift = y_width_shift >> 1;
+  const int uv_height_shift = y_height_shift >> 1;
+  const uint8_t ysource = y[y_height_shift * stride + y_width_shift];
+  const uint8_t usource = u[uv_height_shift * strideuv + uv_width_shift];
+  const uint8_t vsource = v[uv_height_shift * strideuv + uv_width_shift];
+  return vp9_skin_pixel(ysource, usource, vsource);
+}
+
+
 #ifdef OUTPUT_YUV_SKINMAP
 // For viewing skin map on input source.
 void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
