@@ -22,6 +22,30 @@
       "revId": "83d7859d37bf529a15d8f259b06f845454c3b430",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa1773d7_980bd501",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-01-05T23:01:41Z",
+      "side": 1,
+      "message": "done, I had to move the code to two lines below after declarations, to be more friendly to compilers.",
+      "parentUuid": "6a481bfe_7ee4b1c8",
+      "range": {
+        "startLine": 190,
+        "startChar": 8,
+        "endLine": 190,
+        "endChar": 17
+      },
+      "revId": "83d7859d37bf529a15d8f259b06f845454c3b430",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
