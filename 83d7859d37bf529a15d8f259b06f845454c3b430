@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a481bfe_7ee4b1c8",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-01-05T17:28:06Z",
+      "side": 1,
+      "message": "if (is_scaled) { \n\n#if CONFIG_BETTER_HW_COMPATIBILITY\n      assert(xd-\u003emi[0]-\u003embmi.sb_type !\u003d BLOCK_4X8 \u0026\u0026\n             xd-\u003emi[0]-\u003embmi.sb_type !\u003d BLOCK_8X4);\n      assert(mv_q4.row \u003d\u003d mv.row * (1 \u003c\u003c (1 - pd-\u003esubsampling_y)) \u0026\u0026\n             mv_q4.col \u003d\u003d mv.col * (1 \u003c\u003c (1 - pd-\u003esubsampling_x)));\n\n#endif \n      // Co-ordinate of containing block to pixel precision.\n      const int x_start \u003d (-xd-\u003emb_to_left_edge \u003e\u003e (3 + pd-\u003esubsampling_x));\n      const int y_start \u003d (-xd-\u003emb_to_top_edge \u003e\u003e (3 + pd-\u003esubsampling_y));\n\n\n...",
+      "range": {
+        "startLine": 190,
+        "startChar": 8,
+        "endLine": 190,
+        "endChar": 17
+      },
+      "revId": "83d7859d37bf529a15d8f259b06f845454c3b430",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
