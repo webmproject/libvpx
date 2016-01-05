@@ -209,20 +209,12 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
   if (refresh_this_block == 0 &&
       bsize <= BLOCK_16X16 &&
       cpi->oxcf.content != VP9E_CONTENT_SCREEN) {
-    // Take center pixel in block to determine is_skin.
-    const int y_width_shift = (4 << b_width_log2_lookup[bsize]) >> 1;
-    const int y_height_shift = (4 << b_height_log2_lookup[bsize]) >> 1;
-    const int uv_width_shift = y_width_shift >> 1;
-    const int uv_height_shift = y_height_shift >> 1;
-    const int stride = p[0].src.stride;
-    const int strideuv = p[1].src.stride;
-    const uint8_t ysource =
-        p[0].src.buf[y_height_shift * stride + y_width_shift];
-    const uint8_t usource =
-        p[1].src.buf[uv_height_shift * strideuv + uv_width_shift];
-    const uint8_t vsource =
-        p[2].src.buf[uv_height_shift * strideuv + uv_width_shift];
-    is_skin = vp9_skin_pixel(ysource, usource, vsource);
+    is_skin = vp9_compute_skin_block(p[0].src.buf,
+                                     p[1].src.buf,
+                                     p[2].src.buf,
+                                     p[0].src.stride,
+                                     p[1].src.stride,
+                                     bsize);
     if (is_skin)
       refresh_this_block = 1;
   }

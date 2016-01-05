@@ -333,20 +333,12 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   int is_skin = 0;
 
   if (bs <= BLOCK_16X16 && denoiser->denoising_level >= kDenLow) {
-    // Take center pixel in block to determine is_skin.
-    const int y_width_shift = (4 << b_width_log2_lookup[bs]) >> 1;
-    const int y_height_shift = (4 << b_height_log2_lookup[bs]) >> 1;
-    const int uv_width_shift = y_width_shift >> 1;
-    const int uv_height_shift = y_height_shift >> 1;
-    const int stride = mb->plane[0].src.stride;
-    const int strideuv = mb->plane[1].src.stride;
-    const uint8_t ysource =
-      mb->plane[0].src.buf[y_height_shift * stride + y_width_shift];
-    const uint8_t usource =
-      mb->plane[1].src.buf[uv_height_shift * strideuv + uv_width_shift];
-    const uint8_t vsource =
-      mb->plane[2].src.buf[uv_height_shift * strideuv + uv_width_shift];
-    is_skin = vp9_skin_pixel(ysource, usource, vsource);
+    is_skin = vp9_compute_skin_block(mb->plane[0].src.buf,
+                                     mb->plane[1].src.buf,
+                                     mb->plane[2].src.buf,
+                                     mb->plane[0].src.stride,
+                                     mb->plane[1].src.stride,
+                                     bs);
   }
 
   mv_col = ctx->best_sse_mv.as_mv.col;

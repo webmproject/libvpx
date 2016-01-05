@@ -145,10 +145,6 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     const uint8_t *src_u = cpi->Source->u_buffer;
     const uint8_t *src_v = cpi->Source->v_buffer;
     const int src_uvstride = cpi->Source->uv_stride;
-    const int y_width_shift = (4 << b_width_log2_lookup[bsize]) >> 1;
-    const int y_height_shift = (4 << b_height_log2_lookup[bsize]) >> 1;
-    const int uv_width_shift = y_width_shift >> 1;
-    const int uv_height_shift = y_height_shift >> 1;
     int mi_row, mi_col;
     int num_low_motion = 0;
     int frame_low_motion = 1;
@@ -173,13 +169,12 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
           // been encoded as zero/low motion x (= thresh_consec_zeromv) frames
           // in a row. consec_zero_mv[] defined for 8x8 blocks, so consider all
           // 4 sub-blocks for 16x16 block. Also, avoid skin blocks.
-          const uint8_t ysource =
-            src_y[y_height_shift * src_ystride + y_width_shift];
-          const uint8_t usource =
-            src_u[uv_height_shift * src_uvstride + uv_width_shift];
-          const uint8_t vsource =
-            src_v[uv_height_shift * src_uvstride + uv_width_shift];
-          int is_skin = vp9_skin_pixel(ysource, usource, vsource);
+          int is_skin = vp9_compute_skin_block(src_y,
+                                               src_u,
+                                               src_v,
+                                               src_ystride,
+                                               src_uvstride,
+                                               bsize);
           if (frame_low_motion &&
               cr->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
               cr->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&
