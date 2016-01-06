@@ -29,8 +29,8 @@ extern "C" {
 struct buffered_ans_symbol {
   uint8_t method;    // one of ANS_METHOD_UABS or ANS_METHOD_RANS
   // TODO(aconverse): Should be possible to write this interms of start for ABS
-  AnsP8 val_start;  // Boolean value for ABS, start in symbol cycle for Rans
-  AnsP8 prob;  // Probability of this symbol
+  AnsP10 val_start;  // Boolean value for ABS, start in symbol cycle for Rans
+  AnsP10 prob;  // Probability of this symbol
 };
 
 struct BufAnsCoder {
