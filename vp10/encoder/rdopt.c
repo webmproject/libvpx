@@ -2364,7 +2364,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       sum_dist += this_dist;
       sum_bsse += this_bsse;
       all_skip &= this_skip;
-      tmp_rd += RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
+      tmp_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (this_rd < tmp_rd)
         break;
     }
