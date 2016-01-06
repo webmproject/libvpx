@@ -18,6 +18,7 @@ extern "C" {
 
 #include "vp10/encoder/encoder.h"
 
+void vp10_encode_token_init();
 void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size);
 
 static INLINE int vp10_preserve_existing_gf(VP10_COMP *cpi) {
