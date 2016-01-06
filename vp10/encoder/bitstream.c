@@ -715,7 +715,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_SUPERTX
       !supertx_enabled &&
 #endif  // CONFIG_SUPERTX
-      !(is_inter && skip)) {
+      !(is_inter && skip) && !xd->lossless[segment_id]) {
 #if CONFIG_VAR_TX
     if (is_inter) {  // This implies skip flag is 0.
       const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
@@ -889,7 +889,8 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   write_skip(cm, xd, mbmi->segment_id, mi, w);
 
-  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
+  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
+      !xd->lossless[mbmi->segment_id])
     write_selected_tx_size(cm, xd, w);
 
   if (bsize >= BLOCK_8X8) {
@@ -1900,7 +1901,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   encode_loopfilter(&cm->lf, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
-  if (xd->lossless[0])
+  if (!cm->seg.enabled && xd->lossless[0])
     cm->tx_mode = TX_4X4;
   else
     write_txfm_mode(cm->tx_mode, wb);

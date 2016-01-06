@@ -2977,8 +2977,8 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   }
 
   setup_segmentation_dequant(cm);
-  cm->tx_mode = (xd->lossless[0]) ? ONLY_4X4
-                                  : read_tx_mode(rb);
+  cm->tx_mode = (!cm->seg.enabled && xd->lossless[0]) ? ONLY_4X4
+                                                      : read_tx_mode(rb);
   cm->reference_mode = read_frame_reference_mode(cm, rb);
 
   setup_tile_info(cm, rb);

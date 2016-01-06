@@ -587,7 +587,12 @@ static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
     // Co-ordinate of containing block to pixel precision.
     int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
     int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
-
+#if CONFIG_BETTER_HW_COMPATIBILITY
+    assert(xd->mi[0]->mbmi.sb_type != BLOCK_4X8 &&
+           xd->mi[0]->mbmi.sb_type != BLOCK_8X4);
+    assert(mv_q4.row == mv->row * (1 << (1 - pd->subsampling_y)) &&
+           mv_q4.col == mv->col * (1 << (1 - pd->subsampling_x)));
+#endif
     // Co-ordinate of the block to 1/16th pixel precision.
     x0_16 = (x_start + x) << SUBPEL_BITS;
     y0_16 = (y_start + y) << SUBPEL_BITS;
