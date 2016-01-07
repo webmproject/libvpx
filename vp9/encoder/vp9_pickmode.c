@@ -1855,6 +1855,13 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     if (ref_frame_skip_mask & (1 << ref_frame))
       continue;
 
+#if CONFIG_BETTER_HW_COMPATIBILITY
+    if ((bsize == BLOCK_8X4 || bsize == BLOCK_4X8) &&
+        ref_frame > INTRA_FRAME &&
+        vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf))
+      continue;
+#endif
+
     // TODO(jingning, agrange): Scaling reference frame not supported for
     // sub8x8 blocks. Is this supported now?
     if (ref_frame > INTRA_FRAME &&

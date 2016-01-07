@@ -3818,6 +3818,16 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
     ref_frame = vp9_ref_order[ref_index].ref_frame[0];
     second_ref_frame = vp9_ref_order[ref_index].ref_frame[1];
 
+#if CONFIG_BETTER_HW_COMPATIBILITY
+    // forbid 8X4 and 4X8 partitions if any reference frame is scaled.
+    if (bsize == BLOCK_8X4 || bsize == BLOCK_4X8) {
+      int ref_scaled = vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf);
+      if (second_ref_frame > INTRA_FRAME)
+        ref_scaled += vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf);
+      if (ref_scaled)
+        continue;
+    }
+#endif
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
     if (ref_index > 2 && sf->mode_skip_start < MAX_MODES) {
