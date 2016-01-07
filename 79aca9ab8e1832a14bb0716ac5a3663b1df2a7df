@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa1773d7_62af27e5",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-01-07T23:59:03Z",
+      "side": 1,
+      "message": "Add a comment/note here, something like (in case someone wants to re-enable this): \"Note: For 1 pass cbr_svc, the GOLDEN reference frame needs to be scaled up here before use.\"",
+      "range": {
+        "startLine": 731,
+        "startChar": 17,
+        "endLine": 731,
+        "endChar": 18
+      },
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a4357e2_1fcd5e3d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1747,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-01-07T23:59:03Z",
+      "side": 1,
+      "message": "prefer to use if (cpi-\u003esvc_use_base_mv)..see previous comment",
+      "range": {
+        "startLine": 1747,
+        "startChar": 4,
+        "endLine": 1747,
+        "endChar": 15
+      },
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa3e9347_476c7dd8",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-01-07T23:59:03Z",
+      "side": 1,
+      "message": "Can we add this as a parameter/mode is the SVC struct, say cpi-\u003esvc.use_base_mv. And set it to 1 for one_pass_cbr_svc, same as svc-\u003eforce_zero_mode_spatial_ref is done in\nvp9_svc_layercontext.c/h.",
+      "range": {
+        "startLine": 665,
+        "startChar": 8,
+        "endLine": 665,
+        "endChar": 19
+      },
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa3e9347_4720fd73",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-01-07T23:59:03Z",
+      "side": 1,
+      "message": "This function seems to be same as existing mv_refs_rt(), except for the \"Get base layer mv\" (lines 177-188). Can we not keep one function and add this extra logic to that one (under the flag cpi-\u003esvc.use_base_mv)?\n\nUnderstand that more changes specifc to svc may be added in future, but if so at that time/later we can split it.",
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa3e9347_47431d45",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-01-07T23:59:03Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 400,
+        "startChar": 18,
+        "endLine": 400,
+        "endChar": 22
+      },
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
