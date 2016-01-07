@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6aa2db12_6e1a6f5d",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-01-07T12:38:40Z",
+      "side": 1,
+      "message": "this could be only one single test:\n\nif (ans-\u003estate \u003e\u003d l_base / ans_p8_precision * io_base * l_s) {...}",
+      "range": {
+        "startLine": 82,
+        "startChar": 25,
+        "endLine": 82,
+        "endChar": 26
+      },
+      "revId": "b8cfb2d62313be9cd791526062304921c680975f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6aa2db12_4e17b331",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-01-07T12:38:40Z",
+      "side": 1,
+      "message": "indent +\u003d 2",
+      "range": {
+        "startLine": 116,
+        "startChar": 2,
+        "endLine": 116,
+        "endChar": 5
+      },
+      "revId": "b8cfb2d62313be9cd791526062304921c680975f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2c372e_9842f923",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-01-07T12:38:40Z",
+      "side": 1,
+      "message": "indent +\u003d 2",
+      "range": {
+        "startLine": 119,
+        "startChar": 2,
+        "endLine": 119,
+        "endChar": 5
+      },
+      "revId": "b8cfb2d62313be9cd791526062304921c680975f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a2b8319_376972c8",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-01-07T12:38:40Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 132,
+        "startChar": 11,
+        "endLine": 132,
+        "endChar": 12
+      },
+      "revId": "b8cfb2d62313be9cd791526062304921c680975f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eae08b3e_c576ecb7",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-01-07T12:38:40Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 164,
+        "startChar": 13,
+        "endLine": 164,
+        "endChar": 14
+      },
+      "revId": "b8cfb2d62313be9cd791526062304921c680975f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a2b8319_d744be53",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-01-07T12:38:40Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 167,
+        "startChar": 7,
+        "endLine": 167,
+        "endChar": 12
+      },
+      "revId": "b8cfb2d62313be9cd791526062304921c680975f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca6e677a_4c202f86",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-01-07T12:38:40Z",
+      "side": 1,
+      "message": "the divide by \u0027ans_p8_precision\u0027 position is incoherent with lines 82, e.g.\n\nShould it be done before or after the multiply by p0?",
+      "range": {
+        "startLine": 179,
+        "startChar": 38,
+        "endLine": 179,
+        "endChar": 45
+      },
+      "revId": "b8cfb2d62313be9cd791526062304921c680975f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
