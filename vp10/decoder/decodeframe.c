@@ -1021,6 +1021,12 @@ static void set_param_topblock(VP10_COMMON *const cm,  MACROBLOCKD *const xd,
       xd->mi[y * cm->mi_stride + x]->mbmi.tx_type = txfm;
 #endif
     }
+#if CONFIG_VAR_TX
+  xd->above_txfm_context = cm->above_txfm_context + mi_col;
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  set_txfm_ctx(xd->left_txfm_context, xd->mi[0]->mbmi.tx_size, bh);
+  set_txfm_ctx(xd->above_txfm_context, xd->mi[0]->mbmi.tx_size, bw);
+#endif
 }
 
 static void set_ref(VP10_COMMON *const cm, MACROBLOCKD *const xd,
