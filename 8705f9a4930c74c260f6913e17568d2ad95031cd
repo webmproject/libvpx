@@ -65,6 +65,30 @@
     },
     {
       "key": {
+        "uuid": "0a7b1f38_6ba0810d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3451,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-07T04:54:00Z",
+      "side": 1,
+      "message": "Weird... I must have made a mistake when I was creating the patch..\nThis should be moved to \"encode_without_recode_loop\" function... I\u0027ll do that.",
+      "parentUuid": "4a4357e2_b79818f0",
+      "range": {
+        "startLine": 3451,
+        "startChar": 41,
+        "endLine": 3451,
+        "endChar": 60
+      },
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea1debf7_4faa4dee",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 4
@@ -76,6 +100,24 @@
       "writtenOn": "2016-01-06T22:52:14Z",
       "side": 1,
       "message": "remove these lines",
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea824b50_32ec301f",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1227,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-07T04:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea1debf7_4faa4dee",
       "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -99,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "aa65b397_28812b6b",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1997,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-07T04:54:00Z",
+      "side": 1,
+      "message": "There were following reasons for doing it as a separate function.\n1. did not want to disturb two-pass coding\n2. wanted to make sure I did not disturb single layer coding, as there were lots of other codes that did not make into the patch.\n3. I thought there can be other changes that can be scalability-specific and controlled with speed settings.. - such as reducing ME when using base layer motion vector... and thresholding cost to skip ZEROMV mode for the base layer reference frame in order to eliminate upsampling altogether for the block. Right now, it seems that base layer block is always upsampled for ZEROMV mode. That reminds me, you should look to make sure the optimized code will be used for upsampling each block for RD decision. (As for now, the whole-frame upsampling uses optimized code, but that will not be called)\n\nAnyway, I can make the change to be in the same function, although this will make further changes later a little more difficult.",
+      "parentUuid": "8a41cfd9_d99b9359",
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a4357e2_97a07c0e",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 4
@@ -116,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "8a8f0f7c_92a71ae0",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-07T04:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a4357e2_97a07c0e",
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a1aaf01_866ff4cd",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 4
@@ -127,6 +205,30 @@
       "writtenOn": "2016-01-06T22:52:14Z",
       "side": 1,
       "message": "remove these lines",
+      "range": {
+        "startLine": 641,
+        "startChar": 4,
+        "endLine": 641,
+        "endChar": 5
+      },
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8abb8f3a_af9a9987",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-07T04:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a1aaf01_866ff4cd",
       "range": {
         "startLine": 641,
         "startChar": 4,
@@ -162,6 +264,30 @@
     },
     {
       "key": {
+        "uuid": "ea824b50_525e94ca",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-07T04:54:00Z",
+      "side": 1,
+      "message": "You can always directly specify each layer\u0027s target using si-\u003ebitrates[] being used above.",
+      "parentUuid": "2a52a3ad_d6c284ab",
+      "range": {
+        "startLine": 336,
+        "startChar": 44,
+        "endLine": 336,
+        "endChar": 46
+      },
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a52a3ad_36b2c84f",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 4
@@ -173,6 +299,30 @@
       "writtenOn": "2016-01-06T22:52:14Z",
       "side": 1,
       "message": "Don\u0027t think we need this, so can remove, Minghai?",
+      "range": {
+        "startLine": 400,
+        "startChar": 23,
+        "endLine": 400,
+        "endChar": 32
+      },
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca85875a_51dbf471",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-07T04:54:00Z",
+      "side": 1,
+      "message": "This code was removed because this was preventing intra-only encoding.",
+      "parentUuid": "2a52a3ad_36b2c84f",
       "range": {
         "startLine": 400,
         "startChar": 23,
