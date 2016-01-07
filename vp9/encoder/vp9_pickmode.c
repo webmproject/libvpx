@@ -1263,15 +1263,18 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     ref_frame = ref_mode_set[idx].ref_frame;
     if (cpi->use_svc) {
       ref_frame = ref_mode_set_svc[idx].ref_frame;
-      if (svc_force_zero_mode[ref_frame - 1] &&
-          frame_mv[this_mode][ref_frame].as_int != 0)
-        continue;
     }
 
     if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
       continue;
     if (const_motion[ref_frame] && this_mode == NEARMV)
       continue;
+
+    if (cpi->use_svc) {
+      if (svc_force_zero_mode[ref_frame - 1] &&
+          frame_mv[this_mode][ref_frame].as_int != 0)
+        continue;
+    }
 
     if (!(frame_mv[this_mode][ref_frame].as_int == 0 &&
         ref_frame == LAST_FRAME)) {
