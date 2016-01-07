@@ -613,6 +613,52 @@ Done:
       mv_ref_list[i].as_int = 0;
 }
 
+#if CONFIG_EXT_INTER
+// This function keeps a mode count for a given MB/SB
+void vp10_update_mv_context(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+                            MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                            int_mv *mv_ref_list,
+                            int block, int mi_row, int mi_col,
+                            int16_t *mode_context) {
+  int i, refmv_count = 0;
+  const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
+  int context_counter = 0;
+  const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type] << 3;
+  const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type] << 3;
+  const TileInfo *const tile = &xd->tile;
+
+  // Blank the reference vector list
+  memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+
+  // The nearest 2 blocks are examined only.
+  // If the size < 8x8, we get the mv from the bmi substructure;
+  for (i = 0; i < 2; ++i) {
+    const POSITION *const mv_ref = &mv_ref_search[i];
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      const MODE_INFO *const candidate_mi =
+          xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride];
+      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
+
+      // Keep counts for entropy encoding.
+      context_counter += mode_2_counter[candidate->mode];
+
+      if (candidate->ref_frame[0] == ref_frame) {
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block),
+                        refmv_count, mv_ref_list, bw, bh, xd, Done);
+      } else if (candidate->ref_frame[1] == ref_frame) {
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block),
+                        refmv_count, mv_ref_list, bw, bh, xd, Done);
+      }
+    }
+  }
+
+ Done:
+
+  if (mode_context)
+    mode_context[ref_frame] = counter_to_context[context_counter];
+}
+#endif  // CONFIG_EXT_INTER
+
 void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
 #if CONFIG_REF_MV
@@ -626,8 +672,15 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_REF_MV
   int idx, all_zero = 1;
 #endif
+#if CONFIG_EXT_INTER
+  vp10_update_mv_context(cm, xd, mi, ref_frame, mv_ref_list, -1,
+                         mi_row, mi_col, mode_context);
+  find_mv_refs_idx(cm, xd, mi, ref_frame, mv_ref_list, -1,
+                   mi_row, mi_col, sync, data, NULL);
+#else
   find_mv_refs_idx(cm, xd, mi, ref_frame, mv_ref_list, -1,
                    mi_row, mi_col, sync, data, mode_context);
+#endif  // CONFIG_EXT_INTER
 
 #if CONFIG_REF_MV
   setup_ref_mv_list(cm, xd, ref_frame, ref_mv_count, ref_mv_stack,
@@ -656,8 +709,13 @@ void vp10_find_best_ref_mvs(int allow_hp,
 
 void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
                                     int block, int ref, int mi_row, int mi_col,
+#if CONFIG_EXT_INTER
+                                    int_mv *mv_list,
+#endif  // CONFIG_EXT_INTER
                                     int_mv *nearest_mv, int_mv *near_mv) {
+#if !CONFIG_EXT_INTER
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
+#endif  // !CONFIG_EXT_INTER
   MODE_INFO *const mi = xd->mi[0];
   b_mode_info *bmi = mi->bmi;
   int n;

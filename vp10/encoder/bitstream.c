@@ -49,7 +49,11 @@ static const struct vp10_token partition_encodings[PARTITION_TYPES] =
   {{0, 1}, {2, 2}, {6, 3}, {7, 3}};
 #if !CONFIG_REF_MV
 static const struct vp10_token inter_mode_encodings[INTER_MODES] =
+#if CONFIG_EXT_INTER
+  {{2, 2}, {6, 3}, {0, 1}, {14, 4}, {15, 4}};
+#else
   {{2, 2}, {6, 3}, {0, 1}, {7, 3}};
+#endif  // CONFIG_EXT_INTER
 #endif
 static const struct vp10_token palette_size_encodings[] = {
     {0, 1}, {2, 2}, {6, 3}, {14, 4}, {30, 5}, {62, 6}, {63, 6},
@@ -117,13 +121,25 @@ static void write_intra_mode(vpx_writer *w, PREDICTION_MODE mode,
 
 static void write_inter_mode(VP10_COMMON *cm,
                              vpx_writer *w, PREDICTION_MODE mode,
+#if CONFIG_REF_MV && CONFIG_EXT_INTER
+                             int is_compound,
+#endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
                              const int16_t mode_ctx) {
 #if CONFIG_REF_MV
   const int16_t newmv_ctx = mode_ctx & NEWMV_CTX_MASK;
   const vpx_prob newmv_prob = cm->fc->newmv_prob[newmv_ctx];
+#if CONFIG_EXT_INTER
+  vpx_write(w, mode != NEWMV && mode != NEWFROMNEARMV, newmv_prob);
+
+  if (!is_compound && (mode == NEWMV || mode == NEWFROMNEARMV))
+    vpx_write(w, mode == NEWFROMNEARMV, cm->fc->new2mv_prob);
+
+  if (mode != NEWMV && mode != NEWFROMNEARMV) {
+#else
   vpx_write(w, mode != NEWMV, newmv_prob);
 
   if (mode != NEWMV) {
+#endif  // CONFIG_EXT_INTER
     const int16_t zeromv_ctx = (mode_ctx >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
     const vpx_prob zeromv_prob = cm->fc->zeromv_prob[zeromv_ctx];
 
@@ -279,6 +295,10 @@ static void update_inter_mode_probs(VP10_COMMON *cm, vpx_writer *w,
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
     vp10_cond_prob_diff_update(w, &cm->fc->refmv_prob[i],
                                counts->refmv_mode[i]);
+
+#if CONFIG_EXT_INTER
+  vp10_cond_prob_diff_update(w, &cm->fc->new2mv_prob, counts->new2mv_mode);
+#endif  // CONFIG_EXT_INTER
 }
 #endif
 
@@ -906,7 +926,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     // If segment skip is not enabled code the mode.
     if (!segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
-        write_inter_mode(cm, w, mode, mode_ctx);
+        write_inter_mode(cm, w, mode,
+#if CONFIG_REF_MV && CONFIG_EXT_INTER
+                         has_second_ref(mbmi),
+#endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
+                         mode_ctx);
       }
     }
 
@@ -926,23 +950,52 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
           mode_ctx = vp10_mode_context_analyzer(mbmi_ext->mode_context,
                                                 mbmi->ref_frame, bsize, j);
 #endif
-          write_inter_mode(cm, w, b_mode, mode_ctx);
+          write_inter_mode(cm, w, b_mode,
+#if CONFIG_REF_MV && CONFIG_EXT_INTER
+                           has_second_ref(mbmi),
+#endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
+                           mode_ctx);
+
+#if CONFIG_EXT_INTER
+          if (b_mode == NEWMV || b_mode == NEWFROMNEARMV) {
+#else
           if (b_mode == NEWMV) {
+#endif  // CONFIG_EXT_INTER
             for (ref = 0; ref < 1 + is_compound; ++ref)
               vp10_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
-                            &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
+#if CONFIG_EXT_INTER
+                             &mi->bmi[j].ref_mv[ref].as_mv,
+#else
+                             &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
+#endif  // CONFIG_EXT_INTER
                             nmvc, allow_hp);
           }
         }
       }
     } else {
+#if CONFIG_EXT_INTER
+      if (mode == NEWMV || mode == NEWFROMNEARMV) {
+#else
       if (mode == NEWMV) {
+#endif  // CONFIG_EXT_INTER
         for (ref = 0; ref < 1 + is_compound; ++ref)
+#if CONFIG_EXT_INTER
+        {
+          if (mode == NEWFROMNEARMV)
+            vp10_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
+                           &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][1].as_mv,
+                           nmvc, allow_hp);
+          else
+#endif  // CONFIG_EXT_INTER
           vp10_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                         &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv, nmvc,
                         allow_hp);
+#if CONFIG_EXT_INTER
+        }
+#endif  // CONFIG_EXT_INTER
       }
     }
+
 #if CONFIG_EXT_INTERP
     write_switchable_interp_filter(cpi, xd, w);
 #endif  // CONFIG_EXT_INTERP

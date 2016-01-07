@@ -132,6 +132,9 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
     vp10_diff_update_prob(r, &fc->zeromv_prob[i]);
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
     vp10_diff_update_prob(r, &fc->refmv_prob[i]);
+#if CONFIG_EXT_INTER
+  vp10_diff_update_prob(r, &fc->new2mv_prob);
+#endif  // CONFIG_EXT_INTER
 #else
   int j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)

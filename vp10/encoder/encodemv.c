@@ -224,6 +224,41 @@ void vp10_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
   build_nmv_component_cost_table(mvcost[1], &ctx->comps[1], usehp);
 }
 
+#if CONFIG_EXT_INTER
+static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
+                    const int_mv mvs[2],
+                    nmv_context_counts *counts) {
+  int i;
+  PREDICTION_MODE mode = mbmi->mode;
+  int mv_idx = (mode == NEWFROMNEARMV);
+
+  if (mode == NEWMV || mode == NEWFROMNEARMV) {
+    for (i = 0; i < 1 + has_second_ref(mbmi); ++i) {
+      const MV *ref = &mbmi_ext->ref_mvs[mbmi->ref_frame[i]][mv_idx].as_mv;
+      const MV diff = {mvs[i].as_mv.row - ref->row,
+                       mvs[i].as_mv.col - ref->col};
+      vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
+    }
+  }
+}
+
+static void inc_mvs_sub8x8(const MODE_INFO *mi,
+                           int block,
+                           const int_mv mvs[2],
+                           nmv_context_counts *counts) {
+  int i;
+  PREDICTION_MODE mode = mi->bmi[block].as_mode;
+
+  if (mode == NEWMV || mode == NEWFROMNEARMV) {
+    for (i = 0; i < 1 + has_second_ref(&mi->mbmi); ++i) {
+      const MV *ref = &mi->bmi[block].ref_mv[i].as_mv;
+      const MV diff = {mvs[i].as_mv.row - ref->row,
+                       mvs[i].as_mv.col - ref->col};
+      vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
+    }
+  }
+}
+#else
 static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
                     const int_mv mvs[2],
                     nmv_context_counts *counts) {
@@ -236,6 +271,7 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
     vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
   }
 }
+#endif  // CONFIG_EXT_INTER
 
 void vp10_update_mv_count(ThreadData *td) {
   const MACROBLOCKD *xd = &td->mb.e_mbd;
@@ -251,12 +287,22 @@ void vp10_update_mv_count(ThreadData *td) {
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int i = idy * 2 + idx;
+
+#if CONFIG_EXT_INTER
+        if (have_newmv_in_inter_mode(mi->bmi[i].as_mode))
+          inc_mvs_sub8x8(mi, i, mi->bmi[i].as_mv, &td->counts->mv);
+#else
         if (mi->bmi[i].as_mode == NEWMV)
           inc_mvs(mbmi, mbmi_ext, mi->bmi[i].as_mv, &td->counts->mv);
+#endif  // CONFIG_EXT_INTER
       }
     }
   } else {
+#if CONFIG_EXT_INTER
+    if (have_newmv_in_inter_mode(mbmi->mode))
+#else
     if (mbmi->mode == NEWMV)
+#endif  // CONFIG_EXT_INTER
       inc_mvs(mbmi, mbmi_ext, mbmi->mv, &td->counts->mv);
   }
 }

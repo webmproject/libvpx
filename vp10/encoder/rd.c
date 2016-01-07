@@ -377,6 +377,10 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
       cpi->refmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->refmv_prob[i], 0);
       cpi->refmv_mode_cost[i][1] = vp10_cost_bit(cm->fc->refmv_prob[i], 1);
     }
+#if CONFIG_EXT_INTER
+    cpi->new2mv_mode_cost[0] = vp10_cost_bit(cm->fc->new2mv_prob, 0);
+    cpi->new2mv_mode_cost[1] = vp10_cost_bit(cm->fc->new2mv_prob, 1);
+#endif  // CONFIG_EXT_INTER
 #else
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
       vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
@@ -685,6 +689,17 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_NEARA] += 1000;
   rd->thresh_mult[THR_NEARG] += 1000;
+
+#if CONFIG_EXT_INTER
+  rd->thresh_mult[THR_NEWFROMNEARMV] += 1000;
+#if CONFIG_EXT_REF
+  rd->thresh_mult[THR_NEWFROMNEARL2] += 1000;
+  rd->thresh_mult[THR_NEWFROMNEARL3] += 1000;
+  rd->thresh_mult[THR_NEWFROMNEARL4] += 1000;
+#endif  // CONFIG_EXT_REF
+  rd->thresh_mult[THR_NEWFROMNEARG] += 1000;
+  rd->thresh_mult[THR_NEWFROMNEARA] += 1000;
+#endif  // CONFIG_EXT_INTER
 
   rd->thresh_mult[THR_ZEROMV] += 2000;
 #if CONFIG_EXT_REFS

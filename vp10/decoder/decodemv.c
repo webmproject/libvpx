@@ -63,6 +63,9 @@ static PREDICTION_MODE read_intra_mode_uv(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
+#if CONFIG_REF_MV && CONFIG_EXT_INTER
+                                       MB_MODE_INFO *mbmi,
+#endif
                                        vpx_reader *r, int16_t ctx) {
 #if CONFIG_REF_MV
   FRAME_COUNTS *counts = xd->counts;
@@ -72,7 +75,25 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (vpx_read(r, mode_prob) == 0) {
     if (counts)
       ++counts->newmv_mode[mode_ctx][0];
+
+#if CONFIG_EXT_INTER
+    if (has_second_ref(mbmi)) {
+#endif  // CONFIG_EXT_INTER
     return NEWMV;
+#if CONFIG_EXT_INTER
+    } else {
+      mode_prob = cm->fc->new2mv_prob;
+      if (vpx_read(r, mode_prob) == 0) {
+        if (counts)
+          ++counts->new2mv_mode[0];
+        return NEWMV;
+      } else {
+        if (counts)
+          ++counts->new2mv_mode[1];
+        return NEWFROMNEARMV;
+      }
+    }
+#endif  // CONFIG_EXT_INTER
   }
   if (counts)
     ++counts->newmv_mode[mode_ctx][1];
@@ -774,6 +795,9 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
   int ret = 1;
 
   switch (mode) {
+#if CONFIG_EXT_INTER
+    case NEWFROMNEARMV:
+#endif  // CONFIG_EXT_INTER
     case NEWMV: {
       FRAME_COUNTS *counts = xd->counts;
       nmv_context_counts *const mv_counts = counts ? &counts->mv : NULL;
@@ -839,6 +863,9 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   const int allow_hp = cm->allow_high_precision_mv;
   int_mv nearestmv[2], nearmv[2];
   int_mv ref_mvs[MODE_CTX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
+#if CONFIG_EXT_INTER
+  int mv_idx;
+#endif  // CONFIG_EXT_INTER
   int ref, is_compound;
   int16_t inter_mode_ctx[MODE_CTX_REF_FRAMES];
   int16_t mode_ctx = 0;
@@ -885,7 +912,11 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     }
   } else {
     if (bsize >= BLOCK_8X8)
-      mbmi->mode = read_inter_mode(cm, xd, r, mode_ctx);
+      mbmi->mode = read_inter_mode(cm, xd,
+#if CONFIG_REF_MV && CONFIG_EXT_INTER
+                                   mbmi,
+#endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
+                                   r, mode_ctx);
   }
 
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
@@ -936,6 +967,9 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     int idx, idy;
     PREDICTION_MODE b_mode;
     int_mv nearest_sub8x8[2], near_sub8x8[2];
+#if CONFIG_EXT_INTER
+    int_mv ref_mv[2][2];
+#endif  // CONFIG_EXT_INTER
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         int_mv block[2];
@@ -944,16 +978,49 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
         mode_ctx = vp10_mode_context_analyzer(inter_mode_ctx,  mbmi->ref_frame,
                                               bsize, j);
 #endif
-        b_mode = read_inter_mode(cm, xd, r, mode_ctx);
+        b_mode = read_inter_mode(cm, xd,
+#if CONFIG_REF_MV && CONFIG_EXT_INTER
+                                 mbmi,
+#endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
+                                 r, mode_ctx);
 
+#if CONFIG_EXT_INTER
+        mv_idx = (b_mode == NEWFROMNEARMV) ? 1 : 0;
+
+        if (b_mode != ZEROMV) {
+#else
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
+#endif  // CONFIG_EXT_INTER
           for (ref = 0; ref < 1 + is_compound; ++ref)
+#if CONFIG_EXT_INTER
+          {
+            int_mv mv_ref_list[MAX_MV_REF_CANDIDATES];
+            vp10_update_mv_context(cm, xd, mi, mbmi->ref_frame[ref],
+                                   mv_ref_list, j, mi_row, mi_col, NULL);
+#endif  // CONFIG_EXT_INTER
             vp10_append_sub8x8_mvs_for_idx(cm, xd, j, ref, mi_row, mi_col,
+#if CONFIG_EXT_INTER
+                                          mv_ref_list,
+#endif  // CONFIG_EXT_INTER
                                           &nearest_sub8x8[ref],
                                           &near_sub8x8[ref]);
+#if CONFIG_EXT_INTER
+            if (have_newmv_in_inter_mode(b_mode)) {
+              mv_ref_list[0].as_int = nearest_sub8x8[ref].as_int;
+              mv_ref_list[1].as_int = near_sub8x8[ref].as_int;
+              vp10_find_best_ref_mvs(allow_hp, mv_ref_list,
+                                     &ref_mv[0][ref], &ref_mv[1][ref]);
+            }
+          }
+#endif  // CONFIG_EXT_INTER
         }
 
-        if (!assign_mv(cm, xd, b_mode, block, nearestmv,
+        if (!assign_mv(cm, xd, b_mode, block,
+#if CONFIG_EXT_INTER
+                       ref_mv[mv_idx],
+#else
+                       nearestmv,
+#endif  // CONFIG_EXT_INTER
                        nearest_sub8x8, near_sub8x8,
                        is_compound, allow_hp, r)) {
           xd->corrupted |= 1;
@@ -976,7 +1043,13 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
-    xd->corrupted |= !assign_mv(cm, xd, mbmi->mode, mbmi->mv, nearestmv,
+    xd->corrupted |= !assign_mv(cm, xd, mbmi->mode, mbmi->mv,
+#if CONFIG_EXT_INTER
+                                mbmi->mode == NEWFROMNEARMV ?
+                                              nearmv : nearestmv,
+#else
+                                nearestmv,
+#endif  // CONFIG_EXT_INTER
                                 nearestmv, nearmv, is_compound, allow_hp, r);
   }
 #if CONFIG_EXT_INTERP

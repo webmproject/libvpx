@@ -1668,9 +1668,18 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
 #if CONFIG_REF_MV
 static void update_inter_mode_stats(FRAME_COUNTS *counts,
                                     PREDICTION_MODE mode,
+#if CONFIG_EXT_INTER
+                                    int is_compound,
+#endif  // CONFIG_EXT_INTER
                                     int16_t mode_context) {
   int16_t mode_ctx = mode_context & NEWMV_CTX_MASK;
+#if CONFIG_EXT_INTER
+  if (mode == NEWMV || mode == NEWFROMNEARMV) {
+    if (!is_compound)
+      ++counts->new2mv_mode[mode == NEWFROMNEARMV];
+#else
   if (mode == NEWMV) {
+#endif  // CONFIG_EXT_INTER
     ++counts->newmv_mode[mode_ctx][0];
     return;
   } else {
@@ -1789,7 +1798,12 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 #if CONFIG_REF_MV
         mode_ctx = vp10_mode_context_analyzer(mbmi_ext->mode_context,
                                               mbmi->ref_frame, bsize, -1);
-        update_inter_mode_stats(counts, mode, mode_ctx);
+        update_inter_mode_stats(counts, mode,
+#if CONFIG_EXT_INTER
+                                has_second_ref(mbmi),
+#endif  // CONFIG_EXT_INTER
+                                mode_ctx);
+
 #else
         ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
 #endif
@@ -1804,7 +1818,11 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 #if CONFIG_REF_MV
             mode_ctx = vp10_mode_context_analyzer(mbmi_ext->mode_context,
                                                   mbmi->ref_frame, bsize, j);
-            update_inter_mode_stats(counts, b_mode, mode_ctx);
+            update_inter_mode_stats(counts, b_mode,
+#if CONFIG_EXT_INTER
+                                    has_second_ref(mbmi),
+#endif  // CONFIG_EXT_INTER
+                                    mode_ctx);
 #else
             ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
 #endif

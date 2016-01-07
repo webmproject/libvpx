@@ -48,8 +48,18 @@ typedef enum {
 #define MAXTXLEN 32
 
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
+#if CONFIG_EXT_INTER
+  return mode >= NEARESTMV && mode <= NEWFROMNEARMV;
+#else
   return mode >= NEARESTMV && mode <= NEWMV;
+#endif  // CONFIG_EXT_INTER
 }
+
+#if CONFIG_EXT_INTER
+static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
+  return (mode == NEWMV || mode == NEWFROMNEARMV);
+}
+#endif  // CONFIG_EXT_INTER
 
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
@@ -58,6 +68,9 @@ static INLINE int is_inter_mode(PREDICTION_MODE mode) {
 typedef struct {
   PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
+#if CONFIG_EXT_INTER
+  int_mv ref_mv[2];
+#endif  // CONFIG_EXT_INTER
 } b_mode_info;
 
 // Note that the rate-distortion optimization loop, bit-stream writer, and

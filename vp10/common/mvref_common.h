@@ -55,6 +55,9 @@ static const int mode_2_counter[MB_MODE_COUNT] = {
   0,  // NEARMV
   3,  // ZEROMV
   1,  // NEWMV
+#if CONFIG_EXT_INTER
+  1,  // NEWFROMNEARMV
+#endif  // CONFIG_EXT_INTER
 };
 
 // There are 3^3 different combinations of 3 counts that can be either 0,1 or
@@ -265,7 +268,19 @@ void vp10_find_best_ref_mvs(int allow_hp,
 
 void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
                                     int block, int ref, int mi_row, int mi_col,
+#if CONFIG_EXT_INTER
+                                    int_mv *mv_list,
+#endif  // CONFIG_EXT_INTER
                                     int_mv *nearest_mv, int_mv *near_mv);
+
+#if CONFIG_EXT_INTER
+// This function keeps a mode count for a given MB/SB
+void vp10_update_mv_context(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+                            MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                            int_mv *mv_ref_list,
+                            int block, int mi_row, int mi_col,
+                            int16_t *mode_context);
+#endif  // CONFIG_EXT_INTER
 
 #ifdef __cplusplus
 }  // extern "C"

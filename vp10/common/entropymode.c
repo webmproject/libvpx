@@ -183,10 +183,24 @@ static const vpx_prob default_zeromv_prob[ZEROMV_MODE_CONTEXTS] = {
 static const vpx_prob default_refmv_prob[REFMV_MODE_CONTEXTS] = {
     220, 220, 200, 200, 180, 128, 30, 220, 30,
 };
+
+#if CONFIG_EXT_INTER
+static const vpx_prob default_new2mv_prob = 180;
+#endif
 #endif
 
 static const vpx_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [INTER_MODES - 1] = {
+#if CONFIG_EXT_INTER
+  // TODO(zoeliu): To adjust the initial default probs
+  {2,       173,   34,   173},  // 0 = both zero mv
+  {7,       145,   85,   145},  // 1 = one zero mv + one a predicted mv
+  {7,       166,   63,   166},  // 2 = two predicted mvs
+  {7,       94,    66,   128},  // 3 = one predicted/zero and one new mv
+  {8,       64,    46,   128},  // 4 = two new mvs
+  {17,      81,    31,   128},  // 5 = one intra neighbour + x
+  {25,      29,    30,    96},  // 6 = two intra neighbours
+#else
   {2,       173,   34},  // 0 = both zero mv
   {7,       145,   85},  // 1 = one zero mv + one a predicted mv
   {7,       166,   63},  // 2 = two predicted mvs
@@ -194,6 +208,7 @@ static const vpx_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
   {8,       64,    46},  // 4 = two new mvs
   {17,      81,    31},  // 5 = one intra neighbour + x
   {25,      29,    30},  // 6 = two intra neighbours
+#endif  // CONFIG_EXT_INTER
 };
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
@@ -212,7 +227,12 @@ const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
 const vpx_tree_index vp10_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
   -INTER_OFFSET(ZEROMV), 2,
   -INTER_OFFSET(NEARESTMV), 4,
+#if CONFIG_EXT_INTER
+  -INTER_OFFSET(NEARMV), 6,
+  -INTER_OFFSET(NEWMV), -INTER_OFFSET(NEWFROMNEARMV)
+#else
   -INTER_OFFSET(NEARMV), -INTER_OFFSET(NEWMV)
+#endif  // CONFIG_EXT_INTER
 };
 
 const vpx_tree_index vp10_partition_tree[TREE_SIZE(PARTITION_TYPES)] = {
@@ -1232,7 +1252,10 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->newmv_prob, default_newmv_prob);
   vp10_copy(fc->zeromv_prob, default_zeromv_prob);
   vp10_copy(fc->refmv_prob, default_refmv_prob);
-#endif
+#if CONFIG_EXT_INTER
+  fc->new2mv_prob = default_new2mv_prob;
+#endif  // CONFIG_EXT_INTER
+#endif  // CONFIG_REF_MV
   vp10_copy(fc->inter_mode_probs, default_inter_mode_probs);
 #if CONFIG_SUPERTX
   vp10_copy(fc->supertx_prob, default_supertx_prob);
@@ -1292,6 +1315,11 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
     fc->refmv_prob[i] = mode_mv_merge_probs(pre_fc->refmv_prob[i],
                                             counts->refmv_mode[i]);
+
+#if CONFIG_EXT_INTER
+  fc->new2mv_prob = mode_mv_merge_probs(pre_fc->new2mv_prob,
+                                        counts->new2mv_mode);
+#endif  // CONFIG_EXT_INTER
 #else
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     vpx_tree_merge_probs(vp10_inter_mode_tree, pre_fc->inter_mode_probs[i],
