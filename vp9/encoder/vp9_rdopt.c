@@ -3035,7 +3035,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     if (!(cpi->ref_frame_flags & flag_list[ref_frame])) {
       // Skip checking missing references in both single and compound reference
-      // modes. Note that a mode will be skipped iff both reference frames
+      // modes. Note that a mode will be skipped if both reference frames
       // are masked out.
       ref_frame_skip_mask[0] |= (1 << ref_frame);
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
