@@ -159,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "4a4357e2_3aa068b0",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1997,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-01-07T23:59:03Z",
+      "side": 1,
+      "message": "I agree that more svc-specific changes can be made to pick_inter_mode. But for the current patch it seems to me that we can just reuse the existing one. It would be easier for getting this patch in.\n\nWe can always split it in another patch, when we make more svc-changes, or refactor it.\n\nYeah, base layer block is always upsampled for ZEROMV, and because we only use ZER0MV for spatial reference we can skip the full frame up-sampling. Agree we should use the optimized scaler for this block-upsampling. Scott will work on getting that optimized code in first, and then we can use it here.",
+      "parentUuid": "aa65b397_28812b6b",
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a4357e2_97a07c0e",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 4
