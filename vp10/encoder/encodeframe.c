@@ -3780,6 +3780,31 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
                         INT64_MAX, td->pc_root);
     }
   }
+#if CONFIG_ENTROPY
+  if (cm->do_subframe_update &&
+      cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
+    if ((mi_row + MI_SIZE) % (MI_SIZE *
+        VPXMAX(cm->mi_rows / MI_SIZE / COEF_PROBS_BUFS, 1)) == 0 &&
+        mi_row + MI_SIZE < cm->mi_rows &&
+        cm->coef_probs_update_idx < COEF_PROBS_BUFS - 1) {
+      TX_SIZE t;
+      SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
+
+      for (t = TX_4X4; t <= TX_32X32; ++t)
+        full_to_model_counts(cpi->td.counts->coef[t],
+                             cpi->td.rd_counts.coef_counts[t]);
+      vp10_partial_adapt_probs(cm, mi_row, mi_col);
+      ++cm->coef_probs_update_idx;
+      vp10_copy(subframe_stats->coef_probs_buf[cm->coef_probs_update_idx],
+                cm->fc->coef_probs);
+      vp10_copy(subframe_stats->coef_counts_buf[cm->coef_probs_update_idx],
+                cpi->td.rd_counts.coef_counts);
+      vp10_copy(subframe_stats->eob_counts_buf[cm->coef_probs_update_idx],
+                cm->counts.eob_branch);
+      fill_token_costs(x->token_costs, cm->fc->coef_probs);
+    }
+  }
+#endif  // CONFIG_ENTROPY
 }
 
 static void init_encode_frame_mb_context(VP10_COMP *cpi) {

@@ -180,6 +180,88 @@ int vp10_prob_diff_update_savings_search_model(const unsigned int *ct,
   return bestsavings;
 }
 
+#if CONFIG_ENTROPY
+static int get_cost(unsigned int ct[][2], vpx_prob p, int n) {
+  int i, p0 = p;
+  unsigned int total_ct[2] = {0 , 0};
+  int cost = 0;
+
+  for (i = 0; i <= n; ++i) {
+    cost += cost_branch256(ct[i], p);
+    total_ct[0] += ct[i][0];
+    total_ct[1] += ct[i][1];
+    if (i < n)
+      p = merge_probs(p0, total_ct, 24, 112);
+  }
+
+  return cost;
+}
+
+int vp10_prob_update_search_subframe(unsigned int ct[][2],
+                                     vpx_prob oldp, vpx_prob *bestp,
+                                     vpx_prob upd, int n) {
+  const int old_b = get_cost(ct, oldp, n);
+  int bestsavings = 0;
+  vpx_prob newp, bestnewp = oldp;
+  const int step = *bestp > oldp ? -1 : 1;
+
+  for (newp = *bestp; newp != oldp; newp += step) {
+    const int new_b = get_cost(ct, newp, n);
+    const int update_b = prob_diff_update_cost(newp, oldp) + vp10_cost_upd256;
+    const int savings = old_b - new_b - update_b;
+    if (savings > bestsavings) {
+      bestsavings = savings;
+      bestnewp = newp;
+    }
+  }
+  *bestp = bestnewp;
+  return bestsavings;
+}
+
+int vp10_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
+                                                          [COEF_PROBS_BUFS][2],
+                                           const vpx_prob *oldp,
+                                           vpx_prob *bestp, vpx_prob upd,
+                                           int stepsize, int n) {
+  int i, old_b, new_b, update_b, savings, bestsavings;
+  int newp;
+  const int step_sign = *bestp > oldp[PIVOT_NODE] ? -1 : 1;
+  const int step = stepsize * step_sign;
+  vpx_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
+  vp10_model_to_full_probs(oldp, oldplist);
+  memcpy(newplist, oldp, sizeof(vpx_prob) * UNCONSTRAINED_NODES);
+  for (i = UNCONSTRAINED_NODES, old_b = 0; i < ENTROPY_NODES; ++i)
+    old_b += get_cost(ct[i], oldplist[i], n);
+  old_b += get_cost(ct[PIVOT_NODE], oldplist[PIVOT_NODE], n);
+
+  bestsavings = 0;
+  bestnewp = oldp[PIVOT_NODE];
+
+  assert(stepsize > 0);
+
+  for (newp = *bestp; (newp - oldp[PIVOT_NODE]) * step_sign < 0;
+      newp += step) {
+    if (newp < 1 || newp > 255)
+      continue;
+    newplist[PIVOT_NODE] = newp;
+    vp10_model_to_full_probs(newplist, newplist);
+    for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
+      new_b += get_cost(ct[i], newplist[i], n);
+    new_b += get_cost(ct[PIVOT_NODE], newplist[PIVOT_NODE], n);
+    update_b = prob_diff_update_cost(newp, oldp[PIVOT_NODE]) +
+        vp10_cost_upd256;
+    savings = old_b - new_b - update_b;
+    if (savings > bestsavings) {
+      bestsavings = savings;
+      bestnewp = newp;
+    }
+  }
+
+  *bestp = bestnewp;
+  return bestsavings;
+}
+#endif  // CONFIG_ENTROPY
+
 void vp10_cond_prob_diff_update(vpx_writer *w, vpx_prob *oldp,
                                const unsigned int ct[2]) {
   const vpx_prob upd = DIFF_UPDATE_PROB;

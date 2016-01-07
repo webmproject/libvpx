@@ -38,6 +38,18 @@ int vp10_prob_diff_update_savings_search_model(const unsigned int *ct,
                                               int stepsize);
 int vp10_cond_prob_diff_update_savings(vpx_prob *oldp,
                                        const unsigned int ct[2]);
+
+#if CONFIG_ENTROPY
+int vp10_prob_update_search_subframe(unsigned int ct[][2],
+                                     vpx_prob oldp, vpx_prob *bestp,
+                                     vpx_prob upd, int n);
+int vp10_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
+                                                          [COEF_PROBS_BUFS][2],
+                                           const vpx_prob *oldp,
+                                           vpx_prob *bestp, vpx_prob upd,
+                                           int stepsize, int n);
+#endif  // CONFIG_ENTROPY
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

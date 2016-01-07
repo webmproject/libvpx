@@ -342,6 +342,11 @@ void vp10_set_rd_speed_thresholds_sub8x8(struct VP10_COMP *cpi);
 void vp10_update_rd_thresh_fact(int (*fact)[MAX_MODES], int rd_thresh,
                                int bsize, int best_mode_index);
 
+#if CONFIG_ENTROPY
+void fill_token_costs(vp10_coeff_cost *c,
+                      vp10_coeff_probs_model (*p)[PLANE_TYPES]);
+#endif  // CONFIG_ENTROPY
+
 static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
                                       int thresh_fact) {
     return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;

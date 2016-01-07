@@ -27,6 +27,12 @@ extern "C" {
 #define DIFF_UPDATE_PROB       252
 #define GROUP_DIFF_UPDATE_PROB 252
 
+#if CONFIG_ENTROPY
+#define COEF_PROBS_BUFS 16
+#define QCTX_BIN_BITS 2
+#define QCTX_BINS (1 << QCTX_BIN_BITS)
+#endif  // CONFIG_ENTROPY
+
 // Coefficient token alphabet
 #define ZERO_TOKEN      0   // 0     Extra Bits 0+0
 #define ONE_TOKEN       1   // 1     Extra Bits 0+1
@@ -139,6 +145,9 @@ typedef unsigned int vp10_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
 struct VP10Common;
 void vp10_default_coef_probs(struct VP10Common *cm);
 void vp10_adapt_coef_probs(struct VP10Common *cm);
+#if CONFIG_ENTROPY
+void vp10_partial_adapt_probs(struct VP10Common *cm, int mi_row, int mi_col);
+#endif  // CONFIG_ENTROPY
 
 // This is the index in the scan order beyond which all coefficients for
 // 8x8 transform and above are in the top band.
