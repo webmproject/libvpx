@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a52a3ad_1cffaa55",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1991,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-07T20:04:37Z",
+      "side": 1,
+      "message": "this check should actually be\nget_ext_tx_types(supertx_size, bsize, 1) \u003e 1 \u0026\u0026 !xd-\u003emi[0]-\u003embmi.skip)\nis that right?\nThis was my bug to begin with.",
+      "revId": "9b10af079a60b481425708fadefade4b4f77de6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
