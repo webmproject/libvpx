@@ -826,6 +826,9 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_EXT_TX
   if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter) > 1 &&
       cm->base_qindex > 0 && !mbmi->skip &&
+#if CONFIG_SUPERTX
+      !supertx_enabled &&
+#endif  // CONFIG_SUPERTX
       !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     int eset = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
     if (is_inter) {

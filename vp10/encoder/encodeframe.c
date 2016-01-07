@@ -1988,8 +1988,9 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
             [partition_supertx_context_lookup[partition]][supertx_size][1]++;
         td->counts->supertx_size[supertx_size]++;
 #if CONFIG_EXT_TX
-        if (supertx_size <= TX_16X16 && !xd->mi[0]->mbmi.skip) {
-          int eset = get_ext_tx_types(supertx_size, bsize, 1);
+        if (get_ext_tx_types(supertx_size, bsize, 1) > 1 &&
+            !xd->mi[0]->mbmi.skip) {
+          int eset = get_ext_tx_set(supertx_size, bsize, 1);
           if (eset > 0) {
             ++td->counts->inter_ext_tx[eset][supertx_size]
                                       [xd->mi[0]->mbmi.tx_type];

@@ -1756,7 +1756,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       reset_skip_context(xd, bsize);
 #if CONFIG_EXT_TX
     if (!skip) {
-      if (supertx_size <= TX_16X16) {
+      if (get_ext_tx_types(supertx_size, bsize, 1) > 1) {
         int eset = get_ext_tx_set(supertx_size, bsize, 1);
         if (eset > 0) {
           txfm = vpx_read_tree(r, vp10_ext_tx_inter_tree[eset],
