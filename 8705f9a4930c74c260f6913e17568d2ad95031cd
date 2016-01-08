@@ -177,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "8a8f0f7c_b8e1ddbc",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1997,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-08T10:43:35Z",
+      "side": 1,
+      "message": "OK. agreed. I\u0027ll make the change.",
+      "parentUuid": "4a4357e2_3aa068b0",
+      "revId": "8705f9a4930c74c260f6913e17568d2ad95031cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a4357e2_97a07c0e",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 4
