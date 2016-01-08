@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ca6827a1_f948170e",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-01-08T18:46:06Z",
+      "side": 1,
+      "message": "I think better to keep it on only for 1 pass mode, since its only used currently for that mode.\n\nNote that the pick_inter_mode in vp9_pickmode.c is only used for real-time case (i.e., 1 pass mode with speeds \u003e\u003d 5).\nTwo pass mode would use pick_inter_mode in vp9_rdopt.c.",
+      "parentUuid": "aa65b397_6b015d4c",
+      "range": {
+        "startLine": 665,
+        "startChar": 8,
+        "endLine": 665,
+        "endChar": 19
+      },
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa3e9347_4720fd73",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 5
