@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8a8f0f7c_58e791ce",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-08T10:43:35Z",
+      "side": 1,
+      "message": "I\u0027ll make the change. I\u0027ll upload a new patch on Monday after testing locally.",
+      "parentUuid": "aa1773d7_62af27e5",
+      "range": {
+        "startLine": 731,
+        "startChar": 17,
+        "endLine": 731,
+        "endChar": 18
+      },
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a4357e2_1fcd5e3d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "aa65b397_6b015d4c",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-08T10:43:35Z",
+      "side": 1,
+      "message": "agreed. I\u0027ll make the changes. Should I make it default for two-pass as well?",
+      "parentUuid": "aa3e9347_476c7dd8",
+      "range": {
+        "startLine": 665,
+        "startChar": 8,
+        "endLine": 665,
+        "endChar": 19
+      },
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa3e9347_4720fd73",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 5
@@ -82,6 +130,24 @@
       "writtenOn": "2016-01-07T23:59:03Z",
       "side": 1,
       "message": "This function seems to be same as existing mv_refs_rt(), except for the \"Get base layer mv\" (lines 177-188). Can we not keep one function and add this extra logic to that one (under the flag cpi-\u003esvc.use_base_mv)?\n\nUnderstand that more changes specifc to svc may be added in future, but if so at that time/later we can split it.",
+      "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa8cd387_f3646ac6",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-08T10:43:35Z",
+      "side": 1,
+      "message": "Agreed. I\u0027ll make the changes.",
+      "parentUuid": "aa3e9347_4720fd73",
       "revId": "79aca9ab8e1832a14bb0716ac5a3663b1df2a7df",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
