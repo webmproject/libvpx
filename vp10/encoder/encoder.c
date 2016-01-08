@@ -328,6 +328,7 @@ void vp10_initialize_enc(void) {
     vp10_rc_init_minq_luts();
     vp10_entropy_mv_init();
     vp10_temporal_filter_init();
+    vp10_encode_token_init();
     init_done = 1;
   }
 }
@@ -2654,7 +2655,7 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->td.mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
   if (is_lossless_requested(&cpi->oxcf)) {
-      lf->filter_level = 0;
+    lf->filter_level = 0;
   } else {
     struct vpx_usec_timer timer;
 

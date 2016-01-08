@@ -212,3 +212,12 @@ void vp10_cond_prob_diff_update(vpx_writer *w, vpx_prob *oldp,
     vpx_write(w, 0, upd);
   }
 }
+
+int vp10_cond_prob_diff_update_savings(vpx_prob *oldp,
+                                       const unsigned int ct[2]) {
+  const vpx_prob upd = DIFF_UPDATE_PROB;
+  vpx_prob newp = get_binary_prob(ct[0], ct[1]);
+  const int savings = vp10_prob_diff_update_savings_search(ct, *oldp, &newp,
+                                                           upd);
+  return savings;
+}

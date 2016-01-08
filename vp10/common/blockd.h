@@ -82,6 +82,9 @@ typedef struct {
   // Only for INTER blocks
   INTERP_FILTER interp_filter;
   MV_REFERENCE_FRAME ref_frame[2];
+#if CONFIG_EXT_TX
+  TX_TYPE tx_type;
+#endif  // CONFIG_EXT_TX
 
   // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
   int_mv mv[2];
@@ -207,7 +210,7 @@ static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
   return subsize_lookup[partition][bsize];
 }
 
-static const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
+static const TX_TYPE intra_mode_to_tx_type_context[INTRA_MODES] = {
   DCT_DCT,    // DC
   ADST_DCT,   // V
   DCT_ADST,   // H
@@ -225,11 +228,20 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
+#if CONFIG_EXT_TX
+  (void) block_idx;
+  if (plane_type != PLANE_TYPE_Y || xd->lossless[mbmi->segment_id] ||
+      mbmi->tx_size >= TX_32X32)
+    return DCT_DCT;
+
+  return mbmi->tx_type;
+#else
   if (plane_type != PLANE_TYPE_Y || xd->lossless[mbmi->segment_id] ||
       is_inter_block(mbmi) || mbmi->tx_size >= TX_32X32)
     return DCT_DCT;
 
-  return intra_mode_to_tx_type_lookup[get_y_mode(mi, block_idx)];
+  return intra_mode_to_tx_type_context[get_y_mode(mi, block_idx)];
+#endif  // CONFIG_EXT_TX
 }
 
 void vp10_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);
