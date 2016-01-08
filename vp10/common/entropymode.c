@@ -326,7 +326,6 @@ static const struct segmentation_probs default_seg_probs = {
 };
 #endif
 
-#if CONFIG_EXT_TX
 const vpx_tree_index vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)] = {
   -DCT_DCT, 2,
   -ADST_ADST, 4,
@@ -346,7 +345,6 @@ static const vpx_prob default_inter_ext_tx_prob[EXT_TX_SIZES]
   {176, 85, 128},
   {192, 85, 128},
 };
-#endif  // CONFIG_EXT_TX
 
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->uv_mode_prob, default_uv_probs);
@@ -364,10 +362,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->seg.tree_probs, default_seg_probs.tree_probs);
   vp10_copy(fc->seg.pred_probs, default_seg_probs.pred_probs);
 #endif
-#if CONFIG_EXT_TX
   vp10_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
   vp10_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
-#endif  // CONFIG_EXT_TX
 }
 
 const vpx_tree_index vp10_switchable_interp_tree
@@ -457,7 +453,6 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
     fc->skip_probs[i] = mode_mv_merge_probs(
         pre_fc->skip_probs[i], counts->skip[i]);
 
-#if CONFIG_EXT_TX
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     int j;
     for (j = 0; j < TX_TYPES; ++j)
@@ -472,7 +467,6 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
                          counts->inter_ext_tx[i],
                          fc->inter_ext_tx_prob[i]);
   }
-#endif  // CONFIG_EXT_TX
 
 #if CONFIG_MISC_FIXES
   if (cm->seg.temporal_update) {

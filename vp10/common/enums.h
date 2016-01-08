@@ -97,9 +97,7 @@ typedef enum {
   TX_TYPES = 4
 } TX_TYPE;
 
-#if CONFIG_EXT_TX
 #define EXT_TX_SIZES       3  // number of sizes that use extended transforms
-#endif  // CONFIG_EXT_TX
 
 typedef enum {
   VP9_LAST_FLAG = 1 << 0,

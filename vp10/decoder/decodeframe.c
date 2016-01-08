@@ -268,11 +268,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
     if (eob == 1) {
       dqcoeff[0] = 0;
     } else {
-#if CONFIG_EXT_TX
       if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
-#else
-      if (tx_size <= TX_16X16 && eob <= 10)
-#endif  // CONFIG_EXT_TX
         memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
       else if (tx_size == TX_32X32 && eob <= 34)
         memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
@@ -2128,7 +2124,6 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   return sz;
 }
 
-#if CONFIG_EXT_TX
 static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   int i, j, k;
   if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
@@ -2145,7 +2140,6 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
     }
   }
 }
-#endif  // CONFIG_EXT_TX
 
 static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
@@ -2228,9 +2222,7 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 #endif
 
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
-#if CONFIG_EXT_TX
     read_ext_tx_probs(fc, &r);
-#endif
   }
 
   return vpx_reader_has_error(&r);
@@ -2271,12 +2263,10 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
   assert(!memcmp(&cm->counts.tx, &zero_counts.tx, sizeof(cm->counts.tx)));
   assert(!memcmp(cm->counts.skip, zero_counts.skip, sizeof(cm->counts.skip)));
   assert(!memcmp(&cm->counts.mv, &zero_counts.mv, sizeof(cm->counts.mv)));
-#if CONFIG_EXT_TX
   assert(!memcmp(cm->counts.intra_ext_tx, zero_counts.intra_ext_tx,
                  sizeof(cm->counts.intra_ext_tx)));
   assert(!memcmp(cm->counts.inter_ext_tx, zero_counts.inter_ext_tx,
                  sizeof(cm->counts.inter_ext_tx)));
-#endif  // CONFIG_EXT_TX
 }
 #endif  // NDEBUG
 
