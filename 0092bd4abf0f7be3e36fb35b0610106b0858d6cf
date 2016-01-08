@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4a8b57a3_a09ad487",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-08T19:14:56Z",
+      "side": 1,
+      "message": "changed name to intra_mode_to_tx_type_context",
+      "parentUuid": "4a8b57a3_9d1703d8",
+      "range": {
+        "startLine": 213,
+        "startChar": 21,
+        "endLine": 213,
+        "endChar": 49
+      },
+      "revId": "0092bd4abf0f7be3e36fb35b0610106b0858d6cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a901bcb_3efc2923",
         "filename": "vp10/encoder/subexp.c",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-08T19:00:03Z",
       "side": 1,
       "message": "this should fit in last line as a single line, may fix in next commit.",
+      "range": {
+        "startLine": 221,
+        "startChar": 62,
+        "endLine": 221,
+        "endChar": 64
+      },
+      "revId": "0092bd4abf0f7be3e36fb35b0610106b0858d6cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea65ebc4_da98a5f1",
+        "filename": "vp10/encoder/subexp.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-08T19:14:56Z",
+      "side": 1,
+      "message": "doesn\u0027t seem to fit.",
+      "parentUuid": "6a901bcb_3efc2923",
       "range": {
         "startLine": 221,
         "startChar": 62,
