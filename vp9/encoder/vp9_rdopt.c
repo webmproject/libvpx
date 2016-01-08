@@ -3035,7 +3035,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     if (!(cpi->ref_frame_flags & flag_list[ref_frame])) {
       // Skip checking missing references in both single and compound reference
-      // modes. Note that a mode will be skipped iff both reference frames
+      // modes. Note that a mode will be skipped if both reference frames
       // are masked out.
       ref_frame_skip_mask[0] |= (1 << ref_frame);
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
@@ -3826,6 +3826,16 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
     ref_frame = refs[0];
     second_ref_frame = refs[1];
 
+#if CONFIG_BETTER_HW_COMPATIBILITY
+    // forbid 8X4 and 4X8 partitions if any reference frame is scaled.
+    if (bsize == BLOCK_8X4 || bsize == BLOCK_4X8) {
+      int ref_scaled = vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf);
+      if (second_ref_frame > INTRA_FRAME)
+        ref_scaled += vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf);
+      if (ref_scaled)
+        continue;
+    }
+#endif
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
     if (ref_index > 2 && sf->mode_skip_start < MAX_MODES) {
