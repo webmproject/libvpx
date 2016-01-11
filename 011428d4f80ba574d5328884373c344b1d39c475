@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a7dc0efe_709f9078",
+        "filename": "test/vp10_ans_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-01-11T18:31:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c50c9af0_39b0af02",
+      "range": {
+        "startLine": 28,
+        "startChar": 37,
+        "endLine": 28,
+        "endChar": 38
+      },
+      "revId": "011428d4f80ba574d5328884373c344b1d39c475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a50326be_d8c36d5d",
         "filename": "test/vp10_ans_test.cc",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-07T12:38:40Z",
       "side": 1,
       "message": "not \u0027p/255.\u0027 ?",
+      "range": {
+        "startLine": 38,
+        "startChar": 19,
+        "endLine": 38,
+        "endChar": 22
+      },
+      "revId": "011428d4f80ba574d5328884373c344b1d39c475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa5f73f8_ec09337a",
+        "filename": "test/vp10_ans_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-01-11T18:31:38Z",
+      "side": 1,
+      "message": "The probabilities in question here are [1/256, 255/256] inclusive. We need a denominator of 256 to avoid divides in the decoder. Why 255? I see it used in VP8\u0027s cost calculations, and I haven\u0027t gotten a straight answer from anyone as to why. And if 255 is the denominator then 255/255 is one and shouldn\u0027t get coded at all.\n\nDoes the 255 fall out of the entropy formula somewhere? All the texts I have say H \u003d -\\Sum{i}{P(x_i)*log(P(x_i))}. I don\u0027t see anything that would rescale the denominator there.",
+      "parentUuid": "a50326be_d8c36d5d",
       "range": {
         "startLine": 38,
         "startChar": 19,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "4a74377b_e4594414",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-01-11T18:31:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a5ea461e_40e2cef6",
+      "range": {
+        "startLine": 116,
+        "startChar": 7,
+        "endLine": 116,
+        "endChar": 12
+      },
+      "revId": "011428d4f80ba574d5328884373c344b1d39c475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "251736fe_14d6541a",
         "filename": "vp10/common/ans.h",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-07T12:38:40Z",
       "side": 1,
       "message": "and on these 2 lines too",
+      "range": {
+        "startLine": 119,
+        "startChar": 7,
+        "endLine": 119,
+        "endChar": 12
+      },
+      "revId": "011428d4f80ba574d5328884373c344b1d39c475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a74377b_c46448c7",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-01-11T18:31:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "251736fe_14d6541a",
       "range": {
         "startLine": 119,
         "startChar": 7,
