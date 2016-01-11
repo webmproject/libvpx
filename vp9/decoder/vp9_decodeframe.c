@@ -15,7 +15,6 @@
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/mem_ops.h"
 #include "vpx_scale/vpx_scale.h"
 
 #include "vp9/common/vp9_alloccommon.h"
@@ -2492,6 +2491,10 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   cm->tile_rows = 1;
   while (cm->tile_rows * cm->tile_height < cm->mi_rows)
     ++cm->tile_rows;
+
+  // Read the number of bytes used to store tile size
+  cm->tile_col_size_bytes  = vp9_rb_read_literal(rb, 2) + 1;
+  cm->tile_size_bytes = vp9_rb_read_literal(rb, 2) + 1;
 #else
   int min_log2_tiles, max_log2_tiles, max_ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tiles, &max_log2_tiles);
@@ -2522,17 +2525,63 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
 #endif
 }
 
+
+#if CONFIG_ROW_TILE
+// set mem read function according to the number of bytes used.
+static INLINE void setup_size_read(int num_bytes, MemRead *read) {
+  *read = mem_get_be32;
+  if (num_bytes == 3) {
+    *read = mem_get_be24;
+  } else if (num_bytes == 2) {
+    *read = mem_get_be16;
+  } else if (num_bytes == 1) {
+    *read = mem_get_be8;
+  }
+}
+#endif
+
 // Reads the next tile returning its size and adjusting '*data' accordingly
 // based on 'is_last'.
+#if CONFIG_ROW_TILE
+static void get_tile_buffer(const uint8_t *const data_end,
+                            int is_last,
+                            struct vpx_internal_error_info *error_info,
+                            const uint8_t **data,
+                            vpx_decrypt_cb decrypt_cb, void *decrypt_state,
+                            TileBuffer *buf, VP9_COMMON *const cm) {
+#else
 static void get_tile_buffer(const uint8_t *const data_end,
                             int is_last,
                             struct vpx_internal_error_info *error_info,
                             const uint8_t **data,
                             vpx_decrypt_cb decrypt_cb, void *decrypt_state,
                             TileBuffer *buf) {
+#endif
+
   size_t size;
 
+#if CONFIG_ROW_TILE
+  // mem read function
+  MemRead read_tile_size;
+  setup_size_read(cm->tile_size_bytes, &read_tile_size);
+#endif
+
   if (!is_last) {
+#if CONFIG_ROW_TILE
+    if (!read_is_valid(*data, cm->tile_size_bytes, data_end))
+      vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+                         "Truncated packet or corrupt tile length");
+    if (decrypt_cb) {
+      uint8_t be_data[4];
+      decrypt_cb(decrypt_state, *data, be_data, 4);
+
+      // Only read number of bytes in cm->tile_size_bytes.
+      size = read_tile_size(be_data);
+    } else {
+      size = read_tile_size(*data);
+    }
+    *data += cm->tile_size_bytes;
+#else
     if (!read_is_valid(*data, 4, data_end))
       vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt tile length");
@@ -2545,6 +2594,7 @@ static void get_tile_buffer(const uint8_t *const data_end,
       size = mem_get_be32(*data);
     }
     *data += 4;
+#endif
 
     if (size > (size_t)(data_end - *data))
       vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
@@ -2564,6 +2614,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
                              const uint8_t *data, const uint8_t *data_end,
                              int tile_cols, int tile_rows,
                              TileBuffer (*tile_buffers)[1024]) {
+  VP9_COMMON *const cm = &pbi->common;
   int r, c;
   const uint8_t *orig_data = data;
   const uint8_t *tile_end_col[1024];
@@ -2573,10 +2624,14 @@ static void get_tile_buffers(VP9Decoder *pbi,
   int tile_row_limit = (pbi->dec_tile_row == -1) ? INT_MAX :
                                  MIN(pbi->dec_tile_row, tile_rows - 1);
 
+  // tile col size read function
+  MemRead read_tile_col_size;
+  setup_size_read(cm->tile_col_size_bytes, &read_tile_col_size);
+
   for (c = 0; c < tile_cols && c <= tile_col_limit; ++c) {
     if (c < tile_cols - 1) {
-      tile_col_size = mem_get_be32(data);
-      data += 4;
+      tile_col_size = read_tile_col_size(data);
+      data += cm->tile_col_size_bytes;
       tile_end_col[c] = data + tile_col_size;
     } else {
       tile_col_size = data_end - data;
@@ -2592,7 +2647,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
     if (tile_col_limit > 0)
       data = tile_end_col[tile_col_limit - 1];
     if (tile_col_limit < tile_cols - 1)
-      data += 4;
+      data += cm->tile_col_size_bytes;
 
     for (r = 0; r <= tile_row_limit; ++r) {
       const int is_last = (r == tile_rows - 1);
@@ -2600,7 +2655,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
       buf->col = tile_col_limit;
       get_tile_buffer(tile_end_col[tile_col_limit], is_last,
                       &pbi->common.error, &data,
-                      pbi->decrypt_cb, pbi->decrypt_state, buf);
+                      pbi->decrypt_cb, pbi->decrypt_state, buf, cm);
     }
     return;
   }
@@ -2610,7 +2665,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
       data = tile_end_col[c - 1];
 
     if (c < tile_cols - 1)
-      data += 4;
+      data += cm->tile_col_size_bytes;
 
     for (r = 0; r < tile_rows && r <= tile_row_limit; ++r) {
       const int is_last = (r == tile_rows - 1);
@@ -2618,7 +2673,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
       buf->col = c;
       get_tile_buffer(tile_end_col[c], is_last,
                       &pbi->common.error, &data,
-                      pbi->decrypt_cb, pbi->decrypt_state, buf);
+                      pbi->decrypt_cb, pbi->decrypt_state, buf, cm);
     }
   }
 }

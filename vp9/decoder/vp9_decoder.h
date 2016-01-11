@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 
 #include "vpx/vpx_codec.h"
+#include "vpx_ports/mem_ops.h"
 #include "vpx_scale/yv12config.h"
 
 #include "vp9/common/vp9_onyxc_int.h"
@@ -71,6 +72,10 @@ typedef struct VP9Decoder {
   int dec_tile_row, dec_tile_col;
 #endif
 } VP9Decoder;
+
+#if CONFIG_ROW_TILE
+typedef unsigned MEM_VALUE_T (*MemRead)(const void *);
+#endif
 
 int vp9_receive_compressed_data(struct VP9Decoder *pbi,
                                 size_t size, const uint8_t **dest);

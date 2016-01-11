@@ -442,6 +442,9 @@ typedef struct VP9_COMP {
 #if CONFIG_ROW_TILE
   TileInfo tile_info[1024][1024];
   TOKENEXTRA *tile_tok[1024][1024];
+
+  unsigned int max_tile_size;
+  unsigned int max_tile_col_size;
 #endif
 
 #if CONFIG_VP9_TEMPORAL_DENOISING

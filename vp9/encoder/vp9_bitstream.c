@@ -14,7 +14,6 @@
 
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/mem_ops.h"
 
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
@@ -2143,15 +2142,73 @@ static void fix_interp_filter(VP9_COMMON *cm) {
   }
 }
 
-static void write_tile_info(const VP9_COMMON *const cm,
-                            struct vp9_write_bit_buffer *wb) {
 #if CONFIG_ROW_TILE
+// Decide how many bytes used for storing tile column size and tile size based
+// on the tile dimensions or the information gathered in a previous bitstream
+// packing while recode is on.
+static INLINE void set_tile_size_in_bytes(VP9_COMP *cpi,
+                                          int tile_width, int tile_height,
+                                          int final_packing) {
+  VP9_COMMON *const cm = &cpi->common;
+
+  // Default number of bytes used is 4.
+  cm->tile_size_bytes = 4;
+  cm->tile_col_size_bytes = 4;
+
+  if (!final_packing ||
+      (cpi->max_tile_size == UINT_MAX || cpi->max_tile_col_size == UINT_MAX)) {
+    // Determine num of bytes by tile size.
+    if (tile_width * tile_height <= 4)
+      cm->tile_size_bytes = 2;
+
+    if (!final_packing) {
+      cpi->max_tile_size = 0;
+      cpi->max_tile_col_size = 0;
+    }
+  } else {
+    // When we have ideas on maximum tile size, use that to estimate the num of
+    // bytes needed. Note: This decision is not always guaranteed to be true.
+    // In later bitstream packing, need to check if the actual tile size is
+    // out of the range.
+    if (cpi->max_tile_size < ONE_BYTE_THRESH)
+      cm->tile_size_bytes = 1;
+    else if (cpi->max_tile_size < TWO_BYTE_THRESH)
+      cm->tile_size_bytes = 2;
+    else if (cpi->max_tile_size < THREE_BYTE_THRESH)
+      cm->tile_size_bytes = 3;
+
+    if (cpi->max_tile_col_size < ONE_BYTE_THRESH)
+      cm->tile_col_size_bytes = 1;
+    else if (cpi->max_tile_col_size < TWO_BYTE_THRESH)
+      cm->tile_col_size_bytes = 2;
+    else if (cpi->max_tile_col_size < THREE_BYTE_THRESH)
+      cm->tile_col_size_bytes = 3;
+  }
+}
+
+static void write_tile_info(VP9_COMP *cpi,
+                            struct vp9_write_bit_buffer *wb,
+                            int final_packing) {
+  VP9_COMMON *const cm = &cpi->common;
+
   int tile_width  = mi_cols_aligned_to_sb(cm->tile_width) >> MI_BLOCK_SIZE_LOG2;
   int tile_height =
       mi_cols_aligned_to_sb(cm->tile_height) >> MI_BLOCK_SIZE_LOG2;
   vp9_wb_write_literal(wb, tile_width, 6);
   vp9_wb_write_literal(wb, tile_height, 6);
+
+  set_tile_size_in_bytes(cpi, tile_width, tile_height, final_packing);
+
+  assert(cm->tile_col_size_bytes > 0 && cm->tile_col_size_bytes <= 4);
+  assert(cm->tile_size_bytes > 0 && cm->tile_size_bytes <= 4);
+
+  // Write the num of bytes decision to bitstream
+  vp9_wb_write_literal(wb, cm->tile_col_size_bytes - 1, 2);
+  vp9_wb_write_literal(wb, cm->tile_size_bytes - 1, 2);
+}
 #else
+static void write_tile_info(VP9_COMMON *const cm,
+                            struct vp9_write_bit_buffer *wb) {
   int min_log2_tiles, max_log2_tiles, ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tiles, &max_log2_tiles);
 
@@ -2167,8 +2224,8 @@ static void write_tile_info(const VP9_COMMON *const cm,
   vp9_wb_write_bit(wb, cm->log2_tile_rows != 0);
   if (cm->log2_tile_rows != 0)
     vp9_wb_write_bit(wb, cm->log2_tile_rows != 1);
-#endif
 }
+#endif
 
 static int get_refresh_mask(VP9_COMP *cpi) {
   if (vp9_preserve_existing_gf(cpi)) {
@@ -2206,7 +2263,31 @@ static int get_refresh_mask(VP9_COMP *cpi) {
   }
 }
 
+#if CONFIG_ROW_TILE
+static INLINE void setup_size_storing(int num_bytes, MemPut *output,
+                                      unsigned int *size_limit) {
+  *output = mem_put_be32;
+  *size_limit = UINT_MAX;
+  if (num_bytes == 3) {
+    *output = mem_put_be24;
+    *size_limit = THREE_BYTE_LIMIT;
+  } else if (num_bytes == 2) {
+    *output = mem_put_be16;
+    *size_limit = TWO_BYTE_LIMIT;
+  } else if (num_bytes == 1) {
+    *output = mem_put_be8;
+    *size_limit = ONE_BYTE_LIMIT;
+  }
+}
+#endif
+
+#if CONFIG_ROW_TILE
+static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr,
+                           int final_packing) {
+#else
 static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
+#endif
+
   VP9_COMMON *const cm = &cpi->common;
   vp9_writer residual_bc;
 
@@ -2224,6 +2305,17 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   const int tile_rows = cm->tile_rows;
   TOKENEXTRA *pre_tok = cpi->tok;
   int tile_tok = 0;
+
+#if CONFIG_ROW_TILE
+  MemPut output_tile_size;
+  MemPut output_tile_col_size;
+  unsigned int tile_size_limit;
+  unsigned int tile_col_size_limit;
+
+  setup_size_storing(cm->tile_size_bytes, &output_tile_size, &tile_size_limit);
+  setup_size_storing(cm->tile_col_size_bytes, &output_tile_col_size,
+                     &tile_col_size_limit);
+#endif
 
   vpx_memset(cm->above_seg_context, 0, sizeof(*cm->above_seg_context) *
              mi_cols_aligned_to_sb(cm->mi_cols));
@@ -2244,30 +2336,54 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
     size_t col_offset = total_size;
 
     if (!is_last_col)
-      total_size += 4;
+      total_size += cm->tile_col_size_bytes;
 
     for (tile_row = 0; tile_row < tile_rows; tile_row++) {
       const TileInfo * const ptile = &tile[tile_row][tile_col];
       tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
 
       if (tile_row < tile_rows - 1)
-        vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
+        vp9_start_encode(&residual_bc, data_ptr + total_size
+                         + cm->tile_size_bytes);
       else
         vp9_start_encode(&residual_bc, data_ptr + total_size);
 
       write_modes(cpi, ptile, &residual_bc, &tok[tile_row][tile_col], tok_end);
       assert(tok[tile_row][tile_col] == tok_end);
       vp9_stop_encode(&residual_bc);
+
+      // If it is not final packing, record the maximum tile size we see,
+      // otherwise, check if the tile size is out of the range.
+      if (!final_packing) {
+        if (cpi->max_tile_size < residual_bc.pos)
+          cpi->max_tile_size = residual_bc.pos;
+      } else {
+        if (residual_bc.pos > tile_size_limit)
+          return 0;
+      }
+
       if (tile_row < tile_rows - 1) {
         // size of this tile
-        mem_put_be32(data_ptr + total_size, residual_bc.pos);
-        total_size += 4;
+        output_tile_size(data_ptr + total_size, residual_bc.pos);
+        total_size += cm->tile_size_bytes;
       }
       total_size += residual_bc.pos;
     }
 
-    if (!is_last_col)
-      mem_put_be32(data_ptr + col_offset, total_size - col_offset - 4);
+    if (!is_last_col) {
+      size_t col_size = total_size - col_offset - cm->tile_col_size_bytes;
+      output_tile_col_size(data_ptr + col_offset, col_size);
+
+      // If it is not final packing, record the maximum tile column size we see,
+      // otherwise, check if the tile size is out of the range.
+      if (!final_packing) {
+        if (cpi->max_tile_col_size < col_size)
+          cpi->max_tile_col_size = col_size;
+      } else {
+        if (col_size > tile_col_size_limit)
+          return 0;
+      }
+    }
   }
 #else
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
@@ -2391,8 +2507,14 @@ static void write_bitdepth_colorspace_sampling(
   }
 }
 
+#if CONFIG_ROW_TILE
+static void write_uncompressed_header(VP9_COMP *cpi,
+                                      struct vp9_write_bit_buffer *wb,
+                                      int final_packing) {
+#else
 static void write_uncompressed_header(VP9_COMP *cpi,
                                       struct vp9_write_bit_buffer *wb) {
+#endif
   VP9_COMMON *const cm = &cpi->common;
 
   vp9_wb_write_literal(wb, VP9_FRAME_MARKER, 2);
@@ -2461,7 +2583,11 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   encode_quantization(cm, wb);
   encode_segmentation(cm, &cpi->mb.e_mbd, wb);
 
+#if CONFIG_ROW_TILE
+  write_tile_info(cpi, wb, final_packing);
+#else
   write_tile_info(cm, wb);
+#endif
 }
 
 #if CONFIG_GLOBAL_MOTION
@@ -2689,13 +2815,23 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   return header_bc.pos;
 }
 
+#if CONFIG_ROW_TILE
+int vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size,
+                       int final_packing) {
+#else
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
+#endif
   uint8_t *data = dest;
   size_t first_part_size, uncompressed_hdr_size;
   struct vp9_write_bit_buffer wb = {data, 0};
   struct vp9_write_bit_buffer saved_wb;
 
+#if CONFIG_ROW_TILE
+  write_uncompressed_header(cpi, &wb, final_packing);
+#else
   write_uncompressed_header(cpi, &wb);
+#endif
+
   saved_wb = wb;
   vp9_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
 
@@ -2709,7 +2845,21 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   // TODO(jbb): Figure out what to do if first_part_size > 16 bits.
   vp9_wb_write_literal(&saved_wb, (int)first_part_size, 16);
 
+#if CONFIG_ROW_TILE
+  {
+    size_t total_size = encode_tiles(cpi, data, final_packing);
+    // If tile size is out of the range, exit and do another packing.
+    if (total_size == 0)
+      return -1;
+
+    data += total_size;
+  }
+#else
   data += encode_tiles(cpi, data);
+#endif
 
   *size = data - dest;
+#if CONFIG_ROW_TILE
+  return 0;
+#endif
 }

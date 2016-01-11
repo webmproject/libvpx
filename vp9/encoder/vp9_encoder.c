@@ -3122,7 +3122,11 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
       save_coding_context(cpi);
 
+#if CONFIG_ROW_TILE
+      vp9_pack_bitstream(cpi, dest, size, 0);
+#else
       vp9_pack_bitstream(cpi, dest, size);
+#endif
 
       rc->projected_frame_size = (int)(*size) << 3;
       restore_coding_context(cpi);
@@ -3572,6 +3576,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
   }
 
+#if CONFIG_ROW_TILE
+  cm->tile_size_bytes = 4;
+  cm->tile_col_size_bytes = 4;
+
+  cpi->max_tile_size = INT_MAX;
+  cpi->max_tile_col_size = INT_MAX;
+#endif
+
   // Configure experimental use of segmentation for enhanced coding of
   // static regions if indicated.
   // Only allowed in second pass of two pass (as requires lagged coding)
@@ -3690,7 +3702,18 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // printf("Bilateral level: %d\n", cm->lf.bilateral_level);
 
   // build the bitstream
+#if CONFIG_ROW_TILE
+  if (vp9_pack_bitstream(cpi, dest, size, 1) < 0) {
+    // If the above bitstream packing fails, reset max_tile_size and
+    // max_tile_col_size, and do another packing.
+    restore_coding_context(cpi);
+    cpi->max_tile_size = UINT_MAX;
+    cpi->max_tile_col_size = UINT_MAX;
+    vp9_pack_bitstream(cpi, dest, size, 1);
+  }
+#else
   vp9_pack_bitstream(cpi, dest, size);
+#endif
 
 #if CONFIG_PALETTE
   vp9_free_palette_map(cm);

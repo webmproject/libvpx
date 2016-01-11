@@ -16,11 +16,25 @@
 extern "C" {
 #endif
 
+#include "vpx_ports/mem_ops.h"
 #include "vp9/encoder/vp9_encoder.h"
 
 void vp9_entropy_mode_init();
 
+#if CONFIG_ROW_TILE
+#define ONE_BYTE_LIMIT    255
+#define TWO_BYTE_LIMIT    65535
+#define THREE_BYTE_LIMIT  16777215
+#define ONE_BYTE_THRESH   (ONE_BYTE_LIMIT - (ONE_BYTE_LIMIT >> 2))
+#define TWO_BYTE_THRESH   (TWO_BYTE_LIMIT - (TWO_BYTE_LIMIT >> 2))
+#define THREE_BYTE_THRESH (THREE_BYTE_LIMIT - (THREE_BYTE_LIMIT >> 2))
+
+typedef void (*MemPut)(void *, MEM_VALUE_T);
+int vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size,
+                       int final_packing);
+#else
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size);
+#endif
 
 static INLINE int vp9_preserve_existing_gf(VP9_COMP *cpi) {
   return !cpi->multi_arf_allowed && cpi->refresh_golden_frame &&

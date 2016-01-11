@@ -60,6 +60,16 @@
 #include "mem_ops_aligned.h"
 #undef  INCLUDED_BY_MEM_OPS_H
 
+#undef  mem_get_be8
+#define mem_get_be8 mem_ops_wrap_symbol(mem_get_be8)
+static unsigned MEM_VALUE_T mem_get_be8(const void *vmem) {
+  unsigned MEM_VALUE_T  val;
+  const MAU_T          *mem = (const MAU_T *)vmem;
+
+  val = mem[0];
+  return val;
+}
+
 #undef  mem_get_be16
 #define mem_get_be16 mem_ops_wrap_symbol(mem_get_be16)
 static unsigned MEM_VALUE_T mem_get_be16(const void *vmem) {
@@ -162,6 +172,14 @@ mem_get_s_generic(le, 24)
 #undef  mem_get_sle32
 #define mem_get_sle32 mem_ops_wrap_symbol(mem_get_sle32)
 mem_get_s_generic(le, 32)
+
+#undef  mem_put_be8
+#define mem_put_be8 mem_ops_wrap_symbol(mem_put_be8)
+static VPX_INLINE void mem_put_be8(void *vmem, MEM_VALUE_T val) {
+  MAU_T *mem = (MAU_T *)vmem;
+
+  mem[0] = (val >> 0) & 0xff;
+}
 
 #undef  mem_put_be16
 #define mem_put_be16 mem_ops_wrap_symbol(mem_put_be16)
