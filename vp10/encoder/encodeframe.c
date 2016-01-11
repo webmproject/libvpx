@@ -4381,6 +4381,18 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
         }
       }
     }
+#else
+    if (mbmi->tx_size < TX_32X32 &&
+        cm->base_qindex > 0 && !mbmi->skip &&
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      if (is_inter_block(mbmi)) {
+        ++td->counts->inter_ext_tx[mbmi->tx_size][mbmi->tx_type];
+      } else {
+        ++td->counts->intra_ext_tx[mbmi->tx_size]
+                                  [intra_mode_to_tx_type_context[mbmi->mode]]
+                                  [mbmi->tx_type];
+      }
+    }
 #endif  // CONFIG_EXT_TX
 #if CONFIG_EXT_INTRA
     if (bsize >= BLOCK_8X8 && !is_inter_block(mbmi)) {

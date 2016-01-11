@@ -2732,7 +2732,7 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->td.mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
   if (is_lossless_requested(&cpi->oxcf)) {
-      lf->filter_level = 0;
+    lf->filter_level = 0;
   } else {
     struct vpx_usec_timer timer;
 

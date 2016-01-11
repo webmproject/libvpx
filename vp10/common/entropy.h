@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#define DIFF_UPDATE_PROB 252
+#define DIFF_UPDATE_PROB       252
 #define GROUP_DIFF_UPDATE_PROB 252
 
 // Coefficient token alphabet

@@ -124,6 +124,18 @@ static void fill_mode_costs(VP10_COMP *cpi) {
       }
     }
   }
+#else
+  for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+    for (j = 0; j < TX_TYPES; ++j)
+      vp10_cost_tokens(cpi->intra_tx_type_costs[i][j],
+                       fc->intra_ext_tx_prob[i][j],
+                       vp10_ext_tx_tree);
+  }
+  for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+    vp10_cost_tokens(cpi->inter_tx_type_costs[i],
+                     fc->inter_ext_tx_prob[i],
+                     vp10_ext_tx_tree);
+  }
 #endif  // CONFIG_EXT_TX
 }
 

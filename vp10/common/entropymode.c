@@ -1192,6 +1192,28 @@ static const struct segmentation_probs default_seg_probs = {
 static  const vpx_prob default_ext_intra_probs[2] = {230, 230};
 #endif  // CONFIG_EXT_INTRA
 
+#if !CONFIG_EXT_TX
+const vpx_tree_index vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)] = {
+  -DCT_DCT, 2,
+  -ADST_ADST, 4,
+  -ADST_DCT, -DCT_ADST
+};
+
+static const vpx_prob default_intra_ext_tx_prob[EXT_TX_SIZES]
+                                               [TX_TYPES][TX_TYPES - 1] = {
+  {{240, 85, 128}, {4, 1, 248}, {4, 1, 8}, {4, 248, 128}},
+  {{244, 85, 128}, {8, 2, 248}, {8, 2, 8}, {8, 248, 128}},
+  {{248, 85, 128}, {16, 4, 248}, {16, 4, 8}, {16, 248, 128}},
+};
+
+static const vpx_prob default_inter_ext_tx_prob[EXT_TX_SIZES]
+                                               [TX_TYPES - 1] = {
+  {160, 85, 128},
+  {176, 85, 128},
+  {192, 85, 128},
+};
+#endif
+
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->uv_mode_prob, default_uv_probs);
   vp10_copy(fc->y_mode_prob, default_if_y_probs);
@@ -1212,10 +1234,6 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->refmv_prob, default_refmv_prob);
 #endif
   vp10_copy(fc->inter_mode_probs, default_inter_mode_probs);
-#if CONFIG_EXT_TX
-  vp10_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
-  vp10_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
-#endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
   vp10_copy(fc->supertx_prob, default_supertx_prob);
 #endif  // CONFIG_SUPERTX
@@ -1224,6 +1242,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_EXT_INTRA
   vp10_copy(fc->ext_intra_probs, default_ext_intra_probs);
 #endif  // CONFIG_EXT_INTRA
+  vp10_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
+  vp10_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
 }
 
 #if CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
@@ -1354,6 +1374,21 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
                                fc->intra_ext_tx_prob[s][i][j]);
       }
     }
+  }
+#else
+  for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+    int j;
+    for (j = 0; j < TX_TYPES; ++j)
+      vpx_tree_merge_probs(vp10_ext_tx_tree,
+                           pre_fc->intra_ext_tx_prob[i][j],
+                           counts->intra_ext_tx[i][j],
+                           fc->intra_ext_tx_prob[i][j]);
+  }
+  for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+    vpx_tree_merge_probs(vp10_ext_tx_tree,
+                         pre_fc->inter_ext_tx_prob[i],
+                         counts->inter_ext_tx[i],
+                         fc->inter_ext_tx_prob[i]);
   }
 #endif  // CONFIG_EXT_TX
 

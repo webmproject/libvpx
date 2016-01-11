@@ -475,6 +475,17 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
       }
     }
   }
+#else
+  for (i = 0; i < EXT_TX_SIZES; i++) {
+    int j;
+    for (j = 0; j < TX_TYPES; ++j)
+      for (k = 0; k < TX_TYPES; k++)
+        cm->counts.intra_ext_tx[i][j][k] += counts->intra_ext_tx[i][j][k];
+  }
+  for (i = 0; i < EXT_TX_SIZES; i++) {
+    for (k = 0; k < TX_TYPES; k++)
+      cm->counts.inter_ext_tx[i][k] += counts->inter_ext_tx[i][k];
+  }
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_SUPERTX
