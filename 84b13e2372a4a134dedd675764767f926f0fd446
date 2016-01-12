@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "07107a94_03498e68",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-12T07:49:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "676db610_5c319594",
+      "revId": "84b13e2372a4a134dedd675764767f926f0fd446",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "676db610_3c4bf90b",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 7
@@ -30,6 +48,30 @@
       "writtenOn": "2016-01-12T00:49:58Z",
       "side": 1,
       "message": "perform_intra_pred is not used in the current patch\n(and this causing build to fail).\nIn the previous patch it was used in logic below:\nif (perform_intra_pred \u0026\u0026\n   ((best_rdc.rdcost \u003d\u003d INT64_MAX || ......",
+      "range": {
+        "startLine": 1742,
+        "startChar": 4,
+        "endLine": 1742,
+        "endChar": 22
+      },
+      "revId": "84b13e2372a4a134dedd675764767f926f0fd446",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07107a94_23448a52",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1742,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2016-01-12T07:49:57Z",
+      "side": 1,
+      "message": "Really weird.. this patch thing is really not working properly.\nMy local copy has it correct, and for some reason, the patch is created this way... even though I thought I was creating the patch on top of patch 5.. I downloaded patch 5 and then changes were made and patch created again. Perhaps rebasing caused this to happen? Anyway, I\u0027ve made proper changes now.",
+      "parentUuid": "676db610_3c4bf90b",
       "range": {
         "startLine": 1742,
         "startChar": 4,
