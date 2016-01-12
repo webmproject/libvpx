@@ -13,6 +13,7 @@
 // An implementation of Asymmetric Numeral Systems
 // http://arxiv.org/abs/1311.2540v2
 
+#include <assert.h>
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem_ops.h"
@@ -68,8 +69,20 @@ static INLINE void ans_write_init(struct AnsCoder *const ans,
 }
 
 static INLINE int ans_write_end(struct AnsCoder *const ans) {
-  mem_put_le24(ans->buf + ans->buf_offset, ans->state);
-  return ans->buf_offset + 3;
+  uint32_t state;
+  assert(ans->state >= l_base);
+  assert(ans->state < l_base * io_base);
+  state = ans->state - l_base;
+  if (state < (1 << 6)) {
+    ans->buf[ans->buf_offset] = (0 << 6) + state;
+    return ans->buf_offset + 1;
+  } else if (state < (1 << 14)) {
+    mem_put_le16(ans->buf + ans->buf_offset, (1 << 14) + state);
+    return ans->buf_offset + 2;
+  } else {
+    mem_put_le24(ans->buf + ans->buf_offset, (1 << 23) + state);
+    return ans->buf_offset + 3;
+  }
 }
 
 // rABS with descending spread
@@ -281,11 +294,28 @@ static INLINE int rans_read(struct AnsDecoder *ans,
 static INLINE int ans_read_init(struct AnsDecoder *const ans,
                                 const uint8_t *const buf,
                                 int offset) {
-  if (offset < 3)
-    return 1;
+  unsigned x;
+  if (offset < 1) return 1;
   ans->buf = buf;
-  ans->buf_offset = offset - 3;
-  ans->state = mem_get_le24(buf + offset - 3);
+  x = buf[offset - 1] >> 6;
+  if (x == 0) {
+    ans->buf_offset = offset - 1;
+    ans->state = buf[offset - 1] & 0x3F;
+  } else if (x == 1) {
+    if (offset < 2) return 1;
+    ans->buf_offset = offset - 2;
+    ans->state = mem_get_le16(buf + offset - 2) & 0x3FFF;
+  } else if (x == 2) {
+    if (offset < 3) return 1;
+    ans->buf_offset = offset - 3;
+    ans->state = mem_get_le24(buf + offset - 3) & 0x3FFFFF;
+  } else {
+    // x == 3 implies this byte is a superframe marker
+    return 1;
+  }
+  ans->state += l_base;
+  if (ans->state >= l_base * io_base)
+    return 1;
   return 0;
 }
 
