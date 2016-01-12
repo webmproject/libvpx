@@ -824,9 +824,9 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
   int_mv nearestmv[2], nearmv[2];
-  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
+  int_mv ref_mvs[MODE_CTX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int ref, is_compound;
-  int16_t inter_mode_ctx[MAX_REF_FRAMES];
+  int16_t inter_mode_ctx[MODE_CTX_REF_FRAMES];
   int16_t mode_ctx = 0;
   MV_REFERENCE_FRAME ref_frame;
 
@@ -845,7 +845,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                          &ref_buf->sf);
   }
 
-  for (ref_frame = LAST_FRAME; ref_frame < MAX_REF_FRAMES; ++ref_frame) {
+  for (ref_frame = LAST_FRAME; ref_frame < MODE_CTX_REF_FRAMES; ++ref_frame) {
     vp10_find_mv_refs(cm, xd, mi, ref_frame,
 #if CONFIG_REF_MV
                       &xd->ref_mv_count[ref_frame],
@@ -855,11 +855,11 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                       mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
 
-  mode_ctx = inter_mode_ctx[mbmi->ref_frame[0]];
-
 #if CONFIG_REF_MV
   mode_ctx = vp10_mode_context_analyzer(inter_mode_ctx,
                                         mbmi->ref_frame, bsize, -1);
+#else
+  mode_ctx = inter_mode_ctx[mbmi->ref_frame[0]];
 #endif
 
   if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
@@ -880,6 +880,26 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                              &nearestmv[ref], &nearmv[ref]);
     }
   }
+
+#if CONFIG_REF_MV
+  if (is_compound && bsize >= BLOCK_8X8 && mbmi->mode != NEWMV &&
+      mbmi->mode != ZEROMV) {
+    uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
+
+    if (xd->ref_mv_count[ref_frame_type] > 1) {
+      int i;
+      nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
+      nearestmv[1] = xd->ref_mv_stack[ref_frame_type][0].comp_mv;
+      nearmv[0] = xd->ref_mv_stack[ref_frame_type][1].this_mv;
+      nearmv[1] = xd->ref_mv_stack[ref_frame_type][1].comp_mv;
+
+      for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
+        lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
+        lower_mv_precision(&nearmv[i].as_mv, allow_hp);
+      }
+    }
+  }
+#endif
 
 #if !CONFIG_EXT_INTERP
   mbmi->interp_filter = (cm->interp_filter == SWITCHABLE)
