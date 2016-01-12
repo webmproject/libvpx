@@ -350,7 +350,12 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
 }
 
 static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
+#if CONFIG_ANS
+                                         const rans_dec_lut *const token_tab,
+                                                struct AnsDecoder *const r,
+#else
                                                 vpx_reader *r,
+#endif  // CONFIG_ANS
                                                 MB_MODE_INFO *const mbmi,
                                                 int plane,
                                                 int row, int col,
@@ -373,7 +378,11 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
     const scan_order *sc = get_scan(tx_size, tx_type, 0);
-    const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size,
+    const int eob = vp10_decode_block_tokens(xd,
+#if CONFIG_ANS
+                                             token_tab,
+#endif  // CONFIG_ANS
+                                             plane, sc, col, row, tx_size,
                                              r, mbmi->segment_id);
     inverse_transform_block_intra(xd, plane, tx_type, tx_size,
                                   dst, pd->dst.stride, eob);
@@ -437,7 +446,13 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, vpx_reader *r,
 }
 #endif  // CONFIG_VAR_TX
 
-static int reconstruct_inter_block(MACROBLOCKD *const xd, vpx_reader *r,
+static int reconstruct_inter_block(MACROBLOCKD *const xd,
+#if CONFIG_ANS
+                                   const rans_dec_lut *const token_tab,
+                                   struct AnsDecoder *const r,
+#else
+                                   vpx_reader *r,
+#endif
                                    MB_MODE_INFO *const mbmi, int plane,
                                    int row, int col, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -445,8 +460,12 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd, vpx_reader *r,
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
   const scan_order *sc = get_scan(tx_size, tx_type, 1);
-  const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size, r,
-                                          mbmi->segment_id);
+  const int eob = vp10_decode_block_tokens(xd,
+#if CONFIG_ANS
+                                           token_tab,
+#endif
+                                           plane, sc, col, row, tx_size, r,
+                                           mbmi->segment_id);
 
   inverse_transform_block_inter(xd, plane, tx_size,
                             &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
@@ -1519,7 +1538,11 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                          int supertx_enabled,
 #endif  // CONFIG_SUPERTX
                          int mi_row, int mi_col,
-                         vpx_reader *r, BLOCK_SIZE bsize,
+                         vpx_reader *r,
+#if CONFIG_ANS
+                         struct AnsDecoder *const tok,
+#endif  // CONFIG_ANS
+                         BLOCK_SIZE bsize,
                          int bwl, int bhl) {
   VP10_COMMON *const cm = &pbi->common;
   const int less8x8 = bsize < BLOCK_8X8;
@@ -1579,7 +1602,13 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
-            predict_and_reconstruct_intra_block(xd, r, mbmi, plane,
+            predict_and_reconstruct_intra_block(xd,
+#if CONFIG_ANS
+                                                pbi->token_tab, tok,
+#else
+                                                r,
+#endif
+                                                mbmi, plane,
                                                 row, col, tx_size);
       }
     } else {
@@ -1627,7 +1656,13 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
           for (row = 0; row < max_blocks_high; row += step)
             for (col = 0; col < max_blocks_wide; col += step)
-              eobtotal += reconstruct_inter_block(xd, r, mbmi, plane, row, col,
+              eobtotal += reconstruct_inter_block(xd,
+#if CONFIG_ANS
+                                                  pbi->token_tab, tok,
+#else
+                                                  r,
+#endif
+                                                  mbmi, plane, row, col,
                                                   tx_size);
 #endif
         }
@@ -1710,7 +1745,11 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                              int supertx_enabled,
 #endif
                              int mi_row, int mi_col,
-                             vpx_reader* r, BLOCK_SIZE bsize, int n4x4_l2) {
+                             vpx_reader* r,
+#if CONFIG_ANS
+                             struct AnsDecoder *const tok,
+#endif  // CONFIG_ANS
+                             BLOCK_SIZE bsize, int n4x4_l2) {
   VP10_COMMON *const cm = &pbi->common;
   const int n8x8_l2 = n4x4_l2 - 1;
   const int num_8x8_wh = 1 << n8x8_l2;
@@ -1783,7 +1822,11 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #if CONFIG_SUPERTX
                  supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                 mi_row, mi_col, r, subsize, 1, 1);
+                 mi_row, mi_col, r,
+#if CONFIG_ANS
+                 tok,
+#endif  // CONFIG_ANS
+                 subsize, 1, 1);
   } else {
     switch (partition) {
       case PARTITION_NONE:
@@ -1791,55 +1834,91 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                     mi_row, mi_col, r, subsize, n4x4_l2, n4x4_l2);
+                     mi_row, mi_col, r,
+#if CONFIG_ANS
+                     tok,
+#endif  // CONFIG_ANS
+                     subsize, n4x4_l2, n4x4_l2);
         break;
       case PARTITION_HORZ:
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                     mi_row, mi_col, r, subsize, n4x4_l2, n8x8_l2);
+                     mi_row, mi_col, r,
+#if CONFIG_ANS
+                     tok,
+#endif  // CONFIG_ANS
+                     subsize, n4x4_l2, n8x8_l2);
         if (has_rows)
           decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                       mi_row + hbs, mi_col, r, subsize, n4x4_l2, n8x8_l2);
+                       mi_row + hbs, mi_col, r,
+#if CONFIG_ANS
+                       tok,
+#endif  // CONFIG_ANS
+                       subsize, n4x4_l2, n8x8_l2);
         break;
       case PARTITION_VERT:
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                     mi_row, mi_col, r, subsize, n8x8_l2, n4x4_l2);
+                     mi_row, mi_col, r,
+#if CONFIG_ANS
+                     tok,
+#endif  // CONFIG_ANS
+                     subsize, n8x8_l2, n4x4_l2);
         if (has_cols)
           decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                       mi_row, mi_col + hbs, r, subsize, n8x8_l2, n4x4_l2);
+                       mi_row, mi_col + hbs, r,
+#if CONFIG_ANS
+                       tok,
+#endif  // CONFIG_ANS
+                       subsize, n8x8_l2, n4x4_l2);
         break;
       case PARTITION_SPLIT:
         decode_partition(pbi, xd,
 #if CONFIG_SUPERTX
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                         mi_row, mi_col, r, subsize, n8x8_l2);
+                         mi_row, mi_col, r,
+#if CONFIG_ANS
+                         tok,
+#endif  // CONFIG_ANS
+                         subsize, n8x8_l2);
         decode_partition(pbi, xd,
 #if CONFIG_SUPERTX
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                         mi_row, mi_col + hbs, r, subsize, n8x8_l2);
+                         mi_row, mi_col + hbs, r,
+#if CONFIG_ANS
+                         tok,
+#endif  // CONFIG_ANS
+                         subsize, n8x8_l2);
         decode_partition(pbi, xd,
 #if CONFIG_SUPERTX
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                         mi_row + hbs, mi_col, r, subsize, n8x8_l2);
+                         mi_row + hbs, mi_col, r,
+#if CONFIG_ANS
+                         tok,
+#endif  // CONFIG_ANS
+                         subsize, n8x8_l2);
         decode_partition(pbi, xd,
 #if CONFIG_SUPERTX
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                         mi_row + hbs, mi_col + hbs, r, subsize, n8x8_l2);
+                         mi_row + hbs, mi_col + hbs, r,
+#if CONFIG_ANS
+                         tok,
+#endif  // CONFIG_ANS
+                         subsize, n8x8_l2);
         break;
       default:
         assert(0 && "Invalid partition type");
@@ -1884,7 +1963,13 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
-            eobtotal += reconstruct_inter_block(xd, r, mbmi, i, row, col,
+            eobtotal += reconstruct_inter_block(xd,
+#if CONFIG_ANS
+                                                pbi->token_tab, tok,
+#else
+                                                r,
+#endif
+                                                mbmi, i, row, col,
                                                 tx_size);
       }
       if (!(subsize < BLOCK_8X8) && eobtotal == 0)
@@ -1904,13 +1989,13 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     dec_update_partition_context(xd, mi_row, mi_col, subsize, num_8x8_wh);
 }
 
-static void setup_token_decoder(const uint8_t *data,
-                                const uint8_t *data_end,
-                                size_t read_size,
-                                struct vpx_internal_error_info *error_info,
-                                vpx_reader *r,
-                                vpx_decrypt_cb decrypt_cb,
-                                void *decrypt_state) {
+static void setup_bool_decoder(const uint8_t *data,
+                               const uint8_t *data_end,
+                               const size_t read_size,
+                               struct vpx_internal_error_info *error_info,
+                               vpx_reader *r,
+                               vpx_decrypt_cb decrypt_cb,
+                               void *decrypt_state) {
   // Validate the calculated partition length. If the buffer
   // described by the partition can't be fully read, then restrict
   // it to the portion that can be (for EC mode) or throw an error.
@@ -1921,6 +2006,27 @@ static void setup_token_decoder(const uint8_t *data,
   if (vpx_reader_init(r, data, read_size, decrypt_cb, decrypt_state))
     vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
+}
+
+static void setup_token_decoder(const uint8_t *data,
+                                const uint8_t *data_end,
+                                const size_t read_size,
+                                struct vpx_internal_error_info *error_info,
+                                struct AnsDecoder *const ans,
+                                vpx_decrypt_cb decrypt_cb,
+                                void *decrypt_state) {
+  (void) decrypt_cb;
+  (void) decrypt_state;
+  // Validate the calculated partition length. If the buffer
+  // described by the partition can't be fully read, then restrict
+  // it to the portion that can be (for EC mode) or throw an error.
+  if (!read_is_valid(data, read_size, data_end))
+    vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+                       "Truncated packet or corrupt tile length");
+
+  if (read_size > INT_MAX || ans_read_init(ans, data, (int)read_size))
+    vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate token decoder %d", 1);
 }
 
 static void read_coef_probs_common(vp10_coeff_probs_model *coef_probs,
@@ -2400,6 +2506,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
       const TileBuffer *const buf = &tile_buffers[tile_row][tile_col];
+
       tile_data = pbi->tile_data + tile_cols * tile_row + tile_col;
       tile_data->cm = cm;
       tile_data->xd = pbi->mb;
@@ -2409,9 +2516,21 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
               &cm->counts : NULL;
       vp10_zero(tile_data->dqcoeff);
       vp10_tile_init(&tile_data->xd.tile, tile_data->cm, tile_row, tile_col);
+#if !CONFIG_ANS
+      setup_bool_decoder(buf->data, data_end, buf->size, &cm->error,
+                         &tile_data->bit_reader, pbi->decrypt_cb,
+                         pbi->decrypt_state);
+#else
+      if (buf->size < 3 || !read_is_valid(buf->data, buf->size, data_end))
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Truncated packet or corrupt tile length");
+      setup_bool_decoder(buf->data, data_end, buf->size, &cm->error,
+                         &tile_data->bit_reader, pbi->decrypt_cb,
+                         pbi->decrypt_state);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
-                          &tile_data->bit_reader, pbi->decrypt_cb,
+                          &tile_data->token_ans, pbi->decrypt_cb,
                           pbi->decrypt_state);
+#endif
       vp10_init_macroblockd(cm, &tile_data->xd, tile_data->dqcoeff);
       tile_data->xd.plane[0].color_index_map = tile_data->color_index_map[0];
       tile_data->xd.plane[1].color_index_map = tile_data->color_index_map[1];
@@ -2440,6 +2559,9 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
                            0,
 #endif
                            mi_row, mi_col, &tile_data->bit_reader,
+#if CONFIG_ANS
+                           &tile_data->token_ans,
+#endif  // CONFIG_ANS
                            BLOCK_64X64, 4);
         }
         pbi->mb.corrupted |= tile_data->xd.corrupted;
@@ -2497,7 +2619,11 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
 
   if (cm->frame_parallel_decode)
     vp10_frameworker_broadcast(pbi->cur_buf, INT_MAX);
+#if CONFIG_ANS
+  return data_end;
+#else
   return vpx_reader_find_end(&tile_data->bit_reader);
+#endif
 }
 
 static int tile_worker_hook(TileWorkerData *const tile_data,
@@ -2527,6 +2653,9 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
                        0,
 #endif
                        mi_row, mi_col, &tile_data->bit_reader,
+#if CONFIG_ANS
+                       &tile_data->token_ans,
+#endif  // CONFIG_ANS
                        BLOCK_64X64, 4);
     }
   }
@@ -2557,6 +2686,9 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
   assert(tile_cols <= (1 << 6));
   assert(tile_rows == 1);
   (void)tile_rows;
+#if CONFIG_ANS
+  abort();  // FIXME: Tile parsing broken
+#endif
 
   // TODO(jzern): See if we can remove the restriction of passing in max
   // threads to the decoder.
@@ -2656,9 +2788,9 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
       vp10_zero(tile_data->dqcoeff);
       vp10_tile_init(tile, cm, 0, buf->col);
       vp10_tile_init(&tile_data->xd.tile, cm, 0, buf->col);
-      setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
-                          &tile_data->bit_reader, pbi->decrypt_cb,
-                          pbi->decrypt_state);
+      setup_bool_decoder(buf->data, data_end, buf->size, &cm->error,
+                         &tile_data->bit_reader, pbi->decrypt_cb,
+                         pbi->decrypt_state);
       vp10_init_macroblockd(cm, &tile_data->xd, tile_data->dqcoeff);
       tile_data->xd.plane[0].color_index_map = tile_data->color_index_map[0];
       tile_data->xd.plane[1].color_index_map = tile_data->color_index_map[1];

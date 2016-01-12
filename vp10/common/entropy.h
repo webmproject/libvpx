@@ -14,6 +14,9 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/prob.h"
 
+#if CONFIG_ANS
+#include "vp10/common/ans.h"
+#endif  // CONFIG_ANS
 #include "vp10/common/common.h"
 #include "vp10/common/enums.h"
 
@@ -163,6 +166,14 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 #define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
 extern const vpx_tree_index vp10_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
 extern const vpx_prob vp10_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
+#if CONFIG_ANS
+extern const vpx_prob
+    vp10_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2];
+
+void vp10_build_pareto8_dec_tab(
+    const vpx_prob token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2],
+    rans_dec_lut dec_tab[COEFF_PROB_MODELS]);
+#endif  // CONFIG_ANS
 
 typedef vpx_prob vp10_coeff_probs_model[REF_TYPES][COEF_BANDS]
                                       [COEFF_CONTEXTS][UNCONSTRAINED_NODES];

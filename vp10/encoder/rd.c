@@ -136,12 +136,21 @@ static void fill_token_costs(vp10_coeff_cost *c,
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
+#if CONFIG_ANS
+            const vpx_prob *const tree_probs = p[t][i][j][k][l];
+            vpx_prob pivot = tree_probs[PIVOT_NODE];
+            vp10_cost_tokens_ans((int *)c[t][i][j][k][0][l], tree_probs,
+                                 vp10_pareto8_token_probs[pivot - 1], 0);
+            vp10_cost_tokens_ans((int *)c[t][i][j][k][1][l], tree_probs,
+                                 vp10_pareto8_token_probs[pivot - 1], 1);
+#else
             vpx_prob probs[ENTROPY_NODES];
             vp10_model_to_full_probs(p[t][i][j][k][l], probs);
             vp10_cost_tokens((int *)c[t][i][j][k][0][l], probs,
                             vp10_coef_tree);
             vp10_cost_tokens_skip((int *)c[t][i][j][k][1][l], probs,
                                  vp10_coef_tree);
+#endif  // CONFIG_ANS
             assert(c[t][i][j][k][0][l][EOB_TOKEN] ==
                    c[t][i][j][k][1][l][EOB_TOKEN]);
           }

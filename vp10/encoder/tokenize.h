@@ -43,7 +43,9 @@ typedef struct {
 
 extern const vpx_tree_index vp10_coef_tree[];
 extern const vpx_tree_index vp10_coef_con_tree[];
+#if !CONFIG_ANS
 extern const struct vp10_token vp10_coef_encodings[];
+#endif  // !CONFIG_ANS
 
 int vp10_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 int vp10_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);

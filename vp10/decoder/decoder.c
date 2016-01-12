@@ -115,6 +115,9 @@ VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
   cm->setup_mi = vp10_dec_setup_mi;
 
   vp10_loop_filter_init(cm);
+#if CONFIG_ANS
+  vp10_build_pareto8_dec_tab(vp10_pareto8_token_probs, pbi->token_tab);
+#endif  // CONFIG_ANS
 
   cm->error.setjmp = 0;
 

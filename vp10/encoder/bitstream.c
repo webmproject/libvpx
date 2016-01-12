@@ -402,6 +402,7 @@ static void update_supertx_probs(VP10_COMMON *cm, vpx_writer *w) {
 }
 #endif  // CONFIG_SUPERTX
 
+#if !CONFIG_ANS
 static void pack_mb_tokens(vpx_writer *w,
                            TOKENEXTRA **tp, const TOKENEXTRA *const stop,
                            vpx_bit_depth_t bit_depth, const TX_SIZE tx) {
@@ -486,6 +487,71 @@ static void pack_mb_tokens(vpx_writer *w,
 
   *tp = p;
 }
+#else
+// This function serializes the tokens backwards both in token order and
+// bit order in each token.
+static void pack_mb_tokens_ans(struct AnsCoder *const ans,
+                               const TOKENEXTRA *const start,
+                               const TOKENEXTRA *const stop,
+                               vpx_bit_depth_t bit_depth) {
+  const TOKENEXTRA *p;
+  TX_SIZE tx_size = TX_SIZES;
+
+  for (p = stop - 1; p >= start; --p) {
+    const int t = p->token;
+    if (t == EOSB_TOKEN) {
+      tx_size = (TX_SIZE)p->extra;
+    } else {
+#if CONFIG_VP9_HIGHBITDEPTH
+    const vp10_extra_bit *const b =
+      (bit_depth == VPX_BITS_12) ? &vp10_extra_bits_high12[t] :
+      (bit_depth == VPX_BITS_10) ? &vp10_extra_bits_high10[t] :
+      &vp10_extra_bits[t];
+#else
+    const vp10_extra_bit *const b = &vp10_extra_bits[t];
+    (void) bit_depth;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+    if (t != EOB_TOKEN && t != ZERO_TOKEN) {
+      // Write extra bits first
+      const int e = p->extra;
+      const int l = b->len;
+      const int skip_bits = (t == CATEGORY6_TOKEN) ? TX_SIZES - 1 - tx_size : 0;
+      assert(tx_size < TX_SIZES);
+      uabs_write(ans, e & 1, 128);
+      if (l) {
+        const int v = e >> 1;
+        int n;
+        for (n = 0; n < l - skip_bits; ++n) {
+          const int bb = (v >> n) & 1;
+          uabs_write(ans, bb, b->prob[l - 1 - n]);
+        }
+        for (; n < l; ++n) {
+          assert(((v >> n) & 1) == 0);
+        }
+      }
+
+      {
+        struct rans_sym s;
+        int j;
+        const vpx_prob *token_probs =
+            vp10_pareto8_token_probs[p->context_tree[PIVOT_NODE] - 1];
+        s.cum_prob = 0;
+        for (j = ONE_TOKEN; j < t; ++j) {
+          s.cum_prob += token_probs[j - ONE_TOKEN];
+        }
+        s.prob = token_probs[t - ONE_TOKEN];
+        rans_write(ans, &s);
+      }
+    }
+    if (t != EOB_TOKEN)
+      uabs_write(ans, t != ZERO_TOKEN, p->context_tree[1]);
+    if (!p->skip_eob_node)
+      uabs_write(ans, t != EOB_TOKEN, p->context_tree[0]);
+  }
+  }
+}
+#endif  // !CONFIG_ANS
 
 #if CONFIG_VAR_TX
 static void pack_txb_tokens(vpx_writer *w,
@@ -973,6 +1039,11 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   MODE_INFO *m;
   int plane;
+#if CONFIG_ANS
+  (void) tok;
+  (void) tok_end;
+  (void) plane;
+#endif  // !CONFIG_ANS
 
   xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
   m = xd->mi[0];
@@ -1008,6 +1079,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   if (supertx_enabled) return;
 #endif  // CONFIG_SUPERTX
 
+#if !CONFIG_ANS
   if (!m->mbmi.skip) {
     assert(*tok < tok_end);
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
@@ -1054,6 +1126,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
       (*tok)++;
     }
   }
+#endif
 }
 
 static void write_partition(const VP10_COMMON *const cm,
@@ -1692,7 +1765,10 @@ static int get_refresh_mask(VP10_COMP *cpi) {
 static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
                            unsigned int *max_tile_sz) {
   VP10_COMMON *const cm = &cpi->common;
-  vpx_writer residual_bc;
+  vpx_writer mode_bc;
+#if CONFIG_ANS
+  struct AnsCoder token_ans;
+#endif
   int tile_row, tile_col;
   TOKENEXTRA *tok_end;
   size_t total_size = 0;
@@ -1710,32 +1786,49 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       int tile_idx = tile_row * tile_cols + tile_col;
+      int put_tile_size = tile_col < tile_cols - 1 || tile_row < tile_rows - 1;
+      uint8_t *const mode_data_start =
+          data_ptr + total_size + (put_tile_size ? 4 : 0);
+      int token_section_size;
       TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
 
       tok_end = cpi->tile_tok[tile_row][tile_col] +
           cpi->tok_count[tile_row][tile_col];
 
-      if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1)
-        vpx_start_encode(&residual_bc, data_ptr + total_size + 4);
-      else
-        vpx_start_encode(&residual_bc, data_ptr + total_size);
+      vpx_start_encode(&mode_bc, mode_data_start);
 
+#if !CONFIG_ANS
+      (void) token_section_size;
       write_modes(cpi, &cpi->tile_data[tile_idx].tile_info,
-                  &residual_bc, &tok, tok_end);
+                  &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
-      vpx_stop_encode(&residual_bc);
-      if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
+      vpx_stop_encode(&mode_bc);
+      if (put_tile_size) {
         unsigned int tile_sz;
 
         // size of this tile
-        assert(residual_bc.pos > 0);
-        tile_sz = residual_bc.pos - 1;
+        assert(mode_bc.pos > 0);
+        tile_sz = mode_bc.pos - 1;
         mem_put_le32(data_ptr + total_size, tile_sz);
         max_tile = max_tile > tile_sz ? max_tile : tile_sz;
         total_size += 4;
       }
-
-      total_size += residual_bc.pos;
+      total_size += mode_bc.pos;
+#else
+      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &mode_bc,
+                  NULL, NULL);
+      vpx_stop_encode(&mode_bc);
+      ans_write_init(&token_ans, mode_data_start + mode_bc.pos);
+      pack_mb_tokens_ans(&token_ans, tok, tok_end, cm->bit_depth);
+      token_section_size = ans_write_end(&token_ans);
+      if (put_tile_size) {
+        // size of this tile
+        mem_put_be32(data_ptr + total_size,
+                     4 + mode_bc.pos + token_section_size);
+        total_size += 4;
+      }
+      total_size += mode_bc.pos + token_section_size;
+#endif  // !CONFIG_ANS
     }
   }
   *max_tile_sz = max_tile;
