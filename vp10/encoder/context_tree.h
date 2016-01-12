@@ -87,6 +87,9 @@ typedef struct PC_TREE {
     struct PC_TREE *split[4];
     PICK_MODE_CONTEXT *leaf_split[4];
   };
+#ifdef CONFIG_SUPERTX
+  PICK_MODE_CONTEXT super_tx;
+#endif
 } PC_TREE;
 
 void vp10_setup_pc_tree(struct VP10Common *cm, struct ThreadData *td);
