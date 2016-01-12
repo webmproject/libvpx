@@ -51,7 +51,7 @@ void vp10_setup_in_frame_q_adj(VP10_COMP *cpi) {
   // Make SURE use of floating point in this function is safe.
   vpx_clear_system_state();
 
-  if (cm->frame_type == KEY_FRAME ||
+  if (frame_is_intra_only(cm) || cm->error_resilient_mode ||
       cpi->refresh_alt_ref_frame ||
       (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
     int segment;

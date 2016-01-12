@@ -273,7 +273,7 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
   no_pred_cost = cost_segmap(no_pred_segcounts, no_pred_tree);
 
   // Key frames cannot use temporal prediction
-  if (!frame_is_intra_only(cm)) {
+  if (!frame_is_intra_only(cm) && !cm->error_resilient_mode) {
     // Work out probability tree for coding those segments not
     // predicted using the temporal method and the cost.
     calc_segtree_probs(t_unpred_seg_counts, t_pred_tree, segp->tree_probs);
@@ -300,6 +300,7 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
 
   // Now choose which coding method to use.
   if (t_pred_cost < no_pred_cost) {
+    assert(!cm->error_resilient_mode);
     seg->temporal_update = 1;
 #if !CONFIG_MISC_FIXES
     memcpy(segp->tree_probs, t_pred_tree, sizeof(t_pred_tree));
