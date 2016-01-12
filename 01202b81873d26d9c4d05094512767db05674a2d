@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4768b202_ef4b7d31",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-12T23:54:43Z",
+      "side": 1,
+      "message": "Was wondering if there is a more efficient way of doing this. What this is doing is essentially solving a 2x2 linear equation: M * flow_vec \u003d b, where M is symmetric but may not be non-singular.\nOkay to do this after the first patch is submitted.",
+      "revId": "01202b81873d26d9c4d05094512767db05674a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
