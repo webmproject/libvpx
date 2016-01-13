@@ -1382,10 +1382,10 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
   }
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    p[i].coeff = (&pc_tree->none)->coeff_pbuf[i][1];
-    p[i].qcoeff = (&pc_tree->none)->qcoeff_pbuf[i][1];
-    pd[i].dqcoeff = (&pc_tree->none)->dqcoeff_pbuf[i][1];
-    p[i].eobs = (&pc_tree->none)->eobs_pbuf[i][1];
+    p[i].coeff = (&pc_tree->super_tx)->coeff_pbuf[i][1];
+    p[i].qcoeff = (&pc_tree->super_tx)->qcoeff_pbuf[i][1];
+    pd[i].dqcoeff = (&pc_tree->super_tx)->dqcoeff_pbuf[i][1];
+    p[i].eobs = (&pc_tree->super_tx)->eobs_pbuf[i][1];
   }
 }
 

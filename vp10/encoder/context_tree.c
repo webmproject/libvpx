@@ -81,6 +81,9 @@ static void alloc_tree_contexts(VP10_COMMON *cm, PC_TREE *tree,
   alloc_mode_context(cm, num_4x4_blk, &tree->none);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[0]);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[0]);
+#ifdef CONFIG_SUPERTX
+  alloc_mode_context(cm, num_4x4_blk, &tree->super_tx);
+#endif
 
   if (num_4x4_blk > 4) {
     alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[1]);
@@ -97,6 +100,9 @@ static void free_tree_contexts(PC_TREE *tree) {
   free_mode_context(&tree->horizontal[1]);
   free_mode_context(&tree->vertical[0]);
   free_mode_context(&tree->vertical[1]);
+#ifdef CONFIG_SUPERTX
+  free_mode_context(&tree->super_tx);
+#endif
 }
 
 // This function sets up a tree of contexts such that at each square
