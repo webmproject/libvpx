@@ -9,7 +9,6 @@
  */
 #include "./vpx_config.h"
 
-#include "vpx_dsp/variance.h"
 #include "vpx_ports/mem.h"
 
 typedef uint32_t (*high_variance_fn_t) (const uint16_t *src, int src_stride,
@@ -63,8 +62,8 @@ static void highbd_10_variance_sse2(const uint16_t *src, int src_stride,
       sum_long += sum0;
     }
   }
-  *sum = ROUND_ZERO_POWER_OF_TWO(sum_long, 2);
-  *sse = (uint32_t)ROUND_ZERO_POWER_OF_TWO(sse_long, 4);
+  *sum = ROUND_POWER_OF_TWO(sum_long, 2);
+  *sse = (uint32_t)ROUND_POWER_OF_TWO(sse_long, 4);
 }
 
 static void highbd_12_variance_sse2(const uint16_t *src, int src_stride,
@@ -85,8 +84,8 @@ static void highbd_12_variance_sse2(const uint16_t *src, int src_stride,
       sum_long += sum0;
     }
   }
-  *sum = ROUND_ZERO_POWER_OF_TWO(sum_long, 4);
-  *sse = (uint32_t)ROUND_ZERO_POWER_OF_TWO(sse_long, 8);
+  *sum = ROUND_POWER_OF_TWO(sum_long, 4);
+  *sse = (uint32_t)ROUND_POWER_OF_TWO(sse_long, 8);
 }
 
 
@@ -107,7 +106,7 @@ void vpx_highbd_10_get##S##x##S##var_sse2(const uint8_t *src8, int src_stride, \
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8); \
   vpx_highbd_calc##S##x##S##var_sse2(src, src_stride, ref, ref_stride, \
                                      sse, sum); \
-  *sum = ROUND_ZERO_POWER_OF_TWO(*sum, 2); \
+  *sum = ROUND_POWER_OF_TWO(*sum, 2); \
   *sse = ROUND_POWER_OF_TWO(*sse, 4); \
 } \
 \
@@ -118,7 +117,7 @@ void vpx_highbd_12_get##S##x##S##var_sse2(const uint8_t *src8, int src_stride, \
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8); \
   vpx_highbd_calc##S##x##S##var_sse2(src, src_stride, ref, ref_stride, \
                                      sse, sum); \
-  *sum = ROUND_ZERO_POWER_OF_TWO(*sum, 4); \
+  *sum = ROUND_POWER_OF_TWO(*sum, 4); \
   *sse = ROUND_POWER_OF_TWO(*sse, 8); \
 }
 
@@ -346,7 +345,7 @@ uint32_t vpx_highbd_10_sub_pixel_variance##w##x##h##_##opt( \
       sse += sse2; \
     } \
   } \
-  se = ROUND_ZERO_POWER_OF_TWO(se, 2); \
+  se = ROUND_POWER_OF_TWO(se, 2); \
   sse = ROUND_POWER_OF_TWO(sse, 4); \
   *sse_ptr = sse; \
   return sse - ((cast se * se) >> (wlog2 + hlog2)); \
@@ -393,7 +392,7 @@ uint32_t vpx_highbd_12_sub_pixel_variance##w##x##h##_##opt( \
       }\
     } \
   } \
-  se = ROUND_ZERO_POWER_OF_TWO(se, 4); \
+  se = ROUND_POWER_OF_TWO(se, 4); \
   sse = (uint32_t)ROUND_POWER_OF_TWO(long_sse, 8); \
   *sse_ptr = sse; \
   return sse - ((cast se * se) >> (wlog2 + hlog2)); \
@@ -515,7 +514,7 @@ uint32_t vpx_highbd_10_sub_pixel_avg_variance##w##x##h##_##opt( \
       sse += sse2; \
     } \
   } \
-  se = ROUND_ZERO_POWER_OF_TWO(se, 2); \
+  se = ROUND_POWER_OF_TWO(se, 2); \
   sse = ROUND_POWER_OF_TWO(sse, 4); \
   *sse_ptr = sse; \
   return sse - ((cast se * se) >> (wlog2 + hlog2)); \
@@ -567,7 +566,7 @@ uint32_t vpx_highbd_12_sub_pixel_avg_variance##w##x##h##_##opt( \
       } \
     } \
   } \
-  se = ROUND_ZERO_POWER_OF_TWO(se, 4); \
+  se = ROUND_POWER_OF_TWO(se, 4); \
   sse = (uint32_t)ROUND_POWER_OF_TWO(long_sse, 8); \
   *sse_ptr = sse; \
   return sse - ((cast se * se) >> (wlog2 + hlog2)); \
