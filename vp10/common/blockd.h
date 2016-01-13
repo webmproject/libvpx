@@ -163,6 +163,8 @@ typedef struct {
 #if CONFIG_EXT_INTRA
   EXT_INTRA_MODE_INFO ext_intra_mode_info;
   int8_t angle_delta[2];
+  // To-Do (huisu): this may be replaced by interp_filter
+  INTRA_FILTER intra_filter;
 #endif  // CONFIG_EXT_INTRA
 
   int_mv mv[2];
@@ -413,6 +415,8 @@ static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
   ADST_DCT,   // FILTER_D63
   ADST_ADST,  // FILTER_TM
 };
+
+int pick_intra_filter(int angle);
 #endif  // CONFIG_EXT_INTRA
 
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,

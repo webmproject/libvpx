@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
 #include "vp10/common/blockd.h"
 
 PREDICTION_MODE vp10_left_block_mode(const MODE_INFO *cur_mi,
@@ -134,3 +135,23 @@ void vp10_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y) {
     xd->plane[i].subsampling_y = i ? ss_y : 0;
   }
 }
+
+#if CONFIG_EXT_INTRA
+#define PI 3.14159265
+// Returns whether filter selection is needed for a given
+// intra prediction angle.
+int pick_intra_filter(int angle) {
+  if (angle % 45 == 0)
+    return 0;
+  if (angle > 90 && angle < 180) {
+    return 1;
+  } else {
+    double t = tan(angle * PI / 180.0);
+    double n;
+    if (angle < 90)
+      t = 1 / t;
+    n = floor(t);
+    return (t - n) * 1024 > 1;
+  }
+}
+#endif  // CONFIG_EXT_INTRA

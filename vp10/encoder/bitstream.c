@@ -97,6 +97,9 @@ static struct vp10_token ext_tx_intra_encodings[EXT_TX_SETS_INTRA][TX_TYPES];
 #else
 static struct vp10_token ext_tx_encodings[TX_TYPES];
 #endif  // CONFIG_EXT_TX
+#if CONFIG_EXT_INTRA
+static struct vp10_token intra_filter_encodings[INTRA_FILTERS];
+#endif  // CONFIG_EXT_INTRA
 
 void vp10_encode_token_init() {
 #if CONFIG_EXT_TX
@@ -110,6 +113,9 @@ void vp10_encode_token_init() {
 #else
   vp10_tokens_from_tree(ext_tx_encodings, vp10_ext_tx_tree);
 #endif  // CONFIG_EXT_TX
+#if CONFIG_EXT_INTRA
+  vp10_tokens_from_tree(intra_filter_encodings, vp10_intra_filter_tree);
+#endif  // CONFIG_EXT_INTRA
 }
 
 #if CONFIG_SUPERTX
@@ -936,8 +942,16 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
       write_intra_mode(w, mode, cm->fc->y_mode_prob[size_group_lookup[bsize]]);
 #if CONFIG_EXT_INTRA
       if (mode != DC_PRED && mode != TM_PRED) {
+        int p_angle;
+        const int intra_filter_ctx = vp10_get_pred_context_intra_interp(xd);
         write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
                       MAX_ANGLE_DELTAS + mbmi->angle_delta[0]);
+        p_angle = mode_to_angle_map[mode] + mbmi->angle_delta[0] * ANGLE_STEP;
+        if (pick_intra_filter(p_angle)) {
+          vp10_write_token(w, vp10_intra_filter_tree,
+                           cm->fc->intra_filter_probs[intra_filter_ctx],
+                           &intra_filter_encodings[mbmi->intra_filter]);
+        }
       }
 #endif  // CONFIG_EXT_INTRA
     } else {
@@ -1188,9 +1202,19 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     write_intra_mode(w, mbmi->mode,
                      get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
 #if CONFIG_EXT_INTRA
-    if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED)
+    if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
+      int p_angle;
+      const int intra_filter_ctx = vp10_get_pred_context_intra_interp(xd);
       write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
                     MAX_ANGLE_DELTAS + mbmi->angle_delta[0]);
+      p_angle =
+          mode_to_angle_map[mbmi->mode] + mbmi->angle_delta[0] * ANGLE_STEP;
+      if (pick_intra_filter(p_angle)) {
+        vp10_write_token(w, vp10_intra_filter_tree,
+                         cm->fc->intra_filter_probs[intra_filter_ctx],
+                         &intra_filter_encodings[mbmi->intra_filter]);
+      }
+    }
 #endif  // CONFIG_EXT_INTRA
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -2291,6 +2315,12 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   for (i = 0; i < PARTITION_CONTEXTS; ++i)
     prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
                      counts->partition[i], PARTITION_TYPES, &header_bc);
+
+#if CONFIG_EXT_INTRA
+  for (i = 0; i < INTRA_FILTERS + 1; ++i)
+    prob_diff_update(vp10_intra_filter_tree, fc->intra_filter_probs[i],
+                     counts->intra_filter[i], INTRA_FILTERS, &header_bc);
+#endif  // CONFIG_EXT_INTRA
 
   if (frame_is_intra_only(cm)) {
     vp10_copy(cm->kf_y_prob, vp10_kf_y_mode_prob);

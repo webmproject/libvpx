@@ -491,9 +491,23 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
       mbmi->mode = read_intra_mode(r,
           get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
 #if CONFIG_EXT_INTRA
-      if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED)
+      if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
+        int p_angle;
+        const int ctx = vp10_get_pred_context_intra_interp(xd);
         mbmi->angle_delta[0] =
             read_uniform(r, 2 * MAX_ANGLE_DELTAS + 1) - MAX_ANGLE_DELTAS;
+        p_angle = mode_to_angle_map[mbmi->mode] +
+            mbmi->angle_delta[0] * ANGLE_STEP;
+        if (pick_intra_filter(p_angle)) {
+          FRAME_COUNTS *counts = xd->counts;
+          mbmi->intra_filter = vpx_read_tree(r, vp10_intra_filter_tree,
+                                             cm->fc->intra_filter_probs[ctx]);
+          if (counts)
+            ++counts->intra_filter[ctx][mbmi->intra_filter];
+        } else {
+          mbmi->intra_filter = INTRA_FILTER_LINEAR;
+        }
+      }
 #endif  // CONFIG_EXT_INTRA
   }
 
@@ -773,9 +787,23 @@ static void read_intra_block_mode_info(VP10_COMMON *const cm,
       mbmi->mode = read_intra_mode_y(cm, xd, r, size_group_lookup[bsize]);
 #if CONFIG_EXT_INTRA
       mbmi->angle_delta[0] = 0;
-      if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED)
+      if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
+        int p_angle;
         mbmi->angle_delta[0] =
             read_uniform(r, 2 * MAX_ANGLE_DELTAS + 1) - MAX_ANGLE_DELTAS;
+        p_angle =
+            mode_to_angle_map[mbmi->mode] + mbmi->angle_delta[0] * ANGLE_STEP;
+        if (pick_intra_filter(p_angle)) {
+          FRAME_COUNTS *counts = xd->counts;
+          const int ctx = vp10_get_pred_context_intra_interp(xd);
+          mbmi->intra_filter = vpx_read_tree(r, vp10_intra_filter_tree,
+                                             cm->fc->intra_filter_probs[ctx]);
+          if (counts)
+            ++counts->intra_filter[ctx][mbmi->intra_filter];
+        } else {
+          mbmi->intra_filter = INTRA_FILTER_LINEAR;
+        }
+      }
 #endif  // CONFIG_EXT_INTRA
   }
 

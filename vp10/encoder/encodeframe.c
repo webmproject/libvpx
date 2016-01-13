@@ -4344,6 +4344,24 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       sum_intra_stats(td->counts, mi, xd->above_mi, xd->left_mi,
                       frame_is_intra_only(cm));
 
+#if CONFIG_EXT_INTRA
+    if (output_enabled && bsize >= BLOCK_8X8) {
+      FRAME_COUNTS *counts = td->counts;
+      if (mbmi->mode == DC_PRED)
+        ++counts->ext_intra[0][mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
+      if (mbmi->uv_mode == DC_PRED)
+        ++counts->ext_intra[1][mbmi->ext_intra_mode_info.use_ext_intra_mode[1]];
+      if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
+        int p_angle;
+        const int intra_filter_ctx = vp10_get_pred_context_intra_interp(xd);
+        p_angle = mode_to_angle_map[mbmi->mode] +
+            mbmi->angle_delta[0] * ANGLE_STEP;
+        if (pick_intra_filter(p_angle))
+          ++counts->intra_filter[intra_filter_ctx][mbmi->intra_filter];
+      }
+    }
+#endif  // CONFIG_EXT_INTRA
+
     if (bsize >= BLOCK_8X8 && output_enabled) {
       if (mbmi->palette_mode_info.palette_size[0] > 0) {
         mbmi->palette_mode_info.palette_first_color_idx[0] =
@@ -4436,16 +4454,6 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       }
     }
 #endif  // CONFIG_EXT_TX
-#if CONFIG_EXT_INTRA
-    if (bsize >= BLOCK_8X8 && !is_inter_block(mbmi)) {
-      if (mbmi->mode == DC_PRED)
-        ++td->counts->ext_intra[0]
-                              [mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
-      if (mbmi->uv_mode == DC_PRED)
-        ++td->counts->ext_intra[1]
-                              [mbmi->ext_intra_mode_info.use_ext_intra_mode[1]];
-    }
-#endif  // CONFIG_EXT_INTRA
   }
 
 #if CONFIG_VAR_TX

@@ -137,6 +137,11 @@ static void fill_mode_costs(VP10_COMP *cpi) {
                      vp10_ext_tx_tree);
   }
 #endif  // CONFIG_EXT_TX
+#if CONFIG_EXT_INTRA
+  for (i = 0; i < INTRA_FILTERS + 1; ++i)
+    vp10_cost_tokens(cpi->intra_filter_cost[i], fc->intra_filter_probs[i],
+                     vp10_intra_filter_tree);
+#endif  // CONFIG_EXT_INTRA
 }
 
 static void fill_token_costs(vp10_coeff_cost *c,

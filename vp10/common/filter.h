@@ -43,6 +43,18 @@ typedef uint8_t INTERP_FILTER;
 
 extern const InterpKernel *vp10_filter_kernels[SWITCHABLE_FILTERS + 1];
 
+#if CONFIG_EXT_INTRA
+typedef enum {
+  INTRA_FILTER_LINEAR,
+  INTRA_FILTER_8TAP,
+  INTRA_FILTER_8TAP_SHARP,
+  INTRA_FILTER_8TAP_SMOOTH,
+  INTRA_FILTERS,
+} INTRA_FILTER;
+
+extern const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS];
+#endif  // CONFIG_EXT_INTRA
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
