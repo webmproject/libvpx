@@ -208,7 +208,7 @@ static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
 }
 
 static INLINE void lower_mv_precision(MV *mv, int allow_hp) {
-  const int use_hp = allow_hp && vp9_use_mv_hp(mv);
+  const int use_hp = allow_hp && use_mv_hp(mv);
   if (!use_hp) {
     if (mv->row & 1)
       mv->row += (mv->row > 0 ? -1 : 1);

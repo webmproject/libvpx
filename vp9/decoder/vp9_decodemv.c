@@ -284,13 +284,6 @@ static int read_mv_component(vpx_reader *r,
   return sign ? -mag : mag;
 }
 
-// TODO(slavarnway): move to vp9_entropymv.h and replace vp9_use_mv_hp
-#define COMPANDED_MVREF_THRESH 8
-static int use_mv_hp(const MV *ref) {
-  return (abs(ref->row) >> 3) < COMPANDED_MVREF_THRESH &&
-         (abs(ref->col) >> 3) < COMPANDED_MVREF_THRESH;
-}
-
 static INLINE void read_mv(vpx_reader *r, MV *mv, const MV *ref,
                            const nmv_context *ctx,
                            nmv_context_counts *counts, int allow_hp) {
