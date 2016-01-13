@@ -22,6 +22,30 @@
       "revId": "a0900fd0db5408da029fd3c71ec1f9d49ff98b3f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "678e9643_02ba3af5",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1064,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-01-13T17:55:02Z",
+      "side": 0,
+      "message": "Thanks, I agree with you. \nAfter looking closely, it turns out to be that update_map and temporal_update are not properly set for error-resilient mode in encoder for aq-mode\u003d1 or aq\u003dmode\u003d2. Please review patch#3 for a more proper fix Of the problem.",
+      "parentUuid": "e759a674_8131f997",
+      "range": {
+        "startLine": 1064,
+        "startChar": 59,
+        "endLine": 1064,
+        "endChar": 60
+      },
+      "revId": "a0900fd0db5408da029fd3c71ec1f9d49ff98b3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
