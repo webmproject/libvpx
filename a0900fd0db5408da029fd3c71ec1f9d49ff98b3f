@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e759a674_8131f997",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1064,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-01-13T08:07:00Z",
+      "side": 0,
+      "message": "I don\u0027t think removing this is semantically correct. If ER mode is on, propagating the previous segmentation map is a strange behavior.",
+      "range": {
+        "startLine": 1064,
+        "startChar": 59,
+        "endLine": 1064,
+        "endChar": 60
+      },
+      "revId": "a0900fd0db5408da029fd3c71ec1f9d49ff98b3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
