@@ -373,9 +373,9 @@ static int cost_coeffs(MACROBLOCK *x,
   int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int16_t *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
+  const int *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
 #else
-  const int16_t *cat6_high_cost = vp9_get_high_cost_table(8);
+  const int *cat6_high_cost = vp9_get_high_cost_table(8);
 #endif
 
   // Check for consistency of tx_size with mode info
