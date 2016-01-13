@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "c75ca266_33496869",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-13T00:43:43Z",
+      "side": 1,
+      "message": "align",
+      "revId": "01202b81873d26d9c4d05094512767db05674a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27673e34_ee054329",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-13T00:43:43Z",
+      "side": 1,
+      "message": "pass in parameter for number of levels of pyramid, and do the right thing for levels \u003d 1.\nYou may be able to avoid an extra allocation.",
+      "revId": "01202b81873d26d9c4d05094512767db05674a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_ef4b7d31",
         "filename": "vp9/encoder/vp9_opticalflow.c",
         "patchSetId": 20
@@ -13,6 +47,40 @@
       "writtenOn": "2016-01-12T23:54:43Z",
       "side": 1,
       "message": "Was wondering if there is a more efficient way of doing this. What this is doing is essentially solving a 2x2 linear equation: M * flow_vec \u003d b, where M is symmetric but may not be non-singular.\nOkay to do this after the first patch is submitted.",
+      "revId": "01202b81873d26d9c4d05094512767db05674a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "274e5eac_16924c7b",
+        "filename": "vp9/encoder/vp9_opticalflow.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-13T00:43:43Z",
+      "side": 1,
+      "message": "remove a1, a2",
+      "revId": "01202b81873d26d9c4d05094512767db05674a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "678e9643_744d80c2",
+        "filename": "vp9/encoder/vp9_opticalflow.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-13T00:43:43Z",
+      "side": 1,
+      "message": "dopt need to expose most of these functions. Only compute_flow() needs to be exposed.\nAlso better to pass in a parameter iterative or not there.",
       "revId": "01202b81873d26d9c4d05094512767db05674a2d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
