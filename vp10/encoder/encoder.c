@@ -3340,6 +3340,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
     // update_base_skip_probs(cpi);
 
     vpx_clear_system_state();
+
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
     // to recode.
