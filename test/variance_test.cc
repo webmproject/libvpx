@@ -54,11 +54,11 @@ static void RoundHighBitDepth(int bit_depth, int64_t *se, uint64_t *sse) {
   switch (bit_depth) {
     case VPX_BITS_12:
       *sse = (*sse + 128) >> 8;
-      *se = (*se + 8) >> 4;
+      *se = *se / (1 << 4);
       break;
     case VPX_BITS_10:
       *sse = (*sse + 8) >> 4;
-      *se = (*se + 2) >> 2;
+      *se = *se / (1 << 2);
       break;
     case VPX_BITS_8:
     default:
