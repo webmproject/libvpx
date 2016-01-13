@@ -19,8 +19,6 @@
 extern "C" {
 #endif
 
-#define ROUND_ZERO_POWER_OF_TWO(value, n) ((value) / (1 << (n)))
-
 #define FILTER_BITS 7
 #define FILTER_WEIGHT 128
 
