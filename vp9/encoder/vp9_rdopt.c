@@ -4965,7 +4965,7 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
 
 #if CONFIG_WEDGE_PARTITION
 static void do_masked_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                    uint8_t *mask, int mask_stride,
+                                    const uint8_t *mask, int mask_stride,
                                     BLOCK_SIZE bsize,
                                     int mi_row, int mi_col,
                                     int_mv *tmp_mv, int *rate_mv,
@@ -5115,12 +5115,9 @@ static void do_masked_motion_search_indexed(VP9_COMP *cpi, MACROBLOCK *x,
   BLOCK_SIZE sb_type = mbmi->sb_type;
   int w = (4 << b_width_log2_lookup[sb_type]);
   int h = (4 << b_height_log2_lookup[sb_type]);
-  int i, j;
-  uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
-  int mask_stride = CODING_UNIT_SIZE;
-
-  vp9_generate_masked_weight(wedge_index, sb_type, h, w, mask, mask_stride);
-  // vp9_generate_hard_mask(wedge_index, sb_type, h, w, mask, mask_stride);
+  const uint8_t *mask;
+  const int mask_stride = MASK_MASTER_STRIDE;
+  mask = vp9_get_soft_mask(wedge_index, sb_type, h, w);
 
   if (which == 0 || which == 2)
     do_masked_motion_search(cpi, x, mask, mask_stride, bsize,
@@ -5131,10 +5128,8 @@ static void do_masked_motion_search_indexed(VP9_COMP *cpi, MACROBLOCK *x,
                             0);
 
   if (which == 1 || which == 2) {
-    for (i = 0; i < h; ++i)
-      for (j = 0; j < w; ++j)
-        mask[i * mask_stride + j] = 64 - mask[i * mask_stride + j];
-
+    // get the negative mask
+    mask = vp9_get_soft_mask(wedge_index ^ 1, sb_type, h, w);
     do_masked_motion_search(cpi, x, mask, mask_stride, bsize,
                             mi_row, mi_col, &tmp_mv[1], &rate_mv[1],
 #if CONFIG_NEW_INTER
@@ -5773,7 +5768,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #ifdef WEDGE_INTERINTRA_REFINE_SEARCH
     int bw = 4 << b_width_log2_lookup[mbmi->sb_type],
         bh = 4 << b_height_log2_lookup[mbmi->sb_type];
-    uint8_t mask[CODING_UNIT_SIZE * CODING_UNIT_SIZE];
     int_mv tmp_mv;
     int tmp_rate_mv = 0;
 #endif  // WEDGE_INTERINTRA_REFINE_SEARCH
@@ -5830,8 +5824,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->interintra_uv_wedge_index = wedge_index;
         vp9_build_interintra_predictors(xd, tmp_buf, tmp_buf + tmp_buf_sz,
                                        tmp_buf + 2 * tmp_buf_sz,
-                                      CODING_UNIT_SIZE, CODING_UNIT_SIZE,
-                                      CODING_UNIT_SIZE, bsize);
+                                       CODING_UNIT_SIZE, CODING_UNIT_SIZE,
+                                       CODING_UNIT_SIZE, bsize);
         model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum, NULL, NULL);
         rd = RDCOST(x->rdmult, x->rddiv,
                     rmode + rate_mv_tmp + rwedge + rate_sum, dist_sum);
@@ -5847,15 +5841,12 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #else
       if (this_mode == NEWMV) {
 #endif  // CONFIG_NEW_INTER
-        int j;
+        // get negative of mask
+        const uint8_t* mask = vp9_get_soft_mask(
+            best_wedge_index ^ 1, bsize, bh, bw);
         mbmi->interintra_wedge_index = best_wedge_index;
         mbmi->interintra_uv_wedge_index = best_wedge_index;
-        vp9_generate_masked_weight_interintra(best_wedge_index, bsize,
-                                              bh, bw, mask, bw);
-        for (i = 0; i < bh; ++i)
-            for (j = 0; j < bw; ++j)
-              mask[i * bw + j] = 64 - mask[i * bw + j];
-        do_masked_motion_search(cpi, x, mask, bw, bsize,
+        do_masked_motion_search(cpi, x, mask, MASK_MASTER_STRIDE, bsize,
                                 mi_row, mi_col, &tmp_mv, &tmp_rate_mv,
 #if CONFIG_NEW_INTER
                                 &ref_mv[0],

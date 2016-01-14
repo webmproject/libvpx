@@ -25,6 +25,7 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
 
@@ -39,6 +40,9 @@ static void initialize_dec() {
   if (!init_done) {
     vp9_rtcd();
     vp9_init_intra_predictors();
+#if CONFIG_WEDGE_PARTITION
+    vp9_init_wedge_masks();
+#endif  // CONFIG_WEDGE_PARTITION
     init_done = 1;
   }
 }

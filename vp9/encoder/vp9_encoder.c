@@ -149,6 +149,9 @@ void vp9_initialize_enc() {
     vp9_entropy_mv_init();
     vp9_entropy_mode_init();
     vp9_temporal_filter_init();
+#if CONFIG_WEDGE_PARTITION
+    vp9_init_wedge_masks();
+#endif
     init_done = 1;
   }
 }
