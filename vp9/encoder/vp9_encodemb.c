@@ -150,6 +150,9 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
+#if CONFIG_NEW_QUANT
+  int dq = xd->mi->mbmi.dq_off_index;
+#endif  //  CONFIG_NEW_QUANT
 #if CONFIG_SR_MODE
   int b_sr = xd->mi[0].src_mi->mbmi.sr;
   // TX_SIZE new_tx_size = (b_sr) ? (tx_size - 1) : tx_size;
@@ -164,10 +167,11 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int16_t *dequant_ptr = pd->dequant;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_NEW_QUANT
+  int dq = xd->mi->mbmi.dq_off_index;
 #if CONFIG_TX_SKIP
   const int use_rect_quant = is_rect_quant_used(&xd->mi[0].src_mi->mbmi, plane);
 #endif  // CONFIG_TX_SKIP
-  const dequant_val_type_nuq *dequant_val = pd->dequant_val_nuq;
+  const dequant_val_type_nuq *dequant_val = pd->dequant_val_nuq[dq];
 #endif  // CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
   const uint8_t *const band_translate = tx_skip ?
@@ -192,7 +196,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 #if CONFIG_TX_SKIP
   const int use_rect_quant = is_rect_quant_used(&xd->mi[0].src_mi->mbmi, plane);
 #endif  // CONFIG_TX_SKIP
-  const dequant_val_type_nuq *dequant_val = pd->dequant_val_nuq;
+  const dequant_val_type_nuq *dequant_val = pd->dequant_val_nuq[dq];
 #endif  // CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
   const uint8_t *const band_translate = tx_skip ?
@@ -224,7 +228,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 
 #if CONFIG_TX_SKIP && CONFIG_NEW_QUANT
   if (xd->mi[0].src_mi->mbmi.tx_skip[plane != 0])
-    dequant_val = pd->dequant_val_nuq_pxd;
+    dequant_val = pd->dequant_val_nuq_pxd[dq];
 #endif  // CONFIG_TX_SKIP && CONFIG_NEW_QUANT
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
@@ -678,6 +682,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+int dq = xd->mi->mbmi.dq_off_index;
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
@@ -712,7 +717,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                 pd->dequant_pxd,
                                 (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                 (const dequant_val_type_nuq *)
-                                pd->dequant_val_nuq_pxd,
+                                pd->dequant_val_nuq_pxd[dq],
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
       else
@@ -720,7 +725,8 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
         vp9_quantize_nuq(coeff, bs * bs, x->skip_block,
                          p->quant_pxd, p->quant_shift_pxd, pd->dequant_pxd,
                          (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
-                         (const dequant_val_type_nuq *)pd->dequant_val_nuq_pxd,
+                         (const dequant_val_type_nuq *)
+                         pd->dequant_val_nuq_pxd[dq],
                          qcoeff, dqcoeff, eob,
                          scan_order->scan, band);
     } else if (tx_size == TX_32X32) {
@@ -732,7 +738,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                       (const cumbins_type_nuq *)
                                       p->cumbins_nuq_pxd,
                                       (const dequant_val_type_nuq *)
-                                      pd->dequant_val_nuq,
+                                      pd->dequant_val_nuq[dq],
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
       else
@@ -742,7 +748,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                pd->dequant_pxd,
                                (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                (const dequant_val_type_nuq *)
-                               pd->dequant_val_nuq,
+                               pd->dequant_val_nuq[dq],
                                qcoeff, dqcoeff, eob,
                                scan_order->scan, band);
     }
@@ -756,7 +762,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                       (const cumbins_type_nuq *)
                                       p->cumbins_nuq_pxd,
                                       (const dequant_val_type_nuq *)
-                                      pd->dequant_val_nuq,
+                                      pd->dequant_val_nuq[dq],
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
       else
@@ -766,7 +772,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                pd->dequant_pxd,
                                (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                (const dequant_val_type_nuq *)
-                               pd->dequant_val_nuq,
+                               pd->dequant_val_nuq[dq],
                                qcoeff, dqcoeff, eob,
                                scan_order->scan, band);
     }
@@ -786,7 +792,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                       p->quant, p->quant_shift, pd->dequant,
                                       (const cumbins_type_nuq *)p->cumbins_nuq,
                                       (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq,
+                                          pd->dequant_val_nuq[dq],
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
         break;
@@ -797,7 +803,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                       p->quant, p->quant_shift, pd->dequant,
                                       (const cumbins_type_nuq *)p->cumbins_nuq,
                                       (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq,
+                                          pd->dequant_val_nuq[dq],
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
         break;
@@ -811,7 +817,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                 p->quant, p->quant_shift, pd->dequant,
                                 (const cumbins_type_nuq *)p->cumbins_nuq,
                                 (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
         break;
@@ -825,7 +831,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                 p->quant, p->quant_shift, pd->dequant,
                                 (const cumbins_type_nuq *)p->cumbins_nuq,
                                 (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
         break;
@@ -839,7 +845,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
                                 p->quant, p->quant_shift, pd->dequant,
                                 (const cumbins_type_nuq *)p->cumbins_nuq,
                                 (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
         break;
@@ -861,7 +867,8 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_64x64_nuq(coeff, 4096, x->skip_block,
                              p->quant, p->quant_shift, pd->dequant,
                              (const cumbins_type_nuq *)p->cumbins_nuq,
-                             (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                             (const dequant_val_type_nuq *)
+                             pd->dequant_val_nuq[dq],
                              qcoeff, dqcoeff, eob,
                              scan_order->scan, band);
       break;
@@ -875,7 +882,8 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_32x32_nuq(coeff, 1024, x->skip_block,
                              p->quant, p->quant_shift, pd->dequant,
                              (const cumbins_type_nuq *)p->cumbins_nuq,
-                             (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                             (const dequant_val_type_nuq *)
+                             pd->dequant_val_nuq[dq],
                              qcoeff, dqcoeff, eob,
                              scan_order->scan, band);
       break;
@@ -888,7 +896,8 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_nuq(coeff, 256, x->skip_block,
                        p->quant, p->quant_shift, pd->dequant,
                        (const cumbins_type_nuq *)p->cumbins_nuq,
-                       (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                       (const dequant_val_type_nuq *)
+                       pd->dequant_val_nuq[dq],
                        qcoeff, dqcoeff, eob,
                        scan_order->scan, band);
       break;
@@ -901,7 +910,8 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_nuq(coeff, 64, x->skip_block,
                        p->quant, p->quant_shift, pd->dequant,
                        (const cumbins_type_nuq *)p->cumbins_nuq,
-                       (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                       (const dequant_val_type_nuq *)
+                       pd->dequant_val_nuq[dq],
                        qcoeff, dqcoeff, eob,
                        scan_order->scan, band);
       break;
@@ -914,7 +924,8 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_nuq(coeff, 16, x->skip_block,
                        p->quant, p->quant_shift, pd->dequant,
                        (const cumbins_type_nuq *)p->cumbins_nuq,
-                       (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                       (const dequant_val_type_nuq *)
+                       pd->dequant_val_nuq[dq],
                        qcoeff, dqcoeff, eob,
                        scan_order->scan, band);
       break;
@@ -929,6 +940,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+int dq = xd->mi->mbmi.dq_off_index;
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
@@ -962,7 +974,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant_pxd_fp, pd->dequant_pxd,
                                    (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                    (const dequant_val_type_nuq *)
-                                   pd->dequant_val_nuq_pxd,
+                                   pd->dequant_val_nuq_pxd[dq],
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
       else
@@ -971,7 +983,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                             p->quant_pxd_fp, pd->dequant_pxd,
                             (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                             (const dequant_val_type_nuq *)
-                            pd->dequant_val_nuq_pxd,
+                            pd->dequant_val_nuq_pxd[dq],
                             qcoeff, dqcoeff, eob,
                             scan_order->scan, band);
     } else if (tx_size == TX_32X32) {
@@ -982,7 +994,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                          (const cumbins_type_nuq *)
                                          p->cumbins_nuq_pxd,
                                          (const dequant_val_type_nuq *)
-                                         pd->dequant_val_nuq_pxd,
+                                         pd->dequant_val_nuq_pxd[dq],
                                          qcoeff, dqcoeff, eob,
                                          scan_order->scan, band);
       else
@@ -991,7 +1003,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                   p->quant_pxd_fp, pd->dequant_pxd,
                                   (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                   (const dequant_val_type_nuq *)
-                                  pd->dequant_val_nuq_pxd,
+                                  pd->dequant_val_nuq_pxd[dq],
                                   qcoeff, dqcoeff, eob,
                                   scan_order->scan, band);
     }
@@ -1004,7 +1016,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                          (const cumbins_type_nuq *)
                                          p->cumbins_nuq_pxd,
                                          (const dequant_val_type_nuq *)
-                                         pd->dequant_val_nuq_pxd,
+                                         pd->dequant_val_nuq_pxd[dq],
                                          qcoeff, dqcoeff, eob,
                                          scan_order->scan, band);
       else
@@ -1013,7 +1025,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                   p->quant_pxd_fp, pd->dequant_pxd,
                                   (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                   (const dequant_val_type_nuq *)
-                                  pd->dequant_val_nuq_pxd,
+                                  pd->dequant_val_nuq_pxd[dq],
                                   qcoeff, dqcoeff, eob,
                                   scan_order->scan, band);
     }
@@ -1033,7 +1045,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                          (const cumbins_type_nuq *)
                                              p->cumbins_nuq,
                                          (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq,
+                                             pd->dequant_val_nuq[dq],
                                          qcoeff, dqcoeff, eob,
                                          scan_order->scan, band);
         break;
@@ -1045,7 +1057,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                          (const cumbins_type_nuq *)
                                              p->cumbins_nuq,
                                          (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq,
+                                             pd->dequant_val_nuq[dq],
                                          qcoeff, dqcoeff, eob,
                                          scan_order->scan, band);
         break;
@@ -1059,7 +1071,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant_fp, pd->dequant,
                                    (const cumbins_type_nuq *)p->cumbins_nuq,
                                    (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq,
+                                       pd->dequant_val_nuq[dq],
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
         break;
@@ -1073,7 +1085,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant_fp, pd->dequant,
                                    (const cumbins_type_nuq *)p->cumbins_nuq,
                                    (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq,
+                                       pd->dequant_val_nuq[dq],
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
         break;
@@ -1087,7 +1099,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant_fp, pd->dequant,
                                    (const cumbins_type_nuq *)p->cumbins_nuq,
                                    (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq,
+                                       pd->dequant_val_nuq[dq],
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
         break;
@@ -1110,7 +1122,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                 p->quant_fp, pd->dequant,
                                 (const cumbins_type_nuq *)p->cumbins_nuq,
                                 (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
       break;
@@ -1125,7 +1137,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
                                 p->quant_fp, pd->dequant,
                                 (const cumbins_type_nuq *)p->cumbins_nuq,
                                 (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
       break;
@@ -1138,7 +1150,8 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_fp_nuq(coeff, 256, x->skip_block,
                           p->quant_fp, pd->dequant,
                           (const cumbins_type_nuq *)p->cumbins_nuq,
-                          (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                          (const dequant_val_type_nuq *)
+                          pd->dequant_val_nuq[dq],
                           qcoeff, dqcoeff, eob,
                           scan_order->scan, band);
       break;
@@ -1151,7 +1164,8 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_fp_nuq(coeff, 64, x->skip_block,
                           p->quant_fp, pd->dequant,
                           (const cumbins_type_nuq *)p->cumbins_nuq,
-                          (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                          (const dequant_val_type_nuq *)
+                          pd->dequant_val_nuq[dq],
                           qcoeff, dqcoeff, eob,
                           scan_order->scan, band);
       break;
@@ -1164,7 +1178,8 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
       vp9_quantize_fp_nuq(coeff, 16, x->skip_block,
                           p->quant_fp, pd->dequant,
                           (const cumbins_type_nuq *)p->cumbins_nuq,
-                          (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                          (const dequant_val_type_nuq *)
+                          pd->dequant_val_nuq[dq],
                           qcoeff, dqcoeff, eob,
                           scan_order->scan, band);
       break;
@@ -1186,6 +1201,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
+  int dq = xd->mi->mbmi.dq_off_index;
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
@@ -1205,13 +1221,14 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant_pxd[0], p->quant_shift_pxd[0],
                                    pd->dequant_pxd[0],
                                    p->cumbins_nuq_pxd[0],
-                                   pd->dequant_val_nuq_pxd[0],
+                                   pd->dequant_val_nuq_pxd[dq][0],
                                    qcoeff, dqcoeff, eob);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       vp9_quantize_dc_nuq(coeff, x->skip_block,
                           p->quant_pxd[0], p->quant_shift_pxd[0],
                           pd->dequant_pxd[0],
-                          p->cumbins_nuq_pxd[0], pd->dequant_val_nuq_pxd[0],
+                          p->cumbins_nuq_pxd[0],
+                          pd->dequant_val_nuq_pxd[dq][0],
                           qcoeff, dqcoeff, eob);
     } else if (tx_size == TX_32X32) {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1220,7 +1237,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                          p->quant_pxd[0], p->quant_shift_pxd[0],
                                          pd->dequant_pxd[0],
                                          p->cumbins_nuq_pxd[0],
-                                         pd->dequant_val_nuq_pxd[0],
+                                         pd->dequant_val_nuq_pxd[dq][0],
                                          qcoeff, dqcoeff, eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -1228,7 +1245,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                   p->quant_pxd[0], p->quant_shift_pxd[0],
                                   pd->dequant_pxd[0],
                                   p->cumbins_nuq_pxd[0],
-                                  pd->dequant_val_nuq_pxd[0],
+                                  pd->dequant_val_nuq_pxd[dq][0],
                                   qcoeff, dqcoeff, eob);
     }
 #if CONFIG_TX64X64
@@ -1239,7 +1256,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                          p->quant_pxd[0], p->quant_shift_pxd[0],
                                          pd->dequant_pxd[0],
                                          p->cumbins_nuq_pxd[0],
-                                         pd->dequant_val_nuq_pxd[0],
+                                         pd->dequant_val_nuq_pxd[dq][0],
                                          qcoeff, dqcoeff, eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -1247,7 +1264,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                   p->quant_pxd[0], p->quant_shift_pxd[0],
                                   pd->dequant_pxd[0],
                                   p->cumbins_nuq_pxd[0],
-                                  pd->dequant_val_nuq_pxd[0],
+                                  pd->dequant_val_nuq_pxd[dq][0],
                                   qcoeff, dqcoeff, eob);
     }
 #endif  // CONFIG_TX64X64
@@ -1266,7 +1283,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                          p->quant[0], p->quant_shift[0],
                                          pd->dequant[0],
                                          p->cumbins_nuq[0],
-                                         pd->dequant_val_nuq[0],
+                                         pd->dequant_val_nuq[dq][0],
                                          qcoeff, dqcoeff, eob);
         break;
 #endif  // CONFIG_TX64X64
@@ -1276,7 +1293,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                          p->quant[0], p->quant_shift[0],
                                          pd->dequant[0],
                                          p->cumbins_nuq[0],
-                                         pd->dequant_val_nuq[0],
+                                         pd->dequant_val_nuq[dq][0],
                                          qcoeff, dqcoeff, eob);
         break;
       case TX_16X16:
@@ -1289,7 +1306,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant[0], p->quant_shift[0],
                                    pd->dequant[0],
                                    p->cumbins_nuq[0],
-                                   pd->dequant_val_nuq[0],
+                                   pd->dequant_val_nuq[dq][0],
                                    qcoeff, dqcoeff, eob);
         break;
       case TX_8X8:
@@ -1302,7 +1319,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant[0], p->quant_shift[0],
                                    pd->dequant[0],
                                    p->cumbins_nuq[0],
-                                   pd->dequant_val_nuq[0],
+                                   pd->dequant_val_nuq[dq][0],
                                    qcoeff, dqcoeff, eob);
         break;
       case TX_4X4:
@@ -1315,7 +1332,7 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
                                    p->quant[0], p->quant_shift[0],
                                    pd->dequant[0],
                                    p->cumbins_nuq[0],
-                                   pd->dequant_val_nuq[0],
+                                   pd->dequant_val_nuq[dq][0],
                                    qcoeff, dqcoeff, eob);
         break;
       default:
@@ -1335,7 +1352,8 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_64x64_nuq(coeff, x->skip_block,
                                 p->quant[0], p->quant_shift[0], pd->dequant[0],
-                                p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                                p->cumbins_nuq[0],
+                                pd->dequant_val_nuq[dq][0],
                                 qcoeff, dqcoeff, eob);
       break;
 #endif  // CONFIG_TX64X64
@@ -1347,7 +1365,8 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_32x32_nuq(coeff, x->skip_block,
                                 p->quant[0], p->quant_shift[0], pd->dequant[0],
-                                p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                                p->cumbins_nuq[0],
+                                pd->dequant_val_nuq[dq][0],
                                 qcoeff, dqcoeff, eob);
       break;
     case TX_16X16:
@@ -1358,7 +1377,8 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_nuq(coeff, x->skip_block,
                           p->quant[0], p->quant_shift[0], pd->dequant[0],
-                          p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                          p->cumbins_nuq[0],
+                          pd->dequant_val_nuq[dq][0],
                           qcoeff, dqcoeff, eob);
       break;
     case TX_8X8:
@@ -1369,7 +1389,8 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_nuq(coeff, x->skip_block,
                           p->quant[0], p->quant_shift[0], pd->dequant[0],
-                          p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                          p->cumbins_nuq[0],
+                          pd->dequant_val_nuq[dq][0],
                           qcoeff, dqcoeff, eob);
       break;
     case TX_4X4:
@@ -1380,7 +1401,8 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_nuq(coeff, x->skip_block,
                           p->quant[0], p->quant_shift[0], pd->dequant[0],
-                          p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                          p->cumbins_nuq[0],
+                          pd->dequant_val_nuq[dq][0],
                           qcoeff, dqcoeff, eob);
       break;
     default:
@@ -1401,6 +1423,7 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
+  int dq = xd->mi->mbmi.dq_off_index;
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
@@ -1419,14 +1442,14 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
         vp9_highbd_quantize_dc_fp_nuq(coeff, x->skip_block,
                                       p->quant_pxd_fp[0], pd->dequant_pxd[0],
                                       p->cumbins_nuq_pxd[0],
-                                      pd->dequant_val_nuq_pxd[0],
+                                      pd->dequant_val_nuq_pxd[dq][0],
                                       qcoeff, dqcoeff, eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         vp9_quantize_dc_fp_nuq(coeff, x->skip_block,
                                p->quant_pxd_fp[0], pd->dequant_pxd[0],
                                p->cumbins_nuq_pxd[0],
-                               pd->dequant_val_nuq_pxd[0],
+                               pd->dequant_val_nuq_pxd[dq][0],
                                qcoeff, dqcoeff, eob);
     } else if (tx_size == TX_32X32) {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1435,14 +1458,15 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
                                             p->quant_pxd_fp[0],
                                             pd->dequant_pxd[0],
                                             p->cumbins_nuq_pxd[0],
-                                            pd->dequant_val_nuq_pxd[0],
+                                            pd->
+                                            dequant_val_nuq_pxd[dq][0],
                                             qcoeff, dqcoeff, eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         vp9_quantize_dc_32x32_fp_nuq(coeff, x->skip_block,
                                      p->quant_pxd_fp[0], pd->dequant_pxd[0],
                                      p->cumbins_nuq_pxd[0],
-                                     pd->dequant_val_nuq_pxd[0],
+                                     pd->dequant_val_nuq_pxd[dq][0],
                                      qcoeff, dqcoeff, eob);
     }
 #if CONFIG_TX64X64
@@ -1453,14 +1477,15 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
                                             p->quant_pxd_fp[0],
                                             pd->dequant_pxd[0],
                                             p->cumbins_nuq_pxd[0],
-                                            pd->dequant_val_nuq_pxd[0],
+                                            pd->
+                                            dequant_val_nuq_pxd[dq][0],
                                             qcoeff, dqcoeff, eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         vp9_quantize_dc_64x64_fp_nuq(coeff, x->skip_block,
                                      p->quant_pxd_fp[0], pd->dequant_pxd[0],
                                      p->cumbins_nuq_pxd[0],
-                                     pd->dequant_val_nuq_pxd[0],
+                                     pd->dequant_val_nuq_pxd[dq][0],
                                      qcoeff, dqcoeff, eob);
     }
 #endif  // CONFIG_TX64X64
@@ -1478,7 +1503,7 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
         vp9_highbd_quantize_dc_64x64_fp_nuq(coeff, x->skip_block,
                                             p->quant_fp[0], pd->dequant[0],
                                             p->cumbins_nuq[0],
-                                            pd->dequant_val_nuq[0],
+                                            pd->dequant_val_nuq[dq][0],
                                             qcoeff, dqcoeff, eob);
         break;
 #endif  // CONFIG_TX64X64
@@ -1487,7 +1512,7 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
         vp9_highbd_quantize_dc_32x32_fp_nuq(coeff, x->skip_block,
                                             p->quant_fp[0], pd->dequant[0],
                                             p->cumbins_nuq[0],
-                                            pd->dequant_val_nuq[0],
+                                            pd->dequant_val_nuq[dq][0],
                                             qcoeff, dqcoeff, eob);
         break;
       case TX_16X16:
@@ -1499,7 +1524,7 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
         vp9_highbd_quantize_dc_fp_nuq(coeff, x->skip_block,
                                       p->quant_fp[0], pd->dequant[0],
                                       p->cumbins_nuq[0],
-                                      pd->dequant_val_nuq[0],
+                                      pd->dequant_val_nuq[dq][0],
                                       qcoeff, dqcoeff, eob);
         break;
       case TX_8X8:
@@ -1511,7 +1536,7 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
         vp9_highbd_quantize_dc_fp_nuq(coeff, x->skip_block,
                                       p->quant_fp[0], pd->dequant[0],
                                       p->cumbins_nuq[0],
-                                      pd->dequant_val_nuq[0],
+                                      pd->dequant_val_nuq[dq][0],
                                       qcoeff, dqcoeff, eob);
         break;
       case TX_4X4:
@@ -1523,7 +1548,7 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
         vp9_highbd_quantize_dc_fp_nuq(coeff, x->skip_block,
                                       p->quant_fp[0], pd->dequant[0],
                                       p->cumbins_nuq[0],
-                                      pd->dequant_val_nuq[0],
+                                      pd->dequant_val_nuq[dq][0],
                                       qcoeff, dqcoeff, eob);
         break;
       default:
@@ -1543,7 +1568,8 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_64x64_fp_nuq(coeff, x->skip_block,
                                    p->quant_fp[0], pd->dequant[0],
-                                   p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                                   p->cumbins_nuq[0],
+                                   pd->dequant_val_nuq[dq][0],
                                    qcoeff, dqcoeff, eob);
       break;
 #endif  // CONFIG_TX64X64
@@ -1555,7 +1581,8 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_32x32_fp_nuq(coeff, x->skip_block,
                                    p->quant_fp[0], pd->dequant[0],
-                                   p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                                   p->cumbins_nuq[0],
+                                   pd->dequant_val_nuq[dq][0],
                                    qcoeff, dqcoeff, eob);
       break;
     case TX_16X16:
@@ -1566,7 +1593,8 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_fp_nuq(coeff, x->skip_block,
                              p->quant_fp[0], pd->dequant[0],
-                             p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                             p->cumbins_nuq[0],
+                             pd->dequant_val_nuq[dq][0],
                              qcoeff, dqcoeff, eob);
       break;
     case TX_8X8:
@@ -1577,7 +1605,8 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_fp_nuq(coeff, x->skip_block,
                              p->quant_fp[0], pd->dequant[0],
-                             p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                             p->cumbins_nuq[0],
+                             pd->dequant_val_nuq[dq][0],
                              qcoeff, dqcoeff, eob);
       break;
     case TX_4X4:
@@ -1588,7 +1617,8 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
 #endif
       vp9_quantize_dc_fp_nuq(coeff, x->skip_block,
                              p->quant_fp[0], pd->dequant[0],
-                             p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                             p->cumbins_nuq[0],
+                             pd->dequant_val_nuq[dq][0],
                              qcoeff, dqcoeff, eob);
       break;
     default:
@@ -2968,6 +2998,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const int dst_stride = pd->dst.stride;
   int i, j;
 #if CONFIG_NEW_QUANT
+  int dq = xd->mi->mbmi.dq_off_index;
   const uint8_t* band = get_band_translate(tx_size);
 #endif  // CONFIG_NEW_QUANT
 #if CONFIG_SR_MODE
@@ -3067,7 +3098,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                        (const cumbins_type_nuq *)
                                        p->cumbins_nuq_pxd,
                                        (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq_pxd,
+                                       pd->dequant_val_nuq_pxd[dq],
                                        qcoeff, dqcoeff, eob,
                                        scan_order->scan, band);
           else
@@ -3077,7 +3108,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     (const cumbins_type_nuq *)
                                     p->cumbins_nuq_pxd,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq_pxd,
+                                    pd->dequant_val_nuq_pxd[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         } else {
@@ -3086,7 +3117,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                 p->quant_pxd_fp, pd->dequant_pxd,
                                 (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                 (const dequant_val_type_nuq *)
-                                pd->dequant_val_nuq_pxd,
+                                pd->dequant_val_nuq_pxd[dq],
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
           else
@@ -3094,7 +3125,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                              p->quant_pxd, p->quant_shift_pxd, pd->dequant_pxd,
                              (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                              (const dequant_val_type_nuq *)
-                             pd->dequant_val_nuq_pxd,
+                             pd->dequant_val_nuq_pxd[dq],
                              qcoeff, dqcoeff, eob,
                              scan_order->scan, band);
         }
@@ -3104,7 +3135,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               p->quant_pxd_fp, pd->dequant_pxd,
                               (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                               (const dequant_val_type_nuq *)
-                              pd->dequant_val_nuq_pxd,
+                              pd->dequant_val_nuq_pxd[dq],
                               qcoeff, dqcoeff, eob,
                               scan_order->scan, band);
         else
@@ -3112,7 +3143,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                            p->quant_pxd, p->quant_shift_pxd, pd->dequant_pxd,
                            (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                            (const dequant_val_type_nuq *)
-                           pd->dequant_val_nuq_pxd,
+                           pd->dequant_val_nuq_pxd[dq],
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -3140,7 +3171,8 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                              (const cumbins_type_nuq *)p->
                                              cumbins_nuq_pxd,
                                              (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq_pxd,
+                                             pd->
+                                             dequant_val_nuq_pxd[dq],
                                              qcoeff, dqcoeff, eob,
                                              scan_order->scan, band);
           else
@@ -3150,7 +3182,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                           (const cumbins_type_nuq *)
                                           p->cumbins_nuq_pxd,
                                           (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq_pxd,
+                                          pd->dequant_val_nuq_pxd[dq],
                                           qcoeff, dqcoeff, eob,
                                           scan_order->scan, band);
         } else {
@@ -3160,7 +3192,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                       (const cumbins_type_nuq *)
                                       p->cumbins_nuq_pxd,
                                       (const dequant_val_type_nuq *)
-                                      pd->dequant_val_nuq_pxd,
+                                      pd->dequant_val_nuq_pxd[dq],
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
           else
@@ -3169,7 +3201,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                    pd->dequant_pxd,
                                    (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                    (const dequant_val_type_nuq *)
-                                   pd->dequant_val_nuq_pxd,
+                                   pd->dequant_val_nuq_pxd[dq],
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
         }
@@ -3180,7 +3212,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     (const cumbins_type_nuq *)
                                     p->cumbins_nuq_pxd,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq_pxd,
+                                    pd->dequant_val_nuq_pxd[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         else
@@ -3189,7 +3221,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                  pd->dequant_pxd,
                                  (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                  (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq_pxd,
+                                 pd->dequant_val_nuq_pxd[dq],
                                  qcoeff, dqcoeff, eob,
                                  scan_order->scan, band);/**/
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -3220,7 +3252,8 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                              (const cumbins_type_nuq *)
                                              p->cumbins_nuq_pxd,
                                              (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq_pxd,
+                                             pd->
+                                             dequant_val_nuq_pxd[dq],
                                              qcoeff, dqcoeff, eob,
                                              scan_order->scan, band);
           else
@@ -3230,7 +3263,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                           (const cumbins_type_nuq *)
                                           p->cumbins_nuq_pxd,
                                           (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq_pxd,
+                                          pd->dequant_val_nuq_pxd[dq],
                                           qcoeff, dqcoeff, eob,
                                           scan_order->scan, band);
         } else {
@@ -3240,7 +3273,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                       (const cumbins_type_nuq *)
                                       p->cumbins_nuq_pxd,
                                       (const dequant_val_type_nuq *)
-                                      pd->dequant_val_nuq_pxd,
+                                      pd->dequant_val_nuq_pxd[dq],
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
           else
@@ -3250,7 +3283,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                    (const cumbins_type_nuq *)
                                    p->cumbins_nuq_pxd,
                                    (const dequant_val_type_nuq *)
-                                   pd->dequant_val_nuq_pxd,
+                                   pd->dequant_val_nuq_pxd[dq],
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
         }
@@ -3261,7 +3294,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     (const cumbins_type_nuq *)
                                     p->cumbins_nuq_pxd,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq_pxd,
+                                    pd->dequant_val_nuq_pxd[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         else
@@ -3270,7 +3303,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                  pd->dequant_pxd,
                                  (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                  (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq_pxd,
+                                 pd->dequant_val_nuq_pxd[dq],
                                  qcoeff, dqcoeff, eob,
                                  scan_order->scan, band);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -3335,7 +3368,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                              (const cumbins_type_nuq *)
                                              p->cumbins_nuq,
                                              (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq,
+                                             pd->dequant_val_nuq[dq],
                                              qcoeff, dqcoeff, eob,
                                              scan_order->scan,
                                              band);
@@ -3345,7 +3378,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                           (const cumbins_type_nuq *)
                                           p->cumbins_nuq,
                                           (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq,
+                                          pd->dequant_val_nuq[dq],
                                           qcoeff, dqcoeff, eob,
                                           scan_order->scan, band);
 #else
@@ -3381,7 +3414,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                              (const cumbins_type_nuq *)
                                              p->cumbins_nuq,
                                              (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq,
+                                             pd->dequant_val_nuq[dq],
                                              qcoeff, dqcoeff, eob,
                                              scan_order->scan,
                                              band);
@@ -3391,7 +3424,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                           (const cumbins_type_nuq *)
                                           p->cumbins_nuq,
                                           (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq,
+                                          pd->dequant_val_nuq[dq],
                                           qcoeff, dqcoeff, eob,
                                           scan_order->scan, band);
 #else
@@ -3426,7 +3459,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                        p->quant_fp, pd->dequant,
                                        (const cumbins_type_nuq *)p->cumbins_nuq,
                                        (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq,
+                                       pd->dequant_val_nuq[dq],
                                        qcoeff, dqcoeff, eob,
                                        scan_order->scan, band);
           else
@@ -3434,7 +3467,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     p->quant, p->quant_shift, pd->dequant,
                                     (const cumbins_type_nuq *)p->cumbins_nuq,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
 #else
@@ -3470,7 +3503,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                        p->quant_fp, pd->dequant,
                                        (const cumbins_type_nuq *)p->cumbins_nuq,
                                        (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq,
+                                       pd->dequant_val_nuq[dq],
                                        qcoeff, dqcoeff, eob,
                                        scan_order->scan, band);
           else
@@ -3478,7 +3511,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     p->quant, p->quant_shift, pd->dequant,
                                     (const cumbins_type_nuq *)p->cumbins_nuq,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
 #else
@@ -3518,7 +3551,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                        p->quant_fp, pd->dequant,
                                        (const cumbins_type_nuq *)p->cumbins_nuq,
                                        (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq,
+                                       pd->dequant_val_nuq[dq],
                                        qcoeff, dqcoeff, eob,
                                        scan_order->scan, band);
           else
@@ -3526,7 +3559,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     p->quant, p->quant_shift, pd->dequant,
                                     (const cumbins_type_nuq *)p->cumbins_nuq,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
 #else
@@ -3599,7 +3632,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     p->quant_fp, pd->dequant,
                                     (const cumbins_type_nuq *)p->cumbins_nuq,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         else
@@ -3607,7 +3640,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                  p->quant, p->quant_shift, pd->dequant,
                                  (const cumbins_type_nuq *)p->cumbins_nuq,
                                  (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq,
+                                 pd->dequant_val_nuq[dq],
                                  qcoeff, dqcoeff, eob,
                                  scan_order->scan, band);
 #else
@@ -3635,7 +3668,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     p->quant_fp, pd->dequant,
                                     (const cumbins_type_nuq *)p->cumbins_nuq,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         else
@@ -3643,7 +3676,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                  p->quant, p->quant_shift, pd->dequant,
                                  (const cumbins_type_nuq *)p->cumbins_nuq,
                                  (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq,
+                                 pd->dequant_val_nuq[dq],
                                  qcoeff, dqcoeff, eob,
                                  scan_order->scan, band);
 #else
@@ -3679,14 +3712,16 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           vp9_quantize_fp_nuq(coeff, 256, x->skip_block,
                               p->quant_fp, pd->dequant,
                               (const cumbins_type_nuq *)p->cumbins_nuq,
-                              (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                              (const dequant_val_type_nuq *)
+                              pd->dequant_val_nuq[dq],
                               qcoeff, dqcoeff, eob,
                               scan_order->scan, band);
         else
           vp9_quantize_nuq(coeff, 256, x->skip_block,
                            p->quant, p->quant_shift, pd->dequant,
                            (const cumbins_type_nuq *)p->cumbins_nuq,
-                           (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                           (const dequant_val_type_nuq *)
+                           pd->dequant_val_nuq[dq],
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #else
@@ -3713,7 +3748,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     p->quant_fp, pd->dequant,
                                     (const cumbins_type_nuq *)p->cumbins_nuq,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq[dq],
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         else
@@ -3721,7 +3756,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                  p->quant, p->quant_shift, pd->dequant,
                                  (const cumbins_type_nuq *)p->cumbins_nuq,
                                  (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq,
+                                 pd->dequant_val_nuq[dq],
                                  qcoeff, dqcoeff, eob,
                                  scan_order->scan, band);
 #else
@@ -3756,14 +3791,16 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           vp9_quantize_fp_nuq(coeff, 64, x->skip_block,
                               p->quant_fp, pd->dequant,
                               (const cumbins_type_nuq *)p->cumbins_nuq,
-                              (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                              (const dequant_val_type_nuq *)
+                              pd->dequant_val_nuq[dq],
                               qcoeff, dqcoeff, eob,
                               scan_order->scan, band);
         else
           vp9_quantize_nuq(coeff, 64, x->skip_block,
                            p->quant, p->quant_shift, pd->dequant,
                            (const cumbins_type_nuq *)p->cumbins_nuq,
-                           (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                           (const dequant_val_type_nuq *)
+                           pd->dequant_val_nuq[dq],
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #else
@@ -3789,14 +3826,16 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           vp9_quantize_fp_nuq(coeff, 256, x->skip_block,
                               p->quant_fp, pd->dequant,
                               (const cumbins_type_nuq *)p->cumbins_nuq,
-                              (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                              (const dequant_val_type_nuq *)
+                              pd->dequant_val_nuq[dq],
                               qcoeff, dqcoeff, eob,
                               scan_order->scan, band);
         else
           vp9_quantize_nuq(coeff, 256, x->skip_block,
                            p->quant, p->quant_shift, pd->dequant,
                            (const cumbins_type_nuq *)p->cumbins_nuq,
-                           (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                           (const dequant_val_type_nuq *)
+                           pd->dequant_val_nuq[dq],
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #else
@@ -3834,13 +3873,14 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
             vp9_quantize_fp_nuq(
                 coeff, 16, x->skip_block, p->quant_fp, pd->dequant,
                 (const cumbins_type_nuq *)p->cumbins_nuq,
-                (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
                 qcoeff, dqcoeff, eob, scan_order->scan, band);
           else
             vp9_quantize_nuq(coeff, 16, x->skip_block,
                              p->quant, p->quant_shift, pd->dequant,
                              (const cumbins_type_nuq *)p->cumbins_nuq,
-                             (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                             (const dequant_val_type_nuq *)
+                             pd->dequant_val_nuq[dq],
                              qcoeff, dqcoeff, eob,
                              scan_order->scan, band);
 #else
@@ -3869,14 +3909,16 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           vp9_quantize_fp_nuq(coeff, 64, x->skip_block,
                               p->quant_fp, pd->dequant,
                               (const cumbins_type_nuq *)p->cumbins_nuq,
-                              (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                              (const dequant_val_type_nuq *)
+                              pd->dequant_val_nuq[dq],
                               qcoeff, dqcoeff, eob,
                               scan_order->scan, band);
         else
           vp9_quantize_nuq(coeff, 64, x->skip_block,
                            p->quant, p->quant_shift, pd->dequant,
                            (const cumbins_type_nuq *)p->cumbins_nuq,
-                           (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                           (const dequant_val_type_nuq *)
+                           pd->dequant_val_nuq[dq],
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #else
@@ -3905,14 +3947,16 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           vp9_quantize_fp_nuq(coeff, 16, x->skip_block,
                               p->quant_fp, pd->dequant,
                               (const cumbins_type_nuq *)p->cumbins_nuq,
-                              (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                              (const dequant_val_type_nuq *)
+                              pd->dequant_val_nuq[dq],
                               qcoeff, dqcoeff, eob,
                               scan_order->scan, band);
         else
           vp9_quantize_nuq(coeff, 16, x->skip_block,
                            p->quant, p->quant_shift, pd->dequant,
                            (const cumbins_type_nuq *)p->cumbins_nuq,
-                           (const dequant_val_type_nuq *)pd->dequant_val_nuq,
+                           (const dequant_val_type_nuq *)
+                           pd->dequant_val_nuq[dq],
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #else

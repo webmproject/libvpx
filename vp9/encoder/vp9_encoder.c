@@ -1627,7 +1627,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_GLOBAL_MOTION
   cpi->mb.e_mbd.global_motion = cm->global_motion;
-#endif
+#endif  // CONFIG_GLOBAL_MOTION
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
