@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e759a674_15ba43f5",
+        "filename": "vp9/encoder/vp9_aq_360.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-14T00:18:33Z",
+      "side": 1,
+      "message": "Done.\n\nI think all the other aq_mode setup functions need to be changed likewise.",
+      "parentUuid": "07623a24_fc67b862",
+      "range": {
+        "startLine": 49,
+        "startChar": 24,
+        "endLine": 49,
+        "endChar": 33
+      },
+      "revId": "a68bb3aacbc9e43761cf6e837613aba9153843d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5099ede_7a3cd99b",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 2
