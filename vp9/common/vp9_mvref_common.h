@@ -221,7 +221,6 @@ typedef void (*find_mv_refs_sync)(void *const data, int mi_row);
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list, int mi_row, int mi_col,
-                      find_mv_refs_sync sync, void *const data,
                       uint8_t *mode_context);
 
 // check a list of motion vectors by sad score using a number rows of pixels

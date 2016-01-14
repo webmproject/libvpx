@@ -17,7 +17,6 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                              int_mv *mv_ref_list,
                              int block, int mi_row, int mi_col,
-                             find_mv_refs_sync sync, void *const data,
                              uint8_t *mode_context) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
@@ -70,23 +69,8 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
   }
 
-  // TODO(hkuang): Remove this sync after fixing pthread_cond_broadcast
-  // on windows platform. The sync here is unnecessary if use_prev_frame_mvs
-  // is 0. But after removing it, there will be hang in the unit test on windows
-  // due to several threads waiting for a thread's signal.
-#if defined(_WIN32) && !HAVE_PTHREAD_H
-    if (cm->frame_parallel_decode && sync != NULL) {
-      sync(data, mi_row);
-    }
-#endif
-
   // Check the last frame's mode and mv info.
   if (cm->use_prev_frame_mvs) {
-    // Synchronize here for frame parallel decode if sync function is provided.
-    if (cm->frame_parallel_decode && sync != NULL) {
-      sync(data, mi_row);
-    }
-
     if (prev_frame_mvs->ref_frame[0] == ref_frame) {
       ADD_MV_REF_LIST(prev_frame_mvs->mv[0], refmv_count, mv_ref_list, Done);
     } else if (prev_frame_mvs->ref_frame[1] == ref_frame) {
@@ -150,10 +134,9 @@ void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col,
-                      find_mv_refs_sync sync, void *const data,
                       uint8_t *mode_context) {
   find_mv_refs_idx(cm, xd, mi, ref_frame, mv_ref_list, -1,
-                   mi_row, mi_col, sync, data, mode_context);
+                   mi_row, mi_col, mode_context);
 }
 
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
@@ -181,7 +164,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
   assert(MAX_MV_REF_CANDIDATES == 2);
 
   find_mv_refs_idx(cm, xd, mi, mi->mbmi.ref_frame[ref], mv_list, block,
-                   mi_row, mi_col, NULL, NULL, mode_context);
+                   mi_row, mi_col, mode_context);
 
   near_mv->as_int = 0;
   switch (block) {
