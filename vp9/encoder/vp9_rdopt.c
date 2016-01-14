@@ -2202,7 +2202,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Gets an initial list of candidate vectors from neighbours and orders them
   vp9_find_mv_refs(cm, xd, mi, ref_frame, candidates, mi_row, mi_col,
-                   NULL, NULL, mbmi_ext->mode_context);
+                   mbmi_ext->mode_context);
 
   // Candidate refinement carried out at encoder and decoder
   vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,

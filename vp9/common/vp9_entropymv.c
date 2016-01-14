@@ -11,9 +11,6 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_entropymv.h"
 
-// Integer pel reference mv threshold for use of high-precision 1/8 mv
-#define COMPANDED_MVREF_THRESH 8
-
 const vpx_tree_index vp9_mv_joint_tree[TREE_SIZE(MV_JOINTS)] = {
   -MV_JOINT_ZERO, 2,
   -MV_JOINT_HNZVZ, 4,
@@ -125,11 +122,6 @@ MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset) {
   if (offset)
     *offset = z - mv_class_base(c);
   return c;
-}
-
-int vp9_use_mv_hp(const MV *ref) {
-  return (abs(ref->row) >> 3) < COMPANDED_MVREF_THRESH &&
-         (abs(ref->col) >> 3) < COMPANDED_MVREF_THRESH;
 }
 
 static void inc_mv_component(int v, nmv_component_counts *comp_counts,

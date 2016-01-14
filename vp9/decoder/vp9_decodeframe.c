@@ -719,6 +719,18 @@ static void dec_build_inter_predictors_sb(VP9Decoder *const pbi,
   const InterpKernel *kernel = vp9_filter_kernels[mi->mbmi.interp_filter];
   const BLOCK_SIZE sb_type = mi->mbmi.sb_type;
   const int is_compound = has_second_ref(&mi->mbmi);
+  int ref;
+
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
+    const MV_REFERENCE_FRAME frame = mi->mbmi.ref_frame[ref];
+    RefBuffer *ref_buf = &pbi->common.frame_refs[frame - LAST_FRAME];
+
+    xd->block_refs[ref] = ref_buf;
+    if (!vp9_is_valid_scale(&ref_buf->sf))
+      vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
+                         "Reference frame has invalid dimensions");
+    vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col, &ref_buf->sf);
+  }
 
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
     struct macroblockd_plane *const pd = &xd->plane[plane];

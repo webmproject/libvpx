@@ -157,7 +157,7 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
 
 // This macro is used to add a motion vector mv_ref list if it isn't
 // already in the list.  If it's the second motion vector it will also
-// skip all additional processing and jump to done!
+// skip all additional processing and jump to Done!
 #define ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, Done) \
   do { \
     if (refmv_count) { \
@@ -207,11 +207,20 @@ static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
                xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
 
+static INLINE void lower_mv_precision(MV *mv, int allow_hp) {
+  const int use_hp = allow_hp && use_mv_hp(mv);
+  if (!use_hp) {
+    if (mv->row & 1)
+      mv->row += (mv->row > 0 ? -1 : 1);
+    if (mv->col & 1)
+      mv->col += (mv->col > 0 ? -1 : 1);
+  }
+}
+
 typedef void (*find_mv_refs_sync)(void *const data, int mi_row);
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list, int mi_row, int mi_col,
-                      find_mv_refs_sync sync, void *const data,
                       uint8_t *mode_context);
 
 // check a list of motion vectors by sad score using a number rows of pixels

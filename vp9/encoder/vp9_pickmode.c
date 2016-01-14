@@ -1225,8 +1225,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (cm->use_prev_frame_mvs)
         vp9_find_mv_refs(cm, xd, xd->mi[0], ref_frame,
-                         candidates, mi_row, mi_col, NULL, NULL,
-                         x->mbmi_ext->mode_context);
+                         candidates, mi_row, mi_col, x->mbmi_ext->mode_context);
       else
         const_motion[ref_frame] = mv_refs_rt(cm, x, xd, tile_info,
                                              xd->mi[0],
@@ -1833,8 +1832,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
                            sf, sf);
       vp9_find_mv_refs(cm, xd, xd->mi[0], ref_frame,
-                       candidates, mi_row, mi_col, NULL, NULL,
-                       mbmi_ext->mode_context);
+                       candidates, mi_row, mi_col, mbmi_ext->mode_context);
 
       vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
                             &dummy_mv[0], &dummy_mv[1]);
