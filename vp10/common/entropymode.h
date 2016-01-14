@@ -83,6 +83,9 @@ typedef struct frame_contexts {
   vpx_prob inter_ext_tx_prob[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES - 1];
   vpx_prob intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
                             [TX_TYPES - 1];
+#else
+  vpx_prob intra_ext_tx_prob[EXT_TX_SIZES][TX_TYPES][TX_TYPES - 1];
+  vpx_prob inter_ext_tx_prob[EXT_TX_SIZES][TX_TYPES - 1];
 #endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
   vpx_prob supertx_prob[PARTITION_SUPERTX_CONTEXTS][TX_SIZES];
@@ -124,6 +127,9 @@ typedef struct FRAME_COUNTS {
   unsigned int inter_ext_tx[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
   unsigned int intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
                            [TX_TYPES];
+#else
+  unsigned int intra_ext_tx[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
+  unsigned int inter_ext_tx[EXT_TX_SIZES][TX_TYPES];
 #endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
   unsigned int supertx[PARTITION_SUPERTX_CONTEXTS][TX_SIZES][2];
@@ -175,6 +181,9 @@ extern const vpx_tree_index
     vp10_ext_tx_inter_tree[EXT_TX_SETS_INTER][TREE_SIZE(TX_TYPES)];
 extern const vpx_tree_index
     vp10_ext_tx_intra_tree[EXT_TX_SETS_INTRA][TREE_SIZE(TX_TYPES)];
+#else
+extern const vpx_tree_index
+    vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)];
 #endif  // CONFIG_EXT_TX
 
 static INLINE int vp10_ceil_log2(int n) {

@@ -83,7 +83,10 @@
 
 #if CONFIG_EXT_TX
 const double ext_tx_th = 0.98;
+#else
+const double ext_tx_th = 0.99;
 #endif
+
 
 typedef struct {
   PREDICTION_MODE mode;
@@ -790,16 +793,16 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
   const TX_SIZE largest_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-#if CONFIG_EXT_TX
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
   int r, s;
   int64_t d, psse, this_rd, best_rd = INT64_MAX;
   vpx_prob skip_prob = vp10_get_skip_prob(cm, xd);
   int  s0 = vp10_cost_bit(skip_prob, 0);
   int  s1 = vp10_cost_bit(skip_prob, 1);
+#if CONFIG_EXT_TX
   int ext_tx_set;
-  const int is_inter = is_inter_block(mbmi);
 #endif  // CONFIG_EXT_TX
+  const int is_inter = is_inter_block(mbmi);
 
   mbmi->tx_size = VPXMIN(max_tx_size, largest_tx_size);
 
@@ -815,7 +818,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
           continue;
       } else {
         if (!ALLOW_INTRA_EXT_TX && bs >= BLOCK_8X8) {
-          if (tx_type != intra_mode_to_tx_type_lookup[mbmi->mode])
+          if (tx_type != intra_mode_to_tx_type_context[mbmi->mode])
             continue;
         }
         if (!ext_tx_used_intra[ext_tx_set][tx_type])
@@ -866,8 +869,41 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  mbmi->tx_type = best_tx_type;
+#else  // CONFIG_EXT_TX
+  if (mbmi->tx_size < TX_32X32 &&
+      !xd->lossless[mbmi->segment_id]) {
+    for (tx_type = 0; tx_type < TX_TYPES; ++tx_type) {
+      mbmi->tx_type = tx_type;
+      txfm_rd_in_plane(x,
+#if CONFIG_VAR_TX
+                       cpi,
+#endif
+                       &r, &d, &s,
+                       &psse, ref_best_rd, 0, bs, mbmi->tx_size,
+                       cpi->sf.use_fast_coef_costing);
+      if (r == INT_MAX)
+        continue;
+      if (is_inter)
+        r += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
+      else
+        r += cpi->intra_tx_type_costs[mbmi->tx_size]
+                                     [intra_mode_to_tx_type_context[mbmi->mode]]
+                                     [mbmi->tx_type];
+      if (s)
+        this_rd = RDCOST(x->rdmult, x->rddiv, s1, psse);
+      else
+        this_rd = RDCOST(x->rdmult, x->rddiv, r + s0, d);
+      if (is_inter && !xd->lossless[mbmi->segment_id] && !s)
+        this_rd = VPXMIN(this_rd, RDCOST(x->rdmult, x->rddiv, s1, psse));
+
+      if (this_rd < ((best_tx_type == DCT_DCT) ? ext_tx_th : 1) * best_rd) {
+        best_rd = this_rd;
+        best_tx_type = mbmi->tx_type;
+      }
+    }
+  }
 #endif  // CONFIG_EXT_TX
+  mbmi->tx_type = best_tx_type;
 
   txfm_rd_in_plane(x,
 #if CONFIG_VAR_TX
@@ -891,6 +927,16 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
             cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size]
                                                  [mbmi->mode][mbmi->tx_type];
     }
+  }
+#else
+  if (mbmi->tx_size < TX_32X32 && !xd->lossless[mbmi->segment_id] &&
+      *rate != INT_MAX) {
+    if (is_inter)
+      *rate += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
+    else
+      *rate += cpi->intra_tx_type_costs[mbmi->tx_size]
+          [intra_mode_to_tx_type_context[mbmi->mode]]
+          [mbmi->tx_type];
   }
 #endif  // CONFIG_EXT_TX
 }
@@ -935,11 +981,11 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   TX_SIZE best_tx = max_tx_size;
   int start_tx, end_tx;
   const int tx_select = cm->tx_mode == TX_MODE_SELECT;
-#if CONFIG_EXT_TX
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
+  const int is_inter = is_inter_block(mbmi);
+#if CONFIG_EXT_TX
   int ext_tx_set;
 #endif  // CONFIG_EXT_TX
-  const int is_inter = is_inter_block(mbmi);
 
   const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
   assert(skip_prob > 0);
@@ -961,9 +1007,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   *skip       = 0;
   *psse       = INT64_MAX;
 
-#if CONFIG_EXT_TX
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
-#endif  // CONFIG_EXT_TX
     last_rd = INT64_MAX;
     for (n = start_tx; n >= end_tx; --n) {
       int r_tx_size = 0;
@@ -981,7 +1025,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
           continue;
       } else {
         if (!ALLOW_INTRA_EXT_TX && bs >= BLOCK_8X8) {
-          if (tx_type != intra_mode_to_tx_type_lookup[mbmi->mode])
+          if (tx_type != intra_mode_to_tx_type_context[mbmi->mode])
             continue;
         }
         if (!ext_tx_used_intra[ext_tx_set][tx_type])
@@ -1015,6 +1059,10 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
         }
       }
 #else  // CONFIG_EXT_TX
+      if (n >= TX_32X32 && tx_type != DCT_DCT) {
+        continue;
+      }
+      mbmi->tx_type = tx_type;
       txfm_rd_in_plane(x,
 #if CONFIG_VAR_TX
                        cpi,
@@ -1022,6 +1070,16 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                        &r, &d, &s,
                        &sse, ref_best_rd, 0, bs, n,
                        cpi->sf.use_fast_coef_costing);
+      if (n < TX_32X32 &&
+          !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
+          r != INT_MAX) {
+        if (is_inter)
+          r += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
+        else
+          r += cpi->intra_tx_type_costs[mbmi->tx_size]
+              [intra_mode_to_tx_type_context[mbmi->mode]]
+              [mbmi->tx_type];
+      }
 #endif  // CONFIG_EXT_TX
 
       if (r == INT_MAX)
@@ -1046,19 +1104,13 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
       // Early termination in transform size search.
       if (cpi->sf.tx_size_search_breakout &&
           (rd == INT64_MAX ||
-#if CONFIG_EXT_TX
            (s == 1 && tx_type != DCT_DCT && n < start_tx) ||
-#else
-           (s == 1 && n < start_tx) ||
-#endif
            (n < (int) max_tx_size && rd > last_rd)))
         break;
 
       last_rd = rd;
       if (rd <
-#if CONFIG_EXT_TX
           (is_inter && best_tx_type == DCT_DCT ? ext_tx_th : 1) *
-#endif  // CONFIG_EXT_TX
           best_rd) {
         best_tx = n;
         best_rd = rd;
@@ -1066,17 +1118,12 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
         *rate       = r;
         *skip       = s;
         *psse       = sse;
-#if CONFIG_EXT_TX
         best_tx_type = mbmi->tx_type;
-#endif  // CONFIG_EXT_TX
       }
     }
-#if CONFIG_EXT_TX
   }
-#endif  // CONFIG_EXT_TX
 
   mbmi->tx_size = best_tx;
-#if CONFIG_EXT_TX
   mbmi->tx_type = best_tx_type;
   txfm_rd_in_plane(x,
 #if CONFIG_VAR_TX
@@ -1085,7 +1132,6 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                    &r, &d, &s,
                    &sse, ref_best_rd, 0, bs, best_tx,
                    cpi->sf.use_fast_coef_costing);
-#endif  // CONFIG_EXT_TX
 }
 
 static void super_block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
@@ -1938,9 +1984,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   const uint8_t *src = x->plane[0].src.buf;
   double hist[DIRECTIONAL_MODES];
 #endif  // CONFIG_EXT_INTRA
-#if CONFIG_EXT_TX
   TX_TYPE best_tx_type = DCT_DCT;
-#endif  // CONFIG_EXT_TX
   int *bmode_costs;
   PALETTE_MODE_INFO palette_mode_info;
   uint8_t *best_palette_color_map = cpi->common.allow_screen_content_tools ?
@@ -2043,9 +2087,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTRA
       best_angle_delta = mic->mbmi.angle_delta[0];
 #endif  // CONFIG_EXT_INTRA
-#if CONFIG_EXT_TX
       best_tx_type    = mic->mbmi.tx_type;
-#endif  // CONFIG_EXT_TX
       *rate           = this_rate;
       *rate_tokenonly = this_rate_tokenonly;
       *distortion     = this_distortion;
@@ -2066,9 +2108,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
       mode_selected       = mic->mbmi.mode;
       best_tx             = mic->mbmi.tx_size;
       ext_intra_mode_info = mic->mbmi.ext_intra_mode_info;
-#if CONFIG_EXT_TX
       best_tx_type        = mic->mbmi.tx_type;
-#endif  // CONFIG_EXT_TX
     }
   }
 
@@ -2085,9 +2125,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTRA
   mic->mbmi.angle_delta[0] = best_angle_delta;
 #endif  // CONFIG_EXT_INTRA
-#if CONFIG_EXT_TX
   mic->mbmi.tx_type = best_tx_type;
-#endif  // CONFIG_EXT_TX
   mic->mbmi.palette_mode_info.palette_size[0] =
       palette_mode_info.palette_size[0];
   if (palette_mode_info.palette_size[0] > 0) {
@@ -2508,7 +2546,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
         continue;
     } else {
       if (!ALLOW_INTRA_EXT_TX && bsize >= BLOCK_8X8) {
-        if (tx_type != intra_mode_to_tx_type_lookup[mbmi->mode])
+        if (tx_type != intra_mode_to_tx_type_context[mbmi->mode])
           continue;
       }
       if (!ext_tx_used_intra[ext_tx_set][tx_type])

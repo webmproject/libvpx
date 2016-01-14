@@ -38,7 +38,6 @@ int vp10_prob_diff_update_savings_search_model(const unsigned int *ct,
                                               int stepsize);
 int vp10_cond_prob_diff_update_savings(vpx_prob *oldp,
                                        const unsigned int ct[2]);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
