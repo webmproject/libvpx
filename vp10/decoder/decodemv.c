@@ -900,6 +900,15 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       mbmi->mode != ZEROMV) {
     uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
 
+    if (xd->ref_mv_count[ref_frame_type] == 1 && mbmi->mode == NEARESTMV) {
+      int i;
+      nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
+      nearestmv[1] = xd->ref_mv_stack[ref_frame_type][0].comp_mv;
+
+      for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
+        lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
+    }
+
     if (xd->ref_mv_count[ref_frame_type] > 1) {
       int i;
       nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
