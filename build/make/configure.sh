@@ -647,7 +647,7 @@ process_common_toolchain() {
       armv6*)
         tgt_isa=armv6
         ;;
-      armv7*-hardfloat*)
+      armv7*-hardfloat* | armv7*-gnueabihf | arm-*-gnueabihf)
         tgt_isa=armv7
         float_abi=hard
         ;;
