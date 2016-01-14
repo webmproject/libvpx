@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4768b202_c85152e9",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-14T16:23:33Z",
+      "side": 1,
+      "message": "can you compute the determinant first and check if Pseudo inverse is needed.\ndet \u003d (M[0] * M[3]) - (M[1] * M[1]);\nif (fabs(det) \u003c 1e-6) {\n  PseudoInverse(M_inv, M, 2, 2);\n  MultiplyMat(M_inv, b, flow_vec, 2, 2, 1);\n} else {\n  // non-singular matrix\n  compute the flow vector directly since the inverse matrix is well known.\n}",
+      "revId": "265734a72c0ac22573fc0ff90153e5fcfdefd7d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "678e9643_2bc62e9c",
+        "filename": "vp9/encoder/vp9_opticalflow.h",
+        "patchSetId": 22
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-14T16:23:33Z",
+      "side": 1,
+      "message": "do any of these macros need to be exposed in the .h. It seems they can all go into the .c",
+      "revId": "265734a72c0ac22573fc0ff90153e5fcfdefd7d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87562a44_7910da9d",
+        "filename": "vp9/encoder/vp9_opticalflow.h",
+        "patchSetId": 22
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-14T16:23:33Z",
+      "side": 1,
+      "message": "why do you need this?",
+      "revId": "265734a72c0ac22573fc0ff90153e5fcfdefd7d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
