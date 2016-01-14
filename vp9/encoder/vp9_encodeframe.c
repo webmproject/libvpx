@@ -33,6 +33,7 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
 
+#include "vp9/encoder/vp9_aq_360.h"
 #include "vp9/encoder/vp9_aq_complexity.h"
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_aq_variance.h"
@@ -221,7 +222,8 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Setup segment ID.
   if (seg->enabled) {
-    if (cpi->oxcf.aq_mode != VARIANCE_AQ) {
+    if (cpi->oxcf.aq_mode != VARIANCE_AQ &&
+        cpi->oxcf.aq_mode != EQUATOR360_AQ) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
@@ -1263,6 +1265,15 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
       mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
     x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
+  } else if (aq_mode == EQUATOR360_AQ) {
+    if (cm->frame_type == KEY_FRAME) {
+      mbmi->segment_id = vp9_360aq_segment_id(mi_row, cm->mi_rows);
+    } else {
+      const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
+                                                    : cm->last_frame_seg_map;
+      mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+    }
+    x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == COMPLEXITY_AQ) {
     x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == CYCLIC_REFRESH_AQ) {
@@ -1719,7 +1730,8 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
     // For in frame complexity AQ or variance AQ, copy segment_id from
     // segmentation_map.
     if (cpi->oxcf.aq_mode == COMPLEXITY_AQ ||
-        cpi->oxcf.aq_mode == VARIANCE_AQ ) {
+        cpi->oxcf.aq_mode == VARIANCE_AQ ||
+        cpi->oxcf.aq_mode == EQUATOR360_AQ) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
