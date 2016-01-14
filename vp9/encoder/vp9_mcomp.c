@@ -439,7 +439,7 @@ int vp9_find_best_sub_pixel_tree_pruned_evenmore(
   tr = br;
   tc = bc;
 
-  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
+  if (allow_hp && use_mv_hp(ref_mv) && forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
     if (eighthiters > 1) {
@@ -507,7 +507,7 @@ int vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
     }
   }
 
-  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
+  if (allow_hp && use_mv_hp(ref_mv) && forced_stop == 0) {
     tr = br;
     tc = bc;
     hstep >>= 1;
@@ -602,7 +602,7 @@ int vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
     tc = bc;
   }
 
-  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
+  if (allow_hp && use_mv_hp(ref_mv) && forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
     if (eighthiters > 1) {
@@ -674,7 +674,7 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
   unsigned int cost_array[5];
   int kr, kc;
 
-  if (!(allow_hp && vp9_use_mv_hp(ref_mv)))
+  if (!(allow_hp && use_mv_hp(ref_mv)))
     if (round == 3)
       round = 2;
 
