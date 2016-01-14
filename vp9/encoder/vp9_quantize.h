@@ -21,9 +21,9 @@ extern "C" {
 typedef struct {
 #if CONFIG_NEW_QUANT
   DECLARE_ALIGNED(16, tran_low_t,
-                  y_cumbins_nuq[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTES]);
+                  y_cumbins_nuq[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTS]);
   DECLARE_ALIGNED(16, tran_low_t,
-                  uv_cumbins_nuq[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTES]);
+                  uv_cumbins_nuq[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTS]);
 #endif  // CONFIG_NEW_QUANT
 
   DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
@@ -62,9 +62,9 @@ typedef struct {
   DECLARE_ALIGNED(16, int16_t, uv_round_pxd[QINDEX_RANGE][8]);
 #if CONFIG_NEW_QUANT
   DECLARE_ALIGNED(16, tran_low_t,
-                  y_cumbins_nuq_pxd[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTES]);
+                  y_cumbins_nuq_pxd[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTS]);
   DECLARE_ALIGNED(16, tran_low_t,
-                  uv_cumbins_nuq_pxd[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTES]);
+                  uv_cumbins_nuq_pxd[QINDEX_RANGE][COEF_BANDS][NUQ_KNOTS]);
 #endif  // CONFIG_NEW_QUANT
 #endif  // CONFIG_TX_SKIP
 } QUANTS;

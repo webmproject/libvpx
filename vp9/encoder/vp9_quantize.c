@@ -54,15 +54,15 @@ static INLINE int quantize_coeff_nuq(const tran_low_t coeffv,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int tmp = clamp(abs_coeff, INT16_MIN, INT16_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < cumbins_ptr[i]) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    tmp -= cumbins_ptr[NUQ_KNOTES - 1];
-    q = NUQ_KNOTES + (((((tmp * quant) >> 16) + tmp) * quant_shift) >> 16);
+  if (i == NUQ_KNOTS) {
+    tmp -= cumbins_ptr[NUQ_KNOTS - 1];
+    q = NUQ_KNOTS + (((((tmp * quant) >> 16) + tmp) * quant_shift) >> 16);
   }
   if (q) {
     *dqcoeff_ptr =
@@ -90,15 +90,15 @@ static INLINE int quantize_coeff_bigtx_nuq(const tran_low_t coeffv,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int tmp = clamp(abs_coeff, INT16_MIN, INT16_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < ROUND_POWER_OF_TWO(cumbins_ptr[i], 1 + logsizeby32)) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    tmp -= ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTES - 1], 1 + logsizeby32);
-    q = NUQ_KNOTES +
+  if (i == NUQ_KNOTS) {
+    tmp -= ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTS - 1], 1 + logsizeby32);
+    q = NUQ_KNOTS +
         (((((tmp * quant) >> 16) + tmp) * quant_shift) >> (15 - logsizeby32));
   }
   if (q) {
@@ -130,15 +130,15 @@ static INLINE int highbd_quantize_coeff_nuq(const tran_low_t coeffv,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int64_t tmp = clamp(abs_coeff, INT32_MIN, INT32_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < cumbins_ptr[i]) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    tmp -= cumbins_ptr[NUQ_KNOTES - 1];
-    q = NUQ_KNOTES + (((((tmp * quant) >> 16) + tmp) * quant_shift) >> 16);
+  if (i == NUQ_KNOTS) {
+    tmp -= cumbins_ptr[NUQ_KNOTS - 1];
+    q = NUQ_KNOTS + (((((tmp * quant) >> 16) + tmp) * quant_shift) >> 16);
   }
   if (q) {
     *dqcoeff_ptr =
@@ -166,15 +166,15 @@ static INLINE int highbd_quantize_coeff_bigtx_nuq(const tran_low_t coeffv,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int64_t tmp = clamp(abs_coeff, INT32_MIN, INT32_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < ROUND_POWER_OF_TWO(cumbins_ptr[i], 1 + logsizeby32)) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    tmp -= ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTES - 1], 1 + logsizeby32);
-    q = NUQ_KNOTES +
+  if (i == NUQ_KNOTS) {
+    tmp -= ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTS - 1], 1 + logsizeby32);
+    q = NUQ_KNOTS +
         (((((tmp * quant) >> 16) + tmp) * quant_shift) >> (15 - logsizeby32));
   }
   if (q) {
@@ -203,15 +203,15 @@ static INLINE int quantize_coeff_fp_nuq(const tran_low_t coeffv,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int tmp = clamp(abs_coeff, INT16_MIN, INT16_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < cumbins_ptr[i]) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    q = NUQ_KNOTES +
-        ((((int64_t)tmp - cumbins_ptr[NUQ_KNOTES - 1]) * quant) >> 16);
+  if (i == NUQ_KNOTS) {
+    q = NUQ_KNOTS +
+        ((((int64_t)tmp - cumbins_ptr[NUQ_KNOTS - 1]) * quant) >> 16);
   }
   if (q) {
     *dqcoeff_ptr =
@@ -238,15 +238,15 @@ static INLINE int quantize_coeff_bigtx_fp_nuq(const tran_low_t coeffv,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int tmp = clamp(abs_coeff, INT16_MIN, INT16_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < ROUND_POWER_OF_TWO(cumbins_ptr[i], 1 + logsizeby32)) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    q = NUQ_KNOTES +
-        ((((int64_t)tmp - ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTES - 1],
+  if (i == NUQ_KNOTS) {
+    q = NUQ_KNOTS +
+        ((((int64_t)tmp - ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTS - 1],
                                              1 + logsizeby32)) * quant) >>
          (15 - logsizeby32));
   }
@@ -278,15 +278,15 @@ static INLINE int highbd_quantize_coeff_fp_nuq(const tran_low_t coeffv,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int64_t tmp = clamp(abs_coeff, INT32_MIN, INT32_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < cumbins_ptr[i]) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    q = NUQ_KNOTES +
-        (((tmp - cumbins_ptr[NUQ_KNOTES - 1]) * quant) >> 16);
+  if (i == NUQ_KNOTS) {
+    q = NUQ_KNOTS +
+        (((tmp - cumbins_ptr[NUQ_KNOTS - 1]) * quant) >> 16);
   }
   if (q) {
     *dqcoeff_ptr =
@@ -314,15 +314,15 @@ static INLINE int highbd_quantize_coeff_bigtx_fp_nuq(
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int i, q;
   int64_t tmp = clamp(abs_coeff, INT32_MIN, INT32_MAX);
-  for (i = 0; i < NUQ_KNOTES; i++) {
+  for (i = 0; i < NUQ_KNOTS; i++) {
     if (tmp < ROUND_POWER_OF_TWO(cumbins_ptr[i], 1 + logsizeby32)) {
       q = i;
       break;
     }
   }
-  if (i == NUQ_KNOTES) {
-    q = NUQ_KNOTES +
-        (((tmp - ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTES - 1],
+  if (i == NUQ_KNOTS) {
+    q = NUQ_KNOTS +
+        (((tmp - ROUND_POWER_OF_TWO(cumbins_ptr[NUQ_KNOTS - 1],
                                     1 + logsizeby32)) * quant) >>
          (15 - logsizeby32));
   }
