@@ -17,6 +17,7 @@
 
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_context_tree.h"
+#include "vp9/encoder/vp9_cost.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +26,7 @@ extern "C" {
 #define RDDIV_BITS          7
 
 #define RDCOST(RM, DM, R, D) \
-  (((128 + ((int64_t)R) * (RM)) >> 8) + (D << DM))
+  (ROUND_POWER_OF_TWO(((int64_t)R) * (RM), VP9_PROB_COST_SHIFT) + (D << DM))
 #define QIDX_SKIP_THRESH     115
 
 #define MV_COST_WEIGHT      108
