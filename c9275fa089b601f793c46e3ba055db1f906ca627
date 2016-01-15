@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "274e5eac_546de2d2",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-15T03:50:05Z",
+      "side": 1,
+      "message": "Scott, this seems like it could be movd given the change; x_half_y_zero_loop and x_zero_y_half_loop don\u0027t get hit by the tests and general encoding is unaffected if this section is decimated, are they really needed?",
+      "revId": "c9275fa089b601f793c46e3ba055db1f906ca627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
