@@ -167,6 +167,9 @@ typedef struct {
 
   int_mv mv[2];
   int_mv pred_mv[2];
+#if CONFIG_REF_MV
+  uint8_t ref_mv_idx;
+#endif
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {

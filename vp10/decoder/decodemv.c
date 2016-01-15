@@ -1003,6 +1003,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTER
   mode_ctx = vp10_mode_context_analyzer(inter_mode_ctx,
                                         mbmi->ref_frame, bsize, -1);
+  mbmi->ref_mv_idx = 0;
 #else
   mode_ctx = inter_mode_ctx[mbmi->ref_frame[0]];
 #endif
@@ -1015,9 +1016,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
         return;
     }
   } else {
-    if (bsize >= BLOCK_8X8)
+    if (bsize >= BLOCK_8X8) {
 #if CONFIG_EXT_INTER
-    {
       if (is_compound)
         mbmi->mode = read_inter_compound_mode(cm, xd, r, mode_ctx);
       else
@@ -1027,9 +1027,12 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                                    mbmi,
 #endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
                                    r, mode_ctx);
-#if CONFIG_EXT_INTER
+#if CONFIG_REF_MV
+    if (mbmi->mode == NEARMV && !is_compound)
+      if (xd->ref_mv_count[mbmi->ref_frame[0]] > 2)
+        mbmi->ref_mv_idx = vpx_read_bit(r);
+#endif
     }
-#endif  // CONFIG_EXT_INTER
   }
 
 #if CONFIG_EXT_INTER
@@ -1045,6 +1048,12 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 
 #if CONFIG_REF_MV
+  if (mbmi->ref_mv_idx == 1) {
+    int_mv cur_mv = xd->ref_mv_stack[mbmi->ref_frame[0]][2].this_mv;
+    lower_mv_precision(&cur_mv.as_mv, cm->allow_high_precision_mv);
+    nearmv[0] = cur_mv;
+  }
+
 #if CONFIG_EXT_INTER
   if (is_compound && bsize >= BLOCK_8X8 && mbmi->mode != ZERO_ZEROMV) {
 #else
