@@ -33,6 +33,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->first_spatial_layer_to_encode = 0;
   svc->rc_drop_superframe = 0;
   svc->force_zero_mode_spatial_ref = 0;
+  svc->use_base_mv = 0;
   svc->current_superframe = 0;
   for (i = 0; i < REF_FRAMES; ++i)
     svc->ref_frame_index[i] = -1;
@@ -416,7 +417,9 @@ static void set_flags_and_fb_idx_for_temporal_mode3(VP9_COMP *const cpi) {
       cpi->ref_frame_flags = VP9_LAST_FLAG;
     } else if (cpi->svc.layer_context[temporal_id].is_key_frame) {
       // base layer is a key frame.
-      cpi->ref_frame_flags = VP9_GOLD_FLAG;
+      cpi->ref_frame_flags = VP9_LAST_FLAG;
+      cpi->ext_refresh_last_frame = 0;
+      cpi->ext_refresh_golden_frame = 1;
     } else {
       cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
     }
@@ -431,40 +434,52 @@ static void set_flags_and_fb_idx_for_temporal_mode3(VP9_COMP *const cpi) {
   } else {
     if (frame_num_within_temporal_struct == 1) {
       // the first tl2 picture
-      if (!spatial_id) {
+      if (spatial_id == cpi->svc.number_spatial_layers - 1) {  // top layer
+        cpi->ext_refresh_frame_flags_pending = 1;
+        if (!spatial_id)
+          cpi->ref_frame_flags = VP9_LAST_FLAG;
+        else
+          cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
+      } else if (!spatial_id) {
         cpi->ext_refresh_frame_flags_pending = 1;
         cpi->ext_refresh_alt_ref_frame = 1;
         cpi->ref_frame_flags = VP9_LAST_FLAG;
       } else if (spatial_id < cpi->svc.number_spatial_layers - 1) {
         cpi->ext_refresh_frame_flags_pending = 1;
         cpi->ext_refresh_alt_ref_frame = 1;
-        cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
-      } else {  // Top layer
-        cpi->ext_refresh_frame_flags_pending = 0;
         cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
       }
     } else {
       //  The second tl2 picture
-      if (!spatial_id) {
+      if (spatial_id == cpi->svc.number_spatial_layers - 1) {  // top layer
+        cpi->ext_refresh_frame_flags_pending = 1;
+        if (!spatial_id)
+        cpi->ref_frame_flags = VP9_LAST_FLAG;
+        else
+          cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
+      } else if (!spatial_id) {
         cpi->ext_refresh_frame_flags_pending = 1;
         cpi->ref_frame_flags = VP9_LAST_FLAG;
-        cpi->ext_refresh_last_frame = 1;
-      } else if (spatial_id < cpi->svc.number_spatial_layers - 1) {
+        cpi->ext_refresh_alt_ref_frame = 1;
+      } else {  // top layer
         cpi->ext_refresh_frame_flags_pending = 1;
         cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
-        cpi->ext_refresh_last_frame = 1;
-      } else {  // top layer
-        cpi->ext_refresh_frame_flags_pending = 0;
-        cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
+        cpi->ext_refresh_alt_ref_frame = 1;
       }
     }
   }
   if (temporal_id == 0) {
     cpi->lst_fb_idx = spatial_id;
-    if (spatial_id)
+    if (spatial_id) {
+      if (cpi->svc.layer_context[temporal_id].is_key_frame) {
+        cpi->lst_fb_idx = spatial_id - 1;
+        cpi->gld_fb_idx = spatial_id;
+      } else {
       cpi->gld_fb_idx = spatial_id - 1;
-    else
+      }
+    } else {
       cpi->gld_fb_idx = 0;
+    }
     cpi->alt_fb_idx = 0;
   } else if (temporal_id == 1) {
     cpi->lst_fb_idx = spatial_id;
@@ -477,7 +492,7 @@ static void set_flags_and_fb_idx_for_temporal_mode3(VP9_COMP *const cpi) {
   } else {
     cpi->lst_fb_idx = cpi->svc.number_spatial_layers + spatial_id;
     cpi->gld_fb_idx = cpi->svc.number_spatial_layers + spatial_id - 1;
-    cpi->alt_fb_idx = 0;
+    cpi->alt_fb_idx = cpi->svc.number_spatial_layers + spatial_id;
   }
 }
 
@@ -499,7 +514,9 @@ static void set_flags_and_fb_idx_for_temporal_mode2(VP9_COMP *const cpi) {
       cpi->ref_frame_flags = VP9_LAST_FLAG;
     } else if (cpi->svc.layer_context[temporal_id].is_key_frame) {
       // base layer is a key frame.
-      cpi->ref_frame_flags = VP9_GOLD_FLAG;
+      cpi->ref_frame_flags = VP9_LAST_FLAG;
+      cpi->ext_refresh_last_frame = 0;
+      cpi->ext_refresh_golden_frame = 1;
     } else {
       cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
     }
@@ -515,10 +532,16 @@ static void set_flags_and_fb_idx_for_temporal_mode2(VP9_COMP *const cpi) {
 
   if (temporal_id == 0) {
     cpi->lst_fb_idx = spatial_id;
-    if (spatial_id)
+    if (spatial_id) {
+      if (cpi->svc.layer_context[temporal_id].is_key_frame) {
+        cpi->lst_fb_idx = spatial_id - 1;
+        cpi->gld_fb_idx = spatial_id;
+      } else {
       cpi->gld_fb_idx = spatial_id - 1;
-    else
+      }
+    } else {
       cpi->gld_fb_idx = 0;
+    }
     cpi->alt_fb_idx = 0;
   } else if (temporal_id == 1) {
     cpi->lst_fb_idx = spatial_id;
@@ -540,20 +563,30 @@ static void set_flags_and_fb_idx_for_temporal_mode_noLayering(
   if (!spatial_id) {
     cpi->ref_frame_flags = VP9_LAST_FLAG;
   } else if (cpi->svc.layer_context[0].is_key_frame) {
-    cpi->ref_frame_flags = VP9_GOLD_FLAG;
+    cpi->ref_frame_flags = VP9_LAST_FLAG;
+    cpi->ext_refresh_last_frame = 0;
+    cpi->ext_refresh_golden_frame = 1;
   } else {
     cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
   }
   cpi->lst_fb_idx = spatial_id;
-  if (spatial_id)
+  if (spatial_id) {
+    if (cpi->svc.layer_context[0].is_key_frame) {
+      cpi->lst_fb_idx = spatial_id - 1;
+      cpi->gld_fb_idx = spatial_id;
+    } else {
     cpi->gld_fb_idx = spatial_id - 1;
-  else
+    }
+  } else {
     cpi->gld_fb_idx = 0;
+  }
 }
 
 int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc = NULL;
+  if (cpi->svc.number_spatial_layers > 1)
+    cpi->svc.use_base_mv = 1;
   cpi->svc.force_zero_mode_spatial_ref = 1;
 
   if (cpi->svc.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0212) {

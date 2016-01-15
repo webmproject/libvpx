@@ -1754,7 +1754,9 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
     }
   }
 
-  if (cm->use_prev_frame_mvs) {
+  if (cm->use_prev_frame_mvs ||
+      (cpi->svc.use_base_mv && cpi->svc.number_spatial_layers > 1
+        && cpi->svc.spatial_layer_id != cpi->svc.number_spatial_layers - 1)) {
     MV_REF *const frame_mvs =
         cm->cur_frame->mvs + mi_row * cm->mi_cols + mi_col;
     int w, h;
