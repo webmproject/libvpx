@@ -67,10 +67,7 @@ const vpx_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
 };
 
 static const int16_t zero_cost[] = {0};
-static const int16_t one_cost[] = {255, 257};
-static const int16_t two_cost[] = {255, 257};
-static const int16_t three_cost[] = {255, 257};
-static const int16_t four_cost[] = {255, 257};
+static const int16_t sign_cost[] = {255, 257};
 static const int16_t cat1_cost[] = {429, 431, 616, 618};
 static const int16_t cat2_cost[] = {624, 626, 727, 729, 848, 850, 951, 953};
 static const int16_t cat3_cost[] = {
@@ -360,10 +357,10 @@ const int16_t vp9_cat6_high12_high_cost[2048] = {
 
 const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, zero_cost},                          // ZERO_TOKEN
-  {0, 0, 1, one_cost},                           // ONE_TOKEN
-  {0, 0, 2, two_cost},                           // TWO_TOKEN
-  {0, 0, 3, three_cost},                         // THREE_TOKEN
-  {0, 0, 4, four_cost},                          // FOUR_TOKEN
+  {0, 0, 1, sign_cost},                          // ONE_TOKEN
+  {0, 0, 2, sign_cost},                          // TWO_TOKEN
+  {0, 0, 3, sign_cost},                          // THREE_TOKEN
+  {0, 0, 4, sign_cost},                          // FOUR_TOKEN
   {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},  // CATEGORY1_TOKEN
   {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},  // CATEGORY2_TOKEN
   {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},  // CATEGORY3_TOKEN
@@ -376,10 +373,10 @@ const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
 #if CONFIG_VP9_HIGHBITDEPTH
 const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
   {0, 0, 0, zero_cost},                             // ZERO
-  {0, 0, 1, one_cost},                              // ONE
-  {0, 0, 2, two_cost},                              // TWO
-  {0, 0, 3, three_cost},                            // THREE
-  {0, 0, 4, four_cost},                             // FOUR
+  {0, 0, 1, sign_cost},                             // ONE
+  {0, 0, 2, sign_cost},                             // TWO
+  {0, 0, 3, sign_cost},                             // THREE
+  {0, 0, 4, sign_cost},                             // FOUR
   {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},     // CAT1
   {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},     // CAT2
   {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},     // CAT3
@@ -390,10 +387,10 @@ const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
 };
 const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
   {0, 0, 0, zero_cost},                          // ZERO
-  {0, 0, 1, one_cost},                           // ONE
-  {0, 0, 2, two_cost},                           // TWO
-  {0, 0, 3, three_cost},                         // THREE
-  {0, 0, 4, four_cost},                          // FOUR
+  {0, 0, 1, sign_cost},                          // ONE
+  {0, 0, 2, sign_cost},                          // TWO
+  {0, 0, 3, sign_cost},                          // THREE
+  {0, 0, 4, sign_cost},                          // FOUR
   {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},  // CAT1
   {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},  // CAT2
   {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},  // CAT3
