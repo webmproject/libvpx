@@ -16,6 +16,24 @@
       "revId": "c9275fa089b601f793c46e3ba055db1f906ca627",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07f87ad1_665530d4",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-15T20:27:34Z",
+      "side": 1,
+      "message": "It looks like it should be movd.  Doing a checkout now and will run some tests.",
+      "parentUuid": "274e5eac_546de2d2",
+      "revId": "c9275fa089b601f793c46e3ba055db1f906ca627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
