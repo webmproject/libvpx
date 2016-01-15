@@ -212,7 +212,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
 
   saved_mbmi = *mbmi;
 
-  if (is_skin && motion_magnitude > 16)
+  if (is_skin && motion_magnitude > 0)
     return COPY_BLOCK;
 
   // If the best reference frame uses inter-prediction and there is enough of a
