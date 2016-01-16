@@ -34,6 +34,24 @@
       "revId": "6e321332ed61417e4aa4ec0477bae7a0832ee1eb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_1d68a531",
+        "filename": "vp8/common/rtcd.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-16T00:47:15Z",
+      "side": 1,
+      "message": "can you post the error? this location seems fragile, if it  has to do with vpx_once it should live a bit closer to that otherwise this could be deleted assuming we can\u0027t reproduce and add coverage on the libvpx side.",
+      "parentUuid": "e7344668_8287dac9",
+      "revId": "6e321332ed61417e4aa4ec0477bae7a0832ee1eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
