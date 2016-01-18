@@ -2822,6 +2822,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
   if (xd->lossless) {
       lf->filter_level = 0;
+      lf->last_filt_level = 0;
   } else {
     struct vpx_usec_timer timer;
 
@@ -2829,7 +2830,16 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
     vpx_usec_timer_start(&timer);
 
-    vp9_pick_filter_level(cpi->Source, cpi, cpi->sf.lpf_pick);
+    if (!cpi->rc.is_src_frame_alt_ref) {
+      if ((cpi->common.frame_type == KEY_FRAME) &&
+          (!cpi->rc.this_key_frame_forced)) {
+        lf->last_filt_level = 0;
+      }
+      vp9_pick_filter_level(cpi->Source, cpi, cpi->sf.lpf_pick);
+      lf->last_filt_level = lf->filter_level;
+    } else {
+      lf->filter_level = 0;
+    }
 
     vpx_usec_timer_mark(&timer);
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
@@ -3022,7 +3032,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
        "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
         "%6d %6d %5d %5d %5d "
         "%10"PRId64" %10.3lf"
-        "%10lf %8u %10"PRId64" %10d %10d %10d\n",
+        "%10lf %8u %10"PRId64" %10d %10d %10d %10d\n",
         cpi->common.current_video_frame,
         cm->width, cm->height,
         cpi->td.rd_counts.m_search_count,
@@ -3054,7 +3064,8 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
             (1 + cpi->twopass.total_left_stats.coded_error),
         cpi->tot_recode_hits, recon_err, cpi->rc.kf_boost,
         cpi->twopass.kf_zeromotion_pct,
-        cpi->twopass.fr_content_type);
+        cpi->twopass.fr_content_type,
+        cm->lf.filter_level);
 
   fclose(f);
 
@@ -4312,7 +4323,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cpi->svc.layer_context[cpi->svc.spatial_layer_id].has_alt_frame = 1;
 #endif
 
-      if (oxcf->arnr_max_frames > 0) {
+      if ((oxcf->arnr_max_frames > 0) && (oxcf->arnr_strength > 0)) {
         // Produce the filtered ARF frame.
         vp9_temporal_filter(cpi, arf_src_index);
         vpx_extend_frame_borders(&cpi->alt_ref_buffer);
