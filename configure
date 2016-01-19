@@ -195,9 +195,6 @@ fi
 # disable codecs when their source directory does not exist
 [ -d "${source_path}/vp10" ] || disable_feature vp10
 
-# disable vp10 codec by default
-disable_feature vp10
-
 # install everything except the sources, by default. sources will have
 # to be enabled when doing dist builds, since that's no longer a common
 # case.
