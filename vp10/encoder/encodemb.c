@@ -766,12 +766,17 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                      src_stride, dst, dst_stride);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_EXT_INTRA
+  vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+                   VP10_XFORM_QUANT_B);
+#else
   if (!x->skip_recode)
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_B);
   else
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_SKIP_QUANT);
+#endif  // CONFIG_EXT_INTRA
 
   if (*eob) {
     // inverse transform
