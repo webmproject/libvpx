@@ -280,6 +280,8 @@ EXPERIMENT_LIST="
     ext_refs
     supertx
     ans
+    loop_restoration
+    ext_partition
 "
 CONFIG_LIST="
     dependency_tracking
