@@ -32,10 +32,10 @@
 #include "./ivfenc.h"
 #include "./tools_common.h"
 
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+#if CONFIG_VP10_ENCODER
 #include "vpx/vp8cx.h"
 #endif
-#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER || CONFIG_VP10_DECODER
+#if CONFIG_VP10_DECODER
 #include "vpx/vp8dx.h"
 #endif
 
@@ -350,31 +350,7 @@ static const arg_def_t cq_level = ARG_DEF(
 static const arg_def_t max_intra_rate_pct = ARG_DEF(
     NULL, "max-intra-rate", 1, "Max I-frame bitrate (pct)");
 
-#if CONFIG_VP8_ENCODER
-static const arg_def_t cpu_used_vp8 = ARG_DEF(
-    NULL, "cpu-used", 1, "CPU Used (-16..16)");
-static const arg_def_t token_parts = ARG_DEF(
-    NULL, "token-parts", 1, "Number of token partitions to use, log2");
-static const arg_def_t screen_content_mode = ARG_DEF(
-    NULL, "screen-content-mode", 1, "Screen content mode");
-static const arg_def_t *vp8_args[] = {
-  &cpu_used_vp8, &auto_altref, &noise_sens, &sharpness, &static_thresh,
-  &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct, &screen_content_mode,
-  NULL
-};
-static const int vp8_arg_ctrl_map[] = {
-  VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
-  VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
-  VP8E_SET_TOKEN_PARTITIONS,
-  VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
-  VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-  VP8E_SET_SCREEN_CONTENT_MODE,
-  0
-};
-#endif
-
-#if CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+#if CONFIG_VP10_ENCODER
 static const arg_def_t cpu_used_vp9 = ARG_DEF(
     NULL, "cpu-used", 1, "CPU Used (-8..8)");
 static const arg_def_t tile_cols = ARG_DEF(
@@ -516,14 +492,6 @@ void usage_exit(void) {
   arg_show_usage(stderr, rc_twopass_args);
   fprintf(stderr, "\nKeyframe Placement Options:\n");
   arg_show_usage(stderr, kf_args);
-#if CONFIG_VP8_ENCODER
-  fprintf(stderr, "\nVP8 Specific Options:\n");
-  arg_show_usage(stderr, vp8_args);
-#endif
-#if CONFIG_VP9_ENCODER
-  fprintf(stderr, "\nVP9 Specific Options:\n");
-  arg_show_usage(stderr, vp9_args);
-#endif
 #if CONFIG_VP10_ENCODER
   fprintf(stderr, "\nVP10 Specific Options:\n");
   arg_show_usage(stderr, vp10_args);
@@ -775,10 +743,6 @@ static int compare_img(const vpx_image_t *const img1,
 #define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
 #if CONFIG_VP10_ENCODER
 #define ARG_CTRL_CNT_MAX NELEMENTS(vp10_arg_ctrl_map)
-#elif CONFIG_VP9_ENCODER
-#define ARG_CTRL_CNT_MAX NELEMENTS(vp9_arg_ctrl_map)
-#else
-#define ARG_CTRL_CNT_MAX NELEMENTS(vp8_arg_ctrl_map)
 #endif
 
 #if !CONFIG_WEBM_IO
@@ -1091,16 +1055,6 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
 
   // Handle codec specific options
   if (0) {
-#if CONFIG_VP8_ENCODER
-  } else if (strcmp(global->codec->name, "vp8") == 0) {
-    ctrl_args = vp8_args;
-    ctrl_args_map = vp8_arg_ctrl_map;
-#endif
-#if CONFIG_VP9_ENCODER
-  } else if (strcmp(global->codec->name, "vp9") == 0) {
-    ctrl_args = vp9_args;
-    ctrl_args_map = vp9_arg_ctrl_map;
-#endif
 #if CONFIG_VP10_ENCODER
   } else if (strcmp(global->codec->name, "vp10") == 0) {
     // TODO(jingning): Reuse VP9 specific encoder configuration parameters.
@@ -1818,46 +1772,29 @@ static void test_decode(struct stream_state  *stream,
     return;
 
   /* Get the internal reference frame */
-  if (strcmp(codec->name, "vp8") == 0) {
-    struct vpx_ref_frame ref_enc, ref_dec;
-    int width, height;
-
-    width = (stream->config.cfg.g_w + 15) & ~15;
-    height = (stream->config.cfg.g_h + 15) & ~15;
-    vpx_img_alloc(&ref_enc.img, VPX_IMG_FMT_I420, width, height, 1);
-    enc_img = ref_enc.img;
-    vpx_img_alloc(&ref_dec.img, VPX_IMG_FMT_I420, width, height, 1);
-    dec_img = ref_dec.img;
-
-    ref_enc.frame_type = VP8_LAST_FRAME;
-    ref_dec.frame_type = VP8_LAST_FRAME;
-    vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &ref_enc);
-    vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &ref_dec);
-  } else {
     struct vp9_ref_frame ref_enc, ref_dec;
 
-    ref_enc.idx = 0;
-    ref_dec.idx = 0;
-    vpx_codec_control(&stream->encoder, VP9_GET_REFERENCE, &ref_enc);
-    enc_img = ref_enc.img;
-    vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref_dec);
-    dec_img = ref_dec.img;
+  ref_enc.idx = 0;
+  ref_dec.idx = 0;
+  vpx_codec_control(&stream->encoder, VP9_GET_REFERENCE, &ref_enc);
+  enc_img = ref_enc.img;
+  vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref_dec);
+  dec_img = ref_dec.img;
 #if CONFIG_VP9_HIGHBITDEPTH
-    if ((enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) !=
-        (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
-      if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
-        vpx_img_alloc(&enc_img, enc_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
-                      enc_img.d_w, enc_img.d_h, 16);
-        vpx_img_truncate_16_to_8(&enc_img, &ref_enc.img);
-      }
-      if (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
-        vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
-                      dec_img.d_w, dec_img.d_h, 16);
-        vpx_img_truncate_16_to_8(&dec_img, &ref_dec.img);
-      }
+  if ((enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) !=
+      (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
+    if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+      vpx_img_alloc(&enc_img, enc_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+                    enc_img.d_w, enc_img.d_h, 16);
+      vpx_img_truncate_16_to_8(&enc_img, &ref_enc.img);
     }
-#endif
+    if (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+      vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+                    dec_img.d_w, dec_img.d_h, 16);
+      vpx_img_truncate_16_to_8(&dec_img, &ref_dec.img);
+    }
   }
+#endif
   ctx_exit_on_error(&stream->encoder, "Failed to get encoder reference frame");
   ctx_exit_on_error(&stream->decoder, "Failed to get decoder reference frame");
 
