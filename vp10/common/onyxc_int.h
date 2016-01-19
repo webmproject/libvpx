@@ -172,6 +172,9 @@ typedef struct VP10Common {
   YV12_BUFFER_CONFIG post_proc_buffer;
   YV12_BUFFER_CONFIG post_proc_buffer_int;
 #endif
+#if CONFIG_LOOP_RESTORATION
+  YV12_BUFFER_CONFIG tmp_loop_buf;
+#endif  // CONFIG_LOOP_RESTORATION
 
   FRAME_TYPE last_frame_type;  /* last frame's frame type for motion search.*/
 #if CONFIG_EXT_REFS

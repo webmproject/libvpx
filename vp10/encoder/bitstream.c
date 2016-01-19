@@ -1645,9 +1645,10 @@ static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
   }
 }
 
-static void encode_loopfilter(struct loopfilter *lf,
+static void encode_loopfilter(VP10_COMMON *cm,
                               struct vpx_write_bit_buffer *wb) {
   int i;
+  struct loopfilter *lf = &cm->lf;
 
   // Encode the loop filter level and type
   vpx_wb_write_literal(wb, lf->filter_level, 6);
@@ -1681,6 +1682,15 @@ static void encode_loopfilter(struct loopfilter *lf,
       }
     }
   }
+#if CONFIG_LOOP_RESTORATION
+  vpx_wb_write_bit(wb, lf->bilateral_level != lf->last_bilateral_level);
+  if (lf->bilateral_level != lf->last_bilateral_level) {
+    int level = lf->bilateral_level -
+                (lf->bilateral_level > lf->last_bilateral_level);
+    vpx_wb_write_literal(wb, level,
+                         vp10_bilateral_level_bits(cm));
+  }
+#endif  // CONFIG_LOOP_RESTORATION
 }
 
 static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
@@ -2139,7 +2149,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
 
   vpx_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);
 
-  encode_loopfilter(&cm->lf, wb);
+  encode_loopfilter(cm, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
   if (!cm->seg.enabled && xd->lossless[0])

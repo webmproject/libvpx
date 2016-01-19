@@ -377,10 +377,16 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
   vp10_free_ref_frame_buffers(cm->buffer_pool);
 #if CONFIG_VP9_POSTPROC
   vp10_free_postproc_buffers(cm);
-#endif
+#endif  // CONFIG_VP9_POSTPROC
+#if CONFIG_LOOP_RESTORATION
+  vp10_free_restoration_buffers(cm);
+#endif  // CONFIG_LOOP_RESTORATION
   vp10_free_context_buffers(cm);
 
   vpx_free_frame_buffer(&cpi->last_frame_uf);
+#if CONFIG_LOOP_RESTORATION
+  vpx_free_frame_buffer(&cpi->last_frame_db);
+#endif  // CONFIG_LOOP_RESTORATION
   vpx_free_frame_buffer(&cpi->scaled_source);
   vpx_free_frame_buffer(&cpi->scaled_last_source);
   vpx_free_frame_buffer(&cpi->alt_ref_buffer);
@@ -633,6 +639,19 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
+
+#if CONFIG_LOOP_RESTORATION
+  if (vpx_realloc_frame_buffer(&cpi->last_frame_db,
+                               cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                               cm->use_highbitdepth,
+#endif
+                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               NULL, NULL, NULL))
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate last frame deblocked buffer");
+#endif  // CONFIG_LOOP_RESTORATION
 
   if (vpx_realloc_frame_buffer(&cpi->scaled_source,
                                cm->width, cm->height,
@@ -2759,6 +2778,12 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
       vp10_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
 #endif
   }
+#if CONFIG_LOOP_RESTORATION
+  vp10_loop_bilateral_init(&cm->lf_info, cm->lf.bilateral_level,
+                           cm->frame_type == KEY_FRAME);
+  if (cm->lf_info.bilateral_used)
+    vp10_loop_bilateral_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
+#endif  // CONFIG_LOOP_RESTORATION
 
   vpx_extend_frame_inner_borders(cm->frame_to_show);
 }
@@ -3867,6 +3892,12 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   cm->last2_frame_type = cm->last_frame_type;
 #endif  // CONFIG_EXT_REFS
   cm->last_frame_type = cm->frame_type;
+#if CONFIG_LOOP_RESTORATION
+  if (cm->frame_type != KEY_FRAME)
+    cm->lf.last_bilateral_level = cm->lf.bilateral_level;
+  else
+    cm->lf.last_bilateral_level = 0;
+#endif  // CONFIG_LOOP_RESTORATION
 
   vp10_rc_postencode_update(cpi, *size);
 

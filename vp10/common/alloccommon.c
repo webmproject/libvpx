@@ -81,6 +81,12 @@ void vp10_free_ref_frame_buffers(BufferPool *pool) {
   }
 }
 
+#if CONFIG_LOOP_RESTORATION
+void vp10_free_restoration_buffers(VP10_COMMON *cm) {
+  vpx_free_frame_buffer(&cm->tmp_loop_buf);
+}
+#endif  // CONFIG_LOOP_RESTORATION
+
 void vp10_free_postproc_buffers(VP10_COMMON *cm) {
 #if CONFIG_VP9_POSTPROC
   vpx_free_frame_buffer(&cm->post_proc_buffer);
