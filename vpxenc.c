@@ -1767,12 +1767,10 @@ static void test_decode(struct stream_state  *stream,
                         enum TestDecodeFatality fatal,
                         const VpxInterface *codec) {
   vpx_image_t enc_img, dec_img;
+  struct vp9_ref_frame ref_enc, ref_dec;
 
   if (stream->mismatch_seen)
     return;
-
-  /* Get the internal reference frame */
-    struct vp9_ref_frame ref_enc, ref_dec;
 
   ref_enc.idx = 0;
   ref_dec.idx = 0;
