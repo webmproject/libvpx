@@ -2052,6 +2052,10 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
       }
       if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
         update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+#if CONFIG_VAR_TX
+      set_txfm_ctx(xd->left_txfm_context, supertx_size, xd->n8_h);
+      set_txfm_ctx(xd->above_txfm_context, supertx_size, mi_height);
+#endif  // CONFIG_VAR_TX
       return;
     } else {
       if (output_enabled) {
