@@ -497,7 +497,8 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              loop_filter_info_n *lfi_n,
                              int mb_row,
                              int mb_col,
-                             int block_index)
+                             int block_index,
+                             int consec_zero_last)
 
 {
     int mv_row;
@@ -608,11 +609,6 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
     motion_threshold = denoiser->denoise_pars.scale_motion_thresh *
         NOISE_MOTION_THRESHOLD;
 
-    // If block is considered to be skin area, lower the motion threshold.
-    // In current version set threshold = 0, so only denoise zero mv on skin.
-    if (x->is_skin)
-        motion_threshold = 0;
-
     if (motion_magnitude2 <
         denoiser->denoise_pars.scale_increase_filter * NOISE_MOTION_THRESHOLD)
       x->increase_denoising = 1;
@@ -622,6 +618,15 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
       sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD_HIGH;
 
     if (best_sse > sse_thresh || motion_magnitude2 > motion_threshold)
+      decision = COPY_BLOCK;
+
+    // If block is considered skin, don't denoise if the block
+    // (1) is selected as non-zero motion for current frame, or
+    // (2) has not been selected as ZERO_LAST mode at least x past frames
+    // in a row.
+    // TODO(marpan): Parameter "x" should be varied with framerate.
+    // In particualar, should be reduced for temporal layers (base layer/LAST).
+    if (x->is_skin && (consec_zero_last < 2 || motion_magnitude2 > 0))
       decision = COPY_BLOCK;
 
     if (decision == FILTER_BLOCK)
