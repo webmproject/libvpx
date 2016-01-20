@@ -20,7 +20,7 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              uint8_t *mode_context) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
-  const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
+  const POSITION *const mv_ref_search = mv_ref_blocks[mi->sb_type];
   int different_ref_found = 0;
   int context_counter = 0;
   const MV_REF *const prev_frame_mvs = cm->use_prev_frame_mvs ?
@@ -38,15 +38,14 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
       const MODE_INFO *const candidate_mi = xd->mi[mv_ref->col + mv_ref->row *
                                                    xd->mi_stride];
-      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       // Keep counts for entropy encoding.
-      context_counter += mode_2_counter[candidate->mode];
+      context_counter += mode_2_counter[candidate_mi->mode];
       different_ref_found = 1;
 
-      if (candidate->ref_frame[0] == ref_frame)
+      if (candidate_mi->ref_frame[0] == ref_frame)
         ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block),
                         refmv_count, mv_ref_list, Done);
-      else if (candidate->ref_frame[1] == ref_frame)
+      else if (candidate_mi->ref_frame[1] == ref_frame)
         ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block),
                         refmv_count, mv_ref_list, Done);
     }
@@ -58,14 +57,14 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   for (; i < MVREF_NEIGHBOURS; ++i) {
     const POSITION *const mv_ref = &mv_ref_search[i];
     if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
-      const MB_MODE_INFO *const candidate =
-          &xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride]->mbmi;
+      const MODE_INFO *const candidate_mi =
+          xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride];
       different_ref_found = 1;
 
-      if (candidate->ref_frame[0] == ref_frame)
-        ADD_MV_REF_LIST(candidate->mv[0], refmv_count, mv_ref_list, Done);
-      else if (candidate->ref_frame[1] == ref_frame)
-        ADD_MV_REF_LIST(candidate->mv[1], refmv_count, mv_ref_list, Done);
+      if (candidate_mi->ref_frame[0] == ref_frame)
+        ADD_MV_REF_LIST(candidate_mi->mv[0], refmv_count, mv_ref_list, Done);
+      else if (candidate_mi->ref_frame[1] == ref_frame)
+        ADD_MV_REF_LIST(candidate_mi->mv[1], refmv_count, mv_ref_list, Done);
     }
   }
 
@@ -85,11 +84,11 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
       const POSITION *mv_ref = &mv_ref_search[i];
       if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
-        const MB_MODE_INFO *const candidate =
-            &xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride]->mbmi;
+        const MODE_INFO *const candidate_mi =
+            xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride];
 
         // If the candidate is INTRA we don't want to consider its mv.
-        IF_DIFF_REF_FRAME_ADD_MV(candidate, ref_frame, ref_sign_bias,
+        IF_DIFF_REF_FRAME_ADD_MV(candidate_mi, ref_frame, ref_sign_bias,
                                  refmv_count, mv_ref_list, Done);
       }
     }
@@ -163,7 +162,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   assert(MAX_MV_REF_CANDIDATES == 2);
 
-  find_mv_refs_idx(cm, xd, mi, mi->mbmi.ref_frame[ref], mv_list, block,
+  find_mv_refs_idx(cm, xd, mi, mi->ref_frame[ref], mv_list, block,
                    mi_row, mi_col, mode_context);
 
   near_mv->as_int = 0;

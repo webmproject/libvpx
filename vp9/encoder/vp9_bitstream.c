@@ -79,8 +79,8 @@ static void prob_diff_update(const vpx_tree_index *tree,
 
 static void write_selected_tx_size(const VP9_COMMON *cm,
                                    const MACROBLOCKD *xd, vpx_writer *w) {
-  TX_SIZE tx_size = xd->mi[0]->mbmi.tx_size;
-  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  TX_SIZE tx_size = xd->mi[0]->tx_size;
+  BLOCK_SIZE bsize = xd->mi[0]->sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   const vpx_prob *const tx_probs = get_tx_probs2(max_tx_size, xd,
                                                  &cm->fc->tx_probs);
@@ -97,7 +97,7 @@ static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
-    const int skip = mi->mbmi.skip;
+    const int skip = mi->skip;
     vpx_write(w, skip, vp9_get_skip_prob(cm, xd));
     return skip;
   }
@@ -194,15 +194,15 @@ static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
 // This function encodes the reference frame
 static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              vpx_writer *w) {
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const int is_compound = has_second_ref(mbmi);
-  const int segment_id = mbmi->segment_id;
+  const MODE_INFO *const mi = xd->mi[0];
+  const int is_compound = has_second_ref(mi);
+  const int segment_id = mi->segment_id;
 
   // If segment level coding of this signal is disabled...
   // or the segment allows multiple reference frame options
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     assert(!is_compound);
-    assert(mbmi->ref_frame[0] ==
+    assert(mi->ref_frame[0] ==
                get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME));
   } else {
     // does the feature use compound prediction or not
@@ -214,13 +214,13 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
 
     if (is_compound) {
-      vpx_write(w, mbmi->ref_frame[0] == GOLDEN_FRAME,
+      vpx_write(w, mi->ref_frame[0] == GOLDEN_FRAME,
                 vp9_get_pred_prob_comp_ref_p(cm, xd));
     } else {
-      const int bit0 = mbmi->ref_frame[0] != LAST_FRAME;
+      const int bit0 = mi->ref_frame[0] != LAST_FRAME;
       vpx_write(w, bit0, vp9_get_pred_prob_single_ref_p1(cm, xd));
       if (bit0) {
-        const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
+        const int bit1 = mi->ref_frame[0] != GOLDEN_FRAME;
         vpx_write(w, bit1, vp9_get_pred_prob_single_ref_p2(cm, xd));
       }
     }
@@ -234,19 +234,18 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   const MACROBLOCK *const x = &cpi->td.mb;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
-  const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
-  const PREDICTION_MODE mode = mbmi->mode;
-  const int segment_id = mbmi->segment_id;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
+  const PREDICTION_MODE mode = mi->mode;
+  const int segment_id = mi->segment_id;
+  const BLOCK_SIZE bsize = mi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
-  const int is_inter = is_inter_block(mbmi);
-  const int is_compound = has_second_ref(mbmi);
+  const int is_inter = is_inter_block(mi);
+  const int is_compound = has_second_ref(mi);
   int skip, ref;
 
   if (seg->update_map) {
     if (seg->temporal_update) {
-      const int pred_flag = mbmi->seg_id_predicted;
+      const int pred_flag = mi->seg_id_predicted;
       vpx_prob pred_prob = vp9_get_pred_prob_seg_id(seg, xd);
       vpx_write(w, pred_flag, pred_prob);
       if (!pred_flag)
@@ -280,9 +279,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         }
       }
     }
-    write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mode]);
+    write_intra_mode(w, mi->uv_mode, cm->fc->uv_mode_prob[mode]);
   } else {
-    const int mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
+    const int mode_ctx = mbmi_ext->mode_context[mi->ref_frame[0]];
     const vpx_prob *const inter_probs = cm->fc->inter_mode_probs[mode_ctx];
     write_ref_frames(cm, xd, w);
 
@@ -297,10 +296,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       const int ctx = vp9_get_pred_context_switchable_interp(xd);
       vp9_write_token(w, vp9_switchable_interp_tree,
                       cm->fc->switchable_interp_prob[ctx],
-                      &switchable_interp_encodings[mbmi->interp_filter]);
-      ++cpi->interp_filter_selected[0][mbmi->interp_filter];
+                      &switchable_interp_encodings[mi->interp_filter]);
+      ++cpi->interp_filter_selected[0][mi->interp_filter];
     } else {
-      assert(mbmi->interp_filter == cm->interp_filter);
+      assert(mi->interp_filter == cm->interp_filter);
     }
 
     if (bsize < BLOCK_8X8) {
@@ -315,7 +314,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
           if (b_mode == NEWMV) {
             for (ref = 0; ref < 1 + is_compound; ++ref)
               vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
-                            &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
+                            &mbmi_ext->ref_mvs[mi->ref_frame[ref]][0].as_mv,
                             nmvc, allow_hp);
           }
         }
@@ -323,8 +322,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     } else {
       if (mode == NEWMV) {
         for (ref = 0; ref < 1 + is_compound; ++ref)
-          vp9_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
-                        &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv, nmvc,
+          vp9_encode_mv(cpi, w, &mi->mv[ref].as_mv,
+                        &mbmi_ext->ref_mvs[mi->ref_frame[ref]][0].as_mv, nmvc,
                         allow_hp);
       }
     }
@@ -337,19 +336,18 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const MODE_INFO *const mi = mi_8x8[0];
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
+  const BLOCK_SIZE bsize = mi->sb_type;
 
   if (seg->update_map)
-    write_segment_id(w, seg, mbmi->segment_id);
+    write_segment_id(w, seg, mi->segment_id);
 
-  write_skip(cm, xd, mbmi->segment_id, mi, w);
+  write_skip(cm, xd, mi->segment_id, mi, w);
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
     write_selected_tx_size(cm, xd, w);
 
   if (bsize >= BLOCK_8X8) {
-    write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
+    write_intra_mode(w, mi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -364,7 +362,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
   }
 
-  write_intra_mode(w, mbmi->uv_mode, vp9_kf_uv_mode_prob[mbmi->mode]);
+  write_intra_mode(w, mi->uv_mode, vp9_kf_uv_mode_prob[mi->mode]);
 }
 
 static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
@@ -382,8 +380,8 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
       (mi_row * cm->mi_cols + mi_col);
 
   set_mi_row_col(xd, tile,
-                 mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],
-                 mi_col, num_8x8_blocks_wide_lookup[m->mbmi.sb_type],
+                 mi_row, num_8x8_blocks_high_lookup[m->sb_type],
+                 mi_col, num_8x8_blocks_wide_lookup[m->sb_type],
                  cm->mi_rows, cm->mi_cols);
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cm, xd, xd->mi, w);
@@ -435,7 +433,7 @@ static void write_modes_sb(VP9_COMP *cpi,
 
   m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
 
-  partition = partition_lookup[bsl][m->mbmi.sb_type];
+  partition = partition_lookup[bsl][m->sb_type];
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
   subsize = get_subsize(bsize, partition);
   if (subsize < BLOCK_8X8) {

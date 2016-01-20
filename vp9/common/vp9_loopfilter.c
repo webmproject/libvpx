@@ -232,9 +232,9 @@ static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
 }
 
 static uint8_t get_filter_level(const loop_filter_info_n *lfi_n,
-                                const MB_MODE_INFO *mbmi) {
-  return lfi_n->lvl[mbmi->segment_id][mbmi->ref_frame[0]]
-                   [mode_lf_lut[mbmi->mode]];
+                                const MODE_INFO *mi) {
+  return lfi_n->lvl[mi->segment_id][mi->ref_frame[0]]
+                   [mode_lf_lut[mi->mode]];
 }
 
 void vp9_loop_filter_init(VP9_COMMON *cm) {
@@ -709,11 +709,10 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
                         const MODE_INFO *mi, const int shift_y,
                         const int shift_uv,
                         LOOP_FILTER_MASK *lfm) {
-  const MB_MODE_INFO *mbmi = &mi->mbmi;
-  const BLOCK_SIZE block_size = mbmi->sb_type;
-  const TX_SIZE tx_size_y = mbmi->tx_size;
+  const BLOCK_SIZE block_size = mi->sb_type;
+  const TX_SIZE tx_size_y = mi->tx_size;
   const TX_SIZE tx_size_uv = get_uv_tx_size_impl(tx_size_y, block_size, 1, 1);
-  const int filter_level = get_filter_level(lfi_n, mbmi);
+  const int filter_level = get_filter_level(lfi_n, mi);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
   uint64_t *const int_4x4_y = &lfm->int_4x4_y;
@@ -754,7 +753,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
 
   // If the block has no coefficients and is not intra we skip applying
   // the loop filter on block edges.
-  if (mbmi->skip && is_inter_block(mbmi))
+  if (mi->skip && is_inter_block(mi))
     return;
 
   // Here we are adding a mask for the transform size. The transform
@@ -788,10 +787,9 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
 static void build_y_mask(const loop_filter_info_n *const lfi_n,
                          const MODE_INFO *mi, const int shift_y,
                          LOOP_FILTER_MASK *lfm) {
-  const MB_MODE_INFO *mbmi = &mi->mbmi;
-  const BLOCK_SIZE block_size = mbmi->sb_type;
-  const TX_SIZE tx_size_y = mbmi->tx_size;
-  const int filter_level = get_filter_level(lfi_n, mbmi);
+  const BLOCK_SIZE block_size = mi->sb_type;
+  const TX_SIZE tx_size_y = mi->tx_size;
+  const int filter_level = get_filter_level(lfi_n, mi);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
   uint64_t *const int_4x4_y = &lfm->int_4x4_y;
@@ -812,7 +810,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
   *above_y |= above_prediction_mask[block_size] << shift_y;
   *left_y |= left_prediction_mask[block_size] << shift_y;
 
-  if (mbmi->skip && is_inter_block(mbmi))
+  if (mi->skip && is_inter_block(mi))
     return;
 
   *above_y |= (size_mask[block_size] &
@@ -980,7 +978,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
   // TODO(jimbankoski): Try moving most of the following code into decode
   // loop and storing lfm in the mbmi structure so that we don't have to go
   // through the recursive loop structure multiple times.
-  switch (mip[0]->mbmi.sb_type) {
+  switch (mip[0]->sb_type) {
     case BLOCK_64X64:
       build_masks(lfi_n, mip[0] , 0, 0, lfm);
       break;
@@ -1006,7 +1004,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
         const int mi_32_row_offset = ((idx_32 >> 1) << 2);
         if (mi_32_col_offset >= max_cols || mi_32_row_offset >= max_rows)
           continue;
-        switch (mip[0]->mbmi.sb_type) {
+        switch (mip[0]->sb_type) {
           case BLOCK_32X32:
             build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
             break;
@@ -1036,7 +1034,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
               if (mi_16_col_offset >= max_cols || mi_16_row_offset >= max_rows)
                 continue;
 
-              switch (mip[0]->mbmi.sb_type) {
+              switch (mip[0]->sb_type) {
                 case BLOCK_16X16:
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   break;
@@ -1186,8 +1184,8 @@ void vp9_filter_block_plane_non420(VP9_COMMON *cm,
     // Determine the vertical edges that need filtering
     for (c = 0; c < MI_BLOCK_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
       const MODE_INFO *mi = mi_8x8[c];
-      const BLOCK_SIZE sb_type = mi[0].mbmi.sb_type;
-      const int skip_this = mi[0].mbmi.skip && is_inter_block(&mi[0].mbmi);
+      const BLOCK_SIZE sb_type = mi[0].sb_type;
+      const int skip_this = mi[0].skip && is_inter_block(mi);
       // left edge of current unit is block/partition edge -> no skip
       const int block_edge_left = (num_4x4_blocks_wide_lookup[sb_type] > 1) ?
           !(c & (num_8x8_blocks_wide_lookup[sb_type] - 1)) : 1;
@@ -1196,13 +1194,13 @@ void vp9_filter_block_plane_non420(VP9_COMMON *cm,
       const int block_edge_above = (num_4x4_blocks_high_lookup[sb_type] > 1) ?
           !(r & (num_8x8_blocks_high_lookup[sb_type] - 1)) : 1;
       const int skip_this_r = skip_this && !block_edge_above;
-      const TX_SIZE tx_size = get_uv_tx_size(&mi[0].mbmi, plane);
+      const TX_SIZE tx_size = get_uv_tx_size(mi, plane);
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
       // Filter level can vary per MI
       if (!(lfl[(r << 3) + (c >> ss_x)] =
-            get_filter_level(&cm->lf_info, &mi[0].mbmi)))
+            get_filter_level(&cm->lf_info, mi)))
         continue;
 
       // Build masks based on the transform size of each block
@@ -1640,12 +1638,12 @@ static const uint8_t first_block_in_16x16[8][8] = {
 // This function sets up the bit masks for a block represented
 // by mi_row, mi_col in a 64x64 region.
 // TODO(SJL): This function only works for yv12.
-void vp9_build_mask(VP9_COMMON *cm, const MB_MODE_INFO *mbmi, int mi_row,
+void vp9_build_mask(VP9_COMMON *cm, const MODE_INFO *mi, int mi_row,
                     int mi_col, int bw, int bh) {
-  const BLOCK_SIZE block_size = mbmi->sb_type;
-  const TX_SIZE tx_size_y = mbmi->tx_size;
+  const BLOCK_SIZE block_size = mi->sb_type;
+  const TX_SIZE tx_size_y = mi->tx_size;
   const loop_filter_info_n *const lfi_n = &cm->lf_info;
-  const int filter_level = get_filter_level(lfi_n, mbmi);
+  const int filter_level = get_filter_level(lfi_n, mi);
   const TX_SIZE tx_size_uv = get_uv_tx_size_impl(tx_size_y, block_size, 1, 1);
   LOOP_FILTER_MASK *const lfm = get_lfm(&cm->lf, mi_row, mi_col);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
@@ -1693,7 +1691,7 @@ void vp9_build_mask(VP9_COMMON *cm, const MB_MODE_INFO *mbmi, int mi_row,
 
   // If the block has no coefficients and is not intra we skip applying
   // the loop filter on block edges.
-  if (mbmi->skip && is_inter_block(mbmi))
+  if (mi->skip && is_inter_block(mi))
     return;
 
   // Add a mask for the transform size. The transform size mask is set to

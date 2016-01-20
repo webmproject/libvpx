@@ -118,7 +118,7 @@ static void count_segs(const VP9_COMMON *cm, MACROBLOCKD *xd,
     return;
 
   xd->mi = mi;
-  segment_id = xd->mi[0]->mbmi.segment_id;
+  segment_id = xd->mi[0]->segment_id;
 
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
@@ -127,7 +127,7 @@ static void count_segs(const VP9_COMMON *cm, MACROBLOCKD *xd,
 
   // Temporal prediction not allowed on key frames
   if (cm->frame_type != KEY_FRAME) {
-    const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+    const BLOCK_SIZE bsize = xd->mi[0]->sb_type;
     // Test to see if the segment id matches the predicted value.
     const int pred_segment_id = get_segment_id(cm, cm->last_frame_seg_map,
                                                bsize, mi_row, mi_col);
@@ -136,7 +136,7 @@ static void count_segs(const VP9_COMMON *cm, MACROBLOCKD *xd,
 
     // Store the prediction status for this mb and update counts
     // as appropriate
-    xd->mi[0]->mbmi.seg_id_predicted = pred_flag;
+    xd->mi[0]->seg_id_predicted = pred_flag;
     temporal_predictor_count[pred_context][pred_flag]++;
 
     // Update the "unpredicted" segment count
@@ -159,8 +159,8 @@ static void count_segs_sb(const VP9_COMMON *cm, MACROBLOCKD *xd,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  bw = num_8x8_blocks_wide_lookup[mi[0]->mbmi.sb_type];
-  bh = num_8x8_blocks_high_lookup[mi[0]->mbmi.sb_type];
+  bw = num_8x8_blocks_wide_lookup[mi[0]->sb_type];
+  bh = num_8x8_blocks_high_lookup[mi[0]->sb_type];
 
   if (bw == bs && bh == bs) {
     count_segs(cm, xd, tile, mi, no_pred_segcounts, temporal_predictor_count,

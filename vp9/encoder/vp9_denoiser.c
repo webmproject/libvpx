@@ -200,8 +200,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   int sse_diff = ctx->zeromv_sse - ctx->newmv_sse;
   MV_REFERENCE_FRAME frame;
   MACROBLOCKD *filter_mbd = &mb->e_mbd;
-  MB_MODE_INFO *mbmi = &filter_mbd->mi[0]->mbmi;
-  MB_MODE_INFO saved_mbmi;
+  MODE_INFO *mi = filter_mbd->mi[0];
+  MODE_INFO saved_mi;
   int i, j;
   struct buf_2d saved_dst[MAX_MB_PLANE];
   struct buf_2d saved_pre[MAX_MB_PLANE][2];  // 2 pre buffers
@@ -210,7 +210,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   mv_row = ctx->best_sse_mv.as_mv.row;
   frame = ctx->best_reference_frame;
 
-  saved_mbmi = *mbmi;
+  saved_mi = *mi;
 
   if (is_skin && motion_magnitude > 0)
     return COPY_BLOCK;
@@ -219,9 +219,9 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   // difference in sum-squared-error, use it.
   if (frame != INTRA_FRAME &&
       sse_diff > sse_diff_thresh(bs, increase_denoising, motion_magnitude)) {
-    mbmi->ref_frame[0] = ctx->best_reference_frame;
-    mbmi->mode = ctx->best_sse_inter_mode;
-    mbmi->mv[0] = ctx->best_sse_mv;
+    mi->ref_frame[0] = ctx->best_reference_frame;
+    mi->mode = ctx->best_sse_inter_mode;
+    mi->mv[0] = ctx->best_sse_mv;
   } else {
     // Otherwise, use the zero reference frame.
     frame = ctx->best_zeromv_reference_frame;
@@ -233,9 +233,9 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
       frame = LAST_FRAME;
       ctx->newmv_sse = ctx->zeromv_lastref_sse;
     }
-    mbmi->ref_frame[0] = frame;
-    mbmi->mode = ZEROMV;
-    mbmi->mv[0].as_int = 0;
+    mi->ref_frame[0] = frame;
+    mi->mode = ZEROMV;
+    mi->mv[0].as_int = 0;
     ctx->best_sse_inter_mode = ZEROMV;
     ctx->best_sse_mv.as_int = 0;
     *zeromv_filter = 1;
@@ -243,13 +243,13 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
 
   if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
     // Restore everything to its original state
-    *mbmi = saved_mbmi;
+    *mi = saved_mi;
     return COPY_BLOCK;
   }
   if (motion_magnitude >
      (noise_motion_thresh(bs, increase_denoising) << 3)) {
     // Restore everything to its original state
-    *mbmi = saved_mbmi;
+    *mi = saved_mi;
     return COPY_BLOCK;
   }
 
@@ -302,7 +302,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   vp9_build_inter_predictors_sby(filter_mbd, mv_row, mv_col, bs);
 
   // Restore everything to its original state
-  *mbmi = saved_mbmi;
+  *mi = saved_mi;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     for (j = 0; j < 2; ++j) {
       filter_mbd->plane[i].pre[j] = saved_pre[i][j];
@@ -461,22 +461,22 @@ void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {
   ctx->zeromv_lastref_sse = UINT_MAX;
 }
 
-void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi, unsigned int sse,
+void vp9_denoiser_update_frame_stats(MODE_INFO *mi, unsigned int sse,
                                      PREDICTION_MODE mode,
                                      PICK_MODE_CONTEXT *ctx) {
   // TODO(tkopp): Use both MVs if possible
-  if (mbmi->mv[0].as_int == 0 && sse < ctx->zeromv_sse) {
+  if (mi->mv[0].as_int == 0 && sse < ctx->zeromv_sse) {
     ctx->zeromv_sse = sse;
-    ctx->best_zeromv_reference_frame = mbmi->ref_frame[0];
-    if (mbmi->ref_frame[0] == LAST_FRAME)
+    ctx->best_zeromv_reference_frame = mi->ref_frame[0];
+    if (mi->ref_frame[0] == LAST_FRAME)
       ctx->zeromv_lastref_sse = sse;
   }
 
-  if (mbmi->mv[0].as_int != 0 && sse < ctx->newmv_sse) {
+  if (mi->mv[0].as_int != 0 && sse < ctx->newmv_sse) {
     ctx->newmv_sse = sse;
     ctx->best_sse_inter_mode = mode;
-    ctx->best_sse_mv = mbmi->mv[0];
-    ctx->best_reference_frame = mbmi->ref_frame[0];
+    ctx->best_sse_mv = mi->mv[0];
+    ctx->best_reference_frame = mi->ref_frame[0];
   }
 }
 

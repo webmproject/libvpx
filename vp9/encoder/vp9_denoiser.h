@@ -60,7 +60,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
 
 void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx);
 
-void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi,
+void vp9_denoiser_update_frame_stats(MODE_INFO *mi,
                                      unsigned int sse, PREDICTION_MODE mode,
                                      PICK_MODE_CONTEXT *ctx);
 
