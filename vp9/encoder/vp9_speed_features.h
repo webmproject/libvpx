@@ -438,6 +438,10 @@ typedef struct SPEED_FEATURES {
 
   // Fast approximation of vp9_model_rd_from_var_lapndz
   int simple_model_rd_from_var;
+
+  // Skip a number of expensive mode evaluations for blocks with zero source
+  // variance.
+  int short_circuit_flat_blocks;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
