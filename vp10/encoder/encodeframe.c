@@ -203,10 +203,10 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
 
   // Set up limit values for MV components.
   // Mv beyond the range do not produce new/different prediction block.
-  x->mv_row_min = -(((mi_row + mi_height) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_col_min = -(((mi_col + mi_width) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_row_max = (cm->mi_rows - mi_row) * MI_SIZE + VP9_INTERP_EXTEND;
-  x->mv_col_max = (cm->mi_cols - mi_col) * MI_SIZE + VP9_INTERP_EXTEND;
+  x->mv_row_min = -(((mi_row + mi_height) * MI_SIZE) + VPX_INTERP_EXTEND);
+  x->mv_col_min = -(((mi_col + mi_width) * MI_SIZE) + VPX_INTERP_EXTEND);
+  x->mv_row_max = (cm->mi_rows - mi_row) * MI_SIZE + VPX_INTERP_EXTEND;
+  x->mv_col_max = (cm->mi_cols - mi_col) * MI_SIZE + VPX_INTERP_EXTEND;
 
   // Set up distance of MB to edge of frame in 1/8th pel units.
   assert(!(mi_col & (mi_width - 1)) && !(mi_row & (mi_height - 1)));

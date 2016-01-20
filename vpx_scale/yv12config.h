@@ -22,7 +22,7 @@ extern "C" {
 
 #define VP8BORDERINPIXELS           32
 #define VP9INNERBORDERINPIXELS      96
-#define VP9_INTERP_EXTEND           4
+#define VPX_INTERP_EXTEND           4
 #define VP9_ENC_BORDER_IN_PIXELS    160
 #define VP9_DEC_BORDER_IN_PIXELS    32
 

@@ -29,7 +29,7 @@ extern "C" {
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))
 // Allowed motion vector pixel distance outside image border
 // for Block_16x16
-#define BORDER_MV_PIXELS_B16 (16 + VP9_INTERP_EXTEND)
+#define BORDER_MV_PIXELS_B16 (16 + VPX_INTERP_EXTEND)
 
 // motion search site
 typedef struct search_site {
