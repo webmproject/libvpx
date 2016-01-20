@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7b10259_917b7c57",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-01-20T20:20:33Z",
+      "side": 1,
+      "message": "May define a macro.",
+      "range": {
+        "startLine": 218,
+        "startChar": 62,
+        "endLine": 218,
+        "endChar": 65
+      },
+      "revId": "13cffbbe8e9c5b2dd1e1d593c235d7a03a20e01f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07123a0e_731b605f",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-01-20T20:20:33Z",
+      "side": 1,
+      "message": "Ditto.",
+      "range": {
+        "startLine": 307,
+        "startChar": 40,
+        "endLine": 307,
+        "endChar": 43
+      },
+      "revId": "13cffbbe8e9c5b2dd1e1d593c235d7a03a20e01f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c70ca2f0_dc4c01c9",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-01-20T20:20:33Z",
+      "side": 1,
+      "message": "Ditto.",
+      "range": {
+        "startLine": 346,
+        "startChar": 40,
+        "endLine": 346,
+        "endChar": 43
+      },
+      "revId": "13cffbbe8e9c5b2dd1e1d593c235d7a03a20e01f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07123a0e_534c644a",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-01-20T20:20:33Z",
+      "side": 1,
+      "message": "Can we allocate it just once at the encoder initialization?",
+      "range": {
+        "startLine": 404,
+        "startChar": 6,
+        "endLine": 404,
+        "endChar": 30
+      },
+      "revId": "13cffbbe8e9c5b2dd1e1d593c235d7a03a20e01f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
