@@ -604,10 +604,9 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         NOISE_MOTION_THRESHOLD;
 
     // If block is considered to be skin area, lower the motion threshold.
-    // In current version set threshold = 1, so only denoise very low
-    // (i.e., zero) mv on skin.
+    // In current version set threshold = 0, so only denoise zero mv on skin.
     if (x->is_skin)
-        motion_threshold = 1;
+        motion_threshold = 0;
 
     if (motion_magnitude2 <
         denoiser->denoise_pars.scale_increase_filter * NOISE_MOTION_THRESHOLD)
