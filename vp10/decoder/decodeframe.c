@@ -1868,7 +1868,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   cm->last_frame_type = cm->frame_type;
   cm->last_intra_only = cm->intra_only;
 
-  if (vpx_rb_read_literal(rb, 2) != VP9_FRAME_MARKER)
+  if (vpx_rb_read_literal(rb, 2) != VPX_FRAME_MARKER)
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame marker");
 
