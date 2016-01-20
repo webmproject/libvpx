@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c786622d_927202b8",
+        "filename": "vp8/encoder/ethreading.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-01-20T18:58:48Z",
+      "side": 1,
+      "message": "Can two threads enter this function simultaneously?\nIf so, both of them may start shutting down other threads and freeing the resources.",
+      "revId": "ff0107f60dbddec82d7d7feacd1c9a3ff9ab4a51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
