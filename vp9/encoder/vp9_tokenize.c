@@ -428,25 +428,21 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 
 static INLINE void add_token(TOKENEXTRA **t, const vpx_prob *context_tree,
-                             int32_t extra, uint8_t token,
-                             uint8_t skip_eob_node,
+                             int16_t token, EXTRABIT extra,
                              unsigned int *counts) {
+  (*t)->context_tree = context_tree;
   (*t)->token = token;
   (*t)->extra = extra;
-  (*t)->context_tree = context_tree;
-  (*t)->skip_eob_node = skip_eob_node;
   (*t)++;
   ++counts[token];
 }
 
 static INLINE void add_token_no_extra(TOKENEXTRA **t,
                                       const vpx_prob *context_tree,
-                                      uint8_t token,
-                                      uint8_t skip_eob_node,
+                                      int16_t token,
                                       unsigned int *counts) {
-  (*t)->token = token;
   (*t)->context_tree = context_tree;
-  (*t)->skip_eob_node = skip_eob_node;
+  (*t)->token = token;
   (*t)++;
   ++counts[token];
 }
@@ -501,15 +497,13 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   while (c < eob) {
     int v = 0;
-    int skip_eob = 0;
     v = qcoeff[scan[c]];
+    ++eob_branch[band[c]][pt];
 
     while (!v) {
-      add_token_no_extra(&t, coef_probs[band[c]][pt], ZERO_TOKEN, skip_eob,
+      add_token_no_extra(&t, coef_probs[band[c]][pt], ZERO_TOKEN,
                          counts[band[c]][pt]);
-      eob_branch[band[c]][pt] += !skip_eob;
 
-      skip_eob = 1;
       token_cache[scan[c]] = 0;
       ++c;
       pt = get_coef_context(nb, token_cache, c);
@@ -518,18 +512,17 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
     vp9_get_token_extra(v, &token, &extra);
 
-    add_token(&t, coef_probs[band[c]][pt], extra, (uint8_t)token,
-              (uint8_t)skip_eob, counts[band[c]][pt]);
-    eob_branch[band[c]][pt] += !skip_eob;
+    add_token(&t, coef_probs[band[c]][pt], token, extra,
+              counts[band[c]][pt]);
 
     token_cache[scan[c]] = vp9_pt_energy_class[token];
     ++c;
     pt = get_coef_context(nb, token_cache, c);
   }
   if (c < seg_eob) {
-    add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN, 0,
-                       counts[band[c]][pt]);
     ++eob_branch[band[c]][pt];
+    add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN,
+                       counts[band[c]][pt]);
   }
 
   *tp = t;
