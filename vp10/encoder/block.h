@@ -56,6 +56,9 @@ typedef struct {
 #if CONFIG_REF_MV
   uint8_t ref_mv_count[MODE_CTX_REF_FRAMES];
   CANDIDATE_MV ref_mv_stack[MODE_CTX_REF_FRAMES][MAX_REF_MV_STACK_SIZE];
+#if CONFIG_EXT_INTER
+  int16_t compound_mode_context[MODE_CTX_REF_FRAMES];
+#endif  // CONFIG_EXT_INTER
 #endif
 } MB_MODE_INFO_EXT;
 

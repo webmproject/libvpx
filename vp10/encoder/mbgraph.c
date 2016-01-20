@@ -67,6 +67,11 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
         &distortion, &sse, NULL, 0, 0);
   }
 
+#if CONFIG_EXT_INTER
+  if (has_second_ref(&xd->mi[0]->mbmi))
+    xd->mi[0]->mbmi.mode = NEW_NEWMV;
+  else
+#endif  // CONFIG_EXT_INTER
   xd->mi[0]->mbmi.mode = NEWMV;
   xd->mi[0]->mbmi.mv[0].as_mv = *dst_mv;
 

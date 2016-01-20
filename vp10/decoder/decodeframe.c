@@ -143,6 +143,19 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
 #endif
 }
 
+#if CONFIG_EXT_INTER
+static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
+  int i, j;
+  if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    for (j = 0; j < INTER_MODE_CONTEXTS; ++j) {
+      for (i = 0; i < INTER_COMPOUND_MODES - 1; ++i) {
+        vp10_diff_update_prob(r, &fc->inter_compound_mode_probs[j][i]);
+      }
+    }
+  }
+}
+#endif  // CONFIG_EXT_INTER
+
 static REFERENCE_MODE read_frame_reference_mode(const VP10_COMMON *cm,
     struct vpx_read_bit_buffer *rb) {
   if (is_compound_reference_allowed(cm)) {
@@ -3259,6 +3272,10 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 
     read_inter_mode_probs(fc, &r);
 
+#if CONFIG_EXT_INTER
+    read_inter_compound_mode_probs(fc, &r);
+#endif  // CONFIG_EXT_INTER
+
     if (cm->interp_filter == SWITCHABLE)
       read_switchable_interp_probs(fc, &r);
 
@@ -3308,6 +3325,11 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
                  sizeof(cm->counts.switchable_interp)));
   assert(!memcmp(cm->counts.inter_mode, zero_counts.inter_mode,
                  sizeof(cm->counts.inter_mode)));
+#if CONFIG_EXT_INTER
+  assert(!memcmp(cm->counts.inter_compound_mode,
+                 zero_counts.inter_compound_mode,
+                 sizeof(cm->counts.inter_compound_mode)));
+#endif  // CONFIG_EXT_INTER
   assert(!memcmp(cm->counts.intra_inter, zero_counts.intra_inter,
                  sizeof(cm->counts.intra_inter)));
   assert(!memcmp(cm->counts.comp_inter, zero_counts.comp_inter,

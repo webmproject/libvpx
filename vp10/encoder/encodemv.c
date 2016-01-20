@@ -232,13 +232,23 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
   PREDICTION_MODE mode = mbmi->mode;
   int mv_idx = (mode == NEWFROMNEARMV);
 
-  if (mode == NEWMV || mode == NEWFROMNEARMV) {
+  if (mode == NEWMV || mode == NEWFROMNEARMV || mode == NEW_NEWMV) {
     for (i = 0; i < 1 + has_second_ref(mbmi); ++i) {
       const MV *ref = &mbmi_ext->ref_mvs[mbmi->ref_frame[i]][mv_idx].as_mv;
       const MV diff = {mvs[i].as_mv.row - ref->row,
                        mvs[i].as_mv.col - ref->col};
       vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
     }
+  } else if (mode == NEAREST_NEWMV || mode == NEAR_NEWMV) {
+    const MV *ref = &mbmi_ext->ref_mvs[mbmi->ref_frame[1]][0].as_mv;
+    const MV diff = {mvs[1].as_mv.row - ref->row,
+                     mvs[1].as_mv.col - ref->col};
+    vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
+  } else if (mode == NEW_NEARESTMV || mode == NEW_NEARMV) {
+    const MV *ref = &mbmi_ext->ref_mvs[mbmi->ref_frame[0]][0].as_mv;
+    const MV diff = {mvs[0].as_mv.row - ref->row,
+                     mvs[0].as_mv.col - ref->col};
+    vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
   }
 }
 
@@ -249,13 +259,23 @@ static void inc_mvs_sub8x8(const MODE_INFO *mi,
   int i;
   PREDICTION_MODE mode = mi->bmi[block].as_mode;
 
-  if (mode == NEWMV || mode == NEWFROMNEARMV) {
+  if (mode == NEWMV || mode == NEWFROMNEARMV || mode == NEW_NEWMV) {
     for (i = 0; i < 1 + has_second_ref(&mi->mbmi); ++i) {
       const MV *ref = &mi->bmi[block].ref_mv[i].as_mv;
       const MV diff = {mvs[i].as_mv.row - ref->row,
                        mvs[i].as_mv.col - ref->col};
       vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
     }
+  } else if (mode == NEAREST_NEWMV || mode == NEAR_NEWMV) {
+    const MV *ref = &mi->bmi[block].ref_mv[1].as_mv;
+    const MV diff = {mvs[1].as_mv.row - ref->row,
+                     mvs[1].as_mv.col - ref->col};
+    vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
+  } else if (mode == NEW_NEARESTMV || mode == NEW_NEARMV) {
+    const MV *ref = &mi->bmi[block].ref_mv[0].as_mv;
+    const MV diff = {mvs[0].as_mv.row - ref->row,
+                     mvs[0].as_mv.col - ref->col};
+    vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
   }
 }
 #else

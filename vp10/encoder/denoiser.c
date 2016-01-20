@@ -230,9 +230,19 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     frame = ctx->best_zeromv_reference_frame;
 
     mbmi->ref_frame[0] = ctx->best_zeromv_reference_frame;
+#if CONFIG_EXT_INTER
+    if (has_second_ref(mbmi))
+      mbmi->mode = ZERO_ZEROMV;
+    else
+#endif  // CONFIG_EXT_INTER
     mbmi->mode = ZEROMV;
     mbmi->mv[0].as_int = 0;
 
+#if CONFIG_EXT_INTER
+    if (has_second_ref(mbmi))
+      ctx->best_sse_inter_mode = ZERO_ZEROMV;
+    else
+#endif  // CONFIG_EXT_INTER
     ctx->best_sse_inter_mode = ZEROMV;
     ctx->best_sse_mv.as_int = 0;
     ctx->newmv_sse = ctx->zeromv_sse;

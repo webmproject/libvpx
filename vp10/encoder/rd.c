@@ -386,6 +386,12 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
       vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
                       cm->fc->inter_mode_probs[i], vp10_inter_mode_tree);
 #endif
+#if CONFIG_EXT_INTER
+    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+      vp10_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
+                       cm->fc->inter_compound_mode_probs[i],
+                       vp10_inter_compound_mode_tree);
+#endif  // CONFIG_EXT_INTER
   }
 }
 
@@ -692,11 +698,11 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
 
 #if CONFIG_EXT_INTER
   rd->thresh_mult[THR_NEWFROMNEARMV] += 1000;
-#if CONFIG_EXT_REF
+#if CONFIG_EXT_REFS
   rd->thresh_mult[THR_NEWFROMNEARL2] += 1000;
   rd->thresh_mult[THR_NEWFROMNEARL3] += 1000;
   rd->thresh_mult[THR_NEWFROMNEARL4] += 1000;
-#endif  // CONFIG_EXT_REF
+#endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_NEWFROMNEARG] += 1000;
   rd->thresh_mult[THR_NEWFROMNEARA] += 1000;
 #endif  // CONFIG_EXT_INTER
@@ -712,6 +718,59 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
 
   rd->thresh_mult[THR_TM] += 1000;
 
+#if CONFIG_EXT_INTER
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTLA] += 1000;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTGA] += 1000;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARLA] += 1200;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARGA] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTLA] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTGA] += 1200;
+  rd->thresh_mult[THR_COMP_NEAREST_NEWLA] += 1500;
+  rd->thresh_mult[THR_COMP_NEAREST_NEWGA] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTLA] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTGA] += 1500;
+  rd->thresh_mult[THR_COMP_NEAR_NEWLA] += 1700;
+  rd->thresh_mult[THR_COMP_NEAR_NEWGA] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARLA] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARGA] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEWLA] += 2000;
+  rd->thresh_mult[THR_COMP_NEW_NEWGA] += 2000;
+  rd->thresh_mult[THR_COMP_ZERO_ZEROLA] += 2500;
+  rd->thresh_mult[THR_COMP_ZERO_ZEROGA] += 2500;
+
+#if CONFIG_EXT_REFS
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTL2A] += 1000;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARL2A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTL2A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAREST_NEWL2A] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTL2A] += 1500;
+  rd->thresh_mult[THR_COMP_NEAR_NEWL2A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARL2A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEWL2A] += 2000;
+  rd->thresh_mult[THR_COMP_ZERO_ZEROL2A] += 2500;
+
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTL3A] += 1000;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARL3A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTL3A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAREST_NEWL3A] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTL3A] += 1500;
+  rd->thresh_mult[THR_COMP_NEAR_NEWL3A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARL3A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEWL3A] += 2000;
+  rd->thresh_mult[THR_COMP_ZERO_ZEROL3A] += 2500;
+
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTL4A] += 1000;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARL4A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTL4A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAREST_NEWL4A] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTL4A] += 1500;
+  rd->thresh_mult[THR_COMP_NEAR_NEWL4A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARL4A] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEWL4A] += 2000;
+  rd->thresh_mult[THR_COMP_ZERO_ZEROL4A] += 2500;
+
+#endif  // CONFIG_EXT_REFS
+#else
   rd->thresh_mult[THR_COMP_NEARESTLA] += 1000;
 #if CONFIG_EXT_REFS
   rd->thresh_mult[THR_COMP_NEARESTL2A] += 1000;
@@ -740,6 +799,7 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_COMP_ZEROL4A] += 2500;
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_COMP_ZEROGA] += 2500;
+#endif  // CONFIG_EXT_INTER
 
   rd->thresh_mult[THR_H_PRED] += 2000;
   rd->thresh_mult[THR_V_PRED] += 2000;

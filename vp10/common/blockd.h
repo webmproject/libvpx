@@ -49,15 +49,26 @@ typedef enum {
 
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
 #if CONFIG_EXT_INTER
-  return mode >= NEARESTMV && mode <= NEWFROMNEARMV;
+  return mode >= NEARESTMV && mode <= NEW_NEWMV;
 #else
   return mode >= NEARESTMV && mode <= NEWMV;
 #endif  // CONFIG_EXT_INTER
 }
 
 #if CONFIG_EXT_INTER
+static INLINE int is_inter_singleref_mode(PREDICTION_MODE mode) {
+  return mode >= NEARESTMV && mode <= NEWFROMNEARMV;
+}
+
+static INLINE int is_inter_compound_mode(PREDICTION_MODE mode) {
+  return mode >= NEAREST_NEARESTMV && mode <= NEW_NEWMV;
+}
+
 static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
-  return (mode == NEWMV || mode == NEWFROMNEARMV);
+  return (mode == NEWMV || mode == NEWFROMNEARMV ||
+          mode == NEW_NEWMV ||
+          mode == NEAREST_NEWMV || mode == NEW_NEARESTMV ||
+          mode == NEAR_NEWMV || mode == NEW_NEARMV);
 }
 #endif  // CONFIG_EXT_INTER
 

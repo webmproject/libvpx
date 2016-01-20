@@ -1796,6 +1796,12 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
 #if CONFIG_REF_MV
+#if CONFIG_EXT_INTER
+        if (has_second_ref(mbmi)) {
+          mode_ctx = mbmi_ext->compound_mode_context[mbmi->ref_frame[0]];
+          ++counts->inter_compound_mode[mode_ctx][INTER_COMPOUND_OFFSET(mode)];
+        } else {
+#endif  // CONFIG_EXT_INTER
         mode_ctx = vp10_mode_context_analyzer(mbmi_ext->mode_context,
                                               mbmi->ref_frame, bsize, -1);
         update_inter_mode_stats(counts, mode,
@@ -1803,8 +1809,15 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
                                 has_second_ref(mbmi),
 #endif  // CONFIG_EXT_INTER
                                 mode_ctx);
-
+#if CONFIG_EXT_INTER
+        }
+#endif  // CONFIG_EXT_INTER
 #else
+#if CONFIG_EXT_INTER
+        if (is_inter_compound_mode(mode))
+          ++counts->inter_compound_mode[mode_ctx][INTER_COMPOUND_OFFSET(mode)];
+        else
+#endif  // CONFIG_EXT_INTER
         ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
 #endif
       } else {
@@ -1816,6 +1829,13 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
             const int j = idy * 2 + idx;
             const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
 #if CONFIG_REF_MV
+#if CONFIG_EXT_INTER
+          if (has_second_ref(mbmi)) {
+            mode_ctx = mbmi_ext->compound_mode_context[mbmi->ref_frame[0]];
+            ++counts->inter_compound_mode[mode_ctx]
+                                         [INTER_COMPOUND_OFFSET(b_mode)];
+          } else {
+#endif  // CONFIG_EXT_INTER
             mode_ctx = vp10_mode_context_analyzer(mbmi_ext->mode_context,
                                                   mbmi->ref_frame, bsize, j);
             update_inter_mode_stats(counts, b_mode,
@@ -1823,7 +1843,16 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
                                     has_second_ref(mbmi),
 #endif  // CONFIG_EXT_INTER
                                     mode_ctx);
+#if CONFIG_EXT_INTER
+            }
+#endif  // CONFIG_EXT_INTER
 #else
+#if CONFIG_EXT_INTER
+            if (is_inter_compound_mode(b_mode))
+              ++counts->inter_compound_mode[mode_ctx]
+                                           [INTER_COMPOUND_OFFSET(b_mode)];
+            else
+#endif  // CONFIG_EXT_INTER
             ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
 #endif
           }

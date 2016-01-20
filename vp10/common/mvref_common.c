@@ -41,7 +41,11 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
           ref_mv_stack[index].weight = 2 * weight;
           ++(*refmv_count);
 
+#if CONFIG_EXT_INTER
+          if (candidate->mode == NEWMV || candidate->mode == NEWFROMNEARMV)
+#else
           if (candidate->mode == NEWMV)
+#endif  // CONFIG_EXT_INTER
             ++newmv_count;
         }
 
@@ -62,7 +66,11 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
             ref_mv_stack[index].weight = weight;
             ++(*refmv_count);
 
+#if CONFIG_EXT_INTER
+          if (candidate->mode == NEWMV || candidate->mode == NEWFROMNEARMV)
+#else
             if (candidate->mode == NEWMV)
+#endif  // CONFIG_EXT_INTER
               ++newmv_count;
           }
         }
@@ -92,7 +100,11 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
         ref_mv_stack[index].weight = 2 * weight;
         ++(*refmv_count);
 
+#if CONFIG_EXT_INTER
+        if (candidate->mode == NEW_NEWMV)
+#else
         if (candidate->mode == NEWMV)
+#endif  // CONFIG_EXT_INTER
           ++newmv_count;
       }
 
@@ -116,7 +128,11 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
           ref_mv_stack[index].weight = weight;
           ++(*refmv_count);
 
+#if CONFIG_EXT_INTER
+          if (candidate->mode == NEW_NEWMV)
+#else
           if (candidate->mode == NEWMV)
+#endif  // CONFIG_EXT_INTER
             ++newmv_count;
         }
       }
@@ -664,6 +680,9 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_REF_MV
                       uint8_t *ref_mv_count,
                       CANDIDATE_MV *ref_mv_stack,
+#if CONFIG_EXT_INTER
+                      int16_t *compound_mode_context,
+#endif  // CONFIG_EXT_INTER
 #endif
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col,
@@ -674,7 +693,12 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #endif
 #if CONFIG_EXT_INTER
   vp10_update_mv_context(cm, xd, mi, ref_frame, mv_ref_list, -1,
-                         mi_row, mi_col, mode_context);
+                         mi_row, mi_col,
+#if CONFIG_REF_MV
+                         compound_mode_context);
+#else
+                         mode_context);
+#endif  // CONFIG_REF_MV
   find_mv_refs_idx(cm, xd, mi, ref_frame, mv_ref_list, -1,
                    mi_row, mi_col, sync, data, NULL);
 #else

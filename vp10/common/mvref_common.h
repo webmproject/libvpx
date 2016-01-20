@@ -57,6 +57,15 @@ static const int mode_2_counter[MB_MODE_COUNT] = {
   1,  // NEWMV
 #if CONFIG_EXT_INTER
   1,  // NEWFROMNEARMV
+  0,  // NEAREST_NEARESTMV
+  0,  // NEAREST_NEARMV
+  0,  // NEAR_NEARESTMV
+  1,  // NEAREST_NEWMV
+  1,  // NEW_NEARESTMV
+  1,  // NEAR_NEWMV
+  1,  // NEW_NEARMV
+  3,  // ZERO_ZEROMV
+  1,  // NEW_NEWMV
 #endif  // CONFIG_EXT_INTER
 };
 
@@ -255,6 +264,9 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_REF_MV
                        uint8_t *ref_mv_count,
                        CANDIDATE_MV *ref_mv_stack,
+#if CONFIG_EXT_INTER
+                       int16_t *compound_mode_context,
+#endif  // CONFIG_EXT_INTER
 #endif
                        int_mv *mv_ref_list, int mi_row, int mi_col,
                        find_mv_refs_sync sync, void *const data,

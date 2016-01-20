@@ -26,6 +26,9 @@ extern "C" {
 #define TX_SIZE_CONTEXTS 2
 
 #define INTER_OFFSET(mode) ((mode) - NEARESTMV)
+#if CONFIG_EXT_INTER
+#define INTER_COMPOUND_OFFSET(mode) ((mode) - NEAREST_NEARESTMV)
+#endif  // CONFIG_EXT_INTER
 
 #define PALETTE_COLOR_CONTEXTS 16
 #define PALETTE_MAX_SIZE 8
@@ -71,6 +74,10 @@ typedef struct frame_contexts {
 #endif
 
   vpx_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
+#if CONFIG_EXT_INTER
+  vpx_prob inter_compound_mode_probs[INTER_MODE_CONTEXTS]
+                                    [INTER_COMPOUND_MODES - 1];
+#endif  // CONFIG_EXT_INTER
   vpx_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vpx_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   vpx_prob single_ref_prob[REF_CONTEXTS][SINGLE_REFS-1];
@@ -119,6 +126,9 @@ typedef struct FRAME_COUNTS {
 #endif
 
   unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
+#if CONFIG_EXT_INTER
+  unsigned int inter_compound_mode[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES];
+#endif  // CONFIG_EXT_INTER
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref[REF_CONTEXTS][SINGLE_REFS-1][2];
@@ -162,6 +172,10 @@ extern const vpx_prob vp10_default_palette_uv_color_prob
 
 extern const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vpx_tree_index vp10_inter_mode_tree[TREE_SIZE(INTER_MODES)];
+#if CONFIG_EXT_INTER
+extern const vpx_tree_index vp10_inter_compound_mode_tree
+                            [TREE_SIZE(INTER_COMPOUND_MODES)];
+#endif  // CONFIG_EXT_INTER
 extern const vpx_tree_index vp10_partition_tree[TREE_SIZE(PARTITION_TYPES)];
 extern const vpx_tree_index vp10_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
