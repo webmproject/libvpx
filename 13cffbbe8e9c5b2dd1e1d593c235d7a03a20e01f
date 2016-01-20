@@ -25,6 +25,23 @@
     },
     {
       "key": {
+        "uuid": "27fe5ee6_7f9e8b27",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-01-20T20:25:37Z",
+      "side": 1,
+      "message": "Suggest that\nlfi-\u003ebilateral_used is initialized in the function of vp10_loop_bilateral_frame() where vp10_loop_bilateral_used() has been checked already.",
+      "revId": "13cffbbe8e9c5b2dd1e1d593c235d7a03a20e01f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07123a0e_731b605f",
         "filename": "vp10/common/loopfilter.c",
         "patchSetId": 3
