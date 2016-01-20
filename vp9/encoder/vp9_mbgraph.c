@@ -69,8 +69,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
         &distortion, &sse, NULL, 0, 0);
   }
 
-  xd->mi[0]->mbmi.mode = NEWMV;
-  xd->mi[0]->mbmi.mv[0].as_mv = *dst_mv;
+  xd->mi[0]->mode = NEWMV;
+  xd->mi[0]->mv[0].as_mv = *dst_mv;
 
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
 
@@ -147,7 +147,7 @@ static int find_best_16x16_intra(VP9_COMP *cpi, PREDICTION_MODE *pbest_mode) {
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     unsigned int err;
 
-    xd->mi[0]->mbmi.mode = mode;
+    xd->mi[0]->mode = mode;
     vp9_predict_intra_block(xd, 2, TX_16X16, mode,
                             x->plane[0].src.buf, x->plane[0].src.stride,
                             xd->plane[0].dst.buf, xd->plane[0].dst.stride,
@@ -254,9 +254,9 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   xd->plane[0].pre[0].stride  = buf->y_stride;
   xd->plane[1].dst.stride = buf->uv_stride;
   xd->mi[0] = &mi_local;
-  mi_local.mbmi.sb_type = BLOCK_16X16;
-  mi_local.mbmi.ref_frame[0] = LAST_FRAME;
-  mi_local.mbmi.ref_frame[1] = NONE;
+  mi_local.sb_type = BLOCK_16X16;
+  mi_local.ref_frame[0] = LAST_FRAME;
+  mi_local.ref_frame[1] = NONE;
 
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     MV gld_left_mv = gld_top_mv;

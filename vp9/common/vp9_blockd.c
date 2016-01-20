@@ -13,7 +13,7 @@
 PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
                                     const MODE_INFO *left_mi, int b) {
   if (b == 0 || b == 2) {
-    if (!left_mi || is_inter_block(&left_mi->mbmi))
+    if (!left_mi || is_inter_block(left_mi))
       return DC_PRED;
 
     return get_y_mode(left_mi, b + 1);
@@ -26,7 +26,7 @@ PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
 PREDICTION_MODE vp9_above_block_mode(const MODE_INFO *cur_mi,
                                      const MODE_INFO *above_mi, int b) {
   if (b == 0 || b == 1) {
-    if (!above_mi || is_inter_block(&above_mi->mbmi))
+    if (!above_mi || is_inter_block(above_mi))
       return DC_PRED;
 
     return get_y_mode(above_mi, b + 2);
@@ -40,12 +40,12 @@ void vp9_foreach_transformed_block_in_plane(
     const MACROBLOCKD *const xd, BLOCK_SIZE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const MB_MODE_INFO* mbmi = &xd->mi[0]->mbmi;
+  const MODE_INFO* mi = xd->mi[0];
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   // transform size varies per plane, look it up in a common way.
-  const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd)
-                                : mbmi->tx_size;
+  const TX_SIZE tx_size = plane ? get_uv_tx_size(mi, pd)
+                                : mi->tx_size;
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];

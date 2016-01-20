@@ -471,17 +471,17 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   uint8_t token_cache[32 * 32];
   struct macroblock_plane *p = &x->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  MODE_INFO *mi = xd->mi[0];
   int pt; /* near block/prev token context index */
   int c;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int eob = p->eobs[block];
   const PLANE_TYPE type = get_plane_type(plane);
   const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
-  const int segment_id = mbmi->segment_id;
+  const int segment_id = mi->segment_id;
   const int16_t *scan, *nb;
   const scan_order *so;
-  const int ref = is_inter_block(mbmi);
+  const int ref = is_inter_block(mi);
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       td->rd_counts.coef_counts[tx_size][type][ref];
   vpx_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
@@ -588,12 +588,12 @@ void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  MODE_INFO *const mi = xd->mi[0];
   const int ctx = vp9_get_skip_context(xd);
-  const int skip_inc = !segfeature_active(&cm->seg, mbmi->segment_id,
+  const int skip_inc = !segfeature_active(&cm->seg, mi->segment_id,
                                           SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, td, t};
-  if (mbmi->skip) {
+  if (mi->skip) {
     if (!dry_run)
       td->counts->skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);

@@ -64,7 +64,7 @@ typedef struct {
 typedef int8_t MV_REFERENCE_FRAME;
 
 // This structure now relates to 8x8 block regions.
-typedef struct {
+typedef struct MODE_INFO {
   // Common for both INTER and INTRA blocks
   BLOCK_SIZE sb_type;
   PREDICTION_MODE mode;
@@ -82,24 +82,21 @@ typedef struct {
 
   // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
   int_mv mv[2];
-} MB_MODE_INFO;
 
-typedef struct MODE_INFO {
-  MB_MODE_INFO mbmi;
   b_mode_info bmi[4];
 } MODE_INFO;
 
 static INLINE PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
-  return mi->mbmi.sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
-                                      : mi->mbmi.mode;
+  return mi->sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
+                                 : mi->mode;
 }
 
-static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
-  return mbmi->ref_frame[0] > INTRA_FRAME;
+static INLINE int is_inter_block(const MODE_INFO *mi) {
+  return mi->ref_frame[0] > INTRA_FRAME;
 }
 
-static INLINE int has_second_ref(const MB_MODE_INFO *mbmi) {
-  return mbmi->ref_frame[1] > INTRA_FRAME;
+static INLINE int has_second_ref(const MODE_INFO *mi) {
+  return mi->ref_frame[1] > INTRA_FRAME;
 }
 
 PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
@@ -160,8 +157,6 @@ typedef struct macroblockd {
   MODE_INFO **mi;
   MODE_INFO *left_mi;
   MODE_INFO *above_mi;
-  MB_MODE_INFO *left_mbmi;
-  MB_MODE_INFO *above_mbmi;
 
   int up_available;
   int left_available;
@@ -212,19 +207,19 @@ extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
 
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const MODE_INFO *const mi = xd->mi[0];
 
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mi))
     return DCT_DCT;
 
-  return intra_mode_to_tx_type_lookup[mbmi->mode];
+  return intra_mode_to_tx_type_lookup[mi->mode];
 }
 
 static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
   const MODE_INFO *const mi = xd->mi[0];
 
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mi))
     return DCT_DCT;
 
   return intra_mode_to_tx_type_lookup[get_y_mode(mi, ib)];
@@ -242,9 +237,9 @@ static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
   }
 }
 
-static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi,
+static INLINE TX_SIZE get_uv_tx_size(const MODE_INFO *mi,
                                      const struct macroblockd_plane *pd) {
-  return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, pd->subsampling_x,
+  return get_uv_tx_size_impl(mi->tx_size, mi->sb_type, pd->subsampling_x,
                              pd->subsampling_y);
 }
 

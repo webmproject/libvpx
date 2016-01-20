@@ -159,8 +159,8 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                    int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0];
-  const int is_compound = has_second_ref(&mi->mbmi);
-  const InterpKernel *kernel = vp9_filter_kernels[mi->mbmi.interp_filter];
+  const int is_compound = has_second_ref(mi);
+  const InterpKernel *kernel = vp9_filter_kernels[mi->interp_filter];
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
@@ -168,9 +168,9 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
-    const MV mv = mi->mbmi.sb_type < BLOCK_8X8
+    const MV mv = mi->sb_type < BLOCK_8X8
                ? average_split_mvs(pd, mi, ref, block)
-               : mi->mbmi.mv[ref].as_mv;
+               : mi->mv[ref].as_mv;
 
     // TODO(jkoleszar): This clamping is done in the incorrect place for the
     // scaling case. It needs to be done on the scaled MV, not the pre-scaling
@@ -191,8 +191,8 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       const int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
       const int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
 #if CONFIG_BETTER_HW_COMPATIBILITY
-      assert(xd->mi[0]->mbmi.sb_type != BLOCK_4X8 &&
-             xd->mi[0]->mbmi.sb_type != BLOCK_8X4);
+      assert(xd->mi[0]->sb_type != BLOCK_4X8 &&
+             xd->mi[0]->sb_type != BLOCK_8X4);
       assert(mv_q4.row == mv.row * (1 << (1 - pd->subsampling_y)) &&
              mv_q4.col == mv.col * (1 << (1 - pd->subsampling_x)));
 #endif
@@ -250,7 +250,7 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
     const int bw = 4 * num_4x4_w;
     const int bh = 4 * num_4x4_h;
 
-    if (xd->mi[0]->mbmi.sb_type < BLOCK_8X8) {
+    if (xd->mi[0]->sb_type < BLOCK_8X8) {
       int i = 0, x, y;
       assert(bsize == BLOCK_8X8);
       for (y = 0; y < num_4x4_h; ++y)

@@ -93,13 +93,13 @@ int vp9_cyclic_refresh_rc_bits_per_mb(const struct VP9_COMP *cpi, int i,
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
 void vp9_cyclic_refresh_update_segment(struct VP9_COMP *const cpi,
-                                       MB_MODE_INFO *const mbmi,
+                                       MODE_INFO *const mi,
                                        int mi_row, int mi_col, BLOCK_SIZE bsize,
                                        int64_t rate, int64_t dist, int skip,
                                        struct macroblock_plane *const p);
 
 void vp9_cyclic_refresh_update_sb_postencode(struct VP9_COMP *const cpi,
-                                             const MB_MODE_INFO *const mbmi,
+                                             const MODE_INFO *const mi,
                                              int mi_row, int mi_col,
                                              BLOCK_SIZE bsize);
 
