@@ -2074,6 +2074,8 @@ int main(int argc, const char **argv_) {
     if (!global.have_framerate) {
       global.framerate.num = input.framerate.numerator;
       global.framerate.den = input.framerate.denominator;
+      FOREACH_STREAM(stream->config.cfg.g_timebase.den = global.framerate.num;
+                     stream->config.cfg.g_timebase.num = global.framerate.den);
     }
 
     FOREACH_STREAM(set_default_kf_interval(stream, &global));
