@@ -10,13 +10,13 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vp9_rtcd.h"
+#include "./vp10_rtcd.h"
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-#include "vp9/common/vp9_blockd.h"
+#include "vp10/common/blockd.h"
 #include "vpx_mem/vpx_mem.h"
 
 typedef void (*SubtractFunc)(int rows, int cols,

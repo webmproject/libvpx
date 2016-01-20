@@ -102,7 +102,7 @@ TEST_P(AqSegmentTest, TestNoMisMatchAQ3) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-VP9_INSTANTIATE_TEST_CASE(AqSegmentTest,
+VP10_INSTANTIATE_TEST_CASE(AqSegmentTest,
                           ::testing::Values(::libvpx_test::kRealTime,
                                             ::libvpx_test::kOnePassGood),
                           ::testing::Range(3, 9));

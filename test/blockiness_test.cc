@@ -16,7 +16,7 @@
 
 #include "./vpx_config.h"
 #if CONFIG_VP9_ENCODER
-#include "./vp9_rtcd.h"
+#include "./vp10_rtcd.h"
 #endif
 
 #include "test/acm_random.h"

@@ -103,10 +103,6 @@ TEST_P(SuperframeTest, TestSuperframeIndexIsOptional) {
   EXPECT_EQ(sf_count_, 1);
 }
 
-VP9_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
-    ::testing::Values(::libvpx_test::kTwoPassGood),
-    ::testing::Values(0)));
-
 VP10_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
     ::testing::Values(::libvpx_test::kTwoPassGood),
     ::testing::Values(CONFIG_MISC_FIXES)));

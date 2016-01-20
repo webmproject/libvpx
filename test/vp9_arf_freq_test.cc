@@ -15,7 +15,7 @@
 #include "test/util.h"
 #include "test/y4m_video_source.h"
 #include "test/yuv_video_source.h"
-#include "vp9/encoder/vp9_ratectrl.h"
+#include "vp10/encoder/ratectrl.h"
 
 namespace {
 
@@ -175,7 +175,7 @@ class ArfFreqTest
     if (min_arf_requested_)
       return min_arf_requested_;
     else
-      return vp9_rc_get_default_min_gf_interval(
+      return vp10_rc_get_default_min_gf_interval(
           test_video_param_.width, test_video_param_.height,
           (double)test_video_param_.framerate_num /
           test_video_param_.framerate_den);
@@ -223,12 +223,6 @@ TEST_P(ArfFreqTest, MinArfFreqTest) {
   }
   delete(video);
 }
-
-VP9_INSTANTIATE_TEST_CASE(
-    ArfFreqTest,
-    ::testing::ValuesIn(kTestVectors),
-    ::testing::ValuesIn(kEncodeVectors),
-    ::testing::ValuesIn(kMinArfVectors));
 
 #if CONFIG_VP9_HIGHBITDEPTH
 # if CONFIG_VP10_ENCODER

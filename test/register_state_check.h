@@ -94,7 +94,7 @@ class RegisterStateCheck {
 }  // namespace libvpx_test
 
 #elif defined(CONFIG_SHARED) && defined(HAVE_NEON_ASM) && defined(CONFIG_VP9) \
-      && !CONFIG_SHARED && HAVE_NEON_ASM && CONFIG_VP9
+      && !CONFIG_SHARED && HAVE_NEON_ASM && CONFIG_VP10
 
 extern "C" {
 // Save the d8-d15 registers into store.

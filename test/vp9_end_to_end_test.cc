@@ -181,12 +181,6 @@ TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   delete(video);
 }
 
-VP9_INSTANTIATE_TEST_CASE(
-    EndToEndTestLarge,
-    ::testing::ValuesIn(kEncodingModeVectors),
-    ::testing::ValuesIn(kTestVectors),
-    ::testing::ValuesIn(kCpuUsedVectors));
-
 #if CONFIG_VP9_HIGHBITDEPTH
 # if CONFIG_VP10_ENCODER
 // TODO(angiebird): many fail in high bitdepth mode.

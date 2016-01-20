@@ -83,7 +83,7 @@ TEST_P(ActiveMapTest, Test) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-VP9_INSTANTIATE_TEST_CASE(ActiveMapTest,
+VP10_INSTANTIATE_TEST_CASE(ActiveMapTest,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(0, 6));
 }  // namespace

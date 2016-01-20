@@ -20,8 +20,8 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp9/common/vp9_entropy.h"
-#include "vp9/common/vp9_scan.h"
+#include "vp10/common/entropy.h"
+#include "vp10/common/scan.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
 

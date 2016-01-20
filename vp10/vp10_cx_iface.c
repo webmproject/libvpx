@@ -1246,7 +1246,7 @@ static vpx_codec_err_t ctrl_set_render_size(vpx_codec_alg_priv_t *ctx,
   struct vp10_extracfg extra_cfg = ctx->extra_cfg;
   int *const render_size = va_arg(args, int *);
   extra_cfg.render_width  = render_size[0];
-  extra_cfg.render_height = render_size[0];
+  extra_cfg.render_height = render_size[1];
   return update_extra_cfg(ctx, &extra_cfg);
 }
 

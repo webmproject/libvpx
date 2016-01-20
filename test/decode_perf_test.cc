@@ -268,6 +268,6 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
   printf("}\n");
 }
 
-VP9_INSTANTIATE_TEST_CASE(
+VP10_INSTANTIATE_TEST_CASE(
   VP9NewEncodeDecodePerfTest, ::testing::Values(::libvpx_test::kTwoPassGood));
 }  // namespace

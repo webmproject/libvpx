@@ -167,7 +167,7 @@ VP8_INSTANTIATE_TEST_CASE(
 
 // Test VP9 decode in serial mode with single thread.
 #if CONFIG_VP9_DECODER
-VP9_INSTANTIATE_TEST_CASE(
+VP10_INSTANTIATE_TEST_CASE(
     TestVectorTest,
     ::testing::Combine(
         ::testing::Values(0),  // Serial Mode.

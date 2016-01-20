@@ -548,6 +548,7 @@ TEST_P(DatarateTestVP9Large, ChangingDropFrameThresh) {
 }
 
 // Check basic rate targeting for 2 temporal layers.
+#if 0  // VP10 does not support multiple layers yet
 TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -679,6 +680,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayersFrameDropping) {
     ASSERT_LE(num_drops_, 130);
   }
 }
+#endif
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 // Check basic datarate targeting, for a single bitrate, when denoiser is on.
@@ -967,12 +969,14 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc4threads) {
   EXPECT_EQ(GetMismatchFrames(), (unsigned int) 0);
 }
 
-VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
-                          ::testing::Values(::libvpx_test::kOnePassGood,
-                                            ::libvpx_test::kRealTime),
-                          ::testing::Range(2, 7));
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvc,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(5, 8));
+VP10_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
+                           ::testing::Values(::libvpx_test::kOnePassGood,
+                                             ::libvpx_test::kRealTime),
+                           ::testing::Range(2, 7));
+
+/* VP10 does not support multiple layers yet.
+VP10_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvc,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Range(5, 8));
+                           */
 }  // namespace

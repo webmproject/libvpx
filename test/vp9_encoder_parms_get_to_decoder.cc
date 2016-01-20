@@ -14,7 +14,7 @@
 #include "test/encode_test_driver.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "vp9/vp9_dx_iface.h"
+#include "vp10/vp10_dx_iface.c"
 
 namespace {
 
@@ -100,7 +100,7 @@ class VpxEncoderParmsGetToDecoder
         reinterpret_cast<vpx_codec_alg_priv_t *>(vp9_decoder->priv);
     FrameWorkerData *const worker_data =
         reinterpret_cast<FrameWorkerData *>(priv->frame_workers[0].data1);
-    VP9_COMMON *const common = &worker_data->pbi->common;
+    VP10_COMMON *const common = &worker_data->pbi->common;
 
     if (encode_parms.lossless) {
       EXPECT_EQ(0, common->base_qindex);
@@ -111,11 +111,7 @@ class VpxEncoderParmsGetToDecoder
     }
     EXPECT_EQ(encode_parms.error_resilient, common->error_resilient_mode);
     if (encode_parms.error_resilient) {
-      EXPECT_EQ(1, common->frame_parallel_decoding_mode);
       EXPECT_EQ(0, common->use_prev_frame_mvs);
-    } else {
-      EXPECT_EQ(encode_parms.frame_parallel,
-                common->frame_parallel_decoding_mode);
     }
     EXPECT_EQ(encode_parms.color_range, common->color_range);
     EXPECT_EQ(encode_parms.cs, common->color_space);
@@ -147,7 +143,7 @@ TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   delete video;
 }
 
-VP9_INSTANTIATE_TEST_CASE(VpxEncoderParmsGetToDecoder,
+VP10_INSTANTIATE_TEST_CASE(VpxEncoderParmsGetToDecoder,
                           ::testing::ValuesIn(kVP9EncodeParameterSet),
                           ::testing::ValuesIn(kVP9EncodePerfTestVectors));
 }  // namespace
