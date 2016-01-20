@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87062ace_dd4cfbc8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-20T21:11:07Z",
+      "side": 1,
+      "message": "Unlike in VP9, ...",
+      "revId": "21b53074c09bfd72c632b48107a46534d356bdf6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87062ace_3d525766",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-20T21:11:07Z",
+      "side": 1,
+      "message": "s/the applications/applications/",
+      "revId": "21b53074c09bfd72c632b48107a46534d356bdf6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c70ca2f0_9f427b95",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-20T21:11:07Z",
+      "side": 1,
+      "message": "This feature could be added ...",
+      "revId": "21b53074c09bfd72c632b48107a46534d356bdf6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
