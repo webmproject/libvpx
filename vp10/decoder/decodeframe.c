@@ -1245,7 +1245,7 @@ static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
 #if CONFIG_VP9_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          VP9_DEC_BORDER_IN_PIXELS,
+          VPX_DEC_BORDER_IN_PIXELS,
           cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
@@ -1339,7 +1339,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
 #if CONFIG_VP9_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          VP9_DEC_BORDER_IN_PIXELS,
+          VPX_DEC_BORDER_IN_PIXELS,
           cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {

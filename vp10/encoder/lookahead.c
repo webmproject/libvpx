@@ -77,7 +77,7 @@ struct lookahead_ctx *vp10_lookahead_init(unsigned int width,
 #if CONFIG_VP9_HIGHBITDEPTH
                                  use_highbitdepth,
 #endif
-                                 VP9_ENC_BORDER_IN_PIXELS,
+                                 VPX_ENC_BORDER_IN_PIXELS,
                                  legacy_byte_alignment))
         goto bail;
   }
@@ -177,7 +177,7 @@ int vp10_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
 #if CONFIG_VP9_HIGHBITDEPTH
                                  use_highbitdepth,
 #endif
-                                 VP9_ENC_BORDER_IN_PIXELS,
+                                 VPX_ENC_BORDER_IN_PIXELS,
                                  0))
           return 1;
       vpx_free_frame_buffer(&buf->img);

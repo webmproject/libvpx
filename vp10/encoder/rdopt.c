@@ -2405,8 +2405,8 @@ static int discount_newmv_test(const VP10_COMP *cpi,
            (mode_mv[NEARMV][ref_frame].as_int == INVALID_MV)));
 }
 
-#define LEFT_TOP_MARGIN ((VP9_ENC_BORDER_IN_PIXELS - VPX_INTERP_EXTEND) << 3)
-#define RIGHT_BOTTOM_MARGIN ((VP9_ENC_BORDER_IN_PIXELS -\
+#define LEFT_TOP_MARGIN ((VPX_ENC_BORDER_IN_PIXELS - VPX_INTERP_EXTEND) << 3)
+#define RIGHT_BOTTOM_MARGIN ((VPX_ENC_BORDER_IN_PIXELS -\
                                 VPX_INTERP_EXTEND) << 3)
 
 // TODO(jingning): this mv clamping function should be block size dependent.

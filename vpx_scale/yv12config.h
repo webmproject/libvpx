@@ -21,10 +21,10 @@ extern "C" {
 #include "vpx/vpx_integer.h"
 
 #define VP8BORDERINPIXELS           32
-#define VP9INNERBORDERINPIXELS      96
+#define VPXINNERBORDERINPIXELS      96
 #define VPX_INTERP_EXTEND           4
-#define VP9_ENC_BORDER_IN_PIXELS    160
-#define VP9_DEC_BORDER_IN_PIXELS    32
+#define VPX_ENC_BORDER_IN_PIXELS    160
+#define VPX_DEC_BORDER_IN_PIXELS    32
 
 typedef struct yv12_buffer_config {
   int   y_width;
