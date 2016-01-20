@@ -58,7 +58,7 @@ typedef unsigned int (*vpx_subp_avg_variance_fn_t)(const uint8_t *a_ptr,
                                                    unsigned int *sse,
                                                    const uint8_t *second_pred);
 #if CONFIG_VP10
-typedef struct vp9_variance_vtable {
+typedef struct vpx_variance_vtable {
   vpx_sad_fn_t               sdf;
   vpx_sad_avg_fn_t           sdaf;
   vpx_variance_fn_t          vf;
@@ -67,7 +67,7 @@ typedef struct vp9_variance_vtable {
   vpx_sad_multi_fn_t         sdx3f;
   vpx_sad_multi_fn_t         sdx8f;
   vpx_sad_multi_d_fn_t       sdx4df;
-} vp9_variance_fn_ptr_t;
+} vpx_variance_fn_ptr_t;
 #endif  // CONFIG_VP10
 
 #ifdef __cplusplus
