@@ -43,7 +43,7 @@
 #include "vp10/decoder/decoder.h"
 #include "vp10/decoder/dsubexp.h"
 
-#define MAX_VP9_HEADER_SIZE 80
+#define MAX_VP10_HEADER_SIZE 80
 
 static int is_compound_reference_allowed(const VP10_COMMON *cm) {
   int i;
@@ -2275,12 +2275,12 @@ static struct vpx_read_bit_buffer *init_read_bit_buffer(
     struct vpx_read_bit_buffer *rb,
     const uint8_t *data,
     const uint8_t *data_end,
-    uint8_t clear_data[MAX_VP9_HEADER_SIZE]) {
+    uint8_t clear_data[MAX_VP10_HEADER_SIZE]) {
   rb->bit_offset = 0;
   rb->error_handler = error_handler;
   rb->error_handler_data = &pbi->common;
   if (pbi->decrypt_cb) {
-    const int n = (int)VPXMIN(MAX_VP9_HEADER_SIZE, data_end - data);
+    const int n = (int)VPXMIN(MAX_VP10_HEADER_SIZE, data_end - data);
     pbi->decrypt_cb(pbi->decrypt_state, data, clear_data, n);
     rb->bit_buffer = clear_data;
     rb->bit_buffer_end = clear_data + n;
@@ -2320,7 +2320,7 @@ void vp10_decode_frame(VP10Decoder *pbi,
   MACROBLOCKD *const xd = &pbi->mb;
   struct vpx_read_bit_buffer rb;
   int context_updated = 0;
-  uint8_t clear_data[MAX_VP9_HEADER_SIZE];
+  uint8_t clear_data[MAX_VP10_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,
       init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
   const int tile_rows = 1 << cm->log2_tile_rows;
