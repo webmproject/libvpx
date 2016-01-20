@@ -16,6 +16,24 @@
       "revId": "ff0107f60dbddec82d7d7feacd1c9a3ff9ab4a51",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7b10259_d1306494",
+        "filename": "vp8/encoder/ethreading.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-01-20T19:08:07Z",
+      "side": 1,
+      "message": "No, vp8cx_remove_encoder_threads() is only called by main thread.",
+      "parentUuid": "c786622d_927202b8",
+      "revId": "ff0107f60dbddec82d7d7feacd1c9a3ff9ab4a51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
