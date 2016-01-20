@@ -136,19 +136,19 @@ static INLINE void clamp_mv_ref(MV *mv, const MACROBLOCKD *xd) {
 // on whether the block_size < 8x8 and we have check_sub_blocks set.
 static INLINE int_mv get_sub_block_mv(const MODE_INFO *candidate, int which_mv,
                                       int search_col, int block_idx) {
-  return block_idx >= 0 && candidate->mbmi.sb_type < BLOCK_8X8
+  return block_idx >= 0 && candidate->sb_type < BLOCK_8X8
           ? candidate->bmi[idx_n_column_to_subblock[block_idx][search_col == 0]]
               .as_mv[which_mv]
-          : candidate->mbmi.mv[which_mv];
+          : candidate->mv[which_mv];
 }
 
 
 // Performs mv sign inversion if indicated by the reference frame combination.
-static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
+static INLINE int_mv scale_mv(const MODE_INFO *mi, int ref,
                               const MV_REFERENCE_FRAME this_ref_frame,
                               const int *ref_sign_bias) {
-  int_mv mv = mbmi->mv[ref];
-  if (ref_sign_bias[mbmi->ref_frame[ref]] != ref_sign_bias[this_ref_frame]) {
+  int_mv mv = mi->mv[ref];
+  if (ref_sign_bias[mi->ref_frame[ref]] != ref_sign_bias[this_ref_frame]) {
     mv.as_mv.row *= -1;
     mv.as_mv.col *= -1;
   }

@@ -46,7 +46,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   const int which_mv = 0;
   const MV mv = { mv_row, mv_col };
   const InterpKernel *const kernel =
-    vp9_filter_kernels[xd->mi[0]->mbmi.interp_filter];
+    vp9_filter_kernels[xd->mi[0]->interp_filter];
 
   enum mv_precision mv_precision_uv;
   int uv_stride;

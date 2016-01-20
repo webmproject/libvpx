@@ -84,11 +84,11 @@ static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
 // size of the coding block (i.e., below min_block size rejected), coding
 // mode, and rate/distortion.
 static int candidate_refresh_aq(const CYCLIC_REFRESH *cr,
-                                const MB_MODE_INFO *mbmi,
+                                const MODE_INFO *mi,
                                 int64_t rate,
                                 int64_t dist,
                                 int bsize) {
-  MV mv = mbmi->mv[0].as_mv;
+  MV mv = mi->mv[0].as_mv;
   // Reject the block for lower-qp coding if projected distortion
   // is above the threshold, and any of the following is true:
   // 1) mode uses large mv
@@ -97,12 +97,12 @@ static int candidate_refresh_aq(const CYCLIC_REFRESH *cr,
   if (dist > cr->thresh_dist_sb &&
       (mv.row > cr->motion_thresh || mv.row < -cr->motion_thresh ||
        mv.col > cr->motion_thresh || mv.col < -cr->motion_thresh ||
-       !is_inter_block(mbmi)))
+       !is_inter_block(mi)))
     return CR_SEGMENT_ID_BASE;
   else  if (bsize >= BLOCK_16X16 &&
             rate < cr->thresh_rate_sb &&
-            is_inter_block(mbmi) &&
-            mbmi->mv[0].as_int == 0 &&
+            is_inter_block(mi) &&
+            mi->mv[0].as_int == 0 &&
             cr->rate_boost_fac > 10)
     // More aggressive delta-q for bigger blocks with zero motion.
     return CR_SEGMENT_ID_BOOST2;
@@ -185,7 +185,7 @@ int vp9_cyclic_refresh_rc_bits_per_mb(const VP9_COMP *cpi, int i,
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
 void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
-                                       MB_MODE_INFO *const mbmi,
+                                       MODE_INFO *const mi,
                                        int mi_row, int mi_col,
                                        BLOCK_SIZE bsize,
                                        int64_t rate,
@@ -199,7 +199,7 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
   const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
   const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
   const int block_index = mi_row * cm->mi_cols + mi_col;
-  int refresh_this_block = candidate_refresh_aq(cr, mbmi, rate, dist, bsize);
+  int refresh_this_block = candidate_refresh_aq(cr, mi, rate, dist, bsize);
   // Default is to not update the refresh map.
   int new_map_value = cr->map[block_index];
   int x = 0; int y = 0;
@@ -220,18 +220,18 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
 
   // If this block is labeled for refresh, check if we should reset the
   // segment_id.
-  if (cyclic_refresh_segment_id_boosted(mbmi->segment_id)) {
-    mbmi->segment_id = refresh_this_block;
+  if (cyclic_refresh_segment_id_boosted(mi->segment_id)) {
+    mi->segment_id = refresh_this_block;
     // Reset segment_id if it will be skipped.
     if (skip)
-      mbmi->segment_id = CR_SEGMENT_ID_BASE;
+      mi->segment_id = CR_SEGMENT_ID_BASE;
   }
 
   // Update the cyclic refresh map, to be used for setting segmentation map
   // for the next frame. If the block  will be refreshed this frame, mark it
   // as clean. The magnitude of the -ve influences how long before we consider
   // it for refresh again.
-  if (cyclic_refresh_segment_id_boosted(mbmi->segment_id)) {
+  if (cyclic_refresh_segment_id_boosted(mi->segment_id)) {
     new_map_value = -cr->time_for_refresh;
   } else if (refresh_this_block) {
     // Else if it is accepted as candidate for refresh, and has not already
@@ -250,17 +250,17 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
     for (x = 0; x < xmis; x++) {
       int map_offset = block_index + y * cm->mi_cols + x;
       cr->map[map_offset] = new_map_value;
-      cpi->segmentation_map[map_offset] = mbmi->segment_id;
+      cpi->segmentation_map[map_offset] = mi->segment_id;
     }
 }
 
 void vp9_cyclic_refresh_update_sb_postencode(VP9_COMP *const cpi,
-                                             const MB_MODE_INFO *const mbmi,
+                                             const MODE_INFO *const mi,
                                              int mi_row, int mi_col,
                                              BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-  MV mv = mbmi->mv[0].as_mv;
+  MV mv = mi->mv[0].as_mv;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
   const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
@@ -274,18 +274,18 @@ void vp9_cyclic_refresh_update_sb_postencode(VP9_COMP *const cpi,
       // don't update the map for them. For cases where motion is non-zero or
       // the reference frame isn't the previous frame, the previous value in
       // the map for this spatial location is not entirely correct.
-      if ((!is_inter_block(mbmi) || !mbmi->skip) &&
-          mbmi->segment_id <= CR_SEGMENT_ID_BOOST2) {
+      if ((!is_inter_block(mi) || !mi->skip) &&
+          mi->segment_id <= CR_SEGMENT_ID_BOOST2) {
         cr->last_coded_q_map[map_offset] = clamp(
-            cm->base_qindex + cr->qindex_delta[mbmi->segment_id], 0, MAXQ);
-      } else if (is_inter_block(mbmi) && mbmi->skip &&
-                 mbmi->segment_id <= CR_SEGMENT_ID_BOOST2) {
+            cm->base_qindex + cr->qindex_delta[mi->segment_id], 0, MAXQ);
+      } else if (is_inter_block(mi) && mi->skip &&
+                 mi->segment_id <= CR_SEGMENT_ID_BOOST2) {
         cr->last_coded_q_map[map_offset] = VPXMIN(
-            clamp(cm->base_qindex + cr->qindex_delta[mbmi->segment_id],
+            clamp(cm->base_qindex + cr->qindex_delta[mi->segment_id],
                   0, MAXQ),
             cr->last_coded_q_map[map_offset]);
       // Update the consecutive zero/low_mv count.
-      if (is_inter_block(mbmi) && (abs(mv.row) < 8 && abs(mv.col) < 8)) {
+      if (is_inter_block(mi) && (abs(mv.row) < 8 && abs(mv.col) < 8)) {
         if (cr->consec_zero_mv[map_offset] < 255)
           cr->consec_zero_mv[map_offset]++;
       } else {
@@ -346,10 +346,10 @@ void vp9_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
 
   for (mi_row = 0; mi_row < rows; mi_row++) {
     for (mi_col = 0; mi_col < cols; mi_col++) {
-      int16_t abs_mvr = mi[0]->mbmi.mv[0].as_mv.row >= 0 ?
-          mi[0]->mbmi.mv[0].as_mv.row : -1 * mi[0]->mbmi.mv[0].as_mv.row;
-      int16_t abs_mvc = mi[0]->mbmi.mv[0].as_mv.col >= 0 ?
-          mi[0]->mbmi.mv[0].as_mv.col : -1 * mi[0]->mbmi.mv[0].as_mv.col;
+      int16_t abs_mvr = mi[0]->mv[0].as_mv.row >= 0 ?
+          mi[0]->mv[0].as_mv.row : -1 * mi[0]->mv[0].as_mv.row;
+      int16_t abs_mvc = mi[0]->mv[0].as_mv.col >= 0 ?
+          mi[0]->mv[0].as_mv.col : -1 * mi[0]->mv[0].as_mv.col;
 
       // Calculate the motion of the background.
       if (abs_mvr <= 16 && abs_mvc <= 16) {

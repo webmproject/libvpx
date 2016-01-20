@@ -67,10 +67,7 @@ const vpx_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
 };
 
 static const int16_t zero_cost[] = {0};
-static const int16_t one_cost[] = {255, 257};
-static const int16_t two_cost[] = {255, 257};
-static const int16_t three_cost[] = {255, 257};
-static const int16_t four_cost[] = {255, 257};
+static const int16_t sign_cost[] = {255, 257};
 static const int16_t cat1_cost[] = {429, 431, 616, 618};
 static const int16_t cat2_cost[] = {624, 626, 727, 729, 848, 850, 951, 953};
 static const int16_t cat3_cost[] = {
@@ -360,10 +357,10 @@ const int16_t vp9_cat6_high12_high_cost[2048] = {
 
 const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, zero_cost},                          // ZERO_TOKEN
-  {0, 0, 1, one_cost},                           // ONE_TOKEN
-  {0, 0, 2, two_cost},                           // TWO_TOKEN
-  {0, 0, 3, three_cost},                         // THREE_TOKEN
-  {0, 0, 4, four_cost},                          // FOUR_TOKEN
+  {0, 0, 1, sign_cost},                          // ONE_TOKEN
+  {0, 0, 2, sign_cost},                          // TWO_TOKEN
+  {0, 0, 3, sign_cost},                          // THREE_TOKEN
+  {0, 0, 4, sign_cost},                          // FOUR_TOKEN
   {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},  // CATEGORY1_TOKEN
   {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},  // CATEGORY2_TOKEN
   {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},  // CATEGORY3_TOKEN
@@ -376,10 +373,10 @@ const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
 #if CONFIG_VP9_HIGHBITDEPTH
 const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
   {0, 0, 0, zero_cost},                             // ZERO
-  {0, 0, 1, one_cost},                              // ONE
-  {0, 0, 2, two_cost},                              // TWO
-  {0, 0, 3, three_cost},                            // THREE
-  {0, 0, 4, four_cost},                             // FOUR
+  {0, 0, 1, sign_cost},                             // ONE
+  {0, 0, 2, sign_cost},                             // TWO
+  {0, 0, 3, sign_cost},                             // THREE
+  {0, 0, 4, sign_cost},                             // FOUR
   {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},     // CAT1
   {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},     // CAT2
   {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},     // CAT3
@@ -390,10 +387,10 @@ const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
 };
 const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
   {0, 0, 0, zero_cost},                          // ZERO
-  {0, 0, 1, one_cost},                           // ONE
-  {0, 0, 2, two_cost},                           // TWO
-  {0, 0, 3, three_cost},                         // THREE
-  {0, 0, 4, four_cost},                          // FOUR
+  {0, 0, 1, sign_cost},                          // ONE
+  {0, 0, 2, sign_cost},                          // TWO
+  {0, 0, 3, sign_cost},                          // THREE
+  {0, 0, 4, sign_cost},                          // FOUR
   {vp9_cat1_prob, 1,  CAT1_MIN_VAL, cat1_cost},  // CAT1
   {vp9_cat2_prob, 2,  CAT2_MIN_VAL, cat2_cost},  // CAT2
   {vp9_cat3_prob, 3,  CAT3_MIN_VAL, cat3_cost},  // CAT3
@@ -471,17 +468,17 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   uint8_t token_cache[32 * 32];
   struct macroblock_plane *p = &x->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  MODE_INFO *mi = xd->mi[0];
   int pt; /* near block/prev token context index */
   int c;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int eob = p->eobs[block];
   const PLANE_TYPE type = get_plane_type(plane);
   const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
-  const int segment_id = mbmi->segment_id;
+  const int segment_id = mi->segment_id;
   const int16_t *scan, *nb;
   const scan_order *so;
-  const int ref = is_inter_block(mbmi);
+  const int ref = is_inter_block(mi);
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       td->rd_counts.coef_counts[tx_size][type][ref];
   vpx_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
@@ -588,12 +585,12 @@ void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  MODE_INFO *const mi = xd->mi[0];
   const int ctx = vp9_get_skip_context(xd);
-  const int skip_inc = !segfeature_active(&cm->seg, mbmi->segment_id,
+  const int skip_inc = !segfeature_active(&cm->seg, mi->segment_id,
                                           SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, td, t};
-  if (mbmi->skip) {
+  if (mi->skip) {
     if (!dry_run)
       td->counts->skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);

@@ -42,8 +42,8 @@ static INLINE int vp9_get_pred_context_seg_id(const MACROBLOCKD *xd) {
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
   const int above_sip = (above_mi != NULL) ?
-                        above_mi->mbmi.seg_id_predicted : 0;
-  const int left_sip = (left_mi != NULL) ? left_mi->mbmi.seg_id_predicted : 0;
+                        above_mi->seg_id_predicted : 0;
+  const int left_sip = (left_mi != NULL) ? left_mi->seg_id_predicted : 0;
 
   return above_sip + left_sip;
 }
@@ -56,8 +56,8 @@ static INLINE vpx_prob vp9_get_pred_prob_seg_id(const struct segmentation *seg,
 static INLINE int vp9_get_skip_context(const MACROBLOCKD *xd) {
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int above_skip = (above_mi != NULL) ? above_mi->mbmi.skip : 0;
-  const int left_skip = (left_mi != NULL) ? left_mi->mbmi.skip : 0;
+  const int above_skip = (above_mi != NULL) ? above_mi->skip : 0;
+  const int left_skip = (left_mi != NULL) ? left_mi->skip : 0;
   return above_skip + left_skip;
 }
 
@@ -110,15 +110,15 @@ static INLINE vpx_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
 // left of the entries corresponding to real blocks.
 // The prediction flags in these dummy entries are initialized to 0.
 static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
-  const int max_tx_size = max_txsize_lookup[xd->mi[0]->mbmi.sb_type];
-  const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
-  const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
+  const int max_tx_size = max_txsize_lookup[xd->mi[0]->sb_type];
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const MODE_INFO *const left_mi = xd->left_mi;
   const int has_above = xd->up_available;
   const int has_left = xd->left_available;
-  int above_ctx = (has_above && !above_mbmi->skip) ? (int)above_mbmi->tx_size
-                                                   : max_tx_size;
-  int left_ctx = (has_left && !left_mbmi->skip) ? (int)left_mbmi->tx_size
-                                                : max_tx_size;
+  int above_ctx = (has_above && !above_mi->skip) ? (int)above_mi->tx_size
+                                                 : max_tx_size;
+  int left_ctx = (has_left && !left_mi->skip) ? (int)left_mi->tx_size
+                                              : max_tx_size;
   if (!has_left)
     left_ctx = above_ctx;
 

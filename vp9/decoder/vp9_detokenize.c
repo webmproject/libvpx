@@ -53,7 +53,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
   FRAME_COUNTS *counts = xd->counts;
   const int max_eob = 16 << (tx_size << 1);
   const FRAME_CONTEXT *const fc = xd->fc;
-  const int ref = is_inter_block(&xd->mi[0]->mbmi);
+  const int ref = is_inter_block(xd->mi[0]);
   int band, c = 0;
   const vpx_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
