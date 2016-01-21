@@ -70,7 +70,7 @@ typedef struct VP10Decoder {
   TileData *tile_data;
   int total_tiles;
 
-  VP9LfSync lf_row_sync;
+  VP10LfSync lf_row_sync;
 
   vpx_decrypt_cb decrypt_cb;
   void *decrypt_state;
