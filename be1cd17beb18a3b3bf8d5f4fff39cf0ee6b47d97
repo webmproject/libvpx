@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14018af3_dba9f39c",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-01-21T02:58:25Z",
+      "side": 1,
+      "message": "if (x-\u003eis_skin \u0026\u0026\n    ((consec_zero_last \u003c thresh_consec_zero_last) || motion_magnitude2 \u003e 0))",
+      "range": {
+        "startLine": 629,
+        "startChar": 4,
+        "endLine": 630,
+        "endChar": 34
+      },
+      "revId": "be1cd17beb18a3b3bf8d5f4fff39cf0ee6b47d97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
