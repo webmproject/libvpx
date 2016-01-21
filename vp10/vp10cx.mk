@@ -23,8 +23,6 @@ VP10_CX_SRCS-yes += encoder/context_tree.h
 VP10_CX_SRCS-yes += encoder/cost.h
 VP10_CX_SRCS-yes += encoder/cost.c
 VP10_CX_SRCS-yes += encoder/dct.c
-VP10_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/denoiser.c
-VP10_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/denoiser.h
 VP10_CX_SRCS-yes += encoder/encodeframe.c
 VP10_CX_SRCS-yes += encoder/encodeframe.h
 VP10_CX_SRCS-yes += encoder/encodemb.c
@@ -101,10 +99,6 @@ endif
 
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.c
 VP10_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/dct_ssse3.c
-
-ifeq ($(CONFIG_VP9_TEMPORAL_DENOISING),yes)
-VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/denoiser_sse2.c
-endif
 
 VP10_CX_SRCS-$(HAVE_AVX2) += encoder/x86/error_intrin_avx2.c
 

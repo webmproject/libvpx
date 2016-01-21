@@ -1681,11 +1681,6 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   cpi->td.mb.nmvsadcost_hp[1] = &cpi->nmvsadcosts_hp[1][MV_MAX];
   cal_nmvsadcosts_hp(cpi->td.mb.nmvsadcost_hp);
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  yuv_denoised_file = fopen("denoised.yuv", "ab");
-#endif
-#endif
 #ifdef OUTPUT_YUV_SKINMAP
   yuv_skinmap_file = fopen("skinmap.yuv", "ab");
 #endif
@@ -1923,10 +1918,6 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 #endif
   }
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  vp10_denoiser_free(&(cpi->denoiser));
-#endif
-
   for (t = 0; t < cpi->num_workers; ++t) {
     VPxWorker *const worker = &cpi->workers[t];
     EncWorkerData *const thread_data = &cpi->tile_thr_data[t];
@@ -1965,11 +1956,6 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
   vp10_free_ref_frame_buffers(cm->buffer_pool);
   vpx_free(cpi);
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  fclose(yuv_denoised_file);
-#endif
-#endif
 #ifdef OUTPUT_YUV_SKINMAP
   fclose(yuv_skinmap_file);
 #endif
@@ -2630,16 +2616,6 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
   }
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp10_denoiser_update_frame_info(&cpi->denoiser,
-                                   *cpi->Source,
-                                   cpi->common.frame_type,
-                                   cpi->refresh_alt_ref_frame,
-                                   cpi->refresh_golden_frame,
-                                   cpi->refresh_last_frame);
-  }
-#endif
 }
 
 static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
@@ -3572,14 +3548,6 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     encode_with_recode_loop(cpi, size, dest);
   }
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  if (oxcf->noise_sensitivity > 0) {
-    vp10_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
-                            yuv_denoised_file);
-  }
-#endif
-#endif
 #ifdef OUTPUT_YUV_SKINMAP
   if (cpi->common.current_video_frame > 1) {
     vp10_compute_skin_map(cpi, yuv_skinmap_file);
@@ -3756,21 +3724,6 @@ static void check_initial_width(VP10_COMP *cpi,
   }
 }
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-static void setup_denoiser_buffer(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      !cpi->denoiser.frame_buffer_initialized) {
-    vp10_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
-                       cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VPX_HIGHBITDEPTH
-                       cm->use_highbitdepth,
-#endif
-                       VPX_ENC_BORDER_IN_PIXELS);
-  }
-}
-#endif
-
 int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
@@ -3786,9 +3739,6 @@ int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
   check_initial_width(cpi, subsampling_x, subsampling_y);
 #endif  // CONFIG_VPX_HIGHBITDEPTH
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  setup_denoiser_buffer(cpi);
-#endif
   vpx_usec_timer_start(&timer);
 
   if (vp10_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
@@ -4317,10 +4267,6 @@ int vp10_set_size_literal(VP10_COMP *cpi, unsigned int width,
 #else
   check_initial_width(cpi, 1, 1);
 #endif  // CONFIG_VPX_HIGHBITDEPTH
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  setup_denoiser_buffer(cpi);
-#endif
 
   if (width) {
     cm->width = width;

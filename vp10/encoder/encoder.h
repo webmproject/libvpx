@@ -34,10 +34,6 @@
 #include "vp10/encoder/speed_features.h"
 #include "vp10/encoder/tokenize.h"
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#include "vp10/encoder/denoiser.h"
-#endif
-
 #if CONFIG_INTERNAL_STATS
 #include "vpx_dsp/ssim.h"
 #endif
@@ -468,9 +464,6 @@ typedef struct VP10_COMP {
 
   int intra_tx_type_costs[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   int inter_tx_type_costs[EXT_TX_SIZES][TX_TYPES];
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  VP9_DENOISER denoiser;
-#endif
 
   int resize_pending;
   int resize_state;

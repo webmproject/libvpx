@@ -288,23 +288,6 @@ if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_highbd_convolve8_avg_vert/, "$sse2_x86_64";
 
   #
-  # post proc
-  #
-  if (vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
-    add_proto qw/void vp10_highbd_mbpost_proc_down/, "uint16_t *dst, int pitch, int rows, int cols, int flimit";
-    specialize qw/vp10_highbd_mbpost_proc_down/;
-
-    add_proto qw/void vp10_highbd_mbpost_proc_across_ip/, "uint16_t *src, int pitch, int rows, int cols, int flimit";
-    specialize qw/vp10_highbd_mbpost_proc_across_ip/;
-
-    add_proto qw/void vp10_highbd_post_proc_down_and_across/, "const uint16_t *src_ptr, uint16_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
-    specialize qw/vp10_highbd_post_proc_down_and_across/;
-
-    add_proto qw/void vp10_highbd_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
-    specialize qw/vp10_highbd_plane_add_noise/;
-  }
-
-  #
   # dct
   #
   # Note as optimized versions of these functions are added we need to add a check to ensure
@@ -325,14 +308,6 @@ if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
 if (vpx_config("CONFIG_VP10_ENCODER") eq "yes") {
 
 # ENCODEMB INVOKE
-
-#
-# Denoiser
-#
-if (vpx_config("CONFIG_VP9_TEMPORAL_DENOISING") eq "yes") {
-  add_proto qw/int vp10_denoiser_filter/, "const uint8_t *sig, int sig_stride, const uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg, int avg_stride, int increase_denoising, BLOCK_SIZE bs, int motion_magnitude";
-  specialize qw/vp10_denoiser_filter sse2/;
-}
 
 if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
 # the transform coefficients are held in 32-bit

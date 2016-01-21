@@ -56,8 +56,6 @@ Advanced options:
   ${toggle_postproc_visualizer}   macro block / block level visualizers
   ${toggle_multi_res_encoding}    enable multiple-resolution encoding
   ${toggle_temporal_denoising}    enable temporal denoising and disable the spatial denoiser
-  ${toggle_vp9_temporal_denoising}
-                                  enable vp9 temporal denoising
   ${toggle_webm_io}               enable input from and output to WebM container
   ${toggle_libyuv}                enable libyuv
 

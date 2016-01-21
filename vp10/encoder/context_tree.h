@@ -58,15 +58,6 @@ typedef struct {
   int rate;
   int64_t dist;
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  unsigned int newmv_sse;
-  unsigned int zeromv_sse;
-  PREDICTION_MODE best_sse_inter_mode;
-  int_mv best_sse_mv;
-  MV_REFERENCE_FRAME best_reference_frame;
-  MV_REFERENCE_FRAME best_zeromv_reference_frame;
-#endif
-
   // motion vector cache for adaptive motion search control in partition
   // search loop
   MV pred_mv[MAX_REF_FRAMES];
