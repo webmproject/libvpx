@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b40b5e17_7bebfbd1",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2244,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-01-21T17:32:29Z",
+      "side": 0,
+      "message": "Seems to me that this flag should be there(?)",
+      "revId": "a40d48621583e1273ec7be80d276042314bf8784",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54f78247_bd073fa2",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2519,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-01-21T17:32:29Z",
+      "side": 0,
+      "message": "This function should not be needed if ext-tx experiment is turned off. By design it is called only if both var-tx and ext-tx is turned on.",
+      "revId": "a40d48621583e1273ec7be80d276042314bf8784",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
