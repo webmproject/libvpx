@@ -252,7 +252,10 @@ static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
-      vp10_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
+      if (fwd_txfm_opt == FWD_TXFM_OPT_NORMAL)
+        vp10_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
+      else  // FWD_TXFM_OPT_DC
+        vpx_highbd_fdct8x8_1(src_diff, coeff, diff_stride);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
@@ -291,7 +294,10 @@ static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
-      vp10_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
+      if (fwd_txfm_opt == FWD_TXFM_OPT_NORMAL)
+        vp10_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
+      else  // FWD_TXFM_OPT_DC
+        vpx_highbd_fdct16x16_1(src_diff, coeff, diff_stride);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
