@@ -36,9 +36,8 @@ typedef struct {
 
 typedef struct {
   const vpx_prob *context_tree;
+  int16_t token;
   EXTRABIT extra;
-  uint8_t token;
-  uint8_t skip_eob_node;
 } TOKENEXTRA;
 
 extern const vpx_tree_index vp9_coef_tree[];
