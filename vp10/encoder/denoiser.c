@@ -427,7 +427,7 @@ void vp10_denoiser_update_frame_stats(MB_MODE_INFO *mbmi, unsigned int sse,
 
 int vp10_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
                        int ssx, int ssy,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                        int use_highbitdepth,
 #endif
                        int border) {
@@ -438,7 +438,7 @@ int vp10_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
   for (i = 0; i < MAX_REF_FRAMES; ++i) {
     fail = vpx_alloc_frame_buffer(&denoiser->running_avg_y[i], width, height,
                                   ssx, ssy,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                   use_highbitdepth,
 #endif
                                   border, legacy_byte_alignment);
@@ -453,7 +453,7 @@ int vp10_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 
   fail = vpx_alloc_frame_buffer(&denoiser->mc_running_avg_y, width, height,
                                 ssx, ssy,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                 use_highbitdepth,
 #endif
                                 border, legacy_byte_alignment);

@@ -40,7 +40,7 @@ static INLINE tran_low_t dct_const_round_shift(tran_high_t input) {
   return check_range(rv);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE tran_low_t highbd_check_range(tran_high_t input,
                                             int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
@@ -64,7 +64,7 @@ static INLINE tran_low_t highbd_dct_const_round_shift(tran_high_t input,
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   return highbd_check_range(rv, bd);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #if CONFIG_EMULATE_HARDWARE
 // When CONFIG_EMULATE_HARDWARE is 1 the transform performs a
@@ -96,7 +96,7 @@ void vp10_iadst4_c(const tran_low_t *input, tran_low_t *output);
 void vp10_iadst8_c(const tran_low_t *input, tran_low_t *output);
 void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd);
 void vp10_highbd_idct8_c(const tran_low_t *input, tran_low_t *output, int bd);
 void vp10_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd);

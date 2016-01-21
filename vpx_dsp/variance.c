@@ -272,7 +272,7 @@ void vpx_comp_avg_pred_c(uint8_t *comp_pred, const uint8_t *pred,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_variance64(const uint8_t *a8, int  a_stride,
                               const uint8_t *b8, int  b_stride,
                               int w, int h, uint64_t *sse, uint64_t *sum) {
@@ -618,4 +618,4 @@ void vpx_highbd_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred8,
     ref += ref_stride;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

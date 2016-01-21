@@ -251,7 +251,7 @@ void vp10_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
   const highbd_transform_2d IHT_4[] = {
@@ -495,4 +495,4 @@ void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
       break;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

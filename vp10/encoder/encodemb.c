@@ -38,14 +38,14 @@ void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vpx_highbd_subtract_block(bh, bw, p->src_diff, bw, p->src.buf,
                               p->src.stride, pd->dst.buf, pd->dst.stride,
                               x->e_mbd.bd);
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   vpx_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
                      pd->dst.buf, pd->dst.stride);
 }
@@ -115,7 +115,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   int16_t t0, t1;
   EXTRABIT e0;
   int best, band, pt, i, final_eob;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   const int16_t *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
 #else
   const int16_t *cat6_high_cost = vp10_get_high_cost_table(8);
@@ -167,11 +167,11 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       best = rd_cost1 < rd_cost0;
       base_bits = vp10_get_cost(t0, e0, cat6_high_cost);
       dx = mul * (dqcoeff[rc] - coeff[rc]);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx >>= xd->bd - 8;
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       d2 = dx * dx;
       tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
       tokens[i][0].error = d2 + (best ? error1 : error0);
@@ -228,7 +228,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       base_bits = vp10_get_cost(t0, e0, cat6_high_cost);
 
       if (shortcut) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           dx -= ((dequant_ptr[rc != 0] >> (xd->bd - 8)) + sz) ^ sz;
         } else {
@@ -236,7 +236,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
         }
 #else
         dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
         d2 = dx * dx;
       }
       tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
@@ -313,7 +313,7 @@ static INLINE void fdct32x32(int rd_transform,
     vpx_fdct32x32(src, dst, src_stride);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE void highbd_fdct32x32(int rd_transform, const int16_t *src,
                                     tran_low_t *dst, int src_stride) {
   if (rd_transform)
@@ -321,7 +321,7 @@ static INLINE void highbd_fdct32x32(int rd_transform, const int16_t *src,
   else
     vpx_highbd_fdct32x32(src, dst, src_stride);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                        int diff_stride, TX_TYPE tx_type, int lossless) {
@@ -392,7 +392,7 @@ static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                               int diff_stride, TX_TYPE tx_type, int lossless) {
   if (lossless) {
@@ -466,7 +466,7 @@ static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
       break;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
                          int blk_row, int blk_col,
@@ -485,7 +485,7 @@ void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   const int16_t *src_diff;
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
@@ -526,7 +526,7 @@ void vp10_xform_quant_fp(MACROBLOCK *x, int plane, int block,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   switch (tx_size) {
     case TX_32X32:
@@ -581,7 +581,7 @@ void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
   const int16_t *src_diff;
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
@@ -617,7 +617,7 @@ void vp10_xform_quant_dc(MACROBLOCK *x, int plane, int block,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   switch (tx_size) {
     case TX_32X32:
@@ -673,7 +673,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
   const int16_t *src_diff;
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
      switch (tx_size) {
       case TX_32X32:
@@ -711,7 +711,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   switch (tx_size) {
     case TX_32X32:
@@ -822,7 +822,7 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 
   if (p->eobs[block] == 0)
     return;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
@@ -852,7 +852,7 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   switch (tx_size) {
     case TX_32X32:
@@ -894,7 +894,7 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
   vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
 
   if (p->eobs[block] > 0) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (xd->lossless[0]) {
         vp10_highbd_iwht4x4_add(dqcoeff, dst, pd->dst.stride,
@@ -905,7 +905,7 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
       }
       return;
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     if (xd->lossless[0]) {
       vp10_iwht4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
     } else {
@@ -980,7 +980,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   vp10_predict_intra_block(xd, bwl, bhl, tx_size, mode, dst, dst_stride,
                           dst, dst_stride, blk_col, blk_row, plane);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
@@ -1053,7 +1053,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
       *(args->skip) = 0;
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   switch (tx_size) {
     case TX_32X32:

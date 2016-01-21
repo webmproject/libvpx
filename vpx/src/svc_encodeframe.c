@@ -26,7 +26,7 @@
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_onyxc_int.h"
+#include "vp10/common/onyxc_int.h"
 
 #ifdef __MINGW32__
 #define strtok_r strtok_s

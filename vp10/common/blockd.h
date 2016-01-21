@@ -192,7 +192,7 @@ typedef struct macroblockd {
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT left_seg_context[8];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   /* Bit depth: 8, 10, 12 */
   int bd;
 #endif

@@ -50,9 +50,9 @@ const TestVideoParam kTestVectors[] = {
     8, VPX_IMG_FMT_I420, VPX_BITS_8, 0},
   {"rush_hour_444.y4m", 352, 288, 30, 1,
     8, VPX_IMG_FMT_I444, VPX_BITS_8, 1},
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   // Add list of profile 2/3 test videos here ...
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 };
 
 const TestEncodeParam kEncodeVectors[] = {
@@ -224,7 +224,7 @@ TEST_P(ArfFreqTest, MinArfFreqTest) {
   delete(video);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 # if CONFIG_VP10_ENCODER
 // TODO(angiebird): 25-29 fail in high bitdepth mode.
 INSTANTIATE_TEST_CASE_P(
@@ -242,5 +242,5 @@ VP10_INSTANTIATE_TEST_CASE(
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kEncodeVectors),
     ::testing::ValuesIn(kMinArfVectors));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }  // namespace

@@ -323,7 +323,7 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
                                        unsigned int *sse1,
                                        int *distortion) {
   unsigned int besterr;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       DECLARE_ALIGNED(16, uint16_t, comp_pred16[64 * 64]);
@@ -352,7 +352,7 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
   }
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   return besterr;
 }
 
@@ -1860,7 +1860,7 @@ unsigned int vp10_int_pro_motion_estimation(const VP10_COMP *cpi, MACROBLOCK *x,
     vp10_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   {
     unsigned int this_sad;
     tmp_mv->row = 0;

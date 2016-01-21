@@ -218,7 +218,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
   const int seg_id = xd->mi[0]->mbmi.segment_id;
   if (eob > 0) {
     tran_low_t *const dqcoeff = pd->dqcoeff;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       switch (tx_size) {
         case TX_4X4:
@@ -242,7 +242,7 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
           return;
       }
     } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
@@ -261,9 +261,9 @@ static void inverse_transform_block_inter(MACROBLOCKD* xd, int plane,
           assert(0 && "Invalid transform size");
           return;
       }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     if (eob == 1) {
       dqcoeff[0] = 0;
@@ -287,7 +287,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
   const int seg_id = xd->mi[0]->mbmi.segment_id;
   if (eob > 0) {
     tran_low_t *const dqcoeff = pd->dqcoeff;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       switch (tx_size) {
         case TX_4X4:
@@ -311,7 +311,7 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
           return;
       }
     } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       switch (tx_size) {
         case TX_4X4:
           vp10_inv_txfm_add_4x4(dqcoeff, dst, stride, eob, tx_type,
@@ -330,9 +330,9 @@ static void inverse_transform_block_intra(MACROBLOCKD* xd, int plane,
           assert(0 && "Invalid transform size");
           return;
       }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     if (eob == 1) {
       dqcoeff[0] = 0;
@@ -438,7 +438,7 @@ static void build_mc_border(const uint8_t *src, int src_stride,
   } while (--b_h);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void high_build_mc_border(const uint8_t *src8, int src_stride,
                                  uint16_t *dst, int dst_stride,
                                  int x, int y, int b_w, int b_h,
@@ -483,9 +483,9 @@ static void high_build_mc_border(const uint8_t *src8, int src_stride,
       ref_row += src_stride;
   } while (--b_h);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                                int x0, int y0, int b_w, int b_h,
                                int frame_width, int frame_height,
@@ -537,7 +537,7 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
   inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
                   subpel_y, sf, w, h, ref, kernel, xs, ys);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                                        int plane, int bw, int bh, int x,
@@ -663,7 +663,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                          dst, dst_buf->stride,
                          subpel_x, subpel_y,
                          kernel, sf,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                          xd,
 #endif
                          w, h, ref, xs, ys);
@@ -678,7 +678,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                              VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
      }
   }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     high_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
                          subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
@@ -689,7 +689,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
 #else
   inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
                   subpel_y, sf, w, h, ref, kernel, xs, ys);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }
 
 static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
@@ -1242,7 +1242,7 @@ static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
           cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
           VPX_DEC_BORDER_IN_PIXELS,
@@ -1336,7 +1336,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
           cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
           VPX_DEC_BORDER_IN_PIXELS,
@@ -1816,12 +1816,12 @@ static void read_bitdepth_colorspace_sampling(
     VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
     cm->bit_depth = vpx_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     cm->use_highbitdepth = 1;
 #endif
   } else {
     cm->bit_depth = VPX_BITS_8;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     cm->use_highbitdepth = 0;
 #endif
   }
@@ -1873,7 +1873,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
                          "Invalid frame marker");
 
   cm->profile = vp10_read_profile(rb);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (cm->profile >= MAX_PROFILES)
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Unsupported bitstream profile");
@@ -1979,7 +1979,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
         cm->color_range = 0;
         cm->subsampling_y = cm->subsampling_x = 1;
         cm->bit_depth = VPX_BITS_8;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         cm->use_highbitdepth = 0;
 #endif
       }
@@ -2009,7 +2009,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         vp10_setup_scale_factors_for_frame(&ref_buf->sf,
                                           ref_buf->buf->y_crop_width,
                                           ref_buf->buf->y_crop_height,
@@ -2024,7 +2024,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       }
     }
   }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
 #endif
   get_frame_new_buffer(cm)->color_space = cm->color_space;
@@ -2088,7 +2088,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 
   setup_loopfilter(&cm->lf, rb);
   setup_quantization(cm, rb);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   xd->bd = (int)cm->bit_depth;
 #endif
 

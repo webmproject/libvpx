@@ -143,7 +143,7 @@ typedef struct VP10Common {
   int subsampling_x;
   int subsampling_y;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   int use_highbitdepth;  // Marks if we need to use 16bit frame buffers.
 #endif
 

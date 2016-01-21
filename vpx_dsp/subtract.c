@@ -32,7 +32,7 @@ void vpx_subtract_block_c(int rows, int cols,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vpx_highbd_subtract_block_c(int rows, int cols,
                                  int16_t *diff, ptrdiff_t diff_stride,
                                  const uint8_t *src8, ptrdiff_t src_stride,
@@ -53,4 +53,4 @@ void vpx_highbd_subtract_block_c(int rows, int cols,
     src  += src_stride;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

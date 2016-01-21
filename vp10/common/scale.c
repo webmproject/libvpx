@@ -44,7 +44,7 @@ MV32 vp10_scale_mv(const MV *mv, int x, int y, const struct scale_factors *sf) {
   return res;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
                                        int other_w, int other_h,
                                        int this_w, int this_h,
@@ -119,7 +119,7 @@ void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
   // 2D subpel motion always gets filtered in both directions
   sf->predict[1][1][0] = vpx_convolve8;
   sf->predict[1][1][1] = vpx_convolve8_avg;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (use_highbd) {
     if (sf->x_step_q4 == 16) {
       if (sf->y_step_q4 == 16) {

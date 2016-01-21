@@ -46,10 +46,10 @@ void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                        int diff_stride, TX_TYPE tx_type, int lossless);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                               int diff_stride, TX_TYPE tx_type, int lossless);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

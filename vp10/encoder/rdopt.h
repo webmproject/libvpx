@@ -32,7 +32,7 @@ void vp10_rd_pick_intra_mode_sb(struct VP10_COMP *cpi, struct macroblock *x,
 unsigned int vp10_get_sby_perpixel_variance(VP10_COMP *cpi,
                                            const struct buf_2d *ref,
                                            BLOCK_SIZE bs);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 unsigned int vp10_high_get_sby_perpixel_variance(VP10_COMP *cpi,
                                                 const struct buf_2d *ref,
                                                 BLOCK_SIZE bs, int bd);

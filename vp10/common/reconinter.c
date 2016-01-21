@@ -19,7 +19,7 @@
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       uint8_t *dst, int dst_stride,
                                       const MV *src_mv,
@@ -40,7 +40,7 @@ void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
   high_inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
                        sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4, bd);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
@@ -112,7 +112,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
            + (scaled_mv.col >> SUBPEL_BITS);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                            subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys,
@@ -124,7 +124,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
 #else
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                     subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 }
 
@@ -145,7 +145,7 @@ void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const uint8_t *pre =
         &pd->pre[ref].buf[(ir * pd->pre[ref].stride + ic) << 2];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp10_highbd_build_inter_predictor(pre, pd->pre[ref].stride,
                                       dst, pd->dst.stride,
@@ -171,7 +171,7 @@ void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
                                kernel, MV_PRECISION_Q3,
                                mi_col * MI_SIZE + 4 * ic,
                                mi_row * MI_SIZE + 4 * ir);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 }
 

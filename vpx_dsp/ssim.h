@@ -80,7 +80,7 @@ double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
                    const YV12_BUFFER_CONFIG *dest,
                    double *ssim_y, double *ssim_u, double *ssim_v);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 double vpx_highbd_calc_ssim(const YV12_BUFFER_CONFIG *source,
                             const YV12_BUFFER_CONFIG *dest,
                             double *weight,
@@ -92,7 +92,7 @@ double vpx_highbd_calc_ssimg(const YV12_BUFFER_CONFIG *source,
                              double *ssim_u,
                              double *ssim_v,
                              unsigned int bd);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

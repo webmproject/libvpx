@@ -33,7 +33,7 @@ static const int segment_id[ENERGY_SPAN] = {0, 1, 1, 2, 3, 4};
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
 DECLARE_ALIGNED(16, static const uint8_t, vp10_64_zeros[64]) = {0};
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 DECLARE_ALIGNED(16, static const uint16_t, vp10_highbd_64_zeros[64]) = {0};
 #endif
 
@@ -104,7 +104,7 @@ static void aq_variance(const uint8_t *a, int  a_stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void aq_highbd_variance64(const uint8_t *a8, int  a_stride,
                                  const uint8_t *b8, int  b_stride,
                                  int w, int h, uint64_t *sse, uint64_t *sum) {
@@ -135,7 +135,7 @@ static void aq_highbd_8_variance(const uint8_t *a8, int  a_stride,
   *sse = (unsigned int)sse_long;
   *sum = (int)sum_long;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bs) {
@@ -150,7 +150,7 @@ static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
     const int bw = 8 * num_8x8_blocks_wide_lookup[bs] - right_overflow;
     const int bh = 8 * num_8x8_blocks_high_lookup[bs] - bottom_overflow;
     int avg;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       aq_highbd_8_variance(x->plane[0].src.buf, x->plane[0].src.stride,
                            CONVERT_TO_BYTEPTR(vp10_highbd_64_zeros), 0, bw, bh,
@@ -164,11 +164,11 @@ static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
 #else
     aq_variance(x->plane[0].src.buf, x->plane[0].src.stride,
                 vp10_64_zeros, 0, bw, bh, &sse, &avg);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     var = sse - (((int64_t)avg * avg) / (bw * bh));
     return (256 * var) / (bw * bh);
   } else {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                                x->plane[0].src.stride,
@@ -183,7 +183,7 @@ static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
     var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                              x->plane[0].src.stride,
                              vp10_64_zeros, 0, &sse);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     return (256 * var) >> num_pels_log2_lookup[bs];
   }
 }

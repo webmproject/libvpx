@@ -130,7 +130,7 @@ TEST_P(VP9IntraPredTest, IntraPredTests) {
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #if CONFIG_USE_X86INC
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, VP9IntraPredTest,
                         ::testing::Values(
@@ -226,6 +226,6 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, VP9IntraPredTest,
                                        &vpx_highbd_tm_predictor_8x8_c, 8, 12)));
 
 #endif  // CONFIG_USE_X86INC
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 }  // namespace

@@ -33,7 +33,7 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
       kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE void high_inter_predictor(const uint8_t *src, int src_stride,
                                         uint8_t *dst, int dst_stride,
                                         const int subpel_x,
@@ -46,7 +46,7 @@ static INLINE void high_inter_predictor(const uint8_t *src, int src_stride,
       src, src_stride, dst, dst_stride,
       kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static INLINE int round_mv_comp_q4(int value) {
   return (value < 0 ? value - 2 : value + 2) / 4;
@@ -156,7 +156,7 @@ void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
                                enum mv_precision precision,
                                int x, int y);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       uint8_t *dst, int dst_stride,
                                       const MV *mv_q3,

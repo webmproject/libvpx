@@ -154,7 +154,7 @@ void vp10_post_proc_down_and_across_c(const uint8_t *src_ptr,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
                                             uint16_t *dst_ptr,
                                             int src_pixels_per_line,
@@ -227,7 +227,7 @@ void vp10_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
     dst_ptr += dst_pixels_per_line;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static int q2mbl(int x) {
   if (x < 20) x = 20;
@@ -271,7 +271,7 @@ void vp10_mbpost_proc_across_ip_c(uint8_t *src, int pitch,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
                                         int rows, int cols, int flimit) {
   int r, c, i;
@@ -309,7 +309,7 @@ void vp10_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
     s += pitch;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_mbpost_proc_down_c(uint8_t *dst, int pitch,
                             int rows, int cols, int flimit) {
@@ -343,7 +343,7 @@ void vp10_mbpost_proc_down_c(uint8_t *dst, int pitch,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch,
                                    int rows, int cols, int flimit) {
   int r, c, i;
@@ -375,7 +375,7 @@ void vp10_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch,
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
                                        YV12_BUFFER_CONFIG   *post,
@@ -387,7 +387,7 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   (void) low_var_thresh;
   (void) flag;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (source->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp10_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->y_buffer),
                                          CONVERT_TO_SHORTPTR(post->y_buffer),
@@ -448,7 +448,7 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   vp10_post_proc_down_and_across(source->v_buffer, post->v_buffer,
                                 source->uv_stride, post->uv_stride,
                                 source->uv_height, source->uv_width, ppl);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }
 
 void vp10_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
@@ -466,7 +466,7 @@ void vp10_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
   const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
            (dst->flags & YV12_FLAG_HIGHBITDEPTH));
     if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -483,7 +483,7 @@ void vp10_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
     vp10_post_proc_down_and_across(srcs[i], dsts[i],
                                   src_strides[i], dst_strides[i],
                                   src_heights[i], src_widths[i], ppl);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 }
 
@@ -507,7 +507,7 @@ void vp10_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
     const int src_height = src_heights[i] - 4;
     const int dst_stride = dst_strides[i];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
            (dst->flags & YV12_FLAG_HIGHBITDEPTH));
     if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -662,9 +662,9 @@ int vp10_post_proc_frame(struct VP10Common *cm,
 
       if (vpx_alloc_frame_buffer(&cm->post_proc_buffer_int, width, height,
                                  cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                  cm->use_highbitdepth,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
                                  VPX_ENC_BORDER_IN_PIXELS,
                                  cm->byte_alignment) < 0) {
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
@@ -680,7 +680,7 @@ int vp10_post_proc_frame(struct VP10Common *cm,
 
   if (vpx_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
                                VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment,

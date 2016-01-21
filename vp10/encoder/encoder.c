@@ -605,7 +605,7 @@ static void alloc_raw_frame_buffers(VP10_COMP *cpi) {
   if (!cpi->lookahead)
     cpi->lookahead = vp10_lookahead_init(oxcf->width, oxcf->height,
                                         cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                       cm->use_highbitdepth,
 #endif
                                       oxcf->lag_in_frames);
@@ -617,7 +617,7 @@ static void alloc_raw_frame_buffers(VP10_COMP *cpi) {
   if (vpx_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                oxcf->width, oxcf->height,
                                cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
                                VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
@@ -631,7 +631,7 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
   if (vpx_realloc_frame_buffer(&cpi->last_frame_uf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
                                VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
@@ -642,7 +642,7 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
   if (vpx_realloc_frame_buffer(&cpi->scaled_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
                                VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
@@ -653,7 +653,7 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
   if (vpx_realloc_frame_buffer(&cpi->scaled_last_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
                                VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
@@ -735,7 +735,7 @@ static void init_config(struct VP10_COMP *cpi, VP10EncoderConfig *oxcf) {
 
   cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   cm->use_highbitdepth = oxcf->use_highbitdepth;
 #endif
   cm->color_space = oxcf->color_space;
@@ -771,7 +771,7 @@ static void set_rc_buffer_sizes(RATE_CONTROL *rc,
                                            : maximum * bandwidth / 1000;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #define HIGHBD_BFP(BT, SDF, SDAF, VF, SVF, SVAF, SDX3F, SDX8F, SDX4DF) \
     cpi->fn_ptr[BT].sdf = SDF; \
     cpi->fn_ptr[BT].sdaf = SDAF; \
@@ -1375,7 +1375,7 @@ static void  highbd_set_var_fns(VP10_COMP *const cpi) {
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void realloc_segmentation_maps(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
@@ -1419,9 +1419,9 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
     assert(cm->bit_depth > VPX_BITS_8);
 
   cpi->oxcf = *oxcf;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   cpi->td.mb.e_mbd.bd = (int)cm->bit_depth;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   if ((oxcf->pass == 0) && (oxcf->rc_mode == VPX_Q)) {
     rc->baseline_gf_interval = FIXED_GF_INTERVAL;
@@ -1498,7 +1498,7 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   cpi->ext_refresh_frame_flags_pending = 0;
   cpi->ext_refresh_frame_context_pending = 0;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   highbd_set_var_fns(cpi);
 #endif
 }
@@ -1810,7 +1810,7 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
       vpx_sub_pixel_avg_variance4x4,
       vpx_sad4x4x3, vpx_sad4x4x8, vpx_sad4x4x4d)
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   highbd_set_var_fns(cpi);
 #endif
 
@@ -2023,7 +2023,7 @@ static void encoder_variance(const uint8_t *a, int  a_stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void encoder_highbd_variance64(const uint8_t *a8, int  a_stride,
                                       const uint8_t *b8, int  b_stride,
                                       int w, int h, uint64_t *sse,
@@ -2057,7 +2057,7 @@ static void encoder_highbd_8_variance(const uint8_t *a8, int  a_stride,
   *sse = (unsigned int)sse_long;
   *sum = (int)sum_long;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static int64_t get_sse(const uint8_t *a, int a_stride,
                        const uint8_t *b, int b_stride,
@@ -2100,7 +2100,7 @@ static int64_t get_sse(const uint8_t *a, int a_stride,
   return total_sse;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
                                     const uint8_t *b8, int b_stride,
                                     int width, int height,
@@ -2156,7 +2156,7 @@ static int64_t highbd_get_sse(const uint8_t *a, int a_stride,
   }
   return total_sse;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 typedef struct {
   double psnr[4];       // total/y/u/v
@@ -2164,7 +2164,7 @@ typedef struct {
   uint32_t samples[4];  // total/y/u/v
 } PSNR_STATS;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b,
                              PSNR_STATS *psnr,
@@ -2217,7 +2217,7 @@ static void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
                                   (double)total_sse);
 }
 
-#else  // !CONFIG_VP9_HIGHBITDEPTH
+#else  // !CONFIG_VPX_HIGHBITDEPTH
 
 static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
                       PSNR_STATS *psnr) {
@@ -2254,13 +2254,13 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, peak,
                                   (double)total_sse);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void generate_psnr_packet(VP10_COMP *cpi) {
   struct vpx_codec_cx_pkt pkt;
   int i;
   PSNR_STATS psnr;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   calc_highbd_psnr(cpi->Source, cpi->common.frame_to_show, &psnr,
                    cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
 #else
@@ -2370,7 +2370,7 @@ void vp10_write_yuv_rec_frame(VP10_COMMON *cm) {
   uint8_t *src = s->y_buffer;
   int h = cm->height;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (s->flags & YV12_FLAG_HIGHBITDEPTH) {
     uint16_t *src16 = CONVERT_TO_SHORTPTR(s->y_buffer);
 
@@ -2398,7 +2398,7 @@ void vp10_write_yuv_rec_frame(VP10_COMMON *cm) {
     fflush(yuv_rec_file);
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   do {
     fwrite(src, s->y_width, 1,  yuv_rec_file);
@@ -2425,14 +2425,14 @@ void vp10_write_yuv_rec_frame(VP10_COMMON *cm) {
 }
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
                                                 YV12_BUFFER_CONFIG *dst,
                                                 int bd) {
 #else
 static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
                                                 YV12_BUFFER_CONFIG *dst) {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   // TODO(dkovalev): replace YV12_BUFFER_CONFIG with vpx_image_t
   int i;
   const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
@@ -2449,7 +2449,7 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
                               dst->uv_crop_height};
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
       vp10_highbd_resize_plane(srcs[i], src_heights[i], src_widths[i],
                               src_strides[i], dsts[i], dst_heights[i],
@@ -2461,18 +2461,18 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
 #else
     vp10_resize_plane(srcs[i], src_heights[i], src_widths[i], src_strides[i],
                      dsts[i], dst_heights[i], dst_widths[i], dst_strides[i]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
   vpx_extend_frame_borders(dst);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                    YV12_BUFFER_CONFIG *dst, int bd) {
 #else
 static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                    YV12_BUFFER_CONFIG *dst) {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   const int src_w = src->y_crop_width;
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
@@ -2496,7 +2496,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                      src_stride + (x / factor) * src_w / dst_w;
         uint8_t *dst_ptr = dsts[i] + (y / factor) * dst_stride + (x / factor);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
           vpx_highbd_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
                                kernel[x_q4 & 0xf], 16 * src_w / dst_w,
@@ -2513,7 +2513,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                       kernel[x_q4 & 0xf], 16 * src_w / dst_w,
                       kernel[y_q4 & 0xf], 16 * src_h / dst_h,
                       16 / factor, 16 / factor);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       }
     }
   }
@@ -2714,7 +2714,7 @@ void vp10_scale_references(VP10_COMP *cpi) {
         continue;
       }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         RefCntBuffer *new_fb_ptr = NULL;
         int force_scaling = 0;
@@ -2763,7 +2763,7 @@ void vp10_scale_references(VP10_COMP *cpi) {
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
         }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       } else {
         const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
         RefCntBuffer *const buf = &pool->frame_bufs[buf_idx];
@@ -3050,7 +3050,7 @@ static void set_frame_size(VP10_COMP *cpi) {
   vpx_realloc_frame_buffer(get_frame_new_buffer(cm),
                            cm->width, cm->height,
                            cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                            cm->use_highbitdepth,
 #endif
                            VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
@@ -3068,7 +3068,7 @@ static void set_frame_size(VP10_COMP *cpi) {
     if (buf_idx != INVALID_IDX) {
       YV12_BUFFER_CONFIG *const buf = &cm->buffer_pool->frame_bufs[buf_idx].buf;
       ref_buf->buf = buf;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       vp10_setup_scale_factors_for_frame(&ref_buf->sf,
                                         buf->y_crop_width, buf->y_crop_height,
                                         cm->width, cm->height,
@@ -3078,7 +3078,7 @@ static void set_frame_size(VP10_COMP *cpi) {
       vp10_setup_scale_factors_for_frame(&ref_buf->sf,
                                         buf->y_crop_width, buf->y_crop_height,
                                         cm->width, cm->height);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       if (vp10_is_scaled(&ref_buf->sf))
         vpx_extend_frame_borders(buf);
     } else {
@@ -3269,7 +3269,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
         int64_t high_err_target = cpi->ambient_err;
         int64_t low_err_target = cpi->ambient_err >> 1;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
           kf_err = vp10_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
         } else {
@@ -3277,7 +3277,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
         }
 #else
         kf_err = vp10_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
         // Prevent possible divide by zero error below for perfect KF
         kf_err += !kf_err;
@@ -3479,11 +3479,11 @@ YV12_BUFFER_CONFIG *vp10_scale_if_required(VP10_COMMON *cm,
                                           YV12_BUFFER_CONFIG *scaled) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
 #else
     scale_and_extend_frame_nonnormative(unscaled, scaled);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     return scaled;
   } else {
     return unscaled;
@@ -3624,7 +3624,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   // fixed interval. Note the reconstruction error if it is the frame before
   // the force key frame
   if (cpi->rc.next_key_frame_forced && cpi->rc.frames_to_key == 1) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       cpi->ambient_err = vp10_highbd_get_y_sse(cpi->Source,
                                               get_frame_new_buffer(cm));
@@ -3633,7 +3633,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     }
 #else
     cpi->ambient_err = vp10_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 
   // If the encoder forced a KEY_FRAME decision
@@ -3760,21 +3760,21 @@ static void init_ref_frame_bufs(VP10_COMMON *cm) {
 }
 
 static void check_initial_width(VP10_COMP *cpi,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                 int use_highbitdepth,
 #endif
                                 int subsampling_x, int subsampling_y) {
   VP10_COMMON *const cm = &cpi->common;
 
   if (!cpi->initial_width ||
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       cm->use_highbitdepth != use_highbitdepth ||
 #endif
       cm->subsampling_x != subsampling_x ||
       cm->subsampling_y != subsampling_y) {
     cm->subsampling_x = subsampling_x;
     cm->subsampling_y = subsampling_y;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     cm->use_highbitdepth = use_highbitdepth;
 #endif
 
@@ -3797,7 +3797,7 @@ static void setup_denoiser_buffer(VP10_COMP *cpi) {
       !cpi->denoiser.frame_buffer_initialized) {
     vp10_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
                        cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                        cm->use_highbitdepth,
 #endif
                        VPX_ENC_BORDER_IN_PIXELS);
@@ -3813,12 +3813,12 @@ int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
   int res = 0;
   const int subsampling_x = sd->subsampling_x;
   const int subsampling_y = sd->subsampling_y;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   const int use_highbitdepth = sd->flags & YV12_FLAG_HIGHBITDEPTH;
   check_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
 #else
   check_initial_width(cpi, subsampling_x, subsampling_y);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   setup_denoiser_buffer(cpi);
@@ -3826,9 +3826,9 @@ int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
   vpx_usec_timer_start(&timer);
 
   if (vp10_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                          use_highbitdepth,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
                          frame_flags))
     res = -1;
   vpx_usec_timer_mark(&timer);
@@ -4153,12 +4153,12 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
         YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
         YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
         PSNR_STATS psnr;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd,
                          cpi->oxcf.input_bit_depth);
 #else
         calc_psnr(orig, recon, &psnr);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
         adjust_image_stat(psnr.psnr[1], psnr.psnr[2], psnr.psnr[3],
                           psnr.psnr[0], &cpi->psnr);
@@ -4173,7 +4173,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           if (vpx_alloc_frame_buffer(&cm->post_proc_buffer,
                                      recon->y_crop_width, recon->y_crop_height,
                                      cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                      cm->use_highbitdepth,
 #endif
                                      VPX_ENC_BORDER_IN_PIXELS,
@@ -4187,19 +4187,19 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 #endif
           vpx_clear_system_state();
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           calc_highbd_psnr(orig, pp, &psnr2, cpi->td.mb.e_mbd.bd,
                            cpi->oxcf.input_bit_depth);
 #else
           calc_psnr(orig, pp, &psnr2);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
           cpi->totalp_sq_error += psnr2.sse[0];
           cpi->totalp_samples += psnr2.samples[0];
           adjust_image_stat(psnr2.psnr[1], psnr2.psnr[2], psnr2.psnr[3],
                             psnr2.psnr[0], &cpi->psnrp);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
             frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight,
                                                (int)cm->bit_depth);
@@ -4208,13 +4208,13 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           }
 #else
           frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
           cpi->worst_ssim= VPXMIN(cpi->worst_ssim, frame_ssim2);
           cpi->summed_quality += frame_ssim2 * weight;
           cpi->summed_weights += weight;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
             frame_ssim2 = vpx_highbd_calc_ssim(
                 orig, &cm->post_proc_buffer, &weight, (int)cm->bit_depth);
@@ -4223,7 +4223,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           }
 #else
           frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
           cpi->summedp_quality += frame_ssim2 * weight;
           cpi->summedp_weights += weight;
@@ -4239,7 +4239,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
         }
       }
       if (cpi->b_calculate_blockiness) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (!cm->use_highbitdepth)
 #endif
         {
@@ -4254,7 +4254,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
       }
 
       if (cpi->b_calculate_consistency) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (!cm->use_highbitdepth)
 #endif
         {
@@ -4276,7 +4276,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
           frame_all = vpx_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
                                             &u, &v, (int)cm->bit_depth);
@@ -4286,10 +4286,10 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
         }
 #else
         frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
         adjust_image_stat(y, u, v, frame_all, &cpi->ssimg);
       }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (!cm->use_highbitdepth)
 #endif
       {
@@ -4299,7 +4299,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
         adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
         /* TODO(JBB): add 10/12 bit support */
       }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (!cm->use_highbitdepth)
 #endif
       {
@@ -4370,11 +4370,11 @@ int vp10_set_internal_size(VP10_COMP *cpi,
 int vp10_set_size_literal(VP10_COMP *cpi, unsigned int width,
                          unsigned int height) {
   VP10_COMMON *cm = &cpi->common;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   check_initial_width(cpi, cm->use_highbitdepth, 1, 1);
 #else
   check_initial_width(cpi, 1, 1);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   setup_denoiser_buffer(cpi);
@@ -4412,7 +4412,7 @@ int64_t vp10_get_y_sse(const YV12_BUFFER_CONFIG *a,
                  a->y_crop_width, a->y_crop_height);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 int64_t vp10_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b) {
   assert(a->y_crop_width == b->y_crop_width);
@@ -4423,7 +4423,7 @@ int64_t vp10_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
   return highbd_get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                         a->y_crop_width, a->y_crop_height);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 int vp10_get_quantizer(VP10_COMP *cpi) {
   return cpi->common.base_qindex;

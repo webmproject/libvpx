@@ -77,7 +77,7 @@ FUN_CONV_1D(avg_vert, y_step_q4, filter_y, v, src - src_stride * 3, avg_, sse2);
 FUN_CONV_2D(, sse2);
 FUN_CONV_2D(avg_ , sse2);
 
-#if CONFIG_VP9_HIGHBITDEPTH && ARCH_X86_64
+#if CONFIG_VPX_HIGHBITDEPTH && ARCH_X86_64
 highbd_filter8_1dfunction vpx_highbd_filter_block1d16_v8_sse2;
 highbd_filter8_1dfunction vpx_highbd_filter_block1d16_h8_sse2;
 highbd_filter8_1dfunction vpx_highbd_filter_block1d8_v8_sse2;
@@ -158,5 +158,5 @@ HIGH_FUN_CONV_1D(avg_vert, y_step_q4, filter_y, v, src - src_stride * 3, avg_,
 //                                    int w, int h, int bd);
 HIGH_FUN_CONV_2D(, sse2);
 HIGH_FUN_CONV_2D(avg_ , sse2);
-#endif  // CONFIG_VP9_HIGHBITDEPTH && ARCH_X86_64
+#endif  // CONFIG_VPX_HIGHBITDEPTH && ARCH_X86_64
 #endif  // HAVE_SSE2

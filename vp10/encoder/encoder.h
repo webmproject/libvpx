@@ -226,7 +226,7 @@ typedef struct VP10EncoderConfig {
 
   vp8e_tuning tuning;
   vp9e_tune_content content;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   int use_highbitdepth;
 #endif
   vpx_color_space_t color_space;
@@ -592,10 +592,10 @@ static INLINE int allocated_tokens(TileInfo tile) {
 }
 
 int64_t vp10_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 int64_t vp10_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_alloc_compressor_data(VP10_COMP *cpi);
 

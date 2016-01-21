@@ -256,7 +256,7 @@ add_proto qw/void vpx_dc_128_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride
 specialize qw/vpx_dc_128_predictor_32x32 msa neon/, "$sse2_x86inc";
 
 # High bitdepth functions
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vpx_highbd_d207_predictor_4x4/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vpx_highbd_d207_predictor_4x4/;
 
@@ -448,7 +448,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vpx_highbd_dc_128_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vpx_highbd_dc_128_predictor_32x32/;
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 
 #
 # Sub Pixel Filters
@@ -495,7 +495,7 @@ specialize qw/vpx_scaled_avg_horiz/;
 add_proto qw/void vpx_scaled_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
 specialize qw/vpx_scaled_avg_vert/;
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   #
   # Sub Pixel Filters
   #
@@ -522,7 +522,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vpx_highbd_convolve8_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
   specialize qw/vpx_highbd_convolve8_avg_vert/, "$sse2_x86_64";
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 
 #
 # Loopfilter
@@ -565,7 +565,7 @@ specialize qw/vpx_lpf_horizontal_4 mmx neon dspr2 msa/;
 add_proto qw/void vpx_lpf_horizontal_4_dual/, "uint8_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1";
 specialize qw/vpx_lpf_horizontal_4_dual sse2 neon dspr2 msa/;
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vpx_highbd_lpf_vertical_16/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bd";
   specialize qw/vpx_highbd_lpf_vertical_16 sse2/;
 
@@ -598,7 +598,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vpx_highbd_lpf_horizontal_4_dual/, "uint16_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1, int bd";
   specialize qw/vpx_highbd_lpf_horizontal_4_dual sse2/;
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 
 #
 # Encoder functions.
@@ -608,7 +608,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 # Forward transform
 #
 if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vpx_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct4x4 sse2/;
 
@@ -686,13 +686,13 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vpx_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct32x32_1 sse2 msa/;
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 }  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
 #
 # Inverse transform
 if ((vpx_config("CONFIG_VP9") eq "yes") || (vpx_config("CONFIG_VP10") eq "yes")) {
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   # Note as optimized versions of these functions are added we need to add a check to ensure
   # that when CONFIG_EMULATE_HARDWARE is on, it defaults to the C versions only.
   add_proto qw/void vpx_iwht4x4_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
@@ -924,7 +924,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vpx_iwht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vpx_iwht4x4_16_add msa/, "$sse2_x86inc";
   }  # CONFIG_EMULATE_HARDWARE
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 }  # CONFIG_VP9 || CONFIG_VP10
 
 #
@@ -937,13 +937,13 @@ if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCO
   add_proto qw/void vpx_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vpx_quantize_b_32x32/, "$ssse3_x86_64_x86inc", "$avx_x86_64_x86inc";
 
-  if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+  if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vpx_highbd_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
     specialize qw/vpx_highbd_quantize_b sse2/;
 
     add_proto qw/void vpx_highbd_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
     specialize qw/vpx_highbd_quantize_b_32x32 sse2/;
-  }  # CONFIG_VP9_HIGHBITDEPTH
+  }  # CONFIG_VPX_HIGHBITDEPTH
 }  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
 if (vpx_config("CONFIG_ENCODERS") eq "yes") {
@@ -1172,7 +1172,7 @@ if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
     specialize qw/vpx_ssim_parms_16x16/, "$sse2_x86_64";
 }
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   #
   # Block subtraction
   #
@@ -1372,7 +1372,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vpx_highbd_ssim_parms_8x8/, "const uint16_t *s, int sp, const uint16_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
     specialize qw/vpx_highbd_ssim_parms_8x8/;
   }
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 }  # CONFIG_ENCODERS
 
 if (vpx_config("CONFIG_ENCODERS") eq "yes" || vpx_config("CONFIG_POSTPROC") eq "yes" || vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
@@ -1541,7 +1541,7 @@ add_proto qw/uint32_t vpx_variance_halfpixvar16x16_v/, "const unsigned char *src
 add_proto qw/uint32_t vpx_variance_halfpixvar16x16_hv/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, uint32_t *sse";
   specialize qw/vpx_variance_halfpixvar16x16_hv mmx sse2 media/;
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   add_proto qw/unsigned int vpx_highbd_12_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
   specialize qw/vpx_highbd_12_variance64x64 sse2/;
 
@@ -1898,7 +1898,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/uint32_t vpx_highbd_8_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
   add_proto qw/uint32_t vpx_highbd_8_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
 
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 }  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
 
 1;

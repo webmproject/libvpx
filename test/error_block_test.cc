@@ -27,7 +27,7 @@
 using libvpx_test::ACMRandom;
 
 namespace {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 const int kNumIterations = 1000;
 
 typedef int64_t (*ErrorBlockFunc)(const tran_low_t *coeff,
@@ -160,52 +160,52 @@ TEST_P(ErrorBlockTest, ExtremeValues) {
 using std::tr1::make_tuple;
 
 #if CONFIG_USE_X86INC
-int64_t wrap_vp9_highbd_block_error_8bit_c(const tran_low_t *coeff,
+int64_t wrap_vp10_highbd_block_error_8bit_c(const tran_low_t *coeff,
                                            const tran_low_t *dqcoeff,
                                            intptr_t block_size,
                                            int64_t *ssz, int bps) {
   assert(bps == 8);
-  return vp9_highbd_block_error_8bit_c(coeff, dqcoeff, block_size, ssz);
+  return vp10_highbd_block_error_8bit_c(coeff, dqcoeff, block_size, ssz);
 }
 
 #if HAVE_SSE2
-int64_t wrap_vp9_highbd_block_error_8bit_sse2(const tran_low_t *coeff,
+int64_t wrap_vp10_highbd_block_error_8bit_sse2(const tran_low_t *coeff,
                                               const tran_low_t *dqcoeff,
                                               intptr_t block_size,
                                               int64_t *ssz, int bps) {
   assert(bps == 8);
-  return vp9_highbd_block_error_8bit_sse2(coeff, dqcoeff, block_size, ssz);
+  return vp10_highbd_block_error_8bit_sse2(coeff, dqcoeff, block_size, ssz);
 }
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, ErrorBlockTest,
     ::testing::Values(
-        make_tuple(&vp9_highbd_block_error_sse2,
-                   &vp9_highbd_block_error_c, VPX_BITS_10),
-        make_tuple(&vp9_highbd_block_error_sse2,
-                   &vp9_highbd_block_error_c, VPX_BITS_12),
-        make_tuple(&vp9_highbd_block_error_sse2,
-                   &vp9_highbd_block_error_c, VPX_BITS_8),
-        make_tuple(&wrap_vp9_highbd_block_error_8bit_sse2,
-                   &wrap_vp9_highbd_block_error_8bit_c, VPX_BITS_8)));
+        make_tuple(&vp10_highbd_block_error_sse2,
+                   &vp10_highbd_block_error_c, VPX_BITS_10),
+        make_tuple(&vp10_highbd_block_error_sse2,
+                   &vp10_highbd_block_error_c, VPX_BITS_12),
+        make_tuple(&vp10_highbd_block_error_sse2,
+                   &vp10_highbd_block_error_c, VPX_BITS_8),
+        make_tuple(&wrap_vp10_highbd_block_error_8bit_sse2,
+                   &wrap_vp10_highbd_block_error_8bit_c, VPX_BITS_8)));
 #endif  // HAVE_SSE2
 
 #if HAVE_AVX
-int64_t wrap_vp9_highbd_block_error_8bit_avx(const tran_low_t *coeff,
+int64_t wrap_vp10_highbd_block_error_8bit_avx(const tran_low_t *coeff,
                                               const tran_low_t *dqcoeff,
                                               intptr_t block_size,
                                               int64_t *ssz, int bps) {
   assert(bps == 8);
-  return vp9_highbd_block_error_8bit_avx(coeff, dqcoeff, block_size, ssz);
+  return vp10_highbd_block_error_8bit_avx(coeff, dqcoeff, block_size, ssz);
 }
 
 INSTANTIATE_TEST_CASE_P(
     AVX, ErrorBlockTest,
     ::testing::Values(
-        make_tuple(&wrap_vp9_highbd_block_error_8bit_avx,
-                   &wrap_vp9_highbd_block_error_8bit_c, VPX_BITS_8)));
+        make_tuple(&wrap_vp10_highbd_block_error_8bit_avx,
+                   &wrap_vp10_highbd_block_error_8bit_c, VPX_BITS_8)));
 #endif  // HAVE_AVX
 
 #endif  // CONFIG_USE_X86INC
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }  // namespace

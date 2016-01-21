@@ -93,7 +93,7 @@ static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
 // Function to allow 8 bit optimisations to be used when profile 0 is used with
 // highbitdepth enabled
 static INLINE __m128i load_input_data(const tran_low_t *data) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   return octa_set_epi16(data[0], data[1], data[2], data[3], data[4], data[5],
       data[6], data[7]);
 #else

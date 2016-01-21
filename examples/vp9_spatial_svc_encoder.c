@@ -83,7 +83,7 @@ static const arg_def_t speed_arg =
 static const arg_def_t aqmode_arg =
     ARG_DEF("aq", "aqmode", 1, "aq-mode off/on");
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static const struct arg_enum_list bitdepth_enum[] = {
   {"8",  VPX_BITS_8},
   {"10", VPX_BITS_10},
@@ -94,7 +94,7 @@ static const struct arg_enum_list bitdepth_enum[] = {
 static const arg_def_t bitdepth_arg =
     ARG_DEF_ENUM("d", "bit-depth", 1, "Bit depth for codec 8, 10 or 12. ",
                  bitdepth_enum);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 
 static const arg_def_t *svc_args[] = {
@@ -108,7 +108,7 @@ static const arg_def_t *svc_args[] = {
   &output_rc_stats_arg,
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   &bitdepth_arg,
 #endif
   &speed_arg,
@@ -265,7 +265,7 @@ static void parse_command_line(int argc, const char **argv_,
       enc_cfg->g_lag_in_frames = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &rc_end_usage_arg, argi)) {
       enc_cfg->rc_end_usage = arg_parse_uint(&arg);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     } else if (arg_match(&arg, &bitdepth_arg, argi)) {
       enc_cfg->g_bit_depth = arg_parse_enum_or_int(&arg);
       switch (enc_cfg->g_bit_depth) {
@@ -285,7 +285,7 @@ static void parse_command_line(int argc, const char **argv_,
           die("Error: Invalid bit depth selected (%d)\n", enc_cfg->g_bit_depth);
           break;
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     } else {
       ++argj;
     }
@@ -634,7 +634,7 @@ int main(int argc, const char **argv) {
   parse_command_line(argc, argv, &app_input, &svc_ctx, &enc_cfg);
 
   // Allocate image buffer
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (!vpx_img_alloc(&raw, enc_cfg.g_input_bit_depth == 8 ?
                          VPX_IMG_FMT_I420 : VPX_IMG_FMT_I42016,
                      enc_cfg.g_w, enc_cfg.g_h, 32)) {
@@ -644,7 +644,7 @@ int main(int argc, const char **argv) {
   if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, enc_cfg.g_w, enc_cfg.g_h, 32)) {
     die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   if (!(infile = fopen(app_input.input_filename, "rb")))
     die("Failed to open %s for reading\n", app_input.input_filename);

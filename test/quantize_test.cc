@@ -28,7 +28,7 @@
 using libvpx_test::ACMRandom;
 
 namespace {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 const int number_of_iterations = 100;
 
 typedef void (*QuantizeFunc)(const tran_low_t *coeff, intptr_t count,
@@ -100,7 +100,7 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
     const int skip_block = i == 0;
     const TX_SIZE sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
     const TX_TYPE tx_type = (TX_TYPE)((i >> 2) % 3);
-    const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
+    const scan_order *scan_order = &vp10_scan_orders[sz][tx_type];
     const int count = (4 << sz) * (4 << sz);  // 16, 64, 256
     int err_count = 0;
     *eob_ptr = rnd.Rand16();
@@ -159,7 +159,7 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
     const int skip_block = i == 0;
     const TX_SIZE sz = TX_32X32;
     const TX_TYPE tx_type = (TX_TYPE)(i % 4);
-    const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
+    const scan_order *scan_order = &vp10_scan_orders[sz][tx_type];
     const int count = (4 << sz) * (4 << sz);  // 1024
     int err_count = 0;
     *eob_ptr = rnd.Rand16();
@@ -218,7 +218,7 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     int skip_block = i == 0;
     TX_SIZE sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
     TX_TYPE tx_type = (TX_TYPE)((i >> 2) % 3);
-    const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
+    const scan_order *scan_order = &vp10_scan_orders[sz][tx_type];
     int count = (4 << sz) * (4 << sz);  // 16, 64, 256
     int err_count = 0;
     *eob_ptr = rnd.Rand16();
@@ -282,7 +282,7 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
     int skip_block = i == 0;
     TX_SIZE sz = TX_32X32;
     TX_TYPE tx_type = (TX_TYPE)(i % 4);
-    const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
+    const scan_order *scan_order = &vp10_scan_orders[sz][tx_type];
     int count = (4 << sz) * (4 << sz);  // 1024
     int err_count = 0;
     *eob_ptr = rnd.Rand16();
@@ -347,5 +347,5 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_highbd_quantize_b_32x32_sse2,
                    &vpx_highbd_quantize_b_32x32_c, VPX_BITS_12)));
 #endif  // HAVE_SSE2
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }  // namespace

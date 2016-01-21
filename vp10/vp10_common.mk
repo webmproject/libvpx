@@ -73,7 +73,7 @@ VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/mfqe_sse2.asm
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
-ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+ifneq ($(CONFIG_VPX_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans4_dspr2.c
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans8_dspr2.c
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans16_dspr2.c
@@ -93,7 +93,7 @@ VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm_sse2.c
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_dct32x32_impl_sse2.h
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm_impl_sse2.h
 
-ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+ifneq ($(CONFIG_VPX_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht4x4_add_neon.c
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht8x8_add_neon.c
 endif

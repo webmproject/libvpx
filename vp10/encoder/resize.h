@@ -69,7 +69,7 @@ void vp10_resize_frame444(const uint8_t *const y,
                          int oheight,
                          int owidth);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_resize_plane(const uint8_t *const input,
                              int height,
                              int width,
@@ -124,7 +124,7 @@ void vp10_highbd_resize_frame444(const uint8_t *const y,
                                 int oheight,
                                 int owidth,
                                 int bd);
-#endif    // CONFIG_VP9_HIGHBITDEPTH
+#endif    // CONFIG_VPX_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

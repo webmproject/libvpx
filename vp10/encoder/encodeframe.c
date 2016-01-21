@@ -66,7 +66,7 @@ static const uint8_t VP9_VAR_OFFS[64] = {
     128, 128, 128, 128, 128, 128, 128, 128
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static const uint16_t VP9_HIGH_VAR_OFFS_8[64] = {
     128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128,
@@ -99,7 +99,7 @@ static const uint16_t VP9_HIGH_VAR_OFFS_12[64] = {
     128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
     128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16
 };
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 unsigned int vp10_get_sby_perpixel_variance(VP10_COMP *cpi,
                                            const struct buf_2d *ref,
@@ -110,7 +110,7 @@ unsigned int vp10_get_sby_perpixel_variance(VP10_COMP *cpi,
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 unsigned int vp10_high_get_sby_perpixel_variance(
     VP10_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
   unsigned int var, sse;
@@ -134,7 +134,7 @@ unsigned int vp10_high_get_sby_perpixel_variance(
   }
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static unsigned int get_sby_perpixel_diff_variance(VP10_COMP *cpi,
                                                    const struct buf_2d *ref,
@@ -519,7 +519,7 @@ void vp10_set_variance_partition_thresholds(VP10_COMP *cpi, int q) {
 // Compute the minmax over the 8x8 subblocks.
 static int compute_minmax_8x8(const uint8_t *s, int sp, const uint8_t *d,
                               int dp, int x16_idx, int y16_idx,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                               int highbd_flag,
 #endif
                               int pixels_wide,
@@ -534,7 +534,7 @@ static int compute_minmax_8x8(const uint8_t *s, int sp, const uint8_t *d,
     int min = 0;
     int max = 0;
     if (x8_idx < pixels_wide && y8_idx < pixels_high) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
         vpx_highbd_minmax_8x8(s + y8_idx * sp + x8_idx, sp,
                               d + y8_idx * dp + x8_idx, dp,
@@ -560,7 +560,7 @@ static int compute_minmax_8x8(const uint8_t *s, int sp, const uint8_t *d,
 
 static void fill_variance_4x4avg(const uint8_t *s, int sp, const uint8_t *d,
                                  int dp, int x8_idx, int y8_idx, v8x8 *vst,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                  int highbd_flag,
 #endif
                                  int pixels_wide,
@@ -575,7 +575,7 @@ static void fill_variance_4x4avg(const uint8_t *s, int sp, const uint8_t *d,
     if (x4_idx < pixels_wide && y4_idx < pixels_high) {
       int s_avg;
       int d_avg = 128;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
         s_avg = vpx_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
         if (!is_key_frame)
@@ -599,7 +599,7 @@ static void fill_variance_4x4avg(const uint8_t *s, int sp, const uint8_t *d,
 
 static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
                                  int dp, int x16_idx, int y16_idx, v16x16 *vst,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                  int highbd_flag,
 #endif
                                  int pixels_wide,
@@ -614,7 +614,7 @@ static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
     if (x8_idx < pixels_wide && y8_idx < pixels_high) {
       int s_avg;
       int d_avg = 128;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
         s_avg = vpx_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
         if (!is_key_frame)
@@ -761,7 +761,7 @@ static int choose_partitioning(VP10_COMP *cpi,
   } else {
     d = VP9_VAR_OFFS;
     dp = 0;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       switch (xd->bd) {
         case 10:
@@ -776,7 +776,7 @@ static int choose_partitioning(VP10_COMP *cpi,
           break;
       }
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 
   // Index for force_split: 0 for 64x64, 1-4 for 32x32 blocks,
@@ -798,7 +798,7 @@ static int choose_partitioning(VP10_COMP *cpi,
       variance4x4downsample[i2 + j] = 0;
       if (!is_key_frame) {
         fill_variance_8x8avg(s, sp, d, dp, x16_idx, y16_idx, vst,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                             xd->cur_buf->flags,
 #endif
                             pixels_wide,
@@ -820,7 +820,7 @@ static int choose_partitioning(VP10_COMP *cpi,
           // compute the minmax over the 8x8 sub-blocks, and if above threshold,
           // force split to 8x8 block for this 16x16 block.
           int minmax = compute_minmax_8x8(s, sp, d, dp, x16_idx, y16_idx,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                           xd->cur_buf->flags,
 #endif
                                           pixels_wide, pixels_high);
@@ -843,7 +843,7 @@ static int choose_partitioning(VP10_COMP *cpi,
           v8x8 *vst2 = is_key_frame ? &vst->split[k] :
               &vt2[i2 + j].split[k];
           fill_variance_4x4avg(s, sp, d, dp, x8_idx, y8_idx, vst2,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                xd->cur_buf->flags,
 #endif
                                pixels_wide,
@@ -1151,7 +1151,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     x->source_variance =
         vp10_high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
@@ -1163,7 +1163,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
 #else
   x->source_variance =
     vp10_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   // Save rdmult before it might be changed, so it can be restored later.
   orig_rdmult = x->rdmult;

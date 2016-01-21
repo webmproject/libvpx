@@ -51,7 +51,7 @@ void vp10_denoiser_update_frame_stats(MB_MODE_INFO *mbmi,
 
 int vp10_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
                        int ssx, int ssy,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                        int use_highbitdepth,
 #endif
                        int border);
