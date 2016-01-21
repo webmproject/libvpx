@@ -171,7 +171,7 @@ vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Incorrect buffer dimensions");
     else
-      vp8_yv12_copy_frame(cfg, sd);
+      vpx_yv12_copy_frame(cfg, sd);
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
@@ -221,7 +221,7 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
     // Manage the reference counters and copy image.
     ref_cnt_fb(frame_bufs, ref_fb_ptr, free_fb);
     ref_buf->buf = &frame_bufs[*ref_fb_ptr].buf;
-    vp8_yv12_copy_frame(sd, ref_buf->buf);
+    vpx_yv12_copy_frame(sd, ref_buf->buf);
   }
 
   return cm->error.error_code;

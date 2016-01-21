@@ -2285,7 +2285,7 @@ int vp10_copy_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp10_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
-    vp8_yv12_copy_frame(cfg, sd);
+    vpx_yv12_copy_frame(cfg, sd);
     return 0;
   } else {
     return -1;
@@ -2296,7 +2296,7 @@ int vp10_set_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp10_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
-    vp8_yv12_copy_frame(sd, cfg);
+    vpx_yv12_copy_frame(sd, cfg);
     return 0;
   } else {
     return -1;
