@@ -905,9 +905,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc) {
   svc_params_.scaling_factor_den[0] = 288;
   svc_params_.scaling_factor_num[1] = 288;
   svc_params_.scaling_factor_den[1] = 288;
-  // TODO(wonkap/marpan): No frame drop for now, we need to implement correct
-  // frame dropping for SVC.
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 10;
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 200);
   // TODO(wonkap/marpan): Check that effective_datarate for each layer hits the
@@ -949,9 +947,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc4threads) {
   svc_params_.scaling_factor_den[0] = 288;
   svc_params_.scaling_factor_num[1] = 288;
   svc_params_.scaling_factor_den[1] = 288;
-  // TODO(wonkap/marpan): No frame drop for now, we need to implement correct
-  // frame dropping for SVC.
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 10;
   ::libvpx_test::I420VideoSource video("niklas_1280_720_30.y4m", 1280, 720,
                                        30, 1, 0, 300);
   cfg_.rc_target_bitrate = 800;
