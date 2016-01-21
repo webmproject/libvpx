@@ -1829,6 +1829,9 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       }
 #endif  // CONFIG_EXT_TX
     }
+#if CONFIG_VAR_TX
+    xd->supertx_size = supertx_size;
+#endif
   }
 #endif  // CONFIG_SUPERTX
   if (!hbs) {

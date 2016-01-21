@@ -1236,6 +1236,7 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
   *mi_addr = *mi;
   *x->mbmi_ext = ctx->mbmi_ext;
   assert(is_inter_block(mbmi));
+  assert(mbmi->tx_size == ctx->mic.mbmi.tx_size);
 
   // If segmentation in use
   if (seg->enabled && output_enabled) {
@@ -1309,6 +1310,16 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
       mv->mv[1].as_int = mi->mbmi.mv[1].as_int;
     }
   }
+
+#if CONFIG_VAR_TX
+  {
+    const TX_SIZE mtx = mbmi->tx_size;
+    int idy, idx;
+    for (idy = 0; idy < (1 << mtx) / 2; ++idy)
+      for (idx = 0; idx < (1 << mtx) / 2; ++idx)
+        mbmi->inter_tx_size[(idy << 3) + idx] = mbmi->tx_size;
+  }
+#endif
 }
 
 static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,

@@ -1283,6 +1283,17 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_VAR_TX
 #if CONFIG_SUPERTX
   }
+#if CONFIG_VAR_TX
+  else if (inter_block) {
+    const int width  = num_4x4_blocks_wide_lookup[bsize];
+    const int height = num_4x4_blocks_high_lookup[bsize];
+    int idx, idy;
+    xd->mi[0]->mbmi.tx_size = xd->supertx_size;
+    for (idy = 0; idy < height; ++idy)
+      for (idx = 0; idx < width; ++idx)
+        xd->mi[0]->mbmi.inter_tx_size[(idy >> 1) * 8 + (idx >> 1)] = xd->supertx_size;
+  }
+#endif  // CONFIG_VAR_TX
 #endif  // CONFIG_SUPERTX
 
   if (inter_block)

@@ -281,6 +281,9 @@ typedef struct macroblockd {
   TXFM_CONTEXT left_txfm_context_buffer[8];
 
   TX_SIZE max_tx_size;
+#if CONFIG_SUPERTX
+  TX_SIZE supertx_size;
+#endif
 #endif
 
   // dimension in the unit of 8x8 block of the current block
