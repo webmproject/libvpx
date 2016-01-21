@@ -512,10 +512,10 @@ int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags);
 
 void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags);
 
-int vp10_copy_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_copy_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd);
 
-int vp10_set_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_set_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd);
 
 int vp10_update_entropy(VP10_COMP *cpi, int update);

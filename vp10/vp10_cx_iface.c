@@ -104,17 +104,17 @@ struct vpx_codec_alg_priv {
   BufferPool              *buffer_pool;
 };
 
-static VP9_REFFRAME ref_frame_to_vp10_reframe(vpx_ref_frame_type_t frame) {
+static VPX_REFFRAME ref_frame_to_vp10_reframe(vpx_ref_frame_type_t frame) {
   switch (frame) {
     case VP8_LAST_FRAME:
-      return VP9_LAST_FLAG;
+      return VPX_LAST_FLAG;
     case VP8_GOLD_FRAME:
-      return VP9_GOLD_FLAG;
+      return VPX_GOLD_FLAG;
     case VP8_ALTR_FRAME:
-      return VP9_ALT_FLAG;
+      return VPX_ALT_FLAG;
   }
   assert(0 && "Invalid Reference Frame");
-  return VP9_LAST_FLAG;
+  return VPX_LAST_FLAG;
 }
 
 static vpx_codec_err_t update_error_state(vpx_codec_alg_priv_t *ctx,

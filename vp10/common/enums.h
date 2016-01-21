@@ -100,10 +100,10 @@ typedef enum {
 #define EXT_TX_SIZES       3  // number of sizes that use extended transforms
 
 typedef enum {
-  VP9_LAST_FLAG = 1 << 0,
-  VP9_GOLD_FLAG = 1 << 1,
-  VP9_ALT_FLAG = 1 << 2,
-} VP9_REFFRAME;
+  VPX_LAST_FLAG = 1 << 0,
+  VPX_GOLD_FLAG = 1 << 1,
+  VPX_ALT_FLAG = 1 << 2,
+} VPX_REFFRAME;
 
 typedef enum {
   PLANE_TYPE_Y  = 0,

@@ -2262,26 +2262,26 @@ int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags) {
 }
 
 void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags) {
-  cpi->ext_refresh_golden_frame = (ref_frame_flags & VP9_GOLD_FLAG) != 0;
-  cpi->ext_refresh_alt_ref_frame = (ref_frame_flags & VP9_ALT_FLAG) != 0;
-  cpi->ext_refresh_last_frame = (ref_frame_flags & VP9_LAST_FLAG) != 0;
+  cpi->ext_refresh_golden_frame = (ref_frame_flags & VPX_GOLD_FLAG) != 0;
+  cpi->ext_refresh_alt_ref_frame = (ref_frame_flags & VPX_ALT_FLAG) != 0;
+  cpi->ext_refresh_last_frame = (ref_frame_flags & VPX_LAST_FLAG) != 0;
   cpi->ext_refresh_frame_flags_pending = 1;
 }
 
 static YV12_BUFFER_CONFIG *get_vp10_ref_frame_buffer(VP10_COMP *cpi,
-                                VP9_REFFRAME ref_frame_flag) {
+                                VPX_REFFRAME ref_frame_flag) {
   MV_REFERENCE_FRAME ref_frame = NONE;
-  if (ref_frame_flag == VP9_LAST_FLAG)
+  if (ref_frame_flag == VPX_LAST_FLAG)
     ref_frame = LAST_FRAME;
-  else if (ref_frame_flag == VP9_GOLD_FLAG)
+  else if (ref_frame_flag == VPX_GOLD_FLAG)
     ref_frame = GOLDEN_FRAME;
-  else if (ref_frame_flag == VP9_ALT_FLAG)
+  else if (ref_frame_flag == VPX_ALT_FLAG)
     ref_frame = ALTREF_FRAME;
 
   return ref_frame == NONE ? NULL : get_ref_frame_buffer(cpi, ref_frame);
 }
 
-int vp10_copy_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_copy_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp10_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
@@ -2292,7 +2292,7 @@ int vp10_copy_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
   }
 }
 
-int vp10_set_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_set_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp10_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
@@ -2667,10 +2667,10 @@ static INLINE void alloc_frame_mvs(const VP10_COMMON *cm,
 void vp10_scale_references(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
-  const VP9_REFFRAME ref_mask[3] = {VP9_LAST_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG};
+  const VPX_REFFRAME ref_mask[3] = {VPX_LAST_FLAG, VPX_GOLD_FLAG, VPX_ALT_FLAG};
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-    // Need to convert from VP9_REFFRAME to index into ref_mask (subtract 1).
+    // Need to convert from VPX_REFFRAME to index into ref_mask (subtract 1).
     if (cpi->ref_frame_flags & ref_mask[ref_frame - 1]) {
       BufferPool *const pool = cm->buffer_pool;
       const YV12_BUFFER_CONFIG *const ref = get_ref_frame_buffer(cpi,
@@ -3367,19 +3367,19 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   const int gold_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idx];
   const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idx];
   const int gold_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
-  int flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
+  int flags = VPX_ALT_FLAG | VPX_GOLD_FLAG | VPX_LAST_FLAG;
 
   if (gold_is_last)
-    flags &= ~VP9_GOLD_FLAG;
+    flags &= ~VPX_GOLD_FLAG;
 
   if (cpi->rc.frames_till_gf_update_due == INT_MAX)
-    flags &= ~VP9_GOLD_FLAG;
+    flags &= ~VPX_GOLD_FLAG;
 
   if (alt_is_last)
-    flags &= ~VP9_ALT_FLAG;
+    flags &= ~VPX_ALT_FLAG;
 
   if (gold_is_alt)
-    flags &= ~VP9_ALT_FLAG;
+    flags &= ~VPX_ALT_FLAG;
 
   return flags;
 }
@@ -4323,13 +4323,13 @@ void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags) {
     int ref = 7;
 
     if (flags & VP8_EFLAG_NO_REF_LAST)
-      ref ^= VP9_LAST_FLAG;
+      ref ^= VPX_LAST_FLAG;
 
     if (flags & VP8_EFLAG_NO_REF_GF)
-      ref ^= VP9_GOLD_FLAG;
+      ref ^= VPX_GOLD_FLAG;
 
     if (flags & VP8_EFLAG_NO_REF_ARF)
-      ref ^= VP9_ALT_FLAG;
+      ref ^= VPX_ALT_FLAG;
 
     vp10_use_as_reference(cpi, ref);
   }
@@ -4340,13 +4340,13 @@ void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags) {
     int upd = 7;
 
     if (flags & VP8_EFLAG_NO_UPD_LAST)
-      upd ^= VP9_LAST_FLAG;
+      upd ^= VPX_LAST_FLAG;
 
     if (flags & VP8_EFLAG_NO_UPD_GF)
-      upd ^= VP9_GOLD_FLAG;
+      upd ^= VPX_GOLD_FLAG;
 
     if (flags & VP8_EFLAG_NO_UPD_ARF)
-      upd ^= VP9_ALT_FLAG;
+      upd ^= VPX_ALT_FLAG;
 
     vp10_update_reference(cpi, upd);
   }

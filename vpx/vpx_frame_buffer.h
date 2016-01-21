@@ -30,7 +30,7 @@ extern "C" {
 
 /*!\brief The maximum number of reference buffers that a VP9 encoder may use.
  */
-#define VP9_MAXIMUM_REF_BUFFERS 8
+#define VPX_MAXIMUM_REF_BUFFERS 8
 
 /*!\brief External frame buffer
  *

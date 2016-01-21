@@ -151,7 +151,7 @@ static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
 }
 
 vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
-                                        VP9_REFFRAME ref_frame_flag,
+                                        VPX_REFFRAME ref_frame_flag,
                                         YV12_BUFFER_CONFIG *sd) {
   VP10_COMMON *cm = &pbi->common;
 
@@ -160,7 +160,7 @@ vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
    * vpxenc --test-decode functionality working, and will be replaced in a
    * later commit that adds VP9-specific controls for this functionality.
    */
-  if (ref_frame_flag == VP9_LAST_FLAG) {
+  if (ref_frame_flag == VPX_LAST_FLAG) {
     const YV12_BUFFER_CONFIG *const cfg = get_ref_frame(cm, 0);
     if (cfg == NULL) {
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
@@ -182,7 +182,7 @@ vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
 
 
 vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
-                                      VP9_REFFRAME ref_frame_flag,
+                                      VPX_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
   RefBuffer *ref_buf = NULL;
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
@@ -191,11 +191,11 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
   // encoder is using the frame buffers for. This is just a stub to keep the
   // vpxenc --test-decode functionality working, and will be replaced in a
   // later commit that adds VP9-specific controls for this functionality.
-  if (ref_frame_flag == VP9_LAST_FLAG) {
+  if (ref_frame_flag == VPX_LAST_FLAG) {
     ref_buf = &cm->frame_refs[0];
-  } else if (ref_frame_flag == VP9_GOLD_FLAG) {
+  } else if (ref_frame_flag == VPX_GOLD_FLAG) {
     ref_buf = &cm->frame_refs[1];
-  } else if (ref_frame_flag == VP9_ALT_FLAG) {
+  } else if (ref_frame_flag == VPX_ALT_FLAG) {
     ref_buf = &cm->frame_refs[2];
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
