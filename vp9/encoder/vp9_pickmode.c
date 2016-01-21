@@ -117,8 +117,8 @@ static int mv_refs_rt(VP9_COMP *cpi, const VP9_COMMON *cm,
     MV_REF *candidate =
         &cm->prev_frame->mvs[(mi_col>>1) + (mi_row>>1) * (cm->mi_cols>>1)];
     if (candidate->mv[0].as_int != INVALID_MV) {
-        base_mv->as_mv.row = (candidate->mv[0].as_mv.row << 1);
-        base_mv->as_mv.col = (candidate->mv[0].as_mv.col << 1);
+        base_mv->as_mv.row = (candidate->mv[0].as_mv.row * 2);
+        base_mv->as_mv.col = (candidate->mv[0].as_mv.col * 2);
       clamp_mv_ref(&base_mv->as_mv, xd);
     } else {
       base_mv->as_int = INVALID_MV;
