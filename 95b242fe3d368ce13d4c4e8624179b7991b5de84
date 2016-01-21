@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d487f2cf_412dd280",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 32
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T17:42:57Z",
+      "side": 1,
+      "message": "Can you call it trace2?",
+      "revId": "95b242fe3d368ce13d4c4e8624179b7991b5de84",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54f78247_bde29f1c",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 32
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T17:42:57Z",
+      "side": 1,
+      "message": "you will save a few computations if you moved the  flow-\u003eu and flow_v computations inside the three cases above. You really do not need to keep the M_inv.",
+      "revId": "95b242fe3d368ce13d4c4e8624179b7991b5de84",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
