@@ -20,7 +20,6 @@
 
 #include "vp10/common/thread_common.h"
 #include "vp10/common/onyxc_int.h"
-#include "vp10/common/ppflags.h"
 #include "vp10/decoder/dthread.h"
 
 #ifdef __cplusplus
@@ -85,8 +84,7 @@ typedef struct VP10Decoder {
 int vp10_receive_compressed_data(struct VP10Decoder *pbi,
                                 size_t size, const uint8_t **dest);
 
-int vp10_get_raw_frame(struct VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd,
-                      vp10_ppflags_t *flags);
+int vp10_get_raw_frame(struct VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd);
 
 vpx_codec_err_t vp10_copy_reference_dec(struct VP10Decoder *pbi,
                                        VP9_REFFRAME ref_frame_flag,

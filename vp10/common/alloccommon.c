@@ -81,15 +81,6 @@ void vp10_free_ref_frame_buffers(BufferPool *pool) {
   }
 }
 
-void vp10_free_postproc_buffers(VP10_COMMON *cm) {
-#if CONFIG_VP9_POSTPROC
-  vpx_free_frame_buffer(&cm->post_proc_buffer);
-  vpx_free_frame_buffer(&cm->post_proc_buffer_int);
-#else
-  (void)cm;
-#endif
-}
-
 void vp10_free_context_buffers(VP10_COMMON *cm) {
   cm->free_mi(cm);
   free_seg_map(cm);

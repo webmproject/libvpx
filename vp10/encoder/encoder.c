@@ -17,9 +17,6 @@
 #include "vp10/common/alloccommon.h"
 #include "vp10/common/filter.h"
 #include "vp10/common/idct.h"
-#if CONFIG_VP9_POSTPROC
-#include "vp10/common/postproc.h"
-#endif
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
 #include "vp10/common/tile_common.h"
@@ -375,9 +372,6 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
   cpi->active_map.map = NULL;
 
   vp10_free_ref_frame_buffers(cm->buffer_pool);
-#if CONFIG_VP9_POSTPROC
-  vp10_free_postproc_buffers(cm);
-#endif
   vp10_free_context_buffers(cm);
 
   vpx_free_frame_buffer(&cpi->last_frame_uf);
@@ -1969,9 +1963,6 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 
   vp10_remove_common(cm);
   vp10_free_ref_frame_buffers(cm->buffer_pool);
-#if CONFIG_VP9_POSTPROC
-  vp10_free_postproc_buffers(cm);
-#endif
   vpx_free(cpi);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
@@ -2961,31 +2952,6 @@ static void set_size_dependent_vars(VP10_COMP *cpi, int *q,
   // lagged coding, and if the relevant speed feature flag is set.
   if (oxcf->pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
-
-#if CONFIG_VP9_POSTPROC
-  if (oxcf->noise_sensitivity > 0) {
-    int l = 0;
-    switch (oxcf->noise_sensitivity) {
-      case 1:
-        l = 20;
-        break;
-      case 2:
-        l = 40;
-        break;
-      case 3:
-        l = 60;
-        break;
-      case 4:
-      case 5:
-        l = 100;
-        break;
-      case 6:
-        l = 150;
-        break;
-    }
-    vp10_denoise(cpi->Source, cpi->Source, l);
-  }
-#endif  // CONFIG_VP9_POSTPROC
 }
 
 static void init_motion_estimation(VP10_COMP *cpi) {
@@ -4169,22 +4135,6 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
         {
           PSNR_STATS psnr2;
           double frame_ssim2 = 0, weight = 0;
-#if CONFIG_VP9_POSTPROC
-          if (vpx_alloc_frame_buffer(&cm->post_proc_buffer,
-                                     recon->y_crop_width, recon->y_crop_height,
-                                     cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VPX_HIGHBITDEPTH
-                                     cm->use_highbitdepth,
-#endif
-                                     VPX_ENC_BORDER_IN_PIXELS,
-                                     cm->byte_alignment) < 0) {
-            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                               "Failed to allocate post processing buffer");
-          }
-
-          vp10_deblock(cm->frame_to_show, &cm->post_proc_buffer,
-                      cm->lf.filter_level * 10 / 6);
-#endif
           vpx_clear_system_state();
 
 #if CONFIG_VPX_HIGHBITDEPTH
@@ -4315,20 +4265,13 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   return 0;
 }
 
-int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
-                              vp10_ppflags_t *flags) {
+int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest) {
   VP10_COMMON *cm = &cpi->common;
-#if !CONFIG_VP9_POSTPROC
-  (void)flags;
-#endif
 
   if (!cm->show_frame) {
     return -1;
   } else {
     int ret;
-#if CONFIG_VP9_POSTPROC
-    ret = vp10_post_proc_frame(cm, dest, flags);
-#else
     if (cm->frame_to_show) {
       *dest = *cm->frame_to_show;
       dest->y_width = cm->width;
@@ -4339,7 +4282,6 @@ int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
     } else {
       ret = -1;
     }
-#endif  // !CONFIG_VP9_POSTPROC
     vpx_clear_system_state();
     return ret;
   }

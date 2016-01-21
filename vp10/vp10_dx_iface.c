@@ -29,7 +29,7 @@
 
 #include "vp10/vp10_iface_common.h"
 
-#define VP9_CAP_POSTPROC (CONFIG_VP9_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
+#define VP9_CAP_POSTPROC 0
 
 typedef vpx_codec_stream_info_t vp10_stream_info_t;
 
@@ -119,9 +119,6 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
           (FrameWorkerData *)worker->data1;
       vpx_get_worker_interface()->end(worker);
       vp10_remove_common(&frame_worker_data->pbi->common);
-#if CONFIG_VP9_POSTPROC
-      vp10_free_postproc_buffers(&frame_worker_data->pbi->common);
-#endif
       vp10_decoder_remove(frame_worker_data->pbi);
       vpx_free(frame_worker_data->scratch_buffer);
 #if CONFIG_MULTITHREAD
@@ -311,15 +308,6 @@ static void set_default_ppflags(vp8_postproc_cfg_t *cfg) {
   cfg->post_proc_flag = VP8_DEBLOCK | VP8_DEMACROBLOCK;
   cfg->deblocking_level = 4;
   cfg->noise_level = 0;
-}
-
-static void set_ppflags(const vpx_codec_alg_priv_t *ctx,
-                        vp10_ppflags_t *flags) {
-  flags->post_proc_flag =
-      ctx->postproc_cfg.post_proc_flag;
-
-  flags->deblocking_level = ctx->postproc_cfg.deblocking_level;
-  flags->noise_level = ctx->postproc_cfg.noise_level;
 }
 
 static int frame_worker_hook(void *arg1, void *arg2) {
@@ -554,7 +542,6 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
 
 static void wait_worker_and_cache_frame(vpx_codec_alg_priv_t *ctx) {
   YV12_BUFFER_CONFIG sd;
-  vp10_ppflags_t flags = {0, 0, 0};
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   VPxWorker *const worker = &ctx->frame_workers[ctx->next_output_worker_id];
   FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
@@ -567,7 +554,7 @@ static void wait_worker_and_cache_frame(vpx_codec_alg_priv_t *ctx) {
 
   check_resync(ctx, frame_worker_data->pbi);
 
-  if (vp10_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
+  if (vp10_get_raw_frame(frame_worker_data->pbi, &sd) == 0) {
     VP10_COMMON *const cm = &frame_worker_data->pbi->common;
     RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
     ctx->frame_cache[ctx->frame_cache_write].fb_idx = cm->new_fb_idx;
@@ -746,7 +733,6 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
   if (*iter == NULL && ctx->frame_workers != NULL) {
     do {
       YV12_BUFFER_CONFIG sd;
-      vp10_ppflags_t flags = {0, 0, 0};
       const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
       VPxWorker *const worker =
           &ctx->frame_workers[ctx->next_output_worker_id];
@@ -754,8 +740,6 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
           (FrameWorkerData *)worker->data1;
       ctx->next_output_worker_id =
           (ctx->next_output_worker_id + 1) % ctx->num_frame_workers;
-      if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
-        set_ppflags(ctx, &flags);
       // Wait for the frame from worker thread.
       if (winterface->sync(worker)) {
         // Check if worker has received any frames.
@@ -764,7 +748,7 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
           frame_worker_data->received_frame = 0;
           check_resync(ctx, frame_worker_data->pbi);
         }
-        if (vp10_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
+        if (vp10_get_raw_frame(frame_worker_data->pbi, &sd) == 0) {
           VP10_COMMON *const cm = &frame_worker_data->pbi->common;
           RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
           release_last_output_frame(ctx);
@@ -878,21 +862,9 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
                                          va_list args) {
-#if CONFIG_VP9_POSTPROC
-  vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
-
-  if (data) {
-    ctx->postproc_cfg_set = 1;
-    ctx->postproc_cfg = *((vp8_postproc_cfg_t *)data);
-    return VPX_CODEC_OK;
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-#else
   (void)ctx;
   (void)args;
   return VPX_CODEC_INCAPABLE;
-#endif
 }
 
 static vpx_codec_err_t ctrl_set_dbg_options(vpx_codec_alg_priv_t *ctx,

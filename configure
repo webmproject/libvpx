@@ -41,7 +41,6 @@ Advanced options:
   ${toggle_vp10}                  VP10 codec support
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_postproc}              postprocessing
-  ${toggle_vp9_postproc}          vp9 specific postprocessing
   ${toggle_multithread}           multithreaded encoding and decoding
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
@@ -283,7 +282,6 @@ CONFIG_LIST="
     dc_recon
     runtime_cpu_detect
     postproc
-    vp9_postproc
     multithread
     internal_stats
     ${CODECS}
@@ -346,7 +344,6 @@ CMDLINE_SELECT="
     dequant_tokens
     dc_recon
     postproc
-    vp9_postproc
     multithread
     internal_stats
     ${CODECS}
@@ -442,7 +439,7 @@ process_targets() {
     done
     enabled debug_libs && DIST_DIR="${DIST_DIR}-debug"
     enabled codec_srcs && DIST_DIR="${DIST_DIR}-src"
-    ! enabled postproc && ! enabled vp9_postproc && DIST_DIR="${DIST_DIR}-nopost"
+    ! enabled postproc && DIST_DIR="${DIST_DIR}-nopost"
     ! enabled multithread && DIST_DIR="${DIST_DIR}-nomt"
     ! enabled install_docs && DIST_DIR="${DIST_DIR}-nodocs"
     DIST_DIR="${DIST_DIR}-${tgt_isa}-${tgt_os}"
@@ -624,10 +621,6 @@ process_toolchain() {
     if enabled mips; then
         enable_feature dequant_tokens
         enable_feature dc_recon
-    fi
-
-    if enabled internal_stats; then
-        enable_feature vp9_postproc
     fi
 
     # Enable the postbuild target if building for visual studio.

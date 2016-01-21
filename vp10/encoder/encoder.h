@@ -17,7 +17,6 @@
 #include "vpx/vp8cx.h"
 
 #include "vp10/common/alloccommon.h"
-#include "vp10/common/ppflags.h"
 #include "vp10/common/entropymode.h"
 #include "vp10/common/thread_common.h"
 #include "vp10/common/onyxc_int.h"
@@ -514,8 +513,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush);
 
-int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
-                              vp10_ppflags_t *flags);
+int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest);
 
 int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags);
 

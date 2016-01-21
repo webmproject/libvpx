@@ -77,10 +77,6 @@ VP10_CX_SRCS-yes += encoder/aq_complexity.c
 VP10_CX_SRCS-yes += encoder/aq_complexity.h
 VP10_CX_SRCS-yes += encoder/skin_detection.c
 VP10_CX_SRCS-yes += encoder/skin_detection.h
-ifeq ($(CONFIG_VP9_POSTPROC),yes)
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
-endif
 VP10_CX_SRCS-yes += encoder/temporal_filter.c
 VP10_CX_SRCS-yes += encoder/temporal_filter.h
 VP10_CX_SRCS-yes += encoder/mbgraph.c
