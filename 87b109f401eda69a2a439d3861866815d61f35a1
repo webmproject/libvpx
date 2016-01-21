@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54206291_c94fe142",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "Better to use consistent comments.\nSuggest converting /* ... */ to:\n// ...\n// ...\n// ...",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d439b2d1_57e4a45e",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "you may want to specialize this function for resize_factor \u003d 0.5, and do not even use that as an argument. That would simplify a lot of stuff in this function.",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54f78247_c3cd8a8c",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "use macro for 30 defined above.",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4f27e53_c68c7621",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "just use pyr-\u003ewidths[i-1] \u003e\u003e 1 (assuming resize_factor \u003d 0.5).",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b40b5e17_fe8819de",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "no need for CHAR_TO_DOUBLE",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d487f2cf_e782f6eb",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "size |\u003d 1;",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4f27e53_066a5ef1",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "\u003e\u003e 1",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d439b2d1_d7b65441",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "(-1.0 * (x * x + y * y) * denominator)",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b40b5e17_fe96d90d",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "move det_inv and trance2_inv declarations to where they are needed. Also use const.",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d439b2d1_179cdcde",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "wind_size \u003e\u003e 1",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d487f2cf_87420a96",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "you may want to do:\nconst double det_inv \u003d 1 / det;\nconst double mult_b0 \u003d det_inv * b0;\nconst double mult_b1 \u003d det_inv * b1;\nflow-\u003eu[loc_x + loc_y * flow-\u003estride] \u003d M[3] * mult_b0 + M[1] * mult_b1;\nflow-\u003ev[loc_x + loc_y * flow-\u003estride] \u003d -M[2] * multi_b0 + M[0] * mult_b1;",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d487f2cf_27477ea8",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "likewise as above.",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "141a6a67_5994c328",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54f78247_6317d696",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "define these constants as macros on the top of the file.",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54f78247_430cda8a",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "use macro to define 5.",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b40b5e17_1e562d08",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 34
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-21T21:31:13Z",
+      "side": 1,
+      "message": "let\u0027s chat about this one offline.",
+      "revId": "87b109f401eda69a2a439d3861866815d61f35a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
