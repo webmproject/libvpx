@@ -2102,8 +2102,9 @@ static void setup_segmentation(VP10_COMMON *const cm,
   }
 }
 
-static void setup_loopfilter(struct loopfilter *lf,
+static void setup_loopfilter(VP10_COMMON *cm,
                              struct vpx_read_bit_buffer *rb) {
+  struct loopfilter *lf = &cm->lf;
   lf->filter_level = vpx_rb_read_literal(rb, 6);
   lf->sharpness_level = vpx_rb_read_literal(rb, 3);
 
@@ -2126,6 +2127,19 @@ static void setup_loopfilter(struct loopfilter *lf,
           lf->mode_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
     }
   }
+#if CONFIG_LOOP_RESTORATION
+  lf->bilateral_level = vpx_rb_read_bit(rb);
+  if (lf->bilateral_level) {
+    int level = vpx_rb_read_literal(rb, vp10_bilateral_level_bits(cm));
+    lf->bilateral_level = level + (level >= lf->last_bilateral_level);
+  } else {
+    lf->bilateral_level = lf->last_bilateral_level;
+  }
+  if (cm->frame_type != KEY_FRAME)
+    cm->lf.last_bilateral_level = cm->lf.bilateral_level;
+  else
+    cm->lf.last_bilateral_level = 0;
+#endif  // CONFIG_LOOP_RESTORATION
 }
 
 static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
@@ -3096,7 +3110,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   if (frame_is_intra_only(cm) || cm->error_resilient_mode)
     vp10_setup_past_independence(cm);
 
-  setup_loopfilter(&cm->lf, rb);
+  setup_loopfilter(cm, rb);
   setup_quantization(cm, rb);
 #if CONFIG_VP9_HIGHBITDEPTH
   xd->bd = (int)cm->bit_depth;
@@ -3445,6 +3459,13 @@ void vp10_decode_frame(VP10Decoder *pbi,
   } else {
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }
+#if CONFIG_LOOP_RESTORATION
+  vp10_loop_bilateral_init(&cm->lf_info, cm->lf.bilateral_level,
+                           cm->frame_type == KEY_FRAME);
+  if (cm->lf_info.bilateral_used) {
+    vp10_loop_bilateral_rows(new_fb, cm, 0, cm->mi_rows, 0);
+  }
+#endif  // CONFIG_LOOP_RESTORATION
 
   if (!xd->corrupted) {
     if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {

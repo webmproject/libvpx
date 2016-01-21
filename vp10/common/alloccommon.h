@@ -29,6 +29,9 @@ void vp10_free_context_buffers(struct VP10Common *cm);
 
 void vp10_free_ref_frame_buffers(struct BufferPool *pool);
 void vp10_free_postproc_buffers(struct VP10Common *cm);
+#if CONFIG_LOOP_RESTORATION
+void vp10_free_restoration_buffers(struct VP10Common *cm);
+#endif  // CONFIG_LOOP_RESTORATION
 
 int vp10_alloc_state_buffers(struct VP10Common *cm, int width, int height);
 void vp10_free_state_buffers(struct VP10Common *cm);

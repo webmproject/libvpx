@@ -122,6 +122,9 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
 #if CONFIG_VP9_POSTPROC
       vp10_free_postproc_buffers(&frame_worker_data->pbi->common);
 #endif
+#if CONFIG_LOOP_RESTORATION
+      vp10_free_restoration_buffers(&frame_worker_data->pbi->common);
+#endif  // CONFIG_LOOP_RESTORATION
       vp10_decoder_remove(frame_worker_data->pbi);
       vpx_free(frame_worker_data->scratch_buffer);
 #if CONFIG_MULTITHREAD
