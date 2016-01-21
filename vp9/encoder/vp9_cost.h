@@ -19,6 +19,9 @@ extern "C" {
 
 extern const unsigned int vp9_prob_cost[256];
 
+// The factor to scale from cost in bits to cost in vp9_prob_cost units.
+#define VP9_PROB_COST_SHIFT 8
+
 #define vp9_cost_zero(prob) (vp9_prob_cost[prob])
 
 #define vp9_cost_one(prob) vp9_cost_zero(vpx_complement(prob))

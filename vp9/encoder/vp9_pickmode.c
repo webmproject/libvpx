@@ -702,8 +702,8 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
   }
 
   if (*skippable == 0) {
-    *rate <<= 10;
-    *rate += (eob_cost << 8);
+    *rate <<= (2 + VP9_PROB_COST_SHIFT);
+    *rate += (eob_cost << VP9_PROB_COST_SHIFT);
   }
 }
 #endif

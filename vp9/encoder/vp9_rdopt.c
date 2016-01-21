@@ -248,7 +248,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       int quantizer = (pd->dequant[1] >> dequant_shift);
 
       if (quantizer < 120)
-        rate = (square_error * (280 - quantizer)) >> 8;
+        rate = (square_error * (280 - quantizer)) >> (16 - VP9_PROB_COST_SHIFT);
       else
         rate = 0;
       dist = (square_error * quantizer) >> 8;
