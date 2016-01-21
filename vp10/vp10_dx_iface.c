@@ -29,8 +29,6 @@
 
 #include "vp10/vp10_iface_common.h"
 
-#define VP9_CAP_POSTPROC 0
-
 typedef vpx_codec_stream_info_t vp10_stream_info_t;
 
 // This limit is due to framebuffer numbers.
@@ -1079,7 +1077,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
 CODEC_INTERFACE(vpx_codec_vp10_dx) = {
   "WebM Project VP10 Decoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
-  VPX_CODEC_CAP_DECODER | VP9_CAP_POSTPROC |
+  VPX_CODEC_CAP_DECODER|
       VPX_CODEC_CAP_EXTERNAL_FRAME_BUFFER,  // vpx_codec_caps_t
   decoder_init,       // vpx_codec_init_fn_t
   decoder_destroy,    // vpx_codec_destroy_fn_t
