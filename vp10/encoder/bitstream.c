@@ -2251,9 +2251,7 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 
     vp10_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc,
                         &counts->mv);
-#if CONFIG_EXT_TX
     update_ext_tx_probs(cm, &header_bc);
-#endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
     if (!xd->lossless[0])
       update_supertx_probs(cm, &header_bc);
