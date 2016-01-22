@@ -1135,6 +1135,8 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
 
   mbmi->tx_size = best_tx;
   mbmi->tx_type = best_tx_type;
+  if (mbmi->tx_size >= TX_32X32)
+    assert(mbmi->tx_type == DCT_DCT);
   txfm_rd_in_plane(x,
 #if CONFIG_VAR_TX
                    cpi,
@@ -2515,7 +2517,6 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-#if CONFIG_EXT_TX
 static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
                                int *rate, int64_t *distortion, int *skippable,
                                int64_t *sse, BLOCK_SIZE bsize,
@@ -2527,7 +2528,6 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   int64_t rd = INT64_MAX;
   int64_t best_rd = INT64_MAX;
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
-  int ext_tx_set;
   const int is_inter = is_inter_block(mbmi);
   vpx_prob skip_prob = vp10_get_skip_prob(cm, xd);
   int s0 = vp10_cost_bit(skip_prob, 0);
@@ -2537,20 +2537,21 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   uint8_t best_blk_skip[256];
   const int n4 = 1 << (num_pels_log2_lookup[bsize] - 4);
   int idx, idy;
+#if CONFIG_EXT_TX
+  int ext_tx_set = get_ext_tx_set(max_tx_size, bsize, is_inter);
+#endif
 
   *distortion = INT64_MAX;
   *rate       = INT_MAX;
   *skippable  = 0;
   *sse        = INT64_MAX;
 
-  ext_tx_set = get_ext_tx_set(max_tx_size, bsize, is_inter);
-
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
     int this_rate = 0;
     int this_skip = 1;
     int64_t this_dist = 0;
     int64_t this_sse  = 0;
-
+#if CONFIG_EXT_TX
     if (is_inter) {
       if (!ext_tx_used_inter[ext_tx_set][tx_type])
         continue;
@@ -2588,6 +2589,26 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
                                        [mbmi->mode][mbmi->tx_type];
       }
     }
+#else  // CONFIG_EXT_TX
+      if (max_tx_size >= TX_32X32 && tx_type != DCT_DCT) {
+        continue;
+      }
+      mbmi->tx_type = tx_type;
+
+      inter_block_yrd(cpi, x, &this_rate, &this_dist, &this_skip, &this_sse,
+                      bsize, ref_best_rd);
+
+      if (max_tx_size < TX_32X32 &&
+          !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
+          this_rate != INT_MAX) {
+        if (is_inter)
+          this_rate += cpi->inter_tx_type_costs[max_tx_size][mbmi->tx_type];
+        else
+          this_rate += cpi->intra_tx_type_costs[max_tx_size]
+              [intra_mode_to_tx_type_context[mbmi->mode]]
+              [mbmi->tx_type];
+      }
+#endif  // CONFIG_EXT_TX
 
     if (this_rate == INT_MAX)
       continue;
@@ -2624,7 +2645,6 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   mbmi->tx_size = best_tx;
   memcpy(x->blk_skip[0], best_blk_skip, sizeof(best_blk_skip[0]) * n4);
 }
-#endif
 
 static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x,
                         int blk_row, int blk_col, int plane, int block,
@@ -5001,13 +5021,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     vp10_subtract_plane(x, bsize, 0);
 #if CONFIG_VAR_TX
     if (cm->tx_mode == TX_MODE_SELECT || xd->lossless[mbmi->segment_id]) {
-#if CONFIG_EXT_TX
       select_tx_type_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                          bsize, ref_best_rd);
-#else
-      inter_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
-                      bsize, ref_best_rd);
-#endif
     } else {
       int idx, idy;
       super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
