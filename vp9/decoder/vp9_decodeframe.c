@@ -136,6 +136,14 @@ static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
       vp9_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
 }
 
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+static void read_dq_profile_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+  int i;
+  for (i = 0; i < QUANT_PROFILES - 1; ++i)
+    vp9_diff_update_prob(r, &fc->dq_profile_prob[i]);
+}
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+
 static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   int i, j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
@@ -911,6 +919,9 @@ static void set_param_topblock(VP9_COMMON *const cm,  MACROBLOCKD *const xd,
 #if CONFIG_EXT_TX
                                int txfm,
 #endif
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+                               int dq_off_index,
+#endif
                                int skip) {
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
@@ -927,6 +938,9 @@ static void set_param_topblock(VP9_COMMON *const cm,  MACROBLOCKD *const xd,
       xd->mi[y * cm->mi_stride + x].mbmi.skip = skip;
 #if CONFIG_EXT_TX
       xd->mi[y * cm->mi_stride + x].mbmi.ext_txfrm = txfm;
+#endif
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+      xd->mi[y * cm->mi_stride + x].mbmi.dq_off_index = dq_off_index;
 #endif
     }
 }
@@ -1685,43 +1699,43 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
-  if (less8x8)
-    bsize = BLOCK_8X8;
+    if (less8x8)
+      bsize = BLOCK_8X8;
 
-  if (mbmi->skip) {
-    reset_skip_context(xd, bsize);
-  } else {
-    if (cm->seg.enabled) {
-      setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg, mbmi->segment_id,
-                                                  cm->base_qindex));
+    if (mbmi->skip) {
+      reset_skip_context(xd, bsize);
+    } else {
+      if (cm->seg.enabled) {
+        setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg, mbmi->segment_id,
+                                                    cm->base_qindex));
+      }
     }
-  }
 
-  if (!is_inter_block(mbmi)
+    if (!is_inter_block(mbmi)
 #if CONFIG_INTRABC
-      && !is_intrabc_mode(mbmi->mode)
+        && !is_intrabc_mode(mbmi->mode)
 #endif  // CONFIG_INTRABC
-      ) {
-    struct intra_args arg = { cm, xd, r };
-    vp9_foreach_transformed_block(xd, bsize,
-                                  predict_and_reconstruct_intra_block, &arg);
-  } else {
-    // Prediction
-    vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+       ) {
+      struct intra_args arg = { cm, xd, r };
+      vp9_foreach_transformed_block(xd, bsize,
+                                    predict_and_reconstruct_intra_block, &arg);
+    } else {
+      // Prediction
+      vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
-    // Reconstruction
-    if (!mbmi->skip) {
-      int eobtotal = 0;
-      struct inter_args arg = { cm, xd, r, &eobtotal };
+      // Reconstruction
+      if (!mbmi->skip) {
+        int eobtotal = 0;
+        struct inter_args arg = { cm, xd, r, &eobtotal };
 
-      vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+        vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
 #if CONFIG_BITSTREAM_FIXES
 #else
-      if (!less8x8 && eobtotal == 0)
-        mbmi->skip = 1;  // skip loopfilter
+        if (!less8x8 && eobtotal == 0)
+          mbmi->skip = 1;  // skip loopfilter
 #endif
+      }
     }
-  }
 #if CONFIG_SUPERTX
   }
 #endif
@@ -1790,6 +1804,9 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 #if CONFIG_EXT_TX
   int txfm = NORM;
 #endif
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+  int dq_off_index = 0;
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
 #endif  // CONFIG_SUPERTX
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
@@ -1841,6 +1858,21 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       }
     }
 #endif  // CONFIG_EXT_TX
+    /*
+    printf("D[%d/%d, %d %d] sb_type %d skip %d}\n", cm->current_video_frame, cm->show_frame,
+           mi_row, mi_col, bsize, skip);
+           */
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+    if (cm->base_qindex > Q_THRESHOLD_MIN &&
+        cm->base_qindex < Q_THRESHOLD_MAX &&
+        switchable_dq_profile_used(bsize) && !skip &&
+        !vp9_segfeature_active(
+            &cm->seg, xd->mi[0].mbmi.segment_id, SEG_LVL_SKIP)) {
+      dq_off_index = vp9_read_dq_profile(cm, r);
+    } else {
+      dq_off_index = 0;
+    }
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
   }
 #endif  // CONFIG_SUPERTX
   if (subsize < BLOCK_8X8) {
@@ -2092,6 +2124,9 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 #if CONFIG_EXT_TX
       xd->mi[0].mbmi.ext_txfrm = txfm;
 #endif
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+      xd->mi[0].mbmi.dq_off_index = dq_off_index;
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
       vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
       if (!(subsize < BLOCK_8X8) && eobtotal == 0)
         skip = 1;
@@ -2100,6 +2135,9 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 #if CONFIG_EXT_TX
                        txfm,
 #endif
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+                       dq_off_index,
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                        skip);
   }
 #endif  // CONFIG_SUPERTX
@@ -3481,6 +3519,10 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
 #if CONFIG_NEW_INTER
     read_inter_compound_mode_probs(fc, &r);
 #endif  // CONFIG_NEW_INTER
+
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+    read_dq_profile_probs(fc, &r);
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
 
     if (cm->interp_filter == SWITCHABLE)
       read_switchable_interp_probs(fc, &r);

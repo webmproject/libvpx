@@ -427,6 +427,10 @@ typedef struct VP9_COMP {
                                                    [PALETTE_COLORS];
 #endif  // CONFIG_PALETTE
 
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+  int dq_profile_costs[QUANT_PROFILES];
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+
   PICK_MODE_CONTEXT *leaf_tree;
   PC_TREE *pc_tree;
   PC_TREE *pc_root;

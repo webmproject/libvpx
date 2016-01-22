@@ -77,8 +77,15 @@ extern "C" {
 #endif  // CONFIG_MULTI_REF
 
 #if CONFIG_NEW_QUANT
-#define QUANT_PROFILES 3
-#define DEFAULT_DQ 0
+#define QUANT_PROFILES 2
+
+#if QUANT_PROFILES > 1
+static INLINE int switchable_dq_profile_used(BLOCK_SIZE bsize) {
+  return bsize >= BLOCK_16X16;
+}
+#define Q_THRESHOLD_MIN 0
+#define Q_THRESHOLD_MAX 1000
+#endif  // QUANT_PROFILES > 1
 #endif  // CONFIG_NEW_QUANT
 
 typedef enum {
