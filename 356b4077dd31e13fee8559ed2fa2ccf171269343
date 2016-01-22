@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "673e969d_a276466f",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 546,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-22T13:11:30Z",
+      "side": 1,
+      "message": "The local version before this, had block passed in.  Instead of passing -1 for all \u003e\u003d 8x8 cases, I tried to make use of existing parameters.  If sync was changed, block would have to be added as a parameter.  I can add the block parameter back if you prefer.",
+      "parentUuid": "d487f2cf_351488cf",
+      "revId": "356b4077dd31e13fee8559ed2fa2ccf171269343",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b40b5e17_2cee6b3f",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-22T04:52:16Z",
       "side": 1,
       "message": "why doesn\u0027t this function just take an int*?",
+      "revId": "356b4077dd31e13fee8559ed2fa2ccf171269343",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27481e4f_0c275790",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-22T13:11:30Z",
+      "side": 1,
+      "message": "In the original design, data is used for a ptr to VP9Decoder.  (see fpm_sync)  This was an attempt to re-use existing parameters, instead of always passing NULL, NULL for sync and data for sub 8x8 blocks.",
+      "parentUuid": "b40b5e17_2cee6b3f",
       "revId": "356b4077dd31e13fee8559ed2fa2ccf171269343",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "673e969d_e2704e75",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-22T13:11:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4115643_4fc4ed19",
+      "revId": "356b4077dd31e13fee8559ed2fa2ccf171269343",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4115643_6fcfb139",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2016-01-22T04:52:16Z",
       "side": 1,
       "message": "if one has {}s they all do, but it doesn\u0027t look like you need them here.\n\nhttps://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements",
+      "revId": "356b4077dd31e13fee8559ed2fa2ccf171269343",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "673e969d_02763a6e",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-22T13:11:30Z",
+      "side": 1,
+      "message": "Cut/paste from existing code, then modified.  Will remove.",
+      "parentUuid": "f4115643_6fcfb139",
       "revId": "356b4077dd31e13fee8559ed2fa2ccf171269343",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
