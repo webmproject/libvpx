@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b40b5e17_0c0cc757",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 37
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-22T01:56:47Z",
+      "side": 1,
+      "message": "Can you remove the division from this and just use fabs((a) - (b)) ? \nThis is for efficiency reasons only.",
+      "revId": "fa211479020c4e421cfe7201e49c7ececc34d4ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4eb7261_15a16413",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 37
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-22T01:56:47Z",
+      "side": 1,
+      "message": "const",
+      "revId": "fa211479020c4e421cfe7201e49c7ececc34d4ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54206291_aad933a5",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 37
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-22T01:56:47Z",
+      "side": 1,
+      "message": "MAX_ERROR?",
+      "revId": "fa211479020c4e421cfe7201e49c7ececc34d4ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d439b2d1_857e52f6",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 37
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-22T01:56:47Z",
+      "side": 1,
+      "message": "make this a macro on the top.",
+      "revId": "fa211479020c4e421cfe7201e49c7ececc34d4ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4eb7261_d5aadcee",
+        "filename": "vp9/encoder/vp9_opticalflow.c",
+        "patchSetId": 37
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-01-22T01:56:47Z",
+      "side": 1,
+      "message": "const",
+      "revId": "fa211479020c4e421cfe7201e49c7ececc34d4ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
