@@ -41,7 +41,7 @@ enum denoiserState {
   kDenoiserOnAdaptive
 };
 
-static int mode_to_num_layers[12] = {1, 2, 2, 3, 3, 3, 3, 5, 2, 3, 3, 3};
+static int mode_to_num_layers[13] = {1, 2, 2, 3, 3, 3, 3, 5, 2, 3, 3, 3, 3};
 
 // For rate control encoding stats.
 struct RateControlMetrics {
@@ -432,7 +432,32 @@ static void set_temporal_layer_pattern(int layering_mode,
       layer_flags[7] = layer_flags[3];
       break;
     }
-    case 11:
+    case 11: {
+      // 3-layers structure with one reference frame.
+      // This works same as temporal_layering_mode 3.
+      // This was added to compare with vp9_spatial_svc_encoder.
+
+      // 3-layers, 4-frame period.
+      int ids[4] = {0, 2, 1, 2};
+      cfg->ts_periodicity = 4;
+      *flag_periodicity = 4;
+      cfg->ts_number_layers = 3;
+      cfg->ts_rate_decimator[0] = 4;
+      cfg->ts_rate_decimator[1] = 2;
+      cfg->ts_rate_decimator[2] = 1;
+      memcpy(cfg->ts_layer_id, ids, sizeof(ids));
+      // 0=L, 1=GF, 2=ARF, Intra-layer prediction disabled.
+      layer_flags[0] = VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+          VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
+      layer_flags[2] = VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+          VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST;
+      layer_flags[1] = VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+          VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
+      layer_flags[3] = VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_ARF |
+          VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
+      break;
+    }
+    case 12:
     default: {
       // 3-layers structure as in case 10, but no sync/refresh points for
       // layer 1 and 2.
@@ -530,7 +555,7 @@ int main(int argc, char **argv) {
   }
 
   layering_mode = strtol(argv[10], NULL, 0);
-  if (layering_mode < 0 || layering_mode > 12) {
+  if (layering_mode < 0 || layering_mode > 13) {
     die("Invalid layering mode (0..12) %s", argv[10]);
   }
 

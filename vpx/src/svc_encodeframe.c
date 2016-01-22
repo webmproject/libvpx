@@ -322,8 +322,7 @@ void assign_layer_bitrates(const SvcContext *svc_ctx,
 
       for (sl = 0; sl < svc_ctx->spatial_layers; ++sl) {
         if (si->svc_params.scaling_factor_den[sl] > 0) {
-          alloc_ratio[sl] = (float)(si->svc_params.scaling_factor_num[sl] *
-              1.0 / si->svc_params.scaling_factor_den[sl]);
+          alloc_ratio[sl] = (float)( (sl+1) );
           total += alloc_ratio[sl];
         }
       }
@@ -334,9 +333,9 @@ void assign_layer_bitrates(const SvcContext *svc_ctx,
                 alloc_ratio[sl] / total);
         if (svc_ctx->temporal_layering_mode == 3) {
           enc_cfg->layer_target_bitrate[sl * svc_ctx->temporal_layers] =
-              spatial_layer_target >> 1;
+              (spatial_layer_target*6)/10;  // 60%
           enc_cfg->layer_target_bitrate[sl * svc_ctx->temporal_layers + 1] =
-              (spatial_layer_target >> 1) + (spatial_layer_target >> 2);
+              (spatial_layer_target*8)/10;  // 80%
           enc_cfg->layer_target_bitrate[sl * svc_ctx->temporal_layers + 2] =
               spatial_layer_target;
         } else if (svc_ctx->temporal_layering_mode == 2 ||
@@ -398,11 +397,13 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   si->width = enc_cfg->g_w;
   si->height = enc_cfg->g_h;
 
-  if (enc_cfg->kf_max_dist < 2) {
+// wonkap: why is this necessary?
+  /*if (enc_cfg->kf_max_dist < 2) {
     svc_log(svc_ctx, SVC_LOG_ERROR, "key frame distance too small: %d\n",
             enc_cfg->kf_max_dist);
     return VPX_CODEC_INVALID_PARAM;
-  }
+  }*/
+
   si->kf_dist = enc_cfg->kf_max_dist;
 
   if (svc_ctx->spatial_layers == 0)
@@ -577,6 +578,27 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx,
       }
 #endif
 #endif
+      case VPX_CODEC_PSNR_PKT:
+      {
+#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
+        int j;
+        svc_log(svc_ctx, SVC_LOG_DEBUG,
+                "frame: %d, layer: %d, PSNR(Total/Y/U/V): "
+                "%2.3f  %2.3f  %2.3f  %2.3f \n",
+                si->psnr_pkt_received, 0,
+                cx_pkt->data.layer_psnr[0].psnr[0],
+                cx_pkt->data.layer_psnr[0].psnr[1],
+                cx_pkt->data.layer_psnr[0].psnr[2],
+                cx_pkt->data.layer_psnr[0].psnr[3]);
+        for (j = 0; j < COMPONENTS; ++j) {
+          si->psnr_sum[0][j] +=
+              cx_pkt->data.layer_psnr[0].psnr[j];
+          si->sse_sum[0][j] += cx_pkt->data.layer_psnr[0].sse[j];
+        }
+#endif
+      }
+      ++si->psnr_pkt_received;
+      break;
       default: {
         break;
       }

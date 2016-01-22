@@ -80,7 +80,7 @@ static int remap_prob(int v, int m) {
 
 static int prob_diff_update_cost(vpx_prob newp, vpx_prob oldp) {
   int delp = remap_prob(newp, oldp);
-  return update_bits[delp] * 256;
+  return update_bits[delp] << VP9_PROB_COST_SHIFT;
 }
 
 static void encode_uniform(vpx_writer *w, int v) {

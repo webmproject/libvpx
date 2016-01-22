@@ -30,6 +30,7 @@
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 #include "../vpxstats.h"
+#include "vp9/encoder/vp9_encoder.h"
 #define OUTPUT_RC_STATS 1
 
 static const arg_def_t skip_frames_arg =
@@ -749,6 +750,7 @@ int main(int argc, const char **argv) {
     cx_time += vpx_usec_timer_elapsed(&timer);
 
     printf("%s", vpx_svc_get_message(&svc_ctx));
+    fflush(stdout);
     if (res != VPX_CODEC_OK) {
       die_codec(&codec, "Failed to encode frame");
     }
@@ -756,6 +758,7 @@ int main(int argc, const char **argv) {
     while ((cx_pkt = vpx_codec_get_cx_data(&codec, &iter)) != NULL) {
       switch (cx_pkt->kind) {
         case VPX_CODEC_CX_FRAME_PKT: {
+          SvcInternal_t *const si = (SvcInternal_t *)svc_ctx.internal;
           if (cx_pkt->data.frame.sz > 0) {
 #if OUTPUT_RC_STATS
             uint32_t sizes[8];
@@ -851,6 +854,8 @@ int main(int argc, const char **argv) {
           printf("SVC frame: %d, kf: %d, size: %d, pts: %d\n", frames_received,
                  !!(cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY),
                  (int)cx_pkt->data.frame.sz, (int)cx_pkt->data.frame.pts);
+          if (enc_cfg.ss_number_layers == 1 && enc_cfg.ts_number_layers == 1)
+            si->bytes_sum[0] += (int)cx_pkt->data.frame.sz;
           ++frames_received;
           break;
         }
