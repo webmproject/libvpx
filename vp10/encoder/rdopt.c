@@ -6380,7 +6380,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         int ref_idx;
         int ref_set = VPXMIN(2, mbmi_ext->ref_mv_count[ref_frame_type] - 2);
 
-        rate2 += vp10_cost_bit(128, 0);
+        uint8_t drl0_ctx =
+            vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 0);
+        rate2 += cpi->drl_mode_cost0[drl0_ctx][0];
 
         if (this_rd < INT64_MAX) {
           if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
@@ -6440,9 +6442,13 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                            dummy_filter_cache);
           }
 
-          tmp_rate += vp10_cost_bit(128, 1);
-          if (mbmi_ext->ref_mv_count[ref_frame_type] > 3)
-            tmp_rate += vp10_cost_bit(128, ref_idx);
+          tmp_rate += cpi->drl_mode_cost0[drl0_ctx][1];
+
+          if (mbmi_ext->ref_mv_count[ref_frame_type] > 3) {
+            uint8_t drl1_ctx =
+                vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
+            tmp_rate += cpi->drl_mode_cost1[drl1_ctx][ref_idx];
+          }
 
           if (tmp_alt_rd < INT64_MAX) {
             if (RDCOST(x->rdmult, x->rddiv,

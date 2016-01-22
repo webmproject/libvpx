@@ -257,6 +257,24 @@ static INLINE int16_t vp10_mode_context_analyzer(
   else
     return mode_context[rf[0]];
 }
+
+static INLINE uint8_t vp10_drl_ctx(const CANDIDATE_MV *ref_mv_stack,
+                                   int ref_idx) {
+  if (ref_mv_stack[ref_idx + 1].weight > REF_CAT_LEVEL &&
+      ref_mv_stack[ref_idx + 2].weight > REF_CAT_LEVEL)
+    return 0;
+
+  if (ref_mv_stack[ref_idx + 1].weight > REF_CAT_LEVEL &&
+      ref_mv_stack[ref_idx + 2].weight < REF_CAT_LEVEL)
+    return 1;
+
+  if (ref_mv_stack[ref_idx + 1].weight < REF_CAT_LEVEL &&
+      ref_mv_stack[ref_idx + 2].weight < REF_CAT_LEVEL)
+    return 2;
+
+  assert(0);
+  return 0;
+}
 #endif
 
 typedef void (*find_mv_refs_sync)(void *const data, int mi_row);

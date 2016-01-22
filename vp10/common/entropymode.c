@@ -184,6 +184,10 @@ static const vpx_prob default_refmv_prob[REFMV_MODE_CONTEXTS] = {
     220, 220, 200, 200, 180, 128, 30, 220, 30,
 };
 
+static const vpx_prob default_drl_prob[DRL_MODE_CONTEXTS] = {
+    128, 128, 128,
+};
+
 #if CONFIG_EXT_INTER
 static const vpx_prob default_new2mv_prob = 180;
 #endif
@@ -1292,6 +1296,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->newmv_prob, default_newmv_prob);
   vp10_copy(fc->zeromv_prob, default_zeromv_prob);
   vp10_copy(fc->refmv_prob, default_refmv_prob);
+  vp10_copy(fc->drl_prob0, default_drl_prob);
+  vp10_copy(fc->drl_prob1, default_drl_prob);
 #if CONFIG_EXT_INTER
   fc->new2mv_prob = default_new2mv_prob;
 #endif  // CONFIG_EXT_INTER
@@ -1359,6 +1365,13 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
     fc->refmv_prob[i] = mode_mv_merge_probs(pre_fc->refmv_prob[i],
                                             counts->refmv_mode[i]);
+
+  for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
+    fc->drl_prob0[i] = mode_mv_merge_probs(pre_fc->drl_prob0[i],
+                                           counts->drl_mode0[i]);
+  for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
+    fc->drl_prob1[i] = mode_mv_merge_probs(pre_fc->drl_prob1[i],
+                                           counts->drl_mode1[i]);
 
 #if CONFIG_EXT_INTER
   fc->new2mv_prob = mode_mv_merge_probs(pre_fc->new2mv_prob,
