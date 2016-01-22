@@ -429,7 +429,9 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
     }
   }
 }
+
 #else
+
 static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
   const int savings_thresh = vp10_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              vp10_cost_zero(GROUP_DIFF_UPDATE_PROB);
@@ -1413,7 +1415,8 @@ static void write_modes_sb(VP10_COMP *cpi,
     if (supertx_enabled) {
       vpx_write(w, xd->mi[0]->mbmi.skip, vp10_get_skip_prob(cm, xd));
 #if CONFIG_EXT_TX
-      if (supertx_size <= TX_16X16 && !xd->mi[0]->mbmi.skip) {
+      if (get_ext_tx_types(supertx_size, bsize, 1) > 1 &&
+          !xd->mi[0]->mbmi.skip) {
         int eset = get_ext_tx_set(supertx_size, bsize, 1);
         if (eset > 0) {
           vp10_write_token(
@@ -1421,6 +1424,13 @@ static void write_modes_sb(VP10_COMP *cpi,
               cm->fc->inter_ext_tx_prob[eset][supertx_size],
               &ext_tx_inter_encodings[eset][xd->mi[0]->mbmi.tx_type]);
         }
+      }
+#else
+      if (supertx_size < TX_32X32 && !xd->mi[0]->mbmi.skip) {
+        vp10_write_token(
+            w, vp10_ext_tx_tree,
+            cm->fc->inter_ext_tx_prob[supertx_size],
+            &ext_tx_encodings[xd->mi[0]->mbmi.tx_type]);
       }
 #endif  // CONFIG_EXT_TX
     }
