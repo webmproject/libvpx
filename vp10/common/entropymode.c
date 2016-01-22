@@ -1326,6 +1326,16 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
                 counts->inter_mode[i], fc->inter_mode_probs[i]);
 #endif
 
+#if CONFIG_SUPERTX
+  for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
+    int j;
+    for (j = 1; j < TX_SIZES; ++j) {
+      fc->supertx_prob[i][j] = mode_mv_merge_probs(pre_fc->supertx_prob[i][j],
+                                                   counts->supertx[i][j]);
+    }
+  }
+#endif  // CONFIG_SUPERTX
+
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     vpx_tree_merge_probs(vp10_intra_mode_tree, pre_fc->y_mode_prob[i],
                 counts->y_mode[i], fc->y_mode_prob[i]);
@@ -1419,16 +1429,6 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
                          fc->inter_ext_tx_prob[i]);
   }
 #endif  // CONFIG_EXT_TX
-
-#if CONFIG_SUPERTX
-  for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
-    int j;
-    for (j = 1; j < TX_SIZES; ++j) {
-      fc->supertx_prob[i][j] = mode_mv_merge_probs(pre_fc->supertx_prob[i][j],
-                                                   counts->supertx[i][j]);
-    }
-  }
-#endif  // CONFIG_SUPERTX
 
   if (cm->seg.temporal_update) {
     for (i = 0; i < PREDICTION_PROBS; i++)
