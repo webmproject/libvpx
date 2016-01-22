@@ -961,6 +961,7 @@ static void choose_smallest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
 
   mbmi->tx_size = TX_4X4;
+  mbmi->tx_type = DCT_DCT;
 
   txfm_rd_in_plane(x,
 #if CONFIG_VAR_TX
