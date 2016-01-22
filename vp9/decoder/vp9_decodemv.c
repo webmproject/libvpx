@@ -310,6 +310,10 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   int_mv dv_ref;
 #endif  // CONFIG_INTRABC
 
+#if CONFIG_NEW_QUANT
+  mbmi->dq_off_index = DEFAULT_DQ;
+#endif  // CONFIG_NEW_QUANT
+
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
 #if CONFIG_MISC_ENTROPY
   mbmi->skip = 0;
@@ -1459,6 +1463,10 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_SUPERTX
   (void) supertx_enabled;
 #endif
+
+#if CONFIG_NEW_QUANT
+  mbmi->dq_off_index = DEFAULT_DQ;
+#endif  // CONFIG_NEW_QUANT
 
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;

@@ -47,8 +47,9 @@ static INLINE int16_t vp9_round_factor_to_round(int16_t quant,
 #define NUQ_KNOTS 3
 typedef tran_low_t dequant_val_type_nuq[NUQ_KNOTS + 1];
 typedef tran_low_t cumbins_type_nuq[NUQ_KNOTS];
-void vp9_get_dequant_val_nuq(int q, int lossless, int band, int bd,
-                             tran_low_t *dq, tran_low_t *cumbins);
+void vp9_get_dequant_val_nuq(int q, int lossless, int band,
+                             tran_low_t *dq, tran_low_t *cumbins,
+                             int dq_off_index);
 tran_low_t vp9_dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq);
 tran_low_t vp9_dequant_coeff_nuq(int v, int q, const tran_low_t *dq);
 #endif  // CONFIG_NEW_QUANT

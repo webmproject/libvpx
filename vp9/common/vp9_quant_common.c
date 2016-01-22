@@ -41,51 +41,7 @@ static const uint8_t vp9_nuq_knots_lossless[COEF_BANDS][NUQ_KNOTS] = {
 #endif  // CONFIG_TX_SKIP
 };
 
-static const uint8_t vp9_nuq_knots_tiny[COEF_BANDS][NUQ_KNOTS] = {
-  {84, 124, 128},  // dc, band 0
-  {84, 124, 128},  // band 1
-  {84, 124, 128},  // band 2
-  {86, 124, 128},  // band 3
-  {86, 124, 128},  // band 4
-  {86, 124, 128},  // band 5
-#if CONFIG_TX_SKIP
-  {84, 124, 128},  // band 6
-#endif  // CONFIG_TX_SKIP
-};
-static const uint8_t vp9_nuq_knots_low[COEF_BANDS][NUQ_KNOTS] = {
-  {84, 124, 128},  // dc, band 0
-  {84, 124, 128},  // band 1
-  {84, 124, 128},  // band 2
-  {86, 124, 128},  // band 3
-  {86, 124, 128},  // band 4
-  {86, 124, 128},  // band 5
-#if CONFIG_TX_SKIP
-  {84, 124, 128},  // band 6
-#endif  // CONFIG_TX_SKIP
-};
 static const uint8_t vp9_nuq_knots_mid[COEF_BANDS][NUQ_KNOTS] = {
-  {84, 124, 128},  // dc, band 0
-  {84, 124, 128},  // band 1
-  {84, 124, 128},  // band 2
-  {86, 124, 128},  // band 3
-  {86, 124, 128},  // band 4
-  {86, 124, 128},  // band 5
-#if CONFIG_TX_SKIP
-  {84, 124, 128},  // band 6
-#endif  // CONFIG_TX_SKIP
-};
-static const uint8_t vp9_nuq_knots_high[COEF_BANDS][NUQ_KNOTS] = {
-  {84, 124, 128},  // dc, band 0
-  {84, 124, 128},  // band 1
-  {84, 124, 128},  // band 2
-  {86, 124, 128},  // band 3
-  {86, 124, 128},  // band 4
-  {86, 124, 128},  // band 5
-#if CONFIG_TX_SKIP
-  {84, 124, 128},  // band 6
-#endif  // CONFIG_TX_SKIP
-};
-static const uint8_t vp9_nuq_knots_huge[COEF_BANDS][NUQ_KNOTS] = {
   {84, 124, 128},  // dc, band 0
   {84, 124, 128},  // band 1
   {84, 124, 128},  // band 2
@@ -102,12 +58,7 @@ static const uint8_t vp9_nuq_doff_lossless[COEF_BANDS] = { 0, 0, 0, 0, 0, 0
     , 0
 #endif  // CONFIG_TX_SKIP
 };
-static const uint8_t vp9_nuq_doff_tiny[COEF_BANDS] = { 8, 16, 17, 22, 23, 24
-#if CONFIG_TX_SKIP
-    , 8
-#endif  // CONFIG_TX_SKIP
-};
-static const uint8_t vp9_nuq_doff_low[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24
+static const uint8_t vp9_nuq_doff_low[COEF_BANDS] =  { 5, 13, 14, 19, 20, 21
 #if CONFIG_TX_SKIP
     , 8
 #endif  // CONFIG_TX_SKIP
@@ -117,12 +68,7 @@ static const uint8_t vp9_nuq_doff_mid[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24
     , 8
 #endif  // CONFIG_TX_SKIP
 };
-static const uint8_t vp9_nuq_doff_high[COEF_BANDS] = { 8, 16, 17, 22, 23, 24
-#if CONFIG_TX_SKIP
-    , 8
-#endif  // CONFIG_TX_SKIP
-};
-static const uint8_t vp9_nuq_doff_huge[COEF_BANDS] = { 8, 16, 17, 22, 23, 24
+static const uint8_t vp9_nuq_doff_high[COEF_BANDS] = { 41, 49, 50, 55, 56, 57
 #if CONFIG_TX_SKIP
     , 8
 #endif  // CONFIG_TX_SKIP
@@ -131,43 +77,28 @@ static const uint8_t vp9_nuq_doff_huge[COEF_BANDS] = { 8, 16, 17, 22, 23, 24
 // Allow different quantization profiles in different q ranges,
 // to enable entropy-constraints in scalar quantization.
 
-static const uint8_t *get_nuq_knots(int16_t quant, int lossless,
-                                     int band, int bd) {
-  const int shift = bd - 8;
+static const uint8_t *get_nuq_knots(int lossless, int band) {
   if (lossless)
     return vp9_nuq_knots_lossless[band];
-  if (quant > (512 << shift))
-    return vp9_nuq_knots_huge[band];
-  else if (quant > (256 << shift))
-    return vp9_nuq_knots_high[band];
-  else if (quant > (128 << shift))
-    return vp9_nuq_knots_mid[band];
-  else if (quant > (64 << shift))
-    return vp9_nuq_knots_low[band];
   else
-    return vp9_nuq_knots_tiny[band];
+    return vp9_nuq_knots_mid[band];
 }
 
-static INLINE int16_t quant_to_doff_fixed(int16_t quant, int lossless,
-                                          int band, int bd) {
-  const int shift = bd - 8;
+static INLINE int16_t quant_to_doff_fixed(int lossless, int band,
+                                          int dq_off_index) {
   if (lossless)
     return vp9_nuq_doff_lossless[band];
-  if (quant > (512 << shift))
-    return vp9_nuq_doff_huge[band];
-  else if (quant > (256 << shift))
-    return vp9_nuq_doff_high[band];
-  else if (quant > (128 << shift))
+  else if (!dq_off_index)  // dq_off_index == 0
     return vp9_nuq_doff_mid[band];
-  else if (quant > (64 << shift))
+  else if (dq_off_index == 1)
     return vp9_nuq_doff_low[band];
-  else
-    return vp9_nuq_doff_tiny[band];
+  else  // dq_off_index == 2
+    return vp9_nuq_doff_high[band];
 }
 
-static INLINE void get_cumbins_nuq(int q, int lossless, int band, int bd,
+static INLINE void get_cumbins_nuq(int q, int lossless, int band,
                                    tran_low_t *cumbins) {
-  const uint8_t *knots = get_nuq_knots(q, lossless, band, bd);
+  const uint8_t *knots = get_nuq_knots(lossless, band);
   int16_t cumknots[NUQ_KNOTS];
   int i;
   cumknots[0] = knots[0];
@@ -177,22 +108,23 @@ static INLINE void get_cumbins_nuq(int q, int lossless, int band, int bd,
     cumbins[i] = (cumknots[i] * q + 64) >> 7;
 }
 
-void vp9_get_dequant_val_nuq(int q, int lossless, int band, int bd,
-                             tran_low_t *dq, tran_low_t *cumbins) {
-  const uint8_t *knots = get_nuq_knots(q, lossless, band, bd);
+void vp9_get_dequant_val_nuq(int q, int lossless, int band,
+                             tran_low_t *dq, tran_low_t *cumbins,
+                             int dq_off_index) {
+  const uint8_t *knots = get_nuq_knots(lossless, band);
   tran_low_t cumbins_[NUQ_KNOTS], *cumbins_ptr;
   tran_low_t doff;
   int i;
   cumbins_ptr = (cumbins ? cumbins : cumbins_);
-  get_cumbins_nuq(q, lossless, band, bd, cumbins_ptr);
+  get_cumbins_nuq(q, lossless, band, cumbins_ptr);
   dq[0] = 0;
   for (i = 1; i < NUQ_KNOTS; ++i) {
     const int16_t qstep = (knots[i] * q + 64) >> 7;
-    doff = quant_to_doff_fixed(qstep, lossless, band, bd);
+    doff = quant_to_doff_fixed(lossless, band, dq_off_index);
     doff = (2 * doff * qstep + q) / (2 * q);
     dq[i] = cumbins_ptr[i - 1] + (((knots[i] - doff * 2) * q + 128) >> 8);
   }
-  doff = quant_to_doff_fixed(q, lossless, band, bd);
+  doff = quant_to_doff_fixed(lossless, band, dq_off_index);
   dq[NUQ_KNOTS] =
       cumbins_ptr[NUQ_KNOTS - 1] + (((64 - doff) * q + 64) >> 7);
 }

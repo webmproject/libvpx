@@ -76,6 +76,11 @@ extern "C" {
 #define COMP_REFS 2
 #endif  // CONFIG_MULTI_REF
 
+#if CONFIG_NEW_QUANT
+#define QUANT_PROFILES 3
+#define DEFAULT_DQ 0
+#endif  // CONFIG_NEW_QUANT
+
 typedef enum {
   PLANE_TYPE_Y  = 0,
   PLANE_TYPE_UV = 1,
@@ -299,6 +304,9 @@ typedef struct {
   uint8_t palette_literal_colors[PALETTE_MAX_SIZE];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_PALETTE
+#if CONFIG_NEW_QUANT
+  int dq_off_index;
+#endif  // CONFIG_NEW_QUANT
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
@@ -366,12 +374,12 @@ struct macroblockd_plane {
   struct buf_2d pre[2];
   const int16_t *dequant;
 #if CONFIG_NEW_QUANT
-  const dequant_val_type_nuq *dequant_val_nuq;
+  const dequant_val_type_nuq* dequant_val_nuq[QUANT_PROFILES];
 #endif  // CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
   const int16_t *dequant_pxd;
 #if CONFIG_NEW_QUANT
-  const dequant_val_type_nuq *dequant_val_nuq_pxd;
+  const dequant_val_type_nuq* dequant_val_nuq_pxd[QUANT_PROFILES];
 #endif  // CONFIG_NEW_QUANT
 #endif  // CONFIG_TX_SKIP
   ENTROPY_CONTEXT *above_context;

@@ -1974,9 +1974,8 @@ static void build_inter_predictors_single_buf(MACROBLOCKD *xd,
 #endif  // CONFIG_INTRABC
   const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
 #if CONFIG_GLOBAL_MOTION
-  Global_Motion_Params *gm;
+  Global_Motion_Params *gm = &xd->global_motion[mi->mbmi.ref_frame[ref]][0];
   int is_global;
-  gm = &xd->global_motion[mi->mbmi.ref_frame[ref]][0];
 #endif  // CONFIG_GLOBAL_MOTION
 
   const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
@@ -2132,6 +2131,7 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
     gm[1] = &xd->global_motion[mi->mbmi.ref_frame[1]][0];
 #endif  // CONFIG_GLOBAL_MOTION
 #if CONFIG_INTRABC
+  (void) is_intrabc;
   assert(!is_intrabc || mi->mbmi.interp_filter == BILINEAR);
 #endif  // CONFIG_INTRABC
   (void) block;

@@ -224,30 +224,40 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, vp9_reader *r) {
 
 static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
   int i;
+#if CONFIG_NEW_QUANT
+  int dq;
+#endif  // CONFIG_NEW_QUANT
   xd->plane[0].dequant = cm->y_dequant[q_index];
 #if CONFIG_NEW_QUANT
-  xd->plane[0].dequant_val_nuq =
-      (const dequant_val_type_nuq *)cm->y_dequant_val_nuq[q_index];
+  for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+    xd->plane[0].dequant_val_nuq[dq] =
+        (const dequant_val_type_nuq *)cm->y_dequant_val_nuq[dq][q_index];
+  }
 #endif  // CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
   xd->plane[0].dequant_pxd = cm->y_dequant_pxd[q_index];
 #if CONFIG_NEW_QUANT
-  xd->plane[0].dequant_val_nuq_pxd =
-      (const dequant_val_type_nuq *)cm->y_dequant_val_nuq_pxd[q_index];
+  for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+    xd->plane[0].dequant_val_nuq_pxd[dq] =
+        (const dequant_val_type_nuq *)cm->y_dequant_val_nuq_pxd[dq][q_index];
+  }
 #endif  // CONFIG_NEW_QUANT
 #endif  // CONFIG_TX_SKIP
-
   for (i = 1; i < MAX_MB_PLANE; i++) {
     xd->plane[i].dequant = cm->uv_dequant[q_index];
 #if CONFIG_NEW_QUANT
-    xd->plane[i].dequant_val_nuq =
-        (const dequant_val_type_nuq *)cm->uv_dequant_val_nuq[q_index];
+    for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+      xd->plane[i].dequant_val_nuq[dq] =
+          (const dequant_val_type_nuq *)cm->uv_dequant_val_nuq[dq][q_index];
+    }
 #endif  // CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
     xd->plane[i].dequant_pxd = cm->uv_dequant_pxd[q_index];
 #if CONFIG_NEW_QUANT
-    xd->plane[i].dequant_val_nuq_pxd =
-        (const dequant_val_type_nuq *)cm->uv_dequant_val_nuq_pxd[q_index];
+    for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+      xd->plane[i].dequant_val_nuq_pxd[dq] =
+          (const dequant_val_type_nuq *)cm->uv_dequant_val_nuq_pxd[dq][q_index];
+    }
 #endif  // CONFIG_NEW_QUANT
 #endif  // CONFIG_TX_SKIP
   }
@@ -1672,7 +1682,6 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   mbmi->tx_skip_shift = q_idx > TX_SKIP_SHIFT_THRESH ?
                         TX_SKIP_SHIFT_HQ : TX_SKIP_SHIFT_LQ;
 #endif
-
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
@@ -2309,6 +2318,7 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
+
 #if CONFIG_VP9_HIGHBITDEPTH
   xd->bd = (int)cm->bit_depth;
 #endif
@@ -3561,6 +3571,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
 
 void vp9_init_dequantizer(VP9_COMMON *cm) {
   int q;
+#if CONFIG_NEW_QUANT
+  int dq;
+#endif  // CONFIG_NEW_QUANT
 
   for (q = 0; q < QINDEX_RANGE; q++) {
     int b;
@@ -3571,13 +3584,15 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
     cm->uv_dequant[q][1] = vp9_ac_quant(q, cm->uv_ac_delta_q, cm->bit_depth);
 
 #if CONFIG_NEW_QUANT
-    for (b = 0; b < COEF_BANDS; ++b) {
-      vp9_get_dequant_val_nuq(
-          cm->y_dequant[q][b != 0], q == 0, b, cm->bit_depth,
-          cm->y_dequant_val_nuq[q][b], NULL);
-      vp9_get_dequant_val_nuq(
-          cm->uv_dequant[q][b != 0], q == 0, b, cm->bit_depth,
-          cm->uv_dequant_val_nuq[q][b], NULL);
+    for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+      for (b = 0; b < COEF_BANDS; ++b) {
+        vp9_get_dequant_val_nuq(
+            cm->y_dequant[q][b != 0], q == 0, b,
+            cm->y_dequant_val_nuq[dq][q][b], NULL, dq);
+        vp9_get_dequant_val_nuq(
+            cm->uv_dequant[q][b != 0], q == 0, b,
+            cm->uv_dequant_val_nuq[dq][q][b], NULL, dq);
+      }
     }
 #endif  // CONFIG_NEW_QUANT
 
@@ -3588,13 +3603,15 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
     cm->uv_dequant_pxd[q][0] = cm->uv_dequant[q][PXD_QUANT_INDEX];
     cm->uv_dequant_pxd[q][1] = cm->uv_dequant[q][PXD_QUANT_INDEX];
 #if CONFIG_NEW_QUANT
-    for (b = 0; b < COEF_BANDS; ++b) {
-      vp9_get_dequant_val_nuq(
-          cm->y_dequant_pxd[q][b != 0], q == 0, b, cm->bit_depth,
-          cm->y_dequant_val_nuq_pxd[q][b], NULL);
-      vp9_get_dequant_val_nuq(
-          cm->uv_dequant_pxd[q][b != 0], q == 0, b, cm->bit_depth,
-          cm->uv_dequant_val_nuq_pxd[q][b], NULL);
+    for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+      for (b = 0; b < COEF_BANDS; ++b) {
+        vp9_get_dequant_val_nuq(
+            cm->y_dequant_pxd[q][b != 0], q == 0, b,
+            cm->y_dequant_val_nuq_pxd[dq][q][b], NULL, dq);
+        vp9_get_dequant_val_nuq(
+            cm->uv_dequant_pxd[q][b != 0], q == 0, b,
+            cm->uv_dequant_val_nuq_pxd[dq][q][b], NULL, dq);
+      }
     }
 #endif  // CONFIG_NEW_QUANT
 #endif  // CONFIG_TX_SKIP

@@ -47,6 +47,10 @@ extern "C" {
 #define FRAME_CONTEXTS_LOG2 2
 #define FRAME_CONTEXTS (1 << FRAME_CONTEXTS_LOG2)
 
+#if CONFIG_NEW_QUANT
+#define QUANT_PROFILES 3
+#endif  // CONFIG_NEW_QUANT
+
 extern const struct {
   PARTITION_CONTEXT above;
   PARTITION_CONTEXT left;
@@ -73,9 +77,9 @@ typedef struct VP9Common {
   DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
 #if CONFIG_NEW_QUANT
   DECLARE_ALIGNED(16, dequant_val_type_nuq,
-                  y_dequant_val_nuq[QINDEX_RANGE][COEF_BANDS]);
+                  y_dequant_val_nuq[QUANT_PROFILES][QINDEX_RANGE][COEF_BANDS]);
   DECLARE_ALIGNED(16, dequant_val_type_nuq,
-                  uv_dequant_val_nuq[QINDEX_RANGE][COEF_BANDS]);
+                  uv_dequant_val_nuq[QUANT_PROFILES][QINDEX_RANGE][COEF_BANDS]);
 #endif  // CONFIG_NEW_QUANT
 
 #if CONFIG_TX_SKIP
@@ -83,9 +87,11 @@ typedef struct VP9Common {
   DECLARE_ALIGNED(16, int16_t, uv_dequant_pxd[QINDEX_RANGE][8]);
 #if CONFIG_NEW_QUANT
   DECLARE_ALIGNED(16, dequant_val_type_nuq,
-                  y_dequant_val_nuq_pxd[QINDEX_RANGE][COEF_BANDS]);
+                  y_dequant_val_nuq_pxd[QUANT_PROFILES][QINDEX_RANGE]
+                                       [COEF_BANDS]);
   DECLARE_ALIGNED(16, dequant_val_type_nuq,
-                  uv_dequant_val_nuq_pxd[QINDEX_RANGE][COEF_BANDS]);
+                  uv_dequant_val_nuq_pxd[QUANT_PROFILES][QINDEX_RANGE]
+                                        [COEF_BANDS]);
 #endif  // CONFIG_NEW_QUANT
 #endif  // CONFIG_TX_SKIP
 
