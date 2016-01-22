@@ -1104,7 +1104,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
       THR_D63_PRED  /*D63_PRED*/,
       THR_TM        /*TM_PRED*/,
     };
-    ++cpi->mode_chosen_counts[kf_mode_index[mi->mode]];
+    ++cpi->mode_chosen_counts[kf_mode_index[xdmi->mode]];
   } else {
     // Note how often each mode chosen as best
     ++cpi->mode_chosen_counts[ctx->best_mode_index];
