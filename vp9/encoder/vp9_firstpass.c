@@ -636,7 +636,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     MV best_ref_mv = {0, 0};
 
     // Reset above block coeffs.
-    xd->up_available = (mb_row != 0);
     recon_yoffset = (mb_row * recon_y_stride * 16);
     recon_uvoffset = (mb_row * recon_uv_stride * uv_mb_height);
 
@@ -662,7 +661,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
       xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;
-      xd->left_available = (mb_col != 0);
       xd->mi[0]->sb_type = bsize;
       xd->mi[0]->ref_frame[0] = INTRA_FRAME;
       set_mi_row_col(xd, &tile,
