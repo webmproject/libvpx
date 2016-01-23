@@ -1819,10 +1819,10 @@ static void define_gf_group(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   {
     int int_max_q =
       (int)(vp10_convert_qindex_to_q(twopass->active_worst_quality,
-                                   cpi->common.bit_depth));
+                                     cpi->common.bit_depth));
     int int_lbq =
       (int)(vp10_convert_qindex_to_q(rc->last_boosted_qindex,
-                                   cpi->common.bit_depth));
+                                     cpi->common.bit_depth));
     active_min_gf_interval = rc->min_gf_interval + VPXMIN(2, int_max_q / 200);
     if (active_min_gf_interval > rc->max_gf_interval)
       active_min_gf_interval = rc->max_gf_interval;
@@ -1835,13 +1835,12 @@ static void define_gf_group(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // At high Q when there are few bits to spare we are better with a longer
       // interval to spread the cost of the GF.
       active_max_gf_interval = 12 + VPXMIN(4, (int_lbq / 6));
-      if (active_max_gf_interval < active_min_gf_interval)
-        active_max_gf_interval = active_min_gf_interval;
 
-      if (active_max_gf_interval > rc->max_gf_interval)
-        active_max_gf_interval = rc->max_gf_interval;
+      // We have: active_min_gf_interval <= rc->max_gf_interval
       if (active_max_gf_interval < active_min_gf_interval)
         active_max_gf_interval = active_min_gf_interval;
+      else if (active_max_gf_interval > rc->max_gf_interval)
+        active_max_gf_interval = rc->max_gf_interval;
     }
   }
 
