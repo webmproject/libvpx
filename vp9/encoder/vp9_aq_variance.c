@@ -48,7 +48,7 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
   struct segmentation *seg = &cm->seg;
   int i;
 
-  if (cm->frame_type == KEY_FRAME ||
+  if (frame_is_intra_only(cm) || cm->error_resilient_mode ||
       cpi->refresh_alt_ref_frame ||
       (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
     vp9_enable_segmentation(seg);
