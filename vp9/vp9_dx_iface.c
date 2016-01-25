@@ -510,7 +510,8 @@ static vpx_codec_err_t ctrl_set_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
     return vp9_set_reference_dec(&ctx->pbi->common,
-                                 (VP9_REFFRAME)frame->frame_type, &sd);
+                                 ref_frame_to_vp9_reframe(frame->frame_type),
+                                 &sd);
   } else {
     return VPX_CODEC_INVALID_PARAM;
   }
