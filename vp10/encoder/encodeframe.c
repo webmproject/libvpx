@@ -1527,6 +1527,14 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
   mbmi = &xd->mi[0]->mbmi;
   mbmi->sb_type = bsize;
+#if CONFIG_SUPERTX
+  // We set tx_size here as skip blocks would otherwise not set it.
+  // tx_size needs to be set at this point as supertx_enable in
+  // write_modes_sb is computed based on this, and if the garbage in memory
+  // just happens to be the supertx_size, then the packer will code this
+  // block as a supertx block, even if rdopt did not pick it as such.
+  mbmi->tx_size = max_txsize_lookup[bsize];
+#endif
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][0];
