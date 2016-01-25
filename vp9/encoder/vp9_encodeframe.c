@@ -4119,6 +4119,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #define GLOBAL_MOTION_ADVANTAGE_THRESH_RZ 0.60
 #define GLOBAL_MOTION_ADVANTAGE_THRESH_TR 0.75
 // #define USE_BLOCK_BASED_GLOBAL_MOTION_COMPUTATION
+// #define USE_FEATURE_BASED_GLOBAL_MOTION_COMPUTATION
 
 static void convert_translation_to_params(
     double *H, Global_Motion_Params *model) {
@@ -4191,7 +4192,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   xd->mi = cm->mi;
   xd->mi[0].src_mi = &xd->mi[0];
-
   vp9_zero(cm->counts);
   vp9_zero(cpi->coef_counts);
   vp9_zero(rd_opt->comp_pred_diff);
@@ -4217,6 +4217,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     YV12_BUFFER_CONFIG *ref_buf;
     int num, frame;
     double global_motion[9 * MAX_GLOBAL_MOTION_MODELS];
+
     for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
       ref_buf = get_ref_frame_buffer(cpi, frame);
       if (ref_buf) {
@@ -4225,11 +4226,15 @@ static void encode_frame_internal(VP9_COMP *cpi) {
              vp9_compute_global_motion_multiple_block_based(
                  cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
                  BLOCK_16X16, MAX_GLOBAL_MOTION_MODELS, 0.5, global_motion))) {
-#else
+#elif defined(USE_FEATURE_BASED_GLOBAL_MOTION_COMPUTATION)
              vp9_compute_global_motion_multiple_feature_based(
                  cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
                  MAX_GLOBAL_MOTION_MODELS, 0.5, global_motion))) {
-#endif  // USE_BLOCK_BASED_GLOBAL_MOTION_COMPUTATION
+#else
+             vp9_compute_global_motion_multiple_optical_flow(
+                 cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
+                 MAX_GLOBAL_MOTION_MODELS, 0.5, global_motion))) {
+#endif
           int i;
           for (i = 0; i < num; i++) {
             convert_model_to_params(
@@ -4285,6 +4290,10 @@ static void encode_frame_internal(VP9_COMP *cpi) {
                   }
                 }
               }
+              if (get_gmtype(&cm->global_motion[frame][i]) != GLOBAL_ZERO)
+                printf("Found it %d/%d - %d [%f %f]\n",
+                       cm->current_video_frame, cm->show_frame, frame,
+                       erroradvantage, erroradvantage_trans);
             }
           }
           cm->num_global_motion[frame] = num;
@@ -4292,6 +4301,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       }
     }
   }
+
 #endif  // CONFIG_GLOBAL_MOTION
 
 #if CONFIG_VP9_HIGHBITDEPTH

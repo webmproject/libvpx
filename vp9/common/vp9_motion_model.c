@@ -18,7 +18,7 @@
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_motion_model.h"
 
-INLINE projectPointsType get_projectPointsType(TransformationType type) {
+inline projectPointsType get_projectPointsType(TransformationType type) {
   switch (type) {
     case HOMOGRAPHY:
       return projectPointsHomography;
@@ -118,8 +118,8 @@ double bicubic(unsigned char *ref, double x, double y, int stride) {
   return getCubicValue(arr, x - i);
 }
 
-static unsigned char interpolate(unsigned char *ref, double x, double y,
-                              int width, int height, int stride) {
+unsigned char interpolate(unsigned char *ref, double x, double y,
+                          int width, int height, int stride) {
   if (x < 0 && y < 0) return ref[0];
   else if (x < 0 && y > height - 1)
     return ref[(height - 1) * stride];
@@ -215,6 +215,34 @@ static void WarpImage(TransformationType type, double *H,
     }
   }
 }
+
+// computes warp error
+double compute_warp_and_error(TransformationType type,
+                              unsigned char *ref,
+                              unsigned char *frm,
+                              int width, int height, int stride,
+                              double *H) {
+  int i, j;
+  double warped;
+  double mse = 0;
+  double err = 0;
+  projectPointsType projectPoints = get_projectPointsType(type);
+  if (projectPoints == NULL) return -1.0;
+  for (i = 0; i < height; ++i)
+    for (j = 0; j < width; ++j) {
+      double in[2], out[2];
+      in[0] = j;
+      in[1] = i;
+      projectPoints(H, in, out, 1, 2, 2);
+      warped = interpolate(ref, out[0], out[1], width, height, stride);
+      err = warped - frm[j + i * stride];
+      mse += err * err;
+    }
+
+  mse /= (width * height);
+  return mse;
+}
+
 // Computes the ratio of the warp error to the zero motion error
 double vp9_warp_erroradv_unq(TransformationType type, double *H,
                              unsigned char *ref,

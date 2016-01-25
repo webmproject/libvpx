@@ -25,6 +25,7 @@
 #include "vp9/common/vp9_motion_model.h"
 #include "vp9/encoder/vp9_corner_detect.h"
 #include "vp9/encoder/vp9_corner_match.h"
+#include "vp9/encoder/vp9_opticalflow.h"
 #include "vp9/encoder/vp9_ransac.h"
 #include "vp9/encoder/vp9_global_motion.h"
 #include "vp9/encoder/vp9_motion_field.h"
@@ -35,6 +36,8 @@
 #define USE_FAST_CORNER
 
 #define MIN_INLIER_PROB 0.1
+
+// #define PARAM_SEARCH
 
 #define MAX_CORNERS 4096
 
@@ -92,13 +95,60 @@ static double compute_error_score(TransformationType type,
   return sqrt(sqerr / n);
 }
 
+void refine_param(TransformationType type, unsigned char *frm,
+                  unsigned char *ref,  double *H,
+                  int param_index, int width, int height,
+                  int stride, int n_refinements) {
+  int i;
+  double step_mse;
+  double best_mse;
+  double curr_mse;
+  double curr_param = H[param_index];
+  double step = 0.5;
+  double best_param = curr_param;
+
+  curr_mse = compute_warp_and_error(type, ref, frm, width, height, stride, H);
+  best_mse = curr_mse;
+  for (i = 0; i < n_refinements; i++) {
+    // look to the left
+    H[param_index] = curr_param - step;
+    step_mse = compute_warp_and_error(type, ref, frm, width, height, stride, H);
+    if (step_mse < best_mse) {
+      step /= 2;
+      best_mse = step_mse;
+      best_param = H[param_index];
+      curr_param = best_param;
+      curr_mse = step_mse;
+      continue;
+    }
+
+    // look to the right
+    H[param_index] = curr_param + step;
+    step_mse = compute_warp_and_error(type, ref, frm, width, height, stride, H);
+    if (step_mse < best_mse) {
+      step /= 2;
+      best_mse = step_mse;
+      best_param = H[param_index];
+      curr_param = best_param;
+      curr_mse = step_mse;
+      continue;
+    }
+
+    // no improvement found-> means we're either already at a minimum or
+    // step is too wide
+    step /= 4;
+  }
+
+  H[param_index] = best_param;
+}
+
 static int compute_global_motion_single(TransformationType type,
-                                        int *correspondences,
+                                        double *correspondences,
                                         int num_correspondences,
                                         double *H,
                                         int *inlier_map) {
   double *mp, *matched_points;
-  int *cp = correspondences;
+  double *cp = correspondences;
   int i, result;
   int num_inliers = 0;
   ransacType ransac = get_ransacType(type);
@@ -138,11 +188,12 @@ int vp9_compute_global_motion_single_feature_based(
     double *H) {
   int num_frm_corners, num_ref_corners;
   int num_correspondences;
-  int *correspondences;
+  double *correspondences;
   int num_inliers;
   int *inlier_map = NULL;
   int frm_corners[2 * MAX_CORNERS], ref_corners[2 * MAX_CORNERS];
   (void) cpi;
+
 
 #ifdef USE_FAST_CORNER
   num_frm_corners = FastCornerDetect(frm->y_buffer, frm->y_width,
@@ -162,7 +213,7 @@ int vp9_compute_global_motion_single_feature_based(
   printf("Reference corners = %d\n", num_ref_corners);
 #endif
 
-  correspondences = (int *) malloc(num_frm_corners * 4 *
+  correspondences = (double *) malloc(num_frm_corners * 4 *
                                    sizeof(*correspondences));
 
   num_correspondences = determine_correspondence(frm->y_buffer,
@@ -201,14 +252,14 @@ int vp9_compute_global_motion_single_feature_based(
 }
 
 static int compute_global_motion_multiple(TransformationType type,
-                                          int *correspondences,
+                                          double *correspondences,
                                           int num_correspondences,
                                           double *H,
                                           int max_models,
                                           double inlier_prob,
                                           int *num_models,
                                           int *processed_mask) {
-  int *cp = correspondences;
+  double *cp = correspondences;
   double *mp, *matched_points;
   int *best_inlier_mask;
   int i, result;
@@ -268,6 +319,85 @@ static int compute_global_motion_multiple(TransformationType type,
   return num_inliers_sum;
 }
 
+int vp9_compute_global_motion_multiple_optical_flow(struct VP9_COMP *cpi,
+                                                    TransformationType type,
+                                                    YV12_BUFFER_CONFIG *frm,
+                                                    YV12_BUFFER_CONFIG *ref,
+                                                    int max_models,
+                                                    double inlier_prob,
+                                                    double *H) {
+  int num_correspondences = 0;
+  double *correspondence_pts = (double *)malloc(frm->y_width * frm->y_height *
+                                                sizeof(correspondence));
+  correspondence *correspondences = (correspondence *)correspondence_pts;
+  int num_inliers;
+  int i, j;
+  int num_models = 0;
+  int *inlier_map = NULL;
+  double *u = (double *)malloc(frm->y_width * frm->y_height * sizeof(u));
+  double *v = (double *)malloc(frm->y_width * frm->y_height * sizeof(v));
+  double *confidence = (double *)malloc(frm->y_width * frm->y_height *
+                                        sizeof(confidence));
+
+  (void) cpi;
+  compute_flow(frm->y_buffer, ref->y_buffer, u, v, confidence,
+               frm->y_width, frm->y_height, frm->y_stride,
+               ref->y_stride, 1);
+
+  // avoid the boundaries because of artifacts
+  for (i = 10; i < frm->y_width - 10; ++i)
+    for (j = 10; j < frm->y_height - 10; ++j) {
+      // Note that this threshold could still benefit from tuning. Confidence
+      // is based on the inverse of the harris corner score.
+      if (confidence[i + j * frm->y_width] < 0.01) {
+        correspondences[num_correspondences].x = i;
+        correspondences[num_correspondences].y = j;
+        correspondences[num_correspondences].rx = i - u[i + j * frm->y_width];
+        correspondences[num_correspondences].ry = j - v[i + j * frm->y_width];
+        num_correspondences++;
+      }
+    }
+  printf("Number of correspondences = %d\n", num_correspondences);
+#ifdef VERBOSE
+  printf("Number of correspondences = %d\n", num_correspondences);
+#endif
+  inlier_map = (int *)malloc(num_correspondences * sizeof(*inlier_map));
+  num_inliers = compute_global_motion_multiple(type, correspondence_pts,
+                                               num_correspondences, H,
+                                               max_models, inlier_prob,
+                                               &num_models, inlier_map);
+#ifdef PARAM_SEARCH
+  for (j = 0; j < num_models; ++j) {
+    for (i = 0; i < get_numparams(type); ++i)
+
+      refine_param(type, frm->y_buffer, ref->y_buffer, H,
+                  i + j * get_numparams(type), frm->y_width, frm->y_height,
+                  frm->y_stride, 2);
+  }
+#endif
+
+#ifdef VERBOSE
+  printf("Models = %d, Inliers = %d\n", num_models, num_inliers);
+  if (num_models)
+    printf("Error Score (inliers) = %g\n",
+           compute_error_score(type, correspondences, 4, correspondences + 2, 4,
+                               num_correspondences, H, inlier_map));
+    printf("Warp error score = %g\n",
+           vp9_warp_error_unq(ROTZOOM, H, ref->y_buffer, ref->y_crop_width,
+                              ref->y_crop_height, ref->y_stride,
+                              frm->y_buffer, 0, 0,
+                              frm->y_crop_width, frm->y_crop_height,
+                              frm->y_stride, 0, 0, 16, 16));
+#endif
+  (void) num_inliers;
+  free(correspondences);
+  free(inlier_map);
+  free(u);
+  free(v);
+  free(confidence);
+  return num_models;
+}
+
 // Returns number of models actually returned
 int vp9_compute_global_motion_multiple_feature_based(
     struct VP9_COMP *cpi,
@@ -279,12 +409,15 @@ int vp9_compute_global_motion_multiple_feature_based(
     double *H) {
   int num_frm_corners, num_ref_corners;
   int num_correspondences;
-  int *correspondences;
+  double *correspondences;
   int num_inliers;
+  int i, j;
   int frm_corners[2 * MAX_CORNERS], ref_corners[2 * MAX_CORNERS];
   int num_models = 0;
   int *inlier_map = NULL;
   (void) cpi;
+  (void) i;
+  (void) j;
 
 #ifdef USE_FAST_CORNER
   num_frm_corners = FastCornerDetect(frm->y_buffer, frm->y_width,
@@ -304,7 +437,7 @@ int vp9_compute_global_motion_multiple_feature_based(
   printf("Reference corners = %d\n", num_ref_corners);
 #endif
 
-  correspondences = (int *) malloc(num_frm_corners * 4 *
+  correspondences = (double *) malloc(num_frm_corners * 4 *
                                    sizeof(*correspondences));
 
   num_correspondences = determine_correspondence(frm->y_buffer,
@@ -316,6 +449,7 @@ int vp9_compute_global_motion_multiple_feature_based(
                                                  frm->y_width, frm->y_height,
                                                  frm->y_stride, ref->y_stride,
                                                  correspondences);
+  printf("Number of correspondences = %d\n", num_correspondences);
 #ifdef VERBOSE
   printf("Number of correspondences = %d\n", num_correspondences);
 #endif
@@ -324,6 +458,16 @@ int vp9_compute_global_motion_multiple_feature_based(
                                                num_correspondences, H,
                                                max_models, inlier_prob,
                                                &num_models, inlier_map);
+#ifdef PARAM_SEARCH
+  for (j = 0; j < num_models; ++j) {
+    for (i = 0; i < get_numparams(type); ++i)
+
+      refine_param(type, frm->y_buffer, ref->y_buffer, H,
+                   i + j * get_numparams(type), frm->y_width, frm->y_height,
+                   frm->y_stride, 3);
+  }
+#endif
+
 #ifdef VERBOSE
   printf("Models = %d, Inliers = %d\n", num_models, num_inliers);
   if (num_models)
@@ -352,7 +496,7 @@ int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
                                                  double *H) {
   VP9_COMMON *const cm = &cpi->common;
   int num_correspondences = 0;
-  int *correspondences;
+  double *correspondences;
   int num_inliers;
   int *inlier_map = NULL;
   int bwidth = num_4x4_blocks_wide_lookup[bsize] << 2;
@@ -363,7 +507,7 @@ int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
 
   vp9_get_frame_motionfield(cpi, frm, ref, bsize, motionfield, confidence);
 
-  correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
+  correspondences = (double *)malloc(4 * cm->mb_rows * cm->mb_cols *
                                   sizeof(*correspondences));
 
   for (i = 0; i < cm->mb_rows * cm->mb_cols; i ++) {
@@ -407,7 +551,7 @@ int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
                                                    double *H) {
   VP9_COMMON *const cm = &cpi->common;
   int num_correspondences = 0;
-  int *correspondences;
+  double *correspondences;
   int num_inliers;
   int num_models = 0;
   int *inlier_map = NULL;
@@ -419,7 +563,7 @@ int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
   double confidence[4096];
   vp9_get_frame_motionfield(cpi, frm, ref, bsize, motionfield, confidence);
 
-  correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
+  correspondences = (double *)malloc(4 * cm->mb_rows * cm->mb_cols *
                                   sizeof(*correspondences));
 
   for (i = 0; i < cm->mb_rows * cm->mb_cols; i ++) {
