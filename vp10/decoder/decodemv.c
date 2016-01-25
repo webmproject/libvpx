@@ -1326,6 +1326,9 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
 #else
   if (mbmi->tx_size < TX_32X32 &&
       cm->base_qindex > 0 && !mbmi->skip &&
+#if CONFIG_SUPERTX
+      !supertx_enabled &&
+#endif  // CONFIG_SUPERTX
       !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     FRAME_COUNTS *counts = xd->counts;
     if (inter_block) {

@@ -1220,27 +1220,9 @@ default_intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES]
     },
   },
 };
-#endif  // CONFIG_EXT_TX
 
-#if CONFIG_SUPERTX
-static const vpx_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
-                                          [TX_SIZES] = {
-  { 1, 160, 160, 170 },
-  { 1, 200, 200, 210 },
-};
-#endif  // CONFIG_SUPERTX
+#else
 
-// FIXME(someone) need real defaults here
-static const struct segmentation_probs default_seg_probs = {
-  { 128, 128, 128, 128, 128, 128, 128 },
-  { 128, 128, 128 },
-};
-
-#if CONFIG_EXT_INTRA
-static  const vpx_prob default_ext_intra_probs[2] = {230, 230};
-#endif  // CONFIG_EXT_INTRA
-
-#if !CONFIG_EXT_TX
 const vpx_tree_index vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)] = {
   -DCT_DCT, 2,
   -ADST_ADST, 4,
@@ -1260,7 +1242,25 @@ static const vpx_prob default_inter_ext_tx_prob[EXT_TX_SIZES]
   {176, 85, 128},
   {192, 85, 128},
 };
-#endif
+#endif  // CONFIG_EXT_TX
+
+#if CONFIG_SUPERTX
+static const vpx_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
+                                          [TX_SIZES] = {
+  { 1, 160, 160, 170 },
+  { 1, 200, 200, 210 },
+};
+#endif  // CONFIG_SUPERTX
+
+// FIXME(someone) need real defaults here
+static const struct segmentation_probs default_seg_probs = {
+  { 128, 128, 128, 128, 128, 128, 128 },
+  { 128, 128, 128 },
+};
+
+#if CONFIG_EXT_INTRA
+static  const vpx_prob default_ext_intra_probs[2] = {230, 230};
+#endif  // CONFIG_EXT_INTRA
 
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->uv_mode_prob, default_uv_probs);

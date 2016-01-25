@@ -1035,9 +1035,7 @@ static void set_offsets_topblock(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 
 static void set_param_topblock(VP10_COMMON *const cm,  MACROBLOCKD *const xd,
                                BLOCK_SIZE bsize, int mi_row, int mi_col,
-#if CONFIG_EXT_TX
                                int txfm,
-#endif
                                int skip) {
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
@@ -1052,9 +1050,7 @@ static void set_param_topblock(VP10_COMMON *const cm,  MACROBLOCKD *const xd,
   for (y = 0; y < y_mis; ++y)
     for (x = 0; x < x_mis; ++x) {
       xd->mi[y * cm->mi_stride + x]->mbmi.skip = skip;
-#if CONFIG_EXT_TX
       xd->mi[y * cm->mi_stride + x]->mbmi.tx_type = txfm;
-#endif
     }
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
@@ -1779,9 +1775,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   int skip = 0;
   TX_SIZE supertx_size = b_width_log2_lookup[bsize];
   const TileInfo *const tile = &xd->tile;
-#if CONFIG_EXT_TX
   int txfm = DCT_DCT;
-#endif  // CONFIG_EXT_TX
 #endif  // CONFIG_SUPERTX
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
@@ -1813,10 +1807,10 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     set_skip_context(xd, mi_row, mi_col);
     // Here skip is read without using any segment level feature
     skip = read_skip_without_seg(cm, xd, r);
-    if (skip)
+    if (skip) {
       reset_skip_context(xd, bsize);
+    } else {
 #if CONFIG_EXT_TX
-    if (!skip) {
       if (get_ext_tx_types(supertx_size, bsize, 1) > 1) {
         int eset = get_ext_tx_set(supertx_size, bsize, 1);
         if (eset > 0) {
@@ -1826,8 +1820,15 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
             ++xd->counts->inter_ext_tx[eset][supertx_size][txfm];
         }
       }
-    }
+#else
+      if (supertx_size < TX_32X32) {
+        txfm = vpx_read_tree(r, vp10_ext_tx_tree,
+                             cm->fc->inter_ext_tx_prob[supertx_size]);
+        if (xd->counts)
+          ++xd->counts->inter_ext_tx[supertx_size][txfm];
+      }
 #endif  // CONFIG_EXT_TX
+    }
   }
 #endif  // CONFIG_SUPERTX
   if (!hbs) {
@@ -1958,9 +1959,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       int eobtotal = 0;
       MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
       set_offsets_topblock(cm, xd, tile, bsize, mi_row, mi_col);
-#if CONFIG_EXT_TX
       xd->mi[0]->mbmi.tx_type = txfm;
-#endif
       for (i = 0; i < MAX_MB_PLANE; ++i) {
         const struct macroblockd_plane *const pd = &xd->plane[i];
         const int num_4x4_w = pd->n4_w;
@@ -1991,11 +1990,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       if (!(subsize < BLOCK_8X8) && eobtotal == 0)
         skip = 1;
     }
-    set_param_topblock(cm, xd, bsize, mi_row, mi_col,
-#if CONFIG_EXT_TX
-                       txfm,
-#endif
-                       skip);
+    set_param_topblock(cm, xd, bsize, mi_row, mi_col, txfm, skip);
   }
 #endif  // CONFIG_SUPERTX
 
@@ -3184,7 +3179,9 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
     }
   }
 }
+
 #else
+
 static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   int i, j, k;
   if (vpx_read(r, GROUP_DIFF_UPDATE_PROB)) {
@@ -3201,7 +3198,6 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
     }
   }
 }
-
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_SUPERTX

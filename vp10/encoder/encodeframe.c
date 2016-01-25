@@ -82,9 +82,7 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
                           const TileInfo *const tile,
                           int mi_row, int mi_col, BLOCK_SIZE bsize,
                           int *tmp_rate, int64_t *tmp_dist,
-#if CONFIG_EXT_TX
                           TX_TYPE *best_tx,
-#endif
                           PC_TREE *pc_tree);
 #endif  // CONFIG_SUPERTX
 
@@ -1391,9 +1389,7 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
 
 static void update_supertx_param(ThreadData *td,
                                  PICK_MODE_CONTEXT *ctx,
-#if CONFIG_EXT_TX
                                  int best_tx,
-#endif
                                  TX_SIZE supertx_size) {
   MACROBLOCK *const x = &td->mb;
 
@@ -1401,17 +1397,13 @@ static void update_supertx_param(ThreadData *td,
   memcpy(ctx->zcoeff_blk, x->zcoeff_blk[supertx_size],
          sizeof(uint8_t) * ctx->num_4x4_blk);
   ctx->skip = x->skip;
-#if CONFIG_EXT_TX
   ctx->mic.mbmi.tx_type = best_tx;
-#endif  // CONFIG_EXT_TX
 }
 
 static void update_supertx_param_sb(VP10_COMP *cpi, ThreadData *td,
                                     int mi_row, int mi_col,
                                     BLOCK_SIZE bsize,
-#if CONFIG_EXT_TX
                                     int best_tx,
-#endif
                                     TX_SIZE supertx_size, PC_TREE *pc_tree) {
   VP10_COMMON *const cm = &cpi->common;
   int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
@@ -1424,64 +1416,44 @@ static void update_supertx_param_sb(VP10_COMP *cpi, ThreadData *td,
   switch (partition) {
     case PARTITION_NONE:
       update_supertx_param(td, &pc_tree->none,
-#if CONFIG_EXT_TX
                            best_tx,
-#endif
                            supertx_size);
       break;
     case PARTITION_VERT:
       update_supertx_param(td, &pc_tree->vertical[0],
-#if CONFIG_EXT_TX
                            best_tx,
-#endif
                            supertx_size);
       if (mi_col + hbs < cm->mi_cols && bsize > BLOCK_8X8)
         update_supertx_param(td, &pc_tree->vertical[1],
-#if CONFIG_EXT_TX
                              best_tx,
-#endif
                              supertx_size);
       break;
     case PARTITION_HORZ:
       update_supertx_param(td, &pc_tree->horizontal[0],
-#if CONFIG_EXT_TX
                            best_tx,
-#endif
                            supertx_size);
       if (mi_row + hbs < cm->mi_rows && bsize > BLOCK_8X8)
         update_supertx_param(td, &pc_tree->horizontal[1],
-#if CONFIG_EXT_TX
                              best_tx,
-#endif
                              supertx_size);
       break;
     case PARTITION_SPLIT:
       if (bsize == BLOCK_8X8) {
         update_supertx_param(td, pc_tree->leaf_split[0],
-#if CONFIG_EXT_TX
                              best_tx,
-#endif
                              supertx_size);
       } else {
         update_supertx_param_sb(cpi, td, mi_row, mi_col, subsize,
-#if CONFIG_EXT_TX
                                 best_tx,
-#endif
                                 supertx_size, pc_tree->split[0]);
         update_supertx_param_sb(cpi, td, mi_row, mi_col + hbs, subsize,
-#if CONFIG_EXT_TX
                                 best_tx,
-#endif
                                 supertx_size, pc_tree->split[1]);
         update_supertx_param_sb(cpi, td, mi_row + hbs, mi_col, subsize,
-#if CONFIG_EXT_TX
                                 best_tx,
-#endif
                                 supertx_size, pc_tree->split[2]);
         update_supertx_param_sb(cpi, td, mi_row + hbs, mi_col + hbs, subsize,
-#if CONFIG_EXT_TX
                                 best_tx,
-#endif
                                 supertx_size, pc_tree->split[3]);
       }
       break;
@@ -2051,6 +2023,11 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
             ++td->counts->inter_ext_tx[eset][supertx_size]
                                       [xd->mi[0]->mbmi.tx_type];
           }
+        }
+#else
+        if (supertx_size < TX_32X32 &&
+            !xd->mi[0]->mbmi.skip) {
+          ++td->counts->inter_ext_tx[supertx_size][xd->mi[0]->mbmi.tx_type];
         }
 #endif  // CONFIG_EXT_TX
       }
@@ -3135,10 +3112,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
         sum_rdc.rdcost =
             RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
         if (is_inter_mode(pc_tree->leaf_split[0]->mic.mbmi.mode)) {
-#if CONFIG_EXT_TX
           TX_TYPE best_tx = DCT_DCT;
-#endif
-
           tmp_rate = sum_rate_nocoef;
           tmp_dist = 0;
 #if CONFIG_VAR_TX
@@ -3151,9 +3125,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_VAR_TX
           rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                         &tmp_rate, &tmp_dist,
-#if CONFIG_EXT_TX
                         &best_tx,
-#endif
                         pc_tree);
 
           tmp_rate += vp10_cost_bit(
@@ -3166,9 +3138,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
             sum_rdc.rate = tmp_rate;
             sum_rdc.dist = tmp_dist;
             update_supertx_param_sb(cpi, td, mi_row, mi_col, bsize,
-#if CONFIG_EXT_TX
                                     best_tx,
-#endif
                                     supertx_size, pc_tree);
           }
         }
@@ -3235,9 +3205,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
             RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
 
         if (!check_intra_sb(cpi, tile_info, mi_row, mi_col, bsize, pc_tree)) {
-#if CONFIG_EXT_TX
           TX_TYPE best_tx = DCT_DCT;
-#endif
 
           tmp_rate = sum_rate_nocoef;
           tmp_dist = 0;
@@ -3251,9 +3219,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_VAR_TX
           rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                         &tmp_rate, &tmp_dist,
-#if CONFIG_EXT_TX
                         &best_tx,
-#endif
                         pc_tree);
 
           tmp_rate += vp10_cost_bit(
@@ -3266,9 +3232,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
             sum_rdc.rate = tmp_rate;
             sum_rdc.dist = tmp_dist;
             update_supertx_param_sb(cpi, td, mi_row, mi_col, bsize,
-#if CONFIG_EXT_TX
                                     best_tx,
-#endif
                                     supertx_size, pc_tree);
           }
         }
@@ -3383,10 +3347,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
 
       if (!check_intra_sb(cpi, tile_info, mi_row, mi_col, bsize, pc_tree)) {
-#if CONFIG_EXT_TX
         TX_TYPE best_tx = DCT_DCT;
-#endif
-
         tmp_rate = sum_rate_nocoef;
         tmp_dist = 0;
 #if CONFIG_VAR_TX
@@ -3398,9 +3359,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_VAR_TX
         rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                       &tmp_rate, &tmp_dist,
-#if CONFIG_EXT_TX
                       &best_tx,
-#endif
                       pc_tree);
 
         tmp_rate += vp10_cost_bit(
@@ -3413,9 +3372,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
           sum_rdc.rate = tmp_rate;
           sum_rdc.dist = tmp_dist;
           update_supertx_param_sb(cpi, td, mi_row, mi_col, bsize,
-#if CONFIG_EXT_TX
                                   best_tx,
-#endif
                                   supertx_size, pc_tree);
         }
       }
@@ -3518,9 +3475,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
 
       if (!check_intra_sb(cpi, tile_info, mi_row, mi_col, bsize, pc_tree)) {
-#if CONFIG_EXT_TX
         TX_TYPE best_tx = DCT_DCT;
-#endif
 
         tmp_rate = sum_rate_nocoef;
         tmp_dist = 0;
@@ -3533,9 +3488,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_VAR_TX
         rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                       &tmp_rate, &tmp_dist,
-#if CONFIG_EXT_TX
                       &best_tx,
-#endif
                       pc_tree);
 
         tmp_rate += vp10_cost_bit(
@@ -3548,9 +3501,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
           sum_rdc.rate = tmp_rate;
           sum_rdc.dist = tmp_dist;
           update_supertx_param_sb(cpi, td, mi_row, mi_col, bsize,
-#if CONFIG_EXT_TX
                                   best_tx,
-#endif
                                   supertx_size, pc_tree);
         }
       }
@@ -5107,9 +5058,7 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
                           const TileInfo *const tile,
                           int mi_row, int mi_col, BLOCK_SIZE bsize,
                           int *tmp_rate, int64_t *tmp_dist,
-#if CONFIG_EXT_TX
                           TX_TYPE *best_tx,
-#endif  // CONFIG_EXT_TX
                           PC_TREE *pc_tree) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
@@ -5120,14 +5069,14 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   uint8_t *dst_buf[3];
   int dst_stride[3];
   TX_SIZE tx_size;
-#if CONFIG_EXT_TX
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   TX_TYPE tx_type, best_tx_nostx = xd->mi[0]->mbmi.tx_type;
+#if CONFIG_EXT_TX
   int ext_tx_set;
+#endif  // CONFIG_EXT_TX
   int tmp_rate_tx = 0, skip_tx = 0;
   int64_t tmp_dist_tx = 0, rd_tx, bestrd_tx = INT64_MAX;
   uint8_t tmp_zcoeff_blk = 0;
-#endif  // CONFIG_EXT_TX
 
   update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, bsize, 0, pc_tree);
   vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
@@ -5140,9 +5089,7 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
                      0, bsize, bsize, dst_buf, dst_stride, pc_tree);
 
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
-#if CONFIG_EXT_TX
   *best_tx = DCT_DCT;
-#endif
 
   // chroma
   skippable_uv = 1;
@@ -5171,22 +5118,29 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   vp10_subtract_plane(x, bsize, 0);
 #if CONFIG_EXT_TX
   ext_tx_set = get_ext_tx_set(tx_size, bsize, 1);
+#endif  // CONFIG_EXT_TX
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
+#if CONFIG_EXT_TX
     if (!ext_tx_used_inter[ext_tx_set][tx_type])
       continue;
-    mbmi->tx_type = tx_type;
     if (ext_tx_set == 1 &&
-        mbmi->tx_type >= DST_ADST && mbmi->tx_type < IDTX &&
-        *best_tx == DCT_DCT) {
+        tx_type >= DST_ADST && tx_type < IDTX && *best_tx == DCT_DCT) {
       tx_type = IDTX - 1;
-      break;
+      continue;
     }
+#else
+    if (tx_size >= TX_32X32 && tx_type != DCT_DCT)
+      continue;
+#endif  // CONFIG_EXT_TX
+    mbmi->tx_type = tx_type;
     vp10_txfm_rd_in_plane_supertx(x,
 #if CONFIG_VAR_TX
                                   cpi,
 #endif
                                   &this_rate, &this_dist, &pnskip,
                                   &pnsse, INT64_MAX, 0, bsize, tx_size, 0);
+
+#if CONFIG_EXT_TX
     if (get_ext_tx_types(tx_size, bsize, 1) > 1 &&
         !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
         this_rate != INT_MAX) {
@@ -5194,6 +5148,13 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
         this_rate += cpi->inter_tx_type_costs[ext_tx_set]
             [mbmi->tx_size][mbmi->tx_type];
     }
+#else
+    if (tx_size < TX_32X32 &&
+        !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
+        this_rate != INT_MAX) {
+      this_rate += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
+    }
+#endif  // CONFIG_EXT_TX
     *tmp_rate = rate_uv + this_rate;
     *tmp_dist = dist_uv + this_dist;
     sse = sse_uv + pnsse;
@@ -5228,34 +5189,5 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   *tmp_dist = tmp_dist_tx;
   x->skip = skip_tx;
   xd->mi[0]->mbmi.tx_type = best_tx_nostx;
-
-#else   // CONFIG_EXT_TX
-
-    vp10_txfm_rd_in_plane_supertx(x,
-#if CONFIG_VAR_TX
-                                  cpi,
-#endif
-                                  &this_rate, &this_dist, &pnskip, &pnsse,
-                                  INT64_MAX, 0, bsize, tx_size, 0);
-    *tmp_rate = rate_uv + this_rate;
-    *tmp_dist = dist_uv + this_dist;
-    sse = sse_uv + pnsse;
-    skippable = skippable_uv && pnskip;
-    if (skippable) {
-      *tmp_rate = vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
-      x->skip = 1;
-    } else {
-      if (RDCOST(x->rdmult, x->rddiv, *tmp_rate, *tmp_dist)
-          < RDCOST(x->rdmult, x->rddiv, 0, sse)) {
-        *tmp_rate += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
-        x->skip = 0;
-      } else {
-        *tmp_dist = sse;
-        *tmp_rate = vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
-        x->skip = 1;
-      }
-    }
-    *tmp_rate += base_rate;
-#endif  // CONFIG_EXT_TX
 }
 #endif  // CONFIG_SUPERTX
