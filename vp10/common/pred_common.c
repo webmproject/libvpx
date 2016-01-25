@@ -17,8 +17,8 @@
 int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // Note:
   // The mode info data structure has a one element border above and to the
-  // left of the entries correpsonding to real macroblocks.
-  // The prediction flags in these dummy entries are initialised to 0.
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
   const int left_type = xd->left_available && is_inter_block(left_mbmi) ?
                             left_mbmi->interp_filter : SWITCHABLE_FILTERS;
@@ -70,8 +70,8 @@ int vp10_get_reference_mode_context(const VP10_COMMON *cm,
   const int has_left = xd->left_available;
   // Note:
   // The mode info data structure has a one element border above and to the
-  // left of the entries correpsonding to real macroblocks.
-  // The prediction flags in these dummy entries are initialised to 0.
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
   if (has_above && has_left) {  // both edges available
     if (!has_second_ref(above_mbmi) && !has_second_ref(left_mbmi))
       // neither edge uses comp pred (0/1)
@@ -114,8 +114,8 @@ int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
 
   // Note:
   // The mode info data structure has a one element border above and to the
-  // left of the entries correpsonding to real macroblocks.
-  // The prediction flags in these dummy entries are initialised to 0.
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
   const int fix_ref_idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
   const int var_ref_idx = !fix_ref_idx;
 
@@ -194,8 +194,8 @@ int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   const int has_left = xd->left_available;
   // Note:
   // The mode info data structure has a one element border above and to the
-  // left of the entries correpsonding to real macroblocks.
-  // The prediction flags in these dummy entries are initialised to 0.
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
   if (has_above && has_left) {  // both edges available
     const int above_intra = !is_inter_block(above_mbmi);
     const int left_intra = !is_inter_block(left_mbmi);
@@ -261,8 +261,8 @@ int vp10_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
 
   // Note:
   // The mode info data structure has a one element border above and to the
-  // left of the entries correpsonding to real macroblocks.
-  // The prediction flags in these dummy entries are initialised to 0.
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
   if (has_above && has_left) {  // both edges available
     const int above_intra = !is_inter_block(above_mbmi);
     const int left_intra = !is_inter_block(left_mbmi);
