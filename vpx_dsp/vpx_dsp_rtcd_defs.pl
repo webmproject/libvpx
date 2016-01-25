@@ -1156,10 +1156,10 @@ add_proto qw/void vpx_sad8x4x4d/, "const uint8_t *src_ptr, int src_stride, const
 specialize qw/vpx_sad8x4x4d msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_sad4x8x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array";
-specialize qw/vpx_sad4x8x4d msa/, "$sse_x86inc";
+specialize qw/vpx_sad4x8x4d msa/, "$sse2_x86inc";
 
 add_proto qw/void vpx_sad4x4x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array";
-specialize qw/vpx_sad4x4x4d msa/, "$sse_x86inc";
+specialize qw/vpx_sad4x4x4d msa/, "$sse2_x86inc";
 
 #
 # Structured Similarity (SSIM)
