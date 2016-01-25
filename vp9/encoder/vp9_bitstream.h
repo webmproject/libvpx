@@ -22,12 +22,18 @@ extern "C" {
 void vp9_entropy_mode_init();
 
 #if CONFIG_ROW_TILE
-#define ONE_BYTE_LIMIT    255
-#define TWO_BYTE_LIMIT    65535
-#define THREE_BYTE_LIMIT  16777215
-#define ONE_BYTE_THRESH   (ONE_BYTE_LIMIT - (ONE_BYTE_LIMIT >> 2))
-#define TWO_BYTE_THRESH   (TWO_BYTE_LIMIT - (TWO_BYTE_LIMIT >> 2))
-#define THREE_BYTE_THRESH (THREE_BYTE_LIMIT - (THREE_BYTE_LIMIT >> 2))
+// In the tile header, 1 bit is used for TCM, and the rest bits are used for
+// TDS. But, no TCM bit in tile column header.
+// type 0: tile header; type 1: tile column header.
+#define ONE_BYTE_LIMIT(type)    ((type) ? 255 : 127)
+#define TWO_BYTE_LIMIT(type)    ((type) ? 65535 : 32767)
+#define THREE_BYTE_LIMIT(type)  ((type) ? 16777215 : 8388607)
+#define ONE_BYTE_THRESH(type) \
+  (ONE_BYTE_LIMIT(type) - (ONE_BYTE_LIMIT(type) >> 2))
+#define TWO_BYTE_THRESH(type) \
+  (TWO_BYTE_LIMIT(type) - (TWO_BYTE_LIMIT(type) >> 2))
+#define THREE_BYTE_THRESH(type) \
+  (THREE_BYTE_LIMIT(type) - (THREE_BYTE_LIMIT(type) >> 2))
 
 typedef void (*MemPut)(void *, MEM_VALUE_T);
 int vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size,
