@@ -5424,13 +5424,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     vp10_subtract_plane(x, bsize, 0);
 #if CONFIG_VAR_TX
     if (cm->tx_mode == TX_MODE_SELECT || xd->lossless[mbmi->segment_id]) {
-#if CONFIG_EXT_TX
       select_tx_type_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                          bsize, ref_best_rd);
-#else
-      inter_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
-                      bsize, ref_best_rd);
-#endif  // CONFIG_EXT_TX
     } else {
       int idx, idy;
       super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
