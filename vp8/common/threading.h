@@ -24,7 +24,7 @@ extern "C" {
 /* Win32 */
 #include <process.h>
 #include <windows.h>
-#define THREAD_FUNCTION DWORD WINAPI
+#define THREAD_FUNCTION unsigned int __stdcall
 #define THREAD_FUNCTION_RETURN DWORD
 #define THREAD_SPECIFIC_INDEX DWORD
 #define pthread_t HANDLE
