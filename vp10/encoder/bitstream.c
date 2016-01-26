@@ -1124,8 +1124,12 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
           &ext_tx_encodings[mbmi->tx_type]);
     }
   } else {
-    if (!mbmi->skip)
-      assert(mbmi->tx_type == DCT_DCT);
+    if (!mbmi->skip) {
+#if CONFIG_SUPERTX
+      if (!supertx_enabled)
+#endif  // CONFIG_SUPERTX
+        assert(mbmi->tx_type == DCT_DCT);
+    }
   }
 #endif  // CONFIG_EXT_TX
 }
