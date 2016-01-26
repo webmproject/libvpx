@@ -574,6 +574,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
       pt = get_coef_context(nb, token_cache, c);
       v = qcoeff[scan[c]];
     }
+    assert(c < eob);
 
     vp10_get_token_extra(v, &token, &extra);
 

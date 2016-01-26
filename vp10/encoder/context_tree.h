@@ -88,7 +88,9 @@ typedef struct PC_TREE {
     PICK_MODE_CONTEXT *leaf_split[4];
   };
 #ifdef CONFIG_SUPERTX
-  PICK_MODE_CONTEXT super_tx;
+  PICK_MODE_CONTEXT horizontal_supertx;
+  PICK_MODE_CONTEXT vertical_supertx;
+  PICK_MODE_CONTEXT split_supertx;
 #endif
 } PC_TREE;
 

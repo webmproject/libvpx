@@ -1336,6 +1336,7 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
   PARTITION_TYPE partition = pc_tree->partitioning;
   BLOCK_SIZE subsize = get_subsize(bsize, partition);
   int i;
+  PICK_MODE_CONTEXT *pmc = NULL;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -1355,6 +1356,7 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
         update_state_supertx(cpi, td, &pc_tree->vertical[1],
                              mi_row, mi_col + hbs, subsize, output_enabled);
       }
+      pmc = &pc_tree->vertical_supertx;
       break;
     case PARTITION_HORZ:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
@@ -1365,6 +1367,7 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
         update_state_supertx(cpi, td, &pc_tree->horizontal[1], mi_row + hbs,
                              mi_col, subsize, output_enabled);
       }
+      pmc = &pc_tree->horizontal_supertx;
       break;
     case PARTITION_SPLIT:
       if (bsize == BLOCK_8X8) {
@@ -1385,16 +1388,25 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
         update_state_sb_supertx(cpi, td, tile, mi_row + hbs, mi_col + hbs,
                                 subsize, output_enabled, pc_tree->split[3]);
       }
+      pmc = &pc_tree->split_supertx;
       break;
     default:
       assert(0);
   }
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    p[i].coeff = (&pc_tree->super_tx)->coeff_pbuf[i][1];
-    p[i].qcoeff = (&pc_tree->super_tx)->qcoeff_pbuf[i][1];
-    pd[i].dqcoeff = (&pc_tree->super_tx)->dqcoeff_pbuf[i][1];
-    p[i].eobs = (&pc_tree->super_tx)->eobs_pbuf[i][1];
+    if (pmc != NULL) {
+      p[i].coeff = pmc->coeff_pbuf[i][1];
+      p[i].qcoeff = pmc->qcoeff_pbuf[i][1];
+      pd[i].dqcoeff = pmc->dqcoeff_pbuf[i][1];
+      p[i].eobs = pmc->eobs_pbuf[i][1];
+    } else {
+      // These should never be used
+      p[i].coeff = NULL;
+      p[i].qcoeff = NULL;
+      pd[i].dqcoeff = NULL;
+      p[i].eobs = NULL;
+    }
   }
 }
 
@@ -2012,7 +2024,8 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
 
       set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
       if (!x->skip) {
-        xd->mi[0]->mbmi.skip = 1;
+        // TODO(geza.lore): Investigate if this can be relaxed
+        x->skip_recode = 0;
         vp10_encode_sb_supertx(x, bsize);
         vp10_tokenize_sb_supertx(cpi, td, tp, !output_enabled, bsize);
       } else {

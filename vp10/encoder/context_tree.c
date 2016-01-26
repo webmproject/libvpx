@@ -82,7 +82,9 @@ static void alloc_tree_contexts(VP10_COMMON *cm, PC_TREE *tree,
   alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[0]);
   alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[0]);
 #ifdef CONFIG_SUPERTX
-  alloc_mode_context(cm, num_4x4_blk, &tree->super_tx);
+  alloc_mode_context(cm, num_4x4_blk, &tree->horizontal_supertx);
+  alloc_mode_context(cm, num_4x4_blk, &tree->vertical_supertx);
+  alloc_mode_context(cm, num_4x4_blk, &tree->split_supertx);
 #endif
 
   if (num_4x4_blk > 4) {
@@ -101,7 +103,9 @@ static void free_tree_contexts(PC_TREE *tree) {
   free_mode_context(&tree->vertical[0]);
   free_mode_context(&tree->vertical[1]);
 #ifdef CONFIG_SUPERTX
-  free_mode_context(&tree->super_tx);
+  free_mode_context(&tree->horizontal_supertx);
+  free_mode_context(&tree->vertical_supertx);
+  free_mode_context(&tree->split_supertx);
 #endif
 }
 
