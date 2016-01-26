@@ -500,6 +500,12 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi) {
   else
     cpi->rc.rc_1_frame = 0;
 
+  // Turn off oscilation detection in the case of massive overshoot.
+  if (cpi->rc.rc_1_frame == -1 && cpi->rc.rc_2_frame == 1 &&
+      correction_factor > 1000) {
+    cpi->rc.rc_2_frame = 0;
+  }
+
   if (correction_factor > 102) {
     // We are not already at the worst allowable quality
     correction_factor = (int)(100 + ((correction_factor - 100) *
