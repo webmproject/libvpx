@@ -4932,7 +4932,6 @@ static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
                xd->mb_to_top_edge - LEFT_TOP_MARGIN,
                xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
-
 static INTERP_FILTER predict_interp_filter(const VP10_COMP *cpi,
                                            const MACROBLOCK *x,
                                            const BLOCK_SIZE bsize,
@@ -4942,19 +4941,17 @@ static INTERP_FILTER predict_interp_filter(const VP10_COMP *cpi,
                                            (*single_filter)[MAX_REF_FRAMES]
                                            ) {
   INTERP_FILTER best_filter = SWITCHABLE;
-
   const VP10_COMMON *cm = &cpi->common;
   const MACROBLOCKD *xd = &x->e_mbd;
   int bsl = mi_width_log2_lookup[bsize];
   int pred_filter_search = cpi->sf.cb_pred_filter_search ?
       (((mi_row + mi_col) >> bsl) +
-       get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;
+          get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   const int is_comp_pred = has_second_ref(mbmi);
   const int this_mode = mbmi->mode;
   int refs[2] = { mbmi->ref_frame[0],
-    (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
-
+      (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
   if (pred_filter_search) {
     INTERP_FILTER af = SWITCHABLE, lf = SWITCHABLE;
     if (xd->up_available)
@@ -5053,6 +5050,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                  int *disable_skip,
                                  int_mv (*mode_mv)[MAX_REF_FRAMES],
                                  int mi_row, int mi_col,
+#if CONFIG_OBMC
+                                 uint8_t *dst_buf1[3],
+                                 int dst_stride1[3],
+                                 uint8_t *dst_buf2[3],
+                                 int dst_stride2[3],
+#endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
                                  int_mv single_newmvs[2][MAX_REF_FRAMES],
 #else
@@ -5088,6 +5091,24 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #else
   DECLARE_ALIGNED(16, uint8_t, tmp_buf[MAX_MB_PLANE * 64 * 64]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_OBMC
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint16_t, tmp_buf1_16[MAX_MB_PLANE * 64 * 64]);
+  uint8_t *tmp_buf1;
+  uint8_t *obmc_tmp_buf[3];
+#else
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * 64 * 64]);
+  uint8_t *obmc_tmp_buf[3] = {tmp_buf1, tmp_buf1 + 4096, tmp_buf1 + 8192};
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  int obmc_tmp_stride[3] = {64, 64, 64};
+  int best_obmc_flag = 0;
+  uint8_t tmp_skip_txfm[MAX_MB_PLANE << 2] = {0};
+  int64_t tmp_bsse[MAX_MB_PLANE << 2] = {0};
+  int64_t rdobmc;
+  int skip_txfm_sb_obmc = 0;
+  int64_t skip_sse_sb_obmc = INT64_MAX;
+  int allow_obmc = is_obmc_allowed(mbmi);
+#endif  // CONFIG_OBMC
   int pred_exists = 0;
   int intpel_mv;
   int64_t rd, tmp_rd, best_rd = INT64_MAX;
@@ -5104,6 +5125,9 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int64_t distortion_y = 0, distortion_uv = 0;
   int16_t mode_ctx = mbmi_ext->mode_context[refs[0]];
 
+#if CONFIG_OBMC
+  tmp_rd = 0;
+#endif  // CONFIG_OBMC
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
   if (is_comp_pred)
@@ -5117,9 +5141,20 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     tmp_buf = CONVERT_TO_BYTEPTR(tmp_buf16);
+#if CONFIG_OBMC
+    tmp_buf1 = CONVERT_TO_BYTEPTR(tmp_buf1_16);
+#endif  // CONFIG_OBMC
   } else {
     tmp_buf = (uint8_t *)tmp_buf16;
+#if CONFIG_OBMC
+    tmp_buf1 = (uint8_t *)tmp_buf1_16;
+#endif  // CONFIG_OBMC
   }
+#if CONFIG_OBMC
+  obmc_tmp_buf[0] = tmp_buf1;
+  obmc_tmp_buf[1] = tmp_buf1 + 4096;
+  obmc_tmp_buf[2] = tmp_buf1 + 8192;
+#endif  // CONFIG_OBMC
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   if (is_comp_pred) {
@@ -5302,9 +5337,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (this_mode == NEARMV && is_comp_pred) {
     uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
     if (mbmi_ext->ref_mv_count[ref_frame_type] > 1) {
-      int ref_mv_idx = mbmi->ref_mv_idx + 1;
-      cur_mv[0] = mbmi_ext->ref_mv_stack[ref_frame_type][ref_mv_idx].this_mv;
-      cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][ref_mv_idx].comp_mv;
+      cur_mv[0] = mbmi_ext->ref_mv_stack[ref_frame_type][1].this_mv;
+      cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][1].comp_mv;
 
       for (i = 0; i < 2; ++i) {
         lower_mv_precision(&cur_mv[i].as_mv, cm->allow_high_precision_mv);
@@ -5383,6 +5417,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       int64_t rs_rd;
       int tmp_skip_sb = 0;
       int64_t tmp_skip_sse = INT64_MAX;
+#if CONFIG_OBMC
+      int obmc_flag = 0;
+      int tmp_skip_sb_obmc = 0;
+      int64_t tmp_skip_sse_obmc = INT64_MAX;
+#endif  // CONFIG_OBMC
 
       mbmi->interp_filter = i;
       rs = vp10_get_switchable_rate(cpi, xd);
@@ -5395,10 +5434,21 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
             VPXMIN(filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
         if (cm->interp_filter == SWITCHABLE)
           rd += rs_rd;
+#if CONFIG_OBMC
+        if (allow_obmc) {
+          obmc_flag = best_obmc_flag;
+          rd += RDCOST(x->rdmult, x->rddiv,
+                       cpi->obmc_cost[bsize][obmc_flag], 0);
+        }
+#endif  // CONFIG_OBMC
         *mask_filter = VPXMAX(*mask_filter, rd);
       } else {
         int rate_sum = 0;
         int64_t dist_sum = 0;
+#if CONFIG_OBMC
+        int rate_sum_obmc = 0;
+        int64_t dist_sum_obmc = 0;
+#endif  // CONFIG_OBMC
         if (i > 0 && cpi->sf.adaptive_interp_filter_search &&
             (cpi->sf.interp_filter_search_mask & (1 << i))) {
           rate_sum = INT_MAX;
@@ -5423,6 +5473,40 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                         &tmp_skip_sb, &tmp_skip_sse);
 
         rd = RDCOST(x->rdmult, x->rddiv, rate_sum, dist_sum);
+#if CONFIG_OBMC
+        if (allow_obmc) {
+          rd += RDCOST(x->rdmult, x->rddiv, cpi->obmc_cost[bsize][0], 0);
+          memcpy(tmp_skip_txfm, x->skip_txfm, sizeof(tmp_skip_txfm));
+          memcpy(tmp_bsse, x->bsse, sizeof(tmp_bsse));
+
+          vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 1,
+                                           obmc_tmp_buf, obmc_tmp_stride,
+                                           dst_buf1, dst_stride1,
+                                           dst_buf2, dst_stride2);
+          for (j = 0; j < MAX_MB_PLANE; ++j) {
+            xd->plane[j].dst.buf = obmc_tmp_buf[j];
+            xd->plane[j].dst.stride = obmc_tmp_stride[j];
+          }
+          model_rd_for_sb(cpi, bsize, x, xd, &rate_sum_obmc, &dist_sum_obmc,
+                          &tmp_skip_sb_obmc, &tmp_skip_sse_obmc);
+          rdobmc = RDCOST(x->rdmult, x->rddiv,
+                          rate_sum_obmc + cpi->obmc_cost[bsize][1],
+                          dist_sum_obmc);
+
+          if ((double)rdobmc <= 0.99 * (double)rd) {
+            obmc_flag = 1;
+            rd = rdobmc;
+            rate_sum = rate_sum_obmc;
+            dist_sum = dist_sum_obmc;
+            tmp_skip_sb = tmp_skip_sb_obmc;
+            tmp_skip_sse = tmp_skip_sse_obmc;
+          } else {
+            obmc_flag = 0;
+            memcpy(x->skip_txfm, tmp_skip_txfm, sizeof(tmp_skip_txfm));
+            memcpy(x->bsse, tmp_bsse, sizeof(tmp_bsse));
+          }
+        }
+#endif  // CONFIG_OBMC
         filter_cache[i] = rd;
         filter_cache[SWITCHABLE_FILTERS] =
             VPXMIN(filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
@@ -5447,6 +5531,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       if (newbest) {
         best_rd = rd;
         best_filter = mbmi->interp_filter;
+#if CONFIG_OBMC
+          if (allow_obmc)
+            best_obmc_flag = obmc_flag;
+#endif  // CONFIG_OBMC
         if (cm->interp_filter == SWITCHABLE && i &&
             !(intpel_mv && IsInterpolatingFilter(i)))
           best_needs_copy = !best_needs_copy;
@@ -5471,8 +5559,18 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
       cm->interp_filter : best_filter;
   rs = cm->interp_filter == SWITCHABLE ? vp10_get_switchable_rate(cpi, xd) : 0;
+#if CONFIG_OBMC
+  if (allow_obmc)
+    mbmi->obmc = best_obmc_flag;
+  else
+    mbmi->obmc = 0;
+#endif  // CONFIG_OBMC
 
+#if CONFIG_OBMC
+  if (pred_exists && !mbmi->obmc) {
+#else
   if (pred_exists) {
+#endif  // CONFIG_OBMC
     if (best_needs_copy) {
       // again temporarily set the buffers to local memory to prevent a memcpy
       for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -5481,16 +5579,77 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       }
     }
     rd = tmp_rd + RDCOST(x->rdmult, x->rddiv, rs, 0);
+#if CONFIG_OBMC
+    if (allow_obmc)
+      rd += RDCOST(x->rdmult, x->rddiv,
+                   cpi->obmc_cost[bsize][mbmi->obmc], 0);
+#endif  // CONFIG_OBMC
   } else {
     int tmp_rate;
     int64_t tmp_dist;
+#if CONFIG_OBMC
+    int tmp_rate_obmc;
+    int64_t tmp_dist_obmc;
+#endif  // CONFIG_OBMC
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear) is indicated at the frame level, or
     // skip condition holds.
     vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+#if CONFIG_OBMC
+    if (mbmi->obmc) {
+      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 1,
+                                       obmc_tmp_buf, obmc_tmp_stride,
+                                       dst_buf1, dst_stride1,
+                                       dst_buf2, dst_stride2);
+      for (i = 0; i < MAX_MB_PLANE; ++i) {
+        xd->plane[i].dst.buf = obmc_tmp_buf[i];
+        xd->plane[i].dst.stride = obmc_tmp_stride[i];
+      }
+      model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist,
+                      &skip_txfm_sb, &skip_sse_sb);
+      rd = RDCOST(x->rdmult, x->rddiv,
+                  rs + tmp_rate + cpi->obmc_cost[bsize][1],
+                  tmp_dist);
+    } else {
+#endif  // CONFIG_OBMC
     model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist,
                     &skip_txfm_sb, &skip_sse_sb);
     rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
+#if CONFIG_OBMC
+      if (allow_obmc) {
+        rd += RDCOST(x->rdmult, x->rddiv, cpi->obmc_cost[bsize][0], 0);
+        memcpy(tmp_skip_txfm, x->skip_txfm, sizeof(tmp_skip_txfm));
+        memcpy(tmp_bsse, x->bsse, sizeof(tmp_bsse));
+
+        vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 1,
+                                         obmc_tmp_buf, obmc_tmp_stride,
+                                         dst_buf1, dst_stride1,
+                                         dst_buf2, dst_stride2);
+        for (i = 0; i < MAX_MB_PLANE; ++i) {
+          xd->plane[i].dst.buf = obmc_tmp_buf[i];
+          xd->plane[i].dst.stride = obmc_tmp_stride[i];
+        }
+        model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate_obmc, &tmp_dist_obmc,
+                        &skip_txfm_sb_obmc, &skip_sse_sb_obmc);
+        rdobmc = RDCOST(x->rdmult, x->rddiv,
+                        rs + tmp_rate_obmc + cpi->obmc_cost[bsize][1],
+                        tmp_dist_obmc);
+        if ((double)rdobmc <= 0.99 * (double)rd) {
+          mbmi->obmc = 1;
+          rd = rdobmc;
+          skip_txfm_sb = skip_txfm_sb_obmc;
+          skip_sse_sb = skip_sse_sb_obmc;
+        } else {
+          mbmi->obmc = 0;
+          memcpy(x->skip_txfm, tmp_skip_txfm, sizeof(tmp_skip_txfm));
+          memcpy(x->bsse, tmp_bsse, sizeof(tmp_bsse));
+          restore_dst_buf(xd, orig_dst, orig_dst_stride);
+        }
+      } else {
+        mbmi->obmc = 0;
+      }
+    }
+#endif  // CONFIG_OBMC
     memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
     memcpy(bsse, x->bsse, sizeof(bsse));
   }
@@ -5570,6 +5729,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
   if (cm->interp_filter == SWITCHABLE)
     *rate2 += rs;
+#if CONFIG_OBMC
+  if (allow_obmc)
+    *rate2 += cpi->obmc_cost[bsize][mbmi->obmc];
+#endif  // CONFIG_OBMC
 
   memcpy(x->skip_txfm, skip_txfm, sizeof(skip_txfm));
   memcpy(x->bsse, bsse, sizeof(bsse));
@@ -5916,6 +6079,39 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
+#if CONFIG_OBMC
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * 64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * 64 * 64]);
+#else
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * 64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * 64 * 64]);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  uint8_t *dst_buf1[3], *dst_buf2[3];
+  int dst_stride1[3] = {64, 64, 64};
+  int dst_stride2[3] = {64, 64, 64};
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    int len = sizeof(uint16_t);
+    dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
+    dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + 4096 * len);
+    dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + 8192 * len);
+    dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
+    dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + 4096 * len);
+    dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + 8192 * len);
+  } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  dst_buf1[0] = tmp_buf1;
+  dst_buf1[1] = tmp_buf1 + 4096;
+  dst_buf1[2] = tmp_buf1 + 8192;
+  dst_buf2[0] = tmp_buf2;
+  dst_buf2[1] = tmp_buf2 + 4096;
+  dst_buf2[2] = tmp_buf2 + 8192;
+#if CONFIG_VP9_HIGHBITDEPTH
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_OBMC
 
   vp10_zero(best_mbmode);
 
@@ -5987,6 +6183,14 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                       NULL, NULL, mbmi_ext->mode_context);
   }
 #endif
+
+#if CONFIG_OBMC
+  vp10_build_prediction_by_above_preds(cpi, xd, mi_row, mi_col, dst_buf1,
+                                       dst_stride1);
+  vp10_build_prediction_by_left_preds(cpi, xd, mi_row, mi_col, dst_buf2,
+                                      dst_stride2);
+  vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
+#endif  // CONFIG_OBMC
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     if (!(cpi->ref_frame_flags & flag_list[ref_frame])) {
@@ -6286,6 +6490,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
                                                           : cm->interp_filter;
     mbmi->mv[0].as_int = mbmi->mv[1].as_int = 0;
+#if CONFIG_OBMC
+    mbmi->obmc = 0;
+#endif  // CONFIG_OBMC
 
     x->skip = 0;
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
@@ -6450,6 +6657,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                   &rate_y, &rate_uv,
                                   &disable_skip, frame_mv,
                                   mi_row, mi_col,
+#if CONFIG_OBMC
+                                  dst_buf1, dst_stride1,
+                                  dst_buf2, dst_stride2,
+#endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
                                   single_newmvs,
 #else
@@ -6522,6 +6733,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                            &tmp_rate_y, &tmp_rate_uv,
                                            &dummy_disable_skip, frame_mv,
                                            mi_row, mi_col,
+#if CONFIG_OBMC
+                                           dst_buf1, dst_stride1,
+                                           dst_buf2, dst_stride2,
+#endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
                                            dummy_single_newmvs,
 #else
@@ -6671,6 +6886,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         }
         *returnrate_nocoef -= vp10_cost_bit(vp10_get_intra_inter_prob(cm, xd),
                                             mbmi->ref_frame[0] != INTRA_FRAME);
+#if CONFIG_OBMC
+        if (is_inter_block(mbmi) && is_obmc_allowed(mbmi))
+          *returnrate_nocoef -= cpi->obmc_cost[bsize][mbmi->obmc];
+#endif  // CONFIG_OBMC
 #endif  // CONFIG_SUPERTX
         rd_cost->dist = distortion2;
         rd_cost->rdcost = this_rd;
@@ -7178,6 +7397,9 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_OBMC
+  mbmi->obmc = 0;
+#endif  // CONFIG_OBMC
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     filter_cache[i] = INT64_MAX;
@@ -7896,3 +8118,167 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   store_coding_context(x, ctx, best_ref_index,
                        best_pred_diff, best_filter_diff, 0);
 }
+
+#if CONFIG_OBMC
+void vp10_build_prediction_by_above_preds(VP10_COMP *cpi,
+                                          MACROBLOCKD *xd,
+                                          int mi_row, int mi_col,
+                                          uint8_t *tmp_buf[MAX_MB_PLANE],
+                                          int tmp_stride[MAX_MB_PLANE]) {
+  VP10_COMMON *const cm = &cpi->common;
+  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  int i, j, mi_step, ref;
+
+  if (mi_row == 0)
+    return;
+
+  for (i = 0; i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {
+    int mi_row_offset = -1;
+    int mi_col_offset = i;
+    int mi_x, mi_y, bw, bh;
+    MODE_INFO *above_mi = xd->mi[mi_col_offset +
+                                 mi_row_offset * xd->mi_stride];
+    MB_MODE_INFO *above_mbmi = &above_mi->mbmi;
+
+    mi_step = VPXMIN(xd->n8_w,
+                     num_8x8_blocks_wide_lookup[above_mbmi->sb_type]);
+
+    if (!is_inter_block(above_mbmi))
+      continue;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      struct macroblockd_plane *const pd = &xd->plane[j];
+      setup_pred_plane(&pd->dst,
+                       tmp_buf[j], tmp_stride[j],
+                       0, i, NULL,
+                       pd->subsampling_x, pd->subsampling_y);
+    }
+    set_ref_ptrs(cm, xd, above_mbmi->ref_frame[0], above_mbmi->ref_frame[1]);
+    for (ref = 0; ref < 1 + has_second_ref(above_mbmi); ++ref) {
+      YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,
+                                                  above_mbmi->ref_frame[ref]);
+      assert(cfg != NULL);
+      vp10_setup_pre_planes(xd, ref, cfg, mi_row, mi_col + i,
+                            &xd->block_refs[ref]->sf);
+    }
+
+    xd->mb_to_left_edge   = -(((mi_col + i) * MI_SIZE) * 8);
+    mi_x = (mi_col + i) << MI_SIZE_LOG2;
+    mi_y = mi_row << MI_SIZE_LOG2;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      const struct macroblockd_plane *pd = &xd->plane[j];
+      bw = (mi_step * 8) >> pd->subsampling_x;
+      bh = VPXMAX((num_4x4_blocks_high_lookup[bsize] * 2) >> pd->subsampling_y,
+                  4);
+
+      if (above_mbmi->sb_type < BLOCK_8X8) {
+        const PARTITION_TYPE bp = BLOCK_8X8 - above_mbmi->sb_type;
+        const int have_vsplit = bp != PARTITION_HORZ;
+        const int have_hsplit = bp != PARTITION_VERT;
+        const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
+        const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
+        const int pw = 8 >> (have_vsplit | pd->subsampling_x);
+        int x, y;
+
+        for (y = 0; y < num_4x4_h; ++y)
+          for (x = 0; x < num_4x4_w; ++x) {
+            if ((bp == PARTITION_HORZ || bp == PARTITION_SPLIT)
+                && y == 0 && !pd->subsampling_y)
+              continue;
+
+            build_inter_predictors(xd, j, mi_col_offset, mi_row_offset,
+                                   y * 2 + x, bw, bh,
+                                   4 * x, 0, pw, bh, mi_x, mi_y);
+          }
+      } else {
+        build_inter_predictors(xd, j, mi_col_offset, mi_row_offset, 0,
+                               bw, bh, 0, 0, bw, bh, mi_x, mi_y);
+      }
+    }
+  }
+  xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
+}
+
+void vp10_build_prediction_by_left_preds(VP10_COMP *cpi,
+                                         MACROBLOCKD *xd,
+                                         int mi_row, int mi_col,
+                                         uint8_t *tmp_buf[MAX_MB_PLANE],
+                                         int tmp_stride[MAX_MB_PLANE]) {
+  VP10_COMMON *const cm = &cpi->common;
+  const TileInfo *const tile = &xd->tile;
+  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  int i, j, mi_step, ref;
+
+  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start) ||
+      (mi_col - 1) >= tile->mi_col_end)
+    return;
+
+  for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row); i += mi_step) {
+    int mi_row_offset = i;
+    int mi_col_offset = -1;
+    int mi_x, mi_y, bw, bh;
+    MODE_INFO *left_mi = xd->mi[mi_col_offset +
+                                mi_row_offset * xd->mi_stride];
+    MB_MODE_INFO *left_mbmi = &left_mi->mbmi;
+
+    mi_step = VPXMIN(xd->n8_h,
+                     num_8x8_blocks_high_lookup[left_mbmi->sb_type]);
+
+    if (!is_inter_block(left_mbmi))
+      continue;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      struct macroblockd_plane *const pd = &xd->plane[j];
+      setup_pred_plane(&pd->dst,
+                       tmp_buf[j], tmp_stride[j],
+                       i, 0, NULL,
+                       pd->subsampling_x, pd->subsampling_y);
+    }
+    set_ref_ptrs(cm, xd, left_mbmi->ref_frame[0], left_mbmi->ref_frame[1]);
+    for (ref = 0; ref < 1 + has_second_ref(left_mbmi); ++ref) {
+      YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,
+                                                     left_mbmi->ref_frame[ref]);
+      assert(cfg != NULL);
+      vp10_setup_pre_planes(xd, ref, cfg, mi_row + i, mi_col,
+                            &xd->block_refs[ref]->sf);
+    }
+
+    xd->mb_to_top_edge    = -(((mi_row + i) * MI_SIZE) * 8);
+    mi_x = mi_col << MI_SIZE_LOG2;
+    mi_y = (mi_row + i) << MI_SIZE_LOG2;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      const struct macroblockd_plane *pd = &xd->plane[j];
+      bw = VPXMAX((num_4x4_blocks_wide_lookup[bsize] * 2) >> pd->subsampling_x,
+                  4);
+      bh = (mi_step << MI_SIZE_LOG2) >> pd->subsampling_y;
+
+      if (left_mbmi->sb_type < BLOCK_8X8) {
+        const PARTITION_TYPE bp = BLOCK_8X8 - left_mbmi->sb_type;
+        const int have_vsplit = bp != PARTITION_HORZ;
+        const int have_hsplit = bp != PARTITION_VERT;
+        const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
+        const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
+        const int ph = 8 >> (have_hsplit | pd->subsampling_y);
+        int x, y;
+
+        for (y = 0; y < num_4x4_h; ++y)
+          for (x = 0; x < num_4x4_w; ++x) {
+            if ((bp == PARTITION_VERT || bp == PARTITION_SPLIT)
+                && x == 0 && !pd->subsampling_x)
+              continue;
+
+            build_inter_predictors(xd, j, mi_col_offset, mi_row_offset,
+                                   y * 2 + x, bw, bh,
+                                   0, 4 * y, bw, ph, mi_x, mi_y);
+          }
+      } else {
+        build_inter_predictors(xd, j, mi_col_offset, mi_row_offset, 0,
+                               bw, bh, 0, 0, bw, bh, mi_x, mi_y);
+      }
+    }
+  }
+  xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
+}
+#endif  // CONFIG_OBMC

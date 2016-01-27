@@ -778,6 +778,24 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 
+#if CONFIG_OBMC
+static int read_is_obmc_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
+                              vpx_reader *r) {
+  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  FRAME_COUNTS *counts = xd->counts;
+  int is_obmc;
+
+  if (is_obmc_allowed(&xd->mi[0]->mbmi)) {
+    is_obmc = vpx_read(r, cm->fc->obmc_prob[bsize]);
+    if (counts)
+      ++counts->obmc[bsize][is_obmc];
+    return is_obmc;
+  } else {
+    return 0;
+  }
+}
+#endif  // CONFIG_OBMC
+
 static INLINE INTERP_FILTER read_switchable_interp_filter(
     VP10_COMMON *const cm, MACROBLOCKD *const xd,
     vpx_reader *r) {
@@ -1016,7 +1034,12 @@ static void fpm_sync(void *const data, int mi_row) {
 static void read_inter_block_mode_info(VP10Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        MODE_INFO *const mi,
+#if CONFIG_OBMC && CONFIG_SUPERTX
+                                       int mi_row, int mi_col, vpx_reader *r,
+                                       int supertx_enabled) {
+#else
                                        int mi_row, int mi_col, vpx_reader *r) {
+#endif  // CONFIG_OBMC && CONFIG_SUPERTX
   VP10_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -1061,6 +1084,13 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                       ref_mvs[ref_frame],
                       mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
+
+#if CONFIG_OBMC
+#if CONFIG_SUPERTX
+  if (!supertx_enabled)
+#endif  // CONFIG_SUPERTX
+  mbmi->obmc = read_is_obmc_block(cm, xd, r);
+#endif  // CONFIG_OBMC
 
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
@@ -1365,14 +1395,19 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
     xd->mi[0]->mbmi.tx_size = xd->supertx_size;
     for (idy = 0; idy < height; ++idy)
       for (idx = 0; idx < width; ++idx)
-        xd->mi[0]->mbmi.inter_tx_size[(idy >> 1) * 8 + (idx >> 1)] = xd->supertx_size;
+        xd->mi[0]->mbmi.inter_tx_size[(idy >> 1) * 8 + (idx >> 1)] =
+            xd->supertx_size;
   }
 #endif  // CONFIG_VAR_TX
 #endif  // CONFIG_SUPERTX
 
   if (inter_block)
     read_inter_block_mode_info(pbi, xd,
+#if CONFIG_OBMC && CONFIG_SUPERTX
+                               mi, mi_row, mi_col, r, supertx_enabled);
+#else
                                mi, mi_row, mi_col, r);
+#endif  // CONFIG_OBMC && CONFIG_SUPERTX
   else
     read_intra_block_mode_info(cm, xd, mi, r);
 

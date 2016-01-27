@@ -479,6 +479,9 @@ typedef struct VP10_COMP {
   unsigned int inter_compound_mode_cost[INTER_MODE_CONTEXTS]
                                        [INTER_COMPOUND_MODES];
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_OBMC
+  int obmc_cost[BLOCK_SIZES][2];
+#endif  // CONFIG_OBMC
   int intra_uv_mode_cost[INTRA_MODES][INTRA_MODES];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];

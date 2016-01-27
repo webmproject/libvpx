@@ -228,6 +228,12 @@ static const vpx_prob default_inter_compound_mode_probs
 };
 #endif  // CONFIG_EXT_INTER
 
+#if CONFIG_OBMC
+static const vpx_prob default_obmc_prob[BLOCK_SIZES] = {
+    255, 255, 255, 151, 153, 144, 178, 165, 160, 207, 195, 168, 244,
+};
+#endif  // CONFIG_OBMC
+
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
   -DC_PRED, 2,                      /* 0 = DC_NODE */
@@ -1303,6 +1309,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #endif  // CONFIG_EXT_INTER
 #endif  // CONFIG_REF_MV
   vp10_copy(fc->inter_mode_probs, default_inter_mode_probs);
+#if CONFIG_OBMC
+  vp10_copy(fc->obmc_prob, default_obmc_prob);
+#endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
   vp10_copy(fc->inter_compound_mode_probs, default_inter_compound_mode_probs);
 #endif  // CONFIG_EXT_INTER
@@ -1382,6 +1391,12 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
     vpx_tree_merge_probs(vp10_inter_mode_tree, pre_fc->inter_mode_probs[i],
                 counts->inter_mode[i], fc->inter_mode_probs[i]);
 #endif
+
+#if CONFIG_OBMC
+  for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
+    fc->obmc_prob[i] = mode_mv_merge_probs(pre_fc->obmc_prob[i],
+                                           counts->obmc[i]);
+#endif  // CONFIG_OBMC
 
 #if CONFIG_SUPERTX
   for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {

@@ -177,7 +177,11 @@ static INLINE MV average_split_mvs(const struct macroblockd_plane *pd,
   return res;
 }
 
-void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
+void build_inter_predictors(MACROBLOCKD *xd, int plane,
+#if CONFIG_OBMC
+                            int mi_col_offset, int mi_row_offset,
+#endif  // CONFIG_OBMC
+                            int block,
                             int bw, int bh,
                             int x, int y, int w, int h,
                             int mi_x, int mi_y);
@@ -352,6 +356,19 @@ static INLINE int vp10_is_interp_needed(const MACROBLOCKD *const xd) {
   return !intpel_mv;
 }
 #endif  // CONFIG_EXT_INTERP
+
+#if CONFIG_OBMC
+void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
+                                      MACROBLOCKD *xd, int mi_row, int mi_col,
+                                      int use_tmp_dst_buf,
+                                      uint8_t *final_buf[MAX_MB_PLANE],
+                                      int final_stride[MAX_MB_PLANE],
+                                      uint8_t *tmp_buf1[MAX_MB_PLANE],
+                                      int tmp_stride1[MAX_MB_PLANE],
+                                      uint8_t *tmp_buf2[MAX_MB_PLANE],
+                                      int tmp_stride2[MAX_MB_PLANE]);
+#endif  // CONFIG_OBMC
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

@@ -995,6 +995,13 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
   } else {
     int16_t mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
     write_ref_frames(cm, xd, w);
+#if CONFIG_OBMC
+#if CONFIG_SUPERTX
+    if (!supertx_enabled)
+#endif  // CONFIG_SUPERTX
+    if (is_obmc_allowed(mbmi))
+      vpx_write(w, mbmi->obmc, cm->fc->obmc_prob[bsize]);
+#endif  // CONFIG_OBMC
 
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
@@ -2394,6 +2401,12 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 #if CONFIG_EXT_INTER
     update_inter_compound_mode_probs(cm, &header_bc);
 #endif  // CONFIG_EXT_INTER
+
+#if CONFIG_OBMC
+    for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
+      vp10_cond_prob_diff_update(&header_bc, &fc->obmc_prob[i],
+                                 counts->obmc[i]);
+#endif  // CONFIG_OBMC
 
     if (cm->interp_filter == SWITCHABLE)
       update_switchable_interp_probs(cm, &header_bc, counts);

@@ -167,6 +167,10 @@ typedef struct {
   INTRA_FILTER intra_filter;
 #endif  // CONFIG_EXT_INTRA
 
+#if CONFIG_OBMC
+  int8_t obmc;
+#endif  // CONFIG_OBMC
+
   int_mv mv[2];
   int_mv pred_mv[2];
 #if CONFIG_REF_MV
@@ -191,6 +195,12 @@ static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
 static INLINE int has_second_ref(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[1] > INTRA_FRAME;
 }
+
+#if CONFIG_OBMC
+static INLINE int is_obmc_allowed(const MB_MODE_INFO *mbmi) {
+  return (mbmi->sb_type >= BLOCK_8X8);
+}
+#endif  // CONFIG_OBMC
 
 PREDICTION_MODE vp10_left_block_mode(const MODE_INFO *cur_mi,
                                     const MODE_INFO *left_mi, int b);

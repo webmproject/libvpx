@@ -1801,6 +1801,13 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
                               [ref0 != GOLDEN_FRAME]++;
 #endif  // CONFIG_EXT_REFS
         }
+#if CONFIG_OBMC
+#if CONFIG_SUPERTX
+        if (!supertx_enabled)
+#endif  // CONFIG_SUPERTX
+        if (is_obmc_allowed(mbmi))
+          counts->obmc[mbmi->sb_type][mbmi->obmc]++;
+#endif  // CONFIG_OBMC
       }
     }
     if (inter_block &&
@@ -4420,6 +4427,55 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 
     vp10_build_inter_predictors_sbuv(xd, mi_row, mi_col,
                                      VPXMAX(bsize, BLOCK_8X8));
+
+#if CONFIG_OBMC
+    if (mbmi->obmc) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * 64 * 64]);
+      DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * 64 * 64]);
+#else
+      DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * 64 * 64]);
+      DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * 64 * 64]);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
+      int dst_stride1[MAX_MB_PLANE] = {64, 64, 64};
+      int dst_stride2[MAX_MB_PLANE] = {64, 64, 64};
+
+      assert(mbmi->sb_type >= BLOCK_8X8);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        int len = sizeof(uint16_t);
+        dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
+        dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + 4096 * len);
+        dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + 8192 * len);
+        dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
+        dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + 4096 * len);
+        dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + 8192 * len);
+      } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      dst_buf1[0] = tmp_buf1;
+      dst_buf1[1] = tmp_buf1 + 4096;
+      dst_buf1[2] = tmp_buf1 + 8192;
+      dst_buf2[0] = tmp_buf2;
+      dst_buf2[1] = tmp_buf2 + 4096;
+      dst_buf2[2] = tmp_buf2 + 8192;
+#if CONFIG_VP9_HIGHBITDEPTH
+      }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+      vp10_build_prediction_by_above_preds(cpi, xd, mi_row, mi_col, dst_buf1,
+                                           dst_stride1);
+      vp10_build_prediction_by_left_preds(cpi, xd, mi_row, mi_col, dst_buf2,
+                                          dst_stride2);
+      vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
+                            mi_row, mi_col);
+      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0, NULL, NULL,
+                                       dst_buf1, dst_stride1,
+                                       dst_buf2, dst_stride2);
+    }
+
+#endif  // CONFIG_OBMC
 
     vp10_encode_sb(x, VPXMAX(bsize, BLOCK_8X8));
 #if CONFIG_VAR_TX
