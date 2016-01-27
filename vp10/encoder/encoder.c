@@ -3695,10 +3695,10 @@ static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
       cpi->refresh_alt_ref_frame)
     return mask;
   for (ref = LAST_FRAME; ref <= ALTREF_FRAME; ++ref)
-    for (ifilter = EIGHTTAP; ifilter <= EIGHTTAP_SHARP; ++ifilter)
+    for (ifilter = EIGHTTAP; ifilter < SWITCHABLE_FILTERS; ++ifilter)
       ref_total[ref] += cpi->interp_filter_selected[ref][ifilter];
 
-  for (ifilter = EIGHTTAP; ifilter <= EIGHTTAP_SHARP; ++ifilter) {
+  for (ifilter = EIGHTTAP; ifilter < SWITCHABLE_FILTERS; ++ifilter) {
     if ((ref_total[LAST_FRAME] &&
         cpi->interp_filter_selected[LAST_FRAME][ifilter] == 0) &&
 #if CONFIG_EXT_REFS

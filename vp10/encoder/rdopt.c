@@ -7232,7 +7232,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
       mbmi->interp_filter = (cm->interp_filter == SWITCHABLE ?
                              tmp_best_filter : cm->interp_filter);
 
-
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear) is indicated at the frame level
