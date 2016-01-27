@@ -1941,15 +1941,24 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
   }
 }
 
-static void restore_context(MACROBLOCK *const x, int mi_row, int mi_col,
-                            ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
-                            ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
-                            PARTITION_CONTEXT sa[8], PARTITION_CONTEXT sl[8],
+
+typedef struct {
+  ENTROPY_CONTEXT a[16 * MAX_MB_PLANE];
+  ENTROPY_CONTEXT l[16 * MAX_MB_PLANE];
+  PARTITION_CONTEXT sa[8];
+  PARTITION_CONTEXT sl[8];
 #if CONFIG_VAR_TX
-                            TXFM_CONTEXT ta[8], TXFM_CONTEXT tl[8],
+  TXFM_CONTEXT *p_ta;
+  TXFM_CONTEXT *p_tl;
+  TXFM_CONTEXT ta[8];
+  TXFM_CONTEXT tl[8];
 #endif
-                            BLOCK_SIZE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
+} RD_SEARCH_MACROBLOCK_CONTEXT;
+
+static void restore_context(MACROBLOCK *x,
+                            const RD_SEARCH_MACROBLOCK_CONTEXT *ctx,
+                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
+  MACROBLOCKD *xd = &x->e_mbd;
   int p;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
@@ -1958,37 +1967,34 @@ static void restore_context(MACROBLOCK *const x, int mi_row, int mi_col,
   for (p = 0; p < MAX_MB_PLANE; p++) {
     memcpy(
         xd->above_context[p] + ((mi_col * 2) >> xd->plane[p].subsampling_x),
-        a + num_4x4_blocks_wide * p,
+        ctx->a + num_4x4_blocks_wide * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
     memcpy(
         xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
-        l + num_4x4_blocks_high * p,
+        ctx->l + num_4x4_blocks_high * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  memcpy(xd->above_seg_context + mi_col, sa,
+  memcpy(xd->above_seg_context + mi_col, ctx->sa,
          sizeof(*xd->above_seg_context) * mi_width);
-  memcpy(xd->left_seg_context + (mi_row & MI_MASK), sl,
+  memcpy(xd->left_seg_context + (mi_row & MI_MASK), ctx->sl,
          sizeof(xd->left_seg_context[0]) * mi_height);
 #if CONFIG_VAR_TX
-  memcpy(xd->above_txfm_context, ta,
+  xd->above_txfm_context = ctx->p_ta;
+  xd->left_txfm_context = ctx->p_tl;
+  memcpy(xd->above_txfm_context, ctx->ta,
          sizeof(*xd->above_txfm_context) * mi_width);
-  memcpy(xd->left_txfm_context, tl,
+  memcpy(xd->left_txfm_context, ctx->tl,
          sizeof(*xd->left_txfm_context) * mi_height);
 #endif
 }
 
-static void save_context(MACROBLOCK *const x, int mi_row, int mi_col,
-                         ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
-                         ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
-                         PARTITION_CONTEXT sa[8], PARTITION_CONTEXT sl[8],
-#if CONFIG_VAR_TX
-                         TXFM_CONTEXT ta[8], TXFM_CONTEXT tl[8],
-#endif
-                         BLOCK_SIZE bsize) {
-  const MACROBLOCKD *const xd = &x->e_mbd;
+static void save_context(const MACROBLOCK *x,
+                         RD_SEARCH_MACROBLOCK_CONTEXT *ctx,
+                         int mi_row, int mi_col, BLOCK_SIZE bsize) {
+  const MACROBLOCKD *xd = &x->e_mbd;
   int p;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
@@ -1998,26 +2004,28 @@ static void save_context(MACROBLOCK *const x, int mi_row, int mi_col,
   // buffer the above/left context information of the block in search.
   for (p = 0; p < MAX_MB_PLANE; ++p) {
     memcpy(
-        a + num_4x4_blocks_wide * p,
+        ctx->a + num_4x4_blocks_wide * p,
         xd->above_context[p] + (mi_col * 2 >> xd->plane[p].subsampling_x),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
     memcpy(
-        l + num_4x4_blocks_high * p,
+        ctx->l + num_4x4_blocks_high * p,
         xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  memcpy(sa, xd->above_seg_context + mi_col,
+  memcpy(ctx->sa, xd->above_seg_context + mi_col,
          sizeof(*xd->above_seg_context) * mi_width);
-  memcpy(sl, xd->left_seg_context + (mi_row & MI_MASK),
+  memcpy(ctx->sl, xd->left_seg_context + (mi_row & MI_MASK),
          sizeof(xd->left_seg_context[0]) * mi_height);
 #if CONFIG_VAR_TX
-  memcpy(ta, xd->above_txfm_context,
+  memcpy(ctx->ta, xd->above_txfm_context,
          sizeof(*xd->above_txfm_context) * mi_width);
-  memcpy(tl, xd->left_txfm_context,
+  memcpy(ctx->tl, xd->left_txfm_context,
          sizeof(*xd->left_txfm_context) * mi_height);
+  ctx->p_ta = xd->above_txfm_context;
+  ctx->p_tl = xd->left_txfm_context;
 #endif
 }
 
@@ -2299,11 +2307,7 @@ static void rd_use_partition(VP10_COMP *cpi,
   int i, pl;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE subsize;
-  ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
-  PARTITION_CONTEXT sl[8], sa[8];
-#if CONFIG_VAR_TX
-  TXFM_CONTEXT tl[8], ta[8];
-#endif
+  RD_SEARCH_MACROBLOCK_CONTEXT x_ctx;
   RD_COST last_part_rdc, none_rdc, chosen_rdc;
   BLOCK_SIZE sub_subsize = BLOCK_4X4;
   int splits_below = 0;
@@ -2329,16 +2333,14 @@ static void rd_use_partition(VP10_COMP *cpi,
   partition = partition_lookup[bsl][bs_type];
   subsize = get_subsize(bsize, partition);
 
+  pc_tree->partitioning = partition;
+
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
   xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
 #endif
-  pc_tree->partitioning = partition;
-  save_context(x, mi_row, mi_col, a, l, sa, sl,
-#if CONFIG_VAR_TX
-               ta, tl,
-#endif
-               bsize);
+
+  save_context(x, &x_ctx, mi_row, mi_col, bsize);
 
   if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode) {
     set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
@@ -2384,11 +2386,8 @@ static void rd_use_partition(VP10_COMP *cpi,
 #endif
       }
 
-      restore_context(x, mi_row, mi_col, a, l, sa, sl,
-#if CONFIG_VAR_TX
-                      ta, tl,
-#endif
-                      bsize);
+      restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+
       mi_8x8[0]->mbmi.sb_type = bs_type;
       pc_tree->partitioning = partition;
     }
@@ -2556,11 +2555,9 @@ static void rd_use_partition(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
     chosen_rate_nocoef = 0;
 #endif
-    restore_context(x, mi_row, mi_col, a, l, sa, sl,
-#if CONFIG_VAR_TX
-                    ta, tl,
-#endif
-                    bsize);
+
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+
     pc_tree->partitioning = PARTITION_SPLIT;
 
     // Split partition.
@@ -2571,20 +2568,12 @@ static void rd_use_partition(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
       int rt_nocoef = 0;
 #endif
-      ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
-      PARTITION_CONTEXT sl[8], sa[8];
-#if CONFIG_VAR_TX
-      TXFM_CONTEXT tl[8], ta[8];
-#endif
+      RD_SEARCH_MACROBLOCK_CONTEXT x_ctx;
 
       if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
         continue;
 
-      save_context(x, mi_row, mi_col, a, l, sa, sl,
-#if CONFIG_VAR_TX
-                   ta, tl,
-#endif
-                   bsize);
+      save_context(x, &x_ctx, mi_row, mi_col, bsize);
       pc_tree->split[i]->partitioning = PARTITION_NONE;
       rd_pick_sb_modes(cpi, tile_data, x,
                        mi_row + y_idx, mi_col + x_idx, &tmp_rdc,
@@ -2593,11 +2582,7 @@ static void rd_use_partition(VP10_COMP *cpi,
 #endif
                        split_subsize, &pc_tree->split[i]->none, INT64_MAX);
 
-      restore_context(x, mi_row, mi_col, a, l, sa, sl,
-#if CONFIG_VAR_TX
-                      ta, tl,
-#endif
-                      bsize);
+      restore_context(x, &x_ctx, mi_row, mi_col, bsize);
 
       if (tmp_rdc.rate == INT_MAX || tmp_rdc.dist == INT64_MAX) {
         vp10_rd_cost_reset(&chosen_rdc);
@@ -2655,15 +2640,7 @@ static void rd_use_partition(VP10_COMP *cpi,
 #endif
   }
 
-#if CONFIG_VAR_TX
-  xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-#endif
-  restore_context(x, mi_row, mi_col, a, l, sa, sl,
-#if CONFIG_VAR_TX
-                  ta, tl,
-#endif
-                  bsize);
+  restore_context(x, &x_ctx, mi_row, mi_col, bsize);
 
   // We must have chosen a partitioning and encoding or we'll fail later on.
   // No other opportunities for success.
@@ -2939,11 +2916,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int mi_step = num_8x8_blocks_wide_lookup[bsize] / 2;
-  ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
-  PARTITION_CONTEXT sl[8], sa[8];
-#if CONFIG_VAR_TX
-  TXFM_CONTEXT tl[8], ta[8];
-#endif
+  RD_SEARCH_MACROBLOCK_CONTEXT x_ctx;
   TOKENEXTRA *tp_orig = *tp;
   PICK_MODE_CONTEXT *ctx = &pc_tree->none;
   int i;
@@ -3020,10 +2993,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
   xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-  save_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-  save_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
 #endif
+
+  save_context(x, &x_ctx, mi_row, mi_col, bsize);
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
@@ -3178,13 +3150,8 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif
       }
     }
-#if CONFIG_VAR_TX
-    xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif  // CONFIG_VAR_TX
+
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
   }
 
   // store estimated motion vector
@@ -3232,14 +3199,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
           TX_TYPE best_tx = DCT_DCT;
           tmp_rate = sum_rate_nocoef;
           tmp_dist = 0;
-#if CONFIG_VAR_TX
-          xd->above_txfm_context = cm->above_txfm_context + mi_col;
-          xd->left_txfm_context =
-              xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-          restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-          restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif  // CONFIG_VAR_TX
+
+          restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+
           rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                         &tmp_rate, &tmp_dist,
                         &best_tx,
@@ -3326,14 +3288,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
           tmp_rate = sum_rate_nocoef;
           tmp_dist = 0;
-#if CONFIG_VAR_TX
-          xd->above_txfm_context = cm->above_txfm_context + mi_col;
-          xd->left_txfm_context =
-              xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-          restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-          restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif  // CONFIG_VAR_TX
+
+          restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+
           rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                         &tmp_rate, &tmp_dist,
                         &best_tx,
@@ -3380,13 +3337,8 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
       if (cpi->sf.less_rectangular_check)
         do_rect &= !partition_none_allowed;
     }
-#if CONFIG_VAR_TX
-    xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif
+
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
   }  // if (do_split)
 
   // PARTITION_HORZ
@@ -3466,13 +3418,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
         TX_TYPE best_tx = DCT_DCT;
         tmp_rate = sum_rate_nocoef;
         tmp_dist = 0;
-#if CONFIG_VAR_TX
-        xd->above_txfm_context = cm->above_txfm_context + mi_col;
-        xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
-        restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-        restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif  // CONFIG_VAR_TX
+
+        restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+
         rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                       &tmp_rate, &tmp_dist,
                       &best_tx,
@@ -3511,13 +3459,8 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
         pc_tree->partitioning = PARTITION_HORZ;
       }
     }
-#if CONFIG_VAR_TX
-    xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif
+
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
   }
   // PARTITION_VERT
   if (partition_vert_allowed &&
@@ -3594,13 +3537,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
         tmp_rate = sum_rate_nocoef;
         tmp_dist = 0;
-#if CONFIG_VAR_TX
-        xd->above_txfm_context = cm->above_txfm_context + mi_col;
-        xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
-        restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-        restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif  // CONFIG_VAR_TX
+
+        restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+
         rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize,
                       &tmp_rate, &tmp_dist,
                       &best_tx,
@@ -3640,13 +3579,8 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
         pc_tree->partitioning = PARTITION_VERT;
       }
     }
-#if CONFIG_VAR_TX
-    xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
-#else
-    restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
-#endif
+
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
   }
 
   // TODO(jbb): This code added so that we avoid static analysis
