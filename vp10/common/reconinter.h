@@ -232,6 +232,101 @@ void vp10_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
 void vp10_setup_pre_planes(MACROBLOCKD *xd, int idx,
                           const YV12_BUFFER_CONFIG *src, int mi_row, int mi_col,
                           const struct scale_factors *sf);
+
+#if CONFIG_EXT_INTERP
+static INLINE int vp10_is_interp_needed(const MACROBLOCKD *const xd) {
+  MODE_INFO *const mi = xd->mi[0];
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
+  const int is_compound = has_second_ref(mbmi);
+  int intpel_mv;
+  int plane;
+
+#if SUPPORT_NONINTERPOLATING_FILTERS
+  // TODO(debargha): This is is currently only for experimentation
+  // with non-interpolating filters. Remove later.
+  // If any of the filters are non-interpolating, then indicate the
+  // interpolation filter always.
+  int i;
+  for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
+    if (!IsInterpolatingFilter(i)) return 1;
+  }
+#endif
+
+  // For scaled references, interpolation filter is indicated all the time.
+  if (vp10_is_scaled(&xd->block_refs[0]->sf))
+    return 1;
+  if (is_compound && vp10_is_scaled(&xd->block_refs[1]->sf))
+    return 1;
+
+  if (bsize == BLOCK_4X4) {
+    for (plane = 0; plane < 2; ++plane) {
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+      MV mv0 = average_split_mvs(pd, mi, 0, 0);
+      MV mv1 = average_split_mvs(pd, mi, 0, 1);
+      MV mv2 = average_split_mvs(pd, mi, 0, 2);
+      MV mv3 = average_split_mvs(pd, mi, 0, 3);
+      intpel_mv =
+          !mv_has_subpel(&mv0) &&
+          !mv_has_subpel(&mv1) &&
+          !mv_has_subpel(&mv2) &&
+          !mv_has_subpel(&mv3);
+      if (is_compound && intpel_mv) {
+        mv0 = average_split_mvs(pd, mi, 1, 0);
+        mv1 = average_split_mvs(pd, mi, 1, 1);
+        mv2 = average_split_mvs(pd, mi, 1, 2);
+        mv3 = average_split_mvs(pd, mi, 1, 3);
+        intpel_mv =
+            !mv_has_subpel(&mv0) &&
+            !mv_has_subpel(&mv1) &&
+            !mv_has_subpel(&mv2) &&
+            !mv_has_subpel(&mv3);
+      }
+      if (!intpel_mv) break;
+    }
+  } else if (bsize == BLOCK_4X8) {
+    for (plane = 0; plane < 2; ++plane) {
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+      MV mv0 = average_split_mvs(pd, mi, 0, 0);
+      MV mv1 = average_split_mvs(pd, mi, 0, 1);
+      intpel_mv =
+          !mv_has_subpel(&mv0) &&
+          !mv_has_subpel(&mv1);
+      if (is_compound && intpel_mv) {
+        mv0 = average_split_mvs(pd, mi, 1, 0);
+        mv1 = average_split_mvs(pd, mi, 1, 1);
+        intpel_mv =
+            !mv_has_subpel(&mv0) &&
+            !mv_has_subpel(&mv1);
+      }
+      if (!intpel_mv) break;
+    }
+  } else if (bsize == BLOCK_8X4) {
+    for (plane = 0; plane < 2; ++plane) {
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+      MV mv0 = average_split_mvs(pd, mi, 0, 0);
+      MV mv1 = average_split_mvs(pd, mi, 0, 2);
+      intpel_mv =
+          !mv_has_subpel(&mv0) &&
+          !mv_has_subpel(&mv1);
+      if (is_compound && intpel_mv) {
+        mv0 = average_split_mvs(pd, mi, 1, 0);
+        mv1 = average_split_mvs(pd, mi, 1, 2);
+        intpel_mv =
+            !mv_has_subpel(&mv0) &&
+            !mv_has_subpel(&mv1);
+      }
+      if (!intpel_mv) break;
+    }
+  } else {
+    intpel_mv = !mv_has_subpel(&mbmi->mv[0].as_mv);
+    if (is_compound && intpel_mv) {
+      intpel_mv &= !mv_has_subpel(&mbmi->mv[1].as_mv);
+    }
+  }
+  return !intpel_mv;
+}
+#endif  // CONFIG_EXT_INTERP
 #ifdef __cplusplus
 }  // extern "C"
 #endif

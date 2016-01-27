@@ -24,6 +24,7 @@
 #include "vp10/common/entropymv.h"
 #include "vp10/common/mvref_common.h"
 #include "vp10/common/pred_common.h"
+#include "vp10/common/reconinter.h"
 #include "vp10/common/seg_common.h"
 #include "vp10/common/tile_common.h"
 

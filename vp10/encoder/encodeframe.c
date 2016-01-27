@@ -1179,7 +1179,6 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
   if (!frame_is_intra_only(cm)) {
     if (is_inter_block(mbmi)) {
       vp10_update_mv_count(td);
-
       if (cm->interp_filter == SWITCHABLE
 #if CONFIG_EXT_INTERP
           && vp10_is_interp_needed(xd)
@@ -3960,6 +3959,15 @@ static void encode_frame_internal(VP10_COMP *cpi) {
 
 static INTERP_FILTER get_interp_filter(
     const int64_t threshes[SWITCHABLE_FILTER_CONTEXTS], int is_alt_ref) {
+#if CONFIG_EXT_INTERP
+  if (!is_alt_ref &&
+      threshes[EIGHTTAP_SMOOTH2] > threshes[EIGHTTAP_SMOOTH] &&
+      threshes[EIGHTTAP_SMOOTH2] > threshes[EIGHTTAP] &&
+      threshes[EIGHTTAP_SMOOTH2] > threshes[EIGHTTAP_SHARP] &&
+      threshes[EIGHTTAP_SMOOTH2] > threshes[SWITCHABLE - 1]) {
+    return EIGHTTAP_SMOOTH2;
+  }
+#endif  // CONFIG_EXT_INTERP
   if (!is_alt_ref &&
       threshes[EIGHTTAP_SMOOTH] > threshes[EIGHTTAP] &&
       threshes[EIGHTTAP_SMOOTH] > threshes[EIGHTTAP_SHARP] &&
