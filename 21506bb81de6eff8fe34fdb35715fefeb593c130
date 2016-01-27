@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14beeac6_c8cf7bdb",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "I don\u0027t see any assert",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54c4e260_0fb5f992",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "max_width might be OK",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14beeac6_28df0f91",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "here and throughout you can add whitespace around operators",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54c4e260_6ff2ed89",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "indent 2",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34c3ee5c_de6e5244",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "you could bring this up one line and break earlier or align the next line the the \u0027(\u0027",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74c9e678_7d5c6801",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "same here for the name",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74c9e678_fd4f9841",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "where are the leftovers being handled?",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4a43ebb_8af8ff30",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "1920?",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74c9e678_9d306490",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "from here through the shift might work as an inline since you use this a few times",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4afde8e_ad5b35d6",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "this can go in the else",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34c3ee5c_f105ff2a",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "these too",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34c3ee5c_f1a09f5f",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "or alternatively you could call the _c version at the cost of a little overhead",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54c4e260_8ff82931",
+        "filename": "vp9/vp9cx.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-27T00:07:16Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
