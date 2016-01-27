@@ -1145,13 +1145,12 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
   x->skip = ctx->skip;
 
 #if CONFIG_VAR_TX
-  for (i = 0; i < MAX_MB_PLANE; ++i)
+  for (i = 0; i < 1; ++i)
     memcpy(x->blk_skip[i], ctx->blk_skip[i],
            sizeof(uint8_t) * ctx->num_4x4_blk);
-#else
+#endif
   memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
          sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
-#endif
 
   if (!output_enabled)
     return;
@@ -1273,8 +1272,24 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
   }
 
   x->skip = ctx->skip;
+
+#if CONFIG_VAR_TX
+  for (i = 0; i < 1; ++i)
+    memcpy(x->blk_skip[i], ctx->blk_skip[i],
+           sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif  // CONFIG_VAR_TX
   memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
          sizeof(uint8_t) * ctx->num_4x4_blk);
+
+#if CONFIG_VAR_TX
+  {
+    const TX_SIZE mtx = mbmi->tx_size;
+    int idy, idx;
+    for (idy = 0; idy < (1 << mtx) / 2; ++idy)
+      for (idx = 0; idx < (1 << mtx) / 2; ++idx)
+        mbmi->inter_tx_size[(idy << 3) + idx] = mbmi->tx_size;
+  }
+#endif  // CONFIG_VAR_TX
 
   if (!output_enabled)
     return;
@@ -1309,16 +1324,6 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
       mv->mv[1].as_int = mi->mbmi.mv[1].as_int;
     }
   }
-
-#if CONFIG_VAR_TX
-  {
-    const TX_SIZE mtx = mbmi->tx_size;
-    int idy, idx;
-    for (idy = 0; idy < (1 << mtx) / 2; ++idy)
-      for (idx = 0; idx < (1 << mtx) / 2; ++idx)
-        mbmi->inter_tx_size[(idy << 3) + idx] = mbmi->tx_size;
-  }
-#endif
 }
 
 static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
@@ -1414,10 +1419,16 @@ static void update_supertx_param(ThreadData *td,
                                  int best_tx,
                                  TX_SIZE supertx_size) {
   MACROBLOCK *const x = &td->mb;
+#if CONFIG_VAR_TX
+  int i;
 
-  ctx->mic.mbmi.tx_size = supertx_size;
+  for (i = 0; i < 1; ++i)
+    memcpy(ctx->blk_skip[i], x->blk_skip[i],
+           sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif  // CONFIG_VAR_TX
   memcpy(ctx->zcoeff_blk, x->zcoeff_blk[supertx_size],
          sizeof(uint8_t) * ctx->num_4x4_blk);
+  ctx->mic.mbmi.tx_size = supertx_size;
   ctx->skip = x->skip;
   ctx->mic.mbmi.tx_type = best_tx;
 }
@@ -5232,6 +5243,11 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   *tmp_rate = tmp_rate_tx;
   *tmp_dist = tmp_dist_tx;
   x->skip = skip_tx;
+#if CONFIG_VAR_TX
+  for (plane = 0; plane < 1; ++plane)
+    memset(x->blk_skip[plane], x->skip,
+           sizeof(uint8_t) * pc_tree->none.num_4x4_blk);
+#endif  // CONFIG_VAR_TX
   xd->mi[0]->mbmi.tx_type = best_tx_nostx;
 }
 #endif  // CONFIG_SUPERTX
