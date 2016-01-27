@@ -552,7 +552,7 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
+static void dec_build_inter_predictors(VPxWorker *const worker, MACROBLOCKD *xd,
                                        int plane, int bw, int bh, int x,
                                        int y, int w, int h, int mi_x, int mi_y,
                                        const InterpKernel *kernel,
@@ -662,8 +662,8 @@ static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
 
     // Wait until reference block is ready. Pad 7 more pixels as last 7
     // pixels of each superblock row can be changed by next superblock row.
-    if (pbi->frame_parallel_decode)
-      vp9_frameworker_wait(pbi->frame_worker_owner, ref_frame_buf,
+    if (worker != NULL)
+      vp9_frameworker_wait(worker, ref_frame_buf,
                            VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
 
     // Skip border extension if block is inside the frame.
@@ -689,11 +689,11 @@ static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
   } else {
     // Wait until reference block is ready. Pad 7 more pixels as last 7
     // pixels of each superblock row can be changed by next superblock row.
-     if (pbi->frame_parallel_decode) {
-       const int y1 = (y0_16 + (h - 1) * ys) >> SUBPEL_BITS;
-       vp9_frameworker_wait(pbi->frame_worker_owner, ref_frame_buf,
-                            VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
-     }
+    if (worker != NULL) {
+      const int y1 = (y0_16 + (h - 1) * ys) >> SUBPEL_BITS;
+      vp9_frameworker_wait(worker, ref_frame_buf,
+                           VPXMAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
+    }
   }
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -720,53 +720,60 @@ static void dec_build_inter_predictors_sb(VP9Decoder *const pbi,
   const BLOCK_SIZE sb_type = mi->sb_type;
   const int is_compound = has_second_ref(mi);
   int ref;
+  int is_scaled;
+  VPxWorker *const fwo = pbi->frame_parallel_decode ?
+      pbi->frame_worker_owner : NULL;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const MV_REFERENCE_FRAME frame = mi->ref_frame[ref];
     RefBuffer *ref_buf = &pbi->common.frame_refs[frame - LAST_FRAME];
+    const struct scale_factors *const sf = &ref_buf->sf;
+    const int idx = ref_buf->idx;
+    BufferPool *const pool = pbi->common.buffer_pool;
+    RefCntBuffer *const ref_frame_buf = &pool->frame_bufs[idx];
 
-    xd->block_refs[ref] = ref_buf;
-    if (!vp9_is_valid_scale(&ref_buf->sf))
+    if (!vp9_is_valid_scale(sf))
       vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
                          "Reference frame has invalid dimensions");
-    vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col, &ref_buf->sf);
-  }
 
-  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-    struct macroblockd_plane *const pd = &xd->plane[plane];
-    struct buf_2d *const dst_buf = &pd->dst;
-    const int num_4x4_w = pd->n4_w;
-    const int num_4x4_h = pd->n4_h;
+    is_scaled = vp9_is_scaled(sf);
+    vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col, sf);
+    xd->block_refs[ref] = ref_buf;
 
-    const int n4w_x4 = 4 * num_4x4_w;
-    const int n4h_x4 = 4 * num_4x4_h;
-    int ref;
-
-    for (ref = 0; ref < 1 + is_compound; ++ref) {
-      const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
-      struct buf_2d *const pre_buf = &pd->pre[ref];
-      const int idx = xd->block_refs[ref]->idx;
-      BufferPool *const pool = pbi->common.buffer_pool;
-      RefCntBuffer *const ref_frame_buf = &pool->frame_bufs[idx];
-      const int is_scaled = vp9_is_scaled(sf);
-
-      if (sb_type < BLOCK_8X8) {
+    if (sb_type < BLOCK_8X8) {
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        struct macroblockd_plane *const pd = &xd->plane[plane];
+        struct buf_2d *const dst_buf = &pd->dst;
+        const int num_4x4_w = pd->n4_w;
+        const int num_4x4_h = pd->n4_h;
+        const int n4w_x4 = 4 * num_4x4_w;
+        const int n4h_x4 = 4 * num_4x4_h;
+        struct buf_2d *const pre_buf = &pd->pre[ref];
         int i = 0, x, y;
         for (y = 0; y < num_4x4_h; ++y) {
           for (x = 0; x < num_4x4_w; ++x) {
             const MV mv = average_split_mvs(pd, mi, ref, i++);
-            dec_build_inter_predictors(pbi, xd, plane, n4w_x4, n4h_x4,
+            dec_build_inter_predictors(fwo, xd, plane, n4w_x4, n4h_x4,
                                        4 * x, 4 * y, 4, 4, mi_x, mi_y, kernel,
                                        sf, pre_buf, dst_buf, &mv,
                                        ref_frame_buf, is_scaled, ref);
           }
         }
-      } else {
-        const MV mv = mi->mv[ref].as_mv;
-        dec_build_inter_predictors(pbi, xd, plane, n4w_x4, n4h_x4,
+      }
+    } else {
+      const MV mv = mi->mv[ref].as_mv;
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        struct macroblockd_plane *const pd = &xd->plane[plane];
+        struct buf_2d *const dst_buf = &pd->dst;
+        const int num_4x4_w = pd->n4_w;
+        const int num_4x4_h = pd->n4_h;
+        const int n4w_x4 = 4 * num_4x4_w;
+        const int n4h_x4 = 4 * num_4x4_h;
+        struct buf_2d *const pre_buf = &pd->pre[ref];
+        dec_build_inter_predictors(fwo, xd, plane, n4w_x4, n4h_x4,
                                    0, 0, n4w_x4, n4h_x4, mi_x, mi_y, kernel,
-                                   sf, pre_buf, dst_buf, &mv, ref_frame_buf,
-                                   is_scaled, ref);
+                                   sf, pre_buf, dst_buf, &mv,
+                                   ref_frame_buf, is_scaled, ref);
       }
     }
   }
