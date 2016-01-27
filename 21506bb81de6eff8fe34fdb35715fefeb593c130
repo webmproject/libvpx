@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d486122d_b2e38632",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "14beeac6_c8cf7bdb",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54c4e260_0fb5f992",
         "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-27T00:07:16Z",
       "side": 1,
       "message": "max_width might be OK",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54722221_4828df72",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54c4e260_0fb5f992",
       "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "34712e1d_279e747b",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "14beeac6_28df0f91",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54c4e260_6ff2ed89",
         "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2016-01-27T00:07:16Z",
       "side": 1,
       "message": "indent 2",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b47d1eef_68f76378",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54c4e260_6ff2ed89",
       "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "34712e1d_47a370be",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34c3ee5c_de6e5244",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74c9e678_7d5c6801",
         "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
         "patchSetId": 9
@@ -98,6 +188,24 @@
       "writtenOn": "2016-01-27T00:07:16Z",
       "side": 1,
       "message": "same here for the name",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b47d1eef_880bb740",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "74c9e678_7d5c6801",
       "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "34984e85_2ca8134b",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "They are not.  I don\u0027t think the handling of leftovers here or in the downsample is necessary.  Isn\u0027t the source padded out to a multiple of 16?",
+      "parentUuid": "74c9e678_fd4f9841",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4a43ebb_8af8ff30",
         "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
         "patchSetId": 9
@@ -132,6 +258,24 @@
       "writtenOn": "2016-01-27T00:07:16Z",
       "side": 1,
       "message": "1920?",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34984e85_ac93231c",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Probably specific to the test case.  Marco, any idea?",
+      "parentUuid": "b4a43ebb_8af8ff30",
       "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "d486122d_321f96f0",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "74c9e678_9d306490",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4afde8e_ad5b35d6",
         "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
         "patchSetId": 9
@@ -166,6 +328,24 @@
       "writtenOn": "2016-01-27T00:07:16Z",
       "side": 1,
       "message": "this can go in the else",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54894239_3015c61d",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4afde8e_ad5b35d6",
       "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "b47d1eef_c805af2b",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34c3ee5c_f105ff2a",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "34c3ee5c_f1a09f5f",
         "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
         "patchSetId": 9
@@ -206,6 +404,24 @@
     },
     {
       "key": {
+        "uuid": "544302e2_600c0c59",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34c3ee5c_f1a09f5f",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54c4e260_8ff82931",
         "filename": "vp9/vp9cx.mk",
         "patchSetId": 9
@@ -217,6 +433,24 @@
       "writtenOn": "2016-01-27T00:07:16Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b47d1eef_48f29f89",
+        "filename": "vp9/vp9cx.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-27T14:49:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54c4e260_8ff82931",
       "revId": "21506bb81de6eff8fe34fdb35715fefeb593c130",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
