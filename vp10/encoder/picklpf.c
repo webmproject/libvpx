@@ -72,16 +72,16 @@ static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
 }
 
 #if CONFIG_LOOP_RESTORATION
-#define JOINT_FILTER_BILATERAL_SEARCH
+#define JOINT_FILTER_RESTORATION_SEARCH
 #define USE_RD_LOOP_POSTFILTER_SEARCH
-static int try_bilateral_frame(const YV12_BUFFER_CONFIG *sd,
-                               VP10_COMP *const cpi,
-                               int bilateral_level,
-                               int partial_frame) {
+static int try_restoration_frame(const YV12_BUFFER_CONFIG *sd,
+                                 VP10_COMP *const cpi,
+                                 int restoration_level,
+                                 int partial_frame) {
   VP10_COMMON *const cm = &cpi->common;
   int filt_err;
-  vp10_loop_bilateral_frame(cm->frame_to_show, cm,
-                            bilateral_level, 1, partial_frame);
+  vp10_loop_restoration_frame(cm->frame_to_show, cm,
+                              restoration_level, 1, partial_frame);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
     filt_err = vp10_highbd_get_y_sse(sd, cm->frame_to_show);
@@ -97,16 +97,16 @@ static int try_bilateral_frame(const YV12_BUFFER_CONFIG *sd,
   return filt_err;
 }
 
-static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
-                                  VP10_COMP *cpi,
-                                  int filter_level, int partial_frame,
-                                  double *best_cost_ret) {
+static int search_restoration_level(const YV12_BUFFER_CONFIG *sd,
+                                    VP10_COMP *cpi,
+                                    int filter_level, int partial_frame,
+                                    double *best_cost_ret) {
   VP10_COMMON *const cm = &cpi->common;
-  int i, bilateral_best, err;
+  int i, restoration_best, err;
   double best_cost;
   double cost;
-  const int bilateral_level_bits = vp10_bilateral_level_bits(&cpi->common);
-  const int bilateral_levels = 1 << bilateral_level_bits;
+  const int restoration_level_bits = vp10_restoration_level_bits(&cpi->common);
+  const int restoration_levels = 1 << restoration_level_bits;
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
   MACROBLOCK *x = &cpi->td.mb;
   int bits;
@@ -118,47 +118,47 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
                          1, partial_frame);
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_db);
 
-  bilateral_best = 0;
-  err = try_bilateral_frame(sd, cpi, 0, partial_frame);
+  restoration_best = 0;
+  err = try_restoration_frame(sd, cpi, 0, partial_frame);
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
-  bits = cm->lf.last_bilateral_level == 0 ? 0 : bilateral_level_bits;
+  bits = cm->lf.last_restoration_level == 0 ? 0 : restoration_level_bits;
   cost = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
 #else
   cost = (double)err;
 #endif  // USE_RD_LOOP_POSTFILTER_SEARCH
   best_cost = cost;
-  for (i = 1; i <= bilateral_levels; ++i) {
-    err = try_bilateral_frame(sd, cpi, i, partial_frame);
+  for (i = 1; i <= restoration_levels; ++i) {
+    err = try_restoration_frame(sd, cpi, i, partial_frame);
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
     // Normally the rate is rate in bits * 256 and dist is sum sq err * 64
     // when RDCOST is used.  However below we just scale both in the correct
     // ratios appropriately but not exactly by these values.
-    bits = cm->lf.last_bilateral_level == i ? 0 : bilateral_level_bits;
+    bits = cm->lf.last_restoration_level == i ? 0 : restoration_level_bits;
     cost = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
 #else
     cost = (double)err;
 #endif  // USE_RD_LOOP_POSTFILTER_SEARCH
     if (cost < best_cost) {
-      bilateral_best = i;
+      restoration_best = i;
       best_cost = cost;
     }
   }
   if (best_cost_ret) *best_cost_ret = best_cost;
   vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
-  return bilateral_best;
+  return restoration_best;
 }
 
-#ifdef JOINT_FILTER_BILATERAL_SEARCH
-static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
-                                         VP10_COMP *cpi,
-                                         int partial_frame,
-                                         int *bilateral_level) {
+#ifdef JOINT_FILTER_RESTORATION_SEARCH
+static int search_filter_restoration_level(const YV12_BUFFER_CONFIG *sd,
+                                           VP10_COMP *cpi,
+                                           int partial_frame,
+                                           int *restoration_level) {
   const VP10_COMMON *const cm = &cpi->common;
   const struct loopfilter *const lf = &cm->lf;
   const int min_filter_level = 0;
   const int max_filter_level = get_max_filter_level(cpi);
   int filt_direction = 0;
-  int filt_best, bilateral_best;
+  int filt_best, restoration_best;
   double best_err;
   int i;
 
@@ -173,10 +173,10 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
   for (i = 0; i <= MAX_LOOP_FILTER; ++i)
     ss_err[i] = -1.0;
 
-  bilateral = search_bilateral_level(sd, cpi, filt_mid,
-                                     partial_frame, &best_err);
+  bilateral = search_restoration_level(sd, cpi, filt_mid,
+                                       partial_frame, &best_err);
   filt_best = filt_mid;
-  bilateral_best = bilateral;
+  restoration_best = bilateral;
   ss_err[filt_mid] = best_err;
 
   while (filter_step > 0) {
@@ -196,9 +196,9 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
       if (ss_err[filt_low] < 0) {
-        bilateral = search_bilateral_level(sd, cpi, filt_low,
-                                           partial_frame,
-                                           &ss_err[filt_low]);
+        bilateral = search_restoration_level(sd, cpi, filt_low,
+                                             partial_frame,
+                                             &ss_err[filt_low]);
       }
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
@@ -209,21 +209,21 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
         }
 
         filt_best = filt_low;
-        bilateral_best = bilateral;
+        restoration_best = bilateral;
       }
     }
 
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
       if (ss_err[filt_high] < 0) {
-        bilateral = search_bilateral_level(sd, cpi, filt_high, partial_frame,
-                                           &ss_err[filt_high]);
+        bilateral = search_restoration_level(sd, cpi, filt_high, partial_frame,
+                                             &ss_err[filt_high]);
       }
       // Was it better than the previous best?
       if (ss_err[filt_high] < (best_err - bias)) {
         best_err = ss_err[filt_high];
         filt_best = filt_high;
-        bilateral_best = bilateral;
+        restoration_best = bilateral;
       }
     }
 
@@ -236,10 +236,10 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
       filt_mid = filt_best;
     }
   }
-  *bilateral_level = bilateral_best;
+  *restoration_level = restoration_best;
   return filt_best;
 }
-#endif  // JOINT_FILTER_BILATERAL_SEARCH
+#endif  // JOINT_FILTER_RESTORATION_SEARCH
 #endif  // CONFIG_LOOP_RESTORATION
 
 static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
@@ -364,20 +364,20 @@ void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
 #if CONFIG_LOOP_RESTORATION
-    lf->bilateral_level = search_bilateral_level(
+    lf->restoration_level = search_restoration_level(
         sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE, NULL);
 #endif  // CONFIG_LOOP_RESTORATION
   } else {
 #if CONFIG_LOOP_RESTORATION
-#ifdef JOINT_FILTER_BILATERAL_SEARCH
-    lf->filter_level = search_filter_bilateral_level(
-        sd, cpi, method == LPF_PICK_FROM_SUBIMAGE, &lf->bilateral_level);
+#ifdef JOINT_FILTER_RESTORATION_SEARCH
+    lf->filter_level = search_filter_restoration_level(
+        sd, cpi, method == LPF_PICK_FROM_SUBIMAGE, &lf->restoration_level);
 #else
     lf->filter_level = search_filter_level(
         sd, cpi, method == LPF_PICK_FROM_SUBIMAGE);
-    lf->bilateral_level = search_bilateral_level(
+    lf->restoration_level = search_restoration_level(
         sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE, NULL);
-#endif  // JOINT_FILTER_BILATERAL_SEARCH
+#endif  // JOINT_FILTER_RESTORATION_SEARCH
 #else
     lf->filter_level = search_filter_level(
         sd, cpi, method == LPF_PICK_FROM_SUBIMAGE);

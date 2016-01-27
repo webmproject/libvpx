@@ -216,87 +216,90 @@ static const int mode_lf_lut[MB_MODE_COUNT] = {
 };
 
 #if CONFIG_LOOP_RESTORATION
-#define BILATERAL_RANGE  256
-#define BILATERAL_RANGE_SYM  (2 * BILATERAL_RANGE + 1)
-static double bilateral_filters_r_kf[BILATERAL_LEVELS_KF + 1]
-                                    [BILATERAL_RANGE_SYM];
-static double bilateral_filters_r[BILATERAL_LEVELS + 1][BILATERAL_RANGE_SYM];
-static double bilateral_filters_s_kf[BILATERAL_LEVELS_KF + 1]
-                                    [BILATERAL_WIN][BILATERAL_WIN];
-static double bilateral_filters_s[BILATERAL_LEVELS + 1]
-                                 [BILATERAL_WIN][BILATERAL_WIN];
+#define RESTORATION_RANGE  256
+#define RESTORATION_RANGE_SYM  (2 * RESTORATION_RANGE + 1)
+static double restoration_filters_r_kf[RESTORATION_LEVELS_KF + 1]
+                                    [RESTORATION_RANGE_SYM];
+static double restoration_filters_r[RESTORATION_LEVELS + 1]
+                                   [RESTORATION_RANGE_SYM];
+static double restoration_filters_s_kf[RESTORATION_LEVELS_KF + 1]
+                                      [RESTORATION_WIN][RESTORATION_WIN];
+static double restoration_filters_s[RESTORATION_LEVELS + 1]
+                                   [RESTORATION_WIN][RESTORATION_WIN];
 
-void vp10_loop_bilateral_precal() {
+void vp10_loop_restoration_precal() {
   int i;
-  for (i = 1; i < BILATERAL_LEVELS_KF + 1; i ++) {
-    const bilateral_params_t param = vp10_bilateral_level_to_params(i, 1);
+  for (i = 1; i < RESTORATION_LEVELS_KF + 1; i ++) {
+    const restoration_params_t param = vp10_restoration_level_to_params(i, 1);
     const int sigma_x = param.sigma_x;
     const int sigma_y = param.sigma_y;
     const int sigma_r = param.sigma_r;
-    const double sigma_r_d = (double)sigma_r / BILATERAL_PRECISION;
-    const double sigma_x_d = (double)sigma_x / BILATERAL_PRECISION;
-    const double sigma_y_d = (double)sigma_y / BILATERAL_PRECISION;
+    const double sigma_r_d = (double)sigma_r / RESTORATION_PRECISION;
+    const double sigma_x_d = (double)sigma_x / RESTORATION_PRECISION;
+    const double sigma_y_d = (double)sigma_y / RESTORATION_PRECISION;
 
-    double *fr = bilateral_filters_r_kf[i] + BILATERAL_RANGE;
+    double *fr = restoration_filters_r_kf[i] + RESTORATION_RANGE;
     int j, x, y;
-    for (j = 0; j <= BILATERAL_RANGE; j++) {
+    for (j = 0; j <= RESTORATION_RANGE; j++) {
       fr[j] = exp(-(j * j) / (2 * sigma_r_d * sigma_r_d));
       fr[-j] = fr[j];
     }
-    for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; y++) {
-      for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; x++) {
-        bilateral_filters_s_kf[i][y + BILATERAL_HALFWIN]
-                                 [x + BILATERAL_HALFWIN] =
+    for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; y++) {
+      for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; x++) {
+        restoration_filters_s_kf[i][y + RESTORATION_HALFWIN]
+                                 [x + RESTORATION_HALFWIN] =
           exp(-(x * x) / (2 * sigma_x_d * sigma_x_d)
               -(y * y) / (2 * sigma_y_d * sigma_y_d));
       }
     }
   }
-  for (i = 1; i < BILATERAL_LEVELS + 1; i ++) {
-    const bilateral_params_t param = vp10_bilateral_level_to_params(i, 0);
+  for (i = 1; i < RESTORATION_LEVELS + 1; i ++) {
+    const restoration_params_t param = vp10_restoration_level_to_params(i, 0);
     const int sigma_x = param.sigma_x;
     const int sigma_y = param.sigma_y;
     const int sigma_r = param.sigma_r;
-    const double sigma_r_d = (double)sigma_r / BILATERAL_PRECISION;
-    const double sigma_x_d = (double)sigma_x / BILATERAL_PRECISION;
-    const double sigma_y_d = (double)sigma_y / BILATERAL_PRECISION;
+    const double sigma_r_d = (double)sigma_r / RESTORATION_PRECISION;
+    const double sigma_x_d = (double)sigma_x / RESTORATION_PRECISION;
+    const double sigma_y_d = (double)sigma_y / RESTORATION_PRECISION;
 
-    double *fr = bilateral_filters_r[i] + BILATERAL_RANGE;
+    double *fr = restoration_filters_r[i] + RESTORATION_RANGE;
     int j, x, y;
-    for (j = 0; j <= BILATERAL_RANGE; j++) {
+    for (j = 0; j <= RESTORATION_RANGE; j++) {
       fr[j] = exp(-(j * j) / (2 * sigma_r_d * sigma_r_d));
       fr[-j] = fr[j];
     }
-    for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; y++) {
-      for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; x++) {
-        bilateral_filters_s[i][y + BILATERAL_HALFWIN][x + BILATERAL_HALFWIN] =
-          exp(-(x * x) / (2 * sigma_x_d * sigma_x_d)
-              -(y * y) / (2 * sigma_y_d * sigma_y_d));
+    for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; y++) {
+      for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; x++) {
+        restoration_filters_s
+            [i][y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] =
+            exp(-(x * x) / (2 * sigma_x_d * sigma_x_d)
+                -(y * y) / (2 * sigma_y_d * sigma_y_d));
       }
     }
   }
 }
 
-int vp10_bilateral_level_bits(const VP10_COMMON *const cm) {
+int vp10_restoration_level_bits(const VP10_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME ?
-      BILATERAL_LEVEL_BITS_KF : BILATERAL_LEVEL_BITS;
+      RESTORATION_LEVEL_BITS_KF : RESTORATION_LEVEL_BITS;
 }
 
-int vp10_loop_bilateral_used(int level, int kf) {
-  const bilateral_params_t param = vp10_bilateral_level_to_params(level, kf);
+int vp10_loop_restoration_used(int level, int kf) {
+  const restoration_params_t param =
+      vp10_restoration_level_to_params(level, kf);
   return (param.sigma_x && param.sigma_y && param.sigma_r);
 }
 
-void vp10_loop_bilateral_init(loop_filter_info_n *lfi, int level, int kf) {
-  lfi->bilateral_used = vp10_loop_bilateral_used(level, kf);
+void vp10_loop_restoration_init(loop_filter_info_n *lfi, int level, int kf) {
+  lfi->restoration_used = vp10_loop_restoration_used(level, kf);
 
-  if (lfi->bilateral_used) {
+  if (lfi->restoration_used) {
     int i;
-    lfi->wr_lut = kf ? bilateral_filters_r_kf[level] :
-                       bilateral_filters_r[level];
-    for (i = 0; i < BILATERAL_WIN; i++)
-      lfi->wx_lut[i] = kf ? bilateral_filters_s_kf[level][i] :
-                            bilateral_filters_s[level][i];
+    lfi->wr_lut = kf ? restoration_filters_r_kf[level] :
+                       restoration_filters_r[level];
+    for (i = 0; i < RESTORATION_WIN; i++)
+      lfi->wx_lut[i] = kf ? restoration_filters_s_kf[level][i] :
+                            restoration_filters_s[level][i];
   }
 }
 
@@ -304,11 +307,11 @@ static int is_in_image(int x, int y, int width, int height) {
   return (x >= 0 && x < width && y >= 0 && y < height);
 }
 
-void loop_bilateral_filter(uint8_t *data, int width, int height,
-                           int stride, loop_filter_info_n *lfi,
-                           uint8_t *tmpdata, int tmpstride) {
+void loop_restoration_filter(uint8_t *data, int width, int height,
+                             int stride, loop_filter_info_n *lfi,
+                             uint8_t *tmpdata, int tmpstride) {
   int i, j;
-  const double *wr_lut_ = lfi->wr_lut + 256;
+  const double *wr_lut_ = lfi->wr_lut + RESTORATION_RANGE;
 
   uint8_t *data_p = data;
   uint8_t *tmpdata_p = tmpdata;
@@ -316,12 +319,12 @@ void loop_bilateral_filter(uint8_t *data, int width, int height,
     for (j = 0; j < width; ++j) {
       int x, y;
       double flsum = 0, wtsum = 0, wt;
-      uint8_t *data_p2 = data_p + j - BILATERAL_HALFWIN * stride;
-      for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; ++y) {
-        for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; ++x) {
+      uint8_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
+      for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
+        for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
           if (!is_in_image(j + x, i + y, width, height))
             continue;
-          wt = lfi->wx_lut[y + BILATERAL_HALFWIN][x + BILATERAL_HALFWIN] *
+          wt = lfi->wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] *
                wr_lut_[data_p2[x] - data_p[j]];
           wtsum += wt;
           flsum += wt * data_p2[x];
@@ -341,13 +344,43 @@ void loop_bilateral_filter(uint8_t *data, int width, int height,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
+// Normalized non-separable filter where weights all sum to 1
+void loop_restoration_filter_norm(uint8_t *data, int width, int height,
                                   int stride, loop_filter_info_n *lfi,
-                                  uint8_t *tmpdata8, int tmpstride,
-                                  int bit_depth) {
+                                  uint8_t *tmpdata, int tmpstride) {
   int i, j;
-  const double *wr_lut_ = lfi->wr_lut + 256;
+  uint8_t *data_p = data;
+  uint8_t *tmpdata_p = tmpdata;
+  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; ++i) {
+    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; ++j) {
+      int x, y;
+      double flsum = 0;
+      uint8_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
+      for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
+        for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
+          flsum += data_p2[x] *
+              lfi->wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN];
+        }
+        data_p2 += stride;
+      }
+      tmpdata_p[j] = clip_pixel((int)(flsum + 0.5));
+    }
+    tmpdata_p += tmpstride;
+    data_p += stride;
+  }
+  for (i = 0; i < height; ++i) {
+    memcpy(data + i * stride, tmpdata + i * tmpstride,
+           width * sizeof(*data));
+  }
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void loop_restoration_filter_highbd(uint8_t *data8, int width, int height,
+                                    int stride, loop_filter_info_n *lfi,
+                                    uint8_t *tmpdata8, int tmpstride,
+                                    int bit_depth) {
+  int i, j;
+  const double *wr_lut_ = lfi->wr_lut + RESTORATION_RANGE;
 
   uint16_t *data = CONVERT_TO_SHORTPTR(data8);
   uint16_t *tmpdata = CONVERT_TO_SHORTPTR(tmpdata8);
@@ -357,17 +390,17 @@ void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
     for (j = 0; j < width; ++j) {
       int x, y, diff_r;
       double flsum = 0, wtsum = 0, wt;
-      uint16_t *data_p2 = data_p + j - BILATERAL_HALFWIN * stride;
+      uint16_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
 
-      for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; ++y) {
-        for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; ++x) {
+      for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
+        for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
           if (!is_in_image(j + x, i + y, width, height))
             continue;
 
           diff_r = (data_p2[x] - data_p[j]) >> (bit_depth - 8);
-          assert(diff_r >= -256 && diff_r <= 256);
+          assert(diff_r >= -RESTORATION_RANGE && diff_r <= RESTORATION_RANGE);
 
-          wt = lfi->wx_lut[y + BILATERAL_HALFWIN][x + BILATERAL_HALFWIN] *
+          wt = lfi->wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] *
                wr_lut_[diff_r];
           wtsum += wt;
           flsum += wt * data_p2[x];
@@ -381,7 +414,38 @@ void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
     tmpdata_p += tmpstride;
     data_p += stride;
   }
+  for (i = 0; i < height; ++i) {
+    memcpy(data + i * stride, tmpdata + i * tmpstride,
+           width * sizeof(*data));
+  }
+}
 
+// Normalized non-separable filter where weights all sum to 1
+void loop_restoration_filter_norm(uint8_t *data8, int width, int height,
+                                  int stride, loop_filter_info_n *lfi,
+                                  uint8_t *tmpdata8, int tmpstride) {
+  int i, j;
+  uint16_t *data = CONVERT_TO_SHORTPTR(data8);
+  uint16_t *tmpdata = CONVERT_TO_SHORTPTR(tmpdata8);
+  uint16_t *data_p = data;
+  uint16_t *tmpdata_p = tmpdata;
+  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; ++i) {
+    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; ++j) {
+      int x, y;
+      double flsum = 0;
+      uint16_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
+      for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
+        for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
+          flsum += data_p2[x] *
+              lfi->wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN];
+        }
+        data_p2 += stride;
+      }
+      tmpdata_p[j] = (int)(flsum + 0.5);
+    }
+    tmpdata_p += tmpstride;
+    data_p += stride;
+  }
   for (i = 0; i < height; ++i) {
     memcpy(data + i * stride, tmpdata + i * tmpstride,
            width * sizeof(*data));
@@ -389,10 +453,10 @@ void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-void vp10_loop_bilateral_rows(YV12_BUFFER_CONFIG *frame,
-                              VP10_COMMON *cm,
-                              int start_mi_row, int end_mi_row,
-                              int y_only) {
+void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
+                                VP10_COMMON *cm,
+                                int start_mi_row, int end_mi_row,
+                                int y_only) {
   const int ywidth = frame->y_crop_width;
   const int ystride = frame->y_stride;
   const int uvwidth = frame->uv_crop_width;
@@ -419,39 +483,43 @@ void vp10_loop_bilateral_rows(YV12_BUFFER_CONFIG *frame,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth)
-    loop_bilateral_filter_highbd(frame->y_buffer + ystart * ystride,
-                                 ywidth, yend - ystart, ystride, &cm->lf_info,
-                                 tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
-                                 tmp_buf->y_stride, cm->bit_depth);
+    loop_restoration_filter_highbd(
+        frame->y_buffer + ystart * ystride,
+        ywidth, yend - ystart, ystride, &cm->lf_info,
+        tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
+        tmp_buf->y_stride, cm->bit_depth);
   else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  loop_bilateral_filter(frame->y_buffer + ystart * ystride,
-                        ywidth, yend - ystart, ystride, &cm->lf_info,
-                        tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
-                        tmp_buf->y_stride);
+  loop_restoration_filter(
+      frame->y_buffer + ystart * ystride,
+      ywidth, yend - ystart, ystride, &cm->lf_info,
+      tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
+      tmp_buf->y_stride);
   if (!y_only) {
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (cm->use_highbitdepth) {
-    loop_bilateral_filter_highbd(
-        frame->u_buffer + uvstart * uvstride,
-        uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
-        tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
-        tmp_buf->uv_stride, cm->bit_depth);
-    loop_bilateral_filter_highbd(
-        frame->v_buffer + uvstart * uvstride,
-        uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
-        tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
-        tmp_buf->uv_stride, cm->bit_depth);
+    if (cm->use_highbitdepth) {
+      loop_restoration_filter_highbd(
+          frame->u_buffer + uvstart * uvstride,
+          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
+          tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
+          tmp_buf->uv_stride, cm->bit_depth);
+      loop_restoration_filter_highbd(
+          frame->v_buffer + uvstart * uvstride,
+          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
+          tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
+          tmp_buf->uv_stride, cm->bit_depth);
     } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    loop_bilateral_filter(frame->u_buffer + uvstart * uvstride,
-                          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
-                          tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
-                          tmp_buf->uv_stride);
-    loop_bilateral_filter(frame->v_buffer + uvstart * uvstride,
-                          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
-                          tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
-                          tmp_buf->uv_stride);
+      loop_restoration_filter(
+          frame->u_buffer + uvstart * uvstride,
+          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
+          tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
+          tmp_buf->uv_stride);
+      loop_restoration_filter(
+          frame->v_buffer + uvstart * uvstride,
+          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
+          tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
+          tmp_buf->uv_stride);
 #if CONFIG_VP9_HIGHBITDEPTH
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -501,7 +569,7 @@ void vp10_loop_filter_init(VP10_COMMON *cm) {
     memset(lfi->lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
 
 #if CONFIG_LOOP_RESTORATION
-  vp10_loop_bilateral_precal();
+  vp10_loop_restoration_precal();
 #endif  // CONFIG_LOOP_RESTORATION
 }
 
@@ -1973,16 +2041,16 @@ void vp10_loop_filter_data_reset(
 }
 
 #if CONFIG_LOOP_RESTORATION
-void vp10_loop_bilateral_frame(YV12_BUFFER_CONFIG *frame,
+void vp10_loop_restoration_frame(YV12_BUFFER_CONFIG *frame,
                                VP10_COMMON *cm,
-                               int bilateral_level,
+                               int restoration_level,
                                int y_only, int partial_frame) {
   int start_mi_row, end_mi_row, mi_rows_to_filter;
-  // const int loop_bilateral_used = vp10_loop_bilateral_used(
-  //     bilateral_level, cm->frame_type == KEY_FRAME);
-  vp10_loop_bilateral_init(&cm->lf_info, bilateral_level,
+  // const int loop_restoration_used = vp10_loop_restoration_used(
+  //     restoration_level, cm->frame_type == KEY_FRAME);
+  vp10_loop_restoration_init(&cm->lf_info, restoration_level,
                            cm->frame_type == KEY_FRAME);
-  if (!cm->lf_info.bilateral_used)
+  if (!cm->lf_info.restoration_used)
     return;
   start_mi_row = 0;
   mi_rows_to_filter = cm->mi_rows;
@@ -1992,7 +2060,7 @@ void vp10_loop_bilateral_frame(YV12_BUFFER_CONFIG *frame,
     mi_rows_to_filter = VPXMAX(cm->mi_rows / 8, 8);
   }
   end_mi_row = start_mi_row + mi_rows_to_filter;
-  vp10_loop_bilateral_rows(frame, cm, start_mi_row, end_mi_row, y_only);
+  vp10_loop_restoration_rows(frame, cm, start_mi_row, end_mi_row, y_only);
 }
 #endif  // CONFIG_LOOP_RESTORATION
 

@@ -2139,17 +2139,17 @@ static void setup_loopfilter(VP10_COMMON *cm,
     }
   }
 #if CONFIG_LOOP_RESTORATION
-  lf->bilateral_level = vpx_rb_read_bit(rb);
-  if (lf->bilateral_level) {
-    int level = vpx_rb_read_literal(rb, vp10_bilateral_level_bits(cm));
-    lf->bilateral_level = level + (level >= lf->last_bilateral_level);
+  lf->restoration_level = vpx_rb_read_bit(rb);
+  if (lf->restoration_level) {
+    int level = vpx_rb_read_literal(rb, vp10_restoration_level_bits(cm));
+    lf->restoration_level = level + (level >= lf->last_restoration_level);
   } else {
-    lf->bilateral_level = lf->last_bilateral_level;
+    lf->restoration_level = lf->last_restoration_level;
   }
   if (cm->frame_type != KEY_FRAME)
-    cm->lf.last_bilateral_level = cm->lf.bilateral_level;
+    cm->lf.last_restoration_level = cm->lf.restoration_level;
   else
-    cm->lf.last_bilateral_level = 0;
+    cm->lf.last_restoration_level = 0;
 #endif  // CONFIG_LOOP_RESTORATION
 }
 
@@ -3481,10 +3481,10 @@ void vp10_decode_frame(VP10Decoder *pbi,
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }
 #if CONFIG_LOOP_RESTORATION
-  vp10_loop_bilateral_init(&cm->lf_info, cm->lf.bilateral_level,
-                           cm->frame_type == KEY_FRAME);
-  if (cm->lf_info.bilateral_used) {
-    vp10_loop_bilateral_rows(new_fb, cm, 0, cm->mi_rows, 0);
+  vp10_loop_restoration_init(&cm->lf_info, cm->lf.restoration_level,
+                             cm->frame_type == KEY_FRAME);
+  if (cm->lf_info.restoration_used) {
+    vp10_loop_restoration_rows(new_fb, cm, 0, cm->mi_rows, 0);
   }
 #endif  // CONFIG_LOOP_RESTORATION
 

@@ -1778,12 +1778,12 @@ static void encode_loopfilter(VP10_COMMON *cm,
     }
   }
 #if CONFIG_LOOP_RESTORATION
-  vpx_wb_write_bit(wb, lf->bilateral_level != lf->last_bilateral_level);
-  if (lf->bilateral_level != lf->last_bilateral_level) {
-    int level = lf->bilateral_level -
-                (lf->bilateral_level > lf->last_bilateral_level);
+  vpx_wb_write_bit(wb, lf->restoration_level != lf->last_restoration_level);
+  if (lf->restoration_level != lf->last_restoration_level) {
+    int level = lf->restoration_level -
+                (lf->restoration_level > lf->last_restoration_level);
     vpx_wb_write_literal(wb, level,
-                         vp10_bilateral_level_bits(cm));
+                         vp10_restoration_level_bits(cm));
   }
 #endif  // CONFIG_LOOP_RESTORATION
 }

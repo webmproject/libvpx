@@ -29,24 +29,24 @@ extern "C" {
 #define MAX_MODE_LF_DELTAS      2
 
 #if CONFIG_LOOP_RESTORATION
-#define BILATERAL_LEVEL_BITS_KF 4
-#define BILATERAL_LEVELS_KF     (1 << BILATERAL_LEVEL_BITS_KF)
-#define BILATERAL_LEVEL_BITS    3
-#define BILATERAL_LEVELS        (1 << BILATERAL_LEVEL_BITS)
-#define DEF_BILATERAL_LEVEL     2
+#define RESTORATION_LEVEL_BITS_KF 4
+#define RESTORATION_LEVELS_KF     (1 << RESTORATION_LEVEL_BITS_KF)
+#define RESTORATION_LEVEL_BITS    3
+#define RESTORATION_LEVELS        (1 << RESTORATION_LEVEL_BITS)
+#define DEF_RESTORATION_LEVEL     2
 
-#define BILATERAL_PRECISION     16
-#define BILATERAL_HALFWIN       3
-#define BILATERAL_WIN           (2 * BILATERAL_HALFWIN + 1)
+#define RESTORATION_PRECISION     16
+#define RESTORATION_HALFWIN       3
+#define RESTORATION_WIN           (2 * RESTORATION_HALFWIN + 1)
 
-typedef struct bilateral_params {
+typedef struct restoration_params {
   int sigma_x;  // spatial variance x
   int sigma_y;  // spatial variance y
   int sigma_r;  // range variance
-} bilateral_params_t;
+} restoration_params_t;
 
-static bilateral_params_t
-    bilateral_level_to_params_arr[BILATERAL_LEVELS + 1] = {
+static restoration_params_t
+    restoration_level_to_params_arr[RESTORATION_LEVELS + 1] = {
   // Values are rounded to 1/16 th precision
   {0, 0, 0},    // 0 - default
   {8, 9, 30},
@@ -59,8 +59,8 @@ static bilateral_params_t
   {32, 32, 40},
 };
 
-static bilateral_params_t
-    bilateral_level_to_params_arr_kf[BILATERAL_LEVELS_KF + 1] = {
+static restoration_params_t
+    restoration_level_to_params_arr_kf[RESTORATION_LEVELS_KF + 1] = {
   // Values are rounded to 1/16 th precision
   {0, 0, 0},    // 0 - default
   {8, 8, 30},
@@ -81,13 +81,13 @@ static bilateral_params_t
   {64, 64, 48},
 };
 
-int vp10_bilateral_level_bits(const struct VP10Common *const cm);
-int vp10_loop_bilateral_used(int level, int kf);
+int vp10_restoration_level_bits(const struct VP10Common *const cm);
+int vp10_loop_restoration_used(int level, int kf);
 
-static INLINE bilateral_params_t vp10_bilateral_level_to_params(
+static INLINE restoration_params_t vp10_restoration_level_to_params(
     int index, int kf) {
-  return kf ? bilateral_level_to_params_arr_kf[index] :
-              bilateral_level_to_params_arr[index];
+  return kf ? restoration_level_to_params_arr_kf[index] :
+              restoration_level_to_params_arr[index];
 }
 #endif  // CONFIG_LOOP_RESTORATION
 
@@ -116,8 +116,8 @@ struct loopfilter {
   signed char last_mode_deltas[MAX_MODE_LF_DELTAS];
 
 #if CONFIG_LOOP_RESTORATION
-  int bilateral_level;
-  int last_bilateral_level;
+  int restoration_level;
+  int last_restoration_level;
 #endif  // CONFIG_LOOP_RESTORATION
 };
 
@@ -133,12 +133,12 @@ typedef struct {
   loop_filter_thresh lfthr[MAX_LOOP_FILTER + 1];
   uint8_t lvl[MAX_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
 #if CONFIG_LOOP_RESTORATION
-  double * wx_lut[BILATERAL_WIN];
-  double * wr_lut;
-  int bilateral_sigma_x_set;
-  int bilateral_sigma_y_set;
-  int bilateral_sigma_r_set;
-  int bilateral_used;
+  double *wx_lut[RESTORATION_WIN];
+  double *wr_lut;
+  int restoration_sigma_x_set;
+  int restoration_sigma_y_set;
+  int restoration_sigma_r_set;
+  int restoration_used;
 #endif  // CONFIG_LOOP_RESTORATION
 } loop_filter_info_n;
 
@@ -198,33 +198,33 @@ void vp10_loop_filter_init(struct VP10Common *cm);
 void vp10_loop_filter_frame_init(struct VP10Common *cm, int default_filt_lvl);
 
 void vp10_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
-                           struct VP10Common *cm,
-                           struct macroblockd *mbd,
-                           int filter_level,
-                           int y_only, int partial_frame);
+                            struct VP10Common *cm,
+                            struct macroblockd *mbd,
+                            int filter_level,
+                            int y_only, int partial_frame);
 
 // Apply the loop filter to [start, stop) macro block rows in frame_buffer.
 void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
-                          struct VP10Common *cm,
-                          struct macroblockd_plane planes[MAX_MB_PLANE],
-                          int start, int stop, int y_only);
+                           struct VP10Common *cm,
+                           struct macroblockd_plane planes[MAX_MB_PLANE],
+                           int start, int stop, int y_only);
 
 #if CONFIG_LOOP_RESTORATION
-void vp10_loop_bilateral_frame(YV12_BUFFER_CONFIG *frame,
-                               struct VP10Common *cm,
-                               int bilateral_level,
-                               int y_only, int partial_frame);
-void vp10_loop_filter_bilateral_frame(YV12_BUFFER_CONFIG *frame,
-                                      struct VP10Common *cm,
-                                      struct macroblockd *mbd,
-                                      int frame_filter_level,
-                                      int bilateral_level,
-                                      int y_only, int partial_frame);
-void vp10_loop_bilateral_init(loop_filter_info_n *lfi, int T, int kf);
-void vp10_loop_bilateral_rows(YV12_BUFFER_CONFIG *frame,
-                              struct VP10Common *cm,
-                              int start_mi_row, int end_mi_row,
-                              int y_only);
+void vp10_loop_restoration_frame(YV12_BUFFER_CONFIG *frame,
+                                 struct VP10Common *cm,
+                                 int restoration_level,
+                                 int y_only, int partial_frame);
+void vp10_loop_filter_restoration_frame(YV12_BUFFER_CONFIG *frame,
+                                        struct VP10Common *cm,
+                                        struct macroblockd *mbd,
+                                        int frame_filter_level,
+                                        int restoration_level,
+                                        int y_only, int partial_frame);
+void vp10_loop_restoration_init(loop_filter_info_n *lfi, int T, int kf);
+void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
+                                struct VP10Common *cm,
+                                int start_mi_row, int end_mi_row,
+                                int y_only);
 #endif  // CONFIG_LOOP_RESTORATION
 
 typedef struct LoopFilterWorkerData {
