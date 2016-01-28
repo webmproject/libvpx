@@ -34,6 +34,24 @@
       "revId": "3e78c7e9c872935b1305201d774868b4feca3712",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5422228b_05ad72a8",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 545,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-28T22:45:23Z",
+      "side": 1,
+      "message": "OK. can you just make this a boolean-like are then? is_sub8x8_block or so?",
+      "parentUuid": "144d0a10_bec475b9",
+      "revId": "3e78c7e9c872935b1305201d774868b4feca3712",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
