@@ -714,6 +714,10 @@ static int choose_partitioning(VP9_COMP *cpi,
   s = x->plane[0].src.buf;
   sp = x->plane[0].src.stride;
 
+  // Index for force_split: 0 for 64x64, 1-4 for 32x32 blocks,
+  // 5-20 for the 16x16 blocks.
+  force_split[0] = 0;
+
   if (!is_key_frame) {
     // In the case of spatial/temporal scalable coding, the assumption here is
     // that the temporal reference frame will always be of type LAST_FRAME.
@@ -768,6 +772,47 @@ static int choose_partitioning(VP9_COMP *cpi,
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
+    // Check if most of the superblock is skin content, and if so, force split
+    // to 32x32. Avoid checking superblocks on/near boundary for high resoln
+    // Note superblock may still pick 64X64 if y_sad is very small
+    // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
+    x->sb_is_skin = 0;
+    if (cpi->oxcf.content != VP9E_CONTENT_SCREEN && (low_res || (mi_col >= 8 &&
+        mi_col + 8 < cm->mi_cols && mi_row >= 8 && mi_row + 8 < cm->mi_rows))) {
+      int num_16x16_skin = 0;
+      int num_16x16_nonskin = 0;
+      uint8_t *ysignal = x->plane[0].src.buf;
+      uint8_t *usignal = x->plane[1].src.buf;
+      uint8_t *vsignal = x->plane[2].src.buf;
+      int spuv = x->plane[1].src.stride;
+      for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+          int is_skin = vp9_compute_skin_block(ysignal,
+                                               usignal,
+                                               vsignal,
+                                               sp,
+                                               spuv,
+                                               BLOCK_16X16);
+          num_16x16_skin += is_skin;
+          num_16x16_nonskin += (1 - is_skin);
+          if (num_16x16_nonskin > 3) {
+            // Exit loop if at least 4 of the 16x16 blocks are not skin.
+            i = 4;
+            j = 4;
+          }
+          ysignal += 16;
+          usignal += 8;
+          vsignal += 8;
+        }
+        ysignal += (sp << 4) - 64;
+        usignal += (spuv << 3) - 32;
+        vsignal += (spuv << 3) - 32;
+      }
+      if (num_16x16_skin > 12) {
+        x->sb_is_skin = 1;
+        force_split[0] = 1;
+      }
+    }
     for (i = 1; i <= 2; ++i) {
       struct macroblock_plane  *p = &x->plane[i];
       struct macroblockd_plane *pd = &xd->plane[i];
@@ -779,7 +824,9 @@ static int choose_partitioning(VP9_COMP *cpi,
         uv_sad = cpi->fn_ptr[bs].sdf(p->src.buf, p->src.stride,
                                      pd->dst.buf, pd->dst.stride);
 
-      x->color_sensitivity[i - 1] = uv_sad > (y_sad >> 2);
+        // TODO(marpan): Investigate if we should lower this threshold if
+        // superblock is detected as skin.
+        x->color_sensitivity[i - 1] = uv_sad > (y_sad >> 2);
     }
 
     d = xd->plane[0].dst.buf;
@@ -818,9 +865,6 @@ static int choose_partitioning(VP9_COMP *cpi,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
-  // Index for force_split: 0 for 64x64, 1-4 for 32x32 blocks,
-  // 5-20 for the 16x16 blocks.
-  force_split[0] = 0;
   // Fill in the entire tree of 8x8 (or 4x4 under some conditions) variances
   // for splits.
   for (i = 0; i < 4; i++) {
@@ -3629,6 +3673,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
     vp9_rd_cost_init(&dummy_rdc);
     x->color_sensitivity[0] = 0;
     x->color_sensitivity[1] = 0;
+    x->sb_is_skin = 0;
 
     if (seg->enabled) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map

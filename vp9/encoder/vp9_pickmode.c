@@ -812,7 +812,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
       mi->mv[0].as_mv.col > 64 ||
       mi->mv[0].as_mv.col < -64)
     motion_low = 0;
-  if (x->encode_breakout > 0 && motion_low == 1) {
+  if (x->encode_breakout > 0 && motion_low == 1 && !x->sb_is_skin) {
     // Set a maximum for threshold to avoid big PSNR loss in low bit rate
     // case. Use extreme low threshold for static frames to limit
     // skipping.
@@ -1585,7 +1585,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
 
     if (cpi->oxcf.speed >= 5 &&
-        cpi->oxcf.content != VP9E_CONTENT_SCREEN) {
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
+        !x->sb_is_skin) {
       // Bias against non-zero (above some threshold) motion for large blocks.
       // This is temporary fix to avoid selection of large mv for big blocks.
       if (frame_mv[this_mode][ref_frame].as_mv.row > 64 ||
