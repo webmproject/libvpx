@@ -16,6 +16,24 @@
       "revId": "3e78c7e9c872935b1305201d774868b4feca3712",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "144d0a10_bec475b9",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 545,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-01-28T12:50:18Z",
+      "side": 1,
+      "message": "Right... I was going to shuffle the code around until I realized the compiler was optimizing this out.\n\nThe check here prevents get_sub_block_mv() from being called for the first two blocks of sizes \u003e\u003d 8x8.",
+      "parentUuid": "542ce22d_9b7e738c",
+      "revId": "3e78c7e9c872935b1305201d774868b4feca3712",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
