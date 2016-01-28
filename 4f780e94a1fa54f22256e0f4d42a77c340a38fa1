@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14f98afe_7b505fe0",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-28T21:02:38Z",
+      "side": 1,
+      "message": "the name isn\u0027t 100% accurate for the NULL flush...",
+      "revId": "4f780e94a1fa54f22256e0f4d42a77c340a38fa1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
