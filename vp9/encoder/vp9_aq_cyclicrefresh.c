@@ -320,11 +320,11 @@ void vp9_cyclic_refresh_postencode(VP9_COMP *const cpi) {
 void vp9_cyclic_refresh_set_golden_update(VP9_COMP *const cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-  // Set minimum gf_interval for GF update to a multiple (== 2) of refresh
-  // period. Depending on past encoding stats, GF flag may be reset and update
-  // may not occur until next baseline_gf_interval.
+  // Set minimum gf_interval for GF update to a multiple of the refresh period,
+  // with some max limit. Depending on past encoding stats, GF flag may be
+  // reset and update may not occur until next baseline_gf_interval.
   if (cr->percent_refresh > 0)
-    rc->baseline_gf_interval = 4 * (100 / cr->percent_refresh);
+    rc->baseline_gf_interval = VPXMIN(4 * (100 / cr->percent_refresh), 40);
   else
     rc->baseline_gf_interval = 40;
 }

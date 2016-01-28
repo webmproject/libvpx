@@ -12,21 +12,22 @@
 #define VP9_ENCODER_VP9_COST_H_
 
 #include "vpx_dsp/prob.h"
+#include "vpx/vpx_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const unsigned int vp9_prob_cost[256];
+extern const uint16_t vp9_prob_cost[257];
 
 // The factor to scale from cost in bits to cost in vp9_prob_cost units.
-#define VP9_PROB_COST_SHIFT 8
+#define VP9_PROB_COST_SHIFT 9
 
 #define vp9_cost_zero(prob) (vp9_prob_cost[prob])
 
-#define vp9_cost_one(prob) vp9_cost_zero(vpx_complement(prob))
+#define vp9_cost_one(prob) vp9_cost_zero(256 - (prob))
 
-#define vp9_cost_bit(prob, bit) vp9_cost_zero((bit) ? vpx_complement(prob) \
+#define vp9_cost_bit(prob, bit) vp9_cost_zero((bit) ? 256 - (prob) \
                                                     : (prob))
 
 static INLINE unsigned int cost_branch256(const unsigned int ct[2],
