@@ -220,7 +220,24 @@ cglobal idct8x8_64_add, 3, 5, 13, input, output, stride
   mova    m12, [pw_11585x2]
 
   lea      r3, [2 * strideq]
-
+%if CONFIG_VP9_HIGHBITDEPTH
+  mova     m0, [inputq +   0]
+  packssdw m0, [inputq +  16]
+  mova     m1, [inputq +  32]
+  packssdw m1, [inputq +  48]
+  mova     m2, [inputq +  64]
+  packssdw m2, [inputq +  80]
+  mova     m3, [inputq +  96]
+  packssdw m3, [inputq + 112]
+  mova     m4, [inputq + 128]
+  packssdw m4, [inputq + 144]
+  mova     m5, [inputq + 160]
+  packssdw m5, [inputq + 176]
+  mova     m6, [inputq + 192]
+  packssdw m6, [inputq + 208]
+  mova     m7, [inputq + 224]
+  packssdw m7, [inputq + 240]
+%else
   mova     m0, [inputq +   0]
   mova     m1, [inputq +  16]
   mova     m2, [inputq +  32]
@@ -229,7 +246,7 @@ cglobal idct8x8_64_add, 3, 5, 13, input, output, stride
   mova     m5, [inputq +  80]
   mova     m6, [inputq +  96]
   mova     m7, [inputq + 112]
-
+%endif
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
   IDCT8_1D
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
@@ -254,10 +271,21 @@ cglobal idct8x8_12_add, 3, 5, 13, input, output, stride
 
   lea        r3, [2 * strideq]
 
+%if CONFIG_VP9_HIGHBITDEPTH
+  mova       m0, [inputq +   0]
+  packssdw   m0, [inputq +  16]
+  mova       m1, [inputq +  32]
+  packssdw   m1, [inputq +  48]
+  mova       m2, [inputq +  64]
+  packssdw   m2, [inputq +  80]
+  mova       m3, [inputq +  96]
+  packssdw   m3, [inputq + 112]
+%else
   mova       m0, [inputq +  0]
   mova       m1, [inputq + 16]
   mova       m2, [inputq + 32]
   mova       m3, [inputq + 48]
+%endif
 
   punpcklwd  m0, m1
   punpcklwd  m2, m3
