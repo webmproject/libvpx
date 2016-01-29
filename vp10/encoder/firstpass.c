@@ -1613,7 +1613,6 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
   int mid_boost_bits = 0;
   int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
-  int alt_frame_index = frame_index;
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
@@ -1626,15 +1625,13 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
       gf_group->update_type[0] = OVERLAY_UPDATE;
       gf_group->rf_level[0] = INTER_NORMAL;
       gf_group->bit_allocation[0] = 0;
-      gf_group->arf_update_idx[0] = arf_buffer_indices[0];
-      gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
     } else {
       gf_group->update_type[0] = GF_UPDATE;
       gf_group->rf_level[0] = GF_ARF_STD;
       gf_group->bit_allocation[0] = gf_arf_bits;
-      gf_group->arf_update_idx[0] = arf_buffer_indices[0];
-      gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
     }
+    gf_group->arf_update_idx[0] = arf_buffer_indices[0];
+    gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
 
     // Step over the golden frame / overlay frame
     if (EOF == input_stats(twopass, &frame_stats))
@@ -1648,15 +1645,15 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
 
   // Store the bits to spend on the ARF if there is one.
   if (rc->source_alt_ref_pending) {
-    gf_group->update_type[alt_frame_index] = ARF_UPDATE;
-    gf_group->rf_level[alt_frame_index] = GF_ARF_STD;
-    gf_group->bit_allocation[alt_frame_index] = gf_arf_bits;
+    gf_group->update_type[frame_index] = ARF_UPDATE;
+    gf_group->rf_level[frame_index] = GF_ARF_STD;
+    gf_group->bit_allocation[frame_index] = gf_arf_bits;
 
-    gf_group->arf_src_offset[alt_frame_index] =
+    gf_group->arf_src_offset[frame_index] =
         (unsigned char)(rc->baseline_gf_interval - 1);
 
-    gf_group->arf_update_idx[alt_frame_index] = arf_buffer_indices[0];
-    gf_group->arf_ref_idx[alt_frame_index] =
+    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
+    gf_group->arf_ref_idx[frame_index] =
       arf_buffer_indices[cpi->multi_arf_last_grp_enabled &&
                          rc->source_alt_ref_active];
     ++frame_index;
