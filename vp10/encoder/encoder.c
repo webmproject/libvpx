@@ -2779,10 +2779,10 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
 #endif
   }
 #if CONFIG_LOOP_RESTORATION
-  vp10_loop_bilateral_init(&cm->lf_info, cm->lf.bilateral_level,
+  vp10_loop_restoration_init(&cm->lf_info, cm->lf.restoration_level,
                            cm->frame_type == KEY_FRAME);
-  if (cm->lf_info.bilateral_used)
-    vp10_loop_bilateral_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
+  if (cm->lf_info.restoration_used)
+    vp10_loop_restoration_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
 #endif  // CONFIG_LOOP_RESTORATION
 
   vpx_extend_frame_inner_borders(cm->frame_to_show);
@@ -3894,9 +3894,9 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   cm->last_frame_type = cm->frame_type;
 #if CONFIG_LOOP_RESTORATION
   if (cm->frame_type != KEY_FRAME)
-    cm->lf.last_bilateral_level = cm->lf.bilateral_level;
+    cm->lf.last_restoration_level = cm->lf.restoration_level;
   else
-    cm->lf.last_bilateral_level = 0;
+    cm->lf.last_restoration_level = 0;
 #endif  // CONFIG_LOOP_RESTORATION
 
   vp10_rc_postencode_update(cpi, *size);
