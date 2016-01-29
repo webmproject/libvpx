@@ -1,0 +1,197 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14950abd_81cb1e76",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "because",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14950abd_a1eadacb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "rsp",
+      "range": {
+        "startLine": 12,
+        "startChar": 26,
+        "endLine": 12,
+        "endChar": 29
+      },
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "548b02a3_468688d0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "instruction",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9462dabe_dacee1b2",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "this should be in a separate patch",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "548b02a3_66b8e48d",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "add a copyright",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "548b02a3_06c9e031",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "you can simply say \u0027SECTION_RODATA 16\u0027",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d468d2a0_bf911fcb",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "where else are these defined that you need to undef them?",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d468d2a0_df96d3bf",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "you should align these with the other column",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "548b02a3_86b5f094",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "remove all trailing whitespace",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "749006cb_0461dab4",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "I don\u0027t think many of these lines need to be broken. comment alignment can be local to each group if you\u0027re worried about line length",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "548b02a3_068480c7",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1255,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:59:01Z",
+      "side": 1,
+      "message": "fix this alignment",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
