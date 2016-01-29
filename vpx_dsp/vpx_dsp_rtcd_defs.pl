@@ -699,7 +699,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_iwht4x4_1_add/;
 
   add_proto qw/void vpx_iwht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-  specialize qw/vpx_iwht4x4_16_add/;
+  specialize qw/vpx_iwht4x4_16_add/, "$sse2_x86inc";
 
   add_proto qw/void vpx_highbd_idct4x4_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vpx_highbd_idct4x4_1_add/;
