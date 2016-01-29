@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "548b02a3_66ef04a8",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-01-29T04:21:18Z",
+      "side": 1,
+      "message": "this looks like a hardcoded value for 1080p. it may serve webrtc\u0027s purposes, but it would be great if we could avoid this or at the very least place a check with a TODO and fall back to the c-code if the frame is too big",
+      "revId": "85b6254ff6493d9460598eef26a0efbf1cb473d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
