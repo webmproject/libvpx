@@ -777,6 +777,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     // Note superblock may still pick 64X64 if y_sad is very small
     // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
     x->sb_is_skin = 0;
+#if !CONFIG_VP9_HIGHBITDEPTH
     if (cpi->oxcf.content != VP9E_CONTENT_SCREEN && (low_res || (mi_col >= 8 &&
         mi_col + 8 < cm->mi_cols && mi_row >= 8 && mi_row + 8 < cm->mi_rows))) {
       int num_16x16_skin = 0;
@@ -813,6 +814,7 @@ static int choose_partitioning(VP9_COMP *cpi,
         force_split[0] = 1;
       }
     }
+#endif
     for (i = 1; i <= 2; ++i) {
       struct macroblock_plane  *p = &x->plane[i];
       struct macroblockd_plane *pd = &xd->plane[i];
