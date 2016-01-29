@@ -344,7 +344,9 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   mv_col = ctx->best_sse_mv.as_mv.col;
   mv_row = ctx->best_sse_mv.as_mv.row;
   motion_magnitude = mv_row * mv_row + mv_col * mv_col;
-  if (denoiser->denoising_level == kDenHigh && motion_magnitude < 16) {
+  if (!is_skin &&
+      denoiser->denoising_level == kDenHigh &&
+      motion_magnitude < 16) {
     denoiser->increase_denoising = 1;
   } else {
     denoiser->increase_denoising = 0;
