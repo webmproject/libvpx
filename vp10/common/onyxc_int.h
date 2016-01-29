@@ -24,6 +24,7 @@
 #include "vp10/common/frame_buffers.h"
 #include "vp10/common/quant_common.h"
 #include "vp10/common/tile_common.h"
+#include "vp10/common/restoration.h"
 
 #if CONFIG_VP9_POSTPROC
 #include "vp10/common/postproc.h"
@@ -255,6 +256,9 @@ typedef struct VP10Common {
   INTERP_FILTER interp_filter;
 
   loop_filter_info_n lf_info;
+#if CONFIG_LOOP_RESTORATION
+  restoration_info_n rst_info;
+#endif  // CONFIG_LOOP_RESTORATION
 
   // Flag signaling how frame contexts should be updated at the end of
   // a frame decode
