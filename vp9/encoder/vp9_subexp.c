@@ -142,8 +142,10 @@ int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
                                               vpx_prob *bestp,
                                               vpx_prob upd,
                                               int stepsize) {
-  int i, old_b, new_b, update_b, savings, bestsavings, step;
+  int i, old_b, new_b, update_b, savings, bestsavings;
   int newp;
+  const int step_sign = *bestp > oldp[PIVOT_NODE] ? -1 : 1;
+  const int step = stepsize * step_sign;
   vpx_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
   vp9_model_to_full_probs(oldp, oldplist);
   memcpy(newplist, oldp, sizeof(vpx_prob) * UNCONSTRAINED_NODES);
@@ -154,41 +156,23 @@ int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
   bestsavings = 0;
   bestnewp = oldp[PIVOT_NODE];
 
-  if (*bestp > oldp[PIVOT_NODE]) {
-    step = -stepsize;
-    for (newp = *bestp; newp > oldp[PIVOT_NODE]; newp += step) {
-      if (newp < 1 || newp > 255)
-        continue;
-      newplist[PIVOT_NODE] = newp;
-      vp9_model_to_full_probs(newplist, newplist);
-      for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
-        new_b += cost_branch256(ct + 2 * i, newplist[i]);
-      new_b += cost_branch256(ct + 2 * PIVOT_NODE, newplist[PIVOT_NODE]);
-      update_b = prob_diff_update_cost(newp, oldp[PIVOT_NODE]) +
-          vp9_cost_upd256;
-      savings = old_b - new_b - update_b;
-      if (savings > bestsavings) {
-        bestsavings = savings;
-        bestnewp = newp;
-      }
-    }
-  } else {
-    step = stepsize;
-    for (newp = *bestp; newp < oldp[PIVOT_NODE]; newp += step) {
-      if (newp < 1 || newp > 255)
-        continue;
-      newplist[PIVOT_NODE] = newp;
-      vp9_model_to_full_probs(newplist, newplist);
-      for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
-        new_b += cost_branch256(ct + 2 * i, newplist[i]);
-      new_b += cost_branch256(ct + 2 * PIVOT_NODE, newplist[PIVOT_NODE]);
-      update_b = prob_diff_update_cost(newp, oldp[PIVOT_NODE]) +
-          vp9_cost_upd256;
-      savings = old_b - new_b - update_b;
-      if (savings > bestsavings) {
-        bestsavings = savings;
-        bestnewp = newp;
-      }
+  assert(stepsize > 0);
+
+  for (newp = *bestp; (newp - oldp[PIVOT_NODE]) * step_sign < 0;
+      newp += step) {
+    if (newp < 1 || newp > 255)
+      continue;
+    newplist[PIVOT_NODE] = newp;
+    vp9_model_to_full_probs(newplist, newplist);
+    for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
+      new_b += cost_branch256(ct + 2 * i, newplist[i]);
+    new_b += cost_branch256(ct + 2 * PIVOT_NODE, newplist[PIVOT_NODE]);
+    update_b = prob_diff_update_cost(newp, oldp[PIVOT_NODE]) +
+        vp9_cost_upd256;
+    savings = old_b - new_b - update_b;
+    if (savings > bestsavings) {
+      bestsavings = savings;
+      bestnewp = newp;
     }
   }
 
