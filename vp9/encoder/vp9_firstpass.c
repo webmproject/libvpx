@@ -1720,15 +1720,13 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       gf_group->update_type[0] = OVERLAY_UPDATE;
       gf_group->rf_level[0] = INTER_NORMAL;
       gf_group->bit_allocation[0] = 0;
-      gf_group->arf_update_idx[0] = arf_buffer_indices[0];
-      gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
     } else {
       gf_group->update_type[0] = GF_UPDATE;
       gf_group->rf_level[0] = GF_ARF_STD;
       gf_group->bit_allocation[0] = gf_arf_bits;
-      gf_group->arf_update_idx[0] = arf_buffer_indices[0];
-      gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
     }
+    gf_group->arf_update_idx[0] = arf_buffer_indices[0];
+    gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
 
     // Step over the golden frame / overlay frame
     if (EOF == input_stats(twopass, &frame_stats))
