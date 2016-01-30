@@ -852,6 +852,12 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
   if (var <= thresh_ac && (sse - var) <= thresh_dc) {
     unsigned int sse_u, sse_v;
     unsigned int var_u, var_v;
+    unsigned int thresh_ac_uv = thresh_ac;
+    unsigned int thresh_dc_uv = thresh_dc;
+    if (x->sb_is_skin) {
+      thresh_ac_uv = 0;
+      thresh_dc_uv = 0;
+    }
 
     // Skip UV prediction unless breakout is zero (lossless) to save
     // computation with low impact on the result
@@ -867,14 +873,14 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
                                     xd->plane[1].dst.stride, &sse_u);
 
     // U skipping condition checking
-    if (((var_u << 2) <= thresh_ac) && (sse_u - var_u <= thresh_dc)) {
+    if (((var_u << 2) <= thresh_ac_uv) && (sse_u - var_u <= thresh_dc_uv)) {
       var_v = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
                                       x->plane[2].src.stride,
                                       xd->plane[2].dst.buf,
                                       xd->plane[2].dst.stride, &sse_v);
 
       // V skipping condition checking
-      if (((var_v << 2) <= thresh_ac) && (sse_v - var_v <= thresh_dc)) {
+      if (((var_v << 2) <= thresh_ac_uv) && (sse_v - var_v <= thresh_dc_uv)) {
         x->skip = 1;
 
         // The cost of skip bit needs to be added.
@@ -1585,7 +1591,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
 
     if (cpi->oxcf.speed >= 5 &&
-        cpi->oxcf.content != VP9E_CONTENT_SCREEN) {
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
+        !x->sb_is_skin) {
       // Bias against non-zero (above some threshold) motion for large blocks.
       // This is temporary fix to avoid selection of large mv for big blocks.
       if (frame_mv[this_mode][ref_frame].as_mv.row > 64 ||

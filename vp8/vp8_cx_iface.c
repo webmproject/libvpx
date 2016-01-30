@@ -1162,31 +1162,6 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx)
         return NULL;
 }
 
-static vpx_codec_err_t vp8e_update_entropy(vpx_codec_alg_priv_t *ctx,
-                                           va_list args)
-{
-    int update = va_arg(args, int);
-    vp8_update_entropy(ctx->cpi, update);
-    return VPX_CODEC_OK;
-
-}
-
-static vpx_codec_err_t vp8e_update_reference(vpx_codec_alg_priv_t *ctx,
-                                             va_list args)
-{
-    int update = va_arg(args, int);
-    vp8_update_reference(ctx->cpi, update);
-    return VPX_CODEC_OK;
-}
-
-static vpx_codec_err_t vp8e_use_reference(vpx_codec_alg_priv_t *ctx,
-                                          va_list args)
-{
-    int reference_flag = va_arg(args, int);
-    vp8_use_as_reference(ctx->cpi, reference_flag);
-    return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t vp8e_set_frame_flags(vpx_codec_alg_priv_t *ctx,
                                             va_list args)
 {

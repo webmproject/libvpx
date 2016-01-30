@@ -66,6 +66,7 @@ int enable_noise_estimation(VP9_COMP *const cpi) {
     return 0;
 }
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
 static void copy_frame(YV12_BUFFER_CONFIG * const dest,
                        const YV12_BUFFER_CONFIG * const src) {
   int r;
@@ -81,6 +82,7 @@ static void copy_frame(YV12_BUFFER_CONFIG * const dest,
     srcbuf += src->y_stride;
   }
 }
+#endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
 NOISE_LEVEL vp9_noise_estimate_extract_level(NOISE_ESTIMATE *const ne) {
   int noise_level = kLowLow;

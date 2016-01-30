@@ -36,6 +36,8 @@
 extern unsigned int cnt_pm;
 #endif
 
+#define MODEL_MODE 0
+
 extern const int vp8_ref_frame_order[MAX_MODES];
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 
@@ -45,18 +47,21 @@ extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 // skin color classifier is defined.
 
 // Fixed-point skin color model parameters.
-static const int skin_mean[2] = {7463, 9614};                 // q6
+static const int skin_mean[5][2] =
+    {{7463, 9614}, {6400, 10240}, {7040, 10240}, {8320, 9280}, {6800, 9614}};
 static const int skin_inv_cov[4] = {4107, 1663, 1663, 2157};  // q16
-static const int skin_threshold = 1570636;                    // q18
+static const int skin_threshold[2] = {1570636, 800000};       // q18
 
 // Evaluates the Mahalanobis distance measure for the input CbCr values.
-static int evaluate_skin_color_difference(int cb, int cr)
-{
+static int evaluate_skin_color_difference(int cb, int cr, int idx) {
   const int cb_q6 = cb << 6;
   const int cr_q6 = cr << 6;
-  const int cb_diff_q12 = (cb_q6 - skin_mean[0]) * (cb_q6 - skin_mean[0]);
-  const int cbcr_diff_q12 = (cb_q6 - skin_mean[0]) * (cr_q6 - skin_mean[1]);
-  const int cr_diff_q12 = (cr_q6 - skin_mean[1]) * (cr_q6 - skin_mean[1]);
+  const int cb_diff_q12 =
+      (cb_q6 - skin_mean[idx][0]) * (cb_q6 - skin_mean[idx][0]);
+  const int cbcr_diff_q12 =
+      (cb_q6 - skin_mean[idx][0]) * (cr_q6 - skin_mean[idx][1]);
+  const int cr_diff_q12 =
+      (cr_q6 - skin_mean[idx][1]) * (cr_q6 - skin_mean[idx][1]);
   const int cb_diff_q2 = (cb_diff_q12 + (1 << 9)) >> 10;
   const int cbcr_diff_q2 = (cbcr_diff_q12 + (1 << 9)) >> 10;
   const int cr_diff_q2 = (cr_diff_q12 + (1 << 9)) >> 10;
@@ -65,6 +70,34 @@ static int evaluate_skin_color_difference(int cb, int cr)
       skin_inv_cov[2] * cbcr_diff_q2 +
       skin_inv_cov[3] * cr_diff_q2;
   return skin_diff;
+}
+
+// Checks if the input yCbCr values corresponds to skin color.
+static int is_skin_color(int y, int cb, int cr)
+{
+  if (y < 40 || y > 220)
+  {
+    return 0;
+  }
+  else
+  {
+    if (MODEL_MODE == 0)
+    {
+      return (evaluate_skin_color_difference(cb, cr, 0) < skin_threshold[0]);
+    }
+    else
+    {
+      int i = 0;
+      for (; i < 5; i++)
+      {
+        if (evaluate_skin_color_difference(cb, cr, i) < skin_threshold[1])
+        {
+          return 1;
+        }
+      }
+      return 0;
+    }
+  }
 }
 
 static int macroblock_corner_grad(unsigned char* signal, int stride,
@@ -155,16 +188,6 @@ static int check_dot_artifact_candidate(VP8_COMP *cpi,
     return 0;
   }
   return 0;
-}
-
-// Checks if the input yCbCr values corresponds to skin color.
-static int is_skin_color(int y, int cb, int cr)
-{
-  if (y < 40 || y > 220)
-  {
-    return 0;
-  }
-  return (evaluate_skin_color_difference(cb, cr) < skin_threshold);
 }
 
 int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
