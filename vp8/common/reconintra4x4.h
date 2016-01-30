@@ -17,8 +17,8 @@
 extern "C" {
 #endif
 
-static void intra_prediction_down_copy(MACROBLOCKD *xd,
-                                       unsigned char *above_right_src)
+static INLINE void intra_prediction_down_copy(MACROBLOCKD *xd,
+                                              unsigned char *above_right_src)
 {
     int dst_stride = xd->dst.y_stride;
     unsigned char *above_right_dst = xd->dst.y_buffer - dst_stride + 16;

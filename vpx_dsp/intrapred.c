@@ -44,6 +44,7 @@ static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
       dst[r * stride + c] = dst[(r + 1) * stride + c - 2];
 }
 
+#if CONFIG_MISC_FIXES
 static INLINE void d207e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                    const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -58,6 +59,7 @@ static INLINE void d207e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
+#endif  // CONFIG_MISC_FIXES
 
 static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
@@ -76,6 +78,7 @@ static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+#if CONFIG_MISC_FIXES
 static INLINE void d63e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -89,6 +92,7 @@ static INLINE void d63e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
+#endif  // CONFIG_MISC_FIXES
 
 static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
@@ -109,6 +113,7 @@ static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+#if CONFIG_MISC_FIXES
 static INLINE void d45e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -121,6 +126,7 @@ static INLINE void d45e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
+#endif  // CONFIG_MISC_FIXES
 
 static INLINE void d117_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
