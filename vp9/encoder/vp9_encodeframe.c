@@ -773,12 +773,13 @@ static int choose_partitioning(VP9_COMP *cpi,
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
     // Check if most of the superblock is skin content, and if so, force split
-    // to 32x32. Avoid checking superblocks on/near boundary for high resoln
+    // to 32x32. Avoid checking superblocks on/near boundary and avoid low
+    // resolutons for now.
     // Note superblock may still pick 64X64 if y_sad is very small
     // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
     x->sb_is_skin = 0;
 #if !CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->oxcf.content != VP9E_CONTENT_SCREEN && (low_res || (mi_col >= 8 &&
+    if (cpi->oxcf.content != VP9E_CONTENT_SCREEN && (!low_res && (mi_col >= 8 &&
         mi_col + 8 < cm->mi_cols && mi_row >= 8 && mi_row + 8 < cm->mi_rows))) {
       int num_16x16_skin = 0;
       int num_16x16_nonskin = 0;
