@@ -419,7 +419,7 @@ static INLINE int is_mv_valid(const MV *mv) {
 static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
                             PREDICTION_MODE mode,
                             int_mv mv[2], int_mv ref_mv[2],
-                            int_mv nearest_mv[2], int_mv near_mv[2],
+                            int_mv near_nearest_mv[2],
                             int is_compound, int allow_hp, vpx_reader *r) {
   int i;
   int ret = 1;
@@ -435,22 +435,15 @@ static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
       }
       break;
     }
+    case NEARMV:
     case NEARESTMV: {
-      mv[0].as_int = nearest_mv[0].as_int;
-      if (is_compound)
-        mv[1].as_int = nearest_mv[1].as_int;
-      break;
-    }
-    case NEARMV: {
-      mv[0].as_int = near_mv[0].as_int;
-      if (is_compound)
-        mv[1].as_int = near_mv[1].as_int;
+      mv[0].as_int = near_nearest_mv[0].as_int;
+      mv[1].as_int = near_nearest_mv[1].as_int;
       break;
     }
     case ZEROMV: {
       mv[0].as_int = 0;
-      if (is_compound)
-        mv[1].as_int = 0;
+      mv[1].as_int = 0;
       break;
     }
     default: {
@@ -475,17 +468,15 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 static void dec_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp, int_mv *mvlist,
-                                  int_mv *nearest_mv, int_mv *near_mv,
-                                  int refmv_count) {
+                                  int_mv *best_mv, int refmv_count) {
   int i;
 
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < refmv_count; ++i) {
     lower_mv_precision(&mvlist[i].as_mv, allow_hp);
     clamp_mv2(&mvlist[i].as_mv, xd);
+    *best_mv = mvlist[i];
   }
-  *nearest_mv = mvlist[0];
-  *near_mv = mvlist[1];
 }
 
 static void fpm_sync(void *const data, int mi_row) {
@@ -532,10 +523,10 @@ static void fpm_sync(void *const data, int mi_row) {
 // This function searches the neighborhood of a given MB/SB
 // to try and find candidate reference vectors.
 static int dec_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                            MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                            PREDICTION_MODE mode, MV_REFERENCE_FRAME ref_frame,
                             const POSITION *const mv_ref_search,
                             int_mv *mv_ref_list,
-                            int mi_row, int mi_col,
+                            int mi_row, int mi_col, int block, int is_sub8x8,
                             find_mv_refs_sync sync, void *const data) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
@@ -545,16 +536,38 @@ static int dec_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const TileInfo *const tile = &xd->tile;
   // If mode is nearestmv or newmv (uses nearestmv as a reference) then stop
   // searching after the first mv is found.
-  const int early_break = (mi->mode == NEARESTMV) ||
-                          (mi->mode == NEWMV);
+  const int early_break = (mode != NEARMV);
 
   // Blank the reference vector list
   memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
 
+  i = 0;
+  if (is_sub8x8) {
+    // If the size < 8x8 we get the mv from the bmi substructure for the
+    // nearest two blocks.
+    for (i = 0; i < 2; ++i) {
+      const POSITION *const mv_ref = &mv_ref_search[i];
+      if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+        const MODE_INFO *const candidate_mi =
+            xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride];
+        different_ref_found = 1;
+
+        if (candidate_mi->ref_frame[0] == ref_frame)
+          ADD_MV_REF_LIST_EB(
+              get_sub_block_mv(candidate_mi, 0, mv_ref->col, block),
+                  refmv_count, mv_ref_list, Done);
+        else if (candidate_mi->ref_frame[1] == ref_frame)
+          ADD_MV_REF_LIST_EB(
+              get_sub_block_mv(candidate_mi, 1, mv_ref->col, block),
+                  refmv_count, mv_ref_list, Done);
+      }
+    }
+  }
+
   // Check the rest of the neighbors in much the same way
   // as before except we don't need to keep track of sub blocks or
   // mode counts.
-  for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
+  for (; i < MVREF_NEIGHBOURS; ++i) {
     const POSITION *const mv_ref = &mv_ref_search[i];
     if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
       const MODE_INFO *const candidate =
@@ -635,7 +648,7 @@ static int dec_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
   }
 
-  if (mi->mode == NEARMV)
+  if (mode == NEARMV)
     refmv_count = MAX_MV_REF_CANDIDATES;
   else
     // we only care about the nearestmv for the remaining modes
@@ -647,6 +660,62 @@ static int dec_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
 
   return refmv_count;
+}
+
+static void append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                      const POSITION *const mv_ref_search,
+                                      PREDICTION_MODE b_mode, int block,
+                                      int ref, int mi_row, int mi_col,
+                                      int_mv *best_sub8x8) {
+  int_mv mv_list[MAX_MV_REF_CANDIDATES];
+  MODE_INFO *const mi = xd->mi[0];
+  b_mode_info *bmi = mi->bmi;
+  int n;
+  int refmv_count;
+
+  assert(MAX_MV_REF_CANDIDATES == 2);
+
+  refmv_count = dec_find_mv_refs(cm, xd, b_mode, mi->ref_frame[ref],
+                                 mv_ref_search, mv_list, mi_row, mi_col, block,
+                                 1, NULL, NULL);
+
+  switch (block) {
+    case 0:
+      best_sub8x8->as_int = mv_list[refmv_count - 1].as_int;
+      break;
+    case 1:
+    case 2:
+      if (b_mode == NEARESTMV) {
+        best_sub8x8->as_int = bmi[0].as_mv[ref].as_int;
+      } else {
+        best_sub8x8->as_int = 0;
+        for (n = 0; n < refmv_count; ++n)
+          if (bmi[0].as_mv[ref].as_int != mv_list[n].as_int) {
+            best_sub8x8->as_int = mv_list[n].as_int;
+            break;
+          }
+      }
+      break;
+    case 3:
+      if (b_mode == NEARESTMV) {
+        best_sub8x8->as_int = bmi[2].as_mv[ref].as_int;
+      } else {
+        int_mv candidates[2 + MAX_MV_REF_CANDIDATES];
+        candidates[0] = bmi[1].as_mv[ref];
+        candidates[1] = bmi[0].as_mv[ref];
+        candidates[2] = mv_list[0];
+        candidates[3] = mv_list[1];
+        best_sub8x8->as_int = 0;
+        for (n = 0; n < 2 + MAX_MV_REF_CANDIDATES; ++n)
+          if (bmi[2].as_mv[ref].as_int != candidates[n].as_int) {
+            best_sub8x8->as_int = candidates[n].as_int;
+            break;
+          }
+      }
+      break;
+    default:
+      assert(0 && "Invalid block index.");
+  }
 }
 
 static uint8_t get_mode_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
@@ -677,7 +746,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
   VP9_COMMON *const cm = &pbi->common;
   const BLOCK_SIZE bsize = mi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
-  int_mv nearestmv[2], nearmv[2];
+  int_mv best_ref_mvs[2];
   int ref, is_compound;
   uint8_t inter_mode_ctx;
   const POSITION *const mv_ref_search = mv_ref_blocks[bsize];
@@ -705,16 +774,16 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
 
     if (mi->mode != ZEROMV) {
       for (ref = 0; ref < 1 + is_compound; ++ref) {
-        int_mv ref_mvs[MAX_MV_REF_CANDIDATES];
+        int_mv tmp_mvs[MAX_MV_REF_CANDIDATES];
         const MV_REFERENCE_FRAME frame = mi->ref_frame[ref];
         int refmv_count;
 
-        refmv_count = dec_find_mv_refs(cm, xd, mi, frame, mv_ref_search,
-                                       ref_mvs, mi_row, mi_col, fpm_sync,
-                                       (void *)pbi);
+        refmv_count = dec_find_mv_refs(cm, xd, mi->mode, frame, mv_ref_search,
+                                       tmp_mvs, mi_row, mi_col, -1, 0,
+                                       fpm_sync, (void *)pbi);
 
-        dec_find_best_ref_mvs(xd, allow_hp, ref_mvs, &nearestmv[ref],
-                              &nearmv[ref], refmv_count);
+        dec_find_best_ref_mvs(xd, allow_hp, tmp_mvs, &best_ref_mvs[ref],
+                              refmv_count);
       }
     }
   }
@@ -728,32 +797,23 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
     const int num_4x4_h = 1 << xd->bmode_blocks_hl;
     int idx, idy;
     PREDICTION_MODE b_mode;
-    int_mv nearest_sub8x8[2], near_sub8x8[2];
+    int_mv best_sub8x8[2];
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
-        int_mv block[2];
         const int j = idy * 2 + idx;
         b_mode = read_inter_mode(cm, xd, r, inter_mode_ctx);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
-          uint8_t dummy_mode_ctx[MAX_REF_FRAMES];
           for (ref = 0; ref < 1 + is_compound; ++ref)
-            vp9_append_sub8x8_mvs_for_idx(cm, xd, j, ref, mi_row, mi_col,
-                                          &nearest_sub8x8[ref],
-                                          &near_sub8x8[ref],
-                                          dummy_mode_ctx);
+            append_sub8x8_mvs_for_idx(cm, xd, mv_ref_search, b_mode, j, ref,
+                                      mi_row, mi_col, &best_sub8x8[ref]);
         }
 
-        if (!assign_mv(cm, xd, b_mode, block, nearestmv,
-                       nearest_sub8x8, near_sub8x8,
-                       is_compound, allow_hp, r)) {
+        if (!assign_mv(cm, xd, b_mode, mi->bmi[j].as_mv, best_ref_mvs,
+                       best_sub8x8, is_compound, allow_hp, r)) {
           xd->corrupted |= 1;
           break;
         }
-
-        mi->bmi[j].as_mv[0].as_int = block[0].as_int;
-        if (is_compound)
-          mi->bmi[j].as_mv[1].as_int = block[1].as_int;
 
         if (num_4x4_h == 2)
           mi->bmi[j + 2] = mi->bmi[j];
@@ -767,8 +827,8 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
     mi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
-    xd->corrupted |= !assign_mv(cm, xd, mi->mode, mi->mv, nearestmv,
-                                nearestmv, nearmv, is_compound, allow_hp, r);
+    xd->corrupted |= !assign_mv(cm, xd, mi->mode, mi->mv, best_ref_mvs,
+                                best_ref_mvs, is_compound, allow_hp, r);
   }
 }
 
