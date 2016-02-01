@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "d468d2a0_16782d08",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-01T22:18:55Z",
+      "side": 1,
+      "message": "do you mean \u0027see if this shift needs to be...\u0027?",
+      "revId": "a39cf1d102dc2b0e3fef0625dd20492d2956093a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f465d6c4_2475fbce",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 1
@@ -13,6 +30,30 @@
       "writtenOn": "2016-02-01T18:05:15Z",
       "side": 1,
       "message": "I don\u0027t like that this will paper over the error if anyone increases the cost again. Thoughts?",
+      "range": {
+        "startLine": 91,
+        "startChar": 31,
+        "endLine": 91,
+        "endChar": 39
+      },
+      "revId": "a39cf1d102dc2b0e3fef0625dd20492d2956093a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f465d6c4_7795e75e",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-01T22:18:55Z",
+      "side": 1,
+      "message": "meaning should the cost exceed unsigned or the result of the multiply? we talked about being more strict with sanitize\u003dinteger, it might make sense on the encoder side at least",
+      "parentUuid": "f465d6c4_2475fbce",
       "range": {
         "startLine": 91,
         "startChar": 31,
