@@ -3702,7 +3702,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                        mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]};
   int_mv ref_mv[2];
   int ite, ref;
-  const InterpKernel *kernel = vp10_filter_kernels[mbmi->interp_filter];
+  const INTERP_FILTER interp_filter = mbmi->interp_filter;
   struct scale_factors sf;
 
   // Do joint motion search in compound mode to get more accurate mv.
@@ -3784,7 +3784,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                        second_pred, pw,
                                        &frame_mv[refs[!id]].as_mv,
                                        &sf, pw, ph, 0,
-                                       kernel, MV_PRECISION_Q3,
+                                       interp_filter, MV_PRECISION_Q3,
                                        mi_col * MI_SIZE, mi_row * MI_SIZE,
                                        xd->bd);
     } else {
@@ -3794,7 +3794,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                 second_pred, pw,
                                 &frame_mv[refs[!id]].as_mv,
                                 &sf, pw, ph, 0,
-                                kernel, MV_PRECISION_Q3,
+                                interp_filter, MV_PRECISION_Q3,
                                 mi_col * MI_SIZE, mi_row * MI_SIZE);
     }
 #else
@@ -3803,7 +3803,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                               second_pred, pw,
                               &frame_mv[refs[!id]].as_mv,
                               &sf, pw, ph, 0,
-                              kernel, MV_PRECISION_Q3,
+                              interp_filter, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
