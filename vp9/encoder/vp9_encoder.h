@@ -494,6 +494,8 @@ typedef struct VP9_COMP {
   int resize_buffer_underflow;
   int resize_count;
 
+  int use_skin_detection;
+
   NOISE_ESTIMATE noise_estimate;
 
   // VAR_BASED_PARTITION thresholds

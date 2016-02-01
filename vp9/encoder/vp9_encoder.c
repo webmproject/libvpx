@@ -1671,6 +1671,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->resize_state = 0;
   cpi->resize_avg_qp = 0;
   cpi->resize_buffer_underflow = 0;
+  cpi->use_skin_detection = 0;
   cpi->common.buffer_pool = pool;
 
   cpi->rc.high_source_sad = 0;
@@ -3329,6 +3330,14 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
 
   set_size_independent_vars(cpi);
   set_size_dependent_vars(cpi, &q, &bottom_index, &top_index);
+
+  if (cpi->oxcf.speed >= 5 &&
+      cpi->oxcf.pass == 0 &&
+      cpi->oxcf.rc_mode == VPX_CBR &&
+      cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
+      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+    cpi->use_skin_detection = 1;
+  }
 
   vp9_set_quantizer(cm, q);
   vp9_set_variance_partition_thresholds(cpi, q);
