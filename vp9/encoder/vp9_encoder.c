@@ -3129,7 +3129,7 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q,
   if (oxcf->pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
 
-#if CONFIG_VP9_POSTPROC
+#if CONFIG_VP9_POSTPROC && !(CONFIG_VP9_TEMPORAL_DENOISING)
   if (oxcf->noise_sensitivity > 0) {
     int l = 0;
     switch (oxcf->noise_sensitivity) {
