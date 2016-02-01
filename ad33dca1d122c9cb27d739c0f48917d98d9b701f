@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9489faaa_94e0b216",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-01T20:34:14Z",
+      "side": 1,
+      "message": "add #if SWITCHABLE_DQ .. #endif",
+      "revId": "ad33dca1d122c9cb27d739c0f48917d98d9b701f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9489faaa_94b7d20a",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 2388,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-01T20:34:14Z",
+      "side": 1,
+      "message": "set mic-\u003embmi.dq_off_index \u003d 0; outside the #if segment",
+      "revId": "ad33dca1d122c9cb27d739c0f48917d98d9b701f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f465d6c4_17faeb98",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 6093,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-01T20:34:14Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ad33dca1d122c9cb27d739c0f48917d98d9b701f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "349a0eef_1242f1ee",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 7306,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-01T20:34:14Z",
+      "side": 1,
+      "message": "remove or uncomment.",
+      "revId": "ad33dca1d122c9cb27d739c0f48917d98d9b701f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f465d6c4_77e967d2",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 7451,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-01T20:34:14Z",
+      "side": 1,
+      "message": "set mbmi-\u003edq_off_index \u003d 0;",
+      "revId": "ad33dca1d122c9cb27d739c0f48917d98d9b701f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
