@@ -65,8 +65,14 @@ struct macroblock {
   int skip_optimize;
   int q_index;
 
+  // The equivalent error at the current rdmult of one whole bit (not one
+  // bitcost unit).
   int errorperbit;
+  // The equivalend SAD error of one (whole) bit at the current quantizer
+  // for large blocks.
   int sadperbit16;
+  // The equivalend SAD error of one (whole) bit at the current quantizer
+  // for sub-8x8 blocks.
   int sadperbit4;
   int rddiv;
   int rdmult;
