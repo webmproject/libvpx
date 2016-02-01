@@ -63,6 +63,30 @@
       "revId": "a39cf1d102dc2b0e3fef0625dd20492d2956093a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "349a0eef_8dba66f4",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-01T22:24:31Z",
+      "side": 1,
+      "message": "Cost and error_per_bit will always be positive and less \u003c 2**31.\n\nWith traditional 8-bit costs this product can bit in 31 bits, with 9-bit costs the product fits in 32-bits, if someone sees the 9-bit coding gain and tries 10-bit then in some cases this will overflow to 33-bits where we need to be using ((u)int64_t). \n\nUnfortunately C doesn\u0027t have a type for unsigned integer without wraparound.",
+      "parentUuid": "f465d6c4_7795e75e",
+      "range": {
+        "startLine": 91,
+        "startChar": 31,
+        "endLine": 91,
+        "endChar": 39
+      },
+      "revId": "a39cf1d102dc2b0e3fef0625dd20492d2956093a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
