@@ -25,7 +25,7 @@ void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       const MV *src_mv,
                                       const struct scale_factors *sf,
                                       int w, int h, int ref,
-                                      const InterpKernel *kernel,
+                                      const INTERP_FILTER interp_filter,
                                       enum mv_precision precision,
                                       int x, int y, int bd) {
   const int is_q4 = precision == MV_PRECISION_Q4;
@@ -38,7 +38,8 @@ void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
   high_inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
-                       sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4, bd);
+                       sf, w, h, ref, interp_filter, sf->x_step_q4,
+                       sf->y_step_q4, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -47,7 +48,7 @@ void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
                                const MV *src_mv,
                                const struct scale_factors *sf,
                                int w, int h, int ref,
-                               const InterpKernel *kernel,
+                               const INTERP_FILTER interp_filter,
                                enum mv_precision precision,
                                int x, int y) {
   const int is_q4 = precision == MV_PRECISION_Q4;
@@ -60,7 +61,7 @@ void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
   inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
-                  sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4);
+                  sf, w, h, ref, interp_filter, sf->x_step_q4, sf->y_step_q4);
 }
 
 void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
@@ -70,7 +71,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0];
   const int is_compound = has_second_ref(&mi->mbmi);
-  const InterpKernel *kernel = vp10_filter_kernels[mi->mbmi.interp_filter];
+  const INTERP_FILTER interp_filter = mi->mbmi.interp_filter;
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
@@ -115,15 +116,15 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                           subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys,
-                           xd->bd);
+                           subpel_x, subpel_y, sf, w, h, ref,
+                           interp_filter, xs, ys, xd->bd);
     } else {
       inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                      subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
+                      subpel_x, subpel_y, sf, w, h, ref, interp_filter, xs, ys);
     }
 #else
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                    subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
+                    subpel_x, subpel_y, sf, w, h, ref, interp_filter, xs, ys);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 }
@@ -140,7 +141,7 @@ void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
   uint8_t *const dst = &pd->dst.buf[(ir * pd->dst.stride + ic) << 2];
   int ref;
   const int is_compound = has_second_ref(&mi->mbmi);
-  const InterpKernel *kernel = vp10_filter_kernels[mi->mbmi.interp_filter];
+  const INTERP_FILTER interp_filter = mi->mbmi.interp_filter;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const uint8_t *pre =
@@ -151,7 +152,7 @@ void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
                                       dst, pd->dst.stride,
                                       &mi->bmi[i].as_mv[ref].as_mv,
                                       &xd->block_refs[ref]->sf, width, height,
-                                      ref, kernel, MV_PRECISION_Q3,
+                                      ref, interp_filter, MV_PRECISION_Q3,
                                       mi_col * MI_SIZE + 4 * ic,
                                       mi_row * MI_SIZE + 4 * ir, xd->bd);
   } else {
@@ -159,7 +160,7 @@ void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
                                dst, pd->dst.stride,
                                &mi->bmi[i].as_mv[ref].as_mv,
                                &xd->block_refs[ref]->sf, width, height, ref,
-                               kernel, MV_PRECISION_Q3,
+                               interp_filter, MV_PRECISION_Q3,
                                mi_col * MI_SIZE + 4 * ic,
                                mi_row * MI_SIZE + 4 * ir);
   }
@@ -168,7 +169,7 @@ void vp10_build_inter_predictor_sub8x8(MACROBLOCKD *xd, int plane,
                                dst, pd->dst.stride,
                                &mi->bmi[i].as_mv[ref].as_mv,
                                &xd->block_refs[ref]->sf, width, height, ref,
-                               kernel, MV_PRECISION_Q3,
+                               interp_filter, MV_PRECISION_Q3,
                                mi_col * MI_SIZE + 4 * ic,
                                mi_row * MI_SIZE + 4 * ir);
 #endif  // CONFIG_VP9_HIGHBITDEPTH

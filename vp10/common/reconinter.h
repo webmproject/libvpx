@@ -14,7 +14,6 @@
 #include "vp10/common/filter.h"
 #include "vp10/common/onyxc_int.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/vpx_filter.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,8 +25,9 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
                                    const int subpel_y,
                                    const struct scale_factors *sf,
                                    int w, int h, int ref,
-                                   const InterpKernel *kernel,
+                                   const INTERP_FILTER interp_filter,
                                    int xs, int ys) {
+  const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   if (kernel[0][SUBPEL_TAPS / 2 - 1] == 128) {
     // Interpolating filter
@@ -53,8 +53,9 @@ static INLINE void high_inter_predictor(const uint8_t *src, int src_stride,
                                         const int subpel_y,
                                         const struct scale_factors *sf,
                                         int w, int h, int ref,
-                                        const InterpKernel *kernel,
+                                        const INTERP_FILTER interp_filter,
                                         int xs, int ys, int bd) {
+  const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   if (kernel[0][SUBPEL_TAPS / 2 - 1] == 128) {
     // Interpolating filter
@@ -192,7 +193,7 @@ void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
                                const MV *mv_q3,
                                const struct scale_factors *sf,
                                int w, int h, int do_avg,
-                               const InterpKernel *kernel,
+                               const INTERP_FILTER interp_filter,
                                enum mv_precision precision,
                                int x, int y);
 
@@ -202,7 +203,7 @@ void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       const MV *mv_q3,
                                       const struct scale_factors *sf,
                                       int w, int h, int do_avg,
-                                      const InterpKernel *kernel,
+                                      const INTERP_FILTER interp_filter,
                                       enum mv_precision precision,
                                       int x, int y, int bd);
 #endif
