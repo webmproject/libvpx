@@ -1871,6 +1871,9 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   vp10_init_quantizer(cpi);
 
   vp10_loop_filter_init(cm);
+#if CONFIG_LOOP_RESTORATION
+  vp10_loop_restoration_precal();
+#endif  // CONFIG_LOOP_RESTORATION
 
   cm->error.setjmp = 0;
 
@@ -2779,9 +2782,9 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
 #endif
   }
 #if CONFIG_LOOP_RESTORATION
-  vp10_loop_restoration_init(&cm->lf_info, cm->lf.restoration_level,
-                           cm->frame_type == KEY_FRAME);
-  if (cm->lf_info.restoration_used)
+  vp10_loop_restoration_init(&cm->rst_info, cm->lf.restoration_level,
+                             cm->frame_type == KEY_FRAME);
+  if (cm->rst_info.restoration_used)
     vp10_loop_restoration_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
 #endif  // CONFIG_LOOP_RESTORATION
 

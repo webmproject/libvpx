@@ -80,6 +80,8 @@ VP10_COMMON_SRCS-$(CONFIG_ANS) += common/divide.c
 
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.h
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.c
+VP10_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.h
+VP10_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.c
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/mfqe.h
 VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/mfqe.c
 ifeq ($(CONFIG_VP9_POSTPROC),yes)

@@ -3481,9 +3481,9 @@ void vp10_decode_frame(VP10Decoder *pbi,
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }
 #if CONFIG_LOOP_RESTORATION
-  vp10_loop_restoration_init(&cm->lf_info, cm->lf.restoration_level,
+  vp10_loop_restoration_init(&cm->rst_info, cm->lf.restoration_level,
                              cm->frame_type == KEY_FRAME);
-  if (cm->lf_info.restoration_used) {
+  if (cm->rst_info.restoration_used) {
     vp10_loop_restoration_rows(new_fb, cm, 0, cm->mi_rows, 0);
   }
 #endif  // CONFIG_LOOP_RESTORATION
