@@ -162,7 +162,9 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
         // 16x16 blocks, 1/4 sample of frame.
-        if (mi_row % 4 == 0 && mi_col % 4 == 0) {
+        if (mi_row % 4 == 0 && mi_col % 4 == 0 &&
+            mi_row < cm->mi_rows - 1 &&
+            mi_col < cm->mi_cols - 1) {
           int bl_index = mi_row * cm->mi_cols + mi_col;
           int bl_index1 = bl_index + 1;
           int bl_index2 = bl_index + cm->mi_cols;
