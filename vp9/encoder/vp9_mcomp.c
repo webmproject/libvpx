@@ -153,10 +153,10 @@ void vp9_init3smotion_compensation(search_site_config *cfg, int stride) {
  */
 
 /* estimated cost of a motion vector (r,c) */
-#define MVC(r, c)                                       \
-    (mvcost ?                                           \
-     ((mvjcost[((r) != rr) * 2 + ((c) != rc)] +         \
-       mvcost[0][((r) - rr)] + mvcost[1][((c) - rc)]) * \
+#define MVC(r, c)                                              \
+    (mvcost ?                                                  \
+     ((unsigned)(mvjcost[((r) != rr) * 2 + ((c) != rc)] +      \
+       mvcost[0][((r) - rr)] + mvcost[1][((c) - rc)]) *        \
       error_per_bit + 4096) >> 13 : 0)
 
 
@@ -849,9 +849,9 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
       cost_list[i + 1] = fn_ptr->vf(what->buf, what->stride,
                                     get_buf_from_mv(in_what, &this_mv),
                                     in_what->stride, &sse) +
-          // mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
-          mv_err_cost(&this_mv, &fcenter_mv, x->nmvjointcost, x->mvcost,
-                      x->errorperbit);
+                                    mv_err_cost(&this_mv, &fcenter_mv,
+                                                x->nmvjointcost, x->mvcost,
+                                                x->errorperbit);
     }
   } else {
     for (i = 0; i < 4; i++) {
@@ -863,9 +863,9 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
         cost_list[i + 1] = fn_ptr->vf(what->buf, what->stride,
                                       get_buf_from_mv(in_what, &this_mv),
                                       in_what->stride, &sse) +
-            // mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
-            mv_err_cost(&this_mv, &fcenter_mv, x->nmvjointcost, x->mvcost,
-                        x->errorperbit);
+                                      mv_err_cost(&this_mv, &fcenter_mv,
+                                                  x->nmvjointcost, x->mvcost,
+                                                  x->errorperbit);
     }
   }
 }
