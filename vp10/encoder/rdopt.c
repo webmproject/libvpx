@@ -132,16 +132,6 @@ static const REF_DEFINITION vp10_ref_order[MAX_REFS] = {
   {{INTRA_FRAME,  NONE}},
 };
 
-static INLINE int write_uniform_cost(int n, int v) {
-  int l = get_unsigned_bits(n), m = (1 << l) - n;
-  if (l == 0)
-    return 0;
-  if (v < m)
-    return (l - 1) * vp10_cost_bit(128, 0);
-  else
-    return l * vp10_cost_bit(128, 0);
-}
-
 static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                            int m, int n, int min_plane, int max_plane) {
   int i;

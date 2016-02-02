@@ -24,19 +24,6 @@
 
 #include "vpx_dsp/vpx_dsp_common.h"
 
-static INLINE int read_uniform(vpx_reader *r, int n) {
-  int l = get_unsigned_bits(n);
-  int m = (1 << l) - n;
-  int v = vpx_read_literal(r, l-1);
-
-  assert(l != 0);
-
-  if (v < m)
-    return v;
-  else
-    return (v << 1) - m + vpx_read_literal(r, 1);
-}
-
 static PREDICTION_MODE read_intra_mode(vpx_reader *r, const vpx_prob *p) {
   return (PREDICTION_MODE)vpx_read_tree(r, vp10_intra_mode_tree, p);
 }
