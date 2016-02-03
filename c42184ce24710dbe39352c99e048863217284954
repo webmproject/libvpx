@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f127a8f2_13b27622",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-03T03:12:56Z",
+      "side": 1,
+      "message": "Please assign the parameters to the macro in vpx_dsp/vpx_filter.h\n\n#define FILTER_BITS 7\n\n#define SUBPEL_BITS 4\n#define SUBPEL_MASK ((1 \u003c\u003c SUBPEL_BITS) - 1)\n#define SUBPEL_SHIFTS (1 \u003c\u003c SUBPEL_BITS)\n#define SUBPEL_TAPS 8",
+      "range": {
+        "startLine": 262,
+        "startChar": 0,
+        "endLine": 265,
+        "endChar": 21
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f127a8f2_93bdc6ef",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-03T03:12:56Z",
+      "side": 1,
+      "message": "Write a check function for this condition",
+      "range": {
+        "startLine": 501,
+        "startChar": 0,
+        "endLine": 501,
+        "endChar": 32
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71c9f878_2aa2a76d",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 4359,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-03T03:12:56Z",
+      "side": 1,
+      "message": "Write a check function for this condition",
+      "range": {
+        "startLine": 4359,
+        "startChar": 0,
+        "endLine": 4359,
+        "endChar": 30
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31fce07c_bb7093af",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1840,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-03T03:12:56Z",
+      "side": 1,
+      "message": "Why doesn\u0027t this condition need filter search?",
+      "range": {
+        "startLine": 1840,
+        "startChar": 12,
+        "endLine": 1840,
+        "endChar": 62
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "711bb8b8_3a494914",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2165,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-03T03:12:56Z",
+      "side": 1,
+      "message": "Write a check function for this condition",
+      "range": {
+        "startLine": 2165,
+        "startChar": 6,
+        "endLine": 2165,
+        "endChar": 28
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b121b0e4_dcb2ad03",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 6287,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-03T03:12:56Z",
+      "side": 1,
+      "message": "Write a check function for this condition",
+      "range": {
+        "startLine": 6287,
+        "startChar": 8,
+        "endLine": 6287,
+        "endChar": 30
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
