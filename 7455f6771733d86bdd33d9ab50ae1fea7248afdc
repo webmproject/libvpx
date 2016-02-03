@@ -127,6 +127,40 @@
     },
     {
       "key": {
+        "uuid": "b1b530ae_ce33379a",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "For local variables, I find it easier to do the following:\n\n%define q0                0\n%define p0          q0 + 16\n%define q1          p0 + 16              \n%define p1          q1 + 16              \n%define q2          p1 + 16              \n%define p2          q2 + 16              \n%define q3          p2 + 16              \n%define p3          q3 + 16\n%define stacksize   p3 + 16\n\nand to access the variable:\n\nmova    [stkreg + p0], m0\n\nwhere stkreg is:\n\n%define stkreg rbp",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1b530ae_2e48d30b",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "Did you mean to re-use the mask variable location?",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d468d2a0_df96d3bf",
         "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
         "patchSetId": 7
@@ -138,6 +172,91 @@
       "writtenOn": "2016-01-29T04:59:01Z",
       "side": 1,
       "message": "you should align these with the other column",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71af3862_ece2bf2f",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "INIT_XMM sse2",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71af3862_cce5833a",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "change lpf_horizontal_edge_w_sse2_16 to mb_lpf_horizontal_edge_w_16",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51c15418_41496247",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "use a define for stack size",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71af3862_0cce3bb3",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "remove extra space",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91a74cbf_8fabb593",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "align comma and remove extra space\n\nalign comma below",
       "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -161,6 +280,40 @@
     },
     {
       "key": {
+        "uuid": "71af3862_8c08ebb2",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "If the source regs values are no longer required, you should be able to use SWAP.  ie SWAP m1, m11",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1a450bb_5096ccc2",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "If m15 is no longer required, you could replace with SWAP m4, m15.",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "749006cb_0461dab4",
         "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
         "patchSetId": 7
@@ -172,6 +325,57 @@
       "writtenOn": "2016-01-29T04:59:01Z",
       "side": 1,
       "message": "I don\u0027t think many of these lines need to be broken. comment alignment can be local to each group if you\u0027re worried about line length",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1b530ae_eeb71b3d",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "rename to vpx_mb_lpf_horizontal_edge_w_16_sse2",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d1be2490_7218eec4",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "rename to vpx_mb_lpf_horizontal_edge_w_16_sse2",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91b82ca8_961c7255",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1254,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-03T18:16:13Z",
+      "side": 1,
+      "message": "rename to vpx_mb_lpf_horizontal_edge_w_16_sse2",
       "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
