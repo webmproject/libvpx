@@ -69,6 +69,7 @@ typedef struct {
 
 struct loopfilter {
   int filter_level;
+  int last_filt_level;
 
   int sharpness_level;
   int last_sharpness_level;

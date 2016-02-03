@@ -86,7 +86,9 @@ static int mv_err_cost(const MV *mv, const MV *ref,
   if (mvcost) {
     const MV diff = { mv->row - ref->row,
                       mv->col - ref->col };
-    return ROUND_POWER_OF_TWO(mv_cost(&diff, mvjcost, mvcost) *
+    // TODO(aconverse): See if this shift needs to be tied to
+    // VP9_PROB_COST_SHIFT.
+    return ROUND_POWER_OF_TWO((unsigned)mv_cost(&diff, mvjcost, mvcost) *
                                   error_per_bit, 13);
   }
   return 0;
@@ -96,8 +98,9 @@ static int mvsad_err_cost(const MACROBLOCK *x, const MV *mv, const MV *ref,
                           int error_per_bit) {
   const MV diff = { mv->row - ref->row,
                     mv->col - ref->col };
-  return ROUND_POWER_OF_TWO(mv_cost(&diff, x->nmvjointsadcost,
-                                    x->nmvsadcost) * error_per_bit, 8);
+  // TODO(aconverse): See if this shift needs to be tied to VP9_PROB_COST_SHIFT.
+  return ROUND_POWER_OF_TWO((unsigned)mv_cost(&diff, x->nmvjointsadcost,
+                                      x->nmvsadcost) * error_per_bit, 8);
 }
 
 void vp9_init_dsmotion_compensation(search_site_config *cfg, int stride) {
