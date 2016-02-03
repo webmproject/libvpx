@@ -398,6 +398,7 @@ static const int ext_tx_used_inter[EXT_TX_SETS_INTER][TX_TYPES] = {
 #define MAX_ANGLE_DELTAS 3
 #define ANGLE_FAST_SEARCH 1
 #define ANGLE_SKIP_THRESH 0.10
+#define FILTER_FAST_SEARCH 1
 
 static uint8_t mode_to_angle_map[INTRA_MODES] = {
     0, 90, 180, 45, 135, 111, 157, 203, 67, 0,
