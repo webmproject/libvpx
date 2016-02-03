@@ -45,19 +45,6 @@ static const struct vp10_token partition_encodings[PARTITION_TYPES] =
 static const struct vp10_token inter_mode_encodings[INTER_MODES] =
   {{2, 2}, {6, 3}, {0, 1}, {7, 3}};
 
-static INLINE void write_uniform(vpx_writer *w, int n, int v) {
-  int l = get_unsigned_bits(n);
-  int m = (1 << l) - n;
-  if (l == 0)
-    return;
-  if (v < m) {
-    vpx_write_literal(w, v, l - 1);
-  } else {
-    vpx_write_literal(w, m + ((v - m) >> 1), l - 1);
-    vpx_write_literal(w, (v - m) & 1, 1);
-  }
-}
-
 static struct vp10_token ext_tx_encodings[TX_TYPES];
 
 void vp10_encode_token_init() {
