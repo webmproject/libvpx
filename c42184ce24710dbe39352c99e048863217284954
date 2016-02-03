@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5116b490_ba6a55ee",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-03T18:28:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f127a8f2_13b27622",
+      "range": {
+        "startLine": 262,
+        "startChar": 0,
+        "endLine": 265,
+        "endChar": 21
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f127a8f2_93bdc6ef",
         "filename": "vp10/decoder/decodemv.c",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-03T03:12:56Z",
       "side": 1,
       "message": "Write a check function for this condition",
+      "range": {
+        "startLine": 501,
+        "startChar": 0,
+        "endLine": 501,
+        "endChar": 32
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9124acf4_73edab40",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-03T18:28:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f127a8f2_93bdc6ef",
       "range": {
         "startLine": 501,
         "startChar": 0,
@@ -82,6 +130,30 @@
       "writtenOn": "2016-02-03T03:12:56Z",
       "side": 1,
       "message": "Why doesn\u0027t this condition need filter search?",
+      "range": {
+        "startLine": 1840,
+        "startChar": 12,
+        "endLine": 1840,
+        "endChar": 62
+      },
+      "revId": "c42184ce24710dbe39352c99e048863217284954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71c9f878_65293075",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1840,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-03T18:28:25Z",
+      "side": 1,
+      "message": "When the prediction angle is multiple of 45 degree, no interpolation is needed, so we can skip filter selection to save bits and computation.",
+      "parentUuid": "31fce07c_bb7093af",
       "range": {
         "startLine": 1840,
         "startChar": 12,
