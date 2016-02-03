@@ -3355,15 +3355,19 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
     }
 
     if (!disable_skip) {
+      vpx_prob skip_prob = vp9_get_skip_prob(cm, xd);
       if (skippable) {
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
 
         // Cost the skip mb case
-        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+        rate2 += vp9_cost_bit(skip_prob, 1);
       } else if (ref_frame != INTRA_FRAME && !xd->lossless) {
-        if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
-            RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
+        if (RDCOST(x->rdmult, x->rddiv,
+                   rate_y + rate_uv + vp9_cost_bit(skip_prob, 0),
+                   distortion2) <
+            RDCOST(x->rdmult, x->rddiv,
+                   vp9_cost_bit(skip_prob, 1), total_sse)) {
           // Add in the cost of the no skip flag.
           rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
         } else {
