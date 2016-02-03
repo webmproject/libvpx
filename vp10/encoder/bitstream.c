@@ -1519,9 +1519,18 @@ static void write_modes_sb(VP10_COMP *cpi,
       !m->mbmi.skip) {
     assert(*tok < tok_end);
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+      const int mbmi_txb_size = txsize_to_bsize[m->mbmi.tx_size];
+      const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi_txb_size];
+      const int num_4x4_h = num_4x4_blocks_high_lookup[mbmi_txb_size];
+      int row, col;
       TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                          : m->mbmi.tx_size;
-      pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+      BLOCK_SIZE txb_size = txsize_to_bsize[tx];
+      int bw = num_4x4_blocks_wide_lookup[txb_size];
+
+      for (row = 0; row < num_4x4_h; row += bw)
+        for (col = 0; col < num_4x4_w; col += bw)
+          pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
       assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
       (*tok)++;
     }
