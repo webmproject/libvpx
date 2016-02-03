@@ -1967,11 +1967,14 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   return cpi;
 }
+
+#if CONFIG_INTERNAL_STATS
 #define SNPRINT(H, T) \
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T))
 
 #define SNPRINT2(H, T, V) \
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
+#endif  // CONFIG_INTERNAL_STATS
 
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *cm;
