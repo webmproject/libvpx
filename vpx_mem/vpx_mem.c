@@ -9,8 +9,6 @@
  */
 
 
-#define __VPX_MEM_C__
-
 #include "vpx_mem.h"
 #include <stdio.h>
 #include <stdlib.h>
