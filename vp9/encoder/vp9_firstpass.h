@@ -138,9 +138,8 @@ typedef struct {
   FIRSTPASS_STATS total_left_stats;
   int first_pass_done;
   int64_t bits_left;
-  double modified_error_min;
-  double modified_error_max;
-  double modified_error_left;
+  double mean_mod_score;
+  double normalized_score_left;
   double mb_av_energy;
   double mb_smooth_pct;
 
