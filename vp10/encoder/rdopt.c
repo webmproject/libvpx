@@ -6285,7 +6285,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         int_mv cur_mv = mbmi_ext->ref_mv_stack[ref_frame][2].this_mv;
         MB_MODE_INFO backup_mbmi = *mbmi;
 
-        int64_t tmp_alt_rd = INT64_MAX;
+        int64_t tmp_alt_rd = INT64_MAX, tmp_ref_rd = this_rd;
         int tmp_rate = 0, tmp_rate_y = 0, tmp_rate_uv = 0;
         int tmp_skip = 1;
         int64_t tmp_dist = 0, tmp_sse = 0;
@@ -6325,9 +6325,33 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                          dummy_filter_cache);
         }
 
-        if (RDCOST(x->rdmult, x->rddiv, rate2, distortion2) >
-            RDCOST(x->rdmult, x->rddiv, tmp_rate, tmp_dist) &&
-            tmp_alt_rd != INT64_MAX) {
+        if (this_rd < INT64_MAX) {
+          if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
+              RDCOST(x->rdmult, x->rddiv, 0, total_sse))
+            tmp_ref_rd = RDCOST(x->rdmult, x->rddiv,
+                rate2 + vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0),
+                distortion2);
+          else
+            tmp_ref_rd = RDCOST(x->rdmult, x->rddiv,
+                rate2 + vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1) -
+                rate_y - rate_uv,
+                total_sse);
+        }
+
+        if (tmp_alt_rd < INT64_MAX) {
+          if (RDCOST(x->rdmult, x->rddiv, tmp_rate_y + tmp_rate_uv, tmp_dist) <
+              RDCOST(x->rdmult, x->rddiv, 0, tmp_sse))
+            tmp_alt_rd = RDCOST(x->rdmult, x->rddiv,
+                tmp_rate + vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0),
+                tmp_dist);
+          else
+            tmp_alt_rd = RDCOST(x->rdmult, x->rddiv,
+                tmp_rate + vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1) -
+                tmp_rate_y - tmp_rate_uv,
+                tmp_sse);
+        }
+
+        if (tmp_ref_rd > tmp_alt_rd) {
           rate2 = tmp_rate;
           distortion2 = tmp_dist;
           skippable = tmp_skip;
@@ -6344,7 +6368,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         frame_mv[NEARMV][ref_frame] = backup_mv;
 
-        rate2 += 256;
+        rate2 += vp10_cost_bit(128, mbmi->ref_mv_idx);
       }
 #endif
 
