@@ -19,11 +19,11 @@
 #include "vpx_ports/mem.h"
 
 #ifdef __GNUC__
-# define __likely__(v)    __builtin_expect(v, 1)
-# define __unlikely__(v)  __builtin_expect(v, 0)
+# define LIKELY(v)    __builtin_expect(v, 1)
+# define UNLIKELY(v)  __builtin_expect(v, 0)
 #else
-# define __likely__(v)    (v)
-# define __unlikely__(v)  (v)
+# define LIKELY(v)    (v)
+# define UNLIKELY(v)  (v)
 #endif
 
 static INLINE int_mv pack_int_mv(int16_t row, int16_t col) {
@@ -162,7 +162,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
       v_inside_d = _mm_cmpeq_epi32(v_these_mv_clamp_w, v_these_mv_w);
 
       // If none of them are inside, then move on
-      if (__likely__(_mm_test_all_zeros(v_inside_d, v_inside_d))) {
+      if (LIKELY(_mm_test_all_zeros(v_inside_d, v_inside_d))) {
         continue;
       }
 
@@ -268,7 +268,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
         // If the local best value is not saturated, just use it, otherwise
         // find the horizontal minimum again the hard way on 32 bits.
         // This is executed rarely.
-        if (__unlikely__(local_best_sad == 0xffff)) {
+        if (UNLIKELY(local_best_sad == 0xffff)) {
           __m128i v_loval_d, v_hival_d, v_loidx_d, v_hiidx_d, v_sel_d;
 
           v_loval_d = v_sad_d;
@@ -293,7 +293,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
         }
 
         // Update the global minimum if the local minimum is smaller
-        if (__likely__(local_best_sad < best_sad)) {
+        if (LIKELY(local_best_sad < best_sad)) {
           new_bmv = ((const int_mv *)&v_these_mv_w)[local_best_idx];
           new_best_address = ((const uint8_t **)v_blocka)[local_best_idx];
 
@@ -312,7 +312,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
     v_ba_d = _mm_set1_epi32((intptr_t)best_address);
 #endif
 
-    if (__unlikely__(best_address == in_what)) {
+    if (UNLIKELY(best_address == in_what)) {
       (*num00)++;
     }
   }
