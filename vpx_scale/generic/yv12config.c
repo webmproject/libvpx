@@ -160,29 +160,12 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     const uint64_t uvplane_size = (uv_height + 2 * uv_border_h) *
                                   (uint64_t)uv_stride + byte_alignment;
 
-#if CONFIG_ALPHA
-    const int alpha_width = aligned_width;
-    const int alpha_height = aligned_height;
-    const int alpha_stride = y_stride;
-    const int alpha_border_w = border;
-    const int alpha_border_h = border;
-    const uint64_t alpha_plane_size = (alpha_height + 2 * alpha_border_h) *
-                                      (uint64_t)alpha_stride + byte_alignment;
-#if CONFIG_VP9_HIGHBITDEPTH
-    const uint64_t frame_size = (1 + use_highbitdepth) *
-        (yplane_size + 2 * uvplane_size + alpha_plane_size);
-#else
-    const uint64_t frame_size = yplane_size + 2 * uvplane_size +
-                                alpha_plane_size;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-#else
 #if CONFIG_VP9_HIGHBITDEPTH
     const uint64_t frame_size =
         (1 + use_highbitdepth) * (yplane_size + 2 * uvplane_size);
 #else
     const uint64_t frame_size = yplane_size + 2 * uvplane_size;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-#endif  // CONFIG_ALPHA
 
     uint8_t *buf = NULL;
 
@@ -277,14 +260,6 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
         buf + yplane_size + uvplane_size + (uv_border_h * uv_stride) +
         uv_border_w, vp9_byte_align);
 
-#if CONFIG_ALPHA
-    ybf->alpha_width = alpha_width;
-    ybf->alpha_height = alpha_height;
-    ybf->alpha_stride = alpha_stride;
-    ybf->alpha_buffer = (uint8_t *)yv12_align_addr(
-        buf + yplane_size + 2 * uvplane_size +
-        (alpha_border_h * alpha_stride) + alpha_border_w, vp9_byte_align);
-#endif
     ybf->corrupted = 0; /* assume not corrupted by errors */
     return 0;
   }
