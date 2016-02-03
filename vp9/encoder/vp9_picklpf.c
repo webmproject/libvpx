@@ -78,7 +78,8 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 
   // Start the search at the previous frame filter level unless it is now out of
   // range.
-  int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
+  int filt_mid =
+      clamp(lf->last_filt_level, min_filter_level, max_filter_level);
   int filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
   // Sum squared error at each filter level
   int64_t ss_err[MAX_LOOP_FILTER + 1];
