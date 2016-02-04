@@ -204,10 +204,17 @@ typedef enum {
   VP9_GOLD_FLAG = 1 << 4,
   VP9_ALT_FLAG = 1 << 5,
   VP9_REFFRAME_ALL = (1 << 6) - 1
-#else
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  VP9_GOLD_FLAG = 1 << 1,
+  VP9_BWD_FLAG = 1 << 2,
+  VP9_ALT_FLAG = 1 << 3,
+  VP9_REFFRAME_ALL = (1 << 4) - 1
+#else  // CONFIG_BIDIR_PRED
   VP9_GOLD_FLAG = 1 << 1,
   VP9_ALT_FLAG = 1 << 2,
   VP9_REFFRAME_ALL = (1 << 3) - 1
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
 } VP9_REFFRAME;
 
@@ -367,11 +374,24 @@ typedef TX_SIZE TXFM_CONTEXT;
 #endif
 
 #if CONFIG_EXT_REFS
+
 #define SINGLE_REFS 6
 #define COMP_REFS 5
-#else
+
+#else  // CONFIG_EXT_REFS
+
+#if CONFIG_BIDIR_PRED
+#define FWD_REFS 2
+#define BWD_REFS 2
+#define SINGLE_REFS (FWD_REFS + BWD_REFS)
+#define COMP_REFS (FWD_REFS * BWD_REFS)
+
+#else  // CONFIG_BIDIR_PRED
+
 #define SINGLE_REFS 3
 #define COMP_REFS 2
+#endif  // CONFIG_BIDIR_PRED
+
 #endif  // CONFIG_EXT_REFS
 
 #if CONFIG_SUPERTX

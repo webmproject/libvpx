@@ -87,7 +87,7 @@ int vp10_get_reference_mode_context(const VP10_COMMON *cm,
                                     const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_reference_mode_prob(const VP10_COMMON *cm,
-                                                   const MACROBLOCKD *xd) {
+                                                    const MACROBLOCKD *xd) {
   return cm->fc->comp_inter_prob[vp10_get_reference_mode_context(cm, xd)];
 }
 
@@ -127,6 +127,20 @@ static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p3(const VP10_COMMON *cm,
   const int pred_context = vp10_get_pred_context_comp_ref_p3(cm, xd);
   return cm->fc->comp_ref_prob[pred_context][3];
 }
+
+#else  // CONFIG_EXT_REFS
+
+#if CONFIG_BIDIR_PRED
+int vp10_get_pred_context_comp_bwdref_p(const VP10_COMMON *cm,
+                                        const MACROBLOCKD *xd);
+
+static INLINE vpx_prob vp10_get_pred_prob_comp_bwdref_p(const VP10_COMMON *cm,
+                                                        const MACROBLOCKD *xd) {
+  const int pred_context = vp10_get_pred_context_comp_bwdref_p(cm, xd);
+  return cm->fc->comp_bwdref_prob[pred_context][0];
+}
+#endif  // CONFIG_BIDIR_PRED
+
 #endif  // CONFIG_EXT_REFS
 
 int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
@@ -143,14 +157,16 @@ static INLINE vpx_prob vp10_get_pred_prob_single_ref_p2(const VP10_COMMON *cm,
   return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p2(xd)][1];
 }
 
-#if CONFIG_EXT_REFS
+#if CONFIG_EXT_REFS || CONFIG_BIDIR_PRED
 int vp10_get_pred_context_single_ref_p3(const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_single_ref_p3(const VP10_COMMON *cm,
                                                         const MACROBLOCKD *xd) {
   return cm->fc->single_ref_prob[vp10_get_pred_context_single_ref_p3(xd)][2];
 }
+#endif  // CONFIG_EXT_REFS || CONFIR_BIDIR_PRED
 
+#if CONFIG_EXT_REFS
 int vp10_get_pred_context_single_ref_p4(const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_single_ref_p4(const VP10_COMMON *cm,

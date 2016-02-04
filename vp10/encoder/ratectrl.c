@@ -240,11 +240,14 @@ static void update_buffer_level(VP10_COMP *cpi, int encoded_frame_size) {
   RATE_CONTROL *const rc = &cpi->rc;
 
   // Non-viewable frames are a special case and are treated as pure overhead.
-  if (!cm->show_frame) {
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  if (!cm->show_frame && !rc->is_bwd_ref_frame)
+#else
+  if (!cm->show_frame)
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     rc->bits_off_target -= encoded_frame_size;
-  } else {
+  else
     rc->bits_off_target += rc->avg_frame_bandwidth - encoded_frame_size;
-  }
 
   // Clip the buffer level to the maximum specified buffer size.
   rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
@@ -946,8 +949,13 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
 
 int vp10_frame_type_qdelta(const VP10_COMP *cpi, int rf_level, int q) {
   static const double rate_factor_deltas[RATE_FACTOR_LEVELS] = {
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+    0.80,  // INTER_NORMAL
+    1.25,  // INTER_HIGH
+#else
     1.00,  // INTER_NORMAL
     1.00,  // INTER_HIGH
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     1.50,  // GF_ARF_LOW
     1.75,  // GF_ARF_STD
     2.00,  // KF_STD
@@ -1282,7 +1290,7 @@ void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
     }
   }
 
-  // Keep record of last boosted (KF/KF/ARF) Q value.
+  // Keep record of last boosted (KF/GF/ARF) Q value.
   // If the current frame is coded at a lower Q then we also update it.
   // If all mbs in this group are skipped only update if the Q value is
   // better than that already stored.
@@ -1314,7 +1322,12 @@ void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
 
   // Actual bits spent
   rc->total_actual_bits += rc->projected_frame_size;
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  rc->total_target_bits += (cm->show_frame || rc->is_bwd_ref_frame) ?
+                            rc->avg_frame_bandwidth : 0;
+#else
   rc->total_target_bits += cm->show_frame ? rc->avg_frame_bandwidth : 0;
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
@@ -1328,7 +1341,12 @@ void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
 
   if (cm->frame_type == KEY_FRAME)
     rc->frames_since_key = 0;
+
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  if (cm->show_frame || rc->is_bwd_ref_frame) {
+#else
   if (cm->show_frame) {
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     rc->frames_since_key++;
     rc->frames_to_key--;
   }

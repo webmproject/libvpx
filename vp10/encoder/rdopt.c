@@ -65,7 +65,22 @@
                                  (1 << LAST2_FRAME) | (1 << INTRA_FRAME) | \
                                  (1 << LAST3_FRAME) | (1 << LAST4_FRAME))
 
-#else
+#else  // CONFIG_EXT_REFS
+
+#if CONFIG_BIDIR_PRED
+
+#define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << BWDREF_FRAME) | (1 << INTRA_FRAME))
+#define GOLDEN_FRAME_MODE_MASK  ((1 << LAST_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << BWDREF_FRAME) | (1 << INTRA_FRAME))
+#define BWD_REF_MODE_MASK       ((1 << LAST_FRAME) | (1 << GOLDEN_FRAME) | \
+                                 (1 << ALTREF_FRAME) | (1 << INTRA_FRAME))
+// TODO(zoeliu): To rename the following to ALTREF_MODE_MASK
+#define ALT_REF_MODE_MASK       ((1 << LAST_FRAME) | (1 << GOLDEN_FRAME) | \
+                                 (1 << BWDREF_FRAME) | (1 << INTRA_FRAME))
+
+
+#else  // CONFIG_BIDIR_PRED
 
 #define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
                                  (1 << INTRA_FRAME))
@@ -74,9 +89,16 @@
 #define ALT_REF_MODE_MASK       ((1 << LAST_FRAME) | (1 << GOLDEN_FRAME) | \
                                  (1 << INTRA_FRAME))
 
+#endif  // CONFIG_BIDIR_PRED
+
 #endif  // CONFIG_EXT_REFS
 
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#define SECOND_REF_FRAME_MASK   ((1 << ALTREF_FRAME) | (1 << BWDREF_FRAME) | \
+                                 0x01)
+#else
 #define SECOND_REF_FRAME_MASK   ((1 << ALTREF_FRAME) | 0x01)
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
 #define MIN_EARLY_TERM_INDEX    3
 #define NEW_MV_DISCOUNT_FACTOR  8
@@ -122,6 +144,10 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEARESTMV, {LAST2_FRAME,  NONE}},
   {NEARESTMV, {LAST3_FRAME,  NONE}},
   {NEARESTMV, {LAST4_FRAME,  NONE}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEARESTMV, {BWDREF_FRAME, NONE}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {NEARESTMV, {ALTREF_FRAME, NONE}},
   {NEARESTMV, {GOLDEN_FRAME, NONE}},
@@ -133,6 +159,10 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEWMV,     {LAST2_FRAME,  NONE}},
   {NEWMV,     {LAST3_FRAME,  NONE}},
   {NEWMV,     {LAST4_FRAME,  NONE}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEWMV,     {BWDREF_FRAME, NONE}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {NEWMV,     {ALTREF_FRAME, NONE}},
   {NEWMV,     {GOLDEN_FRAME, NONE}},
@@ -142,6 +172,10 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEARMV,    {LAST2_FRAME,  NONE}},
   {NEARMV,    {LAST3_FRAME,  NONE}},
   {NEARMV,    {LAST4_FRAME,  NONE}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEARMV,    {BWDREF_FRAME, NONE}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {NEARMV,    {ALTREF_FRAME, NONE}},
   {NEARMV,    {GOLDEN_FRAME, NONE}},
@@ -152,6 +186,10 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEWFROMNEARMV,    {LAST2_FRAME,  NONE}},
   {NEWFROMNEARMV,    {LAST3_FRAME,  NONE}},
   {NEWFROMNEARMV,    {LAST4_FRAME,  NONE}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEWFROMNEARMV,    {BWDREF_FRAME, NONE}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {NEWFROMNEARMV,    {ALTREF_FRAME, NONE}},
   {NEWFROMNEARMV,    {GOLDEN_FRAME, NONE}},
@@ -162,9 +200,15 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {ZEROMV,    {LAST2_FRAME,  NONE}},
   {ZEROMV,    {LAST3_FRAME,  NONE}},
   {ZEROMV,    {LAST4_FRAME,  NONE}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {ZEROMV,    {BWDREF_FRAME, NONE}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {ZEROMV,    {GOLDEN_FRAME, NONE}},
   {ZEROMV,    {ALTREF_FRAME, NONE}},
+
+  // TODO(zoeliu): May need to reconsider the order on the modes to check
 
 #if CONFIG_EXT_INTER
   {NEAREST_NEARESTMV, {LAST_FRAME,   ALTREF_FRAME}},
@@ -172,6 +216,11 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEAREST_NEARESTMV, {LAST2_FRAME,  ALTREF_FRAME}},
   {NEAREST_NEARESTMV, {LAST3_FRAME,  ALTREF_FRAME}},
   {NEAREST_NEARESTMV, {LAST4_FRAME,  ALTREF_FRAME}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEAREST_NEARESTMV, {LAST_FRAME,   BWDREF_FRAME}},
+  {NEAREST_NEARESTMV, {GOLDEN_FRAME, BWDREF_FRAME}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {NEAREST_NEARESTMV, {GOLDEN_FRAME, ALTREF_FRAME}},
 #else  // CONFIG_EXT_INTER
@@ -180,6 +229,11 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEARESTMV, {LAST2_FRAME,  ALTREF_FRAME}},
   {NEARESTMV, {LAST3_FRAME,  ALTREF_FRAME}},
   {NEARESTMV, {LAST4_FRAME,  ALTREF_FRAME}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEARESTMV, {LAST_FRAME,   BWDREF_FRAME}},
+  {NEARESTMV, {GOLDEN_FRAME, BWDREF_FRAME}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {NEARESTMV, {GOLDEN_FRAME, ALTREF_FRAME}},
 #endif  // CONFIG_EXT_INTER
@@ -193,14 +247,14 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEAREST_NEARMV, {GOLDEN_FRAME, ALTREF_FRAME}},
   {NEAR_NEARMV,    {LAST_FRAME,   ALTREF_FRAME}},
   {NEAR_NEARMV,    {GOLDEN_FRAME, ALTREF_FRAME}},
-  {NEW_NEARESTMV, {LAST_FRAME,   ALTREF_FRAME}},
-  {NEW_NEARESTMV, {GOLDEN_FRAME, ALTREF_FRAME}},
-  {NEAREST_NEWMV, {LAST_FRAME,   ALTREF_FRAME}},
-  {NEAREST_NEWMV, {GOLDEN_FRAME, ALTREF_FRAME}},
-  {NEW_NEARMV, {LAST_FRAME,   ALTREF_FRAME}},
-  {NEW_NEARMV, {GOLDEN_FRAME, ALTREF_FRAME}},
-  {NEAR_NEWMV, {LAST_FRAME,   ALTREF_FRAME}},
-  {NEAR_NEWMV, {GOLDEN_FRAME, ALTREF_FRAME}},
+  {NEW_NEARESTMV,  {LAST_FRAME,   ALTREF_FRAME}},
+  {NEW_NEARESTMV,  {GOLDEN_FRAME, ALTREF_FRAME}},
+  {NEAREST_NEWMV,  {LAST_FRAME,   ALTREF_FRAME}},
+  {NEAREST_NEWMV,  {GOLDEN_FRAME, ALTREF_FRAME}},
+  {NEW_NEARMV,     {LAST_FRAME,   ALTREF_FRAME}},
+  {NEW_NEARMV,     {GOLDEN_FRAME, ALTREF_FRAME}},
+  {NEAR_NEWMV,     {LAST_FRAME,   ALTREF_FRAME}},
+  {NEAR_NEWMV,     {GOLDEN_FRAME, ALTREF_FRAME}},
   {NEW_NEWMV,      {LAST_FRAME,   ALTREF_FRAME}},
   {NEW_NEWMV,      {GOLDEN_FRAME, ALTREF_FRAME}},
   {ZERO_ZEROMV,    {LAST_FRAME,   ALTREF_FRAME}},
@@ -235,8 +289,29 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEAR_NEWMV,     {LAST4_FRAME,  ALTREF_FRAME}},
   {NEW_NEWMV,      {LAST4_FRAME,  ALTREF_FRAME}},
   {ZERO_ZEROMV,    {LAST4_FRAME,  ALTREF_FRAME}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEAR_NEARESTMV, {LAST_FRAME,   BWDREF_FRAME}},
+  {NEAR_NEARESTMV, {GOLDEN_FRAME, BWDREF_FRAME}},
+  {NEAREST_NEARMV, {LAST_FRAME,   BWDREF_FRAME}},
+  {NEAREST_NEARMV, {GOLDEN_FRAME, BWDREF_FRAME}},
+  {NEW_NEARESTMV,  {LAST_FRAME,   BWDREF_FRAME}},
+  {NEW_NEARESTMV,  {GOLDEN_FRAME, BWDREF_FRAME}},
+  {NEAREST_NEWMV,  {LAST_FRAME,   BWDREF_FRAME}},
+  {NEAREST_NEWMV,  {GOLDEN_FRAME, BWDREF_FRAME}},
+  {NEW_NEARMV,     {LAST_FRAME,   BWDREF_FRAME}},
+  {NEW_NEARMV,     {GOLDEN_FRAME, BWDREF_FRAME}},
+  {NEAR_NEWMV,     {LAST_FRAME,   BWDREF_FRAME}},
+  {NEAR_NEWMV,     {GOLDEN_FRAME, BWDREF_FRAME}},
+  {NEW_NEWMV,      {LAST_FRAME,   BWDREF_FRAME}},
+  {NEW_NEWMV,      {GOLDEN_FRAME, BWDREF_FRAME}},
+  {ZERO_ZEROMV,    {LAST_FRAME,   BWDREF_FRAME}},
+  {ZERO_ZEROMV,    {GOLDEN_FRAME, BWDREF_FRAME}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
-#else
+
+#else  // CONFIG_EXT_INTER
+
   {NEARMV,    {LAST_FRAME,   ALTREF_FRAME}},
   {NEWMV,     {LAST_FRAME,   ALTREF_FRAME}},
 #if CONFIG_EXT_REFS
@@ -246,6 +321,13 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {NEWMV,     {LAST3_FRAME,  ALTREF_FRAME}},
   {NEARMV,    {LAST4_FRAME,  ALTREF_FRAME}},
   {NEWMV,     {LAST4_FRAME,  ALTREF_FRAME}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {NEARMV,    {LAST_FRAME,   BWDREF_FRAME}},
+  {NEWMV,     {LAST_FRAME,   BWDREF_FRAME}},
+  {NEARMV,    {GOLDEN_FRAME, BWDREF_FRAME}},
+  {NEWMV,     {GOLDEN_FRAME, BWDREF_FRAME}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {NEARMV,    {GOLDEN_FRAME, ALTREF_FRAME}},
   {NEWMV,     {GOLDEN_FRAME, ALTREF_FRAME}},
@@ -255,6 +337,11 @@ static const MODE_DEFINITION vp10_mode_order[MAX_MODES] = {
   {ZEROMV,    {LAST3_FRAME,  ALTREF_FRAME}},
   {ZEROMV,    {LAST2_FRAME,  ALTREF_FRAME}},
   {ZEROMV,    {LAST4_FRAME,  ALTREF_FRAME}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {ZEROMV,    {LAST_FRAME,   BWDREF_FRAME}},
+  {ZEROMV,    {GOLDEN_FRAME, BWDREF_FRAME}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {ZEROMV,    {GOLDEN_FRAME, ALTREF_FRAME}},
 #endif  // CONFIG_EXT_INTER
@@ -309,14 +396,24 @@ static const REF_DEFINITION vp10_ref_order[MAX_REFS] = {
   {{LAST2_FRAME,  NONE}},
   {{LAST3_FRAME,  NONE}},
   {{LAST4_FRAME,  NONE}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {{BWDREF_FRAME, NONE}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {{GOLDEN_FRAME, NONE}},
   {{ALTREF_FRAME, NONE}},
+
   {{LAST_FRAME,   ALTREF_FRAME}},
 #if CONFIG_EXT_REFS
   {{LAST2_FRAME,  ALTREF_FRAME}},
   {{LAST3_FRAME,  ALTREF_FRAME}},
   {{LAST4_FRAME,  ALTREF_FRAME}},
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  {{LAST_FRAME,   BWDREF_FRAME}},
+  {{GOLDEN_FRAME, BWDREF_FRAME}},
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   {{GOLDEN_FRAME, ALTREF_FRAME}},
   {{INTRA_FRAME,  NONE}},
@@ -5699,8 +5796,10 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       vpx_prob ref_single_p1 = vp10_get_pred_prob_single_ref_p1(cm, xd);
       vpx_prob ref_single_p2 = vp10_get_pred_prob_single_ref_p2(cm, xd);
-#if CONFIG_EXT_REFS
+#if CONFIG_EXT_REFS || CONFIG_BIDIR_PRED
       vpx_prob ref_single_p3 = vp10_get_pred_prob_single_ref_p3(cm, xd);
+#endif  // CONFIG_EXT_REFS || CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       vpx_prob ref_single_p4 = vp10_get_pred_prob_single_ref_p4(cm, xd);
       vpx_prob ref_single_p5 = vp10_get_pred_prob_single_ref_p5(cm, xd);
 #endif  // CONFIG_EXT_REFS
@@ -5711,6 +5810,10 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
           ref_costs_single[LAST2_FRAME] =
           ref_costs_single[LAST3_FRAME] =
           ref_costs_single[LAST4_FRAME] =
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+          ref_costs_single[BWDREF_FRAME] =
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
           ref_costs_single[GOLDEN_FRAME] =
           ref_costs_single[ALTREF_FRAME] = base_cost;
@@ -5734,12 +5837,18 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
       ref_costs_single[LAST2_FRAME]  += vp10_cost_bit(ref_single_p4, 1);
       ref_costs_single[LAST3_FRAME]  += vp10_cost_bit(ref_single_p5, 0);
       ref_costs_single[LAST4_FRAME]  += vp10_cost_bit(ref_single_p5, 1);
-#else
+#else  // CONFIG_EXT_REFS
       ref_costs_single[LAST_FRAME]   += vp10_cost_bit(ref_single_p1, 0);
       ref_costs_single[GOLDEN_FRAME] += vp10_cost_bit(ref_single_p1, 1);
-      ref_costs_single[ALTREF_FRAME] += vp10_cost_bit(ref_single_p1, 1);
       ref_costs_single[GOLDEN_FRAME] += vp10_cost_bit(ref_single_p2, 0);
+      ref_costs_single[ALTREF_FRAME] += vp10_cost_bit(ref_single_p1, 1);
       ref_costs_single[ALTREF_FRAME] += vp10_cost_bit(ref_single_p2, 1);
+#if CONFIG_BIDIR_PRED
+      ref_costs_single[ALTREF_FRAME] += vp10_cost_bit(ref_single_p3, 1);
+      ref_costs_single[BWDREF_FRAME] += vp10_cost_bit(ref_single_p1, 1);
+      ref_costs_single[BWDREF_FRAME] += vp10_cost_bit(ref_single_p2, 1);
+      ref_costs_single[BWDREF_FRAME] += vp10_cost_bit(ref_single_p3, 0);
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
     } else {
       ref_costs_single[LAST_FRAME]   = 512;
@@ -5747,6 +5856,10 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
       ref_costs_single[LAST2_FRAME]  = 512;
       ref_costs_single[LAST3_FRAME]  = 512;
       ref_costs_single[LAST4_FRAME]  = 512;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+      ref_costs_single[BWDREF_FRAME] = 512;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
       ref_costs_single[GOLDEN_FRAME] = 512;
       ref_costs_single[ALTREF_FRAME] = 512;
@@ -5758,7 +5871,12 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
       vpx_prob ref_comp_p1 = vp10_get_pred_prob_comp_ref_p1(cm, xd);
       vpx_prob ref_comp_p2 = vp10_get_pred_prob_comp_ref_p2(cm, xd);
       vpx_prob ref_comp_p3 = vp10_get_pred_prob_comp_ref_p3(cm, xd);
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+      vpx_prob bwdref_comp_p = vp10_get_pred_prob_comp_bwdref_p(cm, xd);
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
+
       unsigned int base_cost = vp10_cost_bit(intra_inter_p, 1);
 
       ref_costs_comp[LAST_FRAME] =
@@ -5768,6 +5886,12 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
           ref_costs_comp[LAST4_FRAME] =
 #endif  // CONFIG_EXT_REFS
           ref_costs_comp[GOLDEN_FRAME] = base_cost;
+
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      // NOTE(zoeliu): BWDREF and ALTREF each add an extra cost by coding 1
+      //               more bit.
+      ref_costs_comp[BWDREF_FRAME] = ref_costs_comp[ALTREF_FRAME] = 0;
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
 #if CONFIG_EXT_REFS
       ref_costs_comp[LAST_FRAME]   += vp10_cost_bit(ref_comp_p, 0);
@@ -5784,9 +5908,13 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
 
       ref_costs_comp[LAST3_FRAME]  += vp10_cost_bit(ref_comp_p3, 1);
       ref_costs_comp[LAST4_FRAME]  += vp10_cost_bit(ref_comp_p3, 0);
-#else
+#else  // CONFIG_EXT_REFS
       ref_costs_comp[LAST_FRAME]   += vp10_cost_bit(ref_comp_p, 0);
       ref_costs_comp[GOLDEN_FRAME] += vp10_cost_bit(ref_comp_p, 1);
+#if CONFIG_BIDIR_PRED
+      ref_costs_comp[BWDREF_FRAME] += vp10_cost_bit(bwdref_comp_p, 0);
+      ref_costs_comp[ALTREF_FRAME] += vp10_cost_bit(bwdref_comp_p, 1);
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
     } else {
       ref_costs_comp[LAST_FRAME]   = 512;
@@ -5794,6 +5922,11 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
       ref_costs_comp[LAST2_FRAME]  = 512;
       ref_costs_comp[LAST3_FRAME]  = 512;
       ref_costs_comp[LAST4_FRAME]  = 512;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+      ref_costs_comp[BWDREF_FRAME] = 512;
+      ref_costs_comp[ALTREF_FRAME] = 512;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
       ref_costs_comp[GOLDEN_FRAME] = 512;
     }
@@ -8160,6 +8293,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     VP9_LAST4_FLAG,
 #endif  // CONFIG_EXT_REFS
     VP9_GOLD_FLAG,
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+    VP9_BWD_FLAG,
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     VP9_ALT_FLAG
   };
   int64_t best_rd = best_rd_so_far;
@@ -8338,8 +8474,17 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       // Skip checking missing references in both single and compound reference
       // modes. Note that a mode will be skipped iff both reference frames
       // are masked out.
-      ref_frame_skip_mask[0] |= (1 << ref_frame);
-      ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      if (ref_frame == BWDREF_FRAME || ref_frame == ALTREF_FRAME) {
+        ref_frame_skip_mask[0] |= (1 << ref_frame);
+        ref_frame_skip_mask[1] |= ((1 << ref_frame) | 0x01);
+      } else {
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+        ref_frame_skip_mask[0] |= (1 << ref_frame);
+        ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      }
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     } else {
       for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
         // Skip fixed mv modes for poor references
@@ -8373,9 +8518,15 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
           (1 << LAST2_FRAME) |
           (1 << LAST3_FRAME) |
           (1 << LAST4_FRAME) |
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+          (1 << BWDREF_FRAME) |
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
           (1 << GOLDEN_FRAME);
       ref_frame_skip_mask[1] = SECOND_REF_FRAME_MASK;
+      // TODO(zoeliu): To further explore whether following needs to be done for
+      //               BWDREF_FRAME as well.
       mode_skip_mask[ALTREF_FRAME] = ~INTER_NEAREST_NEAR_ZERO;
       if (frame_mv[NEARMV][ALTREF_FRAME].as_int != 0)
         mode_skip_mask[ALTREF_FRAME] |= (1 << NEARMV);
@@ -8551,8 +8702,17 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
           ref_frame_skip_mask[0] |= GOLDEN_FRAME_MODE_MASK;
           ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
           break;
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+        case BWDREF_FRAME:
+          ref_frame_skip_mask[0] |= BWD_REF_MODE_MASK;
+          ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+          break;
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
         case ALTREF_FRAME:
           ref_frame_skip_mask[0] |= ALT_REF_MODE_MASK;
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+          ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
           break;
         case NONE:
         case MAX_REF_FRAMES:
@@ -8577,6 +8737,14 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      // TODO(zoeliu): To further justify whether following is needed
+      if (cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index]
+          != LASTNRF_UPDATE && second_ref_frame == BWDREF_FRAME) {
+        continue;
+      }
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+
       if (!cpi->allow_comp_inter_inter)
         continue;
 
@@ -9806,6 +9974,9 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     VP9_LAST4_FLAG,
 #endif  // CONFIG_EXT_REFS
     VP9_GOLD_FLAG,
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+    VP9_BWD_FLAG,
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     VP9_ALT_FLAG
   };
   int64_t best_rd = best_rd_so_far;
@@ -9936,6 +10107,10 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                                       (1 << LAST2_FRAME) |
                                       (1 << LAST3_FRAME) |
                                       (1 << LAST4_FRAME) |
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+                                      (1 << BWDREF_FRAME) |
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
                                       (1 << ALTREF_FRAME);
             ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
@@ -9972,18 +10147,37 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                                       (1 << LAST2_FRAME) |
                                       (1 << LAST3_FRAME) |
                                       (1 << LAST4_FRAME) |
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+                                      (1 << BWDREF_FRAME) |
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
                                       (1 << ALTREF_FRAME);
             ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
             break;
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+          case BWDREF_FRAME:
+            ref_frame_skip_mask[0] |= (1 << LAST_FRAME) |
+                                      (1 << GOLDEN_FRAME) |
+                                      (1 << ALTREF_FRAME);
+            ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+            break;
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
           case ALTREF_FRAME:
             ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) |
 #if CONFIG_EXT_REFS
                                       (1 << LAST2_FRAME) |
                                       (1 << LAST3_FRAME) |
                                       (1 << LAST4_FRAME) |
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+                                      (1 << BWDREF_FRAME) |
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
                                       (1 << LAST_FRAME);
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+            ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
             break;
           case NONE:
           case MAX_REF_FRAMES:
@@ -10006,6 +10200,13 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      // TODO(zoeliu): To further justify whether following is needed
+      if (cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index]
+          != LASTNRF_UPDATE && second_ref_frame == BWDREF_FRAME) {
+        continue;
+      }
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
       if (!cpi->allow_comp_inter_inter)
         continue;
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))

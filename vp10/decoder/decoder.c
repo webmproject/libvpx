@@ -214,6 +214,9 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
   // #else  // CONFIG_EXT_REFS
   //   cpi->gld_fb_idx = 1;
   //   cpi->alt_fb_idx = 2;
+
+  // TODO(zoeliu): To revisit following code and reconsider what assumption we
+  // may take on the reference frame buffer virtual indexes
   if (ref_frame_flag == VP9_LAST_FLAG) {
     idx = cm->ref_frame_map[0];
 #if CONFIG_EXT_REFS
@@ -227,11 +230,18 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
     idx = cm->ref_frame_map[4];
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
     idx = cm->ref_frame_map[5];
-#else
+#else  // CONFIG_EXT_REFS
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
     idx = cm->ref_frame_map[1];
+#if CONFIG_BIDIR_PRED
+  } else if (ref_frame_flag == VP9_BWD_FLAG) {
+    idx = cm->ref_frame_map[2];
+  } else if (ref_frame_flag == VP9_ALT_FLAG) {
+    idx = cm->ref_frame_map[3];
+#else  // CONFIG_BIDIR_PRED
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
     idx = cm->ref_frame_map[2];
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
@@ -281,15 +291,25 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   }
 
   // Current thread releases the holding of reference frame.
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  for (; ref_index < REF_FRAMES; ++ref_index) {
+    const int old_idx = cm->ref_frame_map[ref_index];
+    decrease_ref_count(old_idx, frame_bufs, pool);
+    cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
+  }
+#else
   for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
     const int old_idx = cm->ref_frame_map[ref_index];
     decrease_ref_count(old_idx, frame_bufs, pool);
     cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
   }
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
   unlock_buffer_pool(pool);
   pbi->hold_ref_buf = 0;
   cm->frame_to_show = get_frame_new_buffer(cm);
 
+  // TODO(zoeliu): To fix the ref frame buffer update for the scenario of
+  //               cm->frame_parellel_decode == 1
   if (!cm->frame_parallel_decode || !cm->show_frame) {
     lock_buffer_pool(pool);
     --frame_bufs[cm->new_fb_idx].ref_count;
@@ -297,8 +317,10 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   }
 
   // Invalidate these references until the next frame starts.
-  for (ref_index = 0; ref_index < REFS_PER_FRAME; ref_index++)
-    cm->frame_refs[ref_index].idx = -1;
+  for (ref_index = 0; ref_index < REFS_PER_FRAME; ref_index++) {
+    cm->frame_refs[ref_index].idx = INVALID_IDX;
+    cm->frame_refs[ref_index].buf = NULL;
+  }
 }
 
 int vp10_receive_compressed_data(VP10Decoder *pbi,
@@ -327,12 +349,16 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
 
   pbi->ready_for_new_data = 0;
 
+  // Find a free buffer for the new frame, releasing the reference previously
+  // held.
+
   // Check if the previous frame was a frame without any references to it.
   // Release frame buffer if not decoding in frame parallel mode.
   if (!cm->frame_parallel_decode && cm->new_fb_idx >= 0
       && frame_bufs[cm->new_fb_idx].ref_count == 0)
     pool->release_fb_cb(pool->cb_priv,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
+
   // Find a free frame buffer. Return error if can not find any.
   cm->new_fb_idx = get_free_fb(cm);
   if (cm->new_fb_idx == INVALID_IDX)
@@ -386,10 +412,17 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
       }
 
       // Current thread releases the holding of reference frame.
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      for (; ref_index < REF_FRAMES; ++ref_index) {
+        const int old_idx = cm->ref_frame_map[ref_index];
+        decrease_ref_count(old_idx, frame_bufs, pool);
+      }
+#else
       for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
         const int old_idx = cm->ref_frame_map[ref_index];
         decrease_ref_count(old_idx, frame_bufs, pool);
       }
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
       pbi->hold_ref_buf = 0;
     }
     // Release current frame.
@@ -417,7 +450,13 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
 
   if (!cm->show_existing_frame) {
     cm->last_show_frame = cm->show_frame;
-    cm->prev_frame = cm->cur_frame;
+
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+    // NOTE: It is not supposed to ref to any frame not used as reference
+    if (cm->is_reference_frame)
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      cm->prev_frame = cm->cur_frame;
+
     if (cm->seg.enabled && !cm->frame_parallel_decode)
       vp10_swap_current_and_last_seg_map(cm);
   }

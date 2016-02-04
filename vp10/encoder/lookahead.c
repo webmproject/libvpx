@@ -47,13 +47,13 @@ void vp10_lookahead_destroy(struct lookahead_ctx *ctx) {
 
 
 struct lookahead_ctx *vp10_lookahead_init(unsigned int width,
-                                         unsigned int height,
-                                         unsigned int subsampling_x,
-                                         unsigned int subsampling_y,
+                                          unsigned int height,
+                                          unsigned int subsampling_x,
+                                          unsigned int subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-                                         int use_highbitdepth,
+                                          int use_highbitdepth,
 #endif
-                                         unsigned int depth) {
+                                          unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
 
   // Clamp the lookahead queue depth

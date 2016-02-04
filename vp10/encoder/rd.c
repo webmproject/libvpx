@@ -223,7 +223,11 @@ static const int rd_boost_factor[16] = {
   8, 8, 4, 4, 2, 2, 1, 0
 };
 static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
-  128, 144, 128, 128, 144
+  128, 144, 128, 128, 144,
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  // TODO(zoeliu): To adjust further following factor values.
+  128, 128, 128
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 };
 
 int vp10_compute_rd_mult(const VP10_COMP *cpi, int qindex) {
@@ -768,6 +772,10 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
     rd->thresh_mult[THR_NEARESTL2] = 300;
     rd->thresh_mult[THR_NEARESTL3] = 300;
     rd->thresh_mult[THR_NEARESTL4] = 300;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+    rd->thresh_mult[THR_NEARESTB] = 300;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
     rd->thresh_mult[THR_NEARESTG] = 300;
     rd->thresh_mult[THR_NEARESTA] = 300;
@@ -777,6 +785,10 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
     rd->thresh_mult[THR_NEARESTL2] = 0;
     rd->thresh_mult[THR_NEARESTL3] = 0;
     rd->thresh_mult[THR_NEARESTL4] = 0;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+    rd->thresh_mult[THR_NEARESTB] = 0;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
     rd->thresh_mult[THR_NEARESTG] = 0;
     rd->thresh_mult[THR_NEARESTA] = 0;
@@ -789,6 +801,10 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_NEWL2] += 1000;
   rd->thresh_mult[THR_NEWL3] += 1000;
   rd->thresh_mult[THR_NEWL4] += 1000;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_NEWB] += 1000;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_NEWA] += 1000;
   rd->thresh_mult[THR_NEWG] += 1000;
@@ -798,6 +814,10 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_NEARL2] += 1000;
   rd->thresh_mult[THR_NEARL3] += 1000;
   rd->thresh_mult[THR_NEARL4] += 1000;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_NEARB] += 1000;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_NEARA] += 1000;
   rd->thresh_mult[THR_NEARG] += 1000;
@@ -808,6 +828,10 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_NEWFROMNEARL2] += 1000;
   rd->thresh_mult[THR_NEWFROMNEARL3] += 1000;
   rd->thresh_mult[THR_NEWFROMNEARL4] += 1000;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_NEWFROMNEARB] += 1000;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_NEWFROMNEARG] += 1000;
   rd->thresh_mult[THR_NEWFROMNEARA] += 1000;
@@ -818,6 +842,10 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_ZEROL2] += 2000;
   rd->thresh_mult[THR_ZEROL3] += 2000;
   rd->thresh_mult[THR_ZEROL4] += 2000;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_ZEROB] += 2000;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_ZEROG] += 2000;
   rd->thresh_mult[THR_ZEROA] += 2000;
@@ -879,20 +907,53 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEW_NEARL4A] += 1700;
   rd->thresh_mult[THR_COMP_NEW_NEWL4A] += 2000;
   rd->thresh_mult[THR_COMP_ZERO_ZEROL4A] += 2500;
+
+#else  // CONFIG_EXT_REFS
+
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTLB] += 1000;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARESTGB] += 1000;
+
+  rd->thresh_mult[THR_COMP_NEAREST_NEARLB] += 1200;
+  rd->thresh_mult[THR_COMP_NEAREST_NEARGB] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTLB] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARESTGB] += 1200;
+
+  rd->thresh_mult[THR_COMP_NEAREST_NEWLB] += 1500;
+  rd->thresh_mult[THR_COMP_NEAREST_NEWGB] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTLB] += 1500;
+  rd->thresh_mult[THR_COMP_NEW_NEARESTGB] += 1500;
+
+  rd->thresh_mult[THR_COMP_NEAR_NEWLB] += 1700;
+  rd->thresh_mult[THR_COMP_NEAR_NEWGB] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARLB] += 1700;
+  rd->thresh_mult[THR_COMP_NEW_NEARGB] += 1700;
+
+  rd->thresh_mult[THR_COMP_NEW_NEWLB] += 2000;
+  rd->thresh_mult[THR_COMP_NEW_NEWGB] += 2000;
+
+  rd->thresh_mult[THR_COMP_ZERO_ZEROLB] += 2500;
+  rd->thresh_mult[THR_COMP_ZERO_ZEROGB] += 2500;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
-#else
+
+#else  // CONFIG_EXT_INTER
+
   rd->thresh_mult[THR_COMP_NEARESTLA] += 1000;
 #if CONFIG_EXT_REFS
   rd->thresh_mult[THR_COMP_NEARESTL2A] += 1000;
   rd->thresh_mult[THR_COMP_NEARESTL3A] += 1000;
   rd->thresh_mult[THR_COMP_NEARESTL4A] += 1000;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_COMP_NEARESTLB] += 1000;
+  rd->thresh_mult[THR_COMP_NEARESTGB] += 1000;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_COMP_NEARESTGA] += 1000;
 
   rd->thresh_mult[THR_COMP_NEARLA] += 1500;
   rd->thresh_mult[THR_COMP_NEWLA] += 2000;
-  rd->thresh_mult[THR_COMP_NEARGA] += 1500;
-  rd->thresh_mult[THR_COMP_NEWGA] += 2000;
 #if CONFIG_EXT_REFS
   rd->thresh_mult[THR_COMP_NEARL2A] += 1500;
   rd->thresh_mult[THR_COMP_NEWL2A] += 2000;
@@ -900,15 +961,30 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEWL3A] += 2000;
   rd->thresh_mult[THR_COMP_NEARL4A] += 1500;
   rd->thresh_mult[THR_COMP_NEWL4A] += 2000;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_COMP_NEARLB] += 1500;
+  rd->thresh_mult[THR_COMP_NEARGB] += 1500;
+  rd->thresh_mult[THR_COMP_NEWLB] += 2000;
+  rd->thresh_mult[THR_COMP_NEWGB] += 2000;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
+  rd->thresh_mult[THR_COMP_NEARGA] += 1500;
+  rd->thresh_mult[THR_COMP_NEWGA] += 2000;
 
   rd->thresh_mult[THR_COMP_ZEROLA] += 2500;
 #if CONFIG_EXT_REFS
   rd->thresh_mult[THR_COMP_ZEROL2A] += 2500;
   rd->thresh_mult[THR_COMP_ZEROL3A] += 2500;
   rd->thresh_mult[THR_COMP_ZEROL4A] += 2500;
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+  rd->thresh_mult[THR_COMP_ZEROLB] += 2500;
+  rd->thresh_mult[THR_COMP_ZEROGB] += 2500;
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   rd->thresh_mult[THR_COMP_ZEROGA] += 2500;
+
 #endif  // CONFIG_EXT_INTER
 
   rd->thresh_mult[THR_H_PRED] += 2000;
@@ -964,9 +1040,14 @@ void vp10_set_rd_speed_thresholds_sub8x8(VP10_COMP *cpi) {
 #if CONFIG_EXT_REFS
     {2500, 2500, 2500, 2500, 2500, 2500, 4500, 4500, 4500, 4500, 4500, 2500},
     {2000, 2000, 2000, 2000, 2000, 2000, 4000, 4000, 4000, 4000, 4000, 2000}
-#else
+#else  // CONFIG_EXT_REFS
+#if CONFIG_BIDIR_PRED
+    {2500, 2500, 2500, 2500, 4500, 4500, 4500, 4500, 2500},
+    {2000, 2000, 2000, 2000, 4000, 4000, 4000, 4000, 2000}
+#else  // CONFIG_BIDIR_PRED
     {2500, 2500, 2500, 4500, 4500, 2500},
     {2000, 2000, 2000, 4000, 4000, 2000}
+#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   };
   RD_OPT *const rd = &cpi->rd;

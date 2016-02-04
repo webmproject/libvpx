@@ -184,6 +184,15 @@ enum vp8e_enc_control_id {
    */
   VP8E_SET_ENABLEAUTOALTREF,
 
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  /*!\brief Codec control function to enable automatic set and use
+   * bwd-pred frames.
+   *
+   * Supported in codecs: VP10
+   */
+  VP8E_SET_ENABLEAUTOBWDREF,
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+
   /*!\brief control function to set noise sensitivity
    *
    * 0: off, 1: OnYOnly, 2: OnYUV,
@@ -744,6 +753,12 @@ VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
 #define VPX_CTRL_VP8E_SET_CPUUSED
 VPX_CTRL_USE_TYPE(VP8E_SET_ENABLEAUTOALTREF,   unsigned int)
 #define VPX_CTRL_VP8E_SET_ENABLEAUTOALTREF
+
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+VPX_CTRL_USE_TYPE(VP8E_SET_ENABLEAUTOBWDREF,   unsigned int)
+#define VPX_CTRL_VP8E_SET_ENABLEAUTOBWDREF
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+
 VPX_CTRL_USE_TYPE(VP8E_SET_NOISE_SENSITIVITY,  unsigned int)
 #define VPX_CTRL_VP8E_SET_NOISE_SENSITIVITY
 VPX_CTRL_USE_TYPE(VP8E_SET_SHARPNESS,          unsigned int)

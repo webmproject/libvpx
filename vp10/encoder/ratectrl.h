@@ -90,6 +90,14 @@ typedef struct {
   int source_alt_ref_active;
   int is_src_frame_alt_ref;
 
+#if CONFIG_BIDIR_PRED
+  // NOTE: Different types of frames may have different bits allocated
+  //       accordingly, aiming to achieve the overall optimal RD performance.
+  int is_bwd_ref_frame;
+  int is_last_nonref_frame;
+  int is_nonref_frame;
+#endif  // CONFIG_BIDIR_PRED
+
   int avg_frame_bandwidth;  // Average frame size target for clip
   int min_frame_bandwidth;  // Minimum allocation used for any frame
   int max_frame_bandwidth;  // Maximum burst rate allowed for a frame.
