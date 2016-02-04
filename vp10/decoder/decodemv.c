@@ -1028,9 +1028,16 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
                                    r, mode_ctx);
 #if CONFIG_REF_MV
-    if (mbmi->mode == NEARMV && !is_compound)
-      if (xd->ref_mv_count[mbmi->ref_frame[0]] > 2)
-        mbmi->ref_mv_idx = vpx_read_bit(r);
+      if (mbmi->mode == NEARMV && !is_compound) {
+        if (xd->ref_mv_count[mbmi->ref_frame[0]] > 2) {
+          if (vpx_read_bit(r)) {
+            mbmi->ref_mv_idx = 1;
+            if (xd->ref_mv_count[mbmi->ref_frame[0]] > 3)
+              if (vpx_read_bit(r))
+                mbmi->ref_mv_idx = 2;
+          }
+        }
+      }
 #endif
     }
   }
@@ -1048,8 +1055,9 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 
 #if CONFIG_REF_MV
-  if (mbmi->ref_mv_idx == 1) {
-    int_mv cur_mv = xd->ref_mv_stack[mbmi->ref_frame[0]][2].this_mv;
+  if (mbmi->ref_mv_idx > 0) {
+    int_mv cur_mv =
+        xd->ref_mv_stack[mbmi->ref_frame[0]][1 + mbmi->ref_mv_idx].this_mv;
     lower_mv_precision(&cur_mv.as_mv, cm->allow_high_precision_mv);
     nearmv[0] = cur_mv;
   }
