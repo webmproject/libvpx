@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d1c4647f_7fa00711",
+        "filename": "vpx_dsp/psnrhvs.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-04T23:09:37Z",
+      "side": 1,
+      "message": "changed to assert that the _weight * _score \u003e\u003d 0",
+      "parentUuid": "711bb8b8_3cedbe73",
+      "range": {
+        "startLine": 90,
+        "startChar": 6,
+        "endLine": 90,
+        "endChar": 9
+      },
+      "revId": "bcdd4067ab9618d4ac366f752f606afc622b9604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71c9f878_76ce45b4",
         "filename": "vpx_dsp/psnrhvs.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-04T22:47:23Z",
       "side": 1,
       "message": "This will peak at 140 for almost perfect frames, before clipping to 100 for perfect frames",
+      "range": {
+        "startLine": 90,
+        "startChar": 2,
+        "endLine": 92,
+        "endChar": 59
+      },
+      "revId": "bcdd4067ab9618d4ac366f752f606afc622b9604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71c9f878_b1c0e756",
+        "filename": "vpx_dsp/psnrhvs.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-04T23:09:37Z",
+      "side": 1,
+      "message": "fixed the condition for correctly clamping.",
+      "parentUuid": "71c9f878_76ce45b4",
       "range": {
         "startLine": 90,
         "startChar": 2,
