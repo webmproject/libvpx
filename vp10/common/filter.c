@@ -220,7 +220,7 @@ const InterpKernel *vp10_filter_kernels[SWITCHABLE_FILTERS + 1] = {
 
 #if CONFIG_EXT_INTRA
 const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS] = {
-    NULL,                     // INTRA_FILTER_LINEAR
+    bilinear_filters,         // INTRA_FILTER_LINEAR
     sub_pel_filters_8,        // INTRA_FILTER_8TAP
     sub_pel_filters_8sharp,   // INTRA_FILTER_8TAP_SHARP
     sub_pel_filters_8smooth,  // INTRA_FILTER_8TAP_SMOOTH
