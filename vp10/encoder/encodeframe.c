@@ -3906,9 +3906,8 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
   for (i = 0; i < MAX_SEGMENTS; ++i) {
-    const int qindex = CONFIG_MISC_FIXES && cm->seg.enabled ?
-                       vp10_get_qindex(&cm->seg, i, cm->base_qindex) :
-                       cm->base_qindex;
+    const int qindex = cm->seg.enabled ?
+        vp10_get_qindex(&cm->seg, i, cm->base_qindex) : cm->base_qindex;
     xd->lossless[i] = qindex == 0 &&
                       cm->y_dc_delta_q == 0 &&
                       cm->uv_dc_delta_q == 0 &&
