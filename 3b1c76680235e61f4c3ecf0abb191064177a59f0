@@ -22,6 +22,30 @@
       "revId": "3b1c76680235e61f4c3ecf0abb191064177a59f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_a16d09d9",
+        "filename": "vp10/common/blockd.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-04T22:00:58Z",
+      "side": 1,
+      "message": "Mostly right. If angle is less \u003c 90, then skip filter search if tan(angle) \u003d\u003d 1 / N; if 180 \u003c angle \u003c 270, skip filter search if tan(angle) \u003d\u003d N / 1. In both cases, interpolation is not needed because the sub-pixel shift is always 0.",
+      "parentUuid": "b121b0e4_6548410d",
+      "range": {
+        "startLine": 149,
+        "startChar": 3,
+        "endLine": 154,
+        "endChar": 30
+      },
+      "revId": "3b1c76680235e61f4c3ecf0abb191064177a59f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
