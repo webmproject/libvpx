@@ -21,12 +21,6 @@
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_segmentation.h"
 
-#define ENERGY_MIN (-4)
-#define ENERGY_MAX (1)
-#define ENERGY_SPAN (ENERGY_MAX - ENERGY_MIN +  1)
-#define ENERGY_IN_BOUNDS(energy)\
-  assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
-
 static const double rate_ratio[MAX_SEGMENTS] =
   {1.0, 0.75, 0.6, 0.5, 0.4, 0.3, 0.25};
 

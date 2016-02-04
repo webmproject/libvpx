@@ -23,14 +23,6 @@
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
 #define ONE_CONTEXT_NODE            2
-#define LOW_VAL_CONTEXT_NODE        0
-#define TWO_CONTEXT_NODE            1
-#define THREE_CONTEXT_NODE          2
-#define HIGH_LOW_CONTEXT_NODE       3
-#define CAT_ONE_CONTEXT_NODE        4
-#define CAT_THREEFOUR_CONTEXT_NODE  5
-#define CAT_THREE_CONTEXT_NODE      6
-#define CAT_FIVE_CONTEXT_NODE       7
 
 #define INCREMENT_COUNT(token)                              \
   do {                                                      \

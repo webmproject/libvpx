@@ -62,8 +62,6 @@
 #define AM_SEGMENT_ID_INACTIVE 7
 #define AM_SEGMENT_ID_ACTIVE 0
 
-#define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
-
 #define ALTREF_HIGH_PRECISION_MV 1      // Whether to use high precision mv
                                          //  for altref computation.
 #define HIGH_PRECISION_MV_QTHRESH 200   // Q threshold for high precision
@@ -1967,11 +1965,14 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   return cpi;
 }
+
+#if CONFIG_INTERNAL_STATS
 #define SNPRINT(H, T) \
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T))
 
 #define SNPRINT2(H, T, V) \
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
+#endif  // CONFIG_INTERNAL_STATS
 
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *cm;
