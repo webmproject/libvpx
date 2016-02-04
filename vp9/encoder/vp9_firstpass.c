@@ -2260,6 +2260,8 @@ static int test_candidate_kf(TWO_PASS *twopass,
   return is_viable_kf;
 }
 
+#define FRAMES_TO_CHECK_DECAY 8
+
 static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2278,7 +2280,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double boost_score = 0.0;
   double kf_mod_err = 0.0;
   double kf_group_err = 0.0;
-  double recent_loop_decay[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+  double recent_loop_decay[FRAMES_TO_CHECK_DECAY];
 
   vp9_zero(next_frame);
 
@@ -2304,6 +2306,10 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_group_error_left = 0;  // Group modified error score.
 
   kf_mod_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
+
+  // Initialize the decay rates for the recent frames to check
+  for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
+    recent_loop_decay[j] = 1.0;
 
   // Find the next keyframe.
   i = 0;
@@ -2331,9 +2337,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // We want to know something about the recent past... rather than
       // as used elsewhere where we are concerned with decay in prediction
       // quality since the last GF or KF.
-      recent_loop_decay[i % 8] = loop_decay_rate;
+      recent_loop_decay[i % FRAMES_TO_CHECK_DECAY] = loop_decay_rate;
       decay_accumulator = 1.0;
-      for (j = 0; j < 8; ++j)
+      for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
         decay_accumulator *= recent_loop_decay[j];
 
       // Special check for transition or high motion followed by a
