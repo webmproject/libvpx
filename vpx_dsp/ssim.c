@@ -182,31 +182,6 @@ double vpx_calc_ssim(const YV12_BUFFER_CONFIG *source,
   return ssimv;
 }
 
-double vpx_calc_ssimg(const YV12_BUFFER_CONFIG *source,
-                      const YV12_BUFFER_CONFIG *dest,
-                      double *ssim_y, double *ssim_u, double *ssim_v) {
-  double ssim_all = 0;
-  double a, b, c;
-
-  a = vpx_ssim2(source->y_buffer, dest->y_buffer,
-                source->y_stride, dest->y_stride,
-                source->y_crop_width, source->y_crop_height);
-
-  b = vpx_ssim2(source->u_buffer, dest->u_buffer,
-                source->uv_stride, dest->uv_stride,
-                source->uv_crop_width, source->uv_crop_height);
-
-  c = vpx_ssim2(source->v_buffer, dest->v_buffer,
-                source->uv_stride, dest->uv_stride,
-                source->uv_crop_width, source->uv_crop_height);
-  *ssim_y = a;
-  *ssim_u = b;
-  *ssim_v = c;
-  ssim_all = (a * 4 + b + c) / 6;
-
-  return ssim_all;
-}
-
 // traditional ssim as per: http://en.wikipedia.org/wiki/Structural_similarity
 //
 // Re working out the math ->
@@ -478,28 +453,4 @@ double vpx_highbd_calc_ssim(const YV12_BUFFER_CONFIG *source,
   return ssimv;
 }
 
-double vpx_highbd_calc_ssimg(const YV12_BUFFER_CONFIG *source,
-                             const YV12_BUFFER_CONFIG *dest, double *ssim_y,
-                             double *ssim_u, double *ssim_v, unsigned int bd) {
-  double ssim_all = 0;
-  double a, b, c;
-
-  a = vpx_highbd_ssim2(source->y_buffer, dest->y_buffer,
-                       source->y_stride, dest->y_stride,
-                       source->y_crop_width, source->y_crop_height, bd);
-
-  b = vpx_highbd_ssim2(source->u_buffer, dest->u_buffer,
-                       source->uv_stride, dest->uv_stride,
-                       source->uv_crop_width, source->uv_crop_height, bd);
-
-  c = vpx_highbd_ssim2(source->v_buffer, dest->v_buffer,
-                       source->uv_stride, dest->uv_stride,
-                       source->uv_crop_width, source->uv_crop_height, bd);
-  *ssim_y = a;
-  *ssim_u = b;
-  *ssim_v = c;
-  ssim_all = (a * 4 + b + c) / 6;
-
-  return ssim_all;
-}
 #endif  // CONFIG_VP9_HIGHBITDEPTH

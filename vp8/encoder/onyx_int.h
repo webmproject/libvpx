@@ -637,13 +637,6 @@ typedef struct VP8_COMP
     double summed_weights;
     unsigned int tot_recode_hits;
 
-
-    double total_ssimg_y;
-    double total_ssimg_u;
-    double total_ssimg_v;
-    double total_ssimg_all;
-
-    int b_calculate_ssimg;
 #endif
     int b_calculate_psnr;
 
@@ -688,11 +681,6 @@ typedef struct VP8_COMP
     double total_error2_p[VPX_TS_MAX_LAYERS];
     double sum_ssim[VPX_TS_MAX_LAYERS];
     double sum_weights[VPX_TS_MAX_LAYERS];
-
-    double total_ssimg_y_in_layer[VPX_TS_MAX_LAYERS];
-    double total_ssimg_u_in_layer[VPX_TS_MAX_LAYERS];
-    double total_ssimg_v_in_layer[VPX_TS_MAX_LAYERS];
-    double total_ssimg_all_in_layer[VPX_TS_MAX_LAYERS];
 
 #if CONFIG_MULTI_RES_ENCODING
     /* Number of MBs per row at lower-resolution level */

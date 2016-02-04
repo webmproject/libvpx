@@ -436,11 +436,9 @@ typedef struct VP10_COMP {
   unsigned int tot_recode_hits;
   double worst_ssim;
 
-  ImageStat ssimg;
   ImageStat fastssim;
   ImageStat psnrhvs;
 
-  int b_calculate_ssimg;
   int b_calculate_blockiness;
 
   int b_calculate_consistency;
