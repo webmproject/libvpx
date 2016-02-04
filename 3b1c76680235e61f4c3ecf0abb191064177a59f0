@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b121b0e4_6548410d",
+        "filename": "vp10/common/blockd.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-04T21:52:17Z",
+      "side": 1,
+      "message": "This part checks that \ncos(angle) \u003d N * sin(angle) or sin(angle) \u003d N * cos(angle)\nwhere N is an integer.\nAnd if one of the conditions fit, then ignore the interpolation.\n\nIs my understanding right?",
+      "range": {
+        "startLine": 149,
+        "startChar": 3,
+        "endLine": 154,
+        "endChar": 30
+      },
+      "revId": "3b1c76680235e61f4c3ecf0abb191064177a59f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
