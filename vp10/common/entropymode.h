@@ -103,6 +103,7 @@ typedef struct frame_contexts {
   struct segmentation_probs seg;
 #if CONFIG_EXT_INTRA
   vpx_prob ext_intra_probs[PLANE_TYPES];
+  vpx_prob intra_filter_probs[INTRA_FILTERS + 1][INTRA_FILTERS - 1];
 #endif  // CONFIG_EXT_INTRA
 } FRAME_CONTEXT;
 
@@ -154,6 +155,7 @@ typedef struct FRAME_COUNTS {
   struct seg_counts seg;
 #if CONFIG_EXT_INTRA
   unsigned int ext_intra[PLANE_TYPES][2];
+  unsigned int intra_filter[INTRA_FILTERS + 1][INTRA_FILTERS];
 #endif  // CONFIG_EXT_INTRA
 } FRAME_COUNTS;
 
@@ -182,7 +184,18 @@ extern const vpx_tree_index vp10_switchable_interp_tree
 extern const vpx_tree_index vp10_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
 extern const vpx_tree_index
 vp10_palette_color_tree[PALETTE_MAX_SIZE - 1][TREE_SIZE(PALETTE_COLORS)];
-
+#if CONFIG_EXT_INTRA
+extern const vpx_tree_index vp10_intra_filter_tree[TREE_SIZE(INTRA_FILTERS)];
+#endif  // CONFIG_EXT_INTRA
+#if CONFIG_EXT_TX
+extern const vpx_tree_index
+    vp10_ext_tx_inter_tree[EXT_TX_SETS_INTER][TREE_SIZE(TX_TYPES)];
+extern const vpx_tree_index
+    vp10_ext_tx_intra_tree[EXT_TX_SETS_INTRA][TREE_SIZE(TX_TYPES)];
+#else
+extern const vpx_tree_index
+    vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)];
+#endif  // CONFIG_EXT_TX
 
 void vp10_setup_past_independence(struct VP10Common *cm);
 
@@ -195,16 +208,6 @@ void vp10_tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,
                                       unsigned int (*ct_16x16p)[2]);
 void vp10_tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
                                     unsigned int (*ct_8x8p)[2]);
-
-#if CONFIG_EXT_TX
-extern const vpx_tree_index
-    vp10_ext_tx_inter_tree[EXT_TX_SETS_INTER][TREE_SIZE(TX_TYPES)];
-extern const vpx_tree_index
-    vp10_ext_tx_intra_tree[EXT_TX_SETS_INTRA][TREE_SIZE(TX_TYPES)];
-#else
-extern const vpx_tree_index
-    vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)];
-#endif  // CONFIG_EXT_TX
 
 static INLINE int vp10_ceil_log2(int n) {
   int i = 1, p = 2;

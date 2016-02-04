@@ -520,7 +520,10 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
 
 #if CONFIG_EXT_INTRA
   for (i = 0; i < PLANE_TYPES; ++i)
-    for (j = 0; j < 2; j++)
+    for (j = 0; j < 2; ++j)
       cm->counts.ext_intra[i][j] += counts->ext_intra[i][j];
+  for (i = 0; i < INTRA_FILTERS + 1; ++i)
+    for (j = 0; j < INTRA_FILTERS; ++j)
+      cm->counts.intra_filter[i][j] += counts->intra_filter[i][j];
 #endif  // CONFIG_EXT_INTRA
 }

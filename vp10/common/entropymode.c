@@ -1220,9 +1220,7 @@ default_intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES]
     },
   },
 };
-
 #else
-
 const vpx_tree_index vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)] = {
   -DCT_DCT, 2,
   -ADST_ADST, 4,
@@ -1244,6 +1242,24 @@ static const vpx_prob default_inter_ext_tx_prob[EXT_TX_SIZES]
 };
 #endif  // CONFIG_EXT_TX
 
+#if CONFIG_EXT_INTRA
+static const vpx_prob
+default_intra_filter_probs[INTRA_FILTERS + 1][INTRA_FILTERS - 1] = {
+    { 98,  63,  60,  },
+    { 98,  82,  80,  },
+    { 94,  65, 103,  },
+    { 49,  25,  24,  },
+    { 72,  38,  50,  },
+};
+static const vpx_prob default_ext_intra_probs[2] = {230, 230};
+
+const vpx_tree_index vp10_intra_filter_tree[TREE_SIZE(INTRA_FILTERS)] = {
+  -INTRA_FILTER_LINEAR, 2,
+  -INTRA_FILTER_8TAP, 4,
+  -INTRA_FILTER_8TAP_SHARP, -INTRA_FILTER_8TAP_SMOOTH,
+};
+#endif  // CONFIG_EXT_INTRA
+
 #if CONFIG_SUPERTX
 static const vpx_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
                                           [TX_SIZES] = {
@@ -1257,10 +1273,6 @@ static const struct segmentation_probs default_seg_probs = {
   { 128, 128, 128, 128, 128, 128, 128 },
   { 128, 128, 128 },
 };
-
-#if CONFIG_EXT_INTRA
-static  const vpx_prob default_ext_intra_probs[2] = {230, 230};
-#endif  // CONFIG_EXT_INTRA
 
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->uv_mode_prob, default_uv_probs);
@@ -1295,6 +1307,7 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->seg.pred_probs, default_seg_probs.pred_probs);
 #if CONFIG_EXT_INTRA
   vp10_copy(fc->ext_intra_probs, default_ext_intra_probs);
+  vp10_copy(fc->intra_filter_probs, default_intra_filter_probs);
 #endif  // CONFIG_EXT_INTRA
   vp10_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
   vp10_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
@@ -1494,6 +1507,10 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
     fc->ext_intra_probs[i] = mode_mv_merge_probs(
               pre_fc->ext_intra_probs[i], counts->ext_intra[i]);
   }
+
+  for (i = 0; i < INTRA_FILTERS + 1; ++i)
+    vpx_tree_merge_probs(vp10_intra_filter_tree, pre_fc->intra_filter_probs[i],
+                         counts->intra_filter[i], fc->intra_filter_probs[i]);
 #endif  // CONFIG_EXT_INTRA
 }
 

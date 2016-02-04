@@ -248,10 +248,39 @@ static const uint8_t ext_intra_extend_modes[FILTER_INTRA_MODES] = {
   NEED_LEFT | NEED_ABOVE,      // FILTER_TM
 };
 
+static int intra_subpel_interp(int base, int shift, const uint8_t *ref,
+                               int ref_start_idx, int ref_end_idx,
+                               INTRA_FILTER filter_type) {
+  int val, k, idx, filter_idx = 0;
+  const int16_t *filter = NULL;
+
+  if (filter_type == INTRA_FILTER_LINEAR) {
+    val = ref[base] * (256 - shift) + ref[base + 1] * shift;
+    val = ROUND_POWER_OF_TWO(val, 8);
+  } else {
+    filter_idx = ROUND_POWER_OF_TWO(shift, 8 - SUBPEL_BITS);
+    filter = vp10_intra_filter_kernels[filter_type][filter_idx];
+
+    if (filter_idx < (1 << SUBPEL_BITS)) {
+      val = 0;
+      for (k = 0; k < SUBPEL_TAPS; ++k) {
+        idx = base + 1 - (SUBPEL_TAPS / 2) + k;
+        idx = VPXMAX(VPXMIN(idx, ref_end_idx), ref_start_idx);
+        val += ref[idx] * filter[k];
+      }
+      val = ROUND_POWER_OF_TWO(val, FILTER_BITS);
+    } else {
+      val = ref[base + 1];
+    }
+  }
+
+  return val;
+}
+
 // Directional prediction, zone 1: 0 < angle < 90
 static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
                              const uint8_t *above, const uint8_t *left,
-                             int dx, int dy) {
+                             int dx, int dy, INTRA_FILTER filter_type) {
   int r, c, x, y, base, shift, val;
 
   (void)left;
@@ -262,12 +291,12 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
   for (r = 0; r < bs; ++r) {
     y = r + 1;
     for (c = 0; c < bs; ++c) {
-      x = c * 256 - y * dx;
+      x = (c << 8) - y * dx;
       base = x >> 8;
-      shift = x - base * 256;
+      shift = x - (base << 8);
       if (base < 2 * bs - 1) {
-        val =
-            (above[base] * (256 - shift) + above[base + 1] * shift + 128) >> 8;
+        val = intra_subpel_interp(base, shift, above, 0, 2 * bs - 1,
+                                  filter_type);
         dst[c] = clip_pixel(val);
       } else {
         dst[c] = above[2 * bs - 1];
@@ -280,8 +309,8 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
 // Directional prediction, zone 2: 90 < angle < 180
 static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
                              const uint8_t *above, const uint8_t *left,
-                             int dx, int dy) {
-  int r, c, x, y, val1, val2, shift, val, base;
+                             int dx, int dy, INTRA_FILTER filter_type) {
+  int r, c, x, y, shift, val, base;
 
   assert(dx > 0);
   assert(dy > 0);
@@ -289,32 +318,22 @@ static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
       y = r + 1;
-      x = c * 256 - y * dx;
-      if (x >= -256) {
-        if (x <= 0) {
-          val1 = above[-1];
-          val2 = above[0];
-          shift = x + 256;
-        } else {
-          base = x >> 8;
-          val1 = above[base];
-          val2 = above[base + 1];
-          shift = x - base * 256;
-        }
+      x = (c << 8) - y * dx;
+      base = x >> 8;
+      if (base >= -1) {
+        shift = x - (base << 8);
+        val = intra_subpel_interp(base, shift, above, -1, bs - 1, filter_type);
       } else {
         x = c + 1;
-        y = r * 256 - x * dy;
+        y = (r << 8) - x * dy;
         base = y >> 8;
         if (base >= 0) {
-          val1 = left[base];
-          val2 = left[base + 1];
-          shift = y - base * 256;
+          shift = y - (base  << 8);
+          val = intra_subpel_interp(base, shift, left, 0, bs - 1, filter_type);
         } else {
-          val1 = val2 = left[0];
-          shift = 0;
+          val = left[0];
         }
       }
-      val = (val1 * (256 - shift) + val2 * shift + 128) >> 8;
       dst[c] = clip_pixel(val);
     }
     dst += stride;
@@ -324,26 +343,27 @@ static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
 // Directional prediction, zone 3: 180 < angle < 270
 static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
                              const uint8_t *above, const uint8_t *left,
-                             int dx, int dy) {
+                             int dx, int dy, INTRA_FILTER filter_type) {
   int r, c, x, y, base, shift, val;
 
   (void)above;
   (void)dx;
+
   assert(dx == 1);
   assert(dy < 0);
 
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
       x = c + 1;
-      y = r * 256 - x * dy;
+      y = (r << 8) - x * dy;
       base = y >> 8;
-      shift = y - base * 256;
+      shift = y - (base << 8);
       if (base < 2 * bs - 1) {
-        val =
-            (left[base] * (256 - shift) + left[base + 1] * shift + 128) >> 8;
+        val = intra_subpel_interp(base, shift, left, 0, 2 * bs - 1,
+                                  filter_type);
         dst[c] = clip_pixel(val);
       } else {
-        dst[c] = left[bs - 1];
+        dst[c] = left[ 2 * bs - 1];
       }
     }
     dst += stride;
@@ -351,7 +371,8 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
 }
 
 static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
-                         const uint8_t *above, const uint8_t *left, int angle) {
+                         const uint8_t *above, const uint8_t *left, int angle,
+                         INTRA_FILTER filter_type) {
   double t = 0;
   int dx, dy;
   int bs = 4 << tx_size;
@@ -361,16 +382,16 @@ static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
   if (angle > 0 && angle < 90) {
     dx = -((int)(256 / t));
     dy = 1;
-    dr_prediction_z1(dst, stride, bs, above, left, dx, dy);
+    dr_prediction_z1(dst, stride, bs, above, left, dx, dy, filter_type);
   } else if (angle > 90 && angle < 180) {
     t = -t;
     dx = (int)(256 / t);
     dy = (int)(256 * t);
-    dr_prediction_z2(dst, stride, bs, above, left, dx, dy);
+    dr_prediction_z2(dst, stride, bs, above, left, dx, dy, filter_type);
   } else if (angle > 180 && angle < 270) {
     dx = 1;
     dy = -((int)(256 * t));
-    dr_prediction_z3(dst, stride, bs, above, left, dx, dy);
+    dr_prediction_z3(dst, stride, bs, above, left, dx, dy, filter_type);
   } else if (angle == 90) {
     pred[V_PRED][tx_size](dst, stride, above, left);
   } else if (angle == 180) {
@@ -535,10 +556,40 @@ static void (*filter_intra_predictors[EXT_INTRA_MODES])(uint8_t *dst,
 };
 
 #if CONFIG_VP9_HIGHBITDEPTH
+static int highbd_intra_subpel_interp(int base, int shift, const uint16_t *ref,
+                                      int ref_start_idx, int ref_end_idx,
+                                      INTRA_FILTER filter_type) {
+  int val, k, idx, filter_idx = 0;
+  const int16_t *filter = NULL;
+
+  if (filter_type == INTRA_FILTER_LINEAR) {
+    val = ref[base] * (256 - shift) + ref[base + 1] * shift;
+    val = ROUND_POWER_OF_TWO(val, 8);
+  } else {
+    filter_idx = ROUND_POWER_OF_TWO(shift, 8 - SUBPEL_BITS);
+    filter = vp10_intra_filter_kernels[filter_type][filter_idx];
+
+    if (filter_idx < (1 << SUBPEL_BITS)) {
+      val = 0;
+      for (k = 0; k < SUBPEL_TAPS; ++k) {
+        idx = base + 1 - (SUBPEL_TAPS / 2) + k;
+        idx = VPXMAX(VPXMIN(idx, ref_end_idx), ref_start_idx);
+        val += ref[idx] * filter[k];
+      }
+      val = ROUND_POWER_OF_TWO(val, FILTER_BITS);
+    } else {
+      val = ref[base + 1];
+    }
+  }
+
+  return val;
+}
+
 // Directional prediction, zone 1: 0 < angle < 90
 static void highbd_dr_prediction_z1(uint16_t *dst, ptrdiff_t stride, int bs,
                                     const uint16_t *above, const uint16_t *left,
-                                    int dx, int dy, int bd) {
+                                    int dx, int dy, int bd,
+                                    INTRA_FILTER filter_type) {
   int r, c, x, y, base, shift, val;
 
   (void)left;
@@ -549,12 +600,12 @@ static void highbd_dr_prediction_z1(uint16_t *dst, ptrdiff_t stride, int bs,
   for (r = 0; r < bs; ++r) {
     y = r + 1;
     for (c = 0; c < bs; ++c) {
-      x = c * 256 - y * dx;
+      x = (c << 8) - y * dx;
       base = x >> 8;
-      shift = x - base * 256;
+      shift = x - (base << 8);
       if (base < 2 * bs - 1) {
-        val =
-            (above[base] * (256 - shift) + above[base + 1] * shift + 128) >> 8;
+        val = highbd_intra_subpel_interp(base, shift, above, 0, 2 * bs - 1,
+                                         filter_type);
         dst[c] = clip_pixel_highbd(val, bd);
       } else {
         dst[c] = above[2 * bs - 1];
@@ -567,8 +618,9 @@ static void highbd_dr_prediction_z1(uint16_t *dst, ptrdiff_t stride, int bs,
 // Directional prediction, zone 2: 90 < angle < 180
 static void highbd_dr_prediction_z2(uint16_t *dst, ptrdiff_t stride, int bs,
                                     const uint16_t *above, const uint16_t *left,
-                                    int dx, int dy, int bd) {
-  int r, c, x, y, val1, val2, shift, val, base;
+                                    int dx, int dy, int bd,
+                                    INTRA_FILTER filter_type) {
+  int r, c, x, y, shift, val, base;
 
   assert(dx > 0);
   assert(dy > 0);
@@ -576,32 +628,24 @@ static void highbd_dr_prediction_z2(uint16_t *dst, ptrdiff_t stride, int bs,
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
       y = r + 1;
-      x = c * 256 - y * dx;
-      if (x >= -256) {
-        if (x <= 0) {
-          val1 = above[-1];
-          val2 = above[0];
-          shift = x + 256;
-        } else {
-          base = x >> 8;
-          val1 = above[base];
-          val2 = above[base + 1];
-          shift = x - base * 256;
-        }
+      x = (c << 8) - y * dx;
+      base = x >> 8;
+      if (base >= -1) {
+        shift = x - (base << 8);
+        val = highbd_intra_subpel_interp(base, shift, above, -1, bs - 1,
+                                         filter_type);
       } else {
         x = c + 1;
-        y = r * 256 - x * dy;
+        y = (r << 8) - x * dy;
         base = y >> 8;
         if (base >= 0) {
-          val1 = left[base];
-          val2 = left[base + 1];
-          shift = y - base * 256;
+          shift = y - (base  << 8);
+          val = highbd_intra_subpel_interp(base, shift, left, 0, bs - 1,
+                                           filter_type);
         } else {
-          val1 = val2 = left[0];
-          shift = 0;
+          val = left[0];
         }
       }
-      val = (val1 * (256 - shift) + val2 * shift + 128) >> 8;
       dst[c] = clip_pixel_highbd(val, bd);
     }
     dst += stride;
@@ -611,7 +655,8 @@ static void highbd_dr_prediction_z2(uint16_t *dst, ptrdiff_t stride, int bs,
 // Directional prediction, zone 3: 180 < angle < 270
 static void highbd_dr_prediction_z3(uint16_t *dst, ptrdiff_t stride, int bs,
                                     const uint16_t *above, const uint16_t *left,
-                                    int dx, int dy, int bd) {
+                                    int dx, int dy, int bd,
+                                    INTRA_FILTER filter_type) {
   int r, c, x, y, base, shift, val;
 
   (void)above;
@@ -622,15 +667,15 @@ static void highbd_dr_prediction_z3(uint16_t *dst, ptrdiff_t stride, int bs,
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
       x = c + 1;
-      y = r * 256 - x * dy;
+      y = (r << 8) - x * dy;
       base = y >> 8;
-      shift = y - base * 256;
+      shift = y - (base << 8);
       if (base < 2 * bs - 1) {
-        val =
-            (left[base] * (256 - shift) + left[base + 1] * shift + 128) >> 8;
+        val = highbd_intra_subpel_interp(base, shift, left, 0, 2 * bs - 1,
+                                         filter_type);
         dst[c] = clip_pixel_highbd(val, bd);
       } else {
-        dst[c] = left[bs - 1];
+        dst[c] = left[2 * bs - 1];
       }
     }
     dst += stride;
@@ -663,7 +708,7 @@ static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride,
 
 static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                 const uint16_t *above, const uint16_t *left,
-                                int angle, int bd) {
+                                int angle, int bd, INTRA_FILTER filter) {
   double t = 0;
   int dx, dy;
 
@@ -672,16 +717,16 @@ static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   if (angle > 0 && angle < 90) {
     dx = -((int)(256 / t));
     dy = 1;
-    highbd_dr_prediction_z1(dst, stride, bs, above, left, dx, dy, bd);
+    highbd_dr_prediction_z1(dst, stride, bs, above, left, dx, dy, bd, filter);
   } else if (angle > 90 && angle < 180) {
     t = -t;
     dx = (int)(256 / t);
     dy = (int)(256 * t);
-    highbd_dr_prediction_z2(dst, stride, bs, above, left, dx, dy, bd);
+    highbd_dr_prediction_z2(dst, stride, bs, above, left, dx, dy, bd, filter);
   } else if (angle > 180 && angle < 270) {
     dx = 1;
     dy = -((int)(256 * t));
-    highbd_dr_prediction_z3(dst, stride, bs, above, left, dx, dy, bd);
+    highbd_dr_prediction_z3(dst, stride, bs, above, left, dx, dy, bd, filter);
   } else if (angle == 90) {
     highbd_v_predictor(dst, stride, bs, above, left, bd);
   } else if (angle == 180) {
@@ -961,8 +1006,11 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 
   if (mode != DC_PRED && mode != TM_PRED &&
       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+    INTRA_FILTER filter = INTRA_FILTER_LINEAR;
+    if (plane == 0 && pick_intra_filter(p_angle))
+      filter = xd->mi[0]->mbmi.intra_filter;
     highbd_dr_predictor(dst, dst_stride, bs, const_above_row, left_col,
-                        p_angle, xd->bd);
+                        p_angle, xd->bd, filter);
     return;
   }
 #endif  // CONFIG_EXT_INTRA
@@ -1118,7 +1166,11 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
   if (mode != DC_PRED && mode != TM_PRED &&
       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
-    dr_predictor(dst, dst_stride, tx_size, const_above_row, left_col, p_angle);
+    INTRA_FILTER filter = INTRA_FILTER_LINEAR;
+    if (plane == 0 && pick_intra_filter(p_angle))
+      filter = xd->mi[0]->mbmi.intra_filter;
+    dr_predictor(dst, dst_stride, tx_size, const_above_row, left_col, p_angle,
+                 filter);
     return;
   }
 #endif  // CONFIG_EXT_INTRA

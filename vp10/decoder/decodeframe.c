@@ -3262,6 +3262,12 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     for (i = 0; i < PARTITION_TYPES - 1; ++i)
       vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);
 
+#if CONFIG_EXT_INTRA
+  for (i = 0; i < INTRA_FILTERS + 1; ++i)
+    for (j = 0; j < INTRA_FILTERS - 1; ++j)
+      vp10_diff_update_prob(&r, &fc->intra_filter_probs[i][j]);
+#endif  // CONFIG_EXT_INTRA
+
   if (frame_is_intra_only(cm)) {
     vp10_copy(cm->kf_y_prob, vp10_kf_y_mode_prob);
     for (k = 0; k < INTRA_MODES; k++)

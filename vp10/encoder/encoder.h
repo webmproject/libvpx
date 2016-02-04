@@ -496,10 +496,6 @@ typedef struct VP10_COMP {
                                                  [PALETTE_COLORS];
   int palette_uv_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
                                                   [PALETTE_COLORS];
-
-  int multi_arf_allowed;
-  int multi_arf_enabled;
-  int multi_arf_last_grp_enabled;
 #if CONFIG_EXT_TX
   int inter_tx_type_costs[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
   int intra_tx_type_costs[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
@@ -508,6 +504,13 @@ typedef struct VP10_COMP {
   int intra_tx_type_costs[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   int inter_tx_type_costs[EXT_TX_SIZES][TX_TYPES];
 #endif  // CONFIG_EXT_TX
+#if CONFIG_EXT_INTRA
+  int intra_filter_cost[INTRA_FILTERS + 1][INTRA_FILTERS];
+#endif  // CONFIG_EXT_INTRA
+
+  int multi_arf_allowed;
+  int multi_arf_enabled;
+  int multi_arf_last_grp_enabled;
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_DENOISER denoiser;
 #endif
