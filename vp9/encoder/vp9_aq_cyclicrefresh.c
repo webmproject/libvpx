@@ -60,8 +60,6 @@ void vp9_cyclic_refresh_free(CYCLIC_REFRESH *cr) {
 }
 
 // Check if we should turn off cyclic refresh based on bitrate condition.
-// TODO(marpan): May be better in some cases to just reduce the amount/delta-qp
-// instead of completely shutting off.
 static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
                                         const RATE_CONTROL *rc) {
   // Turn off cyclic refresh if bits available per frame is not sufficiently
@@ -535,7 +533,10 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   struct segmentation *const seg = &cm->seg;
-  const int apply_cyclic_refresh  = apply_cyclic_refresh_bitrate(cm, rc);
+  // TODO(marpan): Look into whether we should reduce the amount/delta-qp
+  // instead of completely shutting off at low bitrates. For now keep it on.
+  // const int apply_cyclic_refresh = apply_cyclic_refresh_bitrate(cm, rc);
+  const int apply_cyclic_refresh = 1;
   if (cm->current_video_frame == 0)
     cr->low_content_avg = 0.0;
   // Don't apply refresh on key frame or temporal enhancement layer frames.
