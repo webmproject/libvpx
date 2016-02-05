@@ -862,7 +862,7 @@ static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
     }
   }
 }
-
+#if CONFIG_SUPERTX
 static void dec_build_inter_predictors_sb_sub8x8(VP10Decoder *const pbi,
                                                  MACROBLOCKD *xd,
                                                  int mi_row, int mi_col,
@@ -905,7 +905,7 @@ static void dec_build_inter_predictors_sb_sub8x8(VP10Decoder *const pbi,
     }
   }
 }
-
+#endif
 static INLINE TX_SIZE dec_get_uv_tx_size(const MB_MODE_INFO *mbmi,
                                          int n4_wl, int n4_hl) {
   // get minimum log2 num4x4s dimension
@@ -2024,7 +2024,7 @@ static void setup_bool_decoder(const uint8_t *data,
     vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
-
+#if CONFIG_ANS
 static void setup_token_decoder(const uint8_t *data,
                                 const uint8_t *data_end,
                                 const size_t read_size,
@@ -2045,6 +2045,7 @@ static void setup_token_decoder(const uint8_t *data,
     vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate token decoder %d", 1);
 }
+#endif
 
 static void read_coef_probs_common(vp10_coeff_probs_model *coef_probs,
                                    vpx_reader *r) {
