@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1e0883e_c5c0ac5b",
+        "filename": "vpx_dsp/intrapred.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-05T20:38:07Z",
+      "side": 1,
+      "message": "this is the most correct layout for the accesses, but it also brings out the unfortunate bug above with 32x32; merging the two loops avoids some unrolling, masking the error (and slowing things down a bit)",
+      "revId": "05437805f79780ad3f6afdff1a845512adf27201",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
