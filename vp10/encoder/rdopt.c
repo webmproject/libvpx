@@ -1837,7 +1837,8 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
       p_angle = mode_to_angle_map[mbmi->mode] +
           mbmi->angle_delta[0] * ANGLE_STEP;
       for (filter = INTRA_FILTER_LINEAR; filter < INTRA_FILTERS; ++filter) {
-        if (!pick_intra_filter(p_angle) && filter != INTRA_FILTER_LINEAR)
+        if ((FILTER_FAST_SEARCH || !pick_intra_filter(p_angle)) &&
+            filter != INTRA_FILTER_LINEAR)
           continue;
         mic->mbmi.intra_filter = filter;
         super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
@@ -1878,7 +1879,8 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
             mbmi->angle_delta[0] * ANGLE_STEP;
         for (filter = INTRA_FILTER_LINEAR; filter < INTRA_FILTERS; ++filter) {
           mic->mbmi.intra_filter = filter;
-          if (!pick_intra_filter(p_angle) && filter != INTRA_FILTER_LINEAR)
+          if ((FILTER_FAST_SEARCH || !pick_intra_filter(p_angle)) &&
+              filter != INTRA_FILTER_LINEAR)
             continue;
           super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                           &s, NULL, bsize, best_rd);
@@ -1909,8 +1911,40 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
           mbmi->angle_delta[0] * ANGLE_STEP;
       for (filter = INTRA_FILTER_LINEAR; filter < INTRA_FILTERS; ++filter) {
         mic->mbmi.intra_filter = filter;
-        if (!pick_intra_filter(p_angle) && filter != INTRA_FILTER_LINEAR)
+        if ((FILTER_FAST_SEARCH || !pick_intra_filter(p_angle)) &&
+            filter != INTRA_FILTER_LINEAR)
           continue;
+        super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
+                        &s, NULL, bsize, best_rd);
+        if (this_rate_tokenonly == INT_MAX)
+          continue;
+
+        this_rate = this_rate_tokenonly + rate_overhead +
+            cpi->intra_filter_cost[intra_filter_ctx][filter];
+        this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
+
+        if (this_rd < best_rd) {
+          best_rd             = this_rd;
+          best_angle_delta    = mbmi->angle_delta[0];
+          best_tx_size        = mbmi->tx_size;
+          best_filter         = mbmi->intra_filter;
+          best_tx_type        = mbmi->tx_type;
+          *rate               = this_rate;
+          *rate_tokenonly     = this_rate_tokenonly;
+          *distortion         = this_distortion;
+          *skippable          = s;
+        }
+      }
+    }
+  }
+
+  if (FILTER_FAST_SEARCH && *rate_tokenonly < INT_MAX) {
+    mbmi->angle_delta[0] = best_angle_delta;
+    p_angle = mode_to_angle_map[mbmi->mode] +
+        mbmi->angle_delta[0] * ANGLE_STEP;
+    if (pick_intra_filter(p_angle)) {
+      for (filter = INTRA_FILTER_LINEAR + 1; filter < INTRA_FILTERS; ++filter) {
+        mic->mbmi.intra_filter = filter;
         super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                         &s, NULL, bsize, best_rd);
         if (this_rate_tokenonly == INT_MAX)
