@@ -506,8 +506,6 @@ static double calc_ssim(const unsigned char *_src, int _systride,
 }
 
 
-#define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uintptr_t)(x)) << 1))
-
 static double calc_hbd_ssim(const uint8_t *_src, int _systride,
                             const uint8_t *_dst, int _dystride,
                             int _w, int _h, uint32_t bit_depth) {

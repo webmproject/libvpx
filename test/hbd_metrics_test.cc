@@ -32,6 +32,22 @@ typedef double (*HBDMetricFunc)(const YV12_BUFFER_CONFIG *source,
                                 const YV12_BUFFER_CONFIG *dest,
                                 uint32_t bd);
 
+
+double compute_hbd_psnrhvs(const YV12_BUFFER_CONFIG *source,
+  const YV12_BUFFER_CONFIG *dest,
+  uint32_t bit_depth) {
+  double tempy, tempu, tempv;
+  return vpx_psnrhvs(source, dest,
+                     &tempy, &tempu, &tempv, bit_depth);
+}
+
+double compute_psnrhvs(const YV12_BUFFER_CONFIG *source,
+  const YV12_BUFFER_CONFIG *dest) {
+  double tempy, tempu, tempv;
+  return vpx_psnrhvs(source, dest,
+                     &tempy, &tempu, &tempv, 8);
+}
+
 double compute_hbd_fastssim(const YV12_BUFFER_CONFIG *source,
                             const YV12_BUFFER_CONFIG *dest,
                             uint32_t bit_depth) {
@@ -61,6 +77,7 @@ double compute_vpxssim(const YV12_BUFFER_CONFIG *source,
   ssim = vpx_calc_ssim(source, dest, &weight);
   return 100 * pow(ssim / weight, 8.0);
 }
+
 
 class HBDMetricsTestBase {
  public:
@@ -101,16 +118,40 @@ class HBDMetricsTestBase {
 
     lbd_db = lbd_metric_(&lbd_src, &lbd_dst);
     hbd_db = hbd_metric_(&hbd_src, &hbd_dst, bit_depth_);
+    EXPECT_LE(fabs(lbd_db - hbd_db), threshold_);
 
-    printf("%10f \n", lbd_db);
-    printf("%10f \n", hbd_db);
+    i = 0;
+    while (i < lbd_src.buffer_alloc_sz) {
+      uint16_t dpel;
+      // Create some small distortion for dst buffer.
+      dpel = 120 + (rnd.Rand8() >> 4);
+      lbd_dst.buffer_alloc[i] = (uint8_t)dpel;
+      ((uint16_t*)(hbd_dst.buffer_alloc))[i] = dpel << (bit_depth_ - 8);
+      i++;
+    }
+
+    lbd_db = lbd_metric_(&lbd_src, &lbd_dst);
+    hbd_db = hbd_metric_(&hbd_src, &hbd_dst, bit_depth_);
+    EXPECT_LE(fabs(lbd_db - hbd_db), threshold_);
+
+    i = 0;
+    while (i < lbd_src.buffer_alloc_sz) {
+      uint16_t dpel;
+      // Create some small distortion for dst buffer.
+      dpel = 126 + (rnd.Rand8() >> 6);
+      lbd_dst.buffer_alloc[i] = (uint8_t)dpel;
+      ((uint16_t*)(hbd_dst.buffer_alloc))[i] = dpel << (bit_depth_ - 8);
+      i++;
+    }
+
+    lbd_db = lbd_metric_(&lbd_src, &lbd_dst);
+    hbd_db = hbd_metric_(&hbd_src, &hbd_dst, bit_depth_);
+    EXPECT_LE(fabs(lbd_db - hbd_db), threshold_);
 
     vpx_free_frame_buffer(&lbd_src);
     vpx_free_frame_buffer(&lbd_dst);
     vpx_free_frame_buffer(&hbd_src);
     vpx_free_frame_buffer(&hbd_dst);
-
-    EXPECT_LE(fabs(lbd_db - hbd_db), threshold_);
   }
 
   int bit_depth_;
@@ -140,8 +181,10 @@ TEST_P(HBDMetricsTest, RunAccuracyCheck) {
 
 // Allow small variation due to floating point operations.
 static const double kSsim_thresh = 0.001;
-// Allow some variation from accumulated errors in floating point operations.
-static const double kFSsim_thresh = 0.01;
+// Allow some additional errors accumulated in floating point operations.
+static const double kFSsim_thresh = 0.03;
+// Allow some extra variation due to rounding error accumulated in dct.
+static const double kPhvs_thresh = 0.3;
 
 INSTANTIATE_TEST_CASE_P(
     VPXSSIM, HBDMetricsTest,
@@ -157,5 +200,13 @@ INSTANTIATE_TEST_CASE_P(
                          kFSsim_thresh),
         MetricTestTParam(&compute_fastssim, &compute_hbd_fastssim, 12,
                          kFSsim_thresh)));
+INSTANTIATE_TEST_CASE_P(
+    PSNRHVS, HBDMetricsTest,
+    ::testing::Values(
+        MetricTestTParam(&compute_psnrhvs, &compute_hbd_psnrhvs, 10,
+                         kPhvs_thresh),
+        MetricTestTParam(&compute_psnrhvs, &compute_hbd_psnrhvs, 12,
+                         kPhvs_thresh)));
+
 }  // namespace
 

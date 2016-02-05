@@ -35,6 +35,17 @@ static void od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x,
     for (j = 0; j< 8; j++)
       *(y + ystride*i + j) = (*(y + ystride*i + j) + 4) >> 3;
 }
+#if CONFIG_VP9_HIGHBITDEPTH
+static void hbd_od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x,
+                           int xstride) {
+  int i, j;
+  (void) xstride;
+  vpx_highbd_fdct8x8(x, y, ystride);
+  for (i = 0; i < 8; i++)
+    for (j = 0; j< 8; j++)
+      *(y + ystride*i + j) = (*(y + ystride*i + j) + 4) >> 3;
+}
+#endif
 
 /* Normalized inverse quantization matrix for 8x8 DCT at the point of
  * transparency. This is not the JPEG based matrix from the paper,
@@ -91,18 +102,28 @@ static const double csf_cr420[8][8] = {
     {0.593906509971, 0.802254508198, 0.706020324706, 0.587716619023,
      0.478717061273, 0.393021669543, 0.330555063063, 0.285345396658}};
 
-static double convert_score_db(double _score, double _weight) {
+static double convert_score_db(double _score, double _weight, int bit_depth) {
+  int16_t pix_max = 255;
   assert(_score * _weight >= 0.0);
-  if (_weight * _score < 255 * 255 * 1e-10)
+  if (bit_depth == 10)
+    pix_max = 1023;
+  else if (bit_depth == 12)
+    pix_max = 4095;
+
+  if (_weight * _score < pix_max * pix_max * 1e-10)
     return MAX_PSNR;
-  return 10 * (log10(255 * 255) - log10(_weight * _score));
+  return 10 * (log10(pix_max * pix_max) - log10(_weight * _score));
 }
 
-static double calc_psnrhvs(const unsigned char *_src, int _systride,
-                           const unsigned char *_dst, int _dystride,
-                           double _par, int _w, int _h, int _step,
-                           const double _csf[8][8]) {
+static double calc_psnrhvs(const unsigned char *src, int _systride,
+                               const unsigned char *dst, int _dystride,
+                               double _par, int _w, int _h, int _step,
+                               const double _csf[8][8], uint32_t bit_depth) {
   double ret;
+  const uint8_t *_src8 = src;
+  const uint8_t *_dst8 = dst;
+  const uint16_t *_src16 = CONVERT_TO_SHORTPTR(src);
+  const uint16_t *_dst16 = CONVERT_TO_SHORTPTR(dst);
   int16_t dct_s[8 * 8], dct_d[8 * 8];
   tran_low_t dct_s_coef[8 * 8], dct_d_coef[8 * 8];
   double mask[8][8];
@@ -111,6 +132,7 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
   int y;
   (void) _par;
   ret = pixels = 0;
+
   /*In the PSNR-HVS-M paper[1] the authors describe the construction of
    their masking table as "we have used the quantization table for the
    color component Y of JPEG [6] that has been also obtained on the
@@ -150,8 +172,13 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
       for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++) {
           int sub = ((i & 12) >> 2) + ((j & 12) >> 1);
-          dct_s[i * 8 + j] = _src[(y + i) * _systride + (j + x)];
-          dct_d[i * 8 + j] = _dst[(y + i) * _dystride + (j + x)];
+          if (bit_depth == 8) {
+            dct_s[i * 8 + j] = _src8[(y + i) * _systride + (j + x)];
+            dct_d[i * 8 + j] = _dst8[(y + i) * _dystride + (j + x)];
+          } else if (bit_depth == 10 || bit_depth == 12) {
+            dct_s[i * 8 + j] = _src16[(y + i) * _systride + (j + x)];
+            dct_d[i * 8 + j] = _dst16[(y + i) * _dystride + (j + x)];
+          }
           s_gmean += dct_s[i * 8 + j];
           d_gmean += dct_d[i * 8 + j];
           s_means[sub] += dct_s[i * 8 + j];
@@ -185,8 +212,16 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
         s_gvar = (s_vars[0] + s_vars[1] + s_vars[2] + s_vars[3]) / s_gvar;
       if (d_gvar > 0)
         d_gvar = (d_vars[0] + d_vars[1] + d_vars[2] + d_vars[3]) / d_gvar;
-      od_bin_fdct8x8(dct_s_coef, 8, dct_s, 8);
-      od_bin_fdct8x8(dct_d_coef, 8, dct_d, 8);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (bit_depth == 10 || bit_depth == 12) {
+        hbd_od_bin_fdct8x8(dct_s_coef, 8, dct_s, 8);
+        hbd_od_bin_fdct8x8(dct_d_coef, 8, dct_d, 8);
+      }
+#endif
+      if (bit_depth == 8) {
+        od_bin_fdct8x8(dct_s_coef, 8, dct_s, 8);
+        od_bin_fdct8x8(dct_d_coef, 8, dct_d, 8);
+      }
       for (i = 0; i < 8; i++)
         for (j = (i == 0); j < 8; j++)
           s_mask += dct_s_coef[i * 8 + j] * dct_s_coef[i * 8 + j] * mask[i][j];
@@ -200,7 +235,7 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
       for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++) {
           double err;
-          err = fabs((float)(dct_s_coef[i * 8 + j] - dct_d_coef[i * 8 + j]));
+          err = fabs((double)(dct_s_coef[i * 8 + j] - dct_d_coef[i * 8 + j]));
           if (i != 0 || j != 0)
             err = err < s_mask / mask[i][j] ? 0 : err - s_mask / mask[i][j];
           ret += (err * _csf[i][j]) * (err * _csf[i][j]);
@@ -212,25 +247,28 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
   ret /= pixels;
   return ret;
 }
+
 double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
                    const YV12_BUFFER_CONFIG *dest, double *y_psnrhvs,
-                   double *u_psnrhvs, double *v_psnrhvs) {
+                   double *u_psnrhvs, double *v_psnrhvs, uint32_t bit_depth) {
   double psnrhvs;
   const double par = 1.0;
   const int step = 7;
   vpx_clear_system_state();
+
+  assert(bit_depth == 8 || bit_depth == 10 || bit_depth == 12);
+
   *y_psnrhvs = calc_psnrhvs(source->y_buffer, source->y_stride, dest->y_buffer,
                             dest->y_stride, par, source->y_crop_width,
-                            source->y_crop_height, step, csf_y);
-
+                            source->y_crop_height, step, csf_y, bit_depth);
   *u_psnrhvs = calc_psnrhvs(source->u_buffer, source->uv_stride, dest->u_buffer,
                             dest->uv_stride, par, source->uv_crop_width,
-                            source->uv_crop_height, step, csf_cb420);
+                            source->uv_crop_height, step, csf_cb420, bit_depth);
 
   *v_psnrhvs = calc_psnrhvs(source->v_buffer, source->uv_stride, dest->v_buffer,
                             dest->uv_stride, par, source->uv_crop_width,
-                            source->uv_crop_height, step, csf_cr420);
+                            source->uv_crop_height, step, csf_cr420, bit_depth);
   psnrhvs = (*y_psnrhvs) * .8 + .1 * ((*u_psnrhvs) + (*v_psnrhvs));
-
-  return convert_score_db(psnrhvs, 1.0);
+  return convert_score_db(psnrhvs, 1.0, bit_depth);
 }
+
