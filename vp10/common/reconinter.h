@@ -13,6 +13,7 @@
 
 #include "vp10/common/filter.h"
 #include "vp10/common/onyxc_int.h"
+#include "vp10/common/vp10_convolve.h"
 #include "vpx/vpx_integer.h"
 
 #ifdef __cplusplus
@@ -27,23 +28,34 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
                                    int w, int h, int ref,
                                    const INTERP_FILTER interp_filter,
                                    int xs, int ys) {
-  const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
+  InterpFilterParams interp_filter_params =
+      vp10_get_interp_filter_params(interp_filter);
+  if (interp_filter_params.tap == SUBPEL_TAPS) {
+    const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
-  if (kernel[0][SUBPEL_TAPS / 2 - 1] == 128) {
-    // Interpolating filter
+    if (IsInterpolatingFilter(interp_filter)) {
+      // Interpolating filter
+      sf->predict[subpel_x != 0][subpel_y != 0][ref](
+          src, src_stride, dst, dst_stride,
+          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+    } else {
+      sf->predict_ni[subpel_x != 0][subpel_y != 0][ref](
+          src, src_stride, dst, dst_stride,
+          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+    }
+#else
     sf->predict[subpel_x != 0][subpel_y != 0][ref](
         src, src_stride, dst, dst_stride,
         kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
-  } else {
-    sf->predict_ni[subpel_x != 0][subpel_y != 0][ref](
-        src, src_stride, dst, dst_stride,
-        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
-  }
-#else
-  sf->predict[subpel_x != 0][subpel_y != 0][ref](
-      src, src_stride, dst, dst_stride,
-      kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+  } else {
+    // ref > 0 means this is the second reference frame
+    // first reference frame's prediction result is already in dst
+    // therefore we need to average the first and second results
+    int avg = ref > 0;
+    vp10_convolve(src, src_stride, dst, dst_stride, w, h, interp_filter_params,
+                  subpel_x, xs, subpel_y, ys, avg);
+  }
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -55,23 +67,35 @@ static INLINE void high_inter_predictor(const uint8_t *src, int src_stride,
                                         int w, int h, int ref,
                                         const INTERP_FILTER interp_filter,
                                         int xs, int ys, int bd) {
-  const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
+  InterpFilterParams interp_filter_params =
+      vp10_get_interp_filter_params(interp_filter);
+  if (interp_filter_params.tap == SUBPEL_TAPS) {
+    const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
-  if (kernel[0][SUBPEL_TAPS / 2 - 1] == 128) {
-    // Interpolating filter
+    if (IsInterpolatingFilter(interp_filter)) {
+      // Interpolating filter
+      sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
+          src, src_stride, dst, dst_stride,
+          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+    } else {
+      sf->highbd_predict_ni[subpel_x != 0][subpel_y != 0][ref](
+          src, src_stride, dst, dst_stride,
+          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+    }
+#else
     sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
         src, src_stride, dst, dst_stride,
         kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
-  } else {
-    sf->highbd_predict_ni[subpel_x != 0][subpel_y != 0][ref](
-        src, src_stride, dst, dst_stride,
-        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
-  }
-#else
-  sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
-      src, src_stride, dst, dst_stride,
-      kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
+  } else {
+    // ref > 0 means this is the second reference frame
+    // first reference frame's prediction result is already in dst
+    // therefore we need to average the first and second results
+    int avg = ref > 0;
+    vp10_highbd_convolve(src, src_stride, dst, dst_stride, w, h,
+                         interp_filter_params, subpel_x, xs, subpel_y, ys, avg,
+                         bd);
+  }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 

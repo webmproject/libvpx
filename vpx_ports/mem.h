@@ -46,8 +46,8 @@
     (((value) + ((1 << (n)) - 1)) & ~((1 << (n)) - 1))
 
 #if CONFIG_VP9_HIGHBITDEPTH
-#define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uintptr_t)x) << 1))
-#define CONVERT_TO_BYTEPTR(x) ((uint8_t*)(((uintptr_t)x) >> 1))
+#define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uintptr_t)(x)) << 1))
+#define CONVERT_TO_BYTEPTR(x) ((uint8_t*)(((uintptr_t)(x)) >> 1))
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #endif  // VPX_PORTS_MEM_H_
