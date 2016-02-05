@@ -2558,7 +2558,8 @@ static void get_tile_buffer(const uint8_t *const data_end,
                             struct vpx_internal_error_info *error_info,
                             const uint8_t **data,
                             vpx_decrypt_cb decrypt_cb, void *decrypt_state,
-                            TileBuffer *buf, VP9_COMMON *const cm) {
+                            TileBuffer (*tile_buffers)[1024],
+                            int tile_size_bytes, int col, int row) {
 #else
 static void get_tile_buffer(const uint8_t *const data_end,
                             int is_last,
@@ -2571,26 +2572,39 @@ static void get_tile_buffer(const uint8_t *const data_end,
   size_t size;
 
 #if CONFIG_ROW_TILE
+  size_t copy_size  = 0;
+  const uint8_t *copy_data = NULL;
+
   // mem read function
   MemRead read_tile_size;
-  setup_size_read(cm->tile_size_bytes, &read_tile_size);
+  setup_size_read(tile_size_bytes, &read_tile_size);
 #endif
 
   if (!is_last) {
 #if CONFIG_ROW_TILE
-    if (!read_is_valid(*data, cm->tile_size_bytes, data_end))
+    if (!read_is_valid(*data, tile_size_bytes, data_end))
       vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt tile length");
     if (decrypt_cb) {
       uint8_t be_data[4];
-      decrypt_cb(decrypt_state, *data, be_data, 4);
+      decrypt_cb(decrypt_state, *data, be_data, tile_size_bytes);
 
       // Only read number of bytes in cm->tile_size_bytes.
       size = read_tile_size(be_data);
     } else {
       size = read_tile_size(*data);
     }
-    *data += cm->tile_size_bytes;
+
+    if ((size >> (tile_size_bytes * 8 - 1)) == 1) {
+      int offset = (size >> (tile_size_bytes - 1) * 8) & 0x7f;
+
+      // Currently, only use tiles in same column as reference tiles.
+      copy_data = tile_buffers[row - offset][col].data;
+      copy_size = tile_buffers[row - offset][col].size;
+      size = 0;
+    }
+
+    *data += tile_size_bytes;
 #else
     if (!read_is_valid(*data, 4, data_end))
       vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
@@ -2613,8 +2627,18 @@ static void get_tile_buffer(const uint8_t *const data_end,
     size = data_end - *data;
   }
 
+#if CONFIG_ROW_TILE
+  if (size > 0) {
+    tile_buffers[row][col].data = *data;
+    tile_buffers[row][col].size = size;
+  } else {
+    tile_buffers[row][col].data = copy_data;
+    tile_buffers[row][col].size = copy_size;
+  }
+#else
   buf->data = *data;
   buf->size = size;
+#endif
 
   *data += size;
 }
@@ -2633,15 +2657,17 @@ static void get_tile_buffers(VP9Decoder *pbi,
                                  MIN(pbi->dec_tile_col, tile_cols - 1);
   int tile_row_limit = (pbi->dec_tile_row == -1) ? INT_MAX :
                                  MIN(pbi->dec_tile_row, tile_rows - 1);
+  int tile_col_size_bytes = cm->tile_col_size_bytes;
+  int tile_size_bytes = cm->tile_size_bytes;
 
   // tile col size read function
   MemRead read_tile_col_size;
-  setup_size_read(cm->tile_col_size_bytes, &read_tile_col_size);
+  setup_size_read(tile_col_size_bytes, &read_tile_col_size);
 
   for (c = 0; c < tile_cols && c <= tile_col_limit; ++c) {
     if (c < tile_cols - 1) {
       tile_col_size = read_tile_col_size(data);
-      data += cm->tile_col_size_bytes;
+      data += tile_col_size_bytes;
       tile_end_col[c] = data + tile_col_size;
     } else {
       tile_col_size = data_end - data;
@@ -2657,15 +2683,18 @@ static void get_tile_buffers(VP9Decoder *pbi,
     if (tile_col_limit > 0)
       data = tile_end_col[tile_col_limit - 1];
     if (tile_col_limit < tile_cols - 1)
-      data += cm->tile_col_size_bytes;
+      data += tile_col_size_bytes;
 
     for (r = 0; r <= tile_row_limit; ++r) {
-      const int is_last = (r == tile_rows - 1);
-      TileBuffer *const buf = &tile_buffers[r][tile_col_limit];
-      buf->col = tile_col_limit;
+      // The last tile in the row also has a tile header. So here always set
+      // is_last = 0.
+      const int is_last = 0;
+
+      tile_buffers[r][tile_col_limit].col = tile_col_limit;
       get_tile_buffer(tile_end_col[tile_col_limit], is_last,
                       &pbi->common.error, &data,
-                      pbi->decrypt_cb, pbi->decrypt_state, buf, cm);
+                      pbi->decrypt_cb, pbi->decrypt_state,
+                      tile_buffers, tile_size_bytes, tile_col_limit, r);
     }
     return;
   }
@@ -2675,15 +2704,18 @@ static void get_tile_buffers(VP9Decoder *pbi,
       data = tile_end_col[c - 1];
 
     if (c < tile_cols - 1)
-      data += cm->tile_col_size_bytes;
+      data += tile_col_size_bytes;
 
     for (r = 0; r < tile_rows && r <= tile_row_limit; ++r) {
-      const int is_last = (r == tile_rows - 1);
-      TileBuffer *const buf = &tile_buffers[r][c];
-      buf->col = c;
+      // The last tile in the row also has a tile header. So here always set
+      // is_last = 0.
+      const int is_last = 0;
+
+      tile_buffers[r][c].col = c;
       get_tile_buffer(tile_end_col[c], is_last,
                       &pbi->common.error, &data,
-                      pbi->decrypt_cb, pbi->decrypt_state, buf, cm);
+                      pbi->decrypt_cb, pbi->decrypt_state,
+                      tile_buffers, tile_size_bytes, c, r);
     }
   }
 }
@@ -2767,6 +2799,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   vpx_memset(cm->above_seg_context, 0,
              sizeof(*cm->above_seg_context) * aligned_cols);
 
+  // Scan the frame data buffer, and get each tile data location as well as its
+  // size.
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
   if (pbi->tile_data == NULL ||

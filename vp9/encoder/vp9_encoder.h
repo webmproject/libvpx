@@ -217,6 +217,13 @@ static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
   return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
 }
 
+#if CONFIG_ROW_TILE
+typedef struct EncTileBuffer {
+  uint8_t *data_start;
+  unsigned int data_size;
+} EncTileBuffer;
+#endif
+
 typedef struct VP9_COMP {
   QUANTS quants;
   MACROBLOCK mb;
@@ -441,6 +448,7 @@ typedef struct VP9_COMP {
 
 #if CONFIG_ROW_TILE
   TileInfo tile_info[1024][1024];
+  EncTileBuffer tile_buffers[1024][1024];
   TOKENEXTRA *tile_tok[1024][1024];
 
   unsigned int max_tile_size;

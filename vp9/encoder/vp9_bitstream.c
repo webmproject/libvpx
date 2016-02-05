@@ -2170,18 +2170,18 @@ static INLINE void set_tile_size_in_bytes(VP9_COMP *cpi,
     // bytes needed. Note: This decision is not always guaranteed to be true.
     // In later bitstream packing, need to check if the actual tile size is
     // out of the range.
-    if (cpi->max_tile_size < ONE_BYTE_THRESH)
+    if (cpi->max_tile_size < ONE_BYTE_THRESH(0))
       cm->tile_size_bytes = 1;
-    else if (cpi->max_tile_size < TWO_BYTE_THRESH)
+    else if (cpi->max_tile_size < TWO_BYTE_THRESH(0))
       cm->tile_size_bytes = 2;
-    else if (cpi->max_tile_size < THREE_BYTE_THRESH)
+    else if (cpi->max_tile_size < THREE_BYTE_THRESH(0))
       cm->tile_size_bytes = 3;
 
-    if (cpi->max_tile_col_size < ONE_BYTE_THRESH)
+    if (cpi->max_tile_col_size < ONE_BYTE_THRESH(1))
       cm->tile_col_size_bytes = 1;
-    else if (cpi->max_tile_col_size < TWO_BYTE_THRESH)
+    else if (cpi->max_tile_col_size < TWO_BYTE_THRESH(1))
       cm->tile_col_size_bytes = 2;
-    else if (cpi->max_tile_col_size < THREE_BYTE_THRESH)
+    else if (cpi->max_tile_col_size < THREE_BYTE_THRESH(1))
       cm->tile_col_size_bytes = 3;
   }
 }
@@ -2265,18 +2265,18 @@ static int get_refresh_mask(VP9_COMP *cpi) {
 
 #if CONFIG_ROW_TILE
 static INLINE void setup_size_storing(int num_bytes, MemPut *output,
-                                      unsigned int *size_limit) {
+                                      unsigned int *size_limit, int type) {
   *output = mem_put_be32;
   *size_limit = UINT_MAX;
   if (num_bytes == 3) {
     *output = mem_put_be24;
-    *size_limit = THREE_BYTE_LIMIT;
+    *size_limit = THREE_BYTE_LIMIT(type);
   } else if (num_bytes == 2) {
     *output = mem_put_be16;
-    *size_limit = TWO_BYTE_LIMIT;
+    *size_limit = TWO_BYTE_LIMIT(type);
   } else if (num_bytes == 1) {
     *output = mem_put_be8;
-    *size_limit = ONE_BYTE_LIMIT;
+    *size_limit = ONE_BYTE_LIMIT(type);
   }
 }
 #endif
@@ -2295,6 +2295,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
 #if CONFIG_ROW_TILE
   TOKENEXTRA *(*tok)[1024] = cpi->tile_tok;
   TileInfo (*tile)[1024] = cpi->tile_info;
+  EncTileBuffer (*tile_buf)[1024] = cpi->tile_buffers;
 #else
   TOKENEXTRA *tok[4][1 << 6];
   TileInfo tile[4][1 << 6];
@@ -2312,9 +2313,10 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   unsigned int tile_size_limit;
   unsigned int tile_col_size_limit;
 
-  setup_size_storing(cm->tile_size_bytes, &output_tile_size, &tile_size_limit);
+  setup_size_storing(cm->tile_size_bytes, &output_tile_size, &tile_size_limit,
+                     0);
   setup_size_storing(cm->tile_col_size_bytes, &output_tile_col_size,
-                     &tile_col_size_limit);
+                     &tile_col_size_limit, 1);
 #endif
 
   vpx_memset(cm->above_seg_context, 0, sizeof(*cm->above_seg_context) *
@@ -2339,14 +2341,19 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
       total_size += cm->tile_col_size_bytes;
 
     for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-      const TileInfo * const ptile = &tile[tile_row][tile_col];
+      TileInfo * const ptile = &tile[tile_row][tile_col];
+      EncTileBuffer *const ptile_buf = &tile_buf[tile_row][tile_col];
+      uint8_t *source;
+      int write_tile_data = 1;
+
       tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
 
-      if (tile_row < tile_rows - 1)
-        vp9_start_encode(&residual_bc, data_ptr + total_size
-                         + cm->tile_size_bytes);
-      else
-        vp9_start_encode(&residual_bc, data_ptr + total_size);
+      // Is CONFIG_ROW_TILE = 1, every tile in the row has a header even for
+      // the last one.
+      ptile_buf->data_start = data_ptr + total_size;
+      source = data_ptr + total_size + cm->tile_size_bytes;
+
+      vp9_start_encode(&residual_bc, source);
 
       write_modes(cpi, ptile, &residual_bc, &tok[tile_row][tile_col], tok_end);
       assert(tok[tile_row][tile_col] == tok_end);
@@ -2362,12 +2369,78 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
           return 0;
       }
 
-      if (tile_row < tile_rows - 1) {
+      ptile_buf->data_size = residual_bc.pos;
+
+      // Check if this tile is a copy tile.
+      // Very low chances to have copy tiles on the key frame. Thus, don't
+      // search on key frame to reduce unnecessary search.
+      if (cm->frame_type != KEY_FRAME && final_packing) {
+        const MV32 candidates[1] = {{1, 0}};
+        int i;
+
+        assert(cm->tile_size_bytes >= 1);
+
+        // (TODO: yunqingwang) For now, only above tile is checked and used.
+        // More candidates such as left tile can be added later.
+        for (i = 0; i < 1; i++) {
+          int cand_row = tile_row - candidates[0].row;
+          int cand_col = tile_col - candidates[0].col;
+          uint8_t tile_hdr;
+          uint8_t *ref_tile;
+          unsigned int ref_tile_size;
+          int identical_tile_offset = 0;
+
+          if (tile_row == 0 )
+            continue;
+
+          tile_hdr = *(tile_buf[cand_row][cand_col].data_start);
+
+          // Read out tcm bit
+          if ((tile_hdr >> 7) == 1) {
+            // The candidate is a copy tile itself
+            tile_hdr &= 0x7f;
+            identical_tile_offset = tile_hdr + 1;
+            ref_tile = tile_buf[cand_row - tile_hdr][cand_col].data_start +
+                cm->tile_size_bytes;
+            ref_tile_size = tile_buf[cand_row - tile_hdr][cand_col].data_size;
+          } else {
+            identical_tile_offset = 1;
+            ref_tile = tile_buf[cand_row][cand_col].data_start +
+                cm->tile_size_bytes;
+            ref_tile_size = tile_buf[cand_row][cand_col].data_size;
+          }
+
+          if (identical_tile_offset < 128 && ref_tile_size == residual_bc.pos) {
+            unsigned int m;
+            uint8_t *cur_tile = tile_buf[tile_row][tile_col].data_start +
+                cm->tile_size_bytes;
+            int match = 1;
+
+            for (m = 0; m < residual_bc.pos; m++) {
+              if (*ref_tile++ != *cur_tile++) {
+                match = 0;
+                break;
+              }
+            }
+
+            if (match) {
+              write_tile_data = 0;
+              identical_tile_offset |= 0x80;
+              identical_tile_offset <<= (cm->tile_size_bytes - 1) * 8;
+              output_tile_size(data_ptr + total_size, identical_tile_offset);
+              break;
+            }
+          }
+        }
+      }
+
+      if (write_tile_data) {
         // size of this tile
         output_tile_size(data_ptr + total_size, residual_bc.pos);
-        total_size += cm->tile_size_bytes;
+        total_size += residual_bc.pos;
       }
-      total_size += residual_bc.pos;
+
+      total_size += cm->tile_size_bytes;
     }
 
     if (!is_last_col) {
