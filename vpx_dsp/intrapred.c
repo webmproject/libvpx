@@ -528,6 +528,7 @@ static INLINE void highbd_d207_predictor(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
+#if CONFIG_MISC_FIXES
 static INLINE void highbd_d207e_predictor(uint16_t *dst, ptrdiff_t stride,
                                           int bs, const uint16_t *above,
                                           const uint16_t *left, int bd) {
@@ -544,6 +545,7 @@ static INLINE void highbd_d207e_predictor(uint16_t *dst, ptrdiff_t stride,
     dst += stride;
   }
 }
+#endif  // CONFIG_MISC_FIXES
 
 static INLINE void highbd_d63_predictor(uint16_t *dst, ptrdiff_t stride,
                                         int bs, const uint16_t *above,
@@ -579,6 +581,7 @@ static INLINE void highbd_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+#if CONFIG_MISC_FIXES
 static INLINE void highbd_d45e_predictor(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
@@ -593,6 +596,7 @@ static INLINE void highbd_d45e_predictor(uint16_t *dst, ptrdiff_t stride,
     dst += stride;
   }
 }
+#endif  // CONFIG_MISC_FIXES
 
 static INLINE void highbd_d117_predictor(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,

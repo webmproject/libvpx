@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./vpx_config.h"
 #if CONFIG_VP9_HIGHBITDEPTH
 #include "vpx_dsp/vpx_dsp_common.h"
 #endif  // CONFIG_VP9_HIGHBITDEPTH

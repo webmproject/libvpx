@@ -81,10 +81,6 @@ typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, vpx_bit_depth_t>
     Trans32x32Param;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void idct32x32_8(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct32x32_1024_add_c(in, out, stride, 8);
-}
-
 void idct32x32_10(const tran_low_t *in, uint8_t *out, int stride) {
   vpx_highbd_idct32x32_1024_add_c(in, out, stride, 10);
 }

@@ -16,7 +16,6 @@
 #include "vp9/encoder/vp9_extend.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
-#define SMALL_FRAME_FB_IDX 7
 #define SMALL_FRAME_WIDTH  32
 #define SMALL_FRAME_HEIGHT 16
 
@@ -644,6 +643,8 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
 }
 
 #if CONFIG_SPATIAL_SVC
+#define SMALL_FRAME_FB_IDX 7
+
 int vp9_svc_start_frame(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc;
@@ -754,7 +755,8 @@ int vp9_svc_start_frame(VP9_COMP *const cpi) {
   return 0;
 }
 
-#endif
+#undef SMALL_FRAME_FB_IDX
+#endif  // CONFIG_SPATIAL_SVC
 
 struct lookahead_entry *vp9_svc_lookahead_pop(VP9_COMP *const cpi,
                                               struct lookahead_ctx *ctx,

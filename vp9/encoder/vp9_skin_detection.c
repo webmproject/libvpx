@@ -21,10 +21,11 @@
 static const int skin_mean[5][2] = {
     {7463, 9614}, {6400, 10240}, {7040, 10240}, {8320, 9280}, {6800, 9614}};
 static const int skin_inv_cov[4] = {4107, 1663, 1663, 2157};  // q16
-static const int skin_threshold[2] = {1570636, 800000};       // q18
+static const int skin_threshold[6] = {1570636, 1400000, 800000, 800000, 800000,
+    800000};  // q18
 
 // Thresholds on luminance.
-static const int y_low = 20;
+static const int y_low = 40;
 static const int y_high = 220;
 
 // Evaluates the Mahalanobis distance measure for the input CbCr values.
@@ -55,9 +56,23 @@ int vp9_skin_pixel(const uint8_t y, const uint8_t cb, const uint8_t cr) {
       return (evaluate_skin_color_difference(cb, cr, 0) < skin_threshold[0]);
     } else {
       int i = 0;
+      // Exit on grey.
+      if (cb == 128 && cr == 128)
+        return 0;
+      // Exit on very strong cb.
+      if (cb > 150 && cr < 110)
+        return 0;
+      // Exit on (another) low luminance threshold if either color is high.
+      if (y < 50 && (cb > 140 || cr > 140))
+        return 0;
       for (; i < 5; i++) {
-        if (evaluate_skin_color_difference(cb, cr, i) < skin_threshold[1]) {
+        if (evaluate_skin_color_difference(cb, cr, i) < skin_threshold[i + 1]) {
           return 1;
+        }
+        // Exit if difference is much large than the threshold.
+        if (evaluate_skin_color_difference(cb, cr, i) >
+            (skin_threshold[i + 1] << 3)) {
+          return 0;
         }
       }
       return 0;
