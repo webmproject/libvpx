@@ -4370,13 +4370,13 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
     cpi->bytes += (int)(*size);
 
     if (cm->show_frame) {
+      YV12_BUFFER_CONFIG *orig = cpi->Source;
+      YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
       cpi->count++;
 
       if (cpi->b_calculate_psnr) {
-        YV12_BUFFER_CONFIG *orig = cpi->Source;
-        YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
-        YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
         PSNR_STATS psnr;
+        YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
 #if CONFIG_VP9_HIGHBITDEPTH
         calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd,
                          cpi->oxcf.input_bit_depth);
@@ -4394,7 +4394,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           PSNR_STATS psnr2;
           double frame_ssim2 = 0, weight = 0;
 #if CONFIG_VP9_POSTPROC
-          if (vpx_alloc_frame_buffer(&cm->post_proc_buffer,
+          if (vpx_alloc_frame_buffer(pp,
                                      recon->y_crop_width, recon->y_crop_height,
                                      cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -4406,8 +4406,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
                                "Failed to allocate post processing buffer");
           }
 
-          vp10_deblock(cm->frame_to_show, &cm->post_proc_buffer,
-                      cm->lf.filter_level * 10 / 6);
+          vp10_deblock(recon, pp, cm->lf.filter_level * 10 / 6);
 #endif
           vpx_clear_system_state();
 
@@ -4440,13 +4439,13 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
-            frame_ssim2 = vpx_highbd_calc_ssim(
-                orig, &cm->post_proc_buffer, &weight, (int)cm->bit_depth);
+            frame_ssim2 = vpx_highbd_calc_ssim(orig, pp, &weight,
+                                               (int)cm->bit_depth);
           } else {
-            frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+            frame_ssim2 = vpx_calc_ssim(orig, pp, &weight);
           }
 #else
-          frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+          frame_ssim2 = vpx_calc_ssim(orig, pp, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->summedp_quality += frame_ssim2 * weight;
@@ -4468,9 +4467,8 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 #endif
         {
           double frame_blockiness = vp10_get_blockiness(
-              cpi->Source->y_buffer, cpi->Source->y_stride,
-              cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
-              cpi->Source->y_width, cpi->Source->y_height);
+              orig->y_buffer, orig->y_stride, recon->y_buffer, recon->y_stride,
+              orig->y_width, orig->y_height);
           cpi->worst_blockiness =
               VPXMAX(cpi->worst_blockiness, frame_blockiness);
           cpi->total_blockiness += frame_blockiness;
@@ -4483,10 +4481,8 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 #endif
         {
           double this_inconsistency = vpx_get_ssim_metrics(
-              cpi->Source->y_buffer, cpi->Source->y_stride,
-              cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
-              cpi->Source->y_width, cpi->Source->y_height, cpi->ssim_vars,
-              &cpi->metrics, 1);
+              orig->y_buffer, orig->y_stride, recon->y_buffer, recon->y_stride,
+              orig->y_width, orig->y_height, cpi->ssim_vars, &cpi->metrics, 1);
 
           const double peak = (double)((1 << cpi->oxcf.input_bit_depth) - 1);
           double consistency = vpx_sse_to_psnr(samples, peak,
@@ -4503,8 +4499,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 #endif
       {
         double y, u, v, frame_all;
-        frame_all = vpx_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
-                                      &v);
+        frame_all = vpx_calc_fastssim(orig, recon, &y, &u, &v);
         adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
         /* TODO(JBB): add 10/12 bit support */
       }
@@ -4513,7 +4508,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 #endif
       {
         double y, u, v, frame_all;
-        frame_all = vpx_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
+        frame_all = vpx_psnrhvs(orig, recon, &y, &u, &v);
         adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
       }
     }
