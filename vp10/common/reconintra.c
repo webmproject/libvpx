@@ -225,11 +225,6 @@ static void vp10_init_intra_predictors_internal(void) {
 #undef intra_pred_allsizes
 }
 
-static INLINE void memset16(uint16_t *dst, int val, int n) {
-  while (n--)
-    *dst++ = val;
-}
-
 #if CONFIG_EXT_INTRA
 #define PI 3.14159265
 #define FILTER_INTRA_PREC_BITS 10
@@ -946,9 +941,9 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
           left_col[i] = ref[i * ref_stride - 1];
       }
       if (i < (bs << need_bottom))
-        memset16(&left_col[i], left_col[i - 1], (bs << need_bottom) - i);
+        vpx_memset16(&left_col[i], left_col[i - 1], (bs << need_bottom) - i);
     } else {
-      memset16(left_col, base + 1, bs << need_bottom);
+      vpx_memset16(left_col, base + 1, bs << need_bottom);
     }
   }
 
@@ -976,9 +971,9 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
         i += n_topright_px;
       }
       if (i < (bs << need_right))
-        memset16(&above_row[i], above_row[i - 1], (bs << need_right) - i);
+        vpx_memset16(&above_row[i], above_row[i - 1], (bs << need_right) - i);
     } else {
-      memset16(above_row, base - 1, bs << need_right);
+      vpx_memset16(above_row, base - 1, bs << need_right);
     }
   }
 

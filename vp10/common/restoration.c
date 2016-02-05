@@ -146,7 +146,7 @@ static void loop_restoration_filter(uint8_t *data, int width, int height,
            width * sizeof(*data));
   }
 }
-
+#if 0  // TODO(yaowu): remove when the experiment is finalized
 // Normalized non-separable filter where weights all sum to 1
 static void loop_restoration_filter_norm(uint8_t *data, int width, int height,
                                          int stride, restoration_info_n *rst,
@@ -176,6 +176,7 @@ static void loop_restoration_filter_norm(uint8_t *data, int width, int height,
            width * sizeof(*data));
   }
 }
+#endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void loop_restoration_filter_highbd(
@@ -223,6 +224,7 @@ static void loop_restoration_filter_highbd(
   }
 }
 
+#if 0  // TODO(yaowu): remove when the experiment is finalized
 // Normalized non-separable filter where weights all sum to 1
 static void loop_restoration_filter_norm_highbd(
     uint8_t *data8, int width, int height,
@@ -255,6 +257,7 @@ static void loop_restoration_filter_norm_highbd(
            width * sizeof(*data));
   }
 }
+#endif
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
