@@ -600,7 +600,11 @@ process_toolchain() {
           ;;
           *) check_add_cflags -Wunused-but-set-variable ;;
         esac
-        enabled extra_warnings || check_add_cflags -Wno-unused-function
+        if enabled mips || [ -z "${INLINE}" ]; then
+          enabled extra_warnings || check_add_cflags -Wno-unused-function
+        else
+          check_add_cflags -Wunused-function
+        fi
     fi
 
     if enabled icc; then
