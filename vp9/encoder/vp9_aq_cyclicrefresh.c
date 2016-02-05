@@ -59,27 +59,6 @@ void vp9_cyclic_refresh_free(CYCLIC_REFRESH *cr) {
   vpx_free(cr);
 }
 
-// Check if we should turn off cyclic refresh based on bitrate condition.
-static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
-                                        const RATE_CONTROL *rc) {
-  // Turn off cyclic refresh if bits available per frame is not sufficiently
-  // larger than bit cost of segmentation. Segment map bit cost should scale
-  // with number of seg blocks, so compare available bits to number of blocks.
-  // Average bits available per frame = avg_frame_bandwidth
-  // Number of (8x8) blocks in frame = mi_rows * mi_cols;
-  const float factor = 0.15f;
-  const int number_blocks = cm->mi_rows  * cm->mi_cols;
-  // The condition below corresponds to turning off at target bitrates:
-  // (at 30fps), ~8kbps for CIF, 20kbps for VGA, 60kps for HD/720p.
-  // Also turn off at very small frame sizes, to avoid too large fraction of
-  // superblocks to be refreshed per frame. Threshold below is less than QCIF.
-  if (rc->avg_frame_bandwidth < factor * number_blocks ||
-      number_blocks / 64 < 5)
-    return 0;
-  else
-    return 1;
-}
-
 // Check if this coding block, of size bsize, should be considered for refresh
 // (lower-qp coding). Decision can be based on various factors, such as
 // size of the coding block (i.e., below min_block size rejected), coding
