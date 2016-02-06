@@ -12,6 +12,7 @@
 #ifndef VP8_COMMON_THREADING_H_
 #define VP8_COMMON_THREADING_H_
 
+#include "./vpx_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +21,7 @@ extern "C" {
 #if CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD
 
 /* Thread management macros */
-#ifdef _WIN32
+#if defined(_WIN32) && !HAVE_PTHREAD_H
 /* Win32 */
 #include <process.h>
 #include <windows.h>
@@ -77,8 +78,8 @@ extern "C" {
 #define ts_key_create(ts_key, destructor) pthread_key_create (&(ts_key), destructor);
 #endif
 
-/* Syncrhronization macros: Win32 and Pthreads */
-#ifdef _WIN32
+/* Synchronization macros: Win32 and Pthreads */
+#if defined(_WIN32) && !HAVE_PTHREAD_H
 #define sem_t HANDLE
 #define pause(voidpara) __asm PAUSE
 #define sem_init(sem, sem_attr1, sem_init_value) (int)((*sem = CreateSemaphore(NULL,0,32768,NULL))==NULL)
