@@ -1540,6 +1540,10 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   }
   update_frame_size(cpi);
 
+  if ((last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) &&
+      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+    vp9_cyclic_refresh_reset_resize(cpi);
+
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.rc_mode == VPX_CBR) ||
       ((cpi->svc.number_temporal_layers > 1 ||
