@@ -611,7 +611,7 @@ process_toolchain() {
           ;;
           *) check_add_cflags -Wunused-but-set-variable ;;
         esac
-        if enabled mips || [ -z "${INLINE}" ]; then
+        if enabled mips || [ -z "${INLINE}" ] || enabled vp10; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
         else
           check_add_cflags -Wunused-function
