@@ -1677,7 +1677,6 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
 
   cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 #if CONFIG_INTERNAL_STATS
-  cpi->b_calculate_ssimg = 0;
   cpi->b_calculate_blockiness = 1;
   cpi->b_calculate_consistency = 1;
   cpi->total_inconsistency = 0;
@@ -1701,11 +1700,7 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
     cpi->summedp_weights = 0;
   }
 
-  if (cpi->b_calculate_ssimg) {
-    cpi->ssimg.worst= 100.0;
-  }
   cpi->fastssim.worst = 100.0;
-
   cpi->psnrhvs.worst = 100.0;
 
   if (cpi->b_calculate_blockiness) {
@@ -1952,12 +1947,6 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
           SNPRINT(headings, "\tConsist\tWstCons");
           SNPRINT2(results, "\t%7.3f", consistency);
           SNPRINT2(results, "\t%7.3f", cpi->worst_consistency);
-        }
-
-        if (cpi->b_calculate_ssimg) {
-          SNPRINT(headings, "\t  SSIMG\tWtSSIMG");
-          SNPRINT2(results, "\t%7.3f", cpi->ssimg.stat[ALL] / cpi->count);
-          SNPRINT2(results, "\t%7.3f", cpi->ssimg.worst);
         }
 
         fprintf(f, "%s\t    Time\n", headings);
@@ -4509,21 +4498,6 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
         }
       }
 
-      if (cpi->b_calculate_ssimg) {
-        double y, u, v, frame_all;
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (cm->use_highbitdepth) {
-          frame_all = vpx_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
-                                            &u, &v, (int)cm->bit_depth);
-        } else {
-          frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
-                                     &v);
-        }
-#else
-        frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        adjust_image_stat(y, u, v, frame_all, &cpi->ssimg);
-      }
 #if CONFIG_VP9_HIGHBITDEPTH
       if (!cm->use_highbitdepth)
 #endif
