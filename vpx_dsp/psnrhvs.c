@@ -10,6 +10,7 @@
  *  This code was originally written by: Gregory Maxwell, at the Daala
  *  project.
  */
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -18,6 +19,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ssim.h"
 #include "vpx_ports/system_state.h"
+#include "vpx/internal/vpx_psnr.h"
 
 #if !defined(M_PI)
 # define M_PI (3.141592653589793238462643)
@@ -90,6 +92,9 @@ static const double csf_cr420[8][8] = {
      0.478717061273, 0.393021669543, 0.330555063063, 0.285345396658}};
 
 static double convert_score_db(double _score, double _weight) {
+  assert(_score * _weight >= 0.0);
+  if (_weight * _score < 255 * 255 * 1e-10)
+    return MAX_PSNR;
   return 10 * (log10(255 * 255) - log10(_weight * _score));
 }
 

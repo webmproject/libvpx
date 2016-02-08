@@ -10,6 +10,7 @@
  *  This code was originally written by: Nathan E. Egge, at the Daala
  *  project.
  */
+#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,6 +18,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ssim.h"
 #include "vpx_ports/system_state.h"
+
 /* TODO(jbb): High bit depth version of this code needed */
 typedef struct fs_level fs_level;
 typedef struct fs_ctx fs_ctx;
@@ -442,6 +444,9 @@ static double calc_ssim(const unsigned char *_src, int _systride,
 }
 
 static double convert_ssim_db(double _ssim, double _weight) {
+  assert(_weight >= _ssim);
+  if ((_weight - _ssim) < 1e-10)
+    return MAX_SSIM_DB;
   return 10 * (log10(_weight) - log10(_weight - _ssim));
 }
 

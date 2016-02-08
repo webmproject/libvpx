@@ -11,6 +11,8 @@
 #ifndef VPX_INTERNAL_VPX_PSNR_H_
 #define VPX_INTERNAL_VPX_PSNR_H_
 
+#define MAX_PSNR 100.0
+
 #ifdef __cplusplus
 extern "C" {
 #endif

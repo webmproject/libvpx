@@ -12,7 +12,6 @@
 
 #include "vpx/internal/vpx_psnr.h"
 
-#define MAX_PSNR 100.0
 
 double vpx_sse_to_psnr(double samples, double peak, double sse) {
   if (sse > 0.0) {
