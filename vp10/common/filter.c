@@ -201,3 +201,19 @@ const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS] = {
     sub_pel_filters_8smooth,  // INTRA_FILTER_8TAP_SMOOTH
 };
 #endif  // CONFIG_EXT_INTRA
+
+static const InterpFilterParams
+vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
+  {(const int16_t*)sub_pel_filters_8, SUBPEL_TAPS, SUBPEL_SHIFTS},
+  {(const int16_t*)sub_pel_filters_8smooth, SUBPEL_TAPS, SUBPEL_SHIFTS},
+  {(const int16_t*)sub_pel_filters_8sharp, SUBPEL_TAPS, SUBPEL_SHIFTS},
+#if CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
+  {(const int16_t*)sub_pel_filters_8smooth2, SUBPEL_TAPS, SUBPEL_SHIFTS},
+#endif
+  {(const int16_t*)bilinear_filters, SUBPEL_TAPS, SUBPEL_SHIFTS}
+};
+
+InterpFilterParams vp10_get_interp_filter_params(
+    const INTERP_FILTER interp_filter) {
+  return vp10_interp_filter_params_list[interp_filter];
+}

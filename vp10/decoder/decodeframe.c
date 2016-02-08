@@ -734,13 +734,17 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
     int x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
     int x_pad = 0, y_pad = 0;
 
+    InterpFilterParams filter_params =
+        vp10_get_interp_filter_params(interp_filter);
+    int filter_size = filter_params.tap;
+
     if (subpel_x ||
 #if CONFIG_EXT_INTERP
         !i_filter ||
 #endif
         (sf->x_step_q4 != SUBPEL_SHIFTS)) {
-      x0 -= VP9_INTERP_EXTEND - 1;
-      x1 += VP9_INTERP_EXTEND;
+      x0 -= filter_size / 2 - 1;
+      x1 += filter_size / 2;
       x_pad = 1;
     }
 
@@ -749,8 +753,8 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
         !i_filter ||
 #endif
         (sf->y_step_q4 != SUBPEL_SHIFTS)) {
-      y0 -= VP9_INTERP_EXTEND - 1;
-      y1 += VP9_INTERP_EXTEND;
+      y0 -= filter_size / 2 - 1;
+      y1 += filter_size / 2;
       y_pad = 1;
     }
 
@@ -767,7 +771,8 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
       const uint8_t *const buf_ptr1 = ref_frame + y0 * buf_stride + x0;
       const int b_w = x1 - x0 + 1;
       const int b_h = y1 - y0 + 1;
-      const int border_offset = y_pad * 3 * b_w + x_pad * 3;
+      const int border_offset = y_pad * (filter_size / 2 - 1) * b_w +
+                                x_pad * (filter_size / 2 - 1);
 
       extend_and_predict(buf_ptr1, buf_stride, x0, y0, b_w, b_h,
                          frame_width, frame_height, border_offset,
