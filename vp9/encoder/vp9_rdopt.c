@@ -4153,17 +4153,21 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
     }
 
     if (!disable_skip) {
+      const vpx_prob skip_prob = vp9_get_skip_prob(cm, xd);
+      const int skip_cost0 = vp9_cost_bit(skip_prob, 0);
+      const int skip_cost1 = vp9_cost_bit(skip_prob, 1);
+
       // Skip is never coded at the segment level for sub8x8 blocks and instead
       // always coded in the bitstream at the mode info level.
-
       if (ref_frame != INTRA_FRAME && !xd->lossless) {
-        if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
-            RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
+        if (RDCOST(x->rdmult, x->rddiv,
+                   rate_y + rate_uv + skip_cost0, distortion2) <
+            RDCOST(x->rdmult, x->rddiv, skip_cost1, total_sse)) {
           // Add in the cost of the no skip flag.
-          rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+          rate2 += skip_cost0;
         } else {
           // FIXME(rbultje) make this work for splitmv also
-          rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+          rate2 += skip_cost1;
           distortion2 = total_sse;
           assert(total_sse >= 0);
           rate2 -= (rate_y + rate_uv);
@@ -4173,7 +4177,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
         }
       } else {
         // Add in the cost of the no skip flag.
-        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+        rate2 += skip_cost0;
       }
 
       // Calculate the final RD estimate for this mode.
