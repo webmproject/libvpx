@@ -59,8 +59,8 @@ static void reference_hybrid_1d(double* in, double* out, int size, int type) {
     reference_adst_1d(in, out, size);
 }
 
-static void reference_hybrid_2d(double* in, double* out, int size, int type0,
-                                int type1) {
+static INLINE void reference_hybrid_2d(double* in, double* out, int size,
+                                       int type0, int type1) {
   double* tempOut = new double[size * size];
 
   for (int r = 0; r < size; r++) {

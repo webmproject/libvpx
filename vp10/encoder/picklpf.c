@@ -34,7 +34,8 @@ static int get_max_filter_level(const VP10_COMP *cpi) {
   }
 }
 
-
+#if !CONFIG_LOOP_RESTORATION
+#if !JOINT_FILTER_RESTORATION_SEARCH
 static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
                                 VP10_COMP *const cpi,
                                 int filt_level, int partial_frame) {
@@ -70,6 +71,8 @@ static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
 
   return filt_err;
 }
+#endif
+#endif
 
 #if CONFIG_LOOP_RESTORATION
 #define JOINT_FILTER_RESTORATION_SEARCH
@@ -242,6 +245,8 @@ static int search_filter_restoration_level(const YV12_BUFFER_CONFIG *sd,
 #endif  // JOINT_FILTER_RESTORATION_SEARCH
 #endif  // CONFIG_LOOP_RESTORATION
 
+#if !CONFIG_LOOP_RESTORATION
+#if !JOINT_FILTER_RESTORATION_SEARCH
 static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
                                int partial_frame) {
   const VP10_COMMON *const cm = &cpi->common;
@@ -323,6 +328,8 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
 
   return filt_best;
 }
+#endif
+#endif
 
 void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
                            LPF_PICK_METHOD method) {

@@ -118,16 +118,6 @@ void vp10_encode_token_init() {
 #endif  // CONFIG_EXT_INTRA
 }
 
-#if CONFIG_SUPERTX
-static int vp10_check_supertx(VP10_COMMON *cm, int mi_row, int mi_col,
-                              BLOCK_SIZE bsize) {
-  MODE_INFO *mi;
-  mi = cm->mi + (mi_row * cm->mi_stride + mi_col);
-  return mi[0].mbmi.tx_size == max_txsize_lookup[bsize] &&
-         mi[0].mbmi.sb_type < bsize;
-}
-#endif  // CONFIG_SUPERTX
-
 static void write_intra_mode(vpx_writer *w, PREDICTION_MODE mode,
                              const vpx_prob *probs) {
   vp10_write_token(w, vp10_intra_mode_tree, probs, &intra_mode_encodings[mode]);
