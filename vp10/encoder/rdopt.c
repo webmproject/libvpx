@@ -1702,6 +1702,10 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP10_COMP *cpi, MACROBLOCK *mb,
   mic->mbmi.intra_filter = INTRA_FILTER_LINEAR;
 #endif  // CONFIG_EXT_INTRA
 
+  // TODO(any): Add search of the tx_type to improve rd performance at the
+  // expense of speed.
+  mic->mbmi.tx_type = DCT_DCT;
+
   // Pick modes for each sub-block (of size 4x4, 4x8, or 8x4) in an 8x8 block.
   for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
     for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
@@ -7364,6 +7368,10 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
           rd_opt->threshes[segment_id][bsize][THR_GOLD] : this_rd_thresh;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
         filter_cache[i] = INT64_MAX;
+
+      // TODO(any): Add search of the tx_type to improve rd performance at the
+      // expense of speed.
+      mbmi->tx_type = DCT_DCT;
 
       if (cm->interp_filter != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
