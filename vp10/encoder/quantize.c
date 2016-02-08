@@ -62,11 +62,10 @@ void vp10_quantize_dc_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                              const scan_order *sc) {
   // obsolete skip_block
   const int skip_block = 0;
-
   (void)sc;
-
-  vpx_quantize_dc(coeff_ptr, n_coeffs, skip_block, p->round, p->quant_fp[0],
-                  qcoeff_ptr, dqcoeff_ptr, pd->dequant[0], eob_ptr);
+  vpx_quantize_dc(coeff_ptr, (int)n_coeffs, skip_block, p->round,
+                  p->quant_fp[0], qcoeff_ptr, dqcoeff_ptr, pd->dequant[0],
+                  eob_ptr);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -105,7 +104,7 @@ void vp10_highbd_quantize_dc_facade(
 
   (void)sc;
 
-  vpx_highbd_quantize_dc(coeff_ptr, n_coeffs, skip_block, p->round,
+  vpx_highbd_quantize_dc(coeff_ptr, (int)n_coeffs, skip_block, p->round,
                          p->quant_fp[0], qcoeff_ptr, dqcoeff_ptr,
                          pd->dequant[0], eob_ptr);
 }

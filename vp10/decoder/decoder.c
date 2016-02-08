@@ -526,7 +526,7 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
         sizes[i] = this_sz;
         frame_sz_sum += this_sz;
       }
-      sizes[i] = data_sz - index_sz - frame_sz_sum;
+      sizes[i] = (uint32_t)(data_sz - index_sz - frame_sz_sum);
       *count = frames;
     }
   }

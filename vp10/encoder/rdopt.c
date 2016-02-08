@@ -1350,8 +1350,8 @@ void rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cpi->common.use_highbitdepth)
         for (i = 0; i < k; ++i)
-          mic->mbmi.palette_mode_info.palette_colors[i] =
-              clip_pixel_highbd(round(centroids[i]), cpi->common.bit_depth);
+          pmi->palette_colors[i] = clip_pixel_highbd((int)round(centroids[i]),
+                                                     cpi->common.bit_depth);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         for (i = 0; i < k; ++i)
