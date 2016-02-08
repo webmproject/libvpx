@@ -2975,8 +2975,19 @@ void vp9_scale_references(VP9_COMP *cpi) {
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       } else {
-        const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
-        RefCntBuffer *const buf = &pool->frame_bufs[buf_idx];
+        int buf_idx;
+        RefCntBuffer *buf = NULL;
+        if (cpi->oxcf.pass == 0 && !cpi->use_svc) {
+          // Check for release of scaled reference.
+          buf_idx = cpi->scaled_ref_idx[ref_frame - 1];
+          buf = (buf_idx != INVALID_IDX) ? &pool->frame_bufs[buf_idx] : NULL;
+          if (buf != NULL) {
+            --buf->ref_count;
+            cpi->scaled_ref_idx[ref_frame - 1] = INVALID_IDX;
+          }
+        }
+        buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+        buf = &pool->frame_bufs[buf_idx];
         buf->buf.y_crop_width = ref->y_crop_width;
         buf->buf.y_crop_height = ref->y_crop_height;
         cpi->scaled_ref_idx[ref_frame - 1] = buf_idx;
