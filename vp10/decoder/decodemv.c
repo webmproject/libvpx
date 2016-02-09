@@ -1279,9 +1279,6 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
 #if CONFIG_VAR_TX
   BLOCK_SIZE bsize = mbmi->sb_type;
 #endif  // CONFIG_VAR_TX
-#if CONFIG_SUPERTX
-  (void) supertx_enabled;
-#endif  // CONFIG_SUPERTX
 
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;
