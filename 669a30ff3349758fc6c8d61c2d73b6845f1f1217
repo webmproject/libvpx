@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dda3987e_a6a2a805",
+        "filename": "vp10/common/reconinter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-09T01:51:28Z",
+      "side": 1,
+      "message": "plane 2 is exactly same as plane 1.",
+      "range": {
+        "startLine": 287,
+        "startChar": 40,
+        "endLine": 287,
+        "endChar": 41
+      },
+      "revId": "669a30ff3349758fc6c8d61c2d73b6845f1f1217",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
