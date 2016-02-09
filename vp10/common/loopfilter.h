@@ -52,11 +52,6 @@ struct loopfilter {
   // 0 = ZERO_MV, MV
   signed char mode_deltas[MAX_MODE_LF_DELTAS];
   signed char last_mode_deltas[MAX_MODE_LF_DELTAS];
-
-#if CONFIG_LOOP_RESTORATION
-  int restoration_level;
-  int last_restoration_level;
-#endif  // CONFIG_LOOP_RESTORATION
 };
 
 // Need to align this structure so when it is declared and
