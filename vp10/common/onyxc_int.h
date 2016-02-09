@@ -146,7 +146,8 @@ typedef struct VP10Common {
   int subsampling_y;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  int use_highbitdepth;  // Marks if we need to use 16bit frame buffers.
+  // Marks if we need to use 16bit frame buffers (1: yes, 0: no).
+  int use_highbitdepth;
 #endif
 
   YV12_BUFFER_CONFIG *frame_to_show;
