@@ -2875,7 +2875,8 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif
   TOKENEXTRA *tp_orig = *tp;
   PICK_MODE_CONTEXT *ctx = &pc_tree->none;
-  int i, pl;
+  int i;
+  const int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
   BLOCK_SIZE subsize;
   RD_COST this_rdc, sum_rdc, best_rdc;
 #if CONFIG_SUPERTX
@@ -3021,7 +3022,6 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
                      bsize, ctx, best_rdc.rdcost);
     if (this_rdc.rate != INT_MAX) {
       if (bsize >= BLOCK_8X8) {
-        pl = partition_plane_context(xd, mi_row, mi_col, bsize);
         this_rdc.rate += cpi->partition_cost[pl][PARTITION_NONE];
         this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                                  this_rdc.rate, this_rdc.dist);
@@ -3288,7 +3288,6 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     }
 
     if (sum_rdc.rdcost < best_rdc.rdcost && i == 4) {
-      pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rdc.rate += cpi->partition_cost[pl][PARTITION_SPLIT];
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                               sum_rdc.rate, sum_rdc.dist);
@@ -3427,7 +3426,6 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_SUPERTX
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
-      pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rdc.rate += cpi->partition_cost[pl][PARTITION_HORZ];
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
 #if CONFIG_SUPERTX
@@ -3556,7 +3554,6 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_SUPERTX
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
-      pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rdc.rate += cpi->partition_cost[pl][PARTITION_VERT];
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                               sum_rdc.rate, sum_rdc.dist);
