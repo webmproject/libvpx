@@ -1306,7 +1306,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   } else {
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
 #endif
     pack_inter_mode_mvs(cpi, m,
 #if CONFIG_SUPERTX
