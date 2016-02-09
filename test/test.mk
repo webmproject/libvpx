@@ -171,11 +171,12 @@ LIBVPX_TEST_SRCS-$(CONFIG_ANS)          += vp10_ans_test.cc
 endif # VP10
 
 ## Multi-codec / unconditional whitebox tests.
-
 ifeq ($(findstring yes,$(CONFIG_VP9_ENCODER)$(CONFIG_VP10_ENCODER)),yes)
 LIBVPX_TEST_SRCS-yes += avg_test.cc
 endif
-
+ifeq ($(CONFIG_INTERNAL_STATS),yes)
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_HIGHBITDEPTH) += hbd_metrics_test.cc
+endif
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_txfm_test.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_fwd_txfm1d_test.cc
