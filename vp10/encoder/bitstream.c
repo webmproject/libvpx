@@ -994,10 +994,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
                          mode_ctx);
 
 #if CONFIG_REF_MV
-        if (mode == NEARMV && mbmi->ref_frame[1] == NONE) {
-          if (mbmi_ext->ref_mv_count[mbmi->ref_frame[0]] > 2) {
+        if (mode == NEARMV) {
+          uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
+          if (mbmi_ext->ref_mv_count[ref_frame_type] > 2) {
             vpx_write_bit(w, mbmi->ref_mv_idx != 0);
-            if (mbmi_ext->ref_mv_count[mbmi->ref_frame[0]] > 3 &&
+            if (mbmi_ext->ref_mv_count[ref_frame_type] > 3 &&
                 mbmi->ref_mv_idx > 0)
               vpx_write_bit(w, mbmi->ref_mv_idx != 1);
           }
