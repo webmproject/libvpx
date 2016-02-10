@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "5dbec8e3_467fbcb3",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 4500,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-10T22:46:19Z",
+      "side": 1,
+      "message": "shouldn\u0027t be a separate function.  maybe \n\n\n#if CONFIG_VP9_HIGHBITDEPTH \n  bits \u003d 8; //whatever \n#else\n  bits \u003d cm-\u003ebitdepth;\n#endif \n\ndouble y, u, v, frame_all;\nframe_all \u003d vpx_calc_fastssim(orig, recon, \u0026y, \u0026u, \u0026v);\nadjust_image_stat(y, u, v, frame_all, \u0026cpi-\u003efastssim);",
+      "range": {
+        "startLine": 4500,
+        "startChar": 20,
+        "endLine": 4500,
+        "endChar": 41
+      },
+      "revId": "33e921e3778fb8cb980faaa64d2f17fda82f9225",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7df0ecdc_1044643d",
         "filename": "vpx_dsp/fastssim.c",
         "patchSetId": 7
