@@ -1324,7 +1324,7 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
 
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
     if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
         !mbmi->skip && inter_block) {
       const TX_SIZE max_tx_size = max_txsize_lookup[bsize];

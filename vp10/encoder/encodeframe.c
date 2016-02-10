@@ -233,7 +233,7 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
 
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
   xd->max_tx_size = max_txsize_lookup[bsize];
 #endif
 
@@ -2282,7 +2282,7 @@ static void rd_use_partition(VP10_COMP *cpi,
 
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
 #endif
   pc_tree->partitioning = partition;
   save_context(x, mi_row, mi_col, a, l, sa, sl,
@@ -2608,7 +2608,7 @@ static void rd_use_partition(VP10_COMP *cpi,
 
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
 #endif
   restore_context(x, mi_row, mi_col, a, l, sa, sl,
 #if CONFIG_VAR_TX
@@ -2970,7 +2970,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
   save_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
 #else
   save_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -3131,7 +3131,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     }
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
     restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
 #else
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -3333,7 +3333,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     }
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
     restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
 #else
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -3464,7 +3464,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     }
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
     restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
 #else
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -3593,7 +3593,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     }
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
     restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
 #else
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -4266,7 +4266,7 @@ static void tx_partition_count_update(VP10_COMMON *cm,
   int idx, idy;
 
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
 
   for (idy = 0; idy < mi_height; idy += bh)
     for (idx = 0; idx < mi_width; idx += bh)
@@ -4330,7 +4330,7 @@ static void tx_partition_set_contexts(VP10_COMMON *cm,
   int idx, idy;
 
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
 
   for (idy = 0; idy < mi_height; idy += bh)
     for (idx = 0; idx < mi_width; idx += bh)
