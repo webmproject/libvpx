@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7df0ecdc_1044643d",
+        "filename": "vpx_dsp/fastssim.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-10T22:42:09Z",
+      "side": 1,
+      "message": "kind of a shame to duplicate this function.",
+      "range": {
+        "startLine": 173,
+        "startChar": 4,
+        "endLine": 173,
+        "endChar": 27
+      },
+      "revId": "33e921e3778fb8cb980faaa64d2f17fda82f9225",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5dbec8e3_264e08b1",
+        "filename": "vpx_dsp/fastssim.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-10T22:42:09Z",
+      "side": 1,
+      "message": "why is this a uint8_t pointer?",
+      "range": {
+        "startLine": 529,
+        "startChar": 33,
+        "endLine": 529,
+        "endChar": 34
+      },
+      "revId": "33e921e3778fb8cb980faaa64d2f17fda82f9225",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df328ea_2f7f09b5",
+        "filename": "vpx_dsp/fastssim.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 552,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-10T22:42:09Z",
+      "side": 1,
+      "message": "does this really need to be a separate function?   just add the parm and change it everywhere and if you pass in bit_depth 8 this function would fail.",
+      "range": {
+        "startLine": 552,
+        "startChar": 7,
+        "endLine": 552,
+        "endChar": 28
+      },
+      "revId": "33e921e3778fb8cb980faaa64d2f17fda82f9225",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
