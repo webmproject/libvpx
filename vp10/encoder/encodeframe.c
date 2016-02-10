@@ -3164,7 +3164,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_VAR_TX
           xd->above_txfm_context = cm->above_txfm_context + mi_col;
           xd->left_txfm_context =
-              xd->left_txfm_context_buffer + (mi_row & 0x07);
+              xd->left_txfm_context_buffer + (mi_row & MI_MASK);
           restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
 #else
           restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -5188,6 +5188,11 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   ext_tx_set = get_ext_tx_set(tx_size, bsize, 1);
 #endif  // CONFIG_EXT_TX
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
+#if CONFIG_VAR_TX
+    ENTROPY_CONTEXT ctxa[16], ctxl[16];
+    const struct macroblockd_plane *const pd = &xd->plane[0];
+    int coeff_ctx = 1;
+#endif  // CONFIG_VAR_TX
 #if CONFIG_EXT_TX
     if (!ext_tx_used_inter[ext_tx_set][tx_type])
       continue;
@@ -5201,12 +5206,23 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
       continue;
 #endif  // CONFIG_EXT_TX
     mbmi->tx_type = tx_type;
-    vp10_txfm_rd_in_plane_supertx(x,
+
 #if CONFIG_VAR_TX
-                                  cpi,
-#endif
-                                  &this_rate, &this_dist, &pnskip,
+    this_rate = 0;
+    this_dist = 0;
+    pnsse = 0;
+    pnskip = 1;
+
+    vp10_get_entropy_contexts(bsize, tx_size, pd, ctxa, ctxl);
+    coeff_ctx = combine_entropy_contexts(ctxa[0], ctxl[0]);
+    vp10_tx_block_rd_b(cpi, x, tx_size,
+                       0, 0, 0, 0,
+                       bsize, coeff_ctx,
+                       &this_rate, &this_dist, &pnsse, &pnskip);
+#else
+    vp10_txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip,
                                   &pnsse, INT64_MAX, 0, bsize, tx_size, 0);
+#endif  // CONFIG_VAR_TX
 
 #if CONFIG_EXT_TX
     if (get_ext_tx_types(tx_size, bsize, 1) > 1 &&

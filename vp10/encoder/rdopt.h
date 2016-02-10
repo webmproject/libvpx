@@ -74,6 +74,13 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                                     int64_t best_rd_so_far);
 
 #if CONFIG_SUPERTX
+#if CONFIG_VAR_TX
+void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
+                        int blk_row, int blk_col, int plane, int block,
+                        int plane_bsize, int coeff_ctx,
+                        int *rate, int64_t *dist, int64_t *bsse, int *skip);
+#endif
+
 void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
 #if CONFIG_VAR_TX
                                    const VP10_COMP *cpi,
