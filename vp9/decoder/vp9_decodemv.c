@@ -463,14 +463,13 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 }
 
-static void dec_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp, int_mv *mvlist,
-                                  int_mv *best_mv, int refmv_count) {
+static void dec_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *best_mv,
+                                  int refmv_count) {
   int i;
 
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < refmv_count; ++i) {
     lower_mv_precision(&mvlist[i].as_mv, allow_hp);
-    clamp_mv2(&mvlist[i].as_mv, xd);
     *best_mv = mvlist[i];
   }
 }
@@ -778,7 +777,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
                                        tmp_mvs, mi_row, mi_col, -1, 0,
                                        fpm_sync, (void *)pbi);
 
-        dec_find_best_ref_mvs(xd, allow_hp, tmp_mvs, &best_ref_mvs[ref],
+        dec_find_best_ref_mvs(allow_hp, tmp_mvs, &best_ref_mvs[ref],
                               refmv_count);
       }
     }
