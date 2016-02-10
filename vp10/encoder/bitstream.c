@@ -1120,55 +1120,57 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_EXT_INTERP
   }
 
+    if (!FIXED_TX_TYPE) {
 #if CONFIG_EXT_TX
-  if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter) > 1 &&
-      cm->base_qindex > 0 && !mbmi->skip &&
+      if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter) > 1 &&
+          cm->base_qindex > 0 && !mbmi->skip &&
 #if CONFIG_SUPERTX
-      !supertx_enabled &&
+          !supertx_enabled &&
 #endif  // CONFIG_SUPERTX
-      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-    int eset = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
-    if (is_inter) {
-      if (eset > 0)
-        vp10_write_token(w, vp10_ext_tx_inter_tree[eset],
-                         cm->fc->inter_ext_tx_prob[eset][mbmi->tx_size],
-                         &ext_tx_inter_encodings[eset][mbmi->tx_type]);
-    } else if (ALLOW_INTRA_EXT_TX) {
-      if (eset > 0)
-        vp10_write_token(
-            w, vp10_ext_tx_intra_tree[eset],
-            cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode],
-            &ext_tx_intra_encodings[eset][mbmi->tx_type]);
-    }
-  }
+          !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+        int eset = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
+        if (is_inter) {
+          if (eset > 0)
+            vp10_write_token(w, vp10_ext_tx_inter_tree[eset],
+                             cm->fc->inter_ext_tx_prob[eset][mbmi->tx_size],
+                             &ext_tx_inter_encodings[eset][mbmi->tx_type]);
+        } else if (ALLOW_INTRA_EXT_TX) {
+          if (eset > 0)
+            vp10_write_token(
+                w, vp10_ext_tx_intra_tree[eset],
+                cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode],
+                &ext_tx_intra_encodings[eset][mbmi->tx_type]);
+        }
+      }
 #else
-  if (mbmi->tx_size < TX_32X32 &&
-      cm->base_qindex > 0 && !mbmi->skip &&
+      if (mbmi->tx_size < TX_32X32 &&
+          cm->base_qindex > 0 && !mbmi->skip &&
 #if CONFIG_SUPERTX
-      !supertx_enabled &&
+          !supertx_enabled &&
 #endif  // CONFIG_SUPERTX
-      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-    if (is_inter) {
-      vp10_write_token(
-          w, vp10_ext_tx_tree,
-          cm->fc->inter_ext_tx_prob[mbmi->tx_size],
-          &ext_tx_encodings[mbmi->tx_type]);
-    } else {
-      vp10_write_token(
-          w, vp10_ext_tx_tree,
-          cm->fc->intra_ext_tx_prob[mbmi->tx_size]
-                                   [intra_mode_to_tx_type_context[mbmi->mode]],
-          &ext_tx_encodings[mbmi->tx_type]);
-    }
-  } else {
-    if (!mbmi->skip) {
+          !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+        if (is_inter) {
+          vp10_write_token(
+              w, vp10_ext_tx_tree,
+              cm->fc->inter_ext_tx_prob[mbmi->tx_size],
+              &ext_tx_encodings[mbmi->tx_type]);
+        } else {
+          vp10_write_token(
+              w, vp10_ext_tx_tree,
+              cm->fc->intra_ext_tx_prob[mbmi->tx_size]
+                                    [intra_mode_to_tx_type_context[mbmi->mode]],
+                                    &ext_tx_encodings[mbmi->tx_type]);
+        }
+      } else {
+        if (!mbmi->skip) {
 #if CONFIG_SUPERTX
-      if (!supertx_enabled)
+          if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
-        assert(mbmi->tx_type == DCT_DCT);
-    }
-  }
+            assert(mbmi->tx_type == DCT_DCT);
+        }
+      }
 #endif  // CONFIG_EXT_TX
+    }
 }
 
 static void write_palette_mode_info(const VP10_COMMON *cm,
@@ -1264,30 +1266,31 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
       mbmi->mode == DC_PRED)
     write_palette_mode_info(cm, xd, mi, w);
 
-
+  if (!FIXED_TX_TYPE) {
 #if CONFIG_EXT_TX
-  if (get_ext_tx_types(mbmi->tx_size, bsize, 0) > 1 &&
-      cm->base_qindex > 0 && !mbmi->skip &&
-      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
-      ALLOW_INTRA_EXT_TX) {
-    int eset = get_ext_tx_set(mbmi->tx_size, bsize, 0);
-    if (eset > 0)
-      vp10_write_token(
-          w, vp10_ext_tx_intra_tree[eset],
-          cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode],
-          &ext_tx_intra_encodings[eset][mbmi->tx_type]);
-  }
+    if (get_ext_tx_types(mbmi->tx_size, bsize, 0) > 1 &&
+        cm->base_qindex > 0 && !mbmi->skip &&
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+        ALLOW_INTRA_EXT_TX) {
+      int eset = get_ext_tx_set(mbmi->tx_size, bsize, 0);
+      if (eset > 0)
+        vp10_write_token(
+            w, vp10_ext_tx_intra_tree[eset],
+            cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode],
+            &ext_tx_intra_encodings[eset][mbmi->tx_type]);
+    }
 #else
-  if (mbmi->tx_size < TX_32X32 &&
-      cm->base_qindex > 0 && !mbmi->skip &&
-      !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-    vp10_write_token(
-        w, vp10_ext_tx_tree,
-        cm->fc->intra_ext_tx_prob[mbmi->tx_size]
-                                 [intra_mode_to_tx_type_context[mbmi->mode]],
-        &ext_tx_encodings[mbmi->tx_type]);
-  }
+    if (mbmi->tx_size < TX_32X32 &&
+        cm->base_qindex > 0 && !mbmi->skip &&
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      vp10_write_token(
+          w, vp10_ext_tx_tree,
+          cm->fc->intra_ext_tx_prob[mbmi->tx_size]
+                                    [intra_mode_to_tx_type_context[mbmi->mode]],
+                                    &ext_tx_encodings[mbmi->tx_type]);
+    }
 #endif  // CONFIG_EXT_TX
+  }
 
 #if CONFIG_EXT_INTRA
   if (bsize >= BLOCK_8X8)

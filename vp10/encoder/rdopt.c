@@ -1094,7 +1094,8 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
     last_rd = INT64_MAX;
     for (n = start_tx; n >= end_tx; --n) {
       const int r_tx_size = vp10_cost_tx_size(n, max_tx_size, tx_probs);
-
+      if (FIXED_TX_TYPE && tx_type != get_default_tx_type(0, xd, 0, n))
+          continue;
 #if CONFIG_EXT_TX
       ext_tx_set = get_ext_tx_set(n, bs, is_inter);
       if (is_inter) {
@@ -1149,7 +1150,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                        cpi->sf.use_fast_coef_costing);
       if (n < TX_32X32 &&
           !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
-          r != INT_MAX) {
+          r != INT_MAX && !FIXED_TX_TYPE) {
         if (is_inter)
           r += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
         else
