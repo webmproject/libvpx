@@ -41,7 +41,6 @@
 #include "vp9/encoder/vp9_tokenize.h"
 
 #define RD_THRESH_POW      1.25
-#define RD_MULT_EPB_RATIO  64
 
 // Factor to weigh the rate for switchable interp filters.
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
@@ -279,8 +278,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   rd->RDDIV = RDDIV_BITS;  // In bits (to multiply D by 128).
   rd->RDMULT = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 
-  x->errorperbit = rd->RDMULT / RD_MULT_EPB_RATIO;
-  x->errorperbit += (x->errorperbit == 0);
+  set_error_per_bit(x, rd->RDMULT);
 
   x->select_tx_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
                        cm->frame_type != KEY_FRAME) ? 0 : 1;
