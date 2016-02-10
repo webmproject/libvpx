@@ -3280,7 +3280,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_VAR_TX
           xd->above_txfm_context = cm->above_txfm_context + mi_col;
           xd->left_txfm_context =
-              xd->left_txfm_context_buffer + (mi_row & 0x07);
+              xd->left_txfm_context_buffer + (mi_row & MI_MASK);
           restore_context(x, mi_row, mi_col, a, l, sa, sl, ta, tl, bsize);
 #else
           restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);

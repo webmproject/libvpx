@@ -2752,9 +2752,9 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
       }
     }
 #else  // CONFIG_EXT_TX
-      if (max_tx_size >= TX_32X32 && tx_type != DCT_DCT) {
+      if (max_tx_size >= TX_32X32 && tx_type != DCT_DCT)
         continue;
-      }
+
       mbmi->tx_type = tx_type;
 
       inter_block_yrd(cpi, x, &this_rate, &this_dist, &this_skip, &this_sse,
@@ -2783,9 +2783,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     if (is_inter && !xd->lossless[xd->mi[0]->mbmi.segment_id] && !this_skip)
       rd = VPXMIN(rd, RDCOST(x->rdmult, x->rddiv, s1, this_sse));
 
-    if (rd <
-        (is_inter && best_tx_type == DCT_DCT ? ext_tx_th : 1) *
-        best_rd) {
+    if (rd < (is_inter && best_tx_type == DCT_DCT ? ext_tx_th : 1) * best_rd) {
       best_rd = rd;
       *distortion = this_dist;
       *rate       = this_rate;
