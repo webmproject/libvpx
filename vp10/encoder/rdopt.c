@@ -411,7 +411,7 @@ static void model_rd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bsize,
       int quantizer = (pd->dequant[1] >> dequant_shift);
 
       if (quantizer < 120)
-        rate = (square_error * (280 - quantizer)) >> 8;
+        rate = (square_error * (280 - quantizer)) >> (16 - VP9_PROB_COST_SHIFT);
       else
         rate = 0;
       dist = (square_error * quantizer) >> 8;
@@ -523,9 +523,9 @@ static int cost_coeffs(MACROBLOCK *x,
 #endif
   int c, cost;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int16_t *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
+  const int *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
 #else
-  const int16_t *cat6_high_cost = vp10_get_high_cost_table(8);
+  const int *cat6_high_cost = vp10_get_high_cost_table(8);
 #endif
 
 #if !CONFIG_VAR_TX && !CONFIG_SUPERTX

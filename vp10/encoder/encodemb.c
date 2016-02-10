@@ -52,7 +52,9 @@ void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
                      pd->dst.buf, pd->dst.stride);
 }
 
-#define RDTRUNC(RM, DM, R, D) ((128 + (R) * (RM)) & 0xFF)
+#define RDTRUNC(RM, DM, R, D)                        \
+  (((1 << (VP9_PROB_COST_SHIFT - 1)) + (R) * (RM)) & \
+   ((1 << VP9_PROB_COST_SHIFT) - 1))
 
 typedef struct vp10_token_state {
   int           rate;
@@ -119,9 +121,9 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   EXTRABIT e0;
   int best, band, pt, i, final_eob;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int16_t *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
+  const int *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
 #else
-  const int16_t *cat6_high_cost = vp10_get_high_cost_table(8);
+  const int *cat6_high_cost = vp10_get_high_cost_table(8);
 #endif
 
   assert((!type && !plane) || (type && plane));

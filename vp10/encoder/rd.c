@@ -41,7 +41,6 @@
 #include "vp10/encoder/tokenize.h"
 
 #define RD_THRESH_POW      1.25
-#define RD_MULT_EPB_RATIO  64
 
 // Factor to weigh the rate for switchable interp filters.
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
@@ -343,8 +342,7 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
   rd->RDDIV = RDDIV_BITS;  // In bits (to multiply D by 128).
   rd->RDMULT = vp10_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 
-  x->errorperbit = rd->RDMULT / RD_MULT_EPB_RATIO;
-  x->errorperbit += (x->errorperbit == 0);
+  set_error_per_bit(x, rd->RDMULT);
 
   x->select_tx_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
                        cm->frame_type != KEY_FRAME) ? 0 : 1;
@@ -504,7 +502,7 @@ void vp10_model_rd_from_var_lapndz(unsigned int var, unsigned int n_log2,
         (((uint64_t)qstep * qstep << (n_log2 + 10)) + (var >> 1)) / var;
     const int xsq_q10 = (int)VPXMIN(xsq_q10_64, MAX_XSQ_Q10);
     model_rd_norm(xsq_q10, &r_q10, &d_q10);
-    *rate = ((r_q10 << n_log2) + 2) >> 2;
+    *rate = ROUND_POWER_OF_TWO(r_q10 << n_log2, 10 - VP9_PROB_COST_SHIFT);
     *dist = (var * (int64_t)d_q10 + 512) >> 10;
   }
 }
