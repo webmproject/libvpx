@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9dc4c07e_8d9731c0",
+        "filename": "test/hbd_metrics_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-10T20:48:29Z",
+      "side": 1,
+      "message": "done, used two intermediate variables to make the promotion implicit.",
+      "parentUuid": "1da7f0d2_51e9c4fb",
+      "range": {
+        "startLine": 61,
+        "startChar": 10,
+        "endLine": 61,
+        "endChar": 17
+      },
+      "revId": "94040f5d94c2a0910f4780f3eb440e9f07952116",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ddc9d89d_ed28e91f",
         "filename": "test/hbd_metrics_test.cc",
         "patchSetId": 6
@@ -60,6 +84,30 @@
       "writtenOn": "2016-02-10T20:33:31Z",
       "side": 1,
       "message": "Capitalize and period at the end.",
+      "range": {
+        "startLine": 105,
+        "startChar": 3,
+        "endLine": 105,
+        "endChar": 8
+      },
+      "revId": "94040f5d94c2a0910f4780f3eb440e9f07952116",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdce9ca2_297c95bc",
+        "filename": "test/hbd_metrics_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-10T20:48:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ddc9d89d_ed28e91f",
       "range": {
         "startLine": 105,
         "startChar": 3,
