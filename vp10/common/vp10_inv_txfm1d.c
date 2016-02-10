@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <stdlib.h>
 #include "vp10/common/vp10_inv_txfm1d.h"
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #define range_check(stage, input, buf, size, bit)                         \
@@ -24,7 +25,7 @@
           printf("%d,", input[j]);                                        \
         }                                                                 \
         printf("\n");                                                     \
-        assert(0, "vp10_inv_txfm1d.c: range_check overflow");             \
+        assert(0);                                                        \
       }                                                                   \
     }                                                                     \
   }
