@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7da46cba_441feea4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-10T00:32:43Z",
+      "side": 1,
+      "message": "add the reasoning here: was previously clamped...",
+      "revId": "57a15b3cc9f7f1efbd1ab0deba9269f8977fb141",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
