@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9dc4c07e_c255f8ca",
+        "filename": "test/hbd_metrics_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-10T19:42:11Z",
+      "side": 1,
+      "message": "these are stack variables, they hold pointers to actual image buffers, which are not memset here.",
+      "parentUuid": "ddc9d89d_a7b0d225",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 10
+      },
+      "revId": "9721b7d1d3baedd0e267c2e191595192a20175bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9dc4c07e_628cecf1",
         "filename": "test/hbd_metrics_test.cc",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7dbb8cf2_0c30c7e6",
+        "filename": "test/hbd_metrics_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-10T19:42:11Z",
+      "side": 1,
+      "message": "done, changed to use Rand8()",
+      "parentUuid": "9dc4c07e_628cecf1",
+      "range": {
+        "startLine": 64,
+        "startChar": 50,
+        "endLine": 64,
+        "endChar": 55
+      },
+      "revId": "9721b7d1d3baedd0e267c2e191595192a20175bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ddc9d89d_a77e92f0",
         "filename": "test/hbd_metrics_test.cc",
         "patchSetId": 4
@@ -59,6 +107,24 @@
       "writtenOn": "2016-02-10T18:54:48Z",
       "side": 1,
       "message": "Explain the .0001 in more detail please..",
+      "revId": "9721b7d1d3baedd0e267c2e191595192a20175bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7dbb8cf2_ec3473dc",
+        "filename": "test/hbd_metrics_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-10T19:42:11Z",
+      "side": 1,
+      "message": "done, changed to a defined constant comments",
+      "parentUuid": "ddc9d89d_a77e92f0",
       "revId": "9721b7d1d3baedd0e267c2e191595192a20175bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
