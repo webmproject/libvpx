@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fde93cd0_9faa179a",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5224,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-02-10T16:58:08Z",
+      "side": 1,
+      "message": "This is equivalent to:\nvp10_get_entropy_contexts(bsize, tx_size, pd, ctxa, ctxl);\ncoeff_ctx \u003d combine_entropy_contexts(ctxa[0], ctxl[0]);",
+      "range": {
+        "startLine": 5219,
+        "startChar": 0,
+        "endLine": 5224,
+        "endChar": 53
+      },
+      "revId": "fd565eb53b4af650daccb33ce3c3661175c168a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
