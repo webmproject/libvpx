@@ -177,6 +177,28 @@ static void write_inter_mode(VP10_COMMON *cm,
 #endif
 }
 
+#if CONFIG_REF_MV
+static void write_drl_idx(const VP10_COMMON *cm,
+                          const MB_MODE_INFO *mbmi,
+                          const MB_MODE_INFO_EXT *mbmi_ext,
+                          vpx_writer *w) {
+  uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
+  if (mbmi_ext->ref_mv_count[ref_frame_type] > 2) {
+    uint8_t drl0_ctx =
+        vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 0);
+    vpx_prob drl0_prob = cm->fc->drl_prob0[drl0_ctx];
+    vpx_write(w, mbmi->ref_mv_idx != 0, drl0_prob);
+    if (mbmi_ext->ref_mv_count[ref_frame_type] > 3 &&
+        mbmi->ref_mv_idx > 0) {
+      uint8_t drl1_ctx =
+          vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
+      vpx_prob drl1_prob = cm->fc->drl_prob1[drl1_ctx];
+      vpx_write(w, mbmi->ref_mv_idx != 1, drl1_prob);
+    }
+  }
+}
+#endif
+
 #if CONFIG_EXT_INTER
 static void write_inter_compound_mode(VP10_COMMON *cm, vpx_writer *w,
                                       PREDICTION_MODE mode,
@@ -312,7 +334,12 @@ static void update_inter_mode_probs(VP10_COMMON *cm, vpx_writer *w,
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
     vp10_cond_prob_diff_update(w, &cm->fc->refmv_prob[i],
                                counts->refmv_mode[i]);
-
+  for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
+    vp10_cond_prob_diff_update(w, &cm->fc->drl_prob0[i],
+                               counts->drl_mode0[i]);
+  for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
+    vp10_cond_prob_diff_update(w, &cm->fc->drl_prob1[i],
+                               counts->drl_mode1[i]);
 #if CONFIG_EXT_INTER
   vp10_cond_prob_diff_update(w, &cm->fc->new2mv_prob, counts->new2mv_mode);
 #endif  // CONFIG_EXT_INTER
@@ -994,15 +1021,8 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
                          mode_ctx);
 
 #if CONFIG_REF_MV
-        if (mode == NEARMV) {
-          uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
-          if (mbmi_ext->ref_mv_count[ref_frame_type] > 2) {
-            vpx_write_bit(w, mbmi->ref_mv_idx != 0);
-            if (mbmi_ext->ref_mv_count[ref_frame_type] > 3 &&
-                mbmi->ref_mv_idx > 0)
-              vpx_write_bit(w, mbmi->ref_mv_idx != 1);
-          }
-        }
+        if (mode == NEARMV)
+          write_drl_idx(cm, mbmi, mbmi_ext, w);
 #endif
       }
     }

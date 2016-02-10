@@ -329,6 +329,9 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   nearest_refmv_count = *refmv_count;
 
+  for (idx = 0; idx < nearest_refmv_count; ++idx)
+    ref_mv_stack[idx].weight += REF_CAT_LEVEL;
+
   if (prev_frame_mvs_base && cm->show_frame && cm->last_show_frame
       && rf[1] == NONE) {
     int ref;

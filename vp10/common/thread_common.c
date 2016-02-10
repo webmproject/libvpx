@@ -379,6 +379,15 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
     for (j = 0; j < 2; ++j)
       cm->counts.refmv_mode[i][j] += counts->refmv_mode[i][j];
 
+
+  for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
+    for (j = 0; j < 2; ++j)
+      cm->counts.drl_mode0[i][j] += counts->drl_mode0[i][j];
+
+  for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
+    for (j = 0; j < 2; ++j)
+      cm->counts.drl_mode1[i][j] += counts->drl_mode1[i][j];
+
 #if CONFIG_EXT_INTER
   for (j = 0; j < 2; ++j)
     cm->counts.new2mv_mode[j] += counts->new2mv_mode[j];

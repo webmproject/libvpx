@@ -147,6 +147,45 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
 #endif
 }
 
+#if CONFIG_REF_MV
+static void read_drl_idx(const VP10_COMMON *cm,
+                         MACROBLOCKD *xd,
+                         MB_MODE_INFO *mbmi,
+                         vpx_reader *r) {
+  uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
+  mbmi->ref_mv_idx = 0;
+
+  if (xd->ref_mv_count[ref_frame_type] > 2) {
+    uint8_t drl0_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 0);
+    vpx_prob drl0_prob = cm->fc->drl_prob0[drl0_ctx];
+    if (vpx_read(r, drl0_prob)) {
+      mbmi->ref_mv_idx = 1;
+      if (xd->counts)
+        ++xd->counts->drl_mode0[drl0_ctx][1];
+      if (xd->ref_mv_count[ref_frame_type] > 3) {
+        uint8_t drl1_ctx =
+            vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 1);
+        vpx_prob drl1_prob = cm->fc->drl_prob1[drl1_ctx];
+        if (vpx_read(r, drl1_prob)) {
+          mbmi->ref_mv_idx = 2;
+          if (xd->counts)
+            ++xd->counts->drl_mode1[drl1_ctx][1];
+
+          return;
+        }
+
+        if (xd->counts)
+          ++xd->counts->drl_mode1[drl1_ctx][0];
+      }
+      return;
+    }
+
+    if (xd->counts)
+      ++xd->counts->drl_mode0[drl0_ctx][0];
+  }
+}
+#endif
+
 #if CONFIG_EXT_INTER
 static PREDICTION_MODE read_inter_compound_mode(VP10_COMMON *cm,
                                                 MACROBLOCKD *xd,
@@ -1056,17 +1095,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
                                    r, mode_ctx);
 #if CONFIG_REF_MV
-      if (mbmi->mode == NEARMV) {
-        uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
-        if (xd->ref_mv_count[ref_frame_type] > 2) {
-          if (vpx_read_bit(r)) {
-            mbmi->ref_mv_idx = 1;
-            if (xd->ref_mv_count[ref_frame_type] > 3)
-              if (vpx_read_bit(r))
-                mbmi->ref_mv_idx = 2;
-          }
-        }
-      }
+      if (mbmi->mode == NEARMV)
+        read_drl_idx(cm, xd, mbmi, r);
 #endif
     }
   }
