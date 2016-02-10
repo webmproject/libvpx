@@ -90,74 +90,178 @@ struct FrameInfo {
   unsigned int h;
 };
 
-unsigned int ScaleForFrameNumber(unsigned int frame, unsigned int val) {
-  if (frame < 10)
-    return val;
-  if (frame < 20)
-    return val * 3 / 4;
-  if (frame < 30)
-    return val / 2;
-  if (frame < 40)
-    return val;
-  if (frame < 50)
-    return val * 3 / 4;
-  if (frame < 60)
-    return val / 2;
-  if (frame < 70)
-    return val * 3 / 4;
-  if (frame < 80)
-    return val;
-  if (frame < 90)
-    return val * 3 / 4;
-  if (frame < 100)
-    return val / 2;
-  if (frame < 110)
-    return val * 3 / 4;
-  if (frame < 120)
-    return val;
-  if (frame < 130)
-    return val * 3 / 4;
-  if (frame < 140)
-    return val / 2;
-  if (frame < 150)
-    return val * 3 / 4;
-  if (frame < 160)
-    return val;
-  if (frame < 170)
-    return val / 2;
-  if (frame < 180)
-    return val * 3 / 4;
-  if (frame < 190)
-    return val;
-  if (frame < 200)
-    return val * 3 / 4;
-  if (frame < 210)
-    return val / 2;
-  if (frame < 220)
-    return val * 3 / 4;
-  if (frame < 230)
-    return val;
-  if (frame < 240)
-    return val / 2;
-  if (frame < 250)
-    return val * 3 / 4;
-  return val;
+void ScaleForFrameNumber(unsigned int frame,
+                         unsigned int initial_w,
+                         unsigned int initial_h,
+                         unsigned int *w,
+                         unsigned int *h,
+                         int flag_codec) {
+  if (frame < 10) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  if (frame < 20) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 30) {
+    *w = initial_w / 2;
+    *h = initial_h / 2;
+    return;
+  }
+  if (frame < 40) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  if (frame < 50) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 60) {
+    *w = initial_w / 2;
+    *h = initial_h / 2;
+    return;
+  }
+  if (frame < 70) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  if (frame < 80) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 90) {
+    *w = initial_w / 2;
+    *h = initial_h / 2;
+    return;
+  }
+  if (frame < 100) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 110) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  if (frame < 120) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 130) {
+    *w = initial_w / 2;
+    *h = initial_h / 2;
+    return;
+  }
+  if (frame < 140) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 150) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  if (frame < 160) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 170) {
+    *w = initial_w / 2;
+    *h = initial_h / 2;
+    return;
+  }
+  if (frame < 180) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 190) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  if (frame < 200) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 210) {
+    *w = initial_w / 2;
+    *h = initial_h / 2;
+    return;
+  }
+  if (frame < 220) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 230) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  if (frame < 240) {
+    *w = initial_w * 3 / 4;
+    *h = initial_h * 3 / 4;
+    return;
+  }
+  if (frame < 250) {
+    *w = initial_w  / 2;
+    *h = initial_h / 2;
+    return;
+  }
+  if (frame < 260) {
+    *w = initial_w;
+    *h = initial_h;
+    return;
+  }
+  // Go down very low.
+  if (frame < 270) {
+    *w = initial_w / 4;
+    *h = initial_h / 4;
+    return;
+  }
+  if (flag_codec == 1) {
+    // Cases that only works for VP9.
+    // For VP9: Swap width and height of original.
+    if (frame < 320) {
+      *w = initial_h;
+      *h = initial_w;
+      return;
+    }
+  }
+  *w = initial_w;
+  *h = initial_h;
 }
 
 class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
  public:
   ResizingVideoSource() {
     SetSize(kInitialWidth, kInitialHeight);
-    limit_ = 300;
+    limit_ = 350;
   }
-
+  int flag_codec_;
   virtual ~ResizingVideoSource() {}
 
  protected:
   virtual void Next() {
     ++frame_;
-    SetSize(ScaleForFrameNumber(frame_, kInitialWidth),
-            ScaleForFrameNumber(frame_, kInitialHeight));
+    unsigned int width;
+    unsigned int height;
+    ScaleForFrameNumber(frame_, kInitialWidth, kInitialHeight, &width, &height,
+                        flag_codec_);
+    SetSize(width, height);
     FillFrame();
   }
 };
@@ -184,15 +288,17 @@ class ResizeTest : public ::libvpx_test::EncoderTest,
 
 TEST_P(ResizeTest, TestExternalResizeWorks) {
   ResizingVideoSource video;
+  video.flag_codec_ = 0;
   cfg_.g_lag_in_frames = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
        info != frame_info_list_.end(); ++info) {
     const unsigned int frame = static_cast<unsigned>(info->pts);
-    const unsigned int expected_w = ScaleForFrameNumber(frame, kInitialWidth);
-    const unsigned int expected_h = ScaleForFrameNumber(frame, kInitialHeight);
-
+    unsigned int expected_w;
+    unsigned int expected_h;
+    ScaleForFrameNumber(frame, kInitialWidth, kInitialHeight,
+                        &expected_w, &expected_h, 0);
     EXPECT_EQ(expected_w, info->w)
         << "Frame " << frame << " had unexpected width";
     EXPECT_EQ(expected_h, info->h)
@@ -386,6 +492,7 @@ class ResizeRealtimeTest : public ::libvpx_test::EncoderTest,
 
 TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
   ResizingVideoSource video;
+  video.flag_codec_ = 1;
   DefaultConfig();
   // Disable internal resize for this test.
   cfg_.rc_resize_allowed = 0;
@@ -395,9 +502,10 @@ TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
   for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
        info != frame_info_list_.end(); ++info) {
     const unsigned int frame = static_cast<unsigned>(info->pts);
-    const unsigned int expected_w = ScaleForFrameNumber(frame, kInitialWidth);
-    const unsigned int expected_h = ScaleForFrameNumber(frame, kInitialHeight);
-
+    unsigned int expected_w;
+    unsigned int expected_h;
+    ScaleForFrameNumber(frame, kInitialWidth, kInitialHeight,
+                        &expected_w, &expected_h, 1);
     EXPECT_EQ(expected_w, info->w)
         << "Frame " << frame << " had unexpected width";
     EXPECT_EQ(expected_h, info->h)
