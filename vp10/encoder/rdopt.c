@@ -2317,10 +2317,10 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
 }
 
 #if CONFIG_VAR_TX
-static void tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
-                          int blk_row, int blk_col, int plane, int block,
-                          int plane_bsize, int coeff_ctx,
-                          int *rate, int64_t *dist, int64_t *bsse, int *skip) {
+void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
+                        int blk_row, int blk_col, int plane, int block,
+                        int plane_bsize, int coeff_ctx,
+                        int *rate, int64_t *dist, int64_t *bsse, int *skip) {
   MACROBLOCKD *xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -2531,8 +2531,8 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
 
   if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
     mbmi->inter_tx_size[tx_idx] = tx_size;
-    tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
-                  plane_bsize, coeff_ctx, rate, dist, bsse, skip);
+    vp10_tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
+                       plane_bsize, coeff_ctx, rate, dist, bsse, skip);
 
     if ((RDCOST(x->rdmult, x->rddiv, *rate, *dist) >=
          RDCOST(x->rdmult, x->rddiv, zero_blk_rate, *bsse) || *skip == 1) &&
@@ -2863,8 +2863,8 @@ static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x,
         break;
     }
     coeff_ctx = combine_entropy_contexts(ta[0], tl[0]);
-    tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
-                  plane_bsize, coeff_ctx, rate, dist, bsse, skip);
+    vp10_tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
+                       plane_bsize, coeff_ctx, rate, dist, bsse, skip);
     for (i = 0; i < (1 << tx_size); ++i) {
       ta[i] = !(p->eobs[block] == 0);
       tl[i] = !(p->eobs[block] == 0);
