@@ -5187,16 +5187,36 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   dist_uv = 0;
   sse_uv = 0;
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+#if CONFIG_VAR_TX
+    ENTROPY_CONTEXT ctxa[16], ctxl[16];
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
+    int coeff_ctx = 1;
+
+    this_rate = 0;
+    this_dist = 0;
+    pnsse = 0;
+    pnskip = 1;
+
+    tx_size = max_txsize_lookup[bsize];
+    tx_size = get_uv_tx_size_impl(tx_size, bsize,
+                                  cm->subsampling_x, cm->subsampling_y);
+    vp10_get_entropy_contexts(bsize, tx_size, pd, ctxa, ctxl);
+    coeff_ctx = combine_entropy_contexts(ctxa[0], ctxl[0]);
+
+    vp10_subtract_plane(x, bsize, plane);
+    vp10_tx_block_rd_b(cpi, x, tx_size,
+                       0, 0, plane, 0,
+                       get_plane_block_size(bsize, pd), coeff_ctx,
+                       &this_rate, &this_dist, &pnsse, &pnskip);
+#else
     tx_size = max_txsize_lookup[bsize];
     tx_size = get_uv_tx_size_impl(tx_size, bsize,
                                   cm->subsampling_x, cm->subsampling_y);
     vp10_subtract_plane(x, bsize, plane);
-    vp10_txfm_rd_in_plane_supertx(x,
-#if CONFIG_VAR_TX
-                                  cpi,
-#endif
-                                  &this_rate, &this_dist, &pnskip, &pnsse,
+    vp10_txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
                                   INT64_MAX, plane, bsize, tx_size, 0);
+#endif  // CONFIG_VAR_TX
+
     rate_uv += this_rate;
     dist_uv += this_dist;
     sse_uv += pnsse;
