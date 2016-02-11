@@ -387,6 +387,8 @@ class ResizeRealtimeTest : public ::libvpx_test::EncoderTest,
 TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
   ResizingVideoSource video;
   DefaultConfig();
+  // Disable internal resize for this test.
+  cfg_.rc_resize_allowed = 0;
   change_bitrate_ = false;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 

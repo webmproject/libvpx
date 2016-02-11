@@ -1525,6 +1525,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   if (last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) {
     cm->width = cpi->oxcf.width;
     cm->height = cpi->oxcf.height;
+    cpi->external_resize = 1;
   }
 
   if (cpi->initial_width) {
@@ -1536,6 +1537,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
       alloc_compressor_data(cpi);
       realloc_segmentation_maps(cpi);
       cpi->initial_width = cpi->initial_height = 0;
+      cpi->external_resize = 0;
     }
   }
   update_frame_size(cpi);
@@ -1671,6 +1673,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   cpi->use_svc = 0;
   cpi->resize_state = 0;
+  cpi->external_resize = 0;
   cpi->resize_avg_qp = 0;
   cpi->resize_buffer_underflow = 0;
   cpi->use_skin_detection = 0;

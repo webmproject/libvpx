@@ -303,11 +303,13 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
                                  FLAG_SKIP_INTRA_LOWVAR;
     sf->adaptive_pred_interp_filter = 2;
 
-    // Disable reference masking if using spatial scaling since
-    // pred_mv_sad will not be set (since vp9_mv_pred will not
-    // be called).
-    // TODO(marpan/agrange): Fix this condition.
-    sf->reference_masking = (cpi->oxcf.resize_mode != RESIZE_DYNAMIC &&
+    // Disable reference masking if using spatial scaling or for dynamic
+    // resizing (internal or external) since pred_mv_sad will not be set
+    // (since vp9_mv_pred will not be called).
+    // TODO(marpan): Fix this condition to allow reference masking for when
+    // all references have same resolution as source frame.
+    sf->reference_masking = (cpi->external_resize == 0 &&
+                             cpi->oxcf.resize_mode != RESIZE_DYNAMIC &&
                              cpi->svc.number_spatial_layers == 1) ? 1 : 0;
 
     sf->disable_filter_search_var_thresh = 50;
