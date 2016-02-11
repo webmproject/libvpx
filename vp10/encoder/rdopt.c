@@ -805,9 +805,6 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
 
 #if CONFIG_SUPERTX
 void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
-#if CONFIG_VAR_TX
-                                   const VP10_COMP *cpi,
-#endif
                                    int *rate, int64_t *distortion,
                                    int *skippable, int64_t *sse,
                                    int64_t ref_best_rd, int plane,
@@ -820,9 +817,6 @@ void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
 
   vp10_zero(args);
   args.x = x;
-#if CONFIG_VAR_TX
-  args.cpi = cpi;
-#endif
   args.best_rd = ref_best_rd;
   args.use_fast_coef_costing = use_fast_coef_casting;
 

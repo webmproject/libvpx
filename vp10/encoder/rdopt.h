@@ -82,9 +82,6 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 #endif
 
 void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
-#if CONFIG_VAR_TX
-                                   const VP10_COMP *cpi,
-#endif  // CONFIG_VAR_TX
                                    int *rate, int64_t *distortion,
                                    int *skippable, int64_t *sse,
                                    int64_t ref_best_rd, int plane,
