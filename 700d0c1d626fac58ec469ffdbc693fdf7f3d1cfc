@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d1200d7_c305ea60",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-11T20:53:50Z",
+      "side": 1,
+      "message": "you can still use memcpy for all of these using e.g., N * sizeof(a[0])",
+      "revId": "700d0c1d626fac58ec469ffdbc693fdf7f3d1cfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
