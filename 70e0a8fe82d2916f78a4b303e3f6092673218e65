@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7df0ecdc_33e9b2fd",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-11T01:02:37Z",
+      "side": 1,
+      "message": "Do these need to be full ints? It seems like the maximum value is 1 * (1 \u003c\u003c 7). int16_t or uint8_t would filt and be SIMDable later on?",
+      "range": {
+        "startLine": 28,
+        "startChar": 7,
+        "endLine": 28,
+        "endChar": 10
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9de920fd_d7b134c4",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-11T01:02:37Z",
+      "side": 1,
+      "message": "The *_t namespace is reserved. This detail was exploited in this year\u0027s underhanded C contest.",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 41,
+        "endChar": 22
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dd53033_90b05a26",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-11T01:02:37Z",
+      "side": 1,
+      "message": "The C Integer promotion rules make this cast unnecessary.",
+      "range": {
+        "startLine": 175,
+        "startChar": 15,
+        "endLine": 175,
+        "endChar": 24
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fde3fc1c_f20b2076",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-11T01:02:37Z",
+      "side": 1,
+      "message": "Do we need the wide multiply here? These seem to be 8-bit numbers.",
+      "range": {
+        "startLine": 173,
+        "startChar": 10,
+        "endLine": 175,
+        "endChar": 56
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
