@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd0fc4b0_6dc511ad",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1339,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-11T00:12:30Z",
+      "side": 1,
+      "message": "This line of code is old, and INT_MAX is the uninitialized value for it. Why is this being triggered now? Are you sure this fix isn\u0027t just concealing the real bug?",
+      "range": {
+        "startLine": 1339,
+        "startChar": 12,
+        "endLine": 1339,
+        "endChar": 64
+      },
+      "revId": "f77dcdd5131094a816bbe94f7e2e5478dec21e68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
