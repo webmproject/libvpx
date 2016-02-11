@@ -3031,9 +3031,23 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
   TileInfo *const tile_info = &tile_data->tile_info;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *mi;
+  ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
+  BLOCK_SIZE bs = VPXMAX(bsize, BLOCK_8X8);  // processing unit block size
+  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bs];
+  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bs];
+  int plane;
+
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
   mi = xd->mi[0];
   mi->sb_type = bsize;
+
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    struct macroblockd_plane *pd = &xd->plane[plane];
+    memcpy(a + num_4x4_blocks_wide * plane, pd->above_context,
+           (sizeof(a[0]) * num_4x4_blocks_wide) >> pd->subsampling_x);
+    memcpy(l + num_4x4_blocks_high * plane, pd->left_context,
+           (sizeof(l[0]) * num_4x4_blocks_high) >> pd->subsampling_y);
+  }
 
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
     if (cyclic_refresh_segment_id_boosted(mi->segment_id))
@@ -3051,6 +3065,14 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
                                rd_cost, bsize, ctx);
 
   duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
+
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    struct macroblockd_plane *pd = &xd->plane[plane];
+    memcpy(pd->above_context, a + num_4x4_blocks_wide * plane,
+           (sizeof(a[0]) * num_4x4_blocks_wide) >> pd->subsampling_x);
+    memcpy(pd->left_context, l + num_4x4_blocks_high * plane,
+           (sizeof(l[0]) * num_4x4_blocks_high) >> pd->subsampling_y);
+  }
 
   if (rd_cost->rate == INT_MAX)
     vp9_rd_cost_reset(rd_cost);
