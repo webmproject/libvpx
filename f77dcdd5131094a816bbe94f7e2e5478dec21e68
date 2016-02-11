@@ -46,6 +46,30 @@
       "revId": "f77dcdd5131094a816bbe94f7e2e5478dec21e68",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ddaf464_0e0fabbd",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1339,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-11T00:19:12Z",
+      "side": 1,
+      "message": "Why is pred_mv_sad INT_MAX (it\u0027s default initialization) in this case? If x-\u003epred_mv_sad is INT_MAX should we should we skip this frame? Are we skipping it by some other means?",
+      "parentUuid": "9de920fd_b4b10e5c",
+      "range": {
+        "startLine": 1339,
+        "startChar": 12,
+        "endLine": 1339,
+        "endChar": 64
+      },
+      "revId": "f77dcdd5131094a816bbe94f7e2e5478dec21e68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
