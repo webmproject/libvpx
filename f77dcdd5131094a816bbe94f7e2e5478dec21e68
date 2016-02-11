@@ -94,6 +94,30 @@
       "revId": "f77dcdd5131094a816bbe94f7e2e5478dec21e68",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7df0ecdc_d35a66cc",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1339,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-11T00:42:47Z",
+      "side": 1,
+      "message": "\u003e Why is pred_mv_sad INT_MAX (it\u0027s default initialization) in this\n \u003e case? If x-\u003epred_mv_sad is INT_MAX should we should we skip this\n \u003e frame? Are we skipping it by some other means?\n\nPreviously it was being skipped when rc_resize_allowed was set [1]. Marco cleared that for the external resize check [2] which should be valid; more work needs to be done in that case. In both cases it shouldn\u0027t be necessary to disable the check for the whole stream, but that change would be more involved.\n\n[1] https://chromium.googlesource.com/webm/libvpx/+/master/vp9/encoder/vp9_speed_features.c#306\n[2] https://chromium-review.googlesource.com/#/c/327181",
+      "parentUuid": "3ddaf464_0e0fabbd",
+      "range": {
+        "startLine": 1339,
+        "startChar": 12,
+        "endLine": 1339,
+        "endChar": 64
+      },
+      "revId": "f77dcdd5131094a816bbe94f7e2e5478dec21e68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
