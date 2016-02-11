@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "9de920fd_d7d5b463",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-11T01:30:22Z",
+      "side": 1,
+      "message": "Both CamelCase and ALL_CAPS are consistent with various parts of the code base. I\u0027m partial toward CamelCase because we aren\u0027t really using it for anything else unlike ALL_CAPS constants.",
+      "parentUuid": "9de920fd_d7b134c4",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 41,
+        "endChar": 22
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1dd53033_90b05a26",
         "filename": "vp10/common/restoration.c",
         "patchSetId": 9
