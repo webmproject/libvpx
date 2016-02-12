@@ -730,7 +730,7 @@ void vpx_lpf_horizontal_16_sse2(unsigned char *s, int p,
 void vpx_lpf_horizontal_8_sse2(unsigned char *s, int p,
                                const unsigned char *_blimit,
                                const unsigned char *_limit,
-                               const unsigned char *_thresh, int count) {
+                               const unsigned char *_thresh) {
   DECLARE_ALIGNED(16, unsigned char, flat_op2[16]);
   DECLARE_ALIGNED(16, unsigned char, flat_op1[16]);
   DECLARE_ALIGNED(16, unsigned char, flat_op0[16]);
@@ -744,8 +744,6 @@ void vpx_lpf_horizontal_8_sse2(unsigned char *s, int p,
   __m128i mask, hev, flat;
   __m128i p3, p2, p1, p0, q0, q1, q2, q3;
   __m128i q3p3, q2p2, q1p1, q0p0, p1q1, p0q0;
-
-  (void)count;
 
   q3p3 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(s - 4 * p)),
                             _mm_loadl_epi64((__m128i *)(s + 3 * p)));
@@ -1504,7 +1502,7 @@ void vpx_lpf_vertical_8_sse2(unsigned char *s, int p,
   transpose(src, p, dst, 8, 1);
 
   // Loop filtering
-  vpx_lpf_horizontal_8_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, 1);
+  vpx_lpf_horizontal_8_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh);
 
   src[0] = t_dst;
   dst[0] = s - 4;
