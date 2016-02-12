@@ -652,13 +652,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     return;
 
   if (!is_inter_block(mbmi)) {
-#if CONFIG_VAR_TX
     struct encode_b_args arg = {x, NULL, &mbmi->skip};
-#if CONFIG_VP9_HIGHBITDEPTH
-    vp10_encode_block_intra(plane, block, blk_row, blk_col,
-                            plane_bsize, tx_size, &arg);
-    dist_block(x, plane, block, tx_size, &dist, &sse);
-#else
+#if CONFIG_VAR_TX
     uint8_t *dst, *src;
     int src_stride = x->plane[plane].src.stride;
     int dst_stride = xd->plane[plane].dst.stride;
@@ -680,9 +675,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     args->cpi->fn_ptr[txsize_to_bsize[tx_size]].vf(src, src_stride,
                                                    dst, dst_stride, &tmp_sse);
     dist = (int64_t)tmp_sse * 16;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 #else
-    struct encode_b_args arg = {x, NULL, &mbmi->skip};
     vp10_encode_block_intra(plane, block, blk_row, blk_col,
                             plane_bsize, tx_size, &arg);
     dist_block(x, plane, block, tx_size, &dist, &sse);
@@ -1481,18 +1474,20 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VAR_TX
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
-#endif
+#endif  // CONFIG_VAR_TX
             vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-            ratey += cost_coeffs(x, 0, block,
 #if CONFIG_VAR_TX
-                                 coeff_ctx,
+            ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
+                                 so->neighbors, cpi->sf.use_fast_coef_costing);
+            *(tempa + idx) = !(p->eobs[block] == 0);
+            *(templ + idy) = !(p->eobs[block] == 0);
 #else
-                                 tempa + idx, templ + idy,
-#endif
+            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy,
                                  TX_4X4,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
+#endif  // CONFIG_VAR_TX
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
             vp10_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
@@ -1505,18 +1500,19 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VAR_TX
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
-#endif
+#endif  // CONFIG_VAR_TX
             vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, 0);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-            ratey += cost_coeffs(x, 0, block,
 #if CONFIG_VAR_TX
-                                 coeff_ctx,
+            ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
+                                 so->neighbors, cpi->sf.use_fast_coef_costing);
+            *(tempa + idx) = !(p->eobs[block] == 0);
+            *(templ + idy) = !(p->eobs[block] == 0);
 #else
-                                 tempa + idx, templ + idy,
-#endif
-                                 TX_4X4,
-                                 so->scan, so->neighbors,
+            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy,
+                                 TX_4X4, so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
+#endif  // CONFIG_VAR_TX
             distortion += vp10_highbd_block_error(
                 coeff, BLOCK_OFFSET(pd->dqcoeff, block),
                 16, &unused, xd->bd) >> 2;
@@ -1549,6 +1545,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
 next_highbd:
       {}
     }
+
     if (best_rd >= rd_thresh)
       return best_rd;
 
@@ -1598,8 +1595,8 @@ next_highbd:
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
           const scan_order *so = get_scan(TX_4X4, tx_type, 0);
 #if CONFIG_VAR_TX
-          int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
-                                                   *(templ + idy));
+          const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
+                                                         *(templ + idy));
 #endif
           vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1);
           vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
@@ -1623,8 +1620,8 @@ next_highbd:
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
           const scan_order *so = get_scan(TX_4X4, tx_type, 0);
 #if CONFIG_VAR_TX
-          int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
-                                                   *(templ + idy));
+          const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
+                                                         *(templ + idy));
 #endif
           vp10_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, 0);
           vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
@@ -2315,12 +2312,6 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   MACROBLOCKD *xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
-#if CONFIG_VP9_HIGHBITDEPTH
-  const int ss_txfrm_size = tx_size << 1;
-  int64_t this_sse;
-  int shift = tx_size == TX_32X32 ? 0 : 2;
-  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
-#endif
   unsigned int tmp_sse = 0;
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
@@ -2385,35 +2376,59 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     cpi->fn_ptr[txm_bsize].vf(src, src_stride, rec_buffer, 32, &tmp_sse);
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  *dist += vp10_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                                   &this_sse, xd->bd) >> shift;
-  *bsse += this_sse >> shift;
-#else
   *bsse += (int64_t)tmp_sse * 16;
 
   if (p->eobs[block] > 0) {
-    switch (tx_size) {
-      case TX_32X32:
-        vp10_inv_txfm_add_32x32(dqcoeff, rec_buffer, 32, p->eobs[block],
+    const int lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      const int bd = xd->bd;
+      switch (tx_size) {
+        case TX_32X32:
+          vp10_highbd_inv_txfm_add_32x32(dqcoeff, rec_buffer, 32,
+                                         p->eobs[block], bd, tx_type);
+          break;
+        case TX_16X16:
+          vp10_highbd_inv_txfm_add_16x16(dqcoeff, rec_buffer, 32,
+                                         p->eobs[block], bd, tx_type);
+          break;
+        case TX_8X8:
+          vp10_highbd_inv_txfm_add_8x8(dqcoeff, rec_buffer, 32,
+                                       p->eobs[block], bd, tx_type);
+          break;
+        case TX_4X4:
+          vp10_highbd_inv_txfm_add_4x4(dqcoeff, rec_buffer, 32,
+                                       p->eobs[block], bd, tx_type, lossless);
+          break;
+        default:
+          assert(0 && "Invalid transform size");
+          break;
+      }
+    } else {
+#else
+    {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      switch (tx_size) {
+        case TX_32X32:
+          vp10_inv_txfm_add_32x32(dqcoeff, rec_buffer, 32, p->eobs[block],
+                                  tx_type);
+          break;
+        case TX_16X16:
+          vp10_inv_txfm_add_16x16(dqcoeff, rec_buffer, 32, p->eobs[block],
+                                  tx_type);
+          break;
+        case TX_8X8:
+          vp10_inv_txfm_add_8x8(dqcoeff, rec_buffer, 32, p->eobs[block],
                                 tx_type);
-        break;
-      case TX_16X16:
-        vp10_inv_txfm_add_16x16(dqcoeff, rec_buffer, 32, p->eobs[block],
-                                tx_type);
-        break;
-      case TX_8X8:
-        vp10_inv_txfm_add_8x8(dqcoeff, rec_buffer, 32, p->eobs[block],
-                              tx_type);
-        break;
-      case TX_4X4:
-        vp10_inv_txfm_add_4x4(dqcoeff, rec_buffer, 32, p->eobs[block],
-                              tx_type,
-                              xd->lossless[xd->mi[0]->mbmi.segment_id]);
-        break;
-      default:
-        assert(0 && "Invalid transform size");
-        break;
+          break;
+        case TX_4X4:
+          vp10_inv_txfm_add_4x4(dqcoeff, rec_buffer, 32, p->eobs[block],
+                                tx_type, lossless);
+          break;
+        default:
+          assert(0 && "Invalid transform size");
+          break;
+      }
     }
 
     if ((bh >> 2) + blk_col > max_blocks_wide ||
@@ -2438,7 +2453,6 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     }
   }
   *dist += (int64_t)tmp_sse * 16;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   *rate += cost_coeffs(x, plane, block, coeff_ctx, tx_size,
                        scan_order->scan, scan_order->neighbors, 0);
