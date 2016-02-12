@@ -4509,13 +4509,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
         double y, u, v, frame_all;
         frame_all = vpx_calc_fastssim(orig, recon, &y, &u, &v, bit_depth);
         adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
-      }
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (!cm->use_highbitdepth)
-#endif
-      {
-        double y, u, v, frame_all;
-        frame_all = vpx_psnrhvs(orig, recon, &y, &u, &v);
+        frame_all = vpx_psnrhvs(orig, recon, &y, &u, &v, bit_depth);
         adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
       }
     }
