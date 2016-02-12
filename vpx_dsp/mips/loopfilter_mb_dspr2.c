@@ -322,8 +322,7 @@ void vpx_lpf_vertical_8_dspr2(unsigned char *s,
                               int pitch,
                               const uint8_t *blimit,
                               const uint8_t *limit,
-                              const uint8_t *thresh,
-                              int count) {
+                              const uint8_t *thresh) {
   uint8_t   i;
   uint32_t  mask, hev, flat;
   uint8_t   *s1, *s2, *s3, *s4;

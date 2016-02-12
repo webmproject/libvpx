@@ -345,11 +345,10 @@ static void filter_selectively_vert_row2(int subsampling_factor,
                                   lfi0->hev_thr, lfi1->mblim, lfi1->lim,
                                   lfi1->hev_thr);
         } else if (mask_8x8_0 & 1) {
-          vpx_lpf_vertical_8(s, pitch, lfi0->mblim, lfi0->lim, lfi0->hev_thr,
-                             1);
+          vpx_lpf_vertical_8(s, pitch, lfi0->mblim, lfi0->lim, lfi0->hev_thr);
         } else {
           vpx_lpf_vertical_8(s + 8 * pitch, pitch, lfi1->mblim, lfi1->lim,
-                             lfi1->hev_thr, 1);
+                             lfi1->hev_thr);
         }
       }
 
@@ -1102,7 +1101,7 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
       if (mask_16x16 & 1) {
         vpx_lpf_vertical_16(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
       } else if (mask_8x8 & 1) {
-        vpx_lpf_vertical_8(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
+        vpx_lpf_vertical_8(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
       } else if (mask_4x4 & 1) {
         vpx_lpf_vertical_4(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
       }

@@ -1492,11 +1492,10 @@ void vpx_lpf_vertical_4_dual_sse2(uint8_t *s, int p, const uint8_t *blimit0,
 void vpx_lpf_vertical_8_sse2(unsigned char *s, int p,
                              const unsigned char *blimit,
                              const unsigned char *limit,
-                             const unsigned char *thresh, int count) {
+                             const unsigned char *thresh) {
   DECLARE_ALIGNED(8, unsigned char, t_dst[8 * 8]);
   unsigned char *src[1];
   unsigned char *dst[1];
-  (void)count;
 
   // Transpose 8x8
   src[0] = s - 4;

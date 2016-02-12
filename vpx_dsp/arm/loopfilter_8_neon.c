@@ -328,8 +328,7 @@ void vpx_lpf_vertical_8_neon(
         int pitch,
         const uint8_t *blimit,
         const uint8_t *limit,
-        const uint8_t *thresh,
-        int count) {
+        const uint8_t *thresh) {
     int i;
     uint8_t *s;
     uint8x8_t dblimit, dlimit, dthresh;
@@ -341,14 +340,11 @@ void vpx_lpf_vertical_8_neon(
     uint8x8x4_t d4Result;
     uint8x8x2_t d2Result;
 
-    if (count == 0)
-        return;
-
     dblimit = vld1_u8(blimit);
     dlimit = vld1_u8(limit);
     dthresh = vld1_u8(thresh);
 
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < 1; i++) {
         s = src + (i * (pitch << 3)) - 4;
 
         d3u8 = vld1_u8(s);

@@ -346,9 +346,8 @@ void vpx_lpf_vertical_8_dual_dspr2(uint8_t *s, int p,
                                    const uint8_t *blimit1,
                                    const uint8_t *limit1,
                                    const uint8_t *thresh1) {
-  vpx_lpf_vertical_8_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vpx_lpf_vertical_8_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
-                                       1);
+  vpx_lpf_vertical_8_dspr2(s, p, blimit0, limit0, thresh0);
+  vpx_lpf_vertical_8_dspr2(s + 8 * p, p, blimit1, limit1, thresh1);
 }
 
 void vpx_lpf_vertical_16_dual_dspr2(uint8_t *s, int p,

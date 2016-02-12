@@ -82,30 +82,24 @@ end_vpx_mblf_h_edge
 ;                              int pitch,
 ;                              const uint8_t *blimit,
 ;                              const uint8_t *limit,
-;                              const uint8_t *thresh,
-;                              int count)
+;                              const uint8_t *thresh)
 ;
 ; r0    uint8_t *s,
 ; r1    int pitch,
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
-; sp+4  int count
 |vpx_lpf_vertical_8_neon| PROC
     push        {r4-r5, lr}
 
     vld1.8      {d0[]}, [r2]              ; duplicate *blimit
-    ldr         r12, [sp, #16]            ; load count
     vld1.8      {d1[]}, [r3]              ; duplicate *limit
 
     ldr         r3, [sp, #12]             ; load thresh
     sub         r2, r0, #4                ; move s pointer down by 4 columns
-    cmp         r12, #0
-    beq         end_vpx_mblf_v_edge
 
     vld1.8      {d2[]}, [r3]              ; duplicate *thresh
 
-count_mblf_v_loop
     vld1.u8     {d3}, [r2], r1             ; load s data
     vld1.u8     {d4}, [r2], r1
     vld1.u8     {d5}, [r2], r1
@@ -156,12 +150,6 @@ count_mblf_v_loop
     vst2.8      {d4[6], d5[6]}, [r3], r1
     vst2.8      {d4[7], d5[7]}, [r3]
 
-    add         r0, r0, r1, lsl #3         ; s += pitch * 8
-    subs        r12, r12, #1
-    subne       r2, r0, #4                 ; move s pointer down by 4 columns
-    bne         count_mblf_v_loop
-
-end_vpx_mblf_v_edge
     pop         {r4-r5, pc}
     ENDP        ; |vpx_lpf_vertical_8_neon|
 
