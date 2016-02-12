@@ -80,24 +80,29 @@ int vp10_mv_bit_cost(const MV *mv, const MV *ref,
   return ROUND_POWER_OF_TWO(mv_cost(&diff, mvjcost, mvcost) * weight, 7);
 }
 
-static int mv_err_cost(const MV *mv, const MV *ref,
-                       const int *mvjcost, int *mvcost[2],
-                       int error_per_bit) {
+#define PIXEL_TRANSFORM_ERROR_SCALE 4
+static int mv_err_cost(const MV *mv, const MV *ref, const int *mvjcost,
+                       int *mvcost[2], int error_per_bit) {
   if (mvcost) {
-    const MV diff = { mv->row - ref->row,
-                      mv->col - ref->col };
-    return ROUND_POWER_OF_TWO(mv_cost(&diff, mvjcost, mvcost) *
-                                  error_per_bit, 13);
+    const MV diff = {mv->row - ref->row, mv->col - ref->col};
+    // This product sits at a 32-bit ceiling right now and any additional
+    // accuracy in either bit cost or error cost will cause it to overflow.
+    return ROUND_POWER_OF_TWO(
+        (unsigned)mv_cost(&diff, mvjcost, mvcost) * error_per_bit,
+        RDDIV_BITS + VP9_PROB_COST_SHIFT - RD_EPB_SHIFT +
+            PIXEL_TRANSFORM_ERROR_SCALE);
   }
   return 0;
 }
 
 static int mvsad_err_cost(const MACROBLOCK *x, const MV *mv, const MV *ref,
-                          int error_per_bit) {
+                          int sad_per_bit) {
   const MV diff = { mv->row - ref->row,
                     mv->col - ref->col };
-  return ROUND_POWER_OF_TWO(mv_cost(&diff, x->nmvjointsadcost,
-                                    x->nmvsadcost) * error_per_bit, 8);
+  return ROUND_POWER_OF_TWO(
+      (unsigned)mv_cost(&diff, x->nmvjointsadcost, x->nmvsadcost) *
+          sad_per_bit,
+      VP9_PROB_COST_SHIFT);
 }
 
 void vp10_init_dsmotion_compensation(search_site_config *cfg, int stride) {
@@ -155,12 +160,13 @@ void vp10_init3smotion_compensation(search_site_config *cfg, int stride) {
  * could reduce the area.
  */
 
-/* estimated cost of a motion vector (r,c) */
-#define MVC(r, c)                                       \
-    (mvcost ?                                           \
-     ((mvjcost[((r) != rr) * 2 + ((c) != rc)] +         \
-       mvcost[0][((r) - rr)] + mvcost[1][((c) - rc)]) * \
-      error_per_bit + 4096) >> 13 : 0)
+/* Estimated (square) error cost of a motion vector (r,c). The 14 scale comes
+ * from the same math as in mv_err_cost(). */
+#define MVC(r, c)                                              \
+    (mvcost ?                                                  \
+     ((unsigned)(mvjcost[((r) != rr) * 2 + ((c) != rc)] +      \
+       mvcost[0][((r) - rr)] + mvcost[1][((c) - rc)]) *        \
+      error_per_bit + 8192) >> 14 : 0)
 
 
 // convert motion vector component to offset for sv[a]f calc
@@ -852,9 +858,9 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
       cost_list[i + 1] = fn_ptr->vf(what->buf, what->stride,
                                     get_buf_from_mv(in_what, &this_mv),
                                     in_what->stride, &sse) +
-          // mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
-          mv_err_cost(&this_mv, &fcenter_mv, x->nmvjointcost, x->mvcost,
-                      x->errorperbit);
+                                    mv_err_cost(&this_mv, &fcenter_mv,
+                                                x->nmvjointcost, x->mvcost,
+                                                x->errorperbit);
     }
   } else {
     for (i = 0; i < 4; i++) {
@@ -866,9 +872,9 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
         cost_list[i + 1] = fn_ptr->vf(what->buf, what->stride,
                                       get_buf_from_mv(in_what, &this_mv),
                                       in_what->stride, &sse) +
-            // mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
-            mv_err_cost(&this_mv, &fcenter_mv, x->nmvjointcost, x->mvcost,
-                        x->errorperbit);
+                                      mv_err_cost(&this_mv, &fcenter_mv,
+                                                  x->nmvjointcost, x->mvcost,
+                                                  x->errorperbit);
     }
   }
 }

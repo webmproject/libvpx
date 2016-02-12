@@ -17,18 +17,21 @@
 
 #include "vp10/encoder/block.h"
 #include "vp10/encoder/context_tree.h"
+#include "vp10/encoder/cost.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define RDDIV_BITS          7
+#define RD_EPB_SHIFT        6
 
 #define RDCOST(RM, DM, R, D) \
-  (((128 + ((int64_t)R) * (RM)) >> 8) + (D << DM))
+  (ROUND_POWER_OF_TWO(((int64_t)R) * (RM), VP9_PROB_COST_SHIFT) + (D << DM))
 
-#define RDCOST_DBL(RM, DM, R, D) \
-  (((((double)(R)) * (RM)) / 256.0) + ((double)(D)  * (1 << (DM))))
+#define RDCOST_DBL(RM, DM, R, D)                                   \
+  (((((double)(R)) * (RM)) / (double)(1 << VP9_PROB_COST_SHIFT)) + \
+   ((double)(D) * (1 << (DM))))
 
 #define QIDX_SKIP_THRESH     115
 
@@ -309,6 +312,11 @@ static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
 void vp10_mv_pred(struct VP10_COMP *cpi, MACROBLOCK *x,
                  uint8_t *ref_y_buffer, int ref_y_stride,
                  int ref_frame, BLOCK_SIZE block_size);
+
+static INLINE void set_error_per_bit(MACROBLOCK *x, int rdmult) {
+  x->errorperbit = rdmult >> RD_EPB_SHIFT;
+  x->errorperbit += (x->errorperbit == 0);
+}
 
 void vp10_setup_pred_block(const MACROBLOCKD *xd,
                           struct buf_2d dst[MAX_MB_PLANE],

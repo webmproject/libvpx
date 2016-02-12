@@ -12,18 +12,22 @@
 #define VP10_ENCODER_COST_H_
 
 #include "vpx_dsp/prob.h"
+#include "vpx/vpx_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const unsigned int vp10_prob_cost[256];
+extern const uint16_t vp10_prob_cost[257];
+
+// The factor to scale from cost in bits to cost in vp10_prob_cost units.
+#define VP9_PROB_COST_SHIFT 9
 
 #define vp10_cost_zero(prob) (vp10_prob_cost[prob])
 
-#define vp10_cost_one(prob) vp10_cost_zero(vpx_complement(prob))
+#define vp10_cost_one(prob) vp10_cost_zero(256 - (prob))
 
-#define vp10_cost_bit(prob, bit) vp10_cost_zero((bit) ? vpx_complement(prob) \
+#define vp10_cost_bit(prob, bit) vp10_cost_zero((bit) ? 256 - (prob) \
                                                     : (prob))
 
 static INLINE unsigned int cost_branch256(const unsigned int ct[2],
