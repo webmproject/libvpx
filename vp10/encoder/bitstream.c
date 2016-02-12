@@ -1795,6 +1795,35 @@ static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
   }
 }
 
+#if CONFIG_LOOP_RESTORATION
+static void encode_restoration(VP10_COMMON *cm,
+                               struct vpx_write_bit_buffer *wb) {
+  RestorationInfo *rst = &cm->rst_info;
+  vpx_wb_write_bit(wb, rst->restoration_type != RESTORE_NONE);
+  if (rst->restoration_type != RESTORE_NONE) {
+    if (rst->restoration_type == RESTORE_BILATERAL) {
+      vpx_wb_write_bit(wb, 1);
+      vpx_wb_write_literal(wb, rst->restoration_level,
+                           vp10_restoration_level_bits(cm));
+    } else {
+      vpx_wb_write_bit(wb, 0);
+      vpx_wb_write_literal(
+          wb, rst->vfilter[0] - WIENER_FILT_TAP0_MINV, WIENER_FILT_TAP0_BITS);
+      vpx_wb_write_literal(
+          wb, rst->vfilter[1] - WIENER_FILT_TAP1_MINV, WIENER_FILT_TAP1_BITS);
+      vpx_wb_write_literal(
+          wb, rst->vfilter[2] - WIENER_FILT_TAP2_MINV, WIENER_FILT_TAP2_BITS);
+      vpx_wb_write_literal(
+          wb, rst->hfilter[0] - WIENER_FILT_TAP0_MINV, WIENER_FILT_TAP0_BITS);
+      vpx_wb_write_literal(
+          wb, rst->hfilter[1] - WIENER_FILT_TAP1_MINV, WIENER_FILT_TAP1_BITS);
+      vpx_wb_write_literal(
+          wb, rst->hfilter[2] - WIENER_FILT_TAP2_MINV, WIENER_FILT_TAP2_BITS);
+    }
+  }
+}
+#endif  // CONFIG_LOOP_RESTORATION
+
 static void encode_loopfilter(VP10_COMMON *cm,
                               struct vpx_write_bit_buffer *wb) {
   int i;
@@ -1832,15 +1861,6 @@ static void encode_loopfilter(VP10_COMMON *cm,
       }
     }
   }
-#if CONFIG_LOOP_RESTORATION
-  vpx_wb_write_bit(wb, lf->restoration_level != lf->last_restoration_level);
-  if (lf->restoration_level != lf->last_restoration_level) {
-    int level = lf->restoration_level -
-                (lf->restoration_level > lf->last_restoration_level);
-    vpx_wb_write_literal(wb, level,
-                         vp10_restoration_level_bits(cm));
-  }
-#endif  // CONFIG_LOOP_RESTORATION
 }
 
 static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
@@ -2300,6 +2320,9 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   vpx_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);
 
   encode_loopfilter(cm, wb);
+#if CONFIG_LOOP_RESTORATION
+  encode_restoration(cm, wb);
+#endif  // CONFIG_LOOP_RESTORATION
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
   if (!cm->seg.enabled && xd->lossless[0])

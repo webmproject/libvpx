@@ -258,7 +258,8 @@ typedef struct VP10Common {
 
   loop_filter_info_n lf_info;
 #if CONFIG_LOOP_RESTORATION
-  restoration_info_n rst_info;
+  RestorationInfo rst_info;
+  RestorationInternal rst_internal;
 #endif  // CONFIG_LOOP_RESTORATION
 
   // Flag signaling how frame contexts should be updated at the end of

@@ -26,74 +26,54 @@ extern "C" {
 #define RESTORATION_LEVELS        (1 << RESTORATION_LEVEL_BITS)
 #define DEF_RESTORATION_LEVEL     2
 
-#define RESTORATION_PRECISION     16
 #define RESTORATION_HALFWIN       3
+#define RESTORATION_HALFWIN1      (RESTORATION_HALFWIN + 1)
 #define RESTORATION_WIN           (2 * RESTORATION_HALFWIN + 1)
+#define RESTORATION_WIN2          ((RESTORATION_WIN) * (RESTORATION_WIN))
 
-typedef struct restoration_params {
-  int sigma_x;  // spatial variance x
-  int sigma_y;  // spatial variance y
-  int sigma_r;  // range variance
-} restoration_params_t;
+#define RESTORATION_FILT_BITS 7
+#define RESTORATION_FILT_STEP (1 << RESTORATION_FILT_BITS)
 
-static restoration_params_t
-    restoration_level_to_params_arr[RESTORATION_LEVELS + 1] = {
-  // Values are rounded to 1/16 th precision
-  {0, 0, 0},    // 0 - default
-  {8, 9, 30},
-  {9, 8, 30},
-  {9, 11, 32},
-  {11, 9, 32},
-  {14, 14, 32},
-  {18, 18, 36},
-  {24, 24, 40},
-  {32, 32, 40},
-};
+#define WIENER_FILT_TAP0_MINV     3
+#define WIENER_FILT_TAP1_MINV     (-23)
+#define WIENER_FILT_TAP2_MINV     5
 
-static restoration_params_t
-    restoration_level_to_params_arr_kf[RESTORATION_LEVELS_KF + 1] = {
-  // Values are rounded to 1/16 th precision
-  {0, 0, 0},    // 0 - default
-  {8, 8, 30},
-  {9, 9, 32},
-  {10, 10, 32},
-  {12, 12, 32},
-  {14, 14, 32},
-  {18, 18, 36},
-  {24, 24, 40},
-  {30, 30, 44},
-  {36, 36, 48},
-  {42, 42, 48},
-  {48, 48, 48},
-  {48, 48, 56},
-  {56, 56, 48},
-  {56, 56, 56},
-  {56, 56, 64},
-  {64, 64, 48},
-};
+#define WIENER_FILT_TAP0_BITS     2
+#define WIENER_FILT_TAP1_BITS     4
+#define WIENER_FILT_TAP2_BITS     5
+
+#define WIENER_FILT_TAP0_MAXV \
+  (WIENER_FILT_TAP0_MINV -1 + (1 << WIENER_FILT_TAP0_BITS))
+#define WIENER_FILT_TAP1_MAXV \
+  (WIENER_FILT_TAP1_MINV -1 + (1 << WIENER_FILT_TAP1_BITS))
+#define WIENER_FILT_TAP2_MAXV \
+  (WIENER_FILT_TAP2_MINV -1 + (1 << WIENER_FILT_TAP2_BITS))
+
+typedef enum {
+  RESTORE_NONE,
+  RESTORE_BILATERAL,
+  RESTORE_WIENER,
+} RestorationType;
 
 typedef struct {
-  double *wx_lut[RESTORATION_WIN];
-  double *wr_lut;
-  int restoration_sigma_x_set;
-  int restoration_sigma_y_set;
-  int restoration_sigma_r_set;
-  int restoration_used;
-} restoration_info_n;
+  RestorationType restoration_type;
+  int restoration_level;
+  int vfilter[RESTORATION_HALFWIN], hfilter[RESTORATION_HALFWIN];
+} RestorationInfo;
 
-int vp10_restoration_level_bits(const struct VP10Common *const cm);
-int vp10_loop_restoration_used(int level, int kf);
+typedef struct {
+  RestorationType restoration_type;
+  uint8_t *wx_lut[RESTORATION_WIN];
+  uint8_t *wr_lut;
+  int vfilter[RESTORATION_WIN], hfilter[RESTORATION_WIN];
+} RestorationInternal;
 
-static INLINE restoration_params_t vp10_restoration_level_to_params(
-    int index, int kf) {
-  return kf ? restoration_level_to_params_arr_kf[index] :
-              restoration_level_to_params_arr[index];
-}
-
-void vp10_loop_restoration_init(restoration_info_n *rst, int T, int kf);
+int  vp10_restoration_level_bits(const struct VP10Common *const cm);
+void vp10_loop_restoration_init(RestorationInternal *rst,
+                                RestorationInfo *rsi, int kf);
 void vp10_loop_restoration_frame(YV12_BUFFER_CONFIG *frame,
                                  struct VP10Common *cm,
-                                 int restoration_level,
+                                 RestorationInfo *rsi,
                                  int y_only, int partial_frame);
 void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
                                 struct VP10Common *cm,

@@ -36,6 +36,9 @@
 #include "vp10/encoder/firstpass.h"
 #include "vp10/encoder/mbgraph.h"
 #include "vp10/encoder/picklpf.h"
+#if CONFIG_LOOP_RESTORATION
+#include "vp10/encoder/pickrst.h"
+#endif  // CONFIG_LOOP_RESTORATION
 #include "vp10/encoder/ratectrl.h"
 #include "vp10/encoder/rd.h"
 #include "vp10/encoder/resize.h"
@@ -2738,7 +2741,11 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
 
     vpx_usec_timer_start(&timer);
 
+#if CONFIG_LOOP_RESTORATION
+    vp10_pick_filter_restoration(cpi->Source, cpi, cpi->sf.lpf_pick);
+#else
     vp10_pick_filter_level(cpi->Source, cpi, cpi->sf.lpf_pick);
+#endif  // CONFIG_LOOP_RESTORATION
 
     vpx_usec_timer_mark(&timer);
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
@@ -2758,10 +2765,11 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
 #endif
   }
 #if CONFIG_LOOP_RESTORATION
-  vp10_loop_restoration_init(&cm->rst_info, cm->lf.restoration_level,
-                             cm->frame_type == KEY_FRAME);
-  if (cm->rst_info.restoration_used)
+  if (cm->rst_info.restoration_type != RESTORE_NONE) {
+    vp10_loop_restoration_init(&cm->rst_internal, &cm->rst_info,
+                               cm->frame_type == KEY_FRAME);
     vp10_loop_restoration_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
+  }
 #endif  // CONFIG_LOOP_RESTORATION
 
   vpx_extend_frame_inner_borders(cm->frame_to_show);
@@ -3871,12 +3879,6 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   cm->last2_frame_type = cm->last_frame_type;
 #endif  // CONFIG_EXT_REFS
   cm->last_frame_type = cm->frame_type;
-#if CONFIG_LOOP_RESTORATION
-  if (cm->frame_type != KEY_FRAME)
-    cm->lf.last_restoration_level = cm->lf.restoration_level;
-  else
-    cm->lf.last_restoration_level = 0;
-#endif  // CONFIG_LOOP_RESTORATION
 
   vp10_rc_postencode_update(cpi, *size);
 
