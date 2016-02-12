@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ddaf464_7d75c3d2",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4183,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-12T14:35:19Z",
+      "side": 1,
+      "message": "TODO(yx): Get rid of 2 versions of calc_psnr in favor of one that takes 2 bitdepths.",
+      "range": {
+        "startLine": 4183,
+        "startChar": 6,
+        "endLine": 4183,
+        "endChar": 22
+      },
+      "revId": "9ac892be4d9518f6c4a35f3cb1cc89edeb1c2d63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df328ea_de870990",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4222,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-12T14:35:19Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 4222,
+        "startChar": 8,
+        "endLine": 4222,
+        "endChar": 14
+      },
+      "revId": "9ac892be4d9518f6c4a35f3cb1cc89edeb1c2d63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dd0d03a_246ddccf",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4234,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-12T14:35:19Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 4234,
+        "startChar": 10,
+        "endLine": 4234,
+        "endChar": 16
+      },
+      "revId": "9ac892be4d9518f6c4a35f3cb1cc89edeb1c2d63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd0fc4b0_71260797",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4239,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-12T14:35:19Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 4239,
+        "startChar": 10,
+        "endLine": 4239,
+        "endChar": 16
+      },
+      "revId": "9ac892be4d9518f6c4a35f3cb1cc89edeb1c2d63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d09ccae_3261ad7b",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4240,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-02-12T14:35:19Z",
+      "side": 1,
+      "message": "total_inconsistency is already a double.",
+      "range": {
+        "startLine": 4240,
+        "startChar": 41,
+        "endLine": 4240,
+        "endChar": 43
+      },
+      "revId": "9ac892be4d9518f6c4a35f3cb1cc89edeb1c2d63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
