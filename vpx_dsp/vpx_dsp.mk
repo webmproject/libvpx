@@ -266,6 +266,12 @@ endif
 
 endif  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
+ifeq ($(CONFIG_VP10_ENCODER),yes)
+DSP_SRCS-yes            += sum_squares.c
+
+DSP_SRCS-$(HAVE_SSE2)   += x86/sum_squares_sse2.c
+endif # CONFIG_VP10_ENCODER
+
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes            += sad.c
 DSP_SRCS-yes            += subtract.c
@@ -297,7 +303,6 @@ DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad4d_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad_sse2.asm
 endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_USE_X86INC
-
 endif  # CONFIG_ENCODERS
 
 ifneq ($(filter yes,$(CONFIG_ENCODERS) $(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)

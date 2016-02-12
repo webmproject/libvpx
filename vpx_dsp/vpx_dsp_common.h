@@ -23,6 +23,18 @@ extern "C" {
 #define VPXMIN(x, y) (((x) < (y)) ? (x) : (y))
 #define VPXMAX(x, y) (((x) > (y)) ? (x) : (y))
 
+// These can be used to give a hint about branch outcomes.
+// This can have an effect, even if your target processor has a
+// good branch predictor, as these hints can affect basic block
+// ordering by the compiler.
+#ifdef __GNUC__
+# define LIKELY(v)    __builtin_expect(v, 1)
+# define UNLIKELY(v)  __builtin_expect(v, 0)
+#else
+# define LIKELY(v)    (v)
+# define UNLIKELY(v)  (v)
+#endif
+
 #if CONFIG_VP9_HIGHBITDEPTH
 // Note:
 // tran_low_t  is the datatype used for final transform coefficients.

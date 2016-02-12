@@ -654,27 +654,31 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   if (!is_inter_block(mbmi)) {
     struct encode_b_args arg = {x, NULL, &mbmi->skip};
 #if CONFIG_VAR_TX
-    uint8_t *dst, *src;
-    int src_stride = x->plane[plane].src.stride;
-    int dst_stride = xd->plane[plane].dst.stride;
-    unsigned int tmp_sse;
-    PREDICTION_MODE mode = (plane == 0) ?
-        get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
-
-    src = &x->plane[plane].src.buf[4 * (blk_row * src_stride + blk_col)];
-    dst = &xd->plane[plane].dst.buf[4 * (blk_row * dst_stride + blk_col)];
-    vp10_predict_intra_block(xd, b_width_log2_lookup[plane_bsize],
-                             b_height_log2_lookup[plane_bsize],
-                             tx_size, mode, dst, dst_stride,
-                             dst, dst_stride, blk_col, blk_row, plane);
-    args->cpi->fn_ptr[txsize_to_bsize[tx_size]].vf(src, src_stride,
-                                                   dst, dst_stride, &tmp_sse);
-    sse = (int64_t)tmp_sse * 16;
     vp10_encode_block_intra(plane, block, blk_row, blk_col,
                             plane_bsize, tx_size, &arg);
-    args->cpi->fn_ptr[txsize_to_bsize[tx_size]].vf(src, src_stride,
-                                                   dst, dst_stride, &tmp_sse);
-    dist = (int64_t)tmp_sse * 16;
+
+    {
+      const int bs = 4 << tx_size;
+      const BLOCK_SIZE tx_bsize = txsize_to_bsize[tx_size];
+      const vpx_variance_fn_t variance = args->cpi->fn_ptr[tx_bsize].vf;
+
+      const struct macroblock_plane *const p = &x->plane[plane];
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+
+      const int src_stride = p->src.stride;
+      const int dst_stride = pd->dst.stride;
+      const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+
+      const uint8_t *src = &p->src.buf[4 * (blk_row * src_stride + blk_col)];
+      const uint8_t *dst = &pd->dst.buf[4 * (blk_row * dst_stride + blk_col)];
+      const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
+
+      unsigned int tmp;
+
+      sse = (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, bs) * 16;
+      variance(src, src_stride, dst, dst_stride, &tmp);
+      dist = (int64_t)tmp * 16;
+    }
 #else
     vp10_encode_block_intra(plane, block, blk_row, blk_col,
                             plane_bsize, tx_size, &arg);
@@ -2330,6 +2334,8 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 #else
   DECLARE_ALIGNED(16, uint8_t, rec_buffer[32 * 32]);
 #endif
+  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -2360,20 +2366,16 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   if (blk_row + (bh >> 2) > max_blocks_high ||
       blk_col + (bh >> 2) > max_blocks_wide) {
     int idx, idy;
-    unsigned int this_sse;
     int blocks_height = VPXMIN(bh >> 2, max_blocks_high - blk_row);
     int blocks_width  = VPXMIN(bh >> 2, max_blocks_wide - blk_col);
     for (idy = 0; idy < blocks_height; idy += 2) {
       for (idx = 0; idx < blocks_width; idx += 2) {
-        cpi->fn_ptr[BLOCK_8X8].vf(src + 4 * idy * src_stride + 4 * idx,
-                                  src_stride,
-                                  rec_buffer + 4 * idy * 32 + 4 * idx,
-                                  32, &this_sse);
-        tmp_sse += this_sse;
+        const int16_t *d = diff + 4 * idy * diff_stride + 4 * idx;
+        tmp_sse += vpx_sum_squares_2d_i16(d, diff_stride, 8);
       }
     }
   } else {
-    cpi->fn_ptr[txm_bsize].vf(src, src_stride, rec_buffer, 32, &tmp_sse);
+    tmp_sse = vpx_sum_squares_2d_i16(diff, diff_stride, bh);
   }
 
   *bsse += (int64_t)tmp_sse * 16;
