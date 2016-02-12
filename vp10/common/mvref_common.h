@@ -260,16 +260,16 @@ static INLINE int16_t vp10_mode_context_analyzer(
 
 static INLINE uint8_t vp10_drl_ctx(const CANDIDATE_MV *ref_mv_stack,
                                    int ref_idx) {
-  if (ref_mv_stack[ref_idx + 1].weight > REF_CAT_LEVEL &&
-      ref_mv_stack[ref_idx + 2].weight > REF_CAT_LEVEL)
+  if (ref_mv_stack[ref_idx].weight > REF_CAT_LEVEL &&
+      ref_mv_stack[ref_idx + 1].weight > REF_CAT_LEVEL)
     return 0;
 
-  if (ref_mv_stack[ref_idx + 1].weight > REF_CAT_LEVEL &&
-      ref_mv_stack[ref_idx + 2].weight < REF_CAT_LEVEL)
+  if (ref_mv_stack[ref_idx].weight > REF_CAT_LEVEL &&
+      ref_mv_stack[ref_idx + 1].weight < REF_CAT_LEVEL)
     return 1;
 
-  if (ref_mv_stack[ref_idx + 1].weight < REF_CAT_LEVEL &&
-      ref_mv_stack[ref_idx + 2].weight < REF_CAT_LEVEL)
+  if (ref_mv_stack[ref_idx].weight < REF_CAT_LEVEL &&
+      ref_mv_stack[ref_idx + 1].weight < REF_CAT_LEVEL)
     return 2;
 
   assert(0);

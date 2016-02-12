@@ -1827,7 +1827,7 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
           uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
           if (mbmi_ext->ref_mv_count[ref_frame_type] > 2) {
             uint8_t drl0_ctx =
-                vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 0);
+                vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
             if (mbmi->ref_mv_idx == 0)
               ++counts->drl_mode0[drl0_ctx][0];
             else
@@ -1836,7 +1836,7 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
             if (mbmi_ext->ref_mv_count[ref_frame_type] > 3 &&
                 mbmi->ref_mv_idx > 0) {
               uint8_t drl1_ctx =
-                  vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
+                  vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 2);
               if (mbmi->ref_mv_idx == 1)
                 ++counts->drl_mode1[drl1_ctx][0];
               else

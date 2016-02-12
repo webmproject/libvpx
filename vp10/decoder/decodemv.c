@@ -156,7 +156,7 @@ static void read_drl_idx(const VP10_COMMON *cm,
   mbmi->ref_mv_idx = 0;
 
   if (xd->ref_mv_count[ref_frame_type] > 2) {
-    uint8_t drl0_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 0);
+    uint8_t drl0_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 1);
     vpx_prob drl0_prob = cm->fc->drl_prob0[drl0_ctx];
     if (vpx_read(r, drl0_prob)) {
       mbmi->ref_mv_idx = 1;
@@ -164,7 +164,7 @@ static void read_drl_idx(const VP10_COMMON *cm,
         ++xd->counts->drl_mode0[drl0_ctx][1];
       if (xd->ref_mv_count[ref_frame_type] > 3) {
         uint8_t drl1_ctx =
-            vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 1);
+            vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 2);
         vpx_prob drl1_prob = cm->fc->drl_prob1[drl1_ctx];
         if (vpx_read(r, drl1_prob)) {
           mbmi->ref_mv_idx = 2;
