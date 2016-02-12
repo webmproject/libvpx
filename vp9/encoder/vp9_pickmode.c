@@ -949,7 +949,8 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     // TODO(jingning): Skip is signalled per prediciton block not per tx block.
     rate += vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), is_skippable);
   } else {
-    unsigned int var, sse;
+    unsigned int var = 0;
+    unsigned int sse = 0;
     model_rd_for_sb_uv(cpi, plane_bsize, x, xd, &rate, &dist, &var, &sse,
                        plane, plane);
   }

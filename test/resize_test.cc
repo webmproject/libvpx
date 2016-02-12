@@ -94,13 +94,53 @@ unsigned int ScaleForFrameNumber(unsigned int frame, unsigned int val) {
   if (frame < 10)
     return val;
   if (frame < 20)
-    return val / 2;
+    return val * 3 / 4;
   if (frame < 30)
-    return val * 2 / 3;
+    return val / 2;
   if (frame < 40)
-    return val / 4;
+    return val;
   if (frame < 50)
-    return val * 7 / 8;
+    return val * 3 / 4;
+  if (frame < 60)
+    return val / 2;
+  if (frame < 70)
+    return val * 3 / 4;
+  if (frame < 80)
+    return val;
+  if (frame < 90)
+    return val * 3 / 4;
+  if (frame < 100)
+    return val / 2;
+  if (frame < 110)
+    return val * 3 / 4;
+  if (frame < 120)
+    return val;
+  if (frame < 130)
+    return val * 3 / 4;
+  if (frame < 140)
+    return val / 2;
+  if (frame < 150)
+    return val * 3 / 4;
+  if (frame < 160)
+    return val;
+  if (frame < 170)
+    return val / 2;
+  if (frame < 180)
+    return val * 3 / 4;
+  if (frame < 190)
+    return val;
+  if (frame < 200)
+    return val * 3 / 4;
+  if (frame < 210)
+    return val / 2;
+  if (frame < 220)
+    return val * 3 / 4;
+  if (frame < 230)
+    return val;
+  if (frame < 240)
+    return val / 2;
+  if (frame < 250)
+    return val * 3 / 4;
   return val;
 }
 
@@ -108,7 +148,7 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
  public:
   ResizingVideoSource() {
     SetSize(kInitialWidth, kInitialHeight);
-    limit_ = 60;
+    limit_ = 300;
   }
 
   virtual ~ResizingVideoSource() {}
@@ -347,6 +387,8 @@ class ResizeRealtimeTest : public ::libvpx_test::EncoderTest,
 TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
   ResizingVideoSource video;
   DefaultConfig();
+  // Disable internal resize for this test.
+  cfg_.rc_resize_allowed = 0;
   change_bitrate_ = false;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 

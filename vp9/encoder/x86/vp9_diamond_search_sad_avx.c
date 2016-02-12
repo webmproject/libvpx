@@ -47,12 +47,12 @@ static INLINE int mv_cost(const int_mv mv,
 }
 
 static int mvsad_err_cost(const MACROBLOCK *x, const int_mv mv, const MV *ref,
-                          int error_per_bit) {
+                          int sad_per_bit) {
   const int_mv diff = pack_int_mv(mv.as_mv.row - ref->row,
                                   mv.as_mv.col - ref->col);
   return ROUND_POWER_OF_TWO((unsigned)mv_cost(diff, x->nmvjointsadcost,
                                               x->nmvsadcost) *
-                                              error_per_bit, 8);
+                                              sad_per_bit, VP9_PROB_COST_SHIFT);
 }
 
 /*****************************************************************************

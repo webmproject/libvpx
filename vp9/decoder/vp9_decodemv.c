@@ -81,8 +81,8 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   return (TX_SIZE)tx_size;
 }
 
-static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
-                            int allow_select, vpx_reader *r) {
+static INLINE TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                   int allow_select, vpx_reader *r) {
   TX_MODE tx_mode = cm->tx_mode;
   BLOCK_SIZE bsize = xd->mi[0]->sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
@@ -416,6 +416,14 @@ static INLINE int is_mv_valid(const MV *mv) {
          mv->col > MV_LOW && mv->col < MV_UPP;
 }
 
+static INLINE void copy_mv_pair(int_mv *dst, const int_mv *src) {
+  memcpy(dst, src, sizeof(*dst) * 2);
+}
+
+static INLINE void zero_mv_pair(int_mv *dst) {
+  memset(dst, 0, sizeof(*dst) * 2);
+}
+
 static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
                             PREDICTION_MODE mode,
                             int_mv mv[2], int_mv ref_mv[2],
@@ -437,13 +445,11 @@ static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
     }
     case NEARMV:
     case NEARESTMV: {
-      mv[0].as_int = near_nearest_mv[0].as_int;
-      mv[1].as_int = near_nearest_mv[1].as_int;
+      copy_mv_pair(mv, near_nearest_mv);
       break;
     }
     case ZEROMV: {
-      mv[0].as_int = 0;
-      mv[1].as_int = 0;
+      zero_mv_pair(mv);
       break;
     }
     default: {
@@ -824,8 +830,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
 
     mi->mode = b_mode;
 
-    mi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
-    mi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
+    copy_mv_pair(mi->mv, mi->bmi[3].as_mv);
   } else {
     xd->corrupted |= !assign_mv(cm, xd, mi->mode, mi->mv, best_ref_mvs,
                                 best_ref_mvs, is_compound, allow_hp, r);
@@ -839,8 +844,6 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
   MODE_INFO *const mi = xd->mi[0];
   int inter_block;
 
-  mi->mv[0].as_int = 0;
-  mi->mv[1].as_int = 0;
   mi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
   mi->skip = read_skip(cm, xd, mi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mi->segment_id, r);
@@ -850,6 +853,11 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
     read_inter_block_mode_info(pbi, xd, mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(cm, xd, mi, r);
+}
+
+static INLINE void copy_ref_frame_pair(MV_REFERENCE_FRAME *dst,
+                                       const MV_REFERENCE_FRAME *src) {
+  memcpy(dst, src, sizeof(*dst) * 2);
 }
 
 void vpx_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
@@ -866,14 +874,12 @@ void vpx_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
     read_inter_frame_mode_info(pbi, xd, mi_row, mi_col, r);
 
     for (h = 0; h < y_mis; ++h) {
-      MV_REF *const frame_mv = frame_mvs + h * cm->mi_cols;
       for (w = 0; w < x_mis; ++w) {
-        MV_REF *const mv = frame_mv + w;
-        mv->ref_frame[0] = mi->ref_frame[0];
-        mv->ref_frame[1] = mi->ref_frame[1];
-        mv->mv[0].as_int = mi->mv[0].as_int;
-        mv->mv[1].as_int = mi->mv[1].as_int;
+        MV_REF *const mv = frame_mvs + w;
+        copy_ref_frame_pair(mv->ref_frame, mi->ref_frame);
+        copy_mv_pair(mv->mv, mi->mv);
       }
+      frame_mvs += cm->mi_cols;
     }
   }
 }

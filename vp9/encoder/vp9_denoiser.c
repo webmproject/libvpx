@@ -332,7 +332,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   struct buf_2d src = mb->plane[0].src;
   int is_skin = 0;
 
-  if (bs <= BLOCK_16X16 && denoiser->denoising_level >= kDenLow) {
+  if (bs <= BLOCK_32X32 && denoiser->denoising_level >= kDenLow) {
     is_skin = vp9_compute_skin_block(mb->plane[0].src.buf,
                                      mb->plane[1].src.buf,
                                      mb->plane[2].src.buf,

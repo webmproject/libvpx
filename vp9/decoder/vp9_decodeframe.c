@@ -737,7 +737,8 @@ static void dec_build_inter_predictors_sb(VP9Decoder *const pbi,
                          "Reference frame has invalid dimensions");
 
     is_scaled = vp9_is_scaled(sf);
-    vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col, sf);
+    vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col,
+                         is_scaled ? sf : NULL);
     xd->block_refs[ref] = ref_buf;
 
     if (sb_type < BLOCK_8X8) {

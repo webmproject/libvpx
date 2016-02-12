@@ -1525,6 +1525,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   if (last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) {
     cm->width = cpi->oxcf.width;
     cm->height = cpi->oxcf.height;
+    cpi->external_resize = 1;
   }
 
   if (cpi->initial_width) {
@@ -1536,9 +1537,14 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
       alloc_compressor_data(cpi);
       realloc_segmentation_maps(cpi);
       cpi->initial_width = cpi->initial_height = 0;
+      cpi->external_resize = 0;
     }
   }
   update_frame_size(cpi);
+
+  if ((last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) &&
+      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+    vp9_cyclic_refresh_reset_resize(cpi);
 
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.rc_mode == VPX_CBR) ||
@@ -1667,6 +1673,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   cpi->use_svc = 0;
   cpi->resize_state = 0;
+  cpi->external_resize = 0;
   cpi->resize_avg_qp = 0;
   cpi->resize_buffer_underflow = 0;
   cpi->use_skin_detection = 0;
@@ -2959,8 +2966,19 @@ void vp9_scale_references(VP9_COMP *cpi) {
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       } else {
-        const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
-        RefCntBuffer *const buf = &pool->frame_bufs[buf_idx];
+        int buf_idx;
+        RefCntBuffer *buf = NULL;
+        if (cpi->oxcf.pass == 0 && !cpi->use_svc) {
+          // Check for release of scaled reference.
+          buf_idx = cpi->scaled_ref_idx[ref_frame - 1];
+          buf = (buf_idx != INVALID_IDX) ? &pool->frame_bufs[buf_idx] : NULL;
+          if (buf != NULL) {
+            --buf->ref_count;
+            cpi->scaled_ref_idx[ref_frame - 1] = INVALID_IDX;
+          }
+        }
+        buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+        buf = &pool->frame_bufs[buf_idx];
         buf->buf.y_crop_width = ref->y_crop_width;
         buf->buf.y_crop_height = ref->y_crop_height;
         cpi->scaled_ref_idx[ref_frame - 1] = buf_idx;
@@ -4129,7 +4147,7 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   const int subsampling_x = sd->subsampling_x;
   const int subsampling_y = sd->subsampling_y;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int use_highbitdepth = sd->flags & YV12_FLAG_HIGHBITDEPTH;
+  const int use_highbitdepth = (sd->flags & YV12_FLAG_HIGHBITDEPTH) != 0;
   check_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
 #else
   check_initial_width(cpi, subsampling_x, subsampling_y);
