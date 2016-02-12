@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3d4834fd_7ea911ed",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-12T17:45:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7df0ecdc_33e9b2fd",
+      "range": {
+        "startLine": 28,
+        "startChar": 7,
+        "endLine": 28,
+        "endChar": 10
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9de920fd_d7b134c4",
         "filename": "vp10/common/restoration.c",
         "patchSetId": 9
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "1dd53033_4ccc9280",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-12T17:45:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9de920fd_d7d5b463",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 41,
+        "endChar": 22
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1dd53033_90b05a26",
         "filename": "vp10/common/restoration.c",
         "patchSetId": 9
@@ -106,6 +154,30 @@
       "writtenOn": "2016-02-11T01:02:37Z",
       "side": 1,
       "message": "Do we need the wide multiply here? These seem to be 8-bit numbers.",
+      "range": {
+        "startLine": 173,
+        "startChar": 10,
+        "endLine": 175,
+        "endChar": 56
+      },
+      "revId": "70e0a8fe82d2916f78a4b303e3f6092673218e65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7dbb8cf2_5212d4e7",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-12T17:45:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fde3fc1c_f20b2076",
       "range": {
         "startLine": 173,
         "startChar": 10,
