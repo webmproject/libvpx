@@ -1112,11 +1112,10 @@ void vpx_highbd_lpf_vertical_8_sse2(uint16_t *s, int p,
                                     const uint8_t *blimit,
                                     const uint8_t *limit,
                                     const uint8_t *thresh,
-                                    int count, int bd) {
+                                    int bd) {
   DECLARE_ALIGNED(16, uint16_t, t_dst[8 * 8]);
   uint16_t *src[1];
   uint16_t *dst[1];
-  (void)count;
 
   // Transpose 8x8
   src[0] = s - 4;

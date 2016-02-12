@@ -565,10 +565,10 @@ void vpx_highbd_lpf_horizontal_8_dual_c(uint16_t *s, int p,
 
 void vpx_highbd_lpf_vertical_8_c(uint16_t *s, int pitch, const uint8_t *blimit,
                                  const uint8_t *limit, const uint8_t *thresh,
-                                 int count, int bd) {
+                                 int bd) {
   int i;
 
-  for (i = 0; i < 8 * count; ++i) {
+  for (i = 0; i < 8; ++i) {
     const uint16_t p3 = s[-4], p2 = s[-3], p1 = s[-2], p0 = s[-1];
     const uint16_t q0 = s[0], q1 = s[1], q2 = s[2], q3 = s[3];
     const int8_t mask = highbd_filter_mask(*limit, *blimit,
@@ -591,9 +591,9 @@ void vpx_highbd_lpf_vertical_8_dual_c(uint16_t *s, int pitch,
                                       const uint8_t *limit1,
                                       const uint8_t *thresh1,
                                       int bd) {
-  vpx_highbd_lpf_vertical_8_c(s, pitch, blimit0, limit0, thresh0, 1, bd);
+  vpx_highbd_lpf_vertical_8_c(s, pitch, blimit0, limit0, thresh0, bd);
   vpx_highbd_lpf_vertical_8_c(s + 8 * pitch, pitch, blimit1, limit1,
-                              thresh1, 1, bd);
+                              thresh1, bd);
 }
 
 static INLINE void highbd_filter16(int8_t mask, uint8_t thresh,

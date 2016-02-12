@@ -444,10 +444,10 @@ static void highbd_filter_selectively_vert_row2(int subsampling_factor,
                                          lfi1->hev_thr, bd);
         } else if (mask_8x8_0 & 1) {
           vpx_highbd_lpf_vertical_8(s, pitch, lfi0->mblim, lfi0->lim,
-                                    lfi0->hev_thr, 1, bd);
+                                    lfi0->hev_thr, bd);
         } else {
           vpx_highbd_lpf_vertical_8(s + 8 * pitch, pitch, lfi1->mblim,
-                                    lfi1->lim, lfi1->hev_thr, 1, bd);
+                                    lfi1->lim, lfi1->hev_thr, bd);
         }
       }
 
@@ -1161,7 +1161,7 @@ static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
                                    lfi->hev_thr, bd);
       } else if (mask_8x8 & 1) {
         vpx_highbd_lpf_vertical_8(s, pitch, lfi->mblim, lfi->lim,
-                                  lfi->hev_thr, 1, bd);
+                                  lfi->hev_thr, bd);
       } else if (mask_4x4 & 1) {
         vpx_highbd_lpf_vertical_4(s, pitch, lfi->mblim, lfi->lim,
                                 lfi->hev_thr, 1, bd);
