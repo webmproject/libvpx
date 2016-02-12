@@ -1689,15 +1689,9 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   if (cpi->b_calculate_psnr) {
     cpi->total_sq_error = 0;
     cpi->total_samples = 0;
-
-    cpi->totalp_sq_error = 0;
-    cpi->totalp_samples = 0;
-
     cpi->tot_recode_hits = 0;
     cpi->summed_quality = 0;
     cpi->summed_weights = 0;
-    cpi->summedp_quality = 0;
-    cpi->summedp_weights = 0;
   }
 
   cpi->fastssim.worst = 100.0;
@@ -1713,7 +1707,6 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
                                 4 * cpi->common.mi_rows * cpi->common.mi_cols);
     cpi->worst_consistency = 100.0;
   }
-
 #endif
 
   cpi->first_time_stamp_ever = INT64_MAX;
@@ -1909,14 +1902,8 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
         const double total_psnr =
             vpx_sse_to_psnr((double)cpi->total_samples, peak,
                             (double)cpi->total_sq_error);
-        const double totalp_psnr =
-            vpx_sse_to_psnr((double)cpi->totalp_samples, peak,
-                            (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
                                             cpi->summed_weights, 8.0);
-        const double totalp_ssim = 100 * pow(cpi->summedp_quality /
-                                             cpi->summedp_weights, 8.0);
-
         snprintf(headings, sizeof(headings),
                  "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
                  "VPXSSIM\tVPSSIMP\tFASTSIM\tPSNRHVS\t"
@@ -1926,8 +1913,8 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
                  "%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
                  "%7.3f\t%7.3f\t%7.3f\t%7.3f",
                  dr, cpi->psnr.stat[ALL] / cpi->count, total_psnr,
-                 cpi->psnrp.stat[ALL] / cpi->count, totalp_psnr,
-                 total_ssim, totalp_ssim,
+                 cpi->psnr.stat[ALL] / cpi->count, total_psnr,
+                 total_ssim, total_ssim,
                  cpi->fastssim.stat[ALL] / cpi->count,
                  cpi->psnrhvs.stat[ALL] / cpi->count,
                  cpi->psnr.worst, cpi->worst_ssim, cpi->fastssim.worst,
@@ -1941,7 +1928,7 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 
         if (cpi->b_calculate_consistency) {
           double consistency =
-              vpx_sse_to_psnr((double)cpi->totalp_samples, peak,
+              vpx_sse_to_psnr((double)cpi->total_samples, peak,
                               (double)cpi->total_inconsistency);
 
           SNPRINT(headings, "\tConsist\tWstCons");
@@ -4169,6 +4156,103 @@ static void adjust_image_stat(double y, double u, double v, double all,
   s->stat[ALL] += all;
   s->worst = VPXMIN(s->worst, all);
 }
+
+static void compute_internal_stats(VP10_COMP *cpi) {
+  VP10_COMMON *const cm = &cpi->common;
+  double samples = 0.0;
+  uint32_t in_bit_depth = 8;
+  uint32_t bit_depth = 8;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    in_bit_depth = cpi->oxcf.input_bit_depth;
+    bit_depth = cm->bit_depth;
+  }
+#endif
+  if (cm->show_frame) {
+    const YV12_BUFFER_CONFIG *orig = cpi->Source;
+    const YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
+    double y, u, v, frame_all;
+
+    cpi->count++;
+    if (cpi->b_calculate_psnr) {
+      PSNR_STATS psnr;
+      double frame_ssim2 = 0.0, weight = 0.0;
+      vpx_clear_system_state();
+      // TODO(yaowu): unify these two versions into one.
+#if CONFIG_VP9_HIGHBITDEPTH
+      calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd, in_bit_depth);
+#else
+      calc_psnr(orig, recon, &psnr);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+      adjust_image_stat(psnr.psnr[1], psnr.psnr[2], psnr.psnr[3],
+                        psnr.psnr[0], &cpi->psnr);
+      cpi->total_sq_error += psnr.sse[0];
+      cpi->total_samples += psnr.samples[0];
+      samples = psnr.samples[0];
+      // TODO(yaowu): unify these two versions into one.
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (cm->use_highbitdepth)
+        frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight, bit_depth);
+      else
+        frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
+#else
+      frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+      cpi->worst_ssim= VPXMIN(cpi->worst_ssim, frame_ssim2);
+      cpi->summed_quality += frame_ssim2 * weight;
+      cpi->summed_weights += weight;
+
+#if 0
+      {
+        FILE *f = fopen("q_used.stt", "a");
+        fprintf(f, "%5d : Y%f7.3:U%f7.3:V%f7.3:F%f7.3:S%7.3f\n",
+                cpi->common.current_video_frame, y2, u2, v2,
+                frame_psnr2, frame_ssim2);
+        fclose(f);
+      }
+#endif
+    }
+    if (cpi->b_calculate_blockiness) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (!cm->use_highbitdepth)
+#endif
+      {
+        const double frame_blockiness = vp10_get_blockiness(
+            orig->y_buffer, orig->y_stride, recon->y_buffer, recon->y_stride,
+            orig->y_width, orig->y_height);
+        cpi->worst_blockiness = VPXMAX(cpi->worst_blockiness, frame_blockiness);
+        cpi->total_blockiness += frame_blockiness;
+      }
+
+      if (cpi->b_calculate_consistency) {
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (!cm->use_highbitdepth)
+#endif
+        {
+          const double this_inconsistency = vpx_get_ssim_metrics(
+              orig->y_buffer, orig->y_stride, recon->y_buffer, recon->y_stride,
+              orig->y_width, orig->y_height, cpi->ssim_vars, &cpi->metrics, 1);
+
+          const double peak = (double)((1 << in_bit_depth) - 1);
+          const double consistency = vpx_sse_to_psnr(
+               samples, peak, cpi->total_inconsistency);
+          if (consistency > 0.0)
+            cpi->worst_consistency =
+                VPXMIN(cpi->worst_consistency, consistency);
+          cpi->total_inconsistency += this_inconsistency;
+        }
+      }
+    }
+
+    frame_all = vpx_calc_fastssim(orig, recon, &y, &u, &v, bit_depth);
+    adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
+    frame_all = vpx_psnrhvs(orig, recon, &y, &u, &v, bit_depth);
+    adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
+  }
+}
 #endif  // CONFIG_INTERNAL_STATS
 
 int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
@@ -4364,158 +4448,11 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
     generate_psnr_packet(cpi);
 
 #if CONFIG_INTERNAL_STATS
-
   if (oxcf->pass != 1) {
-    double samples = 0.0;
+    compute_internal_stats(cpi);
     cpi->bytes += (int)(*size);
-
-    if (cm->show_frame) {
-      YV12_BUFFER_CONFIG *orig = cpi->Source;
-      YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
-      uint32_t bit_depth = 8;
-#if CONFIG_VP9_HIGHBITDEPTH
-      uint32_t in_bit_depth = 8;
-#endif
-      cpi->count++;
-
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (cm->use_highbitdepth) {
-        in_bit_depth = cpi->oxcf.input_bit_depth;
-        bit_depth = cm->bit_depth;
-      }
-#endif
-
-      if (cpi->b_calculate_psnr) {
-        PSNR_STATS psnr;
-        YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
-#if CONFIG_VP9_HIGHBITDEPTH
-        calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd,
-                         in_bit_depth);
-#else
-        calc_psnr(orig, recon, &psnr);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-        adjust_image_stat(psnr.psnr[1], psnr.psnr[2], psnr.psnr[3],
-                          psnr.psnr[0], &cpi->psnr);
-        cpi->total_sq_error += psnr.sse[0];
-        cpi->total_samples += psnr.samples[0];
-        samples = psnr.samples[0];
-
-        {
-          PSNR_STATS psnr2;
-          double frame_ssim2 = 0, weight = 0;
-#if CONFIG_VP9_POSTPROC
-          if (vpx_alloc_frame_buffer(pp,
-                                     recon->y_crop_width, recon->y_crop_height,
-                                     cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                                     cm->use_highbitdepth,
-#endif
-                                     VP9_ENC_BORDER_IN_PIXELS,
-                                     cm->byte_alignment) < 0) {
-            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                               "Failed to allocate post processing buffer");
-          }
-
-          vp10_deblock(recon, pp, cm->lf.filter_level * 10 / 6);
-#endif
-          vpx_clear_system_state();
-
-#if CONFIG_VP9_HIGHBITDEPTH
-          calc_highbd_psnr(orig, pp, &psnr2, cpi->td.mb.e_mbd.bd,
-                           cpi->oxcf.input_bit_depth);
-#else
-          calc_psnr(orig, pp, &psnr2);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-          cpi->totalp_sq_error += psnr2.sse[0];
-          cpi->totalp_samples += psnr2.samples[0];
-          adjust_image_stat(psnr2.psnr[1], psnr2.psnr[2], psnr2.psnr[3],
-                            psnr2.psnr[0], &cpi->psnrp);
-
-#if CONFIG_VP9_HIGHBITDEPTH
-          if (cm->use_highbitdepth) {
-            frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight,
-                                               (int)cm->bit_depth);
-          } else {
-            frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
-          }
-#else
-          frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-          cpi->worst_ssim= VPXMIN(cpi->worst_ssim, frame_ssim2);
-          cpi->summed_quality += frame_ssim2 * weight;
-          cpi->summed_weights += weight;
-
-#if CONFIG_VP9_HIGHBITDEPTH
-          if (cm->use_highbitdepth) {
-            frame_ssim2 = vpx_highbd_calc_ssim(orig, pp, &weight,
-                                               (int)cm->bit_depth);
-          } else {
-            frame_ssim2 = vpx_calc_ssim(orig, pp, &weight);
-          }
-#else
-          frame_ssim2 = vpx_calc_ssim(orig, pp, &weight);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-          cpi->summedp_quality += frame_ssim2 * weight;
-          cpi->summedp_weights += weight;
-#if 0
-          {
-            FILE *f = fopen("q_used.stt", "a");
-            fprintf(f, "%5d : Y%f7.3:U%f7.3:V%f7.3:F%f7.3:S%7.3f\n",
-                    cpi->common.current_video_frame, y2, u2, v2,
-                    frame_psnr2, frame_ssim2);
-            fclose(f);
-          }
-#endif
-        }
-      }
-      if (cpi->b_calculate_blockiness) {
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (!cm->use_highbitdepth)
-#endif
-        {
-          double frame_blockiness = vp10_get_blockiness(
-              orig->y_buffer, orig->y_stride, recon->y_buffer, recon->y_stride,
-              orig->y_width, orig->y_height);
-          cpi->worst_blockiness =
-              VPXMAX(cpi->worst_blockiness, frame_blockiness);
-          cpi->total_blockiness += frame_blockiness;
-        }
-      }
-
-      if (cpi->b_calculate_consistency) {
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (!cm->use_highbitdepth)
-#endif
-        {
-          double this_inconsistency = vpx_get_ssim_metrics(
-              orig->y_buffer, orig->y_stride, recon->y_buffer, recon->y_stride,
-              orig->y_width, orig->y_height, cpi->ssim_vars, &cpi->metrics, 1);
-
-          const double peak = (double)((1 << cpi->oxcf.input_bit_depth) - 1);
-          double consistency = vpx_sse_to_psnr(samples, peak,
-                                             (double)cpi->total_inconsistency);
-          if (consistency > 0.0)
-            cpi->worst_consistency =
-                VPXMIN(cpi->worst_consistency, consistency);
-          cpi->total_inconsistency += this_inconsistency;
-        }
-      }
-
-      {
-        double y, u, v, frame_all;
-        frame_all = vpx_calc_fastssim(orig, recon, &y, &u, &v, bit_depth);
-        adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
-        frame_all = vpx_psnrhvs(orig, recon, &y, &u, &v, bit_depth);
-        adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
-      }
-    }
   }
 #endif
-
   vpx_clear_system_state();
   return 0;
 }
