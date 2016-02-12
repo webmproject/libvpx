@@ -103,7 +103,7 @@ TEST_P(TestVectorTest, MD5Match) {
   const int mode = std::tr1::get<kDecodeMode>(input);
   libvpx_test::CompressedVideoSource *video = NULL;
   vpx_codec_flags_t flags = 0;
-  vpx_codec_dec_cfg_t cfg = {0};
+  vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
   char str[256];
 
   if (mode == kFrameParallelMode) {
