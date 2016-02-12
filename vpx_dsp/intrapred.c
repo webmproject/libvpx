@@ -326,6 +326,7 @@ void vpx_ve_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
   const int K = above[2];
   const int L = above[3];
   const int M = above[4];
+  (void)left;
 
   dst[0] = AVG3(H, I, J);
   dst[1] = AVG3(I, J, K);
