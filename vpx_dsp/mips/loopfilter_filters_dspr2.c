@@ -117,8 +117,7 @@ void vpx_lpf_vertical_4_dspr2(unsigned char *s,
                               int pitch,
                               const uint8_t *blimit,
                               const uint8_t *limit,
-                              const uint8_t *thresh,
-                              int count) {
+                              const uint8_t *thresh) {
   uint8_t   i;
   uint32_t  mask, hev;
   uint32_t  pm1, p0, p1, p2, p3, p4, p5, p6;
@@ -335,8 +334,8 @@ void vpx_lpf_vertical_4_dual_dspr2(uint8_t *s, int p,
                                    const uint8_t *blimit1,
                                    const uint8_t *limit1,
                                    const uint8_t *thresh1) {
-  vpx_lpf_vertical_4_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vpx_lpf_vertical_4_dspr2(s + 8 * p, p, blimit1, limit1, thresh1, 1);
+  vpx_lpf_vertical_4_dspr2(s, p, blimit0, limit0, thresh0);
+  vpx_lpf_vertical_4_dspr2(s + 8 * p, p, blimit1, limit1, thresh1);
 }
 
 void vpx_lpf_vertical_8_dual_dspr2(uint8_t *s, int p,

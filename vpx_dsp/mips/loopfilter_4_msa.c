@@ -74,13 +74,10 @@ void vpx_lpf_horizontal_4_dual_msa(uint8_t *src, int32_t pitch,
 void vpx_lpf_vertical_4_msa(uint8_t *src, int32_t pitch,
                             const uint8_t *b_limit_ptr,
                             const uint8_t *limit_ptr,
-                            const uint8_t *thresh_ptr,
-                            int32_t count) {
+                            const uint8_t *thresh_ptr) {
   v16u8 mask, hev, flat, limit, thresh, b_limit;
   v16u8 p3, p2, p1, p0, q3, q2, q1, q0;
   v8i16 vec0, vec1, vec2, vec3;
-
-  (void)count;
 
   LD_UB8((src - 4), pitch, p3, p2, p1, p0, q0, q1, q2, q3);
 

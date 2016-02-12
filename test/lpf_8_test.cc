@@ -459,7 +459,8 @@ INSTANTIATE_TEST_CASE_P(
     MMX, Loop8Test6Param,
     ::testing::Values(
         make_tuple(&vpx_lpf_horizontal_4_mmx, &vpx_lpf_horizontal_4_c, 8, 1),
-        make_tuple(&vpx_lpf_vertical_4_mmx, &vpx_lpf_vertical_4_c, 8, 1)));
+        make_tuple(&wrapper_nc<vpx_lpf_vertical_4_mmx>,
+                   &wrapper_nc<vpx_lpf_vertical_4_c>, 8, 1)));
 #endif  // HAVE_MMX
 
 #if HAVE_SSE2
@@ -609,8 +610,8 @@ INSTANTIATE_TEST_CASE_P(
                    &wrapper_nc<vpx_lpf_vertical_8_c>, 8, 1),
         make_tuple(&vpx_lpf_horizontal_4_neon,
                    &vpx_lpf_horizontal_4_c, 8, 1),
-        make_tuple(&vpx_lpf_vertical_4_neon,
-                   &vpx_lpf_vertical_4_c, 8, 1)));
+        make_tuple(&wrapper_nc<vpx_lpf_vertical_4_neon>,
+                   &wrapper_nc<vpx_lpf_vertical_4_c>, 8, 1)));
 INSTANTIATE_TEST_CASE_P(
     NEON, Loop8Test9Param,
     ::testing::Values(
@@ -637,7 +638,8 @@ INSTANTIATE_TEST_CASE_P(
                    &vpx_lpf_horizontal_16_c, 8, 1),
         make_tuple(&vpx_lpf_horizontal_16_dspr2,
                    &vpx_lpf_horizontal_16_c, 8, 2),
-        make_tuple(&vpx_lpf_vertical_4_dspr2, &vpx_lpf_vertical_4_c, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_vertical_4_dspr2>,
+                   &wrapper_nc<vpx_lpf_vertical_4_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_8_dspr2>,
                    &wrapper_nc<vpx_lpf_vertical_8_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_16_dspr2>,
@@ -666,7 +668,8 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_lpf_horizontal_8_msa, &vpx_lpf_horizontal_8_c, 8, 1),
         make_tuple(&vpx_lpf_horizontal_16_msa, &vpx_lpf_horizontal_16_c, 8, 1),
         make_tuple(&vpx_lpf_horizontal_16_msa, &vpx_lpf_horizontal_16_c, 8, 2),
-        make_tuple(&vpx_lpf_vertical_4_msa, &vpx_lpf_vertical_4_c, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_vertical_4_msa>,
+                   &wrapper_nc<vpx_lpf_vertical_4_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_8_msa>,
                    &wrapper_nc<vpx_lpf_vertical_8_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_16_msa>,

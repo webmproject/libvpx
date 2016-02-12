@@ -230,14 +230,13 @@ sym(vpx_lpf_horizontal_4_mmx):
 ;    int  src_pixel_step,
 ;    const char *blimit,
 ;    const char *limit,
-;    const char *thresh,
-;    int count
+;    const char *thresh
 ;)
 global sym(vpx_lpf_vertical_4_mmx) PRIVATE
 sym(vpx_lpf_vertical_4_mmx):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
+    SHADOW_ARGS_TO_STACK 5
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -254,8 +253,6 @@ sym(vpx_lpf_vertical_4_mmx):
 
         lea         rsi,        [rsi + rax*4 - 4]
 
-        movsxd      rcx,        dword ptr arg(5) ;count
-.next8_v:
         mov         rdi,        rsi           ; rdi points to row +1 for indirect addressing
         add         rdi,        rax
 
@@ -578,10 +575,6 @@ sym(vpx_lpf_vertical_4_mmx):
         psrlq       mm5,        32
 
         movd        [rdi+rax*2+2], mm5
-
-        lea         rsi,        [rsi+rax*8]
-        dec         rcx
-        jnz         .next8_v
 
     add rsp, 64
     pop rsp
