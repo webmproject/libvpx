@@ -770,7 +770,7 @@ void vpx_highbd_lpf_horizontal_4_sse2(uint16_t *s, int p,
                                       const uint8_t *_blimit,
                                       const uint8_t *_limit,
                                       const uint8_t *_thresh,
-                                      int count, int bd) {
+                                      int bd) {
   const __m128i zero = _mm_set1_epi16(0);
   __m128i blimit, limit, thresh;
   __m128i mask, hev, flat;
@@ -809,8 +809,6 @@ void vpx_highbd_lpf_horizontal_4_sse2(uint16_t *s, int p,
   __m128i filt;
   __m128i work_a;
   __m128i filter1, filter2;
-
-  (void)count;
 
   if (bd == 8) {
     blimit = _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_blimit), zero);
@@ -941,9 +939,8 @@ void vpx_highbd_lpf_horizontal_4_dual_sse2(uint16_t *s, int p,
                                            const uint8_t *_limit1,
                                            const uint8_t *_thresh1,
                                            int bd) {
-  vpx_highbd_lpf_horizontal_4_sse2(s, p, _blimit0, _limit0, _thresh0, 1, bd);
-  vpx_highbd_lpf_horizontal_4_sse2(s + 8, p, _blimit1, _limit1, _thresh1, 1,
-                                   bd);
+  vpx_highbd_lpf_horizontal_4_sse2(s, p, _blimit0, _limit0, _thresh0, bd);
+  vpx_highbd_lpf_horizontal_4_sse2(s + 8, p, _blimit1, _limit1, _thresh1, bd);
 }
 
 static INLINE void highbd_transpose(uint16_t *src[], int in_p,
@@ -1067,8 +1064,7 @@ void vpx_highbd_lpf_vertical_4_sse2(uint16_t *s, int p,
   highbd_transpose(src, p, dst, 8, 1);
 
   // Loop filtering
-  vpx_highbd_lpf_horizontal_4_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, 1,
-                                   bd);
+  vpx_highbd_lpf_horizontal_4_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, bd);
 
   src[0] = t_dst;
   dst[0] = s - 4;

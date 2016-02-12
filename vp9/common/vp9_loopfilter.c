@@ -633,10 +633,10 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1) {
               vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                          lfi->lim, lfi->hev_thr, 1, bd);
+                                          lfi->lim, lfi->hev_thr, bd);
             } else if (mask_4x4_int & 2) {
               vpx_highbd_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                          lfin->lim, lfin->hev_thr, 1, bd);
+                                          lfin->lim, lfin->hev_thr, bd);
             }
           }
           count = 2;
@@ -646,7 +646,7 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
 
           if (mask_4x4_int & 1) {
             vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                        lfi->lim, lfi->hev_thr, 1, bd);
+                                        lfi->lim, lfi->hev_thr, bd);
           }
         }
       } else if (mask_4x4 & 1) {
@@ -665,25 +665,25 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1) {
               vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                          lfi->lim, lfi->hev_thr, 1, bd);
+                                          lfi->lim, lfi->hev_thr, bd);
             } else if (mask_4x4_int & 2) {
               vpx_highbd_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                          lfin->lim, lfin->hev_thr, 1, bd);
+                                          lfin->lim, lfin->hev_thr, bd);
             }
           }
           count = 2;
         } else {
           vpx_highbd_lpf_horizontal_4(s, pitch, lfi->mblim, lfi->lim,
-                                      lfi->hev_thr, 1, bd);
+                                      lfi->hev_thr, bd);
 
           if (mask_4x4_int & 1) {
             vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                        lfi->lim, lfi->hev_thr, 1, bd);
+                                        lfi->lim, lfi->hev_thr, bd);
           }
         }
       } else if (mask_4x4_int & 1) {
         vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                    lfi->hev_thr, 1, bd);
+                                    lfi->hev_thr, bd);
       }
     }
     s += 8 * count;
