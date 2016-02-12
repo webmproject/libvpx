@@ -22,6 +22,30 @@
       "revId": "9b2bcc169997df41db49548e35218a9177b67e18",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdce9ca2_beb6964f",
+        "filename": "vpx_dsp/psnrhvs.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-02-12T15:17:26Z",
+      "side": 1,
+      "message": "Thanks for the suggestion, now done in patch#8.",
+      "parentUuid": "5df328ea_92edfaad",
+      "range": {
+        "startLine": 265,
+        "startChar": 7,
+        "endLine": 265,
+        "endChar": 13
+      },
+      "revId": "9b2bcc169997df41db49548e35218a9177b67e18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
