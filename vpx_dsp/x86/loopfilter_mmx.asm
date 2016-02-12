@@ -18,14 +18,13 @@
 ;    int src_pixel_step,
 ;    const char *blimit,
 ;    const char *limit,
-;    const char *thresh,
-;    int  count
+;    const char *thresh
 ;)
 global sym(vpx_lpf_horizontal_4_mmx) PRIVATE
 sym(vpx_lpf_horizontal_4_mmx):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
+    SHADOW_ARGS_TO_STACK 5
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -39,8 +38,6 @@ sym(vpx_lpf_horizontal_4_mmx):
         mov         rsi, arg(0) ;src_ptr
         movsxd      rax, dword ptr arg(1) ;src_pixel_step     ; destination pitch?
 
-        movsxd      rcx, dword ptr arg(5) ;count
-.next8_h:
         mov         rdx, arg(3) ;limit
         movq        mm7, [rdx]
         mov         rdi, rsi              ; rdi points to row +1 for indirect addressing
@@ -207,11 +204,6 @@ sym(vpx_lpf_horizontal_4_mmx):
         psubsb      mm7, mm4              ; q1-= q1 add
         pxor        mm7, [GLOBAL(t80)]    ; unoffset
         movq        [rdi], mm7            ; write back
-
-        add         rsi,8
-        neg         rax
-        dec         rcx
-        jnz         .next8_h
 
     add rsp, 32
     pop rsp

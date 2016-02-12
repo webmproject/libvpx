@@ -535,10 +535,10 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1)
               vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                   lfi->hev_thr, 1);
+                                   lfi->hev_thr);
             else if (mask_4x4_int & 2)
               vpx_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                   lfin->lim, lfin->hev_thr, 1);
+                                   lfin->lim, lfin->hev_thr);
           }
           count = 2;
         } else {
@@ -546,7 +546,7 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
 
           if (mask_4x4_int & 1)
             vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                 lfi->hev_thr, 1);
+                                 lfi->hev_thr);
         }
       } else if (mask_4x4 & 1) {
         if ((mask_4x4 & 3) == 3) {
@@ -563,22 +563,22 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1)
               vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                   lfi->hev_thr, 1);
+                                   lfi->hev_thr);
             else if (mask_4x4_int & 2)
               vpx_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                   lfin->lim, lfin->hev_thr, 1);
+                                   lfin->lim, lfin->hev_thr);
           }
           count = 2;
         } else {
-          vpx_lpf_horizontal_4(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
+          vpx_lpf_horizontal_4(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
 
           if (mask_4x4_int & 1)
             vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                 lfi->hev_thr, 1);
+                                 lfi->hev_thr);
         }
       } else if (mask_4x4_int & 1) {
         vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                             lfi->hev_thr, 1);
+                             lfi->hev_thr);
       }
     }
     s += 8 * count;

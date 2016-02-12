@@ -16,37 +16,28 @@
 
 ; Currently vpx only works on iterations 8 at a time. The vp8 loop filter
 ; works on 16 iterations at a time.
-; TODO(fgalligan): See about removing the count code as this function is only
-; called with a count of 1.
 ;
 ; void vpx_lpf_horizontal_4_neon(uint8_t *s,
 ;                                int p /* pitch */,
 ;                                const uint8_t *blimit,
 ;                                const uint8_t *limit,
-;                                const uint8_t *thresh,
-;                                int count)
+;                                const uint8_t *thresh)
 ;
 ; r0    uint8_t *s,
 ; r1    int p, /* pitch */
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
-; sp+4  int count
 |vpx_lpf_horizontal_4_neon| PROC
     push        {lr}
 
     vld1.8      {d0[]}, [r2]               ; duplicate *blimit
-    ldr         r12, [sp, #8]              ; load count
     ldr         r2, [sp, #4]               ; load thresh
     add         r1, r1, r1                 ; double pitch
-
-    cmp         r12, #0
-    beq         end_vpx_lf_h_edge
 
     vld1.8      {d1[]}, [r3]               ; duplicate *limit
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
 
-count_lf_h_loop
     sub         r2, r0, r1, lsl #1         ; move src pointer down by 4 lines
     add         r3, r2, r1, lsr #1         ; set to 3 lines down
 
@@ -69,11 +60,6 @@ count_lf_h_loop
     vst1.u8     {d6}, [r2@64], r1          ; store oq0
     vst1.u8     {d7}, [r3@64], r1          ; store oq1
 
-    add         r0, r0, #8
-    subs        r12, r12, #1
-    bne         count_lf_h_loop
-
-end_vpx_lf_h_edge
     pop         {pc}
     ENDP        ; |vpx_lpf_horizontal_4_neon|
 
