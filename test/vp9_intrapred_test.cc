@@ -34,7 +34,7 @@ class VP9IntraPredBase {
   virtual ~VP9IntraPredBase() { libvpx_test::ClearSystemState(); }
 
  protected:
-  virtual void Predict(PREDICTION_MODE mode) = 0;
+  virtual void Predict() = 0;
 
   void CheckPrediction(int test_case_number, int *error_count) const {
     // For each pixel ensure that the calculated value is the same as reference.
@@ -73,7 +73,7 @@ class VP9IntraPredBase {
           left_col_[y] = rnd.Rand16() & mask_;
         }
       }
-      Predict(DC_PRED);
+      Predict();
       CheckPrediction(i, &error_count);
     }
     ASSERT_EQ(0, error_count);
@@ -106,7 +106,7 @@ class VP9IntraPredTest
     mask_       = (1 << bit_depth_) - 1;
   }
 
-  virtual void Predict(PREDICTION_MODE mode) {
+  virtual void Predict() {
     const uint16_t *const_above_row = above_row_;
     const uint16_t *const_left_col = left_col_;
     ref_fn_(ref_dst_, stride_, const_above_row, const_left_col, bit_depth_);

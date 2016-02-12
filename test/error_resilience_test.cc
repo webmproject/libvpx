@@ -100,7 +100,7 @@ class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
   }
 
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+                                  ::libvpx_test::Encoder * /*encoder*/) {
     frame_flags_ &= ~(VP8_EFLAG_NO_UPD_LAST |
                       VP8_EFLAG_NO_UPD_GF |
                       VP8_EFLAG_NO_UPD_ARF);

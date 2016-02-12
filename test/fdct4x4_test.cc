@@ -40,7 +40,7 @@ typedef std::tr1::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t> Dct4x4Param;
 typedef std::tr1::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht4x4Param;
 
 void fdct4x4_ref(const int16_t *in, tran_low_t *out, int stride,
-                 int tx_type) {
+                 int /*tx_type*/) {
   vpx_fdct4x4_c(in, out, stride);
 }
 
@@ -49,7 +49,7 @@ void fht4x4_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
 }
 
 void fwht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
-                 int tx_type) {
+                 int /*tx_type*/) {
   vp9_fwht4x4_c(in, out, stride);
 }
 
