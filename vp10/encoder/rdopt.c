@@ -82,7 +82,7 @@
 #define NEW_MV_DISCOUNT_FACTOR  8
 
 #if CONFIG_EXT_TX
-const double ext_tx_th = 0.98;
+const double ext_tx_th = 0.99;
 #else
 const double ext_tx_th = 0.99;
 #endif

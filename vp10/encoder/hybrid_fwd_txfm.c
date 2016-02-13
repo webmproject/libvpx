@@ -181,15 +181,27 @@ static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
         vpx_fdct32x32_1(src_diff, coeff, diff_stride);
       break;
 #if CONFIG_EXT_TX
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case FLIPADST_DCT:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+    case DST_FLIPADST:
+    case FLIPADST_DST:
+      vp10_fht32x32_c(src_diff, coeff, diff_stride, tx_type);
+      break;
     case IDTX:
       fwd_idtx_c(src_diff, coeff, diff_stride, 32);
       break;
 #endif  // CONFIG_EXT_TX
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      assert(0);
-      break;
     default:
       assert(0);
       break;
@@ -335,15 +347,27 @@ static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
         vpx_highbd_fdct32x32_1(src_diff, coeff, diff_stride);
       break;
 #if CONFIG_EXT_TX
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case FLIPADST_DCT:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case DST_DST:
+    case DCT_DST:
+    case DST_DCT:
+    case DST_ADST:
+    case ADST_DST:
+    case DST_FLIPADST:
+    case FLIPADST_DST:
+      vp10_highbd_fht32x32_c(src_diff, coeff, diff_stride, tx_type);
+      break;
     case IDTX:
       fwd_idtx_c(src_diff, coeff, diff_stride, 32);
       break;
 #endif  // CONFIG_EXT_TX
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      assert(0);
-      break;
     default:
       assert(0);
       break;
