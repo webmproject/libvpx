@@ -626,6 +626,36 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
 
+#if HAVE_DSPR2 && !CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    DSPR2, Loop8Test6Param,
+    ::testing::Values(
+        make_tuple(&vpx_lpf_horizontal_4_dspr2, &vpx_lpf_horizontal_4_c, 8, 1),
+        make_tuple(&vpx_lpf_horizontal_8_dspr2, &vpx_lpf_horizontal_8_c, 8, 1),
+        make_tuple(&vpx_lpf_horizontal_16_dspr2,
+                   &vpx_lpf_horizontal_16_c, 8, 1),
+        make_tuple(&vpx_lpf_horizontal_16_dspr2,
+                   &vpx_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&vpx_lpf_vertical_4_dspr2, &vpx_lpf_vertical_4_c, 8, 1),
+        make_tuple(&vpx_lpf_vertical_8_dspr2, &vpx_lpf_vertical_8_c, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_vertical_16_dspr2>,
+                   &wrapper_nc<vpx_lpf_vertical_16_c>, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_vertical_16_dual_dspr2>,
+                   &wrapper_nc<vpx_lpf_vertical_16_dual_c>, 8, 1)));
+
+INSTANTIATE_TEST_CASE_P(
+    DSPR2, Loop8Test9Param,
+    ::testing::Values(
+        make_tuple(&vpx_lpf_horizontal_4_dual_dspr2,
+                   &vpx_lpf_horizontal_4_dual_c, 8),
+        make_tuple(&vpx_lpf_horizontal_8_dual_dspr2,
+                   &vpx_lpf_horizontal_8_dual_c, 8),
+        make_tuple(&vpx_lpf_vertical_4_dual_dspr2,
+                   &vpx_lpf_vertical_4_dual_c, 8),
+        make_tuple(&vpx_lpf_vertical_8_dual_dspr2,
+                   &vpx_lpf_vertical_8_dual_c, 8)));
+#endif  // HAVE_DSPR2 && !CONFIG_VP9_HIGHBITDEPTH
+
 #if HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH)
 INSTANTIATE_TEST_CASE_P(
     MSA, Loop8Test6Param,
