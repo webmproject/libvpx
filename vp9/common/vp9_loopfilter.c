@@ -324,7 +324,6 @@ static void filter_selectively_vert_row2(int subsampling_factor,
     const loop_filter_thresh *lfi0 = lfi_n->lfthr + *lfl;
     const loop_filter_thresh *lfi1 = lfi_n->lfthr + *(lfl + lfl_forward);
 
-    // TODO(yunqingwang): count in loopfilter functions should be removed.
     if (mask & 1) {
       if ((mask_16x16_0 | mask_16x16_1) & 1) {
         if ((mask_16x16_0 & mask_16x16_1) & 1) {
@@ -422,7 +421,6 @@ static void highbd_filter_selectively_vert_row2(int subsampling_factor,
     const loop_filter_thresh *lfi0 = lfi_n->lfthr + *lfl;
     const loop_filter_thresh *lfi1 = lfi_n->lfthr + *(lfl + lfl_forward);
 
-    // TODO(yunqingwang): count in loopfilter functions should be removed.
     if (mask & 1) {
       if ((mask_16x16_0 | mask_16x16_1) & 1) {
         if ((mask_16x16_0 & mask_16x16_1) & 1) {
