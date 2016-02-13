@@ -2057,8 +2057,8 @@ void vpx_highbd_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-static void highbd_idct32_c(const tran_low_t *input,
-                            tran_low_t *output, int bd) {
+void vpx_highbd_idct32_c(const tran_low_t *input,
+                         tran_low_t *output, int bd) {
   tran_low_t step1[32], step2[32];
   tran_high_t temp1, temp2;
   (void) bd;
@@ -2447,7 +2447,7 @@ void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
       zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
 
     if (zero_coeff[0] | zero_coeff[1])
-      highbd_idct32_c(input, outptr, bd);
+      vpx_highbd_idct32_c(input, outptr, bd);
     else
       memset(outptr, 0, sizeof(tran_low_t) * 32);
     input += 32;
@@ -2458,7 +2458,7 @@ void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
   for (i = 0; i < 32; ++i) {
     for (j = 0; j < 32; ++j)
       temp_in[j] = out[j * 32 + i];
-    highbd_idct32_c(temp_in, temp_out, bd);
+    vpx_highbd_idct32_c(temp_in, temp_out, bd);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
           dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 6), bd);
@@ -2477,7 +2477,7 @@ void vpx_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
   // Rows
   // Only upper-left 8x8 has non-zero coeff.
   for (i = 0; i < 8; ++i) {
-    highbd_idct32_c(input, outptr, bd);
+    vpx_highbd_idct32_c(input, outptr, bd);
     input += 32;
     outptr += 32;
   }
@@ -2485,7 +2485,7 @@ void vpx_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
   for (i = 0; i < 32; ++i) {
     for (j = 0; j < 32; ++j)
       temp_in[j] = out[j * 32 + i];
-    highbd_idct32_c(temp_in, temp_out, bd);
+    vpx_highbd_idct32_c(temp_in, temp_out, bd);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
           dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 6), bd);

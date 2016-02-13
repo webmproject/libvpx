@@ -14,7 +14,6 @@
 #include "./vp10_rtcd.h"
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
-
 #include "vp10/common/blockd.h"
 #include "vp10/common/idct.h"
 #include "vpx_dsp/fwd_txfm.h"
@@ -538,7 +537,7 @@ static void fdct16(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 16, 16);
 }
 
-/* TODO(angiebird): Unify this with vp10_fwd_txfm.c: vp10_fdct32
+#if CONFIG_EXT_TX
 static void fdct32(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[32];
@@ -936,7 +935,7 @@ static void fdct32(const tran_low_t *input, tran_low_t *output) {
 
   range_check(output, 32, 18);
 }
-*/
+#endif  // CONFIG_EXT_TX
 
 static void fadst4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x0, x1, x2, x3;
@@ -1213,6 +1212,37 @@ static void fadst16(const tran_low_t *input, tran_low_t *output) {
 }
 
 #if CONFIG_EXT_TX
+// For use in lieu of DST
+static void fhalfcenter32(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  tran_low_t inputhalf[16];
+  for (i = 0; i < 8; ++i) {
+    output[16 + i] = input[i] * 4;
+    output[24 + i] = input[24 + i] * 4;
+  }
+  // Multiply input by sqrt(2)
+  for (i = 0; i < 16; ++i) {
+    inputhalf[i] = (tran_low_t)fdct_round_shift(input[i + 8] * Sqrt2);
+  }
+  fdct16(inputhalf, output);
+  // Note overall scaling factor is 4 times orthogonal
+}
+
+// For use in lieu of ADST
+static void fhalfright32(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  tran_low_t inputhalf[16];
+  for (i = 0; i < 16; ++i) {
+    output[16 + i] = input[i] * 4;
+  }
+  // Multiply input by sqrt(2)
+  for (i = 0; i < 16; ++i) {
+    inputhalf[i] = (tran_low_t)fdct_round_shift(input[i + 16] * Sqrt2);
+  }
+  fdct16(inputhalf, output);
+  // Note overall scaling factor is 4 times orthogonal
+}
+
 static void copy_block(const int16_t *src, int src_stride, int l,
                        int16_t *dest, int dest_stride) {
   int i;
@@ -1374,6 +1404,27 @@ static const transform_2d FHT_16[] = {
   { fdst16,  fdst16  },  // DST_DST           = 15
 #endif  // CONFIG_EXT_TX
 };
+
+#if CONFIG_EXT_TX
+static const transform_2d FHT_32[] = {
+  { fdct32,  fdct32  },                // DCT_DCT           = 0,
+  { fhalfright32, fdct32  },           // ADST_DCT          = 1,
+  { fdct32,  fhalfright32 },           // DCT_ADST          = 2,
+  { fhalfright32, fhalfright32 },      // ADST_ADST         = 3,
+  { fhalfright32, fdct32  },           // FLIPADST_DCT      = 4,
+  { fdct32,  fhalfright32 },           // DCT_FLIPADST      = 5,
+  { fhalfright32, fhalfright32 },      // FLIPADST_FLIPADST = 6,
+  { fhalfright32, fhalfright32 },      // ADST_FLIPADST     = 7,
+  { fhalfright32, fhalfright32 },      // FLIPADST_ADST     = 8,
+  { fhalfcenter32,  fdct32  },         // DST_DCT           = 9,
+  { fdct32,  fhalfcenter32  },         // DCT_DST           = 10,
+  { fhalfcenter32,  fhalfright32 },    // DST_ADST          = 11,
+  { fhalfright32, fhalfcenter32  },    // ADST_DST          = 12,
+  { fhalfcenter32,  fhalfright32 },    // DST_FLIPADST      = 13,
+  { fhalfright32, fhalfcenter32  },    // FLIPADST_DST      = 14,
+  { fhalfcenter32,  fhalfcenter32  },  // DST_DST           = 15
+};
+#endif  // CONFIG_EXT_TX
 
 void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
                    int stride, int tx_type) {
@@ -1671,3 +1722,46 @@ void vp10_highbd_fht16x16_c(const int16_t *input, tran_low_t *output,
   vp10_fht16x16_c(input, output, stride, tx_type);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#if CONFIG_EXT_TX
+void vp10_fht32x32_c(const int16_t *input, tran_low_t *output,
+                     int stride, int tx_type) {
+  if (tx_type == DCT_DCT) {
+    vpx_fdct32x32_c(input, output, stride);
+  } else {
+    tran_low_t out[1024];
+    int i, j;
+    tran_low_t temp_in[32], temp_out[32];
+    const transform_2d ht = FHT_32[tx_type];
+
+    int16_t flipped_input[32 * 32];
+    maybe_flip_input(&input, &stride, 32, flipped_input, tx_type);
+
+    // Columns
+    for (i = 0; i < 32; ++i) {
+      for (j = 0; j < 32; ++j)
+        temp_in[j] = input[j * stride + i] * 4;
+      ht.cols(temp_in, temp_out);
+      for (j = 0; j < 32; ++j)
+        out[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+    }
+
+    // Rows
+    for (i = 0; i < 32; ++i) {
+      for (j = 0; j < 32; ++j)
+        temp_in[j] = out[j + i * 32];
+      ht.rows(temp_in, temp_out);
+      for (j = 0; j < 32; ++j)
+        output[j + i * 32] =
+            (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
+    }
+  }
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp10_highbd_fht32x32_c(const int16_t *input, tran_low_t *output,
+                            int stride, int tx_type) {
+  vp10_fht32x32_c(input, output, stride, tx_type);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_EXT_TX
