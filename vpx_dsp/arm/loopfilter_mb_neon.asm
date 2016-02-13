@@ -8,27 +8,28 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_lpf_horizontal_16_neon|
+    EXPORT  |vpx_lpf_horizontal_edge_8_neon|
+    EXPORT  |vpx_lpf_horizontal_edge_16_neon|
     EXPORT  |vpx_lpf_vertical_16_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-; void vpx_lpf_horizontal_16_neon(uint8_t *s, int p,
-;                                 const uint8_t *blimit,
-;                                 const uint8_t *limit,
-;                                 const uint8_t *thresh
-;                                 int count)
+; void mb_lpf_horizontal_edge(uint8_t *s, int p,
+;                             const uint8_t *blimit,
+;                             const uint8_t *limit,
+;                             const uint8_t *thresh,
+;                             int count)
 ; r0    uint8_t *s,
 ; r1    int p, /* pitch */
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
-|vpx_lpf_horizontal_16_neon| PROC
+; r12   int count
+|mb_lpf_horizontal_edge| PROC
     push        {r4-r8, lr}
     vpush       {d8-d15}
     ldr         r4, [sp, #88]              ; load thresh
-    ldr         r12, [sp, #92]             ; load count
 
 h_count
     vld1.8      {d16[]}, [r2]              ; load *blimit
@@ -115,7 +116,35 @@ h_next
     vpop        {d8-d15}
     pop         {r4-r8, pc}
 
-    ENDP        ; |vpx_lpf_horizontal_16_neon|
+    ENDP        ; |mb_lpf_horizontal_edge|
+
+; void vpx_lpf_horizontal_edge_8_neon(uint8_t *s, int pitch,
+;                                     const uint8_t *blimit,
+;                                     const uint8_t *limit,
+;                                     const uint8_t *thresh)
+; r0    uint8_t *s,
+; r1    int pitch,
+; r2    const uint8_t *blimit,
+; r3    const uint8_t *limit,
+; sp    const uint8_t *thresh
+|vpx_lpf_horizontal_edge_8_neon| PROC
+    mov r12, #1
+    b mb_lpf_horizontal_edge
+    ENDP        ; |vpx_lpf_horizontal_edge_8_neon|
+
+; void vpx_lpf_horizontal_edge_16_neon(uint8_t *s, int pitch,
+;                                      const uint8_t *blimit,
+;                                      const uint8_t *limit,
+;                                      const uint8_t *thresh)
+; r0    uint8_t *s,
+; r1    int pitch,
+; r2    const uint8_t *blimit,
+; r3    const uint8_t *limit,
+; sp    const uint8_t *thresh
+|vpx_lpf_horizontal_edge_16_neon| PROC
+    mov r12, #2
+    b mb_lpf_horizontal_edge
+    ENDP        ; |vpx_lpf_horizontal_edge_16_neon|
 
 ; void vpx_lpf_vertical_16_neon(uint8_t *s, int p,
 ;                               const uint8_t *blimit,

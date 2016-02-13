@@ -289,9 +289,9 @@ static INLINE void filter16(int8_t mask, uint8_t thresh,
   }
 }
 
-void vpx_lpf_horizontal_16_c(uint8_t *s, int p, const uint8_t *blimit,
-                             const uint8_t *limit, const uint8_t *thresh,
-                             int count) {
+static void mb_lpf_horizontal_edge_w(uint8_t *s, int p, const uint8_t *blimit,
+                                     const uint8_t *limit,
+                                     const uint8_t *thresh, int count) {
   int i;
 
   // loop filter designed to work using chars so that we can make maximum use
@@ -313,6 +313,16 @@ void vpx_lpf_horizontal_16_c(uint8_t *s, int p, const uint8_t *blimit,
              s + 4 * p, s + 5 * p, s + 6 * p, s + 7 * p);
     ++s;
   }
+}
+
+void vpx_lpf_horizontal_edge_8_c(uint8_t *s, int p, const uint8_t *blimit,
+                                 const uint8_t *limit, const uint8_t *thresh) {
+  mb_lpf_horizontal_edge_w(s, p, blimit, limit, thresh, 1);
+}
+
+void vpx_lpf_horizontal_edge_16_c(uint8_t *s, int p, const uint8_t *blimit,
+                                  const uint8_t *limit, const uint8_t *thresh) {
+  mb_lpf_horizontal_edge_w(s, p, blimit, limit, thresh, 2);
 }
 
 static void mb_lpf_vertical_edge_w(uint8_t *s, int p,

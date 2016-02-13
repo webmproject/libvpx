@@ -523,8 +523,10 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(
         make_tuple(&wrapper_nc<vpx_lpf_horizontal_8_sse2>,
                    &wrapper_nc<vpx_lpf_horizontal_8_c>, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_sse2, &vpx_lpf_horizontal_16_c, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_sse2, &vpx_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_8_sse2>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_8_c>, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_16_sse2>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_16_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_8_sse2>,
                    &wrapper_nc<vpx_lpf_vertical_8_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_16_sse2>,
@@ -538,9 +540,10 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     AVX2, Loop8Test6Param,
     ::testing::Values(
-        make_tuple(&vpx_lpf_horizontal_16_avx2, &vpx_lpf_horizontal_16_c, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_avx2, &vpx_lpf_horizontal_16_c, 8,
-                   2)));
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_8_avx2>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_8_c>, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_16_avx2>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_16_c>, 8, 1)));
 #endif
 
 #if HAVE_SSE2
@@ -597,10 +600,10 @@ INSTANTIATE_TEST_CASE_P(
 #if HAVE_NEON_ASM
 // Using #if inside the macro is unsupported on MSVS but the tests are not
 // currently built for MSVS with ARM and NEON.
-        make_tuple(&vpx_lpf_horizontal_16_neon,
-                   &vpx_lpf_horizontal_16_c, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_neon,
-                   &vpx_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_8_neon>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_8_c>, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_16_neon>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_16_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_16_neon>,
                    &wrapper_nc<vpx_lpf_vertical_16_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_16_dual_neon>,
@@ -638,10 +641,10 @@ INSTANTIATE_TEST_CASE_P(
                    &wrapper_nc<vpx_lpf_horizontal_4_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_horizontal_8_dspr2>,
                    &wrapper_nc<vpx_lpf_horizontal_8_c>, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_dspr2,
-                   &vpx_lpf_horizontal_16_c, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_dspr2,
-                   &vpx_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_8>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_8>, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_16>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_16>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_4_dspr2>,
                    &wrapper_nc<vpx_lpf_vertical_4_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_8_dspr2>,
@@ -672,8 +675,10 @@ INSTANTIATE_TEST_CASE_P(
                    &wrapper_nc<vpx_lpf_horizontal_4_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_horizontal_8_msa>,
                    &wrapper_nc<vpx_lpf_horizontal_8_c>, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_msa, &vpx_lpf_horizontal_16_c, 8, 1),
-        make_tuple(&vpx_lpf_horizontal_16_msa, &vpx_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_8_msa>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_8_c>, 8, 1),
+        make_tuple(&wrapper_nc<vpx_lpf_horizontal_edge_16_msa>,
+                   &wrapper_nc<vpx_lpf_horizontal_edge_16_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_4_msa>,
                    &wrapper_nc<vpx_lpf_vertical_4_c>, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_8_msa>,

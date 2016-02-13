@@ -18,11 +18,10 @@ static INLINE __m128i abs_diff(__m128i a, __m128i b) {
   return _mm_or_si128(_mm_subs_epu8(a, b), _mm_subs_epu8(b, a));
 }
 
-static void mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
-                                            int p,
-                                            const unsigned char *_blimit,
-                                            const unsigned char *_limit,
-                                            const unsigned char *_thresh) {
+void vpx_lpf_horizontal_edge_8_sse2(unsigned char *s, int p,
+                                    const unsigned char *_blimit,
+                                    const unsigned char *_limit,
+                                    const unsigned char *_thresh) {
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i one = _mm_set1_epi8(1);
   const __m128i blimit = _mm_load_si128((const __m128i *)_blimit);
@@ -383,11 +382,10 @@ static INLINE __m128i filter16_mask(const __m128i *const flat,
   return _mm_or_si128(_mm_andnot_si128(*flat, *other_filt), result);
 }
 
-static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
-                                             int p,
-                                             const unsigned char *_blimit,
-                                             const unsigned char *_limit,
-                                             const unsigned char *_thresh) {
+void vpx_lpf_horizontal_edge_16_sse2(unsigned char *s, int p,
+                                     const unsigned char *_blimit,
+                                     const unsigned char *_limit,
+                                     const unsigned char *_thresh) {
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i one = _mm_set1_epi8(1);
   const __m128i blimit = _mm_load_si128((const __m128i *)_blimit);
@@ -714,17 +712,6 @@ static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
     // wide flat
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
-}
-
-// TODO(yunqingwang): remove count and call these 2 functions(8 or 16) directly.
-void vpx_lpf_horizontal_16_sse2(unsigned char *s, int p,
-                                const unsigned char *_blimit,
-                                const unsigned char *_limit,
-                                const unsigned char *_thresh, int count) {
-  if (count == 1)
-    mb_lpf_horizontal_edge_w_sse2_8(s, p, _blimit, _limit, _thresh);
-  else
-    mb_lpf_horizontal_edge_w_sse2_16(s, p, _blimit, _limit, _thresh);
 }
 
 void vpx_lpf_horizontal_8_sse2(unsigned char *s, int p,
@@ -1554,7 +1541,7 @@ void vpx_lpf_vertical_16_sse2(unsigned char *s, int p,
   transpose(src, p, dst, 8, 2);
 
   // Loop filtering
-  mb_lpf_horizontal_edge_w_sse2_8(t_dst + 8 * 8, 8, blimit, limit, thresh);
+  vpx_lpf_horizontal_edge_8_sse2(t_dst + 8 * 8, 8, blimit, limit, thresh);
 
   src[0] = t_dst;
   src[1] = t_dst + 8 * 8;
@@ -1575,8 +1562,7 @@ void vpx_lpf_vertical_16_dual_sse2(unsigned char *s, int p,
   transpose8x16(s, s + 8 * p, p, t_dst + 8 * 16, 16);
 
   // Loop filtering
-  mb_lpf_horizontal_edge_w_sse2_16(t_dst + 8 * 16, 16, blimit, limit,
-                                   thresh);
+  vpx_lpf_horizontal_edge_16_sse2(t_dst + 8 * 16, 16, blimit, limit, thresh);
 
   // Transpose back
   transpose8x16(t_dst, t_dst + 8 * 16, 16, s - 8, p);
