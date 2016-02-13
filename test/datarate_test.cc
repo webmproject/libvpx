@@ -850,8 +850,7 @@ static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
     const vpx_svc_extra_cfg_t *svc_params,
     int spatial_layers,
     int temporal_layers,
-    int temporal_layering_mode,
-    unsigned int total_rate) {
+    int temporal_layering_mode) {
   int sl, spatial_layer_target;
   float total = 0;
   float alloc_ratio[VPX_MAX_LAYERS] = {0};
@@ -914,8 +913,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc) {
     cfg_.rc_target_bitrate = i;
     ResetModel();
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-        cfg_.rc_target_bitrate);
+        cfg_.ts_number_layers, cfg_.temporal_layering_mode);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.85)
             << " The datarate for the file exceeds the target by too much!";
@@ -953,8 +951,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc4threads) {
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-      cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-      cfg_.rc_target_bitrate);
+      cfg_.ts_number_layers, cfg_.temporal_layering_mode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.85)
           << " The datarate for the file exceeds the target by too much!";

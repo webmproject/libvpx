@@ -55,19 +55,19 @@ class AverageTestBase : public ::testing::Test {
   }
 
   // Sum Pixels
-  unsigned int ReferenceAverage8x8(const uint8_t* source, int pitch ) {
+  unsigned int ReferenceAverage8x8(const uint8_t* source, int pitch) {
     unsigned int average = 0;
     for (int h = 0; h < 8; ++h)
       for (int w = 0; w < 8; ++w)
-        average += source[h * source_stride_ + w];
+        average += source[h * pitch + w];
     return ((average + 32) >> 6);
   }
 
-  unsigned int ReferenceAverage4x4(const uint8_t* source, int pitch ) {
+  unsigned int ReferenceAverage4x4(const uint8_t* source, int pitch) {
     unsigned int average = 0;
     for (int h = 0; h < 4; ++h)
       for (int w = 0; w < 4; ++w)
-        average += source[h * source_stride_ + w];
+        average += source[h * pitch + w];
     return ((average + 8) >> 4);
   }
 

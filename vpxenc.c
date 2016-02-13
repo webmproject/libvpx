@@ -1470,6 +1470,8 @@ static void open_output_file(struct stream_state *stream,
                            global->codec->fourcc,
                            pixel_aspect_ratio);
   }
+#else
+  (void)pixel_aspect_ratio;
 #endif
 
   if (!stream->config.write_webm) {

@@ -164,7 +164,7 @@ int64_t wrap_vp9_highbd_block_error_8bit_c(const tran_low_t *coeff,
                                            const tran_low_t *dqcoeff,
                                            intptr_t block_size,
                                            int64_t *ssz, int bps) {
-  assert(bps == 8);
+  EXPECT_EQ(8, bps);
   return vp9_highbd_block_error_8bit_c(coeff, dqcoeff, block_size, ssz);
 }
 
@@ -173,7 +173,7 @@ int64_t wrap_vp9_highbd_block_error_8bit_sse2(const tran_low_t *coeff,
                                               const tran_low_t *dqcoeff,
                                               intptr_t block_size,
                                               int64_t *ssz, int bps) {
-  assert(bps == 8);
+  EXPECT_EQ(8, bps);
   return vp9_highbd_block_error_8bit_sse2(coeff, dqcoeff, block_size, ssz);
 }
 
@@ -195,7 +195,7 @@ int64_t wrap_vp9_highbd_block_error_8bit_avx(const tran_low_t *coeff,
                                               const tran_low_t *dqcoeff,
                                               intptr_t block_size,
                                               int64_t *ssz, int bps) {
-  assert(bps == 8);
+  EXPECT_EQ(8, bps);
   return vp9_highbd_block_error_8bit_avx(coeff, dqcoeff, block_size, ssz);
 }
 
