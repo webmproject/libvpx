@@ -609,12 +609,12 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
     if (mask & 1) {
       if (mask_16x16 & 1) {
         if ((mask_16x16 & 3) == 3) {
-          vpx_highbd_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr, 2, bd);
+          vpx_highbd_lpf_horizontal_edge_16(s, pitch, lfi->mblim, lfi->lim,
+                                            lfi->hev_thr, bd);
           count = 2;
         } else {
-          vpx_highbd_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr, 1, bd);
+          vpx_highbd_lpf_horizontal_edge_8(s, pitch, lfi->mblim, lfi->lim,
+                                           lfi->hev_thr, bd);
         }
       } else if (mask_8x8 & 1) {
         if ((mask_8x8 & 3) == 3) {

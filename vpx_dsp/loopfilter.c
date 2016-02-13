@@ -669,9 +669,11 @@ static INLINE void highbd_filter16(int8_t mask, uint8_t thresh,
   }
 }
 
-void vpx_highbd_lpf_horizontal_16_c(uint16_t *s, int p, const uint8_t *blimit,
-                                    const uint8_t *limit, const uint8_t *thresh,
-                                    int count, int bd) {
+static void highbd_mb_lpf_horizontal_edge_w(uint16_t *s, int p,
+                                            const uint8_t *blimit,
+                                            const uint8_t *limit,
+                                            const uint8_t *thresh,
+                                            int count, int bd) {
   int i;
 
   // loop filter designed to work using chars so that we can make maximum use
@@ -701,6 +703,20 @@ void vpx_highbd_lpf_horizontal_16_c(uint16_t *s, int p, const uint8_t *blimit,
                     bd);
     ++s;
   }
+}
+
+void vpx_highbd_lpf_horizontal_edge_8_c(uint16_t *s, int p,
+                                        const uint8_t *blimit,
+                                        const uint8_t *limit,
+                                        const uint8_t *thresh, int bd) {
+  highbd_mb_lpf_horizontal_edge_w(s, p, blimit, limit, thresh, 1, bd);
+}
+
+void vpx_highbd_lpf_horizontal_edge_16_c(uint16_t *s, int p,
+                                         const uint8_t *blimit,
+                                         const uint8_t *limit,
+                                         const uint8_t *thresh, int bd) {
+  highbd_mb_lpf_horizontal_edge_w(s, p, blimit, limit, thresh, 2, bd);
 }
 
 static void highbd_mb_lpf_vertical_edge_w(uint16_t *s, int p,
