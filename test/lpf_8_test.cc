@@ -454,6 +454,13 @@ TEST_P(Loop8Test9Param, ValueCheck) {
 
 using std::tr1::make_tuple;
 
+#if HAVE_MMX && !CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    MMX, Loop8Test6Param,
+    ::testing::Values(
+        make_tuple(&vpx_lpf_vertical_4_mmx, &vpx_lpf_vertical_4_c, 8, 1)));
+#endif  // HAVE_MMX
+
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
@@ -625,6 +632,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_lpf_horizontal_8_msa, &vpx_lpf_horizontal_8_c, 8, 1),
         make_tuple(&vpx_lpf_horizontal_16_msa, &vpx_lpf_horizontal_16_c, 8, 1),
         make_tuple(&vpx_lpf_horizontal_16_msa, &vpx_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&vpx_lpf_vertical_4_msa, &vpx_lpf_vertical_4_c, 8, 1),
         make_tuple(&vpx_lpf_vertical_8_msa, &vpx_lpf_vertical_8_c, 8, 1),
         make_tuple(&wrapper_nc<vpx_lpf_vertical_16_msa>,
                    &wrapper_nc<vpx_lpf_vertical_16_c>, 8, 1)));
