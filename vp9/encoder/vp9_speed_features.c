@@ -303,14 +303,26 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
                                  FLAG_SKIP_INTRA_LOWVAR;
     sf->adaptive_pred_interp_filter = 2;
 
-    // Disable reference masking if using spatial scaling or for dynamic
-    // resizing (internal or external) since pred_mv_sad will not be set
-    // (since vp9_mv_pred will not be called).
-    // TODO(marpan): Fix this condition to allow reference masking for when
-    // all references have same resolution as source frame.
-    sf->reference_masking = (cpi->external_resize == 0 &&
-                             cpi->oxcf.resize_mode != RESIZE_DYNAMIC &&
-                             cpi->svc.number_spatial_layers == 1) ? 1 : 0;
+    // Reference masking only enabled for 1 spatial layer, and if none of the
+    // references have been scaled. The latter condition needs to be checked
+    // for external or internal dynamic resize.
+    sf->reference_masking = (cpi->svc.number_spatial_layers == 1);
+    if (sf->reference_masking == 1 &&
+        (cpi->external_resize == 1 ||
+         cpi->oxcf.resize_mode == RESIZE_DYNAMIC)) {
+      MV_REFERENCE_FRAME ref_frame;
+      static const int flag_list[4] =
+          {0, VP9_LAST_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG};
+      for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+        const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
+        if (yv12 != NULL && (cpi->ref_frame_flags & flag_list[ref_frame])) {
+          const struct scale_factors *const scale_fac =
+              &cm->frame_refs[ref_frame - 1].sf;
+          if (vp9_is_scaled(scale_fac))
+            sf->reference_masking = 0;
+        }
+      }
+    }
 
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
