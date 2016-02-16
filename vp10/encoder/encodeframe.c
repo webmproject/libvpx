@@ -5208,8 +5208,8 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   uint8_t *dst_buf[3];
   int dst_stride[3];
   TX_SIZE tx_size;
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  TX_TYPE tx_type, best_tx_nostx = xd->mi[0]->mbmi.tx_type;
+  MB_MODE_INFO *mbmi;
+  TX_TYPE tx_type, best_tx_nostx;
 #if CONFIG_EXT_TX
   int ext_tx_set;
 #endif  // CONFIG_EXT_TX
@@ -5217,7 +5217,10 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   int64_t tmp_dist_tx = 0, rd_tx, bestrd_tx = INT64_MAX;
   uint8_t tmp_zcoeff_blk = 0;
 
-  update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, bsize, 0, pc_tree);
+  set_skip_context(xd, mi_row, mi_col);
+  set_mode_info_offsets(cpi, x, xd, mi_row, mi_col);
+  update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, bsize,
+                          0, pc_tree);
   vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
                         mi_row, mi_col);
   for (plane = 0; plane < MAX_MB_PLANE; plane++) {
@@ -5227,6 +5230,8 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   predict_sb_complex(cpi, td, tile, mi_row, mi_col, mi_row, mi_col,
                      0, bsize, bsize, dst_buf, dst_stride, pc_tree);
 
+  set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
+
   // These skip_txfm flags are previously set by the non-supertx RD search.
   // vp10_txfm_rd_in_plane_supertx calls block_rd_txfm, which checks these
   // to reuse distortion values from the RD estimation, so we reset these
@@ -5234,7 +5239,9 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   for (plane = 0 ; plane < MAX_MB_PLANE ; plane++)
     x->skip_txfm[plane << 2] = SKIP_TXFM_NONE;
 
-  set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
+  mbmi = &xd->mi[0]->mbmi;
+  best_tx_nostx = mbmi->tx_type;
+
   *best_tx = DCT_DCT;
 
   // chroma
@@ -5334,7 +5341,7 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
     if (tx_size < TX_32X32 &&
         !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
         this_rate != INT_MAX) {
-      this_rate += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
+      this_rate += cpi->inter_tx_type_costs[tx_size][mbmi->tx_type];
     }
 #endif  // CONFIG_EXT_TX
     *tmp_rate = rate_uv + this_rate;
