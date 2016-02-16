@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "dd7ab832_ce7f43f0",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3047,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-16T19:24:55Z",
+      "side": 1,
+      "message": "this was still off by one",
+      "parentUuid": "3d4834fd_52b20413",
+      "revId": "07d51ffe9c02fd6cad9cd25733c5b7163935d816",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7df0ecdc_3794f767",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -66,6 +84,23 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "7df0ecdc_3794f767",
+      "revId": "07d51ffe9c02fd6cad9cd25733c5b7163935d816",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd255844_56475296",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3072,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-16T19:24:55Z",
+      "side": 1,
+      "message": "I updated these too",
       "revId": "07d51ffe9c02fd6cad9cd25733c5b7163935d816",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
