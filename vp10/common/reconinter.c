@@ -654,8 +654,6 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
       uint8_t *dst = use_tmp_dst_buf ?
           &final_buf[plane][(i * 8) >> pd->subsampling_x] :
           &pd->dst.buf[(i * 8) >> pd->subsampling_x];
-      int bmc_stride = pd->dst.stride;
-      uint8_t *bmc = &pd->dst.buf[(i * 8) >> pd->subsampling_x];
       int tmp_stride = tmp_stride1[plane];
       uint8_t *tmp = &tmp_buf1[plane][(i * 8) >> pd->subsampling_x];
       const uint8_t *mask[2];
@@ -665,27 +663,22 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (is_hbd) {
         uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
-        uint16_t *bmc16 = CONVERT_TO_SHORTPTR(bmc);
         uint16_t *tmp16 = CONVERT_TO_SHORTPTR(tmp);
 
         for (row = 0; row < bh; ++row) {
-          for (col = 0; col < bw; ++col) {
-            dst16[col] = (mask[0][row] * bmc16[col] + mask[1][row] * tmp16[col]
+          for (col = 0; col < bw; ++col)
+            dst16[col] = (mask[0][row] * dst16[col] + mask[1][row] * tmp16[col]
                           + 32) >> 6;
-          }
           dst16 += dst_stride;
-          bmc16 += bmc_stride;
           tmp16 += tmp_stride;
         }
       } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       for (row = 0; row < bh; ++row) {
-        for (col = 0; col < bw; ++col) {
-          dst[col] = (mask[0][row] * bmc[col] + mask[1][row] * tmp[col] + 32)
+        for (col = 0; col < bw; ++col)
+          dst[col] = (mask[0][row] * dst[col] + mask[1][row] * tmp[col] + 32)
                      >> 6;
-        }
         dst += dst_stride;
-        bmc += bmc_stride;
         tmp += tmp_stride;
       }
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -727,8 +720,6 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
       uint8_t *dst = use_tmp_dst_buf ?
           &final_buf[plane][(i * 8 * dst_stride) >> pd->subsampling_y] :
           &pd->dst.buf[(i * 8 * dst_stride) >> pd->subsampling_y];
-      int bmc_stride = pd->dst.stride;
-      uint8_t *bmc = &pd->dst.buf[(i * 8 * bmc_stride) >> pd->subsampling_y];
       int tmp_stride = tmp_stride2[plane];
       uint8_t *tmp = &tmp_buf2[plane]
                               [(i * 8 * tmp_stride) >> pd->subsampling_y];
@@ -739,27 +730,22 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (is_hbd) {
         uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
-        uint16_t *bmc16 = CONVERT_TO_SHORTPTR(bmc);
         uint16_t *tmp16 = CONVERT_TO_SHORTPTR(tmp);
 
         for (row = 0; row < bh; ++row) {
-          for (col = 0; col < bw; ++col) {
-            dst16[col] = (mask[0][row] * bmc16[col] + mask[1][row] * tmp16[col]
+          for (col = 0; col < bw; ++col)
+            dst16[col] = (mask[0][row] * dst16[col] + mask[1][row] * tmp16[col]
                           + 32) >> 6;
-          }
           dst16 += dst_stride;
-          bmc16 += bmc_stride;
           tmp16 += tmp_stride;
         }
       } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       for (row = 0; row < bh; ++row) {
-        for (col = 0; col < bw; ++col) {
-          dst[col] = (mask[0][col] * bmc[col] + mask[1][col] * tmp[col] + 32)
+        for (col = 0; col < bw; ++col)
+          dst[col] = (mask[0][col] * dst[col] + mask[1][col] * tmp[col] + 32)
                      >> 6;
-        }
         dst += dst_stride;
-        bmc += bmc_stride;
         tmp += tmp_stride;
       }
 #if CONFIG_VP9_HIGHBITDEPTH

@@ -5089,6 +5089,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   DECLARE_ALIGNED(16, uint8_t, tmp_buf[MAX_MB_PLANE * 64 * 64]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_OBMC
+  int allow_obmc = is_obmc_allowed(mbmi);
+  int best_obmc_flag = 0;
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t, tmp_buf1_16[MAX_MB_PLANE * 64 * 64]);
   uint8_t *tmp_buf1;
@@ -5098,13 +5100,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   uint8_t *obmc_tmp_buf[3] = {tmp_buf1, tmp_buf1 + 4096, tmp_buf1 + 8192};
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int obmc_tmp_stride[3] = {64, 64, 64};
-  int best_obmc_flag = 0;
   uint8_t tmp_skip_txfm[MAX_MB_PLANE << 2] = {0};
   int64_t tmp_bsse[MAX_MB_PLANE << 2] = {0};
   int64_t rdobmc;
   int skip_txfm_sb_obmc = 0;
   int64_t skip_sse_sb_obmc = INT64_MAX;
-  int allow_obmc = is_obmc_allowed(mbmi);
 #endif  // CONFIG_OBMC
   int pred_exists = 0;
   int intpel_mv;
@@ -5587,6 +5587,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_OBMC
     int tmp_rate_obmc;
     int64_t tmp_dist_obmc;
+    restore_dst_buf(xd, orig_dst, orig_dst_stride);
 #endif  // CONFIG_OBMC
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear) is indicated at the frame level, or
@@ -5594,19 +5595,14 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 #if CONFIG_OBMC
     if (mbmi->obmc) {
-      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 1,
-                                       obmc_tmp_buf, obmc_tmp_stride,
+      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0,
+                                       NULL, NULL,
                                        dst_buf1, dst_stride1,
                                        dst_buf2, dst_stride2);
-      for (i = 0; i < MAX_MB_PLANE; ++i) {
-        xd->plane[i].dst.buf = obmc_tmp_buf[i];
-        xd->plane[i].dst.stride = obmc_tmp_stride[i];
-      }
       model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist,
                       &skip_txfm_sb, &skip_sse_sb);
       rd = RDCOST(x->rdmult, x->rddiv,
-                  rs + tmp_rate + cpi->obmc_cost[bsize][1],
-                  tmp_dist);
+                  rs + tmp_rate + cpi->obmc_cost[bsize][1], tmp_dist);
     } else {
 #endif  // CONFIG_OBMC
     model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist,
