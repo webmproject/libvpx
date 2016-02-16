@@ -28,5 +28,8 @@ if ((vpx_config("CONFIG_VP9") eq "yes") || (vpx_config("CONFIG_VP10") eq "yes"))
 
     add_proto qw/void vpx_extend_frame_inner_borders/, "struct yv12_buffer_config *ybf";
     specialize qw/vpx_extend_frame_inner_borders dspr2/;
+
+    add_proto qw/void vpx_extend_frame_borders_y/, "struct yv12_buffer_config *ybf";
+    specialize qw/vpx_extend_frame_borders_y/;
 }
 1;

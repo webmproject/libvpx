@@ -283,6 +283,7 @@ EXPERIMENT_LIST="
     loop_restoration
     ext_partition
     obmc
+    affine_motion
 "
 CONFIG_LIST="
     dependency_tracking

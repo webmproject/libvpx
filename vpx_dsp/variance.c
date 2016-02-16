@@ -272,6 +272,41 @@ void vpx_comp_avg_pred_c(uint8_t *comp_pred, const uint8_t *pred,
   }
 }
 
+#if CONFIG_AFFINE_MOTION
+// Get pred block from up-sampled reference.
+void vpx_upsampled_pred_c(uint8_t *comp_pred,
+                          int width, int height,
+                          const uint8_t *ref,  int ref_stride) {
+    int i, j, k;
+    int stride = ref_stride << 3;
+
+    for (i = 0; i < height; i++) {
+      for (j = 0, k = 0; j < width; j++, k += 8) {
+        comp_pred[j] = ref[k];
+      }
+      comp_pred += width;
+      ref += stride;
+    }
+}
+
+void vpx_comp_avg_upsampled_pred_c(uint8_t *comp_pred, const uint8_t *pred,
+                                   int width, int height,
+                                   const uint8_t *ref, int ref_stride) {
+    int i, j;
+    int stride = ref_stride << 3;
+
+    for (i = 0; i < height; i++) {
+      for (j = 0; j < width; j++) {
+        const int tmp = ref[(j << 3)] + pred[j];
+        comp_pred[j] = ROUND_POWER_OF_TWO(tmp, 1);
+      }
+      comp_pred += width;
+      pred += width;
+      ref += stride;
+    }
+}
+#endif
+
 #if CONFIG_VP9_HIGHBITDEPTH
 static void highbd_variance64(const uint8_t *a8, int  a_stride,
                               const uint8_t *b8, int  b_stride,

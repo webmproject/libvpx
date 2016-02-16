@@ -210,6 +210,30 @@ void vpx_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf) {
   extend_frame(ybf, inner_bw);
 }
 
+void vpx_extend_frame_borders_y_c(YV12_BUFFER_CONFIG *ybf) {
+  int ext_size = ybf->border;
+  assert(ybf->y_height - ybf->y_crop_height < 16);
+  assert(ybf->y_width - ybf->y_crop_width < 16);
+  assert(ybf->y_height - ybf->y_crop_height >= 0);
+  assert(ybf->y_width - ybf->y_crop_width >= 0);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (ybf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    extend_plane_high(ybf->y_buffer, ybf->y_stride,
+                      ybf->y_crop_width, ybf->y_crop_height,
+                      ext_size, ext_size,
+                      ext_size + ybf->y_height - ybf->y_crop_height,
+                      ext_size + ybf->y_width - ybf->y_crop_width);
+    return;
+  }
+#endif
+  extend_plane(ybf->y_buffer, ybf->y_stride,
+               ybf->y_crop_width, ybf->y_crop_height,
+               ext_size, ext_size,
+               ext_size + ybf->y_height - ybf->y_crop_height,
+               ext_size + ybf->y_width - ybf->y_crop_width);
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
 void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);

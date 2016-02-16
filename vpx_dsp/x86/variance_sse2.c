@@ -475,3 +475,232 @@ FNS(ssse3, ssse3);
 #undef FNS
 #undef FN
 #endif  // CONFIG_USE_X86INC
+
+#if CONFIG_AFFINE_MOTION
+void vpx_upsampled_pred_sse2(uint8_t *comp_pred,
+                             int width, int height,
+                             const uint8_t *ref,  int ref_stride) {
+    int i, j;
+    int stride = ref_stride << 3;
+
+    if (width >= 16) {
+      // read 16 points at one time
+      for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j+= 16) {
+          __m128i s0 = _mm_loadu_si128((const __m128i *)ref);
+          __m128i s1 = _mm_loadu_si128((const __m128i *)(ref + 16));
+          __m128i s2 = _mm_loadu_si128((const __m128i *)(ref + 32));
+          __m128i s3 = _mm_loadu_si128((const __m128i *)(ref + 48));
+          __m128i s4 = _mm_loadu_si128((const __m128i *)(ref + 64));
+          __m128i s5 = _mm_loadu_si128((const __m128i *)(ref + 80));
+          __m128i s6 = _mm_loadu_si128((const __m128i *)(ref + 96));
+          __m128i s7 = _mm_loadu_si128((const __m128i *)(ref + 112));
+          __m128i t0, t1, t2, t3;
+
+          t0 = _mm_unpacklo_epi8(s0, s1);
+          s1 = _mm_unpackhi_epi8(s0, s1);
+          t1 = _mm_unpacklo_epi8(s2, s3);
+          s3 = _mm_unpackhi_epi8(s2, s3);
+          t2 = _mm_unpacklo_epi8(s4, s5);
+          s5 = _mm_unpackhi_epi8(s4, s5);
+          t3 = _mm_unpacklo_epi8(s6, s7);
+          s7 = _mm_unpackhi_epi8(s6, s7);
+
+          s0 = _mm_unpacklo_epi8(t0, s1);
+          s2 = _mm_unpacklo_epi8(t1, s3);
+          s4 = _mm_unpacklo_epi8(t2, s5);
+          s6 = _mm_unpacklo_epi8(t3, s7);
+
+          *(int *)comp_pred = _mm_cvtsi128_si32(s0);
+          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(s2);
+          *(int *)(comp_pred + 8) = _mm_cvtsi128_si32(s4);
+          *(int *)(comp_pred + 12) = _mm_cvtsi128_si32(s6);
+
+          comp_pred += 16;
+          ref += 16 * 8;
+        }
+        ref += stride - (width << 3);
+      }
+    } else if (width >= 8) {
+      // read 8 points at one time
+      for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j+= 8) {
+          __m128i s0 = _mm_loadu_si128((const __m128i *)ref);
+          __m128i s1 = _mm_loadu_si128((const __m128i *)(ref + 16));
+          __m128i s2 = _mm_loadu_si128((const __m128i *)(ref + 32));
+          __m128i s3 = _mm_loadu_si128((const __m128i *)(ref + 48));
+          __m128i t0, t1;
+
+          t0 = _mm_unpacklo_epi8(s0, s1);
+          s1 = _mm_unpackhi_epi8(s0, s1);
+          t1 = _mm_unpacklo_epi8(s2, s3);
+          s3 = _mm_unpackhi_epi8(s2, s3);
+
+          s0 = _mm_unpacklo_epi8(t0, s1);
+          s2 = _mm_unpacklo_epi8(t1, s3);
+
+          *(int *)comp_pred = _mm_cvtsi128_si32(s0);
+          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(s2);
+          comp_pred += 8;
+          ref += 8 * 8;
+        }
+        ref += stride - (width << 3);
+      }
+    } else {
+      // read 4 points at one time
+      for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j+= 4) {
+          __m128i s0 = _mm_loadu_si128((const __m128i *)ref);
+          __m128i s1 = _mm_loadu_si128((const __m128i *)(ref + 16));
+          __m128i t0;
+
+          t0 = _mm_unpacklo_epi8(s0, s1);
+          s1 = _mm_unpackhi_epi8(s0, s1);
+          s0 = _mm_unpacklo_epi8(t0, s1);
+
+          *(int *)comp_pred = _mm_cvtsi128_si32(s0);
+
+          comp_pred += 4;
+          ref += 4 * 8;
+        }
+        ref += stride - (width << 3);
+      }
+    }
+}
+
+void vpx_comp_avg_upsampled_pred_sse2(uint8_t *comp_pred, const uint8_t *pred,
+                                      int width, int height,
+                                      const uint8_t *ref,  int ref_stride) {
+    const __m128i zero = _mm_set1_epi16(0);
+    const __m128i one = _mm_set1_epi16(1);
+    int i, j;
+    int stride = ref_stride << 3;
+
+    if (width >= 16) {
+      // read 16 points at one time
+      for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j+= 16) {
+          __m128i s0 = _mm_loadu_si128((const __m128i *)ref);
+          __m128i s1 = _mm_loadu_si128((const __m128i *)(ref + 16));
+          __m128i s2 = _mm_loadu_si128((const __m128i *)(ref + 32));
+          __m128i s3 = _mm_loadu_si128((const __m128i *)(ref + 48));
+          __m128i s4 = _mm_loadu_si128((const __m128i *)(ref + 64));
+          __m128i s5 = _mm_loadu_si128((const __m128i *)(ref + 80));
+          __m128i s6 = _mm_loadu_si128((const __m128i *)(ref + 96));
+          __m128i s7 = _mm_loadu_si128((const __m128i *)(ref + 112));
+          __m128i p0 = _mm_loadu_si128((const __m128i *)pred);
+          __m128i p1;
+          __m128i t0, t1, t2, t3;
+
+          t0 = _mm_unpacklo_epi8(s0, s1);
+          s1 = _mm_unpackhi_epi8(s0, s1);
+          t1 = _mm_unpacklo_epi8(s2, s3);
+          s3 = _mm_unpackhi_epi8(s2, s3);
+          t2 = _mm_unpacklo_epi8(s4, s5);
+          s5 = _mm_unpackhi_epi8(s4, s5);
+          t3 = _mm_unpacklo_epi8(s6, s7);
+          s7 = _mm_unpackhi_epi8(s6, s7);
+
+          s0 = _mm_unpacklo_epi8(t0, s1);
+          s2 = _mm_unpacklo_epi8(t1, s3);
+          s4 = _mm_unpacklo_epi8(t2, s5);
+          s6 = _mm_unpacklo_epi8(t3, s7);
+
+          s0 = _mm_unpacklo_epi32(s0, s2);
+          s4 = _mm_unpacklo_epi32(s4, s6);
+          s0 = _mm_unpacklo_epi8(s0, zero);
+          s4 = _mm_unpacklo_epi8(s4, zero);
+
+          p1 = _mm_unpackhi_epi8(p0, zero);
+          p0 = _mm_unpacklo_epi8(p0, zero);
+          p0 = _mm_adds_epu16(s0, p0);
+          p1 = _mm_adds_epu16(s4, p1);
+          p0 = _mm_adds_epu16(p0, one);
+          p1 = _mm_adds_epu16(p1, one);
+
+          p0 = _mm_srli_epi16(p0, 1);
+          p1 = _mm_srli_epi16(p1, 1);
+          p0 = _mm_packus_epi16(p0, p1);
+
+          *(int *)comp_pred = _mm_cvtsi128_si32(p0);
+          p0 = _mm_srli_si128(p0, 4);
+          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(p0);
+          p0 = _mm_srli_si128(p0, 4);
+          *(int *)(comp_pred + 8) = _mm_cvtsi128_si32(p0);
+          p0 = _mm_srli_si128(p0, 4);
+          *(int *)(comp_pred + 12) = _mm_cvtsi128_si32(p0);
+
+          comp_pred += 16;
+          pred += 16;
+          ref += 16 * 8;
+        }
+        ref += stride - (width << 3);
+      }
+    } else if (width >= 8) {
+      // read 8 points at one time
+      for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j+= 8) {
+          __m128i s0 = _mm_loadu_si128((const __m128i *)ref);
+          __m128i s1 = _mm_loadu_si128((const __m128i *)(ref + 16));
+          __m128i s2 = _mm_loadu_si128((const __m128i *)(ref + 32));
+          __m128i s3 = _mm_loadu_si128((const __m128i *)(ref + 48));
+          __m128i p0 = _mm_loadl_epi64((const __m128i *)pred);
+          __m128i t0, t1;
+
+          t0 = _mm_unpacklo_epi8(s0, s1);
+          s1 = _mm_unpackhi_epi8(s0, s1);
+          t1 = _mm_unpacklo_epi8(s2, s3);
+          s3 = _mm_unpackhi_epi8(s2, s3);
+
+          s0 = _mm_unpacklo_epi8(t0, s1);
+          s2 = _mm_unpacklo_epi8(t1, s3);
+          s0 = _mm_unpacklo_epi32(s0, s2);
+          s0 = _mm_unpacklo_epi8(s0, zero);
+
+          p0 = _mm_unpacklo_epi8(p0, zero);
+          p0 = _mm_adds_epu16(s0, p0);
+          p0 = _mm_adds_epu16(p0, one);
+          p0 = _mm_srli_epi16(p0, 1);
+          p0 = _mm_packus_epi16(p0, zero);
+
+          *(int *)comp_pred = _mm_cvtsi128_si32(p0);
+          p0 = _mm_srli_si128(p0, 4);
+          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(p0);
+
+          comp_pred += 8;
+          pred += 8;
+          ref += 8 * 8;
+        }
+        ref += stride - (width << 3);
+      }
+    } else {
+      // read 4 points at one time
+      for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j+= 4) {
+          __m128i s0 = _mm_loadu_si128((const __m128i *)ref);
+          __m128i s1 = _mm_loadu_si128((const __m128i *)(ref + 16));
+          __m128i p0 = _mm_cvtsi32_si128(*(const uint32_t *)pred);
+          __m128i t0;
+
+          t0 = _mm_unpacklo_epi8(s0, s1);
+          s1 = _mm_unpackhi_epi8(s0, s1);
+          s0 = _mm_unpacklo_epi8(t0, s1);
+          s0 = _mm_unpacklo_epi8(s0, zero);
+
+          p0 = _mm_unpacklo_epi8(p0, zero);
+          p0 = _mm_adds_epu16(s0, p0);
+          p0 = _mm_adds_epu16(p0, one);
+          p0 = _mm_srli_epi16(p0, 1);
+          p0 = _mm_packus_epi16(p0, zero);
+
+          *(int *)comp_pred = _mm_cvtsi128_si32(p0);
+
+          comp_pred += 4;
+          pred += 4;
+          ref += 4 * 8;
+        }
+        ref += stride - (width << 3);
+      }
+    }
+}
+#endif

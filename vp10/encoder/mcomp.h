@@ -116,7 +116,11 @@ typedef int (fractional_mv_step_fp) (
     int *mvjcost, int *mvcost[2],
     int *distortion, unsigned int *sse1,
     const uint8_t *second_pred,
+#if CONFIG_AFFINE_MOTION
+    int w, int h, int use_upsampled_ref);
+#else
     int w, int h);
+#endif
 
 extern fractional_mv_step_fp vp10_find_best_sub_pixel_tree;
 extern fractional_mv_step_fp vp10_find_best_sub_pixel_tree_pruned;

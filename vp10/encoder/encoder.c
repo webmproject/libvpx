@@ -410,6 +410,15 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
   vpx_free(cpi->active_map.map);
   cpi->active_map.map = NULL;
 
+#if CONFIG_AFFINE_MOTION
+  {
+    // Free up-sampled reference buffers.
+    int i;
+    for (i = 0; i < MAX_REF_FRAMES; i++)
+      vpx_free_frame_buffer(&cpi->upsampled_ref_bufs[i].buf);
+  }
+#endif
+
   vp10_free_ref_frame_buffers(cm->buffer_pool);
 #if CONFIG_VP9_POSTPROC
   vp10_free_postproc_buffers(cm);
@@ -744,6 +753,26 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled last source buffer");
+
+#if CONFIG_AFFINE_MOTION
+  {
+    // Allocate up-sampled reference buffers.
+    int i;
+
+    for (i = 0; i < MAX_REF_FRAMES; i++)
+      if (vpx_realloc_frame_buffer(&cpi->upsampled_ref_bufs[i].buf,
+                                   (cm->width << 3), (cm->height << 3),
+                                   cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                   cm->use_highbitdepth,
+#endif
+                                   (VP9_ENC_BORDER_IN_PIXELS << 3),
+                                   cm->byte_alignment,
+                                   NULL, NULL, NULL))
+        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+            "Failed to allocate up-sampled reference frame buffer");
+  }
+#endif
 }
 
 
@@ -2353,10 +2382,11 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
-                                   YV12_BUFFER_CONFIG *dst, int bd) {
+                                   YV12_BUFFER_CONFIG *dst, int planes,
+                                   int bd) {
 #else
 static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
-                                   YV12_BUFFER_CONFIG *dst) {
+                                   YV12_BUFFER_CONFIG *dst, int planes) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   const int src_w = src->y_crop_width;
   const int src_h = src->y_crop_height;
@@ -2374,7 +2404,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
 
   for (y = 0; y < dst_h; y += 16) {
     for (x = 0; x < dst_w; x += 16) {
-      for (i = 0; i < MAX_MB_PLANE; ++i) {
+      for (i = 0; i < planes; ++i) {
         const int factor = (i == 0 || i == 3 ? 1 : 2);
         const int x_q4 = x * (16 / factor) * src_w / dst_w;
         const int y_q4 = y * (16 / factor) * src_h / dst_h;
@@ -2391,13 +2421,13 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                &kernel[(y_q4 & 0xf) * taps], 16 * src_h / dst_h,
                                16 / factor, 16 / factor, bd);
         } else {
-          vpx_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
+          vpx_scaled_2d(src_ptr, src_stride, dst_ptr, dst_stride,
                         &kernel[(x_q4 & 0xf) * taps], 16 * src_w / dst_w,
                         &kernel[(y_q4 & 0xf) * taps], 16 * src_h / dst_h,
                         16 / factor, 16 / factor);
         }
 #else
-        vpx_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
+        vpx_scaled_2d(src_ptr, src_stride, dst_ptr, dst_stride,
                       &kernel[(x_q4 & 0xf) * taps], 16 * src_w / dst_w,
                       &kernel[(y_q4 & 0xf) * taps], 16 * src_h / dst_h,
                       16 / factor, 16 / factor);
@@ -2406,7 +2436,10 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
     }
   }
 
-  vpx_extend_frame_borders(dst);
+  if (planes == 1)
+    vpx_extend_frame_borders_y(dst);
+  else
+    vpx_extend_frame_borders(dst);
 }
 
 static int scale_down(VP10_COMP *cpi, int q) {
@@ -2462,12 +2495,62 @@ static int recode_loop_test(VP10_COMP *cpi,
   return force_recode;
 }
 
+#if CONFIG_AFFINE_MOTION
+static INLINE int get_free_upsampled_ref_buf(EncRefCntBuffer *ubufs) {
+  int i;
+
+  for (i = 0; i < MAX_REF_FRAMES; i++) {
+    if (!ubufs[i].ref_count) {
+      return i;
+    }
+  }
+  return INVALID_IDX;
+}
+
+// Up-sample reference frames.
+static INLINE int upsample_ref_frame(RefCntBuffer *bufs,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                     EncRefCntBuffer *ubufs, int new_idx,
+                                     int bit_depth) {
+#else
+                                     EncRefCntBuffer *ubufs, int new_idx) {
+#endif
+  int new_uidx = get_free_upsampled_ref_buf(ubufs);
+
+  if (new_uidx == INVALID_IDX) {
+    return INVALID_IDX;
+  } else {
+    const YV12_BUFFER_CONFIG *const ref = &bufs[new_idx].buf;
+    YV12_BUFFER_CONFIG *upsampled_ref = &ubufs[new_uidx].buf;
+
+    // Currently, only Y plane is up-sampled, U, V are not used.
+#if CONFIG_VP9_HIGHBITDEPTH
+    scale_and_extend_frame(ref, upsampled_ref, 1, bit_depth);
+#else
+    scale_and_extend_frame(ref, upsampled_ref, 1);
+#endif
+    return new_uidx;
+  }
+}
+#endif
+
 void vp10_update_reference_frames(VP10_COMP *cpi) {
   VP10_COMMON * const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
 #if CONFIG_EXT_REFS
   int ref_frame;
 #endif  // CONFIG_EXT_REFS
+
+#if CONFIG_AFFINE_MOTION
+  // Always up-sample the current encoded frame.
+#if CONFIG_VP9_HIGHBITDEPTH
+  int new_uidx = upsample_ref_frame(pool->frame_bufs, cpi->upsampled_ref_bufs,
+                                    cm->new_fb_idx, (int)cm->bit_depth);
+#else
+  int new_uidx = upsample_ref_frame(pool->frame_bufs, cpi->upsampled_ref_bufs,
+                                    cm->new_fb_idx);
+#endif
+#endif
 
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
@@ -2476,6 +2559,13 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
                &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
+
+#if CONFIG_AFFINE_MOTION
+    uref_cnt_fb(cpi->upsampled_ref_bufs,
+                &cpi->upsampled_ref_idx[cpi->gld_fb_idx], new_uidx);
+    uref_cnt_fb(cpi->upsampled_ref_bufs,
+                &cpi->upsampled_ref_idx[cpi->alt_fb_idx], new_uidx);
+#endif
   } else if (vp10_preserve_existing_gf(cpi)) {
     // We have decided to preserve the previously existing golden frame as our
     // new ARF frame. However, in the short term in function
@@ -2489,7 +2579,10 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
 
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
-
+#if CONFIG_AFFINE_MOTION
+    uref_cnt_fb(cpi->upsampled_ref_bufs,
+                &cpi->upsampled_ref_idx[cpi->alt_fb_idx], new_uidx);
+#endif
     tmp = cpi->alt_fb_idx;
     cpi->alt_fb_idx = cpi->gld_fb_idx;
     cpi->gld_fb_idx = tmp;
@@ -2503,6 +2596,10 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
 
       ref_cnt_fb(pool->frame_bufs,
                  &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
+#if CONFIG_AFFINE_MOTION
+      uref_cnt_fb(cpi->upsampled_ref_bufs,
+                  &cpi->upsampled_ref_idx[cpi->alt_fb_idx], new_uidx);
+#endif
       memcpy(cpi->interp_filter_selected[ALTREF_FRAME],
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
@@ -2511,6 +2608,10 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     if (cpi->refresh_golden_frame) {
       ref_cnt_fb(pool->frame_bufs,
                  &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
+#if CONFIG_AFFINE_MOTION
+      uref_cnt_fb(cpi->upsampled_ref_bufs,
+                  &cpi->upsampled_ref_idx[cpi->gld_fb_idx], new_uidx);
+#endif
       if (!cpi->rc.is_src_frame_alt_ref)
         memcpy(cpi->interp_filter_selected[GOLDEN_FRAME],
                cpi->interp_filter_selected[0],
@@ -2545,6 +2646,10 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
   if (cpi->refresh_last_frame) {
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
+#if CONFIG_AFFINE_MOTION
+    uref_cnt_fb(cpi->upsampled_ref_bufs,
+                &cpi->upsampled_ref_idx[cpi->lst_fb_idx], new_uidx);
+#endif
     if (!cpi->rc.is_src_frame_alt_ref) {
       memcpy(cpi->interp_filter_selected[LAST_FRAME],
              cpi->interp_filter_selected[0],
@@ -2678,7 +2783,8 @@ void vp10_scale_references(VP10_COMP *cpi) {
                                        cm->byte_alignment, NULL, NULL, NULL))
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
-          scale_and_extend_frame(ref, &new_fb_ptr->buf, (int)cm->bit_depth);
+          scale_and_extend_frame(ref, &new_fb_ptr->buf, MAX_MB_PLANE,
+                                 (int)cm->bit_depth);
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
         }
@@ -2703,11 +2809,39 @@ void vp10_scale_references(VP10_COMP *cpi) {
                                        cm->byte_alignment, NULL, NULL, NULL))
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
-          scale_and_extend_frame(ref, &new_fb_ptr->buf);
+          scale_and_extend_frame(ref, &new_fb_ptr->buf, MAX_MB_PLANE);
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#if CONFIG_AFFINE_MOTION
+        {
+          const int map_idx = get_ref_frame_map_idx(cpi, ref_frame);
+          EncRefCntBuffer *ubuf =
+              &cpi->upsampled_ref_bufs[cpi->upsampled_ref_idx[map_idx]];
+
+          if (vpx_realloc_frame_buffer(&ubuf->buf,
+                                       (cm->width << 3), (cm->height << 3),
+                                       cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                       cm->use_highbitdepth,
+#endif
+                                       (VP9_ENC_BORDER_IN_PIXELS << 3),
+                                       cm->byte_alignment,
+                                       NULL, NULL, NULL))
+            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                               "Failed to allocate up-sampled frame buffer");
+#if CONFIG_VP9_HIGHBITDEPTH
+          scale_and_extend_frame(&new_fb_ptr->buf, &ubuf->buf, MAX_MB_PLANE,
+                                 (int)cm->bit_depth);
+#else
+          scale_and_extend_frame(&new_fb_ptr->buf, &ubuf->buf, MAX_MB_PLANE);
+#endif
+          cpi->scaled_ref_idx[ref_frame - LAST_FRAME] = new_fb;
+          alloc_frame_mvs(cm, new_fb);
+        }
+#endif
       } else {
         const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
         RefCntBuffer *const buf = &pool->frame_bufs[buf_idx];
@@ -3787,6 +3921,17 @@ static void init_ref_frame_bufs(VP10_COMMON *cm) {
   }
 }
 
+#if CONFIG_AFFINE_MOTION
+static INLINE void init_upsampled_ref_frame_bufs(VP10_COMP *cpi) {
+  int i;
+
+  for (i = 0; i < MAX_REF_FRAMES; ++i) {
+    cpi->upsampled_ref_bufs[i].ref_count = 0;
+    cpi->upsampled_ref_idx[i] = INVALID_IDX;
+  }
+}
+#endif
+
 static void check_initial_width(VP10_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
                                 int use_highbitdepth,
@@ -3809,7 +3954,9 @@ static void check_initial_width(VP10_COMP *cpi,
     alloc_raw_frame_buffers(cpi);
     init_ref_frame_bufs(cm);
     alloc_util_frame_buffers(cpi);
-
+#if CONFIG_AFFINE_MOTION
+    init_upsampled_ref_frame_bufs(cpi);
+#endif
     init_motion_estimation(cpi);  // TODO(agrange) This can be removed.
 
     cpi->initial_width = cm->width;

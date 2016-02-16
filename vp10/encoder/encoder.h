@@ -286,6 +286,13 @@ typedef struct IMAGE_STAT {
   double worst;
 } ImageStat;
 
+#if CONFIG_AFFINE_MOTION
+typedef struct {
+  int ref_count;
+  YV12_BUFFER_CONFIG buf;
+} EncRefCntBuffer;
+#endif
+
 typedef struct VP10_COMP {
   QUANTS quants;
   ThreadData td;
@@ -303,6 +310,12 @@ typedef struct VP10_COMP {
   YV12_BUFFER_CONFIG scaled_source;
   YV12_BUFFER_CONFIG *unscaled_last_source;
   YV12_BUFFER_CONFIG scaled_last_source;
+
+#if CONFIG_AFFINE_MOTION
+  // Up-sampled reference buffers
+  EncRefCntBuffer upsampled_ref_bufs[MAX_REF_FRAMES];
+  int upsampled_ref_idx[MAX_REF_FRAMES];
+#endif
 
   TileDataEnc *tile_data;
   int allocated_tiles;  // Keep track of memory allocated for tiles.
@@ -690,6 +703,20 @@ void vp10_new_framerate(VP10_COMP *cpi, double framerate);
 
 #ifdef __cplusplus
 }  // extern "C"
+#endif
+
+#if CONFIG_AFFINE_MOTION
+// Update up-sampled reference frame index.
+static INLINE void uref_cnt_fb(EncRefCntBuffer *ubufs, int *uidx,
+                               int new_uidx) {
+  const int ref_index = *uidx;
+
+  if (ref_index >= 0 && ubufs[ref_index].ref_count > 0)
+    ubufs[ref_index].ref_count--;
+
+  *uidx = new_uidx;
+  ubufs[new_uidx].ref_count++;
+}
 #endif
 
 #endif  // VP10_ENCODER_ENCODER_H_
