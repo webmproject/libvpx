@@ -119,7 +119,7 @@ VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
   vp10_loop_restoration_precal();
 #endif  // CONFIG_LOOP_RESTORATION
 #if CONFIG_ANS
-  vp10_build_pareto8_dec_tab(vp10_pareto8_token_probs, pbi->token_tab);
+  vp10_build_pareto8_cdf_tab(vp10_pareto8_token_probs, cm->token_tab);
 #endif  // CONFIG_ANS
 
   cm->error.setjmp = 0;

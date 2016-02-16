@@ -147,7 +147,7 @@ bool check_vpxbool(const PvVec &pv_vec, uint8_t *buf) {
 }
 
 const rans_sym rans_sym_tab[] = {
-    {70, 186}, {70, 116}, {100, 16}, {16, 0},
+    {16, 0}, {100, 16}, {70, 116}, {70, 186},
 };
 const int kDistinctSyms = sizeof(rans_sym_tab) / sizeof(rans_sym_tab[0]);
 
@@ -170,13 +170,9 @@ std::vector<int> ans_encode_build_vals(const rans_sym *tab, int iters) {
 
 void rans_build_dec_tab(const struct rans_sym sym_tab[],
                         rans_dec_lut dec_tab) {
-  int val = 0;
-  int i;
-  for (i = ans_p8_precision - 1; i >= 0; --i) {
-    dec_tab[i].val = val;
-    dec_tab[i].prob = sym_tab[val].prob;
-    dec_tab[i].cum_prob = sym_tab[val].cum_prob;
-    if (i == sym_tab[val].cum_prob) ++val;
+  dec_tab[0] = 0;
+  for (int i = 1; dec_tab[i - 1] < ans_p8_precision; ++i) {
+    dec_tab[i] = dec_tab[i - 1] + sym_tab[i - 1].prob;
   }
 }
 
