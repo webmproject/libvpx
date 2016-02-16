@@ -1538,8 +1538,12 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
       realloc_segmentation_maps(cpi);
       cpi->initial_width = cpi->initial_height = 0;
       cpi->external_resize = 0;
+    } else if (cm->mi_alloc_size == new_mi_size &&
+             (cpi->oxcf.width > last_w || cpi->oxcf.height > last_h)) {
+        vp9_alloc_loop_filter(cm);
     }
   }
+
   update_frame_size(cpi);
 
   if ((last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) &&
