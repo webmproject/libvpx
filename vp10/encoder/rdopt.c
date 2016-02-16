@@ -4586,9 +4586,6 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
 #endif  // CONFIG_EXT_REFS
       unsigned int base_cost = vp10_cost_bit(intra_inter_p, 1);
 
-      if (cm->reference_mode == REFERENCE_MODE_SELECT)
-        base_cost += vp10_cost_bit(comp_inter_p, 0);
-
       ref_costs_single[LAST_FRAME] =
 #if CONFIG_EXT_REFS
           ref_costs_single[LAST2_FRAME] =
@@ -4643,9 +4640,6 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
       vpx_prob ref_comp_p3 = vp10_get_pred_prob_comp_ref_p3(cm, xd);
 #endif  // CONFIG_EXT_REFS
       unsigned int base_cost = vp10_cost_bit(intra_inter_p, 1);
-
-      if (cm->reference_mode == REFERENCE_MODE_SELECT)
-        base_cost += vp10_cost_bit(comp_inter_p, 1);
 
       ref_costs_comp[LAST_FRAME] =
 #if CONFIG_EXT_REFS
