@@ -5281,7 +5281,8 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
     tx_size = get_uv_tx_size_impl(tx_size, bsize,
                                   cm->subsampling_x, cm->subsampling_y);
     vp10_subtract_plane(x, bsize, plane);
-    vp10_txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
+    vp10_txfm_rd_in_plane_supertx(x, cpi, &this_rate, &this_dist,
+                                  &pnskip, &pnsse,
                                   INT64_MAX, plane, bsize, tx_size, 0);
 #endif  // CONFIG_VAR_TX
 
@@ -5330,7 +5331,7 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
                        bsize, coeff_ctx,
                        &this_rate, &this_dist, &pnsse, &pnskip);
 #else
-    vp10_txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip,
+    vp10_txfm_rd_in_plane_supertx(x, cpi, &this_rate, &this_dist, &pnskip,
                                   &pnsse, INT64_MAX, 0, bsize, tx_size, 0);
 #endif  // CONFIG_VAR_TX
 
