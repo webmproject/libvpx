@@ -39,7 +39,6 @@ static INLINE void range_check(const tran_low_t *input, const int size,
 
 #if CONFIG_EXT_TX
 void fdst4(const tran_low_t *input, tran_low_t *output) {
-#if USE_DST2
   tran_high_t step[4];
   tran_high_t temp1, temp2;
 
@@ -56,29 +55,9 @@ void fdst4(const tran_low_t *input, tran_low_t *output) {
   temp2 = -step[2] * cospi_8_64 + step[3] * cospi_24_64;
   output[2] = fdct_round_shift(temp1);
   output[0] = fdct_round_shift(temp2);
-#else
-  // {sin(pi/5), sin(pi*2/5)} * sqrt(2/5) * sqrt(2)
-  static const int32_t sinvalue_lookup[] = {
-    141124871, 228344838,
-  };
-  int64_t sum;
-  int64_t s03 = (input[0] + input[3]);
-  int64_t d03 = (input[0] - input[3]);
-  int64_t s12 = (input[1] + input[2]);
-  int64_t d12 = (input[1] - input[2]);
-  sum = s03 * sinvalue_lookup[0] + s12 * sinvalue_lookup[1];
-  output[0] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d03 * sinvalue_lookup[1] + d12 * sinvalue_lookup[0];
-  output[1] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s03 * sinvalue_lookup[1] - s12 * sinvalue_lookup[0];
-  output[2] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d03 * sinvalue_lookup[0] - d12 * sinvalue_lookup[1];
-  output[3] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-#endif  // USE_DST2
 }
 
 void fdst8(const tran_low_t *input, tran_low_t *output) {
-#if USE_DST2
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;  // canbe16
   tran_high_t t0, t1, t2, t3;                  // needs32
   tran_high_t x0, x1, x2, x3;                  // canbe16
@@ -127,47 +106,9 @@ void fdst8(const tran_low_t *input, tran_low_t *output) {
   output[4] = fdct_round_shift(t2);
   output[2] = fdct_round_shift(t1);
   output[0] = fdct_round_shift(t3);
-#else
-  // {sin(pi/9), sin(pi*2/9), ..., sin(pi*4/9)} * sqrt(2/9) * 2
-  static const int sinvalue_lookup[] = {
-    86559612, 162678858, 219176632, 249238470
-  };
-  int64_t sum;
-  int64_t s07 = (input[0] + input[7]);
-  int64_t d07 = (input[0] - input[7]);
-  int64_t s16 = (input[1] + input[6]);
-  int64_t d16 = (input[1] - input[6]);
-  int64_t s25 = (input[2] + input[5]);
-  int64_t d25 = (input[2] - input[5]);
-  int64_t s34 = (input[3] + input[4]);
-  int64_t d34 = (input[3] - input[4]);
-  sum = s07 * sinvalue_lookup[0] + s16 * sinvalue_lookup[1] +
-        s25 * sinvalue_lookup[2] + s34 * sinvalue_lookup[3];
-  output[0] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d07 * sinvalue_lookup[1] + d16 * sinvalue_lookup[3] +
-        d25 * sinvalue_lookup[2] + d34 * sinvalue_lookup[0];
-  output[1] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = (s07 + s16 - s34)* sinvalue_lookup[2];
-  output[2] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d07 * sinvalue_lookup[3] + d16 * sinvalue_lookup[0] -
-        d25 * sinvalue_lookup[2] - d34 * sinvalue_lookup[1];
-  output[3] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s07 * sinvalue_lookup[3] - s16 * sinvalue_lookup[0] -
-        s25 * sinvalue_lookup[2] + s34 * sinvalue_lookup[1];
-  output[4] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = (d07 - d16 + d34)* sinvalue_lookup[2];
-  output[5] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s07 * sinvalue_lookup[1] - s16 * sinvalue_lookup[3] +
-        s25 * sinvalue_lookup[2] - s34 * sinvalue_lookup[0];
-  output[6] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d07 * sinvalue_lookup[0] - d16 * sinvalue_lookup[1] +
-        d25 * sinvalue_lookup[2] - d34 * sinvalue_lookup[3];
-  output[7] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-#endif  // USE_DST2
 }
 
 void fdst16(const tran_low_t *input, tran_low_t *output) {
-#if USE_DST2
   tran_high_t step1[8];      // canbe16
   tran_high_t step2[8];      // canbe16
   tran_high_t step3[8];      // canbe16
@@ -306,110 +247,6 @@ void fdst16(const tran_low_t *input, tran_low_t *output) {
   temp2 = step1[0] *  -cospi_2_64 + step1[7] * cospi_30_64;
   output[8] = fdct_round_shift(temp1);
   output[0] = fdct_round_shift(temp2);
-#else
-  // {sin(pi/17), sin(pi*2/17, ..., sin(pi*8/17)} * sqrt(2/17) * 2 * sqrt(2)
-  static const int sinvalue_lookup[] = {
-    47852167, 94074787, 137093803, 175444254,
-    207820161, 233119001, 250479254, 259309736
-  };
-  int64_t sum;
-  int64_t s015 = (input[0] + input[15]);
-  int64_t d015 = (input[0] - input[15]);
-  int64_t s114 = (input[1] + input[14]);
-  int64_t d114 = (input[1] - input[14]);
-  int64_t s213 = (input[2] + input[13]);
-  int64_t d213 = (input[2] - input[13]);
-  int64_t s312 = (input[3] + input[12]);
-  int64_t d312 = (input[3] - input[12]);
-  int64_t s411 = (input[4] + input[11]);
-  int64_t d411 = (input[4] - input[11]);
-  int64_t s510 = (input[5] + input[10]);
-  int64_t d510 = (input[5] - input[10]);
-  int64_t s69  = (input[6] + input[9]);
-  int64_t d69  = (input[6] - input[9]);
-  int64_t s78  = (input[7] + input[8]);
-  int64_t d78  = (input[7] - input[8]);
-  sum = s015 * sinvalue_lookup[0] + s114 * sinvalue_lookup[1] +
-        s213 * sinvalue_lookup[2] + s312 * sinvalue_lookup[3] +
-        s411 * sinvalue_lookup[4] + s510 * sinvalue_lookup[5] +
-        s69  * sinvalue_lookup[6] + s78  * sinvalue_lookup[7];
-  output[0]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[1] + d114 * sinvalue_lookup[3] +
-        d213 * sinvalue_lookup[5] + d312 * sinvalue_lookup[7] +
-        d411 * sinvalue_lookup[6] + d510 * sinvalue_lookup[4] +
-        d69  * sinvalue_lookup[2] + d78  * sinvalue_lookup[0];
-  output[1]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s015 * sinvalue_lookup[2] + s114 * sinvalue_lookup[5] +
-        s213 * sinvalue_lookup[7] + s312 * sinvalue_lookup[4] +
-        s411 * sinvalue_lookup[1] - s510 * sinvalue_lookup[0] -
-        s69  * sinvalue_lookup[3] - s78  * sinvalue_lookup[6];
-  output[2]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[3] + d114 * sinvalue_lookup[7] +
-        d213 * sinvalue_lookup[4] + d312 * sinvalue_lookup[0] -
-        d411 * sinvalue_lookup[2] - d510 * sinvalue_lookup[6] -
-        d69  * sinvalue_lookup[5] - d78  * sinvalue_lookup[1];
-  output[3]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s015 * sinvalue_lookup[4] + s114 * sinvalue_lookup[6] +
-        s213 * sinvalue_lookup[1] - s312 * sinvalue_lookup[2] -
-        s411 * sinvalue_lookup[7] - s510 * sinvalue_lookup[3] +
-        s69  * sinvalue_lookup[0] + s78  * sinvalue_lookup[5];
-  output[4]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[5] + d114 * sinvalue_lookup[4] -
-        d213 * sinvalue_lookup[0] - d312 * sinvalue_lookup[6] -
-        d411 * sinvalue_lookup[3] + d510 * sinvalue_lookup[1] +
-        d69  * sinvalue_lookup[7] + d78  * sinvalue_lookup[2];
-  output[5]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s015 * sinvalue_lookup[6] + s114 * sinvalue_lookup[2] -
-        s213 * sinvalue_lookup[3] - s312 * sinvalue_lookup[5] +
-        s411 * sinvalue_lookup[0] + s510 * sinvalue_lookup[7] +
-        s69  * sinvalue_lookup[1] - s78  * sinvalue_lookup[4];
-  output[6]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[7] + d114 * sinvalue_lookup[0] -
-        d213 * sinvalue_lookup[6] - d312 * sinvalue_lookup[1] +
-        d411 * sinvalue_lookup[5] + d510 * sinvalue_lookup[2] -
-        d69  * sinvalue_lookup[4] - d78  * sinvalue_lookup[3];
-  output[7]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s015 * sinvalue_lookup[7] - s114 * sinvalue_lookup[0] -
-        s213 * sinvalue_lookup[6] + s312 * sinvalue_lookup[1] +
-        s411 * sinvalue_lookup[5] - s510 * sinvalue_lookup[2] -
-        s69  * sinvalue_lookup[4] + s78  * sinvalue_lookup[3];
-  output[8]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[6] - d114 * sinvalue_lookup[2] -
-        d213 * sinvalue_lookup[3] + d312 * sinvalue_lookup[5] +
-        d411 * sinvalue_lookup[0] - d510 * sinvalue_lookup[7] +
-        d69  * sinvalue_lookup[1] + d78  * sinvalue_lookup[4];
-  output[9]  = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s015 * sinvalue_lookup[5] - s114 * sinvalue_lookup[4] -
-        s213 * sinvalue_lookup[0] + s312 * sinvalue_lookup[6] -
-        s411 * sinvalue_lookup[3] - s510 * sinvalue_lookup[1] +
-        s69  * sinvalue_lookup[7] - s78  * sinvalue_lookup[2];
-  output[10] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[4] - d114 * sinvalue_lookup[6] +
-        d213 * sinvalue_lookup[1] + d312 * sinvalue_lookup[2] -
-        d411 * sinvalue_lookup[7] + d510 * sinvalue_lookup[3] +
-        d69  * sinvalue_lookup[0] - d78  * sinvalue_lookup[5];
-  output[11] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s015 * sinvalue_lookup[3] - s114 * sinvalue_lookup[7] +
-        s213 * sinvalue_lookup[4] - s312 * sinvalue_lookup[0] -
-        s411 * sinvalue_lookup[2] + s510 * sinvalue_lookup[6] -
-        s69  * sinvalue_lookup[5] + s78  * sinvalue_lookup[1];
-  output[12] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[2] - d114 * sinvalue_lookup[5] +
-        d213 * sinvalue_lookup[7] - d312 * sinvalue_lookup[4] +
-        d411 * sinvalue_lookup[1] + d510 * sinvalue_lookup[0] -
-        d69  * sinvalue_lookup[3] + d78  * sinvalue_lookup[6];
-  output[13] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = s015 * sinvalue_lookup[1] - s114 * sinvalue_lookup[3] +
-        s213 * sinvalue_lookup[5] - s312 * sinvalue_lookup[7] +
-        s411 * sinvalue_lookup[6] - s510 * sinvalue_lookup[4] +
-        s69  * sinvalue_lookup[2] - s78  * sinvalue_lookup[0];
-  output[14] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-  sum = d015 * sinvalue_lookup[0] - d114 * sinvalue_lookup[1] +
-        d213 * sinvalue_lookup[2] - d312 * sinvalue_lookup[3] +
-        d411 * sinvalue_lookup[4] - d510 * sinvalue_lookup[5] +
-        d69  * sinvalue_lookup[6] - d78  * sinvalue_lookup[7];
-  output[15] = ROUND_POWER_OF_TWO(sum, (2 * DCT_CONST_BITS));
-#endif  // USE_DST2
 }
 #endif  // CONFIG_EXT_TX
 
