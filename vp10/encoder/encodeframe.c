@@ -2065,6 +2065,11 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
       if (!x->skip) {
         // TODO(geza.lore): Investigate if this can be relaxed
         x->skip_recode = 0;
+        memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+
+        x->skip_optimize = 0;
+        x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
+
         vp10_encode_sb_supertx(x, bsize);
         vp10_tokenize_sb_supertx(cpi, td, tp, !output_enabled, bsize);
       } else {
