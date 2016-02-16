@@ -433,11 +433,29 @@ static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
 int pick_intra_filter(int angle);
 #endif  // CONFIG_EXT_INTRA
 
+#define FIXED_TX_TYPE 0
+
+static INLINE TX_TYPE get_default_tx_type(PLANE_TYPE plane_type,
+                                          const MACROBLOCKD *xd,
+                                          int block_idx, TX_SIZE tx_size) {
+  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+
+  if (is_inter_block(mbmi) || plane_type != PLANE_TYPE_Y ||
+      xd->lossless[mbmi->segment_id] || tx_size >= TX_32X32)
+    return DCT_DCT;
+
+  return intra_mode_to_tx_type_context[plane_type == PLANE_TYPE_Y ?
+      get_y_mode(xd->mi[0], block_idx) : mbmi->uv_mode];
+}
+
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd,
                                   int block_idx, TX_SIZE tx_size) {
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
+
+  if (FIXED_TX_TYPE)
+    return get_default_tx_type(plane_type, xd, block_idx, tx_size);
 
 #if CONFIG_EXT_INTRA
   if (!is_inter_block(mbmi)) {
