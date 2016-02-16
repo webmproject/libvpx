@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dd7ab832_b1f57836",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-16T20:18:35Z",
+      "side": 1,
+      "message": "you can just set this to \u0027cpi-\u003esvc.number_spatial_layers \u003d\u003d 1\u0027 no need for the ternary",
+      "revId": "0ea3ce1eb6c021dd9bcb4bb2a29f3ae6b72ca6fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd2a1c13_9ae8ad9e",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-16T20:18:35Z",
+      "side": 1,
+      "message": "this should be indented one more as it\u0027s part of the () group",
+      "revId": "0ea3ce1eb6c021dd9bcb4bb2a29f3ae6b72ca6fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d76744b_77cf0277",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-16T20:18:35Z",
+      "side": 1,
+      "message": "I would invert these (unless yv12 \u003d\u003d NULL is atypical) and drop the ()s around the yv12 check",
+      "revId": "0ea3ce1eb6c021dd9bcb4bb2a29f3ae6b72ca6fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
