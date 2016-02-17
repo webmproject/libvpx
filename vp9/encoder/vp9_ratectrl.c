@@ -45,6 +45,8 @@
 
 #define FRAME_OVERHEAD_BITS 200
 
+#define LIMIT_QP_ONEPASS_VBR_LAG 0
+
 #if CONFIG_VP9_HIGHBITDEPTH
 #define ASSIGN_MINQ_TABLE(bit_depth, name) \
   do { \
@@ -338,11 +340,16 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->total_target_bits = 0;
   rc->total_target_vs_actual = 0;
   rc->avg_frame_low_motion = 0;
-  rc->high_source_sad = 0;
   rc->count_last_scene_change = 0;
-  rc->avg_source_sad = 0;
   rc->af_ratio_onepass_vbr = 10;
-
+  rc->prev_avg_source_sad_lag = 0;
+  rc->high_source_sad = 0;
+  rc->high_source_sad_lagindex = -1;
+  rc->fac_active_worst_inter = 150;
+  rc->fac_active_worst_gf = 100;
+  rc->force_qpmin = 0;
+  for (i = 0; i < MAX_LAG_BUFFERS; ++i)
+    rc->avg_source_sad[i] = 0;
   rc->frames_since_key = 8;  // Sensible default for first frame.
   rc->this_key_frame_forced = 0;
   rc->next_key_frame_forced = 0;
@@ -630,12 +637,11 @@ static int calc_active_worst_quality_one_pass_vbr(const VP9_COMP *cpi) {
   } else {
     if (!rc->is_src_frame_alt_ref &&
         (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
-      active_worst_quality =  curr_frame == 1 ? rc->last_q[KEY_FRAME] * 5 >> 2
-                                              : rc->last_q[INTER_FRAME];
+      active_worst_quality =  curr_frame == 1 ? rc->last_q[KEY_FRAME] * 5 >> 2 :
+          rc->last_q[INTER_FRAME] * rc->fac_active_worst_gf / 100;
     } else {
       active_worst_quality = curr_frame == 1 ? rc->last_q[KEY_FRAME] << 1 :
-          VPXMIN(rc->last_q[INTER_FRAME] << 1,
-                (rc->avg_frame_qindex[INTER_FRAME] * 3 >> 1));
+          rc->avg_frame_qindex[INTER_FRAME] * rc->fac_active_worst_inter / 100;
     }
   }
   return VPXMIN(active_worst_quality, rc->worst_quality);
@@ -975,6 +981,14 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                               rc->best_quality, rc->worst_quality);
   active_worst_quality = clamp(active_worst_quality,
                                active_best_quality, rc->worst_quality);
+
+#if LIMIT_QP_ONEPASS_VBR_LAG
+  if (oxcf->lag_in_frames > 0 && oxcf->rc_mode == VPX_VBR) {
+    if (rc->force_qpmin > 0 && active_best_quality < rc->force_qpmin)
+      active_best_quality = clamp(active_best_quality,
+                                  rc->force_qpmin, rc->worst_quality);
+  }
+#endif
 
   *top_index = active_worst_quality;
   *bottom_index = active_best_quality;
@@ -1508,24 +1522,25 @@ static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
 
-static void adjust_gf_key_frame(VP9_COMP *cpi) {
+static void adjust_gfint_frame_constraint(VP9_COMP *cpi, int frame_constraint) {
   RATE_CONTROL *const rc = &cpi->rc;
   rc->constrained_gf_group = 0;
-  // Reset gf interval to make more equal spacing for up-coming key frame.
-  if ((rc->frames_to_key <= 7 * rc->baseline_gf_interval >> 2) &&
-      (rc->frames_to_key > rc->baseline_gf_interval)) {
-    rc->baseline_gf_interval = rc->frames_to_key >> 1;
+  // Reset gf interval to make more equal spacing for frame_constraint.
+  if ((frame_constraint <= 7 * rc->baseline_gf_interval >> 2) &&
+      (frame_constraint > rc->baseline_gf_interval)) {
+    rc->baseline_gf_interval = frame_constraint >> 1;
     if (rc->baseline_gf_interval < 5)
-      rc->baseline_gf_interval = rc->frames_to_key;
+      rc->baseline_gf_interval = frame_constraint;
     rc->constrained_gf_group = 1;
   } else {
-    // Reset since frames_till_gf_update_due must be <= frames_to_key.
-    if (rc->baseline_gf_interval > rc->frames_to_key) {
-      rc->baseline_gf_interval = rc->frames_to_key;
+    // Reset to keep gf_interval <= frame_constraint.
+    if (rc->baseline_gf_interval > frame_constraint) {
+      rc->baseline_gf_interval = frame_constraint;
       rc->constrained_gf_group = 1;
     }
   }
 }
+
 void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1573,7 +1588,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
           (rc->avg_frame_low_motion << 1) / (rc->avg_frame_low_motion + 100));
       rc->af_ratio_onepass_vbr = VPXMIN(15, VPXMAX(5, 3 * rc->gfu_boost / 400));
     }
-    adjust_gf_key_frame(cpi);
+    adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     cpi->refresh_golden_frame = 1;
     rc->source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
@@ -2087,12 +2102,134 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   return resize_action;
 }
 
+void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
+  VP9_COMMON * const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  int target;
+  int found = 0;
+  int found2 = 0;
+  int frame;
+  int i;
+  uint64_t avg_source_sad_lag = avg_sad_current;
+  int high_source_sad_lagindex = -1;
+  int steady_sad_lagindex = -1;
+  uint32_t sad_thresh1 = 60000;
+  uint32_t sad_thresh2 = 120000;
+  int low_content = 0;
+  int high_content = 0;
+  double rate_err = 1.0;
+  // Get measure of complexity over the future frames, and get the first
+  // future frame with high_source_sad/scene-change.
+  int tot_frames = vp9_lookahead_depth(cpi->lookahead) - 1;
+  for (frame = tot_frames; frame >= 1; --frame) {
+    const int lagframe_idx = tot_frames - frame + 1;
+    uint64_t reference_sad = rc->avg_source_sad[0];
+    for (i = 1; i < lagframe_idx; ++i) {
+      if (rc->avg_source_sad[i] > 0)
+        reference_sad = (3 * reference_sad + rc->avg_source_sad[i]) >> 2;
+    }
+    // Detect up-coming scene change.
+    if (!found &&
+        (rc->avg_source_sad[lagframe_idx] > VPXMAX(sad_thresh1,
+        (unsigned int)(reference_sad << 1)) ||
+        rc->avg_source_sad[lagframe_idx] > VPXMAX(3 * sad_thresh1 >> 2,
+        (unsigned int)(reference_sad << 2)))) {
+      high_source_sad_lagindex = lagframe_idx;
+      found = 1;
+    }
+    // Detect change from motion to steady.
+    if (!found2 && lagframe_idx > 1 && lagframe_idx < tot_frames &&
+        rc->avg_source_sad[lagframe_idx - 1] > (sad_thresh1 >> 2)) {
+      found2 = 1;
+      for (i = lagframe_idx; i < tot_frames; ++i) {
+       if (!(rc->avg_source_sad[i] > 0 &&
+         rc->avg_source_sad[i] < (sad_thresh1 >> 2) &&
+         rc->avg_source_sad[i] < (rc->avg_source_sad[lagframe_idx - 1] >> 1))) {
+         found2 = 0;
+         i = tot_frames;
+       }
+      }
+      if (found2)
+        steady_sad_lagindex = lagframe_idx;
+    }
+    avg_source_sad_lag += rc->avg_source_sad[lagframe_idx];
+  }
+  if (tot_frames > 0)
+    avg_source_sad_lag = avg_source_sad_lag / tot_frames;
+  // Constrain distance between detected scene cuts.
+  if (high_source_sad_lagindex != -1 &&
+      high_source_sad_lagindex != rc->high_source_sad_lagindex - 1 &&
+      abs(high_source_sad_lagindex - rc->high_source_sad_lagindex) < 4)
+    rc->high_source_sad_lagindex = -1;
+  else
+    rc->high_source_sad_lagindex = high_source_sad_lagindex;
+  // Adjust some factors for the next GF group, ignore initial key frame,
+  // and only for lag_in_frames not too small.
+  if (cpi->refresh_golden_frame == 1 &&
+      cm->frame_type != KEY_FRAME &&
+      cm->current_video_frame > 30 &&
+      cpi->oxcf.lag_in_frames > 8) {
+    int frame_constraint;
+    if (rc->rolling_target_bits > 0)
+      rate_err =
+              (double)rc->rolling_actual_bits / (double)rc->rolling_target_bits;
+    high_content = high_source_sad_lagindex != -1 ||
+        avg_source_sad_lag > (rc->prev_avg_source_sad_lag << 1) ||
+        avg_source_sad_lag > sad_thresh2;
+    low_content = high_source_sad_lagindex == -1 &&
+        ((avg_source_sad_lag < (rc->prev_avg_source_sad_lag >> 1)) ||
+        (avg_source_sad_lag < sad_thresh1));
+    if (low_content) {
+      rc->gfu_boost = DEFAULT_GF_BOOST;
+      rc->baseline_gf_interval =
+          VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
+    } else if (high_content) {
+      rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
+      rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
+    }
+    // Check for constraining gf_interval for up-coming scene/content changes,
+    // or for up-coming key frame, whichever is closer.
+    frame_constraint = rc->frames_to_key;
+    if (rc->high_source_sad_lagindex > 0 &&
+        frame_constraint > rc->high_source_sad_lagindex)
+      frame_constraint = rc->high_source_sad_lagindex;
+    if (steady_sad_lagindex > 0 && steady_sad_lagindex > 2 &&
+        frame_constraint > steady_sad_lagindex)
+      frame_constraint = steady_sad_lagindex;
+    adjust_gfint_frame_constraint(cpi, frame_constraint);
+    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+    // Adjust factors for active_worst setting & af_ratio for next gf interval.
+    rc->fac_active_worst_inter = 150;  // corresponds to 3/2 (= 150 /100).
+    rc->fac_active_worst_gf = 100;
+    if (rate_err < 1.5 && !high_content) {
+      rc->fac_active_worst_inter = 120;
+      rc->fac_active_worst_gf = 90;
+    }
+    if (low_content && rc->avg_frame_low_motion > 80) {
+      rc->af_ratio_onepass_vbr = 15;
+    }
+    else if (high_content || rc->avg_frame_low_motion < 30) {
+      rc->af_ratio_onepass_vbr = 5;
+      rc->gfu_boost = DEFAULT_GF_BOOST >> 2;
+    }
+    target = calc_pframe_target_size_one_pass_vbr(cpi);
+    vp9_rc_set_frame_target(cpi, target);
+#if LIMIT_QP_ONEPASS_VBR_LAG
+    if (rc->avg_frame_low_motion > 85 &&
+        avg_source_sad_lag < (sad_thresh1 >> 1))
+      rc->force_qpmin = 48;
+    else
+      rc->force_qpmin = 0;
+#endif
+  }
+  rc->prev_avg_source_sad_lag = avg_source_sad_lag;
+}
+
 // Compute average source sad (temporal sad: between current source and
 // previous source) over a subset of superblocks. Use this is detect big changes
 // in content and allow rate control to react.
-// TODO(marpan): Superblock sad is computed again in variance partition for
-// non-rd mode (but based on last reconstructed frame). Should try to reuse
-// these computations.
+// This function also handles special case of lag_in_frames, to measure content
+// level in #future frames set by the lag_in_frames.
 void vp9_avg_source_sad(VP9_COMP *cpi) {
   VP9_COMMON * const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2100,58 +2237,113 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
   if (cpi->Last_Source != NULL &&
       cpi->Last_Source->y_width == cpi->Source->y_width &&
       cpi->Last_Source->y_height == cpi->Source->y_height) {
-    const uint8_t *src_y = cpi->Source->y_buffer;
-    const int src_ystride = cpi->Source->y_stride;
-    const uint8_t *last_src_y = cpi->Last_Source->y_buffer;
-    const int last_src_ystride = cpi->Last_Source->y_stride;
-    int sbi_row, sbi_col;
-    const BLOCK_SIZE bsize = BLOCK_64X64;
+    YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS] = {NULL};
+    uint8_t *src_y = cpi->Source->y_buffer;
+    int src_ystride = cpi->Source->y_stride;
+    uint8_t *last_src_y = cpi->Last_Source->y_buffer;
+    int last_src_ystride = cpi->Last_Source->y_stride;
+    int start_frame = 0;
+    int frames_to_buffer = 1;
+    int frame = 0;
+    uint64_t avg_sad_current = 0;
     uint32_t min_thresh = 4000;
     float thresh = 8.0f;
-    // Loop over sub-sample of frame, and compute average sad over 64x64 blocks.
-    uint64_t avg_sad = 0;
-    int num_samples = 0;
-    int sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
-    int sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
-    for (sbi_row = 0; sbi_row < sb_rows; sbi_row ++) {
-      for (sbi_col = 0; sbi_col < sb_cols; sbi_col ++) {
-        // Checker-board pattern, ignore boundary.
-        if ((sbi_row > 0 && sbi_col > 0) &&
-            (sbi_row < sb_rows - 1 && sbi_col < sb_cols - 1) &&
-            ((sbi_row % 2 == 0 && sbi_col % 2 == 0) ||
-            (sbi_row % 2 != 0 && sbi_col % 2 != 0))) {
-          num_samples++;
-          avg_sad += cpi->fn_ptr[bsize].sdf(src_y,
-                                            src_ystride,
-                                            last_src_y,
-                                            last_src_ystride);
-        }
-        src_y += 64;
-        last_src_y += 64;
-      }
-      src_y += (src_ystride << 6) - (sb_cols << 6);
-      last_src_y += (last_src_ystride << 6) - (sb_cols << 6);
-    }
-    if (num_samples > 0)
-      avg_sad = avg_sad / num_samples;
-    // Set high_source_sad flag if we detect very high increase in avg_sad
-    // between current and the previous frame value(s). Use a minimum threshold
-    // for cases where there is small change from content that is completely
-    // static.
     if (cpi->oxcf.rc_mode == VPX_VBR) {
       min_thresh = 60000;
       thresh = 2.1f;
     }
-    if (avg_sad >
-        VPXMAX(min_thresh, (unsigned int)(rc->avg_source_sad  * thresh)) &&
-        rc->frames_since_key > 1)
-      rc->high_source_sad = 1;
-    else
-      rc->high_source_sad = 0;
-    if (avg_sad > 0 || cpi->oxcf.rc_mode == VPX_CBR)
-      rc->avg_source_sad = (3 * rc->avg_source_sad + avg_sad) >> 2;
+    if (cpi->oxcf.lag_in_frames > 0) {
+      frames_to_buffer = (cm->current_video_frame == 1) ?
+          vp9_lookahead_depth(cpi->lookahead) - 1: 2;
+      start_frame = vp9_lookahead_depth(cpi->lookahead) - 1;
+      for (frame = 0; frame < frames_to_buffer; ++frame) {
+        const int lagframe_idx = start_frame - frame;
+        if (lagframe_idx >= 0) {
+          struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
+                                                           lagframe_idx);
+          frames[frame] = &buf->img;
+        }
+      }
+      // The avg_sad for this current frame is the value of frame#1
+      // (first future frame) from previous frame.
+      avg_sad_current = rc->avg_source_sad[1];
+      if (avg_sad_current > VPXMAX(min_thresh,
+          (unsigned int)(rc->avg_source_sad[0] * thresh)) &&
+          cm->current_video_frame > (unsigned int)cpi->oxcf.lag_in_frames)
+        rc->high_source_sad = 1;
+      else
+        rc->high_source_sad = 0;
+      // Update recursive average for current frame.
+      if (avg_sad_current > 0)
+        rc->avg_source_sad[0] = (3 * rc->avg_source_sad[0] +
+            avg_sad_current) >> 2;
+      // Shift back data, starting at frame#1.
+      for (frame = 1; frame < cpi->oxcf.lag_in_frames - 1; ++frame)
+        rc->avg_source_sad[frame] = rc->avg_source_sad[frame + 1];
+    }
+    for (frame = 0; frame < frames_to_buffer; ++frame) {
+      if (cpi->oxcf.lag_in_frames == 0 ||
+          (frames[frame] != NULL &&
+           frames[frame + 1] != NULL &&
+           frames[frame]->y_width == frames[frame + 1]->y_width &&
+           frames[frame]->y_height == frames[frame + 1]->y_height)) {
+        int sbi_row, sbi_col;
+        const int lagframe_idx = (cpi->oxcf.lag_in_frames == 0) ? 0 :
+            start_frame - frame + 1;
+        const BLOCK_SIZE bsize = BLOCK_64X64;
+        // Loop over sub-sample of frame, compute average sad over 64x64 blocks.
+        uint64_t avg_sad = 0;
+        int num_samples = 0;
+        int sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
+        int sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
+        if (cpi->oxcf.lag_in_frames > 0) {
+          src_y = frames[frame]->y_buffer;
+          src_ystride = frames[frame]->y_stride;
+          last_src_y = frames[frame + 1]->y_buffer;
+          last_src_ystride = frames[frame + 1]->y_stride;
+        }
+        for (sbi_row = 0; sbi_row < sb_rows; ++sbi_row) {
+          for (sbi_col = 0; sbi_col < sb_cols; ++sbi_col) {
+            // Checker-board pattern, ignore boundary.
+            if ((sbi_row > 0 && sbi_col > 0) &&
+                (sbi_row < sb_rows - 1 && sbi_col < sb_cols - 1) &&
+                ((sbi_row % 2 == 0 && sbi_col % 2 == 0) ||
+                (sbi_row % 2 != 0 && sbi_col % 2 != 0))) {
+              num_samples++;
+              avg_sad += cpi->fn_ptr[bsize].sdf(src_y,
+                                                src_ystride,
+                                                last_src_y,
+                                                last_src_ystride);
+            }
+            src_y += 64;
+            last_src_y += 64;
+          }
+          src_y += (src_ystride << 6) - (sb_cols << 6);
+          last_src_y += (last_src_ystride << 6) - (sb_cols << 6);
+        }
+        if (num_samples > 0)
+          avg_sad = avg_sad / num_samples;
+        // Set high_source_sad flag if we detect very high increase in avg_sad
+        // between current and previous frame value(s). Use minimum threshold
+        // for cases where there is small change from content that is completely
+        // static.
+        if (lagframe_idx == 0) {
+          if (avg_sad > VPXMAX(min_thresh,
+                              (unsigned int)(rc->avg_source_sad[0] * thresh)) &&
+                               rc->frames_since_key > 1)
+            rc->high_source_sad = 1;
+          else
+            rc->high_source_sad = 0;
+          if (avg_sad > 0 || cpi->oxcf.rc_mode == VPX_CBR)
+            rc->avg_source_sad[0] = (3 * rc->avg_source_sad[0] + avg_sad) >> 2;
+        } else {
+          rc->avg_source_sad[lagframe_idx] = avg_sad;
+        }
+      }
+    }
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR &&
+        cm->frame_type != KEY_FRAME &&
         rc->high_source_sad &&
         rc->frames_to_key > 3 &&
         rc->count_last_scene_change > 4 &&
@@ -2161,7 +2353,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
       rc->baseline_gf_interval = VPXMIN(20,
           VPXMAX(10, rc->baseline_gf_interval));
-      adjust_gf_key_frame(cpi);
+      adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
       target = calc_pframe_target_size_one_pass_vbr(cpi);
       vp9_rc_set_frame_target(cpi, target);
@@ -2169,6 +2361,9 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     } else {
       rc->count_last_scene_change++;
     }
+    // If lag_in_frame is used, set the gf boost and interval.
+    if (cpi->oxcf.lag_in_frames > 0)
+      adjust_gf_boost_lag_one_pass_vbr(cpi, avg_sad_current);
   }
 }
 
