@@ -22,6 +22,30 @@
       "revId": "971f993bba0365b85a0763c7f1e4904ba9efa373",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd9478c3_7be07fdf",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-17T23:18:32Z",
+      "side": 1,
+      "message": "local style is quite mixed on this. I tend toward \u003d\u003d NULL, but as I started adding these I got into this pattern. I can update them.",
+      "parentUuid": "fdabfced_ac962366",
+      "range": {
+        "startLine": 465,
+        "startChar": 11,
+        "endLine": 465,
+        "endChar": 17
+      },
+      "revId": "971f993bba0365b85a0763c7f1e4904ba9efa373",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
