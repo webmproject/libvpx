@@ -16,6 +16,24 @@
       "revId": "efb93f518f4f4de265b7070eef8603325fc6e2da",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d8fa87c_ccb65eba",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-17T20:47:41Z",
+      "side": 0,
+      "message": "ok - please confirm. I was assuming we always use --enable-row-tile --enable-key-frame-tile together, so there is no need to keep them separate.",
+      "parentUuid": "fd2a1c13_09853930",
+      "revId": "efb93f518f4f4de265b7070eef8603325fc6e2da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
