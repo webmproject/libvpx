@@ -12,9 +12,8 @@
 #include "vp9/encoder/vp9_cost.h"
 
 /* round(-log2(i/256.) * (1 << VP9_PROB_COST_SHIFT))
-   Begins and ends with a bogus entry to satisfy use of prob=0 in the firstpass.
-   https://code.google.com/p/webm/issues/detail?id=1089 */
-const uint16_t vp9_prob_cost[257] = {
+   Begins with a bogus entry for simpler addressing. */
+const uint16_t vp9_prob_cost[256] = {
     4096, 4096, 3584, 3284, 3072, 2907, 2772, 2659, 2560, 2473, 2395, 2325,
     2260, 2201, 2147, 2096, 2048, 2003, 1961, 1921, 1883, 1847, 1813, 1780,
     1748, 1718, 1689, 1661, 1635, 1609, 1584, 1559, 1536, 1513, 1491, 1470,
@@ -36,13 +35,14 @@ const uint16_t vp9_prob_cost[257] = {
     125,  122,  119,  115,  112,  109,  105,  102,  99,   95,   92,   89,
     86,   82,   79,   76,   73,   70,   66,   63,   60,   57,   54,   51,
     48,   45,   42,   38,   35,   32,   29,   26,   23,   20,   18,   15,
-    12,   9,    6,    3,     3};
+    12,   9,    6,    3};
 
 static void cost(int *costs, vpx_tree tree, const vpx_prob *probs,
                  int i, int c) {
   const vpx_prob prob = probs[i / 2];
   int b;
 
+  assert(prob != 0);
   for (b = 0; b <= 1; ++b) {
     const int cc = c + vp9_cost_bit(prob, b);
     const vpx_tree_index ii = tree[i + b];
