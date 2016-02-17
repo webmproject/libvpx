@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx_ports/vpx_once.h"
+#include "vpx_ports/system_state.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vpx_version.h"
 #include "vp10/encoder/encoder.h"
@@ -885,9 +886,10 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
                                       const vpx_image_t *img,
                                       vpx_codec_pts_t pts,
                                       unsigned long duration,
-                                      vpx_enc_frame_flags_t flags,
+                                      vpx_enc_frame_flags_t enc_flags,
                                       unsigned long deadline) {
-  vpx_codec_err_t res = VPX_CODEC_OK;
+  volatile vpx_codec_err_t res = VPX_CODEC_OK;
+  volatile vpx_enc_frame_flags_t flags = enc_flags;
   VP10_COMP *const cpi = ctx->cpi;
   const vpx_rational_t *const timebase = &ctx->cfg.g_timebase;
   size_t data_sz;
@@ -925,6 +927,14 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
     ctx->base.err_detail = "Conflicting flags.";
     return VPX_CODEC_INVALID_PARAM;
   }
+
+  if (setjmp(cpi->common.error.jmp)) {
+    cpi->common.error.setjmp = 0;
+    res = update_error_state(ctx, &cpi->common.error);
+    vpx_clear_system_state();
+    return res;
+  }
+  cpi->common.error.setjmp = 1;
 
   vp10_apply_encoding_flags(cpi, flags);
 
@@ -976,7 +986,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
        * the buffer size anyway.
        */
       if (cx_data_sz < ctx->cx_data_sz / 2) {
-        ctx->base.err_detail = "Compressed data buffer too small";
+        vpx_internal_error(&cpi->common.error, VPX_CODEC_ERROR,
+                           "Compressed data buffer too small");
         return VPX_CODEC_ERROR;
       }
     }
@@ -1065,6 +1076,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
     }
   }
 
+  cpi->common.error.setjmp = 0;
   return res;
 }
 

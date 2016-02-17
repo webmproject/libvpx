@@ -3808,20 +3808,14 @@ static void setup_denoiser_buffer(VP10_COMP *cpi) {
 int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
-  VP10_COMMON *volatile const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   struct vpx_usec_timer timer;
-  volatile int res = 0;
+  int res = 0;
   const int subsampling_x = sd->subsampling_x;
   const int subsampling_y = sd->subsampling_y;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int use_highbitdepth = (sd->flags & YV12_FLAG_HIGHBITDEPTH) != 0;
 #endif
-
-  if (setjmp(cm->error.jmp)) {
-    cm->error.setjmp = 0;
-    return -1;
-  }
-  cm->error.setjmp = 1;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   check_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
@@ -3856,7 +3850,6 @@ int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
     res = -1;
   }
 
-  cm->error.setjmp = 0;
   return res;
 }
 
