@@ -1195,8 +1195,9 @@ static void resize_mv_buffer(VP10_COMMON *cm) {
   vpx_free(cm->cur_frame->mvs);
   cm->cur_frame->mi_rows = cm->mi_rows;
   cm->cur_frame->mi_cols = cm->mi_cols;
-  cm->cur_frame->mvs = (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
-                                            sizeof(*cm->cur_frame->mvs));
+  CHECK_MEM_ERROR(cm, cm->cur_frame->mvs,
+                  (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
+                                       sizeof(*cm->cur_frame->mvs)));
 }
 
 static void resize_context_buffers(VP10_COMMON *cm, int width, int height) {
