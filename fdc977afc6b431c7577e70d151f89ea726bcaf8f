@@ -16,6 +16,24 @@
       "revId": "fdc977afc6b431c7577e70d151f89ea726bcaf8f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d862c98_a02f3a86",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-17T23:43:05Z",
+      "side": 0,
+      "message": "I can restore it for now, but it follows a calloc so isn\u0027t really necessary",
+      "parentUuid": "5d8968a7_3fc50705",
+      "revId": "fdc977afc6b431c7577e70d151f89ea726bcaf8f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
