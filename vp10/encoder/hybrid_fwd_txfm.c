@@ -69,8 +69,6 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_fht4x4(src_diff, coeff, diff_stride, tx_type);
-      break;
     case DST_DST:
     case DCT_DST:
     case DST_DCT:
@@ -78,8 +76,7 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_DST:
     case DST_FLIPADST:
     case FLIPADST_DST:
-      // Use C version since DST exists only in C
-      vp10_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
+      vp10_fht4x4(src_diff, coeff, diff_stride, tx_type);
       break;
     case IDTX:
       fwd_idtx_c(src_diff, coeff, diff_stride, 4);
