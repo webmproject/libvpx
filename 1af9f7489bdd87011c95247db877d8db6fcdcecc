@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1dc45060_8f8ae9d6",
+        "filename": "vp10/encoder/rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-02-17T20:56:14Z",
+      "side": 1,
+      "message": "wouldn\u0027t it be better to address this at the source (when generating the probas p[]) instead of curing the symptoms here?",
+      "range": {
+        "startLine": 158,
+        "startChar": 36,
+        "endLine": 158,
+        "endChar": 37
+      },
+      "revId": "1af9f7489bdd87011c95247db877d8db6fcdcecc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
