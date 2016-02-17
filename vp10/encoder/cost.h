@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-extern const uint16_t vp10_prob_cost[257];
+extern const uint16_t vp10_prob_cost[256];
 
 // The factor to scale from cost in bits to cost in vp10_prob_cost units.
 #define VP9_PROB_COST_SHIFT 9
