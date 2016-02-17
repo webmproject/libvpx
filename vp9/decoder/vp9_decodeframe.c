@@ -2959,7 +2959,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     winterface->execute(&pbi->lf_worker);
   }
 
-#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+#if CONFIG_ROW_TILE
   return data_end;
 #endif
 

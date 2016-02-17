@@ -310,14 +310,9 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
   cm = &ctx->pbi->common;
 
 #if CONFIG_ROW_TILE
-#if CONFIG_KEY_FRAME_TILE
   ctx->pbi->dec_tile_row = ctx->cfg.tile_row;
   ctx->pbi->dec_tile_col = ctx->cfg.tile_col;
-#else
-  ctx->pbi->dec_tile_row = -1;
-  ctx->pbi->dec_tile_col = -1;
-#endif
-#endif
+#endif  // CONFIG_ROW_TILE
 
   if (vp9_receive_compressed_data(ctx->pbi, data_sz, data))
     return update_error_state(ctx, &cm->error);

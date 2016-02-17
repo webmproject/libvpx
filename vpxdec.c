@@ -91,7 +91,7 @@ static const arg_def_t md5arg = ARG_DEF(
 static const arg_def_t outbitdeptharg = ARG_DEF(
     NULL, "output-bit-depth", 1, "Output bit-depth for decoded frames");
 #endif
-#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+#if CONFIG_ROW_TILE
 static const arg_def_t tiler = ARG_DEF(
     NULL, "tile-row", 1, "Row tile index");
 static const arg_def_t tilec = ARG_DEF(
@@ -106,7 +106,7 @@ static const arg_def_t *all_args[] = {
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   &outbitdeptharg,
 #endif
-#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+#if CONFIG_ROW_TILE
   &tiler, &tilec,
 #endif
   NULL
@@ -570,7 +570,7 @@ int main_loop(int argc, const char **argv_) {
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   int                     output_bit_depth = 0;
 #endif
-#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+#if CONFIG_ROW_TILE
   int                     tile_row = -1;
   int                     tile_col = -1;
 #endif
@@ -668,7 +668,7 @@ int main_loop(int argc, const char **argv_) {
       output_bit_depth = arg_parse_uint(&arg);
     }
 #endif
-#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+#if CONFIG_ROW_TILE
     else if (arg_match(&arg, &tiler, argi))
       tile_row = arg_parse_int(&arg);
     else if (arg_match(&arg, &tilec, argi))
@@ -812,7 +812,7 @@ int main_loop(int argc, const char **argv_) {
   if (!interface)
     interface = get_vpx_decoder_by_index(0);
 
-#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+#if CONFIG_ROW_TILE
   cfg.tile_row = tile_row;
   cfg.tile_col = tile_col;
 #endif
@@ -1014,7 +1014,7 @@ int main_loop(int argc, const char **argv_) {
       }
 #endif
 
-#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+#if CONFIG_ROW_TILE
       vpx_input_ctx.width = img->d_w;
       vpx_input_ctx.height = img->d_h;
 #endif
