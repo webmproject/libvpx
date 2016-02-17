@@ -974,11 +974,11 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
   const vpx_rational_t *const timebase = &ctx->cfg.g_timebase;
   size_t data_sz;
 
+  if (cpi == NULL) return VPX_CODEC_INVALID_PARAM;
+
   if (img != NULL) {
     res = validate_img(ctx, img);
-    // TODO(jzern) the checks related to cpi's validity should be treated as a
-    // failure condition, encoder setup is done fully in init() currently.
-    if (res == VPX_CODEC_OK && cpi != NULL) {
+    if (res == VPX_CODEC_OK) {
       // There's no codec control for multiple alt-refs so check the encoder
       // instance for its status to determine the compressed data size.
       data_sz = ctx->cfg.g_w * ctx->cfg.g_h * get_image_bps(img) / 8 *
@@ -1017,8 +1017,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
     }
   }
 
-  // Initialize the encoder instance on the first frame.
-  if (res == VPX_CODEC_OK && cpi != NULL) {
+  if (res == VPX_CODEC_OK) {
     unsigned int lib_flags = 0;
     YV12_BUFFER_CONFIG sd;
     int64_t dst_time_stamp = timebase_units_to_ticks(timebase, pts);
