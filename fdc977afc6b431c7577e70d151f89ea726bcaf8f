@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d8968a7_3fc50705",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-02-17T23:36:54Z",
+      "side": 0,
+      "message": "this memset was removed?",
+      "revId": "fdc977afc6b431c7577e70d151f89ea726bcaf8f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
