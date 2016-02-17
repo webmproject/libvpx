@@ -22,6 +22,30 @@
       "revId": "9d5010e523895cca230766236bbcc8029d957583",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d9034ca_5efad58c",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-17T23:21:04Z",
+      "side": 1,
+      "message": "yes. one big vp9_remove_compressor is done after longjmp",
+      "parentUuid": "9dda00a8_a9961d66",
+      "range": {
+        "startLine": 134,
+        "startChar": 24,
+        "endLine": 134,
+        "endChar": 34
+      },
+      "revId": "9d5010e523895cca230766236bbcc8029d957583",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
