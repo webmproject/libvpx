@@ -22,6 +22,30 @@
       "revId": "73f45fcf0b2144d7b84014dd5a7e9b486d03fba1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd7ab832_e02ec842",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1017,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-17T06:46:47Z",
+      "side": 1,
+      "message": "shouldn\u0027t matter. it\u0027s used by vpx_internal_error to longjmp; in the branch it means it did and afterward it\u0027s allowed",
+      "parentUuid": "1ddb703a_f1b43000",
+      "range": {
+        "startLine": 1017,
+        "startChar": 2,
+        "endLine": 1017,
+        "endChar": 5
+      },
+      "revId": "73f45fcf0b2144d7b84014dd5a7e9b486d03fba1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
