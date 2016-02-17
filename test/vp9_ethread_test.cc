@@ -62,7 +62,7 @@ class VPxEncoderThreadTest
     encoder_initialized_ = false;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource * /*video*/,
                                   ::libvpx_test::Encoder *encoder) {
     if (!encoder_initialized_) {
       // Encode 4 column tiles.
