@@ -5334,8 +5334,9 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (this_mode == NEARMV && is_comp_pred) {
     uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
     if (mbmi_ext->ref_mv_count[ref_frame_type] > 1) {
-      cur_mv[0] = mbmi_ext->ref_mv_stack[ref_frame_type][1].this_mv;
-      cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][1].comp_mv;
+      int ref_mv_idx = mbmi->ref_mv_idx + 1;
+      cur_mv[0] = mbmi_ext->ref_mv_stack[ref_frame_type][ref_mv_idx].this_mv;
+      cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][ref_mv_idx].comp_mv;
 
       for (i = 0; i < 2; ++i) {
         lower_mv_precision(&cur_mv[i].as_mv, cm->allow_high_precision_mv);
