@@ -258,7 +258,7 @@ void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
     (double)total_sse);
 }
 
-#else  // !CONFIG_VP9_HIGHBITDEPTH
+#endif  // !CONFIG_VP9_HIGHBITDEPTH
 
 void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   PSNR_STATS *psnr) {
@@ -295,4 +295,3 @@ void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, peak,
     (double)total_sse);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
