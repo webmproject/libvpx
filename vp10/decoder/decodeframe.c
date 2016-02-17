@@ -2322,7 +2322,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
           for (col = 0; col < max_blocks_wide; col += step)
             eobtotal += reconstruct_inter_block(xd,
 #if CONFIG_ANS
-                                                pbi->token_tab, tok,
+                                                cm->token_tab, tok,
 #else
                                                 r,
 #endif

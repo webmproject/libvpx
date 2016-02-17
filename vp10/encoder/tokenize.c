@@ -693,14 +693,6 @@ void vp10_tokenize_sb(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       vp10_foreach_transformed_block_in_plane(xd, bsize, plane, tokenize_b,
                                               &arg);
       (*t)->token = EOSB_TOKEN;
-#if CONFIG_ANS
-      // TODO(aconverse): clip the number of bits in tokenize_b
-      // Smuggle TX_SIZE in the unused extrabits field so the ANS encoder
-      // knows the maximum number of extrabits to write at the end of the block
-      // (where it starts).
-      (*t)->extra = (EXTRABIT)(plane ? get_uv_tx_size(mbmi, &xd->plane[plane])
-                                     : mbmi->tx_size);
-#endif  // CONFIG_ANS
       (*t)++;
     }
   } else {

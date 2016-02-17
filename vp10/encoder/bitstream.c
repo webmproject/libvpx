@@ -28,6 +28,7 @@
 #include "vp10/common/seg_common.h"
 #include "vp10/common/tile_common.h"
 
+#include "vp10/encoder/buf_ans.h"
 #include "vp10/encoder/cost.h"
 #include "vp10/encoder/bitstream.h"
 #include "vp10/encoder/encodemv.h"
@@ -659,65 +660,85 @@ static void pack_mb_tokens(vpx_writer *w,
   *tp = p;
 }
 #else
-// This function serializes the tokens backwards both in token order and
-// bit order in each token.
-static void pack_mb_tokens_ans(struct AnsCoder *const ans,
-                               rans_dec_lut token_tab[COEFF_PROB_MODELS],
-                               const TOKENEXTRA *const start,
+// This function serializes the tokens in forward order using a buffered ans
+// coder.
+static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
+                               const rans_dec_lut token_tab[COEFF_PROB_MODELS],
+                               TOKENEXTRA **tp,
                                const TOKENEXTRA *const stop,
-                               vpx_bit_depth_t bit_depth) {
-  const TOKENEXTRA *p;
-  TX_SIZE tx_size = TX_SIZES;
+                               vpx_bit_depth_t bit_depth,
+                               const TX_SIZE tx) {
+  TOKENEXTRA *p = *tp;
+#if CONFIG_VAR_TX
+  int count = 0;
+  const int seg_eob = 16 << (tx << 1);
+#endif  // CONFIG_VAR_TX
 
-  for (p = stop - 1; p >= start; --p) {
+  while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
-    if (t == EOSB_TOKEN) {
-      tx_size = (TX_SIZE)p->extra;
-    } else {
 #if CONFIG_VP9_HIGHBITDEPTH
-    const vp10_extra_bit *const b =
-      (bit_depth == VPX_BITS_12) ? &vp10_extra_bits_high12[t] :
-      (bit_depth == VPX_BITS_10) ? &vp10_extra_bits_high10[t] :
-      &vp10_extra_bits[t];
+    const vp10_extra_bit *b;
+    if (bit_depth == VPX_BITS_12)
+      b = &vp10_extra_bits_high12[t];
+    else if (bit_depth == VPX_BITS_10)
+      b = &vp10_extra_bits_high10[t];
+    else
+      b = &vp10_extra_bits[t];
 #else
     const vp10_extra_bit *const b = &vp10_extra_bits[t];
-    (void) bit_depth;
+    (void)bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-    if (t != EOB_TOKEN && t != ZERO_TOKEN) {
-      // Write extra bits first
-      const int e = p->extra;
-      const int l = b->len;
-      const int skip_bits = (t == CATEGORY6_TOKEN) ? TX_SIZES - 1 - tx_size : 0;
-      assert(tx_size < TX_SIZES);
-      uabs_write(ans, e & 1, 128);
-      if (l) {
-        const int v = e >> 1;
-        int n;
-        for (n = 0; n < l - skip_bits; ++n) {
-          const int bb = (v >> n) & 1;
-          uabs_write(ans, bb, b->prob[l - 1 - n]);
-        }
-        for (; n < l; ++n) {
-          assert(((v >> n) & 1) == 0);
-        }
-      }
+    /* skip one or two nodes */
+    if (!p->skip_eob_node)
+      buf_uabs_write(ans, t != EOB_TOKEN, p->context_tree[0]);
 
-      {
+    if (t != EOB_TOKEN) {
+      buf_uabs_write(ans, t != ZERO_TOKEN, p->context_tree[1]);
+
+      if (t != ZERO_TOKEN) {
         struct rans_sym s;
         const rans_dec_lut *token_cdf =
             &token_tab[p->context_tree[PIVOT_NODE] - 1];
         s.cum_prob = (*token_cdf)[t - ONE_TOKEN];
         s.prob = (*token_cdf)[t - ONE_TOKEN + 1] - s.cum_prob;
-        rans_write(ans, &s);
+        buf_rans_write(ans, &s);
       }
     }
-    if (t != EOB_TOKEN)
-      uabs_write(ans, t != ZERO_TOKEN, p->context_tree[1]);
-    if (!p->skip_eob_node)
-      uabs_write(ans, t != EOB_TOKEN, p->context_tree[0]);
+
+    if (b->base_val) {
+      const int e = p->extra, l = b->len;
+      int skip_bits = (b->base_val == CAT6_MIN_VAL) ? TX_SIZES - 1 - tx : 0;
+
+      if (l) {
+        const unsigned char *pb = b->prob;
+        int v = e >> 1;
+        int n = l; /* number of bits in v, assumed nonzero */
+        int i = 0;
+
+        do {
+          const int bb = (v >> --n) & 1;
+          if (skip_bits) {
+            skip_bits--;
+            assert(!bb);
+          } else {
+            buf_uabs_write(ans, bb, pb[i >> 1]);
+          }
+          i = b->tree[i + bb];
+        } while (n);
+      }
+
+      buf_uabs_write(ans, e & 1, 128);
+    }
+    ++p;
+
+#if CONFIG_VAR_TX
+    ++count;
+    if (t == EOB_TOKEN || count == seg_eob) break;
+#endif  // CONFIG_VAR_TX
   }
-  }
+
+  *tp = p;
 }
 #endif  // !CONFIG_ANS
 
@@ -1436,8 +1457,11 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 }
 
 static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
-                          vpx_writer *w, TOKENEXTRA **tok,
-                          const TOKENEXTRA *const tok_end,
+                          vpx_writer *w,
+#if CONFIG_ANS
+                          struct BufAnsCoder *ans,
+#endif  // CONFIG_ANS
+                          TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
 #if CONFIG_SUPERTX
                           int supertx_enabled,
 #endif
@@ -1492,7 +1516,6 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   if (supertx_enabled) return;
 #endif  // CONFIG_SUPERTX
 
-#if !CONFIG_ANS
   if (!m->mbmi.skip) {
     assert(*tok < tok_end);
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
@@ -1528,18 +1551,26 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
 
         for (row = 0; row < num_4x4_h; row += bw)
           for (col = 0; col < num_4x4_w; col += bw)
+#if CONFIG_ANS
+            pack_mb_tokens_ans(ans, cm->token_tab, tok, tok_end, cm->bit_depth,
+                               tx);
+#else
             pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+#endif  // CONFIG_ANS
       }
 #else
       TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                          : m->mbmi.tx_size;
+#if CONFIG_ANS
+      pack_mb_tokens_ans(ans, cm->token_tab, tok, tok_end, cm->bit_depth, tx);
+#else
       pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+#endif  // CONFIG_ANS
 #endif  // CONFIG_VAR_TX
       assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
       (*tok)++;
     }
   }
-#endif
 }
 
 static void write_partition(const VP10_COMMON *const cm,
@@ -1564,8 +1595,11 @@ static void write_partition(const VP10_COMMON *const cm,
   }
 }
 
-static void write_modes_sb(VP10_COMP *cpi,
-                           const TileInfo *const tile, vpx_writer *w,
+static void write_modes_sb(VP10_COMP *cpi, const TileInfo *const tile,
+                           vpx_writer *w,
+#if CONFIG_ANS
+                           struct BufAnsCoder *ans,
+#endif  // CONFIG_ANS
                            TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
 #if CONFIG_SUPERTX
                            int supertx_enabled,
@@ -1634,7 +1668,11 @@ static void write_modes_sb(VP10_COMP *cpi,
   }
 #endif  // CONFIG_SUPERTX
   if (subsize < BLOCK_8X8) {
-    write_modes_b(cpi, tile, w, tok, tok_end,
+    write_modes_b(cpi, tile, w,
+#if CONFIG_ANS
+                  ans,
+#endif  // CONFIG_ANS
+                  tok, tok_end,
 #if CONFIG_SUPERTX
                   supertx_enabled,
 #endif  // CONFIG_SUPERTX
@@ -1642,55 +1680,91 @@ static void write_modes_sb(VP10_COMP *cpi,
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        write_modes_b(cpi, tile, w, tok, tok_end,
+        write_modes_b(cpi, tile, w,
+#if CONFIG_ANS
+                      ans,
+#endif  // CONFIG_ANS
+                      tok, tok_end,
 #if CONFIG_SUPERTX
                       supertx_enabled,
 #endif  // CONFIG_SUPERTX
                       mi_row, mi_col);
         break;
       case PARTITION_HORZ:
-        write_modes_b(cpi, tile, w, tok, tok_end,
+        write_modes_b(cpi, tile, w,
+#if CONFIG_ANS
+                      ans,
+#endif  // CONFIG_ANS
+                      tok, tok_end,
 #if CONFIG_SUPERTX
                       supertx_enabled,
 #endif  // CONFIG_SUPERTX
                       mi_row, mi_col);
         if (mi_row + bs < cm->mi_rows)
-          write_modes_b(cpi, tile, w, tok, tok_end,
+          write_modes_b(cpi, tile, w,
+#if CONFIG_ANS
+                        ans,
+#endif  // CONFIG_ANS
+                        tok, tok_end,
 #if CONFIG_SUPERTX
                         supertx_enabled,
 #endif  // CONFIG_SUPERTX
                         mi_row + bs, mi_col);
         break;
       case PARTITION_VERT:
-        write_modes_b(cpi, tile, w, tok, tok_end,
+        write_modes_b(cpi, tile, w,
+#if CONFIG_ANS
+                      ans,
+#endif  // CONFIG_ANS
+                      tok, tok_end,
 #if CONFIG_SUPERTX
                       supertx_enabled,
 #endif  // CONFIG_SUPERTX
                       mi_row, mi_col);
         if (mi_col + bs < cm->mi_cols)
-          write_modes_b(cpi, tile, w, tok, tok_end,
+          write_modes_b(cpi, tile, w,
+#if CONFIG_ANS
+                        ans,
+#endif  // CONFIG_ANS
+                        tok, tok_end,
 #if CONFIG_SUPERTX
                         supertx_enabled,
 #endif  // CONFIG_SUPERTX
                         mi_row, mi_col + bs);
         break;
       case PARTITION_SPLIT:
-        write_modes_sb(cpi, tile, w, tok, tok_end,
+        write_modes_sb(cpi, tile, w,
+#if CONFIG_ANS
+                       ans,
+#endif  // CONFIG_ANS
+                       tok, tok_end,
 #if CONFIG_SUPERTX
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
                        mi_row, mi_col, subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end,
+        write_modes_sb(cpi, tile, w,
+#if CONFIG_ANS
+                       ans,
+#endif  // CONFIG_ANS
+                       tok, tok_end,
 #if CONFIG_SUPERTX
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
                        mi_row, mi_col + bs, subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end,
+        write_modes_sb(cpi, tile, w,
+#if CONFIG_ANS
+                       ans,
+#endif  // CONFIG_ANS
+                       tok, tok_end,
 #if CONFIG_SUPERTX
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
                        mi_row + bs, mi_col, subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end,
+        write_modes_sb(cpi, tile, w,
+#if CONFIG_ANS
+                       ans,
+#endif  // CONFIG_ANS
+                       tok, tok_end,
 #if CONFIG_SUPERTX
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
@@ -1716,7 +1790,12 @@ static void write_modes_sb(VP10_COMP *cpi,
 
       for (row = 0; row < num_4x4_h; row += bw)
         for (col = 0; col < num_4x4_w; col += bw)
+#if CONFIG_ANS
+          pack_mb_tokens_ans(ans, cm->token_tab, tok, tok_end, cm->bit_depth,
+                             tx);
+#else
           pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+#endif
       assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
       (*tok)++;
     }
@@ -1729,8 +1808,11 @@ static void write_modes_sb(VP10_COMP *cpi,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
-static void write_modes(VP10_COMP *cpi,
-                        const TileInfo *const tile, vpx_writer *w,
+static void write_modes(VP10_COMP *cpi, const TileInfo *const tile,
+                        vpx_writer *w,
+#if CONFIG_ANS
+                        struct BufAnsCoder *ans,
+#endif  // CONFIG_ANS
                         TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int mi_row, mi_col;
@@ -1740,7 +1822,11 @@ static void write_modes(VP10_COMP *cpi,
     vp10_zero_left_context(xd);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
-      write_modes_sb(cpi, tile, w, tok, tok_end,
+      write_modes_sb(cpi, tile, w,
+#if CONFIG_ANS
+                     ans,
+#endif  // CONFIG_ANS
+                     tok, tok_end,
 #if CONFIG_SUPERTX
                      0,
 #endif
@@ -2206,13 +2292,18 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
   vpx_writer mode_bc;
 #if CONFIG_ANS
   struct AnsCoder token_ans;
-#endif
+  struct BufAnsCoder buffered_ans;
+#endif  // CONFIG_ANS
   int tile_row, tile_col;
   TOKENEXTRA *tok_end;
   size_t total_size = 0;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
   unsigned int max_tile = 0;
+  const int ans_window_size = get_token_alloc(cm->mb_rows, cm->mb_cols) * 3;
+  struct buffered_ans_symbol *uco_ans_buf =
+      malloc(ans_window_size * sizeof(*uco_ans_buf));
+  assert(uco_ans_buf);
 
   vp10_zero_above_context(cm, 0, mi_cols_aligned_to_sb(cm->mi_cols));
 
@@ -2232,8 +2323,8 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
 
 #if !CONFIG_ANS
       (void) token_section_size;
-      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info,
-                  &mode_bc, &tok, tok_end);
+      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &mode_bc, &tok,
+                  tok_end);
       assert(tok == tok_end);
       vpx_stop_encode(&mode_bc);
       if (put_tile_size) {
@@ -2248,12 +2339,13 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
       }
       total_size += mode_bc.pos;
 #else
+      buf_ans_write_init(&buffered_ans, uco_ans_buf, ans_window_size);
       write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &mode_bc,
-                  NULL, NULL);
+                  &buffered_ans, &tok, tok_end);
+      assert(tok == tok_end);
       vpx_stop_encode(&mode_bc);
       ans_write_init(&token_ans, mode_data_start + mode_bc.pos);
-      pack_mb_tokens_ans(&token_ans, cm->token_tab, tok, tok_end,
-                         cm->bit_depth);
+      buf_ans_flush(&buffered_ans, &token_ans);
       token_section_size = ans_write_end(&token_ans);
       if (put_tile_size) {
         // size of this tile
@@ -2267,6 +2359,9 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
   }
   *max_tile_sz = max_tile;
 
+#if CONFIG_ANS
+  free(uco_ans_buf);
+#endif  // CONFIG_ANS
   return total_size;
 }
 
