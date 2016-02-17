@@ -67,10 +67,11 @@ struct vpx_codec_alg_priv
     FRAGMENT_DATA           fragments;
 };
 
-static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
+static int vp8_init_ctx(vpx_codec_ctx_t *ctx)
 {
     vpx_codec_alg_priv_t *priv =
         (vpx_codec_alg_priv_t *)vpx_calloc(1, sizeof(*priv));
+    if (!priv) return 1;
 
     ctx->priv = (vpx_codec_priv_t *)priv;
     ctx->priv->init_flags = ctx->init_flags;
@@ -85,6 +86,8 @@ static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
         priv->cfg = *ctx->config.dec;
         ctx->config.dec = &priv->cfg;
     }
+
+    return 0;
 }
 
 static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
@@ -103,7 +106,7 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
      * information becomes known.
      */
     if (!ctx->priv) {
-      vp8_init_ctx(ctx);
+      if (vp8_init_ctx(ctx)) return VPX_CODEC_MEM_ERROR;
       priv = (vpx_codec_alg_priv_t *)ctx->priv;
 
       /* initialize number of fragments to zero */
