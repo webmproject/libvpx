@@ -104,6 +104,9 @@ struct macroblock {
   int mv_best_ref_index[MAX_REF_FRAMES];
   unsigned int max_mv_context[MAX_REF_FRAMES];
   unsigned int source_variance;
+#if CONFIG_OBMC
+  unsigned int pred_variance;
+#endif  // CONFIG_OBMC
   unsigned int pred_sse[MAX_REF_FRAMES];
   int pred_mv_sad[MAX_REF_FRAMES];
 
