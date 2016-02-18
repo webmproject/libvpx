@@ -276,28 +276,95 @@ static int intra_subpel_interp(int base, int shift, const uint8_t *ref,
 static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
                              const uint8_t *above, const uint8_t *left,
                              int dx, int dy, INTRA_FILTER filter_type) {
-  int r, c, x, y, base, shift, val;
+  int r, c, x, base, shift, val;
 
   (void)left;
   (void)dy;
   assert(dy == 1);
   assert(dx < 0);
 
-  for (r = 0; r < bs; ++r) {
-    y = r + 1;
-    for (c = 0; c < bs; ++c) {
-      x = (c << 8) - y * dx;
+  if (filter_type != INTRA_FILTER_LINEAR) {
+    const int pad_size = SUBPEL_TAPS >> 1;
+    int len;
+    DECLARE_ALIGNED(16, uint8_t, buf[SUBPEL_SHIFTS][64]);
+    DECLARE_ALIGNED(16, uint8_t, src[64 + SUBPEL_TAPS]);
+    uint8_t flags[SUBPEL_SHIFTS];
+
+    memset(flags, 0, SUBPEL_SHIFTS * sizeof(flags[0]));
+    memset(src, above[0], pad_size * sizeof(above[0]));
+    memcpy(src + pad_size, above, 2 * bs * sizeof(above[0]));
+    memset(src + pad_size + 2 * bs, above[2 * bs - 1],
+           pad_size * sizeof(above[0]));
+    flags[0] = 1;
+    x = -dx;
+    for (r = 0; r < bs; ++r, dst += stride, x -= dx) {
       base = x >> 8;
-      shift = x - (base << 8);
+      shift = x & 0xFF;
+      shift = ROUND_POWER_OF_TWO(shift, 8 - SUBPEL_BITS);
+      if (shift == SUBPEL_SHIFTS) {
+        base += 1;
+        shift = 0;
+      }
+      len = VPXMIN(bs, 2 * bs - 1 - base);
+      if (len <= 0) {
+        int i;
+        for (i = r; i < bs; ++i) {
+          memset(dst, above[2 * bs - 1], bs * sizeof(dst[0]));
+          dst += stride;
+        }
+        return;
+      }
+
+      if (len <= (bs >> 1) && !flags[shift]) {
+        base = x >> 8;
+        shift = x & 0xFF;
+        for (c = 0; c < len; ++c) {
+          val = intra_subpel_interp(base, shift, above, 0, 2 * bs - 1,
+                                    filter_type);
+          dst[c] = clip_pixel(val);
+          ++base;
+        }
+      } else {
+        if (!flags[shift]) {
+          vpx_convolve8_horiz(src + pad_size, 2 * bs, buf[shift], 2 * bs,
+                              vp10_intra_filter_kernels[filter_type][shift], 16,
+                              NULL, 16, 2 * bs, 2 * bs < 16 ? 2 : 1);
+          flags[shift] = 1;
+        }
+        memcpy(dst, shift == 0 ? src + pad_size + base : &buf[shift][base],
+            len * sizeof(dst[0]));
+      }
+
+      if (len < bs)
+        memset(dst + len, above[2 * bs - 1], (bs - len) * sizeof(dst[0]));
+    }
+    return;
+  }
+
+  // For linear filter, C code is faster.
+  x = -dx;
+  for (r = 0; r < bs; ++r, dst += stride, x -= dx) {
+    base = x >> 8;
+    shift = x & 0xFF;
+
+    if (base >= 2 * bs - 1) {
+      int i;
+      for (i = r; i < bs; ++i) {
+        memset(dst, above[2 * bs - 1], bs * sizeof(dst[0]));
+        dst += stride;
+      }
+      return;
+    }
+
+    for (c = 0; c < bs; ++c, ++base) {
       if (base < 2 * bs - 1) {
-        val = intra_subpel_interp(base, shift, above, 0, 2 * bs - 1,
-                                  filter_type);
+        val = above[base] * (256 - shift) + above[base + 1] * shift;
+        val = ROUND_POWER_OF_TWO(val, 8);
         dst[c] = clip_pixel(val);
       } else {
         dst[c] = above[2 * bs - 1];
       }
     }
-    dst += stride;
   }
 }
 
@@ -305,33 +372,33 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
 static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
                              const uint8_t *above, const uint8_t *left,
                              int dx, int dy, INTRA_FILTER filter_type) {
-  int r, c, x, y, shift, val, base;
+  int r, c, x, y, shift1, shift2, val, base1, base2, use_above;
 
   assert(dx > 0);
   assert(dy > 0);
 
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      y = r + 1;
-      x = (c << 8) - y * dx;
-      base = x >> 8;
-      if (base >= -1) {
-        shift = x - (base << 8);
-        val = intra_subpel_interp(base, shift, above, -1, bs - 1, filter_type);
+  x = -dx;
+  for (r = 0; r < bs; ++r, x -= dx, dst += stride) {
+    use_above = 0;
+    base1 = x >> 8;
+    y = (r << 8) - dy;
+    for (c = 0; c < bs; ++c, ++base1, y -= dy) {
+      if (base1 >= -1) {
+        shift1 = x & 0xFF;
+        val = intra_subpel_interp(base1, shift1, above, -1, bs - 1,
+                                  filter_type);
       } else {
-        x = c + 1;
-        y = (r << 8) - x * dy;
-        base = y >> 8;
-        if (base >= 0) {
-          shift = y - (base  << 8);
-          val = intra_subpel_interp(base, shift, left, 0, bs - 1, filter_type);
+        base2 = y >> 8;
+        if (base2 >= 0) {
+          shift2 = y & 0xFF;
+          val = intra_subpel_interp(base2, shift2, left, 0, bs - 1,
+                                    filter_type);
         } else {
           val = left[0];
         }
       }
       dst[c] = clip_pixel(val);
     }
-    dst += stride;
   }
 }
 
@@ -339,7 +406,7 @@ static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
 static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
                              const uint8_t *above, const uint8_t *left,
                              int dx, int dy, INTRA_FILTER filter_type) {
-  int r, c, x, y, base, shift, val;
+  int r, c, y, base, shift, val;
 
   (void)above;
   (void)dx;
@@ -347,21 +414,94 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
   assert(dx == 1);
   assert(dy < 0);
 
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      x = c + 1;
-      y = (r << 8) - x * dy;
+  if (filter_type != INTRA_FILTER_LINEAR) {
+    const int pad_size = SUBPEL_TAPS >> 1;
+    int len, i;
+    DECLARE_ALIGNED(16, uint8_t, buf[64][4 * SUBPEL_SHIFTS]);
+    DECLARE_ALIGNED(16, uint8_t, src[(64 + SUBPEL_TAPS) * 4]);
+    uint8_t flags[SUBPEL_SHIFTS];
+
+    memset(flags, 0, SUBPEL_SHIFTS * sizeof(flags[0]));
+    for (i = 0; i < pad_size; ++i)
+      src[4 * i] = left[0];
+    for (i = 0; i < 2 * bs; ++i)
+      src[4 * (i + pad_size)] = left[i];
+    for (i = 0; i < pad_size; ++i)
+      src[4 * (i + 2 * bs + pad_size)] = left[2 * bs - 1];
+    flags[0] = 1;
+    y = -dy;
+    for (c = 0; c < bs; ++c, y -= dy) {
       base = y >> 8;
-      shift = y - (base << 8);
-      if (base < 2 * bs - 1) {
-        val = intra_subpel_interp(base, shift, left, 0, 2 * bs - 1,
-                                  filter_type);
-        dst[c] = clip_pixel(val);
+      shift = y & 0xFF;
+      shift = ROUND_POWER_OF_TWO(shift, 8 - SUBPEL_BITS);
+      if (shift == SUBPEL_SHIFTS) {
+        base += 1;
+        shift = 0;
+      }
+      len = VPXMIN(bs, 2 * bs - 1 - base);
+
+      if (len <= 0) {
+        for (i = r; r < bs; ++r) {
+          dst[i * stride + c] = left[ 2 * bs - 1];
+        }
+        continue;
+      }
+
+      if (len <= (bs >> 1) && !flags[shift]) {
+        base = y >> 8;
+        shift = y & 0xFF;
+        for (r = 0; r < len; ++r) {
+          val = intra_subpel_interp(base, shift, left, 0, 2 * bs - 1,
+                                    filter_type);
+          dst[r * stride + c] = clip_pixel(val);
+          ++base;
+        }
       } else {
-        dst[c] = left[ 2 * bs - 1];
+        if (!flags[shift]) {
+          vpx_convolve8_vert(src + 4 * pad_size, 4,
+                             buf[0] + 4 * shift, 4 * SUBPEL_SHIFTS, NULL, 16,
+                             vp10_intra_filter_kernels[filter_type][shift], 16,
+                             2 * bs < 16 ? 4 : 4, 2 * bs);
+          flags[shift] = 1;
+        }
+
+        if (shift == 0) {
+          for (r = 0; r < len; ++r) {
+            dst[r * stride + c] = left[r + base];
+          }
+        } else {
+          for (r = 0; r < len; ++r) {
+            dst[r * stride + c] = buf[r + base][4 * shift];
+          }
+        }
+      }
+
+      if (len < bs) {
+        for (r = len; r < bs; ++r) {
+          dst[r * stride + c] = left[ 2 * bs - 1];
+        }
       }
     }
-    dst += stride;
+    return;
+  }
+
+  // For linear filter, C code is faster.
+  y = -dy;
+  for (c = 0; c < bs; ++c, y -= dy) {
+    base = y >> 8;
+    shift = y & 0xFF;
+
+    for (r = 0; r < bs; ++r, ++base) {
+      if (base < 2 * bs - 1) {
+        val = left[base] * (256 - shift) + left[base + 1] * shift;
+        val = ROUND_POWER_OF_TWO(val, 8);
+        dst[r * stride + c] = clip_pixel(val);
+      } else {
+        for (; r < bs; ++r)
+          dst[r * stride + c] = left[2 * bs - 1];
+        break;
+      }
+    }
   }
 }
 
