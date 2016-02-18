@@ -13,9 +13,10 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
 
-static void mb_lpf_horizontal_edge_w_avx2_8(unsigned char *s, int p,
-        const unsigned char *_blimit, const unsigned char *_limit,
-        const unsigned char *_thresh) {
+void vpx_lpf_horizontal_edge_8_avx2(unsigned char *s, int p,
+                                    const unsigned char *_blimit,
+                                    const unsigned char *_limit,
+                                    const unsigned char *_thresh) {
     __m128i mask, hev, flat, flat2;
     const __m128i zero = _mm_set1_epi16(0);
     const __m128i one = _mm_set1_epi8(1);
@@ -400,9 +401,10 @@ DECLARE_ALIGNED(32, static const uint8_t, filt_loopfilter_avx2[32]) = {
   8, 128, 9, 128, 10, 128, 11, 128, 12, 128, 13, 128, 14, 128, 15, 128
 };
 
-static void mb_lpf_horizontal_edge_w_avx2_16(unsigned char *s, int p,
-        const unsigned char *_blimit, const unsigned char *_limit,
-        const unsigned char *_thresh) {
+void vpx_lpf_horizontal_edge_16_avx2(unsigned char *s, int p,
+                                     const unsigned char *_blimit,
+                                     const unsigned char *_limit,
+                                     const unsigned char *_thresh) {
     __m128i mask, hev, flat, flat2;
     const __m128i zero = _mm_set1_epi16(0);
     const __m128i one = _mm_set1_epi8(1);
@@ -974,13 +976,4 @@ static void mb_lpf_horizontal_edge_w_avx2_16(unsigned char *s, int p,
         q6 = _mm_or_si128(flat2_q6, q6);
         _mm_storeu_si128((__m128i *) (s + 6 * p), q6);
     }
-}
-
-void vpx_lpf_horizontal_16_avx2(unsigned char *s, int p,
-        const unsigned char *_blimit, const unsigned char *_limit,
-        const unsigned char *_thresh, int count) {
-    if (count == 1)
-        mb_lpf_horizontal_edge_w_avx2_8(s, p, _blimit, _limit, _thresh);
-    else
-        mb_lpf_horizontal_edge_w_avx2_16(s, p, _blimit, _limit, _thresh);
 }

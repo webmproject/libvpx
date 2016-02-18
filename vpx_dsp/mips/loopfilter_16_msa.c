@@ -423,11 +423,11 @@ void vpx_lpf_horizontal_16_dual_msa(uint8_t *src, int32_t pitch,
   }
 }
 
-void vpx_lpf_horizontal_16_msa(uint8_t *src, int32_t pitch,
-                               const uint8_t *b_limit_ptr,
-                               const uint8_t *limit_ptr,
-                               const uint8_t *thresh_ptr,
-                               int32_t count) {
+static void mb_lpf_horizontal_edge(uint8_t *src, int32_t pitch,
+                                   const uint8_t *b_limit_ptr,
+                                   const uint8_t *limit_ptr,
+                                   const uint8_t *thresh_ptr,
+                                   int32_t count) {
   if (1 == count) {
     uint64_t p2_d, p1_d, p0_d, q0_d, q1_d, q2_d;
     uint64_t dword0, dword1;
@@ -646,6 +646,20 @@ void vpx_lpf_horizontal_16_msa(uint8_t *src, int32_t pitch,
     vpx_lpf_horizontal_16_dual_msa(src, pitch, b_limit_ptr, limit_ptr,
                                    thresh_ptr, count);
   }
+}
+
+void vpx_lpf_horizontal_edge_8_msa(uint8_t *src, int32_t pitch,
+                                   const uint8_t *b_limit_ptr,
+                                   const uint8_t *limit_ptr,
+                                   const uint8_t *thresh_ptr) {
+  mb_lpf_horizontal_edge(src, pitch, b_limit_ptr, limit_ptr, thresh_ptr, 1);
+}
+
+void vpx_lpf_horizontal_edge_16_msa(uint8_t *src, int32_t pitch,
+                                    const uint8_t *b_limit_ptr,
+                                    const uint8_t *limit_ptr,
+                                    const uint8_t *thresh_ptr) {
+  mb_lpf_horizontal_edge(src, pitch, b_limit_ptr, limit_ptr, thresh_ptr, 2);
 }
 
 static void transpose_16x8_to_8x16(uint8_t *input, int32_t in_pitch,
