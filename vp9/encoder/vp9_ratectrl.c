@@ -2017,6 +2017,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     const int last_src_ystride = cpi->Last_Source->y_stride;
     int sbi_row, sbi_col;
     const BLOCK_SIZE bsize = BLOCK_64X64;
+    const uint32_t min_thresh = 4000;
+    float thresh = 8.0f;
     // Loop over sub-sample of frame, and compute average sad over 64x64 blocks.
     uint64_t avg_sad = 0;
     int num_samples = 0;
@@ -2047,12 +2049,30 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // between current and the previous frame value(s). Use a minimum threshold
     // for cases where there is small change from content that is completely
     // static.
-    if (avg_sad > VPXMAX(4000, (rc->avg_source_sad << 3)) &&
+    if (cpi->oxcf.rc_mode == VPX_VBR) {
+      thresh = 2.5f;
+    }
+    if (avg_sad >
+        VPXMAX(min_thresh, (unsigned int)(rc->avg_source_sad  * thresh)) &&
         rc->frames_since_key > 1)
       rc->high_source_sad = 1;
     else
       rc->high_source_sad = 0;
     rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
+    // For VBR, under scene change/high content change, force golden refresh.
+    if (cpi->oxcf.rc_mode == VPX_VBR &&
+        rc->high_source_sad &&
+        cpi->refresh_golden_frame == 0 &&
+        cpi->ext_refresh_frame_flags_pending == 0) {
+      int target;
+      cpi->refresh_golden_frame = 1;
+      rc->frames_till_gf_update_due = rc->baseline_gf_interval >> 1;
+      if (rc->frames_till_gf_update_due > rc->frames_to_key)
+        rc->frames_till_gf_update_due = rc->frames_to_key;
+      rc->gfu_boost = DEFAULT_GF_BOOST;
+      target = calc_pframe_target_size_one_pass_vbr(cpi);
+      vp9_rc_set_frame_target(cpi, target);
+    }
   }
 }
 
