@@ -658,6 +658,10 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
                             plane_bsize, tx_size, &arg);
 
     {
+#if CONFIG_VP9_HIGHBITDEPTH
+      const VP10_COMP *cpi = args->cpi;
+      const uint32_t hbd_shift = (cpi->common.bit_depth - 8) * 2;
+#endif
       const int bs = 4 << tx_size;
       const BLOCK_SIZE tx_bsize = txsize_to_bsize[tx_size];
       const vpx_variance_fn_t variance = args->cpi->fn_ptr[tx_bsize].vf;
@@ -674,8 +678,12 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
       unsigned int tmp;
-
+#if CONFIG_VP9_HIGHBITDEPTH
+      sse = (int64_t)ROUND_POWER_OF_TWO(
+          vpx_sum_squares_2d_i16(diff, diff_stride, bs), hbd_shift) * 16;
+#else
       sse = (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, bs) * 16;
+#endif
       variance(src, src_stride, dst, dst_stride, &tmp);
       dist = (int64_t)tmp * 16;
     }
@@ -2332,6 +2340,7 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t, rec_buffer_alloc_16[32 * 32]);
   uint8_t *rec_buffer;
+  const uint32_t hbd_shift = (cpi->common.bit_depth - 8) * 2;
 #else
   DECLARE_ALIGNED(16, uint8_t, rec_buffer[32 * 32]);
 #endif
@@ -2372,11 +2381,21 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     for (idy = 0; idy < blocks_height; idy += 2) {
       for (idx = 0; idx < blocks_width; idx += 2) {
         const int16_t *d = diff + 4 * idy * diff_stride + 4 * idx;
+#if CONFIG_VP9_HIGHBITDEPTH
+        tmp_sse += ROUND_POWER_OF_TWO(
+            vpx_sum_squares_2d_i16(d, diff_stride, 8), hbd_shift);
+#else
         tmp_sse += vpx_sum_squares_2d_i16(d, diff_stride, 8);
+#endif
       }
     }
   } else {
+#if CONFIG_VP9_HIGHBITDEPTH
+    tmp_sse = ROUND_POWER_OF_TWO(
+        vpx_sum_squares_2d_i16(diff, diff_stride, bh), hbd_shift);
+#else
     tmp_sse = vpx_sum_squares_2d_i16(diff, diff_stride, bh);
+#endif
   }
 
   *bsse += (int64_t)tmp_sse * 16;
