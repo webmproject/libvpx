@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "021f8d56_f424b8a8",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-18T18:51:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7d862c98_43c3d871",
+      "range": {
+        "startLine": 287,
+        "startChar": 25,
+        "endLine": 287,
+        "endChar": 26
+      },
+      "revId": "0f15a81ba079442221bed0dd6862a04155c769be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7d862c98_66562a34",
         "filename": "vp10/common/reconintra.c",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "620e892a_57012c9c",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-18T18:51:49Z",
+      "side": 1,
+      "message": "src is used multiple times in the next \"for\" loop. It is cheaper to initialize it here once, rather than repeatedly doing it inside the for loop.",
+      "parentUuid": "7d862c98_66562a34",
+      "range": {
+        "startLine": 294,
+        "startChar": 0,
+        "endLine": 296,
+        "endChar": 54
+      },
+      "revId": "0f15a81ba079442221bed0dd6862a04155c769be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d8968a7_e279480c",
         "filename": "vp10/common/reconintra.c",
         "patchSetId": 5
@@ -59,6 +107,30 @@
       "writtenOn": "2016-02-18T02:30:14Z",
       "side": 1,
       "message": "Why this condition is used to decide using vpx_convolve8_horiz or not?",
+      "range": {
+        "startLine": 318,
+        "startChar": 10,
+        "endLine": 318,
+        "endChar": 26
+      },
+      "revId": "0f15a81ba079442221bed0dd6862a04155c769be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "820b7d17_b89759ff",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-18T18:51:49Z",
+      "side": 1,
+      "message": "If \"len\" is small, it may be faster just to calculate the filtered value one by one using C code. \"bs \u003e\u003e 1\" here is an empirical threshold.",
+      "parentUuid": "5d8968a7_e279480c",
       "range": {
         "startLine": 318,
         "startChar": 10,
@@ -110,6 +182,30 @@
         "startChar": 48,
         "endLine": 331,
         "endChar": 67
+      },
+      "revId": "0f15a81ba079442221bed0dd6862a04155c769be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6243e950_6f3111ec",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-02-18T18:51:49Z",
+      "side": 1,
+      "message": "Current SIMD convolution functions have some constraints on the width and length. Width needs to be multiples of 4; when width is less then 16, height needs to be at least 2.",
+      "parentUuid": "7d862c98_e6b6bab9",
+      "range": {
+        "startLine": 331,
+        "startChar": 40,
+        "endLine": 331,
+        "endChar": 46
       },
       "revId": "0f15a81ba079442221bed0dd6862a04155c769be",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
