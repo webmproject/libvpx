@@ -5277,13 +5277,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     if (mv_check_bounds(x, &cur_mv[i].as_mv))
       return INT64_MAX;
     mbmi->mv[i].as_int = cur_mv[i].as_int;
-
-#if CONFIG_REF_MV
-    if (this_mode != NEWMV)
-      mbmi->pred_mv[i].as_int = mbmi->mv[i].as_int;
-    else
-      mbmi->pred_mv[i].as_int = mbmi_ext->ref_mvs[refs[i]][0].as_int;
-#endif
   }
 
 #if CONFIG_REF_MV
@@ -7182,6 +7175,15 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   *mbmi = best_mbmode;
   x->skip |= best_skip2;
 
+#if CONFIG_REF_MV
+  for (i = 0; i < 1 + has_second_ref(mbmi); ++i) {
+    if (mbmi->mode != NEWMV)
+      mbmi->pred_mv[i].as_int = mbmi->mv[i].as_int;
+    else
+      mbmi->pred_mv[i].as_int = mbmi_ext->ref_mvs[mbmi->ref_frame[i]][0].as_int;
+  }
+#endif
+
   for (i = 0; i < REFERENCE_MODES; ++i) {
     if (best_pred_rd[i] == INT64_MAX)
       best_pred_diff[i] = INT_MIN;
@@ -8108,6 +8110,10 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 
     mbmi->mv[0].as_int = xd->mi[0]->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = xd->mi[0]->bmi[3].as_mv[1].as_int;
+#if CONFIG_REF_MV
+    mbmi->pred_mv[0].as_int = xd->mi[0]->bmi[3].pred_mv[0].as_int;
+    mbmi->pred_mv[1].as_int = xd->mi[0]->bmi[3].pred_mv[1].as_int;
+#endif
   }
 
   for (i = 0; i < REFERENCE_MODES; ++i) {

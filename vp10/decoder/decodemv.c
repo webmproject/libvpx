@@ -912,10 +912,21 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
 #endif  // CONFIG_EXT_INTER
     case NEWMV: {
       FRAME_COUNTS *counts = xd->counts;
+#if !CONFIG_REF_MV
       nmv_context_counts *const mv_counts = counts ? &counts->mv : NULL;
+#endif
       for (i = 0; i < 1 + is_compound; ++i) {
+#if CONFIG_REF_MV
+        int nmv_ctx = vp10_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[i]],
+                                   xd->ref_mv_stack[mbmi->ref_frame[i]]);
+        nmv_context_counts *const mv_counts =
+            counts ? &counts->mv[nmv_ctx] : NULL;
+        read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, &cm->fc->nmvc[nmv_ctx],
+                mv_counts, allow_hp);
+#else
         read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, &cm->fc->nmvc, mv_counts,
                 allow_hp);
+#endif
         ret = ret && is_mv_valid(&mv[i].as_mv);
 
 #if CONFIG_REF_MV
@@ -963,11 +974,23 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
 #if CONFIG_EXT_INTER
     case NEW_NEWMV: {
       FRAME_COUNTS *counts = xd->counts;
+#if !CONFIG_REF_MV
       nmv_context_counts *const mv_counts = counts ? &counts->mv : NULL;
+#endif
       assert(is_compound);
       for (i = 0; i < 2; ++i) {
+#if CONFIG_REF_MV
+        int nmv_ctx = vp10_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[i]],
+                                   xd->ref_mv_stack[mbmi->ref_frame[i]]);
+        nmv_context_counts *const mv_counts =
+            counts ? &counts->mv[nmv_ctx] : NULL;
+        read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv,
+                &cm->fc->nmvc[nmv_ctx], mv_counts,
+                allow_hp);
+#else
         read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, &cm->fc->nmvc, mv_counts,
                 allow_hp);
+#endif
         ret = ret && is_mv_valid(&mv[i].as_mv);
       }
       break;
@@ -992,40 +1015,83 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
     }
     case NEW_NEARESTMV: {
       FRAME_COUNTS *counts = xd->counts;
+#if CONFIG_REF_MV
+      int nmv_ctx = vp10_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[0]],
+                                 xd->ref_mv_stack[mbmi->ref_frame[0]]);
+      nmv_context_counts *const mv_counts =
+          counts ? &counts->mv[nmv_ctx] : NULL;
+      read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv,
+              &cm->fc->nmvc[nmv_ctx], mv_counts,
+              allow_hp);
+#else
       nmv_context_counts *const mv_counts = counts ? &counts->mv : NULL;
-      assert(is_compound);
       read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv, &cm->fc->nmvc, mv_counts,
               allow_hp);
+#endif
+      assert(is_compound);
       ret = ret && is_mv_valid(&mv[0].as_mv);
       mv[1].as_int = nearest_mv[1].as_int;
       break;
     }
     case NEAREST_NEWMV: {
       FRAME_COUNTS *counts = xd->counts;
+#if CONFIG_REF_MV
+      int nmv_ctx = vp10_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[1]],
+                                 xd->ref_mv_stack[mbmi->ref_frame[1]]);
+      nmv_context_counts *const mv_counts =
+          counts ? &counts->mv[nmv_ctx] : NULL;
+      mv[0].as_int = nearest_mv[0].as_int;
+      read_mv(r, &mv[1].as_mv, &ref_mv[1].as_mv,
+              &cm->fc->nmvc[nmv_ctx], mv_counts,
+              allow_hp);
+#else
       nmv_context_counts *const mv_counts = counts ? &counts->mv : NULL;
-      assert(is_compound);
       mv[0].as_int = nearest_mv[0].as_int;
       read_mv(r, &mv[1].as_mv, &ref_mv[1].as_mv, &cm->fc->nmvc, mv_counts,
               allow_hp);
+#endif
+      assert(is_compound);
       ret = ret && is_mv_valid(&mv[1].as_mv);
       break;
     }
     case NEAR_NEWMV: {
       FRAME_COUNTS *counts = xd->counts;
+#if CONFIG_REF_MV
+      int nmv_ctx = vp10_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[1]],
+                                 xd->ref_mv_stack[mbmi->ref_frame[1]]);
+      nmv_context_counts *const mv_counts =
+          counts ? &counts->mv[nmv_ctx] : NULL;
+      mv[0].as_int = near_mv[0].as_int;
+      read_mv(r, &mv[1].as_mv, &ref_mv[1].as_mv,
+              &cm->fc->nmvc[nmv_ctx], mv_counts,
+              allow_hp);
+#else
       nmv_context_counts *const mv_counts = counts ? &counts->mv : NULL;
-      assert(is_compound);
       mv[0].as_int = near_mv[0].as_int;
       read_mv(r, &mv[1].as_mv, &ref_mv[1].as_mv, &cm->fc->nmvc, mv_counts,
               allow_hp);
+#endif
+      assert(is_compound);
+
       ret = ret && is_mv_valid(&mv[1].as_mv);
       break;
     }
     case NEW_NEARMV: {
       FRAME_COUNTS *counts = xd->counts;
+#if CONFIG_REF_MV
+      int nmv_ctx = vp10_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[0]],
+                                 xd->ref_mv_stack[mbmi->ref_frame[0]]);
+      nmv_context_counts *const mv_counts =
+          counts ? &counts->mv[nmv_ctx] : NULL;
+      read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv,
+              &cm->fc->nmvc[nmv_ctx], mv_counts,
+              allow_hp);
+#else
       nmv_context_counts *const mv_counts = counts ? &counts->mv : NULL;
-      assert(is_compound);
       read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv, &cm->fc->nmvc, mv_counts,
               allow_hp);
+#endif
+      assert(is_compound);
       ret = ret && is_mv_valid(&mv[0].as_mv);
       mv[1].as_int = near_mv[1].as_int;
       break;
@@ -1342,6 +1408,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       }
     }
 
+#if CONFIG_REF_MV
+    mbmi->pred_mv[0].as_int = mi->bmi[3].pred_mv[0].as_int;
+    mbmi->pred_mv[1].as_int = mi->bmi[3].pred_mv[1].as_int;
+#endif
     mi->mbmi.mode = b_mode;
 
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;

@@ -228,6 +228,22 @@ static INLINE void lower_mv_precision(MV *mv, int allow_hp) {
 }
 
 #if CONFIG_REF_MV
+static INLINE int vp10_nmv_ctx(const uint8_t ref_mv_count,
+                               const CANDIDATE_MV *ref_mv_stack) {
+#if CONFIG_EXT_INTER
+  return 0;
+#endif
+  if (ref_mv_stack[0].weight > REF_CAT_LEVEL &&
+      ref_mv_count > 0) {
+    if (abs(ref_mv_stack[0].this_mv.as_mv.row -
+            ref_mv_stack[0].pred_mv.as_mv.row) < 8 &&
+        abs(ref_mv_stack[0].this_mv.as_mv.col -
+            ref_mv_stack[0].pred_mv.as_mv.col) < 8)
+      return 1;
+  }
+  return 0;
+}
+
 static INLINE int8_t vp10_ref_frame_type(const MV_REFERENCE_FRAME *const rf) {
   if (rf[1] > INTRA_FRAME)
     return rf[0] + ALTREF_FRAME;

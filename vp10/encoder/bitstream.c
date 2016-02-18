@@ -882,7 +882,9 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #endif
                                 vpx_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
+#if !CONFIG_REF_MV
   const nmv_context *nmvc = &cm->fc->nmvc;
+#endif
   const MACROBLOCK *x = &cpi->td.mb;
   const MACROBLOCKD *xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
@@ -1070,20 +1072,39 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #else
           if (b_mode == NEWMV) {
 #endif  // CONFIG_EXT_INTER
-            for (ref = 0; ref < 1 + is_compound; ++ref)
+            for (ref = 0; ref < 1 + is_compound; ++ref) {
+#if CONFIG_REF_MV
+              int nmv_ctx =
+                  vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[ref]],
+                               mbmi_ext->ref_mv_stack[mbmi->ref_frame[ref]]);
+              const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+#endif
               vp10_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
 #if CONFIG_EXT_INTER
                              &mi->bmi[j].ref_mv[ref].as_mv,
 #else
                              &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
 #endif  // CONFIG_EXT_INTER
-                            nmvc, allow_hp);
+                             nmvc, allow_hp);
+            }
           }
 #if CONFIG_EXT_INTER
           else if (b_mode == NEAREST_NEWMV || b_mode == NEAR_NEWMV) {
+#if CONFIG_REF_MV
+            int nmv_ctx =
+                vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[1]],
+                             mbmi_ext->ref_mv_stack[mbmi->ref_frame[1]]);
+            const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+#endif
             vp10_encode_mv(cpi, w, &mi->bmi[j].as_mv[1].as_mv,
                            &mi->bmi[j].ref_mv[1].as_mv, nmvc, allow_hp);
           } else if (b_mode == NEW_NEARESTMV || b_mode == NEW_NEARMV) {
+#if CONFIG_REF_MV
+            int nmv_ctx =
+                vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[0]],
+                             mbmi_ext->ref_mv_stack[mbmi->ref_frame[0]]);
+            const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+#endif
             vp10_encode_mv(cpi, w, &mi->bmi[j].as_mv[0].as_mv,
                            &mi->bmi[j].ref_mv[0].as_mv, nmvc, allow_hp);
           }
@@ -1096,9 +1117,14 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #else
       if (mode == NEWMV) {
 #endif  // CONFIG_EXT_INTER
-        for (ref = 0; ref < 1 + is_compound; ++ref)
+        for (ref = 0; ref < 1 + is_compound; ++ref) {
+#if CONFIG_REF_MV
+              int nmv_ctx =
+                  vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[ref]],
+                               mbmi_ext->ref_mv_stack[mbmi->ref_frame[ref]]);
+              const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+#endif
 #if CONFIG_EXT_INTER
-        {
           if (mode == NEWFROMNEARMV)
             vp10_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                            &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][1].as_mv,
@@ -1108,13 +1134,25 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
           vp10_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                         &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv, nmvc,
                         allow_hp);
-#if CONFIG_EXT_INTER
         }
+#if CONFIG_EXT_INTER
       } else if (mode == NEAREST_NEWMV || mode == NEAR_NEWMV) {
+#if CONFIG_REF_MV
+            int nmv_ctx =
+                vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[1]],
+                             mbmi_ext->ref_mv_stack[mbmi->ref_frame[1]]);
+            const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+#endif
         vp10_encode_mv(cpi, w, &mbmi->mv[1].as_mv,
                        &mbmi_ext->ref_mvs[mbmi->ref_frame[1]][0].as_mv, nmvc,
                        allow_hp);
       } else if (mode == NEW_NEARESTMV || mode == NEW_NEARMV) {
+#if CONFIG_REF_MV
+            int nmv_ctx =
+                vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[0]],
+                             mbmi_ext->ref_mv_stack[mbmi->ref_frame[0]]);
+            const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+#endif
         vp10_encode_mv(cpi, w, &mbmi->mv[0].as_mv,
                        &mbmi_ext->ref_mvs[mbmi->ref_frame[0]][0].as_mv, nmvc,
                        allow_hp);
@@ -2449,7 +2487,11 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
                        counts->y_mode[i], INTRA_MODES, &header_bc);
 
     vp10_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc,
-                        &counts->mv);
+#if CONFIG_REF_MV
+                         counts->mv);
+#else
+                         &counts->mv);
+#endif
     update_ext_tx_probs(cm, &header_bc);
 #if CONFIG_SUPERTX
     if (!xd->lossless[0])

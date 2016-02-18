@@ -447,6 +447,39 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
     for (j = 0; j < 2; j++)
       cm->counts.skip[i][j] += counts->skip[i][j];
 
+#if CONFIG_REF_MV
+  for (m = 0; m < NMV_CONTEXTS; ++m) {
+    for (i = 0; i < MV_JOINTS; i++)
+      cm->counts.mv[m].joints[i] += counts->mv[m].joints[i];
+
+    for (k = 0; k < 2; k++) {
+      nmv_component_counts *comps = &cm->counts.mv[m].comps[k];
+      nmv_component_counts *comps_t = &counts->mv[m].comps[k];
+
+      for (i = 0; i < 2; i++) {
+        comps->sign[i] += comps_t->sign[i];
+        comps->class0_hp[i] += comps_t->class0_hp[i];
+        comps->hp[i] += comps_t->hp[i];
+      }
+
+      for (i = 0; i < MV_CLASSES; i++)
+        comps->classes[i] += comps_t->classes[i];
+
+      for (i = 0; i < CLASS0_SIZE; i++) {
+        comps->class0[i] += comps_t->class0[i];
+        for (j = 0; j < MV_FP_SIZE; j++)
+          comps->class0_fp[i][j] += comps_t->class0_fp[i][j];
+      }
+
+      for (i = 0; i < MV_OFFSET_BITS; i++)
+        for (j = 0; j < 2; j++)
+          comps->bits[i][j] += comps_t->bits[i][j];
+
+      for (i = 0; i < MV_FP_SIZE; i++)
+        comps->fp[i] += comps_t->fp[i];
+    }
+  }
+#else
   for (i = 0; i < MV_JOINTS; i++)
     cm->counts.mv.joints[i] += counts->mv.joints[i];
 
@@ -476,6 +509,7 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
     for (i = 0; i < MV_FP_SIZE; i++)
       comps->fp[i] += comps_t->fp[i];
   }
+#endif
 
 #if CONFIG_EXT_TX
   for (i = 0; i < EXT_TX_SIZES; i++) {

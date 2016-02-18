@@ -361,10 +361,20 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
   fill_mode_costs(cpi);
 
   if (!frame_is_intra_only(cm)) {
+#if CONFIG_REF_MV
+    int nmv_ctx = 0;
+    vp10_build_nmv_cost_table(x->nmvjointcost,
+                             cm->allow_high_precision_mv ? x->nmvcost_hp
+                                                         : x->nmvcost,
+                             &cm->fc->nmvc[nmv_ctx],
+                             cm->allow_high_precision_mv);
+#else
     vp10_build_nmv_cost_table(x->nmvjointcost,
                              cm->allow_high_precision_mv ? x->nmvcost_hp
                                                          : x->nmvcost,
                              &cm->fc->nmvc, cm->allow_high_precision_mv);
+#endif
+
 #if CONFIG_REF_MV
     for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i) {
       cpi->newmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->newmv_prob[i], 0);
