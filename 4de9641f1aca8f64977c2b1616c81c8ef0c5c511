@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0206ad0a_bcf981df",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-02-18T18:10:11Z",
+      "side": 1,
+      "message": "previously we explicitly looked for x64 and win64:\nhttps://chromium-review.googlesource.com/#/c/287858/7/third_party/x86inc/x86inc.asm.new\n\nthis uses the macro, WIN64, which is true for win32, win64 and x64 *but only when ARCH_X86_64* - I believe this is to capture 32 bit builds with 64 bit registers and that it won\u0027t affect our usage (presumably 32 bit builds are prefixed, but newer (i think x32?) builds would not be)",
+      "revId": "4de9641f1aca8f64977c2b1616c81c8ef0c5c511",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
