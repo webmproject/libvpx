@@ -786,7 +786,14 @@ BRANCH_INSTR jz, je, jnz, jne, jl, jle, jnl, jnle, jg, jge, jng, jnge, ja, jae, 
     annotate_function_size
     %if %1
         %xdefine %%FUNCTION_PREFIX private_prefix
-        %xdefine %%VISIBILITY hidden
+        ; libvpx explicitly sets visibility in shared object builds. Avoid
+        ; setting visibility to hidden as it may break builds that split
+        ; sources on e.g., directory boundaries.
+        %ifdef CHROMIUM
+            %xdefine %%VISIBILITY hidden
+        %else
+            %xdefine %%VISIBILITY
+        %endif
     %else
         %xdefine %%FUNCTION_PREFIX public_prefix
         %xdefine %%VISIBILITY
