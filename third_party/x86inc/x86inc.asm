@@ -75,6 +75,13 @@
     %define FORMAT_ELF 1
 %endif
 
+%define FORMAT_MACHO 0
+%ifidn __OUTPUT_FORMAT__,macho32
+     %define FORMAT_MACHO 1
+%elifidn __OUTPUT_FORMAT__,macho64
+     %define FORMAT_MACHO 1
+%endif
+
 ; Set PREFIX for libvpx builds.
 %if FORMAT_ELF
     %undef PREFIX
@@ -709,6 +716,12 @@ BRANCH_INSTR jz, je, jnz, jne, jl, jle, jnl, jnle, jg, jge, jng, jnge, ja, jae, 
     %xdefine current_function_section __SECT__
     %if FORMAT_ELF
         global %2:function %%VISIBILITY
+    %elif FORMAT_MACHO
+        %ifdef __NASM_VER__
+            global %2
+        %else
+            global %2:private_extern
+        %endif
     %else
         global %2
     %endif
