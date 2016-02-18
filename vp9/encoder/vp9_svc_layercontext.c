@@ -118,15 +118,20 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
           tl == 0) {
         size_t last_coded_q_map_size;
         size_t consec_zero_mv_size;
+        VP9_COMMON *const cm = &cpi->common;
         lc->sb_index = 0;
-        lc->map = vpx_malloc(mi_rows * mi_cols * sizeof(signed char));
+        CHECK_MEM_ERROR(cm, lc->map,
+                        vpx_malloc(mi_rows * mi_cols * sizeof(*lc->map)));
         memset(lc->map, 0, mi_rows * mi_cols);
-        last_coded_q_map_size = mi_rows * mi_cols * sizeof(uint8_t);
-        lc->last_coded_q_map = vpx_malloc(last_coded_q_map_size);
+        last_coded_q_map_size = mi_rows * mi_cols *
+                                sizeof(*lc->last_coded_q_map);
+        CHECK_MEM_ERROR(cm, lc->last_coded_q_map,
+                        vpx_malloc(last_coded_q_map_size));
         assert(MAXQ <= 255);
         memset(lc->last_coded_q_map, MAXQ, last_coded_q_map_size);
-        consec_zero_mv_size = mi_rows * mi_cols * sizeof(uint8_t);
-        lc->consec_zero_mv = vpx_malloc(consec_zero_mv_size);
+        consec_zero_mv_size = mi_rows * mi_cols * sizeof(*lc->consec_zero_mv);
+        CHECK_MEM_ERROR(cm, lc->consec_zero_mv,
+                        vpx_malloc(consec_zero_mv_size));
         memset(lc->consec_zero_mv, 0, consec_zero_mv_size);
        }
     }
