@@ -15,3 +15,4 @@ Manage name mangling (prefixing with '_') manually because 'PREFIX' does not
 Expand PIC default to macho64 and respect CONFIG_PIC from libvpx
 Set 'private_extern' visibility for macho targets.
 Copy PIC 'GLOBAL' macros from x86_abi_support.asm
+Use .text instead of .rodata on macho to avoid broken tables in PIC mode.

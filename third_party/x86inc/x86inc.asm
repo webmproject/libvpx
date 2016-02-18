@@ -97,8 +97,18 @@
     %define mangle(x) x
 %endif
 
+; In some instances macho32 tables get misaligned when using .rodata.
+; When looking at the disassembly it appears that the offset is either
+; correct or consistently off by 90. Placing them in the .text section
+; works around the issue. It appears to be specific to the way libvpx
+; handles the tables.
 %macro SECTION_RODATA 0-1 16
-    SECTION .rodata align=%1
+    %ifidn __OUTPUT_FORMAT__,macho32
+        SECTION .text align=%1
+        fakegot:
+    %else
+        SECTION .rodata align=%1
+    %endif
 %endmacro
 
 ; PIC macros are copied from vpx_ports/x86_abi_support.asm. The "define PIC"
