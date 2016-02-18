@@ -51,11 +51,11 @@ int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
                              const uint8_t *b8, int b_stride,
                              int width, int height,
                              unsigned int input_shift);
-#else
+#endif
 void calc_psnr(const YV12_BUFFER_CONFIG *a,
                const YV12_BUFFER_CONFIG *b,
                PSNR_STATS *psnr);
-#endif
+
 int64_t highbd_get_sse(const uint8_t *a, int a_stride,
                        const uint8_t *b, int b_stride,
                        int width, int height);
