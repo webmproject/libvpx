@@ -3512,6 +3512,20 @@ static int set_and_cost_bmi_mvs(VP10_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
   mic->bmi[i].as_mode = mode;
 
+#if CONFIG_REF_MV
+  if (mode == NEWMV) {
+    mic->bmi[i].pred_mv[0].as_int =
+        mbmi_ext->ref_mvs[mbmi->ref_frame[0]][0].as_int;
+    if (is_compound)
+      mic->bmi[i].pred_mv[1].as_int =
+          mbmi_ext->ref_mvs[mbmi->ref_frame[1]][0].as_int;
+  } else {
+    mic->bmi[i].pred_mv[0].as_int = this_mv[0].as_int;
+    if (is_compound)
+      mic->bmi[i].pred_mv[1].as_int = this_mv[1].as_int;
+  }
+#endif
+
   for (idy = 0; idy < num_4x4_blocks_high; ++idy)
     for (idx = 0; idx < num_4x4_blocks_wide; ++idx)
       memmove(&mic->bmi[i + idy * 2 + idx], &mic->bmi[i], sizeof(mic->bmi[i]));
@@ -5263,6 +5277,13 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     if (mv_check_bounds(x, &cur_mv[i].as_mv))
       return INT64_MAX;
     mbmi->mv[i].as_int = cur_mv[i].as_int;
+
+#if CONFIG_REF_MV
+    if (this_mode != NEWMV)
+      mbmi->pred_mv[i].as_int = mbmi->mv[i].as_int;
+    else
+      mbmi->pred_mv[i].as_int = mbmi_ext->ref_mvs[refs[i]][0].as_int;
+#endif
   }
 
 #if CONFIG_REF_MV

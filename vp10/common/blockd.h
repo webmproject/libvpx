@@ -79,6 +79,9 @@ static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
 typedef struct {
   PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
+#if CONFIG_REF_MV
+  int_mv pred_mv[2];
+#endif
 #if CONFIG_EXT_INTER
   int_mv ref_mv[2];
 #endif  // CONFIG_EXT_INTER
