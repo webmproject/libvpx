@@ -1318,9 +1318,11 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity > 0) {
       vp8_denoiser_free(&cpi->denoiser);
-      vp8_denoiser_allocate(&cpi->denoiser, width, height,
-                            cm->mb_rows, cm->mb_cols,
-                            cpi->oxcf.noise_sensitivity);
+      if (vp8_denoiser_allocate(&cpi->denoiser, width, height,
+                                cm->mb_rows, cm->mb_cols,
+                                cpi->oxcf.noise_sensitivity))
+          vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                             "Failed to allocate denoiser");
     }
 #endif
 }
@@ -1832,9 +1834,11 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
       {
         int width = (cpi->oxcf.Width + 15) & ~15;
         int height = (cpi->oxcf.Height + 15) & ~15;
-        vp8_denoiser_allocate(&cpi->denoiser, width, height,
-                              cm->mb_rows, cm->mb_cols,
-                              cpi->oxcf.noise_sensitivity);
+        if (vp8_denoiser_allocate(&cpi->denoiser, width, height,
+                                  cm->mb_rows, cm->mb_cols,
+                                  cpi->oxcf.noise_sensitivity))
+            vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                               "Failed to allocate denoiser");
       }
     }
 #endif
