@@ -539,47 +539,70 @@ static int cost_coeffs(MACROBLOCK *x,
     cost = token_costs[0][0][pt][EOB_TOKEN];
     c = 0;
   } else {
-    int band_left = *band_count++;
+    if (use_fast_coef_costing) {
+      int band_left = *band_count++;
 
-    // dc token
-    int v = qcoeff[0];
-    int16_t prev_t;
-    EXTRABIT e;
-    vp10_get_token_extra(v, &prev_t, &e);
-    cost = (*token_costs)[0][pt][prev_t] +
-        vp10_get_cost(prev_t, e, cat6_high_cost);
+      // dc token
+      int v = qcoeff[0];
+      int16_t prev_t;
+      cost = vp10_get_token_cost(v, &prev_t, cat6_high_cost);
+      cost += (*token_costs)[0][pt][prev_t];
 
-    token_cache[0] = vp10_pt_energy_class[prev_t];
-    ++token_costs;
+      token_cache[0] = vp10_pt_energy_class[prev_t];
+      ++token_costs;
 
-    // ac tokens
-    for (c = 1; c < eob; c++) {
-      const int rc = scan[c];
-      int16_t t;
+      // ac tokens
+      for (c = 1; c < eob; c++) {
+        const int rc = scan[c];
+        int16_t t;
 
-      v = qcoeff[rc];
-      vp10_get_token_extra(v, &t, &e);
-      if (use_fast_coef_costing) {
-        cost += (*token_costs)[!prev_t][!prev_t][t] +
-            vp10_get_cost(t, e, cat6_high_cost);
-      } else {
-        pt = get_coef_context(nb, token_cache, c);
-        cost += (*token_costs)[!prev_t][pt][t] +
-            vp10_get_cost(t, e, cat6_high_cost);
-        token_cache[rc] = vp10_pt_energy_class[t];
+        v = qcoeff[rc];
+        cost += vp10_get_token_cost(v, &t, cat6_high_cost);
+        cost += (*token_costs)[!prev_t][!prev_t][t];
+        prev_t = t;
+        if (!--band_left) {
+          band_left = *band_count++;
+          ++token_costs;
+        }
       }
-      prev_t = t;
-      if (!--band_left) {
-        band_left = *band_count++;
-        ++token_costs;
-      }
-    }
 
-    // eob token
-    if (band_left) {
-      if (use_fast_coef_costing) {
+      // eob token
+      if (band_left)
         cost += (*token_costs)[0][!prev_t][EOB_TOKEN];
-      } else {
+
+    } else {  // !use_fast_coef_costing
+      int band_left = *band_count++;
+
+      // dc token
+      int v = qcoeff[0];
+      int16_t tok;
+      unsigned int (*tok_cost_ptr)[COEFF_CONTEXTS][ENTROPY_TOKENS];
+      cost = vp10_get_token_cost(v, &tok, cat6_high_cost);
+      cost += (*token_costs)[0][pt][tok];
+
+      token_cache[0] = vp10_pt_energy_class[tok];
+      ++token_costs;
+
+      tok_cost_ptr = &((*token_costs)[!tok]);
+
+      // ac tokens
+      for (c = 1; c < eob; c++) {
+        const int rc = scan[c];
+
+        v = qcoeff[rc];
+        cost += vp10_get_token_cost(v, &tok, cat6_high_cost);
+        pt = get_coef_context(nb, token_cache, c);
+        cost += (*tok_cost_ptr)[pt][tok];
+        token_cache[rc] = vp10_pt_energy_class[tok];
+        if (!--band_left) {
+          band_left = *band_count++;
+          ++token_costs;
+        }
+        tok_cost_ptr = &((*token_costs)[!tok]);
+      }
+
+      // eob token
+      if (band_left) {
         pt = get_coef_context(nb, token_cache, c);
         cost += (*token_costs)[0][pt][EOB_TOKEN];
       }

@@ -50,6 +50,35 @@ static const TOKENVALUE dct_cat_lt_10_value_tokens[] = {
 const TOKENVALUE *vp10_dct_cat_lt_10_value_tokens = dct_cat_lt_10_value_tokens +
     (sizeof(dct_cat_lt_10_value_tokens) / sizeof(*dct_cat_lt_10_value_tokens))
     / 2;
+// The corresponding costs of the extrabits for the tokens in the above table
+// are stored in the table below. The values are obtained from looking up the
+// entry for the specified extrabits in the table corresponding to the token
+// (as defined in cost element vp10_extra_bits)
+// e.g. {9, 63} maps to cat5_cost[63 >> 1], {1, 1} maps to sign_cost[1 >> 1]
+static const int dct_cat_lt_10_value_cost[] = {
+  3773, 3750, 3704, 3681, 3623, 3600, 3554, 3531,
+  3432, 3409, 3363, 3340, 3282, 3259, 3213, 3190,
+  3136, 3113, 3067, 3044, 2986, 2963, 2917, 2894,
+  2795, 2772, 2726, 2703, 2645, 2622, 2576, 2553,
+  3197, 3116, 3058, 2977, 2881, 2800,
+  2742, 2661, 2615, 2534, 2476, 2395,
+  2299, 2218, 2160, 2079,
+  2566, 2427, 2334, 2195, 2023, 1884, 1791, 1652,
+  1893, 1696, 1453, 1256, 1229, 864,
+  512, 512, 512, 512, 0,
+  512, 512, 512, 512,
+  864, 1229, 1256, 1453, 1696, 1893,
+  1652, 1791, 1884, 2023, 2195, 2334, 2427, 2566,
+  2079, 2160, 2218, 2299, 2395, 2476, 2534, 2615,
+  2661, 2742, 2800, 2881, 2977, 3058, 3116, 3197,
+  2553, 2576, 2622, 2645, 2703, 2726, 2772, 2795,
+  2894, 2917, 2963, 2986, 3044, 3067, 3113, 3136,
+  3190, 3213, 3259, 3282, 3340, 3363, 3409, 3432,
+  3531, 3554, 3600, 3623, 3681, 3704, 3750, 3773,
+};
+const int *vp10_dct_cat_lt_10_value_cost = dct_cat_lt_10_value_cost +
+    (sizeof(dct_cat_lt_10_value_cost) / sizeof(*dct_cat_lt_10_value_cost))
+    / 2;
 
 // Array indices are identical to previously-existing CONTEXT_NODE indices
 const vpx_tree_index vp10_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
