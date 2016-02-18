@@ -75,6 +75,15 @@
     %define FORMAT_ELF 1
 %endif
 
+; Set PREFIX for libvpx builds.
+%if FORMAT_ELF
+    %undef PREFIX
+%elif WIN64
+    %undef PREFIX
+%else
+    %define PREFIX
+%endif
+
 %ifdef PREFIX
     %define mangle(x) _ %+ x
 %else
