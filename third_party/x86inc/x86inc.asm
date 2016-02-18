@@ -96,11 +96,15 @@
 
 %if WIN64
     %define PIC
+%elifidn __OUTPUT_FORMAT__,macho64
+    %define PIC
 %elif ARCH_X86_64 == 0
 ; x86_32 doesn't require PIC.
 ; Some distros prefer shared objects to be PIC, but nothing breaks if
 ; the code contains a few textrels, so we'll skip that complexity.
     %undef PIC
+%elif CONFIG_PIC
+    %define PIC
 %endif
 %ifdef PIC
     default rel
