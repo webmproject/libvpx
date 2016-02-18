@@ -461,6 +461,7 @@ static void resize_multistep(const uint8_t *const input,
     int filteredlength = length;
     if (!tmpbuf) {
       tmpbuf = (uint8_t *)malloc(sizeof(uint8_t) * length);
+      if (tmpbuf == NULL) return;
       otmp = tmpbuf;
     } else {
       otmp = buf;
@@ -520,6 +521,7 @@ void vp10_resize_plane(const uint8_t *const input,
   uint8_t *tmpbuf = (uint8_t *)malloc(sizeof(uint8_t) *
                                       (width < height ? height : width));
   uint8_t *arrbuf = (uint8_t *)malloc(sizeof(uint8_t) * (height + height2));
+  if (intbuf == NULL || tmpbuf == NULL || arrbuf == NULL) goto Error;
   assert(width > 0);
   assert(height > 0);
   assert(width2 > 0);
@@ -532,6 +534,8 @@ void vp10_resize_plane(const uint8_t *const input,
     resize_multistep(arrbuf, height, arrbuf + height, height2, tmpbuf);
     fill_arr_to_col(output + i, out_stride, height2, arrbuf + height);
   }
+
+ Error:
   free(intbuf);
   free(tmpbuf);
   free(arrbuf);
@@ -754,6 +758,7 @@ static void highbd_resize_multistep(const uint16_t *const input,
     int filteredlength = length;
     if (!tmpbuf) {
       tmpbuf = (uint16_t *)malloc(sizeof(uint16_t) * length);
+      if (tmpbuf == NULL) return;
       otmp = tmpbuf;
     } else {
       otmp = buf;
@@ -816,6 +821,7 @@ void vp10_highbd_resize_plane(const uint8_t *const input,
   uint16_t *tmpbuf = (uint16_t *)malloc(sizeof(uint16_t) *
                                         (width < height ? height : width));
   uint16_t *arrbuf = (uint16_t *)malloc(sizeof(uint16_t) * (height + height2));
+  if (intbuf == NULL || tmpbuf == NULL || arrbuf == NULL) goto Error;
   for (i = 0; i < height; ++i) {
     highbd_resize_multistep(CONVERT_TO_SHORTPTR(input + in_stride * i), width,
                             intbuf + width2 * i, width2, tmpbuf, bd);
@@ -827,6 +833,8 @@ void vp10_highbd_resize_plane(const uint8_t *const input,
     highbd_fill_arr_to_col(CONVERT_TO_SHORTPTR(output + i), out_stride, height2,
                            arrbuf + height);
   }
+
+ Error:
   free(intbuf);
   free(tmpbuf);
   free(arrbuf);
