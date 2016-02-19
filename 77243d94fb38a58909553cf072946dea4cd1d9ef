@@ -16,6 +16,24 @@
       "revId": "77243d94fb38a58909553cf072946dea4cd1d9ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_3daa9b49",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4377,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-19T22:29:44Z",
+      "side": 1,
+      "message": "Is cpi-\u003erc.frames_to_key getting set for these forced keyframes?",
+      "parentUuid": "e2a3597e_373020e5",
+      "revId": "77243d94fb38a58909553cf072946dea4cd1d9ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
