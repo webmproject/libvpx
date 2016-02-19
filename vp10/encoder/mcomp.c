@@ -97,12 +97,22 @@ static int mv_err_cost(const MV *mv, const MV *ref, const int *mvjcost,
 
 static int mvsad_err_cost(const MACROBLOCK *x, const MV *mv, const MV *ref,
                           int sad_per_bit) {
+#if CONFIG_REF_MV
+  const MV diff = { (mv->row - ref->row) << 3,
+                    (mv->col - ref->col) << 3 };
+  return ROUND_POWER_OF_TWO(
+      (unsigned)mv_cost(&diff, x->nmvjointsadcost, x->mvsadcost) *
+          sad_per_bit,
+      VP9_PROB_COST_SHIFT);
+#else
   const MV diff = { mv->row - ref->row,
                     mv->col - ref->col };
+
   return ROUND_POWER_OF_TWO(
       (unsigned)mv_cost(&diff, x->nmvjointsadcost, x->nmvsadcost) *
           sad_per_bit,
       VP9_PROB_COST_SHIFT);
+#endif
 }
 
 void vp10_init_dsmotion_compensation(search_site_config *cfg, int stride) {

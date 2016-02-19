@@ -1627,12 +1627,14 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
 #endif
 #define log2f(x) (log (x) / (float) M_LOG2_E)
 
+#if !CONFIG_REF_MV
 static void cal_nmvjointsadcost(int *mvjointsadcost) {
   mvjointsadcost[0] = 600;
   mvjointsadcost[1] = 300;
   mvjointsadcost[2] = 300;
   mvjointsadcost[3] = 300;
 }
+#endif
 
 static void cal_nmvsadcosts(int *mvsadcost[2]) {
   int i = 1;
@@ -1794,7 +1796,6 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
 
   cpi->first_time_stamp_ever = INT64_MAX;
 
-  cal_nmvjointsadcost(cpi->td.mb.nmvjointsadcost);
 #if CONFIG_REF_MV
   for (i = 0; i < NMV_CONTEXTS; ++i) {
     cpi->td.mb.nmvcost[i][0] = &cpi->nmv_costs[i][0][MV_MAX];
@@ -1803,6 +1804,7 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
     cpi->td.mb.nmvcost_hp[i][1] = &cpi->nmv_costs_hp[i][1][MV_MAX];
   }
 #else
+  cal_nmvjointsadcost(cpi->td.mb.nmvjointsadcost);
   cpi->td.mb.nmvcost[0] = &cpi->nmvcosts[0][MV_MAX];
   cpi->td.mb.nmvcost[1] = &cpi->nmvcosts[1][MV_MAX];
   cpi->td.mb.nmvcost_hp[0] = &cpi->nmvcosts_hp[0][MV_MAX];
