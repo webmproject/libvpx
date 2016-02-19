@@ -292,6 +292,10 @@ YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const struct VP10_COMP *cpi,
 
 void vp10_init_me_luts(void);
 
+#if CONFIG_REF_MV
+void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame);
+#endif
+
 void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
                               const struct macroblockd_plane *pd,
                               ENTROPY_CONTEXT t_above[16],

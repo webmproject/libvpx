@@ -331,6 +331,16 @@ static void set_block_thresholds(const VP10_COMMON *cm, RD_OPT *rd) {
   }
 }
 
+#if CONFIG_REF_MV
+void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame) {
+  MB_MODE_INFO_EXT *mbmi_ext = x->mbmi_ext;
+  int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[ref_frame],
+                             mbmi_ext->ref_mv_stack[ref_frame]);
+  x->mvcost = x->mv_cost_stack[nmv_ctx];
+  x->nmvjointcost = x->nmv_vec_cost[nmv_ctx];
+}
+#endif
+
 void vp10_initialize_rd_consts(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
@@ -362,12 +372,16 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
 
   if (!frame_is_intra_only(cm)) {
 #if CONFIG_REF_MV
-    int nmv_ctx = 0;
-    vp10_build_nmv_cost_table(x->nmvjointcost,
-                             cm->allow_high_precision_mv ? x->nmvcost_hp
-                                                         : x->nmvcost,
-                             &cm->fc->nmvc[nmv_ctx],
-                             cm->allow_high_precision_mv);
+    int nmv_ctx;
+    for (nmv_ctx = 0; nmv_ctx < NMV_CONTEXTS; ++nmv_ctx) {
+      vp10_build_nmv_cost_table(x->nmv_vec_cost[nmv_ctx],
+                                cm->allow_high_precision_mv ?
+                                  x->nmvcost_hp[nmv_ctx] : x->nmvcost[nmv_ctx],
+                                &cm->fc->nmvc[nmv_ctx],
+                                cm->allow_high_precision_mv);
+    }
+    x->mvcost = x->mv_cost_stack[0];
+    x->nmvjointcost = x->nmv_vec_cost[0];
 #else
     vp10_build_nmv_cost_table(x->nmvjointcost,
                              cm->allow_high_precision_mv ? x->nmvcost_hp
