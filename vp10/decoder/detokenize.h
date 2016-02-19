@@ -23,9 +23,6 @@ extern "C" {
 void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
                                 vp10_reader *r);
 int vp10_decode_block_tokens(MACROBLOCKD *const xd,
-#if CONFIG_ANS
-                             const rans_dec_lut *const token_tab,
-#endif  // CONFIG_ANS
                              int plane, const scan_order *sc,
                              int x, int y,
                              TX_SIZE tx_size,

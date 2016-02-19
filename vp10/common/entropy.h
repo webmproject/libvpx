@@ -179,9 +179,7 @@ extern const vpx_prob vp10_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 extern const vpx_prob
     vp10_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2];
 
-void vp10_build_pareto8_cdf_tab(
-    const vpx_prob token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2],
-    rans_dec_lut cdf_tab[COEFF_PROB_MODELS]);
+typedef rans_dec_lut coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
 #endif  // CONFIG_ANS
 
 typedef vpx_prob vp10_coeff_probs_model[REF_TYPES][COEF_BANDS]
@@ -229,6 +227,10 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
   return combine_entropy_contexts(above_ec, left_ec);
 }
 
+#if CONFIG_ANS
+struct frame_contexts;
+void vp10_coef_pareto_cdfs(struct frame_contexts *fc);
+#endif  // CONFIG_ANS
 #ifdef __cplusplus
 }  // extern "C"
 #endif

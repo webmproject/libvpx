@@ -363,12 +363,17 @@ static void set_entropy_context_b(int plane, int block,
 }
 
 static INLINE void add_token(TOKENEXTRA **t, const vpx_prob *context_tree,
+#if CONFIG_ANS
+                             const rans_dec_lut *token_cdf,
+#endif  // CONFIG_ANS
                              int32_t extra, uint8_t token,
-                             uint8_t skip_eob_node,
-                             unsigned int *counts) {
+                             uint8_t skip_eob_node, unsigned int *counts) {
   (*t)->token = token;
   (*t)->extra = extra;
   (*t)->context_tree = context_tree;
+#if CONFIG_ANS
+  (*t)->token_cdf = token_cdf;
+#endif  // CONFIG_ANS
   (*t)->skip_eob_node = skip_eob_node;
   (*t)++;
   ++counts[token];
@@ -463,6 +468,10 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   vpx_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->common.fc->coef_probs[tx_size][type][ref];
 #endif  // CONFIG_ENTROPY
+#if CONFIG_ANS
+  rans_dec_lut(*const coef_cdfs)[COEFF_CONTEXTS] =
+      cpi->common.fc->coef_cdfs[tx_size][type][ref];
+#endif  // CONFIG_ANS
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
       td->counts->eob_branch[tx_size][type][ref];
   const uint8_t *const band = get_band_translate(tx_size);
@@ -495,8 +504,11 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
 
     vp10_get_token_extra(v, &token, &extra);
 
-    add_token(&t, coef_probs[band[c]][pt], extra, (uint8_t)token,
-              (uint8_t)skip_eob, counts[band[c]][pt]);
+    add_token(&t, coef_probs[band[c]][pt],
+#if CONFIG_ANS
+              &coef_cdfs[band[c]][pt],
+#endif  // CONFIG_ANS
+              extra, (uint8_t)token, (uint8_t)skip_eob, counts[band[c]][pt]);
     eob_branch[band[c]][pt] += !skip_eob;
 
     token_cache[scan[c]] = vp10_pt_energy_class[token];
