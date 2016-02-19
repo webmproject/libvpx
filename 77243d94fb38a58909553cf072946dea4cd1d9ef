@@ -34,6 +34,24 @@
       "revId": "77243d94fb38a58909553cf072946dea4cd1d9ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_3ba7371b",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4377,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-02-19T23:08:53Z",
+      "side": 1,
+      "message": "I don\u0027t think the flags are inspected on push, only pop. let me take a look",
+      "parentUuid": "c2c1f56d_3daa9b49",
+      "revId": "77243d94fb38a58909553cf072946dea4cd1d9ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
