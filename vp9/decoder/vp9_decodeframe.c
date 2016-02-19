@@ -859,7 +859,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
                          VPX_CODEC_CORRUPT_FRAME, "Invalid block size.");
   }
 
-  vpx_read_mode_info(pbi, xd, mi_row, mi_col, r, x_mis, y_mis);
+  vp9_read_mode_info(pbi, xd, mi_row, mi_col, r, x_mis, y_mis);
 
   if (mi->skip) {
     dec_reset_skip_context(xd);
