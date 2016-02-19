@@ -4008,6 +4008,20 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   arf_src_index = get_arf_src_index(cpi);
 
   if (arf_src_index) {
+    for (i = 0; i <= arf_src_index; ++i) {
+      struct lookahead_entry *e = vp10_lookahead_peek(cpi->lookahead, i);
+      // Avoid creating an alt-ref if there's a forced keyframe pending.
+      if (e == NULL) {
+        break;
+      } else if (e->flags == VPX_EFLAG_FORCE_KF) {
+        arf_src_index = 0;
+        flush = 1;
+        break;
+      }
+    }
+  }
+
+  if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
 
     if ((source = vp10_lookahead_peek(cpi->lookahead, arf_src_index)) != NULL) {
