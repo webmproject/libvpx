@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62a5a9c6_547e4ab7",
+        "filename": "vp10/common/entropymode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 830,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-22T22:30:19Z",
+      "side": 1,
+      "message": "// CONFIG_EXT_INTERP",
+      "revId": "cbf49ff342257495d8f3703190b351555d4907ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_bbb573b0",
+        "filename": "vp10/common/filter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-22T22:30:19Z",
+      "side": 1,
+      "message": "// SWITCHABLE_FILTERS",
+      "revId": "cbf49ff342257495d8f3703190b351555d4907ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
