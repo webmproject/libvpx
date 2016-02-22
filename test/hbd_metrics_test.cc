@@ -37,14 +37,14 @@ double compute_hbd_psnr(const YV12_BUFFER_CONFIG *source,
                         const YV12_BUFFER_CONFIG *dest,
                         uint32_t in_bd, uint32_t bd) {
   PSNR_STATS psnr;
-  calc_highbd_psnr(source, dest, &psnr, bd, in_bd);
+  vpx_calc_highbd_psnr(source, dest, &psnr, bd, in_bd);
   return psnr.psnr[0];
 }
 
 double compute_psnr(const YV12_BUFFER_CONFIG *source,
   const YV12_BUFFER_CONFIG *dest) {
   PSNR_STATS psnr;
-  calc_psnr(source, dest, &psnr);
+  vpx_calc_psnr(source, dest, &psnr);
   return psnr.psnr[0];
 }
 

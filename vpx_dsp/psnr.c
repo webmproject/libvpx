@@ -125,10 +125,10 @@ static int64_t get_sse(const uint8_t *a, int a_stride,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
-  const uint8_t *b8, int b_stride,
-  int width, int height,
-  unsigned int input_shift) {
+static int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
+                                    const uint8_t *b8, int b_stride,
+                                    int width, int height,
+                                    unsigned int input_shift) {
   const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   const uint16_t *b = CONVERT_TO_SHORTPTR(b8);
   int64_t total_sse = 0;
@@ -145,9 +145,9 @@ int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
   return total_sse;
 }
 
-int64_t highbd_get_sse(const uint8_t *a, int a_stride,
-  const uint8_t *b, int b_stride,
-  int width, int height) {
+static int64_t highbd_get_sse(const uint8_t *a, int a_stride,
+                              const uint8_t *b, int b_stride,
+                              int width, int height) {
   int64_t total_sse = 0;
   int x, y;
   const int dw = width % 16;
@@ -206,11 +206,10 @@ int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
-  const YV12_BUFFER_CONFIG *b,
-  PSNR_STATS *psnr,
-  unsigned int bit_depth,
-  unsigned int in_bit_depth) {
+void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
+                          const YV12_BUFFER_CONFIG *b,
+                          PSNR_STATS *psnr, uint32_t bit_depth,
+                          uint32_t in_bit_depth) {
   const int widths[3] =
   { a->y_crop_width, a->uv_crop_width, a->uv_crop_width };
   const int heights[3] =
@@ -260,8 +259,8 @@ void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
 
 #endif  // !CONFIG_VP9_HIGHBITDEPTH
 
-void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
-  PSNR_STATS *psnr) {
+void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
+                   PSNR_STATS *psnr) {
   static const double peak = 255.0;
   const int widths[3] = {
     a->y_crop_width, a->uv_crop_width, a->uv_crop_width };

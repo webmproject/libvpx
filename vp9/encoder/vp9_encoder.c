@@ -2145,10 +2145,10 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   int i;
   PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
-  calc_highbd_psnr(cpi->Source, cpi->common.frame_to_show, &psnr,
-                   cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
+  vpx_calc_highbd_psnr(cpi->Source, cpi->common.frame_to_show, &psnr,
+                       cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
 #else
-  calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr);
+  vpx_calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr);
 #endif
 
   for (i = 0; i < 4; ++i) {
@@ -4329,10 +4329,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
         PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
-        calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd,
-                         in_bit_depth);
+        vpx_calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd,
+                             in_bit_depth);
 #else
-        calc_psnr(orig, recon, &psnr);
+        vpx_calc_psnr(orig, recon, &psnr);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
         adjust_image_stat(psnr.psnr[1], psnr.psnr[2], psnr.psnr[3],
@@ -4363,10 +4363,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           vpx_clear_system_state();
 
 #if CONFIG_VP9_HIGHBITDEPTH
-          calc_highbd_psnr(orig, pp, &psnr2, cpi->td.mb.e_mbd.bd,
+          vpx_calc_highbd_psnr(orig, pp, &psnr2, cpi->td.mb.e_mbd.bd,
                            cpi->oxcf.input_bit_depth);
 #else
-          calc_psnr(orig, pp, &psnr2);
+          vpx_calc_psnr(orig, pp, &psnr2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->totalp_sq_error += psnr2.sse[0];
