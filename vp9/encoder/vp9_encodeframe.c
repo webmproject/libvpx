@@ -770,6 +770,7 @@ static int choose_partitioning(VP9_COMP *cpi,
       x->pred_mv[LAST_FRAME] = mi->mv[0].as_mv;
     }
 
+    set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
     // Check if most of the superblock is skin content, and if so, force split
