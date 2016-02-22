@@ -1323,12 +1323,12 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
                               TX_SIZE tx_size, PREDICTION_MODE mode,
                               const uint8_t *ref, int ref_stride,
                               uint8_t *dst, int dst_stride,
-                              int aoff, int loff, int plane) {
+                              int col_off, int row_off, int plane) {
   const int txw = (1 << tx_size);
-  const int have_top = loff || xd->up_available;
-  const int have_left = aoff || xd->left_available;
-  const int x = aoff * 4;
-  const int y = loff * 4;
+  const int have_top = row_off || xd->up_available;
+  const int have_left = col_off || xd->left_available;
+  const int x = col_off * 4;
+  const int y = row_off * 4;
   const int bw = VPXMAX(2, 1 << bwl_in);
   const int bh = VPXMAX(2, 1 << bhl_in);
   const int mi_row = -xd->mb_to_top_edge >> (3 + MI_SIZE_LOG2);
@@ -1339,11 +1339,11 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
       mi_col + (bw >> !pd->subsampling_x) < xd->tile.mi_col_end;
   const int have_right = vp10_has_right(bsize, mi_row, mi_col,
                                         right_available,
-                                        tx_size, loff, aoff,
+                                        tx_size, row_off, col_off,
                                         pd->subsampling_x);
   const int have_bottom = vp10_has_bottom(bsize, mi_row, mi_col,
                                           xd->mb_to_bottom_edge > 0,
-                                          tx_size, loff, aoff,
+                                          tx_size, row_off, col_off,
                                           pd->subsampling_y);
   const int wpx = 4 * bw;
   const int hpx = 4 * bh;
