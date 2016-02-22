@@ -75,11 +75,6 @@ double vpx_calc_fastssim(const YV12_BUFFER_CONFIG *source,
                          double *ssim_y, double *ssim_u,
                          double *ssim_v, uint32_t bit_depth);
 
-double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
-                   const YV12_BUFFER_CONFIG *dest,
-                   double *phvs_y, double *phvs_u,
-                   double *phvs_v, uint32_t bit_depth);
-
 #if CONFIG_VP9_HIGHBITDEPTH
 double vpx_highbd_calc_ssim(const YV12_BUFFER_CONFIG *source,
                             const YV12_BUFFER_CONFIG *dest,

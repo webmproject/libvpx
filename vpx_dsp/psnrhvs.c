@@ -248,27 +248,27 @@ static double calc_psnrhvs(const unsigned char *src, int _systride,
   return ret;
 }
 
-double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
+double vpx_psnrhvs(const YV12_BUFFER_CONFIG *src,
                    const YV12_BUFFER_CONFIG *dest, double *y_psnrhvs,
-                   double *u_psnrhvs, double *v_psnrhvs, uint32_t bit_depth) {
+                   double *u_psnrhvs, double *v_psnrhvs,
+                   uint32_t bd, uint32_t in_bd) {
   double psnrhvs;
   const double par = 1.0;
   const int step = 7;
   vpx_clear_system_state();
 
-  assert(bit_depth == 8 || bit_depth == 10 || bit_depth == 12);
+  assert(bd == 8 || bd == 10 || bd == 12);
 
-  *y_psnrhvs = calc_psnrhvs(source->y_buffer, source->y_stride, dest->y_buffer,
-                            dest->y_stride, par, source->y_crop_width,
-                            source->y_crop_height, step, csf_y, bit_depth);
-  *u_psnrhvs = calc_psnrhvs(source->u_buffer, source->uv_stride, dest->u_buffer,
-                            dest->uv_stride, par, source->uv_crop_width,
-                            source->uv_crop_height, step, csf_cb420, bit_depth);
-
-  *v_psnrhvs = calc_psnrhvs(source->v_buffer, source->uv_stride, dest->v_buffer,
-                            dest->uv_stride, par, source->uv_crop_width,
-                            source->uv_crop_height, step, csf_cr420, bit_depth);
+  *y_psnrhvs = calc_psnrhvs(src->y_buffer, src->y_stride, dest->y_buffer,
+                            dest->y_stride, par, src->y_crop_width,
+                            src->y_crop_height, step, csf_y, bd);
+  *u_psnrhvs = calc_psnrhvs(src->u_buffer, src->uv_stride, dest->u_buffer,
+                            dest->uv_stride, par, src->uv_crop_width,
+                            src->uv_crop_height, step, csf_cb420, bd);
+  *v_psnrhvs = calc_psnrhvs(src->v_buffer, src->uv_stride, dest->v_buffer,
+                            dest->uv_stride, par, src->uv_crop_width,
+                            src->uv_crop_height, step, csf_cr420, bd);
   psnrhvs = (*y_psnrhvs) * .8 + .1 * ((*u_psnrhvs) + (*v_psnrhvs));
-  return convert_score_db(psnrhvs, 1.0, bit_depth);
+  return convert_score_db(psnrhvs, 1.0, bd);
 }
 

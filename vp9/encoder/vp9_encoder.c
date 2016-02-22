@@ -4314,9 +4314,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
     if (cm->show_frame) {
       uint32_t bit_depth = 8;
-#if CONFIG_VP9_HIGHBITDEPTH
       uint32_t in_bit_depth = 8;
-#endif
       cpi->count++;
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
@@ -4460,7 +4458,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       {
         double y, u, v, frame_all;
         frame_all = vpx_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v,
-                                bit_depth);
+                                bit_depth, in_bit_depth);
         adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
       }
     }
