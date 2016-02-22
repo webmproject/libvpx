@@ -53,14 +53,14 @@ double compute_hbd_psnrhvs(const YV12_BUFFER_CONFIG *source,
                            uint32_t in_bd, uint32_t bd) {
   double tempy, tempu, tempv;
   return vpx_psnrhvs(source, dest,
-                     &tempy, &tempu, &tempv, bd);
+                     &tempy, &tempu, &tempv, bd, in_bd);
 }
 
 double compute_psnrhvs(const YV12_BUFFER_CONFIG *source,
   const YV12_BUFFER_CONFIG *dest) {
   double tempy, tempu, tempv;
   return vpx_psnrhvs(source, dest,
-                     &tempy, &tempu, &tempv, 8);
+                     &tempy, &tempu, &tempv, 8, 8);
 }
 
 double compute_hbd_fastssim(const YV12_BUFFER_CONFIG *source,

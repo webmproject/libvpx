@@ -56,6 +56,11 @@ void calc_psnr(const YV12_BUFFER_CONFIG *a,
                const YV12_BUFFER_CONFIG *b,
                PSNR_STATS *psnr);
 
+double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
+                   const YV12_BUFFER_CONFIG *dest,
+                   double *phvs_y, double *phvs_u,
+                   double *phvs_v, uint32_t bd, uint32_t in_bd);
+
 int64_t highbd_get_sse(const uint8_t *a, int a_stride,
                        const uint8_t *b, int b_stride,
                        int width, int height);
