@@ -4011,6 +4011,10 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     tmp_mv.col >>= 3;
     tmp_mv.row >>= 3;
 
+#if CONFIG_REF_MV
+    vp10_set_mvcost(x, refs[id]);
+#endif
+
     // Small-range full-pixel motion search.
     bestsme = vp10_refining_search_8p_c(x, &tmp_mv, sadpb,
                                        search_range,
@@ -4308,6 +4312,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
           vp10_set_mv_search_range(x, &bsi->ref_mv[0]->as_mv);
 
+#if CONFIG_REF_MV
+          vp10_set_mvcost(x, mbmi->ref_frame[0]);
+#endif
           bestsme = vp10_full_pixel_search(
               cpi, x, bsize, &mvp_full, step_param, sadpb,
               cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL,
@@ -4843,6 +4850,10 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   pred_mv[0] = x->mbmi_ext->ref_mvs[ref][0].as_mv;
   pred_mv[1] = x->mbmi_ext->ref_mvs[ref][1].as_mv;
   pred_mv[2] = x->pred_mv[ref];
+
+#if CONFIG_REF_MV
+  vp10_set_mvcost(x, ref);
+#endif
 
   if (scaled_ref_frame) {
     int i;

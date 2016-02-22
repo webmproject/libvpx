@@ -55,6 +55,12 @@ typedef struct {
   int nmvcosts[2][MV_VALS];
   int nmvcosts_hp[2][MV_VALS];
 
+#if CONFIG_REF_MV
+  int nmv_vec_cost[NMV_CONTEXTS][MV_JOINTS];
+  int nmv_costs[NMV_CONTEXTS][2][MV_VALS];
+  int nmv_costs_hp[NMV_CONTEXTS][2][MV_VALS];
+#endif
+
   unsigned char *last_frame_seg_map_copy;
 
   // 0 = Intra, Last, GF, ARF
@@ -351,6 +357,11 @@ typedef struct VP10_COMP {
   RD_OPT rd;
 
   CODING_CONTEXT coding_context;
+
+#if CONFIG_REF_MV
+  int *nmv_costs[NMV_CONTEXTS][2];
+  int *nmv_costs_hp[NMV_CONTEXTS][2];
+#endif
 
   int *nmvcosts[2];
   int *nmvcosts_hp[2];
