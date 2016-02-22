@@ -653,6 +653,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
   MV32 scaled_mv;
+  MV mv_q4;
   int xs, ys, x0, y0, x0_16, y0_16, frame_width, frame_height,
       buf_stride, subpel_x, subpel_y;
   uint8_t *ref_frame, *buf_ptr;
@@ -672,10 +673,10 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                          : ref_frame_buf->buf.v_buffer;
   }
 
+  mv_q4 = clamp_mv_to_umv_border_sb(xd, mv, bw, bh,
+                                    pd->subsampling_x,
+                                    pd->subsampling_y);
   if (is_scaled) {
-    const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, mv, bw, bh,
-                                               pd->subsampling_x,
-                                               pd->subsampling_y);
     // Co-ordinate of containing block to pixel precision.
     int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
     int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
@@ -699,11 +700,6 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
     xs = sf->x_step_q4;
     ys = sf->y_step_q4;
   } else {
-#if CONFIG_OBMC
-    const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, mv, bw, bh,
-                                               pd->subsampling_x,
-                                               pd->subsampling_y);
-#endif  // CONFIG_OBMC
     // Co-ordinate of containing block to pixel precision.
     x0 = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x)) + x;
     y0 = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y)) + y;
@@ -712,13 +708,8 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
     x0_16 = x0 << SUBPEL_BITS;
     y0_16 = y0 << SUBPEL_BITS;
 
-#if CONFIG_OBMC
     scaled_mv.row = mv_q4.row;
     scaled_mv.col = mv_q4.col;
-#else
-    scaled_mv.row = mv->row * (1 << (1 - pd->subsampling_y));
-    scaled_mv.col = mv->col * (1 << (1 - pd->subsampling_x));
-#endif  // CONFIG_OBMC
     xs = ys = 16;
   }
   subpel_x = scaled_mv.col & SUBPEL_MASK;
