@@ -93,7 +93,11 @@ typedef struct frame_contexts {
   vpx_prob txfm_partition_prob[TXFM_PARTITION_CONTEXTS];
 #endif
   vpx_prob skip_probs[SKIP_CONTEXTS];
+#if CONFIG_REF_MV
+  nmv_context nmvc[NMV_CONTEXTS];
+#else
   nmv_context nmvc;
+#endif
   int initialized;
 #if CONFIG_EXT_TX
   vpx_prob inter_ext_tx_prob[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES - 1];
@@ -150,7 +154,11 @@ typedef struct FRAME_COUNTS {
   unsigned int txfm_partition[TXFM_PARTITION_CONTEXTS][2];
 #endif
   unsigned int skip[SKIP_CONTEXTS][2];
+#if CONFIG_REF_MV
+  nmv_context_counts mv[NMV_CONTEXTS];
+#else
   nmv_context_counts mv;
+#endif
 #if CONFIG_EXT_TX
   unsigned int inter_ext_tx[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
   unsigned int intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]

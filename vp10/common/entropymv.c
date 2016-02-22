@@ -185,7 +185,45 @@ void vp10_inc_mv(const MV *mv, nmv_context_counts *counts, const int usehp) {
 
 void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
   int i, j;
+#if CONFIG_REF_MV
+  int idx;
+  for (idx = 0; idx < NMV_CONTEXTS; ++idx) {
+    nmv_context *fc = &cm->fc->nmvc[idx];
+    const nmv_context *pre_fc =
+        &cm->frame_contexts[cm->frame_context_idx].nmvc[idx];
+    const nmv_context_counts *counts = &cm->counts.mv[idx];
 
+    vpx_tree_merge_probs(vp10_mv_joint_tree, pre_fc->joints, counts->joints,
+                         fc->joints);
+
+    for (i = 0; i < 2; ++i) {
+      nmv_component *comp = &fc->comps[i];
+      const nmv_component *pre_comp = &pre_fc->comps[i];
+      const nmv_component_counts *c = &counts->comps[i];
+
+      comp->sign = mode_mv_merge_probs(pre_comp->sign, c->sign);
+      vpx_tree_merge_probs(vp10_mv_class_tree, pre_comp->classes, c->classes,
+                           comp->classes);
+      vpx_tree_merge_probs(vp10_mv_class0_tree, pre_comp->class0, c->class0,
+                           comp->class0);
+
+      for (j = 0; j < MV_OFFSET_BITS; ++j)
+        comp->bits[j] = mode_mv_merge_probs(pre_comp->bits[j], c->bits[j]);
+
+      for (j = 0; j < CLASS0_SIZE; ++j)
+        vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->class0_fp[j],
+                             c->class0_fp[j], comp->class0_fp[j]);
+
+      vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->fp, c->fp, comp->fp);
+
+      if (allow_hp) {
+        comp->class0_hp = mode_mv_merge_probs(pre_comp->class0_hp,
+                                              c->class0_hp);
+        comp->hp = mode_mv_merge_probs(pre_comp->hp, c->hp);
+      }
+    }
+  }
+#else
   nmv_context *fc = &cm->fc->nmvc;
   const nmv_context *pre_fc = &cm->frame_contexts[cm->frame_context_idx].nmvc;
   const nmv_context_counts *counts = &cm->counts.mv;
@@ -218,8 +256,15 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
       comp->hp = mode_mv_merge_probs(pre_comp->hp, c->hp);
     }
   }
+#endif
 }
 
 void vp10_init_mv_probs(VP10_COMMON *cm) {
+#if CONFIG_REF_MV
+  int i;
+  for (i = 0; i < NMV_CONTEXTS; ++i)
+    cm->fc->nmvc[i] = default_nmv_context;
+#else
   cm->fc->nmvc = default_nmv_context;
+#endif
 }
