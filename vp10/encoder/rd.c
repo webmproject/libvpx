@@ -338,6 +338,8 @@ void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame) {
                              mbmi_ext->ref_mv_stack[ref_frame]);
   x->mvcost = x->mv_cost_stack[nmv_ctx];
   x->nmvjointcost = x->nmv_vec_cost[nmv_ctx];
+  x->mvsadcost = x->mvcost;
+  x->nmvjointsadcost = x->nmvjointcost;
 }
 #endif
 
@@ -382,6 +384,8 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
     }
     x->mvcost = x->mv_cost_stack[0];
     x->nmvjointcost = x->nmv_vec_cost[0];
+    x->mvsadcost = x->mvcost;
+    x->nmvjointsadcost = x->nmvjointcost;
 #else
     vp10_build_nmv_cost_table(x->nmvjointcost,
                              cm->allow_high_precision_mv ? x->nmvcost_hp
