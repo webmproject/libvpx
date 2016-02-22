@@ -4004,7 +4004,8 @@ static void compute_internal_stats(VP10_COMP *cpi) {
       }
     }
 
-    frame_all = vpx_calc_fastssim(orig, recon, &y, &u, &v, bit_depth);
+    frame_all = vpx_calc_fastssim(orig, recon, &y, &u, &v,
+                                  bit_depth, in_bit_depth);
     adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
     frame_all = vpx_psnrhvs(orig, recon, &y, &u, &v, bit_depth, in_bit_depth);
     adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
