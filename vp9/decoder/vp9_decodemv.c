@@ -852,7 +852,7 @@ static INLINE void copy_ref_frame_pair(MV_REFERENCE_FRAME *dst,
   memcpy(dst, src, sizeof(*dst) * 2);
 }
 
-void vpx_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
+void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
                         int mi_row, int mi_col, vpx_reader *r,
                         int x_mis, int y_mis) {
   VP9_COMMON *const cm = &pbi->common;
