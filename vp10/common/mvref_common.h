@@ -150,6 +150,16 @@ static INLINE int_mv get_sub_block_mv(const MODE_INFO *candidate, int which_mv,
           : candidate->mbmi.mv[which_mv];
 }
 
+#if CONFIG_REF_MV
+static INLINE int_mv get_sub_block_pred_mv(const MODE_INFO *candidate,
+                                           int which_mv,
+                                           int search_col, int block_idx) {
+  return block_idx >= 0 && candidate->mbmi.sb_type < BLOCK_8X8
+          ? candidate->bmi[idx_n_column_to_subblock[block_idx][search_col == 0]]
+              .pred_mv[which_mv]
+          : candidate->mbmi.pred_mv[which_mv];
+}
+#endif
 
 // Performs mv sign inversion if indicated by the reference frame combination.
 static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,

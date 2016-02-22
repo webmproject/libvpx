@@ -38,6 +38,8 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
         // Add a new item to the list.
         if (index == *refmv_count) {
           ref_mv_stack[index].this_mv = this_refmv;
+          ref_mv_stack[index].pred_mv =
+              get_sub_block_pred_mv(candidate_mi, ref, col, block);
           ref_mv_stack[index].weight = 2 * weight;
           ++(*refmv_count);
 
@@ -63,6 +65,8 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
           // Add a new item to the list.
           if (index == *refmv_count) {
             ref_mv_stack[index].this_mv = this_refmv;
+            ref_mv_stack[index].pred_mv =
+                get_sub_block_pred_mv(candidate_mi, ref, col, alt_block);
             ref_mv_stack[index].weight = weight;
             ++(*refmv_count);
 

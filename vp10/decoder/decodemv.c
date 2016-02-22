@@ -891,11 +891,20 @@ static INLINE int is_mv_valid(const MV *mv) {
 
 static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
                             PREDICTION_MODE mode,
+#if CONFIG_REF_MV
+                            int block,
+#endif
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
                             int is_compound, int allow_hp, vpx_reader *r) {
   int i;
   int ret = 1;
+#if CONFIG_REF_MV
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  BLOCK_SIZE bsize = mbmi->sb_type;
+  int_mv *pred_mv = (bsize >= BLOCK_8X8) ?
+      mbmi->pred_mv : xd->mi[0]->bmi[block].pred_mv;
+#endif
 
   switch (mode) {
 #if CONFIG_EXT_INTER
@@ -908,6 +917,10 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
         read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, &cm->fc->nmvc, mv_counts,
                 allow_hp);
         ret = ret && is_mv_valid(&mv[i].as_mv);
+
+#if CONFIG_REF_MV
+        pred_mv[i].as_int = ref_mv[i].as_int;
+#endif
       }
       break;
     }
@@ -915,18 +928,36 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
       mv[0].as_int = nearest_mv[0].as_int;
       if (is_compound)
         mv[1].as_int = nearest_mv[1].as_int;
+
+#if CONFIG_REF_MV
+      pred_mv[0].as_int = nearest_mv[0].as_int;
+      if (is_compound)
+        pred_mv[1].as_int = nearest_mv[1].as_int;
+#endif
       break;
     }
     case NEARMV: {
       mv[0].as_int = near_mv[0].as_int;
       if (is_compound)
         mv[1].as_int = near_mv[1].as_int;
+
+#if CONFIG_REF_MV
+      pred_mv[0].as_int = near_mv[0].as_int;
+      if (is_compound)
+        pred_mv[1].as_int = near_mv[1].as_int;
+#endif
       break;
     }
     case ZEROMV: {
       mv[0].as_int = 0;
       if (is_compound)
         mv[1].as_int = 0;
+
+#if CONFIG_REF_MV
+      pred_mv[0].as_int = 0;
+      if (is_compound)
+        pred_mv[1].as_int = 0;
+#endif
       break;
     }
 #if CONFIG_EXT_INTER
@@ -1284,7 +1315,11 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTER
         }
 
-        if (!assign_mv(cm, xd, b_mode, block,
+        if (!assign_mv(cm, xd, b_mode,
+#if CONFIG_REF_MV
+                       j,
+#endif
+                       block,
 #if CONFIG_EXT_INTER
                        ref_mv[mv_idx],
 #else
@@ -1312,7 +1347,11 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
-    xd->corrupted |= !assign_mv(cm, xd, mbmi->mode, mbmi->mv,
+    xd->corrupted |= !assign_mv(cm, xd, mbmi->mode,
+#if CONFIG_REF_MV
+                                0,
+#endif
+                                mbmi->mv,
 #if CONFIG_EXT_INTER
                                 mbmi->mode == NEWFROMNEARMV ?
                                               nearmv : nearestmv,
