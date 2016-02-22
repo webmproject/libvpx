@@ -1810,6 +1810,22 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 #endif  // CONFIG_OBMC
       }
     }
+
+#if CONFIG_EXT_INTER
+    if (cm->reference_mode != COMPOUND_REFERENCE &&
+#if CONFIG_SUPERTX
+       !supertx_enabled &&
+#endif
+       is_interintra_allowed(mbmi)) {
+      if (mbmi->ref_frame[1] == INTRA_FRAME) {
+        counts->y_mode[size_group_lookup[bsize]][mbmi->interintra_mode]++;
+        counts->interintra[bsize][1]++;
+      } else {
+        counts->interintra[bsize][0]++;
+      }
+    }
+#endif  // CONFIG_EXT_INTER
+
     if (inter_block &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       int16_t mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
@@ -4573,7 +4589,13 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 
 #if CONFIG_SUPERTX
 static int check_intra_b(PICK_MODE_CONTEXT *ctx) {
-  return !is_inter_mode((&ctx->mic)->mbmi.mode);
+  if (!is_inter_mode((&ctx->mic)->mbmi.mode))
+    return 1;
+#if CONFIG_EXT_INTER
+  if (ctx->mic.mbmi.ref_frame[1] == INTRA_FRAME)
+    return 1;
+#endif  // CONFIG_EXT_INTER
+  return 0;
 }
 
 static int check_intra_sb(VP10_COMP *cpi, const TileInfo *const tile,

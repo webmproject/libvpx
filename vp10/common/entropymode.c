@@ -226,6 +226,10 @@ static const vpx_prob default_inter_compound_mode_probs
   {17,  81,  52, 192, 192, 128, 180, 180},   // 5 = one intra neighbour
   {25,  29,  50, 192, 192, 128, 180, 180},   // 6 = two intra neighbours
 };
+
+static const vpx_prob default_interintra_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+};
 #endif  // CONFIG_EXT_INTER
 
 #if CONFIG_OBMC
@@ -1326,6 +1330,7 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
   vp10_copy(fc->inter_compound_mode_probs, default_inter_compound_mode_probs);
+  vp10_copy(fc->interintra_prob, default_interintra_prob);
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_SUPERTX
   vp10_copy(fc->supertx_prob, default_supertx_prob);
@@ -1434,6 +1439,12 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
                          pre_fc->inter_compound_mode_probs[i],
                          counts->inter_compound_mode[i],
                          fc->inter_compound_mode_probs[i]);
+
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    if (is_interintra_allowed_bsize(i))
+      fc->interintra_prob[i] = mode_mv_merge_probs(pre_fc->interintra_prob[i],
+                                                   counts->interintra[i]);
+  }
 #endif  // CONFIG_EXT_INTER
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)

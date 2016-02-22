@@ -22,6 +22,10 @@
 #include "vp10/common/onyxc_int.h"
 #endif  // CONFIG_OBMC
 
+// TODO(geza.lore) Update this when the extended coding unit size experiment
+// have been ported.
+#define CU_SIZE 64
+
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       uint8_t *dst, int dst_stride,
@@ -232,23 +236,65 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
 void vp10_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0, 0);
+#if CONFIG_EXT_INTER
+  if (is_interintra_pred(&xd->mi[0]->mbmi))
+    vp10_build_interintra_predictors_sby(xd,
+                                         xd->plane[0].dst.buf,
+                                         xd->plane[0].dst.stride,
+                                         bsize);
+#endif  // CONFIG_EXT_INTER
 }
 
 void vp10_build_inter_predictors_sbp(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                    BLOCK_SIZE bsize, int plane) {
+                                     BLOCK_SIZE bsize, int plane) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, plane, plane);
+#if CONFIG_EXT_INTER
+  if (is_interintra_pred(&xd->mi[0]->mbmi)) {
+    if (plane == 0) {
+      vp10_build_interintra_predictors_sby(xd,
+                                           xd->plane[0].dst.buf,
+                                           xd->plane[0].dst.stride,
+                                           bsize);
+    } else {
+      vp10_build_interintra_predictors_sbc(xd,
+                                           xd->plane[plane].dst.buf,
+                                           xd->plane[plane].dst.stride,
+                                           plane, bsize);
+    }
+  }
+#endif  // CONFIG_EXT_INTER
 }
 
 void vp10_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
                                      BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 1,
                                     MAX_MB_PLANE - 1);
+#if CONFIG_EXT_INTER
+  if (is_interintra_pred(&xd->mi[0]->mbmi))
+    vp10_build_interintra_predictors_sbuv(xd,
+                                          xd->plane[1].dst.buf,
+                                          xd->plane[2].dst.buf,
+                                          xd->plane[1].dst.stride,
+                                          xd->plane[2].dst.stride,
+                                          bsize);
+#endif  // CONFIG_EXT_INTER
 }
 
 void vp10_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0,
                                     MAX_MB_PLANE - 1);
+#if CONFIG_EXT_INTER
+  if (is_interintra_pred(&xd->mi[0]->mbmi))
+    vp10_build_interintra_predictors(xd,
+                                     xd->plane[0].dst.buf,
+                                     xd->plane[1].dst.buf,
+                                     xd->plane[2].dst.buf,
+                                     xd->plane[0].dst.stride,
+                                     xd->plane[1].dst.stride,
+                                     xd->plane[2].dst.stride,
+                                     bsize);
+#endif  // CONFIG_EXT_INTER
 }
 
 void vp10_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
@@ -509,6 +555,17 @@ void vp10_build_inter_predictors_sb_sub8x8(MACROBLOCKD *xd,
                            0, 0, bw, bh,
                            mi_x, mi_y);
   }
+#if CONFIG_EXT_INTER
+  if (is_interintra_pred(&xd->mi[0]->mbmi))
+    vp10_build_interintra_predictors(xd,
+                                     xd->plane[0].dst.buf,
+                                     xd->plane[1].dst.buf,
+                                     xd->plane[2].dst.buf,
+                                     xd->plane[0].dst.stride,
+                                     xd->plane[1].dst.stride,
+                                     xd->plane[2].dst.stride,
+                                     bsize);
+#endif  // CONFIG_EXT_INTER
 }
 #endif  // CONFIG_SUPERTX
 
@@ -755,3 +812,387 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
   }  // each mi in the left column
 }
 #endif  // CONFIG_OBMC
+
+#if CONFIG_EXT_INTER
+static void combine_interintra(PREDICTION_MODE mode,
+                               BLOCK_SIZE plane_bsize,
+                               uint8_t *comppred,
+                               int compstride,
+                               uint8_t *interpred,
+                               int interstride,
+                               uint8_t *intrapred,
+                               int intrastride) {
+  static const int scale_bits = 8;
+  static const int scale_max = 256;
+  static const int scale_round = 127;
+  static const int weights1d[64] = {
+      128, 125, 122, 119, 116, 114, 111, 109,
+      107, 105, 103, 101,  99,  97,  96,  94,
+       93,  91,  90,  89,  88,  86,  85,  84,
+       83,  82,  81,  81,  80,  79,  78,  78,
+       77,  76,  76,  75,  75,  74,  74,  73,
+       73,  72,  72,  71,  71,  71,  70,  70,
+       70,  70,  69,  69,  69,  69,  68,  68,
+       68,  68,  68,  67,  67,  67,  67,  67,
+  };
+  const int bw = 4 << b_width_log2_lookup[plane_bsize];
+  const int bh = 4 << b_height_log2_lookup[plane_bsize];
+
+  int size = VPXMAX(bw, bh);
+  int size_scale = (size >= 64 ? 1 :
+                    size == 32 ? 2 :
+                    size == 16 ? 4 :
+                    size == 8  ? 8 : 16);
+  int i, j;
+
+  switch (mode) {
+    case V_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = weights1d[i * size_scale];
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+               >> scale_bits;
+        }
+      }
+     break;
+
+    case H_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = weights1d[j * size_scale];
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+               >> scale_bits;
+        }
+      }
+     break;
+
+    case D63_PRED:
+    case D117_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = (weights1d[i * size_scale] * 3 +
+                       weights1d[j * size_scale]) >> 2;
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case D207_PRED:
+    case D153_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = (weights1d[j * size_scale] * 3 +
+                       weights1d[i * size_scale]) >> 2;
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case D135_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = weights1d[(i < j ? i : j) * size_scale];
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case D45_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = (weights1d[i * size_scale] +
+                       weights1d[j * size_scale]) >> 1;
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case TM_PRED:
+    case DC_PRED:
+    default:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+            comppred[i * compstride + j] = (interpred[i * interstride + j] +
+                intrapred[i * intrastride + j]) >> 1;
+        }
+      }
+      break;
+  }
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static void combine_interintra_highbd(PREDICTION_MODE mode,
+                                      BLOCK_SIZE plane_bsize,
+                                      uint8_t *comppred8,
+                                      int compstride,
+                                      uint8_t *interpred8,
+                                      int interstride,
+                                      uint8_t *intrapred8,
+                                      int intrastride, int bd) {
+  static const int scale_bits = 8;
+  static const int scale_max = 256;
+  static const int scale_round = 127;
+  static const int weights1d[64] = {
+      128, 125, 122, 119, 116, 114, 111, 109,
+      107, 105, 103, 101,  99,  97,  96,  94,
+       93,  91,  90,  89,  88,  86,  85,  84,
+       83,  82,  81,  81,  80,  79,  78,  78,
+       77,  76,  76,  75,  75,  74,  74,  73,
+       73,  72,  72,  71,  71,  71,  70,  70,
+       70,  70,  69,  69,  69,  69,  68,  68,
+       68,  68,  68,  67,  67,  67,  67,  67,
+  };
+  const int bw = 4 << b_width_log2_lookup[plane_bsize];
+  const int bh = 4 << b_height_log2_lookup[plane_bsize];
+
+  int size = VPXMAX(bw, bh);
+  int size_scale = (size >= 64 ? 1 :
+                    size == 32 ? 2 :
+                    size == 16 ? 4 :
+                    size == 8  ? 8 : 16);
+  int i, j;
+  uint16_t *comppred = CONVERT_TO_SHORTPTR(comppred8);
+  uint16_t *interpred = CONVERT_TO_SHORTPTR(interpred8);
+  uint16_t *intrapred = CONVERT_TO_SHORTPTR(intrapred8);
+  (void) bd;
+
+  switch (mode) {
+    case V_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = weights1d[i * size_scale];
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+              >> scale_bits;
+        }
+      }
+     break;
+
+    case H_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = weights1d[j * size_scale];
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+               scale * intrapred[i * intrastride + j] + scale_round)
+               >> scale_bits;
+        }
+      }
+     break;
+
+    case D63_PRED:
+    case D117_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = (weights1d[i * size_scale] * 3 +
+                       weights1d[j * size_scale]) >> 2;
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case D207_PRED:
+    case D153_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = (weights1d[j * size_scale] * 3 +
+                       weights1d[i * size_scale]) >> 2;
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case D135_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = weights1d[(i < j ? i : j) * size_scale];
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case D45_PRED:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int scale = (weights1d[i * size_scale] +
+                       weights1d[j * size_scale]) >> 1;
+            comppred[i * compstride + j] =
+              ((scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j] + scale_round)
+                  >> scale_bits;
+        }
+      }
+     break;
+
+    case TM_PRED:
+    case DC_PRED:
+    default:
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+            comppred[i * compstride + j] = (interpred[i * interstride + j] +
+                intrapred[i * intrastride + j]) >> 1;
+        }
+      }
+      break;
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+// Break down rectangular intra prediction for joint spatio-temporal prediction
+// into two square intra predictions.
+static void build_intra_predictors_for_interintra(
+    MACROBLOCKD *xd,
+    uint8_t *ref, int ref_stride,
+    uint8_t *dst, int dst_stride,
+    PREDICTION_MODE mode,
+    BLOCK_SIZE bsize,
+    int plane) {
+  BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, &xd->plane[plane]);
+  const int bwl = b_width_log2_lookup[plane_bsize];
+  const int bhl = b_height_log2_lookup[plane_bsize];
+  TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+
+  if (bwl == bhl) {
+    vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
+                             ref, ref_stride, dst, dst_stride,
+                             0, 0, plane);
+
+  } else if (bwl < bhl) {
+    uint8_t *src_2 = ref + (4 << bwl)*ref_stride;
+    uint8_t *dst_2 = dst + (4 << bwl)*dst_stride;
+    vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
+                             ref, ref_stride, dst, dst_stride,
+                             0, 0, plane);
+    vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
+                             src_2, ref_stride, dst_2, dst_stride,
+                             0, 1 << bwl, plane);
+  } else {
+    uint8_t *src_2 = ref + (4 << bhl);
+    uint8_t *dst_2 = dst + (4 << bhl);
+    vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
+                             ref, ref_stride, dst, dst_stride,
+                             0, 0, plane);
+    vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
+                             src_2, ref_stride, dst_2, dst_stride,
+                             1 << bhl, 0, plane);
+  }
+}
+
+void vp10_build_interintra_predictors_sby(MACROBLOCKD *xd,
+                                          uint8_t *ypred,
+                                          int ystride,
+                                          BLOCK_SIZE bsize) {
+  const int bw = 4 << b_width_log2_lookup[bsize];
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    DECLARE_ALIGNED(16, uint16_t,
+                    intrapredictor[CU_SIZE * CU_SIZE]);
+    build_intra_predictors_for_interintra(
+        xd, xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+        CONVERT_TO_BYTEPTR(intrapredictor), bw,
+        xd->mi[0]->mbmi.interintra_mode, bsize, 0);
+    combine_interintra_highbd(xd->mi[0]->mbmi.interintra_mode,
+                              bsize,
+                              xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+                              ypred, ystride,
+                              CONVERT_TO_BYTEPTR(intrapredictor), bw, xd->bd);
+    return;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  {
+    uint8_t intrapredictor[CU_SIZE * CU_SIZE];
+    build_intra_predictors_for_interintra(
+        xd, xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+        intrapredictor, bw,
+        xd->mi[0]->mbmi.interintra_mode, bsize, 0);
+    combine_interintra(xd->mi[0]->mbmi.interintra_mode,
+                       bsize,
+                       xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+                       ypred, ystride, intrapredictor, bw);
+  }
+}
+
+void vp10_build_interintra_predictors_sbc(MACROBLOCKD *xd,
+                                          uint8_t *upred,
+                                          int ustride,
+                                          int plane,
+                                          BLOCK_SIZE bsize) {
+  const BLOCK_SIZE uvbsize = get_plane_block_size(bsize, &xd->plane[plane]);
+  const int bw = 4 << b_width_log2_lookup[uvbsize];
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    DECLARE_ALIGNED(16, uint16_t,
+                    uintrapredictor[CU_SIZE * CU_SIZE]);
+    build_intra_predictors_for_interintra(
+        xd, xd->plane[plane].dst.buf, xd->plane[plane].dst.stride,
+        CONVERT_TO_BYTEPTR(uintrapredictor), bw,
+        xd->mi[0]->mbmi.interintra_uv_mode, bsize, plane);
+    combine_interintra_highbd(xd->mi[0]->mbmi.interintra_uv_mode,
+                              uvbsize,
+                              xd->plane[plane].dst.buf,
+                              xd->plane[plane].dst.stride,
+                              upred, ustride,
+                              CONVERT_TO_BYTEPTR(uintrapredictor), bw, xd->bd);
+    return;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  {
+    uint8_t uintrapredictor[CU_SIZE * CU_SIZE];
+    build_intra_predictors_for_interintra(
+        xd, xd->plane[plane].dst.buf, xd->plane[plane].dst.stride,
+        uintrapredictor, bw,
+        xd->mi[0]->mbmi.interintra_uv_mode, bsize, 1);
+    combine_interintra(xd->mi[0]->mbmi.interintra_uv_mode,
+                       uvbsize,
+                       xd->plane[plane].dst.buf,
+                       xd->plane[plane].dst.stride,
+                       upred, ustride, uintrapredictor, bw);
+  }
+}
+
+void vp10_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
+                                           uint8_t *upred,
+                                           uint8_t *vpred,
+                                           int ustride, int vstride,
+                                           BLOCK_SIZE bsize) {
+  vp10_build_interintra_predictors_sbc(xd, upred, ustride, 1, bsize);
+  vp10_build_interintra_predictors_sbc(xd, vpred, vstride, 2, bsize);
+}
+
+void vp10_build_interintra_predictors(MACROBLOCKD *xd,
+                                      uint8_t *ypred,
+                                      uint8_t *upred,
+                                      uint8_t *vpred,
+                                      int ystride, int ustride, int vstride,
+                                      BLOCK_SIZE bsize) {
+  vp10_build_interintra_predictors_sby(xd, ypred, ystride, bsize);
+  vp10_build_interintra_predictors_sbuv(xd, upred, vpred,
+                                        ustride, vstride, bsize);
+}
+#endif  // CONFIG_EXT_INTER

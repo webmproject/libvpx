@@ -168,7 +168,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
   if (speed >= 2) {
     sf->tx_size_search_method = frame_is_boosted(cpi) ? USE_FULL_RD
                                                       : USE_LARGESTALL;
-
     sf->mode_search_skip_flags = (cm->frame_type == KEY_FRAME) ? 0 :
                                  FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |

@@ -369,6 +369,31 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
                                       int tmp_stride2[MAX_MB_PLANE]);
 #endif  // CONFIG_OBMC
 
+#if CONFIG_EXT_INTER
+void vp10_build_interintra_predictors(MACROBLOCKD *xd,
+                                      uint8_t *ypred,
+                                      uint8_t *upred,
+                                      uint8_t *vpred,
+                                      int ystride,
+                                      int ustride,
+                                      int vstride,
+                                      BLOCK_SIZE bsize);
+void vp10_build_interintra_predictors_sby(MACROBLOCKD *xd,
+                                          uint8_t *ypred,
+                                          int ystride,
+                                          BLOCK_SIZE bsize);
+void vp10_build_interintra_predictors_sbc(MACROBLOCKD *xd,
+                                          uint8_t *upred,
+                                          int ustride,
+                                          int plane,
+                                          BLOCK_SIZE bsize);
+void vp10_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
+                                           uint8_t *upred,
+                                           uint8_t *vpred,
+                                           int ustride, int vstride,
+                                           BLOCK_SIZE bsize);
+#endif  // CONFIG_EXT_INTER
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

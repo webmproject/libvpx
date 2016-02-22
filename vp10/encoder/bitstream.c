@@ -1028,7 +1028,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_EXT_INTER
         write_inter_mode(cm, w, mode,
 #if CONFIG_REF_MV && CONFIG_EXT_INTER
-                         has_second_ref(mbmi),
+                         is_compound,
 #endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
                          mode_ctx);
 
@@ -1162,6 +1162,22 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_EXT_INTER
       }
     }
+
+#if CONFIG_EXT_INTER
+    if (cpi->common.reference_mode != COMPOUND_REFERENCE &&
+#if CONFIG_SUPERTX
+        !supertx_enabled &&
+#endif  // CONFIG_SUPERTX
+        is_interintra_allowed(mbmi)) {
+      const int interintra = mbmi->ref_frame[1] == INTRA_FRAME;
+      vpx_write(w, interintra, cm->fc->interintra_prob[bsize]);
+      if (interintra) {
+        write_intra_mode(w, mbmi->interintra_mode,
+                         cm->fc->y_mode_prob[size_group_lookup[bsize]]);
+        assert(mbmi->interintra_mode == mbmi->interintra_uv_mode);
+      }
+    }
+#endif  // CONFIG_EXT_INTER
 
 #if CONFIG_EXT_INTERP
     write_switchable_interp_filter(cpi, xd, w);
@@ -2444,6 +2460,16 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 
 #if CONFIG_EXT_INTER
     update_inter_compound_mode_probs(cm, &header_bc);
+
+    if (cm->reference_mode != COMPOUND_REFERENCE) {
+      for (i = 0; i < BLOCK_SIZES; i++) {
+        if (is_interintra_allowed_bsize(i)) {
+          vp10_cond_prob_diff_update(&header_bc,
+                                     &fc->interintra_prob[i],
+                                     cm->counts.interintra[i]);
+        }
+      }
+    }
 #endif  // CONFIG_EXT_INTER
 
 #if CONFIG_OBMC

@@ -1133,7 +1133,7 @@ static void fpm_sync(void *const data, int mi_row) {
 static void read_inter_block_mode_info(VP10Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        MODE_INFO *const mi,
-#if CONFIG_OBMC && CONFIG_SUPERTX
+#if (CONFIG_OBMC || CONFIG_EXT_INTER) && CONFIG_SUPERTX
                                        int mi_row, int mi_col, vpx_reader *r,
                                        int supertx_enabled) {
 #else
@@ -1430,6 +1430,37 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTER
                                 nearestmv, nearmv, is_compound, allow_hp, r);
   }
+
+#if CONFIG_EXT_INTER
+  if (cm->reference_mode != COMPOUND_REFERENCE &&
+#if CONFIG_SUPERTX
+      !supertx_enabled &&
+#endif
+      is_interintra_allowed(mbmi)) {
+    const int interintra = vpx_read(r, cm->fc->interintra_prob[bsize]);
+    if (xd->counts)
+      xd->counts->interintra[bsize][interintra]++;
+    assert(mbmi->ref_frame[1] == NONE);
+    if (interintra) {
+      const PREDICTION_MODE interintra_mode =
+          read_intra_mode_y(cm, xd, r, size_group_lookup[bsize]);
+
+      mbmi->ref_frame[1] = INTRA_FRAME;
+      mbmi->interintra_mode = interintra_mode;
+      mbmi->interintra_uv_mode = interintra_mode;
+#if CONFIG_EXT_INTRA
+      // TODO(debargha|geza.lore):
+      // Should we use ext_intra modes for interintra?
+      mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
+      mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
+      mbmi->angle_delta[0] = 0;
+      mbmi->angle_delta[1] = 0;
+      mbmi->intra_filter = INTRA_FILTER_LINEAR;
+#endif  // CONFIG_EXT_INTRA
+    }
+  }
+#endif  // CONFIG_EXT_INTER
+
 #if CONFIG_EXT_INTERP
   mbmi->interp_filter = (cm->interp_filter == SWITCHABLE)
                         ? read_switchable_interp_filter(cm, xd, r)
@@ -1514,7 +1545,8 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
 
   if (inter_block)
     read_inter_block_mode_info(pbi, xd,
-#if CONFIG_OBMC && CONFIG_SUPERTX
+#if (CONFIG_OBMC || CONFIG_EXT_INTER) && CONFIG_SUPERTX
+
                                mi, mi_row, mi_col, r, supertx_enabled);
 #else
                                mi, mi_row, mi_col, r);

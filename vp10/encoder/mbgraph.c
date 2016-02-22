@@ -73,7 +73,11 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
   else
 #endif  // CONFIG_EXT_INTER
   xd->mi[0]->mbmi.mode = NEWMV;
+
   xd->mi[0]->mbmi.mv[0].as_mv = *dst_mv;
+#if CONFIG_EXT_INTER
+  xd->mi[0]->mbmi.ref_frame[1] = NONE;
+#endif  // CONFIG_EXT_INTER
 
   vp10_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
 

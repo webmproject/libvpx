@@ -871,6 +871,17 @@ static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
       }
     }
   }
+#if CONFIG_EXT_INTER
+  if (is_interintra_pred(&xd->mi[0]->mbmi))
+    vp10_build_interintra_predictors(xd,
+                                     xd->plane[0].dst.buf,
+                                     xd->plane[1].dst.buf,
+                                     xd->plane[2].dst.buf,
+                                     xd->plane[0].dst.stride,
+                                     xd->plane[1].dst.stride,
+                                     xd->plane[2].dst.stride,
+                                     sb_type);
+#endif  // CONFIG_EXT_INTER
 }
 
 #if CONFIG_SUPERTX
@@ -915,6 +926,17 @@ static void dec_build_inter_predictors_sb_sub8x8(VP10Decoder *const pbi,
                                  &mv, ref_frame_buf, is_scaled, ref);
     }
   }
+#if CONFIG_EXT_INTER
+  if (is_interintra_pred(&xd->mi[0]->mbmi))
+    vp10_build_interintra_predictors(xd,
+                                     xd->plane[0].dst.buf,
+                                     xd->plane[1].dst.buf,
+                                     xd->plane[2].dst.buf,
+                                     xd->plane[0].dst.stride,
+                                     xd->plane[1].dst.stride,
+                                     xd->plane[2].dst.stride,
+                                     xd->mi[0]->mbmi.sb_type);
+#endif  // CONFIG_EXT_INTER
 }
 #endif  // CONFIG_SUPERTX
 
@@ -3569,6 +3591,14 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 
 #if CONFIG_EXT_INTER
     read_inter_compound_mode_probs(fc, &r);
+
+    if (cm->reference_mode != COMPOUND_REFERENCE) {
+      for (i = 0; i < BLOCK_SIZES; i++) {
+        if (is_interintra_allowed_bsize(i)) {
+          vp10_diff_update_prob(&r, &fc->interintra_prob[i]);
+        }
+      }
+    }
 #endif  // CONFIG_EXT_INTER
 
 #if CONFIG_OBMC
@@ -3634,6 +3664,8 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
   assert(!memcmp(cm->counts.inter_compound_mode,
                  zero_counts.inter_compound_mode,
                  sizeof(cm->counts.inter_compound_mode)));
+  assert(!memcmp(cm->counts.interintra, zero_counts.interintra,
+                 sizeof(cm->counts.interintra)));
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC
   assert(!memcmp(cm->counts.obmc, zero_counts.obmc,

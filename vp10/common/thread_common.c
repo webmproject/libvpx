@@ -403,6 +403,10 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
     for (j = 0; j < INTER_COMPOUND_MODES; j++)
       cm->counts.inter_compound_mode[i][j] +=
           counts->inter_compound_mode[i][j];
+
+  for (i = 0; i < BLOCK_SIZES; i++)
+    for (j = 0; j < 2; j++)
+      cm->counts.interintra[i][j] += counts->interintra[i][j];
 #endif  // CONFIG_EXT_INTER
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
