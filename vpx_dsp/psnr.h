@@ -42,17 +42,13 @@ int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a,
 #if CONFIG_VP9_HIGHBITDEPTH
 int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
-void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
+void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
                       const YV12_BUFFER_CONFIG *b,
                       PSNR_STATS *psnr,
                       unsigned int bit_depth,
                       unsigned int in_bit_depth);
-int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
-                             const uint8_t *b8, int b_stride,
-                             int width, int height,
-                             unsigned int input_shift);
 #endif
-void calc_psnr(const YV12_BUFFER_CONFIG *a,
+void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a,
                const YV12_BUFFER_CONFIG *b,
                PSNR_STATS *psnr);
 
@@ -61,9 +57,6 @@ double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
                    double *phvs_y, double *phvs_u,
                    double *phvs_v, uint32_t bd, uint32_t in_bd);
 
-int64_t highbd_get_sse(const uint8_t *a, int a_stride,
-                       const uint8_t *b, int b_stride,
-                       int width, int height);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
