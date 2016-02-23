@@ -361,84 +361,87 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
 
   set_block_thresholds(cm, rd);
 
-  fill_token_costs(x->token_costs, cm->fc->coef_probs);
-
-  if (cpi->sf.partition_search_type != VAR_BASED_PARTITION ||
-      cm->frame_type == KEY_FRAME) {
-    for (i = 0; i < PARTITION_CONTEXTS; ++i)
-      vp10_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
-                      vp10_partition_tree);
-  }
-
-  fill_mode_costs(cpi);
-
   if (!frame_is_intra_only(cm)) {
 #if CONFIG_REF_MV
     int nmv_ctx;
     for (nmv_ctx = 0; nmv_ctx < NMV_CONTEXTS; ++nmv_ctx) {
-      vp10_build_nmv_cost_table(x->nmv_vec_cost[nmv_ctx],
-                                cm->allow_high_precision_mv ?
-                                  x->nmvcost_hp[nmv_ctx] : x->nmvcost[nmv_ctx],
-                                &cm->fc->nmvc[nmv_ctx],
-                                cm->allow_high_precision_mv);
+      vp10_build_nmv_cost_table(
+          x->nmv_vec_cost[nmv_ctx],
+          cm->allow_high_precision_mv ? x->nmvcost_hp[nmv_ctx]
+                                      : x->nmvcost[nmv_ctx],
+          &cm->fc->nmvc[nmv_ctx], cm->allow_high_precision_mv);
     }
     x->mvcost = x->mv_cost_stack[0];
     x->nmvjointcost = x->nmv_vec_cost[0];
     x->mvsadcost = x->mvcost;
     x->nmvjointsadcost = x->nmvjointcost;
 #else
-    vp10_build_nmv_cost_table(x->nmvjointcost,
-                             cm->allow_high_precision_mv ? x->nmvcost_hp
-                                                         : x->nmvcost,
-                             &cm->fc->nmvc, cm->allow_high_precision_mv);
+    vp10_build_nmv_cost_table(
+        x->nmvjointcost,
+        cm->allow_high_precision_mv ? x->nmvcost_hp : x->nmvcost, &cm->fc->nmvc,
+        cm->allow_high_precision_mv);
 #endif
+  }
+  if (cpi->oxcf.pass != 1) {
+    fill_token_costs(x->token_costs, cm->fc->coef_probs);
 
+    if (cpi->sf.partition_search_type != VAR_BASED_PARTITION ||
+        cm->frame_type == KEY_FRAME) {
+      for (i = 0; i < PARTITION_CONTEXTS; ++i)
+        vp10_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
+                         vp10_partition_tree);
+    }
+
+    fill_mode_costs(cpi);
+
+    if (!frame_is_intra_only(cm)) {
 #if CONFIG_REF_MV
-    for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i) {
-      cpi->newmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->newmv_prob[i], 0);
-      cpi->newmv_mode_cost[i][1] = vp10_cost_bit(cm->fc->newmv_prob[i], 1);
-    }
+      for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i) {
+        cpi->newmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->newmv_prob[i], 0);
+        cpi->newmv_mode_cost[i][1] = vp10_cost_bit(cm->fc->newmv_prob[i], 1);
+      }
 
-    for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i) {
-      cpi->zeromv_mode_cost[i][0] = vp10_cost_bit(cm->fc->zeromv_prob[i], 0);
-      cpi->zeromv_mode_cost[i][1] = vp10_cost_bit(cm->fc->zeromv_prob[i], 1);
-    }
+      for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i) {
+        cpi->zeromv_mode_cost[i][0] = vp10_cost_bit(cm->fc->zeromv_prob[i], 0);
+        cpi->zeromv_mode_cost[i][1] = vp10_cost_bit(cm->fc->zeromv_prob[i], 1);
+      }
 
-    for (i = 0; i < REFMV_MODE_CONTEXTS; ++i) {
-      cpi->refmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->refmv_prob[i], 0);
-      cpi->refmv_mode_cost[i][1] = vp10_cost_bit(cm->fc->refmv_prob[i], 1);
-    }
+      for (i = 0; i < REFMV_MODE_CONTEXTS; ++i) {
+        cpi->refmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->refmv_prob[i], 0);
+        cpi->refmv_mode_cost[i][1] = vp10_cost_bit(cm->fc->refmv_prob[i], 1);
+      }
 
-    for (i = 0; i < DRL_MODE_CONTEXTS; ++i) {
-      cpi->drl_mode_cost0[i][0] = vp10_cost_bit(cm->fc->drl_prob0[i], 0);
-      cpi->drl_mode_cost0[i][1] = vp10_cost_bit(cm->fc->drl_prob0[i], 1);
-    }
+      for (i = 0; i < DRL_MODE_CONTEXTS; ++i) {
+        cpi->drl_mode_cost0[i][0] = vp10_cost_bit(cm->fc->drl_prob0[i], 0);
+        cpi->drl_mode_cost0[i][1] = vp10_cost_bit(cm->fc->drl_prob0[i], 1);
+      }
 
-    for (i = 0; i < DRL_MODE_CONTEXTS; ++i) {
-      cpi->drl_mode_cost1[i][0] = vp10_cost_bit(cm->fc->drl_prob1[i], 0);
-      cpi->drl_mode_cost1[i][1] = vp10_cost_bit(cm->fc->drl_prob1[i], 1);
-    }
+      for (i = 0; i < DRL_MODE_CONTEXTS; ++i) {
+        cpi->drl_mode_cost1[i][0] = vp10_cost_bit(cm->fc->drl_prob1[i], 0);
+        cpi->drl_mode_cost1[i][1] = vp10_cost_bit(cm->fc->drl_prob1[i], 1);
+      }
 #if CONFIG_EXT_INTER
-    cpi->new2mv_mode_cost[0] = vp10_cost_bit(cm->fc->new2mv_prob, 0);
-    cpi->new2mv_mode_cost[1] = vp10_cost_bit(cm->fc->new2mv_prob, 1);
+      cpi->new2mv_mode_cost[0] = vp10_cost_bit(cm->fc->new2mv_prob, 0);
+      cpi->new2mv_mode_cost[1] = vp10_cost_bit(cm->fc->new2mv_prob, 1);
 #endif  // CONFIG_EXT_INTER
 #else
-    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-      vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
-                      cm->fc->inter_mode_probs[i], vp10_inter_mode_tree);
+      for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+        vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
+                         cm->fc->inter_mode_probs[i], vp10_inter_mode_tree);
 #endif
 #if CONFIG_EXT_INTER
-    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-      vp10_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
-                       cm->fc->inter_compound_mode_probs[i],
-                       vp10_inter_compound_mode_tree);
+      for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+        vp10_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
+                         cm->fc->inter_compound_mode_probs[i],
+                         vp10_inter_compound_mode_tree);
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC
-    for (i = BLOCK_8X8; i < BLOCK_SIZES; i++) {
-      cpi->obmc_cost[i][0] = vp10_cost_bit(cm->fc->obmc_prob[i], 0);
-      cpi->obmc_cost[i][1] = vp10_cost_bit(cm->fc->obmc_prob[i], 1);
-    }
+      for (i = BLOCK_8X8; i < BLOCK_SIZES; i++) {
+        cpi->obmc_cost[i][0] = vp10_cost_bit(cm->fc->obmc_prob[i], 0);
+        cpi->obmc_cost[i][1] = vp10_cost_bit(cm->fc->obmc_prob[i], 1);
+      }
 #endif  // CONFIG_OBMC
+    }
   }
 }
 
