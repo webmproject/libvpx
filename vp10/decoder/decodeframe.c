@@ -1978,6 +1978,10 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     }
     if (!is_inter_block(mbmi)) {
       int plane;
+      for (plane = 0; plane <= 1; ++plane) {
+        if (mbmi->palette_mode_info.palette_size[plane])
+          vp10_decode_palette_tokens(xd, plane, r);
+      }
       for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
         const struct macroblockd_plane *const pd = &xd->plane[plane];
         const TX_SIZE tx_size =
@@ -1993,9 +1997,6 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
         const int max_blocks_high = num_4x4_h +
             (xd->mb_to_bottom_edge >= 0 ?
              0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-
-        if (plane <= 1 && mbmi->palette_mode_info.palette_size[plane])
-          vp10_decode_palette_tokens(xd, plane, r);
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)

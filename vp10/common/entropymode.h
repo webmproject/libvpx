@@ -176,6 +176,7 @@ extern const vpx_prob vp10_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
                                         [INTRA_MODES - 1];
 extern const vpx_prob
 vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES][PALETTE_Y_MODE_CONTEXTS];
+extern const vpx_prob vp10_default_palette_uv_mode_prob[2];
 extern const vpx_prob
 vp10_default_palette_y_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
 extern const vpx_prob
