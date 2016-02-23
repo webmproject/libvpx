@@ -5160,18 +5160,34 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int best_obmc_flag = 0;
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t, tmp_buf1_16[MAX_MB_PLANE * 64 * 64]);
-  uint8_t *tmp_buf1;
-  uint8_t *obmc_tmp_buf[3];
+  DECLARE_ALIGNED(16, uint16_t, tmp_buf2_16[MAX_MB_PLANE * 64 * 64]);
+  uint8_t *tmp_buf1, *tmp_buf2;
+  uint8_t *obmc_tmp_buf1[3];
+  uint8_t *obmc_tmp_buf2[3];
 #else
   DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * 64 * 64]);
-  uint8_t *obmc_tmp_buf[3] = {tmp_buf1, tmp_buf1 + 4096, tmp_buf1 + 8192};
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * 64 * 64]);
+  uint8_t *obmc_tmp_buf1[3] = {tmp_buf1, tmp_buf1 + 4096, tmp_buf1 + 8192};
+  uint8_t *obmc_tmp_buf2[3] = {tmp_buf2, tmp_buf2 + 4096, tmp_buf2 + 8192};
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int obmc_tmp_stride[3] = {64, 64, 64};
-  uint8_t tmp_skip_txfm[MAX_MB_PLANE << 2] = {0};
-  int64_t tmp_bsse[MAX_MB_PLANE << 2] = {0};
-  int64_t rdobmc;
-  int skip_txfm_sb_obmc = 0;
-  int64_t skip_sse_sb_obmc = INT64_MAX;
+
+  uint8_t skip_txfm_bestfilter[2][MAX_MB_PLANE << 2] = {{0}, {0}};
+  int64_t bsse_bestfilter[2][MAX_MB_PLANE << 2] = {{0}, {0}};
+  int skip_txfm_sb_bestfilter[2] = {0};
+  int64_t skip_sse_sb_bestfilter[2] = {INT64_MAX};
+
+  int rate2_nocoeff, best_rate2 = INT_MAX,
+      best_skippable, best_xskip, best_disable_skip = 0;
+#if CONFIG_SUPERTX
+  int best_rate_y, best_rate_uv;
+#endif  // CONFIG_SUPERTX
+#if CONFIG_VAR_TX
+  uint8_t best_blk_skip[3][256];
+#endif  // CONFIG_VAR_TX
+  int64_t best_distortion = INT64_MAX;
+  unsigned int best_pred_var = UINT_MAX;
+  MB_MODE_INFO best_mbmi;
 #endif  // CONFIG_OBMC
   int pred_exists = 0;
   int intpel_mv;
@@ -5207,17 +5223,22 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     tmp_buf = CONVERT_TO_BYTEPTR(tmp_buf16);
 #if CONFIG_OBMC
     tmp_buf1 = CONVERT_TO_BYTEPTR(tmp_buf1_16);
+    tmp_buf2 = CONVERT_TO_BYTEPTR(tmp_buf2_16);
 #endif  // CONFIG_OBMC
   } else {
     tmp_buf = (uint8_t *)tmp_buf16;
 #if CONFIG_OBMC
     tmp_buf1 = (uint8_t *)tmp_buf1_16;
+    tmp_buf2 = (uint8_t *)tmp_buf2_16;
 #endif  // CONFIG_OBMC
   }
 #if CONFIG_OBMC
-  obmc_tmp_buf[0] = tmp_buf1;
-  obmc_tmp_buf[1] = tmp_buf1 + 4096;
-  obmc_tmp_buf[2] = tmp_buf1 + 8192;
+  obmc_tmp_buf1[0] = tmp_buf1;
+  obmc_tmp_buf1[1] = tmp_buf1 + 4096;
+  obmc_tmp_buf1[2] = tmp_buf1 + 8192;
+  obmc_tmp_buf2[0] = tmp_buf2;
+  obmc_tmp_buf2[1] = tmp_buf2 + 4096;
+  obmc_tmp_buf2[2] = tmp_buf2 + 8192;
 #endif  // CONFIG_OBMC
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -5486,6 +5507,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       int obmc_flag = 0;
       int tmp_skip_sb_obmc = 0;
       int64_t tmp_skip_sse_obmc = INT64_MAX;
+      int64_t rdobmc = INT64_MAX;
+      uint8_t *obmc_tmp_buf[3];
+      uint8_t tmp_skip_txfm[MAX_MB_PLANE << 2] = {0};
+      int64_t tmp_bsse[MAX_MB_PLANE << 2] = {0};
 #endif  // CONFIG_OBMC
 
       mbmi->interp_filter = i;
@@ -5527,10 +5552,18 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
              (cm->interp_filter == mbmi->interp_filter ||
               (i == 0 && intpel_mv && IsInterpolatingFilter(i))))) {
           restore_dst_buf(xd, orig_dst, orig_dst_stride);
+#if CONFIG_OBMC
+          for (j = 0; j < MAX_MB_PLANE; j++) {
+            obmc_tmp_buf[j] = obmc_tmp_buf1[j];
+          }
+#endif  // CONFIG_OBMC
         } else {
           for (j = 0; j < MAX_MB_PLANE; j++) {
             xd->plane[j].dst.buf = tmp_buf + j * 64 * 64;
             xd->plane[j].dst.stride = 64;
+#if CONFIG_OBMC
+            obmc_tmp_buf[j] = obmc_tmp_buf2[j];
+#endif  // CONFIG_OBMC
           }
         }
         vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
@@ -5563,12 +5596,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
             rd = rdobmc;
             rate_sum = rate_sum_obmc;
             dist_sum = dist_sum_obmc;
-            tmp_skip_sb = tmp_skip_sb_obmc;
-            tmp_skip_sse = tmp_skip_sse_obmc;
-          } else {
-            obmc_flag = 0;
-            memcpy(x->skip_txfm, tmp_skip_txfm, sizeof(tmp_skip_txfm));
-            memcpy(x->bsse, tmp_bsse, sizeof(tmp_bsse));
           }
         }
 #endif  // CONFIG_OBMC
@@ -5594,12 +5621,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       newbest = i == 0 || rd < best_rd;
 
       if (newbest) {
+#if CONFIG_OBMC
+        if (allow_obmc)
+          best_obmc_flag = obmc_flag;
+#endif  // CONFIG_OBMC
         best_rd = rd;
         best_filter = mbmi->interp_filter;
-#if CONFIG_OBMC
-          if (allow_obmc)
-            best_obmc_flag = obmc_flag;
-#endif  // CONFIG_OBMC
         if (cm->interp_filter == SWITCHABLE && i &&
             !(intpel_mv && IsInterpolatingFilter(i)))
           best_needs_copy = !best_needs_copy;
@@ -5611,6 +5638,31 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         pred_exists = 1;
         tmp_rd = best_rd;
 
+#if CONFIG_OBMC
+        if (allow_obmc) {
+          skip_txfm_sb_bestfilter[0] = tmp_skip_sb;
+          skip_sse_sb_bestfilter[0] = tmp_skip_sse;
+          memcpy(skip_txfm_bestfilter[0], tmp_skip_txfm, sizeof(skip_txfm));
+          memcpy(bsse_bestfilter[0], tmp_bsse, sizeof(bsse));
+
+          skip_txfm_sb_bestfilter[1] = tmp_skip_sb_obmc;
+          skip_sse_sb_bestfilter[1] = tmp_skip_sse_obmc;
+          memcpy(skip_txfm_bestfilter[1], x->skip_txfm, sizeof(skip_txfm));
+          memcpy(bsse_bestfilter[1], x->bsse, sizeof(bsse));
+          if (best_obmc_flag) {
+            tmp_skip_sb = tmp_skip_sb_obmc;
+            tmp_skip_sse = tmp_skip_sse_obmc;
+          } else {
+            memcpy(x->skip_txfm, tmp_skip_txfm, sizeof(tmp_skip_txfm));
+            memcpy(x->bsse, tmp_bsse, sizeof(tmp_bsse));
+          }
+        } else {
+          skip_txfm_sb_bestfilter[0] = tmp_skip_sb;
+          skip_sse_sb_bestfilter[0] = tmp_skip_sse;
+          memcpy(skip_txfm_bestfilter[0], x->skip_txfm, sizeof(skip_txfm));
+          memcpy(bsse_bestfilter[0], x->bsse, sizeof(bsse));
+        }
+#endif  // CONFIG_OBMC
         skip_txfm_sb = tmp_skip_sb;
         skip_sse_sb = tmp_skip_sse;
         memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
@@ -5631,11 +5683,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->obmc = 0;
 #endif  // CONFIG_OBMC
 
-#if CONFIG_OBMC
-  if (pred_exists && !mbmi->obmc) {
-#else
   if (pred_exists) {
-#endif  // CONFIG_OBMC
+#if !CONFIG_OBMC
     if (best_needs_copy) {
       // again temporarily set the buffers to local memory to prevent a memcpy
       for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -5643,6 +5692,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         xd->plane[i].dst.stride = 64;
       }
     }
+#endif  // !CONFIG_OBMC
     rd = tmp_rd + RDCOST(x->rdmult, x->rddiv, rs, 0);
 #if CONFIG_OBMC
     if (allow_obmc)
@@ -5653,62 +5703,42 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     int tmp_rate;
     int64_t tmp_dist;
 #if CONFIG_OBMC
-    int tmp_rate_obmc;
-    int64_t tmp_dist_obmc;
+    int64_t rdobmc = INT64_MAX;
     restore_dst_buf(xd, orig_dst, orig_dst_stride);
 #endif  // CONFIG_OBMC
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear) is indicated at the frame level, or
     // skip condition holds.
     vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-#if CONFIG_OBMC
-    if (mbmi->obmc) {
-      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0,
-                                       NULL, NULL,
-                                       dst_buf1, dst_stride1,
-                                       dst_buf2, dst_stride2);
-      model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist,
-                      &skip_txfm_sb, &skip_sse_sb);
-      rd = RDCOST(x->rdmult, x->rddiv,
-                  rs + tmp_rate + cpi->obmc_cost[bsize][1], tmp_dist);
-    } else {
-#endif  // CONFIG_OBMC
     model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist,
                     &skip_txfm_sb, &skip_sse_sb);
     rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
 #if CONFIG_OBMC
-      if (allow_obmc) {
-        rd += RDCOST(x->rdmult, x->rddiv, cpi->obmc_cost[bsize][0], 0);
-        memcpy(tmp_skip_txfm, x->skip_txfm, sizeof(tmp_skip_txfm));
-        memcpy(tmp_bsse, x->bsse, sizeof(tmp_bsse));
-
-        vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 1,
-                                         obmc_tmp_buf, obmc_tmp_stride,
-                                         dst_buf1, dst_stride1,
-                                         dst_buf2, dst_stride2);
-        for (i = 0; i < MAX_MB_PLANE; ++i) {
-          xd->plane[i].dst.buf = obmc_tmp_buf[i];
-          xd->plane[i].dst.stride = obmc_tmp_stride[i];
-        }
-        model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate_obmc, &tmp_dist_obmc,
-                        &skip_txfm_sb_obmc, &skip_sse_sb_obmc);
-        rdobmc = RDCOST(x->rdmult, x->rddiv,
-                        rs + tmp_rate_obmc + cpi->obmc_cost[bsize][1],
-                        tmp_dist_obmc);
-        if ((double)rdobmc <= 0.99 * (double)rd) {
-          mbmi->obmc = 1;
-          rd = rdobmc;
-          skip_txfm_sb = skip_txfm_sb_obmc;
-          skip_sse_sb = skip_sse_sb_obmc;
-        } else {
-          mbmi->obmc = 0;
-          memcpy(x->skip_txfm, tmp_skip_txfm, sizeof(tmp_skip_txfm));
-          memcpy(x->bsse, tmp_bsse, sizeof(tmp_bsse));
-          restore_dst_buf(xd, orig_dst, orig_dst_stride);
-        }
-      } else {
-        mbmi->obmc = 0;
+    skip_txfm_sb_bestfilter[0] = skip_txfm_sb;
+    skip_sse_sb_bestfilter[0] = skip_sse_sb;
+    memcpy(skip_txfm_bestfilter[0], x->skip_txfm, sizeof(skip_txfm));
+    memcpy(bsse_bestfilter[0], x->bsse, sizeof(bsse));
+    if (allow_obmc) {
+      rd += RDCOST(x->rdmult, x->rddiv, cpi->obmc_cost[bsize][0], 0);
+      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 1,
+                                       obmc_tmp_buf1, obmc_tmp_stride,
+                                       dst_buf1, dst_stride1,
+                                       dst_buf2, dst_stride2);
+      for (i = 0; i < MAX_MB_PLANE; ++i) {
+        xd->plane[i].dst.buf = obmc_tmp_buf1[i];
+        xd->plane[i].dst.stride = obmc_tmp_stride[i];
       }
+      model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist,
+                      &skip_txfm_sb, &skip_sse_sb);
+      rdobmc = RDCOST(x->rdmult, x->rddiv,
+                      rs + tmp_rate + cpi->obmc_cost[bsize][1], tmp_dist);
+
+      skip_txfm_sb_bestfilter[1] = skip_txfm_sb;
+      skip_sse_sb_bestfilter[1] = skip_sse_sb;
+      memcpy(skip_txfm_bestfilter[1], x->skip_txfm, sizeof(skip_txfm));
+      memcpy(bsse_bestfilter[1], x->bsse, sizeof(bsse));
+      if ((double)rdobmc <= 0.99 * (double)rd)
+        rd = rdobmc;
     }
 #endif  // CONFIG_OBMC
     memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
@@ -5791,13 +5821,76 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (cm->interp_filter == SWITCHABLE)
     *rate2 += rs;
 #if CONFIG_OBMC
-  if (allow_obmc)
-    *rate2 += cpi->obmc_cost[bsize][mbmi->obmc];
+  rate2_nocoeff = *rate2;
 #endif  // CONFIG_OBMC
 
   memcpy(x->skip_txfm, skip_txfm, sizeof(skip_txfm));
   memcpy(x->bsse, bsse, sizeof(bsse));
 
+
+#if CONFIG_OBMC
+  best_rd = INT64_MAX;
+  for (mbmi->obmc = 0; mbmi->obmc <= allow_obmc; mbmi->obmc++) {
+    int64_t tmp_rd;
+
+    if (pred_exists) {
+      if (best_needs_copy) {
+        if (mbmi->obmc) {
+          for (i = 0; i < MAX_MB_PLANE; i++) {
+            xd->plane[i].dst.buf = obmc_tmp_buf2[i];
+            xd->plane[i].dst.stride = 64;
+          }
+        } else {
+          for (i = 0; i < MAX_MB_PLANE; i++) {
+            xd->plane[i].dst.buf = tmp_buf + i * 64 * 64;
+            xd->plane[i].dst.stride = 64;
+          }
+        }
+      } else {
+        if (mbmi->obmc) {
+          for (i = 0; i < MAX_MB_PLANE; i++) {
+            xd->plane[i].dst.buf = obmc_tmp_buf1[i];
+            xd->plane[i].dst.stride = 64;
+          }
+        } else {
+          restore_dst_buf(xd, orig_dst, orig_dst_stride);
+        }
+      }
+    } else {
+      if (mbmi->obmc) {
+        for (i = 0; i < MAX_MB_PLANE; i++) {
+          xd->plane[i].dst.buf = obmc_tmp_buf1[i];
+          xd->plane[i].dst.stride = 64;
+        }
+      } else {
+        restore_dst_buf(xd, orig_dst, orig_dst_stride);
+      }
+    }
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      x->pred_variance = vp10_high_get_sby_perpixel_variance(cpi,
+                                              &xd->plane[0].dst, bsize, xd->bd);
+    } else {
+      x->pred_variance =
+        vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+    }
+#else
+    x->pred_variance =
+        vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+    skip_txfm_sb = skip_txfm_sb_bestfilter[mbmi->obmc];
+    skip_sse_sb = skip_sse_sb_bestfilter[mbmi->obmc];
+    memcpy(x->skip_txfm, skip_txfm_bestfilter[mbmi->obmc],
+           sizeof(skip_txfm));
+    memcpy(x->bsse, bsse_bestfilter[mbmi->obmc], sizeof(bsse));
+    x->skip = 0;
+
+    *rate2 = rate2_nocoeff;
+    *distortion = 0;
+    if (allow_obmc)
+      *rate2 += cpi->obmc_cost[bsize][mbmi->obmc];
+#endif  // CONFIG_OBMC
   if (!skip_txfm_sb) {
     int skippable_y, skippable_uv;
     int64_t sseuv = INT64_MAX;
@@ -5825,8 +5918,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     if (*rate_y == INT_MAX) {
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
+#if CONFIG_OBMC
+      continue;
+#else
       restore_dst_buf(xd, orig_dst, orig_dst_stride);
       return INT64_MAX;
+#endif  // CONFIG_OBMC
     }
 
     *rate2 += *rate_y;
@@ -5844,23 +5941,104 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_VAR_TX
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
+#if CONFIG_OBMC
+      continue;
+#else
       restore_dst_buf(xd, orig_dst, orig_dst_stride);
       return INT64_MAX;
+#endif  // CONFIG_OBMC
     }
 
     *psse += sseuv;
     *rate2 += *rate_uv;
     *distortion += distortion_uv;
     *skippable = skippable_y && skippable_uv;
+#if CONFIG_OBMC
+    if (*skippable) {
+      *rate2 -= *rate_uv + *rate_y;
+      *rate_y = 0;
+      *rate_uv = 0;
+      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
+      mbmi->skip = 0;
+      // here mbmi->skip temporarily plays a role as what this_skip2 does
+    } else if (!xd->lossless[mbmi->segment_id] &&
+               (RDCOST(x->rdmult, x->rddiv, *rate_y + *rate_uv +
+                  vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0), *distortion) >=
+                RDCOST(x->rdmult, x->rddiv,
+                  vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1), *psse))) {
+      *rate2 -= *rate_uv + *rate_y;
+      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
+      *distortion = *psse;
+      *rate_y = 0;
+      *rate_uv = 0;
+      mbmi->skip = 1;
+    } else {
+      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
+      mbmi->skip = 0;
+    }
+    *disable_skip = 0;
+#endif  // CONFIG_OBMC
   } else {
     x->skip = 1;
     *disable_skip = 1;
 
     // The cost of skip bit needs to be added.
+#if CONFIG_OBMC
+    mbmi->skip = xd->lossless[mbmi->segment_id] ? 0 : 1;
+    if (xd->lossless[mbmi->segment_id])
+      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
+    else
+#endif  // CONFIG_OBMC
     *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
 
     *distortion = skip_sse_sb;
   }
+#if CONFIG_OBMC
+    tmp_rd = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
+    if (mbmi->obmc == 0 || (tmp_rd < best_rd)) {
+      best_mbmi = *mbmi;
+      best_rd = tmp_rd;
+      best_rate2 = *rate2;
+#if CONFIG_SUPERTX
+      best_rate_y = *rate_y;
+      best_rate_uv = *rate_uv;
+#endif  // CONFIG_SUPERTX
+#if CONFIG_VAR_TX
+      for (i = 0; i < MAX_MB_PLANE; ++i)
+        memcpy(best_blk_skip[i], x->blk_skip[i],
+               sizeof(uint8_t) * xd->n8_h * xd->n8_w * 4);
+#endif  // CONFIG_VAR_TX
+      best_distortion = *distortion;
+      best_skippable = *skippable;
+      best_xskip = x->skip;
+      best_disable_skip = *disable_skip;
+      best_pred_var = x->pred_variance;
+    }
+  }
+
+  if (best_rd == INT64_MAX) {
+    *rate2 = INT_MAX;
+    *distortion = INT64_MAX;
+    restore_dst_buf(xd, orig_dst, orig_dst_stride);
+    return INT64_MAX;
+  }
+  *mbmi = best_mbmi;
+  *rate2 = best_rate2;
+#if CONFIG_SUPERTX
+  *rate_y = best_rate_y;
+  *rate_uv = best_rate_uv;
+#endif  // CONFIG_SUPERTX
+#if CONFIG_VAR_TX
+  for (i = 0; i < MAX_MB_PLANE; ++i)
+    memcpy(x->blk_skip[i], best_blk_skip[i],
+           sizeof(uint8_t) * xd->n8_h * xd->n8_w * 4);
+#endif  // CONFIG_VAR_TX
+  *distortion = best_distortion;
+  *skippable = best_skippable;
+  x->skip = best_xskip;
+  *disable_skip = best_disable_skip;
+  x->pred_variance = best_pred_var;
+#endif  // CONFIG_OBMC
 
   if (!is_comp_pred)
     single_skippable[this_mode][refs[0]] = *skippable;
@@ -5930,6 +6108,9 @@ static void rd_variance_adjustment(VP10_COMP *cpi,
                                    BLOCK_SIZE bsize,
                                    int64_t *this_rd,
                                    MV_REFERENCE_FRAME ref_frame,
+#if CONFIG_OBMC
+                                   int is_pred_var_available,
+#endif  // CONFIG_OBMC
                                    unsigned int source_variance) {
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int recon_variance;
@@ -5940,6 +6121,11 @@ static void rd_variance_adjustment(VP10_COMP *cpi,
   if (*this_rd == INT64_MAX)
     return;
 
+#if CONFIG_OBMC
+  if (is_pred_var_available) {
+    recon_variance = x->pred_variance;
+  } else {
+#endif  // CONFIG_OBMC
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     recon_variance =
@@ -5952,6 +6138,9 @@ static void rd_variance_adjustment(VP10_COMP *cpi,
   recon_variance =
     vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_OBMC
+  }
+#endif  // CONFIG_OBMC
 
   if ((source_variance + recon_variance) > LOW_VAR_THRESH) {
     absvar_diff = (source_variance > recon_variance)
@@ -6819,6 +7008,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
           }
 
           if (tmp_alt_rd < INT64_MAX) {
+#if CONFIG_OBMC
+            tmp_alt_rd = RDCOST(x->rdmult, x->rddiv, tmp_rate, tmp_dist);
+#else
             if (RDCOST(x->rdmult, x->rddiv,
                        tmp_rate_y + tmp_rate_uv, tmp_dist) <
                 RDCOST(x->rdmult, x->rddiv, 0, tmp_sse))
@@ -6830,6 +7022,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                   tmp_rate + vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1) -
                   tmp_rate_y - tmp_rate_uv,
                   tmp_sse);
+#endif  // CONFIG_OBMC
           }
 
           if (tmp_ref_rd > tmp_alt_rd) {
@@ -6870,7 +7063,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       rate2 += ref_costs_single[ref_frame];
     }
 
+#if CONFIG_OBMC
+    if (ref_frame == INTRA_FRAME) {
+#else
     if (!disable_skip) {
+#endif  // CONFIG_OBMC
       if (skippable) {
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
@@ -6878,7 +7075,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         rate_uv = 0;
         // Cost the skip mb case
         rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
-
       } else if (ref_frame != INTRA_FRAME && !xd->lossless[mbmi->segment_id]) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
@@ -6901,12 +7097,21 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
       // Calculate the final RD estimate for this mode.
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+#if CONFIG_OBMC
+    } else {
+      this_skip2 = mbmi->skip;
+      this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+#endif  // CONFIG_OBMC
     }
+
 
     // Apply an adjustment to the rd value based on the similarity of the
     // source variance and reconstructed variance.
-    rd_variance_adjustment(cpi, x, bsize, &this_rd,
-                           ref_frame, x->source_variance);
+    rd_variance_adjustment(cpi, x, bsize, &this_rd, ref_frame,
+#if CONFIG_OBMC
+                           is_inter_block(mbmi),
+#endif  // CONFIG_OBMC
+                           x->source_variance);
 
     if (ref_frame == INTRA_FRAME) {
     // Keep record of best intra rd
