@@ -3951,7 +3951,8 @@ static void compute_internal_stats(VP10_COMP *cpi) {
       // TODO(yaowu): unify these two versions into one.
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth)
-        frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight, bit_depth);
+        frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight,
+                                           bit_depth, in_bit_depth);
       else
         frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
 #else
