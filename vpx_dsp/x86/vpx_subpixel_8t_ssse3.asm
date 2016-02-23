@@ -538,11 +538,11 @@ cglobal filter_block1d%2_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     movx         m1, [srcq + sstrideq     ]     ;B
     movx         m6, [srcq + sstride6q    ]     ;G
     punpcklbw    m0, m1                         ;A B
-    movx         m7, [rax + sstride6q     ]     ;H
+    movx         m7, [src1q + sstride6q   ]     ;H
     pmaddubsw    m0, k0k1
     movx         m2, [srcq + sstrideq * 2 ]     ;C
     punpcklbw    m6, m7                         ;G H
-    movx         m3, [rax + sstrideq * 2  ]     ;D
+    movx         m3, [src1q + sstrideq * 2]     ;D
     pmaddubsw    m6, k6k7
     movx         m4, [srcq + sstrideq * 4 ]     ;E
     punpcklbw    m2, m3                         ;C D
