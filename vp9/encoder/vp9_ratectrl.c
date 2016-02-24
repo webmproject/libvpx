@@ -2017,14 +2017,16 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
   VP9_COMMON * const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   rc->high_source_sad = 0;
-  if (cpi->Last_Source != NULL) {
+  if (cpi->Last_Source != NULL &&
+      cpi->Last_Source->y_width == cm->width &&
+      cpi->Last_Source->y_height == cm->height) {
     const uint8_t *src_y = cpi->Source->y_buffer;
     const int src_ystride = cpi->Source->y_stride;
     const uint8_t *last_src_y = cpi->Last_Source->y_buffer;
     const int last_src_ystride = cpi->Last_Source->y_stride;
     int sbi_row, sbi_col;
     const BLOCK_SIZE bsize = BLOCK_64X64;
-    const uint32_t min_thresh = 4000;
+    uint32_t min_thresh = 4000;
     float thresh = 8.0f;
     // Loop over sub-sample of frame, and compute average sad over 64x64 blocks.
     uint64_t avg_sad = 0;
@@ -2057,7 +2059,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // for cases where there is small change from content that is completely
     // static.
     if (cpi->oxcf.rc_mode == VPX_VBR) {
-      thresh = 2.5f;
+      min_thresh = 20000;
+      thresh = 2.0f;
     }
     if (avg_sad >
         VPXMAX(min_thresh, (unsigned int)(rc->avg_source_sad  * thresh)) &&
@@ -2065,7 +2068,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
       rc->high_source_sad = 1;
     else
       rc->high_source_sad = 0;
-    rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
+    if (avg_sad > 0)
+      rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR &&
         rc->high_source_sad &&
