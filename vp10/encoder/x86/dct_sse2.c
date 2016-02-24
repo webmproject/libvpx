@@ -1288,6 +1288,155 @@ static void fadst8_sse2(__m128i *in) {
   array_transpose_8x8(in, in);
 }
 
+#if CONFIG_EXT_TX
+static void fdst8_sse2(__m128i *in) {
+  // Constants
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t) cospi_16_64);
+  const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
+  const __m128i k__cospi_m16_m16 = _mm_set1_epi16((int16_t) -cospi_16_64);
+  const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
+  const __m128i k__cospi_m24_p08 = pair_set_epi16(-cospi_24_64, cospi_8_64);
+  const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
+  const __m128i k__cospi_p28_p04 = pair_set_epi16(cospi_28_64, cospi_4_64);
+  const __m128i k__cospi_m04_p28 = pair_set_epi16(-cospi_4_64, cospi_28_64);
+  const __m128i k__cospi_p20_p12 = pair_set_epi16(cospi_20_64, cospi_12_64);
+  const __m128i k__cospi_m12_p20 = pair_set_epi16(-cospi_12_64, cospi_20_64);
+  const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
+
+  __m128i s0, s1, s2, s3, s4, s5, s6, s7;
+  __m128i x0, x1, x2, x3, x4, x5, x6, x7;
+  __m128i t0, t1, t2, t3, t4, t5, t6, t7;
+
+  s0 = _mm_sub_epi16(in[0], in[7]);
+  s1 = _mm_sub_epi16(in[1], in[6]);  // -s1
+  s2 = _mm_sub_epi16(in[2], in[5]);
+  s3 = _mm_sub_epi16(in[3], in[4]);  // -s3
+  s4 = _mm_add_epi16(in[3], in[4]);  // -s4
+  s5 = _mm_add_epi16(in[2], in[5]);
+  s6 = _mm_add_epi16(in[1], in[6]);  // -s6
+  s7 = _mm_add_epi16(in[0], in[7]);
+
+  x0 = _mm_sub_epi16(s0, s3);
+  x1 = _mm_sub_epi16(s1, s2);  // -x1
+  x2 = _mm_add_epi16(s1, s2);  // -x2
+  x3 = _mm_add_epi16(s0, s3);
+
+  // Interleave
+  t0 = _mm_unpacklo_epi16(x0, x1);
+  t1 = _mm_unpackhi_epi16(x0, x1);
+  t2 = _mm_unpacklo_epi16(x2, x3);
+  t3 = _mm_unpackhi_epi16(x2, x3);
+
+  // Perform butterfly multiplication/addition
+  x0 = _mm_madd_epi16(t0, k__cospi_p16_m16);
+  x1 = _mm_madd_epi16(t1, k__cospi_p16_m16);
+  x2 = _mm_madd_epi16(t0, k__cospi_p16_p16);
+  x3 = _mm_madd_epi16(t1, k__cospi_p16_p16);
+  x4 = _mm_madd_epi16(t2, k__cospi_m24_p08);
+  x5 = _mm_madd_epi16(t3, k__cospi_m24_p08);
+  x6 = _mm_madd_epi16(t2, k__cospi_p08_p24);
+  x7 = _mm_madd_epi16(t3, k__cospi_p08_p24);
+
+  // Rounding
+  t0 = _mm_add_epi32(x0, k__DCT_CONST_ROUNDING);
+  t1 = _mm_add_epi32(x1, k__DCT_CONST_ROUNDING);
+  t2 = _mm_add_epi32(x2, k__DCT_CONST_ROUNDING);
+  t3 = _mm_add_epi32(x3, k__DCT_CONST_ROUNDING);
+  t4 = _mm_add_epi32(x4, k__DCT_CONST_ROUNDING);
+  t5 = _mm_add_epi32(x5, k__DCT_CONST_ROUNDING);
+  t6 = _mm_add_epi32(x6, k__DCT_CONST_ROUNDING);
+  t7 = _mm_add_epi32(x7, k__DCT_CONST_ROUNDING);
+  // Shift
+  x0 = _mm_srai_epi32(t0, DCT_CONST_BITS);
+  x1 = _mm_srai_epi32(t1, DCT_CONST_BITS);
+  x2 = _mm_srai_epi32(t2, DCT_CONST_BITS);
+  x3 = _mm_srai_epi32(t3, DCT_CONST_BITS);
+  x4 = _mm_srai_epi32(t4, DCT_CONST_BITS);
+  x5 = _mm_srai_epi32(t5, DCT_CONST_BITS);
+  x6 = _mm_srai_epi32(t6, DCT_CONST_BITS);
+  x7 = _mm_srai_epi32(t7, DCT_CONST_BITS);
+
+  // Pack 32b integer to 16b with signed saturation
+  in[7] = _mm_packs_epi32(x0, x1);
+  in[5] = _mm_packs_epi32(x4, x5);
+  in[3] = _mm_packs_epi32(x2, x3);
+  in[1] = _mm_packs_epi32(x6, x7);
+
+  // Interleave
+  s0 = _mm_unpacklo_epi16(s6, s5);
+  s1 = _mm_unpackhi_epi16(s6, s5);
+
+  // Perform butterfly multiplication/addition
+  x0 = _mm_madd_epi16(s0, k__cospi_m16_m16);
+  x1 = _mm_madd_epi16(s1, k__cospi_m16_m16);
+  x2 = _mm_madd_epi16(s0, k__cospi_m16_p16);
+  x3 = _mm_madd_epi16(s1, k__cospi_m16_p16);
+
+  // Rounding
+  t0 = _mm_add_epi32(x0, k__DCT_CONST_ROUNDING);
+  t1 = _mm_add_epi32(x1, k__DCT_CONST_ROUNDING);
+  t2 = _mm_add_epi32(x2, k__DCT_CONST_ROUNDING);
+  t3 = _mm_add_epi32(x3, k__DCT_CONST_ROUNDING);
+
+  // Shift
+  x0 = _mm_srai_epi32(t0, DCT_CONST_BITS);
+  x1 = _mm_srai_epi32(t1, DCT_CONST_BITS);
+  x2 = _mm_srai_epi32(t2, DCT_CONST_BITS);
+  x3 = _mm_srai_epi32(t3, DCT_CONST_BITS);
+
+  // Pack 32b integer to 16b with signed saturation
+  t2 = _mm_packs_epi32(x0, x1);
+  t3 = _mm_packs_epi32(x2, x3);
+
+  x0 = _mm_sub_epi16(t2, s4);
+  x1 = _mm_add_epi16(t2, s4);  // -x1
+  x2 = _mm_sub_epi16(s7, t3);
+  x3 = _mm_add_epi16(s7, t3);
+
+  s0 = _mm_unpacklo_epi16(x0, x3);
+  s1 = _mm_unpackhi_epi16(x0, x3);
+  s2 = _mm_unpacklo_epi16(x1, x2);
+  s3 = _mm_unpackhi_epi16(x1, x2);
+
+  t0 = _mm_madd_epi16(s0, k__cospi_p28_p04);
+  t1 = _mm_madd_epi16(s1, k__cospi_p28_p04);
+  t2 = _mm_madd_epi16(s2, k__cospi_m12_p20);
+  t3 = _mm_madd_epi16(s3, k__cospi_m12_p20);
+  t4 = _mm_madd_epi16(s2, k__cospi_p20_p12);
+  t5 = _mm_madd_epi16(s3, k__cospi_p20_p12);
+  t6 = _mm_madd_epi16(s0, k__cospi_m04_p28);
+  t7 = _mm_madd_epi16(s1, k__cospi_m04_p28);
+
+  // Rounding
+  x0 = _mm_add_epi32(t0, k__DCT_CONST_ROUNDING);
+  x1 = _mm_add_epi32(t1, k__DCT_CONST_ROUNDING);
+  x2 = _mm_add_epi32(t2, k__DCT_CONST_ROUNDING);
+  x3 = _mm_add_epi32(t3, k__DCT_CONST_ROUNDING);
+  x4 = _mm_add_epi32(t4, k__DCT_CONST_ROUNDING);
+  x5 = _mm_add_epi32(t5, k__DCT_CONST_ROUNDING);
+  x6 = _mm_add_epi32(t6, k__DCT_CONST_ROUNDING);
+  x7 = _mm_add_epi32(t7, k__DCT_CONST_ROUNDING);
+  // Shift
+  s0 = _mm_srai_epi32(x0, DCT_CONST_BITS);
+  s1 = _mm_srai_epi32(x1, DCT_CONST_BITS);
+  s2 = _mm_srai_epi32(x2, DCT_CONST_BITS);
+  s3 = _mm_srai_epi32(x3, DCT_CONST_BITS);
+  s4 = _mm_srai_epi32(x4, DCT_CONST_BITS);
+  s5 = _mm_srai_epi32(x5, DCT_CONST_BITS);
+  s6 = _mm_srai_epi32(x6, DCT_CONST_BITS);
+  s7 = _mm_srai_epi32(x7, DCT_CONST_BITS);
+
+  in[6] = _mm_packs_epi32(s0, s1);
+  in[4] = _mm_packs_epi32(s4, s5);
+  in[2] = _mm_packs_epi32(s2, s3);
+  in[0] = _mm_packs_epi32(s6, s7);
+
+  // coeffs: [x3 x2 x1 x0, x7 x6 x5 x4]
+  // Transpose
+  array_transpose_8x8(in, in);
+}
+#endif  // CONFIG_EXT_TX
+
 void vp10_fht8x8_sse2(const int16_t *input, tran_low_t *output,
                      int stride, int tx_type) {
   __m128i in[8];
@@ -1350,6 +1499,55 @@ void vp10_fht8x8_sse2(const int16_t *input, tran_low_t *output,
       load_buffer_8x8(input, in, stride, 1, 0);
       fadst8_sse2(in);
       fadst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case DST_DST:
+      load_buffer_8x8(input, in, stride, 0, 0);
+      fdst8_sse2(in);
+      fdst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case DCT_DST:
+      load_buffer_8x8(input, in, stride, 0, 0);
+      fdct8_sse2(in);
+      fdst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case DST_DCT:
+      load_buffer_8x8(input, in, stride, 0, 0);
+      fdst8_sse2(in);
+      fdct8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case DST_ADST:
+      load_buffer_8x8(input, in, stride, 0, 0);
+      fdst8_sse2(in);
+      fadst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case ADST_DST:
+      load_buffer_8x8(input, in, stride, 0, 0);
+      fadst8_sse2(in);
+      fdst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case DST_FLIPADST:
+      load_buffer_8x8(input, in, stride, 0, 1);
+      fdst8_sse2(in);
+      fadst8_sse2(in);
+      right_shift_8x8(in, 1);
+      write_buffer_8x8(output, in, 8);
+      break;
+    case FLIPADST_DST:
+      load_buffer_8x8(input, in, stride, 1, 0);
+      fadst8_sse2(in);
+      fdst8_sse2(in);
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
       break;
