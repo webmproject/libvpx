@@ -38,9 +38,13 @@
 #define __builtin_prefetch(x)
 #endif
 
-/* Shift down with rounding */
+/* Shift down with rounding for use when n > 0 */
 #define ROUND_POWER_OF_TWO(value, n) \
     (((value) + (1 << ((n) - 1))) >> (n))
+
+/* Shift down with rounding for use when n >= 0 */
+#define ROUNDZ_POWER_OF_TWO(value, n) \
+    ((n) ? (((value) + (1 << ((n) - 1))) >> (n)) : (value))
 
 #define ALIGN_POWER_OF_TWO(value, n) \
     (((value) + ((1 << (n)) - 1)) & ~((1 << (n)) - 1))

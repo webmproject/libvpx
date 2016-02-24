@@ -768,8 +768,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 
       sse = vpx_sum_squares_2d_i16(diff, diff_stride, bs);
 #if CONFIG_VP9_HIGHBITDEPTH
-      if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && (xd->bd > 8))
-        sse = ROUND_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        sse = ROUNDZ_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       sse = (int64_t)sse * 16;
 
@@ -2458,8 +2458,8 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && (xd->bd > 8))
-    tmp = ROUND_POWER_OF_TWO(tmp, (xd->bd - 8) * 2);
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+    tmp = ROUNDZ_POWER_OF_TWO(tmp, (xd->bd - 8) * 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   *bsse += (int64_t)tmp * 16;
 
