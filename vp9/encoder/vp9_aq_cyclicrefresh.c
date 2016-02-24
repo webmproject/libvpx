@@ -29,13 +29,13 @@ CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
 
   cr->map = vpx_calloc(mi_rows * mi_cols, sizeof(*cr->map));
   if (cr->map == NULL) {
-    vpx_free(cr);
+    vp9_cyclic_refresh_free(cr);
     return NULL;
   }
   last_coded_q_map_size = mi_rows * mi_cols * sizeof(*cr->last_coded_q_map);
   cr->last_coded_q_map = vpx_malloc(last_coded_q_map_size);
   if (cr->last_coded_q_map == NULL) {
-    vpx_free(cr);
+    vp9_cyclic_refresh_free(cr);
     return NULL;
   }
   assert(MAXQ <= 255);
@@ -44,7 +44,7 @@ CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
   consec_zero_mv_size = mi_rows * mi_cols * sizeof(*cr->consec_zero_mv);
   cr->consec_zero_mv = vpx_malloc(consec_zero_mv_size);
   if (cr->consec_zero_mv == NULL) {
-    vpx_free(cr);
+    vp9_cyclic_refresh_free(cr);
     return NULL;
   }
   memset(cr->consec_zero_mv, 0, consec_zero_mv_size);

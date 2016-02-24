@@ -331,7 +331,6 @@ static void filter_selectively_vert_row2(int subsampling_factor,
     const loop_filter_thresh *lfi0 = lfi_n->lfthr + *lfl;
     const loop_filter_thresh *lfi1 = lfi_n->lfthr + *(lfl + lfl_forward);
 
-    // TODO(yunqingwang): count in loopfilter functions should be removed.
     if (mask & 1) {
       if ((mask_16x16_0 | mask_16x16_1) & 1) {
         if ((mask_16x16_0 & mask_16x16_1) & 1) {
@@ -352,11 +351,10 @@ static void filter_selectively_vert_row2(int subsampling_factor,
                                   lfi0->hev_thr, lfi1->mblim, lfi1->lim,
                                   lfi1->hev_thr);
         } else if (mask_8x8_0 & 1) {
-          vpx_lpf_vertical_8(s, pitch, lfi0->mblim, lfi0->lim, lfi0->hev_thr,
-                             1);
+          vpx_lpf_vertical_8(s, pitch, lfi0->mblim, lfi0->lim, lfi0->hev_thr);
         } else {
           vpx_lpf_vertical_8(s + 8 * pitch, pitch, lfi1->mblim, lfi1->lim,
-                             lfi1->hev_thr, 1);
+                             lfi1->hev_thr);
         }
       }
 
@@ -366,11 +364,10 @@ static void filter_selectively_vert_row2(int subsampling_factor,
                                   lfi0->hev_thr, lfi1->mblim, lfi1->lim,
                                   lfi1->hev_thr);
         } else if (mask_4x4_0 & 1) {
-          vpx_lpf_vertical_4(s, pitch, lfi0->mblim, lfi0->lim, lfi0->hev_thr,
-                             1);
+          vpx_lpf_vertical_4(s, pitch, lfi0->mblim, lfi0->lim, lfi0->hev_thr);
         } else {
           vpx_lpf_vertical_4(s + 8 * pitch, pitch, lfi1->mblim, lfi1->lim,
-                             lfi1->hev_thr, 1);
+                             lfi1->hev_thr);
         }
       }
 
@@ -381,10 +378,10 @@ static void filter_selectively_vert_row2(int subsampling_factor,
                                   lfi1->hev_thr);
         } else if (mask_4x4_int_0 & 1) {
           vpx_lpf_vertical_4(s + 4, pitch, lfi0->mblim, lfi0->lim,
-                             lfi0->hev_thr, 1);
+                             lfi0->hev_thr);
         } else {
           vpx_lpf_vertical_4(s + 8 * pitch + 4, pitch, lfi1->mblim, lfi1->lim,
-                             lfi1->hev_thr, 1);
+                             lfi1->hev_thr);
         }
       }
     }
@@ -431,7 +428,6 @@ static void highbd_filter_selectively_vert_row2(int subsampling_factor,
     const loop_filter_thresh *lfi0 = lfi_n->lfthr + *lfl;
     const loop_filter_thresh *lfi1 = lfi_n->lfthr + *(lfl + lfl_forward);
 
-    // TODO(yunqingwang): count in loopfilter functions should be removed.
     if (mask & 1) {
       if ((mask_16x16_0 | mask_16x16_1) & 1) {
         if ((mask_16x16_0 & mask_16x16_1) & 1) {
@@ -453,10 +449,10 @@ static void highbd_filter_selectively_vert_row2(int subsampling_factor,
                                          lfi1->hev_thr, bd);
         } else if (mask_8x8_0 & 1) {
           vpx_highbd_lpf_vertical_8(s, pitch, lfi0->mblim, lfi0->lim,
-                                    lfi0->hev_thr, 1, bd);
+                                    lfi0->hev_thr, bd);
         } else {
           vpx_highbd_lpf_vertical_8(s + 8 * pitch, pitch, lfi1->mblim,
-                                    lfi1->lim, lfi1->hev_thr, 1, bd);
+                                    lfi1->lim, lfi1->hev_thr, bd);
         }
       }
 
@@ -467,10 +463,10 @@ static void highbd_filter_selectively_vert_row2(int subsampling_factor,
                                          lfi1->hev_thr, bd);
         } else if (mask_4x4_0 & 1) {
           vpx_highbd_lpf_vertical_4(s, pitch, lfi0->mblim, lfi0->lim,
-                                    lfi0->hev_thr, 1, bd);
+                                    lfi0->hev_thr, bd);
         } else {
           vpx_highbd_lpf_vertical_4(s + 8 * pitch, pitch, lfi1->mblim,
-                                    lfi1->lim, lfi1->hev_thr, 1, bd);
+                                    lfi1->lim, lfi1->hev_thr, bd);
         }
       }
 
@@ -481,10 +477,10 @@ static void highbd_filter_selectively_vert_row2(int subsampling_factor,
                                          lfi1->hev_thr, bd);
         } else if (mask_4x4_int_0 & 1) {
           vpx_highbd_lpf_vertical_4(s + 4, pitch, lfi0->mblim, lfi0->lim,
-                                    lfi0->hev_thr, 1, bd);
+                                    lfi0->hev_thr, bd);
         } else {
           vpx_highbd_lpf_vertical_4(s + 8 * pitch + 4, pitch, lfi1->mblim,
-                                    lfi1->lim, lfi1->hev_thr, 1, bd);
+                                    lfi1->lim, lfi1->hev_thr, bd);
         }
       }
     }
@@ -521,12 +517,12 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
     if (mask & 1) {
       if (mask_16x16 & 1) {
         if ((mask_16x16 & 3) == 3) {
-          vpx_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim,
-                                lfi->hev_thr, 2);
+          vpx_lpf_horizontal_edge_16(s, pitch, lfi->mblim, lfi->lim,
+                                     lfi->hev_thr);
           count = 2;
         } else {
-          vpx_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim,
-                                lfi->hev_thr, 1);
+          vpx_lpf_horizontal_edge_8(s, pitch, lfi->mblim, lfi->lim,
+                                    lfi->hev_thr);
         }
       } else if (mask_8x8 & 1) {
         if ((mask_8x8 & 3) == 3) {
@@ -544,18 +540,18 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1)
               vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                   lfi->hev_thr, 1);
+                                   lfi->hev_thr);
             else if (mask_4x4_int & 2)
               vpx_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                   lfin->lim, lfin->hev_thr, 1);
+                                   lfin->lim, lfin->hev_thr);
           }
           count = 2;
         } else {
-          vpx_lpf_horizontal_8(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
+          vpx_lpf_horizontal_8(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
 
           if (mask_4x4_int & 1)
             vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                 lfi->hev_thr, 1);
+                                 lfi->hev_thr);
         }
       } else if (mask_4x4 & 1) {
         if ((mask_4x4 & 3) == 3) {
@@ -572,22 +568,22 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1)
               vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                   lfi->hev_thr, 1);
+                                   lfi->hev_thr);
             else if (mask_4x4_int & 2)
               vpx_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                   lfin->lim, lfin->hev_thr, 1);
+                                   lfin->lim, lfin->hev_thr);
           }
           count = 2;
         } else {
-          vpx_lpf_horizontal_4(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
+          vpx_lpf_horizontal_4(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
 
           if (mask_4x4_int & 1)
             vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                 lfi->hev_thr, 1);
+                                 lfi->hev_thr);
         }
       } else if (mask_4x4_int & 1) {
         vpx_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                             lfi->hev_thr, 1);
+                             lfi->hev_thr);
       }
     }
     s += 8 * count;
@@ -618,12 +614,12 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
     if (mask & 1) {
       if (mask_16x16 & 1) {
         if ((mask_16x16 & 3) == 3) {
-          vpx_highbd_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr, 2, bd);
+          vpx_highbd_lpf_horizontal_edge_16(s, pitch, lfi->mblim, lfi->lim,
+                                            lfi->hev_thr, bd);
           count = 2;
         } else {
-          vpx_highbd_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr, 1, bd);
+          vpx_highbd_lpf_horizontal_edge_8(s, pitch, lfi->mblim, lfi->lim,
+                                           lfi->hev_thr, bd);
         }
       } else if (mask_8x8 & 1) {
         if ((mask_8x8 & 3) == 3) {
@@ -642,20 +638,20 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1) {
               vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                          lfi->lim, lfi->hev_thr, 1, bd);
+                                          lfi->lim, lfi->hev_thr, bd);
             } else if (mask_4x4_int & 2) {
               vpx_highbd_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                          lfin->lim, lfin->hev_thr, 1, bd);
+                                          lfin->lim, lfin->hev_thr, bd);
             }
           }
           count = 2;
         } else {
           vpx_highbd_lpf_horizontal_8(s, pitch, lfi->mblim, lfi->lim,
-                                      lfi->hev_thr, 1, bd);
+                                      lfi->hev_thr, bd);
 
           if (mask_4x4_int & 1) {
             vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                        lfi->lim, lfi->hev_thr, 1, bd);
+                                        lfi->lim, lfi->hev_thr, bd);
           }
         }
       } else if (mask_4x4 & 1) {
@@ -674,25 +670,25 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
           } else {
             if (mask_4x4_int & 1) {
               vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                          lfi->lim, lfi->hev_thr, 1, bd);
+                                          lfi->lim, lfi->hev_thr, bd);
             } else if (mask_4x4_int & 2) {
               vpx_highbd_lpf_horizontal_4(s + 8 + 4 * pitch, pitch, lfin->mblim,
-                                          lfin->lim, lfin->hev_thr, 1, bd);
+                                          lfin->lim, lfin->hev_thr, bd);
             }
           }
           count = 2;
         } else {
           vpx_highbd_lpf_horizontal_4(s, pitch, lfi->mblim, lfi->lim,
-                                      lfi->hev_thr, 1, bd);
+                                      lfi->hev_thr, bd);
 
           if (mask_4x4_int & 1) {
             vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim,
-                                        lfi->lim, lfi->hev_thr, 1, bd);
+                                        lfi->lim, lfi->hev_thr, bd);
           }
         }
       } else if (mask_4x4_int & 1) {
         vpx_highbd_lpf_horizontal_4(s + 4 * pitch, pitch, lfi->mblim, lfi->lim,
-                                    lfi->hev_thr, 1, bd);
+                                    lfi->hev_thr, bd);
       }
     }
     s += 8 * count;
@@ -1152,13 +1148,13 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
       if (mask_16x16 & 1) {
         vpx_lpf_vertical_16(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
       } else if (mask_8x8 & 1) {
-        vpx_lpf_vertical_8(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
+        vpx_lpf_vertical_8(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
       } else if (mask_4x4 & 1) {
-        vpx_lpf_vertical_4(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
+        vpx_lpf_vertical_4(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
       }
     }
     if (mask_4x4_int & 1)
-      vpx_lpf_vertical_4(s + 4, pitch, lfi->mblim, lfi->lim, lfi->hev_thr, 1);
+      vpx_lpf_vertical_4(s + 4, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
     s += 8;
     lfl += 1;
     mask_16x16 >>= 1;
@@ -1188,15 +1184,15 @@ static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
                                    lfi->hev_thr, bd);
       } else if (mask_8x8 & 1) {
         vpx_highbd_lpf_vertical_8(s, pitch, lfi->mblim, lfi->lim,
-                                  lfi->hev_thr, 1, bd);
+                                  lfi->hev_thr, bd);
       } else if (mask_4x4 & 1) {
         vpx_highbd_lpf_vertical_4(s, pitch, lfi->mblim, lfi->lim,
-                                lfi->hev_thr, 1, bd);
+                                  lfi->hev_thr, bd);
       }
     }
     if (mask_4x4_int & 1)
       vpx_highbd_lpf_vertical_4(s + 4, pitch, lfi->mblim, lfi->lim,
-                                lfi->hev_thr, 1, bd);
+                                lfi->hev_thr, bd);
     s += 8;
     lfl += 1;
     mask_16x16 >>= 1;

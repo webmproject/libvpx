@@ -64,13 +64,13 @@ CYCLIC_REFRESH *vp10_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
 
   cr->map = vpx_calloc(mi_rows * mi_cols, sizeof(*cr->map));
   if (cr->map == NULL) {
-    vpx_free(cr);
+    vp10_cyclic_refresh_free(cr);
     return NULL;
   }
   last_coded_q_map_size = mi_rows * mi_cols * sizeof(*cr->last_coded_q_map);
   cr->last_coded_q_map = vpx_malloc(last_coded_q_map_size);
   if (cr->last_coded_q_map == NULL) {
-    vpx_free(cr);
+    vp10_cyclic_refresh_free(cr);
     return NULL;
   }
   assert(MAXQ <= 255);

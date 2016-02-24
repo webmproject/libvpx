@@ -728,10 +728,8 @@ static const vp9_coeff_probs_model default_coef_probs_32x32[PLANE_TYPES] = {
 };
 
 static void extend_to_full_distribution(vpx_prob *probs, vpx_prob p) {
-  // TODO(aconverse): model[PIVOT_NODE] should never be zero.
-  // https://code.google.com/p/webm/issues/detail?id=1089
-  memcpy(probs, vp9_pareto8_full[p == 0 ? 254 : p - 1],
-         MODEL_NODES * sizeof(vpx_prob));
+  assert(p != 0);
+  memcpy(probs, vp9_pareto8_full[p - 1], MODEL_NODES * sizeof(vpx_prob));
 }
 
 void vp9_model_to_full_probs(const vpx_prob *model, vpx_prob *full) {

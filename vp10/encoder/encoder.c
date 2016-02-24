@@ -1788,8 +1788,9 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   }
 
   if (cpi->b_calculate_consistency) {
-    cpi->ssim_vars = vpx_malloc(sizeof(*cpi->ssim_vars) *
-                                4 * cpi->common.mi_rows * cpi->common.mi_cols);
+    CHECK_MEM_ERROR(cm, cpi->ssim_vars,
+                    vpx_malloc(sizeof(*cpi->ssim_vars) * 4 *
+                               cpi->common.mi_rows * cpi->common.mi_cols));
     cpi->worst_consistency = 100.0;
   }
 #endif
@@ -2611,16 +2612,16 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
   vpx_extend_frame_inner_borders(cm->frame_to_show);
 }
 
-static INLINE void alloc_frame_mvs(const VP10_COMMON *cm,
+static INLINE void alloc_frame_mvs(VP10_COMMON *const cm,
                                    int buffer_idx) {
   RefCntBuffer *const new_fb_ptr = &cm->buffer_pool->frame_bufs[buffer_idx];
   if (new_fb_ptr->mvs == NULL ||
       new_fb_ptr->mi_rows < cm->mi_rows ||
       new_fb_ptr->mi_cols < cm->mi_cols) {
     vpx_free(new_fb_ptr->mvs);
-    new_fb_ptr->mvs =
-      (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
-                           sizeof(*new_fb_ptr->mvs));
+    CHECK_MEM_ERROR(cm, new_fb_ptr->mvs,
+                    (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
+                                         sizeof(*new_fb_ptr->mvs)));
     new_fb_ptr->mi_rows = cm->mi_rows;
     new_fb_ptr->mi_cols = cm->mi_cols;
   }
@@ -2667,12 +2668,13 @@ void vp10_scale_references(VP10_COMP *cpi) {
         if (force_scaling ||
             new_fb_ptr->buf.y_crop_width != cm->width ||
             new_fb_ptr->buf.y_crop_height != cm->height) {
-          vpx_realloc_frame_buffer(&new_fb_ptr->buf,
-                                   cm->width, cm->height,
-                                   cm->subsampling_x, cm->subsampling_y,
-                                   cm->use_highbitdepth,
-                                   VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                                   NULL, NULL, NULL);
+          if (vpx_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
+                                       cm->subsampling_x, cm->subsampling_y,
+                                       cm->use_highbitdepth,
+                                       VP9_ENC_BORDER_IN_PIXELS,
+                                       cm->byte_alignment, NULL, NULL, NULL))
+            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                               "Failed to allocate frame buffer");
           scale_and_extend_frame(ref, &new_fb_ptr->buf, (int)cm->bit_depth);
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
@@ -2692,11 +2694,12 @@ void vp10_scale_references(VP10_COMP *cpi) {
         if (force_scaling ||
             new_fb_ptr->buf.y_crop_width != cm->width ||
             new_fb_ptr->buf.y_crop_height != cm->height) {
-          vpx_realloc_frame_buffer(&new_fb_ptr->buf,
-                                   cm->width, cm->height,
-                                   cm->subsampling_x, cm->subsampling_y,
-                                   VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                                   NULL, NULL, NULL);
+          if (vpx_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
+                                       cm->subsampling_x, cm->subsampling_y,
+                                       VP9_ENC_BORDER_IN_PIXELS,
+                                       cm->byte_alignment, NULL, NULL, NULL))
+            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                               "Failed to allocate frame buffer");
           scale_and_extend_frame(ref, &new_fb_ptr->buf);
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
@@ -2993,14 +2996,15 @@ static void set_frame_size(VP10_COMP *cpi) {
   alloc_frame_mvs(cm, cm->new_fb_idx);
 
   // Reset the frame pointers to the current frame size.
-  vpx_realloc_frame_buffer(get_frame_new_buffer(cm),
-                           cm->width, cm->height,
-                           cm->subsampling_x, cm->subsampling_y,
+  if (vpx_realloc_frame_buffer(get_frame_new_buffer(cm), cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-                           cm->use_highbitdepth,
+                               cm->use_highbitdepth,
 #endif
-                           VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                           NULL, NULL, NULL);
+                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               NULL, NULL, NULL))
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate frame buffer");
 
   alloc_util_frame_buffers(cpi);
   init_motion_estimation(cpi);
@@ -3816,12 +3820,14 @@ static void setup_denoiser_buffer(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   if (cpi->oxcf.noise_sensitivity > 0 &&
       !cpi->denoiser.frame_buffer_initialized) {
-    vp10_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
-                       cm->subsampling_x, cm->subsampling_y,
+    if (vp10_denoiser_alloc(&cpi->denoiser, cm->width, cm->height,
+                            cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-                       cm->use_highbitdepth,
+                            cm->use_highbitdepth,
 #endif
-                       VP9_ENC_BORDER_IN_PIXELS);
+                            VP9_ENC_BORDER_IN_PIXELS))
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Failed to allocate denoiser");
   }
 }
 #endif
@@ -3829,20 +3835,14 @@ static void setup_denoiser_buffer(VP10_COMP *cpi) {
 int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
-  VP10_COMMON *volatile const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   struct vpx_usec_timer timer;
-  volatile int res = 0;
+  int res = 0;
   const int subsampling_x = sd->subsampling_x;
   const int subsampling_y = sd->subsampling_y;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int use_highbitdepth = (sd->flags & YV12_FLAG_HIGHBITDEPTH) != 0;
 #endif
-
-  if (setjmp(cm->error.jmp)) {
-    cm->error.setjmp = 0;
-    return -1;
-  }
-  cm->error.setjmp = 1;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   check_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
@@ -3877,7 +3877,6 @@ int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
     res = -1;
   }
 
-  cm->error.setjmp = 0;
   return res;
 }
 

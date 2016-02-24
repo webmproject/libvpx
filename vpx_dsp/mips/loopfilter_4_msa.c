@@ -13,13 +13,10 @@
 void vpx_lpf_horizontal_4_msa(uint8_t *src, int32_t pitch,
                               const uint8_t *b_limit_ptr,
                               const uint8_t *limit_ptr,
-                              const uint8_t *thresh_ptr,
-                              int32_t count) {
+                              const uint8_t *thresh_ptr) {
   uint64_t p1_d, p0_d, q0_d, q1_d;
   v16u8 mask, hev, flat, thresh, b_limit, limit;
   v16u8 p3, p2, p1, p0, q3, q2, q1, q0, p1_out, p0_out, q0_out, q1_out;
-
-  (void)count;
 
   /* load vector elements */
   LD_UB8((src - 4 * pitch), pitch, p3, p2, p1, p0, q0, q1, q2, q3);
@@ -74,13 +71,10 @@ void vpx_lpf_horizontal_4_dual_msa(uint8_t *src, int32_t pitch,
 void vpx_lpf_vertical_4_msa(uint8_t *src, int32_t pitch,
                             const uint8_t *b_limit_ptr,
                             const uint8_t *limit_ptr,
-                            const uint8_t *thresh_ptr,
-                            int32_t count) {
+                            const uint8_t *thresh_ptr) {
   v16u8 mask, hev, flat, limit, thresh, b_limit;
   v16u8 p3, p2, p1, p0, q3, q2, q1, q0;
   v8i16 vec0, vec1, vec2, vec3;
-
-  (void)count;
 
   LD_UB8((src - 4), pitch, p3, p2, p1, p0, q0, q1, q2, q3);
 
