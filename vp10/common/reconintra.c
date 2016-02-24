@@ -372,14 +372,13 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
 static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
                              const uint8_t *above, const uint8_t *left,
                              int dx, int dy, INTRA_FILTER filter_type) {
-  int r, c, x, y, shift1, shift2, val, base1, base2, use_above;
+  int r, c, x, y, shift1, shift2, val, base1, base2;
 
   assert(dx > 0);
   assert(dy > 0);
 
   x = -dx;
   for (r = 0; r < bs; ++r, x -= dx, dst += stride) {
-    use_above = 0;
     base1 = x >> 8;
     y = (r << 8) - dy;
     for (c = 0; c < bs; ++c, ++base1, y -= dy) {
@@ -441,8 +440,8 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
       len = VPXMIN(bs, 2 * bs - 1 - base);
 
       if (len <= 0) {
-        for (i = r; r < bs; ++r) {
-          dst[i * stride + c] = left[ 2 * bs - 1];
+        for (r = 0; r < bs; ++r) {
+          dst[r * stride + c] = left[ 2 * bs - 1];
         }
         continue;
       }
