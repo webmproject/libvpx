@@ -32,6 +32,27 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   { 0, 0, 0,   8, 120, 0, 0, 0 }
 };
 
+DECLARE_ALIGNED(16, static const int16_t,
+                sub_pel_filters_12sharp[16][12]) = {
+  // intfilt 0.8
+  {0,   0,   0,   0,   0, 128,   0,   0,   0,   0,   0, 0},
+  {0,   1,  -1,   3,  -7, 127,   8,  -4,   2,  -1,   0, 0},
+  {0,   1,  -3,   5, -12, 124,  18,  -8,   4,  -2,   1, 0},
+  {-1,   2,  -4,   8, -17, 120,  28, -11,   6,  -3,   1, -1},
+  {-1,   2,  -4,  10, -21, 114,  38, -15,   8,  -4,   2, -1},
+  {-1,   3,  -5,  11, -23, 107,  49, -18,   9,  -5,   2, -1},
+  {-1,   3,  -6,  12, -25,  99,  60, -21,  11,  -6,   3, -1},
+  {-1,   3,  -6,  12, -25,  90,  70, -23,  12,  -6,   3, -1},
+  {-1,   3,  -6,  12, -24,  80,  80, -24,  12,  -6,   3, -1},
+  {-1,   3,  -6,  12, -23,  70,  90, -25,  12,  -6,   3, -1},
+  {-1,   3,  -6,  11, -21,  60,  99, -25,  12,  -6,   3, -1},
+  {-1,   2,  -5,   9, -18,  49, 107, -23,  11,  -5,   3, -1},
+  {-1,   2,  -4,   8, -15,  38, 114, -21,  10,  -4,   2, -1},
+  {-1,   1,  -3,   6, -11,  28, 120, -17,   8,  -4,   2, -1},
+  {0,   1,  -2,   4,  -8,  18, 124, -12,   5,  -3,   1, 0},
+  {0,   0,  -1,   2,  -4,   8, 127,  -7,   3,  -1,   1, 0},
+};
+
 DECLARE_ALIGNED(256, static const InterpKernel,
                 sub_pel_filters_8[SUBPEL_SHIFTS]) = {
 #if CONFIG_EXT_INTERP
@@ -157,28 +178,6 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   {0,   2, -12,  37,  94,  14,  -9, 2},
   {0,   2, -11,  31,  95,  19, -10, 2},
 };
-
-DECLARE_ALIGNED(16, static const int16_t,
-                sub_pel_filters_12sharp[16][12]) = {
-  // intfilt 0.8
-  {0,   0,   0,   0,   0, 128,   0,   0,   0,   0,   0, 0},
-  {0,   1,  -1,   3,  -7, 127,   8,  -4,   2,  -1,   0, 0},
-  {0,   1,  -3,   5, -12, 124,  18,  -8,   4,  -2,   1, 0},
-  {-1,   2,  -4,   8, -17, 120,  28, -11,   6,  -3,   1, -1},
-  {-1,   2,  -4,  10, -21, 114,  38, -15,   8,  -4,   2, -1},
-  {-1,   3,  -5,  11, -23, 107,  49, -18,   9,  -5,   2, -1},
-  {-1,   3,  -6,  12, -25,  99,  60, -21,  11,  -6,   3, -1},
-  {-1,   3,  -6,  12, -25,  90,  70, -23,  12,  -6,   3, -1},
-  {-1,   3,  -6,  12, -24,  80,  80, -24,  12,  -6,   3, -1},
-  {-1,   3,  -6,  12, -23,  70,  90, -25,  12,  -6,   3, -1},
-  {-1,   3,  -6,  11, -21,  60,  99, -25,  12,  -6,   3, -1},
-  {-1,   2,  -5,   9, -18,  49, 107, -23,  11,  -5,   3, -1},
-  {-1,   2,  -4,   8, -15,  38, 114, -21,  10,  -4,   2, -1},
-  {-1,   1,  -3,   6, -11,  28, 120, -17,   8,  -4,   2, -1},
-  {0,   1,  -2,   4,  -8,  18, 124, -12,   5,  -3,   1, 0},
-  {0,   0,  -1,   2,  -4,   8, 127,  -7,   3,  -1,   1, 0},
-};
-
 #else
 
 DECLARE_ALIGNED(256, static const InterpKernel,
@@ -201,7 +200,6 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   { 0, -3,  2,  41, 63, 29, -2, -2},
   { 0, -3,  1,  38, 64, 32, -1, -3}
 };
-
 #endif  // CONFIG_EXT_INTERP
 
 const InterpKernel *vp10_filter_kernels[SWITCHABLE_FILTERS + 1] = {
@@ -240,7 +238,17 @@ vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
   {(const int16_t*)bilinear_filters, SUBPEL_TAPS, SUBPEL_SHIFTS}
 };
 
+#if FILTER_12TAP
+static const InterpFilterParams vp10_interp_filter_12tap = {
+    (const int16_t*)sub_pel_filters_12sharp, 12, SUBPEL_SHIFTS
+};
+#endif
+
 InterpFilterParams vp10_get_interp_filter_params(
     const INTERP_FILTER interp_filter) {
+#if FILTER_12TAP
+  if (interp_filter == SHARP_FILTER_12TAP)
+    return vp10_interp_filter_12tap;
+#endif
   return vp10_interp_filter_params_list[interp_filter];
 }
