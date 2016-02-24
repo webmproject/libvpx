@@ -159,6 +159,10 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
 
     sf->tx_size_search_breakout = 1;
     sf->partition_search_breakout_rate_thr = 80;
+
+    // Use transform domain distortion.
+    // Note var-tx expt always uses pixel domain distortion.
+    sf->use_transform_domain_distortion = 1;
   }
 
   if (speed >= 2) {
@@ -270,6 +274,10 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
   sf->use_fast_coef_costing = 1;
   sf->allow_exhaustive_searches = 0;
   sf->exhaustive_searches_thresh = INT_MAX;
+
+  // Use transform domain distortion computation
+  // Note var-tx expt always uses pixel domain distortion.
+  sf->use_transform_domain_distortion = 1;
 
   if (speed >= 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
@@ -510,6 +518,9 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->partition_search_breakout_dist_thr = 0;
   sf->partition_search_breakout_rate_thr = 0;
   sf->simple_model_rd_from_var = 0;
+
+  // Set this at the appropriate speed levels
+  sf->use_transform_domain_distortion = 0;
 
   if (oxcf->mode == REALTIME)
     set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);

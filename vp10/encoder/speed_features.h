@@ -465,6 +465,10 @@ typedef struct SPEED_FEATURES {
 
   // Fast approximation of vp10_model_rd_from_var_lapndz
   int simple_model_rd_from_var;
+
+  // Whether to compute distortion in the image domain (slower but
+  // more accurate), or in the transform domain (faster but less acurate).
+  int use_transform_domain_distortion;
 } SPEED_FEATURES;
 
 struct VP10_COMP;
