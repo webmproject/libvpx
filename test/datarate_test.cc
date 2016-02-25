@@ -957,7 +957,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SpatialLayers) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
           << " The datarate for the file exceeds the target by too much!";
-  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.17)
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.22)
       << " The datarate for the file is lower than the target by too much!";
   EXPECT_EQ(GetMismatchFrames(), (unsigned int) 0);
 }
@@ -1035,7 +1035,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SpatialLayers4threads) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
           << " The datarate for the file exceeds the target by too much!";
-  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.17)
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.22)
       << " The datarate for the file is lower than the target by too much!";
   EXPECT_EQ(GetMismatchFrames(), (unsigned int) 0);
 }

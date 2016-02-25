@@ -70,6 +70,8 @@ typedef struct {
   // Store scaled source frames to be used for temporal filter to generate
   // a alt ref frame.
   YV12_BUFFER_CONFIG scaled_frames[MAX_LAG_BUFFERS];
+  // Temp buffer used for 2-stage down-sampling, for real-time mode.
+  YV12_BUFFER_CONFIG scaled_temp;
 
   // Layer context used for rate control in one pass temporal CBR mode or
   // two pass spatial mode.
