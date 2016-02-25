@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02e4ed24_8d5a6f56",
+        "filename": "vp10/common/filter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-02-25T20:04:25Z",
+      "side": 1,
+      "message": "Won\u0027t this mix up with BILINEAR filter?",
+      "range": {
+        "startLine": 50,
+        "startChar": 8,
+        "endLine": 50,
+        "endChar": 45
+      },
+      "revId": "8eb1ce3894714b189757320d7ae70d7afe419ac4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
