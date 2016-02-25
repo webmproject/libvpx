@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62be89e4_23e388c4",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-02-25T13:33:51Z",
+      "side": 1,
+      "message": "oopps... commented out of order... from other commit:\n\nChecking the filter_y is not necessary.  The offset should be from the same table, so for bilinear detection, you will get the same result.",
+      "revId": "b3ceb629badb9f0720db71a3c8a3f564311fcc02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
