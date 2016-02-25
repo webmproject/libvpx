@@ -410,6 +410,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   memset(&cpi->svc.scaled_frames[0], 0,
          MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
 
+  vpx_free_frame_buffer(&cpi->svc.scaled_temp);
+  memset(&cpi->svc.scaled_temp, 0, sizeof(cpi->svc.scaled_temp));
+
   vpx_free_frame_buffer(&cpi->svc.empty_frame.img);
   memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
 
@@ -3357,11 +3360,20 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   vpx_clear_system_state();
 
   set_frame_size(cpi);
-  cpi->Source = vp9_scale_if_required(cm,
-                                      cpi->un_scaled_source,
-                                      &cpi->scaled_source,
-                                      (cpi->oxcf.pass == 0));
 
+  if (is_one_pass_cbr_svc(cpi) &&
+      cpi->un_scaled_source->y_width == cm->width << 2 &&
+      cpi->un_scaled_source->y_height == cm->height << 2) {
+    cpi->Source = vp9_svc_twostage_scale(cm,
+                                         cpi->un_scaled_source,
+                                         &cpi->scaled_source,
+                                         &cpi->svc.scaled_temp);
+  } else {
+    cpi->Source = vp9_scale_if_required(cm,
+                                        cpi->un_scaled_source,
+                                        &cpi->scaled_source,
+                                        (cpi->oxcf.pass == 0));
+  }
   // Avoid scaling last_source unless its needed.
   // Last source is needed if vp9_avg_source_sad() is used, or if
   // partition_search_type == SOURCE_VAR_BASED_PARTITION, or if noise
@@ -3779,6 +3791,25 @@ static void set_ext_overrides(VP9_COMP *cpi) {
     cpi->refresh_last_frame = cpi->ext_refresh_last_frame;
     cpi->refresh_golden_frame = cpi->ext_refresh_golden_frame;
     cpi->refresh_alt_ref_frame = cpi->ext_refresh_alt_ref_frame;
+  }
+}
+
+YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(VP9_COMMON *cm,
+                                           YV12_BUFFER_CONFIG *unscaled,
+                                           YV12_BUFFER_CONFIG *scaled,
+                                           YV12_BUFFER_CONFIG *scaled_temp) {
+  if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
+      cm->mi_rows * MI_SIZE != unscaled->y_height) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth);
+      scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth);
+#else
+      vp9_scale_and_extend_frame(unscaled, scaled_temp);
+      vp9_scale_and_extend_frame(scaled_temp, scaled);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    return scaled;
+  } else {
+    return unscaled;
   }
 }
 

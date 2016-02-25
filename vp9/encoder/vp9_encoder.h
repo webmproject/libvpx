@@ -623,6 +623,11 @@ void vp9_update_reference_frames(VP9_COMP *cpi);
 
 void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
 
+YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(VP9_COMMON *cm,
+                                           YV12_BUFFER_CONFIG *unscaled,
+                                           YV12_BUFFER_CONFIG *scaled,
+                                           YV12_BUFFER_CONFIG *scaled_temp);
+
 YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
                                           YV12_BUFFER_CONFIG *scaled,

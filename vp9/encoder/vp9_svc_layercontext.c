@@ -43,6 +43,25 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     cpi->svc.ext_alt_fb_idx[sl] = 2;
   }
 
+  // For 1 pass cbr: allocate scaled_frame that may be used for 2 stage
+  // downsampling.
+  if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    if (vpx_realloc_frame_buffer(&cpi->svc.scaled_temp,
+                                 cpi->common.width >> 1,
+                                 cpi->common.height >> 1,
+                                 cpi->common.subsampling_x,
+                                 cpi->common.subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 cpi->common.use_highbitdepth,
+#endif
+                                 VP9_ENC_BORDER_IN_PIXELS,
+                                 cpi->common.byte_alignment,
+                                 NULL, NULL, NULL))
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                         "Failed to allocate scaled_frame for svc ");
+  }
+
+
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
     if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
                                  SMALL_FRAME_WIDTH, SMALL_FRAME_HEIGHT,
