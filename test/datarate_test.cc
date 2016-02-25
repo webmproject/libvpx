@@ -905,6 +905,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc) {
   svc_params_.scaling_factor_num[1] = 288;
   svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 10;
+  // TODO(marpan): another test should be added for default/small kf_max_dist
+  // once https://bugs.chromium.org/p/webm/issues/detail?id=1150 is fixed.
+  cfg_.kf_max_dist = 9999;
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 200);
   // TODO(wonkap/marpan): Check that effective_datarate for each layer hits the

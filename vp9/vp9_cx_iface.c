@@ -1566,7 +1566,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       // keyframing settings (kf)
       VPX_KF_AUTO,        // g_kfmode
       0,                  // kf_min_dist
-      9999,               // kf_max_dist
+      128,                // kf_max_dist
 
       VPX_SS_DEFAULT_LAYERS,  // ss_number_layers
       {0},
