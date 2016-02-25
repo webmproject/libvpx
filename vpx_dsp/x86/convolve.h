@@ -45,27 +45,20 @@ typedef void filter8_1dfunction (
       dst += 16; \
       w -= 16; \
     } \
-    while (w >= 8) { \
+    if (w == 8) { \
       vpx_filter_block1d8_##dir##8_##avg##opt(src_start, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 8; \
-      dst += 8; \
-      w -= 8; \
-    } \
-    while (w >= 4) { \
+    } else if (w == 4) { \
       vpx_filter_block1d4_##dir##8_##avg##opt(src_start, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 4; \
-      dst += 4; \
-      w -= 4; \
     } \
   } else { \
     while (w >= 16) { \
@@ -79,27 +72,20 @@ typedef void filter8_1dfunction (
       dst += 16; \
       w -= 16; \
     } \
-    while (w >= 8) { \
+    if (w == 8) { \
       vpx_filter_block1d8_##dir##2_##avg##opt(src, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 8; \
-      dst += 8; \
-      w -= 8; \
-    } \
-    while (w >= 4) { \
+    } else if (w == 4) { \
       vpx_filter_block1d4_##dir##2_##avg##opt(src, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 4; \
-      dst += 4; \
-      w -= 4; \
     } \
   } \
 }
