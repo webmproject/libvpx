@@ -45,10 +45,16 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int x, int y) {
   const int which_mv = 0;
   const MV mv = { mv_row, mv_col };
-  const INTERP_FILTER interp_filter = xd->mi[0]->mbmi.interp_filter;
-
   enum mv_precision mv_precision_uv;
   int uv_stride;
+
+#if FILTER_12TAP
+  const INTERP_FILTER interp_filter = SHARP_FILTER_12TAP;
+  (void)xd;
+#else
+  const INTERP_FILTER interp_filter = xd->mi[0]->mbmi.interp_filter;
+#endif
+
   if (uv_block_width == 8) {
     uv_stride = (stride + 1) >> 1;
     mv_precision_uv = MV_PRECISION_Q4;
