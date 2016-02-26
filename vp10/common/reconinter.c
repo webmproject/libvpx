@@ -119,6 +119,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
       scaled_mv.col = mv_q4.col;
       xs = ys = 16;
     }
+
     subpel_x = scaled_mv.col & SUBPEL_MASK;
     subpel_y = scaled_mv.row & SUBPEL_MASK;
     pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
