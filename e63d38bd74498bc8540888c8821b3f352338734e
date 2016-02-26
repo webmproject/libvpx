@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82bb7df1_db726024",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2533,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-02-26T16:40:56Z",
+      "side": 1,
+      "message": "This function seems in pair with ref_cnt_fb(), in common/onyxc_int.h. Suggest to put it in a header file, e.g. encoder/encoder.h",
+      "revId": "e63d38bd74498bc8540888c8821b3f352338734e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_2865a6ac",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2608,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-02-26T16:40:56Z",
+      "side": 1,
+      "message": "May fix the indent by one more space.",
+      "revId": "e63d38bd74498bc8540888c8821b3f352338734e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_e87f9e3a",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2846,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-02-26T16:40:56Z",
+      "side": 1,
+      "message": "Would suggest \"ref_frame - LAST_FRAME\" instead of the hard-coded value of \"1\", even though the above original code also used the hard-coded value of \"1\".",
+      "revId": "e63d38bd74498bc8540888c8821b3f352338734e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_6aa717d3",
+        "filename": "vp10/encoder/mcomp.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-02-26T16:40:56Z",
+      "side": 1,
+      "message": "May suggest to try to avoid #define.\n\nIf still prefer to use, please make sure all the parameters of \"v\", \"r\", and \"c\" are placed within parentheses, as \"(v)\", \"(r)\", and \"(c)\".",
+      "revId": "e63d38bd74498bc8540888c8821b3f352338734e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_a433f9ab",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 5021,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-02-26T16:40:56Z",
+      "side": 1,
+      "message": "Suggest indent to be aligned with the above first line right to the left of the left parenthesis.",
+      "revId": "e63d38bd74498bc8540888c8821b3f352338734e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
