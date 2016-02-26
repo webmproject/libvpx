@@ -107,8 +107,6 @@ static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_fht8x8(src_diff, coeff, diff_stride, tx_type);
-      break;
     case DST_DST:
     case DCT_DST:
     case DST_DCT:
@@ -116,8 +114,7 @@ static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_DST:
     case DST_FLIPADST:
     case FLIPADST_DST:
-      // Use C version since DST exists only in C
-      vp10_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
+      vp10_fht8x8(src_diff, coeff, diff_stride, tx_type);
       break;
     case IDTX:
       fwd_idtx_c(src_diff, coeff, diff_stride, 8);
