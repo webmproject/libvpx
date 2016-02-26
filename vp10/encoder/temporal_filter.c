@@ -51,6 +51,9 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
 #if FILTER_12TAP
   const INTERP_FILTER interp_filter = SHARP_FILTER_12TAP;
   (void)xd;
+#elif SWITCHABLE_FILTERS == 5
+  const INTERP_FILTER interp_filter = EIGHTTAP_SHARP2;
+  (void)xd;
 #else
   const INTERP_FILTER interp_filter = xd->mi[0]->mbmi.interp_filter;
 #endif
