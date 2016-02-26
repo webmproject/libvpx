@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c26bb568_4aa0136b",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 7046,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-02-26T17:27:19Z",
+      "side": 1,
+      "message": "No - we should not use it yet. If we are using bits to indicate extended intra modes, we should turn it off for interintra.\nWe will probably redo the inter-intra modes anyway later.",
+      "revId": "e99d729b8aad63fa71c4927aae43837e6960414d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
