@@ -16,6 +16,24 @@
       "revId": "e99d729b8aad63fa71c4927aae43837e6960414d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2b881d5_a24184e4",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 7046,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-02-26T18:01:45Z",
+      "side": 1,
+      "message": "Ok, that is what it is doing at the moment, more specifically:\n- No bits are coded in the bitstream to signal extended intra modes for interintra (only the plain intra mode is coded, as without ext-intra).\n- When ext-intra is enabled, the codec uses default parameters (set just below) for interintra. (These defaults should effectively mean falling back on the normal intra prediction?)",
+      "parentUuid": "c26bb568_4aa0136b",
+      "revId": "e99d729b8aad63fa71c4927aae43837e6960414d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
