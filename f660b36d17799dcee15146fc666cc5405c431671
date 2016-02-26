@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_d3f26a8d",
+        "filename": "vpx_dsp/ssim.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-02-26T21:42:46Z",
+      "side": 1,
+      "message": "What we ultimately have here is four ways through this block. 8, 10, 12, none of the above. If you add an assert in the none of the above path does the warning go away?",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 3
+      },
+      "revId": "f660b36d17799dcee15146fc666cc5405c431671",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
