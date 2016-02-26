@@ -82,7 +82,7 @@ double compute_hbd_vpxssim(const YV12_BUFFER_CONFIG *source,
                            const YV12_BUFFER_CONFIG *dest,
                            uint32_t in_bd, uint32_t bd) {
   double ssim, weight;
-  ssim = vpx_highbd_calc_ssim(source, dest, &weight, bd);
+  ssim = vpx_highbd_calc_ssim(source, dest, &weight, bd, in_bd);
   return 100 * pow(ssim / weight, 8.0);
 }
 
@@ -209,11 +209,11 @@ INSTANTIATE_TEST_CASE_P(
         MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim, 8, 10,
                          kSsim_thresh),
         MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim, 10, 10,
-                         kSsim_thresh),
+                         kPhvs_thresh),
         MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim, 8, 12,
                          kSsim_thresh),
         MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim, 12, 12,
-                         kSsim_thresh)));
+                         kPhvs_thresh)));
 INSTANTIATE_TEST_CASE_P(
     FASTSSIM, HBDMetricsTest,
     ::testing::Values(
