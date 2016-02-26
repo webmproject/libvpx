@@ -236,9 +236,11 @@ static INLINE int vp10_nmv_ctx(const uint8_t ref_mv_count,
   if (ref_mv_stack[0].weight > REF_CAT_LEVEL &&
       ref_mv_count > 0) {
     if (abs(ref_mv_stack[0].this_mv.as_mv.row -
-            ref_mv_stack[0].pred_mv.as_mv.row) < 8 &&
-        abs(ref_mv_stack[0].this_mv.as_mv.col -
-            ref_mv_stack[0].pred_mv.as_mv.col) < 8)
+             ref_mv_stack[0].pred_mv.as_mv.row) <= 4 &&
+         abs(ref_mv_stack[0].this_mv.as_mv.col -
+             ref_mv_stack[0].pred_mv.as_mv.col) <= 4)
+      return 2;
+    else
       return 1;
   }
   return 0;

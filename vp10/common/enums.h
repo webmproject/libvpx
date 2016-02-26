@@ -227,7 +227,7 @@ typedef enum {
 #define SKIP_CONTEXTS 3
 
 #if CONFIG_REF_MV
-#define NMV_CONTEXTS 2
+#define NMV_CONTEXTS 3
 
 #define NEWMV_MODE_CONTEXTS  7
 #define ZEROMV_MODE_CONTEXTS 2
