@@ -65,6 +65,9 @@ TEST_P(AltRefTest, MonotonicTimestamps) {
   EXPECT_GE(altref_count(), 1);
 }
 
+VP8_INSTANTIATE_TEST_CASE(AltRefTest,
+                          ::testing::Range(kLookAheadMin, kLookAheadMax));
+
 #endif  // CONFIG_VP8_ENCODER
 
 class AltRefForcedKeyTest
@@ -148,9 +151,6 @@ TEST_P(AltRefForcedKeyTest, ForcedFrameIsKey) {
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   }
 }
-
-VP8_INSTANTIATE_TEST_CASE(AltRefTest,
-                          ::testing::Range(kLookAheadMin, kLookAheadMax));
 
 VP8_INSTANTIATE_TEST_CASE(
     AltRefForcedKeyTest,
