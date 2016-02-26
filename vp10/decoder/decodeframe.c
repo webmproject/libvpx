@@ -741,7 +741,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
 
     InterpFilterParams filter_params =
         vp10_get_interp_filter_params(interp_filter);
-    int filter_size = filter_params.tap;
+    int filter_size = filter_params.taps;
 
     if (subpel_x ||
 #if CONFIG_EXT_INTERP

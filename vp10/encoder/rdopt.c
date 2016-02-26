@@ -4407,7 +4407,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #else
             this_mode == NEWMV &&
 #endif  // CONFIG_EXT_INTER
-            mbmi->interp_filter == EIGHTTAP) {
+            mbmi->interp_filter == EIGHTTAP_REGULAR) {
           // adjust src pointers
           mi_buf_shift(x, i);
           if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
@@ -5133,11 +5133,11 @@ static INTERP_FILTER predict_interp_filter(const VP10_COMP *cpi,
   }
   if (cm->interp_filter != BILINEAR) {
     if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
-      best_filter = EIGHTTAP;
+      best_filter = EIGHTTAP_REGULAR;
     }
 #if CONFIG_EXT_INTERP
     else if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE) {
-      best_filter = EIGHTTAP;
+      best_filter = EIGHTTAP_REGULAR;
     }
 #endif
   }
@@ -6775,7 +6775,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #endif  // CONFIG_EXT_INTRA
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
-    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
+    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP_REGULAR
                                                           : cm->interp_filter;
     mbmi->mv[0].as_int = mbmi->mv[1].as_int = 0;
 #if CONFIG_OBMC
@@ -7576,7 +7576,7 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   x->skip = 1;
 
   if (cm->interp_filter != BILINEAR) {
-    best_filter = EIGHTTAP;
+    best_filter = EIGHTTAP_REGULAR;
     if (cm->interp_filter == SWITCHABLE &&
 #if CONFIG_EXT_INTERP
         vp10_is_interp_needed(xd) &&
@@ -7919,7 +7919,7 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     mbmi->ref_frame[1] = second_ref_frame;
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
-    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
+    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP_REGULAR
                                                           : cm->interp_filter;
     x->skip = 0;
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
@@ -8003,9 +8003,9 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
       mbmi->tx_type = DCT_DCT;
 
       if (cm->interp_filter != BILINEAR) {
-        tmp_best_filter = EIGHTTAP;
+        tmp_best_filter = EIGHTTAP_REGULAR;
         if (x->source_variance < sf->disable_filter_search_var_thresh) {
-          tmp_best_filter = EIGHTTAP;
+          tmp_best_filter = EIGHTTAP_REGULAR;
         } else if (sf->adaptive_pred_interp_filter == 1 &&
                    ctx->pred_interp_filter < SWITCHABLE) {
           tmp_best_filter = ctx->pred_interp_filter;
@@ -8033,7 +8033,7 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                                               mi_row, mi_col);
 #if CONFIG_EXT_INTERP
             if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
-                mbmi->interp_filter != EIGHTTAP)  // invalid configuration
+                mbmi->interp_filter != EIGHTTAP_REGULAR)  // invalid config
               continue;
 #endif  // CONFIG_EXT_INTERP
             if (tmp_rd == INT64_MAX)
@@ -8105,8 +8105,8 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                                           mi_row, mi_col);
 #if CONFIG_EXT_INTERP
         if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
-            mbmi->interp_filter != EIGHTTAP) {
-          mbmi->interp_filter = EIGHTTAP;
+            mbmi->interp_filter != EIGHTTAP_REGULAR) {
+          mbmi->interp_filter = EIGHTTAP_REGULAR;
           tmp_rd = rd_pick_best_sub8x8_mode(cpi, x,
                    &x->mbmi_ext->ref_mvs[ref_frame][0],
                    second_ref, best_yrd, &rate, &rate_y,

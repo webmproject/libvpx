@@ -32,8 +32,9 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   { 0, 0, 0,   8, 120, 0, 0, 0 }
 };
 
+#if (CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 5) || FILTER_12TAP
 DECLARE_ALIGNED(16, static const int16_t,
-                sub_pel_filters_12sharp[16][12]) = {
+                sub_pel_filters_12sharp[SUBPEL_SHIFTS][12]) = {
   // intfilt 0.8
   {0,   0,   0,   0,   0, 128,   0,   0,   0,   0,   0, 0},
   {0,   1,  -1,   3,  -7, 127,   8,  -4,   2,  -1,   0, 0},
@@ -52,10 +53,11 @@ DECLARE_ALIGNED(16, static const int16_t,
   {0,   1,  -2,   4,  -8,  18, 124, -12,   5,  -3,   1, 0},
   {0,   0,  -1,   2,  -4,   8, 127,  -7,   3,  -1,   1, 0},
 };
+#endif
 
+#if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(256, static const InterpKernel,
                 sub_pel_filters_8[SUBPEL_SHIFTS]) = {
-#if CONFIG_EXT_INTERP
   // intfilt 0.575
   {0,   0,   0, 128,   0,   0,   0, 0},
   {0,   1,  -5, 126,   8,  -3,   1, 0},
@@ -73,30 +75,10 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   {0,   3,  -9,  27, 118, -14,   4, -1},
   {-1,   2,  -6,  18, 123, -10,   3, -1},
   {0,   1,  -3,   8, 126,  -5,   1, 0},
-#else
-  // Lagrangian interpolation filter
-  { 0,   0,   0, 128,   0,   0,   0,  0},
-  { 0,   1,  -5, 126,   8,  -3,   1,  0},
-  { -1,   3, -10, 122,  18,  -6,   2,  0},
-  { -1,   4, -13, 118,  27,  -9,   3, -1},
-  { -1,   4, -16, 112,  37, -11,   4, -1},
-  { -1,   5, -18, 105,  48, -14,   4, -1},
-  { -1,   5, -19,  97,  58, -16,   5, -1},
-  { -1,   6, -19,  88,  68, -18,   5, -1},
-  { -1,   6, -19,  78,  78, -19,   6, -1},
-  { -1,   5, -18,  68,  88, -19,   6, -1},
-  { -1,   5, -16,  58,  97, -19,   5, -1},
-  { -1,   4, -14,  48, 105, -18,   5, -1},
-  { -1,   4, -11,  37, 112, -16,   4, -1},
-  { -1,   3,  -9,  27, 118, -13,   4, -1},
-  { 0,   2,  -6,  18, 122, -10,   3, -1},
-  { 0,   1,  -3,   8, 126,  -5,   1,  0}
-#endif  // CONFIG_EXT_INTERP
 };
 
 DECLARE_ALIGNED(256, static const InterpKernel,
                 sub_pel_filters_8sharp[SUBPEL_SHIFTS]) = {
-#if CONFIG_EXT_INTERP
   // intfilt 0.8
   {0,   0,   0, 128,   0,   0,   0, 0},
   {-1,   2,  -6, 127,   9,  -4,   2, -1},
@@ -114,29 +96,9 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   {-2,   5, -11,  28, 119, -16,   7, -2},
   {-2,   4,  -7,  18, 124, -12,   5, -2},
   {-1,   2,  -4,   9, 127,  -6,   2, -1},
-#else
-  // DCT based filter
-  {0,   0,   0, 128,   0,   0,   0, 0},
-  {-1,   3,  -7, 127,   8,  -3,   1, 0},
-  {-2,   5, -13, 125,  17,  -6,   3, -1},
-  {-3,   7, -17, 121,  27, -10,   5, -2},
-  {-4,   9, -20, 115,  37, -13,   6, -2},
-  {-4,  10, -23, 108,  48, -16,   8, -3},
-  {-4,  10, -24, 100,  59, -19,   9, -3},
-  {-4,  11, -24,  90,  70, -21,  10, -4},
-  {-4,  11, -23,  80,  80, -23,  11, -4},
-  {-4,  10, -21,  70,  90, -24,  11, -4},
-  {-3,   9, -19,  59, 100, -24,  10, -4},
-  {-3,   8, -16,  48, 108, -23,  10, -4},
-  {-2,   6, -13,  37, 115, -20,   9, -4},
-  {-2,   5, -10,  27, 121, -17,   7, -3},
-  {-1,   3,  -6,  17, 125, -13,   5, -2},
-  {0,   1,  -3,   8, 127,  -7,   3, -1}
-#endif  // CONFIG_EXT_INTERP
 };
 
-#if CONFIG_EXT_INTERP && (SWITCHABLE_FILTERS == 4 || SWITCHABLE_FILTERS == 5)
-
+#if SWITCHABLE_FILTERS >= 4
 DECLARE_ALIGNED(256, static const InterpKernel,
                 sub_pel_filters_8smooth2[SUBPEL_SHIFTS]) = {
 // freqmultiplier = 0.35
@@ -178,7 +140,56 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   {0,   2, -12,  37,  94,  14,  -9, 2},
   {0,   2, -11,  31,  95,  19, -10, 2},
 };
-#else
+#endif  // SWITCHABLE_FILTERS >= 4
+
+#if SWITCHABLE_FILTERS == 5
+// Once FILTER 12TAP is resolved move the sub_pel_filters_12sharp
+// filter here.
+#endif
+
+#else  // CONFIG_EXT_INTERP
+
+DECLARE_ALIGNED(256, static const InterpKernel,
+                sub_pel_filters_8[SUBPEL_SHIFTS]) = {
+  // Lagrangian interpolation filter
+  { 0,   0,   0, 128,   0,   0,   0,  0},
+  { 0,   1,  -5, 126,   8,  -3,   1,  0},
+  { -1,   3, -10, 122,  18,  -6,   2,  0},
+  { -1,   4, -13, 118,  27,  -9,   3, -1},
+  { -1,   4, -16, 112,  37, -11,   4, -1},
+  { -1,   5, -18, 105,  48, -14,   4, -1},
+  { -1,   5, -19,  97,  58, -16,   5, -1},
+  { -1,   6, -19,  88,  68, -18,   5, -1},
+  { -1,   6, -19,  78,  78, -19,   6, -1},
+  { -1,   5, -18,  68,  88, -19,   6, -1},
+  { -1,   5, -16,  58,  97, -19,   5, -1},
+  { -1,   4, -14,  48, 105, -18,   5, -1},
+  { -1,   4, -11,  37, 112, -16,   4, -1},
+  { -1,   3,  -9,  27, 118, -13,   4, -1},
+  { 0,   2,  -6,  18, 122, -10,   3, -1},
+  { 0,   1,  -3,   8, 126,  -5,   1,  0}
+};
+
+DECLARE_ALIGNED(256, static const InterpKernel,
+                sub_pel_filters_8sharp[SUBPEL_SHIFTS]) = {
+  // DCT based filter
+  {0,   0,   0, 128,   0,   0,   0, 0},
+  {-1,   3,  -7, 127,   8,  -3,   1, 0},
+  {-2,   5, -13, 125,  17,  -6,   3, -1},
+  {-3,   7, -17, 121,  27, -10,   5, -2},
+  {-4,   9, -20, 115,  37, -13,   6, -2},
+  {-4,  10, -23, 108,  48, -16,   8, -3},
+  {-4,  10, -24, 100,  59, -19,   9, -3},
+  {-4,  11, -24,  90,  70, -21,  10, -4},
+  {-4,  11, -23,  80,  80, -23,  11, -4},
+  {-4,  10, -21,  70,  90, -24,  11, -4},
+  {-3,   9, -19,  59, 100, -24,  10, -4},
+  {-3,   8, -16,  48, 108, -23,  10, -4},
+  {-2,   6, -13,  37, 115, -20,   9, -4},
+  {-2,   5, -10,  27, 121, -17,   7, -3},
+  {-1,   3,  -6,  17, 125, -13,   5, -2},
+  {0,   1,  -3,   8, 127,  -7,   3, -1}
+};
 
 DECLARE_ALIGNED(256, static const InterpKernel,
                 sub_pel_filters_8smooth[SUBPEL_SHIFTS]) = {
@@ -202,41 +213,38 @@ DECLARE_ALIGNED(256, static const InterpKernel,
 };
 #endif  // CONFIG_EXT_INTERP
 
-const InterpKernel *vp10_filter_kernels[SWITCHABLE_FILTERS + 1] = {
-  sub_pel_filters_8,
-  sub_pel_filters_8smooth,
-  sub_pel_filters_8sharp,
-#if CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
-  sub_pel_filters_8smooth2,
-#elif CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 5
-  sub_pel_filters_8smooth2,
-  (const InterpKernel*)sub_pel_filters_12sharp,
-#endif
-  bilinear_filters
-};
-
 #if CONFIG_EXT_INTRA
 const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS] = {
-    bilinear_filters,         // INTRA_FILTER_LINEAR
-    sub_pel_filters_8,        // INTRA_FILTER_8TAP
-    sub_pel_filters_8sharp,   // INTRA_FILTER_8TAP_SHARP
-    sub_pel_filters_8smooth,  // INTRA_FILTER_8TAP_SMOOTH
+  bilinear_filters,         // INTRA_FILTER_LINEAR
+  sub_pel_filters_8,        // INTRA_FILTER_8TAP
+  sub_pel_filters_8sharp,   // INTRA_FILTER_8TAP_SHARP
+  sub_pel_filters_8smooth,  // INTRA_FILTER_8TAP_SMOOTH
 };
 #endif  // CONFIG_EXT_INTRA
 
+#if CONFIG_EXT_INTERP
 static const InterpFilterParams
 vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
   {(const int16_t*)sub_pel_filters_8, SUBPEL_TAPS, SUBPEL_SHIFTS},
   {(const int16_t*)sub_pel_filters_8smooth, SUBPEL_TAPS, SUBPEL_SHIFTS},
   {(const int16_t*)sub_pel_filters_8sharp, SUBPEL_TAPS, SUBPEL_SHIFTS},
-#if CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
+#if SWITCHABLE_FILTERS >= 4
   {(const int16_t*)sub_pel_filters_8smooth2, SUBPEL_TAPS, SUBPEL_SHIFTS},
-#elif CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 5
-  {(const int16_t*)sub_pel_filters_8smooth2, SUBPEL_TAPS, SUBPEL_SHIFTS},
+#endif
+#if SWITCHABLE_FILTERS == 5
   {(const int16_t*)sub_pel_filters_12sharp, 12, SUBPEL_SHIFTS},
 #endif
   {(const int16_t*)bilinear_filters, SUBPEL_TAPS, SUBPEL_SHIFTS}
 };
+#else
+static const InterpFilterParams
+vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
+  {(const int16_t*)sub_pel_filters_8, SUBPEL_TAPS, SUBPEL_SHIFTS},
+  {(const int16_t*)sub_pel_filters_8smooth, SUBPEL_TAPS, SUBPEL_SHIFTS},
+  {(const int16_t*)sub_pel_filters_8sharp, SUBPEL_TAPS, SUBPEL_SHIFTS},
+  {(const int16_t*)bilinear_filters, SUBPEL_TAPS, SUBPEL_SHIFTS}
+};
+#endif  // CONFIG_EXT_INTERP
 
 #if FILTER_12TAP
 static const InterpFilterParams vp10_interp_filter_12tap = {
@@ -251,4 +259,10 @@ InterpFilterParams vp10_get_interp_filter_params(
     return vp10_interp_filter_12tap;
 #endif
   return vp10_interp_filter_params_list[interp_filter];
+}
+
+const int16_t *vp10_get_interp_filter_kernel(
+    const INTERP_FILTER interp_filter) {
+  return (const int16_t*)
+      vp10_interp_filter_params_list[interp_filter].filter_ptr;
 }

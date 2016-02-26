@@ -326,8 +326,9 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
         }
       } else {
         if (!flags[shift]) {
+          const int16_t *filter = vp10_intra_filter_kernels[filter_type][shift];
           vpx_convolve8_horiz(src + pad_size, 2 * bs, buf[shift], 2 * bs,
-                              vp10_intra_filter_kernels[filter_type][shift], 16,
+                              filter, 16,
                               NULL, 16, 2 * bs, 2 * bs < 16 ? 2 : 1);
           flags[shift] = 1;
         }
@@ -457,9 +458,10 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
         }
       } else {
         if (!flags[shift]) {
+          const int16_t *filter = vp10_intra_filter_kernels[filter_type][shift];
           vpx_convolve8_vert(src + 4 * pad_size, 4,
                              buf[0] + 4 * shift, 4 * SUBPEL_SHIFTS, NULL, 16,
-                             vp10_intra_filter_kernels[filter_type][shift], 16,
+                             filter, 16,
                              2 * bs < 16 ? 4 : 4, 2 * bs);
           flags[shift] = 1;
         }

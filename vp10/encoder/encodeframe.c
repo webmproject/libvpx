@@ -4005,22 +4005,22 @@ static INTERP_FILTER get_interp_filter(
 #if CONFIG_EXT_INTERP
   if (!is_alt_ref &&
       threshes[EIGHTTAP_SMOOTH2] > threshes[EIGHTTAP_SMOOTH] &&
-      threshes[EIGHTTAP_SMOOTH2] > threshes[EIGHTTAP] &&
-      threshes[EIGHTTAP_SMOOTH2] > threshes[EIGHTTAP_SHARP] &&
+      threshes[EIGHTTAP_SMOOTH2] > threshes[EIGHTTAP_REGULAR] &&
+      threshes[EIGHTTAP_SMOOTH2] > threshes[MULTITAP_SHARP] &&
       threshes[EIGHTTAP_SMOOTH2] > threshes[SWITCHABLE - 1]) {
     return EIGHTTAP_SMOOTH2;
   }
 #endif  // CONFIG_EXT_INTERP
   if (!is_alt_ref &&
-      threshes[EIGHTTAP_SMOOTH] > threshes[EIGHTTAP] &&
-      threshes[EIGHTTAP_SMOOTH] > threshes[EIGHTTAP_SHARP] &&
+      threshes[EIGHTTAP_SMOOTH] > threshes[EIGHTTAP_REGULAR] &&
+      threshes[EIGHTTAP_SMOOTH] > threshes[MULTITAP_SHARP] &&
       threshes[EIGHTTAP_SMOOTH] > threshes[SWITCHABLE - 1]) {
     return EIGHTTAP_SMOOTH;
-  } else if (threshes[EIGHTTAP_SHARP] > threshes[EIGHTTAP] &&
-             threshes[EIGHTTAP_SHARP] > threshes[SWITCHABLE - 1]) {
-    return EIGHTTAP_SHARP;
-  } else if (threshes[EIGHTTAP] > threshes[SWITCHABLE - 1]) {
-    return EIGHTTAP;
+  } else if (threshes[MULTITAP_SHARP] > threshes[EIGHTTAP_REGULAR] &&
+             threshes[MULTITAP_SHARP] > threshes[SWITCHABLE - 1]) {
+    return MULTITAP_SHARP;
+  } else if (threshes[EIGHTTAP_REGULAR] > threshes[SWITCHABLE - 1]) {
+    return EIGHTTAP_REGULAR;
   } else {
     return SWITCHABLE;
   }

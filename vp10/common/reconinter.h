@@ -30,23 +30,26 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
                                    int xs, int ys) {
   InterpFilterParams interp_filter_params =
       vp10_get_interp_filter_params(interp_filter);
-  if (interp_filter_params.tap == SUBPEL_TAPS) {
-    const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
+  if (interp_filter_params.taps == SUBPEL_TAPS) {
+    const int16_t *kernel_x =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_x);
+    const int16_t *kernel_y =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_y);
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
     if (IsInterpolatingFilter(interp_filter)) {
       // Interpolating filter
       sf->predict[subpel_x != 0][subpel_y != 0][ref](
           src, src_stride, dst, dst_stride,
-          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+          kernel_x, xs, kernel_y, ys, w, h);
     } else {
       sf->predict_ni[subpel_x != 0][subpel_y != 0][ref](
           src, src_stride, dst, dst_stride,
-          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+          kernel_x, xs, kernel_y, ys, w, h);
     }
 #else
     sf->predict[subpel_x != 0][subpel_y != 0][ref](
         src, src_stride, dst, dst_stride,
-        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
+        kernel_x, xs, kernel_y, ys, w, h);
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   } else {
     // ref > 0 means this is the second reference frame
@@ -69,23 +72,26 @@ static INLINE void high_inter_predictor(const uint8_t *src, int src_stride,
                                         int xs, int ys, int bd) {
   InterpFilterParams interp_filter_params =
       vp10_get_interp_filter_params(interp_filter);
-  if (interp_filter_params.tap == SUBPEL_TAPS) {
-    const InterpKernel *kernel = vp10_filter_kernels[interp_filter];
+  if (interp_filter_params.taps == SUBPEL_TAPS) {
+    const int16_t *kernel_x =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_x);
+    const int16_t *kernel_y =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_y);
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
     if (IsInterpolatingFilter(interp_filter)) {
       // Interpolating filter
       sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
           src, src_stride, dst, dst_stride,
-          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+          kernel_x, xs, kernel_y, ys, w, h, bd);
     } else {
       sf->highbd_predict_ni[subpel_x != 0][subpel_y != 0][ref](
           src, src_stride, dst, dst_stride,
-          kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+          kernel_x, xs, kernel_y, ys, w, h, bd);
     }
 #else
     sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
         src, src_stride, dst, dst_stride,
-        kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+        kernel_x, xs, kernel_y, ys, w, h, bd);
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   } else {
     // ref > 0 means this is the second reference frame
