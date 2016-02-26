@@ -351,7 +351,9 @@ static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
 #endif  // CONFIG_SUPERTX
 
 #if CONFIG_EXT_TX
-#define ALLOW_INTRA_EXT_TX 1
+#define ALLOW_INTRA_EXT_TX       1
+// whether masked transforms are used for 32X32
+#define USE_MSKTX_FOR_32X32      1
 
 static const int num_ext_tx_set_inter[EXT_TX_SETS_INTER] = {
   1, 17, 10, 2
@@ -360,23 +362,36 @@ static const int num_ext_tx_set_intra[EXT_TX_SETS_INTRA] = {
   1, 17, 10
 };
 
-#define USE_IDTX_FOR_32X32 0
+#if EXT_TX_SIZES == 4
+static INLINE int get_ext_tx_set(TX_SIZE tx_size, BLOCK_SIZE bs,
+                                 int is_inter) {
+  if (tx_size > TX_32X32 || bs < BLOCK_8X8) return 0;
+  if (tx_size == TX_32X32)
+    return is_inter ? 3 - 2 * USE_MSKTX_FOR_32X32 : 0;
+  return ((is_inter || tx_size < TX_16X16) ? 1 : 2);
+}
+
+static const int use_intra_ext_tx_for_txsize[EXT_TX_SETS_INTRA][TX_SIZES] = {
+  { 0, 0, 0, 0, },  // unused
+  { 1, 1, 0, 0, },
+  { 0, 0, 1, 0, },
+};
+
+static const int use_inter_ext_tx_for_txsize[EXT_TX_SETS_INTER][TX_SIZES] = {
+  { 0, 0, 0, 0, },  // unused
+  { 1, 1, 1, USE_MSKTX_FOR_32X32, },
+  { 0, 0, 0, 0, },
+  { 0, 0, 0, (!USE_MSKTX_FOR_32X32), },
+};
+
+#else  // EXT_TX_SIZES == 4
+
 static INLINE int get_ext_tx_set(TX_SIZE tx_size, BLOCK_SIZE bs,
                                  int is_inter) {
   (void) is_inter;
   if (tx_size > TX_32X32 || bs < BLOCK_8X8) return 0;
-#if USE_IDTX_FOR_32X32
-  if (tx_size == TX_32X32) return is_inter ? 3 : 0;
-#else
   if (tx_size == TX_32X32) return 0;
-#endif
   return tx_size == TX_16X16 ? 2 : 1;
-}
-
-static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
-                                   int is_inter) {
-  const int set = get_ext_tx_set(tx_size, bs, is_inter);
-  return is_inter ? num_ext_tx_set_inter[set] : num_ext_tx_set_intra[set];
 }
 
 static const int use_intra_ext_tx_for_txsize[EXT_TX_SETS_INTRA][TX_SIZES] = {
@@ -389,8 +404,9 @@ static const int use_inter_ext_tx_for_txsize[EXT_TX_SETS_INTER][TX_SIZES] = {
   { 0, 0, 0, 0, },  // unused
   { 1, 1, 0, 0, },
   { 0, 0, 1, 0, },
-  { 0, 0, 0, USE_IDTX_FOR_32X32, },
+  { 0, 0, 0, 0, },
 };
+#endif  // EXT_TX_SIZES == 4
 
 // Transform types used in each intra set
 static const int ext_tx_used_intra[EXT_TX_SETS_INTRA][TX_TYPES] = {
@@ -406,6 +422,12 @@ static const int ext_tx_used_inter[EXT_TX_SETS_INTER][TX_TYPES] = {
   { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, },
   { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
 };
+
+static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
+                                   int is_inter) {
+  const int set = get_ext_tx_set(tx_size, bs, is_inter);
+  return is_inter ? num_ext_tx_set_inter[set] : num_ext_tx_set_intra[set];
+}
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_EXT_INTRA
@@ -504,7 +526,7 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
 #endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_EXT_TX
-#if USE_IDTX_FOR_32X32
+#if EXT_TX_SIZES == 4
   if (xd->lossless[mbmi->segment_id] || tx_size > TX_32X32 ||
       (tx_size >= TX_32X32 && !is_inter_block(mbmi)))
 #else
