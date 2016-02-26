@@ -18,6 +18,7 @@ LIBVPX_TEST_SRCS-yes += video_source.h
 LIBVPX_TEST_SRCS-yes                   += ../md5_utils.h ../md5_utils.c
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ivf_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += ../y4minput.h ../y4minput.c
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += altref_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += aq_segment_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += datarate_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += encode_api_test.cc
@@ -27,7 +28,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += resize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += y4m_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += yuv_video_source.h
 
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += altref_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += config_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += cq_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
