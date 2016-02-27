@@ -33,7 +33,7 @@ typedef void filter8_1dfunction (
                                     int w, int h) { \
   assert(filter[3] != 128); \
   assert(step_q4 == 16); \
-  if (filter[0] || filter[1] || filter[2]) { \
+  if (filter[0] | filter[1] | filter[2]) { \
     while (w >= 16) { \
       vpx_filter_block1d16_##dir##8_##avg##opt(src_start, \
                                                src_stride, \
@@ -45,27 +45,20 @@ typedef void filter8_1dfunction (
       dst += 16; \
       w -= 16; \
     } \
-    while (w >= 8) { \
+    if (w == 8) { \
       vpx_filter_block1d8_##dir##8_##avg##opt(src_start, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 8; \
-      dst += 8; \
-      w -= 8; \
-    } \
-    while (w >= 4) { \
+    } else if (w == 4) { \
       vpx_filter_block1d4_##dir##8_##avg##opt(src_start, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 4; \
-      dst += 4; \
-      w -= 4; \
     } \
   } else { \
     while (w >= 16) { \
@@ -79,27 +72,20 @@ typedef void filter8_1dfunction (
       dst += 16; \
       w -= 16; \
     } \
-    while (w >= 8) { \
+    if (w == 8) { \
       vpx_filter_block1d8_##dir##2_##avg##opt(src, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 8; \
-      dst += 8; \
-      w -= 8; \
-    } \
-    while (w >= 4) { \
+    } else if (w == 4) { \
       vpx_filter_block1d4_##dir##2_##avg##opt(src, \
                                               src_stride, \
                                               dst, \
                                               dst_stride, \
                                               h, \
                                               filter); \
-      src += 4; \
-      dst += 4; \
-      w -= 4; \
     } \
   } \
 }
@@ -116,8 +102,7 @@ void vpx_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
   assert(h <= 64); \
   assert(x_step_q4 == 16); \
   assert(y_step_q4 == 16); \
-  if (filter_x[0] || filter_x[1] || filter_x[2]|| \
-      filter_y[0] || filter_y[1] || filter_y[2]) { \
+  if (filter_x[0] | filter_x[1] | filter_x[2]) { \
     DECLARE_ALIGNED(16, uint8_t, fdata2[64 * 71]); \
     vpx_convolve8_horiz_##opt(src - 3 * src_stride, src_stride, fdata2, 64, \
                               filter_x, x_step_q4, filter_y, y_step_q4, \
@@ -161,7 +146,7 @@ typedef void highbd_filter8_1dfunction (
   if (step_q4 == 16 && filter[3] != 128) { \
     uint16_t *src = CONVERT_TO_SHORTPTR(src8); \
     uint16_t *dst = CONVERT_TO_SHORTPTR(dst8); \
-    if (filter[0] || filter[1] || filter[2]) { \
+    if (filter[0] | filter[1] | filter[2]) { \
       while (w >= 16) { \
         vpx_highbd_filter_block1d16_##dir##8_##avg##opt(src_start, \
                                                         src_stride, \
@@ -253,8 +238,7 @@ void vpx_highbd_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
   assert(w <= 64); \
   assert(h <= 64); \
   if (x_step_q4 == 16 && y_step_q4 == 16) { \
-    if (filter_x[0] || filter_x[1] || filter_x[2] || filter_x[3] == 128 || \
-        filter_y[0] || filter_y[1] || filter_y[2] || filter_y[3] == 128) { \
+    if ((filter_x[0] | filter_x[1] | filter_x[2]) || filter_x[3] == 128) { \
       DECLARE_ALIGNED(16, uint16_t, fdata2[64 * 71]); \
       vpx_highbd_convolve8_horiz_##opt(src - 3 * src_stride, src_stride, \
                                        CONVERT_TO_BYTEPTR(fdata2), 64, \
