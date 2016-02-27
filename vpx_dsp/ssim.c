@@ -88,6 +88,9 @@ static double similarity(uint32_t sum_s, uint32_t sum_r,
   } else if (bd == 12) {
     c1 = (cc1_12 * count * count) >> 12;
     c2 = (cc2_12 * count * count) >> 12;
+  } else {
+    c1 = c2 = 0;
+    assert(0);
   }
 
   ssim_n = (2 * sum_s * sum_r + c1) * ((int64_t) 2 * count * sum_sxr -
