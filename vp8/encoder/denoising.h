@@ -18,8 +18,8 @@
 extern "C" {
 #endif
 
-#define SUM_DIFF_THRESHOLD (16 * 16 * 2)
-#define SUM_DIFF_THRESHOLD_HIGH (600)  // ~(16 * 16 * 1.5)
+#define SUM_DIFF_THRESHOLD 384
+#define SUM_DIFF_THRESHOLD_HIGH 512
 #define MOTION_MAGNITUDE_THRESHOLD (8*3)
 
 #define SUM_DIFF_THRESHOLD_UV (96)   // (8 * 8 * 1.5)
