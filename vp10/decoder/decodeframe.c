@@ -493,6 +493,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   return eob;
 }
 
+#if (CONFIG_SUPERTX || CONFIG_OBMC)
 static void build_mc_border(const uint8_t *src, int src_stride,
                             uint8_t *dst, int dst_stride,
                             int x, int y, int b_w, int b_h, int w, int h) {
@@ -581,9 +582,7 @@ static void high_build_mc_border(const uint8_t *src8, int src_stride,
       ref_row += src_stride;
   } while (--b_h);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGHBITDEPTH
 static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                                int x0, int y0, int b_w, int b_h,
                                int frame_width, int frame_height,
@@ -616,9 +615,7 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                     subpel_y, sf, w, h, ref, interp_filter, xs, ys);
   }
 }
-
 #else
-
 static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                                int x0, int y0, int b_w, int b_h,
                                int frame_width, int frame_height,
@@ -639,7 +636,6 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                   subpel_y, sf, w, h, ref, interp_filter, xs, ys);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
 static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                                        int plane, int bw, int bh, int x,
                                        int y, int w, int h, int mi_x, int mi_y,
@@ -883,6 +879,7 @@ static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
                                      sb_type);
 #endif  // CONFIG_EXT_INTER
 }
+#endif  // (CONFIG_SUPERTX || CONFIG_OBMC)
 
 #if CONFIG_SUPERTX
 static void dec_build_inter_predictors_sb_sub8x8(VP10Decoder *const pbi,
@@ -1868,7 +1865,8 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       }
     } else {
       // Prediction
-      dec_build_inter_predictors_sb(pbi, xd, mi_row, mi_col);
+      vp10_build_inter_predictors_sb(xd, mi_row, mi_col,
+                                     VPXMAX(bsize, BLOCK_8X8));
 #if CONFIG_OBMC
       if (mbmi->obmc) {
 #if CONFIG_VP9_HIGHBITDEPTH

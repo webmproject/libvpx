@@ -395,6 +395,8 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
 
   swap_frame_buffers(pbi);
 
+  vpx_extend_frame_inner_borders(cm->frame_to_show);
+
   vpx_clear_system_state();
 
   if (!cm->show_existing_frame) {
