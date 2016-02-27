@@ -572,7 +572,6 @@ cglobal filter_block1d%2_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
 %macro SUBPIX_VFILTER16 1
 cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
                              src, sstride, dst, dstride, height, filter
-
     mova          m4, [filterq]
     SETUP_LOCAL_VARS
 %if ARCH_X86_64
@@ -630,13 +629,10 @@ cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     movh          m5, [src1q + sstride6q + 8]    ;H
     psraw         m0, 7
     punpcklbw     m2, m5                         ;G H
-    packuswb      m0, m0
     pmaddubsw     m2, k6k7
 %ifidn %1, v8_avg
-    movh          m4, [dstq]
-    pavgb         m0, m4
+    mova          m4, [dstq]
 %endif
-    movh      [dstq], m0
     mova          m6, m7
     pmaxsw        m7, m1
     pminsw        m1, m6
@@ -645,15 +641,14 @@ cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     paddsw        m3, m7
     paddsw        m3, krd
     psraw         m3, 7
-    packuswb      m3, m3
+    packuswb      m0, m3
 
     add         srcq, sstrideq
     add        src1q, sstrideq
 %ifidn %1, v8_avg
-    movh          m1, [dstq + 8]
-    pavgb         m3, m1
+    pavgb         m0, m4
 %endif
-    movh  [dstq + 8], m3
+    mova      [dstq], m0
     add         dstq, dst_stride
     dec      heightd
     jnz        .loop
