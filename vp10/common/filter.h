@@ -41,10 +41,9 @@ extern "C" {
 #define SWITCHABLE_FILTERS  3 /* Number of switchable filters */
 #endif  // CONFIG_EXT_INTERP
 
-// TODO(jingning): Align the experiment flags and clean this up.
-#define FILTER_12TAP (!CONFIG_EXT_INTERP)
-#if FILTER_12TAP
-#define SHARP_FILTER_12TAP (SWITCHABLE_FILTERS + 1)
+#define USE_TEMPORALFILTER_12TAP 1
+#if USE_TEMPORALFILTER_12TAP
+#define TEMPORALFILTER_12TAP (SWITCHABLE_FILTERS + 1)
 #endif
 
 // The codec can operate in four possible inter prediction filter mode:

@@ -32,9 +32,9 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   { 0, 0, 0,   8, 120, 0, 0, 0 }
 };
 
-#if (CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 5) || FILTER_12TAP
+#if USE_TEMPORALFILTER_12TAP
 DECLARE_ALIGNED(16, static const int16_t,
-                sub_pel_filters_12sharp[SUBPEL_SHIFTS][12]) = {
+                sub_pel_filters_temporalfilter_12[SUBPEL_SHIFTS][12]) = {
   // intfilt 0.8
   {0,   0,   0,   0,   0, 128,   0,   0,   0,   0,   0, 0},
   {0,   1,  -1,   3,  -7, 127,   8,  -4,   2,  -1,   0, 0},
@@ -53,7 +53,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   {0,   1,  -2,   4,  -8,  18, 124, -12,   5,  -3,   1, 0},
   {0,   0,  -1,   2,  -4,   8, 127,  -7,   3,  -1,   1, 0},
 };
-#endif
+#endif  // USE_TEMPORALFILTER_12TAP
 
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(256, static const InterpKernel,
@@ -143,8 +143,26 @@ DECLARE_ALIGNED(256, static const InterpKernel,
 #endif  // SWITCHABLE_FILTERS >= 4
 
 #if SWITCHABLE_FILTERS == 5
-// Once FILTER 12TAP is resolved move the sub_pel_filters_12sharp
-// filter here.
+DECLARE_ALIGNED(16, static const int16_t,
+                sub_pel_filters_12sharp[SUBPEL_SHIFTS][12]) = {
+  // intfilt 0.8
+  {0,   0,   0,   0,   0, 128,   0,   0,   0,   0,   0, 0},
+  {0,   1,  -1,   3,  -7, 127,   8,  -4,   2,  -1,   0, 0},
+  {0,   1,  -3,   5, -12, 124,  18,  -8,   4,  -2,   1, 0},
+  {-1,   2,  -4,   8, -17, 120,  28, -11,   6,  -3,   1, -1},
+  {-1,   2,  -4,  10, -21, 114,  38, -15,   8,  -4,   2, -1},
+  {-1,   3,  -5,  11, -23, 107,  49, -18,   9,  -5,   2, -1},
+  {-1,   3,  -6,  12, -25,  99,  60, -21,  11,  -6,   3, -1},
+  {-1,   3,  -6,  12, -25,  90,  70, -23,  12,  -6,   3, -1},
+  {-1,   3,  -6,  12, -24,  80,  80, -24,  12,  -6,   3, -1},
+  {-1,   3,  -6,  12, -23,  70,  90, -25,  12,  -6,   3, -1},
+  {-1,   3,  -6,  11, -21,  60,  99, -25,  12,  -6,   3, -1},
+  {-1,   2,  -5,   9, -18,  49, 107, -23,  11,  -5,   3, -1},
+  {-1,   2,  -4,   8, -15,  38, 114, -21,  10,  -4,   2, -1},
+  {-1,   1,  -3,   6, -11,  28, 120, -17,   8,  -4,   2, -1},
+  {0,   1,  -2,   4,  -8,  18, 124, -12,   5,  -3,   1, 0},
+  {0,   0,  -1,   2,  -4,   8, 127,  -7,   3,  -1,   1, 0},
+};
 #endif
 
 #else  // CONFIG_EXT_INTERP
@@ -246,23 +264,27 @@ vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
 };
 #endif  // CONFIG_EXT_INTERP
 
-#if FILTER_12TAP
-static const InterpFilterParams vp10_interp_filter_12tap = {
-    (const int16_t*)sub_pel_filters_12sharp, 12, SUBPEL_SHIFTS
+#if USE_TEMPORALFILTER_12TAP
+static const InterpFilterParams vp10_interp_temporalfilter_12tap = {
+    (const int16_t*)sub_pel_filters_temporalfilter_12, 12, SUBPEL_SHIFTS
 };
-#endif
+#endif  // USE_TEMPORALFILTER_12TAP
 
 InterpFilterParams vp10_get_interp_filter_params(
     const INTERP_FILTER interp_filter) {
-#if FILTER_12TAP
-  if (interp_filter == SHARP_FILTER_12TAP)
-    return vp10_interp_filter_12tap;
-#endif
+#if USE_TEMPORALFILTER_12TAP
+  if (interp_filter == TEMPORALFILTER_12TAP)
+    return vp10_interp_temporalfilter_12tap;
+#endif  // USE_TEMPORALFILTER_12TAP
   return vp10_interp_filter_params_list[interp_filter];
 }
 
 const int16_t *vp10_get_interp_filter_kernel(
     const INTERP_FILTER interp_filter) {
+#if USE_TEMPORALFILTER_12TAP
+  if (interp_filter == TEMPORALFILTER_12TAP)
+    return vp10_interp_temporalfilter_12tap.filter_ptr;
+#endif  // USE_TEMPORALFILTER_12TAP
   return (const int16_t*)
       vp10_interp_filter_params_list[interp_filter].filter_ptr;
 }

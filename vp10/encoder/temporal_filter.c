@@ -48,15 +48,12 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   enum mv_precision mv_precision_uv;
   int uv_stride;
 
-#if FILTER_12TAP
-  const INTERP_FILTER interp_filter = SHARP_FILTER_12TAP;
-  (void)xd;
-#elif SWITCHABLE_FILTERS == 5
-  const INTERP_FILTER interp_filter = EIGHTTAP_SHARP2;
+#if USE_TEMPORALFILTER_12TAP
+  const INTERP_FILTER interp_filter = TEMPORALFILTER_12TAP;
   (void)xd;
 #else
   const INTERP_FILTER interp_filter = xd->mi[0]->mbmi.interp_filter;
-#endif
+#endif  // USE_TEMPORALFILTER_12TAP
 
   if (uv_block_width == 8) {
     uv_stride = (stride + 1) >> 1;
@@ -98,28 +95,28 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   vp10_build_inter_predictor(y_mb_ptr, stride,
-                            &pred[0], 16,
-                            &mv,
-                            scale,
-                            16, 16,
-                            which_mv,
-                            interp_filter, MV_PRECISION_Q3, x, y);
+                             &pred[0], 16,
+                             &mv,
+                             scale,
+                             16, 16,
+                             which_mv,
+                             interp_filter, MV_PRECISION_Q3, x, y);
 
   vp10_build_inter_predictor(u_mb_ptr, uv_stride,
-                            &pred[256], uv_block_width,
-                            &mv,
-                            scale,
-                            uv_block_width, uv_block_height,
-                            which_mv,
-                            interp_filter, mv_precision_uv, x, y);
+                             &pred[256], uv_block_width,
+                             &mv,
+                             scale,
+                             uv_block_width, uv_block_height,
+                             which_mv,
+                             interp_filter, mv_precision_uv, x, y);
 
   vp10_build_inter_predictor(v_mb_ptr, uv_stride,
-                            &pred[512], uv_block_width,
-                            &mv,
-                            scale,
-                            uv_block_width, uv_block_height,
-                            which_mv,
-                            interp_filter, mv_precision_uv, x, y);
+                             &pred[512], uv_block_width,
+                             &mv,
+                             scale,
+                             uv_block_width, uv_block_height,
+                             which_mv,
+                             interp_filter, mv_precision_uv, x, y);
 }
 
 void vp10_temporal_filter_init(void) {
@@ -131,14 +128,14 @@ void vp10_temporal_filter_init(void) {
 }
 
 void vp10_temporal_filter_apply_c(uint8_t *frame1,
-                                 unsigned int stride,
-                                 uint8_t *frame2,
-                                 unsigned int block_width,
-                                 unsigned int block_height,
-                                 int strength,
-                                 int filter_weight,
-                                 unsigned int *accumulator,
-                                 uint16_t *count) {
+                                  unsigned int stride,
+                                  uint8_t *frame2,
+                                  unsigned int block_width,
+                                  unsigned int block_height,
+                                  int strength,
+                                  int filter_weight,
+                                  unsigned int *accumulator,
+                                  uint16_t *count) {
   unsigned int i, j, k;
   int modifier;
   int byte = 0;
@@ -199,14 +196,14 @@ void vp10_temporal_filter_apply_c(uint8_t *frame1,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_temporal_filter_apply_c(uint8_t *frame1_8,
-                                        unsigned int stride,
-                                        uint8_t *frame2_8,
-                                        unsigned int block_width,
-                                        unsigned int block_height,
-                                        int strength,
-                                        int filter_weight,
-                                        unsigned int *accumulator,
-                                        uint16_t *count) {
+                                         unsigned int stride,
+                                         uint8_t *frame2_8,
+                                         unsigned int block_width,
+                                         unsigned int block_height,
+                                         int strength,
+                                         int filter_weight,
+                                         unsigned int *accumulator,
+                                         uint16_t *count) {
   uint16_t *frame1 = CONVERT_TO_SHORTPTR(frame1_8);
   uint16_t *frame2 = CONVERT_TO_SHORTPTR(frame2_8);
   unsigned int i, j, k;
