@@ -107,6 +107,10 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
   const int w = VPXMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
   const int step = 1 << txsz;
 
+  // Handle block size 4x8 and 4x4
+  if (ss_x == 0 && num_4x4_blocks_wide_lookup[bsize] < 2 && x == 0)
+    return 1;
+
   if (y == 0) {
     const int hl = mi_height_log2_lookup[bsize];
     const uint8_t *order = orders[bsize];
@@ -144,6 +148,13 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     const uint8_t *order = orders[bsize];
     int my_order, bl_order;
 
+    // Handle block size 8x4 and 4x4
+    if (ss_y == 0 && num_4x4_blocks_high_lookup[bsize] < 2 && y == 0)
+      return 1;
+
+    if (y + step < h)
+      return 1;
+
     mi_row = (mi_row & 7) >> hl;
     mi_col = (mi_col & 7) >> wl;
 
@@ -153,9 +164,6 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
 
     if (((mi_row + 1) << hl) >= 8)
       return 0;
-
-    if (y + step < h)
-      return 1;
 
     my_order = order[((mi_row + 0) << (3 - wl)) + mi_col + 0];
     bl_order = order[((mi_row + 1) << (3 - wl)) + mi_col - 1];
