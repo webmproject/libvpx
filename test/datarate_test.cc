@@ -813,8 +813,6 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest,
     if (bits_total_) {
       const double file_size_in_kb = bits_total_ / 1000.;  // bits per kilobit
       duration_ = (last_pts_ + 1) * timebase_;
-      effective_datarate_ = (bits_total_ - bits_in_last_frame_) / 1000.0
-          / (cfg_.rc_buf_initial_sz / 1000.0 + duration_);
       file_datarate_ = file_size_in_kb / duration_;
     }
   }
@@ -838,7 +836,6 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest,
   int64_t bits_total_;
   double duration_;
   double file_datarate_;
-  double effective_datarate_;
   size_t bits_in_last_frame_;
   vpx_svc_extra_cfg_t svc_params_;
   int speed_setting_;
@@ -917,7 +914,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayers) {
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
         cfg_.ts_number_layers, cfg_.temporal_layering_mode);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.85)
+    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
             << " The datarate for the file exceeds the target by too much!";
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
         << " The datarate for the file is lower than the target by too much!";
@@ -958,7 +955,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SpatialLayers) {
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
      cfg_.ts_number_layers, cfg_.temporal_layering_mode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.85)
+  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
           << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.17)
       << " The datarate for the file is lower than the target by too much!";
@@ -996,7 +993,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayers4threads) {
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
       cfg_.ts_number_layers, cfg_.temporal_layering_mode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.85)
+  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
           << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
       << " The datarate for the file is lower than the target by too much!";
@@ -1036,7 +1033,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SpatialLayers4threads) {
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
       cfg_.ts_number_layers, cfg_.temporal_layering_mode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.85)
+  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
           << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.17)
       << " The datarate for the file is lower than the target by too much!";
