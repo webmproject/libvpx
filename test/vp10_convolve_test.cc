@@ -11,10 +11,10 @@ using libvpx_test::ACMRandom;
 namespace {
 TEST(VP10ConvolveTest, vp10_convolve8) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  INTERP_FILTER interp_filter = EIGHTTAP;
+  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
-  ptrdiff_t filter_size = filter_params.tap;
+  ptrdiff_t filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint8_t src[12 * 12];
   int src_stride = filter_size;
@@ -39,9 +39,9 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
                 subpel_y_q4, y_step_q4, avg);
 
   const int16_t* x_filter =
-      vp10_get_interp_filter_kernel(filter_params, subpel_x_q4);
+      vp10_get_interp_filter_subpel_kernel(filter_params, subpel_x_q4);
   const int16_t* y_filter =
-      vp10_get_interp_filter_kernel(filter_params, subpel_y_q4);
+      vp10_get_interp_filter_subpel_kernel(filter_params, subpel_y_q4);
 
   vpx_convolve8_c(src + src_stride * filter_center + filter_center, src_stride,
                   dst1, dst_stride, x_filter, 16, y_filter, 16, w, h);
@@ -49,10 +49,10 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
 }
 TEST(VP10ConvolveTest, vp10_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  INTERP_FILTER interp_filter = EIGHTTAP;
+  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
-  ptrdiff_t filter_size = filter_params.tap;
+  ptrdiff_t filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint8_t src[12 * 12];
   int src_stride = filter_size;
@@ -78,9 +78,9 @@ TEST(VP10ConvolveTest, vp10_convolve) {
                     subpel_x_q4, x_step_q4, subpel_y_q4, y_step_q4, avg);
 
       const int16_t* x_filter =
-          vp10_get_interp_filter_kernel(filter_params, subpel_x_q4);
+          vp10_get_interp_filter_subpel_kernel(filter_params, subpel_x_q4);
       const int16_t* y_filter =
-          vp10_get_interp_filter_kernel(filter_params, subpel_y_q4);
+          vp10_get_interp_filter_subpel_kernel(filter_params, subpel_y_q4);
 
       int temp[12];
       int dst_ref = 0;
@@ -100,10 +100,10 @@ TEST(VP10ConvolveTest, vp10_convolve) {
 
 TEST(VP10ConvolveTest, vp10_convolve_avg) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  INTERP_FILTER interp_filter = EIGHTTAP;
+  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
-  ptrdiff_t filter_size = filter_params.tap;
+  ptrdiff_t filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint8_t src0[12 * 12];
   uint8_t src1[12 * 12];
@@ -157,10 +157,10 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
 #if CONFIG_VP9_HIGHBITDEPTH
 TEST(VP10ConvolveTest, vp10_highbd_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  INTERP_FILTER interp_filter = EIGHTTAP;
+  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
-  ptrdiff_t filter_size = filter_params.tap;
+  ptrdiff_t filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint16_t src[12 * 12];
   int src_stride = filter_size;
@@ -188,9 +188,9 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
           subpel_x_q4, x_step_q4, subpel_y_q4, y_step_q4, avg, bd);
 
       const int16_t* x_filter =
-          vp10_get_interp_filter_kernel(filter_params, subpel_x_q4);
+          vp10_get_interp_filter_subpel_kernel(filter_params, subpel_x_q4);
       const int16_t* y_filter =
-          vp10_get_interp_filter_kernel(filter_params, subpel_y_q4);
+          vp10_get_interp_filter_subpel_kernel(filter_params, subpel_y_q4);
 
       int temp[12];
       int dst_ref = 0;
@@ -211,10 +211,10 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
 
 TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  INTERP_FILTER interp_filter = EIGHTTAP;
+  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
-  ptrdiff_t filter_size = filter_params.tap;
+  ptrdiff_t filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint16_t src0[12 * 12];
   uint16_t src1[12 * 12];

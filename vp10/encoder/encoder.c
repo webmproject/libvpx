@@ -2366,7 +2366,10 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
   uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
   const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
-  const InterpKernel *const kernel = vp10_filter_kernels[EIGHTTAP];
+  const InterpFilterParams interp_filter_params =
+      vp10_get_interp_filter_params(EIGHTTAP_REGULAR);
+  const int16_t *kernel = interp_filter_params.filter_ptr;
+  const int taps = interp_filter_params.taps;
   int x, y, i;
 
   for (y = 0; y < dst_h; y += 16) {
@@ -2384,19 +2387,19 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
 #if CONFIG_VP9_HIGHBITDEPTH
         if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
           vpx_highbd_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
-                               kernel[x_q4 & 0xf], 16 * src_w / dst_w,
-                               kernel[y_q4 & 0xf], 16 * src_h / dst_h,
+                               &kernel[(x_q4 & 0xf) * taps], 16 * src_w / dst_w,
+                               &kernel[(y_q4 & 0xf) * taps], 16 * src_h / dst_h,
                                16 / factor, 16 / factor, bd);
         } else {
           vpx_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
-                        kernel[x_q4 & 0xf], 16 * src_w / dst_w,
-                        kernel[y_q4 & 0xf], 16 * src_h / dst_h,
+                        &kernel[(x_q4 & 0xf) * taps], 16 * src_w / dst_w,
+                        &kernel[(y_q4 & 0xf) * taps], 16 * src_h / dst_h,
                         16 / factor, 16 / factor);
         }
 #else
         vpx_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
-                      kernel[x_q4 & 0xf], 16 * src_w / dst_w,
-                      kernel[y_q4 & 0xf], 16 * src_h / dst_h,
+                      &kernel[(x_q4 & 0xf) * taps], 16 * src_w / dst_w,
+                      &kernel[(y_q4 & 0xf) * taps], 16 * src_h / dst_h,
                       16 / factor, 16 / factor);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
@@ -3522,10 +3525,10 @@ static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
       cpi->refresh_alt_ref_frame)
     return mask;
   for (ref = LAST_FRAME; ref <= ALTREF_FRAME; ++ref)
-    for (ifilter = EIGHTTAP; ifilter < SWITCHABLE_FILTERS; ++ifilter)
+    for (ifilter = EIGHTTAP_REGULAR; ifilter < SWITCHABLE_FILTERS; ++ifilter)
       ref_total[ref] += cpi->interp_filter_selected[ref][ifilter];
 
-  for (ifilter = EIGHTTAP; ifilter < SWITCHABLE_FILTERS; ++ifilter) {
+  for (ifilter = EIGHTTAP_REGULAR; ifilter < SWITCHABLE_FILTERS; ++ifilter) {
     if ((ref_total[LAST_FRAME] &&
         cpi->interp_filter_selected[LAST_FRAME][ifilter] == 0) &&
 #if CONFIG_EXT_REFS

@@ -868,7 +868,7 @@ static void write_switchable_interp_filter(VP10_COMP *cpi,
     const int ctx = vp10_get_pred_context_switchable_interp(xd);
 #if CONFIG_EXT_INTERP
     if (!vp10_is_interp_needed(xd)) {
-      assert(mbmi->interp_filter == EIGHTTAP);
+      assert(mbmi->interp_filter == EIGHTTAP_REGULAR);
       return;
     }
 #endif

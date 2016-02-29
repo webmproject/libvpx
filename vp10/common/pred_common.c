@@ -46,13 +46,13 @@ int vp10_get_pred_context_intra_interp(const MACROBLOCKD *xd) {
     PREDICTION_MODE mode = left_mbmi->mode;
     if (is_inter_block(left_mbmi)) {
       switch (left_mbmi->interp_filter) {
-        case EIGHTTAP:
+        case EIGHTTAP_REGULAR:
           left_type = INTRA_FILTER_8TAP;
           break;
         case EIGHTTAP_SMOOTH:
           left_type = INTRA_FILTER_8TAP_SMOOTH;
           break;
-        case EIGHTTAP_SHARP:
+        case MULTITAP_SHARP:
           left_type = INTRA_FILTER_8TAP_SHARP;
           break;
         case BILINEAR:
@@ -76,13 +76,13 @@ int vp10_get_pred_context_intra_interp(const MACROBLOCKD *xd) {
   if (xd->up_available && above_mbmi->sb_type >= BLOCK_8X8) {
     if (is_inter_block(above_mbmi)) {
       switch (above_mbmi->interp_filter) {
-        case EIGHTTAP:
+        case EIGHTTAP_REGULAR:
           above_type = INTRA_FILTER_8TAP;
           break;
         case EIGHTTAP_SMOOTH:
           above_type = INTRA_FILTER_8TAP_SMOOTH;
           break;
-        case EIGHTTAP_SHARP:
+        case MULTITAP_SHARP:
           above_type = INTRA_FILTER_8TAP_SHARP;
           break;
         case BILINEAR:

@@ -39,8 +39,7 @@ typedef enum {
 } FRAME_TYPE;
 
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
-#define IsInterpolatingFilter(filter) \
-    (vp10_filter_kernels[filter][0][SUBPEL_TAPS / 2 - 1] == 128)
+#define IsInterpolatingFilter(filter)  (vp10_is_interpolating_filter(filter))
 #else
 #define IsInterpolatingFilter(filter)  (1)
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
