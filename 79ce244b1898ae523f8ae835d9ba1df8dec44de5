@@ -34,6 +34,24 @@
       "revId": "79ce244b1898ae523f8ae835d9ba1df8dec44de5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22ef3134_5c1bd494",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-03-01T18:45:59Z",
+      "side": 1,
+      "message": "we can\u0027t use \"is_one_pass_cbr_svc\" here since cpi-\u003euse_svc (which is set via control function) may not be set at this stage (init_encode). So leaving this as is.",
+      "parentUuid": "a26ec178_48433239",
+      "revId": "79ce244b1898ae523f8ae835d9ba1df8dec44de5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
