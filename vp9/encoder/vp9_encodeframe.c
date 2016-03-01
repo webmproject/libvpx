@@ -4272,13 +4272,9 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MODE_INFO **mi_8x8 = xd->mi;
-  MODE_INFO *mi = mi_8x8[0];
+  MODE_INFO *mi = xd->mi[0];
   const int seg_skip = segfeature_active(&cm->seg, mi->segment_id,
                                          SEG_LVL_SKIP);
-  const int mis = cm->mi_stride;
-  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-  const int mi_height = num_8x8_blocks_high_lookup[bsize];
 
   x->skip_recode = !x->select_tx_size && mi->sb_type >= BLOCK_8X8 &&
                    cpi->oxcf.aq_mode != COMPLEXITY_AQ &&
@@ -4334,20 +4330,14 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
       ++get_tx_counts(max_txsize_lookup[bsize], get_tx_size_context(xd),
                       &td->counts->tx)[mi->tx_size];
     } else {
-      int x, y;
-      TX_SIZE tx_size;
       // The new intra coding scheme requires no change of transform size
       if (is_inter_block(mi)) {
-        tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
-                         max_txsize_lookup[bsize]);
+        mi->tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
+                             max_txsize_lookup[bsize]);
       } else {
-        tx_size = (bsize >= BLOCK_8X8) ? mi->tx_size : TX_4X4;
+        mi->tx_size = (bsize >= BLOCK_8X8) ? mi->tx_size : TX_4X4;
       }
 
-      for (y = 0; y < mi_height; y++)
-        for (x = 0; x < mi_width; x++)
-          if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
-            mi_8x8[mis * y + x]->tx_size = tx_size;
     }
     ++td->counts->tx.tx_totals[mi->tx_size];
     ++td->counts->tx.tx_totals[get_uv_tx_size(mi, &xd->plane[1])];
