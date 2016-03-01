@@ -349,6 +349,9 @@ void vp10_initialize_enc(void) {
     vp10_entropy_mv_init();
     vp10_temporal_filter_init();
     vp10_encode_token_init();
+#if CONFIG_EXT_INTER
+    vp10_init_wedge_masks();
+#endif
     init_done = 1;
   }
 }
@@ -1038,6 +1041,19 @@ static void fnname##_bits12(const uint8_t *src_ptr, \
   sad_array[i] >>= 4; \
 }
 
+#if CONFIG_EXT_PARTITION
+MAKE_BFP_SAD_WRAPPER(vpx_highbd_sad128x128)
+MAKE_BFP_SADAVG_WRAPPER(vpx_highbd_sad128x128_avg)
+MAKE_BFP_SAD3_WRAPPER(vpx_highbd_sad128x128x3)
+MAKE_BFP_SAD8_WRAPPER(vpx_highbd_sad128x128x8)
+MAKE_BFP_SAD4D_WRAPPER(vpx_highbd_sad128x128x4d)
+MAKE_BFP_SAD_WRAPPER(vpx_highbd_sad128x64)
+MAKE_BFP_SADAVG_WRAPPER(vpx_highbd_sad128x64_avg)
+MAKE_BFP_SAD4D_WRAPPER(vpx_highbd_sad128x64x4d)
+MAKE_BFP_SAD_WRAPPER(vpx_highbd_sad64x128)
+MAKE_BFP_SADAVG_WRAPPER(vpx_highbd_sad64x128_avg)
+MAKE_BFP_SAD4D_WRAPPER(vpx_highbd_sad64x128x4d)
+#endif  // CONFIG_EXT_PARTITION
 MAKE_BFP_SAD_WRAPPER(vpx_highbd_sad32x16)
 MAKE_BFP_SADAVG_WRAPPER(vpx_highbd_sad32x16_avg)
 MAKE_BFP_SAD4D_WRAPPER(vpx_highbd_sad32x16x4d)
@@ -1093,6 +1109,61 @@ MAKE_BFP_SADAVG_WRAPPER(vpx_highbd_sad4x4_avg)
 MAKE_BFP_SAD3_WRAPPER(vpx_highbd_sad4x4x3)
 MAKE_BFP_SAD8_WRAPPER(vpx_highbd_sad4x4x8)
 MAKE_BFP_SAD4D_WRAPPER(vpx_highbd_sad4x4x4d)
+
+#if CONFIG_EXT_INTER
+#define HIGHBD_MBFP(BT, MSDF, MVF, MSVF)         \
+  cpi->fn_ptr[BT].msdf            = MSDF; \
+  cpi->fn_ptr[BT].mvf             = MVF;  \
+  cpi->fn_ptr[BT].msvf            = MSVF;
+
+#define MAKE_MBFP_SAD_WRAPPER(fnname) \
+static unsigned int fnname##_bits8(const uint8_t *src_ptr, \
+                                   int source_stride, \
+                                   const uint8_t *ref_ptr, \
+                                   int ref_stride, \
+                                   const uint8_t *m, \
+                                   int m_stride) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, \
+                m, m_stride); \
+} \
+static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    const uint8_t *m, \
+                                    int m_stride) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, \
+                m, m_stride) >> 2; \
+} \
+static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    const uint8_t *m, \
+                                    int m_stride) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, \
+                m, m_stride) >> 4; \
+}
+
+#if CONFIG_EXT_PARTITION
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad128x128)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad128x64)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad64x128)
+#endif  // CONFIG_EXT_PARTITION
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad64x64)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad64x32)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad32x64)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad32x32)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad32x16)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad16x32)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad16x16)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad16x8)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad8x16)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad8x8)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad8x4)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad4x8)
+MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad4x4)
+#endif  // CONFIG_EXT_INTER
 
 static void  highbd_set_var_fns(VP10_COMP *const cpi) {
   VP10_COMMON *const cm = &cpi->common;
@@ -1228,6 +1299,107 @@ static void  highbd_set_var_fns(VP10_COMP *const cpi) {
                    vpx_highbd_sad4x4x3_bits8,
                    vpx_highbd_sad4x4x8_bits8,
                    vpx_highbd_sad4x4x4d_bits8)
+
+#if CONFIG_EXT_PARTITION
+        HIGHBD_BFP(BLOCK_128X128,
+                   vpx_highbd_sad128x128_bits8,
+                   vpx_highbd_sad128x128_avg_bits8,
+                   vpx_highbd_8_variance128x128,
+                   vpx_highbd_8_sub_pixel_variance128x128,
+                   vpx_highbd_8_sub_pixel_avg_variance128x128,
+                   vpx_highbd_sad128x128x3_bits8,
+                   vpx_highbd_sad128x128x8_bits8,
+                   vpx_highbd_sad128x128x4d_bits8)
+
+        HIGHBD_BFP(BLOCK_128X64,
+                   vpx_highbd_sad128x64_bits8,
+                   vpx_highbd_sad128x64_avg_bits8,
+                   vpx_highbd_8_variance128x64,
+                   vpx_highbd_8_sub_pixel_variance128x64,
+                   vpx_highbd_8_sub_pixel_avg_variance128x64,
+                   NULL,
+                   NULL,
+                   vpx_highbd_sad128x64x4d_bits8)
+
+        HIGHBD_BFP(BLOCK_64X128,
+                   vpx_highbd_sad64x128_bits8,
+                   vpx_highbd_sad64x128_avg_bits8,
+                   vpx_highbd_8_variance64x128,
+                   vpx_highbd_8_sub_pixel_variance64x128,
+                   vpx_highbd_8_sub_pixel_avg_variance64x128,
+                   NULL,
+                   NULL,
+                   vpx_highbd_sad64x128x4d_bits8)
+#endif  // CONFIG_EXT_PARTITION
+
+#if CONFIG_EXT_INTER
+#if CONFIG_EXT_PARTITION
+        HIGHBD_MBFP(BLOCK_128X128,
+                    vpx_highbd_masked_sad128x128_bits8,
+                    vpx_highbd_masked_variance128x128,
+                    vpx_highbd_masked_sub_pixel_variance128x128)
+        HIGHBD_MBFP(BLOCK_128X64,
+                    vpx_highbd_masked_sad128x64_bits8,
+                    vpx_highbd_masked_variance128x64,
+                    vpx_highbd_masked_sub_pixel_variance128x64)
+        HIGHBD_MBFP(BLOCK_64X128,
+                    vpx_highbd_masked_sad64x128_bits8,
+                    vpx_highbd_masked_variance64x128,
+                    vpx_highbd_masked_sub_pixel_variance64x128)
+#endif  // CONFIG_EXT_PARTITION
+        HIGHBD_MBFP(BLOCK_64X64,
+                    vpx_highbd_masked_sad64x64_bits8,
+                    vpx_highbd_masked_variance64x64,
+                    vpx_highbd_masked_sub_pixel_variance64x64)
+        HIGHBD_MBFP(BLOCK_64X32,
+                    vpx_highbd_masked_sad64x32_bits8,
+                    vpx_highbd_masked_variance64x32,
+                    vpx_highbd_masked_sub_pixel_variance64x32)
+        HIGHBD_MBFP(BLOCK_32X64,
+                    vpx_highbd_masked_sad32x64_bits8,
+                    vpx_highbd_masked_variance32x64,
+                    vpx_highbd_masked_sub_pixel_variance32x64)
+        HIGHBD_MBFP(BLOCK_32X32,
+                    vpx_highbd_masked_sad32x32_bits8,
+                    vpx_highbd_masked_variance32x32,
+                    vpx_highbd_masked_sub_pixel_variance32x32)
+        HIGHBD_MBFP(BLOCK_32X16,
+                    vpx_highbd_masked_sad32x16_bits8,
+                    vpx_highbd_masked_variance32x16,
+                    vpx_highbd_masked_sub_pixel_variance32x16)
+        HIGHBD_MBFP(BLOCK_16X32,
+                    vpx_highbd_masked_sad16x32_bits8,
+                    vpx_highbd_masked_variance16x32,
+                    vpx_highbd_masked_sub_pixel_variance16x32)
+        HIGHBD_MBFP(BLOCK_16X16,
+                    vpx_highbd_masked_sad16x16_bits8,
+                    vpx_highbd_masked_variance16x16,
+                    vpx_highbd_masked_sub_pixel_variance16x16)
+        HIGHBD_MBFP(BLOCK_8X16,
+                    vpx_highbd_masked_sad8x16_bits8,
+                    vpx_highbd_masked_variance8x16,
+                    vpx_highbd_masked_sub_pixel_variance8x16)
+        HIGHBD_MBFP(BLOCK_16X8,
+                    vpx_highbd_masked_sad16x8_bits8,
+                    vpx_highbd_masked_variance16x8,
+                    vpx_highbd_masked_sub_pixel_variance16x8)
+        HIGHBD_MBFP(BLOCK_8X8,
+                    vpx_highbd_masked_sad8x8_bits8,
+                    vpx_highbd_masked_variance8x8,
+                    vpx_highbd_masked_sub_pixel_variance8x8)
+        HIGHBD_MBFP(BLOCK_4X8,
+                    vpx_highbd_masked_sad4x8_bits8,
+                    vpx_highbd_masked_variance4x8,
+                    vpx_highbd_masked_sub_pixel_variance4x8)
+        HIGHBD_MBFP(BLOCK_8X4,
+                    vpx_highbd_masked_sad8x4_bits8,
+                    vpx_highbd_masked_variance8x4,
+                    vpx_highbd_masked_sub_pixel_variance8x4)
+        HIGHBD_MBFP(BLOCK_4X4,
+                    vpx_highbd_masked_sad4x4_bits8,
+                    vpx_highbd_masked_variance4x4,
+                    vpx_highbd_masked_sub_pixel_variance4x4)
+#endif  // CONFIG_EXT_INTER
         break;
 
       case VPX_BITS_10:
@@ -1360,6 +1532,107 @@ static void  highbd_set_var_fns(VP10_COMP *const cpi) {
                    vpx_highbd_sad4x4x3_bits10,
                    vpx_highbd_sad4x4x8_bits10,
                    vpx_highbd_sad4x4x4d_bits10)
+
+#if CONFIG_EXT_PARTITION
+        HIGHBD_BFP(BLOCK_128X128,
+                   vpx_highbd_sad128x128_bits10,
+                   vpx_highbd_sad128x128_avg_bits10,
+                   vpx_highbd_10_variance128x128,
+                   vpx_highbd_10_sub_pixel_variance128x128,
+                   vpx_highbd_10_sub_pixel_avg_variance128x128,
+                   vpx_highbd_sad128x128x3_bits10,
+                   vpx_highbd_sad128x128x8_bits10,
+                   vpx_highbd_sad128x128x4d_bits10)
+
+        HIGHBD_BFP(BLOCK_128X64,
+                   vpx_highbd_sad128x64_bits10,
+                   vpx_highbd_sad128x64_avg_bits10,
+                   vpx_highbd_10_variance128x64,
+                   vpx_highbd_10_sub_pixel_variance128x64,
+                   vpx_highbd_10_sub_pixel_avg_variance128x64,
+                   NULL,
+                   NULL,
+                   vpx_highbd_sad128x64x4d_bits10)
+
+        HIGHBD_BFP(BLOCK_64X128,
+                   vpx_highbd_sad64x128_bits10,
+                   vpx_highbd_sad64x128_avg_bits10,
+                   vpx_highbd_10_variance64x128,
+                   vpx_highbd_10_sub_pixel_variance64x128,
+                   vpx_highbd_10_sub_pixel_avg_variance64x128,
+                   NULL,
+                   NULL,
+                   vpx_highbd_sad64x128x4d_bits10)
+#endif  // CONFIG_EXT_PARTITION
+
+#if CONFIG_EXT_INTER
+#if CONFIG_EXT_PARTITION
+        HIGHBD_MBFP(BLOCK_128X128,
+                    vpx_highbd_masked_sad128x128_bits10,
+                    vpx_highbd_10_masked_variance128x128,
+                    vpx_highbd_10_masked_sub_pixel_variance128x128)
+        HIGHBD_MBFP(BLOCK_128X64,
+                    vpx_highbd_masked_sad128x64_bits10,
+                    vpx_highbd_10_masked_variance128x64,
+                    vpx_highbd_10_masked_sub_pixel_variance128x64)
+        HIGHBD_MBFP(BLOCK_64X128,
+                    vpx_highbd_masked_sad64x128_bits10,
+                    vpx_highbd_10_masked_variance64x128,
+                    vpx_highbd_10_masked_sub_pixel_variance64x128)
+#endif  // CONFIG_EXT_PARTITION
+        HIGHBD_MBFP(BLOCK_64X64,
+                    vpx_highbd_masked_sad64x64_bits10,
+                    vpx_highbd_10_masked_variance64x64,
+                    vpx_highbd_10_masked_sub_pixel_variance64x64)
+        HIGHBD_MBFP(BLOCK_64X32,
+                    vpx_highbd_masked_sad64x32_bits10,
+                    vpx_highbd_10_masked_variance64x32,
+                    vpx_highbd_10_masked_sub_pixel_variance64x32)
+        HIGHBD_MBFP(BLOCK_32X64,
+                    vpx_highbd_masked_sad32x64_bits10,
+                    vpx_highbd_10_masked_variance32x64,
+                    vpx_highbd_10_masked_sub_pixel_variance32x64)
+        HIGHBD_MBFP(BLOCK_32X32,
+                    vpx_highbd_masked_sad32x32_bits10,
+                    vpx_highbd_10_masked_variance32x32,
+                    vpx_highbd_10_masked_sub_pixel_variance32x32)
+        HIGHBD_MBFP(BLOCK_32X16,
+                    vpx_highbd_masked_sad32x16_bits10,
+                    vpx_highbd_10_masked_variance32x16,
+                    vpx_highbd_10_masked_sub_pixel_variance32x16)
+        HIGHBD_MBFP(BLOCK_16X32,
+                    vpx_highbd_masked_sad16x32_bits10,
+                    vpx_highbd_10_masked_variance16x32,
+                    vpx_highbd_10_masked_sub_pixel_variance16x32)
+        HIGHBD_MBFP(BLOCK_16X16,
+                    vpx_highbd_masked_sad16x16_bits10,
+                    vpx_highbd_10_masked_variance16x16,
+                    vpx_highbd_10_masked_sub_pixel_variance16x16)
+        HIGHBD_MBFP(BLOCK_8X16,
+                    vpx_highbd_masked_sad8x16_bits10,
+                    vpx_highbd_10_masked_variance8x16,
+                    vpx_highbd_10_masked_sub_pixel_variance8x16)
+        HIGHBD_MBFP(BLOCK_16X8,
+                    vpx_highbd_masked_sad16x8_bits10,
+                    vpx_highbd_10_masked_variance16x8,
+                    vpx_highbd_10_masked_sub_pixel_variance16x8)
+        HIGHBD_MBFP(BLOCK_8X8,
+                    vpx_highbd_masked_sad8x8_bits10,
+                    vpx_highbd_10_masked_variance8x8,
+                    vpx_highbd_10_masked_sub_pixel_variance8x8)
+        HIGHBD_MBFP(BLOCK_4X8,
+                    vpx_highbd_masked_sad4x8_bits10,
+                    vpx_highbd_10_masked_variance4x8,
+                    vpx_highbd_10_masked_sub_pixel_variance4x8)
+        HIGHBD_MBFP(BLOCK_8X4,
+                    vpx_highbd_masked_sad8x4_bits10,
+                    vpx_highbd_10_masked_variance8x4,
+                    vpx_highbd_10_masked_sub_pixel_variance8x4)
+        HIGHBD_MBFP(BLOCK_4X4,
+                    vpx_highbd_masked_sad4x4_bits10,
+                    vpx_highbd_10_masked_variance4x4,
+                    vpx_highbd_10_masked_sub_pixel_variance4x4)
+#endif  // CONFIG_EXT_INTER
         break;
 
       case VPX_BITS_12:
@@ -1492,6 +1765,107 @@ static void  highbd_set_var_fns(VP10_COMP *const cpi) {
                    vpx_highbd_sad4x4x3_bits12,
                    vpx_highbd_sad4x4x8_bits12,
                    vpx_highbd_sad4x4x4d_bits12)
+
+#if CONFIG_EXT_PARTITION
+        HIGHBD_BFP(BLOCK_128X128,
+                   vpx_highbd_sad128x128_bits12,
+                   vpx_highbd_sad128x128_avg_bits12,
+                   vpx_highbd_12_variance128x128,
+                   vpx_highbd_12_sub_pixel_variance128x128,
+                   vpx_highbd_12_sub_pixel_avg_variance128x128,
+                   vpx_highbd_sad128x128x3_bits12,
+                   vpx_highbd_sad128x128x8_bits12,
+                   vpx_highbd_sad128x128x4d_bits12)
+
+        HIGHBD_BFP(BLOCK_128X64,
+                   vpx_highbd_sad128x64_bits12,
+                   vpx_highbd_sad128x64_avg_bits12,
+                   vpx_highbd_12_variance128x64,
+                   vpx_highbd_12_sub_pixel_variance128x64,
+                   vpx_highbd_12_sub_pixel_avg_variance128x64,
+                   NULL,
+                   NULL,
+                   vpx_highbd_sad128x64x4d_bits12)
+
+        HIGHBD_BFP(BLOCK_64X128,
+                   vpx_highbd_sad64x128_bits12,
+                   vpx_highbd_sad64x128_avg_bits12,
+                   vpx_highbd_12_variance64x128,
+                   vpx_highbd_12_sub_pixel_variance64x128,
+                   vpx_highbd_12_sub_pixel_avg_variance64x128,
+                   NULL,
+                   NULL,
+                   vpx_highbd_sad64x128x4d_bits12)
+#endif  // CONFIG_EXT_PARTITION
+
+#if CONFIG_EXT_INTER
+#if CONFIG_EXT_PARTITION
+        HIGHBD_MBFP(BLOCK_128X128,
+                    vpx_highbd_masked_sad128x128_bits12,
+                    vpx_highbd_12_masked_variance128x128,
+                    vpx_highbd_12_masked_sub_pixel_variance128x128)
+        HIGHBD_MBFP(BLOCK_128X64,
+                    vpx_highbd_masked_sad128x64_bits12,
+                    vpx_highbd_12_masked_variance128x64,
+                    vpx_highbd_12_masked_sub_pixel_variance128x64)
+        HIGHBD_MBFP(BLOCK_64X128,
+                    vpx_highbd_masked_sad64x128_bits12,
+                    vpx_highbd_12_masked_variance64x128,
+                    vpx_highbd_12_masked_sub_pixel_variance64x128)
+#endif  // CONFIG_EXT_PARTITION
+        HIGHBD_MBFP(BLOCK_64X64,
+                    vpx_highbd_masked_sad64x64_bits12,
+                    vpx_highbd_12_masked_variance64x64,
+                    vpx_highbd_12_masked_sub_pixel_variance64x64)
+        HIGHBD_MBFP(BLOCK_64X32,
+                    vpx_highbd_masked_sad64x32_bits12,
+                    vpx_highbd_12_masked_variance64x32,
+                    vpx_highbd_12_masked_sub_pixel_variance64x32)
+        HIGHBD_MBFP(BLOCK_32X64,
+                    vpx_highbd_masked_sad32x64_bits12,
+                    vpx_highbd_12_masked_variance32x64,
+                    vpx_highbd_12_masked_sub_pixel_variance32x64)
+        HIGHBD_MBFP(BLOCK_32X32,
+                    vpx_highbd_masked_sad32x32_bits12,
+                    vpx_highbd_12_masked_variance32x32,
+                    vpx_highbd_12_masked_sub_pixel_variance32x32)
+        HIGHBD_MBFP(BLOCK_32X16,
+                    vpx_highbd_masked_sad32x16_bits12,
+                    vpx_highbd_12_masked_variance32x16,
+                    vpx_highbd_12_masked_sub_pixel_variance32x16)
+        HIGHBD_MBFP(BLOCK_16X32,
+                    vpx_highbd_masked_sad16x32_bits12,
+                    vpx_highbd_12_masked_variance16x32,
+                    vpx_highbd_12_masked_sub_pixel_variance16x32)
+        HIGHBD_MBFP(BLOCK_16X16,
+                    vpx_highbd_masked_sad16x16_bits12,
+                    vpx_highbd_12_masked_variance16x16,
+                    vpx_highbd_12_masked_sub_pixel_variance16x16)
+        HIGHBD_MBFP(BLOCK_8X16,
+                    vpx_highbd_masked_sad8x16_bits12,
+                    vpx_highbd_12_masked_variance8x16,
+                    vpx_highbd_12_masked_sub_pixel_variance8x16)
+        HIGHBD_MBFP(BLOCK_16X8,
+                    vpx_highbd_masked_sad16x8_bits12,
+                    vpx_highbd_12_masked_variance16x8,
+                    vpx_highbd_12_masked_sub_pixel_variance16x8)
+        HIGHBD_MBFP(BLOCK_8X8,
+                    vpx_highbd_masked_sad8x8_bits12,
+                    vpx_highbd_12_masked_variance8x8,
+                    vpx_highbd_12_masked_sub_pixel_variance8x8)
+        HIGHBD_MBFP(BLOCK_4X8,
+                    vpx_highbd_masked_sad4x8_bits12,
+                    vpx_highbd_12_masked_variance4x8,
+                    vpx_highbd_12_masked_sub_pixel_variance4x8)
+        HIGHBD_MBFP(BLOCK_8X4,
+                    vpx_highbd_masked_sad8x4_bits12,
+                    vpx_highbd_12_masked_variance8x4,
+                    vpx_highbd_12_masked_sub_pixel_variance8x4)
+        HIGHBD_MBFP(BLOCK_4X4,
+                    vpx_highbd_masked_sad4x4_bits12,
+                    vpx_highbd_12_masked_variance4x4,
+                    vpx_highbd_12_masked_sub_pixel_variance4x4)
+#endif  // CONFIG_EXT_INTER
         break;
 
       default:
@@ -1912,6 +2286,21 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
     cpi->fn_ptr[BT].sdx8f          = SDX8F; \
     cpi->fn_ptr[BT].sdx4df         = SDX4DF;
 
+#if CONFIG_EXT_PARTITION
+  BFP(BLOCK_128X128, vpx_sad128x128, vpx_sad128x128_avg,
+      vpx_variance128x128, vpx_sub_pixel_variance128x128,
+      vpx_sub_pixel_avg_variance128x128, vpx_sad128x128x3, vpx_sad128x128x8,
+      vpx_sad128x128x4d)
+
+  BFP(BLOCK_128X64, vpx_sad128x64, vpx_sad128x64_avg,
+      vpx_variance128x64, vpx_sub_pixel_variance128x64,
+      vpx_sub_pixel_avg_variance128x64, NULL, NULL, vpx_sad128x64x4d)
+
+  BFP(BLOCK_64X128, vpx_sad64x128, vpx_sad64x128_avg,
+      vpx_variance64x128, vpx_sub_pixel_variance64x128,
+      vpx_sub_pixel_avg_variance64x128, NULL, NULL, vpx_sad64x128x4d)
+#endif  // CONFIG_EXT_PARTITION
+
   BFP(BLOCK_32X16, vpx_sad32x16, vpx_sad32x16_avg,
       vpx_variance32x16, vpx_sub_pixel_variance32x16,
       vpx_sub_pixel_avg_variance32x16, NULL, NULL, vpx_sad32x16x4d)
@@ -1970,6 +2359,48 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
       vpx_variance4x4, vpx_sub_pixel_variance4x4,
       vpx_sub_pixel_avg_variance4x4,
       vpx_sad4x4x3, vpx_sad4x4x8, vpx_sad4x4x4d)
+
+#if CONFIG_EXT_INTER
+#define MBFP(BT, MSDF, MVF, MSVF)         \
+  cpi->fn_ptr[BT].msdf            = MSDF; \
+  cpi->fn_ptr[BT].mvf             = MVF;  \
+  cpi->fn_ptr[BT].msvf            = MSVF;
+
+#if CONFIG_EXT_PARTITION
+  MBFP(BLOCK_128X128, vpx_masked_sad128x128, vpx_masked_variance128x128,
+       vpx_masked_sub_pixel_variance128x128)
+  MBFP(BLOCK_128X64, vpx_masked_sad128x64, vpx_masked_variance128x64,
+       vpx_masked_sub_pixel_variance128x64)
+  MBFP(BLOCK_64X128, vpx_masked_sad64x128, vpx_masked_variance64x128,
+       vpx_masked_sub_pixel_variance64x128)
+#endif  // CONFIG_EXT_PARTITION
+  MBFP(BLOCK_64X64, vpx_masked_sad64x64, vpx_masked_variance64x64,
+       vpx_masked_sub_pixel_variance64x64)
+  MBFP(BLOCK_64X32, vpx_masked_sad64x32, vpx_masked_variance64x32,
+       vpx_masked_sub_pixel_variance64x32)
+  MBFP(BLOCK_32X64, vpx_masked_sad32x64, vpx_masked_variance32x64,
+       vpx_masked_sub_pixel_variance32x64)
+  MBFP(BLOCK_32X32, vpx_masked_sad32x32, vpx_masked_variance32x32,
+       vpx_masked_sub_pixel_variance32x32)
+  MBFP(BLOCK_32X16, vpx_masked_sad32x16, vpx_masked_variance32x16,
+       vpx_masked_sub_pixel_variance32x16)
+  MBFP(BLOCK_16X32, vpx_masked_sad16x32, vpx_masked_variance16x32,
+       vpx_masked_sub_pixel_variance16x32)
+  MBFP(BLOCK_16X16, vpx_masked_sad16x16, vpx_masked_variance16x16,
+       vpx_masked_sub_pixel_variance16x16)
+  MBFP(BLOCK_16X8, vpx_masked_sad16x8, vpx_masked_variance16x8,
+       vpx_masked_sub_pixel_variance16x8)
+  MBFP(BLOCK_8X16, vpx_masked_sad8x16, vpx_masked_variance8x16,
+       vpx_masked_sub_pixel_variance8x16)
+  MBFP(BLOCK_8X8, vpx_masked_sad8x8, vpx_masked_variance8x8,
+       vpx_masked_sub_pixel_variance8x8)
+  MBFP(BLOCK_4X8, vpx_masked_sad4x8, vpx_masked_variance4x8,
+       vpx_masked_sub_pixel_variance4x8)
+  MBFP(BLOCK_8X4, vpx_masked_sad8x4, vpx_masked_variance8x4,
+       vpx_masked_sub_pixel_variance8x4)
+  MBFP(BLOCK_4X4, vpx_masked_sad4x4, vpx_masked_variance4x4,
+       vpx_masked_sub_pixel_variance4x4)
+#endif  // CONFIG_EXT_INTER
 
 #if CONFIG_VP9_HIGHBITDEPTH
   highbd_set_var_fns(cpi);

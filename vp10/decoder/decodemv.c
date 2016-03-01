@@ -1185,10 +1185,11 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 
 #if CONFIG_OBMC
+  mbmi->obmc = 0;
 #if CONFIG_SUPERTX
   if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
-  mbmi->obmc = read_is_obmc_block(cm, xd, r);
+    mbmi->obmc = read_is_obmc_block(cm, xd, r);
 #endif  // CONFIG_OBMC
 
 #if CONFIG_REF_MV
@@ -1432,7 +1433,12 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 
 #if CONFIG_EXT_INTER
+    mbmi->use_wedge_interintra = 0;
+    mbmi->use_wedge_interinter = 0;
   if (cm->reference_mode != COMPOUND_REFERENCE &&
+#if CONFIG_OBMC
+      !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
+#endif  // CONFIG_OBMC
 #if CONFIG_SUPERTX
       !supertx_enabled &&
 #endif
@@ -1444,19 +1450,42 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     if (interintra) {
       const PREDICTION_MODE interintra_mode =
           read_intra_mode_y(cm, xd, r, size_group_lookup[bsize]);
-
       mbmi->ref_frame[1] = INTRA_FRAME;
       mbmi->interintra_mode = interintra_mode;
       mbmi->interintra_uv_mode = interintra_mode;
 #if CONFIG_EXT_INTRA
-      // TODO(debargha|geza.lore):
-      // Should we use ext_intra modes for interintra?
       mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
       mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
       mbmi->angle_delta[0] = 0;
       mbmi->angle_delta[1] = 0;
       mbmi->intra_filter = INTRA_FILTER_LINEAR;
 #endif  // CONFIG_EXT_INTRA
+      if (get_wedge_bits(bsize)) {
+        mbmi->use_wedge_interintra =
+            vpx_read(r, cm->fc->wedge_interintra_prob[bsize]);
+        if (xd->counts)
+          xd->counts->wedge_interintra[bsize][mbmi->use_wedge_interintra]++;
+        if (mbmi->use_wedge_interintra) {
+          mbmi->interintra_wedge_index =
+          mbmi->interintra_uv_wedge_index =
+              vpx_read_literal(r, get_wedge_bits(bsize));
+        }
+      }
+    }
+  }
+  if (cm->reference_mode != SINGLE_REFERENCE &&
+      is_inter_compound_mode(mbmi->mode) &&
+#if CONFIG_OBMC
+      !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
+#endif  // CONFIG_OBMC
+      get_wedge_bits(bsize)) {
+    mbmi->use_wedge_interinter =
+        vpx_read(r, cm->fc->wedge_interinter_prob[bsize]);
+    if (xd->counts)
+      xd->counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
+    if (mbmi->use_wedge_interinter) {
+      mbmi->interinter_wedge_index =
+          vpx_read_literal(r, get_wedge_bits(bsize));
     }
   }
 #endif  // CONFIG_EXT_INTER

@@ -388,7 +388,7 @@ static void first_pass_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   MV ref_mv_full = {ref_mv->row >> 3, ref_mv->col >> 3};
   int num00, tmp_err, n;
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
+  vp10_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
   const int new_mv_mode_penalty = NEW_MV_MODE_PENALTY;
 
   int step_param = 3;

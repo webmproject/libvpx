@@ -422,7 +422,7 @@ typedef struct VP10_COMP {
   fractional_mv_step_fp *find_fractional_mv_step;
   vp10_full_search_fn_t full_search_sad;
   vp10_diamond_search_fn_t diamond_search_sad;
-  vp9_variance_fn_ptr_t fn_ptr[BLOCK_SIZES];
+  vp10_variance_fn_ptr_t fn_ptr[BLOCK_SIZES];
   uint64_t time_receive_data;
   uint64_t time_compress_data;
   uint64_t time_pick_lpf;

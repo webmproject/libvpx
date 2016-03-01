@@ -10,6 +10,7 @@
 
 #include "vpx_mem/vpx_mem.h"
 
+#include "vp10/common/reconinter.h"
 #include "vp10/common/onyxc_int.h"
 #include "vp10/common/seg_common.h"
 
@@ -190,8 +191,8 @@ static const vpx_prob default_drl_prob[DRL_MODE_CONTEXTS] = {
 
 #if CONFIG_EXT_INTER
 static const vpx_prob default_new2mv_prob = 180;
-#endif
-#endif
+#endif  // CONFIG_EXT_INTER
+#endif  // CONFIG_REF_MV
 
 static const vpx_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [INTER_MODES - 1] = {
@@ -228,6 +229,14 @@ static const vpx_prob default_inter_compound_mode_probs
 };
 
 static const vpx_prob default_interintra_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+};
+
+static const vpx_prob default_wedge_interintra_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+};
+
+static const vpx_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
   192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
 };
 #endif  // CONFIG_EXT_INTER
@@ -1337,6 +1346,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_EXT_INTER
   vp10_copy(fc->inter_compound_mode_probs, default_inter_compound_mode_probs);
   vp10_copy(fc->interintra_prob, default_interintra_prob);
+  vp10_copy(fc->wedge_interintra_prob, default_wedge_interintra_prob);
+  vp10_copy(fc->wedge_interinter_prob, default_wedge_interinter_prob);
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_SUPERTX
   vp10_copy(fc->supertx_prob, default_supertx_prob);
@@ -1445,11 +1456,20 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
                          pre_fc->inter_compound_mode_probs[i],
                          counts->inter_compound_mode[i],
                          fc->inter_compound_mode_probs[i]);
-
   for (i = 0; i < BLOCK_SIZES; ++i) {
     if (is_interintra_allowed_bsize(i))
       fc->interintra_prob[i] = mode_mv_merge_probs(pre_fc->interintra_prob[i],
                                                    counts->interintra[i]);
+  }
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    if (is_interintra_allowed_bsize(i) && get_wedge_bits(i))
+      fc->wedge_interintra_prob[i] = mode_mv_merge_probs(
+          pre_fc->wedge_interintra_prob[i], counts->wedge_interintra[i]);
+  }
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    if (get_wedge_bits(i))
+      fc->wedge_interinter_prob[i] = mode_mv_merge_probs(
+          pre_fc->wedge_interinter_prob[i], counts->wedge_interinter[i]);
   }
 #endif  // CONFIG_EXT_INTER
 
