@@ -819,25 +819,15 @@ static aom_codec_err_t encoder_destroy(aom_codec_alg_priv_t *ctx) {
 }
 
 static void pick_quickcompress_mode(aom_codec_alg_priv_t *ctx,
-                                    unsigned long duration,
                                     unsigned long deadline) {
   MODE new_mode = BEST;
 
   switch (ctx->cfg.g_pass) {
     case AOM_RC_ONE_PASS:
-      if (deadline > 0) {
-        const aom_codec_enc_cfg_t *const cfg = &ctx->cfg;
-
-        // Convert duration parameter from stream timebase to microseconds.
-        const uint64_t duration_us = (uint64_t)duration * 1000000 *
-                                     (uint64_t)cfg->g_timebase.num /
-                                     (uint64_t)cfg->g_timebase.den;
-
-        // If the deadline is more that the duration this frame is to be shown,
-        // use good quality mode. Otherwise use realtime mode.
-        new_mode = (deadline > duration_us) ? GOOD : REALTIME;
-      } else {
-        new_mode = BEST;
+      switch (deadline) {
+        case AOM_DL_BEST_QUALITY: new_mode = BEST; break;
+        case AOM_DL_REALTIME: new_mode = REALTIME; break;
+        default: new_mode = GOOD; break;
       }
       break;
     case AOM_RC_FIRST_PASS: break;
@@ -981,7 +971,7 @@ static aom_codec_err_t encoder_encode(aom_codec_alg_priv_t *ctx,
     }
   }
 
-  pick_quickcompress_mode(ctx, duration, deadline);
+  pick_quickcompress_mode(ctx, deadline);
   aom_codec_pkt_list_init(&ctx->pkt_list);
 
   // Handle Flags
