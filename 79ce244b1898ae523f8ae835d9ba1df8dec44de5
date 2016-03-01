@@ -16,6 +16,24 @@
       "revId": "79ce244b1898ae523f8ae835d9ba1df8dec44de5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_48433239",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-03-01T06:43:13Z",
+      "side": 1,
+      "message": "i think we can use \"is_one_pass_cbr_svc\" here, will fix it tomorrow.\nYeah we should also do this for resolution change in single-layer encoding, but prefer to do that in another CL.",
+      "parentUuid": "c20f35b0_8d7f25ed",
+      "revId": "79ce244b1898ae523f8ae835d9ba1df8dec44de5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
