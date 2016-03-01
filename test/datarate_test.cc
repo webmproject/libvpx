@@ -1044,8 +1044,8 @@ VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
-                          ::testing::Range(2, 7));
+                          ::testing::Range(2, 9));
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvc,
                           ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(5, 8));
+                          ::testing::Range(5, 9));
 }  // namespace
