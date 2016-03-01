@@ -2404,7 +2404,7 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   MACROBLOCKD *xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  unsigned int tmp;
+  int64_t tmp;
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
@@ -2472,7 +2472,7 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
     tmp = ROUNDZ_POWER_OF_TWO(tmp, (xd->bd - 8) * 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  *bsse += (int64_t)tmp * 16;
+  *bsse += tmp * 16;
 
   if (p->eobs[block] > 0) {
     const int lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
@@ -2544,12 +2544,12 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
         }
       }
     } else {
-      cpi->fn_ptr[txm_bsize].vf(src, src_stride,
-                                rec_buffer, 32, &tmp);
+      uint32_t this_dist;
+      cpi->fn_ptr[txm_bsize].vf(src, src_stride, rec_buffer, 32, &this_dist);
+      tmp = this_dist;
     }
   }
-  *dist += (int64_t)tmp * 16;
-
+  *dist += tmp * 16;
   *rate += cost_coeffs(x, plane, block, coeff_ctx, tx_size,
                        scan_order->scan, scan_order->neighbors, 0);
   *skip &= (p->eobs[block] == 0);
