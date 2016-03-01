@@ -102,9 +102,6 @@ void vp10_build_prediction_by_left_preds(VP10_COMP *cpi,
                                          uint8_t *tmp_buf[MAX_MB_PLANE],
                                          int tmp_stride[MAX_MB_PLANE]);
 #endif  // CONFIG_OBMC
-#ifdef __cplusplus
-}  // extern "C"
-#endif
 
 #if CONFIG_AFFINE_MOTION
 static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(VP10_COMP *cpi,
@@ -120,6 +117,10 @@ static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(VP10_COMP *cpi,
 
   return &cpi->upsampled_ref_bufs[cpi->upsampled_ref_idx[ref_idx]].buf;
 }
+#endif
+
+#ifdef __cplusplus
+}  // extern "C"
 #endif
 
 #endif  // VP10_ENCODER_RDOPT_H_

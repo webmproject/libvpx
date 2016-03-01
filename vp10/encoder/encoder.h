@@ -701,10 +701,6 @@ void vp10_new_framerate(VP10_COMP *cpi, double framerate);
 
 #define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))
 
-#ifdef __cplusplus
-}  // extern "C"
-#endif
-
 #if CONFIG_AFFINE_MOTION
 // Update up-sampled reference frame index.
 static INLINE void uref_cnt_fb(EncRefCntBuffer *ubufs, int *uidx,
@@ -717,6 +713,10 @@ static INLINE void uref_cnt_fb(EncRefCntBuffer *ubufs, int *uidx,
   *uidx = new_uidx;
   ubufs[new_uidx].ref_count++;
 }
+#endif
+
+#ifdef __cplusplus
+}  // extern "C"
 #endif
 
 #endif  // VP10_ENCODER_ENCODER_H_
