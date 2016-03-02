@@ -1345,7 +1345,7 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int right_available =
-      mi_col + (bw >> !pd->subsampling_x) < xd->tile.mi_col_end;
+      mi_col + (1 << mi_width_log2_lookup[bsize]) < xd->tile.mi_col_end;
   const int have_right = vp10_has_right(bsize, mi_row, mi_col,
                                         right_available,
                                         tx_size, row_off, col_off,
