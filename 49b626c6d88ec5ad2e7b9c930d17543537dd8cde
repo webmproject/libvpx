@@ -46,6 +46,29 @@
       "revId": "49b626c6d88ec5ad2e7b9c930d17543537dd8cde",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42f42502_81985c2f",
+        "filename": "vpx_dsp/x86/masked_sad_intrin_ssse3.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-03-02T00:36:51Z",
+      "side": 1,
+      "message": "This needs to move into the loop like it is in masked_sad8xh_ssse3 (and keep the _mm_add_epi32 on line 206). (it is signed arithmetic from here on, and res can have the top bit set in a 16 bit lane at this point).",
+      "range": {
+        "startLine": 214,
+        "startChar": 2,
+        "endLine": 214,
+        "endChar": 32
+      },
+      "revId": "49b626c6d88ec5ad2e7b9c930d17543537dd8cde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
