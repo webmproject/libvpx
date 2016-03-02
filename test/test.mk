@@ -168,6 +168,11 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_dct_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ANS)          += vp10_ans_test.cc
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += sum_squares_test.cc
+
+ifeq ($(CONFIG_EXT_INTER),yes)
+LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_variance_test.cc
+LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
+endif
 endif # VP10
 
 ## Multi-codec / unconditional whitebox tests.

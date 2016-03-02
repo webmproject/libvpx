@@ -27,6 +27,10 @@ extern "C" {
 
 typedef int16_t InterpKernel[SUBPEL_TAPS];
 
+#define BIL_SUBPEL_BITS    3
+#define BIL_SUBPEL_SHIFTS  (1 << BIL_SUBPEL_BITS)
+extern const uint8_t vpx_bilinear_filters[BIL_SUBPEL_SHIFTS][2];
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
