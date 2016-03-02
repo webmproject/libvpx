@@ -1594,14 +1594,15 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   int target = rc->avg_frame_bandwidth;
   int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
       cpi->svc.temporal_layer_id, cpi->svc.number_temporal_layers);
-
+  // Periodic key frames is based on the super-frame counter
+  // (svc.current_superframe), also only base spatial layer is key frame.
   if ((cm->current_video_frame == 0) ||
       (cpi->frame_flags & FRAMEFLAGS_KEY) ||
-      (cpi->oxcf.auto_key && (rc->frames_since_key %
-          cpi->oxcf.key_freq == 0))) {
+      (cpi->oxcf.auto_key &&
+       (cpi->svc.current_superframe % cpi->oxcf.key_freq == 0) &&
+       cpi->svc.spatial_layer_id == 0)) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
-
     if (is_two_pass_svc(cpi)) {
       cpi->svc.layer_context[layer].is_key_frame = 1;
       cpi->ref_frame_flags &=

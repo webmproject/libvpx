@@ -3983,6 +3983,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       ++cm->current_video_frame;
       cpi->ext_refresh_frame_flags_pending = 0;
       cpi->svc.rc_drop_superframe = 1;
+      if (cpi->use_svc)
+        vp9_inc_frame_in_layer(cpi);
       return;
     }
   }
