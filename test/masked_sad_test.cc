@@ -22,6 +22,8 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 
+#define MAX_CU_SIZE 128
+
 using libvpx_test::ACMRandom;
 
 namespace {
@@ -50,16 +52,16 @@ class MaskedSADTest : public ::testing::TestWithParam<MaskedSADParam> {
 TEST_P(MaskedSADTest, OperationCheck) {
   unsigned int ref_ret, ret;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t,  src_ptr[4096]);
-  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[4096]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[4096]);
+  DECLARE_ALIGNED(16, uint8_t, src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = 64;
-  int ref_stride = 64;
-  int msk_stride = 64;
+  int src_stride = MAX_CU_SIZE;
+  int ref_stride = MAX_CU_SIZE;
+  int msk_stride = MAX_CU_SIZE;
   for (int i = 0; i < number_of_iterations; ++i) {
-    for (int j = 0; j < 4096; j++) {
+    for (int j = 0; j < MAX_CU_SIZE*MAX_CU_SIZE; j++) {
       src_ptr[j] = rnd.Rand8();
       ref_ptr[j] = rnd.Rand8();
       msk_ptr[j] = ((rnd.Rand8()&0x7f) > 64) ? rnd.Rand8()&0x3f : 64;
@@ -108,18 +110,18 @@ class HighbdMaskedSADTest : public ::testing::
 TEST_P(HighbdMaskedSADTest, OperationCheck) {
   unsigned int ref_ret, ret;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint16_t,  src_ptr[4096]);
-  DECLARE_ALIGNED(16, uint16_t,  ref_ptr[4096]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[4096]);
+  DECLARE_ALIGNED(16, uint16_t, src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
   uint8_t* src8_ptr = CONVERT_TO_BYTEPTR(src_ptr);
   uint8_t* ref8_ptr = CONVERT_TO_BYTEPTR(ref_ptr);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = 64;
-  int ref_stride = 64;
-  int msk_stride = 64;
+  int src_stride = MAX_CU_SIZE;
+  int ref_stride = MAX_CU_SIZE;
+  int msk_stride = MAX_CU_SIZE;
   for (int i = 0; i < number_of_iterations; ++i) {
-    for (int j = 0; j < 4096; j++) {
+    for (int j = 0; j < MAX_CU_SIZE*MAX_CU_SIZE; j++) {
       src_ptr[j] = rnd.Rand16()&0xfff;
       ref_ptr[j] = rnd.Rand16()&0xfff;
       msk_ptr[j] = ((rnd.Rand8()&0x7f) > 64) ? rnd.Rand8()&0x3f : 64;
@@ -148,6 +150,14 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
   SSSE3_C_COMPARE, MaskedSADTest,
   ::testing::Values(
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_masked_sad128x128_ssse3,
+               &vpx_masked_sad128x128_c),
+    make_tuple(&vpx_masked_sad128x64_ssse3,
+               &vpx_masked_sad128x64_c),
+    make_tuple(&vpx_masked_sad64x128_ssse3,
+               &vpx_masked_sad64x128_c),
+#endif  // CONFIG_EXT_PARTITION
     make_tuple(&vpx_masked_sad64x64_ssse3,
                &vpx_masked_sad64x64_c),
     make_tuple(&vpx_masked_sad64x32_ssse3,
@@ -178,32 +188,40 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
   SSSE3_C_COMPARE, HighbdMaskedSADTest,
   ::testing::Values(
-    make_tuple(&vp9_highbd_masked_sad64x64_ssse3,
-               &vp9_highbd_masked_sad64x64_c),
-    make_tuple(&vp9_highbd_masked_sad64x32_ssse3,
-               &vp9_highbd_masked_sad64x32_c),
-    make_tuple(&vp9_highbd_masked_sad32x64_ssse3,
-               &vp9_highbd_masked_sad32x64_c),
-    make_tuple(&vp9_highbd_masked_sad32x32_ssse3,
-               &vp9_highbd_masked_sad32x32_c),
-    make_tuple(&vp9_highbd_masked_sad32x16_ssse3,
-               &vp9_highbd_masked_sad32x16_c),
-    make_tuple(&vp9_highbd_masked_sad16x32_ssse3,
-               &vp9_highbd_masked_sad16x32_c),
-    make_tuple(&vp9_highbd_masked_sad16x16_ssse3,
-               &vp9_highbd_masked_sad16x16_c),
-    make_tuple(&vp9_highbd_masked_sad16x8_ssse3,
-               &vp9_highbd_masked_sad16x8_c),
-    make_tuple(&vp9_highbd_masked_sad8x16_ssse3,
-               &vp9_highbd_masked_sad8x16_c),
-    make_tuple(&vp9_highbd_masked_sad8x8_ssse3,
-               &vp9_highbd_masked_sad8x8_c),
-    make_tuple(&vp9_highbd_masked_sad8x4_ssse3,
-               &vp9_highbd_masked_sad8x4_c),
-    make_tuple(&vp9_highbd_masked_sad4x8_ssse3,
-               &vp9_highbd_masked_sad4x8_c),
-    make_tuple(&vp9_highbd_masked_sad4x4_ssse3,
-               &vp9_highbd_masked_sad4x4_c)));
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_masked_sad128x128_ssse3,
+               &vpx_highbd_masked_sad128x128_c),
+    make_tuple(&vpx_highbd_masked_sad128x64_ssse3,
+               &vpx_highbd_masked_sad128x64_c),
+    make_tuple(&vpx_highbd_masked_sad64x128_ssse3,
+               &vpx_highbd_masked_sad64x128_c),
+#endif  // CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_masked_sad64x64_ssse3,
+               &vpx_highbd_masked_sad64x64_c),
+    make_tuple(&vpx_highbd_masked_sad64x32_ssse3,
+               &vpx_highbd_masked_sad64x32_c),
+    make_tuple(&vpx_highbd_masked_sad32x64_ssse3,
+               &vpx_highbd_masked_sad32x64_c),
+    make_tuple(&vpx_highbd_masked_sad32x32_ssse3,
+               &vpx_highbd_masked_sad32x32_c),
+    make_tuple(&vpx_highbd_masked_sad32x16_ssse3,
+               &vpx_highbd_masked_sad32x16_c),
+    make_tuple(&vpx_highbd_masked_sad16x32_ssse3,
+               &vpx_highbd_masked_sad16x32_c),
+    make_tuple(&vpx_highbd_masked_sad16x16_ssse3,
+               &vpx_highbd_masked_sad16x16_c),
+    make_tuple(&vpx_highbd_masked_sad16x8_ssse3,
+               &vpx_highbd_masked_sad16x8_c),
+    make_tuple(&vpx_highbd_masked_sad8x16_ssse3,
+               &vpx_highbd_masked_sad8x16_c),
+    make_tuple(&vpx_highbd_masked_sad8x8_ssse3,
+               &vpx_highbd_masked_sad8x8_c),
+    make_tuple(&vpx_highbd_masked_sad8x4_ssse3,
+               &vpx_highbd_masked_sad8x4_c),
+    make_tuple(&vpx_highbd_masked_sad4x8_ssse3,
+               &vpx_highbd_masked_sad4x8_c),
+    make_tuple(&vpx_highbd_masked_sad4x4_ssse3,
+               &vpx_highbd_masked_sad4x4_c)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSSE3
 }  // namespace

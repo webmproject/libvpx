@@ -20,10 +20,12 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
+#include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/vpx_filter.h"
+#include "vpx_mem/vpx_mem.h"
 
-#define MAX_SIZE 64
+#define MAX_CU_SIZE 128
 
 using libvpx_test::ACMRandom;
 
@@ -58,17 +60,17 @@ TEST_P(MaskedVarianceTest, OperationCheck) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t,  src_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_SIZE*MAX_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = MAX_SIZE;
-  int ref_stride = MAX_SIZE;
-  int msk_stride = MAX_SIZE;
+  int src_stride = MAX_CU_SIZE;
+  int ref_stride = MAX_CU_SIZE;
+  int msk_stride = MAX_CU_SIZE;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    for (int j = 0; j < MAX_SIZE*MAX_SIZE; j++) {
+    for (int j = 0; j < MAX_CU_SIZE*MAX_CU_SIZE; j++) {
       src_ptr[j] = rnd.Rand8();
       ref_ptr[j] = rnd.Rand8();
       msk_ptr[j] = rnd(65);
@@ -100,19 +102,19 @@ TEST_P(MaskedVarianceTest, ExtremeValues) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t,  src_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_SIZE*MAX_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = MAX_SIZE;
-  int ref_stride = MAX_SIZE;
-  int msk_stride = MAX_SIZE;
+  int src_stride = MAX_CU_SIZE;
+  int ref_stride = MAX_CU_SIZE;
+  int msk_stride = MAX_CU_SIZE;
 
   for (int i = 0; i < 8; ++i) {
-    memset(src_ptr, (i & 0x1) ? 255 : 0, MAX_SIZE*MAX_SIZE);
-    memset(ref_ptr, (i & 0x2) ? 255 : 0, MAX_SIZE*MAX_SIZE);
-    memset(msk_ptr, (i & 0x4) ?  64 : 0, MAX_SIZE*MAX_SIZE);
+    memset(src_ptr, (i & 0x1) ? 255 : 0, MAX_CU_SIZE*MAX_CU_SIZE);
+    memset(ref_ptr, (i & 0x2) ? 255 : 0, MAX_CU_SIZE*MAX_CU_SIZE);
+    memset(msk_ptr, (i & 0x4) ?  64 : 0, MAX_CU_SIZE*MAX_CU_SIZE);
 
     ref_ret = ref_func_(src_ptr, src_stride,
                         ref_ptr, ref_stride,
@@ -166,21 +168,21 @@ TEST_P(MaskedSubPixelVarianceTest, OperationCheck) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t,  src_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  src_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = (MAX_SIZE+1);
-  int ref_stride = (MAX_SIZE+1);
-  int msk_stride = (MAX_SIZE+1);
+  int src_stride = (MAX_CU_SIZE+1);
+  int ref_stride = (MAX_CU_SIZE+1);
+  int msk_stride = (MAX_CU_SIZE+1);
   int xoffset;
   int yoffset;
 
   for (int i = 0; i < number_of_iterations; ++i) {
     int xoffsets[] = {0, 4, rnd(BIL_SUBPEL_SHIFTS)};
     int yoffsets[] = {0, 4, rnd(BIL_SUBPEL_SHIFTS)};
-    for (int j = 0; j < (MAX_SIZE+1)*(MAX_SIZE+1); j++) {
+    for (int j = 0; j < (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1); j++) {
       src_ptr[j] = rnd.Rand8();
       ref_ptr[j] = rnd.Rand8();
       msk_ptr[j] = rnd(65);
@@ -221,23 +223,23 @@ TEST_P(MaskedSubPixelVarianceTest, ExtremeValues) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t,  src_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  src_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  ref_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
   int first_failure_x = -1;
   int first_failure_y = -1;
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = (MAX_SIZE+1);
-  int ref_stride = (MAX_SIZE+1);
-  int msk_stride = (MAX_SIZE+1);
+  int src_stride = (MAX_CU_SIZE+1);
+  int ref_stride = (MAX_CU_SIZE+1);
+  int msk_stride = (MAX_CU_SIZE+1);
 
   for (int xoffset = 0 ; xoffset < BIL_SUBPEL_SHIFTS ; xoffset++) {
     for (int yoffset = 0 ; yoffset < BIL_SUBPEL_SHIFTS ; yoffset++) {
       for (int i = 0; i < 8; ++i) {
-        memset(src_ptr, (i & 0x1) ? 255 : 0, (MAX_SIZE+1)*(MAX_SIZE+1));
-        memset(ref_ptr, (i & 0x2) ? 255 : 0, (MAX_SIZE+1)*(MAX_SIZE+1));
-        memset(msk_ptr, (i & 0x4) ?  64 : 0, (MAX_SIZE+1)*(MAX_SIZE+1));
+        memset(src_ptr, (i & 0x1) ? 255 : 0, (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1));
+        memset(ref_ptr, (i & 0x2) ? 255 : 0, (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1));
+        memset(msk_ptr, (i & 0x4) ?  64 : 0, (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1));
 
         ref_ret = ref_func_(src_ptr, src_stride,
                             xoffset, yoffset,
@@ -297,19 +299,19 @@ TEST_P(HighbdMaskedVarianceTest, OperationCheck) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint16_t, src_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint16_t, ref_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_SIZE*MAX_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
   uint8_t* src8_ptr = CONVERT_TO_BYTEPTR(src_ptr);
   uint8_t* ref8_ptr = CONVERT_TO_BYTEPTR(ref_ptr);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = MAX_SIZE;
-  int ref_stride = MAX_SIZE;
-  int msk_stride = MAX_SIZE;
+  int src_stride = MAX_CU_SIZE;
+  int ref_stride = MAX_CU_SIZE;
+  int msk_stride = MAX_CU_SIZE;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    for (int j = 0; j < MAX_SIZE*MAX_SIZE; j++) {
+    for (int j = 0; j < MAX_CU_SIZE*MAX_CU_SIZE; j++) {
       src_ptr[j] = rnd.Rand16() & ((1 << bit_depth_) - 1);
       ref_ptr[j] = rnd.Rand16() & ((1 << bit_depth_) - 1);
       msk_ptr[j] = rnd(65);
@@ -341,23 +343,23 @@ TEST_P(HighbdMaskedVarianceTest, ExtremeValues) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint16_t, src_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint16_t, ref_ptr[MAX_SIZE*MAX_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_SIZE*MAX_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
   uint8_t* src8_ptr = CONVERT_TO_BYTEPTR(src_ptr);
   uint8_t* ref8_ptr = CONVERT_TO_BYTEPTR(ref_ptr);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = MAX_SIZE;
-  int ref_stride = MAX_SIZE;
-  int msk_stride = MAX_SIZE;
+  int src_stride = MAX_CU_SIZE;
+  int ref_stride = MAX_CU_SIZE;
+  int msk_stride = MAX_CU_SIZE;
 
   for (int i = 0; i < 8; ++i) {
     vpx_memset16(src_ptr, (i & 0x1) ? ((1 << bit_depth_) - 1) : 0,
-                 MAX_SIZE*MAX_SIZE);
+                 MAX_CU_SIZE*MAX_CU_SIZE);
     vpx_memset16(ref_ptr, (i & 0x2) ? ((1 << bit_depth_) - 1) : 0,
-                 MAX_SIZE*MAX_SIZE);
-    memset(msk_ptr, (i & 0x4) ?  64 : 0, MAX_SIZE*MAX_SIZE);
+                 MAX_CU_SIZE*MAX_CU_SIZE);
+    memset(msk_ptr, (i & 0x4) ?  64 : 0, MAX_CU_SIZE*MAX_CU_SIZE);
 
     ref_ret = ref_func_(src8_ptr, src_stride,
                         ref8_ptr, ref_stride,
@@ -407,24 +409,24 @@ TEST_P(HighbdMaskedSubPixelVarianceTest, OperationCheck) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint16_t, src_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint16_t, ref_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint16_t, src_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint16_t, ref_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
   uint8_t* src8_ptr = CONVERT_TO_BYTEPTR(src_ptr);
   uint8_t* ref8_ptr = CONVERT_TO_BYTEPTR(ref_ptr);
   int err_count = 0;
   int first_failure = -1;
   int first_failure_x = -1;
   int first_failure_y = -1;
-  int src_stride = (MAX_SIZE+1);
-  int ref_stride = (MAX_SIZE+1);
-  int msk_stride = (MAX_SIZE+1);
+  int src_stride = (MAX_CU_SIZE+1);
+  int ref_stride = (MAX_CU_SIZE+1);
+  int msk_stride = (MAX_CU_SIZE+1);
   int xoffset, yoffset;
 
   for (int i = 0; i < number_of_iterations; ++i) {
     for (xoffset = 0; xoffset < BIL_SUBPEL_SHIFTS; xoffset++) {
       for (yoffset = 0; yoffset < BIL_SUBPEL_SHIFTS; yoffset++) {
-        for (int j = 0; j < (MAX_SIZE+1)*(MAX_SIZE+1); j++) {
+        for (int j = 0; j < (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1); j++) {
           src_ptr[j] = rnd.Rand16() & ((1 << bit_depth_) - 1);
           ref_ptr[j] = rnd.Rand16() & ((1 << bit_depth_) - 1);
           msk_ptr[j] = rnd(65);
@@ -465,27 +467,27 @@ TEST_P(HighbdMaskedSubPixelVarianceTest, ExtremeValues) {
   unsigned int ref_ret, opt_ret;
   unsigned int ref_sse, opt_sse;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint16_t, src_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint16_t, ref_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
-  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_SIZE+1)*(MAX_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint16_t, src_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint16_t, ref_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
+  DECLARE_ALIGNED(16, uint8_t,  msk_ptr[(MAX_CU_SIZE+1)*(MAX_CU_SIZE+1)]);
   uint8_t* src8_ptr = CONVERT_TO_BYTEPTR(src_ptr);
   uint8_t* ref8_ptr = CONVERT_TO_BYTEPTR(ref_ptr);
   int first_failure_x = -1;
   int first_failure_y = -1;
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = (MAX_SIZE+1);
-  int ref_stride = (MAX_SIZE+1);
-  int msk_stride = (MAX_SIZE+1);
+  int src_stride = (MAX_CU_SIZE+1);
+  int ref_stride = (MAX_CU_SIZE+1);
+  int msk_stride = (MAX_CU_SIZE+1);
 
   for (int xoffset = 0 ; xoffset < BIL_SUBPEL_SHIFTS ; xoffset++) {
     for (int yoffset = 0 ; yoffset < BIL_SUBPEL_SHIFTS ; yoffset++) {
       for (int i = 0; i < 8; ++i) {
         vpx_memset16(src_ptr, (i & 0x1) ? ((1 << bit_depth_) - 1) : 0,
-                     (MAX_SIZE+1)*(MAX_SIZE+1));
+                     (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1));
         vpx_memset16(ref_ptr, (i & 0x2) ? ((1 << bit_depth_) - 1) : 0,
-                     (MAX_SIZE+1)*(MAX_SIZE+1));
-        memset(msk_ptr, (i & 0x4) ?   64 : 0, (MAX_SIZE+1)*(MAX_SIZE+1));
+                     (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1));
+        memset(msk_ptr, (i & 0x4) ?   64 : 0, (MAX_CU_SIZE+1)*(MAX_CU_SIZE+1));
 
         ref_ret = ref_func_(src8_ptr, src_stride,
                             xoffset, yoffset,
@@ -525,6 +527,14 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
   SSSE3_C_COMPARE, MaskedVarianceTest,
   ::testing::Values(
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_masked_variance128x128_ssse3,
+               &vpx_masked_variance128x128_c),
+    make_tuple(&vpx_masked_variance128x64_ssse3,
+               &vpx_masked_variance128x64_c),
+    make_tuple(&vpx_masked_variance64x128_ssse3,
+               &vpx_masked_variance64x128_c),
+#endif  // CONFIG_EXT_PARTITION
     make_tuple(&vpx_masked_variance64x64_ssse3,
                &vpx_masked_variance64x64_c),
     make_tuple(&vpx_masked_variance64x32_ssse3,
@@ -555,197 +565,253 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
   SSSE3_C_COMPARE, MaskedSubPixelVarianceTest,
   ::testing::Values(
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_masked_sub_pixel_variance128x128_ssse3,
+               &vpx_masked_sub_pixel_variance128x128_c),
+    make_tuple(&vpx_masked_sub_pixel_variance128x64_ssse3,
+               &vpx_masked_sub_pixel_variance128x64_c),
+    make_tuple(&vpx_masked_sub_pixel_variance64x128_ssse3,
+               &vpx_masked_sub_pixel_variance64x128_c),
+#endif  // CONFIG_EXT_PARTITION
     make_tuple(&vpx_masked_sub_pixel_variance64x64_ssse3,
-              &vpx_masked_sub_pixel_variance64x64_c),
+               &vpx_masked_sub_pixel_variance64x64_c),
     make_tuple(&vpx_masked_sub_pixel_variance64x32_ssse3,
-              &vpx_masked_sub_pixel_variance64x32_c),
+               &vpx_masked_sub_pixel_variance64x32_c),
     make_tuple(&vpx_masked_sub_pixel_variance32x64_ssse3,
-              &vpx_masked_sub_pixel_variance32x64_c),
+               &vpx_masked_sub_pixel_variance32x64_c),
     make_tuple(&vpx_masked_sub_pixel_variance32x32_ssse3,
-              &vpx_masked_sub_pixel_variance32x32_c),
+               &vpx_masked_sub_pixel_variance32x32_c),
     make_tuple(&vpx_masked_sub_pixel_variance32x16_ssse3,
-              &vpx_masked_sub_pixel_variance32x16_c),
+               &vpx_masked_sub_pixel_variance32x16_c),
     make_tuple(&vpx_masked_sub_pixel_variance16x32_ssse3,
-              &vpx_masked_sub_pixel_variance16x32_c),
+               &vpx_masked_sub_pixel_variance16x32_c),
     make_tuple(&vpx_masked_sub_pixel_variance16x16_ssse3,
-              &vpx_masked_sub_pixel_variance16x16_c),
+               &vpx_masked_sub_pixel_variance16x16_c),
     make_tuple(&vpx_masked_sub_pixel_variance16x8_ssse3,
-              &vpx_masked_sub_pixel_variance16x8_c),
+               &vpx_masked_sub_pixel_variance16x8_c),
     make_tuple(&vpx_masked_sub_pixel_variance8x16_ssse3,
-              &vpx_masked_sub_pixel_variance8x16_c),
+               &vpx_masked_sub_pixel_variance8x16_c),
     make_tuple(&vpx_masked_sub_pixel_variance8x8_ssse3,
-              &vpx_masked_sub_pixel_variance8x8_c),
+               &vpx_masked_sub_pixel_variance8x8_c),
     make_tuple(&vpx_masked_sub_pixel_variance8x4_ssse3,
-              &vpx_masked_sub_pixel_variance8x4_c),
+               &vpx_masked_sub_pixel_variance8x4_c),
     make_tuple(&vpx_masked_sub_pixel_variance4x8_ssse3,
-              &vpx_masked_sub_pixel_variance4x8_c),
+               &vpx_masked_sub_pixel_variance4x8_c),
     make_tuple(&vpx_masked_sub_pixel_variance4x4_ssse3,
-              &vpx_masked_sub_pixel_variance4x4_c)));
+               &vpx_masked_sub_pixel_variance4x4_c)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
   SSSE3_C_COMPARE, HighbdMaskedVarianceTest,
   ::testing::Values(
-    make_tuple(&vp9_highbd_masked_variance64x64_ssse3,
-               &vp9_highbd_masked_variance64x64_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance64x32_ssse3,
-               &vp9_highbd_masked_variance64x32_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance32x64_ssse3,
-               &vp9_highbd_masked_variance32x64_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance32x32_ssse3,
-               &vp9_highbd_masked_variance32x32_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance32x16_ssse3,
-               &vp9_highbd_masked_variance32x16_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance16x32_ssse3,
-               &vp9_highbd_masked_variance16x32_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance16x16_ssse3,
-               &vp9_highbd_masked_variance16x16_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance16x8_ssse3,
-               &vp9_highbd_masked_variance16x8_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance8x16_ssse3,
-               &vp9_highbd_masked_variance8x16_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance8x8_ssse3,
-               &vp9_highbd_masked_variance8x8_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance8x4_ssse3,
-               &vp9_highbd_masked_variance8x4_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance4x8_ssse3,
-               &vp9_highbd_masked_variance4x8_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_variance4x4_ssse3,
-               &vp9_highbd_masked_variance4x4_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_10_masked_variance64x64_ssse3,
-               &vp9_highbd_10_masked_variance64x64_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance64x32_ssse3,
-               &vp9_highbd_10_masked_variance64x32_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance32x64_ssse3,
-               &vp9_highbd_10_masked_variance32x64_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance32x32_ssse3,
-               &vp9_highbd_10_masked_variance32x32_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance32x16_ssse3,
-               &vp9_highbd_10_masked_variance32x16_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance16x32_ssse3,
-               &vp9_highbd_10_masked_variance16x32_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance16x16_ssse3,
-               &vp9_highbd_10_masked_variance16x16_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance16x8_ssse3,
-               &vp9_highbd_10_masked_variance16x8_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance8x16_ssse3,
-               &vp9_highbd_10_masked_variance8x16_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance8x8_ssse3,
-               &vp9_highbd_10_masked_variance8x8_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance8x4_ssse3,
-               &vp9_highbd_10_masked_variance8x4_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance4x8_ssse3,
-               &vp9_highbd_10_masked_variance4x8_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_variance4x4_ssse3,
-               &vp9_highbd_10_masked_variance4x4_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_12_masked_variance64x64_ssse3,
-               &vp9_highbd_12_masked_variance64x64_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance64x32_ssse3,
-               &vp9_highbd_12_masked_variance64x32_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance32x64_ssse3,
-               &vp9_highbd_12_masked_variance32x64_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance32x32_ssse3,
-               &vp9_highbd_12_masked_variance32x32_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance32x16_ssse3,
-               &vp9_highbd_12_masked_variance32x16_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance16x32_ssse3,
-               &vp9_highbd_12_masked_variance16x32_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance16x16_ssse3,
-               &vp9_highbd_12_masked_variance16x16_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance16x8_ssse3,
-               &vp9_highbd_12_masked_variance16x8_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance8x16_ssse3,
-               &vp9_highbd_12_masked_variance8x16_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance8x8_ssse3,
-               &vp9_highbd_12_masked_variance8x8_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance8x4_ssse3,
-               &vp9_highbd_12_masked_variance8x4_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance4x8_ssse3,
-               &vp9_highbd_12_masked_variance4x8_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_variance4x4_ssse3,
-               &vp9_highbd_12_masked_variance4x4_c, VPX_BITS_12)));
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_masked_variance128x128_ssse3,
+               &vpx_highbd_masked_variance128x128_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance128x64_ssse3,
+               &vpx_highbd_masked_variance128x64_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance64x128_ssse3,
+               &vpx_highbd_masked_variance64x128_c, VPX_BITS_8),
+#endif  // CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_masked_variance64x64_ssse3,
+               &vpx_highbd_masked_variance64x64_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance64x32_ssse3,
+               &vpx_highbd_masked_variance64x32_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance32x64_ssse3,
+               &vpx_highbd_masked_variance32x64_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance32x32_ssse3,
+               &vpx_highbd_masked_variance32x32_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance32x16_ssse3,
+               &vpx_highbd_masked_variance32x16_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance16x32_ssse3,
+               &vpx_highbd_masked_variance16x32_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance16x16_ssse3,
+               &vpx_highbd_masked_variance16x16_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance16x8_ssse3,
+               &vpx_highbd_masked_variance16x8_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance8x16_ssse3,
+               &vpx_highbd_masked_variance8x16_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance8x8_ssse3,
+               &vpx_highbd_masked_variance8x8_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance8x4_ssse3,
+               &vpx_highbd_masked_variance8x4_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance4x8_ssse3,
+               &vpx_highbd_masked_variance4x8_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_variance4x4_ssse3,
+               &vpx_highbd_masked_variance4x4_c, VPX_BITS_8),
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_10_masked_variance128x128_ssse3,
+               &vpx_highbd_10_masked_variance128x128_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance128x64_ssse3,
+               &vpx_highbd_10_masked_variance128x64_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance64x128_ssse3,
+               &vpx_highbd_10_masked_variance64x128_c, VPX_BITS_10),
+#endif  // CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_10_masked_variance64x64_ssse3,
+               &vpx_highbd_10_masked_variance64x64_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance64x32_ssse3,
+               &vpx_highbd_10_masked_variance64x32_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance32x64_ssse3,
+               &vpx_highbd_10_masked_variance32x64_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance32x32_ssse3,
+               &vpx_highbd_10_masked_variance32x32_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance32x16_ssse3,
+               &vpx_highbd_10_masked_variance32x16_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance16x32_ssse3,
+               &vpx_highbd_10_masked_variance16x32_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance16x16_ssse3,
+               &vpx_highbd_10_masked_variance16x16_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance16x8_ssse3,
+               &vpx_highbd_10_masked_variance16x8_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance8x16_ssse3,
+               &vpx_highbd_10_masked_variance8x16_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance8x8_ssse3,
+               &vpx_highbd_10_masked_variance8x8_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance8x4_ssse3,
+               &vpx_highbd_10_masked_variance8x4_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance4x8_ssse3,
+               &vpx_highbd_10_masked_variance4x8_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_variance4x4_ssse3,
+               &vpx_highbd_10_masked_variance4x4_c, VPX_BITS_10),
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_12_masked_variance128x128_ssse3,
+               &vpx_highbd_12_masked_variance128x128_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance128x64_ssse3,
+               &vpx_highbd_12_masked_variance128x64_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance64x128_ssse3,
+               &vpx_highbd_12_masked_variance64x128_c, VPX_BITS_12),
+#endif  // CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_12_masked_variance64x64_ssse3,
+               &vpx_highbd_12_masked_variance64x64_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance64x32_ssse3,
+               &vpx_highbd_12_masked_variance64x32_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance32x64_ssse3,
+               &vpx_highbd_12_masked_variance32x64_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance32x32_ssse3,
+               &vpx_highbd_12_masked_variance32x32_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance32x16_ssse3,
+               &vpx_highbd_12_masked_variance32x16_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance16x32_ssse3,
+               &vpx_highbd_12_masked_variance16x32_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance16x16_ssse3,
+               &vpx_highbd_12_masked_variance16x16_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance16x8_ssse3,
+               &vpx_highbd_12_masked_variance16x8_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance8x16_ssse3,
+               &vpx_highbd_12_masked_variance8x16_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance8x8_ssse3,
+               &vpx_highbd_12_masked_variance8x8_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance8x4_ssse3,
+               &vpx_highbd_12_masked_variance8x4_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance4x8_ssse3,
+               &vpx_highbd_12_masked_variance4x8_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_variance4x4_ssse3,
+               &vpx_highbd_12_masked_variance4x4_c, VPX_BITS_12)));
 
 INSTANTIATE_TEST_CASE_P(
   SSSE3_C_COMPARE, HighbdMaskedSubPixelVarianceTest,
   ::testing::Values(
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance64x64_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance64x64_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance64x32_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance64x32_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance32x64_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance32x64_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance32x32_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance32x32_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance32x16_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance32x16_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance16x32_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance16x32_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance16x16_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance16x16_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance16x8_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance16x8_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance8x16_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance8x16_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance8x8_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance8x8_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance8x4_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance8x4_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance4x8_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance4x8_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_masked_sub_pixel_variance4x4_ssse3,
-               &vp9_highbd_masked_sub_pixel_variance4x4_c, VPX_BITS_8),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance64x64_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance64x64_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance64x32_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance64x32_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance32x64_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance32x64_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance32x32_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance32x32_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance32x16_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance32x16_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance16x32_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance16x32_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance16x16_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance16x16_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance16x8_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance16x8_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance8x16_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance8x16_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance8x8_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance8x8_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance8x4_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance8x4_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance4x8_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance4x8_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_10_masked_sub_pixel_variance4x4_ssse3,
-               &vp9_highbd_10_masked_sub_pixel_variance4x4_c, VPX_BITS_10),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance64x64_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance64x64_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance64x32_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance64x32_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance32x64_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance32x64_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance32x32_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance32x32_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance32x16_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance32x16_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance16x32_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance16x32_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance16x16_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance16x16_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance16x8_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance16x8_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance8x16_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance8x16_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance8x8_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance8x8_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance8x4_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance8x4_c, VPX_BITS_12) ,
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance4x8_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance4x8_c, VPX_BITS_12),
-    make_tuple(&vp9_highbd_12_masked_sub_pixel_variance4x4_ssse3,
-               &vp9_highbd_12_masked_sub_pixel_variance4x4_c, VPX_BITS_12)));
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance128x128_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance128x128_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance128x64_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance128x64_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance64x128_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance64x128_c, VPX_BITS_8),
+#endif  // CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance64x64_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance64x64_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance64x32_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance64x32_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance32x64_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance32x64_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance32x32_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance32x32_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance32x16_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance32x16_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance16x32_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance16x32_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance16x16_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance16x16_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance16x8_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance16x8_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance8x16_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance8x16_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance8x8_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance8x8_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance8x4_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance8x4_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance4x8_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance4x8_c, VPX_BITS_8),
+    make_tuple(&vpx_highbd_masked_sub_pixel_variance4x4_ssse3,
+               &vpx_highbd_masked_sub_pixel_variance4x4_c, VPX_BITS_8),
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance128x128_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance128x128_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance128x64_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance128x64_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance64x128_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance64x128_c, VPX_BITS_10),
+#endif  // CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance64x64_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance64x64_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance64x32_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance64x32_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance32x64_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance32x64_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance32x32_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance32x32_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance32x16_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance32x16_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance16x32_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance16x32_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance16x16_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance16x16_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance16x8_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance16x8_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance8x16_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance8x16_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance8x8_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance8x8_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance8x4_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance8x4_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance4x8_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance4x8_c, VPX_BITS_10),
+    make_tuple(&vpx_highbd_10_masked_sub_pixel_variance4x4_ssse3,
+               &vpx_highbd_10_masked_sub_pixel_variance4x4_c, VPX_BITS_10),
+#if CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance128x128_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance128x128_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance128x64_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance128x64_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance64x128_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance64x128_c, VPX_BITS_12),
+#endif  // CONFIG_EXT_PARTITION
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance64x64_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance64x64_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance64x32_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance64x32_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance32x64_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance32x64_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance32x32_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance32x32_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance32x16_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance32x16_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance16x32_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance16x32_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance16x16_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance16x16_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance16x8_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance16x8_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance8x16_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance8x16_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance8x8_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance8x8_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance8x4_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance8x4_c, VPX_BITS_12) ,
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance4x8_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance4x8_c, VPX_BITS_12),
+    make_tuple(&vpx_highbd_12_masked_sub_pixel_variance4x4_ssse3,
+               &vpx_highbd_12_masked_sub_pixel_variance4x4_c, VPX_BITS_12)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #endif  // HAVE_SSSE3
