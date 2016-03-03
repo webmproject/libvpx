@@ -143,6 +143,9 @@ struct macroblock {
   uint8_t zcoeff_blk[TX_SIZES][256];
 #if CONFIG_VAR_TX
   uint8_t blk_skip[MAX_MB_PLANE][256];
+#if CONFIG_REF_MV
+  uint8_t blk_skip_drl[MAX_MB_PLANE][256];
+#endif
 #endif
 
   int skip;
