@@ -7208,6 +7208,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                 rate_y - rate_uv,
                 total_sse);
         }
+#if CONFIG_VAR_TX
+        for (i = 0; i < MAX_MB_PLANE; ++i)
+          memcpy(x->blk_skip_drl[i], x->blk_skip[i],
+                 sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif
 
         for (ref_idx = 0; ref_idx < ref_set; ++ref_idx) {
           int64_t tmp_alt_rd = INT64_MAX;
@@ -7235,8 +7240,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #else
             int_mv dummy_single_newmv[MAX_REF_FRAMES] = { { 0 } };
 #endif
-
-
             mbmi->ref_mv_idx = 1 + ref_idx;
 
             frame_mv[NEARMV][ref_frame] = cur_mv;
@@ -7299,12 +7302,22 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
             this_rd = tmp_alt_rd;
             tmp_ref_rd = tmp_alt_rd;
             backup_mbmi = *mbmi;
+#if CONFIG_VAR_TX
+            for (i = 0; i < MAX_MB_PLANE; ++i)
+              memcpy(x->blk_skip_drl[i], x->blk_skip[i],
+                     sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif
           } else {
             *mbmi = backup_mbmi;
           }
         }
 
         frame_mv[NEARMV][ref_frame] = backup_mv;
+#if CONFIG_VAR_TX
+        for (i = 0; i < MAX_MB_PLANE; ++i)
+          memcpy(x->blk_skip[i], x->blk_skip_drl[i],
+                 sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif
       }
 #endif  // CONFIG_REF_MV
 

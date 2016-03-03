@@ -3987,6 +3987,9 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   vp10_zero(x->skip_txfm);
 #if CONFIG_VAR_TX
   vp10_zero(x->blk_skip);
+#if CONFIG_REF_MV
+  vp10_zero(x->blk_skip_drl);
+#endif
 #endif
 
   {
