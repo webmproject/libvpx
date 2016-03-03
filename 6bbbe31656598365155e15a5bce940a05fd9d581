@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82d1bd8e_a868dbf6",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-03T17:27:17Z",
+      "side": 1,
+      "message": "What I intend on doing is using SSE intrinsics for a fast compare/lookup here. (kind of like how EOB scan works in quantization). But I want to get all the algorithms nailed down before I start writing assembly.",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 275,
+        "endChar": 37
+      },
+      "revId": "6bbbe31656598365155e15a5bce940a05fd9d581",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
