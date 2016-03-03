@@ -644,6 +644,9 @@ process_common_toolchain() {
 
     # detect tgt_isa
     case "$gcctarget" in
+      aarch64*)
+        tgt_isa=arm64
+        ;;
       armv6*)
         tgt_isa=armv6
         ;;
