@@ -161,6 +161,24 @@
     },
     {
       "key": {
+        "uuid": "82ea9d1e_e304affa",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2016-03-04T21:30:19Z",
+      "side": 1,
+      "message": "Yes those variable location are being reused.",
+      "parentUuid": "b1b530ae_2e48d30b",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d468d2a0_df96d3bf",
         "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
         "patchSetId": 7
@@ -172,6 +190,24 @@
       "writtenOn": "2016-01-29T04:59:01Z",
       "side": 1,
       "message": "you should align these with the other column",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22ef3134_f01bca92",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2016-03-04T21:30:19Z",
+      "side": 1,
+      "message": "what is not align here?\n FLATX_QIPI_OR_QIPI      m7, m1, [org_q%3], \\\n [org_p%3], m0, m3",
+      "parentUuid": "d468d2a0_df96d3bf",
       "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -297,6 +333,24 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_93373038",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2016-03-04T21:30:19Z",
+      "side": 1,
+      "message": "the value in m11 is being used later again",
+      "parentUuid": "71af3862_8c08ebb2",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b1a450bb_5096ccc2",
         "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
         "patchSetId": 7
@@ -325,6 +379,24 @@
       "writtenOn": "2016-01-29T04:59:01Z",
       "side": 1,
       "message": "I don\u0027t think many of these lines need to be broken. comment alignment can be local to each group if you\u0027re worried about line length",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82d1bd8e_d70de617",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2016-03-04T21:30:19Z",
+      "side": 1,
+      "message": "I didnt understand.\ncan you show me an example.",
+      "parentUuid": "749006cb_0461dab4",
       "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
