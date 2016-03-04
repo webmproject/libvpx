@@ -792,7 +792,7 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 
         for (row = 0; row < bh; ++row) {
           for (col = 0; col < bw; ++col)
-            dst16[col] = (mask[0][row] * dst16[col] + mask[1][row] * tmp16[col]
+            dst16[col] = (mask[0][col] * dst16[col] + mask[1][col] * tmp16[col]
                           + 32) >> 6;
           dst16 += dst_stride;
           tmp16 += tmp_stride;

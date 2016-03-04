@@ -811,7 +811,9 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi, MACROBLOCKD *xd,
                   subpel_y, sf, w, h, ref, interp_filter, xs, ys);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
+#endif  // (CONFIG_SUPERTX || CONFIG_OBMC)
 
+#if CONFIG_SUPERTX
 static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
                                           MACROBLOCKD *xd,
                                           int mi_row, int mi_col) {
@@ -881,9 +883,7 @@ static void dec_build_inter_predictors_sb(VP10Decoder *const pbi,
                                      sb_type);
 #endif  // CONFIG_EXT_INTER
 }
-#endif  // (CONFIG_SUPERTX || CONFIG_OBMC)
 
-#if CONFIG_SUPERTX
 static void dec_build_inter_predictors_sb_sub8x8(VP10Decoder *const pbi,
                                                  MACROBLOCKD *xd,
                                                  int mi_row, int mi_col,
