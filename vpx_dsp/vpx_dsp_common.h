@@ -20,6 +20,12 @@
 extern "C" {
 #endif
 
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+# define MAX_CU_SIZE 128
+#else
+# define MAX_CU_SIZE 64
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
+
 #define VPXMIN(x, y) (((x) < (y)) ? (x) : (y))
 #define VPXMAX(x, y) (((x) > (y)) ? (x) : (y))
 

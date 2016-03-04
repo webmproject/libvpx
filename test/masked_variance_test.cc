@@ -25,8 +25,6 @@
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_mem/vpx_mem.h"
 
-#define MAX_CU_SIZE 128
-
 using libvpx_test::ACMRandom;
 
 namespace {

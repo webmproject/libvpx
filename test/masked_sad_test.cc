@@ -22,8 +22,6 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 
-#define MAX_CU_SIZE 128
-
 using libvpx_test::ACMRandom;
 
 namespace {

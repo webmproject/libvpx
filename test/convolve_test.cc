@@ -28,7 +28,7 @@
 
 namespace {
 
-static const unsigned int kMaxDimension = 64;
+static const unsigned int kMaxDimension = MAX_CU_SIZE;
 
 typedef void (*ConvolveFunc)(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
@@ -102,7 +102,7 @@ void filter_block2d_8_c(const uint8_t *src_ptr,
   //                               = 23
   // and filter_max_width          = 16
   //
-  uint8_t intermediate_buffer[71 * kMaxDimension];
+  uint8_t intermediate_buffer[(kMaxDimension+8) * kMaxDimension];
   const int intermediate_next_stride = 1 - intermediate_height * output_width;
 
   // Horizontal pass (src -> transposed intermediate).
@@ -183,9 +183,9 @@ void filter_average_block2d_8_c(const uint8_t *src_ptr,
 
   assert(output_width <= kMaxDimension);
   assert(output_height <= kMaxDimension);
-  filter_block2d_8_c(src_ptr, src_stride, HFilter, VFilter, tmp, 64,
+  filter_block2d_8_c(src_ptr, src_stride, HFilter, VFilter, tmp, kMaxDimension,
                      output_width, output_height);
-  block2d_average_c(tmp, 64, dst_ptr, dst_stride,
+  block2d_average_c(tmp, kMaxDimension, dst_ptr, dst_stride,
                     output_width, output_height);
 }
 
@@ -214,7 +214,7 @@ void highbd_filter_block2d_8_c(const uint16_t *src_ptr,
    *                               = 23
    * and filter_max_width = 16
    */
-  uint16_t intermediate_buffer[71 * kMaxDimension];
+  uint16_t intermediate_buffer[(kMaxDimension+8) * kMaxDimension];
   const int intermediate_next_stride = 1 - intermediate_height * output_width;
 
   // Horizontal pass (src -> transposed intermediate).
@@ -302,9 +302,10 @@ void highbd_filter_average_block2d_8_c(const uint16_t *src_ptr,
 
   assert(output_width <= kMaxDimension);
   assert(output_height <= kMaxDimension);
-  highbd_filter_block2d_8_c(src_ptr, src_stride, HFilter, VFilter, tmp, 64,
+  highbd_filter_block2d_8_c(src_ptr, src_stride, HFilter, VFilter,
+                            tmp, kMaxDimension,
                             output_width, output_height, bd);
-  highbd_block2d_average_c(tmp, 64, dst_ptr, dst_stride,
+  highbd_block2d_average_c(tmp, kMaxDimension, dst_ptr, dst_stride,
                            output_width, output_height);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -351,7 +352,7 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
 
  protected:
   static const int kDataAlignment = 16;
-  static const int kOuterBlockSize = 256;
+  static const int kOuterBlockSize = 4*kMaxDimension;
   static const int kInputStride = kOuterBlockSize;
   static const int kOutputStride = kOuterBlockSize;
   static const int kInputBufferSize = kOuterBlockSize * kOuterBlockSize;
@@ -414,7 +415,8 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   void CopyOutputToRef() {
     memcpy(output_ref_, output_, kOutputBufferSize);
 #if CONFIG_VP9_HIGHBITDEPTH
-    memcpy(output16_ref_, output16_, kOutputBufferSize);
+    memcpy(output16_ref_, output16_,
+           kOutputBufferSize * sizeof(*output16_ref_));
 #endif
   }
 
@@ -426,41 +428,41 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   }
 
   uint8_t *input() const {
+    const int index = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return input_ + BorderTop() * kOuterBlockSize + BorderLeft();
+      return input_ + index;
     } else {
-      return CONVERT_TO_BYTEPTR(input16_ + BorderTop() * kOuterBlockSize +
-                                BorderLeft());
+      return CONVERT_TO_BYTEPTR(input16_) + index;
     }
 #else
-    return input_ + BorderTop() * kOuterBlockSize + BorderLeft();
+    return input_ + index;
 #endif
   }
 
   uint8_t *output() const {
+    const int index = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return output_ + BorderTop() * kOuterBlockSize + BorderLeft();
+      return output_ + index;
     } else {
-      return CONVERT_TO_BYTEPTR(output16_ + BorderTop() * kOuterBlockSize +
-                                BorderLeft());
+      return CONVERT_TO_BYTEPTR(output16_ + index);
     }
 #else
-    return output_ + BorderTop() * kOuterBlockSize + BorderLeft();
+    return output_ + index;
 #endif
   }
 
   uint8_t *output_ref() const {
+    const int index = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return output_ref_ + BorderTop() * kOuterBlockSize + BorderLeft();
+      return output_ref_ + index;
     } else {
-      return CONVERT_TO_BYTEPTR(output16_ref_ + BorderTop() * kOuterBlockSize +
-                                BorderLeft());
+      return CONVERT_TO_BYTEPTR(output16_ref_ + index);
     }
 #else
-    return output_ref_ + BorderTop() * kOuterBlockSize + BorderLeft();
+    return output_ref_ + index;
 #endif
   }
 
@@ -1035,6 +1037,11 @@ const ConvolveFunctions convolve8_c(
     wrap_convolve8_vert_c_8, wrap_convolve8_avg_vert_c_8,
     wrap_convolve8_c_8, wrap_convolve8_avg_c_8, 8);
 INSTANTIATE_TEST_CASE_P(C_8, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_c),
+    make_tuple(64, 128, &convolve8_c),
+    make_tuple(128, 128, &convolve8_c),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_c),
     make_tuple(8, 4, &convolve8_c),
     make_tuple(4, 8, &convolve8_c),
@@ -1057,6 +1064,11 @@ const ConvolveFunctions convolve10_c(
     wrap_convolve8_vert_c_10, wrap_convolve8_avg_vert_c_10,
     wrap_convolve8_c_10, wrap_convolve8_avg_c_10, 10);
 INSTANTIATE_TEST_CASE_P(C_10, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve10_c),
+    make_tuple(64, 128, &convolve10_c),
+    make_tuple(128, 128, &convolve10_c),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve10_c),
     make_tuple(8, 4, &convolve10_c),
     make_tuple(4, 8, &convolve10_c),
@@ -1079,6 +1091,11 @@ const ConvolveFunctions convolve12_c(
     wrap_convolve8_vert_c_12, wrap_convolve8_avg_vert_c_12,
     wrap_convolve8_c_12, wrap_convolve8_avg_c_12, 12);
 INSTANTIATE_TEST_CASE_P(C_12, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve12_c),
+    make_tuple(64, 128, &convolve12_c),
+    make_tuple(128, 128, &convolve12_c),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve12_c),
     make_tuple(8, 4, &convolve12_c),
     make_tuple(4, 8, &convolve12_c),
@@ -1105,6 +1122,11 @@ const ConvolveFunctions convolve8_c(
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
 INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_c),
+    make_tuple(64, 128, &convolve8_c),
+    make_tuple(128, 128, &convolve8_c),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_c),
     make_tuple(8, 4, &convolve8_c),
     make_tuple(4, 8, &convolve8_c),
@@ -1158,7 +1180,12 @@ const ConvolveFunctions convolve12_sse2(
     wrap_convolve8_horiz_sse2_12, wrap_convolve8_avg_horiz_sse2_12,
     wrap_convolve8_vert_sse2_12, wrap_convolve8_avg_vert_sse2_12,
     wrap_convolve8_sse2_12, wrap_convolve8_avg_sse2_12, 12);
-INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
+INSTANTIATE_TEST_CASE_P(SSE2_8, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_sse2),
+    make_tuple(64, 128, &convolve8_sse2),
+    make_tuple(128, 128, &convolve8_sse2),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_sse2),
     make_tuple(8, 4, &convolve8_sse2),
     make_tuple(4, 8, &convolve8_sse2),
@@ -1171,7 +1198,13 @@ INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
     make_tuple(32, 32, &convolve8_sse2),
     make_tuple(64, 32, &convolve8_sse2),
     make_tuple(32, 64, &convolve8_sse2),
-    make_tuple(64, 64, &convolve8_sse2),
+    make_tuple(64, 64, &convolve8_sse2)));
+INSTANTIATE_TEST_CASE_P(SSE2_10, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve10_sse2),
+    make_tuple(64, 128, &convolve10_sse2),
+    make_tuple(128, 128, &convolve10_sse2),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve10_sse2),
     make_tuple(8, 4, &convolve10_sse2),
     make_tuple(4, 8, &convolve10_sse2),
@@ -1184,7 +1217,13 @@ INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
     make_tuple(32, 32, &convolve10_sse2),
     make_tuple(64, 32, &convolve10_sse2),
     make_tuple(32, 64, &convolve10_sse2),
-    make_tuple(64, 64, &convolve10_sse2),
+    make_tuple(64, 64, &convolve10_sse2)));
+INSTANTIATE_TEST_CASE_P(SSE2_12, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve12_sse2),
+    make_tuple(64, 128, &convolve12_sse2),
+    make_tuple(128, 128, &convolve12_sse2),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve12_sse2),
     make_tuple(8, 4, &convolve12_sse2),
     make_tuple(4, 8, &convolve12_sse2),
@@ -1213,6 +1252,11 @@ const ConvolveFunctions convolve8_sse2(
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
 INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_sse2),
+    make_tuple(64, 128, &convolve8_sse2),
+    make_tuple(128, 128, &convolve8_sse2),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_sse2),
     make_tuple(8, 4, &convolve8_sse2),
     make_tuple(4, 8, &convolve8_sse2),
@@ -1237,9 +1281,14 @@ const ConvolveFunctions convolve8_ssse3(
     vpx_convolve8_ssse3, vpx_convolve8_avg_ssse3,
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c,
     vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
-    vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
+    vpx_scaled_2d_ssse3, vpx_scaled_avg_2d_c, 0);
 
 INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_ssse3),
+    make_tuple(64, 128, &convolve8_ssse3),
+    make_tuple(128, 128, &convolve8_ssse3),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_ssse3),
     make_tuple(8, 4, &convolve8_ssse3),
     make_tuple(4, 8, &convolve8_ssse3),
@@ -1266,6 +1315,11 @@ const ConvolveFunctions convolve8_avx2(
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
 INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_avx2),
+    make_tuple(64, 128, &convolve8_avx2),
+    make_tuple(128, 128, &convolve8_avx2),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_avx2),
     make_tuple(8, 4, &convolve8_avx2),
     make_tuple(4, 8, &convolve8_avx2),
@@ -1281,7 +1335,8 @@ INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest, ::testing::Values(
     make_tuple(64, 64, &convolve8_avx2)));
 #endif  // HAVE_AVX2 && HAVE_SSSE3
 
-#if HAVE_NEON
+// TODO(any): Make NEON versions support 128x128 128x64 64x128 block sizes
+#if HAVE_NEON && !(CONFIG_VP10 && CONFIG_EXT_PARTITION)
 #if HAVE_NEON_ASM
 const ConvolveFunctions convolve8_neon(
     vpx_convolve_copy_neon, vpx_convolve_avg_neon,
@@ -1303,6 +1358,11 @@ const ConvolveFunctions convolve8_neon(
 #endif  // HAVE_NEON_ASM
 
 INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_neon),
+    make_tuple(64, 128, &convolve8_neon),
+    make_tuple(128, 128, &convolve8_neon),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_neon),
     make_tuple(8, 4, &convolve8_neon),
     make_tuple(4, 8, &convolve8_neon),
@@ -1318,7 +1378,8 @@ INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest, ::testing::Values(
     make_tuple(64, 64, &convolve8_neon)));
 #endif  // HAVE_NEON
 
-#if HAVE_DSPR2
+// TODO(any): Make DSPR2 versions support 128x128 128x64 64x128 block sizes
+#if HAVE_DSPR2 && !(CONFIG_VP10 && CONFIG_EXT_PARTITION)
 const ConvolveFunctions convolve8_dspr2(
     vpx_convolve_copy_dspr2, vpx_convolve_avg_dspr2,
     vpx_convolve8_horiz_dspr2, vpx_convolve8_avg_horiz_dspr2,
@@ -1329,6 +1390,11 @@ const ConvolveFunctions convolve8_dspr2(
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
 INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_dspr2),
+    make_tuple(64, 128, &convolve8_dspr2),
+    make_tuple(128, 128, &convolve8_dspr2),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_dspr2),
     make_tuple(8, 4, &convolve8_dspr2),
     make_tuple(4, 8, &convolve8_dspr2),
@@ -1344,7 +1410,8 @@ INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest, ::testing::Values(
     make_tuple(64, 64, &convolve8_dspr2)));
 #endif
 
-#if HAVE_MSA
+// TODO(any): Make MSA versions support 128x128 128x64 64x128 block sizes
+#if HAVE_MSA && !(CONFIG_VP10 && CONFIG_EXT_PARTITION)
 const ConvolveFunctions convolve8_msa(
     vpx_convolve_copy_msa, vpx_convolve_avg_msa,
     vpx_convolve8_horiz_msa, vpx_convolve8_avg_horiz_msa,
@@ -1355,6 +1422,11 @@ const ConvolveFunctions convolve8_msa(
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
 INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest, ::testing::Values(
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+    make_tuple(128, 64, &convolve8_msa),
+    make_tuple(64, 128, &convolve8_msa),
+    make_tuple(128, 128, &convolve8_msa),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
     make_tuple(4, 4, &convolve8_msa),
     make_tuple(8, 4, &convolve8_msa),
     make_tuple(4, 8, &convolve8_msa),
