@@ -133,7 +133,7 @@ static void init_minq_luts(int *kf_low_m, int *kf_high_m,
     kf_high_m[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55, bit_depth);
     arfgf_low[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.30, bit_depth);
     arfgf_high[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55, bit_depth);
-    inter[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.90, bit_depth);
+    inter[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.70, bit_depth);
     rtc[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.70, bit_depth);
   }
 }
