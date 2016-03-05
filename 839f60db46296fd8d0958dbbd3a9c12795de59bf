@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "423ee59c_ae38f7b7",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-05T01:43:08Z",
+      "side": 1,
+      "message": "It seems like this is substantially less overhead than the other use of this feature because we were already doing full pixel reconstruction. Maybe give this speed feature multiple levels?",
+      "range": {
+        "startLine": 1609,
+        "startChar": 16,
+        "endLine": 1609,
+        "endChar": 55
+      },
+      "revId": "839f60db46296fd8d0958dbbd3a9c12795de59bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
