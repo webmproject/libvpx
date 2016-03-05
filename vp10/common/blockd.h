@@ -580,17 +580,12 @@ static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
 static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi,
                                      const struct macroblockd_plane *pd) {
 #if CONFIG_SUPERTX
-  if (!supertx_enabled(mbmi)) {
-    return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, pd->subsampling_x,
-                               pd->subsampling_y);
-  } else {
+  if (supertx_enabled(mbmi))
     return uvsupertx_size_lookup[mbmi->tx_size][pd->subsampling_x]
                                                [pd->subsampling_y];
-  }
-#else
+#endif  // CONFIG_SUPERTX
   return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, pd->subsampling_x,
                              pd->subsampling_y);
-#endif  // CONFIG_SUPERTX
 }
 
 static INLINE BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,
