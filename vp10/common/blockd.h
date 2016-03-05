@@ -360,7 +360,7 @@ static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
 #define USE_MSKTX_FOR_32X32      1
 
 static const int num_ext_tx_set_inter[EXT_TX_SETS_INTER] = {
-  1, 17, 10, 2
+  1, 19, 12, 2
 };
 static const int num_ext_tx_set_intra[EXT_TX_SETS_INTRA] = {
   1, 17, 10
@@ -421,10 +421,10 @@ static const int ext_tx_used_intra[EXT_TX_SETS_INTRA][TX_TYPES] = {
 
 // Transform types used in each inter set
 static const int ext_tx_used_inter[EXT_TX_SETS_INTER][TX_TYPES] = {
-  { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
-  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, },
-  { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+  { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
+  { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
 };
 
 static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,

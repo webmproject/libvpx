@@ -108,6 +108,8 @@ typedef enum {
   FLIPADST_DST = 14,
   DST_DST = 15,
   IDTX = 16,
+  V_DCT = 17,
+  H_DCT = 18,
 #endif  // CONFIG_EXT_TX
   TX_TYPES,
 } TX_TYPE;

@@ -326,11 +326,79 @@ static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_EXT_TX
 
-// Inverse identiy transform and add.
+// Inverse identity transform and add.
 static void inv_idtx_add_c(const tran_low_t *input, uint8_t *dest, int stride,
-                           int bs) {
+                           int bs, int tx_type) {
   int r, c;
   const int shift = bs < 32 ? 3 : 2;
+
+  tran_low_t temp_in[32], temp_out[32];
+  transform_2d ht = {idct4_c, idct4_c};
+  int out_scale = 1;
+  int coeff_stride = 0;
+
+  switch (bs) {
+    case 4:
+      ht.cols = idct4_c;
+      ht.rows = idct4_c;
+      out_scale = cospi_16_64 >> 3;
+      coeff_stride = 4;
+      break;
+    case 8:
+      ht.cols = idct8_c;
+      ht.rows = idct8_c;
+      out_scale = (1 << (DCT_CONST_BITS - 4));
+      coeff_stride = 8;
+      break;
+    case 16:
+      ht.cols = idct16_c;
+      ht.rows = idct16_c;
+      out_scale = cospi_16_64 >> 4;
+      coeff_stride = 16;
+      break;
+    case 32:
+      ht.cols = idct32_c;
+      ht.rows = idct32_c;
+      out_scale = (1 << (DCT_CONST_BITS - 4));
+      coeff_stride = 32;
+      break;
+    default:
+      assert(0);
+  }
+
+  // Columns
+  if (tx_type == V_DCT) {
+    for (c = 0; c < bs; ++c) {
+      for (r = 0; r < bs; ++r)
+        temp_in[r] = input[r * coeff_stride + c];
+      ht.cols(temp_in, temp_out);
+
+      for (r = 0; r < bs; ++r) {
+        tran_high_t temp = (tran_high_t)temp_out[r] * out_scale;
+        temp >>= DCT_CONST_BITS;
+        dest[r * stride + c] = clip_pixel_add(dest[r * stride + c],
+                                              (tran_low_t)temp);
+      }
+    }
+    return;
+  }
+
+  if (tx_type == H_DCT) {
+    for (r = 0; r < bs; ++r) {
+      for (c = 0; c < bs; ++c)
+        temp_in[c] = input[r * coeff_stride + c];
+      ht.rows(temp_in, temp_out);
+
+      for (c = 0; c < bs; ++c) {
+        tran_high_t temp = (tran_high_t)temp_out[c] * out_scale;
+        temp >>= DCT_CONST_BITS;
+        dest[r * stride + c] = clip_pixel_add(dest[r * stride + c],
+                                              (tran_low_t)temp);
+      }
+    }
+    return;
+  }
+
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c)
       dest[c] = clip_pixel_add(dest[c], input[c] >> shift);
@@ -360,6 +428,8 @@ static void maybe_flip_strides(uint8_t **dst, int *dstride,
     case DST_DCT:
     case DST_ADST:
     case ADST_DST:
+    case V_DCT:
+    case H_DCT:
       break;
     case FLIPADST_DCT:
     case FLIPADST_ADST:
@@ -1031,8 +1101,10 @@ void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
       // Use C version since DST only exists in C code
       vp10_iht4x4_16_add_c(input, dest, stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
-      inv_idtx_add_c(input, dest, stride, 4);
+      inv_idtx_add_c(input, dest, stride, 4, tx_type);
       break;
 #endif  // CONFIG_EXT_TX
     default:
@@ -1070,8 +1142,10 @@ void vp10_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
       // Use C version since DST only exists in C code
       vp10_iht8x8_64_add_c(input, dest, stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
-      inv_idtx_add_c(input, dest, stride, 8);
+      inv_idtx_add_c(input, dest, stride, 8, tx_type);
       break;
 #endif  // CONFIG_EXT_TX
     default:
@@ -1109,8 +1183,10 @@ void vp10_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
       // Use C version since DST only exists in C code
       vp10_iht16x16_256_add_c(input, dest, stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
-      inv_idtx_add_c(input, dest, stride, 16);
+      inv_idtx_add_c(input, dest, stride, 16, tx_type);
       break;
 #endif  // CONFIG_EXT_TX
     default:
@@ -1143,8 +1219,10 @@ void vp10_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
     case DST_FLIPADST:
       vp10_iht32x32_1024_add_c(input, dest, stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
-      inv_idtx_add_c(input, dest, stride, 32);
+      inv_idtx_add_c(input, dest, stride, 32, tx_type);
       break;
 #endif  // CONFIG_EXT_TX
     default:
