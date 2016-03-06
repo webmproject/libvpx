@@ -20,6 +20,8 @@
 #include "aom/aom_integer.h"
 #if CONFIG_ANS
 #include "aom_dsp/ansreader.h"
+#elif CONFIG_DAALA_EC
+#include "aom_dsp/daalaboolreader.h"
 #else
 #include "aom_dsp/dkboolreader.h"
 #endif
@@ -31,6 +33,8 @@ extern "C" {
 
 #if CONFIG_ANS
 typedef struct AnsDecoder aom_reader;
+#elif CONFIG_DAALA_EC
+typedef struct daala_reader aom_reader;
 #else
 typedef struct aom_dk_reader aom_reader;
 #endif
@@ -43,6 +47,10 @@ static INLINE int aom_reader_init(aom_reader *r, const uint8_t *buffer,
   (void)decrypt_state;
   assert(size <= INT_MAX);
   return ans_read_init(r, buffer, size);
+#elif CONFIG_DAALA_EC
+  (void)decrypt_cb;
+  (void)decrypt_state;
+  return aom_daala_reader_init(r, buffer, size);
 #else
   return aom_dk_reader_init(r, buffer, size, decrypt_cb, decrypt_state);
 #endif
@@ -53,6 +61,8 @@ static INLINE const uint8_t *aom_reader_find_end(aom_reader *r) {
   (void)r;
   assert(0 && "Use the raw buffer size with ANS");
   return NULL;
+#elif CONFIG_DAALA_EC
+  return aom_daala_reader_find_end(r);
 #else
   return aom_dk_reader_find_end(r);
 #endif
@@ -61,6 +71,8 @@ static INLINE const uint8_t *aom_reader_find_end(aom_reader *r) {
 static INLINE int aom_reader_has_error(aom_reader *r) {
 #if CONFIG_ANS
   return ans_reader_has_error(r);
+#elif CONFIG_DAALA_EC
+  return aom_daala_reader_has_error(r);
 #else
   return aom_dk_reader_has_error(r);
 #endif
@@ -69,6 +81,8 @@ static INLINE int aom_reader_has_error(aom_reader *r) {
 static INLINE int aom_read(aom_reader *r, int prob) {
 #if CONFIG_ANS
   return uabs_read(r, prob);
+#elif CONFIG_DAALA_EC
+  return aom_daala_read(r, prob);
 #else
   return aom_dk_read(r, prob);
 #endif

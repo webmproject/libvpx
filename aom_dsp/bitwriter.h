@@ -29,6 +29,8 @@ extern "C" {
 
 #if CONFIG_ANS
 typedef struct BufAnsCoder aom_writer;
+#elif CONFIG_DAALA_EC
+typedef struct daala_writer aom_writer;
 #else
 typedef struct aom_dk_writer aom_writer;
 #endif
@@ -38,6 +40,8 @@ static INLINE void aom_start_encode(aom_writer *bc, uint8_t *buffer) {
   (void)bc;
   (void)buffer;
   assert(0 && "buf_ans requires a more complicated startup procedure");
+#elif CONFIG_DAALA_EC
+  aom_daala_start_encode(bc, buffer);
 #else
   aom_dk_start_encode(bc, buffer);
 #endif
@@ -47,6 +51,8 @@ static INLINE void aom_stop_encode(aom_writer *bc) {
 #if CONFIG_ANS
   (void)bc;
   assert(0 && "buf_ans requires a more complicated shutdown procedure");
+#elif CONFIG_DAALA_EC
+  aom_daala_stop_encode(bc);
 #else
   aom_dk_stop_encode(bc);
 #endif
@@ -55,6 +61,8 @@ static INLINE void aom_stop_encode(aom_writer *bc) {
 static INLINE void aom_write(aom_writer *br, int bit, int probability) {
 #if CONFIG_ANS
   buf_uabs_write(br, bit, probability);
+#elif CONFIG_DAALA_EC
+  aom_daala_write(br, bit, probability);
 #else
   aom_dk_write(br, bit, probability);
 #endif

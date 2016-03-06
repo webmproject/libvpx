@@ -386,7 +386,7 @@ static void set_entropy_context_b(int plane, int block, int blk_row,
 }
 
 static INLINE void add_token(TOKENEXTRA **t, const aom_prob *context_tree,
-#if CONFIG_ANS
+#if CONFIG_ANS || CONFIG_DAALA_EC
                              const aom_cdf_prob (*token_cdf)[ENTROPY_TOKENS],
 #endif  // CONFIG_ANS
                              int32_t extra, uint8_t token,
@@ -394,7 +394,7 @@ static INLINE void add_token(TOKENEXTRA **t, const aom_prob *context_tree,
   (*t)->token = token;
   (*t)->extra = extra;
   (*t)->context_tree = context_tree;
-#if CONFIG_ANS
+#if CONFIG_ANS || CONFIG_DAALA_EC
   (*t)->token_cdf = token_cdf;
 #endif  // CONFIG_ANS
   (*t)->skip_eob_node = skip_eob_node;
@@ -488,7 +488,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   aom_prob(*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->common.fc->coef_probs[txsize_sqr_map[tx_size]][type][ref];
 #endif  // CONFIG_ENTROPY
-#if CONFIG_ANS
+#if CONFIG_ANS || CONFIG_DAALA_EC
   aom_cdf_prob(*const coef_cdfs)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       cpi->common.fc->coef_cdfs[tx_size][type][ref];
 #endif  // CONFIG_ANS
@@ -512,7 +512,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
     av1_get_token_extra(v, &token, &extra);
 
     add_token(&t, coef_probs[band[c]][pt],
-#if CONFIG_ANS
+#if CONFIG_ANS || CONFIG_DAALA_EC
               (const aom_cdf_prob(*)[ENTROPY_TOKENS]) & coef_cdfs[band[c]][pt],
 #endif  // CONFIG_ANS
               extra, (uint8_t)token, (uint8_t)skip_eob, counts[band[c]][pt]);
