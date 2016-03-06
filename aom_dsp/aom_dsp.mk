@@ -52,6 +52,15 @@ endif
 # intra predictions
 DSP_SRCS-yes += intrapred.c
 
+ifeq ($(CONFIG_DAALA_EC),yes)
+DSP_SRCS-yes += entenc.c
+DSP_SRCS-yes += entenc.h
+DSP_SRCS-yes += entdec.c
+DSP_SRCS-yes += entdec.h
+DSP_SRCS-yes += entcode.c
+DSP_SRCS-yes += entcode.h
+endif
+
 DSP_SRCS-$(HAVE_SSE) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
