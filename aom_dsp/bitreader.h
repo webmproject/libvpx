@@ -115,7 +115,11 @@ static INLINE int aom_read_tree_bits(aom_reader *r, const aom_tree_index *tree,
 
 static INLINE int aom_read_tree(aom_reader *r, const aom_tree_index *tree,
                                 const aom_prob *probs) {
+#if CONFIG_DAALA_EC
+  return daala_read_tree_bits(r, tree, probs);
+#else
   return aom_read_tree_bits(r, tree, probs);
+#endif
 }
 
 static INLINE int aom_read_symbol(aom_reader *r, const aom_cdf_prob *cdf,

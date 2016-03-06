@@ -91,7 +91,11 @@ static INLINE void aom_write_tree_bits(aom_writer *w, const aom_tree_index *tr,
 static INLINE void aom_write_tree(aom_writer *w, const aom_tree_index *tree,
                                   const aom_prob *probs, int bits, int len,
                                   aom_tree_index i) {
+#if CONFIG_DAALA_EC
+  daala_write_tree_bits(w, tree, probs, bits, len, i);
+#else
   aom_write_tree_bits(w, tree, probs, bits, len, i);
+#endif
 }
 
 static INLINE void aom_write_symbol(aom_writer *w, int symb,

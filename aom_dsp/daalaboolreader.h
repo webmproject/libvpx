@@ -47,6 +47,25 @@ static INLINE int aom_daala_reader_has_error(daala_reader *r) {
   return r->ec.error;
 }
 
+static INLINE int daala_read_tree_bits(daala_reader *r,
+                                       const aom_tree_index *tree,
+                                       const aom_prob *probs) {
+  aom_tree_index i = 0;
+  do {
+    uint16_t cdf[16];
+    aom_tree_index index[16];
+    int path[16];
+    int dist[16];
+    int nsymbs;
+    int symb;
+    nsymbs = tree_to_cdf(tree, probs, i, cdf, index, path, dist);
+    symb = od_ec_decode_cdf_q15(&r->ec, cdf, nsymbs, "aom");
+    OD_ASSERT(symb >= 0 && symb < nsymbs);
+    i = index[symb];
+  } while (i > 0);
+  return -i;
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

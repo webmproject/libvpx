@@ -96,6 +96,12 @@ static INLINE aom_prob mode_mv_merge_probs(aom_prob pre_prob,
 void aom_tree_merge_probs(const aom_tree_index *tree, const aom_prob *pre_probs,
                           const unsigned int *counts, aom_prob *probs);
 
+#if CONFIG_DAALA_EC
+int tree_to_cdf(const aom_tree_index *tree, const aom_prob *probs,
+                aom_tree_index root, uint16_t *cdf, aom_tree_index *ind,
+                int *pth, int *len);
+#endif
+
 DECLARE_ALIGNED(16, extern const uint8_t, aom_norm[256]);
 
 #ifdef __cplusplus
