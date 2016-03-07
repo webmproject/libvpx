@@ -199,6 +199,10 @@
 %ifdef PIC
     default rel
 %endif
+
+%ifndef GET_GOT_DEFINED
+    %define GET_GOT_DEFINED 0
+%endif
 ; Done with PIC macros
 
 %ifdef __NASM_VER__
