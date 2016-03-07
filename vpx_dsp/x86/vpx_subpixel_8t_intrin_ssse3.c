@@ -844,34 +844,49 @@ static void scaledconvolve2d(const uint8_t *src, ptrdiff_t src_stride,
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
   // --Require an additional 8 rows for the horiz_w8 transpose tail.
-  DECLARE_ALIGNED(16, uint8_t, temp[(135 + 8) * 64]);
+  DECLARE_ALIGNED(16, uint8_t, temp[(MAX_EXT_SIZE + 8) * MAX_CU_SIZE]);
   const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
-  assert(w <= 64);
-  assert(h <= 64);
+  assert(w <= MAX_CU_SIZE);
+  assert(h <= MAX_CU_SIZE);
   assert(y_step_q4 <= 32);
   assert(x_step_q4 <= 32);
 
   if (w >= 8) {
     scaledconvolve_horiz_w8(src - src_stride * (SUBPEL_TAPS / 2 - 1),
-                            src_stride, temp, 64, x_filters, x0_q4, x_step_q4,
+                            src_stride,
+                            temp,
+                            MAX_CU_SIZE,
+                            x_filters, x0_q4, x_step_q4,
                             w, intermediate_height);
   } else {
     scaledconvolve_horiz_w4(src - src_stride * (SUBPEL_TAPS / 2 - 1),
-                            src_stride, temp, 64, x_filters, x0_q4, x_step_q4,
+                            src_stride,
+                            temp,
+                            MAX_CU_SIZE,
+                            x_filters, x0_q4, x_step_q4,
                             w, intermediate_height);
   }
 
   if (w >= 16) {
-    scaledconvolve_vert_w16(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
-                            dst_stride, y_filters, y0_q4, y_step_q4, w, h);
+    scaledconvolve_vert_w16(temp + MAX_CU_SIZE * (SUBPEL_TAPS / 2 - 1),
+                            MAX_CU_SIZE,
+                            dst,
+                            dst_stride,
+                            y_filters, y0_q4, y_step_q4, w, h);
   } else if (w == 8) {
-    scaledconvolve_vert_w8(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
-                           dst_stride, y_filters, y0_q4, y_step_q4, w, h);
+    scaledconvolve_vert_w8(temp + MAX_CU_SIZE * (SUBPEL_TAPS / 2 - 1),
+                           MAX_CU_SIZE,
+                           dst,
+                           dst_stride,
+                           y_filters, y0_q4, y_step_q4, w, h);
   } else {
-    scaledconvolve_vert_w4(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
-                           dst_stride, y_filters, y0_q4, y_step_q4, w, h);
+    scaledconvolve_vert_w4(temp + MAX_CU_SIZE * (SUBPEL_TAPS / 2 - 1),
+                           MAX_CU_SIZE,
+                           dst,
+                           dst_stride,
+                           y_filters, y0_q4, y_step_q4, w, h);
   }
 }
 
