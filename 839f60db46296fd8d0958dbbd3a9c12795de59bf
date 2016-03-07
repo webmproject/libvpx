@@ -46,6 +46,30 @@
       "revId": "839f60db46296fd8d0958dbbd3a9c12795de59bf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7331df3_afb2550e",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-03-07T18:56:10Z",
+      "side": 1,
+      "message": "Here pixel domain distortion calculation is only enabled for speed 0. The impact of on the encoding time is very low, around 1% due to the changes for both intra and inter cases. Regarding the overhead due to moving the \u0027goto\u0027 after the inverse transform, I did a small experiment, in which we first use the spectral domain distortion to determine whether to early terminate, then do inverse transform, calculate pixel domain distortion plus another early termination (both distortion will be calculated for most blocks, but we save some effort to do the last inverse transform). The difference in encoding time is barely noticeable.",
+      "parentUuid": "423ee59c_ae38f7b7",
+      "range": {
+        "startLine": 1609,
+        "startChar": 16,
+        "endLine": 1609,
+        "endChar": 55
+      },
+      "revId": "839f60db46296fd8d0958dbbd3a9c12795de59bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
