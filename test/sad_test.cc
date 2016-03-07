@@ -59,13 +59,13 @@ class SADTestBase : public ::testing::Test {
     reference_data8_ = reinterpret_cast<uint8_t*>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
     second_pred8_ = reinterpret_cast<uint8_t*>(
-        vpx_memalign(kDataAlignment, 64*64));
+        vpx_memalign(kDataAlignment, 128*128));
     source_data16_ = reinterpret_cast<uint16_t*>(
         vpx_memalign(kDataAlignment, kDataBlockSize*sizeof(uint16_t)));
     reference_data16_ = reinterpret_cast<uint16_t*>(
         vpx_memalign(kDataAlignment, kDataBufferSize*sizeof(uint16_t)));
     second_pred16_ = reinterpret_cast<uint16_t*>(
-        vpx_memalign(kDataAlignment, 64*64*sizeof(uint16_t)));
+        vpx_memalign(kDataAlignment, 128*128*sizeof(uint16_t)));
   }
 
   static void TearDownTestCase() {
@@ -88,9 +88,9 @@ class SADTestBase : public ::testing::Test {
   }
 
  protected:
-  // Handle blocks up to 4 blocks 64x64 with stride up to 128
+  // Handle up to 4 128x128 blocks, with stride up to 256
   static const int kDataAlignment = 16;
-  static const int kDataBlockSize = 64 * 128;
+  static const int kDataBlockSize = 128 * 256;
   static const int kDataBufferSize = 4 * kDataBlockSize;
 
   virtual void SetUp() {
@@ -485,6 +485,11 @@ using std::tr1::make_tuple;
 //------------------------------------------------------------------------------
 // C functions
 const SadMxNParam c_tests[] = {
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_sad128x128_c, -1),
+  make_tuple(128, 64, &vpx_sad128x64_c, -1),
+  make_tuple(64, 128, &vpx_sad64x128_c, -1),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_sad64x64_c, -1),
   make_tuple(64, 32, &vpx_sad64x32_c, -1),
   make_tuple(32, 64, &vpx_sad32x64_c, -1),
@@ -499,6 +504,11 @@ const SadMxNParam c_tests[] = {
   make_tuple(4, 8, &vpx_sad4x8_c, -1),
   make_tuple(4, 4, &vpx_sad4x4_c, -1),
 #if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128_c, 8),
+  make_tuple(128, 64, &vpx_highbd_sad128x64_c, 8),
+  make_tuple(64, 128, &vpx_highbd_sad64x128_c, 8),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64_c, 8),
   make_tuple(64, 32, &vpx_highbd_sad64x32_c, 8),
   make_tuple(32, 64, &vpx_highbd_sad32x64_c, 8),
@@ -512,6 +522,11 @@ const SadMxNParam c_tests[] = {
   make_tuple(8, 4, &vpx_highbd_sad8x4_c, 8),
   make_tuple(4, 8, &vpx_highbd_sad4x8_c, 8),
   make_tuple(4, 4, &vpx_highbd_sad4x4_c, 8),
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128_c, 10),
+  make_tuple(128, 64, &vpx_highbd_sad128x64_c, 10),
+  make_tuple(64, 128, &vpx_highbd_sad64x128_c, 10),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64_c, 10),
   make_tuple(64, 32, &vpx_highbd_sad64x32_c, 10),
   make_tuple(32, 64, &vpx_highbd_sad32x64_c, 10),
@@ -525,6 +540,11 @@ const SadMxNParam c_tests[] = {
   make_tuple(8, 4, &vpx_highbd_sad8x4_c, 10),
   make_tuple(4, 8, &vpx_highbd_sad4x8_c, 10),
   make_tuple(4, 4, &vpx_highbd_sad4x4_c, 10),
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128_c, 12),
+  make_tuple(128, 64, &vpx_highbd_sad128x64_c, 12),
+  make_tuple(64, 128, &vpx_highbd_sad64x128_c, 12),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64_c, 12),
   make_tuple(64, 32, &vpx_highbd_sad64x32_c, 12),
   make_tuple(32, 64, &vpx_highbd_sad32x64_c, 12),
@@ -543,6 +563,11 @@ const SadMxNParam c_tests[] = {
 INSTANTIATE_TEST_CASE_P(C, SADTest, ::testing::ValuesIn(c_tests));
 
 const SadMxNAvgParam avg_c_tests[] = {
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_sad128x128_avg_c, -1),
+  make_tuple(128, 64, &vpx_sad128x64_avg_c, -1),
+  make_tuple(64, 128, &vpx_sad64x128_avg_c, -1),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_sad64x64_avg_c, -1),
   make_tuple(64, 32, &vpx_sad64x32_avg_c, -1),
   make_tuple(32, 64, &vpx_sad32x64_avg_c, -1),
@@ -557,6 +582,11 @@ const SadMxNAvgParam avg_c_tests[] = {
   make_tuple(4, 8, &vpx_sad4x8_avg_c, -1),
   make_tuple(4, 4, &vpx_sad4x4_avg_c, -1),
 #if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128_avg_c, 8),
+  make_tuple(128, 64, &vpx_highbd_sad128x64_avg_c, 8),
+  make_tuple(64, 128, &vpx_highbd_sad64x128_avg_c, 8),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64_avg_c, 8),
   make_tuple(64, 32, &vpx_highbd_sad64x32_avg_c, 8),
   make_tuple(32, 64, &vpx_highbd_sad32x64_avg_c, 8),
@@ -570,6 +600,11 @@ const SadMxNAvgParam avg_c_tests[] = {
   make_tuple(8, 4, &vpx_highbd_sad8x4_avg_c, 8),
   make_tuple(4, 8, &vpx_highbd_sad4x8_avg_c, 8),
   make_tuple(4, 4, &vpx_highbd_sad4x4_avg_c, 8),
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128_avg_c, 10),
+  make_tuple(128, 64, &vpx_highbd_sad128x64_avg_c, 10),
+  make_tuple(64, 128, &vpx_highbd_sad64x128_avg_c, 10),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64_avg_c, 10),
   make_tuple(64, 32, &vpx_highbd_sad64x32_avg_c, 10),
   make_tuple(32, 64, &vpx_highbd_sad32x64_avg_c, 10),
@@ -583,6 +618,11 @@ const SadMxNAvgParam avg_c_tests[] = {
   make_tuple(8, 4, &vpx_highbd_sad8x4_avg_c, 10),
   make_tuple(4, 8, &vpx_highbd_sad4x8_avg_c, 10),
   make_tuple(4, 4, &vpx_highbd_sad4x4_avg_c, 10),
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128_avg_c, 12),
+  make_tuple(128, 64, &vpx_highbd_sad128x64_avg_c, 12),
+  make_tuple(64, 128, &vpx_highbd_sad64x128_avg_c, 12),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64_avg_c, 12),
   make_tuple(64, 32, &vpx_highbd_sad64x32_avg_c, 12),
   make_tuple(32, 64, &vpx_highbd_sad32x64_avg_c, 12),
@@ -601,6 +641,11 @@ const SadMxNAvgParam avg_c_tests[] = {
 INSTANTIATE_TEST_CASE_P(C, SADavgTest, ::testing::ValuesIn(avg_c_tests));
 
 const SadMxNx4Param x4d_c_tests[] = {
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_sad128x128x4d_c, -1),
+  make_tuple(128, 64, &vpx_sad128x64x4d_c, -1),
+  make_tuple(64, 128, &vpx_sad64x128x4d_c, -1),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_sad64x64x4d_c, -1),
   make_tuple(64, 32, &vpx_sad64x32x4d_c, -1),
   make_tuple(32, 64, &vpx_sad32x64x4d_c, -1),
@@ -615,6 +660,11 @@ const SadMxNx4Param x4d_c_tests[] = {
   make_tuple(4, 8, &vpx_sad4x8x4d_c, -1),
   make_tuple(4, 4, &vpx_sad4x4x4d_c, -1),
 #if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128x4d_c, 8),
+  make_tuple(128, 64, &vpx_highbd_sad128x64x4d_c, 8),
+  make_tuple(64, 128, &vpx_highbd_sad64x128x4d_c, 8),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64x4d_c, 8),
   make_tuple(64, 32, &vpx_highbd_sad64x32x4d_c, 8),
   make_tuple(32, 64, &vpx_highbd_sad32x64x4d_c, 8),
@@ -628,6 +678,11 @@ const SadMxNx4Param x4d_c_tests[] = {
   make_tuple(8, 4, &vpx_highbd_sad8x4x4d_c, 8),
   make_tuple(4, 8, &vpx_highbd_sad4x8x4d_c, 8),
   make_tuple(4, 4, &vpx_highbd_sad4x4x4d_c, 8),
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128x4d_c, 10),
+  make_tuple(128, 64, &vpx_highbd_sad128x64x4d_c, 10),
+  make_tuple(64, 128, &vpx_highbd_sad64x128x4d_c, 10),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64x4d_c, 10),
   make_tuple(64, 32, &vpx_highbd_sad64x32x4d_c, 10),
   make_tuple(32, 64, &vpx_highbd_sad32x64x4d_c, 10),
@@ -641,6 +696,11 @@ const SadMxNx4Param x4d_c_tests[] = {
   make_tuple(8, 4, &vpx_highbd_sad8x4x4d_c, 10),
   make_tuple(4, 8, &vpx_highbd_sad4x8x4d_c, 10),
   make_tuple(4, 4, &vpx_highbd_sad4x4x4d_c, 10),
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+  make_tuple(128, 128, &vpx_highbd_sad128x128x4d_c, 12),
+  make_tuple(128, 64, &vpx_highbd_sad128x64x4d_c, 12),
+  make_tuple(64, 128, &vpx_highbd_sad64x128x4d_c, 12),
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
   make_tuple(64, 64, &vpx_highbd_sad64x64x4d_c, 12),
   make_tuple(64, 32, &vpx_highbd_sad64x32x4d_c, 12),
   make_tuple(32, 64, &vpx_highbd_sad32x64x4d_c, 12),

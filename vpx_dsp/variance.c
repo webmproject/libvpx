@@ -17,17 +17,6 @@
 #include "vpx_dsp/variance.h"
 #include "vpx_dsp/vpx_filter.h"
 
-const uint8_t vpx_bilinear_filters[BIL_SUBPEL_SHIFTS][2] = {
-  { 128,   0  },
-  { 112,  16  },
-  {  96,  32  },
-  {  80,  48  },
-  {  64,  64  },
-  {  48,  80  },
-  {  32,  96  },
-  {  16, 112  },
-};
-
 uint32_t vpx_get4x4sse_cs_c(const uint8_t *a, int  a_stride,
                             const uint8_t *b, int  b_stride) {
   int distortion = 0;
@@ -176,9 +165,9 @@ uint32_t vpx_sub_pixel_variance##W##x##H##_c(const uint8_t *a, int a_stride, \
   uint8_t temp2[H * W]; \
 \
   var_filter_block2d_bil_first_pass(a, fdata3, a_stride, 1, H + 1, W, \
-                                    vpx_bilinear_filters[xoffset]); \
+                                    bilinear_filters_2t[xoffset]); \
   var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                     vpx_bilinear_filters[yoffset]); \
+                                     bilinear_filters_2t[yoffset]); \
 \
   return vpx_variance##W##x##H##_c(temp2, W, b, b_stride, sse); \
 }
@@ -196,9 +185,9 @@ uint32_t vpx_sub_pixel_avg_variance##W##x##H##_c(const uint8_t *a, \
   DECLARE_ALIGNED(16, uint8_t, temp3[H * W]); \
 \
   var_filter_block2d_bil_first_pass(a, fdata3, a_stride, 1, H + 1, W, \
-                                    vpx_bilinear_filters[xoffset]); \
+                                    bilinear_filters_2t[xoffset]); \
   var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                     vpx_bilinear_filters[yoffset]); \
+                                     bilinear_filters_2t[yoffset]); \
 \
   vpx_comp_avg_pred(temp3, second_pred, W, H, temp2, W); \
 \
@@ -235,6 +224,11 @@ uint32_t vpx_mse##W##x##H##_c(const uint8_t *a, int a_stride, \
     SUBPIX_VAR(W, H) \
     SUBPIX_AVG_VAR(W, H)
 
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+VARIANCES(128, 128)
+VARIANCES(128, 64)
+VARIANCES(64, 128)
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
 VARIANCES(64, 64)
 VARIANCES(64, 32)
 VARIANCES(32, 64)
@@ -501,9 +495,9 @@ uint32_t vpx_highbd_8_sub_pixel_variance##W##x##H##_c( \
   uint16_t temp2[H * W]; \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
-                                           W, vpx_bilinear_filters[xoffset]); \
+                                           W, bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   return vpx_highbd_8_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), W, dst, \
                                           dst_stride, sse); \
@@ -518,9 +512,9 @@ uint32_t vpx_highbd_10_sub_pixel_variance##W##x##H##_c( \
   uint16_t temp2[H * W]; \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
-                                           W, vpx_bilinear_filters[xoffset]); \
+                                           W, bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   return vpx_highbd_10_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
                                              W, dst, dst_stride, sse); \
@@ -535,9 +529,9 @@ uint32_t vpx_highbd_12_sub_pixel_variance##W##x##H##_c( \
   uint16_t temp2[H * W]; \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
-                                           W, vpx_bilinear_filters[xoffset]); \
+                                           W, bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   return vpx_highbd_12_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
                                              W, dst, dst_stride, sse); \
@@ -555,9 +549,9 @@ uint32_t vpx_highbd_8_sub_pixel_avg_variance##W##x##H##_c( \
   DECLARE_ALIGNED(16, uint16_t, temp3[H * W]); \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
-                                           W, vpx_bilinear_filters[xoffset]); \
+                                           W, bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   vpx_highbd_comp_avg_pred(temp3, second_pred, W, H, \
                            CONVERT_TO_BYTEPTR(temp2), W); \
@@ -577,9 +571,9 @@ uint32_t vpx_highbd_10_sub_pixel_avg_variance##W##x##H##_c( \
   DECLARE_ALIGNED(16, uint16_t, temp3[H * W]); \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
-                                           W, vpx_bilinear_filters[xoffset]); \
+                                           W, bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   vpx_highbd_comp_avg_pred(temp3, second_pred, W, H, \
                            CONVERT_TO_BYTEPTR(temp2), W); \
@@ -599,9 +593,9 @@ uint32_t vpx_highbd_12_sub_pixel_avg_variance##W##x##H##_c( \
   DECLARE_ALIGNED(16, uint16_t, temp3[H * W]); \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
-                                           W, vpx_bilinear_filters[xoffset]); \
+                                           W, bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   vpx_highbd_comp_avg_pred(temp3, second_pred, W, H, \
                            CONVERT_TO_BYTEPTR(temp2), W); \
@@ -616,6 +610,11 @@ uint32_t vpx_highbd_12_sub_pixel_avg_variance##W##x##H##_c( \
     HIGHBD_SUBPIX_VAR(W, H) \
     HIGHBD_SUBPIX_AVG_VAR(W, H)
 
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+HIGHBD_VARIANCES(128, 128)
+HIGHBD_VARIANCES(128, 64)
+HIGHBD_VARIANCES(64, 128)
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
 HIGHBD_VARIANCES(64, 64)
 HIGHBD_VARIANCES(64, 32)
 HIGHBD_VARIANCES(32, 64)
@@ -677,8 +676,9 @@ void masked_variance(const uint8_t *a, int  a_stride,
     b += b_stride;
     m += m_stride;
   }
-  *sum = (sum64 >= 0) ? ((sum64 + 31) >> 6) : -((-sum64 + 31) >> 6);
-  *sse = (sse64 + 2047) >> 12;
+  sum64 = (sum64 >= 0) ? sum64  : -sum64;
+  *sum = ROUND_POWER_OF_TWO(sum64, 6);
+  *sse = ROUND_POWER_OF_TWO(sse64, 12);
 }
 
 #define MASK_VAR(W, H) \
@@ -702,9 +702,9 @@ unsigned int vpx_masked_sub_pixel_variance##W##x##H##_c( \
   uint8_t temp2[H * W]; \
 \
   var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, W, \
-                                    vpx_bilinear_filters[xoffset]); \
+                                    bilinear_filters_2t[xoffset]); \
   var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                     vpx_bilinear_filters[yoffset]); \
+                                     bilinear_filters_2t[yoffset]); \
 \
   return vpx_masked_variance##W##x##H##_c(temp2, W, dst, dst_stride, \
                                           msk, msk_stride, sse); \
@@ -765,27 +765,28 @@ void highbd_masked_variance64(const uint8_t *a8, int  a_stride,
                               const uint8_t *b8, int  b_stride,
                               const uint8_t *m, int  m_stride,
                               int  w, int  h,
-                              uint64_t *sse64, int *sum) {
+                              uint64_t *sse, int64_t *sum) {
   int i, j;
   uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   uint16_t *b = CONVERT_TO_SHORTPTR(b8);
 
-  int64_t sum64 = 0;
-  *sse64 = 0;
+  *sum = 0;
+  *sse = 0;
 
   for (i = 0; i < h; i++) {
     for (j = 0; j < w; j++) {
       const int diff = (a[j] - b[j]) * (m[j]);
-      sum64 += diff;
-      *sse64 += (int64_t)diff * diff;
+      *sum += (int64_t)diff;
+      *sse += (int64_t)diff * diff;
     }
 
     a += a_stride;
     b += b_stride;
     m += m_stride;
   }
-  *sum = (sum64 >= 0) ? ((sum64 + 31) >> 6) : -((-sum64 + 31) >> 6);
-  *sse64 = (*sse64 + 2047) >> 12;
+  *sum = (*sum >= 0) ? *sum  : -*sum;
+  *sum = ROUND_POWER_OF_TWO(*sum, 6);
+  *sse = ROUND_POWER_OF_TWO(*sse, 12);
 }
 
 void highbd_masked_variance(const uint8_t *a8, int  a_stride,
@@ -793,9 +794,11 @@ void highbd_masked_variance(const uint8_t *a8, int  a_stride,
                             const uint8_t *m, int  m_stride,
                             int  w, int  h,
                             unsigned int *sse, int *sum) {
+  int64_t sum64;
   uint64_t sse64;
   highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
-                           w, h, &sse64, sum);
+                           w, h, &sse64, &sum64);
+  *sum = (int)sum64;
   *sse = (unsigned int)sse64;
 }
 
@@ -804,10 +807,11 @@ void highbd_10_masked_variance(const uint8_t *a8, int  a_stride,
                                const uint8_t *m, int  m_stride,
                                int  w, int  h,
                                unsigned int *sse, int *sum) {
+  int64_t sum64;
   uint64_t sse64;
   highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
-                           w, h, &sse64, sum);
-  *sum = ROUND_POWER_OF_TWO(*sum, 2);
+                           w, h, &sse64, &sum64);
+  *sum = (int)ROUND_POWER_OF_TWO(sum64, 2);
   *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 4);
 }
 
@@ -816,10 +820,11 @@ void highbd_12_masked_variance(const uint8_t *a8, int  a_stride,
                                const uint8_t *m, int  m_stride,
                                int  w, int  h,
                                unsigned int *sse, int *sum) {
+  int64_t sum64;
   uint64_t sse64;
   highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
-                           w, h, &sse64, sum);
-  *sum = ROUND_POWER_OF_TWO(*sum, 4);
+                           w, h, &sse64, &sum64);
+  *sum = (int)ROUND_POWER_OF_TWO(sum64, 4);
   *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 8);
 }
 
@@ -875,9 +880,9 @@ unsigned int vpx_highbd_masked_sub_pixel_variance##W##x##H##_c( \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, \
                                            H + 1, W, \
-                                           vpx_bilinear_filters[xoffset]); \
+                                           bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   return vpx_highbd_masked_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
                                                  W, dst, dst_stride, \
@@ -895,9 +900,9 @@ unsigned int vpx_highbd_10_masked_sub_pixel_variance##W##x##H##_c( \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, \
                                            H + 1, W, \
-                                           vpx_bilinear_filters[xoffset]); \
+                                           bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   return vpx_highbd_10_masked_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
                                                     W, dst, dst_stride, \
@@ -915,9 +920,9 @@ unsigned int vpx_highbd_12_masked_sub_pixel_variance##W##x##H##_c( \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, \
                                            H + 1, W, \
-                                           vpx_bilinear_filters[xoffset]); \
+                                           bilinear_filters_2t[xoffset]); \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
-                                            vpx_bilinear_filters[yoffset]); \
+                                            bilinear_filters_2t[yoffset]); \
 \
   return vpx_highbd_12_masked_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
                                                     W, dst, dst_stride, \

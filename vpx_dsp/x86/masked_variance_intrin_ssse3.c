@@ -18,17 +18,63 @@
 #include "vpx_ports/mem.h"
 #include "vpx_dsp/vpx_filter.h"
 
-// Assumes mask values are <= 64
 
-// Log 2 of powers of 2 as an expression
-#define LOG2_P2(n)  ((n) ==   1 ? 0 :       \
-                     (n) ==   2 ? 1 :       \
-                     (n) ==   4 ? 2 :       \
-                     (n) ==   8 ? 3 :       \
-                     (n) ==  16 ? 4 :       \
-                     (n) ==  32 ? 5 :       \
-                     (n) ==  64 ? 6 :       \
-                     (n) == 128 ? 7 :  -1)
+// Half pixel shift
+#define HALF_PIXEL_OFFSET (BIL_SUBPEL_SHIFTS/2)
+
+/*****************************************************************************
+ * Horizontal additions
+ *****************************************************************************/
+
+static INLINE int32_t hsum_epi32_si32(__m128i v_d) {
+  v_d = _mm_hadd_epi32(v_d, v_d);
+  v_d = _mm_hadd_epi32(v_d, v_d);
+  return _mm_cvtsi128_si32(v_d);
+}
+
+static INLINE int64_t hsum_epi64_si64(__m128i v_q) {
+  v_q = _mm_add_epi64(v_q, _mm_srli_si128(v_q, 8));
+#if ARCH_X86_64
+  return _mm_cvtsi128_si64(v_q);
+#else
+  {
+    int64_t tmp;
+    _mm_storel_epi64((__m128i*)&tmp, v_q);
+    return tmp;
+  }
+#endif
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE int64_t hsum_epi32_si64(__m128i v_d) {
+  const __m128i v_sign_d =  _mm_cmplt_epi32(v_d, _mm_setzero_si128());
+  const __m128i v_0_q = _mm_unpacklo_epi32(v_d, v_sign_d);
+  const __m128i v_1_q = _mm_unpackhi_epi32(v_d, v_sign_d);
+  return hsum_epi64_si64(_mm_add_epi64(v_0_q, v_1_q));
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+static INLINE int calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
+                                       unsigned int* sse,
+                                       const int w, const int h) {
+  int64_t sum64;
+  uint64_t sse64;
+
+  // Horizontal sum
+  sum64 = hsum_epi32_si32(v_sum_d);
+  sse64 = hsum_epi64_si64(v_sse_q);
+
+  sum64 = (sum64 >= 0) ? sum64 : -sum64;
+
+  // Round
+  sum64 = ROUND_POWER_OF_TWO(sum64, 6);
+  sse64 = ROUND_POWER_OF_TWO(sse64, 12);
+
+  // Store the SSE
+  *sse = (unsigned int)sse64;
+  // Compute the variance
+  return  *sse - ((sum64 * sum64) / (w * h));
+}
 
 /*****************************************************************************
  * n*16 Wide versions
@@ -98,30 +144,7 @@ static INLINE unsigned int masked_variancewxh_ssse3(
     m += m_stride;
   }
 
-  // Horizontal sum
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_srli_si128(v_sse_q, 8));
-
-  // Round
-  v_sum_d = _mm_sub_epi32(v_sum_d, _mm_cmplt_epi32(v_sum_d, v_zero));
-  v_sum_d = _mm_add_epi32(v_sum_d, _mm_set_epi32(0, 0, 0, 31));
-  v_sum_d = _mm_srai_epi32(v_sum_d, 6);
-
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 12);
-
-  // Store the SSE
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
-  // Compute the variance
-  v_sum_d = _mm_abs_epi32(v_sum_d);
-  v_sum_d = _mm_mul_epu32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_srl_epi64(v_sum_d,
-                          _mm_set_epi32(0, 0, 0, LOG2_P2(w) + LOG2_P2(h)));
-  v_sse_q = _mm_sub_epi64(v_sse_q, v_sum_d);
-
-  return _mm_cvtsi128_si32(v_sse_q);
+  return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
 }
 
 #define MASKED_VARWXH(W, H)                                               \
@@ -144,6 +167,11 @@ MASKED_VARWXH(32, 32)
 MASKED_VARWXH(32, 64)
 MASKED_VARWXH(64, 32)
 MASKED_VARWXH(64, 64)
+#if CONFIG_EXT_PARTITION
+MASKED_VARWXH(64, 128)
+MASKED_VARWXH(128, 64)
+MASKED_VARWXH(128, 128)
+#endif  // CONFIG_EXT_PARTITION
 
 /*****************************************************************************
  * 8 Wide versions
@@ -198,29 +226,7 @@ static INLINE unsigned int masked_variance8xh_ssse3(
     m += m_stride;
   }
 
-  // Horizontal sum
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_srli_si128(v_sse_q, 8));
-
-  // Round
-  v_sum_d = _mm_sub_epi32(v_sum_d, _mm_cmplt_epi32(v_sum_d, v_zero));
-  v_sum_d = _mm_add_epi32(v_sum_d, _mm_set_epi32(0, 0, 0, 31));
-  v_sum_d = _mm_srai_epi32(v_sum_d, 6);
-
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 12);
-
-  // Store the SSE
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
-  // Compute the variance
-  v_sum_d = _mm_abs_epi32(v_sum_d);
-  v_sum_d = _mm_mul_epu32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_srl_epi64(v_sum_d, _mm_set_epi32(0, 0, 0, LOG2_P2(h) + 3));
-  v_sse_q = _mm_sub_epi64(v_sse_q, v_sum_d);
-
-  return _mm_cvtsi128_si32(v_sse_q);
+  return calc_masked_variance(v_sum_d, v_sse_q, sse, 8, h);
 }
 
 #define MASKED_VAR8XH(H)                                                  \
@@ -302,29 +308,7 @@ static INLINE unsigned int masked_variance4xh_ssse3(
     m += m_stride * 2;
   }
 
-  // Horizontal sum
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_srli_si128(v_sse_q, 8));
-
-  // Round
-  v_sum_d = _mm_sub_epi32(v_sum_d, _mm_cmplt_epi32(v_sum_d, v_zero));
-  v_sum_d = _mm_add_epi32(v_sum_d, _mm_set_epi32(0, 0, 0, 31));
-  v_sum_d = _mm_srai_epi32(v_sum_d, 6);
-
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 12);
-
-  // Store the SSE
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
-  // Compute the variance
-  v_sum_d = _mm_abs_epi32(v_sum_d);
-  v_sum_d = _mm_mul_epu32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_srl_epi64(v_sum_d, _mm_set_epi32(0, 0, 0, LOG2_P2(h) + 2));
-  v_sse_q = _mm_sub_epi64(v_sse_q, v_sum_d);
-
-  return _mm_cvtsi128_si32(v_sse_q);
+  return calc_masked_variance(v_sum_d, v_sse_q, sse, 4, h);
 }
 
 #define MASKED_VAR4XH(H)                                                  \
@@ -350,13 +334,13 @@ static INLINE void highbd_masked_variance64_ssse3(
     const uint16_t *b, int  b_stride,
     const uint8_t *m, int  m_stride,
     int w, int  h,
-    __m128i* v_sum_d, __m128i* v_sse_q) {
+    int64_t *sum, uint64_t *sse) {
   int ii, jj;
 
   const __m128i v_zero = _mm_setzero_si128();
 
-  *v_sum_d = _mm_setzero_si128();
-  *v_sse_q = _mm_setzero_si128();
+  __m128i v_sum_d = _mm_setzero_si128();
+  __m128i v_sse_q = _mm_setzero_si128();
 
   assert((w % 8) == 0);
 
@@ -373,7 +357,7 @@ static INLINE void highbd_masked_variance64_ssse3(
       // Difference: [-4095, 4095]
       const __m128i v_d_w = _mm_sub_epi16(v_a_w, v_b_w);
 
-      // Error - [-4095, 4095] * [0, 64] => fits in 19 bits (incld sign bit)
+      // Error - [-4095, 4095] * [0, 64] => sum of 2 of these fits in 19 bits
       const __m128i v_e_d = _mm_madd_epi16(v_d_w, v_m_w);
 
       // Squared error - max (18 bits * 18 bits) = 36 bits (no sign bit)
@@ -397,8 +381,8 @@ static INLINE void highbd_masked_variance64_ssse3(
       v_se_q = _mm_add_epi64(v_se0_q, v_se1_q);
 
       // Accumulate
-      *v_sum_d = _mm_add_epi32(*v_sum_d, v_e_d);
-      *v_sse_q = _mm_add_epi64(*v_sse_q, v_se_q);
+      v_sum_d = _mm_add_epi32(v_sum_d, v_e_d);
+      v_sse_q = _mm_add_epi64(v_sse_q, v_se_q);
     }
 
     // Move on to next row
@@ -408,17 +392,13 @@ static INLINE void highbd_masked_variance64_ssse3(
   }
 
   // Horizontal sum
-  *v_sum_d = _mm_hadd_epi32(*v_sum_d, *v_sum_d);
-  *v_sum_d = _mm_hadd_epi32(*v_sum_d, *v_sum_d);
-  *v_sse_q = _mm_add_epi64(*v_sse_q, _mm_srli_si128(*v_sse_q, 8));
+  *sum = hsum_epi32_si64(v_sum_d);
+  *sse = hsum_epi64_si64(v_sse_q);
 
   // Round
-  *v_sum_d = _mm_sub_epi32(*v_sum_d, _mm_cmplt_epi32(*v_sum_d, v_zero));
-  *v_sum_d = _mm_add_epi32(*v_sum_d, _mm_set_epi32(0, 0, 0, 31));
-  *v_sum_d = _mm_srai_epi32(*v_sum_d, 6);
-
-  *v_sse_q = _mm_add_epi64(*v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  *v_sse_q = _mm_srli_epi64(*v_sse_q, 12);
+  *sum = (*sum >= 0) ? *sum  : -*sum;
+  *sum = ROUND_POWER_OF_TWO(*sum, 6);
+  *sse = ROUND_POWER_OF_TWO(*sse, 12);
 }
 
 // Main calculation for 4 wide blocks
@@ -427,13 +407,13 @@ static INLINE void highbd_masked_variance64_4wide_ssse3(
     const uint16_t *b, int  b_stride,
     const uint8_t *m, int  m_stride,
     int  h,
-    __m128i* v_sum_d, __m128i* v_sse_q) {
+    int64_t *sum, uint64_t *sse) {
   int ii;
 
   const __m128i v_zero = _mm_setzero_si128();
 
-  *v_sum_d = _mm_setzero_si128();
-  *v_sse_q = _mm_setzero_si128();
+  __m128i v_sum_d = _mm_setzero_si128();
+  __m128i v_sse_q = _mm_setzero_si128();
 
   assert((h % 2) == 0);
 
@@ -481,8 +461,8 @@ static INLINE void highbd_masked_variance64_4wide_ssse3(
     v_se_q = _mm_add_epi64(v_se0_q, v_se1_q);
 
     // Accumulate
-    *v_sum_d = _mm_add_epi32(*v_sum_d, v_e_d);
-    *v_sse_q = _mm_add_epi64(*v_sse_q, v_se_q);
+    v_sum_d = _mm_add_epi32(v_sum_d, v_e_d);
+    v_sse_q = _mm_add_epi64(v_sse_q, v_se_q);
 
     // Move on to next row
     a += a_stride * 2;
@@ -491,17 +471,13 @@ static INLINE void highbd_masked_variance64_4wide_ssse3(
   }
 
   // Horizontal sum
-  *v_sum_d = _mm_hadd_epi32(*v_sum_d, *v_sum_d);
-  *v_sum_d = _mm_hadd_epi32(*v_sum_d, *v_sum_d);
-  *v_sse_q = _mm_add_epi64(*v_sse_q, _mm_srli_si128(*v_sse_q, 8));
+  *sum = hsum_epi32_si32(v_sum_d);
+  *sse = hsum_epi64_si64(v_sse_q);
 
   // Round
-  *v_sum_d = _mm_sub_epi32(*v_sum_d, _mm_cmplt_epi32(*v_sum_d, v_zero));
-  *v_sum_d = _mm_add_epi32(*v_sum_d, _mm_set_epi32(0, 0, 0, 31));
-  *v_sum_d = _mm_srai_epi32(*v_sum_d, 6);
-
-  *v_sse_q = _mm_add_epi64(*v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  *v_sse_q = _mm_srli_epi64(*v_sse_q, 12);
+  *sum = (*sum >= 0) ? *sum  : -*sum;
+  *sum = ROUND_POWER_OF_TWO(*sum, 6);
+  *sse = ROUND_POWER_OF_TWO(*sse, 12);
 }
 
 static INLINE unsigned int highbd_masked_variancewxh_ssse3(
@@ -510,26 +486,20 @@ static INLINE unsigned int highbd_masked_variancewxh_ssse3(
     const uint8_t *m, int  m_stride,
     int w, int  h,
     unsigned int *sse) {
-  __m128i v_sum_d, v_sse_q;
+  uint64_t sse64;
+  int64_t sum64;
 
   if (w == 4)
     highbd_masked_variance64_4wide_ssse3(a, a_stride, b,  b_stride, m, m_stride,
-            h, &v_sum_d, &v_sse_q);
+            h, &sum64, &sse64);
   else
     highbd_masked_variance64_ssse3(a, a_stride, b,  b_stride, m, m_stride, w, h,
-            &v_sum_d, &v_sse_q);
+            &sum64, &sse64);
 
   // Store the SSE
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
-  // Compute the variance
-  v_sum_d = _mm_abs_epi32(v_sum_d);
-  v_sum_d = _mm_mul_epu32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_srl_epi64(v_sum_d,
-                          _mm_set_epi32(0, 0, 0, LOG2_P2(w) + LOG2_P2(h)));
-  v_sse_q = _mm_sub_epi64(v_sse_q, v_sum_d);
-
-  return _mm_cvtsi128_si32(v_sse_q);
+  *sse = (unsigned int)sse64;
+  // Compute and return variance
+  return *sse - ((sum64 * sum64) / (w * h));
 }
 
 static INLINE unsigned int highbd_10_masked_variancewxh_ssse3(
@@ -538,32 +508,24 @@ static INLINE unsigned int highbd_10_masked_variancewxh_ssse3(
     const uint8_t *m, int  m_stride,
     int w, int  h,
     unsigned int *sse) {
-  __m128i v_sum_d, v_sse_q;
+  uint64_t sse64;
+  int64_t sum64;
 
   if (w == 4)
     highbd_masked_variance64_4wide_ssse3(a, a_stride, b,  b_stride, m, m_stride,
-            h, &v_sum_d, &v_sse_q);
+            h, &sum64, &sse64);
   else
     highbd_masked_variance64_ssse3(a, a_stride, b,  b_stride, m, m_stride, w, h,
-            &v_sum_d, &v_sse_q);
+            &sum64, &sse64);
 
-  // Round sum and sse
-  v_sum_d = _mm_srai_epi32(_mm_add_epi32(v_sum_d,
-          _mm_set_epi32(0, 0, 0, 1 << 1)), 2);
-  v_sse_q = _mm_srli_epi64(_mm_add_epi64(v_sse_q,
-          _mm_set_epi32(0, 0, 0, 1 << 3)), 4);
+  // Normalise
+  sum64 = ROUND_POWER_OF_TWO(sum64, 2);
+  sse64 = ROUND_POWER_OF_TWO(sse64, 4);
 
   // Store the SSE
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
-  // Compute the variance
-  v_sum_d = _mm_abs_epi32(v_sum_d);
-  v_sum_d = _mm_mul_epu32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_srl_epi64(v_sum_d,
-                          _mm_set_epi32(0, 0, 0, LOG2_P2(w) + LOG2_P2(h)));
-  v_sse_q = _mm_sub_epi64(v_sse_q, v_sum_d);
-
-  return _mm_cvtsi128_si32(v_sse_q);
+  *sse = (unsigned int)sse64;
+  // Compute and return variance
+  return *sse - ((sum64 * sum64) / (w * h));
 }
 
 static INLINE unsigned int highbd_12_masked_variancewxh_ssse3(
@@ -572,32 +534,23 @@ static INLINE unsigned int highbd_12_masked_variancewxh_ssse3(
     const uint8_t *m, int  m_stride,
     int w, int  h,
     unsigned int *sse) {
-  __m128i v_sum_d, v_sse_q;
+  uint64_t sse64;
+  int64_t sum64;
 
   if (w == 4)
     highbd_masked_variance64_4wide_ssse3(a, a_stride, b,  b_stride, m, m_stride,
-            h, &v_sum_d, &v_sse_q);
+            h, &sum64, &sse64);
   else
     highbd_masked_variance64_ssse3(a, a_stride, b,  b_stride, m, m_stride, w, h,
-            &v_sum_d, &v_sse_q);
+            &sum64, &sse64);
 
-  // Round sum and sse
-  v_sum_d = _mm_srai_epi32(_mm_add_epi32(v_sum_d,
-          _mm_set_epi32(0, 0, 0, 1 << 3)), 4);
-  v_sse_q = _mm_srli_epi64(_mm_add_epi64(v_sse_q,
-          _mm_set_epi32(0, 0, 0, 1 << 7)), 8);
+  sum64 = ROUND_POWER_OF_TWO(sum64, 4);
+  sse64 = ROUND_POWER_OF_TWO(sse64, 8);
 
   // Store the SSE
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
-  // Compute the variance
-  v_sum_d = _mm_abs_epi32(v_sum_d);
-  v_sum_d = _mm_mul_epu32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_srl_epi64(v_sum_d,
-                          _mm_set_epi32(0, 0, 0, LOG2_P2(w) + LOG2_P2(h)));
-  v_sse_q = _mm_sub_epi64(v_sse_q, v_sum_d);
-
-  return _mm_cvtsi128_si32(v_sse_q);
+  *sse = (unsigned int)sse64;
+  // Compute and return variance
+  return *sse - ((sum64 * sum64) / (w * h));
 }
 
 #define HIGHBD_MASKED_VARWXH(W, H)                                             \
@@ -653,6 +606,11 @@ HIGHBD_MASKED_VARWXH(32, 32)
 HIGHBD_MASKED_VARWXH(32, 64)
 HIGHBD_MASKED_VARWXH(64, 32)
 HIGHBD_MASKED_VARWXH(64, 64)
+#if CONFIG_EXT_PARTITION
+HIGHBD_MASKED_VARWXH(64, 128)
+HIGHBD_MASKED_VARWXH(128, 64)
+HIGHBD_MASKED_VARWXH(128, 128)
+#endif  // CONFIG_EXT_PARTITION
 
 #endif
 
@@ -663,8 +621,8 @@ HIGHBD_MASKED_VARWXH(64, 64)
 typedef __m128i (*filter_fn_t)(__m128i v_a_b, __m128i v_b_b,
                                     __m128i v_filter_b);
 
-static INLINE __m128i apply_filter8(const __m128i v_a_b, const __m128i v_b_b,
-                                    const __m128i v_filter_b) {
+static INLINE __m128i apply_filter_avg(const __m128i v_a_b, const __m128i v_b_b,
+                                       const __m128i v_filter_b) {
   (void) v_filter_b;
   return _mm_avg_epu8(v_a_b, v_b_b);
 }
@@ -735,31 +693,6 @@ static void sum_and_sse(const __m128i v_a_b, const __m128i v_b_b,
   *v_sse_q = _mm_add_epi64(*v_sse_q, v_se_hi_q);
 }
 
-static INLINE int calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
-                                       unsigned int* sse,
-                                       const int w, const int h) {
-  int sum;
-
-  // Horizontal sum
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_srli_si128(v_sse_q, 8));
-
-  // Round
-  sum = _mm_cvtsi128_si32(v_sum_d);
-  sum = (sum >= 0) ? ((sum + 31) >> 6) : -((-sum + 31) >> 6);
-
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 12);
-
-  // Store the SSE
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
-  // Compute the variance
-  return  *sse - (((int64_t)sum * sum) >> (LOG2_P2(h) + LOG2_P2(w)));
-}
-
-
 // Functions for width (W) >= 16
 unsigned int vpx_masked_subpel_varWxH_xzero(
         const uint8_t *src, int src_stride, int yoffset,
@@ -770,9 +703,9 @@ unsigned int vpx_masked_subpel_varWxH_xzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   const __m128i v_filter_b = _mm_set1_epi16((
-        vpx_bilinear_filters[yoffset][1] << 8) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(yoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 8) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   for (j = 0; j < w; j += 16) {
     // Load the first row ready
     v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
@@ -814,9 +747,9 @@ unsigned int vpx_masked_subpel_varWxH_yzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   const __m128i v_filter_b = _mm_set1_epi16((
-        vpx_bilinear_filters[xoffset][1] << 8) +
-        vpx_bilinear_filters[xoffset][0]);
-  assert(xoffset < 8);
+        bilinear_filters_2t[xoffset][1] << 8) +
+        bilinear_filters_2t[xoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
   for (i = 0; i < h; i++) {
     for (j = 0; j < w; j += 16) {
       // Load this row and one below & apply the filter to them
@@ -846,13 +779,13 @@ unsigned int vpx_masked_subpel_varWxH_xnonzero_ynonzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   const __m128i v_filterx_b = _mm_set1_epi16((
-        vpx_bilinear_filters[xoffset][1] << 8) +
-        vpx_bilinear_filters[xoffset][0]);
+        bilinear_filters_2t[xoffset][1] << 8) +
+        bilinear_filters_2t[xoffset][0]);
   const __m128i v_filtery_b = _mm_set1_epi16((
-        vpx_bilinear_filters[yoffset][1] << 8) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(yoffset < 8);
-  assert(xoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 8) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
   for (j = 0; j < w; j += 16) {
     // Load the first row ready
     v_src0_b = _mm_loadu_si128((const __m128i*)(src + j));
@@ -908,9 +841,9 @@ unsigned int vpx_masked_subpel_var4xH_xzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filter_b = _mm_set1_epi16((
-        vpx_bilinear_filters[yoffset][1] << 8) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(yoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 8) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   // Load the first row of src data ready
   v_src0_b = _mm_loadl_epi64((const __m128i*)src);
   for (i = 0; i < h; i += 4) {
@@ -938,7 +871,7 @@ unsigned int vpx_masked_subpel_var4xH_xzero(
     v_msk2_b = _mm_unpacklo_epi32(v_msk3_b, v_msk2_b);
     v_msk0_b = _mm_unpacklo_epi64(v_msk2_b, v_msk0_b);
     // Apply the y filter
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       v_src1_b = _mm_unpacklo_epi64(v_src3_b, v_src1_b);
       v_src2_b = _mm_or_si128(_mm_slli_si128(v_src1_b, 4),
             _mm_and_si128(v_src0_b, _mm_setr_epi32(-1, 0, 0, 0)));
@@ -974,13 +907,13 @@ unsigned int vpx_masked_subpel_var8xH_xzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filter_b = _mm_set1_epi16((
-        vpx_bilinear_filters[yoffset][1] << 8) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(yoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 8) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   // Load the first row of src data ready
   v_src0_b = _mm_loadl_epi64((const __m128i*)src);
   for (i = 0; i < h; i += 2) {
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       // Load the rest of the source data for these rows
       v_src1_b = _mm_or_si128(
             _mm_slli_si128(v_src0_b, 8),
@@ -1030,9 +963,9 @@ unsigned int vpx_masked_subpel_var4xH_yzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filter_b = _mm_set1_epi16((
-        vpx_bilinear_filters[xoffset][1] << 8) +
-        vpx_bilinear_filters[xoffset][0]);
-  assert(xoffset < 8);
+        bilinear_filters_2t[xoffset][1] << 8) +
+        bilinear_filters_2t[xoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
   for (i = 0; i < h; i += 4) {
     // Load the src data
     v_src0_b = _mm_loadl_epi64((const __m128i*)src);
@@ -1064,7 +997,7 @@ unsigned int vpx_masked_subpel_var4xH_yzero(
     v_msk2_b = _mm_unpacklo_epi32(v_msk3_b, v_msk2_b);
     v_msk0_b = _mm_unpacklo_epi64(v_msk2_b, v_msk0_b);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src0_b = _mm_unpacklo_epi64(v_src2_b, v_src0_b);
       v_src0_shift_b = _mm_unpacklo_epi64(v_src2_shift_b, v_src0_shift_b);
       v_res_b = _mm_avg_epu8(v_src0_b, v_src0_shift_b);
@@ -1093,9 +1026,9 @@ unsigned int vpx_masked_subpel_var8xH_yzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filter_b = _mm_set1_epi16((
-        vpx_bilinear_filters[xoffset][1] << 8) +
-        vpx_bilinear_filters[xoffset][0]);
-  assert(xoffset < 8);
+        bilinear_filters_2t[xoffset][1] << 8) +
+        bilinear_filters_2t[xoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
   for (i = 0; i < h; i += 2) {
     // Load the src data
     v_src0_b = _mm_loadu_si128((const __m128i*)(src));
@@ -1103,7 +1036,7 @@ unsigned int vpx_masked_subpel_var8xH_yzero(
     v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride));
     v_src1_shift_b = _mm_srli_si128(v_src1_b, 1);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src1_b = _mm_unpacklo_epi64(v_src0_b, v_src1_b);
       v_src1_shift_b = _mm_unpacklo_epi64(v_src0_shift_b, v_src1_shift_b);
       v_res_b = _mm_avg_epu8(v_src1_b, v_src1_shift_b);
@@ -1145,13 +1078,13 @@ unsigned int vpx_masked_subpel_var4xH_xnonzero_ynonzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filterx_b = _mm_set1_epi16((
-        vpx_bilinear_filters[xoffset][1] << 8) +
-        vpx_bilinear_filters[xoffset][0]);
+        bilinear_filters_2t[xoffset][1] << 8) +
+        bilinear_filters_2t[xoffset][0]);
   __m128i v_filtery_b = _mm_set1_epi16((
-        vpx_bilinear_filters[yoffset][1] << 8) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(xoffset < 8);
-  assert(yoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 8) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   for (i = 0; i < h; i += 4) {
     // Load the src data
     v_src0_b = _mm_loadl_epi64((const __m128i*)src);
@@ -1167,7 +1100,7 @@ unsigned int vpx_masked_subpel_var4xH_xnonzero_ynonzero(
     v_src3_shift_b = _mm_srli_si128(v_src3_b, 1);
     v_src2_shift_b = _mm_unpacklo_epi32(v_src3_shift_b, v_src2_shift_b);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src0_b = _mm_unpacklo_epi64(v_src2_b, v_src0_b);
       v_src0_shift_b = _mm_unpacklo_epi64(v_src2_shift_b, v_src0_shift_b);
       v_xres_b[i == 0 ? 0 : 1] = _mm_avg_epu8(v_src0_b, v_src0_shift_b);
@@ -1183,7 +1116,7 @@ unsigned int vpx_masked_subpel_var4xH_xnonzero_ynonzero(
   v_src0_b = _mm_loadl_epi64((const __m128i*)src);
   v_src0_shift_b = _mm_srli_si128(v_src0_b, 1);
   // Apply the x filter
-  if (xoffset == 8) {
+  if (xoffset == HALF_PIXEL_OFFSET) {
     v_extra_row_b = _mm_and_si128(
             _mm_avg_epu8(v_src0_b, v_src0_shift_b),
             _mm_setr_epi32(-1, 0, 0, 0));
@@ -1203,7 +1136,7 @@ unsigned int vpx_masked_subpel_var4xH_xnonzero_ynonzero(
                               v_extra_row_b);
     }
     // Apply the y filter
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       v_res_b = _mm_avg_epu8(v_xres_b[i == 0 ? 0 : 1], v_temp_b);
     } else {
       v_res_b = apply_filter(v_xres_b[i == 0 ? 0 : 1], v_temp_b, v_filtery_b);
@@ -1245,21 +1178,20 @@ unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filterx_b = _mm_set1_epi16((
-        vpx_bilinear_filters[xoffset][1] << 8) +
-        vpx_bilinear_filters[xoffset][0]);
+        bilinear_filters_2t[xoffset][1] << 8) +
+        bilinear_filters_2t[xoffset][0]);
   __m128i v_filtery_b = _mm_set1_epi16((
-        vpx_bilinear_filters[yoffset][1] << 8) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(xoffset < 8);
-  assert(yoffset < 8);
-
+        bilinear_filters_2t[yoffset][1] << 8) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   // Load the first block of src data
   v_src0_b = _mm_loadu_si128((const __m128i*)(src));
   v_src0_shift_b = _mm_srli_si128(v_src0_b, 1);
   v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride));
   v_src1_shift_b = _mm_srli_si128(v_src1_b, 1);
   // Apply the x filter
-  if (xoffset == 8) {
+  if (xoffset == HALF_PIXEL_OFFSET) {
     v_src1_b = _mm_unpacklo_epi64(v_src0_b, v_src1_b);
     v_src1_shift_b = _mm_unpacklo_epi64(v_src0_shift_b, v_src1_shift_b);
     v_xres0_b = _mm_avg_epu8(v_src1_b, v_src1_shift_b);
@@ -1275,7 +1207,7 @@ unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
     v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 3));
     v_src1_shift_b = _mm_srli_si128(v_src1_b, 1);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src1_b = _mm_unpacklo_epi64(v_src0_b, v_src1_b);
       v_src1_shift_b = _mm_unpacklo_epi64(v_src0_shift_b, v_src1_shift_b);
       v_xres1_b = _mm_avg_epu8(v_src1_b, v_src1_shift_b);
@@ -1287,7 +1219,7 @@ unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
     // Apply the y filter to the previous block
     v_temp_b = _mm_or_si128(_mm_srli_si128(v_xres0_b, 8),
                             _mm_slli_si128(v_xres1_b, 8));
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       v_res_b = _mm_avg_epu8(v_xres0_b, v_temp_b);
     } else {
       v_res_b = apply_filter(v_xres0_b, v_temp_b, v_filtery_b);
@@ -1309,7 +1241,7 @@ unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
     v_src1_b = _mm_loadu_si128((const __m128i*)(src + src_stride * 5));
     v_src1_shift_b = _mm_srli_si128(v_src1_b, 1);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src1_b = _mm_unpacklo_epi64(v_src0_b, v_src1_b);
       v_src1_shift_b = _mm_unpacklo_epi64(v_src0_shift_b, v_src1_shift_b);
       v_xres0_b = _mm_avg_epu8(v_src1_b, v_src1_shift_b);
@@ -1321,7 +1253,7 @@ unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
     // Apply the y filter to the previous block
     v_temp_b = _mm_or_si128(_mm_srli_si128(v_xres1_b, 8),
                             _mm_slli_si128(v_xres0_b, 8));
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       v_res_b = _mm_avg_epu8(v_xres1_b, v_temp_b);
     } else {
       v_res_b = apply_filter(v_xres1_b, v_temp_b, v_filtery_b);
@@ -1359,41 +1291,45 @@ unsigned int vpx_masked_sub_pixel_variance##W##x##H##_ssse3(                   \
       return vpx_masked_variance##W##x##H##_ssse3(src, src_stride,             \
                                                   dst, dst_stride,             \
                                                   msk, msk_stride, sse);       \
-    else if (yoffset == 8)                                                     \
-      return vpx_masked_subpel_varWxH_xzero(src, src_stride, 8,                \
+    else if (yoffset == HALF_PIXEL_OFFSET)                                     \
+      return vpx_masked_subpel_varWxH_xzero(src, src_stride,                   \
+                                            HALF_PIXEL_OFFSET,                 \
                                             dst, dst_stride, msk, msk_stride,  \
-                                            sse, W, H, apply_filter8);         \
+                                            sse, W, H, apply_filter_avg);      \
     else                                                                       \
-      return vpx_masked_subpel_varWxH_xzero(src, src_stride, yoffset,          \
+      return vpx_masked_subpel_varWxH_xzero(src, src_stride,                   \
+                                            yoffset,                           \
                                             dst, dst_stride, msk, msk_stride,  \
                                             sse, W, H, apply_filter);          \
   } else if (yoffset == 0) {                                                   \
-    if (xoffset == 8)                                                          \
-      return vpx_masked_subpel_varWxH_yzero(src, src_stride, 8,                \
+    if (xoffset == HALF_PIXEL_OFFSET)                                          \
+      return vpx_masked_subpel_varWxH_yzero(src, src_stride,                   \
+                                            HALF_PIXEL_OFFSET,                 \
                                             dst, dst_stride, msk, msk_stride,  \
-                                            sse, W, H, apply_filter8);         \
+                                            sse, W, H, apply_filter_avg);      \
     else                                                                       \
-      return vpx_masked_subpel_varWxH_yzero(src, src_stride, xoffset,          \
+      return vpx_masked_subpel_varWxH_yzero(src, src_stride,                   \
+                                            xoffset,                           \
                                             dst, dst_stride, msk, msk_stride,  \
                                             sse, W, H, apply_filter);          \
-  } else if (xoffset == 8) {                                                   \
-    if (yoffset == 8)                                                          \
+  } else if (xoffset == HALF_PIXEL_OFFSET) {                                   \
+    if (yoffset == HALF_PIXEL_OFFSET)                                          \
       return vpx_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
-              8, 8, dst, dst_stride, msk, msk_stride, sse, W, H,               \
-              apply_filter8, apply_filter8);                                   \
+              HALF_PIXEL_OFFSET, HALF_PIXEL_OFFSET, dst, dst_stride, msk,      \
+              msk_stride, sse, W, H, apply_filter_avg, apply_filter_avg);      \
     else                                                                       \
       return vpx_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
-              8, yoffset, dst, dst_stride, msk, msk_stride, sse, W, H,         \
-              apply_filter8, apply_filter);                                    \
+              HALF_PIXEL_OFFSET, yoffset, dst, dst_stride, msk,                \
+              msk_stride, sse, W, H, apply_filter_avg, apply_filter);          \
   } else {                                                                     \
-    if (yoffset == 8)                                                          \
+    if (yoffset == HALF_PIXEL_OFFSET)                                          \
       return vpx_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
-              xoffset, 8, dst, dst_stride, msk, msk_stride, sse, W, H,         \
-              apply_filter, apply_filter8);                                    \
+              xoffset, HALF_PIXEL_OFFSET, dst, dst_stride, msk,                \
+              msk_stride, sse, W, H, apply_filter, apply_filter_avg);          \
     else                                                                       \
       return vpx_masked_subpel_varWxH_xnonzero_ynonzero(src, src_stride,       \
-              xoffset, yoffset, dst, dst_stride, msk, msk_stride, sse, W, H,   \
-              apply_filter, apply_filter);                                     \
+              xoffset, yoffset, dst, dst_stride, msk,                          \
+              msk_stride, sse, W, H, apply_filter, apply_filter);              \
   }                                                                            \
 }
 
@@ -1437,6 +1373,11 @@ MASK_SUBPIX_VAR_LARGE(32, 32)
 MASK_SUBPIX_VAR_LARGE(32, 64)
 MASK_SUBPIX_VAR_LARGE(64, 32)
 MASK_SUBPIX_VAR_LARGE(64, 64)
+#if CONFIG_EXT_PARTITION
+MASK_SUBPIX_VAR_LARGE(64, 128)
+MASK_SUBPIX_VAR_LARGE(128, 64)
+MASK_SUBPIX_VAR_LARGE(128, 128)
+#endif  // CONFIG_EXT_PARTITION
 
 #if CONFIG_VP9_HIGHBITDEPTH
 typedef int (*highbd_calc_masked_var_t)(__m128i v_sum_d, __m128i v_sse_q,
@@ -1449,9 +1390,9 @@ typedef unsigned int (*highbd_variance_fn_t)(
 typedef __m128i (*highbd_filter_fn_t)(__m128i v_a_w, __m128i v_b_w,
                                     __m128i v_filter_w);
 
-static INLINE __m128i highbd_apply_filter8(const __m128i v_a_w,
-                                           const __m128i v_b_w,
-                                           const __m128i v_filter_w) {
+static INLINE __m128i highbd_apply_filter_avg(const __m128i v_a_w,
+                                              const __m128i v_b_w,
+                                              const __m128i v_filter_w) {
   (void) v_filter_w;
   return _mm_avg_epu16(v_a_w, v_b_w);
 }
@@ -1523,55 +1464,53 @@ static INLINE int highbd_10_calc_masked_variance(__m128i v_sum_d,
                                                  __m128i v_sse_q,
                                                  unsigned int* sse,
                                                  const int w, const int h) {
-  int sum;
+  int64_t sum64;
+  uint64_t sse64;
 
   // Horizontal sum
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_srli_si128(v_sse_q, 8));
+  sum64 = hsum_epi32_si32(v_sum_d);
+  sse64 = hsum_epi64_si64(v_sse_q);
+
+  sum64 = (sum64 >= 0) ? sum64 : -sum64;
 
   // Round
-  sum = _mm_cvtsi128_si32(v_sum_d);
-  sum = (sum >= 0) ? ((sum + 31) >> 6) : -((-sum + 31) >> 6);
-  sum = ROUND_POWER_OF_TWO(sum, 2);
+  sum64 = ROUND_POWER_OF_TWO(sum64, 6);
+  sse64 = ROUND_POWER_OF_TWO(sse64, 12);
 
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 12);
+  // Normalise
+  sum64 = ROUND_POWER_OF_TWO(sum64, 2);
+  sse64 = ROUND_POWER_OF_TWO(sse64, 4);
 
   // Store the SSE
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 0x8));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 4);
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
+  *sse = (unsigned int)sse64;
   // Compute the variance
-  return  *sse - (((int64_t)sum * sum) >> (LOG2_P2(h) + LOG2_P2(w)));
+  return  *sse - ((sum64 * sum64) / (w * h));
 }
 static INLINE int highbd_12_calc_masked_variance(__m128i v_sum_d,
                                                  __m128i v_sse_q,
                                                  unsigned int* sse,
                                                  const int w, const int h) {
-  int sum;
+  int64_t sum64;
+  uint64_t sse64;
 
   // Horizontal sum
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sum_d = _mm_hadd_epi32(v_sum_d, v_sum_d);
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_srli_si128(v_sse_q, 8));
+  sum64 = hsum_epi32_si64(v_sum_d);
+  sse64 = hsum_epi64_si64(v_sse_q);
+
+  sum64 = (sum64 >= 0) ? sum64 : -sum64;
 
   // Round
-  sum = _mm_cvtsi128_si32(v_sum_d);
-  sum = (sum >= 0) ? ((sum + 31) >> 6) : -((-sum + 31) >> 6);
-  sum = ROUND_POWER_OF_TWO(sum, 4);
+  sum64 = ROUND_POWER_OF_TWO(sum64, 6);
+  sse64 = ROUND_POWER_OF_TWO(sse64, 12);
 
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 2047));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 12);
+  // Normalise
+  sum64 = ROUND_POWER_OF_TWO(sum64, 4);
+  sse64 = ROUND_POWER_OF_TWO(sse64, 8);
 
   // Store the SSE
-  v_sse_q = _mm_add_epi64(v_sse_q, _mm_set_epi32(0, 0, 0, 0x80));
-  v_sse_q = _mm_srli_epi64(v_sse_q, 8);
-  *sse = _mm_cvtsi128_si32(v_sse_q);
-
+  *sse = (unsigned int)sse64;
   // Compute the variance
-  return  *sse - (((int64_t)sum * sum) >> (LOG2_P2(h) + LOG2_P2(w)));
+  return  *sse - ((sum64 * sum64) / (w * h));
 }
 
 
@@ -1586,9 +1525,9 @@ unsigned int vpx_highbd_masked_subpel_varWxH_xzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   const __m128i v_filter_w = _mm_set1_epi32((
-        vpx_bilinear_filters[yoffset][1] << 16) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(yoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 16) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   for (j = 0; j < w; j += 8) {
     // Load the first row ready
     v_src0_w = _mm_loadu_si128((const __m128i*)(src + j));
@@ -1631,9 +1570,9 @@ unsigned int vpx_highbd_masked_subpel_varWxH_yzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   const __m128i v_filter_w = _mm_set1_epi32((
-        vpx_bilinear_filters[xoffset][1] << 16) +
-        vpx_bilinear_filters[xoffset][0]);
-  assert(xoffset < 8);
+        bilinear_filters_2t[xoffset][1] << 16) +
+        bilinear_filters_2t[xoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
   for (i = 0; i < h; i++) {
     for (j = 0; j < w; j += 8) {
       // Load this row & apply the filter to them
@@ -1664,13 +1603,13 @@ unsigned int vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   const __m128i v_filterx_w = _mm_set1_epi32((
-        vpx_bilinear_filters[xoffset][1] << 16) +
-        vpx_bilinear_filters[xoffset][0]);
+        bilinear_filters_2t[xoffset][1] << 16) +
+        bilinear_filters_2t[xoffset][0]);
   const __m128i v_filtery_w = _mm_set1_epi32((
-        vpx_bilinear_filters[yoffset][1] << 16) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(xoffset < 8);
-  assert(yoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 16) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   for (j = 0; j < w; j += 8) {
     // Load the first row ready
     v_src0_w = _mm_loadu_si128((const __m128i*)(src + j));
@@ -1724,13 +1663,13 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filter_w = _mm_set1_epi32((
-        vpx_bilinear_filters[yoffset][1] << 16) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(yoffset < 8);
+        bilinear_filters_2t[yoffset][1] << 16) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   // Load the first row of src data ready
   v_src0_w = _mm_loadl_epi64((const __m128i*)src);
   for (i = 0; i < h; i += 2) {
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       // Load the rest of the source data for these rows
       v_src1_w = _mm_or_si128(
             _mm_slli_si128(v_src0_w, 8),
@@ -1776,9 +1715,9 @@ unsigned int vpx_highbd_masked_subpel_var4xH_yzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filter_w = _mm_set1_epi32((
-        vpx_bilinear_filters[xoffset][1] << 16) +
-        vpx_bilinear_filters[xoffset][0]);
-  assert(xoffset < 8);
+        bilinear_filters_2t[xoffset][1] << 16) +
+        bilinear_filters_2t[xoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
   for (i = 0; i < h; i += 2) {
     // Load the src data
     v_src0_w = _mm_loadu_si128((const __m128i*)(src));
@@ -1786,7 +1725,7 @@ unsigned int vpx_highbd_masked_subpel_var4xH_yzero(
     v_src1_w = _mm_loadu_si128((const __m128i*)(src + src_stride));
     v_src1_shift_w = _mm_srli_si128(v_src1_w, 2);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src1_w = _mm_unpacklo_epi64(v_src0_w, v_src1_w);
       v_src1_shift_w = _mm_unpacklo_epi64(v_src0_shift_w, v_src1_shift_w);
       v_res_w = _mm_avg_epu16(v_src1_w, v_src1_shift_w);
@@ -1826,21 +1765,20 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
   __m128i v_sum_d = _mm_setzero_si128();
   __m128i v_sse_q = _mm_setzero_si128();
   __m128i v_filterx_w = _mm_set1_epi32((
-        vpx_bilinear_filters[xoffset][1] << 16) +
-        vpx_bilinear_filters[xoffset][0]);
+        bilinear_filters_2t[xoffset][1] << 16) +
+        bilinear_filters_2t[xoffset][0]);
   __m128i v_filtery_w = _mm_set1_epi32((
-        vpx_bilinear_filters[yoffset][1] << 16) +
-        vpx_bilinear_filters[yoffset][0]);
-  assert(xoffset < 8);
-  assert(yoffset < 8);
-
+        bilinear_filters_2t[yoffset][1] << 16) +
+        bilinear_filters_2t[yoffset][0]);
+  assert(xoffset < BIL_SUBPEL_SHIFTS);
+  assert(yoffset < BIL_SUBPEL_SHIFTS);
   // Load the first block of src data
   v_src0_w = _mm_loadu_si128((const __m128i*)(src));
   v_src0_shift_w = _mm_srli_si128(v_src0_w, 2);
   v_src1_w = _mm_loadu_si128((const __m128i*)(src + src_stride));
   v_src1_shift_w = _mm_srli_si128(v_src1_w, 2);
   // Apply the x filter
-  if (xoffset == 8) {
+  if (xoffset == HALF_PIXEL_OFFSET) {
     v_src1_w = _mm_unpacklo_epi64(v_src0_w, v_src1_w);
     v_src1_shift_w = _mm_unpacklo_epi64(v_src0_shift_w, v_src1_shift_w);
     v_xres0_w = _mm_avg_epu16(v_src1_w, v_src1_shift_w);
@@ -1858,7 +1796,7 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
     v_src1_w = _mm_loadu_si128((const __m128i*)(src + src_stride * 3));
     v_src1_shift_w = _mm_srli_si128(v_src1_w, 2);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src1_w = _mm_unpacklo_epi64(v_src0_w, v_src1_w);
       v_src1_shift_w = _mm_unpacklo_epi64(v_src0_shift_w, v_src1_shift_w);
       v_xres1_w = _mm_avg_epu16(v_src1_w, v_src1_shift_w);
@@ -1872,7 +1810,7 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
     // Apply the y filter to the previous block
     v_temp_w = _mm_or_si128(_mm_srli_si128(v_xres0_w, 8),
                             _mm_slli_si128(v_xres1_w, 8));
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       v_res_w = _mm_avg_epu16(v_xres0_w, v_temp_w);
     } else {
       v_res_w = highbd_apply_filter(v_xres0_w, v_temp_w, v_filtery_w);
@@ -1894,7 +1832,7 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
     v_src1_w = _mm_loadu_si128((const __m128i*)(src + src_stride * 5));
     v_src1_shift_w = _mm_srli_si128(v_src1_w, 2);
     // Apply the x filter
-    if (xoffset == 8) {
+    if (xoffset == HALF_PIXEL_OFFSET) {
       v_src1_w = _mm_unpacklo_epi64(v_src0_w, v_src1_w);
       v_src1_shift_w = _mm_unpacklo_epi64(v_src0_shift_w, v_src1_shift_w);
       v_xres0_w = _mm_avg_epu16(v_src1_w, v_src1_shift_w);
@@ -1908,7 +1846,7 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
     // Apply the y filter to the previous block
     v_temp_w = _mm_or_si128(_mm_srli_si128(v_xres1_w, 8),
                             _mm_slli_si128(v_xres0_w, 8));
-    if (yoffset == 8) {
+    if (yoffset == HALF_PIXEL_OFFSET) {
       v_res_w = _mm_avg_epu16(v_xres1_w, v_temp_w);
     } else {
       v_res_w = highbd_apply_filter(v_xres1_w, v_temp_w, v_filtery_w);
@@ -1948,55 +1886,61 @@ unsigned int highbd_masked_sub_pixel_variance##W##x##H##_ssse3(                \
     if (yoffset == 0)                                                          \
       return full_variance_function(src8, src_stride, dst8, dst_stride,        \
                                     msk, msk_stride, sse);                     \
-    else if (yoffset == 8)                                                     \
-      return vpx_highbd_masked_subpel_varWxH_xzero(src, src_stride, 8,         \
+    else if (yoffset == HALF_PIXEL_OFFSET)                                     \
+      return vpx_highbd_masked_subpel_varWxH_xzero(src, src_stride,            \
+                                                   HALF_PIXEL_OFFSET,          \
                                                    dst, dst_stride,            \
                                                    msk, msk_stride,            \
                                                    sse, W, H,                  \
-                                                   highbd_apply_filter8,       \
+                                                   highbd_apply_filter_avg,    \
                                                    calc_var);                  \
     else                                                                       \
-      return vpx_highbd_masked_subpel_varWxH_xzero(src, src_stride, yoffset,   \
+      return vpx_highbd_masked_subpel_varWxH_xzero(src, src_stride,            \
+                                                   yoffset,                    \
                                                    dst, dst_stride,            \
                                                    msk, msk_stride,            \
                                                    sse, W, H,                  \
                                                    highbd_apply_filter,        \
                                                    calc_var);                  \
   } else if (yoffset == 0) {                                                   \
-    if (xoffset == 8)                                                          \
-      return vpx_highbd_masked_subpel_varWxH_yzero(src, src_stride, 8,         \
+    if (xoffset == HALF_PIXEL_OFFSET)                                          \
+      return vpx_highbd_masked_subpel_varWxH_yzero(src, src_stride,            \
+                                                   HALF_PIXEL_OFFSET,          \
                                                    dst, dst_stride,            \
                                                    msk, msk_stride,            \
                                                    sse, W, H,                  \
-                                                   highbd_apply_filter8,       \
+                                                   highbd_apply_filter_avg,    \
                                                    calc_var);                  \
     else                                                                       \
-      return vpx_highbd_masked_subpel_varWxH_yzero(src, src_stride, xoffset,   \
+      return vpx_highbd_masked_subpel_varWxH_yzero(src, src_stride,            \
+                                                   xoffset,                    \
                                                    dst, dst_stride,            \
                                                    msk, msk_stride,            \
                                                    sse, W, H,                  \
                                                    highbd_apply_filter,        \
                                                    calc_var);                  \
-  } else if (xoffset == 8) {                                                   \
-    if (yoffset == 8)                                                          \
+  } else if (xoffset == HALF_PIXEL_OFFSET) {                                   \
+    if (yoffset == HALF_PIXEL_OFFSET)                                          \
       return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(                \
-              src, src_stride, 8, 8, dst, dst_stride, msk, msk_stride,         \
-              sse, W, H, highbd_apply_filter8, highbd_apply_filter8, calc_var);\
+              src, src_stride, HALF_PIXEL_OFFSET, HALF_PIXEL_OFFSET,           \
+              dst, dst_stride, msk, msk_stride, sse, W, H,                     \
+              highbd_apply_filter_avg, highbd_apply_filter_avg, calc_var);     \
     else                                                                       \
       return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(                \
-              src, src_stride, 8, yoffset, dst, dst_stride,                    \
-              msk, msk_stride, sse, W, H, highbd_apply_filter8,                \
+              src, src_stride, HALF_PIXEL_OFFSET, yoffset, dst, dst_stride,    \
+              msk, msk_stride, sse, W, H, highbd_apply_filter_avg,             \
               highbd_apply_filter, calc_var);                                  \
   } else {                                                                     \
-    if (yoffset == 8)                                                          \
+    if (yoffset == HALF_PIXEL_OFFSET)                                          \
       return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(                \
-              src, src_stride, xoffset, 8, dst, dst_stride, msk, msk_stride,   \
-              sse, W, H, highbd_apply_filter, highbd_apply_filter8, calc_var); \
+              src, src_stride, xoffset, HALF_PIXEL_OFFSET,                     \
+              dst, dst_stride, msk, msk_stride, sse, W, H,                     \
+              highbd_apply_filter, highbd_apply_filter_avg, calc_var);         \
     else                                                                       \
       return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(                \
-              src, src_stride, xoffset, yoffset, dst, dst_stride,              \
-               msk, msk_stride, sse, W, H, highbd_apply_filter,                \
-               highbd_apply_filter, calc_var);                                 \
+              src, src_stride, xoffset, yoffset,                               \
+              dst, dst_stride, msk, msk_stride, sse, W, H,                     \
+              highbd_apply_filter, highbd_apply_filter, calc_var);             \
   }                                                                            \
 }
 
@@ -2093,4 +2037,12 @@ HIGHBD_MASK_SUBPIX_VAR_LARGE(64, 32)
 HIGHBD_MASK_SUBPIX_VAR_WRAPPERS(64, 32)
 HIGHBD_MASK_SUBPIX_VAR_LARGE(64, 64)
 HIGHBD_MASK_SUBPIX_VAR_WRAPPERS(64, 64)
+#if CONFIG_EXT_PARTITION
+HIGHBD_MASK_SUBPIX_VAR_LARGE(64, 128)
+HIGHBD_MASK_SUBPIX_VAR_WRAPPERS(64, 128)
+HIGHBD_MASK_SUBPIX_VAR_LARGE(128, 64)
+HIGHBD_MASK_SUBPIX_VAR_WRAPPERS(128, 64)
+HIGHBD_MASK_SUBPIX_VAR_LARGE(128, 128)
+HIGHBD_MASK_SUBPIX_VAR_WRAPPERS(128, 128)
+#endif  // CONFIG_EXT_PARTITION
 #endif

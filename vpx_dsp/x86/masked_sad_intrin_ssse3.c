@@ -64,6 +64,11 @@ unsigned int vpx_masked_sad##m##x##n##_ssse3(const uint8_t *src, \
                           m, n); \
 }
 
+#if CONFIG_EXT_PARTITION
+MASKSADMXN_SSSE3(128, 128)
+MASKSADMXN_SSSE3(128, 64)
+MASKSADMXN_SSSE3(64, 128)
+#endif  // CONFIG_EXT_PARTITION
 MASKSADMXN_SSSE3(64, 64)
 MASKSADMXN_SSSE3(64, 32)
 MASKSADMXN_SSSE3(32, 64)
@@ -100,7 +105,7 @@ MASKSAD4XN_SSSE3(8)
 MASKSAD4XN_SSSE3(4)
 
 // For width a multiple of 16
-// Assumes values in m are <=64 and w = 16, 32, or 64
+// Assumes values in m are <=64
 static INLINE unsigned int masked_sad_ssse3(const uint8_t *a_ptr, int a_stride,
                                             const uint8_t *b_ptr, int b_stride,
                                             const uint8_t *m_ptr, int m_stride,
@@ -255,6 +260,11 @@ unsigned int vpx_highbd_masked_sad##m##x##n##_ssse3(const uint8_t *src, \
                                  msk_stride, m, n); \
 }
 
+#if CONFIG_EXT_PARTITION
+HIGHBD_MASKSADMXN_SSSE3(128, 128)
+HIGHBD_MASKSADMXN_SSSE3(128, 64)
+HIGHBD_MASKSADMXN_SSSE3(64, 128)
+#endif  // CONFIG_EXT_PARTITION
 HIGHBD_MASKSADMXN_SSSE3(64, 64)
 HIGHBD_MASKSADMXN_SSSE3(64, 32)
 HIGHBD_MASKSADMXN_SSSE3(32, 64)
