@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d79c592c_9b026bed",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-03-07T19:34:15Z",
+      "side": 1,
+      "message": "Ugh I should get around to removing all the \"USE_X86INC\" stuff. It was useful before PIC stuff got added to x86inc.asm, but now it\u0027s just another layer to forget.",
+      "revId": "e38e5aa5f7641e88754f5260857e714ebb34f9de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17935119_fdeda7ac",
+        "filename": "vpx_dsp/x86/loopfilter_mmx.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-03-07T19:34:15Z",
+      "side": 1,
+      "message": "GET_GOT_DEFINED is only defined for PIC so you only need the one, I think?",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 19
+      },
+      "revId": "e38e5aa5f7641e88754f5260857e714ebb34f9de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
