@@ -77,6 +77,7 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   {0,   1,  -3,   8, 126,  -5,   1, 0},
 };
 
+#if CONFIG_EXT_INTRA
 DECLARE_ALIGNED(256, static const InterpKernel,
                 sub_pel_filters_8sharp[SUBPEL_SHIFTS]) = {
   // intfilt 0.8
@@ -96,6 +97,28 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   {-2,   5, -11,  28, 119, -16,   7, -2},
   {-2,   4,  -7,  18, 124, -12,   5, -2},
   {-1,   2,  -4,   9, 127,  -6,   2, -1},
+};
+#endif  // CONFIG_EXT_INTRA
+
+DECLARE_ALIGNED(256, static const int16_t,
+                sub_pel_filters_10sharp[SUBPEL_SHIFTS][10]) = {
+  // intfilt 0.77
+  {0,   0,   0,   0, 128,   0,   0,   0,   0, 0},
+  {0,  -1,   3,  -6, 127,   8,  -4,   2,  -1, 0},
+  {1,  -2,   5, -12, 124,  18,  -7,   3,  -2, 0},
+  {1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1},
+  {1,  -4,   8, -20, 114,  38, -14,   7,  -3, 1},
+  {1,  -4,   9, -22, 107,  49, -17,   8,  -4, 1},
+  {2,  -5,  10, -24,  99,  59, -20,   9,  -4, 2},
+  {2,  -5,  10, -24,  90,  70, -22,  10,  -5, 2},
+  {2,  -5,  10, -23,  80,  80, -23,  10,  -5, 2},
+  {2,  -5,  10, -22,  70,  90, -24,  10,  -5, 2},
+  {2,  -4,   9, -20,  59,  99, -24,  10,  -5, 2},
+  {1,  -4,   8, -17,  49, 107, -22,   9,  -4, 1},
+  {1,  -3,   7, -14,  38, 114, -20,   8,  -4, 1},
+  {1,  -2,   5, -11,  28, 119, -17,   7,  -3, 1},
+  {0,  -2,   3,  -7,  18, 124, -12,   5,  -2, 1},
+  {0,  -1,   2,  -4,   8, 127,  -6,   3,  -1, 0},
 };
 
 #if SWITCHABLE_FILTERS >= 4
@@ -145,23 +168,23 @@ DECLARE_ALIGNED(256, static const InterpKernel,
 #if SWITCHABLE_FILTERS == 5
 DECLARE_ALIGNED(16, static const int16_t,
                 sub_pel_filters_12sharp[SUBPEL_SHIFTS][12]) = {
-  // intfilt 0.8
+  // intfilt 0.85
   {0,   0,   0,   0,   0, 128,   0,   0,   0,   0,   0, 0},
-  {0,   1,  -1,   3,  -7, 127,   8,  -4,   2,  -1,   0, 0},
-  {0,   1,  -3,   5, -12, 124,  18,  -8,   4,  -2,   1, 0},
-  {-1,   2,  -4,   8, -17, 120,  28, -11,   6,  -3,   1, -1},
-  {-1,   2,  -4,  10, -21, 114,  38, -15,   8,  -4,   2, -1},
-  {-1,   3,  -5,  11, -23, 107,  49, -18,   9,  -5,   2, -1},
-  {-1,   3,  -6,  12, -25,  99,  60, -21,  11,  -6,   3, -1},
-  {-1,   3,  -6,  12, -25,  90,  70, -23,  12,  -6,   3, -1},
-  {-1,   3,  -6,  12, -24,  80,  80, -24,  12,  -6,   3, -1},
-  {-1,   3,  -6,  12, -23,  70,  90, -25,  12,  -6,   3, -1},
-  {-1,   3,  -6,  11, -21,  60,  99, -25,  12,  -6,   3, -1},
-  {-1,   2,  -5,   9, -18,  49, 107, -23,  11,  -5,   3, -1},
-  {-1,   2,  -4,   8, -15,  38, 114, -21,  10,  -4,   2, -1},
-  {-1,   1,  -3,   6, -11,  28, 120, -17,   8,  -4,   2, -1},
-  {0,   1,  -2,   4,  -8,  18, 124, -12,   5,  -3,   1, 0},
-  {0,   0,  -1,   2,  -4,   8, 127,  -7,   3,  -1,   1, 0},
+  {0,   1,  -2,   3,  -7, 127,   8,  -4,   2,  -1,   1, 0},
+  {-1,   2,  -3,   6, -13, 124,  18,  -8,   4,  -2,   2, -1},
+  {-1,   3,  -4,   8, -18, 120,  28, -12,   7,  -4,   2, -1},
+  {-1,   3,  -6,  10, -21, 115,  38, -15,   8,  -5,   3, -1},
+  {-2,   4,  -6,  12, -24, 108,  49, -18,  10,  -6,   3, -2},
+  {-2,   4,  -7,  13, -25, 100,  60, -21,  11,  -7,   4, -2},
+  {-2,   4,  -7,  13, -26,  91,  71, -24,  13,  -7,   4, -2},
+  {-2,   4,  -7,  13, -25,  81,  81, -25,  13,  -7,   4, -2},
+  {-2,   4,  -7,  13, -24,  71,  91, -26,  13,  -7,   4, -2},
+  {-2,   4,  -7,  11, -21,  60, 100, -25,  13,  -7,   4, -2},
+  {-2,   3,  -6,  10, -18,  49, 108, -24,  12,  -6,   4, -2},
+  {-1,   3,  -5,   8, -15,  38, 115, -21,  10,  -6,   3, -1},
+  {-1,   2,  -4,   7, -12,  28, 120, -18,   8,  -4,   3, -1},
+  {-1,   2,  -2,   4,  -8,  18, 124, -13,   6,  -3,   2, -1},
+  {0,   1,  -1,   2,  -4,   8, 127,  -7,   3,  -2,   1, 0},
 };
 #endif
 
@@ -245,7 +268,7 @@ static const InterpFilterParams
 vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
   {(const int16_t*)sub_pel_filters_8, SUBPEL_TAPS, SUBPEL_SHIFTS},
   {(const int16_t*)sub_pel_filters_8smooth, SUBPEL_TAPS, SUBPEL_SHIFTS},
-  {(const int16_t*)sub_pel_filters_8sharp, SUBPEL_TAPS, SUBPEL_SHIFTS},
+  {(const int16_t*)sub_pel_filters_10sharp, 10, SUBPEL_SHIFTS},
 #if SWITCHABLE_FILTERS >= 4
   {(const int16_t*)sub_pel_filters_8smooth2, SUBPEL_TAPS, SUBPEL_SHIFTS},
 #endif
@@ -266,7 +289,7 @@ vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
 
 #if USE_TEMPORALFILTER_12TAP
 static const InterpFilterParams vp10_interp_temporalfilter_12tap = {
-    (const int16_t*)sub_pel_filters_temporalfilter_12, 12, SUBPEL_SHIFTS
+  (const int16_t*)sub_pel_filters_temporalfilter_12, 12, SUBPEL_SHIFTS
 };
 #endif  // USE_TEMPORALFILTER_12TAP
 
