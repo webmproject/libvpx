@@ -816,3 +816,27 @@ void vp9_free_svc_cyclic_refresh(VP9_COMP *const cpi) {
     }
   }
 }
+
+// Reset on key frame: reset counters, references and buffer updates.
+void vp9_svc_reset_key_frame(VP9_COMP *cpi) {
+  int sl, tl;
+  SVC *const svc = &cpi->svc;
+  LAYER_CONTEXT *lc = NULL;
+  for (sl = 0; sl < svc->number_spatial_layers; ++sl) {
+    for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+      lc = &cpi->svc.layer_context[sl * svc->number_temporal_layers + tl];
+      lc->current_video_frame_in_layer = 0;
+      lc->frames_from_key_frame = 0;
+    }
+  }
+  if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0212) {
+    set_flags_and_fb_idx_for_temporal_mode3(cpi);
+  } else if (svc->temporal_layering_mode ==
+             VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING) {
+     set_flags_and_fb_idx_for_temporal_mode_noLayering(cpi);
+  } else if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0101) {
+     set_flags_and_fb_idx_for_temporal_mode2(cpi);
+  }
+  vp9_update_temporal_layer_framerate(cpi);
+  vp9_restore_layer_context(cpi);
+}
