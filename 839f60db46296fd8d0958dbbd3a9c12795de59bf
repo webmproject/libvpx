@@ -22,6 +22,30 @@
       "revId": "839f60db46296fd8d0958dbbd3a9c12795de59bf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2222d18a_6554662a",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-03-07T10:54:33Z",
+      "side": 1,
+      "message": "We were already doing reconstruction only if this mode was so far bettern in RD cost. It is unclear to me how many times does that goto between block_eror and inv_txfm_add get taken.",
+      "parentUuid": "423ee59c_ae38f7b7",
+      "range": {
+        "startLine": 1609,
+        "startChar": 16,
+        "endLine": 1609,
+        "endChar": 55
+      },
+      "revId": "839f60db46296fd8d0958dbbd3a9c12795de59bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
