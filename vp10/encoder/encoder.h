@@ -516,6 +516,7 @@ typedef struct VP10_COMP {
                                                  [PALETTE_COLORS];
   int palette_uv_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
                                                   [PALETTE_COLORS];
+  int tx_size_cost[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_EXT_TX
   int inter_tx_type_costs[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
   int intra_tx_type_costs[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]

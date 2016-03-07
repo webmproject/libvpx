@@ -37,19 +37,6 @@ extern "C" {
 
 struct VP10Common;
 
-struct tx_probs {
-  vpx_prob p32x32[TX_SIZE_CONTEXTS][TX_SIZES - 1];
-  vpx_prob p16x16[TX_SIZE_CONTEXTS][TX_SIZES - 2];
-  vpx_prob p8x8[TX_SIZE_CONTEXTS][TX_SIZES - 3];
-};
-
-struct tx_counts {
-  unsigned int p32x32[TX_SIZE_CONTEXTS][TX_SIZES];
-  unsigned int p16x16[TX_SIZE_CONTEXTS][TX_SIZES - 1];
-  unsigned int p8x8[TX_SIZE_CONTEXTS][TX_SIZES - 2];
-  unsigned int tx_totals[TX_SIZES];
-};
-
 struct seg_counts {
   unsigned int tree_total[MAX_SEGMENTS];
   unsigned int tree_mispred[MAX_SEGMENTS];
@@ -89,7 +76,7 @@ typedef struct frame_contexts {
   vpx_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   vpx_prob single_ref_prob[REF_CONTEXTS][SINGLE_REFS-1];
   vpx_prob comp_ref_prob[REF_CONTEXTS][COMP_REFS-1];
-  struct tx_probs tx_probs;
+  vpx_prob tx_size_probs[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES - 1];
 #if CONFIG_VAR_TX
   vpx_prob txfm_partition_prob[TXFM_PARTITION_CONTEXTS];
 #endif
@@ -151,7 +138,8 @@ typedef struct FRAME_COUNTS {
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref[REF_CONTEXTS][SINGLE_REFS-1][2];
   unsigned int comp_ref[REF_CONTEXTS][COMP_REFS-1][2];
-  struct tx_counts tx;
+  unsigned int tx_size_totals[TX_SIZES];
+  unsigned int tx_size[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_VAR_TX
   unsigned int txfm_partition[TXFM_PARTITION_CONTEXTS][2];
 #endif
@@ -205,6 +193,8 @@ extern const vpx_tree_index vp10_switchable_interp_tree
 extern const vpx_tree_index vp10_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
 extern const vpx_tree_index
 vp10_palette_color_tree[PALETTE_MAX_SIZE - 1][TREE_SIZE(PALETTE_COLORS)];
+extern const vpx_tree_index
+vp10_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)];
 #if CONFIG_EXT_INTRA
 extern const vpx_tree_index vp10_intra_filter_tree[TREE_SIZE(INTRA_FILTERS)];
 #endif  // CONFIG_EXT_INTRA
@@ -222,13 +212,6 @@ void vp10_setup_past_independence(struct VP10Common *cm);
 
 void vp10_adapt_intra_frame_probs(struct VP10Common *cm);
 void vp10_adapt_inter_frame_probs(struct VP10Common *cm);
-
-void vp10_tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
-                                      unsigned int (*ct_32x32p)[2]);
-void vp10_tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,
-                                      unsigned int (*ct_16x16p)[2]);
-void vp10_tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
-                                    unsigned int (*ct_8x8p)[2]);
 
 static INLINE int vp10_ceil_log2(int n) {
   int i = 1, p = 2;

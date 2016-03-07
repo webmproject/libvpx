@@ -273,16 +273,11 @@ static TX_SIZE read_selected_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
                                      TX_SIZE max_tx_size, vpx_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
   const int ctx = get_tx_size_context(xd);
-  const vpx_prob *tx_probs = get_tx_probs(max_tx_size, ctx, &cm->fc->tx_probs);
-  int tx_size = vpx_read(r, tx_probs[0]);
-  if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
-    tx_size += vpx_read(r, tx_probs[1]);
-    if (tx_size != TX_8X8 && max_tx_size >= TX_32X32)
-      tx_size += vpx_read(r, tx_probs[2]);
-  }
-
+  const int tx_size_cat = max_tx_size - TX_8X8;
+  int tx_size = vpx_read_tree(r, vp10_tx_size_tree[tx_size_cat],
+                              cm->fc->tx_size_probs[tx_size_cat][ctx]);
   if (counts)
-    ++get_tx_counts(max_tx_size, ctx, &counts->tx)[tx_size];
+    ++counts->tx_size[tx_size_cat][ctx][tx_size];
   return (TX_SIZE)tx_size;
 }
 
@@ -1508,7 +1503,7 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
                              idy, idx, r);
       if (xd->counts) {
         const int ctx = get_tx_size_context(xd);
-        ++get_tx_counts(max_tx_size, ctx, &xd->counts->tx)[mbmi->tx_size];
+        ++xd->counts->tx_size[max_tx_size - TX_8X8][ctx][mbmi->tx_size];
       }
     } else {
       mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);

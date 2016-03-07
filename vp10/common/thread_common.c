@@ -432,19 +432,13 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
       for (k = 0; k < 2; k++)
         cm->counts.comp_ref[i][j][k] += counts->comp_ref[i][j][k];
 
-  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-    for (j = 0; j < TX_SIZES; j++)
-      cm->counts.tx.p32x32[i][j] += counts->tx.p32x32[i][j];
+  for (i = 0; i < TX_SIZES - 1; ++i)
+    for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
+      for (k = 0; k < i + 2; ++k)
+        cm->counts.tx_size[i][j][k] += counts->tx_size[i][j][k];
 
-    for (j = 0; j < TX_SIZES - 1; j++)
-      cm->counts.tx.p16x16[i][j] += counts->tx.p16x16[i][j];
-
-    for (j = 0; j < TX_SIZES - 2; j++)
-      cm->counts.tx.p8x8[i][j] += counts->tx.p8x8[i][j];
-  }
-
-  for (i = 0; i < TX_SIZES; i++)
-    cm->counts.tx.tx_totals[i] += counts->tx.tx_totals[i];
+  for (i = 0; i < TX_SIZES; ++i)
+    cm->counts.tx_size_totals[i] += counts->tx_size_totals[i];
 
 #if CONFIG_VAR_TX
   for (i = 0; i < TXFM_PARTITION_CONTEXTS; ++i)

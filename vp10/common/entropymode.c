@@ -320,17 +320,6 @@ static const vpx_prob default_single_ref_p[REF_CONTEXTS][SINGLE_REFS - 1] = {
 #endif  // CONFIG_EXT_REFS
 };
 
-static const struct tx_probs default_tx_probs = {
-  { { 3, 136, 37 },
-    { 5, 52,  13 } },
-
-  { { 20, 152 },
-    { 15, 101 } },
-
-  { { 100 },
-    { 66  } }
-};
-
 const vpx_tree_index vp10_palette_size_tree[TREE_SIZE(PALETTE_SIZES)] = {
     -TWO_COLORS, 2,
     -THREE_COLORS, 4,
@@ -694,6 +683,34 @@ static const int palette_color_context_lookup[PALETTE_COLOR_CONTEXTS] = {
     9680, 10648, 10890, 13310
 };
 
+const vpx_tree_index vp10_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)] = {
+    {  // Max tx_size is 8X8
+        -TX_4X4, -TX_8X8,
+    },
+    {  // Max tx_size is 16X16
+        -TX_4X4, 2,
+        -TX_8X8, -TX_16X16,
+    },
+    {  // Max tx_size is 32X32
+        -TX_4X4, 2,
+        -TX_8X8, 4,
+        -TX_16X16, -TX_32X32,
+    },
+};
+
+static const vpx_prob
+default_tx_size_prob[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES - 1] = {
+    {  // Max tx_size is 8X8
+        { 100, }, { 66, },
+    },
+    {  // Max tx_size is 16X16
+        { 20, 152, }, { 15, 101, },
+    },
+    {  // Max tx_size is 32X32
+        { 3, 136, 37 }, { 5, 52,  13 },
+    },
+};
+
 int vp10_get_palette_color_context(const uint8_t *color_map, int cols,
                                    int r, int c, int n, int *color_order) {
   int i, j, max, max_idx, temp;
@@ -765,33 +782,6 @@ int vp10_get_palette_color_context(const uint8_t *color_map, int cols,
     color_ctx = 0;
 
   return color_ctx;
-}
-
-void vp10_tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
-                                      unsigned int (*ct_32x32p)[2]) {
-  ct_32x32p[0][0] = tx_count_32x32p[TX_4X4];
-  ct_32x32p[0][1] = tx_count_32x32p[TX_8X8] +
-                    tx_count_32x32p[TX_16X16] +
-                    tx_count_32x32p[TX_32X32];
-  ct_32x32p[1][0] = tx_count_32x32p[TX_8X8];
-  ct_32x32p[1][1] = tx_count_32x32p[TX_16X16] +
-                    tx_count_32x32p[TX_32X32];
-  ct_32x32p[2][0] = tx_count_32x32p[TX_16X16];
-  ct_32x32p[2][1] = tx_count_32x32p[TX_32X32];
-}
-
-void vp10_tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,
-                                      unsigned int (*ct_16x16p)[2]) {
-  ct_16x16p[0][0] = tx_count_16x16p[TX_4X4];
-  ct_16x16p[0][1] = tx_count_16x16p[TX_8X8] + tx_count_16x16p[TX_16X16];
-  ct_16x16p[1][0] = tx_count_16x16p[TX_8X8];
-  ct_16x16p[1][1] = tx_count_16x16p[TX_16X16];
-}
-
-void vp10_tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
-                                    unsigned int (*ct_8x8p)[2]) {
-  ct_8x8p[0][0] = tx_count_8x8p[TX_4X4];
-  ct_8x8p[0][1] = tx_count_8x8p[TX_8X8];
 }
 
 #if CONFIG_VAR_TX
@@ -1315,7 +1305,7 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->comp_inter_prob, default_comp_inter_p);
   vp10_copy(fc->comp_ref_prob, default_comp_ref_p);
   vp10_copy(fc->single_ref_prob, default_single_ref_p);
-  fc->tx_probs = default_tx_probs;
+  vp10_copy(fc->tx_size_probs, default_tx_size_prob);
 #if CONFIG_VAR_TX
   vp10_copy(fc->txfm_partition_prob, default_txfm_partition_probs);
 #endif
@@ -1467,32 +1457,18 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
 }
 
 void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
-  int i;
+  int i, j;
   FRAME_CONTEXT *fc = cm->fc;
   const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
   const FRAME_COUNTS *counts = &cm->counts;
 
   if (cm->tx_mode == TX_MODE_SELECT) {
-    int j;
-    unsigned int branch_ct_8x8p[TX_SIZES - 3][2];
-    unsigned int branch_ct_16x16p[TX_SIZES - 2][2];
-    unsigned int branch_ct_32x32p[TX_SIZES - 1][2];
-
-    for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-      vp10_tx_counts_to_branch_counts_8x8(counts->tx.p8x8[i], branch_ct_8x8p);
-      for (j = 0; j < TX_SIZES - 3; ++j)
-        fc->tx_probs.p8x8[i][j] = mode_mv_merge_probs(
-            pre_fc->tx_probs.p8x8[i][j], branch_ct_8x8p[j]);
-
-      vp10_tx_counts_to_branch_counts_16x16(counts->tx.p16x16[i], branch_ct_16x16p);
-      for (j = 0; j < TX_SIZES - 2; ++j)
-        fc->tx_probs.p16x16[i][j] = mode_mv_merge_probs(
-            pre_fc->tx_probs.p16x16[i][j], branch_ct_16x16p[j]);
-
-      vp10_tx_counts_to_branch_counts_32x32(counts->tx.p32x32[i], branch_ct_32x32p);
-      for (j = 0; j < TX_SIZES - 1; ++j)
-        fc->tx_probs.p32x32[i][j] = mode_mv_merge_probs(
-            pre_fc->tx_probs.p32x32[i][j], branch_ct_32x32p[j]);
+    for (i = 0; i < TX_SIZES - 1; ++i) {
+      for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
+        vpx_tree_merge_probs(vp10_tx_size_tree[i],
+                             pre_fc->tx_size_probs[i][j],
+                             counts->tx_size[i][j],
+                             fc->tx_size_probs[i][j]);
     }
   }
 
@@ -1532,7 +1508,6 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
   }
 #else
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-    int j;
     for (j = 0; j < TX_TYPES; ++j)
       vpx_tree_merge_probs(vp10_ext_tx_tree,
                            pre_fc->intra_ext_tx_prob[i][j],

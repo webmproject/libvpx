@@ -185,48 +185,11 @@ static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
   return (above_ctx + left_ctx) > max_tx_size;
 }
 
-static INLINE const vpx_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
-                                           const struct tx_probs *tx_probs) {
-  switch (max_tx_size) {
-    case TX_8X8:
-      return tx_probs->p8x8[ctx];
-    case TX_16X16:
-      return tx_probs->p16x16[ctx];
-    case TX_32X32:
-      return tx_probs->p32x32[ctx];
-    default:
-      assert(0 && "Invalid max_tx_size.");
-      return NULL;
-  }
-}
-
-static INLINE const vpx_prob *get_tx_probs2(TX_SIZE max_tx_size,
-                                            const MACROBLOCKD *xd,
-                                            const struct tx_probs *tx_probs) {
-  return get_tx_probs(max_tx_size, get_tx_size_context(xd), tx_probs);
-}
-
-static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
-                                          struct tx_counts *tx_counts) {
-  switch (max_tx_size) {
-    case TX_8X8:
-      return tx_counts->p8x8[ctx];
-    case TX_16X16:
-      return tx_counts->p16x16[ctx];
-    case TX_32X32:
-      return tx_counts->p32x32[ctx];
-    default:
-      assert(0 && "Invalid max_tx_size.");
-      return NULL;
-  }
-}
-
 #if CONFIG_VAR_TX
 static void update_tx_counts(VP10_COMMON *cm, MACROBLOCKD *xd,
                              MB_MODE_INFO *mbmi, BLOCK_SIZE plane_bsize,
                              TX_SIZE tx_size, int blk_row, int blk_col,
-                             TX_SIZE max_tx_size, int ctx,
-                             struct tx_counts *tx_counts) {
+                             TX_SIZE max_tx_size, int ctx) {
   const struct macroblockd_plane *const pd = &xd->plane[0];
   const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
   int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
@@ -244,7 +207,7 @@ static void update_tx_counts(VP10_COMMON *cm, MACROBLOCKD *xd,
     return;
 
   if (tx_size == plane_tx_size) {
-    ++get_tx_counts(max_tx_size, ctx, tx_counts)[tx_size];
+    ++xd->counts->tx_size[max_tx_size - TX_8X8][ctx][tx_size];
     mbmi->tx_size = tx_size;
   } else {
     int bsl = b_width_log2_lookup[bsize];
@@ -260,8 +223,7 @@ static void update_tx_counts(VP10_COMMON *cm, MACROBLOCKD *xd,
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
         continue;
       update_tx_counts(cm, xd, mbmi, plane_bsize,
-                       tx_size - 1, offsetr, offsetc,
-                       max_tx_size, ctx, tx_counts);
+                       tx_size - 1, offsetr, offsetc, max_tx_size, ctx);
     }
   }
 }
@@ -270,8 +232,7 @@ static INLINE void inter_block_tx_count_update(VP10_COMMON *cm,
                                                MACROBLOCKD *xd,
                                                MB_MODE_INFO *mbmi,
                                                BLOCK_SIZE plane_bsize,
-                                               int ctx,
-                                               struct tx_counts *tx_counts) {
+                                               int ctx) {
   const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
   const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
   TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
@@ -282,7 +243,7 @@ static INLINE void inter_block_tx_count_update(VP10_COMMON *cm,
   for (idy = 0; idy < mi_height; idy += bh)
     for (idx = 0; idx < mi_width; idx += bh)
       update_tx_counts(cm, xd, mbmi, plane_bsize, max_tx_size, idy, idx,
-                       max_tx_size, ctx, tx_counts);
+                       max_tx_size, ctx);
 }
 #endif
 

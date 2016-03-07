@@ -4148,19 +4148,18 @@ void vp10_encode_frame(VP10_COMP *cpi) {
       int count8x8_lp = 0, count8x8_8x8p = 0;
       int count16x16_16x16p = 0, count16x16_lp = 0;
       int count32x32 = 0;
-
       for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-        count4x4 += counts->tx.p32x32[i][TX_4X4];
-        count4x4 += counts->tx.p16x16[i][TX_4X4];
-        count4x4 += counts->tx.p8x8[i][TX_4X4];
+        count4x4 += counts->tx_size[0][i][TX_4X4];
+        count4x4 += counts->tx_size[1][i][TX_4X4];
+        count4x4 += counts->tx_size[2][i][TX_4X4];
 
-        count8x8_lp += counts->tx.p32x32[i][TX_8X8];
-        count8x8_lp += counts->tx.p16x16[i][TX_8X8];
-        count8x8_8x8p += counts->tx.p8x8[i][TX_8X8];
+        count8x8_lp += counts->tx_size[1][i][TX_8X8];
+        count8x8_lp += counts->tx_size[2][i][TX_8X8];
+        count8x8_8x8p += counts->tx_size[0][i][TX_8X8];
 
-        count16x16_16x16p += counts->tx.p16x16[i][TX_16X16];
-        count16x16_lp += counts->tx.p32x32[i][TX_16X16];
-        count32x32 += counts->tx.p32x32[i][TX_32X32];
+        count16x16_16x16p += counts->tx_size[1][i][TX_16X16];
+        count16x16_lp += counts->tx_size[2][i][TX_16X16];
+        count32x32 += counts->tx_size[2][i][TX_32X32];
       }
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
 #if CONFIG_SUPERTX
@@ -4521,8 +4520,8 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       if (is_inter_block(mbmi))
         tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);
 #endif
-      ++get_tx_counts(max_txsize_lookup[bsize], get_tx_size_context(xd),
-                      &td->counts->tx)[mbmi->tx_size];
+      ++td->counts->tx_size[max_txsize_lookup[bsize] - TX_8X8]
+                           [get_tx_size_context(xd)][mbmi->tx_size];
     } else {
       int x, y;
       TX_SIZE tx_size;
@@ -4538,8 +4537,8 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
           if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
             mi_8x8[mis * y + x]->mbmi.tx_size = tx_size;
     }
-    ++td->counts->tx.tx_totals[mbmi->tx_size];
-    ++td->counts->tx.tx_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
+    ++td->counts->tx_size_totals[mbmi->tx_size];
+    ++td->counts->tx_size_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
 #if CONFIG_EXT_TX
     if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter_block(mbmi)) > 1 &&
         cm->base_qindex > 0 && !mbmi->skip &&

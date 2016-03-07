@@ -1251,21 +1251,6 @@ static void choose_smallest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
                    mbmi->tx_size, cpi->sf.use_fast_coef_costing);
 }
 
-static INLINE int vp10_cost_tx_size(TX_SIZE tx_size, TX_SIZE max_tx_size,
-                                    const vpx_prob *tx_probs) {
-  int m;
-  int r_tx_size = 0;
-
-  for (m = 0; m <= tx_size - (tx_size == max_tx_size); ++m) {
-    if (m == tx_size)
-      r_tx_size += vp10_cost_zero(tx_probs[m]);
-    else
-      r_tx_size += vp10_cost_one(tx_probs[m]);
-  }
-
-  return r_tx_size;
-}
-
 static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                                    int *rate,
                                    int64_t *distortion,
@@ -1288,7 +1273,6 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   int start_tx, end_tx;
   const int tx_select = cm->tx_mode == TX_MODE_SELECT;
   const int is_inter = is_inter_block(mbmi);
-  const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
   int prune = 0;
 #if CONFIG_EXT_TX
@@ -1320,7 +1304,8 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
     last_rd = INT64_MAX;
     for (n = start_tx; n >= end_tx; --n) {
-      const int r_tx_size = vp10_cost_tx_size(n, max_tx_size, tx_probs);
+      const int r_tx_size =
+          cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)][n];
       if (FIXED_TX_TYPE && tx_type != get_default_tx_type(0, xd, 0, n))
           continue;
 #if CONFIG_EXT_TX
@@ -2393,8 +2378,6 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   const PREDICTION_MODE A = vp10_above_block_mode(mic, above_mi, 0);
   const PREDICTION_MODE L = vp10_left_block_mode(mic, left_mi, 0);
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-  const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd,
-                                           &cpi->common.fc->tx_probs);
   bmode_costs = cpi->y_mode_costs[A][L];
 
 #if CONFIG_EXT_INTRA
@@ -2471,8 +2454,9 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
       // tokenonly rate, but for intra blocks, tx_size is always coded
       // (prediction granularity), so we account for it in the full rate,
       // not the tokenonly rate.
-      this_rate_tokenonly -= vp10_cost_tx_size(mic->mbmi.tx_size, max_tx_size,
-                                               tx_probs);
+      this_rate_tokenonly -=
+          cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
+                                                 [mic->mbmi.tx_size];
     }
     if (cpi->common.allow_screen_content_tools && mode == DC_PRED)
       this_rate +=
@@ -6719,7 +6703,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   int64_t mask_filter = 0;
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-  const vpx_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
 #if CONFIG_OBMC
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * 64 * 64]);
@@ -7276,7 +7259,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         // tokenonly rate, but for intra blocks, tx_size is always coded
         // (prediction granularity), so we account for it in the full rate,
         // not the tokenonly rate.
-        rate_y -= vp10_cost_tx_size(mbmi->tx_size, max_tx_size, tx_probs);
+        rate_y -=
+            cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
+                                                   [mbmi->tx_size];
       }
 #if CONFIG_EXT_INTRA
       if (is_directional_mode) {

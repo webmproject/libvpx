@@ -100,22 +100,6 @@ static TX_MODE read_tx_mode(struct vpx_read_bit_buffer *rb) {
   return vpx_rb_read_bit(rb) ? TX_MODE_SELECT : vpx_rb_read_literal(rb, 2);
 }
 
-static void read_tx_mode_probs(struct tx_probs *tx_probs, vpx_reader *r) {
-  int i, j;
-
-  for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-    for (j = 0; j < TX_SIZES - 3; ++j)
-      vp10_diff_update_prob(r, &tx_probs->p8x8[i][j]);
-
-  for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-    for (j = 0; j < TX_SIZES - 2; ++j)
-      vp10_diff_update_prob(r, &tx_probs->p16x16[i][j]);
-
-  for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-    for (j = 0; j < TX_SIZES - 1; ++j)
-      vp10_diff_update_prob(r, &tx_probs->p32x32[i][j]);
-}
-
 static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
@@ -3541,8 +3525,13 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 
-  if (cm->tx_mode == TX_MODE_SELECT)
-    read_tx_mode_probs(&fc->tx_probs, &r);
+  if (cm->tx_mode == TX_MODE_SELECT) {
+    for (i = 0; i < TX_SIZES - 1; ++i)
+      for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
+        for (k = 0; k < i + 1; ++k)
+          vp10_diff_update_prob(&r, &fc->tx_size_probs[i][j][k]);
+  }
+
   read_coef_probs(fc, cm->tx_mode, &r);
 
 #if CONFIG_VAR_TX
@@ -3679,7 +3668,8 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
                  sizeof(cm->counts.single_ref)));
   assert(!memcmp(cm->counts.comp_ref, zero_counts.comp_ref,
                  sizeof(cm->counts.comp_ref)));
-  assert(!memcmp(&cm->counts.tx, &zero_counts.tx, sizeof(cm->counts.tx)));
+  assert(!memcmp(&cm->counts.tx_size, &zero_counts.tx_size,
+                 sizeof(cm->counts.tx_size)));
   assert(!memcmp(cm->counts.skip, zero_counts.skip, sizeof(cm->counts.skip)));
 #if CONFIG_REF_MV
   assert(!memcmp(&cm->counts.mv[0], &zero_counts.mv[0],

@@ -81,6 +81,13 @@ palette_color_encodings[PALETTE_MAX_SIZE - 1][PALETTE_MAX_SIZE] = {
         {30, 5}, {62, 6}, {126, 7}, {127, 7}},  // 8 colors
 };
 
+static const struct vp10_token
+tx_size_encodings[TX_SIZES - 1][TX_SIZES] = {
+    {{0, 1}, {1, 1}},  // Max tx_size is 8X8
+    {{0, 1}, {2, 2}, {3, 2}},  // Max tx_size is 16X16
+    {{0, 1}, {2, 2}, {6, 3}, {7, 3}},  // Max tx_size is 32X32
+};
+
 static INLINE void write_uniform(vpx_writer *w, int n, int v) {
   int l = get_unsigned_bits(n);
   int m = (1 << l) - n;
@@ -314,13 +321,11 @@ static void write_selected_tx_size(const VP10_COMMON *cm,
   TX_SIZE tx_size = xd->mi[0]->mbmi.tx_size;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-  const vpx_prob *const tx_probs = get_tx_probs2(max_tx_size, xd,
-                                                 &cm->fc->tx_probs);
-  vpx_write(w, tx_size != TX_4X4, tx_probs[0]);
-  if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
-    vpx_write(w, tx_size != TX_8X8, tx_probs[1]);
-    if (tx_size != TX_8X8 && max_tx_size >= TX_32X32)
-      vpx_write(w, tx_size != TX_16X16, tx_probs[2]);
+  if (max_tx_size > TX_4X4) {
+    vp10_write_token(w, vp10_tx_size_tree[max_tx_size - TX_8X8],
+                     cm->fc->tx_size_probs[max_tx_size - TX_8X8]
+                                          [get_tx_size_context(xd)],
+                     &tx_size_encodings[max_tx_size - TX_8X8][tx_size]);
   }
 }
 
@@ -1847,7 +1852,7 @@ static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size) {
     vp10_coeff_stats frame_branch_ct[PLANE_TYPES];
     vp10_coeff_probs_model frame_coef_probs[PLANE_TYPES];
-    if (cpi->td.counts->tx.tx_totals[tx_size] <= 20 ||
+    if (cpi->td.counts->tx_size_totals[tx_size] <= 20 ||
         (tx_size >= TX_16X16 && cpi->sf.tx_size_search_method == USE_TX_8X8)) {
       vpx_write_bit(w, 0);
     } else {
@@ -2028,30 +2033,11 @@ static void update_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
                               FRAME_COUNTS *counts) {
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
-    unsigned int ct_8x8p[TX_SIZES - 3][2];
-    unsigned int ct_16x16p[TX_SIZES - 2][2];
-    unsigned int ct_32x32p[TX_SIZES - 1][2];
-
-
-    for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      vp10_tx_counts_to_branch_counts_8x8(counts->tx.p8x8[i], ct_8x8p);
-      for (j = 0; j < TX_SIZES - 3; j++)
-        vp10_cond_prob_diff_update(w, &cm->fc->tx_probs.p8x8[i][j], ct_8x8p[j]);
-    }
-
-    for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      vp10_tx_counts_to_branch_counts_16x16(counts->tx.p16x16[i], ct_16x16p);
-      for (j = 0; j < TX_SIZES - 2; j++)
-        vp10_cond_prob_diff_update(w, &cm->fc->tx_probs.p16x16[i][j],
-                                  ct_16x16p[j]);
-    }
-
-    for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      vp10_tx_counts_to_branch_counts_32x32(counts->tx.p32x32[i], ct_32x32p);
-      for (j = 0; j < TX_SIZES - 1; j++)
-        vp10_cond_prob_diff_update(w, &cm->fc->tx_probs.p32x32[i][j],
-                                  ct_32x32p[j]);
-    }
+    for (i = 0; i < TX_SIZES - 1; ++i)
+      for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
+        prob_diff_update(vp10_tx_size_tree[i],
+                         cm->fc->tx_size_probs[i][j],
+                         counts->tx_size[i][j], i + 2, w);
   }
 }
 
