@@ -241,23 +241,16 @@ struct rans_dec_sym {
   AnsP8 cum_prob;  // not-inclusive
 };
 
-typedef struct rans_dec_sym rans_dec_lut[ans_p8_precision];
+// This is now just a boring cdf. It starts with an explict zero.
+// TODO(aconverse): Remove starting zero.
+typedef uint16_t rans_dec_lut[16];
 
-static INLINE void rans_build_dec_tab(const AnsP8 token_probs[],
-                                      rans_dec_lut dec_tab) {
-  int val = 0;
-  int cum_prob = 0;
-  int sym_end = token_probs[0];
+static INLINE void rans_build_cdf_from_pdf(const AnsP8 token_probs[],
+                                           rans_dec_lut cdf_tab) {
   int i;
-  for (i = 0; i < 256; ++i) {
-    if (i == sym_end) {
-      ++val;
-      cum_prob = sym_end;
-      sym_end += token_probs[val];
-    }
-    dec_tab[i].val = val;
-    dec_tab[i].prob = token_probs[val];
-    dec_tab[i].cum_prob = cum_prob;
+  cdf_tab[0] = 0;
+  for (i = 1; cdf_tab[i - 1] < ans_p8_precision; ++i) {
+    cdf_tab[i] = cdf_tab[i - 1] + token_probs[i - 1];
   }
 }
 
@@ -275,20 +268,32 @@ static INLINE void rans_write(struct AnsCoder *ans,
       (ans->state / p) * ans_p8_precision + ans->state % p + sym->cum_prob;
 }
 
+static INLINE void fetch_sym(struct rans_dec_sym *out, const rans_dec_lut cdf,
+                             AnsP8 rem) {
+  int i = 0;
+  // TODO(skal): if critical, could be a binary search.
+  // Or, better, an O(1) alias-table.
+  while (rem >= cdf[i]) {
+    ++i;
+  }
+  out->val = i - 1;
+  out->prob = cdf[i] - cdf[i - 1];
+  out->cum_prob = cdf[i - 1];
+}
+
 static INLINE int rans_read(struct AnsDecoder *ans,
                             const rans_dec_lut tab) {
   unsigned rem;
   unsigned quo;
-  int val;
+  struct rans_dec_sym sym;
   if (ans->state < l_base && ans->buf_offset > 0) {
     ans->state = ans->state * io_base + ans->buf[--ans->buf_offset];
   }
   quo = ans->state / ans_p8_precision;
   rem = ans->state % ans_p8_precision;
-  val = tab[rem].val;
-
-  ans->state = quo * tab[rem].prob + rem - tab[rem].cum_prob;
-  return val;
+  fetch_sym(&sym, tab, rem);
+  ans->state = quo * sym.prob + rem - sym.cum_prob;
+  return sym.val;
 }
 
 static INLINE int ans_read_init(struct AnsDecoder *const ans,

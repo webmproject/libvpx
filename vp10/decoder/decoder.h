@@ -89,9 +89,6 @@ typedef struct VP10Decoder {
   int inv_tile_order;
   int need_resync;  // wait for key/intra-only frame.
   int hold_ref_buf;  // hold the reference buffer.
-#if CONFIG_ANS
-  rans_dec_lut token_tab[COEFF_PROB_MODELS];
-#endif  // CONFIG_ANS
 } VP10Decoder;
 
 int vp10_receive_compressed_data(struct VP10Decoder *pbi,

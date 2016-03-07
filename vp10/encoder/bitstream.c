@@ -634,6 +634,7 @@ static void pack_mb_tokens(vpx_writer *w,
 // This function serializes the tokens backwards both in token order and
 // bit order in each token.
 static void pack_mb_tokens_ans(struct AnsCoder *const ans,
+                               rans_dec_lut token_tab[COEFF_PROB_MODELS],
                                const TOKENEXTRA *const start,
                                const TOKENEXTRA *const stop,
                                vpx_bit_depth_t bit_depth) {
@@ -676,14 +677,10 @@ static void pack_mb_tokens_ans(struct AnsCoder *const ans,
 
       {
         struct rans_sym s;
-        int j;
-        const vpx_prob *token_probs =
-            vp10_pareto8_token_probs[p->context_tree[PIVOT_NODE] - 1];
-        s.cum_prob = 0;
-        for (j = ONE_TOKEN; j < t; ++j) {
-          s.cum_prob += token_probs[j - ONE_TOKEN];
-        }
-        s.prob = token_probs[t - ONE_TOKEN];
+        const rans_dec_lut *token_cdf =
+            &token_tab[p->context_tree[PIVOT_NODE] - 1];
+        s.cum_prob = (*token_cdf)[t - ONE_TOKEN];
+        s.prob = (*token_cdf)[t - ONE_TOKEN + 1] - s.cum_prob;
         rans_write(ans, &s);
       }
     }
@@ -2200,7 +2197,8 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
                   NULL, NULL);
       vpx_stop_encode(&mode_bc);
       ans_write_init(&token_ans, mode_data_start + mode_bc.pos);
-      pack_mb_tokens_ans(&token_ans, tok, tok_end, cm->bit_depth);
+      pack_mb_tokens_ans(&token_ans, cm->token_tab, tok, tok_end,
+                         cm->bit_depth);
       token_section_size = ans_write_end(&token_ans);
       if (put_tile_size) {
         // size of this tile

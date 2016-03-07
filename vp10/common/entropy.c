@@ -676,12 +676,12 @@ const vpx_prob vp10_pareto8_token_probs[COEFF_PROB_MODELS]
   {247, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
 
-void vp10_build_pareto8_dec_tab(
+void vp10_build_pareto8_cdf_tab(
     const vpx_prob token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2],
-    rans_dec_lut dec_tab[COEFF_PROB_MODELS]) {
+    rans_dec_lut cdf_tab[COEFF_PROB_MODELS]) {
   int p;
   for (p = 0; p < COEFF_PROB_MODELS; ++p) {
-    rans_build_dec_tab(token_probs[p], dec_tab[p]);
+    rans_build_cdf_from_pdf(token_probs[p], cdf_tab[p]);
   }
 }
 #endif  // CONFIG_ANS
