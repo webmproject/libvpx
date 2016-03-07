@@ -39,6 +39,30 @@
       "revId": "e38e5aa5f7641e88754f5260857e714ebb34f9de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b76d25ef_3a3c8177",
+        "filename": "vpx_dsp/x86/loopfilter_mmx.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-03-07T19:41:26Z",
+      "side": 1,
+      "message": "You have build issues without it.  And with it as well.  :-(\n\nThis should fix everything once submitted.\nhttps://chromium-review.googlesource.com/#/c/331202/",
+      "parentUuid": "17935119_fdeda7ac",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 19
+      },
+      "revId": "e38e5aa5f7641e88754f5260857e714ebb34f9de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
