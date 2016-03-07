@@ -5,8 +5,8 @@
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 
-#define MAX_BLOCK_WIDTH (64)
-#define MAX_BLOCK_HEIGHT (64)
+#define MAX_BLOCK_WIDTH (MAX_SB_SIZE)
+#define MAX_BLOCK_HEIGHT (MAX_SB_SIZE)
 #define MAX_STEP (32)
 #define MAX_FILTER_TAP (12)
 

@@ -332,7 +332,7 @@ typedef struct VP10Common {
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
 #if CONFIG_VAR_TX
   TXFM_CONTEXT *above_txfm_context;
-  TXFM_CONTEXT left_txfm_context[8];
+  TXFM_CONTEXT left_txfm_context[MI_BLOCK_SIZE];
 #endif
   int above_context_alloc_cols;
 
@@ -440,7 +440,7 @@ static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
   const int above_idx = mi_col * 2;
-  const int left_idx = (mi_row * 2) & 15;  // FIXME: Mask should be CU_SIZE*2-1
+  const int left_idx = (mi_row * 2) & MI_MASK_2;
   int i;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblockd_plane *const pd = &xd->plane[i];

@@ -11,11 +11,14 @@
 #include "vp10/encoder/context_tree.h"
 #include "vp10/encoder/encoder.h"
 
-static const BLOCK_SIZE square[] = {
+static const BLOCK_SIZE square[MAX_SB_SIZE_LOG2 - 2] = {
   BLOCK_8X8,
   BLOCK_16X16,
   BLOCK_32X32,
   BLOCK_64X64,
+#if CONFIG_EXT_PARTITION
+  BLOCK_128X128,
+#endif  // CONFIG_EXT_PARTITION
 };
 
 static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
@@ -51,6 +54,14 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
       ctx->qcoeff_pbuf[i][k]  = ctx->qcoeff[i][k];
       ctx->dqcoeff_pbuf[i][k] = ctx->dqcoeff[i][k];
       ctx->eobs_pbuf[i][k]    = ctx->eobs[i][k];
+    }
+  }
+
+  if (cm->allow_screen_content_tools) {
+    for (i = 0;  i < 2; ++i) {
+      CHECK_MEM_ERROR(cm, ctx->color_index_map[i],
+                    vpx_memalign(32,
+                                 num_pix * sizeof(*ctx->color_index_map[i])));
     }
   }
 }
@@ -177,8 +188,13 @@ static void free_tree_contexts(PC_TREE *tree) {
 // represents the state of our search.
 void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
   int i, j;
+#if CONFIG_EXT_PARTITION
+  const int leaf_nodes = 256;
+  const int tree_nodes = 256 + 64 + 16 + 4 + 1;
+#else
   const int leaf_nodes = 64;
   const int tree_nodes = 64 + 16 + 4 + 1;
+#endif  // CONFIG_EXT_PARTITION
   int pc_tree_index = 0;
   PC_TREE *this_pc;
   PICK_MODE_CONTEXT *this_leaf;
@@ -217,7 +233,7 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
 
   // Each node has 4 leaf nodes, fill each block_size level of the tree
   // from leafs to the root.
-  for (nodes = 16; nodes > 0; nodes >>= 2) {
+  for (nodes = leaf_nodes >> 2; nodes > 0; nodes >>= 2) {
     for (i = 0; i < nodes; ++i) {
       PC_TREE *const tree = &td->pc_tree[pc_tree_index];
       alloc_tree_contexts(cm, tree, 4 << (2 * square_index));
@@ -233,11 +249,17 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
 }
 
 void vp10_free_pc_tree(ThreadData *td) {
+#if CONFIG_EXT_PARTITION
+  const int leaf_nodes = 256;
+  const int tree_nodes = 256 + 64 + 16 + 4 + 1;
+#else
+  const int leaf_nodes = 64;
   const int tree_nodes = 64 + 16 + 4 + 1;
+#endif  // CONFIG_EXT_PARTITION
   int i;
 
   // Set up all 4x4 mode contexts
-  for (i = 0; i < 64; ++i)
+  for (i = 0; i < leaf_nodes; ++i)
     free_mode_context(&td->leaf_tree[i]);
 
   // Sets up all the leaf nodes in the tree.

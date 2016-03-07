@@ -109,6 +109,12 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
     path = LF_PATH_SLOW;
 #endif  // !CONFIG_EXT_PARTITION_TYPES
 
+#if CONFIG_EXT_PARTITION
+  printf("STOPPING: This code has not been modified to work with the "
+         "extended coding unit size experiment");
+  exit(EXIT_FAILURE);
+#endif  // CONFIG_EXT_PARTITION
+
   for (mi_row = start; mi_row < stop;
        mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
     MODE_INFO **const mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
@@ -175,6 +181,12 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
   const int tile_cols = cm->tile_cols;
   const int num_workers = VPXMIN(nworkers, tile_cols);
   int i;
+
+#if CONFIG_EXT_PARTITION
+      printf("STOPPING: This code has not been modified to work with the "
+             "extended coding unit size experiment");
+      exit(EXIT_FAILURE);
+#endif  // CONFIG_EXT_PARTITION
 
   if (!lf_sync->sync_range || sb_rows != lf_sync->rows ||
       num_workers > lf_sync->num_workers) {

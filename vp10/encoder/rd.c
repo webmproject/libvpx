@@ -62,7 +62,10 @@ void vp10_rd_cost_init(RD_COST *rd_cost) {
 // This table is used to correct for block size.
 // The factors here are << 2 (2 = x0.5, 32 = x8 etc).
 static const uint8_t rd_thresh_block_size_factor[BLOCK_SIZES] = {
-  2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32
+  2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32,
+#if CONFIG_EXT_PARTITION
+  48, 48, 64
+#endif  // CONFIG_EXT_PARTITION
 };
 
 static void fill_mode_costs(VP10_COMP *cpi) {
@@ -560,8 +563,8 @@ void vp10_model_rd_from_var_lapndz(unsigned int var, unsigned int n_log2,
 
 void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
                               const struct macroblockd_plane *pd,
-                              ENTROPY_CONTEXT t_above[16],
-                              ENTROPY_CONTEXT t_left[16]) {
+                              ENTROPY_CONTEXT t_above[2 * MI_BLOCK_SIZE],
+                              ENTROPY_CONTEXT t_left[2 * MI_BLOCK_SIZE]) {
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
@@ -935,7 +938,7 @@ void vp10_update_rd_thresh_fact(int (*factor_buf)[MAX_MODES], int rd_thresh,
     int mode;
     for (mode = 0; mode < top_mode; ++mode) {
       const BLOCK_SIZE min_size = VPXMAX(bsize - 1, BLOCK_4X4);
-      const BLOCK_SIZE max_size = VPXMIN(bsize + 2, BLOCK_64X64);
+      const BLOCK_SIZE max_size = VPXMIN(bsize + 2, BLOCK_LARGEST);
       BLOCK_SIZE bs;
       for (bs = min_size; bs <= max_size; ++bs) {
         int *const fact = &factor_buf[bs][mode];

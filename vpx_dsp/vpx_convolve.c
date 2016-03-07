@@ -130,20 +130,20 @@ static void convolve(const uint8_t *src, ptrdiff_t src_stride,
   // --Must round-up because block may be located at sub-pixel position.
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
-  uint8_t temp[MAX_EXT_SIZE * MAX_CU_SIZE];
+  uint8_t temp[MAX_EXT_SIZE * MAX_SB_SIZE];
   int intermediate_height =
           (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
-  assert(w <= MAX_CU_SIZE);
-  assert(h <= MAX_CU_SIZE);
+  assert(w <= MAX_SB_SIZE);
+  assert(h <= MAX_SB_SIZE);
 
   assert(y_step_q4 <= 32);
   assert(x_step_q4 <= 32);
 
   convolve_horiz(src - src_stride * (SUBPEL_TAPS / 2 - 1), src_stride,
-                 temp, MAX_CU_SIZE,
+                 temp, MAX_SB_SIZE,
                  x_filters, x0_q4, x_step_q4, w, intermediate_height);
-  convolve_vert(temp + MAX_CU_SIZE * (SUBPEL_TAPS / 2 - 1), MAX_CU_SIZE,
+  convolve_vert(temp + MAX_SB_SIZE * (SUBPEL_TAPS / 2 - 1), MAX_SB_SIZE,
                 dst, dst_stride,
                 y_filters, y0_q4, y_step_q4, w, h);
 }
@@ -240,13 +240,13 @@ void vpx_convolve8_avg_c(const uint8_t *src, ptrdiff_t src_stride,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
   /* Fixed size intermediate buffer places limits on parameters. */
-  DECLARE_ALIGNED(16, uint8_t, temp[MAX_CU_SIZE * MAX_CU_SIZE]);
-  assert(w <= MAX_CU_SIZE);
-  assert(h <= MAX_CU_SIZE);
+  DECLARE_ALIGNED(16, uint8_t, temp[MAX_SB_SIZE * MAX_SB_SIZE]);
+  assert(w <= MAX_SB_SIZE);
+  assert(h <= MAX_SB_SIZE);
 
-  vpx_convolve8_c(src, src_stride, temp, MAX_CU_SIZE,
+  vpx_convolve8_c(src, src_stride, temp, MAX_SB_SIZE,
                   filter_x, x_step_q4, filter_y, y_step_q4, w, h);
-  vpx_convolve_avg_c(temp, MAX_CU_SIZE, dst, dst_stride,
+  vpx_convolve_avg_c(temp, MAX_SB_SIZE, dst, dst_stride,
                      NULL, 0, NULL, 0, w, h);
 }
 
@@ -463,21 +463,21 @@ static void highbd_convolve(const uint8_t *src, ptrdiff_t src_stride,
   // --Must round-up because block may be located at sub-pixel position.
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
-  uint16_t temp[MAX_EXT_SIZE * MAX_CU_SIZE];
+  uint16_t temp[MAX_EXT_SIZE * MAX_SB_SIZE];
   int intermediate_height =
           (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
-  assert(w <= MAX_CU_SIZE);
-  assert(h <= MAX_CU_SIZE);
+  assert(w <= MAX_SB_SIZE);
+  assert(h <= MAX_SB_SIZE);
   assert(y_step_q4 <= 32);
   assert(x_step_q4 <= 32);
 
   highbd_convolve_horiz(src - src_stride * (SUBPEL_TAPS / 2 - 1), src_stride,
-                        CONVERT_TO_BYTEPTR(temp), MAX_CU_SIZE,
+                        CONVERT_TO_BYTEPTR(temp), MAX_SB_SIZE,
                         x_filters, x0_q4, x_step_q4, w,
                         intermediate_height, bd);
   highbd_convolve_vert(
-    CONVERT_TO_BYTEPTR(temp) + MAX_CU_SIZE * (SUBPEL_TAPS / 2 - 1), MAX_CU_SIZE,
+    CONVERT_TO_BYTEPTR(temp) + MAX_SB_SIZE * (SUBPEL_TAPS / 2 - 1), MAX_SB_SIZE,
     dst, dst_stride,
     y_filters, y0_q4, y_step_q4, w, h, bd);
 }
@@ -561,14 +561,14 @@ void vpx_highbd_convolve8_avg_c(const uint8_t *src, ptrdiff_t src_stride,
                                 const int16_t *filter_y, int y_step_q4,
                                 int w, int h, int bd) {
   // Fixed size intermediate buffer places limits on parameters.
-  DECLARE_ALIGNED(16, uint16_t, temp[MAX_CU_SIZE * MAX_CU_SIZE]);
-  assert(w <= MAX_CU_SIZE);
-  assert(h <= MAX_CU_SIZE);
+  DECLARE_ALIGNED(16, uint16_t, temp[MAX_SB_SIZE * MAX_SB_SIZE]);
+  assert(w <= MAX_SB_SIZE);
+  assert(h <= MAX_SB_SIZE);
 
   vpx_highbd_convolve8_c(src, src_stride,
-                         CONVERT_TO_BYTEPTR(temp), MAX_CU_SIZE,
+                         CONVERT_TO_BYTEPTR(temp), MAX_SB_SIZE,
                          filter_x, x_step_q4, filter_y, y_step_q4, w, h, bd);
-  vpx_highbd_convolve_avg_c(CONVERT_TO_BYTEPTR(temp), MAX_CU_SIZE,
+  vpx_highbd_convolve_avg_c(CONVERT_TO_BYTEPTR(temp), MAX_SB_SIZE,
                             dst, dst_stride,
                             NULL, 0, NULL, 0, w, h, bd);
 }

@@ -489,7 +489,7 @@ static void extend_and_predict_highbd(const uint8_t *buf_ptr1,
                                       MACROBLOCKD *xd,
                                       int w, int h, int ref, int xs, int ys) {
   DECLARE_ALIGNED(16, uint16_t,
-                  mc_buf_high[(CU_SIZE + 16) * 2 * (CU_SIZE + 16) * 2]);
+    mc_buf_high[(MAX_SB_SIZE + 16) * 2 * (MAX_SB_SIZE + 16) * 2]);
   const uint8_t *buf_ptr;
 
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -535,7 +535,8 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
 #endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
                                MACROBLOCKD *xd,
                                int w, int h, int ref, int xs, int ys) {
-  DECLARE_ALIGNED(16, uint8_t, mc_buf[(CU_SIZE + 16) * 2 * (CU_SIZE + 16) * 2]);
+  DECLARE_ALIGNED(16, uint8_t,
+    mc_buf[(MAX_SB_SIZE + 16) * 2 * (MAX_SB_SIZE + 16) * 2]);
   const uint8_t *buf_ptr;
 
   build_mc_border(buf_ptr1, pre_buf_stride, mc_buf, b_w,
@@ -1093,7 +1094,7 @@ static void set_param_topblock(VP10_COMMON *const cm,  MACROBLOCKD *const xd,
     }
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
   set_txfm_ctx(xd->left_txfm_context, xd->mi[0]->mbmi.tx_size, bh);
   set_txfm_ctx(xd->above_txfm_context, xd->mi[0]->mbmi.tx_size, bw);
 #endif
@@ -1304,38 +1305,38 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
   uint8_t *dst_buf1[3], *dst_buf2[3], *dst_buf3[3];
 
   DECLARE_ALIGNED(16, uint8_t,
-                  tmp_buf1[MAX_MB_PLANE * MAXTXLEN * MAXTXLEN * 2]);
+                  tmp_buf1[MAX_MB_PLANE * MAX_TX_SQUARE * 2]);
   DECLARE_ALIGNED(16, uint8_t,
-                  tmp_buf2[MAX_MB_PLANE * MAXTXLEN * MAXTXLEN * 2]);
+                  tmp_buf2[MAX_MB_PLANE * MAX_TX_SQUARE * 2]);
   DECLARE_ALIGNED(16, uint8_t,
-                  tmp_buf3[MAX_MB_PLANE * MAXTXLEN * MAXTXLEN * 2]);
-  int dst_stride1[3] = {MAXTXLEN, MAXTXLEN, MAXTXLEN};
-  int dst_stride2[3] = {MAXTXLEN, MAXTXLEN, MAXTXLEN};
-  int dst_stride3[3] = {MAXTXLEN, MAXTXLEN, MAXTXLEN};
+                  tmp_buf3[MAX_MB_PLANE * MAX_TX_SQUARE * 2]);
+  int dst_stride1[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
+  int dst_stride2[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
+  int dst_stride3[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     int len = sizeof(uint16_t);
     dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
-    dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAXTXLEN * MAXTXLEN * len);
-    dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + 2 * MAXTXLEN * MAXTXLEN * len);
+    dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_TX_SQUARE * len);
+    dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + 2 * MAX_TX_SQUARE * len);
     dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
-    dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAXTXLEN * MAXTXLEN * len);
-    dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + 2 * MAXTXLEN * MAXTXLEN * len);
+    dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_TX_SQUARE * len);
+    dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + 2 * MAX_TX_SQUARE * len);
     dst_buf3[0] = CONVERT_TO_BYTEPTR(tmp_buf3);
-    dst_buf3[1] = CONVERT_TO_BYTEPTR(tmp_buf3 + MAXTXLEN * MAXTXLEN * len);
-    dst_buf3[2] = CONVERT_TO_BYTEPTR(tmp_buf3 + 2 * MAXTXLEN * MAXTXLEN * len);
+    dst_buf3[1] = CONVERT_TO_BYTEPTR(tmp_buf3 + MAX_TX_SQUARE * len);
+    dst_buf3[2] = CONVERT_TO_BYTEPTR(tmp_buf3 + 2 * MAX_TX_SQUARE * len);
   } else {
 #endif
     dst_buf1[0] = tmp_buf1;
-    dst_buf1[1] = tmp_buf1 + MAXTXLEN * MAXTXLEN;
-    dst_buf1[2] = tmp_buf1 + 2 * MAXTXLEN * MAXTXLEN;
+    dst_buf1[1] = tmp_buf1 + MAX_TX_SQUARE;
+    dst_buf1[2] = tmp_buf1 + 2 * MAX_TX_SQUARE;
     dst_buf2[0] = tmp_buf2;
-    dst_buf2[1] = tmp_buf2 + MAXTXLEN * MAXTXLEN;
-    dst_buf2[2] = tmp_buf2 + 2 * MAXTXLEN * MAXTXLEN;
+    dst_buf2[1] = tmp_buf2 + MAX_TX_SQUARE;
+    dst_buf2[2] = tmp_buf2 + 2 * MAX_TX_SQUARE;
     dst_buf3[0] = tmp_buf3;
-    dst_buf3[1] = tmp_buf3 + MAXTXLEN * MAXTXLEN;
-    dst_buf3[2] = tmp_buf3 + 2 * MAXTXLEN * MAXTXLEN;
+    dst_buf3[1] = tmp_buf3 + MAX_TX_SQUARE;
+    dst_buf3[2] = tmp_buf3 + 2 * MAX_TX_SQUARE;
 #if CONFIG_VP9_HIGHBITDEPTH
   }
 #endif
@@ -1900,39 +1901,37 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       if (mbmi->obmc) {
 #if CONFIG_VP9_HIGHBITDEPTH
         DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf1[2 * MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+                        tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
         DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf2[2 * MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+                        tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
 #else
         DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf1[MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+                        tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
         DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf2[MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+                        tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
-        int dst_stride1[MAX_MB_PLANE] = {CU_SIZE, CU_SIZE, CU_SIZE};
-        int dst_stride2[MAX_MB_PLANE] = {CU_SIZE, CU_SIZE, CU_SIZE};
+        int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+        int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
 
         assert(mbmi->sb_type >= BLOCK_8X8);
 #if CONFIG_VP9_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           int len = sizeof(uint16_t);
           dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
-          dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + CU_SIZE * CU_SIZE * len);
-          dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 +
-                                           CU_SIZE * CU_SIZE * 2 * len);
+          dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * len);
+          dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * 2 * len);
           dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
-          dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + CU_SIZE * CU_SIZE * len);
-          dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 +
-                                           CU_SIZE * CU_SIZE * 2 * len);
+          dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
+          dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
         } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
           dst_buf1[0] = tmp_buf1;
-          dst_buf1[1] = tmp_buf1 + CU_SIZE * CU_SIZE;
-          dst_buf1[2] = tmp_buf1 + CU_SIZE * CU_SIZE * 2;
+          dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
+          dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
           dst_buf2[0] = tmp_buf2;
-          dst_buf2[1] = tmp_buf2 + CU_SIZE * CU_SIZE;
-          dst_buf2[2] = tmp_buf2 + CU_SIZE * CU_SIZE * 2;
+          dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
+          dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
 #if CONFIG_VP9_HIGHBITDEPTH
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -3281,7 +3280,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
 #if CONFIG_ANS
                            &td->token_ans,
 #endif  // CONFIG_ANS
-                           BLOCK_64X64, 4);
+                           BLOCK_LARGEST, MAX_SB_SIZE_LOG2 - 2);
         }
         pbi->mb.corrupted |= td->xd.corrupted;
         if (pbi->mb.corrupted)
@@ -3396,7 +3395,7 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
 #if CONFIG_ANS
                        &tile_data->token_ans,
 #endif  // CONFIG_ANS
-                       BLOCK_64X64, 4);
+                       BLOCK_LARGEST, MAX_SB_SIZE_LOG2 - 2);
     }
   }
   return !tile_data->xd.corrupted;

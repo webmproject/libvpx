@@ -438,7 +438,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   TOKENEXTRA **tp = args->tp;
-  uint8_t token_cache[32 * 32];
+  uint8_t token_cache[MAX_TX_SQUARE];
   struct macroblock_plane *p = &x->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;

@@ -454,52 +454,52 @@ void vp10_make_masked_inter_predictor(
     const MACROBLOCKD *xd) {
   const MODE_INFO *mi = xd->mi[0];
 #if CONFIG_VP9_HIGHBITDEPTH
-  uint8_t tmp_dst_[2 * CU_SIZE * CU_SIZE];
+  uint8_t tmp_dst_[2 * MAX_SB_SQUARE];
   uint8_t *tmp_dst =
       (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
       CONVERT_TO_BYTEPTR(tmp_dst_) : tmp_dst_;
-  vp10_make_inter_predictor(pre, pre_stride, tmp_dst, CU_SIZE,
+  vp10_make_inter_predictor(pre, pre_stride, tmp_dst, MAX_SB_SIZE,
                             subpel_x, subpel_y, sf, w, h, 0,
                             interp_filter, xs, ys, xd);
 #if CONFIG_SUPERTX
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
     build_masked_compound_extend_highbd(
-        dst, dst_stride, tmp_dst, CU_SIZE, plane,
+        dst, dst_stride, tmp_dst, MAX_SB_SIZE, plane,
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.sb_type,
         wedge_offset_y, wedge_offset_x, h, w);
   else
     build_masked_compound_extend(
-        dst, dst_stride, tmp_dst, CU_SIZE, plane,
+        dst, dst_stride, tmp_dst, MAX_SB_SIZE, plane,
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.sb_type,
         wedge_offset_y, wedge_offset_x, h, w);
 #else
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
     build_masked_compound_highbd(
-        dst, dst_stride, tmp_dst, CU_SIZE,
+        dst, dst_stride, tmp_dst, MAX_SB_SIZE,
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.sb_type, h, w);
   else
     build_masked_compound(
-        dst, dst_stride, tmp_dst, CU_SIZE,
+        dst, dst_stride, tmp_dst, MAX_SB_SIZE,
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.sb_type, h, w);
 #endif  // CONFIG_SUPERTX
 #else   // CONFIG_VP9_HIGHBITDEPTH
-  uint8_t tmp_dst[CU_SIZE * CU_SIZE];
-  vp10_make_inter_predictor(pre, pre_stride, tmp_dst, CU_SIZE,
+  uint8_t tmp_dst[MAX_SB_SQUARE];
+  vp10_make_inter_predictor(pre, pre_stride, tmp_dst, MAX_SB_SIZE,
                             subpel_x, subpel_y, sf, w, h, 0,
                             interp_filter, xs, ys, xd);
 #if CONFIG_SUPERTX
   build_masked_compound_extend(
-      dst, dst_stride, tmp_dst, CU_SIZE, plane,
+      dst, dst_stride, tmp_dst, MAX_SB_SIZE, plane,
       mi->mbmi.interinter_wedge_index,
       mi->mbmi.sb_type,
       wedge_offset_y, wedge_offset_x, h, w);
 #else
   build_masked_compound(
-      dst, dst_stride, tmp_dst, CU_SIZE,
+      dst, dst_stride, tmp_dst, MAX_SB_SIZE,
       mi->mbmi.interinter_wedge_index,
       mi->mbmi.sb_type, h, w);
 #endif  // CONFIG_SUPERTX
@@ -877,18 +877,21 @@ void vp10_build_masked_inter_predictor_complex(
     int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
     PARTITION_TYPE partition, int plane) {
   int i, j;
-  uint8_t mask[MAXTXLEN];
-  int top_w = 4 << b_width_log2_lookup[top_bsize],
-      top_h = 4 << b_height_log2_lookup[top_bsize];
-  int w = 4 << b_width_log2_lookup[bsize], h = 4 << b_height_log2_lookup[bsize];
-  int w_offset = (mi_col - mi_col_ori) << 3,
-      h_offset = (mi_row - mi_row_ori) << 3;
+  uint8_t mask[MAX_TX_SIZE];
+  int top_w = 4 << b_width_log2_lookup[top_bsize];
+  int top_h = 4 << b_height_log2_lookup[top_bsize];
+  int w = 4 << b_width_log2_lookup[bsize];
+  int h = 4 << b_height_log2_lookup[bsize];
+  int w_offset = (mi_col - mi_col_ori) * MI_SIZE;
+  int h_offset = (mi_row - mi_row_ori) * MI_SIZE;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   uint16_t *dst16= CONVERT_TO_SHORTPTR(dst);
   uint16_t *dst216 = CONVERT_TO_SHORTPTR(dst2);
   int b_hdb = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  assert(bsize <= BLOCK_32X32);
 
   top_w >>= pd->subsampling_x;
   top_h >>= pd->subsampling_y;
@@ -916,7 +919,8 @@ void vp10_build_masked_inter_predictor_complex(
             if (m == 0)
               dst_tmp[j] = dst2_tmp[j];
             else
-              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
+                                              dst2_tmp[j] * (64 - m), 6);
           }
           dst_tmp += dst_stride;
           dst2_tmp += dst2_stride;
@@ -943,7 +947,8 @@ void vp10_build_masked_inter_predictor_complex(
             if (m == 0)
               dst_tmp[j] = dst2_tmp[j];
             else
-              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
+                                              dst2_tmp[j] * (64 - m), 6);
           }
           dst_tmp += dst_stride;
           dst2_tmp += dst2_stride;
@@ -978,7 +983,8 @@ void vp10_build_masked_inter_predictor_complex(
             if (m == 0)
               dst_tmp[j] = dst2_tmp[j];
             else
-              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
+                                              dst2_tmp[j] * (64 - m), 6);
           }
           memcpy(dst_tmp + j, dst2_tmp + j,
                      (top_w - w_offset - w) * sizeof(uint16_t));
@@ -1001,7 +1007,8 @@ void vp10_build_masked_inter_predictor_complex(
             if (m == 0)
               dst_tmp[j] = dst2_tmp[j];
             else
-              dst_tmp[j] = (dst_tmp[j] * m + dst2_tmp[j] * (64 - m) + 32) >> 6;
+              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
+                                              dst2_tmp[j] * (64 - m), 6);
           }
             memcpy(dst_tmp + j, dst2_tmp + j,
                        (top_w - w_offset - w) * sizeof(uint8_t));
@@ -1158,11 +1165,38 @@ static const uint8_t obmc_mask_16[2][16] = {
 };
 
 static const uint8_t obmc_mask_32[2][32] = {
-    { 33, 35, 36, 38, 40, 41, 43, 44, 45, 47, 48, 50, 51, 52, 53, 55,
-      56, 57, 58, 59, 60, 60, 61, 62, 62, 63, 63, 64, 64, 64, 64, 64},
-    { 31, 29, 28, 26, 24, 23, 21, 20, 19, 17, 16, 14, 13, 12, 11,  9,
-       8,  7,  6,  5,  4,  4,  3,  2,  2,  1,  1,  0,  0,  0,  0,  0}
+    { 33, 35, 36, 38, 40, 41, 43, 44,
+      45, 47, 48, 50, 51, 52, 53, 55,
+      56, 57, 58, 59, 60, 60, 61, 62,
+      62, 63, 63, 64, 64, 64, 64, 64 },
+    { 31, 29, 28, 26, 24, 23, 21, 20,
+      19, 17, 16, 14, 13, 12, 11,  9,
+       8,  7,  6,  5,  4,  4,  3,  2,
+       2,  1,  1,  0,  0,  0,  0,  0 }
 };
+
+#if CONFIG_EXT_PARTITION
+// TODO(debargha): What are the correct values here?
+static const uint8_t obmc_mask_64[2][64] = {
+    { 33, 33, 35, 35, 36, 36, 38, 38,
+      40, 40, 41, 41, 43, 43, 44, 44,
+      45, 45, 47, 47, 48, 48, 50, 50,
+      51, 51, 52, 52, 53, 53, 55, 55,
+      56, 56, 57, 57, 58, 58, 59, 59,
+      60, 60, 60, 60, 61, 61, 62, 62,
+      62, 62, 63, 63, 63, 63, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64 },
+    { 31, 31, 29, 29, 28, 28, 26, 26,
+      24, 24, 23, 23, 21, 21, 20, 20,
+      19, 19, 17, 17, 16, 16, 14, 14,
+      13, 13, 12, 12, 11, 11,  9,  9,
+       8,  8,  7,  7,  6,  6,  5,  5,
+       4,  4,  4,  4,  3,  3,  2,  2,
+       2,  2,  1,  1,  1,  1,  0,  0,
+       0,  0,  0,  0,  0,  0,  0,  0 }
+};
+#endif  // CONFIG_EXT_PARTITION
+
 
 void setup_obmc_mask(int length, const uint8_t *mask[2]) {
   switch (length) {
@@ -1190,9 +1224,15 @@ void setup_obmc_mask(int length, const uint8_t *mask[2]) {
       mask[0] = obmc_mask_32[0];
       mask[1] = obmc_mask_32[1];
       break;
+#if CONFIG_EXT_PARTITION
+    case 64:
+      mask[0] = obmc_mask_64[0];
+      mask[1] = obmc_mask_64[1];
+      break;
+#endif  // CONFIG_EXT_PARTITION
     default:
-      mask[0] = obmc_mask_32[0];
-      mask[1] = obmc_mask_32[1];
+      mask[0] = NULL;
+      mask[1] = NULL;
       assert(0);
       break;
   }
@@ -1265,15 +1305,15 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       const struct macroblockd_plane *pd = &xd->plane[plane];
-      int bw = (mi_step * 8) >> pd->subsampling_x;
+      int bw = (mi_step * MI_SIZE) >> pd->subsampling_x;
       int bh = overlap >> pd->subsampling_y;
       int row, col;
       int dst_stride = use_tmp_dst_buf ? final_stride[plane] : pd->dst.stride;
       uint8_t *dst = use_tmp_dst_buf ?
-          &final_buf[plane][(i * 8) >> pd->subsampling_x] :
-          &pd->dst.buf[(i * 8) >> pd->subsampling_x];
+          &final_buf[plane][(i * MI_SIZE) >> pd->subsampling_x] :
+          &pd->dst.buf[(i * MI_SIZE) >> pd->subsampling_x];
       int tmp_stride = tmp_stride1[plane];
-      uint8_t *tmp = &tmp_buf1[plane][(i * 8) >> pd->subsampling_x];
+      uint8_t *tmp = &tmp_buf1[plane][(i * MI_SIZE) >> pd->subsampling_x];
       const uint8_t *mask[2];
 
       setup_obmc_mask(bh, mask);
@@ -1285,8 +1325,9 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 
         for (row = 0; row < bh; ++row) {
           for (col = 0; col < bw; ++col)
-            dst16[col] = (mask[0][row] * dst16[col] + mask[1][row] * tmp16[col]
-                          + 32) >> 6;
+            dst16[col] = ROUND_POWER_OF_TWO(mask[0][row] * dst16[col] +
+                                            mask[1][row] * tmp16[col], 6);
+
           dst16 += dst_stride;
           tmp16 += tmp_stride;
         }
@@ -1294,8 +1335,8 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       for (row = 0; row < bh; ++row) {
         for (col = 0; col < bw; ++col)
-          dst[col] = (mask[0][row] * dst[col] + mask[1][row] * tmp[col] + 32)
-                     >> 6;
+          dst[col] = ROUND_POWER_OF_TWO(mask[0][row] * dst[col] +
+                                        mask[1][row] * tmp[col], 6);
         dst += dst_stride;
         tmp += tmp_stride;
       }
@@ -1332,15 +1373,15 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       const struct macroblockd_plane *pd = &xd->plane[plane];
       int bw = overlap >> pd->subsampling_x;
-      int bh = (mi_step * 8) >> pd->subsampling_y;
+      int bh = (mi_step * MI_SIZE) >> pd->subsampling_y;
       int row, col;
       int dst_stride = use_tmp_dst_buf ? final_stride[plane] : pd->dst.stride;
       uint8_t *dst = use_tmp_dst_buf ?
-          &final_buf[plane][(i * 8 * dst_stride) >> pd->subsampling_y] :
-          &pd->dst.buf[(i * 8 * dst_stride) >> pd->subsampling_y];
+          &final_buf[plane][(i * MI_SIZE * dst_stride) >> pd->subsampling_y] :
+          &pd->dst.buf[(i * MI_SIZE * dst_stride) >> pd->subsampling_y];
       int tmp_stride = tmp_stride2[plane];
       uint8_t *tmp = &tmp_buf2[plane]
-                              [(i * 8 * tmp_stride) >> pd->subsampling_y];
+                              [(i * MI_SIZE * tmp_stride) >> pd->subsampling_y];
       const uint8_t *mask[2];
 
       setup_obmc_mask(bw, mask);
@@ -1352,8 +1393,8 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 
         for (row = 0; row < bh; ++row) {
           for (col = 0; col < bw; ++col)
-            dst16[col] = (mask[0][col] * dst16[col] + mask[1][col] * tmp16[col]
-                          + 32) >> 6;
+            dst16[col] = ROUND_POWER_OF_TWO(mask[0][col] * dst16[col] +
+                                            mask[1][col] * tmp16[col], 6);
           dst16 += dst_stride;
           tmp16 += tmp_stride;
         }
@@ -1361,8 +1402,8 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       for (row = 0; row < bh; ++row) {
         for (col = 0; col < bw; ++col)
-          dst[col] = (mask[0][col] * dst[col] + mask[1][col] * tmp[col] + 32)
-                     >> 6;
+          dst[col] = ROUND_POWER_OF_TWO(mask[0][col] * dst[col] +
+                                        mask[1][col] * tmp[col], 6);
         dst += dst_stride;
         tmp += tmp_stride;
       }
@@ -1572,7 +1613,31 @@ static void combine_interintra(PREDICTION_MODE mode,
   static const int scale_bits = 8;
   static const int scale_max = 256;
   static const int scale_round = 127;
-  static const int weights1d[64] = {
+#if CONFIG_EXT_PARTITION
+  // TODO(debargha): Fill in the correct weights for 128 wide blocks.
+  static const int weights1d[MAX_SB_SIZE] = {
+      128, 128, 125, 125, 122, 122, 119, 119,
+      116, 116, 114, 114, 111, 111, 109, 109,
+      107, 107, 105, 105, 103, 103, 101, 101,
+       99,  99,  97,  97,  96,  96,  94,  94,
+       93,  93,  91,  91,  90,  90,  89,  89,
+       88,  88,  86,  86,  85,  85,  84,  84,
+       83,  83,  82,  82,  81,  81,  81,  81,
+       80,  80,  79,  79,  78,  78,  78,  78,
+       77,  77,  76,  76,  76,  76,  75,  75,
+       75,  75,  74,  74,  74,  74,  73,  73,
+       73,  73,  72,  72,  72,  72,  71,  71,
+       71,  71,  71,  71,  70,  70,  70,  70,
+       70,  70,  70,  70,  69,  69,  69,  69,
+       69,  69,  69,  69,  68,  68,  68,  68,
+       68,  68,  68,  68,  68,  68,  67,  67,
+       67,  67,  67,  67,  67,  67,  67,  67,
+  };
+  static int size_scales[BLOCK_SIZES] = {
+      32, 16, 16, 16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
+  };
+#else
+  static const int weights1d[MAX_SB_SIZE] = {
       128, 125, 122, 119, 116, 114, 111, 109,
       107, 105, 103, 101,  99,  97,  96,  94,
        93,  91,  90,  89,  88,  86,  85,  84,
@@ -1582,14 +1647,14 @@ static void combine_interintra(PREDICTION_MODE mode,
        70,  70,  69,  69,  69,  69,  68,  68,
        68,  68,  68,  67,  67,  67,  67,  67,
   };
-  const int bw = 4 << b_width_log2_lookup[plane_bsize];
-  const int bh = 4 << b_height_log2_lookup[plane_bsize];
+  static int size_scales[BLOCK_SIZES] = {
+      16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
+  };
+#endif  // CONFIG_EXT_PARTITION
 
-  int size = VPXMAX(bw, bh);
-  int size_scale = (size >= 64 ? 1 :
-                    size == 32 ? 2 :
-                    size == 16 ? 4 :
-                    size == 8  ? 8 : 16);
+  const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
+  const int size_scale = size_scales[plane_bsize];
   int i, j;
 
   if (use_wedge_interintra && get_wedge_bits(bsize)) {
@@ -1712,7 +1777,31 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
   static const int scale_bits = 8;
   static const int scale_max = 256;
   static const int scale_round = 127;
-  static const int weights1d[64] = {
+#if CONFIG_EXT_PARTITION
+  // TODO(debargha): Fill in the correct weights for 128 wide blocks.
+  static const int weights1d[MAX_SB_SIZE] = {
+      128, 128, 125, 125, 122, 122, 119, 119,
+      116, 116, 114, 114, 111, 111, 109, 109,
+      107, 107, 105, 105, 103, 103, 101, 101,
+       99,  99,  97,  97,  96,  96,  94,  94,
+       93,  93,  91,  91,  90,  90,  89,  89,
+       88,  88,  86,  86,  85,  85,  84,  84,
+       83,  83,  82,  82,  81,  81,  81,  81,
+       80,  80,  79,  79,  78,  78,  78,  78,
+       77,  77,  76,  76,  76,  76,  75,  75,
+       75,  75,  74,  74,  74,  74,  73,  73,
+       73,  73,  72,  72,  72,  72,  71,  71,
+       71,  71,  71,  71,  70,  70,  70,  70,
+       70,  70,  70,  70,  69,  69,  69,  69,
+       69,  69,  69,  69,  68,  68,  68,  68,
+       68,  68,  68,  68,  68,  68,  67,  67,
+       67,  67,  67,  67,  67,  67,  67,  67,
+  };
+  static int size_scales[BLOCK_SIZES] = {
+      32, 16, 16, 16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
+  };
+#else
+  static const int weights1d[MAX_SB_SIZE] = {
       128, 125, 122, 119, 116, 114, 111, 109,
       107, 105, 103, 101,  99,  97,  96,  94,
        93,  91,  90,  89,  88,  86,  85,  84,
@@ -1722,15 +1811,16 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
        70,  70,  69,  69,  69,  69,  68,  68,
        68,  68,  68,  67,  67,  67,  67,  67,
   };
-  const int bw = 4 << b_width_log2_lookup[plane_bsize];
-  const int bh = 4 << b_height_log2_lookup[plane_bsize];
+  static int size_scales[BLOCK_SIZES] = {
+      16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
+  };
+#endif  // CONFIG_EXT_PARTITION
 
-  int size = VPXMAX(bw, bh);
-  int size_scale = (size >= 64 ? 1 :
-                    size == 32 ? 2 :
-                    size == 16 ? 4 :
-                    size == 8  ? 8 : 16);
+  const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
+  const int size_scale = size_scales[plane_bsize];
   int i, j;
+
   uint16_t *comppred = CONVERT_TO_SHORTPTR(comppred8);
   uint16_t *interpred = CONVERT_TO_SHORTPTR(interpred8);
   uint16_t *intrapred = CONVERT_TO_SHORTPTR(intrapred8);
@@ -1889,8 +1979,7 @@ void vp10_build_interintra_predictors_sby(MACROBLOCKD *xd,
   const int bw = 4 << b_width_log2_lookup[bsize];
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED(16, uint16_t,
-                    intrapredictor[CU_SIZE * CU_SIZE]);
+    DECLARE_ALIGNED(16, uint16_t, intrapredictor[MAX_SB_SQUARE]);
     build_intra_predictors_for_interintra(
         xd, xd->plane[0].dst.buf, xd->plane[0].dst.stride,
         CONVERT_TO_BYTEPTR(intrapredictor), bw,
@@ -1907,7 +1996,7 @@ void vp10_build_interintra_predictors_sby(MACROBLOCKD *xd,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   {
-    uint8_t intrapredictor[CU_SIZE * CU_SIZE];
+    uint8_t intrapredictor[MAX_SB_SQUARE];
     build_intra_predictors_for_interintra(
         xd, xd->plane[0].dst.buf, xd->plane[0].dst.stride,
         intrapredictor, bw,
@@ -1931,8 +2020,7 @@ void vp10_build_interintra_predictors_sbc(MACROBLOCKD *xd,
   const int bw = 4 << b_width_log2_lookup[uvbsize];
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED(16, uint16_t,
-                    uintrapredictor[CU_SIZE * CU_SIZE]);
+    DECLARE_ALIGNED(16, uint16_t, uintrapredictor[MAX_SB_SQUARE]);
     build_intra_predictors_for_interintra(
         xd, xd->plane[plane].dst.buf, xd->plane[plane].dst.stride,
         CONVERT_TO_BYTEPTR(uintrapredictor), bw,
@@ -1950,7 +2038,7 @@ void vp10_build_interintra_predictors_sbc(MACROBLOCKD *xd,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   {
-    uint8_t uintrapredictor[CU_SIZE * CU_SIZE];
+    uint8_t uintrapredictor[MAX_SB_SQUARE];
     build_intra_predictors_for_interintra(
         xd, xd->plane[plane].dst.buf, xd->plane[plane].dst.stride,
         uintrapredictor, bw,
@@ -2117,30 +2205,30 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
     if (ref && get_wedge_bits(mi->mbmi.sb_type)
         && mi->mbmi.use_wedge_interinter) {
 #if CONFIG_VP9_HIGHBITDEPTH
-      uint8_t tmp_dst_[2 * CU_SIZE * CU_SIZE];
+      uint8_t tmp_dst_[2 * MAX_SB_SQUARE];
       uint8_t *tmp_dst =
           (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
           CONVERT_TO_BYTEPTR(tmp_dst_) : tmp_dst_;
 #else
-      uint8_t tmp_dst[CU_SIZE * CU_SIZE];
+      uint8_t tmp_dst[MAX_SB_SQUARE];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_VP9_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           int k;
           for (k = 0; k < h; ++k)
-            memcpy(tmp_dst_ + 2 * CU_SIZE * k, ext_dst1 +
+            memcpy(tmp_dst_ + 2 * MAX_SB_SIZE * k, ext_dst1 +
                    ext_dst_stride1 * 2 * k, w * 2);
         } else {
           int k;
           for (k = 0; k < h; ++k)
-            memcpy(tmp_dst_ + CU_SIZE * k, ext_dst1 +
+            memcpy(tmp_dst_ + MAX_SB_SIZE * k, ext_dst1 +
                    ext_dst_stride1 * k, w);
         }
 #else
         {
           int k;
           for (k = 0; k < h; ++k)
-            memcpy(tmp_dst + CU_SIZE * k, ext_dst1 +
+            memcpy(tmp_dst + MAX_SB_SIZE * k, ext_dst1 +
                    ext_dst_stride1 * k, w);
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -2149,20 +2237,20 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         build_masked_compound_extend_highbd(
-            dst, dst_buf->stride, tmp_dst, CU_SIZE, plane,
+            dst, dst_buf->stride, tmp_dst, MAX_SB_SIZE, plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.sb_type,
             wedge_offset_y, wedge_offset_x, h, w);
       } else {
         build_masked_compound_extend(
-            dst, dst_buf->stride, tmp_dst, CU_SIZE, plane,
+            dst, dst_buf->stride, tmp_dst, MAX_SB_SIZE, plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.sb_type,
             wedge_offset_y, wedge_offset_x, h, w);
       }
 #else
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst,
-                                   CU_SIZE, plane,
+                                   MAX_SB_SIZE, plane,
                                    mi->mbmi.interinter_wedge_index,
                                    mi->mbmi.sb_type,
                                    wedge_offset_y, wedge_offset_x, h, w);
@@ -2171,12 +2259,12 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
         build_masked_compound_highbd(dst, dst_buf->stride, tmp_dst,
-                                     CU_SIZE,
+                                     MAX_SB_SIZE,
                                      mi->mbmi.interinter_wedge_index,
                                      mi->mbmi.sb_type, h, w);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        build_masked_compound(dst, dst_buf->stride, tmp_dst, CU_SIZE,
+        build_masked_compound(dst, dst_buf->stride, tmp_dst, MAX_SB_SIZE,
                               mi->mbmi.interinter_wedge_index,
                               mi->mbmi.sb_type, h, w);
 #endif  // CONFIG_SUPERTX

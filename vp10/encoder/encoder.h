@@ -312,8 +312,8 @@ typedef struct VP10_COMP {
   QUANTS quants;
   ThreadData td;
   MB_MODE_INFO_EXT *mbmi_ext_base;
-  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);   // 8: SIMD width
+  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);  // 8: SIMD width
   VP10_COMMON common;
   VP10EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;

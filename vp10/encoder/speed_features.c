@@ -353,6 +353,11 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST;
     sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST;
     sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST;
+#if CONFIG_EXT_PARTITION
+    sf->inter_mode_mask[BLOCK_64X128] = INTER_NEAREST;
+    sf->inter_mode_mask[BLOCK_128X64] = INTER_NEAREST;
+    sf->inter_mode_mask[BLOCK_128X128] = INTER_NEAREST;
+#endif  // CONFIG_EXT_PARTITION
     sf->max_intra_bsize = BLOCK_32X32;
     sf->allow_skip_recode = 1;
   }
@@ -372,6 +377,11 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST_NEW_ZERO;
+#if CONFIG_EXT_PARTITION
+    sf->inter_mode_mask[BLOCK_64X128] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_128X64] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_128X128] = INTER_NEAREST_NEW_ZERO;
+#endif  // CONFIG_EXT_PARTITION
     sf->adaptive_rd_thresh = 2;
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
@@ -483,7 +493,7 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->use_square_partition_only = 0;
   sf->auto_min_max_partition_size = NOT_IN_USE;
   sf->rd_auto_partition_min_limit = BLOCK_4X4;
-  sf->default_max_partition_size = BLOCK_64X64;
+  sf->default_max_partition_size = BLOCK_LARGEST;
   sf->default_min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
   sf->last_partitioning_redo_frequency = 4;
@@ -514,7 +524,7 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->schedule_mode_search = 0;
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->inter_mode_mask[i] = INTER_ALL;
-  sf->max_intra_bsize = BLOCK_64X64;
+  sf->max_intra_bsize = BLOCK_LARGEST;
   sf->reuse_inter_pred_sby = 0;
   // This setting only takes effect when partition_search_type is set
   // to FIXED_PARTITION.
@@ -540,6 +550,12 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
     set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);
   else if (oxcf->mode == GOOD)
     set_good_speed_feature(cpi, cm, sf, oxcf->speed);
+
+  // sf->partition_search_breakout_dist_thr is set assuming max 64x64
+  // blocks. Normalise this if the blocks are bigger.
+  if (MAX_SB_SIZE_LOG2 > 6) {
+    sf->partition_search_breakout_dist_thr <<= 2 * (MAX_SB_SIZE_LOG2 - 6);
+  }
 
   cpi->full_search_sad = vp10_full_search_sad;
   cpi->diamond_search_sad = vp10_diamond_search_sad;

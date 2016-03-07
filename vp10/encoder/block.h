@@ -28,7 +28,7 @@ typedef struct {
 } diff;
 
 typedef struct macroblock_plane {
-  DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
+  DECLARE_ALIGNED(16, int16_t, src_diff[MAX_SB_SQUARE]);
   tran_low_t *qcoeff;
   tran_low_t *coeff;
   uint16_t *eobs;
@@ -63,10 +63,10 @@ typedef struct {
 } MB_MODE_INFO_EXT;
 
 typedef struct {
-  uint8_t best_palette_color_map[4096];
-  double kmeans_data_buf[2 * 4096];
-  uint8_t kmeans_indices_buf[4096];
-  uint8_t kmeans_pre_indices_buf[4096];
+  uint8_t best_palette_color_map[MAX_SB_SQUARE];
+  double kmeans_data_buf[2 * MAX_SB_SQUARE];
+  uint8_t kmeans_indices_buf[MAX_SB_SQUARE];
+  uint8_t kmeans_pre_indices_buf[MAX_SB_SQUARE];
 } PALETTE_BUFFER;
 
 typedef struct macroblock MACROBLOCK;
@@ -140,11 +140,11 @@ struct macroblock {
 
   // Notes transform blocks where no coefficents are coded.
   // Set during mode selection. Read during block encoding.
-  uint8_t zcoeff_blk[TX_SIZES][256];
+  uint8_t zcoeff_blk[TX_SIZES][MI_BLOCK_SIZE * MI_BLOCK_SIZE * 4];
 #if CONFIG_VAR_TX
-  uint8_t blk_skip[MAX_MB_PLANE][256];
+  uint8_t blk_skip[MAX_MB_PLANE][MI_BLOCK_SIZE * MI_BLOCK_SIZE * 4];
 #if CONFIG_REF_MV
-  uint8_t blk_skip_drl[MAX_MB_PLANE][256];
+  uint8_t blk_skip_drl[MAX_MB_PLANE][MI_BLOCK_SIZE * MI_BLOCK_SIZE * 4];
 #endif
 #endif
 
@@ -164,12 +164,12 @@ struct macroblock {
   int quant_fp;
 
   // skip forward transform and quantization
-  uint8_t skip_txfm[MAX_MB_PLANE][4];
+  uint8_t skip_txfm[MAX_MB_PLANE][MAX_TX_BLOCKS_IN_MAX_SB];
   #define SKIP_TXFM_NONE 0
   #define SKIP_TXFM_AC_DC 1
   #define SKIP_TXFM_AC_ONLY 2
 
-  int64_t bsse[MAX_MB_PLANE][4];
+  int64_t bsse[MAX_MB_PLANE][MAX_TX_BLOCKS_IN_MAX_SB];
 
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
