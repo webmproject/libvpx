@@ -1315,6 +1315,8 @@ static void maybe_flip_input(const int16_t **src, int *src_stride, int l,
     case DST_DCT:
     case DST_ADST:
     case ADST_DST:
+    case H_DCT:
+    case V_DCT:
       break;
     case FLIPADST_DCT:
     case FLIPADST_ADST:
@@ -1755,6 +1757,95 @@ void vp10_fht32x32_c(const int16_t *input, tran_low_t *output,
         output[j + i * 32] =
             (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
     }
+  }
+}
+
+// Forward identity transform.
+void vp10_fwd_idtx_c(const int16_t *src_diff,
+                     tran_low_t *coeff, int stride,
+                     int bs, int tx_type) {
+  int r, c;
+  const int shift = bs < 32 ? 3 : 2;
+
+  const int16_t *input = src_diff;
+  tran_low_t *output = coeff;
+
+  int i, j;
+  tran_low_t temp_in[32], temp_out[32];
+  transform_2d ht = {fdct4, fdct4};
+  int in_scale = 1;
+  int out_scale = 1;
+  int coeff_stride = 0;
+
+  switch (bs) {
+    case 4:
+      ht.cols = fdct4;
+      ht.rows = fdct4;
+      in_scale = 16;
+      out_scale = cospi_16_64 >> 1;
+      coeff_stride = 4;
+      break;
+    case 8:
+      ht.cols = fdct8;
+      ht.rows = fdct8;
+      in_scale = 4;
+      out_scale = (1 << DCT_CONST_BITS);
+      coeff_stride = 8;
+      break;
+    case 16:
+      ht.cols = fdct16;
+      ht.rows = fdct16;
+      in_scale = 4;
+      out_scale = cospi_16_64;
+      coeff_stride = 16;
+      break;
+    case 32:
+      ht.cols = fdct32;
+      ht.rows = fdct32;
+      in_scale = 4;
+      out_scale = (1 << (DCT_CONST_BITS - 2));
+      coeff_stride = 32;
+      break;
+    default:
+      assert(0);
+  }
+
+  // Columns
+  if (tx_type == V_DCT) {
+    for (i = 0; i < bs; ++i) {
+      for (j = 0; j < bs; ++j)
+        temp_in[j] = input[j * stride + i] * in_scale;
+      ht.cols(temp_in, temp_out);
+
+      for (j = 0; j < bs; ++j) {
+        tran_high_t temp = (tran_high_t)temp_out[j] * out_scale;
+        temp >>= DCT_CONST_BITS;
+        output[j * coeff_stride + i] = (tran_low_t)temp;
+      }
+    }
+    return;
+  }
+
+  // Rows
+  if (tx_type == H_DCT) {
+    for (j = 0; j < bs; ++j) {
+      for (i = 0; i < bs; ++i)
+        temp_in[i] = input[j * stride + i] * in_scale;
+      ht.rows(temp_in, temp_out);
+
+      for (i = 0; i < bs; ++i) {
+        tran_high_t temp = (tran_high_t)temp_out[i] * out_scale;
+        temp >>= DCT_CONST_BITS;
+        output[j * coeff_stride + i] = (tran_low_t)temp;
+      }
+    }
+    return;
+  }
+
+  for (r = 0; r < bs; ++r) {
+    for (c = 0; c < bs; ++c) coeff[c] = src_diff[c] << shift;
+    src_diff += stride;
+    coeff += bs;
   }
 }
 

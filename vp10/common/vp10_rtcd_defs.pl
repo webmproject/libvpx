@@ -426,6 +426,9 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_fwht4x4 msa/, "$mmx_x86inc";
 }
 
+add_proto qw/void vp10_fwd_idtx/, "const int16_t *src_diff, tran_low_t *coeff, int stride, int bs, int tx_type";
+  specialize qw/vp10_fwd_idtx/;
+
 # Inverse transform
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Note as optimized versions of these functions are added we need to add a check to ensure
