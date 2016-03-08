@@ -322,7 +322,7 @@ void assign_layer_bitrates(const SvcContext *svc_ctx,
 
       for (sl = 0; sl < svc_ctx->spatial_layers; ++sl) {
         if (si->svc_params.scaling_factor_den[sl] > 0) {
-          alloc_ratio[sl] = (float)( (sl+1) );
+          alloc_ratio[sl] = (float)( pow(2, sl) );
           total += alloc_ratio[sl];
         }
       }
