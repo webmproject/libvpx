@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d747f965_290669ff",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2153,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-08T00:43:33Z",
+      "side": 1,
+      "message": "This is becoming unreadable. Let\u0027s move it above instead.",
+      "range": {
+        "startLine": 2152,
+        "startChar": 0,
+        "endLine": 2153,
+        "endChar": 78
+      },
+      "revId": "f2c297886d6465d70a60a7c5921b44470680d85a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2274917a_1e7f713d",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2153,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-08T00:43:33Z",
+      "side": 1,
+      "message": "Cast the inner operation, the rest of this logic is all integer",
+      "range": {
+        "startLine": 2153,
+        "startChar": 47,
+        "endLine": 2153,
+        "endChar": 66
+      },
+      "revId": "f2c297886d6465d70a60a7c5921b44470680d85a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2274917a_de6419b3",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3404,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-08T00:43:33Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 3403,
+        "startChar": 28,
+        "endLine": 3404,
+        "endChar": 60
+      },
+      "revId": "f2c297886d6465d70a60a7c5921b44470680d85a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "174ef182_88baf7fe",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-08T00:43:33Z",
+      "side": 1,
+      "message": "This doesn\u0027t seem right. It\u0027s going to force 64 bit arithmetic everywhere we use this. If there is a specific callee where this is failing, we should fix it there.",
+      "range": {
+        "startLine": 47,
+        "startChar": 24,
+        "endLine": 47,
+        "endChar": 31
+      },
+      "revId": "f2c297886d6465d70a60a7c5921b44470680d85a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
