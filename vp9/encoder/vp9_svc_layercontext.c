@@ -818,7 +818,7 @@ void vp9_free_svc_cyclic_refresh(VP9_COMP *const cpi) {
 }
 
 // Reset on key frame: reset counters, references and buffer updates.
-void vp9_svc_reset_key_frame(VP9_COMP *cpi) {
+void vp9_svc_reset_key_frame(VP9_COMP *const cpi) {
   int sl, tl;
   SVC *const svc = &cpi->svc;
   LAYER_CONTEXT *lc = NULL;
