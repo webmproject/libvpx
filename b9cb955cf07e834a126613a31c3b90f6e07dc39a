@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "773acdf7_e6cd7ad7",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-03-08T17:50:52Z",
+      "side": 1,
+      "message": "leave it as is, same in other tests.",
+      "parentUuid": "773acdf7_a3efe413",
+      "range": {
+        "startLine": 468,
+        "startChar": 4,
+        "endLine": 469,
+        "endChar": 36
+      },
+      "revId": "b9cb955cf07e834a126613a31c3b90f6e07dc39a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "773acdf7_c319480c",
         "filename": "test/resize_test.cc",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "773acdf7_a6c372aa",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-03-08T17:50:52Z",
+      "side": 1,
+      "message": "will leave it, prefer to keep it the same as in other tests (datarate).",
+      "parentUuid": "773acdf7_c319480c",
+      "range": {
+        "startLine": 473,
+        "startChar": 0,
+        "endLine": 475,
+        "endChar": 3
+      },
+      "revId": "b9cb955cf07e834a126613a31c3b90f6e07dc39a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "773acdf7_0314d0ce",
         "filename": "test/resize_test.cc",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2016-03-08T01:15:19Z",
       "side": 1,
       "message": "Can use \"mismatch_nframes_\" directly. Same in follow test cases.",
+      "range": {
+        "startLine": 528,
+        "startChar": 44,
+        "endLine": 528,
+        "endChar": 63
+      },
+      "revId": "b9cb955cf07e834a126613a31c3b90f6e07dc39a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "773acdf7_06d17e6f",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-03-08T17:50:52Z",
+      "side": 1,
+      "message": "leave as is",
+      "parentUuid": "773acdf7_0314d0ce",
       "range": {
         "startLine": 528,
         "startChar": 44,
