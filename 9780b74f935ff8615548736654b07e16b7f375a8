@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7979d52_cc486f59",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 6324,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-03-08T21:06:10Z",
+      "side": 1,
+      "message": "Disabling obmc here seems not consistent with the logic of the bitstream syntax (or probably is not making an rd optimal choice). The current logic is: if obmc \u003d 1, do not use wedge modes; otherwise, send the wedge flag. My suggestion is moving this module after the place where the obmc flag has been determined.",
+      "range": {
+        "startLine": 6324,
+        "startChar": 6,
+        "endLine": 6324,
+        "endChar": 21
+      },
+      "revId": "9780b74f935ff8615548736654b07e16b7f375a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7979d52_6cf4db37",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 6655,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-03-08T21:06:10Z",
+      "side": 1,
+      "message": "Here we are reusing the bmc and obmc prediction generated when selecting the interp filter. If wedge interinter is tested before this module, I think prediction in xd-\u003eplane[].dst.buf is no longer the original inter prediction.",
+      "revId": "9780b74f935ff8615548736654b07e16b7f375a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
