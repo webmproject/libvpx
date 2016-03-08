@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "773acdf7_0349705a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-08T00:02:36Z",
+      "side": 1,
+      "message": "you can drop the double negative in these cases and just use the original commit message",
+      "revId": "1befe8bad28a06ca9688dd426d250d8a377024e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
