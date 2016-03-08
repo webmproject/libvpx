@@ -282,6 +282,7 @@ EXPERIMENT_LIST="
     ans
     loop_restoration
     ext_partition
+    ext_tile
     obmc
     affine_motion
 "
