@@ -1741,7 +1741,8 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                          dst, dst_stride, p->eobs[block],
                                          xd->bd, DCT_DCT, 1);
           } else {
-            int64_t unused;
+            int64_t dist;
+            unsigned int tmp;
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
             const scan_order *so = get_scan(TX_4X4, tx_type, 0);
 #if CONFIG_VAR_TX
@@ -1760,14 +1761,14 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                  TX_4X4, so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
 #endif  // CONFIG_VAR_TX
-            distortion += vp10_highbd_block_error(
-                coeff, BLOCK_OFFSET(pd->dqcoeff, block),
-                16, &unused, xd->bd) >> 2;
-            if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
-              goto next_highbd;
             vp10_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
                                          dst, dst_stride, p->eobs[block],
                                          xd->bd, tx_type, 0);
+            cpi->fn_ptr[BLOCK_4X4].vf(src, src_stride, dst, dst_stride, &tmp);
+            dist = (int64_t)tmp << 4;
+            distortion += dist;
+            if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
+              goto next_highbd;
           }
         }
       }
@@ -1863,7 +1864,8 @@ next_highbd:
           vp10_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
                                 dst, dst_stride, p->eobs[block], DCT_DCT, 1);
         } else {
-          int64_t unused;
+          int64_t dist;
+          unsigned int tmp;
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
           const scan_order *so = get_scan(TX_4X4, tx_type, 0);
 #if CONFIG_VAR_TX
@@ -1882,12 +1884,16 @@ next_highbd:
                                TX_4X4, so->scan, so->neighbors,
                                cpi->sf.use_fast_coef_costing);
 #endif
-          distortion += vp10_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
-                                        16, &unused) >> 2;
-          if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
-            goto next;
           vp10_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block),
                                 dst, dst_stride, p->eobs[block], tx_type, 0);
+          cpi->fn_ptr[BLOCK_4X4].vf(src, src_stride, dst, dst_stride, &tmp);
+          dist = (int64_t)tmp << 4;
+          distortion += dist;
+          // To use the pixel domain distortion, the step below needs to be
+          // put behind the inv txfm. Compared to calculating the distortion
+          // in the frequency domain, the overhead of encoding effort is low.
+          if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
+            goto next;
         }
       }
     }
@@ -3867,7 +3873,7 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   k = i;
   for (idy = 0; idy < height / 4; ++idy) {
     for (idx = 0; idx < width / 4; ++idx) {
-      int64_t ssz, rd, rd1, rd2;
+      int64_t dist, ssz, rd, rd1, rd2;
       tran_low_t* coeff;
 #if CONFIG_VAR_TX
       int coeff_ctx;
@@ -3881,19 +3887,9 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
       fwd_txm4x4(vp10_raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
                  coeff, 8);
       vp10_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        thisdistortion += vp10_highbd_block_error(coeff,
-                                                 BLOCK_OFFSET(pd->dqcoeff, k),
-                                                 16, &ssz, xd->bd);
-      } else {
-        thisdistortion += vp10_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
-                                          16, &ssz);
-      }
-#else
-      thisdistortion += vp10_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
-                                        16, &ssz);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+      dist_block(cpi, x, 0, k, idy + (i >> 1), idx + (i & 0x1), TX_4X4,
+                 &dist, &ssz);
+      thisdistortion += dist;
       thissse += ssz;
 #if CONFIG_VAR_TX
       thisrate += cost_coeffs(x, 0, k, coeff_ctx,
@@ -3908,17 +3904,17 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
                               so->scan, so->neighbors,
                               cpi->sf.use_fast_coef_costing);
 #endif
-      rd1 = RDCOST(x->rdmult, x->rddiv, thisrate, thisdistortion >> 2);
-      rd2 = RDCOST(x->rdmult, x->rddiv, 0, thissse >> 2);
+      rd1 = RDCOST(x->rdmult, x->rddiv, thisrate, thisdistortion);
+      rd2 = RDCOST(x->rdmult, x->rddiv, 0, thissse);
       rd = VPXMIN(rd1, rd2);
       if (rd >= best_yrd)
         return INT64_MAX;
     }
   }
 
-  *distortion = thisdistortion >> 2;
+  *distortion = thisdistortion;
   *labelyrate = thisrate;
-  *sse = thissse >> 2;
+  *sse = thissse;
 
   return RDCOST(x->rdmult, x->rddiv, *labelyrate, *distortion);
 }
