@@ -2149,14 +2149,15 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
       p_angle = mode_to_angle_map[mbmi->mode] +
           mbmi->angle_delta[0] * ANGLE_STEP;
       for (filter = INTRA_FILTER_LINEAR; filter < INTRA_FILTERS; ++filter) {
+        int64_t tmp_best_rd;
         if ((FILTER_FAST_SEARCH || !pick_intra_filter(p_angle)) &&
             filter != INTRA_FILTER_LINEAR)
           continue;
         mic->mbmi.intra_filter = filter;
+        tmp_best_rd = (i == 0 && filter == INTRA_FILTER_LINEAR &&
+            best_rd < INT64_MAX) ? (int64_t)(best_rd * rd_adjust) : best_rd;
         super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
-                        &s, NULL, bsize,
-                        (i == 0 && filter == INTRA_FILTER_LINEAR &&
-                         best_rd < INT64_MAX) ? best_rd * rd_adjust : best_rd);
+                        &s, NULL, bsize, tmp_best_rd);
         if (this_rate_tokenonly == INT_MAX) {
           if (i == 0 && filter == INTRA_FILTER_LINEAR)
             return best_rd;
@@ -2261,7 +2262,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
-static inline int get_angle_index(double angle) {
+static INLINE int get_angle_index(double angle) {
   const double step = 22.5, base = 45;
   return (int)round((angle - base) / step);
 }
@@ -3403,11 +3404,12 @@ static int rd_pick_intra_angle_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
     int i, j, best_i = -1;
 
     for (i = 0; i < level1; ++i) {
+      int64_t tmp_best_rd;
       mbmi->angle_delta[1] = deltas_level1[i];
-      if (!super_block_uvrd(cpi, x, &this_rate_tokenonly,
-                            &this_distortion, &s, &this_sse, bsize,
-                            (i == 0 && best_rd < INT64_MAX) ?
-                                best_rd * rd_adjust : best_rd)) {
+      tmp_best_rd = (i == 0 && best_rd < INT64_MAX) ?
+          (int64_t)(best_rd * rd_adjust) : best_rd;
+      if (!super_block_uvrd(cpi, x, &this_rate_tokenonly, &this_distortion,
+                            &s, &this_sse, bsize, tmp_best_rd)) {
         if (i == 0)
           break;
         else

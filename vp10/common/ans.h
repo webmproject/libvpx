@@ -277,8 +277,8 @@ static INLINE void fetch_sym(struct rans_dec_sym *out, const rans_dec_lut cdf,
     ++i;
   }
   out->val = i - 1;
-  out->prob = cdf[i] - cdf[i - 1];
-  out->cum_prob = cdf[i - 1];
+  out->prob = (AnsP8)(cdf[i] - cdf[i - 1]);
+  out->cum_prob = (AnsP8)cdf[i - 1];
 }
 
 static INLINE int rans_read(struct AnsDecoder *ans,
