@@ -155,7 +155,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vp10_iht8x8_64_add sse2/;
 
     add_proto qw/void vp10_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
-    specialize qw/vp10_iht16x16_256_add/;
+    specialize qw/vp10_iht16x16_256_add sse2/;
 
     add_proto qw/void vp10_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
     specialize qw/vp10_fdct4x4 sse2/;

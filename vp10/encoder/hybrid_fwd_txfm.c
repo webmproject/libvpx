@@ -134,8 +134,6 @@ static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_fht16x16(src_diff, coeff, diff_stride, tx_type);
-      break;
     case DST_DST:
     case DCT_DST:
     case DST_DCT:
@@ -143,8 +141,7 @@ static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
     case ADST_DST:
     case DST_FLIPADST:
     case FLIPADST_DST:
-      // Use C version since DST exists only in C
-      vp10_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
+      vp10_fht16x16(src_diff, coeff, diff_stride, tx_type);
       break;
     case H_DCT:
     case V_DCT:
