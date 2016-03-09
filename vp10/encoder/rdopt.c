@@ -1285,8 +1285,12 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
 
   mbmi->tx_size = best_tx;
   mbmi->tx_type = best_tx_type;
+
+#if !CONFIG_EXT_TX
   if (mbmi->tx_size >= TX_32X32)
     assert(mbmi->tx_type == DCT_DCT);
+#endif
+
   txfm_rd_in_plane(x,
                    cpi,
                    &r, &d, &s,
