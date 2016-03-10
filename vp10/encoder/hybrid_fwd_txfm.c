@@ -232,6 +232,8 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
       // Use C version since DST exists only in C
       vp10_highbd_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
       vp10_fwd_idtx_c(src_diff, coeff, diff_stride, 4, tx_type);
       break;
@@ -274,6 +276,8 @@ static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
       // Use C version since DST exists only in C
       vp10_highbd_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
       vp10_fwd_idtx_c(src_diff, coeff, diff_stride, 8, tx_type);
       break;
@@ -316,6 +320,8 @@ static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
       // Use C version since DST exists only in C
       vp10_highbd_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
       vp10_fwd_idtx_c(src_diff, coeff, diff_stride, 16, tx_type);
       break;
@@ -354,6 +360,8 @@ static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
     case FLIPADST_DST:
       vp10_highbd_fht32x32_c(src_diff, coeff, diff_stride, tx_type);
       break;
+    case H_DCT:
+    case V_DCT:
     case IDTX:
       vp10_fwd_idtx_c(src_diff, coeff, diff_stride, 32, tx_type);
       break;
