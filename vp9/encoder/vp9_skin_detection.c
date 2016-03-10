@@ -62,16 +62,16 @@ int vp9_skin_pixel(const uint8_t y, const uint8_t cb, const uint8_t cr) {
       // Exit on very strong cb.
       if (cb > 150 && cr < 110)
         return 0;
-      // Exit on (another) low luminance threshold if either color is high.
-      if (y < 50 && (cb > 140 || cr > 140))
-        return 0;
       for (; i < 5; i++) {
-        if (evaluate_skin_color_difference(cb, cr, i) < skin_threshold[i + 1]) {
-          return 1;
+        int skin_color_diff = evaluate_skin_color_difference(cb, cr, i);
+        if (skin_color_diff < skin_threshold[i + 1]) {
+           if (y < 60 && skin_color_diff > 3 * (skin_threshold[i + 1] >> 2))
+             return 0;
+           else
+            return 1;
         }
         // Exit if difference is much large than the threshold.
-        if (evaluate_skin_color_difference(cb, cr, i) >
-            (skin_threshold[i + 1] << 3)) {
+        if (skin_color_diff > (skin_threshold[i + 1] << 3)) {
           return 0;
         }
       }
