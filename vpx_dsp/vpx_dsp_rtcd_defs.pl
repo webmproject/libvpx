@@ -1233,12 +1233,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 #
 # ...
 #
-if (vpx_config("CONFIG_AFFINE_MOTION") eq "yes") {
-  add_proto qw/void vpx_upsampled_pred/, "uint8_t *comp_pred, int width, int height, const uint8_t *ref, int ref_stride";
-    specialize qw/vpx_upsampled_pred sse2/;
-  add_proto qw/void vpx_comp_avg_upsampled_pred/, "uint8_t *comp_pred, const uint8_t *pred, int width, int height, const uint8_t *ref, int ref_stride";
-    specialize qw/vpx_comp_avg_upsampled_pred sse2/;
-}
+add_proto qw/void vpx_upsampled_pred/, "uint8_t *comp_pred, int width, int height, const uint8_t *ref, int ref_stride";
+specialize qw/vpx_upsampled_pred sse2/;
+add_proto qw/void vpx_comp_avg_upsampled_pred/, "uint8_t *comp_pred, const uint8_t *pred, int width, int height, const uint8_t *ref, int ref_stride";
+specialize qw/vpx_comp_avg_upsampled_pred sse2/;
 
 #
 # ...

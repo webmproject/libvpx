@@ -320,11 +320,7 @@ static int temporal_filter_find_matching_mb_c(VP10_COMP *cpi,
                                          0, mv_sf->subpel_iters_per_step,
                                          cond_cost_list(cpi, cost_list),
                                          NULL, NULL,
-#if CONFIG_AFFINE_MOTION
                                          &distortion, &sse, NULL, 0, 0, 0);
-#else
-                                         &distortion, &sse, NULL, 0, 0);
-#endif
 
   // Restore input state
   x->plane[0].src = src;
