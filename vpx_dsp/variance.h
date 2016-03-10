@@ -74,7 +74,32 @@ typedef struct variance_vtable {
 } vp8_variance_fn_ptr_t;
 #endif  // CONFIG_VP8
 
-#if CONFIG_VP9 || CONFIG_VP10
+#if CONFIG_VP10 && CONFIG_EXT_INTER
+typedef unsigned int(*vpx_masked_sad_fn_t)(const uint8_t *src_ptr,
+                                           int source_stride,
+                                           const uint8_t *ref_ptr,
+                                           int ref_stride,
+                                           const uint8_t *msk_ptr,
+                                           int msk_stride);
+typedef unsigned int (*vpx_masked_variance_fn_t)(const uint8_t *src_ptr,
+                                                 int source_stride,
+                                                 const uint8_t *ref_ptr,
+                                                 int ref_stride,
+                                                 const uint8_t *msk_ptr,
+                                                 int msk_stride,
+                                                 unsigned int *sse);
+typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(const uint8_t *src_ptr,
+                                                       int source_stride,
+                                                       int xoffset,
+                                                       int yoffset,
+                                                       const uint8_t *ref_ptr,
+                                                       int Refstride,
+                                                       const uint8_t *msk_ptr,
+                                                       int msk_stride,
+                                                       unsigned int *sse);
+#endif  // CONFIG_VP10 && CONFIG_EXT_INTER
+
+#if CONFIG_VP9
 typedef struct vp9_variance_vtable {
   vpx_sad_fn_t               sdf;
   vpx_sad_avg_fn_t           sdaf;
@@ -85,7 +110,25 @@ typedef struct vp9_variance_vtable {
   vpx_sad_multi_fn_t         sdx8f;
   vpx_sad_multi_d_fn_t       sdx4df;
 } vp9_variance_fn_ptr_t;
-#endif  // CONFIG_VP9 || CONFIG_VP10
+#endif  // CONFIG_VP9
+
+#if CONFIG_VP10
+typedef struct vp10_variance_vtable {
+  vpx_sad_fn_t                   sdf;
+  vpx_sad_avg_fn_t               sdaf;
+  vpx_variance_fn_t              vf;
+  vpx_subpixvariance_fn_t        svf;
+  vpx_subp_avg_variance_fn_t     svaf;
+  vpx_sad_multi_fn_t             sdx3f;
+  vpx_sad_multi_fn_t             sdx8f;
+  vpx_sad_multi_d_fn_t           sdx4df;
+#if CONFIG_EXT_INTER
+  vpx_masked_sad_fn_t            msdf;
+  vpx_masked_variance_fn_t       mvf;
+  vpx_masked_subpixvariance_fn_t msvf;
+#endif  // CONFIG_EXT_INTER
+} vp10_variance_fn_ptr_t;
+#endif  // CONFIG_VP10
 
 #ifdef __cplusplus
 }  // extern "C"

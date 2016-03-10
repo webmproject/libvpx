@@ -61,6 +61,9 @@ static int check_intra_sb(VP10_COMP *cpi, const TileInfo *const tile,
                           int mi_row, int mi_col, BLOCK_SIZE bsize,
                           PC_TREE *pc_tree);
 static void predict_superblock(VP10_COMP *cpi, ThreadData *td,
+#if CONFIG_EXT_INTER
+                               int mi_row_ori, int mi_col_ori,
+#endif  // CONFIG_EXT_INTER
                                int mi_row_pred, int mi_col_pred,
                                BLOCK_SIZE bsize_pred, int b_sub8x8, int block);
 static int check_supertx_sb(BLOCK_SIZE bsize, TX_SIZE supertx_size,
@@ -1290,6 +1293,10 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
         mbmi->inter_tx_size[(idy << 3) + idx] = mbmi->tx_size;
   }
 #endif  // CONFIG_VAR_TX
+#if CONFIG_OBMC
+  // Turn OBMC off for supertx
+  mbmi->obmc = 0;
+#endif  // CONFIG_OBMC
 
   if (!output_enabled)
     return;
@@ -1801,28 +1808,42 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
                               [ref0 != GOLDEN_FRAME]++;
 #endif  // CONFIG_EXT_REFS
         }
+
 #if CONFIG_OBMC
 #if CONFIG_SUPERTX
         if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
-        if (is_obmc_allowed(mbmi))
-          counts->obmc[mbmi->sb_type][mbmi->obmc]++;
+          if (is_obmc_allowed(mbmi))
+            counts->obmc[mbmi->sb_type][mbmi->obmc]++;
 #endif  // CONFIG_OBMC
       }
     }
 
 #if CONFIG_EXT_INTER
     if (cm->reference_mode != COMPOUND_REFERENCE &&
-#if CONFIG_SUPERTX
-       !supertx_enabled &&
+#if CONFIG_OBMC
+        !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
 #endif
-       is_interintra_allowed(mbmi)) {
+#if CONFIG_SUPERTX
+        !supertx_enabled &&
+#endif
+        is_interintra_allowed(mbmi)) {
       if (mbmi->ref_frame[1] == INTRA_FRAME) {
         counts->y_mode[size_group_lookup[bsize]][mbmi->interintra_mode]++;
         counts->interintra[bsize][1]++;
+        if (get_wedge_bits(bsize))
+          counts->wedge_interintra[bsize][mbmi->use_wedge_interintra]++;
       } else {
         counts->interintra[bsize][0]++;
       }
+    }
+    if (cm->reference_mode != SINGLE_REFERENCE &&
+        is_inter_compound_mode(mbmi->mode) &&
+#if CONFIG_OBMC
+        !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
+#endif  // CONFIG_OBMC
+        get_wedge_bits(bsize)) {
+      counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
     }
 #endif  // CONFIG_EXT_INTER
 
@@ -4457,15 +4478,19 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_OBMC
     if (mbmi->obmc) {
 #if CONFIG_VP9_HIGHBITDEPTH
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * 64 * 64]);
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * 64 * 64]);
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf1[2 * MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf2[2 * MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
 #else
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * 64 * 64]);
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * 64 * 64]);
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf1[MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf2[MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
-      int dst_stride1[MAX_MB_PLANE] = {64, 64, 64};
-      int dst_stride2[MAX_MB_PLANE] = {64, 64, 64};
+      int dst_stride1[MAX_MB_PLANE] = {CU_SIZE, CU_SIZE, CU_SIZE};
+      int dst_stride2[MAX_MB_PLANE] = {CU_SIZE, CU_SIZE, CU_SIZE};
 
       assert(mbmi->sb_type >= BLOCK_8X8);
 
@@ -4473,23 +4498,24 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         int len = sizeof(uint16_t);
         dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
-        dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + 4096 * len);
-        dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + 8192 * len);
+        dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + CU_SIZE * CU_SIZE * len);
+        dst_buf1[2] = CONVERT_TO_BYTEPTR(
+            tmp_buf1 + CU_SIZE * CU_SIZE * 2 * len);
         dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
-        dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + 4096 * len);
-        dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + 8192 * len);
+        dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + CU_SIZE * CU_SIZE * len);
+        dst_buf2[2] = CONVERT_TO_BYTEPTR(
+            tmp_buf2 + CU_SIZE * CU_SIZE * 2 * len);
       } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       dst_buf1[0] = tmp_buf1;
-      dst_buf1[1] = tmp_buf1 + 4096;
-      dst_buf1[2] = tmp_buf1 + 8192;
+      dst_buf1[1] = tmp_buf1 + CU_SIZE * CU_SIZE;
+      dst_buf1[2] = tmp_buf1 + CU_SIZE * CU_SIZE * 2;
       dst_buf2[0] = tmp_buf2;
-      dst_buf2[1] = tmp_buf2 + 4096;
-      dst_buf2[2] = tmp_buf2 + 8192;
+      dst_buf2[1] = tmp_buf2 + CU_SIZE * CU_SIZE;
+      dst_buf2[2] = tmp_buf2 + CU_SIZE * CU_SIZE * 2;
 #if CONFIG_VP9_HIGHBITDEPTH
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
       vp10_build_prediction_by_above_preds(cpi, xd, mi_row, mi_col, dst_buf1,
                                            dst_stride1);
       vp10_build_prediction_by_left_preds(cpi, xd, mi_row, mi_col, dst_buf2,
@@ -4500,7 +4526,6 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
                                        dst_buf1, dst_stride1,
                                        dst_buf2, dst_stride2);
     }
-
 #endif  // CONFIG_OBMC
 
     vp10_encode_sb(x, VPXMAX(bsize, BLOCK_8X8));
@@ -4694,6 +4719,9 @@ static int check_supertx_sb(BLOCK_SIZE bsize, TX_SIZE supertx_size,
 }
 
 static void predict_superblock(VP10_COMP *cpi, ThreadData *td,
+#if CONFIG_EXT_INTER
+                               int mi_row_ori, int mi_col_ori,
+#endif  // CONFIG_EXT_INTER
                                int mi_row_pred, int mi_col_pred,
                                BLOCK_SIZE bsize_pred, int b_sub8x8, int block) {
   // Used in supertx
@@ -4718,10 +4746,19 @@ static void predict_superblock(VP10_COMP *cpi, ThreadData *td,
   }
 
   if (!b_sub8x8)
-    vp10_build_inter_predictors_sb(xd, mi_row_pred, mi_col_pred, bsize_pred);
+    vp10_build_inter_predictors_sb_extend(
+        xd,
+#if CONFIG_EXT_INTER
+        mi_row_ori, mi_col_ori,
+#endif  // CONFIG_EXT_INTER
+        mi_row_pred, mi_col_pred, bsize_pred);
   else
-    vp10_build_inter_predictors_sb_sub8x8(xd, mi_row_pred, mi_col_pred,
-                                          bsize_pred, block);
+    vp10_build_inter_predictors_sb_sub8x8_extend(
+        xd,
+#if CONFIG_EXT_INTER
+        mi_row_ori, mi_col_ori,
+#endif  // CONFIG_EXT_INTER
+        mi_row_pred, mi_col_pred, bsize_pred, block);
 }
 
 static void predict_b_extend(VP10_COMP *cpi, ThreadData *td,
@@ -4772,6 +4809,9 @@ static void predict_b_extend(VP10_COMP *cpi, ThreadData *td,
                          (c >> xd->plane[2].subsampling_x);
 
   predict_superblock(cpi, td,
+#if CONFIG_EXT_INTER
+                     mi_row_ori, mi_col_ori,
+#endif  // CONFIG_EXT_INTER
                      mi_row_pred, mi_col_pred, bsize_pred,
                      b_sub8x8, block);
 

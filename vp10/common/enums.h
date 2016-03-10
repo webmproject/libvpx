@@ -41,21 +41,32 @@ typedef enum BITSTREAM_PROFILE {
   MAX_PROFILES
 } BITSTREAM_PROFILE;
 
-#define BLOCK_4X4     0
-#define BLOCK_4X8     1
-#define BLOCK_8X4     2
-#define BLOCK_8X8     3
-#define BLOCK_8X16    4
-#define BLOCK_16X8    5
-#define BLOCK_16X16   6
-#define BLOCK_16X32   7
-#define BLOCK_32X16   8
-#define BLOCK_32X32   9
-#define BLOCK_32X64  10
-#define BLOCK_64X32  11
-#define BLOCK_64X64  12
-#define BLOCK_SIZES  13
-#define BLOCK_INVALID BLOCK_SIZES
+#define BLOCK_4X4      0
+#define BLOCK_4X8      1
+#define BLOCK_8X4      2
+#define BLOCK_8X8      3
+#define BLOCK_8X16     4
+#define BLOCK_16X8     5
+#define BLOCK_16X16    6
+#define BLOCK_16X32    7
+#define BLOCK_32X16    8
+#define BLOCK_32X32    9
+#define BLOCK_32X64   10
+#define BLOCK_64X32   11
+#define BLOCK_64X64   12
+
+#if CONFIG_EXT_PARTITION
+#define BLOCK_64X128  13
+#define BLOCK_128X64  14
+#define BLOCK_128X128 15
+#define BLOCK_SIZES   16
+#else
+#define BLOCK_SIZES   13
+#endif  // CONFIG_EXT_PARTITION
+
+#define BLOCK_INVALID (BLOCK_SIZES)
+#define BLOCK_LARGEST (BLOCK_SIZES - 1)
+
 typedef uint8_t BLOCK_SIZE;
 
 typedef enum PARTITION_TYPE {

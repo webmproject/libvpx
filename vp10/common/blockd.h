@@ -45,6 +45,7 @@ typedef enum {
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
 
 #define MAXTXLEN 32
+#define CU_SIZE  64
 
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
 #if CONFIG_EXT_INTER
@@ -55,6 +56,23 @@ static INLINE int is_inter_mode(PREDICTION_MODE mode) {
 }
 
 #if CONFIG_EXT_INTER
+#define WEDGE_BITS_SML    3
+#define WEDGE_BITS_MED    4
+#define WEDGE_BITS_BIG    5
+#define WEDGE_NONE       -1
+#define WEDGE_WEIGHT_BITS 6
+
+static INLINE int get_wedge_bits(BLOCK_SIZE sb_type) {
+  if (sb_type < BLOCK_8X8)
+    return 0;
+  if (sb_type <= BLOCK_8X8)
+    return WEDGE_BITS_SML;
+  else if (sb_type <= BLOCK_32X32)
+    return WEDGE_BITS_MED;
+  else
+    return WEDGE_BITS_BIG;
+}
+
 static INLINE int is_inter_singleref_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWFROMNEARMV;
 }
@@ -68,6 +86,11 @@ static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
           mode == NEW_NEWMV ||
           mode == NEAREST_NEWMV || mode == NEW_NEARESTMV ||
           mode == NEAR_NEWMV || mode == NEW_NEARMV);
+}
+#else
+
+static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
+  return (mode == NEWMV);
 }
 #endif  // CONFIG_EXT_INTER
 
@@ -172,6 +195,12 @@ typedef struct {
 #if CONFIG_EXT_INTER
   PREDICTION_MODE interintra_mode;
   PREDICTION_MODE interintra_uv_mode;
+  // TODO(debargha): Consolidate these flags
+  int use_wedge_interintra;
+  int interintra_wedge_index;
+  int interintra_uv_wedge_index;
+  int use_wedge_interinter;
+  int interinter_wedge_index;
 #endif  // CONFIG_EXT_INTER
 
 #if CONFIG_OBMC
@@ -202,12 +231,6 @@ static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
 static INLINE int has_second_ref(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[1] > INTRA_FRAME;
 }
-
-#if CONFIG_OBMC
-static INLINE int is_obmc_allowed(const MB_MODE_INFO *mbmi) {
-  return (mbmi->sb_type >= BLOCK_8X8);
-}
-#endif  // CONFIG_OBMC
 
 PREDICTION_MODE vp10_left_block_mode(const MODE_INFO *cur_mi,
                                     const MODE_INFO *left_mi, int b);
@@ -646,6 +669,23 @@ static INLINE int is_interintra_pred(const MB_MODE_INFO *mbmi) {
   return (mbmi->ref_frame[1] == INTRA_FRAME) && is_interintra_allowed(mbmi);
 }
 #endif  // CONFIG_EXT_INTER
+
+#if CONFIG_OBMC
+static INLINE int is_obmc_allowed(const MB_MODE_INFO *mbmi) {
+  return (mbmi->sb_type >= BLOCK_8X8);
+}
+
+static INLINE int is_neighbor_overlappable(const MB_MODE_INFO *mbmi) {
+#if CONFIG_EXT_INTER
+  return (is_inter_block(mbmi) &&
+          !(has_second_ref(mbmi) && get_wedge_bits(mbmi->sb_type) &&
+            mbmi->use_wedge_interinter) &&
+          !(is_interintra_pred(mbmi)));
+#else
+  return (is_inter_block(mbmi));
+#endif  // CONFIG_EXT_INTER
+}
+#endif  // CONFIG_OBMC
 
 #ifdef __cplusplus
 }  // extern "C"

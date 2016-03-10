@@ -30,6 +30,7 @@
 #include "vp10/common/postproc.h"
 #endif
 #include "vp10/common/quant_common.h"
+#include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
 
 #include "vp10/decoder/decodeframe.h"
@@ -44,6 +45,9 @@ static void initialize_dec(void) {
     vpx_dsp_rtcd();
     vpx_scale_rtcd();
     vp10_init_intra_predictors();
+#if CONFIG_EXT_INTER
+    vp10_init_wedge_masks();
+#endif  // CONFIG_EXT_INTER
     init_done = 1;
   }
 }
