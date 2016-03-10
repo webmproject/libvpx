@@ -267,9 +267,17 @@ void vp10_cyclic_refresh_update_segment(VP10_COMP *const cpi,
       // don't update the map for them. For cases where motion is non-zero or
       // the reference frame isn't the previous frame, the previous value in
       // the map for this spatial location is not entirely correct.
-      if (!is_inter_block(mbmi) || !skip)
+      if ((!is_inter_block(mbmi) || !skip) &&
+          mbmi->segment_id <= CR_SEGMENT_ID_BOOST2) {
         cr->last_coded_q_map[map_offset] = clamp(
             cm->base_qindex + cr->qindex_delta[mbmi->segment_id], 0, MAXQ);
+      } else if (is_inter_block(mbmi) && skip &&
+                 mbmi->segment_id <= CR_SEGMENT_ID_BOOST2) {
+        cr->last_coded_q_map[map_offset] =
+            VPXMIN(clamp(cm->base_qindex + cr->qindex_delta[mbmi->segment_id],
+                         0, MAXQ),
+                   cr->last_coded_q_map[map_offset]);
+      }
     }
 }
 
