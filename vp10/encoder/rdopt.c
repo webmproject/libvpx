@@ -3705,7 +3705,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP10_COMP *cpi, MACROBLOCK *x,
       this_rate += write_uniform_cost(2 * MAX_ANGLE_DELTAS + 1,
                                       MAX_ANGLE_DELTAS +
                                       mbmi->angle_delta[1]);
-    if (mode == DC_PRED && 0)
+    if (mode == DC_PRED)
       this_rate += vp10_cost_bit(cpi->common.fc->ext_intra_probs[1], 0);
 #else
     if (!super_block_uvrd(cpi, x, &this_rate_tokenonly,
