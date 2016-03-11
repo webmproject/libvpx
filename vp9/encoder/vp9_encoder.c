@@ -3137,7 +3137,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
        "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
         "%6d %6d %5d %5d %5d "
         "%10"PRId64" %10.3lf"
-        "%10lf %8u %10"PRId64" %10d %10d %10d %10d\n",
+        "%10lf %8u %10"PRId64" %10d %10d %10d %10d %10d\n",
         cpi->common.current_video_frame,
         cm->width, cm->height,
         cpi->td.rd_counts.m_search_count,
@@ -3171,7 +3171,8 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         cpi->tot_recode_hits, recon_err, cpi->rc.kf_boost,
         cpi->twopass.kf_zeromotion_pct,
         cpi->twopass.fr_content_type,
-        cm->lf.filter_level);
+        cm->lf.filter_level,
+        cm->seg.aq_av_offset);
   }
   fclose(f);
 
