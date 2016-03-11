@@ -429,13 +429,15 @@ void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
-  int rows = 4 * num_4x4_blocks_high_lookup[bsize];
-  int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+  const int rows = (4 * num_4x4_blocks_high_lookup[bsize]) >>
+      (xd->plane[plane != 0].subsampling_y);
+  const int cols = (4 * num_4x4_blocks_wide_lookup[bsize]) >>
+      (xd->plane[plane != 0].subsampling_x);
   int color_idx, color_ctx, color_order[PALETTE_MAX_SIZE];
   int n = mbmi->palette_mode_info.palette_size[plane != 0];
   int i, j;
-  uint8_t *color_map = xd->plane[plane].color_index_map;
-  const vpx_prob (* prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
+  uint8_t *color_map = xd->plane[plane != 0].color_index_map;
+  const vpx_prob (* const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
       plane ? vp10_default_palette_uv_color_prob :
           vp10_default_palette_y_color_prob;
 

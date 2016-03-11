@@ -383,7 +383,7 @@ vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES][PALETTE_Y_MODE_CONTEXTS]
 };
 
 
-const vpx_prob default_uv_palette_mode_prob[2] = {
+const vpx_prob vp10_default_palette_uv_mode_prob[2] = {
     253, 229
 };
 

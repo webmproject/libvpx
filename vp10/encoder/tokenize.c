@@ -398,13 +398,18 @@ void vp10_tokenize_palette_sb(struct ThreadData *const td,
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  uint8_t *color_map = xd->plane[0].color_index_map;
+  uint8_t *color_map = xd->plane[plane != 0].color_index_map;
   PALETTE_MODE_INFO *pmi = &mbmi->palette_mode_info;
   int n = pmi->palette_size[plane != 0];
   int i, j, k;
   int color_new_idx = -1, color_ctx, color_order[PALETTE_MAX_SIZE];
-  int rows = 4 * num_4x4_blocks_high_lookup[bsize];
-  int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+  const int rows = (4 * num_4x4_blocks_high_lookup[bsize]) >>
+      (xd->plane[plane != 0].subsampling_y);
+  const int cols = (4 * num_4x4_blocks_wide_lookup[bsize]) >>
+      (xd->plane[plane != 0].subsampling_x);
+  const vpx_prob (* const probs)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
+      plane == 0 ? vp10_default_palette_y_color_prob :
+          vp10_default_palette_uv_color_prob;
 
   for (i = 0; i < rows; ++i) {
     for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
@@ -416,9 +421,8 @@ void vp10_tokenize_palette_sb(struct ThreadData *const td,
           break;
         }
       assert(color_new_idx >= 0 && color_new_idx < n);
-
       (*t)->token = color_new_idx;
-      (*t)->context_tree = vp10_default_palette_y_color_prob[n - 2][color_ctx];
+      (*t)->context_tree = probs[n - 2][color_ctx];
       (*t)->skip_eob_node = 0;
       ++(*t);
     }

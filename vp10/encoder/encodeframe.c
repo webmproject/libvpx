@@ -4432,9 +4432,11 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_EXT_INTRA
     if (output_enabled && bsize >= BLOCK_8X8) {
       FRAME_COUNTS *counts = td->counts;
-      if (mbmi->mode == DC_PRED)
+      if (mbmi->mode == DC_PRED &&
+          mbmi->palette_mode_info.palette_size[0] == 0)
         ++counts->ext_intra[0][mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
-      if (mbmi->uv_mode == DC_PRED)
+      if (mbmi->uv_mode == DC_PRED &&
+          mbmi->palette_mode_info.palette_size[1] == 0)
         ++counts->ext_intra[1][mbmi->ext_intra_mode_info.use_ext_intra_mode[1]];
       if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
         int p_angle;
@@ -4448,12 +4450,14 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_EXT_INTRA
 
     if (bsize >= BLOCK_8X8 && output_enabled) {
-      if (mbmi->palette_mode_info.palette_size[0] > 0) {
-        mbmi->palette_mode_info.palette_first_color_idx[0] =
-            xd->plane[0].color_index_map[0];
-        // TODO(huisu): this increases the use of token buffer. Needs stretch
-        // test to verify.
-        vp10_tokenize_palette_sb(td, bsize, 0, t);
+      for (plane = 0; plane <= 1; ++plane) {
+        if (mbmi->palette_mode_info.palette_size[plane] > 0) {
+          mbmi->palette_mode_info.palette_first_color_idx[plane] =
+              xd->plane[plane].color_index_map[0];
+          // TODO(huisu): this increases the use of token buffer. Needs stretch
+          // test to verify.
+          vp10_tokenize_palette_sb(td, bsize, plane, t);
+        }
       }
     }
     vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));

@@ -509,13 +509,11 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
 #endif  // CONFIG_EXT_TX
 
 static void pack_palette_tokens(vpx_writer *w, TOKENEXTRA **tp,
-                                BLOCK_SIZE bsize, int n) {
-  int rows = 4 * num_4x4_blocks_high_lookup[bsize];
-  int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+                                int n, int num) {
   int i;
   TOKENEXTRA *p = *tp;
 
-  for (i = 0; i < rows * cols -1; ++i) {
+  for (i = 0; i < num; ++i) {
     vp10_write_token(w, vp10_palette_color_tree[n - 2], p->context_tree,
                      &palette_color_encodings[n - 2][p->token]);
     ++p;
@@ -842,7 +840,8 @@ static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
 #if !ALLOW_FILTER_INTRA_MODES
   return;
 #endif
-  if (mbmi->mode == DC_PRED) {
+  if (mbmi->mode == DC_PRED &&
+      mbmi->palette_mode_info.palette_size[0] == 0) {
     vpx_write(w, mbmi->ext_intra_mode_info.use_ext_intra_mode[0],
               cm->fc->ext_intra_probs[0]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[0]) {
@@ -850,7 +849,8 @@ static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
       write_uniform(w, FILTER_INTRA_MODES, mode);
     }
   }
-  if (mbmi->uv_mode == DC_PRED) {
+  if (mbmi->uv_mode == DC_PRED &&
+      mbmi->palette_mode_info.palette_size[1] == 0) {
     vpx_write(w, mbmi->ext_intra_mode_info.use_ext_intra_mode[1],
               cm->fc->ext_intra_probs[1]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[1]) {
@@ -878,6 +878,55 @@ static void write_switchable_interp_filter(VP10_COMP *cpi,
                      cm->fc->switchable_interp_prob[ctx],
                      &switchable_interp_encodings[mbmi->interp_filter]);
     ++cpi->interp_filter_selected[0][mbmi->interp_filter];
+  }
+}
+
+static void write_palette_mode_info(const VP10_COMMON *cm,
+                                    const MACROBLOCKD *xd,
+                                    const MODE_INFO *const mi,
+                                    vpx_writer *w) {
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const MODE_INFO *const left_mi = xd->left_mi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
+  const PALETTE_MODE_INFO *const pmi = &mbmi->palette_mode_info;
+  int palette_ctx = 0;
+  int n, i;
+
+  if (mbmi->mode == DC_PRED) {
+    n = pmi->palette_size[0];
+    if (above_mi)
+      palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
+    if (left_mi)
+      palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
+    vpx_write(w, n > 0,
+              vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8][palette_ctx]);
+    if (n > 0) {
+      vp10_write_token(w, vp10_palette_size_tree,
+                       vp10_default_palette_y_size_prob[bsize - BLOCK_8X8],
+                       &palette_size_encodings[n - 2]);
+      for (i = 0; i < n; ++i)
+        vpx_write_literal(w, pmi->palette_colors[i], cm->bit_depth);
+      write_uniform(w, n, pmi->palette_first_color_idx[0]);
+    }
+  }
+
+  if (mbmi->uv_mode == DC_PRED) {
+    n = pmi->palette_size[1];
+    vpx_write(w, n > 0,
+              vp10_default_palette_uv_mode_prob[pmi->palette_size[0] > 0]);
+    if (n > 0) {
+      vp10_write_token(w, vp10_palette_size_tree,
+                       vp10_default_palette_uv_size_prob[bsize - BLOCK_8X8],
+                       &palette_size_encodings[n - 2]);
+      for (i = 0; i < n; ++i) {
+        vpx_write_literal(w, pmi->palette_colors[PALETTE_MAX_SIZE + i],
+                          cm->bit_depth);
+        vpx_write_literal(w, pmi->palette_colors[2 * PALETTE_MAX_SIZE + i],
+                          cm->bit_depth);
+      }
+      write_uniform(w, n, pmi->palette_first_color_idx[1]);
+    }
   }
 }
 
@@ -995,7 +1044,10 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         bsize >= BLOCK_8X8)
       write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
                     MAX_ANGLE_DELTAS + mbmi->angle_delta[1]);
-
+#endif  // CONFIG_EXT_INTRA
+    if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
+      write_palette_mode_info(cm, xd, mi, w);
+#if CONFIG_EXT_INTRA
     if (bsize >= BLOCK_8X8)
       write_ext_intra_mode_info(cm, mbmi, w);
 #endif  // CONFIG_EXT_INTRA
@@ -1263,36 +1315,6 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     }
 }
 
-static void write_palette_mode_info(const VP10_COMMON *cm,
-                                    const MACROBLOCKD *xd,
-                                    const MODE_INFO *const mi,
-                                    vpx_writer *w) {
-  const MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const MODE_INFO *const above_mi = xd->above_mi;
-  const MODE_INFO *const left_mi = xd->left_mi;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
-  const PALETTE_MODE_INFO *pmi = &mbmi->palette_mode_info;
-  int palette_ctx = 0;
-  int n, i;
-
-  n = pmi->palette_size[0];
-  if (above_mi)
-    palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-  if (left_mi)
-    palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-  vpx_write(w, n > 0,
-            vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8][palette_ctx]);
-  if (n > 0) {
-    vp10_write_token(w, vp10_palette_size_tree,
-                     vp10_default_palette_y_size_prob[bsize - BLOCK_8X8],
-                     &palette_size_encodings[n - 2]);
-    for (i = 0; i < n; ++i)
-      vpx_write_literal(w, pmi->palette_colors[i],
-                        cm->bit_depth);
-    write_uniform(w, n, pmi->palette_first_color_idx[0]);
-  }
-}
-
 static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                               MODE_INFO **mi_8x8, vpx_writer *w) {
   const struct segmentation *const seg = &cm->seg;
@@ -1351,9 +1373,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
                   MAX_ANGLE_DELTAS + mbmi->angle_delta[1]);
 #endif  // CONFIG_EXT_INTRA
-
-  if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools &&
-      mbmi->mode == DC_PRED)
+  if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
     write_palette_mode_info(cm, xd, mi, w);
 
   if (!FIXED_TX_TYPE) {
@@ -1428,11 +1448,17 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
                         w);
   }
 
-  if (m->mbmi.palette_mode_info.palette_size[0] > 0) {
-    assert(*tok < tok_end);
-    pack_palette_tokens(w, tok, m->mbmi.sb_type,
-                        m->mbmi.palette_mode_info.palette_size[0]);
-    assert(*tok < tok_end);
+  for (plane = 0; plane <= 1; ++plane) {
+    if (m->mbmi.palette_mode_info.palette_size[plane] > 0) {
+      const int rows = (4 * num_4x4_blocks_high_lookup[m->mbmi.sb_type]) >>
+          (xd->plane[plane].subsampling_y);
+      const int cols = (4 * num_4x4_blocks_wide_lookup[m->mbmi.sb_type]) >>
+          (xd->plane[plane].subsampling_x);
+      assert(*tok < tok_end);
+      pack_palette_tokens(w, tok, m->mbmi.palette_mode_info.palette_size[plane],
+                          rows * cols - 1);
+      assert(*tok < tok_end);
+    }
   }
 
 #if CONFIG_SUPERTX

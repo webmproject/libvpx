@@ -419,30 +419,48 @@ static void read_palette_mode_info(VP10_COMMON *const cm,
                                    vpx_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const MODE_INFO *above_mi = xd->above_mi;
-  const MODE_INFO *left_mi  = xd->left_mi;
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const MODE_INFO *const left_mi  = xd->left_mi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
-  int i, palette_ctx = 0;
+  int i, n, palette_ctx = 0;
+  PALETTE_MODE_INFO *const pmi = &mbmi->palette_mode_info;
 
-  if (above_mi)
-    palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-  if (left_mi)
-    palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-  if (vpx_read(r, vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
-                                                   [palette_ctx])) {
-    int n;
-    PALETTE_MODE_INFO *pmi = &mbmi->palette_mode_info;
-
-    pmi->palette_size[0] =
+  if (mbmi->mode == DC_PRED) {
+    if (above_mi)
+      palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
+    if (left_mi)
+      palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
+    if (vpx_read(r, vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
+                                                     [palette_ctx])) {
+      pmi->palette_size[0] =
         vpx_read_tree(r, vp10_palette_size_tree,
                       vp10_default_palette_y_size_prob[bsize - BLOCK_8X8]) + 2;
-    n = pmi->palette_size[0];
+      n = pmi->palette_size[0];
+      for (i = 0; i < n; ++i)
+        pmi->palette_colors[i] = vpx_read_literal(r, cm->bit_depth);
 
-    for (i = 0; i < n; ++i)
-      pmi->palette_colors[i] = vpx_read_literal(r, cm->bit_depth);
+      xd->plane[0].color_index_map[0] = read_uniform(r, n);
+      assert(xd->plane[0].color_index_map[0] < n);
+    }
+  }
 
-    xd->plane[0].color_index_map[0] = read_uniform(r, n);
-    assert(xd->plane[0].color_index_map[0] < n);
+  if (mbmi->uv_mode == DC_PRED) {
+    if (vpx_read(r,
+                 vp10_default_palette_uv_mode_prob[pmi->palette_size[0] > 0])) {
+      pmi->palette_size[1] =
+          vpx_read_tree(r, vp10_palette_size_tree,
+                        vp10_default_palette_uv_size_prob[bsize - BLOCK_8X8])
+                        + 2;
+      n = pmi->palette_size[1];
+      for (i = 0; i < n; ++i) {
+        pmi->palette_colors[PALETTE_MAX_SIZE + i] =
+            vpx_read_literal(r, cm->bit_depth);
+        pmi->palette_colors[2 * PALETTE_MAX_SIZE + i] =
+            vpx_read_literal(r, cm->bit_depth);
+      }
+      xd->plane[1].color_index_map[0] = read_uniform(r, n);
+      assert(xd->plane[1].color_index_map[0] < n);
+    }
   }
 }
 
@@ -456,7 +474,8 @@ static void read_ext_intra_mode_info(VP10_COMMON *const cm,
 #if !ALLOW_FILTER_INTRA_MODES
   return;
 #endif
-  if (mbmi->mode == DC_PRED) {
+  if (mbmi->mode == DC_PRED &&
+      mbmi->palette_mode_info.palette_size[0] == 0) {
     mbmi->ext_intra_mode_info.use_ext_intra_mode[0] =
         vpx_read(r, cm->fc->ext_intra_probs[0]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[0]) {
@@ -466,7 +485,8 @@ static void read_ext_intra_mode_info(VP10_COMMON *const cm,
     if (counts)
       ++counts->ext_intra[0][mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
   }
-  if (mbmi->uv_mode == DC_PRED) {
+  if (mbmi->uv_mode == DC_PRED &&
+      mbmi->palette_mode_info.palette_size[1] == 0) {
     mbmi->ext_intra_mode_info.use_ext_intra_mode[1] =
         vpx_read(r, cm->fc->ext_intra_probs[1]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[1]) {
@@ -555,8 +575,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
 
   mbmi->palette_mode_info.palette_size[0] = 0;
   mbmi->palette_mode_info.palette_size[1] = 0;
-  if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools &&
-      mbmi->mode == DC_PRED)
+  if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
     read_palette_mode_info(cm, xd, r);
 
   if (!FIXED_TX_TYPE) {
@@ -868,9 +887,10 @@ static void read_intra_block_mode_info(VP10_COMMON *const cm,
     mbmi->angle_delta[1] =
         read_uniform(r, 2 * MAX_ANGLE_DELTAS + 1) - MAX_ANGLE_DELTAS;
 #endif  // CONFIG_EXT_INTRA
-
   mbmi->palette_mode_info.palette_size[0] = 0;
   mbmi->palette_mode_info.palette_size[1] = 0;
+  if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
+    read_palette_mode_info(cm, xd, r);
 #if CONFIG_EXT_INTRA
   mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
@@ -1150,6 +1170,9 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
   int16_t mode_ctx = 0;
   MV_REFERENCE_FRAME ref_frame;
+
+  mbmi->palette_mode_info.palette_size[0] = 0;
+  mbmi->palette_mode_info.palette_size[1] = 0;
 
   read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
   is_compound = has_second_ref(mbmi);

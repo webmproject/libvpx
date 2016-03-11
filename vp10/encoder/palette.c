@@ -93,7 +93,7 @@ int vp10_k_means(const double *data, double *centroids, uint8_t *indices,
                  uint8_t *pre_indices, int n, int k, int dim, int max_itr) {
   int i = 0;
   double pre_dist, this_dist;
-  double pre_centroids[PALETTE_MAX_SIZE];
+  double pre_centroids[2 * PALETTE_MAX_SIZE];
 
   vp10_calc_indices(data, centroids, indices, n, k, dim);
   pre_dist = calc_total_dist(data, centroids, indices, n, k, dim);
