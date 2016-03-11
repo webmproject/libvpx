@@ -19,6 +19,7 @@ DECLARE_ALIGNED(16, static const int16_t, default_scan_4x4[16]) = {
   7, 14, 11, 15,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, mcol_scan_4x4[16]) = {
   0, 4, 8, 12,
   1, 5, 9, 13,
@@ -32,6 +33,7 @@ DECLARE_ALIGNED(16, static const int16_t, mrow_scan_4x4[16]) = {
   8, 9, 10, 11,
   12, 13, 14, 15,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, col_scan_4x4[16]) = {
   0,  4,  8,  1,
@@ -58,6 +60,7 @@ DECLARE_ALIGNED(16, static const int16_t, default_scan_8x8[64]) = {
   46, 39, 61, 54, 47, 62, 55, 63,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, mcol_scan_8x8[64]) = {
   0,   8,  16,  24,  32,  40,  48,  56,
   1,   9,  17,  25,  33,  41,  49,  57,
@@ -79,6 +82,7 @@ DECLARE_ALIGNED(16, static const int16_t, mrow_scan_8x8[64]) = {
   48,  49,  50,  51,  52,  53,  54,  55,
   56,  57,  58,  59,  60,  61,  62,  63,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, col_scan_8x8[64]) = {
   0,  8, 16,  1, 24,  9, 32, 17,
@@ -123,6 +127,7 @@ DECLARE_ALIGNED(16, static const int16_t, default_scan_16x16[256]) = {
   255,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, mcol_scan_16x16[256]) = {
   0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240,
   1, 17, 33, 49, 65, 81, 97, 113, 129, 145, 161, 177, 193, 209, 225, 241,
@@ -169,6 +174,7 @@ DECLARE_ALIGNED(16, static const int16_t, mrow_scan_16x16[256]) = {
   240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252,
   253, 254, 255,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, col_scan_16x16[256]) = {
   0, 16, 32, 48, 1, 64, 17, 80, 33, 96, 49, 2, 65, 112, 18, 81,
@@ -213,6 +219,7 @@ DECLARE_ALIGNED(16, static const int16_t, row_scan_16x16[256]) = {
   255,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, mcol_scan_32x32[1024]) = {
   0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480,
   512, 544, 576, 608, 640, 672, 704, 736, 768, 800, 832, 864, 896, 928, 960,
@@ -407,6 +414,7 @@ DECLARE_ALIGNED(16, static const int16_t, mrow_scan_32x32[1024]) = {
     1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014,
     1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, default_scan_32x32[1024]) = {
   0, 32, 1, 64, 33, 2, 96, 65, 34, 128, 3, 97, 66, 160,
@@ -789,6 +797,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   3, 6, 10, 13, 7, 10, 11, 14, 0, 0,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t,
                 mcol_scan_4x4_neighbors[17 * MAX_NEIGHBORS]) = {
   0, 0, 0, 0, 4, 4, 8, 8, 0, 0, 1, 4, 5, 8, 9, 12, 1, 1, 2, 5, 6, 9, 10, 13,
@@ -800,6 +809,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   0, 0, 0, 0, 1, 1, 2, 2, 0, 0, 1, 4, 2, 5, 3, 6, 4, 4, 5, 8, 6, 9, 7, 10, 8,
   8, 9, 12, 10, 13, 11, 14, 0, 0,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t,
                 col_scan_4x4_neighbors[17 * MAX_NEIGHBORS]) = {
@@ -824,6 +834,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   47, 47, 55, 55, 0, 0,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t,
                 mcol_scan_8x8_neighbors[65 * MAX_NEIGHBORS]) = {
   0, 0, 0, 0, 8, 8, 16, 16, 24, 24, 32, 32, 40, 40, 48, 48, 0, 0, 1, 8, 9,
@@ -845,6 +856,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   41, 48, 42, 49, 43, 50, 44, 51, 45, 52, 46, 53, 47, 54, 48, 48, 49, 56,
   50, 57, 51, 58, 52, 59, 53, 60, 54, 61, 55, 62, 0, 0,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t,
                 row_scan_8x8_neighbors[65 * MAX_NEIGHBORS]) = {
@@ -868,6 +880,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   46, 54, 61, 47, 54, 55, 62, 0, 0,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t,
                 mcol_scan_16x16_neighbors[257 * MAX_NEIGHBORS]) = {
   0, 0, 0, 0, 16, 16, 32, 32, 48, 48, 64, 64, 80, 80, 96, 96,
@@ -975,6 +988,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   253, 239, 254,
   0, 0,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t,
                 col_scan_16x16_neighbors[257 * MAX_NEIGHBORS]) = {
@@ -1087,6 +1101,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   238, 239, 254, 0, 0,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t,
                 mcol_scan_32x32_neighbors[1025 * MAX_NEIGHBORS]) = {
   0, 0, 0, 0, 32, 32, 64, 64, 96, 96, 128, 128, 160, 160, 192, 192,
@@ -1474,6 +1489,7 @@ DECLARE_ALIGNED(16, static const int16_t,
   987, 1018, 988, 1019, 989, 1020, 990, 1021, 991, 1022,
   0, 0,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t,
                 default_scan_32x32_neighbors[1025 * MAX_NEIGHBORS]) = {
@@ -2143,6 +2159,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_default_iscan_4x4[16]) = {
   0, 2, 5, 8, 1, 3, 9, 12, 4, 7, 11, 14, 6, 10, 13, 15,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, vp10_mcol_iscan_4x4[16]) = {
   0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15,
 };
@@ -2150,6 +2167,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_mcol_iscan_4x4[16]) = {
 DECLARE_ALIGNED(16, static const int16_t, vp10_mrow_iscan_4x4[16]) = {
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, vp10_col_iscan_4x4[16]) = {
   0, 3, 7, 11, 1, 5, 9, 12, 2, 6, 10, 14, 4, 8, 13, 15,
@@ -2159,6 +2177,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_row_iscan_4x4[16]) = {
   0, 1, 3, 5, 2, 4, 6, 9, 7, 8, 11, 13, 10, 12, 14, 15,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, vp10_mcol_iscan_8x8[64]) = {
   0, 8, 16, 24, 32, 40, 48, 56, 1, 9, 17, 25, 33, 41, 49, 57, 2, 10,
   18, 26, 34, 42, 50, 58, 3, 11, 19, 27, 35, 43, 51, 59, 4, 12, 20,
@@ -2172,6 +2191,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_mrow_iscan_8x8[64]) = {
   37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
   54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, vp10_col_iscan_8x8[64]) = {
   0, 3, 8, 15, 22, 32, 40, 47, 1, 5, 11, 18, 26, 34, 44, 51,
@@ -2194,6 +2214,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_default_iscan_8x8[64]) = {
   25, 32, 39, 45, 50, 55, 59, 62, 33, 40, 46, 51, 54, 58, 61, 63,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, vp10_mcol_iscan_16x16[256]) = {
   0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240,
   1, 17, 33, 49, 65, 81, 97, 113, 129, 145, 161, 177, 193, 209, 225, 241,
@@ -2240,6 +2261,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_mrow_iscan_16x16[256]) = {
   240, 241, 242, 243, 244, 245, 246, 247,
   248, 249, 250, 251, 252, 253, 254, 255,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, vp10_col_iscan_16x16[256]) = {
   0, 4, 11, 20, 31, 43, 59, 75, 85, 109, 130, 150, 165, 181, 195, 198,
@@ -2300,6 +2322,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_default_iscan_16x16[256]) = {
   249, 253, 255,
 };
 
+#if CONFIG_EXT_TX
 DECLARE_ALIGNED(16, static const int16_t, vp10_mcol_iscan_32x32[1024]) = {
   0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416,
   448, 480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800, 832,
@@ -2497,6 +2520,7 @@ DECLARE_ALIGNED(16, static const int16_t, vp10_mrow_iscan_32x32[1024]) = {
   1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019,
   1020, 1021, 1022, 1023,
 };
+#endif  // CONFIG_EXT_TX
 
 DECLARE_ALIGNED(16, static const int16_t, vp10_default_iscan_32x32[1024]) = {
   0, 2, 5, 10, 17, 25, 38, 47, 62, 83, 101, 121, 145, 170, 193, 204,
