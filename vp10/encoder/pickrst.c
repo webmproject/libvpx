@@ -9,6 +9,7 @@
  */
 
 #include <assert.h>
+#include <float.h>
 #include <limits.h>
 #include <math.h>
 
@@ -27,12 +28,12 @@
 #include "vp10/encoder/picklpf.h"
 #include "vp10/encoder/pickrst.h"
 
-static int try_restoration_frame(const YV12_BUFFER_CONFIG *sd,
-                                 VP10_COMP *const cpi,
-                                 RestorationInfo *rsi,
-                                 int partial_frame) {
+static int64_t try_restoration_frame(const YV12_BUFFER_CONFIG *sd,
+                                     VP10_COMP *const cpi,
+                                     RestorationInfo *rsi,
+                                     int partial_frame) {
   VP10_COMMON *const cm = &cpi->common;
-  int filt_err;
+  int64_t filt_err;
   vp10_loop_restoration_frame(cm->frame_to_show, cm,
                               rsi, 1, partial_frame);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -55,7 +56,8 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
                                   int filter_level, int partial_frame,
                                   double *best_cost_ret) {
   VP10_COMMON *const cm = &cpi->common;
-  int i, restoration_best, err;
+  int i, restoration_best;
+  int64_t err;
   double best_cost;
   double cost;
   const int restoration_level_bits = vp10_restoration_level_bits(&cpi->common);
@@ -400,8 +402,8 @@ static void update_b_sep_sym(double **Mc, double **Hc, double *a, double *b) {
   }
 }
 
-static void wiener_decompose_sep_sym(double *M, double *H,
-                                     double *a, double *b) {
+static int wiener_decompose_sep_sym(double *M, double *H,
+                                    double *a, double *b) {
   static const double init_filt[RESTORATION_WIN] = {
     0.035623, -0.127154,  0.211436,  0.760190,  0.211436, -0.127154,  0.035623,
   };
@@ -424,6 +426,7 @@ static void wiener_decompose_sep_sym(double *M, double *H,
     update_b_sep_sym(Mc, Hc, a, b);
     iter++;
   }
+  return 1;
 }
 
 #define CLIP(x, lo, hi) ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))
@@ -448,7 +451,8 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src,
                                 double *best_cost_ret) {
   VP10_COMMON *const cm = &cpi->common;
   RestorationInfo rsi;
-  int err, bits;
+  int64_t err;
+  int bits;
   double cost_wiener, cost_norestore;
   MACROBLOCK *x = &cpi->td.mb;
   double M[RESTORATION_WIN2];
@@ -485,7 +489,10 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src,
     compute_stats(dgd->y_buffer, src->y_buffer, width, height,
                   dgd_stride, src_stride, M, H);
 
-  wiener_decompose_sep_sym(M, H, vfilterd, hfilterd);
+  if (!wiener_decompose_sep_sym(M, H, vfilterd, hfilterd)) {
+    *best_cost_ret = DBL_MAX;
+    return 0;
+  }
   quantize_sym_filter(vfilterd, vfilter);
   quantize_sym_filter(hfilterd, hfilter);
 
@@ -493,7 +500,7 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src,
   memcpy(rsi.vfilter, vfilter, sizeof(rsi.vfilter));
   memcpy(rsi.hfilter, hfilter, sizeof(rsi.hfilter));
   err = try_restoration_frame(src, cpi, &rsi, partial_frame);
-  bits = 22;
+  bits = WIENER_FILT_BITS;
   cost_wiener = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
 
   vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
@@ -511,10 +518,10 @@ void vp10_pick_filter_restoration(
     const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi, LPF_PICK_METHOD method) {
   VP10_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
-  int wiener_success;
-  double cost_bilateral = 1e12;
-  double cost_wiener = 1e12;
-  double cost_norestore = 1e12;
+  int wiener_success = 0;
+  double cost_bilateral = DBL_MAX;
+  double cost_wiener = DBL_MAX;
+  double cost_norestore = DBL_MAX;
 
   lf->sharpness_level =
       cm->frame_type == KEY_FRAME ? 0 : cpi->oxcf.sharpness;
@@ -577,8 +584,6 @@ void vp10_pick_filter_restoration(
     wiener_success = search_wiener_filter(
         sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE,
         cm->rst_info.vfilter, cm->rst_info.hfilter, &cost_wiener);
-    // printf("Costs %g %g (%d) %g\n",
-    //        cost_norestore, cost_bilateral, lf->filter_level, cost_wiener);
     if (cost_bilateral < cost_wiener) {
       lf->filter_level = blf_filter_level;
       if (cm->rst_info.restoration_level != -1)
@@ -591,5 +596,8 @@ void vp10_pick_filter_restoration(
       else
         cm->rst_info.restoration_type = RESTORE_NONE;
     }
+    // printf("[%d] Costs %g %g (%d) %g (%d)\n", cm->rst_info.restoration_type,
+    //        cost_norestore, cost_bilateral, lf->filter_level, cost_wiener,
+    //        wiener_success);
   }
 }
