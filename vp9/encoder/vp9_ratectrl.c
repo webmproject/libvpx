@@ -2056,7 +2056,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
       rc->high_source_sad = 1;
     else
       rc->high_source_sad = 0;
-    if (avg_sad > 0)
+    if (avg_sad > 0 || cpi->oxcf.rc_mode == VPX_CBR)
       rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR &&
