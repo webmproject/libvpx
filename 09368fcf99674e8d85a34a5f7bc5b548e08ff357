@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b7d7e57d_706ec8d0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 8
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-11T02:44:52Z",
+      "side": 1,
+      "message": "this project is mixed unfortunately, but note the guidance for present tense is adhered to a bit more strictly in other projects:\n\nhttps://git-scm.com/book/ch5-2.html",
+      "revId": "09368fcf99674e8d85a34a5f7bc5b548e08ff357",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
