@@ -5,6 +5,7 @@
 #include "vp10/common/filter.h"
 #include "vp10/common/vp10_convolve.h"
 #include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_ports/mem.h"
 
 using libvpx_test::ACMRandom;
 
@@ -270,4 +271,132 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#define CONVOLVE_SPEED_TEST 0
+#if CONVOLVE_SPEED_TEST
+#define highbd_convolve_speed(func, block_size, frame_size)                  \
+  TEST(VP10ConvolveTest, func##_speed_##block_size##_##frame_size) {         \
+    ACMRandom rnd(ACMRandom::DeterministicSeed());                           \
+    INTERP_FILTER interp_filter = EIGHTTAP;                                  \
+    InterpFilterParams filter_params =                                       \
+        vp10_get_interp_filter_params(interp_filter);                        \
+    ptrdiff_t filter_size = filter_params.tap;                               \
+    int filter_center = filter_size / 2 - 1;                                 \
+    DECLARE_ALIGNED(16, uint16_t,                                            \
+                    src[(frame_size + 7) * (frame_size + 7)]) = {0};         \
+    int src_stride = frame_size + 7;                                         \
+    DECLARE_ALIGNED(16, uint16_t, dst[frame_size * frame_size]) = {0};       \
+    int dst_stride = frame_size;                                             \
+    int x_step_q4 = 16;                                                      \
+    int y_step_q4 = 16;                                                      \
+    int subpel_x_q4 = 8;                                                     \
+    int subpel_y_q4 = 6;                                                     \
+    int bd = 10;                                                             \
+                                                                             \
+    int w = block_size;                                                      \
+    int h = block_size;                                                      \
+                                                                             \
+    const int16_t* filter_x =                                                \
+        vp10_get_interp_filter_kernel(filter_params, subpel_x_q4);           \
+    const int16_t* filter_y =                                                \
+        vp10_get_interp_filter_kernel(filter_params, subpel_y_q4);           \
+                                                                             \
+    for (int i = 0; i < src_stride * src_stride; i++) {                      \
+      src[i] = rnd.Rand16() % (1 << bd);                                     \
+    }                                                                        \
+                                                                             \
+    int offset = filter_center * src_stride + filter_center;                 \
+    int row_offset = 0;                                                      \
+    int col_offset = 0;                                                      \
+    for (int i = 0; i < 100000; i++) {                                       \
+      int src_total_offset = offset + col_offset * src_stride + row_offset;  \
+      int dst_total_offset = col_offset * dst_stride + row_offset;           \
+      func(CONVERT_TO_BYTEPTR(src + src_total_offset), src_stride,           \
+           CONVERT_TO_BYTEPTR(dst + dst_total_offset), dst_stride, filter_x, \
+           x_step_q4, filter_y, y_step_q4, w, h, bd);                        \
+      if (offset + w + w < frame_size) {                                     \
+        row_offset += w;                                                     \
+      } else {                                                               \
+        row_offset = 0;                                                      \
+        col_offset += h;                                                     \
+      }                                                                      \
+      if (col_offset + h >= frame_size) {                                    \
+        col_offset = 0;                                                      \
+      }                                                                      \
+    }                                                                        \
+  }
+
+#define lowbd_convolve_speed(func, block_size, frame_size)                  \
+  TEST(VP10ConvolveTest, func##_speed_l_##block_size##_##frame_size) {      \
+    ACMRandom rnd(ACMRandom::DeterministicSeed());                          \
+    INTERP_FILTER interp_filter = EIGHTTAP;                                 \
+    InterpFilterParams filter_params =                                      \
+        vp10_get_interp_filter_params(interp_filter);                       \
+    ptrdiff_t filter_size = filter_params.tap;                              \
+    int filter_center = filter_size / 2 - 1;                                \
+    DECLARE_ALIGNED(16, uint8_t, src[(frame_size + 7) * (frame_size + 7)]); \
+    int src_stride = frame_size + 7;                                        \
+    DECLARE_ALIGNED(16, uint8_t, dst[frame_size * frame_size]);             \
+    int dst_stride = frame_size;                                            \
+    int x_step_q4 = 16;                                                     \
+    int y_step_q4 = 16;                                                     \
+    int subpel_x_q4 = 8;                                                    \
+    int subpel_y_q4 = 6;                                                    \
+    int bd = 8;                                                             \
+                                                                            \
+    int w = block_size;                                                     \
+    int h = block_size;                                                     \
+                                                                            \
+    const int16_t* filter_x =                                               \
+        vp10_get_interp_filter_kernel(filter_params, subpel_x_q4);          \
+    const int16_t* filter_y =                                               \
+        vp10_get_interp_filter_kernel(filter_params, subpel_y_q4);          \
+                                                                            \
+    for (int i = 0; i < src_stride * src_stride; i++) {                     \
+      src[i] = rnd.Rand16() % (1 << bd);                                    \
+    }                                                                       \
+                                                                            \
+    int offset = filter_center * src_stride + filter_center;                \
+    int row_offset = 0;                                                     \
+    int col_offset = 0;                                                     \
+    for (int i = 0; i < 100000; i++) {                                      \
+      func(src + offset, src_stride, dst, dst_stride, filter_x, x_step_q4,  \
+           filter_y, y_step_q4, w, h);                                      \
+      if (offset + w + w < frame_size) {                                    \
+        row_offset += w;                                                    \
+      } else {                                                              \
+        row_offset = 0;                                                     \
+        col_offset += h;                                                    \
+      }                                                                     \
+      if (col_offset + h >= frame_size) {                                   \
+        col_offset = 0;                                                     \
+      }                                                                     \
+    }                                                                       \
+  }
+
+// This experiment shows that when frame size is 64x64
+// vpx_highbd_convolve8_sse2 and vpx_convolve8_sse2's speed are similar.
+// However when frame size becomes 1024x1024
+// vpx_highbd_convolve8_sse2 is around 50% slower than vpx_convolve8_sse2
+// we think the bottleneck is from memory IO
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 8, 64);
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 16, 64);
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 32, 64);
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 64, 64);
+
+lowbd_convolve_speed(vpx_convolve8_sse2, 8, 64);
+lowbd_convolve_speed(vpx_convolve8_sse2, 16, 64);
+lowbd_convolve_speed(vpx_convolve8_sse2, 32, 64);
+lowbd_convolve_speed(vpx_convolve8_sse2, 64, 64);
+
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 8, 1024);
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 16, 1024);
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 32, 1024);
+highbd_convolve_speed(vpx_highbd_convolve8_sse2, 64, 1024);
+
+lowbd_convolve_speed(vpx_convolve8_sse2, 8, 1024);
+lowbd_convolve_speed(vpx_convolve8_sse2, 16, 1024);
+lowbd_convolve_speed(vpx_convolve8_sse2, 32, 1024);
+lowbd_convolve_speed(vpx_convolve8_sse2, 64, 1024);
+#endif  // CONVOLVE_SPEED_TEST
 }  // namespace
