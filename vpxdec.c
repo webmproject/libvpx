@@ -93,6 +93,14 @@ static const arg_def_t md5arg = ARG_DEF(
 static const arg_def_t outbitdeptharg = ARG_DEF(
     NULL, "output-bit-depth", 1, "Output bit-depth for decoded frames");
 #endif
+#if CONFIG_EXT_TILE
+static const arg_def_t tiler = ARG_DEF(
+    NULL, "tile-row", 1, "Row index of tile to decode "
+                          "(-1 for all rows)");
+static const arg_def_t tilec = ARG_DEF(
+    NULL, "tile-column", 1, "Column index of tile to decode "
+                            "(-1 for all columns)");
+#endif  // CONFIG_EXT_TILE
 
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &rawvideo, &noblitarg,
@@ -102,6 +110,9 @@ static const arg_def_t *all_args[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
   &outbitdeptharg,
 #endif
+#if CONFIG_EXT_TILE
+  &tiler, &tilec,
+#endif  // CONFIG_EXT_TILE
   NULL
 };
 
@@ -564,6 +575,10 @@ static int main_loop(int argc, const char **argv_) {
 #if CONFIG_VP9_HIGHBITDEPTH
   unsigned int            output_bit_depth = 0;
 #endif
+#if CONFIG_EXT_TILE
+  int                     tile_row = -1;
+  int                     tile_col = -1;
+#endif  // CONFIG_EXT_TILE
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
   int                     vp8_dbg_color_ref_frame = 0;
@@ -659,6 +674,12 @@ static int main_loop(int argc, const char **argv_) {
       output_bit_depth = arg_parse_uint(&arg);
     }
 #endif
+#if CONFIG_EXT_TILE
+    else if (arg_match(&arg, &tiler, argi))
+      tile_row = arg_parse_int(&arg);
+    else if (arg_match(&arg, &tilec, argi))
+      tile_col = arg_parse_int(&arg);
+#endif  // CONFIG_EXT_TILE
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
       postproc = 1;
@@ -796,6 +817,11 @@ static int main_loop(int argc, const char **argv_) {
 
   if (!interface)
     interface = get_vpx_decoder_by_index(0);
+
+#if CONFIG_EXT_TILE
+  cfg.tile_row = tile_row;
+  cfg.tile_col = tile_col;
+#endif  // CONFIG_EXT_TILE
 
   dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
               (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0) |
@@ -1015,6 +1041,11 @@ static int main_loop(int argc, const char **argv_) {
         img = img_shifted;
       }
 #endif
+
+#if CONFIG_EXT_TILE
+      vpx_input_ctx.width = img->d_w;
+      vpx_input_ctx.height = img->d_h;
+#endif  // CONFIG_EXT_TILE
 
       if (single_file) {
         if (use_y4m) {

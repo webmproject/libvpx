@@ -57,8 +57,13 @@ static struct vp10_extracfg default_extra_cfg = {
   0,                          // noise_sensitivity
   0,                          // sharpness
   0,                          // static_thresh
-  6,                          // tile_columns
+#if CONFIG_EXT_TILE
+  64,                         // tile_columns
+  64,                         // tile_rows
+#else
+  0,                          // tile_columns
   0,                          // tile_rows
+#endif  // CONFIG_EXT_TILE
   7,                          // arnr_max_frames
   5,                          // arnr_strength
   0,                          // min_gf_interval; 0 -> default decision
@@ -207,8 +212,16 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, enable_auto_alt_ref, 0, 2);
   RANGE_CHECK(extra_cfg, cpu_used, -8, 8);
   RANGE_CHECK_HI(extra_cfg, noise_sensitivity, 6);
+#if CONFIG_EXT_TILE
+  // TODO(any): Waring. If CONFIG_EXT_TILE is true, tile_columns really
+  // means tile_width, and tile_rows really means tile_hight. The interface
+  // should be sanitized.
+  RANGE_CHECK(extra_cfg, tile_columns, 1, 64);
+  RANGE_CHECK(extra_cfg, tile_rows, 1, 64);
+#else
   RANGE_CHECK(extra_cfg, tile_columns, 0, 6);
   RANGE_CHECK(extra_cfg, tile_rows, 0, 2);
+#endif  // CONFIG_EXT_TILE
   RANGE_CHECK_HI(extra_cfg, sharpness, 7);
   RANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(extra_cfg, arnr_strength, 6);

@@ -305,7 +305,7 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
   int no_pred_cost;
   int t_pred_cost = INT_MAX;
 
-  int i, tile_col, mi_row, mi_col;
+  int i, tile_col, tile_row, mi_row, mi_col;
 
   unsigned (*temporal_predictor_count)[2] = cm->counts.seg.pred;
   unsigned *no_pred_segcounts = cm->counts.seg.tree_total;
@@ -319,22 +319,27 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
 
   // First of all generate stats regarding how well the last segment map
   // predicts this one
-  for (tile_col = 0; tile_col < 1 << cm->log2_tile_cols; tile_col++) {
-    TileInfo tile;
-    MODE_INFO **mi_ptr;
-    vp10_tile_init(&tile, cm, 0, tile_col);
-
-    mi_ptr = cm->mi_grid_visible + tile.mi_col_start;
-    for (mi_row = 0; mi_row < cm->mi_rows;
-         mi_row += 8, mi_ptr += 8 * cm->mi_stride) {
-      MODE_INFO **mi = mi_ptr;
-      for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
-           mi_col += 8, mi += 8)
-        count_segs_sb(cm, xd, &tile, mi, no_pred_segcounts,
-                      temporal_predictor_count, t_unpred_seg_counts,
-                      mi_row, mi_col, BLOCK_64X64);
+  for (tile_row = 0; tile_row < cm->tile_rows; tile_row++) {
+    TileInfo tile_info;
+    vp10_tile_set_row(&tile_info, cm, tile_row);
+    for (tile_col = 0; tile_col < cm->tile_cols; tile_col++) {
+      MODE_INFO **mi_ptr;
+      vp10_tile_set_col(&tile_info, cm, tile_col);
+      mi_ptr = cm->mi_grid_visible + tile_info.mi_row_start * cm->mi_stride +
+                 tile_info.mi_col_start;
+      for (mi_row = tile_info.mi_row_start; mi_row < tile_info.mi_row_end;
+           mi_row += 8, mi_ptr += 8 * cm->mi_stride) {
+        MODE_INFO **mi = mi_ptr;
+        for (mi_col = tile_info.mi_col_start; mi_col < tile_info.mi_col_end;
+             mi_col += 8, mi += 8) {
+          count_segs_sb(cm, xd, &tile_info, mi, no_pred_segcounts,
+                        temporal_predictor_count, t_unpred_seg_counts,
+                        mi_row, mi_col, BLOCK_64X64);
+        }
+      }
     }
   }
+
 
   // Work out probability tree for coding segments without prediction
   // and the cost.

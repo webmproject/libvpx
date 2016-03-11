@@ -131,28 +131,32 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
   }
 
   if (cm->above_context_alloc_cols < cm->mi_cols) {
+    // TODO(geza.lore): These are bigger than they need to be.
+    // cm->tile_width would be enough but it complicates indexing a
+    // little elsewhere.
+    const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
     int i;
+
     for (i = 0 ; i < MAX_MB_PLANE ; i++) {
-    vpx_free(cm->above_context[i]);
+      vpx_free(cm->above_context[i]);
       cm->above_context[i] = (ENTROPY_CONTEXT *)vpx_calloc(
-          2 * mi_cols_aligned_to_sb(cm->mi_cols),
-          sizeof(*cm->above_context[0]));
+          2 * aligned_mi_cols, sizeof(*cm->above_context[0]));
       if (!cm->above_context[i]) goto fail;
     }
 
     vpx_free(cm->above_seg_context);
     cm->above_seg_context = (PARTITION_CONTEXT *)vpx_calloc(
-        mi_cols_aligned_to_sb(cm->mi_cols), sizeof(*cm->above_seg_context));
+        aligned_mi_cols, sizeof(*cm->above_seg_context));
     if (!cm->above_seg_context) goto fail;
 
 #if CONFIG_VAR_TX
     vpx_free(cm->above_txfm_context);
     cm->above_txfm_context = (TXFM_CONTEXT *)vpx_calloc(
-        mi_cols_aligned_to_sb(cm->mi_cols), sizeof(*cm->above_txfm_context));
+        aligned_mi_cols, sizeof(*cm->above_txfm_context));
     if (!cm->above_txfm_context) goto fail;
 #endif
 
-    cm->above_context_alloc_cols = cm->mi_cols;
+    cm->above_context_alloc_cols = aligned_mi_cols;
   }
 
   return 0;

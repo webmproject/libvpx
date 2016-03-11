@@ -172,7 +172,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   // Decoder may allocate more threads than number of tiles based on user's
   // input.
-  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_cols = cm->tile_cols;
   const int num_workers = VPXMIN(nworkers, tile_cols);
   int i;
 

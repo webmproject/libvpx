@@ -308,8 +308,12 @@ typedef struct VP10Common {
 
   int error_resilient_mode;
 
+#if !CONFIG_EXT_TILE
   int log2_tile_cols, log2_tile_rows;
-  int tile_sz_mag;
+#endif  // !CONFIG_EXT_TILE
+  int tile_cols, tile_rows;
+  int tile_width, tile_height;
+
   int byte_alignment;
   int skip_loop_filter;
 
@@ -436,7 +440,7 @@ static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
   const int above_idx = mi_col * 2;
-  const int left_idx = (mi_row * 2) & 15;
+  const int left_idx = (mi_row * 2) & 15;  // FIXME: Mask should be CU_SIZE*2-1
   int i;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblockd_plane *const pd = &xd->plane[i];
@@ -460,7 +464,11 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->mb_to_right_edge  = ((mi_cols - bw - mi_col) * MI_SIZE) * 8;
 
   // Are edges available for intra prediction?
+#if CONFIG_EXT_TILE
+  xd->up_available    = (mi_row > tile->mi_row_start);
+#else
   xd->up_available    = (mi_row != 0);
+#endif  // CONFIG_EXT_TILE
   xd->left_available  = (mi_col > tile->mi_col_start);
   if (xd->up_available) {
     xd->above_mi = xd->mi[-xd->mi_stride];
@@ -586,11 +594,18 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
 static INLINE void vp10_zero_above_context(VP10_COMMON *const cm,
                              int mi_col_start, int mi_col_end) {
   const int width = mi_col_end - mi_col_start;
-  int i;
 
-  for (i = 0 ; i < MAX_MB_PLANE ; i++)
-    vp10_zero_array(cm->above_context[i] + 2 * mi_col_start, 2 * width);
+  const int offset_y = 2 * mi_col_start;
+  const int width_y = 2 * width;
+  const int offset_uv = offset_y >> cm->subsampling_x;
+  const int width_uv = width_y >> cm->subsampling_x;
+
+  vp10_zero_array(cm->above_context[0] + offset_y, width_y);
+  vp10_zero_array(cm->above_context[1] + offset_uv, width_uv);
+  vp10_zero_array(cm->above_context[2] + offset_uv, width_uv);
+
   vp10_zero_array(cm->above_seg_context + mi_col_start, width);
+
 #if CONFIG_VAR_TX
   vp10_zero_array(cm->above_txfm_context + mi_col_start, width);
 #endif  // CONFIG_VAR_TX

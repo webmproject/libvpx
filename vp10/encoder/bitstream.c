@@ -533,10 +533,10 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
 }
 #endif  // CONFIG_EXT_TX
 
-static void pack_palette_tokens(vpx_writer *w, TOKENEXTRA **tp,
+static void pack_palette_tokens(vpx_writer *w, const TOKENEXTRA **tp,
                                 int n, int num) {
   int i;
-  TOKENEXTRA *p = *tp;
+  const TOKENEXTRA *p = *tp;
 
   for (i = 0; i < num; ++i) {
     vp10_write_token(w, vp10_palette_color_tree[n - 2], p->context_tree,
@@ -575,9 +575,9 @@ static void update_supertx_probs(VP10_COMMON *cm, vpx_writer *w) {
 
 #if !CONFIG_ANS
 static void pack_mb_tokens(vpx_writer *w,
-                           TOKENEXTRA **tp, const TOKENEXTRA *const stop,
+                           const TOKENEXTRA **tp, const TOKENEXTRA *const stop,
                            vpx_bit_depth_t bit_depth, const TX_SIZE tx) {
-  TOKENEXTRA *p = *tp;
+  const TOKENEXTRA *p = *tp;
 #if CONFIG_VAR_TX
   int count = 0;
   const int seg_eob = 16 << (tx << 1);
@@ -663,11 +663,11 @@ static void pack_mb_tokens(vpx_writer *w,
 // coder.
 static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
                                const rans_dec_lut token_tab[COEFF_PROB_MODELS],
-                               TOKENEXTRA **tp,
+                               const TOKENEXTRA **tp,
                                const TOKENEXTRA *const stop,
                                vpx_bit_depth_t bit_depth,
                                const TX_SIZE tx) {
-  TOKENEXTRA *p = *tp;
+  const TOKENEXTRA *p = *tp;
 #if CONFIG_VAR_TX
   int count = 0;
   const int seg_eob = 16 << (tx << 1);
@@ -743,7 +743,8 @@ static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
 
 #if CONFIG_VAR_TX
 static void pack_txb_tokens(vpx_writer *w,
-                           TOKENEXTRA **tp, const TOKENEXTRA *const tok_end,
+                           const TOKENEXTRA **tp,
+                           const TOKENEXTRA *const tok_end,
                            MACROBLOCKD *xd, MB_MODE_INFO *mbmi, int plane,
                            BLOCK_SIZE plane_bsize,
                            vpx_bit_depth_t bit_depth,
@@ -1483,7 +1484,8 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_ANS
                           struct BufAnsCoder *ans,
 #endif  // CONFIG_ANS
-                          TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
+                          const TOKENEXTRA **tok,
+                          const TOKENEXTRA *const tok_end,
 #if CONFIG_SUPERTX
                           int supertx_enabled,
 #endif
@@ -1645,12 +1647,14 @@ static void write_partition(const VP10_COMMON *const cm,
   write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col, bsize)
 #endif  // CONFIG_ANS && CONFIG_SUPERTX
 
-static void write_modes_sb(VP10_COMP *cpi, const TileInfo *const tile,
-                           vpx_writer *w,
+static void write_modes_sb(VP10_COMP *const cpi,
+                           const TileInfo *const tile,
+                           vpx_writer *const w,
 #if CONFIG_ANS
                            struct BufAnsCoder *ans,
 #endif  // CONFIG_ANS
-                           TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
+                           const TOKENEXTRA **tok,
+                           const TOKENEXTRA *const tok_end,
 #if CONFIG_SUPERTX
                            int supertx_enabled,
 #endif
@@ -1866,22 +1870,31 @@ static void write_modes_sb(VP10_COMP *cpi, const TileInfo *const tile,
 #endif  // CONFIG_EXT_PARTITION_TYPES
 }
 
-static void write_modes(VP10_COMP *cpi, const TileInfo *const tile,
-                        vpx_writer *w,
+static void write_modes(VP10_COMP *const cpi,
+                        const TileInfo *const tile,
+                        vpx_writer *const w,
 #if CONFIG_ANS
                         struct BufAnsCoder *ans,
 #endif  // CONFIG_ANS
-                        TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
+                        const TOKENEXTRA **tok,
+                        const TOKENEXTRA *const tok_end) {
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
+  const int mi_row_start = tile->mi_row_start;
+  const int mi_row_end = tile->mi_row_end;
+  const int mi_col_start = tile->mi_col_start;
+  const int mi_col_end = tile->mi_col_end;
   int mi_row, mi_col;
 
-  for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
-       mi_row += MI_BLOCK_SIZE) {
+  vp10_zero_above_context(cm, mi_col_start, mi_col_end);
+
+  for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MI_BLOCK_SIZE) {
     vp10_zero_left_context(xd);
-    for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
-         mi_col += MI_BLOCK_SIZE)
-      write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, 0, mi_row, mi_col,
-                             BLOCK_64X64);
+
+    for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MI_BLOCK_SIZE) {
+      write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, 0,
+                             mi_row, mi_col, BLOCK_64X64);
+    }
   }
 }
 
@@ -2569,8 +2582,22 @@ static void fix_interp_filter(VP10_COMMON *cm, FRAME_COUNTS *counts) {
   }
 }
 
-static void write_tile_info(const VP10_COMMON *const cm,
+static void write_tile_info(VP10_COMMON *const cm,
                             struct vpx_write_bit_buffer *wb) {
+#if CONFIG_EXT_TILE
+  // TODO(geza.lore): Dependent on CU_SIZE
+  const int tile_width  =
+            mi_cols_aligned_to_sb(cm->tile_width) >> MI_BLOCK_SIZE_LOG2;
+  const int tile_height =
+            mi_cols_aligned_to_sb(cm->tile_height) >> MI_BLOCK_SIZE_LOG2;
+
+  assert(tile_width > 0 && tile_width <= 64);
+  assert(tile_height > 0 && tile_height <= 64);
+
+  // Write the tile sizes
+  vpx_wb_write_literal(wb, tile_width - 1, 6);
+  vpx_wb_write_literal(wb, tile_height - 1, 6);
+#else
   int min_log2_tile_cols, max_log2_tile_cols, ones;
   vp10_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
@@ -2586,6 +2613,7 @@ static void write_tile_info(const VP10_COMMON *const cm,
   vpx_wb_write_bit(wb, cm->log2_tile_rows != 0);
   if (cm->log2_tile_rows != 0)
     vpx_wb_write_bit(wb, cm->log2_tile_rows != 1);
+#endif  // CONFIG_EXT_TILE
 }
 
 static int get_refresh_mask(VP10_COMP *cpi) {
@@ -2624,8 +2652,67 @@ static int get_refresh_mask(VP10_COMP *cpi) {
   }
 }
 
-static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
-                           unsigned int *max_tile_sz) {
+#if CONFIG_EXT_TILE
+static INLINE int find_identical_tile(
+    const int tile_row, const int tile_col,
+    TileBufferEnc (*const tile_buffers)[1024]) {
+  const MV32 candidate_offset[1] = {{1, 0}};
+  const uint8_t *const cur_tile_data =
+      tile_buffers[tile_row][tile_col].data + 4;
+  const unsigned int cur_tile_size = tile_buffers[tile_row][tile_col].size;
+
+  int i;
+
+  if (tile_row == 0)
+    return 0;
+
+  // (TODO: yunqingwang) For now, only above tile is checked and used.
+  // More candidates such as left tile can be added later.
+  for (i = 0; i < 1; i++) {
+    int row_offset = candidate_offset[0].row;
+    int col_offset = candidate_offset[0].col;
+    int row = tile_row - row_offset;
+    int col = tile_col - col_offset;
+    uint8_t tile_hdr;
+    const uint8_t *tile_data;
+    TileBufferEnc *candidate;
+
+    if (row < 0 || col < 0)
+      continue;
+
+    tile_hdr = *(tile_buffers[row][col].data);
+
+    // Read out tcm bit
+    if ((tile_hdr >> 7) == 1) {
+      // The candidate is a copy tile itself
+      row_offset += tile_hdr & 0x7f;
+      row = tile_row - row_offset;
+    }
+
+    candidate = &tile_buffers[row][col];
+
+    if (row_offset >= 128 || candidate->size != cur_tile_size)
+      continue;
+
+    tile_data = candidate->data + 4;
+
+    if (memcmp(tile_data, cur_tile_data, cur_tile_size) != 0)
+      continue;
+
+    // Identical tile found
+    assert(row_offset > 0);
+    return row_offset;
+  }
+
+  // No identical tile found
+  return 0;
+}
+#endif  // CONFIG_EXT_TILE
+
+static uint32_t write_tiles(VP10_COMP *const cpi,
+                           uint8_t *const dst,
+                           unsigned int *max_tile_size,
+                           unsigned int *max_tile_col_size) {
   VP10_COMMON *const cm = &cpi->common;
   vpx_writer mode_bc;
 #if CONFIG_ANS
@@ -2633,69 +2720,167 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
   struct BufAnsCoder buffered_ans;
 #endif  // CONFIG_ANS
   int tile_row, tile_col;
-  TOKENEXTRA *tok_end;
+  TOKENEXTRA *(*const tok_buffers)[MAX_TILE_COLS] = cpi->tile_tok;
+  TileBufferEnc (*const tile_buffers)[MAX_TILE_COLS] = cpi->tile_buffers;
   size_t total_size = 0;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
-  unsigned int max_tile = 0;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
+#if CONFIG_EXT_TILE
+  const int have_tiles = tile_cols * tile_rows > 1;
+#endif  // COFIG_EXT_TILE
   const int ans_window_size = get_token_alloc(cm->mb_rows, cm->mb_cols) * 3;
   struct buffered_ans_symbol *uco_ans_buf =
       malloc(ans_window_size * sizeof(*uco_ans_buf));
   assert(uco_ans_buf);
 
-  vp10_zero_above_context(cm, 0, mi_cols_aligned_to_sb(cm->mi_cols));
+  *max_tile_size = 0;
+  *max_tile_col_size = 0;
 
-  for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-    for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-      int tile_idx = tile_row * tile_cols + tile_col;
-      int put_tile_size = tile_col < tile_cols - 1 || tile_row < tile_rows - 1;
-      uint8_t *const mode_data_start =
-          data_ptr + total_size + (put_tile_size ? 4 : 0);
-      int token_section_size;
-      TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
+  // All tile size fields are output on 4 bytes. A call to remux_tiles will
+  // later compact the data if smaller headers are adequate.
 
-      tok_end = cpi->tile_tok[tile_row][tile_col] +
-          cpi->tok_count[tile_row][tile_col];
+#if CONFIG_EXT_TILE
+  for (tile_col = 0; tile_col < tile_cols; tile_col++) {
+    TileInfo tile_info;
+    const int is_last_col = (tile_col == tile_cols - 1);
+    const size_t col_offset = total_size;
 
-      vpx_start_encode(&mode_bc, mode_data_start);
+    vp10_tile_set_col(&tile_info, cm, tile_col);
+
+    // The last column does not have a column header
+    if (!is_last_col)
+      total_size += 4;
+
+    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
+      TileBufferEnc *const buf =  &tile_buffers[tile_row][tile_col];
+      unsigned int tile_size;
+      const TOKENEXTRA *tok = tok_buffers[tile_row][tile_col];
+      const TOKENEXTRA *tok_end = tok + cpi->tok_count[tile_row][tile_col];
+
+      vp10_tile_set_row(&tile_info, cm, tile_row);
+
+      buf->data = dst + total_size;
+
+      // Is CONFIG_EXT_TILE = 1, every tile in the row has a header,
+      // even for the last one, unless no tiling is used at all.
+      if (have_tiles) {
+        total_size += 4;
+        vpx_start_encode(&mode_bc, buf->data + 4);
+      } else {
+        vpx_start_encode(&mode_bc, buf->data);
+      }
 
 #if !CONFIG_ANS
-      (void) token_section_size;
-      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &mode_bc, &tok,
-                  tok_end);
+      write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
       vpx_stop_encode(&mode_bc);
-      if (put_tile_size) {
-        unsigned int tile_sz;
-
-        // size of this tile
-        assert(mode_bc.pos > 0);
-        tile_sz = mode_bc.pos - 1;
-        mem_put_le32(data_ptr + total_size, tile_sz);
-        max_tile = max_tile > tile_sz ? max_tile : tile_sz;
-        total_size += 4;
-      }
-      total_size += mode_bc.pos;
+      tile_size = mode_bc.pos;
 #else
       buf_ans_write_init(&buffered_ans, uco_ans_buf, ans_window_size);
-      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &mode_bc,
-                  &buffered_ans, &tok, tok_end);
+      write_modes(cpi, &tile_info, &mode_bc, &buffered_ans, &tok, tok_end);
       assert(tok == tok_end);
       vpx_stop_encode(&mode_bc);
-      ans_write_init(&token_ans, mode_data_start + mode_bc.pos);
+      tile_size = mode_bc.pos;
+
+      ans_write_init(&token_ans, dst + total_size + tile_size);
       buf_ans_flush(&buffered_ans, &token_ans);
-      token_section_size = ans_write_end(&token_ans);
-      if (put_tile_size) {
-        // size of this tile
-        mem_put_be32(data_ptr + total_size,
-                     4 + mode_bc.pos + token_section_size);
-        total_size += 4;
-      }
-      total_size += mode_bc.pos + token_section_size;
+      tile_size += ans_write_end(&token_ans);
 #endif  // !CONFIG_ANS
+
+      buf->size = tile_size;
+
+      // Record the maximum tile size we see, so we can compact headers later.
+      *max_tile_size = VPXMAX(*max_tile_size, tile_size);
+
+      if (have_tiles) {
+        // tile header: size of this tile, or copy offset
+        uint32_t  tile_header = tile_size;
+
+        // Check if this tile is a copy tile.
+        // Very low chances to have copy tiles on the key frames, so don't
+        // search on key frames to reduce unnecessary search.
+        if (cm->frame_type != KEY_FRAME) {
+          const int idendical_tile_offset =
+              find_identical_tile(tile_row, tile_col, tile_buffers);
+
+          if (idendical_tile_offset > 0) {
+            tile_size = 0;
+            tile_header = idendical_tile_offset | 0x80;
+            tile_header <<= 24;
+          }
+        }
+
+        mem_put_le32(buf->data, tile_header);
+      }
+
+      total_size += tile_size;
+    }
+
+    if (!is_last_col) {
+      size_t col_size = total_size - col_offset - 4;
+      mem_put_le32(dst + col_offset, col_size);
+
+      // If it is not final packing, record the maximum tile column size we see,
+      // otherwise, check if the tile size is out of the range.
+      *max_tile_col_size = VPXMAX(*max_tile_col_size, col_size);
     }
   }
-  *max_tile_sz = max_tile;
+#else
+  for (tile_row = 0; tile_row < tile_rows; tile_row++) {
+    TileInfo tile_info;
+    const int is_last_row = (tile_row == tile_rows - 1);
+
+    vp10_tile_set_row(&tile_info, cm, tile_row);
+
+    for (tile_col = 0; tile_col < tile_cols; tile_col++) {
+      TileBufferEnc *const buf = &tile_buffers[tile_row][tile_col];
+      const int is_last_col = (tile_col == tile_cols - 1);
+      const int is_last_tile = is_last_col && is_last_row;
+      unsigned int tile_size;
+      const TOKENEXTRA *tok = tok_buffers[tile_row][tile_col];
+      const TOKENEXTRA *tok_end = tok + cpi->tok_count[tile_row][tile_col];
+
+      vp10_tile_set_col(&tile_info, cm, tile_col);
+
+      buf->data = dst + total_size;
+
+      // The last tile does not have a header.
+      if (!is_last_tile)
+        total_size += 4;
+
+      vpx_start_encode(&mode_bc, dst + total_size);
+
+#if !CONFIG_ANS
+      write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
+      assert(tok == tok_end);
+      vpx_stop_encode(&mode_bc);
+      tile_size = mode_bc.pos;
+#else
+      buf_ans_write_init(&buffered_ans, uco_ans_buf, ans_window_size);
+      write_modes(cpi, &tile_info, &mode_bc, &buffered_ans, &tok, tok_end);
+      assert(tok == tok_end);
+      vpx_stop_encode(&mode_bc);
+      tile_size = mode_bc.pos;
+
+      ans_write_init(&token_ans, dst + total_size + tile_size);
+      buf_ans_flush(&buffered_ans, &token_ans);
+      tile_size += ans_write_end(&token_ans);
+#endif  // !CONFIG_ANS
+
+      assert(tile_size > 0);
+
+      buf->size = tile_size;
+
+      if (!is_last_tile) {
+        *max_tile_size = VPXMAX(*max_tile_size, tile_size);
+        // size of this tile
+        mem_put_le32(buf->data, tile_size);
+      }
+
+      total_size += tile_size;
+    }
+  }
+#endif  // CONFIG_EXT_TILE
 
 #if CONFIG_ANS
   free(uco_ans_buf);
@@ -2894,7 +3079,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   write_tile_info(cm, wb);
 }
 
-static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
+static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   VP10_COMMON *const cm = &cpi->common;
 #if CONFIG_SUPERTX
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
@@ -3042,92 +3227,214 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
   return header_bc.pos;
 }
 
-static int remux_tiles(uint8_t *dest, const int sz,
-                       const int n_tiles, const int mag) {
-  int rpos = 0, wpos = 0, n;
+static int choose_size_bytes(uint32_t size, int spare_msbs) {
+  // Choose the number of bytes required to represent size, without
+  // using the 'spare_msbs' number of most significant bits.
 
-  for (n = 0; n < n_tiles; n++) {
-    int tile_sz;
+  // Make sure we will fit in 4 bytes to start with..
+  if (spare_msbs > 0 && size >> (32 - spare_msbs) != 0)
+    return -1;
 
-    if (n == n_tiles - 1) {
-      tile_sz = sz - rpos;
-    } else {
-      tile_sz = mem_get_le32(&dest[rpos]) + 1;
-      rpos += 4;
-      switch (mag) {
-        case 0:
-          dest[wpos] = tile_sz - 1;
-          break;
-        case 1:
-          mem_put_le16(&dest[wpos], tile_sz - 1);
-          break;
-        case 2:
-          mem_put_le24(&dest[wpos], tile_sz - 1);
-          break;
-        case 3:  // remuxing should only happen if mag < 3
-        default:
-          assert("Invalid value for tile size magnitude" && 0);
-      }
-      wpos += mag + 1;
-    }
+  // Normalise to 32 bits
+  size <<= spare_msbs;
 
-    memmove(&dest[wpos], &dest[rpos], tile_sz);
-    wpos += tile_sz;
-    rpos += tile_sz;
-  }
-
-  assert(rpos > wpos);
-  assert(rpos == sz);
-
-  return wpos;
+  if (size >> 24 != 0)
+    return 4;
+  else if (size >> 16 != 0)
+    return 3;
+  else if (size >> 8 != 0)
+    return 2;
+  else
+    return 1;
 }
 
-void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dest, size_t *size) {
-  uint8_t *data = dest;
-  size_t first_part_size, uncompressed_hdr_size, data_sz;
+static void mem_put_varsize(uint8_t *const dst, const int sz, const int val) {
+  switch (sz) {
+    case 1:
+      dst[0] = (uint8_t)(val & 0xff);
+      break;
+    case 2:
+      mem_put_le16(dst, val);
+      break;
+    case 3:
+      mem_put_le24(dst, val);
+      break;
+    case 4:
+      mem_put_le32(dst, val);
+      break;
+    default:
+      assert("Invalid size" && 0);
+      break;
+  }
+}
+
+static int remux_tiles(const VP10_COMMON *const cm,
+                       uint8_t *dst,
+                       const uint32_t data_size,
+                       const uint32_t max_tile_size,
+                       const uint32_t max_tile_col_size,
+                       int *const tile_size_bytes,
+                       int *const tile_col_size_bytes) {
+  // Choose the tile size bytes (tsb) and tile column size bytes (tcsb)
+#if CONFIG_EXT_TILE
+  // The top bit in the tile size field indicates tile copy mode, so we
+  // have 1 less bit to code the tile size
+  const int tsb = choose_size_bytes(max_tile_size, 1);
+  const int tcsb = choose_size_bytes(max_tile_col_size, 0);
+#else
+  const int tsb = choose_size_bytes(max_tile_size, 0);
+  const int tcsb = 4;  // This is ignored
+  (void) max_tile_col_size;
+#endif  // CONFIG_EXT_TILE
+
+  assert(tsb > 0);
+  assert(tcsb > 0);
+
+  *tile_size_bytes = tsb;
+  *tile_col_size_bytes = tcsb;
+
+  if (tsb == 4 && tcsb == 4) {
+    return data_size;
+  } else {
+    uint32_t wpos = 0;
+    uint32_t rpos = 0;
+
+#if CONFIG_EXT_TILE
+    int tile_row;
+    int tile_col;
+
+    for (tile_col = 0 ; tile_col < cm->tile_cols ; tile_col++) {
+      // All but the last column has a column header
+      if (tile_col < cm->tile_cols - 1) {
+        uint32_t tile_col_size = mem_get_le32(dst + rpos);
+        rpos += 4;
+
+        // Adjust the tile column size by the number of bytes removed
+        // from the tile size fields.
+        tile_col_size -= (4-tsb) * cm->tile_rows;
+
+        mem_put_varsize(dst + wpos, tcsb, tile_col_size);
+        wpos += tcsb;
+      }
+
+      for (tile_row = 0 ; tile_row < cm->tile_rows ; tile_row++) {
+        // All, including the last row has a header
+        uint32_t tile_header = mem_get_le32(dst + rpos);
+        rpos += 4;
+
+        // If this is a copy tile, we need to shift the MSB to the
+        // top bit of the new width, and there is no data to copy.
+        if (tile_header >> 31 != 0) {
+          if (tsb < 4)
+            tile_header >>= 32 - 8 * tsb;
+          mem_put_varsize(dst + wpos, tsb, tile_header);
+          wpos += tsb;
+        } else {
+          mem_put_varsize(dst + wpos, tsb, tile_header);
+          wpos += tsb;
+
+          memmove(dst + wpos, dst + rpos, tile_header);
+          rpos += tile_header;
+          wpos += tile_header;
+        }
+      }
+    }
+#else
+    const int n_tiles = cm->tile_cols * cm->tile_rows;
+    int n;
+
+    for (n = 0; n < n_tiles; n++) {
+      int tile_size;
+
+      if (n == n_tiles - 1) {
+        tile_size = data_size - rpos;
+      } else {
+        tile_size = mem_get_le32(dst + rpos);
+        rpos += 4;
+        mem_put_varsize(dst + wpos, tsb, tile_size);
+        wpos += tsb;
+      }
+
+      memmove(dst + wpos, dst + rpos, tile_size);
+
+      rpos += tile_size;
+      wpos += tile_size;
+    }
+#endif  // CONFIG_EXT_TILE
+
+    assert(rpos > wpos);
+    assert(rpos == data_size);
+
+    return wpos;
+  }
+}
+
+void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dst, size_t *size) {
+  uint8_t *data = dst;
+  uint32_t compressed_header_size;
+  uint32_t uncompressed_header_size;
+  uint32_t data_size;
   struct vpx_write_bit_buffer wb = {data, 0};
   struct vpx_write_bit_buffer saved_wb;
-  unsigned int max_tile;
+  unsigned int max_tile_size;
+  unsigned int max_tile_col_size;
+  int tile_size_bytes;
+  int tile_col_size_bytes;
+
   VP10_COMMON *const cm = &cpi->common;
-  const int n_log2_tiles = cm->log2_tile_rows + cm->log2_tile_cols;
-  const int have_tiles = n_log2_tiles > 0;
+  const int have_tiles = cm->tile_cols * cm->tile_rows > 1;
 
+  // Write the uncompressed header
   write_uncompressed_header(cpi, &wb);
-  saved_wb = wb;
-  // don't know in advance first part. size
-  vpx_wb_write_literal(&wb, 0, 16 + have_tiles * 2);
 
-  uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
-  data += uncompressed_hdr_size;
+  // We do not know these in advance. Output placeholder bit.
+  saved_wb = wb;
+  // Write tile size magnitudes
+  if (have_tiles) {
+    // Note that the last item in the uncompressed header is the data
+    // describing tile configuration.
+#if CONFIG_EXT_TILE
+    // Number of bytes in tile column size - 1
+    vpx_wb_write_literal(&wb, 0, 2);
+#endif  // CONFIG_EXT_TILE
+    // Number of bytes in tile size - 1
+    vpx_wb_write_literal(&wb, 0, 2);
+  }
+  // Size of compressed header
+  vpx_wb_write_literal(&wb, 0, 16);
+
+  uncompressed_header_size = vpx_wb_bytes_written(&wb);
+  data += uncompressed_header_size;
 
   vpx_clear_system_state();
 
-  first_part_size = write_compressed_header(cpi, data);
-  data += first_part_size;
+  // Write the compressed header
+  compressed_header_size = write_compressed_header(cpi, data);
+  data += compressed_header_size;
 
-  data_sz = encode_tiles(cpi, data, &max_tile);
-  if (max_tile > 0) {
-    int mag;
-    unsigned int mask;
+  // Write the encoded tile data
+  data_size = write_tiles(cpi, data, &max_tile_size, &max_tile_col_size);
 
-    // Choose the (tile size) magnitude
-    for (mag = 0, mask = 0xff; mag < 4; mag++) {
-      if (max_tile <= mask)
-        break;
-      mask <<= 8;
-      mask |= 0xff;
-    }
-    assert(n_log2_tiles > 0);
-    vpx_wb_write_literal(&saved_wb, mag, 2);
-    if (mag < 3)
-      data_sz = remux_tiles(data, (int)data_sz, 1 << n_log2_tiles, mag);
-  } else {
-    assert(n_log2_tiles == 0);
+  if (have_tiles) {
+    data_size = remux_tiles(cm, data, data_size,
+                            max_tile_size, max_tile_col_size,
+                            &tile_size_bytes, &tile_col_size_bytes);
   }
-  data += data_sz;
 
-  // TODO(jbb): Figure out what to do if first_part_size > 16 bits.
-  vpx_wb_write_literal(&saved_wb, (int)first_part_size, 16);
+  data += data_size;
 
-  *size = data - dest;
+  // Now fill in the gaps in the uncompressed header.
+  if (have_tiles) {
+#if CONFIG_EXT_TILE
+    assert(tile_col_size_bytes >= 1 && tile_col_size_bytes <= 4);
+    vpx_wb_write_literal(&saved_wb, tile_col_size_bytes - 1, 2);
+#endif  // CONFIG_EXT_TILE
+    assert(tile_size_bytes >= 1 && tile_size_bytes <= 4);
+    vpx_wb_write_literal(&saved_wb, tile_size_bytes - 1, 2);
+  }
+  // TODO(jbb): Figure out what to do if compressed_header_size > 16 bits.
+  assert(compressed_header_size <= 0xffff);
+  vpx_wb_write_literal(&saved_wb, compressed_header_size, 16);
+
+  *size = data - dst;
 }

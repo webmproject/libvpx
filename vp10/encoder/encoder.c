@@ -788,13 +788,38 @@ void vp10_new_framerate(VP10_COMP *cpi, double framerate) {
 
 static void set_tile_limits(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
+#if CONFIG_EXT_TILE
+  cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 64) << MI_BLOCK_SIZE_LOG2;
+  cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 64) << MI_BLOCK_SIZE_LOG2;
 
+  cm->tile_width  = VPXMIN(cm->tile_width, cm->mi_cols);
+  cm->tile_height = VPXMIN(cm->tile_height, cm->mi_rows);
+
+  // Get the number of tiles
+  cm->tile_cols = 1;
+  while (cm->tile_cols * cm->tile_width < cm->mi_cols)
+    ++cm->tile_cols;
+
+  cm->tile_rows = 1;
+  while (cm->tile_rows * cm->tile_height < cm->mi_rows)
+    ++cm->tile_rows;
+#else
   int min_log2_tile_cols, max_log2_tile_cols;
   vp10_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
   cm->log2_tile_cols = clamp(cpi->oxcf.tile_columns,
                              min_log2_tile_cols, max_log2_tile_cols);
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
+
+  cm->tile_cols = 1 << cm->log2_tile_cols;
+  cm->tile_rows = 1 << cm->log2_tile_rows;
+
+  cm->tile_width = (mi_cols_aligned_to_sb(cm->mi_cols) >> cm->log2_tile_cols);
+  cm->tile_height = (mi_cols_aligned_to_sb(cm->mi_rows) >> cm->log2_tile_rows);
+  // round to integer multiples of 8
+  cm->tile_width  = mi_cols_aligned_to_sb(cm->tile_width);
+  cm->tile_height = mi_cols_aligned_to_sb(cm->tile_height);
+#endif  // CONFIG_EXT_TILE
 }
 
 static void update_frame_size(VP10_COMP *cpi) {
@@ -3843,7 +3868,9 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
     // to recode.
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
       save_coding_context(cpi);
+
       vp10_pack_bitstream(cpi, dest, size);
+
       rc->projected_frame_size = (int)(*size) << 3;
       restore_coding_context(cpi);
 

@@ -37,8 +37,8 @@ static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
 static int enc_worker_hook(EncWorkerData *const thread_data, void *unused) {
   VP10_COMP *const cpi = thread_data->cpi;
   const VP10_COMMON *const cm = &cpi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
   int t;
 
   (void) unused;
@@ -56,7 +56,7 @@ static int enc_worker_hook(EncWorkerData *const thread_data, void *unused) {
 
 void vp10_encode_tiles_mt(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_cols = cm->tile_cols;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   const int num_workers = VPXMIN(cpi->oxcf.max_threads, tile_cols);
   int i;
@@ -65,24 +65,23 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
 
   // Only run once to create threads and allocate thread data.
   if (cpi->num_workers == 0) {
-    int allocated_workers = num_workers;
-
     CHECK_MEM_ERROR(cm, cpi->workers,
-                    vpx_malloc(allocated_workers * sizeof(*cpi->workers)));
+                    vpx_malloc(num_workers * sizeof(*cpi->workers)));
 
     CHECK_MEM_ERROR(cm, cpi->tile_thr_data,
-                    vpx_calloc(allocated_workers,
+                    vpx_calloc(num_workers,
                     sizeof(*cpi->tile_thr_data)));
 
-    for (i = 0; i < allocated_workers; i++) {
+    for (i = 0; i < num_workers; i++) {
       VPxWorker *const worker = &cpi->workers[i];
-      EncWorkerData *thread_data = &cpi->tile_thr_data[i];
+      EncWorkerData *const thread_data = &cpi->tile_thr_data[i];
 
       ++cpi->num_workers;
       winterface->init(worker);
 
-      if (i < allocated_workers - 1) {
-        thread_data->cpi = cpi;
+      thread_data->cpi = cpi;
+
+      if (i < num_workers - 1) {
 
         // Allocate thread data.
         CHECK_MEM_ERROR(cm, thread_data->td,
@@ -104,7 +103,6 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
                              "Tile encoder thread creation failed");
       } else {
         // Main thread acts as a worker and uses the thread data in cpi.
-        thread_data->cpi = cpi;
         thread_data->td = &cpi->td;
       }
 

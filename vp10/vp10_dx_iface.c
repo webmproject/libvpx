@@ -23,6 +23,7 @@
 
 #include "vp10/common/alloccommon.h"
 #include "vp10/common/frame_buffers.h"
+#include "vp10/common/enums.h"
 
 #include "vp10/decoder/decoder.h"
 #include "vp10/decoder/decodeframe.h"
@@ -499,6 +500,11 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
     frame_worker_data->pbi->decrypt_cb = ctx->decrypt_cb;
     frame_worker_data->pbi->decrypt_state = ctx->decrypt_state;
 
+#if CONFIG_EXT_TILE
+    frame_worker_data->pbi->dec_tile_row = ctx->cfg.tile_row;
+    frame_worker_data->pbi->dec_tile_col = ctx->cfg.tile_col;
+#endif  // CONFIG_EXT_TILE
+
     worker->had_error = 0;
     winterface->execute(worker);
 
@@ -775,6 +781,39 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
           if (ctx->need_resync)
             return NULL;
           yuvconfig2image(&ctx->img, &sd, frame_worker_data->user_priv);
+
+
+#if CONFIG_EXT_TILE
+          if (frame_worker_data->pbi->dec_tile_row >= 0) {
+            const int tile_row = VPXMIN(frame_worker_data->pbi->dec_tile_row,
+                                        cm->tile_rows - 1);
+            const int mi_row = tile_row * cm->tile_height;
+            const int ssy = ctx->img.y_chroma_shift;
+            int plane;
+            ctx->img.planes[0] += mi_row * MI_SIZE * ctx->img.stride[0];
+            for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+              ctx->img.planes[plane] += mi_row * (MI_SIZE >> ssy) *
+                                        ctx->img.stride[plane];
+            }
+            ctx->img.d_h = VPXMIN(cm->tile_height, cm->mi_rows - mi_row) *
+                           MI_SIZE;
+          }
+
+          if (frame_worker_data->pbi->dec_tile_col >= 0) {
+            const int tile_col = VPXMIN(frame_worker_data->pbi->dec_tile_col,
+                                        cm->tile_cols - 1);
+            const int mi_col = tile_col * cm->tile_width;
+            const int ssx = ctx->img.x_chroma_shift;
+            int plane;
+            ctx->img.planes[0] += mi_col * MI_SIZE;
+            for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+              ctx->img.planes[plane] += mi_col * (MI_SIZE >> ssx);
+            }
+            ctx->img.d_w = VPXMIN(cm->tile_width, cm->mi_cols - mi_col) *
+                           MI_SIZE;
+          }
+#endif  // CONFIG_EXT_TILE
+
           ctx->img.fb_priv = frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
           img = &ctx->img;
           return img;

@@ -4144,12 +4144,13 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
                              int mi_row,
                              TOKENEXTRA **tp) {
   VP10_COMMON *const cm = &cpi->common;
-  TileInfo *const tile_info = &tile_data->tile_info;
+  const TileInfo *const tile_info = &tile_data->tile_info;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   SPEED_FEATURES *const sf = &cpi->sf;
   int mi_col;
 
+  // Initialize the left context for the new SB row
   vp10_zero_left_context(xd);
 
   // Code each SB in the row
@@ -4269,14 +4270,11 @@ static void init_encode_frame_mb_context(VP10_COMP *cpi) {
   MACROBLOCK *const x = &cpi->td.mb;
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-  const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
 
   // Copy data over into macro block data structures.
   vp10_setup_src_planes(x, cpi->Source, 0, 0);
 
   vp10_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
-
-  vp10_zero_above_context(cm, 0, aligned_mi_cols);
 }
 
 static int check_dual_ref_flags(VP10_COMP *cpi) {
@@ -4338,11 +4336,11 @@ static TX_MODE select_tx_mode(const VP10_COMP *cpi, MACROBLOCKD *const xd) {
 
 void vp10_init_tile_data(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
   int tile_col, tile_row;
   TOKENEXTRA *pre_tok = cpi->tile_tok[0][0];
-  int tile_tok = 0;
+  unsigned int tile_tok = 0;
 
   if (cpi->tile_data == NULL || cpi->allocated_tiles < tile_cols * tile_rows) {
     if (cpi->tile_data != NULL)
@@ -4353,7 +4351,7 @@ void vp10_init_tile_data(VP10_COMP *cpi) {
 
     for (tile_row = 0; tile_row < tile_rows; ++tile_row)
       for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-        TileDataEnc *tile_data =
+        TileDataEnc *const tile_data =
             &cpi->tile_data[tile_row * tile_cols + tile_col];
         int i, j;
         for (i = 0; i < BLOCK_SIZES; ++i) {
@@ -4367,7 +4365,7 @@ void vp10_init_tile_data(VP10_COMP *cpi) {
 
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      TileInfo *tile_info =
+      TileInfo *const tile_info =
           &cpi->tile_data[tile_row * tile_cols + tile_col].tile_info;
       vp10_tile_init(tile_info, cm, tile_row, tile_col);
 
@@ -4381,12 +4379,13 @@ void vp10_init_tile_data(VP10_COMP *cpi) {
 void vp10_encode_tile(VP10_COMP *cpi, ThreadData *td,
                      int tile_row, int tile_col) {
   VP10_COMMON *const cm = &cpi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  TileDataEnc *this_tile =
-      &cpi->tile_data[tile_row * tile_cols + tile_col];
+  TileDataEnc *const this_tile =
+      &cpi->tile_data[tile_row * cm->tile_cols + tile_col];
   const TileInfo * const tile_info = &this_tile->tile_info;
   TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
   int mi_row;
+
+  vp10_zero_above_context(cm, tile_info->mi_col_start, tile_info->mi_col_end);
 
   // Set up pointers to per thread motion search counters.
   td->mb.m_search_count_ptr = &td->rd_counts.m_search_count;
@@ -4396,22 +4395,20 @@ void vp10_encode_tile(VP10_COMP *cpi, ThreadData *td,
        mi_row += MI_BLOCK_SIZE) {
     encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
   }
+
   cpi->tok_count[tile_row][tile_col] =
       (unsigned int)(tok - cpi->tile_tok[tile_row][tile_col]);
-  assert(tok - cpi->tile_tok[tile_row][tile_col] <=
-      allocated_tokens(*tile_info));
+  assert(cpi->tok_count[tile_row][tile_col] <= allocated_tokens(*tile_info));
 }
 
 static void encode_tiles(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
   int tile_col, tile_row;
 
   vp10_init_tile_data(cpi);
 
-  for (tile_row = 0; tile_row < tile_rows; ++tile_row)
-    for (tile_col = 0; tile_col < tile_cols; ++tile_col)
+  for (tile_row = 0; tile_row < cm->tile_rows; ++tile_row)
+    for (tile_col = 0; tile_col < cm->tile_cols; ++tile_col)
       vp10_encode_tile(cpi, &cpi->td, tile_row, tile_col);
 }
 
@@ -4497,7 +4494,10 @@ static void encode_frame_internal(VP10_COMP *cpi) {
 #endif
 
     // If allowed, encoding tiles in parallel with one thread handling one tile.
-    if (VPXMIN(cpi->oxcf.max_threads, 1 << cm->log2_tile_cols) > 1)
+    // TODO(geza.lore): The multi-threaded encoder is not safe with more than
+    // 1 tile rows, as it uses the single above_context et al arrays from
+    // cpi->common
+    if (VPXMIN(cpi->oxcf.max_threads, cm->tile_cols) > 1 && cm->tile_rows == 1)
       vp10_encode_tiles_mt(cpi);
     else
       encode_tiles(cpi);

@@ -211,10 +211,18 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
 static INLINE int is_inside(const TileInfo *const tile,
                             int mi_col, int mi_row, int mi_rows,
                             const POSITION *mi_pos) {
+#if CONFIG_EXT_TILE
+  (void) mi_rows;
+  return !(mi_row + mi_pos->row < tile->mi_row_start ||
+           mi_col + mi_pos->col < tile->mi_col_start ||
+           mi_row + mi_pos->row >= tile->mi_row_end ||
+           mi_col + mi_pos->col >= tile->mi_col_end);
+#else
   return !(mi_row + mi_pos->row < 0 ||
            mi_col + mi_pos->col < tile->mi_col_start ||
            mi_row + mi_pos->row >= mi_rows ||
            mi_col + mi_pos->col >= tile->mi_col_end);
+#endif  // CONFIG_EXT_TILE
 }
 
 static INLINE void lower_mv_precision(MV *mv, int allow_hp) {

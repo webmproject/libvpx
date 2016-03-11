@@ -199,5 +199,12 @@ void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
     lf->filter_level = vp10_search_filter_level(
         sd, cpi, method == LPF_PICK_FROM_SUBIMAGE, NULL);
   }
+
+#if CONFIG_EXT_TILE
+  // TODO(any): 0 loopfilter level is only necessary if individual tile
+  // decoding is required. We need to communicate this requirement to this
+  // code and force loop filter level 0 only if required.
+  lf->filter_level = 0;
+#endif  // CONFIG_EXT_TILE
 }
 #endif  // !CONFIG_LOOP_RESTORATION

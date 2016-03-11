@@ -57,6 +57,12 @@ typedef struct TileWorkerData {
   struct vpx_internal_error_info error_info;
 } TileWorkerData;
 
+typedef struct TileBufferDec {
+  const uint8_t *data;
+  size_t size;
+  int col;  // only used with multi-threaded decoding
+} TileBufferDec;
+
 typedef struct VP10Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
@@ -78,7 +84,9 @@ typedef struct VP10Decoder {
   int num_tile_workers;
 
   TileData *tile_data;
-  int total_tiles;
+  int allocated_tiles;
+
+  TileBufferDec tile_buffers[MAX_TILE_ROWS][MAX_TILE_COLS];
 
   VP9LfSync lf_row_sync;
 
@@ -89,6 +97,12 @@ typedef struct VP10Decoder {
   int inv_tile_order;
   int need_resync;  // wait for key/intra-only frame.
   int hold_ref_buf;  // hold the reference buffer.
+
+  int tile_size_bytes;
+#if CONFIG_EXT_TILE
+  int tile_col_size_bytes;
+  int dec_tile_row, dec_tile_col;
+#endif  // CONFIG_EXT_TILE
 } VP10Decoder;
 
 int vp10_receive_compressed_data(struct VP10Decoder *pbi,

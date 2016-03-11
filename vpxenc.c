@@ -1577,7 +1577,8 @@ static void initialize_encoder(struct stream_state *stream,
 #if CONFIG_DECODERS
   if (global->test_decode != TEST_DECODE_OFF) {
     const VpxInterface *decoder = get_vpx_decoder_by_name(global->codec->name);
-    vpx_codec_dec_init(&stream->decoder, decoder->codec_interface(), NULL, 0);
+    vpx_codec_dec_cfg_t cfg = { 0, 0, 0, -1, -1 };
+    vpx_codec_dec_init(&stream->decoder, decoder->codec_interface(), &cfg, 0);
   }
 #endif
 }
