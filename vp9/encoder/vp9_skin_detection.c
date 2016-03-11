@@ -15,7 +15,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_skin_detection.h"
 
-#define MODEL_MODE 0
+#define MODEL_MODE 1
 
 // Fixed-point skin color model parameters.
 static const int skin_mean[5][2] = {
