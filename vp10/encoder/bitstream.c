@@ -69,7 +69,7 @@ static const struct vp10_token inter_mode_encodings[INTER_MODES] =
 #if CONFIG_EXT_INTER
 static const struct vp10_token inter_compound_mode_encodings
                                [INTER_COMPOUND_MODES] = {
-  {2, 2}, {24, 5}, {25, 5}, {52, 6}, {53, 6},
+  {2, 2}, {50, 6}, {51, 6}, {24, 5}, {52, 6}, {53, 6},
   {54, 6}, {55, 6}, {0, 1}, {7, 3}
 };
 #endif  // CONFIG_EXT_INTER

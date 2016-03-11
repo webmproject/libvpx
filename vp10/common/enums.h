@@ -250,15 +250,16 @@ typedef enum {
 #define NEAREST_NEARESTMV 15
 #define NEAREST_NEARMV    16
 #define NEAR_NEARESTMV    17
-#define NEAREST_NEWMV     18
-#define NEW_NEARESTMV     19
-#define NEAR_NEWMV        20
-#define NEW_NEARMV        21
-#define ZERO_ZEROMV       22
-#define NEW_NEWMV         23
-#define MB_MODE_COUNT     24
+#define NEAR_NEARMV       18
+#define NEAREST_NEWMV     19
+#define NEW_NEARESTMV     20
+#define NEAR_NEWMV        21
+#define NEW_NEARMV        22
+#define ZERO_ZEROMV       23
+#define NEW_NEWMV         24
+#define MB_MODE_COUNT     25
 #else
-#define MB_MODE_COUNT 14
+#define MB_MODE_COUNT     14
 #endif  // CONFIG_EXT_INTER
 typedef uint8_t PREDICTION_MODE;
 

@@ -811,6 +811,8 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEAREST_NEARGA] += 1200;
   rd->thresh_mult[THR_COMP_NEAR_NEARESTLA] += 1200;
   rd->thresh_mult[THR_COMP_NEAR_NEARESTGA] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARLA] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARGA] += 1200;
   rd->thresh_mult[THR_COMP_NEAREST_NEWLA] += 1500;
   rd->thresh_mult[THR_COMP_NEAREST_NEWGA] += 1500;
   rd->thresh_mult[THR_COMP_NEW_NEARESTLA] += 1500;
@@ -828,6 +830,7 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEAREST_NEARESTL2A] += 1000;
   rd->thresh_mult[THR_COMP_NEAREST_NEARL2A] += 1200;
   rd->thresh_mult[THR_COMP_NEAR_NEARESTL2A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARL2A] += 1200;
   rd->thresh_mult[THR_COMP_NEAREST_NEWL2A] += 1500;
   rd->thresh_mult[THR_COMP_NEW_NEARESTL2A] += 1500;
   rd->thresh_mult[THR_COMP_NEAR_NEWL2A] += 1700;
@@ -838,6 +841,7 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEAREST_NEARESTL3A] += 1000;
   rd->thresh_mult[THR_COMP_NEAREST_NEARL3A] += 1200;
   rd->thresh_mult[THR_COMP_NEAR_NEARESTL3A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARL3A] += 1200;
   rd->thresh_mult[THR_COMP_NEAREST_NEWL3A] += 1500;
   rd->thresh_mult[THR_COMP_NEW_NEARESTL3A] += 1500;
   rd->thresh_mult[THR_COMP_NEAR_NEWL3A] += 1700;
@@ -848,13 +852,13 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEAREST_NEARESTL4A] += 1000;
   rd->thresh_mult[THR_COMP_NEAREST_NEARL4A] += 1200;
   rd->thresh_mult[THR_COMP_NEAR_NEARESTL4A] += 1200;
+  rd->thresh_mult[THR_COMP_NEAR_NEARL4A] += 1200;
   rd->thresh_mult[THR_COMP_NEAREST_NEWL4A] += 1500;
   rd->thresh_mult[THR_COMP_NEW_NEARESTL4A] += 1500;
   rd->thresh_mult[THR_COMP_NEAR_NEWL4A] += 1700;
   rd->thresh_mult[THR_COMP_NEW_NEARL4A] += 1700;
   rd->thresh_mult[THR_COMP_NEW_NEWL4A] += 2000;
   rd->thresh_mult[THR_COMP_ZERO_ZEROL4A] += 2500;
-
 #endif  // CONFIG_EXT_REFS
 #else
   rd->thresh_mult[THR_COMP_NEARESTLA] += 1000;

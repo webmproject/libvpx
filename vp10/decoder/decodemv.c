@@ -1083,6 +1083,12 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
       mv[1].as_int = nearest_mv[1].as_int;
       break;
     }
+    case NEAR_NEARMV: {
+      assert(is_compound);
+      mv[0].as_int = near_mv[0].as_int;
+      mv[1].as_int = near_mv[1].as_int;
+      break;
+    }
     case NEW_NEARESTMV: {
       FRAME_COUNTS *counts = xd->counts;
 #if CONFIG_REF_MV
@@ -1331,8 +1337,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #if CONFIG_EXT_INTER
       if (mbmi->mode == NEAREST_NEARESTMV) {
 #endif  // CONFIG_EXT_INTER
-      nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
-      nearestmv[1] = xd->ref_mv_stack[ref_frame_type][0].comp_mv;
+        nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
+        nearestmv[1] = xd->ref_mv_stack[ref_frame_type][0].comp_mv;
+        lower_mv_precision(&nearestmv[0].as_mv, allow_hp);
+        lower_mv_precision(&nearestmv[1].as_mv, allow_hp);
 #if CONFIG_EXT_INTER
       } else if (mbmi->mode == NEAREST_NEWMV || mbmi->mode == NEAREST_NEARMV) {
         nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
@@ -1346,12 +1354,16 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 
 #if CONFIG_EXT_INTER
     if (xd->ref_mv_count[ref_frame_type] > 1) {
-      if (mbmi->mode == NEAR_NEWMV || mbmi->mode == NEAR_NEARESTMV) {
+      if (mbmi->mode == NEAR_NEWMV ||
+          mbmi->mode == NEAR_NEARESTMV ||
+          mbmi->mode == NEAR_NEARMV) {
         nearmv[0] = xd->ref_mv_stack[ref_frame_type][1].this_mv;
         lower_mv_precision(&nearmv[0].as_mv, allow_hp);
       }
 
-      if (mbmi->mode == NEW_NEARMV || mbmi->mode == NEAREST_NEARMV) {
+      if (mbmi->mode == NEW_NEARMV ||
+          mbmi->mode == NEAREST_NEARMV ||
+          mbmi->mode == NEAR_NEARMV) {
         nearmv[1] = xd->ref_mv_stack[ref_frame_type][1].comp_mv;
         lower_mv_precision(&nearmv[1].as_mv, allow_hp);
       }
