@@ -16,6 +16,24 @@
       "revId": "7ea59de69c15554931851c12447d380ed58a83c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7d7e57d_9eb42d1a",
+        "filename": "vp10/encoder/pickrst.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-03-11T21:22:45Z",
+      "side": 1,
+      "message": "It is not implemented yet. But the function may return 0 if the estimation was not successful, for instance if the matrices are singular.",
+      "parentUuid": "b7d7e57d_7ee7b92a",
+      "revId": "7ea59de69c15554931851c12447d380ed58a83c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
