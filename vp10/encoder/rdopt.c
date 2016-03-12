@@ -9556,16 +9556,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
         if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
             mbmi->interp_filter != EIGHTTAP_REGULAR) {
           mbmi->interp_filter = EIGHTTAP_REGULAR;
-          tmp_rd = rd_pick_best_sub8x8_mode(cpi, x,
-                   &x->mbmi_ext->ref_mvs[ref_frame][0],
-                   second_ref, best_yrd, &rate, &rate_y,
-                   &distortion, &skippable, &total_sse,
-                   (int) this_rd_thresh, seg_mvs,
-#if CONFIG_EXT_INTER
-                   compound_seg_newmvs,
-#endif  // CONFIG_EXT_INTER
-                   bsi, 0,
-                   mi_row, mi_col);
         }
 #endif  // CONFIG_EXT_INTERP
         if (tmp_rd == INT64_MAX)
