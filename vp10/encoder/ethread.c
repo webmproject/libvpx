@@ -19,9 +19,6 @@ static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
   for (i = 0; i < REFERENCE_MODES; i++)
     td->rd_counts.comp_pred_diff[i] += td_t->rd_counts.comp_pred_diff[i];
 
-  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
-    td->rd_counts.filter_diff[i] += td_t->rd_counts.filter_diff[i];
-
   for (i = 0; i < TX_SIZES; i++)
     for (j = 0; j < PLANE_TYPES; j++)
       for (k = 0; k < REF_TYPES; k++)

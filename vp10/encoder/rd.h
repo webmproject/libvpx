@@ -279,8 +279,6 @@ typedef struct RD_OPT {
 
   int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
 
-  int64_t filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
-
   int RDMULT;
   int RDDIV;
 } RD_OPT;
