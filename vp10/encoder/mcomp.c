@@ -210,7 +210,6 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
 
 #define CHECK_BETTER0(v, r, c) CHECK_BETTER(v, r, c)
 
-#if CONFIG_AFFINE_MOTION
 static INLINE const uint8_t *upre(const uint8_t *buf, int stride,
                                   int r, int c) {
   return &buf[(r) * stride + (c)];
@@ -232,7 +231,6 @@ static INLINE const uint8_t *upre(const uint8_t *buf, int stride,
   } else {                                                             \
     v = INT_MAX;                                                       \
   }
-#endif
 
 #define FIRST_LEVEL_CHECKS                              \
   {                                                     \
@@ -438,11 +436,7 @@ int vp10_find_best_sub_pixel_tree_pruned_evenmore(
     int *distortion,
     unsigned int *sse1,
     const uint8_t *second_pred,
-#if CONFIG_AFFINE_MOTION
     int w, int h, int use_upsampled_ref) {
-#else
-    int w, int h) {
-#endif
   SETUP_SUBPEL_SEARCH;
   besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
                                z, src_stride, y, y_stride, second_pred,
@@ -455,9 +449,7 @@ int vp10_find_best_sub_pixel_tree_pruned_evenmore(
   (void) allow_hp;
   (void) forced_stop;
   (void) hstep;
-#if CONFIG_AFFINE_MOTION
   (void) use_upsampled_ref;
-#endif
 
   if (cost_list &&
       cost_list[0] != INT_MAX && cost_list[1] != INT_MAX &&
@@ -524,16 +516,10 @@ int vp10_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
                                              int *distortion,
                                              unsigned int *sse1,
                                              const uint8_t *second_pred,
-#if CONFIG_AFFINE_MOTION
                                              int w, int h,
                                              int use_upsampled_ref) {
-#else
-                                             int w, int h) {
-#endif
   SETUP_SUBPEL_SEARCH;
-#if CONFIG_AFFINE_MOTION
   (void) use_upsampled_ref;
-#endif
 
   besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
                                z, src_stride, y, y_stride, second_pred,
@@ -607,15 +593,9 @@ int vp10_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
                                         int *distortion,
                                         unsigned int *sse1,
                                         const uint8_t *second_pred,
-#if CONFIG_AFFINE_MOTION
                                         int w, int h, int use_upsampled_ref) {
-#else
-                                        int w, int h) {
-#endif
   SETUP_SUBPEL_SEARCH;
-#if CONFIG_AFFINE_MOTION
   (void) use_upsampled_ref;
-#endif
 
   besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
                                z, src_stride, y, y_stride, second_pred,
@@ -705,9 +685,8 @@ static const MV search_step_table[12] = {
     {0, -1}, {0, 1}, {-1, 0}, {1, 0}
 };
 
-
-#if CONFIG_AFFINE_MOTION
 #if CONFIG_VP9_HIGHBITDEPTH
+// TODO(yunqing): Optimize the following 2 functions.
 static void highbd_comp_avg_upsampled_pred(uint16_t *comp_pred,
                                            const uint8_t *pred8,
                                            int width, int height,
@@ -798,7 +777,6 @@ static unsigned int upsampled_setup_center_error(
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
   return besterr;
 }
-#endif
 
 int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                  MV *bestmv, const MV *ref_mv,
@@ -812,11 +790,7 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                  int *distortion,
                                  unsigned int *sse1,
                                  const uint8_t *second_pred,
-#if CONFIG_AFFINE_MOTION
                                  int w, int h, int use_upsampled_ref) {
-#else
-                                 int w, int h) {
-#endif
   const uint8_t *const z = x->plane[0].src.buf;
   const uint8_t *const src_address = z;
   const int src_stride = x->plane[0].src.stride;
@@ -852,7 +826,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
   bestmv->row *= 8;
   bestmv->col *= 8;
 
-#if CONFIG_AFFINE_MOTION
   // use_upsampled_ref can be 0 or 1
   if (use_upsampled_ref)
     besterr = upsampled_setup_center_error(xd, bestmv, ref_mv, error_per_bit,
@@ -860,7 +833,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                            second_pred, w, h, (offset << 3),
                                            mvjcost, mvcost, sse1, distortion);
   else
-#endif
     besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
                                  z, src_stride, y, y_stride, second_pred,
                                  w, h, offset, mvjcost, mvcost,
@@ -876,7 +848,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
       if (tc >= minc && tc <= maxc && tr >= minr && tr <= maxr) {
         MV this_mv = {tr, tc};
 
-#if CONFIG_AFFINE_MOTION
         if (use_upsampled_ref) {
           const uint8_t *const pre_address = y + tr * y_stride + tc;
 
@@ -884,7 +855,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                          pre_address, y_stride, second_pred,
                                          w, h, &sse);
         } else {
-#endif
           const uint8_t *const pre_address = y + (tr >> 3) * y_stride +
               (tc >> 3);
           if (second_pred == NULL)
@@ -893,9 +863,7 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
           else
             thismse = vfp->svaf(pre_address, y_stride, sp(tc), sp(tr),
                                 src_address, src_stride, &sse, second_pred);
-#if CONFIG_AFFINE_MOTION
         }
-#endif
 
         cost_array[idx] = thismse +
             mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit);
@@ -920,7 +888,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
     if (tc >= minc && tc <= maxc && tr >= minr && tr <= maxr) {
       MV this_mv = {tr, tc};
 
-#if CONFIG_AFFINE_MOTION
       if (use_upsampled_ref) {
         const uint8_t *const pre_address = y + tr * y_stride + tc;
 
@@ -928,7 +895,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                        pre_address, y_stride, second_pred,
                                        w, h, &sse);
       } else {
-#endif
         const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
 
         if (second_pred == NULL)
@@ -937,9 +903,7 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
         else
           thismse = vfp->svaf(pre_address, y_stride, sp(tc), sp(tr),
                               src_address, src_stride, &sse, second_pred);
-#if CONFIG_AFFINE_MOTION
       }
-#endif
 
       cost_array[4] = thismse +
           mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit);
@@ -963,15 +927,11 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
     }
 
     if (iters_per_step > 1 && best_idx != -1) {
-#if CONFIG_AFFINE_MOTION
       if (use_upsampled_ref) {
         SECOND_LEVEL_CHECKS_BEST(1);
       } else {
-#endif
         SECOND_LEVEL_CHECKS_BEST(0);
-#if CONFIG_AFFINE_MOTION
       }
-#endif
     }
 
     tr = br;

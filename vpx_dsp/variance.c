@@ -267,7 +267,6 @@ void vpx_comp_avg_pred_c(uint8_t *comp_pred, const uint8_t *pred,
   }
 }
 
-#if CONFIG_AFFINE_MOTION
 // Get pred block from up-sampled reference.
 void vpx_upsampled_pred_c(uint8_t *comp_pred,
                           int width, int height,
@@ -300,7 +299,6 @@ void vpx_comp_avg_upsampled_pred_c(uint8_t *comp_pred, const uint8_t *pred,
       ref += stride;
     }
 }
-#endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void highbd_variance64(const uint8_t *a8, int  a_stride,

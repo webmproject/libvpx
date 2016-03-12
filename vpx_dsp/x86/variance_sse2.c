@@ -476,7 +476,6 @@ FNS(ssse3, ssse3);
 #undef FN
 #endif  // CONFIG_USE_X86INC
 
-#if CONFIG_AFFINE_MOTION
 void vpx_upsampled_pred_sse2(uint8_t *comp_pred,
                              int width, int height,
                              const uint8_t *ref,  int ref_stride) {
@@ -703,4 +702,3 @@ void vpx_comp_avg_upsampled_pred_sse2(uint8_t *comp_pred, const uint8_t *pred,
       }
     }
 }
-#endif

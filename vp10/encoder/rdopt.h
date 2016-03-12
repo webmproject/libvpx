@@ -103,13 +103,16 @@ void vp10_build_prediction_by_left_preds(VP10_COMP *cpi,
                                          int tmp_stride[MAX_MB_PLANE]);
 #endif  // CONFIG_OBMC
 
-#if CONFIG_AFFINE_MOTION
 static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(VP10_COMP *cpi,
                                                           const int ref) {
   // Use up-sampled reference frames.
   int ref_idx = 0;
   if (ref == LAST_FRAME)
+#if CONFIG_EXT_REFS
+    ref_idx = cpi->lst_fb_idxes[ref - LAST_FRAME];
+#else
     ref_idx = cpi->lst_fb_idx;
+#endif
   else if (ref == GOLDEN_FRAME)
     ref_idx = cpi->gld_fb_idx;
   else if (ref == ALTREF_FRAME)
@@ -117,7 +120,6 @@ static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(VP10_COMP *cpi,
 
   return &cpi->upsampled_ref_bufs[cpi->upsampled_ref_idx[ref_idx]].buf;
 }
-#endif
 
 #ifdef __cplusplus
 }  // extern "C"
