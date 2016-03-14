@@ -193,7 +193,9 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
                                      p[2].src.buf,
                                      p[0].src.stride,
                                      p[1].src.stride,
-                                     bsize);
+                                     bsize,
+                                     0,
+                                     0);
     if (is_skin)
       refresh_this_block = 1;
   }

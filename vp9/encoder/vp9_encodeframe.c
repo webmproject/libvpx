@@ -793,7 +793,9 @@ static int choose_partitioning(VP9_COMP *cpi,
                                                vsignal,
                                                sp,
                                                spuv,
-                                               BLOCK_16X16);
+                                               BLOCK_16X16,
+                                               0,
+                                               0);
           num_16x16_skin += is_skin;
           num_16x16_nonskin += (1 - is_skin);
           if (num_16x16_nonskin > 3) {
