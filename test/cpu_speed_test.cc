@@ -74,7 +74,7 @@ TEST_P(CpuSpeedTest, TestQ0) {
   // the encoder to producing lots of big partitions which will likely
   // extend into the border and test the border condition.
   cfg_.rc_2pass_vbr_minsection_pct = 5;
-  cfg_.rc_2pass_vbr_minsection_pct = 2000;
+  cfg_.rc_2pass_vbr_maxsection_pct = 2000;
   cfg_.rc_target_bitrate = 400;
   cfg_.rc_max_quantizer = 0;
   cfg_.rc_min_quantizer = 0;
@@ -92,7 +92,7 @@ TEST_P(CpuSpeedTest, TestScreencastQ0) {
   ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 25);
   cfg_.g_timebase = video.timebase();
   cfg_.rc_2pass_vbr_minsection_pct = 5;
-  cfg_.rc_2pass_vbr_minsection_pct = 2000;
+  cfg_.rc_2pass_vbr_maxsection_pct = 2000;
   cfg_.rc_target_bitrate = 400;
   cfg_.rc_max_quantizer = 0;
   cfg_.rc_min_quantizer = 0;
@@ -109,7 +109,7 @@ TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
   // the encoder to producing lots of big partitions which will likely
   // extend into the border and test the border condition.
   cfg_.rc_2pass_vbr_minsection_pct = 5;
-  cfg_.rc_2pass_vbr_minsection_pct = 2000;
+  cfg_.rc_2pass_vbr_maxsection_pct = 2000;
   cfg_.rc_target_bitrate = 12000;
   cfg_.rc_max_quantizer = 10;
   cfg_.rc_min_quantizer = 0;
@@ -125,7 +125,7 @@ TEST_P(CpuSpeedTest, TestLowBitrate) {
   // when passing in a very high min q.  This pushes the encoder to producing
   // lots of small partitions which might will test the other condition.
   cfg_.rc_2pass_vbr_minsection_pct = 5;
-  cfg_.rc_2pass_vbr_minsection_pct = 2000;
+  cfg_.rc_2pass_vbr_maxsection_pct = 2000;
   cfg_.rc_target_bitrate = 200;
   cfg_.rc_min_quantizer = 40;
 
