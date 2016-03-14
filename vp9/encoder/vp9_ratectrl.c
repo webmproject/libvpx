@@ -2065,7 +2065,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
         cpi->ext_refresh_frame_flags_pending == 0) {
       int target;
       cpi->refresh_golden_frame = 1;
-      rc->frames_till_gf_update_due = rc->baseline_gf_interval >> 1;
+      rc->frames_till_gf_update_due = rc->baseline_gf_interval;
       if (rc->frames_till_gf_update_due > rc->frames_to_key)
         rc->frames_till_gf_update_due = rc->frames_to_key;
       rc->gfu_boost = DEFAULT_GF_BOOST;
