@@ -441,7 +441,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
-    sf->mv.subpel_force_stop = 2;
+    sf->mv.subpel_force_stop = (content == VP9E_CONTENT_SCREEN) ? 3 : 2;
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
   }
 }
@@ -607,7 +607,10 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
     sf->optimize_coefficients = 0;
   }
 
-  if (sf->mv.subpel_search_method == SUBPEL_TREE) {
+  if (sf->mv.subpel_force_stop == 3) {
+    // Whole pel only
+    cpi->find_fractional_mv_step = vp9_skip_sub_pixel_tree;
+  } else if (sf->mv.subpel_search_method == SUBPEL_TREE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree;
   } else if (sf->mv.subpel_search_method == SUBPEL_TREE_PRUNED) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree_pruned;
