@@ -2047,7 +2047,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // for cases where there is small change from content that is completely
     // static.
     if (cpi->oxcf.rc_mode == VPX_VBR) {
-      min_thresh = 20000;
+      min_thresh = 30000;
       thresh = 2.0f;
     }
     if (avg_sad >
