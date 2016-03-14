@@ -167,7 +167,6 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int16_t *dequant_ptr = pd->dequant;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_NEW_QUANT
-  int dq = xd->mi->mbmi.dq_off_index;
 #if CONFIG_TX_SKIP
   const int use_rect_quant = is_rect_quant_used(&xd->mi[0].src_mi->mbmi, plane);
 #endif  // CONFIG_TX_SKIP
@@ -2710,8 +2709,10 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   int plane;
 
   mbmi->skip = 1;
-  if (x->skip)
+  if (x->skip) {
+    mbmi->tx_size = max_txsize_lookup[bsize];
     return;
+  }
 
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
     if (!x->skip_recode)

@@ -104,6 +104,10 @@ static void fill_mode_costs(VP9_COMP *cpi) {
       vp9_cost_tokens(cpi->palette_uv_color_costs[i][j],
                       fc->palette_uv_color_prob[i][j], vp9_palette_color_tree);
 #endif  // CONFIG_PALETTE
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+  vp9_cost_tokens(cpi->dq_profile_costs, fc->dq_profile_prob,
+                  vp9_dq_profile_tree);
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
 }
 
 static void fill_token_costs(vp9_coeff_cost *c,

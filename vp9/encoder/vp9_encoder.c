@@ -3702,8 +3702,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
 
-  // printf("Bilateral level: %d\n", cm->lf.bilateral_level);
-
   // build the bitstream
 #if CONFIG_ROW_TILE
   if (vp9_pack_bitstream(cpi, dest, size, 1) < 0) {

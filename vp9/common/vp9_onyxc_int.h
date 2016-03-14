@@ -47,10 +47,6 @@ extern "C" {
 #define FRAME_CONTEXTS_LOG2 2
 #define FRAME_CONTEXTS (1 << FRAME_CONTEXTS_LOG2)
 
-#if CONFIG_NEW_QUANT
-#define QUANT_PROFILES 3
-#endif  // CONFIG_NEW_QUANT
-
 extern const struct {
   PARTITION_CONTEXT above;
   PARTITION_CONTEXT left;

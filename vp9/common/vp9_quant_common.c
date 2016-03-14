@@ -41,64 +41,94 @@ static const uint8_t vp9_nuq_knots_lossless[COEF_BANDS][NUQ_KNOTS] = {
 #endif  // CONFIG_TX_SKIP
 };
 
-static const uint8_t vp9_nuq_knots_mid[COEF_BANDS][NUQ_KNOTS] = {
-  {84, 124, 128},  // dc, band 0
-  {84, 124, 128},  // band 1
-  {84, 124, 128},  // band 2
-  {86, 124, 128},  // band 3
-  {86, 124, 128},  // band 4
-  {86, 124, 128},  // band 5
+static const uint8_t vp9_nuq_knots[QUANT_PROFILES][COEF_BANDS][NUQ_KNOTS] = {
+  {
+    {86, 122, 128},  // dc, band 0
+    {86, 122, 128},  // band 1
+    {86, 122, 128},  // band 2
+    {88, 122, 128},  // band 3
+    {88, 122, 128},  // band 4
+    {88, 122, 128},  // band 5
 #if CONFIG_TX_SKIP
-  {84, 124, 128},  // band 6
+    {86, 122, 128},  // band 6
 #endif  // CONFIG_TX_SKIP
+  },
+#if QUANT_PROFILES > 1
+  {
+    {86, 122, 128},  // dc, band 0
+    {86, 122, 128},  // band 1
+    {86, 122, 128},  // band 2
+    {88, 122, 128},  // band 3
+    {88, 122, 128},  // band 4
+    {88, 122, 128},  // band 5
+#if CONFIG_TX_SKIP
+    {86, 122, 128},  // band 6
+#endif  // CONFIG_TX_SKIP
+  },
+#if QUANT_PROFILES > 2
+  {
+    {86, 122, 128},  // dc, band 0
+    {86, 122, 128},  // band 1
+    {86, 122, 128},  // band 2
+    {88, 122, 128},  // band 3
+    {88, 122, 128},  // band 4
+    {88, 122, 128},  // band 5
+#if CONFIG_TX_SKIP
+    {86, 122, 128},  // band 6
+#endif  // CONFIG_TX_SKIP
+  }
+#endif  // QUANT_PROFILES > 2
+#endif  // QUANT_PROFILES > 1
 };
 
-static const uint8_t vp9_nuq_doff_lossless[COEF_BANDS] = { 0, 0, 0, 0, 0, 0
+static const uint8_t vp9_nuq_doff_lossless[COEF_BANDS] = { 0, 0, 0, 0, 0, 0,
 #if CONFIG_TX_SKIP
-    , 0
+    0
 #endif  // CONFIG_TX_SKIP
 };
-static const uint8_t vp9_nuq_doff_low[COEF_BANDS] =  { 5, 13, 14, 19, 20, 21
+static const uint8_t vp9_nuq_doff[QUANT_PROFILES][COEF_BANDS] = {
+  { 8, 15, 16, 22, 23, 24,     // dq_off_index = 0
 #if CONFIG_TX_SKIP
-    , 8
+    8
 #endif  // CONFIG_TX_SKIP
-};
-static const uint8_t vp9_nuq_doff_mid[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24
+  },
+#if QUANT_PROFILES > 1
+  { 6, 12, 13, 16, 17, 18,     // dq_off_index = 1
 #if CONFIG_TX_SKIP
-    , 8
+    8
 #endif  // CONFIG_TX_SKIP
-};
-static const uint8_t vp9_nuq_doff_high[COEF_BANDS] = { 41, 49, 50, 55, 56, 57
+  },
+#if QUANT_PROFILES > 2
+  { 10, 18, 19, 23, 25, 26,     // dq_off_index = 2
 #if CONFIG_TX_SKIP
-    , 8
+    8
 #endif  // CONFIG_TX_SKIP
+  }
+#endif  // QUANT_PROFILES > 2
+#endif  // QUANT_PROFILES > 1
 };
 
 // Allow different quantization profiles in different q ranges,
 // to enable entropy-constraints in scalar quantization.
 
-static const uint8_t *get_nuq_knots(int lossless, int band) {
+static const uint8_t *get_nuq_knots(int lossless, int band, int dq_off_index) {
   if (lossless)
     return vp9_nuq_knots_lossless[band];
   else
-    return vp9_nuq_knots_mid[band];
+    return vp9_nuq_knots[dq_off_index][band];
 }
 
 static INLINE int16_t quant_to_doff_fixed(int lossless, int band,
                                           int dq_off_index) {
   if (lossless)
     return vp9_nuq_doff_lossless[band];
-  else if (!dq_off_index)  // dq_off_index == 0
-    return vp9_nuq_doff_mid[band];
-  else if (dq_off_index == 1)
-    return vp9_nuq_doff_low[band];
-  else  // dq_off_index == 2
-    return vp9_nuq_doff_high[band];
+  else
+    return vp9_nuq_doff[dq_off_index][band];
 }
 
 static INLINE void get_cumbins_nuq(int q, int lossless, int band,
-                                   tran_low_t *cumbins) {
-  const uint8_t *knots = get_nuq_knots(lossless, band);
+                                   tran_low_t *cumbins, int dq_off_index) {
+  const uint8_t *knots = get_nuq_knots(lossless, band, dq_off_index);
   int16_t cumknots[NUQ_KNOTS];
   int i;
   cumknots[0] = knots[0];
@@ -111,12 +141,12 @@ static INLINE void get_cumbins_nuq(int q, int lossless, int band,
 void vp9_get_dequant_val_nuq(int q, int lossless, int band,
                              tran_low_t *dq, tran_low_t *cumbins,
                              int dq_off_index) {
-  const uint8_t *knots = get_nuq_knots(lossless, band);
+  const uint8_t *knots = get_nuq_knots(lossless, band, dq_off_index);
   tran_low_t cumbins_[NUQ_KNOTS], *cumbins_ptr;
   tran_low_t doff;
   int i;
   cumbins_ptr = (cumbins ? cumbins : cumbins_);
-  get_cumbins_nuq(q, lossless, band, cumbins_ptr);
+  get_cumbins_nuq(q, lossless, band, cumbins_ptr, dq_off_index);
   dq[0] = 0;
   for (i = 1; i < NUQ_KNOTS; ++i) {
     const int16_t qstep = (knots[i] * q + 64) >> 7;

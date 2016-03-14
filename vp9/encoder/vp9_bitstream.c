@@ -69,6 +69,9 @@ static struct vp9_token inter_compound_mode_encodings[INTER_COMPOUND_MODES];
 #if CONFIG_GLOBAL_MOTION
 static struct vp9_token global_motion_types_encodings[GLOBAL_MOTION_TYPES];
 #endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+static struct vp9_token dq_profile_encodings[QUANT_PROFILES];
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
 
 #if CONFIG_SUPERTX
 static int vp9_check_supertx(VP9_COMMON *cm, int mi_row, int mi_col,
@@ -115,6 +118,9 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(global_motion_types_encodings,
                        vp9_global_motion_types_tree);
 #endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+  vp9_tokens_from_tree(dq_profile_encodings, vp9_dq_profile_tree);
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
 }
 
 static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
@@ -239,6 +245,20 @@ static void update_skip_probs(VP9_COMMON *cm, vp9_writer *w) {
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     vp9_cond_prob_diff_update(w, &cm->fc.skip_probs[k], cm->counts.skip[k]);
 }
+
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+static void write_dq_profile(const VP9_COMMON *cm, int dq_profile,
+                             vp9_writer *w) {
+  vp9_write_token(w, vp9_dq_profile_tree, cm->fc.dq_profile_prob,
+                  &dq_profile_encodings[dq_profile]);
+}
+
+static void update_dq_profile_probs(VP9_COMMON *cm, vp9_writer *w) {
+  prob_diff_update(vp9_dq_profile_tree,
+                   cm->fc.dq_profile_prob,
+                   cm->counts.dq_profile, QUANT_PROFILES, w);
+}
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
 
 #if CONFIG_SR_MODE
 #if SR_USE_MULTI_F
@@ -607,12 +627,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   if (!supertx_enabled) {
 #endif
 #if CONFIG_COPY_MODE
-  if (mbmi->copy_mode == NOREF)
+    if (mbmi->copy_mode == NOREF)
 #endif
-    if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-      vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
+      if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
+        vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
 #if CONFIG_MISC_ENTROPY
-  skip = write_skip(cm, xd, segment_id, mi, is_inter, w);
+    skip = write_skip(cm, xd, segment_id, mi, is_inter, w);
 #endif
 
 #if CONFIG_SUPERTX
@@ -735,6 +755,24 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
   }
+
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+  if (cm->base_qindex > Q_THRESHOLD_MIN && cm->base_qindex < Q_THRESHOLD_MAX &&
+      switchable_dq_profile_used(mbmi->sb_type) &&
+#if CONFIG_SUPERTX
+      !supertx_enabled &&
+#endif  // CONFIG_SUPERTX
+      !mbmi->skip &&
+      !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+#if CONFIG_COPY_MODE
+    if (mbmi->copy_mode == NOREF)
+#endif  // CONFIG_COPY_MODE
+      write_dq_profile(cm, mbmi->dq_off_index, w);
+  } else {
+    assert(mbmi->dq_off_index == 0);
+  }
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+
 #if CONFIG_EXT_TX
   if (is_inter &&
 #if !CONFIG_WAVELETS
@@ -1163,6 +1201,17 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
     write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
   }
 
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+  if (cm->base_qindex > Q_THRESHOLD_MIN && cm->base_qindex < Q_THRESHOLD_MAX &&
+      switchable_dq_profile_used(mbmi->sb_type) &&
+      !mbmi->skip &&
+      !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+    write_dq_profile(cm, mbmi->dq_off_index, w);
+  } else {
+    assert(mbmi->dq_off_index == 0);
+  }
+#endif  // CONFIG_NEW_QUANT  && QUANT_PROFILES > 1
+
 #if CONFIG_TX_SKIP
   if (bsize >= BLOCK_8X8) {
     int q_idx = vp9_get_qindex(seg, mbmi->segment_id, cm->base_qindex);
@@ -1373,6 +1422,16 @@ static void write_modes_sb(VP9_COMP *cpi,
                         &ext_tx_encodings[xd->mi[0].mbmi.ext_txfrm]);
 #endif  // CONFIG_WAVELETS
 #endif  // CONFIG_EXT_TX
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+      if (!xd->mi[0].mbmi.skip &&
+          cm->base_qindex > Q_THRESHOLD_MIN &&
+          cm->base_qindex < Q_THRESHOLD_MAX &&
+          switchable_dq_profile_used(bsize) &&
+          !vp9_segfeature_active(
+              &cm->seg, xd->mi[0].mbmi.segment_id, SEG_LVL_SKIP)) {
+        write_dq_profile(cm, xd->mi[0].mbmi.dq_off_index, w);
+      }
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
     }
   }
 #endif  // CONFIG_SUPERTX
@@ -2755,6 +2814,10 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 #if CONFIG_NEW_INTER
     update_inter_compound_mode_probs(cm, &header_bc);
 #endif  // CONFIG_NEW_INTER
+
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+    update_dq_profile_probs(cm, &header_bc);
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
 
     if (cm->interp_filter == SWITCHABLE)
       update_switchable_interp_probs(cm, &header_bc);
