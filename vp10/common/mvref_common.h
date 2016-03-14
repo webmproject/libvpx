@@ -335,6 +335,10 @@ void vp10_find_best_ref_mvs(int allow_hp,
 
 void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
                                     int block, int ref, int mi_row, int mi_col,
+#if CONFIG_REF_MV
+                                    CANDIDATE_MV *ref_mv_stack,
+                                    uint8_t *ref_mv_count,
+#endif
 #if CONFIG_EXT_INTER
                                     int_mv *mv_list,
 #endif  // CONFIG_EXT_INTER

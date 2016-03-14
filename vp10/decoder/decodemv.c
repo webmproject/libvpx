@@ -1391,6 +1391,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #else
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_REF_MV
+          CANDIDATE_MV ref_mv_stack[2][MAX_REF_MV_STACK_SIZE];
+          uint8_t ref_mv_count[2];
+#endif
           for (ref = 0; ref < 1 + is_compound; ++ref)
 #if CONFIG_EXT_INTER
           {
@@ -1399,6 +1403,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                                    mv_ref_list, j, mi_row, mi_col, NULL);
 #endif  // CONFIG_EXT_INTER
             vp10_append_sub8x8_mvs_for_idx(cm, xd, j, ref, mi_row, mi_col,
+#if CONFIG_REF_MV
+                                           ref_mv_stack[ref],
+                                           &ref_mv_count[ref],
+#endif
 #if CONFIG_EXT_INTER
                                            mv_ref_list,
 #endif  // CONFIG_EXT_INTER
