@@ -509,12 +509,11 @@ void vpx_upsampled_pred_sse2(uint8_t *comp_pred,
           s2 = _mm_unpacklo_epi8(t1, s3);
           s4 = _mm_unpacklo_epi8(t2, s5);
           s6 = _mm_unpacklo_epi8(t3, s7);
+          s0 = _mm_unpacklo_epi32(s0, s2);
+          s4 = _mm_unpacklo_epi32(s4, s6);
+          s0 = _mm_unpacklo_epi64(s0, s4);
 
-          *(int *)comp_pred = _mm_cvtsi128_si32(s0);
-          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(s2);
-          *(int *)(comp_pred + 8) = _mm_cvtsi128_si32(s4);
-          *(int *)(comp_pred + 12) = _mm_cvtsi128_si32(s6);
-
+          _mm_storeu_si128((__m128i *)(comp_pred), s0);
           comp_pred += 16;
           ref += 16 * 8;
         }
@@ -537,9 +536,9 @@ void vpx_upsampled_pred_sse2(uint8_t *comp_pred,
 
           s0 = _mm_unpacklo_epi8(t0, s1);
           s2 = _mm_unpacklo_epi8(t1, s3);
+          s0 = _mm_unpacklo_epi32(s0, s2);
 
-          *(int *)comp_pred = _mm_cvtsi128_si32(s0);
-          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(s2);
+          _mm_storel_epi64((__m128i *)(comp_pred), s0);
           comp_pred += 8;
           ref += 8 * 8;
         }
@@ -558,7 +557,6 @@ void vpx_upsampled_pred_sse2(uint8_t *comp_pred,
           s0 = _mm_unpacklo_epi8(t0, s1);
 
           *(int *)comp_pred = _mm_cvtsi128_si32(s0);
-
           comp_pred += 4;
           ref += 4 * 8;
         }
@@ -621,14 +619,7 @@ void vpx_comp_avg_upsampled_pred_sse2(uint8_t *comp_pred, const uint8_t *pred,
           p1 = _mm_srli_epi16(p1, 1);
           p0 = _mm_packus_epi16(p0, p1);
 
-          *(int *)comp_pred = _mm_cvtsi128_si32(p0);
-          p0 = _mm_srli_si128(p0, 4);
-          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(p0);
-          p0 = _mm_srli_si128(p0, 4);
-          *(int *)(comp_pred + 8) = _mm_cvtsi128_si32(p0);
-          p0 = _mm_srli_si128(p0, 4);
-          *(int *)(comp_pred + 12) = _mm_cvtsi128_si32(p0);
-
+          _mm_storeu_si128((__m128i *)(comp_pred), p0);
           comp_pred += 16;
           pred += 16;
           ref += 16 * 8;
@@ -662,10 +653,7 @@ void vpx_comp_avg_upsampled_pred_sse2(uint8_t *comp_pred, const uint8_t *pred,
           p0 = _mm_srli_epi16(p0, 1);
           p0 = _mm_packus_epi16(p0, zero);
 
-          *(int *)comp_pred = _mm_cvtsi128_si32(p0);
-          p0 = _mm_srli_si128(p0, 4);
-          *(int *)(comp_pred + 4) = _mm_cvtsi128_si32(p0);
-
+          _mm_storel_epi64((__m128i *)(comp_pred), p0);
           comp_pred += 8;
           pred += 8;
           ref += 8 * 8;
@@ -693,7 +681,6 @@ void vpx_comp_avg_upsampled_pred_sse2(uint8_t *comp_pred, const uint8_t *pred,
           p0 = _mm_packus_epi16(p0, zero);
 
           *(int *)comp_pred = _mm_cvtsi128_si32(p0);
-
           comp_pred += 4;
           pred += 4;
           ref += 4 * 8;

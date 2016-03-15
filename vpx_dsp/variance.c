@@ -651,6 +651,44 @@ void vpx_highbd_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred8,
     ref += ref_stride;
   }
 }
+
+void vpx_highbd_upsampled_pred_c(uint16_t *comp_pred,
+                                 int width, int height,
+                                 const uint8_t *ref8,
+                                 int ref_stride) {
+  int i, j;
+  int stride = ref_stride << 3;
+
+  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
+  for (i = 0; i < height; ++i) {
+    for (j = 0; j < width; ++j) {
+      comp_pred[j] = ref[(j << 3)];
+    }
+    comp_pred += width;
+    ref += stride;
+  }
+}
+
+void vpx_highbd_comp_avg_upsampled_pred_c(uint16_t *comp_pred,
+                                          const uint8_t *pred8,
+                                          int width, int height,
+                                          const uint8_t *ref8,
+                                          int ref_stride) {
+  int i, j;
+  int stride = ref_stride << 3;
+
+  uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
+  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
+  for (i = 0; i < height; ++i) {
+    for (j = 0; j < width; ++j) {
+      const int tmp = pred[j] + ref[(j << 3)];
+      comp_pred[j] = ROUND_POWER_OF_TWO(tmp, 1);
+    }
+    comp_pred += width;
+    pred += width;
+    ref += stride;
+  }
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP10 && CONFIG_EXT_INTER

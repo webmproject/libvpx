@@ -685,47 +685,6 @@ static const MV search_step_table[12] = {
     {0, -1}, {0, 1}, {-1, 0}, {1, 0}
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
-// TODO(yunqing): Optimize the following 2 functions.
-static void highbd_comp_avg_upsampled_pred(uint16_t *comp_pred,
-                                           const uint8_t *pred8,
-                                           int width, int height,
-                                           const uint8_t *ref8,
-                                           int ref_stride) {
-  int i, j;
-  int stride = ref_stride << 3;
-
-  uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
-  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-  for (i = 0; i < height; ++i) {
-    for (j = 0; j < width; ++j) {
-      const int tmp = pred[j] + ref[(j << 3)];
-      comp_pred[j] = ROUND_POWER_OF_TWO(tmp, 1);
-    }
-    comp_pred += width;
-    pred += width;
-    ref += stride;
-  }
-}
-
-static void highbd_upsampled_pred(uint16_t *comp_pred,
-                                  int width, int height,
-                                  const uint8_t *ref8,
-                                  int ref_stride) {
-  int i, j;
-  int stride = ref_stride << 3;
-
-  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-  for (i = 0; i < height; ++i) {
-    for (j = 0; j < width; ++j) {
-      comp_pred[j] = ref[(j << 3)];
-    }
-    comp_pred += width;
-    ref += stride;
-  }
-}
-#endif
-
 static int upsampled_pref_error(const MACROBLOCKD *xd,
                                 const vp10_variance_fn_ptr_t *vfp,
                                 const uint8_t *const src, const int src_stride,
@@ -737,10 +696,10 @@ static int upsampled_pref_error(const MACROBLOCKD *xd,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     DECLARE_ALIGNED(16, uint16_t, pred16[64 * 64]);
     if (second_pred != NULL)
-      highbd_comp_avg_upsampled_pred(pred16, second_pred, w, h, y,
-                                     y_stride);
+      vpx_highbd_comp_avg_upsampled_pred(pred16, second_pred, w, h, y,
+                                         y_stride);
     else
-      highbd_upsampled_pred(pred16, w, h, y, y_stride);
+      vpx_highbd_upsampled_pred(pred16, w, h, y, y_stride);
 
     besterr = vfp->vf(CONVERT_TO_BYTEPTR(pred16), w, src, src_stride,
                       sse);
