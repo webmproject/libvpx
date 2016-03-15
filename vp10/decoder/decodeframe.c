@@ -2962,18 +2962,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   assert(tile_rows <= 4);
   assert(tile_cols <= (1 << 6));
 
-  // Note: this memset assumes above_context[0], [1] and [2]
-  // are allocated as part of the same buffer.
-  memset(cm->above_context, 0,
-         sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_cols);
-
-  memset(cm->above_seg_context, 0,
-         sizeof(*cm->above_seg_context) * aligned_cols);
-
-#if CONFIG_VAR_TX
-  memset(cm->above_txfm_context, 0,
-         sizeof(*cm->above_txfm_context) * aligned_cols);
-#endif
+  vp10_zero_above_context(cm, 0, aligned_cols);
 
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
@@ -3032,11 +3021,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
                         tile_cols - tile_col - 1 : tile_col;
         tile_data = pbi->tile_data + tile_cols * tile_row + col;
         vp10_tile_set_col(&tile, tile_data->cm, col);
-        vp10_zero(tile_data->xd.left_context);
-        vp10_zero(tile_data->xd.left_seg_context);
-#if CONFIG_VAR_TX
-        vp10_zero(tile_data->xd.left_txfm_context_buffer);
-#endif
+        vp10_zero_left_context(&tile_data->xd);
         for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
              mi_col += MI_BLOCK_SIZE) {
           decode_partition(pbi, &tile_data->xd,
@@ -3126,11 +3111,7 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
-    vp10_zero(tile_data->xd.left_context);
-    vp10_zero(tile_data->xd.left_seg_context);
-#if CONFIG_VAR_TX
-    vp10_zero(tile_data->xd.left_txfm_context_buffer);
-#endif
+    vp10_zero_left_context(&tile_data->xd);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
       decode_partition(tile_data->pbi, &tile_data->xd,
@@ -3211,16 +3192,8 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
     worker->data2 = &pbi->tile_worker_info[n];
   }
 
-  // Note: this memset assumes above_context[0], [1] and [2]
-  // are allocated as part of the same buffer.
-  memset(cm->above_context, 0,
-         sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_mi_cols);
-  memset(cm->above_seg_context, 0,
-         sizeof(*cm->above_seg_context) * aligned_mi_cols);
-#if CONFIG_VAR_TX
-  memset(cm->above_txfm_context, 0,
-         sizeof(*cm->above_txfm_context) * aligned_mi_cols);
-#endif
+  vp10_zero_above_context(cm, 0, aligned_mi_cols);
+
   // Load tile data into tile_buffers
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 

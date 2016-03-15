@@ -97,10 +97,13 @@ void vp10_free_postproc_buffers(VP10_COMMON *cm) {
 }
 
 void vp10_free_context_buffers(VP10_COMMON *cm) {
+  int i;
   cm->free_mi(cm);
   free_seg_map(cm);
-  vpx_free(cm->above_context);
-  cm->above_context = NULL;
+  for (i = 0 ; i < MAX_MB_PLANE ; i++) {
+    vpx_free(cm->above_context[i]);
+    cm->above_context[i] = NULL;
+  }
   vpx_free(cm->above_seg_context);
   cm->above_seg_context = NULL;
 #if CONFIG_VAR_TX
@@ -128,11 +131,14 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
   }
 
   if (cm->above_context_alloc_cols < cm->mi_cols) {
-    vpx_free(cm->above_context);
-    cm->above_context = (ENTROPY_CONTEXT *)vpx_calloc(
-        2 * mi_cols_aligned_to_sb(cm->mi_cols) * MAX_MB_PLANE,
-        sizeof(*cm->above_context));
-    if (!cm->above_context) goto fail;
+    int i;
+    for (i = 0 ; i < MAX_MB_PLANE ; i++) {
+    vpx_free(cm->above_context[i]);
+      cm->above_context[i] = (ENTROPY_CONTEXT *)vpx_calloc(
+          2 * mi_cols_aligned_to_sb(cm->mi_cols),
+          sizeof(*cm->above_context[0]));
+      if (!cm->above_context[i]) goto fail;
+    }
 
     vpx_free(cm->above_seg_context);
     cm->above_seg_context = (PARTITION_CONTEXT *)vpx_calloc(

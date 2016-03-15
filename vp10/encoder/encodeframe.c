@@ -3693,13 +3693,8 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
   SPEED_FEATURES *const sf = &cpi->sf;
   int mi_col;
 
-  // Initialize the left context for the new SB row
-  memset(&xd->left_context, 0, sizeof(xd->left_context));
-  memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
-#if CONFIG_VAR_TX
-  memset(xd->left_txfm_context_buffer, 0,
-         sizeof(xd->left_txfm_context_buffer));
-#endif
+  vp10_zero_left_context(xd);
+
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
@@ -3797,19 +3792,9 @@ static void init_encode_frame_mb_context(VP10_COMP *cpi) {
   // Copy data over into macro block data structures.
   vp10_setup_src_planes(x, cpi->Source, 0, 0);
 
-  vp10_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
+  vp10_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
 
-  // Note: this memset assumes above_context[0], [1] and [2]
-  // are allocated as part of the same buffer.
-  memset(xd->above_context[0], 0,
-         sizeof(*xd->above_context[0]) *
-         2 * aligned_mi_cols * MAX_MB_PLANE);
-  memset(xd->above_seg_context, 0,
-         sizeof(*xd->above_seg_context) * aligned_mi_cols);
-#if CONFIG_VAR_TX
-  memset(cm->above_txfm_context, 0,
-         sizeof(*xd->above_txfm_context) * aligned_mi_cols);
-#endif
+  vp10_zero_above_context(cm, 0, aligned_mi_cols);
 }
 
 static int check_dual_ref_flags(VP10_COMP *cpi) {

@@ -313,7 +313,7 @@ typedef struct VP10Common {
   BufferPool *buffer_pool;
 
   PARTITION_CONTEXT *above_seg_context;
-  ENTROPY_CONTEXT *above_context;
+  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
 #if CONFIG_VAR_TX
   TXFM_CONTEXT *above_txfm_context;
   TXFM_CONTEXT left_txfm_context[8];
@@ -405,9 +405,7 @@ static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     xd->plane[i].dqcoeff = dqcoeff;
-    xd->above_context[i] = cm->above_context +
-        i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
-
+    xd->above_context[i] = cm->above_context[i];
     if (xd->plane[i].plane_type == PLANE_TYPE_Y) {
       memcpy(xd->plane[i].seg_dequant, cm->y_dequant, sizeof(cm->y_dequant));
     } else {
@@ -523,6 +521,27 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
   assert(bsl >= 0);
 
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
+}
+
+static INLINE void vp10_zero_above_context(VP10_COMMON *const cm,
+                             int mi_col_start, int mi_col_end) {
+  const int width = mi_col_end - mi_col_start;
+  int i;
+
+  for (i = 0 ; i < MAX_MB_PLANE ; i++)
+    vp10_zero_array(cm->above_context[i] + 2 * mi_col_start, 2 * width);
+  vp10_zero_array(cm->above_seg_context + mi_col_start, width);
+#if CONFIG_VAR_TX
+  vp10_zero_array(cm->above_txfm_context + mi_col_start, width);
+#endif  // CONFIG_VAR_TX
+}
+
+static INLINE void vp10_zero_left_context(MACROBLOCKD *const xd) {
+  vp10_zero(xd->left_context);
+  vp10_zero(xd->left_seg_context);
+#if CONFIG_VAR_TX
+  vp10_zero(xd->left_txfm_context_buffer);
+#endif
 }
 
 #if CONFIG_VAR_TX

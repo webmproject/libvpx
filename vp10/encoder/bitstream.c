@@ -1710,10 +1710,7 @@ static void write_modes(VP10_COMP *cpi,
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
-    vp10_zero(xd->left_seg_context);
-#if CONFIG_VAR_TX
-    vp10_zero(xd->left_txfm_context_buffer);
-#endif
+    vp10_zero_left_context(xd);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
       write_modes_sb(cpi, tile, w, tok, tok_end,
@@ -2190,12 +2187,7 @@ static size_t encode_tiles(VP10_COMP *cpi, uint8_t *data_ptr,
   const int tile_rows = 1 << cm->log2_tile_rows;
   unsigned int max_tile = 0;
 
-  memset(cm->above_seg_context, 0,
-         sizeof(*cm->above_seg_context) * mi_cols_aligned_to_sb(cm->mi_cols));
-#if CONFIG_VAR_TX
-  memset(cm->above_txfm_context, 0,
-         sizeof(*cm->above_txfm_context) * mi_cols_aligned_to_sb(cm->mi_cols));
-#endif
+  vp10_zero_above_context(cm, 0, mi_cols_aligned_to_sb(cm->mi_cols));
 
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
