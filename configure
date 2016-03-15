@@ -284,6 +284,7 @@ EXPERIMENT_LIST="
     ext_partition
     ext_tile
     obmc
+    entropy
 "
 CONFIG_LIST="
     dependency_tracking
