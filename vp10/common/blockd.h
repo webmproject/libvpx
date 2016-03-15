@@ -380,7 +380,7 @@ static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
 #if CONFIG_EXT_TX
 #define ALLOW_INTRA_EXT_TX       1
 // whether masked transforms are used for 32X32
-#define USE_MSKTX_FOR_32X32      1
+#define USE_MSKTX_FOR_32X32      0
 
 static const int num_ext_tx_set_inter[EXT_TX_SETS_INTER] = {
   1, 19, 12, 2
@@ -447,7 +447,7 @@ static const int ext_tx_used_inter[EXT_TX_SETS_INTER][TX_TYPES] = {
   { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
   { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
-  { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
+  { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
 };
 
 static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
