@@ -33,12 +33,12 @@ extern "C" {
 
 // Use this for variably-sized arrays.
 #define vp9_copy_array(dest, src, n) {       \
-    assert(sizeof(*dest) == sizeof(*src));   \
-    memcpy(dest, src, n * sizeof(*src)); \
+    assert(sizeof(*(dest)) == sizeof(*(src)));   \
+    memcpy(dest, src, n * sizeof(*(src))); \
   }
 
 #define vp9_zero(dest) memset(&(dest), 0, sizeof(dest))
-#define vp9_zero_array(dest, n) memset(dest, 0, n * sizeof(*dest))
+#define vp9_zero_array(dest, n) memset(dest, 0, n * sizeof(*(dest)))
 
 static INLINE int get_unsigned_bits(unsigned int num_values) {
   return num_values > 0 ? get_msb(num_values) + 1 : 0;
