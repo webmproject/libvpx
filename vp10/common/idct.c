@@ -260,6 +260,30 @@ void idst16_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 #if CONFIG_EXT_TX
+static void iidtx4_c(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 4; ++i)
+    output[i] = (tran_low_t)dct_const_round_shift(input[i] * Sqrt2);
+}
+
+static void iidtx8_c(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 8; ++i)
+    output[i] = input[i] * 2;
+}
+
+static void iidtx16_c(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 16; ++i)
+    output[i] = (tran_low_t)dct_const_round_shift(input[i] * 2 * Sqrt2);
+}
+
+static void iidtx32_c(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 32; ++i)
+    output[i] = input[i] * 4;
+}
+
 // For use in lieu of DST
 static void ihalfcenter32_c(const tran_low_t *input, tran_low_t *output) {
   int i;
@@ -291,6 +315,37 @@ static void ihalfright32_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
+static void highbd_iidtx4_c(const tran_low_t *input, tran_low_t *output,
+                            int bd) {
+  int i;
+  for (i = 0; i < 4; ++i)
+    output[i] = (tran_low_t)highbd_dct_const_round_shift(input[i] * Sqrt2, bd);
+}
+
+static void highbd_iidtx8_c(const tran_low_t *input, tran_low_t *output,
+                            int bd) {
+  int i;
+  (void) bd;
+  for (i = 0; i < 8; ++i)
+    output[i] = input[i] * 2;
+}
+
+static void highbd_iidtx16_c(const tran_low_t *input, tran_low_t *output,
+                            int bd) {
+  int i;
+  for (i = 0; i < 16; ++i)
+    output[i] = (tran_low_t)highbd_dct_const_round_shift(
+        input[i] * 2 * Sqrt2, bd);
+}
+
+static void highbd_iidtx32_c(const tran_low_t *input, tran_low_t *output,
+                             int bd) {
+  int i;
+  (void) bd;
+  for (i = 0; i < 32; ++i)
+    output[i] = input[i] * 4;
+}
+
 static void highbd_ihalfcenter32_c(const tran_low_t *input, tran_low_t *output,
                                    int bd) {
   int i;
@@ -331,85 +386,19 @@ static void inv_idtx_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                            int bs, int tx_type) {
   int r, c;
   const int shift = bs < 32 ? 3 : 2;
-
-  tran_low_t temp_in[32], temp_out[32];
-  transform_2d ht = {idct4_c, idct4_c};
-  int out_scale = 1;
-  int coeff_stride = 0;
-
-  switch (bs) {
-    case 4:
-      ht.cols = idct4_c;
-      ht.rows = idct4_c;
-      out_scale = cospi_16_64 >> 3;
-      coeff_stride = 4;
-      break;
-    case 8:
-      ht.cols = idct8_c;
-      ht.rows = idct8_c;
-      out_scale = (1 << (DCT_CONST_BITS - 4));
-      coeff_stride = 8;
-      break;
-    case 16:
-      ht.cols = idct16_c;
-      ht.rows = idct16_c;
-      out_scale = cospi_16_64 >> 4;
-      coeff_stride = 16;
-      break;
-    case 32:
-      ht.cols = idct32_c;
-      ht.rows = idct32_c;
-      out_scale = (1 << (DCT_CONST_BITS - 4));
-      coeff_stride = 32;
-      break;
-    default:
-      assert(0);
-  }
-
-  // Columns
-  if (tx_type == V_DCT) {
-    for (c = 0; c < bs; ++c) {
-      for (r = 0; r < bs; ++r)
-        temp_in[r] = input[r * coeff_stride + c];
-      ht.cols(temp_in, temp_out);
-
-      for (r = 0; r < bs; ++r) {
-        tran_high_t temp = (tran_high_t)temp_out[r] * out_scale;
-        temp >>= DCT_CONST_BITS;
-        dest[r * stride + c] = clip_pixel_add(dest[r * stride + c],
-                                              (tran_low_t)temp);
-      }
-    }
-    return;
-  }
-
-  if (tx_type == H_DCT) {
+  if (tx_type == IDTX) {
     for (r = 0; r < bs; ++r) {
       for (c = 0; c < bs; ++c)
-        temp_in[c] = input[r * coeff_stride + c];
-      ht.rows(temp_in, temp_out);
-
-      for (c = 0; c < bs; ++c) {
-        tran_high_t temp = (tran_high_t)temp_out[c] * out_scale;
-        temp >>= DCT_CONST_BITS;
-        dest[r * stride + c] = clip_pixel_add(dest[r * stride + c],
-                                              (tran_low_t)temp);
-      }
+        dest[c] = clip_pixel_add(dest[c], input[c] >> shift);
+      dest += stride;
+      input += bs;
     }
-    return;
-  }
-
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c)
-      dest[c] = clip_pixel_add(dest[c], input[c] >> shift);
-    dest += stride;
-    input += bs;
   }
 }
 
 #define FLIPUD_PTR(dest, stride, size) do {     \
-    (dest) = (dest) + ((size) - 1) * (stride);  \
-    (stride) = - (stride);                      \
+  (dest) = (dest) + ((size) - 1) * (stride);  \
+  (stride) = - (stride);                      \
 } while (0)
 
 static void maybe_flip_strides(uint8_t **dst, int *dstride,
@@ -428,6 +417,7 @@ static void maybe_flip_strides(uint8_t **dst, int *dstride,
     case DST_DCT:
     case DST_ADST:
     case ADST_DST:
+    case IDTX:
     case V_DCT:
     case H_DCT:
       break;
@@ -705,78 +695,13 @@ static void highbd_inv_idtx_add_c(const tran_low_t *input, uint8_t *dest8,
   const int shift = bs < 32 ? 3 : 2;
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
-  tran_low_t temp_in[32], temp_out[32];
-  highbd_transform_2d ht = {vpx_highbd_idct4_c, vpx_highbd_idct4_c};
-  int out_scale = 1;
-  int coeff_stride = 0;
-
-  switch (bs) {
-    case 4:
-      ht.cols = vpx_highbd_idct4_c;
-      ht.rows = vpx_highbd_idct4_c;
-      out_scale = cospi_16_64 >> 3;
-      coeff_stride = 4;
-      break;
-    case 8:
-      ht.cols = vpx_highbd_idct8_c;
-      ht.rows = vpx_highbd_idct8_c;
-      out_scale = (1 << (DCT_CONST_BITS - 4));
-      coeff_stride = 8;
-      break;
-    case 16:
-      ht.cols = vpx_highbd_idct16_c;
-      ht.rows = vpx_highbd_idct16_c;
-      out_scale = cospi_16_64 >> 4;
-      coeff_stride = 16;
-      break;
-    case 32:
-      ht.cols = vpx_highbd_idct32_c;
-      ht.rows = vpx_highbd_idct32_c;
-      out_scale = (1 << (DCT_CONST_BITS - 4));
-      coeff_stride = 32;
-      break;
-    default:
-      assert(0);
-  }
-
-  // Columns
-  if (tx_type == V_DCT) {
-    for (c = 0; c < bs; ++c) {
-      for (r = 0; r < bs; ++r)
-        temp_in[r] = input[r * coeff_stride + c];
-      ht.cols(temp_in, temp_out, bd);
-
-      for (r = 0; r < bs; ++r) {
-        tran_high_t temp = (tran_high_t)temp_out[r] * out_scale;
-        temp >>= DCT_CONST_BITS;
-        dest[r * stride + c] = highbd_clip_pixel_add(dest[r * stride + c],
-                                                     (tran_low_t)temp, bd);
-      }
-    }
-    return;
-  }
-
-  if (tx_type == H_DCT) {
+  if (tx_type == IDTX) {
     for (r = 0; r < bs; ++r) {
       for (c = 0; c < bs; ++c)
-        temp_in[c] = input[r * coeff_stride + c];
-      ht.rows(temp_in, temp_out, bd);
-
-      for (c = 0; c < bs; ++c) {
-        tran_high_t temp = (tran_high_t)temp_out[c] * out_scale;
-        temp >>= DCT_CONST_BITS;
-        dest[r * stride + c] = highbd_clip_pixel_add(dest[r * stride + c],
-                                                     (tran_low_t)temp, bd);
-      }
+        dest[c] = highbd_clip_pixel_add(dest[c], input[c] >> shift, bd);
+      dest += stride;
+      input += bs;
     }
-    return;
-  }
-
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c)
-      dest[c] = highbd_clip_pixel_add(dest[c], input[c] >> shift, bd);
-    dest += stride;
-    input += bs;
   }
 }
 
@@ -796,6 +721,9 @@ static void maybe_flip_strides16(uint16_t **dst, int *dstride,
     case DST_DCT:
     case DST_ADST:
     case ADST_DST:
+    case IDTX:
+    case V_DCT:
+    case H_DCT:
       break;
     case FLIPADST_DCT:
     case FLIPADST_ADST:
@@ -843,6 +771,9 @@ void vp10_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     { idst4_c,  iadst4_c },  // DST_FLIPADST      = 13,
     { iadst4_c, idst4_c  },  // FLIPADST_DST      = 14,
     { idst4_c,  idst4_c  },  // DST_DST           = 15
+    { iidtx4_c, iidtx4_c },  // IDTX              = 16
+    { idct4_c,  iidtx4_c },  // V_DCT             = 17
+    { iidtx4_c, idct4_c  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
   };
 
@@ -906,6 +837,9 @@ void vp10_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     { idst8_c,  iadst8_c },  // DST_FLIPADST      = 13,
     { iadst8_c, idst8_c  },  // FLIPADST_DST      = 14,
     { idst8_c,  idst8_c  },  // DST_DST           = 15
+    { iidtx8_c, iidtx8_c },  // IDTX              = 16
+    { idct8_c,  iidtx8_c },  // V_DCT             = 17
+    { iidtx8_c, idct8_c  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
   };
 
@@ -969,6 +903,9 @@ void vp10_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     { idst16_c,  iadst16_c },  // DST_FLIPADST      = 13,
     { iadst16_c, idst16_c  },  // FLIPADST_DST      = 14,
     { idst16_c,  idst16_c  },  // DST_DST           = 15
+    { iidtx16_c, iidtx16_c },  // IDTX              = 16
+    { idct16_c,  iidtx16_c },  // V_DCT             = 17
+    { iidtx16_c, idct16_c  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
   };
 
@@ -1032,6 +969,9 @@ void vp10_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
     { ihalfcenter32_c,  ihalfright32_c },    // DST_FLIPADST      = 13,
     { ihalfright32_c, ihalfcenter32_c  },    // FLIPADST_DST      = 14,
     { ihalfcenter32_c,  ihalfcenter32_c  },  // DST_DST           = 15
+    { iidtx32_c, iidtx32_c },                // IDTX              = 16
+    { idct32_c,  iidtx32_c },                // V_DCT             = 17
+    { iidtx32_c, idct32_c  },                // H_DCT             = 18
   };
 
   int i, j;
@@ -1165,11 +1105,11 @@ void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
+    case H_DCT:
+    case V_DCT:
       // Use C version since DST only exists in C code
       vp10_iht4x4_16_add_c(input, dest, stride, tx_type);
       break;
-    case H_DCT:
-    case V_DCT:
     case IDTX:
       inv_idtx_add_c(input, dest, stride, 4, tx_type);
       break;
@@ -1206,11 +1146,11 @@ void vp10_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
+    case H_DCT:
+    case V_DCT:
       // Use C version since DST only exists in C code
       vp10_iht8x8_64_add_c(input, dest, stride, tx_type);
       break;
-    case H_DCT:
-    case V_DCT:
     case IDTX:
       inv_idtx_add_c(input, dest, stride, 8, tx_type);
       break;
@@ -1247,11 +1187,11 @@ void vp10_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
+    case H_DCT:
+    case V_DCT:
       // Use C version since DST only exists in C code
       vp10_iht16x16_256_add_c(input, dest, stride, tx_type);
       break;
-    case H_DCT:
-    case V_DCT:
     case IDTX:
       inv_idtx_add_c(input, dest, stride, 16, tx_type);
       break;
@@ -1284,10 +1224,10 @@ void vp10_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
-      vp10_iht32x32_1024_add_c(input, dest, stride, tx_type);
-      break;
     case H_DCT:
     case V_DCT:
+      vp10_iht32x32_1024_add_c(input, dest, stride, tx_type);
+      break;
     case IDTX:
       inv_idtx_add_c(input, dest, stride, 32, tx_type);
       break;
@@ -1319,6 +1259,9 @@ void vp10_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
     {     highbd_idst4_c,  vpx_highbd_iadst4_c },  // DST_FLIPADST      = 13,
     { vpx_highbd_iadst4_c,     highbd_idst4_c  },  // FLIPADST_DST      = 14,
     {     highbd_idst4_c,      highbd_idst4_c  },  // DST_DST           = 15
+    {     highbd_iidtx4_c,     highbd_iidtx4_c },  // IDTX              = 16
+    { vpx_highbd_idct4_c,      highbd_iidtx4_c },  // V_DCT             = 17
+    {     highbd_iidtx4_c, vpx_highbd_idct4_c  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
   };
 
@@ -1385,6 +1328,9 @@ void vp10_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
     {     highbd_idst8_c,  vpx_highbd_iadst8_c },  // DST_FLIPADST      = 13,
     { vpx_highbd_iadst8_c,     highbd_idst8_c  },  // FLIPADST_DST      = 14,
     {     highbd_idst8_c,      highbd_idst8_c  },  // DST_DST           = 15
+    {     highbd_iidtx8_c,     highbd_iidtx8_c },  // IDTX              = 16
+    { vpx_highbd_idct8_c,      highbd_iidtx8_c },  // V_DCT             = 17
+    {     highbd_iidtx8_c, vpx_highbd_idct8_c  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
   };
 
@@ -1451,6 +1397,9 @@ void vp10_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
     {     highbd_idst16_c,  vpx_highbd_iadst16_c },  // DST_FLIPADST      = 13,
     { vpx_highbd_iadst16_c,     highbd_idst16_c  },  // FLIPADST_DST      = 14,
     {     highbd_idst16_c,      highbd_idst16_c  },  // DST_DST           = 15
+    {     highbd_iidtx16_c,     highbd_iidtx16_c },  // IDTX              = 16
+    { vpx_highbd_idct16_c,      highbd_iidtx16_c },  // V_DCT             = 17
+    {     highbd_iidtx16_c, vpx_highbd_idct16_c  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
   };
 
@@ -1501,22 +1450,25 @@ void vp10_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
 void vp10_highbd_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
                                      int stride, int tx_type, int bd) {
   static const highbd_transform_2d HIGH_IHT_32[] = {
-    { vpx_highbd_idct32_c, vpx_highbd_idct32_c  },        // DCT_DCT
-    { highbd_ihalfright32_c, vpx_highbd_idct32_c  },      // ADST_DCT
-    { vpx_highbd_idct32_c, highbd_ihalfright32_c },       // DCT_ADST
-    { highbd_ihalfright32_c, highbd_ihalfright32_c },     // ADST_ADST
-    { highbd_ihalfright32_c, vpx_highbd_idct32_c  },      // FLIPADST_DCT
-    { vpx_highbd_idct32_c, highbd_ihalfright32_c },       // DCT_FLIPADST
-    { highbd_ihalfright32_c, highbd_ihalfright32_c },     // FLIPADST_FLIPADST
-    { highbd_ihalfright32_c, highbd_ihalfright32_c },     // ADST_FLIPADST
-    { highbd_ihalfright32_c, highbd_ihalfright32_c },     // FLIPADST_ADST
-    { highbd_ihalfcenter32_c, vpx_highbd_idct32_c  },     // DST_DCT
-    { vpx_highbd_idct32_c, highbd_ihalfcenter32_c  },     // DCT_DST
-    { highbd_ihalfcenter32_c, highbd_ihalfright32_c },    // DST_ADST
-    { highbd_ihalfright32_c, highbd_ihalfcenter32_c  },   // ADST_DST
-    { highbd_ihalfcenter32_c, highbd_ihalfright32_c },    // DST_FLIPADST
-    { highbd_ihalfright32_c, highbd_ihalfcenter32_c  },   // FLIPADST_DST
-    { highbd_ihalfcenter32_c, highbd_ihalfcenter32_c  },  // DST_DST
+    { vpx_highbd_idct32_c,    vpx_highbd_idct32_c    },  // DCT_DCT
+    { highbd_ihalfright32_c,  vpx_highbd_idct32_c    },  // ADST_DCT
+    { vpx_highbd_idct32_c,    highbd_ihalfright32_c  },  // DCT_ADST
+    { highbd_ihalfright32_c,  highbd_ihalfright32_c  },  // ADST_ADST
+    { highbd_ihalfright32_c,  vpx_highbd_idct32_c    },  // FLIPADST_DCT
+    { vpx_highbd_idct32_c,    highbd_ihalfright32_c  },  // DCT_FLIPADST
+    { highbd_ihalfright32_c,  highbd_ihalfright32_c  },  // FLIPADST_FLIPADST
+    { highbd_ihalfright32_c,  highbd_ihalfright32_c  },  // ADST_FLIPADST
+    { highbd_ihalfright32_c,  highbd_ihalfright32_c  },  // FLIPADST_ADST
+    { highbd_ihalfcenter32_c, vpx_highbd_idct32_c    },  // DST_DCT
+    { vpx_highbd_idct32_c,    highbd_ihalfcenter32_c },  // DCT_DST
+    { highbd_ihalfcenter32_c, highbd_ihalfright32_c  },  // DST_ADST
+    { highbd_ihalfright32_c,  highbd_ihalfcenter32_c },  // ADST_DST
+    { highbd_ihalfcenter32_c, highbd_ihalfright32_c  },  // DST_FLIPADST
+    { highbd_ihalfright32_c,  highbd_ihalfcenter32_c },  // FLIPADST_DST
+    { highbd_ihalfcenter32_c, highbd_ihalfcenter32_c },  // DST_DST
+    {     highbd_iidtx32_c,   highbd_iidtx32_c       },  // IDTX
+    { vpx_highbd_idct32_c,    highbd_iidtx32_c       },  // V_DCT
+    {     highbd_iidtx32_c,   vpx_highbd_idct32_c    },  // H_DCT
   };
 
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
@@ -1657,11 +1609,11 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
+    case H_DCT:
+    case V_DCT:
       // Use C version since DST only exists in C code
       vp10_highbd_iht4x4_16_add_c(input, dest, stride, tx_type, bd);
       break;
-    case H_DCT:
-    case V_DCT:
     case IDTX:
       highbd_inv_idtx_add_c(input, dest, stride, 4, tx_type, bd);
       break;
@@ -1699,11 +1651,11 @@ void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
+    case H_DCT:
+    case V_DCT:
       // Use C version since DST only exists in C code
       vp10_highbd_iht8x8_64_add_c(input, dest, stride, tx_type, bd);
       break;
-    case H_DCT:
-    case V_DCT:
     case IDTX:
       highbd_inv_idtx_add_c(input, dest, stride, 8, tx_type, bd);
       break;
@@ -1741,11 +1693,11 @@ void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
+    case H_DCT:
+    case V_DCT:
       // Use C version since DST only exists in C code
       vp10_highbd_iht16x16_256_add_c(input, dest, stride, tx_type, bd);
       break;
-    case H_DCT:
-    case V_DCT:
     case IDTX:
       highbd_inv_idtx_add_c(input, dest, stride, 16, tx_type, bd);
       break;
@@ -1779,10 +1731,10 @@ void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
     case ADST_DST:
     case FLIPADST_DST:
     case DST_FLIPADST:
-      vp10_highbd_iht32x32_1024_add_c(input, dest, stride, tx_type, bd);
-      break;
     case H_DCT:
     case V_DCT:
+      vp10_highbd_iht32x32_1024_add_c(input, dest, stride, tx_type, bd);
+      break;
     case IDTX:
       highbd_inv_idtx_add_c(input, dest, stride, 32, tx_type, bd);
       break;

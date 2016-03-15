@@ -1212,6 +1212,30 @@ static void fadst16(const tran_low_t *input, tran_low_t *output) {
 }
 
 #if CONFIG_EXT_TX
+static void fidtx4(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 4; ++i)
+    output[i] = (tran_low_t)fdct_round_shift(input[i] * Sqrt2);
+}
+
+static void fidtx8(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 8; ++i)
+    output[i] = input[i] * 2;
+}
+
+static void fidtx16(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 16; ++i)
+    output[i] = (tran_low_t)fdct_round_shift(input[i] * 2 * Sqrt2);
+}
+
+static void fidtx32(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 32; ++i)
+    output[i] = input[i] * 4;
+}
+
 // For use in lieu of DST
 static void fhalfcenter32(const tran_low_t *input, tran_low_t *output) {
   int i;
@@ -1315,6 +1339,7 @@ static void maybe_flip_input(const int16_t **src, int *src_stride, int l,
     case DST_DCT:
     case DST_ADST:
     case ADST_DST:
+    case IDTX:
     case H_DCT:
     case V_DCT:
       break;
@@ -1362,6 +1387,9 @@ static const transform_2d FHT_4[] = {
   { fdst4,  fadst4 },  // DST_FLIPADST      = 13,
   { fadst4, fdst4  },  // FLIPADST_DST      = 14,
   { fdst4,  fdst4  },  // DST_DST           = 15
+  { fidtx4, fidtx4 },  // IDTX              = 16
+  { fdct4,  fidtx4 },  // V_DCT             = 17
+  { fidtx4, fdct4  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
 };
 
@@ -1383,6 +1411,9 @@ static const transform_2d FHT_8[] = {
   { fdst8,  fadst8 },  // DST_FLIPADST      = 13,
   { fadst8, fdst8  },  // FLIPADST_DST      = 14,
   { fdst8,  fdst8  },  // DST_DST           = 15
+  { fidtx8, fidtx8 },  // IDTX              = 16
+  { fdct8,  fidtx8 },  // V_DCT             = 17
+  { fidtx8, fdct8  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
 };
 
@@ -1404,6 +1435,9 @@ static const transform_2d FHT_16[] = {
   { fdst16,  fadst16 },  // DST_FLIPADST      = 13,
   { fadst16, fdst16  },  // FLIPADST_DST      = 14,
   { fdst16,  fdst16  },  // DST_DST           = 15
+  { fidtx16, fidtx16 },  // IDTX              = 16
+  { fdct16,  fidtx16 },  // V_DCT             = 17
+  { fidtx16, fdct16  },  // H_DCT             = 18
 #endif  // CONFIG_EXT_TX
 };
 
@@ -1425,6 +1459,9 @@ static const transform_2d FHT_32[] = {
   { fhalfcenter32,  fhalfright32 },    // DST_FLIPADST      = 13,
   { fhalfright32, fhalfcenter32  },    // FLIPADST_DST      = 14,
   { fhalfcenter32,  fhalfcenter32  },  // DST_DST           = 15
+  { fidtx32, fidtx32 },                // IDTX              = 16
+  { fdct32,  fidtx32 },                // V_DCT             = 17
+  { fidtx32, fdct32  },                // H_DCT             = 18
 };
 #endif  // CONFIG_EXT_TX
 
@@ -1766,86 +1803,12 @@ void vp10_fwd_idtx_c(const int16_t *src_diff,
                      int bs, int tx_type) {
   int r, c;
   const int shift = bs < 32 ? 3 : 2;
-
-  const int16_t *input = src_diff;
-  tran_low_t *output = coeff;
-
-  int i, j;
-  tran_low_t temp_in[32], temp_out[32];
-  transform_2d ht = {fdct4, fdct4};
-  int in_scale = 1;
-  int out_scale = 1;
-  int coeff_stride = 0;
-
-  switch (bs) {
-    case 4:
-      ht.cols = fdct4;
-      ht.rows = fdct4;
-      in_scale = 16;
-      out_scale = cospi_16_64 >> 1;
-      coeff_stride = 4;
-      break;
-    case 8:
-      ht.cols = fdct8;
-      ht.rows = fdct8;
-      in_scale = 4;
-      out_scale = (1 << DCT_CONST_BITS);
-      coeff_stride = 8;
-      break;
-    case 16:
-      ht.cols = fdct16;
-      ht.rows = fdct16;
-      in_scale = 4;
-      out_scale = cospi_16_64;
-      coeff_stride = 16;
-      break;
-    case 32:
-      ht.cols = fdct32;
-      ht.rows = fdct32;
-      in_scale = 4;
-      out_scale = (1 << (DCT_CONST_BITS - 2));
-      coeff_stride = 32;
-      break;
-    default:
-      assert(0);
-  }
-
-  // Columns
-  if (tx_type == V_DCT) {
-    for (i = 0; i < bs; ++i) {
-      for (j = 0; j < bs; ++j)
-        temp_in[j] = input[j * stride + i] * in_scale;
-      ht.cols(temp_in, temp_out);
-
-      for (j = 0; j < bs; ++j) {
-        tran_high_t temp = (tran_high_t)temp_out[j] * out_scale;
-        temp >>= DCT_CONST_BITS;
-        output[j * coeff_stride + i] = (tran_low_t)temp;
-      }
+  if (tx_type == IDTX) {
+    for (r = 0; r < bs; ++r) {
+      for (c = 0; c < bs; ++c) coeff[c] = src_diff[c] << shift;
+      src_diff += stride;
+      coeff += bs;
     }
-    return;
-  }
-
-  // Rows
-  if (tx_type == H_DCT) {
-    for (j = 0; j < bs; ++j) {
-      for (i = 0; i < bs; ++i)
-        temp_in[i] = input[j * stride + i] * in_scale;
-      ht.rows(temp_in, temp_out);
-
-      for (i = 0; i < bs; ++i) {
-        tran_high_t temp = (tran_high_t)temp_out[i] * out_scale;
-        temp >>= DCT_CONST_BITS;
-        output[j * coeff_stride + i] = (tran_low_t)temp;
-      }
-    }
-    return;
-  }
-
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) coeff[c] = src_diff[c] << shift;
-    src_diff += stride;
-    coeff += bs;
   }
 }
 
