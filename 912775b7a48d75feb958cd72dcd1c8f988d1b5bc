@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "578949a7_a5dcaaff",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 8349,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-03-15T20:08:51Z",
+      "side": 1,
+      "message": "Thanks for pointing out that rate_y is set to a meaningless number when disable_skip is 1. returnrate_nocoef is the rate for indicating coding parameters. I feel that it should not be set as 0 in any case. If disable_skip \u003d 1, returnrate_nocoef \u003d rate2 - vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1). I can update the patch, since I also realize that something might be wrong when obmc is also on.",
+      "revId": "912775b7a48d75feb958cd72dcd1c8f988d1b5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
