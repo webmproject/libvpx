@@ -111,20 +111,16 @@ typedef enum {
   FLIPADST_FLIPADST = 6,
   ADST_FLIPADST = 7,
   FLIPADST_ADST = 8,
-  DST_DCT = 9,
-  DCT_DST = 10,
-  DST_ADST = 11,
-  ADST_DST = 12,
-  DST_FLIPADST = 13,
-  FLIPADST_DST = 14,
-  DST_DST = 15,
-  IDTX = 16,
-  V_DCT = 17,
-  H_DCT = 18,
+  IDTX = 9,
+  V_DCT = 10,
+  H_DCT = 11,
+  V_ADST = 12,
+  H_ADST = 13,
+  V_FLIPADST = 14,
+  H_FLIPADST = 15,
 #endif  // CONFIG_EXT_TX
   TX_TYPES,
 } TX_TYPE;
-
 
 #if CONFIG_EXT_TX
 #define EXT_TX_SIZES       4  // number of sizes that use extended transforms
