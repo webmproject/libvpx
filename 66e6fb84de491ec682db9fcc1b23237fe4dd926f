@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b7d7e57d_a5b3d513",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4138,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-03-15T01:37:15Z",
+      "side": 0,
+      "message": "it will be good to have a placeholder function get_interp_filter(const VP10_COMP *cpi).\ncm-\u003einterp_filter \u003d get_interp_filter(cpi);",
+      "revId": "66e6fb84de491ec682db9fcc1b23237fe4dd926f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
