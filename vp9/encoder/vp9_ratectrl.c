@@ -2006,8 +2006,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   rc->high_source_sad = 0;
   if (cpi->Last_Source != NULL &&
-      cpi->Last_Source->y_width == cm->width &&
-      cpi->Last_Source->y_height == cm->height) {
+      cpi->Last_Source->y_width == cpi->Source->y_width &&
+      cpi->Last_Source->y_height == cpi->Source->y_height) {
     const uint8_t *src_y = cpi->Source->y_buffer;
     const int src_ystride = cpi->Source->y_stride;
     const uint8_t *last_src_y = cpi->Last_Source->y_buffer;
