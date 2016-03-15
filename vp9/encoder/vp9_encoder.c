@@ -3079,7 +3079,16 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 
   vpx_clear_system_state();
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    recon_err = vp9_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+  } else {
+    recon_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+  }
+#else
   recon_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
     fprintf(f, "%10u %dx%d %10d %10d %d %d %10d %10d %10d %10d"
