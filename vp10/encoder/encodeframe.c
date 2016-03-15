@@ -1654,6 +1654,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
                                    totalrate_nocoef,
 #endif  // CONFIG_SUPERTX
                                    bsize, ctx, best_rd);
+        assert(*totalrate_nocoef >= 0);
       }
     } else {
       vp10_rd_pick_inter_mode_sub8x8(cpi, tile_data, x, mi_row, mi_col, rd_cost,
@@ -1661,6 +1662,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
                                      totalrate_nocoef,
 #endif  // CONFIG_SUPERTX
                                      bsize, ctx, best_rd);
+      assert(*totalrate_nocoef >= 0);
     }
   }
 
