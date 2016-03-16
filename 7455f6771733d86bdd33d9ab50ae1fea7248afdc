@@ -421,6 +421,24 @@
     },
     {
       "key": {
+        "uuid": "578949a7_531d6444",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2016-03-16T00:03:07Z",
+      "side": 1,
+      "message": "ok the comment can be extend out but the instruction itself cannot be and sometimes its bigger then 80 thats why I broke it to lines",
+      "parentUuid": "3703f592_09f8cd66",
+      "revId": "7455f6771733d86bdd33d9ab50ae1fea7248afdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b1b530ae_eeb71b3d",
         "filename": "vpx_dsp/x86/loopfilter_sse2.c",
         "patchSetId": 7
