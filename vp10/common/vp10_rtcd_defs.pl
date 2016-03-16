@@ -643,7 +643,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   # fdct functions
   add_proto qw/void vp10_highbd_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp10_highbd_fht4x4/;
+  specialize qw/vp10_highbd_fht4x4 sse4_1/;
 
   add_proto qw/void vp10_highbd_fht8x8/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp10_highbd_fht8x8/;

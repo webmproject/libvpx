@@ -214,10 +214,12 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
 
   switch (tx_type) {
     case DCT_DCT:
+      vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+      break;
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
-      vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+      vp10_highbd_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
@@ -225,7 +227,7 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+      vp10_highbd_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
       break;
     case DST_DST:
     case DCT_DST:
