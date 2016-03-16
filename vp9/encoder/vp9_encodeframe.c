@@ -693,20 +693,16 @@ static int choose_partitioning(VP9_COMP *cpi,
   const int use_4x4_partition = cm->frame_type == KEY_FRAME;
   const int low_res = (cm->width <= 352 && cm->height <= 288);
   int variance4x4downsample[16];
+  int segment_id;
 
-  int segment_id = CR_SEGMENT_ID_BASE;
+  set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
+  segment_id = xd->mi[0]->segment_id;
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
-    const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map :
-                                                    cm->last_frame_seg_map;
-    segment_id = get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
-
     if (cyclic_refresh_segment_id_boosted(segment_id)) {
       int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
       set_vbp_thresholds(cpi, thresholds, q);
     }
   }
-
-  set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
 
   if (xd->mb_to_right_edge < 0)
     pixels_wide += (xd->mb_to_right_edge >> 3);
