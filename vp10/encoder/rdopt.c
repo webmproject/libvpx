@@ -8059,26 +8059,18 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         // TODO(jingning): This should be deprecated shortly.
         int idx_offset = (mbmi->mode == NEARMV) ? 1 : 0;
-
         int ref_set =
             VPXMIN(2, mbmi_ext->ref_mv_count[ref_frame_type] - 1 - idx_offset);
 
-        uint8_t drl0_ctx = 0;
-        uint8_t drl_ctx = 0;
-
+        uint8_t drl_ctx = vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type],
+                                       idx_offset);
         // Dummy
         int_mv backup_fmv[2];
         backup_fmv[0] = frame_mv[NEWMV][ref_frame];
         if (comp_pred)
           backup_fmv[1] = frame_mv[NEWMV][second_ref_frame];
 
-        if (mbmi->mode == NEARMV) {
-          drl0_ctx = vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
-          rate2 += cpi->drl_mode_cost0[drl0_ctx][0];
-        } else {
-          drl_ctx = vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 0);
-          rate2 += cpi->drl_mode_cost0[drl_ctx][0];
-        }
+        rate2 += cpi->drl_mode_cost0[drl_ctx][0];
 
         if (this_rd < INT64_MAX) {
           if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
@@ -8164,23 +8156,20 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                            &tmp_sse, best_rd);
           }
 
-          if (this_mode == NEARMV) {
-            tmp_rate += cpi->drl_mode_cost0[drl0_ctx][1];
-            if (mbmi_ext->ref_mv_count[ref_frame_type] > 3) {
-              uint8_t drl1_ctx =
-                  vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 2);
-              tmp_rate += cpi->drl_mode_cost1[drl1_ctx][ref_idx];
-            }
+          for (i = 0; i < mbmi->ref_mv_idx; ++i) {
+            uint8_t drl1_ctx = 0;
+            drl1_ctx = vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type],
+                                    i + idx_offset);
+            tmp_rate += cpi->drl_mode_cost0[drl1_ctx][1];
           }
 
-          if (this_mode == NEWMV) {
-            tmp_rate += cpi->drl_mode_cost0[drl_ctx][1];
-
-            if (mbmi_ext->ref_mv_count[ref_frame_type] > 2) {
-              uint8_t this_drl_ctx =
-                  vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
-              tmp_rate += cpi->drl_mode_cost0[this_drl_ctx][ref_idx];
-            }
+          if (mbmi_ext->ref_mv_count[ref_frame_type] >
+              mbmi->ref_mv_idx + idx_offset + 1 &&
+              ref_idx < ref_set - 1) {
+            uint8_t drl1_ctx =
+                vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type],
+                             mbmi->ref_mv_idx + idx_offset);
+            tmp_rate += cpi->drl_mode_cost0[drl1_ctx][0];
           }
 
           if (tmp_alt_rd < INT64_MAX) {
