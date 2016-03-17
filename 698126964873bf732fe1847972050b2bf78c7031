@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3cc67a31_6ee1efba",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-03-17T09:44:01Z",
+      "side": 1,
+      "message": "indent",
+      "range": {
+        "startLine": 396,
+        "startChar": 6,
+        "endLine": 396,
+        "endChar": 7
+      },
+      "revId": "698126964873bf732fe1847972050b2bf78c7031",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cc67a31_0ee62bd4",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-03-17T09:44:01Z",
+      "side": 1,
+      "message": "indent",
+      "range": {
+        "startLine": 405,
+        "startChar": 6,
+        "endLine": 405,
+        "endChar": 7
+      },
+      "revId": "698126964873bf732fe1847972050b2bf78c7031",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
