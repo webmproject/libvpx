@@ -188,7 +188,11 @@ typedef struct MV_SPEED_FEATURES {
   // Maximum number of steps in logarithmic subpel search before giving up.
   int subpel_iters_per_step;
 
-  // Control when to stop subpel search
+  // Control when to stop subpel search:
+  // 0: Full subpel search.
+  // 1: Stop at quarter pixel.
+  // 2: Stop at half pixel.
+  // 3: Stop at full pixel.
   int subpel_force_stop;
 
   // This variable sets the step_param used in full pel motion search.
