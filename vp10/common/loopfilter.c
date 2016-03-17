@@ -1634,7 +1634,7 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
                            int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   int mi_row, mi_col;
-#if !CONFIG_VAR_TX
+#if !CONFIG_VAR_TX && !CONFIG_EXT_PARTITION_TYPES
   enum lf_path path;
   LOOP_FILTER_MASK lfm;
 
@@ -1646,7 +1646,7 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
     path = LF_PATH_444;
   else
     path = LF_PATH_SLOW;
-#endif
+#endif  // !CONFIG_VAR_TX && !CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_VAR_TX
   memset(cm->above_txfm_context, TX_SIZES, cm->mi_cols);
@@ -1661,7 +1661,7 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
 
       vp10_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
-#if CONFIG_VAR_TX
+#if CONFIG_VAR_TX || CONFIG_EXT_PARTITION_TYPES
       for (plane = 0; plane < num_planes; ++plane)
         vp10_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
                                        mi_row, mi_col);
@@ -1684,7 +1684,7 @@ void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
             break;
         }
       }
-#endif
+#endif  // CONFIG_VAR_TX || CONFIG_EXT_PARTITION_TYPES
     }
   }
 }

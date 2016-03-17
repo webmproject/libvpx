@@ -792,6 +792,10 @@ static int choose_partitioning(VP10_COMP *cpi,
     }
   }
 
+#if CONFIG_EXT_PARTITION_TYPES
+  assert(0);
+#endif
+
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
 
   if (xd->mb_to_right_edge < 0)
@@ -1386,6 +1390,9 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
   PARTITION_TYPE partition = pc_tree->partitioning;
   BLOCK_SIZE subsize = get_subsize(bsize, partition);
   int i;
+#if CONFIG_EXT_PARTITION_TYPES
+  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+#endif
   PICK_MODE_CONTEXT *pmc = NULL;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
@@ -1440,6 +1447,56 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
       }
       pmc = &pc_tree->split_supertx;
       break;
+#if CONFIG_EXT_PARTITION_TYPES
+    case PARTITION_HORZ_A:
+      set_offsets_supertx(cpi, td, tile, mi_row, mi_col, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->horizontala[0], mi_row, mi_col,
+                           bsize2, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->horizontala[1], mi_row,
+                           mi_col + hbs, bsize2, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, subsize);
+      update_state_supertx(cpi, td, &pc_tree->horizontala[2], mi_row + hbs,
+                           mi_col, subsize, output_enabled);
+      pmc = &pc_tree->horizontala_supertx;
+      break;
+    case PARTITION_HORZ_B:
+      set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
+      update_state_supertx(cpi, td, &pc_tree->horizontalb[0], mi_row, mi_col,
+                           subsize, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->horizontalb[1], mi_row + hbs,
+                           mi_col, bsize2, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col + hbs, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->horizontalb[2], mi_row + hbs,
+                           mi_col + hbs, bsize2, output_enabled);
+      pmc = &pc_tree->horizontalb_supertx;
+      break;
+    case PARTITION_VERT_A:
+      set_offsets_supertx(cpi, td, tile, mi_row, mi_col, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->verticala[0], mi_row, mi_col,
+                           bsize2, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->verticala[1], mi_row + hbs,
+                           mi_col, bsize2, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, subsize);
+      update_state_supertx(cpi, td, &pc_tree->verticala[2], mi_row,
+                           mi_col + hbs, subsize, output_enabled);
+      pmc = &pc_tree->verticala_supertx;
+      break;
+    case PARTITION_VERT_B:
+      set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
+      update_state_supertx(cpi, td, &pc_tree->verticalb[0], mi_row, mi_col,
+                           subsize, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->verticalb[1], mi_row,
+                           mi_col + hbs, bsize2, output_enabled);
+      set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col + hbs, bsize2);
+      update_state_supertx(cpi, td, &pc_tree->verticalb[2], mi_row + hbs,
+                           mi_col + hbs, bsize2, output_enabled);
+      pmc = &pc_tree->verticalb_supertx;
+      break;
+#endif  // CONFIG_EXT_PARTITION_TYPES
     default:
       assert(0);
   }
@@ -1488,6 +1545,9 @@ static void update_supertx_param_sb(VP10_COMP *cpi, ThreadData *td,
   int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   PARTITION_TYPE partition = pc_tree->partitioning;
   BLOCK_SIZE subsize = get_subsize(bsize, partition);
+#if CONFIG_EXT_PARTITION_TYPES
+  int i;
+#endif
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -1536,6 +1596,28 @@ static void update_supertx_param_sb(VP10_COMP *cpi, ThreadData *td,
                                 supertx_size, pc_tree->split[3]);
       }
       break;
+#if CONFIG_EXT_PARTITION_TYPES
+    case PARTITION_HORZ_A:
+      for ( i = 0; i < 3; i++)
+        update_supertx_param(td, &pc_tree->horizontala[i], best_tx,
+                            supertx_size);
+      break;
+    case PARTITION_HORZ_B:
+      for ( i = 0; i < 3; i++)
+        update_supertx_param(td, &pc_tree->horizontalb[i], best_tx,
+                            supertx_size);
+      break;
+    case PARTITION_VERT_A:
+      for ( i = 0; i < 3; i++)
+        update_supertx_param(td, &pc_tree->verticala[i], best_tx,
+                            supertx_size);
+      break;
+    case PARTITION_VERT_B:
+      for ( i = 0; i < 3; i++)
+        update_supertx_param(td, &pc_tree->verticalb[i], best_tx,
+                            supertx_size);
+      break;
+#endif  // CONFIG_EXT_PARTITION_TYPES
     default:
       assert(0);
   }
@@ -1576,6 +1658,9 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                              int *totalrate_nocoef,
 #endif
+#if CONFIG_EXT_PARTITION_TYPES
+                             PARTITION_TYPE partition,
+#endif
                              BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
                              int64_t best_rd) {
   VP10_COMMON *const cm = &cpi->common;
@@ -1602,6 +1687,9 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   // just happens to be the supertx_size, then the packer will code this
   // block as a supertx block, even if rdopt did not pick it as such.
   mbmi->tx_size = max_txsize_lookup[bsize];
+#endif
+#if CONFIG_EXT_PARTITION_TYPES
+  mbmi->partition = partition;
 #endif
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
@@ -2078,9 +2166,15 @@ static void encode_b(VP10_COMP *cpi, const TileInfo *const tile,
                      ThreadData *td,
                      TOKENEXTRA **tp, int mi_row, int mi_col,
                      int output_enabled, BLOCK_SIZE bsize,
+#if CONFIG_EXT_PARTITION_TYPES
+                     PARTITION_TYPE partition,
+#endif
                      PICK_MODE_CONTEXT *ctx) {
   MACROBLOCK *const x = &td->mb;
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
+#if CONFIG_EXT_PARTITION_TYPES
+  x->e_mbd.mi[0]->mbmi.partition = partition;
+#endif
   update_state(cpi, td, ctx, mi_row, mi_col, bsize, output_enabled);
   encode_superblock(cpi, td, tp, output_enabled, mi_row, mi_col, bsize, ctx);
 
@@ -2106,6 +2200,9 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
   int ctx;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize = bsize;
+#if CONFIG_EXT_PARTITION_TYPES
+  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+#endif
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -2119,6 +2216,10 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
   }
 
   partition = partition_lookup[bsl][subsize];
+#if CONFIG_EXT_PARTITION_TYPES
+  if (bsize > BLOCK_8X8)
+    partition = pc_tree->partitioning;
+#endif
   if (output_enabled && bsize != BLOCK_4X4)
     td->counts->partition[ctx][partition]++;
 
@@ -2197,8 +2298,13 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
         }
 #endif  // CONFIG_EXT_TX
       }
+#if CONFIG_EXT_PARTITION_TYPES
+      update_ext_partition_context(xd, mi_row, mi_col, subsize, bsize,
+                                   partition);
+#else
       if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
         update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+#endif
 #if CONFIG_VAR_TX
       set_txfm_ctx(xd->left_txfm_context, supertx_size, xd->n8_h);
       set_txfm_ctx(xd->above_txfm_context, supertx_size, mi_height);
@@ -2216,27 +2322,47 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
   switch (partition) {
     case PARTITION_NONE:
       encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+#if CONFIG_EXT_PARTITION_TYPES
+               partition,
+#endif
                &pc_tree->none);
       break;
     case PARTITION_VERT:
       encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+#if CONFIG_EXT_PARTITION_TYPES
+               partition,
+#endif
                &pc_tree->vertical[0]);
       if (mi_col + hbs < cm->mi_cols && bsize > BLOCK_8X8) {
         encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled,
-                 subsize, &pc_tree->vertical[1]);
+                 subsize,
+#if CONFIG_EXT_PARTITION_TYPES
+                 partition,
+#endif
+                 &pc_tree->vertical[1]);
       }
       break;
     case PARTITION_HORZ:
       encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+#if CONFIG_EXT_PARTITION_TYPES
+               partition,
+#endif
                &pc_tree->horizontal[0]);
       if (mi_row + hbs < cm->mi_rows && bsize > BLOCK_8X8) {
         encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled,
-                 subsize, &pc_tree->horizontal[1]);
+                 subsize,
+#if CONFIG_EXT_PARTITION_TYPES
+                 partition,
+#endif
+                 &pc_tree->horizontal[1]);
       }
       break;
     case PARTITION_SPLIT:
       if (bsize == BLOCK_8X8) {
         encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+#if CONFIG_EXT_PARTITION_TYPES
+                 partition,
+#endif
                  pc_tree->leaf_split[0]);
       } else {
         encode_sb(cpi, td, tile, tp, mi_row, mi_col, output_enabled, subsize,
@@ -2249,13 +2375,52 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
                   subsize, pc_tree->split[3]);
       }
       break;
+#if CONFIG_EXT_PARTITION_TYPES
+    case PARTITION_HORZ_A:
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, bsize2,
+               partition, &pc_tree->horizontala[0]);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled, bsize2,
+               partition, &pc_tree->horizontala[1]);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled, subsize,
+               partition, &pc_tree->horizontala[2]);
+      break;
+    case PARTITION_HORZ_B:
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+               partition, &pc_tree->horizontalb[0]);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled, bsize2,
+               partition, &pc_tree->horizontalb[1]);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col + hbs, output_enabled,
+               bsize2, partition, &pc_tree->horizontalb[2]);
+      break;
+    case PARTITION_VERT_A:
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, bsize2,
+               partition, &pc_tree->verticala[0]);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled, bsize2,
+               partition, &pc_tree->verticala[1]);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled, subsize,
+               partition, &pc_tree->verticala[2]);
+
+      break;
+    case PARTITION_VERT_B:
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+               partition, &pc_tree->verticalb[0]);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled, bsize2,
+               partition, &pc_tree->verticalb[1]);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col + hbs, output_enabled,
+               bsize2, partition, &pc_tree->verticalb[2]);
+      break;
+#endif  // CONFIG_EXT_PARTITION_TYPES
     default:
       assert(0 && "Invalid partition type.");
       break;
   }
 
+#if CONFIG_EXT_PARTITION_TYPES
+  update_ext_partition_context(xd, mi_row, mi_col, subsize, bsize, partition);
+#else
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+#endif  // CONFIG_EXT_PARTITION_TYPES
 }
 
 // Check to see if the given partition size is allowed for a specified number
@@ -2365,6 +2530,10 @@ static void rd_use_partition(VP10_COMP *cpi,
   int chosen_rate_nocoef = INT_MAX;
 #endif
 
+#if CONFIG_EXT_PARTITION_TYPES
+  assert(0);
+#endif
+
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
@@ -2418,6 +2587,9 @@ static void rd_use_partition(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                        &none_rate_nocoef,
 #endif
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_NONE,
+#endif
                        bsize, ctx, INT64_MAX);
 
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -2444,12 +2616,18 @@ static void rd_use_partition(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                        &last_part_rate_nocoef,
 #endif
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_NONE,
+#endif
                        bsize, ctx, INT64_MAX);
       break;
     case PARTITION_HORZ:
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &last_part_rdc,
 #if CONFIG_SUPERTX
                        &last_part_rate_nocoef,
+#endif
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_HORZ,
 #endif
                        subsize, &pc_tree->horizontal[0],
                        INT64_MAX);
@@ -2467,6 +2645,9 @@ static void rd_use_partition(VP10_COMP *cpi,
                          mi_row + (mi_step >> 1), mi_col, &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
+#endif
+#if CONFIG_EXT_PARTITION_TYPES
+                         PARTITION_HORZ,
 #endif
                          subsize, &pc_tree->horizontal[1], INT64_MAX);
         if (tmp_rdc.rate == INT_MAX || tmp_rdc.dist == INT64_MAX) {
@@ -2489,6 +2670,9 @@ static void rd_use_partition(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                        &last_part_rate_nocoef,
 #endif
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_VERT,
+#endif
                        subsize, &pc_tree->vertical[0], INT64_MAX);
       if (last_part_rdc.rate != INT_MAX &&
           bsize >= BLOCK_8X8 && mi_col + (mi_step >> 1) < cm->mi_cols) {
@@ -2504,6 +2688,9 @@ static void rd_use_partition(VP10_COMP *cpi,
                          mi_row, mi_col + (mi_step >> 1), &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
+#endif
+#if CONFIG_EXT_PARTITION_TYPES
+                         PARTITION_VERT,
 #endif
                          subsize, &pc_tree->vertical[bsize > BLOCK_8X8],
                          INT64_MAX);
@@ -2527,6 +2714,9 @@ static void rd_use_partition(VP10_COMP *cpi,
         rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &last_part_rdc,
 #if CONFIG_SUPERTX
                          &last_part_rate_nocoef,
+#endif
+#if CONFIG_EXT_PARTITION_TYPES
+                         PARTITION_SPLIT,
 #endif
                          subsize, pc_tree->leaf_split[0], INT64_MAX);
         break;
@@ -2624,6 +2814,9 @@ static void rd_use_partition(VP10_COMP *cpi,
                        mi_row + y_idx, mi_col + x_idx, &tmp_rdc,
 #if CONFIG_SUPERTX
                        &rt_nocoef,
+#endif
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_SPLIT,
 #endif
                        split_subsize, &pc_tree->split[i]->none, INT64_MAX);
 
@@ -2945,6 +3138,192 @@ static INLINE int get_motion_inconsistency(MOTION_DIRECTION this_mv,
 }
 #endif
 
+#if CONFIG_EXT_PARTITION_TYPES
+static void rd_test_partition3(VP10_COMP *cpi, ThreadData *td,
+                               TileDataEnc *tile_data,
+                               TOKENEXTRA **tp, PC_TREE *pc_tree,
+                               RD_COST *best_rdc, PICK_MODE_CONTEXT ctxs[3],
+                               PICK_MODE_CONTEXT *ctx,
+                               int mi_row, int mi_col, BLOCK_SIZE bsize,
+                               PARTITION_TYPE partition,
+#if CONFIG_SUPERTX
+                               int64_t best_rd, int *best_rate_nocoef,
+                               RD_SEARCH_MACROBLOCK_CONTEXT* x_ctx,
+#endif
+                               int mi_row0, int mi_col0, BLOCK_SIZE subsize0,
+                               int mi_row1, int mi_col1, BLOCK_SIZE subsize1,
+                               int mi_row2, int mi_col2, BLOCK_SIZE subsize2) {
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  RD_COST this_rdc, sum_rdc;
+#if CONFIG_SUPERTX
+  VP10_COMMON *const cm = &cpi->common;
+  TileInfo *const tile_info = &tile_data->tile_info;
+  int this_rate_nocoef, sum_rate_nocoef;
+  int abort_flag;
+  PARTITION_TYPE best_partition;
+  int tmp_rate;
+  int64_t tmp_dist, tmp_rd;
+#endif
+  if (cpi->sf.adaptive_motion_search)
+    load_pred_mv(x, ctx);
+
+  rd_pick_sb_modes(cpi, tile_data, x, mi_row0, mi_col0, &sum_rdc,
+#if CONFIG_SUPERTX
+                   &sum_rate_nocoef,
+#endif
+#if CONFIG_EXT_PARTITION_TYPES
+                   partition,
+#endif
+                   subsize0, &ctxs[0], best_rdc->rdcost);
+#if CONFIG_SUPERTX
+  abort_flag = sum_rdc.rdcost >= best_rd;
+#endif
+
+#if CONFIG_SUPERTX
+  if (sum_rdc.rdcost < INT64_MAX) {
+#else
+  if (sum_rdc.rdcost < best_rdc->rdcost) {
+#endif
+    PICK_MODE_CONTEXT *ctx = &ctxs[0];
+    update_state(cpi, td, ctx, mi_row0, mi_col0, subsize0, 0);
+    encode_superblock(cpi, td, tp, 0, mi_row0, mi_col0, subsize0, ctx);
+
+    if (cpi->sf.adaptive_motion_search)
+      load_pred_mv(x, ctx);
+
+#if CONFIG_SUPERTX
+    rd_pick_sb_modes(cpi, tile_data, x, mi_row1, mi_col1, &this_rdc,
+                     &this_rate_nocoef,
+#if CONFIG_EXT_PARTITION_TYPES
+                     partition,
+#endif
+                     subsize1, &ctxs[1], INT64_MAX - sum_rdc.rdcost);
+#else
+    rd_pick_sb_modes(cpi, tile_data, x, mi_row1, mi_col1, &this_rdc,
+#if CONFIG_EXT_PARTITION_TYPES
+                     partition,
+#endif
+                     subsize1, &ctxs[1], best_rdc->rdcost - sum_rdc.rdcost);
+#endif  // CONFIG_SUPERTX
+
+    if (this_rdc.rate == INT_MAX) {
+      sum_rdc.rdcost = INT64_MAX;
+#if CONFIG_SUPERTX
+      sum_rate_nocoef = INT_MAX;
+#endif
+    } else {
+      sum_rdc.rate += this_rdc.rate;
+      sum_rdc.dist += this_rdc.dist;
+      sum_rdc.rdcost += this_rdc.rdcost;
+#if CONFIG_SUPERTX
+      sum_rate_nocoef += this_rate_nocoef;
+#endif
+    }
+
+#if CONFIG_SUPERTX
+    if (sum_rdc.rdcost < INT64_MAX) {
+#else
+    if (sum_rdc.rdcost < best_rdc->rdcost) {
+#endif
+      PICK_MODE_CONTEXT *ctx = &ctxs[1];
+      update_state(cpi, td, ctx, mi_row1, mi_col1, subsize1, 0);
+      encode_superblock(cpi, td, tp, 0, mi_row1, mi_col1, subsize1, ctx);
+
+      if (cpi->sf.adaptive_motion_search)
+        load_pred_mv(x, ctx);
+
+#if CONFIG_SUPERTX
+      rd_pick_sb_modes(cpi, tile_data, x, mi_row2, mi_col2, &this_rdc,
+                       &this_rate_nocoef,
+#if CONFIG_EXT_PARTITION_TYPES
+                       partition,
+#endif
+                       subsize2, &ctxs[2], INT64_MAX - sum_rdc.rdcost);
+#else
+      rd_pick_sb_modes(cpi, tile_data, x, mi_row2, mi_col2, &this_rdc,
+#if CONFIG_EXT_PARTITION_TYPES
+                       partition,
+#endif
+                       subsize2, &ctxs[2], best_rdc->rdcost - sum_rdc.rdcost);
+#endif  // CONFIG_SUPERTX
+
+      if (this_rdc.rate == INT_MAX) {
+        sum_rdc.rdcost = INT64_MAX;
+#if CONFIG_SUPERTX
+        sum_rate_nocoef = INT_MAX;
+#endif
+      } else {
+        sum_rdc.rate += this_rdc.rate;
+        sum_rdc.dist += this_rdc.dist;
+        sum_rdc.rdcost += this_rdc.rdcost;
+#if CONFIG_SUPERTX
+        sum_rate_nocoef += this_rate_nocoef;
+#endif
+      }
+
+#if CONFIG_SUPERTX
+      if (cm->frame_type != KEY_FRAME && !abort_flag &&
+          sum_rdc.rdcost < INT64_MAX && bsize <= MAX_SUPERTX_BLOCK_SIZE &&
+          !xd->lossless[0]) {
+        TX_SIZE supertx_size = max_txsize_lookup[bsize];
+        best_partition = pc_tree->partitioning;
+        pc_tree->partitioning = partition;
+        sum_rdc.rate += vp10_cost_bit(
+            cm->fc->supertx_prob
+            [partition_supertx_context_lookup[partition]][supertx_size],
+            0);
+        sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, sum_rdc.rate,
+                                sum_rdc.dist);
+
+        if (!check_intra_sb(cpi, tile_info, mi_row, mi_col, bsize, pc_tree)) {
+          TX_TYPE best_tx = DCT_DCT;
+
+          tmp_rate = sum_rate_nocoef;
+          tmp_dist = 0;
+          restore_context(x, x_ctx, mi_row, mi_col, bsize);
+          rd_supertx_sb(cpi, td, tile_info, mi_row, mi_col, bsize, &tmp_rate,
+                        &tmp_dist, &best_tx, pc_tree);
+
+          tmp_rate += vp10_cost_bit(
+              cm->fc->supertx_prob
+              [partition_supertx_context_lookup[partition]][supertx_size],
+              1);
+          tmp_rd = RDCOST(x->rdmult, x->rddiv, tmp_rate, tmp_dist);
+          if (tmp_rd < sum_rdc.rdcost) {
+            sum_rdc.rdcost = tmp_rd;
+            sum_rdc.rate = tmp_rate;
+            sum_rdc.dist = tmp_dist;
+            update_supertx_param_sb(cpi, td, mi_row, mi_col, bsize, best_tx,
+                                    supertx_size, pc_tree);
+          }
+        }
+        pc_tree->partitioning = best_partition;
+      }
+#endif  // CONFIG_SUPERTX
+
+      if (sum_rdc.rdcost < best_rdc->rdcost) {
+        int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
+        sum_rdc.rate += cpi->partition_cost[pl][partition];
+        sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, sum_rdc.rate,
+                                sum_rdc.dist);
+#if CONFIG_SUPERTX
+        sum_rate_nocoef += cpi->partition_cost[pl][partition];
+#endif
+        if (sum_rdc.rdcost < best_rdc->rdcost) {
+#if CONFIG_SUPERTX
+          *best_rate_nocoef = sum_rate_nocoef;
+          assert(*best_rate_nocoef >= 0);
+#endif
+          *best_rdc = sum_rdc;
+          pc_tree->partitioning = partition;
+        }
+      }
+    }
+  }
+}
+#endif  // CONFIG_EXT_PARTITION_TYPES
+
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
@@ -2977,6 +3356,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_SUPERTX
   int do_split = bsize >= BLOCK_8X8;
   int do_rect = 1;
+#if CONFIG_EXT_PARTITION_TYPES
+  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+#endif
 
   // Override skipping rectangular partition operations for edge blocks
   const int force_horz_split = (mi_row + mi_step >= cm->mi_rows);
@@ -3107,6 +3489,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_SUPERTX
                      &this_rate_nocoef,
 #endif
+#if CONFIG_EXT_PARTITION_TYPES
+                     PARTITION_NONE,
+#endif
                      bsize, ctx, best_rdc.rdcost);
     if (this_rdc.rate != INT_MAX) {
       if (bsize >= BLOCK_8X8) {
@@ -3215,11 +3600,17 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
             ctx->mic.mbmi.interp_filter;
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
-                       &sum_rate_nocoef, subsize, pc_tree->leaf_split[0],
-                       INT64_MAX);
+                       &sum_rate_nocoef,
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_SPLIT,
+#endif
+                       subsize, pc_tree->leaf_split[0], INT64_MAX);
 #else
-      rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
-                       pc_tree->leaf_split[0], best_rdc.rdcost);
+      rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_SPLIT,
+#endif
+                       subsize, pc_tree->leaf_split[0], best_rdc.rdcost);
 #endif  // CONFIG_SUPERTX
       if (sum_rdc.rate == INT_MAX) {
         sum_rdc.rdcost = INT64_MAX;
@@ -3400,6 +3791,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_SUPERTX
                      &sum_rate_nocoef,
 #endif  // CONFIG_SUPERTX
+#if CONFIG_EXT_PARTITION_TYPES
+                     PARTITION_HORZ,
+#endif
                      subsize, &pc_tree->horizontal[0], best_rdc.rdcost);
 
 #if CONFIG_SUPERTX
@@ -3424,11 +3818,18 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row + mi_step, mi_col,
                        &this_rdc, &this_rate_nocoef,
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_HORZ,
+#endif
                        subsize, &pc_tree->horizontal[1],
                        INT64_MAX);
 #else
       rd_pick_sb_modes(cpi, tile_data, x, mi_row + mi_step, mi_col,
-                       &this_rdc, subsize, &pc_tree->horizontal[1],
+                       &this_rdc,
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_HORZ,
+#endif
+                       subsize, &pc_tree->horizontal[1],
                        best_rdc.rdcost - sum_rdc.rdcost);
 #endif  // CONFIG_SUPERTX
       if (this_rdc.rate == INT_MAX) {
@@ -3522,6 +3923,9 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_SUPERTX
                      &sum_rate_nocoef,
 #endif  // CONFIG_SUPERTX
+#if CONFIG_EXT_PARTITION_TYPES
+                     PARTITION_VERT,
+#endif
                      subsize, &pc_tree->vertical[0], best_rdc.rdcost);
 #if CONFIG_SUPERTX
     abort_flag = (sum_rdc.rdcost >= best_rd && bsize > BLOCK_8X8) ||
@@ -3544,11 +3948,19 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
             ctx->mic.mbmi.interp_filter;
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + mi_step, &this_rdc,
-                       &this_rate_nocoef, subsize, &pc_tree->vertical[1],
+                       &this_rate_nocoef,
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_VERT,
+#endif
+                       subsize, &pc_tree->vertical[1],
                        INT64_MAX - sum_rdc.rdcost);
 #else
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + mi_step,
-                       &this_rdc, subsize,
+                       &this_rdc,
+#if CONFIG_EXT_PARTITION_TYPES
+                       PARTITION_VERT,
+#endif
+                       subsize,
                        &pc_tree->vertical[1], best_rdc.rdcost - sum_rdc.rdcost);
 #endif  // CONFIG_SUPERTX
       if (this_rdc.rate == INT_MAX) {
@@ -3624,9 +4036,71 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
         pc_tree->partitioning = PARTITION_VERT;
       }
     }
-
     restore_context(x, &x_ctx, mi_row, mi_col, bsize);
   }
+
+#if CONFIG_EXT_PARTITION_TYPES
+  // PARTITION_HORZ_A
+  if (partition_horz_allowed && do_rect && bsize > BLOCK_8X8 &&
+      partition_none_allowed) {
+    subsize = get_subsize(bsize, PARTITION_HORZ_A);
+    rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
+                       pc_tree->horizontala,
+                       ctx, mi_row, mi_col, bsize, PARTITION_HORZ_A,
+#if CONFIG_SUPERTX
+                       best_rd, &best_rate_nocoef, &x_ctx,
+#endif
+                       mi_row, mi_col, bsize2,
+                       mi_row, mi_col + mi_step, bsize2,
+                       mi_row + mi_step, mi_col, subsize);
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+  }
+  // PARTITION_HORZ_B
+  if (partition_horz_allowed && do_rect && bsize > BLOCK_8X8 &&
+      partition_none_allowed) {
+    subsize = get_subsize(bsize, PARTITION_HORZ_B);
+    rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
+                       pc_tree->horizontalb,
+                       ctx, mi_row, mi_col, bsize, PARTITION_HORZ_B,
+#if CONFIG_SUPERTX
+                       best_rd, &best_rate_nocoef, &x_ctx,
+#endif
+                       mi_row, mi_col, subsize,
+                       mi_row + mi_step, mi_col, bsize2,
+                       mi_row + mi_step, mi_col + mi_step, bsize2);
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+  }
+  // PARTITION_VERT_A
+  if (partition_vert_allowed && do_rect && bsize > BLOCK_8X8 &&
+      partition_none_allowed) {
+    subsize = get_subsize(bsize, PARTITION_VERT_A);
+    rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
+                       pc_tree->verticala,
+                       ctx, mi_row, mi_col, bsize, PARTITION_VERT_A,
+#if CONFIG_SUPERTX
+                       best_rd, &best_rate_nocoef, &x_ctx,
+#endif
+                       mi_row, mi_col, bsize2,
+                       mi_row + mi_step, mi_col, bsize2,
+                       mi_row, mi_col + mi_step, subsize);
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+  }
+  // PARTITION_VERT_B
+  if (partition_vert_allowed && do_rect && bsize > BLOCK_8X8 &&
+      partition_none_allowed) {
+    subsize = get_subsize(bsize, PARTITION_VERT_B);
+    rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
+                       pc_tree->verticalb,
+                       ctx, mi_row, mi_col, bsize, PARTITION_VERT_B,
+#if CONFIG_SUPERTX
+                       best_rd, &best_rate_nocoef, &x_ctx,
+#endif
+                       mi_row, mi_col, subsize,
+                       mi_row, mi_col + mi_step, bsize2,
+                       mi_row + mi_step, mi_col + mi_step, bsize2);
+    restore_context(x, &x_ctx, mi_row, mi_col, bsize);
+  }
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
   // TODO(jbb): This code added so that we avoid static analysis
   // warning related to the fact that best_rd isn't used after this
@@ -4576,6 +5050,9 @@ static int check_intra_sb(VP10_COMP *cpi, const TileInfo *const tile,
   const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize = bsize;
+#if CONFIG_EXT_PARTITION_TYPES
+  int i;
+#endif
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return 1;
@@ -4586,6 +5063,10 @@ static int check_intra_sb(VP10_COMP *cpi, const TileInfo *const tile,
     subsize = BLOCK_4X4;
 
   partition = partition_lookup[bsl][subsize];
+#if CONFIG_EXT_PARTITION_TYPES
+  if (bsize > BLOCK_8X8)
+    partition = pc_tree->partitioning;
+#endif
 
   switch (partition) {
     case PARTITION_NONE:
@@ -4626,6 +5107,32 @@ static int check_intra_sb(VP10_COMP *cpi, const TileInfo *const tile,
           return 1;
       }
       break;
+#if CONFIG_EXT_PARTITION_TYPES
+    case PARTITION_HORZ_A:
+      for (i = 0; i < 3; i++) {
+        if (check_intra_b(&pc_tree->horizontala[i]))
+          return 1;
+      }
+      break;
+    case PARTITION_HORZ_B:
+      for (i = 0; i < 3; i++) {
+        if (check_intra_b(&pc_tree->horizontalb[i]))
+          return 1;
+      }
+      break;
+    case PARTITION_VERT_A:
+      for (i = 0; i < 3; i++) {
+        if (check_intra_b(&pc_tree->verticala[i]))
+          return 1;
+      }
+      break;
+    case PARTITION_VERT_B:
+      for (i = 0; i < 3; i++) {
+        if (check_intra_b(&pc_tree->verticalb[i]))
+          return 1;
+      }
+      break;
+#endif  // CONFIG_EXT_PARTITION_TYPES
     default:
       assert(0);
   }
@@ -4655,6 +5162,16 @@ static int check_supertx_sb(BLOCK_SIZE bsize, TX_SIZE supertx_size,
         return check_supertx_b(supertx_size, pc_tree->leaf_split[0]);
       else
         return check_supertx_sb(subsize, supertx_size, pc_tree->split[0]);
+#if CONFIG_EXT_PARTITION_TYPES
+    case PARTITION_HORZ_A:
+      return check_supertx_b(supertx_size, &pc_tree->horizontala[0]);
+    case PARTITION_HORZ_B:
+      return check_supertx_b(supertx_size, &pc_tree->horizontalb[0]);
+    case PARTITION_VERT_A:
+      return check_supertx_b(supertx_size, &pc_tree->verticala[0]);
+    case PARTITION_VERT_B:
+      return check_supertx_b(supertx_size, &pc_tree->verticalb[0]);
+#endif  // CONFIG_EXT_PARTITION_TYPES
     default:
       assert(0);
       return 0;
@@ -4889,6 +5406,9 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
   const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
+#if CONFIG_EXT_PARTITION_TYPES
+  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+#endif
 
   int i, ctx;
   uint8_t *dst_buf1[3], *dst_buf2[3], *dst_buf3[3];
@@ -4939,6 +5459,10 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
     subsize = BLOCK_4X4;
   }
   partition = partition_lookup[bsl][subsize];
+#if CONFIG_EXT_PARTITION_TYPES
+  if (bsize > BLOCK_8X8)
+    partition = pc_tree->partitioning;
+#endif
   if (output_enabled && bsize != BLOCK_4X4 && bsize < top_bsize)
       cm->counts.partition[ctx][partition]++;
 
@@ -5199,13 +5723,225 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
           }
         }
         break;
+#if CONFIG_EXT_PARTITION_TYPES
+    case PARTITION_HORZ_A:
+      predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
+                       mi_row_top, mi_col_top, dst_buf, dst_stride,
+                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col,
+                 mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs,
+                       mi_row, mi_col + hbs, mi_row_top, mi_col_top,
+                       dst_buf1, dst_stride1, bsize2, top_bsize, bsize2,
+                       output_enabled, 0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col + hbs,
+                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
+                       mi_col, mi_row_top, mi_col_top, dst_buf2, dst_stride2,
+                       subsize, top_bsize, subsize, output_enabled, 0, 0);
+      if (bsize < top_bsize)
+        extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs, mi_col,
+                   mi_row_top, mi_col_top, output_enabled,
+                   dst_buf2, dst_stride2);
+      else
+        extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs, mi_col,
+                   mi_row_top, mi_col_top, output_enabled,
+                   dst_buf2, dst_stride2, 1);
+
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = dst_buf[i];
+        xd->plane[i].dst.stride = dst_stride[i];
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
+      }
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
+      }
+
+      break;
+    case PARTITION_VERT_A:
+
+      predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
+                       mi_row_top, mi_col_top, dst_buf, dst_stride,
+                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col,
+                 mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
+                       mi_col, mi_row_top, mi_col_top, dst_buf1, dst_stride1,
+                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs, mi_col,
+                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
+                       mi_col + hbs, mi_row_top, mi_col_top, dst_buf2,
+                       dst_stride2, subsize, top_bsize, subsize, output_enabled,
+                       0, 0);
+      if (bsize < top_bsize)
+        extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col + hbs,
+                   mi_row_top, mi_col_top, output_enabled,
+                   dst_buf2, dst_stride2);
+      else
+        extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col + hbs,
+                   mi_row_top, mi_col_top, output_enabled,
+                   dst_buf2, dst_stride2, 2);
+
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = dst_buf[i];
+        xd->plane[i].dst.stride = dst_stride[i];
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
+      }
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
+      }
+      break;
+    case PARTITION_HORZ_B:
+
+      predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
+                       mi_row_top, mi_col_top, dst_buf, dst_stride,
+                       subsize, top_bsize, subsize, output_enabled, 0, 0);
+      if (bsize < top_bsize)
+        extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
+                   mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+      else
+        extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
+                   mi_row_top, mi_col_top, output_enabled,
+                   dst_buf, dst_stride, 0);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
+                       mi_col, mi_row_top, mi_col_top, dst_buf1, dst_stride1,
+                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs, mi_col,
+                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col + hbs,
+                       mi_row + hbs, mi_col + hbs, mi_row_top, mi_col_top,
+                       dst_buf2, dst_stride2, bsize2, top_bsize, bsize2,
+                       output_enabled, 0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs,
+                 mi_col + hbs, mi_row_top, mi_col_top, output_enabled, dst_buf2,
+                 dst_stride2);
+
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = dst_buf1[i];
+        xd->plane[i].dst.stride = dst_stride1[i];
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
+      }
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = dst_buf[i];
+        xd->plane[i].dst.stride = dst_stride[i];
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
+      }
+      break;
+    case PARTITION_VERT_B:
+
+      predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
+                       mi_row_top, mi_col_top, dst_buf, dst_stride,
+                       subsize, top_bsize, subsize, output_enabled, 0, 0);
+      if (bsize < top_bsize)
+        extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
+                   mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+      else
+        extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
+                   mi_row_top, mi_col_top, output_enabled,
+                   dst_buf, dst_stride, 3);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
+                       mi_col + hbs, mi_row_top, mi_col_top, dst_buf1,
+                       dst_stride1, bsize2, top_bsize, bsize2, output_enabled,
+                       0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col + hbs,
+                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+
+      predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col + hbs,
+                       mi_row + hbs, mi_col + hbs, mi_row_top, mi_col_top,
+                       dst_buf2, dst_stride2, bsize2, top_bsize, bsize2,
+                       output_enabled, 0, 0);
+      extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs,
+                 mi_col + hbs, mi_row_top, mi_col_top, output_enabled, dst_buf2,
+                 dst_stride2);
+
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = dst_buf1[i];
+        xd->plane[i].dst.stride = dst_stride1[i];
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
+      }
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = dst_buf[i];
+        xd->plane[i].dst.stride = dst_stride[i];
+        vp10_build_masked_inter_predictor_complex(xd,
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  &xd->plane[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
+      }
+      break;
+#endif  // CONFIG_EXT_PARTITION_TYPES
     default:
         assert(0);
   }
 
 
+#if CONFIG_EXT_PARTITION_TYPES
+  if (bsize < top_bsize)
+    update_ext_partition_context(xd, mi_row, mi_col, subsize, bsize, partition);
+#else
   if (bsize < top_bsize && (partition != PARTITION_SPLIT || bsize == BLOCK_8X8))
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+#endif  // CONFIG_EXT_PARTITION_TYPES
 }
 
 static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,

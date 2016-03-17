@@ -96,7 +96,9 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MI_BLOCK_SIZE_LOG2;
   int mi_row, mi_col;
+#if !CONFIG_EXT_PARTITION_TYPES
   enum lf_path path;
+  LOOP_FILTER_MASK lfm;
   if (y_only)
     path = LF_PATH_444;
   else if (planes[1].subsampling_y == 1 && planes[1].subsampling_x == 1)
@@ -105,6 +107,7 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
     path = LF_PATH_444;
   else
     path = LF_PATH_SLOW;
+#endif  // !CONFIG_EXT_PARTITION_TYPES
 
   for (mi_row = start; mi_row < stop;
        mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
@@ -113,13 +116,17 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       const int r = mi_row >> MI_BLOCK_SIZE_LOG2;
       const int c = mi_col >> MI_BLOCK_SIZE_LOG2;
-      LOOP_FILTER_MASK lfm;
       int plane;
 
       sync_read(lf_sync, r, c);
 
       vp10_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
+#if CONFIG_EXT_PARTITION_TYPES
+      for (plane = 0; plane < num_planes; ++plane)
+        vp10_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
+                                       mi_row, mi_col);
+#else
       // TODO(JBB): Make setup_mask work for non 420.
       vp10_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
                      &lfm);
@@ -139,7 +146,7 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
             break;
         }
       }
-
+#endif  // CONFIG_EXT_PARTITION_TYPES
       sync_write(lf_sync, r, c, sb_cols);
     }
   }
@@ -331,7 +338,11 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
       cm->counts.uv_mode[i][j] += counts->uv_mode[i][j];
 
   for (i = 0; i < PARTITION_CONTEXTS; i++)
+#if CONFIG_EXT_PARTITION_TYPES
+    for (j = 0; j < (i ? EXT_PARTITION_TYPES : PARTITION_TYPES); j++)
+#else
     for (j = 0; j < PARTITION_TYPES; j++)
+#endif
       cm->counts.partition[i][j] += counts->partition[i][j];
 
   if (is_dec) {

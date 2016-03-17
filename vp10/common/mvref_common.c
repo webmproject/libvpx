@@ -246,30 +246,50 @@ static uint8_t scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   return newmv_count;
 }
 
+// This function assumes MI blocks are 8x8 and coding units are 64x64
 static int has_top_right(const MACROBLOCKD *xd,
                          int mi_row, int mi_col, int bs) {
+  // In a split partition all apart from the bottom right has a top right
   int has_tr = !((mi_row & bs) & (bs * 2 - 1)) ||
                !((mi_col & bs) & (bs * 2 - 1));
 
   // Filter out partial right-most boundaries
+  // For each 4x4 group of blocks, when the bottom right is decoded the blocks
+  // to the right have not been decoded therefore the second from bottom in the
+  // right-most column does not have a top right
   if ((mi_col & bs) & (bs * 2 - 1)) {
     if (((mi_col & (2 * bs)) & (bs * 4 - 1)) &&
         ((mi_row & (2 * bs)) & (bs * 4 - 1)))
       has_tr = 0;
   }
 
+  // If the right had side of the block lines up with the right had edge end of
+  // a group of 8x8 MI blocks (i.e. edge of a coding unit) and is not on the top
+  // row of that coding unit, it does not have a top right
   if (has_tr)
     if (((mi_col + xd->n8_w) & 0x07) == 0)
       if ((mi_row & 0x07) > 0)
         has_tr = 0;
 
+  // The left had of two vertical rectangles always has a top right (as the
+  // block above will have been decoded)
   if (xd->n8_w < xd->n8_h)
     if (!xd->is_sec_rect)
       has_tr = 1;
 
+  // The bottom of two horizontal rectangles never has a top right (as the block
+  // to the right won't have been decoded)
   if (xd->n8_w > xd->n8_h)
     if (xd->is_sec_rect)
       has_tr = 0;
+
+#if CONFIG_EXT_PARTITION_TYPES
+  // The bottom left square of a Vertical A does not have a top right as it is
+  // decoded before the right hand rectangle of the partition
+  if (xd->mi[0]->mbmi.partition == PARTITION_VERT_A)
+    if ((mi_row & bs) && !(mi_col & bs))
+      has_tr = 0;
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
   return has_tr;
 }

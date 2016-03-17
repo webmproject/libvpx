@@ -282,9 +282,9 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
       const MV diff = {mvs[i].as_mv.row - ref->row,
                        mvs[i].as_mv.col - ref->col};
 #if CONFIG_REF_MV
-    int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[i]],
-                               mbmi_ext->ref_mv_stack[mbmi->ref_frame[i]]);
-    nmv_context_counts *counts = &nmv_counts[nmv_ctx];
+      int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[i]],
+                                 mbmi_ext->ref_mv_stack[mbmi->ref_frame[i]]);
+      nmv_context_counts *counts = &nmv_counts[nmv_ctx];
 #endif
       vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
     }
@@ -332,9 +332,9 @@ static void inc_mvs_sub8x8(const MODE_INFO *mi,
       const MV diff = {mvs[i].as_mv.row - ref->row,
                        mvs[i].as_mv.col - ref->col};
 #if CONFIG_REF_MV
-    int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[i]],
-                               mbmi_ext->ref_mv_stack[mbmi->ref_frame[i]]);
-    nmv_context_counts *counts = &nmv_counts[nmv_ctx];
+      int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[i]],
+                                 mbmi_ext->ref_mv_stack[mbmi->ref_frame[i]]);
+      nmv_context_counts *counts = &nmv_counts[nmv_ctx];
 #endif
       vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
     }
