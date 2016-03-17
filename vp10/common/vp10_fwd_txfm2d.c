@@ -9,8 +9,47 @@
  */
 
 #include "vp10/common/vp10_txfm.h"
+#include "vp10/common/vp10_fwd_txfm1d.h"
 
-static INLINE void fwd_txfm2d_c(const int16_t *input, int32_t *output,
+typedef void (*TxfmFunc)(const int32_t *input, int32_t *output,
+                         const int8_t *cos_bit, const int8_t *stage_range);
+
+static inline TxfmFunc fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
+  switch (txfm_type) {
+    case TXFM_TYPE_DCT4:
+      return vp10_fdct4_new;
+      break;
+    case TXFM_TYPE_DCT8:
+      return vp10_fdct8_new;
+      break;
+    case TXFM_TYPE_DCT16:
+      return vp10_fdct16_new;
+      break;
+    case TXFM_TYPE_DCT32:
+      return vp10_fdct32_new;
+      break;
+    case TXFM_TYPE_DCT64:
+      return vp10_fdct64_new;
+      break;
+    case TXFM_TYPE_ADST4:
+      return vp10_fadst4_new;
+      break;
+    case TXFM_TYPE_ADST8:
+      return vp10_fadst8_new;
+      break;
+    case TXFM_TYPE_ADST16:
+      return vp10_fadst16_new;
+      break;
+    case TXFM_TYPE_ADST32:
+      return vp10_fadst32_new;
+      break;
+    default:
+      assert(0);
+      return NULL;
+  }
+}
+
+static inline void fwd_txfm2d_c(const int16_t *input, int32_t *output,
                                 const int stride, const TXFM_2D_CFG *cfg,
                                 int32_t *txfm_buf) {
   int i, j;
@@ -20,8 +59,8 @@ static INLINE void fwd_txfm2d_c(const int16_t *input, int32_t *output,
   const int8_t *stage_range_row = cfg->stage_range_row;
   const int8_t *cos_bit_col = cfg->cos_bit_col;
   const int8_t *cos_bit_row = cfg->cos_bit_row;
-  const TxfmFunc txfm_func_col = cfg->txfm_func_col;
-  const TxfmFunc txfm_func_row = cfg->txfm_func_row;
+  const TxfmFunc txfm_func_col = fwd_txfm_type_to_func(cfg->txfm_type_col);
+  const TxfmFunc txfm_func_row = fwd_txfm_type_to_func(cfg->txfm_type_row);
 
   // txfm_buf's length is  txfm_size * txfm_size + 2 * txfm_size
   // it is used for intermediate data buffering
