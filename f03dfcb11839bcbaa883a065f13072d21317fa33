@@ -16,6 +16,24 @@
       "revId": "f03dfcb11839bcbaa883a065f13072d21317fa33",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc471e66_a6628881",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1692,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-03-17T15:11:17Z",
+      "side": 1,
+      "message": "Yes agree we should not always assume LAST is a reference.\nMaybe better condition is to always do intra-pred if there is only 1 reference available (last or golden). But yeah for now the fix is fine as is.",
+      "parentUuid": "9c012640_b1a1e072",
+      "revId": "f03dfcb11839bcbaa883a065f13072d21317fa33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
