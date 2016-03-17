@@ -377,16 +377,35 @@ static void get_energy_distribution_fine(const VP10_COMP *cpi,
   unsigned int var[16];
   double total = 0;
   const int f_index = bsize - 6;
+
   if (f_index < 0) {
     int i, j, index;
     int w_shift = bw == 8 ? 1 : 2;
     int h_shift = bh == 8 ? 1 : 2;
-    for (i = 0; i < bh; ++i)
-      for (j = 0; j < bw; ++j) {
-        index = (j >> w_shift) + ((i >> h_shift) << 2);
-        esq[index] += (src[j + i * src_stride] - dst[j + i * dst_stride]) *
-                      (src[j + i * src_stride] - dst[j + i * dst_stride]);
-      }
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cpi->common.use_highbitdepth) {
+      uint16_t *src16 = CONVERT_TO_SHORTPTR(src);
+      uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
+      for (i = 0; i < bh; ++i)
+        for (j = 0; j < bw; ++j) {
+          index = (j >> w_shift) + ((i >> h_shift) << 2);
+          esq[index] += (src16[j + i * src_stride] -
+                        dst16[j + i * dst_stride]) *
+                        (src16[j + i * src_stride] -
+                        dst16[j + i * dst_stride]);
+        }
+    } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+      for (i = 0; i < bh; ++i)
+        for (j = 0; j < bw; ++j) {
+          index = (j >> w_shift) + ((i >> h_shift) << 2);
+          esq[index] += (src[j + i * src_stride] - dst[j + i * dst_stride]) *
+                        (src[j + i * src_stride] - dst[j + i * dst_stride]);
+        }
+#if CONFIG_VP9_HIGHBITDEPTH
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   } else {
     var[0] = cpi->fn_ptr[f_index].vf(src, src_stride,
                                      dst, dst_stride, &esq[0]);
