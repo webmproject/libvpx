@@ -322,42 +322,40 @@ void vp9_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
   int mi_row, mi_col;
   double fraction_low = 0.0;
   int low_content_frame = 0;
-
   MODE_INFO **mi = cm->mi_grid_visible;
   RATE_CONTROL *const rc = &cpi->rc;
   const int rows = cm->mi_rows, cols = cm->mi_cols;
   int cnt1 = 0, cnt2 = 0;
   int force_gf_refresh = 0;
-
+  int flag_force_gf_high_motion = 0;
   for (mi_row = 0; mi_row < rows; mi_row++) {
     for (mi_col = 0; mi_col < cols; mi_col++) {
-      int16_t abs_mvr = mi[0]->mv[0].as_mv.row >= 0 ?
-          mi[0]->mv[0].as_mv.row : -1 * mi[0]->mv[0].as_mv.row;
-      int16_t abs_mvc = mi[0]->mv[0].as_mv.col >= 0 ?
-          mi[0]->mv[0].as_mv.col : -1 * mi[0]->mv[0].as_mv.col;
-
-      // Calculate the motion of the background.
-      if (abs_mvr <= 16 && abs_mvc <= 16) {
-        cnt1++;
-        if (abs_mvr == 0 && abs_mvc == 0)
-          cnt2++;
+      if (flag_force_gf_high_motion == 1) {
+        int16_t abs_mvr = mi[0]->mv[0].as_mv.row >= 0 ?
+            mi[0]->mv[0].as_mv.row : -1 * mi[0]->mv[0].as_mv.row;
+        int16_t abs_mvc = mi[0]->mv[0].as_mv.col >= 0 ?
+            mi[0]->mv[0].as_mv.col : -1 * mi[0]->mv[0].as_mv.col;
+        // Calculate the motion of the background.
+        if (abs_mvr <= 16 && abs_mvc <= 16) {
+          cnt1++;
+          if (abs_mvr == 0 && abs_mvc == 0)
+            cnt2++;
+        }
       }
       mi++;
-
       // Accumulate low_content_frame.
       if (cr->map[mi_row * cols + mi_col] < 1)
         low_content_frame++;
     }
     mi += 8;
   }
-
   // For video conference clips, if the background has high motion in current
   // frame because of the camera movement, set this frame as the golden frame.
   // Use 70% and 5% as the thresholds for golden frame refreshing.
   // Also, force this frame as a golden update frame if this frame will change
   // the resolution (resize_pending != 0).
   if (cpi->resize_pending != 0 ||
-     (cnt1 * 10 > (70 * rows * cols) && cnt2 * 20 < cnt1)) {
+     (cnt1 * 100 > (70 * rows * cols) && cnt2 * 20 < cnt1)) {
     vp9_cyclic_refresh_set_golden_update(cpi);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 
@@ -366,7 +364,6 @@ void vp9_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
     cpi->refresh_golden_frame = 1;
     force_gf_refresh = 1;
   }
-
   fraction_low =
       (double)low_content_frame / (rows * cols);
   // Update average.
