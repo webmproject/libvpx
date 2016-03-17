@@ -75,11 +75,12 @@ static void encode_mv_component(vpx_writer* w, int comp,
 static void build_nmv_component_cost_table(int *mvcost,
                                            const nmv_component* const mvcomp,
                                            int usehp) {
-  int i, v;
   int sign_cost[2], class_cost[MV_CLASSES], class0_cost[CLASS0_SIZE];
   int bits_cost[MV_OFFSET_BITS][2];
   int class0_fp_cost[CLASS0_SIZE][MV_FP_SIZE], fp_cost[MV_FP_SIZE];
   int class0_hp_cost[2], hp_cost[2];
+  int i;
+  int c, o;
 
   sign_cost[0] = vp9_cost_zero(mvcomp->sign);
   sign_cost[1] = vp9_cost_one(mvcomp->sign);
@@ -94,43 +95,55 @@ static void build_nmv_component_cost_table(int *mvcost,
     vp9_cost_tokens(class0_fp_cost[i], mvcomp->class0_fp[i], vp9_mv_fp_tree);
   vp9_cost_tokens(fp_cost, mvcomp->fp, vp9_mv_fp_tree);
 
-  if (usehp) {
-    class0_hp_cost[0] = vp9_cost_zero(mvcomp->class0_hp);
-    class0_hp_cost[1] = vp9_cost_one(mvcomp->class0_hp);
-    hp_cost[0] = vp9_cost_zero(mvcomp->hp);
-    hp_cost[1] = vp9_cost_one(mvcomp->hp);
-  }
+  // Always build the hp costs to avoid an uninitialized warning from gcc
+  class0_hp_cost[0] = vp9_cost_zero(mvcomp->class0_hp);
+  class0_hp_cost[1] = vp9_cost_one(mvcomp->class0_hp);
+  hp_cost[0] = vp9_cost_zero(mvcomp->hp);
+  hp_cost[1] = vp9_cost_one(mvcomp->hp);
+
   mvcost[0] = 0;
-  for (v = 1; v <= MV_MAX; ++v) {
-    int z, c, o, d, e, f, cost = 0;
-    z = v - 1;
-    c = vp9_get_mv_class(z, &o);
-    cost += class_cost[c];
+  // MV_CLASS_0
+  for (o = 0; o < (CLASS0_SIZE << 3); ++o) {
+    int d, e, f;
+    int cost = class_cost[MV_CLASS_0];
+    int v = o + 1;
     d = (o >> 3);               /* int mv data */
     f = (o >> 1) & 3;           /* fractional pel mv data */
-    e = (o & 1);                /* high precision mv data */
-    if (c == MV_CLASS_0) {
-      cost += class0_cost[d];
-    } else {
-      int i, b;
-      b = c + CLASS0_BITS - 1;  /* number of bits */
-      for (i = 0; i < b; ++i)
-        cost += bits_cost[i][((d >> i) & 1)];
-    }
-    if (c == MV_CLASS_0) {
-      cost += class0_fp_cost[d][f];
-    } else {
-      cost += fp_cost[f];
-    }
+    cost += class0_cost[d];
+    cost += class0_fp_cost[d][f];
     if (usehp) {
-      if (c == MV_CLASS_0) {
-        cost += class0_hp_cost[e];
-      } else {
-        cost += hp_cost[e];
-      }
+      e = (o & 1);                /* high precision mv data */
+      cost += class0_hp_cost[e];
     }
     mvcost[v] = cost + sign_cost[0];
     mvcost[-v] = cost + sign_cost[1];
+  }
+  for (c = MV_CLASS_1; c < MV_CLASSES; ++c) {
+    int d;
+    for (d = 0; d < (1 << c); ++d) {
+      int f;
+      int whole_cost = class_cost[c];
+      int b = c + CLASS0_BITS - 1;  /* number of bits */
+      for (i = 0; i < b; ++i)
+        whole_cost += bits_cost[i][((d >> i) & 1)];
+      for (f = 0; f < 4; ++f) {
+        int cost = whole_cost + fp_cost[f];
+        int v = (CLASS0_SIZE << (c + 2)) + d * 8 + f * 2 /* + e */ + 1;
+        if (usehp) {
+          mvcost[v] = cost + hp_cost[0] + sign_cost[0];
+          mvcost[-v] = cost + hp_cost[0] + sign_cost[1];
+          if (v + 1 > MV_MAX) break;
+          mvcost[v + 1] = cost + hp_cost[1] + sign_cost[0];
+          mvcost[-v - 1] = cost + hp_cost[1] + sign_cost[1];
+        } else {
+          mvcost[v] = cost + sign_cost[0];
+          mvcost[-v] = cost + sign_cost[1];
+          if (v + 1 > MV_MAX) break;
+          mvcost[v + 1] = cost + sign_cost[0];
+          mvcost[-v - 1] = cost + sign_cost[1];
+        }
+      }
+    }
   }
 }
 
