@@ -50,7 +50,7 @@ class CpuSpeedTest
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
-      encoder->Control(VP9E_SET_TUNE_CONTENT, VP9E_CONTENT_SCREEN);
+      encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
