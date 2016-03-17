@@ -96,3 +96,15 @@ void vp10_inv_txfm2d_add_32x32(const int32_t *input, uint16_t *output,
   inv_txfm2d_add_c(input, (int16_t *)output, stride, cfg, txfm_buf);
   clamp_block((int16_t *)output, 32, stride, 0, (1 << bd) - 1);
 }
+
+void vp10_inv_txfm2d_add_64x64(const int32_t *input, uint16_t *output,
+                               const int stride, const TXFM_2D_CFG *cfg,
+                               const int bd) {
+  int txfm_buf[64 * 64 + 64 + 64];
+  // output contains the prediction signal which is always positive and smaller
+  // than (1 << bd) - 1
+  // since bd < 16-1, therefore we can treat the uint16_t* output buffer as an
+  // int16_t*
+  inv_txfm2d_add_c(input, (int16_t *)output, stride, cfg, txfm_buf);
+  clamp_block((int16_t *)output, 64, stride, 0, (1 << bd) - 1);
+}

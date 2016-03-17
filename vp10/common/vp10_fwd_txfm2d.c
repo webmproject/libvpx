@@ -82,3 +82,11 @@ void vp10_fwd_txfm2d_32x32(const int16_t *input, int32_t *output,
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
+
+void vp10_fwd_txfm2d_64x64(const int16_t *input, int32_t *output,
+                           const int stride, const TXFM_2D_CFG *cfg,
+                           const int bd) {
+  int txfm_buf[64 * 64 + 64 + 64];
+  (void)bd;
+  fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
+}

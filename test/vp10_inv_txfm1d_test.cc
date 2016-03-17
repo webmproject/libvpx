@@ -16,16 +16,20 @@ using libvpx_test::ACMRandom;
 
 namespace {
 static int txfm_type_num = 2;
-static int txfm_size_num = 4;
-static int txfm_size_ls[4] = {4, 8, 16, 32};
+static int txfm_size_num = 5;
+static int txfm_size_ls[5] = {4, 8, 16, 32, 64};
 
-static TxfmFunc fwd_txfm_func_ls[2][4] = {
-    {vp10_fdct4_new, vp10_fdct8_new, vp10_fdct16_new, vp10_fdct32_new},
-    {vp10_fadst4_new, vp10_fadst8_new, vp10_fadst16_new, vp10_fadst32_new}};
+static TxfmFunc fwd_txfm_func_ls[2][5] = {
+    {vp10_fdct4_new, vp10_fdct8_new, vp10_fdct16_new, vp10_fdct32_new,
+     vp10_fdct64_new},
+    {vp10_fadst4_new, vp10_fadst8_new, vp10_fadst16_new, vp10_fadst32_new,
+     NULL}};
 
-static TxfmFunc inv_txfm_func_ls[2][4] = {
-    {vp10_idct4_new, vp10_idct8_new, vp10_idct16_new, vp10_idct32_new},
-    {vp10_iadst4_new, vp10_iadst8_new, vp10_iadst16_new, vp10_iadst32_new}};
+static TxfmFunc inv_txfm_func_ls[2][5] = {
+    {vp10_idct4_new, vp10_idct8_new, vp10_idct16_new, vp10_idct32_new,
+     vp10_idct64_new},
+    {vp10_iadst4_new, vp10_iadst8_new, vp10_iadst16_new, vp10_iadst32_new,
+     NULL}};
 
 // the maximum stage number of fwd/inv 1d dct/adst txfm is 12
 static int8_t cos_bit[12] = {14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14};
@@ -44,19 +48,22 @@ TEST(vp10_inv_txfm1d, round_trip) {
       TxfmFunc inv_txfm_func = inv_txfm_func_ls[ti][si];
       int max_error = 2;
 
-      const int count_test_block = 5000;
-      for (int ci = 0; ci < count_test_block; ++ci) {
-        for (int ni = 0; ni < txfm_size; ++ni) {
-          input[ni] = rnd.Rand16() % base - rnd.Rand16() % base;
-        }
+      if (fwd_txfm_func != NULL) {
+        const int count_test_block = 5000;
+        for (int ci = 0; ci < count_test_block; ++ci) {
+          for (int ni = 0; ni < txfm_size; ++ni) {
+            input[ni] = rnd.Rand16() % base - rnd.Rand16() % base;
+          }
 
-        fwd_txfm_func(input, output, cos_bit, range_bit);
-        inv_txfm_func(output, round_trip_output, cos_bit, range_bit);
+          fwd_txfm_func(input, output, cos_bit, range_bit);
+          inv_txfm_func(output, round_trip_output, cos_bit, range_bit);
 
-        for (int ni = 0; ni < txfm_size; ++ni) {
-          EXPECT_LE(abs(input[ni] - round_shift(round_trip_output[ni],
-                                                get_max_bit(txfm_size) - 1)),
-                    max_error);
+          for (int ni = 0; ni < txfm_size; ++ni) {
+            int node_err =
+                abs(input[ni] - round_shift(round_trip_output[ni],
+                                            get_max_bit(txfm_size) - 1));
+            EXPECT_LE(node_err, max_error);
+          }
         }
       }
     }

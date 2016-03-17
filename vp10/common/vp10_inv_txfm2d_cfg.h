@@ -96,6 +96,29 @@ static const TXFM_2D_CFG inv_txfm_2d_cfg_dct_dct_32 = {
     vp10_idct32_new,                 // .txfm_func_col
     vp10_idct32_new};                // .txfm_func_row;
 
+//  ---------------- config inv_dct_dct_64 ----------------
+static int8_t inv_shift_dct_dct_64[2] = {-1, -7};
+static int8_t inv_stage_range_col_dct_dct_64[12] = {19, 19, 19, 19, 19, 19,
+                                                    19, 19, 19, 19, 18, 18};
+static int8_t inv_stage_range_row_dct_dct_64[12] = {20, 20, 20, 20, 20, 20,
+                                                    20, 20, 20, 20, 20, 20};
+static int8_t inv_cos_bit_col_dct_dct_64[12] = {13, 13, 13, 13, 13, 13,
+                                                13, 13, 13, 13, 13, 14};
+static int8_t inv_cos_bit_row_dct_dct_64[12] = {12, 12, 12, 12, 12, 12,
+                                                12, 12, 12, 12, 12, 12};
+
+static const TXFM_2D_CFG inv_txfm_2d_cfg_dct_dct_64 = {
+    64,                              // .txfm_size
+    12,                              // .stage_num_col
+    12,                              // .stage_num_row
+    inv_shift_dct_dct_64,            // .shift
+    inv_stage_range_col_dct_dct_64,  // .stage_range_col
+    inv_stage_range_row_dct_dct_64,  // .stage_range_row
+    inv_cos_bit_col_dct_dct_64,      // .cos_bit_col
+    inv_cos_bit_row_dct_dct_64,      // .cos_bit_row
+    vp10_idct64_new,                 // .txfm_func_col
+    vp10_idct64_new};                // .txfm_func_row;
+
 //  ---------------- config inv_dct_adst_4 ----------------
 static const int8_t inv_shift_dct_adst_4[2] = {1, -5};
 static const int8_t inv_stage_range_col_dct_adst_4[4] = {17, 17, 16, 16};

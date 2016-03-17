@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "test/vp10_txfm_test.h"
 #include "vp10/common/vp10_fwd_txfm1d.h"
+#include "test/vp10_txfm_test.h"
 
 using libvpx_test::ACMRandom;
 
@@ -17,12 +17,14 @@ namespace {
 static int txfm_type_num = 2;
 static TYPE_TXFM txfm_type_ls[2] = {TYPE_DCT, TYPE_ADST};
 
-static int txfm_size_num = 4;
-static int txfm_size_ls[4] = {4, 8, 16, 32};
+static int txfm_size_num = 5;
+static int txfm_size_ls[5] = {4, 8, 16, 32, 64};
 
-static TxfmFunc fwd_txfm_func_ls[2][4] = {
-    {vp10_fdct4_new, vp10_fdct8_new, vp10_fdct16_new, vp10_fdct32_new},
-    {vp10_fadst4_new, vp10_fadst8_new, vp10_fadst16_new, vp10_fadst32_new}};
+static TxfmFunc fwd_txfm_func_ls[2][5] = {
+    {vp10_fdct4_new, vp10_fdct8_new, vp10_fdct16_new, vp10_fdct32_new,
+     vp10_fdct64_new},
+    {vp10_fadst4_new, vp10_fadst8_new, vp10_fadst16_new, vp10_fadst32_new,
+     NULL}};
 
 // the maximum stage number of fwd/inv 1d dct/adst txfm is 12
 static int8_t cos_bit[12] = {14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14};
@@ -104,19 +106,21 @@ TEST(vp10_fwd_txfm1d, accuracy) {
       int max_error = 7;
 
       const int count_test_block = 5000;
-      for (int ti = 0; ti < count_test_block; ++ti) {
-        for (int ni = 0; ni < txfm_size; ++ni) {
-          input[ni] = rnd.Rand16() % base - rnd.Rand16() % base;
-          ref_input[ni] = static_cast<double>(input[ni]);
-        }
+      if (fwd_txfm_func != NULL) {
+        for (int ti = 0; ti < count_test_block; ++ti) {
+          for (int ni = 0; ni < txfm_size; ++ni) {
+            input[ni] = rnd.Rand16() % base - rnd.Rand16() % base;
+            ref_input[ni] = static_cast<double>(input[ni]);
+          }
 
-        fwd_txfm_func(input, output, cos_bit, range_bit);
-        reference_hybrid_1d(ref_input, ref_output, txfm_size, txfm_type);
+          fwd_txfm_func(input, output, cos_bit, range_bit);
+          reference_hybrid_1d(ref_input, ref_output, txfm_size, txfm_type);
 
-        for (int ni = 0; ni < txfm_size; ++ni) {
-          EXPECT_LE(
-              abs(output[ni] - static_cast<int32_t>(round(ref_output[ni]))),
-              max_error);
+          for (int ni = 0; ni < txfm_size; ++ni) {
+            EXPECT_LE(
+                abs(output[ni] - static_cast<int32_t>(round(ref_output[ni]))),
+                max_error);
+          }
         }
       }
     }

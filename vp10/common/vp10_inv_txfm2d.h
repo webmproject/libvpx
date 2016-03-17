@@ -27,6 +27,9 @@ void vp10_inv_txfm2d_add_16x16(const int32_t *input, uint16_t *output,
 void vp10_inv_txfm2d_add_32x32(const int32_t *input, uint16_t *output,
                                const int stride, const TXFM_2D_CFG *cfg,
                                const int bd);
+void vp10_inv_txfm2d_add_64x64(const int32_t *input, uint16_t *output,
+                               const int stride, const TXFM_2D_CFG *cfg,
+                               const int bd);
 #ifdef __cplusplus
 }
 #endif
