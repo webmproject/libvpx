@@ -3496,6 +3496,11 @@ static int super_block_uvrd(const VP10_COMP *cpi, MACROBLOCK *x,
     *distortion += pndist;
     *sse += pnsse;
     *skippable &= pnskip;
+    if (RDCOST(x->rdmult, x->rddiv, *rate, *distortion) > ref_best_rd &&
+        RDCOST(x->rdmult, x->rddiv, 0, *sse) > ref_best_rd) {
+      is_cost_valid = 0;
+      break;
+    }
   }
 
   if (!is_cost_valid) {
@@ -9424,6 +9429,8 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
         distortion2 += distortion_uv;
         skippable = skippable && uv_skippable;
         total_sse += uv_sse;
+      } else {
+        continue;
       }
     }
 
