@@ -188,8 +188,6 @@ typedef enum {
 #if CONFIG_EXT_TX
   // eliminates two tx types in each direction
   PRUNE_TWO = 2,
-  // eliminates three tx types in each direction
-  PRUNE_THREE = 3,
 #endif
 } TX_TYPE_SEARCH;
 
