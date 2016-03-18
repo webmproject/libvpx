@@ -3825,7 +3825,7 @@ static int rd_pick_intra_angle_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
   mbmi->angle_delta[1] = best_angle_delta;
   if (*rate_tokenonly != INT_MAX)
     super_block_uvrd(cpi, x, &this_rate_tokenonly,
-                     &this_distortion, &s, &this_sse, bsize, INT_MAX);
+                     &this_distortion, &s, &this_sse, bsize, INT64_MAX);
   return *rate_tokenonly != INT_MAX;
 }
 #endif  // CONFIG_EXT_INTRA
