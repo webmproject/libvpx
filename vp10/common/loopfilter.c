@@ -1276,9 +1276,9 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
 #if CONFIG_VAR_TX
       if (is_inter_block(mbmi) && !mbmi->skip)
         tx_size = (plane->plane_type == PLANE_TYPE_UV) ?
-            get_uv_tx_size_impl(mbmi->inter_tx_size[blk_row * 8 + blk_col],
+            get_uv_tx_size_impl(mbmi->inter_tx_size[blk_row][ blk_col],
                                 sb_type, ss_x, ss_y) :
-            mbmi->inter_tx_size[blk_row * 8 + blk_col];
+            mbmi->inter_tx_size[blk_row][blk_col];
 
       tx_size_r = VPXMIN(tx_size, cm->above_txfm_context[mi_col + c]);
       tx_size_c = VPXMIN(tx_size, cm->left_txfm_context[(mi_row + r) & 0x07]);

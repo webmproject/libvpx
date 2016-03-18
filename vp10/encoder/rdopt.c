@@ -2907,8 +2907,10 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
-               (blk_col >> (1 - pd->subsampling_x));
+  const int tx_row = blk_row >> (1 - pd->subsampling_y);
+  const int tx_col = blk_col >> (1 - pd->subsampling_x);
+  TX_SIZE (*const inter_tx_size)[MI_BLOCK_SIZE] =
+    (TX_SIZE (*)[MI_BLOCK_SIZE])&mbmi->inter_tx_size[tx_row][tx_col];
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
   int64_t this_rd = INT64_MAX;
@@ -2971,7 +2973,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       x->token_costs[tx_size][pd->plane_type][1][0][0][coeff_ctx][EOB_TOKEN];
 
   if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
-    mbmi->inter_tx_size[tx_idx] = tx_size;
+    inter_tx_size[0][0] = tx_size;
     vp10_tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                        plane_bsize, coeff_ctx, rate, dist, bsse, skip);
 
@@ -3034,11 +3036,10 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       pta[i] = ptl[i] = !(tmp_eob == 0);
     txfm_partition_update(tx_above + (blk_col >> 1),
                           tx_left + (blk_row >> 1), tx_size);
-    mbmi->inter_tx_size[tx_idx] = tx_size;
-
+    inter_tx_size[0][0] = tx_size;
     for (idy = 0; idy < (1 << tx_size) / 2; ++idy)
       for (idx = 0; idx < (1 << tx_size) / 2; ++idx)
-        mbmi->inter_tx_size[tx_idx + (idy << 3) + idx] = tx_size;
+        inter_tx_size[idy][idx] = tx_size;
     mbmi->tx_size = tx_size;
     if (this_rd == INT64_MAX)
       *is_cost_valid = 0;
@@ -3138,7 +3139,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   vpx_prob skip_prob = vp10_get_skip_prob(cm, xd);
   int s0 = vp10_cost_bit(skip_prob, 0);
   int s1 = vp10_cost_bit(skip_prob, 1);
-  TX_SIZE best_tx_size[64];
+  TX_SIZE best_tx_size[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   TX_SIZE best_tx = TX_SIZES;
   uint8_t best_blk_skip[256];
   const int n4 = 1 << (num_pels_log2_lookup[bsize] - 4);
@@ -3253,14 +3254,14 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
       memcpy(best_blk_skip, x->blk_skip[0], sizeof(best_blk_skip[0]) * n4);
       for (idy = 0; idy < xd->n8_h; ++idy)
         for (idx = 0; idx < xd->n8_w; ++idx)
-          best_tx_size[idy * 8 + idx] = mbmi->inter_tx_size[idy * 8 + idx];
+          best_tx_size[idy][idx] = mbmi->inter_tx_size[idy][idx];
     }
   }
 
   mbmi->tx_type = best_tx_type;
   for (idy = 0; idy < xd->n8_h; ++idy)
     for (idx = 0; idx < xd->n8_w; ++idx)
-      mbmi->inter_tx_size[idy * 8 + idx] = best_tx_size[idy * 8 + idx];
+      mbmi->inter_tx_size[idy][idx] = best_tx_size[idy][idx];
   mbmi->tx_size = best_tx;
   memcpy(x->blk_skip[0], best_blk_skip, sizeof(best_blk_skip[0]) * n4);
 }
@@ -3275,12 +3276,11 @@ static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x,
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
-               (blk_col >> (1 - pd->subsampling_x));
-  TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], bsize,
-                          0, 0) :
-      mbmi->inter_tx_size[tx_idx];
+  const int tx_row = blk_row >> (1 - pd->subsampling_y);
+  const int tx_col = blk_col >> (1 - pd->subsampling_x);
+  const TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_row][tx_col], bsize, 0, 0) :
+      mbmi->inter_tx_size[tx_row][tx_col];
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -6909,7 +6909,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                       bsize, ref_best_rd);
       for (idy = 0; idy < xd->n8_h; ++idy)
         for (idx = 0; idx < xd->n8_w; ++idx)
-          mbmi->inter_tx_size[idy * 8 + idx] = mbmi->tx_size;
+          mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
     }
 #else
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
@@ -9073,7 +9073,7 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     }
 
 #if CONFIG_VAR_TX
-    mbmi->inter_tx_size[0] = mbmi->tx_size;
+    mbmi->inter_tx_size[0][0] = mbmi->tx_size;
 #endif
 
     if (ref_frame == INTRA_FRAME) {

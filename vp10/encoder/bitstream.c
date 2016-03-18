@@ -266,11 +266,12 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
                                 const MB_MODE_INFO *mbmi,
                                 TX_SIZE tx_size, int blk_row, int blk_col,
                                 vpx_writer *w) {
-  const int tx_idx = (blk_row >> 1) * 8 + (blk_col >> 1);
+  const int tx_row = blk_row >> 1;
+  const int tx_col = blk_col >> 1;
   int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
-  int ctx = txfm_partition_context(xd->above_txfm_context + (blk_col >> 1),
-                                   xd->left_txfm_context + (blk_row >> 1),
+  int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
+                                   xd->left_txfm_context + tx_row,
                                    tx_size);
 
   if (xd->mb_to_bottom_edge < 0)
@@ -281,10 +282,10 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
      return;
 
-  if (tx_size == mbmi->inter_tx_size[tx_idx]) {
+  if (tx_size == mbmi->inter_tx_size[tx_row][tx_col]) {
     vpx_write(w, 0, cm->fc->txfm_partition_prob[ctx]);
-    txfm_partition_update(xd->above_txfm_context + (blk_col >> 1),
-                          xd->left_txfm_context + (blk_row >> 1), tx_size);
+    txfm_partition_update(xd->above_txfm_context + tx_col,
+                          xd->left_txfm_context + tx_row, tx_size);
   } else {
     const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_width_log2_lookup[bsize];
@@ -292,8 +293,8 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
     vpx_write(w, 1, cm->fc->txfm_partition_prob[ctx]);
 
     if (tx_size == TX_8X8) {
-      txfm_partition_update(xd->above_txfm_context + (blk_col >> 1),
-                            xd->left_txfm_context + (blk_row >> 1), TX_4X4);
+      txfm_partition_update(xd->above_txfm_context + tx_col,
+                            xd->left_txfm_context + tx_row, TX_4X4);
       return;
     }
 
@@ -706,11 +707,11 @@ static void pack_txb_tokens(vpx_writer *w,
                            int blk_row, int blk_col, TX_SIZE tx_size) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
-               (blk_col >> (1 - pd->subsampling_x));
-  TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], bsize, 0, 0) :
-      mbmi->inter_tx_size[tx_idx];
+  const int tx_row = blk_row >> (1 - pd->subsampling_y);
+  const int tx_col = blk_col >> (1 - pd->subsampling_x);
+  const TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_row][tx_col], bsize, 0, 0) :
+      mbmi->inter_tx_size[tx_row][tx_col];
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
 
