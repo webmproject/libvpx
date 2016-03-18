@@ -449,7 +449,7 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 #endif
     if (x->quant_fp) {
       // Encoding process for rtc mode
-      if (x->skip_txfm[0] == SKIP_TXFM_AC_DC && plane == 0) {
+      if (x->skip_txfm[0][0] == SKIP_TXFM_AC_DC && plane == 0) {
         // skip forward transform
         p->eobs[block] = 0;
         *a = *l = 0;
@@ -460,12 +460,12 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
       }
     } else {
       if (max_txsize_lookup[plane_bsize] == tx_size) {
-        int txfm_blk_index = (plane << 2) + (block >> (tx_size << 1));
-        if (x->skip_txfm[txfm_blk_index] == SKIP_TXFM_NONE) {
+        int blk_index = (block >> (tx_size << 1));
+        if (x->skip_txfm[plane][blk_index] == SKIP_TXFM_NONE) {
           // full forward transform and quantization
           vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
                            tx_size, VP10_XFORM_QUANT_B);
-        } else if (x->skip_txfm[txfm_blk_index] == SKIP_TXFM_AC_ONLY) {
+        } else if (x->skip_txfm[plane][blk_index] == SKIP_TXFM_AC_ONLY) {
           // fast path forward transform and quantization
           vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
                            tx_size, VP10_XFORM_QUANT_DC);

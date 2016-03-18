@@ -750,18 +750,18 @@ static void model_rd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bsize,
 
         var = cpi->fn_ptr[unit_size].vf(src, p->src.stride,
                                         dst, pd->dst.stride, &sse);
-        x->bsse[(i << 2) + block_idx] = sse;
+        x->bsse[i][block_idx] = sse;
         sum_sse += sse;
 
-        x->skip_txfm[(i << 2) + block_idx] = SKIP_TXFM_NONE;
+        x->skip_txfm[i][block_idx] = SKIP_TXFM_NONE;
         if (!x->select_tx_size) {
           // Check if all ac coefficients can be quantized to zero.
           if (var < ac_thr || var == 0) {
-            x->skip_txfm[(i << 2) + block_idx] = SKIP_TXFM_AC_ONLY;
+            x->skip_txfm[i][block_idx] = SKIP_TXFM_AC_ONLY;
 
             // Check if dc coefficient can be quantized to zero.
             if (sse - var < dc_thr || sse == var) {
-              x->skip_txfm[(i << 2) + block_idx] = SKIP_TXFM_AC_DC;
+              x->skip_txfm[i][block_idx] = SKIP_TXFM_AC_DC;
 
               if (!sse || (var < low_ac_thr && sse - var < low_dc_thr))
                 low_err_skip = 1;
@@ -1154,21 +1154,21 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       dist = (int64_t)tmp * 16;
     }
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
-    if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
+    if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                        plane_bsize, tx_size, VP10_XFORM_QUANT_B);
       dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
-    } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
+    } else if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
                SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                           plane_bsize, tx_size, VP10_XFORM_QUANT_DC);
-      sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
+      sse  = x->bsse[plane][block >> (tx_size << 1)] << 4;
       dist = sse;
       if (x->plane[plane].eobs[block]) {
         const int64_t orig_sse = (int64_t)coeff[0] * coeff[0];
@@ -1186,7 +1186,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       // SKIP_TXFM_AC_DC
       // skip forward transform
       x->plane[plane].eobs[block] = 0;
-      sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
+      sse  = x->bsse[plane][block >> (tx_size << 1)] << 4;
       dist = sse;
     }
   } else {
@@ -6059,8 +6059,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
   INTERP_FILTER best_filter = SWITCHABLE;
-  uint8_t skip_txfm[MAX_MB_PLANE << 2] = {0};
-  int64_t bsse[MAX_MB_PLANE << 2] = {0};
+  uint8_t skip_txfm[MAX_MB_PLANE][4] = {{0}};
+  int64_t bsse[MAX_MB_PLANE][4] = {{0}};
 
   int skip_txfm_sb = 0;
   int64_t skip_sse_sb = INT64_MAX;
