@@ -199,9 +199,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
     sf->adaptive_interp_filter_search = 1;
-#if CONFIG_EXT_TX
-    sf->tx_type_search = PRUNE_THREE;
-#endif
   }
 
   if (speed >= 4) {

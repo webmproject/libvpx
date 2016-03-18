@@ -603,17 +603,6 @@ static int prune_two_for_sby(const VP10_COMP *cpi,
          dct_vs_dst(p->src_diff, bw, bw, bh, &hcorr, &vcorr);
 }
 
-static int prune_three_for_sby(const VP10_COMP *cpi,
-                               BLOCK_SIZE bsize,
-                               MACROBLOCK *x,
-                               MACROBLOCKD *xd) {
-  (void) cpi;
-  (void) bsize;
-  (void) x;
-  (void) xd;
-  return 0;
-}
-
 #endif  // CONFIG_EXT_TX
 
 // Performance drop: 0.3%, Speed improvement: 5%
@@ -643,9 +632,6 @@ static int prune_tx_types(const VP10_COMP *cpi,
   #if CONFIG_EXT_TX
     case PRUNE_TWO :
       return prune_two_for_sby(cpi, bsize, x, xd);
-      break;
-    case PRUNE_THREE :
-      return prune_three_for_sby(cpi, bsize, x, xd);
       break;
   #endif
   }
