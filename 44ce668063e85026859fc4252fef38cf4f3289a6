@@ -22,6 +22,30 @@
       "revId": "44ce668063e85026859fc4252fef38cf4f3289a6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_32dccefd",
+        "filename": "vp10/encoder/buf_ans.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-18T20:08:43Z",
+      "side": 1,
+      "message": "We\u0027ve run into a problem across libvpx that C doesn\u0027t support packed enums. You wind up with integer sized enums wasting extra RAM and cache. In Scott\u0027s optimizations he got good gains by converting some of them back to defines. I expect to have a large array of buffered symbols so I don\u0027t think the RAM issue is premature. \n\nSee baaaa575 for an example.",
+      "parentUuid": "1cdb763a_5d4fbb0a",
+      "range": {
+        "startLine": 27,
+        "startChar": 8,
+        "endLine": 27,
+        "endChar": 23
+      },
+      "revId": "44ce668063e85026859fc4252fef38cf4f3289a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
