@@ -8286,7 +8286,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         rd_cost->rate = rate2;
 #if CONFIG_SUPERTX
-        if (x->skip && rate_y == INT_MAX)
+        if (x->skip)
           *returnrate_nocoef = rate2;
         else
           *returnrate_nocoef = rate2 - rate_y - rate_uv;

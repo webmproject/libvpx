@@ -1457,7 +1457,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
       assert(*tok < tok_end);
       pack_palette_tokens(w, tok, m->mbmi.palette_mode_info.palette_size[plane],
                           rows * cols - 1);
-      assert(*tok < tok_end);
+      assert(*tok < tok_end + m->mbmi.skip);
     }
   }
 
