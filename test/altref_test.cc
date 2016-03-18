@@ -70,17 +70,17 @@ VP8_INSTANTIATE_TEST_CASE(AltRefTest,
 
 #endif  // CONFIG_VP8_ENCODER
 
-class AltRefForcedKeyTest
+class AltRefForcedKeyTestLarge
     : public ::libvpx_test::EncoderTest,
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
-  AltRefForcedKeyTest()
+  AltRefForcedKeyTestLarge()
       : EncoderTest(GET_PARAM(0)),
         encoding_mode_(GET_PARAM(1)),
         cpu_used_(GET_PARAM(2)),
         forced_kf_frame_num_(1),
         frame_num_(0) {}
-  virtual ~AltRefForcedKeyTest() {}
+  virtual ~AltRefForcedKeyTestLarge() {}
 
   virtual void SetUp() {
     InitializeConfig();
@@ -124,7 +124,7 @@ class AltRefForcedKeyTest
   unsigned int frame_num_;
 };
 
-TEST_P(AltRefForcedKeyTest, Frame1IsKey) {
+TEST_P(AltRefForcedKeyTestLarge, Frame1IsKey) {
   const vpx_rational timebase = { 1, 30 };
   const int lag_values[] = { 3, 15, 25, -1 };
 
@@ -138,7 +138,7 @@ TEST_P(AltRefForcedKeyTest, Frame1IsKey) {
   }
 }
 
-TEST_P(AltRefForcedKeyTest, ForcedFrameIsKey) {
+TEST_P(AltRefForcedKeyTestLarge, ForcedFrameIsKey) {
   const vpx_rational timebase = { 1, 30 };
   const int lag_values[] = { 3, 15, 25, -1 };
 
@@ -153,17 +153,17 @@ TEST_P(AltRefForcedKeyTest, ForcedFrameIsKey) {
 }
 
 VP8_INSTANTIATE_TEST_CASE(
-    AltRefForcedKeyTest,
+    AltRefForcedKeyTestLarge,
     ::testing::Values(::libvpx_test::kOnePassGood),
     ::testing::Range(0, 9));
 
 VP9_INSTANTIATE_TEST_CASE(
-    AltRefForcedKeyTest,
+    AltRefForcedKeyTestLarge,
     ::testing::Values(::libvpx_test::kOnePassGood),
     ::testing::Range(0, 9));
 
 VP10_INSTANTIATE_TEST_CASE(
-    AltRefForcedKeyTest,
+    AltRefForcedKeyTestLarge,
     ::testing::Values(::libvpx_test::kOnePassGood),
     ::testing::Range(0, 9));
 
