@@ -4459,9 +4459,9 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_VP9_HIGHBITDEPTH
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      vp10_build_prediction_by_above_preds(cpi, xd, mi_row, mi_col, dst_buf1,
+      vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
                                            dst_stride1);
-      vp10_build_prediction_by_left_preds(cpi, xd, mi_row, mi_col, dst_buf2,
+      vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col, dst_buf2,
                                           dst_stride2);
       vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
                             mi_row, mi_col);

@@ -385,7 +385,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
 }
 #endif  // !CONFIG_VAR_TX || CONFIG_SUPER_TX
 
-#if (CONFIG_SUPERTX || CONFIG_OBMC)
+#if CONFIG_SUPERTX
 static void build_mc_border(const uint8_t *src, int src_stride,
                             uint8_t *dst, int dst_stride,
                             int x, int y, int b_w, int b_h, int w, int h) {
@@ -774,9 +774,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi,
                             interp_filter, xs, ys, xd);
 #endif  // CONFIG_EXT_INTER
 }
-#endif  // (CONFIG_SUPERTX || CONFIG_OBMC)
 
-#if CONFIG_SUPERTX
 static void dec_build_inter_predictors_sb_extend(
     VP10Decoder *const pbi, MACROBLOCKD *xd,
 #if CONFIG_EXT_INTER
@@ -946,237 +944,6 @@ static void dec_build_inter_predictors_sb_sub8x8_extend(
 #endif  // CONFIG_EXT_INTER
 }
 #endif  // CONFIG_SUPERTX
-
-#if CONFIG_OBMC
-static void dec_build_prediction_by_above_preds(VP10Decoder *const pbi,
-                                                MACROBLOCKD *xd,
-                                                int mi_row, int mi_col,
-                                                uint8_t *tmp_buf[MAX_MB_PLANE],
-                                                int tmp_stride[MAX_MB_PLANE]) {
-  VP10_COMMON *const cm = &pbi->common;
-  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  int i, j, mi_step, ref;
-
-  if (mi_row == 0)
-    return;
-
-  for (i = 0; i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {
-    int mi_row_offset = -1;
-    int mi_col_offset = i;
-    int mi_x, mi_y, bw, bh;
-    const MODE_INFO *mi = xd->mi[mi_col_offset + mi_row_offset * cm->mi_stride];
-    const MB_MODE_INFO *mbmi = &mi->mbmi;
-    const BLOCK_SIZE sb_type = mbmi->sb_type;
-    const int is_compound = has_second_ref(mbmi);
-    const INTERP_FILTER interp_filter = mbmi->interp_filter;
-
-    mi_step = VPXMIN(xd->n8_w, num_8x8_blocks_wide_lookup[sb_type]);
-
-    if (!is_neighbor_overlappable(mbmi))
-      continue;
-
-    for (j = 0; j < MAX_MB_PLANE; ++j) {
-      struct macroblockd_plane *const pd = &xd->plane[j];
-      setup_pred_plane(&pd->dst,
-                       tmp_buf[j], tmp_stride[j],
-                       0, i, NULL,
-                       pd->subsampling_x, pd->subsampling_y);
-    }
-    for (ref = 0; ref < 1 + is_compound; ++ref) {
-      MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
-      RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
-
-      xd->block_refs[ref] = ref_buf;
-      if ((!vp10_is_valid_scale(&ref_buf->sf)))
-        vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
-                           "Reference frame has invalid dimensions");
-      vp10_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col + i,
-                            &ref_buf->sf);
-    }
-
-    xd->mb_to_left_edge = -(((mi_col + i) * MI_SIZE) * 8);
-    mi_x = (mi_col + i) << MI_SIZE_LOG2;
-    mi_y = mi_row << MI_SIZE_LOG2;
-
-    for (j = 0; j < MAX_MB_PLANE; ++j) {
-      struct macroblockd_plane *pd = &xd->plane[j];
-      struct buf_2d *const dst_buf = &pd->dst;
-      bw = (mi_step * 8) >> pd->subsampling_x;
-      bh = VPXMAX((num_4x4_blocks_high_lookup[bsize] * 2) >> pd->subsampling_y,
-                  4);
-
-      for (ref = 0; ref < 1 + is_compound; ++ref) {
-        const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
-        struct buf_2d *const pre_buf = &pd->pre[ref];
-        const int idx = xd->block_refs[ref]->idx;
-        BufferPool *const pool = pbi->common.buffer_pool;
-        RefCntBuffer *const ref_frame_buf = &pool->frame_bufs[idx];
-        const int is_scaled = vp10_is_scaled(sf);
-
-        if (sb_type < BLOCK_8X8) {
-          const PARTITION_TYPE bp = BLOCK_8X8 - sb_type;
-          const int have_vsplit = bp != PARTITION_HORZ;
-          const int have_hsplit = bp != PARTITION_VERT;
-          const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
-          const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
-          const int pw = 8 >> (have_vsplit | pd->subsampling_x);
-          int x, y;
-
-          for (y = 0; y < num_4x4_h; ++y)
-            for (x = 0; x < num_4x4_w; ++x) {
-              const MV mv = average_split_mvs(pd, mi, ref, y * 2 + x);
-              if ((bp == PARTITION_HORZ || bp == PARTITION_SPLIT)
-                  && y == 0 && !pd->subsampling_y)
-                continue;
-
-              dec_build_inter_predictors(pbi, xd, j,
-                                         mi_col_offset, mi_row_offset,
-                                         bw, bh,
-                                         4 * x, 0, pw, bh,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                         0, 0,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                         mi_x, mi_y,
-                                         interp_filter, sf, pre_buf, dst_buf,
-                                         &mv, ref_frame_buf, is_scaled, ref);
-            }
-        } else {
-          const MV mv = mi->mbmi.mv[ref].as_mv;
-          dec_build_inter_predictors(pbi, xd, j,
-                                     mi_col_offset, mi_row_offset,
-                                     bw, bh,
-                                     0, 0, bw, bh,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                     0, 0,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                     mi_x, mi_y, interp_filter,
-                                     sf, pre_buf, dst_buf, &mv, ref_frame_buf,
-                                     is_scaled, ref);
-        }
-      }
-    }
-  }
-  xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
-}
-
-static void dec_build_prediction_by_left_preds(VP10Decoder *const pbi,
-                                               MACROBLOCKD *xd,
-                                               int mi_row, int mi_col,
-                                               uint8_t *tmp_buf[MAX_MB_PLANE],
-                                               int tmp_stride[MAX_MB_PLANE]) {
-  VP10_COMMON *const cm = &pbi->common;
-  const TileInfo *const tile = &xd->tile;
-  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  int i, j, mi_step, ref;
-
-  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start) ||
-      (mi_col - 1) >= tile->mi_col_end)
-    return;
-
-  for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row); i += mi_step) {
-    int mi_row_offset = i;
-    int mi_col_offset = -1;
-    int mi_x, mi_y, bw, bh;
-    const MODE_INFO *mi = xd->mi[mi_col_offset + mi_row_offset * cm->mi_stride];
-    const MB_MODE_INFO *mbmi = &mi->mbmi;
-    const BLOCK_SIZE sb_type = mbmi->sb_type;
-    const int is_compound = has_second_ref(mbmi);
-    const INTERP_FILTER interp_filter = mbmi->interp_filter;
-
-    mi_step = VPXMIN(xd->n8_h, num_8x8_blocks_high_lookup[sb_type]);
-
-    if (!is_neighbor_overlappable(mbmi))
-      continue;
-
-    for (j = 0; j < MAX_MB_PLANE; ++j) {
-      struct macroblockd_plane *const pd = &xd->plane[j];
-      setup_pred_plane(&pd->dst,
-                       tmp_buf[j], tmp_stride[j],
-                       i, 0, NULL,
-                       pd->subsampling_x, pd->subsampling_y);
-    }
-
-    for (ref = 0; ref < 1 + is_compound; ++ref) {
-      MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
-      RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
-
-      xd->block_refs[ref] = ref_buf;
-      if ((!vp10_is_valid_scale(&ref_buf->sf)))
-        vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
-                           "Reference frame has invalid dimensions");
-      vp10_setup_pre_planes(xd, ref, ref_buf->buf, mi_row + i, mi_col,
-                            &ref_buf->sf);
-    }
-
-    xd->mb_to_top_edge    = -(((mi_row + i) * MI_SIZE) * 8);
-    mi_x = mi_col << MI_SIZE_LOG2;
-    mi_y = (mi_row + i) << MI_SIZE_LOG2;
-
-    for (j = 0; j < MAX_MB_PLANE; ++j) {
-      struct macroblockd_plane *pd = &xd->plane[j];
-      struct buf_2d *const dst_buf = &pd->dst;
-      bw = VPXMAX((num_4x4_blocks_wide_lookup[bsize] * 2) >> pd->subsampling_x,
-                  4);
-      bh = (mi_step << MI_SIZE_LOG2) >> pd->subsampling_y;
-
-      for (ref = 0; ref < 1 + is_compound; ++ref) {
-        const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
-        struct buf_2d *const pre_buf = &pd->pre[ref];
-        const int idx = xd->block_refs[ref]->idx;
-        BufferPool *const pool = pbi->common.buffer_pool;
-        RefCntBuffer *const ref_frame_buf = &pool->frame_bufs[idx];
-        const int is_scaled = vp10_is_scaled(sf);
-
-        if (sb_type < BLOCK_8X8) {
-          const PARTITION_TYPE bp = BLOCK_8X8 - sb_type;
-          const int have_vsplit = bp != PARTITION_HORZ;
-          const int have_hsplit = bp != PARTITION_VERT;
-          const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
-          const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
-          const int ph = 8 >> (have_hsplit | pd->subsampling_y);
-          int x, y;
-
-          for (y = 0; y < num_4x4_h; ++y)
-            for (x = 0; x < num_4x4_w; ++x) {
-              const MV mv = average_split_mvs(pd, mi, ref, y * 2 + x);
-              if ((bp == PARTITION_VERT || bp == PARTITION_SPLIT)
-                  && x == 0 && !pd->subsampling_x)
-                continue;
-
-              dec_build_inter_predictors(pbi, xd, j,
-#if CONFIG_OBMC
-                                         mi_col_offset, mi_row_offset,
-#endif  // CONFIG_OBMC
-                                         bw, bh,
-                                         0, 4 * y, bw, ph,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                         0, 0,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                         mi_x, mi_y,
-                                         interp_filter, sf, pre_buf, dst_buf,
-                                         &mv, ref_frame_buf, is_scaled, ref);
-            }
-        } else {
-          const MV mv = mi->mbmi.mv[ref].as_mv;
-          dec_build_inter_predictors(pbi, xd, j,
-#if CONFIG_OBMC
-                                     mi_col_offset, mi_row_offset,
-#endif  // CONFIG_OBMC
-                                     bw, bh,
-                                     0, 0, bw, bh,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                     0, 0,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                     mi_x, mi_y, interp_filter,
-                                     sf, pre_buf, dst_buf, &mv, ref_frame_buf,
-                                     is_scaled, ref);
-        }
-      }
-    }
-  }
-  xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
-}
-#endif  // CONFIG_OBMC
 
 static INLINE TX_SIZE dec_get_uv_tx_size(const MB_MODE_INFO *mbmi,
                                          int n4_wl, int n4_hl) {
@@ -1954,10 +1721,10 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #if CONFIG_VP9_HIGHBITDEPTH
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        dec_build_prediction_by_above_preds(pbi, xd, mi_row, mi_col,
-                                            dst_buf1, dst_stride1);
-        dec_build_prediction_by_left_preds(pbi, xd, mi_row, mi_col,
-                                           dst_buf2, dst_stride2);
+        vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col,
+                                             dst_buf1, dst_stride1);
+        vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col,
+                                            dst_buf2, dst_stride2);
         vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
                               mi_row, mi_col);
         vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0, NULL, NULL,

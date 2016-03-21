@@ -430,6 +430,16 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
                                       int tmp_stride1[MAX_MB_PLANE],
                                       uint8_t *tmp_buf2[MAX_MB_PLANE],
                                       int tmp_stride2[MAX_MB_PLANE]);
+void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
+                                          MACROBLOCKD *xd,
+                                          int mi_row, int mi_col,
+                                          uint8_t *tmp_buf[MAX_MB_PLANE],
+                                          int tmp_stride[MAX_MB_PLANE]);
+void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
+                                         MACROBLOCKD *xd,
+                                         int mi_row, int mi_col,
+                                         uint8_t *tmp_buf[MAX_MB_PLANE],
+                                         int tmp_stride[MAX_MB_PLANE]);
 #endif  // CONFIG_OBMC
 
 #if CONFIG_EXT_INTER
