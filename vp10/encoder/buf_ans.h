@@ -81,6 +81,18 @@ static INLINE void buf_ans_flush(const struct BufAnsCoder *const c,
   }
 }
 
+static INLINE void buf_uabs_write_bit(struct BufAnsCoder *c, int bit) {
+  buf_uabs_write(c, bit, 128);
+}
+
+static INLINE void buf_uabs_write_literal(struct BufAnsCoder *c,
+                                          int literal, int bits) {
+  int bit;
+
+  assert(bits < 31);
+  for (bit = bits - 1; bit >= 0; bit--)
+    buf_uabs_write_bit(c, 1 & (literal >> bit));
+}
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
