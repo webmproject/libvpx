@@ -4258,8 +4258,6 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   const int width = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int height = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   int idx, idy;
-  void (*fwd_txm4x4)(const int16_t *input, tran_low_t *output, int stride);
-
   const uint8_t *const src =
       &p->src.buf[vp10_raster_block_offset(BLOCK_8X8, i, p->src.stride)];
   uint8_t *const dst = &pd->dst.buf[vp10_raster_block_offset(BLOCK_8X8, i,
@@ -4270,17 +4268,6 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   const scan_order *so = get_scan(TX_4X4, tx_type, 1);
 
   vp10_build_inter_predictor_sub8x8(xd, 0, i, ir, ic, mi_row, mi_col);
-
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    fwd_txm4x4 = xd->lossless[mi->mbmi.segment_id] ? vp10_highbd_fwht4x4
-                                                   : vpx_highbd_fdct4x4;
-  } else {
-    fwd_txm4x4 = xd->lossless[mi->mbmi.segment_id] ? vp10_fwht4x4 : vpx_fdct4x4;
-  }
-#else
-  fwd_txm4x4 = xd->lossless[mi->mbmi.segment_id] ? vp10_fwht4x4 : vpx_fdct4x4;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -4302,6 +4289,7 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   for (idy = 0; idy < height / 4; ++idy) {
     for (idx = 0; idx < width / 4; ++idx) {
       int64_t dist, ssz, rd, rd1, rd2;
+      const int16_t *src_diff;
       tran_low_t* coeff;
 #if CONFIG_VAR_TX
       int coeff_ctx;
@@ -4312,8 +4300,21 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
                                            *(tl + (k >> 1)));
 #endif
       coeff = BLOCK_OFFSET(p->coeff, k);
-      fwd_txm4x4(vp10_raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
-                 coeff, 8);
+
+      src_diff = vp10_raster_block_offset_int16(BLOCK_8X8, k, p->src_diff);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
+                                 xd->lossless[mi->mbmi.segment_id]);
+      } else {
+        vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
+                          xd->lossless[mi->mbmi.segment_id]);
+      }
+#else
+      vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
+                        xd->lossless[mi->mbmi.segment_id]);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
       vp10_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
       dist_block(cpi, x, 0, k, idy + (i >> 1), idx + (i & 0x1), TX_4X4,
                  &dist, &ssz);
