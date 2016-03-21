@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc0f1e77_c2ef67a3",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-21T19:16:38Z",
+      "side": 1,
+      "message": "It seems like you could get most of same effect (not having to pass vpx_reader down the recursive chains -- a few leaf functions would still need a vpx_reader parameter) by sticking this in pbi and have zero effect on the encoder and no new ifdefs.",
+      "range": {
+        "startLine": 156,
+        "startChar": 0,
+        "endLine": 158,
+        "endChar": 6
+      },
+      "revId": "f9a0ac6e5734f520abc323d46f8028a6d1507d1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
