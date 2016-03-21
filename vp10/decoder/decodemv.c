@@ -933,7 +933,7 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   BLOCK_SIZE bsize = mbmi->sb_type;
   int_mv *pred_mv = (bsize >= BLOCK_8X8) ?
-      mbmi->pred_mv : xd->mi[0]->bmi[block].pred_mv;
+      mbmi->pred_mv : xd->mi[0]->bmi[block].pred_mv_s8;
 #endif
 
   switch (mode) {
@@ -1366,6 +1366,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         int_mv block[2];
         const int j = idy * 2 + idx;
+        int_mv ref_mv_s8[2];
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
         if (!is_compound)
@@ -1423,6 +1424,13 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTER
         }
 
+        for (ref = 0; ref < 2; ++ref) {
+          ref_mv_s8[ref] = nearestmv[ref];
+        }
+#if CONFIG_EXT_INTER
+        (void)ref_mv_s8;
+#endif
+
         if (!assign_mv(cm, xd, b_mode,
 #if CONFIG_REF_MV
                        j,
@@ -1431,7 +1439,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #if CONFIG_EXT_INTER
                        ref_mv[mv_idx],
 #else
-                       nearestmv,
+                       ref_mv_s8,
 #endif  // CONFIG_EXT_INTER
                        nearest_sub8x8, near_sub8x8,
                        is_compound, allow_hp, r)) {
@@ -1451,8 +1459,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     }
 
 #if CONFIG_REF_MV
-    mbmi->pred_mv[0].as_int = mi->bmi[3].pred_mv[0].as_int;
-    mbmi->pred_mv[1].as_int = mi->bmi[3].pred_mv[1].as_int;
+    mbmi->pred_mv[0].as_int = mi->bmi[3].pred_mv_s8[0].as_int;
+    mbmi->pred_mv[1].as_int = mi->bmi[3].pred_mv_s8[1].as_int;
 #endif
     mi->mbmi.mode = b_mode;
 
@@ -1460,19 +1468,19 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
     int ref;
+    int_mv ref_mv[2] = { nearestmv[0], nearestmv[1] };
     for (ref = 0; ref < 1 + is_compound && mbmi->mode == NEWMV; ++ref) {
-      int_mv ref_mv = nearestmv[ref];
 #if CONFIG_REF_MV
       uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
       if (xd->ref_mv_count[ref_frame_type] > 1) {
-        ref_mv = (ref == 0) ?
+        ref_mv[ref] = (ref == 0) ?
             xd->ref_mv_stack[ref_frame_type][mbmi->ref_mv_idx].this_mv :
             xd->ref_mv_stack[ref_frame_type][mbmi->ref_mv_idx].comp_mv;
-        clamp_mv_ref(&ref_mv.as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
-        lower_mv_precision(&ref_mv.as_mv, allow_hp);
+        clamp_mv_ref(&ref_mv[ref].as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
+        lower_mv_precision(&ref_mv[ref].as_mv, allow_hp);
       }
 #endif
-      nearestmv[ref] = ref_mv;
+      nearestmv[ref] = ref_mv[ref];
     }
 
     xd->corrupted |= !assign_mv(cm, xd, mbmi->mode,
@@ -1484,7 +1492,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                                 mbmi->mode == NEWFROMNEARMV ?
                                               nearmv : nearestmv,
 #else
-                                nearestmv,
+                                ref_mv,
 #endif  // CONFIG_EXT_INTER
                                 nearestmv, nearmv, is_compound, allow_hp, r);
   }

@@ -811,11 +811,12 @@ void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
     ref_mv_stack[above_count] = tmp_mv;
   }
 
-  for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *ref_mv_count); ++idx) {
-    mv_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
-    clamp_mv_ref(&mv_list[idx].as_mv,
+  for (idx = 0; idx < *ref_mv_count; ++idx)
+    clamp_mv_ref(&ref_mv_stack[idx].this_mv.as_mv,
                  xd->n8_w << 3, xd->n8_h << 3, xd);
-  }
+
+  for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *ref_mv_count); ++idx)
+    mv_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
 #endif
 
   near_mv->as_int = 0;

@@ -1186,7 +1186,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_EXT_INTER
                              &mi->bmi[j].ref_mv[ref].as_mv,
 #else
+#if CONFIG_REF_MV
+                             &mi->bmi[j].pred_mv_s8[ref].as_mv,
+#else
                              &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
+#endif  // CONFIG_REF_MV
 #endif  // CONFIG_EXT_INTER
                              nmvc, allow_hp);
             }

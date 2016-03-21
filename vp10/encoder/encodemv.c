@@ -268,6 +268,9 @@ void vp10_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
 #if CONFIG_EXT_INTER
 static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
                     const int_mv mvs[2],
+#if CONFIG_REF_MV
+                    const int_mv pred_mvs[2],
+#endif
                     nmv_context_counts *nmv_counts) {
   int i;
   PREDICTION_MODE mode = mbmi->mode;
@@ -285,6 +288,7 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
       int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[i]],
                                  mbmi_ext->ref_mv_stack[mbmi->ref_frame[i]]);
       nmv_context_counts *counts = &nmv_counts[nmv_ctx];
+      (void)pred_mvs;
 #endif
       vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
     }
@@ -363,6 +367,9 @@ static void inc_mvs_sub8x8(const MODE_INFO *mi,
 #else
 static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
                     const int_mv mvs[2],
+#if CONFIG_REF_MV
+                    const int_mv pred_mvs[2],
+#endif
                     nmv_context_counts *nmv_counts) {
   int i;
 #if !CONFIG_REF_MV
@@ -374,8 +381,10 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const MB_MODE_INFO_EXT *mbmi_ext,
     int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[i]],
                                mbmi_ext->ref_mv_stack[mbmi->ref_frame[i]]);
     nmv_context_counts *counts = &nmv_counts[nmv_ctx];
-#endif
+    const MV *ref = &pred_mvs[i].as_mv;
+#else
     const MV *ref = &mbmi_ext->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
+#endif
     const MV diff = {mvs[i].as_mv.row - ref->row,
                      mvs[i].as_mv.col - ref->col};
     vp10_inc_mv(&diff, counts, vp10_use_mv_hp(ref));
@@ -411,6 +420,7 @@ void vp10_update_mv_count(ThreadData *td) {
         if (mi->bmi[i].as_mode == NEWMV)
           inc_mvs(mbmi, mbmi_ext, mi->bmi[i].as_mv,
 #if CONFIG_REF_MV
+                  mi->bmi[i].pred_mv_s8,
                   td->counts->mv);
 #else
                   &td->counts->mv);
@@ -426,6 +436,7 @@ void vp10_update_mv_count(ThreadData *td) {
 #endif  // CONFIG_EXT_INTER
       inc_mvs(mbmi, mbmi_ext, mbmi->mv,
 #if CONFIG_REF_MV
+              mbmi->pred_mv,
               td->counts->mv);
 #else
               &td->counts->mv);
