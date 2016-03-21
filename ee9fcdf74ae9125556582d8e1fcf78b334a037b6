@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc0f1e77_6532fded",
+        "filename": "vp10/encoder/hybrid_fwd_txfm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-03-21T22:04:48Z",
+      "side": 1,
+      "message": "I saw you handle the case in vp10_highbd_fht4x4_sse4_1.\nDoes this change necessary?",
+      "range": {
+        "startLine": 222,
+        "startChar": 24,
+        "endLine": 222,
+        "endChar": 26
+      },
+      "revId": "ee9fcdf74ae9125556582d8e1fcf78b334a037b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_05218996",
+        "filename": "vp10/encoder/hybrid_fwd_txfm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-03-21T22:04:48Z",
+      "side": 1,
+      "message": "Same as above",
+      "range": {
+        "startLine": 230,
+        "startChar": 24,
+        "endLine": 230,
+        "endChar": 26
+      },
+      "revId": "ee9fcdf74ae9125556582d8e1fcf78b334a037b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_25e92563",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-03-21T22:04:48Z",
+      "side": 1,
+      "message": "Please use vp10_highbd_fht4x4_c",
+      "range": {
+        "startLine": 183,
+        "startChar": 6,
+        "endLine": 183,
+        "endChar": 19
+      },
+      "revId": "ee9fcdf74ae9125556582d8e1fcf78b334a037b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_85ee1969",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-03-21T22:04:48Z",
+      "side": 1,
+      "message": "Same as above",
+      "range": {
+        "startLine": 191,
+        "startChar": 0,
+        "endLine": 191,
+        "endChar": 52
+      },
+      "revId": "ee9fcdf74ae9125556582d8e1fcf78b334a037b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
