@@ -102,20 +102,6 @@ INSTANTIATE_TEST_CASE_P(
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 7,
                  VPX_BITS_8, 16),
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 8,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 9,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 10,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 11,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 12,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 13,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 14,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 15,
                  VPX_BITS_8, 16)));
 #endif  // !CONFIG_EXT_TX
 #endif  // HAVE_SSE2

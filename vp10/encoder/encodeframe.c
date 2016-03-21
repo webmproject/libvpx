@@ -5314,11 +5314,6 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
 #if CONFIG_EXT_TX
     if (!ext_tx_used_inter[ext_tx_set][tx_type])
       continue;
-    if (ext_tx_set == 1 &&
-        tx_type >= DST_ADST && tx_type < IDTX && *best_tx == DCT_DCT) {
-      tx_type = IDTX - 1;
-      continue;
-    }
 #else
     if (tx_size >= TX_32X32 && tx_type != DCT_DCT)
       continue;
