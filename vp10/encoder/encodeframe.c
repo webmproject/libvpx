@@ -1234,7 +1234,10 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
                                  PICK_MODE_CONTEXT *ctx,
                                  int mi_row, int mi_col, BLOCK_SIZE bsize,
                                  int output_enabled) {
-  int i, y, x_idx;
+  int y, x_idx;
+#if CONFIG_VAR_TX
+  int i;
+#endif
   VP10_COMMON *const cm = &cpi->common;
   RD_COUNTS *const rdc = &td->rd_counts;
   MACROBLOCK *const x = &td->mb;
