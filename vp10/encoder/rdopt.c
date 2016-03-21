@@ -8435,6 +8435,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   if (cm->allow_screen_content_tools && !is_inter_mode(best_mbmode.mode)) {
     PREDICTION_MODE mode_selected;
     int rate2 = 0, rate_y = 0;
+#if CONFIG_SUPERTX
+    int best_rate_nocoef;
+#endif
     int64_t distortion2 = 0, distortion_y = 0, dummy_rd = best_rd, this_rd;
     int skippable = 0, rate_overhead = 0;
     TX_SIZE best_tx_size, uv_tx;
@@ -8504,8 +8507,14 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
     if (skippable) {
       rate2 -= (rate_y + rate_uv_tokenonly[uv_tx]);
+#if CONFIG_SUPERTX
+      best_rate_nocoef = rate2;
+#endif
       rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
     } else {
+#if CONFIG_SUPERTX
+      best_rate_nocoef = rate2 - (rate_y + rate_uv_tokenonly[uv_tx]);
+#endif
       rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
     }
     this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
@@ -8515,6 +8524,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       mbmi->mv[0].as_int = 0;
       max_plane = 1;
       rd_cost->rate = rate2;
+#if CONFIG_SUPERTX
+      *returnrate_nocoef = best_rate_nocoef;
+#endif
       rd_cost->dist = distortion2;
       rd_cost->rdcost = this_rd;
       best_rd = this_rd;
