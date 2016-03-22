@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5cd96e3d_480a9344",
+        "filename": "vp10/decoder/bitreader.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2016-03-22T23:13:58Z",
+      "side": 1,
+      "message": "don\u0027t you want to move this function to ans.h instead?",
+      "range": {
+        "startLine": 30,
+        "startChar": 33,
+        "endLine": 30,
+        "endChar": 44
+      },
+      "revId": "f0f02f94e447a417d29d72c9e132d437d90e39f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
