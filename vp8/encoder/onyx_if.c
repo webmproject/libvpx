@@ -1531,15 +1531,6 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     if (!oxcf)
         return;
 
-#if CONFIG_MULTITHREAD
-    /*  wait for the last picture loopfilter thread done */
-    if (cpi->b_lpf_running)
-    {
-        sem_wait(&cpi->h_event_end_lpf);
-        cpi->b_lpf_running = 0;
-    }
-#endif
-
     if (cm->version != oxcf->Version)
     {
         cm->version = oxcf->Version;
@@ -3638,15 +3629,6 @@ static void encode_frame_to_data_rate
     /* Clear down mmx registers to allow floating point in what follows */
     vp8_clear_system_state();
 
-#if CONFIG_MULTITHREAD
-    /*  wait for the last picture loopfilter thread done */
-    if (cpi->b_lpf_running)
-    {
-        sem_wait(&cpi->h_event_end_lpf);
-        cpi->b_lpf_running = 0;
-    }
-#endif
-
     if(cpi->force_next_frame_intra)
     {
         cm->frame_type = KEY_FRAME;  /* delayed intra frame */
@@ -4375,8 +4357,6 @@ static void encode_frame_to_data_rate
             vp8_setup_key_frame(cpi);
         }
 
-
-
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
         {
             if(cpi->oxcf.error_resilient_mode)
@@ -4842,7 +4822,6 @@ static void encode_frame_to_data_rate
     {
         /* start loopfilter in separate thread */
         sem_post(&cpi->h_event_start_lpf);
-        cpi->b_lpf_running = 1;
     }
     else
 #endif
@@ -4874,11 +4853,10 @@ static void encode_frame_to_data_rate
     vp8_pack_bitstream(cpi, dest, dest_end, size);
 
 #if CONFIG_MULTITHREAD
-    /* if PSNR packets are generated we have to wait for the lpf */
-    if (cpi->b_lpf_running && cpi->b_calculate_psnr)
+    /* wait for the lpf thread done */
+    if (cpi->b_multi_threaded)
     {
         sem_wait(&cpi->h_event_end_lpf);
-        cpi->b_lpf_running = 0;
     }
 #endif
 
@@ -5837,14 +5815,6 @@ int vp8_get_preview_raw_frame(VP8_COMP *cpi, YV12_BUFFER_CONFIG *dest, vp8_ppfla
     else
     {
         int ret;
-
-#if CONFIG_MULTITHREAD
-        if(cpi->b_lpf_running)
-        {
-            sem_wait(&cpi->h_event_end_lpf);
-            cpi->b_lpf_running = 0;
-        }
-#endif
 
 #if CONFIG_POSTPROC
         cpi->common.show_frame_mi = cpi->common.mi;
