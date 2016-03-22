@@ -22,6 +22,30 @@
       "revId": "26b1fee6a4600b37e41be72c697646dddc9203b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_d5727ae9",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-03-22T22:54:41Z",
+      "side": 1,
+      "message": "Actually, tile_columns \u003e 0 and threads \u003d 1 works.\n\nA better condition can be:\nif (oxcf-\u003emax_threads \u003e 1 \u0026\u0026 oxcf-\u003etile_columns \u003e 0)\nThis is the same as what we use for enabling multi-threaded encoder.",
+      "parentUuid": "dc0f1e77_91a497e4",
+      "range": {
+        "startLine": 492,
+        "startChar": 27,
+        "endLine": 492,
+        "endChar": 28
+      },
+      "revId": "26b1fee6a4600b37e41be72c697646dddc9203b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
