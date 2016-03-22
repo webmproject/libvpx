@@ -7,7 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include "vpx_dsp/bitwriter.h"
+#include "vp10/encoder/bitwriter.h"
 
 #include "vp10/common/common.h"
 #include "vp10/common/entropy.h"
@@ -83,35 +83,35 @@ static int prob_diff_update_cost(vpx_prob newp, vpx_prob oldp) {
   return update_bits[delp] << VP9_PROB_COST_SHIFT;
 }
 
-static void encode_uniform(vpx_writer *w, int v) {
+static void encode_uniform(vp10_writer *w, int v) {
   const int l = 8;
   const int m = (1 << l) - 190;
   if (v < m) {
-    vpx_write_literal(w, v, l - 1);
+    vp10_write_literal(w, v, l - 1);
   } else {
-    vpx_write_literal(w, m + ((v - m) >> 1), l - 1);
-    vpx_write_literal(w, (v - m) & 1, 1);
+    vp10_write_literal(w, m + ((v - m) >> 1), l - 1);
+    vp10_write_literal(w, (v - m) & 1, 1);
   }
 }
 
-static INLINE int write_bit_gte(vpx_writer *w, int word, int test) {
-  vpx_write_literal(w, word >= test, 1);
+static INLINE int write_bit_gte(vp10_writer *w, int word, int test) {
+  vp10_write_literal(w, word >= test, 1);
   return word >= test;
 }
 
-static void encode_term_subexp(vpx_writer *w, int word) {
+static void encode_term_subexp(vp10_writer *w, int word) {
   if (!write_bit_gte(w, word, 16)) {
-    vpx_write_literal(w, word, 4);
+    vp10_write_literal(w, word, 4);
   } else if (!write_bit_gte(w, word, 32)) {
-    vpx_write_literal(w, word - 16, 4);
+    vp10_write_literal(w, word - 16, 4);
   } else if (!write_bit_gte(w, word, 64)) {
-    vpx_write_literal(w, word - 32, 5);
+    vp10_write_literal(w, word - 32, 5);
   } else {
     encode_uniform(w, word - 64);
   }
 }
 
-void vp10_write_prob_diff_update(vpx_writer *w, vpx_prob newp, vpx_prob oldp) {
+void vp10_write_prob_diff_update(vp10_writer *w, vpx_prob newp, vpx_prob oldp) {
   const int delp = remap_prob(newp, oldp);
   encode_term_subexp(w, delp);
 }
@@ -262,7 +262,7 @@ int vp10_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
 }
 #endif  // CONFIG_ENTROPY
 
-void vp10_cond_prob_diff_update(vpx_writer *w, vpx_prob *oldp,
+void vp10_cond_prob_diff_update(vp10_writer *w, vpx_prob *oldp,
                                const unsigned int ct[2]) {
   const vpx_prob upd = DIFF_UPDATE_PROB;
   vpx_prob newp = get_binary_prob(ct[0], ct[1]);
@@ -270,11 +270,11 @@ void vp10_cond_prob_diff_update(vpx_writer *w, vpx_prob *oldp,
                                                           upd);
   assert(newp >= 1);
   if (savings > 0) {
-    vpx_write(w, 1, upd);
+    vp10_write(w, 1, upd);
     vp10_write_prob_diff_update(w, newp, *oldp);
     *oldp = newp;
   } else {
-    vpx_write(w, 0, upd);
+    vp10_write(w, 0, upd);
   }
 }
 

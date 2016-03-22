@@ -21,11 +21,11 @@ static int inv_recenter_nonneg(int v, int m) {
   return (v & 1) ? m - ((v + 1) >> 1) : m + (v >> 1);
 }
 
-static int decode_uniform(vpx_reader *r) {
+static int decode_uniform(vp10_reader *r) {
   const int l = 8;
   const int m = (1 << l) - 190;
-  const int v = vpx_read_literal(r, l - 1);
-  return v < m ?  v : (v << 1) - m + vpx_read_bit(r);
+  const int v = vp10_read_literal(r, l - 1);
+  return v < m ?  v : (v << 1) - m + vp10_read_bit(r);
 }
 
 static int inv_remap_prob(int v, int m) {
@@ -58,18 +58,18 @@ static int inv_remap_prob(int v, int m) {
   }
 }
 
-static int decode_term_subexp(vpx_reader *r) {
-  if (!vpx_read_bit(r))
-    return vpx_read_literal(r, 4);
-  if (!vpx_read_bit(r))
-    return vpx_read_literal(r, 4) + 16;
-  if (!vpx_read_bit(r))
-    return vpx_read_literal(r, 5) + 32;
+static int decode_term_subexp(vp10_reader *r) {
+  if (!vp10_read_bit(r))
+    return vp10_read_literal(r, 4);
+  if (!vp10_read_bit(r))
+    return vp10_read_literal(r, 4) + 16;
+  if (!vp10_read_bit(r))
+    return vp10_read_literal(r, 5) + 32;
   return decode_uniform(r) + 64;
 }
 
-void vp10_diff_update_prob(vpx_reader *r, vpx_prob* p) {
-  if (vpx_read(r, DIFF_UPDATE_PROB)) {
+void vp10_diff_update_prob(vp10_reader *r, vpx_prob* p) {
+  if (vp10_read(r, DIFF_UPDATE_PROB)) {
     const int delp = decode_term_subexp(r);
     *p = (vpx_prob)inv_remap_prob(delp, *p);
   }

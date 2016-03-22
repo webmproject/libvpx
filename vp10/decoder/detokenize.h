@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
-                                vpx_reader *r);
+                                vp10_reader *r);
 int vp10_decode_block_tokens(MACROBLOCKD *const xd,
 #if CONFIG_ANS
                              const rans_dec_lut *const token_tab,
@@ -32,7 +32,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
 #if CONFIG_ANS
                              struct AnsDecoder *const r,
 #else
-                             vpx_reader *r,
+                             vp10_reader *r,
 #endif  // CONFIG_ANS
                              int seg_id);
 

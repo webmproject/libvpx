@@ -40,10 +40,10 @@
   } while (0)
 
 #if !CONFIG_ANS
-static INLINE int read_coeff(const vpx_prob *probs, int n, vpx_reader *r) {
+static INLINE int read_coeff(const vpx_prob *probs, int n, vp10_reader *r) {
   int i, val = 0;
   for (i = 0; i < n; ++i)
-    val = (val << 1) | vpx_read(r, probs[i]);
+    val = (val << 1) | vp10_read(r, probs[i]);
   return val;
 }
 
@@ -51,7 +51,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
                         PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
-                        vpx_reader *r) {
+                        vp10_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
   const int max_eob = 16 << (tx_size << 1);
   const FRAME_CONTEXT *const fc = xd->fc;
@@ -129,12 +129,12 @@ static int decode_coefs(const MACROBLOCKD *xd,
     prob = coef_probs[band][ctx];
     if (counts)
       ++eob_branch_count[band][ctx];
-    if (!vpx_read(r, prob[EOB_CONTEXT_NODE])) {
+    if (!vp10_read(r, prob[EOB_CONTEXT_NODE])) {
       INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
     }
 
-    while (!vpx_read(r, prob[ZERO_CONTEXT_NODE])) {
+    while (!vp10_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       dqv = dq[1];
       token_cache[scan[c]] = 0;
@@ -146,13 +146,13 @@ static int decode_coefs(const MACROBLOCKD *xd,
       prob = coef_probs[band][ctx];
     }
 
-    if (!vpx_read(r, prob[ONE_CONTEXT_NODE])) {
+    if (!vp10_read(r, prob[ONE_CONTEXT_NODE])) {
       INCREMENT_COUNT(ONE_TOKEN);
       token = ONE_TOKEN;
       val = 1;
     } else {
       INCREMENT_COUNT(TWO_TOKEN);
-      token = vpx_read_tree(r, vp10_coef_con_tree,
+      token = vp10_read_tree(r, vp10_coef_con_tree,
                             vp10_pareto8_full[prob[PIVOT_NODE] - 1]);
       switch (token) {
         case TWO_TOKEN:
@@ -203,13 +203,13 @@ static int decode_coefs(const MACROBLOCKD *xd,
     v = (val * dqv) >> dq_shift;
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
-    dqcoeff[scan[c]] = highbd_check_range((vpx_read_bit(r) ? -v : v),
+    dqcoeff[scan[c]] = highbd_check_range((vp10_read_bit(r) ? -v : v),
                                           xd->bd);
 #else
-    dqcoeff[scan[c]] = check_range(vpx_read_bit(r) ? -v : v);
+    dqcoeff[scan[c]] = check_range(vp10_read_bit(r) ? -v : v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else
-    dqcoeff[scan[c]] = vpx_read_bit(r) ? -v : v;
+    dqcoeff[scan[c]] = vp10_read_bit(r) ? -v : v;
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
     token_cache[scan[c]] = vp10_pt_energy_class[token];
     ++c;
@@ -445,7 +445,7 @@ void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
 }
 
 void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
-                                vpx_reader *r) {
+                                vp10_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -465,7 +465,7 @@ void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
     for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
       color_ctx = vp10_get_palette_color_context(color_map, cols, i, j, n,
                                                  color_order);
-      color_idx = vpx_read_tree(r, vp10_palette_color_tree[n - 2],
+      color_idx = vp10_read_tree(r, vp10_palette_color_tree[n - 2],
                                 prob[n - 2][color_ctx]);
       assert(color_idx >= 0 && color_idx < n);
       color_map[i * cols + j] = color_order[color_idx];
@@ -483,7 +483,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
 #if CONFIG_ANS
                              struct AnsDecoder *const r,
 #else
-                             vpx_reader *r,
+                             vp10_reader *r,
 #endif  // CONFIG_ANS
                              int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];

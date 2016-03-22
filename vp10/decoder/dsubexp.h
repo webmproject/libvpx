@@ -12,13 +12,13 @@
 #ifndef VP10_DECODER_DSUBEXP_H_
 #define VP10_DECODER_DSUBEXP_H_
 
-#include "vpx_dsp/bitreader.h"
+#include "vp10/decoder/bitreader.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void vp10_diff_update_prob(vpx_reader *r, vpx_prob* p);
+void vp10_diff_update_prob(vp10_reader *r, vpx_prob* p);
 
 #ifdef __cplusplus
 }  // extern "C"

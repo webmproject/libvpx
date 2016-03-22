@@ -31,7 +31,7 @@ void vp10_entropy_mv_init(void) {
   vp10_tokens_from_tree(mv_fp_encodings, vp10_mv_fp_tree);
 }
 
-static void encode_mv_component(vpx_writer* w, int comp,
+static void encode_mv_component(vp10_writer* w, int comp,
                                 const nmv_component* mvcomp, int usehp) {
   int offset;
   const int sign = comp < 0;
@@ -44,7 +44,7 @@ static void encode_mv_component(vpx_writer* w, int comp,
   assert(comp != 0);
 
   // Sign
-  vpx_write(w, sign, mvcomp->sign);
+  vp10_write(w, sign, mvcomp->sign);
 
   // Class
   vp10_write_token(w, vp10_mv_class_tree, mvcomp->classes,
@@ -58,7 +58,7 @@ static void encode_mv_component(vpx_writer* w, int comp,
     int i;
     const int n = mv_class + CLASS0_BITS - 1;  // number of bits
     for (i = 0; i < n; ++i)
-      vpx_write(w, (d >> i) & 1, mvcomp->bits[i]);
+      vp10_write(w, (d >> i) & 1, mvcomp->bits[i]);
   }
 
   // Fractional bits
@@ -68,7 +68,7 @@ static void encode_mv_component(vpx_writer* w, int comp,
 
   // High precision bit
   if (usehp)
-    vpx_write(w, hp,
+    vp10_write(w, hp,
               mv_class == MV_CLASS_0 ? mvcomp->class0_hp : mvcomp->hp);
 }
 
@@ -135,7 +135,7 @@ static void build_nmv_component_cost_table(int *mvcost,
   }
 }
 
-static void update_mv(vpx_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
+static void update_mv(vp10_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
                       vpx_prob upd_p) {
   (void) upd_p;
   vp10_cond_prob_diff_update(w, cur_p, ct);
@@ -144,7 +144,7 @@ static void update_mv(vpx_writer *w, const unsigned int ct[2], vpx_prob *cur_p,
 static void write_mv_update(const vpx_tree_index *tree,
                             vpx_prob probs[/*n - 1*/],
                             const unsigned int counts[/*n - 1*/],
-                            int n, vpx_writer *w) {
+                            int n, vp10_writer *w) {
   int i;
   unsigned int branch_ct[32][2];
 
@@ -156,7 +156,7 @@ static void write_mv_update(const vpx_tree_index *tree,
     update_mv(w, branch_ct[i], &probs[i], MV_UPDATE_PROB);
 }
 
-void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vpx_writer *w,
+void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vp10_writer *w,
                           nmv_context_counts *const nmv_counts) {
   int i, j;
 #if CONFIG_REF_MV
@@ -235,7 +235,7 @@ void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vpx_writer *w,
 #endif
 }
 
-void vp10_encode_mv(VP10_COMP* cpi, vpx_writer* w,
+void vp10_encode_mv(VP10_COMP* cpi, vp10_writer* w,
                    const MV* mv, const MV* ref,
                    const nmv_context* mvctx, int usehp) {
   const MV diff = {mv->row - ref->row,

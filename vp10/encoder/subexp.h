@@ -18,12 +18,12 @@ extern "C" {
 
 #include "vpx_dsp/prob.h"
 
-struct vpx_writer;
+struct vp10_writer;
 
-void vp10_write_prob_diff_update(struct vpx_writer *w,
+void vp10_write_prob_diff_update(struct vp10_writer *w,
                                 vpx_prob newp, vpx_prob oldp);
 
-void vp10_cond_prob_diff_update(struct vpx_writer *w, vpx_prob *oldp,
+void vp10_cond_prob_diff_update(struct vp10_writer *w, vpx_prob *oldp,
                                const unsigned int ct[2]);
 
 int vp10_prob_diff_update_savings_search(const unsigned int *ct,

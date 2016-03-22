@@ -24,25 +24,25 @@
 
 #include "vpx_dsp/vpx_dsp_common.h"
 
-static INLINE int read_uniform(vpx_reader *r, int n) {
+static INLINE int read_uniform(vp10_reader *r, int n) {
   int l = get_unsigned_bits(n);
   int m = (1 << l) - n;
-  int v = vpx_read_literal(r, l-1);
+  int v = vp10_read_literal(r, l-1);
 
   assert(l != 0);
 
   if (v < m)
     return v;
   else
-    return (v << 1) - m + vpx_read_literal(r, 1);
+    return (v << 1) - m + vp10_read_literal(r, 1);
 }
 
-static PREDICTION_MODE read_intra_mode(vpx_reader *r, const vpx_prob *p) {
-  return (PREDICTION_MODE)vpx_read_tree(r, vp10_intra_mode_tree, p);
+static PREDICTION_MODE read_intra_mode(vp10_reader *r, const vpx_prob *p) {
+  return (PREDICTION_MODE)vp10_read_tree(r, vp10_intra_mode_tree, p);
 }
 
 static PREDICTION_MODE read_intra_mode_y(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                         vpx_reader *r, int size_group) {
+                                         vp10_reader *r, int size_group) {
   const PREDICTION_MODE y_mode =
       read_intra_mode(r, cm->fc->y_mode_prob[size_group]);
   FRAME_COUNTS *counts = xd->counts;
@@ -52,7 +52,7 @@ static PREDICTION_MODE read_intra_mode_y(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static PREDICTION_MODE read_intra_mode_uv(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                          vpx_reader *r,
+                                          vp10_reader *r,
                                           PREDICTION_MODE y_mode) {
   const PREDICTION_MODE uv_mode = read_intra_mode(r,
                                          cm->fc->uv_mode_prob[y_mode]);
@@ -79,13 +79,13 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
 #if CONFIG_REF_MV && CONFIG_EXT_INTER
                                        MB_MODE_INFO *mbmi,
 #endif
-                                       vpx_reader *r, int16_t ctx) {
+                                       vp10_reader *r, int16_t ctx) {
 #if CONFIG_REF_MV
   FRAME_COUNTS *counts = xd->counts;
   int16_t mode_ctx = ctx & NEWMV_CTX_MASK;
   vpx_prob mode_prob = cm->fc->newmv_prob[mode_ctx];
 
-  if (vpx_read(r, mode_prob) == 0) {
+  if (vp10_read(r, mode_prob) == 0) {
     if (counts)
       ++counts->newmv_mode[mode_ctx][0];
 
@@ -96,7 +96,7 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
 #if CONFIG_EXT_INTER
     } else {
       mode_prob = cm->fc->new2mv_prob;
-      if (vpx_read(r, mode_prob) == 0) {
+      if (vp10_read(r, mode_prob) == 0) {
         if (counts)
           ++counts->new2mv_mode[0];
         return NEWMV;
@@ -117,7 +117,7 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
   mode_ctx = (ctx >> ZEROMV_OFFSET) & ZEROMV_CTX_MASK;
 
   mode_prob = cm->fc->zeromv_prob[mode_ctx];
-  if (vpx_read(r, mode_prob) == 0) {
+  if (vp10_read(r, mode_prob) == 0) {
     if (counts)
       ++counts->zeromv_mode[mode_ctx][0];
     return ZEROMV;
@@ -136,7 +136,7 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
 
   mode_prob = cm->fc->refmv_prob[mode_ctx];
 
-  if (vpx_read(r, mode_prob) == 0) {
+  if (vp10_read(r, mode_prob) == 0) {
     if (counts)
       ++counts->refmv_mode[mode_ctx][0];
 
@@ -150,7 +150,7 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
   // Invalid prediction mode.
   assert(0);
 #else
-  const int mode = vpx_read_tree(r, vp10_inter_mode_tree,
+  const int mode = vp10_read_tree(r, vp10_inter_mode_tree,
                                  cm->fc->inter_mode_probs[ctx]);
   FRAME_COUNTS *counts = xd->counts;
   if (counts)
@@ -164,7 +164,7 @@ static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
 static void read_drl_idx(const VP10_COMMON *cm,
                          MACROBLOCKD *xd,
                          MB_MODE_INFO *mbmi,
-                         vpx_reader *r) {
+                         vp10_reader *r) {
   uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
   mbmi->ref_mv_idx = 0;
 
@@ -174,7 +174,7 @@ static void read_drl_idx(const VP10_COMMON *cm,
       if (xd->ref_mv_count[ref_frame_type] > idx + 1) {
         uint8_t drl_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], idx);
         vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
-        if (!vpx_read(r, drl_prob)) {
+        if (!vp10_read(r, drl_prob)) {
           mbmi->ref_mv_idx = idx;
           if (xd->counts)
             ++xd->counts->drl_mode[drl_ctx][0];
@@ -196,7 +196,7 @@ static void read_drl_idx(const VP10_COMMON *cm,
       if (xd->ref_mv_count[ref_frame_type] > idx + 1) {
         uint8_t drl_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], idx);
         vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
-        if (!vpx_read(r, drl_prob)) {
+        if (!vp10_read(r, drl_prob)) {
           mbmi->ref_mv_idx = idx - 1;
           if (xd->counts)
             ++xd->counts->drl_mode[drl_ctx][0];
@@ -214,8 +214,8 @@ static void read_drl_idx(const VP10_COMMON *cm,
 #if CONFIG_EXT_INTER
 static PREDICTION_MODE read_inter_compound_mode(VP10_COMMON *cm,
                                                 MACROBLOCKD *xd,
-                                                vpx_reader *r, int16_t ctx) {
-  const int mode = vpx_read_tree(r, vp10_inter_compound_mode_tree,
+                                                vp10_reader *r, int16_t ctx) {
+  const int mode = vp10_read_tree(r, vp10_inter_compound_mode_tree,
                                  cm->fc->inter_compound_mode_probs[ctx]);
   FRAME_COUNTS *counts = xd->counts;
 
@@ -227,16 +227,16 @@ static PREDICTION_MODE read_inter_compound_mode(VP10_COMMON *cm,
 }
 #endif  // CONFIG_EXT_INTER
 
-static int read_segment_id(vpx_reader *r,
+static int read_segment_id(vp10_reader *r,
     const struct segmentation_probs *segp) {
-  return vpx_read_tree(r, vp10_segment_tree, segp->tree_probs);
+  return vp10_read_tree(r, vp10_segment_tree, segp->tree_probs);
 }
 
 #if CONFIG_VAR_TX
 static void read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
                                MB_MODE_INFO *mbmi, FRAME_COUNTS *counts,
                                TX_SIZE tx_size, int blk_row, int blk_col,
-                               vpx_reader *r) {
+                               vp10_reader *r) {
   int is_split = 0;
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
@@ -256,7 +256,7 @@ static void read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
      return;
 
-  is_split = vpx_read(r, cm->fc->txfm_partition_prob[ctx]);
+  is_split = vp10_read(r, cm->fc->txfm_partition_prob[ctx]);
 
   if (is_split) {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
@@ -298,11 +298,11 @@ static void read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
 #endif
 
 static TX_SIZE read_selected_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                     TX_SIZE max_tx_size, vpx_reader *r) {
+                                     TX_SIZE max_tx_size, vp10_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
   const int ctx = get_tx_size_context(xd);
   const int tx_size_cat = max_tx_size - TX_8X8;
-  int tx_size = vpx_read_tree(r, vp10_tx_size_tree[tx_size_cat],
+  int tx_size = vp10_read_tree(r, vp10_tx_size_tree[tx_size_cat],
                               cm->fc->tx_size_probs[tx_size_cat][ctx]);
   if (counts)
     ++counts->tx_size[tx_size_cat][ctx][tx_size];
@@ -310,7 +310,7 @@ static TX_SIZE read_selected_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static TX_SIZE read_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
-                            int allow_select, vpx_reader *r) {
+                            int allow_select, vp10_reader *r) {
   TX_MODE tx_mode = cm->tx_mode;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
@@ -348,7 +348,7 @@ static void set_segment_id(VP10_COMMON *cm, int mi_offset,
 
 static int read_intra_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_offset, int x_mis, int y_mis,
-                                 vpx_reader *r) {
+                                 vp10_reader *r) {
   struct segmentation *const seg = &cm->seg;
   FRAME_COUNTS *counts = xd->counts;
   struct segmentation_probs *const segp = &cm->fc->seg;
@@ -379,7 +379,7 @@ static void copy_segment_id(const VP10_COMMON *cm,
 }
 
 static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
-                                 int mi_row, int mi_col, vpx_reader *r) {
+                                 int mi_row, int mi_col, vp10_reader *r) {
   struct segmentation *const seg = &cm->seg;
   FRAME_COUNTS *counts = xd->counts;
   struct segmentation_probs *const segp = &cm->fc->seg;
@@ -409,7 +409,7 @@ static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   if (seg->temporal_update) {
     const int ctx = vp10_get_pred_context_seg_id(xd);
     const vpx_prob pred_prob = segp->pred_probs[ctx];
-    mbmi->seg_id_predicted = vpx_read(r, pred_prob);
+    mbmi->seg_id_predicted = vp10_read(r, pred_prob);
     if (counts)
       ++counts->seg.pred[ctx][mbmi->seg_id_predicted];
     if (mbmi->seg_id_predicted) {
@@ -429,12 +429,12 @@ static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd,
-                     int segment_id, vpx_reader *r) {
+                     int segment_id, vp10_reader *r) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
     const int ctx = vp10_get_skip_context(xd);
-    const int skip = vpx_read(r, cm->fc->skip_probs[ctx]);
+    const int skip = vp10_read(r, cm->fc->skip_probs[ctx]);
     FRAME_COUNTS *counts = xd->counts;
     if (counts)
       ++counts->skip[ctx][skip];
@@ -444,7 +444,7 @@ static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd,
 
 static void read_palette_mode_info(VP10_COMMON *const cm,
                                    MACROBLOCKD *const xd,
-                                   vpx_reader *r) {
+                                   vp10_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MODE_INFO *const above_mi = xd->above_mi;
@@ -458,14 +458,14 @@ static void read_palette_mode_info(VP10_COMMON *const cm,
       palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
     if (left_mi)
       palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-    if (vpx_read(r, vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
+    if (vp10_read(r, vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
                                                      [palette_ctx])) {
       pmi->palette_size[0] =
-        vpx_read_tree(r, vp10_palette_size_tree,
+        vp10_read_tree(r, vp10_palette_size_tree,
                       vp10_default_palette_y_size_prob[bsize - BLOCK_8X8]) + 2;
       n = pmi->palette_size[0];
       for (i = 0; i < n; ++i)
-        pmi->palette_colors[i] = vpx_read_literal(r, cm->bit_depth);
+        pmi->palette_colors[i] = vp10_read_literal(r, cm->bit_depth);
 
       xd->plane[0].color_index_map[0] = read_uniform(r, n);
       assert(xd->plane[0].color_index_map[0] < n);
@@ -473,18 +473,18 @@ static void read_palette_mode_info(VP10_COMMON *const cm,
   }
 
   if (mbmi->uv_mode == DC_PRED) {
-    if (vpx_read(r,
+    if (vp10_read(r,
                  vp10_default_palette_uv_mode_prob[pmi->palette_size[0] > 0])) {
       pmi->palette_size[1] =
-          vpx_read_tree(r, vp10_palette_size_tree,
+          vp10_read_tree(r, vp10_palette_size_tree,
                         vp10_default_palette_uv_size_prob[bsize - BLOCK_8X8])
                         + 2;
       n = pmi->palette_size[1];
       for (i = 0; i < n; ++i) {
         pmi->palette_colors[PALETTE_MAX_SIZE + i] =
-            vpx_read_literal(r, cm->bit_depth);
+            vp10_read_literal(r, cm->bit_depth);
         pmi->palette_colors[2 * PALETTE_MAX_SIZE + i] =
-            vpx_read_literal(r, cm->bit_depth);
+            vp10_read_literal(r, cm->bit_depth);
       }
       xd->plane[1].color_index_map[0] = read_uniform(r, n);
       assert(xd->plane[1].color_index_map[0] < n);
@@ -494,7 +494,7 @@ static void read_palette_mode_info(VP10_COMMON *const cm,
 
 #if CONFIG_EXT_INTRA
 static void read_ext_intra_mode_info(VP10_COMMON *const cm,
-                                     MACROBLOCKD *const xd, vpx_reader *r) {
+                                     MACROBLOCKD *const xd, vp10_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   FRAME_COUNTS *counts = xd->counts;
@@ -505,7 +505,7 @@ static void read_ext_intra_mode_info(VP10_COMMON *const cm,
   if (mbmi->mode == DC_PRED &&
       mbmi->palette_mode_info.palette_size[0] == 0) {
     mbmi->ext_intra_mode_info.use_ext_intra_mode[0] =
-        vpx_read(r, cm->fc->ext_intra_probs[0]);
+        vp10_read(r, cm->fc->ext_intra_probs[0]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[0]) {
       mbmi->ext_intra_mode_info.ext_intra_mode[0] =
           read_uniform(r, FILTER_INTRA_MODES);
@@ -516,7 +516,7 @@ static void read_ext_intra_mode_info(VP10_COMMON *const cm,
   if (mbmi->uv_mode == DC_PRED &&
       mbmi->palette_mode_info.palette_size[1] == 0) {
     mbmi->ext_intra_mode_info.use_ext_intra_mode[1] =
-        vpx_read(r, cm->fc->ext_intra_probs[1]);
+        vp10_read(r, cm->fc->ext_intra_probs[1]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[1]) {
       mbmi->ext_intra_mode_info.ext_intra_mode[1] =
           read_uniform(r, FILTER_INTRA_MODES);
@@ -529,7 +529,7 @@ static void read_ext_intra_mode_info(VP10_COMMON *const cm,
 
 static void read_intra_frame_mode_info(VP10_COMMON *const cm,
                                        MACROBLOCKD *const xd,
-                                       int mi_row, int mi_col, vpx_reader *r) {
+                                       int mi_row, int mi_col, vp10_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MODE_INFO *above_mi = xd->above_mi;
@@ -582,7 +582,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
             mbmi->angle_delta[0] * ANGLE_STEP;
         if (pick_intra_filter(p_angle)) {
           FRAME_COUNTS *counts = xd->counts;
-          mbmi->intra_filter = vpx_read_tree(r, vp10_intra_filter_tree,
+          mbmi->intra_filter = vp10_read_tree(r, vp10_intra_filter_tree,
                                              cm->fc->intra_filter_probs[ctx]);
           if (counts)
             ++counts->intra_filter[ctx][mbmi->intra_filter];
@@ -615,7 +615,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
       FRAME_COUNTS *counts = xd->counts;
       int eset = get_ext_tx_set(mbmi->tx_size, mbmi->sb_type, 0);
       if (eset > 0) {
-        mbmi->tx_type = vpx_read_tree(
+        mbmi->tx_type = vp10_read_tree(
             r, vp10_ext_tx_intra_tree[eset],
             cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode]);
         if (counts)
@@ -631,7 +631,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       FRAME_COUNTS *counts = xd->counts;
       TX_TYPE tx_type_nom = intra_mode_to_tx_type_context[mbmi->mode];
-      mbmi->tx_type = vpx_read_tree(
+      mbmi->tx_type = vp10_read_tree(
           r, vp10_ext_tx_tree,
           cm->fc->intra_ext_tx_prob[mbmi->tx_size][tx_type_nom]);
       if (counts)
@@ -650,16 +650,16 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
 #endif  // CONFIG_EXT_INTRA
 }
 
-static int read_mv_component(vpx_reader *r,
+static int read_mv_component(vp10_reader *r,
                              const nmv_component *mvcomp, int usehp) {
   int mag, d, fr, hp;
-  const int sign = vpx_read(r, mvcomp->sign);
-  const int mv_class = vpx_read_tree(r, vp10_mv_class_tree, mvcomp->classes);
+  const int sign = vp10_read(r, mvcomp->sign);
+  const int mv_class = vp10_read_tree(r, vp10_mv_class_tree, mvcomp->classes);
   const int class0 = mv_class == MV_CLASS_0;
 
   // Integer part
   if (class0) {
-    d = vpx_read_tree(r, vp10_mv_class0_tree, mvcomp->class0);
+    d = vp10_read_tree(r, vp10_mv_class0_tree, mvcomp->class0);
     mag = 0;
   } else {
     int i;
@@ -667,16 +667,16 @@ static int read_mv_component(vpx_reader *r,
 
     d = 0;
     for (i = 0; i < n; ++i)
-      d |= vpx_read(r, mvcomp->bits[i]) << i;
+      d |= vp10_read(r, mvcomp->bits[i]) << i;
     mag = CLASS0_SIZE << (mv_class + 2);
   }
 
   // Fractional part
-  fr = vpx_read_tree(r, vp10_mv_fp_tree, class0 ? mvcomp->class0_fp[d]
+  fr = vp10_read_tree(r, vp10_mv_fp_tree, class0 ? mvcomp->class0_fp[d]
                                                : mvcomp->fp);
 
   // High precision part (if hp is not used, the default value of the hp is 1)
-  hp = usehp ? vpx_read(r, class0 ? mvcomp->class0_hp : mvcomp->hp)
+  hp = usehp ? vp10_read(r, class0 ? mvcomp->class0_hp : mvcomp->hp)
              : 1;
 
   // Result
@@ -684,11 +684,11 @@ static int read_mv_component(vpx_reader *r,
   return sign ? -mag : mag;
 }
 
-static INLINE void read_mv(vpx_reader *r, MV *mv, const MV *ref,
+static INLINE void read_mv(vp10_reader *r, MV *mv, const MV *ref,
                            const nmv_context *ctx,
                            nmv_context_counts *counts, int allow_hp) {
   const MV_JOINT_TYPE joint_type =
-      (MV_JOINT_TYPE)vpx_read_tree(r, vp10_mv_joint_tree, ctx->joints);
+      (MV_JOINT_TYPE)vp10_read_tree(r, vp10_mv_joint_tree, ctx->joints);
   const int use_hp = allow_hp && vp10_use_mv_hp(ref);
   MV diff = {0, 0};
 
@@ -706,11 +706,11 @@ static INLINE void read_mv(vpx_reader *r, MV *mv, const MV *ref,
 
 static REFERENCE_MODE read_block_reference_mode(VP10_COMMON *cm,
                                                 const MACROBLOCKD *xd,
-                                                vpx_reader *r) {
+                                                vp10_reader *r) {
   if (cm->reference_mode == REFERENCE_MODE_SELECT) {
     const int ctx = vp10_get_reference_mode_context(cm, xd);
     const REFERENCE_MODE mode =
-        (REFERENCE_MODE)vpx_read(r, cm->fc->comp_inter_prob[ctx]);
+        (REFERENCE_MODE)vp10_read(r, cm->fc->comp_inter_prob[ctx]);
     FRAME_COUNTS *counts = xd->counts;
     if (counts)
       ++counts->comp_inter[ctx][mode];
@@ -722,7 +722,7 @@ static REFERENCE_MODE read_block_reference_mode(VP10_COMMON *cm,
 
 // Read the referncence frame
 static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
-                            vpx_reader *r,
+                            vp10_reader *r,
                             int segment_id, MV_REFERENCE_FRAME ref_frame[2]) {
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = xd->counts;
@@ -737,7 +737,7 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
     if (mode == COMPOUND_REFERENCE) {
       const int idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
       const int ctx = vp10_get_pred_context_comp_ref_p(cm, xd);
-      const int bit = vpx_read(r, fc->comp_ref_prob[ctx][0]);
+      const int bit = vp10_read(r, fc->comp_ref_prob[ctx][0]);
       if (counts)
         ++counts->comp_ref[ctx][0][bit];
       ref_frame[idx] = cm->comp_fixed_ref;
@@ -745,18 +745,18 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 #if CONFIG_EXT_REFS
       if (!bit) {
         const int ctx1 = vp10_get_pred_context_comp_ref_p1(cm, xd);
-        const int bit1 = vpx_read(r, fc->comp_ref_prob[ctx1][1]);
+        const int bit1 = vp10_read(r, fc->comp_ref_prob[ctx1][1]);
         if (counts)
           ++counts->comp_ref[ctx1][1][bit1];
         ref_frame[!idx] = cm->comp_var_ref[bit1 ? 0 : 1];
       } else {
         const int ctx2 = vp10_get_pred_context_comp_ref_p2(cm, xd);
-        const int bit2 = vpx_read(r, fc->comp_ref_prob[ctx2][2]);
+        const int bit2 = vp10_read(r, fc->comp_ref_prob[ctx2][2]);
         if (counts)
           ++counts->comp_ref[ctx2][2][bit2];
         if (!bit2) {
           const int ctx3 = vp10_get_pred_context_comp_ref_p3(cm, xd);
-          const int bit3 = vpx_read(r, fc->comp_ref_prob[ctx3][3]);
+          const int bit3 = vp10_read(r, fc->comp_ref_prob[ctx3][3]);
           if (counts)
             ++counts->comp_ref[ctx3][3][bit3];
           ref_frame[!idx] = cm->comp_var_ref[bit3 ? 2 : 3];
@@ -770,29 +770,29 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
     } else if (mode == SINGLE_REFERENCE) {
 #if CONFIG_EXT_REFS
       const int ctx0 = vp10_get_pred_context_single_ref_p1(xd);
-      const int bit0 = vpx_read(r, fc->single_ref_prob[ctx0][0]);
+      const int bit0 = vp10_read(r, fc->single_ref_prob[ctx0][0]);
       if (counts)
         ++counts->single_ref[ctx0][0][bit0];
       if (bit0) {
         const int ctx1 = vp10_get_pred_context_single_ref_p2(xd);
-        const int bit1 = vpx_read(r, fc->single_ref_prob[ctx1][1]);
+        const int bit1 = vp10_read(r, fc->single_ref_prob[ctx1][1]);
         if (counts)
           ++counts->single_ref[ctx1][1][bit1];
         ref_frame[0] = bit1 ? ALTREF_FRAME : GOLDEN_FRAME;
       } else {
         const int ctx2 = vp10_get_pred_context_single_ref_p3(xd);
-        const int bit2 = vpx_read(r, fc->single_ref_prob[ctx2][2]);
+        const int bit2 = vp10_read(r, fc->single_ref_prob[ctx2][2]);
         if (counts)
           ++counts->single_ref[ctx2][2][bit2];
         if (bit2) {
           const int ctx4 = vp10_get_pred_context_single_ref_p5(xd);
-          const int bit4 = vpx_read(r, fc->single_ref_prob[ctx4][4]);
+          const int bit4 = vp10_read(r, fc->single_ref_prob[ctx4][4]);
           if (counts)
             ++counts->single_ref[ctx4][4][bit4];
           ref_frame[0] = bit4 ? LAST4_FRAME : LAST3_FRAME;
         } else {
           const int ctx3 = vp10_get_pred_context_single_ref_p4(xd);
-          const int bit3 = vpx_read(r, fc->single_ref_prob[ctx3][3]);
+          const int bit3 = vp10_read(r, fc->single_ref_prob[ctx3][3]);
           if (counts)
             ++counts->single_ref[ctx3][3][bit3];
           ref_frame[0] = bit3 ? LAST2_FRAME : LAST_FRAME;
@@ -800,12 +800,12 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
       }
 #else
       const int ctx0 = vp10_get_pred_context_single_ref_p1(xd);
-      const int bit0 = vpx_read(r, fc->single_ref_prob[ctx0][0]);
+      const int bit0 = vp10_read(r, fc->single_ref_prob[ctx0][0]);
       if (counts)
         ++counts->single_ref[ctx0][0][bit0];
       if (bit0) {
         const int ctx1 = vp10_get_pred_context_single_ref_p2(xd);
-        const int bit1 = vpx_read(r, fc->single_ref_prob[ctx1][1]);
+        const int bit1 = vp10_read(r, fc->single_ref_prob[ctx1][1]);
         if (counts)
           ++counts->single_ref[ctx1][1][bit1];
         ref_frame[0] = bit1 ? ALTREF_FRAME : GOLDEN_FRAME;
@@ -824,13 +824,13 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 
 #if CONFIG_OBMC
 static int read_is_obmc_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
-                              vpx_reader *r) {
+                              vp10_reader *r) {
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   FRAME_COUNTS *counts = xd->counts;
   int is_obmc;
 
   if (is_obmc_allowed(&xd->mi[0]->mbmi)) {
-    is_obmc = vpx_read(r, cm->fc->obmc_prob[bsize]);
+    is_obmc = vp10_read(r, cm->fc->obmc_prob[bsize]);
     if (counts)
       ++counts->obmc[bsize][is_obmc];
     return is_obmc;
@@ -842,14 +842,14 @@ static int read_is_obmc_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 
 static INLINE INTERP_FILTER read_switchable_interp_filter(
     VP10_COMMON *const cm, MACROBLOCKD *const xd,
-    vpx_reader *r) {
+    vp10_reader *r) {
   const int ctx = vp10_get_pred_context_switchable_interp(xd);
   FRAME_COUNTS *counts = xd->counts;
   INTERP_FILTER type;
 #if CONFIG_EXT_INTERP
   if (!vp10_is_interp_needed(xd)) return EIGHTTAP_REGULAR;
 #endif
-  type = (INTERP_FILTER)vpx_read_tree(r, vp10_switchable_interp_tree,
+  type = (INTERP_FILTER)vp10_read_tree(r, vp10_switchable_interp_tree,
                                       cm->fc->switchable_interp_prob[ctx]);
   if (counts)
     ++counts->switchable_interp[ctx][type];
@@ -858,7 +858,7 @@ static INLINE INTERP_FILTER read_switchable_interp_filter(
 
 static void read_intra_block_mode_info(VP10_COMMON *const cm,
                                        MACROBLOCKD *const xd, MODE_INFO *mi,
-                                       vpx_reader *r) {
+                                       vp10_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
   int i;
@@ -897,7 +897,7 @@ static void read_intra_block_mode_info(VP10_COMMON *const cm,
         if (pick_intra_filter(p_angle)) {
           FRAME_COUNTS *counts = xd->counts;
           const int ctx = vp10_get_pred_context_intra_interp(xd);
-          mbmi->intra_filter = vpx_read_tree(r, vp10_intra_filter_tree,
+          mbmi->intra_filter = vp10_read_tree(r, vp10_intra_filter_tree,
                                              cm->fc->intra_filter_probs[ctx]);
           if (counts)
             ++counts->intra_filter[ctx][mbmi->intra_filter];
@@ -939,7 +939,7 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
 #endif
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
-                            int is_compound, int allow_hp, vpx_reader *r) {
+                            int is_compound, int allow_hp, vp10_reader *r) {
   int i;
   int ret = 1;
 #if CONFIG_REF_MV
@@ -1154,12 +1154,12 @@ static INLINE int assign_mv(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static int read_is_inter_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
-                               int segment_id, vpx_reader *r) {
+                               int segment_id, vp10_reader *r) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     return get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) != INTRA_FRAME;
   } else {
     const int ctx = vp10_get_intra_inter_context(xd);
-    const int is_inter = vpx_read(r, cm->fc->intra_inter_prob[ctx]);
+    const int is_inter = vp10_read(r, cm->fc->intra_inter_prob[ctx]);
     FRAME_COUNTS *counts = xd->counts;
     if (counts)
       ++counts->intra_inter[ctx][is_inter];
@@ -1177,10 +1177,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        MODE_INFO *const mi,
 #if (CONFIG_OBMC || CONFIG_EXT_INTER) && CONFIG_SUPERTX
-                                       int mi_row, int mi_col, vpx_reader *r,
+                                       int mi_row, int mi_col, vp10_reader *r,
                                        int supertx_enabled) {
 #else
-                                       int mi_row, int mi_col, vpx_reader *r) {
+                                       int mi_row, int mi_col, vp10_reader *r) {
 #endif  // CONFIG_OBMC && CONFIG_SUPERTX
   VP10_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -1526,7 +1526,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       !supertx_enabled &&
 #endif
       is_interintra_allowed(mbmi)) {
-    const int interintra = vpx_read(r, cm->fc->interintra_prob[bsize]);
+    const int interintra = vp10_read(r, cm->fc->interintra_prob[bsize]);
     if (xd->counts)
       xd->counts->interintra[bsize][interintra]++;
     assert(mbmi->ref_frame[1] == NONE);
@@ -1545,13 +1545,13 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTRA
       if (get_wedge_bits(bsize)) {
         mbmi->use_wedge_interintra =
-            vpx_read(r, cm->fc->wedge_interintra_prob[bsize]);
+            vp10_read(r, cm->fc->wedge_interintra_prob[bsize]);
         if (xd->counts)
           xd->counts->wedge_interintra[bsize][mbmi->use_wedge_interintra]++;
         if (mbmi->use_wedge_interintra) {
           mbmi->interintra_wedge_index =
           mbmi->interintra_uv_wedge_index =
-              vpx_read_literal(r, get_wedge_bits(bsize));
+              vp10_read_literal(r, get_wedge_bits(bsize));
         }
       }
     }
@@ -1563,12 +1563,12 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_OBMC
       get_wedge_bits(bsize)) {
     mbmi->use_wedge_interinter =
-        vpx_read(r, cm->fc->wedge_interinter_prob[bsize]);
+        vp10_read(r, cm->fc->wedge_interinter_prob[bsize]);
     if (xd->counts)
       xd->counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
     if (mbmi->use_wedge_interinter) {
       mbmi->interinter_wedge_index =
-          vpx_read_literal(r, get_wedge_bits(bsize));
+          vp10_read_literal(r, get_wedge_bits(bsize));
     }
   }
 #endif  // CONFIG_EXT_INTER
@@ -1585,7 +1585,7 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
 #if CONFIG_SUPERTX
                                        int supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                                       int mi_row, int mi_col, vpx_reader *r) {
+                                       int mi_row, int mi_col, vp10_reader *r) {
   VP10_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -1682,14 +1682,14 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
       if (inter_block) {
         if (eset > 0) {
           mbmi->tx_type =
-              vpx_read_tree(r, vp10_ext_tx_inter_tree[eset],
+              vp10_read_tree(r, vp10_ext_tx_inter_tree[eset],
                             cm->fc->inter_ext_tx_prob[eset][mbmi->tx_size]);
           if (counts)
             ++counts->inter_ext_tx[eset][mbmi->tx_size][mbmi->tx_type];
         }
       } else if (ALLOW_INTRA_EXT_TX) {
         if (eset > 0) {
-          mbmi->tx_type = vpx_read_tree(r, vp10_ext_tx_intra_tree[eset],
+          mbmi->tx_type = vp10_read_tree(r, vp10_ext_tx_intra_tree[eset],
                                         cm->fc->intra_ext_tx_prob[eset]
                                                 [mbmi->tx_size][mbmi->mode]);
           if (counts)
@@ -1709,14 +1709,14 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       FRAME_COUNTS *counts = xd->counts;
       if (inter_block) {
-        mbmi->tx_type = vpx_read_tree(
+        mbmi->tx_type = vp10_read_tree(
             r, vp10_ext_tx_tree,
             cm->fc->inter_ext_tx_prob[mbmi->tx_size]);
         if (counts)
           ++counts->inter_ext_tx[mbmi->tx_size][mbmi->tx_type];
       } else {
         const TX_TYPE tx_type_nom = intra_mode_to_tx_type_context[mbmi->mode];
-        mbmi->tx_type = vpx_read_tree(
+        mbmi->tx_type = vp10_read_tree(
             r, vp10_ext_tx_tree,
             cm->fc->intra_ext_tx_prob[mbmi->tx_size][tx_type_nom]);
         if (counts)
@@ -1733,7 +1733,7 @@ void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
 #if CONFIG_SUPERTX
                          int supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                         int mi_row, int mi_col, vpx_reader *r,
+                         int mi_row, int mi_col, vp10_reader *r,
                          int x_mis, int y_mis) {
   VP10_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];

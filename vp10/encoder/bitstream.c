@@ -93,16 +93,16 @@ tx_size_encodings[TX_SIZES - 1][TX_SIZES] = {
     {{0, 1}, {2, 2}, {6, 3}, {7, 3}},  // Max tx_size is 32X32
 };
 
-static INLINE void write_uniform(vpx_writer *w, int n, int v) {
+static INLINE void write_uniform(vp10_writer *w, int n, int v) {
   int l = get_unsigned_bits(n);
   int m = (1 << l) - n;
   if (l == 0)
     return;
   if (v < m) {
-    vpx_write_literal(w, v, l - 1);
+    vp10_write_literal(w, v, l - 1);
   } else {
-    vpx_write_literal(w, m + ((v - m) >> 1), l - 1);
-    vpx_write_literal(w, (v - m) & 1, 1);
+    vp10_write_literal(w, m + ((v - m) >> 1), l - 1);
+    vp10_write_literal(w, (v - m) & 1, 1);
   }
 }
 
@@ -139,7 +139,7 @@ void vp10_encode_token_init() {
 #endif  // CONFIG_EXT_INTER
 }
 
-static void write_intra_mode(vpx_writer *w, PREDICTION_MODE mode,
+static void write_intra_mode(vp10_writer *w, PREDICTION_MODE mode,
                              const vpx_prob *probs) {
   vp10_write_token(w, vp10_intra_mode_tree, probs, &intra_mode_encodings[mode]);
 }
@@ -153,7 +153,7 @@ static void write_interintra_mode(vpx_writer *w, INTERINTRA_MODE mode,
 #endif  // CONFIG_EXT_INTER
 
 static void write_inter_mode(VP10_COMMON *cm,
-                             vpx_writer *w, PREDICTION_MODE mode,
+                             vp10_writer *w, PREDICTION_MODE mode,
 #if CONFIG_REF_MV && CONFIG_EXT_INTER
                              int is_compound,
 #endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
@@ -162,14 +162,14 @@ static void write_inter_mode(VP10_COMMON *cm,
   const int16_t newmv_ctx = mode_ctx & NEWMV_CTX_MASK;
   const vpx_prob newmv_prob = cm->fc->newmv_prob[newmv_ctx];
 #if CONFIG_EXT_INTER
-  vpx_write(w, mode != NEWMV && mode != NEWFROMNEARMV, newmv_prob);
+  vp10_write(w, mode != NEWMV && mode != NEWFROMNEARMV, newmv_prob);
 
   if (!is_compound && (mode == NEWMV || mode == NEWFROMNEARMV))
-    vpx_write(w, mode == NEWFROMNEARMV, cm->fc->new2mv_prob);
+    vp10_write(w, mode == NEWFROMNEARMV, cm->fc->new2mv_prob);
 
   if (mode != NEWMV && mode != NEWFROMNEARMV) {
 #else
-  vpx_write(w, mode != NEWMV, newmv_prob);
+  vp10_write(w, mode != NEWMV, newmv_prob);
 
   if (mode != NEWMV) {
 #endif  // CONFIG_EXT_INTER
@@ -181,7 +181,7 @@ static void write_inter_mode(VP10_COMMON *cm,
       return;
     }
 
-    vpx_write(w, mode != ZEROMV, zeromv_prob);
+    vp10_write(w, mode != ZEROMV, zeromv_prob);
 
     if (mode != ZEROMV) {
       int16_t refmv_ctx = (mode_ctx >> REFMV_OFFSET) & REFMV_CTX_MASK;
@@ -195,7 +195,7 @@ static void write_inter_mode(VP10_COMMON *cm,
         refmv_ctx = 8;
 
       refmv_prob = cm->fc->refmv_prob[refmv_ctx];
-      vpx_write(w, mode != NEARESTMV, refmv_prob);
+      vp10_write(w, mode != NEARESTMV, refmv_prob);
     }
   }
 #else
@@ -210,7 +210,7 @@ static void write_inter_mode(VP10_COMMON *cm,
 static void write_drl_idx(const VP10_COMMON *cm,
                           const MB_MODE_INFO *mbmi,
                           const MB_MODE_INFO_EXT *mbmi_ext,
-                          vpx_writer *w) {
+                          vp10_writer *w) {
   uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
 
   assert(mbmi->ref_mv_idx < 3);
@@ -223,7 +223,7 @@ static void write_drl_idx(const VP10_COMMON *cm,
             vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], idx);
         vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
 
-        vpx_write(w, mbmi->ref_mv_idx != idx, drl_prob);
+        vp10_write(w, mbmi->ref_mv_idx != idx, drl_prob);
         if (mbmi->ref_mv_idx == idx)
           return;
       }
@@ -240,7 +240,7 @@ static void write_drl_idx(const VP10_COMMON *cm,
             vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], idx);
         vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
 
-        vpx_write(w, mbmi->ref_mv_idx != (idx - 1), drl_prob);
+        vp10_write(w, mbmi->ref_mv_idx != (idx - 1), drl_prob);
         if (mbmi->ref_mv_idx == (idx - 1))
           return;
       }
@@ -251,7 +251,7 @@ static void write_drl_idx(const VP10_COMMON *cm,
 #endif
 
 #if CONFIG_EXT_INTER
-static void write_inter_compound_mode(VP10_COMMON *cm, vpx_writer *w,
+static void write_inter_compound_mode(VP10_COMMON *cm, vp10_writer *w,
                                       PREDICTION_MODE mode,
                                       const int16_t mode_ctx) {
   const vpx_prob *const inter_compound_probs =
@@ -271,7 +271,7 @@ static void encode_unsigned_max(struct vpx_write_bit_buffer *wb,
 static void prob_diff_update(const vpx_tree_index *tree,
                              vpx_prob probs[/*n - 1*/],
                              const unsigned int counts[/*n - 1*/],
-                             int n, vpx_writer *w) {
+                             int n, vp10_writer *w) {
   int i;
   unsigned int branch_ct[32][2];
 
@@ -306,7 +306,7 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
                                 const MACROBLOCKD *xd,
                                 const MB_MODE_INFO *mbmi,
                                 TX_SIZE tx_size, int blk_row, int blk_col,
-                                vpx_writer *w) {
+                                vp10_writer *w) {
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
   int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
@@ -324,14 +324,14 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
      return;
 
   if (tx_size == mbmi->inter_tx_size[tx_row][tx_col]) {
-    vpx_write(w, 0, cm->fc->txfm_partition_prob[ctx]);
+    vp10_write(w, 0, cm->fc->txfm_partition_prob[ctx]);
     txfm_partition_update(xd->above_txfm_context + tx_col,
                           xd->left_txfm_context + tx_row, tx_size);
   } else {
     const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_width_log2_lookup[bsize];
     int i;
-    vpx_write(w, 1, cm->fc->txfm_partition_prob[ctx]);
+    vp10_write(w, 1, cm->fc->txfm_partition_prob[ctx]);
 
     if (tx_size == TX_8X8) {
       txfm_partition_update(xd->above_txfm_context + tx_col,
@@ -349,7 +349,7 @@ static void write_tx_size_inter(const VP10_COMMON *cm,
   }
 }
 
-static void update_txfm_partition_probs(VP10_COMMON *cm, vpx_writer *w,
+static void update_txfm_partition_probs(VP10_COMMON *cm, vp10_writer *w,
                                         FRAME_COUNTS *counts) {
   int k;
   for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
@@ -359,7 +359,7 @@ static void update_txfm_partition_probs(VP10_COMMON *cm, vpx_writer *w,
 #endif
 
 static void write_selected_tx_size(const VP10_COMMON *cm,
-                                   const MACROBLOCKD *xd, vpx_writer *w) {
+                                   const MACROBLOCKD *xd, vp10_writer *w) {
   TX_SIZE tx_size = xd->mi[0]->mbmi.tx_size;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
@@ -372,7 +372,7 @@ static void write_selected_tx_size(const VP10_COMMON *cm,
 }
 
 #if CONFIG_REF_MV
-static void update_inter_mode_probs(VP10_COMMON *cm, vpx_writer *w,
+static void update_inter_mode_probs(VP10_COMMON *cm, vp10_writer *w,
                                     FRAME_COUNTS *counts) {
   int i;
   for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
@@ -394,7 +394,7 @@ static void update_inter_mode_probs(VP10_COMMON *cm, vpx_writer *w,
 #endif
 
 #if CONFIG_EXT_INTER
-static void update_inter_compound_mode_probs(VP10_COMMON *cm, vpx_writer *w) {
+static void update_inter_compound_mode_probs(VP10_COMMON *cm, vp10_writer *w) {
   const int savings_thresh = vp10_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              vp10_cost_zero(GROUP_DIFF_UPDATE_PROB);
   int i;
@@ -407,7 +407,7 @@ static void update_inter_compound_mode_probs(VP10_COMMON *cm, vpx_writer *w) {
                                         INTER_COMPOUND_MODES);
   }
   do_update = savings > savings_thresh;
-  vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
+  vp10_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
   if (do_update) {
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
       prob_diff_update(vp10_inter_compound_mode_tree,
@@ -420,17 +420,17 @@ static void update_inter_compound_mode_probs(VP10_COMMON *cm, vpx_writer *w) {
 #endif  // CONFIG_EXT_INTER
 
 static int write_skip(const VP10_COMMON *cm, const MACROBLOCKD *xd,
-                      int segment_id, const MODE_INFO *mi, vpx_writer *w) {
+                      int segment_id, const MODE_INFO *mi, vp10_writer *w) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
     const int skip = mi->mbmi.skip;
-    vpx_write(w, skip, vp10_get_skip_prob(cm, xd));
+    vp10_write(w, skip, vp10_get_skip_prob(cm, xd));
     return skip;
   }
 }
 
-static void update_skip_probs(VP10_COMMON *cm, vpx_writer *w,
+static void update_skip_probs(VP10_COMMON *cm, vp10_writer *w,
                               FRAME_COUNTS *counts) {
   int k;
 
@@ -438,7 +438,7 @@ static void update_skip_probs(VP10_COMMON *cm, vpx_writer *w,
     vp10_cond_prob_diff_update(w, &cm->fc->skip_probs[k], counts->skip[k]);
 }
 
-static void update_switchable_interp_probs(VP10_COMMON *cm, vpx_writer *w,
+static void update_switchable_interp_probs(VP10_COMMON *cm, vp10_writer *w,
                                            FRAME_COUNTS *counts) {
   int j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
@@ -449,7 +449,7 @@ static void update_switchable_interp_probs(VP10_COMMON *cm, vpx_writer *w,
 
 
 #if CONFIG_EXT_TX
-static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
+static void update_ext_tx_probs(VP10_COMMON *cm, vp10_writer *w) {
   const int savings_thresh = vp10_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              vp10_cost_zero(GROUP_DIFF_UPDATE_PROB);
   int i, j;
@@ -464,7 +464,7 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
           cm->counts.inter_ext_tx[s][i], num_ext_tx_set_inter[s]);
     }
     do_update = savings > savings_thresh;
-    vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
+    vp10_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
     if (do_update) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
         if (!use_inter_ext_tx_for_txsize[s][i]) continue;
@@ -487,7 +487,7 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
             cm->counts.intra_ext_tx[s][i][j], num_ext_tx_set_intra[s]);
     }
     do_update = savings > savings_thresh;
-    vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
+    vp10_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
     if (do_update) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
         if (!use_intra_ext_tx_for_txsize[s][i]) continue;
@@ -503,7 +503,7 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
 
 #else
 
-static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
+static void update_ext_tx_probs(VP10_COMMON *cm, vp10_writer *w) {
   const int savings_thresh = vp10_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              vp10_cost_zero(GROUP_DIFF_UPDATE_PROB);
   int i, j;
@@ -517,7 +517,7 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
           cm->counts.intra_ext_tx[i][j], TX_TYPES);
   }
   do_update = savings > savings_thresh;
-  vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
+  vp10_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
   if (do_update) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
       for (j = 0; j < TX_TYPES; ++j)
@@ -535,7 +535,7 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
         cm->counts.inter_ext_tx[i], TX_TYPES);
   }
   do_update = savings > savings_thresh;
-  vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
+  vp10_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
   if (do_update) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
       prob_diff_update(vp10_ext_tx_tree,
@@ -547,7 +547,7 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vpx_writer *w) {
 }
 #endif  // CONFIG_EXT_TX
 
-static void pack_palette_tokens(vpx_writer *w, const TOKENEXTRA **tp,
+static void pack_palette_tokens(vp10_writer *w, const TOKENEXTRA **tp,
                                 int n, int num) {
   int i;
   const TOKENEXTRA *p = *tp;
@@ -562,7 +562,7 @@ static void pack_palette_tokens(vpx_writer *w, const TOKENEXTRA **tp,
 }
 
 #if CONFIG_SUPERTX
-static void update_supertx_probs(VP10_COMMON *cm, vpx_writer *w) {
+static void update_supertx_probs(VP10_COMMON *cm, vp10_writer *w) {
   const int savings_thresh = vp10_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              vp10_cost_zero(GROUP_DIFF_UPDATE_PROB);
   int i, j;
@@ -575,7 +575,7 @@ static void update_supertx_probs(VP10_COMMON *cm, vpx_writer *w) {
     }
   }
   do_update = savings > savings_thresh;
-  vpx_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
+  vp10_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
   if (do_update) {
     for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
       for (j = 1; j < TX_SIZES; ++j) {
@@ -588,7 +588,7 @@ static void update_supertx_probs(VP10_COMMON *cm, vpx_writer *w) {
 #endif  // CONFIG_SUPERTX
 
 #if !CONFIG_ANS
-static void pack_mb_tokens(vpx_writer *w,
+static void pack_mb_tokens(vp10_writer *w,
                            const TOKENEXTRA **tp, const TOKENEXTRA *const stop,
                            vpx_bit_depth_t bit_depth, const TX_SIZE tx) {
   const TOKENEXTRA *p = *tp;
@@ -619,13 +619,13 @@ static void pack_mb_tokens(vpx_writer *w,
     if (p->skip_eob_node)
       n -= p->skip_eob_node;
     else
-      vpx_write(w, t != EOB_TOKEN, p->context_tree[0]);
+      vp10_write(w, t != EOB_TOKEN, p->context_tree[0]);
 
     if (t != EOB_TOKEN) {
-      vpx_write(w, t != ZERO_TOKEN, p->context_tree[1]);
+      vp10_write(w, t != ZERO_TOKEN, p->context_tree[1]);
 
       if (t != ZERO_TOKEN) {
-        vpx_write(w, t != ONE_TOKEN, p->context_tree[2]);
+        vp10_write(w, t != ONE_TOKEN, p->context_tree[2]);
 
         if (t != ONE_TOKEN) {
           int len = UNCONSTRAINED_NODES - p->skip_eob_node;
@@ -653,13 +653,13 @@ static void pack_mb_tokens(vpx_writer *w,
             skip_bits--;
             assert(!bb);
           } else {
-            vpx_write(w, bb, pb[i >> 1]);
+            vp10_write(w, bb, pb[i >> 1]);
           }
           i = b->tree[i + bb];
         } while (n);
       }
 
-      vpx_write_bit(w, e & 1);
+      vp10_write_bit(w, e & 1);
     }
     ++p;
 
@@ -756,7 +756,7 @@ static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
 #endif  // !CONFIG_ANS
 
 #if CONFIG_VAR_TX
-static void pack_txb_tokens(vpx_writer *w,
+static void pack_txb_tokens(vp10_writer *w,
                            const TOKENEXTRA **tp,
                            const TOKENEXTRA *const tok_end,
                            MACROBLOCKD *xd, MB_MODE_INFO *mbmi, int plane,
@@ -807,7 +807,7 @@ static void pack_txb_tokens(vpx_writer *w,
 }
 #endif
 
-static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
+static void write_segment_id(vp10_writer *w, const struct segmentation *seg,
                              const struct segmentation_probs *segp,
                              int segment_id) {
   if (seg->enabled && seg->update_map)
@@ -816,7 +816,7 @@ static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
 
 // This function encodes the reference frame
 static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
-                             vpx_writer *w) {
+                             vp10_writer *w) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const int is_compound = has_second_ref(mbmi);
   const int segment_id = mbmi->segment_id;
@@ -831,7 +831,7 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     // does the feature use compound prediction or not
     // (if not specified at the frame/segment level)
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
-      vpx_write(w, is_compound, vp10_get_reference_mode_prob(cm, xd));
+      vp10_write(w, is_compound, vp10_get_reference_mode_prob(cm, xd));
     } else {
       assert(!is_compound == (cm->reference_mode == SINGLE_REFERENCE));
     }
@@ -844,18 +844,18 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #else
       const int bit = mbmi->ref_frame[0] == GOLDEN_FRAME;
 #endif  // CONFIG_EXT_REFS
-      vpx_write(w, bit, vp10_get_pred_prob_comp_ref_p(cm, xd));
+      vp10_write(w, bit, vp10_get_pred_prob_comp_ref_p(cm, xd));
 
 #if CONFIG_EXT_REFS
       if (!bit) {
         const int bit1 = mbmi->ref_frame[0] == LAST_FRAME;
-        vpx_write(w, bit1, vp10_get_pred_prob_comp_ref_p1(cm, xd));
+        vp10_write(w, bit1, vp10_get_pred_prob_comp_ref_p1(cm, xd));
       } else {
         const int bit2 = mbmi->ref_frame[0] == GOLDEN_FRAME;
-        vpx_write(w, bit2, vp10_get_pred_prob_comp_ref_p2(cm, xd));
+        vp10_write(w, bit2, vp10_get_pred_prob_comp_ref_p2(cm, xd));
         if (!bit2) {
           const int bit3 = mbmi->ref_frame[0] == LAST3_FRAME;
-          vpx_write(w, bit3, vp10_get_pred_prob_comp_ref_p3(cm, xd));
+          vp10_write(w, bit3, vp10_get_pred_prob_comp_ref_p3(cm, xd));
         }
       }
 #endif  // CONFIG_EXT_REFS
@@ -863,30 +863,30 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_EXT_REFS
       const int bit0 = (mbmi->ref_frame[0] == GOLDEN_FRAME ||
                         mbmi->ref_frame[0] == ALTREF_FRAME);
-      vpx_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
+      vp10_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
 
       if (bit0) {
         const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
-        vpx_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
+        vp10_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
       } else {
         const int bit2 = (mbmi->ref_frame[0] == LAST3_FRAME ||
                           mbmi->ref_frame[0] == LAST4_FRAME);
-        vpx_write(w, bit2, vp10_get_pred_prob_single_ref_p3(cm, xd));
+        vp10_write(w, bit2, vp10_get_pred_prob_single_ref_p3(cm, xd));
 
         if (!bit2) {
           const int bit3 = mbmi->ref_frame[0] != LAST_FRAME;
-          vpx_write(w, bit3, vp10_get_pred_prob_single_ref_p4(cm, xd));
+          vp10_write(w, bit3, vp10_get_pred_prob_single_ref_p4(cm, xd));
         } else {
           const int bit4 = mbmi->ref_frame[0] != LAST3_FRAME;
-          vpx_write(w, bit4, vp10_get_pred_prob_single_ref_p5(cm, xd));
+          vp10_write(w, bit4, vp10_get_pred_prob_single_ref_p5(cm, xd));
         }
       }
 #else
       const int bit0 = mbmi->ref_frame[0] != LAST_FRAME;
-      vpx_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
+      vp10_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
       if (bit0) {
         const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
-        vpx_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
+        vp10_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
       }
 #endif  // CONFIG_EXT_REFS
     }
@@ -896,13 +896,13 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_EXT_INTRA
 static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
                                       const MB_MODE_INFO *const mbmi,
-                                      vpx_writer *w) {
+                                      vp10_writer *w) {
 #if !ALLOW_FILTER_INTRA_MODES
   return;
 #endif
   if (mbmi->mode == DC_PRED &&
       mbmi->palette_mode_info.palette_size[0] == 0) {
-    vpx_write(w, mbmi->ext_intra_mode_info.use_ext_intra_mode[0],
+    vp10_write(w, mbmi->ext_intra_mode_info.use_ext_intra_mode[0],
               cm->fc->ext_intra_probs[0]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[0]) {
       EXT_INTRA_MODE mode = mbmi->ext_intra_mode_info.ext_intra_mode[0];
@@ -911,7 +911,7 @@ static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
   }
   if (mbmi->uv_mode == DC_PRED &&
       mbmi->palette_mode_info.palette_size[1] == 0) {
-    vpx_write(w, mbmi->ext_intra_mode_info.use_ext_intra_mode[1],
+    vp10_write(w, mbmi->ext_intra_mode_info.use_ext_intra_mode[1],
               cm->fc->ext_intra_probs[1]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[1]) {
       EXT_INTRA_MODE mode = mbmi->ext_intra_mode_info.ext_intra_mode[1];
@@ -923,7 +923,7 @@ static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
 
 static void write_switchable_interp_filter(VP10_COMP *cpi,
                                            const MACROBLOCKD *xd,
-                                           vpx_writer *w) {
+                                           vp10_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   if (cm->interp_filter == SWITCHABLE) {
@@ -944,7 +944,7 @@ static void write_switchable_interp_filter(VP10_COMP *cpi,
 static void write_palette_mode_info(const VP10_COMMON *cm,
                                     const MACROBLOCKD *xd,
                                     const MODE_INFO *const mi,
-                                    vpx_writer *w) {
+                                    vp10_writer *w) {
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
@@ -959,30 +959,30 @@ static void write_palette_mode_info(const VP10_COMMON *cm,
       palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
     if (left_mi)
       palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-    vpx_write(w, n > 0,
+    vp10_write(w, n > 0,
               vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8][palette_ctx]);
     if (n > 0) {
       vp10_write_token(w, vp10_palette_size_tree,
                        vp10_default_palette_y_size_prob[bsize - BLOCK_8X8],
                        &palette_size_encodings[n - 2]);
       for (i = 0; i < n; ++i)
-        vpx_write_literal(w, pmi->palette_colors[i], cm->bit_depth);
+        vp10_write_literal(w, pmi->palette_colors[i], cm->bit_depth);
       write_uniform(w, n, pmi->palette_first_color_idx[0]);
     }
   }
 
   if (mbmi->uv_mode == DC_PRED) {
     n = pmi->palette_size[1];
-    vpx_write(w, n > 0,
+    vp10_write(w, n > 0,
               vp10_default_palette_uv_mode_prob[pmi->palette_size[0] > 0]);
     if (n > 0) {
       vp10_write_token(w, vp10_palette_size_tree,
                        vp10_default_palette_uv_size_prob[bsize - BLOCK_8X8],
                        &palette_size_encodings[n - 2]);
       for (i = 0; i < n; ++i) {
-        vpx_write_literal(w, pmi->palette_colors[PALETTE_MAX_SIZE + i],
+        vp10_write_literal(w, pmi->palette_colors[PALETTE_MAX_SIZE + i],
                           cm->bit_depth);
-        vpx_write_literal(w, pmi->palette_colors[2 * PALETTE_MAX_SIZE + i],
+        vp10_write_literal(w, pmi->palette_colors[2 * PALETTE_MAX_SIZE + i],
                           cm->bit_depth);
       }
       write_uniform(w, n, pmi->palette_first_color_idx[1]);
@@ -994,7 +994,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_SUPERTX
                                 int supertx_enabled,
 #endif
-                                vpx_writer *w) {
+                                vp10_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
 #if !CONFIG_REF_MV
   const nmv_context *nmvc = &cm->fc->nmvc;
@@ -1017,7 +1017,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     if (seg->temporal_update) {
       const int pred_flag = mbmi->seg_id_predicted;
       vpx_prob pred_prob = vp10_get_pred_prob_seg_id(segp, xd);
-      vpx_write(w, pred_flag, pred_prob);
+      vp10_write(w, pred_flag, pred_prob);
       if (!pred_flag)
         write_segment_id(w, seg, segp, segment_id);
     } else {
@@ -1038,7 +1038,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
   if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
     if (!segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-      vpx_write(w, is_inter, vp10_get_intra_inter_prob(cm, xd));
+      vp10_write(w, is_inter, vp10_get_intra_inter_prob(cm, xd));
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
 #if CONFIG_SUPERTX
@@ -1120,7 +1120,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
       if (is_obmc_allowed(mbmi))
-        vpx_write(w, mbmi->obmc, cm->fc->obmc_prob[bsize]);
+        vp10_write(w, mbmi->obmc, cm->fc->obmc_prob[bsize]);
 #endif  // CONFIG_OBMC
 
 #if CONFIG_REF_MV
@@ -1294,17 +1294,17 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_SUPERTX
         is_interintra_allowed(mbmi)) {
       const int interintra = mbmi->ref_frame[1] == INTRA_FRAME;
-      vpx_write(w, interintra, cm->fc->interintra_prob[bsize]);
+      vp10_write(w, interintra, cm->fc->interintra_prob[bsize]);
       if (interintra) {
         write_interintra_mode(
             w, mbmi->interintra_mode,
             cm->fc->interintra_mode_prob[size_group_lookup[bsize]]);
         assert(mbmi->interintra_mode == mbmi->interintra_uv_mode);
         if (get_wedge_bits(bsize)) {
-          vpx_write(w, mbmi->use_wedge_interintra,
+          vp10_write(w, mbmi->use_wedge_interintra,
                     cm->fc->wedge_interintra_prob[bsize]);
           if (mbmi->use_wedge_interintra) {
-            vpx_write_literal(w, mbmi->interintra_wedge_index,
+            vp10_write_literal(w, mbmi->interintra_wedge_index,
                               get_wedge_bits(bsize));
           }
         }
@@ -1316,10 +1316,10 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
 #endif  // CONFIG_OBMC
         get_wedge_bits(bsize)) {
-      vpx_write(w, mbmi->use_wedge_interinter,
+      vp10_write(w, mbmi->use_wedge_interinter,
                 cm->fc->wedge_interinter_prob[bsize]);
       if (mbmi->use_wedge_interinter)
-        vpx_write_literal(w, mbmi->interinter_wedge_index,
+        vp10_write_literal(w, mbmi->interinter_wedge_index,
                           get_wedge_bits(bsize));
     }
 #endif  // CONFIG_EXT_INTER
@@ -1383,7 +1383,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 }
 
 static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
-                              MODE_INFO **mi_8x8, vpx_writer *w) {
+                              MODE_INFO **mi_8x8, vp10_writer *w) {
   const struct segmentation *const seg = &cm->seg;
   const struct segmentation_probs *const segp = &cm->fc->seg;
   const MODE_INFO *const mi = mi_8x8[0];
@@ -1495,7 +1495,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #endif  // CONFIG_ANS && CONFIG_SUPERTX
 
 static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
-                          vpx_writer *w,
+                          vp10_writer *w,
 #if CONFIG_ANS
                           struct BufAnsCoder *ans,
 #endif  // CONFIG_ANS
@@ -1616,7 +1616,8 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
 static void write_partition(const VP10_COMMON *const cm,
                             const MACROBLOCKD *const xd,
                             int hbs, int mi_row, int mi_col,
-                            PARTITION_TYPE p, BLOCK_SIZE bsize, vpx_writer *w) {
+                            PARTITION_TYPE p, BLOCK_SIZE bsize,
+                            vp10_writer *w) {
   const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
   const vpx_prob *const probs = cm->fc->partition_prob[ctx];
   const int has_rows = (mi_row + hbs) < cm->mi_rows;
@@ -1634,10 +1635,10 @@ static void write_partition(const VP10_COMMON *const cm,
 #endif  // CONFIG_EXT_PARTITION_TYPES
   } else if (!has_rows && has_cols) {
     assert(p == PARTITION_SPLIT || p == PARTITION_HORZ);
-    vpx_write(w, p == PARTITION_SPLIT, probs[1]);
+    vp10_write(w, p == PARTITION_SPLIT, probs[1]);
   } else if (has_rows && !has_cols) {
     assert(p == PARTITION_SPLIT || p == PARTITION_VERT);
-    vpx_write(w, p == PARTITION_SPLIT, probs[2]);
+    vp10_write(w, p == PARTITION_SPLIT, probs[2]);
   } else {
     assert(p == PARTITION_SPLIT);
   }
@@ -1665,7 +1666,7 @@ static void write_partition(const VP10_COMMON *const cm,
 
 static void write_modes_sb(VP10_COMP *const cpi,
                            const TileInfo *const tile,
-                           vpx_writer *const w,
+                           vp10_writer *const w,
 #if CONFIG_ANS
                            struct BufAnsCoder *ans,
 #endif  // CONFIG_ANS
@@ -1716,9 +1717,9 @@ static void write_modes_sb(VP10_COMP *const cpi,
     prob = cm->fc->supertx_prob[partition_supertx_context_lookup[partition]]
                                [supertx_size];
     supertx_enabled = (xd->mi[0]->mbmi.tx_size == supertx_size);
-    vpx_write(w, supertx_enabled, prob);
+    vp10_write(w, supertx_enabled, prob);
     if (supertx_enabled) {
-      vpx_write(w, xd->mi[0]->mbmi.skip, vp10_get_skip_prob(cm, xd));
+      vp10_write(w, xd->mi[0]->mbmi.skip, vp10_get_skip_prob(cm, xd));
 #if CONFIG_EXT_TX
       if (get_ext_tx_types(supertx_size, bsize, 1) > 1 &&
           !xd->mi[0]->mbmi.skip) {
@@ -1852,7 +1853,7 @@ static void write_modes_sb(VP10_COMP *const cpi,
 
 static void write_modes(VP10_COMP *const cpi,
                         const TileInfo *const tile,
-                        vpx_writer *const w,
+                        vp10_writer *const w,
 #if CONFIG_ANS
                         struct BufAnsCoder *ans,
 #endif  // CONFIG_ANS
@@ -1905,7 +1906,7 @@ static void build_tree_distribution(VP10_COMP *cpi, TX_SIZE tx_size,
   }
 }
 
-static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
+static void update_coef_probs_common(vp10_writer* const bc, VP10_COMP *cpi,
                                      TX_SIZE tx_size,
                                      vp10_coeff_stats *frame_branch_ct,
                                      vp10_coeff_probs_model *new_coef_probs) {
@@ -1951,10 +1952,10 @@ static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
 
       /* Is coef updated at all */
       if (update[1] == 0 || savings < 0) {
-        vpx_write_bit(bc, 0);
+        vp10_write_bit(bc, 0);
         return;
       }
-      vpx_write_bit(bc, 1);
+      vp10_write_bit(bc, 1);
       for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
@@ -1976,7 +1977,7 @@ static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
                       *oldp, &newp, upd);
                 if (s > 0 && newp != *oldp)
                   u = 1;
-                vpx_write(bc, u, upd);
+                vp10_write(bc, u, upd);
                 if (u) {
                   /* send/use new probability */
                   vp10_write_prob_diff_update(bc, newp, *oldp);
@@ -2024,11 +2025,11 @@ static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
                 if (u == 1 && updates == 1) {
                   int v;
                   // first update
-                  vpx_write_bit(bc, 1);
+                  vp10_write_bit(bc, 1);
                   for (v = 0; v < noupdates_before_first; ++v)
-                    vpx_write(bc, 0, upd);
+                    vp10_write(bc, 0, upd);
                 }
-                vpx_write(bc, u, upd);
+                vp10_write(bc, u, upd);
                 if (u) {
                   /* send/use new probability */
                   vp10_write_prob_diff_update(bc, newp, *oldp);
@@ -2040,7 +2041,7 @@ static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
         }
       }
       if (updates == 0) {
-        vpx_write_bit(bc, 0);  // no updates
+        vp10_write_bit(bc, 0);  // no updates
       }
       return;
     }
@@ -2098,7 +2099,7 @@ static void get_coef_counts_diff(VP10_COMP *cpi, int index,
           }
 }
 
-static void update_coef_probs_subframe(vpx_writer* const bc, VP10_COMP *cpi,
+static void update_coef_probs_subframe(vp10_writer* const bc, VP10_COMP *cpi,
                                        TX_SIZE tx_size,
                                        vp10_coeff_stats
                                        branch_ct[COEF_PROBS_BUFS][TX_SIZES]
@@ -2157,10 +2158,10 @@ static void update_coef_probs_subframe(vpx_writer* const bc, VP10_COMP *cpi,
 
       /* Is coef updated at all */
       if (update[1] == 0 || savings < 0) {
-        vpx_write_bit(bc, 0);
+        vp10_write_bit(bc, 0);
         return;
       }
-      vpx_write_bit(bc, 1);
+      vp10_write_bit(bc, 1);
       for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
@@ -2189,7 +2190,7 @@ static void update_coef_probs_subframe(vpx_writer* const bc, VP10_COMP *cpi,
                                                        max_idx);
                 if (s > 0 && newp != *oldp)
                   u = 1;
-                vpx_write(bc, u, upd);
+                vp10_write(bc, u, upd);
                 if (u) {
                   /* send/use new probability */
                   vp10_write_prob_diff_update(bc, newp, *oldp);
@@ -2241,11 +2242,11 @@ static void update_coef_probs_subframe(vpx_writer* const bc, VP10_COMP *cpi,
                 if (u == 1 && updates == 1) {
                   int v;
                   // first update
-                  vpx_write_bit(bc, 1);
+                  vp10_write_bit(bc, 1);
                   for (v = 0; v < noupdates_before_first; ++v)
-                    vpx_write(bc, 0, upd);
+                    vp10_write(bc, 0, upd);
                 }
-                vpx_write(bc, u, upd);
+                vp10_write(bc, u, upd);
                 if (u) {
                   /* send/use new probability */
                   vp10_write_prob_diff_update(bc, newp, *oldp);
@@ -2257,7 +2258,7 @@ static void update_coef_probs_subframe(vpx_writer* const bc, VP10_COMP *cpi,
         }
       }
       if (updates == 0) {
-        vpx_write_bit(bc, 0);  // no updates
+        vp10_write_bit(bc, 0);  // no updates
       }
       return;
     }
@@ -2267,7 +2268,7 @@ static void update_coef_probs_subframe(vpx_writer* const bc, VP10_COMP *cpi,
 }
 #endif  // CONFIG_ENTROPY
 
-static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
+static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
@@ -2298,7 +2299,7 @@ static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
     vp10_coeff_probs_model frame_coef_probs[PLANE_TYPES];
     if (cpi->td.counts->tx_size_totals[tx_size] <= 20 ||
         (tx_size >= TX_16X16 && cpi->sf.tx_size_search_method == USE_TX_8X8)) {
-      vpx_write_bit(w, 0);
+      vp10_write_bit(w, 0);
     } else {
 #if CONFIG_ENTROPY
       if (cm->do_subframe_update &&
@@ -2492,7 +2493,7 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-static void update_seg_probs(VP10_COMP *cpi, vpx_writer *w) {
+static void update_seg_probs(VP10_COMP *cpi, vp10_writer *w) {
   VP10_COMMON *cm = &cpi->common;
 
   if (!cpi->common.seg.enabled)
@@ -2520,7 +2521,7 @@ static void write_txfm_mode(TX_MODE mode, struct vpx_write_bit_buffer *wb) {
 }
 
 
-static void update_txfm_probs(VP10_COMMON *cm, vpx_writer *w,
+static void update_txfm_probs(VP10_COMMON *cm, vp10_writer *w,
                               FRAME_COUNTS *counts) {
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
@@ -2694,10 +2695,9 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
                            unsigned int *max_tile_size,
                            unsigned int *max_tile_col_size) {
   VP10_COMMON *const cm = &cpi->common;
-  vpx_writer mode_bc;
+  vp10_writer mode_bc;
 #if CONFIG_ANS
   struct AnsCoder token_ans;
-  struct BufAnsCoder buffered_ans;
 #endif  // CONFIG_ANS
   int tile_row, tile_col;
   TOKENEXTRA *(*const tok_buffers)[MAX_TILE_COLS] = cpi->tile_tok;
@@ -2738,6 +2738,7 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
       unsigned int tile_size;
       const TOKENEXTRA *tok = tok_buffers[tile_row][tile_col];
       const TOKENEXTRA *tok_end = tok + cpi->tok_count[tile_row][tile_col];
+      const int data_offset = have_tiles ? 4 : 0;
 
       vp10_tile_set_row(&tile_info, cm, tile_row);
 
@@ -2745,28 +2746,20 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
 
       // Is CONFIG_EXT_TILE = 1, every tile in the row has a header,
       // even for the last one, unless no tiling is used at all.
-      if (have_tiles) {
-        total_size += 4;
-        vpx_start_encode(&mode_bc, buf->data + 4);
-      } else {
-        vpx_start_encode(&mode_bc, buf->data);
-      }
-
+      total_size += data_offset;
 #if !CONFIG_ANS
+      vpx_start_encode(&mode_bc, buf->data + data_offset);
       write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
       vpx_stop_encode(&mode_bc);
       tile_size = mode_bc.pos;
 #else
-      buf_ans_write_init(&buffered_ans, uco_ans_buf, ans_window_size);
-      write_modes(cpi, &tile_info, &mode_bc, &buffered_ans, &tok, tok_end);
+      buf_ans_write_init(&mode_bc, uco_ans_buf, ans_window_size);
+      write_modes(cpi, &tile_info, &mode_bc, &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
-      vpx_stop_encode(&mode_bc);
-      tile_size = mode_bc.pos;
-
-      ans_write_init(&token_ans, dst + total_size + tile_size);
-      buf_ans_flush(&buffered_ans, &token_ans);
-      tile_size += ans_write_end(&token_ans);
+      ans_write_init(&token_ans, buf->data + data_offset);
+      buf_ans_flush(&mode_bc, &token_ans);
+      tile_size = ans_write_end(&token_ans);
 #endif  // !CONFIG_ANS
 
       buf->size = tile_size;
@@ -2830,23 +2823,19 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
       if (!is_last_tile)
         total_size += 4;
 
-      vpx_start_encode(&mode_bc, dst + total_size);
-
 #if !CONFIG_ANS
+      vpx_start_encode(&mode_bc, dst + total_size);
       write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
       vpx_stop_encode(&mode_bc);
       tile_size = mode_bc.pos;
 #else
-      buf_ans_write_init(&buffered_ans, uco_ans_buf, ans_window_size);
-      write_modes(cpi, &tile_info, &mode_bc, &buffered_ans, &tok, tok_end);
+      buf_ans_write_init(&mode_bc, uco_ans_buf, ans_window_size);
+      write_modes(cpi, &tile_info, &mode_bc, &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
-      vpx_stop_encode(&mode_bc);
-      tile_size = mode_bc.pos;
-
-      ans_write_init(&token_ans, dst + total_size + tile_size);
-      buf_ans_flush(&buffered_ans, &token_ans);
-      tile_size += ans_write_end(&token_ans);
+      ans_write_init(&token_ans, dst + total_size);
+      buf_ans_flush(&mode_bc, &token_ans);
+      tile_size = ans_write_end(&token_ans);
 #endif  // !CONFIG_ANS
 
       assert(tile_size > 0);
@@ -3068,10 +3057,20 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 #endif  // CONFIG_SUPERTX
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = cpi->td.counts;
-  vpx_writer header_bc;
+  vp10_writer header_bc;
   int i, j;
 
+#if CONFIG_ANS
+  struct AnsCoder header_ans;
+  struct buffered_ans_symbol *uco_ans_buf;
+  const int ans_window_size = 50000;  // TODO(aconverse): revisit window size
+  int header_size;
+  CHECK_MEM_ERROR(cm, uco_ans_buf,
+                  vpx_malloc(ans_window_size * sizeof(*uco_ans_buf)));
+  buf_ans_write_init(&header_bc, uco_ans_buf, ans_window_size);
+#else
   vpx_start_encode(&header_bc, data);
+#endif
   update_txfm_probs(cm, &header_bc, counts);
   update_coef_probs(cpi, &header_bc);
 
@@ -3209,10 +3208,18 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 #endif  // CONFIG_SUPERTX
   }
 
+#if CONFIG_ANS
+  ans_write_init(&header_ans, data);
+  buf_ans_flush(&header_bc, &header_ans);
+  vpx_free(uco_ans_buf);
+  header_size = ans_write_end(&header_ans);
+  assert(header_size <= 0xffff);
+  return header_size;
+#else
   vpx_stop_encode(&header_bc);
   assert(header_bc.pos <= 0xffff);
-
   return header_bc.pos;
+#endif  // CONFIG_ANS
 }
 
 static int choose_size_bytes(uint32_t size, int spare_msbs) {
