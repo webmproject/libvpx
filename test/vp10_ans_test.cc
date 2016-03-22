@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#define VP10_FORCE_VPXBOOL_TREEWRITER
+
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
