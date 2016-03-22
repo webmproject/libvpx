@@ -749,6 +749,10 @@ void vp10_find_best_ref_mvs(int allow_hp,
 
 void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
                                     int block, int ref, int mi_row, int mi_col,
+#if CONFIG_REF_MV
+                                    CANDIDATE_MV *ref_mv_stack,
+                                    uint8_t *ref_mv_count,
+#endif
 #if CONFIG_EXT_INTER
                                     int_mv *mv_list,
 #endif  // CONFIG_EXT_INTER
@@ -760,11 +764,11 @@ void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
   b_mode_info *bmi = mi->bmi;
   int n;
 #if CONFIG_REF_MV
-  CANDIDATE_MV ref_mv_stack[MAX_REF_MV_STACK_SIZE];
   CANDIDATE_MV tmp_mv;
-  uint8_t ref_mv_count = 0, idx;
+  uint8_t idx;
   uint8_t above_count = 0, left_count = 0;
   MV_REFERENCE_FRAME rf[2] = { mi->mbmi.ref_frame[ref], NONE };
+  *ref_mv_count = 0;
 #endif
 
   assert(MAX_MV_REF_CANDIDATES == 2);
@@ -774,12 +778,12 @@ void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
 
 #if CONFIG_REF_MV
   scan_blk_mbmi(cm, xd, mi_row, mi_col, block, rf,
-                -1, 0, ref_mv_stack, &ref_mv_count);
-  above_count = ref_mv_count;
+                -1, 0, ref_mv_stack, ref_mv_count);
+  above_count = *ref_mv_count;
 
   scan_blk_mbmi(cm, xd, mi_row, mi_col, block, rf,
-                0, -1, ref_mv_stack, &ref_mv_count);
-  left_count = ref_mv_count - above_count;
+                0, -1, ref_mv_stack, ref_mv_count);
+  left_count = *ref_mv_count - above_count;
 
   if (above_count > 1 && left_count > 0) {
     tmp_mv = ref_mv_stack[1];
@@ -787,7 +791,7 @@ void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd,
     ref_mv_stack[above_count] = tmp_mv;
   }
 
-  for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, ref_mv_count); ++idx) {
+  for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *ref_mv_count); ++idx) {
     mv_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
     clamp_mv_ref(&mv_list[idx].as_mv,
                  xd->n8_w << 3, xd->n8_h << 3, xd);

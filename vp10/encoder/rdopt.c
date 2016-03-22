@@ -4757,6 +4757,10 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
       int64_t best_rd = INT64_MAX;
       const int i = idy * 2 + idx;
       int ref;
+#if CONFIG_REF_MV
+        CANDIDATE_MV ref_mv_stack[2][MAX_REF_MV_STACK_SIZE];
+        uint8_t ref_mv_count[2];
+#endif
 #if CONFIG_EXT_INTER
       int mv_idx;
       int_mv ref_mvs_sub8x8[2][2];
@@ -4771,6 +4775,10 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_EXT_INTER
         frame_mv[ZEROMV][frame].as_int = 0;
         vp10_append_sub8x8_mvs_for_idx(cm, xd, i, ref, mi_row, mi_col,
+#if CONFIG_REF_MV
+                                       ref_mv_stack[ref],
+                                       &ref_mv_count[ref],
+#endif
 #if CONFIG_EXT_INTER
                                        mv_ref_list,
 #endif  // CONFIG_EXT_INTER
@@ -5145,6 +5153,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                     bsi->rdstat[i][mode_idx].tl,
                                     idy, idx,
                                     mi_row, mi_col);
+
         if (bsi->rdstat[i][mode_idx].brdcost < INT64_MAX) {
           bsi->rdstat[i][mode_idx].brdcost += RDCOST(x->rdmult, x->rddiv,
                                             bsi->rdstat[i][mode_idx].brate, 0);
