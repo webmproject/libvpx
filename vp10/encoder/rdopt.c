@@ -1008,6 +1008,9 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGHBITDEPTH
     const int bd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? xd->bd : 8;
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH && xd->bd == BITDEPTH_10) {
+      shift = 2;
+    }
     *out_dist = vp10_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                         &this_sse, bd) >> shift;
 #else
@@ -1176,9 +1179,17 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
         int64_t dc_correct = orig_sse - resd_sse * resd_sse;
 #if CONFIG_VP9_HIGHBITDEPTH
         dc_correct >>= ((xd->bd - 8) * 2);
-#endif
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH &&
+            xd->bd == BITDEPTH_10) {
+          dc_correct >>= 2;
+        } else {
+          if (tx_size != TX_32X32)
+            dc_correct >>= 2;
+        }
+#else
         if (tx_size != TX_32X32)
           dc_correct >>= 2;
+#endif
 
         dist = VPXMAX(0, sse - dc_correct);
       }

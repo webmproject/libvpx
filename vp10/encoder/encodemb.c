@@ -105,7 +105,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
   const int default_eob = 16 << (tx_size << 1);
-  const int mul = 1 + (tx_size == TX_32X32);
+  int mul;
   const int16_t *dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
   TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
@@ -128,6 +128,16 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH && xd->bd == BITDEPTH_10) {
+    mul = 1;
+  } else {
+    mul = 1 + (tx_size == TX_32X32);
+  }
+#else
+  mul = 1 + (tx_size == TX_32X32);
+#endif
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   if (!ref)
@@ -384,7 +394,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
       if (x->skip_block) {
         vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
       } else {
-        if (tx_size == TX_32X32)
+        if (tx_size == TX_32X32 && xd->bd != 10)
           quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD_32](
               coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
         else
