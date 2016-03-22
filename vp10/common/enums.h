@@ -243,7 +243,7 @@ typedef enum {
 #define NEWMV_MODE_CONTEXTS  7
 #define ZEROMV_MODE_CONTEXTS 2
 #define REFMV_MODE_CONTEXTS  9
-#define DRL_MODE_CONTEXTS    3
+#define DRL_MODE_CONTEXTS    5
 
 #define ZEROMV_OFFSET 3
 #define REFMV_OFFSET  4

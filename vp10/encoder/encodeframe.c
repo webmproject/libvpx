@@ -1912,24 +1912,34 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 #endif  // CONFIG_EXT_INTER
                                 mode_ctx);
 
+        if (mode == NEWMV) {
+          uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
+          int idx;
+
+          for (idx = 0; idx < 2; ++idx) {
+            if (mbmi_ext->ref_mv_count[ref_frame_type] > idx + 1) {
+              uint8_t drl_ctx =
+                  vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], idx);
+              ++counts->drl_mode[drl_ctx][mbmi->ref_mv_idx != idx];
+
+              if (mbmi->ref_mv_idx == idx)
+                break;
+            }
+          }
+        }
+
         if (mode == NEARMV) {
           uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
-          if (mbmi_ext->ref_mv_count[ref_frame_type] > 2) {
-            uint8_t drl0_ctx =
-                vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
-            if (mbmi->ref_mv_idx == 0)
-              ++counts->drl_mode0[drl0_ctx][0];
-            else
-              ++counts->drl_mode0[drl0_ctx][1];
+          int idx;
 
-            if (mbmi_ext->ref_mv_count[ref_frame_type] > 3 &&
-                mbmi->ref_mv_idx > 0) {
-              uint8_t drl1_ctx =
-                  vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 2);
-              if (mbmi->ref_mv_idx == 1)
-                ++counts->drl_mode1[drl1_ctx][0];
-              else
-                ++counts->drl_mode1[drl1_ctx][1];
+          for (idx = 1; idx < 3; ++idx) {
+            if (mbmi_ext->ref_mv_count[ref_frame_type] > idx + 1) {
+              uint8_t drl_ctx =
+                  vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], idx);
+              ++counts->drl_mode[drl_ctx][mbmi->ref_mv_idx != idx - 1];
+
+              if (mbmi->ref_mv_idx == idx - 1)
+                break;
             }
           }
         }

@@ -197,39 +197,37 @@ static void write_drl_idx(const VP10_COMMON *cm,
 
   assert(mbmi->ref_mv_idx < 3);
 
-  if (mbmi_ext->ref_mv_count[ref_frame_type] > 1 && mbmi->mode == NEWMV) {
-    uint8_t drl_ctx =
-        vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 0);
-    vpx_prob drl_prob = cm->fc->drl_prob0[drl_ctx];
+  if (mbmi->mode == NEWMV) {
+    int idx;
+    for (idx = 0; idx < 2; ++idx) {
+      if (mbmi_ext->ref_mv_count[ref_frame_type] > idx + 1) {
+        uint8_t drl_ctx =
+            vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], idx);
+        vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
 
-    vpx_write(w, mbmi->ref_mv_idx != 0, drl_prob);
-    if (mbmi->ref_mv_idx == 0)
-      return;
-
-    if (mbmi_ext->ref_mv_count[ref_frame_type] > 2) {
-      drl_ctx = vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
-      drl_prob = cm->fc->drl_prob0[drl_ctx];
-      vpx_write(w, mbmi->ref_mv_idx != 1, drl_prob);
+        vpx_write(w, mbmi->ref_mv_idx != idx, drl_prob);
+        if (mbmi->ref_mv_idx == idx)
+          return;
+      }
     }
-    if (mbmi->ref_mv_idx == 1)
-      return;
-
-    assert(mbmi->ref_mv_idx == 2);
     return;
   }
 
-  if (mbmi_ext->ref_mv_count[ref_frame_type] > 2 && mbmi->mode == NEARMV) {
-    uint8_t drl0_ctx =
-        vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 1);
-    vpx_prob drl0_prob = cm->fc->drl_prob0[drl0_ctx];
-    vpx_write(w, mbmi->ref_mv_idx != 0, drl0_prob);
-    if (mbmi_ext->ref_mv_count[ref_frame_type] > 3 &&
-        mbmi->ref_mv_idx > 0) {
-      uint8_t drl1_ctx =
-          vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], 2);
-      vpx_prob drl1_prob = cm->fc->drl_prob1[drl1_ctx];
-      vpx_write(w, mbmi->ref_mv_idx != 1, drl1_prob);
+  if (mbmi->mode == NEARMV) {
+    int idx;
+    // TODO(jingning): Temporary solution to compensate the NEARESTMV offset.
+    for (idx = 1; idx < 3; ++idx) {
+      if (mbmi_ext->ref_mv_count[ref_frame_type] > idx + 1) {
+        uint8_t drl_ctx =
+            vp10_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type], idx);
+        vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
+
+        vpx_write(w, mbmi->ref_mv_idx != (idx - 1), drl_prob);
+        if (mbmi->ref_mv_idx == (idx - 1))
+          return;
+      }
     }
+    return;
   }
 }
 #endif
@@ -369,11 +367,8 @@ static void update_inter_mode_probs(VP10_COMMON *cm, vpx_writer *w,
     vp10_cond_prob_diff_update(w, &cm->fc->refmv_prob[i],
                                counts->refmv_mode[i]);
   for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
-    vp10_cond_prob_diff_update(w, &cm->fc->drl_prob0[i],
-                               counts->drl_mode0[i]);
-  for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
-    vp10_cond_prob_diff_update(w, &cm->fc->drl_prob1[i],
-                               counts->drl_mode1[i]);
+    vp10_cond_prob_diff_update(w, &cm->fc->drl_prob[i],
+                               counts->drl_mode[i]);
 #if CONFIG_EXT_INTER
   vp10_cond_prob_diff_update(w, &cm->fc->new2mv_prob, counts->new2mv_mode);
 #endif  // CONFIG_EXT_INTER

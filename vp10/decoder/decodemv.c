@@ -155,55 +155,45 @@ static void read_drl_idx(const VP10_COMMON *cm,
   uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
   mbmi->ref_mv_idx = 0;
 
-  if (xd->ref_mv_count[ref_frame_type] > 1 && mbmi->mode == NEWMV) {
-    uint8_t drl_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 0);
-    vpx_prob drl_prob = cm->fc->drl_prob0[drl_ctx];
-
-    if (!vpx_read(r, drl_prob)) {
-      mbmi->ref_mv_idx = 0;
-      return;
-    }
-    mbmi->ref_mv_idx = 1;
-
-    if (xd->ref_mv_count[ref_frame_type] > 2) {
-      drl_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 1);
-      drl_prob = cm->fc->drl_prob0[drl_ctx];
-      if (!vpx_read(r, drl_prob)) {
-        mbmi->ref_mv_idx = 1;
-        return;
-      }
-      mbmi->ref_mv_idx = 2;
-    }
-    return;
-  }
-
-  if (xd->ref_mv_count[ref_frame_type] > 2 && mbmi->mode == NEARMV) {
-    uint8_t drl0_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 1);
-    vpx_prob drl0_prob = cm->fc->drl_prob0[drl0_ctx];
-    if (vpx_read(r, drl0_prob)) {
-      mbmi->ref_mv_idx = 1;
-      if (xd->counts)
-        ++xd->counts->drl_mode0[drl0_ctx][1];
-      if (xd->ref_mv_count[ref_frame_type] > 3) {
-        uint8_t drl1_ctx =
-            vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], 2);
-        vpx_prob drl1_prob = cm->fc->drl_prob1[drl1_ctx];
-        if (vpx_read(r, drl1_prob)) {
-          mbmi->ref_mv_idx = 2;
+  if (mbmi->mode == NEWMV) {
+    int idx;
+    for (idx = 0; idx < 2; ++idx) {
+      if (xd->ref_mv_count[ref_frame_type] > idx + 1) {
+        uint8_t drl_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], idx);
+        vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
+        if (!vpx_read(r, drl_prob)) {
+          mbmi->ref_mv_idx = idx;
           if (xd->counts)
-            ++xd->counts->drl_mode1[drl1_ctx][1];
-
+            ++xd->counts->drl_mode[drl_ctx][0];
           return;
         }
-
+        mbmi->ref_mv_idx = idx + 1;
         if (xd->counts)
-          ++xd->counts->drl_mode1[drl1_ctx][0];
+          ++xd->counts->drl_mode[drl_ctx][1];
       }
-      return;
     }
+  }
 
-    if (xd->counts)
-      ++xd->counts->drl_mode0[drl0_ctx][0];
+  if (mbmi->mode == NEARMV) {
+    int idx;
+    // Offset the NEARESTMV mode.
+    // TODO(jingning): Unify the two syntax decoding loops after the NEARESTMV
+    // mode is factored in.
+    for (idx = 1; idx < 3; ++idx) {
+      if (xd->ref_mv_count[ref_frame_type] > idx + 1) {
+        uint8_t drl_ctx = vp10_drl_ctx(xd->ref_mv_stack[ref_frame_type], idx);
+        vpx_prob drl_prob = cm->fc->drl_prob[drl_ctx];
+        if (!vpx_read(r, drl_prob)) {
+          mbmi->ref_mv_idx = idx - 1;
+          if (xd->counts)
+            ++xd->counts->drl_mode[drl_ctx][0];
+          return;
+        }
+        mbmi->ref_mv_idx = idx;
+        if (xd->counts)
+          ++xd->counts->drl_mode[drl_ctx][1];
+      }
+    }
   }
 }
 #endif
