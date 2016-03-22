@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "dc0f1e77_55668afd",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-22T23:24:16Z",
+      "side": 1,
+      "message": "memcmp of a fixed sized buffer or some \u0027|\u0027 chain I guess. I haven\u0027t gotten this code to generate vld\u0027s with a hint, but it seems risky given the x/y offset.",
+      "parentUuid": "dc0f1e77_95f5a2a6",
+      "revId": "7dbe7dd43d1ad8970370807fe5f922ad43fd9734",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc0f1e77_252c8532",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 3
