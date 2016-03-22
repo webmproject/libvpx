@@ -90,19 +90,6 @@ void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
                                    int use_fast_coef_casting);
 #endif  // CONFIG_SUPERTX
 
-#if CONFIG_OBMC
-void vp10_build_prediction_by_above_preds(VP10_COMP *cpi,
-                                          MACROBLOCKD *xd,
-                                          int mi_row, int mi_col,
-                                          uint8_t *tmp_buf[MAX_MB_PLANE],
-                                          int tmp_stride[MAX_MB_PLANE]);
-void vp10_build_prediction_by_left_preds(VP10_COMP *cpi,
-                                         MACROBLOCKD *xd,
-                                         int mi_row, int mi_col,
-                                         uint8_t *tmp_buf[MAX_MB_PLANE],
-                                         int tmp_stride[MAX_MB_PLANE]);
-#endif  // CONFIG_OBMC
-
 static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(VP10_COMP *cpi,
                                                           const int ref) {
   // Use up-sampled reference frames.

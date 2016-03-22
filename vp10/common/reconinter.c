@@ -1372,6 +1372,189 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
     }
   }  // each mi in the left column
 }
+
+void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
+                                          MACROBLOCKD *xd,
+                                          int mi_row, int mi_col,
+                                          uint8_t *tmp_buf[MAX_MB_PLANE],
+                                          int tmp_stride[MAX_MB_PLANE]) {
+  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  int i, j, mi_step, ref;
+
+  if (mi_row == 0)
+    return;
+
+  for (i = 0; i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {
+    int mi_row_offset = -1;
+    int mi_col_offset = i;
+    int mi_x, mi_y, bw, bh;
+    MODE_INFO *above_mi = xd->mi[mi_col_offset +
+                                 mi_row_offset * xd->mi_stride];
+    MB_MODE_INFO *above_mbmi = &above_mi->mbmi;
+
+    mi_step = VPXMIN(xd->n8_w,
+                     num_8x8_blocks_wide_lookup[above_mbmi->sb_type]);
+
+    if (!is_neighbor_overlappable(above_mbmi))
+      continue;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      struct macroblockd_plane *const pd = &xd->plane[j];
+      setup_pred_plane(&pd->dst,
+                       tmp_buf[j], tmp_stride[j],
+                       0, i, NULL,
+                       pd->subsampling_x, pd->subsampling_y);
+    }
+    for (ref = 0; ref < 1 + has_second_ref(above_mbmi); ++ref) {
+      MV_REFERENCE_FRAME frame = above_mbmi->ref_frame[ref];
+      RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
+
+      xd->block_refs[ref] = ref_buf;
+      if ((!vp10_is_valid_scale(&ref_buf->sf)))
+        vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Reference frame has invalid dimensions");
+      vp10_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col + i,
+                            &ref_buf->sf);
+    }
+
+    xd->mb_to_left_edge   = -(((mi_col + i) * MI_SIZE) * 8);
+    mi_x = (mi_col + i) << MI_SIZE_LOG2;
+    mi_y = mi_row << MI_SIZE_LOG2;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      const struct macroblockd_plane *pd = &xd->plane[j];
+      bw = (mi_step * 8) >> pd->subsampling_x;
+      bh = VPXMAX((num_4x4_blocks_high_lookup[bsize] * 2) >> pd->subsampling_y,
+                  4);
+
+      if (above_mbmi->sb_type < BLOCK_8X8) {
+        const PARTITION_TYPE bp = BLOCK_8X8 - above_mbmi->sb_type;
+        const int have_vsplit = bp != PARTITION_HORZ;
+        const int have_hsplit = bp != PARTITION_VERT;
+        const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
+        const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
+        const int pw = 8 >> (have_vsplit | pd->subsampling_x);
+        int x, y;
+
+        for (y = 0; y < num_4x4_h; ++y)
+          for (x = 0; x < num_4x4_w; ++x) {
+            if ((bp == PARTITION_HORZ || bp == PARTITION_SPLIT)
+                && y == 0 && !pd->subsampling_y)
+              continue;
+
+            build_inter_predictors(xd, j, mi_col_offset, mi_row_offset,
+                                   y * 2 + x, bw, bh,
+                                   4 * x, 0, pw, bh,
+#if CONFIG_SUPERTX && CONFIG_EXT_INTER
+                                   0, 0,
+#endif  // CONFIG_SUPERTX && CONFIG_EXT_INTER
+                                   mi_x, mi_y);
+          }
+      } else {
+        build_inter_predictors(xd, j, mi_col_offset, mi_row_offset,
+                               0, bw, bh, 0, 0, bw, bh,
+#if CONFIG_SUPERTX && CONFIG_EXT_INTER
+                               0, 0,
+#endif  // CONFIG_SUPERTX && CONFIG_EXT_INTER
+                               mi_x, mi_y);
+      }
+    }
+  }
+  xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
+}
+
+void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
+                                         MACROBLOCKD *xd,
+                                         int mi_row, int mi_col,
+                                         uint8_t *tmp_buf[MAX_MB_PLANE],
+                                         int tmp_stride[MAX_MB_PLANE]) {
+  const TileInfo *const tile = &xd->tile;
+  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  int i, j, mi_step, ref;
+
+  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start) ||
+      (mi_col - 1) >= tile->mi_col_end)
+    return;
+
+  for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row); i += mi_step) {
+    int mi_row_offset = i;
+    int mi_col_offset = -1;
+    int mi_x, mi_y, bw, bh;
+    MODE_INFO *left_mi = xd->mi[mi_col_offset +
+                                mi_row_offset * xd->mi_stride];
+    MB_MODE_INFO *left_mbmi = &left_mi->mbmi;
+    const int is_compound = has_second_ref(left_mbmi);
+
+    mi_step = VPXMIN(xd->n8_h,
+                     num_8x8_blocks_high_lookup[left_mbmi->sb_type]);
+
+    if (!is_neighbor_overlappable(left_mbmi))
+      continue;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      struct macroblockd_plane *const pd = &xd->plane[j];
+      setup_pred_plane(&pd->dst,
+                       tmp_buf[j], tmp_stride[j],
+                       i, 0, NULL,
+                       pd->subsampling_x, pd->subsampling_y);
+    }
+    for (ref = 0; ref < 1 + is_compound; ++ref) {
+      MV_REFERENCE_FRAME frame = left_mbmi->ref_frame[ref];
+      RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
+
+      xd->block_refs[ref] = ref_buf;
+      if ((!vp10_is_valid_scale(&ref_buf->sf)))
+        vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Reference frame has invalid dimensions");
+      vp10_setup_pre_planes(xd, ref, ref_buf->buf, mi_row + i, mi_col,
+                            &ref_buf->sf);
+    }
+
+    xd->mb_to_top_edge    = -(((mi_row + i) * MI_SIZE) * 8);
+    mi_x = mi_col << MI_SIZE_LOG2;
+    mi_y = (mi_row + i) << MI_SIZE_LOG2;
+
+    for (j = 0; j < MAX_MB_PLANE; ++j) {
+      const struct macroblockd_plane *pd = &xd->plane[j];
+      bw = VPXMAX((num_4x4_blocks_wide_lookup[bsize] * 2) >> pd->subsampling_x,
+                  4);
+      bh = (mi_step << MI_SIZE_LOG2) >> pd->subsampling_y;
+
+      if (left_mbmi->sb_type < BLOCK_8X8) {
+        const PARTITION_TYPE bp = BLOCK_8X8 - left_mbmi->sb_type;
+        const int have_vsplit = bp != PARTITION_HORZ;
+        const int have_hsplit = bp != PARTITION_VERT;
+        const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
+        const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
+        const int ph = 8 >> (have_hsplit | pd->subsampling_y);
+        int x, y;
+
+        for (y = 0; y < num_4x4_h; ++y)
+          for (x = 0; x < num_4x4_w; ++x) {
+            if ((bp == PARTITION_VERT || bp == PARTITION_SPLIT)
+                && x == 0 && !pd->subsampling_x)
+              continue;
+
+            build_inter_predictors(xd, j, mi_col_offset, mi_row_offset,
+                                   y * 2 + x, bw, bh,
+                                   0, 4 * y, bw, ph,
+#if CONFIG_SUPERTX && CONFIG_EXT_INTER
+                                   0, 0,
+#endif  // CONFIG_SUPERTX && CONFIG_EXT_INTER
+                                   mi_x, mi_y);
+          }
+      } else {
+        build_inter_predictors(xd, j, mi_col_offset, mi_row_offset, 0,
+                               bw, bh, 0, 0, bw, bh,
+#if CONFIG_SUPERTX && CONFIG_EXT_INTER
+                               0, 0,
+#endif  // CONFIG_SUPERTX && CONFIG_EXT_INTER
+                               mi_x, mi_y);
+      }
+    }
+  }
+  xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
+}
 #endif  // CONFIG_OBMC
 
 #if CONFIG_EXT_INTER
