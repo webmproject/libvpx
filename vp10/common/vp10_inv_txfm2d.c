@@ -88,7 +88,7 @@ static inline void inv_txfm2d_add_c(const int32_t *input, int16_t *output,
   }
 }
 
-void vp10_inv_txfm2d_add_4x4(const int32_t *input, uint16_t *output,
+void vp10_inv_txfm2d_add_4x4_c(const int32_t *input, uint16_t *output,
                              const int stride, const TXFM_2D_CFG *cfg,
                              const int bd) {
   int txfm_buf[4 * 4 + 4 + 4];
@@ -100,7 +100,7 @@ void vp10_inv_txfm2d_add_4x4(const int32_t *input, uint16_t *output,
   clamp_block((int16_t *)output, 4, stride, 0, (1 << bd) - 1);
 }
 
-void vp10_inv_txfm2d_add_8x8(const int32_t *input, uint16_t *output,
+void vp10_inv_txfm2d_add_8x8_c(const int32_t *input, uint16_t *output,
                              const int stride, const TXFM_2D_CFG *cfg,
                              const int bd) {
   int txfm_buf[8 * 8 + 8 + 8];
@@ -112,7 +112,7 @@ void vp10_inv_txfm2d_add_8x8(const int32_t *input, uint16_t *output,
   clamp_block((int16_t *)output, 8, stride, 0, (1 << bd) - 1);
 }
 
-void vp10_inv_txfm2d_add_16x16(const int32_t *input, uint16_t *output,
+void vp10_inv_txfm2d_add_16x16_c(const int32_t *input, uint16_t *output,
                                const int stride, const TXFM_2D_CFG *cfg,
                                const int bd) {
   int txfm_buf[16 * 16 + 16 + 16];
@@ -124,7 +124,7 @@ void vp10_inv_txfm2d_add_16x16(const int32_t *input, uint16_t *output,
   clamp_block((int16_t *)output, 16, stride, 0, (1 << bd) - 1);
 }
 
-void vp10_inv_txfm2d_add_32x32(const int32_t *input, uint16_t *output,
+void vp10_inv_txfm2d_add_32x32_c(const int32_t *input, uint16_t *output,
                                const int stride, const TXFM_2D_CFG *cfg,
                                const int bd) {
   int txfm_buf[32 * 32 + 32 + 32];
@@ -136,7 +136,7 @@ void vp10_inv_txfm2d_add_32x32(const int32_t *input, uint16_t *output,
   clamp_block((int16_t *)output, 32, stride, 0, (1 << bd) - 1);
 }
 
-void vp10_inv_txfm2d_add_64x64(const int32_t *input, uint16_t *output,
+void vp10_inv_txfm2d_add_64x64_c(const int32_t *input, uint16_t *output,
                                const int stride, const TXFM_2D_CFG *cfg,
                                const int bd) {
   int txfm_buf[64 * 64 + 64 + 64];

@@ -12,17 +12,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "third_party/googletest/src/include/gtest/gtest.h"
-
 #include "test/acm_random.h"
 #include "test/vp10_txfm_test.h"
-#include "vp10/common/vp10_fwd_txfm2d.h"
 #include "vp10/common/vp10_fwd_txfm2d_cfg.h"
+#include "./vp10_rtcd.h"
 
 using libvpx_test::ACMRandom;
 
 namespace {
 
+#if CONFIG_VP9_HIGHBITDEPTH
 const int txfm_size_num = 5;
 const int txfm_size_ls[5] = {4, 8, 16, 32, 64};
 const TXFM_2D_CFG* fwd_txfm_cfg_ls[5][4] = {
@@ -105,5 +104,6 @@ TEST(vp10_fwd_txfm2d, accuracy) {
     delete[] ref_output;
   }
 }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 }  // anonymous namespace

@@ -7,6 +7,7 @@ print <<EOF
 #include "vpx/vpx_integer.h"
 #include "vp10/common/common.h"
 #include "vp10/common/enums.h"
+#include "vp10/common/vp10_txfm.h"
 
 struct macroblockd;
 
@@ -610,6 +611,32 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vp10_iwht4x4_16_add/;
   }  # CONFIG_EMULATE_HARDWARE
 }  # CONFIG_VP9_HIGHBITDEPTH
+
+if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+  #fwd txfm
+  add_proto qw/void vp10_fwd_txfm2d_4x4/, "const int16_t *input, int32_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_fwd_txfm2d_4x4/;
+  add_proto qw/void vp10_fwd_txfm2d_8x8/, "const int16_t *input, int32_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_fwd_txfm2d_8x8/;
+  add_proto qw/void vp10_fwd_txfm2d_16x16/, "const int16_t *input, int32_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_fwd_txfm2d_16x16/;
+  add_proto qw/void vp10_fwd_txfm2d_32x32/, "const int16_t *input, int32_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_fwd_txfm2d_32x32/;
+  add_proto qw/void vp10_fwd_txfm2d_64x64/, "const int16_t *input, int32_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_fwd_txfm2d_64x64/;
+
+  #inv txfm
+  add_proto qw/void vp10_inv_txfm2d_add_4x4/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_inv_txfm2d_add_4x4/;
+  add_proto qw/void vp10_inv_txfm2d_add_8x8/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_inv_txfm2d_add_8x8/;
+  add_proto qw/void vp10_inv_txfm2d_add_16x16/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_inv_txfm2d_add_16x16/;
+  add_proto qw/void vp10_inv_txfm2d_add_32x32/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_inv_txfm2d_add_32x32/;
+  add_proto qw/void vp10_inv_txfm2d_add_64x64/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  specialize qw/vp10_inv_txfm2d_add_64x64/;
+}
 
 #
 # Motion search
