@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc0f1e77_8060c7de",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-03-22T00:18:03Z",
+      "side": 1,
+      "message": "psrlq may work here if you only need the lower 32bit.",
+      "revId": "6cc10e55204e302396d619b06dfed0aa924fcca5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
