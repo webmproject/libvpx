@@ -34,6 +34,24 @@
       "revId": "4c395d5c14734842cb3452d7e052e1eb3f097adf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_96ee4d69",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1481,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-03-22T18:47:30Z",
+      "side": 1,
+      "message": "yep... taking a closer look at the code now",
+      "parentUuid": "dc0f1e77_d67565d4",
+      "revId": "4c395d5c14734842cb3452d7e052e1eb3f097adf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
