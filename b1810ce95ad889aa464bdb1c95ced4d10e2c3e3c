@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ccf6672_1510a46a",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-03-22T23:10:50Z",
+      "side": 1,
+      "message": "assert(bits \u003c 31);",
+      "revId": "b1810ce95ad889aa464bdb1c95ced4d10e2c3e3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccf6672_55b30cca",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-03-22T23:10:50Z",
+      "side": 1,
+      "message": "just curious: have you considered writing the bits in the opposite order (LSB first)? Why order is more hardware friendly a priori?",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 11
+      },
+      "revId": "b1810ce95ad889aa464bdb1c95ced4d10e2c3e3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccf6672_35ae8865",
+        "filename": "vp10/encoder/buf_ans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-03-22T23:10:50Z",
+      "side": 1,
+      "message": "assert(bits \u003c 31)",
+      "range": {
+        "startLine": 90,
+        "startChar": 6,
+        "endLine": 90,
+        "endChar": 9
+      },
+      "revId": "b1810ce95ad889aa464bdb1c95ced4d10e2c3e3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
