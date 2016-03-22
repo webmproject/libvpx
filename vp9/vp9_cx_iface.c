@@ -486,7 +486,13 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->content = extra_cfg->content;
 
   oxcf->tile_columns = extra_cfg->tile_columns;
-  oxcf->tile_rows    = extra_cfg->tile_rows;
+
+  // The dependencies between row tiles cause error in multi-threaded encoding.
+  // For now, it is forced to be 0 in this case.
+  if (oxcf->max_threads > 1 && oxcf->tile_columns > 0)
+    oxcf->tile_rows  = 0;
+  else
+    oxcf->tile_rows  = extra_cfg->tile_rows;
 
   oxcf->error_resilient_mode         = cfg->g_error_resilient;
   oxcf->frame_parallel_decoding_mode = extra_cfg->frame_parallel_decoding_mode;
