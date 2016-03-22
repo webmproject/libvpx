@@ -150,6 +150,18 @@ static INLINE void clamp_block(int16_t *block, int block_size, int stride,
 typedef void (*TxfmFunc)(const int32_t *input, int32_t *output,
                          const int8_t *cos_bit, const int8_t *stage_range);
 
+typedef enum TXFM_TYPE {
+  TXFM_TYPE_DCT4,
+  TXFM_TYPE_DCT8,
+  TXFM_TYPE_DCT16,
+  TXFM_TYPE_DCT32,
+  TXFM_TYPE_DCT64,
+  TXFM_TYPE_ADST4,
+  TXFM_TYPE_ADST8,
+  TXFM_TYPE_ADST16,
+  TXFM_TYPE_ADST32,
+} TXFM_TYPE;
+
 typedef struct TXFM_2D_CFG {
   const int txfm_size;
   const int stage_num_col;
@@ -160,8 +172,8 @@ typedef struct TXFM_2D_CFG {
   const int8_t *stage_range_row;
   const int8_t *cos_bit_col;
   const int8_t *cos_bit_row;
-  const TxfmFunc txfm_func_col;
-  const TxfmFunc txfm_func_row;
+  const TXFM_TYPE txfm_type_col;
+  const TXFM_TYPE txfm_type_row;
 } TXFM_2D_CFG;
 
 #endif  // VP10_TXFM_H_
