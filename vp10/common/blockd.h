@@ -212,6 +212,9 @@ typedef struct {
 #if CONFIG_REF_MV
   uint8_t ref_mv_idx;
 #endif
+#if CONFIG_EXT_PARTITION_TYPES
+  PARTITION_TYPE partition;
+#endif
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
@@ -355,6 +358,37 @@ static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
                                      PARTITION_TYPE partition) {
   return subsize_lookup[partition][bsize];
 }
+
+#if CONFIG_EXT_PARTITION_TYPES
+static INLINE PARTITION_TYPE get_partition(const MODE_INFO *const mi,
+                                           int mi_stride, int mi_rows,
+                                           int mi_cols, int mi_row,
+                                           int mi_col, BLOCK_SIZE bsize) {
+  const int bsl = b_width_log2_lookup[bsize];
+  const int bs = (1 << bsl) / 4;
+  MODE_INFO m = mi[mi_row * mi_stride + mi_col];
+  PARTITION_TYPE partition = partition_lookup[bsl][m.mbmi.sb_type];
+  if (partition != PARTITION_NONE && bsize > BLOCK_8X8 &&
+      mi_row + bs < mi_rows && mi_col + bs < mi_cols) {
+    BLOCK_SIZE h = get_subsize(bsize, PARTITION_HORZ_A);
+    BLOCK_SIZE v = get_subsize(bsize, PARTITION_VERT_A);
+    MODE_INFO m_right = mi[mi_row * mi_stride + mi_col + bs];
+    MODE_INFO m_below = mi[(mi_row + bs) * mi_stride + mi_col];
+    if (m.mbmi.sb_type == h) {
+      return m_below.mbmi.sb_type == h ? PARTITION_HORZ : PARTITION_HORZ_B;
+    } else if (m.mbmi.sb_type == v) {
+      return m_right.mbmi.sb_type == v ? PARTITION_VERT : PARTITION_VERT_B;
+    } else if (m_below.mbmi.sb_type == h) {
+      return PARTITION_HORZ_A;
+    } else if (m_right.mbmi.sb_type == v) {
+      return PARTITION_VERT_A;
+    } else {
+      return PARTITION_SPLIT;
+    }
+  }
+  return partition;
+}
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 static const TX_TYPE intra_mode_to_tx_type_context[INTRA_MODES] = {
   DCT_DCT,    // DC

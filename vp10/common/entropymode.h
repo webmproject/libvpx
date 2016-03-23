@@ -46,7 +46,11 @@ struct seg_counts {
 typedef struct frame_contexts {
   vpx_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
   vpx_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
+#if CONFIG_EXT_PARTITION_TYPES
+  vpx_prob partition_prob[PARTITION_CONTEXTS][EXT_PARTITION_TYPES - 1];
+#else
   vpx_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
+#endif
   vp10_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
   vpx_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
@@ -110,7 +114,11 @@ typedef struct FRAME_COUNTS {
   unsigned int kf_y_mode[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   unsigned int y_mode[BLOCK_SIZE_GROUPS][INTRA_MODES];
   unsigned int uv_mode[INTRA_MODES][INTRA_MODES];
+#if CONFIG_EXT_PARTITION_TYPES
+  unsigned int partition[PARTITION_CONTEXTS][EXT_PARTITION_TYPES];
+#else
   unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
+#endif
   vp10_coeff_count_model coef[TX_SIZES][PLANE_TYPES];
   unsigned int eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES]
                          [COEF_BANDS][COEFF_CONTEXTS];
@@ -191,6 +199,10 @@ extern const vpx_tree_index vp10_inter_compound_mode_tree
                             [TREE_SIZE(INTER_COMPOUND_MODES)];
 #endif  // CONFIG_EXT_INTER
 extern const vpx_tree_index vp10_partition_tree[TREE_SIZE(PARTITION_TYPES)];
+#if CONFIG_EXT_PARTITION_TYPES
+extern const vpx_tree_index vp10_ext_partition_tree
+                                [TREE_SIZE(EXT_PARTITION_TYPES)];
+#endif
 extern const vpx_tree_index vp10_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
 extern const vpx_tree_index vp10_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];

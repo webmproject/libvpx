@@ -148,6 +148,31 @@ static const vpx_prob default_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
   { 101,  21, 107, 181, 192, 103,  19,  67, 125 }   // y = tm
 };
 
+#if CONFIG_EXT_PARTITION_TYPES
+static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
+                                             [EXT_PARTITION_TYPES - 1] = {
+  // 8x8 -> 4x4
+  { 199, 122, 141, 128, 128, 128, 128 },  // a/l both not split
+  { 147,  63, 159, 128, 128, 128, 128 },  // a split, l not split
+  { 148, 133, 118, 128, 128, 128, 128 },  // l split, a not split
+  { 121, 104, 114, 128, 128, 128, 128 },  // a/l both split
+  // 16x16 -> 8x8
+  { 174,  73,  87, 128, 128, 128, 128 },  // a/l both not split
+  {  92,  41,  83, 128, 128, 128, 128 },  // a split, l not split
+  {  82,  99,  50, 128, 128, 128, 128 },  // l split, a not split
+  {  53,  39,  39, 128, 128, 128, 128 },  // a/l both split
+  // 32x32 -> 16x16
+  { 177,  58,  59, 128, 128, 128, 128 },  // a/l both not split
+  {  68,  26,  63, 128, 128, 128, 128 },  // a split, l not split
+  {  52,  79,  25, 128, 128, 128, 128 },  // l split, a not split
+  {  17,  14,  12, 128, 128, 128, 128 },  // a/l both split
+  // 64x64 -> 32x32
+  { 222,  34,  30, 128, 128, 128, 128 },  // a/l both not split
+  {  72,  16,  44, 128, 128, 128, 128 },  // a split, l not split
+  {  58,  32,  12, 128, 128, 128, 128 },  // l split, a not split
+  {  10,   7,   6, 128, 128, 128, 128 },  // a/l both split
+};
+#else
 static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
                                              [PARTITION_TYPES - 1] = {
   // 8x8 -> 4x4
@@ -171,6 +196,7 @@ static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
   {  58,  32,  12 },  // l split, a not split
   {  10,   7,   6 },  // a/l both split
 };
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_REF_MV
 static const vpx_prob default_newmv_prob[NEWMV_MODE_CONTEXTS] = {
@@ -291,6 +317,18 @@ const vpx_tree_index vp10_partition_tree[TREE_SIZE(PARTITION_TYPES)] = {
   -PARTITION_HORZ, 4,
   -PARTITION_VERT, -PARTITION_SPLIT
 };
+
+#if CONFIG_EXT_PARTITION_TYPES
+const vpx_tree_index vp10_ext_partition_tree[TREE_SIZE(EXT_PARTITION_TYPES)] = {
+  -PARTITION_NONE, 2,
+  6, 4,
+  8, -PARTITION_SPLIT,
+  -PARTITION_HORZ, 10,
+  -PARTITION_VERT, 12,
+  -PARTITION_HORZ_A, -PARTITION_HORZ_B,
+  -PARTITION_VERT_A, -PARTITION_VERT_B
+};
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 static const vpx_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
   9, 102, 187, 225
@@ -1349,9 +1387,17 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
     vpx_tree_merge_probs(vp10_intra_mode_tree, pre_fc->uv_mode_prob[i],
                          counts->uv_mode[i], fc->uv_mode_prob[i]);
 
+#if CONFIG_EXT_PARTITION_TYPES
+  vpx_tree_merge_probs(vp10_partition_tree, pre_fc->partition_prob[0],
+                       counts->partition[0], fc->partition_prob[0]);
+  for (i = 1; i < PARTITION_CONTEXTS; i++)
+    vpx_tree_merge_probs(vp10_ext_partition_tree, pre_fc->partition_prob[i],
+                         counts->partition[i], fc->partition_prob[i]);
+#else
   for (i = 0; i < PARTITION_CONTEXTS; i++)
     vpx_tree_merge_probs(vp10_partition_tree, pre_fc->partition_prob[i],
                          counts->partition[i], fc->partition_prob[i]);
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_INTRA
   for (i = 0; i < PLANE_TYPES; ++i) {

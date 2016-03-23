@@ -73,6 +73,9 @@ typedef struct {
   // search loop
   MV pred_mv[MAX_REF_FRAMES];
   INTERP_FILTER pred_interp_filter;
+#if CONFIG_EXT_PARTITION_TYPES
+  PARTITION_TYPE partition;
+#endif
 } PICK_MODE_CONTEXT;
 
 typedef struct PC_TREE {
@@ -82,6 +85,12 @@ typedef struct PC_TREE {
   PICK_MODE_CONTEXT none;
   PICK_MODE_CONTEXT horizontal[2];
   PICK_MODE_CONTEXT vertical[2];
+#if CONFIG_EXT_PARTITION_TYPES
+  PICK_MODE_CONTEXT horizontala[3];
+  PICK_MODE_CONTEXT horizontalb[3];
+  PICK_MODE_CONTEXT verticala[3];
+  PICK_MODE_CONTEXT verticalb[3];
+#endif
   union {
     struct PC_TREE *split[4];
     PICK_MODE_CONTEXT *leaf_split[4];
@@ -90,6 +99,12 @@ typedef struct PC_TREE {
   PICK_MODE_CONTEXT horizontal_supertx;
   PICK_MODE_CONTEXT vertical_supertx;
   PICK_MODE_CONTEXT split_supertx;
+#if CONFIG_EXT_PARTITION_TYPES
+  PICK_MODE_CONTEXT horizontala_supertx;
+  PICK_MODE_CONTEXT horizontalb_supertx;
+  PICK_MODE_CONTEXT verticala_supertx;
+  PICK_MODE_CONTEXT verticalb_supertx;
+#endif
 #endif
 } PC_TREE;
 

@@ -393,9 +393,17 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
 
     if (cpi->sf.partition_search_type != VAR_BASED_PARTITION ||
         cm->frame_type == KEY_FRAME) {
+#if CONFIG_EXT_PARTITION_TYPES
+      vp10_cost_tokens(cpi->partition_cost[0], cm->fc->partition_prob[0],
+                       vp10_partition_tree);
+      for (i = 1; i < PARTITION_CONTEXTS; ++i)
+        vp10_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
+                         vp10_ext_partition_tree);
+#else
       for (i = 0; i < PARTITION_CONTEXTS; ++i)
         vp10_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
                          vp10_partition_tree);
+#endif  // CONFIG_EXT_PARTITION_TYPES
     }
 
     fill_mode_costs(cpi);

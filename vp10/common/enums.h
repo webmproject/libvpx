@@ -69,6 +69,21 @@ typedef enum BITSTREAM_PROFILE {
 
 typedef uint8_t BLOCK_SIZE;
 
+#if CONFIG_EXT_PARTITION_TYPES
+typedef enum PARTITION_TYPE {
+  PARTITION_NONE,
+  PARTITION_HORZ,
+  PARTITION_VERT,
+  PARTITION_SPLIT,
+  PARTITION_HORZ_A,  // HORZ split and the left partition is split again
+  PARTITION_HORZ_B,  // HORZ split and the right partition is split again
+  PARTITION_VERT_A,  // VERT split and the top partition is split again
+  PARTITION_VERT_B,  // VERT split and the bottom partition is split again
+  EXT_PARTITION_TYPES,
+  PARTITION_TYPES = PARTITION_SPLIT + 1,
+  PARTITION_INVALID = EXT_PARTITION_TYPES
+} PARTITION_TYPE;
+#else
 typedef enum PARTITION_TYPE {
   PARTITION_NONE,
   PARTITION_HORZ,
@@ -77,10 +92,11 @@ typedef enum PARTITION_TYPE {
   PARTITION_TYPES,
   PARTITION_INVALID = PARTITION_TYPES
 } PARTITION_TYPE;
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 typedef char PARTITION_CONTEXT;
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
-#define PARTITION_CONTEXTS (4 * PARTITION_PLOFFSET)
+#define PARTITION_CONTEXTS   (4 * PARTITION_PLOFFSET)
 
 // block transform size
 typedef uint8_t TX_SIZE;

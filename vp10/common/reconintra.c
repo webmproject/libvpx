@@ -99,9 +99,40 @@ static const uint8_t *const orders[BLOCK_SIZES] = {
   orders_16x32, orders_32x16, orders_32x32,
   orders_32x64, orders_64x32, orders_64x64,
 };
+#if CONFIG_EXT_PARTITION_TYPES
+static const uint8_t orders_verta_32x32[4] = {
+  0, 2,
+  1, 2,
+};
+static const uint8_t orders_verta_16x16[16] = {
+  0,   2,  4,  6,
+  1,   2,  5,  6,
+  8,  10, 12, 14,
+  9,  10, 13, 14,
+};
+static const uint8_t orders_verta_8x8[64] = {
+  0,   2,  4,  6, 16, 18, 20, 22,
+  1,   2,  5,  6, 17, 18, 21, 22,
+  8,  10, 12, 14, 24, 26, 28, 30,
+  9,  10, 13, 14, 25, 26, 29, 30,
+  32, 34, 36, 38, 48, 50, 52, 54,
+  33, 34, 37, 38, 49, 50, 53, 54,
+  40, 42, 44, 46, 56, 58, 60, 62,
+  41, 42, 45, 46, 57, 58, 61, 62,
+};
+static const uint8_t *const orders_verta[BLOCK_SIZES] = {
+  orders_verta_8x8, orders_verta_8x8, orders_verta_8x8, orders_verta_8x8,
+  orders_8x16, orders_16x8, orders_verta_16x16,
+  orders_16x32, orders_32x16, orders_verta_32x32,
+  orders_32x64, orders_64x32, orders_64x64,
+};
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
                           int right_available,
+#if CONFIG_EXT_PARTITION_TYPES
+                          PARTITION_TYPE partition,
+#endif
                           TX_SIZE txsz, int y, int x, int ss_x) {
   const int wl = mi_width_log2_lookup[bsize];
   const int w = VPXMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
@@ -113,8 +144,14 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
 
   if (y == 0) {
     const int hl = mi_height_log2_lookup[bsize];
-    const uint8_t *order = orders[bsize];
+    const uint8_t *order;
     int my_order, tr_order;
+#if CONFIG_EXT_PARTITION_TYPES
+    if (partition == PARTITION_VERT_A)
+      order = orders_verta[bsize];
+    else
+#endif  // CONFIG_EXT_PARTITION_TYPES
+    order = orders[bsize];
 
     if (x + step < w)
       return 1;
@@ -122,9 +159,11 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
     mi_row = (mi_row & 7) >> hl;
     mi_col = (mi_col & 7) >> wl;
 
+    // If top row of coding unit
     if (mi_row == 0)
       return right_available;
 
+    // If rightmost column of coding unit
     if (((mi_col + 1) << wl) >= 8)
       return 0;
 
@@ -1346,8 +1385,14 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int right_available =
       mi_col + (1 << mi_width_log2_lookup[bsize]) < xd->tile.mi_col_end;
+#if CONFIG_EXT_PARTITION_TYPES
+  const PARTITION_TYPE partition = xd->mi[0]->mbmi.partition;
+#endif
   const int have_right = vp10_has_right(bsize, mi_row, mi_col,
                                         right_available,
+#if CONFIG_EXT_PARTITION_TYPES
+                                        partition,
+#endif
                                         tx_size, row_off, col_off,
                                         pd->subsampling_x);
   const int have_bottom = vp10_has_bottom(bsize, mi_row, mi_col,

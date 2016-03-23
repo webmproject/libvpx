@@ -499,6 +499,12 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   PARTITION_CONTEXT *const above_ctx = xd->above_seg_context + mi_col;
   PARTITION_CONTEXT *const left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
 
+#if CONFIG_EXT_PARTITION_TYPES
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
+  memset(above_ctx, partition_context_lookup[subsize].above, bw);
+  memset(left_ctx, partition_context_lookup[subsize].left, bh);
+#else
   // num_4x4_blocks_wide_lookup[bsize] / 2
   const int bs = num_8x8_blocks_wide_lookup[bsize];
 
@@ -507,7 +513,49 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   // bits of smaller block sizes to be zero.
   memset(above_ctx, partition_context_lookup[subsize].above, bs);
   memset(left_ctx, partition_context_lookup[subsize].left, bs);
+#endif  // CONFIG_EXT_PARTITION_TYPES
 }
+
+#if CONFIG_EXT_PARTITION_TYPES
+static INLINE void update_ext_partition_context(MACROBLOCKD *xd,
+                                                int mi_row, int mi_col,
+                                                BLOCK_SIZE subsize,
+                                                BLOCK_SIZE bsize,
+                                                PARTITION_TYPE partition) {
+  if (bsize >= BLOCK_8X8) {
+    const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
+    BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+    switch (partition) {
+      case PARTITION_SPLIT:
+        if (bsize != BLOCK_8X8)
+          break;
+      case PARTITION_NONE:
+      case PARTITION_HORZ:
+      case PARTITION_VERT:
+        update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+        break;
+      case PARTITION_HORZ_A:
+        update_partition_context(xd, mi_row, mi_col, bsize2, subsize);
+        update_partition_context(xd, mi_row + hbs, mi_col, subsize, subsize);
+        break;
+      case PARTITION_HORZ_B:
+        update_partition_context(xd, mi_row, mi_col, subsize, subsize);
+        update_partition_context(xd, mi_row + hbs, mi_col, bsize2, subsize);
+        break;
+      case PARTITION_VERT_A:
+        update_partition_context(xd, mi_row, mi_col, bsize2, subsize);
+        update_partition_context(xd, mi_row, mi_col + hbs, subsize, subsize);
+        break;
+      case PARTITION_VERT_B:
+        update_partition_context(xd, mi_row, mi_col, subsize, subsize);
+        update_partition_context(xd, mi_row, mi_col + hbs, bsize2, subsize);
+        break;
+      default:
+        assert(0 && "Invalid partition type");
+    }
+  }
+}
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 static INLINE int partition_plane_context(const MACROBLOCKD *xd,
                                           int mi_row, int mi_col,

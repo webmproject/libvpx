@@ -50,6 +50,10 @@ static const struct vp10_token switchable_interp_encodings[SWITCHABLE_FILTERS] =
 static const struct vp10_token switchable_interp_encodings[SWITCHABLE_FILTERS] =
   {{0, 1}, {2, 2}, {3, 2}};
 #endif  // CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
+#if CONFIG_EXT_PARTITION_TYPES
+static const struct vp10_token ext_partition_encodings[EXT_PARTITION_TYPES] =
+  {{0, 1}, {4, 3}, {12, 4}, {7, 3}, {10, 4}, {11, 4}, {26, 5}, {27, 5}};
+#endif
 static const struct vp10_token partition_encodings[PARTITION_TYPES] =
   {{0, 1}, {2, 2}, {6, 3}, {7, 3}};
 #if !CONFIG_REF_MV
@@ -1597,7 +1601,15 @@ static void write_partition(const VP10_COMMON *const cm,
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
   if (has_rows && has_cols) {
+#if CONFIG_EXT_PARTITION_TYPES
+    if (bsize <= BLOCK_8X8)
+      vp10_write_token(w, vp10_partition_tree, probs, &partition_encodings[p]);
+    else
+      vp10_write_token(w, vp10_ext_partition_tree, probs,
+                      &ext_partition_encodings[p]);
+#else
     vp10_write_token(w, vp10_partition_tree, probs, &partition_encodings[p]);
+#endif  // CONFIG_EXT_PARTITION_TYPES
   } else if (!has_rows && has_cols) {
     assert(p == PARTITION_SPLIT || p == PARTITION_HORZ);
     vpx_write(w, p == PARTITION_SPLIT, probs[1]);
@@ -1659,6 +1671,10 @@ static void write_modes_sb(VP10_COMP *cpi, const TileInfo *const tile,
   m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
 
   partition = partition_lookup[bsl][m->mbmi.sb_type];
+#if CONFIG_EXT_PARTITION_TYPES
+  partition = get_partition(cm->mi, cm->mi_stride, cm->mi_rows, cm->mi_cols,
+                            mi_row, mi_col, bsize);
+#endif
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
   subsize = get_subsize(bsize, partition);
 #if CONFIG_SUPERTX
@@ -1734,6 +1750,76 @@ static void write_modes_sb(VP10_COMP *cpi, const TileInfo *const tile,
         write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
                                mi_row + bs, mi_col + bs, subsize);
         break;
+#if CONFIG_EXT_PARTITION_TYPES
+      case PARTITION_HORZ_A:
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col);
+        break;
+      case PARTITION_HORZ_B:
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col + bs);
+        break;
+      case PARTITION_VERT_A:
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col + bs);
+        break;
+      case PARTITION_VERT_B:
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col + bs);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row + bs, mi_col + bs);
+        break;
+#endif  // CONFIG_EXT_PARTITION_TYPES
       default:
         assert(0);
     }
@@ -1767,9 +1853,13 @@ static void write_modes_sb(VP10_COMP *cpi, const TileInfo *const tile,
 #endif  // CONFIG_SUPERTX
 
   // update partition context
+#if CONFIG_EXT_PARTITION_TYPES
+  update_ext_partition_context(xd, mi_row, mi_col, subsize, bsize, partition);
+#else
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+#endif  // CONFIG_EXT_PARTITION_TYPES
 }
 
 static void write_modes(VP10_COMP *cpi, const TileInfo *const tile,
@@ -2538,9 +2628,18 @@ static size_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
     prob_diff_update(vp10_intra_mode_tree, fc->uv_mode_prob[i],
                      counts->uv_mode[i], INTRA_MODES, &header_bc);
 
+#if CONFIG_EXT_PARTITION_TYPES
+  prob_diff_update(vp10_partition_tree, fc->partition_prob[0],
+                   counts->partition[0], PARTITION_TYPES, &header_bc);
+  for (i = 1; i < PARTITION_CONTEXTS; ++i)
+    prob_diff_update(vp10_ext_partition_tree, fc->partition_prob[i],
+                     counts->partition[i], EXT_PARTITION_TYPES,
+                     &header_bc);
+#else
   for (i = 0; i < PARTITION_CONTEXTS; ++i)
     prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
                      counts->partition[i], PARTITION_TYPES, &header_bc);
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_INTRA
   for (i = 0; i < INTRA_FILTERS + 1; ++i)
