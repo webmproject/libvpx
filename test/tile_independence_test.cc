@@ -86,11 +86,11 @@ TEST_P(TileIndependenceTest, MD5Match) {
   const vpx_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 500;
-  cfg_.g_lag_in_frames = 25;
+  cfg_.g_lag_in_frames = 12;
   cfg_.rc_end_usage = VPX_VBR;
 
   libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 144,
-                                     timebase.den, timebase.num, 0, 30);
+                                     timebase.den, timebase.num, 0, 15);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   const char *md5_fw_str = md5_fw_order_.Get();
@@ -104,5 +104,5 @@ TEST_P(TileIndependenceTest, MD5Match) {
 
 VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1));
 
-VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1));
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 1, 1));
 }  // namespace
