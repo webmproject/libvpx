@@ -16,9 +16,6 @@
 #include "vpx_dsp/txfm_common.h"
 #include "vpx_ports/mem.h"
 
-
-#if CONFIG_VP9_HIGHBITDEPTH
-
 static INLINE void load_buffer_4x4(const int16_t *input, __m128i *in,
                                    int stride, int flipud, int fliplr) {
   const __m128i k__nonzero_bias_a = _mm_setr_epi32(0, 1, 1, 1);
@@ -193,13 +190,12 @@ void vp10_highbd_fht4x4_sse4_1(const int16_t *input, tran_low_t *output,
     case FLIPADST_ADST:
       vp10_highbd_fht4x4_c(input, output, stride, tx_type);
       break;
-    case DST_DST:
-    case DCT_DST:
-    case DST_DCT:
-    case DST_ADST:
-    case ADST_DST:
-    case DST_FLIPADST:
-    case FLIPADST_DST:
+    case V_DCT:
+    case H_DCT:
+    case V_ADST:
+    case H_ADST:
+    case V_FLIPADST:
+    case H_FLIPADST:
       vp10_highbd_fht4x4_c(input, output, stride, tx_type);
       break;
 #endif  // CONFIG_EXT_TX
@@ -207,5 +203,3 @@ void vp10_highbd_fht4x4_sse4_1(const int16_t *input, tran_low_t *output,
       assert(0);
   }
 }
-
-#endif  // CONFIG_VP9_HIGHBITDEPTH
