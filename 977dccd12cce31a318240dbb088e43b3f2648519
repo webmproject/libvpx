@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc0f1e77_be2d1b90",
+        "filename": "vp10/vp10cx.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-03-23T18:10:08Z",
+      "side": 1,
+      "message": "Better to be consistent with other hbd functions. Add\nifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes) here, and remove config flag in the file.\n\nYou can check in this patch, and fix it later in your next patch.",
+      "revId": "977dccd12cce31a318240dbb088e43b3f2648519",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
