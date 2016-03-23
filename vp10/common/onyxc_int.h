@@ -283,6 +283,18 @@ typedef struct VP10Common {
   unsigned int  frame_context_idx; /* Context to use/update */
   FRAME_COUNTS counts;
 
+#if CONFIG_ENTROPY
+  // The initial probabilities for a frame, before any subframe backward update,
+  // and after forward update.
+  vp10_coeff_probs_model starting_coef_probs[TX_SIZES][PLANE_TYPES];
+  // Number of subframe backward updates already done
+  uint8_t coef_probs_update_idx;
+  // Signal if the backward update is subframe or end-of-frame
+  uint8_t partial_prob_update;
+  // Frame level flag to turn on/off subframe backward update
+  uint8_t do_subframe_update;
+#endif  // CONFIG_ENTROPY
+
   unsigned int current_video_frame;
   BITSTREAM_PROFILE profile;
 

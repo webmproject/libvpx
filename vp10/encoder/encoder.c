@@ -3335,8 +3335,13 @@ static void full_to_model_count(unsigned int *model_count,
   model_count[EOB_MODEL_TOKEN] = full_count[EOB_TOKEN];
 }
 
+#if CONFIG_ENTROPY
+void full_to_model_counts(vp10_coeff_count_model *model_count,
+                                 vp10_coeff_count *full_count) {
+#else
 static void full_to_model_counts(vp10_coeff_count_model *model_count,
                                  vp10_coeff_count *full_count) {
+#endif  // CONFIG_ENTROPY
   int i, j, k, l;
 
   for (i = 0; i < PLANE_TYPES; ++i)
@@ -3666,6 +3671,16 @@ static void encode_without_recode_loop(VP10_COMP *cpi) {
 
   setup_frame(cpi);
 
+#if CONFIG_ENTROPY
+  cm->do_subframe_update =
+      cm->log2_tile_cols == 0 && cm->log2_tile_rows == 0;
+  vp10_copy(cm->starting_coef_probs, cm->fc->coef_probs);
+  vp10_copy(cpi->subframe_stats.enc_starting_coef_probs,
+            cm->fc->coef_probs);
+  cm->coef_probs_update_idx = 0;
+  vp10_copy(cpi->subframe_stats.coef_probs_buf[0], cm->fc->coef_probs);
+#endif  // CONFIG_ENTROPY
+
   suppress_active_map(cpi);
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
@@ -3767,6 +3782,44 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
 
     if (loop_count == 0)
       setup_frame(cpi);
+
+#if CONFIG_ENTROPY
+    // Base q-index may have changed, so we need to assign proper default coef
+    // probs before every iteration.
+    if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
+      int i;
+      vp10_default_coef_probs(cm);
+      if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode ||
+          cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL) {
+        for (i = 0; i < FRAME_CONTEXTS; ++i)
+          cm->frame_contexts[i] = *cm->fc;
+      } else if (cm->reset_frame_context == RESET_FRAME_CONTEXT_CURRENT) {
+        cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
+      }
+    }
+#endif  // CONFIG_ENTROPY
+
+#if CONFIG_ENTROPY
+    cm->do_subframe_update =
+        cm->log2_tile_cols == 0 && cm->log2_tile_rows == 0;
+    if (loop_count == 0 || frame_is_intra_only(cm) ||
+        cm->error_resilient_mode) {
+      vp10_copy(cm->starting_coef_probs, cm->fc->coef_probs);
+      vp10_copy(cpi->subframe_stats.enc_starting_coef_probs,
+                cm->fc->coef_probs);
+    } else {
+      if (cm->do_subframe_update) {
+        vp10_copy(cm->fc->coef_probs,
+                  cpi->subframe_stats.enc_starting_coef_probs);
+        vp10_copy(cm->starting_coef_probs,
+                  cpi->subframe_stats.enc_starting_coef_probs);
+        vp10_zero(cpi->subframe_stats.coef_counts_buf);
+        vp10_zero(cpi->subframe_stats.eob_counts_buf);
+      }
+    }
+    cm->coef_probs_update_idx = 0;
+    vp10_copy(cpi->subframe_stats.coef_probs_buf[0], cm->fc->coef_probs);
+#endif  // CONFIG_ENTROPY
 
     // Variance adaptive and in frame q adjustment experiments are mutually
     // exclusive.
@@ -4283,6 +4336,9 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
                          cpi->td.rd_counts.coef_counts[t]);
 
   if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
+#if CONFIG_ENTROPY
+    cm->partial_prob_update = 0;
+#endif  // CONFIG_ENTROPY
     vp10_adapt_coef_probs(cm);
     vp10_adapt_intra_frame_probs(cm);
   }

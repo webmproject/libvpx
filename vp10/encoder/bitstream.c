@@ -2052,10 +2052,250 @@ static void update_coef_probs_common(vpx_writer* const bc, VP10_COMP *cpi,
   }
 }
 
+#if CONFIG_ENTROPY
+// Calculate the token counts between subsequent subframe updates.
+static void get_coef_counts_diff(VP10_COMP *cpi, int index,
+                                 vp10_coeff_count
+                                 coef_counts[TX_SIZES][PLANE_TYPES],
+                                 unsigned int eob_counts[TX_SIZES]
+                                 [PLANE_TYPES][REF_TYPES][COEF_BANDS]
+                                 [COEFF_CONTEXTS]) {
+  int i, j, k, l, m, tx_size, val;
+  const int max_idx = cpi->common.coef_probs_update_idx;
+  const TX_MODE tx_mode = cpi->common.tx_mode;
+  const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
+  const SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
+
+  assert(max_idx < COEF_PROBS_BUFS);
+
+  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+    for (i = 0; i < PLANE_TYPES; ++i)
+      for (j = 0; j < REF_TYPES; ++j)
+        for (k = 0; k < COEF_BANDS; ++k)
+          for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
+            if (index == max_idx) {
+              val = cpi->common.counts.eob_branch[tx_size][i][j][k][l] -
+                  subframe_stats->eob_counts_buf[max_idx][tx_size][i][j][k][l];
+            } else {
+              val = subframe_stats->eob_counts_buf[index + 1][tx_size]
+                                                             [i][j][k][l] -
+                  subframe_stats->eob_counts_buf[index][tx_size][i][j][k][l];
+            }
+            assert(val >= 0);
+            eob_counts[tx_size][i][j][k][l] = val;
+
+            for (m = 0; m < ENTROPY_TOKENS; ++m) {
+              if (index == max_idx) {
+                val = cpi->td.rd_counts.coef_counts[tx_size][i][j][k][l][m] -
+                    subframe_stats->coef_counts_buf[max_idx][tx_size]
+                                                            [i][j][k][l][m];
+              } else {
+                val = subframe_stats->coef_counts_buf[index + 1]
+                                                     [tx_size][i][j][k][l][m] -
+                      subframe_stats->coef_counts_buf[index][tx_size]
+                                                            [i][j][k][l][m];
+              }
+              assert(val >= 0);
+              coef_counts[tx_size][i][j][k][l][m] = val;
+            }
+          }
+}
+
+static void update_coef_probs_subframe(vpx_writer* const bc, VP10_COMP *cpi,
+                                       TX_SIZE tx_size,
+                                       vp10_coeff_stats
+                                       branch_ct[COEF_PROBS_BUFS][TX_SIZES]
+                                                                 [PLANE_TYPES],
+                                     vp10_coeff_probs_model *new_coef_probs) {
+  vp10_coeff_probs_model *old_coef_probs = cpi->common.fc->coef_probs[tx_size];
+  const vpx_prob upd = DIFF_UPDATE_PROB;
+  const int entropy_nodes_update = UNCONSTRAINED_NODES;
+  int i, j, k, l, t;
+  int stepsize = cpi->sf.coeff_prob_appx_step;
+  const int max_idx = cpi->common.coef_probs_update_idx;
+  int idx;
+  unsigned int this_branch_ct[ENTROPY_NODES][COEF_PROBS_BUFS][2];
+
+  switch (cpi->sf.use_fast_coef_updates) {
+    case TWO_LOOP: {
+      /* dry run to see if there is any update at all needed */
+      int savings = 0;
+      int update[2] = {0, 0};
+      for (i = 0; i < PLANE_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (k = 0; k < COEF_BANDS; ++k) {
+            for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
+              for (t = 0; t < ENTROPY_NODES; ++t) {
+                for (idx = 0; idx <= max_idx; ++idx) {
+                  memcpy(this_branch_ct[t][idx],
+                         branch_ct[idx][tx_size][i][j][k][l][t],
+                         2 * sizeof(this_branch_ct[t][idx][0]));
+                }
+              }
+              for (t = 0; t < entropy_nodes_update; ++t) {
+                vpx_prob newp = new_coef_probs[i][j][k][l][t];
+                const vpx_prob oldp = old_coef_probs[i][j][k][l][t];
+                int s, u = 0;
+
+                if (t == PIVOT_NODE)
+                  s = vp10_prob_update_search_model_subframe(this_branch_ct,
+                                      old_coef_probs[i][j][k][l], &newp, upd,
+                                      stepsize, max_idx);
+                else
+                  s = vp10_prob_update_search_subframe(this_branch_ct[t],
+                                                       oldp, &newp, upd,
+                                                       max_idx);
+                if (s > 0 && newp != oldp)
+                  u = 1;
+                if (u)
+                  savings += s - (int)(vp10_cost_zero(upd));
+                else
+                  savings -= (int)(vp10_cost_zero(upd));
+                update[u]++;
+              }
+            }
+          }
+        }
+      }
+
+      /* Is coef updated at all */
+      if (update[1] == 0 || savings < 0) {
+        vpx_write_bit(bc, 0);
+        return;
+      }
+      vpx_write_bit(bc, 1);
+      for (i = 0; i < PLANE_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (k = 0; k < COEF_BANDS; ++k) {
+            for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
+              for (t = 0; t < ENTROPY_NODES; ++t) {
+                for (idx = 0; idx <= max_idx; ++idx) {
+                  memcpy(this_branch_ct[t][idx],
+                         branch_ct[idx][tx_size][i][j][k][l][t],
+                         2 * sizeof(this_branch_ct[t][idx][0]));
+                }
+              }
+              for (t = 0; t < entropy_nodes_update; ++t) {
+                vpx_prob newp = new_coef_probs[i][j][k][l][t];
+                vpx_prob *oldp = old_coef_probs[i][j][k][l] + t;
+                const vpx_prob upd = DIFF_UPDATE_PROB;
+                int s;
+                int u = 0;
+
+                if (t == PIVOT_NODE)
+                  s = vp10_prob_update_search_model_subframe(this_branch_ct,
+                                     old_coef_probs[i][j][k][l], &newp, upd,
+                                     stepsize, max_idx);
+                else
+                  s = vp10_prob_update_search_subframe(this_branch_ct[t],
+                                                       *oldp, &newp, upd,
+                                                       max_idx);
+                if (s > 0 && newp != *oldp)
+                  u = 1;
+                vpx_write(bc, u, upd);
+                if (u) {
+                  /* send/use new probability */
+                  vp10_write_prob_diff_update(bc, newp, *oldp);
+                  *oldp = newp;
+                }
+              }
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    case ONE_LOOP_REDUCED: {
+      int updates = 0;
+      int noupdates_before_first = 0;
+      for (i = 0; i < PLANE_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (k = 0; k < COEF_BANDS; ++k) {
+            for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
+              for (t = 0; t < ENTROPY_NODES; ++t) {
+                for (idx = 0; idx <= max_idx; ++idx) {
+                  memcpy(this_branch_ct[t][idx],
+                         branch_ct[idx][tx_size][i][j][k][l][t],
+                         2 * sizeof(this_branch_ct[t][idx][0]));
+                }
+              }
+              for (t = 0; t < entropy_nodes_update; ++t) {
+                vpx_prob newp = new_coef_probs[i][j][k][l][t];
+                vpx_prob *oldp = old_coef_probs[i][j][k][l] + t;
+                int s;
+                int u = 0;
+
+                if (t == PIVOT_NODE)
+                  s = vp10_prob_update_search_model_subframe(this_branch_ct,
+                                      old_coef_probs[i][j][k][l], &newp, upd,
+                                      stepsize, max_idx);
+                else
+                  s = vp10_prob_update_search_subframe(this_branch_ct[t],
+                                                       *oldp, &newp, upd,
+                                                       max_idx);
+                if (s > 0 && newp != *oldp)
+                  u = 1;
+                updates += u;
+                if (u == 0 && updates == 0) {
+                  noupdates_before_first++;
+                  continue;
+                }
+                if (u == 1 && updates == 1) {
+                  int v;
+                  // first update
+                  vpx_write_bit(bc, 1);
+                  for (v = 0; v < noupdates_before_first; ++v)
+                    vpx_write(bc, 0, upd);
+                }
+                vpx_write(bc, u, upd);
+                if (u) {
+                  /* send/use new probability */
+                  vp10_write_prob_diff_update(bc, newp, *oldp);
+                  *oldp = newp;
+                }
+              }
+            }
+          }
+        }
+      }
+      if (updates == 0) {
+        vpx_write_bit(bc, 0);  // no updates
+      }
+      return;
+    }
+    default:
+      assert(0);
+  }
+}
+#endif  // CONFIG_ENTROPY
+
 static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
+#if CONFIG_ENTROPY
+  VP10_COMMON *cm = &cpi->common;
+  SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
+  unsigned int eob_counts_copy[TX_SIZES][PLANE_TYPES][REF_TYPES]
+                              [COEF_BANDS][COEFF_CONTEXTS];
+  int i;
+  vp10_coeff_count coef_counts[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
+  unsigned int eob_counts[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES]
+                         [REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
+  vp10_coeff_stats branch_ct[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
+  vp10_coeff_probs_model dummy_frame_coef_probs[PLANE_TYPES];
+
+  if (cm->do_subframe_update &&
+      cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
+    vp10_copy(cpi->common.fc->coef_probs,
+              subframe_stats->enc_starting_coef_probs);
+    for (i = 0; i <= cpi->common.coef_probs_update_idx; ++i) {
+      get_coef_counts_diff(cpi, i, coef_counts[i], eob_counts[i]);
+    }
+  }
+#endif  // CONFIG_ENTROPY
+
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size) {
     vp10_coeff_stats frame_branch_ct[PLANE_TYPES];
     vp10_coeff_probs_model frame_coef_probs[PLANE_TYPES];
@@ -2063,12 +2303,59 @@ static void update_coef_probs(VP10_COMP *cpi, vpx_writer* w) {
         (tx_size >= TX_16X16 && cpi->sf.tx_size_search_method == USE_TX_8X8)) {
       vpx_write_bit(w, 0);
     } else {
-      build_tree_distribution(cpi, tx_size, frame_branch_ct,
-                              frame_coef_probs);
-      update_coef_probs_common(w, cpi, tx_size, frame_branch_ct,
-                               frame_coef_probs);
+#if CONFIG_ENTROPY
+      if (cm->do_subframe_update &&
+          cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
+        unsigned int eob_counts_copy[PLANE_TYPES][REF_TYPES]
+                                                 [COEF_BANDS][COEFF_CONTEXTS];
+        vp10_coeff_count coef_counts_copy[PLANE_TYPES];
+        vp10_copy(eob_counts_copy, cpi->common.counts.eob_branch[tx_size]);
+        vp10_copy(coef_counts_copy, cpi->td.rd_counts.coef_counts[tx_size]);
+        build_tree_distribution(cpi, tx_size, frame_branch_ct,
+                                frame_coef_probs);
+        for (i = 0; i <= cpi->common.coef_probs_update_idx; ++i) {
+          vp10_copy(cpi->common.counts.eob_branch[tx_size],
+                    eob_counts[i][tx_size]);
+          vp10_copy(cpi->td.rd_counts.coef_counts[tx_size],
+                    coef_counts[i][tx_size]);
+          build_tree_distribution(cpi, tx_size, branch_ct[i][tx_size],
+                                  dummy_frame_coef_probs);
+        }
+        vp10_copy(cpi->common.counts.eob_branch[tx_size], eob_counts_copy);
+        vp10_copy(cpi->td.rd_counts.coef_counts[tx_size], coef_counts_copy);
+
+        update_coef_probs_subframe(w, cpi, tx_size, branch_ct,
+                                   frame_coef_probs);
+      } else {
+#endif  // CONFIG_ENTROPY
+        build_tree_distribution(cpi, tx_size, frame_branch_ct,
+                                frame_coef_probs);
+        update_coef_probs_common(w, cpi, tx_size, frame_branch_ct,
+                                 frame_coef_probs);
+#if CONFIG_ENTROPY
+      }
+#endif  // CONFIG_ENTROPY
     }
   }
+
+#if CONFIG_ENTROPY
+  vp10_copy(cm->starting_coef_probs, cm->fc->coef_probs);
+  vp10_copy(subframe_stats->coef_probs_buf[0], cm->fc->coef_probs);
+  if (cm->do_subframe_update &&
+      cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
+    vp10_copy(eob_counts_copy, cm->counts.eob_branch);
+    for (i = 1; i <= cpi->common.coef_probs_update_idx; ++i) {
+      for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+        full_to_model_counts(cm->counts.coef[tx_size],
+                             subframe_stats->coef_counts_buf[i][tx_size]);
+      vp10_copy(cm->counts.eob_branch, subframe_stats->eob_counts_buf[i]);
+      vp10_partial_adapt_probs(cm, 0, 0);
+      vp10_copy(subframe_stats->coef_probs_buf[i], cm->fc->coef_probs);
+    }
+    vp10_copy(cm->fc->coef_probs, subframe_stats->coef_probs_buf[0]);
+    vp10_copy(cm->counts.eob_branch, eob_counts_copy);
+  }
+#endif  // CONFIG_ENTROPY
 }
 
 #if CONFIG_LOOP_RESTORATION
