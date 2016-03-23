@@ -133,9 +133,9 @@ typedef struct frame_contexts {
 #if CONFIG_GLOBAL_MOTION
   vp9_prob global_motion_types_prob[GLOBAL_MOTION_TYPES - 1];
 #endif  // CONFIG_GLOBAL_MOTION
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
   vp9_prob dq_profile_prob[QUANT_PROFILES - 1];
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -214,9 +214,9 @@ typedef struct {
 #if CONFIG_GLOBAL_MOTION
   unsigned int global_motion_types[GLOBAL_MOTION_TYPES];
 #endif  // CONFIG_GLOBAL_MOTION
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
   unsigned int dq_profile[QUANT_PROFILES];
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
@@ -262,9 +262,9 @@ extern const vp9_tree_index vp9_inter_compound_mode_tree
                                 [TREE_SIZE(INTER_COMPOUND_MODES)];
 #endif  // CONFIG_NEW_INTER
 
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 extern const vp9_tree_index vp9_dq_profile_tree[TREE_SIZE(QUANT_PROFILES)];
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 #if CONFIG_ROW_TILE

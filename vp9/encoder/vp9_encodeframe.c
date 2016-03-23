@@ -1928,16 +1928,16 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
         cm->counts.supertx
             [partition_supertx_context_lookup[partition]][supertx_size][1]++;
         cm->counts.supertx_size[supertx_size]++;
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
         if (cm->base_qindex > Q_THRESHOLD_MIN &&
             cm->base_qindex < Q_THRESHOLD_MAX &&
-            switchable_dq_profile_used(bsize) &&
             !xd->mi[0].mbmi.skip &&
+            xd->mi[0].mbmi.send_dq_bit &&
             !vp9_segfeature_active(&cm->seg, xd->mi[0].mbmi.segment_id,
                                    SEG_LVL_SKIP)) {
           ++cm->counts.dq_profile[xd->mi[0].mbmi.dq_off_index];
         }
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 #if CONFIG_EXT_TX
 #if CONFIG_WAVELETS
         if (!xd->mi[0].mbmi.skip)
@@ -2957,7 +2957,7 @@ static void rd_test_partition3(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
 #if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                                     dq_index,
-#endif
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                                     supertx_size, pc_tree);
           }
         }
@@ -3362,7 +3362,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
 #if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                                     dq_index,
-#endif
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                                     supertx_size, pc_tree);
           }
         }
@@ -3631,7 +3631,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
 #if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                       &dq_index,
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
                       pc_tree);
 
         tmp_rate += vp9_cost_bit(
@@ -4921,12 +4921,12 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   }
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
   // This is not strictly required, but is a good practice.
   // If you remove this, the assert in vp9_bitstream.c needs to be removed also.
   if (mbmi->skip)
     mbmi->dq_off_index = 0;
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 
 #if CONFIG_INTRABC
   if (frame_is_intra_only(cm) && output_enabled && bsize >= BLOCK_8X8) {
@@ -4993,10 +4993,10 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       ++cm->counts.ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
     }
 #endif  // CONFIG_EXT_TX
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
     if (cm->base_qindex > Q_THRESHOLD_MIN &&
         cm->base_qindex < Q_THRESHOLD_MAX &&
-        switchable_dq_profile_used(mbmi->sb_type) &&
+        mbmi->send_dq_bit &&
 #if CONFIG_COPY_MODE
         (frame_is_intra_only(cm) || mbmi->copy_mode == NOREF) &&
 #endif  // CONFIG_COPY_MODE
@@ -5004,7 +5004,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       ++cm->counts.dq_profile[mbmi->dq_off_index];
     }
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 #if CONFIG_TX_SKIP
     if (bsize >= BLOCK_8X8) {
       int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
@@ -6080,6 +6080,6 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
 #endif  // CONFIG_EXT_TX
 #if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
   *dq_index = 0;
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 &&
 }
 #endif  // CONFIG_SUPERTX

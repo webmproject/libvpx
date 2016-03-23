@@ -944,7 +944,7 @@ const vp9_tree_index vp9_copy_mode_tree[TREE_SIZE(COPY_MODE_COUNT - 1)] = {
 };
 #endif  // CONFIG_COPY_MODE
 
-#if CONFIG_NEW_QUANT
+#if CONFIG_NEW_QUANT && !Q_CTX_BASED_PROFILES
 #if QUANT_PROFILES == 2
 const vp9_tree_index vp9_dq_profile_tree[TREE_SIZE(QUANT_PROFILES)] = {
   -0, -1
@@ -962,7 +962,7 @@ static const vp9_prob default_dq_profile_prob[QUANT_PROFILES - 1] = {
   240, 128
 };
 #endif  // QUANT_PROFILES != 2 and QUANT_PROFILES != 3
-#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_NEW_QUANT && !Q_CTX_BASED_PROFILES
 
 #if CONFIG_TX64X64
 void tx_counts_to_branch_counts_64x64(const unsigned int *tx_count_64x64p,
@@ -1116,9 +1116,9 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_WEDGE_PARTITION
   vp9_copy(fc->wedge_interinter_prob, default_wedge_interinter_prob);
 #endif  // CONFIG_WEDGE_PARTITION
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
   vp9_copy(fc->dq_profile_prob, default_dq_profile_prob);
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -1347,10 +1347,10 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                    counts->uv_palette_enabled[i]);
 #endif  // CONFIG_PALETTE
 
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
   adapt_probs(vp9_dq_profile_tree, pre_fc->dq_profile_prob,
               counts->dq_profile, fc->dq_profile_prob);
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

@@ -30,9 +30,9 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
 #endif
 #endif
                         int mi_row, int mi_col, vp9_reader *r);
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 int vp9_read_dq_profile(VP9_COMMON *cm, vp9_reader *r);
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 
 #ifdef __cplusplus
 }  // extern "C"

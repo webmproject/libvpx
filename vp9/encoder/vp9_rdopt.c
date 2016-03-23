@@ -2388,13 +2388,17 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 #if CONFIG_NEW_QUANT
   mic->mbmi.dq_off_index = 0;
-#if QUANT_PROFILES > 1
+  mic->mbmi.send_dq_bit = 0;
+#if QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
   if (cpi->common.base_qindex > Q_THRESHOLD_MIN &&
       cpi->common.base_qindex < Q_THRESHOLD_MAX &&
-      !xd->lossless && switchable_dq_profile_used(bsize)) {
+      !xd->lossless &&
+      switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                 bsize)) {
     int64_t local_tx_cache[TX_MODES];
     int i;
     int best_dq = -1;
+    mic->mbmi.send_dq_bit = 1;
     for (i = 0; i < QUANT_PROFILES; i++) {
       mic->mbmi.dq_off_index = i;
       super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
@@ -2412,7 +2416,22 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate_tokenonly = this_rate_tokenonly;
     *distortion = this_distortion;
   }
-#endif  // QUANT_PROFILES > 1
+#endif  // QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
+
+#if QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
+  if (switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                 bsize) == 2) {
+    mic->mbmi.dq_off_index = 1;
+#if QUANT_PROFILES > 2
+  } else if (switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                        bsize) == 1) {
+    mic->mbmi.dq_off_index = 2;
+#endif  // QUANT_PROFILES > 2
+  } else {
+    mic->mbmi.dq_off_index = 0;
+  }
+#endif  // QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
+
 #endif  // CONFIG_NEW_QUANT
 
 #if CONFIG_TX_SKIP
@@ -6094,17 +6113,20 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_NEW_QUANT
     mbmi->dq_off_index = 0;
-#if QUANT_PROFILES > 1
+    mbmi->send_dq_bit = 0;
+#if QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
     // Choose the best dq_index
     if (cm->base_qindex > Q_THRESHOLD_MIN &&
         cm->base_qindex < Q_THRESHOLD_MAX &&
-        !xd->lossless && switchable_dq_profile_used(bsize)) {
+        !xd->lossless &&
+        switchable_dq_profile_used(get_entropy_context_sb(xd, bsize), bsize)) {
       int64_t rdcost_dq;
       int rate_y_dq;
       int64_t distortion_y_dq;
       int dummy;
       int64_t best_rdcost_dq = INT64_MAX;
       int best_dq = -1;
+      mbmi->send_dq_bit = 1;
       for (i = 0; i < QUANT_PROFILES; i++) {
         mbmi->dq_off_index = i;
         super_block_yrd(cpi, x, &rate_y_dq, &distortion_y_dq, &dummy, psse,
@@ -6122,7 +6144,22 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
       mbmi->dq_off_index = best_dq;
     }
-#endif  // QUANT_PROFILES > 1
+#endif  // QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
+
+#if QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
+  if (switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                 bsize) == 2) {
+    mbmi->dq_off_index = 1;
+#if QUANT_PROFILES > 2
+  } else if (switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                        bsize) == 1) {
+    mbmi->dq_off_index = 2;
+#endif  // QUANT_PROFILES > 2
+  } else {
+    mbmi->dq_off_index = 0;
+  }
+#endif  // QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
+
 #endif  // CONFIG_NEW_QUANT
 
     // Y cost and distortion
@@ -7450,16 +7487,20 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_NEW_QUANT
       mbmi->dq_off_index = 0;
-#if QUANT_PROFILES > 1
+      mbmi->send_dq_bit = 0;
+#if QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
       if (cm->base_qindex > Q_THRESHOLD_MIN &&
           cm->base_qindex < Q_THRESHOLD_MAX &&
-          !xd->lossless && switchable_dq_profile_used(bsize)) {
+          !xd->lossless &&
+          switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                     bsize)) {
         int64_t rdcost_dq;
         int rate_y_dq;
         int64_t distortion_y_dq;
         int dummy;
         int64_t best_rdcost_dq = INT64_MAX;
         int best_dq = -1;
+        mbmi->send_dq_bit = 1;
         for (i = 0; i < QUANT_PROFILES; i++) {
           mbmi->dq_off_index = i;
           super_block_yrd(cpi, x, &rate_y_dq, &distortion_y_dq, &dummy,
@@ -7476,7 +7517,22 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         }
         mbmi->dq_off_index = best_dq;
       }
-#endif  // QUANT_PROFILES > 1
+#endif  // QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
+
+#if QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
+      if (switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                     bsize) == 2) {
+        mbmi->dq_off_index = 1;
+#if QUANT_PROFILES > 2
+      } else if (switchable_dq_profile_used(get_entropy_context_sb(xd, bsize),
+                                            bsize) == 1) {
+        mbmi->dq_off_index = 2;
+#endif  // QUANT_PROFILES > 2
+      } else {
+        mbmi->dq_off_index = 0;
+      }
+#endif  // QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
+
 #endif  // CONFIG_NEW_QUANT
 
     } else {
@@ -7934,13 +7990,17 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->tx_skip[0] = 0;
     mbmi->tx_skip[1] = 0;
 #endif  // CONFIG_TX_SKIP
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
     if (!(cm->base_qindex > Q_THRESHOLD_MIN &&
           cm->base_qindex < Q_THRESHOLD_MAX &&
-          switchable_dq_profile_used(mbmi->sb_type) &&
+          switchable_dq_profile_used(get_entropy_context_sb(xd, mbmi->sb_type),
+                                     mbmi->sb_type) &&
           !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)))
       mbmi->dq_off_index = 0;
-#endif
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
+    mbmi->dq_off_index = 0;
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && Q_CTX_BASED_PROFILES
     x->skip = 0;
     set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
     for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -8048,10 +8108,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     rate2 += rate_copy_mode;
     this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
     if (this_skip2 && mbmi->dq_off_index > 0)
       mbmi->dq_off_index = 0;
-#endif
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 
     if (this_rd < best_rd) {
       rd_cost->rate = rate2;

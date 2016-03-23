@@ -1105,7 +1105,8 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
 #endif
         vp9_highbd_quantize_fp_nuq(coeff, 16, x->skip_block,
                                    p->quant_fp, pd->dequant,
-                                   (const cumbins_type_nuq *)p->cumbins_nuq,
+                                   (const cumbins_type_nuq *)
+                                       p->cumbins_nuq[dq],
                                    (const dequant_val_type_nuq *)
                                        pd->dequant_val_nuq[dq],
                                    qcoeff, dqcoeff, eob,
