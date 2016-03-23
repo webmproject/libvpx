@@ -31,7 +31,7 @@ static int8_t cos_bit[12] = {14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14};
 static int8_t range_bit[12] = {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32};
 
 TEST(vp10_fwd_txfm1d, round_shift) {
-  EXPECT_EQ(round_shift(7, 1), 3);
+  EXPECT_EQ(round_shift(7, 1), 4);
   EXPECT_EQ(round_shift(-7, 1), -3);
 
   EXPECT_EQ(round_shift(7, 2), 2);
@@ -44,17 +44,6 @@ TEST(vp10_fwd_txfm1d, round_shift) {
 TEST(vp10_fwd_txfm1d, get_max_bit) {
   int max_bit = get_max_bit(8);
   EXPECT_EQ(max_bit, 3);
-}
-
-TEST(vp10_fwd_txfm1d, half_btf) {
-  int32_t max = (1 << 15) - 1;
-  int32_t w0 = max;
-  int32_t in0 = max;
-  int32_t w1 = max;
-  int32_t in1 = max;
-  int32_t result_32 = half_btf(w0, in0, w1, in1, 0);
-  int64_t result_64 = (int64_t)w0 * (int64_t)in0 + (int64_t)w1 * (int64_t)in1;
-  EXPECT_EQ(result_32, result_64);
 }
 
 TEST(vp10_fwd_txfm1d, cospi_arr) {
