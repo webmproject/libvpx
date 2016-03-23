@@ -172,6 +172,41 @@ static void fadst4_sse2(__m128i *in) {
   transpose_4x4(in);
 }
 
+#if CONFIG_EXT_TX
+static void fidtx4_sse2(__m128i *in) {
+  const __m128i k__zero_epi16 = _mm_set1_epi16((int16_t)0);
+  const __m128i k__sqrt2_epi16 = _mm_set1_epi16((int16_t)Sqrt2);
+  const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
+
+  __m128i v0, v1, v2, v3;
+  __m128i u0, u1, u2, u3;
+
+  v0 = _mm_unpacklo_epi16(in[0], k__zero_epi16);
+  v1 = _mm_unpacklo_epi16(in[1], k__zero_epi16);
+  v2 = _mm_unpacklo_epi16(in[2], k__zero_epi16);
+  v3 = _mm_unpacklo_epi16(in[3], k__zero_epi16);
+
+  u0 = _mm_madd_epi16(v0, k__sqrt2_epi16);
+  u1 = _mm_madd_epi16(v1, k__sqrt2_epi16);
+  u2 = _mm_madd_epi16(v2, k__sqrt2_epi16);
+  u3 = _mm_madd_epi16(v3, k__sqrt2_epi16);
+
+  v0 = _mm_add_epi32(u0, k__DCT_CONST_ROUNDING);
+  v1 = _mm_add_epi32(u1, k__DCT_CONST_ROUNDING);
+  v2 = _mm_add_epi32(u2, k__DCT_CONST_ROUNDING);
+  v3 = _mm_add_epi32(u3, k__DCT_CONST_ROUNDING);
+
+  u0 = _mm_srai_epi32(v0, DCT_CONST_BITS);
+  u1 = _mm_srai_epi32(v1, DCT_CONST_BITS);
+  u2 = _mm_srai_epi32(v2, DCT_CONST_BITS);
+  u3 = _mm_srai_epi32(v3, DCT_CONST_BITS);
+
+  in[0] = _mm_packs_epi32(u0, u2);
+  in[1] = _mm_packs_epi32(u1, u3);
+  transpose_4x4(in);
+}
+#endif  // CONFIG_EXT_TX
+
 void vp10_fht4x4_sse2(const int16_t *input, tran_low_t *output,
                      int stride, int tx_type) {
   __m128i in[4];
@@ -229,10 +264,45 @@ void vp10_fht4x4_sse2(const int16_t *input, tran_low_t *output,
       fadst4_sse2(in);
       write_buffer_4x4(output, in);
       break;
+    case V_DCT:
+      load_buffer_4x4(input, in, stride, 0, 0);
+      fdct4_sse2(in);
+      fidtx4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case H_DCT:
+      load_buffer_4x4(input, in, stride, 0, 0);
+      fidtx4_sse2(in);
+      fdct4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case V_ADST:
+      load_buffer_4x4(input, in, stride, 0, 0);
+      fadst4_sse2(in);
+      fidtx4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case H_ADST:
+      load_buffer_4x4(input, in, stride, 0, 0);
+      fidtx4_sse2(in);
+      fadst4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case V_FLIPADST:
+      load_buffer_4x4(input, in, stride, 1, 0);
+      fadst4_sse2(in);
+      fidtx4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
+    case H_FLIPADST:
+      load_buffer_4x4(input, in, stride, 0, 1);
+      fidtx4_sse2(in);
+      fadst4_sse2(in);
+      write_buffer_4x4(output, in);
+      break;
 #endif  // CONFIG_EXT_TX
-   default:
-     assert(0);
-     break;
+    default:
+      assert(0);
   }
 }
 
