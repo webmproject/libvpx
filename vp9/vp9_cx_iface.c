@@ -487,8 +487,11 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->tile_columns = extra_cfg->tile_columns;
 
-  // The dependencies between row tiles cause error in multi-threaded encoding.
-  // For now, it is forced to be 0 in this case.
+  // TODO(yunqing): The dependencies between row tiles cause error in multi-
+  // threaded encoding. For now, tile_rows is forced to be 0 in this case.
+  // The further fix can be done by adding synchronizations after a tile row
+  // is encoded. But this will hurt multi-threaded encoder performance. So,
+  // it is recommended to use tile-rows=0 while encoding with threads > 1.
   if (oxcf->max_threads > 1 && oxcf->tile_columns > 0)
     oxcf->tile_rows  = 0;
   else
