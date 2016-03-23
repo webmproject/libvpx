@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "dc0f1e77_fe683365",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-23T19:02:24Z",
+      "side": 1,
+      "message": "always put a blank line after the subject of the commit, otherwise git joins the following lines. This makes browsing the history difficult and should be visible in message from gerrit (in fact I think it warns on upload).",
+      "revId": "977dccd12cce31a318240dbb088e43b3f2648519",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc0f1e77_be2d1b90",
         "filename": "vp10/vp10cx.mk",
         "patchSetId": 7
