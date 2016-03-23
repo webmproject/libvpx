@@ -380,7 +380,8 @@ static const arg_def_t cpu_used_vp9 = ARG_DEF(
 static const arg_def_t tile_cols = ARG_DEF(
     NULL, "tile-columns", 1, "Number of tile columns to use, log2");
 static const arg_def_t tile_rows = ARG_DEF(
-    NULL, "tile-rows", 1, "Number of tile rows to use, log2");
+    NULL, "tile-rows", 1,
+    "Number of tile rows to use, log2 (set to 0 while threads > 1)");
 static const arg_def_t lossless = ARG_DEF(
     NULL, "lossless", 1, "Lossless mode (0: false (default), 1: true)");
 static const arg_def_t frame_parallel_decoding = ARG_DEF(
