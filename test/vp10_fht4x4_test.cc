@@ -168,7 +168,7 @@ INSTANTIATE_TEST_CASE_P(
       make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 2,
                  VPX_BITS_10, 16),
       make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 3,
-                 VPX_BITS_10, 16)));
+                 VPX_BITS_10, 16),
       make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 0,
                  VPX_BITS_12, 16),
       make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 1,
