@@ -53,7 +53,7 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     int refresh_last_frame,
                                     int resized);
 
-void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
+void vp9_denoiser_denoise(struct VP9_COMP *cpi, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs,
                           PICK_MODE_CONTEXT *ctx ,
                           VP9_DENOISER_DECISION *denoiser_decision);

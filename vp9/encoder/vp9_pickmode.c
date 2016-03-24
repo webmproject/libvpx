@@ -1825,8 +1825,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->oxcf.noise_sensitivity > 0 &&
       cpi->resize_pending == 0) {
     VP9_DENOISER_DECISION decision = COPY_BLOCK;
-    vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col,
-                         VPXMAX(BLOCK_8X8, bsize), ctx, &decision);
+    vp9_denoiser_denoise(cpi, x, mi_row, mi_col, VPXMAX(BLOCK_8X8, bsize),
+                         ctx, &decision);
     // If INTRA or GOLDEN reference was selected, re-evaluate ZEROMV on denoised
     // result. Only do this under noise conditions, and if rdcost of ZEROMV on
     // original source is not significantly higher than rdcost of best mode.

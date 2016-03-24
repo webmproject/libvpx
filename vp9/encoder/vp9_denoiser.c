@@ -316,13 +316,14 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   return FILTER_BLOCK;
 }
 
-void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
+void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs,
                           PICK_MODE_CONTEXT *ctx,
                           VP9_DENOISER_DECISION *denoiser_decision) {
   int mv_col, mv_row;
   int motion_magnitude = 0;
   int zeromv_filter = 0;
+  VP9_DENOISER *denoiser = &cpi->denoiser;
   VP9_DENOISER_DECISION decision = COPY_BLOCK;
   YV12_BUFFER_CONFIG avg = denoiser->running_avg_y[INTRA_FRAME];
   YV12_BUFFER_CONFIG mc_avg = denoiser->mc_running_avg_y;
@@ -331,21 +332,53 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                                           mi_row, mi_col);
   struct buf_2d src = mb->plane[0].src;
   int is_skin = 0;
+  mv_col = ctx->best_sse_mv.as_mv.col;
+  mv_row = ctx->best_sse_mv.as_mv.row;
+  motion_magnitude = mv_row * mv_row + mv_col * mv_col;
 
-  if (bs <= BLOCK_32X32 && denoiser->denoising_level >= kDenLow) {
+  if (cpi->use_skin_detection &&
+      bs <= BLOCK_32X32 &&
+      denoiser->denoising_level >= kDenLow) {
+    int motion_level = (motion_magnitude < 16) ? 0 : 1;
+    // If motion for current block is small/zero, compute consec_zeromv for
+    // skin detection (early exit in skin detection is done for large
+    // consec_zeromv when current block has small/zero motion).
+    int consec_zeromv = 0;
+    if (motion_level == 0) {
+      CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+      VP9_COMMON * const cm = &cpi->common;
+      int j, i;
+      // Loop through the 8x8 sub-blocks.
+      const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
+      const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
+      const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
+      const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
+      const int block_index = mi_row * cm->mi_cols + mi_col;
+      consec_zeromv = 100;
+      for (i = 0; i < ymis; i++) {
+        for (j = 0; j < xmis; j++) {
+          int bl_index = block_index + i * cm->mi_cols + j;
+          consec_zeromv = VPXMIN(cr->consec_zero_mv[bl_index], consec_zeromv);
+          // No need to keep checking 8x8 blocks if any of the sub-blocks
+          // has small consec_zeromv (since threshold for no_skin based on
+          // zero/small motion in skin detection is high, i.e, > 5).
+          if (consec_zeromv < 5) {
+            i = ymis;
+            j = xmis;
+          }
+        }
+      }
+    }
+    // TODO(marpan): Compute skin detection over sub-blocks.
     is_skin = vp9_compute_skin_block(mb->plane[0].src.buf,
                                      mb->plane[1].src.buf,
                                      mb->plane[2].src.buf,
                                      mb->plane[0].src.stride,
                                      mb->plane[1].src.stride,
                                      bs,
-                                     0,
-                                     0);
+                                     consec_zeromv,
+                                     motion_level);
   }
-
-  mv_col = ctx->best_sse_mv.as_mv.col;
-  mv_row = ctx->best_sse_mv.as_mv.row;
-  motion_magnitude = mv_row * mv_row + mv_col * mv_col;
   if (!is_skin &&
       denoiser->denoising_level == kDenHigh &&
       motion_magnitude < 16) {
