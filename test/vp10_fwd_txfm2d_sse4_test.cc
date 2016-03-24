@@ -12,9 +12,9 @@ using libvpx_test::ACMRandom;
 namespace {
 
 #if CONFIG_VP9_HIGHBITDEPTH
-TEST(vp10_fwd_txfm2d_sse2, accuracy) {
+TEST(vp10_fwd_txfm2d_sse4_1, accuracy) {
   int16_t input[4096] = {0};
-  int32_t output_sse2[4096] = {0};
+  int32_t output_sse4_1[4096] = {0};
   int32_t output_c[4096] = {0};
 
   int txfm_num = 17;
@@ -36,10 +36,10 @@ TEST(vp10_fwd_txfm2d_sse2, accuracy) {
       vp10_fwd_txfm2d_32x32_c, vp10_fwd_txfm2d_64x64_c,
   };
 
-  Fwd_Txfm2d_Func txfm2d_func_sse2_list[] = {
-      vp10_fwd_txfm2d_4x4_sse2,   vp10_fwd_txfm2d_8x8_sse2,
-      vp10_fwd_txfm2d_16x16_sse2, vp10_fwd_txfm2d_32x32_sse2,
-      vp10_fwd_txfm2d_64x64_sse2,
+  Fwd_Txfm2d_Func txfm2d_func_sse4_1_list[] = {
+      vp10_fwd_txfm2d_4x4_sse4_1,   vp10_fwd_txfm2d_8x8_sse4_1,
+      vp10_fwd_txfm2d_16x16_sse4_1, vp10_fwd_txfm2d_32x32_sse4_1,
+      vp10_fwd_txfm2d_64x64_sse4_1,
   };
 
   for (int i = 0; i < txfm_num; i++) {
@@ -47,7 +47,7 @@ TEST(vp10_fwd_txfm2d_sse2, accuracy) {
     int txfm_size = cfg.txfm_size;
     int func_idx = get_max_bit(txfm_size) - 2;
     Fwd_Txfm2d_Func txfm2d_func_c = txfm2d_func_c_list[func_idx];
-    Fwd_Txfm2d_Func txfm2d_func_sse2 = txfm2d_func_sse2_list[func_idx];
+    Fwd_Txfm2d_Func txfm2d_func_sse4_1 = txfm2d_func_sse4_1_list[func_idx];
 
     ACMRandom rnd(ACMRandom::DeterministicSeed());
 
@@ -59,10 +59,11 @@ TEST(vp10_fwd_txfm2d_sse2, accuracy) {
     }
 
     txfm2d_func_c(input, output_c, cfg.txfm_size, &cfg, 10);
-    txfm2d_func_sse2(input, output_sse2, cfg.txfm_size, &cfg, 10);
+    txfm2d_func_sse4_1(input, output_sse4_1, cfg.txfm_size, &cfg, 10);
     for (int r = 0; r < txfm_size; r++) {
       for (int c = 0; c < txfm_size; c++) {
-        EXPECT_EQ(output_c[r * txfm_size + c], output_sse2[r * txfm_size + c]);
+        EXPECT_EQ(output_c[r * txfm_size + c],
+                  output_sse4_1[r * txfm_size + c]);
       }
     }
   }
