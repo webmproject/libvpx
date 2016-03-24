@@ -1170,7 +1170,7 @@ static int read_is_inter_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 static void fpm_sync(void *const data, int mi_row) {
   VP10Decoder *const pbi = (VP10Decoder *)data;
   vp10_frameworker_wait(pbi->frame_worker_owner, pbi->common.prev_frame,
-                       mi_row << MAX_MIB_SIZE_LOG2);
+                       mi_row << pbi->common.mib_size_log2);
 }
 
 static void read_inter_block_mode_info(VP10Decoder *const pbi,

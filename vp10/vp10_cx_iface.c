@@ -49,40 +49,42 @@ struct vp10_extracfg {
   int                         color_range;
   int                         render_width;
   int                         render_height;
+  vpx_superblock_size_t       superblock_size;
 };
 
 static struct vp10_extracfg default_extra_cfg = {
-  0,                          // cpu_used
-  1,                          // enable_auto_alt_ref
-  0,                          // noise_sensitivity
-  0,                          // sharpness
-  0,                          // static_thresh
+  0,                            // cpu_used
+  1,                            // enable_auto_alt_ref
+  0,                            // noise_sensitivity
+  0,                            // sharpness
+  0,                            // static_thresh
 #if CONFIG_EXT_TILE
-  64,                         // tile_columns
-  64,                         // tile_rows
+  UINT_MAX,                     // tile_columns
+  UINT_MAX,                     // tile_rows
 #else
-  0,                          // tile_columns
-  0,                          // tile_rows
+  0,                            // tile_columns
+  0,                            // tile_rows
 #endif  // CONFIG_EXT_TILE
-  7,                          // arnr_max_frames
-  5,                          // arnr_strength
-  0,                          // min_gf_interval; 0 -> default decision
-  0,                          // max_gf_interval; 0 -> default decision
-  VP8_TUNE_PSNR,              // tuning
-  10,                         // cq_level
-  0,                          // rc_max_intra_bitrate_pct
-  0,                          // rc_max_inter_bitrate_pct
-  0,                          // gf_cbr_boost_pct
-  0,                          // lossless
-  1,                          // frame_parallel_decoding_mode
-  NO_AQ,                      // aq_mode
-  0,                          // frame_periodic_delta_q
-  VPX_BITS_8,                 // Bit depth
-  VP9E_CONTENT_DEFAULT,       // content
-  VPX_CS_UNKNOWN,             // color space
-  0,                          // color range
-  0,                          // render width
-  0,                          // render height
+  7,                            // arnr_max_frames
+  5,                            // arnr_strength
+  0,                            // min_gf_interval; 0 -> default decision
+  0,                            // max_gf_interval; 0 -> default decision
+  VP8_TUNE_PSNR,                // tuning
+  10,                           // cq_level
+  0,                            // rc_max_intra_bitrate_pct
+  0,                            // rc_max_inter_bitrate_pct
+  0,                            // gf_cbr_boost_pct
+  0,                            // lossless
+  1,                            // frame_parallel_decoding_mode
+  NO_AQ,                        // aq_mode
+  0,                            // frame_periodic_delta_q
+  VPX_BITS_8,                   // Bit depth
+  VP9E_CONTENT_DEFAULT,         // content
+  VPX_CS_UNKNOWN,               // color space
+  0,                            // color range
+  0,                            // render width
+  0,                            // render height
+  VPX_SUPERBLOCK_SIZE_DYNAMIC   // superblock_size
 };
 
 struct vpx_codec_alg_priv {
@@ -199,12 +201,26 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, enable_auto_alt_ref, 0, 2);
   RANGE_CHECK(extra_cfg, cpu_used, -8, 8);
   RANGE_CHECK_HI(extra_cfg, noise_sensitivity, 6);
+  RANGE_CHECK(extra_cfg, superblock_size,
+              VPX_SUPERBLOCK_SIZE_64X64, VPX_SUPERBLOCK_SIZE_DYNAMIC);
 #if CONFIG_EXT_TILE
   // TODO(any): Waring. If CONFIG_EXT_TILE is true, tile_columns really
   // means tile_width, and tile_rows really means tile_hight. The interface
   // should be sanitized.
-  RANGE_CHECK(extra_cfg, tile_columns, 1, 64);
-  RANGE_CHECK(extra_cfg, tile_rows, 1, 64);
+#if CONFIG_EXT_PARTITION
+  if (extra_cfg->superblock_size != VPX_SUPERBLOCK_SIZE_64X64) {
+    if (extra_cfg->tile_columns != UINT_MAX)
+      RANGE_CHECK(extra_cfg, tile_columns, 1, 32);
+    if (extra_cfg->tile_rows != UINT_MAX)
+      RANGE_CHECK(extra_cfg, tile_rows, 1, 32);
+  } else
+#endif  // CONFIG_EXT_PARTITION
+  {
+    if (extra_cfg->tile_columns != UINT_MAX)
+      RANGE_CHECK(extra_cfg, tile_columns, 1, 64);
+    if (extra_cfg->tile_rows != UINT_MAX)
+      RANGE_CHECK(extra_cfg, tile_rows, 1, 64);
+  }
 #else
   RANGE_CHECK(extra_cfg, tile_columns, 0, 6);
   RANGE_CHECK(extra_cfg, tile_rows, 0, 2);
@@ -416,8 +432,25 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->tuning = extra_cfg->tuning;
   oxcf->content = extra_cfg->content;
 
+#if CONFIG_EXT_PARTITION
+  oxcf->superblock_size = extra_cfg->superblock_size;
+#endif  // CONFIG_EXT_PARTITION
+
+#if CONFIG_EXT_TILE
+  {
+#if CONFIG_EXT_PARTITION
+    const unsigned int max =
+      extra_cfg->superblock_size == VPX_SUPERBLOCK_SIZE_64X64 ? 64 : 32;
+#else
+    const unsigned int max = 64;
+#endif  // CONFIG_EXT_PARTITION
+    oxcf->tile_columns = VPXMIN(extra_cfg->tile_columns, max);
+    oxcf->tile_rows    = VPXMIN(extra_cfg->tile_rows, max);
+  }
+#else
   oxcf->tile_columns = extra_cfg->tile_columns;
   oxcf->tile_rows    = extra_cfg->tile_rows;
+#endif  // CONFIG_EXT_TILE
 
   oxcf->error_resilient_mode         = cfg->g_error_resilient;
   oxcf->frame_parallel_decoding_mode = extra_cfg->frame_parallel_decoding_mode;
@@ -1247,6 +1280,13 @@ static vpx_codec_err_t ctrl_set_render_size(vpx_codec_alg_priv_t *ctx,
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
+static vpx_codec_err_t ctrl_set_superblock_size(vpx_codec_alg_priv_t *ctx,
+                                            va_list args) {
+  struct vp10_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.superblock_size = CAST(VP10E_SET_SUPERBLOCK_SIZE, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,                ctrl_copy_reference},
   {VP8E_USE_REFERENCE,                ctrl_use_reference},
@@ -1283,6 +1323,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_MIN_GF_INTERVAL,          ctrl_set_min_gf_interval},
   {VP9E_SET_MAX_GF_INTERVAL,          ctrl_set_max_gf_interval},
   {VP9E_SET_RENDER_SIZE,              ctrl_set_render_size},
+  {VP10E_SET_SUPERBLOCK_SIZE,         ctrl_set_superblock_size},
 
   // Getters
   {VP8E_GET_LAST_QUANTIZER,           ctrl_get_quantizer},

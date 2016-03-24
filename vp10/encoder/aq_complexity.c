@@ -116,8 +116,6 @@ void vp10_caq_select_segment(VP10_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
   VP10_COMMON *const cm = &cpi->common;
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = num_8x8_blocks_wide_lookup[BLOCK_LARGEST];
-  const int bh = num_8x8_blocks_high_lookup[BLOCK_LARGEST];
   const int xmis = VPXMIN(cm->mi_cols - mi_col, num_8x8_blocks_wide_lookup[bs]);
   const int ymis = VPXMIN(cm->mi_rows - mi_row, num_8x8_blocks_high_lookup[bs]);
   int x, y;
@@ -130,7 +128,7 @@ void vp10_caq_select_segment(VP10_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
     // Rate depends on fraction of a SB64 in frame (xmis * ymis / bw * bh).
     // It is converted to bits * 256 units.
     const int target_rate = (cpi->rc.sb64_target_rate * xmis * ymis * 256) /
-                            (bw * bh);
+                            (cm->mib_size * cm->mib_size);
     double logvar;
     double low_var_thresh;
     const int aq_strength = get_aq_c_strength(cm->base_qindex, cm->bit_depth);

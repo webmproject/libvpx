@@ -5752,10 +5752,9 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     step_param = cpi->mv_step_param;
   }
 
-  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_LARGEST) {
-    int boffset =
-        2 * (b_width_log2_lookup[BLOCK_LARGEST] -
-             VPXMIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
+  if (cpi->sf.adaptive_motion_search && bsize < cm->sb_size) {
+    int boffset =  2 * (b_width_log2_lookup[cm->sb_size] -
+         VPXMIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
     step_param = VPXMAX(step_param, boffset);
   }
 
@@ -5926,9 +5925,9 @@ static void do_masked_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   // TODO(debargha): is show_frame needed here?
-  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_LARGEST &&
+  if (cpi->sf.adaptive_motion_search && bsize < cm->sb_size &&
       cm->show_frame) {
-    int boffset = 2 * (b_width_log2_lookup[BLOCK_LARGEST] -
+    int boffset = 2 * (b_width_log2_lookup[cm->sb_size] -
           VPXMIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
     step_param = VPXMAX(step_param, boffset);
   }
@@ -7460,8 +7459,8 @@ int vp10_active_v_edge(VP10_COMP *cpi, int mi_col, int mi_step) {
 // bars embedded in the stream.
 int vp10_active_edge_sb(VP10_COMP *cpi,
                        int mi_row, int mi_col) {
-  return vp10_active_h_edge(cpi, mi_row, MAX_MIB_SIZE) ||
-         vp10_active_v_edge(cpi, mi_col, MAX_MIB_SIZE);
+  return vp10_active_h_edge(cpi, mi_row, cpi->common.mib_size) ||
+         vp10_active_v_edge(cpi, mi_col, cpi->common.mib_size);
 }
 
 static void restore_uv_color_map(VP10_COMP *cpi, MACROBLOCK *x) {
@@ -8952,8 +8951,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
          !is_inter_block(&best_mbmode));
 
   if (!cpi->rc.is_src_frame_alt_ref)
-    vp10_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                              sf->adaptive_rd_thresh, bsize, best_mode_index);
+    vp10_update_rd_thresh_fact(cm, tile_data->thresh_freq_fact,
+                               sf->adaptive_rd_thresh, bsize, best_mode_index);
 
   // macroblock modes
   *mbmi = best_mbmode;
@@ -9099,8 +9098,8 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == mbmi->interp_filter));
 
-  vp10_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                            cpi->sf.adaptive_rd_thresh, bsize, THR_ZEROMV);
+  vp10_update_rd_thresh_fact(cm, tile_data->thresh_freq_fact,
+                             cpi->sf.adaptive_rd_thresh, bsize, THR_ZEROMV);
 
   vp10_zero(best_pred_diff);
 
@@ -9821,8 +9820,8 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
          (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
 
-  vp10_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                            sf->adaptive_rd_thresh, bsize, best_ref_index);
+  vp10_update_rd_thresh_fact(cm, tile_data->thresh_freq_fact,
+                             sf->adaptive_rd_thresh, bsize, best_ref_index);
 
   // macroblock modes
   *mbmi = best_mbmode;

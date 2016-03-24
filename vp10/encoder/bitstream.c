@@ -1498,6 +1498,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   MODE_INFO *m;
   int plane;
+  int bh, bw;
 #if CONFIG_ANS
   (void) tok;
   (void) tok_end;
@@ -1507,12 +1508,14 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
   m = xd->mi[0];
 
+  assert(m->mbmi.sb_type <= cm->sb_size);
+
+  bh = num_8x8_blocks_high_lookup[m->mbmi.sb_type];
+  bw = num_8x8_blocks_wide_lookup[m->mbmi.sb_type];
+
   cpi->td.mb.mbmi_ext = cpi->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 
-  set_mi_row_col(xd, tile,
-                 mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],
-                 mi_col, num_8x8_blocks_wide_lookup[m->mbmi.sb_type],
-                 cm->mi_rows, cm->mi_cols);
+  set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cm, xd, xd->mi, w);
   } else {
@@ -1660,7 +1663,7 @@ static void write_modes_sb(VP10_COMP *const cpi,
   const BLOCK_SIZE subsize =  get_subsize(bsize, partition);
 #if CONFIG_SUPERTX
   const int mi_offset = mi_row * cm->mi_stride + mi_col;
-  MB_MODE_INFO *mbmi = NULL;
+  MB_MODE_INFO *mbmi;
   const int pack_token = !supertx_enabled;
   TX_SIZE supertx_size;
   int plane;
@@ -1835,12 +1838,12 @@ static void write_modes(VP10_COMP *const cpi,
 
   vp10_zero_above_context(cm, mi_col_start, mi_col_end);
 
-  for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MAX_MIB_SIZE) {
+  for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += cm->mib_size) {
     vp10_zero_left_context(xd);
 
-    for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MAX_MIB_SIZE) {
+    for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += cm->mib_size) {
       write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, 0,
-                             mi_row, mi_col, BLOCK_LARGEST);
+                             mi_row, mi_col, cm->sb_size);
     }
   }
 }
@@ -2529,21 +2532,32 @@ static void fix_interp_filter(VP10_COMMON *cm, FRAME_COUNTS *counts) {
   }
 }
 
-static void write_tile_info(VP10_COMMON *const cm,
+static void write_tile_info(const VP10_COMMON *const cm,
                             struct vpx_write_bit_buffer *wb) {
 #if CONFIG_EXT_TILE
-  // TODO(geza.lore): Dependent on CU_SIZE
   const int tile_width  =
-            mi_cols_aligned_to_sb(cm->tile_width) >> MAX_MIB_SIZE_LOG2;
+    ALIGN_POWER_OF_TWO(cm->tile_width, cm->mib_size_log2) >> cm->mib_size_log2;
   const int tile_height =
-            mi_cols_aligned_to_sb(cm->tile_height) >> MAX_MIB_SIZE_LOG2;
+    ALIGN_POWER_OF_TWO(cm->tile_height, cm->mib_size_log2) >> cm->mib_size_log2;
 
-  assert(tile_width > 0 && tile_width <= 64);
-  assert(tile_height > 0 && tile_height <= 64);
+  assert(tile_width > 0);
+  assert(tile_height > 0);
 
   // Write the tile sizes
-  vpx_wb_write_literal(wb, tile_width - 1, 6);
-  vpx_wb_write_literal(wb, tile_height - 1, 6);
+#if CONFIG_EXT_PARTITION
+  if (cm->sb_size == BLOCK_128X128) {
+    assert(tile_width <= 32);
+    assert(tile_height <= 32);
+    vpx_wb_write_literal(wb, tile_width - 1, 5);
+    vpx_wb_write_literal(wb, tile_height - 1, 5);
+  } else
+#endif  // CONFIG_EXT_PARTITION
+  {
+    assert(tile_width <= 64);
+    assert(tile_height <= 64);
+    vpx_wb_write_literal(wb, tile_width - 1, 6);
+    vpx_wb_write_literal(wb, tile_height - 1, 6);
+  }
 #else
   int min_log2_tile_cols, max_log2_tile_cols, ones;
   vp10_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
@@ -2660,7 +2674,7 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
                            uint8_t *const dst,
                            unsigned int *max_tile_size,
                            unsigned int *max_tile_col_size) {
-  VP10_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   vp10_writer mode_bc;
 #if CONFIG_ANS
   struct AnsCoder token_ans;
@@ -2993,6 +3007,15 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   }
 
   vpx_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);
+
+  assert(cm->mib_size == num_8x8_blocks_wide_lookup[cm->sb_size]);
+  assert(cm->mib_size == 1 << cm->mib_size_log2);
+#if CONFIG_EXT_PARTITION
+  assert(cm->sb_size == BLOCK_128X128 || cm->sb_size == BLOCK_64X64);
+  vpx_wb_write_bit(wb, cm->sb_size == BLOCK_128X128 ? 1 : 0);
+#else
+  assert(cm->sb_size == BLOCK_64X64);
+#endif  // CONFIG_EXT_PARTITION
 
   encode_loopfilter(cm, wb);
 #if CONFIG_LOOP_RESTORATION

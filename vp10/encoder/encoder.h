@@ -235,6 +235,10 @@ typedef struct VP10EncoderConfig {
   int color_range;
   int render_width;
   int render_height;
+
+#if CONFIG_EXT_PARTITION
+  vpx_superblock_size_t superblock_size;
+#endif  // CONFIG_EXT_PARTITION
 } VP10EncoderConfig;
 
 static INLINE int is_lossless_requested(const VP10EncoderConfig *cfg) {
@@ -418,7 +422,7 @@ typedef struct VP10_COMP {
   // clips, and 300 for < HD clips.
   int encode_breakout;
 
-  unsigned char *segmentation_map;
+  uint8_t *segmentation_map;
 
   // segment threashold for encode breakout
   int  segment_encode_breakout[MAX_SEGMENTS];

@@ -476,6 +476,17 @@ static const int vp9_arg_ctrl_map[] = {
 #endif
 
 #if CONFIG_VP10_ENCODER
+#if CONFIG_EXT_PARTITION
+static const struct arg_enum_list superblock_size_enum[] = {
+  {"dynamic", VPX_SUPERBLOCK_SIZE_DYNAMIC},
+  {"64", VPX_SUPERBLOCK_SIZE_64X64},
+  {"128", VPX_SUPERBLOCK_SIZE_128X128},
+  {NULL, 0}
+};
+static const arg_def_t superblock_size = ARG_DEF_ENUM(
+    NULL, "sb-size", 1, "Superblock size to use", superblock_size_enum);
+#endif  // CONFIG_EXT_PARTITION
+
 static const arg_def_t *vp10_args[] = {
   &cpu_used_vp9, &auto_altref, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
@@ -484,6 +495,9 @@ static const arg_def_t *vp10_args[] = {
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
   &noise_sens, &tune_content, &input_color_space,
   &min_gf_interval, &max_gf_interval,
+#if CONFIG_EXT_PARTITION
+  &superblock_size,
+#endif  // CONFIG_EXT_PARTITION
 #if CONFIG_VP9_HIGHBITDEPTH
   &bitdeptharg, &inbitdeptharg,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -500,6 +514,9 @@ static const int vp10_arg_ctrl_map[] = {
   VP9E_SET_FRAME_PERIODIC_BOOST, VP9E_SET_NOISE_SENSITIVITY,
   VP9E_SET_TUNE_CONTENT, VP9E_SET_COLOR_SPACE,
   VP9E_SET_MIN_GF_INTERVAL, VP9E_SET_MAX_GF_INTERVAL,
+#if CONFIG_EXT_PARTITION
+  VP10E_SET_SUPERBLOCK_SIZE,
+#endif  // CONFIG_EXT_PARTITION
   0
 };
 #endif

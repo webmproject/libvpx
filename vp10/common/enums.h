@@ -41,6 +41,7 @@ extern "C" {
 #define MAX_MIB_MASK    (MAX_MIB_SIZE - 1)
 #define MAX_MIB_MASK_2  (MAX_MIB_SIZE * 2 - 1)
 
+// Maximum number of tile rows and tile columns
 #if CONFIG_EXT_TILE
 # define  MAX_TILE_ROWS 1024
 # define  MAX_TILE_COLS 1024

@@ -935,14 +935,15 @@ void vp10_set_rd_speed_thresholds_sub8x8(VP10_COMP *cpi) {
   memcpy(rd->thresh_mult_sub8x8, thresh_mult[idx], sizeof(thresh_mult[idx]));
 }
 
-void vp10_update_rd_thresh_fact(int (*factor_buf)[MAX_MODES], int rd_thresh,
-                               int bsize, int best_mode_index) {
+void vp10_update_rd_thresh_fact(const VP10_COMMON *const cm,
+                                int (*factor_buf)[MAX_MODES], int rd_thresh,
+                                int bsize, int best_mode_index) {
   if (rd_thresh > 0) {
     const int top_mode = bsize < BLOCK_8X8 ? MAX_REFS : MAX_MODES;
     int mode;
     for (mode = 0; mode < top_mode; ++mode) {
       const BLOCK_SIZE min_size = VPXMAX(bsize - 1, BLOCK_4X4);
-      const BLOCK_SIZE max_size = VPXMIN(bsize + 2, BLOCK_LARGEST);
+      const BLOCK_SIZE max_size = VPXMIN(bsize + 2, cm->sb_size);
       BLOCK_SIZE bs;
       for (bs = min_size; bs <= max_size; ++bs) {
         int *const fact = &factor_buf[bs][mode];

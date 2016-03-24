@@ -222,6 +222,18 @@ extern "C" {
     VPX_BITS_12 = 12,  /**< 12 bits */
   } vpx_bit_depth_t;
 
+  /*!\brief Superblock size selection.
+   *
+   * Defines the superblock size used for encoding. The superblock size can
+   * either be fixed at 64x64 or 128x128 pixels, or it can be dynamically
+   * selected by the encoder for each frame.
+   */
+  typedef enum vpx_superblock_size {
+    VPX_SUPERBLOCK_SIZE_64X64,    /**< Always use 64x64 superblocks. */
+    VPX_SUPERBLOCK_SIZE_128X128,  /**< Always use 128x128 superblocks. */
+    VPX_SUPERBLOCK_SIZE_DYNAMIC   /**< Select superblock size dynamically. */
+  } vpx_superblock_size_t;
+
   /*
    * Library Version Number Interface
    *

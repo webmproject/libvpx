@@ -312,7 +312,7 @@ typedef struct VP10Common {
   int log2_tile_cols, log2_tile_rows;
 #endif  // !CONFIG_EXT_TILE
   int tile_cols, tile_rows;
-  int tile_width, tile_height;
+  int tile_width, tile_height;  // In MI units
 
   int byte_alignment;
   int skip_loop_filter;
@@ -343,6 +343,10 @@ typedef struct VP10Common {
 #if CONFIG_ANS
   rans_dec_lut token_tab[COEFF_PROB_MODELS];
 #endif  // CONFIG_ANS
+
+  BLOCK_SIZE sb_size;   // Size of the superblock used for this frame
+  int mib_size;         // Size of the superblock in units of MI blocks
+  int mib_size_log2;    // Log 2 of above.
 } VP10_COMMON;
 
 // TODO(hkuang): Don't need to lock the whole pool after implementing atomic
@@ -408,8 +412,12 @@ static INLINE void ref_cnt_fb(RefCntBuffer *bufs, int *idx, int new_idx) {
   bufs[new_idx].ref_count++;
 }
 
-static INLINE int mi_cols_aligned_to_sb(int n_mis) {
-  return ALIGN_POWER_OF_TWO(n_mis, MAX_MIB_SIZE_LOG2);
+static INLINE int mi_cols_aligned_to_sb(const VP10_COMMON *cm) {
+  return ALIGN_POWER_OF_TWO(cm->mi_cols, cm->mib_size_log2);
+}
+
+static INLINE int mi_rows_aligned_to_sb(const VP10_COMMON *cm) {
+  return ALIGN_POWER_OF_TWO(cm->mi_rows, cm->mib_size_log2);
 }
 
 static INLINE int frame_is_intra_only(const VP10_COMMON *const cm) {
@@ -695,6 +703,13 @@ static INLINE PARTITION_TYPE get_partition(const VP10_COMMON *const cm,
     return partition;
 #endif  // !CONFIG_EXT_PARTITION_TYPES
   }
+}
+
+static INLINE void set_sb_size(VP10_COMMON *const cm,
+                               const BLOCK_SIZE sb_size) {
+  cm->sb_size = sb_size;
+  cm->mib_size = num_8x8_blocks_wide_lookup[cm->sb_size];
+  cm->mib_size_log2 = mi_width_log2_lookup[cm->sb_size];
 }
 
 #ifdef __cplusplus

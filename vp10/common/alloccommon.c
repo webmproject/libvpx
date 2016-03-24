@@ -134,7 +134,8 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
     // TODO(geza.lore): These are bigger than they need to be.
     // cm->tile_width would be enough but it complicates indexing a
     // little elsewhere.
-    const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+    const int aligned_mi_cols =
+        ALIGN_POWER_OF_TWO(cm->mi_cols, MAX_MIB_SIZE_LOG2);
     int i;
 
     for (i = 0 ; i < MAX_MB_PLANE ; i++) {

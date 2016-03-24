@@ -30,6 +30,8 @@ extern "C" {
 #define VPXMIN(x, y) (((x) < (y)) ? (x) : (y))
 #define VPXMAX(x, y) (((x) > (y)) ? (x) : (y))
 
+#define IMPLIES(a, b)  (!(a) || (b))  //  Logical 'a implies b' (or 'a -> b')
+
 // These can be used to give a hint about branch outcomes.
 // This can have an effect, even if your target processor has a
 // good branch predictor, as these hints can affect basic block

@@ -560,6 +560,15 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_RENDER_SIZE,
+
+  /*!\brief Codec control function to set intended superblock size.
+   *
+   * By default, the superblock size is determined separately for each
+   * frame by the encoder.
+   *
+   * Supported in codecs: VP10
+   */
+  VP10E_SET_SUPERBLOCK_SIZE,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -820,6 +829,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
  */
 #define VPX_CTRL_VP9E_SET_RENDER_SIZE
 VPX_CTRL_USE_TYPE(VP9E_SET_RENDER_SIZE, int *)
+
+VPX_CTRL_USE_TYPE(VP10E_SET_SUPERBLOCK_SIZE, unsigned int)
+#define VPX_CTRL_VP10E_SET_SUPERBLOCK_SIZE
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus

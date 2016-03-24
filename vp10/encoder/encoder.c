@@ -248,6 +248,29 @@ void vp10_set_high_precision_mv(VP10_COMP *cpi, int allow_high_precision_mv) {
 #endif
 }
 
+static BLOCK_SIZE select_sb_size(const VP10_COMP *const cpi) {
+#if CONFIG_EXT_PARTITION
+  if (cpi->oxcf.superblock_size == VPX_SUPERBLOCK_SIZE_64X64)
+    return BLOCK_64X64;
+
+  if (cpi->oxcf.superblock_size == VPX_SUPERBLOCK_SIZE_128X128)
+    return BLOCK_128X128;
+
+  assert(cpi->oxcf.superblock_size == VPX_SUPERBLOCK_SIZE_DYNAMIC);
+
+  assert(IMPLIES(cpi->common.tile_cols > 1,
+                 cpi->common.tile_width % MAX_MIB_SIZE == 0));
+  assert(IMPLIES(cpi->common.tile_rows > 1,
+                 cpi->common.tile_height % MAX_MIB_SIZE == 0));
+
+  // TODO(any): Possibly could improve this with a heuristic.
+  return BLOCK_128X128;
+#else
+  (void)cpi;
+  return BLOCK_64X64;
+#endif  //  CONFIG_EXT_PARTITION
+}
+
 static void setup_frame(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   // Set up entropy context depending on frame type. The decoder mandates
@@ -269,6 +292,8 @@ static void setup_frame(VP10_COMP *cpi) {
     *cm->fc = cm->frame_contexts[cm->frame_context_idx];
     vp10_zero(cpi->interp_filter_selected[0]);
   }
+
+  set_sb_size(cm, select_sb_size(cpi));
 }
 
 static void vp10_enc_setup_mi(VP10_COMMON *cm) {
@@ -786,14 +811,30 @@ void vp10_new_framerate(VP10_COMP *cpi, double framerate) {
   vp10_rc_update_framerate(cpi);
 }
 
-static void set_tile_limits(VP10_COMP *cpi) {
+static void set_tile_info(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
+
 #if CONFIG_EXT_TILE
-  cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 64) << MAX_MIB_SIZE_LOG2;
-  cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 64) << MAX_MIB_SIZE_LOG2;
+#if CONFIG_EXT_PARTITION
+  if (cpi->oxcf.superblock_size != VPX_SUPERBLOCK_SIZE_64X64) {
+    cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 32);
+    cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 32);
+    cm->tile_width  <<= MAX_MIB_SIZE_LOG2;
+    cm->tile_height <<= MAX_MIB_SIZE_LOG2;
+  } else
+#endif  // CONFIG_EXT_PARTITION
+  {
+    cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 64);
+    cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 64);
+    cm->tile_width  <<= MAX_MIB_SIZE_LOG2 - 1;
+    cm->tile_height <<= MAX_MIB_SIZE_LOG2 - 1;
+  }
 
   cm->tile_width  = VPXMIN(cm->tile_width, cm->mi_cols);
   cm->tile_height = VPXMIN(cm->tile_height, cm->mi_rows);
+
+  assert(cm->tile_width >> MAX_MIB_SIZE <= 32);
+  assert(cm->tile_height >> MAX_MIB_SIZE <= 32);
 
   // Get the number of tiles
   cm->tile_cols = 1;
@@ -814,11 +855,14 @@ static void set_tile_limits(VP10_COMP *cpi) {
   cm->tile_cols = 1 << cm->log2_tile_cols;
   cm->tile_rows = 1 << cm->log2_tile_rows;
 
-  cm->tile_width = (mi_cols_aligned_to_sb(cm->mi_cols) >> cm->log2_tile_cols);
-  cm->tile_height = (mi_cols_aligned_to_sb(cm->mi_rows) >> cm->log2_tile_rows);
-  // round to integer multiples of 8
-  cm->tile_width  = mi_cols_aligned_to_sb(cm->tile_width);
-  cm->tile_height = mi_cols_aligned_to_sb(cm->tile_height);
+  cm->tile_width = ALIGN_POWER_OF_TWO(cm->mi_cols, MAX_MIB_SIZE_LOG2);
+  cm->tile_width >>= cm->log2_tile_cols;
+  cm->tile_height = ALIGN_POWER_OF_TWO(cm->mi_rows, MAX_MIB_SIZE_LOG2);
+  cm->tile_height >>= cm->log2_tile_rows;
+
+  // round to integer multiples of max superblock size
+  cm->tile_width  = ALIGN_POWER_OF_TWO(cm->tile_width, MAX_MIB_SIZE_LOG2);
+  cm->tile_height = ALIGN_POWER_OF_TWO(cm->tile_height, MAX_MIB_SIZE_LOG2);
 #endif  // CONFIG_EXT_TILE
 }
 
@@ -832,7 +876,7 @@ static void update_frame_size(VP10_COMP *cpi) {
   memset(cpi->mbmi_ext_base, 0,
          cm->mi_rows * cm->mi_cols * sizeof(*cpi->mbmi_ext_base));
 
-  set_tile_limits(cpi);
+  set_tile_info(cpi);
 }
 
 static void init_buffer_indices(VP10_COMP *cpi) {
@@ -2015,7 +2059,7 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   cpi->last_frame_distortion = 0;
 #endif
 
-  set_tile_limits(cpi);
+  set_tile_info(cpi);
 
   cpi->ext_refresh_frame_flags_pending = 0;
   cpi->ext_refresh_frame_context_pending = 0;
@@ -3699,8 +3743,7 @@ static void encode_without_recode_loop(VP10_COMP *cpi) {
   setup_frame(cpi);
 
 #if CONFIG_ENTROPY
-  cm->do_subframe_update =
-      cm->log2_tile_cols == 0 && cm->log2_tile_rows == 0;
+  cm->do_subframe_update = cm->tile_cols == 1 && cm->tile_rows == 1;
   vp10_copy(cm->starting_coef_probs, cm->fc->coef_probs);
   vp10_copy(cpi->subframe_stats.enc_starting_coef_probs,
             cm->fc->coef_probs);
@@ -3827,8 +3870,7 @@ static void encode_with_recode_loop(VP10_COMP *cpi,
 #endif  // CONFIG_ENTROPY
 
 #if CONFIG_ENTROPY
-    cm->do_subframe_update =
-        cm->log2_tile_cols == 0 && cm->log2_tile_rows == 0;
+    cm->do_subframe_update = cm->tile_cols == 1 && cm->tile_rows == 1;
     if (loop_count == 0 || frame_is_intra_only(cm) ||
         cm->error_resilient_mode) {
       vp10_copy(cm->starting_coef_probs, cm->fc->coef_probs);
