@@ -7920,6 +7920,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         mbmi->angle_delta[0] = 0;
         super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
                         NULL, bsize, best_rd);
+        if (rate_y == INT_MAX)
+          continue;
       }
 
       // TODO(huisu): ext-intra is turned off in lossless mode for now to
