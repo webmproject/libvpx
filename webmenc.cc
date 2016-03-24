@@ -11,9 +11,9 @@
 
 #include <string>
 
-#include "third_party/libwebm/mkvmuxer.hpp"
-#include "third_party/libwebm/mkvmuxerutil.hpp"
-#include "third_party/libwebm/mkvwriter.hpp"
+#include "third_party/libwebm/mkvmuxer/mkvmuxer.h"
+#include "third_party/libwebm/mkvmuxer/mkvmuxerutil.h"
+#include "third_party/libwebm/mkvmuxer/mkvwriter.h"
 
 namespace {
 const uint64_t kDebugTrackUid = 0xDEADBEEF;
