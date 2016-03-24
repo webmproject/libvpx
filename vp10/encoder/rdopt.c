@@ -4856,11 +4856,6 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                       &frame_mv[NEARESTMV][frame],
                                       &frame_mv[NEARMV][frame]);
 
-#if CONFIG_REF_MV
-        if (ref_mv_count[ref] > 0)
-          bsi->ref_mv[ref] = &ref_mv_stack[ref][0].this_mv;
-#endif
-
 #if CONFIG_EXT_INTER
         mv_ref_list[0].as_int = frame_mv[NEARESTMV][frame].as_int;
         mv_ref_list[1].as_int = frame_mv[NEARMV][frame].as_int;
