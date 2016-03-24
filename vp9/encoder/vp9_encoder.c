@@ -2722,6 +2722,13 @@ static int scale_down(VP9_COMP *cpi, int q) {
   return scale;
 }
 
+static int big_rate_miss(VP9_COMP *cpi, int high_limit, int low_limit) {
+  const RATE_CONTROL *const rc = &cpi->rc;
+
+  return (rc->projected_frame_size > ((high_limit * 3) / 2)) ||
+         (rc->projected_frame_size < (low_limit / 2));
+}
+
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
 static int recode_loop_test(VP9_COMP *cpi,
@@ -2733,6 +2740,7 @@ static int recode_loop_test(VP9_COMP *cpi,
   int force_recode = 0;
 
   if ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
+      big_rate_miss(cpi, high_limit, low_limit) ||
       (cpi->sf.recode_loop == ALLOW_RECODE) ||
       (frame_is_kfgfarf &&
        (cpi->sf.recode_loop == ALLOW_RECODE_KFARFGF))) {
