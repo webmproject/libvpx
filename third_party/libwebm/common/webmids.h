@@ -6,10 +6,10 @@
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
 
-#ifndef WEBMIDS_HPP
-#define WEBMIDS_HPP
+#ifndef COMMON_WEBMIDS_H_
+#define COMMON_WEBMIDS_H_
 
-namespace mkvmuxer {
+namespace libwebm {
 
 enum MkvId {
   kMkvEBML = 0x1A45DFA3,
@@ -95,6 +95,35 @@ enum MkvId {
   kMkvAspectRatioType = 0x54B3,
   kMkvFrameRate = 0x2383E3,
   // end video
+  // colour
+  kMkvColour = 0x55B0,
+  kMkvMatrixCoefficients = 0x55B1,
+  kMkvBitsPerChannel = 0x55B2,
+  kMkvChromaSubsamplingHorz = 0x55B3,
+  kMkvChromaSubsamplingVert = 0x55B4,
+  kMkvCbSubsamplingHorz = 0x55B5,
+  kMkvCbSubsamplingVert = 0x55B6,
+  kMkvChromaSitingHorz = 0x55B7,
+  kMkvChromaSitingVert = 0x55B8,
+  kMkvRange = 0x55B9,
+  kMkvTransferCharacteristics = 0x55BA,
+  kMkvPrimaries = 0x55BB,
+  kMkvMaxCLL = 0x55BC,
+  kMkvMaxFALL = 0x55BD,
+  // mastering metadata
+  kMkvMasteringMetadata = 0x55D0,
+  kMkvPrimaryRChromaticityX = 0x55D1,
+  kMkvPrimaryRChromaticityY = 0x55D2,
+  kMkvPrimaryGChromaticityX = 0x55D3,
+  kMkvPrimaryGChromaticityY = 0x55D4,
+  kMkvPrimaryBChromaticityX = 0x55D5,
+  kMkvPrimaryBChromaticityY = 0x55D6,
+  kMkvWhitePointChromaticityX = 0x55D7,
+  kMkvWhitePointChromaticityY = 0x55D8,
+  kMkvLuminanceMax = 0x55D9,
+  kMkvLuminanceMin = 0x55DA,
+  // end mastering metadata
+  // end colour
   // audio
   kMkvAudio = 0xE1,
   kMkvSamplingFrequency = 0xB5,
@@ -150,6 +179,6 @@ enum MkvId {
   kMkvTagString = 0x4487
 };
 
-}  // end namespace mkvmuxer
+}  // namespace libwebm
 
-#endif  // WEBMIDS_HPP
+#endif  // COMMON_WEBMIDS_H_

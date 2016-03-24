@@ -5,12 +5,12 @@
 // tree. An additional intellectual property rights grant can be found
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
+#ifndef MKVPARSER_MKVREADER_H_
+#define MKVPARSER_MKVREADER_H_
 
-#ifndef MKVREADER_HPP
-#define MKVREADER_HPP
-
-#include "mkvparser.hpp"
 #include <cstdio>
+
+#include "mkvparser/mkvparser.h"
 
 namespace mkvparser {
 
@@ -40,6 +40,6 @@ class MkvReader : public IMkvReader {
   bool reader_owns_file_;
 };
 
-}  // end namespace mkvparser
+}  // namespace mkvparser
 
-#endif  // MKVREADER_HPP
+#endif  // MKVPARSER_MKVREADER_H_
