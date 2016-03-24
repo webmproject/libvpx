@@ -6,13 +6,11 @@
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
 
-#include "mkvwriter.hpp"
+#include "mkvmuxer/mkvwriter.h"
 
 #ifdef _MSC_VER
 #include <share.h>  // for _SH_DENYWR
 #endif
-
-#include <new>
 
 namespace mkvmuxer {
 
@@ -22,7 +20,7 @@ MkvWriter::MkvWriter(FILE* fp) : file_(fp), writer_owns_file_(false) {}
 
 MkvWriter::~MkvWriter() { Close(); }
 
-int32 MkvWriter::Write(const void* buffer, uint32 length) {
+int32_t MkvWriter::Write(const void* buffer, uint32_t length) {
   if (!file_)
     return -1;
 
@@ -61,7 +59,7 @@ void MkvWriter::Close() {
   file_ = NULL;
 }
 
-int64 MkvWriter::Position() const {
+int64_t MkvWriter::Position() const {
   if (!file_)
     return 0;
 
@@ -72,7 +70,7 @@ int64 MkvWriter::Position() const {
 #endif
 }
 
-int32 MkvWriter::Position(int64 position) {
+int32_t MkvWriter::Position(int64_t position) {
   if (!file_)
     return -1;
 
@@ -85,6 +83,6 @@ int32 MkvWriter::Position(int64 position) {
 
 bool MkvWriter::Seekable() const { return true; }
 
-void MkvWriter::ElementStartNotify(uint64, int64) {}
+void MkvWriter::ElementStartNotify(uint64_t, int64_t) {}
 
 }  // namespace mkvmuxer
