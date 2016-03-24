@@ -6983,10 +6983,14 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
 #if CONFIG_OBMC
-      continue;
-#else
+      if (mbmi->obmc) {
+        continue;
+      } else {
+#endif  // CONFIG_OBMC
       restore_dst_buf(xd, orig_dst, orig_dst_stride);
       return INT64_MAX;
+#if CONFIG_OBMC
+      }
 #endif  // CONFIG_OBMC
     }
 
