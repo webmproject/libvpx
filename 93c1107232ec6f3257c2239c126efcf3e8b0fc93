@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc0f1e77_ef5ebf49",
+        "filename": "examples.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-24T03:07:48Z",
+      "side": 1,
+      "message": "of course there\u0027s 2 ways to do it. see line 259 and it\u0027s probably worth a msvc check as it uses that one.\ngtest in libs.mk is a bit more specific in the makefile targets and explicitly spells it out for msvc",
+      "revId": "93c1107232ec6f3257c2239c126efcf3e8b0fc93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_cf5b0358",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-24T03:07:48Z",
+      "side": 1,
+      "message": "same comment about msvc",
+      "revId": "93c1107232ec6f3257c2239c126efcf3e8b0fc93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_2f59f75f",
+        "filename": "test/test.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-24T03:07:48Z",
+      "side": 1,
+      "message": "just go the rest of the way and bring this group to 1 space after the variable",
+      "revId": "93c1107232ec6f3257c2239c126efcf3e8b0fc93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0f1e77_0f56bb30",
+        "filename": "third_party/libwebm/Android.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-24T03:07:48Z",
+      "side": 1,
+      "message": "note, no test builds for this one",
+      "revId": "93c1107232ec6f3257c2239c126efcf3e8b0fc93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
