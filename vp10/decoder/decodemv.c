@@ -232,8 +232,8 @@ static void read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
                                    xd->left_txfm_context + tx_row,
                                    tx_size);
-  TX_SIZE (*const inter_tx_size)[MI_BLOCK_SIZE] =
-    (TX_SIZE (*)[MI_BLOCK_SIZE])&mbmi->inter_tx_size[tx_row][tx_col];
+  TX_SIZE (*const inter_tx_size)[MAX_MIB_SIZE] =
+    (TX_SIZE (*)[MAX_MIB_SIZE])&mbmi->inter_tx_size[tx_row][tx_col];
 
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> 5;
@@ -1157,7 +1157,7 @@ static int read_is_inter_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 static void fpm_sync(void *const data, int mi_row) {
   VP10Decoder *const pbi = (VP10Decoder *)data;
   vp10_frameworker_wait(pbi->frame_worker_owner, pbi->common.prev_frame,
-                       mi_row << MI_BLOCK_SIZE_LOG2);
+                       mi_row << MAX_MIB_SIZE_LOG2);
 }
 
 static void read_inter_block_mode_info(VP10Decoder *const pbi,
@@ -1592,7 +1592,8 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
 
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+    xd->left_txfm_context =
+      xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
     if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
         !mbmi->skip && inter_block) {
       const TX_SIZE max_tx_size = max_txsize_lookup[bsize];

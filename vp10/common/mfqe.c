@@ -356,8 +356,8 @@ void vp10_mfqe(VP10_COMMON *cm) {
   // Last decoded frame and will store the MFQE result.
   YV12_BUFFER_CONFIG *dest = &cm->post_proc_buffer;
   // Loop through each super block.
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE) {
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MAX_MIB_SIZE) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MAX_MIB_SIZE) {
       MODE_INFO *mi;
       MODE_INFO *mi_local = cm->mi + (mi_row * cm->mi_stride + mi_col);
       // Motion Info in last frame.

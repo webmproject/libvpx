@@ -272,21 +272,19 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
       if (x + step < w)
         return 1;
 
-      mi_row = (mi_row & MI_MASK) >> hl;
-      mi_col = (mi_col & MI_MASK) >> wl;
+      mi_row = (mi_row & MAX_MIB_MASK) >> hl;
+      mi_col = (mi_col & MAX_MIB_MASK) >> wl;
 
       // If top row of coding unit
       if (mi_row == 0)
         return 1;
 
       // If rightmost column of coding unit
-      if (((mi_col + 1) << wl) >= MI_BLOCK_SIZE)
+      if (((mi_col + 1) << wl) >= MAX_MIB_SIZE)
         return 0;
 
-      my_order =
-        order[((mi_row + 0) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col + 0];
-      tr_order =
-        order[((mi_row - 1) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col + 1];
+      my_order = order[((mi_row + 0) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 0];
+      tr_order = order[((mi_row - 1) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 1];
 
       return my_order > tr_order;
     } else {
@@ -315,17 +313,17 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     if (y + step < h)
       return 1;
 
-    mi_row = (mi_row & MI_MASK) >> hl;
-    mi_col = (mi_col & MI_MASK) >> wl;
+    mi_row = (mi_row & MAX_MIB_MASK) >> hl;
+    mi_col = (mi_col & MAX_MIB_MASK) >> wl;
 
     if (mi_col == 0)
-      return (mi_row << (hl + !ss_y)) + y + step < (MI_BLOCK_SIZE << !ss_y);
+      return (mi_row << (hl + !ss_y)) + y + step < (MAX_MIB_SIZE << !ss_y);
 
-    if (((mi_row + 1) << hl) >= MI_BLOCK_SIZE)
+    if (((mi_row + 1) << hl) >= MAX_MIB_SIZE)
       return 0;
 
-    my_order = order[((mi_row + 0) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col + 0];
-    bl_order = order[((mi_row + 1) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col - 1];
+    my_order = order[((mi_row + 0) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 0];
+    bl_order = order[((mi_row + 1) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col - 1];
 
     return bl_order < my_order;
   }

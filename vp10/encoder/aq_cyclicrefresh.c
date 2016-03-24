@@ -388,8 +388,8 @@ static void cyclic_refresh_update_map(VP10_COMP *const cpi) {
   int i, block_count, bl_index, sb_rows, sb_cols, sbs_in_frame;
   int xmis, ymis, x, y;
   memset(seg_map, CR_SEGMENT_ID_BASE, cm->mi_rows * cm->mi_cols);
-  sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
-  sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
+  sb_cols = (cm->mi_cols + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
+  sb_rows = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   sbs_in_frame = sb_cols * sb_rows;
   // Number of target blocks to get the q delta (segment 1).
   block_count = cr->percent_refresh * cm->mi_rows * cm->mi_cols / 100;
@@ -404,8 +404,8 @@ static void cyclic_refresh_update_map(VP10_COMP *const cpi) {
     // Get the mi_row/mi_col corresponding to superblock index i.
     int sb_row_index = (i / sb_cols);
     int sb_col_index = i - sb_row_index * sb_cols;
-    int mi_row = sb_row_index * MI_BLOCK_SIZE;
-    int mi_col = sb_col_index * MI_BLOCK_SIZE;
+    int mi_row = sb_row_index * MAX_MIB_SIZE;
+    int mi_col = sb_col_index * MAX_MIB_SIZE;
     int qindex_thresh =
         cpi->oxcf.content == VP9E_CONTENT_SCREEN
             ? vp10_get_qindex(&cm->seg, CR_SEGMENT_ID_BOOST2, cm->base_qindex)

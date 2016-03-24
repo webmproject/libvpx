@@ -102,8 +102,8 @@ typedef struct {
 struct rdcost_block_args {
   const VP10_COMP *cpi;
   MACROBLOCK *x;
-  ENTROPY_CONTEXT t_above[2 * MI_BLOCK_SIZE];
-  ENTROPY_CONTEXT t_left[2 * MI_BLOCK_SIZE];
+  ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE];
+  ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE];
   int this_rate;
   int64_t this_dist;
   int64_t this_sse;
@@ -2957,8 +2957,8 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
-  TX_SIZE (*const inter_tx_size)[MI_BLOCK_SIZE] =
-    (TX_SIZE (*)[MI_BLOCK_SIZE])&mbmi->inter_tx_size[tx_row][tx_col];
+  TX_SIZE (*const inter_tx_size)[MAX_MIB_SIZE] =
+    (TX_SIZE (*)[MAX_MIB_SIZE])&mbmi->inter_tx_size[tx_row][tx_col];
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
   int64_t this_rd = INT64_MAX;
@@ -3128,10 +3128,10 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     int idx, idy;
     int block = 0;
     int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
-    ENTROPY_CONTEXT ctxa[2 * MI_BLOCK_SIZE];
-    ENTROPY_CONTEXT ctxl[2 * MI_BLOCK_SIZE];
-    TXFM_CONTEXT tx_above[MI_BLOCK_SIZE];
-    TXFM_CONTEXT tx_left[MI_BLOCK_SIZE];
+    ENTROPY_CONTEXT ctxa[2 * MAX_MIB_SIZE];
+    ENTROPY_CONTEXT ctxl[2 * MAX_MIB_SIZE];
+    TXFM_CONTEXT tx_above[MAX_MIB_SIZE];
+    TXFM_CONTEXT tx_left[MAX_MIB_SIZE];
 
     int pnrate = 0, pnskip = 1;
     int64_t pndist = 0, pnsse = 0;
@@ -3243,9 +3243,9 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   int64_t best_rd = INT64_MAX;
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
   const int is_inter = is_inter_block(mbmi);
-  TX_SIZE best_tx_size[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
+  TX_SIZE best_tx_size[MAX_MIB_SIZE][MAX_MIB_SIZE];
   TX_SIZE best_tx = TX_SIZES;
-  uint8_t best_blk_skip[MI_BLOCK_SIZE * MI_BLOCK_SIZE * 4];
+  uint8_t best_blk_skip[MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
   const int n4 = 1 << (num_pels_log2_lookup[bsize] - 4);
   int idx, idy;
   int prune = 0;
@@ -3428,8 +3428,8 @@ static int inter_block_uvrd(const VP10_COMP *cpi, MACROBLOCK *x,
     int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
     int pnrate = 0, pnskip = 1;
     int64_t pndist = 0, pnsse = 0;
-    ENTROPY_CONTEXT ta[2 * MI_BLOCK_SIZE];
-    ENTROPY_CONTEXT tl[2 * MI_BLOCK_SIZE];
+    ENTROPY_CONTEXT ta[2 * MAX_MIB_SIZE];
+    ENTROPY_CONTEXT tl[2 * MAX_MIB_SIZE];
 
     vp10_get_entropy_contexts(bsize, TX_4X4, pd, ta, tl);
 
@@ -6234,7 +6234,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int best_rate_y, best_rate_uv;
 #endif  // CONFIG_SUPERTX
 #if CONFIG_VAR_TX
-  uint8_t best_blk_skip[MAX_MB_PLANE][MI_BLOCK_SIZE * MI_BLOCK_SIZE * 4];
+  uint8_t best_blk_skip[MAX_MB_PLANE][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
 #endif  // CONFIG_VAR_TX
   int64_t best_distortion = INT64_MAX;
   unsigned int best_pred_var = UINT_MAX;
@@ -7445,8 +7445,8 @@ int vp10_active_v_edge(VP10_COMP *cpi, int mi_col, int mi_step) {
 // bars embedded in the stream.
 int vp10_active_edge_sb(VP10_COMP *cpi,
                        int mi_row, int mi_col) {
-  return vp10_active_h_edge(cpi, mi_row, MI_BLOCK_SIZE) ||
-         vp10_active_v_edge(cpi, mi_col, MI_BLOCK_SIZE);
+  return vp10_active_h_edge(cpi, mi_row, MAX_MIB_SIZE) ||
+         vp10_active_v_edge(cpi, mi_col, MAX_MIB_SIZE);
 }
 
 static void restore_uv_color_map(VP10_COMP *cpi, MACROBLOCK *x) {

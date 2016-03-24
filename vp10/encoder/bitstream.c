@@ -1514,7 +1514,8 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
   } else {
 #if CONFIG_VAR_TX
     xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+    xd->left_txfm_context =
+      xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 #endif
     pack_inter_mode_mvs(cpi, m,
 #if CONFIG_SUPERTX
@@ -1852,10 +1853,10 @@ static void write_modes(VP10_COMP *const cpi,
 
   vp10_zero_above_context(cm, mi_col_start, mi_col_end);
 
-  for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MI_BLOCK_SIZE) {
+  for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MAX_MIB_SIZE) {
     vp10_zero_left_context(xd);
 
-    for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MI_BLOCK_SIZE) {
+    for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MAX_MIB_SIZE) {
       write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, 0,
                              mi_row, mi_col, BLOCK_LARGEST);
     }
@@ -2551,9 +2552,9 @@ static void write_tile_info(VP10_COMMON *const cm,
 #if CONFIG_EXT_TILE
   // TODO(geza.lore): Dependent on CU_SIZE
   const int tile_width  =
-            mi_cols_aligned_to_sb(cm->tile_width) >> MI_BLOCK_SIZE_LOG2;
+            mi_cols_aligned_to_sb(cm->tile_width) >> MAX_MIB_SIZE_LOG2;
   const int tile_height =
-            mi_cols_aligned_to_sb(cm->tile_height) >> MI_BLOCK_SIZE_LOG2;
+            mi_cols_aligned_to_sb(cm->tile_height) >> MAX_MIB_SIZE_LOG2;
 
   assert(tile_width > 0 && tile_width <= 64);
   assert(tile_height > 0 && tile_height <= 64);

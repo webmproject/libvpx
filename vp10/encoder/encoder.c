@@ -789,8 +789,8 @@ void vp10_new_framerate(VP10_COMP *cpi, double framerate) {
 static void set_tile_limits(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
 #if CONFIG_EXT_TILE
-  cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 64) << MI_BLOCK_SIZE_LOG2;
-  cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 64) << MI_BLOCK_SIZE_LOG2;
+  cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 64) << MAX_MIB_SIZE_LOG2;
+  cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 64) << MAX_MIB_SIZE_LOG2;
 
   cm->tile_width  = VPXMIN(cm->tile_width, cm->mi_cols);
   cm->tile_height = VPXMIN(cm->tile_height, cm->mi_rows);

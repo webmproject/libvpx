@@ -332,7 +332,7 @@ typedef struct VP10Common {
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
 #if CONFIG_VAR_TX
   TXFM_CONTEXT *above_txfm_context;
-  TXFM_CONTEXT left_txfm_context[MI_BLOCK_SIZE];
+  TXFM_CONTEXT left_txfm_context[MAX_MIB_SIZE];
 #endif
   int above_context_alloc_cols;
 
@@ -408,7 +408,7 @@ static INLINE void ref_cnt_fb(RefCntBuffer *bufs, int *idx, int new_idx) {
 }
 
 static INLINE int mi_cols_aligned_to_sb(int n_mis) {
-  return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
+  return ALIGN_POWER_OF_TWO(n_mis, MAX_MIB_SIZE_LOG2);
 }
 
 static INLINE int frame_is_intra_only(const VP10_COMMON *const cm) {
@@ -440,7 +440,7 @@ static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
   const int above_idx = mi_col * 2;
-  const int left_idx = (mi_row * 2) & MI_MASK_2;
+  const int left_idx = (mi_row * 2) & MAX_MIB_MASK_2;
   int i;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblockd_plane *const pd = &xd->plane[i];
@@ -451,7 +451,7 @@ static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
 
 static INLINE int calc_mi_size(int len) {
   // len is in mi units.
-  return len + MI_BLOCK_SIZE;
+  return len + MAX_MIB_SIZE;
 }
 
 static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
@@ -517,7 +517,8 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
                                             BLOCK_SIZE subsize,
                                             BLOCK_SIZE bsize) {
   PARTITION_CONTEXT *const above_ctx = xd->above_seg_context + mi_col;
-  PARTITION_CONTEXT *const left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
+  PARTITION_CONTEXT *const left_ctx =
+    xd->left_seg_context + (mi_row & MAX_MIB_MASK);
 
 #if CONFIG_EXT_PARTITION_TYPES
   const int bw = num_8x8_blocks_wide_lookup[bsize];
@@ -581,7 +582,8 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
                                           int mi_row, int mi_col,
                                           BLOCK_SIZE bsize) {
   const PARTITION_CONTEXT *above_ctx = xd->above_seg_context + mi_col;
-  const PARTITION_CONTEXT *left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
+  const PARTITION_CONTEXT *left_ctx =
+    xd->left_seg_context + (mi_row & MAX_MIB_MASK);
   const int bsl = mi_width_log2_lookup[bsize];
   int above = (*above_ctx >> bsl) & 1 , left = (*left_ctx >> bsl) & 1;
 

@@ -260,7 +260,7 @@ static int has_top_right(const MACROBLOCKD *xd,
   // For each 4x4 group of blocks, when the bottom right is decoded the blocks
   // to the right have not been decoded therefore the bottom right does
   // not have a top right
-  while (bs < MI_BLOCK_SIZE) {
+  while (bs < MAX_MIB_SIZE) {
     if (mi_col & bs) {
       if ((mi_col & (2 * bs)) && (mi_row & (2 * bs))) {
         has_tr = 0;
