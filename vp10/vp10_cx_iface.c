@@ -1158,6 +1158,14 @@ static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
   }
 }
 
+static vpx_codec_err_t ctrl_use_reference(vpx_codec_alg_priv_t *ctx,
+                                          va_list args) {
+  const int reference_flag = va_arg(args, int);
+
+  vp10_use_as_reference(ctx->cpi, reference_flag);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t ctrl_set_roi_map(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
   (void)ctx;
@@ -1254,6 +1262,7 @@ static vpx_codec_err_t ctrl_set_render_size(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,                ctrl_copy_reference},
+  {VP8E_USE_REFERENCE,                ctrl_use_reference},
 
   // Setters
   {VP8_SET_REFERENCE,                 ctrl_set_reference},
