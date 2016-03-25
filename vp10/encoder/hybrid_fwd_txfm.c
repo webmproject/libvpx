@@ -62,7 +62,7 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
     case H_ADST:
     case V_FLIPADST:
     case H_FLIPADST:
-      vp10_fht4x4_c(src_diff, coeff, diff_stride, tx_type);
+      vp10_fht4x4(src_diff, coeff, diff_stride, tx_type);
       break;
     case IDTX:
       vp10_fwd_idtx_c(src_diff, coeff, diff_stride, 4, tx_type);
