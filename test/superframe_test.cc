@@ -47,6 +47,7 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
                                   libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
+      encoder->Control(VP8E_SET_CPUUSED, 2);
     }
   }
 
