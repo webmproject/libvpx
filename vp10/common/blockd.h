@@ -519,7 +519,11 @@ static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
 int pick_intra_filter(int angle);
 #endif  // CONFIG_EXT_INTRA
 
+#if CONFIG_EXT_TILE
+#define FIXED_TX_TYPE 1
+#else
 #define FIXED_TX_TYPE 0
+#endif
 
 static INLINE TX_TYPE get_default_tx_type(PLANE_TYPE plane_type,
                                           const MACROBLOCKD *xd,

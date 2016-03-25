@@ -399,7 +399,13 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
 
   swap_frame_buffers(pbi);
 
-  vpx_extend_frame_inner_borders(cm->frame_to_show);
+#if CONFIG_EXT_TILE
+  // For now, we only extend the frame borders when the whole frame is decoded.
+  // Later, if needed, extend the border for the decoded tile on the frame
+  // border.
+  if (pbi->dec_tile_row == -1 && pbi->dec_tile_col == -1)
+#endif  // CONFIG_EXT_TILE
+    vpx_extend_frame_inner_borders(cm->frame_to_show);
 
   vpx_clear_system_state();
 

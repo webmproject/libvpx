@@ -141,6 +141,12 @@ extern vpx_codec_iface_t *vpx_codec_vp10_cx(void);
  * \sa #vpx_codec_control
  */
 enum vp8e_enc_control_id {
+  /*!\brief Codec control function to set which reference frame encoder can use.
+   *
+   * Supported in codecs: VP8, VP9
+   */
+  VP8E_USE_REFERENCE         = 7,
+
   /*!\brief Codec control function to pass an ROI map to encoder.
    *
    * Supported in codecs: VP8, VP9
@@ -703,6 +709,8 @@ typedef struct vpx_svc_ref_frame_config {
  *
  */
 
+VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_USE_REFERENCE, int)
+#define VPX_CTRL_VP8E_USE_REFERENCE
 VPX_CTRL_USE_TYPE(VP8E_SET_FRAME_FLAGS,        int)
 #define VPX_CTRL_VP8E_SET_FRAME_FLAGS
 VPX_CTRL_USE_TYPE(VP8E_SET_TEMPORAL_LAYER_ID,  int)
