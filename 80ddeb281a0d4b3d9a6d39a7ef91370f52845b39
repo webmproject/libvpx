@@ -33,6 +33,24 @@
       "revId": "80ddeb281a0d4b3d9a6d39a7ef91370f52845b39",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "313f85ea_bd81bf77",
+        "filename": "libs.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-25T22:10:13Z",
+      "side": 1,
+      "message": "googletest is here, so it\u0027s fine to keep them gathered",
+      "parentUuid": "1c39b6b4_50e65230",
+      "revId": "80ddeb281a0d4b3d9a6d39a7ef91370f52845b39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
