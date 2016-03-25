@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "114d2187_249d7287",
+        "filename": "vp10/decoder/bitreader.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-03-25T07:34:34Z",
+      "side": 1,
+      "message": "no longer needed here, since it\u0027s in ans.h now",
+      "range": {
+        "startLine": 22,
+        "startChar": 1,
+        "endLine": 22,
+        "endChar": 8
+      },
+      "revId": "c5c16684dbbad039072a1ee260ff484dcb1af474",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
