@@ -2727,11 +2727,13 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
   const int tile_rows = cm->tile_rows;
 #if CONFIG_EXT_TILE
   const int have_tiles = tile_cols * tile_rows > 1;
-#endif  // COFIG_EXT_TILE
+#endif  // CONFIG_EXT_TILE
+#if CONFIG_ANS
   const int ans_window_size = get_token_alloc(cm->mb_rows, cm->mb_cols) * 3;
-  struct buffered_ans_symbol *uco_ans_buf =
-      malloc(ans_window_size * sizeof(*uco_ans_buf));
-  assert(uco_ans_buf);
+  struct buffered_ans_symbol *uco_ans_buf;
+  CHECK_MEM_ERROR(cm, uco_ans_buf,
+                  vpx_malloc(ans_window_size * sizeof(*uco_ans_buf)));
+#endif  // CONFIG_ANS
 
   *max_tile_size = 0;
   *max_tile_col_size = 0;
@@ -2883,7 +2885,7 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
 #endif  // CONFIG_EXT_TILE
 
 #if CONFIG_ANS
-  free(uco_ans_buf);
+  vpx_free(uco_ans_buf);
 #endif  // CONFIG_ANS
   return total_size;
 }
