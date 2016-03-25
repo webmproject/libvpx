@@ -400,6 +400,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH;
     sf->tx_size_search_method = is_keyframe ? USE_LARGESTALL : USE_TX_8X8;
     sf->simple_model_rd_from_var = 1;
+    if (cpi->oxcf.rc_mode == VPX_VBR)
+      sf->mv.search_method = NSTEP;
 
     if (!is_keyframe) {
       int i;
