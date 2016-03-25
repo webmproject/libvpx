@@ -9,6 +9,7 @@
  */
 
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "./vp8_rtcd.h"
@@ -153,6 +154,8 @@ static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
                                             void *decrypt_state)
 {
     vpx_codec_err_t res = VPX_CODEC_OK;
+
+    assert(data != NULL);
 
     if(data + data_sz <= data)
     {
