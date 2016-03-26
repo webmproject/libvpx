@@ -64,7 +64,7 @@ typedef struct {
 
 typedef struct {
   uint8_t best_palette_color_map[4096];
-  double kmeans_data_buf[4096];
+  double kmeans_data_buf[2 * 4096];
   uint8_t kmeans_indices_buf[4096];
   uint8_t kmeans_pre_indices_buf[4096];
 } PALETTE_BUFFER;
