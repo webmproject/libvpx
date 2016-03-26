@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51e079e0_61b4d0f6",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-26T02:19:17Z",
+      "side": 1,
+      "message": "this has the least amount of impact, though some of the code around data/data_sz could be cleaned up here since the earlier change to vpx_decoder.c made the checks here for !data \u0026\u0026 data_sz \u003e 0 impossible",
+      "revId": "1bf7a0fb29c8af93a9d65f8082bab03cdb22d53d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
