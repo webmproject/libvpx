@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51e079e0_9eaf7def",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-03-26T00:36:15Z",
+      "side": 1,
+      "message": "this was deprecated previously and removed because a combination of VP8_EFLAGS_* should handle this.\n\n-/* These controls have been deprecated in favor of the flags parameter to\n- * vpx_codec_encode(). See the definition of VP8_EFLAG_* above.\n- */\n-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_ENTROPY,            int)\n-#define VPX_CTRL_VP8E_UPD_ENTROPY\n-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_REFERENCE,          int)\n-#define VPX_CTRL_VP8E_UPD_REFERENCE\n-VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_USE_REFERENCE,          int)\n-#define VPX_CTRL_VP8E_USE_REFERENC",
+      "revId": "bdcc14051b044938c8483d19dad8bbe1618df263",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
