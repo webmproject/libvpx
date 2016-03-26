@@ -109,5 +109,5 @@ VP9_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
 
 VP10_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
     ::testing::Values(::libvpx_test::kTwoPassGood),
-    ::testing::Values(CONFIG_MISC_FIXES)));
+    ::testing::Values(1)));
 }  // namespace
