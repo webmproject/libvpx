@@ -6,21 +6,19 @@
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
 
-#include "mkvmuxer/mkvmuxer.h"
+#include "mkvmuxer.hpp"
 
-#include <cfloat>
 #include <climits>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <memory>
 #include <new>
-#include <vector>
 
-#include "common/webmids.h"
-#include "mkvmuxer/mkvmuxerutil.h"
-#include "mkvmuxer/mkvwriter.h"
-#include "mkvparser/mkvparser.h"
+#include "mkvmuxerutil.hpp"
+#include "mkvparser.hpp"
+#include "mkvwriter.hpp"
+#include "webmids.hpp"
 
 #ifdef _MSC_VER
 // Disable MSVC warnings that suggest making code non-portable.
@@ -28,9 +26,6 @@
 #endif
 
 namespace mkvmuxer {
-
-const float MasteringMetadata::kValueNotPresent = FLT_MAX;
-const uint64_t Colour::kValueNotPresent = UINT64_MAX;
 
 namespace {
 // Deallocate the string designated by |dst|, and then copy the |src|
@@ -60,20 +55,6 @@ bool StrCpy(const char* src, char** dst_ptr) {
   strcpy(dst, src);  // NOLINT
   return true;
 }
-
-typedef std::auto_ptr<PrimaryChromaticity> PrimaryChromaticityPtr;
-bool CopyChromaticity(const PrimaryChromaticity* src,
-                      PrimaryChromaticityPtr* dst) {
-  if (!dst)
-    return false;
-
-  dst->reset(new (std::nothrow) PrimaryChromaticity(src->x, src->y));
-  if (!dst->get())
-    return false;
-
-  return true;
-}
-
 }  // namespace
 
 ///////////////////////////////////////////////////////////////
@@ -84,31 +65,31 @@ IMkvWriter::IMkvWriter() {}
 
 IMkvWriter::~IMkvWriter() {}
 
-bool WriteEbmlHeader(IMkvWriter* writer, uint64_t doc_type_version) {
+bool WriteEbmlHeader(IMkvWriter* writer, uint64 doc_type_version) {
   // Level 0
-  uint64_t size = EbmlElementSize(libwebm::kMkvEBMLVersion, UINT64_C(1));
-  size += EbmlElementSize(libwebm::kMkvEBMLReadVersion, UINT64_C(1));
-  size += EbmlElementSize(libwebm::kMkvEBMLMaxIDLength, UINT64_C(4));
-  size += EbmlElementSize(libwebm::kMkvEBMLMaxSizeLength, UINT64_C(8));
-  size += EbmlElementSize(libwebm::kMkvDocType, "webm");
-  size += EbmlElementSize(libwebm::kMkvDocTypeVersion, doc_type_version);
-  size += EbmlElementSize(libwebm::kMkvDocTypeReadVersion, UINT64_C(2));
+  uint64 size = EbmlElementSize(kMkvEBMLVersion, 1ULL);
+  size += EbmlElementSize(kMkvEBMLReadVersion, 1ULL);
+  size += EbmlElementSize(kMkvEBMLMaxIDLength, 4ULL);
+  size += EbmlElementSize(kMkvEBMLMaxSizeLength, 8ULL);
+  size += EbmlElementSize(kMkvDocType, "webm");
+  size += EbmlElementSize(kMkvDocTypeVersion, doc_type_version);
+  size += EbmlElementSize(kMkvDocTypeReadVersion, 2ULL);
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvEBML, size))
+  if (!WriteEbmlMasterElement(writer, kMkvEBML, size))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvEBMLVersion, UINT64_C(1)))
+  if (!WriteEbmlElement(writer, kMkvEBMLVersion, 1ULL))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvEBMLReadVersion, UINT64_C(1)))
+  if (!WriteEbmlElement(writer, kMkvEBMLReadVersion, 1ULL))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvEBMLMaxIDLength, UINT64_C(4)))
+  if (!WriteEbmlElement(writer, kMkvEBMLMaxIDLength, 4ULL))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvEBMLMaxSizeLength, UINT64_C(8)))
+  if (!WriteEbmlElement(writer, kMkvEBMLMaxSizeLength, 8ULL))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvDocType, "webm"))
+  if (!WriteEbmlElement(writer, kMkvDocType, "webm"))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvDocTypeVersion, doc_type_version))
+  if (!WriteEbmlElement(writer, kMkvDocTypeVersion, doc_type_version))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvDocTypeReadVersion, UINT64_C(2)))
+  if (!WriteEbmlElement(writer, kMkvDocTypeReadVersion, 2ULL))
     return false;
 
   return true;
@@ -119,16 +100,16 @@ bool WriteEbmlHeader(IMkvWriter* writer) {
 }
 
 bool ChunkedCopy(mkvparser::IMkvReader* source, mkvmuxer::IMkvWriter* dst,
-                 int64_t start, int64_t size) {
+                 mkvmuxer::int64 start, int64 size) {
   // TODO(vigneshv): Check if this is a reasonable value.
-  const uint32_t kBufSize = 2048;
-  uint8_t* buf = new uint8_t[kBufSize];
-  int64_t offset = start;
+  const uint32 kBufSize = 2048;
+  uint8* buf = new uint8[kBufSize];
+  int64 offset = start;
   while (size > 0) {
-    const int64_t read_len = (size > kBufSize) ? kBufSize : size;
+    const int64 read_len = (size > kBufSize) ? kBufSize : size;
     if (source->Read(offset, static_cast<long>(read_len), buf))
       return false;
-    dst->Write(buf, static_cast<uint32_t>(read_len));
+    dst->Write(buf, static_cast<uint32>(read_len));
     offset += read_len;
     size -= read_len;
   }
@@ -145,7 +126,6 @@ Frame::Frame()
       additional_(NULL),
       additional_length_(0),
       duration_(0),
-      duration_set_(false),
       frame_(NULL),
       is_key_(false),
       length_(0),
@@ -178,19 +158,16 @@ bool Frame::CopyFrom(const Frame& frame) {
     return false;
   }
   duration_ = frame.duration();
-  duration_set_ = frame.duration_set();
   is_key_ = frame.is_key();
   track_number_ = frame.track_number();
   timestamp_ = frame.timestamp();
   discard_padding_ = frame.discard_padding();
-  reference_block_timestamp_ = frame.reference_block_timestamp();
-  reference_block_timestamp_set_ = frame.reference_block_timestamp_set();
   return true;
 }
 
-bool Frame::Init(const uint8_t* frame, uint64_t length) {
-  uint8_t* const data =
-      new (std::nothrow) uint8_t[static_cast<size_t>(length)];  // NOLINT
+bool Frame::Init(const uint8* frame, uint64 length) {
+  uint8* const data =
+      new (std::nothrow) uint8[static_cast<size_t>(length)];  // NOLINT
   if (!data)
     return false;
 
@@ -202,10 +179,10 @@ bool Frame::Init(const uint8_t* frame, uint64_t length) {
   return true;
 }
 
-bool Frame::AddAdditionalData(const uint8_t* additional, uint64_t length,
-                              uint64_t add_id) {
-  uint8_t* const data =
-      new (std::nothrow) uint8_t[static_cast<size_t>(length)];  // NOLINT
+bool Frame::AddAdditionalData(const uint8* additional, uint64 length,
+                              uint64 add_id) {
+  uint8* const data =
+      new (std::nothrow) uint8[static_cast<size_t>(length)];  // NOLINT
   if (!data)
     return false;
 
@@ -239,12 +216,7 @@ bool Frame::CanBeSimpleBlock() const {
   return additional_ == NULL && discard_padding_ == 0 && duration_ == 0;
 }
 
-void Frame::set_duration(uint64_t duration) {
-  duration_ = duration;
-  duration_set_ = true;
-}
-
-void Frame::set_reference_block_timestamp(int64_t reference_block_timestamp) {
+void Frame::set_reference_block_timestamp(int64 reference_block_timestamp) {
   reference_block_timestamp_ = reference_block_timestamp;
   reference_block_timestamp_set_ = true;
 }
@@ -266,64 +238,61 @@ bool CuePoint::Write(IMkvWriter* writer) const {
   if (!writer || track_ < 1 || cluster_pos_ < 1)
     return false;
 
-  uint64_t size =
-      EbmlElementSize(libwebm::kMkvCueClusterPosition, cluster_pos_);
-  size += EbmlElementSize(libwebm::kMkvCueTrack, track_);
+  uint64 size = EbmlElementSize(kMkvCueClusterPosition, cluster_pos_);
+  size += EbmlElementSize(kMkvCueTrack, track_);
   if (output_block_number_ && block_number_ > 1)
-    size += EbmlElementSize(libwebm::kMkvCueBlockNumber, block_number_);
-  const uint64_t track_pos_size =
-      EbmlMasterElementSize(libwebm::kMkvCueTrackPositions, size) + size;
-  const uint64_t payload_size =
-      EbmlElementSize(libwebm::kMkvCueTime, time_) + track_pos_size;
+    size += EbmlElementSize(kMkvCueBlockNumber, block_number_);
+  const uint64 track_pos_size =
+      EbmlMasterElementSize(kMkvCueTrackPositions, size) + size;
+  const uint64 payload_size =
+      EbmlElementSize(kMkvCueTime, time_) + track_pos_size;
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvCuePoint, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvCuePoint, payload_size))
     return false;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvCueTime, time_))
+  if (!WriteEbmlElement(writer, kMkvCueTime, time_))
     return false;
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvCueTrackPositions, size))
+  if (!WriteEbmlMasterElement(writer, kMkvCueTrackPositions, size))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvCueTrack, track_))
+  if (!WriteEbmlElement(writer, kMkvCueTrack, track_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvCueClusterPosition, cluster_pos_))
+  if (!WriteEbmlElement(writer, kMkvCueClusterPosition, cluster_pos_))
     return false;
   if (output_block_number_ && block_number_ > 1)
-    if (!WriteEbmlElement(writer, libwebm::kMkvCueBlockNumber, block_number_))
+    if (!WriteEbmlElement(writer, kMkvCueBlockNumber, block_number_))
       return false;
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0)
     return false;
 
-  if (stop_position - payload_position != static_cast<int64_t>(payload_size))
+  if (stop_position - payload_position != static_cast<int64>(payload_size))
     return false;
 
   return true;
 }
 
-uint64_t CuePoint::PayloadSize() const {
-  uint64_t size =
-      EbmlElementSize(libwebm::kMkvCueClusterPosition, cluster_pos_);
-  size += EbmlElementSize(libwebm::kMkvCueTrack, track_);
+uint64 CuePoint::PayloadSize() const {
+  uint64 size = EbmlElementSize(kMkvCueClusterPosition, cluster_pos_);
+  size += EbmlElementSize(kMkvCueTrack, track_);
   if (output_block_number_ && block_number_ > 1)
-    size += EbmlElementSize(libwebm::kMkvCueBlockNumber, block_number_);
-  const uint64_t track_pos_size =
-      EbmlMasterElementSize(libwebm::kMkvCueTrackPositions, size) + size;
-  const uint64_t payload_size =
-      EbmlElementSize(libwebm::kMkvCueTime, time_) + track_pos_size;
+    size += EbmlElementSize(kMkvCueBlockNumber, block_number_);
+  const uint64 track_pos_size =
+      EbmlMasterElementSize(kMkvCueTrackPositions, size) + size;
+  const uint64 payload_size =
+      EbmlElementSize(kMkvCueTime, time_) + track_pos_size;
 
   return payload_size;
 }
 
-uint64_t CuePoint::Size() const {
-  const uint64_t payload_size = PayloadSize();
-  return EbmlMasterElementSize(libwebm::kMkvCuePoint, payload_size) +
-         payload_size;
+uint64 CuePoint::Size() const {
+  const uint64 payload_size = PayloadSize();
+  return EbmlMasterElementSize(kMkvCuePoint, payload_size) + payload_size;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -338,7 +307,7 @@ Cues::Cues()
 
 Cues::~Cues() {
   if (cue_entries_) {
-    for (int32_t i = 0; i < cue_entries_size_; ++i) {
+    for (int32 i = 0; i < cue_entries_size_; ++i) {
       CuePoint* const cue = cue_entries_[i];
       delete cue;
     }
@@ -352,7 +321,7 @@ bool Cues::AddCue(CuePoint* cue) {
 
   if ((cue_entries_size_ + 1) > cue_entries_capacity_) {
     // Add more CuePoints.
-    const int32_t new_capacity =
+    const int32 new_capacity =
         (!cue_entries_capacity_) ? 2 : cue_entries_capacity_ * 2;
 
     if (new_capacity < 1)
@@ -363,7 +332,7 @@ bool Cues::AddCue(CuePoint* cue) {
     if (!cues)
       return false;
 
-    for (int32_t i = 0; i < cue_entries_size_; ++i) {
+    for (int32 i = 0; i < cue_entries_size_; ++i) {
       cues[i] = cue_entries_[i];
     }
 
@@ -378,7 +347,7 @@ bool Cues::AddCue(CuePoint* cue) {
   return true;
 }
 
-CuePoint* Cues::GetCueByIndex(int32_t index) const {
+CuePoint* Cues::GetCueByIndex(int32 index) const {
   if (cue_entries_ == NULL)
     return NULL;
 
@@ -388,11 +357,11 @@ CuePoint* Cues::GetCueByIndex(int32_t index) const {
   return cue_entries_[index];
 }
 
-uint64_t Cues::Size() {
-  uint64_t size = 0;
-  for (int32_t i = 0; i < cue_entries_size_; ++i)
+uint64 Cues::Size() {
+  uint64 size = 0;
+  for (int32 i = 0; i < cue_entries_size_; ++i)
     size += GetCueByIndex(i)->Size();
-  size += EbmlMasterElementSize(libwebm::kMkvCues, size);
+  size += EbmlMasterElementSize(kMkvCues, size);
   return size;
 }
 
@@ -400,8 +369,8 @@ bool Cues::Write(IMkvWriter* writer) const {
   if (!writer)
     return false;
 
-  uint64_t size = 0;
-  for (int32_t i = 0; i < cue_entries_size_; ++i) {
+  uint64 size = 0;
+  for (int32 i = 0; i < cue_entries_size_; ++i) {
     const CuePoint* const cue = GetCueByIndex(i);
 
     if (!cue)
@@ -410,25 +379,25 @@ bool Cues::Write(IMkvWriter* writer) const {
     size += cue->Size();
   }
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvCues, size))
+  if (!WriteEbmlMasterElement(writer, kMkvCues, size))
     return false;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  for (int32_t i = 0; i < cue_entries_size_; ++i) {
+  for (int32 i = 0; i < cue_entries_size_; ++i) {
     const CuePoint* const cue = GetCueByIndex(i);
 
     if (!cue->Write(writer))
       return false;
   }
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0)
     return false;
 
-  if (stop_position - payload_position != static_cast<int64_t>(size))
+  if (stop_position - payload_position != static_cast<int64>(size))
     return false;
 
   return true;
@@ -440,40 +409,36 @@ bool Cues::Write(IMkvWriter* writer) const {
 
 ContentEncAESSettings::ContentEncAESSettings() : cipher_mode_(kCTR) {}
 
-uint64_t ContentEncAESSettings::Size() const {
-  const uint64_t payload = PayloadSize();
-  const uint64_t size =
-      EbmlMasterElementSize(libwebm::kMkvContentEncAESSettings, payload) +
-      payload;
+uint64 ContentEncAESSettings::Size() const {
+  const uint64 payload = PayloadSize();
+  const uint64 size =
+      EbmlMasterElementSize(kMkvContentEncAESSettings, payload) + payload;
   return size;
 }
 
 bool ContentEncAESSettings::Write(IMkvWriter* writer) const {
-  const uint64_t payload = PayloadSize();
+  const uint64 payload = PayloadSize();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvContentEncAESSettings,
-                              payload))
+  if (!WriteEbmlMasterElement(writer, kMkvContentEncAESSettings, payload))
     return false;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvAESSettingsCipherMode,
-                        cipher_mode_))
+  if (!WriteEbmlElement(writer, kMkvAESSettingsCipherMode, cipher_mode_))
     return false;
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64_t>(payload))
+      stop_position - payload_position != static_cast<int64>(payload))
     return false;
 
   return true;
 }
 
-uint64_t ContentEncAESSettings::PayloadSize() const {
-  uint64_t size =
-      EbmlElementSize(libwebm::kMkvAESSettingsCipherMode, cipher_mode_);
+uint64 ContentEncAESSettings::PayloadSize() const {
+  uint64 size = EbmlElementSize(kMkvAESSettingsCipherMode, cipher_mode_);
   return size;
 }
 
@@ -491,14 +456,14 @@ ContentEncoding::ContentEncoding()
 
 ContentEncoding::~ContentEncoding() { delete[] enc_key_id_; }
 
-bool ContentEncoding::SetEncryptionID(const uint8_t* id, uint64_t length) {
+bool ContentEncoding::SetEncryptionID(const uint8* id, uint64 length) {
   if (!id || length < 1)
     return false;
 
   delete[] enc_key_id_;
 
   enc_key_id_ =
-      new (std::nothrow) uint8_t[static_cast<size_t>(length)];  // NOLINT
+      new (std::nothrow) uint8[static_cast<size_t>(length)];  // NOLINT
   if (!enc_key_id_)
     return false;
 
@@ -508,89 +473,79 @@ bool ContentEncoding::SetEncryptionID(const uint8_t* id, uint64_t length) {
   return true;
 }
 
-uint64_t ContentEncoding::Size() const {
-  const uint64_t encryption_size = EncryptionSize();
-  const uint64_t encoding_size = EncodingSize(0, encryption_size);
-  const uint64_t encodings_size =
-      EbmlMasterElementSize(libwebm::kMkvContentEncoding, encoding_size) +
-      encoding_size;
+uint64 ContentEncoding::Size() const {
+  const uint64 encryption_size = EncryptionSize();
+  const uint64 encoding_size = EncodingSize(0, encryption_size);
+  const uint64 encodings_size =
+      EbmlMasterElementSize(kMkvContentEncoding, encoding_size) + encoding_size;
 
   return encodings_size;
 }
 
 bool ContentEncoding::Write(IMkvWriter* writer) const {
-  const uint64_t encryption_size = EncryptionSize();
-  const uint64_t encoding_size = EncodingSize(0, encryption_size);
-  const uint64_t size =
-      EbmlMasterElementSize(libwebm::kMkvContentEncoding, encoding_size) +
-      encoding_size;
+  const uint64 encryption_size = EncryptionSize();
+  const uint64 encoding_size = EncodingSize(0, encryption_size);
+  const uint64 size =
+      EbmlMasterElementSize(kMkvContentEncoding, encoding_size) + encoding_size;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvContentEncoding,
-                              encoding_size))
+  if (!WriteEbmlMasterElement(writer, kMkvContentEncoding, encoding_size))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvContentEncodingOrder,
-                        encoding_order_))
+  if (!WriteEbmlElement(writer, kMkvContentEncodingOrder, encoding_order_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvContentEncodingScope,
-                        encoding_scope_))
+  if (!WriteEbmlElement(writer, kMkvContentEncodingScope, encoding_scope_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvContentEncodingType,
-                        encoding_type_))
+  if (!WriteEbmlElement(writer, kMkvContentEncodingType, encoding_type_))
     return false;
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvContentEncryption,
-                              encryption_size))
+  if (!WriteEbmlMasterElement(writer, kMkvContentEncryption, encryption_size))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvContentEncAlgo, enc_algo_))
+  if (!WriteEbmlElement(writer, kMkvContentEncAlgo, enc_algo_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvContentEncKeyID, enc_key_id_,
+  if (!WriteEbmlElement(writer, kMkvContentEncKeyID, enc_key_id_,
                         enc_key_id_length_))
     return false;
 
   if (!enc_aes_settings_.Write(writer))
     return false;
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64_t>(size))
+      stop_position - payload_position != static_cast<int64>(size))
     return false;
 
   return true;
 }
 
-uint64_t ContentEncoding::EncodingSize(uint64_t compresion_size,
-                                       uint64_t encryption_size) const {
+uint64 ContentEncoding::EncodingSize(uint64 compresion_size,
+                                     uint64 encryption_size) const {
   // TODO(fgalligan): Add support for compression settings.
   if (compresion_size != 0)
     return 0;
 
-  uint64_t encoding_size = 0;
+  uint64 encoding_size = 0;
 
   if (encryption_size > 0) {
     encoding_size +=
-        EbmlMasterElementSize(libwebm::kMkvContentEncryption, encryption_size) +
+        EbmlMasterElementSize(kMkvContentEncryption, encryption_size) +
         encryption_size;
   }
-  encoding_size +=
-      EbmlElementSize(libwebm::kMkvContentEncodingType, encoding_type_);
-  encoding_size +=
-      EbmlElementSize(libwebm::kMkvContentEncodingScope, encoding_scope_);
-  encoding_size +=
-      EbmlElementSize(libwebm::kMkvContentEncodingOrder, encoding_order_);
+  encoding_size += EbmlElementSize(kMkvContentEncodingType, encoding_type_);
+  encoding_size += EbmlElementSize(kMkvContentEncodingScope, encoding_scope_);
+  encoding_size += EbmlElementSize(kMkvContentEncodingOrder, encoding_order_);
 
   return encoding_size;
 }
 
-uint64_t ContentEncoding::EncryptionSize() const {
-  const uint64_t aes_size = enc_aes_settings_.Size();
+uint64 ContentEncoding::EncryptionSize() const {
+  const uint64 aes_size = enc_aes_settings_.Size();
 
-  uint64_t encryption_size = EbmlElementSize(libwebm::kMkvContentEncKeyID,
-                                             enc_key_id_, enc_key_id_length_);
-  encryption_size += EbmlElementSize(libwebm::kMkvContentEncAlgo, enc_algo_);
+  uint64 encryption_size =
+      EbmlElementSize(kMkvContentEncKeyID, enc_key_id_, enc_key_id_length_);
+  encryption_size += EbmlElementSize(kMkvContentEncAlgo, enc_algo_);
 
   return encryption_size + aes_size;
 }
@@ -622,7 +577,7 @@ Track::~Track() {
   delete[] name_;
 
   if (content_encoding_entries_) {
-    for (uint32_t i = 0; i < content_encoding_entries_size_; ++i) {
+    for (uint32 i = 0; i < content_encoding_entries_size_; ++i) {
       ContentEncoding* const encoding = content_encoding_entries_[i];
       delete encoding;
     }
@@ -631,7 +586,7 @@ Track::~Track() {
 }
 
 bool Track::AddContentEncoding() {
-  const uint32_t count = content_encoding_entries_size_ + 1;
+  const uint32 count = content_encoding_entries_size_ + 1;
 
   ContentEncoding** const content_encoding_entries =
       new (std::nothrow) ContentEncoding*[count];  // NOLINT
@@ -645,7 +600,7 @@ bool Track::AddContentEncoding() {
     return false;
   }
 
-  for (uint32_t i = 0; i < content_encoding_entries_size_; ++i) {
+  for (uint32 i = 0; i < content_encoding_entries_size_; ++i) {
     content_encoding_entries[i] = content_encoding_entries_[i];
   }
 
@@ -657,7 +612,7 @@ bool Track::AddContentEncoding() {
   return true;
 }
 
-ContentEncoding* Track::GetContentEncodingByIndex(uint32_t index) const {
+ContentEncoding* Track::GetContentEncodingByIndex(uint32 index) const {
   if (content_encoding_entries_ == NULL)
     return NULL;
 
@@ -667,47 +622,46 @@ ContentEncoding* Track::GetContentEncodingByIndex(uint32_t index) const {
   return content_encoding_entries_[index];
 }
 
-uint64_t Track::PayloadSize() const {
-  uint64_t size = EbmlElementSize(libwebm::kMkvTrackNumber, number_);
-  size += EbmlElementSize(libwebm::kMkvTrackUID, uid_);
-  size += EbmlElementSize(libwebm::kMkvTrackType, type_);
+uint64 Track::PayloadSize() const {
+  uint64 size = EbmlElementSize(kMkvTrackNumber, number_);
+  size += EbmlElementSize(kMkvTrackUID, uid_);
+  size += EbmlElementSize(kMkvTrackType, type_);
   if (codec_id_)
-    size += EbmlElementSize(libwebm::kMkvCodecID, codec_id_);
+    size += EbmlElementSize(kMkvCodecID, codec_id_);
   if (codec_private_)
-    size += EbmlElementSize(libwebm::kMkvCodecPrivate, codec_private_,
+    size += EbmlElementSize(kMkvCodecPrivate, codec_private_,
                             codec_private_length_);
   if (language_)
-    size += EbmlElementSize(libwebm::kMkvLanguage, language_);
+    size += EbmlElementSize(kMkvLanguage, language_);
   if (name_)
-    size += EbmlElementSize(libwebm::kMkvName, name_);
+    size += EbmlElementSize(kMkvName, name_);
   if (max_block_additional_id_)
-    size += EbmlElementSize(libwebm::kMkvMaxBlockAdditionID,
-                            max_block_additional_id_);
+    size += EbmlElementSize(kMkvMaxBlockAdditionID, max_block_additional_id_);
   if (codec_delay_)
-    size += EbmlElementSize(libwebm::kMkvCodecDelay, codec_delay_);
+    size += EbmlElementSize(kMkvCodecDelay, codec_delay_);
   if (seek_pre_roll_)
-    size += EbmlElementSize(libwebm::kMkvSeekPreRoll, seek_pre_roll_);
+    size += EbmlElementSize(kMkvSeekPreRoll, seek_pre_roll_);
   if (default_duration_)
-    size += EbmlElementSize(libwebm::kMkvDefaultDuration, default_duration_);
+    size += EbmlElementSize(kMkvDefaultDuration, default_duration_);
 
   if (content_encoding_entries_size_ > 0) {
-    uint64_t content_encodings_size = 0;
-    for (uint32_t i = 0; i < content_encoding_entries_size_; ++i) {
+    uint64 content_encodings_size = 0;
+    for (uint32 i = 0; i < content_encoding_entries_size_; ++i) {
       ContentEncoding* const encoding = content_encoding_entries_[i];
       content_encodings_size += encoding->Size();
     }
 
-    size += EbmlMasterElementSize(libwebm::kMkvContentEncodings,
-                                  content_encodings_size) +
-            content_encodings_size;
+    size +=
+        EbmlMasterElementSize(kMkvContentEncodings, content_encodings_size) +
+        content_encodings_size;
   }
 
   return size;
 }
 
-uint64_t Track::Size() const {
-  uint64_t size = PayloadSize();
-  size += EbmlMasterElementSize(libwebm::kMkvTrackEntry, size);
+uint64 Track::Size() const {
+  uint64 size = PayloadSize();
+  size += EbmlMasterElementSize(kMkvTrackEntry, size);
   return size;
 }
 
@@ -721,97 +675,95 @@ bool Track::Write(IMkvWriter* writer) const {
 
   // |size| may be bigger than what is written out in this function because
   // derived classes may write out more data in the Track element.
-  const uint64_t payload_size = PayloadSize();
+  const uint64 payload_size = PayloadSize();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvTrackEntry, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvTrackEntry, payload_size))
     return false;
 
-  uint64_t size = EbmlElementSize(libwebm::kMkvTrackNumber, number_);
-  size += EbmlElementSize(libwebm::kMkvTrackUID, uid_);
-  size += EbmlElementSize(libwebm::kMkvTrackType, type_);
+  uint64 size = EbmlElementSize(kMkvTrackNumber, number_);
+  size += EbmlElementSize(kMkvTrackUID, uid_);
+  size += EbmlElementSize(kMkvTrackType, type_);
   if (codec_id_)
-    size += EbmlElementSize(libwebm::kMkvCodecID, codec_id_);
+    size += EbmlElementSize(kMkvCodecID, codec_id_);
   if (codec_private_)
-    size += EbmlElementSize(libwebm::kMkvCodecPrivate, codec_private_,
+    size += EbmlElementSize(kMkvCodecPrivate, codec_private_,
                             codec_private_length_);
   if (language_)
-    size += EbmlElementSize(libwebm::kMkvLanguage, language_);
+    size += EbmlElementSize(kMkvLanguage, language_);
   if (name_)
-    size += EbmlElementSize(libwebm::kMkvName, name_);
+    size += EbmlElementSize(kMkvName, name_);
   if (max_block_additional_id_)
-    size += EbmlElementSize(libwebm::kMkvMaxBlockAdditionID,
-                            max_block_additional_id_);
+    size += EbmlElementSize(kMkvMaxBlockAdditionID, max_block_additional_id_);
   if (codec_delay_)
-    size += EbmlElementSize(libwebm::kMkvCodecDelay, codec_delay_);
+    size += EbmlElementSize(kMkvCodecDelay, codec_delay_);
   if (seek_pre_roll_)
-    size += EbmlElementSize(libwebm::kMkvSeekPreRoll, seek_pre_roll_);
+    size += EbmlElementSize(kMkvSeekPreRoll, seek_pre_roll_);
   if (default_duration_)
-    size += EbmlElementSize(libwebm::kMkvDefaultDuration, default_duration_);
+    size += EbmlElementSize(kMkvDefaultDuration, default_duration_);
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvTrackNumber, number_))
+  if (!WriteEbmlElement(writer, kMkvTrackNumber, number_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvTrackUID, uid_))
+  if (!WriteEbmlElement(writer, kMkvTrackUID, uid_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvTrackType, type_))
+  if (!WriteEbmlElement(writer, kMkvTrackType, type_))
     return false;
   if (max_block_additional_id_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvMaxBlockAdditionID,
+    if (!WriteEbmlElement(writer, kMkvMaxBlockAdditionID,
                           max_block_additional_id_)) {
       return false;
     }
   }
   if (codec_delay_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvCodecDelay, codec_delay_))
+    if (!WriteEbmlElement(writer, kMkvCodecDelay, codec_delay_))
       return false;
   }
   if (seek_pre_roll_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvSeekPreRoll, seek_pre_roll_))
+    if (!WriteEbmlElement(writer, kMkvSeekPreRoll, seek_pre_roll_))
       return false;
   }
   if (default_duration_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvDefaultDuration,
-                          default_duration_))
+    if (!WriteEbmlElement(writer, kMkvDefaultDuration, default_duration_))
       return false;
   }
   if (codec_id_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvCodecID, codec_id_))
+    if (!WriteEbmlElement(writer, kMkvCodecID, codec_id_))
       return false;
   }
   if (codec_private_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvCodecPrivate, codec_private_,
+    if (!WriteEbmlElement(writer, kMkvCodecPrivate, codec_private_,
                           codec_private_length_))
       return false;
   }
   if (language_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvLanguage, language_))
+    if (!WriteEbmlElement(writer, kMkvLanguage, language_))
       return false;
   }
   if (name_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvName, name_))
+    if (!WriteEbmlElement(writer, kMkvName, name_))
       return false;
   }
 
-  int64_t stop_position = writer->Position();
+  int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64_t>(size))
+      stop_position - payload_position != static_cast<int64>(size))
     return false;
 
   if (content_encoding_entries_size_ > 0) {
-    uint64_t content_encodings_size = 0;
-    for (uint32_t i = 0; i < content_encoding_entries_size_; ++i) {
+    uint64 content_encodings_size = 0;
+    for (uint32 i = 0; i < content_encoding_entries_size_; ++i) {
       ContentEncoding* const encoding = content_encoding_entries_[i];
       content_encodings_size += encoding->Size();
     }
 
-    if (!WriteEbmlMasterElement(writer, libwebm::kMkvContentEncodings,
+    if (!WriteEbmlMasterElement(writer, kMkvContentEncodings,
                                 content_encodings_size))
       return false;
 
-    for (uint32_t i = 0; i < content_encoding_entries_size_; ++i) {
+    for (uint32 i = 0; i < content_encoding_entries_size_; ++i) {
       ContentEncoding* const encoding = content_encoding_entries_[i];
       if (!encoding->Write(writer))
         return false;
@@ -824,14 +776,14 @@ bool Track::Write(IMkvWriter* writer) const {
   return true;
 }
 
-bool Track::SetCodecPrivate(const uint8_t* codec_private, uint64_t length) {
+bool Track::SetCodecPrivate(const uint8* codec_private, uint64 length) {
   if (!codec_private || length < 1)
     return false;
 
   delete[] codec_private_;
 
   codec_private_ =
-      new (std::nothrow) uint8_t[static_cast<size_t>(length)];  // NOLINT
+      new (std::nothrow) uint8[static_cast<size_t>(length)];  // NOLINT
   if (!codec_private_)
     return false;
 
@@ -892,279 +844,6 @@ void Track::set_name(const char* name) {
 
 ///////////////////////////////////////////////////////////////
 //
-// Colour and its child elements
-
-uint64_t PrimaryChromaticity::PrimaryChromaticityPayloadSize(
-    libwebm::MkvId x_id, libwebm::MkvId y_id) const {
-  return EbmlElementSize(x_id, x) + EbmlElementSize(y_id, y);
-}
-
-bool PrimaryChromaticity::Write(IMkvWriter* writer, libwebm::MkvId x_id,
-                                libwebm::MkvId y_id) const {
-  return WriteEbmlElement(writer, x_id, x) && WriteEbmlElement(writer, y_id, y);
-}
-
-uint64_t MasteringMetadata::MasteringMetadataSize() const {
-  uint64_t size = PayloadSize();
-
-  if (size > 0)
-    size += EbmlMasterElementSize(libwebm::kMkvMasteringMetadata, size);
-
-  return size;
-}
-
-bool MasteringMetadata::Write(IMkvWriter* writer) const {
-  const uint64_t size = PayloadSize();
-
-  // Don't write an empty element.
-  if (size == 0)
-    return true;
-
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvMasteringMetadata, size))
-    return false;
-  if (luminance_max != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvLuminanceMax, luminance_max)) {
-    return false;
-  }
-  if (luminance_min != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvLuminanceMin, luminance_min)) {
-    return false;
-  }
-  if (r_ &&
-      !r_->Write(writer, libwebm::kMkvPrimaryRChromaticityX,
-                 libwebm::kMkvPrimaryRChromaticityY)) {
-    return false;
-  }
-  if (g_ &&
-      !g_->Write(writer, libwebm::kMkvPrimaryGChromaticityX,
-                 libwebm::kMkvPrimaryGChromaticityY)) {
-    return false;
-  }
-  if (b_ &&
-      !b_->Write(writer, libwebm::kMkvPrimaryBChromaticityX,
-                 libwebm::kMkvPrimaryBChromaticityY)) {
-    return false;
-  }
-  if (white_point_ &&
-      !white_point_->Write(writer, libwebm::kMkvWhitePointChromaticityX,
-                           libwebm::kMkvWhitePointChromaticityY)) {
-    return false;
-  }
-
-  return true;
-}
-
-bool MasteringMetadata::SetChromaticity(
-    const PrimaryChromaticity* r, const PrimaryChromaticity* g,
-    const PrimaryChromaticity* b, const PrimaryChromaticity* white_point) {
-  PrimaryChromaticityPtr r_ptr(NULL);
-  if (r) {
-    if (!CopyChromaticity(r, &r_ptr))
-      return false;
-  }
-  PrimaryChromaticityPtr g_ptr(NULL);
-  if (g) {
-    if (!CopyChromaticity(g, &g_ptr))
-      return false;
-  }
-  PrimaryChromaticityPtr b_ptr(NULL);
-  if (b) {
-    if (!CopyChromaticity(b, &b_ptr))
-      return false;
-  }
-  PrimaryChromaticityPtr wp_ptr(NULL);
-  if (white_point) {
-    if (!CopyChromaticity(white_point, &wp_ptr))
-      return false;
-  }
-
-  r_ = r_ptr.release();
-  g_ = g_ptr.release();
-  b_ = b_ptr.release();
-  white_point_ = wp_ptr.release();
-  return true;
-}
-
-uint64_t MasteringMetadata::PayloadSize() const {
-  uint64_t size = 0;
-
-  if (luminance_max != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvLuminanceMax, luminance_max);
-  if (luminance_min != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvLuminanceMin, luminance_min);
-
-  if (r_) {
-    size += r_->PrimaryChromaticityPayloadSize(
-        libwebm::kMkvPrimaryRChromaticityX, libwebm::kMkvPrimaryRChromaticityY);
-  }
-  if (g_) {
-    size += g_->PrimaryChromaticityPayloadSize(
-        libwebm::kMkvPrimaryGChromaticityX, libwebm::kMkvPrimaryGChromaticityY);
-  }
-  if (b_) {
-    size += b_->PrimaryChromaticityPayloadSize(
-        libwebm::kMkvPrimaryBChromaticityX, libwebm::kMkvPrimaryBChromaticityY);
-  }
-  if (white_point_) {
-    size += white_point_->PrimaryChromaticityPayloadSize(
-        libwebm::kMkvWhitePointChromaticityX,
-        libwebm::kMkvWhitePointChromaticityY);
-  }
-
-  return size;
-}
-
-uint64_t Colour::ColourSize() const {
-  uint64_t size = PayloadSize();
-
-  if (size > 0)
-    size += EbmlMasterElementSize(libwebm::kMkvColour, size);
-
-  return size;
-}
-
-bool Colour::Write(IMkvWriter* writer) const {
-  const uint64_t size = PayloadSize();
-
-  // Don't write an empty element.
-  if (size == 0)
-    return true;
-
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvColour, size))
-    return false;
-
-  if (matrix_coefficients != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvMatrixCoefficients,
-                        matrix_coefficients)) {
-    return false;
-  }
-  if (bits_per_channel != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvBitsPerChannel,
-                        bits_per_channel)) {
-    return false;
-  }
-  if (chroma_subsampling_horz != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvChromaSubsamplingHorz,
-                        chroma_subsampling_horz)) {
-    return false;
-  }
-  if (chroma_subsampling_vert != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvChromaSubsamplingVert,
-                        chroma_subsampling_vert)) {
-    return false;
-  }
-
-  if (cb_subsampling_horz != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvCbSubsamplingHorz,
-                        cb_subsampling_horz)) {
-    return false;
-  }
-  if (cb_subsampling_vert != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvCbSubsamplingVert,
-                        cb_subsampling_vert)) {
-    return false;
-  }
-  if (chroma_siting_horz != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvChromaSitingHorz,
-                        chroma_siting_horz)) {
-    return false;
-  }
-  if (chroma_siting_vert != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvChromaSitingVert,
-                        chroma_siting_vert)) {
-    return false;
-  }
-  if (range != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvRange, range)) {
-    return false;
-  }
-  if (transfer_characteristics != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvTransferCharacteristics,
-                        transfer_characteristics)) {
-    return false;
-  }
-  if (primaries != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvPrimaries, primaries)) {
-    return false;
-  }
-  if (max_cll != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvMaxCLL, max_cll)) {
-    return false;
-  }
-  if (max_fall != kValueNotPresent &&
-      !WriteEbmlElement(writer, libwebm::kMkvMaxFALL, max_fall)) {
-    return false;
-  }
-
-  if (mastering_metadata_ && !mastering_metadata_->Write(writer))
-    return false;
-
-  return true;
-}
-
-bool Colour::SetMasteringMetadata(const MasteringMetadata& mastering_metadata) {
-  std::auto_ptr<MasteringMetadata> mm_ptr(new MasteringMetadata());
-  if (!mm_ptr.get())
-    return false;
-
-  mm_ptr->luminance_max = mastering_metadata.luminance_max;
-  mm_ptr->luminance_min = mastering_metadata.luminance_min;
-
-  if (!mm_ptr->SetChromaticity(mastering_metadata.r(), mastering_metadata.g(),
-                               mastering_metadata.b(),
-                               mastering_metadata.white_point())) {
-    return false;
-  }
-
-  delete mastering_metadata_;
-  mastering_metadata_ = mm_ptr.release();
-  return true;
-}
-
-uint64_t Colour::PayloadSize() const {
-  uint64_t size = 0;
-
-  if (matrix_coefficients != kValueNotPresent)
-    size +=
-        EbmlElementSize(libwebm::kMkvMatrixCoefficients, matrix_coefficients);
-  if (bits_per_channel != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvBitsPerChannel, bits_per_channel);
-  if (chroma_subsampling_horz != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvChromaSubsamplingHorz,
-                            chroma_subsampling_horz);
-  if (chroma_subsampling_vert != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvChromaSubsamplingVert,
-                            chroma_subsampling_vert);
-  if (cb_subsampling_horz != kValueNotPresent)
-    size +=
-        EbmlElementSize(libwebm::kMkvCbSubsamplingHorz, cb_subsampling_horz);
-  if (cb_subsampling_vert != kValueNotPresent)
-    size +=
-        EbmlElementSize(libwebm::kMkvCbSubsamplingVert, cb_subsampling_vert);
-  if (chroma_siting_horz != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvChromaSitingHorz, chroma_siting_horz);
-  if (chroma_siting_vert != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvChromaSitingVert, chroma_siting_vert);
-  if (range != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvRange, range);
-  if (transfer_characteristics != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvTransferCharacteristics,
-                            transfer_characteristics);
-  if (primaries != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvPrimaries, primaries);
-  if (max_cll != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvMaxCLL, max_cll);
-  if (max_fall != kValueNotPresent)
-    size += EbmlElementSize(libwebm::kMkvMaxFALL, max_fall);
-
-  if (mastering_metadata_)
-    size += mastering_metadata_->MasteringMetadataSize();
-
-  return size;
-}
-
-///////////////////////////////////////////////////////////////
-//
 // VideoTrack Class
 
 VideoTrack::VideoTrack(unsigned int* seed)
@@ -1179,12 +858,11 @@ VideoTrack::VideoTrack(unsigned int* seed)
       height_(0),
       stereo_mode_(0),
       alpha_mode_(0),
-      width_(0),
-      colour_(NULL) {}
+      width_(0) {}
 
-VideoTrack::~VideoTrack() { delete colour_; }
+VideoTrack::~VideoTrack() {}
 
-bool VideoTrack::SetStereoMode(uint64_t stereo_mode) {
+bool VideoTrack::SetStereoMode(uint64 stereo_mode) {
   if (stereo_mode != kMono && stereo_mode != kSideBySideLeftIsFirst &&
       stereo_mode != kTopBottomRightIsFirst &&
       stereo_mode != kTopBottomLeftIsFirst &&
@@ -1195,7 +873,7 @@ bool VideoTrack::SetStereoMode(uint64_t stereo_mode) {
   return true;
 }
 
-bool VideoTrack::SetAlphaMode(uint64_t alpha_mode) {
+bool VideoTrack::SetAlphaMode(uint64 alpha_mode) {
   if (alpha_mode != kNoAlpha && alpha_mode != kAlpha)
     return false;
 
@@ -1203,11 +881,11 @@ bool VideoTrack::SetAlphaMode(uint64_t alpha_mode) {
   return true;
 }
 
-uint64_t VideoTrack::PayloadSize() const {
-  const uint64_t parent_size = Track::PayloadSize();
+uint64 VideoTrack::PayloadSize() const {
+  const uint64 parent_size = Track::PayloadSize();
 
-  uint64_t size = VideoPayloadSize();
-  size += EbmlMasterElementSize(libwebm::kMkvVideo, size);
+  uint64 size = VideoPayloadSize();
+  size += EbmlMasterElementSize(kMkvVideo, size);
 
   return parent_size + size;
 }
@@ -1216,122 +894,88 @@ bool VideoTrack::Write(IMkvWriter* writer) const {
   if (!Track::Write(writer))
     return false;
 
-  const uint64_t size = VideoPayloadSize();
+  const uint64 size = VideoPayloadSize();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvVideo, size))
+  if (!WriteEbmlMasterElement(writer, kMkvVideo, size))
     return false;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvPixelWidth, width_))
+  if (!WriteEbmlElement(writer, kMkvPixelWidth, width_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvPixelHeight, height_))
+  if (!WriteEbmlElement(writer, kMkvPixelHeight, height_))
     return false;
   if (display_width_ > 0) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvDisplayWidth, display_width_))
+    if (!WriteEbmlElement(writer, kMkvDisplayWidth, display_width_))
       return false;
   }
   if (display_height_ > 0) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvDisplayHeight, display_height_))
+    if (!WriteEbmlElement(writer, kMkvDisplayHeight, display_height_))
       return false;
   }
   if (crop_left_ > 0) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvPixelCropLeft, crop_left_))
+    if (!WriteEbmlElement(writer, kMkvPixelCropLeft, crop_left_))
       return false;
   }
   if (crop_right_ > 0) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvPixelCropRight, crop_right_))
+    if (!WriteEbmlElement(writer, kMkvPixelCropRight, crop_right_))
       return false;
   }
   if (crop_top_ > 0) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvPixelCropTop, crop_top_))
+    if (!WriteEbmlElement(writer, kMkvPixelCropTop, crop_top_))
       return false;
   }
   if (crop_bottom_ > 0) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvPixelCropBottom, crop_bottom_))
+    if (!WriteEbmlElement(writer, kMkvPixelCropBottom, crop_bottom_))
       return false;
   }
   if (stereo_mode_ > kMono) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvStereoMode, stereo_mode_))
+    if (!WriteEbmlElement(writer, kMkvStereoMode, stereo_mode_))
       return false;
   }
   if (alpha_mode_ > kNoAlpha) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvAlphaMode, alpha_mode_))
+    if (!WriteEbmlElement(writer, kMkvAlphaMode, alpha_mode_))
       return false;
   }
   if (frame_rate_ > 0.0) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvFrameRate,
+    if (!WriteEbmlElement(writer, kMkvFrameRate,
                           static_cast<float>(frame_rate_))) {
       return false;
     }
   }
-  if (colour_) {
-    if (!colour_->Write(writer))
-      return false;
-  }
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64_t>(size)) {
+      stop_position - payload_position != static_cast<int64>(size)) {
     return false;
   }
 
   return true;
 }
 
-bool VideoTrack::SetColour(const Colour& colour) {
-  std::auto_ptr<Colour> colour_ptr(new Colour());
-  if (!colour_ptr.get())
-    return false;
-
-  if (colour.mastering_metadata()) {
-    if (!colour_ptr->SetMasteringMetadata(*colour.mastering_metadata()))
-      return false;
-  }
-
-  colour_ptr->matrix_coefficients = colour.matrix_coefficients;
-  colour_ptr->bits_per_channel = colour.bits_per_channel;
-  colour_ptr->chroma_subsampling_horz = colour.chroma_subsampling_horz;
-  colour_ptr->chroma_subsampling_vert = colour.chroma_subsampling_vert;
-  colour_ptr->cb_subsampling_horz = colour.cb_subsampling_horz;
-  colour_ptr->cb_subsampling_vert = colour.cb_subsampling_vert;
-  colour_ptr->chroma_siting_horz = colour.chroma_siting_horz;
-  colour_ptr->chroma_siting_vert = colour.chroma_siting_vert;
-  colour_ptr->range = colour.range;
-  colour_ptr->transfer_characteristics = colour.transfer_characteristics;
-  colour_ptr->primaries = colour.primaries;
-  colour_ptr->max_cll = colour.max_cll;
-  colour_ptr->max_fall = colour.max_fall;
-  colour_ = colour_ptr.release();
-  return true;
-}
-
-uint64_t VideoTrack::VideoPayloadSize() const {
-  uint64_t size = EbmlElementSize(libwebm::kMkvPixelWidth, width_);
-  size += EbmlElementSize(libwebm::kMkvPixelHeight, height_);
+uint64 VideoTrack::VideoPayloadSize() const {
+  uint64 size = EbmlElementSize(kMkvPixelWidth, width_);
+  size += EbmlElementSize(kMkvPixelHeight, height_);
   if (display_width_ > 0)
-    size += EbmlElementSize(libwebm::kMkvDisplayWidth, display_width_);
+    size += EbmlElementSize(kMkvDisplayWidth, display_width_);
   if (display_height_ > 0)
-    size += EbmlElementSize(libwebm::kMkvDisplayHeight, display_height_);
+    size += EbmlElementSize(kMkvDisplayHeight, display_height_);
   if (crop_left_ > 0)
-    size += EbmlElementSize(libwebm::kMkvPixelCropLeft, crop_left_);
+    size += EbmlElementSize(kMkvPixelCropLeft, crop_left_);
   if (crop_right_ > 0)
-    size += EbmlElementSize(libwebm::kMkvPixelCropRight, crop_right_);
+    size += EbmlElementSize(kMkvPixelCropRight, crop_right_);
   if (crop_top_ > 0)
-    size += EbmlElementSize(libwebm::kMkvPixelCropTop, crop_top_);
+    size += EbmlElementSize(kMkvPixelCropTop, crop_top_);
   if (crop_bottom_ > 0)
-    size += EbmlElementSize(libwebm::kMkvPixelCropBottom, crop_bottom_);
+    size += EbmlElementSize(kMkvPixelCropBottom, crop_bottom_);
   if (stereo_mode_ > kMono)
-    size += EbmlElementSize(libwebm::kMkvStereoMode, stereo_mode_);
+    size += EbmlElementSize(kMkvStereoMode, stereo_mode_);
   if (alpha_mode_ > kNoAlpha)
-    size += EbmlElementSize(libwebm::kMkvAlphaMode, alpha_mode_);
+    size += EbmlElementSize(kMkvAlphaMode, alpha_mode_);
   if (frame_rate_ > 0.0)
-    size += EbmlElementSize(libwebm::kMkvFrameRate,
-                            static_cast<float>(frame_rate_));
-  if (colour_)
-    size += colour_->ColourSize();
+    size += EbmlElementSize(kMkvFrameRate, static_cast<float>(frame_rate_));
 
   return size;
 }
@@ -1345,15 +989,15 @@ AudioTrack::AudioTrack(unsigned int* seed)
 
 AudioTrack::~AudioTrack() {}
 
-uint64_t AudioTrack::PayloadSize() const {
-  const uint64_t parent_size = Track::PayloadSize();
+uint64 AudioTrack::PayloadSize() const {
+  const uint64 parent_size = Track::PayloadSize();
 
-  uint64_t size = EbmlElementSize(libwebm::kMkvSamplingFrequency,
-                                  static_cast<float>(sample_rate_));
-  size += EbmlElementSize(libwebm::kMkvChannels, channels_);
+  uint64 size =
+      EbmlElementSize(kMkvSamplingFrequency, static_cast<float>(sample_rate_));
+  size += EbmlElementSize(kMkvChannels, channels_);
   if (bit_depth_ > 0)
-    size += EbmlElementSize(libwebm::kMkvBitDepth, bit_depth_);
-  size += EbmlMasterElementSize(libwebm::kMkvAudio, size);
+    size += EbmlElementSize(kMkvBitDepth, bit_depth_);
+  size += EbmlMasterElementSize(kMkvAudio, size);
 
   return parent_size + size;
 }
@@ -1363,31 +1007,31 @@ bool AudioTrack::Write(IMkvWriter* writer) const {
     return false;
 
   // Calculate AudioSettings size.
-  uint64_t size = EbmlElementSize(libwebm::kMkvSamplingFrequency,
-                                  static_cast<float>(sample_rate_));
-  size += EbmlElementSize(libwebm::kMkvChannels, channels_);
+  uint64 size =
+      EbmlElementSize(kMkvSamplingFrequency, static_cast<float>(sample_rate_));
+  size += EbmlElementSize(kMkvChannels, channels_);
   if (bit_depth_ > 0)
-    size += EbmlElementSize(libwebm::kMkvBitDepth, bit_depth_);
+    size += EbmlElementSize(kMkvBitDepth, bit_depth_);
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvAudio, size))
+  if (!WriteEbmlMasterElement(writer, kMkvAudio, size))
     return false;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvSamplingFrequency,
+  if (!WriteEbmlElement(writer, kMkvSamplingFrequency,
                         static_cast<float>(sample_rate_)))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvChannels, channels_))
+  if (!WriteEbmlElement(writer, kMkvChannels, channels_))
     return false;
   if (bit_depth_ > 0)
-    if (!WriteEbmlElement(writer, libwebm::kMkvBitDepth, bit_depth_))
+    if (!WriteEbmlElement(writer, kMkvBitDepth, bit_depth_))
       return false;
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64_t>(size))
+      stop_position - payload_position != static_cast<int64>(size))
     return false;
 
   return true;
@@ -1403,12 +1047,11 @@ const char Tracks::kVp8CodecId[] = "V_VP8";
 const char Tracks::kVp9CodecId[] = "V_VP9";
 const char Tracks::kVp10CodecId[] = "V_VP10";
 
-Tracks::Tracks()
-    : track_entries_(NULL), track_entries_size_(0), wrote_tracks_(false) {}
+Tracks::Tracks() : track_entries_(NULL), track_entries_size_(0) {}
 
 Tracks::~Tracks() {
   if (track_entries_) {
-    for (uint32_t i = 0; i < track_entries_size_; ++i) {
+    for (uint32 i = 0; i < track_entries_size_; ++i) {
       Track* const track = track_entries_[i];
       delete track;
     }
@@ -1416,8 +1059,8 @@ Tracks::~Tracks() {
   }
 }
 
-bool Tracks::AddTrack(Track* track, int32_t number) {
-  if (number < 0 || wrote_tracks_)
+bool Tracks::AddTrack(Track* track, int32 number) {
+  if (number < 0)
     return false;
 
   // This muxer only supports track numbers in the range [1, 126], in
@@ -1428,23 +1071,23 @@ bool Tracks::AddTrack(Track* track, int32_t number) {
   if (number > 0x7E)
     return false;
 
-  uint32_t track_num = number;
+  uint32 track_num = number;
 
   if (track_num > 0) {
     // Check to make sure a track does not already have |track_num|.
-    for (uint32_t i = 0; i < track_entries_size_; ++i) {
+    for (uint32 i = 0; i < track_entries_size_; ++i) {
       if (track_entries_[i]->number() == track_num)
         return false;
     }
   }
 
-  const uint32_t count = track_entries_size_ + 1;
+  const uint32 count = track_entries_size_ + 1;
 
   Track** const track_entries = new (std::nothrow) Track*[count];  // NOLINT
   if (!track_entries)
     return false;
 
-  for (uint32_t i = 0; i < track_entries_size_; ++i) {
+  for (uint32 i = 0; i < track_entries_size_; ++i) {
     track_entries[i] = track_entries_[i];
   }
 
@@ -1458,7 +1101,7 @@ bool Tracks::AddTrack(Track* track, int32_t number) {
     bool exit = false;
     do {
       exit = true;
-      for (uint32_t i = 0; i < track_entries_size_; ++i) {
+      for (uint32 i = 0; i < track_entries_size_; ++i) {
         if (track_entries[i]->number() == track_num) {
           track_num++;
           exit = false;
@@ -1475,7 +1118,7 @@ bool Tracks::AddTrack(Track* track, int32_t number) {
   return true;
 }
 
-const Track* Tracks::GetTrackByIndex(uint32_t index) const {
+const Track* Tracks::GetTrackByIndex(uint32 index) const {
   if (track_entries_ == NULL)
     return NULL;
 
@@ -1485,9 +1128,9 @@ const Track* Tracks::GetTrackByIndex(uint32_t index) const {
   return track_entries_[index];
 }
 
-Track* Tracks::GetTrackByNumber(uint64_t track_number) const {
-  const int32_t count = track_entries_size();
-  for (int32_t i = 0; i < count; ++i) {
+Track* Tracks::GetTrackByNumber(uint64 track_number) const {
+  const int32 count = track_entries_size();
+  for (int32 i = 0; i < count; ++i) {
     if (track_entries_[i]->number() == track_number)
       return track_entries_[i];
   }
@@ -1495,7 +1138,7 @@ Track* Tracks::GetTrackByNumber(uint64_t track_number) const {
   return NULL;
 }
 
-bool Tracks::TrackIsAudio(uint64_t track_number) const {
+bool Tracks::TrackIsAudio(uint64 track_number) const {
   const Track* const track = GetTrackByNumber(track_number);
 
   if (track->type() == kAudio)
@@ -1504,7 +1147,7 @@ bool Tracks::TrackIsAudio(uint64_t track_number) const {
   return false;
 }
 
-bool Tracks::TrackIsVideo(uint64_t track_number) const {
+bool Tracks::TrackIsVideo(uint64 track_number) const {
   const Track* const track = GetTrackByNumber(track_number);
 
   if (track->type() == kVideo)
@@ -1514,9 +1157,9 @@ bool Tracks::TrackIsVideo(uint64_t track_number) const {
 }
 
 bool Tracks::Write(IMkvWriter* writer) const {
-  uint64_t size = 0;
-  const int32_t count = track_entries_size();
-  for (int32_t i = 0; i < count; ++i) {
+  uint64 size = 0;
+  const int32 count = track_entries_size();
+  for (int32 i = 0; i < count; ++i) {
     const Track* const track = GetTrackByIndex(i);
 
     if (!track)
@@ -1525,25 +1168,24 @@ bool Tracks::Write(IMkvWriter* writer) const {
     size += track->Size();
   }
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvTracks, size))
+  if (!WriteEbmlMasterElement(writer, kMkvTracks, size))
     return false;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  for (int32_t i = 0; i < count; ++i) {
+  for (int32 i = 0; i < count; ++i) {
     const Track* const track = GetTrackByIndex(i);
     if (!track->Write(writer))
       return false;
   }
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64_t>(size))
+      stop_position - payload_position != static_cast<int64>(size))
     return false;
 
-  wrote_tracks_ = true;
   return true;
 }
 
@@ -1553,10 +1195,9 @@ bool Tracks::Write(IMkvWriter* writer) const {
 
 bool Chapter::set_id(const char* id) { return StrCpy(id, &id_); }
 
-void Chapter::set_time(const Segment& segment, uint64_t start_ns,
-                       uint64_t end_ns) {
+void Chapter::set_time(const Segment& segment, uint64 start_ns, uint64 end_ns) {
   const SegmentInfo* const info = segment.GetSegmentInfo();
-  const uint64_t timecode_scale = info->timecode_scale();
+  const uint64 timecode_scale = info->timecode_scale();
   start_timecode_ = start_ns / timecode_scale;
   end_timecode_ = end_ns / timecode_scale;
 }
@@ -1651,40 +1292,38 @@ bool Chapter::ExpandDisplaysArray() {
   return true;
 }
 
-uint64_t Chapter::WriteAtom(IMkvWriter* writer) const {
-  uint64_t payload_size =
-      EbmlElementSize(libwebm::kMkvChapterStringUID, id_) +
-      EbmlElementSize(libwebm::kMkvChapterUID, uid_) +
-      EbmlElementSize(libwebm::kMkvChapterTimeStart, start_timecode_) +
-      EbmlElementSize(libwebm::kMkvChapterTimeEnd, end_timecode_);
+uint64 Chapter::WriteAtom(IMkvWriter* writer) const {
+  uint64 payload_size = EbmlElementSize(kMkvChapterStringUID, id_) +
+                        EbmlElementSize(kMkvChapterUID, uid_) +
+                        EbmlElementSize(kMkvChapterTimeStart, start_timecode_) +
+                        EbmlElementSize(kMkvChapterTimeEnd, end_timecode_);
 
   for (int idx = 0; idx < displays_count_; ++idx) {
     const Display& d = displays_[idx];
     payload_size += d.WriteDisplay(NULL);
   }
 
-  const uint64_t atom_size =
-      EbmlMasterElementSize(libwebm::kMkvChapterAtom, payload_size) +
-      payload_size;
+  const uint64 atom_size =
+      EbmlMasterElementSize(kMkvChapterAtom, payload_size) + payload_size;
 
   if (writer == NULL)
     return atom_size;
 
-  const int64_t start = writer->Position();
+  const int64 start = writer->Position();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvChapterAtom, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvChapterAtom, payload_size))
     return 0;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvChapterStringUID, id_))
+  if (!WriteEbmlElement(writer, kMkvChapterStringUID, id_))
     return 0;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvChapterUID, uid_))
+  if (!WriteEbmlElement(writer, kMkvChapterUID, uid_))
     return 0;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvChapterTimeStart, start_timecode_))
+  if (!WriteEbmlElement(writer, kMkvChapterTimeStart, start_timecode_))
     return 0;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvChapterTimeEnd, end_timecode_))
+  if (!WriteEbmlElement(writer, kMkvChapterTimeEnd, end_timecode_))
     return 0;
 
   for (int idx = 0; idx < displays_count_; ++idx) {
@@ -1694,9 +1333,9 @@ uint64_t Chapter::WriteAtom(IMkvWriter* writer) const {
       return 0;
   }
 
-  const int64_t stop = writer->Position();
+  const int64 stop = writer->Position();
 
-  if (stop >= start && uint64_t(stop - start) != atom_size)
+  if (stop >= start && uint64(stop - start) != atom_size)
     return 0;
 
   return atom_size;
@@ -1726,44 +1365,42 @@ bool Chapter::Display::set_country(const char* country) {
   return StrCpy(country, &country_);
 }
 
-uint64_t Chapter::Display::WriteDisplay(IMkvWriter* writer) const {
-  uint64_t payload_size = EbmlElementSize(libwebm::kMkvChapString, title_);
+uint64 Chapter::Display::WriteDisplay(IMkvWriter* writer) const {
+  uint64 payload_size = EbmlElementSize(kMkvChapString, title_);
 
   if (language_)
-    payload_size += EbmlElementSize(libwebm::kMkvChapLanguage, language_);
+    payload_size += EbmlElementSize(kMkvChapLanguage, language_);
 
   if (country_)
-    payload_size += EbmlElementSize(libwebm::kMkvChapCountry, country_);
+    payload_size += EbmlElementSize(kMkvChapCountry, country_);
 
-  const uint64_t display_size =
-      EbmlMasterElementSize(libwebm::kMkvChapterDisplay, payload_size) +
-      payload_size;
+  const uint64 display_size =
+      EbmlMasterElementSize(kMkvChapterDisplay, payload_size) + payload_size;
 
   if (writer == NULL)
     return display_size;
 
-  const int64_t start = writer->Position();
+  const int64 start = writer->Position();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvChapterDisplay,
-                              payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvChapterDisplay, payload_size))
     return 0;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvChapString, title_))
+  if (!WriteEbmlElement(writer, kMkvChapString, title_))
     return 0;
 
   if (language_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvChapLanguage, language_))
+    if (!WriteEbmlElement(writer, kMkvChapLanguage, language_))
       return 0;
   }
 
   if (country_) {
-    if (!WriteEbmlElement(writer, libwebm::kMkvChapCountry, country_))
+    if (!WriteEbmlElement(writer, kMkvChapCountry, country_))
       return 0;
   }
 
-  const int64_t stop = writer->Position();
+  const int64 stop = writer->Position();
 
-  if (stop >= start && uint64_t(stop - start) != display_size)
+  if (stop >= start && uint64(stop - start) != display_size)
     return 0;
 
   return display_size;
@@ -1801,19 +1438,19 @@ bool Chapters::Write(IMkvWriter* writer) const {
   if (writer == NULL)
     return false;
 
-  const uint64_t payload_size = WriteEdition(NULL);  // return size only
+  const uint64 payload_size = WriteEdition(NULL);  // return size only
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvChapters, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvChapters, payload_size))
     return false;
 
-  const int64_t start = writer->Position();
+  const int64 start = writer->Position();
 
   if (WriteEdition(writer) == 0)  // error
     return false;
 
-  const int64_t stop = writer->Position();
+  const int64 stop = writer->Position();
 
-  if (stop >= start && uint64_t(stop - start) != payload_size)
+  if (stop >= start && uint64(stop - start) != payload_size)
     return false;
 
   return true;
@@ -1843,37 +1480,36 @@ bool Chapters::ExpandChaptersArray() {
   return true;
 }
 
-uint64_t Chapters::WriteEdition(IMkvWriter* writer) const {
-  uint64_t payload_size = 0;
+uint64 Chapters::WriteEdition(IMkvWriter* writer) const {
+  uint64 payload_size = 0;
 
   for (int idx = 0; idx < chapters_count_; ++idx) {
     const Chapter& chapter = chapters_[idx];
     payload_size += chapter.WriteAtom(NULL);
   }
 
-  const uint64_t edition_size =
-      EbmlMasterElementSize(libwebm::kMkvEditionEntry, payload_size) +
-      payload_size;
+  const uint64 edition_size =
+      EbmlMasterElementSize(kMkvEditionEntry, payload_size) + payload_size;
 
   if (writer == NULL)  // return size only
     return edition_size;
 
-  const int64_t start = writer->Position();
+  const int64 start = writer->Position();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvEditionEntry, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvEditionEntry, payload_size))
     return 0;  // error
 
   for (int idx = 0; idx < chapters_count_; ++idx) {
     const Chapter& chapter = chapters_[idx];
 
-    const uint64_t chapter_size = chapter.WriteAtom(writer);
+    const uint64 chapter_size = chapter.WriteAtom(writer);
     if (chapter_size == 0)  // error
       return 0;
   }
 
-  const int64_t stop = writer->Position();
+  const int64 stop = writer->Position();
 
-  if (stop >= start && uint64_t(stop - start) != edition_size)
+  if (stop >= start && uint64(stop - start) != edition_size)
     return 0;
 
   return edition_size;
@@ -1945,23 +1581,23 @@ bool Tag::ExpandSimpleTagsArray() {
   return true;
 }
 
-uint64_t Tag::Write(IMkvWriter* writer) const {
-  uint64_t payload_size = 0;
+uint64 Tag::Write(IMkvWriter* writer) const {
+  uint64 payload_size = 0;
 
   for (int idx = 0; idx < simple_tags_count_; ++idx) {
     const SimpleTag& st = simple_tags_[idx];
     payload_size += st.Write(NULL);
   }
 
-  const uint64_t tag_size =
-      EbmlMasterElementSize(libwebm::kMkvTag, payload_size) + payload_size;
+  const uint64 tag_size =
+      EbmlMasterElementSize(kMkvTag, payload_size) + payload_size;
 
   if (writer == NULL)
     return tag_size;
 
-  const int64_t start = writer->Position();
+  const int64 start = writer->Position();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvTag, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvTag, payload_size))
     return 0;
 
   for (int idx = 0; idx < simple_tags_count_; ++idx) {
@@ -1971,9 +1607,9 @@ uint64_t Tag::Write(IMkvWriter* writer) const {
       return 0;
   }
 
-  const int64_t stop = writer->Position();
+  const int64 stop = writer->Position();
 
-  if (stop >= start && uint64_t(stop - start) != tag_size)
+  if (stop >= start && uint64(stop - start) != tag_size)
     return 0;
 
   return tag_size;
@@ -1999,32 +1635,31 @@ bool Tag::SimpleTag::set_tag_string(const char* tag_string) {
   return StrCpy(tag_string, &tag_string_);
 }
 
-uint64_t Tag::SimpleTag::Write(IMkvWriter* writer) const {
-  uint64_t payload_size = EbmlElementSize(libwebm::kMkvTagName, tag_name_);
+uint64 Tag::SimpleTag::Write(IMkvWriter* writer) const {
+  uint64 payload_size = EbmlElementSize(kMkvTagName, tag_name_);
 
-  payload_size += EbmlElementSize(libwebm::kMkvTagString, tag_string_);
+  payload_size += EbmlElementSize(kMkvTagString, tag_string_);
 
-  const uint64_t simple_tag_size =
-      EbmlMasterElementSize(libwebm::kMkvSimpleTag, payload_size) +
-      payload_size;
+  const uint64 simple_tag_size =
+      EbmlMasterElementSize(kMkvSimpleTag, payload_size) + payload_size;
 
   if (writer == NULL)
     return simple_tag_size;
 
-  const int64_t start = writer->Position();
+  const int64 start = writer->Position();
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvSimpleTag, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvSimpleTag, payload_size))
     return 0;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvTagName, tag_name_))
+  if (!WriteEbmlElement(writer, kMkvTagName, tag_name_))
     return 0;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvTagString, tag_string_))
+  if (!WriteEbmlElement(writer, kMkvTagString, tag_string_))
     return 0;
 
-  const int64_t stop = writer->Position();
+  const int64 stop = writer->Position();
 
-  if (stop >= start && uint64_t(stop - start) != simple_tag_size)
+  if (stop >= start && uint64(stop - start) != simple_tag_size)
     return 0;
 
   return simple_tag_size;
@@ -2059,29 +1694,29 @@ bool Tags::Write(IMkvWriter* writer) const {
   if (writer == NULL)
     return false;
 
-  uint64_t payload_size = 0;
+  uint64 payload_size = 0;
 
   for (int idx = 0; idx < tags_count_; ++idx) {
     const Tag& tag = tags_[idx];
     payload_size += tag.Write(NULL);
   }
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvTags, payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvTags, payload_size))
     return false;
 
-  const int64_t start = writer->Position();
+  const int64 start = writer->Position();
 
   for (int idx = 0; idx < tags_count_; ++idx) {
     const Tag& tag = tags_[idx];
 
-    const uint64_t tag_size = tag.Write(writer);
+    const uint64 tag_size = tag.Write(writer);
     if (tag_size == 0)  // error
       return 0;
   }
 
-  const int64_t stop = writer->Position();
+  const int64 stop = writer->Position();
 
-  if (stop >= start && uint64_t(stop - start) != payload_size)
+  if (stop >= start && uint64(stop - start) != payload_size)
     return false;
 
   return true;
@@ -2115,8 +1750,7 @@ bool Tags::ExpandTagsArray() {
 //
 // Cluster class
 
-Cluster::Cluster(uint64_t timecode, int64_t cues_pos, uint64_t timecode_scale,
-                 bool write_last_frame_with_duration)
+Cluster::Cluster(uint64 timecode, int64 cues_pos, uint64 timecode_scale)
     : blocks_added_(0),
       finalized_(false),
       header_written_(false),
@@ -2125,7 +1759,6 @@ Cluster::Cluster(uint64_t timecode, int64_t cues_pos, uint64_t timecode_scale,
       size_position_(-1),
       timecode_(timecode),
       timecode_scale_(timecode_scale),
-      write_last_frame_with_duration_(write_last_frame_with_duration),
       writer_(NULL) {}
 
 Cluster::~Cluster() {}
@@ -2138,27 +1771,24 @@ bool Cluster::Init(IMkvWriter* ptr_writer) {
   return true;
 }
 
-bool Cluster::AddFrame(const Frame* const frame) {
-  return QueueOrWriteFrame(frame);
-}
+bool Cluster::AddFrame(const Frame* const frame) { return DoWriteFrame(frame); }
 
-bool Cluster::AddFrame(const uint8_t* data, uint64_t length,
-                       uint64_t track_number, uint64_t abs_timecode,
-                       bool is_key) {
+bool Cluster::AddFrame(const uint8* data, uint64 length, uint64 track_number,
+                       uint64 abs_timecode, bool is_key) {
   Frame frame;
   if (!frame.Init(data, length))
     return false;
   frame.set_track_number(track_number);
   frame.set_timestamp(abs_timecode);
   frame.set_is_key(is_key);
-  return QueueOrWriteFrame(&frame);
+  return DoWriteFrame(&frame);
 }
 
-bool Cluster::AddFrameWithAdditional(const uint8_t* data, uint64_t length,
-                                     const uint8_t* additional,
-                                     uint64_t additional_length,
-                                     uint64_t add_id, uint64_t track_number,
-                                     uint64_t abs_timecode, bool is_key) {
+bool Cluster::AddFrameWithAdditional(const uint8* data, uint64 length,
+                                     const uint8* additional,
+                                     uint64 additional_length, uint64 add_id,
+                                     uint64 track_number, uint64 abs_timecode,
+                                     bool is_key) {
   if (!additional || additional_length == 0) {
     return false;
   }
@@ -2170,13 +1800,13 @@ bool Cluster::AddFrameWithAdditional(const uint8_t* data, uint64_t length,
   frame.set_track_number(track_number);
   frame.set_timestamp(abs_timecode);
   frame.set_is_key(is_key);
-  return QueueOrWriteFrame(&frame);
+  return DoWriteFrame(&frame);
 }
 
-bool Cluster::AddFrameWithDiscardPadding(const uint8_t* data, uint64_t length,
-                                         int64_t discard_padding,
-                                         uint64_t track_number,
-                                         uint64_t abs_timecode, bool is_key) {
+bool Cluster::AddFrameWithDiscardPadding(const uint8* data, uint64 length,
+                                         int64 discard_padding,
+                                         uint64 track_number,
+                                         uint64 abs_timecode, bool is_key) {
   Frame frame;
   if (!frame.Init(data, length))
     return false;
@@ -2184,12 +1814,11 @@ bool Cluster::AddFrameWithDiscardPadding(const uint8_t* data, uint64_t length,
   frame.set_track_number(track_number);
   frame.set_timestamp(abs_timecode);
   frame.set_is_key(is_key);
-  return QueueOrWriteFrame(&frame);
+  return DoWriteFrame(&frame);
 }
 
-bool Cluster::AddMetadata(const uint8_t* data, uint64_t length,
-                          uint64_t track_number, uint64_t abs_timecode,
-                          uint64_t duration_timecode) {
+bool Cluster::AddMetadata(const uint8* data, uint64 length, uint64 track_number,
+                          uint64 abs_timecode, uint64 duration_timecode) {
   Frame frame;
   if (!frame.Init(data, length))
     return false;
@@ -2197,62 +1826,17 @@ bool Cluster::AddMetadata(const uint8_t* data, uint64_t length,
   frame.set_timestamp(abs_timecode);
   frame.set_duration(duration_timecode);
   frame.set_is_key(true);  // All metadata blocks are keyframes.
-  return QueueOrWriteFrame(&frame);
+  return DoWriteFrame(&frame);
 }
 
-void Cluster::AddPayloadSize(uint64_t size) { payload_size_ += size; }
+void Cluster::AddPayloadSize(uint64 size) { payload_size_ += size; }
 
 bool Cluster::Finalize() {
-  return !write_last_frame_with_duration_ && Finalize(false, 0);
-}
-
-bool Cluster::Finalize(bool set_last_frame_duration, uint64_t duration) {
-  if (!writer_ || finalized_)
-    return false;
-
-  if (write_last_frame_with_duration_) {
-    // Write out held back Frames. This essentially performs a k-way merge
-    // across all tracks in the increasing order of timestamps.
-    while (!stored_frames_.empty()) {
-      Frame* frame = stored_frames_.begin()->second.front();
-
-      // Get the next frame to write (frame with least timestamp across all
-      // tracks).
-      for (FrameMapIterator frames_iterator = ++stored_frames_.begin();
-           frames_iterator != stored_frames_.end(); ++frames_iterator) {
-        if (frames_iterator->second.front()->timestamp() < frame->timestamp()) {
-          frame = frames_iterator->second.front();
-        }
-      }
-
-      // Set the duration if it's the last frame for the track.
-      if (set_last_frame_duration &&
-          stored_frames_[frame->track_number()].size() == 1 &&
-          !frame->duration_set()) {
-        frame->set_duration(duration - frame->timestamp());
-        if (!frame->is_key() && !frame->reference_block_timestamp_set()) {
-          frame->set_reference_block_timestamp(
-              last_block_timestamp_[frame->track_number()]);
-        }
-      }
-
-      // Write the frame and remove it from |stored_frames_|.
-      const bool wrote_frame = DoWriteFrame(frame);
-      stored_frames_[frame->track_number()].pop_front();
-      if (stored_frames_[frame->track_number()].empty()) {
-        stored_frames_.erase(frame->track_number());
-      }
-      delete frame;
-      if (!wrote_frame)
-        return false;
-    }
-  }
-
-  if (size_position_ == -1)
+  if (!writer_ || finalized_ || size_position_ == -1)
     return false;
 
   if (writer_->Seekable()) {
-    const int64_t pos = writer_->Position();
+    const int64 pos = writer_->Position();
 
     if (writer_->Position(size_position_))
       return false;
@@ -2269,10 +1853,9 @@ bool Cluster::Finalize(bool set_last_frame_duration, uint64_t duration) {
   return true;
 }
 
-uint64_t Cluster::Size() const {
-  const uint64_t element_size =
-      EbmlMasterElementSize(libwebm::kMkvCluster, 0xFFFFFFFFFFFFFFFFULL) +
-      payload_size_;
+uint64 Cluster::Size() const {
+  const uint64 element_size =
+      EbmlMasterElementSize(kMkvCluster, 0xFFFFFFFFFFFFFFFFULL) + payload_size_;
   return element_size;
 }
 
@@ -2288,15 +1871,15 @@ bool Cluster::PreWriteBlock() {
   return true;
 }
 
-void Cluster::PostWriteBlock(uint64_t element_size) {
+void Cluster::PostWriteBlock(uint64 element_size) {
   AddPayloadSize(element_size);
   ++blocks_added_;
 }
 
-int64_t Cluster::GetRelativeTimecode(int64_t abs_timecode) const {
-  const int64_t cluster_timecode = this->Cluster::timecode();
-  const int64_t rel_timecode =
-      static_cast<int64_t>(abs_timecode) - cluster_timecode;
+int64 Cluster::GetRelativeTimecode(int64 abs_timecode) const {
+  const int64 cluster_timecode = this->Cluster::timecode();
+  const int64 rel_timecode =
+      static_cast<int64>(abs_timecode) - cluster_timecode;
 
   if (rel_timecode < 0 || rel_timecode > kMaxBlockTimecode)
     return -1;
@@ -2311,67 +1894,11 @@ bool Cluster::DoWriteFrame(const Frame* const frame) {
   if (!PreWriteBlock())
     return false;
 
-  const uint64_t element_size = WriteFrame(writer_, frame, this);
+  const uint64 element_size = WriteFrame(writer_, frame, this);
   if (element_size == 0)
     return false;
 
   PostWriteBlock(element_size);
-  last_block_timestamp_[frame->track_number()] = frame->timestamp();
-  return true;
-}
-
-bool Cluster::QueueOrWriteFrame(const Frame* const frame) {
-  if (!frame || !frame->IsValid())
-    return false;
-
-  // If |write_last_frame_with_duration_| is not set, then write the frame right
-  // away.
-  if (!write_last_frame_with_duration_) {
-    return DoWriteFrame(frame);
-  }
-
-  // Queue the current frame.
-  uint64_t track_number = frame->track_number();
-  Frame* const frame_to_store = new Frame();
-  frame_to_store->CopyFrom(*frame);
-  stored_frames_[track_number].push_back(frame_to_store);
-
-  // Iterate through all queued frames in the current track except the last one
-  // and write it if it is okay to do so (i.e.) no other track has an held back
-  // frame with timestamp <= the timestamp of the frame in question.
-  std::vector<std::list<Frame*>::iterator> frames_to_erase;
-  for (std::list<Frame *>::iterator
-           current_track_iterator = stored_frames_[track_number].begin(),
-           end = --stored_frames_[track_number].end();
-       current_track_iterator != end; ++current_track_iterator) {
-    const Frame* const frame_to_write = *current_track_iterator;
-    bool okay_to_write = true;
-    for (FrameMapIterator track_iterator = stored_frames_.begin();
-         track_iterator != stored_frames_.end(); ++track_iterator) {
-      if (track_iterator->first == track_number) {
-        continue;
-      }
-      if (track_iterator->second.front()->timestamp() <
-          frame_to_write->timestamp()) {
-        okay_to_write = false;
-        break;
-      }
-    }
-    if (okay_to_write) {
-      const bool wrote_frame = DoWriteFrame(frame_to_write);
-      delete frame_to_write;
-      if (!wrote_frame)
-        return false;
-      frames_to_erase.push_back(current_track_iterator);
-    } else {
-      break;
-    }
-  }
-  for (std::vector<std::list<Frame*>::iterator>::iterator iterator =
-           frames_to_erase.begin();
-       iterator != frames_to_erase.end(); ++iterator) {
-    stored_frames_[track_number].erase(*iterator);
-  }
   return true;
 }
 
@@ -2379,7 +1906,7 @@ bool Cluster::WriteClusterHeader() {
   if (finalized_)
     return false;
 
-  if (WriteID(writer_, libwebm::kMkvCluster))
+  if (WriteID(writer_, kMkvCluster))
     return false;
 
   // Save for later.
@@ -2390,9 +1917,9 @@ bool Cluster::WriteClusterHeader() {
   if (SerializeInt(writer_, kEbmlUnknownValue, 8))
     return false;
 
-  if (!WriteEbmlElement(writer_, libwebm::kMkvTimecode, timecode()))
+  if (!WriteEbmlElement(writer_, kMkvTimecode, timecode()))
     return false;
-  AddPayloadSize(EbmlElementSize(libwebm::kMkvTimecode, timecode()));
+  AddPayloadSize(EbmlElementSize(kMkvTimecode, timecode()));
   header_written_ = true;
 
   return true;
@@ -2403,7 +1930,7 @@ bool Cluster::WriteClusterHeader() {
 // SeekHead Class
 
 SeekHead::SeekHead() : start_pos_(0ULL) {
-  for (int32_t i = 0; i < kSeekEntryCount; ++i) {
+  for (int32 i = 0; i < kSeekEntryCount; ++i) {
     seek_entry_id_[i] = 0;
     seek_entry_pos_[i] = 0;
   }
@@ -2416,19 +1943,17 @@ bool SeekHead::Finalize(IMkvWriter* writer) const {
     if (start_pos_ == -1)
       return false;
 
-    uint64_t payload_size = 0;
-    uint64_t entry_size[kSeekEntryCount];
+    uint64 payload_size = 0;
+    uint64 entry_size[kSeekEntryCount];
 
-    for (int32_t i = 0; i < kSeekEntryCount; ++i) {
+    for (int32 i = 0; i < kSeekEntryCount; ++i) {
       if (seek_entry_id_[i] != 0) {
-        entry_size[i] = EbmlElementSize(
-            libwebm::kMkvSeekID, static_cast<uint64_t>(seek_entry_id_[i]));
-        entry_size[i] +=
-            EbmlElementSize(libwebm::kMkvSeekPosition, seek_entry_pos_[i]);
+        entry_size[i] =
+            EbmlElementSize(kMkvSeekID, static_cast<uint64>(seek_entry_id_[i]));
+        entry_size[i] += EbmlElementSize(kMkvSeekPosition, seek_entry_pos_[i]);
 
         payload_size +=
-            EbmlMasterElementSize(libwebm::kMkvSeek, entry_size[i]) +
-            entry_size[i];
+            EbmlMasterElementSize(kMkvSeek, entry_size[i]) + entry_size[i];
       }
     }
 
@@ -2436,35 +1961,34 @@ bool SeekHead::Finalize(IMkvWriter* writer) const {
     if (payload_size == 0)
       return true;
 
-    const int64_t pos = writer->Position();
+    const int64 pos = writer->Position();
     if (writer->Position(start_pos_))
       return false;
 
-    if (!WriteEbmlMasterElement(writer, libwebm::kMkvSeekHead, payload_size))
+    if (!WriteEbmlMasterElement(writer, kMkvSeekHead, payload_size))
       return false;
 
-    for (int32_t i = 0; i < kSeekEntryCount; ++i) {
+    for (int32 i = 0; i < kSeekEntryCount; ++i) {
       if (seek_entry_id_[i] != 0) {
-        if (!WriteEbmlMasterElement(writer, libwebm::kMkvSeek, entry_size[i]))
+        if (!WriteEbmlMasterElement(writer, kMkvSeek, entry_size[i]))
           return false;
 
-        if (!WriteEbmlElement(writer, libwebm::kMkvSeekID,
-                              static_cast<uint64_t>(seek_entry_id_[i])))
+        if (!WriteEbmlElement(writer, kMkvSeekID,
+                              static_cast<uint64>(seek_entry_id_[i])))
           return false;
 
-        if (!WriteEbmlElement(writer, libwebm::kMkvSeekPosition,
-                              seek_entry_pos_[i]))
+        if (!WriteEbmlElement(writer, kMkvSeekPosition, seek_entry_pos_[i]))
           return false;
       }
     }
 
-    const uint64_t total_entry_size = kSeekEntryCount * MaxEntrySize();
-    const uint64_t total_size =
-        EbmlMasterElementSize(libwebm::kMkvSeekHead, total_entry_size) +
+    const uint64 total_entry_size = kSeekEntryCount * MaxEntrySize();
+    const uint64 total_size =
+        EbmlMasterElementSize(kMkvSeekHead, total_entry_size) +
         total_entry_size;
-    const int64_t size_left = total_size - (writer->Position() - start_pos_);
+    const int64 size_left = total_size - (writer->Position() - start_pos_);
 
-    const uint64_t bytes_written = WriteVoidElement(writer, size_left);
+    const uint64 bytes_written = WriteVoidElement(writer, size_left);
     if (!bytes_written)
       return false;
 
@@ -2476,21 +2000,20 @@ bool SeekHead::Finalize(IMkvWriter* writer) const {
 }
 
 bool SeekHead::Write(IMkvWriter* writer) {
-  const uint64_t entry_size = kSeekEntryCount * MaxEntrySize();
-  const uint64_t size =
-      EbmlMasterElementSize(libwebm::kMkvSeekHead, entry_size);
+  const uint64 entry_size = kSeekEntryCount * MaxEntrySize();
+  const uint64 size = EbmlMasterElementSize(kMkvSeekHead, entry_size);
 
   start_pos_ = writer->Position();
 
-  const uint64_t bytes_written = WriteVoidElement(writer, size + entry_size);
+  const uint64 bytes_written = WriteVoidElement(writer, size + entry_size);
   if (!bytes_written)
     return false;
 
   return true;
 }
 
-bool SeekHead::AddSeekEntry(uint32_t id, uint64_t pos) {
-  for (int32_t i = 0; i < kSeekEntryCount; ++i) {
+bool SeekHead::AddSeekEntry(uint32 id, uint64 pos) {
+  for (int32 i = 0; i < kSeekEntryCount; ++i) {
     if (seek_entry_id_[i] == 0) {
       seek_entry_id_[i] = id;
       seek_entry_pos_[i] = pos;
@@ -2500,19 +2023,19 @@ bool SeekHead::AddSeekEntry(uint32_t id, uint64_t pos) {
   return false;
 }
 
-uint32_t SeekHead::GetId(int index) const {
+uint32 SeekHead::GetId(int index) const {
   if (index < 0 || index >= kSeekEntryCount)
     return UINT_MAX;
   return seek_entry_id_[index];
 }
 
-uint64_t SeekHead::GetPosition(int index) const {
+uint64 SeekHead::GetPosition(int index) const {
   if (index < 0 || index >= kSeekEntryCount)
     return ULLONG_MAX;
   return seek_entry_pos_[index];
 }
 
-bool SeekHead::SetSeekEntry(int index, uint32_t id, uint64_t position) {
+bool SeekHead::SetSeekEntry(int index, uint32 id, uint64 position) {
   if (index < 0 || index >= kSeekEntryCount)
     return false;
   seek_entry_id_[index] = id;
@@ -2520,12 +2043,12 @@ bool SeekHead::SetSeekEntry(int index, uint32_t id, uint64_t position) {
   return true;
 }
 
-uint64_t SeekHead::MaxEntrySize() const {
-  const uint64_t max_entry_payload_size =
-      EbmlElementSize(libwebm::kMkvSeekID, UINT64_C(0xffffffff)) +
-      EbmlElementSize(libwebm::kMkvSeekPosition, UINT64_C(0xffffffffffffffff));
-  const uint64_t max_entry_size =
-      EbmlMasterElementSize(libwebm::kMkvSeek, max_entry_payload_size) +
+uint64 SeekHead::MaxEntrySize() const {
+  const uint64 max_entry_payload_size =
+      EbmlElementSize(kMkvSeekID, 0xffffffffULL) +
+      EbmlElementSize(kMkvSeekPosition, 0xffffffffffffffffULL);
+  const uint64 max_entry_size =
+      EbmlMasterElementSize(kMkvSeek, max_entry_payload_size) +
       max_entry_payload_size;
 
   return max_entry_size;
@@ -2549,10 +2072,10 @@ SegmentInfo::~SegmentInfo() {
 }
 
 bool SegmentInfo::Init() {
-  int32_t major;
-  int32_t minor;
-  int32_t build;
-  int32_t revision;
+  int32 major;
+  int32 minor;
+  int32 build;
+  int32 revision;
   GetVersion(&major, &minor, &build, &revision);
   char temp[256];
 #ifdef _MSC_VER
@@ -2592,12 +2115,12 @@ bool SegmentInfo::Finalize(IMkvWriter* writer) const {
       if (duration_pos_ == -1)
         return false;
 
-      const int64_t pos = writer->Position();
+      const int64 pos = writer->Position();
 
       if (writer->Position(duration_pos_))
         return false;
 
-      if (!WriteEbmlElement(writer, libwebm::kMkvDuration,
+      if (!WriteEbmlElement(writer, kMkvDuration,
                             static_cast<float>(duration_)))
         return false;
 
@@ -2613,45 +2136,43 @@ bool SegmentInfo::Write(IMkvWriter* writer) {
   if (!writer || !muxing_app_ || !writing_app_)
     return false;
 
-  uint64_t size = EbmlElementSize(libwebm::kMkvTimecodeScale, timecode_scale_);
+  uint64 size = EbmlElementSize(kMkvTimecodeScale, timecode_scale_);
   if (duration_ > 0.0)
-    size +=
-        EbmlElementSize(libwebm::kMkvDuration, static_cast<float>(duration_));
+    size += EbmlElementSize(kMkvDuration, static_cast<float>(duration_));
   if (date_utc_ != LLONG_MIN)
-    size += EbmlDateElementSize(libwebm::kMkvDateUTC);
-  size += EbmlElementSize(libwebm::kMkvMuxingApp, muxing_app_);
-  size += EbmlElementSize(libwebm::kMkvWritingApp, writing_app_);
+    size += EbmlDateElementSize(kMkvDateUTC);
+  size += EbmlElementSize(kMkvMuxingApp, muxing_app_);
+  size += EbmlElementSize(kMkvWritingApp, writing_app_);
 
-  if (!WriteEbmlMasterElement(writer, libwebm::kMkvInfo, size))
+  if (!WriteEbmlMasterElement(writer, kMkvInfo, size))
     return false;
 
-  const int64_t payload_position = writer->Position();
+  const int64 payload_position = writer->Position();
   if (payload_position < 0)
     return false;
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvTimecodeScale, timecode_scale_))
+  if (!WriteEbmlElement(writer, kMkvTimecodeScale, timecode_scale_))
     return false;
 
   if (duration_ > 0.0) {
     // Save for later
     duration_pos_ = writer->Position();
 
-    if (!WriteEbmlElement(writer, libwebm::kMkvDuration,
-                          static_cast<float>(duration_)))
+    if (!WriteEbmlElement(writer, kMkvDuration, static_cast<float>(duration_)))
       return false;
   }
 
   if (date_utc_ != LLONG_MIN)
-    WriteEbmlDateElement(writer, libwebm::kMkvDateUTC, date_utc_);
+    WriteEbmlDateElement(writer, kMkvDateUTC, date_utc_);
 
-  if (!WriteEbmlElement(writer, libwebm::kMkvMuxingApp, muxing_app_))
+  if (!WriteEbmlElement(writer, kMkvMuxingApp, muxing_app_))
     return false;
-  if (!WriteEbmlElement(writer, libwebm::kMkvWritingApp, writing_app_))
+  if (!WriteEbmlElement(writer, kMkvWritingApp, writing_app_))
     return false;
 
-  const int64_t stop_position = writer->Position();
+  const int64 stop_position = writer->Position();
   if (stop_position < 0 ||
-      stop_position - payload_position != static_cast<int64_t>(size))
+      stop_position - payload_position != static_cast<int64>(size))
     return false;
 
   return true;
@@ -2739,7 +2260,7 @@ Segment::Segment()
 
 Segment::~Segment() {
   if (cluster_list_) {
-    for (int32_t i = 0; i < cluster_list_size_; ++i) {
+    for (int32 i = 0; i < cluster_list_size_; ++i) {
       Cluster* const cluster = cluster_list_[i];
       delete cluster;
     }
@@ -2747,7 +2268,7 @@ Segment::~Segment() {
   }
 
   if (frames_) {
-    for (int32_t i = 0; i < frames_size_; ++i) {
+    for (int32 i = 0; i < frames_size_; ++i) {
       Frame* const frame = frames_[i];
       delete frame;
     }
@@ -2771,13 +2292,13 @@ Segment::~Segment() {
   }
 }
 
-void Segment::MoveCuesBeforeClustersHelper(uint64_t diff, int32_t index,
-                                           uint64_t* cues_size) {
+void Segment::MoveCuesBeforeClustersHelper(uint64 diff, int32 index,
+                                           uint64* cues_size) {
   CuePoint* const cue_point = cues_.GetCueByIndex(index);
   if (cue_point == NULL)
     return;
-  const uint64_t old_cue_point_size = cue_point->Size();
-  const uint64_t cluster_pos = cue_point->cluster_pos() + diff;
+  const uint64 old_cue_point_size = cue_point->Size();
+  const uint64 cluster_pos = cue_point->cluster_pos() + diff;
   cue_point->set_cluster_pos(cluster_pos);  // update the new cluster position
   // New size of the cue is computed as follows
   //    Let a = current sum of size of all CuePoints
@@ -2787,40 +2308,40 @@ void Segment::MoveCuesBeforeClustersHelper(uint64_t diff, int32_t index,
   //    Let d = b + c. Now d is the |diff| passed to the next recursive call.
   //    Let e = a + b. Now e is the |cues_size| passed to the next recursive
   //                   call.
-  const uint64_t cue_point_size_diff = cue_point->Size() - old_cue_point_size;
-  const uint64_t cue_size_diff =
+  const uint64 cue_point_size_diff = cue_point->Size() - old_cue_point_size;
+  const uint64 cue_size_diff =
       GetCodedUIntSize(*cues_size + cue_point_size_diff) -
       GetCodedUIntSize(*cues_size);
   *cues_size += cue_point_size_diff;
   diff = cue_size_diff + cue_point_size_diff;
   if (diff > 0) {
-    for (int32_t i = 0; i < cues_.cue_entries_size(); ++i) {
+    for (int32 i = 0; i < cues_.cue_entries_size(); ++i) {
       MoveCuesBeforeClustersHelper(diff, i, cues_size);
     }
   }
 }
 
 void Segment::MoveCuesBeforeClusters() {
-  const uint64_t current_cue_size = cues_.Size();
-  uint64_t cue_size = 0;
-  for (int32_t i = 0; i < cues_.cue_entries_size(); ++i)
+  const uint64 current_cue_size = cues_.Size();
+  uint64 cue_size = 0;
+  for (int32 i = 0; i < cues_.cue_entries_size(); ++i)
     cue_size += cues_.GetCueByIndex(i)->Size();
-  for (int32_t i = 0; i < cues_.cue_entries_size(); ++i)
+  for (int32 i = 0; i < cues_.cue_entries_size(); ++i)
     MoveCuesBeforeClustersHelper(current_cue_size, i, &cue_size);
 
   // Adjust the Seek Entry to reflect the change in position
   // of Cluster and Cues
-  int32_t cluster_index = 0;
-  int32_t cues_index = 0;
-  for (int32_t i = 0; i < SeekHead::kSeekEntryCount; ++i) {
-    if (seek_head_.GetId(i) == libwebm::kMkvCluster)
+  int32 cluster_index = 0;
+  int32 cues_index = 0;
+  for (int32 i = 0; i < SeekHead::kSeekEntryCount; ++i) {
+    if (seek_head_.GetId(i) == kMkvCluster)
       cluster_index = i;
-    if (seek_head_.GetId(i) == libwebm::kMkvCues)
+    if (seek_head_.GetId(i) == kMkvCues)
       cues_index = i;
   }
-  seek_head_.SetSeekEntry(cues_index, libwebm::kMkvCues,
+  seek_head_.SetSeekEntry(cues_index, kMkvCues,
                           seek_head_.GetPosition(cluster_index));
-  seek_head_.SetSeekEntry(cluster_index, libwebm::kMkvCluster,
+  seek_head_.SetSeekEntry(cluster_index, kMkvCluster,
                           cues_.Size() + seek_head_.GetPosition(cues_index));
 }
 
@@ -2838,8 +2359,8 @@ bool Segment::CopyAndMoveCuesBeforeClusters(mkvparser::IMkvReader* reader,
                                             IMkvWriter* writer) {
   if (!writer->Seekable() || chunking_)
     return false;
-  const int64_t cluster_offset =
-      cluster_list_[0]->size_position() - GetUIntSize(libwebm::kMkvCluster);
+  const int64 cluster_offset =
+      cluster_list_[0]->size_position() - GetUIntSize(kMkvCluster);
 
   // Copy the headers.
   if (!ChunkedCopy(reader, writer, 0, cluster_offset))
@@ -2862,8 +2383,8 @@ bool Segment::CopyAndMoveCuesBeforeClusters(mkvparser::IMkvReader* reader,
     return false;
 
   // Update the Segment size in case the Cues size has changed.
-  const int64_t pos = writer->Position();
-  const int64_t segment_size = writer->Position() - payload_pos_;
+  const int64 pos = writer->Position();
+  const int64 segment_size = writer->Position() - payload_pos_;
   if (writer->Position(size_position_) ||
       WriteUIntSize(writer, segment_size, 8) || writer->Position(pos))
     return false;
@@ -2874,17 +2395,15 @@ bool Segment::Finalize() {
   if (WriteFramesAll() < 0)
     return false;
 
-  if (cluster_list_size_ > 0) {
-    // Update last cluster's size
-    Cluster* const old_cluster = cluster_list_[cluster_list_size_ - 1];
-
-    // For the last frame of the last Cluster, we don't write it as a BlockGroup
-    // with Duration unless the frame itself has duration set explicitly.
-    if (!old_cluster || !old_cluster->Finalize(false, 0))
-      return false;
-  }
-
   if (mode_ == kFile) {
+    if (cluster_list_size_ > 0) {
+      // Update last cluster's size
+      Cluster* const old_cluster = cluster_list_[cluster_list_size_ - 1];
+
+      if (!old_cluster || !old_cluster->Finalize())
+        return false;
+    }
+
     if (chunking_ && chunk_writer_cluster_) {
       chunk_writer_cluster_->Close();
       chunk_count_++;
@@ -2898,7 +2417,7 @@ bool Segment::Finalize() {
       return false;
 
     if (output_cues_)
-      if (!seek_head_.AddSeekEntry(libwebm::kMkvCues, MaxOffset()))
+      if (!seek_head_.AddSeekEntry(kMkvCues, MaxOffset()))
         return false;
 
     if (chunking_) {
@@ -2929,11 +2448,11 @@ bool Segment::Finalize() {
       if (size_position_ == -1)
         return false;
 
-      const int64_t segment_size = MaxOffset();
+      const int64 segment_size = MaxOffset();
       if (segment_size < 1)
         return false;
 
-      const int64_t pos = writer_header_->Position();
+      const int64 pos = writer_header_->Position();
       UpdateDocTypeVersion();
       if (doc_type_version_ != doc_type_version_written_) {
         if (writer_header_->Position(0))
@@ -2971,7 +2490,7 @@ bool Segment::Finalize() {
   return true;
 }
 
-Track* Segment::AddTrack(int32_t number) {
+Track* Segment::AddTrack(int32 number) {
   Track* const track = new (std::nothrow) Track(&seed_);  // NOLINT
 
   if (!track)
@@ -2989,7 +2508,7 @@ Chapter* Segment::AddChapter() { return chapters_.AddChapter(&seed_); }
 
 Tag* Segment::AddTag() { return tags_.AddTag(); }
 
-uint64_t Segment::AddVideoTrack(int32_t width, int32_t height, int32_t number) {
+uint64 Segment::AddVideoTrack(int32 width, int32 height, int32 number) {
   VideoTrack* const track = new (std::nothrow) VideoTrack(&seed_);  // NOLINT
   if (!track)
     return 0;
@@ -3005,7 +2524,7 @@ uint64_t Segment::AddVideoTrack(int32_t width, int32_t height, int32_t number) {
   return track->number();
 }
 
-bool Segment::AddCuePoint(uint64_t timestamp, uint64_t track) {
+bool Segment::AddCuePoint(uint64 timestamp, uint64 track) {
   if (cluster_list_size_ < 1)
     return false;
 
@@ -3028,8 +2547,7 @@ bool Segment::AddCuePoint(uint64_t timestamp, uint64_t track) {
   return true;
 }
 
-uint64_t Segment::AddAudioTrack(int32_t sample_rate, int32_t channels,
-                                int32_t number) {
+uint64 Segment::AddAudioTrack(int32 sample_rate, int32 channels, int32 number) {
   AudioTrack* const track = new (std::nothrow) AudioTrack(&seed_);  // NOLINT
   if (!track)
     return 0;
@@ -3044,8 +2562,8 @@ uint64_t Segment::AddAudioTrack(int32_t sample_rate, int32_t channels,
   return track->number();
 }
 
-bool Segment::AddFrame(const uint8_t* data, uint64_t length,
-                       uint64_t track_number, uint64_t timestamp, bool is_key) {
+bool Segment::AddFrame(const uint8* data, uint64 length, uint64 track_number,
+                       uint64 timestamp, bool is_key) {
   if (!data)
     return false;
 
@@ -3058,11 +2576,11 @@ bool Segment::AddFrame(const uint8_t* data, uint64_t length,
   return AddGenericFrame(&frame);
 }
 
-bool Segment::AddFrameWithAdditional(const uint8_t* data, uint64_t length,
-                                     const uint8_t* additional,
-                                     uint64_t additional_length,
-                                     uint64_t add_id, uint64_t track_number,
-                                     uint64_t timestamp, bool is_key) {
+bool Segment::AddFrameWithAdditional(const uint8* data, uint64 length,
+                                     const uint8* additional,
+                                     uint64 additional_length, uint64 add_id,
+                                     uint64 track_number, uint64 timestamp,
+                                     bool is_key) {
   if (!data || !additional)
     return false;
 
@@ -3077,10 +2595,10 @@ bool Segment::AddFrameWithAdditional(const uint8_t* data, uint64_t length,
   return AddGenericFrame(&frame);
 }
 
-bool Segment::AddFrameWithDiscardPadding(const uint8_t* data, uint64_t length,
-                                         int64_t discard_padding,
-                                         uint64_t track_number,
-                                         uint64_t timestamp, bool is_key) {
+bool Segment::AddFrameWithDiscardPadding(const uint8* data, uint64 length,
+                                         int64 discard_padding,
+                                         uint64 track_number, uint64 timestamp,
+                                         bool is_key) {
   if (!data)
     return false;
 
@@ -3094,9 +2612,8 @@ bool Segment::AddFrameWithDiscardPadding(const uint8_t* data, uint64_t length,
   return AddGenericFrame(&frame);
 }
 
-bool Segment::AddMetadata(const uint8_t* data, uint64_t length,
-                          uint64_t track_number, uint64_t timestamp_ns,
-                          uint64_t duration_ns) {
+bool Segment::AddMetadata(const uint8* data, uint64 length, uint64 track_number,
+                          uint64 timestamp_ns, uint64 duration_ns) {
   if (!data)
     return false;
 
@@ -3185,10 +2702,6 @@ bool Segment::AddGenericFrame(const Frame* frame) {
 
 void Segment::OutputCues(bool output_cues) { output_cues_ = output_cues; }
 
-void Segment::AccurateClusterDuration(bool accurate_cluster_duration) {
-  accurate_cluster_duration_ = accurate_cluster_duration;
-}
-
 bool Segment::SetChunking(bool chunking, const char* filename) {
   if (chunk_count_ > 0)
     return false;
@@ -3268,7 +2781,7 @@ bool Segment::SetChunking(bool chunking, const char* filename) {
   return true;
 }
 
-bool Segment::CuesTrack(uint64_t track_number) {
+bool Segment::CuesTrack(uint64 track_number) {
   const Track* const track = GetTrackByNumber(track_number);
   if (!track)
     return false;
@@ -3279,7 +2792,7 @@ bool Segment::CuesTrack(uint64_t track_number) {
 
 void Segment::ForceNewClusterOnNextFrame() { force_new_cluster_ = true; }
 
-Track* Segment::GetTrackByNumber(uint64_t track_number) const {
+Track* Segment::GetTrackByNumber(uint64 track_number) const {
   return tracks_.GetTrackByNumber(track_number);
 }
 
@@ -3290,11 +2803,11 @@ bool Segment::WriteSegmentHeader() {
   if (!WriteEbmlHeader(writer_header_, doc_type_version_))
     return false;
   doc_type_version_written_ = doc_type_version_;
-  ebml_header_size_ = static_cast<int32_t>(writer_header_->Position());
+  ebml_header_size_ = static_cast<int32>(writer_header_->Position());
 
   // Write "unknown" (-1) as segment size value. If mode is kFile, Segment
   // will write over duration when the file is finalized.
-  if (WriteID(writer_header_, libwebm::kMkvSegment))
+  if (WriteID(writer_header_, kMkvSegment))
     return false;
 
   // Save for later.
@@ -3318,25 +2831,25 @@ bool Segment::WriteSegmentHeader() {
       return false;
   }
 
-  if (!seek_head_.AddSeekEntry(libwebm::kMkvInfo, MaxOffset()))
+  if (!seek_head_.AddSeekEntry(kMkvInfo, MaxOffset()))
     return false;
   if (!segment_info_.Write(writer_header_))
     return false;
 
-  if (!seek_head_.AddSeekEntry(libwebm::kMkvTracks, MaxOffset()))
+  if (!seek_head_.AddSeekEntry(kMkvTracks, MaxOffset()))
     return false;
   if (!tracks_.Write(writer_header_))
     return false;
 
   if (chapters_.Count() > 0) {
-    if (!seek_head_.AddSeekEntry(libwebm::kMkvChapters, MaxOffset()))
+    if (!seek_head_.AddSeekEntry(kMkvChapters, MaxOffset()))
       return false;
     if (!chapters_.Write(writer_header_))
       return false;
   }
 
   if (tags_.Count() > 0) {
-    if (!seek_head_.AddSeekEntry(libwebm::kMkvTags, MaxOffset()))
+    if (!seek_head_.AddSeekEntry(kMkvTags, MaxOffset()))
       return false;
     if (!tags_.Write(writer_header_))
       return false;
@@ -3357,7 +2870,7 @@ bool Segment::WriteSegmentHeader() {
 // Here we are testing whether to create a new cluster, given a frame
 // having time frame_timestamp_ns.
 //
-int Segment::TestFrame(uint64_t track_number, uint64_t frame_timestamp_ns,
+int Segment::TestFrame(uint64 track_number, uint64 frame_timestamp_ns,
                        bool is_key) const {
   if (force_new_cluster_)
     return 1;
@@ -3375,11 +2888,11 @@ int Segment::TestFrame(uint64_t track_number, uint64_t frame_timestamp_ns,
   // written to the existing cluster, or that a new cluster should be
   // created.
 
-  const uint64_t timecode_scale = segment_info_.timecode_scale();
-  const uint64_t frame_timecode = frame_timestamp_ns / timecode_scale;
+  const uint64 timecode_scale = segment_info_.timecode_scale();
+  const uint64 frame_timecode = frame_timestamp_ns / timecode_scale;
 
   const Cluster* const last_cluster = cluster_list_[cluster_list_size_ - 1];
-  const uint64_t last_cluster_timecode = last_cluster->timecode();
+  const uint64 last_cluster_timecode = last_cluster->timecode();
 
   // For completeness we test for the case when the frame's timecode
   // is less than the cluster's timecode.  Although in principle that
@@ -3394,7 +2907,7 @@ int Segment::TestFrame(uint64_t track_number, uint64_t frame_timestamp_ns,
   // using a 16-bit signed integer), then we cannot write this frame
   // to that cluster, and so we must create a new cluster.
 
-  const int64_t delta_timecode = frame_timecode - last_cluster_timecode;
+  const int64 delta_timecode = frame_timecode - last_cluster_timecode;
 
   if (delta_timecode > kMaxBlockTimecode)
     return 2;
@@ -3410,7 +2923,7 @@ int Segment::TestFrame(uint64_t track_number, uint64_t frame_timestamp_ns,
   // already, where "too many" is defined as "the total time of frames
   // in the cluster exceeds a threshold".
 
-  const uint64_t delta_ns = delta_timecode * timecode_scale;
+  const uint64 delta_ns = delta_timecode * timecode_scale;
 
   if (max_cluster_duration_ > 0 && delta_ns >= max_cluster_duration_)
     return 1;
@@ -3419,7 +2932,7 @@ int Segment::TestFrame(uint64_t track_number, uint64_t frame_timestamp_ns,
   // cluster is created when the size of the current cluster exceeds a
   // threshold.
 
-  const uint64_t cluster_size = last_cluster->payload_size();
+  const uint64 cluster_size = last_cluster->payload_size();
 
   if (max_cluster_size_ > 0 && cluster_size >= max_cluster_size_)
     return 1;
@@ -3429,19 +2942,19 @@ int Segment::TestFrame(uint64_t track_number, uint64_t frame_timestamp_ns,
   return 0;
 }
 
-bool Segment::MakeNewCluster(uint64_t frame_timestamp_ns) {
-  const int32_t new_size = cluster_list_size_ + 1;
+bool Segment::MakeNewCluster(uint64 frame_timestamp_ns) {
+  const int32 new_size = cluster_list_size_ + 1;
 
   if (new_size > cluster_list_capacity_) {
     // Add more clusters.
-    const int32_t new_capacity =
+    const int32 new_capacity =
         (cluster_list_capacity_ <= 0) ? 1 : cluster_list_capacity_ * 2;
     Cluster** const clusters =
         new (std::nothrow) Cluster*[new_capacity];  // NOLINT
     if (!clusters)
       return false;
 
-    for (int32_t i = 0; i < cluster_list_size_; ++i) {
+    for (int32 i = 0; i < cluster_list_size_; ++i) {
       clusters[i] = cluster_list_[i];
     }
 
@@ -3454,16 +2967,18 @@ bool Segment::MakeNewCluster(uint64_t frame_timestamp_ns) {
   if (!WriteFramesLessThan(frame_timestamp_ns))
     return false;
 
-  if (cluster_list_size_ > 0) {
-    // Update old cluster's size
-    Cluster* const old_cluster = cluster_list_[cluster_list_size_ - 1];
+  if (mode_ == kFile) {
+    if (cluster_list_size_ > 0) {
+      // Update old cluster's size
+      Cluster* const old_cluster = cluster_list_[cluster_list_size_ - 1];
 
-    if (!old_cluster || !old_cluster->Finalize(true, frame_timestamp_ns))
-      return false;
+      if (!old_cluster || !old_cluster->Finalize())
+        return false;
+    }
+
+    if (output_cues_)
+      new_cuepoint_ = true;
   }
-
-  if (output_cues_)
-    new_cuepoint_ = true;
 
   if (chunking_ && cluster_list_size_ > 0) {
     chunk_writer_cluster_->Close();
@@ -3475,25 +2990,24 @@ bool Segment::MakeNewCluster(uint64_t frame_timestamp_ns) {
       return false;
   }
 
-  const uint64_t timecode_scale = segment_info_.timecode_scale();
-  const uint64_t frame_timecode = frame_timestamp_ns / timecode_scale;
+  const uint64 timecode_scale = segment_info_.timecode_scale();
+  const uint64 frame_timecode = frame_timestamp_ns / timecode_scale;
 
-  uint64_t cluster_timecode = frame_timecode;
+  uint64 cluster_timecode = frame_timecode;
 
   if (frames_size_ > 0) {
     const Frame* const f = frames_[0];  // earliest queued frame
-    const uint64_t ns = f->timestamp();
-    const uint64_t tc = ns / timecode_scale;
+    const uint64 ns = f->timestamp();
+    const uint64 tc = ns / timecode_scale;
 
     if (tc < cluster_timecode)
       cluster_timecode = tc;
   }
 
   Cluster*& cluster = cluster_list_[cluster_list_size_];
-  const int64_t offset = MaxOffset();
-  cluster = new (std::nothrow)
-      Cluster(cluster_timecode, offset, segment_info_.timecode_scale(),
-              accurate_cluster_duration_);
+  const int64 offset = MaxOffset();
+  cluster = new (std::nothrow) Cluster(cluster_timecode,  // NOLINT
+                                       offset, segment_info_.timecode_scale());
   if (!cluster)
     return false;
 
@@ -3504,8 +3018,8 @@ bool Segment::MakeNewCluster(uint64_t frame_timestamp_ns) {
   return true;
 }
 
-bool Segment::DoNewClusterProcessing(uint64_t track_number,
-                                     uint64_t frame_timestamp_ns, bool is_key) {
+bool Segment::DoNewClusterProcessing(uint64 track_number,
+                                     uint64 frame_timestamp_ns, bool is_key) {
   for (;;) {
     // Based on the characteristics of the current frame and current
     // cluster, decide whether to create a new cluster.
@@ -3541,12 +3055,12 @@ bool Segment::CheckHeaderInfo() {
     if (!WriteSegmentHeader())
       return false;
 
-    if (!seek_head_.AddSeekEntry(libwebm::kMkvCluster, MaxOffset()))
+    if (!seek_head_.AddSeekEntry(kMkvCluster, MaxOffset()))
       return false;
 
     if (output_cues_ && cues_track_ == 0) {
       // Check for a video track
-      for (uint32_t i = 0; i < tracks_.track_entries_size(); ++i) {
+      for (uint32 i = 0; i < tracks_.track_entries_size(); ++i) {
         const Track* const track = tracks_.GetTrackByIndex(i);
         if (!track)
           return false;
@@ -3571,7 +3085,7 @@ bool Segment::CheckHeaderInfo() {
 }
 
 void Segment::UpdateDocTypeVersion() {
-  for (uint32_t index = 0; index < tracks_.track_entries_size(); ++index) {
+  for (uint32 index = 0; index < tracks_.track_entries_size(); ++index) {
     const Track* track = tracks_.GetTrackByIndex(index);
     if (track == NULL)
       break;
@@ -3613,14 +3127,14 @@ bool Segment::UpdateChunkName(const char* ext, char** name) const {
   return true;
 }
 
-int64_t Segment::MaxOffset() {
+int64 Segment::MaxOffset() {
   if (!writer_header_)
     return -1;
 
-  int64_t offset = writer_header_->Position() - payload_pos_;
+  int64 offset = writer_header_->Position() - payload_pos_;
 
   if (chunking_) {
-    for (int32_t i = 0; i < cluster_list_size_; ++i) {
+    for (int32 i = 0; i < cluster_list_size_; ++i) {
       Cluster* const cluster = cluster_list_[i];
       offset += cluster->Size();
     }
@@ -3633,11 +3147,11 @@ int64_t Segment::MaxOffset() {
 }
 
 bool Segment::QueueFrame(Frame* frame) {
-  const int32_t new_size = frames_size_ + 1;
+  const int32 new_size = frames_size_ + 1;
 
   if (new_size > frames_capacity_) {
     // Add more frames.
-    const int32_t new_capacity = (!frames_capacity_) ? 2 : frames_capacity_ * 2;
+    const int32 new_capacity = (!frames_capacity_) ? 2 : frames_capacity_ * 2;
 
     if (new_capacity < 1)
       return false;
@@ -3646,7 +3160,7 @@ bool Segment::QueueFrame(Frame* frame) {
     if (!frames)
       return false;
 
-    for (int32_t i = 0; i < frames_size_; ++i) {
+    for (int32 i = 0; i < frames_size_; ++i) {
       frames[i] = frames_[i];
     }
 
@@ -3672,7 +3186,7 @@ int Segment::WriteFramesAll() {
   if (!cluster)
     return -1;
 
-  for (int32_t i = 0; i < frames_size_; ++i) {
+  for (int32 i = 0; i < frames_size_; ++i) {
     Frame*& frame = frames_[i];
     // TODO(jzern/vigneshv): using Segment::AddGenericFrame here would limit the
     // places where |doc_type_version_| needs to be updated.
@@ -3701,7 +3215,7 @@ int Segment::WriteFramesAll() {
   return result;
 }
 
-bool Segment::WriteFramesLessThan(uint64_t timestamp) {
+bool Segment::WriteFramesLessThan(uint64 timestamp) {
   // Check |cluster_list_size_| to see if this is the first cluster. If it is
   // the first cluster the audio frames that are less than the first video
   // timesatmp will be written in a later step.
@@ -3713,11 +3227,11 @@ bool Segment::WriteFramesLessThan(uint64_t timestamp) {
     if (!cluster)
       return false;
 
-    int32_t shift_left = 0;
+    int32 shift_left = 0;
 
     // TODO(fgalligan): Change this to use the durations of frames instead of
     // the next frame's start time if the duration is accurate.
-    for (int32_t i = 1; i < frames_size_; ++i) {
+    for (int32 i = 1; i < frames_size_; ++i) {
       const Frame* const frame_curr = frames_[i];
 
       if (frame_curr->timestamp() > timestamp)
@@ -3748,8 +3262,8 @@ bool Segment::WriteFramesLessThan(uint64_t timestamp) {
       if (shift_left >= frames_size_)
         return false;
 
-      const int32_t new_frames_size = frames_size_ - shift_left;
-      for (int32_t i = 0; i < new_frames_size; ++i) {
+      const int32 new_frames_size = frames_size_ - shift_left;
+      for (int32 i = 0; i < new_frames_size; ++i) {
         frames_[i] = frames_[i + shift_left];
       }
 
