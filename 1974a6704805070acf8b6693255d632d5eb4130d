@@ -22,6 +22,30 @@
       "revId": "1974a6704805070acf8b6693255d632d5eb4130d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51e079e0_b240e832",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4925,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-03-28T21:59:25Z",
+      "side": 1,
+      "message": "Done.\n\nZero or non-zero indicate if the motion estimation will kick off. Value 1 is an intermediate step to handle compound modes.\n\nAdded comments inline.",
+      "parentUuid": "51e079e0_d2c014fb",
+      "range": {
+        "startLine": 4925,
+        "startChar": 28,
+        "endLine": 4925,
+        "endChar": 29
+      },
+      "revId": "1974a6704805070acf8b6693255d632d5eb4130d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
