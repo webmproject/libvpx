@@ -138,48 +138,54 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
   const int w = VPXMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
   const int step = 1 << txsz;
 
-  // Handle block size 4x8 and 4x4
-  if (ss_x == 0 && num_4x4_blocks_wide_lookup[bsize] < 2 && x == 0)
-    return 1;
-
-  if (y == 0) {
-    const int hl = mi_height_log2_lookup[bsize];
-    const uint8_t *order;
-    int my_order, tr_order;
-#if CONFIG_EXT_PARTITION_TYPES
-    if (partition == PARTITION_VERT_A)
-      order = orders_verta[bsize];
-    else
-#endif  // CONFIG_EXT_PARTITION_TYPES
-    order = orders[bsize];
-
-    if (x + step < w)
+  if (!right_available) {
+    return 0;
+  } else {
+    // Handle block size 4x8 and 4x4
+    if (ss_x == 0 && num_4x4_blocks_wide_lookup[bsize] < 2 && x == 0)
       return 1;
 
-    mi_row = (mi_row & 7) >> hl;
-    mi_col = (mi_col & 7) >> wl;
+    if (y == 0) {
+      const int hl = mi_height_log2_lookup[bsize];
+      const uint8_t *order;
+      int my_order, tr_order;
+#if CONFIG_EXT_PARTITION_TYPES
+      if (partition == PARTITION_VERT_A)
+        order = orders_verta[bsize];
+      else
+#endif  // CONFIG_EXT_PARTITION_TYPES
+        order = orders[bsize];
 
-    // If top row of coding unit
-    if (mi_row == 0)
-      return right_available;
+      if (x + step < w)
+        return 1;
 
-    // If rightmost column of coding unit
-    if (((mi_col + 1) << wl) >= 8)
-      return 0;
+      mi_row = (mi_row & 7) >> hl;
+      mi_col = (mi_col & 7) >> wl;
 
-    my_order = order[((mi_row + 0) << (3 - wl)) + mi_col + 0];
-    tr_order = order[((mi_row - 1) << (3 - wl)) + mi_col + 1];
+      // If top row of coding unit
+      if (mi_row == 0)
+        return 1;
 
-    return my_order > tr_order && right_available;
-  } else {
-    return x + step < w;
+      // If rightmost column of coding unit
+      if (((mi_col + 1) << wl) >= 8)
+        return 0;
+
+      my_order = order[((mi_row + 0) << (3 - wl)) + mi_col + 0];
+      tr_order = order[((mi_row - 1) << (3 - wl)) + mi_col + 1];
+
+      return my_order > tr_order;
+    } else {
+      return x + step < w;
+    }
   }
 }
 
 static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
                            int bottom_available, TX_SIZE txsz,
                            int y, int x, int ss_y) {
-  if (x == 0) {
+  if (!bottom_available || x != 0) {
+    return 0;
+  } else {
     const int wl = mi_width_log2_lookup[bsize];
     const int hl = mi_height_log2_lookup[bsize];
     const int h = 1 << (hl + 1 - ss_y);
@@ -198,8 +204,7 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     mi_col = (mi_col & 7) >> wl;
 
     if (mi_col == 0)
-      return bottom_available &&
-             (mi_row << (hl + !ss_y)) + y + step < (8 << !ss_y);
+      return (mi_row << (hl + !ss_y)) + y + step < (8 << !ss_y);
 
     if (((mi_row + 1) << hl) >= 8)
       return 0;
@@ -207,9 +212,7 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     my_order = order[((mi_row + 0) << (3 - wl)) + mi_col + 0];
     bl_order = order[((mi_row + 1) << (3 - wl)) + mi_col - 1];
 
-    return bl_order < my_order && bottom_available;
-  } else {
-    return 0;
+    return bl_order < my_order;
   }
 }
 
@@ -1389,12 +1392,12 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const PARTITION_TYPE partition = xd->mi[0]->mbmi.partition;
 #endif
   const int have_right = vp10_has_right(bsize, mi_row, mi_col,
-                                        right_available,
+                                          right_available,
 #if CONFIG_EXT_PARTITION_TYPES
-                                        partition,
+                                          partition,
 #endif
-                                        tx_size, row_off, col_off,
-                                        pd->subsampling_x);
+                                          tx_size, row_off, col_off,
+                                          pd->subsampling_x);
   const int have_bottom = vp10_has_bottom(bsize, mi_row, mi_col,
                                           xd->mb_to_bottom_edge > 0,
                                           tx_size, row_off, col_off,
