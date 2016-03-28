@@ -19,12 +19,17 @@
 extern "C" {
 #endif
 
+typedef struct QUANT_PARAM {
+  int log_scale;
+} QUANT_PARAM;
+
 typedef void (*VP10_QUANT_FACADE)(const tran_low_t *coeff_ptr,
                                   intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
                                   tran_low_t *qcoeff_ptr,
                                   const MACROBLOCKD_PLANE *pd,
                                   tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                  const scan_order *sc);
+                                  const scan_order *sc,
+                                  const QUANT_PARAM *qparam);
 
 typedef struct {
   // 0: dc 1: ac 2-8: ac repeated to SIMD width
@@ -48,7 +53,6 @@ typedef struct {
 
 void vp10_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                  const int16_t *scan, const int16_t *iscan);
-
 struct VP10_COMP;
 struct VP10Common;
 
@@ -71,74 +75,41 @@ void vp10_quantize_fp_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                              const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
                              const MACROBLOCKD_PLANE *pd,
                              tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                             const scan_order *sc);
+                             const scan_order *sc, const QUANT_PARAM *qparam);
 
 void vp10_quantize_b_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
                             const MACROBLOCKD_PLANE *pd,
                             tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                            const scan_order *sc);
+                            const scan_order *sc, const QUANT_PARAM *qparam);
 
 void vp10_quantize_dc_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                              const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
                              const MACROBLOCKD_PLANE *pd,
                              tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                             const scan_order *sc);
+                             const scan_order *sc, const QUANT_PARAM *qparam);
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_quantize_fp_facade(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
     tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
-    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc);
+    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc,
+    const QUANT_PARAM *qparam);
 
 void vp10_highbd_quantize_b_facade(const tran_low_t *coeff_ptr,
                                    intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
                                    tran_low_t *qcoeff_ptr,
                                    const MACROBLOCKD_PLANE *pd,
                                    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                   const scan_order *sc);
+                                   const scan_order *sc,
+                                   const QUANT_PARAM *qparam);
 
 void vp10_highbd_quantize_dc_facade(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
     tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
-    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc);
+    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc,
+    const QUANT_PARAM *qparam);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-void vp10_quantize_fp_32x32_facade(const tran_low_t *coeff_ptr,
-                                   intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-                                   tran_low_t *qcoeff_ptr,
-                                   const MACROBLOCKD_PLANE *pd,
-                                   tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                   const scan_order *sc);
-
-void vp10_quantize_b_32x32_facade(const tran_low_t *coeff_ptr,
-                                  intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-                                  tran_low_t *qcoeff_ptr,
-                                  const MACROBLOCKD_PLANE *pd,
-                                  tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                  const scan_order *sc);
-
-void vp10_quantize_dc_32x32_facade(const tran_low_t *coeff_ptr,
-                                   intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-                                   tran_low_t *qcoeff_ptr,
-                                   const MACROBLOCKD_PLANE *pd,
-                                   tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                   const scan_order *sc);
-#if CONFIG_VP9_HIGHBITDEPTH
-void vp10_highbd_quantize_fp_32x32_facade(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-    tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
-    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc);
-
-void vp10_highbd_quantize_b_32x32_facade(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-    tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
-    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc);
-
-void vp10_highbd_quantize_dc_32x32_facade(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-    tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
-    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 #ifdef __cplusplus
 }  // extern "C"
 #endif

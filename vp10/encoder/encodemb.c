@@ -129,15 +129,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH && xd->bd == BITDEPTH_10) {
-    mul = 1;
-  } else {
-    mul = 1 + (tx_size == TX_32X32);
-  }
-#else
-  mul = 1 + (tx_size == TX_32X32);
-#endif
+  mul = 1 << get_tx_scale(xd, tx_type, tx_size);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   if (!ref)
@@ -323,35 +315,29 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 #if CONFIG_VP9_HIGHBITDEPTH
 typedef enum QUANT_FUNC {
   QUANT_FUNC_LOWBD = 0,
-  QUANT_FUNC_LOWBD_32 = 1,
-  QUANT_FUNC_HIGHBD = 2,
-  QUANT_FUNC_HIGHBD_32 = 3,
-  QUANT_FUNC_LAST = 4
-} QUANT_FUNC;
-
-static VP10_QUANT_FACADE
-    quant_func_list[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] = {
-        {vp10_quantize_fp_facade, vp10_quantize_fp_32x32_facade,
-         vp10_highbd_quantize_fp_facade, vp10_highbd_quantize_fp_32x32_facade},
-        {vp10_quantize_b_facade, vp10_quantize_b_32x32_facade,
-         vp10_highbd_quantize_b_facade, vp10_highbd_quantize_b_32x32_facade},
-        {vp10_quantize_dc_facade, vp10_quantize_dc_32x32_facade,
-         vp10_highbd_quantize_dc_facade, vp10_highbd_quantize_dc_32x32_facade},
-        {NULL, NULL, NULL, NULL}};
-
-#else
-typedef enum QUANT_FUNC {
-  QUANT_FUNC_LOWBD = 0,
-  QUANT_FUNC_LOWBD_32 = 1,
+  QUANT_FUNC_HIGHBD = 1,
   QUANT_FUNC_LAST = 2
 } QUANT_FUNC;
 
 static VP10_QUANT_FACADE
     quant_func_list[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] = {
-        {vp10_quantize_fp_facade, vp10_quantize_fp_32x32_facade},
-        {vp10_quantize_b_facade, vp10_quantize_b_32x32_facade},
-        {vp10_quantize_dc_facade, vp10_quantize_dc_32x32_facade},
+        {vp10_quantize_fp_facade, vp10_highbd_quantize_fp_facade},
+        {vp10_quantize_b_facade, vp10_highbd_quantize_b_facade},
+        {vp10_quantize_dc_facade, vp10_highbd_quantize_dc_facade},
         {NULL, NULL}};
+
+#else
+typedef enum QUANT_FUNC {
+  QUANT_FUNC_LOWBD = 0,
+  QUANT_FUNC_LAST = 1
+} QUANT_FUNC;
+
+static VP10_QUANT_FACADE
+    quant_func_list[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] = {
+        {vp10_quantize_fp_facade},
+        {vp10_quantize_b_facade},
+        {vp10_quantize_dc_facade},
+        {NULL}};
 #endif
 
 static FWD_TXFM_OPT fwd_txfm_opt_list[VP10_XFORM_QUANT_LAST] = {
@@ -378,7 +364,9 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   const int tx2d_size = tx1d_size * tx1d_size;
 
   FWD_TXFM_PARAM fwd_txfm_param;
-  fwd_txfm_param.tx_type = get_tx_type(plane_type, xd, block, tx_size);
+  QUANT_PARAM qparam;
+
+  fwd_txfm_param.tx_type = tx_type;
   fwd_txfm_param.tx_size = tx_size;
   fwd_txfm_param.fwd_txfm_opt = fwd_txfm_opt_list[xform_quant_idx];
   fwd_txfm_param.rd_transform = x->use_lp32x32fdct;
@@ -386,6 +374,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
 
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
+  qparam.log_scale = get_tx_scale(xd, tx_type, tx_size);
 #if CONFIG_VP9_HIGHBITDEPTH
   fwd_txfm_param.bd = xd->bd;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -394,12 +383,9 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
       if (x->skip_block) {
         vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
       } else {
-        if (tx_size == TX_32X32 && xd->bd != 10)
-          quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD_32](
-              coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
-        else
-          quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD](
-              coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+        quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD](
+            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob,
+            scan_order, &qparam);
       }
     }
     return;
@@ -411,12 +397,9 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
     if (x->skip_block) {
       vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
     } else {
-      if (tx_size == TX_32X32)
-        quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD_32](
-            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
-      else
-        quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD](
-            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order);
+      quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD](
+          coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob,
+          scan_order, &qparam);
     }
   }
 }

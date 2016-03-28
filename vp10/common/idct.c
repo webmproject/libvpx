@@ -19,6 +19,23 @@
 #include "vpx_dsp/inv_txfm.h"
 #include "vpx_ports/mem.h"
 
+int get_tx_scale(const MACROBLOCKD *const xd, const TX_TYPE tx_type,
+                 const TX_SIZE tx_size) {
+  (void) tx_type;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    if (xd->bd == BITDEPTH_10) {
+      return 0;
+    } else {
+      return tx_size == TX_32X32;
+    }
+  }
+#else
+  (void)xd;
+#endif
+  return tx_size == TX_32X32;
+}
+
 #if CONFIG_EXT_TX
 static void iidtx4_c(const tran_low_t *input, tran_low_t *output) {
   int i;

@@ -15,9 +15,7 @@
 #include "vp10/common/blockd.h"
 #include "vp10/common/common.h"
 #include "vp10/common/entropy.h"
-#if CONFIG_COEFFICIENT_RANGE_CHECKING
 #include "vp10/common/idct.h"
-#endif
 
 #include "vp10/decoder/detokenize.h"
 
@@ -113,15 +111,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
   cat6_prob = vp10_cat6_prob;
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH && xd->bd == BITDEPTH_10) {
-    dq_shift = 0;
-  } else {
-    dq_shift = (tx_size == TX_32X32);
-  }
-#else
-  dq_shift = (tx_size == TX_32X32);
-#endif
+  dq_shift = get_tx_scale(xd, 0, tx_size);
 
   while (c < max_eob) {
     int val = -1;
@@ -257,15 +247,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
   const uint8_t *cat5_prob;
   const uint8_t *cat6_prob;
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH && xd->bd == BITDEPTH_10) {
-    dq_shift = 0;
-  } else {
-    dq_shift = (tx_size == TX_32X32);
-  }
-#else
-  dq_shift = (tx_size == TX_32X32);
-#endif
+  dq_shift = get_tx_scale(xd, 0, tx_size);
 
   if (counts) {
     coef_counts = counts->coef[tx_size][type][ref];
