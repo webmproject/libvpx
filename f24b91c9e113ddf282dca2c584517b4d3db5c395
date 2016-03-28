@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51e079e0_040b1ab5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-03-28T17:50:01Z",
+      "side": 1,
+      "message": "Is there a tracking issue related to this fix?",
+      "range": {
+        "startLine": 7,
+        "startChar": 4,
+        "endLine": 7,
+        "endChar": 13
+      },
+      "revId": "f24b91c9e113ddf282dca2c584517b4d3db5c395",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
