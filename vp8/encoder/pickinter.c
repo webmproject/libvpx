@@ -50,7 +50,8 @@ extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 static const int skin_mean[5][2] =
     {{7463, 9614}, {6400, 10240}, {7040, 10240}, {8320, 9280}, {6800, 9614}};
 static const int skin_inv_cov[4] = {4107, 1663, 1663, 2157};  // q16
-static const int skin_threshold[2] = {1570636, 800000};       // q18
+static const int skin_threshold[6] = {1570636, 1400000, 800000, 800000, 800000,
+    800000};  // q18
 
 // Evaluates the Mahalanobis distance measure for the input CbCr values.
 static int evaluate_skin_color_difference(int cb, int cr, int idx) {
@@ -73,7 +74,7 @@ static int evaluate_skin_color_difference(int cb, int cr, int idx) {
 }
 
 // Checks if the input yCbCr values corresponds to skin color.
-static int is_skin_color(int y, int cb, int cr)
+static int is_skin_color(int y, int cb, int cr, int consec_zeromv)
 {
   if (y < 40 || y > 220)
   {
@@ -88,13 +89,31 @@ static int is_skin_color(int y, int cb, int cr)
     else
     {
       int i = 0;
-      for (; i < 5; i++)
-      {
-        if (evaluate_skin_color_difference(cb, cr, i) < skin_threshold[1])
-        {
-          return 1;
-        }
-      }
+      // No skin if block has been zero motion for long consecutive time.
+      if (consec_zeromv > 80)
+        return 0;
+      // Exit on grey.
+       if (cb == 128 && cr == 128)
+         return 0;
+       // Exit on very strong cb.
+       if (cb > 150 && cr < 110)
+         return 0;
+       for (; i < 5; i++) {
+         int skin_color_diff = evaluate_skin_color_difference(cb, cr, i);
+         if (skin_color_diff < skin_threshold[i + 1]) {
+            if (y < 60 && skin_color_diff > 3 * (skin_threshold[i + 1] >> 2))
+              return 0;
+            else if (consec_zeromv > 30 &&
+                     skin_color_diff > (skin_threshold[i + 1] >> 1))
+              return 0;
+            else
+             return 1;
+         }
+         // Exit if difference is much large than the threshold.
+         if (skin_color_diff > (skin_threshold[i + 1] << 3)) {
+           return 0;
+         }
+       }
       return 0;
     }
   }
@@ -851,8 +870,10 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         x->src.v_buffer[4 * x->src.uv_stride + 3] +
         x->src.v_buffer[4 * x->src.uv_stride + 4]) >> 2;
     x->is_skin = 0;
-    if (!cpi->oxcf.screen_content_mode)
-      x->is_skin = is_skin_color(y, cb, cr);
+    if (!cpi->oxcf.screen_content_mode) {
+      int block_index = mb_row * cpi->common.mb_cols + mb_col;
+      x->is_skin = is_skin_color(y, cb, cr, cpi->consec_zero_last[block_index]);
+    }
     }
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity) {
