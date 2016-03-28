@@ -70,6 +70,61 @@ TEST_P(VP10Trans16x16HT, CoeffCheck) {
   RunCoeffCheck();
 }
 
+#if CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
+TEST(VP10Trans16x16HTSpeedTest, C_version) {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 20000;
+    int bit_depth = 8;
+    int mask = (1 << bit_depth) - 1;
+    const int num_coeffs = 256;
+    int16_t *input = new int16_t[num_coeffs];
+    tran_low_t *output = new tran_low_t[num_coeffs];
+    const int stride = 16;
+    int tx_type;
+
+    for (int i = 0; i < count_test_block; ++i) {
+      for (int j = 0; j < num_coeffs; ++j) {
+        input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
+      }
+      for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
+        vp10_fht16x16_c(input, output, stride, tx_type);
+      }
+    }
+
+    delete[] input;
+    delete[] output;
+}
+#endif  // CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
+
+#if HAVE_SSE2 && CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
+TEST(VP10Trans16x16HTSpeedTest, SSE2_version) {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 20000;
+    int bit_depth = 8;
+    int mask = (1 << bit_depth) - 1;
+    const int num_coeffs = 256;
+    int16_t *input = reinterpret_cast<int16_t *>
+        (vpx_memalign(16, sizeof(int16_t) * num_coeffs));
+    tran_low_t *output = reinterpret_cast<tran_low_t *>
+        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs));
+
+    const int stride = 16;
+    int tx_type;
+
+    for (int i = 0; i < count_test_block; ++i) {
+      for (int j = 0; j < num_coeffs; ++j) {
+        input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
+      }
+      for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
+        vp10_fht16x16_sse2(input, output, stride, tx_type);
+      }
+    }
+
+    vpx_free(input);
+    vpx_free(output);
+}
+#endif  // HAVE_SSE2 && CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
+
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
@@ -103,6 +158,18 @@ INSTANTIATE_TEST_CASE_P(
       make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 7,
                  VPX_BITS_8, 256),
       make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 8,
+                 VPX_BITS_8, 256),
+      make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 10,
+                 VPX_BITS_8, 256),
+      make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 11,
+                 VPX_BITS_8, 256),
+      make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 12,
+                 VPX_BITS_8, 256),
+      make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 13,
+                 VPX_BITS_8, 256),
+      make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 14,
+                 VPX_BITS_8, 256),
+      make_tuple(&vp10_fht16x16_sse2, &vp10_iht16x16_256_add_sse2, 15,
                  VPX_BITS_8, 256)));
 #endif  // !CONFIG_EXT_TX
 #endif  // HAVE_SSE2

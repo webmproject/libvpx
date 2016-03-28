@@ -54,8 +54,6 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_fht4x4(src_diff, coeff, diff_stride, tx_type);
-      break;
     case V_DCT:
     case H_DCT:
     case V_ADST:
@@ -70,7 +68,6 @@ void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
-      break;
   }
 }
 
@@ -93,15 +90,13 @@ static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_fht8x8(src_diff, coeff, diff_stride, tx_type);
-      break;
     case V_DCT:
     case H_DCT:
     case V_ADST:
     case H_ADST:
     case V_FLIPADST:
     case H_FLIPADST:
-      vp10_fht8x8_c(src_diff, coeff, diff_stride, tx_type);
+      vp10_fht8x8(src_diff, coeff, diff_stride, tx_type);
       break;
     case IDTX:
       vp10_fwd_idtx_c(src_diff, coeff, diff_stride, 8, tx_type);
@@ -109,7 +104,6 @@ static void fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
-      break;
   }
 }
 
@@ -132,15 +126,13 @@ static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_fht16x16(src_diff, coeff, diff_stride, tx_type);
-      break;
     case V_DCT:
     case H_DCT:
     case V_ADST:
     case H_ADST:
     case V_FLIPADST:
     case H_FLIPADST:
-      vp10_fht16x16_c(src_diff, coeff, diff_stride, tx_type);
+      vp10_fht16x16(src_diff, coeff, diff_stride, tx_type);
       break;
     case IDTX:
       vp10_fwd_idtx_c(src_diff, coeff, diff_stride, 16, tx_type);
@@ -148,7 +140,6 @@ static void fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
 #endif  // CONFIG_EXT_TX
     default:
       assert(0);
-      break;
   }
 }
 
