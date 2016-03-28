@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51e079e0_6704e0f8",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2777,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-28T19:19:52Z",
+      "side": 1,
+      "message": "TODO(me): Eliminate this double argument.",
+      "range": {
+        "startLine": 2777,
+        "startChar": 35,
+        "endLine": 2777,
+        "endChar": 54
+      },
+      "revId": "ffad43a2bea7acc487242026f2dc9918ffe18bbb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
