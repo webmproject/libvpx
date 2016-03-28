@@ -4932,7 +4932,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_EXT_INTER
         const struct buf_2d orig_src = x->plane[0].src;
         struct buf_2d orig_pre[2];
-        int run_rd_check = 0;
+        // This flag controls if the motion estimation will kick off. When it
+        // is set to a non-zero value, the encoder will force motion estimation.
+        int run_mv_search = 0;
 
         mode_idx = INTER_OFFSET(this_mode);
 #if CONFIG_EXT_INTER
@@ -4946,7 +4948,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
           continue;
 
 #if CONFIG_REF_MV
-        run_rd_check = 2;
+        run_mv_search = 2;
 #if !CONFIG_EXT_INTER
         if (filter_idx > 0) {
           BEST_SEG_INFO* ref_bsi = bsi_buf;
@@ -4955,39 +4957,39 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
               ref_bsi->rdstat[i][mode_idx].mvs[0].as_int != INVALID_MV)
             if (bsi->ref_mv[0]->as_int ==
                 ref_bsi->rdstat[i][mode_idx].pred_mv[0].as_int)
-              --run_rd_check;
+              --run_mv_search;
 
           if (!has_second_rf) {
-            --run_rd_check;
+            --run_mv_search;
           } else {
             if (seg_mvs[i][mbmi->ref_frame[1]].as_int ==
                 ref_bsi->rdstat[i][mode_idx].mvs[1].as_int &&
                 ref_bsi->rdstat[i][mode_idx].mvs[1].as_int != INVALID_MV)
               if (bsi->ref_mv[1]->as_int ==
                   ref_bsi->rdstat[i][mode_idx].pred_mv[1].as_int)
-                --run_rd_check;
+                --run_mv_search;
           }
 
-          if (run_rd_check != 0 && filter_idx > 1) {
+          if (run_mv_search != 0 && filter_idx > 1) {
             ref_bsi = bsi_buf + 1;
-            run_rd_check = 2;
+            run_mv_search = 2;
 
             if (seg_mvs[i][mbmi->ref_frame[0]].as_int ==
                 ref_bsi->rdstat[i][mode_idx].mvs[0].as_int &&
                 ref_bsi->rdstat[i][mode_idx].mvs[0].as_int != INVALID_MV)
               if (bsi->ref_mv[0]->as_int ==
                   ref_bsi->rdstat[i][mode_idx].pred_mv[0].as_int)
-                --run_rd_check;
+                --run_mv_search;
 
             if (!has_second_rf) {
-              --run_rd_check;
+              --run_mv_search;
             } else {
               if (seg_mvs[i][mbmi->ref_frame[1]].as_int ==
                   ref_bsi->rdstat[i][mode_idx].mvs[1].as_int &&
                   ref_bsi->rdstat[i][mode_idx].mvs[1].as_int != INVALID_MV)
                 if (bsi->ref_mv[1]->as_int ==
                     ref_bsi->rdstat[i][mode_idx].pred_mv[1].as_int)
-                  --run_rd_check;
+                  --run_mv_search;
             }
           }
         }
@@ -5016,7 +5018,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #else
             this_mode == NEWMV &&
             (seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV ||
-                run_rd_check)
+                run_mv_search)
 #endif  // CONFIG_EXT_INTER
             ) {
 #if CONFIG_EXT_INTER
@@ -5180,7 +5182,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #else
             this_mode == NEWMV &&
 #endif  // CONFIG_EXT_INTER
-            (mbmi->interp_filter == EIGHTTAP_REGULAR || run_rd_check)) {
+            (mbmi->interp_filter == EIGHTTAP_REGULAR || run_mv_search)) {
           // adjust src pointers
           mi_buf_shift(x, i);
           if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
