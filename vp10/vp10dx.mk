@@ -29,5 +29,6 @@ VP10_DX_SRCS-yes += decoder/decoder.c
 VP10_DX_SRCS-yes += decoder/decoder.h
 VP10_DX_SRCS-yes += decoder/dsubexp.c
 VP10_DX_SRCS-yes += decoder/dsubexp.h
+VP10_DX_SRCS-yes += decoder/bitreader.h
 
 VP10_DX_SRCS-yes := $(filter-out $(VP10_DX_SRCS_REMOVE-yes),$(VP10_DX_SRCS-yes))

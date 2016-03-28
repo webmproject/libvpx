@@ -16,6 +16,7 @@
 #include <assert.h>
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/prob.h"
 #include "vpx_ports/mem_ops.h"
 
 #define ANS_DIVIDE_BY_MULTIPLY 1
@@ -240,6 +241,18 @@ static INLINE int uabs_read_literal(struct AnsDecoder *ans, int bits) {
     literal |= uabs_read_bit(ans) << bit;
 
   return literal;
+}
+
+// TODO(aconverse): Replace trees with tokensets.
+static INLINE int uabs_read_tree(struct AnsDecoder *ans,
+                                 const vpx_tree_index *tree,
+                                 const AnsP8 *probs) {
+  vpx_tree_index i = 0;
+
+  while ((i = tree[i + uabs_read(ans, probs[i >> 1])]) > 0)
+    continue;
+
+  return -i;
 }
 
 struct rans_sym {
