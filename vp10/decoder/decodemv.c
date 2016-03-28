@@ -1390,7 +1390,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 
         if (b_mode != ZEROMV && b_mode != ZERO_ZEROMV) {
 #else
-        if (b_mode == NEARESTMV || b_mode == NEARMV) {
+        if (b_mode != ZEROMV) {
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_REF_MV
           CANDIDATE_MV ref_mv_stack[2][MAX_REF_MV_STACK_SIZE];
@@ -1411,8 +1411,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #if CONFIG_EXT_INTER
                                            mv_ref_list,
 #endif  // CONFIG_EXT_INTER
-                                          &nearest_sub8x8[ref],
-                                          &near_sub8x8[ref]);
+                                           &nearest_sub8x8[ref],
+                                           &near_sub8x8[ref]);
 #if CONFIG_EXT_INTER
             if (have_newmv_in_inter_mode(b_mode)) {
               mv_ref_list[0].as_int = nearest_sub8x8[ref].as_int;
@@ -1424,8 +1424,13 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTER
         }
 
-        for (ref = 0; ref < 2; ++ref) {
+        for (ref = 0; ref < 1 + is_compound && b_mode != ZEROMV; ++ref) {
+#if CONFIG_REF_MV
+          ref_mv_s8[ref] = nearest_sub8x8[ref];
+          lower_mv_precision(&ref_mv_s8[ref].as_mv, allow_hp);
+#else
           ref_mv_s8[ref] = nearestmv[ref];
+#endif
         }
 #if CONFIG_EXT_INTER
         (void)ref_mv_s8;
