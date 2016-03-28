@@ -13,6 +13,7 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vp10/common/idct.h"
+#include "vp10/common/vp10_fwd_txfm2d_cfg.h"
 #include "vp10/encoder/hybrid_fwd_txfm.h"
 
 static INLINE void fdct32x32(int rd_transform, const int16_t *src,
@@ -184,7 +185,8 @@ static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
-                              int diff_stride, TX_TYPE tx_type, int lossless) {
+                              int diff_stride, TX_TYPE tx_type, int lossless,
+                              const int bd) {
   if (lossless) {
     assert(tx_type == DCT_DCT);
     vp10_highbd_fwht4x4(src_diff, coeff, diff_stride);
@@ -193,7 +195,12 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
 
   switch (tx_type) {
     case DCT_DCT:
-      vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+      if (bd == 10) {
+        vp10_fwd_txfm2d_4x4(src_diff, coeff, diff_stride,
+                            &fwd_txfm_2d_cfg_dct_dct_4, bd);
+      } else {
+        vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+      }
       break;
     case ADST_DCT:
     case DCT_ADST:
@@ -228,10 +235,15 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
 
 static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
                                 int diff_stride, TX_TYPE tx_type,
-                                FWD_TXFM_OPT fwd_txfm_opt) {
+                                FWD_TXFM_OPT fwd_txfm_opt, const int bd) {
   (void)fwd_txfm_opt;
   switch (tx_type) {
     case DCT_DCT:
+      if (bd == 10) {
+        vp10_fwd_txfm2d_8x8(src_diff, coeff, diff_stride,
+                            &fwd_txfm_2d_cfg_dct_dct_8, bd);
+        break;
+      }
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
@@ -269,10 +281,15 @@ static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
 
 static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
                                   int diff_stride, TX_TYPE tx_type,
-                                  FWD_TXFM_OPT fwd_txfm_opt) {
+                                  FWD_TXFM_OPT fwd_txfm_opt, const int bd) {
   (void)fwd_txfm_opt;
   switch (tx_type) {
     case DCT_DCT:
+      if (bd == 10) {
+        vp10_fwd_txfm2d_16x16(src_diff, coeff, diff_stride,
+                              &fwd_txfm_2d_cfg_dct_dct_16, bd);
+        break;
+      }
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
@@ -310,7 +327,9 @@ static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
 
 static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
                                   tran_low_t *coeff, int diff_stride,
-                                  TX_TYPE tx_type, FWD_TXFM_OPT fwd_txfm_opt) {
+                                  TX_TYPE tx_type, FWD_TXFM_OPT fwd_txfm_opt,
+                                  const int bd) {
+  (void)bd;
   switch (tx_type) {
     case DCT_DCT:
       if (fwd_txfm_opt == FWD_TXFM_OPT_NORMAL)
@@ -381,20 +400,23 @@ void highbd_fwd_txfm(const int16_t *src_diff, tran_low_t *coeff,
   const TX_SIZE tx_size = fwd_txfm_param->tx_size;
   const int rd_transform = fwd_txfm_param->rd_transform;
   const int lossless = fwd_txfm_param->lossless;
+  const int bd = fwd_txfm_param->bd;
   switch (tx_size) {
     case TX_32X32:
       highbd_fwd_txfm_32x32(rd_transform, src_diff, coeff, diff_stride, tx_type,
-                            fwd_txfm_opt);
+                            fwd_txfm_opt, bd);
       break;
     case TX_16X16:
       highbd_fwd_txfm_16x16(src_diff, coeff, diff_stride, tx_type,
-                            fwd_txfm_opt);
+                            fwd_txfm_opt, bd);
       break;
     case TX_8X8:
-      highbd_fwd_txfm_8x8(src_diff, coeff, diff_stride, tx_type, fwd_txfm_opt);
+      highbd_fwd_txfm_8x8(src_diff, coeff, diff_stride, tx_type,
+                          fwd_txfm_opt, bd);
       break;
     case TX_4X4:
-      vp10_highbd_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type, lossless);
+      vp10_highbd_fwd_txfm_4x4(src_diff, coeff, diff_stride, tx_type,
+                               lossless, bd);
       break;
     default:
       assert(0);

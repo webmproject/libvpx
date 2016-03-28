@@ -1970,7 +1970,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
 #endif  // CONFIG_VAR_TX
-            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1);
+            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1, xd->bd);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
@@ -1997,7 +1997,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
 #endif  // CONFIG_VAR_TX
-            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, 0);
+            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, 0, xd->bd);
             vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
@@ -4303,7 +4303,7 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
-                                 xd->lossless[mi->mbmi.segment_id]);
+                                 xd->lossless[mi->mbmi.segment_id], xd->bd);
       } else {
         vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
                           xd->lossless[mi->mbmi.segment_id]);

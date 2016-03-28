@@ -377,6 +377,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
 #if CONFIG_VP9_HIGHBITDEPTH
+  fwd_txfm_param.bd = xd->bd;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {

@@ -15,6 +15,7 @@
 #include "vp10/common/blockd.h"
 #include "vp10/common/enums.h"
 #include "vp10/common/idct.h"
+#include "vp10/common/vp10_inv_txfm2d_cfg.h"
 #include "vpx_dsp/inv_txfm.h"
 #include "vpx_ports/mem.h"
 
@@ -1288,7 +1289,11 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:
-      vp10_highbd_idct4x4_add(input, dest, stride, eob, bd);
+      if (bd == 10)
+        vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
+                                &inv_txfm_2d_cfg_dct_dct_4, bd);
+      else
+        vp10_highbd_idct4x4_add(input, dest, stride, eob, bd);
       break;
     case ADST_DCT:
     case DCT_ADST:
@@ -1327,7 +1332,11 @@ void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
                                   TX_TYPE tx_type) {
   switch (tx_type) {
     case DCT_DCT:
-      vp10_highbd_idct8x8_add(input, dest, stride, eob, bd);
+      if (bd == 10)
+        vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
+                                &inv_txfm_2d_cfg_dct_dct_8, bd);
+      else
+        vp10_highbd_idct8x8_add(input, dest, stride, eob, bd);
       break;
     case ADST_DCT:
     case DCT_ADST:
@@ -1366,7 +1375,11 @@ void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
                                     TX_TYPE tx_type) {
   switch (tx_type) {
     case DCT_DCT:
-      vp10_highbd_idct16x16_add(input, dest, stride, eob, bd);
+      if (bd == 10)
+        vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
+                                  &inv_txfm_2d_cfg_dct_dct_16, bd);
+      else
+        vp10_highbd_idct16x16_add(input, dest, stride, eob, bd);
       break;
     case ADST_DCT:
     case DCT_ADST:
