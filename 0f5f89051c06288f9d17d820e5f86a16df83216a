@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51e079e0_c47692a3",
+        "filename": "vp10/decoder/detokenize.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-03-28T16:29:36Z",
+      "side": 1,
+      "message": "Can we guarantee that xd-\u003ecur_buf-\u003eflags has a valid value when CONFIG_VP9_HIGHBITDEPTH \u003d 0?",
+      "revId": "0f5f89051c06288f9d17d820e5f86a16df83216a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
