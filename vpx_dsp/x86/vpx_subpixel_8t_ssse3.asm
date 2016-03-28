@@ -16,6 +16,11 @@ pw_64:    times 8 dw 64
 ; %define USE_PMULHRSW
 ; NOTE: pmulhrsw has a latency of 5 cycles.  Tests showed a performance loss
 ; when using this instruction.
+;
+; The add order below (based on ffvp9) must be followed to prevent outranges.
+; x = k0k1 + k4k5
+; y = k2k3 + k6k7
+; z = signed SAT(x + y)
 
 SECTION .text
 %if ARCH_X86_64
@@ -77,17 +82,12 @@ SECTION .text
 
     pmaddubsw %2, k0k1k4k5
     pmaddubsw m3, k2k3k6k7
-
-    mova      m4, %2
-    mova      m5, m3
-    psrldq    %2, 8
-    psrldq    m3, 8
-    mova      m6, m5
-
-    paddsw    m4, m3
-    pmaxsw    m5, %2
-    pminsw    %2, m6
+    mova      m4, %2        ;k0k1
+    mova      m5, m3        ;k2k3
+    psrldq    %2, 8         ;k4k5
+    psrldq    m3, 8         ;k6k7
     paddsw    %2, m4
+    paddsw    m5, m3
     paddsw    %2, m5
     paddsw    %2, krd
     psraw     %2, 7
@@ -157,27 +157,20 @@ cglobal filter_block1d4_%1, 6, 6+(ARCH_X86_64*2), 11, LOCAL_VARS_SIZE, \
     pmaddubsw           m7, k0k1k4k5
     palignr             m3, m2,  5
     pmaddubsw           m3, k2k3k6k7
-    mova                m0, m4
-    mova                m5, m1
-    mova                m2, m7
-    psrldq              m4, 8
-    psrldq              m1, 8
-    mova                m6, m5
-    paddsw              m0, m1
-    mova                m1, m3
-    psrldq              m7, 8
-    psrldq              m3, 8
-    paddsw              m2, m3
-    mova                m3, m1
-    pmaxsw              m5, m4
-    pminsw              m4, m6
+    mova                m0, m4                  ;k0k1
+    mova                m5, m1                  ;k2k3
+    mova                m2, m7                  ;k0k1 upper
+    psrldq              m4, 8                   ;k4k5
+    psrldq              m1, 8                   ;k6k7
     paddsw              m4, m0
-    paddsw              m4, m5
-    pmaxsw              m1, m7
-    pminsw              m7, m3
+    paddsw              m5, m1
+    mova                m1, m3                  ;k2k3 upper
+    psrldq              m7, 8                   ;k4k5 upper
+    psrldq              m3, 8                   ;k6k7 upper
     paddsw              m7, m2
+    paddsw              m4, m5
+    paddsw              m1, m3
     paddsw              m7, m1
-
     paddsw              m4, krd
     psraw               m4, 7
     packuswb            m4, m4
@@ -240,16 +233,13 @@ cglobal filter_block1d4_%1, 6, 6+(ARCH_X86_64*2), 11, LOCAL_VARS_SIZE, \
     pmaddubsw   %3, k2k3
     pmaddubsw   %4, k4k5
     pmaddubsw   %5, k6k7
-
+    paddsw      %2, %4
+    paddsw      %5, %3
     paddsw      %2, %5
-    mova        %1, %3
-    pminsw      %3, %4
-    pmaxsw      %1, %4
-    paddsw      %2, %3
-    paddsw      %1, %2
-    paddsw      %1, krd
-    psraw       %1, 7
-    packuswb    %1, %1
+    paddsw      %2, krd
+    psraw       %2, 7
+    packuswb    %2, %2
+    SWAP        %1, %2
 %endm
 
 ;-------------------------------------------------------------------------------
@@ -293,39 +283,33 @@ cglobal filter_block1d8_%1, 6, 6+(ARCH_X86_64*1), 14, LOCAL_VARS_SIZE, \
     pmaddubsw            m3, k4k5
 
     palignr              m7, m4, 13
-    paddsw               m1, m5
-    mova                 m5, m6
-    mova                 m0, m2
-    palignr              m5, m4, 5
-    pminsw               m2, m3
-    pmaddubsw            m7, k6k7
-    pmaxsw               m3, m0
-    paddsw               m1, m2
     mova                 m0, m6
-    palignr              m6, m4, 1
-    pmaddubsw            m5, k2k3
+    palignr              m0, m4, 5
+    pmaddubsw            m7, k6k7
     paddsw               m1, m3
+    paddsw               m2, m5
+    paddsw               m1, m2
+    mova                 m5, m6
+    palignr              m6, m4, 1
+    pmaddubsw            m0, k2k3
     pmaddubsw            m6, k0k1
-    palignr              m0, m4, 9
+    palignr              m5, m4, 9
     paddsw               m1, krd
-    pmaddubsw            m0, k4k5
-    mova                 m4, m5
+    pmaddubsw            m5, k4k5
     psraw                m1, 7
-    pminsw               m5, m0
-    paddsw               m6, m7
+    paddsw               m0, m7
+%ifidn %1, h8_avg
+    movh                 m7, [dstq]
+    movh                 m2, [dstq + dstrideq]
+%endif
     packuswb             m1, m1
-
     paddsw               m6, m5
-    pmaxsw               m0, m4
     paddsw               m6, m0
     paddsw               m6, krd
     psraw                m6, 7
     packuswb             m6, m6
-
 %ifidn %1, h8_avg
-    movh                 m0, [dstq]
-    movh                 m2, [dstq + dstrideq]
-    pavgb                m1, m0
+    pavgb                m1, m7
     pavgb                m6, m2
 %endif
     movh             [dstq], m1
@@ -388,7 +372,7 @@ cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*0), 14, LOCAL_VARS_SIZE, \
     pmaddubsw     m1, k2k3
     palignr       m2, m7, 9
     pmaddubsw     m2, k4k5
-    paddsw        m0, m3
+    paddsw        m1, m3
     mova          m3, m4
     punpckhbw     m4, m4
     mova          m5, m4
@@ -403,17 +387,13 @@ cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*0), 14, LOCAL_VARS_SIZE, \
     pmaddubsw     m6, k4k5
     palignr       m7, m3, 13
     pmaddubsw     m7, k6k7
-
-    mova          m3, m1
-    pmaxsw        m1, m2
-    pminsw        m2, m3
     paddsw        m0, m2
     paddsw        m0, m1
-    paddsw        m4, m7
-    mova          m7, m5
-    pmaxsw        m5, m6
-    pminsw        m6, m7
+%ifidn %1, h8_avg
+    mova          m1, [dstq]
+%endif
     paddsw        m4, m6
+    paddsw        m5, m7
     paddsw        m4, m5
     paddsw        m0, krd
     paddsw        m4, krd
@@ -421,7 +401,6 @@ cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*0), 14, LOCAL_VARS_SIZE, \
     psraw         m4, 7
     packuswb      m0, m4
 %ifidn %1, h8_avg
-    mova          m1, [dstq]
     pavgb         m0, m1
 %endif
     lea         srcq, [srcq + sstrideq]
@@ -488,27 +467,21 @@ cglobal filter_block1d%2_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     movx         m7, [src1q + sstride6q   ]     ;H
     punpcklbw    m6, m7                         ;G H
     pmaddubsw    m6, k6k7
-    mova        tmp, m2
     pmaddubsw    m3, k2k3
     pmaddubsw    m1, k0k1
-    pmaxsw       m2, m4
-    paddsw       m0, m6
+    paddsw       m0, m4
+    paddsw       m2, m6
     movx         m6, [srcq + sstrideq * 8 ]     ;H next iter
     punpcklbw    m7, m6
     pmaddubsw    m7, k6k7
-    pminsw       m4, tmp
-    paddsw       m0, m4
-    mova         m4, m3
     paddsw       m0, m2
-    pminsw       m3, m5
-    pmaxsw       m5, m4
     paddsw       m0, krd
     psraw        m0, 7
-    paddsw       m1, m7
+    paddsw       m1, m5
     packuswb     m0, m0
 
+    paddsw       m3, m7
     paddsw       m1, m3
-    paddsw       m1, m5
     paddsw       m1, krd
     psraw        m1, 7
     lea        srcq, [srcq + sstrideq * 2 ]
@@ -538,11 +511,11 @@ cglobal filter_block1d%2_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     movx         m1, [srcq + sstrideq     ]     ;B
     movx         m6, [srcq + sstride6q    ]     ;G
     punpcklbw    m0, m1                         ;A B
-    movx         m7, [rax + sstride6q     ]     ;H
+    movx         m7, [src1q + sstride6q   ]     ;H
     pmaddubsw    m0, k0k1
     movx         m2, [srcq + sstrideq * 2 ]     ;C
     punpcklbw    m6, m7                         ;G H
-    movx         m3, [rax + sstrideq * 2  ]     ;D
+    movx         m3, [src1q + sstrideq * 2]     ;D
     pmaddubsw    m6, k6k7
     movx         m4, [srcq + sstrideq * 4 ]     ;E
     punpcklbw    m2, m3                         ;C D
@@ -550,10 +523,7 @@ cglobal filter_block1d%2_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     punpcklbw    m4, m5                         ;E F
     pmaddubsw    m2, k2k3
     pmaddubsw    m4, k4k5
-    paddsw       m0, m6
-    mova         m1, m2
-    pmaxsw       m2, m4
-    pminsw       m4, m1
+    paddsw       m2, m6
     paddsw       m0, m4
     paddsw       m0, m2
     paddsw       m0, krd
@@ -572,7 +542,6 @@ cglobal filter_block1d%2_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
 %macro SUBPIX_VFILTER16 1
 cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
                              src, sstride, dst, dstride, height, filter
-
     mova          m4, [filterq]
     SETUP_LOCAL_VARS
 %if ARCH_X86_64
@@ -611,12 +580,9 @@ cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     punpcklbw     m3, m5                         ;A B
     movh          m7, [srcq + sstrideq * 2 + 8]  ;C
     pmaddubsw     m6, k6k7
-    mova          m1, m2
     movh          m5, [src1q + sstrideq * 2 + 8] ;D
-    pmaxsw        m2, m4
     punpcklbw     m7, m5                         ;C D
-    pminsw        m4, m1
-    paddsw        m0, m6
+    paddsw        m2, m6
     pmaddubsw     m3, k0k1
     movh          m1, [srcq + sstrideq * 4 + 8]  ;E
     paddsw        m0, m4
@@ -630,30 +596,24 @@ cglobal filter_block1d16_%1, 6, 6+(ARCH_X86_64*3), 14, LOCAL_VARS_SIZE, \
     movh          m5, [src1q + sstride6q + 8]    ;H
     psraw         m0, 7
     punpcklbw     m2, m5                         ;G H
-    packuswb      m0, m0
     pmaddubsw     m2, k6k7
 %ifidn %1, v8_avg
-    movh          m4, [dstq]
-    pavgb         m0, m4
+    mova          m4, [dstq]
 %endif
     movh      [dstq], m0
-    mova          m6, m7
-    pmaxsw        m7, m1
-    pminsw        m1, m6
-    paddsw        m3, m2
+    paddsw        m7, m2
     paddsw        m3, m1
     paddsw        m3, m7
     paddsw        m3, krd
     psraw         m3, 7
-    packuswb      m3, m3
+    packuswb      m0, m3
 
     add         srcq, sstrideq
     add        src1q, sstrideq
 %ifidn %1, v8_avg
-    movh          m1, [dstq + 8]
-    pavgb         m3, m1
+    pavgb         m0, m4
 %endif
-    movh  [dstq + 8], m3
+    mova      [dstq], m0
     add         dstq, dst_stride
     dec      heightd
     jnz        .loop

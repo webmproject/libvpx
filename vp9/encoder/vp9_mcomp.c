@@ -383,6 +383,51 @@ static void get_cost_surf_min(int *cost_list, int *ir, int *ic,
                          (cost_list[4] - 2 * cost_list[0] + cost_list[2]));
 }
 
+int vp9_skip_sub_pixel_tree(
+    const MACROBLOCK *x,
+    MV *bestmv, const MV *ref_mv,
+    int allow_hp,
+    int error_per_bit,
+    const vp9_variance_fn_ptr_t *vfp,
+    int forced_stop,
+    int iters_per_step,
+    int *cost_list,
+    int *mvjcost, int *mvcost[2],
+    int *distortion,
+    unsigned int *sse1,
+    const uint8_t *second_pred,
+    int w, int h) {
+  SETUP_SUBPEL_SEARCH;
+  besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
+                               z, src_stride, y, y_stride, second_pred,
+                               w, h, offset, mvjcost, mvcost,
+                               sse1, distortion);
+  (void) halfiters;
+  (void) quarteriters;
+  (void) eighthiters;
+  (void) whichdir;
+  (void) allow_hp;
+  (void) forced_stop;
+  (void) hstep;
+  (void) rr;
+  (void) rc;
+  (void) minr;
+  (void) minc;
+  (void) maxr;
+  (void) maxc;
+  (void) tr;
+  (void) tc;
+  (void) sse;
+  (void) thismse;
+  (void) cost_list;
+
+  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
+      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
+    return INT_MAX;
+
+  return besterr;
+}
+
 int vp9_find_best_sub_pixel_tree_pruned_evenmore(
     const MACROBLOCK *x,
     MV *bestmv, const MV *ref_mv,

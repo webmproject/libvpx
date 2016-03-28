@@ -158,7 +158,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(cfg, g_w,                   1, 65535);  // 16 bits available
   RANGE_CHECK(cfg, g_h,                   1, 65535);  // 16 bits available
   RANGE_CHECK(cfg, g_timebase.den,        1, 1000000000);
-  RANGE_CHECK(cfg, g_timebase.num,        1, cfg->g_timebase.den);
+  RANGE_CHECK(cfg, g_timebase.num,        1, 1000000000);
   RANGE_CHECK_HI(cfg, g_profile,          3);
 
   RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
@@ -486,7 +486,16 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->content = extra_cfg->content;
 
   oxcf->tile_columns = extra_cfg->tile_columns;
-  oxcf->tile_rows    = extra_cfg->tile_rows;
+
+  // TODO(yunqing): The dependencies between row tiles cause error in multi-
+  // threaded encoding. For now, tile_rows is forced to be 0 in this case.
+  // The further fix can be done by adding synchronizations after a tile row
+  // is encoded. But this will hurt multi-threaded encoder performance. So,
+  // it is recommended to use tile-rows=0 while encoding with threads > 1.
+  if (oxcf->max_threads > 1 && oxcf->tile_columns > 0)
+    oxcf->tile_rows  = 0;
+  else
+    oxcf->tile_rows  = extra_cfg->tile_rows;
 
   oxcf->error_resilient_mode         = cfg->g_error_resilient;
   oxcf->frame_parallel_decoding_mode = extra_cfg->frame_parallel_decoding_mode;
@@ -1566,7 +1575,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       // keyframing settings (kf)
       VPX_KF_AUTO,        // g_kfmode
       0,                  // kf_min_dist
-      9999,               // kf_max_dist
+      128,                // kf_max_dist
 
       VPX_SS_DEFAULT_LAYERS,  // ss_number_layers
       {0},

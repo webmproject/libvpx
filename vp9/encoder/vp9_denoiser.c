@@ -338,7 +338,9 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                                      mb->plane[2].src.buf,
                                      mb->plane[0].src.stride,
                                      mb->plane[1].src.stride,
-                                     bs);
+                                     bs,
+                                     0,
+                                     0);
   }
 
   mv_col = ctx->best_sse_mv.as_mv.col;

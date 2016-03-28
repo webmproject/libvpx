@@ -43,6 +43,26 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     cpi->svc.ext_alt_fb_idx[sl] = 2;
   }
 
+  // For 1 pass cbr: allocate scaled_frame that may be used as an intermediate
+  // buffer for a 2 stage down-sampling: two stages of 1:2 down-sampling for a
+  // target of 1/4x1/4.
+  if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    if (vpx_realloc_frame_buffer(&cpi->svc.scaled_temp,
+                                 cpi->common.width >> 1,
+                                 cpi->common.height >> 1,
+                                 cpi->common.subsampling_x,
+                                 cpi->common.subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 cpi->common.use_highbitdepth,
+#endif
+                                 VP9_ENC_BORDER_IN_PIXELS,
+                                 cpi->common.byte_alignment,
+                                 NULL, NULL, NULL))
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                         "Failed to allocate scaled_frame for svc ");
+  }
+
+
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
     if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
                                  SMALL_FRAME_WIDTH, SMALL_FRAME_HEIGHT,
@@ -795,4 +815,28 @@ void vp9_free_svc_cyclic_refresh(VP9_COMP *const cpi) {
           vpx_free(lc->consec_zero_mv);
     }
   }
+}
+
+// Reset on key frame: reset counters, references and buffer updates.
+void vp9_svc_reset_key_frame(VP9_COMP *const cpi) {
+  int sl, tl;
+  SVC *const svc = &cpi->svc;
+  LAYER_CONTEXT *lc = NULL;
+  for (sl = 0; sl < svc->number_spatial_layers; ++sl) {
+    for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+      lc = &cpi->svc.layer_context[sl * svc->number_temporal_layers + tl];
+      lc->current_video_frame_in_layer = 0;
+      lc->frames_from_key_frame = 0;
+    }
+  }
+  if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0212) {
+    set_flags_and_fb_idx_for_temporal_mode3(cpi);
+  } else if (svc->temporal_layering_mode ==
+             VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING) {
+     set_flags_and_fb_idx_for_temporal_mode_noLayering(cpi);
+  } else if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0101) {
+     set_flags_and_fb_idx_for_temporal_mode2(cpi);
+  }
+  vp9_update_temporal_layer_framerate(cpi);
+  vp9_restore_layer_context(cpi);
 }

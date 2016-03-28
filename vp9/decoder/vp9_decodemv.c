@@ -149,17 +149,12 @@ static int read_intra_segment_id(VP9_COMMON *const cm, int mi_offset,
 }
 
 static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                                 int mi_row, int mi_col, vpx_reader *r) {
+                                 int mi_row, int mi_col, vpx_reader *r,
+                                 int x_mis, int y_mis) {
   struct segmentation *const seg = &cm->seg;
   MODE_INFO *const mi = xd->mi[0];
   int predicted_segment_id, segment_id;
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = xd->plane[0].n4_w >> 1;
-  const int bh = xd->plane[0].n4_h >> 1;
-
-  // TODO(slavarnway): move x_mis, y_mis into xd ?????
-  const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
-  const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
@@ -202,19 +197,14 @@ static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 static void read_intra_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
-                                       int mi_row, int mi_col, vpx_reader *r) {
+                                       int mi_row, int mi_col, vpx_reader *r,
+                                       int x_mis, int y_mis) {
   MODE_INFO *const mi = xd->mi[0];
   const MODE_INFO *above_mi = xd->above_mi;
   const MODE_INFO *left_mi  = xd->left_mi;
   const BLOCK_SIZE bsize = mi->sb_type;
   int i;
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = xd->plane[0].n4_w >> 1;
-  const int bh = xd->plane[0].n4_h >> 1;
-
-  // TODO(slavarnway): move x_mis, y_mis into xd ?????
-  const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
-  const int y_mis = VPXMIN(cm->mi_rows - mi_row, bh);
 
   mi->segment_id = read_intra_segment_id(cm, mi_offset, x_mis, y_mis, r);
   mi->skip = read_skip(cm, xd, mi->segment_id, r);
@@ -473,14 +463,13 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 }
 
-static void dec_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp, int_mv *mvlist,
-                                  int_mv *best_mv, int refmv_count) {
+static void dec_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *best_mv,
+                                  int refmv_count) {
   int i;
 
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < refmv_count; ++i) {
     lower_mv_precision(&mvlist[i].as_mv, allow_hp);
-    clamp_mv2(&mvlist[i].as_mv, xd);
     *best_mv = mvlist[i];
   }
 }
@@ -788,7 +777,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
                                        tmp_mvs, mi_row, mi_col, -1, 0,
                                        fpm_sync, (void *)pbi);
 
-        dec_find_best_ref_mvs(xd, allow_hp, tmp_mvs, &best_ref_mvs[ref],
+        dec_find_best_ref_mvs(allow_hp, tmp_mvs, &best_ref_mvs[ref],
                               refmv_count);
       }
     }
@@ -839,12 +828,14 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
 
 static void read_inter_frame_mode_info(VP9Decoder *const pbi,
                                        MACROBLOCKD *const xd,
-                                       int mi_row, int mi_col, vpx_reader *r) {
+                                       int mi_row, int mi_col, vpx_reader *r,
+                                       int x_mis, int y_mis) {
   VP9_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
   int inter_block;
 
-  mi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
+  mi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r, x_mis,
+                                         y_mis);
   mi->skip = read_skip(cm, xd, mi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mi->segment_id, r);
   mi->tx_size = read_tx_size(cm, xd, !mi->skip || !inter_block, r);
@@ -860,7 +851,7 @@ static INLINE void copy_ref_frame_pair(MV_REFERENCE_FRAME *dst,
   memcpy(dst, src, sizeof(*dst) * 2);
 }
 
-void vpx_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
+void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
                         int mi_row, int mi_col, vpx_reader *r,
                         int x_mis, int y_mis) {
   VP9_COMMON *const cm = &pbi->common;
@@ -869,9 +860,9 @@ void vpx_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
   int w, h;
 
   if (frame_is_intra_only(cm)) {
-    read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
+    read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r, x_mis, y_mis);
   } else {
-    read_inter_frame_mode_info(pbi, xd, mi_row, mi_col, r);
+    read_inter_frame_mode_info(pbi, xd, mi_row, mi_col, r, x_mis, y_mis);
 
     for (h = 0; h < y_mis; ++h) {
       for (w = 0; w < x_mis; ++w) {

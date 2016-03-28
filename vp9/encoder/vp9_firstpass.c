@@ -490,7 +490,35 @@ static void set_first_pass_params(VP9_COMP *cpi) {
   cpi->rc.frames_to_key = INT_MAX;
 }
 
+// This threshold is used to track blocks where to all intents and purposes
+// the intra prediction error 0. Though the metric we test against
+// is technically a sse we are mainly interested in blocks where all the pixels
+// int he 8 bit domain have an error of <= 1 (where error = sse) so a
+// linear scaling for 10 and 12 bit gives similar results.
 #define UL_INTRA_THRESH 50
+#if CONFIG_VP9_HIGHBITDEPTH
+static int get_ul_intra_threshold(VP9_COMMON *cm) {
+  int ret_val = UL_INTRA_THRESH;
+  if (cm->use_highbitdepth) {
+    switch (cm->bit_depth) {
+      case VPX_BITS_8:
+        ret_val = UL_INTRA_THRESH;
+        break;
+      case VPX_BITS_10:
+        ret_val = UL_INTRA_THRESH >> 2;
+        break;
+      case VPX_BITS_12:
+        ret_val = UL_INTRA_THRESH >> 4;
+        break;
+      default:
+        assert(0 && "cm->bit_depth should be VPX_BITS_8, "
+                    "VPX_BITS_10 or VPX_BITS_12");
+    }
+  }
+  return ret_val;
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 #define INVALID_ROW -1
 void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int mb_row, mb_col;
@@ -681,7 +709,11 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       // domain). In natural videos this is uncommon, but it is much more
       // common in animations, graphics and screen content, so may be used
       // as a signal to detect these types of content.
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (this_error < get_ul_intra_threshold(cm)) {
+#else
       if (this_error < UL_INTRA_THRESH) {
+#endif
         ++intra_skip_count;
       } else if ((mb_col > 0) && (image_data_start_row == INVALID_ROW)) {
         image_data_start_row = mb_row;
