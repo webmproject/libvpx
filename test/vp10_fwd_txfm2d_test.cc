@@ -18,6 +18,13 @@
 #include "./vp10_rtcd.h"
 
 using libvpx_test::ACMRandom;
+using libvpx_test::base;
+using libvpx_test::bd;
+using libvpx_test::compute_avg_abs_error;
+using libvpx_test::Fwd_Txfm2d_Func;
+using libvpx_test::TYPE_TXFM;
+using libvpx_test::TYPE_DCT;
+using libvpx_test::TYPE_ADST;
 
 namespace {
 
@@ -106,4 +113,4 @@ TEST(vp10_fwd_txfm2d, accuracy) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-}  // anonymous namespace
+}  // namespace

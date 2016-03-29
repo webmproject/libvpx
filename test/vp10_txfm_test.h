@@ -23,6 +23,7 @@
 #include "test/acm_random.h"
 #include "vp10/common/vp10_txfm.h"
 
+namespace libvpx_test {
 typedef enum {
   TYPE_DCT = 0,
   TYPE_ADST,
@@ -109,5 +110,5 @@ typedef void (*Inv_Txfm2d_Func)(const int32_t*, uint16_t*, const int,
 
 static const int bd = 10;
 static const int base = (1 << bd);
-
+}  // namespace libvpx_test
 #endif  // VP10_TXFM_TEST_H_
