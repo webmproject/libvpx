@@ -92,6 +92,7 @@ extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree;
 extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree_pruned;
 extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree_pruned_more;
 extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree_pruned_evenmore;
+extern fractional_mv_step_fp vp9_skip_sub_pixel_tree;
 
 typedef int (*vp9_full_search_fn_t)(const MACROBLOCK *x,
                                     const MV *ref_mv, int sad_per_bit,

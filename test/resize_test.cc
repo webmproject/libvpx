@@ -463,6 +463,17 @@ class ResizeRealtimeTest : public ::libvpx_test::EncoderTest,
     frame_info_list_.push_back(FrameInfo(pts, img.d_w, img.d_h));
   }
 
+  virtual void MismatchHook(const vpx_image_t *img1,
+                             const vpx_image_t *img2) {
+    double mismatch_psnr = compute_psnr(img1, img2);
+    mismatch_psnr_ += mismatch_psnr;
+    ++mismatch_nframes_;
+  }
+
+  unsigned int GetMismatchFrames() {
+      return mismatch_nframes_;
+  }
+
   void DefaultConfig() {
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_buf_optimal_sz = 600;
@@ -488,6 +499,8 @@ class ResizeRealtimeTest : public ::libvpx_test::EncoderTest,
   std::vector< FrameInfo > frame_info_list_;
   int set_cpu_used_;
   bool change_bitrate_;
+  double mismatch_psnr_;
+  int mismatch_nframes_;
 };
 
 TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
@@ -497,6 +510,8 @@ TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
   // Disable internal resize for this test.
   cfg_.rc_resize_allowed = 0;
   change_bitrate_ = false;
+  mismatch_psnr_ = 0.0;
+  mismatch_nframes_ = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
@@ -510,6 +525,7 @@ TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
         << "Frame " << frame << " had unexpected width";
     EXPECT_EQ(expected_h, info->h)
         << "Frame " << frame << " had unexpected height";
+    EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
   }
 }
 
@@ -523,6 +539,8 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDown) {
   cfg_.g_w = 352;
   cfg_.g_h = 288;
   change_bitrate_ = false;
+  mismatch_psnr_ = 0.0;
+  mismatch_nframes_ = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   unsigned int last_w = cfg_.g_w;
@@ -542,6 +560,7 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDown) {
 
   // Verify that we get 1 resize down event in this test.
   ASSERT_EQ(1, resize_count) << "Resizing should occur.";
+  EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
 }
 
 // Verify the dynamic resizer behavior for real time, 1 pass CBR mode.
@@ -554,6 +573,8 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
   cfg_.g_w = 352;
   cfg_.g_h = 288;
   change_bitrate_ = true;
+  mismatch_psnr_ = 0.0;
+  mismatch_nframes_ = 0;
   // Disable dropped frames.
   cfg_.rc_dropframe_thresh = 0;
   // Starting bitrate low.
@@ -583,6 +604,7 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
 
   // Verify that we get 2 resize events in this test.
   ASSERT_EQ(resize_count, 2) << "Resizing should occur twice.";
+  EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
 }
 
 vpx_img_fmt_t CspForFrameNumber(int frame) {

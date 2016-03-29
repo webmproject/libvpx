@@ -1469,7 +1469,12 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
   if (rc->frames_till_gf_update_due == 0) {
-    rc->baseline_gf_interval = (rc->min_gf_interval + rc->max_gf_interval) / 2;
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.pass == 0) {
+      vp9_cyclic_refresh_set_golden_update(cpi);
+    } else {
+      rc->baseline_gf_interval =
+          (rc->min_gf_interval + rc->max_gf_interval) / 2;
+    }
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     // NOTE: frames_till_gf_update_due must be <= frames_to_key.
     if (rc->frames_till_gf_update_due > rc->frames_to_key) {
@@ -1487,6 +1492,8 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
   else
     target = calc_pframe_target_size_one_pass_vbr(cpi);
   vp9_rc_set_frame_target(cpi, target);
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.pass == 0)
+    vp9_cyclic_refresh_update_parameters(cpi);
 }
 
 static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
@@ -1567,40 +1574,28 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
 
-// Reset information needed to set proper reference frames and buffer updates
-// for temporal layering. This is called when a key frame is encoded.
-static void reset_temporal_layer_to_zero(VP9_COMP *cpi) {
-  int sl;
-  LAYER_CONTEXT *lc = NULL;
-  cpi->svc.temporal_layer_id = 0;
-
-  for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
-    lc = &cpi->svc.layer_context[sl * cpi->svc.number_temporal_layers];
-    lc->current_video_frame_in_layer = 0;
-    lc->frames_from_key_frame = 0;
-  }
-}
-
 void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target = rc->avg_frame_bandwidth;
   int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
       cpi->svc.temporal_layer_id, cpi->svc.number_temporal_layers);
-
+  // Periodic key frames is based on the super-frame counter
+  // (svc.current_superframe), also only base spatial layer is key frame.
   if ((cm->current_video_frame == 0) ||
       (cpi->frame_flags & FRAMEFLAGS_KEY) ||
-      (cpi->oxcf.auto_key && (rc->frames_since_key %
-          cpi->oxcf.key_freq == 0))) {
+      (cpi->oxcf.auto_key &&
+       (cpi->svc.current_superframe % cpi->oxcf.key_freq == 0) &&
+       cpi->svc.spatial_layer_id == 0)) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
-
     if (is_two_pass_svc(cpi)) {
       cpi->svc.layer_context[layer].is_key_frame = 1;
       cpi->ref_frame_flags &=
           (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
     } else if (is_one_pass_cbr_svc(cpi)) {
-      reset_temporal_layer_to_zero(cpi);
+      if (cm->current_video_frame > 0)
+        vp9_svc_reset_key_frame(cpi);
       layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
            cpi->svc.temporal_layer_id, cpi->svc.number_temporal_layers);
       cpi->svc.layer_context[layer].is_key_frame = 1;
@@ -2010,13 +2005,17 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
   VP9_COMMON * const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   rc->high_source_sad = 0;
-  if (cpi->Last_Source != NULL) {
+  if (cpi->Last_Source != NULL &&
+      cpi->Last_Source->y_width == cpi->Source->y_width &&
+      cpi->Last_Source->y_height == cpi->Source->y_height) {
     const uint8_t *src_y = cpi->Source->y_buffer;
     const int src_ystride = cpi->Source->y_stride;
     const uint8_t *last_src_y = cpi->Last_Source->y_buffer;
     const int last_src_ystride = cpi->Last_Source->y_stride;
     int sbi_row, sbi_col;
     const BLOCK_SIZE bsize = BLOCK_64X64;
+    uint32_t min_thresh = 4000;
+    float thresh = 8.0f;
     // Loop over sub-sample of frame, and compute average sad over 64x64 blocks.
     uint64_t avg_sad = 0;
     int num_samples = 0;
@@ -2047,12 +2046,32 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // between current and the previous frame value(s). Use a minimum threshold
     // for cases where there is small change from content that is completely
     // static.
-    if (avg_sad > VPXMAX(4000, (rc->avg_source_sad << 3)) &&
+    if (cpi->oxcf.rc_mode == VPX_VBR) {
+      min_thresh = 30000;
+      thresh = 2.0f;
+    }
+    if (avg_sad >
+        VPXMAX(min_thresh, (unsigned int)(rc->avg_source_sad  * thresh)) &&
         rc->frames_since_key > 1)
       rc->high_source_sad = 1;
     else
       rc->high_source_sad = 0;
-    rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
+    if (avg_sad > 0 || cpi->oxcf.rc_mode == VPX_CBR)
+      rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
+    // For VBR, under scene change/high content change, force golden refresh.
+    if (cpi->oxcf.rc_mode == VPX_VBR &&
+        rc->high_source_sad &&
+        cpi->refresh_golden_frame == 0 &&
+        cpi->ext_refresh_frame_flags_pending == 0) {
+      int target;
+      cpi->refresh_golden_frame = 1;
+      rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+      if (rc->frames_till_gf_update_due > rc->frames_to_key)
+        rc->frames_till_gf_update_due = rc->frames_to_key;
+      rc->gfu_boost = DEFAULT_GF_BOOST;
+      target = calc_pframe_target_size_one_pass_vbr(cpi);
+      vp9_rc_set_frame_target(cpi, target);
+    }
   }
 }
 

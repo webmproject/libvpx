@@ -74,6 +74,7 @@ extern const int16_t *vp9_dct_value_cost_ptr;
  */
 extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
 extern const TOKENVALUE *vp9_dct_cat_lt_10_value_tokens;
+extern const int *vp9_dct_cat_lt_10_value_cost;
 extern const int16_t vp9_cat6_low_cost[256];
 extern const int vp9_cat6_high_cost[64];
 extern const int vp9_cat6_high10_high_cost[256];
@@ -117,6 +118,18 @@ static INLINE int16_t vp9_get_token(int v) {
   return vp9_dct_cat_lt_10_value_tokens[v].token;
 }
 
+static INLINE int vp9_get_token_cost(int v, int16_t *token,
+                                     const int *cat6_high_table) {
+  if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL) {
+    EXTRABIT extrabits;
+    *token = CATEGORY6_TOKEN;
+    extrabits = abs(v) - CAT6_MIN_VAL;
+    return vp9_cat6_low_cost[extrabits & 0xff] +
+           cat6_high_table[extrabits >> 8];
+  }
+  *token = vp9_dct_cat_lt_10_value_tokens[v].token;
+  return vp9_dct_cat_lt_10_value_cost[v];
+}
 
 #ifdef __cplusplus
 }  // extern "C"

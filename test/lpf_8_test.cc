@@ -430,7 +430,7 @@ TEST_P(Loop8Test9Param, ValueCheck) {
 
 using std::tr1::make_tuple;
 
-#if HAVE_MMX && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_MMX && CONFIG_USE_X86INC && !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     MMX, Loop8Test6Param,
     ::testing::Values(

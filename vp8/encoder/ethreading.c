@@ -518,7 +518,6 @@ int vp8cx_create_encoder_threads(VP8_COMP *cpi)
 
     cpi->b_multi_threaded = 0;
     cpi->encoding_thread_count = 0;
-    cpi->b_lpf_running = 0;
 
     pthread_mutex_init(&cpi->mt_mutex, NULL);
 

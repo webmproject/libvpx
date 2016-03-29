@@ -23,7 +23,7 @@ static const unsigned int NOISE_MOTION_THRESHOLD = 25 * 25;
  */
 static const unsigned int SSE_DIFF_THRESHOLD = 16 * 16 * 20;
 static const unsigned int SSE_THRESHOLD = 16 * 16 * 40;
-static const unsigned int SSE_THRESHOLD_HIGH = 16 * 16 * 60;
+static const unsigned int SSE_THRESHOLD_HIGH = 16 * 16 * 80;
 
 /*
  * The filter function was modified to reduce the computational complexity.
