@@ -33,6 +33,29 @@
       "revId": "6bb8fdfec43112d3df16f9d84f9d89df1765ca17",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "514879fd_c43f3299",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1792,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-29T22:36:04Z",
+      "side": 1,
+      "message": "While these are good changes that I support, they don\u0027t seem in anyway related to the change in top level block size.",
+      "range": {
+        "startLine": 1763,
+        "startChar": 0,
+        "endLine": 1792,
+        "endChar": 48
+      },
+      "revId": "6bb8fdfec43112d3df16f9d84f9d89df1765ca17",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
