@@ -1823,6 +1823,9 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
 #endif  // CONFIG_EXT_INTRA
 
+    if (rows * cols > PALETTE_MAX_BLOCK_SIZE)
+      return 0;
+
     for (n = colors > PALETTE_MAX_SIZE ? PALETTE_MAX_SIZE : colors;
         n >= 2; --n) {
       for (i = 0; i < n; ++i)
@@ -3551,6 +3554,9 @@ static void rd_pick_palette_intra_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
   const int src_stride = x->plane[1].src.stride;
   const uint8_t *const src_u = x->plane[1].src.buf;
   const uint8_t *const src_v = x->plane[2].src.buf;
+
+  if (rows * cols > PALETTE_MAX_BLOCK_SIZE)
+    return;
 
 #if CONFIG_EXT_INTRA
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;

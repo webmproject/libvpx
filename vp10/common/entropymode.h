@@ -34,6 +34,7 @@ extern "C" {
 #define PALETTE_MAX_SIZE 8
 #define PALETTE_BLOCK_SIZES (BLOCK_LARGEST - BLOCK_8X8 + 1)
 #define PALETTE_Y_MODE_CONTEXTS 3
+#define PALETTE_MAX_BLOCK_SIZE (64 * 64)
 
 struct VP10Common;
 
