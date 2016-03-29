@@ -794,8 +794,8 @@ static void model_rd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bsize,
       dist_sum += dist;
     } else {
       vp10_model_rd_from_var_lapndz(sum_sse, num_pels_log2_lookup[bs],
-                                   pd->dequant[1] >> dequant_shift,
-                                   &rate, &dist);
+                                    pd->dequant[1] >> dequant_shift,
+                                    &rate, &dist);
       rate_sum += rate;
       dist_sum += dist;
     }
@@ -6791,6 +6791,16 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         bh = 4 << b_height_log2_lookup[mbmi->sb_type];
     int_mv tmp_mv;
     int tmp_rate_mv = 0;
+    DECLARE_ALIGNED(16, uint8_t,
+                    intrapred_[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+    uint8_t *intrapred;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+      intrapred = CONVERT_TO_BYTEPTR(intrapred_);
+    else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      intrapred = intrapred_;
+
     mbmi->ref_frame[1] = NONE;
     for (j = 0; j < MAX_MB_PLANE; j++) {
       xd->plane[j].dst.buf = tmp_buf + j * MAX_SB_SQUARE;
@@ -6824,20 +6834,27 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->interintra_mode = best_interintra_mode;
     mbmi->interintra_uv_mode = best_interintra_mode;
     if (ref_best_rd < INT64_MAX &&
-        best_interintra_rd / 2 > ref_best_rd) {
+        best_interintra_rd > 2 * ref_best_rd) {
       return INT64_MAX;
     }
+    vp10_build_intra_predictors_for_interintra(
+        xd, bsize, 0, intrapred, MAX_SB_SIZE);
+    vp10_build_intra_predictors_for_interintra(
+        xd, bsize, 1, intrapred + MAX_SB_SQUARE, MAX_SB_SIZE);
+    vp10_build_intra_predictors_for_interintra(
+        xd, bsize, 2, intrapred + 2 * MAX_SB_SQUARE, MAX_SB_SIZE);
+
     wedge_bits = get_wedge_bits(bsize);
     rmode = intra_mode_cost[mbmi->interintra_mode];
     if (wedge_bits) {
-      vp10_build_interintra_predictors(xd,
-                                       tmp_buf,
-                                       tmp_buf + MAX_SB_SQUARE,
-                                       tmp_buf + 2 * MAX_SB_SQUARE,
-                                       MAX_SB_SIZE,
-                                       MAX_SB_SIZE,
-                                       MAX_SB_SIZE,
-                                       bsize);
+      vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
+                              intrapred, MAX_SB_SIZE);
+      vp10_combine_interintra(xd, bsize, 1,
+                              tmp_buf + MAX_SB_SQUARE, MAX_SB_SIZE,
+                              intrapred + MAX_SB_SQUARE, MAX_SB_SIZE);
+      vp10_combine_interintra(xd, bsize, 2,
+                              tmp_buf + 2 * MAX_SB_SQUARE, MAX_SB_SIZE,
+                              intrapred + 2 * MAX_SB_SQUARE, MAX_SB_SIZE);
       model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
                       &skip_txfm_sb, &skip_sse_sb);
       rwedge = vp10_cost_bit(cm->fc->wedge_interintra_prob[bsize], 0);
@@ -6852,14 +6869,15 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
         mbmi->interintra_wedge_index = wedge_index;
         mbmi->interintra_uv_wedge_index = wedge_index;
-        vp10_build_interintra_predictors(xd,
-                                         tmp_buf,
-                                         tmp_buf + MAX_SB_SQUARE,
-                                         tmp_buf + 2 * MAX_SB_SQUARE,
-                                         MAX_SB_SIZE,
-                                         MAX_SB_SIZE,
-                                         MAX_SB_SIZE,
-                                         bsize);
+        vp10_combine_interintra(xd, bsize, 0,
+                                tmp_buf, MAX_SB_SIZE,
+                                intrapred, MAX_SB_SIZE);
+        vp10_combine_interintra(xd, bsize, 1,
+                                tmp_buf + MAX_SB_SQUARE, MAX_SB_SIZE,
+                                intrapred + MAX_SB_SQUARE, MAX_SB_SIZE);
+        vp10_combine_interintra(xd, bsize, 2,
+                                tmp_buf + 2 * MAX_SB_SQUARE, MAX_SB_SIZE,
+                                intrapred + 2 * MAX_SB_SQUARE, MAX_SB_SIZE);
         model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
                         &skip_txfm_sb, &skip_sse_sb);
         rd = RDCOST(x->rdmult, x->rddiv,
@@ -7557,6 +7575,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   uint8_t ref_frame_skip_mask[2] = { 0 };
 #if CONFIG_EXT_INTER
   uint32_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
+  MV_REFERENCE_FRAME best_single_inter_ref = LAST_FRAME;
+  int64_t best_single_inter_rd = INT64_MAX;
 #else
   uint16_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
 #endif  // CONFIG_EXT_INTER
@@ -8183,6 +8203,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #endif
 #if CONFIG_EXT_INTER
       if (second_ref_frame == INTRA_FRAME) {
+        if (best_single_inter_ref != ref_frame)
+          continue;
         mbmi->interintra_mode = best_intra_mode;
         mbmi->interintra_uv_mode = best_intra_mode;
 #if CONFIG_EXT_INTRA
@@ -8482,7 +8504,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #endif  // CONFIG_OBMC
     }
 
-
     // Apply an adjustment to the rd value based on the similarity of the
     // source variance and reconstructed variance.
     rd_variance_adjustment(cpi, x, bsize, &this_rd, ref_frame,
@@ -8492,11 +8513,18 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                            x->source_variance);
 
     if (ref_frame == INTRA_FRAME) {
-    // Keep record of best intra rd
+      // Keep record of best intra rd
       if (this_rd < best_intra_rd) {
         best_intra_rd = this_rd;
         best_intra_mode = mbmi->mode;
       }
+#if CONFIG_EXT_INTER
+    } else if (second_ref_frame == NONE) {
+      if (this_rd < best_single_inter_rd) {
+        best_single_inter_rd = this_rd;
+        best_single_inter_ref = mbmi->ref_frame[0];
+      }
+#endif  // CONFIG_EXT_INTER
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
