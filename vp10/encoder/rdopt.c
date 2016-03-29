@@ -1744,7 +1744,7 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                      int palette_ctx, int dc_mode_cost,
                                      PALETTE_MODE_INFO *palette_mode_info,
                                      uint8_t *best_palette_color_map,
-                                     TX_SIZE *best_tx,
+                                     TX_SIZE *best_tx, TX_TYPE *best_tx_type,
                                      PREDICTION_MODE *mode_selected,
                                      int64_t *best_rd) {
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -1898,6 +1898,7 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
                rows * cols * sizeof(color_map[0]));
         *mode_selected = DC_PRED;
         *best_tx = mbmi->tx_size;
+        *best_tx_type = mbmi->tx_type;
         rate_overhead = this_rate - this_rate_tokenonly;
       }
     }
@@ -2774,7 +2775,8 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (cpi->common.allow_screen_content_tools)
     rd_pick_palette_intra_sby(cpi, x, bsize, palette_ctx, bmode_costs[DC_PRED],
                               &palette_mode_info, best_palette_color_map,
-                              &best_tx, &mode_selected, &best_rd);
+                              &best_tx, &best_tx_type, &mode_selected,
+                              &best_rd);
 
 #if CONFIG_EXT_INTRA
   if (ALLOW_FILTER_INTRA_MODES) {
@@ -8616,6 +8618,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     int64_t distortion2 = 0, distortion_y = 0, dummy_rd = best_rd, this_rd;
     int skippable = 0, rate_overhead = 0;
     TX_SIZE best_tx_size, uv_tx;
+    TX_TYPE best_tx_type;
     PALETTE_MODE_INFO palette_mode_info;
     uint8_t *const best_palette_color_map =
         x->palette_buffer->best_palette_color_map;
@@ -8631,7 +8634,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         rd_pick_palette_intra_sby(cpi, x, bsize, palette_ctx,
                                   intra_mode_cost[DC_PRED],
                                   &palette_mode_info, best_palette_color_map,
-                                  &best_tx_size, &mode_selected, &dummy_rd);
+                                  &best_tx_size, &best_tx_type, &mode_selected,
+                                  &dummy_rd);
     if (palette_mode_info.palette_size[0] == 0)
       goto PALETTE_EXIT;
 
