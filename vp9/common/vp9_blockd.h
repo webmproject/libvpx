@@ -158,6 +158,9 @@ typedef struct macroblockd {
   MODE_INFO *left_mi;
   MODE_INFO *above_mi;
 
+  unsigned int max_blocks_wide;
+  unsigned int max_blocks_high;
+
   const vpx_prob (*partition_probs)[PARTITION_TYPES - 1];
 
   /* Distance of MB away from frame edges */

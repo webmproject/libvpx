@@ -883,6 +883,9 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
       const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ?
           0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
 
+      xd->max_blocks_wide = xd->mb_to_right_edge >= 0 ? 0 : max_blocks_wide;
+      xd->max_blocks_high = xd->mb_to_bottom_edge >= 0 ? 0 : max_blocks_high;
+
       for (row = 0; row < max_blocks_high; row += step)
         for (col = 0; col < max_blocks_wide; col += step)
           predict_and_reconstruct_intra_block(xd, r, mi, plane,
@@ -910,6 +913,9 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
             0 : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
         const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ?
             0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+
+        xd->max_blocks_wide = xd->mb_to_right_edge >= 0 ? 0 : max_blocks_wide;
+        xd->max_blocks_high = xd->mb_to_bottom_edge >= 0 ? 0 : max_blocks_high;
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
