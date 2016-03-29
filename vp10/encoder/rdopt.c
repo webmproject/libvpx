@@ -5301,13 +5301,6 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
           if (!subpelmv && have_ref &&
               ref_bsi->rdstat[i][mode_idx].brdcost < INT64_MAX) {
 #if CONFIG_REF_MV
-            bsi->rdstat[i][mode_idx].pred_mv[0].as_int =
-                bsi->ref_mv[0]->as_int;
-
-            if (has_second_rf)
-              bsi->rdstat[i][mode_idx].pred_mv[1].as_int =
-                  bsi->ref_mv[1]->as_int;
-
             bsi->rdstat[i][mode_idx].byrate =
                 ref_bsi->rdstat[i][mode_idx].byrate;
             bsi->rdstat[i][mode_idx].bdist =
@@ -5318,6 +5311,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                 ref_bsi->rdstat[i][mode_idx].byrate;
             bsi->rdstat[i][mode_idx].eobs =
                 ref_bsi->rdstat[i][mode_idx].eobs;
+
+            bsi->rdstat[i][mode_idx].brdcost =
+                RDCOST(x->rdmult, x->rddiv, bsi->rdstat[i][mode_idx].brate,
+                       bsi->rdstat[i][mode_idx].bdist);
+
             memcpy(bsi->rdstat[i][mode_idx].ta,
                    ref_bsi->rdstat[i][mode_idx].ta,
                    sizeof(bsi->rdstat[i][mode_idx].ta));
