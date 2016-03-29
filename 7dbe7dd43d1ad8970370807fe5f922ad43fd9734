@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "51e079e0_98330ded",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-03-29T12:33:00Z",
+      "side": 1,
+      "message": "I found this in vpx_mem_intrnl.h\n\n#  define DEFAULT_ALIGNMENT        (2 * sizeof(void*)) \n\nAll callocs would be guaranteed to be at least 8 byte aligned (for 32 bit).  All TX_32X32 context will be reading from an 8 byte aligned memory location, so we should be ok.",
+      "parentUuid": "51e079e0_41e6f4fe",
+      "revId": "7dbe7dd43d1ad8970370807fe5f922ad43fd9734",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc0f1e77_252c8532",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 3
