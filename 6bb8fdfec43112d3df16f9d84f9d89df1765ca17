@@ -16,6 +16,23 @@
       "revId": "6bb8fdfec43112d3df16f9d84f9d89df1765ca17",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "514879fd_c4ce5230",
+        "filename": "tools/diff.pyc",
+        "patchSetId": 15
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-03-29T22:14:59Z",
+      "side": 1,
+      "message": "Remove this file",
+      "revId": "6bb8fdfec43112d3df16f9d84f9d89df1765ca17",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
