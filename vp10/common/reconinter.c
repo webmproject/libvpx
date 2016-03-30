@@ -1098,7 +1098,7 @@ void vp10_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
     const int bh = 4 * num_4x4_h;
 
     if (xd->mi[0]->mbmi.sb_type < BLOCK_8X8) {
-      int i = 0, x, y;
+      int x, y;
       assert(bsize == BLOCK_8X8);
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
@@ -1107,7 +1107,7 @@ void vp10_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
 #if CONFIG_OBMC
                0, 0,
 #endif  // CONFIG_OBMC
-               i++, bw, bh, 4 * x, 4 * y, 4, 4,
+               y * 2 + x, bw, bh, 4 * x, 4 * y, 4, 4,
 #if CONFIG_EXT_INTER
                wedge_offset_x >> (xd->plane[plane].subsampling_x),
                wedge_offset_y >> (xd->plane[plane].subsampling_y),
@@ -2067,12 +2067,12 @@ void vp10_build_inter_predictors_for_planes_single_buf(
     const int bh = 4 * num_4x4_h;
 
     if (xd->mi[0]->mbmi.sb_type < BLOCK_8X8) {
-      int i = 0, x, y;
+      int x, y;
       assert(bsize == BLOCK_8X8);
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
           build_inter_predictors_single_buf(xd, plane,
-                                            i++, bw, bh,
+                                            y * 2 + x, bw, bh,
                                             4 * x, 4 * y, 4, 4,
                                             mi_x, mi_y, ref,
                                             ext_dst[plane],
