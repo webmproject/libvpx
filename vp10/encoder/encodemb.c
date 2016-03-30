@@ -29,8 +29,8 @@
 #include "vp10/encoder/tokenize.h"
 
 struct optimize_ctx {
-  ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
-  ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
+  ENTROPY_CONTEXT ta[MAX_MB_PLANE][2 * MI_BLOCK_SIZE];
+  ENTROPY_CONTEXT tl[MAX_MB_PLANE][2 * MI_BLOCK_SIZE];
 };
 
 void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
@@ -96,9 +96,9 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ref = is_inter_block(&xd->mi[0]->mbmi);
-  vp10_token_state tokens[1025][2];
-  unsigned best_index[1025][2];
-  uint8_t token_cache[1024];
+  vp10_token_state tokens[MAX_TX_SQUARE+1][2];
+  unsigned best_index[MAX_TX_SQUARE+1][2];
+  uint8_t token_cache[MAX_TX_SQUARE];
   const tran_low_t *const coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);

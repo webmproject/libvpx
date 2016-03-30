@@ -147,7 +147,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_error_block_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += subtract_test.cc
 
 ifeq ($(CONFIG_VP9_ENCODER),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_SPATIAL_SVC) += svc_test.cc
@@ -172,6 +172,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ANS)          += vp10_ans_test.cc
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += sum_squares_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
 
 ifeq ($(CONFIG_EXT_INTER),yes)
 LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_variance_test.cc

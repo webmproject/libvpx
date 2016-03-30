@@ -13,18 +13,19 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-# define MAX_CU_SIZE 128
-#else
-# define MAX_CU_SIZE 64
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
+#ifndef MAX_SB_SIZE
+# if CONFIG_VP10 && CONFIG_EXT_PARTITION
+#   define MAX_SB_SIZE 128
+# else
+#   define MAX_SB_SIZE 64
+# endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
+#endif  // ndef MAX_SB_SIZE
 
 #define VPXMIN(x, y) (((x) < (y)) ? (x) : (y))
 #define VPXMAX(x, y) (((x) > (y)) ? (x) : (y))

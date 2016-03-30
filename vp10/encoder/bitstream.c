@@ -1893,7 +1893,7 @@ static void write_modes(VP10_COMP *const cpi,
 
     for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MI_BLOCK_SIZE) {
       write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, 0,
-                             mi_row, mi_col, BLOCK_64X64);
+                             mi_row, mi_col, BLOCK_LARGEST);
     }
   }
 }

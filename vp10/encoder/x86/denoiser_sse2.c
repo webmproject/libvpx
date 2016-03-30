@@ -361,9 +361,7 @@ int vp10_denoiser_filter_sse2(const uint8_t *sig, int sig_stride,
                                        avg, avg_stride,
                                        increase_denoising,
                                        bs, motion_magnitude, 8);
-  } else if (bs == BLOCK_16X8 || bs == BLOCK_16X16 || bs == BLOCK_16X32 ||
-             bs == BLOCK_32X16|| bs == BLOCK_32X32 || bs == BLOCK_32X64 ||
-             bs == BLOCK_64X32 || bs == BLOCK_64X64) {
+  } else if (bs < BLOCK_SIZES) {
     return vp10_denoiser_NxM_sse2_big(sig, sig_stride,
                                      mc_avg, mc_avg_stride,
                                      avg, avg_stride,

@@ -1955,6 +1955,8 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
       CHECK_MEM_ERROR(cm, x->palette_buffer,
                       vpx_memalign(16, sizeof(*x->palette_buffer)));
     }
+    vp10_free_pc_tree(&cpi->td);
+    vp10_setup_pc_tree(&cpi->common, &cpi->td);
   }
 
   vp10_reset_segment_features(cm);
@@ -3147,7 +3149,7 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
   }
 
   if (lf->filter_level > 0) {
-#if CONFIG_VAR_TX
+#if CONFIG_VAR_TX || CONFIG_EXT_PARTITION
     vp10_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
 #else
     if (cpi->num_workers > 1)

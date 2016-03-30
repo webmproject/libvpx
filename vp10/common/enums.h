@@ -18,13 +18,25 @@
 extern "C" {
 #endif
 
-#define MI_SIZE_LOG2 3
-#define MI_BLOCK_SIZE_LOG2 (6 - MI_SIZE_LOG2)  // 64 = 2^6
+#undef MAX_SB_SIZE
 
+#if CONFIG_EXT_PARTITION
+# define MAX_SB_SIZE_LOG2 7
+#else
+# define MAX_SB_SIZE_LOG2 6
+#endif  // CONFIG_EXT_PARTITION
+
+#define MAX_SB_SIZE (1 << MAX_SB_SIZE_LOG2)
+#define MAX_SB_SQUARE (MAX_SB_SIZE * MAX_SB_SIZE)
+
+#define MI_SIZE_LOG2 3
 #define MI_SIZE (1 << MI_SIZE_LOG2)  // pixels per mi-unit
+
+#define MI_BLOCK_SIZE_LOG2 (MAX_SB_SIZE_LOG2 - MI_SIZE_LOG2)
 #define MI_BLOCK_SIZE (1 << MI_BLOCK_SIZE_LOG2)  // mi-units per max block
 
 #define MI_MASK (MI_BLOCK_SIZE - 1)
+#define MI_MASK_2 (MI_BLOCK_SIZE * 2 - 1)
 
 #if CONFIG_EXT_TILE
 # define  MAX_TILE_ROWS 1024
@@ -49,32 +61,29 @@ typedef enum BITSTREAM_PROFILE {
   MAX_PROFILES
 } BITSTREAM_PROFILE;
 
-#define BLOCK_4X4      0
-#define BLOCK_4X8      1
-#define BLOCK_8X4      2
-#define BLOCK_8X8      3
-#define BLOCK_8X16     4
-#define BLOCK_16X8     5
-#define BLOCK_16X16    6
-#define BLOCK_16X32    7
-#define BLOCK_32X16    8
-#define BLOCK_32X32    9
-#define BLOCK_32X64   10
-#define BLOCK_64X32   11
-#define BLOCK_64X64   12
-
-#if CONFIG_EXT_PARTITION
-#define BLOCK_64X128  13
-#define BLOCK_128X64  14
-#define BLOCK_128X128 15
-#define BLOCK_SIZES   16
+#define BLOCK_4X4       0
+#define BLOCK_4X8       1
+#define BLOCK_8X4       2
+#define BLOCK_8X8       3
+#define BLOCK_8X16      4
+#define BLOCK_16X8      5
+#define BLOCK_16X16     6
+#define BLOCK_16X32     7
+#define BLOCK_32X16     8
+#define BLOCK_32X32     9
+#define BLOCK_32X64    10
+#define BLOCK_64X32    11
+#define BLOCK_64X64    12
+#if !CONFIG_EXT_PARTITION
+# define BLOCK_SIZES   13
 #else
-#define BLOCK_SIZES   13
-#endif  // CONFIG_EXT_PARTITION
-
-#define BLOCK_INVALID (BLOCK_SIZES)
+# define BLOCK_64X128  13
+# define BLOCK_128X64  14
+# define BLOCK_128X128 15
+# define BLOCK_SIZES   16
+#endif  // !CONFIG_EXT_PARTITION
+#define BLOCK_INVALID BLOCK_SIZES
 #define BLOCK_LARGEST (BLOCK_SIZES - 1)
-
 typedef uint8_t BLOCK_SIZE;
 
 #if CONFIG_EXT_PARTITION_TYPES
@@ -104,7 +113,11 @@ typedef enum PARTITION_TYPE {
 
 typedef char PARTITION_CONTEXT;
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
-#define PARTITION_CONTEXTS   (4 * PARTITION_PLOFFSET)
+#if CONFIG_EXT_PARTITION
+# define PARTITION_CONTEXTS  (5 * PARTITION_PLOFFSET)
+#else
+# define PARTITION_CONTEXTS  (4 * PARTITION_PLOFFSET)
+#endif  // CONFIG_EXT_PARTITION
 
 // block transform size
 typedef uint8_t TX_SIZE;
@@ -113,6 +126,15 @@ typedef uint8_t TX_SIZE;
 #define TX_16X16 ((TX_SIZE)2)   // 16x16 transform
 #define TX_32X32 ((TX_SIZE)3)   // 32x32 transform
 #define TX_SIZES ((TX_SIZE)4)
+
+#define MAX_TX_SIZE_LOG2  5
+#define MAX_TX_SIZE       (1 << MAX_TX_SIZE_LOG2)
+#define MAX_TX_SQUARE     (MAX_TX_SIZE * MAX_TX_SIZE)
+
+// Number of maxium size transform blocks in the maximum size superblock
+#define MAX_TX_BLOCKS_IN_MAX_SB_LOG2 \
+  ((MAX_SB_SIZE_LOG2 - MAX_TX_SIZE_LOG2) * 2)
+#define MAX_TX_BLOCKS_IN_MAX_SB (1 << MAX_TX_BLOCKS_IN_MAX_SB_LOG2)
 
 // frame transform mode
 typedef enum {
@@ -286,10 +308,15 @@ typedef enum {
 
 /* Segment Feature Masks */
 #define MAX_MV_REF_CANDIDATES 2
+
 #if CONFIG_REF_MV
 #define MAX_REF_MV_STACK_SIZE 16
-#define REF_CAT_LEVEL  160
-#endif
+#if CONFIG_EXT_PARTITION
+#define REF_CAT_LEVEL 640
+#else
+#define REF_CAT_LEVEL 160
+#endif  // CONFIG_EXT_PARTITION
+#endif  // CONFIG_REF_MV
 
 #define INTRA_INTER_CONTEXTS 4
 #define COMP_INTER_CONTEXTS 5

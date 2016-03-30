@@ -50,16 +50,16 @@ class MaskedSADTest : public ::testing::TestWithParam<MaskedSADParam> {
 TEST_P(MaskedSADTest, OperationCheck) {
   unsigned int ref_ret, ret;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t, src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t, ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t, msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, src_ptr[MAX_SB_SIZE*MAX_SB_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, ref_ptr[MAX_SB_SIZE*MAX_SB_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, msk_ptr[MAX_SB_SIZE*MAX_SB_SIZE]);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = MAX_CU_SIZE;
-  int ref_stride = MAX_CU_SIZE;
-  int msk_stride = MAX_CU_SIZE;
+  int src_stride = MAX_SB_SIZE;
+  int ref_stride = MAX_SB_SIZE;
+  int msk_stride = MAX_SB_SIZE;
   for (int i = 0; i < number_of_iterations; ++i) {
-    for (int j = 0; j < MAX_CU_SIZE*MAX_CU_SIZE; j++) {
+    for (int j = 0; j < MAX_SB_SIZE*MAX_SB_SIZE; j++) {
       src_ptr[j] = rnd.Rand8();
       ref_ptr[j] = rnd.Rand8();
       msk_ptr[j] = ((rnd.Rand8()&0x7f) > 64) ? rnd.Rand8()&0x3f : 64;
@@ -108,18 +108,18 @@ class HighbdMaskedSADTest : public ::testing::
 TEST_P(HighbdMaskedSADTest, OperationCheck) {
   unsigned int ref_ret, ret;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint16_t, src_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
-  DECLARE_ALIGNED(16, uint16_t, ref_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
-  DECLARE_ALIGNED(16, uint8_t, msk_ptr[MAX_CU_SIZE*MAX_CU_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, src_ptr[MAX_SB_SIZE*MAX_SB_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, ref_ptr[MAX_SB_SIZE*MAX_SB_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, msk_ptr[MAX_SB_SIZE*MAX_SB_SIZE]);
   uint8_t* src8_ptr = CONVERT_TO_BYTEPTR(src_ptr);
   uint8_t* ref8_ptr = CONVERT_TO_BYTEPTR(ref_ptr);
   int err_count = 0;
   int first_failure = -1;
-  int src_stride = MAX_CU_SIZE;
-  int ref_stride = MAX_CU_SIZE;
-  int msk_stride = MAX_CU_SIZE;
+  int src_stride = MAX_SB_SIZE;
+  int ref_stride = MAX_SB_SIZE;
+  int msk_stride = MAX_SB_SIZE;
   for (int i = 0; i < number_of_iterations; ++i) {
-    for (int j = 0; j < MAX_CU_SIZE*MAX_CU_SIZE; j++) {
+    for (int j = 0; j < MAX_SB_SIZE*MAX_SB_SIZE; j++) {
       src_ptr[j] = rnd.Rand16()&0xfff;
       ref_ptr[j] = rnd.Rand16()&0xfff;
       msk_ptr[j] = ((rnd.Rand8()&0x7f) > 64) ? rnd.Rand8()&0x3f : 64;

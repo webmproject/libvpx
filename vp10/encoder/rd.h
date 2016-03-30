@@ -330,8 +330,8 @@ void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame);
 
 void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
                               const struct macroblockd_plane *pd,
-                              ENTROPY_CONTEXT t_above[16],
-                              ENTROPY_CONTEXT t_left[16]);
+                              ENTROPY_CONTEXT t_above[2 * MI_BLOCK_SIZE],
+                              ENTROPY_CONTEXT t_left[2 * MI_BLOCK_SIZE]);
 
 void vp10_set_rd_speed_thresholds(struct VP10_COMP *cpi);
 

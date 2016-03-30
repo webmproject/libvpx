@@ -189,7 +189,7 @@ int vp10_denoiser_filter_c(const uint8_t *sig, int sig_stride,
 
 static uint8_t *block_start(uint8_t *framebuf, int stride,
                             int mi_row, int mi_col) {
-  return framebuf + (stride * mi_row * 8) + (mi_col * 8);
+  return framebuf + (stride * mi_row * MI_SIZE) + (mi_col * MI_SIZE);
 }
 
 static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,

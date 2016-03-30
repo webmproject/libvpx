@@ -44,30 +44,30 @@ static const uint8_t extend_modes[INTRA_MODES] = {
   NEED_LEFT | NEED_ABOVE | NEED_ABOVELEFT,  // TM
 };
 
-static const uint8_t orders_64x64[1] = { 0 };
-static const uint8_t orders_64x32[2] = { 0, 1 };
-static const uint8_t orders_32x64[2] = { 0, 1 };
-static const uint8_t orders_32x32[4] = {
+static const uint8_t orders_128x128[1] = { 0 };
+static const uint8_t orders_128x64[2] = { 0, 1 };
+static const uint8_t orders_64x128[2] = { 0, 1 };
+static const uint8_t orders_64x64[4] = {
   0, 1,
   2, 3,
 };
-static const uint8_t orders_32x16[8] = {
+static const uint8_t orders_64x32[8] = {
   0, 2,
   1, 3,
   4, 6,
   5, 7,
 };
-static const uint8_t orders_16x32[8] = {
+static const uint8_t orders_32x64[8] = {
   0, 1, 2, 3,
   4, 5, 6, 7,
 };
-static const uint8_t orders_16x16[16] = {
+static const uint8_t orders_32x32[16] = {
   0,   1,  4,  5,
   2,   3,  6,  7,
   8,   9, 12, 13,
   10, 11, 14, 15,
 };
-static const uint8_t orders_16x8[32] = {
+static const uint8_t orders_32x16[32] = {
   0,   2,  8, 10,
   1,   3,  9, 11,
   4,   6, 12, 14,
@@ -77,13 +77,13 @@ static const uint8_t orders_16x8[32] = {
   20, 22, 28, 30,
   21, 23, 29, 31,
 };
-static const uint8_t orders_8x16[32] = {
+static const uint8_t orders_16x32[32] = {
   0,   1,  2,  3,  8,  9, 10, 11,
   4,   5,  6,  7, 12, 13, 14, 15,
   16, 17, 18, 19, 24, 25, 26, 27,
   20, 21, 22, 23, 28, 29, 30, 31,
 };
-static const uint8_t orders_8x8[64] = {
+static const uint8_t orders_16x16[64] = {
   0,   1,  4,  5, 16, 17, 20, 21,
   2,   3,  6,  7, 18, 19, 22, 23,
   8,   9, 12, 13, 24, 25, 28, 29,
@@ -93,24 +93,96 @@ static const uint8_t orders_8x8[64] = {
   40, 41, 44, 45, 56, 57, 60, 61,
   42, 43, 46, 47, 58, 59, 62, 63,
 };
-static const uint8_t *const orders[BLOCK_SIZES] = {
-  orders_8x8, orders_8x8, orders_8x8, orders_8x8,
-  orders_8x16, orders_16x8, orders_16x16,
-  orders_16x32, orders_32x16, orders_32x32,
-  orders_32x64, orders_64x32, orders_64x64,
+
+#if CONFIG_EXT_PARTITION
+static const uint8_t orders_16x8[128] = {
+  0,   2,  8, 10,  32,  34,  40,  42,
+  1,   3,  9, 11,  33,  35,  41,  43,
+  4,   6, 12, 14,  36,  38,  44,  46,
+  5,   7, 13, 15,  37,  39,  45,  47,
+  16, 18, 24, 26,  48,  50,  56,  58,
+  17, 19, 25, 27,  49,  51,  57,  59,
+  20, 22, 28, 30,  52,  54,  60,  62,
+  21, 23, 29, 31,  53,  55,  61,  63,
+  64, 66, 72, 74,  96,  98, 104, 106,
+  65, 67, 73, 75,  97,  99, 105, 107,
+  68, 70, 76, 78, 100, 102, 108, 110,
+  69, 71, 77, 79, 101, 103, 109, 111,
+  80, 82, 88, 90, 112, 114, 120, 122,
+  81, 83, 89, 91, 113, 115, 121, 123,
+  84, 86, 92, 94, 116, 118, 124, 126,
+  85, 87, 93, 95, 117, 119, 125, 127,
 };
+static const uint8_t orders_8x16[128] = {
+  0,   1,  2,  3,  8,  9, 10, 11,  32,  33,  34,  35,  40,  41,  42,  43,
+  4,   5,  6,  7, 12, 13, 14, 15,  36,  37,  38,  39,  44,  45,  46,  47,
+  16, 17, 18, 19, 24, 25, 26, 27,  48,  49,  50,  51,  56,  57,  58,  59,
+  20, 21, 22, 23, 28, 29, 30, 31,  52,  53,  54,  55,  60,  61,  62,  63,
+  64, 65, 66, 67, 72, 73, 74, 75,  96,  97,  98,  99, 104, 105, 106, 107,
+  68, 69, 70, 71, 76, 77, 78, 79, 100, 101, 102, 103, 108, 109, 110, 111,
+  80, 81, 82, 83, 88, 89, 90, 91, 112, 113, 114, 115, 120, 121, 122, 123,
+  84, 85, 86, 87, 92, 93, 94, 95, 116, 117, 118, 119, 124, 125, 126, 127,
+};
+static const uint8_t orders_8x8[256] = {
+0,     1,   4,   5,  16,  17,  20,  21,  64,  65,  68,  69,  80,  81,  84,  85,
+2,     3,   6,   7,  18,  19,  22,  23,  66,  67,  70,  71,  82,  83,  86,  87,
+8,     9,  12,  13,  24,  25,  28,  29,  72,  73,  76,  77,  88,  89,  92,  93,
+10,   11,  14,  15,  26,  27,  30,  31,  74,  75,  78,  79,  90,  91,  94,  95,
+32,   33,  36,  37,  48,  49,  52,  53,  96,  97, 100, 101, 112, 113, 116, 117,
+34,   35,  38,  39,  50,  51,  54,  55,  98,  99, 102, 103, 114, 115, 118, 119,
+40,   41,  44,  45,  56,  57,  60,  61, 104, 105, 108, 109, 120, 121, 124, 125,
+42,   43,  46,  47,  58,  59,  62,  63, 106, 107, 110, 111, 122, 123, 126, 127,
+128, 129, 132, 133, 144, 145, 148, 149, 192, 193, 196, 197, 208, 209, 212, 213,
+130, 131, 134, 135, 146, 147, 150, 151, 194, 195, 198, 199, 210, 211, 214, 215,
+136, 137, 140, 141, 152, 153, 156, 157, 200, 201, 204, 205, 216, 217, 220, 221,
+138, 139, 142, 143, 154, 155, 158, 159, 202, 203, 206, 207, 218, 219, 222, 223,
+160, 161, 164, 165, 176, 177, 180, 181, 224, 225, 228, 229, 240, 241, 244, 245,
+162, 163, 166, 167, 178, 179, 182, 183, 226, 227, 230, 231, 242, 243, 246, 247,
+168, 169, 172, 173, 184, 185, 188, 189, 232, 233, 236, 237, 248, 249, 252, 253,
+170, 171, 174, 175, 186, 187, 190, 191, 234, 235, 238, 239, 250, 251, 254, 255,
+};
+
+static const uint8_t *const orders[BLOCK_SIZES] = {
+  //                              4X4
+                                  orders_8x8,
+  // 4X8,         8X4,            8X8
+  orders_8x8,     orders_8x8,     orders_8x8,
+  // 8X16,        16X8,           16X16
+  orders_8x16,    orders_16x8,    orders_16x16,
+  // 16X32,       32X16,          32X32
+  orders_16x32,   orders_32x16,   orders_32x32,
+  // 32X64,       64X32,          64X64
+  orders_32x64,   orders_64x32,   orders_64x64,
+  // 64x128,      128x64,         128x128
+  orders_64x128,  orders_128x64,  orders_128x128
+};
+#else
+static const uint8_t *const orders[BLOCK_SIZES] = {
+  //                              4X4
+                                  orders_16x16,
+  // 4X8,         8X4,            8X8
+  orders_16x16,   orders_16x16,   orders_16x16,
+  // 8X16,        16X8,           16X16
+  orders_16x32,   orders_32x16,   orders_32x32,
+  // 16X32,       32X16,          32X32
+  orders_32x64,   orders_64x32,   orders_64x64,
+  // 32X64,       64X32,          64X64
+  orders_64x128,  orders_128x64,  orders_128x128
+};
+#endif  // CONFIG_EXT_PARTITION
+
 #if CONFIG_EXT_PARTITION_TYPES
-static const uint8_t orders_verta_32x32[4] = {
+static const uint8_t orders_verta_64x64[4] = {
   0, 2,
   1, 2,
 };
-static const uint8_t orders_verta_16x16[16] = {
+static const uint8_t orders_verta_32x32[16] = {
   0,   2,  4,  6,
   1,   2,  5,  6,
   8,  10, 12, 14,
   9,  10, 13, 14,
 };
-static const uint8_t orders_verta_8x8[64] = {
+static const uint8_t orders_verta_16x16[64] = {
   0,   2,  4,  6, 16, 18, 20, 22,
   1,   2,  5,  6, 17, 18, 21, 22,
   8,  10, 12, 14, 24, 26, 28, 30,
@@ -120,12 +192,53 @@ static const uint8_t orders_verta_8x8[64] = {
   40, 42, 44, 46, 56, 58, 60, 62,
   41, 42, 45, 46, 57, 58, 61, 62,
 };
-static const uint8_t *const orders_verta[BLOCK_SIZES] = {
-  orders_verta_8x8, orders_verta_8x8, orders_verta_8x8, orders_verta_8x8,
-  orders_8x16, orders_16x8, orders_verta_16x16,
-  orders_16x32, orders_32x16, orders_verta_32x32,
-  orders_32x64, orders_64x32, orders_64x64,
+#if CONFIG_EXT_PARTITION
+static const uint8_t orders_verta_8x8[256] = {
+0,     2,   4,   6,  16,  18,  20,  22,  64,  66,  68,  70,  80,  82,  84,  86,
+1,     2,   5,   6,  17,  18,  21,  22,  65,  66,  69,  70,  81,  82,  85,  86,
+8,    10,  12,  14,  24,  26,  28,  30,  72,  74,  76,  78,  88,  90,  92,  94,
+9,    10,  13,  14,  25,  26,  29,  30,  73,  74,  77,  78,  89,  90,  93,  94,
+32,   34,  36,  38,  48,  50,  52,  54,  96,  98, 100, 102, 112, 114, 116, 118,
+33,   34,  37,  38,  49,  50,  53,  54,  97,  98, 101, 102, 113, 114, 117, 118,
+40,   42,  44,  46,  56,  58,  60,  62, 104, 106, 108, 110, 120, 122, 124, 126,
+41,   42,  45,  46,  57,  58,  61,  62, 105, 106, 109, 110, 121, 122, 125, 126,
+128, 130, 132, 134, 144, 146, 148, 150, 192, 194, 196, 198, 208, 210, 212, 214,
+129, 130, 133, 134, 145, 146, 149, 150, 193, 194, 197, 198, 209, 210, 213, 214,
+136, 138, 140, 142, 152, 154, 156, 158, 200, 202, 204, 206, 216, 218, 220, 222,
+137, 138, 141, 142, 153, 154, 157, 158, 201, 202, 205, 206, 217, 218, 221, 222,
+160, 162, 164, 166, 176, 178, 180, 182, 224, 226, 228, 230, 240, 242, 244, 246,
+161, 162, 165, 166, 177, 178, 181, 182, 225, 226, 229, 230, 241, 242, 245, 246,
+168, 170, 172, 174, 184, 186, 188, 190, 232, 234, 236, 238, 248, 250, 252, 254,
+169, 170, 173, 174, 185, 186, 189, 190, 233, 234, 237, 238, 249, 250, 253, 254,
 };
+static const uint8_t *const orders_verta[BLOCK_SIZES] = {
+  //                                  4X4
+                                      orders_verta_8x8,
+  // 4X8,           8X4,              8X8
+  orders_verta_8x8, orders_verta_8x8, orders_verta_8x8,
+  // 8X16,          16X8,             16X16
+  orders_8x16,      orders_16x8,      orders_verta_16x16,
+  // 16X32,         32X16,            32X32
+  orders_16x32,     orders_32x16,     orders_verta_32x32,
+  // 32X64,         64X32,            64X64
+  orders_32x64,     orders_64x32,     orders_verta_64x64,
+  // 64x128,        128x64,           128x128
+  orders_64x128,    orders_128x64,    orders_128x128
+};
+#else
+static const uint8_t *const orders_verta[BLOCK_SIZES] = {
+  //                                      4X4
+                                          orders_verta_16x16,
+  // 4X8,             8X4,                8X8
+  orders_verta_16x16, orders_verta_16x16, orders_verta_16x16,
+  // 8X16,            16X8,               16X16
+  orders_16x32,       orders_32x16,       orders_verta_32x32,
+  // 16X32,           32X16,              32X32
+  orders_32x64,       orders_64x32,       orders_verta_64x64,
+  // 32X64,           64X32,              64X64
+  orders_64x128,      orders_128x64,      orders_128x128
+};
+#endif  // CONFIG_EXT_PARTITION
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
 static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
@@ -154,24 +267,26 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
         order = orders_verta[bsize];
       else
 #endif  // CONFIG_EXT_PARTITION_TYPES
-        order = orders[bsize];
+      order = orders[bsize];
 
       if (x + step < w)
         return 1;
 
-      mi_row = (mi_row & 7) >> hl;
-      mi_col = (mi_col & 7) >> wl;
+      mi_row = (mi_row & MI_MASK) >> hl;
+      mi_col = (mi_col & MI_MASK) >> wl;
 
       // If top row of coding unit
       if (mi_row == 0)
         return 1;
 
       // If rightmost column of coding unit
-      if (((mi_col + 1) << wl) >= 8)
+      if (((mi_col + 1) << wl) >= MI_BLOCK_SIZE)
         return 0;
 
-      my_order = order[((mi_row + 0) << (3 - wl)) + mi_col + 0];
-      tr_order = order[((mi_row - 1) << (3 - wl)) + mi_col + 1];
+      my_order =
+        order[((mi_row + 0) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col + 0];
+      tr_order =
+        order[((mi_row - 1) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col + 1];
 
       return my_order > tr_order;
     } else {
@@ -200,17 +315,17 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     if (y + step < h)
       return 1;
 
-    mi_row = (mi_row & 7) >> hl;
-    mi_col = (mi_col & 7) >> wl;
+    mi_row = (mi_row & MI_MASK) >> hl;
+    mi_col = (mi_col & MI_MASK) >> wl;
 
     if (mi_col == 0)
-      return (mi_row << (hl + !ss_y)) + y + step < (8 << !ss_y);
+      return (mi_row << (hl + !ss_y)) + y + step < (MI_BLOCK_SIZE << !ss_y);
 
-    if (((mi_row + 1) << hl) >= 8)
+    if (((mi_row + 1) << hl) >= MI_BLOCK_SIZE)
       return 0;
 
-    my_order = order[((mi_row + 0) << (3 - wl)) + mi_col + 0];
-    bl_order = order[((mi_row + 1) << (3 - wl)) + mi_col - 1];
+    my_order = order[((mi_row + 0) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col + 0];
+    bl_order = order[((mi_row + 1) << (MI_BLOCK_SIZE_LOG2 - wl)) + mi_col - 1];
 
     return bl_order < my_order;
   }
@@ -336,8 +451,8 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
   if (filter_type != INTRA_FILTER_LINEAR) {
     const int pad_size = SUBPEL_TAPS >> 1;
     int len;
-    DECLARE_ALIGNED(16, uint8_t, buf[SUBPEL_SHIFTS][64]);
-    DECLARE_ALIGNED(16, uint8_t, src[64 + SUBPEL_TAPS]);
+    DECLARE_ALIGNED(16, uint8_t, buf[SUBPEL_SHIFTS][MAX_SB_SIZE]);
+    DECLARE_ALIGNED(16, uint8_t, src[MAX_SB_SIZE + SUBPEL_TAPS]);
     uint8_t flags[SUBPEL_SHIFTS];
 
     memset(flags, 0, SUBPEL_SHIFTS * sizeof(flags[0]));
@@ -467,8 +582,8 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
   if (filter_type != INTRA_FILTER_LINEAR) {
     const int pad_size = SUBPEL_TAPS >> 1;
     int len, i;
-    DECLARE_ALIGNED(16, uint8_t, buf[64][4 * SUBPEL_SHIFTS]);
-    DECLARE_ALIGNED(16, uint8_t, src[(64 + SUBPEL_TAPS) * 4]);
+    DECLARE_ALIGNED(16, uint8_t, buf[MAX_SB_SIZE][4 * SUBPEL_SHIFTS]);
+    DECLARE_ALIGNED(16, uint8_t, src[(MAX_SB_SIZE + SUBPEL_TAPS) * 4]);
     uint8_t flags[SUBPEL_SHIFTS];
 
     memset(flags, 0, SUBPEL_SHIFTS * sizeof(flags[0]));
@@ -1063,8 +1178,8 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int i;
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-  DECLARE_ALIGNED(16, uint16_t, left_col[64]);
-  DECLARE_ALIGNED(16, uint16_t, above_data[64 + 16]);
+  DECLARE_ALIGNED(16, uint16_t, left_col[MAX_SB_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, above_data[MAX_SB_SIZE + 16]);
   uint16_t *above_row = above_data + 16;
   const uint16_t *const_above_row = above_row;
   const int bs = 4 << tx_size;
@@ -1220,9 +1335,9 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
                                    int n_left_px, int n_bottomleft_px,
                                    int plane) {
   int i;
-  DECLARE_ALIGNED(16, uint8_t, left_col[64]);
+  DECLARE_ALIGNED(16, uint8_t, left_col[MAX_SB_SIZE]);
   const uint8_t *above_ref = ref - ref_stride;
-  DECLARE_ALIGNED(16, uint8_t, above_data[64 + 16]);
+  DECLARE_ALIGNED(16, uint8_t, above_data[MAX_SB_SIZE + 16]);
   uint8_t *above_row = above_data + 16;
   const uint8_t *const_above_row = above_row;
   const int bs = 4 << tx_size;

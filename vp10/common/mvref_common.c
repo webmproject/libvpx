@@ -12,6 +12,7 @@
 #include "vp10/common/mvref_common.h"
 
 #if CONFIG_REF_MV
+
 static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
                                     const MB_MODE_INFO *const candidate,
                                     const MV_REFERENCE_FRAME rf[2],
@@ -22,6 +23,8 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
   const int weight = len;
   int index = 0, ref;
   int newmv_count = 0;
+
+  assert(2 * weight < REF_CAT_LEVEL);
 
   if (rf[1] == NONE) {
     // single reference frame
@@ -246,32 +249,30 @@ static uint8_t scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   return newmv_count;
 }
 
-// This function assumes MI blocks are 8x8 and coding units are 64x64
 static int has_top_right(const MACROBLOCKD *xd,
                          int mi_row, int mi_col, int bs) {
   // In a split partition all apart from the bottom right has a top right
-  int has_tr = !((mi_row & bs) & (bs * 2 - 1)) ||
-               !((mi_col & bs) & (bs * 2 - 1));
+  int has_tr = !((mi_row & bs) && (mi_col & bs));
 
-  // Filter out partial right-most boundaries
+  // bs > 0 and bs is a power of 2
+  assert(bs > 0 && !(bs & (bs - 1)));
+
   // For each 4x4 group of blocks, when the bottom right is decoded the blocks
-  // to the right have not been decoded therefore the second from bottom in the
-  // right-most column does not have a top right
-  if ((mi_col & bs) & (bs * 2 - 1)) {
-    if (((mi_col & (2 * bs)) & (bs * 4 - 1)) &&
-        ((mi_row & (2 * bs)) & (bs * 4 - 1)))
-      has_tr = 0;
+  // to the right have not been decoded therefore the bottom right does
+  // not have a top right
+  while (bs < MI_BLOCK_SIZE) {
+    if (mi_col & bs) {
+      if ((mi_col & (2 * bs)) && (mi_row & (2 * bs))) {
+        has_tr = 0;
+        break;
+      }
+    } else {
+      break;
+    }
+    bs <<= 1;
   }
 
-  // If the right had side of the block lines up with the right had edge end of
-  // a group of 8x8 MI blocks (i.e. edge of a coding unit) and is not on the top
-  // row of that coding unit, it does not have a top right
-  if (has_tr)
-    if (((mi_col + xd->n8_w) & 0x07) == 0)
-      if ((mi_row & 0x07) > 0)
-        has_tr = 0;
-
-  // The left had of two vertical rectangles always has a top right (as the
+  // The left hand of two vertical rectangles always has a top right (as the
   // block above will have been decoded)
   if (xd->n8_w < xd->n8_h)
     if (!xd->is_sec_rect)
@@ -359,8 +360,11 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   nearest_refmv_count = *refmv_count;
 
-  for (idx = 0; idx < nearest_refmv_count; ++idx)
+  for (idx = 0; idx < nearest_refmv_count; ++idx) {
+    assert(ref_mv_stack[idx].weight > 0 &&
+           ref_mv_stack[idx].weight < REF_CAT_LEVEL);
     ref_mv_stack[idx].weight += REF_CAT_LEVEL;
+  }
 
   if (prev_frame_mvs_base && cm->show_frame && cm->last_show_frame
       && rf[1] == NONE) {

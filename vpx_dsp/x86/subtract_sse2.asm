@@ -31,6 +31,10 @@ cglobal subtract_block, 7, 7, 8, \
   je .case_16
   cmp                colsd, 32
   je .case_32
+%if CONFIG_EXT_PARTITION
+  cmp                colsd, 64
+  je .case_64
+%endif
 
 %macro loop16 6
   mova                  m0, [srcq+%1]
@@ -55,6 +59,22 @@ cglobal subtract_block, 7, 7, 8, \
   mova [diffq+mmsize*1+%6], m1
 %endmacro
 
+%if CONFIG_EXT_PARTITION
+  mov             pred_str, pred_stridemp
+.loop_128:
+  loop16 0*mmsize, 1*mmsize, 0*mmsize, 1*mmsize,  0*mmsize,  2*mmsize
+  loop16 2*mmsize, 3*mmsize, 2*mmsize, 3*mmsize,  4*mmsize,  6*mmsize
+  loop16 4*mmsize, 5*mmsize, 4*mmsize, 5*mmsize,  8*mmsize, 10*mmsize
+  loop16 6*mmsize, 7*mmsize, 6*mmsize, 7*mmsize, 12*mmsize, 14*mmsize
+  lea                diffq, [diffq+diff_strideq*2]
+  add                predq, pred_str
+  add                 srcq, src_strideq
+  sub                rowsd, 1
+  jnz .loop_128
+  RET
+
+.case_64:
+%endif
   mov             pred_str, pred_stridemp
 .loop_64:
   loop16 0*mmsize, 1*mmsize, 0*mmsize, 1*mmsize, 0*mmsize, 2*mmsize

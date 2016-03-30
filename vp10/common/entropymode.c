@@ -171,6 +171,13 @@ static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
   {  72,  16,  44, 128, 128, 128, 128 },  // a split, l not split
   {  58,  32,  12, 128, 128, 128, 128 },  // l split, a not split
   {  10,   7,   6, 128, 128, 128, 128 },  // a/l both split
+#if CONFIG_EXT_PARTITION
+  // 128x128 -> 64x64
+  { 222,  34,  30, 128, 128, 128, 128 },  // a/l both not split
+  {  72,  16,  44, 128, 128, 128, 128 },  // a split, l not split
+  {  58,  32,  12, 128, 128, 128, 128 },  // l split, a not split
+  {  10,   7,   6, 128, 128, 128, 128 },  // a/l both split
+#endif  // CONFIG_EXT_PARTITION
 };
 #else
 static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
@@ -195,6 +202,13 @@ static const vpx_prob default_partition_probs[PARTITION_CONTEXTS]
   {  72,  16,  44 },  // a split, l not split
   {  58,  32,  12 },  // l split, a not split
   {  10,   7,   6 },  // a/l both split
+#if CONFIG_EXT_PARTITION
+  // 128x128 -> 64x64
+  { 222,  34,  30 },  // a/l both not split
+  {  72,  16,  44 },  // a split, l not split
+  {  58,  32,  12 },  // l split, a not split
+  {  10,   7,   6 },  // a/l both split
+#endif  // CONFIG_EXT_PARTITION
 };
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
@@ -256,20 +270,33 @@ static const vpx_prob default_inter_compound_mode_probs
 
 static const vpx_prob default_interintra_prob[BLOCK_SIZES] = {
   192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+#if CONFIG_EXT_PARTITION
+  192, 192, 192
+#endif  // CONFIG_EXT_PARTITION
 };
 
 static const vpx_prob default_wedge_interintra_prob[BLOCK_SIZES] = {
   192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+#if CONFIG_EXT_PARTITION
+  192, 192, 192
+#endif  // CONFIG_EXT_PARTITION
 };
 
 static const vpx_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
   192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+#if CONFIG_EXT_PARTITION
+  192, 192, 192
+#endif  // CONFIG_EXT_PARTITION
 };
 #endif  // CONFIG_EXT_INTER
 
 #if CONFIG_OBMC
 static const vpx_prob default_obmc_prob[BLOCK_SIZES] = {
     255, 255, 255, 151, 153, 144, 178, 165, 160, 207, 195, 168, 244,
+#if CONFIG_EXT_PARTITION
+    // TODO(debargha) What are the correct values for these?
+    192, 192, 192
+#endif  // CONFIG_EXT_PARTITION
 };
 #endif  // CONFIG_OBMC
 
@@ -389,6 +416,11 @@ vp10_default_palette_y_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1] = {
     { 180, 113, 136,  49,  45, 114},
     { 107,  70,  87,  49, 154, 156},
     {  98, 105, 142,  63,  64, 152},
+#if CONFIG_EXT_PARTITION
+    {  98, 105, 142,  63,  64, 152},
+    {  98, 105, 142,  63,  64, 152},
+    {  98, 105, 142,  63,  64, 152},
+#endif  // CONFIG_EXT_PARTITION
 };
 
 const vpx_prob
@@ -403,6 +435,11 @@ vp10_default_palette_uv_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1] = {
     {  67,  53,  54,  55,  66,  93},
     { 120, 130,  83, 171,  75, 214},
     {  72,  55,  66,  68,  79, 107},
+#if CONFIG_EXT_PARTITION
+    {  72,  55,  66,  68,  79, 107},
+    {  72,  55,  66,  68,  79, 107},
+    {  72,  55,  66,  68,  79, 107},
+#endif  // CONFIG_EXT_PARTITION
 };
 
 const vpx_prob
@@ -418,6 +455,11 @@ vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES][PALETTE_Y_MODE_CONTEXTS]
     { 240,  180,  100, },
     { 240,  180,  100, },
     { 240,  180,  100, },
+#if CONFIG_EXT_PARTITION
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+#endif  // CONFIG_EXT_PARTITION
 };
 
 

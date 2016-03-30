@@ -102,8 +102,8 @@ typedef struct {
 struct rdcost_block_args {
   const VP10_COMP *cpi;
   MACROBLOCK *x;
-  ENTROPY_CONTEXT t_above[16];
-  ENTROPY_CONTEXT t_left[16];
+  ENTROPY_CONTEXT t_above[2 * MI_BLOCK_SIZE];
+  ENTROPY_CONTEXT t_left[2 * MI_BLOCK_SIZE];
   int this_rate;
   int64_t this_dist;
   int64_t this_sse;
@@ -376,8 +376,8 @@ static void get_energy_distribution_fine(const VP10_COMP *cpi,
   unsigned int esq[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   unsigned int var[16];
   double total = 0;
-  const int f_index = bsize - 6;
 
+  const int f_index = bsize - BLOCK_16X16;
   if (f_index < 0) {
     int i, j, index;
     int w_shift = bw == 8 ? 1 : 2;
@@ -890,7 +890,7 @@ static int cost_coeffs(MACROBLOCK *x,
   const tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
                    x->token_costs[tx_size][type][is_inter_block(mbmi)];
-  uint8_t token_cache[32 * 32];
+  uint8_t token_cache[MAX_TX_SQUARE];
 #if CONFIG_VAR_TX
   int pt = coeff_ctx;
 #else
@@ -1045,10 +1045,10 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
     if (*eob) {
       const MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
 #if CONFIG_VP9_HIGHBITDEPTH
-      DECLARE_ALIGNED(16, uint16_t, recon16[32 * 32]);  // MAX TX_SIZE**2
+      DECLARE_ALIGNED(16, uint16_t, recon16[MAX_TX_SQUARE]);
       uint8_t *recon = (uint8_t*)recon16;
 #else
-      DECLARE_ALIGNED(16, uint8_t, recon[32 * 32]);     // MAX TX_SIZE**2
+      DECLARE_ALIGNED(16, uint8_t, recon[MAX_TX_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
       const PLANE_TYPE plane_type = plane == 0 ? PLANE_TYPE_Y : PLANE_TYPE_UV;
@@ -1064,18 +1064,18 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         recon = CONVERT_TO_BYTEPTR(recon);
         inv_txfm_param.bd = xd->bd;
-        vpx_highbd_convolve_copy(dst, dst_stride, recon, 32,
+        vpx_highbd_convolve_copy(dst, dst_stride, recon, MAX_TX_SIZE,
                                  NULL, 0, NULL, 0, bs, bs, xd->bd);
-        highbd_inv_txfm_add(dqcoeff, recon, 32, &inv_txfm_param);
+        highbd_inv_txfm_add(dqcoeff, recon, MAX_TX_SIZE, &inv_txfm_param);
       } else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       {
-        vpx_convolve_copy(dst, dst_stride, recon, 32,
+        vpx_convolve_copy(dst, dst_stride, recon, MAX_TX_SIZE,
                           NULL, 0, NULL, 0, bs, bs);
-        inv_txfm_add(dqcoeff, recon, 32, &inv_txfm_param);
+        inv_txfm_add(dqcoeff, recon, MAX_TX_SIZE, &inv_txfm_param);
       }
 
-      cpi->fn_ptr[tx_bsize].vf(src, src_stride, recon, 32, &tmp);
+      cpi->fn_ptr[tx_bsize].vf(src, src_stride, recon, MAX_TX_SIZE, &tmp);
     }
 
     *out_dist = (int64_t)tmp * 16;
@@ -2838,10 +2838,10 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   uint8_t *src = &p->src.buf[4 * blk_row * src_stride + 4 * blk_col];
   uint8_t *dst = &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col];
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, rec_buffer_alloc_16[32 * 32]);
+  DECLARE_ALIGNED(16, uint16_t, rec_buffer16[MAX_TX_SQUARE]);
   uint8_t *rec_buffer;
 #else
-  DECLARE_ALIGNED(16, uint8_t, rec_buffer[32 * 32]);
+  DECLARE_ALIGNED(16, uint8_t, rec_buffer[MAX_TX_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
@@ -2860,16 +2860,16 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   // TODO(any): Use dist_block to compute distortion
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    rec_buffer = CONVERT_TO_BYTEPTR(rec_buffer_alloc_16);
-    vpx_highbd_convolve_copy(dst, pd->dst.stride, rec_buffer, 32,
+    rec_buffer = CONVERT_TO_BYTEPTR(rec_buffer16);
+    vpx_highbd_convolve_copy(dst, pd->dst.stride, rec_buffer, MAX_TX_SIZE,
                              NULL, 0, NULL, 0, bh, bh, xd->bd);
   } else {
-    rec_buffer = (uint8_t *)rec_buffer_alloc_16;
-    vpx_convolve_copy(dst, pd->dst.stride, rec_buffer, 32,
+    rec_buffer = (uint8_t *)rec_buffer16;
+    vpx_convolve_copy(dst, pd->dst.stride, rec_buffer, MAX_TX_SIZE,
                       NULL, 0, NULL, 0, bh, bh);
   }
 #else
-  vpx_convolve_copy(dst, pd->dst.stride, rec_buffer, 32,
+  vpx_convolve_copy(dst, pd->dst.stride, rec_buffer, MAX_TX_SIZE,
                     NULL, 0, NULL, 0, bh, bh);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -2904,12 +2904,12 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       inv_txfm_param.bd = xd->bd;
-      highbd_inv_txfm_add(dqcoeff, rec_buffer, 32, &inv_txfm_param);
+      highbd_inv_txfm_add(dqcoeff, rec_buffer, MAX_TX_SIZE, &inv_txfm_param);
     } else {
-      inv_txfm_add(dqcoeff, rec_buffer, 32, &inv_txfm_param);
+      inv_txfm_add(dqcoeff, rec_buffer, MAX_TX_SIZE, &inv_txfm_param);
     }
 #else  // CONFIG_VP9_HIGHBITDEPTH
-    inv_txfm_add(dqcoeff, rec_buffer, 32, &inv_txfm_param);
+    inv_txfm_add(dqcoeff, rec_buffer, MAX_TX_SIZE, &inv_txfm_param);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if ((bh >> 2) + blk_col > max_blocks_wide ||
@@ -2921,16 +2921,16 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
       tmp = 0;
       for (idy = 0; idy < blocks_height; idy += 2) {
         for (idx = 0; idx < blocks_width; idx += 2) {
-          cpi->fn_ptr[BLOCK_8X8].vf(src + 4 * idy * src_stride + 4 * idx,
-                                    src_stride,
-                                    rec_buffer + 4 * idy * 32 + 4 * idx,
-                                    32, &this_dist);
+          uint8_t *const s = src + 4 * idy * src_stride + 4 * idx;
+          uint8_t *const r = rec_buffer + 4 * idy * MAX_TX_SIZE + 4 * idx;
+          cpi->fn_ptr[BLOCK_8X8].vf(s, src_stride, r, MAX_TX_SIZE, &this_dist);
           tmp += this_dist;
         }
       }
     } else {
       uint32_t this_dist;
-      cpi->fn_ptr[txm_bsize].vf(src, src_stride, rec_buffer, 32, &this_dist);
+      cpi->fn_ptr[txm_bsize].vf(src, src_stride, rec_buffer, MAX_TX_SIZE,
+                                &this_dist);
       tmp = this_dist;
     }
   }
@@ -3125,8 +3125,10 @@ static void inter_block_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     int idx, idy;
     int block = 0;
     int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
-    ENTROPY_CONTEXT ctxa[16], ctxl[16];
-    TXFM_CONTEXT tx_above[8], tx_left[8];
+    ENTROPY_CONTEXT ctxa[2 * MI_BLOCK_SIZE];
+    ENTROPY_CONTEXT ctxl[2 * MI_BLOCK_SIZE];
+    TXFM_CONTEXT tx_above[MI_BLOCK_SIZE];
+    TXFM_CONTEXT tx_left[MI_BLOCK_SIZE];
 
     int pnrate = 0, pnskip = 1;
     int64_t pndist = 0, pnsse = 0;
@@ -3240,7 +3242,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   const int is_inter = is_inter_block(mbmi);
   TX_SIZE best_tx_size[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   TX_SIZE best_tx = TX_SIZES;
-  uint8_t best_blk_skip[256];
+  uint8_t best_blk_skip[MI_BLOCK_SIZE * MI_BLOCK_SIZE * 4];
   const int n4 = 1 << (num_pels_log2_lookup[bsize] - 4);
   int idx, idy;
   int prune = 0;
@@ -3423,7 +3425,8 @@ static int inter_block_uvrd(const VP10_COMP *cpi, MACROBLOCK *x,
     int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
     int pnrate = 0, pnskip = 1;
     int64_t pndist = 0, pnsse = 0;
-    ENTROPY_CONTEXT ta[16], tl[16];
+    ENTROPY_CONTEXT ta[2 * MI_BLOCK_SIZE];
+    ENTROPY_CONTEXT tl[2 * MI_BLOCK_SIZE];
 
     vp10_get_entropy_contexts(bsize, TX_4X4, pd, ta, tl);
 
@@ -4560,10 +4563,10 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
 
   // Prediction buffer from second frame.
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, second_pred_alloc_16[64 * 64]);
+  DECLARE_ALIGNED(16, uint16_t, second_pred_alloc_16[MAX_SB_SQUARE]);
   uint8_t *second_pred;
 #else
-  DECLARE_ALIGNED(16, uint8_t, second_pred[64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, second_pred[MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   for (ref = 0; ref < 2; ++ref) {
@@ -5733,9 +5736,9 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     step_param = cpi->mv_step_param;
   }
 
-  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64) {
+  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_LARGEST) {
     int boffset =
-        2 * (b_width_log2_lookup[BLOCK_64X64] -
+        2 * (b_width_log2_lookup[BLOCK_LARGEST] -
              VPXMIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
     step_param = VPXMAX(step_param, boffset);
   }
@@ -6202,16 +6205,15 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   const int * const intra_mode_cost =
     cpi->mbmode_cost[size_group_lookup[bsize]];
   const int is_comp_interintra_pred = (mbmi->ref_frame[1] == INTRA_FRAME);
-  const int tmp_buf_sz = CU_SIZE * CU_SIZE;
 #if CONFIG_REF_MV
   uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
 #endif
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, tmp_buf16[MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+  DECLARE_ALIGNED(16, uint16_t, tmp_buf16[MAX_MB_PLANE * MAX_SB_SQUARE]);
   uint8_t *tmp_buf;
 #else
-  DECLARE_ALIGNED(16, uint8_t, tmp_buf[MAX_MB_PLANE * CU_SIZE * CU_SIZE]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf[MAX_MB_PLANE * MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_OBMC
@@ -6226,7 +6228,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int best_rate_y, best_rate_uv;
 #endif  // CONFIG_SUPERTX
 #if CONFIG_VAR_TX
-  uint8_t best_blk_skip[3][256];
+  uint8_t best_blk_skip[MAX_MB_PLANE][MI_BLOCK_SIZE * MI_BLOCK_SIZE * 4];
 #endif  // CONFIG_VAR_TX
   int64_t best_distortion = INT64_MAX;
   unsigned int best_pred_var = UINT_MAX;
@@ -6241,8 +6243,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
   INTERP_FILTER best_filter = SWITCHABLE;
-  uint8_t skip_txfm[MAX_MB_PLANE][4] = {{0}};
-  int64_t bsse[MAX_MB_PLANE][4] = {{0}};
+  uint8_t skip_txfm[MAX_MB_PLANE][MAX_TX_BLOCKS_IN_MAX_SB] = {{0}};
+  int64_t bsse[MAX_MB_PLANE][MAX_TX_BLOCKS_IN_MAX_SB] = {{0}};
 
   int skip_txfm_sb = 0;
   int64_t skip_sse_sb = INT64_MAX;
@@ -6569,8 +6571,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
           restore_dst_buf(xd, orig_dst, orig_dst_stride);
         } else {
           for (j = 0; j < MAX_MB_PLANE; j++) {
-            xd->plane[j].dst.buf = tmp_buf + j * 64 * 64;
-            xd->plane[j].dst.stride = 64;
+            xd->plane[j].dst.buf = tmp_buf + j * MAX_SB_SQUARE;
+            xd->plane[j].dst.stride = MAX_SB_SIZE;
           }
         }
         vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
@@ -6648,15 +6650,15 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     if (have_newmv_in_inter_mode(this_mode)) {
       int_mv tmp_mv[2];
       int rate_mvs[2], tmp_rate_mv = 0;
-      uint8_t pred0[2 * CU_SIZE * CU_SIZE * 3];
-      uint8_t pred1[2 * CU_SIZE * CU_SIZE * 3];
+      uint8_t pred0[2 * MAX_SB_SQUARE * 3];
+      uint8_t pred1[2 * MAX_SB_SQUARE * 3];
       uint8_t *preds0[3] = {pred0,
-                            pred0 + 2 * CU_SIZE * CU_SIZE,
-                            pred0 + 4 * CU_SIZE * CU_SIZE};
+                            pred0 + 2 * MAX_SB_SQUARE,
+                            pred0 + 4 * MAX_SB_SQUARE};
       uint8_t *preds1[3] = {pred1,
-                            pred1 + 2 * CU_SIZE * CU_SIZE,
-                            pred1 + 4 * CU_SIZE * CU_SIZE};
-      int strides[3] = {CU_SIZE, CU_SIZE, CU_SIZE};
+                            pred1 + 2 * MAX_SB_SQUARE,
+                            pred1 + 4 * MAX_SB_SQUARE};
+      int strides[3] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
       vp10_build_inter_predictors_for_planes_single_buf(
           xd, bsize, mi_row, mi_col, 0, preds0, strides);
       vp10_build_inter_predictors_for_planes_single_buf(
@@ -6723,15 +6725,15 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         mbmi->mv[1].as_int = cur_mv[1].as_int;
       }
     } else {
-      uint8_t pred0[2 * CU_SIZE * CU_SIZE * 3];
-      uint8_t pred1[2 * CU_SIZE * CU_SIZE * 3];
+      uint8_t pred0[2 * MAX_SB_SQUARE * 3];
+      uint8_t pred1[2 * MAX_SB_SQUARE * 3];
       uint8_t *preds0[3] = {pred0,
-                            pred0 + 2 * CU_SIZE * CU_SIZE,
-                            pred0 + 4 * CU_SIZE * CU_SIZE};
+                            pred0 + 2 * MAX_SB_SQUARE,
+                            pred0 + 4 * MAX_SB_SQUARE};
       uint8_t *preds1[3] = {pred1,
-                            pred1 + 2 * CU_SIZE * CU_SIZE,
-                            pred1 + 4 * CU_SIZE * CU_SIZE};
-      int strides[3] = {CU_SIZE, CU_SIZE, CU_SIZE};
+                            pred1 + 2 * MAX_SB_SQUARE,
+                            pred1 + 4 * MAX_SB_SQUARE};
+      int strides[3] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
       vp10_build_inter_predictors_for_planes_single_buf(
           xd, bsize, mi_row, mi_col, 0, preds0, strides);
       vp10_build_inter_predictors_for_planes_single_buf(
@@ -6791,8 +6793,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     int tmp_rate_mv = 0;
     mbmi->ref_frame[1] = NONE;
     for (j = 0; j < MAX_MB_PLANE; j++) {
-      xd->plane[j].dst.buf = tmp_buf + j * tmp_buf_sz;
-      xd->plane[j].dst.stride = CU_SIZE;
+      xd->plane[j].dst.buf = tmp_buf + j * MAX_SB_SQUARE;
+      xd->plane[j].dst.stride = MAX_SB_SIZE;
     }
     vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
     restore_dst_buf(xd, orig_dst, orig_dst_stride);
@@ -6805,11 +6807,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       rmode = intra_mode_cost[mbmi->interintra_mode];
       vp10_build_interintra_predictors(xd,
                                        tmp_buf,
-                                       tmp_buf + tmp_buf_sz,
-                                       tmp_buf + 2 * tmp_buf_sz,
-                                       CU_SIZE,
-                                       CU_SIZE,
-                                       CU_SIZE,
+                                       tmp_buf + MAX_SB_SQUARE,
+                                       tmp_buf + 2 * MAX_SB_SQUARE,
+                                       MAX_SB_SIZE,
+                                       MAX_SB_SIZE,
+                                       MAX_SB_SIZE,
                                        bsize);
       model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
                       &skip_txfm_sb, &skip_sse_sb);
@@ -6830,11 +6832,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     if (wedge_bits) {
       vp10_build_interintra_predictors(xd,
                                        tmp_buf,
-                                       tmp_buf + tmp_buf_sz,
-                                       tmp_buf + 2 * tmp_buf_sz,
-                                       CU_SIZE,
-                                       CU_SIZE,
-                                       CU_SIZE,
+                                       tmp_buf + MAX_SB_SQUARE,
+                                       tmp_buf + 2 * MAX_SB_SQUARE,
+                                       MAX_SB_SIZE,
+                                       MAX_SB_SIZE,
+                                       MAX_SB_SIZE,
                                        bsize);
       model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
                       &skip_txfm_sb, &skip_sse_sb);
@@ -6852,11 +6854,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         mbmi->interintra_uv_wedge_index = wedge_index;
         vp10_build_interintra_predictors(xd,
                                          tmp_buf,
-                                         tmp_buf + tmp_buf_sz,
-                                         tmp_buf + 2 * tmp_buf_sz,
-                                         CU_SIZE,
-                                         CU_SIZE,
-                                         CU_SIZE,
+                                         tmp_buf + MAX_SB_SQUARE,
+                                         tmp_buf + 2 * MAX_SB_SQUARE,
+                                         MAX_SB_SIZE,
+                                         MAX_SB_SIZE,
+                                         MAX_SB_SIZE,
                                          bsize);
         model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
                         &skip_txfm_sb, &skip_sse_sb);
@@ -6937,8 +6939,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     if (best_needs_copy) {
       // again temporarily set the buffers to local memory to prevent a memcpy
       for (i = 0; i < MAX_MB_PLANE; i++) {
-        xd->plane[i].dst.buf = tmp_buf + i * 64 * 64;
-        xd->plane[i].dst.stride = 64;
+        xd->plane[i].dst.buf = tmp_buf + i * MAX_SB_SQUARE;
+        xd->plane[i].dst.stride = MAX_SB_SIZE;
       }
     }
     rd = tmp_rd;
@@ -7572,33 +7574,33 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   const MODE_INFO *left_mi = xd->left_mi;
 #if CONFIG_OBMC
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * 64 * 64]);
-  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * 64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
 #else
-  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * 64 * 64]);
-  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * 64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  uint8_t *dst_buf1[3], *dst_buf2[3];
-  int dst_stride1[3] = {64, 64, 64};
-  int dst_stride2[3] = {64, 64, 64};
+  uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
+  int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+  int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     int len = sizeof(uint16_t);
     dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
-    dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + 4096 * len);
-    dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + 8192 * len);
+    dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * len);
+    dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + 2 * MAX_SB_SQUARE * len);
     dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
-    dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + 4096 * len);
-    dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + 8192 * len);
+    dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
+    dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + 2 * MAX_SB_SQUARE * len);
   } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   dst_buf1[0] = tmp_buf1;
-  dst_buf1[1] = tmp_buf1 + 4096;
-  dst_buf1[2] = tmp_buf1 + 8192;
+  dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
+  dst_buf1[2] = tmp_buf1 + 2 * MAX_SB_SQUARE;
   dst_buf2[0] = tmp_buf2;
-  dst_buf2[1] = tmp_buf2 + 4096;
-  dst_buf2[2] = tmp_buf2 + 8192;
+  dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
+  dst_buf2[2] = tmp_buf2 + 2 * MAX_SB_SQUARE;
 #if CONFIG_VP9_HIGHBITDEPTH
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -9386,7 +9388,7 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
       int switchable_filter_index;
       int_mv *second_ref = comp_pred ?
                              &x->mbmi_ext->ref_mvs[second_ref_frame][0] : NULL;
-      b_mode_info tmp_best_bmodes[16];
+      b_mode_info tmp_best_bmodes[16];  // Should this be 4 ?
       MB_MODE_INFO tmp_best_mbmode;
       BEST_SEG_INFO bsi[SWITCHABLE_FILTERS];
       int pred_exists = 0;

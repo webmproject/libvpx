@@ -461,7 +461,7 @@ void vp10_init_quantizer(VP10_COMP *cpi) {
       cpi->uv_dequant[q][i] = quant;
     }
 
-    for (i = 2; i < 8; i++) {
+    for (i = 2; i < 8; i++) {  // 8: SIMD width
       quants->y_quant[q][i] = quants->y_quant[q][1];
       quants->y_quant_fp[q][i] = quants->y_quant_fp[q][1];
       quants->y_round_fp[q][i] = quants->y_round_fp[q][1];

@@ -62,7 +62,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
   const vpx_prob *prob;
   unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int (*eob_branch_count)[COEFF_CONTEXTS];
-  uint8_t token_cache[32 * 32];
+  uint8_t token_cache[MAX_TX_SQUARE];
   const uint8_t *band_translate = get_band_translate(tx_size);
   int dq_shift;
   int v, token;
@@ -245,7 +245,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
   const vpx_prob *prob;
   unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int (*eob_branch_count)[COEFF_CONTEXTS];
-  uint8_t token_cache[32 * 32];
+  uint8_t token_cache[MAX_TX_SQUARE];
   const uint8_t *band_translate = get_band_translate(tx_size);
   int dq_shift;
   int v, token;

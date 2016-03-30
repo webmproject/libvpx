@@ -28,7 +28,7 @@
 
 namespace {
 
-static const unsigned int kMaxDimension = MAX_CU_SIZE;
+static const unsigned int kMaxDimension = MAX_SB_SIZE;
 
 typedef void (*ConvolveFunc)(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,

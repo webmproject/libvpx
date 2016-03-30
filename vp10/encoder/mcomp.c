@@ -366,13 +366,13 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      DECLARE_ALIGNED(16, uint16_t, comp_pred16[64 * 64]);
+      DECLARE_ALIGNED(16, uint16_t, comp_pred16[MAX_SB_SQUARE]);
       vpx_highbd_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,
                                y_stride);
       besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, src, src_stride,
                         sse1);
     } else {
-      DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
+      DECLARE_ALIGNED(16, uint8_t, comp_pred[MAX_SB_SQUARE]);
       vpx_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
       besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
     }
@@ -384,7 +384,7 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
 #else
   (void) xd;
   if (second_pred != NULL) {
-    DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
+    DECLARE_ALIGNED(16, uint8_t, comp_pred[MAX_SB_SQUARE]);
     vpx_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
     besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
   } else {
@@ -694,7 +694,7 @@ static int upsampled_pref_error(const MACROBLOCKD *xd,
   unsigned int besterr;
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED(16, uint16_t, pred16[64 * 64]);
+    DECLARE_ALIGNED(16, uint16_t, pred16[MAX_SB_SQUARE]);
     if (second_pred != NULL)
       vpx_highbd_comp_avg_upsampled_pred(pred16, second_pred, w, h, y,
                                          y_stride);
@@ -704,9 +704,9 @@ static int upsampled_pref_error(const MACROBLOCKD *xd,
     besterr = vfp->vf(CONVERT_TO_BYTEPTR(pred16), w, src, src_stride,
                       sse);
   } else {
-    DECLARE_ALIGNED(16, uint8_t, pred[64 * 64]);
+    DECLARE_ALIGNED(16, uint8_t, pred[MAX_SB_SQUARE]);
 #else
-    DECLARE_ALIGNED(16, uint8_t, pred[64 * 64]);
+    DECLARE_ALIGNED(16, uint8_t, pred[MAX_SB_SQUARE]);
     (void) xd;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     if (second_pred != NULL)
@@ -1961,10 +1961,10 @@ unsigned int vp10_int_pro_motion_estimation(const VP10_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
-  DECLARE_ALIGNED(16, int16_t, hbuf[128]);
-  DECLARE_ALIGNED(16, int16_t, vbuf[128]);
-  DECLARE_ALIGNED(16, int16_t, src_hbuf[64]);
-  DECLARE_ALIGNED(16, int16_t, src_vbuf[64]);
+  DECLARE_ALIGNED(16, int16_t, hbuf[2 * MAX_SB_SIZE]);
+  DECLARE_ALIGNED(16, int16_t, vbuf[2 * MAX_SB_SIZE]);
+  DECLARE_ALIGNED(16, int16_t, src_hbuf[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, int16_t, src_vbuf[MAX_SB_SQUARE]);
   int idx;
   const int bw = 4 << b_width_log2_lookup[bsize];
   const int bh = 4 << b_height_log2_lookup[bsize];

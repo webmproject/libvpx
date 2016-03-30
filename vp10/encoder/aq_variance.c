@@ -32,9 +32,11 @@ static const int segment_id[ENERGY_SPAN] = {0, 1, 1, 2, 3, 4};
 
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
-DECLARE_ALIGNED(16, static const uint8_t, vp10_64_zeros[64]) = {0};
+DECLARE_ALIGNED(16, static const uint8_t,
+                vp10_all_zeros[MAX_SB_SIZE]) = {0};
 #if CONFIG_VP9_HIGHBITDEPTH
-DECLARE_ALIGNED(16, static const uint16_t, vp10_highbd_64_zeros[64]) = {0};
+DECLARE_ALIGNED(16, static const uint16_t,
+                vp10_highbd_all_zeros[MAX_SB_SIZE]) = {0};
 #endif
 
 unsigned int vp10_vaq_segment_id(int energy) {
@@ -153,17 +155,17 @@ static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       aq_highbd_8_variance(x->plane[0].src.buf, x->plane[0].src.stride,
-                           CONVERT_TO_BYTEPTR(vp10_highbd_64_zeros), 0, bw, bh,
+                           CONVERT_TO_BYTEPTR(vp10_highbd_all_zeros), 0, bw, bh,
                            &sse, &avg);
       sse >>= 2 * (xd->bd - 8);
       avg >>= (xd->bd - 8);
     } else {
       aq_variance(x->plane[0].src.buf, x->plane[0].src.stride,
-                  vp10_64_zeros, 0, bw, bh, &sse, &avg);
+                  vp10_all_zeros, 0, bw, bh, &sse, &avg);
     }
 #else
     aq_variance(x->plane[0].src.buf, x->plane[0].src.stride,
-                vp10_64_zeros, 0, bw, bh, &sse, &avg);
+                vp10_all_zeros, 0, bw, bh, &sse, &avg);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     var = sse - (((int64_t)avg * avg) / (bw * bh));
     return (256 * var) / (bw * bh);
@@ -172,17 +174,17 @@ static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                                x->plane[0].src.stride,
-                               CONVERT_TO_BYTEPTR(vp10_highbd_64_zeros),
+                               CONVERT_TO_BYTEPTR(vp10_highbd_all_zeros),
                                0, &sse);
     } else {
       var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                                x->plane[0].src.stride,
-                               vp10_64_zeros, 0, &sse);
+                               vp10_all_zeros, 0, &sse);
     }
 #else
     var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                              x->plane[0].src.stride,
-                             vp10_64_zeros, 0, &sse);
+                             vp10_all_zeros, 0, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     return (256 * var) >> num_pels_log2_lookup[bs];
   }
