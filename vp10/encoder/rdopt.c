@@ -87,8 +87,8 @@ const double ext_tx_th = 0.99;
 const double ext_tx_th = 0.99;
 #endif
 
-const double ADST_FLIP_SVM[8] = {-7.3283, -3.0450, -3.2450, 3.6403,  // vert
-                                 -9.4204, -3.1821, -4.6851, 4.1469};  // horz
+const double ADST_FLIP_SVM[8] = {-6.6623, -2.8062, -3.2531, 3.1671,  // vert
+                                 -7.7051, -3.2234, -3.6193, 3.4533};  // horz
 
 typedef struct {
   PREDICTION_MODE mode;
@@ -355,14 +355,14 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
 // constants for prune 1 and prune 2 decision boundaries
 #define FAST_EXT_TX_CORR_MID 0.0
 #define FAST_EXT_TX_EDST_MID 0.1
-#define FAST_EXT_TX_CORR_MARGIN 0.5
-#define FAST_EXT_TX_EDST_MARGIN 0.05
+#define FAST_EXT_TX_CORR_MARGIN 0.3
+#define FAST_EXT_TX_EDST_MARGIN 0.5
 
 typedef enum {
   DCT_1D = 0,
   ADST_1D = 1,
   FLIPADST_1D = 2,
-  DST_1D = 3,
+  IDTX_1D = 3,
   TX_TYPES_1D = 4,
 } TX_TYPE_1D;
 
@@ -568,18 +568,18 @@ static void get_horver_correlation(int16_t *diff, int stride,
   }
 }
 
-int dct_vs_dst(int16_t *diff, int stride, int w, int h,
-               double *hcorr, double *vcorr) {
+int dct_vs_idtx(int16_t *diff, int stride, int w, int h,
+                double *hcorr, double *vcorr) {
   int prune_bitmask = 0;
   get_horver_correlation(diff, stride, w, h, hcorr, vcorr);
 
   if (*vcorr > FAST_EXT_TX_CORR_MID + FAST_EXT_TX_CORR_MARGIN)
-    prune_bitmask |= 1 << DST_1D;
+    prune_bitmask |= 1 << IDTX_1D;
   else if (*vcorr < FAST_EXT_TX_CORR_MID - FAST_EXT_TX_CORR_MARGIN)
     prune_bitmask |= 1 << DCT_1D;
 
   if (*hcorr > FAST_EXT_TX_CORR_MID + FAST_EXT_TX_CORR_MARGIN)
-    prune_bitmask |= 1 << (DST_1D + 8);
+    prune_bitmask |= 1 << (IDTX_1D + 8);
   else if (*hcorr < FAST_EXT_TX_CORR_MID - FAST_EXT_TX_CORR_MARGIN)
     prune_bitmask |= 1 << (DCT_1D + 8);
   return prune_bitmask;
@@ -600,7 +600,7 @@ static int prune_two_for_sby(const VP10_COMP *cpi,
   vp10_subtract_plane(x, bsize, 0);
   return adst_vs_flipadst(cpi, bsize, p->src.buf, p->src.stride, pd->dst.buf,
                           pd->dst.stride, hdist, vdist) |
-         dct_vs_dst(p->src_diff, bw, bw, bh, &hcorr, &vcorr);
+         dct_vs_idtx(p->src_diff, bw, bw, bh, &hcorr, &vcorr);
 }
 
 #endif  // CONFIG_EXT_TX
@@ -653,13 +653,13 @@ static int do_tx_type_search(TX_TYPE tx_type,
     FLIPADST_1D,
     ADST_1D,
     FLIPADST_1D,
-    DST_1D,
+    IDTX_1D,
     DCT_1D,
-    DST_1D,
+    IDTX_1D,
     ADST_1D,
-    DST_1D,
+    IDTX_1D,
     FLIPADST_1D,
-    DST_1D,
+    IDTX_1D,
   };
   static TX_TYPE_1D htx_tab[TX_TYPES] = {
     DCT_1D,
@@ -671,16 +671,14 @@ static int do_tx_type_search(TX_TYPE tx_type,
     FLIPADST_1D,
     FLIPADST_1D,
     ADST_1D,
+    IDTX_1D,
+    IDTX_1D,
     DCT_1D,
-    DST_1D,
+    IDTX_1D,
     ADST_1D,
-    DST_1D,
+    IDTX_1D,
     FLIPADST_1D,
-    DST_1D,
-    DST_1D,
   };
-  if (tx_type >= IDTX)
-    return 1;
   return !(((prune >> vtx_tab[tx_type]) & 1) |
          ((prune >> (htx_tab[tx_type] + 8)) & 1));
 #else
