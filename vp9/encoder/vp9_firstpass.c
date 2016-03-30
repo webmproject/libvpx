@@ -65,7 +65,7 @@
 
 #define NCOUNT_INTRA_THRESH 8192
 #define NCOUNT_INTRA_FACTOR 3
-#define NCOUNT_FRAME_II_THRESH 5.0
+
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
@@ -1382,6 +1382,8 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 #define DEFAULT_DECAY_LIMIT 0.75
 #define LOW_SR_DIFF_TRHESH 0.1
 #define SR_DIFF_MAX 128.0
+#define LOW_CODED_ERR_PER_MB 10.0
+#define NCOUNT_FRAME_II_THRESH 6.0
 
 static double get_sr_decay_rate(const VP9_COMP *cpi,
                                 const FIRSTPASS_STATS *frame) {
@@ -1398,8 +1400,9 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
        (cpi->initial_height + cpi->initial_width));
 
   modified_pct_inter = frame->pcnt_inter;
-  if ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
-      (double)NCOUNT_FRAME_II_THRESH) {
+  if (((frame->coded_error / num_mbs) > LOW_CODED_ERR_PER_MB) &&
+      ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
+       (double)NCOUNT_FRAME_II_THRESH)) {
     modified_pct_inter = frame->pcnt_inter - frame->pcnt_neutral;
   }
   modified_pcnt_intra = 100 * (1.0 - modified_pct_inter);
