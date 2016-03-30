@@ -216,31 +216,39 @@ static void WarpImage(TransformationType type, double *H,
   }
 }
 
-// computes warp error
-double compute_warp_and_error(TransformationType type,
-                              unsigned char *ref,
-                              unsigned char *frm,
-                              int width, int height, int stride,
-                              double *H) {
+double compute_warp_and_error(Global_Motion_Params *gm,
+                            projectPointsType projectPoints,
+                            unsigned char *ref,
+                            int width, int height, int stride,
+                            unsigned char *src,
+                            int p_col, int p_row,
+                            int p_width, int p_height, int p_stride,
+                            int subsampling_col, int subsampling_row,
+                            int x_scale, int y_scale) {
+  double H[9];
+  vp9_convert_params_to_rotzoom(gm, H);
   int i, j;
-  double warped;
-  double mse = 0;
-  double err = 0;
-  projectPointsType projectPoints = get_projectPointsType(type);
-  if (projectPoints == NULL) return -1.0;
-  for (i = 0; i < height; ++i)
-    for (j = 0; j < width; ++j) {
+  int64_t sumerr = 0;
+  if (projectPoints == NULL)
+    return -1;
+  for (i = p_row; i < p_row + p_height; ++i) {
+    for (j = p_col; j < p_col + p_width; ++j) {
       double in[2], out[2];
-      in[0] = j;
-      in[1] = i;
+      uint8_t pred;
+      int err;
+      in[0] = subsampling_col ? 2 * j + 0.5 : j;
+      in[1] = subsampling_row ? 2 * i + 0.5 : i;
       projectPoints(H, in, out, 1, 2, 2);
-      warped = interpolate(ref, out[0], out[1], width, height, stride);
-      err = warped - frm[j + i * stride];
-      mse += err * err;
+      out[0] = subsampling_col ? (out[0] - 0.5) / 2.0 : out[0];
+      out[1] = subsampling_row ? (out[1] - 0.5) / 2.0 : out[1];
+      out[0] *= x_scale / 16.0;
+      out[1] *= y_scale / 16.0;
+      pred = interpolate(ref, out[0], out[1], width, height, stride);
+      err = pred - src[(j - p_col) + (i - p_row) * p_stride];
+      sumerr += err * err;
     }
-
-  mse /= (width * height);
-  return mse;
+  }
+  return sumerr/(width * height);
 }
 
 // Computes the ratio of the warp error to the zero motion error

@@ -4228,7 +4228,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #define GLOBAL_MOTION_ADVANTAGE_THRESH_RZ 0.60
 #define GLOBAL_MOTION_ADVANTAGE_THRESH_TR 0.75
 // #define USE_BLOCK_BASED_GLOBAL_MOTION_COMPUTATION
-// #define USE_FEATURE_BASED_GLOBAL_MOTION_COMPUTATION
+#define USE_FEATURE_BASED_GLOBAL_MOTION_COMPUTATION
 
 static void convert_translation_to_params(
     double *H, Global_Motion_Params *model) {
@@ -4350,6 +4350,16 @@ static void encode_frame_internal(VP9_COMP *cpi) {
                 global_motion + i * get_numparams(GLOBAL_MOTION_MODEL),
                 GLOBAL_MOTION_MODEL,
                 &cm->global_motion[frame][i]);
+            refine_quant_param(&cm->global_motion[frame][i],
+                               GLOBAL_MOTION_MODEL, ref_buf->y_buffer,
+                               ref_buf->y_crop_width,
+                               ref_buf->y_crop_height,
+                               ref_buf->y_stride,
+                               cpi->Source->y_buffer,
+                               cpi->Source->y_crop_width,
+                               cpi->Source->y_crop_height,
+                               cpi->Source->y_stride, 3);
+
             if (get_gmtype(&cm->global_motion[frame][i]) != GLOBAL_ZERO) {
               double erroradvantage_trans;
               double erroradvantage =
