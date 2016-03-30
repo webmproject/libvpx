@@ -2460,10 +2460,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (pred_filter_search) {
     INTERP_FILTER af = SWITCHABLE, lf = SWITCHABLE;
-    if (xd->up_available)
-      af = xd->mi[-xd->mi_stride]->interp_filter;
-    if (xd->left_available)
-      lf = xd->mi[-1]->interp_filter;
+    if (xd->above_mi)
+      af = xd->above_mi->interp_filter;
+    if (xd->left_mi)
+      lf = xd->left_mi->interp_filter;
 
     if ((this_mode != NEWMV) || (af == lf))
       best_filter = af;

@@ -1228,10 +1228,10 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   MODE_INFO *const mi = xd->mi[0];
   INTERP_FILTER filter_ref;
 
-  if (xd->up_available)
-    filter_ref = xd->mi[-xd->mi_stride]->interp_filter;
-  else if (xd->left_available)
-    filter_ref = xd->mi[-1]->interp_filter;
+  if (xd->above_mi)
+    filter_ref = xd->above_mi->interp_filter;
+  else if (xd->left_mi)
+    filter_ref = xd->left_mi->interp_filter;
   else
     filter_ref = EIGHTTAP;
 
@@ -2266,8 +2266,8 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
                                     BLOCK_SIZE *max_block_size) {
   VP9_COMMON *const cm = &cpi->common;
   MODE_INFO **mi = xd->mi;
-  const int left_in_image = xd->left_available && mi[-1];
-  const int above_in_image = xd->up_available && mi[-xd->mi_stride];
+  const int left_in_image = !!xd->left_mi;
+  const int above_in_image = !!xd->above_mi;
   const int row8x8_remaining = tile->mi_row_end - mi_row;
   const int col8x8_remaining = tile->mi_col_end - mi_col;
   int bh, bw;
@@ -2362,7 +2362,7 @@ static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd,
     }
   }
 
-  if (xd->left_available) {
+  if (xd->left_mi) {
     for (idy = 0; idy < mi_height; ++idy) {
       mi = xd->mi[idy * cm->mi_stride - 1];
       bs = mi ? mi->sb_type : bsize;
@@ -2371,7 +2371,7 @@ static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd,
     }
   }
 
-  if (xd->up_available) {
+  if (xd->above_mi) {
     for (idx = 0; idx < mi_width; ++idx) {
       mi = xd->mi[idx - cm->mi_stride];
       bs = mi ? mi->sb_type : bsize;

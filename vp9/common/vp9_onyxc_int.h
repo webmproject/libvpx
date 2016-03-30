@@ -404,20 +404,8 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->mb_to_right_edge  = ((mi_cols - bw - mi_col) * MI_SIZE) * 8;
 
   // Are edges available for intra prediction?
-  xd->up_available    = (mi_row != 0);
-  xd->left_available  = (mi_col > tile->mi_col_start);
-  // TODO(slavarnway): eliminate up/left available ???
-  if (xd->up_available) {
-    xd->above_mi = xd->mi[-xd->mi_stride];
-  } else {
-    xd->above_mi = NULL;
-  }
-
-  if (xd->left_available) {
-    xd->left_mi = xd->mi[-1];
-  } else {
-    xd->left_mi = NULL;
-  }
+  xd->above_mi = (mi_row != 0) ? xd->mi[-xd->mi_stride] : NULL;
+  xd->left_mi  = (mi_col > tile->mi_col_start) ? xd->mi[-1] : NULL;
 }
 
 static INLINE void update_partition_context(MACROBLOCKD *xd,
