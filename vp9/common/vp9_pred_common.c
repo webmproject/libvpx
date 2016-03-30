@@ -20,10 +20,10 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // left of the entries corresponding to real macroblocks.
   // The prediction flags in these dummy entries are initialized to 0.
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int left_type = xd->left_available && is_inter_block(left_mi) ?
+  const int left_type = left_mi && is_inter_block(left_mi) ?
                             left_mi->interp_filter : SWITCHABLE_FILTERS;
   const MODE_INFO *const above_mi = xd->above_mi;
-  const int above_type = xd->up_available && is_inter_block(above_mi) ?
+  const int above_type = above_mi && is_inter_block(above_mi) ?
                              above_mi->interp_filter : SWITCHABLE_FILTERS;
 
   if (left_type == above_type)
@@ -46,8 +46,8 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
 int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int has_above = xd->up_available;
-  const int has_left = xd->left_available;
+  const int has_above = !!above_mi;
+  const int has_left = !!left_mi;
 
   if (has_above && has_left) {  // both edges available
     const int above_intra = !is_inter_block(above_mi);
@@ -66,8 +66,8 @@ int vp9_get_reference_mode_context(const VP9_COMMON *cm,
   int ctx;
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int has_above = xd->up_available;
-  const int has_left = xd->left_available;
+  const int has_above = !!above_mi;
+  const int has_left = !!left_mi;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries corresponding to real macroblocks.
@@ -109,8 +109,8 @@ int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
   int pred_context;
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int above_in_image = xd->up_available;
-  const int left_in_image = xd->left_available;
+  const int above_in_image = !!above_mi;
+  const int left_in_image = !!left_mi;
 
   // Note:
   // The mode info data structure has a one element border above and to the
@@ -190,8 +190,8 @@ int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int has_above = xd->up_available;
-  const int has_left = xd->left_available;
+  const int has_above = !!above_mi;
+  const int has_left = !!left_mi;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries corresponding to real macroblocks.
@@ -256,8 +256,8 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int has_above = xd->up_available;
-  const int has_left = xd->left_available;
+  const int has_above = !!above_mi;
+  const int has_left = !!left_mi;
 
   // Note:
   // The mode info data structure has a one element border above and to the

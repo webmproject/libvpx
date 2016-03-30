@@ -563,6 +563,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   double intra_factor;
   double brightness_factor;
   BufferPool *const pool = cm->buffer_pool;
+  MODE_INFO mi_above, mi_left;
 
   // First pass code requires valid last and new frame buffers.
   assert(new_yv12 != NULL);
@@ -695,6 +696,12 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
                      mb_row << 1, num_8x8_blocks_high_lookup[bsize],
                      mb_col << 1, num_8x8_blocks_wide_lookup[bsize],
                      cm->mi_rows, cm->mi_cols);
+      // Are edges available for intra prediction?
+      // Since the firstpass does not populate the mi_grid_visible,
+      // above_mi/left_mi must be overwritten with a nonzero value when edges
+      // are available.  Required by vp9_predict_intra_block().
+      xd->above_mi = (mb_row != 0) ? &mi_above : NULL;
+      xd->left_mi  = (mb_col > tile.mi_col_start) ? &mi_left : NULL;
 
       // Do intra 16x16 prediction.
       x->skip_encode = 0;

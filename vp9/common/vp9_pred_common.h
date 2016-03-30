@@ -113,8 +113,8 @@ static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
   const int max_tx_size = max_txsize_lookup[xd->mi[0]->sb_type];
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int has_above = xd->up_available;
-  const int has_left = xd->left_available;
+  const int has_above = !!above_mi;
+  const int has_left = !!left_mi;
   int above_ctx = (has_above && !above_mi->skip) ? (int)above_mi->tx_size
                                                  : max_tx_size;
   int left_ctx = (has_left && !left_mi->skip) ? (int)left_mi->tx_size
