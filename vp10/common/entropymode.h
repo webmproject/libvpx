@@ -71,6 +71,7 @@ typedef struct frame_contexts {
   vpx_prob inter_compound_mode_probs[INTER_MODE_CONTEXTS]
                                     [INTER_COMPOUND_MODES - 1];
   vpx_prob interintra_prob[BLOCK_SIZES];
+  vpx_prob interintra_mode_prob[BLOCK_SIZE_GROUPS][INTERINTRA_MODES - 1];
   vpx_prob wedge_interintra_prob[BLOCK_SIZES];
   vpx_prob wedge_interinter_prob[BLOCK_SIZES];
 #endif  // CONFIG_EXT_INTER
@@ -138,6 +139,7 @@ typedef struct FRAME_COUNTS {
 #if CONFIG_EXT_INTER
   unsigned int inter_compound_mode[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES];
   unsigned int interintra[BLOCK_SIZES][2];
+  unsigned int interintra_mode[BLOCK_SIZE_GROUPS][INTERINTRA_MODES];
   unsigned int wedge_interintra[BLOCK_SIZES][2];
   unsigned int wedge_interinter[BLOCK_SIZES][2];
 #endif  // CONFIG_EXT_INTER
@@ -195,6 +197,8 @@ extern const vpx_prob vp10_default_palette_uv_color_prob
 extern const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vpx_tree_index vp10_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 #if CONFIG_EXT_INTER
+extern const vpx_tree_index vp10_interintra_mode_tree
+                            [TREE_SIZE(INTERINTRA_MODES)];
 extern const vpx_tree_index vp10_inter_compound_mode_tree
                             [TREE_SIZE(INTER_COMPOUND_MODES)];
 #endif  // CONFIG_EXT_INTER

@@ -62,6 +62,19 @@ static PREDICTION_MODE read_intra_mode_uv(VP10_COMMON *cm, MACROBLOCKD *xd,
   return uv_mode;
 }
 
+#if CONFIG_EXT_INTER
+static INTERINTRA_MODE read_interintra_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
+                                            vpx_reader *r, int size_group) {
+  const INTERINTRA_MODE ii_mode =
+      (INTERINTRA_MODE)vpx_read_tree(r, vp10_interintra_mode_tree,
+                                     cm->fc->interintra_mode_prob[size_group]);
+  FRAME_COUNTS *counts = xd->counts;
+  if (counts)
+    ++counts->interintra_mode[size_group][ii_mode];
+  return ii_mode;
+}
+#endif  // CONFIG_EXT_INTER
+
 static PREDICTION_MODE read_inter_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
 #if CONFIG_REF_MV && CONFIG_EXT_INTER
                                        MB_MODE_INFO *mbmi,
@@ -1518,8 +1531,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       xd->counts->interintra[bsize][interintra]++;
     assert(mbmi->ref_frame[1] == NONE);
     if (interintra) {
-      const PREDICTION_MODE interintra_mode =
-          read_intra_mode_y(cm, xd, r, size_group_lookup[bsize]);
+      const INTERINTRA_MODE interintra_mode =
+          read_interintra_mode(cm, xd, r, size_group_lookup[bsize]);
       mbmi->ref_frame[1] = INTRA_FRAME;
       mbmi->interintra_mode = interintra_mode;
       mbmi->interintra_uv_mode = interintra_mode;

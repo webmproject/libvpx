@@ -507,6 +507,7 @@ typedef struct VP10_COMP {
 #if CONFIG_EXT_INTER
   unsigned int inter_compound_mode_cost[INTER_MODE_CONTEXTS]
                                        [INTER_COMPOUND_MODES];
+  unsigned int interintra_mode_cost[BLOCK_SIZE_GROUPS][INTERINTRA_MODES];
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC
   int obmc_cost[BLOCK_SIZES][2];

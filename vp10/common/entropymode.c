@@ -310,7 +310,7 @@ const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
   -D135_PRED, -D117_PRED,           /* 5 = D135_NODE */
   -D45_PRED, 14,                    /* 6 = D45_NODE */
   -D63_PRED, 16,                    /* 7 = D63_NODE */
-  -D153_PRED, -D207_PRED             /* 8 = D153_NODE */
+  -D153_PRED, -D207_PRED            /* 8 = D153_NODE */
 };
 
 const vpx_tree_index vp10_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
@@ -325,6 +325,26 @@ const vpx_tree_index vp10_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
 };
 
 #if CONFIG_EXT_INTER
+const vpx_tree_index vp10_interintra_mode_tree[TREE_SIZE(INTERINTRA_MODES)] = {
+  -II_DC_PRED, 2,                   /* 0 = II_DC_NODE     */
+  -II_TM_PRED, 4,                   /* 1 = II_TM_NODE     */
+  -II_V_PRED, 6,                    /* 2 = II_V_NODE      */
+  8, 12,                            /* 3 = II_COM_NODE    */
+  -II_H_PRED, 10,                   /* 4 = II_H_NODE      */
+  -II_D135_PRED, -II_D117_PRED,     /* 5 = II_D135_NODE   */
+  -II_D45_PRED, 14,                 /* 6 = II_D45_NODE    */
+  -II_D63_PRED, 16,                 /* 7 = II_D63_NODE    */
+  -II_D153_PRED, -II_D207_PRED      /* 8 = II_D153_NODE   */
+};
+
+static const vpx_prob
+    default_interintra_mode_prob[BLOCK_SIZE_GROUPS][INTERINTRA_MODES - 1] = {
+  {  65,  32,  18, 144, 162, 194,  41,  51,  98 },  // block_size < 8x8
+  { 132,  68,  18, 165, 217, 196,  45,  40,  78 },  // block_size < 16x16
+  { 173,  80,  19, 176, 240, 193,  64,  35,  46 },  // block_size < 32x32
+  { 221, 135,  38, 194, 248, 121,  96,  85,  29 }   // block_size >= 32x32
+};
+
 const vpx_tree_index vp10_inter_compound_mode_tree
       [TREE_SIZE(INTER_COMPOUND_MODES)] = {
   -INTER_COMPOUND_OFFSET(ZERO_ZEROMV), 2,
@@ -1211,6 +1231,7 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_EXT_INTER
   vp10_copy(fc->inter_compound_mode_probs, default_inter_compound_mode_probs);
   vp10_copy(fc->interintra_prob, default_interintra_prob);
+  vp10_copy(fc->interintra_mode_prob, default_interintra_mode_prob);
   vp10_copy(fc->wedge_interintra_prob, default_wedge_interintra_prob);
   vp10_copy(fc->wedge_interinter_prob, default_wedge_interinter_prob);
 #endif  // CONFIG_EXT_INTER
@@ -1321,6 +1342,11 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
     if (is_interintra_allowed_bsize(i))
       fc->interintra_prob[i] = mode_mv_merge_probs(pre_fc->interintra_prob[i],
                                                    counts->interintra[i]);
+  }
+  for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
+    vpx_tree_merge_probs(
+        vp10_interintra_mode_tree, pre_fc->interintra_mode_prob[i],
+        counts->interintra_mode[i], fc->interintra_mode_prob[i]);
   }
   for (i = 0; i < BLOCK_SIZES; ++i) {
     if (is_interintra_allowed_bsize(i) && get_wedge_bits(i))

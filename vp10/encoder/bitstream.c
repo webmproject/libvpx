@@ -115,6 +115,9 @@ static struct vp10_token ext_tx_encodings[TX_TYPES];
 #if CONFIG_EXT_INTRA
 static struct vp10_token intra_filter_encodings[INTRA_FILTERS];
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_EXT_INTER
+static struct vp10_token interintra_mode_encodings[INTERINTRA_MODES];
+#endif  // CONFIG_EXT_INTER
 
 void vp10_encode_token_init() {
 #if CONFIG_EXT_TX
@@ -131,12 +134,23 @@ void vp10_encode_token_init() {
 #if CONFIG_EXT_INTRA
   vp10_tokens_from_tree(intra_filter_encodings, vp10_intra_filter_tree);
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_EXT_INTER
+  vp10_tokens_from_tree(interintra_mode_encodings, vp10_interintra_mode_tree);
+#endif  // CONFIG_EXT_INTER
 }
 
 static void write_intra_mode(vpx_writer *w, PREDICTION_MODE mode,
                              const vpx_prob *probs) {
   vp10_write_token(w, vp10_intra_mode_tree, probs, &intra_mode_encodings[mode]);
 }
+
+#if CONFIG_EXT_INTER
+static void write_interintra_mode(vpx_writer *w, INTERINTRA_MODE mode,
+                                  const vpx_prob *probs) {
+  vp10_write_token(w, vp10_interintra_mode_tree, probs,
+                   &interintra_mode_encodings[mode]);
+}
+#endif  // CONFIG_EXT_INTER
 
 static void write_inter_mode(VP10_COMMON *cm,
                              vpx_writer *w, PREDICTION_MODE mode,
@@ -1282,8 +1296,9 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
       const int interintra = mbmi->ref_frame[1] == INTRA_FRAME;
       vpx_write(w, interintra, cm->fc->interintra_prob[bsize]);
       if (interintra) {
-        write_intra_mode(w, mbmi->interintra_mode,
-                         cm->fc->y_mode_prob[size_group_lookup[bsize]]);
+        write_interintra_mode(
+            w, mbmi->interintra_mode,
+            cm->fc->interintra_mode_prob[size_group_lookup[bsize]]);
         assert(mbmi->interintra_mode == mbmi->interintra_uv_mode);
         if (get_wedge_bits(bsize)) {
           vpx_write(w, mbmi->use_wedge_interintra,
@@ -3150,6 +3165,12 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
                                      &fc->interintra_prob[i],
                                      cm->counts.interintra[i]);
         }
+      }
+      for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
+        prob_diff_update(vp10_interintra_mode_tree,
+                         cm->fc->interintra_mode_prob[i],
+                         counts->interintra_mode[i],
+                         INTERINTRA_MODES, &header_bc);
       }
       for (i = 0; i < BLOCK_SIZES; i++) {
         if (is_interintra_allowed_bsize(i) && get_wedge_bits(i))

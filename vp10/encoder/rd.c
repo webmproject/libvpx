@@ -445,12 +445,16 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
         vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
                          cm->fc->inter_mode_probs[i], vp10_inter_mode_tree);
-#endif
+#endif  // CONFIG_REF_MV
 #if CONFIG_EXT_INTER
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
         vp10_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
                          cm->fc->inter_compound_mode_probs[i],
                          vp10_inter_compound_mode_tree);
+      for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
+        vp10_cost_tokens((int *)cpi->interintra_mode_cost[i],
+                         cm->fc->interintra_mode_prob[i],
+                         vp10_interintra_mode_tree);
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC
       for (i = BLOCK_8X8; i < BLOCK_SIZES; i++) {
