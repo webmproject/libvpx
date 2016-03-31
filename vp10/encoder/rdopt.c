@@ -5978,15 +5978,18 @@ static void do_masked_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
 
   if (bestsme < INT_MAX) {
     int dis;  /* TODO: use dis in distortion calculation later. */
-    vp10_find_best_masked_sub_pixel_tree(x, mask, mask_stride,
-                                         &tmp_mv->as_mv, &ref_mv,
-                                         cm->allow_high_precision_mv,
-                                         x->errorperbit,
-                                         &cpi->fn_ptr[bsize],
-                                         cpi->sf.mv.subpel_force_stop,
-                                         cpi->sf.mv.subpel_iters_per_step,
-                                         x->nmvjointcost, x->mvcost,
-                                         &dis, &x->pred_sse[ref], ref_idx);
+    vp10_find_best_masked_sub_pixel_tree_up(cpi, x, mask, mask_stride,
+                                            mi_row, mi_col,
+                                            &tmp_mv->as_mv, &ref_mv,
+                                            cm->allow_high_precision_mv,
+                                            x->errorperbit,
+                                            &cpi->fn_ptr[bsize],
+                                            cpi->sf.mv.subpel_force_stop,
+                                            cpi->sf.mv.subpel_iters_per_step,
+                                            x->nmvjointcost, x->mvcost,
+                                            &dis, &x->pred_sse[ref],
+                                            ref_idx,
+                                            cpi->sf.use_upsampled_references);
   }
   *rate_mv = vp10_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
                               x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
