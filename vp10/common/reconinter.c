@@ -1176,24 +1176,18 @@ static const uint8_t obmc_mask_32[2][32] = {
 };
 
 #if CONFIG_EXT_PARTITION
-// TODO(debargha): What are the correct values here?
 static const uint8_t obmc_mask_64[2][64] = {
-    { 33, 33, 35, 35, 36, 36, 38, 38,
-      40, 40, 41, 41, 43, 43, 44, 44,
-      45, 45, 47, 47, 48, 48, 50, 50,
-      51, 51, 52, 52, 53, 53, 55, 55,
-      56, 56, 57, 57, 58, 58, 59, 59,
-      60, 60, 60, 60, 61, 61, 62, 62,
-      62, 62, 63, 63, 63, 63, 64, 64,
-      64, 64, 64, 64, 64, 64, 64, 64 },
-    { 31, 31, 29, 29, 28, 28, 26, 26,
-      24, 24, 23, 23, 21, 21, 20, 20,
-      19, 19, 17, 17, 16, 16, 14, 14,
-      13, 13, 12, 12, 11, 11,  9,  9,
-       8,  8,  7,  7,  6,  6,  5,  5,
-       4,  4,  4,  4,  3,  3,  2,  2,
-       2,  2,  1,  1,  1,  1,  0,  0,
-       0,  0,  0,  0,  0,  0,  0,  0 }
+    {
+      33, 34, 35, 35, 36, 37, 38, 39, 40, 40, 41, 42, 43, 44, 44, 44,
+      45, 46, 47, 47, 48, 49, 50, 51, 51, 51, 52, 52, 53, 54, 55, 56,
+      56, 56, 57, 57, 58, 58, 59, 60, 60, 60, 60, 60, 61, 62, 62, 62,
+      62, 62, 63, 63, 63, 63, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    }, {
+      31, 30, 29, 29, 28, 27, 26, 25, 24, 24, 23, 22, 21, 20, 20, 20,
+      19, 18, 17, 17, 16, 15, 14, 13, 13, 13, 12, 12, 11, 10,  9,  8,
+      8,  8,  7,  7,  6,  6,  5, 4,  4,  4,  4,  4,  3,  2,  2,  2,
+      2,  2,  1,  1, 1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    }
 };
 #endif  // CONFIG_EXT_PARTITION
 
@@ -1599,7 +1593,45 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
 #endif  // CONFIG_OBMC
 
 #if CONFIG_EXT_INTER
-static void combine_interintra(PREDICTION_MODE mode,
+#if CONFIG_EXT_PARTITION
+static const int weights1d[MAX_SB_SIZE] = {
+  128, 127, 125, 124, 123, 122, 120, 119,
+  118, 117, 116, 115, 113, 112, 111, 110,
+  109, 108, 107, 106, 105, 104, 103, 103,
+  102, 101, 100,  99,  98,  97,  97,  96,
+  95,  94,  94,  93,  92,  91,  91,  90,
+  89,  89,  88,  87,  87,  86,  86,  85,
+  84,  84,  83,  83,  82,  82,  81,  81,
+  80,  80,  79,  79,  78,  78,  77,  77,
+  76,  76,  75,  75,  75,  74,  74,  73,
+  73,  73,  72,  72,  72,  71,  71,  70,
+  70,  70,  69,  69,  69,  69,  68,  68,
+  68,  67,  67,  67,  67,  66,  66,  66,
+  66,  65,  65,  65,  65,  64,  64,  64,
+  64,  63,  63,  63,  63,  63,  62,  62,
+  62,  62,  62,  61,  61,  61,  61,  61,
+  61,  60,  60,  60,  60,  60,  60,  60,
+};
+static int size_scales[BLOCK_SIZES] = {
+  32, 16, 16, 16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
+};
+#else
+static const int weights1d[MAX_SB_SIZE] = {
+  128, 125, 123, 120, 118, 116, 113, 111,
+  109, 107, 105, 103, 102, 100,  98,  97,
+  95,  94,  92,  91,  89,  88,  87,  86,
+  84,  83,  82,  81,  80,  79,  78,  77,
+  76,  75,  75,  74,  73,  72,  72,  71,
+  70,  69,  69,  68,  68,  67,  67,  66,
+  66,  65,  65,  64,  64,  63,  63,  62,
+  62,  62,  61,  61,  61,  60,  60,  60,
+};
+static int size_scales[BLOCK_SIZES] = {
+  16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
+};
+#endif  // CONFIG_EXT_PARTITION
+
+static void combine_interintra(INTERINTRA_MODE mode,
                                int use_wedge_interintra,
                                int wedge_index,
                                BLOCK_SIZE bsize,
@@ -1613,45 +1645,6 @@ static void combine_interintra(PREDICTION_MODE mode,
   static const int scale_bits = 8;
   static const int scale_max = 256;
   static const int scale_round = 127;
-#if CONFIG_EXT_PARTITION
-  // TODO(debargha): Fill in the correct weights for 128 wide blocks.
-  static const int weights1d[MAX_SB_SIZE] = {
-    128, 128, 125, 125, 122, 122, 119, 119,
-    116, 116, 114, 114, 111, 111, 109, 109,
-    107, 107, 105, 105, 103, 103, 101, 101,
-    99,  99,  97,  97,  96,  96,  94,  94,
-    93,  93,  91,  91,  90,  90,  89,  89,
-    88,  88,  86,  86,  85,  85,  84,  84,
-    83,  83,  82,  82,  81,  81,  81,  81,
-    80,  80,  79,  79,  78,  78,  78,  78,
-    77,  77,  76,  76,  76,  76,  75,  75,
-    75,  75,  74,  74,  74,  74,  73,  73,
-    73,  73,  72,  72,  72,  72,  71,  71,
-    71,  71,  71,  71,  70,  70,  70,  70,
-    70,  70,  70,  70,  69,  69,  69,  69,
-    69,  69,  69,  69,  68,  68,  68,  68,
-    68,  68,  68,  68,  68,  68,  67,  67,
-    67,  67,  67,  67,  67,  67,  67,  67,
-  };
-  static int size_scales[BLOCK_SIZES] = {
-    32, 16, 16, 16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
-  };
-#else
-  static const int weights1d[MAX_SB_SIZE] = {
-    128, 125, 122, 119, 116, 114, 111, 109,
-    107, 105, 103, 101,  99,  97,  96,  94,
-    93,  91,  90,  89,  88,  86,  85,  84,
-    83,  82,  81,  81,  80,  79,  78,  78,
-    77,  76,  76,  75,  75,  74,  74,  73,
-    73,  72,  72,  71,  71,  71,  70,  70,
-    70,  70,  69,  69,  69,  69,  68,  68,
-    68,  68,  68,  67,  67,  67,  67,  67,
-  };
-  static int size_scales[BLOCK_SIZES] = {
-    16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
-  };
-#endif  // CONFIG_EXT_PARTITION
-
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   const int size_scale = size_scales[plane_bsize];
@@ -1674,7 +1667,7 @@ static void combine_interintra(PREDICTION_MODE mode,
   }
 
   switch (mode) {
-    case V_PRED:
+    case II_V_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = weights1d[i * size_scale];
@@ -1686,7 +1679,7 @@ static void combine_interintra(PREDICTION_MODE mode,
       }
       break;
 
-    case H_PRED:
+    case II_H_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = weights1d[j * size_scale];
@@ -1698,8 +1691,8 @@ static void combine_interintra(PREDICTION_MODE mode,
       }
       break;
 
-    case D63_PRED:
-    case D117_PRED:
+    case II_D63_PRED:
+    case II_D117_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = (weights1d[i * size_scale] * 3 +
@@ -1712,8 +1705,8 @@ static void combine_interintra(PREDICTION_MODE mode,
       }
       break;
 
-    case D207_PRED:
-    case D153_PRED:
+    case II_D207_PRED:
+    case II_D153_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = (weights1d[j * size_scale] * 3 +
@@ -1726,7 +1719,7 @@ static void combine_interintra(PREDICTION_MODE mode,
       }
       break;
 
-    case D135_PRED:
+    case II_D135_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = weights1d[(i < j ? i : j) * size_scale];
@@ -1738,7 +1731,7 @@ static void combine_interintra(PREDICTION_MODE mode,
       }
       break;
 
-    case D45_PRED:
+    case II_D45_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = (weights1d[i * size_scale] +
@@ -1751,8 +1744,8 @@ static void combine_interintra(PREDICTION_MODE mode,
       }
       break;
 
-    case TM_PRED:
-    case DC_PRED:
+    case II_TM_PRED:
+    case II_DC_PRED:
     default:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
@@ -1765,7 +1758,7 @@ static void combine_interintra(PREDICTION_MODE mode,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void combine_interintra_highbd(PREDICTION_MODE mode,
+static void combine_interintra_highbd(INTERINTRA_MODE mode,
                                       int use_wedge_interintra,
                                       int wedge_index,
                                       BLOCK_SIZE bsize,
@@ -1779,45 +1772,6 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
   static const int scale_bits = 8;
   static const int scale_max = 256;
   static const int scale_round = 127;
-#if CONFIG_EXT_PARTITION
-  // TODO(debargha): Fill in the correct weights for 128 wide blocks.
-  static const int weights1d[MAX_SB_SIZE] = {
-    128, 128, 125, 125, 122, 122, 119, 119,
-    116, 116, 114, 114, 111, 111, 109, 109,
-    107, 107, 105, 105, 103, 103, 101, 101,
-    99,  99,  97,  97,  96,  96,  94,  94,
-    93,  93,  91,  91,  90,  90,  89,  89,
-    88,  88,  86,  86,  85,  85,  84,  84,
-    83,  83,  82,  82,  81,  81,  81,  81,
-    80,  80,  79,  79,  78,  78,  78,  78,
-    77,  77,  76,  76,  76,  76,  75,  75,
-    75,  75,  74,  74,  74,  74,  73,  73,
-    73,  73,  72,  72,  72,  72,  71,  71,
-    71,  71,  71,  71,  70,  70,  70,  70,
-    70,  70,  70,  70,  69,  69,  69,  69,
-    69,  69,  69,  69,  68,  68,  68,  68,
-    68,  68,  68,  68,  68,  68,  67,  67,
-    67,  67,  67,  67,  67,  67,  67,  67,
-  };
-  static int size_scales[BLOCK_SIZES] = {
-    32, 16, 16, 16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
-  };
-#else
-  static const int weights1d[MAX_SB_SIZE] = {
-    128, 125, 122, 119, 116, 114, 111, 109,
-    107, 105, 103, 101,  99,  97,  96,  94,
-    93,  91,  90,  89,  88,  86,  85,  84,
-    83,  82,  81,  81,  80,  79,  78,  78,
-    77,  76,  76,  75,  75,  74,  74,  73,
-    73,  72,  72,  71,  71,  71,  70,  70,
-    70,  70,  69,  69,  69,  69,  68,  68,
-    68,  68,  68,  67,  67,  67,  67,  67,
-  };
-  static int size_scales[BLOCK_SIZES] = {
-    16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
-  };
-#endif  // CONFIG_EXT_PARTITION
-
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   const int size_scale = size_scales[plane_bsize];
@@ -1843,7 +1797,7 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
   }
 
   switch (mode) {
-    case V_PRED:
+    case II_V_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = weights1d[i * size_scale];
@@ -1855,7 +1809,7 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
       }
       break;
 
-    case H_PRED:
+    case II_H_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = weights1d[j * size_scale];
@@ -1867,8 +1821,8 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
       }
       break;
 
-    case D63_PRED:
-    case D117_PRED:
+    case II_D63_PRED:
+    case II_D117_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = (weights1d[i * size_scale] * 3 +
@@ -1881,8 +1835,8 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
       }
       break;
 
-    case D207_PRED:
-    case D153_PRED:
+    case II_D207_PRED:
+    case II_D153_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = (weights1d[j * size_scale] * 3 +
@@ -1895,7 +1849,7 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
       }
       break;
 
-    case D135_PRED:
+    case II_D135_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = weights1d[(i < j ? i : j) * size_scale];
@@ -1907,7 +1861,7 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
       }
       break;
 
-    case D45_PRED:
+    case II_D45_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int scale = (weights1d[i * size_scale] +
@@ -1920,8 +1874,8 @@ static void combine_interintra_highbd(PREDICTION_MODE mode,
       }
       break;
 
-    case TM_PRED:
-    case DC_PRED:
+    case II_TM_PRED:
+    case II_DC_PRED:
     default:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
@@ -1999,13 +1953,29 @@ static void build_intra_predictors_for_interintra(
   }
 }
 
+// Mapping of interintra to intra mode for use in the intra component
+static const int interintra_to_intra_mode[INTERINTRA_MODES] = {
+  DC_PRED,
+  V_PRED,
+  H_PRED,
+  D45_PRED,
+  D135_PRED,
+  D117_PRED,
+  D153_PRED,
+  D207_PRED,
+  D63_PRED,
+  TM_PRED
+};
+
 void vp10_build_intra_predictors_for_interintra(
     MACROBLOCKD *xd,
     BLOCK_SIZE bsize, int plane,
     uint8_t *dst, int dst_stride) {
   build_intra_predictors_for_interintra(
       xd, xd->plane[plane].dst.buf, xd->plane[plane].dst.stride,
-      dst, dst_stride, xd->mi[0]->mbmi.interintra_mode, bsize, plane);
+      dst, dst_stride,
+      interintra_to_intra_mode[xd->mi[0]->mbmi.interintra_mode],
+      bsize, plane);
 }
 
 void vp10_combine_interintra(MACROBLOCKD *xd,

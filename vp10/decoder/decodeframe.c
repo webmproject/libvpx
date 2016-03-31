@@ -4042,6 +4042,10 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
           vp10_diff_update_prob(&r, &fc->interintra_prob[i]);
         }
       }
+      for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
+        for (j = 0; j < INTERINTRA_MODES - 1; j++)
+          vp10_diff_update_prob(&r, &fc->interintra_mode_prob[i][j]);
+      }
       for (i = 0; i < BLOCK_SIZES; i++) {
         if (is_interintra_allowed_bsize(i) && get_wedge_bits(i)) {
           vp10_diff_update_prob(&r, &fc->wedge_interintra_prob[i]);

@@ -2024,8 +2024,9 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 #endif
         is_interintra_allowed(mbmi)) {
       if (mbmi->ref_frame[1] == INTRA_FRAME) {
-        counts->y_mode[size_group_lookup[bsize]][mbmi->interintra_mode]++;
         counts->interintra[bsize][1]++;
+        counts->interintra_mode[size_group_lookup[bsize]]
+                               [mbmi->interintra_mode]++;
         if (get_wedge_bits(bsize))
           counts->wedge_interintra[bsize][mbmi->use_wedge_interintra]++;
       } else {

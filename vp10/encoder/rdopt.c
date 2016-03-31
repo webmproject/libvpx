@@ -6218,8 +6218,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTER
   int mv_idx = (this_mode == NEWFROMNEARMV) ? 1 : 0;
   int_mv single_newmv[MAX_REF_FRAMES];
-  const int * const intra_mode_cost =
-    cpi->mbmode_cost[size_group_lookup[bsize]];
+  const unsigned int *const interintra_mode_cost =
+    cpi->interintra_mode_cost[size_group_lookup[bsize]];
   const int is_comp_interintra_pred = (mbmi->ref_frame[1] == INTRA_FRAME);
 #if CONFIG_REF_MV
   uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
@@ -6794,7 +6794,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   if (is_comp_interintra_pred) {
-    PREDICTION_MODE interintra_mode, best_interintra_mode = DC_PRED;
+    INTERINTRA_MODE best_interintra_mode = II_DC_PRED;
     int64_t best_interintra_rd = INT64_MAX;
     int rmode, rate_sum;
     int64_t dist_sum;
@@ -6826,11 +6826,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     restore_dst_buf(xd, orig_dst, orig_dst_stride);
     mbmi->ref_frame[1] = INTRA_FRAME;
 
-    for (interintra_mode = DC_PRED; interintra_mode <= TM_PRED;
-         ++interintra_mode) {
-      mbmi->interintra_mode = interintra_mode;
-      mbmi->interintra_uv_mode = interintra_mode;
-      rmode = intra_mode_cost[mbmi->interintra_mode];
+    for (j = 0; j < INTERINTRA_MODES; ++j) {
+      mbmi->interintra_mode = (INTERINTRA_MODE)j;
+      mbmi->interintra_uv_mode = (INTERINTRA_MODE)j;
+      rmode = interintra_mode_cost[mbmi->interintra_mode];
       vp10_build_interintra_predictors(xd,
                                        tmp_buf,
                                        tmp_buf + MAX_SB_SQUARE,
@@ -6844,7 +6843,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       rd = RDCOST(x->rdmult, x->rddiv, rate_mv + rmode + rate_sum, dist_sum);
       if (rd < best_interintra_rd) {
         best_interintra_rd = rd;
-        best_interintra_mode = interintra_mode;
+        best_interintra_mode = mbmi->interintra_mode;
       }
     }
     mbmi->interintra_mode = best_interintra_mode;
@@ -6861,7 +6860,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         xd, bsize, 2, intrapred + 2 * MAX_SB_SQUARE, MAX_SB_SIZE);
 
     wedge_bits = get_wedge_bits(bsize);
-    rmode = intra_mode_cost[mbmi->interintra_mode];
+    rmode = interintra_mode_cost[mbmi->interintra_mode];
     if (wedge_bits) {
       vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
                               intrapred, MAX_SB_SIZE);
@@ -6948,7 +6947,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     tmp_rd = best_interintra_rd;
     *compmode_interintra_cost =
         vp10_cost_bit(cm->fc->interintra_prob[bsize], 1);
-    *compmode_interintra_cost += intra_mode_cost[mbmi->interintra_mode];
+    *compmode_interintra_cost += interintra_mode_cost[mbmi->interintra_mode];
     if (get_wedge_bits(bsize)) {
       *compmode_interintra_cost += vp10_cost_bit(
           cm->fc->wedge_interintra_prob[bsize], mbmi->use_wedge_interintra);

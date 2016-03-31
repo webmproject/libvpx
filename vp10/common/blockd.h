@@ -190,8 +190,8 @@ typedef struct {
 #endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_EXT_INTER
-  PREDICTION_MODE interintra_mode;
-  PREDICTION_MODE interintra_uv_mode;
+  INTERINTRA_MODE interintra_mode;
+  INTERINTRA_MODE interintra_uv_mode;
   // TODO(debargha): Consolidate these flags
   int use_wedge_interintra;
   int interintra_wedge_index;

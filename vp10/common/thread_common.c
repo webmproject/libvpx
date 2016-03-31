@@ -432,6 +432,10 @@ void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts,
     for (j = 0; j < 2; j++)
       cm->counts.interintra[i][j] += counts->interintra[i][j];
 
+  for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
+    for (j = 0; j < INTERINTRA_MODES; j++)
+      cm->counts.interintra_mode[i][j] += counts->interintra_mode[i][j];
+
   for (i = 0; i < BLOCK_SIZES; i++)
     for (j = 0; j < 2; j++)
       cm->counts.wedge_interintra[i][j] += counts->wedge_interintra[i][j];
