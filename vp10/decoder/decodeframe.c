@@ -1094,7 +1094,8 @@ static void set_param_topblock(VP10_COMMON *const cm,  MACROBLOCKD *const xd,
     }
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+  xd->left_txfm_context =
+    xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
   set_txfm_ctx(xd->left_txfm_context, xd->mi[0]->mbmi.tx_size, bh);
   set_txfm_ctx(xd->above_txfm_context, xd->mi[0]->mbmi.tx_size, bw);
 #endif
@@ -2014,7 +2015,8 @@ static INLINE int dec_partition_plane_context(const MACROBLOCKD *xd,
                                               int mi_row, int mi_col,
                                               int bsl) {
   const PARTITION_CONTEXT *above_ctx = xd->above_seg_context + mi_col;
-  const PARTITION_CONTEXT *left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
+  const PARTITION_CONTEXT *left_ctx =
+    xd->left_seg_context + (mi_row & MAX_MIB_MASK);
   int above = (*above_ctx >> bsl) & 1 , left = (*left_ctx >> bsl) & 1;
 
 //  assert(bsl >= 0);
@@ -2028,7 +2030,8 @@ static INLINE void dec_update_partition_context(MACROBLOCKD *xd,
                                                 BLOCK_SIZE subsize,
                                                 int bw) {
   PARTITION_CONTEXT *const above_ctx = xd->above_seg_context + mi_col;
-  PARTITION_CONTEXT *const left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
+  PARTITION_CONTEXT *const left_ctx =
+    xd->left_seg_context + (mi_row & MAX_MIB_MASK);
 
   // update the partition context at the end notes. set partition bits
   // of block sizes larger than the current one to be one, and partition
@@ -2902,8 +2905,8 @@ static void setup_tile_info(VP10Decoder *const pbi,
   cm->tile_width  = vpx_rb_read_literal(rb, 6) + 1;   // in [1, 64]
   cm->tile_height = vpx_rb_read_literal(rb, 6) + 1;   // in [1, 64]
 
-  cm->tile_width  = cm->tile_width << MI_BLOCK_SIZE_LOG2;
-  cm->tile_height = cm->tile_height << MI_BLOCK_SIZE_LOG2;
+  cm->tile_width  = cm->tile_width << MAX_MIB_SIZE_LOG2;
+  cm->tile_height = cm->tile_height << MAX_MIB_SIZE_LOG2;
 
   cm->tile_width  = VPXMIN(cm->tile_width, cm->mi_cols);
   cm->tile_height = VPXMIN(cm->tile_height, cm->mi_rows);
@@ -3265,13 +3268,13 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
       vp10_zero_above_context(cm, tile_info.mi_col_start, tile_info.mi_col_end);
 
       for (mi_row = tile_info.mi_row_start; mi_row < tile_info.mi_row_end;
-           mi_row += MI_BLOCK_SIZE) {
+           mi_row += MAX_MIB_SIZE) {
         int mi_col;
 
         vp10_zero_left_context(&td->xd);
 
         for (mi_col = tile_info.mi_col_start; mi_col < tile_info.mi_col_end;
-             mi_col += MI_BLOCK_SIZE) {
+             mi_col += MAX_MIB_SIZE) {
           decode_partition(pbi, &td->xd,
 #if CONFIG_SUPERTX
                            0,
@@ -3307,8 +3310,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
     // Loopfilter one tile row.
     if (cm->lf.filter_level && !cm->skip_loop_filter) {
       LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-      const int lf_start = VPXMAX(0, tile_info.mi_row_start - MI_BLOCK_SIZE);
-      const int lf_end = tile_info.mi_row_end - MI_BLOCK_SIZE;
+      const int lf_start = VPXMAX(0, tile_info.mi_row_start - MAX_MIB_SIZE);
+      const int lf_end = tile_info.mi_row_end - MAX_MIB_SIZE;
 
       // Delay the loopfilter if the first tile row is only
       // a single superblock high.
@@ -3332,7 +3335,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
     // After loopfiltering, the last 7 row pixels in each superblock row may
     // still be changed by the longest loopfilter of the next superblock row.
     if (cm->frame_parallel_decode)
-      vp10_frameworker_broadcast(pbi->cur_buf, mi_row << MI_BLOCK_SIZE_LOG2);
+      vp10_frameworker_broadcast(pbi->cur_buf, mi_row << MAX_MIB_SIZE_LOG2);
 #endif  // !CONFIG_VAR_TX
   }
 
@@ -3382,11 +3385,11 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
   vp10_zero_above_context(&pbi->common, tile->mi_col_start, tile->mi_col_end);
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
-       mi_row += MI_BLOCK_SIZE) {
+       mi_row += MAX_MIB_SIZE) {
     vp10_zero_left_context(&tile_data->xd);
 
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
-         mi_col += MI_BLOCK_SIZE) {
+         mi_col += MAX_MIB_SIZE) {
       decode_partition(pbi, &tile_data->xd,
 #if CONFIG_SUPERTX
                        0,

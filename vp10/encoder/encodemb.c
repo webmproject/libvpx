@@ -29,8 +29,8 @@
 #include "vp10/encoder/tokenize.h"
 
 struct optimize_ctx {
-  ENTROPY_CONTEXT ta[MAX_MB_PLANE][2 * MI_BLOCK_SIZE];
-  ENTROPY_CONTEXT tl[MAX_MB_PLANE][2 * MI_BLOCK_SIZE];
+  ENTROPY_CONTEXT ta[MAX_MB_PLANE][2 * MAX_MIB_SIZE];
+  ENTROPY_CONTEXT tl[MAX_MB_PLANE][2 * MAX_MIB_SIZE];
 };
 
 void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {

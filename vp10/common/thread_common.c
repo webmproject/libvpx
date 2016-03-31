@@ -94,7 +94,7 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
                              int start, int stop, int y_only,
                              VP9LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
-  const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MI_BLOCK_SIZE_LOG2;
+  const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MAX_MIB_SIZE_LOG2;
   int mi_row, mi_col;
 #if !CONFIG_EXT_PARTITION_TYPES
   enum lf_path path;
@@ -116,12 +116,12 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
 #endif  // CONFIG_EXT_PARTITION
 
   for (mi_row = start; mi_row < stop;
-       mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
+       mi_row += lf_sync->num_workers * MAX_MIB_SIZE) {
     MODE_INFO **const mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
 
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
-      const int r = mi_row >> MI_BLOCK_SIZE_LOG2;
-      const int c = mi_col >> MI_BLOCK_SIZE_LOG2;
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MAX_MIB_SIZE) {
+      const int r = mi_row >> MAX_MIB_SIZE_LOG2;
+      const int c = mi_col >> MAX_MIB_SIZE_LOG2;
       int plane;
 
       sync_read(lf_sync, r, c);
@@ -175,7 +175,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
                                 VP9LfSync *lf_sync) {
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   // Number of superblock rows and cols
-  const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
+  const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MAX_MIB_SIZE_LOG2;
   // Decoder may allocate more threads than number of tiles based on user's
   // input.
   const int tile_cols = cm->tile_cols;
@@ -215,7 +215,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
 
     // Loopfilter data
     vp10_loop_filter_data_reset(lf_data, frame, cm, planes);
-    lf_data->start = start + i * MI_BLOCK_SIZE;
+    lf_data->start = start + i * MAX_MIB_SIZE;
     lf_data->stop = stop;
     lf_data->y_only = y_only;
 

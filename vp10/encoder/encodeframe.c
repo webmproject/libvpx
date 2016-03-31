@@ -276,7 +276,8 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
 
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+  xd->left_txfm_context =
+    xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
   xd->max_tx_size = max_txsize_lookup[bsize];
 #endif
 
@@ -2146,15 +2147,15 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 }
 
 typedef struct {
-  ENTROPY_CONTEXT a[2 * MI_BLOCK_SIZE * MAX_MB_PLANE];
-  ENTROPY_CONTEXT l[2 * MI_BLOCK_SIZE * MAX_MB_PLANE];
-  PARTITION_CONTEXT sa[MI_BLOCK_SIZE];
-  PARTITION_CONTEXT sl[MI_BLOCK_SIZE];
+  ENTROPY_CONTEXT a[2 * MAX_MIB_SIZE * MAX_MB_PLANE];
+  ENTROPY_CONTEXT l[2 * MAX_MIB_SIZE * MAX_MB_PLANE];
+  PARTITION_CONTEXT sa[MAX_MIB_SIZE];
+  PARTITION_CONTEXT sl[MAX_MIB_SIZE];
 #if CONFIG_VAR_TX
   TXFM_CONTEXT *p_ta;
   TXFM_CONTEXT *p_tl;
-  TXFM_CONTEXT ta[MI_BLOCK_SIZE];
-  TXFM_CONTEXT tl[MI_BLOCK_SIZE];
+  TXFM_CONTEXT ta[MAX_MIB_SIZE];
+  TXFM_CONTEXT tl[MAX_MIB_SIZE];
 #endif
 } RD_SEARCH_MACROBLOCK_CONTEXT;
 
@@ -2175,14 +2176,14 @@ static void restore_context(MACROBLOCK *x,
         xd->plane[p].subsampling_x);
     memcpy(
         xd->left_context[p]
-            + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
+            + ((mi_row & MAX_MIB_MASK) * 2 >> xd->plane[p].subsampling_y),
         ctx->l + num_4x4_blocks_high * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
   memcpy(xd->above_seg_context + mi_col, ctx->sa,
          sizeof(*xd->above_seg_context) * mi_width);
-  memcpy(xd->left_seg_context + (mi_row & MI_MASK), ctx->sl,
+  memcpy(xd->left_seg_context + (mi_row & MAX_MIB_MASK), ctx->sl,
          sizeof(xd->left_seg_context[0]) * mi_height);
 #if CONFIG_VAR_TX
   xd->above_txfm_context = ctx->p_ta;
@@ -2214,13 +2215,13 @@ static void save_context(const MACROBLOCK *x,
     memcpy(
         ctx->l + num_4x4_blocks_high * p,
         xd->left_context[p]
-            + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
+            + ((mi_row & MAX_MIB_MASK) * 2 >> xd->plane[p].subsampling_y),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
   memcpy(ctx->sa, xd->above_seg_context + mi_col,
          sizeof(*xd->above_seg_context) * mi_width);
-  memcpy(ctx->sl, xd->left_seg_context + (mi_row & MI_MASK),
+  memcpy(ctx->sl, xd->left_seg_context + (mi_row & MAX_MIB_MASK),
          sizeof(xd->left_seg_context[0]) * mi_height);
 #if CONFIG_VAR_TX
   memcpy(ctx->ta, xd->above_txfm_context,
@@ -2518,9 +2519,9 @@ static void set_partial_b64x64_partition(MODE_INFO *mi, int mis,
     BLOCK_SIZE bsize, MODE_INFO **mi_8x8) {
   int bh = bh_in;
   int r, c;
-  for (r = 0; r < MI_BLOCK_SIZE; r += bh) {
+  for (r = 0; r < MAX_MIB_SIZE; r += bh) {
     int bw = bw_in;
-    for (c = 0; c < MI_BLOCK_SIZE; c += bw) {
+    for (c = 0; c < MAX_MIB_SIZE; c += bw) {
       const int index = r * mis + c;
       mi_8x8[index] = mi + index;
       mi_8x8[index]->mbmi.sb_type = find_partition_size(bsize,
@@ -2549,10 +2550,10 @@ static void set_fixed_partitioning(VP10_COMP *cpi, const TileInfo *const tile,
   assert((row8x8_remaining > 0) && (col8x8_remaining > 0));
 
   // Apply the requested partition size to the SB64 if it is all "in image"
-  if ((col8x8_remaining >= MI_BLOCK_SIZE) &&
-      (row8x8_remaining >= MI_BLOCK_SIZE)) {
-    for (block_row = 0; block_row < MI_BLOCK_SIZE; block_row += bh) {
-      for (block_col = 0; block_col < MI_BLOCK_SIZE; block_col += bw) {
+  if ((col8x8_remaining >= MAX_MIB_SIZE) &&
+      (row8x8_remaining >= MAX_MIB_SIZE)) {
+    for (block_row = 0; block_row < MAX_MIB_SIZE; block_row += bh) {
+      for (block_col = 0; block_col < MAX_MIB_SIZE; block_col += bw) {
         int index = block_row * mis + block_col;
         mi_8x8[index] = mi_upper_left + index;
         mi_8x8[index]->mbmi.sb_type = bsize;
@@ -2621,7 +2622,8 @@ static void rd_use_partition(VP10_COMP *cpi,
 
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+  xd->left_txfm_context =
+    xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 #endif
 
   save_context(x, &x_ctx, mi_row, mi_col, bsize);
@@ -3013,8 +3015,8 @@ static void get_sb_partition_size_range(MACROBLOCKD *xd, MODE_INFO **mi_8x8,
                                         BLOCK_SIZE *min_block_size,
                                         BLOCK_SIZE *max_block_size,
                                         int bs_hist[BLOCK_SIZES]) {
-  int sb_width_in_blocks = MI_BLOCK_SIZE;
-  int sb_height_in_blocks  = MI_BLOCK_SIZE;
+  int sb_width_in_blocks = MAX_MIB_SIZE;
+  int sb_height_in_blocks  = MAX_MIB_SIZE;
   int i, j;
   int index = 0;
 
@@ -3065,13 +3067,13 @@ static void rd_auto_partition_range(VP10_COMP *cpi, const TileInfo *const tile,
     }
     // Find the min and max partition sizes used in the left SB64
     if (left_in_image) {
-      MODE_INFO **left_sb64_mi = &mi[-MI_BLOCK_SIZE];
+      MODE_INFO **left_sb64_mi = &mi[-MAX_MIB_SIZE];
       get_sb_partition_size_range(xd, left_sb64_mi, &min_size, &max_size,
                                   bs_hist);
     }
     // Find the min and max partition sizes used in the above SB64.
     if (above_in_image) {
-      MODE_INFO **above_sb64_mi = &mi[-xd->mi_stride * MI_BLOCK_SIZE];
+      MODE_INFO **above_sb64_mi = &mi[-xd->mi_stride * MAX_MIB_SIZE];
       get_sb_partition_size_range(xd, above_sb64_mi, &min_size, &max_size,
                                   bs_hist);
     }
@@ -3508,7 +3510,8 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
 #if CONFIG_VAR_TX
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+  xd->left_txfm_context =
+    xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 #endif
 
   save_context(x, &x_ctx, mi_row, mi_col, bsize);
@@ -4239,7 +4242,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
 
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
-       mi_col += MI_BLOCK_SIZE) {
+       mi_col += MAX_MIB_SIZE) {
     const struct segmentation *const seg = &cm->seg;
     int dummy_rate;
     int64_t dummy_dist;
@@ -4476,7 +4479,7 @@ void vp10_encode_tile(VP10_COMP *cpi, ThreadData *td,
   td->mb.ex_search_count_ptr = &td->rd_counts.ex_search_count;
 
   for (mi_row = tile_info->mi_row_start; mi_row < tile_info->mi_row_end;
-       mi_row += MI_BLOCK_SIZE) {
+       mi_row += MAX_MIB_SIZE) {
     encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
   }
 
@@ -4848,7 +4851,8 @@ static void tx_partition_count_update(VP10_COMMON *cm,
   int idx, idy;
 
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+  xd->left_txfm_context =
+    xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 
   for (idy = 0; idy < mi_height; idy += bh)
     for (idx = 0; idx < mi_width; idx += bh)
@@ -4913,7 +4917,8 @@ static void tx_partition_set_contexts(VP10_COMMON *cm,
   int idx, idy;
 
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
-  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & MI_MASK);
+  xd->left_txfm_context =
+    xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 
   for (idy = 0; idy < mi_height; idy += bh)
     for (idx = 0; idx < mi_width; idx += bh)
@@ -6112,8 +6117,8 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   sse_uv = 0;
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
 #if CONFIG_VAR_TX
-    ENTROPY_CONTEXT ctxa[2 * MI_BLOCK_SIZE];
-    ENTROPY_CONTEXT ctxl[2 * MI_BLOCK_SIZE];
+    ENTROPY_CONTEXT ctxa[2 * MAX_MIB_SIZE];
+    ENTROPY_CONTEXT ctxl[2 * MAX_MIB_SIZE];
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     int coeff_ctx = 1;
 
@@ -6157,8 +6162,8 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_EXT_TX
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
 #if CONFIG_VAR_TX
-    ENTROPY_CONTEXT ctxa[2 * MI_BLOCK_SIZE];
-    ENTROPY_CONTEXT ctxl[2 * MI_BLOCK_SIZE];
+    ENTROPY_CONTEXT ctxa[2 * MAX_MIB_SIZE];
+    ENTROPY_CONTEXT ctxl[2 * MAX_MIB_SIZE];
     const struct macroblockd_plane *const pd = &xd->plane[0];
     int coeff_ctx = 1;
 #endif  // CONFIG_VAR_TX

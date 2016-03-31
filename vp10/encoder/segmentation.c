@@ -328,10 +328,10 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
       mi_ptr = cm->mi_grid_visible + tile_info.mi_row_start * cm->mi_stride +
                  tile_info.mi_col_start;
       for (mi_row = tile_info.mi_row_start; mi_row < tile_info.mi_row_end;
-           mi_row += MI_BLOCK_SIZE, mi_ptr += MI_BLOCK_SIZE * cm->mi_stride) {
+           mi_row += MAX_MIB_SIZE, mi_ptr += MAX_MIB_SIZE * cm->mi_stride) {
         MODE_INFO **mi = mi_ptr;
         for (mi_col = tile_info.mi_col_start; mi_col < tile_info.mi_col_end;
-             mi_col += MI_BLOCK_SIZE, mi += MI_BLOCK_SIZE) {
+             mi_col += MAX_MIB_SIZE, mi += MAX_MIB_SIZE) {
           count_segs_sb(cm, xd, &tile_info, mi, no_pred_segcounts,
                         temporal_predictor_count, t_unpred_seg_counts,
                         mi_row, mi_col, BLOCK_LARGEST);

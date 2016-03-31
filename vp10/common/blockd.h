@@ -166,7 +166,7 @@ typedef struct {
 #if CONFIG_VAR_TX
   // TODO(jingning): This effectively assigned a separate entry for each
   // 8x8 block. Apparently it takes much more space than needed.
-  TX_SIZE inter_tx_size[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
+  TX_SIZE inter_tx_size[MAX_MIB_SIZE][MAX_MIB_SIZE];
 #endif
   int8_t skip;
   int8_t has_no_coeffs;
@@ -315,15 +315,15 @@ typedef struct macroblockd {
   const YV12_BUFFER_CONFIG *cur_buf;
 
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
-  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][2 * MI_BLOCK_SIZE];
+  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][2 * MAX_MIB_SIZE];
 
   PARTITION_CONTEXT *above_seg_context;
-  PARTITION_CONTEXT left_seg_context[MI_BLOCK_SIZE];
+  PARTITION_CONTEXT left_seg_context[MAX_MIB_SIZE];
 
 #if CONFIG_VAR_TX
   TXFM_CONTEXT *above_txfm_context;
   TXFM_CONTEXT *left_txfm_context;
-  TXFM_CONTEXT left_txfm_context_buffer[MI_BLOCK_SIZE];
+  TXFM_CONTEXT left_txfm_context_buffer[MAX_MIB_SIZE];
 
   TX_SIZE max_tx_size;
 #if CONFIG_SUPERTX
