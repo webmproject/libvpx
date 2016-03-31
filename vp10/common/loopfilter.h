@@ -84,8 +84,8 @@ typedef struct {
   uint16_t above_uv[TX_SIZES];
   uint16_t left_int_4x4_uv;
   uint16_t above_int_4x4_uv;
-  uint8_t lfl_y[MAX_MIB_SIZE * MAX_MIB_SIZE];
-  uint8_t lfl_uv[MAX_MIB_SIZE / 2 * MAX_MIB_SIZE / 2];
+  uint8_t lfl_y[MAX_MIB_SIZE][MAX_MIB_SIZE];
+  uint8_t lfl_uv[MAX_MIB_SIZE / 2][MAX_MIB_SIZE / 2];
 } LOOP_FILTER_MASK;
 
 /* assorted loopfilter functions which get used elsewhere */
