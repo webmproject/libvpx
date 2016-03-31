@@ -1526,13 +1526,14 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       !supertx_enabled &&
 #endif
       is_interintra_allowed(mbmi)) {
-    const int interintra = vp10_read(r, cm->fc->interintra_prob[bsize]);
+    const int bsize_group = size_group_lookup[bsize];
+    const int interintra = vpx_read(r, cm->fc->interintra_prob[bsize_group]);
     if (xd->counts)
-      xd->counts->interintra[bsize][interintra]++;
+      xd->counts->interintra[bsize_group][interintra]++;
     assert(mbmi->ref_frame[1] == NONE);
     if (interintra) {
       const INTERINTRA_MODE interintra_mode =
-          read_interintra_mode(cm, xd, r, size_group_lookup[bsize]);
+          read_interintra_mode(cm, xd, r, bsize_group);
       mbmi->ref_frame[1] = INTRA_FRAME;
       mbmi->interintra_mode = interintra_mode;
       mbmi->interintra_uv_mode = interintra_mode;
@@ -1543,7 +1544,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       mbmi->angle_delta[1] = 0;
       mbmi->intra_filter = INTRA_FILTER_LINEAR;
 #endif  // CONFIG_EXT_INTRA
-      if (get_wedge_bits(bsize)) {
+      if (is_interintra_wedge_used(bsize)) {
         mbmi->use_wedge_interintra =
             vp10_read(r, cm->fc->wedge_interintra_prob[bsize]);
         if (xd->counts)
@@ -1561,7 +1562,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #if CONFIG_OBMC
       !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
 #endif  // CONFIG_OBMC
-      get_wedge_bits(bsize)) {
+      is_interinter_wedge_used(bsize)) {
     mbmi->use_wedge_interinter =
         vp10_read(r, cm->fc->wedge_interinter_prob[bsize]);
     if (xd->counts)

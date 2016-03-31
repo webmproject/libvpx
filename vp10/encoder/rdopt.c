@@ -6644,7 +6644,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   rs = cm->interp_filter == SWITCHABLE ? vp10_get_switchable_rate(cpi, xd) : 0;
 
 #if CONFIG_EXT_INTER
-  if (is_comp_pred && get_wedge_bits(bsize)) {
+  if (is_comp_pred && is_interinter_wedge_used(bsize)) {
     int wedge_index, best_wedge_index = WEDGE_NONE, rs;
     int rate_sum;
     int64_t dist_sum;
@@ -6830,14 +6830,20 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       mbmi->interintra_mode = (INTERINTRA_MODE)j;
       mbmi->interintra_uv_mode = (INTERINTRA_MODE)j;
       rmode = interintra_mode_cost[mbmi->interintra_mode];
-      vp10_build_interintra_predictors(xd,
-                                       tmp_buf,
-                                       tmp_buf + MAX_SB_SQUARE,
-                                       tmp_buf + 2 * MAX_SB_SQUARE,
-                                       MAX_SB_SIZE,
-                                       MAX_SB_SIZE,
-                                       MAX_SB_SIZE,
-                                       bsize);
+      vp10_build_intra_predictors_for_interintra(
+          xd, bsize, 0, intrapred, MAX_SB_SIZE);
+      vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
+                              intrapred, MAX_SB_SIZE);
+      vp10_build_intra_predictors_for_interintra(
+          xd, bsize, 1, intrapred + MAX_SB_SQUARE, MAX_SB_SIZE);
+      vp10_build_intra_predictors_for_interintra(
+          xd, bsize, 2, intrapred + 2 * MAX_SB_SQUARE, MAX_SB_SIZE);
+      vp10_combine_interintra(xd, bsize, 1,
+                              tmp_buf + MAX_SB_SQUARE, MAX_SB_SIZE,
+                              intrapred + MAX_SB_SQUARE, MAX_SB_SIZE);
+      vp10_combine_interintra(xd, bsize, 2,
+                              tmp_buf + 2 * MAX_SB_SQUARE, MAX_SB_SIZE,
+                              intrapred + 2 * MAX_SB_SQUARE, MAX_SB_SIZE);
       model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
                       &skip_txfm_sb, &skip_sse_sb);
       rd = RDCOST(x->rdmult, x->rddiv, rate_mv + rmode + rate_sum, dist_sum);
@@ -6859,9 +6865,9 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     vp10_build_intra_predictors_for_interintra(
         xd, bsize, 2, intrapred + 2 * MAX_SB_SQUARE, MAX_SB_SIZE);
 
-    wedge_bits = get_wedge_bits(bsize);
     rmode = interintra_mode_cost[mbmi->interintra_mode];
-    if (wedge_bits) {
+    if (is_interintra_wedge_used(bsize)) {
+      wedge_bits = get_wedge_bits(bsize);
       vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
                               intrapred, MAX_SB_SIZE);
       vp10_combine_interintra(xd, bsize, 1,
@@ -6946,9 +6952,9 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     pred_exists = 0;
     tmp_rd = best_interintra_rd;
     *compmode_interintra_cost =
-        vp10_cost_bit(cm->fc->interintra_prob[bsize], 1);
+        vp10_cost_bit(cm->fc->interintra_prob[size_group_lookup[bsize]], 1);
     *compmode_interintra_cost += interintra_mode_cost[mbmi->interintra_mode];
-    if (get_wedge_bits(bsize)) {
+    if (is_interintra_wedge_used(bsize)) {
       *compmode_interintra_cost += vp10_cost_bit(
           cm->fc->wedge_interintra_prob[bsize], mbmi->use_wedge_interintra);
       if (mbmi->use_wedge_interintra) {
@@ -6957,7 +6963,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     }
   } else if (is_interintra_allowed(mbmi)) {
     *compmode_interintra_cost =
-      vp10_cost_bit(cm->fc->interintra_prob[bsize], 0);
+      vp10_cost_bit(cm->fc->interintra_prob[size_group_lookup[bsize]], 0);
   }
 
 #if CONFIG_EXT_INTERP

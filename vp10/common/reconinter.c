@@ -762,7 +762,7 @@ void vp10_build_inter_predictors_sbp(MACROBLOCKD *xd, int mi_row, int mi_col,
 }
 
 void vp10_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                     BLOCK_SIZE bsize) {
+                                      BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 1,
                                     MAX_MB_PLANE - 1);
 #if CONFIG_EXT_INTER
@@ -1594,7 +1594,7 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
 
 #if CONFIG_EXT_INTER
 #if CONFIG_EXT_PARTITION
-static const int weights1d[MAX_SB_SIZE] = {
+static const int ii_weights1d[MAX_SB_SIZE] = {
   128, 127, 125, 124, 123, 122, 120, 119,
   118, 117, 116, 115, 113, 112, 111, 110,
   109, 108, 107, 106, 105, 104, 103, 103,
@@ -1612,21 +1612,21 @@ static const int weights1d[MAX_SB_SIZE] = {
   62,  62,  62,  61,  61,  61,  61,  61,
   61,  60,  60,  60,  60,  60,  60,  60,
 };
-static int size_scales[BLOCK_SIZES] = {
+static int ii_size_scales[BLOCK_SIZES] = {
   32, 16, 16, 16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
 };
 #else
-static const int weights1d[MAX_SB_SIZE] = {
-  128, 125, 123, 120, 118, 116, 113, 111,
-  109, 107, 105, 103, 102, 100,  98,  97,
-  95,  94,  92,  91,  89,  88,  87,  86,
-  84,  83,  82,  81,  80,  79,  78,  77,
-  76,  75,  75,  74,  73,  72,  72,  71,
-  70,  69,  69,  68,  68,  67,  67,  66,
-  66,  65,  65,  64,  64,  63,  63,  62,
-  62,  62,  61,  61,  61,  60,  60,  60,
+static const int ii_weights1d[MAX_SB_SIZE] = {
+  102, 100,  97,  95,  92,  90,  88,  86,
+  84,  82,  80,  78,  76,  74,  73,  71,
+  69,  68,  67,  65,  64,  62,  61,  60,
+  59,  58,  57,  55,  54,  53,  52,  52,
+  51,  50,  49,  48,  47,  47,  46,  45,
+  45,  44,  43,  43,  42,  41,  41,  40,
+  40,  39,  39,  38,  38,  38,  37,  37,
+  36,  36,  36,  35,  35,  35,  34,  34,
 };
-static int size_scales[BLOCK_SIZES] = {
+static int ii_size_scales[BLOCK_SIZES] = {
   16, 8, 8, 8, 4, 4, 4, 2, 2, 2, 1, 1, 1
 };
 #endif  // CONFIG_EXT_PARTITION
@@ -1647,7 +1647,7 @@ static void combine_interintra(INTERINTRA_MODE mode,
   static const int scale_round = 127;
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
-  const int size_scale = size_scales[plane_bsize];
+  const int size_scale = ii_size_scales[plane_bsize];
   int i, j;
 
   if (use_wedge_interintra) {
@@ -1670,7 +1670,7 @@ static void combine_interintra(INTERINTRA_MODE mode,
     case II_V_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = weights1d[i * size_scale];
+          int scale = ii_weights1d[i * size_scale];
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1682,7 +1682,7 @@ static void combine_interintra(INTERINTRA_MODE mode,
     case II_H_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = weights1d[j * size_scale];
+          int scale = ii_weights1d[j * size_scale];
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1695,8 +1695,8 @@ static void combine_interintra(INTERINTRA_MODE mode,
     case II_D117_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = (weights1d[i * size_scale] * 3 +
-                       weights1d[j * size_scale]) >> 2;
+          int scale = (ii_weights1d[i * size_scale] * 3 +
+                       ii_weights1d[j * size_scale]) >> 2;
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1709,8 +1709,8 @@ static void combine_interintra(INTERINTRA_MODE mode,
     case II_D153_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = (weights1d[j * size_scale] * 3 +
-                       weights1d[i * size_scale]) >> 2;
+          int scale = (ii_weights1d[j * size_scale] * 3 +
+                       ii_weights1d[i * size_scale]) >> 2;
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1722,7 +1722,7 @@ static void combine_interintra(INTERINTRA_MODE mode,
     case II_D135_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = weights1d[(i < j ? i : j) * size_scale];
+          int scale = ii_weights1d[(i < j ? i : j) * size_scale];
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1734,8 +1734,8 @@ static void combine_interintra(INTERINTRA_MODE mode,
     case II_D45_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = (weights1d[i * size_scale] +
-                       weights1d[j * size_scale]) >> 1;
+          int scale = (ii_weights1d[i * size_scale] +
+                       ii_weights1d[j * size_scale]) >> 1;
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1774,7 +1774,7 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
   static const int scale_round = 127;
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
-  const int size_scale = size_scales[plane_bsize];
+  const int size_scale = ii_size_scales[plane_bsize];
   int i, j;
 
   uint16_t *comppred = CONVERT_TO_SHORTPTR(comppred8);
@@ -1782,15 +1782,17 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
   uint16_t *intrapred = CONVERT_TO_SHORTPTR(intrapred8);
   (void) bd;
 
-  if (use_wedge_interintra && get_wedge_bits(bsize)) {
-    const uint8_t *mask = vp10_get_soft_mask(wedge_index, bsize, bh, bw);
-    for (i = 0; i < bh; ++i) {
-      for (j = 0; j < bw; ++j) {
-        int m = mask[i * MASK_MASTER_STRIDE + j];
-        comppred[i * compstride + j] =
-            (intrapred[i * intrastride + j] * m +
-             interpred[i * interstride + j] * ((1 << WEDGE_WEIGHT_BITS) - m) +
-             (1 << (WEDGE_WEIGHT_BITS - 1))) >> WEDGE_WEIGHT_BITS;
+  if (use_wedge_interintra) {
+    if (get_wedge_bits(bsize)) {
+      const uint8_t *mask = vp10_get_soft_mask(wedge_index, bsize, bh, bw);
+      for (i = 0; i < bh; ++i) {
+        for (j = 0; j < bw; ++j) {
+          int m = mask[i * MASK_MASTER_STRIDE + j];
+          comppred[i * compstride + j] =
+              (intrapred[i * intrastride + j] * m +
+               interpred[i * interstride + j] * ((1 << WEDGE_WEIGHT_BITS) - m) +
+               (1 << (WEDGE_WEIGHT_BITS - 1))) >> WEDGE_WEIGHT_BITS;
+        }
       }
     }
     return;
@@ -1800,7 +1802,7 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
     case II_V_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = weights1d[i * size_scale];
+          int scale = ii_weights1d[i * size_scale];
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1812,7 +1814,7 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
     case II_H_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = weights1d[j * size_scale];
+          int scale = ii_weights1d[j * size_scale];
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1825,8 +1827,8 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
     case II_D117_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = (weights1d[i * size_scale] * 3 +
-                       weights1d[j * size_scale]) >> 2;
+          int scale = (ii_weights1d[i * size_scale] * 3 +
+                       ii_weights1d[j * size_scale]) >> 2;
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1839,8 +1841,8 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
     case II_D153_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = (weights1d[j * size_scale] * 3 +
-                       weights1d[i * size_scale]) >> 2;
+          int scale = (ii_weights1d[j * size_scale] * 3 +
+                       ii_weights1d[i * size_scale]) >> 2;
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1852,7 +1854,7 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
     case II_D135_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = weights1d[(i < j ? i : j) * size_scale];
+          int scale = ii_weights1d[(i < j ? i : j) * size_scale];
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1864,8 +1866,8 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
     case II_D45_PRED:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          int scale = (weights1d[i * size_scale] +
-                       weights1d[j * size_scale]) >> 1;
+          int scale = (ii_weights1d[i * size_scale] +
+                       ii_weights1d[j * size_scale]) >> 1;
           comppred[i * compstride + j] =
               ((scale_max - scale) * interpred[i * interstride + j] +
                scale * intrapred[i * intrastride + j] + scale_round)
@@ -1915,10 +1917,10 @@ static void build_intra_predictors_for_interintra(
                              0, 0, plane);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      uint16_t *src2_16 = CONVERT_TO_SHORTPTR(src_2);
-      uint16_t *dst2_16 = CONVERT_TO_SHORTPTR(dst_2);
-      memcpy(src2_16 - ref_stride, dst2_16 - dst_stride,
-             sizeof(*src2_16) * (4 << bhl));
+      uint16_t *src_216 = CONVERT_TO_SHORTPTR(src_2);
+      uint16_t *dst_216 = CONVERT_TO_SHORTPTR(dst_2);
+      memcpy(src_216 - ref_stride, dst_216 - dst_stride,
+             sizeof(*src_216) * (4 << bhl));
     } else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     {

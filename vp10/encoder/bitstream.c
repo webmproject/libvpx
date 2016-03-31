@@ -1294,14 +1294,15 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_SUPERTX
         is_interintra_allowed(mbmi)) {
       const int interintra = mbmi->ref_frame[1] == INTRA_FRAME;
-      vp10_write(w, interintra, cm->fc->interintra_prob[bsize]);
+      const int bsize_group = size_group_lookup[bsize];
+      vpx_write(w, interintra, cm->fc->interintra_prob[bsize_group]);
       if (interintra) {
         write_interintra_mode(
             w, mbmi->interintra_mode,
-            cm->fc->interintra_mode_prob[size_group_lookup[bsize]]);
+            cm->fc->interintra_mode_prob[bsize_group]);
         assert(mbmi->interintra_mode == mbmi->interintra_uv_mode);
-        if (get_wedge_bits(bsize)) {
-          vp10_write(w, mbmi->use_wedge_interintra,
+        if (is_interintra_wedge_used(bsize)) {
+          vpx_write(w, mbmi->use_wedge_interintra,
                     cm->fc->wedge_interintra_prob[bsize]);
           if (mbmi->use_wedge_interintra) {
             vp10_write_literal(w, mbmi->interintra_wedge_index,
@@ -1315,8 +1316,8 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_OBMC
         !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
 #endif  // CONFIG_OBMC
-        get_wedge_bits(bsize)) {
-      vp10_write(w, mbmi->use_wedge_interinter,
+        is_interinter_wedge_used(bsize)) {
+      vpx_write(w, mbmi->use_wedge_interinter,
                 cm->fc->wedge_interinter_prob[bsize]);
       if (mbmi->use_wedge_interinter)
         vp10_write_literal(w, mbmi->interinter_wedge_index,
@@ -3096,8 +3097,8 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
     update_inter_compound_mode_probs(cm, &header_bc);
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
-      for (i = 0; i < BLOCK_SIZES; i++) {
-        if (is_interintra_allowed_bsize(i)) {
+      for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
+        if (is_interintra_allowed_bsize_group(i)) {
           vp10_cond_prob_diff_update(&header_bc,
                                      &fc->interintra_prob[i],
                                      cm->counts.interintra[i]);
@@ -3110,7 +3111,7 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
                          INTERINTRA_MODES, &header_bc);
       }
       for (i = 0; i < BLOCK_SIZES; i++) {
-        if (is_interintra_allowed_bsize(i) && get_wedge_bits(i))
+        if (is_interintra_allowed_bsize(i) && is_interintra_wedge_used(i))
           vp10_cond_prob_diff_update(&header_bc,
                                      &fc->wedge_interintra_prob[i],
                                      cm->counts.wedge_interintra[i]);
@@ -3118,7 +3119,7 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
     }
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < BLOCK_SIZES; i++)
-        if (get_wedge_bits(i))
+        if (is_interinter_wedge_used(i))
           vp10_cond_prob_diff_update(&header_bc,
                                      &fc->wedge_interinter_prob[i],
                                      cm->counts.wedge_interinter[i]);

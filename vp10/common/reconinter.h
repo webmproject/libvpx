@@ -445,6 +445,15 @@ void vp10_combine_interintra(
     BLOCK_SIZE bsize, int plane,
     uint8_t *inter_pred, int inter_stride,
     uint8_t *intra_pred, int intra_stride);
+void vp10_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
+                                           uint8_t *upred,
+                                           uint8_t *vpred,
+                                           int ustride, int vstride,
+                                           BLOCK_SIZE bsize);
+void vp10_build_interintra_predictors_sby(MACROBLOCKD *xd,
+                                          uint8_t *ypred,
+                                          int ystride,
+                                          BLOCK_SIZE bsize);
 
 // Encoder only
 void vp10_build_inter_predictors_for_planes_single_buf(

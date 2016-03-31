@@ -2023,14 +2023,14 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
         !supertx_enabled &&
 #endif
         is_interintra_allowed(mbmi)) {
+      const int bsize_group = size_group_lookup[bsize];
       if (mbmi->ref_frame[1] == INTRA_FRAME) {
-        counts->interintra[bsize][1]++;
-        counts->interintra_mode[size_group_lookup[bsize]]
-                               [mbmi->interintra_mode]++;
-        if (get_wedge_bits(bsize))
+        counts->interintra[bsize_group][1]++;
+        counts->interintra_mode[bsize_group][mbmi->interintra_mode]++;
+        if (is_interintra_wedge_used(bsize))
           counts->wedge_interintra[bsize][mbmi->use_wedge_interintra]++;
       } else {
-        counts->interintra[bsize][0]++;
+        counts->interintra[bsize_group][0]++;
       }
     }
     if (cm->reference_mode != SINGLE_REFERENCE &&
@@ -2038,7 +2038,7 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 #if CONFIG_OBMC
         !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
 #endif  // CONFIG_OBMC
-        get_wedge_bits(bsize)) {
+        is_interinter_wedge_used(bsize)) {
       counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
     }
 #endif  // CONFIG_EXT_INTER
