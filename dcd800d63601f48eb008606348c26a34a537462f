@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce3684de_12950cbe",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5349,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-03-31T15:54:34Z",
+      "side": 1,
+      "message": "I think a code comment here and below to clarify the intent here would be worth while.",
+      "range": {
+        "startLine": 5349,
+        "startChar": 4,
+        "endLine": 5349,
+        "endChar": 17
+      },
+      "revId": "dcd800d63601f48eb008606348c26a34a537462f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
