@@ -1915,8 +1915,8 @@ static void build_intra_predictors_for_interintra(
                              0, 0, plane);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      uint16_t *src_216 = CONVERT_TO_SHORTPTR(src_2);
-      uint16_t *dst_216 = CONVERT_TO_SHORTPTR(dst_2);
+      uint16_t *src2_16 = CONVERT_TO_SHORTPTR(src_2);
+      uint16_t *dst2_16 = CONVERT_TO_SHORTPTR(dst_2);
       memcpy(src2_16 - ref_stride, dst2_16 - dst_stride,
              sizeof(*src2_16) * (4 << bhl));
     } else
