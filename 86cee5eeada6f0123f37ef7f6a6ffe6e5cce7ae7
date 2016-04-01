@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb56cae_085387ec",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 629,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-04-01T18:29:58Z",
+      "side": 1,
+      "message": "why have () for this condition but not have () for motion_magnitude2?",
+      "range": {
+        "startLine": 629,
+        "startChar": 23,
+        "endLine": 629,
+        "endChar": 24
+      },
+      "revId": "86cee5eeada6f0123f37ef7f6a6ffe6e5cce7ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_c84c8f48",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-04-01T18:29:58Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we combine this condition with the one in line 620?",
+      "range": {
+        "startLine": 630,
+        "startChar": 17,
+        "endLine": 630,
+        "endChar": 27
+      },
+      "revId": "86cee5eeada6f0123f37ef7f6a6ffe6e5cce7ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
