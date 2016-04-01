@@ -81,32 +81,20 @@ static INLINE void transpose_32(int txfm_size, const __m128i* input,
   }
 }
 
-#define mullo_epi32(a, b)                                                   \
-  ({                                                                        \
+#define mullo_epi32(a, b)                                                     \
+  ({                                                                          \
     __m128i tmp1 = _mm_mul_epu32(a, b);                                       \
     __m128i tmp2 = _mm_mul_epu32(_mm_srli_si128(a, 4), _mm_srli_si128(b, 4)); \
-    _mm_unpacklo_epi32(_mm_shuffle_epi32(tmp1, _MM_SHUFFLE(0, 0, 2, 0)),    \
-                       _mm_shuffle_epi32(tmp2, _MM_SHUFFLE(0, 0, 2, 0)));   \
+    _mm_unpacklo_epi32(_mm_shuffle_epi32(tmp1, _MM_SHUFFLE(0, 0, 2, 0)),      \
+                       _mm_shuffle_epi32(tmp2, _MM_SHUFFLE(0, 0, 2, 0)));     \
   })
 
-#define round_shift_32_simple_sse2(input, bit)          \
-  ({                                                    \
-    __m128i round = _mm_set1_epi32((1 << (bit - 1)) - 1); \
-    __m128i tmp1 = _mm_add_epi32(input, round);           \
-    _mm_srai_epi32(tmp1, bit);                          \
-  })
-
-#define round_shift_32_sse2(vec, bit)             \
-  ({                                              \
-    __m128i sign, tmp, round;                       \
-    sign = _mm_srai_epi32(vec, 31);               \
-    tmp = _mm_add_epi32(vec, sign);               \
-    tmp = _mm_xor_si128(tmp, sign);               \
-    round = _mm_set1_epi32((1 << (bit - 1)) - 1); \
-    tmp = _mm_add_epi32(tmp, round);              \
-    tmp = _mm_srli_epi32(tmp, bit);               \
-    tmp = _mm_xor_si128(tmp, sign);               \
-    _mm_sub_epi32(tmp, sign);                     \
+#define round_shift_32_sse2(vec, bit)       \
+  ({                                        \
+    __m128i tmp, round;                     \
+    round = _mm_set1_epi32(1 << (bit - 1)); \
+    tmp = _mm_add_epi32(vec, round);        \
+    _mm_srai_epi32(tmp, bit);               \
   })
 
 #define round_shift_array_32_sse2(input, output, size, bit) \
@@ -128,7 +116,7 @@ static INLINE void transpose_32(int txfm_size, const __m128i* input,
 // out1 = -in1*w0 + in0*w1
 #define btf_32_sse2_type0(w0, w1, in0, in1, out0, out1, bit) \
   ({                                                         \
-    __m128i ww0, ww1, in0_w0, in1_w1, in0_w1, in1_w0;          \
+    __m128i ww0, ww1, in0_w0, in1_w1, in0_w1, in1_w0;        \
     ww0 = _mm_set1_epi32(w0);                                \
     ww1 = _mm_set1_epi32(w1);                                \
     in0_w0 = mullo_epi32(in0, ww0);                          \
@@ -145,7 +133,7 @@ static INLINE void transpose_32(int txfm_size, const __m128i* input,
 // out1 = in1*w0 - in0*w1
 #define btf_32_sse2_type1(w0, w1, in0, in1, out0, out1, bit) \
   ({                                                         \
-    __m128i ww0, ww1, in0_w0, in1_w1, in0_w1, in1_w0;          \
+    __m128i ww0, ww1, in0_w0, in1_w1, in0_w1, in1_w0;        \
     ww0 = _mm_set1_epi32(w0);                                \
     ww1 = _mm_set1_epi32(w1);                                \
     in0_w0 = mullo_epi32(in0, ww0);                          \

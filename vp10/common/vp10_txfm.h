@@ -81,23 +81,7 @@ static const int32_t cospi_arr[7][64] =
     12785, 11204,  9616,  8022,  6424,  4821,  3216,  1608}};
 
 static INLINE int32_t round_shift(int32_t value, int bit) {
-  // For value >= 0,
-  // there are twe version of rounding
-  // 1) (value + (1 << (bit - 1)) - 1) >> bit
-  // 2) (value + (1 << (bit - 1))) >> bit
-  // boath methods are mild unbiased
-  // however, the first version has slightly advantage because
-  // it rounds number toward zero.
-  // For value < 0, we also choose the version that rounds number
-  // toward zero.
-  if (bit > 0) {
-    if (value >= 0)
-      return (value + (1 << (bit - 1)) - 1) >> bit;
-    else
-      return ((value - (1 << (bit - 1))) >> bit) + 1;
-  } else {
-    return value << (-bit);
-  }
+  return (value + (1 << (bit - 1))) >> bit;
 }
 
 static INLINE void round_shift_array(int32_t *arr, int size, int bit) {
@@ -105,8 +89,14 @@ static INLINE void round_shift_array(int32_t *arr, int size, int bit) {
   if (bit == 0) {
     return;
   } else {
-    for (i = 0; i < size; i++) {
-      arr[i] = round_shift(arr[i], bit);
+    if (bit > 0) {
+      for (i = 0; i < size; i++) {
+        arr[i] = round_shift(arr[i], bit);
+      }
+    } else {
+      for (i = 0; i < size; i++) {
+        arr[i] = arr[i] << (-bit);
+      }
     }
   }
 }
