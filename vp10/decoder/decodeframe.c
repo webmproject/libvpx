@@ -1809,9 +1809,6 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #endif  // CONFIG_SUPERTX
                          int mi_row, int mi_col,
                          vp10_reader *r,
-#if CONFIG_ANS
-                         struct AnsDecoder *const tok,
-#endif  // CONFIG_ANS
 #if CONFIG_EXT_PARTITION_TYPES
                          PARTITION_TYPE partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -1887,10 +1884,9 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
           for (col = 0; col < max_blocks_wide; col += step)
             predict_and_reconstruct_intra_block(xd,
 #if CONFIG_ANS
-                                                cm->token_tab, tok,
-#else
-                                                r,
+                                                cm->token_tab,
 #endif
+                                                r,
                                                 mbmi, plane,
                                                 row, col, tx_size);
       }
@@ -1991,10 +1987,9 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
             for (col = 0; col < max_blocks_wide; col += step)
               eobtotal += reconstruct_inter_block(xd,
 #if CONFIG_ANS
-                                                  cm->token_tab, tok,
-#else
-                                                  r,
+                                                  cm->token_tab,
 #endif
+                                                  r,
                                                   mbmi, plane, row, col,
                                                   tx_size);
 #endif
@@ -2094,9 +2089,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #endif
                              int mi_row, int mi_col,
                              vp10_reader* r,
-#if CONFIG_ANS
-                             struct AnsDecoder *const tok,
-#endif  // CONFIG_ANS
                              BLOCK_SIZE bsize, int n4x4_l2) {
   VP10_COMMON *const cm = &pbi->common;
   const int n8x8_l2 = n4x4_l2 - 1;
@@ -2185,9 +2177,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                  supertx_enabled,
 #endif  // CONFIG_SUPERTX
                  mi_row, mi_col, r,
-#if CONFIG_ANS
-                 tok,
-#endif  // CONFIG_ANS
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -2200,9 +2189,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                      supertx_enabled,
 #endif  // CONFIG_SUPERTX
                      mi_row, mi_col, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -2214,9 +2200,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                      supertx_enabled,
 #endif  // CONFIG_SUPERTX
                      mi_row, mi_col, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -2227,9 +2210,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
                        mi_row + hbs, mi_col, r,
-#if CONFIG_ANS
-                       tok,
-#endif  // CONFIG_ANS
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -2241,9 +2221,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                      supertx_enabled,
 #endif  // CONFIG_SUPERTX
                      mi_row, mi_col, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -2254,9 +2231,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                        supertx_enabled,
 #endif  // CONFIG_SUPERTX
                        mi_row, mi_col + hbs, r,
-#if CONFIG_ANS
-                       tok,
-#endif  // CONFIG_ANS
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -2268,36 +2242,24 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
                          mi_row, mi_col, r,
-#if CONFIG_ANS
-                         tok,
-#endif  // CONFIG_ANS
                          subsize, n8x8_l2);
         decode_partition(pbi, xd,
 #if CONFIG_SUPERTX
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
                          mi_row, mi_col + hbs, r,
-#if CONFIG_ANS
-                         tok,
-#endif  // CONFIG_ANS
                          subsize, n8x8_l2);
         decode_partition(pbi, xd,
 #if CONFIG_SUPERTX
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
                          mi_row + hbs, mi_col, r,
-#if CONFIG_ANS
-                         tok,
-#endif  // CONFIG_ANS
                          subsize, n8x8_l2);
         decode_partition(pbi, xd,
 #if CONFIG_SUPERTX
                          supertx_enabled,
 #endif  // CONFIG_SUPERTX
                          mi_row + hbs, mi_col + hbs, r,
-#if CONFIG_ANS
-                         tok,
-#endif  // CONFIG_ANS
                          subsize, n8x8_l2);
         break;
 #if CONFIG_EXT_PARTITION_TYPES
@@ -2307,27 +2269,18 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                      supertx_enabled,
 #endif
                      mi_row,       mi_col,       r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row,       mi_col + hbs, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row + hbs, mi_col, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, subsize, n4x4_l2, n8x8_l2);
         break;
       case PARTITION_HORZ_B:
@@ -2336,27 +2289,18 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                      supertx_enabled,
 #endif
                      mi_row, mi_col, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, subsize, n4x4_l2, n8x8_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row + hbs, mi_col,       r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row + hbs, mi_col + hbs, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         break;
       case PARTITION_VERT_A:
@@ -2365,27 +2309,18 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                      supertx_enabled,
 #endif
                      mi_row,       mi_col,       r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row + hbs, mi_col,       r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row, mi_col + hbs, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, subsize, n8x8_l2, n4x4_l2);
         break;
       case PARTITION_VERT_B:
@@ -2394,27 +2329,18 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                      supertx_enabled,
 #endif
                      mi_row, mi_col, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, subsize, n8x8_l2, n4x4_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row,       mi_col + hbs, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         decode_block(pbi, xd,
 #if CONFIG_SUPERTX
                      supertx_enabled,
 #endif
                      mi_row + hbs, mi_col + hbs, r,
-#if CONFIG_ANS
-                     tok,
-#endif  // CONFIG_ANS
                      partition, bsize2, n8x8_l2, n8x8_l2);
         break;
 #endif
@@ -2461,10 +2387,9 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
           for (col = 0; col < max_blocks_wide; col += step)
             eobtotal += reconstruct_inter_block(xd,
 #if CONFIG_ANS
-                                                cm->token_tab, tok,
-#else
-                                                r,
+                                                cm->token_tab,
 #endif
+                                                r,
                                                 mbmi, i, row, col,
                                                 tx_size);
       }
@@ -3285,9 +3210,6 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
                            0,
 #endif  // CONFIG_SUPERTX
                            mi_row, mi_col, &td->bit_reader,
-#if CONFIG_ANS
-                           &td->bit_reader,
-#endif  // CONFIG_ANS
                            BLOCK_LARGEST, MAX_SB_SIZE_LOG2 - 2);
         }
         pbi->mb.corrupted |= td->xd.corrupted;
@@ -3400,9 +3322,6 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
                        0,
 #endif
                        mi_row, mi_col, &tile_data->bit_reader,
-#if CONFIG_ANS
-                       &tile_data->bit_reader,
-#endif  // CONFIG_ANS
                        BLOCK_LARGEST, MAX_SB_SIZE_LOG2 - 2);
     }
   }

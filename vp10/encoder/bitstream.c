@@ -1475,30 +1475,18 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #endif  // CONFIG_EXT_INTRA
 }
 
-#if CONFIG_ANS && CONFIG_SUPERTX
-#define write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end,            \
-                              supertx_enabled, mi_row, mi_col)            \
-  write_modes_b(cpi, tile, w, ans, tok, tok_end, supertx_enabled, mi_row, \
-                mi_col)
-#elif CONFIG_SUPERTX
-#define write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, \
+#if CONFIG_SUPERTX
+#define write_modes_b_wrapper(cpi, tile, w, tok, tok_end,      \
                               supertx_enabled, mi_row, mi_col) \
   write_modes_b(cpi, tile, w, tok, tok_end, supertx_enabled, mi_row, mi_col)
-#elif CONFIG_ANS
-#define write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, \
-                              supertx_enabled, mi_row, mi_col) \
-  write_modes_b(cpi, tile, w, ans, tok, tok_end, mi_row, mi_col)
 #else
-#define write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, \
+#define write_modes_b_wrapper(cpi, tile, w, tok, tok_end,      \
                               supertx_enabled, mi_row, mi_col) \
   write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col)
 #endif  // CONFIG_ANS && CONFIG_SUPERTX
 
 static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
                           vp10_writer *w,
-#if CONFIG_ANS
-                          struct BufAnsCoder *ans,
-#endif  // CONFIG_ANS
                           const TOKENEXTRA **tok,
                           const TOKENEXTRA *const tok_end,
 #if CONFIG_SUPERTX
@@ -1592,7 +1580,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
         for (row = 0; row < num_4x4_h; row += bw)
           for (col = 0; col < num_4x4_w; col += bw)
 #if CONFIG_ANS
-            pack_mb_tokens_ans(ans, cm->token_tab, tok, tok_end, cm->bit_depth,
+            pack_mb_tokens_ans(w, cm->token_tab, tok, tok_end, cm->bit_depth,
                                tx);
 #else
             pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
@@ -1602,7 +1590,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
       TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                          : m->mbmi.tx_size;
 #if CONFIG_ANS
-      pack_mb_tokens_ans(ans, cm->token_tab, tok, tok_end, cm->bit_depth, tx);
+      pack_mb_tokens_ans(w, cm->token_tab, tok, tok_end, cm->bit_depth, tx);
 #else
       pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
 #endif  // CONFIG_ANS
@@ -1644,22 +1632,13 @@ static void write_partition(const VP10_COMMON *const cm,
   }
 }
 
-#if CONFIG_ANS && CONFIG_SUPERTX
-#define write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end,            \
-                               supertx_enabled, mi_row, mi_col, bsize)     \
-  write_modes_sb(cpi, tile, w, ans, tok, tok_end, supertx_enabled, mi_row, \
-                 mi_col, bsize)
-#elif CONFIG_SUPERTX
-#define write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end,               \
+#if CONFIG_SUPERTX
+#define write_modes_sb_wrapper(cpi, tile, w, tok, tok_end,                    \
                                supertx_enabled, mi_row, mi_col, bsize)        \
   write_modes_sb(cpi, tile, w, tok, tok_end, supertx_enabled, mi_row, mi_col, \
                  bsize)
-#elif CONFIG_ANS
-#define write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end,        \
-                               supertx_enabled, mi_row, mi_col, bsize) \
-  write_modes_sb(cpi, tile, w, ans, tok, tok_end, mi_row, mi_col, bsize)
 #else
-#define write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end,        \
+#define write_modes_sb_wrapper(cpi, tile, w, tok, tok_end,             \
                                supertx_enabled, mi_row, mi_col, bsize) \
   write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col, bsize)
 #endif  // CONFIG_ANS && CONFIG_SUPERTX
@@ -1667,9 +1646,6 @@ static void write_partition(const VP10_COMMON *const cm,
 static void write_modes_sb(VP10_COMP *const cpi,
                            const TileInfo *const tile,
                            vp10_writer *const w,
-#if CONFIG_ANS
-                           struct BufAnsCoder *ans,
-#endif  // CONFIG_ANS
                            const TOKENEXTRA **tok,
                            const TOKENEXTRA *const tok_end,
 #if CONFIG_SUPERTX
@@ -1743,69 +1719,69 @@ static void write_modes_sb(VP10_COMP *const cpi,
   }
 #endif  // CONFIG_SUPERTX
   if (subsize < BLOCK_8X8) {
-    write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+    write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                           mi_row, mi_col);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                               mi_row, mi_col);
         break;
       case PARTITION_HORZ:
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                               mi_row, mi_col);
         if (mi_row + bs < cm->mi_rows)
-          write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end,
+          write_modes_b_wrapper(cpi, tile, w, tok, tok_end,
                                 supertx_enabled, mi_row + bs, mi_col);
         break;
       case PARTITION_VERT:
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                               mi_row, mi_col);
         if (mi_col + bs < cm->mi_cols)
-          write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end,
+          write_modes_b_wrapper(cpi, tile, w, tok, tok_end,
                                 supertx_enabled, mi_row, mi_col + bs);
         break;
       case PARTITION_SPLIT:
-        write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                                mi_row, mi_col, subsize);
-        write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                                mi_row, mi_col + bs, subsize);
-        write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                                mi_row + bs, mi_col, subsize);
-        write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                                mi_row + bs, mi_col + bs, subsize);
         break;
 #if CONFIG_EXT_PARTITION_TYPES
       case PARTITION_HORZ_A:
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col + bs);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row + bs, mi_col);
         break;
       case PARTITION_HORZ_B:
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row + bs, mi_col);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row + bs, mi_col + bs);
         break;
       case PARTITION_VERT_A:
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row + bs, mi_col);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col + bs);
         break;
       case PARTITION_VERT_B:
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col + bs);
-        write_modes_b_wrapper(cpi, tile, w, ans, tok, tok_end, supertx_enabled,
+        write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row + bs, mi_col + bs);
         break;
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -1830,7 +1806,7 @@ static void write_modes_sb(VP10_COMP *const cpi,
       for (row = 0; row < num_4x4_h; row += bw)
         for (col = 0; col < num_4x4_w; col += bw)
 #if CONFIG_ANS
-          pack_mb_tokens_ans(ans, cm->token_tab, tok, tok_end, cm->bit_depth,
+          pack_mb_tokens_ans(w, cm->token_tab, tok, tok_end, cm->bit_depth,
                              tx);
 #else
           pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
@@ -1854,9 +1830,6 @@ static void write_modes_sb(VP10_COMP *const cpi,
 static void write_modes(VP10_COMP *const cpi,
                         const TileInfo *const tile,
                         vp10_writer *const w,
-#if CONFIG_ANS
-                        struct BufAnsCoder *ans,
-#endif  // CONFIG_ANS
                         const TOKENEXTRA **tok,
                         const TOKENEXTRA *const tok_end) {
   VP10_COMMON *const cm = &cpi->common;
@@ -1873,7 +1846,7 @@ static void write_modes(VP10_COMP *const cpi,
     vp10_zero_left_context(xd);
 
     for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MAX_MIB_SIZE) {
-      write_modes_sb_wrapper(cpi, tile, w, ans, tok, tok_end, 0,
+      write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, 0,
                              mi_row, mi_col, BLOCK_LARGEST);
     }
   }
@@ -2755,7 +2728,7 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
       tile_size = mode_bc.pos;
 #else
       buf_ans_write_init(&mode_bc, uco_ans_buf, ans_window_size);
-      write_modes(cpi, &tile_info, &mode_bc, &mode_bc, &tok, tok_end);
+      write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
       ans_write_init(&token_ans, buf->data + data_offset);
       buf_ans_flush(&mode_bc, &token_ans);
@@ -2831,7 +2804,7 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
       tile_size = mode_bc.pos;
 #else
       buf_ans_write_init(&mode_bc, uco_ans_buf, ans_window_size);
-      write_modes(cpi, &tile_info, &mode_bc, &mode_bc, &tok, tok_end);
+      write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
       assert(tok == tok_end);
       ans_write_init(&token_ans, dst + total_size);
       buf_ans_flush(&mode_bc, &token_ans);
