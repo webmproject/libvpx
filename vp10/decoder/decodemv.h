@@ -11,7 +11,7 @@
 #ifndef VP10_DECODER_DECODEMV_H_
 #define VP10_DECODER_DECODEMV_H_
 
-#include "vpx_dsp/bitreader.h"
+#include "vp10/decoder/bitreader.h"
 
 #include "vp10/decoder/decoder.h"
 
@@ -24,7 +24,7 @@ void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
                          int supertx_enabled,
 #endif
 
-                         int mi_row, int mi_col, vpx_reader *r,
+                         int mi_row, int mi_col, vp10_reader *r,
                          int x_mis, int y_mis);
 
 #ifdef __cplusplus
