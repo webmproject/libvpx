@@ -51,7 +51,7 @@ static inline TxfmFunc fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
 
 static inline void fwd_txfm2d_c(const int16_t *input, int32_t *output,
                                 const int stride, const TXFM_2D_CFG *cfg,
-                                int32_t *txfm_buf) {
+                                int32_t *buf) {
   int i, j;
   const int txfm_size = cfg->txfm_size;
   const int8_t *shift = cfg->shift;
@@ -62,11 +62,9 @@ static inline void fwd_txfm2d_c(const int16_t *input, int32_t *output,
   const TxfmFunc txfm_func_col = fwd_txfm_type_to_func(cfg->txfm_type_col);
   const TxfmFunc txfm_func_row = fwd_txfm_type_to_func(cfg->txfm_type_row);
 
-  // txfm_buf's length is  txfm_size * txfm_size + 2 * txfm_size
-  // it is used for intermediate data buffering
-  int32_t *temp_in = txfm_buf;
-  int32_t *temp_out = temp_in + txfm_size;
-  int32_t *buf = temp_out + txfm_size;
+  // use output buffer as temp buffer
+  int32_t* temp_in = output;
+  int32_t* temp_out = output + txfm_size;
 
   // Columns
   for (i = 0; i < txfm_size; ++i) {
@@ -81,19 +79,16 @@ static inline void fwd_txfm2d_c(const int16_t *input, int32_t *output,
 
   // Rows
   for (i = 0; i < txfm_size; ++i) {
-    for (j = 0; j < txfm_size; ++j)
-      temp_in[j] = buf[j + i * txfm_size];
-    txfm_func_row(temp_in, temp_out, cos_bit_row, stage_range_row);
-    round_shift_array(temp_out, txfm_size, -shift[2]);
-    for (j = 0; j < txfm_size; ++j)
-      output[j + i * txfm_size] = (int32_t)temp_out[j];
+    txfm_func_row(buf + i * txfm_size, output + i * txfm_size, cos_bit_row,
+                  stage_range_row);
+    round_shift_array(output + i * txfm_size, txfm_size, -shift[2]);
   }
 }
 
 void vp10_fwd_txfm2d_4x4_c(const int16_t *input, int32_t *output,
                          const int stride, const TXFM_2D_CFG *cfg,
                          const int bd) {
-  int txfm_buf[4 * 4 + 4 + 4];
+  int32_t txfm_buf[4 * 4];
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
@@ -101,7 +96,7 @@ void vp10_fwd_txfm2d_4x4_c(const int16_t *input, int32_t *output,
 void vp10_fwd_txfm2d_8x8_c(const int16_t *input, int32_t *output,
                          const int stride, const TXFM_2D_CFG *cfg,
                          const int bd) {
-  int txfm_buf[8 * 8 + 8 + 8];
+  int32_t txfm_buf[8 * 8];
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
@@ -109,7 +104,7 @@ void vp10_fwd_txfm2d_8x8_c(const int16_t *input, int32_t *output,
 void vp10_fwd_txfm2d_16x16_c(const int16_t *input, int32_t *output,
                            const int stride, const TXFM_2D_CFG *cfg,
                            const int bd) {
-  int txfm_buf[16 * 16 + 16 + 16];
+  int32_t txfm_buf[16 * 16];
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
@@ -117,7 +112,7 @@ void vp10_fwd_txfm2d_16x16_c(const int16_t *input, int32_t *output,
 void vp10_fwd_txfm2d_32x32_c(const int16_t *input, int32_t *output,
                            const int stride, const TXFM_2D_CFG *cfg,
                            const int bd) {
-  int txfm_buf[32 * 32 + 32 + 32];
+  int32_t txfm_buf[32 * 32];
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
@@ -125,7 +120,7 @@ void vp10_fwd_txfm2d_32x32_c(const int16_t *input, int32_t *output,
 void vp10_fwd_txfm2d_64x64_c(const int16_t *input, int32_t *output,
                            const int stride, const TXFM_2D_CFG *cfg,
                            const int bd) {
-  int txfm_buf[64 * 64 + 64 + 64];
+  int32_t txfm_buf[64 * 64];
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
