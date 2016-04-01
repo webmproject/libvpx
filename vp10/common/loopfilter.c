@@ -1546,8 +1546,8 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
   for (r = 0; r < MAX_MIB_SIZE && mi_row + r < cm->mi_rows; r += 4) {
     if (plane->plane_type == 1) {
       for (c = 0; c < (MAX_MIB_SIZE >> 1); c++) {
-        lfm->lfl_uv[r][c] = lfm->lfl_y[r][c << 1];
-        lfm->lfl_uv[r + 2][c] = lfm->lfl_y[r + 2][c << 1];
+        lfm->lfl_uv[r >> 1][c] = lfm->lfl_y[r][c << 1];
+        lfm->lfl_uv[(r + 2) >> 1][c] = lfm->lfl_y[r + 2][c << 1];
       }
     }
 
@@ -1563,18 +1563,18 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
         highbd_filter_selectively_vert_row2(
             plane->subsampling_x, CONVERT_TO_SHORTPTR(dst->buf), dst->stride,
             mask_16x16_l, mask_8x8_l, mask_4x4_l, mask_4x4_int_l, &cm->lf_info,
-            &lfm->lfl_uv[r][0], (int)cm->bit_depth);
+            &lfm->lfl_uv[r >> 1][0], (int)cm->bit_depth);
       } else {
         filter_selectively_vert_row2(
             plane->subsampling_x, dst->buf, dst->stride,
             mask_16x16_l, mask_8x8_l, mask_4x4_l, mask_4x4_int_l, &cm->lf_info,
-            &lfm->lfl_uv[r][0]);
+            &lfm->lfl_uv[r >> 1][0]);
       }
 #else
       filter_selectively_vert_row2(
           plane->subsampling_x, dst->buf, dst->stride,
           mask_16x16_l, mask_8x8_l, mask_4x4_l, mask_4x4_int_l, &cm->lf_info,
-          &lfm->lfl_uv[r][0]);
+          &lfm->lfl_uv[r >> 1][0]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
       dst->buf += 16 * dst->stride;
@@ -1615,16 +1615,17 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
       highbd_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
                                       dst->stride, mask_16x16_r, mask_8x8_r,
                                       mask_4x4_r, mask_4x4_int_r, &cm->lf_info,
-                                      &lfm->lfl_uv[r][0], (int)cm->bit_depth);
+                                      &lfm->lfl_uv[r >> 1][0],
+                                      (int)cm->bit_depth);
     } else {
       filter_selectively_horiz(dst->buf, dst->stride, mask_16x16_r, mask_8x8_r,
                                mask_4x4_r, mask_4x4_int_r, &cm->lf_info,
-                               &lfm->lfl_uv[r][0]);
+                               &lfm->lfl_uv[r >> 1][0]);
     }
 #else
     filter_selectively_horiz(dst->buf, dst->stride, mask_16x16_r, mask_8x8_r,
                              mask_4x4_r, mask_4x4_int_r, &cm->lf_info,
-                             &lfm->lfl_uv[r][0]);
+                             &lfm->lfl_uv[r >> 1][0]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     dst->buf += 8 * dst->stride;
