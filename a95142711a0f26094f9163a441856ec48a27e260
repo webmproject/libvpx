@@ -33,6 +33,24 @@
       "revId": "a95142711a0f26094f9163a441856ec48a27e260",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_089067cd",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-04-01T18:30:07Z",
+      "side": 1,
+      "message": "The output[1] should be 0. Unless one uses a quantizer targeted for DC-only case.",
+      "parentUuid": "11736196_fa5641d8",
+      "revId": "a95142711a0f26094f9163a441856ec48a27e260",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
