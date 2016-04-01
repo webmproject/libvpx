@@ -85,7 +85,6 @@ void vpx_fdct4x4_1_c(const int16_t *input, tran_low_t *output, int stride) {
       sum += input[r * stride + c];
 
   output[0] = sum << 1;
-  output[1] = 0;
 }
 
 void vpx_fdct8x8_c(const int16_t *input, tran_low_t *final_output, int stride) {
@@ -182,7 +181,6 @@ void vpx_fdct8x8_1_c(const int16_t *input, tran_low_t *output, int stride) {
       sum += input[r * stride + c];
 
   output[0] = sum;
-  output[1] = 0;
 }
 
 void vpx_fdct16x16_c(const int16_t *input, tran_low_t *output, int stride) {
@@ -373,7 +371,6 @@ void vpx_fdct16x16_1_c(const int16_t *input, tran_low_t *output, int stride) {
       sum += input[r * stride + c];
 
   output[0] = sum >> 1;
-  output[1] = 0;
 }
 
 static INLINE tran_high_t dct_32_round(tran_high_t input) {
@@ -771,13 +768,12 @@ void vpx_fdct32x32_rd_c(const int16_t *input, tran_low_t *out, int stride) {
 
 void vpx_fdct32x32_1_c(const int16_t *input, tran_low_t *output, int stride) {
   int r, c;
-  tran_low_t sum = 0;
+  int sum = 0;
   for (r = 0; r < 32; ++r)
     for (c = 0; c < 32; ++c)
       sum += input[r * stride + c];
 
-  output[0] = sum >> 3;
-  output[1] = 0;
+  output[0] = (tran_low_t)(sum >> 3);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
