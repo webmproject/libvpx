@@ -69,6 +69,24 @@
       "revId": "e50138db8490111e17d9dd26d136ff68a88714bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11736196_9edc5a2f",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-01T01:17:36Z",
+      "side": 1,
+      "message": "if you\u0027ll post a bug with the patch then that\u0027s fine by me.",
+      "parentUuid": "11736196_e9ecbd6e",
+      "revId": "e50138db8490111e17d9dd26d136ff68a88714bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
