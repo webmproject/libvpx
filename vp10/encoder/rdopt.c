@@ -1003,7 +1003,8 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
     const struct macroblock_plane *const p = &x->plane[plane];
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     int64_t this_sse;
-    int shift = (MAX_TX_SCALE - get_tx_scale(xd, 0, tx_size)) * 2;
+    int tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
+    int shift = (MAX_TX_SCALE - get_tx_scale(xd, tx_type, tx_size)) * 2;
     tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1177,7 +1178,9 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
         const int64_t orig_sse = (int64_t)coeff[0] * coeff[0];
         const int64_t resd_sse = coeff[0] - dqcoeff[0];
         int64_t dc_correct = orig_sse - resd_sse * resd_sse;
-        int shift = (MAX_TX_SCALE - get_tx_scale(xd, 0, tx_size)) * 2;
+        const struct macroblockd_plane *const pd = &xd->plane[plane];
+        TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
+        int shift = (MAX_TX_SCALE - get_tx_scale(xd, tx_type, tx_size)) * 2;
 #if CONFIG_VP9_HIGHBITDEPTH
         dc_correct >>= ((xd->bd - 8) * 2);
 #endif

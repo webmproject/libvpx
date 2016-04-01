@@ -29,6 +29,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                              int plane, const scan_order *sc,
                              int x, int y,
                              TX_SIZE tx_size,
+                             TX_TYPE tx_type,
 #if CONFIG_ANS
                              struct AnsDecoder *const r,
 #else
