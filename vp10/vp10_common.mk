@@ -110,6 +110,10 @@ VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_intrin_sse2.c
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm_sse2.c
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_dct32x32_impl_sse2.h
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm_impl_sse2.h
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_txfm1d_sse2.h
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm1d_sse2.h
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm1d_sse2.c
+VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm2d_sse2.c
 
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht4x4_add_neon.c
