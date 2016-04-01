@@ -1316,9 +1316,16 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
       if ($w != 128 && $h != 128 && $w != 4 && $h != 4) {
         specialize "vpx_highbd_${bd}_variance${w}x${h}", "sse2";
       }
+      if ($w == 4 && $h == 4) {
+        specialize "vpx_highbd_${bd}_variance${w}x${h}", "sse4_1";
+      }
       if ($w != 128 && $h != 128 && $w != 4) {
         specialize "vpx_highbd_${bd}_sub_pixel_variance${w}x${h}", $sse2_x86inc;
         specialize "vpx_highbd_${bd}_sub_pixel_avg_variance${w}x${h}", $sse2_x86inc;
+      }
+      if ($w == 4 && $h == 4) {
+        specialize "vpx_highbd_${bd}_sub_pixel_variance${w}x${h}", "sse4_1";
+        specialize "vpx_highbd_${bd}_sub_pixel_avg_variance${w}x${h}", "sse4_1";
       }
     }
   }
