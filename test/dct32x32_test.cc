@@ -364,9 +364,9 @@ INSTANTIATE_TEST_CASE_P(
                    &vpx_idct32x32_1024_add_c, 1, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
     C, PartialTrans32x32Test,
-    ::testing::Values(make_tuple(vpx_highbd_fdct32x32_1_c, VPX_BITS_8),
-                      make_tuple(vpx_highbd_fdct32x32_1_c, VPX_BITS_10),
-                      make_tuple(vpx_highbd_fdct32x32_1_c, VPX_BITS_12)));
+    ::testing::Values(make_tuple(&vpx_highbd_fdct32x32_1_c, VPX_BITS_8),
+                      make_tuple(&vpx_highbd_fdct32x32_1_c, VPX_BITS_10),
+                      make_tuple(&vpx_highbd_fdct32x32_1_c, VPX_BITS_12)));
 #else
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
@@ -376,7 +376,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_fdct32x32_rd_c,
                    &vpx_idct32x32_1024_add_c, 1, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(C, PartialTrans32x32Test,
-                        ::testing::Values(make_tuple(vpx_fdct32x32_1_c,
+                        ::testing::Values(make_tuple(&vpx_fdct32x32_1_c,
                                                      VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -399,7 +399,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_fdct32x32_rd_sse2,
                    &vpx_idct32x32_1024_add_sse2, 1, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(SSE2, PartialTrans32x32Test,
-                        ::testing::Values(make_tuple(vpx_fdct32x32_1_sse2,
+                        ::testing::Values(make_tuple(&vpx_fdct32x32_1_sse2,
                                                      VPX_BITS_8)));
 #endif  // HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
@@ -418,7 +418,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_fdct32x32_rd_sse2, &vpx_idct32x32_1024_add_c, 1,
                    VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(SSE2, PartialTrans32x32Test,
-                        ::testing::Values(make_tuple(vpx_fdct32x32_1_sse2,
+                        ::testing::Values(make_tuple(&vpx_fdct32x32_1_sse2,
                                                      VPX_BITS_8)));
 #endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
@@ -441,7 +441,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_fdct32x32_rd_msa,
                    &vpx_idct32x32_1024_add_msa, 1, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(MSA, PartialTrans32x32Test,
-                        ::testing::Values(make_tuple(vpx_fdct32x32_1_msa,
+                        ::testing::Values(make_tuple(&vpx_fdct32x32_1_msa,
                                                      VPX_BITS_8)));
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace
