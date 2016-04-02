@@ -76,21 +76,21 @@ static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_dct_16 = {
     TXFM_TYPE_DCT16};                // .txfm_type_row
 
 //  ---------------- config fwd_dct_dct_32 ----------------
-static const int8_t fwd_shift_dct_dct_32[3] = {2, -3, 0};
+static const int8_t fwd_shift_dct_dct_32[3] = {2, -4, 0};
 static const int8_t fwd_stage_range_col_dct_dct_32[10] = {15, 16, 17, 18, 19,
                                                           20, 20, 20, 20, 20};
-static const int8_t fwd_stage_range_row_dct_dct_32[10] = {17, 18, 19, 20, 21,
-                                                          21, 21, 21, 21, 21};
+static const int8_t fwd_stage_range_row_dct_dct_32[10] = {16, 17, 18, 19, 20,
+                                                          20, 20, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_dct_dct_32[10] = {13, 13, 13, 13, 13,
                                                       12, 12, 12, 12, 12};
-static const int8_t fwd_cos_bit_row_dct_dct_32[10] = {13, 13, 13, 12, 11,
-                                                      11, 11, 11, 11, 11};
+static const int8_t fwd_cos_bit_row_dct_dct_32[10] = {13, 13, 13, 13, 12,
+                                                      12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_dct_32 = {
     32,  // .txfm_size
     10,  // .stage_num_col
     10,  // .stage_num_row
-    // 0,  // .log_scale
+    // 1,  // .log_scale
     fwd_shift_dct_dct_32,            // .shift
     fwd_stage_range_col_dct_dct_32,  // .stage_range_col
     fwd_stage_range_row_dct_dct_32,  // .stage_range_row

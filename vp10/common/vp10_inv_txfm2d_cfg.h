@@ -76,21 +76,21 @@ static const TXFM_2D_CFG inv_txfm_2d_cfg_dct_dct_16 = {
     TXFM_TYPE_DCT16};                // .txfm_type_row
 
 //  ---------------- config inv_dct_dct_32 ----------------
-static const int8_t inv_shift_dct_dct_32[2] = {-1, -6};
-static const int8_t inv_stage_range_col_dct_dct_32[10] = {20, 20, 20, 20, 20,
-                                                          20, 20, 20, 19, 19};
-static const int8_t inv_stage_range_row_dct_dct_32[10] = {21, 21, 21, 21, 21,
-                                                          21, 21, 21, 21, 21};
-static const int8_t inv_cos_bit_col_dct_dct_32[10] = {12, 12, 12, 12, 12,
-                                                      12, 12, 12, 12, 13};
-static const int8_t inv_cos_bit_row_dct_dct_32[10] = {11, 11, 11, 11, 11,
-                                                      11, 11, 11, 11, 11};
+static const int8_t inv_shift_dct_dct_32[2] = {-1, -5};
+static const int8_t inv_stage_range_col_dct_dct_32[10] = {19, 19, 19, 19, 19,
+                                                          19, 19, 19, 18, 18};
+static const int8_t inv_stage_range_row_dct_dct_32[10] = {20, 20, 20, 20, 20,
+                                                          20, 20, 20, 20, 20};
+static const int8_t inv_cos_bit_col_dct_dct_32[10] = {13, 13, 13, 13, 13,
+                                                      13, 13, 13, 13, 13};
+static const int8_t inv_cos_bit_row_dct_dct_32[10] = {12, 12, 12, 12, 12,
+                                                      12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG inv_txfm_2d_cfg_dct_dct_32 = {
     32,  // .txfm_size
     10,  // .stage_num_col
     10,  // .stage_num_row
-    // 0,  // .log_scale
+    // 1,  // .log_scale
     inv_shift_dct_dct_32,            // .shift
     inv_stage_range_col_dct_dct_32,  // .stage_range_col
     inv_stage_range_row_dct_dct_32,  // .stage_range_row
