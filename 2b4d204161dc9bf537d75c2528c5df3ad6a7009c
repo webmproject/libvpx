@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb56cae_f18e1aed",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-02T02:53:25Z",
+      "side": 1,
+      "message": "split this change in 2 on this boundary",
+      "revId": "2b4d204161dc9bf537d75c2528c5df3ad6a7009c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_5167e6f3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-02T02:53:25Z",
+      "side": 1,
+      "message": "this fix should land first, ideally in the master branch if it exists there",
+      "revId": "2b4d204161dc9bf537d75c2528c5df3ad6a7009c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
