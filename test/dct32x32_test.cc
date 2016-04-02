@@ -344,6 +344,28 @@ TEST_P(PartialTrans32x32Test, Extremes) {
   EXPECT_EQ((minval * kNumCoeffs) >> 3, output[0]);
 }
 
+TEST_P(PartialTrans32x32Test, Random) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  const int16_t maxval =
+      static_cast<int16_t>(clip_pixel_highbd(1 << 30, bit_depth_));
+#else
+  const int16_t maxval = 255;
+#endif
+  DECLARE_ALIGNED(16, int16_t, input[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, output[kNumCoeffs]);
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+
+  int sum = 0;
+  for (int i = 0; i < kNumCoeffs; ++i) {
+    const int val = (i & 1) ? -rnd(maxval + 1) : rnd(maxval + 1);
+    input[i] = val;
+    sum += val;
+  }
+  output[0] = 0;
+  ASM_REGISTER_STATE_CHECK(fwd_txfm_(input, output, 32));
+  EXPECT_EQ(sum >> 3, output[0]);
+}
+
 using std::tr1::make_tuple;
 
 #if CONFIG_VP9_HIGHBITDEPTH
