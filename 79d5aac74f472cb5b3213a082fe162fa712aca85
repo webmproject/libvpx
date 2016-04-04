@@ -16,6 +16,24 @@
       "revId": "79d5aac74f472cb5b3213a082fe162fa712aca85",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_a22cd2d8",
+        "filename": "webmdec.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T19:31:09Z",
+      "side": 1,
+      "message": "documentation for this function says \u00271\u0027, but it looks like the branch above will end up returning -1 when block_entry goes NULL",
+      "parentUuid": "8eb56cae_421e36ab",
+      "revId": "79d5aac74f472cb5b3213a082fe162fa712aca85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
