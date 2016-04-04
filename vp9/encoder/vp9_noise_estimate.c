@@ -91,7 +91,7 @@ NOISE_LEVEL vp9_noise_estimate_extract_level(NOISE_ESTIMATE *const ne) {
   } else {
     if (ne->value > ne->thresh)
       noise_level = kMedium;
-    else if (ne->value > (ne->thresh >> 1))
+    else if (ne->value > ((5 * ne->thresh) >> 3))
       noise_level = kLow;
     else
       noise_level = kLowLow;
