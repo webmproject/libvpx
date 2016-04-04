@@ -164,7 +164,7 @@ int webm_read_frame(struct WebmInputContext *webm_ctx,
       }
       get_new_block = true;
     }
-    if (status) {
+    if (status || block_entry == NULL) {
       return -1;
     }
     if (get_new_block) {
