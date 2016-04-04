@@ -1302,11 +1302,8 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10)
-        vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                &inv_txfm_2d_cfg_dct_dct_4, bd);
-      else
-        vp10_highbd_idct4x4_add(input, dest, stride, eob, bd);
+      vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
+                              &inv_txfm_2d_cfg_dct_dct_4, bd);
       break;
     case ADST_DCT:
     case DCT_ADST:
@@ -1343,13 +1340,11 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
 void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
                                   int stride, int eob, int bd,
                                   TX_TYPE tx_type) {
+  (void)eob;
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10)
-        vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                &inv_txfm_2d_cfg_dct_dct_8, bd);
-      else
-        vp10_highbd_idct8x8_add(input, dest, stride, eob, bd);
+      vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
+                              &inv_txfm_2d_cfg_dct_dct_8, bd);
       break;
     case ADST_DCT:
     case DCT_ADST:
@@ -1386,13 +1381,11 @@ void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
 void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
                                     int stride, int eob, int bd,
                                     TX_TYPE tx_type) {
+  (void)eob;
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10)
-        vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                  &inv_txfm_2d_cfg_dct_dct_16, bd);
-      else
-        vp10_highbd_idct16x16_add(input, dest, stride, eob, bd);
+      vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
+                                &inv_txfm_2d_cfg_dct_dct_16, bd);
       break;
     case ADST_DCT:
     case DCT_ADST:
@@ -1429,13 +1422,11 @@ void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
 void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
                                     int stride, int eob, int bd,
                                     TX_TYPE tx_type) {
+  (void)eob;
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10)
-        vp10_inv_txfm2d_add_32x32(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                  &inv_txfm_2d_cfg_dct_dct_32, bd);
-      else
-        vp10_highbd_idct32x32_add(input, dest, stride, eob, bd);
+      vp10_inv_txfm2d_add_32x32(input, CONVERT_TO_SHORTPTR(dest), stride,
+                                &inv_txfm_2d_cfg_dct_dct_32, bd);
       break;
 #if CONFIG_EXT_TX
     case ADST_DCT:
