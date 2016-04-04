@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb56cae_b7e892f3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T19:12:48Z",
+      "side": 1,
+      "message": "prefer (imperative) present tense for commit messages:\n\nhttps://git-scm.com/book/ch5-2.html\nInstead of “I added tests for” or “Adding tests for,” use “Add tests for.”",
+      "revId": "6dec2f569ae45d46df6529ba37f299193e0cb11b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_579cb69b",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T19:12:48Z",
+      "side": 1,
+      "message": "the variance prototypes use \u0027src, ref\u0027 in that order. this doesn\u0027t look necessary for this change",
+      "revId": "6dec2f569ae45d46df6529ba37f299193e0cb11b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_f78cca66",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T19:12:48Z",
+      "side": 1,
+      "message": "note when there are more than a few points of failure you can use a SCOPED_TRACE, this is all right here\n\nhttps://github.com/google/googletest/blob/master/googletest/docs/V1_7_AdvancedGuide.md",
+      "revId": "6dec2f569ae45d46df6529ba37f299193e0cb11b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
