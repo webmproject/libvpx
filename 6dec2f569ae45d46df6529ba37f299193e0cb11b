@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8eb56cae_626d7a01",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T19:33:55Z",
+      "side": 1,
+      "message": "this could also be clearer as to what is being fixed. linking the bug is good, but if you can say something like \u0027variance_test: fix high-bitdepth mask\u0027 it\u0027s clearer to the reader of the history.",
+      "parentUuid": "8eb56cae_b7e892f3",
+      "revId": "6dec2f569ae45d46df6529ba37f299193e0cb11b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8eb56cae_579cb69b",
         "filename": "test/variance_test.cc",
         "patchSetId": 1
