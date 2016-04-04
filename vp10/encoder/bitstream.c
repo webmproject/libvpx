@@ -1654,13 +1654,12 @@ static void write_modes_sb(VP10_COMP *const cpi,
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
   const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
-
-  const int bsl = b_width_log2_lookup[bsize];
-  const int bs = (1 << bsl) / 4;
-  PARTITION_TYPE partition;
-  BLOCK_SIZE subsize;
-  MODE_INFO *m = NULL;
+  const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
+  const PARTITION_TYPE partition = get_partition(cm, mi_row, mi_col, bsize);
+  const BLOCK_SIZE subsize =  get_subsize(bsize, partition);
 #if CONFIG_SUPERTX
+  const int mi_offset = mi_row * cm->mi_stride + mi_col;
+  MB_MODE_INFO *mbmi = NULL;
   const int pack_token = !supertx_enabled;
   TX_SIZE supertx_size;
   int plane;
@@ -1669,17 +1668,10 @@ static void write_modes_sb(VP10_COMP *const cpi,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
-
-  partition = partition_lookup[bsl][m->mbmi.sb_type];
-#if CONFIG_EXT_PARTITION_TYPES
-  partition = get_partition(cm->mi, cm->mi_stride, cm->mi_rows, cm->mi_cols,
-                            mi_row, mi_col, bsize);
-#endif
-  write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
-  subsize = get_subsize(bsize, partition);
+  write_partition(cm, xd, hbs, mi_row, mi_col, partition, bsize, w);
 #if CONFIG_SUPERTX
-  xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
+  mbmi = &cm->mi_grid_visible[mi_offset]->mbmi;
+  xd->mi = cm->mi_grid_visible + mi_offset;
   set_mi_row_col(xd, tile,
                  mi_row, num_8x8_blocks_high_lookup[bsize],
                  mi_col, num_8x8_blocks_wide_lookup[bsize],
@@ -1730,59 +1722,59 @@ static void write_modes_sb(VP10_COMP *const cpi,
       case PARTITION_HORZ:
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                               mi_row, mi_col);
-        if (mi_row + bs < cm->mi_rows)
+        if (mi_row + hbs < cm->mi_rows)
           write_modes_b_wrapper(cpi, tile, w, tok, tok_end,
-                                supertx_enabled, mi_row + bs, mi_col);
+                                supertx_enabled, mi_row + hbs, mi_col);
         break;
       case PARTITION_VERT:
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                               mi_row, mi_col);
-        if (mi_col + bs < cm->mi_cols)
+        if (mi_col + hbs < cm->mi_cols)
           write_modes_b_wrapper(cpi, tile, w, tok, tok_end,
-                                supertx_enabled, mi_row, mi_col + bs);
+                                supertx_enabled, mi_row, mi_col + hbs);
         break;
       case PARTITION_SPLIT:
         write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                                mi_row, mi_col, subsize);
         write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                               mi_row, mi_col + bs, subsize);
+                               mi_row, mi_col + hbs, subsize);
         write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                               mi_row + bs, mi_col, subsize);
+                               mi_row + hbs, mi_col, subsize);
         write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                               mi_row + bs, mi_col + bs, subsize);
+                               mi_row + hbs, mi_col + hbs, subsize);
         break;
 #if CONFIG_EXT_PARTITION_TYPES
       case PARTITION_HORZ_A:
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row, mi_col + bs);
+                      mi_row, mi_col + hbs);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row + bs, mi_col);
+                      mi_row + hbs, mi_col);
         break;
       case PARTITION_HORZ_B:
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row + bs, mi_col);
+                      mi_row + hbs, mi_col);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row + bs, mi_col + bs);
+                      mi_row + hbs, mi_col + hbs);
         break;
       case PARTITION_VERT_A:
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row + bs, mi_col);
+                      mi_row + hbs, mi_col);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row, mi_col + bs);
+                      mi_row, mi_col + hbs);
         break;
       case PARTITION_VERT_B:
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
                       mi_row, mi_col);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row, mi_col + bs);
+                      mi_row, mi_col + hbs);
         write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled,
-                      mi_row + bs, mi_col + bs);
+                      mi_row + hbs, mi_col + hbs);
         break;
 #endif  // CONFIG_EXT_PARTITION_TYPES
       default:
@@ -1791,15 +1783,15 @@ static void write_modes_sb(VP10_COMP *const cpi,
   }
 #if CONFIG_SUPERTX
   if (partition != PARTITION_NONE && supertx_enabled && pack_token &&
-      !m->mbmi.skip) {
+      !mbmi->skip) {
     assert(*tok < tok_end);
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-      const int mbmi_txb_size = txsize_to_bsize[m->mbmi.tx_size];
+      const int mbmi_txb_size = txsize_to_bsize[mbmi->tx_size];
       const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi_txb_size];
       const int num_4x4_h = num_4x4_blocks_high_lookup[mbmi_txb_size];
       int row, col;
-      TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
-                         : m->mbmi.tx_size;
+      TX_SIZE tx = plane ? get_uv_tx_size(mbmi, &xd->plane[plane])
+                         : mbmi->tx_size;
       BLOCK_SIZE txb_size = txsize_to_bsize[tx];
       int bw = num_4x4_blocks_wide_lookup[txb_size];
 

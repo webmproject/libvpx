@@ -355,6 +355,12 @@ void vp10_mfqe(VP10_COMMON *cm) {
   const YV12_BUFFER_CONFIG *show = cm->frame_to_show;
   // Last decoded frame and will store the MFQE result.
   YV12_BUFFER_CONFIG *dest = &cm->post_proc_buffer;
+
+#if CONFIG_EXT_PARTITION || CONFIG_EXT_PARTITION_TYPES
+  // TODO(any): Fix for ext parition types and 128 superblocks
+  assert(0);
+#endif  // CONFIG_EXT_PARTITION || CONFIG_EXT_PARTITION_TYPES
+
   // Loop through each super block.
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MAX_MIB_SIZE) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MAX_MIB_SIZE) {

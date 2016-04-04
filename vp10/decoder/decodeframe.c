@@ -1292,17 +1292,15 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
                                    int mi_row_top, int mi_col_top,
                                    BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
                                    uint8_t *dst_buf[3], int dst_stride[3]) {
-  VP10_COMMON *const cm = &pbi->common;
-  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
-  PARTITION_TYPE partition;
-  BLOCK_SIZE subsize;
-#if !CONFIG_EXT_PARTITION_TYPES
-  MB_MODE_INFO *mbmi;
-#endif
-  int i, offset = mi_row * cm->mi_stride + mi_col;
+  const VP10_COMMON *const cm = &pbi->common;
+  const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
+  const PARTITION_TYPE partition = get_partition(cm, mi_row, mi_col, bsize);
+  const BLOCK_SIZE subsize = get_subsize(bsize, partition);
 #if CONFIG_EXT_PARTITION_TYPES
-  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+  const BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
 #endif
+  int i;
+  const int mi_offset = mi_row * cm->mi_stride + mi_col;
   uint8_t *dst_buf1[3], *dst_buf2[3], *dst_buf3[3];
 
   DECLARE_ALIGNED(16, uint8_t,
@@ -1345,16 +1343,8 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  xd->mi = cm->mi_grid_visible + offset;
-  xd->mi[0] = cm->mi + offset;
-#if CONFIG_EXT_PARTITION_TYPES
-  partition = get_partition(cm->mi, cm->mi_stride, cm->mi_rows, cm->mi_cols,
-                            mi_row, mi_col, bsize);
-#else
-  mbmi = &xd->mi[0]->mbmi;
-  partition = partition_lookup[bsl][mbmi->sb_type];
-#endif
-  subsize = get_subsize(bsize, partition);
+  xd->mi = cm->mi_grid_visible + mi_offset;
+  xd->mi[0] = cm->mi + mi_offset;
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
     xd->plane[i].dst.buf = dst_buf[i];

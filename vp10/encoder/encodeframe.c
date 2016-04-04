@@ -2572,12 +2572,11 @@ static void rd_use_partition(VP10_COMP *cpi,
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int mis = cm->mi_stride;
-  const int bsl = b_width_log2_lookup[bsize];
-  const int mi_step = num_4x4_blocks_wide_lookup[bsize] / 2;
-  const int bss = (1 << bsl) / 4;
+  const int bs = num_8x8_blocks_wide_lookup[bsize];
+  const int hbs = bs / 2;
   int i, pl;
-  PARTITION_TYPE partition = PARTITION_NONE;
-  BLOCK_SIZE subsize;
+  const PARTITION_TYPE partition = get_partition(cm, mi_row, mi_col, bsize);
+  const BLOCK_SIZE subsize =  get_subsize(bsize, partition);
   RD_SEARCH_MACROBLOCK_CONTEXT x_ctx;
   RD_COST last_part_rdc, none_rdc, chosen_rdc;
   BLOCK_SIZE sub_subsize = BLOCK_4X4;
@@ -2605,9 +2604,6 @@ static void rd_use_partition(VP10_COMP *cpi,
   vp10_rd_cost_reset(&none_rdc);
   vp10_rd_cost_reset(&chosen_rdc);
 
-  partition = partition_lookup[bsl][bs_type];
-  subsize = get_subsize(bsize, partition);
-
   pc_tree->partitioning = partition;
 
 #if CONFIG_VAR_TX
@@ -2632,7 +2628,7 @@ static void rd_use_partition(VP10_COMP *cpi,
       splits_below = 1;
       for (i = 0; i < 4; i++) {
         int jj = i >> 1, ii = i & 0x01;
-        MODE_INFO *this_mi = mi_8x8[jj * bss * mis + ii * bss];
+        MODE_INFO *this_mi = mi_8x8[jj * hbs * mis + ii * hbs];
         if (this_mi && this_mi->mbmi.sb_type >= sub_subsize) {
           splits_below = 0;
         }
@@ -2642,8 +2638,8 @@ static void rd_use_partition(VP10_COMP *cpi,
     // If partition is not none try none unless each of the 4 splits are split
     // even further..
     if (partition != PARTITION_NONE && !splits_below &&
-        mi_row + (mi_step >> 1) < cm->mi_rows &&
-        mi_col + (mi_step >> 1) < cm->mi_cols) {
+        mi_row + hbs < cm->mi_rows &&
+        mi_col + hbs < cm->mi_cols) {
       pc_tree->partitioning = PARTITION_NONE;
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &none_rdc,
 #if CONFIG_SUPERTX
@@ -2694,7 +2690,7 @@ static void rd_use_partition(VP10_COMP *cpi,
                        subsize, &pc_tree->horizontal[0],
                        INT64_MAX);
       if (last_part_rdc.rate != INT_MAX &&
-          bsize >= BLOCK_8X8 && mi_row + (mi_step >> 1) < cm->mi_rows) {
+          bsize >= BLOCK_8X8 && mi_row + hbs < cm->mi_rows) {
         RD_COST tmp_rdc;
 #if CONFIG_SUPERTX
         int rt_nocoef = 0;
@@ -2704,7 +2700,7 @@ static void rd_use_partition(VP10_COMP *cpi,
         update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
         encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
         rd_pick_sb_modes(cpi, tile_data, x,
-                         mi_row + (mi_step >> 1), mi_col, &tmp_rdc,
+                         mi_row + hbs, mi_col, &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
 #endif
@@ -2737,7 +2733,7 @@ static void rd_use_partition(VP10_COMP *cpi,
 #endif
                        subsize, &pc_tree->vertical[0], INT64_MAX);
       if (last_part_rdc.rate != INT_MAX &&
-          bsize >= BLOCK_8X8 && mi_col + (mi_step >> 1) < cm->mi_cols) {
+          bsize >= BLOCK_8X8 && mi_col + hbs < cm->mi_cols) {
         RD_COST tmp_rdc;
 #if CONFIG_SUPERTX
         int rt_nocoef = 0;
@@ -2747,7 +2743,7 @@ static void rd_use_partition(VP10_COMP *cpi,
         update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
         encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
         rd_pick_sb_modes(cpi, tile_data, x,
-                         mi_row, mi_col + (mi_step >> 1), &tmp_rdc,
+                         mi_row, mi_col + hbs, &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
 #endif
@@ -2790,8 +2786,8 @@ static void rd_use_partition(VP10_COMP *cpi,
       last_part_rate_nocoef = 0;
 #endif
       for (i = 0; i < 4; i++) {
-        int x_idx = (i & 1) * (mi_step >> 1);
-        int y_idx = (i >> 1) * (mi_step >> 1);
+        int x_idx = (i & 1) * hbs;
+        int y_idx = (i >> 1) * hbs;
         int jj = i >> 1, ii = i & 0x01;
         RD_COST tmp_rdc;
 #if CONFIG_SUPERTX
@@ -2802,7 +2798,7 @@ static void rd_use_partition(VP10_COMP *cpi,
 
         vp10_rd_cost_init(&tmp_rdc);
         rd_use_partition(cpi, td, tile_data,
-                         mi_8x8 + jj * bss * mis + ii * bss, tp,
+                         mi_8x8 + jj * hbs * mis + ii * hbs, tp,
                          mi_row + y_idx, mi_col + x_idx, subsize,
                          &tmp_rdc.rate, &tmp_rdc.dist,
 #if CONFIG_SUPERTX
@@ -2842,10 +2838,10 @@ static void rd_use_partition(VP10_COMP *cpi,
       && cpi->sf.adjust_partitioning_from_last_frame
       && cpi->sf.partition_search_type == SEARCH_PARTITION
       && partition != PARTITION_SPLIT && bsize > BLOCK_8X8
-      && (mi_row + mi_step < cm->mi_rows ||
-          mi_row + (mi_step >> 1) == cm->mi_rows)
-      && (mi_col + mi_step < cm->mi_cols ||
-          mi_col + (mi_step >> 1) == cm->mi_cols)) {
+      && (mi_row + bs < cm->mi_rows ||
+          mi_row + hbs == cm->mi_rows)
+      && (mi_col + bs < cm->mi_cols ||
+          mi_col + hbs == cm->mi_cols)) {
     BLOCK_SIZE split_subsize = get_subsize(bsize, PARTITION_SPLIT);
     chosen_rdc.rate = 0;
     chosen_rdc.dist = 0;
@@ -2859,8 +2855,8 @@ static void rd_use_partition(VP10_COMP *cpi,
 
     // Split partition.
     for (i = 0; i < 4; i++) {
-      int x_idx = (i & 1) * (mi_step >> 1);
-      int y_idx = (i >> 1) * (mi_step >> 1);
+      int x_idx = (i & 1) * hbs;
+      int y_idx = (i >> 1) * hbs;
       RD_COST tmp_rdc;
 #if CONFIG_SUPERTX
       int rt_nocoef = 0;

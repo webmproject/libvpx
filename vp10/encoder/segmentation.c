@@ -180,8 +180,7 @@ static void count_segs_sb(const VP10_COMMON *cm, MACROBLOCKD *xd,
   if (bsize == BLOCK_8X8)
     partition = PARTITION_NONE;
   else
-    partition = get_partition(cm->mi, cm->mi_stride, cm->mi_rows, cm->mi_cols,
-                              mi_row, mi_col, bsize);
+    partition = get_partition(cm, mi_row, mi_col, bsize);
   switch (partition) {
     case PARTITION_NONE:
       count_segs(cm, xd, tile, mi, no_pred_segcounts, temporal_predictor_count,

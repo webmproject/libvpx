@@ -652,6 +652,51 @@ static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
 }
 #endif
 
+static INLINE PARTITION_TYPE get_partition(const VP10_COMMON *const cm,
+                                           const int mi_row,
+                                           const int mi_col,
+                                           const BLOCK_SIZE bsize) {
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
+    return PARTITION_INVALID;
+  } else {
+    const int offset = mi_row * cm->mi_stride + mi_col;
+    MODE_INFO **mi = cm->mi_grid_visible + offset;
+    const MB_MODE_INFO *const mbmi = &mi[0]->mbmi;
+    const int bsl = b_width_log2_lookup[bsize];
+    const PARTITION_TYPE partition = partition_lookup[bsl][mbmi->sb_type];
+#if !CONFIG_EXT_PARTITION_TYPES
+    return partition;
+#else
+    const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
+
+    assert(cm->mi_grid_visible[offset] == &cm->mi[offset]);
+
+    if (partition != PARTITION_NONE &&
+        bsize > BLOCK_8X8 &&
+        mi_row + hbs < cm->mi_rows &&
+        mi_col + hbs < cm->mi_cols) {
+      const BLOCK_SIZE h = get_subsize(bsize, PARTITION_HORZ_A);
+      const BLOCK_SIZE v = get_subsize(bsize, PARTITION_VERT_A);
+      const MB_MODE_INFO *const mbmi_right = &mi[hbs]->mbmi;
+      const MB_MODE_INFO *const mbmi_below = &mi[hbs * cm->mi_stride]->mbmi;
+      if (mbmi->sb_type == h) {
+        return mbmi_below->sb_type == h ? PARTITION_HORZ : PARTITION_HORZ_B;
+      } else if (mbmi->sb_type == v) {
+        return mbmi_right->sb_type == v ? PARTITION_VERT : PARTITION_VERT_B;
+      } else if (mbmi_below->sb_type == h) {
+        return PARTITION_HORZ_A;
+      } else if (mbmi_right->sb_type == v) {
+        return PARTITION_VERT_A;
+      } else {
+        return PARTITION_SPLIT;
+      }
+    }
+
+    return partition;
+#endif  // !CONFIG_EXT_PARTITION_TYPES
+  }
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
