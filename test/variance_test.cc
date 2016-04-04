@@ -74,6 +74,10 @@ static unsigned int mb_ss_ref(const int16_t *src) {
   return res;
 }
 
+/* Note:
+ *  Our codebase calculates the "diff" value in the variance algorithm by
+ *  (src - ref).
+ */
 static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref,
                              int l2w, int l2h, int src_stride_coeff,
                              int ref_stride_coeff, uint32_t *sse_ptr,
@@ -87,14 +91,14 @@ static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref,
     for (int x = 0; x < w; x++) {
       int diff;
       if (!use_high_bit_depth_) {
-        diff = ref[w * y * ref_stride_coeff + x] -
-               src[w * y * src_stride_coeff + x];
+        diff = src[w * y * src_stride_coeff + x] -
+               ref[w * y * ref_stride_coeff + x];
         se += diff;
         sse += diff * diff;
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        diff = CONVERT_TO_SHORTPTR(ref)[w * y * ref_stride_coeff + x] -
-               CONVERT_TO_SHORTPTR(src)[w * y * src_stride_coeff + x];
+        diff = CONVERT_TO_SHORTPTR(src)[w * y * src_stride_coeff + x] -
+               CONVERT_TO_SHORTPTR(ref)[w * y * ref_stride_coeff + x];
         se += diff;
         sse += diff * diff;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -328,8 +332,10 @@ void VarianceTest<VarianceFunctionType>::RefTest() {
                                            log2height_, stride_coeff,
                                            stride_coeff, &sse2,
                                            use_high_bit_depth_, bit_depth_);
-    EXPECT_EQ(sse1, sse2);
-    EXPECT_EQ(var1, var2);
+    EXPECT_EQ(sse1, sse2)
+        << "Error at test index: " << i;
+    EXPECT_EQ(var1, var2)
+        << "Error at test index: " << i;
   }
 }
 
@@ -361,8 +367,10 @@ void VarianceTest<VarianceFunctionType>::RefStrideTest() {
                                            log2height_, src_stride_coeff,
                                            ref_stride_coeff, &sse2,
                                            use_high_bit_depth_, bit_depth_);
-    EXPECT_EQ(sse1, sse2);
-    EXPECT_EQ(var1, var2);
+    EXPECT_EQ(sse1, sse2)
+        << "Error at test index: " << i;
+    EXPECT_EQ(var1, var2)
+        << "Error at test index: " << i;
   }
 }
 
@@ -866,36 +874,36 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(6, 7, &vpx_highbd_12_variance64x128_c, 12),
 #endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
                       make_tuple(6, 6, &vpx_highbd_12_variance64x64_c, 12),
-                      // make_tuple(6, 5, &vpx_highbd_12_variance64x32_c, 12),
-                      // make_tuple(5, 6, &vpx_highbd_12_variance32x64_c, 12),
-                      // make_tuple(5, 5, &vpx_highbd_12_variance32x32_c, 12),
+                      make_tuple(6, 5, &vpx_highbd_12_variance64x32_c, 12),
+                      make_tuple(5, 6, &vpx_highbd_12_variance32x64_c, 12),
+                      make_tuple(5, 5, &vpx_highbd_12_variance32x32_c, 12),
                       make_tuple(5, 4, &vpx_highbd_12_variance32x16_c, 12),
                       make_tuple(4, 5, &vpx_highbd_12_variance16x32_c, 12),
-                      // make_tuple(4, 4, &vpx_highbd_12_variance16x16_c, 12),
-                      // make_tuple(4, 3, &vpx_highbd_12_variance16x8_c, 12),
-                      // make_tuple(3, 4, &vpx_highbd_12_variance8x16_c, 12),
-                      // make_tuple(3, 3, &vpx_highbd_12_variance8x8_c, 12),
-                      // make_tuple(3, 2, &vpx_highbd_12_variance8x4_c, 12),
-                      // make_tuple(2, 3, &vpx_highbd_12_variance4x8_c, 12),
+                      make_tuple(4, 4, &vpx_highbd_12_variance16x16_c, 12),
+                      make_tuple(4, 3, &vpx_highbd_12_variance16x8_c, 12),
+                      make_tuple(3, 4, &vpx_highbd_12_variance8x16_c, 12),
+                      make_tuple(3, 3, &vpx_highbd_12_variance8x8_c, 12),
+                      make_tuple(3, 2, &vpx_highbd_12_variance8x4_c, 12),
+                      make_tuple(2, 3, &vpx_highbd_12_variance4x8_c, 12),
                       make_tuple(2, 2, &vpx_highbd_12_variance4x4_c, 12),
 #if CONFIG_VP10 && CONFIG_EXT_PARTITION
                       make_tuple(7, 7, &vpx_highbd_10_variance128x128_c, 10),
-                      // make_tuple(7, 6, &vpx_highbd_10_variance128x64_c, 10),
-                      // make_tuple(6, 7, &vpx_highbd_10_variance64x128_c, 10),
+                      make_tuple(7, 6, &vpx_highbd_10_variance128x64_c, 10),
+                      make_tuple(6, 7, &vpx_highbd_10_variance64x128_c, 10),
 #endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-                      // make_tuple(6, 6, &vpx_highbd_10_variance64x64_c, 10),
-                      // make_tuple(6, 5, &vpx_highbd_10_variance64x32_c, 10),
-                      // make_tuple(5, 6, &vpx_highbd_10_variance32x64_c, 10),
-                      // make_tuple(5, 5, &vpx_highbd_10_variance32x32_c, 10),
-                      // make_tuple(5, 4, &vpx_highbd_10_variance32x16_c, 10),
-                      // make_tuple(4, 5, &vpx_highbd_10_variance16x32_c, 10),
-                      // make_tuple(4, 4, &vpx_highbd_10_variance16x16_c, 10),
-                      // make_tuple(4, 3, &vpx_highbd_10_variance16x8_c, 10),
-                      // make_tuple(3, 4, &vpx_highbd_10_variance8x16_c, 10),
-                      // make_tuple(3, 3, &vpx_highbd_10_variance8x8_c, 10),
-                      // make_tuple(3, 2, &vpx_highbd_10_variance8x4_c, 10),
-                      // make_tuple(2, 3, &vpx_highbd_10_variance4x8_c, 10),
-                      // make_tuple(2, 2, &vpx_highbd_10_variance4x4_c, 10),
+                      make_tuple(6, 6, &vpx_highbd_10_variance64x64_c, 10),
+                      make_tuple(6, 5, &vpx_highbd_10_variance64x32_c, 10),
+                      make_tuple(5, 6, &vpx_highbd_10_variance32x64_c, 10),
+                      make_tuple(5, 5, &vpx_highbd_10_variance32x32_c, 10),
+                      make_tuple(5, 4, &vpx_highbd_10_variance32x16_c, 10),
+                      make_tuple(4, 5, &vpx_highbd_10_variance16x32_c, 10),
+                      make_tuple(4, 4, &vpx_highbd_10_variance16x16_c, 10),
+                      make_tuple(4, 3, &vpx_highbd_10_variance16x8_c, 10),
+                      make_tuple(3, 4, &vpx_highbd_10_variance8x16_c, 10),
+                      make_tuple(3, 3, &vpx_highbd_10_variance8x8_c, 10),
+                      make_tuple(3, 2, &vpx_highbd_10_variance8x4_c, 10),
+                      make_tuple(2, 3, &vpx_highbd_10_variance4x8_c, 10),
+                      make_tuple(2, 2, &vpx_highbd_10_variance4x4_c, 10),
 #if CONFIG_VP10 && CONFIG_EXT_PARTITION
                       make_tuple(7, 7, &vpx_highbd_8_variance128x128_c, 8),
                       make_tuple(7, 6, &vpx_highbd_8_variance128x64_c, 8),
@@ -1138,25 +1146,25 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxHBDVarianceTest,
     ::testing::Values(make_tuple(6, 6, &vpx_highbd_12_variance64x64_sse2, 12),
-                    // make_tuple(6, 5, &vpx_highbd_12_variance64x32_sse2, 12),
-                    // make_tuple(5, 6, &vpx_highbd_12_variance32x64_sse2, 12),
-                    // make_tuple(5, 5, &vpx_highbd_12_variance32x32_sse2, 12),
+                      make_tuple(6, 5, &vpx_highbd_12_variance64x32_sse2, 12),
+                      make_tuple(5, 6, &vpx_highbd_12_variance32x64_sse2, 12),
+                      make_tuple(5, 5, &vpx_highbd_12_variance32x32_sse2, 12),
                       make_tuple(5, 4, &vpx_highbd_12_variance32x16_sse2, 12),
                       make_tuple(4, 5, &vpx_highbd_12_variance16x32_sse2, 12),
-                    // make_tuple(4, 4, &vpx_highbd_12_variance16x16_sse2, 12),
-                    // make_tuple(4, 3, &vpx_highbd_12_variance16x8_sse2, 12),
-                    // make_tuple(3, 4, &vpx_highbd_12_variance8x16_sse2, 12),
-                    // make_tuple(3, 3, &vpx_highbd_12_variance8x8_sse2, 12),
-                    // make_tuple(6, 6, &vpx_highbd_10_variance64x64_sse2, 10),
-                    // make_tuple(6, 5, &vpx_highbd_10_variance64x32_sse2, 10),
-                    // make_tuple(5, 6, &vpx_highbd_10_variance32x64_sse2, 10),
-                    // make_tuple(5, 5, &vpx_highbd_10_variance32x32_sse2, 10),
-                    // make_tuple(5, 4, &vpx_highbd_10_variance32x16_sse2, 10),
-                    // make_tuple(4, 5, &vpx_highbd_10_variance16x32_sse2, 10),
-                    // make_tuple(4, 4, &vpx_highbd_10_variance16x16_sse2, 10),
-                    // make_tuple(4, 3, &vpx_highbd_10_variance16x8_sse2, 10),
-                    // make_tuple(3, 4, &vpx_highbd_10_variance8x16_sse2, 10),
-                    // make_tuple(3, 3, &vpx_highbd_10_variance8x8_sse2, 10),
+                      make_tuple(4, 4, &vpx_highbd_12_variance16x16_sse2, 12),
+                      make_tuple(4, 3, &vpx_highbd_12_variance16x8_sse2, 12),
+                      make_tuple(3, 4, &vpx_highbd_12_variance8x16_sse2, 12),
+                      make_tuple(3, 3, &vpx_highbd_12_variance8x8_sse2, 12),
+                      make_tuple(6, 6, &vpx_highbd_10_variance64x64_sse2, 10),
+                      make_tuple(6, 5, &vpx_highbd_10_variance64x32_sse2, 10),
+                      make_tuple(5, 6, &vpx_highbd_10_variance32x64_sse2, 10),
+                      make_tuple(5, 5, &vpx_highbd_10_variance32x32_sse2, 10),
+                      make_tuple(5, 4, &vpx_highbd_10_variance32x16_sse2, 10),
+                      make_tuple(4, 5, &vpx_highbd_10_variance16x32_sse2, 10),
+                      make_tuple(4, 4, &vpx_highbd_10_variance16x16_sse2, 10),
+                      make_tuple(4, 3, &vpx_highbd_10_variance16x8_sse2, 10),
+                      make_tuple(3, 4, &vpx_highbd_10_variance8x16_sse2, 10),
+                      make_tuple(3, 3, &vpx_highbd_10_variance8x8_sse2, 10),
                       make_tuple(6, 6, &vpx_highbd_8_variance64x64_sse2, 8),
                       make_tuple(6, 5, &vpx_highbd_8_variance64x32_sse2, 8),
                       make_tuple(5, 6, &vpx_highbd_8_variance32x64_sse2, 8),
