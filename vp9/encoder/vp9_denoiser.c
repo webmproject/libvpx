@@ -212,6 +212,12 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   if (is_skin && (motion_magnitude > 0 || consec_zeromv < 4))
     return COPY_BLOCK;
 
+  // Avoid denoising for small block (unless motion is small).
+  // Small blocks are selected in variance partition (before encoding) and
+  // will typically lie on moving areas.
+  if (motion_magnitude > 16 && bs <= BLOCK_8X8)
+    return COPY_BLOCK;
+
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
   if (frame != INTRA_FRAME &&
