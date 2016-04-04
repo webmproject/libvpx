@@ -2264,35 +2264,24 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
                       TOKENEXTRA **tp, int mi_row, int mi_col,
                       int output_enabled, BLOCK_SIZE bsize,
                       PC_TREE *pc_tree) {
-  VP10_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
-  int ctx;
-  PARTITION_TYPE partition;
-  BLOCK_SIZE subsize = bsize;
+  const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
+  const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
+  const PARTITION_TYPE partition = pc_tree->partitioning;
+  const BLOCK_SIZE subsize =  get_subsize(bsize, partition);
 #if CONFIG_EXT_PARTITION_TYPES
-  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+  const BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
 #endif
+
+  assert(bsize >= BLOCK_8X8);
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  if (bsize >= BLOCK_8X8) {
-    ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
-    subsize = get_subsize(bsize, pc_tree->partitioning);
-  } else {
-    ctx = 0;
-    subsize = BLOCK_4X4;
-  }
-
-  partition = partition_lookup[bsl][subsize];
-#if CONFIG_EXT_PARTITION_TYPES
-  if (bsize > BLOCK_8X8)
-    partition = pc_tree->partitioning;
-#endif
-  if (output_enabled && bsize != BLOCK_4X4)
+  if (output_enabled)
     td->counts->partition[ctx][partition]++;
 
 #if CONFIG_SUPERTX
@@ -5164,28 +5153,19 @@ static int check_intra_b(PICK_MODE_CONTEXT *ctx) {
 static int check_intra_sb(VP10_COMP *cpi, const TileInfo *const tile,
                           int mi_row, int mi_col, BLOCK_SIZE bsize,
                           PC_TREE *pc_tree) {
-  VP10_COMMON *const cm = &cpi->common;
+  const VP10_COMMON *const cm = &cpi->common;
 
-  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
-  PARTITION_TYPE partition;
-  BLOCK_SIZE subsize = bsize;
+  const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
+  const PARTITION_TYPE partition = pc_tree->partitioning;
+  const BLOCK_SIZE subsize = get_subsize(bsize, partition);
 #if CONFIG_EXT_PARTITION_TYPES
   int i;
 #endif
 
+  assert(bsize >= BLOCK_8X8);
+
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return 1;
-
-  if (bsize >= BLOCK_8X8)
-    subsize = get_subsize(bsize, pc_tree->partitioning);
-  else
-    subsize = BLOCK_4X4;
-
-  partition = partition_lookup[bsl][subsize];
-#if CONFIG_EXT_PARTITION_TYPES
-  if (bsize > BLOCK_8X8)
-    partition = pc_tree->partitioning;
-#endif
 
   switch (partition) {
     case PARTITION_NONE:
@@ -5522,14 +5502,15 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
-  PARTITION_TYPE partition;
-  BLOCK_SIZE subsize;
+  const int ctx =  partition_plane_context(xd, mi_row, mi_col, bsize);
+  const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
+  const PARTITION_TYPE partition = pc_tree->partitioning;
+  const BLOCK_SIZE subsize = get_subsize(bsize, partition);
 #if CONFIG_EXT_PARTITION_TYPES
-  BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
+  const BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
 #endif
 
-  int i, ctx;
+  int i;
   uint8_t *dst_buf1[3], *dst_buf2[3], *dst_buf3[3];
   DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * MAX_TX_SQUARE * 2]);
   DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * MAX_TX_SQUARE * 2]);
@@ -5537,6 +5518,12 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
   int dst_stride1[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
   int dst_stride2[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
   int dst_stride3[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
+
+  assert(bsize >= BLOCK_8X8);
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     int len = sizeof(uint16_t);
@@ -5564,23 +5551,8 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
-    return;
-
-  if (bsize >= BLOCK_8X8) {
-    ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
-    subsize = get_subsize(bsize, pc_tree->partitioning);
-  } else {
-    ctx = 0;
-    subsize = BLOCK_4X4;
-  }
-  partition = partition_lookup[bsl][subsize];
-#if CONFIG_EXT_PARTITION_TYPES
-  if (bsize > BLOCK_8X8)
-    partition = pc_tree->partitioning;
-#endif
-  if (output_enabled && bsize != BLOCK_4X4 && bsize < top_bsize)
-      cm->counts.partition[ctx][partition]++;
+  if (output_enabled && bsize < top_bsize)
+    cm->counts.partition[ctx][partition]++;
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
     xd->plane[i].dst.buf = dst_buf[i];
