@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb56cae_327fcdec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T23:55:09Z",
+      "side": 1,
+      "message": "AND",
+      "range": {
+        "startLine": 9,
+        "startChar": 44,
+        "endLine": 9,
+        "endChar": 48
+      },
+      "revId": "b59673443919a6b97fea08f32917dc5c3b9019e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_92a1d9cf",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T23:55:09Z",
+      "side": 1,
+      "message": "...the \"diff\"...",
+      "range": {
+        "startLine": 78,
+        "startChar": 27,
+        "endLine": 78,
+        "endChar": 34
+      },
+      "revId": "b59673443919a6b97fea08f32917dc5c3b9019e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_729c659c",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T23:55:09Z",
+      "side": 1,
+      "message": "...in the...",
+      "range": {
+        "startLine": 78,
+        "startChar": 41,
+        "endLine": 78,
+        "endChar": 44
+      },
+      "revId": "b59673443919a6b97fea08f32917dc5c3b9019e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_32a6ede6",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T23:55:09Z",
+      "side": 1,
+      "message": "remove \u0027is\u0027",
+      "range": {
+        "startLine": 78,
+        "startChar": 63,
+        "endLine": 78,
+        "endChar": 65
+      },
+      "revId": "b59673443919a6b97fea08f32917dc5c3b9019e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_d2967176",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-04T23:55:09Z",
+      "side": 1,
+      "message": "this is only relevant to the change itself, the first sentence is enough to describe the implementation",
+      "range": {
+        "startLine": 79,
+        "startChar": 17,
+        "endLine": 80,
+        "endChar": 16
+      },
+      "revId": "b59673443919a6b97fea08f32917dc5c3b9019e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
