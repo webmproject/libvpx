@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0eb6dc04_1f0ea753",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 6006,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-04-05T22:17:16Z",
+      "side": 1,
+      "message": "Reverting to the old version for now. To be continued in a different patch.",
+      "parentUuid": "8eb56cae_9a86cb9a",
+      "revId": "2530a02b3e72f3b426cd9a12edcadd8bb770ab43",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8eb56cae_daa3e31f",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-05T17:59:40Z",
       "side": 1,
       "message": "remove it",
+      "revId": "2530a02b3e72f3b426cd9a12edcadd8bb770ab43",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb6dc04_5f142f67",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 6894,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-04-05T22:17:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8eb56cae_daa3e31f",
       "revId": "2530a02b3e72f3b426cd9a12edcadd8bb770ab43",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
