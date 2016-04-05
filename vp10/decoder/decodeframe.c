@@ -1026,7 +1026,11 @@ static MB_MODE_INFO *set_offsets_extend(VP10_COMMON *const cm,
   set_mi_row_col(xd, tile, mi_row_pred, bh, mi_col_pred, bw,
                  cm->mi_rows, cm->mi_cols);
 
+#if CONFIG_EXT_TILE
+  xd->up_available    = (mi_row_ori > tile->mi_row_start);
+#else
   xd->up_available    = (mi_row_ori != 0);
+#endif  // CONFIG_EXT_TILE
   xd->left_available  = (mi_col_ori > tile->mi_col_start);
 
   set_plane_n4(xd, bw, bh, bwl, bhl);
