@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb56cae_198d0c61",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-04-05T14:45:57Z",
+      "side": 1,
+      "message": "--enable-ext-partition is OFF",
+      "revId": "4b613a072b95064aacde98dca7df4e160dff91fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
