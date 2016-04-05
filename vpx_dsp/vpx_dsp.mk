@@ -350,6 +350,7 @@ endif  # CONFIG_USE_X86INC
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_sse2.c
+DSP_SRCS-$(HAVE_SSE4_1) += x86/highbd_variance_sse4.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_impl_sse2.asm
 ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_subpel_variance_impl_sse2.asm

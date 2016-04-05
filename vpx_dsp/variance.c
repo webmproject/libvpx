@@ -433,7 +433,7 @@ uint32_t vpx_highbd_12_mse##W##x##H##_c(const uint8_t *src, \
   return *sse; \
 }
 
-static void highbd_var_filter_block2d_bil_first_pass(
+void highbd_var_filter_block2d_bil_first_pass(
     const uint8_t *src_ptr8,
     uint16_t *output_ptr,
     unsigned int src_pixels_per_line,
@@ -459,7 +459,7 @@ static void highbd_var_filter_block2d_bil_first_pass(
   }
 }
 
-static void highbd_var_filter_block2d_bil_second_pass(
+void highbd_var_filter_block2d_bil_second_pass(
     const uint16_t *src_ptr,
     uint16_t *output_ptr,
     unsigned int src_pixels_per_line,
@@ -551,8 +551,8 @@ uint32_t vpx_highbd_8_sub_pixel_avg_variance##W##x##H##_c( \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
                                             bilinear_filters_2t[yoffset]); \
 \
-  vpx_highbd_comp_avg_pred(temp3, second_pred, W, H, \
-                           CONVERT_TO_BYTEPTR(temp2), W); \
+  vpx_highbd_comp_avg_pred_c(temp3, second_pred, W, H, \
+                             CONVERT_TO_BYTEPTR(temp2), W); \
 \
   return vpx_highbd_8_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp3), W, dst, \
                                           dst_stride, sse); \
@@ -573,8 +573,8 @@ uint32_t vpx_highbd_10_sub_pixel_avg_variance##W##x##H##_c( \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
                                             bilinear_filters_2t[yoffset]); \
 \
-  vpx_highbd_comp_avg_pred(temp3, second_pred, W, H, \
-                           CONVERT_TO_BYTEPTR(temp2), W); \
+  vpx_highbd_comp_avg_pred_c(temp3, second_pred, W, H, \
+                             CONVERT_TO_BYTEPTR(temp2), W); \
 \
   return vpx_highbd_10_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp3), \
                                              W, dst, dst_stride, sse); \
@@ -595,8 +595,8 @@ uint32_t vpx_highbd_12_sub_pixel_avg_variance##W##x##H##_c( \
   highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
                                             bilinear_filters_2t[yoffset]); \
 \
-  vpx_highbd_comp_avg_pred(temp3, second_pred, W, H, \
-                           CONVERT_TO_BYTEPTR(temp2), W); \
+  vpx_highbd_comp_avg_pred_c(temp3, second_pred, W, H, \
+                             CONVERT_TO_BYTEPTR(temp2), W); \
 \
   return vpx_highbd_12_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp3), \
                                              W, dst, dst_stride, sse); \
@@ -635,9 +635,9 @@ HIGHBD_MSE(16, 8)
 HIGHBD_MSE(8, 16)
 HIGHBD_MSE(8, 8)
 
-void vpx_highbd_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred8,
-                              int width, int height, const uint8_t *ref8,
-                              int ref_stride) {
+void vpx_highbd_comp_avg_pred_c(uint16_t *comp_pred, const uint8_t *pred8,
+                                int width, int height, const uint8_t *ref8,
+                                int ref_stride) {
   int i, j;
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
