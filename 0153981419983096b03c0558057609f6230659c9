@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb56cae_4895f4bc",
+        "filename": "test/vp10_fwd_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-05T03:16:08Z",
+      "side": 1,
+      "message": "an anonymous namespace in a .cc is fine, unless you\u0027re using this to get unadorned access to the test namespace.\neither way, a space before \u0027{\u0027",
+      "revId": "0153981419983096b03c0558057609f6230659c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_6886b89d",
+        "filename": "test/vp10_fwd_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-05T03:16:08Z",
+      "side": 1,
+      "message": "you can use an anonymous namespace here. given they\u0027re in a namespace as it is and not declared extern elsewhere their visibility will be local; still an anonymous namespace is good practice.",
+      "revId": "0153981419983096b03c0558057609f6230659c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_e89948f8",
+        "filename": "test/vp10_inv_txfm1d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-05T03:16:08Z",
+      "side": 1,
+      "message": "space before \u0027{\u0027",
+      "revId": "0153981419983096b03c0558057609f6230659c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8eb56cae_0897fcc5",
+        "filename": "test/vp10_inv_txfm1d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-05T03:16:08Z",
+      "side": 1,
+      "message": "instead of static these should all be const to avoid an ODR violation. you also get the benefit of them being placed in the RO section.",
+      "revId": "0153981419983096b03c0558057609f6230659c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
