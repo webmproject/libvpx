@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "0eb6dc04_06241bf4",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-06T16:47:12Z",
+      "side": 1,
+      "message": "I must have missed the #define func func_c in vpx_dsp_rtcd.h. Also in vpx_dsp_rtcd_defs.pl, there is no specialize qw/.../ statement.  \n\nI guess this was the reason I used _c function.  We should call fun() instead of fun_c().  I will change it.\n\nI will keep this definition.  Calling will be func().",
+      "parentUuid": "0eb6dc04_0bd1c9d4",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0eb6dc04_b0e80098",
         "filename": "vpx_dsp/variance.h",
         "patchSetId": 3
