@@ -6,8 +6,8 @@
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
 
-#ifndef MKVMUXER_MKVMUXERTYPES_H_
-#define MKVMUXER_MKVMUXERTYPES_H_
+#ifndef MKVMUXERTYPES_HPP
+#define MKVMUXERTYPES_HPP
 
 // Copied from Chromium basictypes.h
 // A macro to disallow the copy constructor and operator= functions
@@ -16,4 +16,15 @@
   TypeName(const TypeName&);                       \
   void operator=(const TypeName&)
 
-#endif  // MKVMUXER_MKVMUXERTYPES_HPP_
+namespace mkvmuxer {
+
+typedef unsigned char uint8;
+typedef short int16;
+typedef int int32;
+typedef unsigned int uint32;
+typedef long long int64;
+typedef unsigned long long uint64;
+
+}  // end namespace mkvmuxer
+
+#endif  // MKVMUXERTYPES_HPP
