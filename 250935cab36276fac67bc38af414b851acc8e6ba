@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "0eb6dc04_1258d1d5",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-06T23:44:35Z",
+      "side": 1,
+      "message": "\u003e I mean I will keep vpx_highbd_comp_avg_pred_c() definition.\n\nyes that makes sense. the actual implementation should have a suffix, in this case we were just getting lucky that the define made this _c.",
+      "parentUuid": "0eb6dc04_c6cf532a",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0eb6dc04_b0e80098",
         "filename": "vpx_dsp/variance.h",
         "patchSetId": 3
