@@ -8579,7 +8579,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         *returnrate_nocoef -= vp10_cost_bit(vp10_get_intra_inter_prob(cm, xd),
                                             mbmi->ref_frame[0] != INTRA_FRAME);
 #if CONFIG_OBMC
-        if (is_inter_block(mbmi) && is_obmc_allowed(mbmi))
+        if (is_neighbor_overlappable(mbmi) && is_obmc_allowed(mbmi))
           *returnrate_nocoef -= cpi->obmc_cost[bsize][mbmi->obmc];
 #endif  // CONFIG_OBMC
 #endif  // CONFIG_SUPERTX
