@@ -19,6 +19,11 @@
 #include "vp10/common/vp10_inv_txfm2d_cfg.h"
 
 using libvpx_test::ACMRandom;
+using libvpx_test::base;
+using libvpx_test::bd;
+using libvpx_test::compute_avg_abs_error;
+using libvpx_test::Fwd_Txfm2d_Func;
+using libvpx_test::Inv_Txfm2d_Func;
 
 namespace {
 
@@ -116,4 +121,4 @@ TEST(vp10_inv_txfm2d, round_trip) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-}  // anonymous namespace
+}  // namespace
