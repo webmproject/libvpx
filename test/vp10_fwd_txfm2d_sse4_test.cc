@@ -8,6 +8,9 @@
 #include "vp10/common/vp10_fwd_txfm2d_cfg.h"
 
 using libvpx_test::ACMRandom;
+using libvpx_test::Fwd_Txfm2d_Func;
+using libvpx_test::base;
+using libvpx_test::bd;
 
 namespace {
 
@@ -58,8 +61,8 @@ TEST(vp10_fwd_txfm2d_sse4_1, accuracy) {
       }
     }
 
-    txfm2d_func_c(input, output_c, cfg.txfm_size, &cfg, 10);
-    txfm2d_func_sse4_1(input, output_sse4_1, cfg.txfm_size, &cfg, 10);
+    txfm2d_func_c(input, output_c, cfg.txfm_size, &cfg, bd);
+    txfm2d_func_sse4_1(input, output_sse4_1, cfg.txfm_size, &cfg, bd);
     for (int r = 0; r < txfm_size; r++) {
       for (int c = 0; c < txfm_size; c++) {
         EXPECT_EQ(output_c[r * txfm_size + c],
