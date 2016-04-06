@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0eb6dc04_10da1409",
+        "filename": "vp10/encoder/mcomp.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-06T01:21:51Z",
+      "side": 1,
+      "message": "why do you need to force the _c version here? vpx_dsp_rtcd should take care of that",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb6dc04_5011bc75",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-06T01:21:51Z",
+      "side": 1,
+      "message": "I don\u0027t think this should force the c-code. if the wrapper isn\u0027t specialized, but this one is, the best function should be called.",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb6dc04_7014b867",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-06T01:21:51Z",
+      "side": 1,
+      "message": "is there another specialization for this? I think this cosmetic should have been applied in another change.",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb6dc04_b0e80098",
+        "filename": "vpx_dsp/variance.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-06T01:21:51Z",
+      "side": 1,
+      "message": "if you expose something in a header and it isn\u0027t inline you should add an appropriate vpx/vp9/vp10 prefix",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb6dc04_50a65c82",
+        "filename": "vpx_dsp/x86/highbd_variance_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-06T01:21:51Z",
+      "side": 1,
+      "message": "phaddd tends to have a high latency",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
