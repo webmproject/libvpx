@@ -71,7 +71,7 @@ typedef struct frame_contexts {
 #if CONFIG_EXT_INTER
   vpx_prob inter_compound_mode_probs[INTER_MODE_CONTEXTS]
                                     [INTER_COMPOUND_MODES - 1];
-  vpx_prob interintra_prob[BLOCK_SIZES];
+  vpx_prob interintra_prob[BLOCK_SIZE_GROUPS];
   vpx_prob interintra_mode_prob[BLOCK_SIZE_GROUPS][INTERINTRA_MODES - 1];
   vpx_prob wedge_interintra_prob[BLOCK_SIZES];
   vpx_prob wedge_interinter_prob[BLOCK_SIZES];
@@ -139,7 +139,7 @@ typedef struct FRAME_COUNTS {
   unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
 #if CONFIG_EXT_INTER
   unsigned int inter_compound_mode[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES];
-  unsigned int interintra[BLOCK_SIZES][2];
+  unsigned int interintra[BLOCK_SIZE_GROUPS][2];
   unsigned int interintra_mode[BLOCK_SIZE_GROUPS][INTERINTRA_MODES];
   unsigned int wedge_interintra[BLOCK_SIZES][2];
   unsigned int wedge_interinter[BLOCK_SIZES][2];

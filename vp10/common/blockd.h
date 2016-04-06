@@ -70,6 +70,16 @@ static INLINE int get_wedge_bits(BLOCK_SIZE sb_type) {
     return WEDGE_BITS_BIG;
 }
 
+static INLINE int is_interinter_wedge_used(BLOCK_SIZE sb_type) {
+  (void) sb_type;
+  return get_wedge_bits(sb_type) > 0;
+}
+
+static INLINE int is_interintra_wedge_used(BLOCK_SIZE sb_type) {
+  (void) sb_type;
+  return 0;  // get_wedge_bits(sb_type) > 0;
+}
+
 static INLINE int is_inter_singleref_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWFROMNEARMV;
 }
@@ -671,6 +681,16 @@ static INLINE int is_interintra_allowed(const MB_MODE_INFO *mbmi) {
   return is_interintra_allowed_bsize(mbmi->sb_type)
           && is_interintra_allowed_mode(mbmi->mode)
           && is_interintra_allowed_ref(mbmi->ref_frame);
+}
+
+static INLINE int is_interintra_allowed_bsize_group(const int group) {
+  int i;
+  for (i = 0; i < BLOCK_SIZES; i++) {
+    if (size_group_lookup[i] == group &&
+        is_interintra_allowed_bsize(i))
+      return 1;
+  }
+  return 0;
 }
 
 static INLINE int is_interintra_pred(const MB_MODE_INFO *mbmi) {

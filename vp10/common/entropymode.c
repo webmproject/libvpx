@@ -268,24 +268,29 @@ static const vpx_prob default_inter_compound_mode_probs
   {25,  29,  50, 192, 192, 128, 180, 180},   // 6 = two intra neighbours
 };
 
-static const vpx_prob default_interintra_prob[BLOCK_SIZES] = {
-  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
-#if CONFIG_EXT_PARTITION
-  192, 192, 192
-#endif  // CONFIG_EXT_PARTITION
+static const vpx_prob default_interintra_prob[BLOCK_SIZE_GROUPS] = {
+  208, 208, 208, 208,
+};
+
+static const vpx_prob
+    default_interintra_mode_prob[BLOCK_SIZE_GROUPS][INTERINTRA_MODES - 1] = {
+  {  65,  32,  18, 144, 162, 194,  41,  51,  98 },  // block_size < 8x8
+  { 132,  68,  18, 165, 217, 196,  45,  40,  78 },  // block_size < 16x16
+  { 173,  80,  19, 176, 240, 193,  64,  35,  46 },  // block_size < 32x32
+  { 221, 135,  38, 194, 248, 121,  96,  85,  29 }   // block_size >= 32x32
 };
 
 static const vpx_prob default_wedge_interintra_prob[BLOCK_SIZES] = {
-  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+  208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208,
 #if CONFIG_EXT_PARTITION
-  192, 192, 192
+  208, 208, 208
 #endif  // CONFIG_EXT_PARTITION
 };
 
 static const vpx_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
-  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192,
+  208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208,
 #if CONFIG_EXT_PARTITION
-  192, 192, 192
+  208, 208, 208
 #endif  // CONFIG_EXT_PARTITION
 };
 #endif  // CONFIG_EXT_INTER
@@ -335,14 +340,6 @@ const vpx_tree_index vp10_interintra_mode_tree[TREE_SIZE(INTERINTRA_MODES)] = {
   -II_D45_PRED, 14,                 /* 6 = II_D45_NODE    */
   -II_D63_PRED, 16,                 /* 7 = II_D63_NODE    */
   -II_D153_PRED, -II_D207_PRED      /* 8 = II_D153_NODE   */
-};
-
-static const vpx_prob
-    default_interintra_mode_prob[BLOCK_SIZE_GROUPS][INTERINTRA_MODES - 1] = {
-  {  65,  32,  18, 144, 162, 194,  41,  51,  98 },  // block_size < 8x8
-  { 132,  68,  18, 165, 217, 196,  45,  40,  78 },  // block_size < 16x16
-  { 173,  80,  19, 176, 240, 193,  64,  35,  46 },  // block_size < 32x32
-  { 221, 135,  38, 194, 248, 121,  96,  85,  29 }   // block_size >= 32x32
 };
 
 const vpx_tree_index vp10_inter_compound_mode_tree
@@ -1172,11 +1169,11 @@ static const vpx_prob default_inter_ext_tx_prob[EXT_TX_SIZES]
 #if CONFIG_EXT_INTRA
 static const vpx_prob
 default_intra_filter_probs[INTRA_FILTERS + 1][INTRA_FILTERS - 1] = {
-    { 98,  63,  60,  },
-    { 98,  82,  80,  },
-    { 94,  65, 103,  },
-    { 49,  25,  24,  },
-    { 72,  38,  50,  },
+  { 98,  63,  60,  },
+  { 98,  82,  80,  },
+  { 94,  65, 103,  },
+  { 49,  25,  24,  },
+  { 72,  38,  50,  },
 };
 static const vpx_prob default_ext_intra_probs[2] = {230, 230};
 
@@ -1338,8 +1335,8 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
                          pre_fc->inter_compound_mode_probs[i],
                          counts->inter_compound_mode[i],
                          fc->inter_compound_mode_probs[i]);
-  for (i = 0; i < BLOCK_SIZES; ++i) {
-    if (is_interintra_allowed_bsize(i))
+  for (i = 0; i < BLOCK_SIZE_GROUPS; ++i) {
+    if (is_interintra_allowed_bsize_group(i))
       fc->interintra_prob[i] = mode_mv_merge_probs(pre_fc->interintra_prob[i],
                                                    counts->interintra[i]);
   }
@@ -1349,12 +1346,12 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
         counts->interintra_mode[i], fc->interintra_mode_prob[i]);
   }
   for (i = 0; i < BLOCK_SIZES; ++i) {
-    if (is_interintra_allowed_bsize(i) && get_wedge_bits(i))
+    if (is_interintra_allowed_bsize(i) && is_interintra_wedge_used(i))
       fc->wedge_interintra_prob[i] = mode_mv_merge_probs(
           pre_fc->wedge_interintra_prob[i], counts->wedge_interintra[i]);
   }
   for (i = 0; i < BLOCK_SIZES; ++i) {
-    if (get_wedge_bits(i))
+    if (is_interinter_wedge_used(i))
       fc->wedge_interinter_prob[i] = mode_mv_merge_probs(
           pre_fc->wedge_interinter_prob[i], counts->wedge_interinter[i]);
   }

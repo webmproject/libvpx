@@ -502,7 +502,7 @@ static void extend_and_predict_highbd(const uint8_t *buf_ptr1,
     buf_ptr = ((uint8_t *)mc_buf_high) + border_offset;
   }
 #if CONFIG_EXT_INTER
-  if (ref && get_wedge_bits(xd->mi[0]->mbmi.sb_type) &&
+  if (ref && is_interinter_wedge_used(xd->mi[0]->mbmi.sb_type) &&
       xd->mi[0]->mbmi.use_wedge_interinter)
     vp10_make_masked_inter_predictor(
         buf_ptr, b_w, dst, dst_buf_stride,
@@ -543,7 +543,7 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                   x0, y0, b_w, b_h, frame_width, frame_height);
   buf_ptr = mc_buf + border_offset;
 #if CONFIG_EXT_INTER
-  if (ref && get_wedge_bits(xd->mi[0]->mbmi.sb_type) &&
+  if (ref && is_interinter_wedge_used(xd->mi[0]->mbmi.sb_type) &&
       xd->mi[0]->mbmi.use_wedge_interinter)
     vp10_make_masked_inter_predictor(
         buf_ptr, b_w, dst, dst_buf_stride,
@@ -752,7 +752,7 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi,
      }
   }
 #if CONFIG_EXT_INTER
-  if (ref && get_wedge_bits(mi->mbmi.sb_type) &&
+  if (ref && is_interinter_wedge_used(mi->mbmi.sb_type) &&
       mi->mbmi.use_wedge_interinter) {
     vp10_make_masked_inter_predictor(
         buf_ptr, buf_stride, dst, dst_buf->stride,
@@ -3962,8 +3962,8 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 #if CONFIG_EXT_INTER
     read_inter_compound_mode_probs(fc, &r);
     if (cm->reference_mode != COMPOUND_REFERENCE) {
-      for (i = 0; i < BLOCK_SIZES; i++) {
-        if (is_interintra_allowed_bsize(i)) {
+      for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
+        if (is_interintra_allowed_bsize_group(i)) {
           vp10_diff_update_prob(&r, &fc->interintra_prob[i]);
         }
       }
@@ -3972,14 +3972,14 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
           vp10_diff_update_prob(&r, &fc->interintra_mode_prob[i][j]);
       }
       for (i = 0; i < BLOCK_SIZES; i++) {
-        if (is_interintra_allowed_bsize(i) && get_wedge_bits(i)) {
+        if (is_interintra_allowed_bsize(i) && is_interintra_wedge_used(i)) {
           vp10_diff_update_prob(&r, &fc->wedge_interintra_prob[i]);
         }
       }
     }
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < BLOCK_SIZES; i++) {
-        if (get_wedge_bits(i)) {
+        if (is_interinter_wedge_used(i)) {
           vp10_diff_update_prob(&r, &fc->wedge_interinter_prob[i]);
         }
       }
