@@ -43,8 +43,8 @@ const TXFM_2D_CFG* fwd_txfm_cfg_ls[5][4] = {
     {&fwd_txfm_2d_cfg_dct_dct_64, NULL, NULL, NULL}};
 
 const Fwd_Txfm2d_Func fwd_txfm_func_ls[5] = {
-    vp10_fwd_txfm2d_4x4, vp10_fwd_txfm2d_8x8, vp10_fwd_txfm2d_16x16,
-    vp10_fwd_txfm2d_32x32, vp10_fwd_txfm2d_64x64};
+    vp10_fwd_txfm2d_4x4_c, vp10_fwd_txfm2d_8x8_c, vp10_fwd_txfm2d_16x16_c,
+    vp10_fwd_txfm2d_32x32_c, vp10_fwd_txfm2d_64x64_c};
 
 const int txfm_type_num = 4;
 const TYPE_TXFM type_ls_0[4] = {TYPE_DCT, TYPE_DCT, TYPE_ADST, TYPE_ADST};
