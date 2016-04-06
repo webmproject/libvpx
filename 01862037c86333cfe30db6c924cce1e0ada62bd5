@@ -34,6 +34,24 @@
       "revId": "01862037c86333cfe30db6c924cce1e0ada62bd5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb6dc04_172fa33a",
+        "filename": "test/vp10_fwd_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-06T22:04:38Z",
+      "side": 1,
+      "message": "It\u0027s fine to test the _c version like this. As to the use of RTCD_C the more proper way would be to call vp10_rtcd() to initialize the function pointers if you wanted to test the best version.\n\nwhere\u0027s the sse4 covered?",
+      "parentUuid": "0eb6dc04_8664ab8a",
+      "revId": "01862037c86333cfe30db6c924cce1e0ada62bd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
