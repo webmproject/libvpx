@@ -1314,7 +1314,7 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
                                  int mi_row, int mi_col, BLOCK_SIZE bsize,
                                  int output_enabled) {
   int y, x_idx;
-#if CONFIG_VAR_TX
+#if CONFIG_VAR_TX || CONFIG_REF_MV
   int i;
 #endif
   VP10_COMMON *const cm = &cpi->common;
