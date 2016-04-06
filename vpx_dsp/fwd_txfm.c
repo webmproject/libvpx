@@ -365,12 +365,12 @@ void vpx_fdct16x16_c(const int16_t *input, tran_low_t *output, int stride) {
 
 void vpx_fdct16x16_1_c(const int16_t *input, tran_low_t *output, int stride) {
   int r, c;
-  tran_low_t sum = 0;
+  int sum = 0;
   for (r = 0; r < 16; ++r)
     for (c = 0; c < 16; ++c)
       sum += input[r * stride + c];
 
-  output[0] = sum >> 1;
+  output[0] = (tran_low_t)(sum >> 1);
 }
 
 static INLINE tran_high_t dct_32_round(tran_high_t input) {
