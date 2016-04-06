@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "0eb6dc04_105334bf",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-06T02:14:10Z",
+      "side": 1,
+      "message": "We declared _c version but we didn\u0027t define it.  We defined vpx_highbd_comp_avg_pred().  To be clear, I think it should be our _c version.  There is no any specialization yet.",
+      "parentUuid": "0eb6dc04_7014b867",
+      "revId": "250935cab36276fac67bc38af414b851acc8e6ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0eb6dc04_b0e80098",
         "filename": "vpx_dsp/variance.h",
         "patchSetId": 3
