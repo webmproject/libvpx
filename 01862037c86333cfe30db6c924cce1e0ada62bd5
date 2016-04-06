@@ -16,6 +16,24 @@
       "revId": "01862037c86333cfe30db6c924cce1e0ada62bd5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0eb6dc04_8664ab8a",
+        "filename": "test/vp10_fwd_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-04-06T17:26:54Z",
+      "side": 1,
+      "message": "There are sse4_1 version\nBoth versions are good.\nThe segmentation fault is coming from \"vp10_fwd_txfm2d_4x4\" is null.\n\nIn ./vp10_rtcd.h, we need to define \"RTCD_C\" such that the vp10_fwd_txfm2d_4x4 will be assigned to either c or sse4_1 version.\n\nBut we don\u0027t have RTCD_C defined in unit test.\n\nMoreover, this unit test is supposed to test c version. The sse4 are tested at vp10_fwd_txfm2d_sse4_test.cc",
+      "parentUuid": "0eb6dc04_4bf7d19f",
+      "revId": "01862037c86333cfe30db6c924cce1e0ada62bd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
