@@ -2048,7 +2048,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // for cases where there is small change from content that is completely
     // static.
     if (cpi->oxcf.rc_mode == VPX_VBR) {
-      min_thresh = 30000;
+      min_thresh = 40000;
       thresh = 2.0f;
     }
     if (avg_sad >
@@ -2062,14 +2062,15 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR &&
         rc->high_source_sad &&
-        cpi->refresh_golden_frame == 0 &&
         cpi->ext_refresh_frame_flags_pending == 0) {
       int target;
       cpi->refresh_golden_frame = 1;
+      rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
+      rc->baseline_gf_interval = VPXMIN(20,
+          VPXMAX(10, rc->baseline_gf_interval));
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
       if (rc->frames_till_gf_update_due > rc->frames_to_key)
         rc->frames_till_gf_update_due = rc->frames_to_key;
-      rc->gfu_boost = DEFAULT_GF_BOOST;
       target = calc_pframe_target_size_one_pass_vbr(cpi);
       vp9_rc_set_frame_target(cpi, target);
     }
