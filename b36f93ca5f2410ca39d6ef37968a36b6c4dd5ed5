@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0eb6dc04_17679c22",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-07T22:04:57Z",
+      "side": 1,
+      "message": "roundf() might cause compatibility issues being c99. recent visual studios support this at least",
+      "revId": "b36f93ca5f2410ca39d6ef37968a36b6c4dd5ed5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
