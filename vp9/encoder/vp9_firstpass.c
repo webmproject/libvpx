@@ -1957,7 +1957,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int int_lbq =
       (int)(vp9_convert_qindex_to_q(rc->last_boosted_qindex,
                                    cpi->common.bit_depth));
-    active_min_gf_interval = rc->min_gf_interval + VPXMIN(2, int_max_q / 200);
+    active_min_gf_interval =
+      rc->min_gf_interval + arf_active_or_kf + VPXMIN(2, int_max_q / 200);
     if (active_min_gf_interval > rc->max_gf_interval)
       active_min_gf_interval = rc->max_gf_interval;
 
@@ -1968,13 +1969,20 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // bits to spare and are better with a smaller interval and smaller boost.
       // At high Q when there are few bits to spare we are better with a longer
       // interval to spread the cost of the GF.
-      active_max_gf_interval = 12 + VPXMIN(4, (int_lbq / 6));
+      active_max_gf_interval =
+        12 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
 
       // We have: active_min_gf_interval <= rc->max_gf_interval
       if (active_max_gf_interval < active_min_gf_interval)
         active_max_gf_interval = active_min_gf_interval;
       else if (active_max_gf_interval > rc->max_gf_interval)
         active_max_gf_interval = rc->max_gf_interval;
+
+      // Would the active max drop us out just before the near the next kf?
+      if ((active_max_gf_interval <= rc->frames_to_key) &&
+          (active_max_gf_interval >=
+              (rc->frames_to_key - rc->min_gf_interval)))
+        active_max_gf_interval = rc->frames_to_key / 2;
     }
   }
 
@@ -2032,11 +2040,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Break out conditions.
     if (
       // Break at active_max_gf_interval unless almost totally static.
-      (i >= (active_max_gf_interval + arf_active_or_kf) &&
-            zero_motion_accumulator < 0.995) ||
+      ((i >= active_max_gf_interval) &&
+       (zero_motion_accumulator < 0.995)) ||
       (
         // Don't break out with a very short interval.
-        (i >= active_min_gf_interval + arf_active_or_kf) &&
+        (i >= active_min_gf_interval) &&
+        // If possible dont break very close to a kf
+        ((rc->frames_to_key - i) >= rc->min_gf_interval) &&
         (!flash_detected) &&
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
          (abs_mv_in_out_accumulator > 3.0) ||
