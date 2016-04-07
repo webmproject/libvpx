@@ -26,6 +26,20 @@ static INLINE double round(double x) {
   else
     return floor(x + 0.5);
 }
+
+static INLINE float roundf(float x) {
+  if (x < 0)
+    return (float)ceil(x - 0.5f);
+  else
+    return (float)floor(x + 0.5f);
+}
+
+static INLINE long lroundf(float x) {
+  if (x < 0)
+    return (long)(x - 0.5f);
+  else
+    return (long)(x + 0.5f);
+}
 #endif  // _MSC_VER < 1800
 
 #endif  // _MSC_VER
