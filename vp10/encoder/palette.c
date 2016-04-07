@@ -11,20 +11,21 @@
 #include <math.h>
 #include "vp10/encoder/palette.h"
 
-static double calc_dist(const double *p1, const double *p2, int dim) {
-  double dist = 0;
+static float calc_dist(const float *p1, const float *p2, int dim) {
+  float dist = 0;
   int i = 0;
 
   for (i = 0; i < dim; ++i) {
-    dist = dist + (p1[i] - round(p2[i])) * (p1[i] - round(p2[i]));
+    float diff = p1[i] - roundf(p2[i]);
+    dist += diff * diff;
   }
   return dist;
 }
 
-void vp10_calc_indices(const double *data, const double *centroids,
+void vp10_calc_indices(const float *data, const float *centroids,
                        uint8_t *indices, int n, int k, int dim) {
   int i, j;
-  double min_dist, this_dist;
+  float min_dist, this_dist;
 
   for (i = 0; i < n; ++i) {
     min_dist = calc_dist(data + i * dim, centroids, dim);
@@ -45,7 +46,7 @@ static unsigned int lcg_rand16(unsigned int *state) {
   return *state / 65536 % 32768;
 }
 
-static void calc_centroids(const double *data, double *centroids,
+static void calc_centroids(const float *data, float *centroids,
                            const uint8_t *indices, int n, int k, int dim) {
   int i, j, index;
   int count[PALETTE_MAX_SIZE];
@@ -70,16 +71,16 @@ static void calc_centroids(const double *data, double *centroids,
       memcpy(centroids + i * dim, data + (lcg_rand16(&rand_state) % n) * dim,
                  sizeof(centroids[0]) * dim);
     } else {
-      const double norm = 1.0 / count[i];
+      const float norm = 1.0f / count[i];
       for (j = 0; j < dim; ++j)
         centroids[i * dim + j] *= norm;
     }
   }
 }
 
-static double calc_total_dist(const double *data, const double *centroids,
+static float calc_total_dist(const float *data, const float *centroids,
                               const uint8_t *indices, int n, int k, int dim) {
-  double dist = 0;
+  float dist = 0;
   int i;
   (void) k;
 
@@ -89,11 +90,11 @@ static double calc_total_dist(const double *data, const double *centroids,
   return dist;
 }
 
-int vp10_k_means(const double *data, double *centroids, uint8_t *indices,
+int vp10_k_means(const float *data, float *centroids, uint8_t *indices,
                  uint8_t *pre_indices, int n, int k, int dim, int max_itr) {
   int i = 0;
-  double pre_dist, this_dist;
-  double pre_centroids[2 * PALETTE_MAX_SIZE];
+  float pre_dist, this_dist;
+  float pre_centroids[2 * PALETTE_MAX_SIZE];
 
   vp10_calc_indices(data, centroids, indices, n, k, dim);
   pre_dist = calc_total_dist(data, centroids, indices, n, k, dim);
@@ -121,9 +122,9 @@ int vp10_k_means(const double *data, double *centroids, uint8_t *indices,
   return i;
 }
 
-void vp10_insertion_sort(double *data, int n) {
+void vp10_insertion_sort(float *data, int n) {
   int i, j, k;
-  double val;
+  float val;
 
   if (n <= 1)
     return;
