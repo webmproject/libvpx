@@ -5,10 +5,13 @@
 // tree. An additional intellectual property rights grant can be found
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
-#ifndef MKVPARSER_MKVPARSER_H_
-#define MKVPARSER_MKVPARSER_H_
+
+#ifndef MKVPARSER_HPP
+#define MKVPARSER_HPP
 
 #include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 
 namespace mkvparser {
 
@@ -25,9 +28,8 @@ class IMkvReader {
   virtual ~IMkvReader();
 };
 
-template <typename Type>
-Type* SafeArrayAlloc(unsigned long long num_elements,
-                     unsigned long long element_size);
+template<typename Type> Type* SafeArrayAlloc(unsigned long long num_elements,
+                                             unsigned long long element_size);
 long long GetUIntLength(IMkvReader*, long long, long&);
 long long ReadUInt(IMkvReader*, long long, long&);
 long long ReadID(IMkvReader* pReader, long long pos, long& len);
@@ -126,7 +128,7 @@ class BlockEntry {
  public:
   virtual ~BlockEntry();
 
-  bool EOS() const { return (GetKind() == kBlockEOS); }
+  bool EOS() const;
   const Cluster* GetCluster() const;
   long GetIndex() const;
   virtual const Block* GetBlock() const = 0;
@@ -389,90 +391,6 @@ class Track {
   ContentEncoding** content_encoding_entries_end_;
 };
 
-struct PrimaryChromaticity {
-  PrimaryChromaticity() : x(0), y(0) {}
-  ~PrimaryChromaticity() {}
-  static bool Parse(IMkvReader* reader, long long read_pos,
-                    long long value_size, bool is_x,
-                    PrimaryChromaticity** chromaticity);
-  float x;
-  float y;
-};
-
-struct MasteringMetadata {
-  static const float kValueNotPresent;
-
-  MasteringMetadata()
-      : r(NULL),
-        g(NULL),
-        b(NULL),
-        white_point(NULL),
-        luminance_max(kValueNotPresent),
-        luminance_min(kValueNotPresent) {}
-  ~MasteringMetadata() {
-    delete r;
-    delete g;
-    delete b;
-    delete white_point;
-  }
-
-  static bool Parse(IMkvReader* reader, long long element_start,
-                    long long element_size,
-                    MasteringMetadata** mastering_metadata);
-
-  PrimaryChromaticity* r;
-  PrimaryChromaticity* g;
-  PrimaryChromaticity* b;
-  PrimaryChromaticity* white_point;
-  float luminance_max;
-  float luminance_min;
-};
-
-struct Colour {
-  static const long long kValueNotPresent;
-
-  // Unless otherwise noted all values assigned upon construction are the
-  // equivalent of unspecified/default.
-  Colour()
-      : matrix_coefficients(kValueNotPresent),
-        bits_per_channel(kValueNotPresent),
-        chroma_subsampling_horz(kValueNotPresent),
-        chroma_subsampling_vert(kValueNotPresent),
-        cb_subsampling_horz(kValueNotPresent),
-        cb_subsampling_vert(kValueNotPresent),
-        chroma_siting_horz(kValueNotPresent),
-        chroma_siting_vert(kValueNotPresent),
-        range(kValueNotPresent),
-        transfer_characteristics(kValueNotPresent),
-        primaries(kValueNotPresent),
-        max_cll(kValueNotPresent),
-        max_fall(kValueNotPresent),
-        mastering_metadata(NULL) {}
-  ~Colour() {
-    delete mastering_metadata;
-    mastering_metadata = NULL;
-  }
-
-  static bool Parse(IMkvReader* reader, long long element_start,
-                    long long element_size, Colour** colour);
-
-  long long matrix_coefficients;
-  long long bits_per_channel;
-  long long chroma_subsampling_horz;
-  long long chroma_subsampling_vert;
-  long long cb_subsampling_horz;
-  long long cb_subsampling_vert;
-  long long chroma_siting_horz;
-  long long chroma_siting_vert;
-  long long range;
-  long long transfer_characteristics;
-  long long primaries;
-  long long max_cll;
-  long long max_fall;
-
-  MasteringMetadata* mastering_metadata;
-};
-
 class VideoTrack : public Track {
   VideoTrack(const VideoTrack&);
   VideoTrack& operator=(const VideoTrack&);
@@ -480,7 +398,6 @@ class VideoTrack : public Track {
   VideoTrack(Segment*, long long element_start, long long element_size);
 
  public:
-  virtual ~VideoTrack();
   static long Parse(Segment*, const Info&, long long element_start,
                     long long element_size, VideoTrack*&);
 
@@ -495,8 +412,6 @@ class VideoTrack : public Track {
   bool VetEntry(const BlockEntry*) const;
   long Seek(long long time_ns, const BlockEntry*&) const;
 
-  Colour* GetColour() const;
-
  private:
   long long m_width;
   long long m_height;
@@ -506,8 +421,6 @@ class VideoTrack : public Track {
   long long m_stereo_mode;
 
   double m_rate;
-
-  Colour* m_colour;
 };
 
 class AudioTrack : public Track {
@@ -1100,7 +1013,7 @@ class Segment {
   const BlockEntry* GetBlock(const CuePoint&, const CuePoint::TrackPosition&);
 };
 
-}  // namespace mkvparser
+}  // end namespace mkvparser
 
 inline long mkvparser::Segment::LoadCluster() {
   long long pos;
@@ -1109,4 +1022,4 @@ inline long mkvparser::Segment::LoadCluster() {
   return LoadCluster(pos, size);
 }
 
-#endif  // MKVPARSER_MKVPARSER_H_
+#endif  // MKVPARSER_HPP

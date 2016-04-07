@@ -5,7 +5,8 @@
 // tree. An additional intellectual property rights grant can be found
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
-#include "mkvparser/mkvreader.h"
+
+#include "mkvreader.hpp"
 
 #include <cassert>
 
@@ -128,4 +129,4 @@ int MkvReader::Read(long long offset, long len, unsigned char* buffer) {
   return 0;  // success
 }
 
-}  // namespace mkvparser
+}  // end namespace mkvparser
