@@ -923,6 +923,15 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(2, 3, &vpx_highbd_8_variance4x8_c, 8),
                       make_tuple(2, 2, &vpx_highbd_8_variance4x4_c, 8)));
 
+#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, VpxHBDVarianceTest,
+    ::testing::Values(
+         make_tuple(2, 2, &vpx_highbd_8_variance4x4_sse4_1, 8),
+         make_tuple(2, 2, &vpx_highbd_10_variance4x4_sse4_1, 10),
+         make_tuple(2, 2, &vpx_highbd_12_variance4x4_sse4_1, 12)));
+#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+
 INSTANTIATE_TEST_CASE_P(
     C, VpxHBDSubpelVarianceTest,
     ::testing::Values(
@@ -1124,6 +1133,22 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_sse, 0),
         make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_sse, 0)));
 #endif  // CONFIG_USE_X86INC
+
+#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, VpxSubpelVarianceTest,
+    ::testing::Values(
+         make_tuple(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_sse4_1, 8),
+         make_tuple(2, 2, &vpx_highbd_10_sub_pixel_variance4x4_sse4_1, 10),
+         make_tuple(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_sse4_1, 12)));
+
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, VpxSubpelAvgVarianceTest,
+    ::testing::Values(
+        make_tuple(2, 2, &vpx_highbd_8_sub_pixel_avg_variance4x4_sse4_1, 8),
+        make_tuple(2, 2, &vpx_highbd_10_sub_pixel_avg_variance4x4_sse4_1, 10),
+        make_tuple(2, 2, &vpx_highbd_12_sub_pixel_avg_variance4x4_sse4_1, 12)));
+#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_HIGHBITDEPTH
 /* TODO(debargha): This test does not support the highbd version
