@@ -882,9 +882,12 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     // Use the lower of active_worst_quality and recent
     // average Q as basis for GF/ARF best Q limit unless last frame was
     // a key frame.
-    if (rc->frames_since_key > 1 &&
-        rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality) {
-      q = rc->avg_frame_qindex[INTER_FRAME];
+    if (rc->frames_since_key > 1) {
+      if (rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality) {
+        q = rc->avg_frame_qindex[INTER_FRAME];
+      } else {
+        q = active_worst_quality;
+      }
     } else {
       q = rc->avg_frame_qindex[KEY_FRAME];
     }
