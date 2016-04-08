@@ -266,7 +266,7 @@ typedef struct ThreadData {
 
   PICK_MODE_CONTEXT *leaf_tree;
   PC_TREE *pc_tree;
-  PC_TREE *pc_root;
+  PC_TREE *pc_root[MAX_MIB_SIZE_LOG2 - MIN_MIB_SIZE_LOG2 + 1];
 } ThreadData;
 
 struct EncWorkerData;

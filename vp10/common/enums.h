@@ -20,7 +20,7 @@ extern "C" {
 
 #undef MAX_SB_SIZE
 
-// Pixels per max superblock size
+// Max superblock size
 #if CONFIG_EXT_PARTITION
 # define MAX_SB_SIZE_LOG2 7
 #else
@@ -29,6 +29,9 @@ extern "C" {
 #define MAX_SB_SIZE   (1 << MAX_SB_SIZE_LOG2)
 #define MAX_SB_SQUARE (MAX_SB_SIZE * MAX_SB_SIZE)
 
+// Min superblock size
+#define MIN_SB_SIZE_LOG2 6
+
 // Pixels per Mode Info (MI) unit
 #define MI_SIZE_LOG2  3
 #define MI_SIZE       (1 << MI_SIZE_LOG2)
@@ -36,6 +39,9 @@ extern "C" {
 // MI-units per max superblock (MI Block - MIB)
 #define MAX_MIB_SIZE_LOG2 (MAX_SB_SIZE_LOG2 - MI_SIZE_LOG2)
 #define MAX_MIB_SIZE      (1 << MAX_MIB_SIZE_LOG2)
+
+// MI-units per min superblock
+#define MIN_MIB_SIZE_LOG2 (MIN_SB_SIZE_LOG2 - MI_SIZE_LOG2)
 
 // Mask to extract MI offset within max MIB
 #define MAX_MIB_MASK    (MAX_MIB_SIZE - 1)

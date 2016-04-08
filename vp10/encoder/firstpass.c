@@ -491,7 +491,8 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
   TileInfo tile;
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = xd->plane;
-  const PICK_MODE_CONTEXT *ctx = &cpi->td.pc_root->none;
+  const PICK_MODE_CONTEXT *ctx =
+      &cpi->td.pc_root[MAX_MIB_SIZE_LOG2 - MIN_MIB_SIZE_LOG2]->none;
   int i;
 
   int recon_yoffset, recon_uvoffset;
