@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0e217c86_a4e4a2f6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-08T16:04:09Z",
+      "side": 1,
+      "message": "Besides the bit exact test, I add a speed check. The check runs the C version function large amount of times against SSE4 version.  The accumulated time roughly gives us an idea how much speed improvement we get.",
+      "parentUuid": "0eb6dc04_bd4a09a1",
+      "revId": "83596e67e1bb27561d080eadb0d0cac13e4b2986",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0eb6dc04_dd44b599",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-08T02:21:53Z",
       "side": 1,
       "message": "this portion should be a separate change preceding this one as it\u0027s largely cosmetic.",
+      "revId": "83596e67e1bb27561d080eadb0d0cac13e4b2986",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e217c86_64f46a9a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-08T16:04:09Z",
+      "side": 1,
+      "message": "I think two commits are more clear to understand.  Let me prepare: 1) cosmetic change 2) new variance unit tests. 1) will come firstly.",
+      "parentUuid": "0eb6dc04_dd44b599",
       "revId": "83596e67e1bb27561d080eadb0d0cac13e4b2986",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "0e217c86_848326fb",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 742,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-08T16:04:09Z",
+      "side": 1,
+      "message": "I think GET_PARAM macro looks cleaner.  But this unit test consistently uses get\u003cnum\u003e(parameters) style.  How do you think?",
+      "parentUuid": "0eb6dc04_7df7e19f",
+      "revId": "83596e67e1bb27561d080eadb0d0cac13e4b2986",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0eb6dc04_1d3b3d21",
         "filename": "test/variance_test.cc",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2016-04-08T02:21:53Z",
       "side": 1,
       "message": "not sure why you need a separate version when the test is already parameterized on the optimization axis",
+      "revId": "83596e67e1bb27561d080eadb0d0cac13e4b2986",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e217c86_0433b63e",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 817,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-08T16:04:09Z",
+      "side": 1,
+      "message": "Speed test moves the signal initialization (src_/ref_) out of test number loop.  And there are no EXPECT_EQ macros.  These are better to get an accumulated function run time for our evaluation. Basically they have different purpose from other tests.",
+      "parentUuid": "0eb6dc04_1d3b3d21",
       "revId": "83596e67e1bb27561d080eadb0d0cac13e4b2986",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
