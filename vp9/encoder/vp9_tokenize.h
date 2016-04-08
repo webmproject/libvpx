@@ -51,7 +51,8 @@ struct VP9_COMP;
 struct ThreadData;
 
 void vp9_tokenize_sb(struct VP9_COMP *cpi, struct ThreadData *td,
-                     TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
+                     TOKENEXTRA **t, int dry_run, int seg_skip,
+                     BLOCK_SIZE bsize);
 
 typedef struct {
   const vpx_prob *prob;
