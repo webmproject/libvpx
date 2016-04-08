@@ -1997,10 +1997,10 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
         const int uvquant = cm->uv_dequant[q][i != 0];
         vp9_get_dequant_val_nuq(quant, q == 0, i,
                                 cm->y_dequant_val_nuq[dq][q][i],
-                                quants->y_cumbins_nuq[q][i], dq);
+                                quants->y_cumbins_nuq[dq][q][i], dq);
         vp9_get_dequant_val_nuq(uvquant, q == 0, i,
                                 cm->uv_dequant_val_nuq[dq][q][i],
-                                quants->uv_cumbins_nuq[q][i], dq);
+                                quants->uv_cumbins_nuq[dq][q][i], dq);
       }
     }
 #endif  // CONFIG_NEW_QUANT
@@ -2050,10 +2050,10 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
         const int uvquant = cm->uv_dequant_pxd[q][i != 0];
         vp9_get_dequant_val_nuq(quant, q == 0, i,
                                 cm->y_dequant_val_nuq_pxd[dq][q][i],
-                                quants->y_cumbins_nuq_pxd[q][i], dq);
+                                quants->y_cumbins_nuq_pxd[dq][q][i], dq);
         vp9_get_dequant_val_nuq(uvquant, q == 0, i,
                                 cm->uv_dequant_val_nuq_pxd[dq][q][i],
-                                quants->uv_cumbins_nuq_pxd[q][i], dq);
+                                quants->uv_cumbins_nuq_pxd[dq][q][i], dq);
       }
     }
 #endif  // CONFIG_NEW_QUANT
@@ -2082,8 +2082,8 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[0].round = quants->y_round[qindex];
   xd->plane[0].dequant = cm->y_dequant[qindex];
 #if CONFIG_NEW_QUANT
-  x->plane[0].cumbins_nuq = quants->y_cumbins_nuq[qindex];
   for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+    x->plane[0].cumbins_nuq[dq] = quants->y_cumbins_nuq[dq][qindex];
     xd->plane[0].dequant_val_nuq[dq] =
         cm->y_dequant_val_nuq[dq][qindex];
   }
@@ -2098,8 +2098,8 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[0].round_pxd = quants->y_round_pxd[qindex];
   xd->plane[0].dequant_pxd = cm->y_dequant_pxd[qindex];
 #if CONFIG_NEW_QUANT
-  x->plane[0].cumbins_nuq_pxd = quants->y_cumbins_nuq_pxd[qindex];
   for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+    x->plane[0].cumbins_nuq_pxd[dq] = quants->y_cumbins_nuq_pxd[dq][qindex];
     xd->plane[0].dequant_val_nuq_pxd[dq] =
         cm->y_dequant_val_nuq_pxd[dq][qindex];
   }
@@ -2120,8 +2120,8 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].round = quants->uv_round[qindex];
     xd->plane[i].dequant = cm->uv_dequant[qindex];
 #if CONFIG_NEW_QUANT
-    x->plane[i].cumbins_nuq = quants->uv_cumbins_nuq[qindex];
     for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+      x->plane[i].cumbins_nuq[dq] = quants->uv_cumbins_nuq[dq][qindex];
       xd->plane[i].dequant_val_nuq[dq] =
           cm->uv_dequant_val_nuq[dq][qindex];
     }
@@ -2135,8 +2135,8 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].round_pxd = quants->uv_round_pxd[qindex];
     xd->plane[i].dequant_pxd = cm->uv_dequant_pxd[qindex];
 #if CONFIG_NEW_QUANT
-    x->plane[i].cumbins_nuq_pxd = quants->uv_cumbins_nuq_pxd[qindex];
     for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+      x->plane[i].cumbins_nuq_pxd[dq] = quants->uv_cumbins_nuq_pxd[dq][qindex];
       xd->plane[i].dequant_val_nuq_pxd[dq] =
           cm->uv_dequant_val_nuq_pxd[dq][qindex];
     }
