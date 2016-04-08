@@ -1270,7 +1270,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  vp9_denoiser_reset_frame_stats(ctx);
+  if (cpi->oxcf.noise_sensitivity > 0 &&
+      cpi->denoiser.denoising_level > kDenLowLow) {
+    vp9_denoiser_reset_frame_stats(ctx);
+  }
 #endif
 
   if (cpi->rc.frames_since_golden == 0 && !cpi->use_svc) {
@@ -1642,7 +1645,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-    if (cpi->oxcf.noise_sensitivity > 0) {
+    if (cpi->oxcf.noise_sensitivity > 0 &&
+        cpi->denoiser.denoising_level > kDenLowLow) {
       vp9_denoiser_update_frame_stats(mi, sse_y, this_mode, ctx);
       // Keep track of zero_last cost.
       if (ref_frame == LAST_FRAME && frame_mv[this_mode][ref_frame].as_int == 0)
@@ -1823,7 +1827,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 &&
-      cpi->resize_pending == 0) {
+      cpi->resize_pending == 0 &&
+      cpi->denoiser.denoising_level > kDenLowLow &&
+      cpi->denoiser.reset == 0) {
     VP9_DENOISER_DECISION decision = COPY_BLOCK;
     vp9_denoiser_denoise(cpi, x, mi_row, mi_col, VPXMAX(BLOCK_8X8, bsize),
                          ctx, &decision);

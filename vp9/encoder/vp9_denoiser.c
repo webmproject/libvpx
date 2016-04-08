@@ -450,11 +450,12 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     int resized) {
   // Copy source into denoised reference buffers on KEY_FRAME or
   // if the just encoded frame was resized.
-  if (frame_type == KEY_FRAME || resized != 0) {
+  if (frame_type == KEY_FRAME || resized != 0 || denoiser->reset) {
     int i;
     // Start at 1 so as not to overwrite the INTRA_FRAME
     for (i = 1; i < MAX_REF_FRAMES; ++i)
       copy_frame(&denoiser->running_avg_y[i], &src);
+    denoiser->reset = 0;
     return;
   }
 
@@ -567,6 +568,8 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
   denoiser->increase_denoising = 0;
   denoiser->frame_buffer_initialized = 1;
   denoiser->denoising_level = kDenLow;
+  denoiser->prev_denoising_level = kDenLow;
+  denoiser->reset = 0;
   return 0;
 }
 
@@ -586,6 +589,12 @@ void vp9_denoiser_free(VP9_DENOISER *denoiser) {
 void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser,
                                   int noise_level) {
   denoiser->denoising_level = noise_level;
+  if (denoiser->denoising_level > kDenLowLow &&
+      denoiser->prev_denoising_level == kDenLowLow)
+    denoiser->reset = 1;
+  else
+    denoiser->reset = 0;
+  denoiser->prev_denoising_level = denoiser->denoising_level;
 }
 
 #ifdef OUTPUT_YUV_DENOISED

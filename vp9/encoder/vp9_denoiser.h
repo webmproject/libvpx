@@ -40,7 +40,9 @@ typedef struct vp9_denoiser {
   YV12_BUFFER_CONFIG last_source;
   int increase_denoising;
   int frame_buffer_initialized;
+  int reset;
   VP9_DENOISER_LEVEL denoising_level;
+  VP9_DENOISER_LEVEL prev_denoising_level;
 } VP9_DENOISER;
 
 struct VP9_COMP;
