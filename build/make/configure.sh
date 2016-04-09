@@ -1187,6 +1187,12 @@ EOF
               soft_disable avx2
               ;;
           esac
+          case $vc_version in
+            7|8|9)
+              echo "${tgt_cc} omits stdint.h, disabling webm-io..."
+              soft_disable webm_io
+              ;;
+          esac
           ;;
       esac
 
