@@ -700,7 +700,11 @@ static INLINE int is_interintra_pred(const MB_MODE_INFO *mbmi) {
 
 #if CONFIG_OBMC
 static INLINE int is_obmc_allowed(const MB_MODE_INFO *mbmi) {
+#if CONFIG_EXT_INTER
+  return (mbmi->sb_type >= BLOCK_8X8 && mbmi->ref_frame[1] != INTRA_FRAME);
+#else
   return (mbmi->sb_type >= BLOCK_8X8);
+#endif  // CONFIG_EXT_INTER
 }
 
 static INLINE int is_neighbor_overlappable(const MB_MODE_INFO *mbmi) {

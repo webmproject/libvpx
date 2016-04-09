@@ -1230,14 +1230,6 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
                       mi_row, mi_col, fpm_sync, (void *)pbi, inter_mode_ctx);
   }
 
-#if CONFIG_OBMC
-  mbmi->obmc = 0;
-#if CONFIG_SUPERTX
-  if (!supertx_enabled)
-#endif  // CONFIG_SUPERTX
-    mbmi->obmc = read_is_obmc_block(cm, xd, r);
-#endif  // CONFIG_OBMC
-
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
   if (is_compound)
@@ -1516,12 +1508,8 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 
 #if CONFIG_EXT_INTER
-    mbmi->use_wedge_interintra = 0;
-    mbmi->use_wedge_interinter = 0;
+  mbmi->use_wedge_interintra = 0;
   if (cm->reference_mode != COMPOUND_REFERENCE &&
-#if CONFIG_OBMC
-      !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
-#endif  // CONFIG_OBMC
 #if CONFIG_SUPERTX
       !supertx_enabled &&
 #endif
@@ -1557,6 +1545,21 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       }
     }
   }
+#endif  // CONFIG_EXT_INTER
+
+#if CONFIG_OBMC
+  mbmi->obmc = 0;
+#if CONFIG_SUPERTX
+  if (!supertx_enabled)
+#endif  // CONFIG_SUPERTX
+#if CONFIG_EXT_INTER
+    if (mbmi->ref_frame[1] != INTRA_FRAME)
+#endif  // CONFIG_EXT_INTER
+    mbmi->obmc = read_is_obmc_block(cm, xd, r);
+#endif  // CONFIG_OBMC
+
+#if CONFIG_EXT_INTER
+  mbmi->use_wedge_interinter = 0;
   if (cm->reference_mode != SINGLE_REFERENCE &&
       is_inter_compound_mode(mbmi->mode) &&
 #if CONFIG_OBMC

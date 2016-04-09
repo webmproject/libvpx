@@ -6248,6 +6248,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int64_t best_distortion = INT64_MAX;
   unsigned int best_pred_var = UINT_MAX;
   MB_MODE_INFO best_mbmi;
+#if CONFIG_EXT_INTER
+  int rate2_bmc_nocoeff;
+  MB_MODE_INFO best_bmc_mbmi;
+#endif  // CONFIG_EXT_INTER
 #endif  // CONFIG_OBMC
 
   int pred_exists = 0;
@@ -6278,9 +6282,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   assert(!is_comp_interintra_pred || is_interintra_allowed(mbmi));
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
-  tmp_rd = 0;
-#endif  // CONFIG_OBMC
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
   if (is_comp_pred)
@@ -6643,6 +6644,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   rs = cm->interp_filter == SWITCHABLE ? vp10_get_switchable_rate(cpi, xd) : 0;
 
 #if CONFIG_EXT_INTER
+#if CONFIG_OBMC
+  best_bmc_mbmi = *mbmi;
+  rate2_bmc_nocoeff = *rate2;
+  if (cm->interp_filter == SWITCHABLE)
+    rate2_bmc_nocoeff += rs;
+#endif  // CONFIG_OBMC
   if (is_comp_pred && is_interinter_wedge_used(bsize)) {
     int wedge_index, best_wedge_index = WEDGE_NONE, rs;
     int rate_sum;
@@ -6755,7 +6762,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
           xd, bsize, mi_row, mi_col, 1, preds1, strides);
       for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
         mbmi->interinter_wedge_index = wedge_index;
-        // vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
         vp10_build_wedge_inter_predictor_from_buf(xd, bsize, mi_row, mi_col,
                                                   preds0, strides,
                                                   preds1, strides);
@@ -6774,12 +6780,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         mbmi->use_wedge_interinter = 0;
       }
     }
-#if CONFIG_OBMC
-    if (mbmi->use_wedge_interinter)
-      allow_obmc = 0;
-#endif  // CONFIG_OBMC
     if (ref_best_rd < INT64_MAX &&
-        VPXMIN(best_rd_wedge, best_rd_nowedge) / 2 > ref_best_rd)
+        VPXMIN(best_rd_wedge, best_rd_nowedge) / 3 > ref_best_rd)
       return INT64_MAX;
 
     pred_exists = 0;
@@ -7079,7 +7081,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   memcpy(x->skip_txfm, skip_txfm, sizeof(skip_txfm));
   memcpy(x->bsse, bsse, sizeof(bsse));
 
-
 #if CONFIG_OBMC
   best_rd = INT64_MAX;
   for (mbmi->obmc = 0; mbmi->obmc <= allow_obmc; mbmi->obmc++) {
@@ -7087,6 +7088,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     int tmp_rate;
 
     if (mbmi->obmc) {
+#if CONFIG_EXT_INTER
+      *mbmi = best_bmc_mbmi;
+      assert(!mbmi->use_wedge_interinter);
+      vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+      mbmi->obmc = 1;
+#endif  // CONFIG_EXT_INTER
       vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0,
                                        NULL, NULL,
                                        dst_buf1, dst_stride1,
@@ -7106,13 +7113,16 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     x->pred_variance =
         vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
     x->skip = 0;
 
+#if CONFIG_EXT_INTER
+    *rate2 = mbmi->obmc ? rate2_bmc_nocoeff : rate2_nocoeff;
+#else
     *rate2 = rate2_nocoeff;
-    *distortion = 0;
+#endif  // CONFIG_EXT_INTER
     if (allow_obmc)
       *rate2 += cpi->obmc_cost[bsize][mbmi->obmc];
+    *distortion = 0;
 #endif  // CONFIG_OBMC
   if (!skip_txfm_sb) {
     int skippable_y, skippable_uv;
@@ -8472,6 +8482,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #if CONFIG_EXT_INTER
     rate2 += compmode_interintra_cost;
     if (cm->reference_mode != SINGLE_REFERENCE && comp_pred)
+#if CONFIG_OBMC
+      if (mbmi->obmc == 0)
+#endif  // CONFIG_OBMC
       rate2 += compmode_wedge_cost;
 #endif  // CONFIG_EXT_INTER
 
@@ -8578,7 +8591,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         *returnrate_nocoef -= vp10_cost_bit(vp10_get_intra_inter_prob(cm, xd),
                                             mbmi->ref_frame[0] != INTRA_FRAME);
 #if CONFIG_OBMC
-        if (is_neighbor_overlappable(mbmi) && is_obmc_allowed(mbmi))
+        if (is_inter_block(mbmi) && is_obmc_allowed(mbmi))
           *returnrate_nocoef -= cpi->obmc_cost[bsize][mbmi->obmc];
 #endif  // CONFIG_OBMC
 #endif  // CONFIG_SUPERTX

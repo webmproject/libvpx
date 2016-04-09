@@ -1115,14 +1115,6 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     int16_t mode_ctx = mbmi_ext->mode_context[mbmi->ref_frame[0]];
     write_ref_frames(cm, xd, w);
 
-#if CONFIG_OBMC
-#if CONFIG_SUPERTX
-    if (!supertx_enabled)
-#endif  // CONFIG_SUPERTX
-      if (is_obmc_allowed(mbmi))
-        vp10_write(w, mbmi->obmc, cm->fc->obmc_prob[bsize]);
-#endif  // CONFIG_OBMC
-
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
     if (is_compound)
@@ -1286,9 +1278,6 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
 
 #if CONFIG_EXT_INTER
     if (cpi->common.reference_mode != COMPOUND_REFERENCE &&
-#if CONFIG_OBMC
-        !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
-#endif  // CONFIG_OBMC
 #if CONFIG_SUPERTX
         !supertx_enabled &&
 #endif  // CONFIG_SUPERTX
@@ -1311,6 +1300,20 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         }
       }
     }
+#endif  // CONFIG_EXT_INTER
+
+#if CONFIG_OBMC
+#if CONFIG_SUPERTX
+    if (!supertx_enabled)
+#endif  // CONFIG_SUPERTX
+#if CONFIG_EXT_INTER
+      if (mbmi->ref_frame[1] != INTRA_FRAME)
+#endif  // CONFIG_EXT_INTER
+      if (is_obmc_allowed(mbmi))
+        vp10_write(w, mbmi->obmc, cm->fc->obmc_prob[bsize]);
+#endif  // CONFIG_OBMC
+
+#if CONFIG_EXT_INTER
     if (cpi->common.reference_mode != SINGLE_REFERENCE &&
         is_inter_compound_mode(mbmi->mode) &&
 #if CONFIG_OBMC
