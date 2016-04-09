@@ -52,6 +52,7 @@ typedef struct {
   double pcnt_second_ref;
   double pcnt_neutral;
   double intra_skip_pct;
+  double intra_smooth_pct;    // % of blocks that are smooth
   double inactive_zone_rows;  // Image mask rows top and bottom.
   double inactive_zone_cols;  // Image mask columns at left and right edges.
   double MVr;
@@ -107,6 +108,7 @@ typedef struct {
   double modified_error_max;
   double modified_error_left;
   double mb_av_energy;
+  double mb_smooth_pct;
 
 #if CONFIG_FP_MB_STATS
   uint8_t *frame_mb_stats_buf;
