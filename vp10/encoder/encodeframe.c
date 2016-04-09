@@ -4235,6 +4235,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
 
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO **mi = cm->mi_grid_visible + idx_str;
+    PC_TREE *const pc_root = td->pc_root[cm->mib_size_log2 - MIN_MIB_SIZE_LOG2];
 
     if (sf->adaptive_pred_interp_filter) {
       for (i = 0; i < leaf_nodes; ++i)
@@ -4249,7 +4250,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
     }
 
     vp10_zero(x->pred_mv);
-    td->pc_root->index = 0;
+    pc_root->index = 0;
 
     if (seg->enabled) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
@@ -4269,7 +4270,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                        &dummy_rate_nocoef,
 #endif  // CONFIG_SUPERTX
-                       1, td->pc_root);
+                       1, pc_root);
     } else if (cpi->partition_search_skippable_frame) {
       BLOCK_SIZE bsize;
       set_offsets(cpi, tile_info, x, mi_row, mi_col, cm->sb_size);
@@ -4280,7 +4281,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                        &dummy_rate_nocoef,
 #endif  // CONFIG_SUPERTX
-                       1, td->pc_root);
+                       1, pc_root);
     } else if (sf->partition_search_type == VAR_BASED_PARTITION &&
                cm->frame_type != KEY_FRAME) {
       choose_partitioning(cpi, tile_info, x, mi_row, mi_col);
@@ -4289,7 +4290,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                        &dummy_rate_nocoef,
 #endif  // CONFIG_SUPERTX
-                       1, td->pc_root);
+                       1, pc_root);
     } else {
       // If required set upper and lower partition size limits
       if (sf->auto_min_max_partition_size) {
@@ -4303,9 +4304,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
 #if CONFIG_SUPERTX
                         &dummy_rate_nocoef,
 #endif  // CONFIG_SUPERTX
-                        INT64_MAX,
-                        cm->sb_size == BLOCK_LARGEST ? td->pc_root
-                                                     : td->pc_root->split[0]);
+                        INT64_MAX, pc_root);
     }
   }
 #if CONFIG_ENTROPY

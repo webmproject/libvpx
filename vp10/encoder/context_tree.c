@@ -244,8 +244,16 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
     }
     ++square_index;
   }
-  td->pc_root = &td->pc_tree[tree_nodes - 1];
-  td->pc_root[0].none.best_mode_index = 2;
+
+  // Set up the root node for the largest superblock size
+  i = MAX_MIB_SIZE_LOG2 - MIN_MIB_SIZE_LOG2;
+  td->pc_root[i] = &td->pc_tree[tree_nodes - 1];
+  td->pc_root[i]->none.best_mode_index = 2;
+  // Set up the root nodes for the rest of the possible superblock sizes
+  while (--i >= 0) {
+    td->pc_root[i] = td->pc_root[i+1]->split[0];
+    td->pc_root[i]->none.best_mode_index = 2;
+  }
 }
 
 void vp10_free_pc_tree(ThreadData *td) {
