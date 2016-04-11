@@ -16,6 +16,24 @@
       "revId": "74599b6b614c15a41c5906a623361ca9a4fe04fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b444688_81a9fcb8",
+        "filename": "vpx_dsp/x86/highbd_subtract_sse4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-11T23:59:45Z",
+      "side": 1,
+      "message": "Good suggestion. Will send patch again.",
+      "parentUuid": "4b444688_e144401f",
+      "revId": "74599b6b614c15a41c5906a623361ca9a4fe04fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
