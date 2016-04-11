@@ -130,7 +130,7 @@ typedef struct vp10_variance_vtable {
 } vp10_variance_fn_ptr_t;
 #endif  // CONFIG_VP10
 
-void highbd_var_filter_block2d_bil_first_pass(
+void vpx_highbd_var_filter_block2d_bil_first_pass(
     const uint8_t *src_ptr8,
     uint16_t *output_ptr,
     unsigned int src_pixels_per_line,
@@ -139,7 +139,7 @@ void highbd_var_filter_block2d_bil_first_pass(
     unsigned int output_width,
     const uint8_t *filter);
 
-void highbd_var_filter_block2d_bil_second_pass(
+void vpx_highbd_var_filter_block2d_bil_second_pass(
     const uint16_t *src_ptr,
     uint16_t *output_ptr,
     unsigned int src_pixels_per_line,

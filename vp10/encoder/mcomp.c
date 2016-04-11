@@ -368,8 +368,8 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       DECLARE_ALIGNED(16, uint16_t, comp_pred16[MAX_SB_SQUARE]);
-      vpx_highbd_comp_avg_pred_c(comp_pred16, second_pred, w, h, y + offset,
-                                 y_stride);
+      vpx_highbd_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,
+                               y_stride);
       besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, src, src_stride,
                         sse1);
     } else {
