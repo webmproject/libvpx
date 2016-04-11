@@ -965,10 +965,6 @@ if (vpx_config("CONFIG_ENCODERS") eq "yes") {
 #
 add_proto qw/void vpx_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
 specialize qw/vpx_subtract_block neon msa/, "$sse2_x86inc";
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
-  add_proto qw/void vpx_highbd_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride, int bd";
-  specialize qw/vpx_highbd_subtract_block/;
-}
 
 if (vpx_config("CONFIG_VP10_ENCODER") eq "yes") {
   #
@@ -991,6 +987,8 @@ if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCO
     specialize qw/vpx_highbd_avg_8x8/;
     add_proto qw/unsigned int vpx_highbd_avg_4x4/, "const uint8_t *, int p";
     specialize qw/vpx_highbd_avg_4x4/;
+    add_proto qw/void vpx_highbd_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride, int bd";
+    specialize qw/vpx_highbd_subtract_block sse2/;
   }
 
   #
