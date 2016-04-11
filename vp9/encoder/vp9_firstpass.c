@@ -1378,7 +1378,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 }
 
 #define SR_DIFF_PART 0.0015
-#define MOTION_AMP_PART 0.003
 #define INTRA_PART 0.005
 #define DEFAULT_DECAY_LIMIT 0.75
 #define LOW_SR_DIFF_TRHESH 0.1
@@ -1393,8 +1392,10 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
   double sr_decay = 1.0;
   double modified_pct_inter;
   double modified_pcnt_intra;
-  const double motion_amplitude_factor =
-    frame->pcnt_motion * ((frame->mvc_abs + frame->mvr_abs) / 2);
+  const double motion_amplitude_part =
+      frame->pcnt_motion *
+      ((frame->mvc_abs + frame->mvr_abs) /
+       (cpi->initial_height + cpi->initial_width));
 
   modified_pct_inter = frame->pcnt_inter;
   if ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
@@ -1407,7 +1408,7 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
   if ((sr_diff > LOW_SR_DIFF_TRHESH)) {
     sr_diff = VPXMIN(sr_diff, SR_DIFF_MAX);
     sr_decay = 1.0 - (SR_DIFF_PART * sr_diff) -
-               (MOTION_AMP_PART * motion_amplitude_factor) -
+               motion_amplitude_part -
                (INTRA_PART * modified_pcnt_intra);
   }
   return VPXMAX(sr_decay, VPXMIN(DEFAULT_DECAY_LIMIT, modified_pct_inter));
