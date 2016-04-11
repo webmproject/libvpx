@@ -18,7 +18,6 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_scan.h"
-#include "vp9/common/vp9_seg_common.h"
 
 #include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_encoder.h"
@@ -354,12 +353,6 @@ static INLINE void add_token_no_extra(TOKENEXTRA **t,
   ++counts[token];
 }
 
-static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
-                             TX_SIZE tx_size) {
-  const int eob_max = 16 << (tx_size << 1);
-  return segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
-}
-
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
@@ -378,7 +371,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   int eob = p->eobs[block];
   const PLANE_TYPE type = get_plane_type(plane);
   const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
-  const int segment_id = mi->segment_id;
   const int16_t *scan, *nb;
   const scan_order *so;
   const int ref = is_inter_block(mi);
@@ -389,7 +381,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
       td->counts->eob_branch[tx_size][type][ref];
   const uint8_t *const band = get_band_translate(tx_size);
-  const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
+  const int tx_eob = 16 << (tx_size << 1);
   int16_t token;
   EXTRABIT extra;
   int aoff, loff;
@@ -426,7 +418,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
     ++c;
     pt = get_coef_context(nb, token_cache, c);
   }
-  if (c < seg_eob) {
+  if (c < tx_eob) {
     ++eob_branch[band[c]][pt];
     add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN,
                        counts[band[c]][pt]);
@@ -481,24 +473,26 @@ int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 }
 
 void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                     int dry_run, BLOCK_SIZE bsize) {
-  VP9_COMMON *const cm = &cpi->common;
+                     int dry_run, int seg_skip, BLOCK_SIZE bsize) {
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0];
   const int ctx = vp9_get_skip_context(xd);
-  const int skip_inc = !segfeature_active(&cm->seg, mi->segment_id,
-                                          SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, td, t};
+
+  if (seg_skip) {
+    assert(mi->skip);
+  }
+
   if (mi->skip) {
-    if (!dry_run)
-      td->counts->skip[ctx][1] += skip_inc;
+    if (!dry_run && !seg_skip)
+      ++td->counts->skip[ctx][1];
     reset_skip_context(xd, bsize);
     return;
   }
 
   if (!dry_run) {
-    td->counts->skip[ctx][0] += skip_inc;
+    ++td->counts->skip[ctx][0];
     vp9_foreach_transformed_block(xd, bsize, tokenize_b, &arg);
   } else {
     vp9_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);

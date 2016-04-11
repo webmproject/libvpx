@@ -4316,7 +4316,8 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
       vp9_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
       sum_intra_stats(td->counts, mi);
-    vp9_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
+    vp9_tokenize_sb(cpi, td, t, !output_enabled, seg_skip,
+                    VPXMAX(bsize, BLOCK_8X8));
   } else {
     int ref;
     const int is_compound = has_second_ref(mi);
@@ -4336,7 +4337,8 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
                                     VPXMAX(bsize, BLOCK_8X8));
 
     vp9_encode_sb(x, VPXMAX(bsize, BLOCK_8X8));
-    vp9_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
+    vp9_tokenize_sb(cpi, td, t, !output_enabled, seg_skip,
+                    VPXMAX(bsize, BLOCK_8X8));
   }
 
   if (output_enabled) {
