@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e217c86_8be96ef9",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-04-11T18:20:30Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "78c836407f694a199f1b7a6008ae2aceea372768",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
