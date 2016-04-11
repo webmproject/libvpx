@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b444688_e144401f",
+        "filename": "vpx_dsp/x86/highbd_subtract_sse4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-04-11T23:36:08Z",
+      "side": 1,
+      "message": "Instead of moving 2 32bit data, can you use \"movq\" to move the whole 64bit data? In that way, these functions can be converted to sse2.",
+      "revId": "74599b6b614c15a41c5906a623361ca9a4fe04fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
