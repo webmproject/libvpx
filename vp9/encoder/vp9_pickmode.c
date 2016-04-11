@@ -701,10 +701,9 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
     }
   }
 
-  if (*skippable == 0) {
-    *rate <<= (2 + VP9_PROB_COST_SHIFT);
-    *rate += (eob_cost << VP9_PROB_COST_SHIFT);
-  }
+  // If skippable is set, rate gets clobbered later.
+  *rate <<= (2 + VP9_PROB_COST_SHIFT);
+  *rate += (eob_cost << VP9_PROB_COST_SHIFT);
 }
 #endif
 
@@ -906,6 +905,7 @@ struct estimate_block_intra_args {
   VP9_COMP *cpi;
   MACROBLOCK *x;
   PREDICTION_MODE mode;
+  int skippable;
   int rate;
   int64_t dist;
 };
@@ -941,13 +941,9 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 
   if (plane == 0) {
     int64_t this_sse = INT64_MAX;
-    int is_skippable;
     // TODO(jingning): This needs further refactoring.
-    block_yrd(cpi, x, &rate, &dist, &is_skippable, &this_sse, 0,
+    block_yrd(cpi, x, &rate, &dist, &args->skippable, &this_sse, 0,
               bsize_tx, VPXMIN(tx_size, TX_16X16));
-    x->skip_txfm[0] = is_skippable;
-    // TODO(jingning): Skip is signalled per prediciton block not per tx block.
-    rate += vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), is_skippable);
   } else {
     unsigned int var = 0;
     unsigned int sse = 0;
@@ -1011,7 +1007,7 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   MODE_INFO *const mi = xd->mi[0];
   RD_COST this_rdc, best_rdc;
   PREDICTION_MODE this_mode;
-  struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
+  struct estimate_block_intra_args args = { cpi, x, DC_PRED, 1, 0, 0 };
   const TX_SIZE intra_tx_size =
       VPXMIN(max_txsize_lookup[bsize],
              tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
@@ -1036,11 +1032,19 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   // mode tests.
   for (this_mode = DC_PRED; this_mode <= H_PRED; ++this_mode) {
     args.mode = this_mode;
+    args.skippable = 1;
     args.rate = 0;
     args.dist = 0;
     mi->tx_size = intra_tx_size;
     vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
                                            estimate_block_intra, &args);
+    if (args.skippable) {
+      x->skip_txfm[0] = SKIP_TXFM_AC_DC;
+      args.rate = vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 1);
+    } else {
+      x->skip_txfm[0] = SKIP_TXFM_NONE;
+      args.rate += vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 0);
+    }
     this_rdc.rate = args.rate;
     this_rdc.dist = args.dist;
     this_rdc.rate += bmode_costs[this_mode];
@@ -1710,7 +1714,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       ((best_rdc.rdcost == INT64_MAX ||
       (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
        bsize <= cpi->sf.max_intra_bsize)))) {
-    struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
+    struct estimate_block_intra_args args = { cpi, x, DC_PRED, 1, 0, 0 };
     int i;
     TX_SIZE best_intra_tx_size = TX_SIZES;
     TX_SIZE intra_tx_size =
@@ -1760,11 +1764,21 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       mi->mode = this_mode;
       mi->ref_frame[0] = INTRA_FRAME;
       args.mode = this_mode;
+      args.skippable = 1;
       args.rate = 0;
       args.dist = 0;
       mi->tx_size = intra_tx_size;
       vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
                                              estimate_block_intra, &args);
+      // Check skip cost here since skippable is not set for for uv, this
+      // mirrors the behavior used by inter
+      if (args.skippable) {
+        x->skip_txfm[0] = SKIP_TXFM_AC_DC;
+        args.rate = vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 1);
+      } else {
+        x->skip_txfm[0] = SKIP_TXFM_NONE;
+        args.rate += vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 0);
+      }
       // Inter and intra RD will mismatch in scale for non-screen content.
       if (cpi->oxcf.content == VP9E_CONTENT_SCREEN) {
         if (x->color_sensitivity[0])
