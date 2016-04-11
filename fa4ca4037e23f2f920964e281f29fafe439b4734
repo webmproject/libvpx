@@ -16,6 +16,24 @@
       "revId": "fa4ca4037e23f2f920964e281f29fafe439b4734",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e217c86_795ecbbe",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-11T16:30:02Z",
+      "side": 1,
+      "message": "See the above assert() (Line 484). If seg_skip is true, mi-\u003eskip is always set and we exit at the first return (Line 491).",
+      "parentUuid": "0e217c86_3997f3c5",
+      "revId": "fa4ca4037e23f2f920964e281f29fafe439b4734",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
