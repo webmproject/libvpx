@@ -12,22 +12,22 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
 
-unsigned int vpx_avg_8x8_c(const uint8_t *s, int p) {
+unsigned int vpx_avg_8x8_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
-  for (i = 0; i < 8; ++i, s+=p)
-    for (j = 0; j < 8; sum += s[j], ++j) {}
+  for (i = 0; i < 8; ++i, src += stride)
+    for (j = 0; j < 8; sum += src[j], ++j) {}
 
-  return (sum + 32) >> 6;
+  return ROUND_POWER_OF_TWO(sum, 6);
 }
 
-unsigned int vpx_avg_4x4_c(const uint8_t *s, int p) {
+unsigned int vpx_avg_4x4_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
-  for (i = 0; i < 4; ++i, s+=p)
-    for (j = 0; j < 4; sum += s[j], ++j) {}
+  for (i = 0; i < 4; ++i, src += stride)
+    for (j = 0; j < 4; sum += src[j], ++j) {}
 
-  return (sum + 8) >> 4;
+  return ROUND_POWER_OF_TWO(sum, 4);
 }
 
 // src_diff: first pass, 9 bit, dynamic range [-255, 255]
@@ -176,14 +176,15 @@ int vpx_vector_var_c(int16_t const *ref, int16_t const *src,
   return var;
 }
 
-void vpx_minmax_8x8_c(const uint8_t *s, int p, const uint8_t *d, int dp,
+void vpx_minmax_8x8_c(const uint8_t *src, int src_stride,
+                      const uint8_t *ref, int ref_stride,
                       int *min, int *max) {
   int i, j;
   *min = 255;
   *max = 0;
-  for (i = 0; i < 8; ++i, s += p, d += dp) {
+  for (i = 0; i < 8; ++i, src += src_stride, ref += ref_stride) {
     for (j = 0; j < 8; ++j) {
-      int diff = abs(s[j]-d[j]);
+      int diff = abs(src[j]-ref[j]);
       *min = diff < *min ? diff : *min;
       *max = diff > *max ? diff : *max;
     }
@@ -191,24 +192,24 @@ void vpx_minmax_8x8_c(const uint8_t *s, int p, const uint8_t *d, int dp,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-unsigned int vpx_highbd_avg_8x8_c(const uint8_t *s8, int p) {
+unsigned int vpx_highbd_avg_8x8_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
-  const uint16_t* s = CONVERT_TO_SHORTPTR(s8);
-  for (i = 0; i < 8; ++i, s+=p)
+  const uint16_t* s = CONVERT_TO_SHORTPTR(src);
+  for (i = 0; i < 8; ++i, s += stride)
     for (j = 0; j < 8; sum += s[j], ++j) {}
 
-  return (sum + 32) >> 6;
+  return ROUND_POWER_OF_TWO(sum, 6);
 }
 
-unsigned int vpx_highbd_avg_4x4_c(const uint8_t *s8, int p) {
+unsigned int vpx_highbd_avg_4x4_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
-  const uint16_t* s = CONVERT_TO_SHORTPTR(s8);
-  for (i = 0; i < 4; ++i, s+=p)
+  const uint16_t* s = CONVERT_TO_SHORTPTR(src);
+  for (i = 0; i < 4; ++i, s+=stride)
     for (j = 0; j < 4; sum += s[j], ++j) {}
 
-  return (sum + 8) >> 4;
+  return ROUND_POWER_OF_TWO(sum, 4);
 }
 
 void vpx_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,

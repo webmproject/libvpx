@@ -463,6 +463,9 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
 
   vp10_free_pc_tree(&cpi->td);
 
+  if (cpi->sf.partition_search_type == VAR_BASED_PARTITION)
+    vp10_free_var_tree(&cpi->td);
+
   if (cpi->common.allow_screen_content_tools)
     vpx_free(cpi->td.mb.palette_buffer);
 
@@ -1999,6 +2002,8 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
       CHECK_MEM_ERROR(cm, x->palette_buffer,
                       vpx_memalign(16, sizeof(*x->palette_buffer)));
     }
+    // Reallocate the pc_tree, as it's contents depends on
+    // the state of cm->allow_screen_content_tools
     vp10_free_pc_tree(&cpi->td);
     vp10_setup_pc_tree(&cpi->common, &cpi->td);
   }
@@ -2586,6 +2591,8 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
         vpx_free(thread_data->td->mb.palette_buffer);
       vpx_free(thread_data->td->counts);
       vp10_free_pc_tree(thread_data->td);
+      if (cpi->sf.partition_search_type == VAR_BASED_PARTITION)
+        vp10_free_var_tree(thread_data->td);
       vpx_free(thread_data->td);
     }
   }

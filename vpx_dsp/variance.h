@@ -23,10 +23,10 @@ extern "C" {
 #define FILTER_WEIGHT 128
 
 typedef unsigned int(*vpx_sad_fn_t)(const uint8_t *a, int a_stride,
-                                    const uint8_t *b_ptr, int b_stride);
+                                    const uint8_t *b, int b_stride);
 
-typedef unsigned int(*vpx_sad_avg_fn_t)(const uint8_t *a_ptr, int a_stride,
-                                        const uint8_t *b_ptr, int b_stride,
+typedef unsigned int(*vpx_sad_avg_fn_t)(const uint8_t *a, int a_stride,
+                                        const uint8_t *b, int b_stride,
                                         const uint8_t *second_pred);
 
 typedef void (*vp8_copy32xn_fn_t)(const uint8_t *a, int a_stride,
@@ -50,10 +50,10 @@ typedef unsigned int (*vpx_subpixvariance_fn_t)(const uint8_t *a, int a_stride,
                                                 const uint8_t *b, int b_stride,
                                                 unsigned int *sse);
 
-typedef unsigned int (*vpx_subp_avg_variance_fn_t)(const uint8_t *a_ptr,
+typedef unsigned int (*vpx_subp_avg_variance_fn_t)(const uint8_t *a,
                                                    int a_stride,
                                                    int xoffset, int yoffset,
-                                                   const uint8_t *b_ptr,
+                                                   const uint8_t *b,
                                                    int b_stride,
                                                    unsigned int *sse,
                                                    const uint8_t *second_pred);
@@ -75,26 +75,25 @@ typedef struct variance_vtable {
 #endif  // CONFIG_VP8
 
 #if CONFIG_VP10 && CONFIG_EXT_INTER
-typedef unsigned int(*vpx_masked_sad_fn_t)(const uint8_t *src_ptr,
-                                           int source_stride,
-                                           const uint8_t *ref_ptr,
+typedef unsigned int(*vpx_masked_sad_fn_t)(const uint8_t *src,
+                                           int src_stride,
+                                           const uint8_t *ref,
                                            int ref_stride,
                                            const uint8_t *msk_ptr,
                                            int msk_stride);
-typedef unsigned int (*vpx_masked_variance_fn_t)(const uint8_t *src_ptr,
-                                                 int source_stride,
-                                                 const uint8_t *ref_ptr,
+typedef unsigned int (*vpx_masked_variance_fn_t)(const uint8_t *src,
+                                                 int src_stride,
+                                                 const uint8_t *ref,
                                                  int ref_stride,
-                                                 const uint8_t *msk_ptr,
+                                                 const uint8_t *msk,
                                                  int msk_stride,
                                                  unsigned int *sse);
-typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(const uint8_t *src_ptr,
-                                                       int source_stride,
-                                                       int xoffset,
-                                                       int yoffset,
-                                                       const uint8_t *ref_ptr,
-                                                       int Refstride,
-                                                       const uint8_t *msk_ptr,
+typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(const uint8_t *src,
+                                                       int src_stride,
+                                                       int xoffset, int yoffset,
+                                                       const uint8_t *ref,
+                                                       int ref_stride,
+                                                       const uint8_t *msk,
                                                        int msk_stride,
                                                        unsigned int *sse);
 #endif  // CONFIG_VP10 && CONFIG_EXT_INTER
