@@ -34,6 +34,7 @@
 #include "vp10/encoder/rd.h"
 #include "vp10/encoder/speed_features.h"
 #include "vp10/encoder/tokenize.h"
+#include "vp10/encoder/variance_tree.h"
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #include "vp10/encoder/denoiser.h"
@@ -267,6 +268,9 @@ typedef struct ThreadData {
   PICK_MODE_CONTEXT *leaf_tree;
   PC_TREE *pc_tree;
   PC_TREE *pc_root[MAX_MIB_SIZE_LOG2 - MIN_MIB_SIZE_LOG2 + 1];
+
+  VAR_TREE *var_tree;
+  VAR_TREE *var_root[MAX_MIB_SIZE_LOG2 - MIN_MIB_SIZE_LOG2 + 1];
 } ThreadData;
 
 struct EncWorkerData;
@@ -568,9 +572,12 @@ typedef struct VP10_COMP {
   int resize_count;
 
   // VAR_BASED_PARTITION thresholds
-  // 0 - threshold_64x64; 1 - threshold_32x32;
-  // 2 - threshold_16x16; 3 - vbp_threshold_8x8;
-  int64_t vbp_thresholds[4];
+  // 0 - threshold_128x128;
+  // 1 - threshold_64x64;
+  // 2 - threshold_32x32;
+  // 3 - threshold_16x16;
+  // 4 - threshold_8x8;
+  int64_t vbp_thresholds[5];
   int64_t vbp_threshold_minmax;
   int64_t vbp_threshold_sad;
   BLOCK_SIZE vbp_bsize_min;
