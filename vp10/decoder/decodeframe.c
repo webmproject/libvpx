@@ -3173,9 +3173,6 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
                          &td->bit_reader, pbi->decrypt_cb,
                          pbi->decrypt_state);
 #else
-      if (buf->size < 3 || !read_is_valid(buf->data, buf->size, data_end))
-        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Truncated packet or corrupt tile length");
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &td->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
