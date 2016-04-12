@@ -64,10 +64,10 @@ static PREDICTION_MODE read_intra_mode_uv(VP10_COMMON *cm, MACROBLOCKD *xd,
 
 #if CONFIG_EXT_INTER
 static INTERINTRA_MODE read_interintra_mode(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                            vpx_reader *r, int size_group) {
+                                            vp10_reader *r, int size_group) {
   const INTERINTRA_MODE ii_mode =
-      (INTERINTRA_MODE)vpx_read_tree(r, vp10_interintra_mode_tree,
-                                     cm->fc->interintra_mode_prob[size_group]);
+      (INTERINTRA_MODE)vp10_read_tree(r, vp10_interintra_mode_tree,
+                                      cm->fc->interintra_mode_prob[size_group]);
   FRAME_COUNTS *counts = xd->counts;
   if (counts)
     ++counts->interintra_mode[size_group][ii_mode];
@@ -1527,7 +1527,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif
       is_interintra_allowed(mbmi)) {
     const int bsize_group = size_group_lookup[bsize];
-    const int interintra = vpx_read(r, cm->fc->interintra_prob[bsize_group]);
+    const int interintra = vp10_read(r, cm->fc->interintra_prob[bsize_group]);
     if (xd->counts)
       xd->counts->interintra[bsize_group][interintra]++;
     assert(mbmi->ref_frame[1] == NONE);
