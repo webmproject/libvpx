@@ -14,6 +14,7 @@
 #include <assert.h>
 
 #include "./vpx_config.h"
+#include "vp10/common/blockd.h"
 #include "vp10/common/common.h"
 #include "vp10/common/enums.h"
 #include "vpx_dsp/inv_txfm.h"
@@ -47,6 +48,10 @@ typedef struct {
   highbd_transform_1d cols, rows;  // vertical and horizontal
 } highbd_transform_2d;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#define MAX_TX_SCALE 1
+int get_tx_scale(const MACROBLOCKD *const xd, const TX_TYPE tx_type,
+                 const TX_SIZE tx_size);
 
 void vp10_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
