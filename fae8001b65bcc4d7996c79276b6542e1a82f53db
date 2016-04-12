@@ -16,6 +16,24 @@
       "revId": "fae8001b65bcc4d7996c79276b6542e1a82f53db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb1d96f8_9db18706",
+        "filename": "test/vp10_ans_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-12T23:57:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb1d96f8_9a1bcd09",
+      "revId": "fae8001b65bcc4d7996c79276b6542e1a82f53db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
