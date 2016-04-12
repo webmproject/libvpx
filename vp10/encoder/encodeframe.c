@@ -4318,8 +4318,8 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
       SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
 
       for (t = TX_4X4; t <= TX_32X32; ++t)
-        full_to_model_counts(cpi->td.counts->coef[t],
-                             cpi->td.rd_counts.coef_counts[t]);
+        vp10_full_to_model_counts(cpi->td.counts->coef[t],
+                                  cpi->td.rd_counts.coef_counts[t]);
       vp10_partial_adapt_probs(cm, mi_row, mi_col);
       ++cm->coef_probs_update_idx;
       vp10_copy(subframe_stats->coef_probs_buf[cm->coef_probs_update_idx],
@@ -4328,7 +4328,7 @@ static void encode_rd_sb_row(VP10_COMP *cpi,
                 cpi->td.rd_counts.coef_counts);
       vp10_copy(subframe_stats->eob_counts_buf[cm->coef_probs_update_idx],
                 cm->counts.eob_branch);
-      fill_token_costs(x->token_costs, cm->fc->coef_probs);
+      vp10_fill_token_costs(x->token_costs, cm->fc->coef_probs);
     }
   }
 #endif  // CONFIG_ENTROPY
