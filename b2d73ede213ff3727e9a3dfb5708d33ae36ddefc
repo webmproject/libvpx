@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ba47ebb_5387b6d6",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-04-12T19:15:54Z",
+      "side": 1,
+      "message": "Don\u0027t think it is an experiment. Maybe better to define it in the specific test file like Yi did in his patch. (?)",
+      "revId": "b2d73ede213ff3727e9a3dfb5708d33ae36ddefc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
