@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ba47ebb_700750fe",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3425,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-12T17:43:39Z",
+      "side": 1,
+      "message": "No need for a wrapper, just use the non-static vp10_ prefixed function everywhere.",
+      "range": {
+        "startLine": 3422,
+        "startChar": 0,
+        "endLine": 3425,
+        "endChar": 1
+      },
+      "revId": "38a36a8d1d3f5698bf7669b9b8c5d305327688b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ba47ebb_b018d85a",
+        "filename": "vp10/encoder/rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-12T17:43:39Z",
+      "side": 1,
+      "message": "Just use the non-static vp10 prefixed function everwhere",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 188,
+        "endChar": 1
+      },
+      "revId": "38a36a8d1d3f5698bf7669b9b8c5d305327688b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
