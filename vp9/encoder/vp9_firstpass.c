@@ -115,7 +115,7 @@ static void output_stats(FIRSTPASS_STATS *stats,
 
     fprintf(fpfile, "%12.0lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf %12.4lf"
             "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf"
-            "%12.4lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf\n",
+            "%12.4lf %12.4lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf\n",
             stats->frame,
             stats->weight,
             stats->intra_error,
@@ -126,6 +126,7 @@ static void output_stats(FIRSTPASS_STATS *stats,
             stats->pcnt_second_ref,
             stats->pcnt_neutral,
             stats->intra_skip_pct,
+            stats->intra_smooth_pct,
             stats->inactive_zone_rows,
             stats->inactive_zone_cols,
             stats->MVr,
@@ -165,6 +166,7 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->pcnt_second_ref = 0.0;
   section->pcnt_neutral = 0.0;
   section->intra_skip_pct = 0.0;
+  section->intra_smooth_pct = 0.0;
   section->inactive_zone_rows = 0.0;
   section->inactive_zone_cols = 0.0;
   section->MVr = 0.0;
@@ -193,6 +195,7 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
   section->pcnt_second_ref += frame->pcnt_second_ref;
   section->pcnt_neutral += frame->pcnt_neutral;
   section->intra_skip_pct += frame->intra_skip_pct;
+  section->intra_smooth_pct += frame->intra_smooth_pct;
   section->inactive_zone_rows += frame->inactive_zone_rows;
   section->inactive_zone_cols += frame->inactive_zone_cols;
   section->MVr += frame->MVr;
@@ -219,6 +222,7 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->pcnt_second_ref -= frame->pcnt_second_ref;
   section->pcnt_neutral -= frame->pcnt_neutral;
   section->intra_skip_pct -= frame->intra_skip_pct;
+  section->intra_smooth_pct -= frame->intra_smooth_pct;
   section->inactive_zone_rows -= frame->inactive_zone_rows;
   section->inactive_zone_cols -= frame->inactive_zone_cols;
   section->MVr -= frame->MVr;
@@ -493,12 +497,12 @@ static void set_first_pass_params(VP9_COMP *cpi) {
 // This threshold is used to track blocks where to all intents and purposes
 // the intra prediction error 0. Though the metric we test against
 // is technically a sse we are mainly interested in blocks where all the pixels
-// int he 8 bit domain have an error of <= 1 (where error = sse) so a
+// in the 8 bit domain have an error of <= 1 (where error = sse) so a
 // linear scaling for 10 and 12 bit gives similar results.
 #define UL_INTRA_THRESH 50
-#if CONFIG_VP9_HIGHBITDEPTH
 static int get_ul_intra_threshold(VP9_COMMON *cm) {
   int ret_val = UL_INTRA_THRESH;
+#if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
     switch (cm->bit_depth) {
       case VPX_BITS_8:
@@ -515,9 +519,37 @@ static int get_ul_intra_threshold(VP9_COMMON *cm) {
                     "VPX_BITS_10 or VPX_BITS_12");
     }
   }
+#else
+  (void) cm;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   return ret_val;
 }
+
+#define SMOOTH_INTRA_THRESH 4000
+static int get_smooth_intra_threshold(VP9_COMMON *cm) {
+  int ret_val = SMOOTH_INTRA_THRESH;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    switch (cm->bit_depth) {
+      case VPX_BITS_8:
+        ret_val = SMOOTH_INTRA_THRESH;
+        break;
+      case VPX_BITS_10:
+        ret_val = SMOOTH_INTRA_THRESH >> 2;
+        break;
+      case VPX_BITS_12:
+        ret_val = SMOOTH_INTRA_THRESH >> 4;
+        break;
+      default:
+        assert(0 && "cm->bit_depth should be VPX_BITS_8, "
+                    "VPX_BITS_10 or VPX_BITS_12");
+    }
+  }
+#else
+  (void) cm;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  return ret_val;
+}
 
 #define INVALID_ROW -1
 void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
@@ -545,6 +577,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   const int intrapenalty = INTRA_MODE_PENALTY;
   double neutral_count;
   int intra_skip_count = 0;
+  int intra_smooth_count = 0;
   int image_data_start_row = INVALID_ROW;
   int new_mv_count = 0;
   int sum_in_vectors = 0;
@@ -716,14 +749,13 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       // domain). In natural videos this is uncommon, but it is much more
       // common in animations, graphics and screen content, so may be used
       // as a signal to detect these types of content.
-#if CONFIG_VP9_HIGHBITDEPTH
       if (this_error < get_ul_intra_threshold(cm)) {
-#else
-      if (this_error < UL_INTRA_THRESH) {
-#endif
         ++intra_skip_count;
       } else if ((mb_col > 0) && (image_data_start_row == INVALID_ROW)) {
         image_data_start_row = mb_row;
+      }
+      if (this_error < get_smooth_intra_threshold(cm)) {
+        ++intra_smooth_count;
       }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1090,6 +1122,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fps.pcnt_second_ref = (double)second_ref_count / num_mbs;
     fps.pcnt_neutral = (double)neutral_count / num_mbs;
     fps.intra_skip_pct = (double)intra_skip_count / num_mbs;
+    fps.intra_smooth_pct = (double)intra_smooth_count / num_mbs;
     fps.inactive_zone_rows = (double)image_data_start_row;
     fps.inactive_zone_cols = (double)0;  // TODO(paulwilkins): fix
 
@@ -2800,6 +2833,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     // applied when combining MB error values for the frame.
     twopass->mb_av_energy =
       log(((this_frame.intra_error * 256.0) / num_mbs) + 1.0);
+    twopass->mb_smooth_pct = this_frame.intra_smooth_pct;
   }
 
   // Update the total stats remaining structure.
