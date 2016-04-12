@@ -637,10 +637,8 @@ int vp10_set_size_literal(VP10_COMP *cpi, unsigned int width,
 
 int vp10_get_quantizer(struct VP10_COMP *cpi);
 
-#if CONFIG_ENTROPY
-void full_to_model_counts(vp10_coeff_count_model *model_count,
-                          vp10_coeff_count *full_count);
-#endif  // CONFIG_ENTROPY
+void vp10_full_to_model_counts(vp10_coeff_count_model *model_count,
+                               vp10_coeff_count *full_count);
 
 static INLINE int frame_is_kf_gf_arf(const VP10_COMP *cpi) {
   return frame_is_intra_only(&cpi->common) ||

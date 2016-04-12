@@ -3413,13 +3413,9 @@ static void full_to_model_count(unsigned int *model_count,
   model_count[EOB_MODEL_TOKEN] = full_count[EOB_TOKEN];
 }
 
-#if CONFIG_ENTROPY
-void full_to_model_counts(vp10_coeff_count_model *model_count,
-                                 vp10_coeff_count *full_count) {
-#else
-static void full_to_model_counts(vp10_coeff_count_model *model_count,
-                                 vp10_coeff_count *full_count) {
-#endif  // CONFIG_ENTROPY
+
+void vp10_full_to_model_counts(vp10_coeff_count_model *model_count,
+                               vp10_coeff_count *full_count) {
   int i, j, k, l;
 
   for (i = 0; i < PLANE_TYPES; ++i)
@@ -4410,8 +4406,8 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   vp10_update_reference_frames(cpi);
 
   for (t = TX_4X4; t <= TX_32X32; t++)
-    full_to_model_counts(cpi->td.counts->coef[t],
-                         cpi->td.rd_counts.coef_counts[t]);
+    vp10_full_to_model_counts(cpi->td.counts->coef[t],
+                              cpi->td.rd_counts.coef_counts[t]);
 
   if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
 #if CONFIG_ENTROPY

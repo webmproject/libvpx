@@ -2313,8 +2313,8 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
     vp10_copy(eob_counts_copy, cm->counts.eob_branch);
     for (i = 1; i <= cpi->common.coef_probs_update_idx; ++i) {
       for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-        full_to_model_counts(cm->counts.coef[tx_size],
-                             subframe_stats->coef_counts_buf[i][tx_size]);
+        vp10_full_to_model_counts(cm->counts.coef[tx_size],
+                                  subframe_stats->coef_counts_buf[i][tx_size]);
       vp10_copy(cm->counts.eob_branch, subframe_stats->eob_counts_buf[i]);
       vp10_partial_adapt_probs(cm, 0, 0);
       vp10_copy(subframe_stats->coef_probs_buf[i], cm->fc->coef_probs);
