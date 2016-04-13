@@ -28,6 +28,9 @@
 #include "vp10/encoder/aq_cyclicrefresh.h"
 #include "vp10/encoder/aq_variance.h"
 #include "vp10/encoder/bitstream.h"
+#if CONFIG_ANS
+#include "vp10/encoder/buf_ans.h"
+#endif
 #include "vp10/encoder/context_tree.h"
 #include "vp10/encoder/encodeframe.h"
 #include "vp10/encoder/encodemv.h"
@@ -473,6 +476,9 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
     vpx_free(cpi->source_diff_var);
     cpi->source_diff_var = NULL;
   }
+#if CONFIG_ANS
+  vp10_buf_ans_free(&cpi->buf_ans);
+#endif  // CONFIG_ANS
 }
 
 static void save_coding_context(VP10_COMP *cpi) {
@@ -804,6 +810,9 @@ void vp10_alloc_compressor_data(VP10_COMP *cpi) {
     unsigned int tokens = get_token_alloc(cm->mb_rows, cm->mb_cols);
     CHECK_MEM_ERROR(cm, cpi->tile_tok[0][0],
         vpx_calloc(tokens, sizeof(*cpi->tile_tok[0][0])));
+#if CONFIG_ANS
+    vp10_buf_ans_alloc(&cpi->buf_ans, cm, tokens);
+#endif  // CONFIG_ANS
   }
 
   vp10_setup_pc_tree(&cpi->common, &cpi->td);

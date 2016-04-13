@@ -23,6 +23,9 @@
 #include "vp10/common/onyxc_int.h"
 
 #include "vp10/encoder/aq_cyclicrefresh.h"
+#if CONFIG_ANS
+#include "vp10/encoder/buf_ans.h"
+#endif
 #include "vp10/encoder/context_tree.h"
 #include "vp10/encoder/encodemb.h"
 #include "vp10/encoder/firstpass.h"
@@ -590,6 +593,9 @@ typedef struct VP10_COMP {
 #if CONFIG_ENTROPY
   SUBFRAME_STATS subframe_stats;
 #endif  // CONFIG_ENTROPY
+#if CONFIG_ANS
+  struct BufAnsCoder buf_ans;
+#endif
 } VP10_COMP;
 
 void vp10_initialize_enc(void);

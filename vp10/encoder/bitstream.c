@@ -2675,9 +2675,10 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
                            unsigned int *max_tile_size,
                            unsigned int *max_tile_col_size) {
   const VP10_COMMON *const cm = &cpi->common;
-  vp10_writer mode_bc;
 #if CONFIG_ANS
   struct AnsCoder token_ans;
+#else
+  vp10_writer mode_bc;
 #endif  // CONFIG_ANS
   int tile_row, tile_col;
   TOKENEXTRA *(*const tok_buffers)[MAX_TILE_COLS] = cpi->tile_tok;
@@ -2689,10 +2690,7 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
   const int have_tiles = tile_cols * tile_rows > 1;
 #endif  // CONFIG_EXT_TILE
 #if CONFIG_ANS
-  const int ans_window_size = get_token_alloc(cm->mb_rows, cm->mb_cols) * 3;
-  struct buffered_ans_symbol *uco_ans_buf;
-  CHECK_MEM_ERROR(cm, uco_ans_buf,
-                  vpx_malloc(ans_window_size * sizeof(*uco_ans_buf)));
+  BufAnsCoder *buf_ans = &cpi->buf_ans;
 #endif  // CONFIG_ANS
 
   *max_tile_size = 0;
@@ -2734,11 +2732,11 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
       vpx_stop_encode(&mode_bc);
       tile_size = mode_bc.pos;
 #else
-      buf_ans_write_init(&mode_bc, uco_ans_buf, ans_window_size);
-      write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
+      buf_ans_write_reset(buf_ans);
+      write_modes(cpi, &tile_info, buf_ans, &tok, tok_end);
       assert(tok == tok_end);
       ans_write_init(&token_ans, buf->data + data_offset);
-      buf_ans_flush(&mode_bc, &token_ans);
+      buf_ans_flush(buf_ans, &token_ans);
       tile_size = ans_write_end(&token_ans);
 #endif  // !CONFIG_ANS
 
@@ -2810,11 +2808,11 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
       vpx_stop_encode(&mode_bc);
       tile_size = mode_bc.pos;
 #else
-      buf_ans_write_init(&mode_bc, uco_ans_buf, ans_window_size);
-      write_modes(cpi, &tile_info, &mode_bc, &tok, tok_end);
+      buf_ans_write_reset(buf_ans);
+      write_modes(cpi, &tile_info, buf_ans, &tok, tok_end);
       assert(tok == tok_end);
       ans_write_init(&token_ans, dst + total_size);
-      buf_ans_flush(&mode_bc, &token_ans);
+      buf_ans_flush(buf_ans, &token_ans);
       tile_size = ans_write_end(&token_ans);
 #endif  // !CONFIG_ANS
 
@@ -2832,10 +2830,6 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
     }
   }
 #endif  // CONFIG_EXT_TILE
-
-#if CONFIG_ANS
-  vpx_free(uco_ans_buf);
-#endif  // CONFIG_ANS
   return total_size;
 }
 
@@ -3046,51 +3040,50 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 #endif  // CONFIG_SUPERTX
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = cpi->td.counts;
-  vp10_writer header_bc;
+  vp10_writer *header_bc;
   int i, j;
 
 #if CONFIG_ANS
   struct AnsCoder header_ans;
-  struct buffered_ans_symbol *uco_ans_buf;
-  const int ans_window_size = 50000;  // TODO(aconverse): revisit window size
   int header_size;
-  CHECK_MEM_ERROR(cm, uco_ans_buf,
-                  vpx_malloc(ans_window_size * sizeof(*uco_ans_buf)));
-  buf_ans_write_init(&header_bc, uco_ans_buf, ans_window_size);
+  header_bc = &cpi->buf_ans;
+  buf_ans_write_reset(header_bc);
 #else
-  vpx_start_encode(&header_bc, data);
+  vp10_writer real_header_bc;
+  header_bc = &real_header_bc;
+  vpx_start_encode(header_bc, data);
 #endif
-  update_txfm_probs(cm, &header_bc, counts);
-  update_coef_probs(cpi, &header_bc);
+  update_txfm_probs(cm, header_bc, counts);
+  update_coef_probs(cpi, header_bc);
 
 #if CONFIG_VAR_TX
-  update_txfm_partition_probs(cm, &header_bc, counts);
+  update_txfm_partition_probs(cm, header_bc, counts);
 #endif
 
-  update_skip_probs(cm, &header_bc, counts);
-  update_seg_probs(cpi, &header_bc);
+  update_skip_probs(cm, header_bc, counts);
+  update_seg_probs(cpi, header_bc);
 
   for (i = 0; i < INTRA_MODES; ++i)
     prob_diff_update(vp10_intra_mode_tree, fc->uv_mode_prob[i],
-                     counts->uv_mode[i], INTRA_MODES, &header_bc);
+                     counts->uv_mode[i], INTRA_MODES, header_bc);
 
 #if CONFIG_EXT_PARTITION_TYPES
   prob_diff_update(vp10_partition_tree, fc->partition_prob[0],
-                   counts->partition[0], PARTITION_TYPES, &header_bc);
+                   counts->partition[0], PARTITION_TYPES, header_bc);
   for (i = 1; i < PARTITION_CONTEXTS; ++i)
     prob_diff_update(vp10_ext_partition_tree, fc->partition_prob[i],
                      counts->partition[i], EXT_PARTITION_TYPES,
-                     &header_bc);
+                     header_bc);
 #else
   for (i = 0; i < PARTITION_CONTEXTS; ++i)
     prob_diff_update(vp10_partition_tree, fc->partition_prob[i],
-                     counts->partition[i], PARTITION_TYPES, &header_bc);
+                     counts->partition[i], PARTITION_TYPES, header_bc);
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_INTRA
   for (i = 0; i < INTRA_FILTERS + 1; ++i)
     prob_diff_update(vp10_intra_filter_tree, fc->intra_filter_probs[i],
-                     counts->intra_filter[i], INTRA_FILTERS, &header_bc);
+                     counts->intra_filter[i], INTRA_FILTERS, header_bc);
 #endif  // CONFIG_EXT_INTRA
 
   if (frame_is_intra_only(cm)) {
@@ -3098,23 +3091,23 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
     for (i = 0; i < INTRA_MODES; ++i)
       for (j = 0; j < INTRA_MODES; ++j)
         prob_diff_update(vp10_intra_mode_tree, cm->kf_y_prob[i][j],
-                         counts->kf_y_mode[i][j], INTRA_MODES, &header_bc);
+                         counts->kf_y_mode[i][j], INTRA_MODES, header_bc);
   } else {
 #if CONFIG_REF_MV
-    update_inter_mode_probs(cm, &header_bc, counts);
+    update_inter_mode_probs(cm, header_bc, counts);
 #else
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
       prob_diff_update(vp10_inter_mode_tree, cm->fc->inter_mode_probs[i],
-                       counts->inter_mode[i], INTER_MODES, &header_bc);
+                       counts->inter_mode[i], INTER_MODES, header_bc);
 #endif
 
 #if CONFIG_EXT_INTER
-    update_inter_compound_mode_probs(cm, &header_bc);
+    update_inter_compound_mode_probs(cm, header_bc);
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
         if (is_interintra_allowed_bsize_group(i)) {
-          vp10_cond_prob_diff_update(&header_bc,
+          vp10_cond_prob_diff_update(header_bc,
                                      &fc->interintra_prob[i],
                                      cm->counts.interintra[i]);
         }
@@ -3123,11 +3116,11 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
         prob_diff_update(vp10_interintra_mode_tree,
                          cm->fc->interintra_mode_prob[i],
                          counts->interintra_mode[i],
-                         INTERINTRA_MODES, &header_bc);
+                         INTERINTRA_MODES, header_bc);
       }
       for (i = 0; i < BLOCK_SIZES; i++) {
         if (is_interintra_allowed_bsize(i) && is_interintra_wedge_used(i))
-          vp10_cond_prob_diff_update(&header_bc,
+          vp10_cond_prob_diff_update(header_bc,
                                      &fc->wedge_interintra_prob[i],
                                      cm->counts.wedge_interintra[i]);
       }
@@ -3135,7 +3128,7 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < BLOCK_SIZES; i++)
         if (is_interinter_wedge_used(i))
-          vp10_cond_prob_diff_update(&header_bc,
+          vp10_cond_prob_diff_update(header_bc,
                                      &fc->wedge_interinter_prob[i],
                                      cm->counts.wedge_interinter[i]);
     }
@@ -3143,29 +3136,29 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 
 #if CONFIG_OBMC
     for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
-      vp10_cond_prob_diff_update(&header_bc, &fc->obmc_prob[i],
+      vp10_cond_prob_diff_update(header_bc, &fc->obmc_prob[i],
                                  counts->obmc[i]);
 #endif  // CONFIG_OBMC
 
     if (cm->interp_filter == SWITCHABLE)
-      update_switchable_interp_probs(cm, &header_bc, counts);
+      update_switchable_interp_probs(cm, header_bc, counts);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-      vp10_cond_prob_diff_update(&header_bc, &fc->intra_inter_prob[i],
+      vp10_cond_prob_diff_update(header_bc, &fc->intra_inter_prob[i],
                                 counts->intra_inter[i]);
 
     if (cpi->allow_comp_inter_inter) {
       const int use_hybrid_pred = cm->reference_mode == REFERENCE_MODE_SELECT;
       if (use_hybrid_pred)
         for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-          vp10_cond_prob_diff_update(&header_bc, &fc->comp_inter_prob[i],
+          vp10_cond_prob_diff_update(header_bc, &fc->comp_inter_prob[i],
                                      counts->comp_inter[i]);
     }
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
         for (j = 0; j < (SINGLE_REFS - 1); j ++) {
-          vp10_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][j],
+          vp10_cond_prob_diff_update(header_bc, &fc->single_ref_prob[i][j],
                                      counts->single_ref[i][j]);
         }
       }
@@ -3174,7 +3167,7 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
         for (j = 0; j < (COMP_REFS - 1); j ++) {
-          vp10_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i][j],
+          vp10_cond_prob_diff_update(header_bc, &fc->comp_ref_prob[i][j],
                                      counts->comp_ref[i][j]);
         }
       }
@@ -3182,32 +3175,31 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 
     for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
       prob_diff_update(vp10_intra_mode_tree, cm->fc->y_mode_prob[i],
-                       counts->y_mode[i], INTRA_MODES, &header_bc);
+                       counts->y_mode[i], INTRA_MODES, header_bc);
 
-    vp10_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc,
+    vp10_write_nmv_probs(cm, cm->allow_high_precision_mv, header_bc,
 #if CONFIG_REF_MV
                          counts->mv);
 #else
                          &counts->mv);
 #endif
-    update_ext_tx_probs(cm, &header_bc);
+    update_ext_tx_probs(cm, header_bc);
 #if CONFIG_SUPERTX
     if (!xd->lossless[0])
-      update_supertx_probs(cm, &header_bc);
+      update_supertx_probs(cm, header_bc);
 #endif  // CONFIG_SUPERTX
   }
 
 #if CONFIG_ANS
   ans_write_init(&header_ans, data);
-  buf_ans_flush(&header_bc, &header_ans);
-  vpx_free(uco_ans_buf);
+  buf_ans_flush(header_bc, &header_ans);
   header_size = ans_write_end(&header_ans);
   assert(header_size <= 0xffff);
   return header_size;
 #else
-  vpx_stop_encode(&header_bc);
-  assert(header_bc.pos <= 0xffff);
-  return header_bc.pos;
+  vpx_stop_encode(header_bc);
+  assert(header_bc->pos <= 0xffff);
+  return header_bc->pos;
 #endif  // CONFIG_ANS
 }
 
