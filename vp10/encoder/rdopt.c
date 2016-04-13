@@ -8832,7 +8832,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         nearestmv[1] = mbmi_ext->ref_mv_stack[rf_type][0].comp_mv;
       }
 
-      for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
+      for (i = 0; i < 2; ++i) {
         lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
         lower_mv_precision(&nearmv[i].as_mv, allow_hp);
       }
