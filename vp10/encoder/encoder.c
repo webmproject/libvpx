@@ -5137,10 +5137,16 @@ int vp10_get_quantizer(VP10_COMP *cpi) {
 void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags) {
   if (flags & (VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF |
                VP8_EFLAG_NO_REF_ARF)) {
-    int ref = 7;
+    int ref = VP9_REFFRAME_ALL;
 
-    if (flags & VP8_EFLAG_NO_REF_LAST)
+    if (flags & VP8_EFLAG_NO_REF_LAST) {
       ref ^= VP9_LAST_FLAG;
+#if CONFIG_EXT_REFS
+      ref ^= VP9_LAST2_FLAG;
+      ref ^= VP9_LAST3_FLAG;
+      ref ^= VP9_LAST4_FLAG;
+#endif  // CONFIG_EXT_REFS
+    }
 
     if (flags & VP8_EFLAG_NO_REF_GF)
       ref ^= VP9_GOLD_FLAG;
@@ -5154,10 +5160,16 @@ void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags) {
   if (flags & (VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
                VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_FORCE_GF |
                VP8_EFLAG_FORCE_ARF)) {
-    int upd = 7;
+    int upd = VP9_REFFRAME_ALL;
 
-    if (flags & VP8_EFLAG_NO_UPD_LAST)
+    if (flags & VP8_EFLAG_NO_UPD_LAST) {
       upd ^= VP9_LAST_FLAG;
+#if CONFIG_EXT_REFS
+      upd ^= VP9_LAST2_FLAG;
+      upd ^= VP9_LAST3_FLAG;
+      upd ^= VP9_LAST4_FLAG;
+#endif  // CONFIG_EXT_REFS
+    }
 
     if (flags & VP8_EFLAG_NO_UPD_GF)
       upd ^= VP9_GOLD_FLAG;
