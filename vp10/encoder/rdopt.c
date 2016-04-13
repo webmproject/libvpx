@@ -1445,7 +1445,9 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi, MACROBLOCK *x,
   last_rd = INT64_MAX;
   for (n = start_tx; n >= end_tx; --n) {
     if (FIXED_TX_TYPE && tx_type != get_default_tx_type(0, xd, 0, n))
-        continue;
+      continue;
+    if (max_tx_size == TX_32X32 && n == TX_4X4)
+      continue;
 #if CONFIG_EXT_TX
     ext_tx_set = get_ext_tx_set(n, bs, is_inter);
     if (is_inter) {
