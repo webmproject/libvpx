@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b2c722d_35bdf083",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-04-13T10:53:07Z",
+      "side": 1,
+      "message": "what if 20 is greater than the max_gf_interval. Also do you mean to set the interval to be max + min which is thus greater than max.",
+      "range": {
+        "startLine": 481,
+        "startChar": 43,
+        "endLine": 481,
+        "endChar": 58
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b2c722d_d57cbc90",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-04-13T10:53:07Z",
+      "side": 1,
+      "message": "Is this saying there will be no boost for Gfs?",
+      "range": {
+        "startLine": 488,
+        "startChar": 31,
+        "endLine": 488,
+        "endChar": 32
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b2c722d_15c0f4f8",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 1460,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-04-13T10:53:07Z",
+      "side": 1,
+      "message": "So for low complexity sources the interval is fixed at min+max / 2 unless near the end of a kf group?",
+      "range": {
+        "startLine": 1460,
+        "startChar": 36,
+        "endLine": 1460,
+        "endChar": 51
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b2c722d_55c66c19",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-04-13T10:53:07Z",
+      "side": 1,
+      "message": "This would appear to say for cases where the source sad is high the baseline GF interval can never be below 10 but it can be if the source sad is low! which seems a very odd behaviour and the wrong way around. High complexity scenes generally want a shorter interval.",
+      "range": {
+        "startLine": 1464,
+        "startChar": 30,
+        "endLine": 1464,
+        "endChar": 31
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
