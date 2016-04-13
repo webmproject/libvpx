@@ -835,8 +835,8 @@ static int get_active_cq_level_two_pass(
   int active_cq_level = oxcf->cq_level;
   if (oxcf->rc_mode == VPX_CQ) {
     if (twopass->mb_smooth_pct > SMOOTH_PCT_MIN) {
-      active_cq_level -= (twopass->mb_smooth_pct - SMOOTH_PCT_MIN) /
-          SMOOTH_PCT_DIV;
+      active_cq_level -= (int)((twopass->mb_smooth_pct - SMOOTH_PCT_MIN) /
+          SMOOTH_PCT_DIV);
       active_cq_level = VPXMAX(active_cq_level, 0);
     }
     if (rc->total_target_bits > 0) {
