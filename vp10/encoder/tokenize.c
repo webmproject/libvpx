@@ -476,6 +476,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
       td->counts->eob_branch[tx_size][type][ref];
   const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
+  int skip_eob = 0;
   int16_t token;
   EXTRABIT extra;
   pt = get_entropy_context(tx_size, pd->above_context + blk_col,
@@ -485,22 +486,8 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   c = 0;
 
   while (c < eob) {
-    int v = 0;
-    int skip_eob = 0;
-    v = qcoeff[scan[c]];
-
-    while (!v) {
-      add_token_no_extra(&t, coef_probs[band[c]][pt], ZERO_TOKEN, skip_eob,
-                         counts[band[c]][pt]);
-      eob_branch[band[c]][pt] += !skip_eob;
-
-      skip_eob = 1;
-      token_cache[scan[c]] = 0;
-      ++c;
-      pt = get_coef_context(nb, token_cache, c);
-      v = qcoeff[scan[c]];
-    }
-    assert(c < eob);
+    const int v = qcoeff[scan[c]];
+    eob_branch[band[c]][pt] += !skip_eob;
 
     vp10_get_token_extra(v, &token, &extra);
 
@@ -509,11 +496,11 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
               &coef_cdfs[band[c]][pt],
 #endif  // CONFIG_ANS
               extra, (uint8_t)token, (uint8_t)skip_eob, counts[band[c]][pt]);
-    eob_branch[band[c]][pt] += !skip_eob;
 
     token_cache[scan[c]] = vp10_pt_energy_class[token];
     ++c;
     pt = get_coef_context(nb, token_cache, c);
+    skip_eob = (token == ZERO_TOKEN);
   }
   if (c < seg_eob) {
     add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN, 0,

@@ -13,6 +13,9 @@
 
 #include <limits.h>
 
+#if CONFIG_ANS
+#include "vp10/common/ans.h"
+#endif  // CONFIG_ANS
 #include "vp10/common/blockd.h"
 
 #include "vp10/encoder/block.h"
@@ -342,6 +345,9 @@ void vp10_update_rd_thresh_fact(const VP10_COMMON *const cm,
                                 int bsize, int best_mode_index);
 
 void vp10_fill_token_costs(vp10_coeff_cost *c,
+#if CONFIG_ANS
+                           coeff_cdf_model (*cdf)[PLANE_TYPES],
+#endif  // CONFIG_ANS
                            vp10_coeff_probs_model (*p)[PLANE_TYPES]);
 
 static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,

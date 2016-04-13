@@ -231,6 +231,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
   const FRAME_CONTEXT *const fc = xd->fc;
   const int ref = is_inter_block(&xd->mi[0]->mbmi);
   int band, c = 0;
+  int skip_eob = 0;
   const vpx_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
   const rans_dec_lut(*coef_cdfs)[COEFF_CONTEXTS] =
@@ -296,87 +297,82 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
     int val = -1;
     band = *band_translate++;
     prob = coef_probs[band][ctx];
-    if (counts)
-      ++eob_branch_count[band][ctx];
-    if (!uabs_read(ans, prob[EOB_CONTEXT_NODE])) {
-      INCREMENT_COUNT(EOB_MODEL_TOKEN);
-      break;
+    if (!skip_eob) {
+      if (counts)
+        ++eob_branch_count[band][ctx];
+      if (!uabs_read(ans, prob[EOB_CONTEXT_NODE])) {
+        INCREMENT_COUNT(EOB_MODEL_TOKEN);
+        break;
+      }
     }
 
-    while (!uabs_read(ans, prob[ZERO_CONTEXT_NODE])) {
-      INCREMENT_COUNT(ZERO_TOKEN);
-      dqv = dq[1];
-      token_cache[scan[c]] = 0;
-      ++c;
-      if (c >= max_eob)
-        return c;  // zero tokens at the end (no eob token)
-      ctx = get_coef_context(nb, token_cache, c);
-      band = *band_translate++;
-      prob = coef_probs[band][ctx];
-    }
     cdf = &coef_cdfs[band][ctx];
-
-    token = ONE_TOKEN + rans_read(ans, *cdf);
-    INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
-    switch (token) {
-      case ONE_TOKEN:
-      case TWO_TOKEN:
-      case THREE_TOKEN:
-      case FOUR_TOKEN:
-        val = token;
-        break;
-      case CATEGORY1_TOKEN:
-        val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, ans);
-        break;
-      case CATEGORY2_TOKEN:
-        val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, ans);
-        break;
-      case CATEGORY3_TOKEN:
-        val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, ans);
-        break;
-      case CATEGORY4_TOKEN:
-        val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, ans);
-        break;
-      case CATEGORY5_TOKEN:
-        val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, ans);
-        break;
-      case CATEGORY6_TOKEN:
-        {
+    token = ZERO_TOKEN + rans_read(ans, *cdf);
+    if (token == ZERO_TOKEN) {
+      INCREMENT_COUNT(ZERO_TOKEN);
+      token_cache[scan[c]] = 0;
+      skip_eob = 1;
+    } else {
+      INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
+      switch (token) {
+        case ONE_TOKEN:
+        case TWO_TOKEN:
+        case THREE_TOKEN:
+        case FOUR_TOKEN:
+          val = token;
+          break;
+        case CATEGORY1_TOKEN:
+          val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, ans);
+          break;
+        case CATEGORY2_TOKEN:
+          val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, ans);
+          break;
+        case CATEGORY3_TOKEN:
+          val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, ans);
+          break;
+        case CATEGORY4_TOKEN:
+          val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, ans);
+          break;
+        case CATEGORY5_TOKEN:
+          val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, ans);
+          break;
+        case CATEGORY6_TOKEN: {
           const int skip_bits = TX_SIZES - 1 - tx_size;
           const uint8_t *cat6p = cat6_prob + skip_bits;
 #if CONFIG_VP9_HIGHBITDEPTH
-        switch (xd->bd) {
-          case VPX_BITS_8:
-            val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
-            break;
-          case VPX_BITS_10:
-            val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, ans);
-            break;
-          case VPX_BITS_12:
-            val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, ans);
-            break;
-          default:
-            assert(0);
-            return -1;
-        }
+          switch (xd->bd) {
+            case VPX_BITS_8:
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
+              break;
+            case VPX_BITS_10:
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, ans);
+              break;
+            case VPX_BITS_12:
+              val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, ans);
+              break;
+            default:
+              assert(0);
+              return -1;
+          }
 #else
-        val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
+          val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
 #endif
-        }
-        break;
-    }
-    v = (val * dqv) >> dq_shift;
+        } break;
+      }
+      v = (val * dqv) >> dq_shift;
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
-    dqcoeff[scan[c]] = highbd_check_range((uabs_read_bit(ans) ? -v : v),
-                                          xd->bd);
+      dqcoeff[scan[c]] =
+          highbd_check_range((uabs_read_bit(ans) ? -v : v), xd->bd);
 #else
-    dqcoeff[scan[c]] = check_range(uabs_read_bit(ans) ? -v : v);
+      dqcoeff[scan[c]] = check_range(uabs_read_bit(ans) ? -v : v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else
-    dqcoeff[scan[c]] = uabs_read_bit(ans) ? -v : v;
+      dqcoeff[scan[c]] = uabs_read_bit(ans) ? -v : v;
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    token_cache[scan[c]] = vp10_pt_energy_class[token];
+      token_cache[scan[c]] = vp10_pt_energy_class[token];
+      skip_eob = 0;
+    }
     ++c;
     ctx = get_coef_context(nb, token_cache, c);
     dqv = dq[1];

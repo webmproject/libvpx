@@ -13,6 +13,9 @@
 
 #include "vpx_dsp/prob.h"
 #include "vpx/vpx_integer.h"
+#if CONFIG_ANS
+#include "vp10/common/ans.h"
+#endif  // CONFIG_ANS
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +57,7 @@ void vp10_cost_tokens_skip(int *costs, const vpx_prob *probs, vpx_tree tree);
 
 #if CONFIG_ANS
 void vp10_cost_tokens_ans(int *costs, const vpx_prob *tree_probs,
-                          const vpx_prob *token_probs, int skip_eob);
+                          const rans_dec_lut *token_cdf, int skip_eob);
 #endif
 
 #ifdef __cplusplus

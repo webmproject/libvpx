@@ -706,40 +706,37 @@ static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
       buf_uabs_write(ans, t != EOB_TOKEN, p->context_tree[0]);
 
     if (t != EOB_TOKEN) {
-      buf_uabs_write(ans, t != ZERO_TOKEN, p->context_tree[1]);
+      struct rans_sym s;
+      const rans_dec_lut *token_cdf = p->token_cdf;
+      assert(token_cdf);
+      s.cum_prob = (*token_cdf)[t - ZERO_TOKEN];
+      s.prob = (*token_cdf)[t - ZERO_TOKEN + 1] - s.cum_prob;
+      buf_rans_write(ans, &s);
 
-      if (t != ZERO_TOKEN) {
-        struct rans_sym s;
-        const rans_dec_lut *token_cdf = p->token_cdf;
-        s.cum_prob = (*token_cdf)[t - ONE_TOKEN];
-        s.prob = (*token_cdf)[t - ONE_TOKEN + 1] - s.cum_prob;
-        buf_rans_write(ans, &s);
+      if (b->base_val) {
+        const int e = p->extra, l = b->len;
+        int skip_bits = (b->base_val == CAT6_MIN_VAL) ? TX_SIZES - 1 - tx : 0;
+
+        if (l) {
+          const unsigned char *pb = b->prob;
+          int v = e >> 1;
+          int n = l; /* number of bits in v, assumed nonzero */
+          int i = 0;
+
+          do {
+            const int bb = (v >> --n) & 1;
+            if (skip_bits) {
+              skip_bits--;
+              assert(!bb);
+            } else {
+              buf_uabs_write(ans, bb, pb[i >> 1]);
+            }
+            i = b->tree[i + bb];
+          } while (n);
+        }
+
+        buf_uabs_write(ans, e & 1, 128);
       }
-    }
-
-    if (b->base_val) {
-      const int e = p->extra, l = b->len;
-      int skip_bits = (b->base_val == CAT6_MIN_VAL) ? TX_SIZES - 1 - tx : 0;
-
-      if (l) {
-        const unsigned char *pb = b->prob;
-        int v = e >> 1;
-        int n = l; /* number of bits in v, assumed nonzero */
-        int i = 0;
-
-        do {
-          const int bb = (v >> --n) & 1;
-          if (skip_bits) {
-            skip_bits--;
-            assert(!bb);
-          } else {
-            buf_uabs_write(ans, bb, pb[i >> 1]);
-          }
-          i = b->tree[i + bb];
-        } while (n);
-      }
-
-      buf_uabs_write(ans, e & 1, 128);
     }
     ++p;
 
