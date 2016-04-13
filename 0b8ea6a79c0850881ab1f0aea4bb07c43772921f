@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0bc5eecd_a463e2e7",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-04-13T16:58:36Z",
+      "side": 1,
+      "message": "The default/existing setting for baseline_gf_interval (in 1 pass vbr mode) is: (max + min) / 2. Here i\u0027m just setting it to twice that much with a minimum of 20 when aq is used. These settings will change, just setting them as placeholder, aq-mode is not currently used for 1 pass vbr.",
+      "parentUuid": "2b2c722d_35bdf083",
+      "range": {
+        "startLine": 481,
+        "startChar": 43,
+        "endLine": 481,
+        "endChar": 58
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b2c722d_d57cbc90",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 30
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-13T10:53:07Z",
       "side": 1,
       "message": "Is this saying there will be no boost for Gfs?",
+      "range": {
+        "startLine": 488,
+        "startChar": 31,
+        "endLine": 488,
+        "endChar": 32
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0bc5eecd_2478928e",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-04-13T16:58:36Z",
+      "side": 1,
+      "message": "The boost for Gfs should still be there.\nThis logic was to turn-off delta-qp for short key frame periods. In any case, no need for this now, so removed this.",
+      "parentUuid": "2b2c722d_d57cbc90",
       "range": {
         "startLine": 488,
         "startChar": 31,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0bc5eecd_c406de00",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 1460,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-04-13T16:58:36Z",
+      "side": 1,
+      "message": "Right, the default/existing behavior for 1 pass vbr is fixed gf period of (max + min) / 2. The only change here is to reset that near an up-coming key frame.",
+      "parentUuid": "2b2c722d_15c0f4f8",
+      "range": {
+        "startLine": 1460,
+        "startChar": 36,
+        "endLine": 1460,
+        "endChar": 51
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b2c722d_55c66c19",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 30
@@ -82,6 +154,30 @@
       "writtenOn": "2016-04-13T10:53:07Z",
       "side": 1,
       "message": "This would appear to say for cases where the source sad is high the baseline GF interval can never be below 10 but it can be if the source sad is low! which seems a very odd behaviour and the wrong way around. High complexity scenes generally want a shorter interval.",
+      "range": {
+        "startLine": 1464,
+        "startChar": 30,
+        "endLine": 1464,
+        "endChar": 31
+      },
+      "revId": "0b8ea6a79c0850881ab1f0aea4bb07c43772921f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0bc5eecd_44fcae17",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-04-13T16:58:36Z",
+      "side": 1,
+      "message": "Changed it to: \nrc-\u003ebaseline_gf_interval \u003d VPXMIN(20, baseline_gf_interval);\n\nThe gf_interval is default/fixed to 10 (max\u003d16, min\u003d4), so this patch does not change that behavior. \n\nThe flag rc-\u003ehigh_source_sad (should rename this flag) just means we believe the current frame is a scene-cut.\n\nThis patch is not yet adjusting gf based on low/high content complexity. The only change in behavior should be reset near key (and option to use aq-mode).",
+      "parentUuid": "2b2c722d_55c66c19",
       "range": {
         "startLine": 1464,
         "startChar": 30,
