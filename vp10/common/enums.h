@@ -194,9 +194,11 @@ typedef enum {
   VP9_LAST4_FLAG = 1 << 3,
   VP9_GOLD_FLAG = 1 << 4,
   VP9_ALT_FLAG = 1 << 5,
+  VP9_REFFRAME_ALL = (1 << 6) - 1
 #else
   VP9_GOLD_FLAG = 1 << 1,
   VP9_ALT_FLAG = 1 << 2,
+  VP9_REFFRAME_ALL = (1 << 3) - 1
 #endif  // CONFIG_EXT_REFS
 } VP9_REFFRAME;
 
