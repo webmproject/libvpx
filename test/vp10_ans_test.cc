@@ -218,14 +218,16 @@ void build_tree(vpx_tree_index *tree, int num_syms) {
   tree[2 * i - 1] = sym;
 }
 
-// treep are the probabilites of tree nodes like:
-//          *
-//         / \
-//    -sym0  *
-//          / \
-//     -sym1  *
-//           / \
-//      -sym2  -sym3
+/* The treep array contains the probabilities of nodes of a tree structured
+ * like:
+ *          *
+ *         / \
+ *    -sym0   *
+ *           / \
+ *       -sym1  *
+ *             / \
+ *        -sym2  -sym3
+ */
 void tab2tree(const rans_sym *tab, int tab_size, vpx_prob *treep) {
   const unsigned basep = 256;
   unsigned pleft = basep;
