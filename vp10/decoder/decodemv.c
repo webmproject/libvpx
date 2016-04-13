@@ -1317,7 +1317,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
       nearestmv[1] = xd->ref_mv_stack[ref_frame_type][0].comp_mv;
 
-      for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
+      for (i = 0; i < 1 + is_compound; ++i)
         lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
 #if CONFIG_EXT_INTER
       } else if (mbmi->mode == NEAREST_NEWMV || mbmi->mode == NEAREST_NEARMV) {
@@ -1351,7 +1351,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       nearmv[0] = xd->ref_mv_stack[ref_frame_type][ref_mv_idx].this_mv;
       nearmv[1] = xd->ref_mv_stack[ref_frame_type][ref_mv_idx].comp_mv;
 
-      for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
+      for (i = 0; i < 1 + is_compound; ++i) {
         lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
         lower_mv_precision(&nearmv[i].as_mv, allow_hp);
       }
