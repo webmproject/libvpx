@@ -145,7 +145,7 @@ static void write_intra_mode(vp10_writer *w, PREDICTION_MODE mode,
 }
 
 #if CONFIG_EXT_INTER
-static void write_interintra_mode(vpx_writer *w, INTERINTRA_MODE mode,
+static void write_interintra_mode(vp10_writer *w, INTERINTRA_MODE mode,
                                   const vpx_prob *probs) {
   vp10_write_token(w, vp10_interintra_mode_tree, probs,
                    &interintra_mode_encodings[mode]);
@@ -1295,15 +1295,15 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         is_interintra_allowed(mbmi)) {
       const int interintra = mbmi->ref_frame[1] == INTRA_FRAME;
       const int bsize_group = size_group_lookup[bsize];
-      vpx_write(w, interintra, cm->fc->interintra_prob[bsize_group]);
+      vp10_write(w, interintra, cm->fc->interintra_prob[bsize_group]);
       if (interintra) {
         write_interintra_mode(
             w, mbmi->interintra_mode,
             cm->fc->interintra_mode_prob[bsize_group]);
         assert(mbmi->interintra_mode == mbmi->interintra_uv_mode);
         if (is_interintra_wedge_used(bsize)) {
-          vpx_write(w, mbmi->use_wedge_interintra,
-                    cm->fc->wedge_interintra_prob[bsize]);
+          vp10_write(w, mbmi->use_wedge_interintra,
+                     cm->fc->wedge_interintra_prob[bsize]);
           if (mbmi->use_wedge_interintra) {
             vp10_write_literal(w, mbmi->interintra_wedge_index,
                               get_wedge_bits(bsize));
@@ -1317,8 +1317,8 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
 #endif  // CONFIG_OBMC
         is_interinter_wedge_used(bsize)) {
-      vpx_write(w, mbmi->use_wedge_interinter,
-                cm->fc->wedge_interinter_prob[bsize]);
+      vp10_write(w, mbmi->use_wedge_interinter,
+                 cm->fc->wedge_interinter_prob[bsize]);
       if (mbmi->use_wedge_interinter)
         vp10_write_literal(w, mbmi->interinter_wedge_index,
                           get_wedge_bits(bsize));
