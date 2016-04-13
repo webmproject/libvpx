@@ -833,7 +833,7 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
       vp10_write(w, is_compound, vp10_get_reference_mode_prob(cm, xd));
     } else {
-      assert(!is_compound == (cm->reference_mode == SINGLE_REFERENCE));
+      assert((!is_compound) == (cm->reference_mode == SINGLE_REFERENCE));
     }
 
     if (is_compound) {
