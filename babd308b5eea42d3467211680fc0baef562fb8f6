@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb1d96f8_c095d22b",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-13T03:08:46Z",
+      "side": 1,
+      "message": "I might have preferred aarch64 here, but given the apple instance and how android references things this is fine.",
+      "revId": "babd308b5eea42d3467211680fc0baef562fb8f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
