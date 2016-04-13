@@ -47,7 +47,8 @@ static INLINE int read_coeff(const vpx_prob *probs, int n, vp10_reader *r) {
 
 static int decode_coefs(const MACROBLOCKD *xd,
                         PLANE_TYPE type,
-                        tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
+                        tran_low_t *dqcoeff, TX_SIZE tx_size, TX_TYPE tx_type,
+                        const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
                         vp10_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
@@ -111,7 +112,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
   cat6_prob = vp10_cat6_prob;
 #endif
 
-  dq_shift = get_tx_scale(xd, 0, tx_size);
+  dq_shift = get_tx_scale(xd, tx_type, tx_size);
 
   while (c < max_eob) {
     int val = -1;
@@ -222,6 +223,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
                             const rans_dec_lut *const token_tab,
                             PLANE_TYPE type,
                             tran_low_t *dqcoeff, TX_SIZE tx_size,
+                            TX_TYPE tx_type,
                             const int16_t *dq,
                             int ctx, const int16_t *scan, const int16_t *nb,
                             struct AnsDecoder *const ans) {
@@ -247,7 +249,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
   const uint8_t *cat5_prob;
   const uint8_t *cat6_prob;
 
-  dq_shift = get_tx_scale(xd, 0, tx_size);
+  dq_shift = get_tx_scale(xd, tx_type, tx_size);
 
   if (counts) {
     coef_counts = counts->coef[tx_size][type][ref];
@@ -462,6 +464,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                              int plane, const scan_order *sc,
                              int x, int y,
                              TX_SIZE tx_size,
+                             TX_TYPE tx_type,
 #if CONFIG_ANS
                              struct AnsDecoder *const r,
 #else
@@ -474,11 +477,11 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                                                pd->left_context + y);
 #if !CONFIG_ANS
   const int eob = decode_coefs(xd, pd->plane_type,
-                               pd->dqcoeff, tx_size,
+                               pd->dqcoeff, tx_size, tx_type,
                                dequant, ctx, sc->scan, sc->neighbors, r);
 #else
   const int eob = decode_coefs_ans(xd, token_tab, pd->plane_type,
-                                   pd->dqcoeff, tx_size,
+                                   pd->dqcoeff, tx_size, tx_type,
                                    dequant, ctx, sc->scan, sc->neighbors, r);
 #endif  // !CONFIG_ANS
   dec_set_contexts(xd, pd, tx_size, eob > 0, x, y);

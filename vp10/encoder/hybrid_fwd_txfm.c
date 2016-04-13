@@ -195,12 +195,8 @@ void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
 
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10) {
-        vp10_fwd_txfm2d_4x4(src_diff, coeff, diff_stride,
-                            &fwd_txfm_2d_cfg_dct_dct_4, bd);
-      } else {
-        vp10_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
-      }
+      vp10_fwd_txfm2d_4x4(src_diff, coeff, diff_stride,
+                          &fwd_txfm_2d_cfg_dct_dct_4, bd);
       break;
     case ADST_DCT:
     case DCT_ADST:
@@ -239,11 +235,9 @@ static void highbd_fwd_txfm_8x8(const int16_t *src_diff, tran_low_t *coeff,
   (void)fwd_txfm_opt;
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10) {
-        vp10_fwd_txfm2d_8x8(src_diff, coeff, diff_stride,
-                            &fwd_txfm_2d_cfg_dct_dct_8, bd);
-        break;
-      }
+      vp10_fwd_txfm2d_8x8(src_diff, coeff, diff_stride,
+                          &fwd_txfm_2d_cfg_dct_dct_8, bd);
+      break;
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
@@ -285,11 +279,9 @@ static void highbd_fwd_txfm_16x16(const int16_t *src_diff, tran_low_t *coeff,
   (void)fwd_txfm_opt;
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10) {
-        vp10_fwd_txfm2d_16x16(src_diff, coeff, diff_stride,
-                              &fwd_txfm_2d_cfg_dct_dct_16, bd);
-        break;
-      }
+      vp10_fwd_txfm2d_16x16(src_diff, coeff, diff_stride,
+                            &fwd_txfm_2d_cfg_dct_dct_16, bd);
+      break;
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
@@ -329,18 +321,12 @@ static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
                                   tran_low_t *coeff, int diff_stride,
                                   TX_TYPE tx_type, FWD_TXFM_OPT fwd_txfm_opt,
                                   const int bd) {
-  (void)bd;
+  (void)rd_transform;
+  (void)fwd_txfm_opt;
   switch (tx_type) {
     case DCT_DCT:
-      if (bd == BITDEPTH_10) {
-        vp10_fwd_txfm2d_32x32(src_diff, coeff, diff_stride,
-                              &fwd_txfm_2d_cfg_dct_dct_32, bd);
-      } else {
-        if (fwd_txfm_opt == FWD_TXFM_OPT_NORMAL)
-          highbd_fdct32x32(rd_transform, src_diff, coeff, diff_stride);
-        else  // FWD_TXFM_OPT_DC
-          vpx_highbd_fdct32x32_1(src_diff, coeff, diff_stride);
-      }
+      vp10_fwd_txfm2d_32x32(src_diff, coeff, diff_stride,
+                            &fwd_txfm_2d_cfg_dct_dct_32, bd);
       break;
 #if CONFIG_EXT_TX
     case ADST_DCT:

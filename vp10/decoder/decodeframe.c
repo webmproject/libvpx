@@ -291,7 +291,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
                                              token_tab,
 #endif  // CONFIG_ANS
                                              plane, sc, col, row, tx_size,
-                                             r, mbmi->segment_id);
+                                             tx_type, r, mbmi->segment_id);
     inverse_transform_block(xd, plane, tx_type, tx_size,
                             dst, pd->dst.stride, eob);
   }
@@ -327,7 +327,7 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, vp10_reader *r,
     const scan_order *sc = get_scan(tx_size, tx_type, 1);
     const int eob = vp10_decode_block_tokens(xd, plane, sc,
                                              blk_col, blk_row, tx_size,
-                                             r, mbmi->segment_id);
+                                             tx_type, r, mbmi->segment_id);
     inverse_transform_block(xd, plane, tx_type, tx_size,
         &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col],
         pd->dst.stride, eob);
@@ -373,7 +373,8 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
 #if CONFIG_ANS
                                            token_tab,
 #endif
-                                           plane, sc, col, row, tx_size, r,
+                                           plane, sc, col, row,
+                                           tx_size, tx_type, r,
                                            mbmi->segment_id);
 
   inverse_transform_block(xd, plane, tx_type, tx_size,
