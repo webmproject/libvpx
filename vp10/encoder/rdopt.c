@@ -4960,7 +4960,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_REF_MV
         run_mv_search = 2;
 #if !CONFIG_EXT_INTER
-        if (filter_idx > 0) {
+        if (filter_idx > 0 && this_mode == NEWMV) {
           BEST_SEG_INFO* ref_bsi = bsi_buf;
           SEG_RDSTAT *ref_rdstat = &ref_bsi->rdstat[i][mode_idx];
 
@@ -5354,6 +5354,24 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                   ref_bsi->rdstat[i + 2][mode_idx].eobs;
 
             if (bsi->rdstat[i][mode_idx].brdcost < best_rd) {
+#if CONFIG_REF_MV
+              // If the NEWMV mode is using the same motion vector as the
+              // NEARESTMV mode, skip the rest rate-distortion calculations
+              // and use the inferred motion vector modes.
+              if (this_mode == NEWMV) {
+                if (has_second_rf) {
+                  if (bsi->rdstat[i][mode_idx].mvs[0].as_int ==
+                          bsi->ref_mv[0]->as_int &&
+                      bsi->rdstat[i][mode_idx].mvs[1].as_int ==
+                          bsi->ref_mv[1]->as_int)
+                    continue;
+                } else {
+                  if (bsi->rdstat[i][mode_idx].mvs[0].as_int ==
+                      bsi->ref_mv[0]->as_int)
+                    continue;
+                }
+              }
+#endif
               mode_selected = this_mode;
               best_rd = bsi->rdstat[i][mode_idx].brdcost;
             }
@@ -5384,6 +5402,24 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
         }
 
         if (bsi->rdstat[i][mode_idx].brdcost < best_rd) {
+#if CONFIG_REF_MV
+          // If the NEWMV mode is using the same motion vector as the
+          // NEARESTMV mode, skip the rest rate-distortion calculations
+          // and use the inferred motion vector modes.
+          if (this_mode == NEWMV) {
+            if (has_second_rf) {
+              if (bsi->rdstat[i][mode_idx].mvs[0].as_int ==
+                      bsi->ref_mv[0]->as_int &&
+                  bsi->rdstat[i][mode_idx].mvs[1].as_int ==
+                      bsi->ref_mv[1]->as_int)
+                continue;
+            } else {
+              if (bsi->rdstat[i][mode_idx].mvs[0].as_int ==
+                  bsi->ref_mv[0]->as_int)
+                continue;
+            }
+          }
+#endif
           mode_selected = this_mode;
           best_rd = bsi->rdstat[i][mode_idx].brdcost;
         }
