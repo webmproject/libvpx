@@ -1016,22 +1016,22 @@ if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCO
   add_proto qw/void vpx_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
   specialize qw/vpx_minmax_8x8 sse2/;
 
-  add_proto qw/void vpx_hadamard_8x8/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
+  add_proto qw/void vpx_hadamard_8x8/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
   specialize qw/vpx_hadamard_8x8 sse2/, "$ssse3_x86_64_x86inc";
 
-  add_proto qw/void vpx_hadamard_16x16/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
+  add_proto qw/void vpx_hadamard_16x16/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
   specialize qw/vpx_hadamard_16x16 sse2/;
 
   add_proto qw/int vpx_satd/, "const int16_t *coeff, int length";
   specialize qw/vpx_satd sse2 neon/;
 
-  add_proto qw/void vpx_int_pro_row/, "int16_t *hbuf, uint8_t const *ref, const int ref_stride, const int height";
+  add_proto qw/void vpx_int_pro_row/, "int16_t *hbuf, const uint8_t *ref, const int ref_stride, const int height";
   specialize qw/vpx_int_pro_row sse2 neon/;
 
-  add_proto qw/int16_t vpx_int_pro_col/, "uint8_t const *ref, const int width";
+  add_proto qw/int16_t vpx_int_pro_col/, "const uint8_t *ref, const int width";
   specialize qw/vpx_int_pro_col sse2 neon/;
 
-  add_proto qw/int vpx_vector_var/, "int16_t const *ref, int16_t const *src, const int bwl";
+  add_proto qw/int vpx_vector_var/, "const int16_t *ref, const int16_t *src, const int bwl";
   specialize qw/vpx_vector_var neon sse2/;
 }  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
