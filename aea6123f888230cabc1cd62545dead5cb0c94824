@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b5f1ef9_389609c6",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1112153
+      },
+      "writtenOn": "2016-04-14T14:41:15Z",
+      "side": 1,
+      "message": "API looks good :)",
+      "revId": "aea6123f888230cabc1cd62545dead5cb0c94824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b5f1ef9_189945f7",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1112153
+      },
+      "writtenOn": "2016-04-14T14:41:15Z",
+      "side": 1,
+      "message": "each plane can have different or same size.\ne.g. YV12 has half size of uv_plane but YV24 has same size of uv_plane to y_plane. so need to keep size per plane.\n\n|data| and |size| is mutually exclusive to |plane| and |stride|. it maybe better to have new struct.\n\nsize_t is better for |stride|",
+      "revId": "aea6123f888230cabc1cd62545dead5cb0c94824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b5f1ef9_d88eedb2",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1112153
+      },
+      "writtenOn": "2016-04-14T14:41:15Z",
+      "side": 1,
+      "message": "u_plane or v_plane size can be different from y_plane and a_plane size. However, callback doesn\u0027t let client know.",
+      "revId": "aea6123f888230cabc1cd62545dead5cb0c94824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
