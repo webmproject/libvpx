@@ -1293,7 +1293,6 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   if (mbmi->ref_mv_idx > 0) {
     int_mv cur_mv =
         xd->ref_mv_stack[mbmi->ref_frame[0]][1 + mbmi->ref_mv_idx].this_mv;
-    lower_mv_precision(&cur_mv.as_mv, cm->allow_high_precision_mv);
     nearmv[0] = cur_mv;
   }
 
@@ -1310,15 +1309,11 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #else
     if (xd->ref_mv_count[ref_frame_type] == 1 && mbmi->mode == NEARESTMV) {
 #endif  // CONFIG_EXT_INTER
-      int i;
 #if CONFIG_EXT_INTER
       if (mbmi->mode == NEAREST_NEARESTMV) {
 #endif  // CONFIG_EXT_INTER
       nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
       nearestmv[1] = xd->ref_mv_stack[ref_frame_type][0].comp_mv;
-
-      for (i = 0; i < 1 + is_compound; ++i)
-        lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
 #if CONFIG_EXT_INTER
       } else if (mbmi->mode == NEAREST_NEWMV || mbmi->mode == NEAREST_NEARMV) {
         nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
@@ -1344,17 +1339,11 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     }
 #else
     if (xd->ref_mv_count[ref_frame_type] > 1) {
-      int i;
       int ref_mv_idx = 1 + mbmi->ref_mv_idx;
       nearestmv[0] = xd->ref_mv_stack[ref_frame_type][0].this_mv;
       nearestmv[1] = xd->ref_mv_stack[ref_frame_type][0].comp_mv;
       nearmv[0] = xd->ref_mv_stack[ref_frame_type][ref_mv_idx].this_mv;
       nearmv[1] = xd->ref_mv_stack[ref_frame_type][ref_mv_idx].comp_mv;
-
-      for (i = 0; i < 1 + is_compound; ++i) {
-        lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
-        lower_mv_precision(&nearmv[i].as_mv, allow_hp);
-      }
     }
 #endif  // CONFIG_EXT_INTER
   }
@@ -1495,7 +1484,6 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
             xd->ref_mv_stack[ref_frame_type][mbmi->ref_mv_idx].this_mv :
             xd->ref_mv_stack[ref_frame_type][mbmi->ref_mv_idx].comp_mv;
         clamp_mv_ref(&ref_mv[ref].as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
-        lower_mv_precision(&ref_mv[ref].as_mv, allow_hp);
       }
 #endif
       nearestmv[ref] = ref_mv[ref];
