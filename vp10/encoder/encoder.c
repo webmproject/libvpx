@@ -4098,14 +4098,14 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   const int last2_is_last =
       map[cpi->lst_fb_idxes[1]] == map[cpi->lst_fb_idxes[0]];
   const int gld_is_last2 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[1]];
-  const int alt_is_last2 = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[1]];
+  const int last2_is_alt = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[1]];
 
   const int last3_is_last =
       map[cpi->lst_fb_idxes[2]] == map[cpi->lst_fb_idxes[0]];
   const int last3_is_last2 =
       map[cpi->lst_fb_idxes[2]] == map[cpi->lst_fb_idxes[1]];
   const int gld_is_last3 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[2]];
-  const int alt_is_last3 = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[2]];
+  const int last3_is_alt = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[2]];
 
   const int last4_is_last =
       map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[0]];
@@ -4114,21 +4114,16 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   const int last4_is_last3 =
       map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[2]];
   const int gld_is_last4 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[3]];
-  const int alt_is_last4 = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[3]];
+  const int last4_is_alt = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[3]];
 #else
   const int gld_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idx];
   const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idx];
 #endif  // CONFIG_EXT_REFS
   const int gld_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
 
-  int flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
-#if CONFIG_EXT_REFS
-  flags |= VP9_LAST2_FLAG;
-  flags |= VP9_LAST3_FLAG;
-  flags |= VP9_LAST4_FLAG;
-#endif  // CONFIG_EXT_REFS
+  int flags = VP9_REFFRAME_ALL;
 
-  if (gld_is_last)
+  if (gld_is_alt || gld_is_last)
     flags &= ~VP9_GOLD_FLAG;
 
   if (cpi->rc.frames_till_gf_update_due == INT_MAX)
@@ -4137,24 +4132,18 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   if (alt_is_last)
     flags &= ~VP9_ALT_FLAG;
 
-  if (gld_is_alt)
-    flags &= ~VP9_ALT_FLAG;
-
 #if CONFIG_EXT_REFS
-  if (last4_is_last || last4_is_last2 || last4_is_last3)
+  if (last4_is_alt || last4_is_last || last4_is_last2 || last4_is_last3)
     flags &= ~VP9_LAST4_FLAG;
 
-  if (last3_is_last || last3_is_last2)
+  if (last3_is_alt || last3_is_last || last3_is_last2)
     flags &= ~VP9_LAST3_FLAG;
 
-  if (last2_is_last)
+  if (last2_is_alt || last2_is_last)
     flags &= ~VP9_LAST2_FLAG;
 
   if (gld_is_last4 || gld_is_last3 || gld_is_last2)
     flags &= ~VP9_GOLD_FLAG;
-
-  if (alt_is_last4 || alt_is_last3 || alt_is_last2)
-    flags &= ~VP9_ALT_FLAG;
 #endif  // CONFIG_EXT_REFS
 
   return flags;
