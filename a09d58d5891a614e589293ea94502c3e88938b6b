@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0bc5eecd_a4c2b7a5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-14T21:43:56Z",
+      "side": 1,
+      "message": "add the full link otherwise it points to chromium. might be a good feature-request for monorail",
+      "revId": "a09d58d5891a614e589293ea94502c3e88938b6b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
