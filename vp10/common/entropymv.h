@@ -95,6 +95,9 @@ typedef struct {
 
 typedef struct {
   vpx_prob joints[MV_JOINTS - 1];
+#if CONFIG_REF_MV
+  vpx_prob zero_rmv;
+#endif
   nmv_component comps[2];
 } nmv_context;
 
@@ -121,6 +124,9 @@ typedef struct {
 
 typedef struct {
   unsigned int joints[MV_JOINTS];
+#if CONFIG_REF_MV
+  unsigned int zero_rmv[2];
+#endif
   nmv_component_counts comps[2];
 } nmv_context_counts;
 

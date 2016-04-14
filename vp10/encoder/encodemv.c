@@ -167,6 +167,8 @@ void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vp10_writer *w,
     write_mv_update(vp10_mv_joint_tree, mvc->joints, counts->joints,
                     MV_JOINTS, w);
 
+    vp10_cond_prob_diff_update(w, &mvc->zero_rmv, counts->zero_rmv);
+
     for (i = 0; i < 2; ++i) {
       nmv_component *comp = &mvc->comps[i];
       nmv_component_counts *comp_counts = &counts->comps[i];
@@ -237,11 +239,29 @@ void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vp10_writer *w,
 
 void vp10_encode_mv(VP10_COMP* cpi, vp10_writer* w,
                    const MV* mv, const MV* ref,
+#if CONFIG_REF_MV
+                   int is_compound,
+#endif
                    const nmv_context* mvctx, int usehp) {
   const MV diff = {mv->row - ref->row,
                    mv->col - ref->col};
   const MV_JOINT_TYPE j = vp10_get_mv_joint(&diff);
   usehp = usehp && vp10_use_mv_hp(ref);
+
+#if CONFIG_REF_MV && !CONFIG_EXT_INTER
+  if (is_compound) {
+    vpx_write(w, (j == MV_JOINT_ZERO), mvctx->zero_rmv);
+    if (j == MV_JOINT_ZERO)
+      return;
+  } else {
+    if (j == MV_JOINT_ZERO)
+      assert(0);
+  }
+#endif
+
+#if CONFIG_REF_MV && CONFIG_EXT_INTER
+  (void)is_compound;
+#endif
 
   vp10_write_token(w, vp10_mv_joint_tree, mvctx->joints, &mv_joint_encodings[j]);
   if (mv_joint_vertical(j))

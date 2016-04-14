@@ -4135,15 +4135,30 @@ static int set_and_cost_bmi_mvs(VP10_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
           !vp10_use_mv_hp(&best_ref_mv[0]->as_mv))
         lower_mv_precision(&this_mv[0].as_mv, 0);
 #endif  // CONFIG_EXT_INTER
+
+#if CONFIG_REF_MV
+      for (idx = 0; idx < 1 + is_compound; ++idx) {
+        this_mv[idx] = seg_mvs[mbmi->ref_frame[idx]];
+        vp10_set_mvcost(x, mbmi->ref_frame[idx]);
+        thismvcost += vp10_mv_bit_cost(&this_mv[idx].as_mv,
+                                       &best_ref_mv[idx]->as_mv,
+                                       x->nmvjointcost, x->mvcost,
+                                       MV_COST_WEIGHT_SUB);
+      }
+      (void)mvjcost;
+      (void)mvcost;
+#else
       thismvcost += vp10_mv_bit_cost(&this_mv[0].as_mv, &best_ref_mv[0]->as_mv,
-                                    mvjcost, mvcost, MV_COST_WEIGHT_SUB);
+                                     mvjcost, mvcost, MV_COST_WEIGHT_SUB);
 #if !CONFIG_EXT_INTER
       if (is_compound) {
         this_mv[1].as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
-        thismvcost += vp10_mv_bit_cost(&this_mv[1].as_mv, &best_ref_mv[1]->as_mv,
-                                      mvjcost, mvcost, MV_COST_WEIGHT_SUB);
+        thismvcost += vp10_mv_bit_cost(&this_mv[1].as_mv,
+                                       &best_ref_mv[1]->as_mv,
+                                       mvjcost, mvcost, MV_COST_WEIGHT_SUB);
       }
 #endif  // !CONFIG_EXT_INTER
+#endif
       break;
     case NEARMV:
     case NEARESTMV:
@@ -4755,14 +4770,22 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
       for (i = 0; i < MAX_MB_PLANE; i++)
         xd->plane[i].pre[ref] = backup_yv12[ref][i];
     }
-
-#if CONFIG_EXT_INTER
-    if (bsize >= BLOCK_8X8)
-#endif  // CONFIG_EXT_INTER
+#if CONFIG_REF_MV
+    vp10_set_mvcost(x, refs[ref]);
     *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
                                  &x->mbmi_ext->ref_mvs[refs[ref]][0].as_mv,
                                  x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
+#else
+    *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
+                                 &x->mbmi_ext->ref_mvs[refs[ref]][0].as_mv,
+                                 x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
+#endif
+
 #if CONFIG_EXT_INTER
+    if (bsize >= BLOCK_8X8)
+      *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
+                                   &x->mbmi_ext->ref_mvs[refs[ref]][0].as_mv,
+                                   x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
     else
       *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
                                    &ref_mv_sub8x8[ref]->as_mv,

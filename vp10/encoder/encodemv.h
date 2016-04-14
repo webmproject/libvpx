@@ -24,7 +24,10 @@ void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vp10_writer *w,
                           nmv_context_counts *const counts);
 
 void vp10_encode_mv(VP10_COMP *cpi, vp10_writer* w, const MV* mv, const MV* ref,
-                   const nmv_context* mvctx, int usehp);
+#if CONFIG_REF_MV
+                    int is_compound,
+#endif
+                    const nmv_context* mvctx, int usehp);
 
 void vp10_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
                               const nmv_context* mvctx, int usehp);
