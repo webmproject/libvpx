@@ -61,6 +61,8 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
           int alt_block = 3 - block;
           this_refmv =
               get_sub_block_mv(candidate_mi, ref, col, alt_block);
+          lower_mv_precision(&this_refmv.as_mv, use_hp);
+
           for (index = 0; index < *refmv_count; ++index)
             if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int)
               break;
@@ -95,6 +97,9 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
           get_sub_block_mv(candidate_mi, 1, col, block)
       };
 
+      for (ref = 0; ref < 2; ++ref)
+        lower_mv_precision(&this_refmv[ref].as_mv, use_hp);
+
       for (index = 0; index < *refmv_count; ++index)
         if ((ref_mv_stack[index].this_mv.as_int == this_refmv[0].as_int) &&
             (ref_mv_stack[index].comp_mv.as_int == this_refmv[1].as_int))
@@ -122,6 +127,9 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
         int alt_block = 3 - block;
         this_refmv[0] = get_sub_block_mv(candidate_mi, 0, col, alt_block);
         this_refmv[1] = get_sub_block_mv(candidate_mi, 1, col, alt_block);
+
+        for (ref = 0; ref < 2; ++ref)
+          lower_mv_precision(&this_refmv[ref].as_mv, use_hp);
 
         for (index = 0; index < *refmv_count; ++index)
           if (ref_mv_stack[index].this_mv.as_int == this_refmv[0].as_int &&
