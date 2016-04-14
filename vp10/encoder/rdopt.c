@@ -1663,6 +1663,10 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   *psse       = INT64_MAX;
 
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
+#if CONFIG_REF_MV
+    if (tx_type != DCT_DCT && is_inter && mbmi->ref_mv_idx > 0)
+      continue;
+#endif
     rd = choose_tx_size_fix_type(cpi, x, &r, &d, &s, &sse, ref_best_rd, bs,
                                  tx_type, prune);
     if (rd < (is_inter && best_tx_type == DCT_DCT ? ext_tx_th : 1) * best_rd) {
