@@ -1067,7 +1067,6 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
           x->mbmi_ext->ref_mv_stack[rf_type][mbmi->ref_mv_idx].this_mv :
           x->mbmi_ext->ref_mv_stack[rf_type][mbmi->ref_mv_idx].comp_mv;
       clamp_mv_ref(&this_mv.as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
-      lower_mv_precision(&this_mv.as_mv, cm->allow_high_precision_mv);
       x->mbmi_ext->ref_mvs[mbmi->ref_frame[i]][0] = this_mv;
       mbmi->pred_mv[i] = this_mv;
     }
