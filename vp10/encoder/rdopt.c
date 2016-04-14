@@ -81,12 +81,6 @@
 #define MIN_EARLY_TERM_INDEX    3
 #define NEW_MV_DISCOUNT_FACTOR  8
 
-#if CONFIG_EXT_TX
-const double ext_tx_th = 0.99;
-#else
-const double ext_tx_th = 0.99;
-#endif
-
 const double ADST_FLIP_SVM[8] = {-6.6623, -2.8062, -3.2531, 3.1671,  // vert
                                  -7.7051, -3.2234, -3.6193, 3.4533};  // horz
 
@@ -1567,7 +1561,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
       if (is_inter_block(mbmi) && !xd->lossless[mbmi->segment_id] && !s)
         this_rd = VPXMIN(this_rd, RDCOST(x->rdmult, x->rddiv, s1, psse));
 
-      if (this_rd < ((best_tx_type == DCT_DCT) ? ext_tx_th : 1) * best_rd) {
+      if (this_rd < best_rd) {
         best_rd = this_rd;
         best_tx_type = mbmi->tx_type;
       }
@@ -1602,7 +1596,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
       if (is_inter && !xd->lossless[mbmi->segment_id] && !s)
         this_rd = VPXMIN(this_rd, RDCOST(x->rdmult, x->rddiv, s1, psse));
 
-      if (this_rd < ((best_tx_type == DCT_DCT) ? ext_tx_th : 1) * best_rd) {
+      if (this_rd < best_rd) {
         best_rd = this_rd;
         best_tx_type = mbmi->tx_type;
       }
@@ -1665,7 +1659,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
     rd = choose_tx_size_fix_type(cpi, x, &r, &d, &s, &sse, ref_best_rd, bs,
                                  tx_type, prune);
-    if (rd < (is_inter && best_tx_type == DCT_DCT ? ext_tx_th : 1) * best_rd) {
+    if (rd < best_rd) {
       best_rd = rd;
       *distortion = d;
       *rate       = r;
@@ -3287,7 +3281,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     rd = select_tx_size_fix_type(cpi, x, &this_rate, &this_dist, &this_skip,
                                  &this_sse, bsize, ref_best_rd, tx_type);
 
-    if (rd < (is_inter && best_tx_type == DCT_DCT ? ext_tx_th : 1) * best_rd) {
+    if (rd < best_rd) {
       best_rd = rd;
       *distortion = this_dist;
       *rate       = this_rate;
