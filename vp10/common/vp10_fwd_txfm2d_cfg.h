@@ -36,7 +36,7 @@ static const int8_t fwd_shift_dct_dct_8[3] = {3, -1, -1};
 static const int8_t fwd_stage_range_col_dct_dct_8[6] = {16, 17, 18, 19, 19, 19};
 static const int8_t fwd_stage_range_row_dct_dct_8[6] = {18, 19, 20, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_dct_dct_8[6] = {13, 13, 13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_dct_dct_8[6] = {13, 13, 12, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_dct_dct_8[6] = {12, 12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_dct_8 = {
     8,  // .txfm_size
@@ -59,7 +59,7 @@ static const int8_t fwd_stage_range_row_dct_dct_16[8] = {17, 18, 19, 20,
                                                          20, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_dct_dct_16[8] = {13, 13, 13, 13,
                                                      13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_dct_dct_16[8] = {13, 13, 13, 12,
+static const int8_t fwd_cos_bit_row_dct_dct_16[8] = {12, 12, 12, 12,
                                                      12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_dct_16 = {
@@ -81,9 +81,9 @@ static const int8_t fwd_stage_range_col_dct_dct_32[10] = {15, 16, 17, 18, 19,
                                                           20, 20, 20, 20, 20};
 static const int8_t fwd_stage_range_row_dct_dct_32[10] = {16, 17, 18, 19, 20,
                                                           20, 20, 20, 20, 20};
-static const int8_t fwd_cos_bit_col_dct_dct_32[10] = {13, 13, 13, 13, 13,
+static const int8_t fwd_cos_bit_col_dct_dct_32[10] = {12, 12, 12, 12, 12,
                                                       12, 12, 12, 12, 12};
-static const int8_t fwd_cos_bit_row_dct_dct_32[10] = {13, 13, 13, 13, 12,
+static const int8_t fwd_cos_bit_row_dct_dct_32[10] = {12, 12, 12, 12, 12,
                                                       12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_dct_32 = {
@@ -150,8 +150,8 @@ static const int8_t fwd_stage_range_col_dct_adst_8[6] = {16, 17, 18,
 static const int8_t fwd_stage_range_row_dct_adst_8[8] = {18, 18, 18, 19,
                                                          19, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_dct_adst_8[6] = {13, 13, 13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_dct_adst_8[8] = {13, 13, 13, 13,
-                                                     13, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_dct_adst_8[8] = {12, 12, 12, 12,
+                                                     12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_adst_8 = {
     8,  // .txfm_size
@@ -174,8 +174,8 @@ static const int8_t fwd_stage_range_row_dct_adst_16[10] = {17, 17, 17, 18, 18,
                                                            19, 19, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_dct_adst_16[8] = {13, 13, 13, 13,
                                                       13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_dct_adst_16[10] = {13, 13, 13, 13, 13,
-                                                       13, 13, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_dct_adst_16[10] = {12, 12, 12, 12, 12,
+                                                       12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_adst_16 = {
     16,  // .txfm_size
@@ -196,10 +196,10 @@ static const int8_t fwd_stage_range_col_dct_adst_32[10] = {15, 16, 17, 18, 19,
                                                            20, 20, 20, 20, 20};
 static const int8_t fwd_stage_range_row_dct_adst_32[12] = {
     16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 20};
-static const int8_t fwd_cos_bit_col_dct_adst_32[10] = {13, 13, 13, 13, 13,
+static const int8_t fwd_cos_bit_col_dct_adst_32[10] = {12, 12, 12, 12, 12,
                                                        12, 12, 12, 12, 12};
-static const int8_t fwd_cos_bit_row_dct_adst_32[12] = {13, 13, 13, 13, 13, 13,
-                                                       13, 13, 13, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_dct_adst_32[12] = {12, 12, 12, 12, 12, 12,
+                                                       12, 12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_adst_32 = {
     32,  // .txfm_size
@@ -243,8 +243,8 @@ static const int8_t fwd_stage_range_row_adst_adst_8[8] = {18, 18, 18, 19,
                                                           19, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_adst_adst_8[8] = {13, 13, 13, 13,
                                                       13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_adst_adst_8[8] = {13, 13, 13, 13,
-                                                      13, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_adst_adst_8[8] = {12, 12, 12, 12,
+                                                      12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_adst_8 = {
     8,  // .txfm_size
@@ -267,8 +267,8 @@ static const int8_t fwd_stage_range_row_adst_adst_16[10] = {17, 17, 17, 18, 18,
                                                             19, 19, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_adst_adst_16[10] = {13, 13, 13, 13, 13,
                                                         13, 13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_adst_adst_16[10] = {13, 13, 13, 13, 13,
-                                                        13, 13, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_adst_adst_16[10] = {12, 12, 12, 12, 12,
+                                                        12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_adst_16 = {
     16,  // .txfm_size
@@ -289,10 +289,10 @@ static const int8_t fwd_stage_range_col_adst_adst_32[12] = {
     15, 15, 16, 17, 17, 18, 18, 19, 19, 20, 20, 20};
 static const int8_t fwd_stage_range_row_adst_adst_32[12] = {
     16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 20};
-static const int8_t fwd_cos_bit_col_adst_adst_32[12] = {13, 13, 13, 13, 13, 13,
-                                                        13, 13, 13, 12, 12, 12};
-static const int8_t fwd_cos_bit_row_adst_adst_32[12] = {13, 13, 13, 13, 13, 13,
-                                                        13, 13, 13, 12, 12, 12};
+static const int8_t fwd_cos_bit_col_adst_adst_32[12] = {12, 12, 12, 12, 12, 12,
+                                                        12, 12, 12, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_adst_adst_32[12] = {12, 12, 12, 12, 12, 12,
+                                                        12, 12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_adst_32 = {
     32,  // .txfm_size
@@ -336,7 +336,7 @@ static const int8_t fwd_stage_range_row_adst_dct_8[6] = {18, 19, 20,
                                                          20, 20, 20};
 static const int8_t fwd_cos_bit_col_adst_dct_8[8] = {13, 13, 13, 13,
                                                      13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_adst_dct_8[6] = {13, 13, 12, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_adst_dct_8[6] = {12, 12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_8 = {
     8,  // .txfm_size
@@ -359,7 +359,7 @@ static const int8_t fwd_stage_range_row_adst_dct_16[8] = {17, 18, 19, 20,
                                                           20, 20, 20, 20};
 static const int8_t fwd_cos_bit_col_adst_dct_16[10] = {13, 13, 13, 13, 13,
                                                        13, 13, 13, 13, 13};
-static const int8_t fwd_cos_bit_row_adst_dct_16[8] = {13, 13, 13, 12,
+static const int8_t fwd_cos_bit_row_adst_dct_16[8] = {12, 12, 12, 12,
                                                       12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_16 = {
@@ -381,9 +381,9 @@ static const int8_t fwd_stage_range_col_adst_dct_32[12] = {
     15, 15, 16, 17, 17, 18, 18, 19, 19, 20, 20, 20};
 static const int8_t fwd_stage_range_row_adst_dct_32[10] = {16, 17, 18, 19, 20,
                                                            20, 20, 20, 20, 20};
-static const int8_t fwd_cos_bit_col_adst_dct_32[12] = {13, 13, 13, 13, 13, 13,
-                                                       13, 13, 13, 12, 12, 12};
-static const int8_t fwd_cos_bit_row_adst_dct_32[10] = {13, 13, 13, 13, 12,
+static const int8_t fwd_cos_bit_col_adst_dct_32[12] = {12, 12, 12, 12, 12, 12,
+                                                       12, 12, 12, 12, 12, 12};
+static const int8_t fwd_cos_bit_row_adst_dct_32[10] = {12, 12, 12, 12, 12,
                                                        12, 12, 12, 12, 12};
 
 static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_32 = {

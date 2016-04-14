@@ -35,7 +35,7 @@ static const TXFM_2D_CFG inv_txfm_2d_cfg_dct_dct_4 = {
 static const int8_t inv_shift_dct_dct_8[2] = {1, -6};
 static const int8_t inv_stage_range_col_dct_dct_8[6] = {20, 20, 20, 20, 19, 19};
 static const int8_t inv_stage_range_row_dct_dct_8[6] = {19, 19, 19, 19, 19, 19};
-static const int8_t inv_cos_bit_col_dct_dct_8[6] = {12, 12, 12, 12, 12, 13};
+static const int8_t inv_cos_bit_col_dct_dct_8[6] = {12, 12, 12, 12, 12, 12};
 static const int8_t inv_cos_bit_row_dct_dct_8[6] = {13, 13, 13, 13, 13, 13};
 
 static const TXFM_2D_CFG inv_txfm_2d_cfg_dct_dct_8 = {
@@ -106,7 +106,7 @@ static const int8_t inv_stage_range_col_dct_dct_64[12] = {
 static const int8_t inv_stage_range_row_dct_dct_64[12] = {
     20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 static const int8_t inv_cos_bit_col_dct_dct_64[12] = {13, 13, 13, 13, 13, 13,
-                                                      13, 13, 13, 13, 13, 14};
+                                                      13, 13, 13, 13, 13, 13};
 static const int8_t inv_cos_bit_row_dct_dct_64[12] = {12, 12, 12, 12, 12, 12,
                                                       12, 12, 12, 12, 12, 12};
 
@@ -149,7 +149,7 @@ static const int8_t inv_stage_range_col_dct_adst_8[6] = {20, 20, 20,
                                                          20, 19, 19};
 static const int8_t inv_stage_range_row_dct_adst_8[8] = {19, 19, 19, 19,
                                                          19, 19, 19, 19};
-static const int8_t inv_cos_bit_col_dct_adst_8[6] = {12, 12, 12, 12, 12, 13};
+static const int8_t inv_cos_bit_col_dct_adst_8[6] = {12, 12, 12, 12, 12, 12};
 static const int8_t inv_cos_bit_row_dct_adst_8[8] = {13, 13, 13, 13,
                                                      13, 13, 13, 13};
 
@@ -243,7 +243,7 @@ static const int8_t inv_stage_range_col_adst_adst_8[8] = {20, 20, 20, 20,
 static const int8_t inv_stage_range_row_adst_adst_8[8] = {19, 19, 19, 19,
                                                           19, 19, 19, 19};
 static const int8_t inv_cos_bit_col_adst_adst_8[8] = {12, 12, 12, 12,
-                                                      12, 12, 12, 13};
+                                                      12, 12, 12, 12};
 static const int8_t inv_cos_bit_row_adst_adst_8[8] = {13, 13, 13, 13,
                                                       13, 13, 13, 13};
 
@@ -336,7 +336,7 @@ static const int8_t inv_stage_range_col_adst_dct_8[8] = {20, 20, 20, 20,
 static const int8_t inv_stage_range_row_adst_dct_8[6] = {19, 19, 19,
                                                          19, 19, 19};
 static const int8_t inv_cos_bit_col_adst_dct_8[8] = {12, 12, 12, 12,
-                                                     12, 12, 12, 13};
+                                                     12, 12, 12, 12};
 static const int8_t inv_cos_bit_row_adst_dct_8[6] = {13, 13, 13, 13, 13, 13};
 
 static const TXFM_2D_CFG inv_txfm_2d_cfg_adst_dct_8 = {
