@@ -6459,7 +6459,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][0].comp_mv;
 
       for (i = 0; i < 2; ++i) {
-        lower_mv_precision(&cur_mv[i].as_mv, cm->allow_high_precision_mv);
         clamp_mv2(&cur_mv[i].as_mv, xd);
         if (mv_check_bounds(x, &cur_mv[i].as_mv))
           return INT64_MAX;
@@ -6521,7 +6520,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][ref_mv_idx].comp_mv;
 
       for (i = 0; i < 2; ++i) {
-        lower_mv_precision(&cur_mv[i].as_mv, cm->allow_high_precision_mv);
         clamp_mv2(&cur_mv[i].as_mv, xd);
         if (mv_check_bounds(x, &cur_mv[i].as_mv))
           return INT64_MAX;
@@ -8288,7 +8286,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
               mbmi_ext->ref_mv_stack[ref_frame_type][0].this_mv :
               mbmi_ext->ref_mv_stack[ref_frame_type][0].comp_mv;
           clamp_mv_ref(&this_mv.as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
-          lower_mv_precision(&this_mv.as_mv, cm->allow_high_precision_mv);
           mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0] = this_mv;
         }
       }
@@ -8378,13 +8375,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                 mbmi_ext->ref_mv_stack[ref_frame_type]
                                       [mbmi->ref_mv_idx].comp_mv;
             clamp_mv_ref(&this_mv.as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
-            lower_mv_precision(&this_mv.as_mv, cm->allow_high_precision_mv);
             mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0] = this_mv;
           }
 
           cur_mv = mbmi_ext->ref_mv_stack[ref_frame]
                                  [mbmi->ref_mv_idx + idx_offset].this_mv;
-          lower_mv_precision(&cur_mv.as_mv, cm->allow_high_precision_mv);
           clamp_mv2(&cur_mv.as_mv, xd);
 
           if (!mv_check_bounds(x, &cur_mv.as_mv)) {
@@ -8830,7 +8825,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
       for (i = 0; i <= ref_set && ref_set != INT_MAX; ++i) {
         int_mv cur_mv = mbmi_ext->ref_mv_stack[rf_type][i + 1].this_mv;
-        lower_mv_precision(&cur_mv.as_mv, cm->allow_high_precision_mv);
         if (cur_mv.as_int == best_mbmode.mv[0].as_int) {
           best_mbmode.mode = NEARMV;
           best_mbmode.ref_mv_idx = i;
@@ -8843,7 +8837,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         best_mbmode.mode = ZEROMV;
     } else {
       int i;
-      const int allow_hp = cm->allow_high_precision_mv;
       int_mv nearestmv[2] = { frame_mv[NEARESTMV][refs[0]],
                               frame_mv[NEARESTMV][refs[1]] };
       int_mv nearmv[2] = { frame_mv[NEARMV][refs[0]],
@@ -8861,8 +8854,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       for (i = 0; i <= ref_set && ref_set != INT_MAX; ++i) {
         nearmv[0] = mbmi_ext->ref_mv_stack[rf_type][i + 1].this_mv;
         nearmv[1] = mbmi_ext->ref_mv_stack[rf_type][i + 1].comp_mv;
-        lower_mv_precision(&nearmv[0].as_mv, allow_hp);
-        lower_mv_precision(&nearmv[1].as_mv, allow_hp);
 
         if (nearmv[0].as_int == best_mbmode.mv[0].as_int &&
             nearmv[1].as_int == best_mbmode.mv[1].as_int) {
@@ -8875,11 +8866,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       if (mbmi_ext->ref_mv_count[rf_type] >= 1) {
         nearestmv[0] = mbmi_ext->ref_mv_stack[rf_type][0].this_mv;
         nearestmv[1] = mbmi_ext->ref_mv_stack[rf_type][0].comp_mv;
-      }
-
-      for (i = 0; i < 2; ++i) {
-        lower_mv_precision(&nearestmv[i].as_mv, allow_hp);
-        lower_mv_precision(&nearmv[i].as_mv, allow_hp);
       }
 
       if (nearestmv[0].as_int == best_mbmode.mv[0].as_int &&
