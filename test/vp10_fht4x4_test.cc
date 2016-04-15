@@ -119,10 +119,12 @@ TEST_P(VP10HighbdTrans4x4HT, HighbdCoeffCheck) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#define SPEED_TEST (0)
+#if SPEED_TEST
 #if CONFIG_EXT_TX
 TEST(VP10Trans4x4HTSpeedTest, C_version) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
-    const int count_test_block = 20000;
+    const int count_test_block = 200000;
     int bit_depth = 8;
     int mask = (1 << bit_depth) - 1;
     const int num_coeffs = 16;
@@ -131,10 +133,10 @@ TEST(VP10Trans4x4HTSpeedTest, C_version) {
     const int stride = 4;
     int tx_type;
 
+    for (int j = 0; j < num_coeffs; ++j) {
+      input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
+    }
     for (int i = 0; i < count_test_block; ++i) {
-      for (int j = 0; j < num_coeffs; ++j) {
-        input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
-      }
       for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
         vp10_fht4x4_c(input, output, stride, tx_type);
       }
@@ -148,28 +150,30 @@ TEST(VP10Trans4x4HTSpeedTest, C_version) {
 #if HAVE_SSE2 && CONFIG_EXT_TX
 TEST(VP10Trans4x4HTSpeedTest, SSE2_version) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
-    const int count_test_block = 20000;
+    const int count_test_block = 200000;
     int bit_depth = 8;
     int mask = (1 << bit_depth) - 1;
     const int num_coeffs = 16;
     int16_t *input = new int16_t[num_coeffs];
-    tran_low_t *output = new tran_low_t[num_coeffs];
+    tran_low_t *output = reinterpret_cast<tran_low_t *>(
+        vpx_memalign(16, num_coeffs * sizeof(tran_low_t)));
     const int stride = 4;
     int tx_type;
 
+    for (int j = 0; j < num_coeffs; ++j) {
+      input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
+    }
     for (int i = 0; i < count_test_block; ++i) {
-      for (int j = 0; j < num_coeffs; ++j) {
-        input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
-      }
       for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
         vp10_fht4x4_sse2(input, output, stride, tx_type);
       }
     }
 
     delete[] input;
-    delete[] output;
+    vpx_free(output);
 }
 #endif  // HAVE_SSE2 && CONFIG_EXT_TX
+#endif  // SPEED_TEST
 
 using std::tr1::make_tuple;
 
