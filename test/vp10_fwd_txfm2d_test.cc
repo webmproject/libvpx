@@ -88,7 +88,7 @@ TEST(vp10_fwd_txfm2d, accuracy) {
 
           for (int ni = 0; ni < sqr_txfm_size; ++ni) {
             ref_output[ni] = round(ref_output[ni] * amplify_factor);
-            EXPECT_LE(fabs(output[ni] - ref_output[ni]) / amplify_factor, 60);
+            EXPECT_LE(fabs(output[ni] - ref_output[ni]) / amplify_factor, 70);
           }
           avg_abs_error += compute_avg_abs_error<int32_t, double>(
               output, ref_output, sqr_txfm_size);
@@ -100,7 +100,7 @@ TEST(vp10_fwd_txfm2d, accuracy) {
         // printf("type0: %d type1: %d txfm_size: %d accuracy_avg_abs_error:
         // %f\n",
         // type0, type1, txfm_size, avg_abs_error);
-        double max_abs_avg_error = 5;
+        double max_abs_avg_error = 7;
         EXPECT_LE(avg_abs_error, max_abs_avg_error);
       }
     }

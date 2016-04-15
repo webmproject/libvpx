@@ -98,7 +98,7 @@ TEST(vp10_inv_txfm2d, round_trip) {
           inv_txfm_func(output, ref_input, txfm_size, inv_txfm_cfg, bd);
 
           for (int ni = 0; ni < sqr_txfm_size; ++ni) {
-            EXPECT_LE(abs(input[ni] - ref_input[ni]), 2);
+            EXPECT_LE(abs(input[ni] - ref_input[ni]), 4);
           }
           avg_abs_error += compute_avg_abs_error<int16_t, uint16_t>(
               input, ref_input, sqr_txfm_size);
@@ -109,7 +109,7 @@ TEST(vp10_inv_txfm2d, round_trip) {
         // printf("txfm_size: %d accuracy_avg_abs_error: %f\n",
         // txfm_size, avg_abs_error);
         // TODO(angiebird): this upper bound is from adst_adst_8
-        const double max_abs_avg_error = 0.024;
+        const double max_abs_avg_error = 0.4;
         EXPECT_LE(avg_abs_error, max_abs_avg_error);
       }
     }
