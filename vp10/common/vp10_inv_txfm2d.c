@@ -11,9 +11,6 @@
 #include "vp10/common/vp10_txfm.h"
 #include "vp10/common/vp10_inv_txfm1d.h"
 
-typedef void (*TxfmFunc)(const int32_t *input, int32_t *output,
-                         const int8_t *cos_bit, const int8_t *stage_range);
-
 static inline TxfmFunc inv_txfm_type_to_func(TXFM_TYPE txfm_type) {
   switch (txfm_type) {
     case TXFM_TYPE_DCT4:
