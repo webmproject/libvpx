@@ -36,31 +36,6 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
     return SWITCHABLE_FILTERS;
 }
 
-// The mode info data structure has a one element border above and to the
-// left of the entries corresponding to real macroblocks.
-// The prediction flags in these dummy entries are initialized to 0.
-// 0 - inter/inter, inter/--, --/inter, --/--
-// 1 - intra/inter, inter/intra
-// 2 - intra/--, --/intra
-// 3 - intra/intra
-int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
-  const MODE_INFO *const above_mi = xd->above_mi;
-  const MODE_INFO *const left_mi = xd->left_mi;
-  const int has_above = !!above_mi;
-  const int has_left = !!left_mi;
-
-  if (has_above && has_left) {  // both edges available
-    const int above_intra = !is_inter_block(above_mi);
-    const int left_intra = !is_inter_block(left_mi);
-    return left_intra && above_intra ? 3
-                                     : left_intra || above_intra;
-  } else if (has_above || has_left) {  // one edge available
-    return 2 * !is_inter_block(has_above ? above_mi : left_mi);
-  } else {
-    return 0;
-  }
-}
-
 int vp9_get_reference_mode_context(const VP9_COMMON *cm,
                                    const MACROBLOCKD *xd) {
   int ctx;
