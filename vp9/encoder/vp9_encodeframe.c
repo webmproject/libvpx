@@ -1404,7 +1404,7 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
     const int seg_ref_active = segfeature_active(&cm->seg, mi->segment_id,
                                                  SEG_LVL_REF_FRAME);
     if (!seg_ref_active) {
-      counts->intra_inter[vp9_get_intra_inter_context(xd)][inter_block]++;
+      counts->intra_inter[get_intra_inter_context(xd)][inter_block]++;
       // If the segment reference feature is enabled we have only a single
       // reference frame allowed for the segment so exclude it from
       // the reference frame counts used to work out probabilities.
