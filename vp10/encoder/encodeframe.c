@@ -1889,21 +1889,8 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
 #endif  // CONFIG_EXT_REFS
         }
 
-#if CONFIG_OBMC
-#if CONFIG_SUPERTX
-        if (!supertx_enabled)
-#endif  // CONFIG_SUPERTX
-          if (is_obmc_allowed(mbmi))
-            counts->obmc[mbmi->sb_type][mbmi->obmc]++;
-#endif  // CONFIG_OBMC
-      }
-    }
-
 #if CONFIG_EXT_INTER
     if (cm->reference_mode != COMPOUND_REFERENCE &&
-#if CONFIG_OBMC
-        !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
-#endif
 #if CONFIG_SUPERTX
         !supertx_enabled &&
 #endif
@@ -1918,15 +1905,31 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
         counts->interintra[bsize_group][0]++;
       }
     }
-    if (cm->reference_mode != SINGLE_REFERENCE &&
-        is_inter_compound_mode(mbmi->mode) &&
-#if CONFIG_OBMC
-        !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
-#endif  // CONFIG_OBMC
-        is_interinter_wedge_used(bsize)) {
-      counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
-    }
 #endif  // CONFIG_EXT_INTER
+
+#if CONFIG_OBMC
+#if CONFIG_SUPERTX
+        if (!supertx_enabled)
+#endif  // CONFIG_SUPERTX
+#if CONFIG_EXT_INTER
+        if (mbmi->ref_frame[1] != INTRA_FRAME)
+#endif  // CONFIG_EXT_INTER
+          if (is_obmc_allowed(mbmi))
+            counts->obmc[mbmi->sb_type][mbmi->obmc]++;
+#endif  // CONFIG_OBMC
+
+#if CONFIG_EXT_INTER
+        if (cm->reference_mode != SINGLE_REFERENCE &&
+            is_inter_compound_mode(mbmi->mode) &&
+#if CONFIG_OBMC
+            !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
+#endif  // CONFIG_OBMC
+            is_interinter_wedge_used(bsize)) {
+          counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
+        }
+#endif  // CONFIG_EXT_INTER
+      }
+    }
 
     if (inter_block &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
