@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "e8198073_333ec80d",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-17T08:55:23Z",
+      "side": 1,
+      "message": "As you pointed out in the second part of the comment, size is not used if we\u0027re allocating planes, so it\u0027s not necessary to have one size per plane, but this confirms that your second part of the comment is a good idea.\n\nAbout having a new struct, that\u0027s something I considered.\nThe problem is that vpx_codec_frame_buffer structure is used for the API, and internally to keep track of the external buffers (in RefCntBuffer.) This makes having two structures a much bigger change and I\u0027m not sure it\u0027s worth it. Happy to have feedback from someone who works on libvpx on this.",
+      "parentUuid": "8b5f1ef9_189945f7",
+      "revId": "aea6123f888230cabc1cd62545dead5cb0c94824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b5f1ef9_d88eedb2",
         "filename": "vpx_scale/generic/yv12config.c",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2016-04-14T14:41:15Z",
       "side": 1,
       "message": "u_plane or v_plane size can be different from y_plane and a_plane size. However, callback doesn\u0027t let client know.",
+      "revId": "aea6123f888230cabc1cd62545dead5cb0c94824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8198073_53394423",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-17T08:55:23Z",
+      "side": 1,
+      "message": "|format| defines that. If you had to ask that means it was not clear.\nI added some documentation in vpx_frame_buffer.h.",
+      "parentUuid": "8b5f1ef9_d88eedb2",
       "revId": "aea6123f888230cabc1cd62545dead5cb0c94824",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
