@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8859e447_dd22e77f",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1564,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-04-18T18:13:08Z",
+      "side": 1,
+      "message": "If this change causes noticeable performance loss, an alternative way is \"(best_tx_type \u003d\u003d DCT_DCT) ? (100 * this_rd \u003c 99 * best_rd) : (this_rd \u003c best_rd)\"",
+      "range": {
+        "startLine": 1564,
+        "startChar": 10,
+        "endLine": 1564,
+        "endChar": 27
+      },
+      "revId": "6de4a77df349bd9072d2bf8f257602eb819f5e61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
