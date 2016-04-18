@@ -1506,6 +1506,11 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
       rc->baseline_gf_interval =
           (rc->min_gf_interval + rc->max_gf_interval) / 2;
     }
+    // Reset the gf interval to make more equal spacing for up-coming key frame.
+    if ((rc->frames_to_key <= 7 * rc->baseline_gf_interval >> 2) &&
+        (rc->frames_to_key > rc->baseline_gf_interval)) {
+      rc->baseline_gf_interval = rc->frames_to_key >> 1;
+    }
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     // NOTE: frames_till_gf_update_due must be <= frames_to_key.
     if (rc->frames_till_gf_update_due > rc->frames_to_key) {
@@ -2092,6 +2097,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR &&
         rc->high_source_sad &&
+        rc->frames_to_key > 3 &&
         rc->count_last_scene_change > 4 &&
         cpi->ext_refresh_frame_flags_pending == 0) {
       int target;
