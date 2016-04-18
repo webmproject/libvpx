@@ -787,10 +787,8 @@ DECLARE_ALIGNED(16, static const int16_t, qtr_scan_32x32[1024]) = {
 };
 #endif  // CONFIG_EXT_TX
 
-// Neighborhood 5-tuples for various scans and blocksizes,
-// in {top, left, topleft, topright, bottomleft} order
-// for each position in raster scan order.
-// -1 indicates the neighbor does not exist.
+// Neighborhood 2-tuples for various scans and blocksizes,
+// in {top, left} order for each position in corresponding scan order.
 DECLARE_ALIGNED(16, static const int16_t,
                 default_scan_4x4_neighbors[17 * MAX_NEIGHBORS]) = {
   0,   0,   0,   0,   4,   0,   1,   4,   4,   5,   5,   1,

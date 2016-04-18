@@ -65,7 +65,7 @@
 
 #define NCOUNT_INTRA_THRESH 8192
 #define NCOUNT_INTRA_FACTOR 3
-#define NCOUNT_FRAME_II_THRESH 5.0
+
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
@@ -115,7 +115,7 @@ static void output_stats(FIRSTPASS_STATS *stats,
 
     fprintf(fpfile, "%12.0lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf %12.4lf"
             "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf"
-            "%12.4lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf\n",
+            "%12.4lf %12.4lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf\n",
             stats->frame,
             stats->weight,
             stats->intra_error,
@@ -126,6 +126,7 @@ static void output_stats(FIRSTPASS_STATS *stats,
             stats->pcnt_second_ref,
             stats->pcnt_neutral,
             stats->intra_skip_pct,
+            stats->intra_smooth_pct,
             stats->inactive_zone_rows,
             stats->inactive_zone_cols,
             stats->MVr,
@@ -165,6 +166,7 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->pcnt_second_ref = 0.0;
   section->pcnt_neutral = 0.0;
   section->intra_skip_pct = 0.0;
+  section->intra_smooth_pct = 0.0;
   section->inactive_zone_rows = 0.0;
   section->inactive_zone_cols = 0.0;
   section->MVr = 0.0;
@@ -193,6 +195,7 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
   section->pcnt_second_ref += frame->pcnt_second_ref;
   section->pcnt_neutral += frame->pcnt_neutral;
   section->intra_skip_pct += frame->intra_skip_pct;
+  section->intra_smooth_pct += frame->intra_smooth_pct;
   section->inactive_zone_rows += frame->inactive_zone_rows;
   section->inactive_zone_cols += frame->inactive_zone_cols;
   section->MVr += frame->MVr;
@@ -219,6 +222,7 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->pcnt_second_ref -= frame->pcnt_second_ref;
   section->pcnt_neutral -= frame->pcnt_neutral;
   section->intra_skip_pct -= frame->intra_skip_pct;
+  section->intra_smooth_pct -= frame->intra_smooth_pct;
   section->inactive_zone_rows -= frame->inactive_zone_rows;
   section->inactive_zone_cols -= frame->inactive_zone_cols;
   section->MVr -= frame->MVr;
@@ -493,12 +497,12 @@ static void set_first_pass_params(VP9_COMP *cpi) {
 // This threshold is used to track blocks where to all intents and purposes
 // the intra prediction error 0. Though the metric we test against
 // is technically a sse we are mainly interested in blocks where all the pixels
-// int he 8 bit domain have an error of <= 1 (where error = sse) so a
+// in the 8 bit domain have an error of <= 1 (where error = sse) so a
 // linear scaling for 10 and 12 bit gives similar results.
 #define UL_INTRA_THRESH 50
-#if CONFIG_VP9_HIGHBITDEPTH
 static int get_ul_intra_threshold(VP9_COMMON *cm) {
   int ret_val = UL_INTRA_THRESH;
+#if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
     switch (cm->bit_depth) {
       case VPX_BITS_8:
@@ -515,9 +519,37 @@ static int get_ul_intra_threshold(VP9_COMMON *cm) {
                     "VPX_BITS_10 or VPX_BITS_12");
     }
   }
+#else
+  (void) cm;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   return ret_val;
 }
+
+#define SMOOTH_INTRA_THRESH 4000
+static int get_smooth_intra_threshold(VP9_COMMON *cm) {
+  int ret_val = SMOOTH_INTRA_THRESH;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    switch (cm->bit_depth) {
+      case VPX_BITS_8:
+        ret_val = SMOOTH_INTRA_THRESH;
+        break;
+      case VPX_BITS_10:
+        ret_val = SMOOTH_INTRA_THRESH >> 2;
+        break;
+      case VPX_BITS_12:
+        ret_val = SMOOTH_INTRA_THRESH >> 4;
+        break;
+      default:
+        assert(0 && "cm->bit_depth should be VPX_BITS_8, "
+                    "VPX_BITS_10 or VPX_BITS_12");
+    }
+  }
+#else
+  (void) cm;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  return ret_val;
+}
 
 #define INVALID_ROW -1
 void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
@@ -545,6 +577,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   const int intrapenalty = INTRA_MODE_PENALTY;
   double neutral_count;
   int intra_skip_count = 0;
+  int intra_smooth_count = 0;
   int image_data_start_row = INVALID_ROW;
   int new_mv_count = 0;
   int sum_in_vectors = 0;
@@ -563,6 +596,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   double intra_factor;
   double brightness_factor;
   BufferPool *const pool = cm->buffer_pool;
+  MODE_INFO mi_above, mi_left;
 
   // First pass code requires valid last and new frame buffers.
   assert(new_yv12 != NULL);
@@ -695,6 +729,12 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
                      mb_row << 1, num_8x8_blocks_high_lookup[bsize],
                      mb_col << 1, num_8x8_blocks_wide_lookup[bsize],
                      cm->mi_rows, cm->mi_cols);
+      // Are edges available for intra prediction?
+      // Since the firstpass does not populate the mi_grid_visible,
+      // above_mi/left_mi must be overwritten with a nonzero value when edges
+      // are available.  Required by vp9_predict_intra_block().
+      xd->above_mi = (mb_row != 0) ? &mi_above : NULL;
+      xd->left_mi  = (mb_col > tile.mi_col_start) ? &mi_left : NULL;
 
       // Do intra 16x16 prediction.
       x->skip_encode = 0;
@@ -709,14 +749,13 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       // domain). In natural videos this is uncommon, but it is much more
       // common in animations, graphics and screen content, so may be used
       // as a signal to detect these types of content.
-#if CONFIG_VP9_HIGHBITDEPTH
       if (this_error < get_ul_intra_threshold(cm)) {
-#else
-      if (this_error < UL_INTRA_THRESH) {
-#endif
         ++intra_skip_count;
       } else if ((mb_col > 0) && (image_data_start_row == INVALID_ROW)) {
         image_data_start_row = mb_row;
+      }
+      if (this_error < get_smooth_intra_threshold(cm)) {
+        ++intra_smooth_count;
       }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1083,6 +1122,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fps.pcnt_second_ref = (double)second_ref_count / num_mbs;
     fps.pcnt_neutral = (double)neutral_count / num_mbs;
     fps.intra_skip_pct = (double)intra_skip_count / num_mbs;
+    fps.intra_smooth_pct = (double)intra_smooth_count / num_mbs;
     fps.inactive_zone_rows = (double)image_data_start_row;
     fps.inactive_zone_cols = (double)0;  // TODO(paulwilkins): fix
 
@@ -1371,11 +1411,12 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 }
 
 #define SR_DIFF_PART 0.0015
-#define MOTION_AMP_PART 0.003
 #define INTRA_PART 0.005
 #define DEFAULT_DECAY_LIMIT 0.75
 #define LOW_SR_DIFF_TRHESH 0.1
 #define SR_DIFF_MAX 128.0
+#define LOW_CODED_ERR_PER_MB 10.0
+#define NCOUNT_FRAME_II_THRESH 6.0
 
 static double get_sr_decay_rate(const VP9_COMP *cpi,
                                 const FIRSTPASS_STATS *frame) {
@@ -1386,12 +1427,15 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
   double sr_decay = 1.0;
   double modified_pct_inter;
   double modified_pcnt_intra;
-  const double motion_amplitude_factor =
-    frame->pcnt_motion * ((frame->mvc_abs + frame->mvr_abs) / 2);
+  const double motion_amplitude_part =
+      frame->pcnt_motion *
+      ((frame->mvc_abs + frame->mvr_abs) /
+       (cpi->initial_height + cpi->initial_width));
 
   modified_pct_inter = frame->pcnt_inter;
-  if ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
-      (double)NCOUNT_FRAME_II_THRESH) {
+  if (((frame->coded_error / num_mbs) > LOW_CODED_ERR_PER_MB) &&
+      ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
+       (double)NCOUNT_FRAME_II_THRESH)) {
     modified_pct_inter = frame->pcnt_inter - frame->pcnt_neutral;
   }
   modified_pcnt_intra = 100 * (1.0 - modified_pct_inter);
@@ -1400,7 +1444,7 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
   if ((sr_diff > LOW_SR_DIFF_TRHESH)) {
     sr_diff = VPXMIN(sr_diff, SR_DIFF_MAX);
     sr_decay = 1.0 - (SR_DIFF_PART * sr_diff) -
-               (MOTION_AMP_PART * motion_amplitude_factor) -
+               motion_amplitude_part -
                (INTRA_PART * modified_pcnt_intra);
   }
   return VPXMAX(sr_decay, VPXMIN(DEFAULT_DECAY_LIMIT, modified_pct_inter));
@@ -1957,7 +2001,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int int_lbq =
       (int)(vp9_convert_qindex_to_q(rc->last_boosted_qindex,
                                    cpi->common.bit_depth));
-    active_min_gf_interval = rc->min_gf_interval + VPXMIN(2, int_max_q / 200);
+    active_min_gf_interval =
+      rc->min_gf_interval + arf_active_or_kf + VPXMIN(2, int_max_q / 200);
     if (active_min_gf_interval > rc->max_gf_interval)
       active_min_gf_interval = rc->max_gf_interval;
 
@@ -1968,13 +2013,20 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // bits to spare and are better with a smaller interval and smaller boost.
       // At high Q when there are few bits to spare we are better with a longer
       // interval to spread the cost of the GF.
-      active_max_gf_interval = 12 + VPXMIN(4, (int_lbq / 6));
+      active_max_gf_interval =
+        12 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
 
       // We have: active_min_gf_interval <= rc->max_gf_interval
       if (active_max_gf_interval < active_min_gf_interval)
         active_max_gf_interval = active_min_gf_interval;
       else if (active_max_gf_interval > rc->max_gf_interval)
         active_max_gf_interval = rc->max_gf_interval;
+
+      // Would the active max drop us out just before the near the next kf?
+      if ((active_max_gf_interval <= rc->frames_to_key) &&
+          (active_max_gf_interval >=
+              (rc->frames_to_key - rc->min_gf_interval)))
+        active_max_gf_interval = rc->frames_to_key / 2;
     }
   }
 
@@ -2032,11 +2084,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Break out conditions.
     if (
       // Break at active_max_gf_interval unless almost totally static.
-      (i >= (active_max_gf_interval + arf_active_or_kf) &&
-            zero_motion_accumulator < 0.995) ||
+      ((i >= active_max_gf_interval) &&
+       (zero_motion_accumulator < 0.995)) ||
       (
         // Don't break out with a very short interval.
-        (i >= active_min_gf_interval + arf_active_or_kf) &&
+        (i >= active_min_gf_interval) &&
+        // If possible dont break very close to a kf
+        ((rc->frames_to_key - i) >= rc->min_gf_interval) &&
         (!flash_detected) &&
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
          (abs_mv_in_out_accumulator > 3.0) ||
@@ -2782,6 +2836,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     // applied when combining MB error values for the frame.
     twopass->mb_av_energy =
       log(((this_frame.intra_error * 256.0) / num_mbs) + 1.0);
+    twopass->mb_smooth_pct = this_frame.intra_smooth_pct;
   }
 
   // Update the total stats remaining structure.

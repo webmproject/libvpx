@@ -60,10 +60,10 @@ LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += y4m_test.cc ../y4menc.c ../y4menc.h
 
 ## WebM Parsing
 ifeq ($(CONFIG_WEBM_IO), yes)
-LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvparser.cpp
-LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvreader.cpp
-LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvparser.hpp
-LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvreader.hpp
+LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvparser.cc
+LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvreader.cc
+LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvparser.h
+LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvreader.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(LIBWEBM_PARSER_SRCS)
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../tools_common.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.cc

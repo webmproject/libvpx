@@ -243,13 +243,16 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
   MV gld_top_mv = {0, 0};
   MODE_INFO mi_local;
+  MODE_INFO mi_above, mi_left;
 
   vp9_zero(mi_local);
   // Set up limit values for motion vectors to prevent them extending outside
   // the UMV borders.
   x->mv_row_min     = -BORDER_MV_PIXELS_B16;
   x->mv_row_max     = (cm->mb_rows - 1) * 8 + BORDER_MV_PIXELS_B16;
-  xd->up_available  = 0;
+  // Signal to vp9_predict_intra_block() that above is not available
+  xd->above_mi = NULL;
+
   xd->plane[0].dst.stride  = buf->y_stride;
   xd->plane[0].pre[0].stride  = buf->y_stride;
   xd->plane[1].dst.stride = buf->uv_stride;
@@ -268,7 +271,8 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
     // the UMV borders.
     x->mv_col_min      = -BORDER_MV_PIXELS_B16;
     x->mv_col_max      = (cm->mb_cols - 1) * 8 + BORDER_MV_PIXELS_B16;
-    xd->left_available = 0;
+    // Signal to vp9_predict_intra_block() that left is not available
+    xd->left_mi = NULL;
 
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       MBGRAPH_MB_STATS *mb_stats = &stats->mb_stats[offset + mb_col];
@@ -280,14 +284,19 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
       if (mb_col == 0) {
         gld_top_mv = gld_left_mv;
       }
-      xd->left_available = 1;
+      // Signal to vp9_predict_intra_block() that left is available
+      xd->left_mi = &mi_left;
+
       mb_y_in_offset    += 16;
       gld_y_in_offset   += 16;
       arf_y_in_offset   += 16;
       x->mv_col_min     -= 16;
       x->mv_col_max     -= 16;
     }
-    xd->up_available = 1;
+
+    // Signal to vp9_predict_intra_block() that above is available
+    xd->above_mi = &mi_above;
+
     mb_y_offset     += buf->y_stride * 16;
     gld_y_offset    += golden_ref->y_stride * 16;
     if (alt_ref)

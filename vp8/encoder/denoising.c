@@ -497,7 +497,8 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              loop_filter_info_n *lfi_n,
                              int mb_row,
                              int mb_col,
-                             int block_index)
+                             int block_index,
+                             int consec_zero_last)
 
 {
     int mv_row;
@@ -571,58 +572,69 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
             best_sse = zero_mv_sse;
         }
 
-        saved_pre = filter_xd->pre;
-        saved_dst = filter_xd->dst;
+        mv_row = x->best_sse_mv.as_mv.row;
+        mv_col = x->best_sse_mv.as_mv.col;
+        motion_magnitude2 = mv_row * mv_row + mv_col * mv_col;
+        motion_threshold = denoiser->denoise_pars.scale_motion_thresh *
+            NOISE_MOTION_THRESHOLD;
 
-        /* Compensate the running average. */
-        filter_xd->pre.y_buffer = src->y_buffer + recon_yoffset;
-        filter_xd->pre.u_buffer = src->u_buffer + recon_uvoffset;
-        filter_xd->pre.v_buffer = src->v_buffer + recon_uvoffset;
-        /* Write the compensated running average to the destination buffer. */
-        filter_xd->dst.y_buffer = dst->y_buffer + recon_yoffset;
-        filter_xd->dst.u_buffer = dst->u_buffer + recon_uvoffset;
-        filter_xd->dst.v_buffer = dst->v_buffer + recon_uvoffset;
+        if (motion_magnitude2 <
+          denoiser->denoise_pars.scale_increase_filter * NOISE_MOTION_THRESHOLD)
+          x->increase_denoising = 1;
 
-        if (!x->skip)
-        {
-            vp8_build_inter_predictors_mb(filter_xd);
+        sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD;
+        if (x->increase_denoising)
+          sse_thresh =
+              denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD_HIGH;
+
+        if (best_sse > sse_thresh || motion_magnitude2 > motion_threshold)
+          decision = COPY_BLOCK;
+
+        // If block is considered skin, don't denoise if the block
+        // (1) is selected as non-zero motion for current frame, or
+        // (2) has not been selected as ZERO_LAST mode at least x past frames
+        // in a row.
+        // TODO(marpan): Parameter "x" should be varied with framerate.
+        // In particualar, should be reduced for layers (base layer/LAST).
+        if (x->is_skin && (consec_zero_last < 2 || motion_magnitude2 > 0))
+          decision = COPY_BLOCK;
+
+        if (decision == FILTER_BLOCK) {
+          saved_pre = filter_xd->pre;
+          saved_dst = filter_xd->dst;
+
+          /* Compensate the running average. */
+          filter_xd->pre.y_buffer = src->y_buffer + recon_yoffset;
+          filter_xd->pre.u_buffer = src->u_buffer + recon_uvoffset;
+          filter_xd->pre.v_buffer = src->v_buffer + recon_uvoffset;
+          /* Write the compensated running average to the destination buffer. */
+          filter_xd->dst.y_buffer = dst->y_buffer + recon_yoffset;
+          filter_xd->dst.u_buffer = dst->u_buffer + recon_uvoffset;
+          filter_xd->dst.v_buffer = dst->v_buffer + recon_uvoffset;
+
+          if (!x->skip)
+          {
+              vp8_build_inter_predictors_mb(filter_xd);
+          }
+          else
+          {
+              vp8_build_inter16x16_predictors_mb(filter_xd,
+                                                 filter_xd->dst.y_buffer,
+                                                 filter_xd->dst.u_buffer,
+                                                 filter_xd->dst.v_buffer,
+                                                 filter_xd->dst.y_stride,
+                                                 filter_xd->dst.uv_stride);
+          }
+          filter_xd->pre = saved_pre;
+          filter_xd->dst = saved_dst;
+          *mbmi = saved_mbmi;
         }
-        else
-        {
-            vp8_build_inter16x16_predictors_mb(filter_xd,
-                                               filter_xd->dst.y_buffer,
-                                               filter_xd->dst.u_buffer,
-                                               filter_xd->dst.v_buffer,
-                                               filter_xd->dst.y_stride,
-                                               filter_xd->dst.uv_stride);
-        }
-        filter_xd->pre = saved_pre;
-        filter_xd->dst = saved_dst;
-        *mbmi = saved_mbmi;
-
-    }
-
-    mv_row = x->best_sse_mv.as_mv.row;
-    mv_col = x->best_sse_mv.as_mv.col;
-    motion_magnitude2 = mv_row * mv_row + mv_col * mv_col;
-    motion_threshold = denoiser->denoise_pars.scale_motion_thresh *
-        NOISE_MOTION_THRESHOLD;
-
-    // If block is considered to be skin area, lower the motion threshold.
-    // In current version set threshold = 0, so only denoise zero mv on skin.
-    if (x->is_skin)
-        motion_threshold = 0;
-
-    if (motion_magnitude2 <
-        denoiser->denoise_pars.scale_increase_filter * NOISE_MOTION_THRESHOLD)
-      x->increase_denoising = 1;
-
-    sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD;
-    if (x->increase_denoising)
-      sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD_HIGH;
-
-    if (best_sse > sse_thresh || motion_magnitude2 > motion_threshold)
+    } else {
+      // zero_frame should always be 1 for real-time mode, as the
+      // ZEROMV mode is always checked, so we should never go into this branch.
+      // If case ZEROMV is not checked, then we will force no denoise (COPY).
       decision = COPY_BLOCK;
+    }
 
     if (decision == FILTER_BLOCK)
     {

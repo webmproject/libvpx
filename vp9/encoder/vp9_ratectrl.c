@@ -133,7 +133,7 @@ static void init_minq_luts(int *kf_low_m, int *kf_high_m,
     kf_high_m[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55, bit_depth);
     arfgf_low[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.30, bit_depth);
     arfgf_high[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55, bit_depth);
-    inter[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.90, bit_depth);
+    inter[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.70, bit_depth);
     rtc[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.70, bit_depth);
   }
 }
@@ -621,15 +621,16 @@ static int calc_active_worst_quality_one_pass_vbr(const VP9_COMP *cpi) {
 
   if (cpi->common.frame_type == KEY_FRAME) {
     active_worst_quality = curr_frame == 0 ? rc->worst_quality
-                                           : rc->last_q[KEY_FRAME] * 2;
+                                           : rc->last_q[KEY_FRAME] << 1;
   } else {
     if (!rc->is_src_frame_alt_ref &&
         (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
-      active_worst_quality =  curr_frame == 1 ? rc->last_q[KEY_FRAME] * 5 / 4
+      active_worst_quality =  curr_frame == 1 ? rc->last_q[KEY_FRAME] * 5 >> 2
                                               : rc->last_q[INTER_FRAME];
     } else {
-      active_worst_quality = curr_frame == 1 ? rc->last_q[KEY_FRAME] * 2
-                                             : rc->last_q[INTER_FRAME] * 2;
+      active_worst_quality = curr_frame == 1 ? rc->last_q[KEY_FRAME] << 1 :
+          VPXMIN(rc->last_q[INTER_FRAME] << 1,
+                (rc->avg_frame_qindex[INTER_FRAME] * 3 >> 1));
     }
   }
   return VPXMIN(active_worst_quality, rc->worst_quality);
@@ -662,7 +663,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
                    VPXMIN(rc->avg_frame_qindex[INTER_FRAME],
                           rc->avg_frame_qindex[KEY_FRAME]) :
                    rc->avg_frame_qindex[INTER_FRAME];
-  active_worst_quality = VPXMIN(rc->worst_quality, ambient_qp * 5 / 4);
+  active_worst_quality = VPXMIN(rc->worst_quality, ambient_qp * 5 >> 2);
   if (rc->buffer_level > rc->optimal_buffer_level) {
     // Adjust down.
     // Maximum limit for down adjustment, ~30%.
@@ -811,8 +812,8 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
   return q;
 }
 
-static int get_active_cq_level(const RATE_CONTROL *rc,
-                               const VP9EncoderConfig *const oxcf) {
+static int get_active_cq_level_one_pass(
+    const RATE_CONTROL *rc, const VP9EncoderConfig *const oxcf) {
   static const double cq_adjust_threshold = 0.1;
   int active_cq_level = oxcf->cq_level;
   if (oxcf->rc_mode == VPX_CQ &&
@@ -825,13 +826,36 @@ static int get_active_cq_level(const RATE_CONTROL *rc,
   return active_cq_level;
 }
 
+#define SMOOTH_PCT_MIN  0.1
+#define SMOOTH_PCT_DIV  0.05
+static int get_active_cq_level_two_pass(
+    const TWO_PASS *twopass, const RATE_CONTROL *rc,
+    const VP9EncoderConfig *const oxcf) {
+  static const double cq_adjust_threshold = 0.1;
+  int active_cq_level = oxcf->cq_level;
+  if (oxcf->rc_mode == VPX_CQ) {
+    if (twopass->mb_smooth_pct > SMOOTH_PCT_MIN) {
+      active_cq_level -= (int)((twopass->mb_smooth_pct - SMOOTH_PCT_MIN) /
+          SMOOTH_PCT_DIV);
+      active_cq_level = VPXMAX(active_cq_level, 0);
+    }
+    if (rc->total_target_bits > 0) {
+      const double x = (double)rc->total_actual_bits / rc->total_target_bits;
+      if (x < cq_adjust_threshold) {
+        active_cq_level = (int)(active_cq_level * x / cq_adjust_threshold);
+      }
+    }
+  }
+  return active_cq_level;
+}
+
 static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                                              int *bottom_index,
                                              int *top_index) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  const int cq_level = get_active_cq_level(rc, oxcf);
+  const int cq_level = get_active_cq_level_one_pass(rc, oxcf);
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_vbr(cpi);
   int q;
@@ -881,9 +905,12 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     // Use the lower of active_worst_quality and recent
     // average Q as basis for GF/ARF best Q limit unless last frame was
     // a key frame.
-    if (rc->frames_since_key > 1 &&
-        rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality) {
-      q = rc->avg_frame_qindex[INTER_FRAME];
+    if (rc->frames_since_key > 1) {
+      if (rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality) {
+        q = rc->avg_frame_qindex[INTER_FRAME];
+      } else {
+        q = active_worst_quality;
+      }
     } else {
       q = rc->avg_frame_qindex[KEY_FRAME];
     }
@@ -1017,7 +1044,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
-  const int cq_level = get_active_cq_level(rc, oxcf);
+  const int cq_level = get_active_cq_level_two_pass(&cpi->twopass, rc, oxcf);
   int active_best_quality;
   int active_worst_quality = cpi->twopass.active_worst_quality;
   int q;
@@ -2047,8 +2074,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // for cases where there is small change from content that is completely
     // static.
     if (cpi->oxcf.rc_mode == VPX_VBR) {
-      min_thresh = 30000;
-      thresh = 2.0f;
+      min_thresh = 60000;
+      thresh = 2.1f;
     }
     if (avg_sad >
         VPXMAX(min_thresh, (unsigned int)(rc->avg_source_sad  * thresh)) &&
@@ -2057,20 +2084,25 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     else
       rc->high_source_sad = 0;
     if (avg_sad > 0 || cpi->oxcf.rc_mode == VPX_CBR)
-      rc->avg_source_sad = (rc->avg_source_sad + avg_sad) >> 1;
+      rc->avg_source_sad = (3 * rc->avg_source_sad + avg_sad) >> 2;
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR &&
         rc->high_source_sad &&
-        cpi->refresh_golden_frame == 0 &&
+        rc->count_last_scene_change > 4 &&
         cpi->ext_refresh_frame_flags_pending == 0) {
       int target;
       cpi->refresh_golden_frame = 1;
+      rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
+      rc->baseline_gf_interval = VPXMIN(20,
+          VPXMAX(10, rc->baseline_gf_interval));
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
       if (rc->frames_till_gf_update_due > rc->frames_to_key)
         rc->frames_till_gf_update_due = rc->frames_to_key;
-      rc->gfu_boost = DEFAULT_GF_BOOST;
       target = calc_pframe_target_size_one_pass_vbr(cpi);
       vp9_rc_set_frame_target(cpi, target);
+      rc->count_last_scene_change = 0;
+    } else {
+      rc->count_last_scene_change++;
     }
   }
 }
