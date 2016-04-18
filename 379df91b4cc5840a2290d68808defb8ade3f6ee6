@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8859e447_722205ee",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-04-18T20:41:47Z",
+      "side": 1,
+      "message": "The nextgenv2 version of this function should be taken. In decoder, there is not always an empty frame buffer available since the buffers are allocated only when they are needed.\n\nWe can add code to allocate buffer here if we couldn\u0027t find any as Jim suggested. But, before that, nextgenv2 version should be used.",
+      "revId": "379df91b4cc5840a2290d68808defb8ade3f6ee6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
