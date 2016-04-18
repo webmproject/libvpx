@@ -22,6 +22,30 @@
       "revId": "6de4a77df349bd9072d2bf8f257602eb819f5e61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8859e447_5dc4b7b3",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1564,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-04-18T18:24:31Z",
+      "side": 1,
+      "message": "There is no noticeable performance loss.\n100 * this_rd could cause overflow if this_rd is near INT64_MAX",
+      "parentUuid": "8859e447_dd22e77f",
+      "range": {
+        "startLine": 1564,
+        "startChar": 10,
+        "endLine": 1564,
+        "endChar": 27
+      },
+      "revId": "6de4a77df349bd9072d2bf8f257602eb819f5e61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
