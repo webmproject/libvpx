@@ -5,16 +5,14 @@
 // tree. An additional intellectual property rights grant can be found
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
+#ifndef MKVPARSER_MKVPARSER_H_
+#define MKVPARSER_MKVPARSER_H_
 
-#ifndef MKVPARSER_HPP
-#define MKVPARSER_HPP
-
-#include <cstdlib>
-#include <cstdio>
 #include <cstddef>
 
 namespace mkvparser {
 
+const int E_PARSE_FAILED = -1;
 const int E_FILE_FORMAT_INVALID = -2;
 const int E_BUFFER_NOT_FULL = -3;
 
@@ -27,12 +25,17 @@ class IMkvReader {
   virtual ~IMkvReader();
 };
 
+template <typename Type>
+Type* SafeArrayAlloc(unsigned long long num_elements,
+                     unsigned long long element_size);
 long long GetUIntLength(IMkvReader*, long long, long&);
 long long ReadUInt(IMkvReader*, long long, long&);
+long long ReadID(IMkvReader* pReader, long long pos, long& len);
 long long UnserializeUInt(IMkvReader*, long long pos, long long size);
 
 long UnserializeFloat(IMkvReader*, long long pos, long long size, double&);
-long UnserializeInt(IMkvReader*, long long pos, long len, long long& result);
+long UnserializeInt(IMkvReader*, long long pos, long long size,
+                    long long& result);
 
 long UnserializeString(IMkvReader*, long long pos, long long size, char*& str);
 
@@ -123,7 +126,7 @@ class BlockEntry {
  public:
   virtual ~BlockEntry();
 
-  bool EOS() const;
+  bool EOS() const { return (GetKind() == kBlockEOS); }
   const Cluster* GetCluster() const;
   long GetIndex() const;
   virtual const Block* GetBlock() const = 0;
@@ -386,6 +389,90 @@ class Track {
   ContentEncoding** content_encoding_entries_end_;
 };
 
+struct PrimaryChromaticity {
+  PrimaryChromaticity() : x(0), y(0) {}
+  ~PrimaryChromaticity() {}
+  static bool Parse(IMkvReader* reader, long long read_pos,
+                    long long value_size, bool is_x,
+                    PrimaryChromaticity** chromaticity);
+  float x;
+  float y;
+};
+
+struct MasteringMetadata {
+  static const float kValueNotPresent;
+
+  MasteringMetadata()
+      : r(NULL),
+        g(NULL),
+        b(NULL),
+        white_point(NULL),
+        luminance_max(kValueNotPresent),
+        luminance_min(kValueNotPresent) {}
+  ~MasteringMetadata() {
+    delete r;
+    delete g;
+    delete b;
+    delete white_point;
+  }
+
+  static bool Parse(IMkvReader* reader, long long element_start,
+                    long long element_size,
+                    MasteringMetadata** mastering_metadata);
+
+  PrimaryChromaticity* r;
+  PrimaryChromaticity* g;
+  PrimaryChromaticity* b;
+  PrimaryChromaticity* white_point;
+  float luminance_max;
+  float luminance_min;
+};
+
+struct Colour {
+  static const long long kValueNotPresent;
+
+  // Unless otherwise noted all values assigned upon construction are the
+  // equivalent of unspecified/default.
+  Colour()
+      : matrix_coefficients(kValueNotPresent),
+        bits_per_channel(kValueNotPresent),
+        chroma_subsampling_horz(kValueNotPresent),
+        chroma_subsampling_vert(kValueNotPresent),
+        cb_subsampling_horz(kValueNotPresent),
+        cb_subsampling_vert(kValueNotPresent),
+        chroma_siting_horz(kValueNotPresent),
+        chroma_siting_vert(kValueNotPresent),
+        range(kValueNotPresent),
+        transfer_characteristics(kValueNotPresent),
+        primaries(kValueNotPresent),
+        max_cll(kValueNotPresent),
+        max_fall(kValueNotPresent),
+        mastering_metadata(NULL) {}
+  ~Colour() {
+    delete mastering_metadata;
+    mastering_metadata = NULL;
+  }
+
+  static bool Parse(IMkvReader* reader, long long element_start,
+                    long long element_size, Colour** colour);
+
+  long long matrix_coefficients;
+  long long bits_per_channel;
+  long long chroma_subsampling_horz;
+  long long chroma_subsampling_vert;
+  long long cb_subsampling_horz;
+  long long cb_subsampling_vert;
+  long long chroma_siting_horz;
+  long long chroma_siting_vert;
+  long long range;
+  long long transfer_characteristics;
+  long long primaries;
+  long long max_cll;
+  long long max_fall;
+
+  MasteringMetadata* mastering_metadata;
+};
+
 class VideoTrack : public Track {
   VideoTrack(const VideoTrack&);
   VideoTrack& operator=(const VideoTrack&);
@@ -393,20 +480,34 @@ class VideoTrack : public Track {
   VideoTrack(Segment*, long long element_start, long long element_size);
 
  public:
+  virtual ~VideoTrack();
   static long Parse(Segment*, const Info&, long long element_start,
                     long long element_size, VideoTrack*&);
 
   long long GetWidth() const;
   long long GetHeight() const;
+  long long GetDisplayWidth() const;
+  long long GetDisplayHeight() const;
+  long long GetDisplayUnit() const;
+  long long GetStereoMode() const;
   double GetFrameRate() const;
 
   bool VetEntry(const BlockEntry*) const;
   long Seek(long long time_ns, const BlockEntry*&) const;
 
+  Colour* GetColour() const;
+
  private:
   long long m_width;
   long long m_height;
+  long long m_display_width;
+  long long m_display_height;
+  long long m_display_unit;
+  long long m_stereo_mode;
+
   double m_rate;
+
+  Colour* m_colour;
 };
 
 class AudioTrack : public Track {
@@ -582,6 +683,85 @@ class Chapters {
   int m_editions_count;
 };
 
+class Tags {
+  Tags(const Tags&);
+  Tags& operator=(const Tags&);
+
+ public:
+  Segment* const m_pSegment;
+  const long long m_start;
+  const long long m_size;
+  const long long m_element_start;
+  const long long m_element_size;
+
+  Tags(Segment*, long long payload_start, long long payload_size,
+       long long element_start, long long element_size);
+
+  ~Tags();
+
+  long Parse();
+
+  class Tag;
+  class SimpleTag;
+
+  class SimpleTag {
+    friend class Tag;
+    SimpleTag();
+    SimpleTag(const SimpleTag&);
+    ~SimpleTag();
+    SimpleTag& operator=(const SimpleTag&);
+
+   public:
+    const char* GetTagName() const;
+    const char* GetTagString() const;
+
+   private:
+    void Init();
+    void ShallowCopy(SimpleTag&) const;
+    void Clear();
+    long Parse(IMkvReader*, long long pos, long long size);
+
+    char* m_tag_name;
+    char* m_tag_string;
+  };
+
+  class Tag {
+    friend class Tags;
+    Tag();
+    Tag(const Tag&);
+    ~Tag();
+    Tag& operator=(const Tag&);
+
+   public:
+    int GetSimpleTagCount() const;
+    const SimpleTag* GetSimpleTag(int index) const;
+
+   private:
+    void Init();
+    void ShallowCopy(Tag&) const;
+    void Clear();
+    long Parse(IMkvReader*, long long pos, long long size);
+
+    long ParseSimpleTag(IMkvReader*, long long pos, long long size);
+    bool ExpandSimpleTagsArray();
+
+    SimpleTag* m_simple_tags;
+    int m_simple_tags_size;
+    int m_simple_tags_count;
+  };
+
+  int GetTagCount() const;
+  const Tag* GetTag(int index) const;
+
+ private:
+  long ParseTag(long long pos, long long size);
+  bool ExpandTagsArray();
+
+  Tag* m_tags;
+  int m_tags_size;
+  int m_tags_count;
+};
+
 class SegmentInfo {
   SegmentInfo(const SegmentInfo&);
   SegmentInfo& operator=(const SegmentInfo&);
@@ -684,7 +864,7 @@ class CuePoint {
   long long m_element_start;
   long long m_element_size;
 
-  void Load(IMkvReader*);
+  bool Load(IMkvReader*);
 
   long long GetTimeCode() const;  // absolute but unscaled
   long long GetTime(const Segment*) const;  // absolute and scaled (ns units)
@@ -697,7 +877,7 @@ class CuePoint {
     // reference = clusters containing req'd referenced blocks
     //  reftime = timecode of the referenced block
 
-    void Parse(IMkvReader*, long long, long long);
+    bool Parse(IMkvReader*, long long, long long);
   };
 
   const TrackPosition* Find(const Track*) const;
@@ -730,14 +910,6 @@ class Cues {
       long long time_ns, const Track*, const CuePoint*&,
       const CuePoint::TrackPosition*&) const;
 
-#if 0
-    bool FindNext(  //upper_bound of time_ns
-        long long time_ns,
-        const Track*,
-        const CuePoint*&,
-        const CuePoint::TrackPosition*&) const;
-#endif
-
   const CuePoint* GetFirst() const;
   const CuePoint* GetLast() const;
   const CuePoint* GetNext(const CuePoint*) const;
@@ -751,8 +923,8 @@ class Cues {
   bool DoneParsing() const;
 
  private:
-  void Init() const;
-  void PreloadCuePoint(long&, long long) const;
+  bool Init() const;
+  bool PreloadCuePoint(long&, long long) const;
 
   mutable CuePoint** m_cue_points;
   mutable long m_count;
@@ -877,18 +1049,12 @@ class Segment {
   long ParseNext(const Cluster* pCurr, const Cluster*& pNext, long long& pos,
                  long& size);
 
-#if 0
-    //This pair parses one cluster, but only changes the state of the
-    //segment object when the cluster is actually added to the index.
-    long ParseCluster(long long& cluster_pos, long long& new_pos) const;
-    bool AddCluster(long long cluster_pos, long long new_pos);
-#endif
-
   const SeekHead* GetSeekHead() const;
   const Tracks* GetTracks() const;
   const SegmentInfo* GetInfo() const;
   const Cues* GetCues() const;
   const Chapters* GetChapters() const;
+  const Tags* GetTags() const;
 
   long long GetDuration() const;
 
@@ -914,6 +1080,7 @@ class Segment {
   Tracks* m_pTracks;
   Cues* m_pCues;
   Chapters* m_pChapters;
+  Tags* m_pTags;
   Cluster** m_clusters;
   long m_clusterCount;  // number of entries for which m_index >= 0
   long m_clusterPreloadCount;  // number of entries for which m_index < 0
@@ -923,8 +1090,8 @@ class Segment {
   long DoLoadClusterUnknownSize(long long&, long&);
   long DoParseNext(const Cluster*&, long long&, long&);
 
-  void AppendCluster(Cluster*);
-  void PreloadCluster(Cluster*, ptrdiff_t);
+  bool AppendCluster(Cluster*);
+  bool PreloadCluster(Cluster*, ptrdiff_t);
 
   // void ParseSeekHead(long long pos, long long size);
   // void ParseSeekEntry(long long pos, long long size);
@@ -933,7 +1100,7 @@ class Segment {
   const BlockEntry* GetBlock(const CuePoint&, const CuePoint::TrackPosition&);
 };
 
-}  // end namespace mkvparser
+}  // namespace mkvparser
 
 inline long mkvparser::Segment::LoadCluster() {
   long long pos;
@@ -942,4 +1109,4 @@ inline long mkvparser::Segment::LoadCluster() {
   return LoadCluster(pos, size);
 }
 
-#endif  // MKVPARSER_HPP
+#endif  // MKVPARSER_MKVPARSER_H_
