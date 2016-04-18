@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8859e447_a2bf12eb",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1695,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-04-18T16:55:23Z",
+      "side": 0,
+      "message": "May be ok to remove this now, but we probably need to handle zcoeff_blk[], which is currently disabled in encode_block().",
+      "range": {
+        "startLine": 1691,
+        "startChar": 2,
+        "endLine": 1695,
+        "endChar": 50
+      },
+      "revId": "d2c66804875c678b795e4f699e429abb241ac9b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
