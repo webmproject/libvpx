@@ -2946,8 +2946,9 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
   TX_SIZE (*const inter_tx_size)[MAX_MIB_SIZE] =
     (TX_SIZE (*)[MAX_MIB_SIZE])&mbmi->inter_tx_size[tx_row][tx_col];
+  const int bw = num_4x4_blocks_wide_lookup[plane_bsize];
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
-  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+  int max_blocks_wide = bw;
   int64_t this_rd = INT64_MAX;
   ENTROPY_CONTEXT *pta = ta + blk_col;
   ENTROPY_CONTEXT *ptl = tl + blk_row;
@@ -3018,10 +3019,10 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
       *rate = zero_blk_rate;
       *dist = *bsse;
       *skip = 1;
-      x->blk_skip[plane][blk_row * max_blocks_wide + blk_col] = 1;
+      x->blk_skip[plane][blk_row * bw + blk_col] = 1;
       p->eobs[block] = 0;
     } else {
-      x->blk_skip[plane][blk_row * max_blocks_wide + blk_col] = 0;
+      x->blk_skip[plane][blk_row * bw + blk_col] = 0;
       *skip = 0;
     }
 
@@ -3078,7 +3079,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->tx_size = tx_size;
     if (this_rd == INT64_MAX)
       *is_cost_valid = 0;
-    x->blk_skip[plane][blk_row * max_blocks_wide + blk_col] = *skip;
+    x->blk_skip[plane][blk_row * bw + blk_col] = *skip;
   } else {
     *rate = sum_rate;
     *dist = sum_dist;
@@ -7166,6 +7167,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       for (idy = 0; idy < xd->n8_h; ++idy)
         for (idx = 0; idx < xd->n8_w; ++idx)
           mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
+      memset(x->blk_skip[0], skippable_y,
+             sizeof(uint8_t) * xd->n8_h * xd->n8_w * 4);
     }
 #else
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
