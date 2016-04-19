@@ -3339,6 +3339,15 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
                                bsize >= BLOCK_8X8;
   (void) *tp_orig;
 
+#if CONFIG_VAR_TX
+#ifndef NDEBUG
+  // Nothing should rely on the default value of this array (which is just
+  // leftover from encoding the previous block. Setting it to magic number
+  // when debugging.
+  memset(x->blk_skip[0], 234, sizeof(x->blk_skip[0]));
+#endif  // NDEBUG
+#endif  // CONFIG_VAR_TX
+
   assert(num_8x8_blocks_wide_lookup[bsize] ==
              num_8x8_blocks_high_lookup[bsize]);
 
@@ -4433,7 +4442,6 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   x->quant_fp = cpi->sf.use_quant_fp;
   vp10_zero(x->skip_txfm);
 #if CONFIG_VAR_TX
-  vp10_zero(x->blk_skip);
 #if CONFIG_REF_MV
   vp10_zero(x->blk_skip_drl);
 #endif

@@ -7166,6 +7166,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       for (idy = 0; idy < xd->n8_h; ++idy)
         for (idx = 0; idx < xd->n8_w; ++idx)
           mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
+      memset(x->blk_skip[0], skippable_y, (xd->n8_h * xd->n8_w) * 4);
     }
 #else
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,

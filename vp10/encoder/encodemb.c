@@ -435,6 +435,9 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 //    return;
 //  }
 
+  // Assert not magic number (uninitialised).
+  assert(x->blk_skip[plane][(blk_row << bwl) + blk_col] != 234);
+
 #if CONFIG_VAR_TX
   if (!x->skip_recode &&
       x->blk_skip[plane][(blk_row << bwl) + blk_col] == 0) {
