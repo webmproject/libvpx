@@ -1407,6 +1407,7 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi, MACROBLOCK *x,
   int64_t best_rd = INT64_MAX, last_rd = INT64_MAX;
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   TX_SIZE best_tx = max_tx_size;
+  uint8_t zcoeff_blk[TX_SIZES][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
   const int tx_select = cm->tx_mode == TX_MODE_SELECT;
   const int is_inter = is_inter_block(mbmi);
 #if CONFIG_EXT_TX
@@ -1477,9 +1478,16 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi, MACROBLOCK *x,
       *rate       = r;
       *skip       = s;
       *psse       = sse;
+      memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
+             sizeof(zcoeff_blk[mbmi->tx_size][0]) *
+             MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
     }
   }
   mbmi->tx_size = best_tx;
+
+  memcpy(x->zcoeff_blk[mbmi->tx_size], zcoeff_blk[mbmi->tx_size],
+         sizeof(zcoeff_blk[mbmi->tx_size][0]) *
+         MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
 
   return best_rd;
 }
@@ -1639,6 +1647,7 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bs) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  uint8_t zcoeff_blk[TX_SIZES][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
   int r, s;
   int64_t d, sse;
   int64_t rd = INT64_MAX;
@@ -1671,6 +1680,9 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
       *psse       = sse;
       best_tx_type = tx_type;
       best_tx = mbmi->tx_size;
+      memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
+             sizeof(zcoeff_blk[mbmi->tx_size][0]) *
+             MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
     }
   }
 
@@ -1681,6 +1693,10 @@ static void choose_tx_size_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   if (mbmi->tx_size >= TX_32X32)
     assert(mbmi->tx_type == DCT_DCT);
 #endif
+
+  memcpy(x->zcoeff_blk[mbmi->tx_size], zcoeff_blk[mbmi->tx_size],
+         sizeof(zcoeff_blk[mbmi->tx_size][0]) *
+         MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
 }
 
 static void super_block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
