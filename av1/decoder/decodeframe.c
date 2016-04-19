@@ -2747,16 +2747,6 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
     winterface->execute(&pbi->lf_worker);
   }
 #endif  // CONFIG_VAR_TX
-#if CONFIG_CLPF
-  if (cm->clpf && !cm->skip_loop_filter)
-    av1_clpf_frame(&pbi->cur_buf->buf, cm, &pbi->mb);
-#endif
-#if CONFIG_DERING
-  if (cm->dering_level && !cm->skip_loop_filter) {
-    av1_dering_frame(&pbi->cur_buf->buf, cm, &pbi->mb, cm->dering_level);
-  }
-#endif  // CONFIG_DERING
-
   if (cm->frame_parallel_decode)
     av1_frameworker_broadcast(pbi->cur_buf, INT_MAX);
 
@@ -3852,6 +3842,16 @@ void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
     av1_loop_restoration_rows(new_fb, cm, 0, cm->mi_rows, 0);
   }
 #endif  // CONFIG_LOOP_RESTORATION
+
+#if CONFIG_CLPF
+  if (cm->clpf && !cm->skip_loop_filter)
+    av1_clpf_frame(&pbi->cur_buf->buf, cm, &pbi->mb);
+#endif
+#if CONFIG_DERING
+  if (cm->dering_level && !cm->skip_loop_filter) {
+    av1_dering_frame(&pbi->cur_buf->buf, cm, &pbi->mb, cm->dering_level);
+  }
+#endif  // CONFIG_DERING
 
   if (!xd->corrupted) {
     if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
