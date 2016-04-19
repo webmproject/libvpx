@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8c4e87d_991bfbb7",
+        "filename": "examples.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-04-19T17:38:54Z",
+      "side": 1,
+      "message": "I think the real problem is right here, and this is probably the reason why the libyuv include path is added on 237 instead of up above. Might have to look at this in master, and this is just an fyi/note-to-self comment.",
+      "revId": "3e3f40acb9a7c4b4497aa5f816a693ca4ea9178b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
