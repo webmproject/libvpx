@@ -1292,10 +1292,7 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
     if (!is_neighbor_overlappable(above_mbmi))
       continue;
 
-    overlap = (above_mbmi->skip) ?
-              num_4x4_blocks_high_lookup[bsize] << 1 :
-              VPXMIN(num_4x4_blocks_high_lookup[bsize],
-                     num_4x4_blocks_high_lookup[above_mbmi->sb_type]) << 1;
+    overlap = num_4x4_blocks_high_lookup[bsize] << 1;
 
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       const struct macroblockd_plane *pd = &xd->plane[plane];
@@ -1359,10 +1356,7 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
     if (!is_neighbor_overlappable(left_mbmi))
       continue;
 
-    overlap = (left_mbmi->skip) ?
-              num_4x4_blocks_wide_lookup[bsize] << 1 :
-              VPXMIN(num_4x4_blocks_wide_lookup[bsize],
-                     num_4x4_blocks_wide_lookup[left_mbmi->sb_type]) << 1;
+    overlap = num_4x4_blocks_wide_lookup[bsize] << 1;
 
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       const struct macroblockd_plane *pd = &xd->plane[plane];
