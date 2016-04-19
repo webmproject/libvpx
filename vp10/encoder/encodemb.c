@@ -773,6 +773,20 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                      VP10_XFORM_QUANT_SKIP_QUANT);
 #endif  // CONFIG_EXT_INTRA
 
+  if (args->ctx != NULL) {
+    struct optimize_ctx *const ctx = args->ctx;
+    ENTROPY_CONTEXT *a, *l;
+    a = &ctx->ta[plane][blk_col];
+    l = &ctx->tl[plane][blk_row];
+    if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
+      int ctx;
+      ctx = combine_entropy_contexts(*a, *l);
+      *a = *l = optimize_b(x, plane, block, tx_size, ctx) > 0;
+    } else {
+      *a = *l = p->eobs[block] > 0;
+    }
+  }
+
   if (*eob) {
     // inverse transform
     inv_txfm_param.tx_type = tx_type;
@@ -794,10 +808,22 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   }
 }
 
-void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
+void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
+                                   int enable_optimize_b) {
   const MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL, &xd->mi[0]->mbmi.skip};
+  struct optimize_ctx ctx;
+  struct encode_b_args arg = {x, &ctx, &xd->mi[0]->mbmi.skip};
 
+  if (enable_optimize_b && x->optimize &&
+      (!x->skip_recode || !x->skip_optimize)) {
+    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const TX_SIZE tx_size = plane ? get_uv_tx_size(&xd->mi[0]->mbmi, pd) :
+        xd->mi[0]->mbmi.tx_size;
+    vp10_get_entropy_contexts(bsize, tx_size, pd,
+                              ctx.ta[plane], ctx.tl[plane]);
+  } else {
+    arg.ctx = NULL;
+  }
   vp10_foreach_transformed_block_in_plane(xd, bsize, plane,
                                           vp10_encode_block_intra, &arg);
 }

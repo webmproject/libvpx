@@ -4834,7 +4834,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
     int plane;
     mbmi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-      vp10_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
+      vp10_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane, 1);
     if (output_enabled)
       sum_intra_stats(td->counts, mi, xd->above_mi, xd->left_mi,
                       frame_is_intra_only(cm));

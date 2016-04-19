@@ -8243,7 +8243,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       if (this_mode != DC_PRED && this_mode != TM_PRED)
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
-      vp10_encode_intra_block_plane(x, bsize, 0);
+      vp10_encode_intra_block_plane(x, bsize, 0, 0);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         x->recon_variance =
