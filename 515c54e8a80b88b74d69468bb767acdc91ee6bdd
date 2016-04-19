@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8c4e87d_ed734de5",
+        "filename": "test/acm_random.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "not sure about the name. Rand9 might be enough given the return type. Or do we want to say SignedRand9 / Rand9Signed",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_6d2e1dd5",
+        "filename": "test/acm_random.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "Generate() provides a range of [0, range) -\u003e you want 512 I think",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_2d2825c4",
+        "filename": "test/acm_random.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "do static_cast\u003cint16_t\u003e()",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_ad6d5502",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "2016",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_eddc6d02",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "in C++ you can use camel case names, though we\u0027re consistent with that in the tests",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_ade675cc",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "tmp might be fine \u0027b_\u0027 looks like a class variable",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_cd3089e3",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "+ 0 could be done to balance the equations",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_2d970502",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "it\u0027s still (expected, actual) with this release; if a new one is made we can drop that as the failure output has been made more generic",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_ed0d8d1f",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "whitespace around operators",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_edd7cdc4",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:48:38Z",
+      "side": 1,
+      "message": "this is OK, note one can use std::sort in c++.\n\nhttp://en.cppreference.com/w/cpp/algorithm/sort\nhttps://www.sgi.com/tech/stl/sort.html",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
