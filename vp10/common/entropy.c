@@ -675,15 +675,6 @@ const vpx_prob vp10_pareto8_token_probs[COEFF_PROB_MODELS]
   {247, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   {247, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
-
-void vp10_build_pareto8_cdf_tab(
-    const vpx_prob token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2],
-    rans_dec_lut cdf_tab[COEFF_PROB_MODELS]) {
-  int p;
-  for (p = 0; p < COEFF_PROB_MODELS; ++p) {
-    rans_build_cdf_from_pdf(token_probs[p], cdf_tab[p]);
-  }
-}
 #endif  // CONFIG_ANS
 
 #if CONFIG_ENTROPY
@@ -2807,6 +2798,24 @@ void vp10_model_to_full_probs(const vpx_prob *model, vpx_prob *full) {
   extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 
+#if CONFIG_ANS
+void vp10_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
+  TX_SIZE t;
+  int i, j, k, l;
+  for (t = TX_4X4; t <= TX_32X32; ++t)
+    for (i = 0; i < PLANE_TYPES; ++i)
+      for (j = 0; j < REF_TYPES; ++j)
+        for (k = 0; k < COEF_BANDS; ++k)
+          for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
+            const vpx_prob *const tree_probs = fc->coef_probs[t][i][j][k][l];
+            vpx_prob pivot = tree_probs[PIVOT_NODE];
+            assert(pivot != 0);
+            rans_build_cdf_from_pdf(vp10_pareto8_token_probs[pivot - 1],
+                                    fc->coef_cdfs[t][i][j][k][l]);
+          }
+}
+#endif  // CONFIG_ANS
+
 void vp10_default_coef_probs(VP10_COMMON *cm) {
 #if CONFIG_ENTROPY
   const int index =
@@ -2819,6 +2828,9 @@ void vp10_default_coef_probs(VP10_COMMON *cm) {
   vp10_copy(cm->fc->coef_probs[TX_16X16], default_coef_probs_16x16);
   vp10_copy(cm->fc->coef_probs[TX_32X32], default_coef_probs_32x32);
 #endif  // CONFIG_ENTROPY
+#if CONFIG_ANS
+  vp10_coef_pareto_cdfs(cm->fc);
+#endif  // CONFIG_ANS
 }
 
 #define COEF_COUNT_SAT 24
@@ -2888,6 +2900,9 @@ void vp10_adapt_coef_probs(VP10_COMMON *cm) {
 #endif  // CONFIG_ENTROPY
   for (t = TX_4X4; t <= TX_32X32; t++)
     adapt_coef_probs(cm, t, count_sat, update_factor);
+#if CONFIG_ANS
+  vp10_coef_pareto_cdfs(cm->fc);
+#endif
 }
 
 #if CONFIG_ENTROPY

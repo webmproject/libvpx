@@ -220,7 +220,6 @@ static INLINE int read_coeff(const vpx_prob *const probs, int n,
 }
 
 static int decode_coefs_ans(const MACROBLOCKD *const xd,
-                            const rans_dec_lut *const token_tab,
                             PLANE_TYPE type,
                             tran_low_t *dqcoeff, TX_SIZE tx_size,
                             TX_TYPE tx_type,
@@ -234,7 +233,10 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
   int band, c = 0;
   const vpx_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
+  const rans_dec_lut(*coef_cdfs)[COEFF_CONTEXTS] =
+      fc->coef_cdfs[tx_size][type][ref];
   const vpx_prob *prob;
+  const rans_dec_lut *cdf;
   unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int (*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[MAX_TX_SQUARE];
@@ -312,8 +314,9 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
       band = *band_translate++;
       prob = coef_probs[band][ctx];
     }
+    cdf = &coef_cdfs[band][ctx];
 
-    token = ONE_TOKEN + rans_read(ans, token_tab[prob[PIVOT_NODE] - 1]);
+    token = ONE_TOKEN + rans_read(ans, *cdf);
     INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
     switch (token) {
       case ONE_TOKEN:
@@ -458,9 +461,6 @@ void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
 }
 
 int vp10_decode_block_tokens(MACROBLOCKD *const xd,
-#if CONFIG_ANS
-                             const rans_dec_lut *const token_tab,
-#endif  // CONFIG_ANS
                              int plane, const scan_order *sc,
                              int x, int y,
                              TX_SIZE tx_size,
@@ -480,7 +480,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                                pd->dqcoeff, tx_size, tx_type,
                                dequant, ctx, sc->scan, sc->neighbors, r);
 #else
-  const int eob = decode_coefs_ans(xd, token_tab, pd->plane_type,
+  const int eob = decode_coefs_ans(xd, pd->plane_type,
                                    pd->dqcoeff, tx_size, tx_type,
                                    dequant, ctx, sc->scan, sc->neighbors, r);
 #endif  // !CONFIG_ANS

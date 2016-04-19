@@ -263,7 +263,6 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane,
 
 static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 #if CONFIG_ANS
-                                         const rans_dec_lut *const token_tab,
                                                 struct AnsDecoder *const r,
 #else
                                                 vp10_reader *r,
@@ -291,9 +290,6 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
     const scan_order *sc = get_scan(tx_size, tx_type, 0);
     const int eob = vp10_decode_block_tokens(xd,
-#if CONFIG_ANS
-                                             token_tab,
-#endif  // CONFIG_ANS
                                              plane, sc, col, row, tx_size,
                                              tx_type, r, mbmi->segment_id);
     inverse_transform_block(xd, plane, tx_type, tx_size,
@@ -361,7 +357,6 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, vp10_reader *r,
 #if !CONFIG_VAR_TX || CONFIG_SUPERTX
 static int reconstruct_inter_block(MACROBLOCKD *const xd,
 #if CONFIG_ANS
-                                   const rans_dec_lut *const token_tab,
                                    struct AnsDecoder *const r,
 #else
                                    vp10_reader *r,
@@ -374,9 +369,6 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
   const scan_order *sc = get_scan(tx_size, tx_type, 1);
   const int eob = vp10_decode_block_tokens(xd,
-#if CONFIG_ANS
-                                           token_tab,
-#endif
                                            plane, sc, col, row,
                                            tx_size, tx_type, r,
                                            mbmi->segment_id);
@@ -1882,9 +1874,6 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
             predict_and_reconstruct_intra_block(xd,
-#if CONFIG_ANS
-                                                cm->token_tab,
-#endif
                                                 r,
                                                 mbmi, plane,
                                                 row, col, tx_size);
@@ -1985,9 +1974,6 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
           for (row = 0; row < max_blocks_high; row += step)
             for (col = 0; col < max_blocks_wide; col += step)
               eobtotal += reconstruct_inter_block(xd,
-#if CONFIG_ANS
-                                                  cm->token_tab,
-#endif
                                                   r,
                                                   mbmi, plane, row, col,
                                                   tx_size);
@@ -2385,9 +2371,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
             eobtotal += reconstruct_inter_block(xd,
-#if CONFIG_ANS
-                                                cm->token_tab,
-#endif
                                                 r,
                                                 mbmi, i, row, col,
                                                 tx_size);
@@ -2499,6 +2482,9 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
     TX_SIZE tx_size;
     for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
       read_coef_probs_common(fc->coef_probs[tx_size], r);
+#if CONFIG_ANS
+    vp10_coef_pareto_cdfs(fc);
+#endif  // CONFIG_ANS
 }
 
 static void setup_segmentation(VP10_COMMON *const cm,

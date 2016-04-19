@@ -53,6 +53,9 @@ typedef struct frame_contexts {
   vpx_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 #endif
   vp10_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
+#if CONFIG_ANS
+  coeff_cdf_model coef_cdfs[TX_SIZES][PLANE_TYPES];
+#endif
   vpx_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
 

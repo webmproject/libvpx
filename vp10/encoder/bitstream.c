@@ -676,7 +676,6 @@ static void pack_mb_tokens(vp10_writer *w,
 // This function serializes the tokens in forward order using a buffered ans
 // coder.
 static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
-                               const rans_dec_lut token_tab[COEFF_PROB_MODELS],
                                const TOKENEXTRA **tp,
                                const TOKENEXTRA *const stop,
                                vpx_bit_depth_t bit_depth,
@@ -711,8 +710,7 @@ static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
 
       if (t != ZERO_TOKEN) {
         struct rans_sym s;
-        const rans_dec_lut *token_cdf =
-            &token_tab[p->context_tree[PIVOT_NODE] - 1];
+        const rans_dec_lut *token_cdf = p->token_cdf;
         s.cum_prob = (*token_cdf)[t - ONE_TOKEN];
         s.prob = (*token_cdf)[t - ONE_TOKEN + 1] - s.cum_prob;
         buf_rans_write(ans, &s);
@@ -1611,8 +1609,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
         for (row = 0; row < num_4x4_h; row += bw)
           for (col = 0; col < num_4x4_w; col += bw)
 #if CONFIG_ANS
-            pack_mb_tokens_ans(w, cm->token_tab, tok, tok_end, cm->bit_depth,
-                               tx);
+            pack_mb_tokens_ans(w, tok, tok_end, cm->bit_depth, tx);
 #else
             pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
 #endif  // CONFIG_ANS
@@ -1621,7 +1618,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
       TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                          : m->mbmi.tx_size;
 #if CONFIG_ANS
-      pack_mb_tokens_ans(w, cm->token_tab, tok, tok_end, cm->bit_depth, tx);
+      pack_mb_tokens_ans(w, tok, tok_end, cm->bit_depth, tx);
 #else
       pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
 #endif  // CONFIG_ANS
@@ -1829,8 +1826,7 @@ static void write_modes_sb(VP10_COMP *const cpi,
       for (row = 0; row < num_4x4_h; row += bw)
         for (col = 0; col < num_4x4_w; col += bw)
 #if CONFIG_ANS
-          pack_mb_tokens_ans(w, cm->token_tab, tok, tok_end, cm->bit_depth,
-                             tx);
+          pack_mb_tokens_ans(w, tok, tok_end, cm->bit_depth, tx);
 #else
           pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
 #endif
@@ -2268,6 +2264,9 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
+#if CONFIG_ANS
+  int update = 0;
+#endif  // CONFIG_ANS
 #if CONFIG_ENTROPY
   VP10_COMMON *cm = &cpi->common;
   SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
@@ -2320,12 +2319,18 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
 
         update_coef_probs_subframe(w, cpi, tx_size, branch_ct,
                                    frame_coef_probs);
+#if CONFIG_ANS
+        update = 1;
+#endif  // CONFIG_ANS
       } else {
 #endif  // CONFIG_ENTROPY
         build_tree_distribution(cpi, tx_size, frame_branch_ct,
                                 frame_coef_probs);
         update_coef_probs_common(w, cpi, tx_size, frame_branch_ct,
                                  frame_coef_probs);
+#if CONFIG_ANS
+        update = 1;
+#endif  // CONFIG_ANS
 #if CONFIG_ENTROPY
       }
 #endif  // CONFIG_ENTROPY
@@ -2350,6 +2355,9 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
     vp10_copy(cm->counts.eob_branch, eob_counts_copy);
   }
 #endif  // CONFIG_ENTROPY
+#if CONFIG_ANS
+  if (update) vp10_coef_pareto_cdfs(cpi->common.fc);
+#endif  // CONFIG_ANS
 }
 
 #if CONFIG_LOOP_RESTORATION
