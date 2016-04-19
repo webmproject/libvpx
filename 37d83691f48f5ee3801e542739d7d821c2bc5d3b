@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8c4e87d_c2d5f835",
+        "filename": "test/minmax_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-19T22:54:06Z",
+      "side": 1,
+      "message": "UINT8_MAX and CHAR_MAX both failed with vpx/vpx_integer.h, not sure what the best type would be.",
+      "range": {
+        "startLine": 42,
+        "startChar": 15,
+        "endLine": 42,
+        "endChar": 16
+      },
+      "revId": "37d83691f48f5ee3801e542739d7d821c2bc5d3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
