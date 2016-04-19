@@ -76,6 +76,7 @@ VP10_CX_SRCS-yes += encoder/resize.c
 VP10_CX_SRCS-yes += encoder/resize.h
 VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/blockiness.c
 VP10_CX_SRCS-$(CONFIG_ANS) += encoder/buf_ans.h
+VP10_CX_SRCS-$(CONFIG_ANS) += encoder/buf_ans.c
 
 VP10_CX_SRCS-yes += encoder/tokenize.c
 VP10_CX_SRCS-yes += encoder/treewriter.c

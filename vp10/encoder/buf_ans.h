@@ -17,7 +17,6 @@
 #include <assert.h>
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_ports/mem_ops.h"
 #include "vp10/common/ans.h"
 
 #ifdef __cplusplus
@@ -35,22 +34,29 @@ struct buffered_ans_symbol {
 };
 
 struct BufAnsCoder {
+  struct VP10Common *cm;
   struct buffered_ans_symbol *buf;
   int size;
   int offset;
 };
 
-static INLINE void buf_ans_write_init(struct BufAnsCoder *const c,
-                                      struct buffered_ans_symbol *sym_arr,
-                                      int size) {
-  c->buf = sym_arr;
-  c->size = size;
+void vp10_buf_ans_alloc(struct BufAnsCoder *c, struct VP10Common *cm,
+                        int size_hint);
+
+void vp10_buf_ans_free(struct BufAnsCoder *c);
+
+void vp10_buf_ans_grow(struct BufAnsCoder *c);
+
+static INLINE void buf_ans_write_reset(struct BufAnsCoder *const c) {
   c->offset = 0;
 }
 
 static INLINE void buf_uabs_write(struct BufAnsCoder *const c,
                              uint8_t val, AnsP8 prob) {
-  assert(c->offset < c->size);
+  assert(c->offset <= c->size);
+  if (c->offset == c->size) {
+    vp10_buf_ans_grow(c);
+  }
   c->buf[c->offset].method = ANS_METHOD_UABS;
   c->buf[c->offset].val_start = val;
   c->buf[c->offset].prob = prob;
@@ -59,7 +65,10 @@ static INLINE void buf_uabs_write(struct BufAnsCoder *const c,
 
 static INLINE void buf_rans_write(struct BufAnsCoder *const c,
                                   const struct rans_sym *const sym) {
-  assert(c->offset < c->size);
+  assert(c->offset <= c->size);
+  if (c->offset == c->size) {
+    vp10_buf_ans_grow(c);
+  }
   c->buf[c->offset].method = ANS_METHOD_RANS;
   c->buf[c->offset].val_start = sym->cum_prob;
   c->buf[c->offset].prob = sym->prob;
