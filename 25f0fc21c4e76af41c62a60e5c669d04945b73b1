@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "a8c4e87d_6dd3bd1f",
+        "filename": "test/minmax_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-19T23:12:47Z",
+      "side": 1,
+      "message": "with a fixed sized array sizeof will return the size of the array itself; sizeof a uint8_t* would return the size of the pointer. sizeof(*a)/sizeof(a[0]) is the size of the type which is correct here, but unnecessary.",
+      "parentUuid": "a8c4e87d_8265c08a",
+      "revId": "25f0fc21c4e76af41c62a60e5c669d04945b73b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8821e4e4_ebad2daf",
         "filename": "test/minmax_test.cc",
         "patchSetId": 5
