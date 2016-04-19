@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a8c4e87d_623f4cb6",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-19T22:30:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68f3d0ea_6fd63111",
+      "range": {
+        "startLine": 317,
+        "startChar": 12,
+        "endLine": 317,
+        "endChar": 13
+      },
+      "revId": "eeac42198e4c393c94ccadecbfd671b0643e7c75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c80f5cb0_6acdf782",
         "filename": "vp10/common/ans.h",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "a8c4e87d_023770dc",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-19T22:30:20Z",
+      "side": 1,
+      "message": "Driving any of these to zero is obviously bad. I suspect the maximum magnitude of adjustment is in_syms, but I\u0027m not sure if I can prove it.",
+      "parentUuid": "c80f5cb0_6acdf782",
+      "range": {
+        "startLine": 319,
+        "startChar": 5,
+        "endLine": 319,
+        "endChar": 11
+      },
+      "revId": "eeac42198e4c393c94ccadecbfd671b0643e7c75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c80f5cb0_4aca336d",
         "filename": "vp10/encoder/tokenize.c",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2016-04-19T22:03:54Z",
       "side": 1,
       "message": "i\u0027d suggest adding some ()\u0027s",
+      "range": {
+        "startLine": 503,
+        "startChar": 15,
+        "endLine": 503,
+        "endChar": 20
+      },
+      "revId": "eeac42198e4c393c94ccadecbfd671b0643e7c75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c4e87d_4225689d",
+        "filename": "vp10/encoder/tokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-19T22:30:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c80f5cb0_4aca336d",
       "range": {
         "startLine": 503,
         "startChar": 15,
