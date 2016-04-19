@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "68f3d0ea_ef8fc14e",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3348,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-04-19T20:47:16Z",
+      "side": 1,
+      "message": "Well, it found 2 issues so far. I would leave it in for a short while (release time in the worst), as I do not think the coverage of the unit tests is great. Might flag up something later. But to answer your question, no it is not strictly needed.",
+      "parentUuid": "a8c4e87d_fc278563",
+      "revId": "7aa95be980242b6d6fd026fdb393a9da388b143c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c4e87d_dc2cc148",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 2
@@ -30,6 +48,47 @@
       "writtenOn": "2016-04-19T19:57:54Z",
       "side": 1,
       "message": "why changing the name?",
+      "revId": "7aa95be980242b6d6fd026fdb393a9da388b143c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68f3d0ea_cf94fd63",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2949,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-04-19T20:47:16Z",
+      "side": 1,
+      "message": "max_blocks_wide and bw are not the same for right edge blocks (see below), so it is not just a name change.",
+      "parentUuid": "a8c4e87d_dc2cc148",
+      "revId": "7aa95be980242b6d6fd026fdb393a9da388b143c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68f3d0ea_af99b999",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2998,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-04-19T20:47:16Z",
+      "side": 1,
+      "message": "max_blocks_wide updated here for right edge blocks.",
+      "range": {
+        "startLine": 2998,
+        "startChar": 4,
+        "endLine": 2998,
+        "endChar": 19
+      },
       "revId": "7aa95be980242b6d6fd026fdb393a9da388b143c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
