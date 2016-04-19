@@ -9,7 +9,7 @@
 
 using libvpx_test::ACMRandom;
 using libvpx_test::Fwd_Txfm2d_Func;
-using libvpx_test::base;
+using libvpx_test::input_base;
 using libvpx_test::bd;
 
 namespace {
@@ -57,7 +57,7 @@ TEST(vp10_fwd_txfm2d_sse4_1, accuracy) {
     // init input
     for (int r = 0; r < txfm_size; r++) {
       for (int c = 0; c < txfm_size; c++) {
-        input[r * txfm_size + c] = rnd.Rand16() % base;
+        input[r * txfm_size + c] = rnd.Rand16() % input_base;
       }
     }
 

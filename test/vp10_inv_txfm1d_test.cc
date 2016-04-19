@@ -13,7 +13,7 @@
 #include "vp10/common/vp10_inv_txfm1d.h"
 
 using libvpx_test::ACMRandom;
-using libvpx_test::base;
+using libvpx_test::input_base;
 
 namespace {
 const int txfm_type_num = 2;
@@ -53,7 +53,7 @@ TEST(vp10_inv_txfm1d, round_trip) {
         const int count_test_block = 5000;
         for (int ci = 0; ci < count_test_block; ++ci) {
           for (int ni = 0; ni < txfm_size; ++ni) {
-            input[ni] = rnd.Rand16() % base - rnd.Rand16() % base;
+            input[ni] = rnd.Rand16() % input_base - rnd.Rand16() % input_base;
           }
 
           fwd_txfm_func(input, output, cos_bit, range_bit);

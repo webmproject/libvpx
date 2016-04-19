@@ -12,7 +12,7 @@
 #include "test/vp10_txfm_test.h"
 
 using libvpx_test::ACMRandom;
-using libvpx_test::base;
+using libvpx_test::input_base;
 using libvpx_test::reference_hybrid_1d;
 using libvpx_test::TYPE_TXFM;
 using libvpx_test::TYPE_DCT;
@@ -103,7 +103,7 @@ TEST(vp10_fwd_txfm1d, accuracy) {
       if (fwd_txfm_func != NULL) {
         for (int ti = 0; ti < count_test_block; ++ti) {
           for (int ni = 0; ni < txfm_size; ++ni) {
-            input[ni] = rnd.Rand16() % base - rnd.Rand16() % base;
+            input[ni] = rnd.Rand16() % input_base - rnd.Rand16() % input_base;
             ref_input[ni] = static_cast<double>(input[ni]);
           }
 
