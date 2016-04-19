@@ -1192,9 +1192,13 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
               vp10_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
 #if CONFIG_EXT_INTER
                              &mi->bmi[j].ref_mv[ref].as_mv,
+#if CONFIG_REF_MV
+                             is_compound,
+#endif
 #else
 #if CONFIG_REF_MV
                              &mi->bmi[j].pred_mv_s8[ref].as_mv,
+                             is_compound,
 #else
                              &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
 #endif  // CONFIG_REF_MV
@@ -1211,7 +1215,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
             const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
             vp10_encode_mv(cpi, w, &mi->bmi[j].as_mv[1].as_mv,
-                           &mi->bmi[j].ref_mv[1].as_mv, nmvc, allow_hp);
+                           &mi->bmi[j].ref_mv[1].as_mv,
+#if CONFIG_REF_MV
+                           is_compound,
+#endif
+                           nmvc, allow_hp);
           } else if (b_mode == NEW_NEARESTMV || b_mode == NEW_NEARMV) {
 #if CONFIG_REF_MV
             int nmv_ctx =
@@ -1220,7 +1228,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
             const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
             vp10_encode_mv(cpi, w, &mi->bmi[j].as_mv[0].as_mv,
-                           &mi->bmi[j].ref_mv[0].as_mv, nmvc, allow_hp);
+                           &mi->bmi[j].ref_mv[0].as_mv,
+#if CONFIG_REF_MV
+                           is_compound,
+#endif
+                           nmvc, allow_hp);
           }
 #endif  // CONFIG_EXT_INTER
         }
@@ -1244,12 +1256,18 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
           if (mode == NEWFROMNEARMV)
             vp10_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                            &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][1].as_mv,
+#if CONFIG_REF_MV
+                           is_compound,
+#endif
                            nmvc, allow_hp);
           else
 #endif  // CONFIG_EXT_INTER
           vp10_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
-                         &ref_mv.as_mv, nmvc,
-                         allow_hp);
+                         &ref_mv.as_mv,
+#if CONFIG_REF_MV
+                         is_compound,
+#endif
+                         nmvc, allow_hp);
         }
 #if CONFIG_EXT_INTER
       } else if (mode == NEAREST_NEWMV || mode == NEAR_NEWMV) {
@@ -1260,8 +1278,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
             const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
         vp10_encode_mv(cpi, w, &mbmi->mv[1].as_mv,
-                       &mbmi_ext->ref_mvs[mbmi->ref_frame[1]][0].as_mv, nmvc,
-                       allow_hp);
+                       &mbmi_ext->ref_mvs[mbmi->ref_frame[1]][0].as_mv,
+#if CONFIG_REF_MV
+                       is_compound,
+#endif
+                       nmvc, allow_hp);
       } else if (mode == NEW_NEARESTMV || mode == NEW_NEARMV) {
 #if CONFIG_REF_MV
             int nmv_ctx =
@@ -1270,8 +1291,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
             const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
         vp10_encode_mv(cpi, w, &mbmi->mv[0].as_mv,
-                       &mbmi_ext->ref_mvs[mbmi->ref_frame[0]][0].as_mv, nmvc,
-                       allow_hp);
+                       &mbmi_ext->ref_mvs[mbmi->ref_frame[0]][0].as_mv,
+#if CONFIG_REF_MV
+                       is_compound,
+#endif
+                       nmvc, allow_hp);
 #endif  // CONFIG_EXT_INTER
       }
     }

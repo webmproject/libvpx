@@ -349,6 +349,9 @@ void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame) {
   x->nmvjointcost = x->nmv_vec_cost[nmv_ctx];
   x->mvsadcost = x->mvcost;
   x->nmvjointsadcost = x->nmvjointcost;
+
+    x->nmv_vec_cost[nmv_ctx][MV_JOINT_ZERO] =
+        x->zero_rmv_cost[nmv_ctx][1] - x->zero_rmv_cost[nmv_ctx][0];
 }
 #endif
 
@@ -373,12 +376,23 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
   if (!frame_is_intra_only(cm)) {
 #if CONFIG_REF_MV
     int nmv_ctx;
+
     for (nmv_ctx = 0; nmv_ctx < NMV_CONTEXTS; ++nmv_ctx) {
+      vpx_prob tmp_prob = cm->fc->nmvc[nmv_ctx].joints[MV_JOINT_ZERO];
+      cm->fc->nmvc[nmv_ctx].joints[MV_JOINT_ZERO] = 1;
+
       vp10_build_nmv_cost_table(
           x->nmv_vec_cost[nmv_ctx],
           cm->allow_high_precision_mv ? x->nmvcost_hp[nmv_ctx]
                                       : x->nmvcost[nmv_ctx],
           &cm->fc->nmvc[nmv_ctx], cm->allow_high_precision_mv);
+      cm->fc->nmvc[nmv_ctx].joints[MV_JOINT_ZERO] = tmp_prob;
+
+      x->nmv_vec_cost[nmv_ctx][MV_JOINT_ZERO] = 0;
+      x->zero_rmv_cost[nmv_ctx][0] =
+          vp10_cost_bit(cm->fc->nmvc[nmv_ctx].zero_rmv, 0);
+      x->zero_rmv_cost[nmv_ctx][1] =
+          vp10_cost_bit(cm->fc->nmvc[nmv_ctx].zero_rmv, 1);
     }
     x->mvcost = x->mv_cost_stack[0];
     x->nmvjointcost = x->nmv_vec_cost[0];
