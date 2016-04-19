@@ -18,7 +18,7 @@
 #include "./vp10_rtcd.h"
 
 using libvpx_test::ACMRandom;
-using libvpx_test::base;
+using libvpx_test::input_base;
 using libvpx_test::bd;
 using libvpx_test::compute_avg_abs_error;
 using libvpx_test::Fwd_Txfm2d_Func;
@@ -77,7 +77,7 @@ TEST(vp10_fwd_txfm2d, accuracy) {
         double avg_abs_error = 0;
         for (int ci = 0; ci < count; ci++) {
           for (int ni = 0; ni < sqr_txfm_size; ++ni) {
-            input[ni] = rnd.Rand16() % base;
+            input[ni] = rnd.Rand16() % input_base;
             ref_input[ni] = static_cast<double>(input[ni]);
             output[ni] = 0;
             ref_output[ni] = 0;

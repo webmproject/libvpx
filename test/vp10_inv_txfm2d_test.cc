@@ -19,7 +19,7 @@
 #include "vp10/common/vp10_inv_txfm2d_cfg.h"
 
 using libvpx_test::ACMRandom;
-using libvpx_test::base;
+using libvpx_test::input_base;
 using libvpx_test::bd;
 using libvpx_test::compute_avg_abs_error;
 using libvpx_test::Fwd_Txfm2d_Func;
@@ -85,11 +85,11 @@ TEST(vp10_inv_txfm2d, round_trip) {
         for (int ci = 0; ci < count; ci++) {
           for (int ni = 0; ni < sqr_txfm_size; ++ni) {
             if (ci == 0) {
-              int extreme_input = base - 1;
+              int extreme_input = input_base - 1;
               input[ni] = extreme_input;  // extreme case
               ref_input[ni] = 0;
             } else {
-              input[ni] = rnd.Rand16() % base;
+              input[ni] = rnd.Rand16() % input_base;
               ref_input[ni] = 0;
             }
           }
