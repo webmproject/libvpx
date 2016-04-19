@@ -68,11 +68,32 @@ static INLINE vpx_prob vp9_get_skip_prob(const VP9_COMMON *cm,
 
 int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
 
-int vp9_get_intra_inter_context(const MACROBLOCKD *xd);
+// The mode info data structure has a one element border above and to the
+// left of the entries corresponding to real macroblocks.
+// The prediction flags in these dummy entries are initialized to 0.
+// 0 - inter/inter, inter/--, --/inter, --/--
+// 1 - intra/inter, inter/intra
+// 2 - intra/--, --/intra
+// 3 - intra/intra
+static INLINE int get_intra_inter_context(const MACROBLOCKD *xd) {
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const MODE_INFO *const left_mi = xd->left_mi;
+  const int has_above = !!above_mi;
+  const int has_left = !!left_mi;
+
+  if (has_above && has_left) {  // both edges available
+    const int above_intra = !is_inter_block(above_mi);
+    const int left_intra = !is_inter_block(left_mi);
+    return left_intra && above_intra ? 3 : left_intra || above_intra;
+  } else if (has_above || has_left) {  // one edge available
+    return 2 * !is_inter_block(has_above ? above_mi : left_mi);
+  }
+  return 0;
+}
 
 static INLINE vpx_prob vp9_get_intra_inter_prob(const VP9_COMMON *cm,
                                                 const MACROBLOCKD *xd) {
-  return cm->fc->intra_inter_prob[vp9_get_intra_inter_context(xd)];
+  return cm->fc->intra_inter_prob[get_intra_inter_context(xd)];
 }
 
 int vp9_get_reference_mode_context(const VP9_COMMON *cm, const MACROBLOCKD *xd);
@@ -113,8 +134,8 @@ static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
   const int max_tx_size = max_txsize_lookup[xd->mi[0]->sb_type];
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int has_above = xd->up_available;
-  const int has_left = xd->left_available;
+  const int has_above = !!above_mi;
+  const int has_left = !!left_mi;
   int above_ctx = (has_above && !above_mi->skip) ? (int)above_mi->tx_size
                                                  : max_tx_size;
   int left_ctx = (has_left && !left_mi->skip) ? (int)left_mi->tx_size

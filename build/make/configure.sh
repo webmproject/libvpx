@@ -644,6 +644,9 @@ process_common_toolchain() {
 
     # detect tgt_isa
     case "$gcctarget" in
+      aarch64*)
+        tgt_isa=arm64
+        ;;
       armv6*)
         tgt_isa=armv6
         ;;
@@ -1185,6 +1188,12 @@ EOF
               RTCD_OPTIONS="${RTCD_OPTIONS}--disable-avx --disable-avx2 "
               soft_disable avx
               soft_disable avx2
+              ;;
+          esac
+          case $vc_version in
+            7|8|9)
+              echo "${tgt_cc} omits stdint.h, disabling webm-io..."
+              soft_disable webm_io
               ;;
           esac
           ;;

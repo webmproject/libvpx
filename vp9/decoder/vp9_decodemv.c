@@ -353,11 +353,36 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 }
 
+// TODO(slavarnway): Move this decoder version of
+// vp9_get_pred_context_switchable_interp() to vp9_pred_common.h and update the
+// encoder.
+//
+// Returns a context number for the given MB prediction signal
+static int dec_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
+  // Note:
+  // The mode info data structure has a one element border above and to the
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
+  const MODE_INFO *const left_mi = xd->left_mi;
+  const int left_type = left_mi ? left_mi->interp_filter : SWITCHABLE_FILTERS;
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const int above_type = above_mi ? above_mi->interp_filter
+                             : SWITCHABLE_FILTERS;
+
+  if (left_type == above_type)
+    return left_type;
+  else if (left_type == SWITCHABLE_FILTERS && above_type != SWITCHABLE_FILTERS)
+    return above_type;
+  else if (left_type != SWITCHABLE_FILTERS && above_type == SWITCHABLE_FILTERS)
+    return left_type;
+  else
+    return SWITCHABLE_FILTERS;
+}
 
 static INLINE INTERP_FILTER read_switchable_interp_filter(
     VP9_COMMON *const cm, MACROBLOCKD *const xd,
     vpx_reader *r) {
-  const int ctx = vp9_get_pred_context_switchable_interp(xd);
+  const int ctx = dec_get_pred_context_switchable_interp(xd);
   const INTERP_FILTER type =
       (INTERP_FILTER)vpx_read_tree(r, vp9_switchable_interp_tree,
                                    cm->fc->switchable_interp_prob[ctx]);
@@ -372,9 +397,6 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm,
                                        vpx_reader *r) {
   const BLOCK_SIZE bsize = mi->sb_type;
   int i;
-
-  mi->ref_frame[0] = INTRA_FRAME;
-  mi->ref_frame[1] = NONE;
 
   switch (bsize) {
     case BLOCK_4X4:
@@ -399,6 +421,13 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm,
   }
 
   mi->uv_mode = read_intra_mode_uv(cm, xd, r, mi->mode);
+
+  // Initialize interp_filter here so we do not have to check for inter block
+  // modes in dec_get_pred_context_switchable_interp()
+  mi->interp_filter = SWITCHABLE_FILTERS;
+
+  mi->ref_frame[0] = INTRA_FRAME;
+  mi->ref_frame[1] = NONE;
 }
 
 static INLINE int is_mv_valid(const MV *mv) {
@@ -454,7 +483,7 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     return get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) != INTRA_FRAME;
   } else {
-    const int ctx = vp9_get_intra_inter_context(xd);
+    const int ctx = get_intra_inter_context(xd);
     const int is_inter = vpx_read(r, cm->fc->intra_inter_prob[ctx]);
     FRAME_COUNTS *counts = xd->counts;
     if (counts)

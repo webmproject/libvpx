@@ -210,7 +210,7 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
       vpx_write(w, is_compound, vp9_get_reference_mode_prob(cm, xd));
     } else {
-      assert((!is_compound) == (cm->reference_mode == SINGLE_REFERENCE));
+      assert(!is_compound == (cm->reference_mode == SINGLE_REFERENCE));
     }
 
     if (is_compound) {

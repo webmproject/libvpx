@@ -446,7 +446,7 @@ static void resize_multistep(const uint8_t *const input,
                              int length,
                              uint8_t *output,
                              int olength,
-                             uint8_t *buf) {
+                             uint8_t *otmp) {
   int steps;
   if (length == olength) {
     memcpy(output, input, sizeof(output[0]) * length);
@@ -457,16 +457,10 @@ static void resize_multistep(const uint8_t *const input,
   if (steps > 0) {
     int s;
     uint8_t *out = NULL;
-    uint8_t *tmpbuf = NULL;
-    uint8_t *otmp, *otmp2;
+    uint8_t *otmp2;
     int filteredlength = length;
-    if (!tmpbuf) {
-      tmpbuf = (uint8_t *)malloc(sizeof(uint8_t) * length);
-      if (tmpbuf == NULL) return;
-      otmp = tmpbuf;
-    } else {
-      otmp = buf;
-    }
+
+    assert(otmp != NULL);
     otmp2 = otmp + get_down2_length(length, 1);
     for (s = 0; s < steps; ++s) {
       const int proj_filteredlength = get_down2_length(filteredlength, 1);
@@ -484,8 +478,6 @@ static void resize_multistep(const uint8_t *const input,
     if (filteredlength != olength) {
       interpolate(out, filteredlength, output, olength);
     }
-    if (tmpbuf)
-      free(tmpbuf);
   } else {
     interpolate(input, length, output, olength);
   }
@@ -521,25 +513,29 @@ void vp9_resize_plane(const uint8_t *const input,
   uint8_t *intbuf = (uint8_t *)malloc(sizeof(uint8_t) * width2 * height);
   uint8_t *tmpbuf = (uint8_t *)malloc(sizeof(uint8_t) *
                                       (width < height ? height : width));
-  uint8_t *arrbuf = (uint8_t *)malloc(sizeof(uint8_t) * (height + height2));
-  if (intbuf == NULL || tmpbuf == NULL || arrbuf == NULL) goto Error;
+  uint8_t *arrbuf = (uint8_t *)malloc(sizeof(uint8_t) * height);
+  uint8_t *arrbuf2 = (uint8_t *)malloc(sizeof(uint8_t) * height2);
+  if (intbuf == NULL || tmpbuf == NULL ||
+      arrbuf == NULL || arrbuf2 == NULL)
+    goto Error;
   assert(width > 0);
   assert(height > 0);
   assert(width2 > 0);
   assert(height2 > 0);
   for (i = 0; i < height; ++i)
     resize_multistep(input + in_stride * i, width,
-                        intbuf + width2 * i, width2, tmpbuf);
+                     intbuf + width2 * i, width2, tmpbuf);
   for (i = 0; i < width2; ++i) {
     fill_col_to_arr(intbuf + i, width2, height, arrbuf);
-    resize_multistep(arrbuf, height, arrbuf + height, height2, tmpbuf);
-    fill_arr_to_col(output + i, out_stride, height2, arrbuf + height);
+    resize_multistep(arrbuf, height, arrbuf2, height2, tmpbuf);
+    fill_arr_to_col(output + i, out_stride, height2, arrbuf2);
   }
 
  Error:
   free(intbuf);
   free(tmpbuf);
   free(arrbuf);
+  free(arrbuf2);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -742,7 +738,7 @@ static void highbd_resize_multistep(const uint16_t *const input,
                                     int length,
                                     uint16_t *output,
                                     int olength,
-                                    uint16_t *buf,
+                                    uint16_t *otmp,
                                     int bd) {
   int steps;
   if (length == olength) {
@@ -754,16 +750,10 @@ static void highbd_resize_multistep(const uint16_t *const input,
   if (steps > 0) {
     int s;
     uint16_t *out = NULL;
-    uint16_t *tmpbuf = NULL;
-    uint16_t *otmp, *otmp2;
+    uint16_t *otmp2;
     int filteredlength = length;
-    if (!tmpbuf) {
-      tmpbuf = (uint16_t *)malloc(sizeof(uint16_t) * length);
-      if (tmpbuf == NULL) return;
-      otmp = tmpbuf;
-    } else {
-      otmp = buf;
-    }
+
+    assert(otmp != NULL);
     otmp2 = otmp + get_down2_length(length, 1);
     for (s = 0; s < steps; ++s) {
       const int proj_filteredlength = get_down2_length(filteredlength, 1);
@@ -781,8 +771,6 @@ static void highbd_resize_multistep(const uint16_t *const input,
     if (filteredlength != olength) {
       highbd_interpolate(out, filteredlength, output, olength, bd);
     }
-    if (tmpbuf)
-      free(tmpbuf);
   } else {
     highbd_interpolate(input, length, output, olength, bd);
   }
@@ -821,24 +809,28 @@ void vp9_highbd_resize_plane(const uint8_t *const input,
   uint16_t *intbuf = (uint16_t *)malloc(sizeof(uint16_t) * width2 * height);
   uint16_t *tmpbuf = (uint16_t *)malloc(sizeof(uint16_t) *
                                         (width < height ? height : width));
-  uint16_t *arrbuf = (uint16_t *)malloc(sizeof(uint16_t) * (height + height2));
-  if (intbuf == NULL || tmpbuf == NULL || arrbuf == NULL) goto Error;
+  uint16_t *arrbuf = (uint16_t *)malloc(sizeof(uint16_t) * height);
+  uint16_t *arrbuf2 = (uint16_t *)malloc(sizeof(uint16_t) * height2);
+  if (intbuf == NULL || tmpbuf == NULL ||
+      arrbuf == NULL || arrbuf2 == NULL)
+    goto Error;
   for (i = 0; i < height; ++i) {
     highbd_resize_multistep(CONVERT_TO_SHORTPTR(input + in_stride * i), width,
                             intbuf + width2 * i, width2, tmpbuf, bd);
   }
   for (i = 0; i < width2; ++i) {
     highbd_fill_col_to_arr(intbuf + i, width2, height, arrbuf);
-    highbd_resize_multistep(arrbuf, height, arrbuf + height, height2, tmpbuf,
+    highbd_resize_multistep(arrbuf, height, arrbuf2, height2, tmpbuf,
                             bd);
     highbd_fill_arr_to_col(CONVERT_TO_SHORTPTR(output + i), out_stride, height2,
-                           arrbuf + height);
+                           arrbuf2);
   }
 
  Error:
   free(intbuf);
   free(tmpbuf);
   free(arrbuf);
+  free(arrbuf2);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 

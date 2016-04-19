@@ -2530,7 +2530,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         vp8_denoiser_denoise_mb(&cpi->denoiser, x, best_sse, zero_mv_sse,
                                 recon_yoffset, recon_uvoffset,
                                 &cpi->common.lf_info, mb_row, mb_col,
-                                block_index);
+                                block_index, 0);
 
         /* Reevaluate ZEROMV after denoising. */
         if (best_mode.mbmode.ref_frame == INTRA_FRAME &&
