@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_e28a06dd",
+        "filename": "test/vp10_fwd_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-20T02:43:40Z",
+      "side": 1,
+      "message": "Not the same as vp10_inv_txfm2d_test.cc, because we use fwd_txfm_cfg to calculate amplify_bit. I still need to keep fwd_txfm_cfg_ls[5][4]",
+      "parentUuid": "c8e03c3f_82a85a4f",
+      "range": {
+        "startLine": 74,
+        "startChar": 8,
+        "endLine": 74,
+        "endChar": 61
+      },
+      "revId": "749a15194348032f5b2a61e813068658eed3fc2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_a2ae3e5d",
         "filename": "test/vp10_inv_txfm2d_test.cc",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-20T02:16:16Z",
       "side": 1,
       "message": "Please change the \nTXFM_2D_CFG fwd_txfm_cfg_ls[5][4] \n\nto \n\nTX_TYPE txfm_type[4] \u003d {DCT_DCT, ADST_DCT, DCT_ADST, ADST_ADST};\n\nThen do \n\nint tx_type \u003d txfm_type[txfm_type_idx];\n\nThen you don\u0027t need get_tx_type() at all.",
+      "range": {
+        "startLine": 79,
+        "startChar": 10,
+        "endLine": 79,
+        "endChar": 59
+      },
+      "revId": "749a15194348032f5b2a61e813068658eed3fc2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_829a1a27",
+        "filename": "test/vp10_inv_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-04-20T02:43:40Z",
+      "side": 1,
+      "message": "Sounds reasonable, we don\u0027t use fwd_txfm_cfg anymore.",
+      "parentUuid": "c8e03c3f_a2ae3e5d",
       "range": {
         "startLine": 79,
         "startChar": 10,
