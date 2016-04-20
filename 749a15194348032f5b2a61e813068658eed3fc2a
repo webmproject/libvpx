@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_a2ae3e5d",
+        "filename": "test/vp10_inv_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-04-20T02:16:16Z",
+      "side": 1,
+      "message": "Please change the \nTXFM_2D_CFG fwd_txfm_cfg_ls[5][4] \n\nto \n\nTX_TYPE txfm_type[4] \u003d {DCT_DCT, ADST_DCT, DCT_ADST, ADST_ADST};\n\nThen do \n\nint tx_type \u003d txfm_type[txfm_type_idx];\n\nThen you don\u0027t need get_tx_type() at all.",
+      "range": {
+        "startLine": 79,
+        "startChar": 10,
+        "endLine": 79,
+        "endChar": 59
+      },
+      "revId": "749a15194348032f5b2a61e813068658eed3fc2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
