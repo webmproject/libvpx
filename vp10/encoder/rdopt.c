@@ -8876,7 +8876,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       else if (best_mbmode.mv[0].as_int == 0)
         best_mbmode.mode = ZEROMV;
     } else {
-      int i;
       int_mv nearestmv[2] = { frame_mv[NEARESTMV][refs[0]],
                               frame_mv[NEARESTMV][refs[1]] };
       int_mv nearmv[2] = { frame_mv[NEARMV][refs[0]],
@@ -8888,6 +8887,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
          nearmv[1] = mbmi_ext->ref_mv_stack[rf_type][1].comp_mv;
        }
 #else
+      int i;
       int ref_set = (mbmi_ext->ref_mv_count[rf_type] >= 2) ?
           VPXMIN(2, mbmi_ext->ref_mv_count[rf_type] - 2) : INT_MAX;
 
