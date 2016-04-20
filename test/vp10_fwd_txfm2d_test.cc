@@ -71,6 +71,7 @@ TEST(vp10_fwd_txfm2d, accuracy) {
                           fwd_txfm_cfg->shift[2];
         double amplify_factor =
             amplify_bit >= 0 ? (1 << amplify_bit) : (1.0 / (1 << -amplify_bit));
+        int tx_type = libvpx_test::get_tx_type(fwd_txfm_cfg);
 
         ACMRandom rnd(ACMRandom::DeterministicSeed());
         int count = 500;
@@ -83,7 +84,7 @@ TEST(vp10_fwd_txfm2d, accuracy) {
             ref_output[ni] = 0;
           }
 
-          fwd_txfm_func(input, output, txfm_size, fwd_txfm_cfg, bd);
+          fwd_txfm_func(input, output, txfm_size, tx_type, bd);
           reference_hybrid_2d(ref_input, ref_output, txfm_size, type0, type1);
 
           for (int ni = 0; ni < sqr_txfm_size; ++ni) {

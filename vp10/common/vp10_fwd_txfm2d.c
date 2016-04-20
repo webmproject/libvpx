@@ -8,8 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp10/common/vp10_txfm.h"
+#include <assert.h>
+
+#include "vp10/common/enums.h"
 #include "vp10/common/vp10_fwd_txfm1d.h"
+#include "vp10/common/vp10_fwd_txfm2d_cfg.h"
+#include "vp10/common/vp10_txfm.h"
 
 static inline TxfmFunc fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
   switch (txfm_type) {
@@ -83,41 +87,145 @@ static inline void fwd_txfm2d_c(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_4x4_c(const int16_t *input, int32_t *output,
-                         const int stride, const TXFM_2D_CFG *cfg,
+                         const int stride, int tx_type,
                          const int bd) {
   int32_t txfm_buf[4 * 4];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_4x4_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_8x8_c(const int16_t *input, int32_t *output,
-                         const int stride, const TXFM_2D_CFG *cfg,
+                         const int stride, int tx_type,
                          const int bd) {
   int32_t txfm_buf[8 * 8];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_8x8_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_16x16_c(const int16_t *input, int32_t *output,
-                           const int stride, const TXFM_2D_CFG *cfg,
+                           const int stride, int tx_type,
                            const int bd) {
   int32_t txfm_buf[16 * 16];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_16x16_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_32x32_c(const int16_t *input, int32_t *output,
-                           const int stride, const TXFM_2D_CFG *cfg,
+                           const int stride, int tx_type,
                            const int bd) {
   int32_t txfm_buf[32 * 32];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_32x32_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_64x64_c(const int16_t *input, int32_t *output,
-                           const int stride, const TXFM_2D_CFG *cfg,
+                           const int stride, int tx_type,
                            const int bd) {
   int32_t txfm_buf[64 * 64];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_64x64_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_c(input, output, stride, cfg, txfm_buf);
+}
+
+const TXFM_2D_CFG* vp10_get_txfm_4x4_cfg(int tx_type) {
+  const TXFM_2D_CFG* cfg = NULL;
+  switch (tx_type) {
+    case DCT_DCT:
+      cfg = &fwd_txfm_2d_cfg_dct_dct_4;
+      break;
+    case ADST_DCT:
+      cfg = &fwd_txfm_2d_cfg_adst_dct_4;
+      break;
+    case DCT_ADST:
+      cfg = &fwd_txfm_2d_cfg_dct_adst_4;
+      break;
+    case ADST_ADST:
+      cfg = &fwd_txfm_2d_cfg_adst_adst_4;
+      break;
+    default:
+      assert(0);
+  }
+  return cfg;
+}
+
+const TXFM_2D_CFG* vp10_get_txfm_8x8_cfg(int tx_type) {
+  const TXFM_2D_CFG* cfg = NULL;
+  switch (tx_type) {
+    case DCT_DCT:
+      cfg = &fwd_txfm_2d_cfg_dct_dct_8;
+      break;
+    case ADST_DCT:
+      cfg = &fwd_txfm_2d_cfg_adst_dct_8;
+      break;
+    case DCT_ADST:
+      cfg = &fwd_txfm_2d_cfg_dct_adst_8;
+      break;
+    case ADST_ADST:
+      cfg = &fwd_txfm_2d_cfg_adst_adst_8;
+      break;
+    default:
+      assert(0);
+  }
+  return cfg;
+}
+
+const TXFM_2D_CFG* vp10_get_txfm_16x16_cfg(int tx_type) {
+  const TXFM_2D_CFG* cfg = NULL;
+  switch (tx_type) {
+    case DCT_DCT:
+      cfg = &fwd_txfm_2d_cfg_dct_dct_16;
+      break;
+    case ADST_DCT:
+      cfg = &fwd_txfm_2d_cfg_adst_dct_16;
+      break;
+    case DCT_ADST:
+      cfg = &fwd_txfm_2d_cfg_dct_adst_16;
+      break;
+    case ADST_ADST:
+      cfg = &fwd_txfm_2d_cfg_adst_adst_16;
+      break;
+    default:
+      assert(0);
+  }
+  return cfg;
+}
+
+const TXFM_2D_CFG* vp10_get_txfm_32x32_cfg(int tx_type) {
+  const TXFM_2D_CFG* cfg = NULL;
+  switch (tx_type) {
+    case DCT_DCT:
+      cfg = &fwd_txfm_2d_cfg_dct_dct_32;
+      break;
+    case ADST_DCT:
+      cfg = &fwd_txfm_2d_cfg_adst_dct_32;
+      break;
+    case DCT_ADST:
+      cfg = &fwd_txfm_2d_cfg_dct_adst_32;
+      break;
+    case ADST_ADST:
+      cfg = &fwd_txfm_2d_cfg_adst_adst_32;
+      break;
+    default:
+      assert(0);
+  }
+  return cfg;
+}
+
+const TXFM_2D_CFG* vp10_get_txfm_64x64_cfg(int tx_type) {
+  const TXFM_2D_CFG* cfg = NULL;
+  switch (tx_type) {
+    case DCT_DCT:
+      cfg = &fwd_txfm_2d_cfg_dct_dct_64;
+      break;
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    default:
+      assert(0);
+  }
+  return cfg;
 }

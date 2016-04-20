@@ -51,6 +51,7 @@ TEST(vp10_fwd_txfm2d_sse4_1, accuracy) {
     int func_idx = get_max_bit(txfm_size) - 2;
     Fwd_Txfm2d_Func txfm2d_func_c = txfm2d_func_c_list[func_idx];
     Fwd_Txfm2d_Func txfm2d_func_sse4_1 = txfm2d_func_sse4_1_list[func_idx];
+    int tx_type = libvpx_test::get_tx_type(&cfg);
 
     ACMRandom rnd(ACMRandom::DeterministicSeed());
 
@@ -61,8 +62,8 @@ TEST(vp10_fwd_txfm2d_sse4_1, accuracy) {
       }
     }
 
-    txfm2d_func_c(input, output_c, cfg.txfm_size, &cfg, bd);
-    txfm2d_func_sse4_1(input, output_sse4_1, cfg.txfm_size, &cfg, bd);
+    txfm2d_func_c(input, output_c, cfg.txfm_size, tx_type, bd);
+    txfm2d_func_sse4_1(input, output_sse4_1, cfg.txfm_size, tx_type, bd);
     for (int r = 0; r < txfm_size; r++) {
       for (int c = 0; c < txfm_size; c++) {
         EXPECT_EQ(output_c[r * txfm_size + c],

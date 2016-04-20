@@ -21,6 +21,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "test/acm_random.h"
+#include "vp10/common/enums.h"
 #include "vp10/common/vp10_txfm.h"
 
 namespace libvpx_test {
@@ -104,11 +105,29 @@ typedef void (*TxfmFunc)(const int32_t* in, int32_t* out, const int8_t* cos_bit,
                          const int8_t* range_bit);
 
 typedef void (*Fwd_Txfm2d_Func)(const int16_t*, int32_t*, const int,
-                                const TXFM_2D_CFG*, const int);
+                                int tx_type, const int);
 typedef void (*Inv_Txfm2d_Func)(const int32_t*, uint16_t*, const int,
                                 const TXFM_2D_CFG*, const int);
 
 static const int bd = 10;
 static const int input_base = (1 << bd);
+
+static INLINE int get_tx_type(const TXFM_2D_CFG *cfg) {
+  int tx_type;
+  if (cfg->txfm_type_col <= TXFM_TYPE_DCT64) {
+    if (cfg->txfm_type_row <= TXFM_TYPE_DCT64) {
+      tx_type = DCT_DCT;
+    } else {
+      tx_type = DCT_ADST;
+    }
+  } else {
+    if (cfg->txfm_type_row <= TXFM_TYPE_DCT64) {
+      tx_type = ADST_DCT;
+    } else {
+      tx_type = ADST_ADST;
+    }
+  }
+  return tx_type;
+}
 }  // namespace libvpx_test
 #endif  // VP10_TXFM_TEST_H_

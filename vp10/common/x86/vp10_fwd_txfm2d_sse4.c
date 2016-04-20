@@ -1,3 +1,14 @@
+/*
+ *  Copyright (c) 2016 The WebM project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
+ */
+
+#include "vp10/common/vp10_fwd_txfm2d_cfg.h"
 #include "vp10/common/x86/vp10_txfm1d_sse4.h"
 
 static inline void int16_array_with_stride_to_int32_array_without_stride(
@@ -49,8 +60,8 @@ static inline TxfmFuncSSE2 fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
 }
 
 static inline void fwd_txfm2d_sse4_1(const int16_t *input, int32_t *output,
-                                   const int stride, const TXFM_2D_CFG *cfg,
-                                   int32_t *txfm_buf) {
+                                     const int stride, const TXFM_2D_CFG *cfg,
+                                     int32_t *txfm_buf) {
   const int txfm_size = cfg->txfm_size;
   const int8_t *shift = cfg->shift;
   const int8_t *stage_range_col = cfg->stage_range_col;
@@ -77,41 +88,46 @@ static inline void fwd_txfm2d_sse4_1(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_4x4_sse4_1(const int16_t *input, int32_t *output,
-                              const int stride, const TXFM_2D_CFG *cfg,
-                              const int bd) {
+                                const int stride, int tx_type,
+                                const int bd) {
   int32_t txfm_buf[16];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_4x4_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *output,
-                              const int stride, const TXFM_2D_CFG *cfg,
-                              const int bd) {
+                                const int stride, int tx_type,
+                                const int bd) {
   int32_t txfm_buf[64];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_8x8_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_16x16_sse4_1(const int16_t *input, int32_t *output,
-                                const int stride, const TXFM_2D_CFG *cfg,
-                                const int bd) {
+                                  const int stride, int tx_type,
+                                  const int bd) {
   int32_t txfm_buf[256];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_16x16_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_32x32_sse4_1(const int16_t *input, int32_t *output,
-                                const int stride, const TXFM_2D_CFG *cfg,
-                                const int bd) {
+                                  const int stride, int tx_type,
+                                  const int bd) {
   int32_t txfm_buf[1024];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_32x32_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_64x64_sse4_1(const int16_t *input, int32_t *output,
-                                const int stride, const TXFM_2D_CFG *cfg,
-                                const int bd) {
+                                  const int stride, int tx_type,
+                                  const int bd) {
   int32_t txfm_buf[4096];
+  const TXFM_2D_CFG* cfg = vp10_get_txfm_64x64_cfg(tx_type);
   (void)bd;
   fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
 }
