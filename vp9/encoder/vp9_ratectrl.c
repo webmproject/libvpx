@@ -1441,10 +1441,6 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
-  if (!cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
-    rc->avg_intersize_gfint += rc->projected_frame_size;
-  }
-
   if (!cpi->use_svc || is_two_pass_svc(cpi)) {
     if (is_altref_enabled(cpi) && cpi->refresh_alt_ref_frame &&
         (cm->frame_type != KEY_FRAME))
@@ -1469,8 +1465,12 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     rc->frame_size_selector = rc->next_frame_size_selector;
   }
 
-  if (oxcf->pass == 0 && cm->frame_type != KEY_FRAME)
-    compute_frame_low_motion(cpi);
+  if (oxcf->pass == 0) {
+    if (cm->frame_type != KEY_FRAME)
+      compute_frame_low_motion(cpi);
+    if (!cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame)
+      rc->avg_intersize_gfint += rc->projected_frame_size;
+  }
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
@@ -1531,6 +1531,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
   if (rc->frames_till_gf_update_due == 0) {
     rc->avg_intersize_gfint =
         rc->avg_intersize_gfint / (rc->baseline_gf_interval + 1);
+    rc->gfu_boost = DEFAULT_GF_BOOST;
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.pass == 0) {
       vp9_cyclic_refresh_set_golden_update(cpi);
     } else {
@@ -1547,6 +1548,11 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
           rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
           rc->avg_intersize_gfint > (5 * rc->avg_frame_bandwidth) >> 1) {
           rc->baseline_gf_interval = (3 * rc->baseline_gf_interval) >> 1;
+      } else if (cm->current_video_frame > 30 &&
+                 rc->avg_frame_low_motion < 20) {
+        // Decrease boost and gf interval for high motion case.
+        rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
+        rc->baseline_gf_interval = VPXMIN(6, rc->baseline_gf_interval >> 1);
       }
     }
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
@@ -1559,7 +1565,6 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     }
     cpi->refresh_golden_frame = 1;
     rc->source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
-    rc->gfu_boost = DEFAULT_GF_BOOST;
     rc->avg_intersize_gfint = 0;
   }
   if (cm->frame_type == KEY_FRAME)
