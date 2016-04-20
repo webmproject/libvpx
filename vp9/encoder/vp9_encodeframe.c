@@ -4228,7 +4228,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #define GLOBAL_MOTION_ADVANTAGE_THRESH_RZ 0.60
 #define GLOBAL_MOTION_ADVANTAGE_THRESH_TR 0.75
 // #define USE_BLOCK_BASED_GLOBAL_MOTION_COMPUTATION
-// #define USE_FEATURE_BASED_GLOBAL_MOTION_COMPUTATION
+#define USE_FEATURE_BASED_GLOBAL_MOTION_COMPUTATION
 
 static void convert_translation_to_params(
     double *H, Global_Motion_Params *model) {
