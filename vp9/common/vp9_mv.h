@@ -52,11 +52,11 @@ static INLINE void clamp_mv(MV *mv, int min_col, int max_col,
 #define MAX_GLOBAL_MOTION_MODELS  1
 
 #define ZOOM_PRECISION_BITS       11
-#define ROTATION_PRECISION_BITS   8
+#define ROTATION_PRECISION_BITS   11
 
-#define ABS_ZOOM_BITS             6
-#define ABS_ROTATION_BITS         6
-#define ABS_TRANSLATION_BITS      7
+#define ABS_ZOOM_BITS             11
+#define ABS_ROTATION_BITS         11
+#define ABS_TRANSLATION_BITS      11
 
 typedef enum {
   GLOBAL_ZERO = 0,
