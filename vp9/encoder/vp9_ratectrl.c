@@ -2126,6 +2126,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
       target = calc_pframe_target_size_one_pass_vbr(cpi);
       vp9_rc_set_frame_target(cpi, target);
       rc->count_last_scene_change = 0;
+      rc->avg_intersize_gfint = 0;
     } else {
       rc->count_last_scene_change++;
     }
