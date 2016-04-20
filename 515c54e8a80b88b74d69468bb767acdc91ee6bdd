@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_0bcd8535",
+        "filename": "test/acm_random.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "Can we overload based on return type? I think it\u0027s handy to call out the difference.",
+      "parentUuid": "a8c4e87d_ed734de5",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c4e87d_6d2e1dd5",
         "filename": "test/acm_random.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-19T23:48:38Z",
       "side": 1,
       "message": "Generate() provides a range of [0, range) -\u003e you want 512 I think",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_cb7b9d95",
+        "filename": "test/acm_random.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "I used 0x1FF to illustrate the 9 bits used. Using 512 will result in a positive value of 256, or 0x100, which would introduce ambiguity with -256, also 0x100 (or more accurately 0xFF00 with sign extension)",
+      "parentUuid": "a8c4e87d_6d2e1dd5",
       "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_ab80d9c0",
+        "filename": "test/acm_random.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8c4e87d_2d2825c4",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c4e87d_ad6d5502",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2016-04-19T23:48:38Z",
       "side": 1,
       "message": "2016",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_6b97f100",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8c4e87d_ad6d5502",
       "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_cb643df3",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "yeah, the reference code in other files seems to stick with underscores so I tried to stick with that.",
+      "parentUuid": "a8c4e87d_eddc6d02",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c4e87d_ade675cc",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2016-04-19T23:48:38Z",
       "side": 1,
       "message": "tmp might be fine \u0027b_\u0027 looks like a class variable",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_0b5f451d",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "fair point about b_. The reference code uses a b and c for the temp vars so I was trying to keep it similar. will pass in a, a_stride, and out and rename the local to b",
+      "parentUuid": "a8c4e87d_ade675cc",
       "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_eb6301e5",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8c4e87d_cd3089e3",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c4e87d_2d970502",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2016-04-19T23:48:38Z",
       "side": 1,
       "message": "it\u0027s still (expected, actual) with this release; if a new one is made we can drop that as the failure output has been made more generic",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_4b794d91",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8c4e87d_2d970502",
       "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_2b7689a2",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8c4e87d_ed0d8d1f",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c4e87d_edd7cdc4",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 3
@@ -166,6 +328,24 @@
       "writtenOn": "2016-04-19T23:48:38Z",
       "side": 1,
       "message": "this is OK, note one can use std::sort in c++.\n\nhttp://en.cppreference.com/w/cpp/algorithm/sort\nhttps://www.sgi.com/tech/stl/sort.html",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_6b7091a4",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-20T19:50:06Z",
+      "side": 1,
+      "message": "tried std::sort but even just adding #include\u003calgorithm\u003e throws the build into a mess",
+      "parentUuid": "a8c4e87d_edd7cdc4",
       "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
