@@ -1,0 +1,372 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_68c4175e",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "nit: alignment",
+      "range": {
+        "startLine": 200,
+        "startChar": 6,
+        "endLine": 200,
+        "endChar": 21
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_48d67310",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "nit:lets",
+      "range": {
+        "startLine": 381,
+        "startChar": 27,
+        "endLine": 381,
+        "endChar": 30
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_68dd3726",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "client",
+      "range": {
+        "startLine": 382,
+        "startChar": 27,
+        "endLine": 382,
+        "endChar": 32
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_48ff9376",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "nit: Capitalize",
+      "range": {
+        "startLine": 39,
+        "startChar": 3,
+        "endLine": 39,
+        "endChar": 7
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_a80f3f86",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "contiguous",
+      "range": {
+        "startLine": 39,
+        "startChar": 40,
+        "endLine": 39,
+        "endChar": 49
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_08310be5",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "What about adding a type field to this struct? The two values could be SIZE or PLANES. If SIZE then the external frame buffer would use data and size, otherwise plane and stride. Then you could also add the width, height, and format to this struct as well to be filled out by libvpx if type \u003d\u003d PLANES.\n\nIf you do it this way, we do not need to add more callback function types and it should be backwards compatible as the old code would not know about the new fields and always set data and size (though the old way would be marked as deprecated.)\n\nI\u0027m not sure which way I think it is best to go, though I\u0027m leaning to the type field. Just want to get some opinions.",
+      "range": {
+        "startLine": 42,
+        "startChar": 15,
+        "endLine": 42,
+        "endChar": 37
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_c833a346",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "Make this some kind of define, like VP9_MAXIMUM_EXTERNAL_PLANES or something.",
+      "range": {
+        "startLine": 46,
+        "startChar": 17,
+        "endLine": 46,
+        "endChar": 18
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_482b1375",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "If we currently only ever use 3 planes should we just make this value 3?",
+      "range": {
+        "startLine": 47,
+        "startChar": 13,
+        "endLine": 47,
+        "endChar": 14
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_e8ff8745",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "must allocate?",
+      "range": {
+        "startLine": 89,
+        "startChar": 58,
+        "endLine": 89,
+        "endChar": 62
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_28120f7b",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "You should mention that fb-\u003eplane must be aligned to a multiple of 32 bytes.",
+      "range": {
+        "startLine": 93,
+        "startChar": 36,
+        "endLine": 93,
+        "endChar": 38
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_2845ef93",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "Seems like there was more to the comment.",
+      "range": {
+        "startLine": 118,
+        "startChar": 65,
+        "endLine": 118,
+        "endChar": 66
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_28604f07",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "You are going to have to move this block of code down after all the variable initializations in this scope because it is a C file.",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 20
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_a821ffe9",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "planes_cb !\u003d NULL for consistency",
+      "range": {
+        "startLine": 155,
+        "startChar": 8,
+        "endLine": 155,
+        "endChar": 17
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_489e732f",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "alignment is off",
+      "range": {
+        "startLine": 175,
+        "startChar": 10,
+        "endLine": 175,
+        "endChar": 24
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_c8856302",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "pointer checks should be against NULL for consistency.",
+      "range": {
+        "startLine": 178,
+        "startChar": 16,
+        "endLine": 178,
+        "endChar": 21
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_08b46bab",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-04-20T17:46:29Z",
+      "side": 1,
+      "message": "I think you can refactor this code with a lot of the code below.",
+      "range": {
+        "startLine": 197,
+        "startChar": 26,
+        "endLine": 197,
+        "endChar": 31
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
