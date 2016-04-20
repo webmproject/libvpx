@@ -971,9 +971,6 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
   vp9_zero(*lfm);
   assert(mip[0] != NULL);
 
-  // TODO(jimbankoski): Try moving most of the following code into decode
-  // loop and storing lfm in the mbmi structure so that we don't have to go
-  // through the recursive loop structure multiple times.
   switch (mip[0]->sb_type) {
     case BLOCK_64X64:
       build_masks(lfi_n, mip[0] , 0, 0, lfm);
