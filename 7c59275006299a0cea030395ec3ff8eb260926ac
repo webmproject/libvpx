@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_f7bda227",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T02:35:00Z",
+      "side": 1,
+      "message": "same + 0 could be done on the b[i] references",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_b7c31aac",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T02:35:00Z",
+      "side": 1,
+      "message": "these should be pointers or dereferenced immediately",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_57ca8ec5",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T02:35:00Z",
+      "side": 1,
+      "message": "should be (expected, actual) with our version of googletest.",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_17e00642",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T02:35:00Z",
+      "side": 1,
+      "message": "long line",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
