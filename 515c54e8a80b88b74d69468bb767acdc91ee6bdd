@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_b7215aea",
+        "filename": "test/acm_random.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T02:35:00Z",
+      "side": 1,
+      "message": "yes it can be overloaded. I don\u0027t think \u0027I\u0027 on it\u0027s own tells the reader very much; the new naming is better",
+      "parentUuid": "c8e03c3f_0bcd8535",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c4e87d_6d2e1dd5",
         "filename": "test/acm_random.h",
         "patchSetId": 3
@@ -346,6 +364,24 @@
       "side": 1,
       "message": "tried std::sort but even just adding #include\u003calgorithm\u003e throws the build into a mess",
       "parentUuid": "a8c4e87d_edd7cdc4",
+      "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_37770ad8",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T02:35:00Z",
+      "side": 1,
+      "message": "sounds suspicious, but as said qsort is fine",
+      "parentUuid": "c8e03c3f_6b7091a4",
       "revId": "515c54e8a80b88b74d69468bb767acdc91ee6bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
