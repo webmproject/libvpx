@@ -62,7 +62,7 @@ typedef struct vp9_token_state {
   int16_t       qc;
 } vp9_token_state;
 
-// TODO(jimbankoski): experiment to find optimal RD numbers.
+// TODO(huisu): experiment to find optimal RD numbers.
 static const int plane_rd_mult[PLANE_TYPES] = { 4, 2 };
 
 #define UPDATE_RD_COST()\
