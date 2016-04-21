@@ -2799,6 +2799,15 @@ void vp10_model_to_full_probs(const vpx_prob *model, vpx_prob *full) {
 }
 
 #if CONFIG_ANS
+void vp10_build_token_cdfs(const vpx_prob *pdf_model, rans_dec_lut cdf) {
+  AnsP8 pdf_tab[ENTROPY_TOKENS - 1];
+  assert(pdf_model[2] != 0);
+  rans_merge_prob_pdf(pdf_tab, pdf_model[1],
+                      vp10_pareto8_token_probs[pdf_model[2] - 1],
+                      ENTROPY_TOKENS - 2);
+  rans_build_cdf_from_pdf(pdf_tab, cdf);
+}
+
 void vp10_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
   TX_SIZE t;
   int i, j, k, l;
@@ -2806,13 +2815,9 @@ void vp10_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
     for (i = 0; i < PLANE_TYPES; ++i)
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
-          for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
-            const vpx_prob *const tree_probs = fc->coef_probs[t][i][j][k][l];
-            vpx_prob pivot = tree_probs[PIVOT_NODE];
-            assert(pivot != 0);
-            rans_build_cdf_from_pdf(vp10_pareto8_token_probs[pivot - 1],
-                                    fc->coef_cdfs[t][i][j][k][l]);
-          }
+          for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l)
+            vp10_build_token_cdfs(fc->coef_probs[t][i][j][k][l],
+                                  fc->coef_cdfs[t][i][j][k][l]);
 }
 #endif  // CONFIG_ANS
 

@@ -10,6 +10,9 @@
 #include <assert.h>
 
 #include "vp10/encoder/cost.h"
+#if CONFIG_ANS
+#include "vp10/common/ans.h"
+#endif  // CONFIG_ANS
 #include "vp10/common/entropy.h"
 
 /* round(-log2(i/256.) * (1 << VP9_PROB_COST_SHIFT))
@@ -57,16 +60,15 @@ static void cost(int *costs, vpx_tree tree, const vpx_prob *probs,
 
 #if CONFIG_ANS
 void vp10_cost_tokens_ans(int *costs, const vpx_prob *tree_probs,
-                          const vpx_prob *token_probs, int skip_eob) {
+                          const rans_dec_lut *token_cdf, int skip_eob) {
   int c_tree = 0;  // Cost of the "tree" nodes EOB and ZERO.
   int i;
   costs[EOB_TOKEN] = vp10_cost_bit(tree_probs[0], 0);
   if (!skip_eob)
     c_tree = vp10_cost_bit(tree_probs[0], 1);
-  costs[ZERO_TOKEN] = c_tree + vp10_cost_bit(tree_probs[1], 0);
-  c_tree += vp10_cost_bit(tree_probs[1], 1);
-  for (i = ONE_TOKEN; i <= CATEGORY6_TOKEN; ++i) {
-    costs[i] = c_tree + vp10_cost_bit(token_probs[i - ONE_TOKEN], 0);
+  for (i = ZERO_TOKEN; i <= CATEGORY6_TOKEN; ++i) {
+    const int p = (*token_cdf)[i + 1] - (*token_cdf)[i];
+    costs[i] = c_tree + vp10_cost_bit(p, 0);
   }
 }
 #endif  // CONFIG_ANS
