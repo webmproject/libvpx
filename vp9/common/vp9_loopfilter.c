@@ -934,7 +934,6 @@ void vp9_adjust_mask(VP9_COMMON *const cm, const int mi_row,
 
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
-// TODO(JBB): This function only works for yv12.
 void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
                     MODE_INFO **mi, const int mode_info_stride,
                     LOOP_FILTER_MASK *lfm) {
@@ -1588,6 +1587,8 @@ void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
 }
 
 // Used by the encoder to build the loopfilter masks.
+// TODO(slavarnway): Do the encoder the same way the decoder does it and
+//                   build the masks in line as part of the encode process.
 void vp9_build_mask_frame(VP9_COMMON *cm, int frame_filter_level,
                           int partial_frame) {
   int start_mi_row, end_mi_row, mi_rows_to_filter;
