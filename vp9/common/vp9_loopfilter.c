@@ -700,7 +700,6 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
 // whether there were any coefficients encoded, and the loop filter strength
 // block we are currently looking at. Shift is used to position the
 // 1's we produce.
-// TODO(JBB) Need another function for different resolution color..
 static void build_masks(const loop_filter_info_n *const lfi_n,
                         const MODE_INFO *mi, const int shift_y,
                         const int shift_uv,
