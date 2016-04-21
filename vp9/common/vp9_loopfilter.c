@@ -1547,7 +1547,7 @@ static void loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer, VP9_COMMON *cm,
 
       vp9_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
-      // TODO(JBB): Make setup_mask work for non 420.
+      // TODO(jimbankoski): For 444 only need to do y mask.
       vp9_adjust_mask(cm, mi_row, mi_col, lfm);
 
       vp9_filter_block_plane_ss00(cm, &planes[0], mi_row, lfm);
