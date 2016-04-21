@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_778192ed",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T02:35:00Z",
+      "side": 1,
+      "message": "best to use the full link until something works; maybe consider uploading a dummy change for reference in the bug.",
+      "revId": "a4a1f9cac655bf52b59637edb2b0587865b4eabf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
