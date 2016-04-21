@@ -402,6 +402,24 @@
       "revId": "25f0fc21c4e76af41c62a60e5c669d04945b73b1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_3cdd3159",
+        "filename": "vpx_dsp/arm/avg_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-21T00:52:59Z",
+      "side": 1,
+      "message": "Have not managed a way to sort that out. Can\u0027t even replace one of the max calls with a rev, let alone go down an instruction.\n\nOn the flip side, this is pretty awesome: http://szeged.github.io/nevada/",
+      "parentUuid": "a8c4e87d_e227dc4a",
+      "revId": "25f0fc21c4e76af41c62a60e5c669d04945b73b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
