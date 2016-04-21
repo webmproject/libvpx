@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_fd274063",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-21T21:00:23Z",
+      "side": 1,
+      "message": "woops, did it for c and totally forgot about the b here. done",
+      "parentUuid": "c8e03c3f_f7bda227",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_b7c31aac",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-21T02:35:00Z",
       "side": 1,
       "message": "these should be pointers or dereferenced immediately",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_dd2cfc48",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-21T21:00:23Z",
+      "side": 1,
+      "message": "removed with switch to std::sort!",
+      "parentUuid": "c8e03c3f_b7c31aac",
       "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_1d378491",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-21T21:00:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_57ca8ec5",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_17e00642",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2016-04-21T02:35:00Z",
       "side": 1,
       "message": "long line",
+      "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_5d390c80",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-21T21:00:23Z",
+      "side": 1,
+      "message": "it was perfect until i added the \u0026",
+      "parentUuid": "c8e03c3f_17e00642",
       "revId": "7c59275006299a0cea030395ec3ff8eb260926ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
