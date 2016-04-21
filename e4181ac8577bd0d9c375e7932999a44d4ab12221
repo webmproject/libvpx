@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_d8da4a95",
+        "filename": "vpx_dsp/avg.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-21T22:24:12Z",
+      "side": 1,
+      "message": "output",
+      "revId": "e4181ac8577bd0d9c375e7932999a44d4ab12221",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
