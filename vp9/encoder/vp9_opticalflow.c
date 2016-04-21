@@ -144,8 +144,9 @@ static void convolve_char(double *filter, unsigned char *image,
 }
 
 // Convolution with reflected content padding to minimize edge artifacts.
-static void convolve_double(double *filter, double *image, double *convolved,
-                            int filt_width, int filt_height, int image_width,
+static void convolve_double(const double *filter, double *image,
+                            double *convolved, int filt_width,
+                            int filt_height, int image_width,
                             int image_height, int image_stride,
                             int convolved_stride) {
   int i, j, x, y, imx, imy;
@@ -334,7 +335,7 @@ static inline void pointwise_matrix_add(double *mat1, double *mat2,
 // stride. window is a wind_size x wind_size set of weights for the
 // window_size x window_size neighborhood surrounding loc_x and loc_y.
 static void optical_flow_per_pixel(double *dx, double *dy, double *dt,
-                                   double *window, int wind_size,
+                                   const double *window, int wind_size,
                                    flowMV *flow, int width, int height,
                                    int stride, int loc_x, int loc_y) {
   int i, j, iw, jw, im_ind;
