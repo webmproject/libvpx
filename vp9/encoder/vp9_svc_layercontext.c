@@ -327,12 +327,12 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
     CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
     signed char *temp = cr->map;
     uint8_t *temp2 = cr->last_coded_q_map;
-    uint8_t *temp3 = cr->consec_zero_mv;
+    uint8_t *temp3 = cpi->consec_zero_mv;
     cr->map = lc->map;
     lc->map = temp;
     cr->last_coded_q_map = lc->last_coded_q_map;
     lc->last_coded_q_map = temp2;
-    cr->consec_zero_mv = lc->consec_zero_mv;
+    cpi->consec_zero_mv = lc->consec_zero_mv;
     lc->consec_zero_mv = temp3;
     cr->sb_index = lc->sb_index;
   }
@@ -360,8 +360,8 @@ void vp9_save_layer_context(VP9_COMP *const cpi) {
     cr->map = temp;
     lc->last_coded_q_map = cr->last_coded_q_map;
     cr->last_coded_q_map = temp2;
-    lc->consec_zero_mv = cr->consec_zero_mv;
-    cr->consec_zero_mv = temp3;
+    lc->consec_zero_mv = cpi->consec_zero_mv;
+    cpi->consec_zero_mv = temp3;
     lc->sb_index = cr->sb_index;
   }
 }

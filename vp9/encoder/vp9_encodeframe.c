@@ -780,7 +780,6 @@ static int choose_partitioning(VP9_COMP *cpi,
 #if !CONFIG_VP9_HIGHBITDEPTH
     if (cpi->use_skin_detection && !low_res && (mi_col >= 8 &&
         mi_col + 8 < cm->mi_cols && mi_row >= 8 && mi_row + 8 < cm->mi_rows)) {
-      CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
       int bl_index1, bl_index2, bl_index3;
       int num_16x16_skin = 0;
       int num_16x16_nonskin = 0;
@@ -803,10 +802,10 @@ static int choose_partitioning(VP9_COMP *cpi,
           bl_index1 = bl_index + 1;
           bl_index2 = bl_index + cm->mi_cols;
           bl_index3 = bl_index2 + 1;
-          consec_zeromv = VPXMIN(cr->consec_zero_mv[bl_index],
-                                 VPXMIN(cr->consec_zero_mv[bl_index1],
-                                 VPXMIN(cr->consec_zero_mv[bl_index2],
-                                 cr->consec_zero_mv[bl_index3])));
+          consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index],
+                                 VPXMIN(cpi->consec_zero_mv[bl_index1],
+                                 VPXMIN(cpi->consec_zero_mv[bl_index2],
+                                 cpi->consec_zero_mv[bl_index3])));
           is_skin = vp9_compute_skin_block(ysignal,
                                            usignal,
                                            vsignal,
@@ -4281,6 +4280,33 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   ++counts->uv_mode[y_mode][uv_mode];
 }
 
+static void update_zeromv_cnt(VP9_COMP *const cpi,
+                              const MODE_INFO *const mi,
+                              int mi_row, int mi_col,
+                              BLOCK_SIZE bsize) {
+  const VP9_COMMON *const cm = &cpi->common;
+  MV mv = mi->mv[0].as_mv;
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
+  const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
+  const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
+  const int block_index = mi_row * cm->mi_cols + mi_col;
+  int x, y;
+  for (y = 0; y < ymis; y++)
+    for (x = 0; x < xmis; x++) {
+      int map_offset = block_index + y * cm->mi_cols + x;
+      if (is_inter_block(mi) && mi->skip &&
+          mi->segment_id <= CR_SEGMENT_ID_BOOST2) {
+        if (abs(mv.row) < 8 && abs(mv.col) < 8) {
+          if (cpi->consec_zero_mv[map_offset] < 255)
+           cpi->consec_zero_mv[map_offset]++;
+        } else {
+          cpi->consec_zero_mv[map_offset] = 0;
+        }
+      }
+    }
+}
+
 static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
                               TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize,
@@ -4361,5 +4387,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     ++td->counts->tx.tx_totals[get_uv_tx_size(mi, &xd->plane[1])];
     if (cm->seg.enabled && cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
       vp9_cyclic_refresh_update_sb_postencode(cpi, mi, mi_row, mi_col, bsize);
+    if (cpi->oxcf.pass == 0 && cpi->svc.temporal_layer_id == 0)
+      update_zeromv_cnt(cpi, mi, mi_row, mi_col, bsize);
   }
 }

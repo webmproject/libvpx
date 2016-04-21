@@ -23,7 +23,6 @@
 
 CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
   size_t last_coded_q_map_size;
-  size_t consec_zero_mv_size;
   CYCLIC_REFRESH *const cr = vpx_calloc(1, sizeof(*cr));
   if (cr == NULL)
     return NULL;
@@ -41,21 +40,12 @@ CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
   }
   assert(MAXQ <= 255);
   memset(cr->last_coded_q_map, MAXQ, last_coded_q_map_size);
-
-  consec_zero_mv_size = mi_rows * mi_cols * sizeof(*cr->consec_zero_mv);
-  cr->consec_zero_mv = vpx_malloc(consec_zero_mv_size);
-  if (cr->consec_zero_mv == NULL) {
-    vp9_cyclic_refresh_free(cr);
-    return NULL;
-  }
-  memset(cr->consec_zero_mv, 0, consec_zero_mv_size);
   return cr;
 }
 
 void vp9_cyclic_refresh_free(CYCLIC_REFRESH *cr) {
   vpx_free(cr->map);
   vpx_free(cr->last_coded_q_map);
-  vpx_free(cr->consec_zero_mv);
   vpx_free(cr);
 }
 
@@ -245,7 +235,6 @@ void vp9_cyclic_refresh_update_sb_postencode(VP9_COMP *const cpi,
                                              BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-  MV mv = mi->mv[0].as_mv;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
   const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
@@ -269,15 +258,8 @@ void vp9_cyclic_refresh_update_sb_postencode(VP9_COMP *const cpi,
             clamp(cm->base_qindex + cr->qindex_delta[mi->segment_id],
                   0, MAXQ),
             cr->last_coded_q_map[map_offset]);
-      // Update the consecutive zero/low_mv count.
-      if (is_inter_block(mi) && (abs(mv.row) < 8 && abs(mv.col) < 8)) {
-        if (cr->consec_zero_mv[map_offset] < 255)
-          cr->consec_zero_mv[map_offset]++;
-      } else {
-        cr->consec_zero_mv[map_offset] = 0;
       }
     }
-  }
 }
 
 // Update the actual number of blocks that were applied the segment delta q.
@@ -442,7 +424,7 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
         if (cr->map[bl_index2] == 0) {
           count_tot++;
           if (cr->last_coded_q_map[bl_index2] > qindex_thresh ||
-              cr->consec_zero_mv[bl_index2] < consec_zero_mv_thresh) {
+              cpi->consec_zero_mv[bl_index2] < consec_zero_mv_thresh) {
             sum_map++;
             count_sel++;
           }
@@ -545,8 +527,6 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     if (cm->frame_type == KEY_FRAME) {
       memset(cr->last_coded_q_map, MAXQ,
              cm->mi_rows * cm->mi_cols * sizeof(*cr->last_coded_q_map));
-      memset(cr->consec_zero_mv, 0,
-             cm->mi_rows * cm->mi_cols * sizeof(*cr->consec_zero_mv));
       cr->sb_index = 0;
     }
     return;
@@ -621,7 +601,6 @@ void vp9_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   memset(cr->map, 0, cm->mi_rows * cm->mi_cols);
   memset(cr->last_coded_q_map, MAXQ, cm->mi_rows * cm->mi_cols);
-  memset(cr->consec_zero_mv, 0, cm->mi_rows * cm->mi_cols);
   cr->sb_index = 0;
   cpi->refresh_golden_frame = 1;
   cpi->refresh_alt_ref_frame = 1;
