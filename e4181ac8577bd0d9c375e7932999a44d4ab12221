@@ -16,6 +16,24 @@
       "revId": "e4181ac8577bd0d9c375e7932999a44d4ab12221",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_d8552a9f",
+        "filename": "vpx_dsp/avg.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-21T22:29:08Z",
+      "side": 1,
+      "message": "Ugh embarrassing",
+      "parentUuid": "c8e03c3f_d8da4a95",
+      "revId": "e4181ac8577bd0d9c375e7932999a44d4ab12221",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
