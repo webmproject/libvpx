@@ -71,7 +71,9 @@ void reference_hadamard(const int16_t *a, int a_stride, int16_t *b) {
 }
 
 TEST_P(HadamardTest, CompareReferenceRandom) {
-  int16_t a[64], b[64], b_ref[64];
+  DECLARE_ALIGNED(16, int16_t, a[64]);
+  DECLARE_ALIGNED(16, int16_t, b[64]);
+  int16_t b_ref[64];
   for (int i = 0; i < 64; i++) {
     a[i] = rnd_.Rand9Signed();
   }
@@ -88,7 +90,9 @@ TEST_P(HadamardTest, CompareReferenceRandom) {
 }
 
 TEST_P(HadamardTest, VaryStride) {
-  int16_t a[64 * 8], b[64], b_ref[64];
+  DECLARE_ALIGNED(16, int16_t, a[64 * 8]);
+  DECLARE_ALIGNED(16, int16_t, b[64]);
+  int16_t b_ref[64];
   for (int i = 0; i < 64 * 8; i++) {
     a[i] = rnd_.Rand9Signed();
   }
