@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "289d58d4_b6b4ae17",
+        "filename": "test/vp10_ans_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-04-22T20:39:54Z",
+      "side": 1,
+      "message": "TODO(aconverse): refine/re-train the values\n\n?",
+      "range": {
+        "startLine": 152,
+        "startChar": 10,
+        "endLine": 152,
+        "endChar": 11
+      },
+      "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289d58d4_56e74a26",
+        "filename": "test/vp10_ans_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-04-22T20:39:54Z",
+      "side": 1,
+      "message": "you could use pleft * 4 instead of pleft here (and change the rounding constant to base_p*2). This would make line 238\u0027s calc unneeded.",
+      "range": {
+        "startLine": 235,
+        "startChar": 58,
+        "endLine": 235,
+        "endChar": 63
+      },
+      "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289d58d4_96b9b20f",
+        "filename": "vp10/common/entropy.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-04-22T20:39:54Z",
+      "side": 1,
+      "message": "probably need some re-train too, to refine the values...",
+      "range": {
+        "startLine": 676,
+        "startChar": 34,
+        "endLine": 676,
+        "endChar": 36
+      },
+      "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
