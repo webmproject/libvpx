@@ -215,7 +215,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   // Avoid denoising for small block (unless motion is small).
   // Small blocks are selected in variance partition (before encoding) and
   // will typically lie on moving areas.
-  if (motion_magnitude > 16 && bs <= BLOCK_8X8)
+  if (denoiser->denoising_level < kDenHigh &&
+      motion_magnitude > 16 && bs <= BLOCK_8X8)
     return COPY_BLOCK;
 
   // If the best reference frame uses inter-prediction and there is enough of a
@@ -242,6 +243,9 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     ctx->best_sse_inter_mode = ZEROMV;
     ctx->best_sse_mv.as_int = 0;
     *zeromv_filter = 1;
+    if (denoiser->denoising_level > kDenMedium) {
+      motion_magnitude = 0;
+    }
   }
 
   if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
@@ -334,7 +338,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
 
   if (cpi->use_skin_detection &&
       bs <= BLOCK_32X32 &&
-      denoiser->denoising_level >= kDenLow) {
+      denoiser->denoising_level < kDenHigh) {
     int motion_level = (motion_magnitude < 16) ? 0 : 1;
     // If motion for current block is small/zero, compute consec_zeromv for
     // skin detection (early exit in skin detection is done for large
@@ -375,8 +379,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
                                      motion_level);
   }
   if (!is_skin &&
-      denoiser->denoising_level == kDenHigh &&
-      motion_magnitude < 16) {
+      denoiser->denoising_level == kDenHigh) {
     denoiser->increase_denoising = 1;
   } else {
     denoiser->increase_denoising = 0;
