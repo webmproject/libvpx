@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_aa0c415d",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T22:21:22Z",
+      "side": 1,
+      "message": "I\u0027m trying to create unique bit patters on the first byte for variable length decoding. See ans_read_init(). Do you think |0x2 \u003c\u003c 22| would be more clear?",
+      "parentUuid": "289d58d4_36c9de98",
+      "range": {
+        "startLine": 89,
+        "startChar": 51,
+        "endLine": 89,
+        "endChar": 53
+      },
+      "revId": "09520f1ecb15ef2d7d8c3d719b6dcecaf19d3691",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "289d58d4_16c66288",
         "filename": "vp10/common/ans.h",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-22T21:16:55Z",
       "side": 1,
       "message": "maybe add afterward: out_pdf[0] |\u003d node_prob \u003e\u003e 6\nto dither the lower bits",
+      "range": {
+        "startLine": 317,
+        "startChar": 15,
+        "endLine": 317,
+        "endChar": 24
+      },
+      "revId": "09520f1ecb15ef2d7d8c3d719b6dcecaf19d3691",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_ea05a938",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T22:21:22Z",
+      "side": 1,
+      "message": "I\u0027m not sure that\u0027s right here. We are deriving the value of node_prob by taking the ratio of zero coefs to total coefs and round that. So the low end winds up away from its true value. \n\nIt\u0027s also worth nothing on the high end where we\u0027d always be adding 2 here we have an artificial ceiling of 1014 not 1023 because we can\u0027t have zero sized bins. Pushing values toward that ceiling limits the number of probabilities we can  represent. (Currently 254 and 255 both clip to 1014, with dithering 253 would as well). \n\nIf we want to take advantage of the extra probability resolution on the zero node as well, perhaps the best thing to do is to use 10-bit precision when calculating it. \n\nBut in general most of the benefit of the benefits of 10-bit probabilities seems to come from narrowing the minimum bin size of unlikely symbols (especially when you have many -- giving it back to the popular symbols) and from precision that gets lost on further pdf manipulations.",
+      "parentUuid": "289d58d4_16c66288",
       "range": {
         "startLine": 317,
         "startChar": 15,
