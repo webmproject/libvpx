@@ -1829,6 +1829,8 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
         if (centroids[i] == centroids[i - 1]) {
           j = i;
           while (j < k - 1) {
+            assert((j + 1) < PALETTE_MAX_SIZE);
+            assert(j > 0);
             centroids[j] = centroids[j + 1];
             ++j;
           }
