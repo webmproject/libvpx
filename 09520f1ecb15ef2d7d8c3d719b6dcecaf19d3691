@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "289d58d4_96a252d3",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-04-22T22:43:45Z",
+      "side": 1,
+      "message": "ah, i see. 0x2 \u003c\u003c 22 would definitely be clearer here\n\n(and 0x01 \u003c\u003c 14) / (0x00 \u003c\u003c 6) above)",
+      "parentUuid": "c8e03c3f_aa0c415d",
+      "range": {
+        "startLine": 89,
+        "startChar": 51,
+        "endLine": 89,
+        "endChar": 53
+      },
+      "revId": "09520f1ecb15ef2d7d8c3d719b6dcecaf19d3691",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "289d58d4_16c66288",
         "filename": "vp10/common/ans.h",
         "patchSetId": 5
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "I\u0027m not sure that\u0027s right here. We are deriving the value of node_prob by taking the ratio of zero coefs to total coefs and round that. So the low end winds up away from its true value. \n\nIt\u0027s also worth nothing on the high end where we\u0027d always be adding 2 here we have an artificial ceiling of 1014 not 1023 because we can\u0027t have zero sized bins. Pushing values toward that ceiling limits the number of probabilities we can  represent. (Currently 254 and 255 both clip to 1014, with dithering 253 would as well). \n\nIf we want to take advantage of the extra probability resolution on the zero node as well, perhaps the best thing to do is to use 10-bit precision when calculating it. \n\nBut in general most of the benefit of the benefits of 10-bit probabilities seems to come from narrowing the minimum bin size of unlikely symbols (especially when you have many -- giving it back to the popular symbols) and from precision that gets lost on further pdf manipulations.",
       "parentUuid": "289d58d4_16c66288",
+      "range": {
+        "startLine": 317,
+        "startChar": 15,
+        "endLine": 317,
+        "endChar": 24
+      },
+      "revId": "09520f1ecb15ef2d7d8c3d719b6dcecaf19d3691",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289d58d4_f6a756e1",
+        "filename": "vp10/common/ans.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-04-22T22:43:45Z",
+      "side": 1,
+      "message": "indeed, you\u0027re right about small probas",
+      "parentUuid": "c8e03c3f_ea05a938",
       "range": {
         "startLine": 317,
         "startChar": 15,
