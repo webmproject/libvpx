@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_6ae9999a",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T22:18:05Z",
+      "side": 1,
+      "message": "If you pass in mode rather than angles you should just be able to table dx and dy.",
+      "range": {
+        "startLine": 687,
+        "startChar": 8,
+        "endLine": 687,
+        "endChar": 17
+      },
+      "revId": "05562b715630448c5e83c860b56e338a3d35cf54",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_ea2129e9",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 2
