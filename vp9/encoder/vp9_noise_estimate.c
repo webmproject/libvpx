@@ -174,14 +174,17 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
                                      VPXMIN(cpi->consec_zero_mv[bl_index1],
                                      VPXMIN(cpi->consec_zero_mv[bl_index2],
                                      cpi->consec_zero_mv[bl_index3])));
-          int is_skin = vp9_compute_skin_block(src_y,
-                                               src_u,
-                                               src_v,
-                                               src_ystride,
-                                               src_uvstride,
-                                               bsize,
-                                               consec_zeromv,
-                                               0);
+          int is_skin = 0;
+          if (cpi->use_skin_detection) {
+            is_skin = vp9_compute_skin_block(src_y,
+                                             src_u,
+                                             src_v,
+                                             src_ystride,
+                                             src_uvstride,
+                                             bsize,
+                                             consec_zeromv,
+                                             0);
+          }
           if (frame_low_motion &&
               cpi->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
               cpi->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&
