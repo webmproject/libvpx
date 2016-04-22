@@ -62,6 +62,8 @@ static void hadamard_col8(const int16_t *src_diff, int src_stride,
   coeff[5] = c3 - c7;
 }
 
+// The order of the output coeff of the hadamard is not important. For
+// optimization purposes the final transpose may be skipped.
 void vpx_hadamard_8x8_c(const int16_t *src_diff, int src_stride,
                         int16_t *coeff) {
   int idx;
