@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_7f903d0b",
+        "filename": "test/vp10_ans_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T21:01:07Z",
+      "side": 1,
+      "message": "These are kind of just bogus values that I tossed in here to test the writer. I could probably grab more representative pdfs from the codec to use.",
+      "parentUuid": "289d58d4_b6b4ae17",
+      "range": {
+        "startLine": 152,
+        "startChar": 10,
+        "endLine": 152,
+        "endChar": 11
+      },
+      "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "289d58d4_56e74a26",
         "filename": "test/vp10_ans_test.cc",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_3fcd1536",
+        "filename": "test/vp10_ans_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T21:01:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "289d58d4_56e74a26",
+      "range": {
+        "startLine": 235,
+        "startChar": 58,
+        "endLine": 235,
+        "endChar": 63
+      },
+      "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "289d58d4_96b9b20f",
         "filename": "vp10/common/entropy.c",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2016-04-22T20:39:54Z",
       "side": 1,
       "message": "probably need some re-train too, to refine the values...",
+      "range": {
+        "startLine": 676,
+        "startChar": 34,
+        "endLine": 676,
+        "endChar": 36
+      },
+      "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_1fb931a3",
+        "filename": "vp10/common/entropy.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T21:01:07Z",
+      "side": 1,
+      "message": "These were generated from a model (sort of described above). These values have been regenerated from the same model running at a higher precision.\n\nI know it looks a little bit fishy seeing the first entry of each divisible by 4, but that\u0027s because the modeled one bin sizes are generated uniformly, and the other values for each row are derived from the one bin. Those other values all use the full distribution. \n\nEven with the %4 spacing we can still get the benefit of a max probability raised to .99 (vs .96 with the 8-bit values).",
+      "parentUuid": "289d58d4_96b9b20f",
       "range": {
         "startLine": 676,
         "startChar": 34,
