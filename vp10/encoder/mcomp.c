@@ -99,8 +99,8 @@ static int mv_err_cost(const MV *mv, const MV *ref, const int *mvjcost,
 static int mvsad_err_cost(const MACROBLOCK *x, const MV *mv, const MV *ref,
                           int sad_per_bit) {
 #if CONFIG_REF_MV
-  const MV diff = { (mv->row - ref->row) << 3,
-                    (mv->col - ref->col) << 3 };
+  const MV diff = { (mv->row - ref->row) * 8,
+                    (mv->col - ref->col) * 8 };
   return ROUND_POWER_OF_TWO(
       (unsigned)mv_cost(&diff, x->nmvjointsadcost, x->mvsadcost) *
           sad_per_bit,
@@ -790,7 +790,7 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
   if (use_upsampled_ref)
     besterr = upsampled_setup_center_error(xd, bestmv, ref_mv, error_per_bit,
                                            vfp, z, src_stride, y, y_stride,
-                                           second_pred, w, h, (offset << 3),
+                                           second_pred, w, h, (offset * 8),
                                            mvjcost, mvcost, sse1, distortion);
   else
     besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
