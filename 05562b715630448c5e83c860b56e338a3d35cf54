@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_ea2129e9",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2518,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T22:10:52Z",
+      "side": 1,
+      "message": "lround may be faster here.",
+      "range": {
+        "startLine": 2518,
+        "startChar": 14,
+        "endLine": 2518,
+        "endChar": 19
+      },
+      "revId": "05562b715630448c5e83c860b56e338a3d35cf54",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_6ad3591f",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2526,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T22:10:52Z",
+      "side": 1,
+      "message": "I worry that these initializations are putting stuff in the x87.\n\nYou can zero divisor after vpx_clear_system_state() and #define pi.",
+      "range": {
+        "startLine": 2524,
+        "startChar": 0,
+        "endLine": 2526,
+        "endChar": 27
+      },
+      "revId": "05562b715630448c5e83c860b56e338a3d35cf54",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_aaf6019e",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2542,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-22T22:10:52Z",
+      "side": 1,
+      "message": "Kind of off topic but you can use atan2 here.\n\nIf you can find a good fixed point atan2, it should be pretty trivial to fixed point convert the whole thing.",
+      "range": {
+        "startLine": 2542,
+        "startChar": 17,
+        "endLine": 2542,
+        "endChar": 21
+      },
+      "revId": "05562b715630448c5e83c860b56e338a3d35cf54",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
