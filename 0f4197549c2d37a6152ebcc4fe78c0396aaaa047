@@ -140,6 +140,30 @@
       "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289d58d4_d6b33a2b",
+        "filename": "vp10/common/entropy.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-04-22T21:16:55Z",
+      "side": 1,
+      "message": "i see, sgtm",
+      "parentUuid": "c8e03c3f_1fb931a3",
+      "range": {
+        "startLine": 676,
+        "startChar": 34,
+        "endLine": 676,
+        "endChar": 36
+      },
+      "revId": "0f4197549c2d37a6152ebcc4fe78c0396aaaa047",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
