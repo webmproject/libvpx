@@ -128,6 +128,14 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
       ne->last_h = cm->height;
     }
     return;
+  } else if (cpi->rc.avg_frame_low_motion < 50) {
+    // Force noise estimation to 0 and denoiser off if content has high motion.
+    ne->level = kLowLow;
+#if CONFIG_VP9_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity > 0)
+      vp9_denoiser_set_noise_level(&cpi->denoiser, ne->level);
+#endif
+    return;
   } else {
     int num_samples = 0;
     uint64_t avg_est = 0;

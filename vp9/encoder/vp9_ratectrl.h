@@ -163,6 +163,7 @@ typedef struct {
   int high_source_sad;
   int count_last_scene_change;
   int avg_intersize_gfint;
+  int avg_frame_low_motion;
 } RATE_CONTROL;
 
 struct VP9_COMP;

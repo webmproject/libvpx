@@ -338,6 +338,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->total_target_bits = 0;
   rc->total_target_vs_actual = 0;
   rc->avg_intersize_gfint = 0;
+  rc->avg_frame_low_motion = 0;
 
   rc->frames_since_key = 8;  // Sensible default for first frame.
   rc->this_key_frame_forced = 0;
@@ -1334,6 +1335,26 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
   }
 }
 
+static void compute_frame_low_motion(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  int mi_row, mi_col;
+  MODE_INFO **mi = cm->mi_grid_visible;
+  RATE_CONTROL *const rc = &cpi->rc;
+  const int rows = cm->mi_rows, cols = cm->mi_cols;
+  int cnt_zeromv = 0;
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      if (abs(mi[0]->mv[0].as_mv.row) < 16 &&
+          abs(mi[0]->mv[0].as_mv.col) < 16)
+        cnt_zeromv++;
+      mi++;
+    }
+    mi += 8;
+  }
+  cnt_zeromv = 100 * cnt_zeromv / (rows * cols);
+  rc->avg_frame_low_motion = (3 * rc->avg_frame_low_motion + cnt_zeromv) >> 2;
+}
+
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -1447,6 +1468,9 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
         rc->next_frame_size_selector != rc->frame_size_selector;
     rc->frame_size_selector = rc->next_frame_size_selector;
   }
+
+  if (oxcf->pass == 0 && cm->frame_type != KEY_FRAME)
+    compute_frame_low_motion(cpi);
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
