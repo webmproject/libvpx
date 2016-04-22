@@ -98,6 +98,30 @@ typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(const uint8_t *src,
                                                        unsigned int *sse);
 #endif  // CONFIG_VP10 && CONFIG_EXT_INTER
 
+#if CONFIG_VP10 && CONFIG_OBMC
+typedef unsigned int(*vpx_obmc_sad_fn_t)(const uint8_t *pred,
+                                         int pred_stride,
+                                         const int *wsrc,
+                                         int wsrc_stride,
+                                         const int *msk,
+                                         int msk_stride);
+typedef unsigned int (*vpx_obmc_variance_fn_t)(const uint8_t *pred,
+                                               int pred_stride,
+                                               const int *wsrc,
+                                               int wsrc_stride,
+                                               const int *msk,
+                                               int msk_stride,
+                                               unsigned int *sse);
+typedef unsigned int (*vpx_obmc_subpixvariance_fn_t)(const uint8_t *pred,
+                                                     int pred_stride,
+                                                     int xoffset, int yoffset,
+                                                     const int *wsrc,
+                                                     int wsrc_stride,
+                                                     const int *msk,
+                                                     int msk_stride,
+                                                     unsigned int *sse);
+#endif  // CONFIG_VP10 && CONFIG_OBMC
+
 #if CONFIG_VP9
 typedef struct vp9_variance_vtable {
   vpx_sad_fn_t               sdf;
@@ -126,6 +150,11 @@ typedef struct vp10_variance_vtable {
   vpx_masked_variance_fn_t       mvf;
   vpx_masked_subpixvariance_fn_t msvf;
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_OBMC
+  vpx_obmc_sad_fn_t              osdf;
+  vpx_obmc_variance_fn_t         ovf;
+  vpx_obmc_subpixvariance_fn_t   osvf;
+#endif  // CONFIG_OBMC
 } vp10_variance_fn_ptr_t;
 #endif  // CONFIG_VP10
 

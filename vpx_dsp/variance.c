@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include <stdlib.h>
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
@@ -1022,3 +1023,322 @@ HIGHBD_MASK_SUBPIX_VAR(128, 128)
 #endif  // CONFIG_EXT_PARTITION
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_VP10 && CONFIG_EXT_INTER
+
+#if CONFIG_VP10 && CONFIG_OBMC
+void obmc_variance(const uint8_t *a, int  a_stride,
+                   const int *b, int  b_stride,
+                   const int *m, int  m_stride,
+                   int w, int h, unsigned int *sse, int *sum) {
+  int i, j;
+
+  *sse = 0;
+  *sum = 0;
+
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      int scaled_diff = b[j] - a[j] * m[j];
+      int abs_diff = (abs(scaled_diff) + 2048) >> 12;
+      int diff = (scaled_diff >= 0) ? abs_diff : -abs_diff;
+      *sum += diff;
+      *sse += diff * diff;
+    }
+
+    a += a_stride;
+    b += b_stride;
+    m += m_stride;
+  }
+}
+
+#define OBMC_VAR(W, H) \
+unsigned int vpx_obmc_variance##W##x##H##_c(const uint8_t *a, int a_stride, \
+                                            const int *b, int b_stride, \
+                                            const int *m, int m_stride, \
+                                            unsigned int *sse) { \
+  int sum; \
+  obmc_variance(a, a_stride, b, b_stride, m, m_stride, W, H, sse, &sum); \
+  return *sse - (((int64_t)sum * sum) / (W * H)); \
+}
+
+#define OBMC_SUBPIX_VAR(W, H) \
+unsigned int vpx_obmc_sub_pixel_variance##W##x##H##_c(                        \
+                                        const uint8_t *pre, int pre_stride,   \
+                                        int xoffset, int  yoffset,            \
+                                        const int *wsrc, int wsrc_stride,     \
+                                        const int *msk, int msk_stride,       \
+                                        unsigned int *sse) {                  \
+  uint16_t fdata3[(H + 1) * W];                                               \
+  uint8_t temp2[H * W];                                                       \
+                                                                              \
+  var_filter_block2d_bil_first_pass(pre, fdata3, pre_stride, 1, H + 1, W,     \
+                                    bilinear_filters_2t[xoffset]);            \
+  var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W,               \
+                                     bilinear_filters_2t[yoffset]);           \
+                                                                              \
+  return vpx_obmc_variance##W##x##H##_c(temp2, W, wsrc, wsrc_stride,          \
+                                        msk, msk_stride, sse);                \
+}
+
+OBMC_VAR(4, 4)
+OBMC_SUBPIX_VAR(4, 4)
+
+OBMC_VAR(4, 8)
+OBMC_SUBPIX_VAR(4, 8)
+
+OBMC_VAR(8, 4)
+OBMC_SUBPIX_VAR(8, 4)
+
+OBMC_VAR(8, 8)
+OBMC_SUBPIX_VAR(8, 8)
+
+OBMC_VAR(8, 16)
+OBMC_SUBPIX_VAR(8, 16)
+
+OBMC_VAR(16, 8)
+OBMC_SUBPIX_VAR(16, 8)
+
+OBMC_VAR(16, 16)
+OBMC_SUBPIX_VAR(16, 16)
+
+OBMC_VAR(16, 32)
+OBMC_SUBPIX_VAR(16, 32)
+
+OBMC_VAR(32, 16)
+OBMC_SUBPIX_VAR(32, 16)
+
+OBMC_VAR(32, 32)
+OBMC_SUBPIX_VAR(32, 32)
+
+OBMC_VAR(32, 64)
+OBMC_SUBPIX_VAR(32, 64)
+
+OBMC_VAR(64, 32)
+OBMC_SUBPIX_VAR(64, 32)
+
+OBMC_VAR(64, 64)
+OBMC_SUBPIX_VAR(64, 64)
+
+#if CONFIG_EXT_PARTITION
+OBMC_VAR(64, 128)
+OBMC_SUBPIX_VAR(64, 128)
+
+OBMC_VAR(128, 64)
+OBMC_SUBPIX_VAR(128, 64)
+
+OBMC_VAR(128, 128)
+OBMC_SUBPIX_VAR(128, 128)
+#endif  // CONFIG_EXT_PARTITION
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void highbd_obmc_variance64(const uint8_t *a8, int  a_stride,
+                            const int *b, int  b_stride,
+                            const int *m, int  m_stride,
+                            int w, int h, uint64_t *sse, int64_t *sum) {
+  int i, j;
+  uint16_t *a = CONVERT_TO_SHORTPTR(a8);
+
+  *sse = 0;
+  *sum = 0;
+
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      int scaled_diff = b[j] - a[j] * m[j];
+      int abs_diff = (abs(scaled_diff) + 2048) >> 12;
+      int diff = (scaled_diff >= 0) ? abs_diff : -abs_diff;
+      *sum += diff;
+      *sse += diff * diff;
+    }
+
+    a += a_stride;
+    b += b_stride;
+    m += m_stride;
+  }
+}
+
+void highbd_obmc_variance(const uint8_t *a8, int  a_stride,
+                          const int *b, int  b_stride,
+                          const int *m, int  m_stride,
+                          int  w, int  h, unsigned int *sse, int *sum) {
+  int64_t sum64;
+  uint64_t sse64;
+  highbd_obmc_variance64(a8, a_stride, b, b_stride, m, m_stride,
+                         w, h, &sse64, &sum64);
+  *sum = (int)sum64;
+  *sse = (unsigned int)sse64;
+}
+
+void highbd_10_obmc_variance(const uint8_t *a8, int  a_stride,
+                             const int *b, int  b_stride,
+                             const int *m, int  m_stride,
+                             int  w, int  h, unsigned int *sse, int *sum) {
+  int64_t sum64;
+  uint64_t sse64;
+  highbd_obmc_variance64(a8, a_stride, b, b_stride, m, m_stride,
+                         w, h, &sse64, &sum64);
+  *sum = (int)ROUND_POWER_OF_TWO(sum64, 2);
+  *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 4);
+}
+
+void highbd_12_obmc_variance(const uint8_t *a8, int  a_stride,
+                             const int *b, int  b_stride,
+                             const int *m, int  m_stride,
+                             int  w, int  h, unsigned int *sse, int *sum) {
+  int64_t sum64;
+  uint64_t sse64;
+  highbd_obmc_variance64(a8, a_stride, b, b_stride, m, m_stride,
+                         w, h, &sse64, &sum64);
+  *sum = (int)ROUND_POWER_OF_TWO(sum64, 4);
+  *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 8);
+}
+
+#define HIGHBD_OBMC_VAR(W, H)                                                 \
+unsigned int vpx_highbd_obmc_variance##W##x##H##_c(const uint8_t *a,          \
+                                                   int a_stride,              \
+                                                   const int *b,              \
+                                                   int b_stride,              \
+                                                   const int *m,              \
+                                                   int m_stride,              \
+                                                   unsigned int *sse) {       \
+  int sum;                                                                    \
+  highbd_obmc_variance(a, a_stride, b, b_stride, m, m_stride,                 \
+                       W, H, sse, &sum);                                      \
+  return *sse - (((int64_t)sum * sum) / (W * H));                             \
+}                                                                             \
+                                                                              \
+unsigned int vpx_highbd_10_obmc_variance##W##x##H##_c(const uint8_t *a,       \
+                                                      int a_stride,           \
+                                                      const int *b,           \
+                                                      int b_stride,           \
+                                                      const int *m,           \
+                                                      int m_stride,           \
+                                                      unsigned int *sse) {    \
+  int sum;                                                                    \
+  highbd_10_obmc_variance(a, a_stride, b, b_stride, m, m_stride,              \
+                          W, H, sse, &sum);                                   \
+  return *sse - (((int64_t)sum * sum) / (W * H));                             \
+}                                                                             \
+                                                                              \
+unsigned int vpx_highbd_12_obmc_variance##W##x##H##_c(const uint8_t *a,       \
+                                                      int a_stride,           \
+                                                      const int *b,           \
+                                                      int b_stride,           \
+                                                      const int *m,           \
+                                                      int m_stride,           \
+                                                      unsigned int *sse) {    \
+  int sum;                                                                    \
+  highbd_12_obmc_variance(a, a_stride, b, b_stride, m, m_stride,              \
+                          W, H, sse, &sum);                                   \
+  return *sse - (((int64_t)sum * sum) / (W * H));                             \
+}
+
+#define HIGHBD_OBMC_SUBPIX_VAR(W, H)                                          \
+unsigned int vpx_highbd_obmc_sub_pixel_variance##W##x##H##_c(                 \
+                                        const uint8_t *pre, int pre_stride,   \
+                                        int xoffset, int  yoffset,            \
+                                        const int *wsrc, int wsrc_stride,     \
+                                        const int *msk, int msk_stride,       \
+                                        unsigned int *sse) {                  \
+  uint16_t fdata3[(H + 1) * W];                                               \
+  uint16_t temp2[H * W];                                                      \
+                                                                              \
+  vpx_highbd_var_filter_block2d_bil_first_pass(pre, fdata3, pre_stride, 1,    \
+                                               H + 1, W,                      \
+                                               bilinear_filters_2t[xoffset]); \
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W,    \
+                                               bilinear_filters_2t[yoffset]); \
+                                                                              \
+  return vpx_highbd_obmc_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2),     \
+                                               W, wsrc, wsrc_stride,          \
+                                               msk, msk_stride, sse);         \
+}                                                                             \
+                                                                              \
+unsigned int vpx_highbd_10_obmc_sub_pixel_variance##W##x##H##_c(              \
+                                        const uint8_t *pre, int pre_stride,   \
+                                        int xoffset, int  yoffset,            \
+                                        const int *wsrc, int wsrc_stride,     \
+                                        const int *msk, int msk_stride,       \
+                                        unsigned int *sse) {                  \
+  uint16_t fdata3[(H + 1) * W];                                               \
+  uint16_t temp2[H * W];                                                      \
+                                                                              \
+  vpx_highbd_var_filter_block2d_bil_first_pass(pre, fdata3, pre_stride, 1,    \
+                                               H + 1, W,                      \
+                                               bilinear_filters_2t[xoffset]); \
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W,    \
+                                               bilinear_filters_2t[yoffset]); \
+                                                                              \
+  return vpx_highbd_10_obmc_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2),  \
+                                                  W, wsrc, wsrc_stride,       \
+                                                  msk, msk_stride, sse);      \
+}                                                                             \
+                                                                              \
+unsigned int vpx_highbd_12_obmc_sub_pixel_variance##W##x##H##_c(              \
+                                        const uint8_t *pre, int pre_stride,   \
+                                        int xoffset, int  yoffset,            \
+                                        const int *wsrc, int wsrc_stride,     \
+                                        const int *msk, int msk_stride,       \
+                                        unsigned int *sse) {                  \
+  uint16_t fdata3[(H + 1) * W];                                               \
+  uint16_t temp2[H * W];                                                      \
+                                                                              \
+  vpx_highbd_var_filter_block2d_bil_first_pass(pre, fdata3, pre_stride, 1,    \
+                                               H + 1, W,                      \
+                                               bilinear_filters_2t[xoffset]); \
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W,    \
+                                               bilinear_filters_2t[yoffset]); \
+                                                                              \
+  return vpx_highbd_12_obmc_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2),  \
+                                                  W, wsrc, wsrc_stride,       \
+                                                  msk, msk_stride, sse);      \
+}
+
+HIGHBD_OBMC_VAR(4, 4)
+HIGHBD_OBMC_SUBPIX_VAR(4, 4)
+
+HIGHBD_OBMC_VAR(4, 8)
+HIGHBD_OBMC_SUBPIX_VAR(4, 8)
+
+HIGHBD_OBMC_VAR(8, 4)
+HIGHBD_OBMC_SUBPIX_VAR(8, 4)
+
+HIGHBD_OBMC_VAR(8, 8)
+HIGHBD_OBMC_SUBPIX_VAR(8, 8)
+
+HIGHBD_OBMC_VAR(8, 16)
+HIGHBD_OBMC_SUBPIX_VAR(8, 16)
+
+HIGHBD_OBMC_VAR(16, 8)
+HIGHBD_OBMC_SUBPIX_VAR(16, 8)
+
+HIGHBD_OBMC_VAR(16, 16)
+HIGHBD_OBMC_SUBPIX_VAR(16, 16)
+
+HIGHBD_OBMC_VAR(16, 32)
+HIGHBD_OBMC_SUBPIX_VAR(16, 32)
+
+HIGHBD_OBMC_VAR(32, 16)
+HIGHBD_OBMC_SUBPIX_VAR(32, 16)
+
+HIGHBD_OBMC_VAR(32, 32)
+HIGHBD_OBMC_SUBPIX_VAR(32, 32)
+
+HIGHBD_OBMC_VAR(32, 64)
+HIGHBD_OBMC_SUBPIX_VAR(32, 64)
+
+HIGHBD_OBMC_VAR(64, 32)
+HIGHBD_OBMC_SUBPIX_VAR(64, 32)
+
+HIGHBD_OBMC_VAR(64, 64)
+HIGHBD_OBMC_SUBPIX_VAR(64, 64)
+
+#if CONFIG_EXT_PARTITION
+HIGHBD_OBMC_VAR(64, 128)
+HIGHBD_OBMC_SUBPIX_VAR(64, 128)
+
+HIGHBD_OBMC_VAR(128, 64)
+HIGHBD_OBMC_SUBPIX_VAR(128, 64)
+
+HIGHBD_OBMC_VAR(128, 128)
+HIGHBD_OBMC_SUBPIX_VAR(128, 128)
+#endif  // CONFIG_EXT_PARTITION
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VP10 && CONFIG_OBMC

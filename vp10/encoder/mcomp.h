@@ -195,6 +195,29 @@ int vp10_masked_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
                                    const MV *ref_mv, MV *dst_mv,
                                    int is_second);
 #endif  // CONFIG_EXT_INTER
+
+#if CONFIG_OBMC
+int vp10_obmc_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
+                                 const int *wsrc, int wsrc_stride,
+                                 const int *mask, int mask_stride,
+                                 MV *mvp_full, int step_param,
+                                 int sadpb, int further_steps, int do_refine,
+                                 const vp10_variance_fn_ptr_t *fn_ptr,
+                                 const MV *ref_mv, MV *dst_mv,
+                                 int is_second);
+int vp10_find_best_obmc_sub_pixel_tree_up(struct VP10_COMP *cpi, MACROBLOCK *x,
+                                          const int *wsrc, int wsrc_stride,
+                                          const int *mask, int mask_stride,
+                                          int mi_row, int mi_col,
+                                          MV *bestmv, const MV *ref_mv,
+                                          int allow_hp, int error_per_bit,
+                                          const vp10_variance_fn_ptr_t *vfp,
+                                          int forced_stop, int iters_per_step,
+                                          int *mvjcost, int *mvcost[2],
+                                          int *distortion, unsigned int *sse1,
+                                          int is_second,
+                                          int use_upsampled_ref);
+#endif  // CONFIG_OBMC
 #ifdef __cplusplus
 }  // extern "C"
 #endif

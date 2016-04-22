@@ -450,3 +450,109 @@ HIGHBD_MASKSADMXN(4, 8)
 HIGHBD_MASKSADMXN(4, 4)
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_VP10 && CONFIG_EXT_INTER
+
+#if CONFIG_VP10 && CONFIG_OBMC
+// a: pred
+// b: target weighted prediction (has been *4096 to keep precision)
+// m: 2d weights (scaled by 4096)
+static INLINE unsigned int obmc_sad(const uint8_t *a, int a_stride,
+                                    const int *b, int b_stride,
+                                    const int *m, int m_stride,
+                                    int width, int height) {
+  int y, x;
+  unsigned int sad = 0;
+
+  for (y = 0; y < height; y++) {
+    for (x = 0; x < width; x++) {
+      int abs_diff = abs(b[x] - a[x] * m[x]);
+      sad += (abs_diff + 2048) >> 12;
+    }
+
+    a += a_stride;
+    b += b_stride;
+    m += m_stride;
+  }
+
+  return sad;
+}
+
+#define OBMCSADMxN(m, n)                                                      \
+unsigned int vpx_obmc_sad##m##x##n##_c(const uint8_t *ref, int ref_stride,    \
+                                       const int *wsrc, int wsrc_stride,      \
+                                       const int *msk, int msk_stride) {      \
+  return obmc_sad(ref, ref_stride, wsrc, wsrc_stride, msk, msk_stride, m, n); \
+}
+
+#if CONFIG_EXT_PARTITION
+OBMCSADMxN(128, 128)
+OBMCSADMxN(128, 64)
+OBMCSADMxN(64, 128)
+#endif  // CONFIG_EXT_PARTITION
+OBMCSADMxN(64, 64)
+OBMCSADMxN(64, 32)
+OBMCSADMxN(32, 64)
+OBMCSADMxN(32, 32)
+OBMCSADMxN(32, 16)
+OBMCSADMxN(16, 32)
+OBMCSADMxN(16, 16)
+OBMCSADMxN(16, 8)
+OBMCSADMxN(8, 16)
+OBMCSADMxN(8, 8)
+OBMCSADMxN(8, 4)
+OBMCSADMxN(4, 8)
+OBMCSADMxN(4, 4)
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE unsigned int highbd_obmc_sad(const uint8_t *a8, int a_stride,
+                                           const int *b, int b_stride,
+                                           const int *m, int m_stride,
+                                           int width, int height) {
+  int y, x;
+  unsigned int sad = 0;
+  const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
+
+  for (y = 0; y < height; y++) {
+    for (x = 0; x < width; x++) {
+      int abs_diff = abs(b[x] - a[x] * m[x]);
+      sad += (abs_diff + 2048) >> 12;
+    }
+
+    a += a_stride;
+    b += b_stride;
+    m += m_stride;
+  }
+
+  return sad;
+}
+
+#define HIGHBD_OBMCSADMXN(m, n)                                               \
+unsigned int vpx_highbd_obmc_sad##m##x##n##_c(const uint8_t *ref,             \
+                                              int ref_stride,                 \
+                                              const int *wsrc,                \
+                                              int wsrc_stride,                \
+                                              const int *msk,                 \
+                                              int msk_stride) {               \
+  return highbd_obmc_sad(ref, ref_stride, wsrc, wsrc_stride,                  \
+                         msk, msk_stride, m, n);                              \
+}
+
+#if CONFIG_EXT_PARTITION
+HIGHBD_OBMCSADMXN(128, 128)
+HIGHBD_OBMCSADMXN(128, 64)
+HIGHBD_OBMCSADMXN(64, 128)
+#endif  // CONFIG_EXT_PARTITION
+HIGHBD_OBMCSADMXN(64, 64)
+HIGHBD_OBMCSADMXN(64, 32)
+HIGHBD_OBMCSADMXN(32, 64)
+HIGHBD_OBMCSADMXN(32, 32)
+HIGHBD_OBMCSADMXN(32, 16)
+HIGHBD_OBMCSADMXN(16, 32)
+HIGHBD_OBMCSADMXN(16, 16)
+HIGHBD_OBMCSADMXN(16, 8)
+HIGHBD_OBMCSADMXN(8, 16)
+HIGHBD_OBMCSADMXN(8, 8)
+HIGHBD_OBMCSADMXN(8, 4)
+HIGHBD_OBMCSADMXN(4, 8)
+HIGHBD_OBMCSADMXN(4, 4)
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VP10 && CONFIG_OBMC
