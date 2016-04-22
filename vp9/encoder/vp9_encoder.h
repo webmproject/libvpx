@@ -499,6 +499,9 @@ typedef struct VP9_COMP {
 
   NOISE_ESTIMATE noise_estimate;
 
+  // Count on how many consecutive times a block uses small/zeromv for encoding.
+  uint8_t *consec_zero_mv;
+
   // VAR_BASED_PARTITION thresholds
   // 0 - threshold_64x64; 1 - threshold_32x32;
   // 2 - threshold_16x16; 3 - vbp_threshold_8x8;

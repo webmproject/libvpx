@@ -341,7 +341,6 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
     // consec_zeromv when current block has small/zero motion).
     consec_zeromv = 0;
     if (motion_level == 0) {
-      CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
       VP9_COMMON * const cm = &cpi->common;
       int j, i;
       // Loop through the 8x8 sub-blocks.
@@ -354,7 +353,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
       for (i = 0; i < ymis; i++) {
         for (j = 0; j < xmis; j++) {
           int bl_index = block_index + i * cm->mi_cols + j;
-          consec_zeromv = VPXMIN(cr->consec_zero_mv[bl_index], consec_zeromv);
+          consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index], consec_zeromv);
           // No need to keep checking 8x8 blocks if any of the sub-blocks
           // has small consec_zeromv (since threshold for no_skin based on
           // zero/small motion in skin detection is high, i.e, > 4).
