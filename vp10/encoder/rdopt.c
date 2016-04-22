@@ -5046,7 +5046,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
         if (!has_second_rf &&
 #if CONFIG_EXT_INTER
             have_newmv_in_inter_mode(this_mode) &&
-            seg_mvs[i][mv_idx][mbmi->ref_frame[0]].as_int == INVALID_MV
+            (seg_mvs[i][mv_idx][mbmi->ref_frame[0]].as_int == INVALID_MV ||
+             vp10_use_mv_hp(&bsi->ref_mv[0]->as_mv) == 0)
 #else
             this_mode == NEWMV &&
             (seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV ||
