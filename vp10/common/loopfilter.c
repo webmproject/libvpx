@@ -731,9 +731,11 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   } else {
     const int w = num_8x8_blocks_wide_lookup[block_size];
     const int h = num_8x8_blocks_high_lookup[block_size];
-    for (i = 0; i < h; i++) {
-      memset(&lfm->lfl_y[i][shift_y], filter_level, w);
-    }
+    const int row = (shift_y >> MAX_MIB_SIZE_LOG2);
+    const int col = shift_y - (row << MAX_MIB_SIZE_LOG2);
+
+    for (i = 0; i < h; i++)
+      memset(&lfm->lfl_y[row + i][col], filter_level, w);
   }
 
   // These set 1 in the current block size for the block size edges.
@@ -811,9 +813,11 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
   } else {
     const int w = num_8x8_blocks_wide_lookup[block_size];
     const int h = num_8x8_blocks_high_lookup[block_size];
-    for (i = 0; i < h; i++) {
-      memset(&lfm->lfl_y[i][shift_y], filter_level, w);
-    }
+    const int row = (shift_y >> MAX_MIB_SIZE_LOG2);
+    const int col = shift_y - (row << MAX_MIB_SIZE_LOG2);
+
+    for (i = 0; i < h; i++)
+      memset(&lfm->lfl_y[row + i][col], filter_level, w);
   }
 
   *above_y |= above_prediction_mask[block_size] << shift_y;
