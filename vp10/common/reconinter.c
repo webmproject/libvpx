@@ -454,7 +454,7 @@ void vp10_make_masked_inter_predictor(
     const MACROBLOCKD *xd) {
   const MODE_INFO *mi = xd->mi[0];
 #if CONFIG_VP9_HIGHBITDEPTH
-  uint8_t tmp_dst_[2 * MAX_SB_SQUARE];
+  DECLARE_ALIGNED(16, uint8_t, tmp_dst_[2 * MAX_SB_SQUARE]);
   uint8_t *tmp_dst =
       (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
       CONVERT_TO_BYTEPTR(tmp_dst_) : tmp_dst_;
@@ -487,7 +487,7 @@ void vp10_make_masked_inter_predictor(
         mi->mbmi.sb_type, h, w);
 #endif  // CONFIG_SUPERTX
 #else   // CONFIG_VP9_HIGHBITDEPTH
-  uint8_t tmp_dst[MAX_SB_SQUARE];
+  DECLARE_ALIGNED(16, uint8_t, tmp_dst[MAX_SB_SQUARE]);
   vp10_make_inter_predictor(pre, pre_stride, tmp_dst, MAX_SB_SIZE,
                             subpel_x, subpel_y, sf, w, h, 0,
                             interp_filter, xs, ys, xd);
@@ -2020,7 +2020,7 @@ void vp10_build_interintra_predictors_sby(MACROBLOCKD *xd,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   {
-    uint8_t intrapredictor[MAX_SB_SQUARE];
+    DECLARE_ALIGNED(16, uint8_t, intrapredictor[MAX_SB_SQUARE]);
     vp10_build_intra_predictors_for_interintra(
         xd, bsize, 0, intrapredictor, MAX_SB_SIZE);
     vp10_combine_interintra(xd, bsize, 0, ypred, ystride,
@@ -2045,7 +2045,7 @@ void vp10_build_interintra_predictors_sbc(MACROBLOCKD *xd,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   {
-    uint8_t uintrapredictor[MAX_SB_SQUARE];
+    DECLARE_ALIGNED(16, uint8_t, uintrapredictor[MAX_SB_SQUARE]);
     vp10_build_intra_predictors_for_interintra(
         xd, bsize, plane, uintrapredictor, MAX_SB_SIZE);
     vp10_combine_interintra(xd, bsize, plane, upred, ustride,
@@ -2204,12 +2204,12 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
     if (ref && get_wedge_bits(mi->mbmi.sb_type)
         && mi->mbmi.use_wedge_interinter) {
 #if CONFIG_VP9_HIGHBITDEPTH
-      uint8_t tmp_dst_[2 * MAX_SB_SQUARE];
+      DECLARE_ALIGNED(16, uint8_t, tmp_dst_[2 * MAX_SB_SQUARE]);
       uint8_t *tmp_dst =
           (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
           CONVERT_TO_BYTEPTR(tmp_dst_) : tmp_dst_;
 #else
-      uint8_t tmp_dst[MAX_SB_SQUARE];
+      DECLARE_ALIGNED(16, uint8_t, tmp_dst[MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_VP9_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
