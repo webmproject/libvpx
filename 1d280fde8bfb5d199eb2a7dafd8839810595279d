@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_c5c37676",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-23T01:21:40Z",
+      "side": 1,
+      "message": "providing this link is OK, but remember that there\u0027s no guarantee of permanence. adding the git log -1 --oneline output would be a more stable reference",
+      "revId": "1d280fde8bfb5d199eb2a7dafd8839810595279d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
