@@ -4339,7 +4339,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     int plane;
     mi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-      vp9_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
+      vp9_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane, 1);
     if (output_enabled)
       sum_intra_stats(td->counts, mi);
     vp9_tokenize_sb(cpi, td, t, !output_enabled, seg_skip,

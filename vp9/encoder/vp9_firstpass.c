@@ -741,7 +741,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       xd->mi[0]->mode = DC_PRED;
       xd->mi[0]->tx_size = use_dc_pred ?
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
-      vp9_encode_intra_block_plane(x, bsize, 0);
+      vp9_encode_intra_block_plane(x, bsize, 0, 0);
       this_error = vpx_get_mb_ss(x->plane[0].src_diff);
 
       // Keep a record of blocks that have almost no intra error residual

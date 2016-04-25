@@ -785,10 +785,19 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
   int i, j;
+  struct optimize_ctx *const ctx = args->ctx;
+  ENTROPY_CONTEXT *a = NULL;
+  ENTROPY_CONTEXT *l = NULL;
+  int entropy_ctx = 0;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * (j * dst_stride + i)];
   src = &p->src.buf[4 * (j * src_stride + i)];
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+  if (args->ctx != NULL) {
+    a = &ctx->ta[plane][i];
+    l = &ctx->tl[plane][j];
+    entropy_ctx = combine_entropy_contexts(*a, *l);
+  }
 
   if (tx_size == TX_4X4) {
     tx_type = get_tx_type_4x4(get_plane_type(plane), xd, block);
@@ -907,6 +916,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                              pd->dequant, eob, scan_order->scan,
                              scan_order->iscan);
       }
+      if (args->ctx != NULL) {
+       *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+      }
       if (!x->skip_encode && *eob)
         vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
       break;
@@ -920,6 +932,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
+      if (args->ctx != NULL) {
+        *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+      }
       if (!x->skip_encode && *eob)
         vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
       break;
@@ -932,6 +947,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
+      }
+      if (args->ctx != NULL) {
+        *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
         vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
@@ -949,7 +967,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-
+      if (args->ctx != NULL) {
+        *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+      }
       if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
@@ -968,9 +988,20 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     *(args->skip) = 0;
 }
 
-void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
+void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
+                                  int enable_optimize_b) {
   const MACROBLOCKD *const xd = &x->e_mbd;
+  struct optimize_ctx ctx;
   struct encode_b_args arg = {x, NULL, &xd->mi[0]->skip};
+
+  if (enable_optimize_b && x->optimize &&
+      (!x->skip_recode || !x->skip_optimize)) {
+    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const TX_SIZE tx_size = plane ? get_uv_tx_size(xd->mi[0], pd) :
+        xd->mi[0]->tx_size;
+    vp9_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane], ctx.tl[plane]);
+    arg.ctx = &ctx;
+  }
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
                                          vp9_encode_block_intra, &arg);
