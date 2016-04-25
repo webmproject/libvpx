@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "08f7b548_7d2bf7db",
+        "filename": "vpx/src/vpx_decoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Is there something to automatically format the code?\nThis function is gone now.",
+      "parentUuid": "c8e03c3f_68c4175e",
+      "range": {
+        "startLine": 200,
+        "startChar": 6,
+        "endLine": 200,
+        "endChar": 21
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_48d67310",
         "filename": "vpx/vpx_decoder.h",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "08f7b548_5d303b46",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "This is gone now.",
+      "parentUuid": "c8e03c3f_48d67310",
+      "range": {
+        "startLine": 381,
+        "startChar": 27,
+        "endLine": 381,
+        "endChar": 30
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_68dd3726",
         "filename": "vpx/vpx_decoder.h",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2016-04-20T17:46:29Z",
       "side": 1,
       "message": "client",
+      "range": {
+        "startLine": 382,
+        "startChar": 27,
+        "endLine": 382,
+        "endChar": 32
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_3d356f36",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Gone.",
+      "parentUuid": "c8e03c3f_68dd3726",
       "range": {
         "startLine": 382,
         "startChar": 27,
@@ -105,6 +177,30 @@
       "writtenOn": "2016-04-20T17:46:29Z",
       "side": 1,
       "message": "contiguous",
+      "range": {
+        "startLine": 39,
+        "startChar": 40,
+        "endLine": 39,
+        "endChar": 49
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_3de7aff6",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Ack. This comment is gone now.",
+      "parentUuid": "c8e03c3f_a80f3f86",
       "range": {
         "startLine": 39,
         "startChar": 40,
@@ -164,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "e8f8a0fc_5e43d1ee",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Definitely simpler: chromium-review.googlesource.com/340550\n\nI don\u0027t understand what you mean with \"[..] could also add the width, height, and format to this struct as well to be filled out by libvpx if type \u003d\u003d PLANES.\"\n\nAs I understood it the callback would set the allocation type, so the size and format would always be passed to the callback.\nDid you mean that we should set the type of allocation in libvpx when it\u0027s initialized?\n\nThe only thing I don\u0027t particularly like is that now this struct is used both for input and output.",
+      "parentUuid": "c8e03c3f_57c9ee96",
+      "range": {
+        "startLine": 42,
+        "startChar": 15,
+        "endLine": 42,
+        "endChar": 37
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_c833a346",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 4
@@ -175,6 +295,30 @@
       "writtenOn": "2016-04-20T17:46:29Z",
       "side": 1,
       "message": "Make this some kind of define, like VP9_MAXIMUM_EXTERNAL_PLANES or something.",
+      "range": {
+        "startLine": 46,
+        "startChar": 17,
+        "endLine": 46,
+        "endChar": 18
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_1decf3d6",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_c833a346",
       "range": {
         "startLine": 46,
         "startChar": 17,
@@ -210,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "08f7b548_fdd02709",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_482b1375",
+      "range": {
+        "startLine": 47,
+        "startChar": 13,
+        "endLine": 47,
+        "endChar": 14
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_e8ff8745",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 4
@@ -221,6 +389,30 @@
       "writtenOn": "2016-04-20T17:46:29Z",
       "side": 1,
       "message": "must allocate?",
+      "range": {
+        "startLine": 89,
+        "startChar": 58,
+        "endLine": 89,
+        "endChar": 62
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_ddcd6b6f",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "This is gone.",
+      "parentUuid": "c8e03c3f_e8ff8745",
       "range": {
         "startLine": 89,
         "startChar": 58,
@@ -256,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "08f7b548_bdda9f25",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_28120f7b",
+      "range": {
+        "startLine": 93,
+        "startChar": 36,
+        "endLine": 93,
+        "endChar": 38
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_2845ef93",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 4
@@ -267,6 +483,30 @@
       "writtenOn": "2016-04-20T17:46:29Z",
       "side": 1,
       "message": "Seems like there was more to the comment.",
+      "range": {
+        "startLine": 118,
+        "startChar": 65,
+        "endLine": 118,
+        "endChar": 66
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_7d04176e",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "There was, but I pushed the wrong version. :/\nThis is gone now.",
+      "parentUuid": "c8e03c3f_2845ef93",
       "range": {
         "startLine": 118,
         "startChar": 65,
@@ -325,6 +565,54 @@
     },
     {
       "key": {
+        "uuid": "08f7b548_9d45a3a5",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_a821ffe9",
+      "range": {
+        "startLine": 155,
+        "startChar": 8,
+        "endLine": 155,
+        "endChar": 17
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_1d3ab326",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_28604f07",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 20
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_489e732f",
         "filename": "vpx_scale/generic/yv12config.c",
         "patchSetId": 4
@@ -336,6 +624,30 @@
       "writtenOn": "2016-04-20T17:46:29Z",
       "side": 1,
       "message": "alignment is off",
+      "range": {
+        "startLine": 175,
+        "startChar": 10,
+        "endLine": 175,
+        "endChar": 24
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_7d12d7a5",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Ack.",
+      "parentUuid": "c8e03c3f_489e732f",
       "range": {
         "startLine": 175,
         "startChar": 10,
@@ -371,6 +683,30 @@
     },
     {
       "key": {
+        "uuid": "08f7b548_5d171b94",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_c8856302",
+      "range": {
+        "startLine": 178,
+        "startChar": 16,
+        "endLine": 178,
+        "endChar": 21
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_08b46bab",
         "filename": "vpx_scale/generic/yv12config.c",
         "patchSetId": 4
@@ -382,6 +718,30 @@
       "writtenOn": "2016-04-20T17:46:29Z",
       "side": 1,
       "message": "I think you can refactor this code with a lot of the code below.",
+      "range": {
+        "startLine": 197,
+        "startChar": 26,
+        "endLine": 197,
+        "endChar": 31
+      },
+      "revId": "36e9a928fddfb9973fad084d40af22b974b02fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08f7b548_3d0c4f84",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-25T19:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_08b46bab",
       "range": {
         "startLine": 197,
         "startChar": 26,
