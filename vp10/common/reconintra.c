@@ -12,6 +12,7 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
+#include "vpx_ports/system_state.h"
 
 #if CONFIG_VP9_HIGHBITDEPTH
 #include "vpx_dsp/vpx_dsp_common.h"
@@ -389,7 +390,6 @@ static void vp10_init_intra_predictors_internal(void) {
 }
 
 #if CONFIG_EXT_INTRA
-#define PI 3.14159265
 #define FILTER_INTRA_PREC_BITS 10
 #define FILTER_INTRA_ROUND_VAL 511
 
@@ -672,10 +672,12 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
 static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
                          const uint8_t *above, const uint8_t *left, int angle,
                          INTRA_FILTER filter_type) {
-  double t = 0;
+  double t;
   int dx, dy;
   int bs = 4 << tx_size;
 
+  vpx_clear_system_state();
+  t = 0;
   if (angle != 90 && angle != 180)
     t = tan(angle * PI / 180.0);
   if (angle > 0 && angle < 90) {
@@ -1008,9 +1010,11 @@ static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride,
 static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                 const uint16_t *above, const uint16_t *left,
                                 int angle, int bd, INTRA_FILTER filter) {
-  double t = 0;
+  double t;
   int dx, dy;
 
+  vpx_clear_system_state();
+  t = 0;
   if (angle != 90 && angle != 180)
     t = tan(angle * PI / 180.0);
   if (angle > 0 && angle < 90) {
