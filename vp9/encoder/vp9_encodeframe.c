@@ -4295,8 +4295,7 @@ static void update_zeromv_cnt(VP9_COMP *const cpi,
   for (y = 0; y < ymis; y++)
     for (x = 0; x < xmis; x++) {
       int map_offset = block_index + y * cm->mi_cols + x;
-      if (is_inter_block(mi) && mi->skip &&
-          mi->segment_id <= CR_SEGMENT_ID_BOOST2) {
+      if (is_inter_block(mi) && mi->segment_id <= CR_SEGMENT_ID_BOOST2) {
         if (abs(mv.row) < 8 && abs(mv.col) < 8) {
           if (cpi->consec_zero_mv[map_offset] < 255)
            cpi->consec_zero_mv[map_offset]++;
