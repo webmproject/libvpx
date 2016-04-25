@@ -148,23 +148,25 @@ bool check_vpxbool(const PvVec &pv_vec, uint8_t *buf) {
   return okay;
 }
 
+// TODO(aconverse): replace this with a more representative distribution from
+// the codec.
 const rans_sym rans_sym_tab[] = {
-    {16, 0}, {100, 16}, {70, 116}, {70, 186},
+    {16 * 4, 0 * 4}, {100 * 4, 16 * 4}, {70 * 4, 116 *4}, {70 * 4, 186 *4},
 };
 const int kDistinctSyms = sizeof(rans_sym_tab) / sizeof(rans_sym_tab[0]);
 
 std::vector<int> ans_encode_build_vals(const rans_sym *tab, int iters) {
   std::vector<int> p_to_sym;
   int i = 0;
-  while (p_to_sym.size() < 256) {
+  while (p_to_sym.size() < rans_precision) {
     p_to_sym.insert(p_to_sym.end(), tab[i].prob, i);
     ++i;
   }
-  assert(p_to_sym.size() == 256);
+  assert(p_to_sym.size() == rans_precision);
   std::vector<int> ret;
   libvpx_test::ACMRandom gen(18543637);
   for (int i = 0; i < iters; ++i) {
-    int sym = p_to_sym[gen.Rand8()];
+    int sym = p_to_sym[gen.Rand8() * 4];
     ret.push_back(sym);
   }
   return ret;
@@ -173,7 +175,7 @@ std::vector<int> ans_encode_build_vals(const rans_sym *tab, int iters) {
 void rans_build_dec_tab(const struct rans_sym sym_tab[],
                         rans_dec_lut dec_tab) {
   dec_tab[0] = 0;
-  for (int i = 1; dec_tab[i - 1] < ans_p8_precision; ++i) {
+  for (int i = 1; dec_tab[i - 1] < rans_precision; ++i) {
     dec_tab[i] = dec_tab[i - 1] + sym_tab[i - 1].prob;
   }
 }
@@ -229,10 +231,10 @@ void build_tree(vpx_tree_index *tree, int num_syms) {
  *        -sym2  -sym3
  */
 void tab2tree(const rans_sym *tab, int tab_size, vpx_prob *treep) {
-  const unsigned basep = 256;
+  const unsigned basep = rans_precision;
   unsigned pleft = basep;
   for (int i = 0; i < tab_size - 1; ++i) {
-    unsigned prob = (tab[i].prob * basep + (basep / 2)) / pleft;
+    unsigned prob = (tab[i].prob * basep + basep * 2) / (pleft * 4);
     assert(prob > 0 && prob < 256);
     treep[i] = prob;
     pleft -= tab[i].prob;

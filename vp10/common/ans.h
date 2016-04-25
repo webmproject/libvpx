@@ -58,7 +58,12 @@ struct AnsDecoder {
 typedef uint8_t AnsP8;
 #define ans_p8_precision 256u
 #define ans_p8_shift 8
-#define l_base (ans_p8_precision * 4)  // l_base % precision must be 0
+typedef uint16_t AnsP10;
+#define ans_p10_precision 1024u
+
+#define rans_precision ans_p10_precision
+
+#define l_base (ans_p10_precision * 4)  // l_base % precision must be 0
 #define io_base 256
 // Range I = { l_base, l_base + 1, ..., l_base * io_base - 1 }
 
@@ -75,14 +80,17 @@ static INLINE int ans_write_end(struct AnsCoder *const ans) {
   assert(ans->state < l_base * io_base);
   state = ans->state - l_base;
   if (state < (1 << 6)) {
-    ans->buf[ans->buf_offset] = (0 << 6) + state;
+    ans->buf[ans->buf_offset] = (0x00 << 6) + state;
     return ans->buf_offset + 1;
   } else if (state < (1 << 14)) {
-    mem_put_le16(ans->buf + ans->buf_offset, (1 << 14) + state);
+    mem_put_le16(ans->buf + ans->buf_offset, (0x01 << 14) + state);
     return ans->buf_offset + 2;
-  } else {
-    mem_put_le24(ans->buf + ans->buf_offset, (1 << 23) + state);
+  } else if (state < (1 << 22)) {
+    mem_put_le24(ans->buf + ans->buf_offset, (0x02 << 22) + state);
     return ans->buf_offset + 3;
+  } else {
+    assert(0 && "State is too large to be serialized");
+    return ans->buf_offset;
   }
 }
 
@@ -189,7 +197,7 @@ static INLINE int rabs_asc_read(struct AnsDecoder *ans, AnsP8 p0) {
 static INLINE void uabs_write(struct AnsCoder *ans, int val, AnsP8 p0) {
   AnsP8 p = ans_p8_precision - p0;
   const unsigned l_s = val ? p : p0;
-  if (ans->state >= l_base / ans_p8_precision * io_base * l_s) {
+  while (ans->state >= l_base / ans_p8_precision * io_base * l_s) {
     ans->buf[ans->buf_offset++] = ans->state % io_base;
     ans->state /= io_base;
   }
@@ -205,7 +213,7 @@ static INLINE int uabs_read(struct AnsDecoder *ans, AnsP8 p0) {
   // unsigned int xp1;
   unsigned xp, sp;
   unsigned state = ans->state;
-  if (state < l_base && ans->buf_offset > 0) {
+  while (state < l_base && ans->buf_offset > 0) {
     state = state * io_base + ans->buf[--ans->buf_offset];
   }
   sp = state * p;
@@ -223,7 +231,7 @@ static INLINE int uabs_read(struct AnsDecoder *ans, AnsP8 p0) {
 static INLINE int uabs_read_bit(struct AnsDecoder *ans) {
   int s;
   unsigned state = ans->state;
-  if (state < l_base && ans->buf_offset > 0) {
+  while (state < l_base && ans->buf_offset > 0) {
     state = state * io_base + ans->buf[--ans->buf_offset];
   }
   s = (int)(state & 1);
@@ -256,31 +264,31 @@ static INLINE int uabs_read_tree(struct AnsDecoder *ans,
 }
 
 struct rans_sym {
-  AnsP8 prob;
-  AnsP8 cum_prob;  // not-inclusive
+  AnsP10 prob;
+  AnsP10 cum_prob;  // not-inclusive
 };
 
 struct rans_dec_sym {
   uint8_t val;
-  AnsP8 prob;
-  AnsP8 cum_prob;  // not-inclusive
+  AnsP10 prob;
+  AnsP10 cum_prob;  // not-inclusive
 };
 
 // This is now just a boring cdf. It starts with an explicit zero.
 // TODO(aconverse): Remove starting zero.
 typedef uint16_t rans_dec_lut[16];
 
-static INLINE void rans_build_cdf_from_pdf(const AnsP8 token_probs[],
+static INLINE void rans_build_cdf_from_pdf(const AnsP10 token_probs[],
                                            rans_dec_lut cdf_tab) {
   int i;
   cdf_tab[0] = 0;
-  for (i = 1; cdf_tab[i - 1] < ans_p8_precision; ++i) {
+  for (i = 1; cdf_tab[i - 1] < rans_precision; ++i) {
     cdf_tab[i] = cdf_tab[i - 1] + token_probs[i - 1];
   }
-  assert(cdf_tab[i - 1] == ans_p8_precision);
+  assert(cdf_tab[i - 1] == rans_precision);
 }
 
-static INLINE int ans_find_largest(const AnsP8 *const pdf_tab,
+static INLINE int ans_find_largest(const AnsP10 *const pdf_tab,
                                    int num_syms) {
   int largest_idx = -1;
   int largest_p = -1;
@@ -295,22 +303,22 @@ static INLINE int ans_find_largest(const AnsP8 *const pdf_tab,
   return largest_idx;
 }
 
-static INLINE void rans_merge_prob_pdf(AnsP8 *const out_pdf,
-                                       const AnsP8 node_prob,
-                                       const AnsP8 *const src_pdf,
-                                       int in_syms) {
+static INLINE void rans_merge_prob8_pdf(AnsP10 *const out_pdf,
+                                        const AnsP8 node_prob,
+                                        const AnsP10 *const src_pdf,
+                                        int in_syms) {
   int i;
-  int adjustment = ans_p8_precision;
+  int adjustment = rans_precision;
   const int round_fact = ans_p8_precision >> 1;
   const AnsP8 p1 = ans_p8_precision - node_prob;
   const int out_syms = in_syms + 1;
   assert(src_pdf != out_pdf);
 
-  out_pdf[0] = node_prob;
-  adjustment -= node_prob;
+  out_pdf[0] = node_prob << (10 - 8);
+  adjustment -= out_pdf[0];
   for (i = 0; i < in_syms; ++i) {
     int p = (p1 * src_pdf[i] + round_fact) >> ans_p8_shift;
-    p = VPXMIN(p, (int)ans_p8_precision - in_syms);
+    p = VPXMIN(p, (int)rans_precision - in_syms);
     p = VPXMAX(p, 1);
     out_pdf[i + 1] = p;
     adjustment -= p;
@@ -332,20 +340,20 @@ static INLINE void rans_merge_prob_pdf(AnsP8 *const out_pdf,
 
 // rANS with normalization
 // sym->prob takes the place of l_s from the paper
-// ans_p8_precision is m
+// ans_p10_precision is m
 static INLINE void rans_write(struct AnsCoder *ans,
                               const struct rans_sym *const sym) {
-  const AnsP8 p = sym->prob;
-  if (ans->state >= l_base / ans_p8_precision * io_base * p) {
+  const AnsP10 p = sym->prob;
+  while (ans->state >= l_base / rans_precision * io_base * p) {
     ans->buf[ans->buf_offset++] = ans->state % io_base;
     ans->state /= io_base;
   }
   ans->state =
-      (ans->state / p) * ans_p8_precision + ans->state % p + sym->cum_prob;
+      (ans->state / p) * rans_precision + ans->state % p + sym->cum_prob;
 }
 
 static INLINE void fetch_sym(struct rans_dec_sym *out, const rans_dec_lut cdf,
-                             AnsP8 rem) {
+                             AnsP10 rem) {
   int i = 0;
   // TODO(skal): if critical, could be a binary search.
   // Or, better, an O(1) alias-table.
@@ -353,8 +361,8 @@ static INLINE void fetch_sym(struct rans_dec_sym *out, const rans_dec_lut cdf,
     ++i;
   }
   out->val = i - 1;
-  out->prob = (AnsP8)(cdf[i] - cdf[i - 1]);
-  out->cum_prob = (AnsP8)cdf[i - 1];
+  out->prob = (AnsP10)(cdf[i] - cdf[i - 1]);
+  out->cum_prob = (AnsP10)cdf[i - 1];
 }
 
 static INLINE int rans_read(struct AnsDecoder *ans,
@@ -362,11 +370,11 @@ static INLINE int rans_read(struct AnsDecoder *ans,
   unsigned rem;
   unsigned quo;
   struct rans_dec_sym sym;
-  if (ans->state < l_base && ans->buf_offset > 0) {
+  while (ans->state < l_base && ans->buf_offset > 0) {
     ans->state = ans->state * io_base + ans->buf[--ans->buf_offset];
   }
-  quo = ans->state / ans_p8_precision;
-  rem = ans->state % ans_p8_precision;
+  quo = ans->state / rans_precision;
+  rem = ans->state % rans_precision;
   fetch_sym(&sym, tab, rem);
   ans->state = quo * sym.prob + rem - sym.cum_prob;
   return sym.val;
