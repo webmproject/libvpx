@@ -87,15 +87,6 @@ static inline void fwd_txfm2d_sse4_1(const int16_t *input, int32_t *output,
   transpose_32(txfm_size, buf_128, out_128);
 }
 
-void vp10_fwd_txfm2d_4x4_sse4_1(const int16_t *input, int32_t *output,
-                                const int stride, int tx_type,
-                                const int bd) {
-  int32_t txfm_buf[16];
-  const TXFM_2D_CFG* cfg = vp10_get_txfm_4x4_cfg(tx_type);
-  (void)bd;
-  fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
-}
-
 void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *output,
                                 const int stride, int tx_type,
                                 const int bd) {

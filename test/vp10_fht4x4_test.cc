@@ -25,9 +25,9 @@ using libvpx_test::ACMRandom;
 namespace {
 typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                         int tx_type);
-
+using std::tr1::tuple;
 using libvpx_test::FhtFunc;
-typedef std::tr1::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t, int> Ht4x4Param;
+typedef tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t, int> Ht4x4Param;
 
 void fht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
                 int tx_type) {
@@ -37,13 +37,14 @@ void fht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
 #if CONFIG_VP9_HIGHBITDEPTH
 typedef void (*IhighbdHtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                               int tx_type, int bd);
+typedef void (*HBDFhtFunc)(const int16_t *input, int32_t *output, int stride,
+                        int tx_type, int bd);
+// Target optimized function, tx_type, bit depth
+typedef tuple<HBDFhtFunc, int, int> HighbdHt4x4Param;
 
-typedef std::tr1::tuple<FhtFunc, IhighbdHtFunc, int, vpx_bit_depth_t, int>
-HighbdHt4x4Param;
-
-void highbe_fht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
-                       int tx_type) {
-  vp10_highbd_fht4x4_c(in, out, stride, tx_type);
+void highbe_fht4x4_ref(const int16_t *in, int32_t *out, int stride,
+                       int tx_type, int bd) {
+  vp10_fwd_txfm2d_4x4_c(in, out, stride, tx_type, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -83,97 +84,75 @@ TEST_P(VP10Trans4x4HT, CoeffCheck) {
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-class VP10HighbdTrans4x4HT
-    : public libvpx_test::TransformTestBase,
-      public ::testing::TestWithParam<HighbdHt4x4Param> {
+class VP10HighbdTrans4x4HT : public ::testing::TestWithParam<HighbdHt4x4Param> {
  public:
   virtual ~VP10HighbdTrans4x4HT() {}
 
   virtual void SetUp() {
     fwd_txfm_ = GET_PARAM(0);
-    inv_txfm_ = GET_PARAM(1);
-    tx_type_  = GET_PARAM(2);
-    pitch_    = 4;
-    fwd_txfm_ref = highbe_fht4x4_ref;
-    bit_depth_ = GET_PARAM(3);
+    fwd_txfm_ref_ = highbe_fht4x4_ref;
+    tx_type_  = GET_PARAM(1);
+    bit_depth_ = GET_PARAM(2);
     mask_ = (1 << bit_depth_) - 1;
-    num_coeffs_ = GET_PARAM(4);
+    num_coeffs_ = 16;
+
+    input_ = reinterpret_cast<int16_t *>
+       (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    output_ = reinterpret_cast<int32_t *>
+        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
+    output_ref_ = reinterpret_cast<int32_t *>
+        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+
+  virtual void TearDown() {
+    vpx_free(input_);
+    vpx_free(output_);
+    vpx_free(output_ref_);
+    libvpx_test::ClearSystemState();
+  }
 
  protected:
-  void RunFwdTxfm(const int16_t *in, tran_low_t *out, int stride) {
-    fwd_txfm_(in, out, stride, tx_type_);
-  }
+  void RunBitexactCheck();
 
-  void RunInvTxfm(const tran_low_t *out, uint8_t *dst, int stride) {
-    inv_txfm_(out, dst, stride, tx_type_, bit_depth_);
-  }
-
-  FhtFunc fwd_txfm_;
-  IhighbdHtFunc inv_txfm_;
+ private:
+  HBDFhtFunc fwd_txfm_;
+  HBDFhtFunc fwd_txfm_ref_;
+  int tx_type_;
+  int bit_depth_;
+  int mask_;
+  int num_coeffs_;
+  int16_t *input_;
+  int32_t *output_;
+  int32_t *output_ref_;
 };
 
+void VP10HighbdTrans4x4HT::RunBitexactCheck() {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  int i, j;
+  const int stride = 4;
+  const int num_tests = 200000;
+  const int num_coeffs = 16;
+
+  for (i = 0; i < num_tests; ++i) {
+    for (j = 0; j < num_coeffs; ++j) {
+      input_[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+    }
+
+    fwd_txfm_ref_(input_, output_ref_, stride, tx_type_, bit_depth_);
+    fwd_txfm_(input_, output_, stride, tx_type_, bit_depth_);
+
+    for (j = 0; j < num_coeffs; ++j) {
+      EXPECT_EQ(output_[j], output_ref_[j])
+          << "Not bit-exact result at index: " << j
+          << " at test block: " << i;
+    }
+  }
+}
+
 TEST_P(VP10HighbdTrans4x4HT, HighbdCoeffCheck) {
-  RunCoeffCheck();
+  RunBitexactCheck();
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-#define SPEED_TEST (0)
-#if SPEED_TEST
-#if CONFIG_EXT_TX
-TEST(VP10Trans4x4HTSpeedTest, C_version) {
-    ACMRandom rnd(ACMRandom::DeterministicSeed());
-    const int count_test_block = 200000;
-    int bit_depth = 8;
-    int mask = (1 << bit_depth) - 1;
-    const int num_coeffs = 16;
-    int16_t *input = new int16_t[num_coeffs];
-    tran_low_t *output = new tran_low_t[num_coeffs];
-    const int stride = 4;
-    int tx_type;
-
-    for (int j = 0; j < num_coeffs; ++j) {
-      input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
-    }
-    for (int i = 0; i < count_test_block; ++i) {
-      for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
-        vp10_fht4x4_c(input, output, stride, tx_type);
-      }
-    }
-
-    delete[] input;
-    delete[] output;
-}
-#endif  // CONFIG_EXT_TX
-
-#if HAVE_SSE2 && CONFIG_EXT_TX
-TEST(VP10Trans4x4HTSpeedTest, SSE2_version) {
-    ACMRandom rnd(ACMRandom::DeterministicSeed());
-    const int count_test_block = 200000;
-    int bit_depth = 8;
-    int mask = (1 << bit_depth) - 1;
-    const int num_coeffs = 16;
-    int16_t *input = new int16_t[num_coeffs];
-    tran_low_t *output = reinterpret_cast<tran_low_t *>(
-        vpx_memalign(16, num_coeffs * sizeof(tran_low_t)));
-    const int stride = 4;
-    int tx_type;
-
-    for (int j = 0; j < num_coeffs; ++j) {
-      input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
-    }
-    for (int i = 0; i < count_test_block; ++i) {
-      for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
-        vp10_fht4x4_sse2(input, output, stride, tx_type);
-      }
-    }
-
-    delete[] input;
-    vpx_free(output);
-}
-#endif  // HAVE_SSE2 && CONFIG_EXT_TX
-#endif  // SPEED_TEST
 
 using std::tr1::make_tuple;
 
@@ -229,83 +208,23 @@ INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HighbdTrans4x4HT,
     ::testing::Values(
 #if !CONFIG_EXT_TX
-      // make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 0,
-      //            VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 1,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 2,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 3,
-                 VPX_BITS_10, 16),
-      // make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 0,
-      //            VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 1,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 2,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 3,
-                 VPX_BITS_12, 16)));
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12)));
 #else
-      // make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 0,
-      //            VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 1,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 2,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 3,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 4,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 5,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 6,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 7,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 8,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 10,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 11,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 12,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 13,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 14,
-                 VPX_BITS_10, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 15,
-                 VPX_BITS_10, 16),
-      // make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 0,
-      //            VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 1,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 2,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 3,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 4,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 5,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 6,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 7,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 8,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 10,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 11,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 12,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 13,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 14,
-                 VPX_BITS_12, 16),
-      make_tuple(&vp10_highbd_fht4x4_sse4_1, &vp10_highbd_iht4x4_16_add_c, 15,
-                 VPX_BITS_12, 16)));
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12)));
 #endif  // !CONFIG_EXT_TX
 #endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
