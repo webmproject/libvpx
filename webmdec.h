@@ -53,8 +53,6 @@ int file_is_webm(struct WebmInputContext *webm_ctx,
 //      0 - Success
 //      1 - End of Stream
 //     -1 - Error
-// TODO(vigneshv): Make the return values consistent across all functions in
-// this file.
 int webm_read_frame(struct WebmInputContext *webm_ctx,
                     uint8_t **buffer,
                     size_t *bytes_in_buffer,
