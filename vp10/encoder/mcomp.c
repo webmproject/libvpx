@@ -171,15 +171,6 @@ void vp10_init3smotion_compensation(search_site_config *cfg, int stride) {
  * could reduce the area.
  */
 
-/* Estimated (square) error cost of a motion vector (r,c). The 14 scale comes
- * from the same math as in mv_err_cost(). */
-#define MVC(r, c)                                              \
-    (mvcost ?                                                  \
-     ((unsigned)(mvjcost[((r) != rr) * 2 + ((c) != rc)] +      \
-       mvcost[0][((r) - rr)] + mvcost[1][((c) - rc)]) *        \
-      error_per_bit + 8192) >> 14 : 0)
-
-
 // convert motion vector component to offset for sv[a]f calc
 static INLINE int sp(int x) {
   return x & 7;
@@ -192,13 +183,16 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
 /* checks if (r, c) has better score than previous best */
 #define CHECK_BETTER(v, r, c) \
   if (c >= minc && c <= maxc && r >= minr && r <= maxr) {              \
+    MV this_mv = {r, c};                                               \
+    v = mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit); \
     if (second_pred == NULL)                                           \
       thismse = vfp->svf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), z, \
                              src_stride, &sse);                        \
     else                                                               \
       thismse = vfp->svaf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), \
                               z, src_stride, &sse, second_pred);       \
-    if ((v = MVC(r, c) + thismse) < besterr) {                         \
+    v += thismse;                                                      \
+    if (v < besterr) {                                                 \
       besterr = v;                                                     \
       br = r;                                                          \
       bc = c;                                                          \
@@ -219,10 +213,13 @@ static INLINE const uint8_t *upre(const uint8_t *buf, int stride,
 /* checks if (r, c) has better score than previous best */
 #define CHECK_BETTER1(v, r, c) \
   if (c >= minc && c <= maxc && r >= minr && r <= maxr) {              \
+    MV this_mv = {r, c};                                               \
     thismse = upsampled_pref_error(xd, vfp, z, src_stride,             \
                                    upre(y, y_stride, r, c), y_stride,  \
                                    second_pred, w, h, &sse);           \
-    if ((v = MVC(r, c) + thismse) < besterr) {                         \
+    v = mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit); \
+    v += thismse;                                                      \
+    if (v < besterr) {                                                 \
       besterr = v;                                                     \
       br = r;                                                          \
       bc = c;                                                          \
@@ -334,8 +331,6 @@ static INLINE const uint8_t *upre(const uint8_t *buf, int stride,
   const int offset = bestmv->row * y_stride + bestmv->col;                 \
   const uint8_t *const y = xd->plane[0].pre[0].buf;                        \
                                                                            \
-  int rr = ref_mv->row;                                                    \
-  int rc = ref_mv->col;                                                    \
   int br = bestmv->row * 8;                                                \
   int bc = bestmv->col * 8;                                                \
   int hstep = 4;                                                           \
@@ -762,8 +757,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
   const int offset = bestmv->row * y_stride + bestmv->col;
   const uint8_t *const y = xd->plane[0].pre[0].buf;
 
-  int rr = ref_mv->row;
-  int rc = ref_mv->col;
   int br = bestmv->row * 8;
   int bc = bestmv->col * 8;
   int hstep = 4;
@@ -920,7 +913,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
   return besterr;
 }
 
-#undef MVC
 #undef PRE
 #undef CHECK_BETTER
 
