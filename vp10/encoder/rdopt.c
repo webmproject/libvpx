@@ -2517,7 +2517,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
 
 static INLINE int get_angle_index(double angle) {
   const double step = 22.5, base = 45;
-  return (int)round((angle - base) / step);
+  return (int)lround((angle - base) / step);
 }
 
 static void angle_estimation(const uint8_t *src, int src_stride,
