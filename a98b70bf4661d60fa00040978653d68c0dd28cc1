@@ -48,6 +48,54 @@
     },
     {
       "key": {
+        "uuid": "c8e03c3f_818ddbf4",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-04-25T21:46:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_e184a700",
+      "range": {
+        "startLine": 493,
+        "startChar": 13,
+        "endLine": 493,
+        "endChar": 16
+      },
+      "revId": "a98b70bf4661d60fa00040978653d68c0dd28cc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_418bd3e1",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-04-25T21:46:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_6190973d",
+      "range": {
+        "startLine": 493,
+        "startChar": 0,
+        "endLine": 493,
+        "endChar": 36
+      },
+      "revId": "a98b70bf4661d60fa00040978653d68c0dd28cc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e03c3f_01742bcc",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-04-25T21:26:03Z",
       "side": 1,
       "message": "You still will need the cast or you will get an implicit narrowing conversion warning on MSVC 64-bit.",
+      "range": {
+        "startLine": 2520,
+        "startChar": 9,
+        "endLine": 2520,
+        "endChar": 15
+      },
+      "revId": "a98b70bf4661d60fa00040978653d68c0dd28cc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_e19ae727",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2520,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-04-25T21:46:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8e03c3f_01742bcc",
       "range": {
         "startLine": 2520,
         "startChar": 9,
