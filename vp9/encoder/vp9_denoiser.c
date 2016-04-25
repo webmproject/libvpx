@@ -21,12 +21,6 @@
 #include "vp9/encoder/vp9_denoiser.h"
 #include "vp9/encoder/vp9_encoder.h"
 
-/* The VP9 denoiser is similar to that of the VP8 denoiser. While
- * choosing the motion vectors / reference frames, the denoiser is run, and if
- * it did not modify the signal to much, the denoised block is copied to the
- * signal.
- */
-
 #ifdef OUTPUT_YUV_DENOISED
 static void make_grayscale(YV12_BUFFER_CONFIG *yuv);
 #endif
@@ -500,12 +494,12 @@ void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {
   ctx->zeromv_sse = UINT_MAX;
   ctx->newmv_sse = UINT_MAX;
   ctx->zeromv_lastref_sse = UINT_MAX;
+  ctx->best_sse_mv.as_int = 0;
 }
 
 void vp9_denoiser_update_frame_stats(MODE_INFO *mi, unsigned int sse,
                                      PREDICTION_MODE mode,
                                      PICK_MODE_CONTEXT *ctx) {
-  // TODO(tkopp): Use both MVs if possible
   if (mi->mv[0].as_int == 0 && sse < ctx->zeromv_sse) {
     ctx->zeromv_sse = sse;
     ctx->best_zeromv_reference_frame = mi->ref_frame[0];
