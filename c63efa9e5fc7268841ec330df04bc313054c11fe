@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e03c3f_3ad6c073",
+        "filename": "vp9/encoder/vp9_noise_estimate.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-04-25T01:16:22Z",
+      "side": 1,
+      "message": "Better to use kLowLow.",
+      "range": {
+        "startLine": 133,
+        "startChar": 16,
+        "endLine": 133,
+        "endChar": 17
+      },
+      "revId": "c63efa9e5fc7268841ec330df04bc313054c11fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8e03c3f_7a04c8b2",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1338,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-04-25T01:16:22Z",
+      "side": 1,
+      "message": "I think it would be more natural if define this function in vp9_noise_estimation.c",
+      "range": {
+        "startLine": 1338,
+        "startChar": 12,
+        "endLine": 1338,
+        "endChar": 36
+      },
+      "revId": "c63efa9e5fc7268841ec330df04bc313054c11fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
