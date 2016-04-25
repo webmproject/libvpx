@@ -28,7 +28,6 @@
 using libvpx_test::ACMRandom;
 
 namespace {
-const double PI = 3.141592653589793238462643383279502884;
 const double kInvSqrt2 = 0.707106781186547524400844362104;
 
 void reference_idct_1d(const double *in, double *out, int size) {

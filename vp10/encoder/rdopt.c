@@ -2523,10 +2523,11 @@ static INLINE int get_angle_index(double angle) {
 static void angle_estimation(const uint8_t *src, int src_stride,
                              int rows, int cols, double *hist) {
   int r, c, i, index;
-  const double pi = 3.1415;
   double angle, dx, dy;
-  double temp, divisor = 0;
+  double temp, divisor;
 
+  vpx_clear_system_state();
+  divisor = 0;
   for (i = 0; i < DIRECTIONAL_MODES; ++i)
     hist[i] = 0;
 
@@ -2539,7 +2540,7 @@ static void angle_estimation(const uint8_t *src, int src_stride,
       if (dy == 0)
         angle = 90;
       else
-        angle = (atan((double)dx / (double)dy)) * 180 / pi;
+        angle = (atan((double)dx / (double)dy)) * 180 / PI;
       assert(angle >= -90 && angle <= 90);
       index = get_angle_index(angle + 180);
       if (index < DIRECTIONAL_MODES) {
@@ -2567,11 +2568,12 @@ static void angle_estimation(const uint8_t *src, int src_stride,
 static void highbd_angle_estimation(const uint8_t *src8, int src_stride,
                                     int rows, int cols, double *hist) {
   int r, c, i, index;
-  const double pi = 3.1415;
   double angle, dx, dy;
-  double temp, divisor = 0;
+  double temp, divisor;
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
 
+  vpx_clear_system_state();
+  divisor = 0;
   for (i = 0; i < DIRECTIONAL_MODES; ++i)
     hist[i] = 0;
 
@@ -2584,7 +2586,7 @@ static void highbd_angle_estimation(const uint8_t *src8, int src_stride,
       if (dy == 0)
         angle = 90;
       else
-        angle = (atan((double)dx / (double)dy)) * 180 / pi;
+        angle = (atan((double)dx / (double)dy)) * 180 / PI;
       assert(angle >= -90 && angle <= 90);
       index = get_angle_index(angle + 180);
       if (index < DIRECTIONAL_MODES) {

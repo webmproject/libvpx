@@ -9,6 +9,9 @@
  */
 
 #include <math.h>
+
+#include "vpx_ports/system_state.h"
+
 #include "vp10/common/blockd.h"
 
 PREDICTION_MODE vp10_left_block_mode(const MODE_INFO *cur_mi,
@@ -137,7 +140,6 @@ void vp10_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y) {
 }
 
 #if CONFIG_EXT_INTRA
-#define PI 3.14159265
 // Returns whether filter selection is needed for a given
 // intra prediction angle.
 int pick_intra_filter(int angle) {
@@ -146,8 +148,12 @@ int pick_intra_filter(int angle) {
   if (angle > 90 && angle < 180) {
     return 1;
   } else {
-    double t = tan(angle * PI / 180.0);
+    double t;
     double n;
+
+    vpx_clear_system_state();
+
+    t = tan(angle * PI / 180.0);
     if (angle < 90)
       t = 1 / t;
     n = floor(t);

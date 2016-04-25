@@ -25,6 +25,8 @@
 extern "C" {
 #endif
 
+#define PI 3.141592653589793238462643383279502884
+
 // Only need this for fixed-size arrays, for structs just assign.
 #define vp10_copy(dest, src) {            \
     assert(sizeof(dest) == sizeof(src)); \
