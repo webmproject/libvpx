@@ -1072,8 +1072,6 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
       }
       break;
   }
-
-  vp9_adjust_mask(cm, mi_row, mi_col, lfm);
 }
 
 static void filter_selectively_vert(uint8_t *s, int pitch,
