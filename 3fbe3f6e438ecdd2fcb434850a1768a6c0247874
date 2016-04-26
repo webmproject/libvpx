@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "68b591ab_e8c63359",
+        "filename": "test/external_frame_buffer_planes_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-26T18:41:06Z",
+      "side": 1,
+      "message": "I\u0027m afraid libvpx doesn\u0027t support outputting to a packed format at this time. That\u0027s why I was saying a copy/conversion will probably be needed in chrome.\n\nI\u0027d be happy to discover otherwise.",
+      "parentUuid": "88864495_2617c2dc",
+      "revId": "3fbe3f6e438ecdd2fcb434850a1768a6c0247874",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2874787a_18814979",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-26T10:31:33Z",
       "side": 1,
       "message": "why not 4?\nVPX_IMG_FMT_444A requires 4 planes.",
+      "revId": "3fbe3f6e438ecdd2fcb434850a1768a6c0247874",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68b591ab_88c3f747",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-26T18:41:06Z",
+      "side": 1,
+      "message": "Just following what Frank suggested in the other review since we currently support only formats with 3 planes.",
+      "parentUuid": "2874787a_18814979",
       "revId": "3fbe3f6e438ecdd2fcb434850a1768a6c0247874",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
