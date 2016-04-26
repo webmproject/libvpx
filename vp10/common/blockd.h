@@ -485,13 +485,10 @@ static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
 #define ALLOW_FILTER_INTRA_MODES 1
 #define ANGLE_STEP 3
 #define MAX_ANGLE_DELTAS 3
-#define ANGLE_FAST_SEARCH 1
-#define ANGLE_SKIP_THRESH 0.10
-#define FILTER_FAST_SEARCH 1
 
 extern const int16_t dr_intra_derivative[270][2];
 
-static uint8_t mode_to_angle_map[INTRA_MODES] = {
+static const uint8_t mode_to_angle_map[INTRA_MODES] = {
     0, 90, 180, 45, 135, 111, 157, 203, 67, 0,
 };
 
