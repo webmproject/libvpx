@@ -16,6 +16,70 @@
       "revId": "42fe096fbd063a35488464c0ada882d39c8db762",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08933519_7d3677f5",
+        "filename": "vp10/common/entropymv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-04-26T16:55:48Z",
+      "side": 1,
+      "message": "Is \"ToDo\" appropriate here to state your intention?",
+      "parentUuid": "08933519_3d030f65",
+      "revId": "42fe096fbd063a35488464c0ada882d39c8db762",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08933519_1d3bb3dc",
+        "filename": "vp10/common/entropymv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-04-26T16:55:48Z",
+      "side": 1,
+      "message": "remove {} to be consistent,with other single statement ifs.",
+      "range": {
+        "startLine": 182,
+        "startChar": 30,
+        "endLine": 182,
+        "endChar": 31
+      },
+      "revId": "42fe096fbd063a35488464c0ada882d39c8db762",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08933519_3d40ef45",
+        "filename": "vp10/common/entropymv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-04-26T16:55:48Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 186,
+        "startChar": 32,
+        "endLine": 186,
+        "endChar": 33
+      },
+      "revId": "42fe096fbd063a35488464c0ada882d39c8db762",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
