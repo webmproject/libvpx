@@ -47,6 +47,10 @@ static void initialize_dec(void) {
     av1_init_wedge_masks();
 #endif  // CONFIG_EXT_INTER
     init_done = 1;
+#if CONFIG_DAALA_EC
+    av1_indices_from_tree(av1_switchable_interp_ind, av1_switchable_interp_inv,
+                          SWITCHABLE_FILTERS, av1_switchable_interp_tree);
+#endif
   }
 }
 

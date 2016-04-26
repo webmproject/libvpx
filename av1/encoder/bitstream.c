@@ -189,6 +189,14 @@ void av1_encode_token_init(void) {
   av1_tokens_from_tree(switchable_restore_encodings,
                        av1_switchable_restore_tree);
 #endif  // CONFIG_LOOP_RESTORATION
+
+#if CONFIG_DAALA_EC
+  /* This hack is necessary when CONFIG_EXT_INTERP is enabled because the five
+      SWITCHABLE_FILTERS are not consecutive, e.g., 0, 1, 2, 3, 4, when doing
+      an in-order traversal of the av1_switchable_interp_tree structure. */
+  av1_indices_from_tree(av1_switchable_interp_ind, av1_switchable_interp_inv,
+                        SWITCHABLE_FILTERS, av1_switchable_interp_tree);
+#endif
 }
 
 static void write_intra_mode(aom_writer *w, PREDICTION_MODE mode,
@@ -486,10 +494,16 @@ static void update_skip_probs(AV1_COMMON *cm, aom_writer *w,
 static void update_switchable_interp_probs(AV1_COMMON *cm, aom_writer *w,
                                            FRAME_COUNTS *counts) {
   int j;
-  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
+  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
     prob_diff_update(av1_switchable_interp_tree,
                      cm->fc->switchable_interp_prob[j],
                      counts->switchable_interp[j], SWITCHABLE_FILTERS, w);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_switchable_interp_tree,
+                    cm->fc->switchable_interp_prob[j],
+                    cm->fc->switchable_interp_cdf[j]);
+#endif
+  }
 }
 
 #if CONFIG_EXT_TX
@@ -963,9 +977,15 @@ static void write_switchable_interp_filter(AV1_COMP *cpi, const MACROBLOCKD *xd,
 #else
     {
       const int ctx = av1_get_pred_context_switchable_interp(xd);
+#if CONFIG_DAALA_EC
+      aom_write_tree_cdf(w, av1_switchable_interp_ind[mbmi->interp_filter],
+                         cm->fc->switchable_interp_cdf[ctx],
+                         SWITCHABLE_FILTERS);
+#else
       av1_write_token(w, av1_switchable_interp_tree,
                       cm->fc->switchable_interp_prob[ctx],
                       &switchable_interp_encodings[mbmi->interp_filter]);
+#endif
       ++cpi->interp_filter_selected[0][mbmi->interp_filter];
     }
 #endif

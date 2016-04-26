@@ -131,6 +131,10 @@ typedef struct frame_contexts {
 #if CONFIG_LOOP_RESTORATION
   aom_prob switchable_restore_prob[RESTORE_SWITCHABLE_TYPES - 1];
 #endif  // CONFIG_LOOP_RESTORATION
+#if CONFIG_DAALA_EC
+  uint16_t switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS]
+                                [SWITCHABLE_FILTERS];
+#endif
 } FRAME_CONTEXT;
 
 typedef struct FRAME_COUNTS {
@@ -278,6 +282,10 @@ extern const aom_tree_index av1_motion_mode_tree[TREE_SIZE(MOTION_MODES)];
 extern const aom_tree_index
     av1_switchable_restore_tree[TREE_SIZE(RESTORE_SWITCHABLE_TYPES)];
 #endif  // CONFIG_LOOP_RESTORATION
+#if CONFIG_DAALA_EC
+extern int av1_switchable_interp_ind[SWITCHABLE_FILTERS];
+extern int av1_switchable_interp_inv[SWITCHABLE_FILTERS];
+#endif
 
 void av1_setup_past_independence(struct AV1Common *cm);
 
