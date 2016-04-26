@@ -672,26 +672,16 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
 static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
                          const uint8_t *above, const uint8_t *left, int angle,
                          INTRA_FILTER filter_type) {
-  double t;
-  int dx, dy;
-  int bs = 4 << tx_size;
+  const int dx = (int)dr_intra_derivative[angle][0];
+  const int dy = (int)dr_intra_derivative[angle][1];
+  const int bs = 4 << tx_size;
+  assert(angle > 0 && angle < 270);
 
-  vpx_clear_system_state();
-  t = 0;
-  if (angle != 90 && angle != 180)
-    t = tan(angle * PI / 180.0);
   if (angle > 0 && angle < 90) {
-    dx = -((int)(256 / t));
-    dy = 1;
     dr_prediction_z1(dst, stride, bs, above, left, dx, dy, filter_type);
   } else if (angle > 90 && angle < 180) {
-    t = -t;
-    dx = (int)(256 / t);
-    dy = (int)(256 * t);
     dr_prediction_z2(dst, stride, bs, above, left, dx, dy, filter_type);
   } else if (angle > 180 && angle < 270) {
-    dx = 1;
-    dy = -((int)(256 * t));
     dr_prediction_z3(dst, stride, bs, above, left, dx, dy, filter_type);
   } else if (angle == 90) {
     pred[V_PRED][tx_size](dst, stride, above, left);
@@ -1010,25 +1000,15 @@ static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride,
 static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                 const uint16_t *above, const uint16_t *left,
                                 int angle, int bd, INTRA_FILTER filter) {
-  double t;
-  int dx, dy;
+  const int dx = (int)dr_intra_derivative[angle][0];
+  const int dy = (int)dr_intra_derivative[angle][1];
+  assert(angle > 0 && angle < 270);
 
-  vpx_clear_system_state();
-  t = 0;
-  if (angle != 90 && angle != 180)
-    t = tan(angle * PI / 180.0);
   if (angle > 0 && angle < 90) {
-    dx = -((int)(256 / t));
-    dy = 1;
     highbd_dr_prediction_z1(dst, stride, bs, above, left, dx, dy, bd, filter);
   } else if (angle > 90 && angle < 180) {
-    t = -t;
-    dx = (int)(256 / t);
-    dy = (int)(256 * t);
     highbd_dr_prediction_z2(dst, stride, bs, above, left, dx, dy, bd, filter);
   } else if (angle > 180 && angle < 270) {
-    dx = 1;
-    dy = -((int)(256 * t));
     highbd_dr_prediction_z3(dst, stride, bs, above, left, dx, dy, bd, filter);
   } else if (angle == 90) {
     highbd_v_predictor(dst, stride, bs, above, left, bd);
