@@ -62,8 +62,7 @@ typedef struct vp9_token_state {
   int16_t       qc;
 } vp9_token_state;
 
-// TODO(huisu): experiment to find optimal RD numbers.
-static const int plane_rd_mult[PLANE_TYPES] = { 4, 2 };
+static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] ={ {10, 6}, {8, 7}, };
 
 #define UPDATE_RD_COST()\
 {\
@@ -110,7 +109,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
   int next = eob, sz = 0;
-  int64_t rdmult = mb->rdmult * plane_rd_mult[type], rddiv = mb->rddiv;
+  const int64_t rdmult = (mb->rdmult * plane_rd_mult[ref][type]) >> 1;
+  const int64_t rddiv = mb->rddiv;
   int64_t rd_cost0, rd_cost1;
   int rate0, rate1, error0, error1;
   int16_t t0, t1;
@@ -126,9 +126,6 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-  if (!ref)
-    rdmult = (rdmult * 9) >> 4;
-
   /* Initialize the sentinel node of the trellis. */
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
