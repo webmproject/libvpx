@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08933519_71bc607d",
+        "filename": "test/external_frame_buffer_planes_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-26T23:04:07Z",
+      "side": 1,
+      "message": "remove these. the ASan tests take any output on stderr as a failure",
+      "revId": "9ef554bd939ec5eb672523ea1874d1db711ad04a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
