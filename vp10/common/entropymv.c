@@ -207,7 +207,7 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
     vpx_tree_merge_probs(vp10_mv_joint_tree, pre_fc->joints, counts->joints,
                          fc->joints);
 #if CONFIG_REF_MV
-    fc->zero_rmv = mode_mv_merge_probs(pre_fc->zero_rmv, counts->zero_rmv);
+    fc->zero_rmv = vp10_mode_mv_merge_probs(pre_fc->zero_rmv, counts->zero_rmv);
 #endif
 
     for (i = 0; i < 2; ++i) {
@@ -215,14 +215,14 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
       const nmv_component *pre_comp = &pre_fc->comps[i];
       const nmv_component_counts *c = &counts->comps[i];
 
-      comp->sign = mode_mv_merge_probs(pre_comp->sign, c->sign);
+      comp->sign = vp10_mode_mv_merge_probs(pre_comp->sign, c->sign);
       vpx_tree_merge_probs(vp10_mv_class_tree, pre_comp->classes, c->classes,
                            comp->classes);
       vpx_tree_merge_probs(vp10_mv_class0_tree, pre_comp->class0, c->class0,
                            comp->class0);
 
       for (j = 0; j < MV_OFFSET_BITS; ++j)
-        comp->bits[j] = mode_mv_merge_probs(pre_comp->bits[j], c->bits[j]);
+        comp->bits[j] = vp10_mode_mv_merge_probs(pre_comp->bits[j], c->bits[j]);
 
       for (j = 0; j < CLASS0_SIZE; ++j)
         vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->class0_fp[j],
@@ -231,9 +231,9 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
       vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->fp, c->fp, comp->fp);
 
       if (allow_hp) {
-        comp->class0_hp = mode_mv_merge_probs(pre_comp->class0_hp,
-                                              c->class0_hp);
-        comp->hp = mode_mv_merge_probs(pre_comp->hp, c->hp);
+        comp->class0_hp = vp10_mode_mv_merge_probs(pre_comp->class0_hp,
+                                                   c->class0_hp);
+        comp->hp = vp10_mode_mv_merge_probs(pre_comp->hp, c->hp);
       }
     }
   }
@@ -250,14 +250,14 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
     const nmv_component *pre_comp = &pre_fc->comps[i];
     const nmv_component_counts *c = &counts->comps[i];
 
-    comp->sign = mode_mv_merge_probs(pre_comp->sign, c->sign);
+    comp->sign = vp10_mode_mv_merge_probs(pre_comp->sign, c->sign);
     vpx_tree_merge_probs(vp10_mv_class_tree, pre_comp->classes, c->classes,
                          comp->classes);
     vpx_tree_merge_probs(vp10_mv_class0_tree, pre_comp->class0, c->class0,
                          comp->class0);
 
     for (j = 0; j < MV_OFFSET_BITS; ++j)
-      comp->bits[j] = mode_mv_merge_probs(pre_comp->bits[j], c->bits[j]);
+      comp->bits[j] = vp10_mode_mv_merge_probs(pre_comp->bits[j], c->bits[j]);
 
     for (j = 0; j < CLASS0_SIZE; ++j)
       vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->class0_fp[j],
@@ -266,8 +266,9 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
     vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->fp, c->fp, comp->fp);
 
     if (allow_hp) {
-      comp->class0_hp = mode_mv_merge_probs(pre_comp->class0_hp, c->class0_hp);
-      comp->hp = mode_mv_merge_probs(pre_comp->hp, c->hp);
+      comp->class0_hp = vp10_mode_mv_merge_probs(
+          pre_comp->class0_hp, c->class0_hp);
+      comp->hp = vp10_mode_mv_merge_probs(pre_comp->hp, c->hp);
     }
   }
 #endif

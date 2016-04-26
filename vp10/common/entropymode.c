@@ -1270,37 +1270,37 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
   const FRAME_COUNTS *counts = &cm->counts;
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-    fc->intra_inter_prob[i] = mode_mv_merge_probs(pre_fc->intra_inter_prob[i],
-                                                  counts->intra_inter[i]);
+    fc->intra_inter_prob[i] = vp10_mode_mv_merge_probs(
+        pre_fc->intra_inter_prob[i], counts->intra_inter[i]);
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-    fc->comp_inter_prob[i] = mode_mv_merge_probs(pre_fc->comp_inter_prob[i],
-                                                 counts->comp_inter[i]);
+    fc->comp_inter_prob[i] = vp10_mode_mv_merge_probs(
+        pre_fc->comp_inter_prob[i], counts->comp_inter[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < (COMP_REFS - 1); j++)
-      fc->comp_ref_prob[i][j] = mode_mv_merge_probs(pre_fc->comp_ref_prob[i][j],
-                                                    counts->comp_ref[i][j]);
+      fc->comp_ref_prob[i][j] = vp10_mode_mv_merge_probs(
+          pre_fc->comp_ref_prob[i][j], counts->comp_ref[i][j]);
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < (SINGLE_REFS - 1); j++)
-      fc->single_ref_prob[i][j] = mode_mv_merge_probs(
+      fc->single_ref_prob[i][j] = vp10_mode_mv_merge_probs(
           pre_fc->single_ref_prob[i][j], counts->single_ref[i][j]);
 
 #if CONFIG_REF_MV
   for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
-    fc->newmv_prob[i] = mode_mv_merge_probs(pre_fc->newmv_prob[i],
-                                            counts->newmv_mode[i]);
+    fc->newmv_prob[i] = vp10_mode_mv_merge_probs(pre_fc->newmv_prob[i],
+                                                 counts->newmv_mode[i]);
   for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i)
-    fc->zeromv_prob[i] = mode_mv_merge_probs(pre_fc->zeromv_prob[i],
-                                             counts->zeromv_mode[i]);
+    fc->zeromv_prob[i] = vp10_mode_mv_merge_probs(pre_fc->zeromv_prob[i],
+                                                  counts->zeromv_mode[i]);
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
-    fc->refmv_prob[i] = mode_mv_merge_probs(pre_fc->refmv_prob[i],
-                                            counts->refmv_mode[i]);
+    fc->refmv_prob[i] = vp10_mode_mv_merge_probs(pre_fc->refmv_prob[i],
+                                                 counts->refmv_mode[i]);
 
   for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
-    fc->drl_prob[i] = mode_mv_merge_probs(pre_fc->drl_prob[i],
-                                          counts->drl_mode[i]);
+    fc->drl_prob[i] = vp10_mode_mv_merge_probs(pre_fc->drl_prob[i],
+                                               counts->drl_mode[i]);
 #if CONFIG_EXT_INTER
-  fc->new2mv_prob = mode_mv_merge_probs(pre_fc->new2mv_prob,
-                                        counts->new2mv_mode);
+  fc->new2mv_prob = vp10_mode_mv_merge_probs(pre_fc->new2mv_prob,
+                                             counts->new2mv_mode);
 #endif  // CONFIG_EXT_INTER
 #else
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
@@ -1310,16 +1310,16 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
 
 #if CONFIG_OBMC
   for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
-    fc->obmc_prob[i] = mode_mv_merge_probs(pre_fc->obmc_prob[i],
-                                           counts->obmc[i]);
+    fc->obmc_prob[i] = vp10_mode_mv_merge_probs(pre_fc->obmc_prob[i],
+                                                counts->obmc[i]);
 #endif  // CONFIG_OBMC
 
 #if CONFIG_SUPERTX
   for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
     int j;
     for (j = 1; j < TX_SIZES; ++j) {
-      fc->supertx_prob[i][j] = mode_mv_merge_probs(pre_fc->supertx_prob[i][j],
-                                                   counts->supertx[i][j]);
+      fc->supertx_prob[i][j] = vp10_mode_mv_merge_probs(
+          pre_fc->supertx_prob[i][j], counts->supertx[i][j]);
     }
   }
 #endif  // CONFIG_SUPERTX
@@ -1332,8 +1332,8 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
                          fc->inter_compound_mode_probs[i]);
   for (i = 0; i < BLOCK_SIZE_GROUPS; ++i) {
     if (is_interintra_allowed_bsize_group(i))
-      fc->interintra_prob[i] = mode_mv_merge_probs(pre_fc->interintra_prob[i],
-                                                   counts->interintra[i]);
+      fc->interintra_prob[i] = vp10_mode_mv_merge_probs(
+          pre_fc->interintra_prob[i], counts->interintra[i]);
   }
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
     vpx_tree_merge_probs(
@@ -1342,12 +1342,12 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
   }
   for (i = 0; i < BLOCK_SIZES; ++i) {
     if (is_interintra_allowed_bsize(i) && is_interintra_wedge_used(i))
-      fc->wedge_interintra_prob[i] = mode_mv_merge_probs(
+      fc->wedge_interintra_prob[i] = vp10_mode_mv_merge_probs(
           pre_fc->wedge_interintra_prob[i], counts->wedge_interintra[i]);
   }
   for (i = 0; i < BLOCK_SIZES; ++i) {
     if (is_interinter_wedge_used(i))
-      fc->wedge_interinter_prob[i] = mode_mv_merge_probs(
+      fc->wedge_interinter_prob[i] = vp10_mode_mv_merge_probs(
           pre_fc->wedge_interinter_prob[i], counts->wedge_interinter[i]);
   }
 #endif  // CONFIG_EXT_INTER
@@ -1385,12 +1385,12 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
   if (cm->tx_mode == TX_MODE_SELECT)
     for (i = 0; i < TXFM_PARTITION_CONTEXTS; ++i)
       fc->txfm_partition_prob[i] =
-          mode_mv_merge_probs(pre_fc->txfm_partition_prob[i],
+          vp10_mode_mv_merge_probs(pre_fc->txfm_partition_prob[i],
                               counts->txfm_partition[i]);
 #endif
 
   for (i = 0; i < SKIP_CONTEXTS; ++i)
-    fc->skip_probs[i] = mode_mv_merge_probs(
+    fc->skip_probs[i] = vp10_mode_mv_merge_probs(
         pre_fc->skip_probs[i], counts->skip[i]);
 
 #if CONFIG_EXT_TX
@@ -1433,8 +1433,8 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
 
   if (cm->seg.temporal_update) {
     for (i = 0; i < PREDICTION_PROBS; i++)
-      fc->seg.pred_probs[i] = mode_mv_merge_probs(pre_fc->seg.pred_probs[i],
-                                                  counts->seg.pred[i]);
+      fc->seg.pred_probs[i] = vp10_mode_mv_merge_probs(
+          pre_fc->seg.pred_probs[i], counts->seg.pred[i]);
 
     vpx_tree_merge_probs(vp10_segment_tree, pre_fc->seg.tree_probs,
                          counts->seg.tree_mispred, fc->seg.tree_probs);
@@ -1461,7 +1461,7 @@ void vp10_adapt_intra_frame_probs(VP10_COMMON *cm) {
 
 #if CONFIG_EXT_INTRA
   for (i = 0; i < PLANE_TYPES; ++i) {
-    fc->ext_intra_probs[i] = mode_mv_merge_probs(
+    fc->ext_intra_probs[i] = vp10_mode_mv_merge_probs(
               pre_fc->ext_intra_probs[i], counts->ext_intra[i]);
   }
 

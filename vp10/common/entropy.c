@@ -2840,13 +2840,6 @@ void vp10_default_coef_probs(VP10_COMMON *cm) {
 #endif  // CONFIG_ANS
 }
 
-#define COEF_COUNT_SAT 24
-#define COEF_MAX_UPDATE_FACTOR 112
-#define COEF_COUNT_SAT_KEY 24
-#define COEF_MAX_UPDATE_FACTOR_KEY 112
-#define COEF_COUNT_SAT_AFTER_KEY 24
-#define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
-
 static void adapt_coef_probs(VP10_COMMON *cm, TX_SIZE tx_size,
                              unsigned int count_sat,
                              unsigned int update_factor) {
@@ -2880,9 +2873,9 @@ static void adapt_coef_probs(VP10_COMMON *cm, TX_SIZE tx_size,
             { n1, n2 }
           };
           for (m = 0; m < UNCONSTRAINED_NODES; ++m)
-            probs[i][j][k][l][m] = merge_probs(pre_probs[i][j][k][l][m],
-                                               branch_ct[m],
-                                               count_sat, update_factor);
+            probs[i][j][k][l][m] = vp10_merge_probs(pre_probs[i][j][k][l][m],
+                                                    branch_ct[m],
+                                                    count_sat, update_factor);
         }
 }
 
@@ -2890,19 +2883,24 @@ void vp10_adapt_coef_probs(VP10_COMMON *cm) {
   TX_SIZE t;
   unsigned int count_sat, update_factor;
 
-  if (frame_is_intra_only(cm)) {
-    update_factor = COEF_MAX_UPDATE_FACTOR_KEY;
-    count_sat = COEF_COUNT_SAT_KEY;
-  } else if (cm->last_frame_type == KEY_FRAME) {
+#if CONFIG_ENTROPY
+  if (cm->last_frame_type == KEY_FRAME) {
+    update_factor = COEF_MAX_UPDATE_FACTOR_AFTER_KEY_BITS;  /* adapt quickly */
+    count_sat = COEF_COUNT_SAT_AFTER_KEY_BITS;
+  } else {
+    update_factor = COEF_MAX_UPDATE_FACTOR_BITS;
+    count_sat = COEF_COUNT_SAT_BITS;
+  }
+  if (cm->partial_prob_update == 1) {
+    update_factor = COEF_MAX_UPDATE_FACTOR_BITS;
+  }
+#else
+  if (cm->last_frame_type == KEY_FRAME) {
     update_factor = COEF_MAX_UPDATE_FACTOR_AFTER_KEY;  /* adapt quickly */
     count_sat = COEF_COUNT_SAT_AFTER_KEY;
   } else {
     update_factor = COEF_MAX_UPDATE_FACTOR;
     count_sat = COEF_COUNT_SAT;
-  }
-#if CONFIG_ENTROPY
-  if (cm->partial_prob_update == 1) {
-    update_factor = COEF_MAX_UPDATE_FACTOR;
   }
 #endif  // CONFIG_ENTROPY
   for (t = TX_4X4; t <= TX_32X32; t++)
