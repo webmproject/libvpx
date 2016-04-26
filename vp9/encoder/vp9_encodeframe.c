@@ -4137,6 +4137,31 @@ static INTERP_FILTER get_interp_filter(
   }
 }
 
+static int compute_frame_aq_offset(struct VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  MODE_INFO **mi_8x8_ptr = cm->mi_grid_visible;
+  struct segmentation *const seg = &cm->seg;
+
+  int mi_row, mi_col;
+  int sum_delta = 0;
+  int map_index = 0;
+  int qdelta_index;
+  int segment_id;
+
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
+    MODE_INFO **mi_8x8 = mi_8x8_ptr;
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col++, mi_8x8++) {
+      segment_id = mi_8x8[0]->segment_id;
+      qdelta_index = get_segdata(seg, segment_id, SEG_LVL_ALT_Q);
+      sum_delta += qdelta_index;
+      map_index++;
+    }
+    mi_8x8_ptr += cm->mi_stride;
+  }
+
+  return sum_delta / (cm->mi_rows * cm->mi_cols);
+}
+
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
 
@@ -4259,8 +4284,13 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     cm->reference_mode = SINGLE_REFERENCE;
     encode_frame_internal(cpi);
   }
-}
 
+  // If segmentated AQ is enabled compute the average AQ weighting.
+  if (cm->seg.enabled && (cpi->oxcf.aq_mode != NO_AQ) &&
+      (cm->seg.update_map || cm->seg.update_data)) {
+    cm->seg.aq_av_offset = compute_frame_aq_offset(cpi);
+  }
+}
 static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   const PREDICTION_MODE y_mode = mi->mode;
   const PREDICTION_MODE uv_mode = mi->uv_mode;

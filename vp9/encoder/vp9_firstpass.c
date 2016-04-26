@@ -2849,6 +2849,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
+  VP9_COMMON *const cm = &cpi->common;
   const int bits_used = rc->base_frame_target;
 
   // VBR correction is done through rc->vbr_bits_off_target. Based on the
@@ -2886,6 +2887,22 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
       rc->worst_quality - twopass->active_worst_quality;
     const int minq_adj_limit =
         (cpi->oxcf.rc_mode == VPX_CQ ? MINQ_ADJ_LIMIT_CQ : MINQ_ADJ_LIMIT);
+    int aq_extend_min = 0;
+    int aq_extend_max = 0;
+
+    // Extend min or Max Q range to account for imbalance from the base
+    // value when using AQ.
+    if (cpi->oxcf.aq_mode != NO_AQ) {
+      if (cm->seg.aq_av_offset < 0) {
+        // The balance of the AQ map tends towarda lowering the average Q.
+        aq_extend_min = 0;
+        aq_extend_max = VPXMIN(maxq_adj_limit, -cm->seg.aq_av_offset);
+      } else {
+        // The balance of the AQ map tends towards raising the average Q.
+        aq_extend_min = VPXMIN(minq_adj_limit, cm->seg.aq_av_offset);
+        aq_extend_max = 0;
+      }
+    }
 
     // Undershoot.
     if (rc->rate_error_estimate > cpi->oxcf.under_shoot_pct) {
@@ -2910,8 +2927,10 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
         --twopass->extend_maxq;
     }
 
-    twopass->extend_minq = clamp(twopass->extend_minq, 0, minq_adj_limit);
-    twopass->extend_maxq = clamp(twopass->extend_maxq, 0, maxq_adj_limit);
+    twopass->extend_minq =
+        clamp(twopass->extend_minq, aq_extend_min, minq_adj_limit);
+    twopass->extend_maxq =
+        clamp(twopass->extend_maxq, aq_extend_max, maxq_adj_limit);
 
     // If there is a big and undexpected undershoot then feed the extra
     // bits back in quickly. One situation where this may happen is if a

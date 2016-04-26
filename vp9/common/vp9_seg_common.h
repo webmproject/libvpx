@@ -47,6 +47,7 @@ struct segmentation {
 
   int16_t feature_data[MAX_SEGMENTS][SEG_LVL_MAX];
   unsigned int feature_mask[MAX_SEGMENTS];
+  int aq_av_offset;
 };
 
 static INLINE int segfeature_active(const struct segmentation *seg,
