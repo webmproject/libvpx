@@ -1124,7 +1124,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fps.intra_skip_pct = (double)intra_skip_count / num_mbs;
     fps.intra_smooth_pct = (double)intra_smooth_count / num_mbs;
     fps.inactive_zone_rows = (double)image_data_start_row;
-    fps.inactive_zone_cols = (double)0;  // TODO(paulwilkins): fix
+    // Currently set to 0 as most issues relate to letter boxing.
+    fps.inactive_zone_cols = (double)0;
 
     if (mvcount > 0) {
       fps.MVr = (double)sum_mvr / mvcount;
@@ -1150,10 +1151,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       fps.pcnt_motion = 0.0;
     }
 
-    // TODO(paulwilkins):  Handle the case when duration is set to 0, or
-    // something less than the full time between subsequent values of
-    // cpi->source_time_stamp.
-    fps.duration = (double)(source->ts_end - source->ts_start);
+    // Dont allow a value of 0 for duration.
+    // (Section duration is also defaulted to minimum of 1.0).
+    fps.duration = VPXMAX(1.0, (double)(source->ts_end - source->ts_start));
 
     // Don't want to do output stats with a stack variable!
     twopass->this_frame_stats = fps;
