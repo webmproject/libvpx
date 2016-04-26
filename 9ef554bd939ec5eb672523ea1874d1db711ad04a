@@ -16,6 +16,24 @@
       "revId": "9ef554bd939ec5eb672523ea1874d1db711ad04a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_8f9f5560",
+        "filename": "test/external_frame_buffer_planes_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-26T23:25:32Z",
+      "side": 1,
+      "message": "Done. Tnx.\n\nPlease note that these tests are mostly like the tests in external_frame_buffer_test.cc. Let me know if you prefer to consolidate them in the same file before reviewing this code.",
+      "parentUuid": "08933519_71bc607d",
+      "revId": "9ef554bd939ec5eb672523ea1874d1db711ad04a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
