@@ -243,10 +243,10 @@ void vp10_set_high_precision_mv(VP10_COMP *cpi, int allow_high_precision_mv) {
 #else
   if (cpi->common.allow_high_precision_mv) {
     mb->mvcost = mb->nmvcost_hp;
-    mb->mvsadcost = mb->nmvsadcost_hp;
+    mb->mvsadcost = mb->nmvcost_hp;
   } else {
     mb->mvcost = mb->nmvcost;
-    mb->mvsadcost = mb->nmvsadcost;
+    mb->mvsadcost = mb->nmvcost;
   }
 #endif
 }
