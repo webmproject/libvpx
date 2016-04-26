@@ -3519,9 +3519,14 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j, k;
   if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-      for (j = 0; j < TX_TYPES; ++j)
+      for (j = 0; j < TX_TYPES; ++j) {
         for (k = 0; k < TX_TYPES - 1; ++k)
           av1_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k]);
+#if CONFIG_DAALA_EC
+        av1_tree_to_cdf(av1_ext_tx_tree, fc->intra_ext_tx_prob[i][j],
+                        fc->intra_ext_tx_cdf[i][j]);
+#endif
+      }
     }
   }
   if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {

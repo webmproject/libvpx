@@ -134,6 +134,7 @@ typedef struct frame_contexts {
 #if CONFIG_DAALA_EC
   uint16_t switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS]
                                 [SWITCHABLE_FILTERS];
+  uint16_t intra_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
 #endif
 } FRAME_CONTEXT;
 
@@ -291,6 +292,10 @@ void av1_setup_past_independence(struct AV1Common *cm);
 
 void av1_adapt_intra_frame_probs(struct AV1Common *cm);
 void av1_adapt_inter_frame_probs(struct AV1Common *cm);
+#if CONFIG_DAALA_EC
+extern int av1_ext_tx_ind[TX_TYPES];
+extern int av1_ext_tx_inv[TX_TYPES];
+#endif
 
 static INLINE int av1_ceil_log2(int n) {
   int i = 1, p = 2;

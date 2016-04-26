@@ -196,6 +196,11 @@ void av1_encode_token_init(void) {
       an in-order traversal of the av1_switchable_interp_tree structure. */
   av1_indices_from_tree(av1_switchable_interp_ind, av1_switchable_interp_inv,
                         SWITCHABLE_FILTERS, av1_switchable_interp_tree);
+  /* This hack is necessary because the four TX_TYPES are not consecutive,
+      e.g., 0, 1, 2, 3, when doing an in-order traversal of the av1_ext_tx_tree
+      structure. */
+  av1_indices_from_tree(av1_ext_tx_ind, av1_ext_tx_inv, TX_TYPES,
+                        av1_ext_tx_tree);
 #endif
 }
 
@@ -576,9 +581,14 @@ static void update_ext_tx_probs(AV1_COMMON *cm, aom_writer *w) {
   aom_write(w, do_update, GROUP_DIFF_UPDATE_PROB);
   if (do_update) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-      for (j = 0; j < TX_TYPES; ++j)
+      for (j = 0; j < TX_TYPES; ++j) {
         prob_diff_update(av1_ext_tx_tree, cm->fc->intra_ext_tx_prob[i][j],
                          cm->counts.intra_ext_tx[i][j], TX_TYPES, w);
+#if CONFIG_DAALA_EC
+        av1_tree_to_cdf(av1_ext_tx_tree, cm->fc->intra_ext_tx_prob[i][j],
+                        cm->fc->intra_ext_tx_cdf[i][j]);
+#endif
+      }
     }
   }
   savings = 0;
@@ -1452,12 +1462,20 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
                         cm->fc->inter_ext_tx_prob[mbmi->tx_size],
                         &ext_tx_encodings[mbmi->tx_type]);
       } else {
+#if CONFIG_DAALA_EC
+      aom_write_tree_cdf(
+          w, av1_ext_tx_ind[mbmi->tx_type],
+          cm->fc->intra_ext_tx_cdf[mbmi->tx_size]
+                                  [intra_mode_to_tx_type_context[mbmi->mode]],
+          TX_TYPES);
+#else
         av1_write_token(
             w, av1_ext_tx_tree,
             cm->fc
                 ->intra_ext_tx_prob[mbmi->tx_size]
                                    [intra_mode_to_tx_type_context[mbmi->mode]],
             &ext_tx_encodings[mbmi->tx_type]);
+#endif
       }
     } else {
       if (!mbmi->skip) {
