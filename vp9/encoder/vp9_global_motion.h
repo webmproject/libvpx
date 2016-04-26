@@ -31,10 +31,11 @@ INLINE ransacType get_ransacType(TransformationType type);
 // Searches around each parameter and seeks to minimize MSE  between
 // the warped frame produced from the set of parameters and the frame being
 // approximated.
-void refine_param(TransformationType type, unsigned char *frm,
-                  unsigned char *ref, double *H,
-                  int param_index, int width, int height,
-                  int stride, int n_refinements);
+void refine_quant_param(Global_Motion_Params *gm, TransformationType type,
+                        unsigned char *ref, int ref_width,
+                        int ref_height, int ref_stride,
+                        unsigned char *frm, int frm_width, int frm_height,
+                        int frm_stride, int n_refinements);
 
 // Returns number of models actually returned: 1 - if success, 0 - if failure
 int vp9_compute_global_motion_single_feature_based(struct VP9_COMP *cpi,

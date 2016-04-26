@@ -4350,6 +4350,16 @@ static void encode_frame_internal(VP9_COMP *cpi) {
                 global_motion + i * get_numparams(GLOBAL_MOTION_MODEL),
                 GLOBAL_MOTION_MODEL,
                 &cm->global_motion[frame][i]);
+            refine_quant_param(&cm->global_motion[frame][i],
+                               GLOBAL_MOTION_MODEL, ref_buf->y_buffer,
+                               ref_buf->y_crop_width,
+                               ref_buf->y_crop_height,
+                               ref_buf->y_stride,
+                               cpi->Source->y_buffer,
+                               cpi->Source->y_crop_width,
+                               cpi->Source->y_crop_height,
+                               cpi->Source->y_stride, 3);
+
             if (get_gmtype(&cm->global_motion[frame][i]) != GLOBAL_ZERO) {
               double erroradvantage_trans;
               double erroradvantage =

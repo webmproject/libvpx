@@ -92,13 +92,15 @@ double vp9_warp_erroradv_unq(TransformationType type, double *H,
                              int subsampling_col, int subsampling_row,
                              int x_scale, int y_scale);
 
-double compute_warp_and_error(TransformationType type,
+double compute_warp_and_error(Global_Motion_Params *gm,
+                              projectPointsType projectPoints,
                               unsigned char *ref,
-                              unsigned char *frm,
                               int width, int height, int stride,
-                              double *H);
-
-
+                              unsigned char *src,
+                              int p_col, int p_row,
+                              int p_width, int p_height, int p_stride,
+                              int subsampling_col, int subsampling_row,
+                              int x_scale, int y_scale);
 
 unsigned char interpolate(unsigned char *ref, double x, double y,
                           int width, int height, int stride);
