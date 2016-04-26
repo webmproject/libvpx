@@ -4787,20 +4787,14 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     }
 #if CONFIG_REF_MV
     vp10_set_mvcost(x, refs[ref]);
-    *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
-                                 &x->mbmi_ext->ref_mvs[refs[ref]][0].as_mv,
-                                 x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
-#else
-    *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
-                                 &x->mbmi_ext->ref_mvs[refs[ref]][0].as_mv,
-                                 x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 #endif
-
 #if CONFIG_EXT_INTER
     if (bsize >= BLOCK_8X8)
-      *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
-                                   &x->mbmi_ext->ref_mvs[refs[ref]][0].as_mv,
-                                   x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
+#endif  // CONFIG_EXT_INTER
+    *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
+                                 &x->mbmi_ext->ref_mvs[refs[ref]][0].as_mv,
+                                 x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
+#if CONFIG_EXT_INTER
     else
       *rate_mv += vp10_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
                                    &ref_mv_sub8x8[ref]->as_mv,
