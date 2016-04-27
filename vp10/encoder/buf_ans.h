@@ -52,7 +52,7 @@ static INLINE void buf_ans_write_reset(struct BufAnsCoder *const c) {
 }
 
 static INLINE void buf_uabs_write(struct BufAnsCoder *const c,
-                             uint8_t val, AnsP8 prob) {
+                                  uint8_t val, AnsP8 prob) {
   assert(c->offset <= c->size);
   if (c->offset == c->size) {
     vp10_buf_ans_grow(c);
@@ -85,7 +85,8 @@ static INLINE void buf_ans_flush(const struct BufAnsCoder *const c,
       sym.cum_prob = c->buf[offset].val_start;
       rans_write(ans, &sym);
     } else {
-      uabs_write(ans, c->buf[offset].val_start, c->buf[offset].prob);
+      uabs_write(ans, (uint8_t)c->buf[offset].val_start,
+                 (AnsP8)c->buf[offset].prob);
     }
   }
 }
