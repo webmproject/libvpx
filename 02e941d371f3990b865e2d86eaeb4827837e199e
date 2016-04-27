@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48d9ad3d_33ba20f2",
+        "filename": "vp10/common/x86/vp10_txfm1d_sse4.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-27T17:51:16Z",
+      "side": 0,
+      "message": "When bit is -shift[0], cl preprocesses this as --shift[0] while gcc preprocesses this as - -shift[0].",
+      "range": {
+        "startLine": 102,
+        "startChar": 46,
+        "endLine": 102,
+        "endChar": 49
+      },
+      "revId": "02e941d371f3990b865e2d86eaeb4827837e199e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
