@@ -28,7 +28,9 @@
 #include "vp10/common/seg_common.h"
 #include "vp10/common/tile_common.h"
 
+#if CONFIG_ANS
 #include "vp10/encoder/buf_ans.h"
+#endif  // CONFIG_ANS
 #include "vp10/encoder/cost.h"
 #include "vp10/encoder/bitstream.h"
 #include "vp10/encoder/encodemv.h"
