@@ -410,6 +410,7 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
 void vp10_init_wedge_masks();
 
 const uint8_t *vp10_get_soft_mask(int wedge_index,
+                                  int wedge_sign,
                                   BLOCK_SIZE sb_type,
                                   int h, int w);
 

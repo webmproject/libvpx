@@ -1316,7 +1316,8 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
                      cm->fc->wedge_interintra_prob[bsize]);
           if (mbmi->use_wedge_interintra) {
             vp10_write_literal(w, mbmi->interintra_wedge_index,
-                              get_wedge_bits(bsize));
+                              get_wedge_bits_lookup[bsize]);
+            assert(mbmi->interintra_wedge_sign == 0);
           }
         }
       }
@@ -1343,9 +1344,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         is_interinter_wedge_used(bsize)) {
       vp10_write(w, mbmi->use_wedge_interinter,
                  cm->fc->wedge_interinter_prob[bsize]);
-      if (mbmi->use_wedge_interinter)
+      if (mbmi->use_wedge_interinter) {
         vp10_write_literal(w, mbmi->interinter_wedge_index,
-                          get_wedge_bits(bsize));
+                           get_wedge_bits_lookup[bsize]);
+        vp10_write_bit(w, mbmi->interinter_wedge_sign);
+      }
     }
 #endif  // CONFIG_EXT_INTER
 
