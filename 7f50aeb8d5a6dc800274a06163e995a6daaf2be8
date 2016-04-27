@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "480b6d61_3882ed62",
+        "filename": "vpx_dsp/mips/postproc_msa.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-27T23:13:01Z",
+      "side": 1,
+      "message": "Is this necessary? Not sure I see anything that needs stdlib either.",
+      "range": {
+        "startLine": 12,
+        "startChar": 9,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "7f50aeb8d5a6dc800274a06163e995a6daaf2be8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_9892f9ad",
+        "filename": "vpx_dsp/postproc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-27T23:13:01Z",
+      "side": 1,
+      "message": "This should be sorted before merging or shortly after. It\u0027s very bad to have the assembly do something different (and undocumented) from the C",
+      "range": {
+        "startLine": 26,
+        "startChar": 43,
+        "endLine": 26,
+        "endChar": 44
+      },
+      "revId": "7f50aeb8d5a6dc800274a06163e995a6daaf2be8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_18ee0933",
+        "filename": "vpx_dsp/postproc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-04-27T23:13:01Z",
+      "side": 1,
+      "message": "only need one space after char. just out of curiosity what does lint not like about this line?\n\nprobably should be using uint8_t too, here and in the prototype",
+      "range": {
+        "startLine": 31,
+        "startChar": 56,
+        "endLine": 31,
+        "endChar": 62
+      },
+      "revId": "7f50aeb8d5a6dc800274a06163e995a6daaf2be8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
