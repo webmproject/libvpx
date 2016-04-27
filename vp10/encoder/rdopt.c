@@ -6387,10 +6387,16 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
           joint_motion_search(cpi, x, bsize, frame_mv,
                               mi_row, mi_col, NULL, single_newmv, &rate_mv, 0);
         } else {
+#if CONFIG_REF_MV
+          vp10_set_mvcost(x, mbmi->ref_frame[0]);
+#endif  // CONFIG_REF_MV
           rate_mv  = vp10_mv_bit_cost(&frame_mv[refs[0]].as_mv,
                                       &x->mbmi_ext->ref_mvs[refs[0]][0].as_mv,
                                       x->nmvjointcost, x->mvcost,
                                       MV_COST_WEIGHT);
+#if CONFIG_REF_MV
+          vp10_set_mvcost(x, mbmi->ref_frame[1]);
+#endif  // CONFIG_REF_MV
           rate_mv += vp10_mv_bit_cost(&frame_mv[refs[1]].as_mv,
                                       &x->mbmi_ext->ref_mvs[refs[1]][0].as_mv,
                                       x->nmvjointcost, x->mvcost,
@@ -6417,9 +6423,15 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                             mi_row, mi_col,
                             single_newmv, &rate_mv, 0);
       } else {
+#if CONFIG_REF_MV
+        vp10_set_mvcost(x, mbmi->ref_frame[0]);
+#endif  // CONFIG_REF_MV
         rate_mv  = vp10_mv_bit_cost(&frame_mv[refs[0]].as_mv,
                                    &x->mbmi_ext->ref_mvs[refs[0]][0].as_mv,
                                    x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
+#if CONFIG_REF_MV
+        vp10_set_mvcost(x, mbmi->ref_frame[1]);
+#endif  // CONFIG_REF_MV
         rate_mv += vp10_mv_bit_cost(&frame_mv[refs[1]].as_mv,
                                    &x->mbmi_ext->ref_mvs[refs[1]][0].as_mv,
                                    x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
