@@ -127,19 +127,7 @@ TEST(VP10Trans8x8HTSpeedTest, SSE2_version) {
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
-    SSE2, VP10Trans8x8HT,
-    ::testing::Values(
-#if !CONFIG_EXT_TX
-      make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 0,
-                 VPX_BITS_8, 64),
-      make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 1,
-                 VPX_BITS_8, 64),
-      make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 2,
-                 VPX_BITS_8, 64),
-      make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 3,
-                 VPX_BITS_8, 64)));
-#else
+const Ht8x8Param kArrayHt8x8Param_sse2[] = {
       make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 0,
                  VPX_BITS_8, 64),
       make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 1,
@@ -148,6 +136,7 @@ INSTANTIATE_TEST_CASE_P(
                  VPX_BITS_8, 64),
       make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 3,
                  VPX_BITS_8, 64),
+#if CONFIG_EXT_TX
       make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 4,
                  VPX_BITS_8, 64),
       make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 5,
@@ -169,8 +158,12 @@ INSTANTIATE_TEST_CASE_P(
       make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 14,
                  VPX_BITS_8, 64),
       make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 15,
-                 VPX_BITS_8, 64)));
-#endif  // !CONFIG_EXT_TX
+                 VPX_BITS_8, 64)
+#endif  // CONFIG_EXT_TX
+};
+INSTANTIATE_TEST_CASE_P(
+    SSE2, VP10Trans8x8HT,
+    ::testing::ValuesIn(kArrayHt8x8Param_sse2));
 #endif  // HAVE_SSE2
 
 }  // namespace

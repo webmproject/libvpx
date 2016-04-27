@@ -157,19 +157,7 @@ TEST_P(VP10HighbdTrans4x4HT, HighbdCoeffCheck) {
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
-    SSE2, VP10Trans4x4HT,
-    ::testing::Values(
-#if !CONFIG_EXT_TX
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 0,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 1,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 2,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 3,
-                 VPX_BITS_8, 16)));
-#else
+const Ht4x4Param kArrayHt4x4Param_sse2[] = {
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 0,
                  VPX_BITS_8, 16),
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 1,
@@ -178,6 +166,7 @@ INSTANTIATE_TEST_CASE_P(
                  VPX_BITS_8, 16),
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 3,
                  VPX_BITS_8, 16),
+#if CONFIG_EXT_TX
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 4,
                  VPX_BITS_8, 16),
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 5,
@@ -199,15 +188,18 @@ INSTANTIATE_TEST_CASE_P(
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 14,
                  VPX_BITS_8, 16),
       make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 15,
-                 VPX_BITS_8, 16)));
-#endif  // !CONFIG_EXT_TX
+                 VPX_BITS_8, 16)
+#endif  // CONFIG_EXT_TX
+};
+INSTANTIATE_TEST_CASE_P(
+    SSE2, VP10Trans4x4HT,
+    ::testing::ValuesIn(kArrayHt4x4Param_sse2));
 #endif  // HAVE_SSE2
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HighbdTrans4x4HT,
     ::testing::Values(
-#if !CONFIG_EXT_TX
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 10),
@@ -216,16 +208,6 @@ INSTANTIATE_TEST_CASE_P(
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 12),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 10),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12)));
-#else
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12)));
-#endif  // !CONFIG_EXT_TX
 #endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace
