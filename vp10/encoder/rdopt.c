@@ -81,6 +81,12 @@
 #define MIN_EARLY_TERM_INDEX    3
 #define NEW_MV_DISCOUNT_FACTOR  8
 
+#if CONFIG_EXT_INTRA
+#define ANGLE_FAST_SEARCH 1
+#define ANGLE_SKIP_THRESH 10
+#define FILTER_FAST_SEARCH 1
+#endif  // CONFIG_EXT_INTRA
+
 const double ADST_FLIP_SVM[8] = {-6.6623, -2.8062, -3.2531, 3.1671,  // vert
                                  -7.7051, -3.2234, -3.6193, 3.4533};  // horz
 
@@ -2531,99 +2537,134 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
-static INLINE int get_angle_index(double angle) {
-  const double step = 22.5, base = 45;
-  return (int)lround((angle - base) / step);
-}
+// Indices are sign, integer, and fractional part of the gradient value
+static const uint8_t gradient_to_angle_bin[2][7][16] = {
+    {
+        {6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, },
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, },
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, },
+        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, },
+    },
+    {
+        {6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, },
+        {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, },
+        {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, },
+        {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, },
+        {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, },
+        {3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, },
+        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, },
+    },
+};
+
+static const uint8_t mode_to_angle_bin[INTRA_MODES] = {
+    0, 2, 6, 0, 4, 3, 5, 7, 1, 0,
+};
 
 static void angle_estimation(const uint8_t *src, int src_stride,
-                             int rows, int cols, double *hist) {
-  int r, c, i, index;
-  double angle, dx, dy;
-  double temp, divisor;
+                             int rows, int cols,
+                             uint8_t *directional_mode_skip_mask) {
+  int i, r, c, index, dx, dy, temp, sn, remd, quot;
+  uint64_t hist[DIRECTIONAL_MODES];
+  uint64_t hist_sum = 0;
 
-  vpx_clear_system_state();
-  divisor = 0;
-  for (i = 0; i < DIRECTIONAL_MODES; ++i)
-    hist[i] = 0;
-
+  memset(hist, 0, DIRECTIONAL_MODES * sizeof(hist[0]));
   src += src_stride;
   for (r = 1; r < rows; ++r) {
     for (c = 1; c < cols; ++c) {
       dx = src[c] - src[c - 1];
       dy = src[c] - src[c - src_stride];
       temp = dx * dx + dy * dy;
-      if (dy == 0)
-        angle = 90;
-      else
-        angle = (atan((double)dx / (double)dy)) * 180 / PI;
-      assert(angle >= -90 && angle <= 90);
-      index = get_angle_index(angle + 180);
-      if (index < DIRECTIONAL_MODES) {
-        hist[index] += temp;
-        divisor += temp;
+      if (dy == 0) {
+        index = 2;
+      } else {
+        sn = (dx > 0) ^ (dy > 0);
+        dx = abs(dx);
+        dy = abs(dy);
+        remd = dx % dy;
+        quot = dx / dy;
+        remd = remd * 16 / dy;
+        index = gradient_to_angle_bin[sn][VPXMIN(quot, 6)][VPXMIN(remd, 15)];
       }
-      if (angle > 0) {
-        index = get_angle_index(angle);
-        if (index >= 0) {
-          hist[index] += temp;
-          divisor += temp;
-        }
-      }
+      hist[index] += temp;
     }
     src += src_stride;
   }
 
-  if (divisor < 1)
-    divisor = 1;
   for (i = 0; i < DIRECTIONAL_MODES; ++i)
-    hist[i] /= divisor;
+    hist_sum += hist[i];
+  for (i = 0; i < INTRA_MODES; ++i) {
+    if (i != DC_PRED && i != TM_PRED) {
+      int index = mode_to_angle_bin[i];
+      uint64_t score = 2 * hist[index];
+      int weight = 2;
+      if (index > 0) {
+        score += hist[index - 1];
+        weight += 1;
+      }
+      if (index < DIRECTIONAL_MODES - 1) {
+        score += hist[index + 1];
+        weight += 1;
+      }
+      if (score * ANGLE_SKIP_THRESH  < hist_sum * weight)
+        directional_mode_skip_mask[i] = 1;
+    }
+  }
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void highbd_angle_estimation(const uint8_t *src8, int src_stride,
-                                    int rows, int cols, double *hist) {
-  int r, c, i, index;
-  double angle, dx, dy;
-  double temp, divisor;
+                                    int rows, int cols,
+                                    uint8_t *directional_mode_skip_mask) {
+  int i, r, c, index, dx, dy, temp, sn, remd, quot;
+  uint64_t hist[DIRECTIONAL_MODES];
+  uint64_t hist_sum = 0;
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
 
-  vpx_clear_system_state();
-  divisor = 0;
-  for (i = 0; i < DIRECTIONAL_MODES; ++i)
-    hist[i] = 0;
-
+  memset(hist, 0, DIRECTIONAL_MODES * sizeof(hist[0]));
   src += src_stride;
   for (r = 1; r < rows; ++r) {
     for (c = 1; c < cols; ++c) {
       dx = src[c] - src[c - 1];
       dy = src[c] - src[c - src_stride];
       temp = dx * dx + dy * dy;
-      if (dy == 0)
-        angle = 90;
-      else
-        angle = (atan((double)dx / (double)dy)) * 180 / PI;
-      assert(angle >= -90 && angle <= 90);
-      index = get_angle_index(angle + 180);
-      if (index < DIRECTIONAL_MODES) {
-        hist[index] += temp;
-        divisor += temp;
+      if (dy == 0) {
+        index = 2;
+      } else {
+        sn = (dx > 0) ^ (dy > 0);
+        dx = abs(dx);
+        dy = abs(dy);
+        remd = dx % dy;
+        quot = dx / dy;
+        remd = remd * 16 / dy;
+        index = gradient_to_angle_bin[sn][VPXMIN(quot, 6)][VPXMIN(remd, 15)];
       }
-      if (angle > 0) {
-        index = get_angle_index(angle);
-        if (index >= 0) {
-          hist[index] += temp;
-          divisor += temp;
-        }
-      }
+      hist[index] += temp;
     }
     src += src_stride;
   }
 
-  if (divisor < 1)
-    divisor = 1;
   for (i = 0; i < DIRECTIONAL_MODES; ++i)
-    hist[i] /= divisor;
+    hist_sum += hist[i];
+  for (i = 0; i < INTRA_MODES; ++i) {
+    if (i != DC_PRED && i != TM_PRED) {
+      int index = mode_to_angle_bin[i];
+      uint64_t score = 2 * hist[index];
+      int weight = 2;
+      if (index > 0) {
+        score += hist[index - 1];
+        weight += 1;
+      }
+      if (index < DIRECTIONAL_MODES - 1) {
+        score += hist[index + 1];
+        weight += 1;
+      }
+      if (score * ANGLE_SKIP_THRESH  < hist_sum * weight)
+        directional_mode_skip_mask[i] = 1;
+    }
+  }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_EXT_INTRA
@@ -2649,7 +2690,6 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   uint8_t directional_mode_skip_mask[INTRA_MODES];
   const int src_stride = x->plane[0].src.stride;
   const uint8_t *src = x->plane[0].src.buf;
-  double hist[DIRECTIONAL_MODES];
 #endif  // CONFIG_EXT_INTRA
   TX_TYPE best_tx_type = DCT_DCT;
   int *bmode_costs;
@@ -2675,29 +2715,11 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
          sizeof(directional_mode_skip_mask[0]) * INTRA_MODES);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-    highbd_angle_estimation(src, src_stride, rows, cols, hist);
+    highbd_angle_estimation(src, src_stride, rows, cols,
+                            directional_mode_skip_mask);
   else
 #endif
-    angle_estimation(src, src_stride, rows, cols, hist);
-
-  for (mode = 0; mode < INTRA_MODES; ++mode) {
-    if (mode != DC_PRED && mode != TM_PRED) {
-      int index = get_angle_index((double)mode_to_angle_map[mode]);
-      double score, weight = 1.0;
-      score = hist[index];
-      if (index > 0) {
-        score += hist[index - 1] * 0.5;
-        weight += 0.5;
-      }
-      if (index < DIRECTIONAL_MODES - 1) {
-        score += hist[index + 1] * 0.5;
-        weight += 0.5;
-      }
-      score /= weight;
-      if (score < ANGLE_SKIP_THRESH)
-        directional_mode_skip_mask[mode] = 1;
-    }
-  }
+    angle_estimation(src, src_stride, rows, cols, directional_mode_skip_mask);
 #endif  // CONFIG_EXT_INTRA
   memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   palette_mode_info.palette_size[0] = 0;
@@ -8150,33 +8172,14 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
           const uint8_t *src = x->plane[0].src.buf;
           const int rows = 4 * num_4x4_blocks_high_lookup[bsize];
           const int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
-          double hist[DIRECTIONAL_MODES];
-          PREDICTION_MODE mode;
-
 #if CONFIG_VP9_HIGHBITDEPTH
           if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-            highbd_angle_estimation(src, src_stride, rows, cols, hist);
+            highbd_angle_estimation(src, src_stride, rows, cols,
+                                    directional_mode_skip_mask);
           else
 #endif
-            angle_estimation(src, src_stride, rows, cols, hist);
-          for (mode = 0; mode < INTRA_MODES; ++mode) {
-            if (mode != DC_PRED && mode != TM_PRED) {
-              int index = get_angle_index((double)mode_to_angle_map[mode]);
-              double score, weight = 1.0;
-              score = hist[index];
-              if (index > 0) {
-                score += hist[index - 1] * 0.5;
-                weight += 0.5;
-              }
-              if (index < DIRECTIONAL_MODES - 1) {
-                score += hist[index + 1] * 0.5;
-                weight += 0.5;
-              }
-              score /= weight;
-              if (score < ANGLE_SKIP_THRESH)
-                directional_mode_skip_mask[mode] = 1;
-            }
-          }
+            angle_estimation(src, src_stride, rows, cols,
+                             directional_mode_skip_mask);
           angle_stats_ready = 1;
         }
         if (directional_mode_skip_mask[mbmi->mode])
