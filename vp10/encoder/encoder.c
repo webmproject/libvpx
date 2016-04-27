@@ -833,14 +833,18 @@ static void set_tile_info(VP10_COMP *cpi) {
     cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 32);
     cm->tile_width  <<= MAX_MIB_SIZE_LOG2;
     cm->tile_height <<= MAX_MIB_SIZE_LOG2;
-  } else
-#endif  // CONFIG_EXT_PARTITION
-  {
+  } else {
     cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 64);
     cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 64);
     cm->tile_width  <<= MAX_MIB_SIZE_LOG2 - 1;
     cm->tile_height <<= MAX_MIB_SIZE_LOG2 - 1;
   }
+#else
+  cm->tile_width  = clamp(cpi->oxcf.tile_columns, 1, 64);
+  cm->tile_height = clamp(cpi->oxcf.tile_rows, 1, 64);
+  cm->tile_width  <<= MAX_MIB_SIZE_LOG2;
+  cm->tile_height <<= MAX_MIB_SIZE_LOG2;
+#endif  // CONFIG_EXT_PARTITION
 
   cm->tile_width  = VPXMIN(cm->tile_width, cm->mi_cols);
   cm->tile_height = VPXMIN(cm->tile_height, cm->mi_rows);
