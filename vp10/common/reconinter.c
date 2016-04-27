@@ -1402,6 +1402,19 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
   }  // each mi in the left column
 }
 
+#if CONFIG_EXT_INTER
+void modify_neighbor_predictor_for_obmc(MB_MODE_INFO *mbmi) {
+  if (is_interintra_pred(mbmi)) {
+    mbmi->ref_frame[1] = NONE;
+  } else if (has_second_ref(mbmi) && get_wedge_bits(mbmi->sb_type) &&
+             mbmi->use_wedge_interinter) {
+    mbmi->use_wedge_interinter = 0;
+    mbmi->ref_frame[1] = NONE;
+  }
+  return;
+}
+#endif  // CONFIG_EXT_INTER
+
 void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
                                           MACROBLOCKD *xd,
                                           int mi_row, int mi_col,
@@ -1420,12 +1433,20 @@ void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
     MODE_INFO *above_mi = xd->mi[mi_col_offset +
                                  mi_row_offset * xd->mi_stride];
     MB_MODE_INFO *above_mbmi = &above_mi->mbmi;
+#if CONFIG_EXT_INTER
+    MB_MODE_INFO backup_mbmi;
+#endif  // CONFIG_EXT_INTER
 
     mi_step = VPXMIN(xd->n8_w,
                      num_8x8_blocks_wide_lookup[above_mbmi->sb_type]);
 
     if (!is_neighbor_overlappable(above_mbmi))
       continue;
+
+#if CONFIG_EXT_INTER
+    backup_mbmi = *above_mbmi;
+    modify_neighbor_predictor_for_obmc(above_mbmi);
+#endif  // CONFIG_EXT_INTER
 
     for (j = 0; j < MAX_MB_PLANE; ++j) {
       struct macroblockd_plane *const pd = &xd->plane[j];
@@ -1488,6 +1509,9 @@ void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
                                mi_x, mi_y);
       }
     }
+#if CONFIG_EXT_INTER
+    *above_mbmi = backup_mbmi;
+#endif  // CONFIG_EXT_INTER
   }
   xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
 }
@@ -1513,12 +1537,20 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
                                 mi_row_offset * xd->mi_stride];
     MB_MODE_INFO *left_mbmi = &left_mi->mbmi;
     const int is_compound = has_second_ref(left_mbmi);
+#if CONFIG_EXT_INTER
+    MB_MODE_INFO backup_mbmi;
+#endif  // CONFIG_EXT_INTER
 
     mi_step = VPXMIN(xd->n8_h,
                      num_8x8_blocks_high_lookup[left_mbmi->sb_type]);
 
     if (!is_neighbor_overlappable(left_mbmi))
       continue;
+
+#if CONFIG_EXT_INTER
+    backup_mbmi = *left_mbmi;
+    modify_neighbor_predictor_for_obmc(left_mbmi);
+#endif  // CONFIG_EXT_INTER
 
     for (j = 0; j < MAX_MB_PLANE; ++j) {
       struct macroblockd_plane *const pd = &xd->plane[j];
@@ -1581,6 +1613,9 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
                                mi_x, mi_y);
       }
     }
+#if CONFIG_EXT_INTER
+    *left_mbmi = backup_mbmi;
+#endif  // CONFIG_EXT_INTER
   }
   xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
 }

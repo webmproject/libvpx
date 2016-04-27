@@ -721,14 +721,7 @@ static INLINE int is_obmc_allowed(const MB_MODE_INFO *mbmi) {
 }
 
 static INLINE int is_neighbor_overlappable(const MB_MODE_INFO *mbmi) {
-#if CONFIG_EXT_INTER
-  return (is_inter_block(mbmi) &&
-          !(has_second_ref(mbmi) && get_wedge_bits(mbmi->sb_type) &&
-            mbmi->use_wedge_interinter) &&
-          !(is_interintra_pred(mbmi)));
-#else
   return (is_inter_block(mbmi));
-#endif  // CONFIG_EXT_INTER
 }
 #endif  // CONFIG_OBMC
 
