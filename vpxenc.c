@@ -790,7 +790,7 @@ static int compare_img(const vpx_image_t *const img1,
 
 #if !CONFIG_WEBM_IO
 typedef int stereo_format_t;
-struct EbmlGlobal { int debug; };
+struct WebmOutputContext { int debug; };
 #endif
 
 /* Per-stream configuration */
@@ -818,7 +818,7 @@ struct stream_state {
   struct stream_config      config;
   FILE                     *file;
   struct rate_hist         *rate_hist;
-  struct EbmlGlobal         ebml;
+  struct WebmOutputContext  webm_ctx;
   uint64_t                  psnr_sse_total;
   uint64_t                  psnr_samples_total;
   double                    psnr_totals[4];
@@ -1061,13 +1061,13 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     stream->config.write_webm = 1;
 #if CONFIG_WEBM_IO
     stream->config.stereo_fmt = STEREO_FORMAT_MONO;
-    stream->ebml.last_pts_ns = -1;
-    stream->ebml.writer = NULL;
-    stream->ebml.segment = NULL;
+    stream->webm_ctx.last_pts_ns = -1;
+    stream->webm_ctx.writer = NULL;
+    stream->webm_ctx.segment = NULL;
 #endif
 
     /* Allows removal of the application version from the EBML tags */
-    stream->ebml.debug = global->debug;
+    stream->webm_ctx.debug = global->debug;
 
     /* Default lag_in_frames is 0 in realtime mode */
     if (global->deadline == VPX_DL_REALTIME)
@@ -1449,8 +1449,8 @@ static void open_output_file(struct stream_state *stream,
 
 #if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
-    stream->ebml.stream = stream->file;
-    write_webm_file_header(&stream->ebml, cfg,
+    stream->webm_ctx.stream = stream->file;
+    write_webm_file_header(&stream->webm_ctx, cfg,
                            &global->framerate,
                            stream->config.stereo_fmt,
                            global->codec->fourcc,
@@ -1475,7 +1475,7 @@ static void close_output_file(struct stream_state *stream,
 
 #if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
-    write_webm_file_footer(&stream->ebml);
+    write_webm_file_footer(&stream->webm_ctx);
   }
 #endif
 
@@ -1702,7 +1702,7 @@ static void get_cx_data(struct stream_state *stream,
         update_rate_histogram(stream->rate_hist, cfg, pkt);
 #if CONFIG_WEBM_IO
         if (stream->config.write_webm) {
-          write_webm_block(&stream->ebml, cfg, pkt);
+          write_webm_block(&stream->webm_ctx, cfg, pkt);
         }
 #endif
         if (!stream->config.write_webm) {
