@@ -82,6 +82,7 @@ class VPxEncoderThreadTest
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+#if CONFIG_VP9_DECODER
     const vpx_codec_err_t res = decoder_->DecodeFrame(
         reinterpret_cast<uint8_t*>(pkt->data.frame.buf), pkt->data.frame.sz);
     if (res != VPX_CODEC_OK) {
@@ -95,6 +96,9 @@ class VPxEncoderThreadTest
       md5_res.Add(img);
       md5_.push_back(md5_res.Get());
     }
+#else
+    ASSERT_EQ(NULL, decoder_);
+#endif
   }
 
   bool encoder_initialized_;
