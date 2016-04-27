@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48d9ad3d_6e3bdfdb",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2541,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-27T18:47:39Z",
+      "side": 1,
+      "message": "static const",
+      "range": {
+        "startLine": 2541,
+        "startChar": 0,
+        "endLine": 2541,
+        "endChar": 7
+      },
+      "revId": "3f4f223184221067904267de05c7f62dcd85117b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48d9ad3d_8e402348",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2562,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-27T18:47:39Z",
+      "side": 1,
+      "message": "static const",
+      "range": {
+        "startLine": 2562,
+        "startChar": 0,
+        "endLine": 2562,
+        "endChar": 7
+      },
+      "revId": "3f4f223184221067904267de05c7f62dcd85117b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48d9ad3d_ae0b271a",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2640,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-27T18:47:39Z",
+      "side": 1,
+      "message": "This subtract shouldn\u0027t be necessary and might break the compiler\u0027s ability to generate a single divide and remainder instruction.",
+      "range": {
+        "startLine": 2640,
+        "startChar": 18,
+        "endLine": 2640,
+        "endChar": 25
+      },
+      "revId": "3f4f223184221067904267de05c7f62dcd85117b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
