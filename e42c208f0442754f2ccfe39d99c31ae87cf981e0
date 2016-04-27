@@ -16,6 +16,24 @@
       "revId": "e42c208f0442754f2ccfe39d99c31ae87cf981e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "882ac5bd_89d759cf",
+        "filename": "vpx_dsp/x86/variance_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-27T23:31:28Z",
+      "side": 1,
+      "message": "Oops, good catch.",
+      "parentUuid": "480b6d61_f80225a3",
+      "revId": "e42c208f0442754f2ccfe39d99c31ae87cf981e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
