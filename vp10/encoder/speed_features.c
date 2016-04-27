@@ -551,6 +551,12 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   else if (oxcf->mode == GOOD)
     set_good_speed_feature(cpi, cm, sf, oxcf->speed);
 
+#if CONFIG_REF_MV
+  // TODO(geza): Temporarily turn this off for ref-mv to fix tests.
+  //             Investigate/reimplement skip_recode better to enable this.
+  sf->allow_skip_recode = 0;
+#endif  // CONFIG_REF_MV
+
   // sf->partition_search_breakout_dist_thr is set assuming max 64x64
   // blocks. Normalise this if the blocks are bigger.
   if (MAX_SB_SIZE_LOG2 > 6) {
