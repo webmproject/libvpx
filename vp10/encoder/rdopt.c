@@ -8433,8 +8433,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
           if (!mv_check_bounds(x, &cur_mv.as_mv)) {
             INTERP_FILTER dummy_single_inter_filter[MB_MODE_COUNT]
-                                                   [MAX_REF_FRAMES];
-            int dummy_single_skippable[MB_MODE_COUNT][MAX_REF_FRAMES];
+                                                   [MAX_REF_FRAMES] =
+                                          { { 0 } };
+            int dummy_single_skippable[MB_MODE_COUNT][MAX_REF_FRAMES] =
+                                          { { 0 } };
             int dummy_disable_skip = 0;
 #if CONFIG_EXT_INTER
             int_mv dummy_single_newmvs[2][MAX_REF_FRAMES] =
