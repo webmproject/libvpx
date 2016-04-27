@@ -16,6 +16,24 @@
       "revId": "6c4007be1c7b663db1717a0768b8299517b6708d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "882ac5bd_49d601d7",
+        "filename": "vpx_dsp/x86/variance_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-04-27T23:29:14Z",
+      "side": 1,
+      "message": "sum can be -65280. -65280*-65280 does not fit in a signed integer. Signed integer overflow is undefined. -65280*-65280 does fit in an unsigned integer. \n\nIn practice this code generates a 32x32 multiply as intended by the original code.",
+      "parentUuid": "480b6d61_f86b4573",
+      "revId": "6c4007be1c7b663db1717a0768b8299517b6708d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
