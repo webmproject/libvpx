@@ -69,6 +69,41 @@ struct ConvolveFunctions {
 
 typedef std::tr1::tuple<int, int, const ConvolveFunctions *> ConvolveParam;
 
+#if CONFIG_VP10 && CONFIG_EXT_PARTITION
+#define ALL_SIZES(convolve_fn) \
+    make_tuple(128, 64, &convolve_fn),  \
+    make_tuple(64, 128, &convolve_fn),  \
+    make_tuple(128, 128, &convolve_fn), \
+    make_tuple(4, 4, &convolve_fn),     \
+    make_tuple(8, 4, &convolve_fn),     \
+    make_tuple(4, 8, &convolve_fn),     \
+    make_tuple(8, 8, &convolve_fn),     \
+    make_tuple(16, 8, &convolve_fn),    \
+    make_tuple(8, 16, &convolve_fn),    \
+    make_tuple(16, 16, &convolve_fn),   \
+    make_tuple(32, 16, &convolve_fn),   \
+    make_tuple(16, 32, &convolve_fn),   \
+    make_tuple(32, 32, &convolve_fn),   \
+    make_tuple(64, 32, &convolve_fn),   \
+    make_tuple(32, 64, &convolve_fn),   \
+    make_tuple(64, 64, &convolve_fn)
+#else
+#define ALL_SIZES(convolve_fn) \
+    make_tuple(4, 4, &convolve_fn),     \
+    make_tuple(8, 4, &convolve_fn),     \
+    make_tuple(4, 8, &convolve_fn),     \
+    make_tuple(8, 8, &convolve_fn),     \
+    make_tuple(16, 8, &convolve_fn),    \
+    make_tuple(8, 16, &convolve_fn),    \
+    make_tuple(16, 16, &convolve_fn),   \
+    make_tuple(32, 16, &convolve_fn),   \
+    make_tuple(16, 32, &convolve_fn),   \
+    make_tuple(32, 32, &convolve_fn),   \
+    make_tuple(64, 32, &convolve_fn),   \
+    make_tuple(32, 64, &convolve_fn),   \
+    make_tuple(64, 64, &convolve_fn)
+#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
+
 // Reference 8-tap subpixel filter, slightly modified to fit into this test.
 #define VP9_FILTER_WEIGHT 128
 #define VP9_FILTER_SHIFT 7
@@ -1036,25 +1071,6 @@ const ConvolveFunctions convolve8_c(
     wrap_convolve8_horiz_c_8, wrap_convolve8_avg_horiz_c_8,
     wrap_convolve8_vert_c_8, wrap_convolve8_avg_vert_c_8,
     wrap_convolve8_c_8, wrap_convolve8_avg_c_8, 8);
-INSTANTIATE_TEST_CASE_P(C_8, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_c),
-    make_tuple(64, 128, &convolve8_c),
-    make_tuple(128, 128, &convolve8_c),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_c),
-    make_tuple(8, 4, &convolve8_c),
-    make_tuple(4, 8, &convolve8_c),
-    make_tuple(8, 8, &convolve8_c),
-    make_tuple(16, 8, &convolve8_c),
-    make_tuple(8, 16, &convolve8_c),
-    make_tuple(16, 16, &convolve8_c),
-    make_tuple(32, 16, &convolve8_c),
-    make_tuple(16, 32, &convolve8_c),
-    make_tuple(32, 32, &convolve8_c),
-    make_tuple(64, 32, &convolve8_c),
-    make_tuple(32, 64, &convolve8_c),
-    make_tuple(64, 64, &convolve8_c)));
 const ConvolveFunctions convolve10_c(
     wrap_convolve_copy_c_10, wrap_convolve_avg_c_10,
     wrap_convolve8_horiz_c_10, wrap_convolve8_avg_horiz_c_10,
@@ -1063,25 +1079,6 @@ const ConvolveFunctions convolve10_c(
     wrap_convolve8_horiz_c_10, wrap_convolve8_avg_horiz_c_10,
     wrap_convolve8_vert_c_10, wrap_convolve8_avg_vert_c_10,
     wrap_convolve8_c_10, wrap_convolve8_avg_c_10, 10);
-INSTANTIATE_TEST_CASE_P(C_10, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve10_c),
-    make_tuple(64, 128, &convolve10_c),
-    make_tuple(128, 128, &convolve10_c),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve10_c),
-    make_tuple(8, 4, &convolve10_c),
-    make_tuple(4, 8, &convolve10_c),
-    make_tuple(8, 8, &convolve10_c),
-    make_tuple(16, 8, &convolve10_c),
-    make_tuple(8, 16, &convolve10_c),
-    make_tuple(16, 16, &convolve10_c),
-    make_tuple(32, 16, &convolve10_c),
-    make_tuple(16, 32, &convolve10_c),
-    make_tuple(32, 32, &convolve10_c),
-    make_tuple(64, 32, &convolve10_c),
-    make_tuple(32, 64, &convolve10_c),
-    make_tuple(64, 64, &convolve10_c)));
 const ConvolveFunctions convolve12_c(
     wrap_convolve_copy_c_12, wrap_convolve_avg_c_12,
     wrap_convolve8_horiz_c_12, wrap_convolve8_avg_horiz_c_12,
@@ -1090,28 +1087,13 @@ const ConvolveFunctions convolve12_c(
     wrap_convolve8_horiz_c_12, wrap_convolve8_avg_horiz_c_12,
     wrap_convolve8_vert_c_12, wrap_convolve8_avg_vert_c_12,
     wrap_convolve8_c_12, wrap_convolve8_avg_c_12, 12);
-INSTANTIATE_TEST_CASE_P(C_12, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve12_c),
-    make_tuple(64, 128, &convolve12_c),
-    make_tuple(128, 128, &convolve12_c),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve12_c),
-    make_tuple(8, 4, &convolve12_c),
-    make_tuple(4, 8, &convolve12_c),
-    make_tuple(8, 8, &convolve12_c),
-    make_tuple(16, 8, &convolve12_c),
-    make_tuple(8, 16, &convolve12_c),
-    make_tuple(16, 16, &convolve12_c),
-    make_tuple(32, 16, &convolve12_c),
-    make_tuple(16, 32, &convolve12_c),
-    make_tuple(32, 32, &convolve12_c),
-    make_tuple(64, 32, &convolve12_c),
-    make_tuple(32, 64, &convolve12_c),
-    make_tuple(64, 64, &convolve12_c)));
+const ConvolveParam kArrayConvolve_c[] = {
+    ALL_SIZES(convolve8_c),
+    ALL_SIZES(convolve10_c),
+    ALL_SIZES(convolve12_c)
+};
 
 #else
-
 const ConvolveFunctions convolve8_c(
     vpx_convolve_copy_c, vpx_convolve_avg_c,
     vpx_convolve8_horiz_c, vpx_convolve8_avg_horiz_c,
@@ -1120,27 +1102,10 @@ const ConvolveFunctions convolve8_c(
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c,
     vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
-
-INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_c),
-    make_tuple(64, 128, &convolve8_c),
-    make_tuple(128, 128, &convolve8_c),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_c),
-    make_tuple(8, 4, &convolve8_c),
-    make_tuple(4, 8, &convolve8_c),
-    make_tuple(8, 8, &convolve8_c),
-    make_tuple(16, 8, &convolve8_c),
-    make_tuple(8, 16, &convolve8_c),
-    make_tuple(16, 16, &convolve8_c),
-    make_tuple(32, 16, &convolve8_c),
-    make_tuple(16, 32, &convolve8_c),
-    make_tuple(32, 32, &convolve8_c),
-    make_tuple(64, 32, &convolve8_c),
-    make_tuple(32, 64, &convolve8_c),
-    make_tuple(64, 64, &convolve8_c)));
+const ConvolveParam kArrayConvolve_c[] = { ALL_SIZES(convolve8_c) };
 #endif
+INSTANTIATE_TEST_CASE_P(C, ConvolveTest,
+                        ::testing::ValuesIn(kArrayConvolve_c));
 
 #if HAVE_SSE2 && ARCH_X86_64
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1180,63 +1145,11 @@ const ConvolveFunctions convolve12_sse2(
     wrap_convolve8_horiz_sse2_12, wrap_convolve8_avg_horiz_sse2_12,
     wrap_convolve8_vert_sse2_12, wrap_convolve8_avg_vert_sse2_12,
     wrap_convolve8_sse2_12, wrap_convolve8_avg_sse2_12, 12);
-INSTANTIATE_TEST_CASE_P(SSE2_8, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_sse2),
-    make_tuple(64, 128, &convolve8_sse2),
-    make_tuple(128, 128, &convolve8_sse2),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_sse2),
-    make_tuple(8, 4, &convolve8_sse2),
-    make_tuple(4, 8, &convolve8_sse2),
-    make_tuple(8, 8, &convolve8_sse2),
-    make_tuple(16, 8, &convolve8_sse2),
-    make_tuple(8, 16, &convolve8_sse2),
-    make_tuple(16, 16, &convolve8_sse2),
-    make_tuple(32, 16, &convolve8_sse2),
-    make_tuple(16, 32, &convolve8_sse2),
-    make_tuple(32, 32, &convolve8_sse2),
-    make_tuple(64, 32, &convolve8_sse2),
-    make_tuple(32, 64, &convolve8_sse2),
-    make_tuple(64, 64, &convolve8_sse2)));
-INSTANTIATE_TEST_CASE_P(SSE2_10, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve10_sse2),
-    make_tuple(64, 128, &convolve10_sse2),
-    make_tuple(128, 128, &convolve10_sse2),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve10_sse2),
-    make_tuple(8, 4, &convolve10_sse2),
-    make_tuple(4, 8, &convolve10_sse2),
-    make_tuple(8, 8, &convolve10_sse2),
-    make_tuple(16, 8, &convolve10_sse2),
-    make_tuple(8, 16, &convolve10_sse2),
-    make_tuple(16, 16, &convolve10_sse2),
-    make_tuple(32, 16, &convolve10_sse2),
-    make_tuple(16, 32, &convolve10_sse2),
-    make_tuple(32, 32, &convolve10_sse2),
-    make_tuple(64, 32, &convolve10_sse2),
-    make_tuple(32, 64, &convolve10_sse2),
-    make_tuple(64, 64, &convolve10_sse2)));
-INSTANTIATE_TEST_CASE_P(SSE2_12, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve12_sse2),
-    make_tuple(64, 128, &convolve12_sse2),
-    make_tuple(128, 128, &convolve12_sse2),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve12_sse2),
-    make_tuple(8, 4, &convolve12_sse2),
-    make_tuple(4, 8, &convolve12_sse2),
-    make_tuple(8, 8, &convolve12_sse2),
-    make_tuple(16, 8, &convolve12_sse2),
-    make_tuple(8, 16, &convolve12_sse2),
-    make_tuple(16, 16, &convolve12_sse2),
-    make_tuple(32, 16, &convolve12_sse2),
-    make_tuple(16, 32, &convolve12_sse2),
-    make_tuple(32, 32, &convolve12_sse2),
-    make_tuple(64, 32, &convolve12_sse2),
-    make_tuple(32, 64, &convolve12_sse2),
-    make_tuple(64, 64, &convolve12_sse2)));
+const ConvolveParam kArrayConvolve_sse2[] = {
+    ALL_SIZES(convolve8_sse2),
+    ALL_SIZES(convolve10_sse2),
+    ALL_SIZES(convolve12_sse2)
+};
 #else
 const ConvolveFunctions convolve8_sse2(
 #if CONFIG_USE_X86INC
@@ -1251,26 +1164,10 @@ const ConvolveFunctions convolve8_sse2(
     vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
-INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_sse2),
-    make_tuple(64, 128, &convolve8_sse2),
-    make_tuple(128, 128, &convolve8_sse2),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_sse2),
-    make_tuple(8, 4, &convolve8_sse2),
-    make_tuple(4, 8, &convolve8_sse2),
-    make_tuple(8, 8, &convolve8_sse2),
-    make_tuple(16, 8, &convolve8_sse2),
-    make_tuple(8, 16, &convolve8_sse2),
-    make_tuple(16, 16, &convolve8_sse2),
-    make_tuple(32, 16, &convolve8_sse2),
-    make_tuple(16, 32, &convolve8_sse2),
-    make_tuple(32, 32, &convolve8_sse2),
-    make_tuple(64, 32, &convolve8_sse2),
-    make_tuple(32, 64, &convolve8_sse2),
-    make_tuple(64, 64, &convolve8_sse2)));
+const ConvolveParam kArrayConvolve_sse2[] = { ALL_SIZES(convolve8_sse2) };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest,
+                        ::testing::ValuesIn(kArrayConvolve_sse2));
 #endif
 
 #if HAVE_SSSE3
@@ -1283,25 +1180,9 @@ const ConvolveFunctions convolve8_ssse3(
     vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
     vpx_scaled_2d_ssse3, vpx_scaled_avg_2d_c, 0);
 
-INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_ssse3),
-    make_tuple(64, 128, &convolve8_ssse3),
-    make_tuple(128, 128, &convolve8_ssse3),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_ssse3),
-    make_tuple(8, 4, &convolve8_ssse3),
-    make_tuple(4, 8, &convolve8_ssse3),
-    make_tuple(8, 8, &convolve8_ssse3),
-    make_tuple(16, 8, &convolve8_ssse3),
-    make_tuple(8, 16, &convolve8_ssse3),
-    make_tuple(16, 16, &convolve8_ssse3),
-    make_tuple(32, 16, &convolve8_ssse3),
-    make_tuple(16, 32, &convolve8_ssse3),
-    make_tuple(32, 32, &convolve8_ssse3),
-    make_tuple(64, 32, &convolve8_ssse3),
-    make_tuple(32, 64, &convolve8_ssse3),
-    make_tuple(64, 64, &convolve8_ssse3)));
+const ConvolveParam kArrayConvolve8_ssse3[] = { ALL_SIZES(convolve8_ssse3) };
+INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest,
+                        ::testing::ValuesIn(kArrayConvolve8_ssse3));
 #endif
 
 #if HAVE_AVX2 && HAVE_SSSE3
@@ -1314,25 +1195,9 @@ const ConvolveFunctions convolve8_avx2(
     vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
-INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_avx2),
-    make_tuple(64, 128, &convolve8_avx2),
-    make_tuple(128, 128, &convolve8_avx2),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_avx2),
-    make_tuple(8, 4, &convolve8_avx2),
-    make_tuple(4, 8, &convolve8_avx2),
-    make_tuple(8, 8, &convolve8_avx2),
-    make_tuple(8, 16, &convolve8_avx2),
-    make_tuple(16, 8, &convolve8_avx2),
-    make_tuple(16, 16, &convolve8_avx2),
-    make_tuple(32, 16, &convolve8_avx2),
-    make_tuple(16, 32, &convolve8_avx2),
-    make_tuple(32, 32, &convolve8_avx2),
-    make_tuple(64, 32, &convolve8_avx2),
-    make_tuple(32, 64, &convolve8_avx2),
-    make_tuple(64, 64, &convolve8_avx2)));
+const ConvolveParam kArrayConvolve8_avx2[] = { ALL_SIZES(convolve8_avx2) };
+INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest,
+                        ::testing::ValuesIn(kArrayConvolve8_avx2));
 #endif  // HAVE_AVX2 && HAVE_SSSE3
 
 // TODO(any): Make NEON versions support 128x128 128x64 64x128 block sizes
@@ -1357,25 +1222,9 @@ const ConvolveFunctions convolve8_neon(
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 #endif  // HAVE_NEON_ASM
 
-INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_neon),
-    make_tuple(64, 128, &convolve8_neon),
-    make_tuple(128, 128, &convolve8_neon),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_neon),
-    make_tuple(8, 4, &convolve8_neon),
-    make_tuple(4, 8, &convolve8_neon),
-    make_tuple(8, 8, &convolve8_neon),
-    make_tuple(16, 8, &convolve8_neon),
-    make_tuple(8, 16, &convolve8_neon),
-    make_tuple(16, 16, &convolve8_neon),
-    make_tuple(32, 16, &convolve8_neon),
-    make_tuple(16, 32, &convolve8_neon),
-    make_tuple(32, 32, &convolve8_neon),
-    make_tuple(64, 32, &convolve8_neon),
-    make_tuple(32, 64, &convolve8_neon),
-    make_tuple(64, 64, &convolve8_neon)));
+const ConvolveParam kArrayConvolve8_neon[] = { ALL_SIZES(convolve8_neon) };
+INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest,
+                        ::testing::ValuesIn(kArrayConvolve8_neon));
 #endif  // HAVE_NEON
 
 // TODO(any): Make DSPR2 versions support 128x128 128x64 64x128 block sizes
@@ -1389,26 +1238,10 @@ const ConvolveFunctions convolve8_dspr2(
     vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
-INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_dspr2),
-    make_tuple(64, 128, &convolve8_dspr2),
-    make_tuple(128, 128, &convolve8_dspr2),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_dspr2),
-    make_tuple(8, 4, &convolve8_dspr2),
-    make_tuple(4, 8, &convolve8_dspr2),
-    make_tuple(8, 8, &convolve8_dspr2),
-    make_tuple(16, 8, &convolve8_dspr2),
-    make_tuple(8, 16, &convolve8_dspr2),
-    make_tuple(16, 16, &convolve8_dspr2),
-    make_tuple(32, 16, &convolve8_dspr2),
-    make_tuple(16, 32, &convolve8_dspr2),
-    make_tuple(32, 32, &convolve8_dspr2),
-    make_tuple(64, 32, &convolve8_dspr2),
-    make_tuple(32, 64, &convolve8_dspr2),
-    make_tuple(64, 64, &convolve8_dspr2)));
-#endif
+const ConvolveParam kArrayConvolve8_dspr2[] = { ALL_SIZES(convolve8_dspr2) };
+INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest,
+                        ::testing::ValuesIn(kArrayConvolve8_dspr2));
+#endif  // HAVE_DSPR2
 
 // TODO(any): Make MSA versions support 128x128 128x64 64x128 block sizes
 #if HAVE_MSA && !(CONFIG_VP10 && CONFIG_EXT_PARTITION)
@@ -1421,24 +1254,8 @@ const ConvolveFunctions convolve8_msa(
     vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
-INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest, ::testing::Values(
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(128, 64, &convolve8_msa),
-    make_tuple(64, 128, &convolve8_msa),
-    make_tuple(128, 128, &convolve8_msa),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-    make_tuple(4, 4, &convolve8_msa),
-    make_tuple(8, 4, &convolve8_msa),
-    make_tuple(4, 8, &convolve8_msa),
-    make_tuple(8, 8, &convolve8_msa),
-    make_tuple(16, 8, &convolve8_msa),
-    make_tuple(8, 16, &convolve8_msa),
-    make_tuple(16, 16, &convolve8_msa),
-    make_tuple(32, 16, &convolve8_msa),
-    make_tuple(16, 32, &convolve8_msa),
-    make_tuple(32, 32, &convolve8_msa),
-    make_tuple(64, 32, &convolve8_msa),
-    make_tuple(32, 64, &convolve8_msa),
-    make_tuple(64, 64, &convolve8_msa)));
+const ConvolveParam kArrayConvolve8_msa[] = { ALL_SIZES(convolve8_msa) };
+INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest,
+                        ::testing::ValuesIn(kArrayConvolve8_msa));
 #endif  // HAVE_MSA
 }  // namespace
