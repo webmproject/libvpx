@@ -18,13 +18,6 @@
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"
 
-// Reverse the 8 16 bit words in __m128i
-static INLINE __m128i mm_reverse_epi16(const __m128i x) {
-  const __m128i a = _mm_shufflelo_epi16(x, 0x1b);
-  const __m128i b = _mm_shufflehi_epi16(a, 0x1b);
-  return _mm_shuffle_epi32(b, 0x4e);
-}
-
 static INLINE void load_buffer_4x4(const int16_t *input, __m128i *in,
                                    int stride, int flipud, int fliplr) {
   const __m128i k__nonzero_bias_a = _mm_setr_epi16(0, 1, 1, 1, 1, 1, 1, 1);

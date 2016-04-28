@@ -27,12 +27,27 @@ typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                         int tx_type);
 
 using libvpx_test::FhtFunc;
-typedef std::tr1::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t, int> Ht8x8Param;
+using std::tr1::tuple;
+typedef tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t, int> Ht8x8Param;
 
 void fht8x8_ref(const int16_t *in, tran_low_t *out, int stride,
                 int tx_type) {
   vp10_fht8x8_c(in, out, stride, tx_type);
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+typedef void (*IhighbdHtFunc)(const tran_low_t *in, uint8_t *out, int stride,
+                              int tx_type, int bd);
+typedef void (*HBDFhtFunc)(const int16_t *input, int32_t *output, int stride,
+                        int tx_type, int bd);
+// Target optimized function, tx_type, bit depth
+typedef tuple<HBDFhtFunc, int, int> HighbdHt8x8Param;
+
+void highbe_fht8x8_ref(const int16_t *in, int32_t *out, int stride,
+                       int tx_type, int bd) {
+  vp10_fwd_txfm2d_8x8_c(in, out, stride, tx_type, bd);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 class VP10Trans8x8HT
     : public libvpx_test::TransformTestBase,
@@ -69,60 +84,76 @@ TEST_P(VP10Trans8x8HT, CoeffCheck) {
   RunCoeffCheck();
 }
 
-#if CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
-TEST(VP10Trans8x8HTSpeedTest, C_version) {
-    ACMRandom rnd(ACMRandom::DeterministicSeed());
-    const int count_test_block = 20000;
-    int bit_depth = 8;
-    int mask = (1 << bit_depth) - 1;
-    const int num_coeffs = 64;
-    int16_t *input = new int16_t[num_coeffs];
-    tran_low_t *output = new tran_low_t[num_coeffs];
-    const int stride = 8;
-    int tx_type;
+#if CONFIG_VP9_HIGHBITDEPTH
+class VP10HighbdTrans8x8HT : public ::testing::TestWithParam<HighbdHt8x8Param> {
+ public:
+  virtual ~VP10HighbdTrans8x8HT() {}
 
-    for (int i = 0; i < count_test_block; ++i) {
-      for (int j = 0; j < num_coeffs; ++j) {
-        input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
-      }
-      for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
-        vp10_fht8x8_c(input, output, stride, tx_type);
-      }
+  virtual void SetUp() {
+    fwd_txfm_ = GET_PARAM(0);
+    fwd_txfm_ref_ = highbe_fht8x8_ref;
+    tx_type_  = GET_PARAM(1);
+    bit_depth_ = GET_PARAM(2);
+    mask_ = (1 << bit_depth_) - 1;
+    num_coeffs_ = 64;
+
+    input_ = reinterpret_cast<int16_t *>
+       (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    output_ = reinterpret_cast<int32_t *>
+        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
+    output_ref_ = reinterpret_cast<int32_t *>
+        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
+  }
+
+  virtual void TearDown() {
+    vpx_free(input_);
+    vpx_free(output_);
+    vpx_free(output_ref_);
+    libvpx_test::ClearSystemState();
+  }
+
+ protected:
+  void RunBitexactCheck();
+
+ private:
+  HBDFhtFunc fwd_txfm_;
+  HBDFhtFunc fwd_txfm_ref_;
+  int tx_type_;
+  int bit_depth_;
+  int mask_;
+  int num_coeffs_;
+  int16_t *input_;
+  int32_t *output_;
+  int32_t *output_ref_;
+};
+
+void VP10HighbdTrans8x8HT::RunBitexactCheck() {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  int i, j;
+  const int stride = 8;
+  const int num_tests = 200000;
+  const int num_coeffs = 64;
+
+  for (i = 0; i < num_tests; ++i) {
+    for (j = 0; j < num_coeffs; ++j) {
+      input_[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
     }
 
-    delete[] input;
-    delete[] output;
-}
-#endif  // CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
+    fwd_txfm_ref_(input_, output_ref_, stride, tx_type_, bit_depth_);
+    fwd_txfm_(input_, output_, stride, tx_type_, bit_depth_);
 
-#if HAVE_SSE2 && CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
-TEST(VP10Trans8x8HTSpeedTest, SSE2_version) {
-    ACMRandom rnd(ACMRandom::DeterministicSeed());
-    const int count_test_block = 20000;
-    int bit_depth = 8;
-    int mask = (1 << bit_depth) - 1;
-    const int num_coeffs = 64;
-    int16_t *input = reinterpret_cast<int16_t *>
-        (vpx_memalign(16, sizeof(int16_t) * num_coeffs));
-    tran_low_t *output = reinterpret_cast<tran_low_t *>
-        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs));
-
-    const int stride = 8;
-    int tx_type;
-
-    for (int i = 0; i < count_test_block; ++i) {
-      for (int j = 0; j < num_coeffs; ++j) {
-        input[j] = (rnd.Rand8() & mask) - (rnd.Rand8() & mask);
-      }
-      for (tx_type = V_DCT; tx_type <= H_FLIPADST; ++tx_type) {
-        vp10_fht8x8_sse2(input, output, stride, tx_type);
-      }
+    for (j = 0; j < num_coeffs; ++j) {
+      EXPECT_EQ(output_[j], output_ref_[j])
+          << "Not bit-exact result at index: " << j
+          << " at test block: " << i;
     }
-
-    vpx_free(input);
-    vpx_free(output);
+  }
 }
-#endif  // HAVE_SSE2 && CONFIG_EXT_TX && !CONFIG_VP9_HIGHBITDEPTH
+
+TEST_P(VP10HighbdTrans8x8HT, HighbdCoeffCheck) {
+  RunBitexactCheck();
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 using std::tr1::make_tuple;
 
@@ -165,5 +196,21 @@ INSTANTIATE_TEST_CASE_P(
     SSE2, VP10Trans8x8HT,
     ::testing::ValuesIn(kArrayHt8x8Param_sse2));
 #endif  // HAVE_SSE2
+
+#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+const HighbdHt8x8Param kArrayHBDHt8x8Param_sse4_1[] = {
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 0, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 0, 12),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 1, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 1, 12),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 2, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 2, 12),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 3, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 3, 12)
+};
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, VP10HighbdTrans8x8HT,
+    ::testing::ValuesIn(kArrayHBDHt8x8Param_sse4_1));
+#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace
