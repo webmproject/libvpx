@@ -172,7 +172,7 @@ x86_simd_caps(void) {
   env = getenv("VPX_SIMD_CAPS_MASK");
 
   if (env && *env)
-    mask = strtol(env, NULL, 0);
+    mask = (unsigned int)strtoul(env, NULL, 0);
 
   /* Ensure that the CPUID instruction supports extended features */
   cpuid(0, 0, max_cpuid_val, reg_ebx, reg_ecx, reg_edx);
