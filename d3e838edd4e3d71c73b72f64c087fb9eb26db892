@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "480b6d61_849f3413",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2383,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "this might be better implemented as a table, [(bit_depth \u0026 0x6) \u003e\u003e 1][block_size] might work as a lookup",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_e4f8c05b",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2389,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "no whitespace after the label\n\nhttps://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_64a4d067",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2428,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "\u0027#\u0027s belong in the first column\n\nhttps://google.github.io/styleguide/cppguide.html#Preprocessor_Directives",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_0493440b",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2547,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "adding some text (always after the 0) can helping debugging/logging -\u003e assert(0 \u0026\u0026 \"Invalid ...\");",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_e48f20db",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2553,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "this is redundant. for something so simple the function name should imply the behavior.\n\nsee the general section about comments:\nhttps://google.github.io/styleguide/cppguide.html#Function_Comments",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_24c128f5",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2615,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "const",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_44bc2c7d",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2656,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "these lines can be joined",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_c45dbc3a",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2721,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "prefer to put this earlier (after the variable declarations); no space after the cast",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_a45a383e",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2723,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "this line can go",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_84d1f4df",
+        "filename": "vp10/common/reconinter.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T05:58:03Z",
+      "side": 1,
+      "message": "non-inline global functions should have a prefix, vpx_/vp10_. this should also be within the ifdef and ideally placed with logically related functions and/or in the order it appears in the .c file (though that\u0027s more often enforced in class definitions).",
+      "revId": "d3e838edd4e3d71c73b72f64c087fb9eb26db892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
