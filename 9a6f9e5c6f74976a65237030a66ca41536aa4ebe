@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e84d01b0_19771cf4",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-04-28T18:38:08Z",
+      "side": 1,
+      "message": "name it adst_flipadst ?",
+      "revId": "9a6f9e5c6f74976a65237030a66ca41536aa4ebe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e84d01b0_b969c817",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-04-28T18:38:08Z",
+      "side": 1,
+      "message": "instead of hard coding tx_set \u003d\u003d 3, can we use the array of available transforms in that passed in tx_set to decide?",
+      "revId": "9a6f9e5c6f74976a65237030a66ca41536aa4ebe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8594975_d7ae13f7",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 647,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-04-28T18:38:08Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "9a6f9e5c6f74976a65237030a66ca41536aa4ebe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
