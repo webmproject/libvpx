@@ -34,6 +34,24 @@
       "revId": "9ef554bd939ec5eb672523ea1874d1db711ad04a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_1ef39184",
+        "filename": "test/external_frame_buffer_planes_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-04-28T00:39:47Z",
+      "side": 1,
+      "message": "\u003e Done. Tnx.\n \u003e \n \u003e Please note that these tests are mostly like the tests in\n \u003e external_frame_buffer_test.cc. Let me know if you prefer to\n \u003e consolidate them in the same file before reviewing this code.\n\nI think they\u0027re similar enough that they could be consolidated, perhaps into one set of parameterized tests (TEST_P).",
+      "parentUuid": "480b6d61_8f9f5560",
+      "revId": "9ef554bd939ec5eb672523ea1874d1db711ad04a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
