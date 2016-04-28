@@ -1518,7 +1518,7 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
                           int supertx_enabled,
 #endif
                           int mi_row, int mi_col) {
-  const VP10_COMMON *const cm = &cpi->common;
+  VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   MODE_INFO *m;
   int plane;
@@ -1548,6 +1548,12 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
     xd->left_txfm_context =
       xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 #endif
+#if CONFIG_EXT_INTERP
+    // vp10_is_interp_needed needs the ref frame buffers set up to look
+    // up if they are scaled. vp10_is_interp_needed is in turn needed by
+    // write_switchable_interp_filter, which is called by pack_inter_mode_mvs.
+    set_ref_ptrs(cm, xd, m->mbmi.ref_frame[0], m->mbmi.ref_frame[1]);
+#endif  // CONFIG_EXT_INTER
     pack_inter_mode_mvs(cpi, m,
 #if CONFIG_SUPERTX
                         supertx_enabled,
