@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48d9ad3d_7441eefa",
+        "filename": "vp10/encoder/subexp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-04-28T18:49:44Z",
+      "side": 1,
+      "message": "This is not needed. It\u0027s already inside #if CONFIG_ENTROPY.",
+      "range": {
+        "startLine": 194,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 18
+      },
+      "revId": "6a2e34a586bbeb77e6579556877a1e2c1bf8e483",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
