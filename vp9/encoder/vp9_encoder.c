@@ -1692,9 +1692,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->use_skin_detection = 0;
   cpi->common.buffer_pool = pool;
 
-  cpi->rc.high_source_sad = 0;
-  cpi->rc.count_last_scene_change = 0;
-
   init_config(cpi, oxcf);
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 

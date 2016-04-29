@@ -339,6 +339,9 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->total_target_vs_actual = 0;
   rc->avg_intersize_gfint = 0;
   rc->avg_frame_low_motion = 0;
+  rc->high_source_sad = 0;
+  rc->count_last_scene_change = 0;
+  rc->avg_source_sad = 0;
 
   rc->frames_since_key = 8;  // Sensible default for first frame.
   rc->this_key_frame_forced = 0;
