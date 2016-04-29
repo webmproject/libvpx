@@ -662,12 +662,79 @@ static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
   }
 }
 
+#if !CONFIG_VP9_HIGHBITDEPTH
+// Check if most of the superblock is skin content, and if so, force split to
+// 32x32, and set x->sb_is_skin for use in mode selection.
+static int skin_sb_split(VP9_COMP *cpi, MACROBLOCK *x, const int low_res,
+                         int mi_row, int mi_col, int *force_split) {
+  VP9_COMMON * const cm = &cpi->common;
+  // Avoid checking superblocks on/near boundary and avoid low resolutions.
+  // Note superblock may still pick 64X64 if y_sad is very small
+  // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
+  if (!low_res && (mi_col >= 8 && mi_col + 8 < cm->mi_cols && mi_row >= 8 &&
+      mi_row + 8 < cm->mi_rows)) {
+    int num_16x16_skin = 0;
+    int num_16x16_nonskin = 0;
+    uint8_t *ysignal = x->plane[0].src.buf;
+    uint8_t *usignal = x->plane[1].src.buf;
+    uint8_t *vsignal = x->plane[2].src.buf;
+    int sp = x->plane[0].src.stride;
+    int spuv = x->plane[1].src.stride;
+    const int block_index = mi_row * cm->mi_cols + mi_col;
+    const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
+    const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
+    const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
+    const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
+    // Loop through the 16x16 sub-blocks.
+    int i, j;
+    for (i = 0; i < ymis; i+=2) {
+      for (j = 0; j < xmis; j+=2) {
+        int bl_index = block_index + i * cm->mi_cols + j;
+        int bl_index1 = bl_index + 1;
+        int bl_index2 = bl_index + cm->mi_cols;
+        int bl_index3 = bl_index2 + 1;
+        int consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index],
+                                   VPXMIN(cpi->consec_zero_mv[bl_index1],
+                                   VPXMIN(cpi->consec_zero_mv[bl_index2],
+                                   cpi->consec_zero_mv[bl_index3])));
+        int is_skin = vp9_compute_skin_block(ysignal,
+                                             usignal,
+                                             vsignal,
+                                             sp,
+                                             spuv,
+                                             BLOCK_16X16,
+                                             consec_zeromv,
+                                             0);
+        num_16x16_skin += is_skin;
+        num_16x16_nonskin += (1 - is_skin);
+        if (num_16x16_nonskin > 3) {
+          // Exit loop if at least 4 of the 16x16 blocks are not skin.
+          i = ymis;
+          break;
+        }
+        ysignal += 16;
+        usignal += 8;
+        vsignal += 8;
+      }
+      ysignal += (sp << 4) - 64;
+      usignal += (spuv << 3) - 32;
+      vsignal += (spuv << 3) - 32;
+    }
+    if (num_16x16_skin > 12) {
+      *force_split = 1;
+      return 1;
+    }
+  }
+  return 0;
+}
+#endif
+
 // This function chooses partitioning based on the variance between source and
 // reconstructed last, where variance is computed for down-sampled inputs.
 static int choose_partitioning(VP9_COMP *cpi,
-                                const TileInfo *const tile,
-                                MACROBLOCK *x,
-                                int mi_row, int mi_col) {
+                               const TileInfo *const tile,
+                               MACROBLOCK *x,
+                               int mi_row, int mi_col) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   int i, j, k, m;
@@ -771,70 +838,13 @@ static int choose_partitioning(VP9_COMP *cpi,
     set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
-    // Check if most of the superblock is skin content, and if so, force split
-    // to 32x32, and set x->sb_is_skin for use in mode selection.
-    // Avoid checking superblocks on/near boundary and avoid low resolutions.
-    // Note superblock may still pick 64X64 if y_sad is very small
-    // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
     x->sb_is_skin = 0;
 #if !CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->use_skin_detection && !low_res && (mi_col >= 8 &&
-        mi_col + 8 < cm->mi_cols && mi_row >= 8 && mi_row + 8 < cm->mi_rows)) {
-      int bl_index1, bl_index2, bl_index3;
-      int num_16x16_skin = 0;
-      int num_16x16_nonskin = 0;
-      int is_skin = 0;
-      int consec_zeromv = 0;
-      uint8_t *ysignal = x->plane[0].src.buf;
-      uint8_t *usignal = x->plane[1].src.buf;
-      uint8_t *vsignal = x->plane[2].src.buf;
-      int spuv = x->plane[1].src.stride;
-      const int block_index = mi_row * cm->mi_cols + mi_col;
-      const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
-      const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
-      const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
-      const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
-      // Loop through the 16x16 sub-blocks.
-      int j, i;
-      for (i = 0; i < ymis; i+=2) {
-        for (j = 0; j < xmis; j+=2) {
-          int bl_index = block_index + i * cm->mi_cols + j;
-          bl_index1 = bl_index + 1;
-          bl_index2 = bl_index + cm->mi_cols;
-          bl_index3 = bl_index2 + 1;
-          consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index],
-                                 VPXMIN(cpi->consec_zero_mv[bl_index1],
-                                 VPXMIN(cpi->consec_zero_mv[bl_index2],
-                                 cpi->consec_zero_mv[bl_index3])));
-          is_skin = vp9_compute_skin_block(ysignal,
-                                           usignal,
-                                           vsignal,
-                                           sp,
-                                           spuv,
-                                           BLOCK_16X16,
-                                           consec_zeromv,
-                                           0);
-          num_16x16_skin += is_skin;
-          num_16x16_nonskin += (1 - is_skin);
-          if (num_16x16_nonskin > 3) {
-            // Exit loop if at least 4 of the 16x16 blocks are not skin.
-            i = ymis;
-            j = xmis;
-          }
-          ysignal += 16;
-          usignal += 8;
-          vsignal += 8;
-        }
-        ysignal += (sp << 4) - 64;
-        usignal += (spuv << 3) - 32;
-        vsignal += (spuv << 3) - 32;
-      }
-      if (num_16x16_skin > 12) {
-        x->sb_is_skin = 1;
-        force_split[0] = 1;
-      }
-    }
+    if (cpi->use_skin_detection)
+      x->sb_is_skin = skin_sb_split(cpi, x, low_res, mi_row, mi_col,
+                                    &force_split[0]);
 #endif
+
     for (i = 1; i <= 2; ++i) {
       struct macroblock_plane  *p = &x->plane[i];
       struct macroblockd_plane *pd = &xd->plane[i];
