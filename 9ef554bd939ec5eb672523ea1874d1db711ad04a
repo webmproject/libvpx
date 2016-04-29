@@ -52,6 +52,24 @@
       "revId": "9ef554bd939ec5eb672523ea1874d1db711ad04a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "480b6d61_31a683d2",
+        "filename": "test/external_frame_buffer_planes_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-04-29T18:40:04Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "480b6d61_1ef39184",
+      "revId": "9ef554bd939ec5eb672523ea1874d1db711ad04a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
