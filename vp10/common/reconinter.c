@@ -1185,6 +1185,11 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
   const TileInfo *const tile = &xd->tile;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int plane, i, mi_step;
+#if CONFIG_EXT_TILE
+  int above_available = mi_row > 0 && (mi_row - 1 >= tile->mi_row_start);
+#else
+  int above_available = mi_row > 0;
+#endif  // CONFIG_EXT_TILE
 #if CONFIG_VP9_HIGHBITDEPTH
   int is_hbd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -1214,7 +1219,7 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
   }
 
   // handle above row
-  for (i = 0; mi_row > 0 && i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col);
+  for (i = 0; above_available && i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col);
        i += mi_step) {
     int mi_row_offset = -1;
     int mi_col_offset = i;
@@ -1274,8 +1279,7 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
     }
   }  // each mi in the above row
 
-  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start) ||
-      (mi_col - 1) >= tile->mi_col_end)
+  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start))
     return;
   // handle left column
   for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row);
@@ -1357,10 +1361,17 @@ void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
                                           int mi_row, int mi_col,
                                           uint8_t *tmp_buf[MAX_MB_PLANE],
                                           int tmp_stride[MAX_MB_PLANE]) {
+#if CONFIG_EXT_TILE
+  const TileInfo *const tile = &xd->tile;
+#endif  // CONFIG_EXT_TILE
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int i, j, mi_step, ref;
 
+#if CONFIG_EXT_TILE
+  if (mi_row == 0 || (mi_row - 1) < tile->mi_row_start)
+#else
   if (mi_row == 0)
+#endif  // CONFIG_EXT_TILE
     return;
 
   for (i = 0; i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {
@@ -1462,8 +1473,7 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int i, j, mi_step, ref;
 
-  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start) ||
-      (mi_col - 1) >= tile->mi_col_end)
+  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start))
     return;
 
   for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row); i += mi_step) {
@@ -1473,7 +1483,6 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
     MODE_INFO *left_mi = xd->mi[mi_col_offset +
                                 mi_row_offset * xd->mi_stride];
     MB_MODE_INFO *left_mbmi = &left_mi->mbmi;
-    const int is_compound = has_second_ref(left_mbmi);
 #if CONFIG_EXT_INTER
     MB_MODE_INFO backup_mbmi;
 #endif  // CONFIG_EXT_INTER
@@ -1496,7 +1505,7 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
                        i, 0, NULL,
                        pd->subsampling_x, pd->subsampling_y);
     }
-    for (ref = 0; ref < 1 + is_compound; ++ref) {
+    for (ref = 0; ref < 1 + has_second_ref(left_mbmi); ++ref) {
       MV_REFERENCE_FRAME frame = left_mbmi->ref_frame[ref];
       RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
 
