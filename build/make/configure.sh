@@ -1018,18 +1018,7 @@ EOF
           NM="$(${XCRUN_FIND} nm)"
           RANLIB="$(${XCRUN_FIND} ranlib)"
           AS_SFX=.s
-
-          # Special handling of ld for armv6 because libclang_rt.ios.a does
-          # not contain armv6 support in Apple's clang package:
-          #   Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn).
-          # TODO(tomfinegan): Remove this. Our minimum iOS version (6.0)
-          # renders support for armv6 unnecessary because the 3GS and up
-          # support neon.
-          if [ "${tgt_isa}" = "armv6" ]; then
-            LD="$(${XCRUN_FIND} ld)"
-          else
-            LD="${CXX:-$(${XCRUN_FIND} ld)}"
-          fi
+          LD="${CXX:-$(${XCRUN_FIND} ld)}"
 
           # ASFLAGS is written here instead of using check_add_asflags
           # because we need to overwrite all of ASFLAGS and purge the
