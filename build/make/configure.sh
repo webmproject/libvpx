@@ -751,7 +751,13 @@ process_common_toolchain() {
   enabled shared && soft_enable pic
 
   # Minimum iOS version for all target platforms (darwin and iphonesimulator).
-  IOS_VERSION_MIN="6.0"
+  if enabled shared; then
+    IOS_VERSION_OPTIONS="--enable-shared"
+  else
+    IOS_VERSION_OPTIONS=""
+  fi
+  IOS_VERSION_MIN=$("${source_path}/build/make/ios-version.sh" \
+    ${IOS_VERSION_OPTIONS})
 
   # Handle darwin variants. Newer SDKs allow targeting older
   # platforms, so use the newest one available.
