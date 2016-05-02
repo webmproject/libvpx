@@ -198,7 +198,11 @@ typedef struct {
   PALETTE_MODE_INFO palette_mode_info;
 
   // Only for INTER blocks
+#if CONFIG_DUAL_FILTER
+  INTERP_FILTER interp_filter[4];
+#else
   INTERP_FILTER interp_filter;
+#endif
   MV_REFERENCE_FRAME ref_frame[2];
   TX_TYPE tx_type;
 

@@ -14,6 +14,44 @@
 #include "vp10/common/seg_common.h"
 
 // Returns a context number for the given MB prediction signal
+#if CONFIG_DUAL_FILTER
+int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd, int dir) {
+  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  MV_REFERENCE_FRAME ref_frame = (dir < 2) ?
+      mbmi->ref_frame[0] : mbmi->ref_frame[1];
+  // Note:
+  // The mode info data structure has a one element border above and to the
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
+  const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
+  const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
+  int left_type = SWITCHABLE_FILTERS;
+  int above_type = SWITCHABLE_FILTERS;
+
+  if (xd->left_available) {
+    if (left_mbmi->ref_frame[0] == ref_frame)
+      left_type = left_mbmi->interp_filter[(dir & 0x01)];
+    else if (left_mbmi->ref_frame[1] == ref_frame)
+      left_type = left_mbmi->interp_filter[(dir & 0x01) + 2];
+  }
+
+  if (xd->up_available) {
+    if (above_mbmi->ref_frame[0] == ref_frame)
+      above_type = above_mbmi->interp_filter[(dir & 0x01)];
+    else if (above_mbmi->ref_frame[1] == ref_frame)
+      above_type = above_mbmi->interp_filter[(dir & 0x01) + 2];
+  }
+
+  if (left_type == above_type)
+    return left_type;
+  else if (left_type == SWITCHABLE_FILTERS && above_type != SWITCHABLE_FILTERS)
+    return above_type;
+  else if (left_type != SWITCHABLE_FILTERS && above_type == SWITCHABLE_FILTERS)
+    return left_type;
+  else
+    return SWITCHABLE_FILTERS;
+}
+#else
 int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // Note:
   // The mode info data structure has a one element border above and to the
@@ -35,6 +73,7 @@ int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   else
     return SWITCHABLE_FILTERS;
 }
+#endif
 
 #if CONFIG_EXT_INTRA
 // Obtain the reference filter type from the above/left neighbor blocks.
@@ -44,7 +83,11 @@ static INTRA_FILTER get_ref_intra_filter(const MB_MODE_INFO *ref_mbmi) {
   if (ref_mbmi->sb_type >= BLOCK_8X8) {
     PREDICTION_MODE mode = ref_mbmi->mode;
     if (is_inter_block(ref_mbmi)) {
+#if CONFIG_DUAL_FILTER
+      switch (ref_mbmi->interp_filter[0]) {
+#else
       switch (ref_mbmi->interp_filter) {
+#endif
         case EIGHTTAP_REGULAR:
           ref_type = INTRA_FILTER_8TAP;
           break;

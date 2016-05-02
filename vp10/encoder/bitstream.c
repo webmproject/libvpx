@@ -920,18 +920,42 @@ static void write_switchable_interp_filter(VP10_COMP *cpi,
                                            vp10_writer *w) {
   VP10_COMMON *const cm = &cpi->common;
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+#if CONFIG_DUAL_FILTER
+  int dir;
+#endif
   if (cm->interp_filter == SWITCHABLE) {
-    const int ctx = vp10_get_pred_context_switchable_interp(xd);
 #if CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
+    if (!vp10_is_interp_needed(xd)) {
+      assert(mbmi->interp_filter[0] == EIGHTTAP_REGULAR);
+      return;
+    }
+#else
     if (!vp10_is_interp_needed(xd)) {
       assert(mbmi->interp_filter == EIGHTTAP_REGULAR);
       return;
     }
-#endif
+#endif  // CONFIG_DUAL_FILTER
+#endif  // CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
+    for (dir = 0; dir < 4; ++dir) {
+      const int frame_idx = (dir >> 1);
+      if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
+          has_subpel_mv_component(xd, dir)) {
+        const int ctx = vp10_get_pred_context_switchable_interp(xd, dir);
+        vp10_write_token(w, vp10_switchable_interp_tree,
+              cm->fc->switchable_interp_prob[ctx],
+              &switchable_interp_encodings[mbmi->interp_filter[dir]]);
+        ++cpi->interp_filter_selected[0][mbmi->interp_filter[dir]];
+      }
+    }
+#else
+    const int ctx = vp10_get_pred_context_switchable_interp(xd);
     vp10_write_token(w, vp10_switchable_interp_tree,
                      cm->fc->switchable_interp_prob[ctx],
                      &switchable_interp_encodings[mbmi->interp_filter]);
     ++cpi->interp_filter_selected[0][mbmi->interp_filter];
+#endif
   }
 }
 
@@ -1140,7 +1164,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
       }
     }
 
-#if !CONFIG_EXT_INTERP
+#if !CONFIG_EXT_INTERP && !CONFIG_DUAL_FILTER
     write_switchable_interp_filter(cpi, xd, w);
 #endif  // !CONFIG_EXT_INTERP
 
@@ -1348,7 +1372,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_EXT_INTERP
+#if CONFIG_EXT_INTERP || CONFIG_DUAL_FILTER
     write_switchable_interp_filter(cpi, xd, w);
 #endif  // CONFIG_EXT_INTERP
   }

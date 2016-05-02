@@ -25,16 +25,37 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
                                    const int subpel_x,
                                    const int subpel_y,
                                    const struct scale_factors *sf,
-                                   int w, int h, int ref,
+                                   int w, int h, int ref_idx,
+#if CONFIG_DUAL_FILTER
+                                   const INTERP_FILTER *interp_filter,
+#else
                                    const INTERP_FILTER interp_filter,
+#endif
                                    int xs, int ys) {
+#if CONFIG_DUAL_FILTER
+  InterpFilterParams interp_filter_params_x =
+      vp10_get_interp_filter_params(interp_filter[1 + 2 * ref_idx]);
+  InterpFilterParams interp_filter_params_y =
+      vp10_get_interp_filter_params(interp_filter[0 + 2 * ref_idx]);
+#else
   InterpFilterParams interp_filter_params =
       vp10_get_interp_filter_params(interp_filter);
+#endif
+
+#if CONFIG_DUAL_FILTER
+  if (interp_filter_params_x.taps == SUBPEL_TAPS &&
+      interp_filter_params_y.taps == SUBPEL_TAPS) {
+    const int16_t *kernel_x =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params_x, subpel_x);
+    const int16_t *kernel_y =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params_y, subpel_y);
+#else
   if (interp_filter_params.taps == SUBPEL_TAPS) {
     const int16_t *kernel_x =
         vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_x);
     const int16_t *kernel_y =
         vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_y);
+#endif
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
     if (IsInterpolatingFilter(interp_filter)) {
       // Interpolating filter
@@ -47,17 +68,16 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
           kernel_x, xs, kernel_y, ys, w, h);
     }
 #else
-    sf->predict[subpel_x != 0][subpel_y != 0][ref](
+    sf->predict[subpel_x != 0][subpel_y != 0][ref_idx](
         src, src_stride, dst, dst_stride,
         kernel_x, xs, kernel_y, ys, w, h);
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   } else {
-    // ref > 0 means this is the second reference frame
+    // ref_idx > 0 means this is the second reference frame
     // first reference frame's prediction result is already in dst
     // therefore we need to average the first and second results
-    int avg = ref > 0;
-    vp10_convolve(src, src_stride, dst, dst_stride, w, h, interp_filter_params,
-                  subpel_x, xs, subpel_y, ys, avg);
+    vp10_convolve(src, src_stride, dst, dst_stride, w, h, interp_filter,
+                  subpel_x, xs, subpel_y, ys, ref_idx);
   }
 }
 
@@ -126,7 +146,11 @@ static INLINE void vp10_make_inter_predictor(
     const int subpel_y,
     const struct scale_factors *sf,
     int w, int h, int ref,
+#if CONFIG_DUAL_FILTER
+    const INTERP_FILTER *interp_filter,
+#else
     const INTERP_FILTER interp_filter,
+#endif
     int xs, int ys,
     const MACROBLOCKD *xd) {
   (void) xd;
@@ -152,7 +176,11 @@ void vp10_make_masked_inter_predictor(
     const int subpel_y,
     const struct scale_factors *sf,
     int w, int h,
+#if CONFIG_DUAL_FILTER
+    const INTERP_FILTER *interp_filter,
+#else
     const INTERP_FILTER interp_filter,
+#endif
     int xs, int ys,
 #if CONFIG_SUPERTX
     int wedge_offset_x, int wedge_offset_y,
@@ -284,7 +312,11 @@ void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
                                const MV *mv_q3,
                                const struct scale_factors *sf,
                                int w, int h, int do_avg,
+#if CONFIG_DUAL_FILTER
+                               const INTERP_FILTER *interp_filter,
+#else
                                const INTERP_FILTER interp_filter,
+#endif
                                enum mv_precision precision,
                                int x, int y);
 
@@ -324,6 +356,54 @@ void vp10_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
 void vp10_setup_pre_planes(MACROBLOCKD *xd, int idx,
                           const YV12_BUFFER_CONFIG *src, int mi_row, int mi_col,
                           const struct scale_factors *sf);
+
+#if CONFIG_DUAL_FILTER
+// Detect if the block have sub-pixel level motion vectors
+// per component.
+static INLINE int has_subpel_mv_component(const MACROBLOCKD *const xd,
+                                          int dir) {
+  MODE_INFO *const mi = xd->mi[0];
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
+  int plane;
+  int ref = (dir >> 1);
+
+  if (bsize >= BLOCK_8X8) {
+    if (dir & 0x01) {
+      if (mbmi->mv[ref].as_mv.col & SUBPEL_MASK)
+        return 1;
+    } else {
+      if (mbmi->mv[ref].as_mv.row & SUBPEL_MASK)
+        return 1;
+    }
+  } else {
+    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+      const PARTITION_TYPE bp = BLOCK_8X8 - bsize;
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+      const int have_vsplit = bp != PARTITION_HORZ;
+      const int have_hsplit = bp != PARTITION_VERT;
+      const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
+      const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
+
+      int x, y;
+      for (y = 0; y < num_4x4_h; ++y) {
+        for (x = 0; x < num_4x4_w; ++x) {
+          const MV mv = average_split_mvs(pd, mi, ref, y * 2 + x);
+          if (dir & 0x01) {
+            if (mv.col & SUBPEL_MASK)
+              return 1;
+          } else {
+            if (mv.row & SUBPEL_MASK)
+              return 1;
+          }
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+#endif
 
 #if CONFIG_EXT_INTERP
 static INLINE int vp10_is_interp_needed(const MACROBLOCKD *const xd) {

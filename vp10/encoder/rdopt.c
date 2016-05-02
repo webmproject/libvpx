@@ -4607,7 +4607,14 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                        mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]};
   int_mv ref_mv[2];
   int ite, ref;
+#if CONFIG_DUAL_FILTER
+  INTERP_FILTER interp_filter[4] = {
+      mbmi->interp_filter[0], mbmi->interp_filter[1],
+      mbmi->interp_filter[2], mbmi->interp_filter[3],
+  };
+#else
   const INTERP_FILTER interp_filter = mbmi->interp_filter;
+#endif
   struct scale_factors sf;
 
   // Do joint motion search in compound mode to get more accurate mv.
@@ -4679,6 +4686,14 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     // Initialized here because of compiler problem in Visual Studio.
     ref_yv12[0] = xd->plane[0].pre[0];
     ref_yv12[1] = xd->plane[0].pre[1];
+
+#if CONFIG_DUAL_FILTER
+    // reload the filter types
+    interp_filter[0] = (id == 0) ?
+        mbmi->interp_filter[2] : mbmi->interp_filter[0];
+    interp_filter[1] = (id == 0) ?
+        mbmi->interp_filter[3] : mbmi->interp_filter[1];
+#endif
 
     // Get the prediction block from the 'other' reference frame.
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -5255,13 +5270,21 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
             continue;
         }
 
+#if CONFIG_DUAL_FILTER
+        (void)run_mv_search;
+#endif
+
         if (has_second_rf &&
 #if CONFIG_EXT_INTER
             this_mode == NEW_NEWMV &&
 #else
             this_mode == NEWMV &&
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_DUAL_FILTER
+            1) {
+#else
             (mbmi->interp_filter == EIGHTTAP_REGULAR || run_mv_search)) {
+#endif
           // adjust src pointers
           mi_buf_shift(x, i);
           if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
@@ -6182,6 +6205,10 @@ static INTERP_FILTER predict_interp_filter(const VP10_COMP *cpi,
   const int this_mode = mbmi->mode;
   int refs[2] = { mbmi->ref_frame[0],
       (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
+#if CONFIG_DUAL_FILTER
+  (void)pred_filter_search;
+  return SWITCHABLE;
+#else
   if (pred_filter_search) {
     INTERP_FILTER af = SWITCHABLE, lf = SWITCHABLE;
     if (xd->up_available)
@@ -6197,6 +6224,7 @@ static INTERP_FILTER predict_interp_filter(const VP10_COMP *cpi,
 #endif  // CONFIG_EXT_INTER
       best_filter = af;
   }
+#endif
   if (is_comp_pred) {
     if (cpi->sf.adaptive_mode_search) {
 #if CONFIG_EXT_INTER
@@ -6672,7 +6700,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       int tmp_skip_sb = 0;
       int64_t tmp_skip_sse = INT64_MAX;
 
+#if CONFIG_DUAL_FILTER
+      for (j = 0; j < 4; ++j)
+        mbmi->interp_filter[j] = i;
+#else
       mbmi->interp_filter = i;
+#endif
       rs = vp10_get_switchable_rate(cpi, xd);
       rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
 
@@ -6697,7 +6730,13 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
             is_comp_interintra_pred ||
 #endif  // CONFIG_EXT_INTER
             (cm->interp_filter != SWITCHABLE &&
-             (cm->interp_filter == mbmi->interp_filter ||
+             (
+#if CONFIG_DUAL_FILTER
+              cm->interp_filter == mbmi->interp_filter[0]
+#else
+              cm->interp_filter == mbmi->interp_filter
+#endif
+              ||
               (i == 0 && intpel_mv && IsInterpolatingFilter(i))))) {
           restore_dst_buf(xd, orig_dst, orig_dst_stride);
         } else {
@@ -6730,7 +6769,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
       if (newbest) {
         best_rd = rd;
+#if CONFIG_DUAL_FILTER
+        best_filter = mbmi->interp_filter[0];
+#else
         best_filter = mbmi->interp_filter;
+#endif
         if (cm->interp_filter == SWITCHABLE && i &&
             !(intpel_mv && IsInterpolatingFilter(i)))
           best_needs_copy = !best_needs_copy;
@@ -6738,7 +6781,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
       if ((cm->interp_filter == SWITCHABLE && newbest) ||
           (cm->interp_filter != SWITCHABLE &&
+#if CONFIG_DUAL_FILTER
+           cm->interp_filter == mbmi->interp_filter[0])) {
+#else
            cm->interp_filter == mbmi->interp_filter)) {
+#endif
         pred_exists = 1;
         tmp_rd = best_rd;
 
@@ -6754,8 +6801,17 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   // Set the appropriate filter
+#if CONFIG_DUAL_FILTER
+  for (i = 0; i < 4; ++i) {
+    const int frame_idx = (i >> 1);
+    if (mbmi->ref_frame[frame_idx] > INTRA_FRAME)
+      mbmi->interp_filter[i] = cm->interp_filter != SWITCHABLE ?
+          cm->interp_filter : best_filter;
+  }
+#else
   mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
       cm->interp_filter : best_filter;
+#endif
   rs = cm->interp_filter == SWITCHABLE ? vp10_get_switchable_rate(cpi, xd) : 0;
 
 #if CONFIG_EXT_INTER
@@ -7106,7 +7162,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_EXT_INTERP
   if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE) {
+#if CONFIG_DUAL_FILTER
+    for (i = 0; i < 4; ++i)
+      mbmi->interp_filter[i] = EIGHTTAP_REGULAR;
+#else
     mbmi->interp_filter = EIGHTTAP_REGULAR;
+#endif
     pred_exists = 0;
   }
 #endif  // CONFIG_EXT_INTERP
@@ -7136,8 +7197,13 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     memcpy(bsse, x->bsse, sizeof(bsse));
   }
 
+#if CONFIG_DUAL_FILTER
+  if (!is_comp_pred)
+    single_filter[this_mode][refs[0]] = mbmi->interp_filter[0];
+#else
   if (!is_comp_pred)
     single_filter[this_mode][refs[0]] = mbmi->interp_filter;
+#endif
 
   if (cpi->sf.adaptive_mode_search)
     if (is_comp_pred)
@@ -8190,8 +8256,15 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #endif  // CONFIG_EXT_INTRA
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
+#if CONFIG_DUAL_FILTER
+    for (i = 0; i < 4; ++i) {
+      mbmi->interp_filter[i] = cm->interp_filter == SWITCHABLE ?
+          EIGHTTAP_REGULAR : cm->interp_filter;
+    }
+#else
     mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP_REGULAR
                                                           : cm->interp_filter;
+#endif
     mbmi->mv[0].as_int = mbmi->mv[1].as_int = 0;
 #if CONFIG_OBMC
     mbmi->obmc = 0;
@@ -9100,9 +9173,26 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     }
   }
 
+#if CONFIG_DUAL_FILTER
+  assert((cm->interp_filter == SWITCHABLE) ||
+         (cm->interp_filter == best_mbmode.interp_filter[0]) ||
+         !is_inter_block(&best_mbmode));
+  assert((cm->interp_filter == SWITCHABLE) ||
+         (cm->interp_filter == best_mbmode.interp_filter[1]) ||
+         !is_inter_block(&best_mbmode));
+  if (best_mbmode.ref_frame[1] > INTRA_FRAME) {
+    assert((cm->interp_filter == SWITCHABLE) ||
+           (cm->interp_filter == best_mbmode.interp_filter[2]) ||
+           !is_inter_block(&best_mbmode));
+    assert((cm->interp_filter == SWITCHABLE) ||
+           (cm->interp_filter == best_mbmode.interp_filter[3]) ||
+           !is_inter_block(&best_mbmode));
+  }
+#else
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
+#endif
 
   if (!cpi->rc.is_src_frame_alt_ref)
     vp10_update_rd_thresh_fact(cm, tile_data->thresh_freq_fact,
@@ -9214,21 +9304,41 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
       int rs;
       int best_rs = INT_MAX;
       for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
+#if CONFIG_DUAL_FILTER
+        int k;
+        for (k = 0; k < 4; ++k)
+          mbmi->interp_filter[k] = i;
+#else
         mbmi->interp_filter = i;
+#endif
         rs = vp10_get_switchable_rate(cpi, xd);
         if (rs < best_rs) {
           best_rs = rs;
+#if CONFIG_DUAL_FILTER
+          best_filter = mbmi->interp_filter[0];
+#else
           best_filter = mbmi->interp_filter;
+#endif
         }
       }
     }
   }
   // Set the appropriate filter
   if (cm->interp_filter == SWITCHABLE) {
+#if CONFIG_DUAL_FILTER
+    for (i = 0; i < 4; ++i)
+      mbmi->interp_filter[i] = best_filter;
+#else
     mbmi->interp_filter = best_filter;
+#endif
     rate2 += vp10_get_switchable_rate(cpi, xd);
   } else {
+#if CONFIG_DUAL_FILTER
+    for (i = 0; i < 4; ++i)
+      mbmi->interp_filter[0] = cm->interp_filter;
+#else
     mbmi->interp_filter = cm->interp_filter;
+#endif
   }
 
   if (cm->reference_mode == REFERENCE_MODE_SELECT)
@@ -9249,8 +9359,13 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
     return;
   }
 
+#if CONFIG_DUAL_FILTER
+  assert((cm->interp_filter == SWITCHABLE) ||
+         (cm->interp_filter == mbmi->interp_filter[0]));
+#else
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == mbmi->interp_filter));
+#endif
 
   vp10_update_rd_thresh_fact(cm, tile_data->thresh_freq_fact,
                              cpi->sf.adaptive_rd_thresh, bsize, THR_ZEROMV);
@@ -9542,8 +9657,14 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     mbmi->ref_frame[1] = second_ref_frame;
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
+#if CONFIG_DUAL_FILTER
+    for (i = 0; i < 4; ++i)
+      mbmi->interp_filter[i] = cm->interp_filter == SWITCHABLE ?
+          EIGHTTAP_REGULAR : cm->interp_filter;
+#else
     mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP_REGULAR
                                                           : cm->interp_filter;
+#endif
     x->skip = 0;
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
 
@@ -9638,7 +9759,13 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
             int newbest, rs;
             int64_t rs_rd;
             MB_MODE_INFO_EXT *mbmi_ext = x->mbmi_ext;
+#if CONFIG_DUAL_FILTER
+            int dir;
+            for (dir = 0; dir < 4; ++dir)
+              mbmi->interp_filter[dir] = switchable_filter_index;
+#else
             mbmi->interp_filter = switchable_filter_index;
+#endif
             tmp_rd = rd_pick_best_sub8x8_mode(cpi, x,
                                               &mbmi_ext->ref_mvs[ref_frame][0],
                                               second_ref, best_yrd, &rate,
@@ -9651,9 +9778,15 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                                               bsi, switchable_filter_index,
                                               mi_row, mi_col);
 #if CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
+            if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
+                mbmi->interp_filter[0] != EIGHTTAP_REGULAR)  // invalid config
+              continue;
+#else
             if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
                 mbmi->interp_filter != EIGHTTAP_REGULAR)  // invalid config
               continue;
+#endif
 #endif  // CONFIG_EXT_INTERP
             if (tmp_rd == INT64_MAX)
               continue;
@@ -9664,11 +9797,21 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 
             newbest = (tmp_rd < tmp_best_rd);
             if (newbest) {
+#if CONFIG_DUAL_FILTER
+              tmp_best_filter = mbmi->interp_filter[0];
+#else
               tmp_best_filter = mbmi->interp_filter;
+#endif
               tmp_best_rd = tmp_rd;
             }
             if ((newbest && cm->interp_filter == SWITCHABLE) ||
-                (mbmi->interp_filter == cm->interp_filter &&
+                (
+#if CONFIG_DUAL_FILTER
+                 mbmi->interp_filter[0] == cm->interp_filter
+#else
+                 mbmi->interp_filter == cm->interp_filter
+#endif
+                 &&
                  cm->interp_filter != SWITCHABLE)) {
               tmp_best_rdu = tmp_rd;
               tmp_best_rate = rate;
@@ -9682,17 +9825,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                 x->zcoeff_blk[TX_4X4][i] = !x->plane[0].eobs[i];
               }
               pred_exists = 1;
-              if (switchable_filter_index == 0 &&
-                  sf->use_rd_breakout &&
-                  best_rd < INT64_MAX) {
-                if (tmp_best_rdu / 2 > best_rd) {
-                  // skip searching the other filters if the first is
-                  // already substantially larger than the best so far
-                  tmp_best_filter = mbmi->interp_filter;
-                  tmp_best_rdu = INT64_MAX;
-                  break;
-                }
-              }
             }
           }  // switchable_filter_index loop
         }
@@ -9701,8 +9833,14 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
       if (tmp_best_rdu == INT64_MAX && pred_exists)
         continue;
 
+#if CONFIG_DUAL_FILTER
+      for (i = 0; i < 4; ++i)
+        mbmi->interp_filter[i] = (cm->interp_filter == SWITCHABLE ?
+                               tmp_best_filter : cm->interp_filter);
+#else
       mbmi->interp_filter = (cm->interp_filter == SWITCHABLE ?
                              tmp_best_filter : cm->interp_filter);
+#endif
 
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
@@ -9718,10 +9856,16 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
                                           bsi, 0,
                                           mi_row, mi_col);
 #if CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
         if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
-            mbmi->interp_filter != EIGHTTAP_REGULAR) {
+            mbmi->interp_filter[0] != EIGHTTAP_REGULAR)
+          for (i = 0; i < 4; ++i)
+            mbmi->interp_filter[i] = EIGHTTAP_REGULAR;
+#else
+        if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
+            mbmi->interp_filter != EIGHTTAP_REGULAR)
           mbmi->interp_filter = EIGHTTAP_REGULAR;
-        }
+#endif  // CONFIG_DUAL_FILTER
 #endif  // CONFIG_EXT_INTERP
         if (tmp_rd == INT64_MAX)
           continue;
@@ -9968,9 +10112,15 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     return;
   }
 
+#if CONFIG_DUAL_FILTER
+  assert((cm->interp_filter == SWITCHABLE) ||
+         (cm->interp_filter == best_mbmode.interp_filter[0]) ||
+         !is_inter_block(&best_mbmode));
+#else
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
+#endif
 
   vp10_update_rd_thresh_fact(cm, tile_data->thresh_freq_fact,
                              sf->adaptive_rd_thresh, bsize, best_ref_index);

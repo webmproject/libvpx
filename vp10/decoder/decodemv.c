@@ -866,6 +866,9 @@ static int read_is_obmc_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 
 static INLINE INTERP_FILTER read_interp_filter(
     VP10_COMMON *const cm, MACROBLOCKD *const xd,
+#if CONFIG_DUAL_FILTER
+    int dir,
+#endif
     vp10_reader *r) {
 #if CONFIG_EXT_INTERP
   if (!vp10_is_interp_needed(xd)) return EIGHTTAP_REGULAR;
@@ -873,7 +876,11 @@ static INLINE INTERP_FILTER read_interp_filter(
   if (cm->interp_filter != SWITCHABLE) {
     return cm->interp_filter;
   } else {
+#if CONFIG_DUAL_FILTER
+    const int ctx = vp10_get_pred_context_switchable_interp(xd, dir);
+#else
     const int ctx = vp10_get_pred_context_switchable_interp(xd);
+#endif
     FRAME_COUNTS *counts = xd->counts;
     const INTERP_FILTER type =
       (INTERP_FILTER)vp10_read_tree(r, vp10_switchable_interp_tree,
@@ -1384,9 +1391,9 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 #endif
 
-#if !CONFIG_EXT_INTERP
+#if !CONFIG_EXT_INTERP && !CONFIG_DUAL_FILTER
   mbmi->interp_filter = read_interp_filter(cm, xd, r);
-#endif  // !CONFIG_EXT_INTERP
+#endif  // !CONFIG_EXT_INTERP && !CONFIG_DUAL_FILTER
 
   if (bsize < BLOCK_8X8) {
     const int num_4x4_w = 1 << xd->bmode_blocks_wl;
@@ -1606,9 +1613,21 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 #endif  // CONFIG_EXT_INTER
 
+#if CONFIG_DUAL_FILTER
+  for (ref = 0; ref < 4; ++ref) {
+    const int frame_idx = (ref >> 1);
+    mbmi->interp_filter[ref] = (cm->interp_filter == SWITCHABLE) ?
+        EIGHTTAP_REGULAR : cm->interp_filter;
+
+    if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
+        has_subpel_mv_component(xd, ref))
+      mbmi->interp_filter[ref] = read_interp_filter(cm, xd, ref, r);
+  }
+#else
 #if CONFIG_EXT_INTERP
   mbmi->interp_filter = read_interp_filter(cm, xd, r);
 #endif  // CONFIG_EXT_INTERP
+#endif  // CONFIG_DUAL_FILTER
 }
 
 static void read_inter_frame_mode_info(VP10Decoder *const pbi,

@@ -927,7 +927,12 @@ static void choose_partitioning(VP10_COMP *const cpi,
     mbmi->ref_frame[1] = NONE;
     mbmi->sb_type = cm->sb_size;
     mbmi->mv[0].as_int = 0;
+#if CONFIG_DUAL_FILTER
+    for (i = 0; i < 4; ++i)
+      mbmi->interp_filter[i] = BILINEAR;
+#else
     mbmi->interp_filter = BILINEAR;
+#endif
 
     y_sad = vp10_int_pro_motion_estimation(cpi, x, bsize, mi_row, mi_col);
 
@@ -1018,6 +1023,34 @@ static void choose_partitioning(VP10_COMP *const cpi,
   set_vt_partitioning(cpi, x, xd, vt, mi_row, mi_col, thre, bmin);
 }
 
+#if CONFIG_DUAL_FILTER
+static void reset_intmv_filter_type(VP10_COMMON *cm,
+                                    MACROBLOCKD *xd, MB_MODE_INFO *mbmi) {
+  int dir;
+  for (dir = 0; dir < 4; ++dir) {
+    const int frame_idx = (dir >> 1);
+    if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
+        !has_subpel_mv_component(xd, dir))
+      mbmi->interp_filter[dir] = (cm->interp_filter == SWITCHABLE) ?
+          EIGHTTAP_REGULAR : cm->interp_filter;
+  }
+}
+
+static void update_filter_type_count(FRAME_COUNTS *counts,
+                                     const MACROBLOCKD *xd,
+                                     const MB_MODE_INFO *mbmi) {
+  int dir;
+  for (dir = 0; dir < 4; ++dir) {
+    const int frame_idx = (dir >> 1);
+    if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
+        has_subpel_mv_component(xd, dir)) {
+      const int ctx = vp10_get_pred_context_switchable_interp(xd, dir);
+      ++counts->switchable_interp[ctx][mbmi->interp_filter[dir]];
+    }
+  }
+}
+#endif
+
 static void update_state(VP10_COMP *cpi, ThreadData *td,
                          PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
@@ -1056,6 +1089,10 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
 
   *mi_addr = *mi;
   *x->mbmi_ext = ctx->mbmi_ext;
+
+#if CONFIG_DUAL_FILTER
+  reset_intmv_filter_type(cm, xd, mbmi);
+#endif
 
 #if CONFIG_REF_MV
   rf_type = vp10_ref_frame_type(mbmi->ref_frame);
@@ -1167,8 +1204,12 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
           && vp10_is_interp_needed(xd)
 #endif
           ) {
+#if CONFIG_DUAL_FILTER
+        update_filter_type_count(td->counts, xd, mbmi);
+#else
         const int ctx = vp10_get_pred_context_switchable_interp(xd);
         ++td->counts->switchable_interp[ctx][mbmi->interp_filter];
+#endif
       }
     }
 
@@ -1223,6 +1264,10 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
   *x->mbmi_ext = ctx->mbmi_ext;
   assert(is_inter_block(mbmi));
   assert(mbmi->tx_size == ctx->mic.mbmi.tx_size);
+
+#if CONFIG_DUAL_FILTER
+  reset_intmv_filter_type(cm, xd, mbmi);
+#endif
 
 #if CONFIG_REF_MV
   rf_type = vp10_ref_frame_type(mbmi->ref_frame);
@@ -1311,8 +1356,12 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
         && vp10_is_interp_needed(xd)
 #endif
         ) {
+#if CONFIG_DUAL_FILTER
+      update_filter_type_count(td->counts, xd, mbmi);
+#else
       const int ctx = vp10_get_pred_context_switchable_interp(xd);
       ++td->counts->switchable_interp[ctx][mbmi->interp_filter];
+#endif
     }
 
     rdc->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
@@ -3563,9 +3612,15 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     subsize = get_subsize(bsize, PARTITION_SPLIT);
     if (bsize == BLOCK_8X8) {
       i = 4;
+#if CONFIG_DUAL_FILTER
+      if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
+        pc_tree->leaf_split[0]->pred_interp_filter =
+            ctx->mic.mbmi.interp_filter[0];
+#else
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
         pc_tree->leaf_split[0]->pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
+#endif
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
                        &sum_rate_nocoef,
@@ -3747,10 +3802,17 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     subsize = get_subsize(bsize, PARTITION_HORZ);
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, ctx);
+#if CONFIG_DUAL_FILTER
+    if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
+        partition_none_allowed)
+      pc_tree->horizontal[0].pred_interp_filter =
+          ctx->mic.mbmi.interp_filter[0];
+#else
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
       pc_tree->horizontal[0].pred_interp_filter =
           ctx->mic.mbmi.interp_filter;
+#endif
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
 #if CONFIG_SUPERTX
                      &sum_rate_nocoef,
@@ -3775,10 +3837,18 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, ctx);
+
+#if CONFIG_DUAL_FILTER
+      if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
+          partition_none_allowed)
+        pc_tree->horizontal[1].pred_interp_filter =
+            ctx->mic.mbmi.interp_filter[0];
+#else
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
         pc_tree->horizontal[1].pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
+#endif
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row + mi_step, mi_col,
                        &this_rdc, &this_rate_nocoef,
@@ -3878,10 +3948,18 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, ctx);
+
+#if CONFIG_DUAL_FILTER
+    if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
+        partition_none_allowed)
+      pc_tree->vertical[0].pred_interp_filter =
+          ctx->mic.mbmi.interp_filter[0];
+#else
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
       pc_tree->vertical[0].pred_interp_filter =
           ctx->mic.mbmi.interp_filter;
+#endif
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
 #if CONFIG_SUPERTX
                      &sum_rate_nocoef,
@@ -3905,10 +3983,18 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, ctx);
+
+#if CONFIG_DUAL_FILTER
+      if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
+          partition_none_allowed)
+        pc_tree->vertical[1].pred_interp_filter =
+            ctx->mic.mbmi.interp_filter[0];
+#else
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
         pc_tree->vertical[1].pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
+#endif
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + mi_step, &this_rdc,
                        &this_rate_nocoef,
@@ -4477,10 +4563,13 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   cpi->last_frame_distortion = cpi->frame_distortion;
 #endif
 }
+
+#if !CONFIG_DUAL_FILTER
 static INTERP_FILTER get_cm_interp_filter(VP10_COMP *cpi) {
   (void)cpi;
   return SWITCHABLE;
 }
+#endif
 
 void vp10_encode_frame(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
@@ -4548,9 +4637,11 @@ void vp10_encode_frame(VP10_COMP *cpi) {
     else
       cm->reference_mode = REFERENCE_MODE_SELECT;
 
+#if !CONFIG_DUAL_FILTER
     if (cm->interp_filter == SWITCHABLE) {
       cm->interp_filter = get_cm_interp_filter(cpi);
     }
+#endif
 
     encode_frame_internal(cpi);
 
@@ -4879,6 +4970,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
   } else {
     int ref;
     const int is_compound = has_second_ref(mbmi);
+
     set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
     for (ref = 0; ref < 1 + is_compound; ++ref) {
       YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,

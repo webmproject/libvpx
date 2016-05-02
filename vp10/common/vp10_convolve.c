@@ -95,10 +95,13 @@ static void convolve_copy(const uint8_t *src, int src_stride, uint8_t *dst,
 
 void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
                    int dst_stride, int w, int h,
-                   const InterpFilterParams filter_params,
+#if CONFIG_DUAL_FILTER
+                   const INTERP_FILTER *interp_filter,
+#else
+                   const INTERP_FILTER interp_filter,
+#endif
                    const int subpel_x_q4, int x_step_q4, const int subpel_y_q4,
-                   int y_step_q4, int avg) {
-  int filter_size = filter_params.taps;
+                   int y_step_q4, int ref_idx) {
   int ignore_horiz = x_step_q4 == 16 && subpel_x_q4 == 0;
   int ignore_vert = y_step_q4 == 16 && subpel_y_q4 == 0;
 
@@ -106,16 +109,31 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
   assert(h <= MAX_BLOCK_HEIGHT);
   assert(y_step_q4 <= MAX_STEP);
   assert(x_step_q4 <= MAX_STEP);
-  assert(filter_params.taps <= MAX_FILTER_TAP);
 
   if (ignore_horiz && ignore_vert) {
-    convolve_copy(src, src_stride, dst, dst_stride, w, h, avg);
+    convolve_copy(src, src_stride, dst, dst_stride, w, h, ref_idx);
   } else if (ignore_vert) {
+#if CONFIG_DUAL_FILTER
+    InterpFilterParams filter_params =
+        vp10_get_interp_filter_params(interp_filter[1 + 2 * ref_idx]);
+#else
+    InterpFilterParams filter_params =
+        vp10_get_interp_filter_params(interp_filter);
+#endif
+    assert(filter_params.taps <= MAX_FILTER_TAP);
     convolve_horiz(src, src_stride, dst, dst_stride, w, h, filter_params,
-                   subpel_x_q4, x_step_q4, avg);
+                   subpel_x_q4, x_step_q4, ref_idx);
   } else if (ignore_horiz) {
+#if CONFIG_DUAL_FILTER
+    InterpFilterParams filter_params =
+        vp10_get_interp_filter_params(interp_filter[2 * ref_idx]);
+#else
+    InterpFilterParams filter_params =
+        vp10_get_interp_filter_params(interp_filter);
+#endif
+    assert(filter_params.taps <= MAX_FILTER_TAP);
     convolve_vert(src, src_stride, dst, dst_stride, w, h, filter_params,
-                  subpel_y_q4, y_step_q4, avg);
+                  subpel_y_q4, y_step_q4, ref_idx);
   } else {
     // temp's size is set to (maximum possible intermediate_height) *
     // MAX_BLOCK_WIDTH
@@ -123,15 +141,34 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
                   MAX_FILTER_TAP) *
                  MAX_BLOCK_WIDTH];
     int temp_stride = MAX_BLOCK_WIDTH;
-
+#if CONFIG_DUAL_FILTER
+    InterpFilterParams filter_params =
+        vp10_get_interp_filter_params(interp_filter[1 + 2 * ref_idx]);
+#else
+    InterpFilterParams filter_params =
+        vp10_get_interp_filter_params(interp_filter);
+#endif
+    int filter_size = filter_params.taps;
     int intermediate_height =
         (((h - 1) * y_step_q4 + subpel_y_q4) >> SUBPEL_BITS) + filter_size;
+
+    assert(filter_params.taps <= MAX_FILTER_TAP);
 
     convolve_horiz(src - src_stride * (filter_size / 2 - 1), src_stride, temp,
                    temp_stride, w, intermediate_height, filter_params,
                    subpel_x_q4, x_step_q4, 0);
+
+#if CONFIG_DUAL_FILTER
+    filter_params = vp10_get_interp_filter_params(interp_filter[2 * ref_idx]);
+#else
+    filter_params = vp10_get_interp_filter_params(interp_filter);
+#endif
+    filter_size = filter_params.taps;
+    assert(filter_params.taps <= MAX_FILTER_TAP);
+
     convolve_vert(temp + temp_stride * (filter_size / 2 - 1), temp_stride, dst,
-                  dst_stride, w, h, filter_params, subpel_y_q4, y_step_q4, avg);
+                  dst_stride, w, h, filter_params,
+                  subpel_y_q4, y_step_q4, ref_idx);
   }
 }
 
