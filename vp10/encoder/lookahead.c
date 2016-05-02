@@ -20,8 +20,8 @@
 
 /* Return the buffer at the given absolute index and increment the index */
 static struct lookahead_entry *pop(struct lookahead_ctx *ctx,
-                                   unsigned int *idx) {
-  unsigned int index = *idx;
+                                   int *idx) {
+  int index = *idx;
   struct lookahead_entry *buf = ctx->buf + index;
 
   assert(index < ctx->max_sz);
@@ -35,7 +35,7 @@ static struct lookahead_entry *pop(struct lookahead_ctx *ctx,
 void vp10_lookahead_destroy(struct lookahead_ctx *ctx) {
   if (ctx) {
     if (ctx->buf) {
-      unsigned int i;
+      int i;
 
       for (i = 0; i < ctx->max_sz; i++)
         vpx_free_frame_buffer(&ctx->buf[i].img);
@@ -221,9 +221,9 @@ struct lookahead_entry *vp10_lookahead_peek(struct lookahead_ctx *ctx,
 
   if (index >= 0) {
     // Forward peek
-    if (index < (int)ctx->sz) {
+    if (index < ctx->sz) {
       index += ctx->read_idx;
-      if (index >= (int)ctx->max_sz)
+      if (index >= ctx->max_sz)
         index -= ctx->max_sz;
       buf = ctx->buf + index;
     }
