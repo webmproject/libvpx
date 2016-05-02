@@ -98,7 +98,6 @@ EOF
 
 # all_platforms is a list of all supported target platforms. Maintain
 # alphabetically by architecture, generic-gnu last.
-all_platforms="${all_platforms} armv6-darwin-gcc"
 all_platforms="${all_platforms} armv6-linux-rvct"
 all_platforms="${all_platforms} armv6-linux-gcc"
 all_platforms="${all_platforms} armv6-none-rvct"
