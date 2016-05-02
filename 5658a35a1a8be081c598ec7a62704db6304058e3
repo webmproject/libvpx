@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "089df5d3_cde1e910",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-05-02T18:19:20Z",
+      "side": 1,
+      "message": "\u003c\u003c 1 (instead of * 2)?",
+      "range": {
+        "startLine": 192,
+        "startChar": 49,
+        "endLine": 192,
+        "endChar": 50
+      },
+      "revId": "5658a35a1a8be081c598ec7a62704db6304058e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
