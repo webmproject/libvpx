@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "089df5d3_53bbdc1e",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-05-02T20:10:14Z",
+      "side": 1,
+      "message": "char_dist[0] is the highest value in the distribution. Will add a comment to explain that.",
+      "parentUuid": "089df5d3_538d9c8a",
+      "range": {
+        "startLine": 83,
+        "startChar": 20,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "089df5d3_73e7f850",
         "filename": "test/add_noise_test.cc",
         "patchSetId": 2
@@ -82,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "089df5d3_d3450c08",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-05-02T20:10:14Z",
+      "side": 1,
+      "message": "it\u0027s doing a standard deviation of random numbers both horizontally and vertically.   It seemed remotely possible that I could get the same value 4 times ( despite it being quite unlikely).   8 times seemed really unlikely",
+      "parentUuid": "089df5d3_d3f7cc03",
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "089df5d3_33dd7081",
         "filename": "test/add_noise_test.cc",
         "patchSetId": 2
@@ -105,6 +147,30 @@
     },
     {
       "key": {
+        "uuid": "089df5d3_5352bcce",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-05-02T20:10:14Z",
+      "side": 1,
+      "message": "could be an assert.   If this triggers for one pixel it likely happens all the time and who wants a full image size of expect output...  \n\nI think assert would cause it to fail the whole test,  but I\u0027ll figure out a better way to do this.",
+      "parentUuid": "089df5d3_33dd7081",
+      "range": {
+        "startLine": 133,
+        "startChar": 14,
+        "endLine": 133,
+        "endChar": 15
+      },
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "089df5d3_53e47c4a",
         "filename": "test/add_noise_test.cc",
         "patchSetId": 2
@@ -116,6 +182,30 @@
       "writtenOn": "2016-05-02T20:01:11Z",
       "side": 1,
       "message": "Why does the above test pass but this one doesn\u0027t? Doesn\u0027t the above test use bothclamp[]?",
+      "range": {
+        "startLine": 152,
+        "startChar": 21,
+        "endLine": 152,
+        "endChar": 46
+      },
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_136f9483",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-05-02T20:10:14Z",
+      "side": 1,
+      "message": "The above test succeeds because it only tests that there is no roll over positive or negative and that we are actually adding some sort of noise.  The c simply doesn\u0027t match any of the assembly / both clamp or not.",
+      "parentUuid": "089df5d3_53e47c4a",
       "range": {
         "startLine": 152,
         "startChar": 21,
