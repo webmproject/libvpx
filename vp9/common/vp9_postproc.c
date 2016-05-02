@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "./vpx_dsp_rtcd.h"
 #include "./vpx_config.h"
 #include "./vpx_scale_rtcd.h"
 #include "./vp9_rtcd.h"
@@ -587,32 +588,6 @@ static void fillrd(struct postproc_state *state, int q, int a) {
   state->last_noise = a;
 }
 
-void vp9_plane_add_noise_c(uint8_t *start, char *noise,
-                           char blackclamp[16],
-                           char whiteclamp[16],
-                           char bothclamp[16],
-                           unsigned int width, unsigned int height, int pitch) {
-  unsigned int i, j;
-
-  // TODO(jbb): why does simd code use both but c doesn't,  normalize and
-  // fix..
-  (void) bothclamp;
-  for (i = 0; i < height; i++) {
-    uint8_t *pos = start + i * pitch;
-    char  *ref = (char *)(noise + (rand() & 0xff));  // NOLINT
-
-    for (j = 0; j < width; j++) {
-      if (pos[j] < blackclamp[0])
-        pos[j] = blackclamp[0];
-
-      if (pos[j] > 255 + whiteclamp[0])
-        pos[j] = 255 + whiteclamp[0];
-
-      pos[j] += ref[j];
-    }
-  }
-}
-
 static void swap_mi_and_prev_mi(VP9_COMMON *cm) {
   // Current mip will be the prev_mip for the next frame.
   MODE_INFO *temp = cm->postproc_state.prev_mip;
@@ -726,8 +701,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
         ppstate->last_noise != noise_level) {
       fillrd(ppstate, 63 - q, noise_level);
     }
-
-    vp9_plane_add_noise(ppbuf->y_buffer, ppstate->noise, ppstate->blackclamp,
+    vpx_plane_add_noise(ppbuf->y_buffer, ppstate->noise, ppstate->blackclamp,
                         ppstate->whiteclamp, ppstate->bothclamp,
                         ppbuf->y_width, ppbuf->y_height, ppbuf->y_stride);
   }

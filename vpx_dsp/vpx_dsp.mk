@@ -53,6 +53,13 @@ DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_sse2.asm
 endif  # CONFIG_USE_X86INC
 endif  # CONFIG_VP9_HIGHBITDEPTH
 
+ifneq ($(filter yes,$(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)
+DSP_SRCS-yes += postproc.c
+DSP_SRCS-$(HAVE_MSA) += mips/postproc_msa.c
+DSP_SRCS-$(HAVE_MMX) += x86/postproc_mmx.asm
+DSP_SRCS-$(HAVE_SSE2) += x86/postproc_sse2.asm
+endif # CONFIG_POSTPROC
+
 DSP_SRCS-$(HAVE_NEON_ASM) += arm/intrapred_neon_asm$(ASM)
 DSP_SRCS-$(HAVE_NEON) += arm/intrapred_neon.c
 DSP_SRCS-$(HAVE_MSA) += mips/intrapred_msa.c
