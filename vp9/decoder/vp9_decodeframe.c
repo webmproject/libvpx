@@ -136,13 +136,13 @@ static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
       vp9_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
 }
 
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 static void read_dq_profile_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   int i;
   for (i = 0; i < QUANT_PROFILES - 1; ++i)
     vp9_diff_update_prob(r, &fc->dq_profile_prob[i]);
 }
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 
 static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   int i, j;
@@ -918,10 +918,10 @@ static void set_param_topblock(VP9_COMMON *const cm,  MACROBLOCKD *const xd,
                                BLOCK_SIZE bsize, int mi_row, int mi_col,
 #if CONFIG_EXT_TX
                                int txfm,
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                                int dq_off_index,
-#endif
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
                                int skip) {
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
@@ -938,10 +938,10 @@ static void set_param_topblock(VP9_COMMON *const cm,  MACROBLOCKD *const xd,
       xd->mi[y * cm->mi_stride + x].mbmi.skip = skip;
 #if CONFIG_EXT_TX
       xd->mi[y * cm->mi_stride + x].mbmi.ext_txfrm = txfm;
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
       xd->mi[y * cm->mi_stride + x].mbmi.dq_off_index = dq_off_index;
-#endif
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
     }
 }
 
@@ -1858,21 +1858,18 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       }
     }
 #endif  // CONFIG_EXT_TX
-    /*
-    printf("D[%d/%d, %d %d] sb_type %d skip %d}\n", cm->current_video_frame, cm->show_frame,
-           mi_row, mi_col, bsize, skip);
-           */
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
     if (cm->base_qindex > Q_THRESHOLD_MIN &&
         cm->base_qindex < Q_THRESHOLD_MAX &&
-        switchable_dq_profile_used(bsize) && !skip &&
+        switchable_dq_profile_used(get_entropy_context_sb(xd, bsize), bsize) &&
+        !skip &&
         !vp9_segfeature_active(
             &cm->seg, xd->mi[0].mbmi.segment_id, SEG_LVL_SKIP)) {
       dq_off_index = vp9_read_dq_profile(cm, r);
     } else {
       dq_off_index = 0;
     }
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
   }
 #endif  // CONFIG_SUPERTX
   if (subsize < BLOCK_8X8) {
@@ -3554,9 +3551,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     read_inter_compound_mode_probs(fc, &r);
 #endif  // CONFIG_NEW_INTER
 
-#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#if CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
     read_dq_profile_probs(fc, &r);
-#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1
+#endif  // CONFIG_NEW_QUANT && QUANT_PROFILES > 1 && !Q_CTX_BASED_PROFILES
 
     if (cm->interp_filter == SWITCHABLE)
       read_switchable_interp_probs(fc, &r);

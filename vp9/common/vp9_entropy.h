@@ -260,7 +260,6 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       assert(0 && "Invalid transform size.");
       break;
   }
-
   return combine_entropy_contexts(above_ec, left_ec);
 }
 

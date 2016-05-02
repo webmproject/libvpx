@@ -43,36 +43,36 @@ static const uint8_t vp9_nuq_knots_lossless[COEF_BANDS][NUQ_KNOTS] = {
 
 static const uint8_t vp9_nuq_knots[QUANT_PROFILES][COEF_BANDS][NUQ_KNOTS] = {
   {
-    {86, 122, 128},  // dc, band 0
-    {86, 122, 128},  // band 1
-    {86, 122, 128},  // band 2
-    {88, 122, 128},  // band 3
-    {88, 122, 128},  // band 4
-    {88, 122, 128},  // band 5
+    {86, 122, 134},  // dc, band 0
+    {78, 122, 134},  // band 1
+    {78, 122, 134},  // band 2
+    {84, 122, 133},  // band 3
+    {88, 122, 134},  // band 4
+    {88, 122, 134},  // band 5
 #if CONFIG_TX_SKIP
     {86, 122, 128},  // band 6
 #endif  // CONFIG_TX_SKIP
   },
 #if QUANT_PROFILES > 1
   {
-    {86, 122, 128},  // dc, band 0
-    {86, 122, 128},  // band 1
-    {86, 122, 128},  // band 2
-    {88, 122, 128},  // band 3
-    {88, 122, 128},  // band 4
-    {88, 122, 128},  // band 5
+    {86, 122, 134},  // dc, band 0
+    {78, 122, 134},  // band 1
+    {78, 122, 134},  // band 2
+    {84, 122, 134},  // band 3
+    {88, 122, 134},  // band 4
+    {88, 122, 134},  // band 5
 #if CONFIG_TX_SKIP
     {86, 122, 128},  // band 6
 #endif  // CONFIG_TX_SKIP
   },
 #if QUANT_PROFILES > 2
   {
-    {86, 122, 128},  // dc, band 0
-    {86, 122, 128},  // band 1
-    {86, 122, 128},  // band 2
-    {88, 122, 128},  // band 3
-    {88, 122, 128},  // band 4
-    {88, 122, 128},  // band 5
+    {86, 122, 134},  // dc, band 0
+    {78, 122, 135},  // band 1
+    {78, 122, 134},  // band 2
+    {84, 122, 133},  // band 3
+    {88, 122, 134},  // band 4
+    {88, 122, 134},  // band 5
 #if CONFIG_TX_SKIP
     {86, 122, 128},  // band 6
 #endif  // CONFIG_TX_SKIP
@@ -86,27 +86,47 @@ static const uint8_t vp9_nuq_doff_lossless[COEF_BANDS] = { 0, 0, 0, 0, 0, 0,
     0
 #endif  // CONFIG_TX_SKIP
 };
+
+#if QUANT_PROFILES == 1
+static const uint8_t vp9_nuq_doff[QUANT_PROFILES][COEF_BANDS] = {
+  { 8, 15, 16, 22, 23, 24,     // dq_off_index = 0
+#if CONFIG_TX_SKIP
+    8
+#endif  // CONFIG_TX_SKIP
+  }
+};
+#elif QUANT_PROFILES == 2
 static const uint8_t vp9_nuq_doff[QUANT_PROFILES][COEF_BANDS] = {
   { 8, 15, 16, 22, 23, 24,     // dq_off_index = 0
 #if CONFIG_TX_SKIP
     8
 #endif  // CONFIG_TX_SKIP
   },
-#if QUANT_PROFILES > 1
-  { 6, 12, 13, 16, 17, 18,     // dq_off_index = 1
+  { 13, 20, 21, 27, 28, 29,     // dq_off_index = 1
 #if CONFIG_TX_SKIP
     8
 #endif  // CONFIG_TX_SKIP
   },
-#if QUANT_PROFILES > 2
-  { 10, 18, 19, 23, 25, 26,     // dq_off_index = 2
+};
+#else  // QUANT_PROFILES == 3
+static const uint8_t vp9_nuq_doff[QUANT_PROFILES][COEF_BANDS] = {
+  { 6, 14, 15, 22, 23, 27,     // dq_off_index = 0
+#if CONFIG_TX_SKIP
+    8
+#endif  // CONFIG_TX_SKIP
+  },
+  { 6, 15, 17, 22, 23, 23,     // dq_off_index = 1
+#if CONFIG_TX_SKIP
+    8
+#endif  // CONFIG_TX_SKIP
+  },
+  { 6, 14, 16, 22, 23, 27,     // dq_off_index = 2
 #if CONFIG_TX_SKIP
     8
 #endif  // CONFIG_TX_SKIP
   }
-#endif  // QUANT_PROFILES > 2
-#endif  // QUANT_PROFILES > 1
 };
+#endif
 
 // Allow different quantization profiles in different q ranges,
 // to enable entropy-constraints in scalar quantization.
