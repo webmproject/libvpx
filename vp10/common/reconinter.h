@@ -155,7 +155,7 @@ void vp10_make_masked_inter_predictor(
     const INTERP_FILTER interp_filter,
     int xs, int ys,
 #if CONFIG_SUPERTX
-    int plane, int wedge_offset_x, int wedge_offset_y,
+    int wedge_offset_x, int wedge_offset_y,
 #endif  // CONFIG_SUPERTX
     const MACROBLOCKD *xd);
 #endif  // CONFIG_EXT_INTER
@@ -274,8 +274,8 @@ struct macroblockd_plane;
 void vp10_build_masked_inter_predictor_complex(
     MACROBLOCKD *xd,
     uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
-    const struct macroblockd_plane *pd, int mi_row, int mi_col,
-    int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
+    int mi_row, int mi_col, int mi_row_ori, int mi_col_ori,
+    BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
     PARTITION_TYPE partition, int plane);
 #endif  // CONFIG_SUPERTX
 
@@ -412,7 +412,8 @@ void vp10_init_wedge_masks();
 const uint8_t *vp10_get_soft_mask(int wedge_index,
                                   int wedge_sign,
                                   BLOCK_SIZE sb_type,
-                                  int h, int w);
+                                  int wedge_offset_x,
+                                  int wedge_offset_y);
 
 void vp10_build_interintra_predictors(MACROBLOCKD *xd,
                                       uint8_t *ypred,

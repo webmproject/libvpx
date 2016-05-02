@@ -399,6 +399,11 @@ typedef struct SPEED_FEATURES {
   // Choose a very large value (UINT_MAX) to use 8-tap always
   unsigned int disable_filter_search_var_thresh;
 
+#if CONFIG_EXT_INTER
+  // A source variance threshold below which wedge search is disabled
+  unsigned int disable_wedge_search_var_thresh;
+#endif  // CONFIG_EXT_INTER
+
   // These bit masks allow you to enable or disable intra modes for each
   // transform size separately.
   int intra_y_mode_mask[TX_SIZES];
