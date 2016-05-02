@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "089df5d3_501752dd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-02T19:07:35Z",
+      "side": 1,
+      "message": "please extract the inttypes bit and make it a separate commit",
+      "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_10e4aa1b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-02T19:07:35Z",
+      "side": 1,
+      "message": "s/Fixes /BUG\u003d/",
+      "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_f0575eb8",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-02T19:07:35Z",
+      "side": 1,
+      "message": "this needs to be wrapped",
+      "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_9009bad0",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-02T19:07:35Z",
+      "side": 1,
+      "message": "needs wrapping",
+      "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_33a3b0b0",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-02T19:07:35Z",
+      "side": 1,
+      "message": "please add the SVC related changes as a follow up commit to this one (SVC is in a limbo like unreleased state, and I\u0027d prefer to keep related changes separate)",
+      "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
