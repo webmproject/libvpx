@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "089df5d3_33545043",
+        "filename": "build/make/ios-Info.plist",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-02T19:10:17Z",
+      "side": 1,
+      "message": "This and bundle short version should probably not be hardcoded in here... bundle short version is libvpx version, no?",
+      "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "089df5d3_f0575eb8",
         "filename": "build/make/iosbuild.sh",
         "patchSetId": 1
