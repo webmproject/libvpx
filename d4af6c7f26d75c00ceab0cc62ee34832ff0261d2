@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "089df5d3_dceb59bf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-02T22:55:18Z",
+      "side": 1,
+      "message": "use cherry-pick -x to indicate the origin of the change from the master branch. that also helps ensure there aren\u0027t any copy/paste issues.",
+      "revId": "d4af6c7f26d75c00ceab0cc62ee34832ff0261d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
