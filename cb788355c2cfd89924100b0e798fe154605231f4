@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "089df5d3_538d9c8a",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-02T20:01:11Z",
+      "side": 1,
+      "message": "What is special about char_dist[0]?",
+      "range": {
+        "startLine": 83,
+        "startChar": 20,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_73e7f850",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-02T20:01:11Z",
+      "side": 1,
+      "message": "since s is well defined, why not just declare it above?",
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_3341f02a",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-02T20:01:11Z",
+      "side": 1,
+      "message": "most of the other users of memset seem to be able to get away with ignoring the return code. hmmm, not sure which is preferable.",
+      "range": {
+        "startLine": 107,
+        "startChar": 15,
+        "endLine": 107,
+        "endChar": 16
+      },
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_d3f7cc03",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-02T20:01:11Z",
+      "side": 1,
+      "message": "Should these be compared to 0 independently?",
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_33dd7081",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-02T20:01:11Z",
+      "side": 1,
+      "message": "if s[i] \u003c 10, shouldn\u0027t that have triggered the EXPECT_GT?",
+      "range": {
+        "startLine": 133,
+        "startChar": 14,
+        "endLine": 133,
+        "endChar": 15
+      },
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_53e47c4a",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-02T20:01:11Z",
+      "side": 1,
+      "message": "Why does the above test pass but this one doesn\u0027t? Doesn\u0027t the above test use bothclamp[]?",
+      "range": {
+        "startLine": 152,
+        "startChar": 21,
+        "endLine": 152,
+        "endChar": 46
+      },
+      "revId": "cb788355c2cfd89924100b0e798fe154605231f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
