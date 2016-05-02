@@ -2273,7 +2273,8 @@ int main(int argc, const char **argv_) {
     }
 
     if (global.show_psnr) {
-      if (global.codec->fourcc == VP9_FOURCC) {
+      if (global.codec->fourcc == VP9_FOURCC ||
+          global.codec->fourcc == VP10_FOURCC) {
         FOREACH_STREAM(
             show_psnr(stream, (1 << stream->config.cfg.g_input_bit_depth) - 1));
       } else {
