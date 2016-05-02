@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "089df5d3_b3cfa0c2",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-02T20:05:26Z",
+      "side": 1,
+      "message": "\u0027for target; do\u0027 is shorthand",
+      "revId": "b9e8d41daaa32c4e370636315ada2bd25f20965c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_33c450a1",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-02T20:05:26Z",
+      "side": 1,
+      "message": "maybe a note on the expected format here",
+      "revId": "b9e8d41daaa32c4e370636315ada2bd25f20965c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
