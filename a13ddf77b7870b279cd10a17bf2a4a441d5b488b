@@ -119,6 +119,24 @@
       "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd192f74_13398c30",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1131014
+      },
+      "writtenOn": "2016-05-03T08:36:16Z",
+      "side": 1,
+      "message": "I\u0027m breaking them out to a separate commit but they have to come before this, not after, in order for the shared library to link correctly when the option is *not* enabled (the default state)",
+      "parentUuid": "089df5d3_33a3b0b0",
+      "revId": "a13ddf77b7870b279cd10a17bf2a4a441d5b488b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
