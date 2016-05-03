@@ -32,6 +32,10 @@ class VPxEncoderThreadTest
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.w = 1280;
     cfg.h = 720;
+#if CONFIG_EXT_TILE
+    cfg.tile_col = -1;
+    cfg.tile_row = -1;
+#endif  // CONFIG_EXT_TILE
     decoder_ = codec_->CreateDecoder(cfg, 0);
 
     md5_.clear();

@@ -33,6 +33,10 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
     cfg.w = 704;
     cfg.h = 144;
     cfg.threads = 1;
+#if CONFIG_EXT_TILE
+    cfg.tile_col = -1;
+    cfg.tile_row = -1;
+#endif  // CONFIG_EXT_TILE
     fw_dec_ = codec_->CreateDecoder(cfg, 0);
     inv_dec_ = codec_->CreateDecoder(cfg, 0);
     inv_dec_->Control(VP9_INVERT_TILE_DECODE_ORDER, 1);
@@ -104,5 +108,9 @@ TEST_P(TileIndependenceTest, MD5Match) {
 
 VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1));
 
+#if CONFIG_EXT_TILE
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(1, 2, 32));
+#else
 VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 1, 1));
+#endif  // CONFIG_EXT_TILE
 }  // namespace
