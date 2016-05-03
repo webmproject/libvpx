@@ -18,8 +18,11 @@ namespace {
 
 const int kTestMode = 0;
 const int kSuperframeSyntax = 1;
+const int kTileCols = 2;
+const int kTileRows = 3;
 
-typedef std::tr1::tuple<libvpx_test::TestMode,int> SuperframeTestParam;
+typedef std::tr1::tuple<libvpx_test::TestMode, int,
+                        int, int> SuperframeTestParam;
 
 class SuperframeTest : public ::libvpx_test::EncoderTest,
     public ::libvpx_test::CodecTestWithParam<SuperframeTestParam> {
@@ -37,6 +40,8 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
     sf_count_ = 0;
     sf_count_max_ = INT_MAX;
     is_vp10_style_superframe_ = syntax;
+    n_tile_cols_ = std::tr1::get<kTileCols>(input);
+    n_tile_rows_ = std::tr1::get<kTileRows>(input);
   }
 
   virtual void TearDown() {
@@ -48,6 +53,8 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
       encoder->Control(VP8E_SET_CPUUSED, 2);
+      encoder->Control(VP9E_SET_TILE_COLUMNS, n_tile_cols_);
+      encoder->Control(VP9E_SET_TILE_ROWS, n_tile_rows_);
     }
   }
 
@@ -92,6 +99,10 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
   vpx_codec_cx_pkt_t modified_pkt_;
   uint8_t *modified_buf_;
   vpx_codec_pts_t last_sf_pts_;
+
+ private:
+  int n_tile_cols_;
+  int n_tile_rows_;
 };
 
 TEST_P(SuperframeTest, TestSuperframeIndexIsOptional) {
@@ -106,13 +117,28 @@ TEST_P(SuperframeTest, TestSuperframeIndexIsOptional) {
 
 VP9_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
     ::testing::Values(::libvpx_test::kTwoPassGood),
-    ::testing::Values(0)));
+    ::testing::Values(0), ::testing::Values(0), ::testing::Values(0)));
 
 // The superframe index is currently mandatory with ANS due to the decoder
 // starting at the end of the buffer.
+#if CONFIG_EXT_TILE
+// Single tile does not work with ANS (see comment above).
+#if CONFIG_ANS
+const int tile_col_values[] = { 1, 2 };
+#else
+const int tile_col_values[] = { 1, 2, 32 };
+#endif
+const int tile_row_values[] = { 1, 2, 32 };
+VP10_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
+    ::testing::Values(::libvpx_test::kTwoPassGood),
+    ::testing::Values(1),
+    ::testing::ValuesIn(tile_col_values),
+    ::testing::ValuesIn(tile_row_values)));
+#else
 #if !CONFIG_ANS
 VP10_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
     ::testing::Values(::libvpx_test::kTwoPassGood),
-    ::testing::Values(1)));
-#endif
+    ::testing::Values(1), ::testing::Values(0), ::testing::Values(0)));
+#endif  // !CONFIG_ANS
+#endif  // CONFIG_EXT_TILE
 }  // namespace
