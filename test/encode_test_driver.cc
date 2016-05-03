@@ -142,6 +142,12 @@ void EncoderTest::MismatchHook(const vpx_image_t* /*img1*/,
 void EncoderTest::RunLoop(VideoSource *video) {
   vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
 
+#if CONFIG_ROW_TILE
+  // Decode all tiles.
+  dec_cfg.tile_col = -1;
+  dec_cfg.tile_row = -1;
+#endif  // CONFIG_ROW_TILE
+
   stats_.Reset();
 
   ASSERT_TRUE(passes_ == 1 || passes_ == 2);

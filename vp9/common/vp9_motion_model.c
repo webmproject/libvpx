@@ -226,11 +226,11 @@ double compute_warp_and_error(Global_Motion_Params *gm,
                             int subsampling_col, int subsampling_row,
                             int x_scale, int y_scale) {
   double H[9];
-  vp9_convert_params_to_rotzoom(gm, H);
   int i, j;
   int64_t sumerr = 0;
   if (projectPoints == NULL)
     return -1;
+  vp9_convert_params_to_rotzoom(gm, H);
   for (i = p_row; i < p_row + p_height; ++i) {
     for (j = p_col; j < p_col + p_width; ++j) {
       double in[2], out[2];
