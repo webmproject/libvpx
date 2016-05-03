@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "089df5d3_67460eb1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "\u0027...add a unit test...\u0027",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_8777baf1",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "add a virtual destructor too",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_87205ae9",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "here and throughout, static isn\u0027t necessary in an anonymous namespace",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_47267207",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "const",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_272366f7",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "const",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_4754b243",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "indent is off. alternatively you could join this and the line above and align the parameters that overflow with the function call",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_2751a653",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "const",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_a7cbd62d",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "indent is off",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_67f9ee5d",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "(void) shouldn\u0027t be necessary here even with -Wunused-result in most cases.",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_a7991632",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "unnecessary semicolon",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_2786c6c9",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_079f4a14",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "unnecessary semicolon",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089df5d3_6790cefd",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T00:31:18Z",
+      "side": 1,
+      "message": "alignment is wrong here and with the rest",
+      "revId": "9d0ba20203da90fd99e9b27c36d0111c47c93aaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
