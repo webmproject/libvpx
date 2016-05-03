@@ -45,11 +45,14 @@ void Encoder::InitEncoder(VideoSource *video) {
 #endif
 #if CONFIG_VP10_ENCODER
     if (CodecInterface() == &vpx_codec_vp10_cx_algo) {
-      // Default to 1 tile column for VP10.
+      // Default to 1 tile column for VP10. With CONFIG_EXT_TILE, the
+      // default is already the largest possible tile size
+#if !CONFIG_EXT_TILE
       const int log2_tile_columns = 0;
       res = vpx_codec_control_(&encoder_, VP9E_SET_TILE_COLUMNS,
                                log2_tile_columns);
       ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+#endif  // !CONFIG_EXT_TILE
     } else
 #endif
     {
@@ -174,6 +177,12 @@ void EncoderTest::MismatchHook(const vpx_image_t* /*img1*/,
 
 void EncoderTest::RunLoop(VideoSource *video) {
   vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
+
+#if CONFIG_EXT_TILE
+  // Decode all tiles.
+  dec_cfg.tile_col = -1;
+  dec_cfg.tile_row = -1;
+#endif  // CONFIG_EXT_TILE
 
   stats_.Reset();
 
