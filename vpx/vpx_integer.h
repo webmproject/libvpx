@@ -68,7 +68,12 @@ typedef size_t uintptr_t;
 #if defined(_MSC_VER) && _MSC_VER < 1800
 #define PRId64 "I64d"
 #else
+#if defined(__APPLE__)
+// When building dynamic frameworks with Swift compatibility, module maps
+// do not allow us to include the system's inttypes.h.
+#else
 #include <inttypes.h>
+#endif
 #endif
 
 #endif  // VPX_VPX_INTEGER_H_
