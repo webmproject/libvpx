@@ -1769,14 +1769,19 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       FRAME_COUNTS *counts = xd->counts;
       if (inter_block) {
+#if CONFIG_DAALA_EC
+        mbmi->tx_type = av1_ext_tx_inv[aom_read_tree_cdf(
+            r, cm->fc->inter_ext_tx_cdf[mbmi->tx_size], TX_TYPES)];
+#else
         mbmi->tx_type = aom_read_tree(r, av1_ext_tx_tree,
                                       cm->fc->inter_ext_tx_prob[mbmi->tx_size]);
+#endif
         if (counts) ++counts->inter_ext_tx[mbmi->tx_size][mbmi->tx_type];
       } else {
         const TX_TYPE tx_type_nom = intra_mode_to_tx_type_context[mbmi->mode];
 #if CONFIG_DAALA_EC
-      mbmi->tx_type = av1_ext_tx_inv[aom_read_tree_cdf(
-          r, cm->fc->intra_ext_tx_cdf[mbmi->tx_size][tx_type_nom], TX_TYPES)];
+        mbmi->tx_type = av1_ext_tx_inv[aom_read_tree_cdf(
+            r, cm->fc->intra_ext_tx_cdf[mbmi->tx_size][tx_type_nom], TX_TYPES)];
 #else
         mbmi->tx_type = aom_read_tree(
             r, av1_ext_tx_tree,
