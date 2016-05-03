@@ -4560,13 +4560,6 @@ static void encode_frame_internal(VP10_COMP *cpi) {
 #endif
 }
 
-#if !CONFIG_DUAL_FILTER
-static INTERP_FILTER get_cm_interp_filter(VP10_COMP *cpi) {
-  (void)cpi;
-  return SWITCHABLE;
-}
-#endif
-
 void vp10_encode_frame(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
 
@@ -4633,10 +4626,8 @@ void vp10_encode_frame(VP10_COMP *cpi) {
     else
       cm->reference_mode = REFERENCE_MODE_SELECT;
 
-#if !CONFIG_DUAL_FILTER
-    if (cm->interp_filter == SWITCHABLE) {
-      cm->interp_filter = get_cm_interp_filter(cpi);
-    }
+#if CONFIG_DUAL_FILTER
+    cm->interp_filter = SWITCHABLE;
 #endif
 
     encode_frame_internal(cpi);
