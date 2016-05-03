@@ -183,6 +183,9 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += third_party/x86inc/x86inc.asm
 endif
 CODEC_EXPORTS-yes += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
+ifeq ($(CONFIG_SPATIAL_SVC),yes)
+CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_spatial_svc
+endif
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
 
 INSTALL-LIBS-yes += include/vpx/vpx_codec.h
