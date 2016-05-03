@@ -1746,7 +1746,11 @@ static void write_partition(const AV1_COMMON *const cm,
       av1_write_token(w, av1_ext_partition_tree, probs,
                       &ext_partition_encodings[p]);
 #else
+#if CONFIG_DAALA_EC
+    aom_write_tree_cdf(w, p, cm->fc->partition_cdf[ctx], PARTITION_TYPES);
+#else
     av1_write_token(w, av1_partition_tree, probs, &partition_encodings[p]);
+#endif
 #endif  // CONFIG_EXT_PARTITION_TYPES
   } else if (!has_rows && has_cols) {
     assert(p == PARTITION_SPLIT || p == PARTITION_HORZ);
@@ -3448,9 +3452,14 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
     prob_diff_update(av1_ext_partition_tree, fc->partition_prob[i],
                      counts->partition[i], EXT_PARTITION_TYPES, header_bc);
 #else
-  for (i = 0; i < PARTITION_CONTEXTS; ++i)
+  for (i = 0; i < PARTITION_CONTEXTS; ++i) {
     prob_diff_update(av1_partition_tree, fc->partition_prob[i],
                      counts->partition[i], PARTITION_TYPES, header_bc);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_partition_tree, cm->fc->partition_prob[i],
+                    cm->fc->partition_cdf[i]);
+#endif
+  }
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_INTRA

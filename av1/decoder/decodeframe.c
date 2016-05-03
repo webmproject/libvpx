@@ -1419,7 +1419,12 @@ static PARTITION_TYPE read_partition(AV1_COMMON *cm, MACROBLOCKD *xd,
     else
       p = (PARTITION_TYPE)aom_read_tree(r, av1_ext_partition_tree, probs);
 #else
+#if CONFIG_DAALA_EC
+    p = (PARTITION_TYPE)aom_read_tree_cdf(r, cm->fc->partition_cdf[ctx],
+                                          PARTITION_TYPES);
+#else
     p = (PARTITION_TYPE)aom_read_tree(r, av1_partition_tree, probs);
+#endif
 #endif  // CONFIG_EXT_PARTITION_TYPES
   else if (!has_rows && has_cols)
     p = aom_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
@@ -3680,9 +3685,14 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     for (i = 0; i < EXT_PARTITION_TYPES - 1; ++i)
       av1_diff_update_prob(&r, &fc->partition_prob[j][i]);
 #else
-  for (j = 0; j < PARTITION_CONTEXTS; ++j)
+  for (j = 0; j < PARTITION_CONTEXTS; ++j) {
     for (i = 0; i < PARTITION_TYPES - 1; ++i)
       av1_diff_update_prob(&r, &fc->partition_prob[j][i]);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_partition_tree, fc->partition_prob[j],
+                    fc->partition_cdf[j]);
+#endif
+  }
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_INTRA
