@@ -143,8 +143,8 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
 
       for (idy = -1; idy <= 1; ++idy) {
         for (idx = -1; idx <= 1; ++idx) {
-          int row = i + idy;
-          int col = j + idx;
+          int row = (int)i + idy;
+          int col = (int)j + idx;
 
           if (row >= 0 && row < (int)block_height &&
               col >= 0 && col < (int)block_width) {
@@ -211,8 +211,8 @@ void vp9_highbd_temporal_filter_apply_c(uint8_t *frame1_8,
 
       for (idy = -1; idy <= 1; ++idy) {
         for (idx = -1; idx <= 1; ++idx) {
-          int row = i + idy;
-          int col = j + idx;
+          int row = (int)i + idy;
+          int col = (int)j + idx;
 
           if (row >= 0 && row < (int)block_height &&
               col >= 0 && col < (int)block_width) {
