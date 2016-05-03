@@ -21,13 +21,15 @@
 
 namespace {
 class TileIndependenceTest : public ::libvpx_test::EncoderTest,
-                             public ::libvpx_test::CodecTestWithParam<int> {
+                             public ::libvpx_test::CodecTestWith2Params<int,
+                                                                        int> {
  protected:
   TileIndependenceTest()
       : EncoderTest(GET_PARAM(0)),
         md5_fw_order_(),
         md5_inv_order_(),
-        n_tiles_(GET_PARAM(1)) {
+        n_tile_cols_(GET_PARAM(1)),
+        n_tile_rows_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.w = 704;
@@ -55,7 +57,8 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                                   libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP9E_SET_TILE_COLUMNS, n_tiles_);
+      encoder->Control(VP9E_SET_TILE_COLUMNS, n_tile_cols_);
+      encoder->Control(VP9E_SET_TILE_ROWS, n_tile_rows_);
     }
   }
 
@@ -80,7 +83,8 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
   ::libvpx_test::Decoder *fw_dec_, *inv_dec_;
 
  private:
-  int n_tiles_;
+  int n_tile_cols_;
+  int n_tile_rows_;
 };
 
 // run an encode with 2 or 4 tiles, and do the decode both in normal and
@@ -93,7 +97,7 @@ TEST_P(TileIndependenceTest, MD5Match) {
   cfg_.g_lag_in_frames = 12;
   cfg_.rc_end_usage = VPX_VBR;
 
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 144,
+  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 576,
                                      timebase.den, timebase.num, 0, 15);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
@@ -106,11 +110,14 @@ TEST_P(TileIndependenceTest, MD5Match) {
   ASSERT_STREQ(md5_fw_str, md5_inv_str);
 }
 
-VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1));
+VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1),
+                                                ::testing::Values(0));
 
 #if CONFIG_EXT_TILE
-VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(1, 2, 32));
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(1, 2, 32),
+                                                 ::testing::Values(1, 2, 32));
 #else
-VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 1, 1));
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 1, 1),
+                                                 ::testing::Range(0, 1, 1));
 #endif  // CONFIG_EXT_TILE
 }  // namespace
