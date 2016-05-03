@@ -1310,7 +1310,6 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         write_interintra_mode(
             w, mbmi->interintra_mode,
             cm->fc->interintra_mode_prob[bsize_group]);
-        assert(mbmi->interintra_mode == mbmi->interintra_uv_mode);
         if (is_interintra_wedge_used(bsize)) {
           vp10_write(w, mbmi->use_wedge_interintra,
                      cm->fc->wedge_interintra_prob[bsize]);

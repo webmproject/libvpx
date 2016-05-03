@@ -211,7 +211,6 @@ typedef struct {
 
 #if CONFIG_EXT_INTER
   INTERINTRA_MODE interintra_mode;
-  INTERINTRA_MODE interintra_uv_mode;
   // TODO(debargha): Consolidate these flags
   int use_wedge_interintra;
   int interintra_wedge_index;

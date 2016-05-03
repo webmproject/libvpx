@@ -1551,7 +1551,6 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
           read_interintra_mode(cm, xd, r, bsize_group);
       mbmi->ref_frame[1] = INTRA_FRAME;
       mbmi->interintra_mode = interintra_mode;
-      mbmi->interintra_uv_mode = interintra_mode;
 #if CONFIG_EXT_INTRA
       mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
       mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;

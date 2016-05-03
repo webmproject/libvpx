@@ -479,10 +479,9 @@ static void extend_and_predict_highbd(const uint8_t *buf_ptr1,
                                       int subpel_x, int subpel_y,
                                       const INTERP_FILTER interp_filter,
                                       const struct scale_factors *sf,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                      int plane,
+#if CONFIG_EXT_INTER
                                       int wedge_offset_x, int wedge_offset_y,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
+#endif  // CONFIG_EXT_INTER
                                       MACROBLOCKD *xd,
                                       int w, int h, int ref, int xs, int ys) {
   DECLARE_ALIGNED(16, uint16_t,
@@ -505,9 +504,7 @@ static void extend_and_predict_highbd(const uint8_t *buf_ptr1,
         buf_ptr, b_w, dst, dst_buf_stride,
         subpel_x, subpel_y, sf, w, h,
         interp_filter, xs, ys,
-#if CONFIG_SUPERTX
-        plane, wedge_offset_x, wedge_offset_y,
-#endif  // CONFIG_SUPERTX
+        wedge_offset_x, wedge_offset_y,
         xd);
   else
 #endif  // CONFIG_EXT_INTER
@@ -526,10 +523,9 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                                int subpel_x, int subpel_y,
                                const INTERP_FILTER interp_filter,
                                const struct scale_factors *sf,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                               int plane,
+#if CONFIG_EXT_INTER
                                int wedge_offset_x, int wedge_offset_y,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
+#endif  // CONFIG_EXT_INTER
                                MACROBLOCKD *xd,
                                int w, int h, int ref, int xs, int ys) {
   DECLARE_ALIGNED(16, uint8_t,
@@ -546,9 +542,7 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
         buf_ptr, b_w, dst, dst_buf_stride,
         subpel_x, subpel_y, sf, w, h,
         interp_filter, xs, ys,
-#if CONFIG_SUPERTX
-        plane, wedge_offset_x, wedge_offset_y,
-#endif  // CONFIG_SUPERTX
+        wedge_offset_x, wedge_offset_y,
         xd);
   else
 #endif  // CONFIG_EXT_INTER
@@ -565,9 +559,9 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi,
 #endif  // CONFIG_OBMC
                                        int bw, int bh,
                                        int x, int y, int w, int h,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
+#if CONFIG_EXT_INTER
                                        int wedge_offset_x, int wedge_offset_y,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
+#endif  // CONFIG_EXT_INTER
                                        int mi_x, int mi_y,
                                        const INTERP_FILTER interp_filter,
                                        const struct scale_factors *sf,
@@ -722,9 +716,9 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi,
                                 dst, dst_buf->stride,
                                 subpel_x, subpel_y,
                                 interp_filter, sf,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                                plane, wedge_offset_x, wedge_offset_y,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
+#if CONFIG_EXT_INTER
+                                wedge_offset_x, wedge_offset_y,
+#endif  // CONFIG_EXT_INTER
                                 xd, w, h, ref, xs, ys);
 #else
       extend_and_predict(buf_ptr1, buf_stride, x0, y0, b_w, b_h,
@@ -732,9 +726,9 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi,
                          dst, dst_buf->stride,
                          subpel_x, subpel_y,
                          interp_filter, sf,
-#if CONFIG_EXT_INTER && CONFIG_SUPERTX
-                         plane, wedge_offset_x, wedge_offset_y,
-#endif  // CONFIG_EXT_INTER && CONFIG_SUPERTX
+#if CONFIG_EXT_INTER
+                         wedge_offset_x, wedge_offset_y,
+#endif  // CONFIG_EXT_INTER
                          xd, w, h, ref, xs, ys);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       return;
@@ -750,25 +744,18 @@ static void dec_build_inter_predictors(VP10Decoder *const pbi,
   }
 #if CONFIG_EXT_INTER
   if (ref && is_interinter_wedge_used(mi->mbmi.sb_type) &&
-      mi->mbmi.use_wedge_interinter) {
+      mi->mbmi.use_wedge_interinter)
     vp10_make_masked_inter_predictor(
         buf_ptr, buf_stride, dst, dst_buf->stride,
         subpel_x, subpel_y, sf, w, h,
         interp_filter, xs, ys,
-#if CONFIG_SUPERTX
-        plane, wedge_offset_x, wedge_offset_y,
-#endif  // CONFIG_SUPERTX
+        wedge_offset_x, wedge_offset_y,
         xd);
-  } else {
+  else
+#endif  // CONFIG_EXT_INTER
     vp10_make_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride,
                               subpel_x, subpel_y, sf, w, h, ref,
                               interp_filter, xs, ys, xd);
-  }
-#else
-  vp10_make_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride,
-                            subpel_x, subpel_y, sf, w, h, ref,
-                            interp_filter, xs, ys, xd);
-#endif  // CONFIG_EXT_INTER
 }
 
 static void dec_build_inter_predictors_sb_extend(
@@ -828,8 +815,8 @@ static void dec_build_inter_predictors_sb_extend(
                 n4w_x4, n4h_x4,
                 4 * x, 4 * y, pw, ph,
 #if CONFIG_EXT_INTER
-                wedge_offset_x >> (pd->subsampling_x),
-                wedge_offset_y >> (pd->subsampling_y),
+                wedge_offset_x,
+                wedge_offset_y,
 #endif  // CONFIG_EXT_INTER
                 mi_x, mi_y,
                 interp_filter, sf, pre_buf, dst_buf,
@@ -846,8 +833,8 @@ static void dec_build_inter_predictors_sb_extend(
             n4w_x4, n4h_x4,
             0, 0, n4w_x4, n4h_x4,
 #if CONFIG_EXT_INTER
-            wedge_offset_x >> (pd->subsampling_x),
-            wedge_offset_y >> (pd->subsampling_y),
+            wedge_offset_x,
+            wedge_offset_y,
 #endif  // CONFIG_EXT_INTER
             mi_x, mi_y,
             interp_filter, sf, pre_buf, dst_buf,
@@ -919,8 +906,8 @@ static void dec_build_inter_predictors_sb_sub8x8_extend(
                                  n4w_x4, n4h_x4,
                                  0, 0, n4w_x4, n4h_x4,
 #if CONFIG_EXT_INTER
-                                 wedge_offset_x >> (pd->subsampling_x),
-                                 wedge_offset_y >> (pd->subsampling_y),
+                                 wedge_offset_x,
+                                 wedge_offset_y,
 #endif  // CONFIG_EXT_INTER
                                  mi_x, mi_y,
                                  interp_filter, sf, pre_buf, dst_buf,
@@ -1386,7 +1373,6 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         vp10_build_masked_inter_predictor_complex(xd,
                                                   dst_buf[0], dst_stride[0],
                                                   dst_buf1[0], dst_stride1[0],
-                                                  &xd->plane[0],
                                                   mi_row, mi_col,
                                                   mi_row_top, mi_col_top,
                                                   bsize, top_bsize,
@@ -1427,7 +1413,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
             xd->plane[i].dst.stride = dst_stride[i];
             vp10_build_masked_inter_predictor_complex(
                 xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i],
-                &xd->plane[i], mi_row, mi_col, mi_row_top, mi_col_top,
+                mi_row, mi_col, mi_row_top, mi_col_top,
                 bsize, top_bsize, PARTITION_HORZ, i);
           }
         }
@@ -1457,7 +1443,6 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         vp10_build_masked_inter_predictor_complex(xd,
                                                   dst_buf[0], dst_stride[0],
                                                   dst_buf1[0], dst_stride1[0],
-                                                  &xd->plane[0],
                                                   mi_row, mi_col,
                                                   mi_row_top, mi_col_top,
                                                   bsize, top_bsize,
@@ -1494,7 +1479,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
             xd->plane[i].dst.stride = dst_stride[i];
             vp10_build_masked_inter_predictor_complex(
                 xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i],
-                &xd->plane[i], mi_row, mi_col, mi_row_top, mi_col_top,
+                mi_row, mi_col, mi_row_top, mi_col_top,
                 bsize, top_bsize, PARTITION_VERT, i);
           }
         }
@@ -1549,7 +1534,6 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
                                                       dst_buf[i], dst_stride[i],
                                                       dst_buf1[i],
                                                       dst_stride1[i],
-                                                      &xd->plane[i],
                                                       mi_row, mi_col,
                                                       mi_row_top, mi_col_top,
                                                       bsize, top_bsize,
@@ -1560,7 +1544,6 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
                                                         dst_stride2[i],
                                                         dst_buf3[i],
                                                         dst_stride3[i],
-                                                        &xd->plane[i],
                                                         mi_row, mi_col,
                                                         mi_row_top, mi_col_top,
                                                         bsize, top_bsize,
@@ -1570,7 +1553,6 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
                                                         dst_stride[i],
                                                         dst_buf2[i],
                                                         dst_stride2[i],
-                                                        &xd->plane[i],
                                                         mi_row, mi_col,
                                                         mi_row_top, mi_col_top,
                                                         bsize, top_bsize,
@@ -1582,7 +1564,6 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
                                                       dst_stride[i],
                                                       dst_buf2[i],
                                                       dst_stride2[i],
-                                                      &xd->plane[i],
                                                       mi_row, mi_col,
                                                       mi_row_top, mi_col_top,
                                                       bsize, top_bsize,
@@ -1620,23 +1601,21 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf[i], dst_stride[i],
-                                                 dst_buf1[i], dst_stride1[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_VERT, i);
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
       }
       for (i = 0; i < MAX_MB_PLANE; i++) {
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf[i], dst_stride[i],
-                                                 dst_buf2[i], dst_stride2[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_HORZ, i);
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
       }
       break;
     case PARTITION_VERT_A:
@@ -1670,23 +1649,21 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf[i], dst_stride[i],
-                                                 dst_buf1[i], dst_stride1[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_HORZ, i);
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
       }
       for (i = 0; i < MAX_MB_PLANE; i++) {
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf[i], dst_stride[i],
-                                                 dst_buf2[i], dst_stride2[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_VERT, i);
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
       }
       break;
     case PARTITION_HORZ_B:
@@ -1717,25 +1694,23 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         xd->plane[i].dst.buf = dst_buf1[i];
         xd->plane[i].dst.stride = dst_stride1[i];
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf1[i], dst_stride1[i],
-                                                 dst_buf2[i], dst_stride2[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_VERT, i);
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
       }
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf[i], dst_stride[i],
-                                                 dst_buf1[i], dst_stride1[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_HORZ, i);
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
       }
       break;
     case PARTITION_VERT_B:
@@ -1766,25 +1741,23 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         xd->plane[i].dst.buf = dst_buf1[i];
         xd->plane[i].dst.stride = dst_stride1[i];
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf1[i], dst_stride1[i],
-                                                 dst_buf2[i], dst_stride2[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_HORZ, i);
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  dst_buf2[i], dst_stride2[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_HORZ, i);
       }
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
         vp10_build_masked_inter_predictor_complex(xd,
-                                                 dst_buf[i], dst_stride[i],
-                                                 dst_buf1[i], dst_stride1[i],
-                                                 &xd->plane[i],
-                                                 mi_row, mi_col,
-                                                 mi_row_top, mi_col_top,
-                                                 bsize, top_bsize,
-                                                 PARTITION_VERT, i);
+                                                  dst_buf[i], dst_stride[i],
+                                                  dst_buf1[i], dst_stride1[i],
+                                                  mi_row, mi_col,
+                                                  mi_row_top, mi_col_top,
+                                                  bsize, top_bsize,
+                                                  PARTITION_VERT, i);
       }
       break;
 #endif  // CONFIG_EXT_PARTITION_TYPES
