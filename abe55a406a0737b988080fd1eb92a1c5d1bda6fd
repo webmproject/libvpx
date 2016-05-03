@@ -226,6 +226,24 @@
       "revId": "abe55a406a0737b988080fd1eb92a1c5d1bda6fd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_fc6225c8",
+        "filename": "vpx_dsp/x86/postproc_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-05-03T22:04:14Z",
+      "side": 1,
+      "message": "probably the test could be unaligned.   I added these lines just now and thought why force them to be aligned. But since the very next thing I want to do with this is to have the function take a single clamp value for black and white ( not a pointer to 16) it seems silly to fix this now...\n\nif you want I\u0027ll get rid of declspec",
+      "parentUuid": "8d149734_0ddcc182",
+      "revId": "abe55a406a0737b988080fd1eb92a1c5d1bda6fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
