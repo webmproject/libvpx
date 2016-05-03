@@ -3098,12 +3098,14 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   const int tile_cols_start = single_col ? dec_tile_col : 0;
   const int tile_cols_end = single_col ? tile_cols_start + 1 : tile_cols;
   const int inv_col_order = pbi->inv_tile_order && !single_col;
+  const int inv_row_order = pbi->inv_tile_order && !single_row;
 #else
   const int tile_rows_start = 0;
   const int tile_rows_end = tile_rows;
   const int tile_cols_start = 0;
   const int tile_cols_end = tile_cols;
   const int inv_col_order = pbi->inv_tile_order;
+  const int inv_row_order = pbi->inv_tile_order;
 #endif  // CONFIG_EXT_TILE
   int tile_row, tile_col;
 
@@ -3175,14 +3177,15 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   }
 
   for (tile_row = tile_rows_start; tile_row < tile_rows_end; ++tile_row) {
+    const int row = inv_row_order ? tile_rows - 1 - tile_row : tile_row;
     int mi_row = 0;
     TileInfo tile_info;
 
-    vp10_tile_set_row(&tile_info, cm, tile_row);
+    vp10_tile_set_row(&tile_info, cm, row);
 
     for (tile_col = tile_cols_start; tile_col < tile_cols_end; ++tile_col) {
       const int col = inv_col_order ? tile_cols - 1 - tile_col : tile_col;
-      TileData *const td = pbi->tile_data + tile_cols * tile_row + col;
+      TileData *const td = pbi->tile_data + tile_cols * row + col;
 
       vp10_tile_set_col(&tile_info, cm, col);
 
