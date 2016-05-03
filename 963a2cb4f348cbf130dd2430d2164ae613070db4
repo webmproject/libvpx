@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8d5c9765_7c6f35b5",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T22:03:12Z",
+      "side": 1,
+      "message": "\u0027i\u0027 shadows the other declaration.",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_1c7a7977",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T22:03:12Z",
+      "side": 1,
+      "message": "these locals match the other test, you could normalize the order",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_bc3f0da4",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T22:03:12Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_9c37a9d4",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T22:03:12Z",
+      "side": 1,
+      "message": "no space before \u0027.\u0027",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_bc11cd46",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T22:03:12Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_5c0d1126",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T22:03:12Z",
+      "side": 1,
+      "message": "redundant",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_5c26b1a9",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-03T22:03:12Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
