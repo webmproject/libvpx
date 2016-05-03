@@ -938,10 +938,10 @@ static void write_switchable_interp_filter(VP10_COMP *cpi,
 #endif  // CONFIG_DUAL_FILTER
 #endif  // CONFIG_EXT_INTERP
 #if CONFIG_DUAL_FILTER
-    for (dir = 0; dir < 4; ++dir) {
-      const int frame_idx = (dir >> 1);
-      if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
-          has_subpel_mv_component(xd, dir)) {
+    for (dir = 0; dir < 2; ++dir) {
+      if (has_subpel_mv_component(xd, dir) ||
+          (mbmi->ref_frame[1] > INTRA_FRAME &&
+           has_subpel_mv_component(xd, dir + 2))) {
         const int ctx = vp10_get_pred_context_switchable_interp(xd, dir);
         vp10_write_token(w, vp10_switchable_interp_tree,
               cm->fc->switchable_interp_prob[ctx],

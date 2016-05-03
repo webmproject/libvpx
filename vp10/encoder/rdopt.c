@@ -10116,6 +10116,9 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
       if (cm->interp_filter != BILINEAR) {
 #if CONFIG_DUAL_FILTER
         tmp_best_filter[0] = EIGHTTAP_REGULAR;
+        tmp_best_filter[1] = EIGHTTAP_REGULAR;
+        tmp_best_filter[2] = EIGHTTAP_REGULAR;
+        tmp_best_filter[3] = EIGHTTAP_REGULAR;
 #else
         tmp_best_filter = EIGHTTAP_REGULAR;
 #endif

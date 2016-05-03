@@ -1023,12 +1023,13 @@ static void choose_partitioning(VP10_COMP *const cpi,
 static void reset_intmv_filter_type(VP10_COMMON *cm,
                                     MACROBLOCKD *xd, MB_MODE_INFO *mbmi) {
   int dir;
-  for (dir = 0; dir < 4; ++dir) {
-    const int frame_idx = (dir >> 1);
-    if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
-        !has_subpel_mv_component(xd, dir))
+  for (dir = 0; dir < 2; ++dir) {
+    if (!has_subpel_mv_component(xd, dir) &&
+        (mbmi->ref_frame[1] == NONE ||
+         !has_subpel_mv_component(xd, dir + 2)))
       mbmi->interp_filter[dir] = (cm->interp_filter == SWITCHABLE) ?
           EIGHTTAP_REGULAR : cm->interp_filter;
+    mbmi->interp_filter[dir + 2] = mbmi->interp_filter[dir];
   }
 }
 
@@ -1036,10 +1037,10 @@ static void update_filter_type_count(FRAME_COUNTS *counts,
                                      const MACROBLOCKD *xd,
                                      const MB_MODE_INFO *mbmi) {
   int dir;
-  for (dir = 0; dir < 4; ++dir) {
-    const int frame_idx = (dir >> 1);
-    if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
-        has_subpel_mv_component(xd, dir)) {
+  for (dir = 0; dir < 2; ++dir) {
+    if (has_subpel_mv_component(xd, dir) ||
+        (mbmi->ref_frame[1] > INTRA_FRAME &&
+         has_subpel_mv_component(xd, dir + 2))) {
       const int ctx = vp10_get_pred_context_switchable_interp(xd, dir);
       ++counts->switchable_interp[ctx][mbmi->interp_filter[dir]];
     }

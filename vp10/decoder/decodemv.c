@@ -1617,15 +1617,20 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTER
 
 #if CONFIG_DUAL_FILTER
-  for (ref = 0; ref < 4; ++ref) {
-    const int frame_idx = (ref >> 1);
+  for (ref = 0; ref < 2; ++ref) {
     mbmi->interp_filter[ref] = (cm->interp_filter == SWITCHABLE) ?
         EIGHTTAP_REGULAR : cm->interp_filter;
 
-    if (mbmi->ref_frame[frame_idx] > INTRA_FRAME &&
-        has_subpel_mv_component(xd, ref))
+    if (has_subpel_mv_component(xd, ref) ||
+        (mbmi->ref_frame[1] > INTRA_FRAME &&
+         has_subpel_mv_component(xd, ref + 2)))
       mbmi->interp_filter[ref] = read_interp_filter(cm, xd, ref, r);
   }
+  // The index system worsk as:
+  // (0, 1) -> (vertical, horizontal) filter types for the first ref frame.
+  // (2, 3) -> (vertical, horizontal) filter types for the second ref frame.
+  mbmi->interp_filter[2] = mbmi->interp_filter[0];
+  mbmi->interp_filter[3] = mbmi->interp_filter[1];
 #else
 #if CONFIG_EXT_INTERP
   mbmi->interp_filter = read_interp_filter(cm, xd, r);
