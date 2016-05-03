@@ -2951,6 +2951,8 @@ static void get_tile_buffer(const uint8_t *const data_end,
   }
 
   *data += size;
+
+  tile_buffers[row][col].raw_data_end = *data;
 }
 
 static void get_tile_buffers(
@@ -2966,6 +2968,7 @@ static void get_tile_buffers(
     const uint32_t tile_size = data_end - data;
     tile_buffers[0][0].data = data;
     tile_buffers[0][0].size = tile_size;
+    tile_buffers[0][0].raw_data_end = NULL;
   } else {
     const uint8_t *tile_col_data_end[MAX_TILE_COLS];
     const uint8_t *const data_start = data;
@@ -3087,6 +3090,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
+  const int n_tiles = tile_cols * tile_rows;
   TileBufferDec (*const tile_buffers)[MAX_TILE_COLS] = pbi->tile_buffers;
 #if CONFIG_EXT_TILE
   const int dec_tile_row = VPXMIN(pbi->dec_tile_row, tile_rows);
@@ -3110,7 +3114,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   int tile_row, tile_col;
 
 #if CONFIG_ENTROPY
-  cm->do_subframe_update = cm->tile_cols == 1 && cm->tile_rows == 1;
+  cm->do_subframe_update = n_tiles == 1;
 #endif  // CONFIG_ENTROPY
 
   if (cm->lf.filter_level && !cm->skip_loop_filter &&
@@ -3137,14 +3141,13 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
 
   get_tile_buffers(pbi, data, data_end, tile_buffers);
 
-  if (pbi->tile_data == NULL ||
-      (tile_cols * tile_rows) != pbi->allocated_tiles) {
+  if (pbi->tile_data == NULL || n_tiles != pbi->allocated_tiles) {
     vpx_free(pbi->tile_data);
     CHECK_MEM_ERROR(
         cm,
         pbi->tile_data,
-        vpx_memalign(32, tile_cols * tile_rows * (sizeof(*pbi->tile_data))));
-    pbi->allocated_tiles = tile_rows * tile_cols;
+        vpx_memalign(32, n_tiles * (sizeof(*pbi->tile_data))));
+    pbi->allocated_tiles = n_tiles;
   }
 
   // Load all tile information into tile_data.
@@ -3278,7 +3281,20 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
   if (cm->frame_parallel_decode)
     vp10_frameworker_broadcast(pbi->cur_buf, INT_MAX);
 
-#if CONFIG_ANS || CONFIG_EXT_TILE
+#if CONFIG_EXT_TILE
+  if (n_tiles == 1) {
+#if CONFIG_ANS
+    return data_end;
+#else
+    // Find the end of the single tile buffer
+    return vpx_reader_find_end(&pbi->tile_data->bit_reader);
+#endif  // CONFIG_ANS
+  } else {
+    // Return the end of the last tile buffer
+    return tile_buffers[tile_rows - 1][tile_cols - 1].raw_data_end;
+  }
+#else
+#if CONFIG_ANS
   return data_end;
 #else
   {
@@ -3286,7 +3302,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi,
     TileData *const td = pbi->tile_data + tile_cols * tile_rows - 1;
     return vpx_reader_find_end(&td->bit_reader);
   }
-#endif  // CONFIG_ANS || CONFIG_EXT_TILE
+#endif  // CONFIG_ANS
+#endif  // CONFIG_EXT_TILE
 }
 
 static int tile_worker_hook(TileWorkerData *const tile_data,
@@ -3363,6 +3380,8 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
 
   assert(tile_rows <= MAX_TILE_ROWS);
   assert(tile_cols <= MAX_TILE_COLS);
+
+  assert(tile_cols * tile_rows > 1);
 
 #if CONFIG_ANS
   // TODO(any): This might just work now. Needs to be tested.
@@ -3503,7 +3522,11 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
     }
   }
 
-#if CONFIG_ANS || CONFIG_EXT_TILE
+#if CONFIG_EXT_TILE
+  // Return the end of the last tile buffer
+  return tile_buffers[tile_rows - 1][tile_cols - 1].raw_data_end;
+#else
+#if CONFIG_ANS
   return data_end;
 #else
   assert(final_worker != -1);
@@ -3512,7 +3535,8 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
         (TileWorkerData*)pbi->tile_workers[final_worker].data1;
     return vpx_reader_find_end(&twd->bit_reader);
   }
-#endif  // CONFIG_ANS || CONFIG_EXT_TILE
+#endif  // CONFIG_ANS
+#endif  // CONFIG_EXT_TILE
 }
 
 static void error_handler(void *data) {

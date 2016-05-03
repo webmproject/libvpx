@@ -51,6 +51,8 @@ typedef struct TileWorkerData {
 typedef struct TileBufferDec {
   const uint8_t *data;
   size_t size;
+  const uint8_t *raw_data_end;  // The end of the raw tile buffer in the
+                                // bit stream.
   int col;  // only used with multi-threaded decoding
 } TileBufferDec;
 
