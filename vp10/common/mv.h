@@ -11,9 +11,8 @@
 #ifndef VP10_COMMON_MV_H_
 #define VP10_COMMON_MV_H_
 
-#include "vpx/vpx_integer.h"
-
 #include "vp10/common/common.h"
+#include "vpx_dsp/vpx_filter.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +57,7 @@ static INLINE void clamp_mv(MV *mv, int min_col, int max_col,
 }
 
 static INLINE int mv_has_subpel(const MV *mv) {
-  return (mv->row & 0x0F) || (mv->col & 0x0F);
+  return (mv->row & SUBPEL_MASK) || (mv->col & SUBPEL_MASK);
 }
 #ifdef __cplusplus
 }  // extern "C"
