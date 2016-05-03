@@ -27,38 +27,40 @@ sym(vpx_plane_add_noise_sse2):
     push        rdi
     ; end prolog
 
+    ; get the clamps in registers
+    mov     rdx, arg(2) ; blackclamp
+    movdqu  xmm3, [rdx]
+    mov     rdx, arg(3) ; whiteclamp
+    movdqu  xmm4, [rdx]
+    mov     rdx, arg(4) ; bothclamp
+    movdqu  xmm5, [rdx]
+
 .addnoise_loop:
     call sym(LIBVPX_RAND) WRT_PLT
     mov     rcx, arg(1) ;noise
     and     rax, 0xff
     add     rcx, rax
 
-    ; we rely on the fact that the clamping vectors are stored contiguously
-    ; in black/white/both order. Note that we have to reload this here because
-    ; rdx could be trashed by rand()
-    mov     rdx, arg(2) ; blackclamp
-
-
-            mov     rdi, rcx
-            movsxd  rcx, dword arg(5) ;[Width]
-            mov     rsi, arg(0) ;Pos
-            xor         rax,rax
+    mov     rdi, rcx
+    movsxd  rcx, dword arg(5) ;[Width]
+    mov     rsi, arg(0) ;Pos
+    xor         rax,rax
 
 .addnoise_nextset:
-            movdqu      xmm1,[rsi+rax]         ; get the source
+      movdqu      xmm1,[rsi+rax]         ; get the source
 
-            psubusb     xmm1, [rdx]    ;blackclamp        ; clamp both sides so we don't outrange adding noise
-            paddusb     xmm1, [rdx+32] ;bothclamp
-            psubusb     xmm1, [rdx+16] ;whiteclamp
+      psubusb     xmm1, xmm3 ; subtract black clamp
+      paddusb     xmm1, xmm5 ; add both clamp
+      psubusb     xmm1, xmm4 ; subtract whiteclamp
 
-            movdqu      xmm2,[rdi+rax]         ; get the noise for this line
-            paddb       xmm1,xmm2              ; add it in
-            movdqu      [rsi+rax],xmm1         ; store the result
+      movdqu      xmm2,[rdi+rax]         ; get the noise for this line
+      paddb       xmm1,xmm2              ; add it in
+      movdqu      [rsi+rax],xmm1         ; store the result
 
-            add         rax,16                 ; move to the next line
+      add         rax,16                 ; move to the next line
 
-            cmp         rax, rcx
-            jl          .addnoise_nextset
+      cmp         rax, rcx
+      jl          .addnoise_nextset
 
     movsxd  rax, dword arg(7) ; Pitch
     add     arg(0), rax ; Start += Pitch
@@ -72,7 +74,6 @@ sym(vpx_plane_add_noise_sse2):
     UNSHADOW_ARGS
     pop         rbp
     ret
-
 
 SECTION_RODATA
 align 16

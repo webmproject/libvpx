@@ -103,6 +103,7 @@ LIBVPX_TEST_SRCS-yes                   += vp8_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp8_fragments_test.cc
 endif
 
+LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += add_noise_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += vp8_decrypt_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += quantize_test.cc
