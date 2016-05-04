@@ -580,7 +580,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
             read_uniform(r, 2 * MAX_ANGLE_DELTAS + 1) - MAX_ANGLE_DELTAS;
         p_angle = mode_to_angle_map[mbmi->mode] +
             mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle)) {
+        if (vp10_is_intra_filter_switchable(p_angle)) {
           FRAME_COUNTS *counts = xd->counts;
           mbmi->intra_filter = vp10_read_tree(r, vp10_intra_filter_tree,
                                              cm->fc->intra_filter_probs[ctx]);
@@ -922,7 +922,7 @@ static void read_intra_block_mode_info(VP10_COMMON *const cm,
             read_uniform(r, 2 * MAX_ANGLE_DELTAS + 1) - MAX_ANGLE_DELTAS;
         p_angle =
             mode_to_angle_map[mbmi->mode] + mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle)) {
+        if (vp10_is_intra_filter_switchable(p_angle)) {
           FRAME_COUNTS *counts = xd->counts;
           const int ctx = vp10_get_pred_context_intra_interp(xd);
           mbmi->intra_filter = vp10_read_tree(r, vp10_intra_filter_tree,

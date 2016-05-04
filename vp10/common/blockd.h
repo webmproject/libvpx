@@ -524,7 +524,7 @@ static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
   ADST_ADST,  // FILTER_TM
 };
 
-int pick_intra_filter(int angle);
+int vp10_is_intra_filter_switchable(int angle);
 #endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_EXT_TILE

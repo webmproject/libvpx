@@ -26,7 +26,7 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
                              uint8_t *dst, int dst_stride,
                              int aoff, int loff, int plane);
 #if CONFIG_EXT_INTRA
-int pick_intra_filter(int angle);
+int vp10_is_intra_filter_switchable(int angle);
 #endif  // CONFIG_EXT_INTRA
 #ifdef __cplusplus
 }  // extern "C"

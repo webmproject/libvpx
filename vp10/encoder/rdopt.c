@@ -2422,7 +2422,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
           mbmi->angle_delta[0] * ANGLE_STEP;
       for (filter = INTRA_FILTER_LINEAR; filter < INTRA_FILTERS; ++filter) {
         int64_t tmp_best_rd;
-        if ((FILTER_FAST_SEARCH || !pick_intra_filter(p_angle)) &&
+        if ((FILTER_FAST_SEARCH || !vp10_is_intra_filter_switchable(p_angle)) &&
             filter != INTRA_FILTER_LINEAR)
           continue;
         mic->mbmi.intra_filter = filter;
@@ -2464,8 +2464,8 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
             mbmi->angle_delta[0] * ANGLE_STEP;
         for (filter = INTRA_FILTER_LINEAR; filter < INTRA_FILTERS; ++filter) {
           mic->mbmi.intra_filter = filter;
-          if ((FILTER_FAST_SEARCH || !pick_intra_filter(p_angle)) &&
-              filter != INTRA_FILTER_LINEAR)
+          if ((FILTER_FAST_SEARCH || !vp10_is_intra_filter_switchable(p_angle))
+              && filter != INTRA_FILTER_LINEAR)
             continue;
           pick_intra_angle_routine_sby(cpi, x, rate, rate_tokenonly,
                                        distortion, skippable,
@@ -2486,7 +2486,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
           mbmi->angle_delta[0] * ANGLE_STEP;
       for (filter = INTRA_FILTER_LINEAR; filter < INTRA_FILTERS; ++filter) {
         mic->mbmi.intra_filter = filter;
-        if ((FILTER_FAST_SEARCH || !pick_intra_filter(p_angle)) &&
+        if ((FILTER_FAST_SEARCH || !vp10_is_intra_filter_switchable(p_angle)) &&
             filter != INTRA_FILTER_LINEAR)
           continue;
         pick_intra_angle_routine_sby(cpi, x, rate, rate_tokenonly,
@@ -2505,7 +2505,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->angle_delta[0] = best_angle_delta;
     p_angle = mode_to_angle_map[mbmi->mode] +
         mbmi->angle_delta[0] * ANGLE_STEP;
-    if (pick_intra_filter(p_angle)) {
+    if (vp10_is_intra_filter_switchable(p_angle)) {
       for (filter = INTRA_FILTER_LINEAR + 1; filter < INTRA_FILTERS; ++filter) {
         mic->mbmi.intra_filter = filter;
         pick_intra_angle_routine_sby(cpi, x, rate, rate_tokenonly,
@@ -2778,7 +2778,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                       mic->mbmi.angle_delta[0]);
       p_angle = mode_to_angle_map[mic->mbmi.mode] +
           mic->mbmi.angle_delta[0] * ANGLE_STEP;
-      if (pick_intra_filter(p_angle))
+      if (vp10_is_intra_filter_switchable(p_angle))
         this_rate +=
             cpi->intra_filter_cost[intra_filter_ctx][mic->mbmi.intra_filter];
     }
@@ -8333,7 +8333,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                     mbmi->angle_delta[0]);
         p_angle = mode_to_angle_map[mbmi->mode] +
             mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle))
+        if (vp10_is_intra_filter_switchable(p_angle))
           rate2 += cpi->intra_filter_cost[intra_filter_ctx][mbmi->intra_filter];
       }
 
