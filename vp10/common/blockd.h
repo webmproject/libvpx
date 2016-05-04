@@ -484,6 +484,15 @@ static const int ext_tx_used_inter[EXT_TX_SETS_INTER][TX_TYPES] = {
   {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
 };
 
+// 1D Transforms used in inter set, this needs to be changed if
+// ext_tx_used_inter is changed
+static const int ext_tx_used_inter_1D[EXT_TX_SETS_INTER][TX_TYPES_1D] = {
+  {1, 0, 0, 0},
+  {1, 1, 1, 1},
+  {1, 1, 1, 1},
+  {1, 0, 0, 1},
+};
+
 static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
                                    int is_inter) {
   const int set = get_ext_tx_set(tx_size, bs, is_inter);
