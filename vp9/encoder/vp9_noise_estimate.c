@@ -39,7 +39,7 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
   ne->num_frames_estimate = 20;
 }
 
-int enable_noise_estimation(VP9_COMP *const cpi) {
+static int enable_noise_estimation(VP9_COMP *const cpi) {
   // Enable noise estimation if denoising is on.
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0)
