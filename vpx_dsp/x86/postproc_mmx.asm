@@ -25,17 +25,19 @@ sym(vpx_plane_add_noise_mmx):
     push        rdi
     ; end prolog
 
+    ; get the clamps in registers
+    mov     rdx, arg(2) ; blackclamp
+    movq    mm3, [rdx]
+    mov     rdx, arg(3) ; whiteclamp
+    movq    mm4, [rdx]
+    mov     rdx, arg(4) ; bothclamp
+    movq    mm5, [rdx]
+
 .addnoise_loop:
     call sym(LIBVPX_RAND) WRT_PLT
     mov     rcx, arg(1) ;noise
     and     rax, 0xff
     add     rcx, rax
-
-    ; we rely on the fact that the clamping vectors are stored contiguously
-    ; in black/white/both order. Note that we have to reload this here because
-    ; rdx could be trashed by rand()
-    mov     rdx, arg(2) ; blackclamp
-
 
             mov     rdi, rcx
             movsxd  rcx, dword arg(5) ;[Width]
@@ -45,9 +47,9 @@ sym(vpx_plane_add_noise_mmx):
 .addnoise_nextset:
             movq        mm1,[rsi+rax]         ; get the source
 
-            psubusb     mm1, [rdx]    ;blackclamp        ; clamp both sides so we don't outrange adding noise
-            paddusb     mm1, [rdx+32] ;bothclamp
-            psubusb     mm1, [rdx+16] ;whiteclamp
+            psubusb     mm1, mm3 ; subtract black clamp
+            paddusb     mm1, mm5 ; add both clamp
+            psubusb     mm1, mm4 ; subtract whiteclamp
 
             movq        mm2,[rdi+rax]         ; get the noise for this line
             paddb       mm1,mm2              ; add it in

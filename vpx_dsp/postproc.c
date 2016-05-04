@@ -34,8 +34,8 @@ void vpx_plane_add_noise_c(uint8_t *start, char *noise,
       if (pos[j] < blackclamp[0])
         pos[j] = blackclamp[0];
 
-      if (pos[j] > 255 + whiteclamp[0])
-        pos[j] = 255 + whiteclamp[0];
+      if (pos[j] > 255 - whiteclamp[0])
+        pos[j] = 255 - whiteclamp[0];
 
       pos[j] += ref[j];
     }
