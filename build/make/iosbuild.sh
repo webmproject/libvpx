@@ -24,6 +24,7 @@ CONFIGURE_ARGS="--disable-docs
                 --disable-unit-tests"
 DIST_DIR="_dist"
 FRAMEWORK_DIR="VPX.framework"
+FRAMEWORK_LIB="VPX.framework/VPX"
 HEADER_DIR="${FRAMEWORK_DIR}/Headers/vpx"
 SCRIPT_DIR=$(dirname "$0")
 LIBVPX_SOURCE_DIR=$(cd ${SCRIPT_DIR}/../..; pwd)
@@ -137,6 +138,44 @@ create_vpx_framework_config_shim() {
   printf "#endif  // ${include_guard}" >> "${config_file}"
 }
 
+# Verifies that $FRAMEWORK_LIB fat library contains requested builds.
+verify_framework_targets() {
+  local requested_cpus=""
+  local cpu=""
+
+  # Extract CPU from full target name.
+  for target; do
+    cpu="${target%%-*}"
+    if [ "${cpu}" = "x86" ]; then
+      # lipo -info outputs i386 for libvpx x86 targets.
+      cpu="i386"
+    fi
+    requested_cpus="${requested_cpus}${cpu} "
+  done
+
+  # Get target CPUs present in framework library.
+  local targets_built=$(${LIPO} -info ${FRAMEWORK_LIB})
+
+  # $LIPO -info outputs a string like the following:
+  #   Architectures in the fat file: $FRAMEWORK_LIB <architectures>
+  # Capture only the architecture strings.
+  targets_built=${targets_built##*: }
+
+  # Sort CPU strings to make the next step a simple string compare.
+  local actual=$(echo ${targets_built} | tr " " "\n" | sort | tr "\n" " ")
+  local requested=$(echo ${requested_cpus} | tr " " "\n" | sort | tr "\n" " ")
+
+  vlog "Requested ${FRAMEWORK_LIB} CPUs: ${requested}"
+  vlog "Actual ${FRAMEWORK_LIB} CPUs: ${actual}"
+
+  if [ "${requested}" != "${actual}" ]; then
+    elog "Actual ${FRAMEWORK_LIB} targets do not match requested target list."
+    elog "  Requested target CPUs: ${requested}"
+    elog "  Actual target CPUs: ${actual}"
+    return 1
+  fi
+}
+
 # Configures and builds each target specified by $1, and then builds
 # VPX.framework.
 build_framework() {
@@ -176,13 +215,13 @@ build_framework() {
   # Copy in vpx_version.h.
   cp -p "${BUILD_ROOT}/${target}/vpx_version.h" "${HEADER_DIR}"
 
-  vlog "Created fat library ${FRAMEWORK_DIR}/VPX containing:"
+  # Confirm VPX.framework/VPX contains the targets requested.
+  verify_framework_targets ${targets}
+
+  vlog "Created fat library ${FRAMEWORK_LIB} containing:"
   for lib in ${lib_list}; do
     vlog "  $(echo ${lib} | awk -F / '{print $2, $NF}')"
   done
-
-  # TODO(tomfinegan): Verify that expected targets are included within
-  # VPX.framework/VPX via lipo -info.
 }
 
 # Trap function. Cleans up the subtree used to build all targets contained in
@@ -285,6 +324,7 @@ cat << EOF
   CONFIGURE_ARGS=${CONFIGURE_ARGS}
   EXTRA_CONFIGURE_ARGS=${EXTRA_CONFIGURE_ARGS}
   FRAMEWORK_DIR=${FRAMEWORK_DIR}
+  FRAMEWORK_LIB=${FRAMEWORK_LIB}
   HEADER_DIR=${HEADER_DIR}
   LIBVPX_SOURCE_DIR=${LIBVPX_SOURCE_DIR}
   LIPO=${LIPO}
