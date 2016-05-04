@@ -211,7 +211,7 @@ void vpx_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf) {
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {
+static void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
   memcpy(dst, src, num * sizeof(uint16_t));
