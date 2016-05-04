@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "ed70b31a_0ae89f24",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-04T21:37:09Z",
+      "side": 1,
+      "message": "\u003e Would it make sense to add two entries in kVP9TestVectors to test\n \u003e the yv12 format and one high-bitdepth?\n \u003e Are there vectors to test this format already?\n \u003e I\u0027m happy to do add those in another CL and rebase this change if\n \u003e that makes sense.\n \u003e \n\nI wasn\u0027t really following the change before, expecting just what the library will produce should be fine. High bitdepth wasn\u0027t the primary focus when the original code was added, just the overall size was needed at the user level.\n\n \u003e I\u0027m also assuming we\u0027d need to add another field, use_highbitdepth,\n \u003e to vpx_codec_frame_buffer_t.\n \u003e Should we ifdef CONFIG_VP9_HIGHBITDEPTH that field even if it\u0027s\n \u003e part of a public api?\n\nwe\u0027ve tried to avoid having the public headers rely on vpx_config.h",
+      "parentUuid": "2de00be0_5eb5f5fd",
+      "revId": "49841a36f4d36be63e54a4ca41734105cf23de5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8d5c9765_68f76b07",
         "filename": "test/external_frame_buffer_test.cc",
         "patchSetId": 7
