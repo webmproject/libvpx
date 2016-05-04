@@ -1105,7 +1105,7 @@ static const REF_MODE ref_mode_set_svc[RT_INTER_MODES] = {
     {GOLDEN_FRAME, NEWMV}
 };
 
-int set_intra_cost_penalty(const VP9_COMP *const cpi, BLOCK_SIZE bsize) {
+static int set_intra_cost_penalty(const VP9_COMP *const cpi, BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
   // Reduce the intra cost penalty for small blocks (<=16x16).
   int reduction_fac =
