@@ -57,7 +57,7 @@ typedef struct vp10_token_state {
   int           error;
   int           next;
   int16_t       token;
-  short         qc;
+  tran_low_t    qc;
 } vp10_token_state;
 
 // TODO(jimbankoski): experiment to find optimal RD numbers.
