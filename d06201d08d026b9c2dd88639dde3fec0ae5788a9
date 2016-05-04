@@ -16,6 +16,24 @@
       "revId": "d06201d08d026b9c2dd88639dde3fec0ae5788a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2de00be0_fefec1bc",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1131014
+      },
+      "writtenOn": "2016-05-04T18:51:12Z",
+      "side": 1,
+      "message": "As far as I can tell version.sh is used to create the packed version number returned from vpx_codec_version(), so the 1.5.0 is already embedded in the binary when building from HEAD. I would expect that version to match the version number listed on the Info.plist.",
+      "parentUuid": "ed70b31a_048ed636",
+      "revId": "d06201d08d026b9c2dd88639dde3fec0ae5788a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
