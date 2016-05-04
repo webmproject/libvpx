@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed70b31a_84dba68b",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-04T18:17:12Z",
+      "side": 1,
+      "message": "use ACMRandom. If it needs to be reset, use rnd_.Reset(ACMRandom::DeterministicSeed());",
+      "range": {
+        "startLine": 169,
+        "startChar": 9,
+        "endLine": 169,
+        "endChar": 11
+      },
+      "revId": "5634ec77a8d267a675ff55d38e1bfc98eb9d66b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_a49342b3",
+        "filename": "vpx_dsp/postproc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-04T18:17:12Z",
+      "side": 1,
+      "message": "int v \u003d pos[j];",
+      "range": {
+        "startLine": 32,
+        "startChar": 11,
+        "endLine": 32,
+        "endChar": 12
+      },
+      "revId": "5634ec77a8d267a675ff55d38e1bfc98eb9d66b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_c4903ea9",
+        "filename": "vpx_dsp/postproc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-04T18:17:12Z",
+      "side": 1,
+      "message": "pos[j] \u003d v;",
+      "range": {
+        "startLine": 36,
+        "startChar": 15,
+        "endLine": 36,
+        "endChar": 20
+      },
+      "revId": "5634ec77a8d267a675ff55d38e1bfc98eb9d66b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
