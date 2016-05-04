@@ -904,14 +904,68 @@ static const vpx_prob default_skip_probs[SKIP_CONTEXTS] = {
 #if CONFIG_EXT_INTERP
 static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                                     [SWITCHABLE_FILTERS - 1] = {
+#if CONFIG_DUAL_FILTER
   { 235, 192, 128, 128},
   { 36, 243, 208, 128},
   { 34, 16, 128, 128},
   { 36, 243, 48, 128},
   { 34, 16, 128, 128},
   { 149, 160, 128, 128},
+
+  { 235, 192, 128, 128},
+  { 36, 243, 208, 128},
+  { 34, 16, 128, 128},
+  { 36, 243, 48, 128},
+  { 34, 16, 128, 128},
+  { 149, 160, 128, 128},
+
+  { 235, 192, 128, 128},
+  { 36, 243, 208, 128},
+  { 34, 16, 128, 128},
+  { 36, 243, 48, 128},
+  { 34, 16, 128, 128},
+  { 149, 160, 128, 128},
+
+  { 235, 192, 128, 128},
+  { 36, 243, 208, 128},
+  { 34, 16, 128, 128},
+  { 36, 243, 48, 128},
+  { 34, 16, 128, 128},
+  { 149, 160, 128, 128},
+#else
+  { 235, 192, 128, 128},
+  { 36, 243, 208, 128},
+  { 34, 16, 128, 128},
+  { 36, 243, 48, 128},
+  { 34, 16, 128, 128},
+  { 149, 160, 128, 128},
+#endif
 };
 #else  // CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
+static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
+                                                    [SWITCHABLE_FILTERS - 1] = {
+  { 235, 162, },
+  { 36, 255, },
+  { 34, 3, },
+  { 149, 144, },
+
+  { 235, 162, },
+  { 36, 255, },
+  { 34, 3, },
+  { 10, 3, },
+
+  { 235, 162, },
+  { 36, 255, },
+  { 34, 3, },
+  { 149, 144, },
+
+  { 235, 162, },
+  { 36, 255, },
+  { 34, 3, },
+  { 10, 3, },
+};
+#else
 static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                                     [SWITCHABLE_FILTERS - 1] = {
   { 235, 162, },
@@ -919,6 +973,7 @@ static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
   { 34, 3, },
   { 149, 144, },
 };
+#endif
 #endif  // CONFIG_EXT_INTERP
 
 #if CONFIG_EXT_TX
