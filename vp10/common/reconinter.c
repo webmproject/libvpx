@@ -482,14 +482,14 @@ void vp10_make_masked_inter_predictor(
         dst, dst_stride, tmp_dst, MAX_SB_SIZE,
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.interinter_wedge_sign,
-        mi->mbmi.sb_type, plane,
+        mi->mbmi.sb_type,
         wedge_offset_x, wedge_offset_y, h, w);
   else
     build_masked_compound_wedge_extend(
         dst, dst_stride, tmp_dst, MAX_SB_SIZE,
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.interinter_wedge_sign,
-        mi->mbmi.sb_type, plane,
+        mi->mbmi.sb_type,
         wedge_offset_x, wedge_offset_y, h, w);
 #else
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
