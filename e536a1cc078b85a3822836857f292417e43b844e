@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6dbbe3f2_f88d513a",
+        "filename": "vp10/common/thread_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-05-04T21:06:33Z",
+      "side": 0,
+      "message": "See here",
+      "range": {
+        "startLine": 381,
+        "startChar": 0,
+        "endLine": 385,
+        "endChar": 54
+      },
+      "revId": "e536a1cc078b85a3822836857f292417e43b844e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
