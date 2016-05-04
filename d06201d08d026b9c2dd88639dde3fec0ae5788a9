@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed70b31a_048ed636",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-04T17:09:02Z",
+      "side": 1,
+      "message": "Don\u0027t use version.sh here; my understanding is that it\u0027s for full releases only.  Do this:\n\n    git describe --match\u003dv[0-9]* 2\u003e/dev/null\n\nWhy: the WebM project does not build or ship VPX.framework: Users build it with the config(s) needed. \n\nThe framework should be tagged with what\u0027s in the repo from which it was built, not a dotted version number that has no basis in reality (git describe will return simply a version number if actually on a tag). Tagging a VPX.framework built from HEAD w/v1.5.0 is not correct.",
+      "revId": "d06201d08d026b9c2dd88639dde3fec0ae5788a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
