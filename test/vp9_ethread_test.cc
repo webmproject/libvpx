@@ -25,7 +25,6 @@ class VPxEncoderThreadTest
   VPxEncoderThreadTest()
       : EncoderTest(GET_PARAM(0)),
         encoder_initialized_(false),
-        tiles_(2),
         encoding_mode_(GET_PARAM(1)),
         set_cpu_used_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
@@ -38,7 +37,9 @@ class VPxEncoderThreadTest
 #endif  // CONFIG_EXT_TILE
     decoder_ = codec_->CreateDecoder(cfg, 0);
 
-    md5_.clear();
+    size_enc_.clear();
+    md5_dec_.clear();
+    md5_enc_.clear();
   }
   virtual ~VPxEncoderThreadTest() {
     delete decoder_;
@@ -69,8 +70,16 @@ class VPxEncoderThreadTest
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource * /*video*/,
                                   ::libvpx_test::Encoder *encoder) {
     if (!encoder_initialized_) {
-      // Encode 4 column tiles.
-      encoder->Control(VP9E_SET_TILE_COLUMNS, tiles_);
+#if CONFIG_EXT_TILE
+      encoder->Control(VP9E_SET_TILE_COLUMNS, 1);
+      // TODO(geza): Start using multiple tile rows when the multi-threaded
+      // encoder can handle them
+      encoder->Control(VP9E_SET_TILE_ROWS, 32);
+#else
+      // Encode 4 tile columns.
+      encoder->Control(VP9E_SET_TILE_COLUMNS, 2);
+      encoder->Control(VP9E_SET_TILE_ROWS, 0);
+#endif  // CONFIG_EXT_TILE
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
@@ -86,6 +95,13 @@ class VPxEncoderThreadTest
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+    size_enc_.push_back(pkt->data.frame.sz);
+
+    ::libvpx_test::MD5 md5_enc;
+    md5_enc.Add(reinterpret_cast<uint8_t*>(pkt->data.frame.buf),
+                pkt->data.frame.sz);
+    md5_enc_.push_back(md5_enc.Get());
+
     const vpx_codec_err_t res = decoder_->DecodeFrame(
         reinterpret_cast<uint8_t*>(pkt->data.frame.buf), pkt->data.frame.sz);
     if (res != VPX_CODEC_OK) {
@@ -97,20 +113,23 @@ class VPxEncoderThreadTest
     if (img) {
       ::libvpx_test::MD5 md5_res;
       md5_res.Add(img);
-      md5_.push_back(md5_res.Get());
+      md5_dec_.push_back(md5_res.Get());
     }
   }
 
   bool encoder_initialized_;
-  int tiles_;
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
   ::libvpx_test::Decoder *decoder_;
-  std::vector<std::string> md5_;
+  std::vector<size_t> size_enc_;
+  std::vector<std::string> md5_enc_;
+  std::vector<std::string> md5_dec_;
 };
 
 TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
-  std::vector<std::string> single_thr_md5, multi_thr_md5;
+  std::vector<size_t> single_thr_size_enc, multi_thr_size_enc;
+  std::vector<std::string> single_thr_md5_enc, multi_thr_md5_enc;
+  std::vector<std::string> single_thr_md5_dec, multi_thr_md5_dec;
 
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 18);
 
@@ -120,17 +139,27 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   cfg_.g_threads = 1;
   init_flags_ = VPX_CODEC_USE_PSNR;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  single_thr_md5 = md5_;
-  md5_.clear();
+  single_thr_size_enc = size_enc_;
+  single_thr_md5_enc = md5_enc_;
+  single_thr_md5_dec = md5_dec_;
+  size_enc_.clear();
+  md5_enc_.clear();
+  md5_dec_.clear();
 
   // Encode using multiple threads.
   cfg_.g_threads = 4;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  multi_thr_md5 = md5_;
-  md5_.clear();
+  multi_thr_size_enc = size_enc_;
+  multi_thr_md5_enc = md5_enc_;
+  multi_thr_md5_dec = md5_dec_;
+  size_enc_.clear();
+  md5_enc_.clear();
+  md5_dec_.clear();
 
-  // Compare to check if two vectors are equal.
-  ASSERT_EQ(single_thr_md5, multi_thr_md5);
+  // Check that the vectors are equal.
+  ASSERT_EQ(single_thr_size_enc, multi_thr_size_enc);
+  ASSERT_EQ(single_thr_md5_enc, multi_thr_md5_enc);
+  ASSERT_EQ(single_thr_md5_dec, multi_thr_md5_dec);
 }
 
 VP9_INSTANTIATE_TEST_CASE(
@@ -142,5 +171,5 @@ VP9_INSTANTIATE_TEST_CASE(
 VP10_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(1, 2));
+    ::testing::Range(1, 9));
 }  // namespace
