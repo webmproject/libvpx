@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed70b31a_6aebd3bf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-04T20:52:22Z",
+      "side": 1,
+      "message": "BUG\u003dhttps...",
+      "revId": "edd023b57973643341b893fabb3d21f1661a7ecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_cae3e7b3",
+        "filename": "build/make/version.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-04T20:52:22Z",
+      "side": 1,
+      "message": "should add \u0027|| [ -e \"${source_path}/.git\" ] since that way the describe will work in the submodule too",
+      "revId": "edd023b57973643341b893fabb3d21f1661a7ecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
