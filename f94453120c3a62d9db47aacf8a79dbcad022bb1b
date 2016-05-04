@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8d5c9765_88dc7f57",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-04T06:10:13Z",
+      "side": 1,
+      "message": "was going to ask if all cases would call vp9_free_context_buffers on failure, but there are only a couple...one unchecked in the encoder. that should probably be fixed on its own",
+      "revId": "f94453120c3a62d9db47aacf8a79dbcad022bb1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_c8e5d71c",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-04T06:10:13Z",
+      "side": 1,
+      "message": "dead code",
+      "revId": "f94453120c3a62d9db47aacf8a79dbcad022bb1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d5c9765_68e12b0f",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-04T06:10:13Z",
+      "side": 1,
+      "message": "this is consistent, but should they be build_frame_filterlevels/mask instead?",
+      "revId": "f94453120c3a62d9db47aacf8a79dbcad022bb1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
