@@ -101,7 +101,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   NOISE_ESTIMATE *const ne = &cpi->noise_estimate;
   // Estimate of noise level every frame_period frames.
-  int frame_period = 10;
+  int frame_period = 8;
   int thresh_consec_zeromv = 6;
   unsigned int thresh_sum_diff = 100;
   unsigned int thresh_sum_spatial = (200 * 200) << 8;
