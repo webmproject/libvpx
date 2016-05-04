@@ -116,6 +116,8 @@ typedef struct frame_contexts {
 } FRAME_CONTEXT;
 
 typedef struct FRAME_COUNTS {
+  // Note: This structure should only contain 'unsigned int' fields, or
+  // aggregates built solely from 'unsigned int' fields/elements
   unsigned int kf_y_mode[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   unsigned int y_mode[BLOCK_SIZE_GROUPS][INTRA_MODES];
   unsigned int uv_mode[INTRA_MODES][INTRA_MODES];

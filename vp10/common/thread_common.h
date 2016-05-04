@@ -56,7 +56,7 @@ void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               VP9LfSync *lf_sync);
 
 void vp10_accumulate_frame_counts(struct VP10Common *cm,
-                                 struct FRAME_COUNTS *counts, int is_dec);
+                                 struct FRAME_COUNTS *counts);
 
 #ifdef __cplusplus
 }  // extern "C"

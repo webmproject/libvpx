@@ -167,7 +167,7 @@ void vp10_encode_tiles_mt(VP10_COMP *cpi) {
 
     // Accumulate counters.
     if (i < cpi->num_workers - 1) {
-      vp10_accumulate_frame_counts(cm, thread_data->td->counts, 0);
+      vp10_accumulate_frame_counts(cm, thread_data->td->counts);
       accumulate_rd_opt(&cpi->td, thread_data->td);
     }
   }

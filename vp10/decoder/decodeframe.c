@@ -3491,7 +3491,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi,
   if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     for (i = 0; i < num_workers; ++i) {
       TileWorkerData *const twd = (TileWorkerData*)pbi->tile_workers[i].data1;
-      vp10_accumulate_frame_counts(cm, &twd->counts, 1);
+      vp10_accumulate_frame_counts(cm, &twd->counts);
     }
   }
 
