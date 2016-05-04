@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed70b31a_c7e5a04a",
+        "filename": "vp10/common/pred_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-05-04T20:03:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed70b31a_a7aa64df",
+      "range": {
+        "startLine": 41,
+        "startChar": 7,
+        "endLine": 41,
+        "endChar": 13
+      },
+      "revId": "e8bf9a5780b049b6b619c11d5f83aa2cdb247dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed70b31a_279f54c5",
         "filename": "vp10/common/pred_common.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-04T20:01:07Z",
       "side": 1,
       "message": "These can be collapsed",
+      "range": {
+        "startLine": 65,
+        "startChar": 8,
+        "endLine": 66,
+        "endChar": 18
+      },
+      "revId": "e8bf9a5780b049b6b619c11d5f83aa2cdb247dcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_e7e29c3f",
+        "filename": "vp10/common/pred_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-05-04T20:03:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed70b31a_279f54c5",
       "range": {
         "startLine": 65,
         "startChar": 8,
