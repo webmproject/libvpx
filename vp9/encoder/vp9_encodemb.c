@@ -59,7 +59,7 @@ typedef struct vp9_token_state {
   int           error;
   int           next;
   int16_t       token;
-  int16_t       qc;
+  tran_low_t    qc;
 } vp9_token_state;
 
 static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] ={ {10, 6}, {8, 7}, };
