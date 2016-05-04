@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "8d5c9765_423088f8",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-04T00:08:48Z",
+      "side": 1,
+      "message": "OK, we\u0027re not picking up -Wshadow warnings right now, but this just caught my eye",
+      "parentUuid": "8d5c9765_7f40c7f8",
+      "revId": "963a2cb4f348cbf130dd2430d2164ae613070db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8d5c9765_1c7a7977",
         "filename": "test/add_noise_test.cc",
         "patchSetId": 8
