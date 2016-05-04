@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/fwd_txfm.h"
 
 void vpx_fdct4x4_c(const int16_t *input, tran_low_t *output, int stride) {

@@ -11,6 +11,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/inv_txfm.h"
 
 void vpx_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
