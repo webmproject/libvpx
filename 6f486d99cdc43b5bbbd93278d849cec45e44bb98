@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed70b31a_e417fadc",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-05-04T18:40:56Z",
+      "side": 1,
+      "message": "Should be \nvp9_get_qindex(\u0026cm-\u003eseg, CR_SEGMENT_ID_BOOST1, 7 * cm-\u003ebase_qindex \u003e\u003e 3) ?",
+      "range": {
+        "startLine": 403,
+        "startChar": 30,
+        "endLine": 403,
+        "endChar": 54
+      },
+      "revId": "6f486d99cdc43b5bbbd93278d849cec45e44bb98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
