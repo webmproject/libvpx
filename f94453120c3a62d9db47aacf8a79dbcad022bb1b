@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ed70b31a_b979a320",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-05-05T13:08:12Z",
+      "side": 1,
+      "message": "yeah... I noticed that while fixing the memory leak",
+      "parentUuid": "8d5c9765_88dc7f57",
+      "revId": "f94453120c3a62d9db47aacf8a79dbcad022bb1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8d5c9765_c8e5d71c",
         "filename": "vp9/common/vp9_loopfilter.c",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ed70b31a_8b9d6e6b",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-05-05T13:08:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8d5c9765_c8e5d71c",
+      "revId": "f94453120c3a62d9db47aacf8a79dbcad022bb1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8d5c9765_68e12b0f",
         "filename": "vp9/common/vp9_loopfilter.h",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2016-05-04T06:10:13Z",
       "side": 1,
       "message": "this is consistent, but should they be build_frame_filterlevels/mask instead?",
+      "revId": "f94453120c3a62d9db47aacf8a79dbcad022bb1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_6b98327a",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-05-05T13:08:12Z",
+      "side": 1,
+      "message": "Initially, this function only built the filter levels.  After debugging the unit test failures, I realized the masks bits needed to be cleared when the filter level is zero.  Still deciding if this is the best solution.",
+      "parentUuid": "8d5c9765_68e12b0f",
       "revId": "f94453120c3a62d9db47aacf8a79dbcad022bb1b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
