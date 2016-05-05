@@ -1512,6 +1512,22 @@ static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
 
+static void adjust_gf_key_frame(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+  rc->constrained_gf_group = 0;
+  // Reset gf interval to make more equal spacing for up-coming key frame.
+  if ((rc->frames_to_key <= 7 * rc->baseline_gf_interval >> 2) &&
+      (rc->frames_to_key > rc->baseline_gf_interval)) {
+    rc->baseline_gf_interval = rc->frames_to_key >> 1;
+    rc->constrained_gf_group = 1;
+  } else {
+    // Reset since frames_till_gf_update_due must be <= frames_to_key.
+    if (rc->baseline_gf_interval > rc->frames_to_key) {
+      rc->baseline_gf_interval = rc->frames_to_key;
+      rc->constrained_gf_group = 1;
+    }
+  }
+}
 void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1541,31 +1557,19 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
       rc->baseline_gf_interval =
           (rc->min_gf_interval + rc->max_gf_interval) / 2;
     }
-    // Reset the gf interval to make more equal spacing for up-coming key frame.
-    if ((rc->frames_to_key <= 7 * rc->baseline_gf_interval >> 2) &&
-        (rc->frames_to_key > rc->baseline_gf_interval)) {
-      rc->baseline_gf_interval = rc->frames_to_key >> 1;
-    } else {
-      // Increase gf interval at high Q and high overshoot.
-      if (cm->current_video_frame > 30 &&
-          rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
-          rc->avg_intersize_gfint > (5 * rc->avg_frame_bandwidth) >> 1) {
-          rc->baseline_gf_interval = (3 * rc->baseline_gf_interval) >> 1;
-      } else if (cm->current_video_frame > 30 &&
-                 rc->avg_frame_low_motion < 20) {
-        // Decrease boost and gf interval for high motion case.
-        rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
-        rc->baseline_gf_interval = VPXMIN(6, rc->baseline_gf_interval >> 1);
-      }
+    // Increase gf interval at high Q and high overshoot.
+    if (cm->current_video_frame > 30 &&
+        rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
+        rc->avg_intersize_gfint > (5 * rc->avg_frame_bandwidth) >> 1) {
+        rc->baseline_gf_interval = (3 * rc->baseline_gf_interval) >> 1;
+    } else if (cm->current_video_frame > 30 &&
+               rc->avg_frame_low_motion < 20) {
+      // Decrease boost and gf interval for high motion case.
+      rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
+      rc->baseline_gf_interval = VPXMIN(6, rc->baseline_gf_interval >> 1);
     }
+    adjust_gf_key_frame(cpi);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-    // NOTE: frames_till_gf_update_due must be <= frames_to_key.
-    if (rc->frames_till_gf_update_due > rc->frames_to_key) {
-      rc->frames_till_gf_update_due = rc->frames_to_key;
-      rc->constrained_gf_group = 1;
-    } else {
-      rc->constrained_gf_group = 0;
-    }
     cpi->refresh_golden_frame = 1;
     rc->source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
     rc->avg_intersize_gfint = 0;
@@ -2152,9 +2156,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
       rc->baseline_gf_interval = VPXMIN(20,
           VPXMAX(10, rc->baseline_gf_interval));
+      adjust_gf_key_frame(cpi);
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-      if (rc->frames_till_gf_update_due > rc->frames_to_key)
-        rc->frames_till_gf_update_due = rc->frames_to_key;
       target = calc_pframe_target_size_one_pass_vbr(cpi);
       vp9_rc_set_frame_target(cpi, target);
       rc->count_last_scene_change = 0;
