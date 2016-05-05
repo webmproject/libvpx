@@ -205,7 +205,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         level != LEVEL_4 && level != LEVEL_4_1 && level != LEVEL_5 &&
         level != LEVEL_5_1 && level != LEVEL_5_2 && level != LEVEL_6 &&
         level != LEVEL_6_1 && level != LEVEL_6_2 &&
-        level != LEVEL_UNKNOWN && level != LEVEL_NOT_CARE)
+        level != LEVEL_UNKNOWN && level != LEVEL_MAX)
     ERROR("target_level is invalid");
   }
 
@@ -807,6 +807,13 @@ static vpx_codec_err_t ctrl_set_target_level(vpx_codec_alg_priv_t *ctx,
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
+static vpx_codec_err_t ctrl_get_level(vpx_codec_alg_priv_t *ctx, va_list args) {
+  int *const arg = va_arg(args, int *);
+  if (arg == NULL) return VPX_CODEC_INVALID_PARAM;
+  *arg = (int)vp9_get_level(&ctx->cpi->level_info.level_spec);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
                                     vpx_codec_priv_enc_mr_cfg_t *data) {
   vpx_codec_err_t res = VPX_CODEC_OK;
@@ -963,9 +970,6 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   }
   return index_sz;
 }
-
-// vp9 uses 10,000,000 ticks/second as time stamp
-#define TICKS_PER_SEC 10000000LL
 
 static int64_t timebase_units_to_ticks(const vpx_rational_t *timebase,
                                        int64_t n) {
@@ -1547,6 +1551,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9_GET_REFERENCE,                 ctrl_get_reference},
   {VP9E_GET_SVC_LAYER_ID,             ctrl_get_svc_layer_id},
   {VP9E_GET_ACTIVEMAP,                ctrl_get_active_map},
+  {VP9E_GET_LEVEL,                    ctrl_get_level},
 
   { -1, NULL},
 };

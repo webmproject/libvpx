@@ -22,7 +22,9 @@ class LevelTest
      : EncoderTest(GET_PARAM(0)),
        encoding_mode_(GET_PARAM(1)),
        cpu_used_(GET_PARAM(2)),
-       target_level_(0) {}
+       min_gf_internal_(24),
+       target_level_(0),
+       level_(0) {}
   virtual ~LevelTest() {}
 
   virtual void SetUp() {
@@ -47,6 +49,7 @@ class LevelTest
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP9E_SET_TARGET_LEVEL, target_level_);
+      encoder->Control(VP9E_SET_MIN_GF_INTERVAL, min_gf_internal_);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
@@ -54,20 +57,33 @@ class LevelTest
         encoder->Control(VP8E_SET_ARNR_TYPE, 3);
       }
     }
+    encoder->Control(VP9E_GET_LEVEL, &level_);
+    ASSERT_LE(level_, 51);
+    ASSERT_GE(level_, 0);
   }
 
   ::libvpx_test::TestMode encoding_mode_;
   int cpu_used_;
+  int min_gf_internal_;
   int target_level_;
+  int level_;
 };
 
+// Test for keeping level stats only
 TEST_P(LevelTest, TestTargetLevel0) {
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
-                                       30);
+                                       40);
   target_level_ = 0;
+  min_gf_internal_ = 4;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_EQ(11, level_);
+
+  cfg_.rc_target_bitrate = 1600;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_EQ(20, level_);
 }
 
+// Test for level control being turned off
 TEST_P(LevelTest, TestTargetLevel255) {
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        30);
@@ -98,7 +114,6 @@ TEST_P(LevelTest, TestTargetLevelApi) {
 
 VP9_INSTANTIATE_TEST_CASE(LevelTest,
                           ::testing::Values(::libvpx_test::kTwoPassGood,
-                                            ::libvpx_test::kOnePassGood,
-                                            ::libvpx_test::kRealTime),
+                                            ::libvpx_test::kOnePassGood),
                           ::testing::Range(0, 9));
 }  // namespace
