@@ -554,6 +554,15 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_RENDER_SIZE,
+
+  /*!\brief Codec control function to set target level.
+   *
+   * 255: off (default); 0: only keep level stats; 10: target for level 1.0;
+   * 11: target for level 1.1; ... 62: target for level 6.2
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_TARGET_LEVEL,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -808,6 +817,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_RENDER_SIZE, int *)
 #define VPX_CTRL_VP9E_SET_RENDER_SIZE
+
+VPX_CTRL_USE_TYPE(VP9E_SET_LEVEL_STATS,  unsigned int)
+#define VPX_CTRL_VP9E_SET_LEVEL_STATS
 
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */

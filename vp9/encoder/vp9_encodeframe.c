@@ -4035,7 +4035,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   rdc->m_search_count = 0;   // Count of motion search hits.
   rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
-
   xd->lossless = cm->base_qindex == 0 &&
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
