@@ -281,6 +281,7 @@ EXPERIMENT_LIST="
     ext_interp
     ext_refs
     global_motion
+    new_quant
     supertx
     ans
     loop_restoration
