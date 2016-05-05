@@ -9602,8 +9602,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
       int uv_skippable;
 #if CONFIG_EXT_INTER
       int_mv compound_seg_newmvs[4][2];
-      int i;
-
       for (i = 0; i < 4; i++) {
         compound_seg_newmvs[i][0].as_int = INVALID_MV;
         compound_seg_newmvs[i][1].as_int = INVALID_MV;
