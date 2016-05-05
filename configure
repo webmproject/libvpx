@@ -275,7 +275,6 @@ EXPERIMENT_LIST="
     ref_mv
     dual_filter
     ext_tx
-    misc_fixes
     ext_intra
     ext_inter
     ext_interp
