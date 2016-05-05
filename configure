@@ -289,6 +289,7 @@ EXPERIMENT_LIST="
     ext_tile
     obmc
     entropy
+    bidir_pred
 "
 CONFIG_LIST="
     dependency_tracking
