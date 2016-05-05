@@ -9,8 +9,103 @@
  */
 
 #include "vp10/common/common.h"
+#include "vp10/common/entropy.h"
 #include "vp10/common/quant_common.h"
 #include "vp10/common/seg_common.h"
+
+#if CONFIG_NEW_QUANT
+// Bin widths expressed as a fraction over 128 of the quant stepsize,
+// for the quantization bins 0-4.
+// So a value x indicates the bin is actually factor x/128 of the
+// nominal quantization step.  For the zero bin, the width is only
+// for one side of zero, so the actual width is twice that.
+// There are four sets of values for 4 different quantizer ranges.
+//
+// Functions with nuq correspond to "non uniform quantization"
+// TODO(debargha): Optimize these tables
+static const uint8_t nuq_knots_lossless[COEF_BANDS][NUQ_KNOTS] = {
+  {64, 128, 128},  // dc, band 0
+  {64, 128, 128},  // band 1
+  {64, 128, 128},  // band 2
+  {64, 128, 128},  // band 3
+  {64, 128, 128},  // band 4
+  {64, 128, 128},  // band 5
+};
+
+// TODO(sarahparker) add multiple quantization profiles
+static const uint8_t nuq_knots[COEF_BANDS][NUQ_KNOTS] = {
+    {86, 122, 134},  // dc, band 0
+    {78, 122, 134},  // band 1
+    {78, 122, 134},  // band 2
+    {84, 122, 133},  // band 3
+    {88, 122, 134},  // band 4
+    {88, 122, 134},  // band 5
+};
+
+// dequantization offsets
+static const uint8_t nuq_doff_lossless[COEF_BANDS] = {0, 0, 0, 0, 0, 0};
+
+static const uint8_t nuq_doff[COEF_BANDS] = {8, 15, 16, 22, 23, 24};
+
+static const uint8_t *get_nuq_knots(int lossless, int band) {
+  if (lossless)
+    return nuq_knots_lossless[band];
+  else
+    return nuq_knots[band];
+}
+
+static INLINE int16_t quant_to_doff_fixed(int lossless, int band) {
+  if (lossless)
+    return nuq_doff_lossless[band];
+  else
+    return nuq_doff[band];
+}
+
+// get cumulative bins
+static INLINE void get_cuml_bins_nuq(int q, int lossless, int band,
+                                   tran_low_t *cuml_bins) {
+  const uint8_t *knots = get_nuq_knots(lossless, band);
+  int16_t cuml_knots[NUQ_KNOTS];
+  int i;
+  cuml_knots[0] = knots[0];
+  for (i = 1; i < NUQ_KNOTS; ++i)
+    cuml_knots[i] = cuml_knots[i - 1] + knots[i];
+  for (i = 0; i < NUQ_KNOTS; ++i)
+    cuml_bins[i] = ROUND_POWER_OF_TWO(cuml_knots[i] * q, 7);
+}
+
+void get_dequant_val_nuq(int q, int lossless, int band,
+                         tran_low_t *dq, tran_low_t *cuml_bins) {
+  const uint8_t *knots = get_nuq_knots(lossless, band);
+  tran_low_t cuml_bins_[NUQ_KNOTS], *cuml_bins_ptr;
+  tran_low_t doff;
+  int i;
+  cuml_bins_ptr = (cuml_bins ? cuml_bins : cuml_bins_);
+  get_cuml_bins_nuq(q, lossless, band, cuml_bins_ptr);
+  dq[0] = 0;
+  for (i = 1; i < NUQ_KNOTS; ++i) {
+    doff = quant_to_doff_fixed(lossless, band);
+    doff = ROUND_POWER_OF_TWO(doff * knots[i], 7);
+    dq[i] = cuml_bins_ptr[i - 1] +
+            ROUND_POWER_OF_TWO((knots[i] - doff * 2) * q, 8);
+  }
+  doff = quant_to_doff_fixed(lossless, band);
+  dq[NUQ_KNOTS] =
+      cuml_bins_ptr[NUQ_KNOTS - 1] + ROUND_POWER_OF_TWO((64 - doff) * q, 7);
+}
+
+tran_low_t dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq) {
+  if (v <= NUQ_KNOTS)
+    return dq[v];
+  else
+    return dq[NUQ_KNOTS] + (v - NUQ_KNOTS) * q;
+}
+
+tran_low_t dequant_coeff_nuq(int v, int q, const tran_low_t *dq) {
+  tran_low_t dqmag = dequant_abscoeff_nuq(abs(v), q, dq);
+  return (v < 0 ? -dqmag : dqmag);
+}
+#endif  // CONFIG_NEW_QUANT
 
 static const int16_t dc_qlookup[QINDEX_RANGE] = {
   4,       8,    8,    9,   10,   11,   12,   12,

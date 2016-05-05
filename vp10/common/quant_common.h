@@ -29,6 +29,14 @@ int16_t vp10_ac_quant(int qindex, int delta, vpx_bit_depth_t bit_depth);
 int vp10_get_qindex(const struct segmentation *seg, int segment_id,
                    int base_qindex);
 
+#if CONFIG_NEW_QUANT
+#define NUQ_KNOTS 3
+void get_dequant_val_nuq(int q, int lossless, int band,
+                         tran_low_t *dq, tran_low_t *cumbins);
+tran_low_t dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq);
+tran_low_t dequant_coeff_nuq(int v, int q, const tran_low_t *dq);
+#endif  // CONFIG_NEW_QUANT
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
