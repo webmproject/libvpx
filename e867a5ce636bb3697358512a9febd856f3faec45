@@ -16,6 +16,24 @@
       "revId": "e867a5ce636bb3697358512a9febd856f3faec45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6dbbe3f2_98f65509",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-05-05T16:59:08Z",
+      "side": 1,
+      "message": "Indeed, it will revert to using the single threaded encoder if there are multiple tile rows. Probably better to use a single tile row for now with ext-tile.",
+      "parentUuid": "ed70b31a_0bb5fe41",
+      "revId": "e867a5ce636bb3697358512a9febd856f3faec45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
