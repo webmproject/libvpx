@@ -1848,10 +1848,10 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
                                                bsize, 0, 0);
       const int subh = 2 * num_4x4_blocks_high_lookup[bsize] == bh;
       const int subw = 2 * num_4x4_blocks_wide_lookup[bsize] == bw;
-      build_masked_compound(comppred8, compstride,
-                            intrapred8, intrastride,
-                            interpred8, interstride, mask,
-                            bh, bw, subh, subw);
+      build_masked_compound_highbd(comppred8, compstride,
+                                   intrapred8, intrastride,
+                                   interpred8, interstride, mask,
+                                   bh, bw, subh, subw);
     }
     return;
   }
