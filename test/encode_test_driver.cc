@@ -56,7 +56,7 @@ void Encoder::InitEncoder(VideoSource *video) {
 #endif  // !CONFIG_EXT_TILE
     } else
 #endif
-    {
+    if (CodecInterface() == &vpx_codec_vp8_cx_algo) {
 #if CONFIG_VP8_ENCODER
       ASSERT_EQ(&vpx_codec_vp8_cx_algo, CodecInterface())
           << "Unknown Codec Interface";
@@ -261,12 +261,6 @@ void EncoderTest::MismatchHook(const vpx_image_t* img_enc,
 void EncoderTest::RunLoop(VideoSource *video) {
   vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
 
-#if CONFIG_EXT_TILE
-  // Decode all tiles.
-  dec_cfg.tile_col = -1;
-  dec_cfg.tile_row = -1;
-#endif  // CONFIG_EXT_TILE
-
   stats_.Reset();
 
   ASSERT_TRUE(passes_ == 1 || passes_ == 2);
@@ -295,6 +289,15 @@ void EncoderTest::RunLoop(VideoSource *video) {
     if (init_flags_ & VPX_CODEC_USE_OUTPUT_PARTITION)
       dec_init_flags |= VPX_CODEC_USE_INPUT_FRAGMENTS;
     Decoder* const decoder = codec_->CreateDecoder(dec_cfg, dec_init_flags, 0);
+#if CONFIG_VP10 && CONFIG_EXT_TILE
+    if (decoder->IsVP10()) {
+      // Set dec_cfg.tile_row = -1 and dec_cfg.tile_col = -1 so that the whole
+      // frame is decoded.
+      decoder->Control(VP10_SET_DECODE_TILE_ROW, -1);
+      decoder->Control(VP10_SET_DECODE_TILE_COL, -1);
+    }
+#endif
+
     bool again;
     for (again = true; again; video->Next()) {
       again = (video->img() != NULL);

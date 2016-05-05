@@ -121,7 +121,16 @@ enum vp8_dec_control_id {
    */
   VP9_SET_SKIP_LOOP_FILTER,
 
-  VP8_DECODER_CTRL_ID_MAX
+  VP8_DECODER_CTRL_ID_MAX,
+
+  /** control function to set the range of tile decoding. A value that is
+   * greater and equal to zero indicates only the specific row/column is
+   * decoded. A value that is -1 indicates the whole row/column is decoded.
+   * A special case is both values are -1 that means the whole frame is
+   * decoded.
+   */
+  VP10_SET_DECODE_TILE_ROW,
+  VP10_SET_DECODE_TILE_COL
 };
 
 /** Decrypt n bytes of data from input -> output, using the decrypt_state
@@ -174,7 +183,10 @@ VPX_CTRL_USE_TYPE(VP9D_GET_FRAME_SIZE,          int *)
 #define VPX_CTRL_VP9D_GET_FRAME_SIZE
 VPX_CTRL_USE_TYPE(VP9_INVERT_TILE_DECODE_ORDER, int)
 #define VPX_CTRL_VP9_INVERT_TILE_DECODE_ORDER
-
+VPX_CTRL_USE_TYPE(VP10_SET_DECODE_TILE_ROW,     int)
+#define VPX_CTRL_VP10_SET_DECODE_TILE_ROW
+VPX_CTRL_USE_TYPE(VP10_SET_DECODE_TILE_COL,     int)
+#define VPX_CTRL_VP10_SET_DECODE_TILE_COL
 /*!\endcond */
 /*! @} - end defgroup vp8_decoder */
 

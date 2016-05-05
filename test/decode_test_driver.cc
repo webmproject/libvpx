@@ -18,6 +18,7 @@
 namespace libvpx_test {
 
 const char kVP8Name[] = "WebM Project VP8";
+const char kVP10Name[] = "WebM Project VP10";
 
 vpx_codec_err_t Decoder::PeekStream(const uint8_t *cxdata, size_t size,
                                     vpx_codec_stream_info_t *stream_info) {
@@ -44,6 +45,11 @@ vpx_codec_err_t Decoder::DecodeFrame(const uint8_t *cxdata, size_t size,
 bool Decoder::IsVP8() const {
   const char *codec_name = GetDecoderName();
   return strncmp(kVP8Name, codec_name, sizeof(kVP8Name) - 1) == 0;
+}
+
+bool Decoder::IsVP10() const {
+  const char *codec_name = GetDecoderName();
+  return strncmp(kVP10Name, codec_name, sizeof(kVP10Name) - 1) == 0;
 }
 
 void DecoderTest::HandlePeekResult(Decoder *const decoder,

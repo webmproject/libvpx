@@ -61,12 +61,14 @@ class SvcTest : public ::testing::Test {
     codec_enc_.kf_max_dist = 100;
 
     vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
-#if CONFIG_EXT_TILE
-    dec_cfg.tile_col = -1;
-    dec_cfg.tile_row = -1;
-#endif  // CONFIG_EXT_TILE
     VP9CodecFactory codec_factory;
     decoder_ = codec_factory.CreateDecoder(dec_cfg, 0);
+#if CONFIG_VP10 && CONFIG_EXT_TILE
+    if (decoder_->IsVP10()) {
+      decoder_->Control(VP10_SET_DECODE_TILE_ROW, -1);
+      decoder_->Control(VP10_SET_DECODE_TILE_COL, -1);
+    }
+#endif
 
     tile_columns_ = 0;
     tile_rows_ = 0;

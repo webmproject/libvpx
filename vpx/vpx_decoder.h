@@ -108,10 +108,6 @@ extern "C" {
     unsigned int threads; /**< Maximum number of threads to use, default 1 */
     unsigned int w;      /**< Width */
     unsigned int h;      /**< Height */
-    int          tile_row;  /**< The index of row tile to be decoded.
-                                 Value -1 means to decode all row tiles. */
-    int          tile_col;  /**< The index of column tile to be decoded.
-                                 Value -1 means to decode all column tiles */
   } vpx_codec_dec_cfg_t; /**< alias for struct vpx_codec_dec_cfg */
 
 

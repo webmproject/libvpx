@@ -107,6 +107,8 @@ class Decoder {
 
   bool IsVP8() const;
 
+  bool IsVP10() const;
+
   vpx_codec_ctx_t * GetDecoder() {
     return &decoder_;
   }

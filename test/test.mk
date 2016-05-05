@@ -170,6 +170,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ANS)          += vp10_ans_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_EXT_TILE)     += vp10_ext_tile_test.cc
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += sum_squares_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
