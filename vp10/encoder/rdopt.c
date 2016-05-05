@@ -363,14 +363,6 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
 #define FAST_EXT_TX_CORR_MARGIN 0.3
 #define FAST_EXT_TX_EDST_MARGIN 0.5
 
-typedef enum {
-  DCT_1D = 0,
-  ADST_1D = 1,
-  FLIPADST_1D = 2,
-  IDTX_1D = 3,
-  TX_TYPES_1D = 4,
-} TX_TYPE_1D;
-
 static void get_energy_distribution_fine(const VP10_COMP *cpi,
                                          BLOCK_SIZE bsize,
                                          uint8_t *src, int src_stride,
