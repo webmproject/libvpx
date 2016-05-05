@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed70b31a_2d2c9588",
+        "filename": "build/make/ios-module.modulemap",
+        "patchSetId": 10
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-05T14:03:25Z",
+      "side": 1,
+      "message": "need copyright block",
+      "revId": "2f331aa5aff4b9412a241a8db0c7ff11554f9502",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_2d03b5ff",
+        "filename": "build/make/ios-version.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-05T14:03:25Z",
+      "side": 1,
+      "message": "needs copyright block (just dupe it from another .sh file, but make sure year is correct)",
+      "revId": "2f331aa5aff4b9412a241a8db0c7ff11554f9502",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_0d199977",
+        "filename": "build/make/ios-version.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-05T14:03:25Z",
+      "side": 1,
+      "message": "style nit: if; then on the same line",
+      "revId": "2f331aa5aff4b9412a241a8db0c7ff11554f9502",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_6d184d71",
+        "filename": "build/make/ios-version.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-05T14:03:25Z",
+      "side": 1,
+      "message": "style nit: 2 space indent",
+      "revId": "2f331aa5aff4b9412a241a8db0c7ff11554f9502",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_ed319dde",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-05T14:03:25Z",
+      "side": 1,
+      "message": "wrap this",
+      "revId": "2f331aa5aff4b9412a241a8db0c7ff11554f9502",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed70b31a_0d751989",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-05T14:03:25Z",
+      "side": 1,
+      "message": "please add SCRIPT_DIR here-- apparently I forgot to include it in the dumped vars",
+      "revId": "2f331aa5aff4b9412a241a8db0c7ff11554f9502",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
