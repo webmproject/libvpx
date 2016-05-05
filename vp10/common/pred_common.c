@@ -37,72 +37,50 @@ int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
 }
 
 #if CONFIG_EXT_INTRA
+// Obtain the reference filter type from the above/left neighbor blocks.
+static INTRA_FILTER get_ref_intra_filter(const MB_MODE_INFO *ref_mbmi) {
+  INTRA_FILTER ref_type = INTRA_FILTERS;
+
+  if (ref_mbmi->sb_type >= BLOCK_8X8) {
+    PREDICTION_MODE mode = ref_mbmi->mode;
+    if (is_inter_block(ref_mbmi)) {
+      switch (ref_mbmi->interp_filter) {
+        case EIGHTTAP_REGULAR:
+          ref_type = INTRA_FILTER_8TAP;
+          break;
+        case EIGHTTAP_SMOOTH:
+          ref_type = INTRA_FILTER_8TAP_SMOOTH;
+          break;
+        case MULTITAP_SHARP:
+          ref_type = INTRA_FILTER_8TAP_SHARP;
+          break;
+        case BILINEAR:
+          ref_type = INTRA_FILTERS;
+          break;
+        default:
+          break;
+      }
+    } else {
+      if (mode != DC_PRED && mode != TM_PRED) {
+        int p_angle = mode_to_angle_map[mode] +
+            ref_mbmi->angle_delta[0] * ANGLE_STEP;
+        if (pick_intra_filter(p_angle)) {
+          ref_type = ref_mbmi->intra_filter;
+        }
+      }
+    }
+  }
+  return ref_type;
+}
+
 int vp10_get_pred_context_intra_interp(const MACROBLOCKD *xd) {
-  const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
-  const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   int left_type = INTRA_FILTERS, above_type = INTRA_FILTERS;
 
-  if (xd->left_available && left_mbmi->sb_type >= BLOCK_8X8) {
-    PREDICTION_MODE mode = left_mbmi->mode;
-    if (is_inter_block(left_mbmi)) {
-      switch (left_mbmi->interp_filter) {
-        case EIGHTTAP_REGULAR:
-          left_type = INTRA_FILTER_8TAP;
-          break;
-        case EIGHTTAP_SMOOTH:
-          left_type = INTRA_FILTER_8TAP_SMOOTH;
-          break;
-        case MULTITAP_SHARP:
-          left_type = INTRA_FILTER_8TAP_SHARP;
-          break;
-        case BILINEAR:
-          left_type = INTRA_FILTERS;
-          break;
-        default:
-          break;
-      }
-    } else {
-      if (mode != DC_PRED && mode != TM_PRED) {
-        int p_angle;
-        p_angle = mode_to_angle_map[mode] +
-            left_mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle)) {
-          left_type = left_mbmi->intra_filter;
-        }
-      }
-    }
-  }
+  if (xd->left_available)
+    left_type = get_ref_intra_filter(xd->left_mbmi);
 
-  if (xd->up_available && above_mbmi->sb_type >= BLOCK_8X8) {
-    if (is_inter_block(above_mbmi)) {
-      switch (above_mbmi->interp_filter) {
-        case EIGHTTAP_REGULAR:
-          above_type = INTRA_FILTER_8TAP;
-          break;
-        case EIGHTTAP_SMOOTH:
-          above_type = INTRA_FILTER_8TAP_SMOOTH;
-          break;
-        case MULTITAP_SHARP:
-          above_type = INTRA_FILTER_8TAP_SHARP;
-          break;
-        case BILINEAR:
-          above_type = INTRA_FILTERS;
-          break;
-        default:
-          break;
-      }
-    } else {
-      PREDICTION_MODE mode = above_mbmi->mode;
-      if (mode != DC_PRED && mode != TM_PRED) {
-        int p_angle;
-        p_angle = mode_to_angle_map[mode] +
-            above_mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle)) {
-          above_type = above_mbmi->intra_filter;
-        }
-      }
-    }
-  }
+  if (xd->up_available)
+    above_type = get_ref_intra_filter(xd->above_mbmi);
 
   if (left_type == above_type)
     return left_type;
