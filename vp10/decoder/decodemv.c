@@ -864,20 +864,24 @@ static int read_is_obmc_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 }
 #endif  // CONFIG_OBMC
 
-static INLINE INTERP_FILTER read_switchable_interp_filter(
+static INLINE INTERP_FILTER read_interp_filter(
     VP10_COMMON *const cm, MACROBLOCKD *const xd,
     vp10_reader *r) {
-  const int ctx = vp10_get_pred_context_switchable_interp(xd);
-  FRAME_COUNTS *counts = xd->counts;
-  INTERP_FILTER type;
 #if CONFIG_EXT_INTERP
   if (!vp10_is_interp_needed(xd)) return EIGHTTAP_REGULAR;
 #endif
-  type = (INTERP_FILTER)vp10_read_tree(r, vp10_switchable_interp_tree,
-                                      cm->fc->switchable_interp_prob[ctx]);
-  if (counts)
-    ++counts->switchable_interp[ctx][type];
-  return type;
+  if (cm->interp_filter != SWITCHABLE) {
+    return cm->interp_filter;
+  } else {
+    const int ctx = vp10_get_pred_context_switchable_interp(xd);
+    FRAME_COUNTS *counts = xd->counts;
+    const INTERP_FILTER type =
+      (INTERP_FILTER)vp10_read_tree(r, vp10_switchable_interp_tree,
+                                    cm->fc->switchable_interp_prob[ctx]);
+    if (counts)
+      ++counts->switchable_interp[ctx][type];
+    return type;
+  }
 }
 
 static void read_intra_block_mode_info(VP10_COMMON *const cm,
@@ -1381,9 +1385,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif
 
 #if !CONFIG_EXT_INTERP
-  mbmi->interp_filter = (cm->interp_filter == SWITCHABLE)
-                        ? read_switchable_interp_filter(cm, xd, r)
-                        : cm->interp_filter;
+  mbmi->interp_filter = read_interp_filter(cm, xd, r);
 #endif  // !CONFIG_EXT_INTERP
 
   if (bsize < BLOCK_8X8) {
@@ -1605,9 +1607,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #endif  // CONFIG_EXT_INTER
 
 #if CONFIG_EXT_INTERP
-  mbmi->interp_filter = (cm->interp_filter == SWITCHABLE)
-                        ? read_switchable_interp_filter(cm, xd, r)
-                        : cm->interp_filter;
+  mbmi->interp_filter = read_interp_filter(cm, xd, r);
 #endif  // CONFIG_EXT_INTERP
 }
 
