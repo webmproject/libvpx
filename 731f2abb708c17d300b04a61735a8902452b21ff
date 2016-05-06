@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d1a9f04_665f4031",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-06T04:08:18Z",
+      "side": 1,
+      "message": "this isn\u0027t helpful; maybe something like: vp10_fht8x8_test: normalize type/function names",
+      "revId": "731f2abb708c17d300b04a61735a8902452b21ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d1a9f04_865cd43b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-06T04:08:18Z",
+      "side": 1,
+      "message": "these aren\u0027t guaranteed to be stable and in this case the subject will give an indication of the changes. here you could note specifically what the normalization is.",
+      "revId": "731f2abb708c17d300b04a61735a8902452b21ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
