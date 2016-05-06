@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "52f5e03b_e2c2c896",
+        "filename": "build/make/version.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-06T22:34:14Z",
+      "side": 1,
+      "message": "-e covers files and directories. added here: https://chromium-review.googlesource.com/#/c/342520/",
+      "parentUuid": "ed70b31a_cae3e7b3",
+      "revId": "edd023b57973643341b893fabb3d21f1661a7ecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed70b31a_6bff5277",
         "filename": "build/make/version.sh",
         "patchSetId": 4
@@ -47,6 +65,24 @@
       "writtenOn": "2016-05-05T13:49:01Z",
       "side": 1,
       "message": "this needs to be wrapped.",
+      "revId": "edd023b57973643341b893fabb3d21f1661a7ecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52f5e03b_620c78e0",
+        "filename": "build/make/version.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-06T22:34:14Z",
+      "side": 1,
+      "message": "yes please",
+      "parentUuid": "ed70b31a_6bff5277",
       "revId": "edd023b57973643341b893fabb3d21f1661a7ecb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
