@@ -44,6 +44,76 @@ cglobal sad%1x%2_avg, 5, ARCH_X86_64 + %3, 6, src, src_stride, \
 %endif ; %3 == 7
 %endmacro
 
+%if CONFIG_EXT_PARTITION
+; unsigned int vpx_sad128x128_sse2(uint8_t *src, int src_stride,
+;                                  uint8_t *ref, int ref_stride);
+%macro SAD128XN 1-2 0
+  SAD_FN 128, %1, 5, %2
+  mov              n_rowsd, %1
+  pxor                  m0, m0
+
+.loop:
+  movu                  m1, [refq]
+  movu                  m2, [refq+16]
+  movu                  m3, [refq+32]
+  movu                  m4, [refq+48]
+%if %2 == 1
+  pavgb                 m1, [second_predq+mmsize*0]
+  pavgb                 m2, [second_predq+mmsize*1]
+  pavgb                 m3, [second_predq+mmsize*2]
+  pavgb                 m4, [second_predq+mmsize*3]
+%endif
+  psadbw                m1, [srcq]
+  psadbw                m2, [srcq+16]
+  psadbw                m3, [srcq+32]
+  psadbw                m4, [srcq+48]
+
+  paddd                 m1, m2
+  paddd                 m3, m4
+  paddd                 m0, m1
+  paddd                 m0, m3
+
+  movu                  m1, [refq+64]
+  movu                  m2, [refq+80]
+  movu                  m3, [refq+96]
+  movu                  m4, [refq+112]
+%if %2 == 1
+  pavgb                 m1, [second_predq+mmsize*4]
+  pavgb                 m2, [second_predq+mmsize*5]
+  pavgb                 m3, [second_predq+mmsize*6]
+  pavgb                 m4, [second_predq+mmsize*7]
+  lea         second_predq, [second_predq+mmsize*8]
+%endif
+  psadbw                m1, [srcq+64]
+  psadbw                m2, [srcq+80]
+  psadbw                m3, [srcq+96]
+  psadbw                m4, [srcq+112]
+
+  add                 refq, ref_strideq
+  add                 srcq, src_strideq
+
+  paddd                 m1, m2
+  paddd                 m3, m4
+  paddd                 m0, m1
+  paddd                 m0, m3
+
+  sub              n_rowsd, 1
+  jg .loop
+
+  movhlps               m1, m0
+  paddd                 m0, m1
+  movd                 eax, m0
+  RET
+%endmacro
+
+INIT_XMM sse2
+SAD128XN 128     ; sad128x128_sse2
+SAD128XN 128, 1  ; sad128x128_avg_sse2
+SAD128XN 64      ; sad128x64_sse2
+SAD128XN 64, 1   ; sad128x64_avg_sse2
+%endif
+
+
 ; unsigned int vpx_sad64x64_sse2(uint8_t *src, int src_stride,
 ;                                uint8_t *ref, int ref_stride);
 %macro SAD64XN 1-2 0
@@ -82,6 +152,10 @@ cglobal sad%1x%2_avg, 5, ARCH_X86_64 + %3, 6, src, src_stride, \
 %endmacro
 
 INIT_XMM sse2
+%if CONFIG_EXT_PARTITION
+SAD64XN 128     ; sad64x128_sse2
+SAD64XN 128, 1  ; sad64x128_avg_sse2
+%endif
 SAD64XN 64 ; sad64x64_sse2
 SAD64XN 32 ; sad64x32_sse2
 SAD64XN 64, 1 ; sad64x64_avg_sse2

@@ -175,6 +175,12 @@ SECTION .text
   PROCESS_32x2x4  0, %4, %5, %4 + 32, %5 + 32, %6
 %endmacro
 
+; PROCESS_128x2x4 first, off_{first,second}_{src,ref}, advance_at_end
+%macro PROCESS_128x2x4 5-6 0
+  PROCESS_64x2x4 %1, %2, %3, %2 + 64, %3 + 64
+  PROCESS_64x2x4  0, %4, %5, %4 + 64, %5 + 64, %6
+%endmacro
+
 ; void vpx_sadNxNx4d_sse2(uint8_t *src,    int src_stride,
 ;                         uint8_t *ref[4], int ref_stride,
 ;                         uint32_t res[4]);
@@ -224,6 +230,11 @@ cglobal sad%1x%2x4d, 4, 7, 8, src, src_stride, ref1, ref_stride, \
 %endmacro
 
 INIT_XMM sse2
+%if CONFIG_EXT_PARTITION
+SADNXN4D 128, 128
+SADNXN4D 128, 64
+SADNXN4D 64,  128
+%endif
 SADNXN4D 64, 64
 SADNXN4D 64, 32
 SADNXN4D 32, 64
