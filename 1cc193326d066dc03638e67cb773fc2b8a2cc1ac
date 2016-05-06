@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "52f5e03b_c21d84ae",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-06T22:04:03Z",
+      "side": 1,
+      "message": "This should be \"tran_low_t\", consistent with C version.",
+      "range": {
+        "startLine": 125,
+        "startChar": 53,
+        "endLine": 125,
+        "endChar": 56
+      },
+      "revId": "1cc193326d066dc03638e67cb773fc2b8a2cc1ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52f5e03b_c278e4e2",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-06T22:04:03Z",
+      "side": 1,
+      "message": "Should be \"int32_t\" according to vp10_fwd_txfm2d_4x4_c().",
+      "range": {
+        "startLine": 208,
+        "startChar": 54,
+        "endLine": 208,
+        "endChar": 57
+      },
+      "revId": "1cc193326d066dc03638e67cb773fc2b8a2cc1ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52f5e03b_425cd46c",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 920,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-06T22:04:03Z",
+      "side": 1,
+      "message": "Should be \"int32_t\", the same as above.",
+      "range": {
+        "startLine": 920,
+        "startChar": 54,
+        "endLine": 920,
+        "endChar": 64
+      },
+      "revId": "1cc193326d066dc03638e67cb773fc2b8a2cc1ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
