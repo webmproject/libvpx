@@ -54,9 +54,9 @@ static INLINE int64_t hsum_epi32_si64(__m128i v_d) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static INLINE int calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
-                                       unsigned int* sse,
-                                       const int w, const int h) {
+static INLINE uint32_t calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
+                                            uint32_t* sse,
+                                            const int w, const int h) {
   int64_t sum64;
   uint64_t sse64;
 
@@ -71,9 +71,9 @@ static INLINE int calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
   sse64 = ROUND_POWER_OF_TWO(sse64, 12);
 
   // Store the SSE
-  *sse = (unsigned int)sse64;
+  *sse = (uint32_t)sse64;
   // Compute the variance
-  return  *sse - ((sum64 * sum64) / (w * h));
+  return  *sse - (uint32_t)((sum64 * sum64) / (w * h));
 }
 
 /*****************************************************************************
@@ -497,9 +497,9 @@ static INLINE unsigned int highbd_masked_variancewxh_ssse3(
             &sum64, &sse64);
 
   // Store the SSE
-  *sse = (unsigned int)sse64;
+  *sse = (uint32_t)sse64;
   // Compute and return variance
-  return *sse - ((sum64 * sum64) / (w * h));
+  return *sse - (uint32_t)((sum64 * sum64) / (w * h));
 }
 
 static INLINE unsigned int highbd_10_masked_variancewxh_ssse3(
@@ -523,9 +523,9 @@ static INLINE unsigned int highbd_10_masked_variancewxh_ssse3(
   sse64 = ROUND_POWER_OF_TWO(sse64, 4);
 
   // Store the SSE
-  *sse = (unsigned int)sse64;
+  *sse = (uint32_t)sse64;
   // Compute and return variance
-  return *sse - ((sum64 * sum64) / (w * h));
+  return *sse - (uint32_t)((sum64 * sum64) / (w * h));
 }
 
 static INLINE unsigned int highbd_12_masked_variancewxh_ssse3(
@@ -548,9 +548,9 @@ static INLINE unsigned int highbd_12_masked_variancewxh_ssse3(
   sse64 = ROUND_POWER_OF_TWO(sse64, 8);
 
   // Store the SSE
-  *sse = (unsigned int)sse64;
+  *sse = (uint32_t)sse64;
   // Compute and return variance
-  return *sse - ((sum64 * sum64) / (w * h));
+  return *sse - (uint32_t)((sum64 * sum64) / (w * h));
 }
 
 #define HIGHBD_MASKED_VARWXH(W, H)                                             \
@@ -1460,10 +1460,11 @@ static void highbd_sum_and_sse(const __m128i v_a_w, const __m128i v_b_w,
   *v_sse_q = _mm_add_epi64(*v_sse_q, v_se_q);
 }
 
-static INLINE int highbd_10_calc_masked_variance(__m128i v_sum_d,
-                                                 __m128i v_sse_q,
-                                                 unsigned int* sse,
-                                                 const int w, const int h) {
+static INLINE uint32_t highbd_10_calc_masked_variance(__m128i v_sum_d,
+                                                      __m128i v_sse_q,
+                                                      uint32_t* sse,
+                                                      const int w,
+                                                      const int h) {
   int64_t sum64;
   uint64_t sse64;
 
@@ -1482,14 +1483,15 @@ static INLINE int highbd_10_calc_masked_variance(__m128i v_sum_d,
   sse64 = ROUND_POWER_OF_TWO(sse64, 4);
 
   // Store the SSE
-  *sse = (unsigned int)sse64;
+  *sse = (uint32_t)sse64;
   // Compute the variance
-  return  *sse - ((sum64 * sum64) / (w * h));
+  return  *sse - (uint32_t)((sum64 * sum64) / (w * h));
 }
-static INLINE int highbd_12_calc_masked_variance(__m128i v_sum_d,
-                                                 __m128i v_sse_q,
-                                                 unsigned int* sse,
-                                                 const int w, const int h) {
+static INLINE uint32_t highbd_12_calc_masked_variance(__m128i v_sum_d,
+                                                      __m128i v_sse_q,
+                                                      uint32_t* sse,
+                                                      const int w,
+                                                      const int h) {
   int64_t sum64;
   uint64_t sse64;
 
@@ -1508,9 +1510,9 @@ static INLINE int highbd_12_calc_masked_variance(__m128i v_sum_d,
   sse64 = ROUND_POWER_OF_TWO(sse64, 8);
 
   // Store the SSE
-  *sse = (unsigned int)sse64;
+  *sse = (uint32_t)sse64;
   // Compute the variance
-  return  *sse - ((sum64 * sum64) / (w * h));
+  return  *sse - (uint32_t)((sum64 * sum64) / (w * h));
 }
 
 
