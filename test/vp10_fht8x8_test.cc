@@ -36,14 +36,14 @@ void fht8x8_ref(const int16_t *in, tran_low_t *out, int stride,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-typedef void (*IhighbdHtFunc)(const tran_low_t *in, uint8_t *out, int stride,
-                              int tx_type, int bd);
-typedef void (*HBDFhtFunc)(const int16_t *input, int32_t *output, int stride,
-                        int tx_type, int bd);
+typedef void (*IHbdHtFunc)(const tran_low_t *in, uint8_t *out, int stride,
+                           int tx_type, int bd);
+typedef void (*HbdHtFunc)(const int16_t *input, int32_t *output, int stride,
+                          int tx_type, int bd);
 // Target optimized function, tx_type, bit depth
-typedef tuple<HBDFhtFunc, int, int> HighbdHt8x8Param;
+typedef tuple<HbdHtFunc, int, int> HighbdHt8x8Param;
 
-void highbe_fht8x8_ref(const int16_t *in, int32_t *out, int stride,
+void highbd_fht8x8_ref(const int16_t *in, int32_t *out, int stride,
                        int tx_type, int bd) {
   vp10_fwd_txfm2d_8x8_c(in, out, stride, tx_type, bd);
 }
@@ -91,18 +91,18 @@ class VP10HighbdTrans8x8HT : public ::testing::TestWithParam<HighbdHt8x8Param> {
 
   virtual void SetUp() {
     fwd_txfm_ = GET_PARAM(0);
-    fwd_txfm_ref_ = highbe_fht8x8_ref;
+    fwd_txfm_ref_ = highbd_fht8x8_ref;
     tx_type_  = GET_PARAM(1);
     bit_depth_ = GET_PARAM(2);
     mask_ = (1 << bit_depth_) - 1;
     num_coeffs_ = 64;
 
-    input_ = reinterpret_cast<int16_t *>
-       (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
-    output_ = reinterpret_cast<int32_t *>
-        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
-    output_ref_ = reinterpret_cast<int32_t *>
-        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
+    input_ = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    output_ = reinterpret_cast<int32_t *>(
+        vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
+    output_ref_ = reinterpret_cast<int32_t *>(
+        vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
   }
 
   virtual void TearDown() {
@@ -116,8 +116,8 @@ class VP10HighbdTrans8x8HT : public ::testing::TestWithParam<HighbdHt8x8Param> {
   void RunBitexactCheck();
 
  private:
-  HBDFhtFunc fwd_txfm_;
-  HBDFhtFunc fwd_txfm_ref_;
+  HbdHtFunc fwd_txfm_;
+  HbdHtFunc fwd_txfm_ref_;
   int tx_type_;
   int bit_depth_;
   int mask_;
@@ -140,10 +140,11 @@ void VP10HighbdTrans8x8HT::RunBitexactCheck() {
     }
 
     fwd_txfm_ref_(input_, output_ref_, stride, tx_type_, bit_depth_);
-    fwd_txfm_(input_, output_, stride, tx_type_, bit_depth_);
+    ASM_REGISTER_STATE_CHECK(fwd_txfm_(input_, output_, stride, tx_type_,
+                                       bit_depth_));
 
     for (j = 0; j < num_coeffs; ++j) {
-      EXPECT_EQ(output_[j], output_ref_[j])
+      EXPECT_EQ(output_ref_[j], output_[j])
           << "Not bit-exact result at index: " << j
           << " at test block: " << i;
     }
