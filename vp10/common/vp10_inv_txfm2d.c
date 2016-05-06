@@ -11,7 +11,7 @@
 #include "vp10/common/vp10_txfm.h"
 #include "vp10/common/vp10_inv_txfm1d.h"
 
-static inline TxfmFunc inv_txfm_type_to_func(TXFM_TYPE txfm_type) {
+static INLINE TxfmFunc inv_txfm_type_to_func(TXFM_TYPE txfm_type) {
   switch (txfm_type) {
     case TXFM_TYPE_DCT4:
       return vp10_idct4_new;
@@ -46,7 +46,7 @@ static inline TxfmFunc inv_txfm_type_to_func(TXFM_TYPE txfm_type) {
   }
 }
 
-static inline void inv_txfm2d_add_c(const int32_t *input, int16_t *output,
+static INLINE void inv_txfm2d_add_c(const int32_t *input, int16_t *output,
                                     int stride, const TXFM_2D_CFG *cfg,
                                     int32_t *txfm_buf) {
   const int txfm_size = cfg->txfm_size;

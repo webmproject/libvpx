@@ -11,7 +11,7 @@
 #include "vp10/common/vp10_fwd_txfm2d_cfg.h"
 #include "vp10/common/x86/vp10_txfm1d_sse4.h"
 
-static inline void int16_array_with_stride_to_int32_array_without_stride(
+static INLINE void int16_array_with_stride_to_int32_array_without_stride(
     const int16_t *input, int stride, int32_t *output, int txfm1d_size) {
   int r, c;
   for (r = 0; r < txfm1d_size; r++) {
@@ -24,7 +24,7 @@ static inline void int16_array_with_stride_to_int32_array_without_stride(
 typedef void (*TxfmFuncSSE2)(const __m128i *input, __m128i *output,
                              const int8_t *cos_bit, const int8_t *stage_range);
 
-static inline TxfmFuncSSE2 fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
+static INLINE TxfmFuncSSE2 fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
   switch (txfm_type) {
     case TXFM_TYPE_DCT4:
       return vp10_fdct4_new_sse4_1;
@@ -59,7 +59,7 @@ static inline TxfmFuncSSE2 fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
   return NULL;
 }
 
-static inline void fwd_txfm2d_sse4_1(const int16_t *input, int32_t *output,
+static INLINE void fwd_txfm2d_sse4_1(const int16_t *input, int32_t *output,
                                      const int stride, const TXFM_2D_CFG *cfg,
                                      int32_t *txfm_buf) {
   const int txfm_size = cfg->txfm_size;
