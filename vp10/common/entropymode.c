@@ -901,16 +901,7 @@ static const vpx_prob default_skip_probs[SKIP_CONTEXTS] = {
   192, 128, 64
 };
 
-#if CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
-static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
-                                                    [SWITCHABLE_FILTERS - 1] = {
-  { 235, 192, 128},
-  { 36, 243, 208},
-  { 34, 16, 128},
-  { 36, 243, 48},
-  { 149, 160, 128},
-};
-#elif CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 5
+#if CONFIG_EXT_INTERP
 static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                                     [SWITCHABLE_FILTERS - 1] = {
   { 235, 192, 128, 128},
@@ -1236,14 +1227,7 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp10_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
 }
 
-#if CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 4
-const vpx_tree_index vp10_switchable_interp_tree
-[TREE_SIZE(SWITCHABLE_FILTERS)] = {
-  -EIGHTTAP_REGULAR, 2,
-  4, -MULTITAP_SHARP,
-  -EIGHTTAP_SMOOTH, -EIGHTTAP_SMOOTH2,
-};
-#elif CONFIG_EXT_INTERP && SWITCHABLE_FILTERS == 5
+#if CONFIG_EXT_INTERP
 const vpx_tree_index vp10_switchable_interp_tree
 [TREE_SIZE(SWITCHABLE_FILTERS)] = {
   -EIGHTTAP_REGULAR, 2,

@@ -26,17 +26,13 @@ extern "C" {
 #define MULTITAP_SHARP      2
 
 #if CONFIG_EXT_INTERP
+#define EIGHTTAP_SMOOTH2    3
+#define MULTITAP_SHARP2     4
+
 #define MAX_SUBPEL_TAPS    12
+
 #define SUPPORT_NONINTERPOLATING_FILTERS 0  /* turn it on for experimentation */
 #define SWITCHABLE_FILTERS  5 /* Number of switchable filters */
-
-#if SWITCHABLE_FILTERS >= 4
-#define EIGHTTAP_SMOOTH2    3
-#endif
-#if SWITCHABLE_FILTERS == 5
-#define MULTITAP_SHARP2     4
-#endif  // SWITCHABLE_FILTERS
-
 #else
 #define SWITCHABLE_FILTERS  3 /* Number of switchable filters */
 #endif  // CONFIG_EXT_INTERP
