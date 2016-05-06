@@ -8955,16 +8955,17 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       else if (best_mbmode.mv[0].as_int == 0)
         best_mbmode.mode = ZEROMV;
     } else {
-      int_mv nearestmv[2] = { frame_mv[NEARESTMV][refs[0]],
-                              frame_mv[NEARESTMV][refs[1]] };
-      int_mv nearmv[2] = { frame_mv[NEARMV][refs[0]],
-                           frame_mv[NEARMV][refs[1]] };
+      int_mv nearestmv[2];
+      int_mv nearmv[2];
 
 #if CONFIG_EXT_INTER
       if (mbmi_ext->ref_mv_count[rf_type] > 1) {
-         nearmv[0] = mbmi_ext->ref_mv_stack[rf_type][1].this_mv;
-         nearmv[1] = mbmi_ext->ref_mv_stack[rf_type][1].comp_mv;
-       }
+        nearmv[0] = mbmi_ext->ref_mv_stack[rf_type][1].this_mv;
+        nearmv[1] = mbmi_ext->ref_mv_stack[rf_type][1].comp_mv;
+      } else {
+        nearmv[0] = frame_mv[NEARMV][refs[0]];
+        nearmv[1] = frame_mv[NEARMV][refs[1]];
+      }
 #else
       int i;
       int ref_set = (mbmi_ext->ref_mv_count[rf_type] >= 2) ?
@@ -8981,10 +8982,12 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         }
       }
 #endif
-
       if (mbmi_ext->ref_mv_count[rf_type] >= 1) {
         nearestmv[0] = mbmi_ext->ref_mv_stack[rf_type][0].this_mv;
         nearestmv[1] = mbmi_ext->ref_mv_stack[rf_type][0].comp_mv;
+      } else {
+        nearestmv[0] = frame_mv[NEARESTMV][refs[0]];
+        nearestmv[1] = frame_mv[NEARESTMV][refs[1]];
       }
 
       if (nearestmv[0].as_int == best_mbmode.mv[0].as_int &&
