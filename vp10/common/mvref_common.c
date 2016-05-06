@@ -92,13 +92,12 @@ static uint8_t add_ref_mv_candidate(const MODE_INFO *const candidate_mi,
     // compound reference frame
     if (candidate->ref_frame[0] == rf[0] &&
         candidate->ref_frame[1] == rf[1]) {
-      int_mv this_refmv[2] = {
-          get_sub_block_mv(candidate_mi, 0, col, block),
-          get_sub_block_mv(candidate_mi, 1, col, block)
-      };
+      int_mv this_refmv[2];
 
-      for (ref = 0; ref < 2; ++ref)
+      for (ref = 0; ref < 2; ++ref) {
+        this_refmv[ref] = get_sub_block_mv(candidate_mi, ref, col, block);
         lower_mv_precision(&this_refmv[ref].as_mv, use_hp);
+      }
 
       for (index = 0; index < *refmv_count; ++index)
         if ((ref_mv_stack[index].this_mv.as_int == this_refmv[0].as_int) &&
