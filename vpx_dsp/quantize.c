@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/quantize.h"
 #include "vpx_mem/vpx_mem.h"
 
