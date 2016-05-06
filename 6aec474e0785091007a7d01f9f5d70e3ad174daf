@@ -62,6 +62,30 @@
       "revId": "6aec474e0785091007a7d01f9f5d70e3ad174daf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52f5e03b_7f62cf31",
+        "filename": "vp10/common/quant_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-05-06T20:39:21Z",
+      "side": 1,
+      "message": "Yes - you may be able to just do:\n\ndoff \u003d quant_to_doff_fixed(lossless, band);\ndoff \u003d ROUND_POWER_OF_TWO(knots[i] * doff, 7);\ndq[i] \u003d cumbins_ptr[i - 1] + ROUND_POWER_OF_TWO((knots[i] - doff * 2) * q, 8);\n\ndouble check.",
+      "parentUuid": "b2e8dc66_82b41ae3",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 88,
+        "endChar": 73
+      },
+      "revId": "6aec474e0785091007a7d01f9f5d70e3ad174daf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
