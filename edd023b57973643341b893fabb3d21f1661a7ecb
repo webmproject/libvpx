@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "728e64f1_c0bebebc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-06T22:46:13Z",
+      "side": 1,
+      "message": "*should* support this format now:\nBUG\u003dwebm:1211",
+      "parentUuid": "ed70b31a_6aebd3bf",
+      "revId": "edd023b57973643341b893fabb3d21f1661a7ecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed70b31a_cae3e7b3",
         "filename": "build/make/version.sh",
         "patchSetId": 4
