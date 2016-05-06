@@ -16,6 +16,24 @@
       "revId": "07126d1c37a3d8c539707f0c3b2978491867a217",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52f5e03b_3ff567fc",
+        "filename": "test/vp10_fht8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-06T21:20:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d629fc1_9d2f0396",
+      "revId": "07126d1c37a3d8c539707f0c3b2978491867a217",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
