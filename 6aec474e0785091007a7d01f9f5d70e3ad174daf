@@ -16,6 +16,52 @@
       "revId": "6aec474e0785091007a7d01f9f5d70e3ad174daf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d629fc1_9d12a3a4",
+        "filename": "vp10/common/quant_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-05-06T20:11:44Z",
+      "side": 1,
+      "message": "Please use ROUND_POWER_OF_TWO(value, n)",
+      "range": {
+        "startLine": 72,
+        "startChar": 17,
+        "endLine": 72,
+        "endChar": 44
+      },
+      "revId": "6aec474e0785091007a7d01f9f5d70e3ad174daf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e8dc66_82b41ae3",
+        "filename": "vp10/common/quant_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-05-06T20:11:44Z",
+      "side": 1,
+      "message": "qstep \u003d (knot[i] * q)/128\n\ndoff \u003d 8 --\u003e dc case\n\ndoff \u003d (2 * 8 * knot[i] * q / 128 + q) / (2*q)\n     \u003d 8 * knot[i] /128 + 1 / 2\n     \u003d (8 * knot[i] + 64) / 128     --\u003e independent to q\n\nIt seems like the calculation of doff can be independent to q",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 88,
+        "endChar": 73
+      },
+      "revId": "6aec474e0785091007a7d01f9f5d70e3ad174daf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
