@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "728e64f1_405b8ee4",
+        "filename": "libs.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-06T23:52:40Z",
+      "side": 1,
+      "message": "It would *probably* be sufficient to use CODEC_EXPORTS-$(CONFIG_SPATIAL_SVC) but I\u0027m not 100% sure and this is more explicit.",
+      "revId": "e2b451d9e399d0d72a24f288b8c0aa0456a59dda",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
