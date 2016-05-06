@@ -2590,7 +2590,22 @@ static void encode_loopfilter(AV1_COMMON *cm, struct aom_write_bit_buffer *wb) {
 
 #if CONFIG_CLPF
 static void encode_clpf(const AV1_COMMON *cm, struct aom_write_bit_buffer *wb) {
-  aom_wb_write_literal(wb, cm->clpf, 1);
+  aom_wb_write_literal(wb, cm->clpf_strength, 2);
+  if (cm->clpf_strength) {
+    aom_wb_write_literal(wb, cm->clpf_size, 2);
+    if (cm->clpf_size) {
+      int i;
+      // TODO(stemidts): The number of bits to transmit could be
+      // implicitly deduced if transmitted after the filter block or
+      // after the frame (when it's known whether the block is all
+      // skip and implicitly unfiltered).  And the bits do not have
+      // 50% probability, so a more efficient coding is possible.
+      aom_wb_write_literal(wb, cm->clpf_numblocks, av1_clpf_maxbits(cm));
+      for (i = 0; i < cm->clpf_numblocks; i++) {
+        aom_wb_write_literal(wb, cm->clpf_blocks[i], 1);
+      }
+    }
+  }
 }
 #endif
 

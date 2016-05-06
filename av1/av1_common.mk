@@ -86,8 +86,10 @@ ifeq (yes,$(filter $(CONFIG_GLOBAL_MOTION) $(CONFIG_WARPED_MOTION),yes))
 AV1_COMMON_SRCS-yes += common/warped_motion.h
 AV1_COMMON_SRCS-yes += common/warped_motion.c
 endif
+ifeq ($(CONFIG_CLPF),yes)
 AV1_COMMON_SRCS-yes += common/clpf.c
 AV1_COMMON_SRCS-yes += common/clpf.h
+endif
 ifeq ($(CONFIG_DERING),yes)
 AV1_COMMON_SRCS-yes += common/od_dering.c
 AV1_COMMON_SRCS-yes += common/od_dering.h

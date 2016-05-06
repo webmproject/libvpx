@@ -9,96 +9,119 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 #include "av1/common/clpf.h"
+#include "aom_dsp/aom_dsp_common.h"
 
-// Apply the filter on a single block
-static void clpf_block(const uint8_t *src, uint8_t *dst, int sstride,
-                       int dstride, int has_top, int has_left, int has_bottom,
-                       int has_right, int width, int height) {
+int av1_clpf_maxbits(const AV1_COMMON *cm) {
+  return get_msb(
+             ALIGN_POWER_OF_TWO(cm->mi_cols * MAX_MIB_SIZE, cm->clpf_size + 4) *
+                 ALIGN_POWER_OF_TWO(cm->mi_rows * MAX_MIB_SIZE,
+                                    cm->clpf_size + 4) >>
+             (cm->clpf_size * 2 + 8)) +
+         1;
+}
+
+int av1_clpf_sample(int X, int A, int B, int C, int D, int E, int F, int b) {
+  int delta = 4 * clamp(A - X, -b, b) + clamp(B - X, -b, b) +
+              3 * clamp(C - X, -b, b) + 3 * clamp(D - X, -b, b) +
+              clamp(E - X, -b, b) + 4 * clamp(F - X, -b, b);
+  return (8 + delta - (delta < 0)) >> 4;
+}
+
+static void clpf_block(const uint8_t *src, uint8_t *dst, int stride, int x0,
+                       int y0, int sizex, int sizey, int width, int height,
+                       unsigned int strength) {
   int x, y;
-
-  for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++) {
-      int X = src[(y + 0) * sstride + x + 0];
-      int A = has_top ? src[(y - 1) * sstride + x + 0] : X;
-      int B = has_left ? src[(y + 0) * sstride + x - 1] : X;
-      int C = has_right ? src[(y + 0) * sstride + x + 1] : X;
-      int D = has_bottom ? src[(y + 1) * sstride + x + 0] : X;
-      int delta = ((A > X) + (B > X) + (C > X) + (D > X) > 2) -
-                  ((A < X) + (B < X) + (C < X) + (D < X) > 2);
-      dst[y * dstride + x] = X + delta;
+  for (y = y0; y < y0 + sizey; y++) {
+    for (x = x0; x < x0 + sizex; x++) {
+      int X = src[y * stride + x];
+      int A = src[AOMMAX(0, y - 1) * stride + x];
+      int B = src[y * stride + AOMMAX(0, x - 2)];
+      int C = src[y * stride + AOMMAX(0, x - 1)];
+      int D = src[y * stride + AOMMIN(width - 1, x + 1)];
+      int E = src[y * stride + AOMMIN(width - 1, x + 2)];
+      int F = src[AOMMIN(height - 1, y + 1) * stride + x];
+      int delta;
+      delta = av1_clpf_sample(X, A, B, C, D, E, F, strength);
+      dst[y * stride + x] = X + delta;
     }
   }
 }
 
-#define BS (MI_SIZE * MAX_MIB_SIZE)
+// Return number of filtered blocks
+int av1_clpf_frame(const YV12_BUFFER_CONFIG *dst, const YV12_BUFFER_CONFIG *rec,
+                   const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
+                   int enable_fb_flag, unsigned int strength,
+                   unsigned int fb_size_log2, uint8_t *blocks,
+                   int (*decision)(int, int, const YV12_BUFFER_CONFIG *,
+                                   const YV12_BUFFER_CONFIG *,
+                                   const AV1_COMMON *cm, int, int, int,
+                                   unsigned int, unsigned int, uint8_t *)) {
+  /* Constrained low-pass filter (CLPF) */
+  int c, k, l, m, n;
+  int width = rec->y_crop_width;
+  int height = rec->y_crop_height;
+  int xpos, ypos;
+  int stride_y = rec->y_stride;
+  int stride_c = rec->uv_stride;
+  const int bs = MAX_MIB_SIZE;
+  int num_fb_hor = (width + (1 << fb_size_log2) - bs) >> fb_size_log2;
+  int num_fb_ver = (height + (1 << fb_size_log2) - bs) >> fb_size_log2;
+  int block_index = 0;
 
-// Iterate over blocks within a superblock
-static void av1_clpf_sb(const YV12_BUFFER_CONFIG *frame_buffer,
-                        const AV1_COMMON *cm, MACROBLOCKD *xd,
-                        MODE_INFO *const *mi_8x8, int xpos, int ypos) {
-  // Temporary buffer (to allow SIMD parallelism)
-  uint8_t buf_unaligned[BS * BS + 15];
-  uint8_t *buf = (uint8_t *)(((intptr_t)buf_unaligned + 15) & ~15);
-  int x, y, p;
-
-  for (p = 0; p < (CLPF_FILTER_ALL_PLANES ? MAX_MB_PLANE : 1); p++) {
-    for (y = 0; y < MAX_MIB_SIZE && ypos + y < cm->mi_rows; y++) {
-      for (x = 0; x < MAX_MIB_SIZE && xpos + x < cm->mi_cols; x++) {
-        const MB_MODE_INFO *mbmi =
-            &mi_8x8[(ypos + y) * cm->mi_stride + xpos + x]->mbmi;
-
-        // Do not filter if there is no residual
-        if (!mbmi->skip) {
-          // Do not filter frame edges
-          int has_top = ypos + y > 0;
-          int has_left = xpos + x > 0;
-          int has_bottom = ypos + y < cm->mi_rows - 1;
-          int has_right = xpos + x < cm->mi_cols - 1;
-#if CLPF_ALLOW_BLOCK_PARALLELISM
-          // Do not filter superblock edges
-          has_top &= !!y;
-          has_left &= !!x;
-          has_bottom &= y != MAX_MIB_SIZE - 1;
-          has_right &= x != MAX_MIB_SIZE - 1;
-#endif
-          av1_setup_dst_planes(xd->plane, frame_buffer, ypos + y, xpos + x);
-          clpf_block(
-              xd->plane[p].dst.buf, CLPF_ALLOW_PIXEL_PARALLELISM
-                                        ? buf + y * MI_SIZE * BS + x * MI_SIZE
-                                        : xd->plane[p].dst.buf,
-              xd->plane[p].dst.stride,
-              CLPF_ALLOW_PIXEL_PARALLELISM ? BS : xd->plane[p].dst.stride,
-              has_top, has_left, has_bottom, has_right,
-              MI_SIZE >> xd->plane[p].subsampling_x,
-              MI_SIZE >> xd->plane[p].subsampling_y);
+  // Iterate over all filter blocks
+  for (k = 0; k < num_fb_ver; k++) {
+    for (l = 0; l < num_fb_hor; l++) {
+      int h, w;
+      int allskip = 1;
+      for (m = 0; allskip && m < (1 << fb_size_log2) / bs; m++) {
+        for (n = 0; allskip && n < (1 << fb_size_log2) / bs; n++) {
+          xpos = (l << fb_size_log2) + n * bs;
+          ypos = (k << fb_size_log2) + m * bs;
+          if (xpos < width && ypos < height) {
+            allskip &=
+                cm->mi_grid_visible[ypos / bs * cm->mi_stride + xpos / bs]
+                    ->mbmi.skip;
+          }
         }
       }
-    }
-#if CLPF_ALLOW_PIXEL_PARALLELISM
-    for (y = 0; y < MAX_MIB_SIZE && ypos + y < cm->mi_rows; y++) {
-      for (x = 0; x < MAX_MIB_SIZE && xpos + x < cm->mi_cols; x++) {
-        const MB_MODE_INFO *mbmi =
-            &mi_8x8[(ypos + y) * cm->mi_stride + xpos + x]->mbmi;
-        av1_setup_dst_planes(xd->plane, frame_buffer, ypos + y, xpos + x);
-        if (!mbmi->skip) {
-          int i = 0;
-          for (i = 0; i<MI_SIZE>> xd->plane[p].subsampling_y; i++)
-            memcpy(xd->plane[p].dst.buf + i * xd->plane[p].dst.stride,
-                   buf + (y * MI_SIZE + i) * BS + x * MI_SIZE,
-                   MI_SIZE >> xd->plane[p].subsampling_x);
+
+      // Calculate the actual filter block size near frame edges
+      h = AOMMIN(height, (k + 1) << fb_size_log2) & ((1 << fb_size_log2) - 1);
+      w = AOMMIN(width, (l + 1) << fb_size_log2) & ((1 << fb_size_log2) - 1);
+      h += !h << fb_size_log2;
+      w += !w << fb_size_log2;
+      if (!allskip &&  // Do not filter the block if all is skip encoded
+          (!enable_fb_flag ||
+           decision(k, l, rec, org, cm, bs, w / bs, h / bs, strength,
+                    fb_size_log2, blocks + block_index))) {
+        // Iterate over all smaller blocks inside the filter block
+        for (m = 0; m < (h + bs - 1) / bs; m++) {
+          for (n = 0; n < (w + bs - 1) / bs; n++) {
+            xpos = (l << fb_size_log2) + n * bs;
+            ypos = (k << fb_size_log2) + m * bs;
+            if (!cm->mi_grid_visible[ypos / bs * cm->mi_stride + xpos / bs]
+                     ->mbmi.skip) {
+              // Not skip block, apply the filter
+              clpf_block(rec->y_buffer, dst->y_buffer, stride_y, xpos, ypos, bs,
+                         bs, width, height, strength);
+            } else {  // Skip block, copy instead
+              for (c = 0; c < bs; c++)
+                *(uint64_t *)(dst->y_buffer + (ypos + c) * stride_y + xpos) =
+                    *(uint64_t *)(rec->y_buffer + (ypos + c) * stride_y + xpos);
+            }
+          }
         }
+      } else {  // Entire filter block is skip, copy
+        for (m = 0; m < h; m++)
+          memcpy(dst->y_buffer + ((k << fb_size_log2) + m) * stride_y +
+                     (l << fb_size_log2),
+                 rec->y_buffer + ((k << fb_size_log2) + m) * stride_y +
+                     (l << fb_size_log2),
+                 w);
       }
+      block_index += !allskip;  // Count number of blocks filtered
     }
-#endif
   }
-}
 
-// Iterate over the superblocks of an entire frame
-void av1_clpf_frame(const YV12_BUFFER_CONFIG *frame, const AV1_COMMON *cm,
-                    MACROBLOCKD *xd) {
-  int x, y;
-
-  for (y = 0; y < cm->mi_rows; y += MAX_MIB_SIZE)
-    for (x = 0; x < cm->mi_cols; x += MAX_MIB_SIZE)
-      av1_clpf_sb(frame, cm, xd, cm->mi_grid_visible, x, y);
+  return block_index;
 }
