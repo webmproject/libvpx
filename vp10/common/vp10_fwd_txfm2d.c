@@ -15,7 +15,7 @@
 #include "vp10/common/vp10_fwd_txfm2d_cfg.h"
 #include "vp10/common/vp10_txfm.h"
 
-static inline TxfmFunc fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
+static INLINE TxfmFunc fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
   switch (txfm_type) {
     case TXFM_TYPE_DCT4:
       return vp10_fdct4_new;
@@ -50,7 +50,7 @@ static inline TxfmFunc fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
   }
 }
 
-static inline void fwd_txfm2d_c(const int16_t *input, int32_t *output,
+static INLINE void fwd_txfm2d_c(const int16_t *input, int32_t *output,
                                 const int stride, const TXFM_2D_CFG *cfg,
                                 int32_t *buf) {
   int i, j;
