@@ -20,13 +20,15 @@
 namespace {
 class VPxEncoderThreadTest
     : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+      public ::libvpx_test::CodecTestWith3Params<libvpx_test::TestMode,
+                                                 int, int> {
  protected:
   VPxEncoderThreadTest()
       : EncoderTest(GET_PARAM(0)),
         encoder_initialized_(false),
         encoding_mode_(GET_PARAM(1)),
-        set_cpu_used_(GET_PARAM(2)) {
+        set_cpu_used_(GET_PARAM(2)),
+        vp10_(GET_PARAM(3)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.w = 1280;
@@ -72,9 +74,13 @@ class VPxEncoderThreadTest
     if (!encoder_initialized_) {
 #if CONFIG_EXT_TILE
       encoder->Control(VP9E_SET_TILE_COLUMNS, 1);
-      // TODO(geza): Start using multiple tile rows when the multi-threaded
-      // encoder can handle them
-      encoder->Control(VP9E_SET_TILE_ROWS, 32);
+      if (vp10_) {
+        // TODO(geza): Start using multiple tile rows when the multi-threaded
+        // encoder can handle them
+        encoder->Control(VP9E_SET_TILE_ROWS, 32);
+      } else {
+        encoder->Control(VP9E_SET_TILE_ROWS, 0);
+      }
 #else
       // Encode 4 tile columns.
       encoder->Control(VP9E_SET_TILE_COLUMNS, 2);
@@ -124,6 +130,8 @@ class VPxEncoderThreadTest
   std::vector<size_t> size_enc_;
   std::vector<std::string> md5_enc_;
   std::vector<std::string> md5_dec_;
+
+  bool vp10_;
 };
 
 TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
@@ -166,10 +174,10 @@ VP9_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
                       ::libvpx_test::kRealTime),
-    ::testing::Range(1, 9));
+    ::testing::Range(1, 9), ::testing::Values(0));
 
 VP10_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(1, 9));
+    ::testing::Range(1, 9), ::testing::Values(1));
 }  // namespace
