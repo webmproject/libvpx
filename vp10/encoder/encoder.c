@@ -931,10 +931,6 @@ static void init_config(struct VP10_COMP *cpi, VP10EncoderConfig *oxcf) {
   cpi->td.counts = &cm->counts;
 
   // change includes all joint functionality
-#if CONFIG_EXT_REFS
-  cpi->last_ref_to_refresh = LAST_FRAME;
-#endif  // CONFIG_EXT_REFS
-
   vp10_change_config(cpi, oxcf);
 
   cpi->static_mb_pct = 0;
@@ -1963,9 +1959,6 @@ static void realloc_segmentation_maps(VP10_COMP *cpi) {
 void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   VP10_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
-#if CONFIG_EXT_REFS
-  int ref_frame;
-#endif  // CONFIG_EXT_REFS
 
   if (cm->profile != oxcf->profile)
     cm->profile = oxcf->profile;
@@ -1990,17 +1983,7 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   }
 
   cpi->refresh_golden_frame = 0;
-
-#if CONFIG_EXT_REFS
-  for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
-    if (ref_frame == cpi->last_ref_to_refresh)
-      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 1;
-    else
-      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 0;
-  }
-#else
   cpi->refresh_last_frame = 1;
-#endif  // CONFIG_EXT_REFS
 
   cm->refresh_frame_context =
       oxcf->error_resilient_mode ? REFRESH_FRAME_CONTEXT_OFF :
@@ -2691,14 +2674,7 @@ int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags) {
 void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags) {
   cpi->ext_refresh_golden_frame = (ref_frame_flags & VP9_GOLD_FLAG) != 0;
   cpi->ext_refresh_alt_ref_frame = (ref_frame_flags & VP9_ALT_FLAG) != 0;
-#if CONFIG_EXT_REFS
-  cpi->ext_refresh_last_frames[0] = (ref_frame_flags & VP9_LAST_FLAG) != 0;
-  cpi->ext_refresh_last_frames[1] = (ref_frame_flags & VP9_LAST2_FLAG) != 0;
-  cpi->ext_refresh_last_frames[2] = (ref_frame_flags & VP9_LAST3_FLAG) != 0;
-  cpi->ext_refresh_last_frames[3] = (ref_frame_flags & VP9_LAST4_FLAG) != 0;
-#else
   cpi->ext_refresh_last_frame = (ref_frame_flags & VP9_LAST_FLAG) != 0;
-#endif  // CONFIG_EXT_REFS
   cpi->ext_refresh_frame_flags_pending = 1;
 }
 
@@ -3136,27 +3112,79 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     }
   }
 
-#if CONFIG_EXT_REFS
-  for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
-    const int ref_idx = ref_frame - LAST_FRAME;
-    if (cpi->refresh_last_frames[ref_idx]) {
-      ref_cnt_fb(pool->frame_bufs,
-                 &cm->ref_frame_map[cpi->lst_fb_idxes[ref_idx]],
-                 cm->new_fb_idx);
-      if (!cpi->rc.is_src_frame_alt_ref) {
-        memcpy(cpi->interp_filter_selected[ref_frame],
-               cpi->interp_filter_selected[0],
-               sizeof(cpi->interp_filter_selected[0]));
-      }
-    }
-  }
-  // NOTE: The order for the refreshing of the 4 last reference frames are:
-  // LAST_FRAME -> LAST2_FRAME -> LAST3_FRAME -> LAST4_FRAME -> LAST_FRAME
-  cpi->last_ref_to_refresh += 1;
-  if (cpi->last_ref_to_refresh == LAST4_FRAME)
-    cpi->last_ref_to_refresh = LAST_FRAME;
-#else
   if (cpi->refresh_last_frame) {
+#if CONFIG_EXT_REFS
+    // NOTE(zoeliu): We have two layers of mapping (1) from the per-frame
+    // reference to the reference frame buffer virtual index; and then (2) from
+    // the virtual index to the reference frame buffer physical index:
+    //
+    // LAST_FRAME,      ..., LAST4_FRAME,     GOLDEN_FRAME,    ALTREF_FRAME
+    //      |                     |                |                |
+    //      v                     v                v                v
+    // lst_fb_idxes[0], ..., lst_fb_idxes[3], gld_fb_idx,      alt_fb_idx
+    //      |                     |                |                |
+    //      v                     v                v                v
+    // ref_frame_map[], ..., ref_frame_map[], ref_frame_map[], ref_frame_map[]
+    //
+    // When refresh_last_frame is set, it is intended to retire LAST4_FRAME,
+    // have all the other 3 reference frames shifted as follows:
+    // LAST_FRAME -> LAST2_FRAME -> LAST3_FRAME -> LAST4_FRAME,
+    // , and then have LAST_FRAME refreshed by the newly coded frame.
+    //
+    // To fulfill it, the decoder will be notified to execute following 2 steps:
+    //
+    // (a) To change ref_frame_map[] and have the virtual index of LAST4_FRAME
+    //     to point to the newly coded frame, i.e.
+    //     ref_frame_map[lst_fb_idexes[3]] => new_fb_idx;
+    //
+    // (b) To change the 1st layer mapping to have LAST_FRAME mapped to the
+    //     original virtual index of LAST4_FRAME and have all the other mapping
+    //     shifted as follows:
+    // LAST_FRAME,      LAST2_FRAME,     LAST3_FRAME,     LAST4_FRAME
+    //      |                |                |                |
+    //      v                v                v                v
+    // lst_fb_idxes[3], lst_fb_idxes[0], lst_fb_idxes[1], lst_fb_idxes[2]
+    int tmp;
+
+    if (cm->frame_type == KEY_FRAME) {
+      for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
+        ref_cnt_fb(pool->frame_bufs,
+                   &cm->ref_frame_map[cpi->lst_fb_idxes[ref_frame-LAST_FRAME]],
+                   cm->new_fb_idx);
+
+        if (use_upsampled_ref)
+          uref_cnt_fb(
+              cpi->upsampled_ref_bufs,
+              &cpi->upsampled_ref_idx[cpi->lst_fb_idxes[ref_frame-LAST_FRAME]],
+              new_uidx);
+      }
+    } else {
+      ref_cnt_fb(pool->frame_bufs,
+                 &cm->ref_frame_map[cpi->lst_fb_idxes[LAST4_FRAME-LAST_FRAME]],
+                 cm->new_fb_idx);
+
+      if (use_upsampled_ref)
+        uref_cnt_fb(
+            cpi->upsampled_ref_bufs,
+            &cpi->upsampled_ref_idx[cpi->lst_fb_idxes[LAST4_FRAME-LAST_FRAME]],
+            new_uidx);
+
+      tmp = cpi->lst_fb_idxes[LAST4_FRAME-LAST_FRAME];
+      for (ref_frame = LAST4_FRAME; ref_frame > LAST_FRAME; --ref_frame) {
+        cpi->lst_fb_idxes[ref_frame - LAST_FRAME] =
+            cpi->lst_fb_idxes[ref_frame - LAST_FRAME - 1];
+        if (!cpi->rc.is_src_frame_alt_ref) {
+          memcpy(cpi->interp_filter_selected[ref_frame],
+                 cpi->interp_filter_selected[ref_frame - 1],
+                 sizeof(cpi->interp_filter_selected[ref_frame - 1]));
+        }
+      }
+      cpi->lst_fb_idxes[LAST_FRAME-LAST_FRAME] = tmp;
+      memcpy(cpi->interp_filter_selected[LAST_FRAME],
+             cpi->interp_filter_selected[0],
+             sizeof(cpi->interp_filter_selected[0]));
+    }
+#else  // CONFIG_EXT_REFS
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
     if (use_upsampled_ref)
@@ -3168,19 +3196,15 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
     }
-  }
 #endif  // CONFIG_EXT_REFS
+  }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp10_denoiser_update_frame_info(&cpi->denoiser,
                                    *cpi->Source,
                                    cpi->common.frame_type,
-#if CONFIG_EXT_REFS
-                                   cpi->refresh_last_frames,
-#else
                                    cpi->refresh_last_frame,
-#endif  // CONFIG_EXT_REFS
                                    cpi->refresh_alt_ref_frame,
                                    cpi->refresh_golden_frame);
   }
@@ -3375,14 +3399,12 @@ static void release_scaled_references(VP10_COMP *cpi) {
     // Only release scaled references under certain conditions:
     // if reference will be updated, or if scaled reference has same resolution.
     int refresh[REFS_PER_FRAME];
+    refresh[0] = (cpi->refresh_last_frame) ? 1 : 0;
 #if CONFIG_EXT_REFS
-    for (i = LAST_FRAME; i <= LAST4_FRAME; ++i)
-      refresh[i - LAST_FRAME] =
-          (cpi->refresh_last_frames[i - LAST_FRAME]) ? 1 : 0;
+    refresh[1] = refresh[2] = refresh[3] = 0;
     refresh[4] = (cpi->refresh_golden_frame) ? 1 : 0;
     refresh[5] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
 #else
-    refresh[0] = (cpi->refresh_last_frame) ? 1 : 0;
     refresh[1] = (cpi->refresh_golden_frame) ? 1 : 0;
     refresh[2] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
 #endif  // CONFIG_EXT_REFS
@@ -4169,15 +4191,7 @@ static void set_ext_overrides(VP10_COMP *cpi) {
     cpi->ext_refresh_frame_context_pending = 0;
   }
   if (cpi->ext_refresh_frame_flags_pending) {
-#if CONFIG_EXT_REFS
-    int ref_frame;
-    for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
-      cpi->refresh_last_frames[ref_frame - LAST_FRAME] =
-          cpi->ext_refresh_last_frames[ref_frame - LAST_FRAME];
-    }
-#else
     cpi->refresh_last_frame = cpi->ext_refresh_last_frame;
-#endif  // CONFIG_EXT_REFS
     cpi->refresh_golden_frame = cpi->ext_refresh_golden_frame;
     cpi->refresh_alt_ref_frame = cpi->ext_refresh_alt_ref_frame;
     cpi->ext_refresh_frame_flags_pending = 0;
@@ -4374,14 +4388,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
 
   // If the encoder forced a KEY_FRAME decision
   if (cm->frame_type == KEY_FRAME) {
-#if CONFIG_EXT_REFS
-    int ref_frame;
-    for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame)
-      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 1;
-    cpi->last_ref_to_refresh = LAST_FRAME;
-#else
     cpi->refresh_last_frame = 1;
-#endif  // CONFIG_EXT_REFS
   }
 
   cm->frame_to_show = get_frame_new_buffer(cm);
@@ -4606,14 +4613,7 @@ static int frame_is_reference(const VP10_COMP *cpi) {
   const VP10_COMMON *cm = &cpi->common;
 
   return cm->frame_type == KEY_FRAME ||
-#if CONFIG_EXT_REFS
-         cpi->refresh_last_frames[LAST_FRAME - LAST_FRAME] ||
-         cpi->refresh_last_frames[LAST2_FRAME - LAST_FRAME] ||
-         cpi->refresh_last_frames[LAST3_FRAME - LAST_FRAME] ||
-         cpi->refresh_last_frames[LAST4_FRAME - LAST_FRAME] ||
-#else
          cpi->refresh_last_frame ||
-#endif  // CONFIG_EXT_REFS
          cpi->refresh_golden_frame ||
          cpi->refresh_alt_ref_frame ||
          cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF ||
@@ -4693,21 +4693,12 @@ static void check_src_altref(VP10_COMP *cpi,
   }
 
   if (rc->is_src_frame_alt_ref) {
-#if CONFIG_EXT_REFS
-    int ref_frame;
-#endif  // CONFIG_EXT_REFS
-
     // Current frame is an ARF overlay frame.
     cpi->alt_ref_source = NULL;
 
     // Don't refresh the last buffer for an ARF overlay frame. It will
     // become the GF so preserve last as an alternative prediction option.
-#if CONFIG_EXT_REFS
-    for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame)
-      cpi->refresh_last_frames[ref_frame - LAST_FRAME] = 0;
-#else
     cpi->refresh_last_frame = 0;
-#endif  // CONFIG_EXT_REFS
   }
 }
 
@@ -4857,16 +4848,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
           oxcf->frame_parallel_decoding_mode ? REFRESH_FRAME_CONTEXT_FORWARD
                                              : REFRESH_FRAME_CONTEXT_BACKWARD;
 
-#if CONFIG_EXT_REFS
-  for (i = LAST_FRAME; i <= LAST4_FRAME; ++i) {
-    if (i == cpi->last_ref_to_refresh)
-      cpi->refresh_last_frames[i - LAST_FRAME] = 1;
-    else
-      cpi->refresh_last_frames[i - LAST_FRAME] = 0;
-  }
-#else
   cpi->refresh_last_frame = 1;
-#endif  // CONFIG_EXT_REFS
   cpi->refresh_golden_frame = 0;
   cpi->refresh_alt_ref_frame = 0;
 
@@ -4904,12 +4886,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
       cm->intra_only = 0;
       cpi->refresh_alt_ref_frame = 1;
       cpi->refresh_golden_frame = 0;
-#if CONFIG_EXT_REFS
-      for (i = LAST_FRAME; i <= LAST4_FRAME; ++i)
-        cpi->refresh_last_frames[i - LAST_FRAME] = 0;
-#else
       cpi->refresh_last_frame = 0;
-#endif  // CONFIG_EXT_REFS
       rc->is_src_frame_alt_ref = 0;
     }
     rc->source_alt_ref_pending = 0;

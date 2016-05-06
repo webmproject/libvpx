@@ -2642,14 +2642,20 @@ static void write_tile_info(const VP10_COMMON *const cm,
 
 static int get_refresh_mask(VP10_COMP *cpi) {
   int refresh_mask = 0;
+
 #if CONFIG_EXT_REFS
-  int ref_frame;
-  for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
-    refresh_mask |= (cpi->refresh_last_frames[ref_frame - LAST_FRAME] <<
-                     cpi->lst_fb_idxes[ref_frame - LAST_FRAME]);
-  }
+  // NOTE(zoeliu): When LAST_FRAME is to get refreshed, the decoder will be
+  // notified to get LAST4_FRAME refreshed and then the virtual indexes for all
+  // the 4 LAST reference frames will be updated accordingly, i.e.:
+  // (1) The original virtual index for LAST4_FRAME will become the new virtual
+  //     index for LAST_FRAME; and
+  // (2) The original virtual indexes for LAST_FRAME ~ LAST3_FRAME will be
+  //     shifted and become the new virtual indexes for LAST2_FRAME ~
+  //     LAST4_FRAME.
+  refresh_mask |= (cpi->refresh_last_frame <<
+      cpi->lst_fb_idxes[LAST4_FRAME - LAST_FRAME]);
 #else
-  refresh_mask = cpi->refresh_last_frame << cpi->lst_fb_idx;
+  refresh_mask |= (cpi->refresh_last_frame << cpi->lst_fb_idx);
 #endif  // CONFIG_EXT_REFS
 
   if (vp10_preserve_existing_gf(cpi)) {

@@ -387,17 +387,9 @@ static void swap_frame_buffer(YV12_BUFFER_CONFIG *dest,
 void vp10_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     YV12_BUFFER_CONFIG src,
                                     FRAME_TYPE frame_type,
-#if CONFIG_EXT_REFS
-                                    int refresh_last_frames[LAST_REF_FRAMES],
-#else
                                     int refresh_last_frame,
-#endif  // CONFIG_EXT_REFS
                                     int refresh_alt_ref_frame,
                                     int refresh_golden_frame) {
-#if CONFIG_EXT_REFS
-  int ref_frame;
-#endif  // CONFIG_EXT_REFS
-
   if (frame_type == KEY_FRAME) {
     int i;
     // Start at 1 so as not to overwrite the INTRA_FRAME
@@ -415,19 +407,10 @@ void vp10_denoiser_update_frame_info(VP9_DENOISER *denoiser,
     swap_frame_buffer(&denoiser->running_avg_y[GOLDEN_FRAME],
                       &denoiser->running_avg_y[INTRA_FRAME]);
   }
-#if CONFIG_EXT_REFS
-  for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
-    if (refresh_last_frames[ref_frame - LAST_FRAME]) {
-      swap_frame_buffer(&denoiser->running_avg_y[ref_frame],
-                        &denoiser->running_avg_y[INTRA_FRAME]);
-    }
-  }
-#else
   if (refresh_last_frame) {
     swap_frame_buffer(&denoiser->running_avg_y[LAST_FRAME],
                       &denoiser->running_avg_y[INTRA_FRAME]);
   }
-#endif  // CONFIG_EXT_REFS
 }
 
 void vp10_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {

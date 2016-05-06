@@ -2401,48 +2401,28 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
   cpi->rc.is_src_frame_alt_ref = 0;
   switch (twopass->gf_group.update_type[twopass->gf_group.index]) {
     case KF_UPDATE:
-#if CONFIG_EXT_REFS
-      cpi->refresh_last_frames[LAST_FRAME - LAST_FRAME] = 1;
-#else
       cpi->refresh_last_frame = 1;
-#endif  // CONFIG_EXT_REFS
       cpi->refresh_golden_frame = 1;
       cpi->refresh_alt_ref_frame = 1;
       break;
     case LF_UPDATE:
-#if CONFIG_EXT_REFS
-      cpi->refresh_last_frames[LAST_FRAME - LAST_FRAME] = 1;
-#else
       cpi->refresh_last_frame = 1;
-#endif  // CONFIG_EXT_REFS
       cpi->refresh_golden_frame = 0;
       cpi->refresh_alt_ref_frame = 0;
       break;
     case GF_UPDATE:
-#if CONFIG_EXT_REFS
-      cpi->refresh_last_frames[LAST_FRAME - LAST_FRAME] = 1;
-#else
       cpi->refresh_last_frame = 1;
-#endif  // CONFIG_EXT_REFS
       cpi->refresh_golden_frame = 1;
       cpi->refresh_alt_ref_frame = 0;
       break;
     case OVERLAY_UPDATE:
-#if CONFIG_EXT_REFS
-      cpi->refresh_last_frames[LAST_FRAME - LAST_FRAME] = 0;
-#else
       cpi->refresh_last_frame = 0;
-#endif  // CONFIG_EXT_REFS
       cpi->refresh_golden_frame = 1;
       cpi->refresh_alt_ref_frame = 0;
       cpi->rc.is_src_frame_alt_ref = 1;
       break;
     case ARF_UPDATE:
-#if CONFIG_EXT_REFS
-      cpi->refresh_last_frames[LAST_FRAME - LAST_FRAME] = 0;
-#else
       cpi->refresh_last_frame = 0;
-#endif  // CONFIG_EXT_REFS
       cpi->refresh_golden_frame = 0;
       cpi->refresh_alt_ref_frame = 1;
       break;
