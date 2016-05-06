@@ -4858,7 +4858,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
         const int intra_filter_ctx = vp10_get_pred_context_intra_interp(xd);
         p_angle = mode_to_angle_map[mbmi->mode] +
             mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle))
+        if (vp10_is_intra_filter_switchable(p_angle))
           ++counts->intra_filter[intra_filter_ctx][mbmi->intra_filter];
       }
     }

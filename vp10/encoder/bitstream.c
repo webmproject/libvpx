@@ -1076,7 +1076,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
                       MAX_ANGLE_DELTAS + mbmi->angle_delta[0]);
         p_angle = mode_to_angle_map[mode] + mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle)) {
+        if (vp10_is_intra_filter_switchable(p_angle)) {
           const int ctx = vp10_get_pred_context_intra_interp(xd);
           vp10_write_token(w, vp10_intra_filter_tree,
                            cm->fc->intra_filter_probs[ctx],
@@ -1439,7 +1439,7 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                     MAX_ANGLE_DELTAS + mbmi->angle_delta[0]);
       p_angle =
           mode_to_angle_map[mbmi->mode] + mbmi->angle_delta[0] * ANGLE_STEP;
-      if (pick_intra_filter(p_angle)) {
+      if (vp10_is_intra_filter_switchable(p_angle)) {
         vp10_write_token(w, vp10_intra_filter_tree,
                          cm->fc->intra_filter_probs[intra_filter_ctx],
                          &intra_filter_encodings[mbmi->intra_filter]);

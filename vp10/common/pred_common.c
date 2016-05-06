@@ -64,7 +64,7 @@ static INTRA_FILTER get_ref_intra_filter(const MB_MODE_INFO *ref_mbmi) {
       if (mode != DC_PRED && mode != TM_PRED) {
         int p_angle = mode_to_angle_map[mode] +
             ref_mbmi->angle_delta[0] * ANGLE_STEP;
-        if (pick_intra_filter(p_angle)) {
+        if (vp10_is_intra_filter_switchable(p_angle)) {
           ref_type = ref_mbmi->intra_filter;
         }
       }

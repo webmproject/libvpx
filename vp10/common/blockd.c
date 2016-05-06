@@ -216,7 +216,7 @@ const int16_t dr_intra_derivative[270][2] = {
 
 // Returns whether filter selection is needed for a given
 // intra prediction angle.
-int pick_intra_filter(int angle) {
+int vp10_is_intra_filter_switchable(int angle) {
   assert(angle > 0 && angle < 270);
   if (angle % 45 == 0)
     return 0;
