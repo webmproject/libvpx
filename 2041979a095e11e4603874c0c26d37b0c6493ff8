@@ -16,6 +16,24 @@
       "revId": "2041979a095e11e4603874c0c26d37b0c6493ff8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d1a9f04_cc866bec",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 935,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-05-06T14:05:17Z",
+      "side": 0,
+      "message": "It was a confusion caused by the old code, as the comment above was to address the following code \"vp10_change_config()\", and the old code in ext-refs should not have been placed in between in the first place.",
+      "parentUuid": "cd53efc8_83e83e8d",
+      "revId": "2041979a095e11e4603874c0c26d37b0c6493ff8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
