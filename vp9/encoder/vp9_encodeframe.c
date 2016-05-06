@@ -4872,7 +4872,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     mbmi->skip = 1;
 #endif
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-      vp9_encode_intra_block_plane(x, MAX(bsize, BLOCK_8X8), plane);
+      vp9_encode_intra_block_plane(x, MAX(bsize, BLOCK_8X8), plane, 1);
     if (output_enabled)
       sum_intra_stats(&cm->counts,
 #if CONFIG_FILTERINTRA

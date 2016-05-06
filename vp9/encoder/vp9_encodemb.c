@@ -107,7 +107,7 @@ typedef struct vp9_token_state {
   int           error;
   int           next;
   signed char   token;
-  short         qc;
+  tran_low_t    qc;
 } vp9_token_state;
 
 // TODO(jimbankoski): experiment to find optimal RD numbers.
@@ -3010,6 +3010,10 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
   int i, j;
+  struct optimize_ctx *const ctx = args->ctx;
+  ENTROPY_CONTEXT *a = NULL;
+  ENTROPY_CONTEXT *l = NULL;
+  int entropy_ctx = 0;
 #if CONFIG_NEW_QUANT
   int dq = xd->mi->mbmi.dq_off_index;
   const uint8_t* band = get_band_translate(tx_size);
@@ -3029,6 +3033,11 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   dst = &pd->dst.buf[4 * (j * dst_stride + i)];
   src = &p->src.buf[4 * (j * src_stride + i)];
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+  if (args->ctx != NULL) {
+    a = &ctx->ta[plane][i];
+    l = &ctx->tl[plane][j];
+    entropy_ctx = combine_entropy_contexts(*a, *l);
+  }
 #if CONFIG_SR_MODE
   src_sr_diff = (int16_t *)&p->src_sr_diff[4 * (j * src_sr_diff_stride + i)];
 #endif  // CONFIG_SR_MODE
@@ -3793,6 +3802,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                pd->dequant, eob, scan_order->scan,
                                scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
+          if (args->ctx != NULL) {
+            *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+          }
           if (*eob)
             vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
 #if CONFIG_SR_MODE
@@ -3876,6 +3888,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                          pd->dequant, eob, scan_order->scan,
                          scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
+          if (args->ctx != NULL) {
+            *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+          }
           if (*eob)
             vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
 #if CONFIG_SR_MODE
@@ -3962,6 +3977,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
+        if (args->ctx != NULL) {
+          *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+        }
         if (*eob)
           vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
 #if CONFIG_SR_MODE
@@ -4002,6 +4020,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
+        if (args->ctx != NULL) {
+          *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+        }
       }
 
       if (!x->skip_encode && *eob) {
@@ -4030,10 +4051,23 @@ void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
 }
 
 
-void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
+void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
+                                  int enable_optimize_b) {
   const MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL, &xd->mi[0].src_mi->mbmi.skip};
+  struct optimize_ctx ctx;
+  struct encode_b_args arg = {x, &ctx, &xd->mi[0].src_mi->mbmi.skip};
 
+  if (enable_optimize_b && x->optimize &&
+      (!x->skip_recode || !x->skip_optimize)) {
+    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const TX_SIZE tx_size = plane ?
+        get_uv_tx_size(&xd->mi[0].src_mi->mbmi, pd) :
+        xd->mi[0].src_mi->mbmi.tx_size;
+    vp9_get_entropy_contexts(bsize, tx_size, pd,
+                             ctx.ta[plane], ctx.tl[plane]);
+  } else {
+    arg.ctx = NULL;
+  }
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block_intra,
                                          &arg);
 }

@@ -557,7 +557,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       xd->mi[0].src_mi->mbmi.tx_skip[0] = 0;
       xd->mi[0].src_mi->mbmi.tx_skip[1] = 0;
 #endif
-      vp9_encode_intra_block_plane(x, bsize, 0);
+      vp9_encode_intra_block_plane(x, bsize, 0, 0);
       this_error = vp9_get_mb_ss(x->plane[0].src_diff);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
