@@ -83,7 +83,7 @@ TEST_P(CpuSpeedTest, TestQ0) {
   cfg_.rc_min_quantizer = 0;
 
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
-                                       20);
+                                       10);
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
@@ -92,7 +92,7 @@ TEST_P(CpuSpeedTest, TestQ0) {
 }
 
 TEST_P(CpuSpeedTest, TestScreencastQ0) {
-  ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 25);
+  ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 10);
   cfg_.g_timebase = video.timebase();
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_maxsection_pct = 2000;
@@ -107,7 +107,7 @@ TEST_P(CpuSpeedTest, TestScreencastQ0) {
 }
 
 TEST_P(CpuSpeedTest, TestTuneScreen) {
-  ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 25);
+  ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 10);
   cfg_.g_timebase = video.timebase();
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_minsection_pct = 2000;
@@ -133,7 +133,7 @@ TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
   cfg_.rc_min_quantizer = 0;
 
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
-                                       20);
+                                       10);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
@@ -148,7 +148,7 @@ TEST_P(CpuSpeedTest, TestLowBitrate) {
   cfg_.rc_min_quantizer = 40;
 
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
-                                       20);
+                                       10);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }

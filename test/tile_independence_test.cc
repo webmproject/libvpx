@@ -97,7 +97,7 @@ TEST_P(TileIndependenceTest, MD5Match) {
   cfg_.g_lag_in_frames = 12;
   cfg_.rc_end_usage = VPX_VBR;
 
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 576,
+  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 144,
                                      timebase.den, timebase.num, 0, 15);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
