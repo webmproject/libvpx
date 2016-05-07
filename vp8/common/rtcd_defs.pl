@@ -205,7 +205,6 @@ $vp8_sixtap_predict8x4_media=vp8_sixtap_predict8x4_armv6;
 $vp8_sixtap_predict8x4_dspr2=vp8_sixtap_predict8x4_dspr2;
 
 add_proto qw/void vp8_sixtap_predict4x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-#TODO(johannkoenig): fix the neon version https://code.google.com/p/webm/issues/detail?id=817
 specialize qw/vp8_sixtap_predict4x4 mmx ssse3 media dspr2 msa/;
 $vp8_sixtap_predict4x4_media=vp8_sixtap_predict4x4_armv6;
 $vp8_sixtap_predict4x4_dspr2=vp8_sixtap_predict4x4_dspr2;
@@ -223,7 +222,6 @@ specialize qw/vp8_bilinear_predict8x4 mmx media neon msa/;
 $vp8_bilinear_predict8x4_media=vp8_bilinear_predict8x4_armv6;
 
 add_proto qw/void vp8_bilinear_predict4x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-#TODO(johannkoenig): fix the neon version https://code.google.com/p/webm/issues/detail?id=892
 specialize qw/vp8_bilinear_predict4x4 mmx media msa/;
 $vp8_bilinear_predict4x4_media=vp8_bilinear_predict4x4_armv6;
 
