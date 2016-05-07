@@ -260,8 +260,7 @@ unsigned int vpx_highbd_12_mse8x8_sse2(const uint8_t *src8, int src_stride,
   DECL(16, opt)
 
 DECLS(sse2);
-// TODO(johannkoenig): enable the ssse3 or delete
-// DECLS(ssse3, ssse3);
+
 #undef DECLS
 #undef DECL
 
