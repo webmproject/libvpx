@@ -144,8 +144,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
   vpx_free(s);
 }
 
-// TODO(jimbankoski): Make the c work like assembly so we can enable this.
-TEST_P(AddNoiseTest, DISABLED_CheckCvsAssembly) {
+TEST_P(AddNoiseTest, CheckCvsAssembly) {
   DECLARE_ALIGNED(16, char, blackclamp[16]);
   DECLARE_ALIGNED(16, char, whiteclamp[16]);
   DECLARE_ALIGNED(16, char, bothclamp[16]);
@@ -167,8 +166,10 @@ TEST_P(AddNoiseTest, DISABLED_CheckCvsAssembly) {
   memset(s, 99, image_size);
   memset(d, 99, image_size);
 
+  srand(0);
   ASM_REGISTER_STATE_CHECK(GetParam()(s, noise, blackclamp, whiteclamp,
                                       bothclamp, width, height, width));
+  srand(0);
   ASM_REGISTER_STATE_CHECK(vpx_plane_add_noise_c(d, noise, blackclamp,
                                                  whiteclamp, bothclamp,
                                                  width, height, width));
