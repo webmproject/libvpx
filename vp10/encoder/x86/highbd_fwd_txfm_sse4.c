@@ -205,8 +205,8 @@ static void fadst4x4_sse4_1(__m128i *in, int bit) {
   in[3] = _mm_unpackhi_epi64(v1, v3);
 }
 
-void vp10_fwd_txfm2d_4x4_sse4_1(const int16_t *input, tran_low_t *coeff,
-                                int input_stride, int tx_type,
+void vp10_fwd_txfm2d_4x4_sse4_1(const int16_t *input, int32_t *coeff,
+                                const int input_stride, int tx_type,
                                 const int bd) {
   __m128i in[4];
   const TXFM_2D_CFG *cfg = NULL;
@@ -917,8 +917,8 @@ static void fadst8x8_sse4_1(__m128i *in, __m128i *out, int bit) {
   out[15] = _mm_sub_epi32(kZero, u[1]);
 }
 
-void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, tran_low_t *coeff,
-                                int stride, int tx_type, int bd) {
+void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *coeff,
+                                const int stride, int tx_type, const int bd) {
   __m128i in[16], out[16];
   const TXFM_2D_CFG *cfg = NULL;
 
