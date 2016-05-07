@@ -1515,7 +1515,10 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
     int ref;
-    int_mv ref_mv[2] = { nearestmv[0], nearestmv[1] };
+    int_mv ref_mv[2];
+    ref_mv[0] = nearestmv[0];
+    ref_mv[1] = nearestmv[1];
+
     for (ref = 0; ref < 1 + is_compound && mbmi->mode == NEWMV; ++ref) {
 #if CONFIG_REF_MV
       uint8_t ref_frame_type = vp10_ref_frame_type(mbmi->ref_frame);
