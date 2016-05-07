@@ -434,10 +434,10 @@ void vp10_setup_pre_planes(MACROBLOCKD *xd, int idx,
 #if CONFIG_DUAL_FILTER
 // Detect if the block have sub-pixel level motion vectors
 // per component.
-static INLINE int has_subpel_mv_component(const MACROBLOCKD *const xd,
+static INLINE int has_subpel_mv_component(const MODE_INFO *const mi,
+                                          const MACROBLOCKD *const xd,
                                           int dir) {
-  MODE_INFO *const mi = xd->mi[0];
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int plane;
   int ref = (dir >> 1);

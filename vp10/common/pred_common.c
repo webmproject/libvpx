@@ -11,18 +11,20 @@
 
 #include "vp10/common/common.h"
 #include "vp10/common/pred_common.h"
+#include "vp10/common/reconinter.h"
 #include "vp10/common/seg_common.h"
 
 // Returns a context number for the given MB prediction signal
 #if CONFIG_DUAL_FILTER
-static INTERP_FILTER get_ref_filter_type(const MB_MODE_INFO *ref_mbmi,
+static INTERP_FILTER get_ref_filter_type(const MODE_INFO *mi,
+                                         const MACROBLOCKD *xd,
                                          int dir,
                                          MV_REFERENCE_FRAME ref_frame) {
   INTERP_FILTER ref_type = SWITCHABLE_FILTERS;
-  const MV tmp_mv[2] = {ref_mbmi->mv[0].as_mv, ref_mbmi->mv[1].as_mv};
-  const int use_subpel[2] = {
-      ((dir & 0x01) ? tmp_mv[0].col : tmp_mv[0].row) & SUBPEL_MASK,
-      ((dir & 0x01) ? tmp_mv[1].col : tmp_mv[1].row) & SUBPEL_MASK,
+  const MB_MODE_INFO *ref_mbmi = &mi->mbmi;
+  int use_subpel[2] = {
+      has_subpel_mv_component(mi, xd, dir),
+      has_subpel_mv_component(mi, xd, dir + 2),
   };
 
   if (ref_mbmi->ref_frame[0] == ref_frame && use_subpel[0])
@@ -43,17 +45,16 @@ int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd, int dir) {
   // The mode info data structure has a one element border above and to the
   // left of the entries corresponding to real macroblocks.
   // The prediction flags in these dummy entries are initialized to 0.
-  const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
-  const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   int filter_type_ctx = ctx_offset + (dir & 0x01) * INTER_FILTER_DIR_OFFSET;
   int left_type = SWITCHABLE_FILTERS;
   int above_type = SWITCHABLE_FILTERS;
 
   if (xd->left_available)
-    left_type = get_ref_filter_type(left_mbmi, dir, ref_frame);
+    left_type = get_ref_filter_type(xd->mi[-1], xd, dir, ref_frame);
 
   if (xd->up_available)
-    above_type = get_ref_filter_type(above_mbmi, dir, ref_frame);
+    above_type = get_ref_filter_type(xd->mi[-xd->mi_stride], xd,
+                                     dir, ref_frame);
 
   if (left_type == above_type)
     filter_type_ctx += left_type;

@@ -1621,9 +1621,9 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
     mbmi->interp_filter[ref] = (cm->interp_filter == SWITCHABLE) ?
         EIGHTTAP_REGULAR : cm->interp_filter;
 
-    if (has_subpel_mv_component(xd, ref) ||
+    if (has_subpel_mv_component(xd->mi[0], xd, ref) ||
         (mbmi->ref_frame[1] > INTRA_FRAME &&
-         has_subpel_mv_component(xd, ref + 2)))
+         has_subpel_mv_component(xd->mi[0], xd, ref + 2)))
       mbmi->interp_filter[ref] = read_interp_filter(cm, xd, ref, r);
   }
   // The index system worsk as:

@@ -730,9 +730,9 @@ int vp10_get_switchable_rate(const VP10_COMP *cpi,
   int dir;
 
   for (dir = 0; dir < 2; ++dir) {
-    if (has_subpel_mv_component(xd, dir) ||
+    if (has_subpel_mv_component(xd->mi[0], xd, dir) ||
         (mbmi->ref_frame[1] > INTRA_FRAME &&
-         has_subpel_mv_component(xd, dir + 2))) {
+         has_subpel_mv_component(xd->mi[0], xd, dir + 2))) {
       const int ctx = vp10_get_pred_context_switchable_interp(xd, dir);
       inter_filter_cost +=
           cpi->switchable_interp_costs[ctx][mbmi->interp_filter[dir]];
