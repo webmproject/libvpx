@@ -88,15 +88,36 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
                                           const int subpel_y,
                                           const struct scale_factors *sf,
                                           int w, int h, int ref,
+#if CONFIG_DUAL_FILTER
+                                          const INTERP_FILTER *interp_filter,
+#else
                                           const INTERP_FILTER interp_filter,
+#endif
                                           int xs, int ys, int bd) {
+#if CONFIG_DUAL_FILTER
+  InterpFilterParams interp_filter_params_x =
+      vp10_get_interp_filter_params(interp_filter[1 + 2 * ref]);
+  InterpFilterParams interp_filter_params_y =
+      vp10_get_interp_filter_params(interp_filter[0 + 2 * ref]);
+#else
   InterpFilterParams interp_filter_params =
       vp10_get_interp_filter_params(interp_filter);
+#endif
+
+#if CONFIG_DUAL_FILTER
+  if (interp_filter_params_x.taps == SUBPEL_TAPS &&
+      interp_filter_params_y.taps == SUBPEL_TAPS) {
+    const int16_t *kernel_x =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params_x, subpel_x);
+    const int16_t *kernel_y =
+        vp10_get_interp_filter_subpel_kernel(interp_filter_params_y, subpel_y);
+#else
   if (interp_filter_params.taps == SUBPEL_TAPS) {
     const int16_t *kernel_x =
         vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_x);
     const int16_t *kernel_y =
         vp10_get_interp_filter_subpel_kernel(interp_filter_params, subpel_y);
+#endif  // CONFIG_DUAL_FILTER
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
     if (IsInterpolatingFilter(interp_filter)) {
       // Interpolating filter
@@ -119,7 +140,7 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
     // therefore we need to average the first and second results
     int avg = ref > 0;
     vp10_highbd_convolve(src, src_stride, dst, dst_stride, w, h,
-                         interp_filter_params, subpel_x, xs, subpel_y, ys, avg,
+                         interp_filter, subpel_x, xs, subpel_y, ys, avg,
                          bd);
   }
 }
@@ -326,7 +347,11 @@ void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       const MV *mv_q3,
                                       const struct scale_factors *sf,
                                       int w, int h, int do_avg,
+#if CONFIG_DUAL_FILTER
+                                      const INTERP_FILTER *interp_filter,
+#else
                                       const INTERP_FILTER interp_filter,
+#endif
                                       enum mv_precision precision,
                                       int x, int y, int bd);
 #endif
