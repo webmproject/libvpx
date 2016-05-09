@@ -1311,24 +1311,10 @@ void vpx_idct16x16_1_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   dc_value = _mm_set1_epi16(a);
 
-  for (i = 0; i < 2; ++i) {
-    RECON_AND_STORE(dest +  0 * stride, dc_value);
-    RECON_AND_STORE(dest +  1 * stride, dc_value);
-    RECON_AND_STORE(dest +  2 * stride, dc_value);
-    RECON_AND_STORE(dest +  3 * stride, dc_value);
-    RECON_AND_STORE(dest +  4 * stride, dc_value);
-    RECON_AND_STORE(dest +  5 * stride, dc_value);
-    RECON_AND_STORE(dest +  6 * stride, dc_value);
-    RECON_AND_STORE(dest +  7 * stride, dc_value);
-    RECON_AND_STORE(dest +  8 * stride, dc_value);
-    RECON_AND_STORE(dest +  9 * stride, dc_value);
-    RECON_AND_STORE(dest + 10 * stride, dc_value);
-    RECON_AND_STORE(dest + 11 * stride, dc_value);
-    RECON_AND_STORE(dest + 12 * stride, dc_value);
-    RECON_AND_STORE(dest + 13 * stride, dc_value);
-    RECON_AND_STORE(dest + 14 * stride, dc_value);
-    RECON_AND_STORE(dest + 15 * stride, dc_value);
-    dest += 8;
+  for (i = 0; i < 16; ++i) {
+    RECON_AND_STORE(dest +  0, dc_value);
+    RECON_AND_STORE(dest +  8, dc_value);
+    dest += stride;
   }
 }
 
