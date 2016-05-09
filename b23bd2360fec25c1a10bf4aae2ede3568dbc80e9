@@ -16,6 +16,24 @@
       "revId": "b23bd2360fec25c1a10bf4aae2ede3568dbc80e9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72a2e4c0_c93e4979",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-09T22:09:07Z",
+      "side": 1,
+      "message": "Fair point",
+      "parentUuid": "72a2e4c0_49c23948",
+      "revId": "b23bd2360fec25c1a10bf4aae2ede3568dbc80e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
