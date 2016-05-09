@@ -23,21 +23,18 @@ void vpx_plane_add_noise_c(uint8_t *start, char *noise,
                            unsigned int width, unsigned int height, int pitch) {
   unsigned int i, j;
 
-  // TODO(jbb): why does simd code use both but c doesn't,  normalize and
-  // fix..
-  (void) bothclamp;
   for (i = 0; i < height; i++) {
     uint8_t *pos = start + i * pitch;
     char  *ref = (char *)(noise + (rand() & 0xff));  // NOLINT
 
     for (j = 0; j < width; j++) {
-      if (pos[j] < blackclamp[0])
-        pos[j] = blackclamp[0];
+      int v = pos[j];
 
-      if (pos[j] > 255 - whiteclamp[0])
-        pos[j] = 255 - whiteclamp[0];
+      v = clamp(v - blackclamp[0], 0, 255);
+      v = clamp(v + bothclamp[0], 0, 255);
+      v = clamp(v - whiteclamp[0], 0, 255);
 
-      pos[j] += ref[j];
+      pos[j] = v + ref[j];
     }
   }
 }
