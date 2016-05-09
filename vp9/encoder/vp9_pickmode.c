@@ -244,7 +244,7 @@ static void block_variance(const uint8_t *src, int src_stride,
                     &sse8x8[k], &sum8x8[k]);
       *sse += sse8x8[k];
       *sum += sum8x8[k];
-      var8x8[k] = sse8x8[k] - (((unsigned int)sum8x8[k] * sum8x8[k]) >> 6);
+      var8x8[k] = sse8x8[k] - (uint32_t)(((int64_t)sum8x8[k] * sum8x8[k]) >> 6);
       k++;
     }
   }
@@ -265,7 +265,7 @@ static void calculate_variance(int bw, int bh, TX_SIZE tx_size,
           sse_i[(i + 1) * nw + j] + sse_i[(i + 1) * nw + j + 1];
       sum_o[k] = sum_i[i * nw + j] + sum_i[i * nw + j + 1] +
           sum_i[(i + 1) * nw + j] + sum_i[(i + 1) * nw + j + 1];
-      var_o[k] = sse_o[k] - (((unsigned int)sum_o[k] * sum_o[k]) >>
+      var_o[k] = sse_o[k] - (uint32_t)(((int64_t)sum_o[k] * sum_o[k]) >>
           (b_width_log2_lookup[unit_size] +
               b_height_log2_lookup[unit_size] + 6));
       k++;
