@@ -674,11 +674,11 @@ static void pack_mb_tokens(vp10_writer *w,
 #else
 // This function serializes the tokens in forward order using a buffered ans
 // coder.
-static void pack_mb_tokens_ans(struct BufAnsCoder *ans,
-                               const TOKENEXTRA **tp,
-                               const TOKENEXTRA *const stop,
-                               vpx_bit_depth_t bit_depth,
-                               const TX_SIZE tx) {
+static void pack_mb_tokens(struct BufAnsCoder *ans,
+                           const TOKENEXTRA **tp,
+                           const TOKENEXTRA *const stop,
+                           vpx_bit_depth_t bit_depth,
+                           const TX_SIZE tx) {
   const TOKENEXTRA *p = *tp;
 #if CONFIG_VAR_TX
   int count = 0;
@@ -1636,20 +1636,12 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
 
         for (row = 0; row < num_4x4_h; row += bw)
           for (col = 0; col < num_4x4_w; col += bw)
-#if CONFIG_ANS
-            pack_mb_tokens_ans(w, tok, tok_end, cm->bit_depth, tx);
-#else
             pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
-#endif  // CONFIG_ANS
       }
 #else
       TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                          : m->mbmi.tx_size;
-#if CONFIG_ANS
-      pack_mb_tokens_ans(w, tok, tok_end, cm->bit_depth, tx);
-#else
       pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
-#endif  // CONFIG_ANS
 #endif  // CONFIG_VAR_TX
       assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
       (*tok)++;
@@ -1853,11 +1845,7 @@ static void write_modes_sb(VP10_COMP *const cpi,
 
       for (row = 0; row < num_4x4_h; row += bw)
         for (col = 0; col < num_4x4_w; col += bw)
-#if CONFIG_ANS
-          pack_mb_tokens_ans(w, tok, tok_end, cm->bit_depth, tx);
-#else
           pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
-#endif
       assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
       (*tok)++;
     }
