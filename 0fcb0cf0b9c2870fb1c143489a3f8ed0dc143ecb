@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "925cb865_7c5615be",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-09T16:03:17Z",
+      "side": 1,
+      "message": "1080P?",
+      "range": {
+        "startLine": 12,
+        "startChar": 73,
+        "endLine": 12,
+        "endChar": 75
+      },
+      "revId": "0fcb0cf0b9c2870fb1c143489a3f8ed0dc143ecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
