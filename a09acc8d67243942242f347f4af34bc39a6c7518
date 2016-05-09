@@ -16,6 +16,24 @@
       "revId": "a09acc8d67243942242f347f4af34bc39a6c7518",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "929d9872_91967c59",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-05-09T16:53:21Z",
+      "side": 1,
+      "message": "But anything less than 512 high can\u0027t use multiple tile rows (without ext-tile, with ext-tile you still need 256), so we can\u0027t test independence of tile rows.\n\nCould split into 2 tests, a short wide to test columns (which it does originally) and a tall narrow to test rows, but it is not quite the same coverage.",
+      "parentUuid": "925cb865_5feea3d3",
+      "revId": "a09acc8d67243942242f347f4af34bc39a6c7518",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
