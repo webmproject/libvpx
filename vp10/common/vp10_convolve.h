@@ -22,7 +22,11 @@ void vp10_convolve(const uint8_t *src, int src_stride,
 void vp10_highbd_convolve(const uint8_t *src, int src_stride,
                    uint8_t *dst, int dst_stride,
                    int w, int h,
-                   const InterpFilterParams filter_params,
+#if CONFIG_DUAL_FILTER
+                   const INTERP_FILTER *interp_filter,
+#else
+                   const INTERP_FILTER interp_filter,
+#endif
                    const int subpel_x,
                    const int subpel_y,
                    int xstep, int ystep, int avg, int bd);

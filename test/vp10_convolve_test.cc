@@ -185,9 +185,18 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
 #if CONFIG_VP9_HIGHBITDEPTH
 TEST(VP10ConvolveTest, vp10_highbd_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
+#if CONFIG_DUAL_FILTER
+  INTERP_FILTER interp_filter[4] = {
+      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR
+  };
+  InterpFilterParams filter_params =
+      vp10_get_interp_filter_params(interp_filter[0]);
+#else
   INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
+#endif
   ptrdiff_t filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint16_t src[12 * 12];
@@ -212,7 +221,7 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
     for (subpel_y_q4 = 0; subpel_y_q4 < 16; subpel_y_q4++) {
       vp10_highbd_convolve(
           CONVERT_TO_BYTEPTR(src + src_stride * filter_center + filter_center),
-          src_stride, CONVERT_TO_BYTEPTR(dst), dst_stride, w, h, filter_params,
+          src_stride, CONVERT_TO_BYTEPTR(dst), dst_stride, w, h, interp_filter,
           subpel_x_q4, x_step_q4, subpel_y_q4, y_step_q4, avg, bd);
 
       const int16_t* x_filter =
@@ -239,9 +248,18 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
 
 TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
+#if CONFIG_DUAL_FILTER
+  INTERP_FILTER interp_filter[4] = {
+      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR
+  };
+  InterpFilterParams filter_params =
+      vp10_get_interp_filter_params(interp_filter[0]);
+#else
   INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
+#endif
   ptrdiff_t filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint16_t src0[12 * 12];
@@ -274,23 +292,23 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
       avg = 0;
       vp10_highbd_convolve(CONVERT_TO_BYTEPTR(src0 + offset), src_stride,
                            CONVERT_TO_BYTEPTR(dst0), dst_stride, w, h,
-                           filter_params, subpel_x_q4, x_step_q4, subpel_y_q4,
+                           interp_filter, subpel_x_q4, x_step_q4, subpel_y_q4,
                            y_step_q4, avg, bd);
       avg = 0;
       vp10_highbd_convolve(CONVERT_TO_BYTEPTR(src1 + offset), src_stride,
                            CONVERT_TO_BYTEPTR(dst1), dst_stride, w, h,
-                           filter_params, subpel_x_q4, x_step_q4, subpel_y_q4,
+                           interp_filter, subpel_x_q4, x_step_q4, subpel_y_q4,
                            y_step_q4, avg, bd);
 
       avg = 0;
       vp10_highbd_convolve(CONVERT_TO_BYTEPTR(src0 + offset), src_stride,
                            CONVERT_TO_BYTEPTR(dst), dst_stride, w, h,
-                           filter_params, subpel_x_q4, x_step_q4, subpel_y_q4,
+                           interp_filter, subpel_x_q4, x_step_q4, subpel_y_q4,
                            y_step_q4, avg, bd);
       avg = 1;
       vp10_highbd_convolve(CONVERT_TO_BYTEPTR(src1 + offset), src_stride,
                            CONVERT_TO_BYTEPTR(dst), dst_stride, w, h,
-                           filter_params, subpel_x_q4, x_step_q4, subpel_y_q4,
+                           interp_filter, subpel_x_q4, x_step_q4, subpel_y_q4,
                            y_step_q4, avg, bd);
 
       EXPECT_EQ(dst[0], ROUND_POWER_OF_TWO(dst0[0] + dst1[0], 1));

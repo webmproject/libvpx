@@ -538,7 +538,11 @@ void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       const MV *src_mv,
                                       const struct scale_factors *sf,
                                       int w, int h, int ref,
+#if CONFIG_DUAL_FILTER
+                                      const INTERP_FILTER *interp_filter,
+#else
                                       const INTERP_FILTER interp_filter,
+#endif
                                       enum mv_precision precision,
                                       int x, int y, int bd) {
   const int is_q4 = precision == MV_PRECISION_Q4;
@@ -551,8 +555,8 @@ void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
   highbd_inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
-                       sf, w, h, ref, interp_filter, sf->x_step_q4,
-                       sf->y_step_q4, bd);
+                         sf, w, h, ref, interp_filter, sf->x_step_q4,
+                         sf->y_step_q4, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
