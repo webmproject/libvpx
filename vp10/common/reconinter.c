@@ -472,6 +472,11 @@ void vp10_make_masked_inter_predictor(
 #endif  // CONFIG_SUPERTX
     const MACROBLOCKD *xd) {
   const MODE_INFO *mi = xd->mi[0];
+  // The prediction filter types used here should be those for
+  // the second reference block.
+  INTERP_FILTER tmp_ipf[4] = {interp_filter[2], interp_filter[3],
+      interp_filter[2], interp_filter[3],
+  };
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint8_t, tmp_dst_[2 * MAX_SB_SQUARE]);
   uint8_t *tmp_dst =
@@ -479,7 +484,7 @@ void vp10_make_masked_inter_predictor(
       CONVERT_TO_BYTEPTR(tmp_dst_) : tmp_dst_;
   vp10_make_inter_predictor(pre, pre_stride, tmp_dst, MAX_SB_SIZE,
                             subpel_x, subpel_y, sf, w, h, 0,
-                            interp_filter, xs, ys, xd);
+                            tmp_ipf, xs, ys, xd);
 #if CONFIG_SUPERTX
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
     build_masked_compound_wedge_extend_highbd(
@@ -513,7 +518,7 @@ void vp10_make_masked_inter_predictor(
   DECLARE_ALIGNED(16, uint8_t, tmp_dst[MAX_SB_SQUARE]);
   vp10_make_inter_predictor(pre, pre_stride, tmp_dst, MAX_SB_SIZE,
                             subpel_x, subpel_y, sf, w, h, 0,
-                            interp_filter, xs, ys, xd);
+                            tmp_ipf, xs, ys, xd);
 #if CONFIG_SUPERTX
   build_masked_compound_wedge_extend(
       dst, dst_stride, tmp_dst, MAX_SB_SIZE,
