@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72a2e4c0_54508c4b",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-09T22:59:31Z",
+      "side": 1,
+      "message": "inttypes isn\u0027t universally available. vpx_integer is meant to handle that. it may be that an earlier change for ios broke mac.",
+      "revId": "80299385cd5720ede4ffba3cc7cf1c262fd357c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
