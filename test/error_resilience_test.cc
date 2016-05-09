@@ -164,7 +164,7 @@ class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
     mismatch_psnr_ += mismatch_psnr;
     ++mismatch_nframes_;
     // std::cout << "Mismatch frame psnr: " << mismatch_psnr << "\n";
-    ASSERT_TRUE(0) << "Encode/Decode mismatch found";
+    ::libvpx_test::EncoderTest::MismatchHook(img1, img2);
   }
 
   void SetErrorFrames(int num, unsigned int *list) {

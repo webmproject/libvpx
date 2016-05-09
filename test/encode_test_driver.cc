@@ -13,6 +13,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
+#include "vpx_ports/mem.h"
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/encode_test_driver.h"
@@ -141,38 +142,120 @@ void EncoderTest::SetMode(TestMode mode) {
   else
     passes_ = 1;
 }
+
+static bool compare_plane(const uint8_t *const buf1, const int stride1,
+                          const uint8_t *const buf2, const int stride2,
+                          const int w, const int h,
+                          int *const mismatch_row,
+                          int *const mismatch_col,
+                          int *const mismatch_pix1,
+                          int *const mismatch_pix2) {
+  int r, c;
+
+  for (r = 0; r < h; ++r) {
+    for (c = 0; c < w; ++c) {
+      const int pix1 = buf1[r * stride1 + c];
+      const int pix2 = buf2[r * stride2 + c];
+
+      if (pix1 != pix2) {
+        if (mismatch_row != NULL)
+          *mismatch_row = r;
+        if (mismatch_col != NULL)
+          *mismatch_col = c;
+        if (mismatch_pix1 != NULL)
+          *mismatch_pix1 = pix1;
+        if (mismatch_pix2 != NULL)
+          *mismatch_pix2 = pix2;
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 // The function should return "true" most of the time, therefore no early
 // break-out is implemented within the match checking process.
 static bool compare_img(const vpx_image_t *img1,
-                        const vpx_image_t *img2) {
-  bool match = (img1->fmt == img2->fmt) &&
-               (img1->cs == img2->cs) &&
-               (img1->d_w == img2->d_w) &&
-               (img1->d_h == img2->d_h);
+                        const vpx_image_t *img2,
+                        int *const mismatch_row,
+                        int *const mismatch_col,
+                        int *const mismatch_plane,
+                        int *const mismatch_pix1,
+                        int *const mismatch_pix2) {
 
-  const unsigned int width_y  = img1->d_w;
-  const unsigned int height_y = img1->d_h;
-  unsigned int i;
-  for (i = 0; i < height_y; ++i)
-    match = (memcmp(img1->planes[VPX_PLANE_Y] + i * img1->stride[VPX_PLANE_Y],
-                    img2->planes[VPX_PLANE_Y] + i * img2->stride[VPX_PLANE_Y],
-                    width_y) == 0) && match;
-  const unsigned int width_uv  = (img1->d_w + 1) >> 1;
-  const unsigned int height_uv = (img1->d_h + 1) >> 1;
-  for (i = 0; i <  height_uv; ++i)
-    match = (memcmp(img1->planes[VPX_PLANE_U] + i * img1->stride[VPX_PLANE_U],
-                    img2->planes[VPX_PLANE_U] + i * img2->stride[VPX_PLANE_U],
-                    width_uv) == 0) && match;
-  for (i = 0; i < height_uv; ++i)
-    match = (memcmp(img1->planes[VPX_PLANE_V] + i * img1->stride[VPX_PLANE_V],
-                    img2->planes[VPX_PLANE_V] + i * img2->stride[VPX_PLANE_V],
-                    width_uv) == 0) && match;
-  return match;
+  const unsigned int w_y = img1->d_w;
+  const unsigned int h_y = img1->d_h;
+  const unsigned int w_uv = ROUNDZ_POWER_OF_TWO(w_y, img1->x_chroma_shift);
+  const unsigned int h_uv = ROUNDZ_POWER_OF_TWO(h_y, img1->y_chroma_shift);
+
+  if (img1->fmt != img2->fmt
+      || img1->cs != img2->cs
+      || img1->d_w != img2->d_w
+      || img1->d_h != img2->d_h) {
+    if (mismatch_row != NULL)
+      *mismatch_row = -1;
+    if (mismatch_col != NULL)
+      *mismatch_col = -1;
+    return false;
+  }
+
+  if (!compare_plane(img1->planes[VPX_PLANE_Y],  img1->stride[VPX_PLANE_Y],
+                     img2->planes[VPX_PLANE_Y],  img2->stride[VPX_PLANE_Y],
+                     w_y, h_y,
+                     mismatch_row, mismatch_col,
+                     mismatch_pix1, mismatch_pix2)) {
+    if (mismatch_plane != NULL)
+      *mismatch_plane = VPX_PLANE_Y;
+    return false;
+  }
+
+  if (!compare_plane(img1->planes[VPX_PLANE_U],  img1->stride[VPX_PLANE_U],
+                     img2->planes[VPX_PLANE_U],  img2->stride[VPX_PLANE_U],
+                     w_uv, h_uv,
+                     mismatch_row, mismatch_col,
+                     mismatch_pix1, mismatch_pix2)) {
+    if (mismatch_plane != NULL)
+      *mismatch_plane = VPX_PLANE_U;
+    return false;
+  }
+
+  if (!compare_plane(img1->planes[VPX_PLANE_V],  img1->stride[VPX_PLANE_V],
+                     img2->planes[VPX_PLANE_V],  img2->stride[VPX_PLANE_V],
+                     w_uv, h_uv,
+                     mismatch_row, mismatch_col,
+                     mismatch_pix1, mismatch_pix2)) {
+    if (mismatch_plane != NULL)
+      *mismatch_plane = VPX_PLANE_U;
+    return false;
+  }
+
+  return true;
 }
 
-void EncoderTest::MismatchHook(const vpx_image_t* /*img1*/,
-                               const vpx_image_t* /*img2*/) {
-  ASSERT_TRUE(0) << "Encode/Decode mismatch found";
+void EncoderTest::MismatchHook(const vpx_image_t* img_enc,
+                               const vpx_image_t* img_dec) {
+  int mismatch_row;
+  int mismatch_col;
+  int mismatch_plane;
+  int mismatch_pix_enc;
+  int mismatch_pix_dec;
+
+  ASSERT_FALSE(compare_img(img_enc, img_dec,
+                           &mismatch_row, &mismatch_col,
+                           &mismatch_plane,
+                           &mismatch_pix_enc,
+                           &mismatch_pix_dec));
+
+  GTEST_FAIL()
+    << "Encode/Decode mismatch found:"
+    << std::endl
+    << "  pixel value enc/dec: "  << mismatch_pix_enc << "/" << mismatch_pix_dec
+    << std::endl
+    << "                plane: " << mismatch_plane
+    << std::endl
+    << "              row/col: " << mismatch_row << "/" << mismatch_col
+    << std::endl;
 }
 
 void EncoderTest::RunLoop(VideoSource *video) {
@@ -265,7 +348,8 @@ void EncoderTest::RunLoop(VideoSource *video) {
         DxDataIterator dec_iter = decoder->GetDxData();
         const vpx_image_t *img_dec = dec_iter.Next();
         if (img_enc && img_dec) {
-          const bool res = compare_img(img_enc, img_dec);
+          const bool res = compare_img(img_enc, img_dec,
+                                       NULL, NULL, NULL, NULL, NULL);
           if (!res) {  // Mismatch
             MismatchHook(img_enc, img_dec);
           }
