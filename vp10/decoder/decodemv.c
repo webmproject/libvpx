@@ -696,7 +696,7 @@ static INLINE void read_mv(vp10_reader *r, MV *mv, const MV *ref,
 
 #if CONFIG_REF_MV && !CONFIG_EXT_INTER
   if (is_compound) {
-    int is_zero_rmv = vpx_read(r, ctx->zero_rmv);
+    int is_zero_rmv = vp10_read(r, ctx->zero_rmv);
     if (is_zero_rmv) {
       joint_type = MV_JOINT_ZERO;
     } else {
