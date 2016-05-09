@@ -250,7 +250,7 @@ void vp10_encode_mv(VP10_COMP* cpi, vp10_writer* w,
 
 #if CONFIG_REF_MV && !CONFIG_EXT_INTER
   if (is_compound) {
-    vpx_write(w, (j == MV_JOINT_ZERO), mvctx->zero_rmv);
+    vp10_write(w, (j == MV_JOINT_ZERO), mvctx->zero_rmv);
     if (j == MV_JOINT_ZERO)
       return;
   } else {
