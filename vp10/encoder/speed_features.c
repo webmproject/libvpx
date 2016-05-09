@@ -510,11 +510,11 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->disable_filter_search_var_thresh = 0;
   sf->adaptive_interp_filter_search = 0;
   sf->allow_partition_search_skip = 0;
-#if CONFIG_EXT_REFS || CONFIG_EXT_TILE
+#if CONFIG_EXT_TILE
   sf->use_upsampled_references = 0;
 #else
   sf->use_upsampled_references = 1;
-#endif
+#endif  // CONFIG_EXT_TILE
 #if CONFIG_EXT_INTER
   sf->disable_wedge_search_var_thresh = 0;
 #endif  // CONFIG_EXT_INTER
@@ -553,7 +553,7 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->use_transform_domain_distortion = 1;
 #else
   sf->use_transform_domain_distortion = 0;
-#endif
+#endif  // CONFIG_EXT_TILE
 
   if (oxcf->mode == REALTIME)
     set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);
