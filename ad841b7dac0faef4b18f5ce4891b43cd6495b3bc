@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72a2e4c0_80c6d6aa",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-09T17:47:34Z",
+      "side": 1,
+      "message": "Top-level const would be ignored by compiler. So we are not supposed to use \"const\" here.",
+      "range": {
+        "startLine": 209,
+        "startChar": 32,
+        "endLine": 209,
+        "endChar": 37
+      },
+      "revId": "ad841b7dac0faef4b18f5ce4891b43cd6495b3bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72a2e4c0_40c0ce8d",
+        "filename": "vp10/encoder/x86/highbd_fwd_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 921,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-09T17:47:34Z",
+      "side": 1,
+      "message": "The same as line 209.",
+      "range": {
+        "startLine": 921,
+        "startChar": 32,
+        "endLine": 921,
+        "endChar": 37
+      },
+      "revId": "ad841b7dac0faef4b18f5ce4891b43cd6495b3bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
