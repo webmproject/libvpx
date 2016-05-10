@@ -626,15 +626,15 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_fwd_txfm2d_64x64 sse4_1/;
 
   #inv txfm
-  add_proto qw/void vp10_inv_txfm2d_add_4x4/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  add_proto qw/void vp10_inv_txfm2d_add_4x4/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_inv_txfm2d_add_4x4/;
-  add_proto qw/void vp10_inv_txfm2d_add_8x8/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  add_proto qw/void vp10_inv_txfm2d_add_8x8/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_inv_txfm2d_add_8x8/;
-  add_proto qw/void vp10_inv_txfm2d_add_16x16/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  add_proto qw/void vp10_inv_txfm2d_add_16x16/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_inv_txfm2d_add_16x16/;
-  add_proto qw/void vp10_inv_txfm2d_add_32x32/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  add_proto qw/void vp10_inv_txfm2d_add_32x32/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_inv_txfm2d_add_32x32/;
-  add_proto qw/void vp10_inv_txfm2d_add_64x64/, "const int32_t *input, uint16_t *output, const int stride, const TXFM_2D_CFG *cfg, const int bd";
+  add_proto qw/void vp10_inv_txfm2d_add_64x64/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_inv_txfm2d_add_64x64/;
 }
 

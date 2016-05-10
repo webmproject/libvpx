@@ -1302,20 +1302,11 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:
-      vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_dct_dct_4, bd);
-      break;
     case ADST_DCT:
-      vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_adst_dct_4, bd);
-      break;
     case DCT_ADST:
-      vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_dct_adst_4, bd);
-      break;
     case ADST_ADST:
       vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_adst_adst_4, bd);
+                              tx_type, bd);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
@@ -1350,20 +1341,11 @@ void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
   (void)eob;
   switch (tx_type) {
     case DCT_DCT:
-      vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_dct_dct_8, bd);
-      break;
     case ADST_DCT:
-      vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_adst_dct_8, bd);
-      break;
     case DCT_ADST:
-      vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_dct_adst_8, bd);
-      break;
     case ADST_ADST:
       vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
-                              &inv_txfm_2d_cfg_adst_adst_8, bd);
+                              tx_type, bd);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
@@ -1398,20 +1380,11 @@ void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
   (void)eob;
   switch (tx_type) {
     case DCT_DCT:
-      vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                &inv_txfm_2d_cfg_dct_dct_16, bd);
-      break;
     case ADST_DCT:
-      vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                &inv_txfm_2d_cfg_adst_dct_16, bd);
-      break;
     case DCT_ADST:
-      vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                &inv_txfm_2d_cfg_dct_adst_16, bd);
-      break;
     case ADST_ADST:
       vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                &inv_txfm_2d_cfg_adst_adst_16, bd);
+                                tx_type, bd);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
@@ -1447,7 +1420,7 @@ void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
   switch (tx_type) {
     case DCT_DCT:
       vp10_inv_txfm2d_add_32x32(input, CONVERT_TO_SHORTPTR(dest), stride,
-                                &inv_txfm_2d_cfg_dct_dct_32, bd);
+                                DCT_DCT, bd);
       break;
 #if CONFIG_EXT_TX
     case ADST_DCT:
