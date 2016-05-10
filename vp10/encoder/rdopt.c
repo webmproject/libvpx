@@ -4986,7 +4986,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
         const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
 #if CONFIG_EXT_INTER
         int_mv mv_ref_list[MAX_MV_REF_CANDIDATES];
-        vp10_update_mv_context(cm, xd, mi, frame, mv_ref_list, i,
+        vp10_update_mv_context(xd, mi, frame, mv_ref_list, i,
                                mi_row, mi_col, NULL);
 #endif  // CONFIG_EXT_INTER
         frame_mv[ZEROMV][frame].as_int = 0;

@@ -173,7 +173,7 @@ static uint8_t scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     mi_pos.row = row_offset;
     mi_pos.col = i;
 
-    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, &mi_pos)) {
+    if (is_inside(tile, mi_col, mi_row, &mi_pos)) {
       const MODE_INFO *const candidate_mi =
           xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
@@ -208,7 +208,7 @@ static uint8_t scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     mi_pos.row = i;
     mi_pos.col = col_offset;
 
-    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, &mi_pos)) {
+    if (is_inside(tile, mi_col, mi_row, &mi_pos)) {
       const MODE_INFO *const candidate_mi =
           xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
@@ -241,7 +241,7 @@ static uint8_t scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   mi_pos.row = row_offset;
   mi_pos.col = col_offset;
 
-  if (is_inside(tile, mi_col, mi_row, cm->mi_rows, &mi_pos) &&
+  if (is_inside(tile, mi_col, mi_row, &mi_pos) &&
       *refmv_count < MAX_REF_MV_STACK_SIZE) {
     const MODE_INFO *const candidate_mi =
         xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
@@ -387,7 +387,7 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
         mi_pos.row = blk_row;
         mi_pos.col = blk_col;
 
-        if (!is_inside(&xd->tile, mi_col, mi_row, cm->mi_rows, &mi_pos))
+        if (!is_inside(&xd->tile, mi_col, mi_row, &mi_pos))
           continue;
 
         for (ref = 0; ref < 2; ++ref) {
@@ -565,7 +565,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   // and we also need to keep a mode count.
   for (i = 0; i < 2; ++i) {
     const POSITION *const mv_ref = &mv_ref_search[i];
-    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+    if (is_inside(tile, mi_col, mi_row, mv_ref)) {
       const MODE_INFO *const candidate_mi = xd->mi[mv_ref->col + mv_ref->row *
                                                    xd->mi_stride];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
@@ -587,7 +587,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   // mode counts.
   for (; i < MVREF_NEIGHBOURS; ++i) {
     const POSITION *const mv_ref = &mv_ref_search[i];
-    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+    if (is_inside(tile, mi_col, mi_row, mv_ref)) {
       const MB_MODE_INFO *const candidate = &xd->mi[mv_ref->col + mv_ref->row *
                                                     xd->mi_stride]->mbmi;
       different_ref_found = 1;
@@ -633,7 +633,7 @@ static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   if (different_ref_found) {
     for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
       const POSITION *mv_ref = &mv_ref_search[i];
-      if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      if (is_inside(tile, mi_col, mi_row, mv_ref)) {
         const MB_MODE_INFO *const candidate = &xd->mi[mv_ref->col + mv_ref->row
                                               * xd->mi_stride]->mbmi;
 
@@ -678,7 +678,7 @@ Done:
 
 #if CONFIG_EXT_INTER
 // This function keeps a mode count for a given MB/SB
-void vp10_update_mv_context(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+void vp10_update_mv_context(const MACROBLOCKD *xd,
                             MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                             int_mv *mv_ref_list,
                             int block, int mi_row, int mi_col,
@@ -697,7 +697,7 @@ void vp10_update_mv_context(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   // If the size < 8x8, we get the mv from the bmi substructure;
   for (i = 0; i < 2; ++i) {
     const POSITION *const mv_ref = &mv_ref_search[i];
-    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+    if (is_inside(tile, mi_col, mi_row, mv_ref)) {
       const MODE_INFO *const candidate_mi =
           xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
@@ -739,7 +739,7 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   int idx, all_zero = 1;
 #endif
 #if CONFIG_EXT_INTER
-  vp10_update_mv_context(cm, xd, mi, ref_frame, mv_ref_list, -1,
+  vp10_update_mv_context(xd, mi, ref_frame, mv_ref_list, -1,
                          mi_row, mi_col,
 #if CONFIG_REF_MV
                          compound_mode_context);
