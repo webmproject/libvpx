@@ -239,7 +239,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
 static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
     SPEED_FEATURES *sf, int speed) {
   VP10_COMMON *const cm = &cpi->common;
-
   if (speed >= 1) {
     if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
@@ -308,6 +307,7 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
   }
+
 
   if (speed >= 2) {
     sf->mode_search_skip_flags = (cm->frame_type == KEY_FRAME) ? 0 :

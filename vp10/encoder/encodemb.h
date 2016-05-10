@@ -41,6 +41,20 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
                       int blk_row, int blk_col,
                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                       VP10_XFORM_QUANT xform_quant_idx);
+#if CONFIG_NEW_QUANT
+void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
+                          int blk_col, BLOCK_SIZE plane_bsize,
+                          TX_SIZE tx_size);
+void vp10_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
+                             int blk_col, BLOCK_SIZE plane_bsize,
+                             TX_SIZE tx_size);
+void vp10_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
+                             int blk_col, BLOCK_SIZE plane_bsize,
+                             TX_SIZE tx_size);
+void vp10_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
+                                int blk_row, int blk_col,
+                                BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
+#endif
 
 void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 

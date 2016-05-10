@@ -34,18 +34,18 @@ static const uint8_t nuq_knots_lossless[COEF_BANDS][NUQ_KNOTS] = {
 
 // TODO(sarahparker) add multiple quantization profiles
 static const uint8_t nuq_knots[COEF_BANDS][NUQ_KNOTS] = {
-    {86, 122, 134},  // dc, band 0
+    {91, 133, 139},  // dc, band 0
     {78, 122, 134},  // band 1
-    {78, 122, 134},  // band 2
-    {84, 122, 133},  // band 3
-    {88, 122, 134},  // band 4
-    {88, 122, 134},  // band 5
+    {83, 127, 139},  // band 2
+    {84, 117, 128},  // band 3
+    {88, 117, 129},  // band 4
+    {93, 122, 134},  // band 5
 };
 
 // dequantization offsets
 static const uint8_t nuq_doff_lossless[COEF_BANDS] = {0, 0, 0, 0, 0, 0};
 
-static const uint8_t nuq_doff[COEF_BANDS] = {8, 15, 16, 22, 23, 24};
+static const uint8_t nuq_doff[COEF_BANDS] = {11, 12, 22, 18, 20, 21};
 
 static const uint8_t *get_nuq_knots(int lossless, int band) {
   if (lossless)

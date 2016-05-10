@@ -41,6 +41,9 @@ typedef struct macroblock_plane {
   int16_t *quant_shift;
   int16_t *zbin;
   int16_t *round;
+#if CONFIG_NEW_QUANT
+  cuml_bins_type_nuq *cuml_bins_nuq;
+#endif  // CONFIG_NEW_QUANT
 
   int64_t quant_thred[2];
 } MACROBLOCK_PLANE;
