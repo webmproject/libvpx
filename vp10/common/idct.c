@@ -104,23 +104,6 @@ static void highbd_iidtx32_c(const tran_low_t *input, tran_low_t *output,
     output[i] = input[i] * 4;
 }
 
-static void highbd_ihalfcenter32_c(const tran_low_t *input, tran_low_t *output,
-                                   int bd) {
-  int i;
-  tran_low_t inputhalf[16];
-  for (i = 0; i < 8; ++i) {
-    output[i] = input[16 + i] * 4;
-    output[24 + i] = input[24 + i] * 4;
-  }
-  // Multiply input by sqrt(2)
-  for (i = 0; i < 16; ++i) {
-    inputhalf[i] = (tran_low_t)highbd_dct_const_round_shift(
-        input[i] * Sqrt2, bd);
-  }
-  vpx_highbd_idct16_c(inputhalf, output + 8, bd);
-  // Note overall scaling factor is 4 times orthogonal
-}
-
 static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
                                   int bd) {
   int i;
