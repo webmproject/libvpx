@@ -227,6 +227,8 @@ typedef struct VP9EncoderConfig {
 
   int max_threads;
 
+  int target_level;
+
   vpx_fixed_buf_t two_pass_stats_in;
   struct vpx_codec_pkt_list *output_pkt_list;
 
@@ -496,6 +498,8 @@ typedef struct VP9_COMP {
   int resize_count;
 
   int use_skin_detection;
+
+  int target_level;
 
   NOISE_ESTIMATE noise_estimate;
 
