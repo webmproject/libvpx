@@ -23,206 +23,352 @@
 #endif  // CONFIG_OBMC
 
 #if CONFIG_EXT_INTER
-static int get_masked_weight(int m) {
+#define NSMOOTHERS  2
+static int get_masked_weight(int m, int smoothness) {
 #define SMOOTHER_LEN  32
-  static const uint8_t smoothfn[2 * SMOOTHER_LEN + 1] = {
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    1,  1,  2,  4,  6, 10, 16, 23,
-    32,
-    41, 48, 54, 58, 60, 62, 63, 63,
-    64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64,
+  static const uint8_t smoothfn[NSMOOTHERS][2 * SMOOTHER_LEN + 1] = {
+    {
+      0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  1,  2,  4,  7, 13, 21,
+      32,
+      43, 51, 57, 60, 62, 63, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64,
+    }, {
+      0,  0,  0,  0,  0,  0,  0,  0,
+      1,  1,  1,  1,  1,  1,  2,  2,
+      3,  3,  4,  4,  5,  6,  8,  9,
+      11, 13, 15, 17, 20, 23, 26, 29,
+      32,
+      35, 38, 41, 44, 47, 49, 51, 53,
+      55, 56, 58, 59, 60, 60, 61, 61,
+      62, 62, 63, 63, 63, 63, 63, 63,
+      64, 64, 64, 64, 64, 64, 64, 64,
+    }
   };
   if (m < -SMOOTHER_LEN)
     return 0;
   else if (m > SMOOTHER_LEN)
     return (1 << WEDGE_WEIGHT_BITS);
   else
-    return smoothfn[m + SMOOTHER_LEN];
+    return smoothfn[smoothness][m + SMOOTHER_LEN];
 }
 
-#define WEDGE_OBLIQUE  1
-#define WEDGE_STRAIGHT 0
+// Angles are with respect to horizontal anti-clockwise
+typedef enum {
+  WEDGE_HORIZONTAL = 0,
+  WEDGE_VERTICAL = 1,
+  WEDGE_OBLIQUE27 = 2,
+  WEDGE_OBLIQUE63 = 3,
+  WEDGE_OBLIQUE117 = 4,
+  WEDGE_OBLIQUE153 = 5,
+  WEDGE_DIRECTIONS
+} WedgeDirectionType;
 
-#define WEDGE_PARMS    5
+#define WEDGE_PARMS    4
 
-// [negative][transpose][reverse]
-DECLARE_ALIGNED(16, static uint8_t,
-                wedge_mask_obl[2][2][2][MASK_MASTER_SIZE * MASK_MASTER_SIZE]);
-// [negative][transpose]
-DECLARE_ALIGNED(16, static uint8_t,
-                wedge_mask_str[2][2][MASK_MASTER_SIZE * MASK_MASTER_SIZE]);
+// [smoother][negative][direction]
+DECLARE_ALIGNED(
+    16, static uint8_t,
+    wedge_mask_obl[NSMOOTHERS][2][WEDGE_DIRECTIONS]
+                  [MASK_MASTER_SIZE * MASK_MASTER_SIZE]);
 
 // Equation of line: f(x, y) = a[0]*(x - a[2]*w/8) + a[1]*(y - a[3]*h/8) = 0
 void vp10_init_wedge_masks() {
-  int i, j;
+  int i, j, s;
   const int w = MASK_MASTER_SIZE;
   const int h = MASK_MASTER_SIZE;
   const int stride = MASK_MASTER_STRIDE;
-  const int a[4] = {2, 1, 4, 4};
-  for (i = 0; i < h; ++i)
-    for (j = 0; j < w; ++j) {
-      int x = (2 * j + 1 - (a[2] * w) / 4);
-      int y = (2 * i + 1 - (a[3] * h) / 4);
-      int m = (a[0] * x + a[1] * y) / 2;
-      wedge_mask_obl[1][0][0][i * stride + j] =
-      wedge_mask_obl[1][1][0][j * stride + i] =
-          get_masked_weight(m);
-      wedge_mask_obl[1][0][1][i * stride + w - 1 - j] =
-      wedge_mask_obl[1][1][1][(w - 1 - j) * stride + i] =
-          (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(m);
-      wedge_mask_obl[0][0][0][i * stride + j] =
-      wedge_mask_obl[0][1][0][j * stride + i] =
-          (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(m);
-      wedge_mask_obl[0][0][1][i * stride + w - 1 - j] =
-      wedge_mask_obl[0][1][1][(w - 1 - j) * stride + i] =
-          get_masked_weight(m);
-      wedge_mask_str[1][0][i * stride + j] =
-      wedge_mask_str[1][1][j * stride + i] =
-          get_masked_weight(x);
-      wedge_mask_str[0][0][i * stride + j] =
-      wedge_mask_str[0][1][j * stride + i] =
-          (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(x);
-    }
+  const int a[2] = {2, 1};
+  const double asqrt = sqrt(a[0] * a[0] + a[1] * a[1]);
+  for (s = 0; s < NSMOOTHERS; s++) {
+    for (i = 0; i < h; ++i)
+      for (j = 0; j < w; ++j) {
+        int x = (2 * j + 1 - w);
+        int y = (2 * i + 1 - h);
+        int m = (int)rint((a[0] * x + a[1] * y) / asqrt);
+        wedge_mask_obl[s][1][WEDGE_OBLIQUE63][i * stride + j] =
+        wedge_mask_obl[s][1][WEDGE_OBLIQUE27][j * stride + i] =
+            get_masked_weight(m, s);
+        wedge_mask_obl[s][1][WEDGE_OBLIQUE117][i * stride + w - 1 - j] =
+        wedge_mask_obl[s][1][WEDGE_OBLIQUE153][(w - 1 - j) * stride + i] =
+            (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(m, s);
+        wedge_mask_obl[s][0][WEDGE_OBLIQUE63][i * stride + j] =
+        wedge_mask_obl[s][0][WEDGE_OBLIQUE27][j * stride + i] =
+            (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(m, s);
+        wedge_mask_obl[s][0][WEDGE_OBLIQUE117][i * stride + w - 1 - j] =
+        wedge_mask_obl[s][0][WEDGE_OBLIQUE153][(w - 1 - j) * stride + i] =
+            get_masked_weight(m, s);
+        wedge_mask_obl[s][1][WEDGE_VERTICAL][i * stride + j] =
+        wedge_mask_obl[s][1][WEDGE_HORIZONTAL][j * stride + i] =
+            get_masked_weight(x, s);
+        wedge_mask_obl[s][0][WEDGE_VERTICAL][i * stride + j] =
+        wedge_mask_obl[s][0][WEDGE_HORIZONTAL][j * stride + i] =
+            (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(x, s);
+      }
+  }
 }
 
-static const int wedge_params_sml[1 << WEDGE_BITS_SML]
-                                 [WEDGE_PARMS] = {
-    {WEDGE_OBLIQUE,  1, 1, 4, 4},
-    {WEDGE_OBLIQUE,  1, 0, 4, 4},
-    {WEDGE_OBLIQUE,  0, 1, 4, 4},
-    {WEDGE_OBLIQUE,  0, 0, 4, 4},
+static const int wedge_params_4[1 << WEDGE_BITS_2]
+                               [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 1},
+    {WEDGE_OBLIQUE63,  4, 4, 1},
+    {WEDGE_OBLIQUE117, 4, 4, 1},
+    {WEDGE_OBLIQUE153, 4, 4, 1},
 };
 
-static const int wedge_params_med_hgtw[1 << WEDGE_BITS_MED]
-                                      [WEDGE_PARMS] = {
-    {WEDGE_OBLIQUE,  1, 1, 4, 4},
-    {WEDGE_OBLIQUE,  1, 0, 4, 4},
-    {WEDGE_OBLIQUE,  0, 1, 4, 4},
-    {WEDGE_OBLIQUE,  0, 0, 4, 4},
+static const int wedge_params_8_hgtw[1 << WEDGE_BITS_3]
+                                    [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 1},
+    {WEDGE_OBLIQUE63,  4, 4, 1},
+    {WEDGE_OBLIQUE117, 4, 4, 1},
+    {WEDGE_OBLIQUE153, 4, 4, 1},
 
-    {WEDGE_OBLIQUE,  1, 1, 4, 2},
-    {WEDGE_OBLIQUE,  1, 1, 4, 6},
-    {WEDGE_OBLIQUE,  1, 0, 4, 2},
-    {WEDGE_OBLIQUE,  1, 0, 4, 6},
+    {WEDGE_OBLIQUE27,  4, 2, 1},
+    {WEDGE_OBLIQUE27,  4, 6, 1},
+    {WEDGE_OBLIQUE153, 4, 2, 1},
+    {WEDGE_OBLIQUE153, 4, 6, 1},
 };
 
-static const int wedge_params_med_hltw[1 << WEDGE_BITS_MED]
-                                      [WEDGE_PARMS] = {
-    {WEDGE_OBLIQUE,  1, 1, 4, 4},
-    {WEDGE_OBLIQUE,  1, 0, 4, 4},
-    {WEDGE_OBLIQUE,  0, 1, 4, 4},
-    {WEDGE_OBLIQUE,  0, 0, 4, 4},
+static const int wedge_params_8_hltw[1 << WEDGE_BITS_3]
+                                    [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 1},
+    {WEDGE_OBLIQUE63,  4, 4, 1},
+    {WEDGE_OBLIQUE117, 4, 4, 1},
+    {WEDGE_OBLIQUE153, 4, 4, 1},
 
-    {WEDGE_OBLIQUE,  0, 1, 2, 4},
-    {WEDGE_OBLIQUE,  0, 1, 6, 4},
-    {WEDGE_OBLIQUE,  0, 0, 2, 4},
-    {WEDGE_OBLIQUE,  0, 0, 6, 4},
+    {WEDGE_OBLIQUE63,  2, 4, 1},
+    {WEDGE_OBLIQUE63,  6, 4, 1},
+    {WEDGE_OBLIQUE117, 2, 4, 1},
+    {WEDGE_OBLIQUE117, 6, 4, 1},
 };
 
-static const int wedge_params_med_heqw[1 << WEDGE_BITS_MED]
-                                      [WEDGE_PARMS] = {
-    {WEDGE_OBLIQUE,  1, 1, 4, 4},
-    {WEDGE_OBLIQUE,  1, 0, 4, 4},
-    {WEDGE_OBLIQUE,  0, 1, 4, 4},
-    {WEDGE_OBLIQUE,  0, 0, 4, 4},
+static const int wedge_params_8_heqw[1 << WEDGE_BITS_3]
+                                     [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 1},
+    {WEDGE_OBLIQUE63,  4, 4, 1},
+    {WEDGE_OBLIQUE117, 4, 4, 1},
+    {WEDGE_OBLIQUE153, 4, 4, 1},
 
-    {WEDGE_STRAIGHT, 1, 0, 4, 2},
-    {WEDGE_STRAIGHT, 1, 0, 4, 6},
-    {WEDGE_STRAIGHT, 0, 0, 2, 4},
-    {WEDGE_STRAIGHT, 0, 0, 6, 4},
+    {WEDGE_HORIZONTAL, 4, 2, 1},
+    {WEDGE_HORIZONTAL, 4, 6, 1},
+    {WEDGE_VERTICAL,   2, 4, 1},
+    {WEDGE_VERTICAL,   6, 4, 1},
 };
 
-static const int wedge_params_big_hgtw[1 << WEDGE_BITS_BIG]
-                                      [WEDGE_PARMS] = {
-    {WEDGE_OBLIQUE,  1, 1, 4, 4},
-    {WEDGE_OBLIQUE,  1, 0, 4, 4},
-    {WEDGE_OBLIQUE,  0, 1, 4, 4},
-    {WEDGE_OBLIQUE,  0, 0, 4, 4},
+static const int wedge_params_16_hgtw[1 << WEDGE_BITS_4]
+                                     [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 0},
+    {WEDGE_OBLIQUE63,  4, 4, 0},
+    {WEDGE_OBLIQUE117, 4, 4, 0},
+    {WEDGE_OBLIQUE153, 4, 4, 0},
 
-    {WEDGE_OBLIQUE,  1, 1, 4, 2},
-    {WEDGE_OBLIQUE,  1, 1, 4, 6},
-    {WEDGE_OBLIQUE,  1, 0, 4, 2},
-    {WEDGE_OBLIQUE,  1, 0, 4, 6},
+    {WEDGE_HORIZONTAL, 4, 2, 0},
+    {WEDGE_HORIZONTAL, 4, 4, 0},
+    {WEDGE_HORIZONTAL, 4, 6, 0},
+    {WEDGE_VERTICAL,   4, 4, 0},
 
-    {WEDGE_OBLIQUE,  0, 1, 2, 4},
-    {WEDGE_OBLIQUE,  0, 1, 6, 4},
-    {WEDGE_OBLIQUE,  0, 0, 2, 4},
-    {WEDGE_OBLIQUE,  0, 0, 6, 4},
+    {WEDGE_OBLIQUE27,  4, 2, 0},
+    {WEDGE_OBLIQUE27,  4, 6, 0},
+    {WEDGE_OBLIQUE153, 4, 2, 0},
+    {WEDGE_OBLIQUE153, 4, 6, 0},
 
-    {WEDGE_STRAIGHT, 1, 0, 4, 2},
-    {WEDGE_STRAIGHT, 1, 0, 4, 4},
-    {WEDGE_STRAIGHT, 1, 0, 4, 6},
-    {WEDGE_STRAIGHT, 0, 0, 4, 4},
+    {WEDGE_OBLIQUE63,  2, 4, 0},
+    {WEDGE_OBLIQUE63,  6, 4, 0},
+    {WEDGE_OBLIQUE117, 2, 4, 0},
+    {WEDGE_OBLIQUE117, 6, 4, 0},
 };
 
-static const int wedge_params_big_hltw[1 << WEDGE_BITS_BIG]
-                                      [WEDGE_PARMS] = {
-    {WEDGE_OBLIQUE,  1, 1, 4, 4},
-    {WEDGE_OBLIQUE,  1, 0, 4, 4},
-    {WEDGE_OBLIQUE,  0, 1, 4, 4},
-    {WEDGE_OBLIQUE,  0, 0, 4, 4},
+static const int wedge_params_16_hltw[1 << WEDGE_BITS_4]
+                                     [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 0},
+    {WEDGE_OBLIQUE63,  4, 4, 0},
+    {WEDGE_OBLIQUE117, 4, 4, 0},
+    {WEDGE_OBLIQUE153, 4, 4, 0},
 
-    {WEDGE_OBLIQUE,  1, 1, 4, 2},
-    {WEDGE_OBLIQUE,  1, 1, 4, 6},
-    {WEDGE_OBLIQUE,  1, 0, 4, 2},
-    {WEDGE_OBLIQUE,  1, 0, 4, 6},
+    {WEDGE_VERTICAL,   2, 4, 0},
+    {WEDGE_VERTICAL,   4, 4, 0},
+    {WEDGE_VERTICAL,   6, 4, 0},
+    {WEDGE_HORIZONTAL, 4, 4, 0},
 
-    {WEDGE_OBLIQUE,  0, 1, 2, 4},
-    {WEDGE_OBLIQUE,  0, 1, 6, 4},
-    {WEDGE_OBLIQUE,  0, 0, 2, 4},
-    {WEDGE_OBLIQUE,  0, 0, 6, 4},
+    {WEDGE_OBLIQUE27,  4, 2, 0},
+    {WEDGE_OBLIQUE27,  4, 6, 0},
+    {WEDGE_OBLIQUE153, 4, 2, 0},
+    {WEDGE_OBLIQUE153, 4, 6, 0},
 
-    {WEDGE_STRAIGHT, 0, 0, 2, 4},
-    {WEDGE_STRAIGHT, 0, 0, 4, 4},
-    {WEDGE_STRAIGHT, 0, 0, 6, 4},
-    {WEDGE_STRAIGHT, 1, 0, 4, 4},
+    {WEDGE_OBLIQUE63,  2, 4, 0},
+    {WEDGE_OBLIQUE63,  6, 4, 0},
+    {WEDGE_OBLIQUE117, 2, 4, 0},
+    {WEDGE_OBLIQUE117, 6, 4, 0},
 };
 
-static const int wedge_params_big_heqw[1 << WEDGE_BITS_BIG]
-                                      [WEDGE_PARMS] = {
-    {WEDGE_OBLIQUE,  1, 1, 4, 4},
-    {WEDGE_OBLIQUE,  1, 0, 4, 4},
-    {WEDGE_OBLIQUE,  0, 1, 4, 4},
-    {WEDGE_OBLIQUE,  0, 0, 4, 4},
+static const int wedge_params_16_heqw[1 << WEDGE_BITS_4]
+                                     [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 0},
+    {WEDGE_OBLIQUE63,  4, 4, 0},
+    {WEDGE_OBLIQUE117, 4, 4, 0},
+    {WEDGE_OBLIQUE153, 4, 4, 0},
 
-    {WEDGE_OBLIQUE,  1, 1, 4, 2},
-    {WEDGE_OBLIQUE,  1, 1, 4, 6},
-    {WEDGE_OBLIQUE,  1, 0, 4, 2},
-    {WEDGE_OBLIQUE,  1, 0, 4, 6},
+    {WEDGE_HORIZONTAL, 4, 2, 0},
+    {WEDGE_HORIZONTAL, 4, 6, 0},
+    {WEDGE_VERTICAL,   2, 4, 0},
+    {WEDGE_VERTICAL,   6, 4, 0},
 
-    {WEDGE_OBLIQUE,  0, 1, 2, 4},
-    {WEDGE_OBLIQUE,  0, 1, 6, 4},
-    {WEDGE_OBLIQUE,  0, 0, 2, 4},
-    {WEDGE_OBLIQUE,  0, 0, 6, 4},
+    {WEDGE_OBLIQUE27,  4, 2, 0},
+    {WEDGE_OBLIQUE27,  4, 6, 0},
+    {WEDGE_OBLIQUE153, 4, 2, 0},
+    {WEDGE_OBLIQUE153, 4, 6, 0},
 
-    {WEDGE_STRAIGHT, 1, 0, 4, 2},
-    {WEDGE_STRAIGHT, 1, 0, 4, 6},
-    {WEDGE_STRAIGHT, 0, 0, 2, 4},
-    {WEDGE_STRAIGHT, 0, 0, 6, 4},
+    {WEDGE_OBLIQUE63,  2, 4, 0},
+    {WEDGE_OBLIQUE63,  6, 4, 0},
+    {WEDGE_OBLIQUE117, 2, 4, 0},
+    {WEDGE_OBLIQUE117, 6, 4, 0},
+};
+
+static const int wedge_params_32_hgtw[1 << WEDGE_BITS_5]
+                                     [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 0},
+    {WEDGE_OBLIQUE63,  4, 4, 0},
+    {WEDGE_OBLIQUE117, 4, 4, 0},
+    {WEDGE_OBLIQUE153, 4, 4, 0},
+
+    {WEDGE_HORIZONTAL, 4, 2, 0},
+    {WEDGE_HORIZONTAL, 4, 4, 0},
+    {WEDGE_HORIZONTAL, 4, 6, 0},
+    {WEDGE_VERTICAL,   4, 4, 0},
+
+    {WEDGE_OBLIQUE27,  4, 1, 0},
+    {WEDGE_OBLIQUE27,  4, 2, 0},
+    {WEDGE_OBLIQUE27,  4, 3, 0},
+    {WEDGE_OBLIQUE27,  4, 5, 0},
+    {WEDGE_OBLIQUE27,  4, 6, 0},
+    {WEDGE_OBLIQUE27,  4, 7, 0},
+
+    {WEDGE_OBLIQUE153, 4, 1, 0},
+    {WEDGE_OBLIQUE153, 4, 2, 0},
+    {WEDGE_OBLIQUE153, 4, 3, 0},
+    {WEDGE_OBLIQUE153, 4, 5, 0},
+    {WEDGE_OBLIQUE153, 4, 6, 0},
+    {WEDGE_OBLIQUE153, 4, 7, 0},
+
+    {WEDGE_OBLIQUE63,  1, 4, 0},
+    {WEDGE_OBLIQUE63,  2, 4, 0},
+    {WEDGE_OBLIQUE63,  3, 4, 0},
+    {WEDGE_OBLIQUE63,  5, 4, 0},
+    {WEDGE_OBLIQUE63,  6, 4, 0},
+    {WEDGE_OBLIQUE63,  7, 4, 0},
+
+    {WEDGE_OBLIQUE117, 1, 4, 0},
+    {WEDGE_OBLIQUE117, 2, 4, 0},
+    {WEDGE_OBLIQUE117, 3, 4, 0},
+    {WEDGE_OBLIQUE117, 5, 4, 0},
+    {WEDGE_OBLIQUE117, 6, 4, 0},
+    {WEDGE_OBLIQUE117, 7, 4, 0},
+};
+
+static const int wedge_params_32_hltw[1 << WEDGE_BITS_5]
+                                     [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 0},
+    {WEDGE_OBLIQUE63,  4, 4, 0},
+    {WEDGE_OBLIQUE117, 4, 4, 0},
+    {WEDGE_OBLIQUE153, 4, 4, 0},
+
+    {WEDGE_VERTICAL,   2, 4, 0},
+    {WEDGE_VERTICAL,   4, 4, 0},
+    {WEDGE_VERTICAL,   6, 4, 0},
+    {WEDGE_HORIZONTAL, 4, 4, 0},
+
+    {WEDGE_OBLIQUE27,  4, 1, 0},
+    {WEDGE_OBLIQUE27,  4, 2, 0},
+    {WEDGE_OBLIQUE27,  4, 3, 0},
+    {WEDGE_OBLIQUE27,  4, 5, 0},
+    {WEDGE_OBLIQUE27,  4, 6, 0},
+    {WEDGE_OBLIQUE27,  4, 7, 0},
+
+    {WEDGE_OBLIQUE153, 4, 1, 0},
+    {WEDGE_OBLIQUE153, 4, 2, 0},
+    {WEDGE_OBLIQUE153, 4, 3, 0},
+    {WEDGE_OBLIQUE153, 4, 5, 0},
+    {WEDGE_OBLIQUE153, 4, 6, 0},
+    {WEDGE_OBLIQUE153, 4, 7, 0},
+
+    {WEDGE_OBLIQUE63,  1, 4, 0},
+    {WEDGE_OBLIQUE63,  2, 4, 0},
+    {WEDGE_OBLIQUE63,  3, 4, 0},
+    {WEDGE_OBLIQUE63,  5, 4, 0},
+    {WEDGE_OBLIQUE63,  6, 4, 0},
+    {WEDGE_OBLIQUE63,  7, 4, 0},
+
+    {WEDGE_OBLIQUE117, 1, 4, 0},
+    {WEDGE_OBLIQUE117, 2, 4, 0},
+    {WEDGE_OBLIQUE117, 3, 4, 0},
+    {WEDGE_OBLIQUE117, 5, 4, 0},
+    {WEDGE_OBLIQUE117, 6, 4, 0},
+    {WEDGE_OBLIQUE117, 7, 4, 0},
+};
+
+static const int wedge_params_32_heqw[1 << WEDGE_BITS_5]
+                                     [WEDGE_PARMS] = {
+    {WEDGE_OBLIQUE27,  4, 4, 0},
+    {WEDGE_OBLIQUE63,  4, 4, 0},
+    {WEDGE_OBLIQUE117, 4, 4, 0},
+    {WEDGE_OBLIQUE153, 4, 4, 0},
+
+    {WEDGE_HORIZONTAL, 4, 2, 0},
+    {WEDGE_HORIZONTAL, 4, 6, 0},
+    {WEDGE_VERTICAL,   2, 4, 0},
+    {WEDGE_VERTICAL,   6, 4, 0},
+
+    {WEDGE_OBLIQUE27,  4, 1, 0},
+    {WEDGE_OBLIQUE27,  4, 2, 0},
+    {WEDGE_OBLIQUE27,  4, 3, 0},
+    {WEDGE_OBLIQUE27,  4, 5, 0},
+    {WEDGE_OBLIQUE27,  4, 6, 0},
+    {WEDGE_OBLIQUE27,  4, 7, 0},
+
+    {WEDGE_OBLIQUE153, 4, 1, 0},
+    {WEDGE_OBLIQUE153, 4, 2, 0},
+    {WEDGE_OBLIQUE153, 4, 3, 0},
+    {WEDGE_OBLIQUE153, 4, 5, 0},
+    {WEDGE_OBLIQUE153, 4, 6, 0},
+    {WEDGE_OBLIQUE153, 4, 7, 0},
+
+    {WEDGE_OBLIQUE63,  1, 4, 0},
+    {WEDGE_OBLIQUE63,  2, 4, 0},
+    {WEDGE_OBLIQUE63,  3, 4, 0},
+    {WEDGE_OBLIQUE63,  5, 4, 0},
+    {WEDGE_OBLIQUE63,  6, 4, 0},
+    {WEDGE_OBLIQUE63,  7, 4, 0},
+
+    {WEDGE_OBLIQUE117, 1, 4, 0},
+    {WEDGE_OBLIQUE117, 2, 4, 0},
+    {WEDGE_OBLIQUE117, 3, 4, 0},
+    {WEDGE_OBLIQUE117, 5, 4, 0},
+    {WEDGE_OBLIQUE117, 6, 4, 0},
+    {WEDGE_OBLIQUE117, 7, 4, 0},
 };
 
 static const int *get_wedge_params_lookup[BLOCK_SIZES] = {
   NULL,
   NULL,
   NULL,
-  &wedge_params_sml[0][0],
-  &wedge_params_med_hgtw[0][0],
-  &wedge_params_med_hltw[0][0],
-  &wedge_params_med_heqw[0][0],
-  &wedge_params_med_hgtw[0][0],
-  &wedge_params_med_hltw[0][0],
-  &wedge_params_med_heqw[0][0],
-  &wedge_params_big_hgtw[0][0],
-  &wedge_params_big_hltw[0][0],
-  &wedge_params_big_heqw[0][0],
+  &wedge_params_16_heqw[0][0],
+  &wedge_params_16_hgtw[0][0],
+  &wedge_params_16_hltw[0][0],
+  &wedge_params_16_heqw[0][0],
+  &wedge_params_16_hgtw[0][0],
+  &wedge_params_16_hltw[0][0],
+  &wedge_params_16_heqw[0][0],
+  NULL,
+  NULL,
+  NULL,
 #if CONFIG_EXT_PARTITION
-  &wedge_params_big_hgtw[0][0],
-  &wedge_params_big_hltw[0][0],
-  &wedge_params_big_heqw[0][0],
+  NULL,
+  NULL,
+  NULL,
 #endif  // CONFIG_EXT_PARTITION
 };
 
@@ -244,11 +390,9 @@ static const uint8_t *get_wedge_mask_inplace(int wedge_index,
   const int *a = get_wedge_params(wedge_index, sb_type);
   int woff, hoff;
   if (!a) return NULL;
-  woff = (a[3] * bw) >> 3;
-  hoff = (a[4] * bh) >> 3;
-  master = (a[0] ?
-            wedge_mask_obl[neg][a[1]][a[2]] :
-            wedge_mask_str[neg][a[1]]) +
+  woff = (a[1] * bw) >> 3;
+  hoff = (a[2] * bh) >> 3;
+  master = wedge_mask_obl[a[3]][neg][a[0]] +
       MASK_MASTER_STRIDE * (MASK_MASTER_SIZE / 2 - hoff) +
       MASK_MASTER_SIZE / 2 - woff;
   return master;

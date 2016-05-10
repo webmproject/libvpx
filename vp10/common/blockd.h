@@ -53,43 +53,6 @@ static INLINE int is_inter_mode(PREDICTION_MODE mode) {
 }
 
 #if CONFIG_EXT_INTER
-#define WEDGE_BITS_SML    2
-#define WEDGE_BITS_MED    3
-#define WEDGE_BITS_BIG    4
-#define WEDGE_NONE       -1
-#define WEDGE_WEIGHT_BITS 6
-
-static const int get_wedge_bits_lookup[BLOCK_SIZES] = {
-  0,
-  0,
-  0,
-  WEDGE_BITS_SML,
-  WEDGE_BITS_MED,
-  WEDGE_BITS_MED,
-  WEDGE_BITS_MED,
-  WEDGE_BITS_MED,
-  WEDGE_BITS_MED,
-  WEDGE_BITS_MED,
-  WEDGE_BITS_BIG,
-  WEDGE_BITS_BIG,
-  WEDGE_BITS_BIG,
-#if CONFIG_EXT_PARTITION
-  WEDGE_BITS_BIG,
-  WEDGE_BITS_BIG,
-  WEDGE_BITS_BIG,
-#endif  // CONFIG_EXT_PARTITION
-};
-
-static INLINE int is_interinter_wedge_used(BLOCK_SIZE sb_type) {
-  (void) sb_type;
-  return get_wedge_bits_lookup[sb_type] > 0;
-}
-
-static INLINE int is_interintra_wedge_used(BLOCK_SIZE sb_type) {
-  (void) sb_type;
-  return get_wedge_bits_lookup[sb_type] > 0;
-}
-
 static INLINE int is_inter_singleref_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWFROMNEARMV;
 }

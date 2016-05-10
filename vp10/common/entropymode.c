@@ -281,16 +281,16 @@ static const vpx_prob
 };
 
 static const vpx_prob default_wedge_interintra_prob[BLOCK_SIZES] = {
-  208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208,
+  208, 208, 208, 208, 208, 208, 216, 216, 216, 224, 224, 224, 240,
 #if CONFIG_EXT_PARTITION
   208, 208, 208
 #endif  // CONFIG_EXT_PARTITION
 };
 
 static const vpx_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
-  208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208, 208,
+  208, 208, 208, 208, 208, 208, 216, 216, 216, 224, 224, 224, 240,
 #if CONFIG_EXT_PARTITION
-  208, 208, 208
+  255, 255, 255
 #endif  // CONFIG_EXT_PARTITION
 };
 #endif  // CONFIG_EXT_INTER
