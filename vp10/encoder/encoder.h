@@ -580,6 +580,9 @@ typedef struct VP10_COMP {
   VP9LfSync lf_row_sync;
 #if CONFIG_ENTROPY
   SUBFRAME_STATS subframe_stats;
+  // TODO(yaowu): minimize the size of count buffers
+  SUBFRAME_STATS wholeframe_stats;
+  vp10_coeff_stats branch_ct_buf[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
 #endif  // CONFIG_ENTROPY
 #if CONFIG_ANS
   struct BufAnsCoder buf_ans;
