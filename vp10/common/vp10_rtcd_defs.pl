@@ -614,15 +614,15 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   #fwd txfm
-  add_proto qw/void vp10_fwd_txfm2d_4x4/, "const int16_t *input, int32_t *output, const int stride, int tx_type, const int bd";
+  add_proto qw/void vp10_fwd_txfm2d_4x4/, "const int16_t *input, int32_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_fwd_txfm2d_4x4 sse4_1/;
-  add_proto qw/void vp10_fwd_txfm2d_8x8/, "const int16_t *input, int32_t *output, const int stride, int tx_type, const int bd";
+  add_proto qw/void vp10_fwd_txfm2d_8x8/, "const int16_t *input, int32_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_fwd_txfm2d_8x8 sse4_1/;
-  add_proto qw/void vp10_fwd_txfm2d_16x16/, "const int16_t *input, int32_t *output, const int stride, int tx_type, const int bd";
+  add_proto qw/void vp10_fwd_txfm2d_16x16/, "const int16_t *input, int32_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_fwd_txfm2d_16x16 sse4_1/;
-  add_proto qw/void vp10_fwd_txfm2d_32x32/, "const int16_t *input, int32_t *output, const int stride, int tx_type, const int bd";
+  add_proto qw/void vp10_fwd_txfm2d_32x32/, "const int16_t *input, int32_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_fwd_txfm2d_32x32 sse4_1/;
-  add_proto qw/void vp10_fwd_txfm2d_64x64/, "const int16_t *input, int32_t *output, const int stride, int tx_type, const int bd";
+  add_proto qw/void vp10_fwd_txfm2d_64x64/, "const int16_t *input, int32_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_fwd_txfm2d_64x64 sse4_1/;
 
   #inv txfm
@@ -662,10 +662,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/int64_t vp10_highbd_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz, int bd";
   specialize qw/vp10_highbd_block_error sse2/;
 
-  add_proto qw/void vp10_highbd_quantize_fp/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan, const int log_scale";
+  add_proto qw/void vp10_highbd_quantize_fp/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan, int log_scale";
   specialize qw/vp10_highbd_quantize_fp/;
 
-  add_proto qw/void vp10_highbd_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan, const int log_scale";
+  add_proto qw/void vp10_highbd_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan, int log_scale";
   specialize qw/vp10_highbd_quantize_b/;
 
   # fdct functions

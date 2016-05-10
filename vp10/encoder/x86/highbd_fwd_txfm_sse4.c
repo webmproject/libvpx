@@ -206,8 +206,7 @@ static void fadst4x4_sse4_1(__m128i *in, int bit) {
 }
 
 void vp10_fwd_txfm2d_4x4_sse4_1(const int16_t *input, int32_t *coeff,
-                                const int input_stride, int tx_type,
-                                const int bd) {
+                                int input_stride, int tx_type, int bd) {
   __m128i in[4];
   const TXFM_2D_CFG *cfg = NULL;
 
@@ -916,7 +915,7 @@ static void fadst8x8_sse4_1(__m128i *in, __m128i *out, int bit) {
 }
 
 void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *coeff,
-                                const int stride, int tx_type, const int bd) {
+                                int stride, int tx_type, int bd) {
   __m128i in[16], out[16];
   const TXFM_2D_CFG *cfg = NULL;
 
