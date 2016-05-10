@@ -2291,10 +2291,6 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
   unsigned int eob_counts_copy[TX_SIZES][PLANE_TYPES][REF_TYPES]
                               [COEF_BANDS][COEFF_CONTEXTS];
   int i;
-  vp10_coeff_count coef_counts[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
-  unsigned int eob_counts[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES]
-                         [REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
-  vp10_coeff_stats branch_ct[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
   vp10_coeff_probs_model dummy_frame_coef_probs[PLANE_TYPES];
 
   if (cm->do_subframe_update &&
@@ -2302,7 +2298,9 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
     vp10_copy(cpi->common.fc->coef_probs,
               subframe_stats->enc_starting_coef_probs);
     for (i = 0; i <= cpi->common.coef_probs_update_idx; ++i) {
-      get_coef_counts_diff(cpi, i, coef_counts[i], eob_counts[i]);
+      get_coef_counts_diff(cpi, i,
+                           cpi->wholeframe_stats.coef_counts_buf[i],
+                           cpi->wholeframe_stats.eob_counts_buf[i]);
     }
   }
 #endif  // CONFIG_ENTROPY
@@ -2326,16 +2324,17 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer* w) {
                                 frame_coef_probs);
         for (i = 0; i <= cpi->common.coef_probs_update_idx; ++i) {
           vp10_copy(cpi->common.counts.eob_branch[tx_size],
-                    eob_counts[i][tx_size]);
+                    cpi->wholeframe_stats.eob_counts_buf[i][tx_size]);
           vp10_copy(cpi->td.rd_counts.coef_counts[tx_size],
-                    coef_counts[i][tx_size]);
-          build_tree_distribution(cpi, tx_size, branch_ct[i][tx_size],
+                    cpi->wholeframe_stats.coef_counts_buf[i][tx_size]);
+          build_tree_distribution(cpi, tx_size,
+                                  cpi->branch_ct_buf[i][tx_size],
                                   dummy_frame_coef_probs);
         }
         vp10_copy(cpi->common.counts.eob_branch[tx_size], eob_counts_copy);
         vp10_copy(cpi->td.rd_counts.coef_counts[tx_size], coef_counts_copy);
 
-        update_coef_probs_subframe(w, cpi, tx_size, branch_ct,
+        update_coef_probs_subframe(w, cpi, tx_size, cpi->branch_ct_buf,
                                    frame_coef_probs);
 #if CONFIG_ANS
         update = 1;
