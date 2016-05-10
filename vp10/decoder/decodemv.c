@@ -1442,7 +1442,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
 #if CONFIG_EXT_INTER
           {
             int_mv mv_ref_list[MAX_MV_REF_CANDIDATES];
-            vp10_update_mv_context(cm, xd, mi, mbmi->ref_frame[ref],
+            vp10_update_mv_context(xd, mi, mbmi->ref_frame[ref],
                                    mv_ref_list, j, mi_row, mi_col, NULL);
 #endif  // CONFIG_EXT_INTER
             vp10_append_sub8x8_mvs_for_idx(cm, xd, j, ref, mi_row, mi_col,

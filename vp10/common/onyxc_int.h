@@ -466,11 +466,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->mb_to_right_edge  = ((mi_cols - bw - mi_col) * MI_SIZE) * 8;
 
   // Are edges available for intra prediction?
-#if CONFIG_EXT_TILE
   xd->up_available    = (mi_row > tile->mi_row_start);
-#else
-  xd->up_available    = (mi_row != 0);
-#endif  // CONFIG_EXT_TILE
   xd->left_available  = (mi_col > tile->mi_col_start);
   if (xd->up_available) {
     xd->above_mi = xd->mi[-xd->mi_stride];

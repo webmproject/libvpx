@@ -1286,11 +1286,7 @@ void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
   const TileInfo *const tile = &xd->tile;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int plane, i, mi_step;
-#if CONFIG_EXT_TILE
-  int above_available = mi_row > 0 && (mi_row - 1 >= tile->mi_row_start);
-#else
-  int above_available = mi_row > 0;
-#endif  // CONFIG_EXT_TILE
+  int above_available = mi_row > tile->mi_row_start;
 #if CONFIG_VP9_HIGHBITDEPTH
   int is_hbd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -1462,17 +1458,11 @@ void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
                                           int mi_row, int mi_col,
                                           uint8_t *tmp_buf[MAX_MB_PLANE],
                                           int tmp_stride[MAX_MB_PLANE]) {
-#if CONFIG_EXT_TILE
   const TileInfo *const tile = &xd->tile;
-#endif  // CONFIG_EXT_TILE
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int i, j, mi_step, ref;
 
-#if CONFIG_EXT_TILE
-  if (mi_row == 0 || (mi_row - 1) < tile->mi_row_start)
-#else
-  if (mi_row == 0)
-#endif  // CONFIG_EXT_TILE
+  if (mi_row <= tile->mi_row_start)
     return;
 
   for (i = 0; i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {

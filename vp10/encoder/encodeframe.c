@@ -379,11 +379,7 @@ static void set_offsets_extend(VP10_COMP *cpi, ThreadData *td,
   assert(!(mi_col_pred & (mi_width - 1)) && !(mi_row_pred & (mi_height - 1)));
   set_mi_row_col(xd, tile, mi_row_pred, mi_height, mi_col_pred, mi_width,
                  cm->mi_rows, cm->mi_cols);
-#if CONFIG_EXT_TILE
   xd->up_available    = (mi_row_ori > tile->mi_row_start);
-#else
-  xd->up_available    = (mi_row_ori != 0);
-#endif  // CONFIG_EXT_TILE
   xd->left_available  = (mi_col_ori > tile->mi_col_start);
 
   // R/D setup.
