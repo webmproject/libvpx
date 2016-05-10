@@ -474,9 +474,13 @@ void vp10_make_masked_inter_predictor(
   const MODE_INFO *mi = xd->mi[0];
   // The prediction filter types used here should be those for
   // the second reference block.
-  INTERP_FILTER tmp_ipf[4] = {interp_filter[2], interp_filter[3],
-      interp_filter[2], interp_filter[3],
+#if CONFIG_DUAL_FILTER
+  INTERP_FILTER tmp_ipf[4] = {
+    interp_filter[2], interp_filter[3], interp_filter[2], interp_filter[3],
   };
+#else
+  INTERP_FILTER tmp_ipf = interp_filter;
+#endif  // CONFIG_DUAL_FILTER
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint8_t, tmp_dst_[2 * MAX_SB_SQUARE]);
   uint8_t *tmp_dst =

@@ -950,11 +950,13 @@ static void write_switchable_interp_filter(VP10_COMP *cpi,
       }
     }
 #else
-    const int ctx = vp10_get_pred_context_switchable_interp(xd);
-    vp10_write_token(w, vp10_switchable_interp_tree,
-                     cm->fc->switchable_interp_prob[ctx],
-                     &switchable_interp_encodings[mbmi->interp_filter]);
-    ++cpi->interp_filter_selected[0][mbmi->interp_filter];
+    {
+      const int ctx = vp10_get_pred_context_switchable_interp(xd);
+      vp10_write_token(w, vp10_switchable_interp_tree,
+                       cm->fc->switchable_interp_prob[ctx],
+                       &switchable_interp_encodings[mbmi->interp_filter]);
+      ++cpi->interp_filter_selected[0][mbmi->interp_filter];
+    }
 #endif
   }
 }
