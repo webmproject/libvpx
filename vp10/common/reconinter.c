@@ -1976,6 +1976,8 @@ static void build_intra_predictors_for_interintra(
   BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, &xd->plane[plane]);
   const int bwl = b_width_log2_lookup[plane_bsize];
   const int bhl = b_height_log2_lookup[plane_bsize];
+  const int pxbw = 4 << bwl;
+  const int pxbh = 4 << bhl;
   TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
 
   if (bwl == bhl) {
@@ -1984,8 +1986,8 @@ static void build_intra_predictors_for_interintra(
                              0, 0, plane);
 
   } else if (bwl < bhl) {
-    uint8_t *src_2 = ref + (4 << bwl)*ref_stride;
-    uint8_t *dst_2 = dst + (4 << bwl)*dst_stride;
+    uint8_t *src_2 = ref + pxbw * ref_stride;
+    uint8_t *dst_2 = dst + pxbw * dst_stride;
     vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
                              ref, ref_stride, dst, dst_stride,
                              0, 0, plane);
@@ -1994,20 +1996,19 @@ static void build_intra_predictors_for_interintra(
       uint16_t *src_216 = CONVERT_TO_SHORTPTR(src_2);
       uint16_t *dst_216 = CONVERT_TO_SHORTPTR(dst_2);
       memcpy(src_216 - ref_stride, dst_216 - dst_stride,
-             sizeof(*src_216) * (4 << bhl));
+             sizeof(*src_216) * pxbw);
     } else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     {
-      memcpy(src_2 - ref_stride, dst_2 - dst_stride,
-             sizeof(*src_2) * (4 << bhl));
+      memcpy(src_2 - ref_stride, dst_2 - dst_stride, sizeof(*src_2) * pxbw);
     }
     vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
                              src_2, ref_stride, dst_2, dst_stride,
                              0, 1 << bwl, plane);
-  } else {
+  } else {  // bwl > bhl
     int i;
-    uint8_t *src_2 = ref + (4 << bhl);
-    uint8_t *dst_2 = dst + (4 << bhl);
+    uint8_t *src_2 = ref + pxbh;
+    uint8_t *dst_2 = dst + pxbh;
     vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
                              ref, ref_stride, dst, dst_stride,
                              0, 0, plane);
@@ -2015,12 +2016,12 @@ static void build_intra_predictors_for_interintra(
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       uint16_t *src_216 = CONVERT_TO_SHORTPTR(src_2);
       uint16_t *dst_216 = CONVERT_TO_SHORTPTR(dst_2);
-      for (i = 0; i < (4 << bwl); ++i)
+      for (i = 0; i < pxbh; ++i)
         src_216[i * ref_stride - 1] = dst_216[i * dst_stride - 1];
     } else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     {
-      for (i = 0; i < (4 << bwl); ++i)
+      for (i = 0; i < pxbh; ++i)
         src_2[i * ref_stride - 1] = dst_2[i * dst_stride - 1];
     }
     vp10_predict_intra_block(xd, bwl, bhl, max_tx_size, mode,
