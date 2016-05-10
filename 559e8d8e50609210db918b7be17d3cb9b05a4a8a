@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2e0dc3d_a253de04",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 953,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-10T16:59:44Z",
+      "side": 1,
+      "message": "why add a level of { }?",
+      "range": {
+        "startLine": 953,
+        "startChar": 4,
+        "endLine": 953,
+        "endChar": 5
+      },
+      "revId": "559e8d8e50609210db918b7be17d3cb9b05a4a8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
