@@ -44,6 +44,24 @@
 #include "vp10/encoder/rdopt.h"
 #include "vp10/encoder/aq_variance.h"
 
+#if CONFIG_DUAL_FILTER
+#if CONFIG_EXT_INTERP
+static const int filter_sets[25][2] = {
+    {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4},
+    {1, 0}, {1, 1}, {1, 2}, {1, 3}, {1, 4},
+    {2, 0}, {2, 1}, {2, 2}, {2, 3}, {2, 4},
+    {3, 0}, {3, 1}, {3, 2}, {3, 3}, {3, 4},
+    {4, 0}, {4, 1}, {4, 2}, {4, 3}, {4, 4},
+};
+#else
+static const int filter_sets[9][2] = {
+    {0, 0}, {0, 1}, {0, 2},
+    {1, 0}, {1, 1}, {1, 2},
+    {2, 0}, {2, 1}, {2, 2},
+};
+#endif
+#endif
+
 #if CONFIG_EXT_REFS
 
 #define LAST_FRAME_MODE_MASK    ((1 << INTRA_FRAME) | (1 << LAST2_FRAME) | \
@@ -402,18 +420,6 @@ static const REF_DEFINITION vp10_ref_order[MAX_REFS] = {
 
   {{INTRA_FRAME,  NONE}},
 };
-
-#if CONFIG_DUAL_FILTER
-// TODO(jingning): The magic number 9 here really means the combination
-// of prediction filter types for vertical and horizontal directions.
-// It will be replaced after we integrate the dual filter experiment with
-// the ext-interp experiment.
-static int filter_sets[9][2] = {
-    {0, 0}, {0, 1}, {0, 2},
-    {1, 0}, {1, 1}, {1, 2},
-    {2, 0}, {2, 1}, {2, 2},
-};
-#endif
 
 static INLINE int write_uniform_cost(int n, int v) {
   int l = get_unsigned_bits(n), m = (1 << l) - n;
@@ -5357,7 +5363,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
             this_mode == NEWMV &&
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_DUAL_FILTER
-            1) {
+            (mbmi->interp_filter[0] == EIGHTTAP_REGULAR || run_mv_search)) {
 #else
             (mbmi->interp_filter == EIGHTTAP_REGULAR || run_mv_search)) {
 #endif
@@ -7181,7 +7187,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     int64_t tmp_dist_sum = 0;
 
 #if CONFIG_DUAL_FILTER
+#if CONFIG_EXT_INTERP
+    for (i = 0; i < 25; ++i) {
+#else
     for (i = 0; i < 9; ++i) {
+#endif
 #else
     for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
 #endif
@@ -10479,7 +10489,11 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
       b_mode_info tmp_best_bmodes[16];  // Should this be 4 ?
       MB_MODE_INFO tmp_best_mbmode;
 #if CONFIG_DUAL_FILTER
+#if CONFIG_EXT_INTERP
+      BEST_SEG_INFO bsi[25];
+#else
       BEST_SEG_INFO bsi[9];
+#endif
 #else
       BEST_SEG_INFO bsi[SWITCHABLE_FILTERS];
 #endif
@@ -10546,7 +10560,11 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
         } else {
 #if CONFIG_DUAL_FILTER
           for (switchable_filter_index = 0;
+#if CONFIG_EXT_INTERP
+               switchable_filter_index < 25;
+#else
                switchable_filter_index < 9;
+#endif
                ++switchable_filter_index) {
 #else
           for (switchable_filter_index = 0;
@@ -10578,7 +10596,8 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 #if CONFIG_EXT_INTERP
 #if CONFIG_DUAL_FILTER
             if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
-                mbmi->interp_filter[0] != EIGHTTAP_REGULAR)  // invalid config
+                (mbmi->interp_filter[0] != EIGHTTAP_REGULAR ||
+                 mbmi->interp_filter[1] != EIGHTTAP_REGULAR))  // invalid config
               continue;
 #else
             if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
@@ -10664,9 +10683,11 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 #if CONFIG_EXT_INTERP
 #if CONFIG_DUAL_FILTER
         if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
-            mbmi->interp_filter[0] != EIGHTTAP_REGULAR)
-          for (i = 0; i < 4; ++i)
-            mbmi->interp_filter[i] = EIGHTTAP_REGULAR;
+            (mbmi->interp_filter[0] != EIGHTTAP_REGULAR ||
+             mbmi->interp_filter[1] != EIGHTTAP_REGULAR)) {
+          mbmi->interp_filter[0] = EIGHTTAP_REGULAR;
+          mbmi->interp_filter[1] = EIGHTTAP_REGULAR;
+        }
 #else
         if (!vp10_is_interp_needed(xd) && cm->interp_filter == SWITCHABLE &&
             mbmi->interp_filter != EIGHTTAP_REGULAR)
