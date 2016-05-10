@@ -24,16 +24,6 @@ static INLINE void fdct32x32(int rd_transform, const int16_t *src,
     vpx_fdct32x32(src, dst, src_stride);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-static INLINE void highbd_fdct32x32(int rd_transform, const int16_t *src,
-                                    tran_low_t *dst, int src_stride) {
-  if (rd_transform)
-    vpx_highbd_fdct32x32_rd(src, dst, src_stride);
-  else
-    vpx_highbd_fdct32x32(src, dst, src_stride);
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
 void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                        int diff_stride, TX_TYPE tx_type, int lossless) {
   if (lossless) {
