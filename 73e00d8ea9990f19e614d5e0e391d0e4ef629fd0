@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2e0dc3d_4522dc45",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1512,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-05-10T18:40:00Z",
+      "side": 1,
+      "message": "remove it",
+      "revId": "73e00d8ea9990f19e614d5e0e391d0e4ef629fd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_2594f84f",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 6858,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-05-10T18:40:00Z",
+      "side": 1,
+      "message": "I guess later we can try calculating the true YUV rd using DCT and biggest tx size for nowedge and bestwedge, to get a better decision. Not sure about the additional complexity.",
+      "revId": "73e00d8ea9990f19e614d5e0e391d0e4ef629fd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
