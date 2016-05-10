@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2e0dc3d_22c98e8c",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 759,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-10T17:54:35Z",
+      "side": 1,
+      "message": "- Please use $() instead of ``\n- Needs line wrap",
+      "revId": "e9da544b1b55e5ee01fe064af3d0ccb9c30d72c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_05e9f4ca",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-10T17:54:35Z",
+      "side": 1,
+      "message": "Do we need a new variable? In the if below, why not just:\n\n    CONFIGURE_ARGS\u003d\"--enable-shared ${CONFIGURE_ARGS}\"\n\n?",
+      "revId": "e9da544b1b55e5ee01fe064af3d0ccb9c30d72c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_85f4e494",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-10T17:54:35Z",
+      "side": 1,
+      "message": "consistency nit: please use the braced form: ${ENABLE_SHARED}",
+      "revId": "e9da544b1b55e5ee01fe064af3d0ccb9c30d72c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_a52da8f1",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-10T17:54:35Z",
+      "side": 1,
+      "message": "ditto consistency nit",
+      "revId": "e9da544b1b55e5ee01fe064af3d0ccb9c30d72c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_e537b039",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-10T17:54:35Z",
+      "side": 1,
+      "message": "ditto consistency nit",
+      "revId": "e9da544b1b55e5ee01fe064af3d0ccb9c30d72c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_45c81c69",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-10T17:54:35Z",
+      "side": 1,
+      "message": "nit: period",
+      "revId": "e9da544b1b55e5ee01fe064af3d0ccb9c30d72c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_c50f0c7c",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-10T17:54:35Z",
+      "side": 1,
+      "message": "Here and just above: please use $() instead of ``",
+      "revId": "e9da544b1b55e5ee01fe064af3d0ccb9c30d72c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
