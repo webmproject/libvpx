@@ -76,7 +76,7 @@ uint32_t vpx_highbd_8_variance4x4_sse4_1(const uint8_t *a,
   variance4x4_64_sse4_1(a, a_stride, b, b_stride, &local_sse, &sum);
   *sse = (uint32_t)local_sse;
 
-  return *sse - ((sum * sum) >> 4);
+  return *sse - (uint32_t)((sum * sum) >> 4);
 }
 
 uint32_t vpx_highbd_10_variance4x4_sse4_1(const uint8_t *a,
@@ -91,7 +91,7 @@ uint32_t vpx_highbd_10_variance4x4_sse4_1(const uint8_t *a,
   *sse = (uint32_t)ROUND_POWER_OF_TWO(local_sse, 4);
   sum = ROUND_POWER_OF_TWO(sum, 2);
 
-  return *sse - ((sum * sum) >> 4);
+  return *sse - (uint32_t)((sum * sum) >> 4);
 }
 
 uint32_t vpx_highbd_12_variance4x4_sse4_1(const uint8_t *a,
@@ -106,7 +106,7 @@ uint32_t vpx_highbd_12_variance4x4_sse4_1(const uint8_t *a,
   *sse = (uint32_t)ROUND_POWER_OF_TWO(local_sse, 8);
   sum = ROUND_POWER_OF_TWO(sum, 4);
 
-  return *sse - ((sum * sum) >> 4);
+  return *sse - (uint32_t)((sum * sum) >> 4);
 }
 
 // Sub-pixel

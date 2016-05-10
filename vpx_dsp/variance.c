@@ -719,8 +719,8 @@ void masked_variance(const uint8_t *a, int  a_stride,
     m += m_stride;
   }
   sum64 = (sum64 >= 0) ? sum64  : -sum64;
-  *sum = ROUND_POWER_OF_TWO(sum64, 6);
-  *sse = ROUND_POWER_OF_TWO(sse64, 12);
+  *sum = (int)ROUND_POWER_OF_TWO(sum64, 6);
+  *sse = (uint32_t)ROUND_POWER_OF_TWO(sse64, 12);
 }
 
 #define MASK_VAR(W, H) \

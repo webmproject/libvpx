@@ -2887,7 +2887,7 @@ static uint32_t write_tiles(VP10_COMP *const cpi,
     }
   }
 #endif  // CONFIG_EXT_TILE
-  return total_size;
+  return (uint32_t)total_size;
 }
 
 static void write_render_size(const VP10_COMMON *cm,
@@ -3436,7 +3436,7 @@ void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dst, size_t *size) {
   // Size of compressed header
   vpx_wb_write_literal(&wb, 0, 16);
 
-  uncompressed_header_size = vpx_wb_bytes_written(&wb);
+  uncompressed_header_size = (uint32_t)vpx_wb_bytes_written(&wb);
   data += uncompressed_header_size;
 
   vpx_clear_system_state();
