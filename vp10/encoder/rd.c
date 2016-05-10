@@ -167,9 +167,9 @@ void vp10_fill_token_costs(vp10_coeff_cost *c,
 #if CONFIG_ANS
             const vpx_prob *const tree_probs = p[t][i][j][k][l];
             vp10_cost_tokens_ans((int *)c[t][i][j][k][0][l], tree_probs,
-                                 &cdf[t][i][j][k][l], 0);
+                                 cdf[t][i][j][k][l], 0);
             vp10_cost_tokens_ans((int *)c[t][i][j][k][1][l], tree_probs,
-                                 &cdf[t][i][j][k][l], 1);
+                                 cdf[t][i][j][k][l], 1);
 #else
             vpx_prob probs[ENTROPY_NODES];
             vp10_model_to_full_probs(p[t][i][j][k][l], probs);

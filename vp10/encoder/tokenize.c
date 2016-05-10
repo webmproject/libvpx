@@ -469,7 +469,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
       cpi->common.fc->coef_probs[tx_size][type][ref];
 #endif  // CONFIG_ENTROPY
 #if CONFIG_ANS
-  rans_dec_lut(*const coef_cdfs)[COEFF_CONTEXTS] =
+  rans_dec_lut (*const coef_cdfs)[COEFF_CONTEXTS] =
       cpi->common.fc->coef_cdfs[tx_size][type][ref];
 #endif  // CONFIG_ANS
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
@@ -493,7 +493,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
 
     add_token(&t, coef_probs[band[c]][pt],
 #if CONFIG_ANS
-              &coef_cdfs[band[c]][pt],
+              (const rans_dec_lut*)&coef_cdfs[band[c]][pt],
 #endif  // CONFIG_ANS
               extra, (uint8_t)token, (uint8_t)skip_eob, counts[band[c]][pt]);
 
