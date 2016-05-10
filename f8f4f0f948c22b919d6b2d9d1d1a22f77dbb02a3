@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2e0dc3d_d67a24df",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-05-10T23:39:39Z",
+      "side": 1,
+      "message": "align",
+      "revId": "f8f4f0f948c22b919d6b2d9d1d1a22f77dbb02a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_562454ff",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 903,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-05-10T23:39:39Z",
+      "side": 1,
+      "message": "???",
+      "revId": "f8f4f0f948c22b919d6b2d9d1d1a22f77dbb02a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
