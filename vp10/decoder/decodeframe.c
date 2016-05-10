@@ -477,7 +477,11 @@ static void extend_and_predict_highbd(const uint8_t *buf_ptr1,
                                       int border_offset,
                                       uint8_t *const dst, int dst_buf_stride,
                                       int subpel_x, int subpel_y,
+#if CONFIG_DUAL_FILTER
+                                      const INTERP_FILTER *interp_filter,
+#else
                                       const INTERP_FILTER interp_filter,
+#endif
                                       const struct scale_factors *sf,
 #if CONFIG_EXT_INTER
                                       int wedge_offset_x, int wedge_offset_y,
