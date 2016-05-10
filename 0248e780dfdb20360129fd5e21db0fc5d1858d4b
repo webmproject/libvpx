@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2e0dc3d_48faf384",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-10T18:51:57Z",
+      "side": 1,
+      "message": "we probably don\u0027t care about compatibility for the previously optional error resilient. still for the other TODOs this could probably do with some real param parsing",
+      "revId": "0248e780dfdb20360129fd5e21db0fc5d1858d4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_c8de031f",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-10T18:51:57Z",
+      "side": 1,
+      "message": "this line can go",
+      "revId": "0248e780dfdb20360129fd5e21db0fc5d1858d4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_88dd1b1f",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-10T18:51:57Z",
+      "side": 1,
+      "message": "you\u0027ll want a cast, but I see other cases too. could be done in a followup.\n\nthis index is the same as 226, I\u0027m guessing you want this one to be optional?",
+      "revId": "0248e780dfdb20360129fd5e21db0fc5d1858d4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
