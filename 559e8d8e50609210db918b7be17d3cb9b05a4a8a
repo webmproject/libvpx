@@ -22,6 +22,30 @@
       "revId": "559e8d8e50609210db918b7be17d3cb9b05a4a8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92b1185a_31d3b014",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 953,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-05-10T21:46:11Z",
+      "side": 1,
+      "message": "Get rid of compiler warning about definition not at beginning of block (ctx variable)",
+      "parentUuid": "b2e0dc3d_a253de04",
+      "range": {
+        "startLine": 953,
+        "startChar": 4,
+        "endLine": 953,
+        "endChar": 5
+      },
+      "revId": "559e8d8e50609210db918b7be17d3cb9b05a4a8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
