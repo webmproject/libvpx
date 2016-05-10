@@ -104,10 +104,8 @@ static double compute_avg_abs_error(const Type1* a, const Type2* b,
 typedef void (*TxfmFunc)(const int32_t* in, int32_t* out, const int8_t* cos_bit,
                          const int8_t* range_bit);
 
-typedef void (*Fwd_Txfm2d_Func)(const int16_t*, int32_t*, const int,
-                                int tx_type, const int);
-typedef void (*Inv_Txfm2d_Func)(const int32_t*, uint16_t*, const int,
-                                const TXFM_2D_CFG*, const int);
+typedef void (*Fwd_Txfm2d_Func)(const int16_t*, int32_t*, int, int, int);
+typedef void (*Inv_Txfm2d_Func)(const int32_t*, uint16_t*, int, int, int);
 
 static const int bd = 10;
 static const int input_base = (1 << bd);

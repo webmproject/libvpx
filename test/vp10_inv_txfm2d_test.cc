@@ -84,7 +84,7 @@ TEST(vp10_inv_txfm2d, round_trip) {
           }
 
           fwd_txfm_func(input, output, txfm_size, tx_type, bd);
-          inv_txfm_func(output, ref_input, txfm_size, inv_txfm_cfg, bd);
+          inv_txfm_func(output, ref_input, txfm_size, tx_type, bd);
 
           for (int ni = 0; ni < sqr_txfm_size; ++ni) {
             EXPECT_LE(abs(input[ni] - ref_input[ni]), 4);
