@@ -3051,10 +3051,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
 
   if (!cm->error_resilient_mode) {
     vpx_wb_write_bit(wb,
-                     cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF);
-    if (cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF)
-      vpx_wb_write_bit(wb, cm->refresh_frame_context !=
-          REFRESH_FRAME_CONTEXT_BACKWARD);
+        cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_FORWARD);
   }
 
   vpx_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);

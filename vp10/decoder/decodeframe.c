@@ -3739,14 +3739,9 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   if (!cm->error_resilient_mode) {
     cm->refresh_frame_context =
         vpx_rb_read_bit(rb) ? REFRESH_FRAME_CONTEXT_FORWARD
-                            : REFRESH_FRAME_CONTEXT_OFF;
-    if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_FORWARD) {
-        cm->refresh_frame_context =
-            vpx_rb_read_bit(rb) ? REFRESH_FRAME_CONTEXT_FORWARD
-                                : REFRESH_FRAME_CONTEXT_BACKWARD;
-    }
+                            : REFRESH_FRAME_CONTEXT_BACKWARD;
   } else {
-    cm->refresh_frame_context = REFRESH_FRAME_CONTEXT_OFF;
+    cm->refresh_frame_context = REFRESH_FRAME_CONTEXT_FORWARD;
   }
 
   // This flag will be overridden by the call to vp10_setup_past_independence
@@ -4274,7 +4269,6 @@ void vp10_decode_frame(VP10Decoder *pbi,
   }
 
   // Non frame parallel update frame context here.
-  if (cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_OFF &&
-      !context_updated)
+  if (!cm->error_resilient_mode && !context_updated)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
 }
