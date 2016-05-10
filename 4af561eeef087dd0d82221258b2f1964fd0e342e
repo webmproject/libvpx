@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b2e0dc3d_a28e3e3e",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-05-10T17:48:49Z",
+      "side": 1,
+      "message": "It\u0027s false only for the SetAfterDecode test.\nInvestigating a little bit further, I\u0027m confused by this test.\nIf SetFrameBufferFunctions has not been called before CheckXImageFrameBuffer, what does img-\u003efb_priv points to? InternalFrameBuffer?\nIf that\u0027s the case, the test used to work just because the memory layout of InternalFrameBuffer is the same as ExternalFrameBuffer.\nAm I missing something? Was that intended to work that way?",
+      "parentUuid": "72a2e4c0_f42d60f0",
+      "range": {
+        "startLine": 183,
+        "startChar": 10,
+        "endLine": 183,
+        "endChar": 37
+      },
+      "revId": "4af561eeef087dd0d82221258b2f1964fd0e342e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "72a2e4c0_54476cae",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 11
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "72a2e4c0_3ae61156",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-05-10T17:48:49Z",
+      "side": 1,
+      "message": "The previous documentation was saying: \"The callback must zero out all the data allocated\", doesn\u0027t that mean that the restriction was there before?",
+      "parentUuid": "72a2e4c0_54476cae",
+      "range": {
+        "startLine": 87,
+        "startChar": 3,
+        "endLine": 87,
+        "endChar": 55
+      },
+      "revId": "4af561eeef087dd0d82221258b2f1964fd0e342e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "72a2e4c0_69461d15",
         "filename": "vpx_scale/generic/yv12config.c",
         "patchSetId": 11
@@ -59,6 +107,30 @@
       "writtenOn": "2016-05-09T22:50:03Z",
       "side": 1,
       "message": "nit: alignment",
+      "range": {
+        "startLine": 202,
+        "startChar": 6,
+        "endLine": 202,
+        "endChar": 74
+      },
+      "revId": "4af561eeef087dd0d82221258b2f1964fd0e342e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72a2e4c0_fad6695c",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-05-10T17:48:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "72a2e4c0_69461d15",
       "range": {
         "startLine": 202,
         "startChar": 6,
