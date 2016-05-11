@@ -62,8 +62,9 @@ AV1_COMMON_SRCS-yes += common/restoration.h
 AV1_COMMON_SRCS-yes += common/common_data.h
 AV1_COMMON_SRCS-yes += common/scan.c
 AV1_COMMON_SRCS-yes += common/scan.h
-AV1_COMMON_SRCS-yes += common/av1_fwd_txfm.h
-AV1_COMMON_SRCS-yes += common/av1_fwd_txfm.c
+# TODO(angiebird) the forward transform belongs under encoder/
+AV1_COMMON_SRCS-$(CONFIG_AV1_ENCODER) += common/av1_fwd_txfm.h
+AV1_COMMON_SRCS-$(CONFIG_AV1_ENCODER) += common/av1_fwd_txfm.c
 AV1_COMMON_SRCS-yes += common/av1_txfm.h
 AV1_COMMON_SRCS-yes += common/av1_fwd_txfm1d.h
 AV1_COMMON_SRCS-yes += common/av1_fwd_txfm1d.c
@@ -113,13 +114,14 @@ AV1_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct8x8_msa.c
 AV1_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct16x16_msa.c
 
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_intrin_sse2.c
+ifeq ($(CONFIG_AV1_ENCODER),yes)
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_txfm_sse2.c
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_dct32x32_impl_sse2.h
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_txfm_impl_sse2.h
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_txfm1d_sse4.h
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_fwd_txfm1d_sse4.c
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_fwd_txfm2d_sse4.c
-
+endif
 ifeq ($(CONFIG_AOM_HIGHBITDEPTH),yes)
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/highbd_txfm_utility_sse4.h
 endif
