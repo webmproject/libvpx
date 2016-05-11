@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_2b8879d7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-05-11T20:58:32Z",
+      "side": 1,
+      "message": "If you format this as BUG\u003dhttps://bugs.chromium.org/p/webm/issues/detail?id\u003d1217 then it will automatically update the bug",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 61
+      },
+      "revId": "2c6c7d71a47c153de6f23cf0ba4b9f7e20dddbbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
