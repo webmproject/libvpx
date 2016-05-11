@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2e0dc3d_11b2d614",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-11T00:24:10Z",
+      "side": 1,
+      "message": "for compatibility you should avoid a trailing \u0027,\u0027 in enums; that wasn\u0027t supported in the original spec.\n\nLEVEL_MAX might be a better choice for a name",
+      "revId": "be3f0698b08c4cdc8641b407de246efa24568f45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_91c6e678",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-11T00:24:10Z",
+      "side": 1,
+      "message": "seems the trailing \u0027,\u0027 was ignored here without too much affect. maybe most people are on modern toolchains nowadays",
+      "revId": "be3f0698b08c4cdc8641b407de246efa24568f45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
