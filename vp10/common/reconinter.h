@@ -487,6 +487,7 @@ static INLINE int vp10_is_interp_needed(const MACROBLOCKD *const xd) {
 #endif  // CONFIG_EXT_INTERP
 
 #if CONFIG_OBMC
+void setup_obmc_mask(int length, const uint8_t *mask[2]);
 void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
                                       MACROBLOCKD *xd, int mi_row, int mi_col,
                                       int use_tmp_dst_buf,
