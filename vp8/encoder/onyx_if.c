@@ -2257,6 +2257,8 @@ void vp8_remove_compressor(VP8_COMP **ptr)
             double total_encode_time = (cpi->time_receive_data +
                                             cpi->time_compress_data) / 1000.000;
             double dr = (double)cpi->bytes * 8.0 / 1000.0 / time_encoded;
+            const double target_rate = (double)cpi->oxcf.target_bandwidth / 1000;
+            const double rate_err = ((100.0 * (dr - target_rate)) / target_rate);
 
             if (cpi->b_calculate_psnr)
             {
@@ -2302,12 +2304,14 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                                                       cpi->summed_weights, 8.0);
 
                     fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
-                               "GLPsnrP\tVPXSSIM\t  Time(us)\n");
+                               "GLPsnrP\tVPXSSIM\t  Time(us)  Rc-Err "
+                               "Abs Err\n");
                     fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                               "%7.3f\t%8.0f\n",
+                               "%7.3f\t%8.0f %7.2f %7.2f\n",
                                dr, cpi->total / cpi->count, total_psnr,
                                cpi->totalp / cpi->count, total_psnr2,
-                               total_ssim, total_encode_time);
+                               total_ssim, total_encode_time,
+                               rate_err, fabs(rate_err));
                 }
             }
 
