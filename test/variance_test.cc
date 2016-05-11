@@ -977,20 +977,6 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_MMX
-INSTANTIATE_TEST_CASE_P(MMX, VpxMseTest,
-                        ::testing::Values(make_tuple(4, 4, &vpx_mse16x16_mmx)));
-
-INSTANTIATE_TEST_CASE_P(MMX, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_mmx));
-
-INSTANTIATE_TEST_CASE_P(
-    MMX, VpxVarianceTest,
-    ::testing::Values(make_tuple(4, 4, &vpx_variance16x16_mmx, 0),
-                      make_tuple(4, 3, &vpx_variance16x8_mmx, 0),
-                      make_tuple(3, 4, &vpx_variance8x16_mmx, 0),
-                      make_tuple(3, 3, &vpx_variance8x8_mmx, 0),
-                      make_tuple(2, 2, &vpx_variance4x4_mmx, 0)));
-
 INSTANTIATE_TEST_CASE_P(
     MMX, VpxSubpelVarianceTest,
     ::testing::Values(make_tuple(4, 4, &vpx_sub_pixel_variance16x16_mmx, 0),
