@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "b2e0dc3d_7fbde80e",
+        "filename": "build/make/ios-version.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-11T19:53:00Z",
+      "side": 1,
+      "message": "this is a bit fragile, but OK for now I suppose",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b2e0dc3d_8c67e8a8",
         "filename": "build/make/iosbuild.sh",
         "patchSetId": 16
@@ -47,6 +64,40 @@
       "writtenOn": "2016-05-11T18:10:33Z",
       "side": 1,
       "message": "please wrap as described here:\nhttps://google.github.io/styleguide/shell.xml#Pipelines",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_1f113cf4",
+        "filename": "configure",
+        "patchSetId": 16
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-11T19:53:00Z",
+      "side": 1,
+      "message": "you can fix the alignment here. does this work for desktop targets?",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_ff1578df",
+        "filename": "libs.mk",
+        "patchSetId": 16
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-11T19:53:00Z",
+      "side": 1,
+      "message": "this can be one line",
       "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
