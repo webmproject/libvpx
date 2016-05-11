@@ -174,8 +174,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_ANS)          += vp10_ans_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += sum_squares_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
 
-LIBVPX_TEST_SRCS-$(HAVE_SSE4_1) += vp10_fwd_txfm2d_sse4_test.cc
-
 ifeq ($(CONFIG_EXT_INTER),yes)
 LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_variance_test.cc
 LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
