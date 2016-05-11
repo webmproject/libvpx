@@ -274,7 +274,7 @@ SECTION .text
   STORE_AND_RET
 
 .x_zero_y_nonzero:
-  cmp           y_offsetd, 8
+  cmp           y_offsetd, 4
   jne .x_zero_y_nonhalf
 
   ; x_offset == 0 && y_offset == 0.5
@@ -478,7 +478,7 @@ SECTION .text
   STORE_AND_RET
 
 .x_nonzero:
-  cmp           x_offsetd, 8
+  cmp           x_offsetd, 4
   jne .x_nonhalf
   ; x_offset == 0.5
   test          y_offsetd, y_offsetd
@@ -546,7 +546,7 @@ SECTION .text
   STORE_AND_RET
 
 .x_half_y_nonzero:
-  cmp           y_offsetd, 8
+  cmp           y_offsetd, 4
   jne .x_half_y_nonhalf
 
   ; x_offset == 0.5 && y_offset == 0.5
@@ -921,7 +921,7 @@ SECTION .text
   STORE_AND_RET
 
 .x_nonhalf_y_nonzero:
-  cmp           y_offsetd, 8
+  cmp           y_offsetd, 4
   jne .x_nonhalf_y_nonhalf
 
   ; x_offset == bilin interpolation && y_offset == 0.5
