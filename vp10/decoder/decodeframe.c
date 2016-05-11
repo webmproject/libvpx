@@ -2957,6 +2957,11 @@ static void get_tile_buffers(
     tile_buffers[0][0].size = tile_size;
     tile_buffers[0][0].raw_data_end = NULL;
   } else {
+    // We locate only the tile buffers that are required, which are the ones
+    // specified by pbi->dec_tile_col and pbi->dec_tile_row. Also, we always
+    // need the last (bottom right) tile buffer, as we need to know where the
+    // end of the compressed frame buffer is for proper superframe decoding.
+
     const uint8_t *tile_col_data_end[MAX_TILE_COLS];
     const uint8_t *const data_start = data;
 
@@ -2975,8 +2980,8 @@ static void get_tile_buffers(
     size_t tile_col_size;
     int r, c;
 
-    // Read tile column sizes
-    for (c = 0; c < tile_cols_end; ++c) {
+    // Read tile column sizes for all columns (we need the last tile buffer)
+    for (c = 0; c < tile_cols; ++c) {
       const int is_last = c == tile_cols - 1;
       if (!is_last) {
         tile_col_size = mem_get_varsize(data, tile_col_size_bytes);
@@ -2991,15 +2996,34 @@ static void get_tile_buffers(
 
     data = data_start;
 
-    // Read tile sizes
+    // Read the required tile sizes.
     for (c = tile_cols_start; c < tile_cols_end; ++c) {
+      const int is_last = c == tile_cols - 1;
+
       if (c > 0)
         data = tile_col_data_end[c - 1];
 
-      if (c < tile_cols - 1)
+      if (!is_last)
         data += tile_col_size_bytes;
 
-      for (r = 0; r < tile_rows_end; ++r) {
+      // Get the whole of the last column, otherwise stop at the required tile.
+      for (r = 0; r < (is_last ? tile_rows : tile_rows_end); ++r) {
+        tile_buffers[r][c].col = c;
+
+        get_tile_buffer(tile_col_data_end[c],
+                        &pbi->common.error, &data,
+                        pbi->decrypt_cb, pbi->decrypt_state,
+                        tile_buffers, tile_size_bytes, c, r);
+      }
+    }
+
+    // If we have not read the last column, then read it to get the last tile.
+    if (tile_cols_end != tile_cols) {
+      c = tile_cols - 1;
+
+      data = tile_col_data_end[c - 1];
+
+      for (r = 0; r < tile_rows; ++r) {
         tile_buffers[r][c].col = c;
 
         get_tile_buffer(tile_col_data_end[c],
