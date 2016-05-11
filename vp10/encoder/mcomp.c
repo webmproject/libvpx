@@ -145,16 +145,6 @@ void vp10_init3smotion_compensation(search_site_config *cfg, int stride) {
   cfg->searches_per_step = 8;
 }
 
-/*
- * To avoid the penalty for crossing cache-line read, preload the reference
- * area in a small buffer, which is aligned to make sure there won't be crossing
- * cache-line read while reading from this buffer. This reduced the cpu
- * cycles spent on reading ref data in sub-pixel filter functions.
- * TODO: Currently, since sub-pixel search range here is -3 ~ 3, copy 22 rows x
- * 32 cols area that is enough for 16x16 macroblock. Later, for SPLITMV, we
- * could reduce the area.
- */
-
 /* estimated cost of a motion vector (r,c) */
 #define MVC(r, c)                                       \
     (mvcost ?                                           \
@@ -790,7 +780,6 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
 }
 
 #undef MVC
-#undef PRE
 #undef CHECK_BETTER
 
 static INLINE int check_bounds(const MACROBLOCK *x, int row, int col,
