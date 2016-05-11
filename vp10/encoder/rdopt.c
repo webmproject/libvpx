@@ -7049,7 +7049,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         best_rd_nowedge < 3 * ref_best_rd) {
 
       mbmi->use_wedge_interinter = 1;
-      rs = (1 + get_wedge_bits_lookup[bsize]) * 256 +
+      rs = vp10_cost_literal(1 + get_wedge_bits_lookup[bsize]) +
           vp10_cost_bit(cm->fc->wedge_interinter_prob[bsize], 1);
       wedge_types = (1 << get_wedge_bits_lookup[bsize]);
       if (have_newmv_in_inter_mode(this_mode)) {
@@ -7188,7 +7188,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         }
         mbmi->interinter_wedge_sign = best_wedge_index & 1;
         mbmi->interinter_wedge_index = best_wedge_index >> 1;
-        mbmi->interinter_wedge_sign = best_wedge_index & 1;
         vp10_build_wedge_inter_predictor_from_buf(xd, bsize,
                                                   0, 0, mi_row, mi_col,
                                                   preds0, strides,
@@ -7217,7 +7216,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     tmp_rd = VPXMIN(best_rd_wedge, best_rd_nowedge);
 
     if (mbmi->use_wedge_interinter)
-      *compmode_wedge_cost = (1 + get_wedge_bits_lookup[bsize]) * 256 +
+      *compmode_wedge_cost =
+          vp10_cost_literal(1 + get_wedge_bits_lookup[bsize]) +
           vp10_cost_bit(cm->fc->wedge_interinter_prob[bsize], 1);
     else
       *compmode_wedge_cost =
@@ -7303,7 +7303,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
         mbmi->use_wedge_interintra = 1;
         wedge_types = (1 << get_wedge_bits_lookup[bsize]);
-        rwedge = get_wedge_bits_lookup[bsize] * 256 +
+        rwedge = vp10_cost_literal(get_wedge_bits_lookup[bsize]) +
             vp10_cost_bit(cm->fc->wedge_interintra_prob[bsize], 1);
         for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
           mbmi->interintra_wedge_index = wedge_index;
@@ -7389,7 +7389,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       *compmode_interintra_cost += vp10_cost_bit(
           cm->fc->wedge_interintra_prob[bsize], mbmi->use_wedge_interintra);
       if (mbmi->use_wedge_interintra) {
-        *compmode_interintra_cost += get_wedge_bits_lookup[bsize] * 256;
+        *compmode_interintra_cost +=
+            vp10_cost_literal(get_wedge_bits_lookup[bsize]);
       }
     }
   } else if (is_interintra_allowed(mbmi)) {

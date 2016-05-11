@@ -33,6 +33,10 @@ extern const uint16_t vp10_prob_cost[256];
 #define vp10_cost_bit(prob, bit) vp10_cost_zero((bit) ? 256 - (prob) \
                                                     : (prob))
 
+// Cost of coding an n bit literal, using 128 (i.e. 50%) probability
+// for each bit.
+#define vp10_cost_literal(n) ((n) * (1 << VP9_PROB_COST_SHIFT))
+
 static INLINE unsigned int cost_branch256(const unsigned int ct[2],
                                           vpx_prob p) {
   return ct[0] * vp10_cost_zero(p) + ct[1] * vp10_cost_one(p);
