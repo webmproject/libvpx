@@ -285,7 +285,6 @@ DSP_SRCS-$(HAVE_NEON)   += arm/subtract_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/sad_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/subtract_msa.c
 
-DSP_SRCS-$(HAVE_MMX)    += x86/sad_mmx.asm
 DSP_SRCS-$(HAVE_SSE3)   += x86/sad_sse3.asm
 DSP_SRCS-$(HAVE_SSSE3)  += x86/sad_ssse3.asm
 DSP_SRCS-$(HAVE_SSE4_1) += x86/sad_sse4.asm

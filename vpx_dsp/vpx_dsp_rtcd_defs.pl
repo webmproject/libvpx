@@ -983,16 +983,16 @@ add_proto qw/unsigned int vpx_sad16x32/, "const uint8_t *src_ptr, int src_stride
 specialize qw/vpx_sad16x32 msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad16x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad16x16 mmx media neon msa/, "$sse2_x86inc";
+specialize qw/vpx_sad16x16 media neon msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad16x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad16x8 mmx neon msa/, "$sse2_x86inc";
+specialize qw/vpx_sad16x8 neon msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad8x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad8x16 mmx neon msa/, "$sse2_x86inc";
+specialize qw/vpx_sad8x16 neon msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad8x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad8x8 mmx neon msa/, "$sse2_x86inc";
+specialize qw/vpx_sad8x8 neon msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad8x4/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vpx_sad8x4 msa/, "$sse2_x86inc";
@@ -1001,7 +1001,7 @@ add_proto qw/unsigned int vpx_sad4x8/, "const uint8_t *src_ptr, int src_stride, 
 specialize qw/vpx_sad4x8 msa/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vpx_sad4x4/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad4x4 mmx neon msa/, "$sse2_x86inc";
+specialize qw/vpx_sad4x4 neon msa/, "$sse2_x86inc";
 
 #
 # Avg
