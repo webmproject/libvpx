@@ -825,7 +825,6 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
 }
 
 #undef MVC
-#undef PRE
 #undef CHECK_BETTER
 
 static INLINE int check_bounds(const MACROBLOCK *x, int row, int col,
