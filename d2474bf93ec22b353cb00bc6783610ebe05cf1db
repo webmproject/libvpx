@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_bfc2dff9",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-12T03:15:01Z",
+      "side": 1,
+      "message": "maybe drop this trailing comma while you\u0027re here",
+      "revId": "d2474bf93ec22b353cb00bc6783610ebe05cf1db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
