@@ -45,8 +45,7 @@ void reference_adst_1d(const double* in, double* out, int size);
 void reference_hybrid_1d(double* in, double* out, int size, int type);
 
 void reference_hybrid_2d(double* in, double* out, int size,
-                                       int type0, int type1);
-
+                         int type0, int type1);
 template <typename Type1, typename Type2>
 static double compute_avg_abs_error(const Type1* a, const Type2* b,
                                     const int size) {
@@ -57,6 +56,15 @@ static double compute_avg_abs_error(const Type1* a, const Type2* b,
   error = error / size;
   return error;
 }
+
+template<typename Type>
+void fliplr(Type *dest, int stride, int length);
+
+template<typename Type>
+void flipud(Type *dest, int stride, int length);
+
+template<typename Type>
+void fliplrud(Type *dest, int stride, int length);
 
 typedef void (*TxfmFunc)(const int32_t* in, int32_t* out, const int8_t* cos_bit,
                          const int8_t* range_bit);

@@ -36,6 +36,28 @@ void get_txfm1d_type(TX_TYPE txfm2d_type, TYPE_TXFM* type0,
       *type0 = TYPE_ADST;
       *type1 = TYPE_ADST;
       break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      *type0 = TYPE_ADST;
+      *type1 = TYPE_DCT;
+      break;
+    case DCT_FLIPADST:
+      *type0 = TYPE_DCT;
+      *type1 = TYPE_ADST;
+      break;
+    case FLIPADST_FLIPADST:
+      *type0 = TYPE_ADST;
+      *type1 = TYPE_ADST;
+      break;
+    case ADST_FLIPADST:
+      *type0 = TYPE_ADST;
+      *type1 = TYPE_ADST;
+      break;
+    case FLIPADST_ADST:
+      *type0 = TYPE_ADST;
+      *type1 = TYPE_ADST;
+      break;
+#endif  // CONFIG_EXT_TX
     default:
       *type0 = TYPE_DCT;
       *type1 = TYPE_DCT;
@@ -100,4 +122,45 @@ void reference_hybrid_2d(double* in, double* out, int size,
   }
   delete[] tempOut;
 }
+
+template<typename Type>
+void fliplr(Type *dest, int stride, int length) {
+  int i, j;
+  for (i = 0; i < length; ++i) {
+    for (j = 0; j < length / 2; ++j) {
+      const Type tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[i * stride + length - 1 - j];
+      dest[i * stride + length - 1 - j] = tmp;
+    }
+  }
+}
+
+template<typename Type>
+void flipud(Type *dest, int stride, int length) {
+  int i, j;
+  for (j = 0; j < length; ++j) {
+    for (i = 0; i < length / 2; ++i) {
+      const Type tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(length - 1 - i) * stride + j];
+      dest[(length - 1 - i) * stride + j] = tmp;
+    }
+  }
+}
+
+template<typename Type>
+void fliplrud(Type *dest, int stride, int length) {
+  int i, j;
+  for (i = 0; i < length / 2; ++i) {
+    for (j = 0; j < length; ++j) {
+      const Type tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(length - 1 - i) * stride + length - 1 - j];
+      dest[(length - 1 - i) * stride + length - 1 - j] = tmp;
+    }
+  }
+}
+
+template void fliplr<double>(double *dest, int stride, int length);
+template void flipud<double>(double *dest, int stride, int length);
+template void fliplrud<double>(double *dest, int stride, int length);
+
 }  // namespace libvpx_test
