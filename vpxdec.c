@@ -818,11 +818,6 @@ static int main_loop(int argc, const char **argv_) {
   if (!interface)
     interface = get_vpx_decoder_by_index(0);
 
-#if CONFIG_EXT_TILE
-  cfg.tile_row = tile_row;
-  cfg.tile_col = tile_col;
-#endif  // CONFIG_EXT_TILE
-
   dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
               (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0) |
               (frame_parallel ? VPX_CODEC_USE_FRAME_THREADING : 0);
@@ -877,6 +872,21 @@ static int main_loop(int argc, const char **argv_) {
   }
 #endif
 
+#if CONFIG_VP10_DECODER && CONFIG_EXT_TILE
+  if (strncmp(decoder.name, "WebM Project VP10", 17) == 0) {
+    if (vpx_codec_control(&decoder, VP10_SET_DECODE_TILE_ROW, tile_row)) {
+      fprintf(stderr, "Failed to set decode_tile_row: %s\n",
+              vpx_codec_error(&decoder));
+      return EXIT_FAILURE;
+    }
+
+    if (vpx_codec_control(&decoder, VP10_SET_DECODE_TILE_COL, tile_col)) {
+      fprintf(stderr, "Failed to set decode_tile_col: %s\n",
+              vpx_codec_error(&decoder));
+      return EXIT_FAILURE;
+    }
+  }
+#endif
 
   if (arg_skip)
     fprintf(stderr, "Skipping first %d frames.\n", arg_skip);

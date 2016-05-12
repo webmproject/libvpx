@@ -58,6 +58,8 @@ struct vpx_codec_alg_priv {
   int                     last_show_frame;  // Index of last output frame.
   int                     byte_alignment;
   int                     skip_loop_filter;
+  int                     decode_tile_row;
+  int                     decode_tile_col;
 
   // Frame parallel related.
   int                     frame_parallel_decode;  // frame-based threading.
@@ -501,8 +503,8 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
     frame_worker_data->pbi->decrypt_state = ctx->decrypt_state;
 
 #if CONFIG_EXT_TILE
-    frame_worker_data->pbi->dec_tile_row = ctx->cfg.tile_row;
-    frame_worker_data->pbi->dec_tile_col = ctx->cfg.tile_col;
+    frame_worker_data->pbi->dec_tile_row = ctx->decode_tile_row;
+    frame_worker_data->pbi->dec_tile_col = ctx->decode_tile_col;
 #endif  // CONFIG_EXT_TILE
 
     worker->had_error = 0;
@@ -1118,6 +1120,18 @@ static vpx_codec_err_t ctrl_set_skip_loop_filter(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_decode_tile_row(vpx_codec_alg_priv_t *ctx,
+                                                va_list args) {
+  ctx->decode_tile_row = va_arg(args, int);
+  return VPX_CODEC_OK;
+}
+
+static vpx_codec_err_t ctrl_set_decode_tile_col(vpx_codec_alg_priv_t *ctx,
+                                                va_list args) {
+  ctx->decode_tile_col = va_arg(args, int);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,            ctrl_copy_reference},
 
@@ -1132,6 +1146,8 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VPXD_SET_DECRYPTOR,            ctrl_set_decryptor},
   {VP9_SET_BYTE_ALIGNMENT,        ctrl_set_byte_alignment},
   {VP9_SET_SKIP_LOOP_FILTER,      ctrl_set_skip_loop_filter},
+  {VP10_SET_DECODE_TILE_ROW,      ctrl_set_decode_tile_row},
+  {VP10_SET_DECODE_TILE_COL,      ctrl_set_decode_tile_col},
 
   // Getters
   {VP8D_GET_LAST_REF_UPDATES,     ctrl_get_last_ref_updates},

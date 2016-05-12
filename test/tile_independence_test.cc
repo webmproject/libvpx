@@ -35,13 +35,18 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
     cfg.w = 704;
     cfg.h = 144;
     cfg.threads = 1;
-#if CONFIG_EXT_TILE
-    cfg.tile_col = -1;
-    cfg.tile_row = -1;
-#endif  // CONFIG_EXT_TILE
     fw_dec_ = codec_->CreateDecoder(cfg, 0);
     inv_dec_ = codec_->CreateDecoder(cfg, 0);
     inv_dec_->Control(VP9_INVERT_TILE_DECODE_ORDER, 1);
+
+#if CONFIG_VP10 && CONFIG_EXT_TILE
+    if (fw_dec_->IsVP10() && inv_dec_->IsVP10()) {
+      fw_dec_->Control(VP10_SET_DECODE_TILE_ROW, -1);
+      fw_dec_->Control(VP10_SET_DECODE_TILE_COL, -1);
+      inv_dec_->Control(VP10_SET_DECODE_TILE_ROW, -1);
+      inv_dec_->Control(VP10_SET_DECODE_TILE_COL, -1);
+    }
+#endif
   }
 
   virtual ~TileIndependenceTest() {

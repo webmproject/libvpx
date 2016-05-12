@@ -1580,8 +1580,18 @@ static void initialize_encoder(struct stream_state *stream,
 #if CONFIG_DECODERS
   if (global->test_decode != TEST_DECODE_OFF) {
     const VpxInterface *decoder = get_vpx_decoder_by_name(global->codec->name);
-    vpx_codec_dec_cfg_t cfg = { 0, 0, 0, -1, -1 };
+    vpx_codec_dec_cfg_t cfg = { 0, 0, 0};
     vpx_codec_dec_init(&stream->decoder, decoder->codec_interface(), &cfg, 0);
+
+#if CONFIG_VP10_DECODER && CONFIG_EXT_TILE
+    if (strcmp(global->codec->name, "vp10") == 0) {
+      vpx_codec_control(&stream->decoder, VP10_SET_DECODE_TILE_ROW, -1);
+      ctx_exit_on_error(&stream->decoder, "Failed to set decode_tile_row");
+
+      vpx_codec_control(&stream->decoder, VP10_SET_DECODE_TILE_COL, -1);
+      ctx_exit_on_error(&stream->decoder, "Failed to set decode_tile_col");
+    }
+#endif
   }
 #endif
 }
