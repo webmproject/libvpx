@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_1aadc1fc",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1131014
+      },
+      "writtenOn": "2016-05-12T15:30:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b2e0dc3d_8c67e8a8",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b2e0dc3d_6cfb84d0",
         "filename": "build/make/iosbuild.sh",
         "patchSetId": 16
@@ -64,6 +82,24 @@
       "writtenOn": "2016-05-11T18:10:33Z",
       "side": 1,
       "message": "please wrap as described here:\nhttps://google.github.io/styleguide/shell.xml#Pipelines",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_faa7151b",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1131014
+      },
+      "writtenOn": "2016-05-12T15:30:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b2e0dc3d_6cfb84d0",
       "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_5a64a9d5",
+        "filename": "configure",
+        "patchSetId": 16
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1131014
+      },
+      "writtenOn": "2016-05-12T15:30:11Z",
+      "side": 1,
+      "message": "Currently this check doesn\u0027t work for desktop builds because the targets for OS X use a specific \u0027darwin\u0027 version eg \u0027darwin15\u0027 rather than the bare \u0027darwin\u0027 used for the iOS targets.\n\nCould retool the check if desired; I\u0027ve only tested on iOS and iOS simulator but it should work as a .dylib on OS X as well.\n\nThe framework bundle creation is currently all in iosbuild.sh as well and hardcodes the targets to build with... If there\u0027s interest I could extend it to support OS X and other Darwin variants like tvOS in a future patch?\n\n.... ok I\u0027ve changed it to a case which accepts darwin* as well as just darwin, for future-proofing. This allows --enable-shared on the configure for Mac OS X targets. Produces a .dylib which looks ok but doesn\u0027t have the framework magic wrapped around it. A future improvement to the framework build script could use this to produce an OS X-friendly VPX.framework.",
+      "parentUuid": "b2e0dc3d_1f113cf4",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b2e0dc3d_ff1578df",
         "filename": "libs.mk",
         "patchSetId": 16
@@ -98,6 +152,24 @@
       "writtenOn": "2016-05-11T19:53:00Z",
       "side": 1,
       "message": "this can be one line",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_daa2590e",
+        "filename": "libs.mk",
+        "patchSetId": 16
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1131014
+      },
+      "writtenOn": "2016-05-12T15:30:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b2e0dc3d_ff1578df",
       "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
