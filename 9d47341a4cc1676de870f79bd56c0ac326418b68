@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_7abde50e",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-12T16:26:26Z",
+      "side": 1,
+      "message": "matches simple_encoder. this and simple_encoder, and probably all of the other examples, need a style cleanup pass.",
+      "parentUuid": "d242b02f_94750a88",
+      "revId": "9d47341a4cc1676de870f79bd56c0ac326418b68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_d46f92b5",
         "filename": "examples/twopass_encoder.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-05-12T01:17:52Z",
       "side": 1,
       "message": "not sure how it would become \u003e max_frames",
+      "revId": "9d47341a4cc1676de870f79bd56c0ac326418b68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_9a34519b",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-12T16:26:26Z",
+      "side": 1,
+      "message": "cosmic rays, man!\n\nVery slightly more seriously, I know this is C, but I\u0027ve been scarred for life by casual mixing of ref and non-ref args in a certain library I help maintain...\n\nanyway, matches what I did in simple_encoder. leaving it for now, and I\u0027ll (try to remember to) fix it in both places when I go through on the style clean up pass.",
+      "parentUuid": "d242b02f_d46f92b5",
       "revId": "9d47341a4cc1676de870f79bd56c0ac326418b68",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
