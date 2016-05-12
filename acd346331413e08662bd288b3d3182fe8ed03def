@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_3700d327",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-12T21:25:22Z",
+      "side": 1,
+      "message": "looped the test a whole bunch of times and measured ~roughly 30% on the arm chromebook",
+      "parentUuid": "d242b02f_347296d2",
+      "revId": "acd346331413e08662bd288b3d3182fe8ed03def",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_b465a610",
         "filename": "vpx_dsp/arm/hadamard_neon.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-05-12T01:04:26Z",
       "side": 1,
       "message": "some description of the stages here might be helpful to the reader",
+      "revId": "acd346331413e08662bd288b3d3182fe8ed03def",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_57fd5f48",
+        "filename": "vpx_dsp/arm/hadamard_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-12T21:25:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_b465a610",
       "revId": "acd346331413e08662bd288b3d3182fe8ed03def",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
