@@ -69,6 +69,10 @@ TEST(vp10_inv_txfm2d, round_trip) {
         const Inv_Txfm2d_Func inv_txfm_func = inv_txfm_func_ls[txfm_size_idx];
         const int count = 1000;
         double avg_abs_error = 0;
+
+        if (txfm_size == 64 && tx_type != DCT_DCT)
+          continue;
+
         ACMRandom rnd(ACMRandom::DeterministicSeed());
         for (int ci = 0; ci < count; ci++) {
           for (int ni = 0; ni < sqr_txfm_size; ++ni) {
