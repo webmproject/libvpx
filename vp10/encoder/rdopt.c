@@ -9024,7 +9024,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       }
 #endif  // CONFIG_EXT_INTRA
 
-      rate2 = rate_y + intra_mode_cost[mbmi->mode] + rate_uv_intra[uv_tx];
+      rate2 = rate_y + intra_mode_cost[mbmi->mode] +
+              rate_uv + cpi->intra_uv_mode_cost[mbmi->mode][mbmi->uv_mode];
       if (cpi->common.allow_screen_content_tools && mbmi->mode == DC_PRED)
         rate2 +=
             vp10_cost_bit(vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
