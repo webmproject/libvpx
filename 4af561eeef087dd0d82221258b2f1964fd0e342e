@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_c0398c93",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-05-12T18:57:57Z",
+      "side": 1,
+      "message": "Yeah it looks like it points to InternalFrameBuffer. OK this should be fine.",
+      "parentUuid": "b2e0dc3d_a28e3e3e",
+      "range": {
+        "startLine": 183,
+        "startChar": 10,
+        "endLine": 183,
+        "endChar": 37
+      },
+      "revId": "4af561eeef087dd0d82221258b2f1964fd0e342e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "72a2e4c0_54476cae",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 11
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "The previous documentation was saying: \"The callback must zero out all the data allocated\", doesn\u0027t that mean that the restriction was there before?",
       "parentUuid": "72a2e4c0_54476cae",
+      "range": {
+        "startLine": 87,
+        "startChar": 3,
+        "endLine": 87,
+        "endChar": 55
+      },
+      "revId": "4af561eeef087dd0d82221258b2f1964fd0e342e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2e0dc3d_c52d4c3a",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-05-12T18:57:57Z",
+      "side": 1,
+      "message": "Ahh yeah OK.",
+      "parentUuid": "72a2e4c0_3ae61156",
       "range": {
         "startLine": 87,
         "startChar": 3,
