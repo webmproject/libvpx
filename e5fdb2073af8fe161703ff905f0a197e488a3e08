@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_14e0350c",
+        "filename": "test/level_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-05-12T20:49:52Z",
+      "side": 1,
+      "message": "I don\u0027t think this does what you want it to do, as this will always be true.",
+      "range": {
+        "startLine": 95,
+        "startChar": 8,
+        "endLine": 95,
+        "endChar": 16
+      },
+      "revId": "e5fdb2073af8fe161703ff905f0a197e488a3e08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
