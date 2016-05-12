@@ -168,45 +168,6 @@ static const TXFM_2D_CFG* fwd_txfm_cfg_ls[TX_TYPES][TX_SIZES] = {
 };
 #endif  // CONFIG_EXT_TX
 
-
-void set_flip_cfg(int tx_type, TXFM_2D_FLIP_CFG* cfg) {
-  switch (tx_type) {
-    case DCT_DCT:
-    case ADST_DCT:
-    case DCT_ADST:
-    case ADST_ADST:
-      cfg->ud_flip = 0;
-      cfg->lr_flip = 0;
-      break;
-#if CONFIG_EXT_TX
-    case FLIPADST_DCT:
-      cfg->ud_flip = 1;
-      cfg->lr_flip = 0;
-      break;
-    case DCT_FLIPADST:
-      cfg->ud_flip = 0;
-      cfg->lr_flip = 1;
-      break;
-    case FLIPADST_FLIPADST:
-      cfg->ud_flip = 1;
-      cfg->lr_flip = 1;
-      break;
-    case ADST_FLIPADST:
-      cfg->ud_flip = 0;
-      cfg->lr_flip = 1;
-      break;
-    case FLIPADST_ADST:
-      cfg->ud_flip = 1;
-      cfg->lr_flip = 0;
-      break;
-#endif  // CONFIG_EXT_TX
-    default:
-      cfg->ud_flip = 0;
-      cfg->lr_flip = 0;
-      assert(0);
-  }
-}
-
 TXFM_2D_FLIP_CFG vp10_get_fwd_txfm_cfg(int tx_type, int tx_size) {
   TXFM_2D_FLIP_CFG cfg;
   set_flip_cfg(tx_type, &cfg);
