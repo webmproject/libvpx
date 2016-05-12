@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_40e2fc14",
+        "filename": "test/level_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-12T19:08:43Z",
+      "side": 1,
+      "message": "encoder_ is protected member of libvpx_test::Encoder, I couldn\u0027t find a way to configure it without using one of its control functions. Let me know if I missed something...",
+      "parentUuid": "d242b02f_540562ac",
+      "revId": "93e2c45ebb5f4293c998c91411df97a025ee7552",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_54c0028e",
         "filename": "test/level_test.cc",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_e0276854",
+        "filename": "test/level_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-12T19:08:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_54c0028e",
+      "revId": "93e2c45ebb5f4293c998c91411df97a025ee7552",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_34f8d6d1",
         "filename": "test/level_test.cc",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2016-05-12T01:40:34Z",
       "side": 1,
       "message": "I would call this TestInvalidTargetLevels and loop through a set, unless things like 15 are expected to pass",
+      "revId": "93e2c45ebb5f4293c998c91411df97a025ee7552",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_002d5435",
+        "filename": "test/level_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-12T19:08:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_34f8d6d1",
       "revId": "93e2c45ebb5f4293c998c91411df97a025ee7552",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
