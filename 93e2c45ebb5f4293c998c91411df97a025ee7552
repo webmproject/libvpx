@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_540562ac",
+        "filename": "test/level_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-12T01:40:34Z",
+      "side": 1,
+      "message": "instead of adding this specialized control you could construct and run the encode locally in the invalid test",
+      "revId": "93e2c45ebb5f4293c998c91411df97a025ee7552",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_54c0028e",
+        "filename": "test/level_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-12T01:40:34Z",
+      "side": 1,
+      "message": "this looks common, you could pull it out to the SetUp for this test since you\u0027re not doing any target validation",
+      "revId": "93e2c45ebb5f4293c998c91411df97a025ee7552",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_34f8d6d1",
+        "filename": "test/level_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-12T01:40:34Z",
+      "side": 1,
+      "message": "I would call this TestInvalidTargetLevels and loop through a set, unless things like 15 are expected to pass",
+      "revId": "93e2c45ebb5f4293c998c91411df97a025ee7552",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
