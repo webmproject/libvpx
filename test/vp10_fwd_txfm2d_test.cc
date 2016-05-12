@@ -14,7 +14,7 @@
 
 #include "test/acm_random.h"
 #include "test/vp10_txfm_test.h"
-#include "vp10/common/vp10_fwd_txfm2d_cfg.h"
+#include "vp10/common/vp10_txfm.h"
 #include "./vp10_rtcd.h"
 
 using libvpx_test::ACMRandom;
@@ -29,49 +29,34 @@ using libvpx_test::TYPE_ADST;
 namespace {
 
 #if CONFIG_VP9_HIGHBITDEPTH
-const int txfm_size_num = 5;
-const int txfm_size_ls[5] = {4, 8, 16, 32, 64};
-const TXFM_2D_CFG* fwd_txfm_cfg_ls[5][4] = {
-    {&fwd_txfm_2d_cfg_dct_dct_4, &fwd_txfm_2d_cfg_dct_adst_4,
-     &fwd_txfm_2d_cfg_adst_adst_4, &fwd_txfm_2d_cfg_adst_dct_4},
-    {&fwd_txfm_2d_cfg_dct_dct_8, &fwd_txfm_2d_cfg_dct_adst_8,
-     &fwd_txfm_2d_cfg_adst_adst_8, &fwd_txfm_2d_cfg_adst_dct_8},
-    {&fwd_txfm_2d_cfg_dct_dct_16, &fwd_txfm_2d_cfg_dct_adst_16,
-     &fwd_txfm_2d_cfg_adst_adst_16, &fwd_txfm_2d_cfg_adst_dct_16},
-    {&fwd_txfm_2d_cfg_dct_dct_32, &fwd_txfm_2d_cfg_dct_adst_32,
-     &fwd_txfm_2d_cfg_adst_adst_32, &fwd_txfm_2d_cfg_adst_dct_32},
-    {&fwd_txfm_2d_cfg_dct_dct_64, NULL, NULL, NULL}};
-
-const Fwd_Txfm2d_Func fwd_txfm_func_ls[5] = {
+const Fwd_Txfm2d_Func fwd_txfm_func_ls[TX_SIZES] = {
     vp10_fwd_txfm2d_4x4_c, vp10_fwd_txfm2d_8x8_c, vp10_fwd_txfm2d_16x16_c,
-    vp10_fwd_txfm2d_32x32_c, vp10_fwd_txfm2d_64x64_c};
+    vp10_fwd_txfm2d_32x32_c};
 
-const int txfm_type_num = 4;
-const TYPE_TXFM type_ls_0[4] = {TYPE_DCT, TYPE_DCT, TYPE_ADST, TYPE_ADST};
-const TYPE_TXFM type_ls_1[4] = {TYPE_DCT, TYPE_ADST, TYPE_ADST, TYPE_DCT};
+const TYPE_TXFM type_ls_0[4] = {TYPE_DCT, TYPE_ADST, TYPE_DCT, TYPE_ADST};
+const TYPE_TXFM type_ls_1[4] = {TYPE_DCT, TYPE_DCT, TYPE_ADST, TYPE_ADST};
 
 TEST(vp10_fwd_txfm2d, accuracy) {
-  for (int txfm_size_idx = 0; txfm_size_idx < txfm_size_num; ++txfm_size_idx) {
-    int txfm_size = txfm_size_ls[txfm_size_idx];
+  for (int tx_size = 0; tx_size < TX_SIZES; ++tx_size) {
+    int txfm_size = 1 << (tx_size + 2);
     int sqr_txfm_size = txfm_size * txfm_size;
     int16_t* input = new int16_t[sqr_txfm_size];
     int32_t* output = new int32_t[sqr_txfm_size];
     double* ref_input = new double[sqr_txfm_size];
     double* ref_output = new double[sqr_txfm_size];
 
-    for (int txfm_type_idx = 0; txfm_type_idx < txfm_type_num;
-         ++txfm_type_idx) {
-      const TXFM_2D_CFG* fwd_txfm_cfg =
-          fwd_txfm_cfg_ls[txfm_size_idx][txfm_type_idx];
+    for (int tx_type = 0; tx_type < 4; ++tx_type) {
+      TXFM_2D_FLIP_CFG fwd_txfm_flip_cfg =
+          vp10_get_fwd_txfm_cfg(tx_type, tx_size);
+      const TXFM_2D_CFG *fwd_txfm_cfg = fwd_txfm_flip_cfg.cfg;
       if (fwd_txfm_cfg != NULL) {
-        Fwd_Txfm2d_Func fwd_txfm_func = fwd_txfm_func_ls[txfm_size_idx];
-        TYPE_TXFM type0 = type_ls_0[txfm_type_idx];
-        TYPE_TXFM type1 = type_ls_1[txfm_type_idx];
+        Fwd_Txfm2d_Func fwd_txfm_func = fwd_txfm_func_ls[tx_size];
+        TYPE_TXFM type0 = type_ls_0[tx_type];
+        TYPE_TXFM type1 = type_ls_1[tx_type];
         int amplify_bit = fwd_txfm_cfg->shift[0] + fwd_txfm_cfg->shift[1] +
                           fwd_txfm_cfg->shift[2];
         double amplify_factor =
             amplify_bit >= 0 ? (1 << amplify_bit) : (1.0 / (1 << -amplify_bit));
-        int tx_type = libvpx_test::get_tx_type(fwd_txfm_cfg);
 
         ACMRandom rnd(ACMRandom::DeterministicSeed());
         int count = 500;

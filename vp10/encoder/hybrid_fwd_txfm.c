@@ -13,7 +13,6 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vp10/common/idct.h"
-#include "vp10/common/vp10_fwd_txfm2d_cfg.h"
 #include "vp10/encoder/hybrid_fwd_txfm.h"
 
 static INLINE void fdct32x32(int rd_transform, const int16_t *src,

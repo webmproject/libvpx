@@ -109,23 +109,5 @@ typedef void (*Inv_Txfm2d_Func)(const int32_t*, uint16_t*, int, int, int);
 
 static const int bd = 10;
 static const int input_base = (1 << bd);
-
-static INLINE int get_tx_type(const TXFM_2D_CFG *cfg) {
-  int tx_type;
-  if (cfg->txfm_type_col <= TXFM_TYPE_DCT64) {
-    if (cfg->txfm_type_row <= TXFM_TYPE_DCT64) {
-      tx_type = DCT_DCT;
-    } else {
-      tx_type = DCT_ADST;
-    }
-  } else {
-    if (cfg->txfm_type_row <= TXFM_TYPE_DCT64) {
-      tx_type = ADST_DCT;
-    } else {
-      tx_type = ADST_ADST;
-    }
-  }
-  return tx_type;
-}
 }  // namespace libvpx_test
 #endif  // VP10_TXFM_TEST_H_

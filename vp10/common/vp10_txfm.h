@@ -7,7 +7,6 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-
 #ifndef VP10_TXFM_H_
 #define VP10_TXFM_H_
 
@@ -165,5 +164,20 @@ typedef struct TXFM_2D_CFG {
   const TXFM_TYPE txfm_type_col;
   const TXFM_TYPE txfm_type_row;
 } TXFM_2D_CFG;
+
+typedef struct TXFM_2D_FLIP_CFG {
+  int ud_flip;  // flip upside down
+  int lr_flip;  // flip left to right
+  const TXFM_2D_CFG* cfg;
+} TXFM_2D_FLIP_CFG;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+TXFM_2D_FLIP_CFG vp10_get_fwd_txfm_cfg(int tx_type, int tx_size);
+TXFM_2D_FLIP_CFG vp10_get_fwd_txfm_64x64_cfg(int tx_type);
+#ifdef __cplusplus
+}
+#endif  // __cplusplus
 
 #endif  // VP10_TXFM_H_

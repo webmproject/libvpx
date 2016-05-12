@@ -8,7 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp10/common/vp10_fwd_txfm2d_cfg.h"
+#include "vp10/common/enums.h"
+#include "vp10/common/vp10_txfm.h"
 #include "vp10/common/x86/vp10_txfm1d_sse4.h"
 
 static INLINE void int16_array_with_stride_to_int32_array_without_stride(
@@ -91,16 +92,16 @@ void vp10_fwd_txfm2d_32x32_sse4_1(const int16_t *input, int32_t *output,
                                   const int stride, int tx_type,
                                   const int bd) {
   int32_t txfm_buf[1024];
-  const TXFM_2D_CFG* cfg = vp10_get_txfm_32x32_cfg(tx_type);
+  TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_cfg(tx_type, TX_32X32);
   (void)bd;
-  fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
+  fwd_txfm2d_sse4_1(input, output, stride, cfg.cfg, txfm_buf);
 }
 
 void vp10_fwd_txfm2d_64x64_sse4_1(const int16_t *input, int32_t *output,
                                   const int stride, int tx_type,
                                   const int bd) {
   int32_t txfm_buf[4096];
-  const TXFM_2D_CFG* cfg = vp10_get_txfm_64x64_cfg(tx_type);
+  TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_64x64_cfg(tx_type);
   (void)bd;
-  fwd_txfm2d_sse4_1(input, output, stride, cfg, txfm_buf);
+  fwd_txfm2d_sse4_1(input, output, stride, cfg.cfg, txfm_buf);
 }

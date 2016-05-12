@@ -399,11 +399,4 @@ static const TXFM_2D_CFG fwd_txfm_2d_cfg_adst_dct_32 = {
     fwd_cos_bit_row_adst_dct_32,      // .cos_bit_row
     TXFM_TYPE_ADST32,                 // .txfm_type_col
     TXFM_TYPE_DCT32};                 // .txfm_type_row
-
-const TXFM_2D_CFG* vp10_get_txfm_4x4_cfg(int tx_type);
-const TXFM_2D_CFG* vp10_get_txfm_8x8_cfg(int tx_type);
-const TXFM_2D_CFG* vp10_get_txfm_16x16_cfg(int tx_type);
-const TXFM_2D_CFG* vp10_get_txfm_32x32_cfg(int tx_type);
-const TXFM_2D_CFG* vp10_get_txfm_64x64_cfg(int tx_type);
-
 #endif  // VP10_FWD_TXFM2D_CFG_H_
