@@ -22,6 +22,30 @@
       "revId": "18112f67247161569113dac53e775095e68c5274",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_ea5582b0",
+        "filename": "test/active_map_refresh_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-12T23:19:02Z",
+      "side": 1,
+      "message": "this is how it\u0027s defined in AOM currently (which also fails). if the workaround is to fail on realtime settings then we can put that in, but I don\u0027t like covering up ASan errors in this way",
+      "parentUuid": "d242b02f_1a7ea107",
+      "range": {
+        "startLine": 133,
+        "startChar": 1,
+        "endLine": 133,
+        "endChar": 78
+      },
+      "revId": "18112f67247161569113dac53e775095e68c5274",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
