@@ -137,6 +137,7 @@ static const TXFM_2D_CFG* vp10_get_inv_txfm_64x64_cfg(int tx_type) {
   switch (tx_type) {
     case DCT_DCT:
       cfg = &inv_txfm_2d_cfg_dct_dct_64;
+      break;
     case ADST_DCT:
     case DCT_ADST:
     case ADST_ADST:
