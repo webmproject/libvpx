@@ -1380,8 +1380,9 @@ MASK_SUBPIX_VAR_LARGE(128, 128)
 #endif  // CONFIG_EXT_PARTITION
 
 #if CONFIG_VP9_HIGHBITDEPTH
-typedef int (*highbd_calc_masked_var_t)(__m128i v_sum_d, __m128i v_sse_q,
-             unsigned int* sse, const int w, const int h);
+typedef uint32_t (*highbd_calc_masked_var_t)(__m128i v_sum_d, __m128i v_sse_q,
+                                             uint32_t *sse,
+                                             const int w, const int h);
 typedef unsigned int (*highbd_variance_fn_t)(
                       const uint8_t *a8, int a_stride,
                       const uint8_t *b8, int b_stride,
