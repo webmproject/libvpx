@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_39c602ad",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-05-13T18:27:20Z",
+      "side": 1,
+      "message": "The negative sign looks strange. Why do you need to inverse the shift value here?",
+      "range": {
+        "startLine": 232,
+        "startChar": 49,
+        "endLine": 232,
+        "endChar": 63
+      },
+      "revId": "cb4bc6b8c04a009a3114d64a7f068773d66b346f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
