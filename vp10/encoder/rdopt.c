@@ -5598,6 +5598,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                 ref_bsi->rdstat[i][mode_idx].mvs[ref].as_int;
           }
 
+          have_ref &= ref_bsi->rdstat[i][mode_idx].brate > 0;
+
           if (filter_idx > 1 && !subpelmv && !have_ref) {
             ref_bsi = bsi_buf + 1;
             have_ref = 1;
@@ -5613,6 +5615,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_EXT_INTER
               have_ref &= mode_mv[this_mode][ref].as_int ==
                   ref_bsi->rdstat[i][mode_idx].mvs[ref].as_int;
+
+            have_ref &= ref_bsi->rdstat[i][mode_idx].brate > 0;
           }
 
           if (!subpelmv && have_ref &&
