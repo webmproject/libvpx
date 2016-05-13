@@ -1161,6 +1161,27 @@ static INLINE void find_predictors(VP9_COMP *cpi, MACROBLOCK *x,
     *ref_frame_skip_mask |= (1 << ref_frame);
   }
 }
+
+static void vp9_large_block_mv_bias(const NOISE_ESTIMATE *ne, RD_COST *this_rdc,
+                                    BLOCK_SIZE bsize, int mv_row, int mv_col,
+                                    int is_last_frame) {
+  // Bias against non-zero (above some threshold) motion for large blocks.
+  // This is temporary fix to avoid selection of large mv for big blocks.
+  if (mv_row > 64 || mv_row < -64 || mv_col > 64 || mv_col < -64) {
+    if (bsize == BLOCK_64X64)
+      this_rdc->rdcost = this_rdc->rdcost << 1;
+    else if (bsize >= BLOCK_32X32)
+      this_rdc->rdcost = 3 * this_rdc->rdcost >> 1;
+  }
+  // If noise estimation is enabled, and estimated level is above threshold,
+  // add a bias to LAST reference with small motion, for large blocks.
+  if (ne->enabled && ne->level >= kMedium &&
+      bsize >= BLOCK_32X32 && is_last_frame &&
+      mv_row < 8 && mv_row > -8 && mv_col < 8 && mv_col > -8) {
+    this_rdc->rdcost = 7 * this_rdc->rdcost >> 3;
+  }
+}
+
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
@@ -1607,32 +1628,15 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     this_rdc.rate += ref_frame_cost[ref_frame];
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
 
+    // Bias against non-zero motion
     if (cpi->oxcf.rc_mode == VPX_CBR &&
         cpi->oxcf.speed >= 5 &&
         cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
         !x->sb_is_skin) {
-      // Bias against non-zero (above some threshold) motion for large blocks.
-      // This is temporary fix to avoid selection of large mv for big blocks.
-      if (frame_mv[this_mode][ref_frame].as_mv.row > 64 ||
-          frame_mv[this_mode][ref_frame].as_mv.row < -64 ||
-          frame_mv[this_mode][ref_frame].as_mv.col > 64 ||
-          frame_mv[this_mode][ref_frame].as_mv.col < -64) {
-        if (bsize == BLOCK_64X64)
-          this_rdc.rdcost = this_rdc.rdcost << 1;
-        else if (bsize >= BLOCK_32X32)
-          this_rdc.rdcost = 3 * this_rdc.rdcost >> 1;
-      }
-      // If noise estimation is enabled, and estimated level is above threshold,
-      // add a bias to LAST reference with small motion, for large blocks.
-      if (cpi->noise_estimate.enabled &&
-          cpi->noise_estimate.level >= kMedium &&
-          bsize >= BLOCK_32X32 &&
-          ref_frame == LAST_FRAME &&
-          frame_mv[this_mode][ref_frame].as_mv.row < 8 &&
-          frame_mv[this_mode][ref_frame].as_mv.row > -8 &&
-          frame_mv[this_mode][ref_frame].as_mv.col < 8 &&
-          frame_mv[this_mode][ref_frame].as_mv.col > -8)
-        this_rdc.rdcost = 7 * this_rdc.rdcost >> 3;
+      vp9_large_block_mv_bias(&cpi->noise_estimate, &this_rdc, bsize,
+                              frame_mv[this_mode][ref_frame].as_mv.row,
+                              frame_mv[this_mode][ref_frame].as_mv.col,
+                              ref_frame == LAST_FRAME);
     }
 
     // Skipping checking: test to see if this block can be reconstructed by
