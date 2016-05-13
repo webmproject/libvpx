@@ -131,7 +131,7 @@ void VP10HighbdTrans8x8HT::RunBitexactCheck() {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int i, j;
   const int stride = 8;
-  const int num_tests = 200000;
+  const int num_tests = 1000;
   const int num_coeffs = 64;
 
   for (i = 0; i < num_tests; ++i) {

@@ -997,6 +997,7 @@ void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *coeff,
       transpose_8x8(out, in);
       write_buffer_8x8(in, coeff);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       cfg = &fwd_txfm_2d_cfg_adst_dct_8;
       load_buffer_8x8(input, in, stride, 1, 0, cfg->shift[0]);
@@ -1047,6 +1048,7 @@ void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *coeff,
       transpose_8x8(out, in);
       write_buffer_8x8(in, coeff);
       break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
   }
@@ -1893,6 +1895,7 @@ void vp10_fwd_txfm2d_16x16_sse4_1(const int16_t *input, int32_t *coeff,
       transpose_16x16(out, in);
       write_buffer_16x16(in, coeff);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       cfg = &fwd_txfm_2d_cfg_adst_dct_16;
       load_buffer_16x16(input, in, stride, 1, 0, cfg->shift[0]);
@@ -1943,6 +1946,7 @@ void vp10_fwd_txfm2d_16x16_sse4_1(const int16_t *input, int32_t *coeff,
       transpose_16x16(out, in);
       write_buffer_16x16(in, coeff);
       break;
+#endif  // CONFIG_EXT_TX
     default:
       assert(0);
   }
