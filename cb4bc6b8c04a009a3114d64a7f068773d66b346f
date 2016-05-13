@@ -39,6 +39,30 @@
       "revId": "cb4bc6b8c04a009a3114d64a7f068773d66b346f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_1d85b1e1",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-13T19:03:01Z",
+      "side": 1,
+      "message": "Here the sign of shift to indicate either left or right shift.  Here since the shift is negative (right shift), I negate it to make it positive.  So the intrinsics does right shift directly. Discussed with Jingning and decide to keep it.",
+      "parentUuid": "d242b02f_39c602ad",
+      "range": {
+        "startLine": 232,
+        "startChar": 49,
+        "endLine": 232,
+        "endChar": 63
+      },
+      "revId": "cb4bc6b8c04a009a3114d64a7f068773d66b346f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
