@@ -273,6 +273,12 @@ EXPORT_FILE             := libvpx.syms
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.dylib  )
 else
+ifeq ($(filter iphonesimulator%,$(TGT_OS)),$(TGT_OS))
+LIBVPX_SO               := libvpx.$(SO_VERSION_MAJOR).dylib
+SHARED_LIB_SUF          := .dylib
+EXPORT_FILE             := libvpx.syms
+LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, libvpx.dylib)
+else
 ifeq ($(filter os2%,$(TGT_OS)),$(TGT_OS))
 LIBVPX_SO               := libvpx$(SO_VERSION_MAJOR).dll
 SHARED_LIB_SUF          := _dll.a
@@ -286,6 +292,7 @@ EXPORT_FILE             := libvpx.ver
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.so libvpx.so.$(SO_VERSION_MAJOR) \
                              libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR))
+endif
 endif
 endif
 
