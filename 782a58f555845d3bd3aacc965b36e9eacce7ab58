@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_83e309b6",
+        "filename": "vpx_dsp/arm/hadamard_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-13T06:05:30Z",
+      "side": 1,
+      "message": "TODO, dedup with idctXXX",
+      "revId": "782a58f555845d3bd3aacc965b36e9eacce7ab58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_63d61dd3",
+        "filename": "vpx_dsp/arm/hadamard_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-13T06:05:30Z",
+      "side": 1,
+      "message": "alignment is off, breaking after the \u003d should work",
+      "revId": "782a58f555845d3bd3aacc965b36e9eacce7ab58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
