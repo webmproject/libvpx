@@ -141,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_23eb358c",
+        "filename": "configure",
+        "patchSetId": 16
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-13T06:12:56Z",
+      "side": 1,
+      "message": "thanks. I mostly wanted to make sure it built for OS X at all if you were going to include it in this change. seems to compile, anything further can be done in subsequent commits",
+      "parentUuid": "d242b02f_5a64a9d5",
+      "revId": "3abd84e315df7acfc30b0e3faf074601c3d3462b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b2e0dc3d_ff1578df",
         "filename": "libs.mk",
         "patchSetId": 16
