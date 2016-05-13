@@ -23,6 +23,7 @@
 #include "test/acm_random.h"
 #include "vp10/common/enums.h"
 #include "vp10/common/vp10_txfm.h"
+#include "./vp10_rtcd.h"
 
 namespace libvpx_test {
 typedef enum {
@@ -74,5 +75,16 @@ typedef void (*Inv_Txfm2d_Func)(const int32_t*, uint16_t*, int, int, int);
 
 static const int bd = 10;
 static const int input_base = (1 << bd);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static const Fwd_Txfm2d_Func fwd_txfm_func_ls[TX_SIZES] = {
+    vp10_fwd_txfm2d_4x4_c, vp10_fwd_txfm2d_8x8_c, vp10_fwd_txfm2d_16x16_c,
+    vp10_fwd_txfm2d_32x32_c};
+
+static const Inv_Txfm2d_Func inv_txfm_func_ls[TX_SIZES] = {
+    vp10_inv_txfm2d_add_4x4_c, vp10_inv_txfm2d_add_8x8_c,
+    vp10_inv_txfm2d_add_16x16_c, vp10_inv_txfm2d_add_32x32_c};
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 }  // namespace libvpx_test
 #endif  // VP10_TXFM_TEST_H_

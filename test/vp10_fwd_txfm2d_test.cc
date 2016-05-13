@@ -27,11 +27,6 @@ using libvpx_test::TYPE_TXFM;
 
 namespace {
 #if CONFIG_VP9_HIGHBITDEPTH
-const Fwd_Txfm2d_Func fwd_txfm_func_ls[TX_SIZES] = {
-    vp10_fwd_txfm2d_4x4_c, vp10_fwd_txfm2d_8x8_c, vp10_fwd_txfm2d_16x16_c,
-    vp10_fwd_txfm2d_32x32_c};
-
-// VP10FwdTxfm2dParam argument list:
 // tx_type_, tx_size_, max_error_, max_avg_error_
 typedef std::tr1::tuple<TX_TYPE, TX_SIZE, double, double> VP10FwdTxfm2dParam;
 
@@ -53,7 +48,7 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
     amplify_factor_ =
         amplify_bit >= 0 ? (1 << amplify_bit) : (1.0 / (1 << -amplify_bit));
 
-    fwd_txfm_ = fwd_txfm_func_ls[tx_size_];
+    fwd_txfm_ = libvpx_test::fwd_txfm_func_ls[tx_size_];
     txfm1d_size_ = libvpx_test::get_txfm1d_size(tx_size_);
     txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
     get_txfm1d_type(tx_type_, &type0_, &type1_);
