@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_86978d55",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1630,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-16T19:53:07Z",
+      "side": 1,
+      "message": "If the assumption is that directional filter type is same for both reference frame, should it be documented with comment?",
+      "range": {
+        "startLine": 1629,
+        "startChar": 2,
+        "endLine": 1630,
+        "endChar": 50
+      },
+      "revId": "2c3a6fe8d9d1c8f19bc3cf31667bc607940b4495",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
