@@ -162,7 +162,7 @@ typedef struct {
   uint64_t avg_source_sad;
   int high_source_sad;
   int count_last_scene_change;
-  int avg_intersize_gfint;
+  int avg_size_inter;
   int avg_frame_low_motion;
 } RATE_CONTROL;
 
