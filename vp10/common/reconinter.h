@@ -146,6 +146,55 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_EXT_INTER
+#define WEDGE_BITS_2      2
+#define WEDGE_BITS_3      3
+#define WEDGE_BITS_4      4
+#define WEDGE_BITS_5      5
+#define WEDGE_NONE       -1
+#define WEDGE_WEIGHT_BITS 6
+
+static const int get_wedge_bits_lookup[BLOCK_SIZES] = {
+  0,
+  0,
+  0,
+  WEDGE_BITS_4,
+  WEDGE_BITS_4,
+  WEDGE_BITS_4,
+  WEDGE_BITS_4,
+  WEDGE_BITS_4,
+  WEDGE_BITS_4,
+  WEDGE_BITS_4,
+  0,
+  0,
+  0,
+#if CONFIG_EXT_PARTITION
+  0,
+  0,
+  0,
+#endif  // CONFIG_EXT_PARTITION
+};
+
+static INLINE int is_interinter_wedge_used(BLOCK_SIZE sb_type) {
+  (void) sb_type;
+  return get_wedge_bits_lookup[sb_type] > 0;
+}
+
+static INLINE int get_interinter_wedge_bits(BLOCK_SIZE sb_type) {
+  const int wbits = get_wedge_bits_lookup[sb_type];
+  return (wbits > 0) ? wbits + 1 : 0;
+}
+
+static INLINE int is_interintra_wedge_used(BLOCK_SIZE sb_type) {
+  (void) sb_type;
+  return get_wedge_bits_lookup[sb_type] > 0;
+}
+
+static INLINE int get_interintra_wedge_bits(BLOCK_SIZE sb_type) {
+  return get_wedge_bits_lookup[sb_type];
+}
+#endif  // CONFIG_EXT_INTER
+
 void build_inter_predictors(MACROBLOCKD *xd, int plane,
 #if CONFIG_OBMC
                             int mi_col_offset, int mi_row_offset,

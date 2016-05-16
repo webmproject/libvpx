@@ -165,6 +165,7 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->use_transform_domain_distortion = 1;
 #if CONFIG_EXT_INTER
     sf->disable_wedge_search_var_thresh = 100;
+    sf->fast_wedge_sign_estimate = 1;
 #endif  // CONFIG_EXT_INTER
   }
 
@@ -283,6 +284,7 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
   sf->use_upsampled_references = 0;
 #if CONFIG_EXT_INTER
   sf->disable_wedge_search_var_thresh = 100;
+  sf->fast_wedge_sign_estimate = 1;
 #endif  // CONFIG_EXT_INTER
 
   // Use transform domain distortion computation
@@ -517,6 +519,7 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
 #endif  // CONFIG_EXT_TILE
 #if CONFIG_EXT_INTER
   sf->disable_wedge_search_var_thresh = 0;
+  sf->fast_wedge_sign_estimate = 0;
 #endif  // CONFIG_EXT_INTER
 
   for (i = 0; i < TX_SIZES; i++) {
