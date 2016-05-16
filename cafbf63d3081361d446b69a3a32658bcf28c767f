@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_d24eb060",
+        "filename": "test/level_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-05-16T17:41:27Z",
+      "side": 1,
+      "message": "What happens if you set a level, then encode one frame, then try to set another level?",
+      "range": {
+        "startLine": 72,
+        "startChar": 17,
+        "endLine": 72,
+        "endChar": 32
+      },
+      "revId": "cafbf63d3081361d446b69a3a32658bcf28c767f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
