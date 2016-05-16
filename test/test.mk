@@ -190,6 +190,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_HIGHBITDEPTH) += hbd_metrics_test.cc
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_txfm_test.h
+LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_txfm_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_fwd_txfm1d_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_inv_txfm1d_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_fwd_txfm2d_test.cc

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include "test/acm_random.h"
+#include "test/util.h"
 #include "test/vp10_txfm_test.h"
 #include "vp10/common/vp10_txfm.h"
 #include "./vp10_rtcd.h"
@@ -23,80 +24,156 @@ using libvpx_test::bd;
 using libvpx_test::compute_avg_abs_error;
 using libvpx_test::Fwd_Txfm2d_Func;
 using libvpx_test::TYPE_TXFM;
-using libvpx_test::TYPE_DCT;
-using libvpx_test::TYPE_ADST;
 
 namespace {
-
 #if CONFIG_VP9_HIGHBITDEPTH
-const Fwd_Txfm2d_Func fwd_txfm_func_ls[TX_SIZES] = {
-    vp10_fwd_txfm2d_4x4_c, vp10_fwd_txfm2d_8x8_c, vp10_fwd_txfm2d_16x16_c,
-    vp10_fwd_txfm2d_32x32_c};
+// tx_type_, tx_size_, max_error_, max_avg_error_
+typedef std::tr1::tuple<TX_TYPE, TX_SIZE, double, double> VP10FwdTxfm2dParam;
 
-const TYPE_TXFM type_ls_0[4] = {TYPE_DCT, TYPE_ADST, TYPE_DCT, TYPE_ADST};
-const TYPE_TXFM type_ls_1[4] = {TYPE_DCT, TYPE_DCT, TYPE_ADST, TYPE_ADST};
+class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
+ public:
+  virtual void SetUp() {
+    tx_type_ = GET_PARAM(0);
+    tx_size_ = GET_PARAM(1);
+    max_error_ = GET_PARAM(2);
+    max_avg_error_ = GET_PARAM(3);
+    count_ = 500;
+    TXFM_2D_FLIP_CFG fwd_txfm_flip_cfg =
+        vp10_get_fwd_txfm_cfg(tx_type_, tx_size_);
+    const TXFM_2D_CFG *fwd_txfm_cfg = fwd_txfm_flip_cfg.cfg;
+    int amplify_bit = fwd_txfm_cfg->shift[0] + fwd_txfm_cfg->shift[1] +
+                      fwd_txfm_cfg->shift[2];
+    ud_flip_ = fwd_txfm_flip_cfg.ud_flip;
+    lr_flip_ = fwd_txfm_flip_cfg.lr_flip;
+    amplify_factor_ =
+        amplify_bit >= 0 ? (1 << amplify_bit) : (1.0 / (1 << -amplify_bit));
 
-TEST(vp10_fwd_txfm2d, accuracy) {
-  for (int tx_size = 0; tx_size < TX_SIZES; ++tx_size) {
-    int txfm_size = 1 << (tx_size + 2);
-    int sqr_txfm_size = txfm_size * txfm_size;
-    int16_t* input = new int16_t[sqr_txfm_size];
-    int32_t* output = new int32_t[sqr_txfm_size];
-    double* ref_input = new double[sqr_txfm_size];
-    double* ref_output = new double[sqr_txfm_size];
+    fwd_txfm_ = libvpx_test::fwd_txfm_func_ls[tx_size_];
+    txfm1d_size_ = libvpx_test::get_txfm1d_size(tx_size_);
+    txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
+    get_txfm1d_type(tx_type_, &type0_, &type1_);
+    input_ = reinterpret_cast<int16_t *>
+       (vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
+    output_ = reinterpret_cast<int32_t *>
+        (vpx_memalign(16, sizeof(int32_t) * txfm2d_size_));
+    ref_input_ = reinterpret_cast<double *>
+        (vpx_memalign(16, sizeof(double) * txfm2d_size_));
+    ref_output_ = reinterpret_cast<double *>
+        (vpx_memalign(16, sizeof(double) * txfm2d_size_));
+  }
 
-    for (int tx_type = 0; tx_type < 4; ++tx_type) {
-      TXFM_2D_FLIP_CFG fwd_txfm_flip_cfg =
-          vp10_get_fwd_txfm_cfg(tx_type, tx_size);
-      const TXFM_2D_CFG *fwd_txfm_cfg = fwd_txfm_flip_cfg.cfg;
-      if (fwd_txfm_cfg != NULL) {
-        Fwd_Txfm2d_Func fwd_txfm_func = fwd_txfm_func_ls[tx_size];
-        TYPE_TXFM type0 = type_ls_0[tx_type];
-        TYPE_TXFM type1 = type_ls_1[tx_type];
-        int amplify_bit = fwd_txfm_cfg->shift[0] + fwd_txfm_cfg->shift[1] +
-                          fwd_txfm_cfg->shift[2];
-        double amplify_factor =
-            amplify_bit >= 0 ? (1 << amplify_bit) : (1.0 / (1 << -amplify_bit));
-
-        ACMRandom rnd(ACMRandom::DeterministicSeed());
-        int count = 500;
-        double avg_abs_error = 0;
-        for (int ci = 0; ci < count; ci++) {
-          for (int ni = 0; ni < sqr_txfm_size; ++ni) {
-            input[ni] = rnd.Rand16() % input_base;
-            ref_input[ni] = static_cast<double>(input[ni]);
-            output[ni] = 0;
-            ref_output[ni] = 0;
-          }
-
-          fwd_txfm_func(input, output, txfm_size, tx_type, bd);
-          reference_hybrid_2d(ref_input, ref_output, txfm_size, type0, type1);
-
-          for (int ni = 0; ni < sqr_txfm_size; ++ni) {
-            ref_output[ni] = round(ref_output[ni] * amplify_factor);
-            EXPECT_LE(fabs(output[ni] - ref_output[ni]) / amplify_factor, 70);
-          }
-          avg_abs_error += compute_avg_abs_error<int32_t, double>(
-              output, ref_output, sqr_txfm_size);
-        }
-
-        avg_abs_error /= amplify_factor;
-        avg_abs_error /= count;
-        // max_abs_avg_error comes from upper bound of avg_abs_error
-        // printf("type0: %d type1: %d txfm_size: %d accuracy_avg_abs_error:
-        // %f\n",
-        // type0, type1, txfm_size, avg_abs_error);
-        double max_abs_avg_error = 7;
-        EXPECT_LE(avg_abs_error, max_abs_avg_error);
+  void RunFwdAccuracyCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    double avg_abs_error = 0;
+    for (int ci = 0; ci < count_; ci++) {
+      for (int ni = 0; ni < txfm2d_size_; ++ni) {
+        input_[ni] = rnd.Rand16() % input_base;
+        ref_input_[ni] = static_cast<double>(input_[ni]);
+        output_[ni] = 0;
+        ref_output_[ni] = 0;
       }
+
+      fwd_txfm_(input_, output_, txfm1d_size_, tx_type_, bd);
+
+      if (lr_flip_ && ud_flip_)
+        libvpx_test::fliplrud(ref_input_, txfm1d_size_, txfm1d_size_);
+      else if (lr_flip_)
+        libvpx_test::fliplr(ref_input_, txfm1d_size_, txfm1d_size_);
+      else if (ud_flip_)
+        libvpx_test::flipud(ref_input_, txfm1d_size_, txfm1d_size_);
+
+      reference_hybrid_2d(ref_input_, ref_output_, txfm1d_size_,
+                          type0_, type1_);
+
+      for (int ni = 0; ni < txfm2d_size_; ++ni) {
+        ref_output_[ni] = round(ref_output_[ni] * amplify_factor_);
+        EXPECT_GE(max_error_,
+                  fabs(output_[ni] - ref_output_[ni]) / amplify_factor_);
+      }
+      avg_abs_error += compute_avg_abs_error<int32_t, double>(
+          output_, ref_output_, txfm2d_size_);
     }
 
-    delete[] input;
-    delete[] output;
-    delete[] ref_input;
-    delete[] ref_output;
+    avg_abs_error /= amplify_factor_;
+    avg_abs_error /= count_;
+    // max_abs_avg_error comes from upper bound of avg_abs_error
+    // printf("type0: %d type1: %d txfm_size: %d accuracy_avg_abs_error:
+    // %f\n", type0_, type1_, txfm1d_size_, avg_abs_error);
+    EXPECT_GE(max_avg_error_, avg_abs_error);
   }
+
+  virtual void TearDown() {
+    vpx_free(input_);
+    vpx_free(output_);
+    vpx_free(ref_input_);
+    vpx_free(ref_output_);
+  }
+
+ private:
+  double max_error_;
+  double max_avg_error_;
+  int count_;
+  double amplify_factor_;
+  TX_TYPE tx_type_;
+  TX_SIZE tx_size_;
+  int txfm1d_size_;
+  int txfm2d_size_;
+  Fwd_Txfm2d_Func fwd_txfm_;
+  TYPE_TXFM type0_;
+  TYPE_TXFM type1_;
+  int16_t* input_;
+  int32_t* output_;
+  double* ref_input_;
+  double* ref_output_;
+  int ud_flip_;  // flip upside down
+  int lr_flip_;  // flip left to right
+};
+
+TEST_P(VP10FwdTxfm2d, RunFwdAccuracyCheck) {
+  RunFwdAccuracyCheck();
 }
+
+INSTANTIATE_TEST_CASE_P(
+    C, VP10FwdTxfm2d,
+    ::testing::Values(
+#if CONFIG_EXT_TX
+        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_32X32, 70, 7),
+        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_32X32, 70, 7),
+        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_32X32, 70, 7),
+        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_32X32, 70, 7),
+        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_32X32, 70, 7),
+#endif
+        VP10FwdTxfm2dParam(DCT_DCT,   TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(ADST_DCT,  TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(DCT_ADST,  TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(ADST_ADST, TX_4X4, 2, 0.2),
+        VP10FwdTxfm2dParam(DCT_DCT,   TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(ADST_DCT,  TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(DCT_ADST,  TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(ADST_ADST, TX_8X8, 5, 0.6),
+        VP10FwdTxfm2dParam(DCT_DCT,   TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(ADST_DCT,  TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(DCT_ADST,  TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(ADST_ADST, TX_16X16, 11, 1.5),
+        VP10FwdTxfm2dParam(DCT_DCT,   TX_32X32, 70, 7),
+        VP10FwdTxfm2dParam(ADST_DCT,  TX_32X32, 70, 7),
+        VP10FwdTxfm2dParam(DCT_ADST,  TX_32X32, 70, 7),
+        VP10FwdTxfm2dParam(ADST_ADST, TX_32X32, 70, 7)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace

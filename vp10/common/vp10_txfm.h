@@ -14,6 +14,7 @@
 #include <math.h>
 #include <assert.h>
 
+#include "vp10/common/enums.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
@@ -170,6 +171,44 @@ typedef struct TXFM_2D_FLIP_CFG {
   int lr_flip;  // flip left to right
   const TXFM_2D_CFG* cfg;
 } TXFM_2D_FLIP_CFG;
+
+static INLINE void set_flip_cfg(int tx_type, TXFM_2D_FLIP_CFG* cfg) {
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+      cfg->ud_flip = 0;
+      cfg->lr_flip = 0;
+      break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      cfg->ud_flip = 1;
+      cfg->lr_flip = 0;
+      break;
+    case DCT_FLIPADST:
+      cfg->ud_flip = 0;
+      cfg->lr_flip = 1;
+      break;
+    case FLIPADST_FLIPADST:
+      cfg->ud_flip = 1;
+      cfg->lr_flip = 1;
+      break;
+    case ADST_FLIPADST:
+      cfg->ud_flip = 0;
+      cfg->lr_flip = 1;
+      break;
+    case FLIPADST_ADST:
+      cfg->ud_flip = 1;
+      cfg->lr_flip = 0;
+      break;
+#endif  // CONFIG_EXT_TX
+    default:
+      cfg->ud_flip = 0;
+      cfg->lr_flip = 0;
+      assert(0);
+  }
+}
 
 #ifdef __cplusplus
 extern "C" {

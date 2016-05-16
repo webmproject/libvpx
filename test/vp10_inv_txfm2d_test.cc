@@ -14,6 +14,7 @@
 
 #include "./vp10_rtcd.h"
 #include "test/acm_random.h"
+#include "test/util.h"
 #include "test/vp10_txfm_test.h"
 #include "vp10/common/vp10_inv_txfm2d_cfg.h"
 
@@ -27,90 +28,133 @@ using libvpx_test::Inv_Txfm2d_Func;
 namespace {
 
 #if CONFIG_VP9_HIGHBITDEPTH
-const int txfm_size_num = 5;
-const int txfm_size_ls[5] = {4, 8, 16, 32, 64};
-const int txfm_type[4] = {DCT_DCT, DCT_ADST, ADST_ADST, ADST_DCT};
-const TXFM_2D_CFG* inv_txfm_cfg_ls[5][4] = {
-    {&inv_txfm_2d_cfg_dct_dct_4, &inv_txfm_2d_cfg_dct_adst_4,
-     &inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_dct_4},
-    {&inv_txfm_2d_cfg_dct_dct_8, &inv_txfm_2d_cfg_dct_adst_8,
-     &inv_txfm_2d_cfg_adst_adst_8, &inv_txfm_2d_cfg_adst_dct_8},
-    {&inv_txfm_2d_cfg_dct_dct_16, &inv_txfm_2d_cfg_dct_adst_16,
-     &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_dct_16},
-    {&inv_txfm_2d_cfg_dct_dct_32, &inv_txfm_2d_cfg_dct_adst_32,
-     &inv_txfm_2d_cfg_adst_adst_32, &inv_txfm_2d_cfg_adst_dct_32},
-    {&inv_txfm_2d_cfg_dct_dct_64, NULL, NULL, NULL}};
+// VP10InvTxfm2dParam argument list:
+// tx_type_, tx_size_, max_error_, max_avg_error_
+typedef std::tr1::tuple<TX_TYPE, TX_SIZE, double, double> VP10InvTxfm2dParam;
 
-const Fwd_Txfm2d_Func fwd_txfm_func_ls[5] = {
-    vp10_fwd_txfm2d_4x4_c, vp10_fwd_txfm2d_8x8_c, vp10_fwd_txfm2d_16x16_c,
-    vp10_fwd_txfm2d_32x32_c, vp10_fwd_txfm2d_64x64_c};
-const Inv_Txfm2d_Func inv_txfm_func_ls[5] = {
-    vp10_inv_txfm2d_add_4x4_c, vp10_inv_txfm2d_add_8x8_c,
-    vp10_inv_txfm2d_add_16x16_c, vp10_inv_txfm2d_add_32x32_c,
-    vp10_inv_txfm2d_add_64x64_c};
+class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
+ public:
+  virtual void SetUp() {
+    tx_type_ = GET_PARAM(0);
+    tx_size_ = GET_PARAM(1);
+    max_error_ = GET_PARAM(2);
+    max_avg_error_ = GET_PARAM(3);
+    txfm1d_size_ = libvpx_test::get_txfm1d_size(tx_size_);
+    txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
+    count_ = 500;
+    input_ = new int16_t[txfm2d_size_];
+    ref_input_ = new uint16_t[txfm2d_size_];
+    output_ = new int32_t[txfm2d_size_];
 
-const int txfm_type_num = 4;
+    input_ = reinterpret_cast<int16_t *>
+        (vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
+    ref_input_ = reinterpret_cast<uint16_t *>
+        (vpx_memalign(16, sizeof(uint16_t) * txfm2d_size_));
+    output_ = reinterpret_cast<int32_t *>
+        (vpx_memalign(16, sizeof(int32_t) * txfm2d_size_));
+  }
 
-TEST(vp10_inv_txfm2d, round_trip) {
-  for (int txfm_size_idx = 0; txfm_size_idx < txfm_size_num; ++txfm_size_idx) {
-    const int txfm_size = txfm_size_ls[txfm_size_idx];
-    const int sqr_txfm_size = txfm_size * txfm_size;
-    int16_t* input = new int16_t[sqr_txfm_size];
-    uint16_t* ref_input = new uint16_t[sqr_txfm_size];
-    int32_t* output = new int32_t[sqr_txfm_size];
-
-    for (int txfm_type_idx = 0; txfm_type_idx < txfm_type_num;
-         ++txfm_type_idx) {
-      const TXFM_2D_CFG* inv_txfm_cfg =
-          inv_txfm_cfg_ls[txfm_size_idx][txfm_type_idx];
-      if (inv_txfm_cfg != NULL) {
-        int tx_type = txfm_type[txfm_type_idx];
-        const Fwd_Txfm2d_Func fwd_txfm_func = fwd_txfm_func_ls[txfm_size_idx];
-        const Inv_Txfm2d_Func inv_txfm_func = inv_txfm_func_ls[txfm_size_idx];
-        const int count = 1000;
-        double avg_abs_error = 0;
-
-        if (txfm_size == 64 && tx_type != DCT_DCT)
-          continue;
-
-        ACMRandom rnd(ACMRandom::DeterministicSeed());
-        for (int ci = 0; ci < count; ci++) {
-          for (int ni = 0; ni < sqr_txfm_size; ++ni) {
-            if (ci == 0) {
-              int extreme_input = input_base - 1;
-              input[ni] = extreme_input;  // extreme case
-              ref_input[ni] = 0;
-            } else {
-              input[ni] = rnd.Rand16() % input_base;
-              ref_input[ni] = 0;
-            }
-          }
-
-          fwd_txfm_func(input, output, txfm_size, tx_type, bd);
-          inv_txfm_func(output, ref_input, txfm_size, tx_type, bd);
-
-          for (int ni = 0; ni < sqr_txfm_size; ++ni) {
-            EXPECT_LE(abs(input[ni] - ref_input[ni]), 4);
-          }
-          avg_abs_error += compute_avg_abs_error<int16_t, uint16_t>(
-              input, ref_input, sqr_txfm_size);
+  void RunRoundtripCheck() {
+    const Fwd_Txfm2d_Func fwd_txfm_func =
+        libvpx_test::fwd_txfm_func_ls[tx_size_];
+    const Inv_Txfm2d_Func inv_txfm_func =
+        libvpx_test::inv_txfm_func_ls[tx_size_];
+    double avg_abs_error = 0;
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    for (int ci = 0; ci < count_; ci++) {
+      for (int ni = 0; ni < txfm2d_size_; ++ni) {
+        if (ci == 0) {
+          int extreme_input = input_base - 1;
+          input_[ni] = extreme_input;  // extreme case
+          ref_input_[ni] = 0;
+        } else {
+          input_[ni] = rnd.Rand16() % input_base;
+          ref_input_[ni] = 0;
         }
-
-        avg_abs_error /= count;
-        // max_abs_avg_error comes from upper bound of
-        // printf("txfm_size: %d accuracy_avg_abs_error: %f\n",
-        // txfm_size, avg_abs_error);
-        // TODO(angiebird): this upper bound is from adst_adst_8
-        const double max_abs_avg_error = 0.4;
-        EXPECT_LE(avg_abs_error, max_abs_avg_error);
       }
+
+      fwd_txfm_func(input_, output_, txfm1d_size_, tx_type_, bd);
+      inv_txfm_func(output_, ref_input_, txfm1d_size_, tx_type_, bd);
+
+      for (int ni = 0; ni < txfm2d_size_; ++ni) {
+        EXPECT_GE(max_error_, abs(input_[ni] - ref_input_[ni]));
+      }
+      avg_abs_error += compute_avg_abs_error<int16_t, uint16_t>(
+          input_, ref_input_, txfm2d_size_);
     }
 
-    delete[] input;
-    delete[] ref_input;
-    delete[] output;
+    avg_abs_error /= count_;
+    // max_abs_avg_error comes from upper bound of
+    // printf("txfm1d_size: %d accuracy_avg_abs_error: %f\n",
+    // txfm1d_size_, avg_abs_error);
+    EXPECT_GE(max_avg_error_, avg_abs_error);
   }
-}
+
+  virtual void TearDown() {
+    vpx_free(input_);
+    vpx_free(output_);
+    vpx_free(ref_input_);
+  }
+
+ private:
+  int count_;
+  int max_error_;
+  double max_avg_error_;
+  TX_TYPE tx_type_;
+  TX_SIZE tx_size_;
+  int txfm1d_size_;
+  int txfm2d_size_;
+  Fwd_Txfm2d_Func fwd_txfm_;
+  Inv_Txfm2d_Func inv_txfm_;
+  int16_t* input_;
+  uint16_t* ref_input_;
+  int32_t* output_;
+};
+
+TEST_P(VP10InvTxfm2d, RunRoundtripCheck) { RunRoundtripCheck(); }
+
+INSTANTIATE_TEST_CASE_P(
+    C, VP10InvTxfm2d,
+    ::testing::Values(
+#if CONFIG_EXT_TX
+        VP10InvTxfm2dParam(FLIPADST_DCT, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(DCT_FLIPADST, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(ADST_FLIPADST, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(FLIPADST_ADST, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(FLIPADST_DCT, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(DCT_FLIPADST, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(ADST_FLIPADST, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(FLIPADST_ADST, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(FLIPADST_DCT, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(DCT_FLIPADST, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_16X16, 11, 0.04),
+        VP10InvTxfm2dParam(ADST_FLIPADST, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(FLIPADST_ADST, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(FLIPADST_DCT, TX_32X32, 4, 0.4),
+        VP10InvTxfm2dParam(DCT_FLIPADST, TX_32X32, 4, 0.4),
+        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_32X32, 4, 0.4),
+        VP10InvTxfm2dParam(ADST_FLIPADST, TX_32X32, 4, 0.4),
+        VP10InvTxfm2dParam(FLIPADST_ADST, TX_32X32, 4, 0.4),
+#endif
+        VP10InvTxfm2dParam(DCT_DCT, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(ADST_DCT, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(DCT_ADST, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(ADST_ADST, TX_4X4, 2, 0.002),
+        VP10InvTxfm2dParam(DCT_DCT, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(ADST_DCT, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(DCT_ADST, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(ADST_ADST, TX_8X8, 2, 0.02),
+        VP10InvTxfm2dParam(DCT_DCT, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(ADST_DCT, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(DCT_ADST, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(ADST_ADST, TX_16X16, 2, 0.04),
+        VP10InvTxfm2dParam(DCT_DCT, TX_32X32, 4, 0.4),
+        VP10InvTxfm2dParam(ADST_DCT, TX_32X32, 4, 0.4),
+        VP10InvTxfm2dParam(DCT_ADST, TX_32X32, 4, 0.4),
+        VP10InvTxfm2dParam(ADST_ADST, TX_32X32, 4, 0.4)));
+
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace
