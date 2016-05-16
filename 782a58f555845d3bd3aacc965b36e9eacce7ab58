@@ -51,6 +51,24 @@
       "revId": "782a58f555845d3bd3aacc965b36e9eacce7ab58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_bcabb686",
+        "filename": "vpx_dsp/arm/hadamard_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-16T21:09:48Z",
+      "side": 1,
+      "message": "breaking after \u003d still requires breaking inside the vtrnq call. matched it up like above, looks nice and clean",
+      "parentUuid": "d242b02f_63d61dd3",
+      "revId": "782a58f555845d3bd3aacc965b36e9eacce7ab58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
