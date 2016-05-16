@@ -627,7 +627,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   #inv txfm
   add_proto qw/void vp10_inv_txfm2d_add_4x4/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
-  specialize qw/vp10_inv_txfm2d_add_4x4/;
+  specialize qw/vp10_inv_txfm2d_add_4x4 sse4_1/;
   add_proto qw/void vp10_inv_txfm2d_add_8x8/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_inv_txfm2d_add_8x8/;
   add_proto qw/void vp10_inv_txfm2d_add_16x16/, "const int32_t *input, uint16_t *output, int stride, int tx_type, int bd";
