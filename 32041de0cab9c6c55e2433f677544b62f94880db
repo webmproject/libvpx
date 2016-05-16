@@ -22,6 +22,30 @@
       "revId": "32041de0cab9c6c55e2433f677544b62f94880db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_c69515ed",
+        "filename": "vp10/common/vp10_convolve.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-05-16T18:50:07Z",
+      "side": 1,
+      "message": "The filter_size used here is for extended block in the direction perpendicular to the filtering operation, so that one has enough reference pixels for the second stage filtering.\n\nWe expect the filter sizes for two directions can be different.\n\nI added a comment here.",
+      "parentUuid": "d242b02f_46e925ca",
+      "range": {
+        "startLine": 150,
+        "startChar": 22,
+        "endLine": 150,
+        "endChar": 37
+      },
+      "revId": "32041de0cab9c6c55e2433f677544b62f94880db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
