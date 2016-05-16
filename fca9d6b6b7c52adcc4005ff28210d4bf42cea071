@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_699c326c",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 4640,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-05-16T19:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_a62489b7",
+      "range": {
+        "startLine": 4638,
+        "startChar": 0,
+        "endLine": 4640,
+        "endChar": 52
+      },
+      "revId": "fca9d6b6b7c52adcc4005ff28210d4bf42cea071",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_e65051c5",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 10
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d242b02f_a6948951",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-05-16T19:54:29Z",
+      "side": 1,
+      "message": "Really should be (SWITCHABLE_FILTERS - 1) * (SWITCHABLE_FILTERS - 1).\n\nBut that involves interactions with ext-interp experiment, which would make the encoder too slow for unit tests.\n\nI added a note here to explain the design and the TODO needed.",
+      "parentUuid": "d242b02f_e65051c5",
+      "range": {
+        "startLine": 326,
+        "startChar": 23,
+        "endLine": 326,
+        "endChar": 24
+      },
+      "revId": "fca9d6b6b7c52adcc4005ff28210d4bf42cea071",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_065c7ddd",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 10
@@ -59,6 +107,30 @@
       "writtenOn": "2016-05-16T19:38:15Z",
       "side": 1,
       "message": "same here, is this 4 for filter choices for x and y directions for motion vectors used by the first and second reference frames in compound mode?",
+      "range": {
+        "startLine": 6604,
+        "startChar": 28,
+        "endLine": 6604,
+        "endChar": 29
+      },
+      "revId": "fca9d6b6b7c52adcc4005ff28210d4bf42cea071",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_098d6e3c",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 6604,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-05-16T19:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_065c7ddd",
       "range": {
         "startLine": 6604,
         "startChar": 28,
