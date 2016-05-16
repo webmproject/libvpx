@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_a62489b7",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 4640,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-16T19:38:15Z",
+      "side": 1,
+      "message": "Unless you plan to change get_cm_interp_filter() to try something new, I think this can be removed. i.e. there is no effect to set cm-\u003einterp_filter to SWITCHABLE when it is checked to be SWITCHABLE already.\n\nSome of the confusion might have come from that we have used this variable for two purposes, one is the \"mode\" of how encoder encodes interpolation filter type choices within a frame, the other is the default choice of block level interpolation filter type. It might be a good idea later we actually make two variable to serve each purpose respectively.",
+      "range": {
+        "startLine": 4638,
+        "startChar": 0,
+        "endLine": 4640,
+        "endChar": 52
+      },
+      "revId": "fca9d6b6b7c52adcc4005ff28210d4bf42cea071",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_e65051c5",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-16T19:38:15Z",
+      "side": 1,
+      "message": "Maybe use macro/const with meaningful names to replace these magic numbers.",
+      "range": {
+        "startLine": 326,
+        "startChar": 23,
+        "endLine": 326,
+        "endChar": 24
+      },
+      "revId": "fca9d6b6b7c52adcc4005ff28210d4bf42cea071",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_065c7ddd",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 6604,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-16T19:38:15Z",
+      "side": 1,
+      "message": "same here, is this 4 for filter choices for x and y directions for motion vectors used by the first and second reference frames in compound mode?",
+      "range": {
+        "startLine": 6604,
+        "startChar": 28,
+        "endLine": 6604,
+        "endChar": 29
+      },
+      "revId": "fca9d6b6b7c52adcc4005ff28210d4bf42cea071",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
