@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_30ae0794",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "you should break before the \u0027:\u0027 and indent 4 spaces",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_50b393f7",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "seems this is unnecessary",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_90d09b06",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "you\u0027re using loadu in the code are you sure you wanted to align these allocations?",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_70c88f69",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "prefer sizeof(var) over sizeof(type)",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_b0c2f744",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "methods come before data members:\n\nhttps://google.github.io/styleguide/cppguide.html#Declaration_Order\n\nthough wouldn\u0027t clamp() in vpx_dsp_common.h be enough?",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_10e4abf1",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "localize these to the loops",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_30336752",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_3000c759",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "prefer placing these at the top, just after local variable declarations",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_50055367",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T03:03:12Z",
+      "side": 1,
+      "message": "are these useful in some case?",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
