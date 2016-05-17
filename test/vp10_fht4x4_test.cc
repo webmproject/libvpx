@@ -38,8 +38,10 @@ void fht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
 typedef void (*IhighbdHtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                               int tx_type, int bd);
 typedef void (*HBDFhtFunc)(const int16_t *input, int32_t *output, int stride,
-                        int tx_type, int bd);
-// Target optimized function, tx_type, bit depth
+                           int tx_type, int bd);
+
+// HighbdHt4x4Param argument list:
+// <Target optimized function, tx_type, bit depth>
 typedef tuple<HBDFhtFunc, int, int> HighbdHt4x4Param;
 
 void highbe_fht4x4_ref(const int16_t *in, int32_t *out, int stride,
@@ -96,12 +98,12 @@ class VP10HighbdTrans4x4HT : public ::testing::TestWithParam<HighbdHt4x4Param> {
     mask_ = (1 << bit_depth_) - 1;
     num_coeffs_ = 16;
 
-    input_ = reinterpret_cast<int16_t *>
-       (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
-    output_ = reinterpret_cast<int32_t *>
-        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
-    output_ref_ = reinterpret_cast<int32_t *>
-        (vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
+    input_ = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    output_ = reinterpret_cast<int32_t *>(
+        vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
+    output_ref_ = reinterpret_cast<int32_t *>(
+        vpx_memalign(16, sizeof(int32_t) * num_coeffs_));
   }
 
   virtual void TearDown() {
@@ -197,9 +199,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VP10HighbdTrans4x4HT,
-    ::testing::Values(
+const HighbdHt4x4Param kArrayHighbdHt4x4Param[] = {
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 10),
@@ -207,7 +207,25 @@ INSTANTIATE_TEST_CASE_P(
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 10),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 12),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12)));
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12),
+#if CONFIG_EXT_TX
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 4, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 4, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 5, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 5, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 6, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 6, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 7, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 7, 12),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 8, 10),
+         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 8, 12),
+#endif  // CONFIG_EXT_TX
+};
+
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, VP10HighbdTrans4x4HT,
+      ::testing::ValuesIn(kArrayHighbdHt4x4Param));
+
 #endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace
