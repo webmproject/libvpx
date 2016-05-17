@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d242b02f_10290b7c",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T04:09:02Z",
+      "side": 1,
+      "message": "movh for consistency?",
+      "revId": "a05025e6409b8029c9013fb08d26988ee3032013",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_301e074e",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T04:09:02Z",
+      "side": 1,
+      "message": "same here and a few other places",
+      "revId": "a05025e6409b8029c9013fb08d26988ee3032013",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d242b02f_9035fbca",
+        "filename": "vpx_dsp/x86/variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T04:09:02Z",
+      "side": 1,
+      "message": "this could probably be simplified later",
+      "revId": "a05025e6409b8029c9013fb08d26988ee3032013",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
