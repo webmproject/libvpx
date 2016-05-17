@@ -7146,7 +7146,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       mbmi->use_wedge_interinter = 1;
       rs = vp10_cost_literal(get_interinter_wedge_bits(bsize)) +
           vp10_cost_bit(cm->fc->wedge_interinter_prob[bsize], 1);
-      wedge_types = (1 << get_wedge_bits_lookup[bsize]);
+      wedge_types = (1 << get_wedge_bits_lookup(bsize));
 
       vp10_build_inter_predictors_for_planes_single_buf(
           xd, bsize, 0, 0,  mi_row, mi_col, 0, preds0, strides);
@@ -7384,7 +7384,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       // Disbale wedge search if source variance is small
       if (x->source_variance > cpi->sf.disable_wedge_search_var_thresh) {
         mbmi->use_wedge_interintra = 1;
-        wedge_types = (1 << get_wedge_bits_lookup[bsize]);
+        wedge_types = (1 << get_wedge_bits_lookup(bsize));
         rwedge = vp10_cost_literal(get_interintra_wedge_bits(bsize)) +
             vp10_cost_bit(cm->fc->wedge_interintra_prob[bsize], 1);
         for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {

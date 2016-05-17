@@ -147,51 +147,60 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_EXT_INTER
-#define WEDGE_BITS_2      2
-#define WEDGE_BITS_3      3
-#define WEDGE_BITS_4      4
-#define WEDGE_BITS_5      5
-#define WEDGE_NONE       -1
+#define MAX_WEDGE_TYPES   (1 << 5)
+
 #define WEDGE_WEIGHT_BITS 6
 
-static const int get_wedge_bits_lookup[BLOCK_SIZES] = {
-  0,
-  0,
-  0,
-  WEDGE_BITS_4,
-  WEDGE_BITS_4,
-  WEDGE_BITS_4,
-  WEDGE_BITS_4,
-  WEDGE_BITS_4,
-  WEDGE_BITS_4,
-  WEDGE_BITS_4,
-  0,
-  0,
-  0,
-#if CONFIG_EXT_PARTITION
-  0,
-  0,
-  0,
-#endif  // CONFIG_EXT_PARTITION
-};
+#define WEDGE_NONE       -1
+
+// Angles are with respect to horizontal anti-clockwise
+typedef enum {
+  WEDGE_HORIZONTAL = 0,
+  WEDGE_VERTICAL = 1,
+  WEDGE_OBLIQUE27 = 2,
+  WEDGE_OBLIQUE63 = 3,
+  WEDGE_OBLIQUE117 = 4,
+  WEDGE_OBLIQUE153 = 5,
+  WEDGE_DIRECTIONS
+} WedgeDirectionType;
+
+// 3-tuple: {direction, x_offset, y_offset}
+typedef struct {
+  WedgeDirectionType direction;
+  int x_offset;
+  int y_offset;
+} wedge_code_type;
+
+typedef struct {
+  int bits;
+  const wedge_code_type *codebook;
+  uint8_t *signflip;
+  int smoother;
+} wedge_params_type;
+
+extern const wedge_params_type wedge_params_lookup[BLOCK_SIZES];
+
+static INLINE int get_wedge_bits_lookup(BLOCK_SIZE sb_type) {
+  return wedge_params_lookup[sb_type].bits;
+}
 
 static INLINE int is_interinter_wedge_used(BLOCK_SIZE sb_type) {
   (void) sb_type;
-  return get_wedge_bits_lookup[sb_type] > 0;
+  return wedge_params_lookup[sb_type].bits > 0;
 }
 
 static INLINE int get_interinter_wedge_bits(BLOCK_SIZE sb_type) {
-  const int wbits = get_wedge_bits_lookup[sb_type];
+  const int wbits = wedge_params_lookup[sb_type].bits;
   return (wbits > 0) ? wbits + 1 : 0;
 }
 
 static INLINE int is_interintra_wedge_used(BLOCK_SIZE sb_type) {
   (void) sb_type;
-  return get_wedge_bits_lookup[sb_type] > 0;
+  return wedge_params_lookup[sb_type].bits > 0;
 }
 
 static INLINE int get_interintra_wedge_bits(BLOCK_SIZE sb_type) {
-  return get_wedge_bits_lookup[sb_type];
+  return wedge_params_lookup[sb_type].bits;
 }
 #endif  // CONFIG_EXT_INTER
 
