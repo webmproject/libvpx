@@ -2007,8 +2007,8 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
   uint16_t best_dst16[8 * 8];
 #endif
 
-  memcpy(ta, a, sizeof(ta));
-  memcpy(tl, l, sizeof(tl));
+  memcpy(ta, a, num_4x4_blocks_wide * sizeof(a[0]));
+  memcpy(tl, l, num_4x4_blocks_high * sizeof(l[0]));
   xd->mi[0]->mbmi.tx_size = TX_4X4;
   xd->mi[0]->mbmi.palette_mode_info.palette_size[0] = 0;
 
@@ -2030,8 +2030,8 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
           continue;
       }
 
-      memcpy(tempa, ta, sizeof(ta));
-      memcpy(templ, tl, sizeof(tl));
+      memcpy(tempa, ta, num_4x4_blocks_wide * sizeof(ta[0]));
+      memcpy(templ, tl, num_4x4_blocks_high * sizeof(tl[0]));
 
       for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
         for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
@@ -2115,8 +2115,8 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
         *bestdistortion = distortion;
         best_rd = this_rd;
         *best_mode = mode;
-        memcpy(a, tempa, sizeof(tempa));
-        memcpy(l, templ, sizeof(templ));
+        memcpy(a, tempa, num_4x4_blocks_wide * sizeof(tempa[0]));
+        memcpy(l, templ, num_4x4_blocks_high * sizeof(templ[0]));
         for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy) {
           memcpy(best_dst16 + idy * 8,
                  CONVERT_TO_SHORTPTR(dst_init + idy * dst_stride),
@@ -2156,8 +2156,8 @@ next_highbd:
         continue;
     }
 
-    memcpy(tempa, ta, sizeof(ta));
-    memcpy(templ, tl, sizeof(tl));
+    memcpy(tempa, ta, num_4x4_blocks_wide * sizeof(ta[0]));
+    memcpy(templ, tl, num_4x4_blocks_high * sizeof(tl[0]));
 
     for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
       for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
@@ -2240,8 +2240,8 @@ next_highbd:
       *bestdistortion = distortion;
       best_rd = this_rd;
       *best_mode = mode;
-      memcpy(a, tempa, sizeof(tempa));
-      memcpy(l, templ, sizeof(templ));
+      memcpy(a, tempa, num_4x4_blocks_wide * sizeof(tempa[0]));
+      memcpy(l, templ, num_4x4_blocks_high * sizeof(templ[0]));
       for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
         memcpy(best_dst + idy * 8, dst_init + idy * dst_stride,
                num_4x4_blocks_wide * 4);
@@ -2277,11 +2277,7 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP10_COMP *cpi, MACROBLOCK *mb,
   int64_t total_distortion = 0;
   int tot_rate_y = 0;
   int64_t total_rd = 0;
-  ENTROPY_CONTEXT t_above[4], t_left[4];
   const int *bmode_costs = cpi->mbmode_cost[0];
-
-  memcpy(t_above, xd->plane[0].above_context, sizeof(t_above));
-  memcpy(t_left, xd->plane[0].left_context, sizeof(t_left));
 
 #if CONFIG_EXT_INTRA
   mic->mbmi.ext_intra_mode_info.use_ext_intra_mode[0] = 0;
@@ -2308,7 +2304,9 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP10_COMP *cpi, MACROBLOCK *mb,
       }
 
       this_rd = rd_pick_intra4x4block(cpi, mb, idy, idx, &best_mode,
-                                      bmode_costs, t_above + idx, t_left + idy,
+                                      bmode_costs,
+                                      xd->plane[0].above_context + idx,
+                                      xd->plane[0].left_context + idy,
                                       &r, &ry, &d, bsize, best_rd - total_rd);
       if (this_rd >= best_rd - total_rd)
         return INT64_MAX;
