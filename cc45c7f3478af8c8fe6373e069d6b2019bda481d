@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1716fa8f_08c40707",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-17T23:57:05Z",
+      "side": 1,
+      "message": "indent is inconsistent here",
+      "revId": "cc45c7f3478af8c8fe6373e069d6b2019bda481d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
