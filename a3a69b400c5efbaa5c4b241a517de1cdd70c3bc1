@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9733ca1f_61be7671",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_30ae0794",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_50b393f7",
         "filename": "test/vp10_iht4x4_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-05-17T03:03:12Z",
       "side": 1,
       "message": "seems this is unnecessary",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9733ca1f_813c5ad1",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_50b393f7",
       "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9733ca1f_21010ef8",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Hybrid transform has 16-byte alignment requirement. Change to use aligned load. Theoretically aligned load is faster.",
+      "parentUuid": "d242b02f_90d09b06",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_70c88f69",
         "filename": "test/vp10_iht4x4_test.cc",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2016-05-17T03:03:12Z",
       "side": 1,
       "message": "prefer sizeof(var) over sizeof(type)",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9733ca1f_8158da20",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_70c88f69",
       "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9733ca1f_c1ab02e7",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Done. See my change.",
+      "parentUuid": "d242b02f_b0c2f744",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_10e4abf1",
         "filename": "test/vp10_iht4x4_test.cc",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2016-05-17T03:03:12Z",
       "side": 1,
       "message": "localize these to the loops",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9733ca1f_a1919eab",
+        "filename": "test/vp10_iht4x4_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_10e4abf1",
       "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "9733ca1f_21c90e37",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_30336752",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_3000c759",
         "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
         "patchSetId": 2
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "9733ca1f_a1d4feca",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d242b02f_3000c759",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d242b02f_50055367",
         "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
         "patchSetId": 2
@@ -149,6 +293,24 @@
       "writtenOn": "2016-05-17T03:03:12Z",
       "side": 1,
       "message": "are these useful in some case?",
+      "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9733ca1f_8101fa60",
+        "filename": "vp10/common/x86/highbd_inv_txfm_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-18T19:34:23Z",
+      "side": 1,
+      "message": "They\u0027re useful for flip DCT/ADST cases.",
+      "parentUuid": "d242b02f_50055367",
       "revId": "a3a69b400c5efbaa5c4b241a517de1cdd70c3bc1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
