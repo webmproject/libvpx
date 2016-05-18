@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1716fa8f_5f24f3a1",
+        "filename": "vp10/common/filter.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-18T18:06:53Z",
+      "side": 1,
+      "message": "add ( and ) for integrity of the macro",
+      "range": {
+        "startLine": 53,
+        "startChar": 34,
+        "endLine": 53,
+        "endChar": 63
+      },
+      "revId": "a04106134623c45267139abfa42549c471ed7387",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1716fa8f_bf3887c2",
+        "filename": "vp10/common/pred_common.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-18T18:06:53Z",
+      "side": 1,
+      "message": "dir is passing by value, const is not necessary",
+      "range": {
+        "startLine": 19,
+        "startChar": 41,
+        "endLine": 19,
+        "endChar": 47
+      },
+      "revId": "a04106134623c45267139abfa42549c471ed7387",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
