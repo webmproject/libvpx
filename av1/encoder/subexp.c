@@ -117,15 +117,16 @@ void av1_write_prob_diff_update(aom_writer *w, aom_prob newp, aom_prob oldp) {
 
 int av1_prob_diff_update_savings_search(const unsigned int *ct, aom_prob oldp,
                                         aom_prob *bestp, aom_prob upd) {
-  const int old_b = cost_branch256(ct, oldp);
+  const uint32_t old_b = cost_branch256(ct, oldp);
   int bestsavings = 0;
   aom_prob newp, bestnewp = oldp;
   const int step = *bestp > oldp ? -1 : 1;
 
   for (newp = *bestp; newp != oldp; newp += step) {
-    const int new_b = cost_branch256(ct, newp);
-    const int update_b = prob_diff_update_cost(newp, oldp) + av1_cost_upd256;
-    const int savings = old_b - new_b - update_b;
+    const uint32_t new_b = cost_branch256(ct, newp);
+    const uint32_t update_b =
+        prob_diff_update_cost(newp, oldp) + av1_cost_upd256;
+    const int savings = (int)((int64_t)old_b - new_b - update_b);
     if (savings > bestsavings) {
       bestsavings = savings;
       bestnewp = newp;
