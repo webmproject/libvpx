@@ -90,24 +90,6 @@ void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
                                    int use_fast_coef_casting);
 #endif  // CONFIG_SUPERTX
 
-static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(VP10_COMP *cpi,
-                                                          const int ref) {
-  // Use up-sampled reference frames.
-  int ref_idx = 0;
-  if (ref == LAST_FRAME)
-#if CONFIG_EXT_REFS
-    ref_idx = cpi->lst_fb_idxes[ref - LAST_FRAME];
-#else
-    ref_idx = cpi->lst_fb_idx;
-#endif  // CONFIG_EXT_REFS
-  else if (ref == GOLDEN_FRAME)
-    ref_idx = cpi->gld_fb_idx;
-  else if (ref == ALTREF_FRAME)
-    ref_idx = cpi->alt_fb_idx;
-
-  return &cpi->upsampled_ref_bufs[cpi->upsampled_ref_idx[ref_idx]].buf;
-}
-
 #if CONFIG_OBMC
 void calc_target_weighted_pred(VP10_COMMON *cm,
                                MACROBLOCK *x,

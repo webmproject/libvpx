@@ -659,7 +659,7 @@ static INLINE int get_ref_frame_map_idx(const VP10_COMP *cpi,
 }
 
 static INLINE int get_ref_frame_buf_idx(const VP10_COMP *const cpi,
-                                        int ref_frame) {
+                                        MV_REFERENCE_FRAME ref_frame) {
   const VP10_COMMON *const cm = &cpi->common;
   const int map_idx = get_ref_frame_map_idx(cpi, ref_frame);
   return (map_idx != INVALID_IDX) ? cm->ref_frame_map[map_idx] : INVALID_IDX;
@@ -671,6 +671,14 @@ static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
   const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
   return
       buf_idx != INVALID_IDX ? &cm->buffer_pool->frame_bufs[buf_idx].buf : NULL;
+}
+
+static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(
+    VP10_COMP *cpi, const MV_REFERENCE_FRAME ref_frame) {
+  // Use up-sampled reference frames.
+  const int buf_idx =
+      cpi->upsampled_ref_idx[get_ref_frame_map_idx(cpi, ref_frame)];
+  return &cpi->upsampled_ref_bufs[buf_idx].buf;
 }
 
 static INLINE unsigned int get_token_alloc(int mb_rows, int mb_cols) {
