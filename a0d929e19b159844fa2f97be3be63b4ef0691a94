@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d76b822f_c3e75652",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-18T21:12:13Z",
+      "side": 1,
+      "message": "31 or 32?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 56
+      },
+      "revId": "a0d929e19b159844fa2f97be3be63b4ef0691a94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d76b822f_a3da5a83",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-18T21:12:13Z",
+      "side": 1,
+      "message": "A better comment would be:\n// For block sizes smaller than 16 the maximum value is X which fits in [u]int32_t.\n\nOtherwise it just explains the code and doesn\u0027t add any information.",
+      "revId": "a0d929e19b159844fa2f97be3be63b4ef0691a94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d76b822f_83dd5e80",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-18T21:12:13Z",
+      "side": 1,
+      "message": "Is this also valid for block sizes under 16x16? \u0027\u003c\u003d\u0027 if so. Although looking at the old code it seems like this function is only valid for block sizes \u003e\u003d 16. I was trying to dig through the calling code to see what gets used but couldn\u0027t find anything conclusive.\n\nWould you please add\nassert(block_size \u003e\u003d 16);\nto this function and the _c version?",
+      "range": {
+        "startLine": 29,
+        "startChar": 6,
+        "endLine": 29,
+        "endChar": 16
+      },
+      "revId": "a0d929e19b159844fa2f97be3be63b4ef0691a94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d76b822f_03d32e70",
+        "filename": "vp9/encoder/x86/vp9_error_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-05-18T21:12:13Z",
+      "side": 1,
+      "message": "; the sum of 2 32bit signed integers ... etc",
+      "range": {
+        "startLine": 41,
+        "startChar": 36,
+        "endLine": 41,
+        "endChar": 37
+      },
+      "revId": "a0d929e19b159844fa2f97be3be63b4ef0691a94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
