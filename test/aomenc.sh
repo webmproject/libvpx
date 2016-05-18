@@ -115,106 +115,6 @@ aomenc() {
     "$@" ${devnull}
 }
 
-aomenc_vp8_ivf() {
-  if [ "$(aomenc_can_encode_vp8)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/vp8.ivf"
-    aomenc $(yuv_input_hantro_collage) \
-      --codec=vp8 \
-      --limit="${TEST_FRAMES}" \
-      --ivf \
-      --output="${output}"
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-  fi
-}
-
-aomenc_vp8_webm() {
-  if [ "$(aomenc_can_encode_vp8)" = "yes" ] && \
-     [ "$(webm_io_available)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/vp8.webm"
-    aomenc $(yuv_input_hantro_collage) \
-      --codec=vp8 \
-      --limit="${TEST_FRAMES}" \
-      --output="${output}"
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-  fi
-}
-
-aomenc_vp8_webm_rt() {
-  if [ "$(aomenc_can_encode_vp8)" = "yes" ] && \
-     [ "$(webm_io_available)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/vp8_rt.webm"
-    aomenc $(yuv_input_hantro_collage) \
-      $(aomenc_rt_params vp8) \
-      --output="${output}"
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-  fi
-}
-
-aomenc_vp8_webm_2pass() {
-  if [ "$(aomenc_can_encode_vp8)" = "yes" ] && \
-     [ "$(webm_io_available)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/vp8.webm"
-    aomenc $(yuv_input_hantro_collage) \
-      --codec=vp8 \
-      --limit="${TEST_FRAMES}" \
-      --output="${output}" \
-      --passes=2
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-  fi
-}
-
-aomenc_vp8_webm_lag10_frames20() {
-  if [ "$(aomenc_can_encode_vp8)" = "yes" ] && \
-     [ "$(webm_io_available)" = "yes" ]; then
-    local readonly lag_total_frames=20
-    local readonly lag_frames=10
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/vp8_lag10_frames20.webm"
-    aomenc $(yuv_input_hantro_collage) \
-      --codec=vp8 \
-      --limit="${lag_total_frames}" \
-      --lag-in-frames="${lag_frames}" \
-      --output="${output}" \
-      --auto-alt-ref=1 \
-      --passes=2
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-  fi
-}
-
-aomenc_vp8_ivf_piped_input() {
-  if [ "$(aomenc_can_encode_vp8)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/vp8_piped_input.ivf"
-    aomenc_pipe $(yuv_input_hantro_collage) \
-      --codec=vp8 \
-      --limit="${TEST_FRAMES}" \
-      --ivf \
-      --output="${output}"
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-  fi
-}
-
 aomenc_av1_ivf() {
   if [ "$(aomenc_can_encode_av1)" = "yes" ]; then
     local readonly output="${AOM_TEST_OUTPUT_DIR}/av1.ivf"
@@ -244,78 +144,6 @@ aomenc_av1_webm() {
       elog "Output file does not exist."
       return 1
     fi
-  fi
-}
-
-aomenc_av1_webm_rt() {
-  if [ "$(aomenc_can_encode_av1)" = "yes" ] && \
-     [ "$(webm_io_available)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/av1_rt.webm"
-    aomenc $(yuv_input_hantro_collage) \
-      $(aomenc_rt_params av1) \
-      --output="${output}"
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-  fi
-}
-
-aomenc_av1_webm_rt_multithread_tiled() {
-  if [ "$(aomenc_can_encode_av1)" = "yes" ] && \
-     [ "$(webm_io_available)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/av1_rt_multithread_tiled.webm"
-    local readonly tilethread_min=2
-    local readonly tilethread_max=4
-    local readonly num_threads="$(seq ${tilethread_min} ${tilethread_max})"
-    local readonly num_tile_cols="$(seq ${tilethread_min} ${tilethread_max})"
-
-    for threads in ${num_threads}; do
-      for tile_cols in ${num_tile_cols}; do
-        aomenc $(y4m_input_720p) \
-          $(aomenc_rt_params av1) \
-          --threads=${threads} \
-          --tile-columns=${tile_cols} \
-          --output="${output}"
-      done
-    done
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-
-    rm "${output}"
-  fi
-}
-
-aomenc_av1_webm_rt_multithread_tiled_frameparallel() {
-  if [ "$(aomenc_can_encode_av1)" = "yes" ] && \
-     [ "$(webm_io_available)" = "yes" ]; then
-    local readonly output="${AOM_TEST_OUTPUT_DIR}/av1_rt_mt_t_fp.webm"
-    local readonly tilethread_min=2
-    local readonly tilethread_max=4
-    local readonly num_threads="$(seq ${tilethread_min} ${tilethread_max})"
-    local readonly num_tile_cols="$(seq ${tilethread_min} ${tilethread_max})"
-
-    for threads in ${num_threads}; do
-      for tile_cols in ${num_tile_cols}; do
-        aomenc $(y4m_input_720p) \
-          $(aomenc_rt_params av1) \
-          --threads=${threads} \
-          --tile-columns=${tile_cols} \
-          --frame-parallel=1 \
-          --output="${output}"
-      done
-    done
-
-    if [ ! -e "${output}" ]; then
-      elog "Output file does not exist."
-      return 1
-    fi
-
-    rm "${output}"
   fi
 }
 
@@ -409,17 +237,8 @@ aomenc_av1_webm_non_square_par() {
   fi
 }
 
-aomenc_tests="aomenc_vp8_ivf
-              aomenc_vp8_webm
-              aomenc_vp8_webm_rt
-              aomenc_vp8_webm_2pass
-              aomenc_vp8_webm_lag10_frames20
-              aomenc_vp8_ivf_piped_input
-              aomenc_av1_ivf
+aomenc_tests="aomenc_av1_ivf
               aomenc_av1_webm
-              aomenc_av1_webm_rt
-              aomenc_av1_webm_rt_multithread_tiled
-              aomenc_av1_webm_rt_multithread_tiled_frameparallel
               aomenc_av1_webm_2pass
               aomenc_av1_ivf_lossless
               aomenc_av1_ivf_minq0_maxq0
