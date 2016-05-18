@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1716fa8f_5a5d210e",
+        "filename": "vp10/common/pred_common.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-18T19:07:19Z",
+      "side": 1,
+      "message": "do we expect ref_mbmi is same as mi-\u003embmi?",
+      "range": {
+        "startLine": 21,
+        "startChar": 61,
+        "endLine": 21,
+        "endChar": 69
+      },
+      "revId": "efc0814a75a0da5fba285ab1474e76be306fb757",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1716fa8f_1a53a907",
+        "filename": "vp10/common/pred_common.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-05-18T19:07:19Z",
+      "side": 1,
+      "message": "Internal to has_subpel_mv_components(), code handles both \u003e\u003d BLOCK_8X8 and \u003c BLOCK_8X8 for subpel_mv, so it is a bit confusing to see we handle both branches here again",
+      "range": {
+        "startLine": 26,
+        "startChar": 2,
+        "endLine": 36,
+        "endChar": 3
+      },
+      "revId": "efc0814a75a0da5fba285ab1474e76be306fb757",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
