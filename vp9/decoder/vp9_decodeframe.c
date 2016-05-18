@@ -525,8 +525,8 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
   }
 
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    high_inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
-                         subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
+    highbd_inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
+                           subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
   } else {
     inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
                     subpel_y, sf, w, h, ref, kernel, xs, ys);
@@ -699,8 +699,8 @@ static void dec_build_inter_predictors(VPxWorker *const worker, MACROBLOCKD *xd,
   }
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    high_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
-                         subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
+    highbd_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
+                           subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
   } else {
     inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
                     subpel_y, sf, w, h, ref, kernel, xs, ys);
