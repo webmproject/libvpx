@@ -1315,11 +1315,16 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   BufferPool *const pool = cm->buffer_pool;
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     if (vpx_rb_read_bit(rb)) {
-      YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
-      width = buf->y_crop_width;
-      height = buf->y_crop_height;
-      found = 1;
-      break;
+      if (cm->frame_refs[i].idx != INVALID_IDX) {
+        YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
+        width = buf->y_crop_width;
+        height = buf->y_crop_height;
+        found = 1;
+        break;
+      } else {
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Failed to decode frame size");
+      }
     }
   }
 
