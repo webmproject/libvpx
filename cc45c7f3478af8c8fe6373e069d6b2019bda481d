@@ -16,6 +16,24 @@
       "revId": "cc45c7f3478af8c8fe6373e069d6b2019bda481d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1716fa8f_d92c839f",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-05-18T11:24:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1716fa8f_08c40707",
+      "revId": "cc45c7f3478af8c8fe6373e069d6b2019bda481d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
