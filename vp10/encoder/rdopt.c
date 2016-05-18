@@ -7323,6 +7323,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     DECLARE_ALIGNED(16, uint8_t,
                     intrapred_[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
     uint8_t *intrapred;
+
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
       intrapred = CONVERT_TO_BYTEPTR(intrapred_);
@@ -7347,34 +7348,34 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
           xd, bsize, 0, intrapred, MAX_SB_SIZE);
       vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
                               intrapred, MAX_SB_SIZE);
-      vp10_subtract_plane(x, bsize, 0);
-      rd = estimate_yrd_for_sb(cpi, bsize, x, &rate_sum, &dist_sum,
-                               &tmp_skip_txfm_sb, &tmp_skip_sse_sb,
-                               INT64_MAX);
-      if (rd != INT64_MAX)
-        rd = RDCOST(x->rdmult, x->rddiv, rate_mv + rmode + rate_sum, dist_sum);
+      model_rd_for_sb(cpi, bsize, x, xd, 0, 0, &rate_sum, &dist_sum,
+                      &tmp_skip_txfm_sb, &tmp_skip_sse_sb);
+      rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate_mv + rate_sum, dist_sum);
       if (rd < best_interintra_rd) {
         best_interintra_rd = rd;
         best_interintra_mode = mbmi->interintra_mode;
       }
     }
     mbmi->interintra_mode = best_interintra_mode;
+    rmode = interintra_mode_cost[mbmi->interintra_mode];
+    vp10_build_intra_predictors_for_interintra(
+        xd, bsize, 0, intrapred, MAX_SB_SIZE);
+    vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
+                            intrapred, MAX_SB_SIZE);
+    vp10_subtract_plane(x, bsize, 0);
+    rd = estimate_yrd_for_sb(cpi, bsize, x, &rate_sum, &dist_sum,
+                             &tmp_skip_txfm_sb, &tmp_skip_sse_sb,
+                             INT64_MAX);
+    if (rd != INT64_MAX)
+      rd = RDCOST(x->rdmult, x->rddiv, rate_mv + rmode + rate_sum, dist_sum);
+    best_interintra_rd = rd;
+
     if (ref_best_rd < INT64_MAX &&
         best_interintra_rd > 2 * ref_best_rd) {
       return INT64_MAX;
     }
-    vp10_build_intra_predictors_for_interintra(
-        xd, bsize, 0, intrapred, MAX_SB_SIZE);
-
-    rmode = interintra_mode_cost[mbmi->interintra_mode];
     if (is_interintra_wedge_used(bsize)) {
       rwedge = vp10_cost_bit(cm->fc->wedge_interintra_prob[bsize], 0);
-      vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
-                              intrapred, MAX_SB_SIZE);
-      vp10_subtract_plane(x, bsize, 0);
-      rd = estimate_yrd_for_sb(cpi, bsize, x, &rate_sum, &dist_sum,
-                               &tmp_skip_txfm_sb, &tmp_skip_sse_sb,
-                               INT64_MAX);
       if (rd != INT64_MAX)
         rd = RDCOST(x->rdmult, x->rddiv,
                     rmode + rate_mv + rwedge + rate_sum, dist_sum);
@@ -7382,7 +7383,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
       // Disbale wedge search if source variance is small
       if (x->source_variance > cpi->sf.disable_wedge_search_var_thresh) {
-
         mbmi->use_wedge_interintra = 1;
         wedge_types = (1 << get_wedge_bits_lookup[bsize]);
         rwedge = vp10_cost_literal(get_interintra_wedge_bits(bsize)) +
