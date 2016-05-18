@@ -320,11 +320,11 @@ unsigned int vpx_mse16x16_sse2(const uint8_t *src, int src_stride,
                                           int height, unsigned int *sse, \
                                           void *unused0, void *unused)
 #define DECLS(opt1, opt2) \
-  DECL(4, opt2); \
+  DECL(4, opt1); \
   DECL(8, opt1); \
   DECL(16, opt1)
 
-DECLS(sse2, sse);
+DECLS(sse2, sse2);
 DECLS(ssse3, ssse3);
 #undef DECLS
 #undef DECL
@@ -380,10 +380,10 @@ FN(16,  8, 16, 4, 3, opt1, (int32_t), (int32_t)); \
 FN(8,  16,  8, 3, 4, opt1, (int32_t), (int32_t)); \
 FN(8,   8,  8, 3, 3, opt1, (int32_t), (int32_t)); \
 FN(8,   4,  8, 3, 2, opt1, (int32_t), (int32_t)); \
-FN(4,   8,  4, 2, 3, opt2, (int32_t), (int32_t)); \
-FN(4,   4,  4, 2, 2, opt2, (int32_t), (int32_t))
+FN(4,   8,  4, 2, 3, opt1, (int32_t), (int32_t)); \
+FN(4,   4,  4, 2, 2, opt1, (int32_t), (int32_t))
 
-FNS(sse2, sse);
+FNS(sse2, sse2);
 FNS(ssse3, ssse3);
 
 #undef FNS
@@ -401,11 +401,11 @@ int vpx_sub_pixel_avg_variance##w##xh_##opt(const uint8_t *src, \
                                             int height, unsigned int *sse, \
                                             void *unused0, void *unused)
 #define DECLS(opt1, opt2) \
-DECL(4, opt2); \
+DECL(4, opt1); \
 DECL(8, opt1); \
 DECL(16, opt1)
 
-DECLS(sse2, sse);
+DECLS(sse2, sse2);
 DECLS(ssse3, ssse3);
 #undef DECL
 #undef DECLS
@@ -466,8 +466,8 @@ FN(16,  8, 16, 4, 3, opt1, (uint32_t), (int32_t)); \
 FN(8,  16,  8, 3, 4, opt1, (uint32_t), (int32_t)); \
 FN(8,   8,  8, 3, 3, opt1, (uint32_t), (int32_t)); \
 FN(8,   4,  8, 3, 2, opt1, (uint32_t), (int32_t)); \
-FN(4,   8,  4, 2, 3, opt2, (uint32_t), (int32_t)); \
-FN(4,   4,  4, 2, 2, opt2, (uint32_t), (int32_t))
+FN(4,   8,  4, 2, 3, opt1, (uint32_t), (int32_t)); \
+FN(4,   4,  4, 2, 2, opt1, (uint32_t), (int32_t))
 
 FNS(sse2, sse);
 FNS(ssse3, ssse3);
