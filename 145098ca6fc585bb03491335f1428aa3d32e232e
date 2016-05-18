@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1716fa8f_8b53d159",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-18T01:02:57Z",
+      "side": 1,
+      "message": "try to keep these lines short; gerrit will start to warn at \u003e 72, at most keep them at 80 unless it\u0027s a url or similar unbreakable string",
+      "revId": "145098ca6fc585bb03491335f1428aa3d32e232e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1716fa8f_ebe1a5af",
+        "filename": "vp10/encoder/x86/dct_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-18T01:02:57Z",
+      "side": 1,
+      "message": "unfortunately some builds are setup such that duplicate basenames (dct_sse2) will cause problems when generating objects in a flattened directory. most common is to rename the .c to \u003cname\u003e_intrin_\u003carch\u003e.c (dct_intrin_sse2.c)",
+      "revId": "145098ca6fc585bb03491335f1428aa3d32e232e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1716fa8f_6bce5540",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-18T01:02:57Z",
+      "side": 1,
+      "message": "add a TODO(linfeng) here noting the duplication with vp10 should be resolved",
+      "revId": "145098ca6fc585bb03491335f1428aa3d32e232e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
