@@ -20,19 +20,6 @@
 #include "vp9/common/vp9_reconintra.h"
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void high_inter_predictor(const uint8_t *src, int src_stride,
-                                 uint8_t *dst, int dst_stride,
-                                 const int subpel_x,
-                                 const int subpel_y,
-                                 const struct scale_factors *sf,
-                                 int w, int h, int ref,
-                                 const InterpKernel *kernel,
-                                 int xs, int ys, int bd) {
-  sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
-      src, src_stride, dst, dst_stride,
-      kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
-}
-
 void vp9_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       uint8_t *dst, int dst_stride,
                                       const MV *src_mv,
@@ -50,8 +37,9 @@ void vp9_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
 
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
-  high_inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
-                       sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4, bd);
+  highbd_inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
+                         sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4,
+                         bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -222,9 +210,9 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
 
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                           subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys,
-                           xd->bd);
+      highbd_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
+                             subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys,
+                             xd->bd);
     } else {
       inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                       subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
