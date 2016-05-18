@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "d76b822f_635dc20e",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-05-18T20:21:25Z",
+      "side": 1,
+      "message": "I\u0027m not sure it\u0027s fine, the InternalFrameBuffer doesn\u0027t have plane and stride fields.\n\nIn the latest patch I added a bool that avoid these checks, and avoid casting ext_fb to ExternalFrameBuffer if no external functions have been set. Does that work for you?",
+      "parentUuid": "d242b02f_c0398c93",
+      "range": {
+        "startLine": 183,
+        "startChar": 10,
+        "endLine": 183,
+        "endChar": 37
+      },
+      "revId": "4af561eeef087dd0d82221258b2f1964fd0e342e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "72a2e4c0_54476cae",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 11
