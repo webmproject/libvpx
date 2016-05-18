@@ -132,7 +132,7 @@ void VP10HighbdTrans16x16HT::RunBitexactCheck() {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int i, j;
   const int stride = 16;
-  const int num_tests = 200000;
+  const int num_tests = 1000;
 
   for (i = 0; i < num_tests; ++i) {
     for (j = 0; j < num_coeffs_; ++j) {
@@ -208,6 +208,7 @@ const HighbdHt16x16Param kArrayHBDHt16x16Param_sse4_1[] = {
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 2, 12),
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 3, 10),
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 3, 12),
+#if CONFIG_EXT_TX
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 4, 10),
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 4, 12),
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 5, 10),
@@ -218,7 +219,6 @@ const HighbdHt16x16Param kArrayHBDHt16x16Param_sse4_1[] = {
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 7, 12),
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 8, 10),
     make_tuple(&vp10_fwd_txfm2d_16x16_sse4_1, 8, 12),
-#if CONFIG_EXT_TX
 #endif  // CONFIG_EXT_TX
 };
 INSTANTIATE_TEST_CASE_P(
