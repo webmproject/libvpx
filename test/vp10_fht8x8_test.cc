@@ -207,7 +207,19 @@ const HighbdHt8x8Param kArrayHBDHt8x8Param_sse4_1[] = {
     make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 2, 10),
     make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 2, 12),
     make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 3, 10),
-    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 3, 12)
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 3, 12),
+#if CONFIG_EXT_TX
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 4, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 4, 12),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 5, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 5, 12),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 6, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 6, 12),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 7, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 7, 12),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 8, 10),
+    make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 8, 12),
+#endif  // CONFIG_EXT_TX
 };
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HighbdTrans8x8HT,
