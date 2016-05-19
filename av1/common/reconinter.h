@@ -27,9 +27,9 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
                                    const struct scale_factors *sf, int w, int h,
                                    int ref_idx,
 #if CONFIG_DUAL_FILTER
-                                   const INTERP_FILTER *interp_filter,
+                                   const InterpFilter *interp_filter,
 #else
-                                   const INTERP_FILTER interp_filter,
+                                   const InterpFilter interp_filter,
 #endif
                                    int xs, int ys) {
 #if CONFIG_DUAL_FILTER
@@ -86,9 +86,9 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
                                           const struct scale_factors *sf, int w,
                                           int h, int ref,
 #if CONFIG_DUAL_FILTER
-                                          const INTERP_FILTER *interp_filter,
+                                          const InterpFilter *interp_filter,
 #else
-                                          const INTERP_FILTER interp_filter,
+                                          const InterpFilter interp_filter,
 #endif
                                           int xs, int ys, int bd) {
 #if CONFIG_DUAL_FILTER
@@ -229,9 +229,9 @@ static INLINE void av1_make_inter_predictor(
     const int subpel_x, const int subpel_y, const struct scale_factors *sf,
     int w, int h, int ref,
 #if CONFIG_DUAL_FILTER
-    const INTERP_FILTER *interp_filter,
+    const InterpFilter *interp_filter,
 #else
-    const INTERP_FILTER interp_filter,
+    const InterpFilter interp_filter,
 #endif
     int xs, int ys, const MACROBLOCKD *xd) {
   (void)xd;
@@ -252,9 +252,9 @@ void av1_make_masked_inter_predictor(const uint8_t *pre, int pre_stride,
                                      const struct scale_factors *sf, int w,
                                      int h,
 #if CONFIG_DUAL_FILTER
-                                     const INTERP_FILTER *interp_filter,
+                                     const InterpFilter *interp_filter,
 #else
-                                     const INTERP_FILTER interp_filter,
+                                     const InterpFilter interp_filter,
 #endif
                                      int xs, int ys,
 #if CONFIG_SUPERTX
@@ -371,9 +371,9 @@ void av1_build_inter_predictor(const uint8_t *src, int src_stride, uint8_t *dst,
                                const struct scale_factors *sf, int w, int h,
                                int do_avg,
 #if CONFIG_DUAL_FILTER
-                               const INTERP_FILTER *interp_filter,
+                               const InterpFilter *interp_filter,
 #else
-                               const INTERP_FILTER interp_filter,
+                               const InterpFilter interp_filter,
 #endif
                                enum mv_precision precision, int x, int y);
 
@@ -382,9 +382,9 @@ void av1_highbd_build_inter_predictor(
     const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride,
     const MV *mv_q3, const struct scale_factors *sf, int w, int h, int do_avg,
 #if CONFIG_DUAL_FILTER
-    const INTERP_FILTER *interp_filter,
+    const InterpFilter *interp_filter,
 #else
-    const INTERP_FILTER interp_filter,
+    const InterpFilter interp_filter,
 #endif
     enum mv_precision precision, int x, int y, int bd);
 #endif

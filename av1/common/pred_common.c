@@ -16,10 +16,10 @@
 
 // Returns a context number for the given MB prediction signal
 #if CONFIG_DUAL_FILTER
-static INTERP_FILTER get_ref_filter_type(const MODE_INFO *mi,
-                                         const MACROBLOCKD *xd, int dir,
-                                         MV_REFERENCE_FRAME ref_frame) {
-  INTERP_FILTER ref_type = SWITCHABLE_FILTERS;
+static InterpFilter get_ref_filter_type(const MODE_INFO *mi,
+                                        const MACROBLOCKD *xd, int dir,
+                                        MV_REFERENCE_FRAME ref_frame) {
+  InterpFilter ref_type = SWITCHABLE_FILTERS;
   const MB_MODE_INFO *ref_mbmi = &mi->mbmi;
   int use_subpel[2] = {
     has_subpel_mv_component(mi, xd, dir),

@@ -96,9 +96,9 @@ static void convolve_copy(const uint8_t *src, int src_stride, uint8_t *dst,
 void av1_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
                   int dst_stride, int w, int h,
 #if CONFIG_DUAL_FILTER
-                  const INTERP_FILTER *interp_filter,
+                  const InterpFilter *interp_filter,
 #else
-                  const INTERP_FILTER interp_filter,
+                  const InterpFilter interp_filter,
 #endif
                   const int subpel_x_q4, int x_step_q4, const int subpel_y_q4,
                   int y_step_q4, int ref_idx) {
@@ -270,9 +270,9 @@ static void highbd_convolve_copy(const uint16_t *src, int src_stride,
 void av1_highbd_convolve(const uint8_t *src8, int src_stride, uint8_t *dst8,
                          int dst_stride, int w, int h,
 #if CONFIG_DUAL_FILTER
-                         const INTERP_FILTER *interp_filter,
+                         const InterpFilter *interp_filter,
 #else
-                         const INTERP_FILTER interp_filter,
+                         const InterpFilter interp_filter,
 #endif
                          const int subpel_x_q4, int x_step_q4,
                          const int subpel_y_q4, int y_step_q4, int ref_idx,

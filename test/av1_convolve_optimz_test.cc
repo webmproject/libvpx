@@ -34,14 +34,14 @@ typedef void (*hbd_conv_filter_t)(const uint16_t *, int, uint16_t *, int, int,
 //  <convolve_horiz_func, convolve_vert_func,
 //  <width, height>, filter_params, subpel_x_q4, avg>
 typedef tuple<int, int> BlockDimension;
-typedef tuple<conv_filter_t, conv_filter_t, BlockDimension, INTERP_FILTER, int,
+typedef tuple<conv_filter_t, conv_filter_t, BlockDimension, InterpFilter, int,
               int> ConvParams;
 #if CONFIG_AOM_HIGHBITDEPTH
 // Test parameter list:
 //  <convolve_horiz_func, convolve_vert_func,
 //  <width, height>, filter_params, subpel_x_q4, avg, bit_dpeth>
 typedef tuple<hbd_conv_filter_t, hbd_conv_filter_t, BlockDimension,
-              INTERP_FILTER, int, int, int> HbdConvParams;
+              InterpFilter, int, int, int> HbdConvParams;
 #endif
 
 // Note:
@@ -211,7 +211,7 @@ const BlockDimension kBlockDim[] = {
 };
 
 // 10/12-tap filters
-const INTERP_FILTER kFilter[] = { 6, 4, 2 };
+const InterpFilter kFilter[] = { 6, 4, 2 };
 
 const int kSubpelQ4[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 

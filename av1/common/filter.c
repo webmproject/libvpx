@@ -222,7 +222,7 @@ static const InterpFilterParams av1_interp_temporalfilter_12tap = {
 #endif  // USE_TEMPORALFILTER_12TAP
 
 InterpFilterParams av1_get_interp_filter_params(
-    const INTERP_FILTER interp_filter) {
+    const InterpFilter interp_filter) {
 #if USE_TEMPORALFILTER_12TAP
   if (interp_filter == TEMPORALFILTER_12TAP)
     return av1_interp_temporalfilter_12tap;
@@ -230,7 +230,7 @@ InterpFilterParams av1_get_interp_filter_params(
   return av1_interp_filter_params_list[interp_filter];
 }
 
-const int16_t *av1_get_interp_filter_kernel(const INTERP_FILTER interp_filter) {
+const int16_t *av1_get_interp_filter_kernel(const InterpFilter interp_filter) {
 #if USE_TEMPORALFILTER_12TAP
   if (interp_filter == TEMPORALFILTER_12TAP)
     return av1_interp_temporalfilter_12tap.filter_ptr;

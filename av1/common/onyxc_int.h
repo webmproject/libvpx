@@ -271,7 +271,7 @@ typedef struct AV1Common {
   uint8_t *current_frame_seg_map;
   int seg_map_alloc_size;
 
-  INTERP_FILTER interp_filter;
+  InterpFilter interp_filter;
 
   loop_filter_info_n lf_info;
 #if CONFIG_LOOP_RESTORATION

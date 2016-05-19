@@ -453,7 +453,7 @@ typedef struct SPEED_FEATURES {
   int encode_breakout_thresh;
 
   // default interp filter choice
-  INTERP_FILTER default_interp_filter;
+  InterpFilter default_interp_filter;
 
   // Early termination in transform size search, which only applies while
   // tx_size_search_method is USE_FULL_RD.

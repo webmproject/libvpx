@@ -418,9 +418,9 @@ void av1_make_masked_inter_predictor(const uint8_t *pre, int pre_stride,
                                      const struct scale_factors *sf, int w,
                                      int h,
 #if CONFIG_DUAL_FILTER
-                                     const INTERP_FILTER *interp_filter,
+                                     const InterpFilter *interp_filter,
 #else
-                                     const INTERP_FILTER interp_filter,
+                                     const InterpFilter interp_filter,
 #endif
                                      int xs, int ys,
 #if CONFIG_SUPERTX
@@ -431,11 +431,11 @@ void av1_make_masked_inter_predictor(const uint8_t *pre, int pre_stride,
 // The prediction filter types used here should be those for
 // the second reference block.
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER tmp_ipf[4] = {
+  InterpFilter tmp_ipf[4] = {
     interp_filter[2], interp_filter[3], interp_filter[2], interp_filter[3],
   };
 #else
-  INTERP_FILTER tmp_ipf = interp_filter;
+  InterpFilter tmp_ipf = interp_filter;
 #endif  // CONFIG_DUAL_FILTER
 #if CONFIG_AOM_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint8_t, tmp_dst_[2 * MAX_SB_SQUARE]);
@@ -491,9 +491,9 @@ void av1_highbd_build_inter_predictor(
     const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride,
     const MV *src_mv, const struct scale_factors *sf, int w, int h, int ref,
 #if CONFIG_DUAL_FILTER
-    const INTERP_FILTER *interp_filter,
+    const InterpFilter *interp_filter,
 #else
-    const INTERP_FILTER interp_filter,
+    const InterpFilter interp_filter,
 #endif
     enum mv_precision precision, int x, int y, int bd) {
   const int is_q4 = precision == MV_PRECISION_Q4;
@@ -516,9 +516,9 @@ void av1_build_inter_predictor(const uint8_t *src, int src_stride, uint8_t *dst,
                                const struct scale_factors *sf, int w, int h,
                                int ref,
 #if CONFIG_DUAL_FILTER
-                               const INTERP_FILTER *interp_filter,
+                               const InterpFilter *interp_filter,
 #else
-                               const INTERP_FILTER interp_filter,
+                               const InterpFilter interp_filter,
 #endif
                                enum mv_precision precision, int x, int y) {
   const int is_q4 = precision == MV_PRECISION_Q4;

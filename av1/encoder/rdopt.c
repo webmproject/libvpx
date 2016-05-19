@@ -4569,12 +4569,12 @@ static void joint_motion_search(AV1_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   int_mv ref_mv[2];
   int ite, ref;
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = {
+  InterpFilter interp_filter[4] = {
     mbmi->interp_filter[0], mbmi->interp_filter[1], mbmi->interp_filter[2],
     mbmi->interp_filter[3],
   };
 #else
-  const INTERP_FILTER interp_filter = mbmi->interp_filter;
+  const InterpFilter interp_filter = mbmi->interp_filter;
 #endif
   struct scale_factors sf;
 
@@ -6335,11 +6335,11 @@ static int estimate_wedge_sign(const AV1_COMP *cpi, const MACROBLOCK *x,
 #endif  // CONFIG_EXT_INTER
 
 #if !CONFIG_DUAL_FILTER
-static INTERP_FILTER predict_interp_filter(
+static InterpFilter predict_interp_filter(
     const AV1_COMP *cpi, const MACROBLOCK *x, const BLOCK_SIZE bsize,
     const int mi_row, const int mi_col,
-    INTERP_FILTER (*single_filter)[TOTAL_REFS_PER_FRAME]) {
-  INTERP_FILTER best_filter = SWITCHABLE;
+    InterpFilter (*single_filter)[TOTAL_REFS_PER_FRAME]) {
+  InterpFilter best_filter = SWITCHABLE;
   const AV1_COMMON *cm = &cpi->common;
   const MACROBLOCKD *xd = &x->e_mbd;
   int bsl = mi_width_log2_lookup[bsize];
@@ -6359,7 +6359,7 @@ static INTERP_FILTER predict_interp_filter(
   return SWITCHABLE;
 #else
   if (pred_filter_search) {
-    INTERP_FILTER af = SWITCHABLE, lf = SWITCHABLE;
+    InterpFilter af = SWITCHABLE, lf = SWITCHABLE;
     if (xd->up_available) af = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
     if (xd->left_available) lf = xd->mi[-1]->mbmi.interp_filter;
 
@@ -6647,7 +6647,7 @@ static int64_t handle_inter_mode(
 #else
     int_mv single_newmv[TOTAL_REFS_PER_FRAME],
 #endif  // CONFIG_EXT_INTER
-    INTERP_FILTER (*single_filter)[TOTAL_REFS_PER_FRAME],
+    InterpFilter (*single_filter)[TOTAL_REFS_PER_FRAME],
     int (*single_skippable)[TOTAL_REFS_PER_FRAME], int64_t *psse,
     const int64_t ref_best_rd) {
   AV1_COMMON *cm = &cpi->common;
@@ -6712,11 +6712,11 @@ static int64_t handle_inter_mode(
   // Index use case:
   // {0, 1} -> (vertical, horizontal) filter types for the first ref frame
   // {2, 3} -> (vertical, horizontal) filter types for the second ref frame
-  INTERP_FILTER best_filter[4] = {
+  InterpFilter best_filter[4] = {
     SWITCHABLE, SWITCHABLE, SWITCHABLE, SWITCHABLE,
   };
 #else
-  INTERP_FILTER best_filter = SWITCHABLE;
+  InterpFilter best_filter = SWITCHABLE;
 #endif
 
   int skip_txfm_sb = 0;
@@ -7510,12 +7510,12 @@ static int64_t handle_inter_mode(
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_EXT_INTERP
 #if CONFIG_DUAL_FILTER
-    INTERP_FILTER obmc_interp_filter[2][2] = {
+    InterpFilter obmc_interp_filter[2][2] = {
       { mbmi->interp_filter[0], mbmi->interp_filter[1] },  // obmc == 0
       { mbmi->interp_filter[0], mbmi->interp_filter[1] }   // obmc == 1
     };
 #else
-    INTERP_FILTER obmc_interp_filter[2] = {
+    InterpFilter obmc_interp_filter[2] = {
       mbmi->interp_filter,  // obmc == 0
       mbmi->interp_filter   // obmc == 1
     };
@@ -8193,7 +8193,7 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
 #else
   int_mv single_newmv[TOTAL_REFS_PER_FRAME] = { { 0 } };
 #endif  // CONFIG_EXT_INTER
-  INTERP_FILTER single_inter_filter[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
+  InterpFilter single_inter_filter[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
   int single_skippable[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
   static const int flag_list[TOTAL_REFS_PER_FRAME] = {
     0,
@@ -8982,10 +8982,9 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
           clamp_mv2(&cur_mv.as_mv, xd);
 
           if (!mv_check_bounds(x, &cur_mv.as_mv)) {
-            INTERP_FILTER
-            dummy_single_inter_filter[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME] = {
-              { 0 }
-            };
+            InterpFilter
+                dummy_single_inter_filter[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME] =
+                    { { 0 } };
             int dummy_single_skippable[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME] = {
               { 0 }
             };
@@ -9763,7 +9762,7 @@ void av1_rd_pick_inter_mode_sb_seg_skip(AV1_COMP *cpi, TileDataEnc *tile_data,
   unsigned int ref_costs_single[TOTAL_REFS_PER_FRAME];
   unsigned int ref_costs_comp[TOTAL_REFS_PER_FRAME];
   aom_prob comp_mode_p;
-  INTERP_FILTER best_filter = SWITCHABLE;
+  InterpFilter best_filter = SWITCHABLE;
   int64_t this_rd = INT64_MAX;
   int rate2 = 0;
   const int64_t distortion2 = 0;
@@ -9923,9 +9922,9 @@ void av1_rd_pick_inter_mode_sub8x8(struct AV1_COMP *cpi, TileDataEnc *tile_data,
   unsigned int ref_costs_comp[TOTAL_REFS_PER_FRAME];
   aom_prob comp_mode_p;
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER tmp_best_filter[4] = { 0 };
+  InterpFilter tmp_best_filter[4] = { 0 };
 #else
-  INTERP_FILTER tmp_best_filter = SWITCHABLE;
+  InterpFilter tmp_best_filter = SWITCHABLE;
 #endif
   int rate_uv_intra, rate_uv_tokenonly;
   int64_t dist_uv;

@@ -32,12 +32,12 @@ void setup_convolve() {
 TEST(AV1ConvolveTest, av1_convolve8) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
+  InterpFilter interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                    EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter[0]);
 #else
-  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
+  InterpFilter interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter);
 #endif
@@ -79,12 +79,12 @@ TEST(AV1ConvolveTest, av1_convolve8) {
 TEST(AV1ConvolveTest, av1_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
+  InterpFilter interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                    EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter[0]);
 #else
-  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
+  InterpFilter interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter);
 #endif
@@ -139,12 +139,12 @@ TEST(AV1ConvolveTest, av1_convolve) {
 TEST(AV1ConvolveTest, av1_convolve_avg) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
+  InterpFilter interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                    EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter[0]);
 #else
-  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
+  InterpFilter interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter);
 #endif
@@ -205,12 +205,12 @@ TEST(AV1ConvolveTest, av1_convolve_avg) {
 TEST(AV1ConvolveTest, av1_highbd_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
+  InterpFilter interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                    EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter[0]);
 #else
-  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
+  InterpFilter interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter);
 #endif
@@ -266,12 +266,12 @@ TEST(AV1ConvolveTest, av1_highbd_convolve) {
 TEST(AV1ConvolveTest, av1_highbd_convolve_avg) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
+  InterpFilter interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                    EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter[0]);
 #else
-  INTERP_FILTER interp_filter = EIGHTTAP_REGULAR;
+  InterpFilter interp_filter = EIGHTTAP_REGULAR;
   InterpFilterParams filter_params =
       av1_get_interp_filter_params(interp_filter);
 #endif
@@ -337,7 +337,7 @@ TEST(AV1ConvolveTest, av1_highbd_convolve_avg) {
 #define highbd_convolve_speed(func, block_size, frame_size)                  \
   TEST(AV1ConvolveTest, func##_speed_##block_size##_##frame_size) {          \
     ACMRandom rnd(ACMRandom::DeterministicSeed());                           \
-    INTERP_FILTER interp_filter = EIGHTTAP;                                  \
+    InterpFilter interp_filter = EIGHTTAP;                                   \
     InterpFilterParams filter_params =                                       \
         av1_get_interp_filter_params(interp_filter);                         \
     int filter_size = filter_params.tap;                                     \
@@ -389,7 +389,7 @@ TEST(AV1ConvolveTest, av1_highbd_convolve_avg) {
 #define lowbd_convolve_speed(func, block_size, frame_size)                  \
   TEST(AV1ConvolveTest, func##_speed_l_##block_size##_##frame_size) {       \
     ACMRandom rnd(ACMRandom::DeterministicSeed());                          \
-    INTERP_FILTER interp_filter = EIGHTTAP;                                 \
+    InterpFilter interp_filter = EIGHTTAP;                                  \
     InterpFilterParams filter_params =                                      \
         av1_get_interp_filter_params(interp_filter);                        \
     int filter_size = filter_params.tap;                                    \

@@ -862,12 +862,12 @@ static MOTION_VARIATION read_motvar_block(AV1_COMMON *const cm,
 }
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
-static INLINE INTERP_FILTER read_interp_filter(AV1_COMMON *const cm,
-                                               MACROBLOCKD *const xd,
+static INLINE InterpFilter read_interp_filter(AV1_COMMON *const cm,
+                                              MACROBLOCKD *const xd,
 #if CONFIG_DUAL_FILTER
-                                               int dir,
+                                              int dir,
 #endif
-                                               aom_reader *r) {
+                                              aom_reader *r) {
 #if CONFIG_EXT_INTERP
   if (!av1_is_interp_needed(xd)) return EIGHTTAP_REGULAR;
 #endif
@@ -880,7 +880,7 @@ static INLINE INTERP_FILTER read_interp_filter(AV1_COMMON *const cm,
     const int ctx = av1_get_pred_context_switchable_interp(xd);
 #endif
     FRAME_COUNTS *counts = xd->counts;
-    const INTERP_FILTER type = (INTERP_FILTER)aom_read_tree(
+    const InterpFilter type = (InterpFilter)aom_read_tree(
         r, av1_switchable_interp_tree, cm->fc->switchable_interp_prob[ctx]);
     if (counts) ++counts->switchable_interp[ctx][type];
     return type;

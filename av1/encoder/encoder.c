@@ -4429,7 +4429,7 @@ static void set_arf_sign_bias(AV1_COMP *cpi) {
 }
 
 static int setup_interp_filter_search_mask(AV1_COMP *cpi) {
-  INTERP_FILTER ifilter;
+  InterpFilter ifilter;
   int ref_total[TOTAL_REFS_PER_FRAME] = { 0 };
   MV_REFERENCE_FRAME ref;
   int mask = 0;

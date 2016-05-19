@@ -203,9 +203,9 @@ typedef struct {
 
 // Only for INTER blocks
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4];
+  InterpFilter interp_filter[4];
 #else
-  INTERP_FILTER interp_filter;
+  InterpFilter interp_filter;
 #endif
   MV_REFERENCE_FRAME ref_frame[2];
   TX_TYPE tx_type;
