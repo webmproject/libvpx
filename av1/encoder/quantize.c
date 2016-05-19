@@ -1050,7 +1050,7 @@ void av1_highbd_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs,
 #endif
 
 static void invert_quant(int16_t *quant, int16_t *shift, int d) {
-  unsigned t;
+  uint32_t t;
   int l, m;
   t = d;
   for (l = 0; t > 1; l++) t >>= 1;
