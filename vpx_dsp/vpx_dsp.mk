@@ -39,7 +39,6 @@ endif
 DSP_SRCS-yes += intrapred.c
 
 ifeq ($(CONFIG_USE_X86INC),yes)
-DSP_SRCS-$(HAVE_MMX) += x86/loopfilter_mmx.asm
 DSP_SRCS-$(HAVE_SSE) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
