@@ -320,13 +320,17 @@ void vp10_highbd_convolve(const uint8_t *src8, int src_stride, uint8_t *dst8,
     int temp_stride = MAX_BLOCK_WIDTH;
 
 #if CONFIG_DUAL_FILTER
-    InterpFilterParams filter_params =
+    InterpFilterParams filter_params_x =
         vp10_get_interp_filter_params(interp_filter[1 + 2 * ref_idx]);
+    InterpFilterParams filter_params_y =
+        vp10_get_interp_filter_params(interp_filter[0 + 2 * ref_idx]);
+    InterpFilterParams filter_params = filter_params_x;
+    int filter_size = filter_params_y.taps;
 #else
     InterpFilterParams filter_params =
         vp10_get_interp_filter_params(interp_filter);
-#endif
     int filter_size = filter_params.taps;
+#endif
 
     int intermediate_height =
         (((h - 1) * y_step_q4 + subpel_y_q4) >> SUBPEL_BITS) + filter_size;
@@ -336,9 +340,7 @@ void vp10_highbd_convolve(const uint8_t *src8, int src_stride, uint8_t *dst8,
                           filter_params, subpel_x_q4, x_step_q4, 0, bd);
 
 #if CONFIG_DUAL_FILTER
-    filter_params = vp10_get_interp_filter_params(interp_filter[2 * ref_idx]);
-#else
-    filter_params = vp10_get_interp_filter_params(interp_filter);
+    filter_params = filter_params_y;
 #endif
     filter_size = filter_params.taps;
     assert(filter_params.taps <= MAX_FILTER_TAP);
