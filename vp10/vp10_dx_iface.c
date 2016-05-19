@@ -921,6 +921,32 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
   }
 }
 
+static vpx_codec_err_t ctrl_get_new_frame_image(vpx_codec_alg_priv_t *ctx,
+                                                va_list args) {
+  vpx_image_t *new_img = va_arg(args, vpx_image_t *);
+
+  // Only support this function in serial decode.
+  if (ctx->frame_parallel_decode) {
+    set_error_detail(ctx, "Not supported in frame parallel decode");
+    return VPX_CODEC_INCAPABLE;
+  }
+
+  if (new_img) {
+    YV12_BUFFER_CONFIG new_frame;
+    VPxWorker *const worker = ctx->frame_workers;
+    FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
+
+    if (vp10_get_frame_to_show(frame_worker_data->pbi, &new_frame) == 0) {
+      yuvconfig2image(new_img, &new_frame, NULL);
+      return VPX_CODEC_OK;
+    } else {
+      return VPX_CODEC_ERROR;
+    }
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
 static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
                                          va_list args) {
 #if CONFIG_VP9_POSTPROC
@@ -1156,6 +1182,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP9D_GET_DISPLAY_SIZE,         ctrl_get_render_size},
   {VP9D_GET_BIT_DEPTH,            ctrl_get_bit_depth},
   {VP9D_GET_FRAME_SIZE,           ctrl_get_frame_size},
+  {VP10_GET_NEW_FRAME_IMAGE,      ctrl_get_new_frame_image},
 
   { -1, NULL},
 };

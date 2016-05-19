@@ -1856,26 +1856,25 @@ static void test_decode(struct stream_state  *stream,
     vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &ref_enc);
     vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &ref_dec);
   } else {
-    struct vp9_ref_frame ref_enc, ref_dec;
+    vpx_codec_control(&stream->encoder, VP10_GET_NEW_FRAME_IMAGE, &enc_img);
+    vpx_codec_control(&stream->decoder, VP10_GET_NEW_FRAME_IMAGE, &dec_img);
 
-    ref_enc.idx = 0;
-    ref_dec.idx = 0;
-    vpx_codec_control(&stream->encoder, VP9_GET_REFERENCE, &ref_enc);
-    enc_img = ref_enc.img;
-    vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref_dec);
-    dec_img = ref_dec.img;
 #if CONFIG_VP9_HIGHBITDEPTH
     if ((enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) !=
         (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
       if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
-        vpx_img_alloc(&enc_img, enc_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+        vpx_image_t enc_hbd_img;
+        vpx_img_alloc(&enc_hbd_img, enc_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
                       enc_img.d_w, enc_img.d_h, 16);
-        vpx_img_truncate_16_to_8(&enc_img, &ref_enc.img);
+        vpx_img_truncate_16_to_8(&enc_hbd_img, &enc_img);
+        enc_img = enc_hbd_img;
       }
       if (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
-        vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+        vpx_image_t dec_hbd_img;
+        vpx_img_alloc(&dec_hbd_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
                       dec_img.d_w, dec_img.d_h, 16);
-        vpx_img_truncate_16_to_8(&dec_img, &ref_dec.img);
+        vpx_img_truncate_16_to_8(&dec_hbd_img, &dec_img);
+        dec_img = dec_hbd_img;
       }
     }
 #endif

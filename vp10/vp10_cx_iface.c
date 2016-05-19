@@ -1141,6 +1141,24 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
   }
 }
 
+static vpx_codec_err_t ctrl_get_new_frame_image(vpx_codec_alg_priv_t *ctx,
+                                                va_list args) {
+  vpx_image_t *const new_img = va_arg(args, vpx_image_t *);
+
+  if (new_img != NULL) {
+    YV12_BUFFER_CONFIG new_frame;
+
+    if (vp10_get_last_show_frame(ctx->cpi, &new_frame) == 0) {
+      yuvconfig2image(new_img, &new_frame, NULL);
+      return VPX_CODEC_OK;
+    } else {
+      return VPX_CODEC_ERROR;
+    }
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
 static vpx_codec_err_t ctrl_set_previewpp(vpx_codec_alg_priv_t *ctx,
                                           va_list args) {
 #if CONFIG_VP9_POSTPROC
@@ -1330,6 +1348,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8E_GET_LAST_QUANTIZER_64,        ctrl_get_quantizer64},
   {VP9_GET_REFERENCE,                 ctrl_get_reference},
   {VP9E_GET_ACTIVEMAP,                ctrl_get_active_map},
+  {VP10_GET_NEW_FRAME_IMAGE,          ctrl_get_new_frame_image},
 
   { -1, NULL},
 };

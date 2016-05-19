@@ -56,6 +56,9 @@ enum vp8_com_control_id {
    */
   VP9_GET_REFERENCE           = 128,  /**< get a pointer to a reference frame */
   VP8_COMMON_CTRL_ID_MAX,
+
+  VP10_GET_NEW_FRAME_IMAGE    = 192,  /**< get a pointer to the new frame */
+
   VP8_DECODER_CTRL_ID_START   = 256
 };
 
@@ -137,6 +140,8 @@ VPX_CTRL_USE_TYPE(VP8_SET_DBG_DISPLAY_MV,      int)
 #define VPX_CTRL_VP8_SET_DBG_DISPLAY_MV
 VPX_CTRL_USE_TYPE(VP9_GET_REFERENCE,           vp9_ref_frame_t *)
 #define VPX_CTRL_VP9_GET_REFERENCE
+VPX_CTRL_USE_TYPE(VP10_GET_NEW_FRAME_IMAGE,    vpx_image_t *)
+#define VPX_CTRL_VP10_GET_NEW_FRAME_IMAGE
 
 /*!\endcond */
 /*! @} - end defgroup vp8 */

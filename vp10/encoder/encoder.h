@@ -353,6 +353,8 @@ typedef struct VP10_COMP {
   int gld_fb_idx;
   int alt_fb_idx;
 
+  int last_show_frame_buf_idx;  // last show frame buffer index
+
   int refresh_last_frame;
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
@@ -609,6 +611,8 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
 int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
                               vp10_ppflags_t *flags);
+
+int vp10_get_last_show_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *frame);
 
 int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags);
 

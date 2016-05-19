@@ -2409,6 +2409,7 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   cm->current_video_frame = 0;
   cpi->partition_search_skippable_frame = 0;
   cpi->tile_data = NULL;
+  cpi->last_show_frame_buf_idx = INVALID_IDX;
 
   realloc_segmentation_maps(cpi);
 
@@ -3321,6 +3322,11 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
 #if CONFIG_EXT_REFS
   int ref_frame;
 #endif  // CONFIG_EXT_REFS
+
+  // NOTE: Save the new show frame buffer index for --test-code=warn, i.e.,
+  //       for the purpose to verify no mismatch between encoder and decoder.
+  if (cm->show_frame)
+    cpi->last_show_frame_buf_idx = cm->new_fb_idx;
 
   if (use_upsampled_ref) {
     // Up-sample the current encoded frame.
@@ -5334,6 +5340,15 @@ int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
     vpx_clear_system_state();
     return ret;
   }
+}
+
+int vp10_get_last_show_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *frame) {
+  if (cpi->last_show_frame_buf_idx == INVALID_IDX)
+    return -1;
+
+  *frame =
+      cpi->common.buffer_pool->frame_bufs[cpi->last_show_frame_buf_idx].buf;
+  return 0;
 }
 
 int vp10_set_internal_size(VP10_COMP *cpi,

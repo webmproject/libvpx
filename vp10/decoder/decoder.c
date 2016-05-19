@@ -483,6 +483,17 @@ int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   return ret;
 }
 
+int vp10_get_frame_to_show(VP10Decoder *pbi,
+                           YV12_BUFFER_CONFIG *frame) {
+  VP10_COMMON *const cm = &pbi->common;
+
+  if (!cm->show_frame || !cm->frame_to_show)
+    return -1;
+
+  *frame = *cm->frame_to_show;
+  return 0;
+}
+
 vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
                                            size_t data_sz,
                                            uint32_t sizes[8], int *count,
