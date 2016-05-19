@@ -7619,6 +7619,19 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #else
     int tmp_rate2 = rate2_nocoeff;
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
+    INTERP_FILTER obmc_interp_filter[2][2] = {
+        {mbmi->interp_filter[0], mbmi->interp_filter[1]},   // obmc == 0
+        {mbmi->interp_filter[0], mbmi->interp_filter[1]}    // obmc == 1
+    };
+#else
+    INTERP_FILTER obmc_interp_filter[2] = {
+        mbmi->interp_filter,  // obmc == 0
+        mbmi->interp_filter   // obmc == 1
+    };
+#endif  // CONFIG_DUAL_FILTER
+#endif  // CONFIG_EXT_INTERP
 
     if (mbmi->obmc) {
 #if CONFIG_EXT_INTER
@@ -7647,6 +7660,21 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #else
         tmp_rate2 = rate2_nocoeff - rate_mv + tmp_rate_mv;
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
+        if (!has_subpel_mv_component(xd, 0))
+          obmc_interp_filter[1][0] = mbmi->interp_filter[0] = EIGHTTAP_REGULAR;
+        if (!has_subpel_mv_component(xd, 1))
+          obmc_interp_filter[1][1] = mbmi->interp_filter[1] = EIGHTTAP_REGULAR;
+#else
+        if (!vp10_is_interp_needed(xd))
+          obmc_interp_filter[1] = mbmi->interp_filter = EIGHTTAP_REGULAR;
+#endif  // CONFIG_DUAL_FILTER
+        // This is not quite correct with CONFIG_DUAL_FILTER when a filter
+        // is needed in only one direction
+        if (!vp10_is_interp_needed(xd))
+          tmp_rate2 -= rs;
+#endif  // CONFIG_EXT_INTERP
         vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 #if CONFIG_EXT_INTER
       } else {
@@ -7787,6 +7815,14 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_OBMC
     tmp_rd = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
     if (mbmi->obmc == 0 || (tmp_rd < best_rd)) {
+#if CONFIG_EXT_INTERP
+#if CONFIG_DUAL_FILTER
+      mbmi->interp_filter[0] = obmc_interp_filter[mbmi->obmc][0];
+      mbmi->interp_filter[1] = obmc_interp_filter[mbmi->obmc][1];
+#else
+      mbmi->interp_filter = obmc_interp_filter[mbmi->obmc];
+#endif  // CONFIG_DUAL_FILTER
+#endif  // CONFIG_EXT_INTERP
       best_mbmi = *mbmi;
       best_rd = tmp_rd;
       best_rate2 = *rate2;
