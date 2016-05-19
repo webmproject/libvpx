@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "773e564b_1468e40d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-05-19T22:29:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "773e564b_c605f66a",
+      "range": {
+        "startLine": 7,
+        "startChar": 14,
+        "endLine": 7,
+        "endChar": 33
+      },
+      "revId": "ed7dc1cd6cb31e033d6b4b49cd624ea3d46e0398",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "773e564b_66a0aaa5",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 6
