@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "773e564b_e6dd9a22",
+        "filename": "vp9/common/vp9_common_data.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-19T18:57:09Z",
+      "side": 1,
+      "message": "Yes, decoder will also be able to measure the bitstream level, e.g., to confirm that the claimed level in the header is correct.",
+      "parentUuid": "1716fa8f_f45186c9",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 17
+      },
+      "revId": "e8c01ddfcfdbf9bc001cead4e119e2f4e8f3d42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1716fa8f_946db28d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-18T17:00:11Z",
       "side": 1,
       "message": "This seems suspicious. Suppose we kept a live reference to the keyframe, but never refreshed it. Would it ever show up here?",
+      "range": {
+        "startLine": 4737,
+        "startChar": 0,
+        "endLine": 4747,
+        "endChar": 5
+      },
+      "revId": "e8c01ddfcfdbf9bc001cead4e119e2f4e8f3d42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "773e564b_86228ef3",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4747,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-19T18:57:09Z",
+      "side": 1,
+      "message": "My understanding is that if a buffer is never refreshed, then it\u0027s never used as a reference frame.",
+      "parentUuid": "1716fa8f_946db28d",
       "range": {
         "startLine": 4737,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "773e564b_86cfee66",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4752,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-19T18:57:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1716fa8f_f464e6d8",
+      "range": {
+        "startLine": 4752,
+        "startChar": 8,
+        "endLine": 4752,
+        "endChar": 16
+      },
+      "revId": "e8c01ddfcfdbf9bc001cead4e119e2f4e8f3d42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1716fa8f_34983ed9",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 11
@@ -82,6 +154,30 @@
       "writtenOn": "2016-05-18T17:00:11Z",
       "side": 1,
       "message": "same",
+      "range": {
+        "startLine": 4792,
+        "startChar": 55,
+        "endLine": 4793,
+        "endChar": 61
+      },
+      "revId": "e8c01ddfcfdbf9bc001cead4e119e2f4e8f3d42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "773e564b_46d9e62d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4793,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-19T18:57:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1716fa8f_34983ed9",
       "range": {
         "startLine": 4792,
         "startChar": 55,
