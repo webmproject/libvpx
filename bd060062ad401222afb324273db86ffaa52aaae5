@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b7b52edc_5d324f4e",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-05-19T12:17:18Z",
+      "side": 1,
+      "message": "Hard wired number!",
+      "range": {
+        "startLine": 770,
+        "startChar": 32,
+        "endLine": 770,
+        "endChar": 33
+      },
+      "revId": "bd060062ad401222afb324273db86ffaa52aaae5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
