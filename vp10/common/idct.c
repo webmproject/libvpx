@@ -1297,7 +1297,7 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_inv_txfm2d_add_4x4_c(input, CONVERT_TO_SHORTPTR(dest), stride,
+      vp10_inv_txfm2d_add_4x4(input, CONVERT_TO_SHORTPTR(dest), stride,
                               tx_type, bd);
       break;
     case V_DCT:
@@ -1337,7 +1337,7 @@ void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_inv_txfm2d_add_8x8_c(input, CONVERT_TO_SHORTPTR(dest), stride,
+      vp10_inv_txfm2d_add_8x8(input, CONVERT_TO_SHORTPTR(dest), stride,
                               tx_type, bd);
       break;
     case V_DCT:
@@ -1377,7 +1377,7 @@ void vp10_highbd_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      vp10_inv_txfm2d_add_16x16_c(input, CONVERT_TO_SHORTPTR(dest), stride,
+      vp10_inv_txfm2d_add_16x16(input, CONVERT_TO_SHORTPTR(dest), stride,
                                 tx_type, bd);
       break;
     case V_DCT:
