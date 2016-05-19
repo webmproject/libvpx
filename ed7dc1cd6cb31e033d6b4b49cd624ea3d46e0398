@@ -94,6 +94,29 @@
     },
     {
       "key": {
+        "uuid": "773e564b_a69f920f",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1932,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-05-19T18:50:53Z",
+      "side": 1,
+      "message": "better to put vp9_pickmode_ctx_den_update before vp9_denoiser_denoise()?, since this update info may be used in some way later for the actual denoising (currently we don\u0027t...).",
+      "range": {
+        "startLine": 1932,
+        "startChar": 4,
+        "endLine": 1932,
+        "endChar": 31
+      },
+      "revId": "ed7dc1cd6cb31e033d6b4b49cd624ea3d46e0398",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "773e564b_26c3824d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 6
