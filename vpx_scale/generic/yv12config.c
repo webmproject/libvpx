@@ -178,23 +178,51 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
       if (external_frame_size != (size_t)external_frame_size)
         return -1;
 
+      fb->type = VPX_CODEC_FRAME_BUFFER_TYPE_SIZE;
+      if (ybf->subsampling_y) {
+        fb->fmt = ybf->subsampling_x ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_I440;
+      } else {
+        fb->fmt = ybf->subsampling_x ? VPX_IMG_FMT_I422 : VPX_IMG_FMT_I444;
+      }
+      fb->width = aligned_width + border * 2;
+      fb->height = aligned_height + border * 2;
+
       // Allocation to hold larger frame, or first allocation.
       if (cb(cb_priv, (size_t)external_frame_size, fb) < 0)
         return -1;
 
-      if (fb->data == NULL || fb->size < external_frame_size)
-        return -1;
+      if (fb->type == VPX_CODEC_FRAME_BUFFER_TYPE_SIZE) {
+        if (fb->data == NULL || fb->size < external_frame_size)
+          return -1;
 
-      ybf->buffer_alloc = (uint8_t *)yv12_align_addr(fb->data, 32);
+        ybf->buffer_alloc = (uint8_t *)yv12_align_addr(fb->data, 32);
 
 #if defined(__has_feature)
 #if __has_feature(memory_sanitizer)
-      // This memset is needed for fixing the issue of using uninitialized
-      // value in msan test. It will cause a perf loss, so only do this for
-      // msan test.
-      memset(ybf->buffer_alloc, 0, (int)frame_size);
+        // This memset is needed for fixing the issue of using uninitialized
+        // value in msan test. It will cause a perf loss, so only do this for
+        // msan test.
+        memset(ybf->buffer_alloc, 0, (int)frame_size);
 #endif
 #endif
+      } else {  // VPX_CODEC_FRAME_BUFFER_TYPE_PLANES
+        if (fb->plane[0] == NULL || fb->plane[1] == NULL ||
+            fb->plane[2] == NULL || !fb->stride[0] || !fb->stride[1] ||
+            !fb->stride[2])
+          return -1;
+        // buffers should be 32 bytes aligned.
+        if ((fb->stride[0] & 0x1f) || (fb->stride[1] & 0x1f))
+          return -3;
+
+        if (fb->stride[1] != fb->stride[2])
+          return -3;
+        ybf->y_stride = fb->stride[0];
+        ybf->uv_stride = fb->stride[1];
+
+        ybf->y_buffer = fb->plane[0];
+        ybf->u_buffer = fb->plane[1];
+        ybf->v_buffer = fb->plane[2];
+      }
     } else if (frame_size > (size_t)ybf->buffer_alloc_sz) {
       // Allocation to hold larger frame, or first allocation.
       vpx_free(ybf->buffer_alloc);
@@ -227,13 +255,11 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     ybf->y_crop_height = height;
     ybf->y_width  = aligned_width;
     ybf->y_height = aligned_height;
-    ybf->y_stride = y_stride;
 
     ybf->uv_crop_width = (width + ss_x) >> ss_x;
     ybf->uv_crop_height = (height + ss_y) >> ss_y;
     ybf->uv_width = uv_width;
     ybf->uv_height = uv_height;
-    ybf->uv_stride = uv_stride;
 
     ybf->border = border;
     ybf->frame_size = (int)frame_size;
@@ -241,24 +267,28 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     ybf->subsampling_y = ss_y;
 
     buf = ybf->buffer_alloc;
+    if (buf != NULL) {
+      ybf->y_stride = y_stride;
+      ybf->uv_stride = uv_stride;
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (use_highbitdepth) {
-      // Store uint16 addresses when using 16bit framebuffers
-      buf = CONVERT_TO_BYTEPTR(ybf->buffer_alloc);
-      ybf->flags = YV12_FLAG_HIGHBITDEPTH;
-    } else {
-      ybf->flags = 0;
-    }
+      if (use_highbitdepth) {
+        // Store uint16 addresses when using 16bit framebuffers
+        buf = CONVERT_TO_BYTEPTR(ybf->buffer_alloc);
+        ybf->flags = YV12_FLAG_HIGHBITDEPTH;
+      } else {
+        ybf->flags = 0;
+      }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-    ybf->y_buffer = (uint8_t *)yv12_align_addr(
-        buf + (border * y_stride) + border, vp9_byte_align);
-    ybf->u_buffer = (uint8_t *)yv12_align_addr(
-        buf + yplane_size + (uv_border_h * uv_stride) + uv_border_w,
-        vp9_byte_align);
-    ybf->v_buffer = (uint8_t *)yv12_align_addr(
-        buf + yplane_size + uvplane_size + (uv_border_h * uv_stride) +
-        uv_border_w, vp9_byte_align);
+      ybf->y_buffer = (uint8_t *)yv12_align_addr(
+          buf + (border * y_stride) + border, vp9_byte_align);
+      ybf->u_buffer = (uint8_t *)yv12_align_addr(
+          buf + yplane_size + (uv_border_h * uv_stride) + uv_border_w,
+          vp9_byte_align);
+      ybf->v_buffer = (uint8_t *)yv12_align_addr(
+          buf + yplane_size + uvplane_size + (uv_border_h * uv_stride) +
+          uv_border_w, vp9_byte_align);
+    }
 
     ybf->corrupted = 0; /* assume not corrupted by errors */
     return 0;

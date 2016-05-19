@@ -23,9 +23,16 @@
 
 namespace {
 
-const int kVideoNameParam = 1;
+const int kCodedFrameBufferTypeParam = 1;
+const int kVideoNameParam = 2;
 
 struct ExternalFrameBuffer {
+  // The first two fields are used when fb->type is equal to
+  // VPX_CODEC_FRAME_BUFFER_TYPE_PLANES
+  uint8_t *plane[VP9_MAXIMUM_EXTERNAL_PLANES];
+  int stride[VP9_MAXIMUM_EXTERNAL_PLANES];
+  // The following two fields are used when fb->type is equal to
+  // VPX_CODEC_FRAME_BUFFER_TYPE_SIZE
   uint8_t *data;
   size_t size;
   int in_use;
@@ -34,12 +41,17 @@ struct ExternalFrameBuffer {
 // Class to manipulate a list of external frame buffers.
 class ExternalFrameBufferList {
  public:
-  ExternalFrameBufferList()
+  explicit ExternalFrameBufferList(vpx_codec_frame_buffer_type_t type)
       : num_buffers_(0),
-        ext_fb_list_(NULL) {}
+        ext_fb_list_(NULL),
+        type_(type),
+        alignment_(32) {}
 
   virtual ~ExternalFrameBufferList() {
     for (int i = 0; i < num_buffers_; ++i) {
+      for (int plane = 0; plane < VP9_MAXIMUM_EXTERNAL_PLANES; ++plane) {
+        delete [] ext_fb_list_[i].plane[plane];
+      }
       delete [] ext_fb_list_[i].data;
     }
     delete [] ext_fb_list_;
@@ -63,17 +75,44 @@ class ExternalFrameBufferList {
   // external frame buffer. Returns < 0 on an error.
   int GetFreeFrameBuffer(size_t min_size, vpx_codec_frame_buffer_t *fb) {
     EXPECT_TRUE(fb != NULL);
+    EXPECT_TRUE(fb->fmt == VPX_IMG_FMT_I420 || fb->fmt == VPX_IMG_FMT_I444 ||
+                fb->fmt == VPX_IMG_FMT_I422 || fb->fmt == VPX_IMG_FMT_I440)
+        << " fmt is: " << fb->fmt;
+
     const int idx = FindFreeBufferIndex();
     if (idx == num_buffers_)
       return -1;
 
-    if (ext_fb_list_[idx].size < min_size) {
-      delete [] ext_fb_list_[idx].data;
-      ext_fb_list_[idx].data = new uint8_t[min_size];
-      memset(ext_fb_list_[idx].data, 0, min_size);
-      ext_fb_list_[idx].size = min_size;
+    if (type_ == VPX_CODEC_FRAME_BUFFER_TYPE_SIZE) {
+      if (ext_fb_list_[idx].size < min_size) {
+        delete [] ext_fb_list_[idx].data;
+        ext_fb_list_[idx].data = new uint8_t[min_size];
+        memset(ext_fb_list_[idx].data, 0, min_size);
+        ext_fb_list_[idx].size = min_size;
+      }
+    } else {
+      EXPECT_EQ(VPX_CODEC_FRAME_BUFFER_TYPE_PLANES, type_);
+      for (int plane = 0; plane < 3; ++plane) {
+        size_t plane_stride = fb->width;
+        size_t plane_height = fb->height;
+
+        if (plane > 0 && fb->fmt != VPX_IMG_FMT_I444) {
+          if (fb->fmt != VPX_IMG_FMT_I440)
+            plane_stride /= 2;
+          if (fb->fmt == VPX_IMG_FMT_I420 || fb->fmt == VPX_IMG_FMT_I440)
+            plane_height /= 2;
+        }
+        plane_stride += alignment_ - plane_stride % alignment_;
+
+        delete [] ext_fb_list_[idx].plane[plane];
+        ext_fb_list_[idx].plane[plane] =
+            new uint8_t[plane_height * plane_stride];
+        memset(ext_fb_list_[idx].plane[plane], 0, plane_height * plane_stride);
+        ext_fb_list_[idx].stride[plane] = plane_stride;
+      }
     }
 
+    fb->type = type_;
     SetFrameBuffer(idx, fb);
     return 0;
   }
@@ -86,12 +125,27 @@ class ExternalFrameBufferList {
     if (idx == num_buffers_)
       return -1;
 
-    if (ext_fb_list_[idx].size < min_size) {
+    if (type_ == VPX_CODEC_FRAME_BUFFER_TYPE_SIZE) {
       delete [] ext_fb_list_[idx].data;
       ext_fb_list_[idx].data = NULL;
       ext_fb_list_[idx].size = min_size;
+    } else {
+      EXPECT_EQ(VPX_CODEC_FRAME_BUFFER_TYPE_PLANES, type_);
+      for (int plane = 0; plane < 3; ++plane) {
+        size_t plane_stride = fb->width;
+        if (plane > 0 && fb->fmt != VPX_IMG_FMT_I444) {
+          if (fb->fmt != VPX_IMG_FMT_I440)
+            plane_stride /= 2;
+        }
+        plane_stride += alignment_ - plane_stride % alignment_;
+
+        delete [] ext_fb_list_[idx].plane[plane];
+        ext_fb_list_[idx].plane[plane] = NULL;
+        ext_fb_list_[idx].stride[plane] = plane_stride;
+      }
     }
 
+    fb->type = type_;
     SetFrameBuffer(idx, fb);
     return 0;
   }
@@ -120,10 +174,22 @@ class ExternalFrameBufferList {
     if (img->fb_priv != NULL) {
       const struct ExternalFrameBuffer *const ext_fb =
           reinterpret_cast<ExternalFrameBuffer*>(img->fb_priv);
-
-      ASSERT_TRUE(img->planes[0] >= ext_fb->data &&
-                  img->planes[0] < (ext_fb->data + ext_fb->size));
+      if (ext_fb->data != NULL) {
+        ASSERT_TRUE(img->planes[0] >= ext_fb->data &&
+                    img->planes[0] < (ext_fb->data + ext_fb->size));
+      } else {
+        for (int plane = 0; plane < VP9_MAXIMUM_EXTERNAL_PLANES; ++plane) {
+          if (ext_fb->stride[plane]) {
+            EXPECT_EQ(img->planes[plane], ext_fb->plane[plane]);
+            EXPECT_EQ(img->stride[plane], ext_fb->stride[plane]);
+          }
+        }
+      }
     }
+  }
+
+  void set_alignment(int alignment) {
+    alignment_ = alignment;
   }
 
  private:
@@ -145,6 +211,10 @@ class ExternalFrameBufferList {
     ASSERT_TRUE(fb != NULL);
     fb->data = ext_fb_list_[idx].data;
     fb->size = ext_fb_list_[idx].size;
+    for (int plane = 0; plane < VP9_MAXIMUM_EXTERNAL_PLANES; ++plane) {
+      fb->plane[plane] = ext_fb_list_[idx].plane[plane];
+      fb->stride[plane] = ext_fb_list_[idx].stride[plane];
+    }
     ASSERT_EQ(0, ext_fb_list_[idx].in_use);
     ext_fb_list_[idx].in_use = 1;
     fb->priv = &ext_fb_list_[idx];
@@ -152,6 +222,8 @@ class ExternalFrameBufferList {
 
   int num_buffers_;
   ExternalFrameBuffer *ext_fb_list_;
+  vpx_codec_frame_buffer_type_t type_;
+  int alignment_;
 };
 
 #if CONFIG_WEBM_IO
@@ -203,12 +275,14 @@ int do_not_release_vp9_frame_buffer(void *user_priv,
 // Class for testing passing in external frame buffers to libvpx.
 class ExternalFrameBufferMD5Test
     : public ::libvpx_test::DecoderTest,
-      public ::libvpx_test::CodecTestWithParam<const char*> {
+      public ::libvpx_test::CodecTestWith2Params<vpx_codec_frame_buffer_type_t,
+                                                 const char*> {
  protected:
   ExternalFrameBufferMD5Test()
       : DecoderTest(GET_PARAM(::libvpx_test::kCodecFactoryParam)),
         md5_file_(NULL),
-        num_buffers_(0) {}
+        num_buffers_(0),
+        fb_list_(GET_PARAM(kCodedFrameBufferTypeParam)) {}
 
   virtual ~ExternalFrameBufferMD5Test() {
     if (md5_file_ != NULL)
@@ -284,12 +358,15 @@ class ExternalFrameBufferMD5Test
 const char kVP9TestFile[] = "vp90-2-02-size-lf-1920x1080.webm";
 
 // Class for testing passing in external frame buffers to libvpx.
-class ExternalFrameBufferTest : public ::testing::Test {
+class ExternalFrameBufferTest
+    : public ::libvpx_test::CodecTestWithParam<vpx_codec_frame_buffer_type_t> {
  protected:
   ExternalFrameBufferTest()
       : video_(NULL),
         decoder_(NULL),
-        num_buffers_(0) {}
+        num_buffers_(0),
+        frame_buffer_functions_set_(false),
+        fb_list_(GET_PARAM(kCodedFrameBufferTypeParam)) {}
 
   virtual void SetUp() {
     video_ = new libvpx_test::WebMVideoSource(kVP9TestFile);
@@ -312,12 +389,17 @@ class ExternalFrameBufferTest : public ::testing::Test {
       int num_buffers,
       vpx_get_frame_buffer_cb_fn_t cb_get,
       vpx_release_frame_buffer_cb_fn_t cb_release) {
+    frame_buffer_functions_set_ = true;
     if (num_buffers > 0) {
       num_buffers_ = num_buffers;
       EXPECT_TRUE(fb_list_.CreateBufferList(num_buffers_));
     }
 
     return decoder_->SetFrameBufferFunctions(cb_get, cb_release, &fb_list_);
+  }
+
+  void SetBufferAlignment(int alignment) {
+    fb_list_.set_alignment(alignment);
   }
 
   vpx_codec_err_t DecodeOneFrame() {
@@ -347,13 +429,15 @@ class ExternalFrameBufferTest : public ::testing::Test {
 
     // Get decompressed data
     while ((img = dec_iter.Next()) != NULL) {
-      fb_list_.CheckXImageFrameBuffer(img);
+      if (frame_buffer_functions_set_)
+        fb_list_.CheckXImageFrameBuffer(img);
     }
   }
 
   libvpx_test::WebMVideoSource *video_;
   libvpx_test::VP9Decoder *decoder_;
   int num_buffers_;
+  bool frame_buffer_functions_set_;
   ExternalFrameBufferList fb_list_;
 };
 #endif  // CONFIG_WEBM_IO
@@ -404,7 +488,7 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
 }
 
 #if CONFIG_WEBM_IO
-TEST_F(ExternalFrameBufferTest, MinFrameBuffers) {
+TEST_P(ExternalFrameBufferTest, MinFrameBuffers) {
   // Minimum number of external frame buffers for VP9 is
   // #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS.
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
@@ -414,7 +498,7 @@ TEST_F(ExternalFrameBufferTest, MinFrameBuffers) {
   ASSERT_EQ(VPX_CODEC_OK, DecodeRemainingFrames());
 }
 
-TEST_F(ExternalFrameBufferTest, EightJitterBuffers) {
+TEST_P(ExternalFrameBufferTest, EightJitterBuffers) {
   // Number of buffers equals #VP9_MAXIMUM_REF_BUFFERS +
   // #VPX_MAXIMUM_WORK_BUFFERS + eight jitter buffers.
   const int jitter_buffers = 8;
@@ -426,7 +510,7 @@ TEST_F(ExternalFrameBufferTest, EightJitterBuffers) {
   ASSERT_EQ(VPX_CODEC_OK, DecodeRemainingFrames());
 }
 
-TEST_F(ExternalFrameBufferTest, NotEnoughBuffers) {
+TEST_P(ExternalFrameBufferTest, NotEnoughBuffers) {
   // Minimum number of external frame buffers for VP9 is
   // #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS. Most files will
   // only use 5 frame buffers at one time.
@@ -438,7 +522,7 @@ TEST_F(ExternalFrameBufferTest, NotEnoughBuffers) {
   ASSERT_EQ(VPX_CODEC_MEM_ERROR, DecodeRemainingFrames());
 }
 
-TEST_F(ExternalFrameBufferTest, NoRelease) {
+TEST_P(ExternalFrameBufferTest, NoRelease) {
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_OK,
             SetFrameBufferFunctions(num_buffers, get_vp9_frame_buffer,
@@ -447,7 +531,7 @@ TEST_F(ExternalFrameBufferTest, NoRelease) {
   ASSERT_EQ(VPX_CODEC_MEM_ERROR, DecodeRemainingFrames());
 }
 
-TEST_F(ExternalFrameBufferTest, NullRealloc) {
+TEST_P(ExternalFrameBufferTest, NullRealloc) {
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_OK,
             SetFrameBufferFunctions(num_buffers, get_vp9_zero_frame_buffer,
@@ -455,7 +539,11 @@ TEST_F(ExternalFrameBufferTest, NullRealloc) {
   ASSERT_EQ(VPX_CODEC_MEM_ERROR, DecodeOneFrame());
 }
 
-TEST_F(ExternalFrameBufferTest, ReallocOneLessByte) {
+TEST_P(ExternalFrameBufferTest, ReallocOneLessByte) {
+  if (GET_PARAM(kCodedFrameBufferTypeParam) ==
+      VPX_CODEC_FRAME_BUFFER_TYPE_PLANES)
+    return;
+
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_OK,
             SetFrameBufferFunctions(
@@ -464,29 +552,50 @@ TEST_F(ExternalFrameBufferTest, ReallocOneLessByte) {
   ASSERT_EQ(VPX_CODEC_MEM_ERROR, DecodeOneFrame());
 }
 
-TEST_F(ExternalFrameBufferTest, NullGetFunction) {
+TEST_P(ExternalFrameBufferTest, NullGetFunction) {
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_INVALID_PARAM,
             SetFrameBufferFunctions(num_buffers, NULL,
                                     release_vp9_frame_buffer));
 }
 
-TEST_F(ExternalFrameBufferTest, NullReleaseFunction) {
+TEST_P(ExternalFrameBufferTest, NullReleaseFunction) {
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_INVALID_PARAM,
             SetFrameBufferFunctions(num_buffers, get_vp9_frame_buffer, NULL));
 }
 
-TEST_F(ExternalFrameBufferTest, SetAfterDecode) {
+TEST_P(ExternalFrameBufferTest, SetAfterDecode) {
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_OK, DecodeOneFrame());
   ASSERT_EQ(VPX_CODEC_ERROR,
             SetFrameBufferFunctions(
                 num_buffers, get_vp9_frame_buffer, release_vp9_frame_buffer));
 }
+
+TEST_P(ExternalFrameBufferTest, InvalidAlignement) {
+  if (GET_PARAM(kCodedFrameBufferTypeParam) ==
+      VPX_CODEC_FRAME_BUFFER_TYPE_SIZE)
+    return;
+  const int num_buffers =
+      VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
+  ASSERT_EQ(VPX_CODEC_OK,
+            SetFrameBufferFunctions(
+                num_buffers, get_vp9_frame_buffer, release_vp9_frame_buffer));
+  SetBufferAlignment(15);
+  ASSERT_EQ(VPX_CODEC_MEM_ERROR, DecodeRemainingFrames());
+}
+
+VP9_INSTANTIATE_TEST_CASE(ExternalFrameBufferTest,
+                          ::testing::Values(
+                              VPX_CODEC_FRAME_BUFFER_TYPE_SIZE,
+                              VPX_CODEC_FRAME_BUFFER_TYPE_PLANES));
+
 #endif  // CONFIG_WEBM_IO
 
 VP9_INSTANTIATE_TEST_CASE(ExternalFrameBufferMD5Test,
+                          ::testing::Values(VPX_CODEC_FRAME_BUFFER_TYPE_SIZE,
+                                            VPX_CODEC_FRAME_BUFFER_TYPE_PLANES),
                           ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
                                               libvpx_test::kVP9TestVectors +
                                               libvpx_test::kNumVP9TestVectors));
