@@ -7662,9 +7662,9 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_EXT_INTERP
 #if CONFIG_DUAL_FILTER
-        if (!has_subpel_mv_component(xd, 0))
+        if (!has_subpel_mv_component(xd->mi[0], xd, 0))
           obmc_interp_filter[1][0] = mbmi->interp_filter[0] = EIGHTTAP_REGULAR;
-        if (!has_subpel_mv_component(xd, 1))
+        if (!has_subpel_mv_component(xd->mi[0], xd, 1))
           obmc_interp_filter[1][1] = mbmi->interp_filter[1] = EIGHTTAP_REGULAR;
 #else
         if (!vp10_is_interp_needed(xd))
