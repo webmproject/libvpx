@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "773e564b_86236eb0",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4747,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-05-19T19:04:34Z",
+      "side": 1,
+      "message": "Consider a one pass RTC short clip. We start with a key frame that refreshes all the slots implicitly and is used as GOLDEN. Then we get a bunch of inter frames that refresh LAST. We have two ref-frames last and golden. We only ever explicitly refresh LAST.",
+      "parentUuid": "773e564b_86228ef3",
+      "range": {
+        "startLine": 4737,
+        "startChar": 0,
+        "endLine": 4747,
+        "endChar": 5
+      },
+      "revId": "e8c01ddfcfdbf9bc001cead4e119e2f4e8f3d42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1716fa8f_f464e6d8",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 11
