@@ -45,6 +45,18 @@ typedef struct vp9_denoiser {
   VP9_DENOISER_LEVEL prev_denoising_level;
 } VP9_DENOISER;
 
+typedef struct {
+  int64_t zero_last_cost_orig;
+  int *ref_frame_cost;
+  int_mv (*frame_mv)[MAX_REF_FRAMES];
+  int reuse_inter_pred;
+  TX_SIZE best_tx_size;
+  PREDICTION_MODE best_mode;
+  MV_REFERENCE_FRAME best_ref_frame;
+  INTERP_FILTER best_pred_filter;
+  uint8_t best_mode_skip_txfm;
+} VP9_PICKMODE_CTX_DEN;
+
 struct VP9_COMP;
 
 void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,

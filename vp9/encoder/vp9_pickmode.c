@@ -1182,6 +1182,90 @@ static void vp9_large_block_mv_bias(const NOISE_ESTIMATE *ne, RD_COST *this_rdc,
   }
 }
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+static void vp9_pickmode_ctx_den_update(
+    VP9_PICKMODE_CTX_DEN *ctx_den,
+    int64_t zero_last_cost_orig,
+    int ref_frame_cost[MAX_REF_FRAMES],
+    int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
+    int reuse_inter_pred,
+    TX_SIZE best_tx_size,
+    PREDICTION_MODE best_mode,
+    MV_REFERENCE_FRAME best_ref_frame,
+    INTERP_FILTER best_pred_filter,
+    uint8_t best_mode_skip_txfm) {
+  ctx_den->zero_last_cost_orig = zero_last_cost_orig;
+  ctx_den->ref_frame_cost = ref_frame_cost;
+  ctx_den->frame_mv = frame_mv;
+  ctx_den->reuse_inter_pred = reuse_inter_pred;
+  ctx_den->best_tx_size = best_tx_size;
+  ctx_den->best_mode = best_mode;
+  ctx_den->best_ref_frame = best_ref_frame;
+  ctx_den->best_pred_filter = best_pred_filter;
+  ctx_den->best_mode_skip_txfm = best_mode_skip_txfm;
+}
+
+static void recheck_zeromv_after_denoising(
+    VP9_COMP *cpi, MODE_INFO *const mi, MACROBLOCK *x, MACROBLOCKD *const xd,
+    VP9_DENOISER_DECISION decision, VP9_PICKMODE_CTX_DEN *ctx_den,
+    struct buf_2d yv12_mb[4][MAX_MB_PLANE], RD_COST *best_rdc, BLOCK_SIZE bsize,
+    int mi_row, int mi_col) {
+  // If INTRA or GOLDEN reference was selected, re-evaluate ZEROMV on
+  // denoised result. Only do this under noise conditions, and if rdcost of
+  // ZEROMV onoriginal source is not significantly higher than rdcost of best
+  // mode.
+  if (cpi->noise_estimate.enabled &&
+      cpi->noise_estimate.level > kLow &&
+      ctx_den->zero_last_cost_orig < (best_rdc->rdcost << 3) &&
+      ((ctx_den->best_ref_frame == INTRA_FRAME && decision >= FILTER_BLOCK) ||
+       (ctx_den->best_ref_frame == GOLDEN_FRAME &&
+        decision == FILTER_ZEROMV_BLOCK))) {
+    // Check if we should pick ZEROMV on denoised signal.
+    int rate = 0;
+    int64_t dist = 0;
+    uint32_t var_y = UINT_MAX;
+    uint32_t sse_y = UINT_MAX;
+    RD_COST this_rdc;
+    mi->mode = ZEROMV;
+    mi->ref_frame[0] = LAST_FRAME;
+    mi->ref_frame[1] = NONE;
+    mi->mv[0].as_int = 0;
+    mi->interp_filter = EIGHTTAP;
+    xd->plane[0].pre[0] = yv12_mb[LAST_FRAME][0];
+    vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+    model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
+    this_rdc.rate = rate + ctx_den->ref_frame_cost[LAST_FRAME] +
+        cpi->inter_mode_cost[x->mbmi_ext->mode_context[LAST_FRAME]]
+                            [INTER_OFFSET(ZEROMV)];
+    this_rdc.dist = dist;
+    this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, rate, dist);
+    // Switch to ZEROMV if the rdcost for ZEROMV on denoised source
+    // is lower than best_ref mode (on original source).
+    if (this_rdc.rdcost > best_rdc->rdcost) {
+      this_rdc = *best_rdc;
+      mi->mode = ctx_den->best_mode;
+      mi->ref_frame[0] = ctx_den->best_ref_frame;
+      mi->interp_filter = ctx_den->best_pred_filter;
+      if (ctx_den->best_ref_frame == INTRA_FRAME)
+        mi->mv[0].as_int = INVALID_MV;
+      else if (ctx_den->best_ref_frame == GOLDEN_FRAME) {
+        mi->mv[0].as_int = ctx_den->frame_mv[ctx_den->best_mode]
+                                            [ctx_den->best_ref_frame].as_int;
+        if (ctx_den->reuse_inter_pred) {
+          xd->plane[0].pre[0] = yv12_mb[GOLDEN_FRAME][0];
+          vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+        }
+      }
+      mi->tx_size = ctx_den->best_tx_size;
+      x->skip_txfm[0] = ctx_den->best_mode_skip_txfm;
+    } else {
+      ctx_den->best_ref_frame = LAST_FRAME;
+      *best_rdc = this_rdc;
+    }
+  }
+}
+#endif  // CONFIG_VP9_TEMPORAL_DENOISING
+
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
@@ -1240,6 +1324,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int svc_force_zero_mode[3] = {0};
   int perform_intra_pred = 1;
 #if CONFIG_VP9_TEMPORAL_DENOISING
+  VP9_PICKMODE_CTX_DEN ctx_den;
   int64_t zero_last_cost_orig = INT64_MAX;
 #endif
 
@@ -1849,54 +1934,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       cpi->denoiser.denoising_level > kDenLowLow &&
       cpi->denoiser.reset == 0) {
     VP9_DENOISER_DECISION decision = COPY_BLOCK;
+    vp9_pickmode_ctx_den_update(&ctx_den, zero_last_cost_orig, ref_frame_cost,
+                                frame_mv, reuse_inter_pred, best_tx_size,
+                                best_mode, best_ref_frame, best_pred_filter,
+                                best_mode_skip_txfm);
     vp9_denoiser_denoise(cpi, x, mi_row, mi_col, bsize, ctx, &decision);
-    // If INTRA or GOLDEN reference was selected, re-evaluate ZEROMV on denoised
-    // result. Only do this under noise conditions, and if rdcost of ZEROMV on
-    // original source is not significantly higher than rdcost of best mode.
-    if (((best_ref_frame == INTRA_FRAME && decision >= FILTER_BLOCK) ||
-        (best_ref_frame == GOLDEN_FRAME && decision == FILTER_ZEROMV_BLOCK)) &&
-        cpi->noise_estimate.enabled &&
-        cpi->noise_estimate.level > kLow &&
-        zero_last_cost_orig < (best_rdc.rdcost << 3)) {
-      // Check if we should pick ZEROMV on denoised signal.
-      int rate = 0;
-      int64_t dist = 0;
-      mi->mode = ZEROMV;
-      mi->ref_frame[0] = LAST_FRAME;
-      mi->ref_frame[1] = NONE;
-      mi->mv[0].as_int = 0;
-      mi->interp_filter = EIGHTTAP;
-      xd->plane[0].pre[0] = yv12_mb[LAST_FRAME][0];
-      vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-      model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
-      this_rdc.rate = rate + ref_frame_cost[LAST_FRAME] +
-          cpi->inter_mode_cost[x->mbmi_ext->mode_context[LAST_FRAME]]
-                              [INTER_OFFSET(ZEROMV)];
-      this_rdc.dist = dist;
-      this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, rate, dist);
-      // Switch to ZEROMV if the rdcost for ZEROMV on denoised source
-      // is lower than best_ref mode (on original source).
-      if (this_rdc.rdcost > best_rdc.rdcost) {
-        this_rdc = best_rdc;
-        mi->mode = best_mode;
-        mi->ref_frame[0] = best_ref_frame;
-        mi->interp_filter = best_pred_filter;
-        if (best_ref_frame == INTRA_FRAME)
-          mi->mv[0].as_int = INVALID_MV;
-        else if (best_ref_frame == GOLDEN_FRAME) {
-          mi->mv[0].as_int = frame_mv[best_mode][best_ref_frame].as_int;
-          if (reuse_inter_pred) {
-            xd->plane[0].pre[0] = yv12_mb[GOLDEN_FRAME][0];
-            vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-          }
-        }
-        mi->tx_size = best_tx_size;
-        x->skip_txfm[0] = best_mode_skip_txfm;
-      } else {
-        best_ref_frame = LAST_FRAME;
-        best_rdc = this_rdc;
-      }
-    }
+    recheck_zeromv_after_denoising(cpi, mi, x, xd, decision, &ctx_den, yv12_mb,
+                                   &best_rdc, bsize, mi_row, mi_col);
+    best_ref_frame = ctx_den.best_ref_frame;
   }
 #endif
 
