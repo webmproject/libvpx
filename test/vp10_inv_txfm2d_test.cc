@@ -104,8 +104,6 @@ class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
   TX_SIZE tx_size_;
   int txfm1d_size_;
   int txfm2d_size_;
-  Fwd_Txfm2d_Func fwd_txfm_;
-  Inv_Txfm2d_Func inv_txfm_;
   int16_t* input_;
   uint16_t* ref_input_;
   int32_t* output_;
