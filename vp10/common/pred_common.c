@@ -15,8 +15,28 @@
 
 // Returns a context number for the given MB prediction signal
 #if CONFIG_DUAL_FILTER
+static INTERP_FILTER get_ref_filter_type(const MB_MODE_INFO *ref_mbmi,
+                                         int dir,
+                                         MV_REFERENCE_FRAME ref_frame) {
+  INTERP_FILTER ref_type = SWITCHABLE_FILTERS;
+  const MV tmp_mv[2] = {ref_mbmi->mv[0].as_mv, ref_mbmi->mv[1].as_mv};
+  const int use_subpel[2] = {
+      ((dir & 0x01) ? tmp_mv[0].col : tmp_mv[0].row) & SUBPEL_MASK,
+      ((dir & 0x01) ? tmp_mv[1].col : tmp_mv[1].row) & SUBPEL_MASK,
+  };
+
+  if (ref_mbmi->ref_frame[0] == ref_frame && use_subpel[0])
+    ref_type = ref_mbmi->interp_filter[(dir & 0x01)];
+  else if (ref_mbmi->ref_frame[1] == ref_frame && use_subpel[1])
+    ref_type = ref_mbmi->interp_filter[(dir & 0x01) + 2];
+
+  return ref_type;
+}
+
 int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd, int dir) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const int ctx_offset =
+      (mbmi->ref_frame[1] > INTRA_FRAME) * INTER_FILTER_COMP_OFFSET;
   MV_REFERENCE_FRAME ref_frame = (dir < 2) ?
       mbmi->ref_frame[0] : mbmi->ref_frame[1];
   // Note:
@@ -25,31 +45,26 @@ int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd, int dir) {
   // The prediction flags in these dummy entries are initialized to 0.
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
+  int filter_type_ctx = ctx_offset + (dir & 0x01) * INTER_FILTER_DIR_OFFSET;
   int left_type = SWITCHABLE_FILTERS;
   int above_type = SWITCHABLE_FILTERS;
 
-  if (xd->left_available) {
-    if (left_mbmi->ref_frame[0] == ref_frame)
-      left_type = left_mbmi->interp_filter[(dir & 0x01)];
-    else if (left_mbmi->ref_frame[1] == ref_frame)
-      left_type = left_mbmi->interp_filter[(dir & 0x01) + 2];
-  }
+  if (xd->left_available)
+    left_type = get_ref_filter_type(left_mbmi, dir, ref_frame);
 
-  if (xd->up_available) {
-    if (above_mbmi->ref_frame[0] == ref_frame)
-      above_type = above_mbmi->interp_filter[(dir & 0x01)];
-    else if (above_mbmi->ref_frame[1] == ref_frame)
-      above_type = above_mbmi->interp_filter[(dir & 0x01) + 2];
-  }
+  if (xd->up_available)
+    above_type = get_ref_filter_type(above_mbmi, dir, ref_frame);
 
   if (left_type == above_type)
-    return left_type;
+    filter_type_ctx += left_type;
   else if (left_type == SWITCHABLE_FILTERS && above_type != SWITCHABLE_FILTERS)
-    return above_type;
+    filter_type_ctx += above_type;
   else if (left_type != SWITCHABLE_FILTERS && above_type == SWITCHABLE_FILTERS)
-    return left_type;
+    filter_type_ctx += left_type;
   else
-    return SWITCHABLE_FILTERS;
+    filter_type_ctx += SWITCHABLE_FILTERS;
+
+  return filter_type_ctx;
 }
 #else
 int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
