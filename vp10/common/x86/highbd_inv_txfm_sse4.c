@@ -9,18 +9,17 @@
  */
 
 #include <assert.h>
-#include <smmintrin.h> /* SSE4.1 */
+#include <smmintrin.h>  /* SSE4.1 */
 
 #include "./vp10_rtcd.h"
 #include "./vpx_config.h"
 #include "vp10/common/vp10_inv_txfm2d_cfg.h"
 
-
 static INLINE void load_buffer_4x4(const int32_t *coeff, __m128i *in) {
-  in[0] = _mm_loadu_si128((const __m128i *)(coeff + 0));
-  in[1] = _mm_loadu_si128((const __m128i *)(coeff + 4));
-  in[2] = _mm_loadu_si128((const __m128i *)(coeff + 8));
-  in[3] = _mm_loadu_si128((const __m128i *)(coeff + 12));
+  in[0] = _mm_load_si128((const __m128i *)(coeff + 0));
+  in[1] = _mm_load_si128((const __m128i *)(coeff + 4));
+  in[2] = _mm_load_si128((const __m128i *)(coeff + 8));
+  in[3] = _mm_load_si128((const __m128i *)(coeff + 12));
 }
 
 static void idct4x4_sse4_1(__m128i *in, int bit) {
@@ -176,7 +175,7 @@ static INLINE __m128i highbd_clamp_epi16(__m128i u, int bd) {
 }
 
 static void write_buffer_4x4(__m128i *in, uint16_t *output, int stride,
-                             int flipud, int fliplr, int shift, int bd) {
+                             int shift, int bd) {
   const __m128i zero = _mm_setzero_si128();
   __m128i u0, u1, u2, u3;
   __m128i v0, v1, v2, v3;
@@ -213,9 +212,6 @@ static void write_buffer_4x4(__m128i *in, uint16_t *output, int stride,
   _mm_storel_epi64((__m128i *)(output + 1 * stride), v1);
   _mm_storel_epi64((__m128i *)(output + 2 * stride), v2);
   _mm_storel_epi64((__m128i *)(output + 3 * stride), v3);
-
-  (void) flipud;
-  (void) fliplr;
 }
 
 void vp10_inv_txfm2d_add_4x4_sse4_1(const int32_t *coeff, uint16_t *output,
@@ -229,28 +225,28 @@ void vp10_inv_txfm2d_add_4x4_sse4_1(const int32_t *coeff, uint16_t *output,
       load_buffer_4x4(coeff, in);
       idct4x4_sse4_1(in, cfg->cos_bit_row[2]);
       idct4x4_sse4_1(in, cfg->cos_bit_row[2]);
-      write_buffer_4x4(in, output, stride, 0, 0, -cfg->shift[1], bd);
+      write_buffer_4x4(in, output, stride, -cfg->shift[1], bd);
       break;
     case ADST_DCT:
       cfg = &inv_txfm_2d_cfg_adst_dct_4;
       load_buffer_4x4(coeff, in);
       idct4x4_sse4_1(in, cfg->cos_bit_row[2]);
       iadst4x4_sse4_1(in, cfg->cos_bit_row[2]);
-      write_buffer_4x4(in, output, stride, 0, 0, -cfg->shift[1], bd);
+      write_buffer_4x4(in, output, stride, -cfg->shift[1], bd);
       break;
     case DCT_ADST:
       cfg = &inv_txfm_2d_cfg_dct_adst_4;
       load_buffer_4x4(coeff, in);
       iadst4x4_sse4_1(in, cfg->cos_bit_row[2]);
       idct4x4_sse4_1(in, cfg->cos_bit_row[2]);
-      write_buffer_4x4(in, output, stride, 0, 0, -cfg->shift[1], bd);
+      write_buffer_4x4(in, output, stride, -cfg->shift[1], bd);
       break;
     case ADST_ADST:
       cfg = &inv_txfm_2d_cfg_adst_adst_4;
       load_buffer_4x4(coeff, in);
       iadst4x4_sse4_1(in, cfg->cos_bit_row[2]);
       iadst4x4_sse4_1(in, cfg->cos_bit_row[2]);
-      write_buffer_4x4(in, output, stride, 0, 0, -cfg->shift[1], bd);
+      write_buffer_4x4(in, output, stride, -cfg->shift[1], bd);
       break;
     default:
       assert(0);
