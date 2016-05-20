@@ -178,6 +178,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
 ifeq ($(CONFIG_EXT_INTER),yes)
 LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_variance_test.cc
 LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += blend_mask6_test.cc
 endif
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
