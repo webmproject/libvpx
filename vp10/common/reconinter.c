@@ -759,6 +759,74 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
   const int is_compound = has_second_ref(&mi->mbmi);
   int ref;
 
+#if CONFIG_DUAL_FILTER
+  if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0) {
+    int blk_num = 1 << (pd->subsampling_x + pd->subsampling_y);
+    int chr_idx;
+    int x_base = x;
+    int y_base = y;
+    int x_step = w >> pd->subsampling_x;
+    int y_step = h >> pd->subsampling_y;
+
+    for (chr_idx = 0; chr_idx < blk_num; ++chr_idx) {
+      for (ref = 0; ref < 1 + is_compound; ++ref) {
+        const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
+        struct buf_2d *const pre_buf = &pd->pre[ref];
+        struct buf_2d *const dst_buf = &pd->dst;
+        uint8_t *dst = dst_buf->buf;
+        const MV mv = mi->bmi[chr_idx].as_mv[ref].as_mv;
+        const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
+                                                   pd->subsampling_x,
+                                                   pd->subsampling_y);
+        uint8_t *pre;
+        MV32 scaled_mv;
+        int xs, ys, subpel_x, subpel_y;
+        const int is_scaled = vp10_is_scaled(sf);
+
+        x = x_base + (chr_idx & 0x01) * x_step;
+        y = y_base + (chr_idx >> 1) * y_step;
+
+        dst += dst_buf->stride * y + x;
+
+        if (is_scaled) {
+          pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, sf);
+          scaled_mv = vp10_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
+          xs = sf->x_step_q4;
+          ys = sf->y_step_q4;
+        } else {
+          pre = pre_buf->buf + y * pre_buf->stride + x;
+          scaled_mv.row = mv_q4.row;
+          scaled_mv.col = mv_q4.col;
+          xs = ys = 16;
+        }
+
+        subpel_x = scaled_mv.col & SUBPEL_MASK;
+        subpel_y = scaled_mv.row & SUBPEL_MASK;
+        pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
+               + (scaled_mv.col >> SUBPEL_BITS);
+
+    #if CONFIG_EXT_INTER
+        if (ref && is_interinter_wedge_used(mi->mbmi.sb_type) &&
+            mi->mbmi.use_wedge_interinter)
+          vp10_make_masked_inter_predictor(
+              pre, pre_buf->stride, dst, dst_buf->stride,
+              subpel_x, subpel_y, sf, w, h,
+              mi->mbmi.interp_filter, xs, ys,
+    #if CONFIG_SUPERTX
+              wedge_offset_x, wedge_offset_y,
+    #endif  // CONFIG_SUPERTX
+              xd);
+        else
+    #endif  // CONFIG_EXT_INTER
+          vp10_make_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
+                                    subpel_x, subpel_y, sf, x_step, y_step, ref,
+                                    mi->mbmi.interp_filter, xs, ys, xd);
+      }
+    }
+    return;
+  }
+#endif
+
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
     struct buf_2d *const pre_buf = &pd->pre[ref];
