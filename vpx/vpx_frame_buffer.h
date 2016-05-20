@@ -19,7 +19,6 @@
 extern "C" {
 #endif
 
-#include "./vpx_image.h"
 #include "./vpx_integer.h"
 
 /*!\brief The maximum number of work buffers used by libvpx.
@@ -33,60 +32,24 @@ extern "C" {
  */
 #define VP9_MAXIMUM_REF_BUFFERS 8
 
-/*!\brief The maximum number of planes that can be allocated by an external
- * frame buffer.
- */
-#define VP9_MAXIMUM_EXTERNAL_PLANES 3
-
-/*!\brief External frame buffer allocation type.
- * This enum defines if the external frame buffer contains one allocation for
- * all the planes contained in the frame buffer, or one allocation per plane.
- */
-typedef enum vpx_codec_frame_buffer_type {
-  VPX_CODEC_FRAME_BUFFER_TYPE_SIZE = 1,
-  VPX_CODEC_FRAME_BUFFER_TYPE_PLANES = 2
-} vpx_codec_frame_buffer_type_t;
-
 /*!\brief External frame buffer
  *
  * This structure holds allocated frame buffers used by the decoder.
  */
 typedef struct vpx_codec_frame_buffer {
-  vpx_img_fmt_t fmt;  /**< Requested framebuffer format. */
-  size_t width;  /**< Logical width of the frame. */
-  size_t height;  /**< Logical height of the frame. */
-
-  /*! Whether data and size, or plane and stride should be used. */
-  vpx_codec_frame_buffer_type_t type;
-
   uint8_t *data;  /**< Pointer to the data buffer */
   size_t size;  /**< Size of data in bytes */
-
-  /*! Pointers for each plane buffer */
-  uint8_t *plane[VP9_MAXIMUM_EXTERNAL_PLANES];
-  int stride[VP9_MAXIMUM_EXTERNAL_PLANES]; /**< Strides for each plane */
-
   void *priv;  /**< Frame's private data */
 } vpx_codec_frame_buffer_t;
 
 /*!\brief get frame buffer callback prototype
  *
- * This callback is invoked by the decoder to allocate storage for the frame
- * buffer in order for the decode call to complete.
- * The callback can allocate one buffer for all the frame buffers, or one buffer
- * per plane with the number and size of planes determined by fb->fmt.
- * If the application decides to allocate only one buffer, fb->type must be set
- * to #VPX_CODEC_FRAME_BUFFER_SIZE, the buffer size must be at least |min_size|
- * in bytes and the pointer to the buffer must be assigned to fb->data.
- * Then the callback must set fb->size to the allocated size.
- * The application does not need to align the allocated data.
- * If the application decides to allocate one buffer per plane, fb->type must be
- * set to #VPX_CODEC_FRAME_BUFFER_PLANES, the buffer pointers must be assigned
- * to fb->plane, and their strides to fb->stride.
- * The application provided buffers and strides must be aligned to 32 bytes.
- * The callback must zero out all the buffers allocated.
- *
- * The callback is triggered when the decoder needs a frame buffer to
+ * This callback is invoked by the decoder to retrieve data for the frame
+ * buffer in order for the decode call to complete. The callback must
+ * allocate at least min_size in bytes and assign it to fb->data. The callback
+ * must zero out all the data allocated. Then the callback must set fb->size
+ * to the allocated size. The application does not need to align the allocated
+ * data. The callback is triggered when the decoder needs a frame buffer to
  * decode a compressed image into. This function may be called more than once
  * for every call to vpx_codec_decode. The application may set fb->priv to
  * some data which will be passed back in the ximage and the release function
