@@ -1623,12 +1623,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               free_pred_buffer(this_mode_pred);
               this_mode_pred = current_pred;
             }
-
-            if (filter < EIGHTTAP_SHARP) {
-              current_pred = &tmp[get_pred_buffer(tmp, 3)];
-              pd->dst.buf = current_pred->data;
-              pd->dst.stride = bw;
-            }
+            current_pred = &tmp[get_pred_buffer(tmp, 3)];
+            pd->dst.buf = current_pred->data;
+            pd->dst.stride = bw;
           }
         }
       }
