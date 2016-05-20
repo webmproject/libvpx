@@ -162,7 +162,7 @@ class VP10ExtTileTest
         break;
     }
 
-    if (IsLastFrame && &tile_img_) {
+    if (IsLastFrame) {
       ::libvpx_test::MD5 md5_res;
       md5_res.Add(&tile_img_);
       tile_md5_.push_back(md5_res.Get());
