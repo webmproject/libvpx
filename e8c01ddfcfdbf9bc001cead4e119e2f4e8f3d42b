@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "97daeaa7_c989d136",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4747,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-20T17:36:56Z",
+      "side": 1,
+      "message": "Good point. I have added some codes to handle such implicit buffer refreshes.",
+      "parentUuid": "773e564b_86236eb0",
+      "range": {
+        "startLine": 4737,
+        "startChar": 0,
+        "endLine": 4747,
+        "endChar": 5
+      },
+      "revId": "e8c01ddfcfdbf9bc001cead4e119e2f4e8f3d42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1716fa8f_f464e6d8",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 11
