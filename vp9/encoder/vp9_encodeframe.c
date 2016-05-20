@@ -747,6 +747,8 @@ static int choose_partitioning(VP9_COMP *cpi,
   const uint8_t *d;
   int sp;
   int dp;
+  // Ref frame used in partitioning.
+  MV_REFERENCE_FRAME ref_frame_partition = LAST_FRAME;
   int pixels_wide = 64, pixels_high = 64;
   int64_t thresholds[4] = {cpi->vbp_thresholds[0], cpi->vbp_thresholds[1],
       cpi->vbp_thresholds[2], cpi->vbp_thresholds[3]};
@@ -769,6 +771,10 @@ static int choose_partitioning(VP9_COMP *cpi,
       int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
       set_vbp_thresholds(cpi, thresholds, q);
     }
+  }
+
+  for (i = 0; i < 9; i++) {
+    x->variance_low[i] = 0;
   }
 
   if (xd->mb_to_right_edge < 0)
@@ -831,8 +837,10 @@ static int choose_partitioning(VP9_COMP *cpi,
       mi->ref_frame[0] = GOLDEN_FRAME;
       mi->mv[0].as_int = 0;
       y_sad = y_sad_g;
+      ref_frame_partition = GOLDEN_FRAME;
     } else {
       x->pred_mv[LAST_FRAME] = mi->mv[0].as_mv;
+      ref_frame_partition = LAST_FRAME;
     }
 
     set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
@@ -1017,6 +1025,31 @@ static int choose_partitioning(VP9_COMP *cpi,
     if (!is_key_frame &&
         vt.part_variances.none.variance > (5 * avg_32x32) >> 4)
       force_split[0] = 1;
+  }
+
+  if (cpi->sf.short_circuit_low_temp_var) {
+    // Set low variance flag, only for blocks >= 32x32 and if LAST_FRAME was
+    // selected.
+    if (ref_frame_partition == LAST_FRAME) {
+      // 64x64
+      if (vt.part_variances.none.variance < (thresholds[0] >> 1))
+        x->variance_low[0] = 1;
+      // 64x32
+      if (vt.part_variances.horz[0].variance < (thresholds[0] >> 2))
+        x->variance_low[1] = 1;
+      if (vt.part_variances.horz[1].variance < (thresholds[0] >> 2))
+        x->variance_low[2] = 1;
+      // 32x64
+      if (vt.part_variances.vert[0].variance < (thresholds[0] >> 2))
+        x->variance_low[3] = 1;
+      if (vt.part_variances.vert[1].variance < (thresholds[0] >> 2))
+        x->variance_low[4] = 1;
+      // 32x32
+      for (i = 0; i < 4; i++) {
+        if (vt.split[i].part_variances.none.variance < (thresholds[1] >> 1))
+          x->variance_low[i + 5] = 1;
+      }
+    }
   }
 
   // Now go through the entire structure, splitting every block size until

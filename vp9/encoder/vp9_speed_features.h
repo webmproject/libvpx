@@ -446,6 +446,10 @@ typedef struct SPEED_FEATURES {
   // Skip a number of expensive mode evaluations for blocks with zero source
   // variance.
   int short_circuit_flat_blocks;
+
+  // Skip a number of expensive mode evaluations for blocks with very low
+  // temporal variance.
+  int short_circuit_low_temp_var;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

@@ -429,6 +429,11 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
+    if (!cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR && cpi->oxcf.pass == 0 &&
+        content != VP9E_CONTENT_SCREEN) {
+      // Enable short circuit when temporal variance is very low.
+      sf->short_circuit_low_temp_var = 1;
+    }
   }
 
   if (speed >= 7) {
@@ -554,6 +559,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->default_interp_filter = SWITCHABLE;
   sf->simple_model_rd_from_var = 0;
   sf->short_circuit_flat_blocks = 0;
+  sf->short_circuit_low_temp_var = 0;
 
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;

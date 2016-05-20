@@ -1126,34 +1126,38 @@ static INLINE void find_predictors(VP9_COMP *cpi, MACROBLOCK *x,
                                  TileDataEnc *tile_data,
                                  int mi_row, int mi_col,
                                  struct buf_2d yv12_mb[4][MAX_MB_PLANE],
-                                 BLOCK_SIZE bsize) {
+                                 BLOCK_SIZE bsize,
+                                 int force_skip_low_temp_var) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
   TileInfo *const tile_info = &tile_data->tile_info;
-// TODO(jingning) placeholder for inter-frame non-RD mode decision.
+  // TODO(jingning) placeholder for inter-frame non-RD mode decision.
   x->pred_mv_sad[ref_frame] = INT_MAX;
   frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
   frame_mv[ZEROMV][ref_frame].as_int = 0;
-// this needs various further optimizations. to be continued..
+  // this needs various further optimizations. to be continued..
   if ((cpi->ref_frame_flags & flag_list[ref_frame]) && (yv12 != NULL)) {
     int_mv *const candidates = x->mbmi_ext->ref_mvs[ref_frame];
     const struct scale_factors *const sf = &cm->frame_refs[ref_frame - 1].sf;
     vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
                          sf, sf);
-    if (cm->use_prev_frame_mvs)
+    if (cm->use_prev_frame_mvs) {
       vp9_find_mv_refs(cm, xd, xd->mi[0], ref_frame,
                        candidates, mi_row, mi_col,
                        x->mbmi_ext->mode_context);
-    else
-    const_motion[ref_frame] =
-        mv_refs_rt(cpi, cm, x, xd, tile_info, xd->mi[0], ref_frame,
-            candidates, &frame_mv[NEWMV][ref_frame], mi_row, mi_col,
-            (int)(cpi->svc.use_base_mv && cpi->svc.spatial_layer_id));
+    } else {
+      const_motion[ref_frame] =
+          mv_refs_rt(cpi, cm, x, xd, tile_info, xd->mi[0], ref_frame,
+                     candidates, &frame_mv[NEWMV][ref_frame], mi_row, mi_col,
+                     (int)(cpi->svc.use_base_mv && cpi->svc.spatial_layer_id));
+    }
     vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
                           &frame_mv[NEARESTMV][ref_frame],
                           &frame_mv[NEARMV][ref_frame]);
-    if (!vp9_is_scaled(sf) && bsize >= BLOCK_8X8) {
+    // Early exit for golden frame if force_skip_low_temp_var is set.
+    if (!vp9_is_scaled(sf) && bsize >= BLOCK_8X8 &&
+        !(force_skip_low_temp_var && ref_frame == GOLDEN_FRAME)) {
       vp9_mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
                   ref_frame, bsize);
     }
@@ -1266,6 +1270,39 @@ static void recheck_zeromv_after_denoising(
 }
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
+static INLINE int set_force_skip_low_temp_var(uint8_t *variance_low,
+                                              int mi_row, int mi_col,
+                                              BLOCK_SIZE bsize) {
+  int force_skip_low_temp_var = 0;
+  // Set force_skip_low_temp_var based on the block size and block offset.
+  if (bsize == BLOCK_64X64) {
+    force_skip_low_temp_var = variance_low[0];
+  } else if (bsize == BLOCK_64X32) {
+    if (!(mi_col & 0x7) && !(mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[1];
+    } else if (!(mi_col & 0x7) && (mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[2];
+    }
+  } else if (bsize == BLOCK_32X64) {
+    if (!(mi_col & 0x7) && !(mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[3];
+    } else if ((mi_col & 0x7) && !(mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[4];
+    }
+  } else if (bsize == BLOCK_32X32) {
+    if (!(mi_col & 0x7) && !(mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[5];
+    } else if ((mi_col & 0x7) && !(mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[6];
+    } else if (!(mi_col & 0x7) && (mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[7];
+    } else if ((mi_col & 0x7) && (mi_row & 0x7)) {
+      force_skip_low_temp_var = variance_low[8];
+    }
+  }
+  return force_skip_low_temp_var;
+}
+
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
@@ -1324,6 +1361,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int svc_force_zero_mode[3] = {0};
   int perform_intra_pred = 1;
   int use_golden_nonzeromv = 1;
+  int force_skip_low_temp_var = 0;
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_PICKMODE_CTX_DEN ctx_den;
   int64_t zero_last_cost_orig = INT64_MAX;
@@ -1410,14 +1448,19 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
+  if (cpi->sf.short_circuit_low_temp_var) {
+    force_skip_low_temp_var =
+        set_force_skip_low_temp_var(&x->variance_low[0], mi_row, mi_col, bsize);
+  }
+
   if (!((cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
-      !svc_force_zero_mode[GOLDEN_FRAME - 1]))
+      !svc_force_zero_mode[GOLDEN_FRAME - 1] && !force_skip_low_temp_var))
     use_golden_nonzeromv = 0;
 
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
     find_predictors(cpi, x, ref_frame, frame_mv, const_motion,
                     &ref_frame_skip_mask, flag_list, tile_data, mi_row, mi_col,
-                    yv12_mb, bsize);
+                    yv12_mb, bsize, force_skip_low_temp_var);
   }
 
   for (idx = 0; idx < RT_INTER_MODES; ++idx) {
@@ -1429,6 +1472,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int is_skippable;
     int this_early_term = 0;
     PREDICTION_MODE this_mode = ref_mode_set[idx].pred_mode;
+
     if (cpi->use_svc)
       this_mode = ref_mode_set_svc[idx].pred_mode;
 
@@ -1447,8 +1491,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
       continue;
+
     if (const_motion[ref_frame] && this_mode == NEARMV)
       continue;
+
+    // Skip non-zeromv mode search for golden frame if force_skip_low_temp_var
+    // is set. If nearestmv for golden frame is 0, zeromv mode will be skipped
+    // later.
+    if (force_skip_low_temp_var && ref_frame == GOLDEN_FRAME &&
+        frame_mv[this_mode][ref_frame].as_int != 0) {
+      continue;
+    }
 
     if (cpi->use_svc) {
       if (svc_force_zero_mode[ref_frame - 1] &&
@@ -1456,8 +1509,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
     }
 
-    if (!(frame_mv[this_mode][ref_frame].as_int == 0 &&
-        ref_frame == LAST_FRAME)) {
+    if (!force_skip_low_temp_var &&
+        !(frame_mv[this_mode][ref_frame].as_int == 0 &&
+          ref_frame == LAST_FRAME)) {
       i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
       if ((cpi->ref_frame_flags & flag_list[i]) && sf->reference_masking)
         if (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[i] << 1))
@@ -1548,8 +1602,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (use_golden_nonzeromv &&
-        this_mode == NEWMV && ref_frame == LAST_FRAME &&
+    // If use_golden_nonzeromv is false, NEWMV mode is skipped for golden, no
+    // need to compute best_pred_sad which is only used to skip golden NEWMV.
+    if (use_golden_nonzeromv && this_mode == NEWMV &&
+        ref_frame == LAST_FRAME &&
         frame_mv[NEWMV][LAST_FRAME].as_int != INVALID_MV) {
       const int pre_stride = xd->plane[0].pre[0].stride;
       const uint8_t * const pre_buf = xd->plane[0].pre[0].buf +
@@ -1786,11 +1842,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     inter_mode_thresh = (inter_mode_thresh << 1) + inter_mode_thresh;
   }
   // Perform intra prediction search, if the best SAD is above a certain
-  // threshold.
-  if (perform_intra_pred &&
-      ((best_rdc.rdcost == INT64_MAX ||
-      (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
-       bsize <= cpi->sf.max_intra_bsize)))) {
+  // threshold. Skip intra prediction if force_skip_low_temp_var is set.
+  if (!force_skip_low_temp_var && perform_intra_pred &&
+      (best_rdc.rdcost == INT64_MAX ||
+       (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
+        bsize <= cpi->sf.max_intra_bsize))) {
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 1, 0, 0 };
     int i;
     TX_SIZE best_intra_tx_size = TX_SIZES;
