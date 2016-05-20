@@ -29,6 +29,7 @@ twopass_encoder() {
   local encoder="${LIBAOM_BIN_PATH}/twopass_encoder${AOM_TEST_EXE_SUFFIX}"
   local codec="$1"
   local output_file="${AOM_TEST_OUTPUT_DIR}/twopass_encoder_${codec}.ivf"
+  local limit=7
 
   if [ ! -x "${encoder}" ]; then
     elog "${encoder} does not exist or is not executable."
@@ -36,28 +37,18 @@ twopass_encoder() {
   fi
 
   eval "${AOM_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
-      "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" 100 \
+      "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" "${limit}" \
       ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }
 
-twopass_encoder_aom() {
-  if [ "$(aom_encode_available)" = "yes" ]; then
-    twopass_encoder aom || return 1
-  fi
-}
-
-# TODO(tomfinegan): Add a frame limit param to twopass_encoder and enable this
-# test. AV1 is just too slow right now: This test takes 31m16s+ on a fast
-# machine.
-DISABLED_twopass_encoder_av1() {
+twopass_encoder_av1() {
   if [ "$(av1_encode_available)" = "yes" ]; then
     twopass_encoder av1 || return 1
   fi
 }
 
-twopass_encoder_tests="twopass_encoder_aom
-                       DISABLED_twopass_encoder_av1"
+twopass_encoder_tests="twopass_encoder_av1"
 
 run_tests twopass_encoder_verify_environment "${twopass_encoder_tests}"

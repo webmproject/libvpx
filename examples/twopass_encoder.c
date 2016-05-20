@@ -62,7 +62,7 @@ static const char *exec_name;
 void usage_exit(void) {
   fprintf(stderr,
           "Usage: %s <codec> <width> <height> <infile> <outfile> "
-          "<frame limit>\n",
+          "<limit(optional)>\n",
           exec_name);
   exit(EXIT_FAILURE);
 }
@@ -123,7 +123,7 @@ static int encode_frame(aom_codec_ctx_t *ctx, const aom_image_t *img,
 
 static aom_fixed_buf_t pass0(aom_image_t *raw, FILE *infile,
                              const AvxInterface *encoder,
-                             const aom_codec_enc_cfg_t *cfg, int max_frames) {
+                             const aom_codec_enc_cfg_t *cfg, int limit) {
   aom_codec_ctx_t codec;
   int frame_count = 0;
   aom_fixed_buf_t stats = { NULL, 0 };
@@ -132,11 +132,10 @@ static aom_fixed_buf_t pass0(aom_image_t *raw, FILE *infile,
     die_codec(&codec, "Failed to initialize encoder");
 
   // Calculate frame statistics.
-  while (aom_img_read(raw, infile)) {
+  while (aom_img_read(raw, infile) && frame_count < limit) {
     ++frame_count;
     get_frame_stats(&codec, raw, frame_count, 1, 0, AOM_DL_GOOD_QUALITY,
                     &stats);
-    if (max_frames > 0 && frame_count >= max_frames) break;
   }
 
   // Flush encoder.
@@ -152,7 +151,7 @@ static aom_fixed_buf_t pass0(aom_image_t *raw, FILE *infile,
 
 static void pass1(aom_image_t *raw, FILE *infile, const char *outfile_name,
                   const AvxInterface *encoder, const aom_codec_enc_cfg_t *cfg,
-                  int max_frames) {
+                  int limit) {
   AvxVideoInfo info = { encoder->fourcc,
                         cfg->g_w,
                         cfg->g_h,
@@ -168,11 +167,9 @@ static void pass1(aom_image_t *raw, FILE *infile, const char *outfile_name,
     die_codec(&codec, "Failed to initialize encoder");
 
   // Encode frames.
-  while (aom_img_read(raw, infile)) {
+  while (aom_img_read(raw, infile) && frame_count < limit) {
     ++frame_count;
     encode_frame(&codec, raw, frame_count, 1, 0, AOM_DL_GOOD_QUALITY, writer);
-
-    if (max_frames > 0 && frame_count >= max_frames) break;
   }
 
   // Flush encoder.
@@ -205,12 +202,14 @@ int main(int argc, char **argv) {
   const char *const height_arg = argv[3];
   const char *const infile_arg = argv[4];
   const char *const outfile_arg = argv[5];
-  int max_frames = 0;
+  int limit = 0;
   exec_name = argv[0];
 
-  if (argc != 7) die("Invalid number of arguments.");
+  if (argc < 6) die("Invalid number of arguments");
 
-  max_frames = strtol(argv[6], NULL, 0);
+  if (argc > 6) limit = strtol(argv[6], NULL, 0);
+
+  if (limit == 0) limit = 100;
 
   encoder = get_aom_encoder_by_name(codec_arg);
   if (!encoder) die("Unsupported codec.");
@@ -241,13 +240,13 @@ int main(int argc, char **argv) {
 
   // Pass 0
   cfg.g_pass = AOM_RC_FIRST_PASS;
-  stats = pass0(&raw, infile, encoder, &cfg, max_frames);
+  stats = pass0(&raw, infile, encoder, &cfg, limit);
 
   // Pass 1
   rewind(infile);
   cfg.g_pass = AOM_RC_LAST_PASS;
   cfg.rc_twopass_stats_in = stats;
-  pass1(&raw, infile, outfile_arg, encoder, &cfg, max_frames);
+  pass1(&raw, infile, outfile_arg, encoder, &cfg, limit);
   free(stats.buf);
 
   aom_img_free(&raw);
