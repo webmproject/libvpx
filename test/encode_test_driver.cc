@@ -56,10 +56,12 @@ void Encoder::InitEncoder(VideoSource *video) {
 #endif  // !CONFIG_EXT_TILE
     } else
 #endif
-    if (CodecInterface() == &vpx_codec_vp8_cx_algo) {
+    {
 #if CONFIG_VP8_ENCODER
-      ASSERT_EQ(&vpx_codec_vp8_cx_algo, CodecInterface())
-          << "Unknown Codec Interface";
+      if (CodecInterface() == &vpx_codec_vp8_cx_algo) {
+        ASSERT_EQ(&vpx_codec_vp8_cx_algo, CodecInterface())
+            << "Unknown Codec Interface";
+      }
 #endif
     }
   }
