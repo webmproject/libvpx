@@ -50,33 +50,17 @@
 #include "av1/encoder/subexp.h"
 #include "av1/encoder/tokenize.h"
 
-static const struct av1_token intra_mode_encodings[INTRA_MODES] = {
-  { 0, 1 },  { 6, 3 },   { 28, 5 },  { 30, 5 }, { 58, 6 },
-  { 59, 6 }, { 126, 7 }, { 127, 7 }, { 62, 6 }, { 2, 2 }
-};
-#if CONFIG_EXT_INTERP
-static const struct av1_token switchable_interp_encodings[SWITCHABLE_FILTERS] =
-    { { 0, 1 }, { 4, 3 }, { 6, 3 }, { 5, 3 }, { 7, 3 } };
-#else
-static const struct av1_token switchable_interp_encodings[SWITCHABLE_FILTERS] =
-    { { 0, 1 }, { 2, 2 }, { 3, 2 } };
-#endif  // CONFIG_EXT_INTERP
+static struct av1_token intra_mode_encodings[INTRA_MODES];
+static struct av1_token switchable_interp_encodings[SWITCHABLE_FILTERS];
 #if CONFIG_EXT_PARTITION_TYPES
 static const struct av1_token ext_partition_encodings[EXT_PARTITION_TYPES] = {
   { 0, 1 },  { 4, 3 },  { 12, 4 }, { 7, 3 },
   { 10, 4 }, { 11, 4 }, { 26, 5 }, { 27, 5 }
 };
 #endif
-static const struct av1_token partition_encodings[PARTITION_TYPES] = {
-  { 0, 1 }, { 2, 2 }, { 6, 3 }, { 7, 3 }
-};
+static struct av1_token partition_encodings[PARTITION_TYPES];
 #if !CONFIG_REF_MV
-static const struct av1_token inter_mode_encodings[INTER_MODES] =
-#if CONFIG_EXT_INTER
-    { { 2, 2 }, { 6, 3 }, { 0, 1 }, { 14, 4 }, { 15, 4 } };
-#else
-    { { 2, 2 }, { 6, 3 }, { 0, 1 }, { 7, 3 } };
-#endif  // CONFIG_EXT_INTER
+static struct av1_token inter_mode_encodings[INTER_MODES];
 #endif
 #if CONFIG_EXT_INTER
 static const struct av1_token
@@ -118,7 +102,6 @@ static const struct av1_token
         { 127, 7 } },  // 8 colors
     };
 #endif  // CONFIG_PALETTE
-
 static const struct av1_token tx_size_encodings[TX_SIZES - 1][TX_SIZES] = {
   { { 0, 1 }, { 1, 1 } },                      // Max tx_size is 8X8
   { { 0, 1 }, { 2, 2 }, { 3, 2 } },            // Max tx_size is 16X16
@@ -173,6 +156,13 @@ void av1_encode_token_init(void) {
 #else
   av1_tokens_from_tree(ext_tx_encodings, av1_ext_tx_tree);
 #endif  // CONFIG_EXT_TX
+  av1_tokens_from_tree(intra_mode_encodings, av1_intra_mode_tree);
+  av1_tokens_from_tree(switchable_interp_encodings, av1_switchable_interp_tree);
+  av1_tokens_from_tree(partition_encodings, av1_partition_tree);
+#if !CONFIG_REF_MV
+  av1_tokens_from_tree(inter_mode_encodings, av1_inter_mode_tree);
+#endif
+
 #if CONFIG_EXT_INTRA
   av1_tokens_from_tree(intra_filter_encodings, av1_intra_filter_tree);
 #endif  // CONFIG_EXT_INTRA
