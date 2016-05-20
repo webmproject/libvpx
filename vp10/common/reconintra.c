@@ -391,7 +391,6 @@ static void vp10_init_intra_predictors_internal(void) {
 
 #if CONFIG_EXT_INTRA
 #define FILTER_INTRA_PREC_BITS 10
-#define FILTER_INTRA_ROUND_VAL 511
 
 static const uint8_t ext_intra_extend_modes[FILTER_INTRA_MODES] = {
   NEED_LEFT | NEED_ABOVE,      // FILTER_DC
@@ -774,9 +773,7 @@ static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
     for (c = 1; c < 2 * bs + 1 - r; ++c) {
       ipred = c0 * pred[r - 1][c] + c1 * pred[r][c - 1] +
           c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
-      pred[r][c] = ipred < 0 ?
-          -((-ipred + FILTER_INTRA_ROUND_VAL) >> FILTER_INTRA_PREC_BITS) :
-          ((ipred + FILTER_INTRA_ROUND_VAL) >> FILTER_INTRA_PREC_BITS);
+      pred[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
     }
 
   for (r = 0; r < bs; ++r) {
@@ -1050,9 +1047,7 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
     for (c = 1; c < 2 * bs + 1 - r; ++c) {
       ipred = c0 * pred[r - 1][c] + c1 * pred[r][c - 1] +
           c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
-      pred[r][c] = ipred < 0 ?
-          -((-ipred + FILTER_INTRA_ROUND_VAL) >> FILTER_INTRA_PREC_BITS) :
-          ((ipred + FILTER_INTRA_ROUND_VAL) >> FILTER_INTRA_PREC_BITS);
+      pred[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
     }
 
   for (r = 0; r < bs; ++r) {
