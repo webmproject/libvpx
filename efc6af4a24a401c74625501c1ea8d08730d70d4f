@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97daeaa7_32a0d6a4",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-05-20T17:43:03Z",
+      "side": 1,
+      "message": "Perhaps we can move this function to vpx_dsp and rename to blend_mask6_highbd_c() already in this patch for consistency?\nThe actual implementation for the highbd case can come in the next patch.",
+      "revId": "efc6af4a24a401c74625501c1ea8d08730d70d4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
