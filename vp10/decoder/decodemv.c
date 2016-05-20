@@ -1577,7 +1577,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
           xd->counts->wedge_interintra[bsize][mbmi->use_wedge_interintra]++;
         if (mbmi->use_wedge_interintra) {
           mbmi->interintra_wedge_index =
-              vp10_read_literal(r, get_wedge_bits_lookup[bsize]);
+              vp10_read_literal(r, get_wedge_bits_lookup(bsize));
           mbmi->interintra_wedge_sign = 0;
         }
       }
@@ -1610,7 +1610,7 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
       xd->counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
     if (mbmi->use_wedge_interinter) {
       mbmi->interinter_wedge_index =
-          vp10_read_literal(r, get_wedge_bits_lookup[bsize]);
+          vp10_read_literal(r, get_wedge_bits_lookup(bsize));
       mbmi->interinter_wedge_sign = vp10_read_bit(r);
     }
   }
