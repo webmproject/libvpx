@@ -190,6 +190,11 @@ typedef enum {
   // eliminates two tx types in each direction
   PRUNE_TWO = 2,
 #endif
+} TX_TYPE_PRUNE_MODE;
+
+typedef struct {
+  TX_TYPE_PRUNE_MODE prune_mode;
+  int fast_intra_tx_type_search;
 } TX_TYPE_SEARCH;
 
 typedef enum {
@@ -310,6 +315,7 @@ typedef struct SPEED_FEATURES {
   PARTITION_SEARCH_TYPE partition_search_type;
 
   TX_TYPE_SEARCH tx_type_search;
+
   // Used if partition_search_type = FIXED_SIZE_PARTITION
   BLOCK_SIZE always_this_block_size;
 

@@ -780,7 +780,7 @@ static int prune_tx_types(const VP10_COMP *cpi,
   const int tx_set_1D[TX_TYPES_1D] = {0};
 #endif
 
-  switch (cpi->sf.tx_type_search) {
+  switch (cpi->sf.tx_type_search.prune_mode) {
     case NO_PRUNE:
       return 0;
       break;
@@ -1576,6 +1576,9 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi,
   for (n = start_tx; n >= end_tx; --n) {
     if (FIXED_TX_TYPE && tx_type != get_default_tx_type(0, xd, 0, n))
       continue;
+    if (!is_inter && x->use_default_intra_tx_type &&
+        tx_type != get_default_tx_type(0, xd, 0, n))
+      continue;
     if (max_tx_size == TX_32X32 && n == TX_4X4)
       continue;
 #if CONFIG_EXT_TX
@@ -1583,7 +1586,7 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi,
     if (is_inter) {
       if (!ext_tx_used_inter[ext_tx_set][tx_type])
         continue;
-      if (cpi->sf.tx_type_search > 0) {
+      if (cpi->sf.tx_type_search.prune_mode > NO_PRUNE) {
         if (!do_tx_type_search(tx_type, prune))
           continue;
       }
@@ -1598,7 +1601,7 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi,
 #else  // CONFIG_EXT_TX
     if (n >= TX_32X32 && tx_type != DCT_DCT)
       continue;
-    if (is_inter && cpi->sf.tx_type_search > 0 &&
+    if (is_inter && cpi->sf.tx_type_search.prune_mode > NO_PRUNE &&
         !do_tx_type_search(tx_type, prune))
         continue;
 #endif  // CONFIG_EXT_TX
@@ -1674,7 +1677,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
   ext_tx_set = get_ext_tx_set(mbmi->tx_size, bs, is_inter);
 #endif  // CONFIG_EXT_TX
 
-  if (is_inter && cpi->sf.tx_type_search > 0)
+  if (is_inter && cpi->sf.tx_type_search.prune_mode > NO_PRUNE)
 #if CONFIG_EXT_TX
     prune = prune_tx_types(cpi, bs, x, xd, ext_tx_set);
 #else
@@ -1687,11 +1690,14 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
       if (is_inter) {
         if (!ext_tx_used_inter[ext_tx_set][tx_type])
           continue;
-        if (cpi->sf.tx_type_search > 0) {
+        if (cpi->sf.tx_type_search.prune_mode > NO_PRUNE) {
           if (!do_tx_type_search(tx_type, prune))
             continue;
         }
       } else {
+        if (x->use_default_intra_tx_type &&
+            tx_type != get_default_tx_type(0, xd, 0, mbmi->tx_size))
+          continue;
         if (!ALLOW_INTRA_EXT_TX && bs >= BLOCK_8X8) {
           if (tx_type != intra_mode_to_tx_type_context[mbmi->mode])
             continue;
@@ -1740,6 +1746,9 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
   if (mbmi->tx_size < TX_32X32 &&
       !xd->lossless[mbmi->segment_id]) {
     for (tx_type = 0; tx_type < TX_TYPES; ++tx_type) {
+      if (!is_inter && x->use_default_intra_tx_type &&
+          tx_type != get_default_tx_type(0, xd, 0, mbmi->tx_size))
+        continue;
       mbmi->tx_type = tx_type;
       txfm_rd_in_plane(x,
                        cpi,
@@ -1750,7 +1759,8 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x,
         continue;
       if (is_inter) {
         r += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
-        if (cpi->sf.tx_type_search > 0 && !do_tx_type_search(tx_type, prune))
+        if (cpi->sf.tx_type_search.prune_mode > NO_PRUNE &&
+            !do_tx_type_search(tx_type, prune))
             continue;
       } else {
         r += cpi->intra_tx_type_costs[mbmi->tx_size]
@@ -1817,7 +1827,7 @@ static void choose_tx_size_type_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
   int prune = 0;
 
-  if (is_inter && cpi->sf.tx_type_search > 0)
+  if (is_inter && cpi->sf.tx_type_search.prune_mode > NO_PRUNE)
     // passing -1 in for tx_type indicates that all 1D
     // transforms should be considered for pruning
     prune = prune_tx_types(cpi, bs, x, xd, -1);
@@ -2835,7 +2845,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                       int64_t *distortion, int *skippable,
                                       BLOCK_SIZE bsize,
                                       int64_t best_rd) {
-  PREDICTION_MODE mode;
+  uint8_t mode_idx;
   PREDICTION_MODE mode_selected = DC_PRED;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mi[0];
@@ -2864,6 +2874,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   const MODE_INFO *left_mi = xd->left_mi;
   const PREDICTION_MODE A = vp10_above_block_mode(mic, above_mi, 0);
   const PREDICTION_MODE L = vp10_left_block_mode(mic, left_mi, 0);
+  const PREDICTION_MODE FINAL_MODE_SEARCH = TM_PRED + 1;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   bmode_costs = cpi->y_mode_costs[A][L];
 
@@ -2889,15 +2900,28 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (left_mi)
     palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
 
+  if (cpi->sf.tx_type_search.fast_intra_tx_type_search)
+    x->use_default_intra_tx_type = 1;
+  else
+    x->use_default_intra_tx_type = 0;
+
   /* Y Search for intra prediction mode */
-  for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
-    mic->mbmi.mode = mode;
+  for (mode_idx = DC_PRED; mode_idx <= FINAL_MODE_SEARCH; ++mode_idx) {
+    if (mode_idx == FINAL_MODE_SEARCH) {
+      if (x->use_default_intra_tx_type == 0)
+        break;
+      mic->mbmi.mode = mode_selected;
+      x->use_default_intra_tx_type = 0;
+    } else {
+      mic->mbmi.mode = mode_idx;
+    }
 #if CONFIG_EXT_INTRA
-    is_directional_mode = (mode != DC_PRED && mode != TM_PRED);
-    if (is_directional_mode && directional_mode_skip_mask[mode])
+    is_directional_mode =
+        (mic->mbmi.mode != DC_PRED && mic->mbmi.mode != TM_PRED);
+    if (is_directional_mode && directional_mode_skip_mask[mic->mbmi.mode])
       continue;
     if (is_directional_mode) {
-      rate_overhead = bmode_costs[mode] +
+      rate_overhead = bmode_costs[mic->mbmi.mode] +
           write_uniform_cost(2 * MAX_ANGLE_DELTAS + 1, 0);
       this_rate_tokenonly = INT_MAX;
       this_rd =
@@ -2917,7 +2941,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
     if (this_rate_tokenonly == INT_MAX)
       continue;
 
-    this_rate = this_rate_tokenonly + bmode_costs[mode];
+    this_rate = this_rate_tokenonly + bmode_costs[mic->mbmi.mode];
 
     if (!xd->lossless[xd->mi[0]->mbmi.segment_id]) {
       // super_block_yrd above includes the cost of the tx_size in the
@@ -2928,12 +2952,12 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
           cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
                                                  [mic->mbmi.tx_size];
     }
-    if (cpi->common.allow_screen_content_tools && mode == DC_PRED)
+    if (cpi->common.allow_screen_content_tools && mic->mbmi.mode == DC_PRED)
       this_rate +=
           vp10_cost_bit(vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8]
                                                          [palette_ctx], 0);
 #if CONFIG_EXT_INTRA
-    if (mode == DC_PRED && ALLOW_FILTER_INTRA_MODES)
+    if (mic->mbmi.mode == DC_PRED && ALLOW_FILTER_INTRA_MODES)
       this_rate += vp10_cost_bit(cpi->common.fc->ext_intra_probs[0], 0);
     if (is_directional_mode) {
       int p_angle;
@@ -2950,7 +2974,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
     if (this_rd < best_rd) {
-      mode_selected   = mode;
+      mode_selected   = mic->mbmi.mode;
       best_rd         = this_rd;
       best_tx         = mic->mbmi.tx_size;
 #if CONFIG_EXT_INTRA
@@ -3444,7 +3468,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
   int ext_tx_set = get_ext_tx_set(max_tx_size, bsize, is_inter);
 #endif  // CONFIG_EXT_TX
 
-  if (is_inter && cpi->sf.tx_type_search > 0)
+  if (is_inter && cpi->sf.tx_type_search.prune_mode > NO_PRUNE)
 #if CONFIG_EXT_TX
     prune = prune_tx_types(cpi, bsize, x, xd, ext_tx_set);
 #else
@@ -3465,7 +3489,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
     if (is_inter) {
       if (!ext_tx_used_inter[ext_tx_set][tx_type])
         continue;
-      if (cpi->sf.tx_type_search > 0) {
+      if (cpi->sf.tx_type_search.prune_mode > NO_PRUNE) {
         if (!do_tx_type_search(tx_type, prune))
           continue;
       }
@@ -3480,7 +3504,7 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
 #else  // CONFIG_EXT_TX
     if (max_tx_size >= TX_32X32 && tx_type != DCT_DCT)
       continue;
-    if (is_inter && cpi->sf.tx_type_search > 0 &&
+    if (is_inter && cpi->sf.tx_type_search.prune_mode > NO_PRUNE &&
         !do_tx_type_search(tx_type, prune))
       continue;
 #endif  // CONFIG_EXT_TX
@@ -8308,6 +8332,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   MB_MODE_INFO best_mbmode;
   int best_mode_skippable = 0;
   int midx, best_mode_index = -1;
+  const int FINAL_MODE_SEARCH = MAX_MODES;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vpx_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
@@ -8597,8 +8622,14 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     midx = end_pos;
   }
 
-  for (midx = 0; midx < MAX_MODES; ++midx) {
-    int mode_index = mode_map[midx];
+
+  if (cpi->sf.tx_type_search.fast_intra_tx_type_search)
+    x->use_default_intra_tx_type = 1;
+  else
+    x->use_default_intra_tx_type = 0;
+
+  for (midx = 0; midx <= FINAL_MODE_SEARCH; ++midx) {
+    int mode_index;
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
     int disable_skip = 0;
@@ -8617,6 +8648,17 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     uint8_t ref_frame_type;
 #endif
 
+    if (midx == FINAL_MODE_SEARCH) {
+      if (!is_inter_mode(best_mbmode.mode) && best_mode_index >= 0 &&
+          x->use_default_intra_tx_type == 1) {
+        mode_index = best_mode_index;
+        x->use_default_intra_tx_type = 0;
+      } else {
+        break;
+      }
+    } else {
+      mode_index = mode_map[midx];
+    }
     this_mode = vp10_mode_order[mode_index].mode;
     ref_frame = vp10_mode_order[mode_index].ref_frame[0];
     second_ref_frame = vp10_mode_order[mode_index].ref_frame[1];
