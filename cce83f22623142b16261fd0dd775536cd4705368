@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bc9c332b_fe9b5d76",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-05-23T19:15:18Z",
+      "side": 1,
+      "message": "Fixed.",
+      "parentUuid": "97daeaa7_5201052c",
+      "revId": "cce83f22623142b16261fd0dd775536cd4705368",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "97daeaa7_b2f1617c",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2016-05-21T19:36:58Z",
       "side": 1,
       "message": "does this have coverage in fdct4x4_test?",
+      "revId": "cce83f22623142b16261fd0dd775536cd4705368",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc9c332b_7eb74de4",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-05-23T19:15:18Z",
+      "side": 1,
+      "message": "Fixed in Patch Set 6 test/fdct4x4_test.cc. Then enable/disable \u0027vp9-highbitdepth\u0027 during configure to test both cases.",
+      "parentUuid": "97daeaa7_b2f1617c",
       "revId": "cce83f22623142b16261fd0dd775536cd4705368",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
