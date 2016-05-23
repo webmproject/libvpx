@@ -32,6 +32,8 @@ extern "C" {
 
 #define IMPLIES(a, b)  (!(a) || (b))  //  Logical 'a implies b' (or 'a -> b')
 
+#define IS_POWER_OF_TWO(x)  (((x) & ((x) - 1)) == 0)
+
 // These can be used to give a hint about branch outcomes.
 // This can have an effect, even if your target processor has a
 // good branch predictor, as these hints can affect basic block

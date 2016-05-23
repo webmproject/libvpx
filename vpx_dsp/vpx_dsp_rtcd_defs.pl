@@ -1358,10 +1358,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   }
 }  # CONFIG_VP9_HIGHBITDEPTH
 
+if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
 #
 # Masked Variance / Masked Subpixel Variance
 #
-if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
   foreach (@block_sizes) {
     ($w, $h) = @$_;
     add_proto qw/unsigned int/, "vpx_masked_variance${w}x${h}", "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *mask, int mask_stride, unsigned int *sse";
@@ -1380,6 +1380,14 @@ if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
         specialize "vpx_highbd${bd}masked_sub_pixel_variance${w}x${h}", qw/ssse3/;
       }
     }
+  }
+
+  add_proto qw/void vpx_blend_mask6/, "uint8_t *dst, uint32_t dst_stride,  uint8_t *src0, uint32_t src0_stride, uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, uint32_t mask_stride, int h, int w, int suby, int subx";
+  specialize "vpx_blend_mask6", qw/sse4_1/;
+
+  if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+    add_proto qw/void vpx_highbd_blend_mask6/, "uint8_t *dst, uint32_t dst_stride,  uint8_t *src0, uint32_t src0_stride, uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, uint32_t mask_stride, int h, int w, int suby, int subx, int bd";
+    specialize "vpx_highbd_blend_mask6", qw/sse4_1/;
   }
 }
 
