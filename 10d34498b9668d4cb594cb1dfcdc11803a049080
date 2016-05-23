@@ -22,6 +22,30 @@
       "revId": "10d34498b9668d4cb594cb1dfcdc11803a049080",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc9c332b_e1f3c2aa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-05-23T19:01:29Z",
+      "side": 1,
+      "message": "Re-phrased it in the next patch. Thanks.",
+      "parentUuid": "bc9c332b_de7f8100",
+      "range": {
+        "startLine": 9,
+        "startChar": 18,
+        "endLine": 9,
+        "endChar": 26
+      },
+      "revId": "10d34498b9668d4cb594cb1dfcdc11803a049080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
