@@ -35,28 +35,19 @@ simple_encoder() {
   fi
 
   eval "${AOM_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
-      "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" 9999 0 100 \
+      "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" 9999 0 5 \
       ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }
 
-simple_encoder_aom() {
-  if [ "$(aom_encode_available)" = "yes" ]; then
-    simple_encoder aom || return 1
-  fi
-}
 
-# TODO(tomfinegan): Add a frame limit param to simple_encoder and enable this
-# test. AV1 is just too slow right now: This test takes 4m30s+ on a fast
-# machine.
-DISABLED_simple_encoder_av1() {
+simple_encoder_av1() {
   if [ "$(av1_encode_available)" = "yes" ]; then
     simple_encoder av1 || return 1
   fi
 }
 
-simple_encoder_tests="simple_encoder_aom
-                      DISABLED_simple_encoder_av1"
+simple_encoder_tests="simple_encoder_av1"
 
 run_tests simple_encoder_verify_environment "${simple_encoder_tests}"
