@@ -69,6 +69,24 @@
       "revId": "cce83f22623142b16261fd0dd775536cd4705368",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_e818c76c",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:59:01Z",
+      "side": 1,
+      "message": "note it might be quicker to run them locally when verifying different configurations",
+      "parentUuid": "bc9c332b_7eb74de4",
+      "revId": "cce83f22623142b16261fd0dd775536cd4705368",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
