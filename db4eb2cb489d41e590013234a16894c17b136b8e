@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ccccf7e_c5268c01",
+        "filename": "test/vp10_highbd_iht_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-05-24T18:32:57Z",
+      "side": 1,
+      "message": "Use macro here and similar places below.",
+      "range": {
+        "startLine": 141,
+        "startChar": 48,
+        "endLine": 141,
+        "endChar": 49
+      },
+      "revId": "db4eb2cb489d41e590013234a16894c17b136b8e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
