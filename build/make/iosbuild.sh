@@ -226,6 +226,7 @@ build_framework() {
 
     # Copy in Info.plist.
     cat "${SCRIPT_DIR}/ios-Info.plist" \
+      | sed "s/\${FULLVERSION}/${FULLVERSION}/g" \
       | sed "s/\${VERSION}/${VERSION}/g" \
       | sed "s/\${IOS_VERSION_MIN}/${IOS_VERSION_MIN}/g" \
       > "${FRAMEWORK_DIR}/Info.plist"
@@ -341,8 +342,9 @@ if [ "${ENABLE_SHARED}" = "yes" ]; then
   CONFIGURE_ARGS="--enable-shared ${CONFIGURE_ARGS}"
 fi
 
-VERSION=$("${SCRIPT_DIR}"/version.sh --bare "${LIBVPX_SOURCE_DIR}" \
-  | sed -E 's/^v(.*)$/\1/')
+FULLVERSION=$("${SCRIPT_DIR}"/version.sh --bare "${LIBVPX_SOURCE_DIR}")
+VERSION=$(echo "${FULLVERSION}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+
 if [ "$ENABLE_SHARED" = "yes" ]; then
   IOS_VERSION_OPTIONS="--enable-shared"
 else
@@ -369,6 +371,7 @@ cat << EOF
   OSX_TARGETS="${OSX_TARGETS}"
   SIM_TARGETS="${SIM_TARGETS}"
   SCRIPT_DIR="${SCRIPT_DIR}"
+  FULLVERSION="${FULLVERSION}"
   VERSION="${VERSION}"
   IOS_VERSION_MIN="${IOS_VERSION_MIN}"
 EOF

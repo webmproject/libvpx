@@ -31,5 +31,7 @@
 		<integer>1</integer>
 		<integer>2</integer>
 	</array>
+	<key>VPXFullVersion</key>
+	<string>${FULLVERSION}</string>
 </dict>
 </plist>
