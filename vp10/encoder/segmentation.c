@@ -358,6 +358,7 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
       const int count0 = temporal_predictor_count[i][0];
       const int count1 = temporal_predictor_count[i][1];
 
+      t_nopred_prob[i] = get_binary_prob(count0, count1);
       vp10_prob_diff_update_savings_search(temporal_predictor_count[i],
                                            segp->pred_probs[i],
                                            &t_nopred_prob[i], DIFF_UPDATE_PROB);
