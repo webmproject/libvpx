@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ccccf7e_880adb12",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:59:01Z",
+      "side": 1,
+      "message": "what about the VPX_BITS_10/12 cases for CONFIG_VP9_HIGHBITDEPTH?",
+      "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
