@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc3eabeb_9dce8395",
+        "filename": "vp10/encoder/segmentation.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1002037
+      },
+      "writtenOn": "2016-05-24T18:11:49Z",
+      "side": 1,
+      "message": "I think t_nopred_prob should just be initialized to t_pred_prob? Assuming they are the same memory space in the context (I believe they are, don\u0027t remember 100%).",
+      "revId": "7118881cee0680b4acd01fe3f73af158796e2e69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
