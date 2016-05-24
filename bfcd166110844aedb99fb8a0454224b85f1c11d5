@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ccccf7e_88e81bc1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "you can just say:\n\nAdd vpx_lpf_{vertical,horizontal}_4_sse2()\n\nin the subject",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_08216be6",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "join this and the next 2 lines: __m128i filter, work ...",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_685e776d",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "this should be indented 4",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_c854e349",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "indent 4",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_a884ffc6",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "does 2 _mm_loadl_epi64 and 1 _mm_unpacklo_epi64 make any difference? I\u0027d prefer that for readability",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_e88e07e5",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "fix alignment",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_28b8ef83",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "indent should be 4",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_48bd3373",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-24T19:54:16Z",
+      "side": 1,
+      "message": "indent should be 4",
+      "revId": "bfcd166110844aedb99fb8a0454224b85f1c11d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
