@@ -22,6 +22,30 @@
       "revId": "db4eb2cb489d41e590013234a16894c17b136b8e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_e83287f5",
+        "filename": "test/vp10_highbd_iht_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-05-24T19:56:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ccccf7e_c5268c01",
+      "range": {
+        "startLine": 141,
+        "startChar": 48,
+        "endLine": 141,
+        "endChar": 49
+      },
+      "revId": "db4eb2cb489d41e590013234a16894c17b136b8e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
