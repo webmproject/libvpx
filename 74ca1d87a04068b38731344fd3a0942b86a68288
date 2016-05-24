@@ -22,6 +22,30 @@
       "revId": "74ca1d87a04068b38731344fd3a0942b86a68288",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_a2c5fe53",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-05-24T17:11:07Z",
+      "side": 1,
+      "message": "bug says arm64, and the webp fix that I\u0027ve stolen is for arm64. since I don\u0027t have xcode 6.3 anywhere I think this is best.",
+      "parentUuid": "fc3eabeb_5d107bf4",
+      "range": {
+        "startLine": 345,
+        "startChar": 34,
+        "endLine": 345,
+        "endChar": 45
+      },
+      "revId": "74ca1d87a04068b38731344fd3a0942b86a68288",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
