@@ -530,7 +530,7 @@ void vp10_make_masked_inter_predictor(
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.interinter_wedge_sign,
         mi->mbmi.sb_type,
-        wedge_offset_x, wedge_offset_y, h, w, xd->cur_buf->bit_depth);
+        wedge_offset_x, wedge_offset_y, h, w, xd->bd);
   else
     build_masked_compound_wedge_extend(
         dst, dst_stride, tmp_dst, MAX_SB_SIZE,
@@ -544,7 +544,7 @@ void vp10_make_masked_inter_predictor(
         dst, dst_stride, tmp_dst, MAX_SB_SIZE,
         mi->mbmi.interinter_wedge_index,
         mi->mbmi.interinter_wedge_sign,
-        mi->mbmi.sb_type, h, w, xd->cur_buf->bit_depth);
+        mi->mbmi.sb_type, h, w, xd->bd);
   else
     build_masked_compound_wedge(
         dst, dst_stride, tmp_dst, MAX_SB_SIZE,
@@ -2418,7 +2418,7 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
             mi->mbmi.interinter_wedge_index,
             mi->mbmi.interinter_wedge_sign,
             mi->mbmi.sb_type,
-            wedge_offset_x, wedge_offset_y, h, w, xd->cur_buf->bit_depth);
+            wedge_offset_x, wedge_offset_y, h, w, xd->bd);
       } else {
         build_masked_compound_wedge_extend(
             dst, dst_buf->stride, tmp_dst, MAX_SB_SIZE,
@@ -2443,7 +2443,7 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
                                            mi->mbmi.interinter_wedge_index,
                                            mi->mbmi.interinter_wedge_sign,
                                            mi->mbmi.sb_type, h, w,
-                                           xd->cur_buf->bit_depth);
+                                           xd->bd);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         build_masked_compound_wedge(dst, dst_buf->stride, tmp_dst, MAX_SB_SIZE,
