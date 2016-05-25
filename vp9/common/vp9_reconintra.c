@@ -142,6 +142,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   // 129  C   D  ..  W   X
   // 129  E   F  ..  U   V
   // 129  G   H  ..  S   T   T   T   T   T
+  // For 10 bit and 12 bit, 127 and 129 are replaced by base -1 and base + 1.
 
   // Get current frame pointer, width and height.
   if (plane == 0) {
@@ -177,7 +178,6 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
           left_col[i] = ref[i * ref_stride - 1];
       }
     } else {
-      // TODO(Peter): this value should probably change for high bitdepth
       vpx_memset16(left_col, base + 1, bs);
     }
   }
@@ -239,7 +239,6 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
           vpx_memset16(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
         }
-        // TODO(Peter) this value should probably change for high bitdepth
         above_row[-1] = left_available ? above_ref[-1] : (base + 1);
       } else {
         /* faster path if the block does not need extension */
@@ -251,13 +250,11 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
             memcpy(above_row + bs, above_ref + bs, bs * sizeof(above_row[0]));
           else
             vpx_memset16(above_row + bs, above_row[bs - 1], bs);
-          // TODO(Peter): this value should probably change for high bitdepth
           above_row[-1] = left_available ? above_ref[-1] : (base + 1);
         }
       }
     } else {
       vpx_memset16(above_row, base - 1, bs * 2);
-      // TODO(Peter): this value should probably change for high bitdepth
       above_row[-1] = base - 1;
     }
   }
