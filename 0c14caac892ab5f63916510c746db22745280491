@@ -16,6 +16,24 @@
       "revId": "0c14caac892ab5f63916510c746db22745280491",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc51e7a9_c2fe4676",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-05-25T16:59:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc51e7a9_1cffb5b8",
+      "revId": "0c14caac892ab5f63916510c746db22745280491",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
