@@ -15,6 +15,7 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
+#include "vp10/common/enums.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
 
@@ -149,32 +150,68 @@ using std::tr1::make_tuple;
 
 const IHbdHtParam kArrayIhtParam[] = {
   // 16x16
-  make_tuple(PARAM_LIST_16X16, 0, 10),
-  make_tuple(PARAM_LIST_16X16, 0, 12),
-  make_tuple(PARAM_LIST_16X16, 1, 10),
-  make_tuple(PARAM_LIST_16X16, 1, 12),
-  make_tuple(PARAM_LIST_16X16, 2, 10),
-  make_tuple(PARAM_LIST_16X16, 2, 12),
-  make_tuple(PARAM_LIST_16X16, 3, 10),
-  make_tuple(PARAM_LIST_16X16, 3, 12),
+  make_tuple(PARAM_LIST_16X16, DCT_DCT, 10),
+  make_tuple(PARAM_LIST_16X16, DCT_DCT, 12),
+  make_tuple(PARAM_LIST_16X16, ADST_DCT, 10),
+  make_tuple(PARAM_LIST_16X16, ADST_DCT, 12),
+  make_tuple(PARAM_LIST_16X16, DCT_ADST, 10),
+  make_tuple(PARAM_LIST_16X16, DCT_ADST, 12),
+  make_tuple(PARAM_LIST_16X16, ADST_ADST, 10),
+  make_tuple(PARAM_LIST_16X16, ADST_ADST, 12),
+#if CONFIG_EXT_TX
+  make_tuple(PARAM_LIST_16X16, FLIPADST_DCT, 10),
+  make_tuple(PARAM_LIST_16X16, FLIPADST_DCT, 12),
+  make_tuple(PARAM_LIST_16X16, DCT_FLIPADST, 10),
+  make_tuple(PARAM_LIST_16X16, DCT_FLIPADST, 12),
+  make_tuple(PARAM_LIST_16X16, FLIPADST_FLIPADST, 10),
+  make_tuple(PARAM_LIST_16X16, FLIPADST_FLIPADST, 12),
+  make_tuple(PARAM_LIST_16X16, ADST_FLIPADST, 10),
+  make_tuple(PARAM_LIST_16X16, ADST_FLIPADST, 12),
+  make_tuple(PARAM_LIST_16X16, FLIPADST_ADST, 10),
+  make_tuple(PARAM_LIST_16X16, FLIPADST_ADST, 12),
+#endif
   // 8x8
-  make_tuple(PARAM_LIST_8X8, 0, 10),
-  make_tuple(PARAM_LIST_8X8, 0, 12),
-  make_tuple(PARAM_LIST_8X8, 1, 10),
-  make_tuple(PARAM_LIST_8X8, 1, 12),
-  make_tuple(PARAM_LIST_8X8, 2, 10),
-  make_tuple(PARAM_LIST_8X8, 2, 12),
-  make_tuple(PARAM_LIST_8X8, 3, 10),
-  make_tuple(PARAM_LIST_8X8, 3, 12),
+  make_tuple(PARAM_LIST_8X8, DCT_DCT, 10),
+  make_tuple(PARAM_LIST_8X8, DCT_DCT, 12),
+  make_tuple(PARAM_LIST_8X8, ADST_DCT, 10),
+  make_tuple(PARAM_LIST_8X8, ADST_DCT, 12),
+  make_tuple(PARAM_LIST_8X8, DCT_ADST, 10),
+  make_tuple(PARAM_LIST_8X8, DCT_ADST, 12),
+  make_tuple(PARAM_LIST_8X8, ADST_ADST, 10),
+  make_tuple(PARAM_LIST_8X8, ADST_ADST, 12),
+#if CONFIG_EXT_TX
+  make_tuple(PARAM_LIST_8X8, FLIPADST_DCT, 10),
+  make_tuple(PARAM_LIST_8X8, FLIPADST_DCT, 12),
+  make_tuple(PARAM_LIST_8X8, DCT_FLIPADST, 10),
+  make_tuple(PARAM_LIST_8X8, DCT_FLIPADST, 12),
+  make_tuple(PARAM_LIST_8X8, FLIPADST_FLIPADST, 10),
+  make_tuple(PARAM_LIST_8X8, FLIPADST_FLIPADST, 12),
+  make_tuple(PARAM_LIST_8X8, ADST_FLIPADST, 10),
+  make_tuple(PARAM_LIST_8X8, ADST_FLIPADST, 12),
+  make_tuple(PARAM_LIST_8X8, FLIPADST_ADST, 10),
+  make_tuple(PARAM_LIST_8X8, FLIPADST_ADST, 12),
+#endif
   // 4x4
-  make_tuple(PARAM_LIST_4X4, 0, 10),
-  make_tuple(PARAM_LIST_4X4, 0, 12),
-  make_tuple(PARAM_LIST_4X4, 1, 10),
-  make_tuple(PARAM_LIST_4X4, 1, 12),
-  make_tuple(PARAM_LIST_4X4, 2, 10),
-  make_tuple(PARAM_LIST_4X4, 2, 12),
-  make_tuple(PARAM_LIST_4X4, 3, 10),
-  make_tuple(PARAM_LIST_4X4, 3, 12),
+  make_tuple(PARAM_LIST_4X4, DCT_DCT, 10),
+  make_tuple(PARAM_LIST_4X4, DCT_DCT, 12),
+  make_tuple(PARAM_LIST_4X4, ADST_DCT, 10),
+  make_tuple(PARAM_LIST_4X4, ADST_DCT, 12),
+  make_tuple(PARAM_LIST_4X4, DCT_ADST, 10),
+  make_tuple(PARAM_LIST_4X4, DCT_ADST, 12),
+  make_tuple(PARAM_LIST_4X4, ADST_ADST, 10),
+  make_tuple(PARAM_LIST_4X4, ADST_ADST, 12),
+#if CONFIG_EXT_TX
+  make_tuple(PARAM_LIST_4X4, FLIPADST_DCT, 10),
+  make_tuple(PARAM_LIST_4X4, FLIPADST_DCT, 12),
+  make_tuple(PARAM_LIST_4X4, DCT_FLIPADST, 10),
+  make_tuple(PARAM_LIST_4X4, DCT_FLIPADST, 12),
+  make_tuple(PARAM_LIST_4X4, FLIPADST_FLIPADST, 10),
+  make_tuple(PARAM_LIST_4X4, FLIPADST_FLIPADST, 12),
+  make_tuple(PARAM_LIST_4X4, ADST_FLIPADST, 10),
+  make_tuple(PARAM_LIST_4X4, ADST_FLIPADST, 12),
+  make_tuple(PARAM_LIST_4X4, FLIPADST_ADST, 10),
+  make_tuple(PARAM_LIST_4X4, FLIPADST_ADST, 12),
+#endif
 };
 
 INSTANTIATE_TEST_CASE_P(
