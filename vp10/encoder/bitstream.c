@@ -3057,7 +3057,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
         assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
         vpx_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),
                              REF_FRAMES_LOG2);
-        // TODO(zoeliu): To further explore whether sign bias bits are needed.
         vpx_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
       }
     }

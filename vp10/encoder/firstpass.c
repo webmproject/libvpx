@@ -61,7 +61,6 @@
 #define RC_FACTOR_MIN       0.75
 #define RC_FACTOR_MAX       1.75
 
-
 #define NCOUNT_INTRA_THRESH 8192
 #define NCOUNT_INTRA_FACTOR 3
 #define NCOUNT_FRAME_II_THRESH 5.0
@@ -1630,8 +1629,20 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
   int mid_boost_bits = 0;
   int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
+
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-  int bidir_pred_frame_index = 0;
+  // The use of bi-predictive frames are only enabled when following 3
+  // conditions are met:
+  // (1) Alt-ref is enabled;
+  // (2) The bi-predictive group interval is at least 2; and
+  // (3) The bi-predictive group interval is strictly smaller than the
+  //     golden group interval.
+  const int is_bipred_enabled =
+      rc->source_alt_ref_pending && rc->bipred_group_interval &&
+      rc->bipred_group_interval <=
+          (rc->baseline_gf_interval - rc->source_alt_ref_pending);
+  int bipred_group_end = 0;
+  int bipred_frame_index = 0;
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
@@ -1671,7 +1682,7 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
   frame_index++;
 
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-  bidir_pred_frame_index++;
+  bipred_frame_index++;
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   // Store the bits to spend on the ARF if there is one.
@@ -1740,38 +1751,39 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
                               VPXMIN(max_bits, (int)total_group_bits));
 
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-    // TODO(zoeliu): Currently only support BIDIR_PRED_PERIOD = 2
-    assert(BIDIR_PRED_PERIOD == 2);
-    // NOTE: BIDIR_PRED is only enabled when its interval is strictly
-    //       less than the GOLDEN_FRAME group interval.
+    // NOTE: BIDIR_PRED is only enabled when the length of the bi-predictive
+    //       frame group interval is strictly smaller than that of the GOLDEN
+    //       FRAME group interval.
     // TODO(zoeliu): Currently BIDIR_PRED is only enabled when alt-ref is on.
-    if (rc->source_alt_ref_pending && BIDIR_PRED_PERIOD <
-        (rc->baseline_gf_interval - rc->source_alt_ref_pending)) {
-      if (bidir_pred_frame_index == 1) {
-        const int curr_brf_src_offset = BIDIR_PRED_PERIOD - 1;
-        if ((i + curr_brf_src_offset) >=
-            (rc->baseline_gf_interval - rc->source_alt_ref_pending)) {
-          gf_group->update_type[frame_index] = LF_UPDATE;
-          gf_group->bidir_pred_enabled[frame_index] = 0;
-          gf_group->brf_src_offset[frame_index] = 0;
-        } else {
-          gf_group->update_type[frame_index] = BRF_UPDATE;
-          gf_group->bidir_pred_enabled[frame_index] = 1;
-          gf_group->brf_src_offset[frame_index] = curr_brf_src_offset;
-        }
-      } else if (bidir_pred_frame_index == BIDIR_PRED_PERIOD) {
-        gf_group->update_type[frame_index] = LASTNRF_UPDATE;
+    if (is_bipred_enabled && !bipred_group_end) {
+      const int cur_brf_src_offset = rc->bipred_group_interval - 1;
+
+      // --- BRF_UPDATE ---
+      if (bipred_frame_index == 1) {
+        gf_group->update_type[frame_index] = BRF_UPDATE;
+        gf_group->bidir_pred_enabled[frame_index] = 1;
+        gf_group->brf_src_offset[frame_index] = cur_brf_src_offset;
+      // --- LAST_BIPRED_UPDATE ---
+      } else if (bipred_frame_index == rc->bipred_group_interval) {
+        gf_group->update_type[frame_index] = LAST_BIPRED_UPDATE;
         gf_group->bidir_pred_enabled[frame_index] = 1;
         gf_group->brf_src_offset[frame_index] = 0;
-        // Reset the bidir_pred index.
-        bidir_pred_frame_index = 0;
+        // Reset the bi-predictive frame index.
+        bipred_frame_index = 0;
+      // --- BIPRED_UPDATE ---
       } else {
-        gf_group->update_type[frame_index] = NRF_UPDATE;
+        gf_group->update_type[frame_index] = BIPRED_UPDATE;
         gf_group->bidir_pred_enabled[frame_index] = 1;
         gf_group->brf_src_offset[frame_index] = 0;
       }
 
-      bidir_pred_frame_index++;
+      bipred_frame_index++;
+      // Check whether the next bi-predictive frame group would entirely be
+      // included within the current golden frame group.
+      if (bipred_frame_index == 1 && (i + 1 + cur_brf_src_offset) >=
+          (rc->baseline_gf_interval - rc->source_alt_ref_pending)) {
+          bipred_group_end = 1;
+      }
     } else {
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
       gf_group->update_type[frame_index] = LF_UPDATE;
@@ -1784,14 +1796,19 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     if (gf_group->update_type[frame_index] == BRF_UPDATE) {
       // Boost up the allocated bits on BWDREF_FRAME
-      // (zoeliu)gf_group->rf_level[frame_index] = GF_ARF_LOW;
       gf_group->rf_level[frame_index] = INTER_HIGH;
       gf_group->bit_allocation[frame_index] =
           target_frame_size + (target_frame_size >> 2);
-    } else if (gf_group->update_type[frame_index] == LASTNRF_UPDATE) {
-      gf_group->rf_level[frame_index] = INTER_NORMAL;
+    } else if (gf_group->update_type[frame_index] == LAST_BIPRED_UPDATE) {
+      // Press down the allocated bits on LAST_BIPRED_UPDATE frames
+      gf_group->rf_level[frame_index] = INTER_LOW;
       gf_group->bit_allocation[frame_index] =
-          VPXMAX(0, target_frame_size - (target_frame_size >> 1));
+          target_frame_size - (target_frame_size >> 1);
+    } else if (gf_group->update_type[frame_index] == BIPRED_UPDATE) {
+      // TODO(zoeliu): To investigate whether the allocated bits on
+      // BIPRED_UPDATE frames need to be further adjusted.
+      gf_group->rf_level[frame_index] = INTER_NORMAL;
+      gf_group->bit_allocation[frame_index] = target_frame_size;
     } else {
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
       gf_group->rf_level[frame_index] = INTER_NORMAL;
@@ -2040,6 +2057,13 @@ static void define_gf_group(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   rc->baseline_gf_interval = i - (is_key_frame || rc->source_alt_ref_pending);
 
   rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  rc->bipred_group_interval = BFG_INTERVAL;
+  // The minimum bi-predictive frame group interval is 2.
+  if (rc->bipred_group_interval < 2)
+    rc->bipred_group_interval = 0;
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   // Reset the file position.
   reset_fpf_position(twopass, start_pos);
@@ -2484,8 +2508,8 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
   cpi->rc.is_src_frame_alt_ref = 0;
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
   cpi->rc.is_bwd_ref_frame = 0;
-  cpi->rc.is_last_nonref_frame = 0;
-  cpi->rc.is_nonref_frame = 0;
+  cpi->rc.is_last_bipred_frame = 0;
+  cpi->rc.is_bipred_frame = 0;
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   switch (twopass->gf_group.update_type[twopass->gf_group.index]) {
@@ -2544,23 +2568,20 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
       cpi->rc.is_bwd_ref_frame = 1;
       break;
 
-    // TODO(zoeliu): When BIDIR_PRED and EXT_REFS start to work together, we
-    // may take both LASTNRF and NRF as one of the last ref
-
-    case LASTNRF_UPDATE:
+    case LAST_BIPRED_UPDATE:
       cpi->refresh_last_frame = 0;
       cpi->refresh_golden_frame = 0;
       cpi->refresh_bwd_ref_frame = 0;
       cpi->refresh_alt_ref_frame = 0;
-      cpi->rc.is_last_nonref_frame = 1;
+      cpi->rc.is_last_bipred_frame = 1;
       break;
 
-    case NRF_UPDATE:
-      cpi->refresh_last_frame = 0;
+    case BIPRED_UPDATE:
+      cpi->refresh_last_frame = 1;
       cpi->refresh_golden_frame = 0;
       cpi->refresh_bwd_ref_frame = 0;
       cpi->refresh_alt_ref_frame = 0;
-      cpi->rc.is_nonref_frame = 1;
+      cpi->rc.is_bipred_frame = 1;
       break;
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 

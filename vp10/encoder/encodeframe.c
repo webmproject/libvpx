@@ -4527,11 +4527,29 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   vp10_initialize_rd_consts(cpi);
   vp10_initialize_me_consts(cpi, x, cm->base_qindex);
   init_encode_frame_mb_context(cpi);
+
   cm->use_prev_frame_mvs = !cm->error_resilient_mode &&
                            cm->width == cm->last_width &&
                            cm->height == cm->last_height &&
                            !cm->intra_only &&
                            cm->last_show_frame;
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  // NOTE(zoeliu): As cm->prev_frame can take neither a frame of
+  //               show_exisiting_frame=1, nor can it take a frame not used as
+  //               a reference, it is probable that by the time it is being
+  //               referred to, the frame buffer it originally points to may
+  //               already get expired and have been reassigned to the current
+  //               newly coded frame. Hence, we need to check whether this is
+  //               the case, and if yes, we have 2 choices:
+  //               (1) Simply disable the use of previous frame mvs; or
+  //               (2) Have cm->prev_frame point to one reference frame buffer,
+  //                   e.g. LAST_FRAME.
+  if (cm->use_prev_frame_mvs && !enc_is_ref_frame_buf(cpi, cm->prev_frame)) {
+    // Reassign the LAST_FRAME buffer to cm->prev_frame.
+    const int last_fb_buf_idx = get_ref_frame_buf_idx(cpi, LAST_FRAME);
+    cm->prev_frame = &cm->buffer_pool->frame_bufs[last_fb_buf_idx];
+  }
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   // Special case: set prev_mi to NULL when the previous mode info
   // context cannot be used.

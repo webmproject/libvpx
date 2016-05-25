@@ -950,7 +950,8 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
 int vp10_frame_type_qdelta(const VP10_COMP *cpi, int rf_level, int q) {
   static const double rate_factor_deltas[RATE_FACTOR_LEVELS] = {
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-    0.80,  // INTER_NORMAL
+    1.00,  // INTER_NORMAL
+    0.80,  // INTER_LOW
     1.25,  // INTER_HIGH
 #else
     1.00,  // INTER_NORMAL
@@ -961,7 +962,12 @@ int vp10_frame_type_qdelta(const VP10_COMP *cpi, int rf_level, int q) {
     2.00,  // KF_STD
   };
   static const FRAME_TYPE frame_type[RATE_FACTOR_LEVELS] =
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+      { INTER_FRAME, INTER_FRAME, INTER_FRAME,
+        INTER_FRAME, INTER_FRAME, KEY_FRAME };
+#else
       {INTER_FRAME, INTER_FRAME, INTER_FRAME, INTER_FRAME, KEY_FRAME};
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
   const VP10_COMMON *const cm = &cpi->common;
   int qdelta = vp10_compute_qdelta_by_rate(&cpi->rc, frame_type[rf_level],
                                           q, rate_factor_deltas[rf_level],

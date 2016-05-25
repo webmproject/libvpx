@@ -3727,6 +3727,23 @@ void vp10_decode_frame(VP10Decoder *pbi,
                            !cm->last_intra_only &&
                            cm->last_show_frame &&
                            (cm->last_frame_type != KEY_FRAME);
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  // NOTE(zoeliu): As cm->prev_frame can take neither a frame of
+  //               show_exisiting_frame=1, nor can it take a frame not used as
+  //               a reference, it is probable that by the time it is being
+  //               referred to, the frame buffer it originally points to may
+  //               already get expired and have been reassigned to the current
+  //               newly coded frame. Hence, we need to check whether this is
+  //               the case, and if yes, we have 2 choices:
+  //               (1) Simply disable the use of previous frame mvs; or
+  //               (2) Have cm->prev_frame point to one reference frame buffer,
+  //                   e.g. LAST_FRAME.
+  if (cm->use_prev_frame_mvs && !dec_is_ref_frame_buf(pbi, cm->prev_frame)) {
+    // Reassign the LAST_FRAME buffer to cm->prev_frame.
+    RefBuffer *last_fb_ref_buf = &cm->frame_refs[LAST_FRAME - LAST_FRAME];
+    cm->prev_frame = &cm->buffer_pool->frame_bufs[last_fb_ref_buf->idx];
+  }
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   vp10_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
 

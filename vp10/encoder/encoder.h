@@ -710,6 +710,20 @@ static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(
   return &cpi->upsampled_ref_bufs[buf_idx].buf;
 }
 
+#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+static INLINE int enc_is_ref_frame_buf(VP10_COMP *cpi,
+                                       RefCntBuffer *frame_buf) {
+  MV_REFERENCE_FRAME ref_frame;
+  VP10_COMMON *const cm = &cpi->common;
+  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+    const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+    if (buf_idx == INVALID_IDX) continue;
+    if (frame_buf == &cm->buffer_pool->frame_bufs[buf_idx]) break;
+  }
+  return (ref_frame <= ALTREF_FRAME);
+}
+#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+
 static INLINE unsigned int get_token_alloc(int mb_rows, int mb_cols) {
   // TODO(JBB): double check we can't exceed this token count if we have a
   // 32x32 transform crossing a boundary at a multiple of 16.

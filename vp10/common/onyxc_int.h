@@ -187,7 +187,8 @@ typedef struct VP10Common {
   int last_show_frame;
   int show_existing_frame;
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-  int is_reference_frame;  // A frame used as a reference
+  // Flag for a frame used as a reference - not written to the bitstream
+  int is_reference_frame;
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
   // Flag signaling that the frame is encoded using only INTRA modes.

@@ -8743,8 +8743,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     if (comp_pred) {
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
       // TODO(zoeliu): To further justify whether following is needed
-      if (cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index]
-          != LASTNRF_UPDATE && second_ref_frame == BWDREF_FRAME) {
+      if (!(cpi->rc.is_last_bipred_frame || cpi->rc.is_bipred_frame) &&
+          second_ref_frame == BWDREF_FRAME) {
         continue;
       }
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
@@ -10206,8 +10206,8 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     if (comp_pred) {
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
       // TODO(zoeliu): To further justify whether following is needed
-      if (cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index]
-          != LASTNRF_UPDATE && second_ref_frame == BWDREF_FRAME) {
+      if (!(cpi->rc.is_last_bipred_frame || cpi->rc.is_bipred_frame) &&
+          second_ref_frame == BWDREF_FRAME) {
         continue;
       }
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
