@@ -48,14 +48,7 @@ aomenc_can_encode_av1() {
   fi
 }
 
-# Echo aomenc command line parameters allowing use of
-# hantro_collage_w352h288.yuv as input.
-yuv_input_hantro_collage() {
-  echo ""${YUV_RAW_INPUT}"
-       --width="${YUV_RAW_INPUT_WIDTH}"
-       --height="${YUV_RAW_INPUT_HEIGHT}""
-}
-
+# Utilities that echo aomenc input file parameters.
 y4m_input_non_square_par() {
   echo ""${Y4M_NOSQ_PAR_INPUT}""
 }
@@ -118,7 +111,7 @@ aomenc() {
 aomenc_av1_ivf() {
   if [ "$(aomenc_can_encode_av1)" = "yes" ]; then
     local readonly output="${AOM_TEST_OUTPUT_DIR}/av1.ivf"
-    aomenc $(yuv_input_hantro_collage) \
+    aomenc $(yuv_raw_input) \
       --codec=av1 \
       --limit="${TEST_FRAMES}" \
       --ivf \
@@ -135,7 +128,7 @@ aomenc_av1_webm() {
   if [ "$(aomenc_can_encode_av1)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${AOM_TEST_OUTPUT_DIR}/av1.webm"
-    aomenc $(yuv_input_hantro_collage) \
+    aomenc $(yuv_raw_input) \
       --codec=av1 \
       --limit="${TEST_FRAMES}" \
       --output="${output}"
@@ -151,7 +144,7 @@ aomenc_av1_webm_2pass() {
   if [ "$(aomenc_can_encode_av1)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${AOM_TEST_OUTPUT_DIR}/av1.webm"
-    aomenc $(yuv_input_hantro_collage) \
+    aomenc $(yuv_raw_input) \
       --codec=av1 \
       --limit="${TEST_FRAMES}" \
       --output="${output}" \
@@ -167,7 +160,7 @@ aomenc_av1_webm_2pass() {
 aomenc_av1_ivf_lossless() {
   if [ "$(aomenc_can_encode_av1)" = "yes" ]; then
     local readonly output="${AOM_TEST_OUTPUT_DIR}/av1_lossless.ivf"
-    aomenc $(yuv_input_hantro_collage) \
+    aomenc $(yuv_raw_input) \
       --codec=av1 \
       --limit="${TEST_FRAMES}" \
       --ivf \
@@ -184,7 +177,7 @@ aomenc_av1_ivf_lossless() {
 aomenc_av1_ivf_minq0_maxq0() {
   if [ "$(aomenc_can_encode_av1)" = "yes" ]; then
     local readonly output="${AOM_TEST_OUTPUT_DIR}/av1_lossless_minq0_maxq0.ivf"
-    aomenc $(yuv_input_hantro_collage) \
+    aomenc $(yuv_raw_input) \
       --codec=av1 \
       --limit="${TEST_FRAMES}" \
       --ivf \
@@ -205,7 +198,7 @@ aomenc_av1_webm_lag10_frames20() {
     local readonly lag_total_frames=20
     local readonly lag_frames=10
     local readonly output="${AOM_TEST_OUTPUT_DIR}/av1_lag10_frames20.webm"
-    aomenc $(yuv_input_hantro_collage) \
+    aomenc $(yuv_raw_input) \
       --codec=av1 \
       --limit="${lag_total_frames}" \
       --lag-in-frames="${lag_frames}" \

@@ -309,6 +309,34 @@ aom_test_check_environment() {
   fi
 }
 
+# Echo aomenc command line parameters allowing use of a raw yuv file as
+# input to aomenc.
+yuv_raw_input() {
+  echo ""${YUV_RAW_INPUT}"
+       --width="${YUV_RAW_INPUT_WIDTH}"
+       --height="${YUV_RAW_INPUT_HEIGHT}""
+}
+
+# Do a small encode for testing decoders.
+encode_yuv_raw_input_av1() {
+  if [ "$(av1_encode_available)" = "yes" ]; then
+    local readonly output="$1"
+    local readonly encoder="$(aom_tool_path aomenc)"
+
+    eval "${encoder}" $(yuv_raw_input) \
+      --codec=av1 \
+      --ivf \
+      --limit=5 \
+      --output="${output}" \
+      ${devnull}
+
+    if [ ! -e "${output}" ]; then
+      elog "Output file does not exist."
+      return 1
+    fi
+  fi
+}
+
 # Parse the command line.
 while [ -n "$1" ]; do
   case "$1" in
