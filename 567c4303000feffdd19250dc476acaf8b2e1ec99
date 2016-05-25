@@ -16,6 +16,24 @@
       "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc51e7a9_dfd61f3c",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-05-25T16:45:37Z",
+      "side": 1,
+      "message": "VPX_BITS_10 passed and VPX_BITS_12 failed because of overflow. Same as the MMX version.",
+      "parentUuid": "9ccccf7e_880adb12",
+      "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
