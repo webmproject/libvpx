@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc51e7a9_31c0923f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-25T23:30:31Z",
+      "side": 1,
+      "message": "you should include the commit hash (or git log --oneline -1) as these links aren\u0027t guaranteed to be long-lived.",
+      "revId": "3e0475608c9f8ad8f971c4799485399510cc6165",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc51e7a9_11deb624",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2077,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-25T23:30:31Z",
+      "side": 1,
+      "message": "you should add a note to clarify why webm is special cased and to refine the general note at line 2070",
+      "revId": "3e0475608c9f8ad8f971c4799485399510cc6165",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
