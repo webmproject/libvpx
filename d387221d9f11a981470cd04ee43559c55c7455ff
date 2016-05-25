@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ccccf7e_9c277d4f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-25T00:40:44Z",
+      "side": 1,
+      "message": "you could be more specific about the location, \u0027build_intra_predictors_high: ...\u0027",
+      "revId": "d387221d9f11a981470cd04ee43559c55c7455ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ccccf7e_bc1b6110",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-25T00:40:44Z",
+      "side": 1,
+      "message": "no longer...",
+      "revId": "d387221d9f11a981470cd04ee43559c55c7455ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
