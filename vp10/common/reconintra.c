@@ -1198,6 +1198,20 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 #endif  // CONFIG_EXT_INTRA
 
   (void) plane;
+  assert(n_top_px >= 0);
+  assert(n_topright_px >= 0);
+  assert(n_left_px >= 0);
+  assert(n_bottomleft_px >= 0);
+
+  if ((!need_above && n_left_px == 0) || (!need_left && n_top_px == 0)) {
+    int i;
+    const int val = (n_left_px == 0) ? base + 1 : base - 1;
+    for (i = 0; i < bs; ++i) {
+      vpx_memset16(dst, val, bs);
+      dst += dst_stride;
+    }
+    return;
+  }
 
   // NEED_LEFT
   if (need_left) {
@@ -1360,6 +1374,16 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   assert(n_topright_px >= 0);
   assert(n_left_px >= 0);
   assert(n_bottomleft_px >= 0);
+
+  if ((!need_above && n_left_px == 0) || (!need_left && n_top_px == 0)) {
+    int i;
+    const int val = (n_left_px == 0) ? 129 : 127;
+    for (i = 0; i < bs; ++i) {
+      memset(dst, val, bs);
+      dst += dst_stride;
+    }
+    return;
+  }
 
   // NEED_LEFT
   if (need_left) {
