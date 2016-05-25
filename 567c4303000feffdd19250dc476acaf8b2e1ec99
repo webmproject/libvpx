@@ -34,6 +34,24 @@
       "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc51e7a9_e5326cac",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-25T19:13:29Z",
+      "side": 1,
+      "message": "if it\u0027s possible to call this with 10/12 and it fails the entry in the rtcd should be removed.",
+      "parentUuid": "dc51e7a9_dfd61f3c",
+      "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
