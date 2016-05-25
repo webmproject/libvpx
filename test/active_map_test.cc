@@ -86,4 +86,12 @@ TEST_P(ActiveMapTest, Test) {
 VP9_INSTANTIATE_TEST_CASE(ActiveMapTest,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(0, 9));
+#if CONFIG_VP10
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_VP10, ActiveMapTest,
+    ::testing::Combine(
+        ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
+            &libvpx_test::kVP10)),
+        ::testing::Values(::libvpx_test::kRealTime), ::testing::Range(0, 9)));
+#endif  // CONFIG_VP10
 }  // namespace
