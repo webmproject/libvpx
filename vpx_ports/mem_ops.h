@@ -89,7 +89,7 @@ static unsigned MEM_VALUE_T mem_get_be32(const void *vmem) {
   unsigned MEM_VALUE_T  val;
   const MAU_T          *mem = (const MAU_T *)vmem;
 
-  val = mem[0] << 24;
+  val = ((unsigned int)mem[0]) << 24;
   val |= mem[1] << 16;
   val |= mem[2] << 8;
   val |= mem[3];
