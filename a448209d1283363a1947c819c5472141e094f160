@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fca6abd4_a06e74b2",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 8746,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-05-26T15:13:59Z",
+      "side": 1,
+      "message": "Can this commented out code go",
+      "revId": "a448209d1283363a1947c819c5472141e094f160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fca6abd4_806498d2",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 10210,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-05-26T15:13:59Z",
+      "side": 1,
+      "message": "Delete commented out code if no redundant.",
+      "revId": "a448209d1283363a1947c819c5472141e094f160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
