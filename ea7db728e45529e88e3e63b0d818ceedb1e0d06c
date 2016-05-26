@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc51e7a9_d238492d",
+        "filename": "vpx_dsp/x86/loopfilter_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-26T20:07:17Z",
+      "side": 1,
+      "message": "if you\u0027re going to keep the c-code try to keep the alignment so it\u0027s still readable",
+      "revId": "ea7db728e45529e88e3e63b0d818ceedb1e0d06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
