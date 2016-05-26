@@ -2523,7 +2523,9 @@ static void pick_intra_angle_routine_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                          TX_TYPE *best_tx_type,
                                          INTRA_FILTER *best_filter,
                                          BLOCK_SIZE bsize, int rate_overhead,
-                                         int64_t *best_rd) {
+                                         int64_t *best_rd,
+                                         uint8_t zcoeff_blk[][MAX_MIB_SIZE *
+                                                            MAX_MIB_SIZE * 4]) {
   int this_rate, this_rate_tokenonly, s;
   int64_t this_distortion, this_rd;
   MB_MODE_INFO *mbmi = &x->e_mbd.mi[0]->mbmi;
@@ -2545,6 +2547,9 @@ static void pick_intra_angle_routine_sby(VP10_COMP *cpi, MACROBLOCK *x,
     *rate_tokenonly     = this_rate_tokenonly;
     *distortion         = this_distortion;
     *skippable          = s;
+    memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
+           sizeof(zcoeff_blk[mbmi->tx_size][0]) *
+           MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
   }
 }
 
@@ -2561,9 +2566,10 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
   const int intra_filter_ctx = vp10_get_pred_context_intra_interp(xd);
   INTRA_FILTER filter, best_filter = INTRA_FILTER_LINEAR;
   const double rd_adjust = 1.2;
-  int64_t this_distortion, this_rd, sse_dummy;
+  int64_t this_distortion, this_rd;
   TX_SIZE best_tx_size = mic->mbmi.tx_size;
   TX_TYPE best_tx_type = mbmi->tx_type;
+  uint8_t zcoeff_blk[TX_SIZES][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
 
   if (ANGLE_FAST_SEARCH) {
     int deltas_level1[3] = {0, -2, 2};
@@ -2610,6 +2616,9 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
           *rate_tokenonly     = this_rate_tokenonly;
           *distortion         = this_distortion;
           *skippable          = s;
+          memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
+                 sizeof(zcoeff_blk[mbmi->tx_size][0]) *
+                 MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
         }
       }
     }
@@ -2631,7 +2640,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                        rate_overhead +
                                        cpi->intra_filter_cost
                                        [intra_filter_ctx][filter],
-                                       &best_rd);
+                                       &best_rd, zcoeff_blk);
         }
       }
     }
@@ -2653,7 +2662,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                      rate_overhead +
                                      cpi->intra_filter_cost
                                      [intra_filter_ctx][filter],
-                                     &best_rd);
+                                     &best_rd, zcoeff_blk);
       }
     }
   }
@@ -2670,7 +2679,8 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                      &best_angle_delta, &best_tx_size,
                                      &best_tx_type, &best_filter, bsize,
                                      rate_overhead + cpi->intra_filter_cost
-                                     [intra_filter_ctx][filter], &best_rd);
+                                     [intra_filter_ctx][filter], &best_rd,
+                                     zcoeff_blk);
       }
     }
   }
@@ -2679,14 +2689,10 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
   mbmi->angle_delta[0] = best_angle_delta;
   mic->mbmi.intra_filter = best_filter;
   mbmi->tx_type = best_tx_type;
-
-  if (*rate_tokenonly < INT_MAX) {
-    txfm_rd_in_plane(x,
-                     cpi,
-                     &this_rate_tokenonly, &this_distortion, &s,
-                     &sse_dummy, INT64_MAX, 0, bsize, mbmi->tx_size,
-                     cpi->sf.use_fast_coef_costing);
-  }
+  if (*rate_tokenonly < INT_MAX)
+    memcpy(x->zcoeff_blk[mbmi->tx_size], zcoeff_blk[mbmi->tx_size],
+           sizeof(zcoeff_blk[mbmi->tx_size][0]) *
+           MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
 
   return best_rd;
 }
@@ -2903,9 +2909,10 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
       super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                       &s, NULL, bsize, best_rd);
     }
-#endif  // CONFIG_EXT_INTRA
+#else
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                     &s, NULL, bsize, best_rd);
+#endif  // CONFIG_EXT_INTRA
 
     if (this_rate_tokenonly == INT_MAX)
       continue;
@@ -4055,9 +4062,6 @@ static int rd_pick_intra_angle_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   mbmi->angle_delta[1] = best_angle_delta;
-  if (*rate_tokenonly != INT_MAX)
-    super_block_uvrd(cpi, x, &this_rate_tokenonly,
-                     &this_distortion, &s, &this_sse, bsize, INT64_MAX);
   return *rate_tokenonly != INT_MAX;
 }
 #endif  // CONFIG_EXT_INTRA
