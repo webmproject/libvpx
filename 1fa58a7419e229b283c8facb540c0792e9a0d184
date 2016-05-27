@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9cd76f7e_6d3391fb",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2894,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-05-27T21:32:03Z",
+      "side": 1,
+      "message": "Does this still need to be a member of MACROBLOCK? It only seems to get set and unset in local functions.",
+      "range": {
+        "startLine": 2894,
+        "startChar": 4,
+        "endLine": 2894,
+        "endChar": 32
+      },
+      "revId": "1fa58a7419e229b283c8facb540c0792e9a0d184",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cd76f7e_4d304ded",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2899,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-05-27T21:32:03Z",
+      "side": 1,
+      "message": "I still think calling this variable |mode| is asking for trouble.",
+      "range": {
+        "startLine": 2899,
+        "startChar": 8,
+        "endLine": 2899,
+        "endChar": 12
+      },
+      "revId": "1fa58a7419e229b283c8facb540c0792e9a0d184",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
