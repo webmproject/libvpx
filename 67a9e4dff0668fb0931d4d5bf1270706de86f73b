@@ -16,6 +16,47 @@
       "revId": "67a9e4dff0668fb0931d4d5bf1270706de86f73b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cd76f7e_ca7543ba",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-05-27T20:18:21Z",
+      "side": 1,
+      "message": "I agree",
+      "parentUuid": "9cd76f7e_2a717ffc",
+      "revId": "67a9e4dff0668fb0931d4d5bf1270706de86f73b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cd76f7e_8a6b4bde",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2902,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-05-27T20:18:21Z",
+      "side": 1,
+      "message": "This construct seems confusing.\n\nhaving the iterated mode not agree with the variable named mode seems error prone. \n\nMaybe something like:\n\u003e\u003e\u003e\n#define TX_SEARCH (TM_PRED+1)\nfor (mode_index \u003d DC_PRED; mode_index \u003c\u003d TM_PRED || x-\u003efast_tx_search; ++mode_index) {\n  if (mode_index \u003d\u003d TX_SEARCH)\n    mode \u003d mode_index\n  else\n    mode \u003d mode_selected;\n\n\u003c\u003c\u003c\nWould be more clear.",
+      "range": {
+        "startLine": 2898,
+        "startChar": 0,
+        "endLine": 2902,
+        "endChar": 37
+      },
+      "revId": "67a9e4dff0668fb0931d4d5bf1270706de86f73b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
