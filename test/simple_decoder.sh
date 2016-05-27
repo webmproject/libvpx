@@ -45,7 +45,7 @@ simple_decoder_av1() {
   if [ "$(av1_decode_available)" = "yes" ]; then
     if [ ! -e "${AV1_IVF_FILE}" ]; then
       local file="${AOM_TEST_OUTPUT_DIR}/test_encode.ivf"
-      encode_yuv_raw_input_av1 "${file}"
+      encode_yuv_raw_input_av1 "${file}" --ivf
       simple_decoder "${file}" av1 || return 1
     else
       simple_decoder "${AV1_IVF_FILE}" av1 || return 1

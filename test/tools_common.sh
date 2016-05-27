@@ -322,10 +322,10 @@ encode_yuv_raw_input_av1() {
   if [ "$(av1_encode_available)" = "yes" ]; then
     local readonly output="$1"
     local readonly encoder="$(aom_tool_path aomenc)"
-
+    shift
     eval "${encoder}" $(yuv_raw_input) \
       --codec=av1 \
-      --ivf \
+      $@ \
       --limit=5 \
       --output="${output}" \
       ${devnull}
