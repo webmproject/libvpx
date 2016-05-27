@@ -22,6 +22,30 @@
       "revId": "acad7855cbb2cd23434e4a9b8f68d8ef8f769b7b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cd76f7e_0af11ba3",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2977,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-05-27T19:37:19Z",
+      "side": 1,
+      "message": "Got rid of goto.",
+      "parentUuid": "dc51e7a9_02b73c92",
+      "range": {
+        "startLine": 2977,
+        "startChar": 4,
+        "endLine": 2977,
+        "endChar": 28
+      },
+      "revId": "acad7855cbb2cd23434e4a9b8f68d8ef8f769b7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
