@@ -236,13 +236,6 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->duration   -= frame->duration;
 }
 
-// Calculate the linear size relative to a baseline of 1080P
-#define BASE_SIZE 2073600.0  // 1920x1080
-static double get_linear_size_factor(const VP9_COMP *cpi) {
-  const double this_area = cpi->initial_width * cpi->initial_height;
-  return pow(this_area / BASE_SIZE, 0.5);
-}
-
 // Calculate an active area of the image that discounts formatting
 // bars and partially discounts other 0 energy areas.
 #define MIN_ACTIVE_AREA 0.5
@@ -1247,7 +1240,7 @@ static double calc_correction_factor(double err_per_mb,
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
-#define ERR_DIVISOR         100.0
+#define ERR_DIVISOR         115.0
 static int get_twopass_worst_quality(VP9_COMP *cpi,
                                      const double section_err,
                                      double inactive_zone,
@@ -1270,7 +1263,6 @@ static int get_twopass_worst_quality(VP9_COMP *cpi,
     const int active_mbs = VPXMAX(1, num_mbs - (int)(num_mbs * inactive_zone));
     const double av_err_per_mb = section_err / active_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
-    double ediv_size_correction;
     double last_group_rate_err;
     const int target_norm_bits_per_mb = ((uint64_t)target_rate <<
                                          BPER_MB_NORMBITS) / active_mbs;
@@ -1279,17 +1271,6 @@ static int get_twopass_worst_quality(VP9_COMP *cpi,
 
     if (is_two_pass_svc(cpi) && cpi->svc.spatial_layer_id > 0)
       is_svc_upper_layer = 1;
-
-    // Larger image formats are expected to be a little harder to code
-    // relatively given the same prediction error score. This in part at
-    // least relates to the increased size and hence coding overheads of
-    // motion vectors. Some account of this is made through adjustment of
-    // the error divisor.
-    ediv_size_correction =
-        VPXMAX(0.2, VPXMIN(5.0, get_linear_size_factor(cpi)));
-    if (ediv_size_correction < 1.0)
-      ediv_size_correction = -(1.0 / ediv_size_correction);
-    ediv_size_correction *= 4.0;
 
     // based on recent history adjust expectations of bits per macroblock.
     last_group_rate_err = (double)twopass->rolling_arf_group_actual_bits /
@@ -1305,7 +1286,7 @@ static int get_twopass_worst_quality(VP9_COMP *cpi,
     for (q = rc->best_quality; q < rc->worst_quality; ++q) {
       const double factor =
           calc_correction_factor(av_err_per_mb,
-                                 ERR_DIVISOR - ediv_size_correction,
+                                 ERR_DIVISOR,
                                  is_svc_upper_layer ? SVC_FACTOR_PT_LOW :
                                  FACTOR_PT_LOW, FACTOR_PT_HIGH, q,
                                  cpi->common.bit_depth);
@@ -2675,20 +2656,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
-  int frames_left;
   FIRSTPASS_STATS this_frame;
 
   int target_rate;
   LAYER_CONTEXT *const lc = is_two_pass_svc(cpi) ?
         &cpi->svc.layer_context[cpi->svc.spatial_layer_id] : 0;
-
-  if (lc != NULL) {
-    frames_left = (int)(twopass->total_stats.count -
-                  lc->current_video_frame_in_layer);
-  } else {
-    frames_left = (int)(twopass->total_stats.count -
-                  cm->current_video_frame);
-  }
 
   if (!twopass->stats_in)
     return;
@@ -2731,6 +2703,9 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;
   } else if (cm->current_video_frame == 0 ||
              (lc != NULL && lc->current_video_frame_in_layer == 0)) {
+    const int frames_left = (int)(twopass->total_stats.count -
+        ((lc != NULL) ? lc->current_video_frame_in_layer
+                      : cm->current_video_frame));
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
