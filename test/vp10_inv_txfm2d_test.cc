@@ -42,9 +42,6 @@ class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
     txfm1d_size_ = libvpx_test::get_txfm1d_size(tx_size_);
     txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
     count_ = 500;
-    input_ = new int16_t[txfm2d_size_];
-    ref_input_ = new uint16_t[txfm2d_size_];
-    output_ = new int32_t[txfm2d_size_];
 
     input_ = reinterpret_cast<int16_t *>
         (vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
