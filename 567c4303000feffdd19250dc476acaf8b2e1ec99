@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "dc51e7a9_57aae493",
+        "filename": "vp10/encoder/x86/dct_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-05-27T17:51:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc51e7a9_140a1a15",
+      "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc51e7a9_5400a2f4",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
         "patchSetId": 7
@@ -107,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "dc51e7a9_97a06cac",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-05-27T17:51:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc51e7a9_5400a2f4",
+      "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc51e7a9_d40cb22f",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
         "patchSetId": 7
@@ -118,6 +154,24 @@
       "writtenOn": "2016-05-27T11:57:08Z",
       "side": 1,
       "message": "I think the output buffer is aligned.  The quantizer (called after this function) does aligned reads from this buffer.  Did I miss something?",
+      "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc51e7a9_378cf849",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-05-27T17:51:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc51e7a9_d40cb22f",
       "revId": "567c4303000feffdd19250dc476acaf8b2e1ec99",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
