@@ -398,7 +398,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_fht16x16 sse2/;
 
   add_proto qw/void vp10_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp10_fwht4x4/, "$mmx_x86inc";
+  specialize qw/vp10_fwht4x4/, "$sse2_x86inc";
 } else {
   add_proto qw/void vp10_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp10_fht4x4 sse2 msa/;
@@ -410,7 +410,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_fht16x16 sse2 msa/;
 
   add_proto qw/void vp10_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp10_fwht4x4 msa/, "$mmx_x86inc";
+  specialize qw/vp10_fwht4x4 msa/, "$sse2_x86inc";
 }
 
 # Inverse transform
