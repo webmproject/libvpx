@@ -195,6 +195,7 @@ typedef enum {
 typedef struct {
   TX_TYPE_PRUNE_MODE prune_mode;
   int fast_intra_tx_type_search;
+  int fast_inter_tx_type_search;
 } TX_TYPE_SEARCH;
 
 typedef enum {

@@ -183,6 +183,8 @@ struct macroblock {
 
   // use default transform and skip transform type search for intra modes
   int use_default_intra_tx_type;
+  // use default transform and skip transform type search for inter modes
+  int use_default_inter_tx_type;
 };
 
 #ifdef __cplusplus
