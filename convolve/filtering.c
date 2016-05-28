@@ -5,6 +5,12 @@
 #include <string.h>
 #include <smmintrin.h>
 
+static inline unsigned int readtsc(void) {
+  unsigned int tsc;
+  __asm__ __volatile__("rdtsc\n\t":"=a"(tsc):);
+  return tsc;
+}
+
 static int filtering(const uint8_t *src, const int16_t *filter, int flen) {
   int k;
   int sum = 0;
@@ -228,13 +234,22 @@ int main(int argc, char **argv)
   uint8_t *pixel = (uint8_t *) malloc(2 * sizeof(pixel[0]) * block_size);
   uint8_t *ppixel = pixel + block_size;
   int *pbuffer = buffer + block_size;
+  uint32_t start, end;
 
   init_state(buffer, pixel, width, block_size);
   init_state(pbuffer, ppixel, width, block_size);
 
+  start = readtsc();
   convolve(pixel, width, filter12, 12, buffer);
+  end = readtsc();
 
+  printf("C version cycles: %d\n", end - start);
+
+  start = readtsc();
   convolve_sse4_1(ppixel, pfilter_12tap, width, pbuffer);
+  end = readtsc();
+
+  printf("SIMD version cycles: %d\n", end - start);
 
   check_buffer(buffer, pbuffer, width);
 
