@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9cd76f7e_99044772",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 8746,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-05-28T23:08:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fca6abd4_a06e74b2",
+      "revId": "a448209d1283363a1947c819c5472141e094f160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fca6abd4_806498d2",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2016-05-26T15:13:59Z",
       "side": 1,
       "message": "Delete commented out code if no redundant.",
+      "revId": "a448209d1283363a1947c819c5472141e094f160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cd76f7e_f9f90390",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 10210,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-05-28T23:08:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fca6abd4_806498d2",
       "revId": "a448209d1283363a1947c819c5472141e094f160",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
