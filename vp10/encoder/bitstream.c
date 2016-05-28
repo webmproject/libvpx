@@ -916,6 +916,7 @@ static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
       write_uniform(w, FILTER_INTRA_MODES, mode);
     }
   }
+
   if (mbmi->uv_mode == DC_PRED &&
       mbmi->palette_mode_info.palette_size[1] == 0) {
     vp10_write(w, mbmi->ext_intra_mode_info.use_ext_intra_mode[1],
@@ -924,6 +925,33 @@ static void write_ext_intra_mode_info(const VP10_COMMON *const cm,
       EXT_INTRA_MODE mode = mbmi->ext_intra_mode_info.ext_intra_mode[1];
       write_uniform(w, FILTER_INTRA_MODES, mode);
     }
+  }
+}
+
+static void write_intra_angle_info(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+                                   vp10_writer *w) {
+  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
+  const int intra_filter_ctx = vp10_get_pred_context_intra_interp(xd);
+  int p_angle;
+
+  if (bsize < BLOCK_8X8)
+    return;
+
+  if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
+    write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
+                  MAX_ANGLE_DELTAS + mbmi->angle_delta[0]);
+    p_angle = mode_to_angle_map[mbmi->mode] + mbmi->angle_delta[0] * ANGLE_STEP;
+    if (vp10_is_intra_filter_switchable(p_angle)) {
+      vp10_write_token(w, vp10_intra_filter_tree,
+                       cm->fc->intra_filter_probs[intra_filter_ctx],
+                       &intra_filter_encodings[mbmi->intra_filter]);
+    }
+  }
+
+  if (mbmi->uv_mode != DC_PRED && mbmi->uv_mode != TM_PRED) {
+    write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
+                  MAX_ANGLE_DELTAS + mbmi->angle_delta[1]);
   }
 }
 #endif  // CONFIG_EXT_INTRA
@@ -1106,20 +1134,6 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
       write_intra_mode(w, mode, cm->fc->y_mode_prob[size_group_lookup[bsize]]);
-#if CONFIG_EXT_INTRA
-      if (mode != DC_PRED && mode != TM_PRED) {
-        int p_angle;
-        write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
-                      MAX_ANGLE_DELTAS + mbmi->angle_delta[0]);
-        p_angle = mode_to_angle_map[mode] + mbmi->angle_delta[0] * ANGLE_STEP;
-        if (vp10_is_intra_filter_switchable(p_angle)) {
-          const int ctx = vp10_get_pred_context_intra_interp(xd);
-          vp10_write_token(w, vp10_intra_filter_tree,
-                           cm->fc->intra_filter_probs[ctx],
-                           &intra_filter_encodings[mbmi->intra_filter]);
-        }
-      }
-#endif  // CONFIG_EXT_INTRA
     } else {
       int idx, idy;
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -1133,10 +1147,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     }
     write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mode]);
 #if CONFIG_EXT_INTRA
-    if (mbmi->uv_mode != DC_PRED && mbmi->uv_mode != TM_PRED &&
-        bsize >= BLOCK_8X8)
-      write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
-                    MAX_ANGLE_DELTAS + mbmi->angle_delta[1]);
+    write_intra_angle_info(cm, xd, w);
 #endif  // CONFIG_EXT_INTRA
     if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
       write_palette_mode_info(cm, xd, mi, w);
@@ -1467,21 +1478,6 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   if (bsize >= BLOCK_8X8) {
     write_intra_mode(w, mbmi->mode,
                      get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
-#if CONFIG_EXT_INTRA
-    if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
-      int p_angle;
-      const int intra_filter_ctx = vp10_get_pred_context_intra_interp(xd);
-      write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
-                    MAX_ANGLE_DELTAS + mbmi->angle_delta[0]);
-      p_angle =
-          mode_to_angle_map[mbmi->mode] + mbmi->angle_delta[0] * ANGLE_STEP;
-      if (vp10_is_intra_filter_switchable(p_angle)) {
-        vp10_write_token(w, vp10_intra_filter_tree,
-                         cm->fc->intra_filter_probs[intra_filter_ctx],
-                         &intra_filter_encodings[mbmi->intra_filter]);
-      }
-    }
-#endif  // CONFIG_EXT_INTRA
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -1498,13 +1494,14 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
   write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mbmi->mode]);
 #if CONFIG_EXT_INTRA
-  if (mbmi->uv_mode != DC_PRED && mbmi->uv_mode != TM_PRED &&
-      bsize >= BLOCK_8X8)
-    write_uniform(w, 2 * MAX_ANGLE_DELTAS + 1,
-                  MAX_ANGLE_DELTAS + mbmi->angle_delta[1]);
+  write_intra_angle_info(cm, xd, w);
 #endif  // CONFIG_EXT_INTRA
   if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
     write_palette_mode_info(cm, xd, mi, w);
+#if CONFIG_EXT_INTRA
+  if (bsize >= BLOCK_8X8)
+      write_ext_intra_mode_info(cm, mbmi, w);
+#endif  // CONFIG_EXT_INTRA
 
   if (!FIXED_TX_TYPE) {
 #if CONFIG_EXT_TX
@@ -1531,11 +1528,6 @@ static void write_mb_modes_kf(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     }
 #endif  // CONFIG_EXT_TX
   }
-
-#if CONFIG_EXT_INTRA
-  if (bsize >= BLOCK_8X8)
-      write_ext_intra_mode_info(cm, mbmi, w);
-#endif  // CONFIG_EXT_INTRA
 }
 
 #if CONFIG_SUPERTX
