@@ -98,14 +98,6 @@ const struct Filter pfilter_10tap = {
   pfilter10, 7
 };
 
-static int get_looping_count(int width, struct Filter f) {
-  return width / f.signalSpan;
-}
-
-static int get_looping_resid(int width, struct Filter f) {
-  return width % f.signalSpan;
-}
-
 static inline __m128i multiply_add(const __m128i ps0, const __m128i ps1,
                                    const __m128i fl0, const __m128i fl1) {
   __m128i sum;
@@ -235,18 +227,27 @@ int main(int argc, char **argv)
   uint8_t *ppixel = pixel + block_size;
   int *pbuffer = buffer + block_size;
   uint32_t start, end;
+  int count;
 
   init_state(buffer, pixel, width, block_size);
   init_state(pbuffer, ppixel, width, block_size);
 
+  count = 0;
   start = readtsc();
-  convolve(pixel, width, filter12, 12, buffer);
+  do {
+    convolve(pixel, width, filter12, 12, buffer);
+    count++;
+  } while (count < 64);
   end = readtsc();
 
   printf("C version cycles: %d\n", end - start);
 
+  count = 0;
   start = readtsc();
-  convolve_sse4_1(ppixel, pfilter_12tap, width, pbuffer);
+  do {
+    convolve_sse4_1(ppixel, pfilter_12tap, width, pbuffer);
+    count++;
+  } while (count < 64);
   end = readtsc();
 
   printf("SIMD version cycles: %d\n", end - start);
