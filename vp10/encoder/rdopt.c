@@ -2478,7 +2478,7 @@ static int rd_pick_ext_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                  int *rate, int *rate_tokenonly,
                                  int64_t *distortion, int *skippable,
                                  BLOCK_SIZE bsize, int mode_cost,
-                                 int64_t *best_rd) {
+                                 int64_t *best_rd, uint16_t skip_mask) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mi[0];
   MB_MODE_INFO *mbmi = &mic->mbmi;
@@ -2496,6 +2496,8 @@ static int rd_pick_ext_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
   mbmi->palette_mode_info.palette_size[0] = 0;
 
   for (mode = 0; mode < FILTER_INTRA_MODES; ++mode) {
+    if (skip_mask & (1 << mode))
+      continue;
     mbmi->ext_intra_mode_info.ext_intra_mode[0] = mode;
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                     &s, NULL, bsize, *best_rd);
@@ -2867,6 +2869,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int is_directional_mode, rate_overhead, best_angle_delta = 0;
   INTRA_FILTER best_filter = INTRA_FILTER_LINEAR;
   uint8_t directional_mode_skip_mask[INTRA_MODES];
+  uint16_t filter_intra_mode_skip_mask = (1 << FILTER_INTRA_MODES) - 1;
   const int src_stride = x->plane[0].src.stride;
   const uint8_t *src = x->plane[0].src.buf;
 #endif  // CONFIG_EXT_INTRA
@@ -2979,6 +2982,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
         this_rate +=
             cpi->intra_filter_cost[intra_filter_ctx][mic->mbmi.intra_filter];
     }
+    filter_intra_mode_skip_mask ^= (1 << mic->mbmi.mode);
 #endif  // CONFIG_EXT_INTRA
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
@@ -3008,7 +3012,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (ALLOW_FILTER_INTRA_MODES) {
     if (rd_pick_ext_intra_sby(cpi, x, rate, rate_tokenonly, distortion,
                               skippable, bsize, bmode_costs[DC_PRED],
-                              &best_rd)) {
+                              &best_rd, filter_intra_mode_skip_mask)) {
       mode_selected       = mic->mbmi.mode;
       best_tx             = mic->mbmi.tx_size;
       ext_intra_mode_info = mic->mbmi.ext_intra_mode_info;
@@ -8962,7 +8966,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
         if (!rd_pick_ext_intra_sby(cpi, x, &rate_dummy, &rate_y, &distortion_y,
                                    &skippable, bsize,
-                                   intra_mode_cost[mbmi->mode], &this_rd))
+                                   intra_mode_cost[mbmi->mode], &this_rd, 0))
           *mbmi = mbmi_copy;
       }
 #else
