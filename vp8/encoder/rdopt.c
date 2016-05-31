@@ -1899,7 +1899,8 @@ static int calculate_final_rd_costs(int this_rd,
                     int prob_skip_cost;
 
                     prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 1);
-                    prob_skip_cost -= vp8_cost_bit(cpi->prob_skip_false, 0);
+                    prob_skip_cost -=
+                        (int)vp8_cost_bit(cpi->prob_skip_false, 0);
                     rd->rate2 += prob_skip_cost;
                     *other_cost += prob_skip_cost;
                 }
