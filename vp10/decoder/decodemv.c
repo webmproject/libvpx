@@ -780,7 +780,7 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
       ref_frame[!idx] = cm->comp_fwd_ref[bit];
       {
         const int ctx1 = vp10_get_pred_context_comp_bwdref_p(cm, xd);
-        const int bit1 = vpx_read(r, fc->comp_bwdref_prob[ctx1][0]);
+        const int bit1 = vp10_read(r, fc->comp_bwdref_prob[ctx1][0]);
         if (counts)
           ++counts->comp_bwdref[ctx1][0][bit1];
         ref_frame[idx] = cm->comp_bwd_ref[bit1];
@@ -860,7 +860,7 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 #if CONFIG_BIDIR_PRED
         if (bit1) {
           const int ctx2 = vp10_get_pred_context_single_ref_p3(xd);
-          const int bit2 = vpx_read(r, fc->single_ref_prob[ctx2][2]);
+          const int bit2 = vp10_read(r, fc->single_ref_prob[ctx2][2]);
           if (counts)
             ++counts->single_ref[ctx2][2][bit2];
           ref_frame[0] = bit2 ? ALTREF_FRAME : BWDREF_FRAME;
