@@ -159,7 +159,8 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
 
     sf->tx_size_search_breakout = 1;
     sf->partition_search_breakout_rate_thr = 80;
-    sf->tx_type_search = PRUNE_ONE;
+    sf->tx_type_search.prune_mode = PRUNE_ONE;
+    sf->tx_type_search.fast_intra_tx_type_search = 1;
     // Use transform domain distortion.
     // Note var-tx expt always uses pixel domain distortion.
     sf->use_transform_domain_distortion = 1;
@@ -183,7 +184,7 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->allow_partition_search_skip = 1;
     sf->use_upsampled_references = 0;
 #if CONFIG_EXT_TX
-    sf->tx_type_search = PRUNE_TWO;
+    sf->tx_type_search.prune_mode = PRUNE_TWO;
 #endif
   }
 
@@ -496,7 +497,8 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   sf->alt_ref_search_fp = 0;
   sf->use_quant_fp = 0;
   sf->partition_search_type = SEARCH_PARTITION;
-  sf->tx_type_search = NO_PRUNE;
+  sf->tx_type_search.prune_mode = NO_PRUNE;
+  sf->tx_type_search.fast_intra_tx_type_search = 0;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
   sf->auto_min_max_partition_size = NOT_IN_USE;
