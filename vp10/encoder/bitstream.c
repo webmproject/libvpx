@@ -857,7 +857,7 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
       }
 #else  // CONFIG_EXT_REFS
 #if CONFIG_BIDIR_PRED
-      vpx_write(w, bit_bwd, vp10_get_pred_prob_comp_bwdref_p(cm, xd));
+      vp10_write(w, bit_bwd, vp10_get_pred_prob_comp_bwdref_p(cm, xd));
 #endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
     } else {
