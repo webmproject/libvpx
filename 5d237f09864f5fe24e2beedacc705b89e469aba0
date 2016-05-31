@@ -16,6 +16,24 @@
       "revId": "5d237f09864f5fe24e2beedacc705b89e469aba0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79700dc4_b9f5ff5f",
+        "filename": "test/vp10_inv_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-05-31T17:17:44Z",
+      "side": 1,
+      "message": "If it is testing simd version then it need 16 alignment. For c version, alignment is not needed",
+      "parentUuid": "dc51e7a9_91bddcbf",
+      "revId": "5d237f09864f5fe24e2beedacc705b89e469aba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
