@@ -822,7 +822,42 @@ static int do_tx_type_search(TX_TYPE tx_type,
 #endif
 }
 
-static void model_rd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bsize,
+static void model_rd_from_sse(const VP10_COMP *const cpi,
+                              const MACROBLOCKD *const xd,
+                              BLOCK_SIZE bsize,
+                              int plane,
+                              uint64_t sse,
+                              int *rate,
+                              int64_t *dist) {
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int dequant_shift =
+#if CONFIG_VP9_HIGHBITDEPTH
+      (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
+          xd->bd - 5 :
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+          3;
+
+  // Fast approximate the modelling function.
+  if (cpi->sf.simple_model_rd_from_var) {
+    const int64_t square_error = sse;
+    int quantizer = (pd->dequant[1] >> dequant_shift);
+
+    if (quantizer < 120)
+      *rate = (square_error * (280 - quantizer)) >> (16 - VP9_PROB_COST_SHIFT);
+    else
+      *rate = 0;
+    *dist = (square_error * quantizer) >> 8;
+  } else {
+    vp10_model_rd_from_var_lapndz(sse, num_pels_log2_lookup[bsize],
+                                  pd->dequant[1] >> dequant_shift,
+                                  rate, dist);
+  }
+
+  *dist <<= 4;
+}
+
+
+static void model_rd_for_sb(const VP10_COMP *const cpi, BLOCK_SIZE bsize,
                             MACROBLOCK *x, MACROBLOCKD *xd,
                             int plane_from, int plane_to,
                             int *out_rate_sum, int64_t *out_dist_sum,
@@ -842,12 +877,6 @@ static void model_rd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bsize,
   const int shift = 6;
   int rate;
   int64_t dist;
-  const int dequant_shift =
-#if CONFIG_VP9_HIGHBITDEPTH
-      (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
-          xd->bd - 5 :
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-          3;
 
   x->pred_sse[ref] = 0;
 
@@ -911,32 +940,16 @@ static void model_rd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bsize,
 
     total_sse += sum_sse;
 
-    // Fast approximate the modelling function.
-    if (cpi->sf.simple_model_rd_from_var) {
-      int64_t rate;
-      const int64_t square_error = sum_sse;
-      int quantizer = (pd->dequant[1] >> dequant_shift);
+    model_rd_from_sse(cpi, xd, bs, i, sum_sse, &rate, &dist);
 
-      if (quantizer < 120)
-        rate = (square_error * (280 - quantizer)) >> (16 - VP9_PROB_COST_SHIFT);
-      else
-        rate = 0;
-      dist = (square_error * quantizer) >> 8;
-      rate_sum += rate;
-      dist_sum += dist;
-    } else {
-      vp10_model_rd_from_var_lapndz(sum_sse, num_pels_log2_lookup[bs],
-                                    pd->dequant[1] >> dequant_shift,
-                                    &rate, &dist);
-      rate_sum += rate;
-      dist_sum += dist;
-    }
+    rate_sum += rate;
+    dist_sum += dist;
   }
 
   *skip_txfm_sb = skip_flag;
   *skip_sse_sb = total_sse << 4;
   *out_rate_sum = (int)rate_sum;
-  *out_dist_sum = dist_sum << 4;
+  *out_dist_sum = dist_sum;
 }
 
 int64_t vp10_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
