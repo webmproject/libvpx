@@ -34,6 +34,41 @@
       "revId": "5d237f09864f5fe24e2beedacc705b89e469aba0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19af1163_46c2d218",
+        "filename": "test/vp10_inv_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-31T23:18:30Z",
+      "side": 1,
+      "message": "I guessed so, I just wanted to make sure this reflected what the library itself was doing. note, however the sse4_1 doesn\u0027t seem to be doing an aligned load for input at least.",
+      "parentUuid": "79700dc4_b9f5ff5f",
+      "revId": "5d237f09864f5fe24e2beedacc705b89e469aba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19af1163_c6d562ce",
+        "filename": "test/vp10_inv_txfm2d_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-05-31T23:18:30Z",
+      "side": 1,
+      "message": "note this is problematic for some platforms (Visual Studio); see some of the changes Alex has made in this directory",
+      "revId": "5d237f09864f5fe24e2beedacc705b89e469aba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
