@@ -458,7 +458,7 @@ class FwdTrans8x8TestBase {
         coeff_r[j] = static_cast<tran_low_t>(round(out_r[j]));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
-        const uint32_t diff = coeff[j] - coeff_r[j];
+        const int32_t diff = coeff[j] - coeff_r[j];
         const uint32_t error = diff * diff;
         EXPECT_GE(9u << 2 * (bit_depth_ - 8), error)
             << "Error: 8x8 DCT has error " << error
