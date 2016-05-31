@@ -87,15 +87,16 @@ const int16_t pfilter10[7][16] __attribute__ ((aligned(16))) = {
 
 struct Filter {
   const int16_t (*coeffs)[16];
+  int tapsNum;
   int signalSpan;
 };
 
 const struct Filter pfilter_12tap = {
-  pfilter12, 5
+  pfilter12, 12, 5
 };
 
 const struct Filter pfilter_10tap = {
-  pfilter10, 7
+  pfilter10, 10, 7
 };
 
 static inline __m128i multiply_add(const __m128i ps0, const __m128i ps1,
