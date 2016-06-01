@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <smmintrin.h>
+#include <tmmintrin.h>
 
 static inline unsigned int readtsc(void) {
   unsigned int tsc;
