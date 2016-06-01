@@ -224,25 +224,19 @@ void convolve_sse4_1(const uint8_t *src, const struct Filter fData,
 
 // Solution 2
 void inline convolve2_w4_sse4_1(const uint8_t *src, const __m128i *f,
-                               int *buffer) {
+                                const __m128i *cm, int *buffer) {
   __m128i pixel;
   __m128i s0, s1, s2, s3, s4, s5;
   const __m128i zero = _mm_setzero_si128();
-  const __m128i cm0 = _mm_setr_epi16(0x100, 0x201, 0x302, 0x403, 0, 0, 0, 0);
-  const __m128i cm1 = _mm_setr_epi16(0x302, 0x403, 0x504, 0x605, 0, 0, 0, 0);
-  const __m128i cm2 = _mm_setr_epi16(0x504, 0x605, 0x706, 0x807, 0, 0, 0, 0);
-  const __m128i cm3 = _mm_setr_epi16(0x706, 0x807, 0x908, 0xa09, 0, 0, 0, 0);
-  const __m128i cm4 = _mm_setr_epi16(0x908, 0xa09, 0xb0a, 0xc0b, 0, 0, 0, 0);
-  const __m128i cm5 = _mm_setr_epi16(0xb0a, 0xc0b, 0xd0c, 0xe0d, 0, 0, 0, 0);
 
   pixel = _mm_loadu_si128((__m128i const *)src);
 
-  __m128i y0 = _mm_shuffle_epi8(pixel, cm0);
-  __m128i y1 = _mm_shuffle_epi8(pixel, cm1);
-  __m128i y2 = _mm_shuffle_epi8(pixel, cm2);
-  __m128i y3 = _mm_shuffle_epi8(pixel, cm3);
-  __m128i y4 = _mm_shuffle_epi8(pixel, cm4);
-  __m128i y5 = _mm_shuffle_epi8(pixel, cm5);
+  __m128i y0 = _mm_shuffle_epi8(pixel, cm[0]);
+  __m128i y1 = _mm_shuffle_epi8(pixel, cm[1]);
+  __m128i y2 = _mm_shuffle_epi8(pixel, cm[2]);
+  __m128i y3 = _mm_shuffle_epi8(pixel, cm[3]);
+  __m128i y4 = _mm_shuffle_epi8(pixel, cm[4]);
+  __m128i y5 = _mm_shuffle_epi8(pixel, cm[5]);
 
   y0 = _mm_unpacklo_epi8(y0, zero);
   y1 = _mm_unpacklo_epi8(y1, zero);
@@ -267,35 +261,40 @@ void inline convolve2_w4_sse4_1(const uint8_t *src, const __m128i *f,
   _mm_storeu_si128((__m128i *)buffer, s0);
 }
 
-void convolve2_w8_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
-  convolve2_w4_sse4_1(src, f, buffer);
+void convolve2_w8_sse4_1(const uint8_t *src, const __m128i *f,
+                         const __m128i *cm, int *buffer) {
+  convolve2_w4_sse4_1(src, f, cm, buffer);
   src += 4;
   buffer += 4;
-  convolve2_w4_sse4_1(src, f, buffer);
+  convolve2_w4_sse4_1(src, f, cm, buffer);
 }
 
-void convolve2_w16_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
-  convolve2_w8_sse4_1(src, f, buffer);
+void convolve2_w16_sse4_1(const uint8_t *src, const __m128i *f,
+                          const __m128i *cm, int *buffer) {
+  convolve2_w8_sse4_1(src, f, cm, buffer);
   src += 8;
   buffer += 8;
-  convolve2_w8_sse4_1(src, f, buffer);
+  convolve2_w8_sse4_1(src, f, cm, buffer);
 }
 
-void convolve2_w32_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
-  convolve2_w16_sse4_1(src, f, buffer);
+void convolve2_w32_sse4_1(const uint8_t *src, const __m128i *f,
+                          const __m128i *cm, int *buffer) {
+  convolve2_w16_sse4_1(src, f, cm, buffer);
   src += 16;
   buffer += 16;
-  convolve2_w16_sse4_1(src, f, buffer);
+  convolve2_w16_sse4_1(src, f, cm, buffer);
 }
 
-void convolve2_w64_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
-  convolve2_w32_sse4_1(src, f, buffer);
+void convolve2_w64_sse4_1(const uint8_t *src, const __m128i *f,
+                          const __m128i *cm, int *buffer) {
+  convolve2_w32_sse4_1(src, f, cm, buffer);
   src += 32;
   buffer += 32;
-  convolve2_w32_sse4_1(src, f, buffer);
+  convolve2_w32_sse4_1(src, f, cm, buffer);
 }
 
-void (*convolveTab2[5])(const uint8_t *, const __m128i *, int *) = {
+void (*convolveTab2[5])(const uint8_t *, const __m128i *, const __m128i *,
+                        int *) = {
    convolve2_w4_sse4_1,
    convolve2_w8_sse4_1,
    convolve2_w16_sse4_1,
@@ -306,6 +305,7 @@ void (*convolveTab2[5])(const uint8_t *, const __m128i *, int *) = {
 void convolve2_sse4_1(const uint8_t *src, const struct Filter fData,
                      int width, int *buffer) {
   __m128i f[6];
+  __m128i cm[6];
   const int16_t *filter = (const int16_t *) fData.coeffs;
 
   f[0] = *((__m128i *)(filter + 0 * 8));
@@ -315,21 +315,28 @@ void convolve2_sse4_1(const uint8_t *src, const struct Filter fData,
   f[4] = *((__m128i *)(filter + 4 * 8));
   f[5] = *((__m128i *)(filter + 5 * 8));
 
+  cm[0] = _mm_setr_epi16(0x100, 0x201, 0x302, 0x403, 0, 0, 0, 0);
+  cm[1] = _mm_setr_epi16(0x302, 0x403, 0x504, 0x605, 0, 0, 0, 0);
+  cm[2] = _mm_setr_epi16(0x504, 0x605, 0x706, 0x807, 0, 0, 0, 0);
+  cm[3] = _mm_setr_epi16(0x706, 0x807, 0x908, 0xa09, 0, 0, 0, 0);
+  cm[4] = _mm_setr_epi16(0x908, 0xa09, 0xb0a, 0xc0b, 0, 0, 0, 0);
+  cm[5] = _mm_setr_epi16(0xb0a, 0xc0b, 0xd0c, 0xe0d, 0, 0, 0, 0);
+
   switch (width) {
     case 4:
-      convolveTab2[0](src, f, buffer);
+      convolveTab2[0](src, f, cm, buffer);
       break;
     case 8:
-      convolveTab2[1](src, f, buffer);
+      convolveTab2[1](src, f, cm, buffer);
       break;
     case 16:
-      convolveTab2[2](src, f, buffer);
+      convolveTab2[2](src, f, cm, buffer);
       break;
     case 32:
-      convolveTab2[3](src, f, buffer);
+      convolveTab2[3](src, f, cm, buffer);
       break;
     case 64:
-      convolveTab2[4](src, f, buffer);
+      convolveTab2[4](src, f, cm, buffer);
       break;
     default:
       assert(0);
