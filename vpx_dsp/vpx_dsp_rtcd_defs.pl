@@ -970,8 +970,11 @@ if (vpx_config("CONFIG_VP10_ENCODER") eq "yes") {
   #
   # Sum of Squares
   #
-  add_proto qw/uint64_t vpx_sum_squares_2d_i16/, "const int16_t *src, int stride, int size";
+  add_proto qw/uint64_t vpx_sum_squares_2d_i16/, "const int16_t *src, int stride, uint32_t size";
   specialize qw/vpx_sum_squares_2d_i16 sse2/;
+
+  add_proto qw/uint64_t vpx_sum_squares_i16/, "const int16_t *src, uint32_t N";
+  specialize qw/vpx_sum_squares_i16 sse2/;
 }
 
 if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
