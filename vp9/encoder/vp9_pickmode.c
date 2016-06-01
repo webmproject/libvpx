@@ -1323,6 +1323,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int ref_frame_cost[MAX_REF_FRAMES];
   int svc_force_zero_mode[3] = {0};
   int perform_intra_pred = 1;
+  int use_golden_nonzeromv = 1;
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_PICKMODE_CTX_DEN ctx_den;
   int64_t zero_last_cost_orig = INT64_MAX;
@@ -1408,6 +1409,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         svc_force_zero_mode[GOLDEN_FRAME - 1] = 1;
     }
   }
+
+  if (!((cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
+      !svc_force_zero_mode[GOLDEN_FRAME - 1]))
+    use_golden_nonzeromv = 0;
 
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
     find_predictors(cpi, x, ref_frame, frame_mv, const_motion,
@@ -1543,7 +1548,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (this_mode == NEWMV && ref_frame == LAST_FRAME &&
+    if (use_golden_nonzeromv &&
+        this_mode == NEWMV && ref_frame == LAST_FRAME &&
         frame_mv[NEWMV][LAST_FRAME].as_int != INVALID_MV) {
       const int pre_stride = xd->plane[0].pre[0].stride;
       const uint8_t * const pre_buf = xd->plane[0].pre[0].buf +
@@ -1554,21 +1560,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                    pre_buf, pre_stride);
       x->pred_mv_sad[LAST_FRAME] = best_pred_sad;
     }
-
-    if (cpi->use_svc) {
-      if (this_mode == NEWMV && ref_frame == GOLDEN_FRAME &&
-          frame_mv[NEWMV][GOLDEN_FRAME].as_int != INVALID_MV) {
-        const int pre_stride = xd->plane[0].pre[0].stride;
-        const uint8_t * const pre_buf = xd->plane[0].pre[0].buf +
-            (frame_mv[NEWMV][GOLDEN_FRAME].as_mv.row >> 3) * pre_stride +
-            (frame_mv[NEWMV][GOLDEN_FRAME].as_mv.col >> 3);
-        best_pred_sad = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf,
-                                               x->plane[0].src.stride,
-                                               pre_buf, pre_stride);
-        x->pred_mv_sad[GOLDEN_FRAME] = best_pred_sad;
-      }
-    }
-
 
     if (this_mode != NEARESTMV &&
         frame_mv[this_mode][ref_frame].as_int ==
