@@ -16,6 +16,24 @@
       "revId": "df2b21e8fd5f838d857eb5c5b5f702e9fad50689",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9936a1dd_1528561d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-06-01T18:25:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19af1163_b5f5ea5f",
+      "revId": "df2b21e8fd5f838d857eb5c5b5f702e9fad50689",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
