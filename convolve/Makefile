@@ -1,6 +1,6 @@
 all : filtering
 
-CFLAGS += -g -msse4.1
+CFLAGS += -msse4.1
 
 filtering : filtering.c
 

@@ -36,7 +36,7 @@ void init_state(int *buf, uint8_t *pixel, int w, int block) {
   memset(pixel, 0, sizeof(pixel[0]) * block);
 
   for (i = 0; i < w; ++i) {
-    pixel[i] = i;
+    pixel[i] = i + 1;
   }
 }
 
@@ -67,6 +67,12 @@ const int16_t pfilter12[5][16] __attribute__ ((aligned(16))) = {
   { 0,  0,  0,  0,  -1,   3,  -4,   8, -18, 120,  28, -12,  7, -4,  2, -1},
 };
 
+const int16_t pfilter12_2[3][16] __attribute__ ((aligned(16))) = {
+  {-1,    3,  -1,   3,  -1,   3,  -1,   3, -4,   8, -4,   8, -4,   8, -4,   8},
+  {-18, 120, -18, 120, -18, 120, -18, 120, 28, -12, 28, -12, 28, -12, 28, -12},
+  {  7,  -4,   7,  -4,   7,  -4,   7,  -4,  2,  -1,  2,  -1,  2,  -1,  2,  -1},
+};
+
 const int16_t pfilter10[7][16] __attribute__ ((aligned(16))) = {
   {1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0, 0, 0, 0},
   {0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0, 0, 0},
@@ -93,6 +99,10 @@ struct Filter {
 
 const struct Filter pfilter_12tap = {
   pfilter12, 12, 5
+};
+
+const struct Filter pfilter_12tap_2 = {
+  pfilter12_2, 12, 5
 };
 
 const struct Filter pfilter_10tap = {
@@ -212,6 +222,122 @@ void convolve_sse4_1(const uint8_t *src, const struct Filter fData,
   }
 }
 
+// Solution 2
+void inline convolve2_w4_sse4_1(const uint8_t *src, const __m128i *f,
+                               int *buffer) {
+  __m128i pixel;
+  __m128i s0, s1, s2, s3, s4, s5;
+  const __m128i zero = _mm_setzero_si128();
+  const __m128i cm0 = _mm_setr_epi16(0x100, 0x201, 0x302, 0x403, 0, 0, 0, 0);
+  const __m128i cm1 = _mm_setr_epi16(0x302, 0x403, 0x504, 0x605, 0, 0, 0, 0);
+  const __m128i cm2 = _mm_setr_epi16(0x504, 0x605, 0x706, 0x807, 0, 0, 0, 0);
+  const __m128i cm3 = _mm_setr_epi16(0x706, 0x807, 0x908, 0xa09, 0, 0, 0, 0);
+  const __m128i cm4 = _mm_setr_epi16(0x908, 0xa09, 0xb0a, 0xc0b, 0, 0, 0, 0);
+  const __m128i cm5 = _mm_setr_epi16(0xb0a, 0xc0b, 0xd0c, 0xe0d, 0, 0, 0, 0);
+
+  pixel = _mm_loadu_si128((__m128i const *)src);
+
+  __m128i y0 = _mm_shuffle_epi8(pixel, cm0);
+  __m128i y1 = _mm_shuffle_epi8(pixel, cm1);
+  __m128i y2 = _mm_shuffle_epi8(pixel, cm2);
+  __m128i y3 = _mm_shuffle_epi8(pixel, cm3);
+  __m128i y4 = _mm_shuffle_epi8(pixel, cm4);
+  __m128i y5 = _mm_shuffle_epi8(pixel, cm5);
+
+  y0 = _mm_unpacklo_epi8(y0, zero);
+  y1 = _mm_unpacklo_epi8(y1, zero);
+  y2 = _mm_unpacklo_epi8(y2, zero);
+  y3 = _mm_unpacklo_epi8(y3, zero);
+  y4 = _mm_unpacklo_epi8(y4, zero);
+  y5 = _mm_unpacklo_epi8(y5, zero);
+
+  s0 = _mm_madd_epi16(y0, f[0]);
+  s1 = _mm_madd_epi16(y1, f[1]);
+  s2 = _mm_madd_epi16(y2, f[2]);
+  s3 = _mm_madd_epi16(y3, f[3]);
+  s4 = _mm_madd_epi16(y4, f[4]);
+  s5 = _mm_madd_epi16(y5, f[5]);
+
+  s0 = _mm_add_epi32(s0, s1);
+  s0 = _mm_add_epi32(s0, s2);
+  s0 = _mm_add_epi32(s0, s3);
+  s0 = _mm_add_epi32(s0, s4);
+  s0 = _mm_add_epi32(s0, s5);
+
+  _mm_storeu_si128((__m128i *)buffer, s0);
+}
+
+void convolve2_w8_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
+  convolve2_w4_sse4_1(src, f, buffer);
+  src += 4;
+  buffer += 4;
+  convolve2_w4_sse4_1(src, f, buffer);
+}
+
+void convolve2_w16_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
+  convolve2_w8_sse4_1(src, f, buffer);
+  src += 8;
+  buffer += 8;
+  convolve2_w8_sse4_1(src, f, buffer);
+}
+
+void convolve2_w32_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
+  convolve2_w16_sse4_1(src, f, buffer);
+  src += 16;
+  buffer += 16;
+  convolve2_w16_sse4_1(src, f, buffer);
+}
+
+void convolve2_w64_sse4_1(const uint8_t *src, const __m128i *f, int *buffer) {
+  convolve2_w32_sse4_1(src, f, buffer);
+  src += 32;
+  buffer += 32;
+  convolve2_w32_sse4_1(src, f, buffer);
+}
+
+void (*convolveTab2[5])(const uint8_t *, const __m128i *, int *) = {
+   convolve2_w4_sse4_1,
+   convolve2_w8_sse4_1,
+   convolve2_w16_sse4_1,
+   convolve2_w32_sse4_1,
+   convolve2_w64_sse4_1,
+};
+
+void convolve2_sse4_1(const uint8_t *src, const struct Filter fData,
+                     int width, int *buffer) {
+  __m128i f[6];
+  const int16_t *filter = (const int16_t *) fData.coeffs;
+
+  f[0] = *((__m128i *)(filter + 0 * 8));
+  f[1] = *((__m128i *)(filter + 1 * 8));
+  f[2] = *((__m128i *)(filter + 2 * 8));
+  f[3] = *((__m128i *)(filter + 3 * 8));
+  f[4] = *((__m128i *)(filter + 4 * 8));
+  f[5] = *((__m128i *)(filter + 5 * 8));
+
+  switch (width) {
+    case 4:
+      convolveTab2[0](src, f, buffer);
+      break;
+    case 8:
+      convolveTab2[1](src, f, buffer);
+      break;
+    case 16:
+      convolveTab2[2](src, f, buffer);
+      break;
+    case 32:
+      convolveTab2[3](src, f, buffer);
+      break;
+    case 64:
+      convolveTab2[4](src, f, buffer);
+      break;
+    default:
+      assert(0);
+  }
+}
+
+#define TEST_NUM (32)
+
 int main(int argc, char **argv)
 {
   const size_t block_size = 256;
@@ -223,37 +349,54 @@ int main(int argc, char **argv)
 
   const int width = atoi(argv[1]);
 
-  int *buffer = (int *) malloc(2 * sizeof(buffer[0]) * block_size);
-  uint8_t *pixel = (uint8_t *) malloc(2 * sizeof(pixel[0]) * block_size);
+  int *buffer = (int *) malloc(3 * sizeof(buffer[0]) * block_size);
+  uint8_t *pixel = (uint8_t *) malloc(3 * sizeof(pixel[0]) * block_size);
   uint8_t *ppixel = pixel + block_size;
   int *pbuffer = buffer + block_size;
+  uint8_t *ppixel2 = pixel + 2 * block_size;
+  int *pbuffer2 = buffer + 2 * block_size;
   uint32_t start, end;
   int count;
 
   init_state(buffer, pixel, width, block_size);
   init_state(pbuffer, ppixel, width, block_size);
+  init_state(pbuffer2, ppixel2, width, block_size);
 
   count = 0;
   start = readtsc();
   do {
     convolve(pixel, width, filter12, 12, buffer);
     count++;
-  } while (count < 64);
+  } while (count < TEST_NUM);
   end = readtsc();
 
   printf("C version cycles: %d\n", end - start);
 
+  // Solution 1
   count = 0;
   start = readtsc();
   do {
     convolve_sse4_1(ppixel, pfilter_12tap, width, pbuffer);
     count++;
-  } while (count < 64);
+  } while (count < TEST_NUM);
   end = readtsc();
 
   printf("SIMD version cycles: %d\n", end - start);
 
   check_buffer(buffer, pbuffer, width);
+
+  // Solution 2
+  count = 0;
+  start = readtsc();
+  do {
+    convolve2_sse4_1(ppixel2, pfilter_12tap_2, width, pbuffer2);
+    count++;
+  } while (count < TEST_NUM);
+  end = readtsc();
+
+  printf("SIMD version 2 cycles: %d\n", end - start);
+
+  check_buffer(buffer, pbuffer2, width);
 
   free(buffer);
   free(pixel);
