@@ -162,45 +162,31 @@ class Randomise {
 // Add further specialisations as necessary
 
 template<>
-bool Randomise::uniform<bool>() {
-  return rnd_.Rand8() & 1 ? true : false;
-}
+bool Randomise::uniform<bool>();
 
 template<>
-uint8_t Randomise::uniform<uint8_t>() {
-  return rnd_.Rand8();
-}
+uint8_t Randomise::uniform<uint8_t>();
 
 template<>
-uint16_t Randomise::uniform<uint16_t>() {
-  return rnd_.Rand16();
-}
+uint16_t Randomise::uniform<uint16_t>();
 
 template<>
-uint32_t Randomise::uniform<uint32_t>() {
-  const uint32_t l = uniform<uint16_t>();
-  const uint32_t h = uniform<uint16_t>();
-  return h << 16 | l;
-}
+uint32_t Randomise::uniform<uint32_t>();
 
 template<>
-uint64_t Randomise::uniform<uint64_t>() {
-  const uint64_t l = uniform<uint32_t>();
-  const uint64_t h = uniform<uint32_t>();
-  return h << 32 | l;
-}
+uint64_t Randomise::uniform<uint64_t>();
 
 template<>
-int8_t Randomise::uniform<int8_t>() { return uniform<uint8_t>(); }
+int8_t Randomise::uniform<int8_t>();
 
 template<>
-int16_t Randomise::uniform<int16_t>() { return uniform<uint16_t>(); }
+int16_t Randomise::uniform<int16_t>();
 
 template<>
-int32_t Randomise::uniform<int32_t>() { return uniform<uint32_t>(); }
+int32_t Randomise::uniform<int32_t>();
 
 template<>
-int64_t Randomise::uniform<int64_t>() { return uniform<uint64_t>(); }
+int64_t Randomise::uniform<int64_t>();
 
 }  // namespace libvpx_test
 

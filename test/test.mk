@@ -49,6 +49,8 @@ LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += encode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
+LIBVPX_TEST_SRCS-yes                   += randomise.h
+LIBVPX_TEST_SRCS-yes                   += randomise.cc
 
 ## IVF writing.
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += ../ivfenc.c ../ivfenc.h
