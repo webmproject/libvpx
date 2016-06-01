@@ -2808,7 +2808,8 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
              * static scene.
              */
             if ( detect_transition_to_still( cpi, i,
-                                             (cpi->key_frame_frequency-i),
+                                             ((int)(cpi->key_frame_frequency) -
+                                              (int)i),
                                              loop_decay_rate,
                                              decay_accumulator ) )
             {
