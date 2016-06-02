@@ -39,8 +39,6 @@ typedef struct {
 } FIRSTPASS_MB_STATS;
 #endif
 
-#define VLOW_MOTION_THRESHOLD 950
-
 typedef struct {
   double frame;
   double weight;
@@ -131,7 +129,6 @@ typedef struct {
 
   int kf_zeromotion_pct;
   int last_kfgroup_zeromotion_pct;
-  int gf_zeromotion_pct;
   int active_worst_quality;
   int baseline_active_worst_quality;
   int extend_minq;
