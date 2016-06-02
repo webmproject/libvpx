@@ -1027,31 +1027,6 @@ static int choose_partitioning(VP9_COMP *cpi,
       force_split[0] = 1;
   }
 
-  if (cpi->sf.short_circuit_low_temp_var) {
-    // Set low variance flag, only for blocks >= 32x32 and if LAST_FRAME was
-    // selected.
-    if (ref_frame_partition == LAST_FRAME) {
-      // 64x64
-      if (vt.part_variances.none.variance < (thresholds[0] >> 1))
-        x->variance_low[0] = 1;
-      // 64x32
-      if (vt.part_variances.horz[0].variance < (thresholds[0] >> 2))
-        x->variance_low[1] = 1;
-      if (vt.part_variances.horz[1].variance < (thresholds[0] >> 2))
-        x->variance_low[2] = 1;
-      // 32x64
-      if (vt.part_variances.vert[0].variance < (thresholds[0] >> 2))
-        x->variance_low[3] = 1;
-      if (vt.part_variances.vert[1].variance < (thresholds[0] >> 2))
-        x->variance_low[4] = 1;
-      // 32x32
-      for (i = 0; i < 4; i++) {
-        if (vt.split[i].part_variances.none.variance < (thresholds[1] >> 1))
-          x->variance_low[i + 5] = 1;
-      }
-    }
-  }
-
   // Now go through the entire structure, splitting every block size until
   // we get to one that's got a variance lower than our threshold.
   if ( mi_col + 8 > cm->mi_cols || mi_row + 8 > cm->mi_rows ||
@@ -1102,6 +1077,34 @@ static int choose_partitioning(VP9_COMP *cpi,
               }
             }
           }
+        }
+      }
+    }
+  }
+
+  if (cpi->sf.short_circuit_low_temp_var) {
+    // Set low variance flag, only for blocks >= 32x32 and if LAST_FRAME was
+    // selected.
+    if (ref_frame_partition == LAST_FRAME) {
+      if (xd->mi[0]->sb_type == BLOCK_64X64 &&
+          vt.part_variances.none.variance < (thresholds[0] >> 1)) {
+        x->variance_low[0] = 1;
+      } else if (xd->mi[0]->sb_type == BLOCK_64X32) {
+        if (vt.part_variances.horz[0].variance < (thresholds[0] >> 2))
+          x->variance_low[1] = 1;
+        if (vt.part_variances.horz[1].variance < (thresholds[0] >> 2))
+          x->variance_low[2] = 1;
+      } else if (xd->mi[0]->sb_type == BLOCK_32X64) {
+        if (vt.part_variances.vert[0].variance < (thresholds[0] >> 2))
+          x->variance_low[3] = 1;
+        if (vt.part_variances.vert[1].variance < (thresholds[0] >> 2))
+          x->variance_low[4] = 1;
+      } else {
+        // 32x32
+        for (i = 0; i < 4; i++) {
+          if (!force_split[i + 1] &&
+              vt.split[i].part_variances.none.variance < (thresholds[1] >> 1))
+            x->variance_low[i + 5] = 1;
         }
       }
     }
