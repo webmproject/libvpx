@@ -1831,9 +1831,8 @@ static void combine_interintra(INTERINTRA_MODE mode,
                                int interstride,
                                uint8_t *intrapred,
                                int intrastride) {
-  static const int scale_bits = 8;
-  static const int scale_max = 256;
-  static const int scale_round = 127;
+  const int scale_bits = 8;
+  const int scale_max = (1 << scale_bits);
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   const int size_scale = ii_size_scales[plane_bsize];
@@ -1860,9 +1859,10 @@ static void combine_interintra(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[i * size_scale];
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -1872,9 +1872,10 @@ static void combine_interintra(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[j * size_scale];
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -1886,9 +1887,10 @@ static void combine_interintra(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] * 3 +
                        ii_weights1d[j * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -1900,9 +1902,10 @@ static void combine_interintra(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[j * size_scale] * 3 +
                        ii_weights1d[i * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -1912,9 +1915,10 @@ static void combine_interintra(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[(i < j ? i : j) * size_scale];
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -1925,9 +1929,10 @@ static void combine_interintra(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] +
                        ii_weights1d[j * size_scale]) >> 1;
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -1937,8 +1942,11 @@ static void combine_interintra(INTERINTRA_MODE mode,
     default:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          comppred[i * compstride + j] = (interpred[i * interstride + j] +
-                                          intrapred[i * intrastride + j]) >> 1;
+          comppred[i * compstride + j] =
+              ROUND_POWER_OF_TWO(
+                  interpred[i * interstride + j] +
+                  intrapred[i * intrastride + j],
+                  1);
         }
       }
       break;
@@ -1958,9 +1966,8 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
                                       int interstride,
                                       uint8_t *intrapred8,
                                       int intrastride, int bd) {
-  static const int scale_bits = 8;
-  static const int scale_max = 256;
-  static const int scale_round = 127;
+  const int scale_bits = 8;
+  const int scale_max = (1 << scale_bits);
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   const int size_scale = ii_size_scales[plane_bsize];
@@ -1991,9 +1998,10 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[i * size_scale];
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -2003,9 +2011,10 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[j * size_scale];
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -2017,9 +2026,10 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] * 3 +
                        ii_weights1d[j * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -2031,9 +2041,10 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[j * size_scale] * 3 +
                        ii_weights1d[i * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -2043,9 +2054,10 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[(i < j ? i : j) * size_scale];
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -2056,9 +2068,10 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] +
                        ii_weights1d[j * size_scale]) >> 1;
           comppred[i * compstride + j] =
-              ((scale_max - scale) * interpred[i * interstride + j] +
-               scale * intrapred[i * intrastride + j] + scale_round)
-              >> scale_bits;
+              ROUND_POWER_OF_TWO(
+                  (scale_max - scale) * interpred[i * interstride + j] +
+                  scale * intrapred[i * intrastride + j],
+                  scale_bits);
         }
       }
       break;
@@ -2068,8 +2081,11 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
     default:
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
-          comppred[i * compstride + j] = (interpred[i * interstride + j] +
-                                          intrapred[i * intrastride + j]) >> 1;
+          comppred[i * compstride + j] =
+              ROUND_POWER_OF_TWO(
+                  interpred[i * interstride + j] +
+                  intrapred[i * intrastride + j],
+                  1);
         }
       }
       break;
