@@ -431,8 +431,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->skip_encode_sb = 0;
     if (!cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR && cpi->oxcf.pass == 0 &&
         content != VP9E_CONTENT_SCREEN) {
-      // Enable short circuit when temporal variance is very low.
-      sf->short_circuit_low_temp_var = 1;
+      // Disable short circuit for low temporal variance.
+      sf->short_circuit_low_temp_var = 0;
     }
   }
 
