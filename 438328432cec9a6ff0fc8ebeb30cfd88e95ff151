@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1990f1c9_e1cb002f",
+        "filename": "vpx_dsp/x86/intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-06-02T19:05:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59a269c0_46534660",
+      "revId": "438328432cec9a6ff0fc8ebeb30cfd88e95ff151",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59a269c0_e6c6da29",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1990f1c9_41d3d4e8",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-06-02T19:05:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59a269c0_e6c6da29",
+      "revId": "438328432cec9a6ff0fc8ebeb30cfd88e95ff151",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59a269c0_06c2de17",
         "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2016-06-02T03:26:26Z",
       "side": 1,
       "message": "I don\u0027t think this needed to move for this commit -- it makes the diff a little harder to review.",
+      "revId": "438328432cec9a6ff0fc8ebeb30cfd88e95ff151",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1990f1c9_61e0d0a5",
+        "filename": "vpx_dsp/x86/intrapred_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-06-02T19:05:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59a269c0_06c2de17",
       "revId": "438328432cec9a6ff0fc8ebeb30cfd88e95ff151",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
