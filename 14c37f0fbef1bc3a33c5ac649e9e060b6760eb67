@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59a269c0_a3e684f2",
+        "filename": "test/level_test.cc",
+        "patchSetId": 19
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-02T01:05:40Z",
+      "side": 1,
+      "message": "you should make sure this is valid on the lower end too",
+      "revId": "14c37f0fbef1bc3a33c5ac649e9e060b6760eb67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59a269c0_a3ffa470",
+        "filename": "test/level_test.cc",
+        "patchSetId": 19
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-02T01:05:40Z",
+      "side": 1,
+      "message": "do you need to keep this around, couldn\u0027t you just query the control at the end of encode?",
+      "revId": "14c37f0fbef1bc3a33c5ac649e9e060b6760eb67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59a269c0_a3d0c4de",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 4731,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-02T01:05:40Z",
+      "side": 1,
+      "message": "break before the operator and fix alignment. you only get to indent 4 when you break after an \u0027\u003d\u0027 or with a function call the \u0027(\u0027",
+      "revId": "14c37f0fbef1bc3a33c5ac649e9e060b6760eb67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59a269c0_237714f0",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-02T01:05:40Z",
+      "side": 1,
+      "message": "struct naming is (and has been all over the place, how about new structs adopt the upper camel-case form -\u003e Vp9LevelSpec)",
+      "revId": "14c37f0fbef1bc3a33c5ac649e9e060b6760eb67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59a269c0_03c2d017",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-02T01:05:40Z",
+      "side": 1,
+      "message": "why does this and the other function need to be inline? I\u0027d expect this one (at least) to be outside of the critical path",
+      "revId": "14c37f0fbef1bc3a33c5ac649e9e060b6760eb67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59a269c0_03ebf087",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-02T01:05:40Z",
+      "side": 1,
+      "message": "could be joined with the line above",
+      "revId": "14c37f0fbef1bc3a33c5ac649e9e060b6760eb67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59a269c0_e3efec8f",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-02T01:05:40Z",
+      "side": 1,
+      "message": "could be one line",
+      "revId": "14c37f0fbef1bc3a33c5ac649e9e060b6760eb67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
