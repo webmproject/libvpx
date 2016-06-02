@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "99e0613e_e2ffa66f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-02T17:51:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59a269c0_a95665f8",
+      "revId": "9f68f412e2fd993861b8f605d89053cb69f4e47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59a269c0_890e0125",
         "filename": "vp10/common/reconinter.c",
         "patchSetId": 2
@@ -30,6 +48,47 @@
       "writtenOn": "2016-06-02T16:57:52Z",
       "side": 1,
       "message": "Can you make the size flexible to accommodate larger wedge sizes? it seems it is not currently.",
+      "revId": "9f68f412e2fd993861b8f605d89053cb69f4e47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d95819e8_44cc8e75",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-02T17:51:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59a269c0_890e0125",
+      "revId": "9f68f412e2fd993861b8f605d89053cb69f4e47c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39edb538_9fdc332c",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-02T17:51:56Z",
+      "side": 1,
+      "message": "Also note that this assertion will fail if wedge_mask_buf is not big enough, so should be easy to spot.",
+      "range": {
+        "startLine": 442,
+        "startChar": 0,
+        "endLine": 442,
+        "endChar": 69
+      },
       "revId": "9f68f412e2fd993861b8f605d89053cb69f4e47c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
