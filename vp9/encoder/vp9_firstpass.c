@@ -41,8 +41,6 @@
 #define OUTPUT_FPF          0
 #define ARF_STATS_OUTPUT    0
 
-#define GROUP_ADAPTIVE_MAXQ 1
-
 #define BOOST_BREAKOUT      12.5
 #define BOOST_FACTOR        12.5
 #define FACTOR_PT_LOW       0.70
@@ -1343,6 +1341,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int is_two_pass_svc = (svc->number_spatial_layers > 1) ||
                               (svc->number_temporal_layers > 1);
+  RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = is_two_pass_svc ?
       &svc->layer_context[svc->spatial_layer_id].twopass : &cpi->twopass;
   double frame_rate;
@@ -1399,14 +1398,20 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   }
 
   // Reset the vbr bits off target counters
-  cpi->rc.vbr_bits_off_target = 0;
-  cpi->rc.vbr_bits_off_target_fast = 0;
-
-  cpi->rc.rate_error_estimate = 0;
+  rc->vbr_bits_off_target = 0;
+  rc->vbr_bits_off_target_fast = 0;
+  rc->rate_error_estimate = 0;
 
   // Static sequence monitor variables.
   twopass->kf_zeromotion_pct = 100;
   twopass->last_kfgroup_zeromotion_pct = 100;
+
+  // Initialize bits per macro_block estimate correction factor.
+  twopass->bpm_factor = 1.0;
+  // Initiallize actual and target bits counters for ARF groups so that
+  // at the start we have a neutral bpm adjustment.
+  twopass->rolling_arf_group_target_bits = 1;
+  twopass->rolling_arf_group_actual_bits = 1;
 
   if (oxcf->resize_mode != RESIZE_NONE) {
     init_subsampling(cpi);
@@ -1932,9 +1937,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double boost_score = 0.0;
   double old_boost_score = 0.0;
   double gf_group_err = 0.0;
-#if GROUP_ADAPTIVE_MAXQ
   double gf_group_raw_error = 0.0;
-#endif
   double gf_group_skip_pct = 0.0;
   double gf_group_inactive_zone_rows = 0.0;
   double gf_first_frame_err = 0.0;
@@ -1984,9 +1987,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // the error score / cost of this frame has already been accounted for.
   if (arf_active_or_kf) {
     gf_group_err -= gf_first_frame_err;
-#if GROUP_ADAPTIVE_MAXQ
     gf_group_raw_error -= this_frame->coded_error;
-#endif
     gf_group_skip_pct -= this_frame->intra_skip_pct;
     gf_group_inactive_zone_rows -= this_frame->inactive_zone_rows;
   }
@@ -2040,9 +2041,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Accumulate error score of frames in this gf group.
     mod_frame_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
     gf_group_err += mod_frame_err;
-#if GROUP_ADAPTIVE_MAXQ
     gf_group_raw_error += this_frame->coded_error;
-#endif
     gf_group_skip_pct += this_frame->intra_skip_pct;
     gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
 
@@ -2142,9 +2141,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       if (EOF == input_stats(twopass, this_frame))
         break;
       gf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
-#if GROUP_ADAPTIVE_MAXQ
       gf_group_raw_error += this_frame->coded_error;
-#endif
       gf_group_skip_pct += this_frame->intra_skip_pct;
       gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
     }
@@ -2159,7 +2156,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Calculate the bits to be allocated to the gf/arf group as a whole
   gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
 
-#if GROUP_ADAPTIVE_MAXQ
   // Calculate an estimate of the maxq needed for the group.
   // We are more agressive about correcting for sections
   // where there could be significant overshoot than for easier
@@ -2181,7 +2177,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     twopass->active_worst_quality =
         (tmp_q + (twopass->active_worst_quality * 3)) >> 2;
   }
-#endif
 
   // Calculate the extra bits to be used for boosted frame(s)
   gf_arf_bits = calculate_boost_bits(rc->baseline_gf_interval,
@@ -2717,13 +2712,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
       (twopass->total_left_stats.inactive_zone_rows * 2) /
       ((double)cm->mb_rows * section_length);
     int tmp_q;
-
-    // Initialize bits per macro_block estimate correction factor.
-    twopass->bpm_factor = 1.0;
-    // Initiallize actual and target bits counters for ARF groups so that
-    // at the start we have a neutral bpm adjustment.
-    twopass->rolling_arf_group_target_bits = 1;
-    twopass->rolling_arf_group_actual_bits = 1;
 
     tmp_q = get_twopass_worst_quality(cpi, section_error,
         section_intra_skip + section_inactive_zone, section_target_bandwidth);
