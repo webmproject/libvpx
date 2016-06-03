@@ -54,13 +54,14 @@ void convolve(const uint8_t *src, int w, const int16_t *filter, int flen,
   }
 }
 
-void init_state(uint8_t *buf, uint8_t *pixel, int w, int block) {
+void init_state(uint8_t *buf, uint8_t *pixel, const unsigned int random,
+                int w, int block) {
   int i;
 
   memset(buf, 0, sizeof(buf[0]) * block);
   memset(pixel, 0, sizeof(pixel[0]) * block);
 
-  seed = RAND_SEED;
+  seed = random;
   for (i = 0; i < w; ++i) {
     pixel[i] = clip_pixel(rand_r(&seed) % 255);
   }
@@ -260,13 +261,13 @@ int main(int argc, char **argv)
   const size_t block_size = 256;
 
   if (argc != 3) {
-    printf("Usage: filtering <width> <seed>\n");
+    printf("Usage: filtering <seed> <width>\n");
     printf("width = 4, 8, 16, 32, 64. seed = random seed number.\n");
     return -1;
   }
 
-  const int width = atoi(argv[1]);
-  seed = atoi(argv[2]);
+  const int width = atoi(argv[2]);
+  const unsigned int random_seed = atoi(argv[1]);
 
   uint8_t *buffer = (uint8_t *) malloc(2 * sizeof(buffer[0]) * block_size);
   uint8_t *pixel = (uint8_t *) malloc(2 * sizeof(pixel[0]) * block_size);
@@ -276,8 +277,8 @@ int main(int argc, char **argv)
   uint32_t start, end;
   int count;
 
-  init_state(buffer, pixel, width, block_size);
-  init_state(pbuffer, ppixel, width, block_size);
+  init_state(buffer, pixel, random_seed, width, block_size);
+  init_state(pbuffer, ppixel, random_seed, width, block_size);
 
   count = 0;
   start = readtsc();
