@@ -2115,8 +2115,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     old_boost_score = boost_score;
   }
 
-  twopass->gf_zeromotion_pct = (int)(zero_motion_accumulator * 1000.0);
-
   // Was the group length constrained by the requirement for a new KF?
   rc->constrained_gf_group = (i >= rc->frames_to_key) ? 1 : 0;
 
@@ -2892,7 +2890,6 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
 
   // If the rate control is drifting consider adjustment to min or maxq.
   if ((cpi->oxcf.rc_mode != VPX_Q) &&
-      (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD) &&
       !cpi->rc.is_src_frame_alt_ref) {
     const int maxq_adj_limit =
       rc->worst_quality - twopass->active_worst_quality;
