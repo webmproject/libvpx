@@ -2582,16 +2582,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   kf_bits = calculate_boost_bits((rc->frames_to_key - 1),
                                   rc->kf_boost, twopass->kf_group_bits);
 
-  // Work out the fraction of the kf group bits reserved for the inter frames
-  // within the group after discounting the bits for the kf itself.
-  if (twopass->kf_group_bits) {
-    twopass->kfgroup_inter_fraction =
-      (double)(twopass->kf_group_bits - kf_bits) /
-      (double)twopass->kf_group_bits;
-  } else {
-    twopass->kfgroup_inter_fraction = 1.0;
-  }
-
   twopass->kf_group_bits -= kf_bits;
 
   // Save the bits to spend on the key frame.
