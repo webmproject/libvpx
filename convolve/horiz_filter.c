@@ -126,8 +126,8 @@ void inline transpose_4x8(const __m128i *in, __m128i *out) {
 
   out[4] = _mm_unpacklo_epi32(t0, t1);
   out[5] = _mm_srli_si128(out[4], 8);
-  out[6] = _mm_unpackhi_epi32(t0, t1);  // 0?
-  out[7] = _mm_srli_si128(out[6], 8);   // 0?
+  // Note: We ignore out[6] and out[7] because
+  // they're zero vectors.
 }
 
 void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
