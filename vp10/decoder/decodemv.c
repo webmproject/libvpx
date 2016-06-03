@@ -386,8 +386,8 @@ static int read_inter_segment_id(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   int predicted_segment_id, segment_id;
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = xd->plane[0].n4_w >> 1;
-  const int bh = xd->plane[0].n4_h >> 1;
+  const int bw = num_8x8_blocks_wide_lookup[mbmi->sb_type];
+  const int bh = num_8x8_blocks_high_lookup[mbmi->sb_type];
 
   // TODO(slavarnway): move x_mis, y_mis into xd ?????
   const int x_mis = VPXMIN(cm->mi_cols - mi_col, bw);
