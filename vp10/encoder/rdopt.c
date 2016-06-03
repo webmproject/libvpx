@@ -1532,7 +1532,7 @@ static int64_t txfm_yrd(VP10_COMP *cpi, MACROBLOCK *x,
     rd = RDCOST(x->rdmult, x->rddiv, *r + s0 + r_tx_size * tx_select, *d);
   }
 
-  if (tx_select && !(*s && is_inter))
+  if (tx_select)
     *r += r_tx_size;
 
   if (is_inter && !xd->lossless[xd->mi[0]->mbmi.segment_id] && !(*s))
