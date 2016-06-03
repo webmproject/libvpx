@@ -8938,14 +8938,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-      // TODO(zoeliu): To further justify whether following is needed
-      if (!(cpi->rc.is_last_bipred_frame || cpi->rc.is_bipred_frame) &&
-          second_ref_frame == BWDREF_FRAME) {
-        continue;
-      }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-
       if (!cpi->allow_comp_inter_inter)
         continue;
 
@@ -10406,13 +10398,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-      // TODO(zoeliu): To further justify whether following is needed
-      if (!(cpi->rc.is_last_bipred_frame || cpi->rc.is_bipred_frame) &&
-          second_ref_frame == BWDREF_FRAME) {
-        continue;
-      }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
       if (!cpi->allow_comp_inter_inter)
         continue;
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
