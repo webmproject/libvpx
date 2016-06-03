@@ -11,8 +11,11 @@ static inline unsigned int readtsc(void) {
   return tsc;
 }
 
-#define FILTER_BITS 7
-#define RAND_SEED (0xabc)
+#define FILTER_BITS         (7)
+#define TEST_NUM            (32)
+#define HD_WIDTH            (1920)
+#define SUPER_BLOCK_HEIGHT  (128)
+#define RAND_SEED           (0xabc)
 unsigned int seed = RAND_SEED;
 
 int round_power_of_two(int x, int n) {
@@ -55,26 +58,35 @@ void convolve(const uint8_t *src, int w, const int16_t *filter, int flen,
 }
 
 void init_state(uint8_t *buf, uint8_t *pixel, const unsigned int random,
-                int w, int block) {
-  int i;
+                int width, int height) {
+  int row, col;
+  int block = width * height;
 
   memset(buf, 0, sizeof(buf[0]) * block);
   memset(pixel, 0, sizeof(pixel[0]) * block);
 
   seed = random;
-  for (i = 0; i < w; ++i) {
-    pixel[i] = clip_pixel(rand_r(&seed) % 255);
+  for (row = 0; row < height; ++row) {
+    for (col = 0; col < width; ++col) {
+      pixel[col] = clip_pixel(rand_r(&seed) % 255);
+    }
+    pixel += width;
   }
 }
 
-void check_buffer(const uint8_t *buf1, const uint8_t *buf2, int width) {
-  int i;
-  for (i = 0; i < width; ++i) {
-    if (buf1[i] != buf2[i]) {
-      printf("Not bit-exact on index %d\n", i);
-      printf("Expected: 0x%x, Actual: 0x%x\n", buf1[i], buf2[i]);
-      return;
+void check_buffer(const uint8_t *buf1, const uint8_t *buf2,
+                  int width, int height) {
+  int row, col;
+  for (row = 0; row < height; ++row) {
+    for (col = 0; col < width; ++col) {
+      if (buf1[col] != buf2[col]) {
+        printf("Not bit-exact on index %d\n", col);
+        printf("Expected: 0x%x, Actual: 0x%x\n", buf1[col], buf2[col]);
+        return;
+      }
     }
+    buf1 += width;
+    buf2 += width;
   }
 }
 
@@ -132,8 +144,8 @@ void inline transpose_4x8(const __m128i *in, __m128i *out) {
 
 void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
                     int tapsNum, uint8_t *buffer) {
-  __m128i sr[4];
-  __m128i sc[8];
+  __m128i sumPairRow[4];
+  __m128i sumPairCol[8];
   __m128i pixel;
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
 
@@ -142,31 +154,31 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   }
 
   pixel = _mm_loadu_si128((__m128i const *)src);
-  sr[0] = _mm_maddubs_epi16(pixel, f[0]);
-  sr[2] = _mm_maddubs_epi16(pixel, f[1]);
-  sr[2] = _mm_srli_si128(sr[2], 2);
+  sumPairRow[0] = _mm_maddubs_epi16(pixel, f[0]);
+  sumPairRow[2] = _mm_maddubs_epi16(pixel, f[1]);
+  sumPairRow[2] = _mm_srli_si128(sumPairRow[2], 2);
 
   pixel = _mm_loadu_si128((__m128i const *)(src + 1));
-  sr[1] = _mm_maddubs_epi16(pixel, f[0]);
-  sr[3] = _mm_maddubs_epi16(pixel, f[1]);
-  sr[3] = _mm_srli_si128(sr[3], 2);
+  sumPairRow[1] = _mm_maddubs_epi16(pixel, f[0]);
+  sumPairRow[3] = _mm_maddubs_epi16(pixel, f[1]);
+  sumPairRow[3] = _mm_srli_si128(sumPairRow[3], 2);
 
-  transpose_4x8(sr, sc);
+  transpose_4x8(sumPairRow, sumPairCol);
 
-  sr[0] = _mm_adds_epi16(sc[0], sc[1]);
-  sr[1] = _mm_adds_epi16(sc[4], sc[5]);
+  sumPairRow[0] = _mm_adds_epi16(sumPairCol[0], sumPairCol[1]);
+  sumPairRow[1] = _mm_adds_epi16(sumPairCol[4], sumPairCol[5]);
 
-  sr[2] = _mm_min_epi16(sc[2], sc[3]);
-  sr[3] = _mm_max_epi16(sc[2], sc[3]);
+  sumPairRow[2] = _mm_min_epi16(sumPairCol[2], sumPairCol[3]);
+  sumPairRow[3] = _mm_max_epi16(sumPairCol[2], sumPairCol[3]);
 
-  sr[0] = _mm_adds_epi16(sr[0], sr[1]);
-  sr[0] = _mm_adds_epi16(sr[0], sr[2]);
-  sr[0] = _mm_adds_epi16(sr[0], sr[3]);
+  sumPairRow[0] = _mm_adds_epi16(sumPairRow[0], sumPairRow[1]);
+  sumPairRow[0] = _mm_adds_epi16(sumPairRow[0], sumPairRow[2]);
+  sumPairRow[0] = _mm_adds_epi16(sumPairRow[0], sumPairRow[3]);
 
-  sr[1] = _mm_mulhrs_epi16(sr[0], k_256);
-  sr[2] = _mm_packus_epi16(sr[1], sr[1]);
+  sumPairRow[1] = _mm_mulhrs_epi16(sumPairRow[0], k_256);
+  sumPairRow[2] = _mm_packus_epi16(sumPairRow[1], sumPairRow[1]);
 
-  *(int *)buffer = _mm_cvtsi128_si32(sr[2]);
+  *(int *)buffer = _mm_cvtsi128_si32(sumPairRow[2]);
 }
 
 void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
@@ -239,33 +251,36 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
 }
 
 // Testing wrapper functions
-#define TEST_NUM (32)
 
-void run_prototype_filter(uint8_t *src, int width, const int16_t *filter,
-                          int flen, uint8_t *dst) {
+void run_prototype_filter(uint8_t *src, int width, int height,
+                          const int16_t *filter, int flen, uint8_t *dst) {
   uint32_t start, end;
   int count = 0;
 
   start = readtsc();
   do {
     convolve(src, width, filter, flen, dst);
+    src += width;
+    dst += width;
     count++;
-  } while (count < TEST_NUM);
+  } while (count < height);
   end = readtsc();
 
   printf("C version cycles:\t%d\n", end - start);
 }
 
-void run_target_filter(uint8_t *src, struct Filter filter, int width,
-                       uint8_t *dst) {
+void run_target_filter(uint8_t *src, struct Filter filter,
+                       int width, int height, uint8_t *dst) {
   uint32_t start, end;
   int count = 0;
 
   start = readtsc();
   do {
     horiz_filter_ssse3(src, filter, width, dst);
+    src += width;
+    dst += width;
     count++;
-  } while (count < TEST_NUM);
+  } while (count < height);
   end = readtsc();
 
   printf("SIMD version cycles:\t%d\n", end - start);
@@ -273,7 +288,8 @@ void run_target_filter(uint8_t *src, struct Filter filter, int width,
 
 int main(int argc, char **argv)
 {
-  const size_t block_size = 256;
+  // We simulate HD width (1920) and max super block height (128)
+  const size_t block_size = HD_WIDTH * SUPER_BLOCK_HEIGHT;
 
   if (argc != 3) {
     printf("Usage: filtering <seed> <width>\n");
@@ -283,22 +299,23 @@ int main(int argc, char **argv)
 
   const int width = atoi(argv[2]);
   const unsigned int random_seed = atoi(argv[1]);
+  const int height = 8;
 
   uint8_t *buffer = (uint8_t *) malloc(2 * sizeof(buffer[0]) * block_size);
   uint8_t *pixel = (uint8_t *) malloc(2 * sizeof(pixel[0]) * block_size);
   uint8_t *ppixel = pixel + block_size;
   uint8_t *pbuffer = buffer + block_size;
 
-  init_state(buffer, pixel, random_seed, width, block_size);
-  init_state(pbuffer, ppixel, random_seed, width, block_size);
+  init_state(buffer, pixel, random_seed, width, height);
+  init_state(pbuffer, ppixel, random_seed, width, height);
 
-  run_prototype_filter(pixel, width, filter12, 12, buffer);
-  run_target_filter(ppixel, pfilter_12tap, width, pbuffer);
-  check_buffer(buffer, pbuffer, width);
+  run_prototype_filter(pixel, width, height, filter12, 12, buffer);
+  run_target_filter(ppixel, pfilter_12tap, width, height, pbuffer);
+  check_buffer(buffer, pbuffer, width, height);
 
-  run_prototype_filter(pixel, width, filter10, 10, buffer);
-  run_target_filter(ppixel, pfilter_10tap, width, pbuffer);
-  check_buffer(buffer, pbuffer, width);
+  run_prototype_filter(pixel, width, height, filter10, 10, buffer);
+  run_target_filter(ppixel, pfilter_10tap, width, height, pbuffer);
+  check_buffer(buffer, pbuffer, width, height);
 
   free(buffer);
   free(pixel);
