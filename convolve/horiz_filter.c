@@ -12,8 +12,8 @@ static inline unsigned int readtsc(void) {
 }
 
 #define FILTER_BITS 7
-
-unsigned int seed = 0xbeef;
+#define RAND_SEED (0xabcd)
+unsigned int seed = RAND_SEED;
 
 int round_power_of_two(int x, int n) {
   int ret = (x + (1 << (n - 1))) >> n;
@@ -60,7 +60,7 @@ void init_state(uint8_t *buf, uint8_t *pixel, int w, int block) {
   memset(buf, 0, sizeof(buf[0]) * block);
   memset(pixel, 0, sizeof(pixel[0]) * block);
 
-  seed = 0xbeef;
+  seed = RAND_SEED;
   for (i = 0; i < w; ++i) {
     pixel[i] = clip_pixel(rand_r(&seed) % 255);
   }
@@ -87,9 +87,7 @@ static const int16_t filter10[10] = {
 
 const int8_t pfilter12[3][16] __attribute__ ((aligned(16))) = {
   {-1,  3, -4,  8, -18, 120,  28, -12,   7,  -4,   2,  -1,  0,  0,  0,  0},
-  //{ 0, -1,  3, -4,   8, -18, 120,  28, -12,   7,  -4,   2, -1,  0,  0,  0},
   { 0,  0, -1,  3,  -4,   8, -18, 120,  28, -12,   7,  -4,  2, -1,  0,  0},
-  //{ 0,  0,  0, -1,   3,  -4,   8, -18, 120,  28, -12,   7, -4,  2, -1,  0},
   { 0,  0,  0,  0,  -1,   3,  -4,   8, -18, 120,  28, -12,  7, -4,  2, -1},
 };
 
