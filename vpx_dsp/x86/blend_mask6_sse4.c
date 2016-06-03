@@ -16,42 +16,11 @@
 #include "vpx_ports/mem.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
+#include "vpx_dsp/x86/synonyms.h"
+
 #include "./vpx_dsp_rtcd.h"
 
 #define MASK_BITS 6
-
-static INLINE __m128i mm_loadl_32(const void *a) {
-  return _mm_cvtsi32_si128(*(const uint32_t*)a);
-}
-
-static INLINE __m128i mm_loadl_64(const void *a) {
-  return _mm_loadl_epi64((const __m128i*)a);
-}
-
-static INLINE __m128i mm_loadu_128(const void *a) {
-  return _mm_loadu_si128((const __m128i*)a);
-}
-
-static INLINE void mm_storel_32(void *const a, const __m128i v) {
-  *(uint32_t*)a = _mm_cvtsi128_si32(v);
-}
-
-static INLINE void mm_storel_64(void *const a, const __m128i v) {
-  _mm_storel_epi64((__m128i*)a, v);
-}
-
-static INLINE void mm_storeu_128(void *const a, const __m128i v) {
-  _mm_storeu_si128((__m128i*)a, v);
-}
-
-static INLINE __m128i mm_round_epu16(__m128i v_val_w) {
-  return _mm_avg_epu16(v_val_w, _mm_setzero_si128());
-}
-
-static INLINE __m128i mm_roundn_epu16(__m128i v_val_w, int bits) {
-  const __m128i v_s_w =_mm_srli_epi16(v_val_w, bits-1);
-  return _mm_avg_epu16(v_s_w, _mm_setzero_si128());
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // Common kernels
@@ -59,8 +28,8 @@ static INLINE __m128i mm_roundn_epu16(__m128i v_val_w, int bits) {
 
 static INLINE __m128i blend_4(uint8_t*src0, uint8_t *src1,
                               const __m128i v_m0_w, const __m128i v_m1_w) {
-  const __m128i v_s0_b = mm_loadl_32(src0);
-  const __m128i v_s1_b = mm_loadl_32(src1);
+  const __m128i v_s0_b = xx_loadl_32(src0);
+  const __m128i v_s1_b = xx_loadl_32(src1);
   const __m128i v_s0_w = _mm_cvtepu8_epi16(v_s0_b);
   const __m128i v_s1_w = _mm_cvtepu8_epi16(v_s1_b);
 
@@ -69,15 +38,15 @@ static INLINE __m128i blend_4(uint8_t*src0, uint8_t *src1,
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = mm_roundn_epu16(v_sum_w, MASK_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, MASK_BITS);
 
   return v_res_w;
 }
 
 static INLINE __m128i blend_8(uint8_t*src0, uint8_t *src1,
                               const __m128i v_m0_w, const __m128i v_m1_w) {
-  const __m128i v_s0_b = mm_loadl_64(src0);
-  const __m128i v_s1_b = mm_loadl_64(src1);
+  const __m128i v_s0_b = xx_loadl_64(src0);
+  const __m128i v_s1_b = xx_loadl_64(src1);
   const __m128i v_s0_w = _mm_cvtepu8_epi16(v_s0_b);
   const __m128i v_s1_w = _mm_cvtepu8_epi16(v_s1_b);
 
@@ -86,7 +55,7 @@ static INLINE __m128i blend_8(uint8_t*src0, uint8_t *src1,
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = mm_roundn_epu16(v_sum_w, MASK_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, MASK_BITS);
 
   return v_res_w;
 }
@@ -106,7 +75,7 @@ static void blend_mask6_w4_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_m0_b = mm_loadl_32(mask);
+    const __m128i v_m0_b = xx_loadl_32(mask);
     const __m128i v_m0_w = _mm_cvtepu8_epi16(v_m0_b);
     const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
@@ -114,7 +83,7 @@ static void blend_mask6_w4_sse4_1(
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_32(dst, v_res_b);
+    xx_storel_32(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -134,7 +103,7 @@ static void blend_mask6_w8_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_m0_b = mm_loadl_64(mask);
+    const __m128i v_m0_b = xx_loadl_64(mask);
     const __m128i v_m0_w = _mm_cvtepu8_epi16(v_m0_b);
     const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
@@ -142,7 +111,7 @@ static void blend_mask6_w8_sse4_1(
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_64(dst, v_res_b);
+    xx_storel_64(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -162,8 +131,8 @@ static void blend_mask6_w16n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 16) {
-      const __m128i v_m0l_b = mm_loadl_64(mask + c);
-      const __m128i v_m0h_b = mm_loadl_64(mask + c + 8);
+      const __m128i v_m0l_b = xx_loadl_64(mask + c);
+      const __m128i v_m0h_b = xx_loadl_64(mask + c + 8);
       const __m128i v_m0l_w = _mm_cvtepu8_epi16(v_m0l_b);
       const __m128i v_m0h_w = _mm_cvtepu8_epi16(v_m0h_b);
       const __m128i v_m1l_w = _mm_sub_epi16(v_maxval_w, v_m0l_w);
@@ -176,7 +145,7 @@ static void blend_mask6_w16n_sse4_1(
 
       const __m128i v_res_b = _mm_packus_epi16(v_resl_w, v_resh_w);
 
-      mm_storeu_128(dst + c, v_res_b);
+      xx_storeu_128(dst + c, v_res_b);
     }
     dst += dst_stride;
     src0 += src0_stride;
@@ -202,7 +171,7 @@ static void blend_mask6_sx_w4_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_r_b = mm_loadl_64(mask);
+    const __m128i v_r_b = xx_loadl_64(mask);
     const __m128i v_a_b = _mm_avg_epu8(v_r_b, _mm_srli_si128(v_r_b, 1));
 
     const __m128i v_m0_w = _mm_and_si128(v_a_b, v_zmask_b);
@@ -212,7 +181,7 @@ static void blend_mask6_sx_w4_sse4_1(
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_32(dst, v_res_b);
+    xx_storel_32(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -234,7 +203,7 @@ static void blend_mask6_sx_w8_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_r_b = mm_loadu_128(mask);
+    const __m128i v_r_b = xx_loadu_128(mask);
     const __m128i v_a_b = _mm_avg_epu8(v_r_b, _mm_srli_si128(v_r_b, 1));
 
     const __m128i v_m0_w = _mm_and_si128(v_a_b, v_zmask_b);
@@ -244,7 +213,7 @@ static void blend_mask6_sx_w8_sse4_1(
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_64(dst, v_res_b);
+    xx_storel_64(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -266,8 +235,8 @@ static void blend_mask6_sx_w16n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 16) {
-      const __m128i v_rl_b = mm_loadu_128(mask + 2 * c);
-      const __m128i v_rh_b = mm_loadu_128(mask + 2 * c + 16);
+      const __m128i v_rl_b = xx_loadu_128(mask + 2 * c);
+      const __m128i v_rh_b = xx_loadu_128(mask + 2 * c + 16);
       const __m128i v_al_b = _mm_avg_epu8(v_rl_b, _mm_srli_si128(v_rl_b, 1));
       const __m128i v_ah_b = _mm_avg_epu8(v_rh_b, _mm_srli_si128(v_rh_b, 1));
 
@@ -283,7 +252,7 @@ static void blend_mask6_sx_w16n_sse4_1(
 
       const __m128i v_res_b = _mm_packus_epi16(v_resl_w, v_resh_w);
 
-      mm_storeu_128(dst + c, v_res_b);
+      xx_storeu_128(dst + c, v_res_b);
     }
     dst += dst_stride;
     src0 += src0_stride;
@@ -307,8 +276,8 @@ static void blend_mask6_sy_w4_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_ra_b = mm_loadl_32(mask);
-    const __m128i v_rb_b = mm_loadl_32(mask + mask_stride);
+    const __m128i v_ra_b = xx_loadl_32(mask);
+    const __m128i v_rb_b = xx_loadl_32(mask + mask_stride);
     const __m128i v_a_b = _mm_avg_epu8(v_ra_b, v_rb_b);
 
     const __m128i v_m0_w = _mm_cvtepu8_epi16(v_a_b);
@@ -318,7 +287,7 @@ static void blend_mask6_sy_w4_sse4_1(
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_32(dst, v_res_b);
+    xx_storel_32(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -338,8 +307,8 @@ static void blend_mask6_sy_w8_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_ra_b = mm_loadl_64(mask);
-    const __m128i v_rb_b = mm_loadl_64(mask + mask_stride);
+    const __m128i v_ra_b = xx_loadl_64(mask);
+    const __m128i v_rb_b = xx_loadl_64(mask + mask_stride);
     const __m128i v_a_b = _mm_avg_epu8(v_ra_b, v_rb_b);
 
     const __m128i v_m0_w = _mm_cvtepu8_epi16(v_a_b);
@@ -349,7 +318,7 @@ static void blend_mask6_sy_w8_sse4_1(
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_64(dst, v_res_b);
+    xx_storel_64(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -370,8 +339,8 @@ static void blend_mask6_sy_w16n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 16) {
-      const __m128i v_ra_b = mm_loadu_128(mask + c);
-      const __m128i v_rb_b = mm_loadu_128(mask + c + mask_stride);
+      const __m128i v_ra_b = xx_loadu_128(mask + c);
+      const __m128i v_rb_b = xx_loadu_128(mask + c + mask_stride);
       const __m128i v_a_b = _mm_avg_epu8(v_ra_b, v_rb_b);
 
       const __m128i v_m0l_w = _mm_cvtepu8_epi16(v_a_b);
@@ -386,7 +355,7 @@ static void blend_mask6_sy_w16n_sse4_1(
 
       const __m128i v_res_b = _mm_packus_epi16(v_resl_w, v_resh_w);
 
-      mm_storeu_128(dst + c, v_res_b);
+      xx_storeu_128(dst + c, v_res_b);
     }
     dst += dst_stride;
     src0 += src0_stride;
@@ -412,22 +381,22 @@ static void blend_mask6_sx_sy_w4_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_ra_b = mm_loadl_64(mask);
-    const __m128i v_rb_b = mm_loadl_64(mask + mask_stride);
+    const __m128i v_ra_b = xx_loadl_64(mask);
+    const __m128i v_rb_b = xx_loadl_64(mask + mask_stride);
     const __m128i v_rvs_b = _mm_add_epi8(v_ra_b, v_rb_b);
     const __m128i v_rvsa_w = _mm_and_si128(v_rvs_b, v_zmask_b);
     const __m128i v_rvsb_w = _mm_and_si128(_mm_srli_si128(v_rvs_b, 1),
                                            v_zmask_b);
     const __m128i v_rs_w = _mm_add_epi16(v_rvsa_w, v_rvsb_w);
 
-    const __m128i v_m0_w = mm_roundn_epu16(v_rs_w, 2);
+    const __m128i v_m0_w = xx_roundn_epu16(v_rs_w, 2);
     const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
     const __m128i v_res_w = blend_4(src0, src1, v_m0_w, v_m1_w);
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_32(dst, v_res_b);
+    xx_storel_32(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -449,22 +418,22 @@ static void blend_mask6_sx_sy_w8_sse4_1(
   (void)w;
 
   do {
-    const __m128i v_ra_b = mm_loadu_128(mask);
-    const __m128i v_rb_b = mm_loadu_128(mask + mask_stride);
+    const __m128i v_ra_b = xx_loadu_128(mask);
+    const __m128i v_rb_b = xx_loadu_128(mask + mask_stride);
     const __m128i v_rvs_b = _mm_add_epi8(v_ra_b, v_rb_b);
     const __m128i v_rvsa_w = _mm_and_si128(v_rvs_b, v_zmask_b);
     const __m128i v_rvsb_w = _mm_and_si128(_mm_srli_si128(v_rvs_b, 1),
                                            v_zmask_b);
     const __m128i v_rs_w = _mm_add_epi16(v_rvsa_w, v_rvsb_w);
 
-    const __m128i v_m0_w = mm_roundn_epu16(v_rs_w, 2);
+    const __m128i v_m0_w = xx_roundn_epu16(v_rs_w, 2);
     const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
     const __m128i v_res_w = blend_8(src0, src1, v_m0_w, v_m1_w);
 
     const __m128i v_res_b = _mm_packus_epi16(v_res_w, v_res_w);
 
-    mm_storel_64(dst, v_res_b);
+    xx_storel_64(dst, v_res_b);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -486,10 +455,10 @@ static void blend_mask6_sx_sy_w16n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 16) {
-      const __m128i v_ral_b = mm_loadu_128(mask + 2 * c);
-      const __m128i v_rah_b = mm_loadu_128(mask + 2 * c + 16);
-      const __m128i v_rbl_b = mm_loadu_128(mask + mask_stride + 2 * c);
-      const __m128i v_rbh_b = mm_loadu_128(mask + mask_stride + 2 * c + 16);
+      const __m128i v_ral_b = xx_loadu_128(mask + 2 * c);
+      const __m128i v_rah_b = xx_loadu_128(mask + 2 * c + 16);
+      const __m128i v_rbl_b = xx_loadu_128(mask + mask_stride + 2 * c);
+      const __m128i v_rbh_b = xx_loadu_128(mask + mask_stride + 2 * c + 16);
       const __m128i v_rvsl_b = _mm_add_epi8(v_ral_b, v_rbl_b);
       const __m128i v_rvsh_b = _mm_add_epi8(v_rah_b, v_rbh_b);
       const __m128i v_rvsal_w = _mm_and_si128(v_rvsl_b, v_zmask_b);
@@ -501,8 +470,8 @@ static void blend_mask6_sx_sy_w16n_sse4_1(
       const __m128i v_rsl_w = _mm_add_epi16(v_rvsal_w, v_rvsbl_w);
       const __m128i v_rsh_w = _mm_add_epi16(v_rvsah_w, v_rvsbh_w);
 
-      const __m128i v_m0l_w = mm_roundn_epu16(v_rsl_w, 2);
-      const __m128i v_m0h_w = mm_roundn_epu16(v_rsh_w, 2);
+      const __m128i v_m0l_w = xx_roundn_epu16(v_rsl_w, 2);
+      const __m128i v_m0h_w = xx_roundn_epu16(v_rsh_w, 2);
       const __m128i v_m1l_w = _mm_sub_epi16(v_maxval_w, v_m0l_w);
       const __m128i v_m1h_w = _mm_sub_epi16(v_maxval_w, v_m0h_w);
 
@@ -513,7 +482,7 @@ static void blend_mask6_sx_sy_w16n_sse4_1(
 
       const __m128i v_res_b = _mm_packus_epi16(v_resl_w, v_resh_w);
 
-      mm_storeu_128(dst + c, v_res_b);
+      xx_storeu_128(dst + c, v_res_b);
     }
     dst += dst_stride;
     src0 += src0_stride;
@@ -575,38 +544,38 @@ typedef __m128i (*blend_unit_fn)(uint16_t*src0, uint16_t *src1,
 
 static INLINE __m128i blend_4_b10(uint16_t*src0, uint16_t *src1,
                                   const __m128i v_m0_w, const __m128i v_m1_w) {
-  const __m128i v_s0_w = mm_loadl_64(src0);
-  const __m128i v_s1_w = mm_loadl_64(src1);
+  const __m128i v_s0_w = xx_loadl_64(src0);
+  const __m128i v_s1_w = xx_loadl_64(src1);
 
   const __m128i v_p0_w = _mm_mullo_epi16(v_s0_w, v_m0_w);
   const __m128i v_p1_w = _mm_mullo_epi16(v_s1_w, v_m1_w);
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = mm_roundn_epu16(v_sum_w, MASK_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, MASK_BITS);
 
   return v_res_w;
 }
 
 static INLINE __m128i blend_8_b10(uint16_t*src0, uint16_t *src1,
                                   const __m128i v_m0_w, const __m128i v_m1_w) {
-  const __m128i v_s0_w = mm_loadu_128(src0);
-  const __m128i v_s1_w = mm_loadu_128(src1);
+  const __m128i v_s0_w = xx_loadu_128(src0);
+  const __m128i v_s1_w = xx_loadu_128(src1);
 
   const __m128i v_p0_w = _mm_mullo_epi16(v_s0_w, v_m0_w);
   const __m128i v_p1_w = _mm_mullo_epi16(v_s1_w, v_m1_w);
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = mm_roundn_epu16(v_sum_w, MASK_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, MASK_BITS);
 
   return v_res_w;
 }
 
 static INLINE __m128i blend_4_b12(uint16_t*src0, uint16_t *src1,
                                   const __m128i v_m0_w, const __m128i v_m1_w) {
-  const __m128i v_s0_w = mm_loadl_64(src0);
-  const __m128i v_s1_w = mm_loadl_64(src1);
+  const __m128i v_s0_w = xx_loadl_64(src0);
+  const __m128i v_s1_w = xx_loadl_64(src1);
 
   // Interleave
   const __m128i v_m01_w = _mm_unpacklo_epi16(v_m0_w, v_m1_w);
@@ -622,15 +591,15 @@ static INLINE __m128i blend_4_b12(uint16_t*src0, uint16_t *src1,
   const __m128i v_pssum_d = _mm_packs_epi32(v_ssum_d, v_ssum_d);
 
   // Round
-  const __m128i v_res_w = mm_round_epu16(v_pssum_d);
+  const __m128i v_res_w = xx_round_epu16(v_pssum_d);
 
   return v_res_w;
 }
 
 static INLINE __m128i blend_8_b12(uint16_t*src0, uint16_t *src1,
                                   const __m128i v_m0_w, const __m128i v_m1_w) {
-  const __m128i v_s0_w = mm_loadu_128(src0);
-  const __m128i v_s1_w = mm_loadu_128(src1);
+  const __m128i v_s0_w = xx_loadu_128(src0);
+  const __m128i v_s1_w = xx_loadu_128(src1);
 
   // Interleave
   const __m128i v_m01l_w = _mm_unpacklo_epi16(v_m0_w, v_m1_w);
@@ -650,7 +619,7 @@ static INLINE __m128i blend_8_b12(uint16_t*src0, uint16_t *src1,
   const __m128i v_pssum_d = _mm_packs_epi32(v_ssuml_d, v_ssumh_d);
 
   // Round
-  const __m128i v_res_w = mm_round_epu16(v_pssum_d);
+  const __m128i v_res_w = xx_round_epu16(v_pssum_d);
 
   return v_res_w;
 }
@@ -668,13 +637,13 @@ static INLINE void blend_mask6_bn_w4_sse4_1(
   const __m128i v_maxval_w = _mm_set1_epi16(1 << MASK_BITS);
 
   do {
-    const __m128i v_m0_b = mm_loadl_32(mask);
+    const __m128i v_m0_b = xx_loadl_32(mask);
     const __m128i v_m0_w = _mm_cvtepu8_epi16(v_m0_b);
     const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
     const __m128i v_res_w = blend(src0, src1, v_m0_w, v_m1_w);
 
-    mm_storel_64(dst, v_res_w);
+    xx_storel_64(dst, v_res_w);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -718,13 +687,13 @@ static inline void blend_mask6_bn_w8n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 8) {
-      const __m128i v_m0_b = mm_loadl_64(mask + c);
+      const __m128i v_m0_b = xx_loadl_64(mask + c);
       const __m128i v_m0_w = _mm_cvtepu8_epi16(v_m0_b);
       const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
       const __m128i v_res_w = blend(src0 + c, src1 + c, v_m0_w, v_m1_w);
 
-      mm_storeu_128(dst + c, v_res_w);
+      xx_storeu_128(dst + c, v_res_w);
     }
     dst += dst_stride;
     src0 += src0_stride;
@@ -770,7 +739,7 @@ static INLINE void blend_mask6_bn_sx_w4_sse4_1(
   const __m128i v_maxval_w = _mm_set1_epi16(1 << MASK_BITS);
 
   do {
-    const __m128i v_r_b = mm_loadl_64(mask);
+    const __m128i v_r_b = xx_loadl_64(mask);
     const __m128i v_a_b = _mm_avg_epu8(v_r_b, _mm_srli_si128(v_r_b, 1));
 
     const __m128i v_m0_w = _mm_and_si128(v_a_b, v_zmask_b);
@@ -778,7 +747,7 @@ static INLINE void blend_mask6_bn_sx_w4_sse4_1(
 
     const __m128i v_res_w = blend(src0, src1, v_m0_w, v_m1_w);
 
-    mm_storel_64(dst, v_res_w);
+    xx_storel_64(dst, v_res_w);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -824,7 +793,7 @@ static INLINE void blend_mask6_bn_sx_w8n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 8) {
-      const __m128i v_r_b = mm_loadu_128(mask + 2 * c);
+      const __m128i v_r_b = xx_loadu_128(mask + 2 * c);
       const __m128i v_a_b = _mm_avg_epu8(v_r_b, _mm_srli_si128(v_r_b, 1));
 
       const __m128i v_m0_w = _mm_and_si128(v_a_b, v_zmask_b);
@@ -832,7 +801,7 @@ static INLINE void blend_mask6_bn_sx_w8n_sse4_1(
 
       const __m128i v_res_w = blend(src0 + c, src1 + c, v_m0_w, v_m1_w);
 
-      mm_storeu_128(dst + c, v_res_w);
+      xx_storeu_128(dst + c, v_res_w);
     }
     dst += dst_stride;
     src0 += src0_stride;
@@ -876,8 +845,8 @@ static INLINE void blend_mask6_bn_sy_w4_sse4_1(
   const __m128i v_maxval_w = _mm_set1_epi16(1 << MASK_BITS);
 
   do {
-    const __m128i v_ra_b = mm_loadl_32(mask);
-    const __m128i v_rb_b = mm_loadl_32(mask + mask_stride);
+    const __m128i v_ra_b = xx_loadl_32(mask);
+    const __m128i v_rb_b = xx_loadl_32(mask + mask_stride);
     const __m128i v_a_b = _mm_avg_epu8(v_ra_b, v_rb_b);
 
     const __m128i v_m0_w = _mm_cvtepu8_epi16(v_a_b);
@@ -885,7 +854,7 @@ static INLINE void blend_mask6_bn_sy_w4_sse4_1(
 
     const __m128i v_res_w = blend(src0, src1, v_m0_w, v_m1_w);
 
-    mm_storel_64(dst, v_res_w);
+    xx_storel_64(dst, v_res_w);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -929,8 +898,8 @@ static INLINE void blend_mask6_bn_sy_w8n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 8) {
-      const __m128i v_ra_b = mm_loadl_64(mask + c);
-      const __m128i v_rb_b = mm_loadl_64(mask + c + mask_stride);
+      const __m128i v_ra_b = xx_loadl_64(mask + c);
+      const __m128i v_rb_b = xx_loadl_64(mask + c + mask_stride);
       const __m128i v_a_b = _mm_avg_epu8(v_ra_b, v_rb_b);
 
       const __m128i v_m0_w = _mm_cvtepu8_epi16(v_a_b);
@@ -938,7 +907,7 @@ static INLINE void blend_mask6_bn_sy_w8n_sse4_1(
 
       const __m128i v_res_w = blend(src0 + c, src1 + c, v_m0_w, v_m1_w);
 
-      mm_storeu_128(dst + c, v_res_w);
+      xx_storeu_128(dst + c, v_res_w);
     }
     dst += dst_stride;
     src0 += src0_stride;
@@ -984,20 +953,20 @@ static INLINE void blend_mask6_bn_sx_sy_w4_sse4_1(
   const __m128i v_maxval_w = _mm_set1_epi16(1 << MASK_BITS);
 
   do {
-    const __m128i v_ra_b = mm_loadl_64(mask);
-    const __m128i v_rb_b = mm_loadl_64(mask + mask_stride);
+    const __m128i v_ra_b = xx_loadl_64(mask);
+    const __m128i v_rb_b = xx_loadl_64(mask + mask_stride);
     const __m128i v_rvs_b = _mm_add_epi8(v_ra_b, v_rb_b);
     const __m128i v_rvsa_w = _mm_and_si128(v_rvs_b, v_zmask_b);
     const __m128i v_rvsb_w = _mm_and_si128(_mm_srli_si128(v_rvs_b, 1),
                                            v_zmask_b);
     const __m128i v_rs_w = _mm_add_epi16(v_rvsa_w, v_rvsb_w);
 
-    const __m128i v_m0_w = mm_roundn_epu16(v_rs_w, 2);
+    const __m128i v_m0_w = xx_roundn_epu16(v_rs_w, 2);
     const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
     const __m128i v_res_w = blend(src0, src1, v_m0_w, v_m1_w);
 
-    mm_storel_64(dst, v_res_w);
+    xx_storel_64(dst, v_res_w);
 
     dst += dst_stride;
     src0 += src0_stride;
@@ -1043,20 +1012,20 @@ static INLINE void blend_mask6_bn_sx_sy_w8n_sse4_1(
   do {
     int c;
     for (c = 0; c < w; c += 8) {
-      const __m128i v_ra_b = mm_loadu_128(mask + 2 * c);
-      const __m128i v_rb_b = mm_loadu_128(mask + 2 * c +mask_stride);
+      const __m128i v_ra_b = xx_loadu_128(mask + 2 * c);
+      const __m128i v_rb_b = xx_loadu_128(mask + 2 * c + mask_stride);
       const __m128i v_rvs_b = _mm_add_epi8(v_ra_b, v_rb_b);
       const __m128i v_rvsa_w = _mm_and_si128(v_rvs_b, v_zmask_b);
       const __m128i v_rvsb_w = _mm_and_si128(_mm_srli_si128(v_rvs_b, 1),
                                              v_zmask_b);
       const __m128i v_rs_w = _mm_add_epi16(v_rvsa_w, v_rvsb_w);
 
-      const __m128i v_m0_w = mm_roundn_epu16(v_rs_w, 2);
+      const __m128i v_m0_w = xx_roundn_epu16(v_rs_w, 2);
       const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
 
       const __m128i v_res_w = blend(src0 + c, src1 + c, v_m0_w, v_m1_w);
 
-      mm_storeu_128(dst + c, v_res_w);
+      xx_storeu_128(dst + c, v_res_w);
     }
     dst += dst_stride;
     src0 += src0_stride;
