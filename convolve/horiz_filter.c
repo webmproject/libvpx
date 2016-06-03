@@ -12,7 +12,7 @@ static inline unsigned int readtsc(void) {
 }
 
 #define FILTER_BITS 7
-#define RAND_SEED (0xabcd)
+#define RAND_SEED (0xabc)
 unsigned int seed = RAND_SEED;
 
 int round_power_of_two(int x, int n) {
@@ -85,10 +85,9 @@ static const int16_t filter10[10] = {
 
 // SSSE3
 
-const int8_t pfilter12[3][16] __attribute__ ((aligned(16))) = {
+const int8_t pfilter12[2][16] __attribute__ ((aligned(16))) = {
   {-1,  3, -4,  8, -18, 120,  28, -12,   7,  -4,   2,  -1,  0,  0,  0,  0},
   { 0,  0, -1,  3,  -4,   8, -18, 120,  28, -12,   7,  -4,  2, -1,  0,  0},
-  { 0,  0,  0,  0,  -1,   3,  -4,   8, -18, 120,  28, -12,  7, -4,  2, -1},
 };
 
 const int8_t pfilter10[3][16] __attribute__ ((aligned(16))) = {
@@ -145,10 +144,12 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   pixel = _mm_loadu_si128((__m128i const *)src);
   sr[0] = _mm_maddubs_epi16(pixel, f[0]);
   sr[2] = _mm_maddubs_epi16(pixel, f[1]);
+  sr[2] = _mm_srli_si128(sr[2], 2);
 
   pixel = _mm_loadu_si128((__m128i const *)(src + 1));
   sr[1] = _mm_maddubs_epi16(pixel, f[0]);
   sr[3] = _mm_maddubs_epi16(pixel, f[1]);
+  sr[3] = _mm_srli_si128(sr[3], 2);
 
   transpose_4x8(sr, sc);
 
@@ -215,8 +216,6 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
   if (fData.tapsNum == 12) {
     f[0] = *((__m128i *)(fData.coeffs));
     f[1] = *((__m128i *)(fData.coeffs + 1));
-    f[2] = *((__m128i *)(fData.coeffs + 2));
-    f[3] = *((__m128i *)(fData.coeffs + 3));
   } else {
     f[0] = *((__m128i *)(fData.coeffs));
     f[1] = *((__m128i *)(fData.coeffs + 1));
@@ -281,7 +280,7 @@ int main(int argc, char **argv)
   } while (count < TEST_NUM);
   end = readtsc();
 
-  printf("C version cycles: %d\n", end - start);
+  printf("C version cycles:\t%d\n", end - start);
 
   // Solution 1
   count = 0;
@@ -292,7 +291,7 @@ int main(int argc, char **argv)
   } while (count < TEST_NUM);
   end = readtsc();
 
-  printf("SIMD version cycles: %d\n", end - start);
+  printf("SIMD version cycles:\t%d\n", end - start);
 
   check_buffer(buffer, pbuffer, width);
 
