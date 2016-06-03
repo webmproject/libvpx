@@ -3362,6 +3362,8 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
   PICK_MODE_CONTEXT *ctx = &pc_tree->none;
   int i;
   const int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
+  int *partition_cost = cpi->partition_cost[pl];
+  int tmp_partition_cost[PARTITION_TYPES];
   BLOCK_SIZE subsize;
   RD_COST this_rdc, sum_rdc, best_rdc;
 #if CONFIG_SUPERTX
@@ -3398,6 +3400,30 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
   int partition_vert_allowed = !force_horz_split && xss <= yss &&
                                bsize >= BLOCK_8X8;
   (void) *tp_orig;
+
+  if (force_horz_split || force_vert_split) {
+    tmp_partition_cost[PARTITION_NONE] = INT_MAX;
+
+    if (!force_vert_split) {  // force_horz_split only
+      tmp_partition_cost[PARTITION_VERT] = INT_MAX;
+      tmp_partition_cost[PARTITION_HORZ] =
+          vp10_cost_bit(cm->fc->partition_prob[pl][PARTITION_HORZ], 0);
+      tmp_partition_cost[PARTITION_SPLIT] =
+          vp10_cost_bit(cm->fc->partition_prob[pl][PARTITION_HORZ], 1);
+    } else if (!force_horz_split) {  // force_vert_split only
+      tmp_partition_cost[PARTITION_HORZ] = INT_MAX;
+      tmp_partition_cost[PARTITION_VERT] =
+          vp10_cost_bit(cm->fc->partition_prob[pl][PARTITION_VERT], 0);
+      tmp_partition_cost[PARTITION_SPLIT] =
+          vp10_cost_bit(cm->fc->partition_prob[pl][PARTITION_VERT], 1);
+    } else {  // force_ horz_split && force_vert_split horz_split
+      tmp_partition_cost[PARTITION_HORZ] = INT_MAX;
+      tmp_partition_cost[PARTITION_VERT] = INT_MAX;
+      tmp_partition_cost[PARTITION_SPLIT] = 0;
+    }
+
+    partition_cost = tmp_partition_cost;
+  }
 
 #if CONFIG_VAR_TX
 #ifndef NDEBUG
@@ -3523,11 +3549,11 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
                      bsize, ctx, best_rdc.rdcost);
     if (this_rdc.rate != INT_MAX) {
       if (bsize >= BLOCK_8X8) {
-        this_rdc.rate += cpi->partition_cost[pl][PARTITION_NONE];
+        this_rdc.rate += partition_cost[PARTITION_NONE];
         this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                                  this_rdc.rate, this_rdc.dist);
 #if CONFIG_SUPERTX
-        this_rate_nocoef += cpi->partition_cost[pl][PARTITION_NONE];
+        this_rate_nocoef += partition_cost[PARTITION_NONE];
 #endif
       }
 
@@ -3782,11 +3808,11 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
     }
 
     if (sum_rdc.rdcost < best_rdc.rdcost && i == 4) {
-      sum_rdc.rate += cpi->partition_cost[pl][PARTITION_SPLIT];
+      sum_rdc.rate += partition_cost[PARTITION_SPLIT];
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                               sum_rdc.rate, sum_rdc.dist);
 #if CONFIG_SUPERTX
-      sum_rate_nocoef += cpi->partition_cost[pl][PARTITION_SPLIT];
+      sum_rate_nocoef += partition_cost[PARTITION_SPLIT];
 #endif  // CONFIG_SUPERTX
 
       if (sum_rdc.rdcost < best_rdc.rdcost) {
@@ -3934,10 +3960,10 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_SUPERTX
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
-      sum_rdc.rate += cpi->partition_cost[pl][PARTITION_HORZ];
+      sum_rdc.rate += partition_cost[PARTITION_HORZ];
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
 #if CONFIG_SUPERTX
-      sum_rate_nocoef += cpi->partition_cost[pl][PARTITION_HORZ];
+      sum_rate_nocoef += partition_cost[PARTITION_HORZ];
 #endif  // CONFIG_SUPERTX
       if (sum_rdc.rdcost < best_rdc.rdcost) {
         best_rdc = sum_rdc;
@@ -4079,11 +4105,11 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_SUPERTX
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
-      sum_rdc.rate += cpi->partition_cost[pl][PARTITION_VERT];
+      sum_rdc.rate += partition_cost[PARTITION_VERT];
       sum_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                               sum_rdc.rate, sum_rdc.dist);
 #if CONFIG_SUPERTX
-      sum_rate_nocoef += cpi->partition_cost[pl][PARTITION_VERT];
+      sum_rate_nocoef += partition_cost[PARTITION_VERT];
 #endif  // CONFIG_SUPERTX
       if (sum_rdc.rdcost < best_rdc.rdcost) {
         best_rdc = sum_rdc;
