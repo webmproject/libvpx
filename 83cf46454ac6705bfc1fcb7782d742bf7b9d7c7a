@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46dfe6f2_6fbfb16b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-03T06:17:29Z",
+      "side": 1,
+      "message": "the gerrit change numbers aren\u0027t guaranteed to be stable, better to use the commit hash",
+      "revId": "83cf46454ac6705bfc1fcb7782d742bf7b9d7c7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
