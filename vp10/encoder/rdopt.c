@@ -6515,7 +6515,7 @@ static void do_masked_motion_search_indexed(VP10_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   BLOCK_SIZE sb_type = mbmi->sb_type;
   const uint8_t *mask;
-  const int mask_stride = MASK_MASTER_STRIDE;
+  const int mask_stride = 4 * num_4x4_blocks_wide_lookup[bsize];
   mask = vp10_get_soft_mask(wedge_index, wedge_sign, sb_type, 0, 0);
 
   if (which == 0 || which == 2)
@@ -7481,6 +7481,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   if (is_comp_interintra_pred) {
+    const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
     INTERINTRA_MODE best_interintra_mode = II_DC_PRED;
     int64_t best_interintra_rd = INT64_MAX;
     int rmode, rate_sum;
@@ -7584,7 +7585,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
               best_wedge_index, 1, bsize, 0, 0);
           mbmi->interintra_wedge_index = best_wedge_index;
           mbmi->interintra_wedge_sign = 0;
-          do_masked_motion_search(cpi, x, mask, MASK_MASTER_STRIDE, bsize,
+          do_masked_motion_search(cpi, x, mask, bw, bsize,
                                   mi_row, mi_col, &tmp_mv, &tmp_rate_mv,
                                   0, mv_idx);
           mbmi->mv[0].as_int = tmp_mv.as_int;

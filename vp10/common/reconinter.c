@@ -25,9 +25,6 @@
 
 #if CONFIG_EXT_INTER
 
-// Set to one to use larger codebooks
-#define USE_LARGE_WEDGE_CODEBOOK  0
-
 #define NSMOOTHERS  1
 static int get_masked_weight(int m, int smoothness) {
 #define SMOOTHER_LEN  32
@@ -62,6 +59,14 @@ DECLARE_ALIGNED(
 DECLARE_ALIGNED(
     16, static uint8_t,
     wedge_signflip_lookup[BLOCK_SIZES][MAX_WEDGE_TYPES]);
+
+// 3 * MAX_WEDGE_SQUARE is an easy to compute and fairly tight upper bound
+// on the sum of all mask sizes up to an including MAX_WEDGE_SQUARE.
+DECLARE_ALIGNED(
+    16, static uint8_t,
+    wedge_mask_buf[2 * MAX_WEDGE_TYPES * 3 * MAX_WEDGE_SQUARE]);
+
+static wedge_masks_type wedge_masks[BLOCK_SIZES][2];
 
 // Some unused wedge codebooks left temporarily to facilitate experiments.
 // To be removed when setteld.
@@ -157,23 +162,23 @@ static const wedge_code_type wedge_codebook_16_heqw[16] = {
 };
 
 const wedge_params_type wedge_params_lookup[BLOCK_SIZES] = {
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
-  {4, wedge_codebook_16_heqw, wedge_signflip_lookup[3], 0},
-  {4, wedge_codebook_16_hgtw, wedge_signflip_lookup[4], 0},
-  {4, wedge_codebook_16_hltw, wedge_signflip_lookup[5], 0},
-  {4, wedge_codebook_16_heqw, wedge_signflip_lookup[6], 0},
-  {4, wedge_codebook_16_hgtw, wedge_signflip_lookup[7], 0},
-  {4, wedge_codebook_16_hltw, wedge_signflip_lookup[8], 0},
-  {4, wedge_codebook_16_heqw, wedge_signflip_lookup[9], 0},
-  {0, wedge_codebook_8_hgtw, wedge_signflip_lookup[10], 0},
-  {0, wedge_codebook_8_hltw, wedge_signflip_lookup[11], 0},
-  {0, wedge_codebook_8_heqw, wedge_signflip_lookup[12], 0},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
+  {4, wedge_codebook_16_heqw, wedge_signflip_lookup[3], 0, wedge_masks[3]},
+  {4, wedge_codebook_16_hgtw, wedge_signflip_lookup[4], 0, wedge_masks[4]},
+  {4, wedge_codebook_16_hltw, wedge_signflip_lookup[5], 0, wedge_masks[5]},
+  {4, wedge_codebook_16_heqw, wedge_signflip_lookup[6], 0, wedge_masks[6]},
+  {4, wedge_codebook_16_hgtw, wedge_signflip_lookup[7], 0, wedge_masks[7]},
+  {4, wedge_codebook_16_hltw, wedge_signflip_lookup[8], 0, wedge_masks[8]},
+  {4, wedge_codebook_16_heqw, wedge_signflip_lookup[9], 0, wedge_masks[9]},
+  {0, wedge_codebook_8_hgtw, wedge_signflip_lookup[10], 0, wedge_masks[10]},
+  {0, wedge_codebook_8_hltw, wedge_signflip_lookup[11], 0, wedge_masks[11]},
+  {0, wedge_codebook_8_heqw, wedge_signflip_lookup[12], 0, wedge_masks[12]},
 #if CONFIG_EXT_PARTITION
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
 #endif  // CONFIG_EXT_PARTITION
 };
 
@@ -285,23 +290,23 @@ static const wedge_code_type wedge_codebook_32_heqw[32] = {
 };
 
 const wedge_params_type wedge_params_lookup[BLOCK_SIZES] = {
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
-  {5, wedge_codebook_32_heqw, wedge_signflip_lookup[3], 0},
-  {5, wedge_codebook_32_hgtw, wedge_signflip_lookup[4], 0},
-  {5, wedge_codebook_32_hltw, wedge_signflip_lookup[5], 0},
-  {5, wedge_codebook_32_heqw, wedge_signflip_lookup[6], 0},
-  {5, wedge_codebook_32_hgtw, wedge_signflip_lookup[7], 0},
-  {5, wedge_codebook_32_hltw, wedge_signflip_lookup[8], 0},
-  {5, wedge_codebook_32_heqw, wedge_signflip_lookup[9], 0},
-  {0, wedge_codebook_8_hgtw, wedge_signflip_lookup[10], 0},
-  {0, wedge_codebook_8_hltw, wedge_signflip_lookup[11], 0},
-  {0, wedge_codebook_8_heqw, wedge_signflip_lookup[12], 0},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
+  {5, wedge_codebook_32_heqw, wedge_signflip_lookup[3], 0, wedge_masks[3]},
+  {5, wedge_codebook_32_hgtw, wedge_signflip_lookup[4], 0, wedge_masks[4]},
+  {5, wedge_codebook_32_hltw, wedge_signflip_lookup[5], 0, wedge_masks[5]},
+  {5, wedge_codebook_32_heqw, wedge_signflip_lookup[6], 0, wedge_masks[6]},
+  {5, wedge_codebook_32_hgtw, wedge_signflip_lookup[7], 0, wedge_masks[7]},
+  {5, wedge_codebook_32_hltw, wedge_signflip_lookup[8], 0, wedge_masks[8]},
+  {5, wedge_codebook_32_heqw, wedge_signflip_lookup[9], 0, wedge_masks[9]},
+  {0, wedge_codebook_8_hgtw, wedge_signflip_lookup[10], 0, wedge_masks[10]},
+  {0, wedge_codebook_8_hltw, wedge_signflip_lookup[11], 0, wedge_masks[11]},
+  {0, wedge_codebook_8_heqw, wedge_signflip_lookup[12], 0, wedge_masks[12]},
 #if CONFIG_EXT_PARTITION
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
-  {0, NULL, NULL, 0},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
+  {0, NULL, NULL, 0, NULL},
 #endif  // CONFIG_EXT_PARTITION
 };
 #endif  // USE_LARGE_WEDGE_CODEBOOK
@@ -328,47 +333,27 @@ static const uint8_t *get_wedge_mask_inplace(int wedge_index,
   return master;
 }
 
+static const uint8_t *get_wedge_mask(int wedge_index,
+                                     int neg,
+                                     BLOCK_SIZE bsize) {
+  return wedge_params_lookup[bsize].masks[neg][wedge_index];
+}
+
+
 const uint8_t *vp10_get_soft_mask(int wedge_index,
                                   int wedge_sign,
                                   BLOCK_SIZE sb_type,
                                   int offset_x,
                                   int offset_y) {
+  const int bw = 4 * num_4x4_blocks_wide_lookup[sb_type];
   const uint8_t *mask =
-      get_wedge_mask_inplace(wedge_index, wedge_sign, sb_type);
+      get_wedge_mask(wedge_index, wedge_sign, sb_type);
   if (mask)
-    mask -= (offset_x + offset_y * MASK_MASTER_STRIDE);
+    mask -= (offset_x + offset_y * bw);
   return mask;
 }
 
-// If the signs for the wedges for various blocksizes are
-// inconsistent flip the sign flag. Do it only once for every
-// wedge codebook.
-static void init_wedge_signs() {
-  BLOCK_SIZE sb_type;
-  memset(wedge_signflip_lookup, 0, sizeof(wedge_signflip_lookup));
-  for (sb_type = BLOCK_4X4; sb_type < BLOCK_SIZES; ++sb_type) {
-    const int bw = 4 * num_4x4_blocks_wide_lookup[sb_type];
-    const int bh = 4 * num_4x4_blocks_high_lookup[sb_type];
-    const wedge_params_type wedge_params = wedge_params_lookup[sb_type];
-    const int wbits = wedge_params.bits;
-    const int wtypes = 1 << wbits;
-    int i, w;
-    if (wbits == 0) continue;
-    for (w = 0; w < wtypes; ++w) {
-      const uint8_t *mask = get_wedge_mask_inplace(w, 0, sb_type);
-      int sum = 0;
-      for (i = 0; i < bw; ++i)
-        sum += mask[i];
-      for (i = 0; i < bh; ++i)
-        sum += mask[i * MASK_MASTER_STRIDE];
-      sum = (sum + (bw + bh) / 2) / (bw + bh);
-      wedge_params.signflip[w] = (sum < 32);
-    }
-  }
-}
-
-// Equation of line: f(x, y) = a[0]*(x - a[2]*w/8) + a[1]*(y - a[3]*h/8) = 0
-void vp10_init_wedge_masks() {
+static void init_wedge_master_masks() {
   int i, j, s;
   const int w = MASK_MASTER_SIZE;
   const int h = MASK_MASTER_SIZE;
@@ -401,7 +386,70 @@ void vp10_init_wedge_masks() {
             (1 << WEDGE_WEIGHT_BITS) - get_masked_weight(x, s);
       }
   }
+}
+
+// If the signs for the wedges for various blocksizes are
+// inconsistent flip the sign flag. Do it only once for every
+// wedge codebook.
+static void init_wedge_signs() {
+  BLOCK_SIZE sb_type;
+  memset(wedge_signflip_lookup, 0, sizeof(wedge_signflip_lookup));
+  for (sb_type = BLOCK_4X4; sb_type < BLOCK_SIZES; ++sb_type) {
+    const int bw = 4 * num_4x4_blocks_wide_lookup[sb_type];
+    const int bh = 4 * num_4x4_blocks_high_lookup[sb_type];
+    const wedge_params_type wedge_params = wedge_params_lookup[sb_type];
+    const int wbits = wedge_params.bits;
+    const int wtypes = 1 << wbits;
+    int i, w;
+    if (wbits == 0) continue;
+    for (w = 0; w < wtypes; ++w) {
+      const uint8_t *mask = get_wedge_mask_inplace(w, 0, sb_type);
+      int sum = 0;
+      for (i = 0; i < bw; ++i)
+        sum += mask[i];
+      for (i = 0; i < bh; ++i)
+        sum += mask[i * MASK_MASTER_STRIDE];
+      sum = (sum + (bw + bh) / 2) / (bw + bh);
+      wedge_params.signflip[w] = (sum < 32);
+    }
+  }
+}
+
+static void init_wedge_masks() {
+  uint8_t *dst = wedge_mask_buf;
+  BLOCK_SIZE bsize;
+  memset(wedge_masks, 0, sizeof(wedge_masks));
+  for (bsize = BLOCK_4X4; bsize < BLOCK_SIZES; ++bsize) {
+    const uint8_t *mask;
+    const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
+    const int bh = 4 * num_4x4_blocks_high_lookup[bsize];
+    const wedge_params_type *wedge_params = &wedge_params_lookup[bsize];
+    const int wbits = wedge_params->bits;
+    const int wtypes = 1 << wbits;
+    int w;
+    if (wbits == 0) continue;
+    for (w = 0; w < wtypes; ++w) {
+      mask = get_wedge_mask_inplace(w, 0, bsize);
+      vpx_convolve_copy(mask, MASK_MASTER_STRIDE, dst, bw,
+                        NULL, 0, NULL, 0, bw, bh);
+      wedge_params->masks[0][w] = dst;
+      dst += bw * bh;
+
+      mask = get_wedge_mask_inplace(w, 1, bsize);
+      vpx_convolve_copy(mask, MASK_MASTER_STRIDE, dst, bw,
+                        NULL, 0, NULL, 0, bw, bh);
+      wedge_params->masks[1][w] = dst;
+      dst += bw * bh;
+    }
+    assert(sizeof(wedge_mask_buf) >= (size_t)(dst - wedge_mask_buf));
+  }
+}
+
+// Equation of line: f(x, y) = a[0]*(x - a[2]*w/8) + a[1]*(y - a[3]*h/8) = 0
+void vp10_init_wedge_masks() {
+  init_wedge_master_masks();
   init_wedge_signs();
+  init_wedge_masks();
 }
 
 
@@ -422,7 +470,7 @@ static void build_masked_compound_wedge_extend(
   vpx_blend_mask6(dst, dst_stride,
                   src0, src0_stride,
                   src1, src1_stride,
-                  mask, MASK_MASTER_STRIDE,
+                  mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
                   h, w, subh, subw);
 }
 
@@ -442,7 +490,7 @@ static void build_masked_compound_wedge_extend_highbd(
   vpx_highbd_blend_mask6(dst_8, dst_stride,
                          src0_8, src0_stride,
                          src1_8, src1_stride,
-                         mask, MASK_MASTER_STRIDE,
+                         mask, bw,
                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -464,7 +512,7 @@ static void build_masked_compound_wedge(uint8_t *dst, int dst_stride,
   vpx_blend_mask6(dst, dst_stride,
                   src0, src0_stride,
                   src1, src1_stride,
-                  mask, MASK_MASTER_STRIDE,
+                  mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
                   h, w, subh, subw);
 }
 
@@ -484,7 +532,7 @@ static void build_masked_compound_wedge_highbd(uint8_t *dst_8, int dst_stride,
   vpx_highbd_blend_mask6(dst_8, dst_stride,
                          src0_8, src0_stride,
                          src1_8, src1_stride,
-                         mask, MASK_MASTER_STRIDE,
+                         mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -1847,7 +1895,7 @@ static void combine_interintra(INTERINTRA_MODE mode,
       vpx_blend_mask6(comppred, compstride,
                       intrapred, intrastride,
                       interpred, interstride,
-                      mask, MASK_MASTER_STRIDE,
+                      mask, 4 * num_4x4_blocks_wide_lookup[bsize],
                       bh, bw, subh, subw);
     }
     return;
@@ -1986,7 +2034,7 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
       vpx_highbd_blend_mask6(comppred8, compstride,
                              intrapred8, intrastride,
                              interpred8, interstride,
-                             mask, MASK_MASTER_STRIDE,
+                             mask, bw,
                              bh, bw, subh, subw, bd);
     }
     return;

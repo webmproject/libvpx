@@ -149,7 +149,18 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_EXT_INTER
+// Set to one to use larger codebooks
+#define USE_LARGE_WEDGE_CODEBOOK  0
+
+#if USE_LARGE_WEDGE_CODEBOOK
 #define MAX_WEDGE_TYPES   (1 << 5)
+#else
+#define MAX_WEDGE_TYPES   (1 << 4)
+#endif
+
+#define MAX_WEDGE_SIZE_LOG2   5   // 32x32
+#define MAX_WEDGE_SIZE        (1 << MAX_WEDGE_SIZE_LOG2)
+#define MAX_WEDGE_SQUARE      (MAX_WEDGE_SIZE * MAX_WEDGE_SIZE)
 
 #define WEDGE_WEIGHT_BITS 6
 
@@ -173,11 +184,14 @@ typedef struct {
   int y_offset;
 } wedge_code_type;
 
+typedef uint8_t *wedge_masks_type[MAX_WEDGE_TYPES];
+
 typedef struct {
   int bits;
   const wedge_code_type *codebook;
   uint8_t *signflip;
   int smoother;
+  wedge_masks_type *masks;
 } wedge_params_type;
 
 extern const wedge_params_type wedge_params_lookup[BLOCK_SIZES];
