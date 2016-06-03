@@ -259,12 +259,14 @@ int main(int argc, char **argv)
 {
   const size_t block_size = 256;
 
-  if (argc != 2) {
-    printf("Usage: filtering <width>, where width = 4, 8, 16, 32, 64\n");
+  if (argc != 3) {
+    printf("Usage: filtering <width> <seed>\n");
+    printf("width = 4, 8, 16, 32, 64. seed = random seed number.\n");
     return -1;
   }
 
   const int width = atoi(argv[1]);
+  seed = atoi(argv[2]);
 
   uint8_t *buffer = (uint8_t *) malloc(2 * sizeof(buffer[0]) * block_size);
   uint8_t *pixel = (uint8_t *) malloc(2 * sizeof(pixel[0]) * block_size);
