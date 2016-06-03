@@ -148,7 +148,7 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   sr[3] = _mm_srli_si128(sr[3], 2);
 
   transpose_4x8(sr, sc);
-#if 1
+
   sr[0] = _mm_adds_epi16(sc[0], sc[1]);
   sr[1] = _mm_adds_epi16(sc[4], sc[5]);
 
@@ -158,20 +158,7 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   sr[0] = _mm_adds_epi16(sr[0], sr[1]);
   sr[0] = _mm_adds_epi16(sr[0], sr[2]);
   sr[0] = _mm_adds_epi16(sr[0], sr[3]);
-#else
-  sr[0] = _mm_adds_epi16(sc[0], sc[1]);
-  sr[0] = _mm_adds_epi16(sr[0], sc[2]);
 
-  //sr[1] = _mm_adds_epi16(sc[7], sc[6]);
-  sr[1] = _mm_adds_epi16(sc[6], sc[5]);
-
-  sr[2] = _mm_min_epi16(sc[3], sc[4]);
-  sr[3] = _mm_max_epi16(sc[3], sc[4]);
-
-  sr[0] = _mm_adds_epi16(sr[0], sr[1]);
-  sr[0] = _mm_adds_epi16(sr[0], sr[2]);
-  sr[0] = _mm_adds_epi16(sr[0], sr[3]);
-#endif
   sr[1] = _mm_mulhrs_epi16(sr[0], k_256);
   sr[2] = _mm_packus_epi16(sr[1], sr[1]);
 
@@ -253,8 +240,41 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
   }
 }
 
-
+// Testing wrapper functions
 #define TEST_NUM (32)
+
+void run_prototype_filter(uint8_t *src, int width, const int16_t *filter,
+                          int flen, uint8_t *dst) {
+  uint32_t start, end;
+  int count;
+  count = 0;
+
+  start = readtsc();
+  do {
+    convolve(src, width, filter, flen, dst);
+    count++;
+  } while (count < TEST_NUM);
+  end = readtsc();
+
+  printf("C version cycles:\t%d\n", end - start);
+}
+
+void run_target_filter(uint8_t *src, struct Filter filter, int width,
+                       uint8_t *dst) {
+  uint32_t start, end;
+  int count;
+  count = 0;
+
+  count = 0;
+  start = readtsc();
+  do {
+    horiz_filter_ssse3(src, filter, width, dst);
+    count++;
+  } while (count < TEST_NUM);
+  end = readtsc();
+
+  printf("SIMD version cycles:\t%d\n", end - start);
+}
 
 int main(int argc, char **argv)
 {
@@ -274,33 +294,11 @@ int main(int argc, char **argv)
   uint8_t *ppixel = pixel + block_size;
   uint8_t *pbuffer = buffer + block_size;
 
-  uint32_t start, end;
-  int count;
-
   init_state(buffer, pixel, random_seed, width, block_size);
   init_state(pbuffer, ppixel, random_seed, width, block_size);
 
-  count = 0;
-  start = readtsc();
-  do {
-    convolve(pixel, width, filter12, 12, buffer);
-    count++;
-  } while (count < TEST_NUM);
-  end = readtsc();
-
-  printf("C version cycles:\t%d\n", end - start);
-
-  // Solution 1
-  count = 0;
-  start = readtsc();
-  do {
-    horiz_filter_ssse3(ppixel, pfilter_12tap, width, pbuffer);
-    count++;
-  } while (count < TEST_NUM);
-  end = readtsc();
-
-  printf("SIMD version cycles:\t%d\n", end - start);
-
+  run_prototype_filter(pixel, width, filter12, 12, buffer);
+  run_target_filter(ppixel, pfilter_12tap, width, pbuffer);
   check_buffer(buffer, pbuffer, width);
 
   free(buffer);
