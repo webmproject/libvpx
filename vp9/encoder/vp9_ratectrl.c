@@ -1889,27 +1889,28 @@ static void vbr_rate_correction(VP9_COMP *cpi, int *this_frame_target) {
   RATE_CONTROL *const rc = &cpi->rc;
   int64_t vbr_bits_off_target = rc->vbr_bits_off_target;
   int max_delta;
-  double position_factor = 1.0;
+  int frame_window = VPXMIN(16,
+      ((int)cpi->twopass.total_stats.count - cpi->common.current_video_frame));
 
-  // How far through the clip are we.
-  // This number is used to damp the per frame rate correction.
-  // Range 0 - 1.0
-  if (cpi->twopass.total_stats.count) {
-    position_factor = sqrt((double)cpi->common.current_video_frame /
-                           cpi->twopass.total_stats.count);
-  }
-  max_delta = (int)(position_factor *
-                    ((*this_frame_target * VBR_PCT_ADJUSTMENT_LIMIT) / 100));
+  // Calcluate the adjustment to rate for this frame.
+  if (frame_window > 0) {
+    max_delta = (vbr_bits_off_target > 0)
+        ? (int)(vbr_bits_off_target / frame_window)
+        : (int)(-vbr_bits_off_target / frame_window);
 
-  // vbr_bits_off_target > 0 means we have extra bits to spend
-  if (vbr_bits_off_target > 0) {
-    *this_frame_target +=
-      (vbr_bits_off_target > max_delta) ? max_delta
-                                        : (int)vbr_bits_off_target;
-  } else {
-    *this_frame_target -=
-      (vbr_bits_off_target < -max_delta) ? max_delta
-                                         : (int)-vbr_bits_off_target;
+    max_delta = VPXMIN(max_delta,
+        ((*this_frame_target * VBR_PCT_ADJUSTMENT_LIMIT) / 100));
+
+    // vbr_bits_off_target > 0 means we have extra bits to spend
+    if (vbr_bits_off_target > 0) {
+      *this_frame_target +=
+        (vbr_bits_off_target > max_delta) ? max_delta
+                                          : (int)vbr_bits_off_target;
+    } else {
+      *this_frame_target -=
+        (vbr_bits_off_target < -max_delta) ? max_delta
+                                           : (int)-vbr_bits_off_target;
+    }
   }
 
   // Fast redistribution of bits arising from massive local undershoot.
