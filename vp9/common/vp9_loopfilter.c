@@ -1302,15 +1302,24 @@ void vp9_filter_block_plane_ss00(VP9_COMMON *const cm,
     // Disable filtering on the leftmost column.
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
-      highbd_filter_selectively_vert_row2(
-          plane->subsampling_x, CONVERT_TO_SHORTPTR(dst->buf), dst->stride,
-          mask_16x16, mask_8x8, mask_4x4, mask_4x4_int, cm->lf_info.lfthr,
-          &lfm->lfl_y[r << 3], (int)cm->bit_depth);
+      highbd_filter_selectively_vert_row2(plane->subsampling_x,
+                                          CONVERT_TO_SHORTPTR(dst->buf),
+                                          dst->stride,
+                                          (unsigned int)mask_16x16,
+                                          (unsigned int)mask_8x8,
+                                          (unsigned int)mask_4x4,
+                                          (unsigned int)mask_4x4_int,
+                                          cm->lf_info.lfthr,
+                                          &lfm->lfl_y[r << 3],
+                                          (int)cm->bit_depth);
     } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      filter_selectively_vert_row2(
-          plane->subsampling_x, dst->buf, dst->stride, mask_16x16, mask_8x8,
-          mask_4x4, mask_4x4_int, cm->lf_info.lfthr, &lfm->lfl_y[r << 3]);
+      filter_selectively_vert_row2(plane->subsampling_x, dst->buf, dst->stride,
+                                   (unsigned int)mask_16x16,
+                                   (unsigned int)mask_8x8,
+                                   (unsigned int)mask_4x4,
+                                   (unsigned int)mask_4x4_int,
+                                   cm->lf_info.lfthr, &lfm->lfl_y[r << 3]);
 #if CONFIG_VP9_HIGHBITDEPTH
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -1395,14 +1404,20 @@ void vp9_filter_block_plane_ss11(VP9_COMMON *const cm,
     if (cm->use_highbitdepth) {
       highbd_filter_selectively_vert_row2(plane->subsampling_x,
                                           CONVERT_TO_SHORTPTR(dst->buf),
-                                          dst->stride, mask_16x16, mask_8x8,
-                                          mask_4x4, mask_4x4_int,
+                                          dst->stride,
+                                          (unsigned int)mask_16x16,
+                                          (unsigned int)mask_8x8,
+                                          (unsigned int)mask_4x4,
+                                          (unsigned int)mask_4x4_int,
                                           cm->lf_info.lfthr, &lfl_uv[r << 1],
                                           (int)cm->bit_depth);
     } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       filter_selectively_vert_row2(plane->subsampling_x, dst->buf, dst->stride,
-                                   mask_16x16, mask_8x8, mask_4x4, mask_4x4_int,
+                                   (unsigned int)mask_16x16,
+                                   (unsigned int)mask_8x8,
+                                   (unsigned int)mask_4x4,
+                                   (unsigned int)mask_4x4_int,
                                    cm->lf_info.lfthr, &lfl_uv[r << 1]);
 #if CONFIG_VP9_HIGHBITDEPTH
     }
