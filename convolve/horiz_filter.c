@@ -172,31 +172,31 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
 }
 
 void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-horiz_w4_ssse3(src, f, buf);
-src += 4;
-buf += 4;
-horiz_w4_ssse3(src, f, buf);
+  horiz_w4_ssse3(src, f, buf);
+  src += 4;
+  buf += 4;
+  horiz_w4_ssse3(src, f, buf);
 }
 
 void horiz_w16_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-horiz_w8_ssse3(src, f, buf);
-src += 8;
-buf += 8;
-horiz_w8_ssse3(src, f, buf);
+  horiz_w8_ssse3(src, f, buf);
+  src += 8;
+  buf += 8;
+  horiz_w8_ssse3(src, f, buf);
 }
 
 void horiz_w32_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-horiz_w16_ssse3(src, f, buf);
-src += 16;
-buf += 16;
-horiz_w16_ssse3(src, f, buf);
+  horiz_w16_ssse3(src, f, buf);
+  src += 16;
+  buf += 16;
+  horiz_w16_ssse3(src, f, buf);
 }
 
 void horiz_w64_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-horiz_w32_ssse3(src, f, buf);
-src += 32;
-buf += 32;
-horiz_w32_ssse3(src, f, buf);
+  horiz_w32_ssse3(src, f, buf);
+  src += 32;
+  buf += 32;
+  horiz_w32_ssse3(src, f, buf);
 }
 
 void (*horizTab[5])(const uint8_t *, const __m128i *, uint8_t *) = {
