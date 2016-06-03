@@ -131,11 +131,15 @@ void inline transpose_4x8(const __m128i *in, __m128i *out) {
 }
 
 void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
-                    uint8_t *buffer) {
+                    int tapsNum, uint8_t *buffer) {
   __m128i sr[4];
   __m128i sc[8];
   __m128i pixel;
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
+
+  if (10 == tapsNum) {
+    src -= 1;
+  }
 
   pixel = _mm_loadu_si128((__m128i const *)src);
   sr[0] = _mm_maddubs_epi16(pixel, f[0]);
@@ -165,35 +169,39 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   *(int *)buffer = _mm_cvtsi128_si32(sr[2]);
 }
 
-void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-  horiz_w4_ssse3(src, f, buf);
+void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                    uint8_t *buf) {
+  horiz_w4_ssse3(src, f, tapsNum, buf);
   src += 4;
   buf += 4;
-  horiz_w4_ssse3(src, f, buf);
+  horiz_w4_ssse3(src, f, tapsNum, buf);
 }
 
-void horiz_w16_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-  horiz_w8_ssse3(src, f, buf);
+void horiz_w16_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                     uint8_t *buf) {
+  horiz_w8_ssse3(src, f, tapsNum, buf);
   src += 8;
   buf += 8;
-  horiz_w8_ssse3(src, f, buf);
+  horiz_w8_ssse3(src, f, tapsNum, buf);
 }
 
-void horiz_w32_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-  horiz_w16_ssse3(src, f, buf);
+void horiz_w32_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                     uint8_t *buf) {
+  horiz_w16_ssse3(src, f, tapsNum, buf);
   src += 16;
   buf += 16;
-  horiz_w16_ssse3(src, f, buf);
+  horiz_w16_ssse3(src, f, tapsNum, buf);
 }
 
-void horiz_w64_ssse3(const uint8_t *src, const __m128i *f, uint8_t *buf) {
-  horiz_w32_ssse3(src, f, buf);
+void horiz_w64_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                     uint8_t *buf) {
+  horiz_w32_ssse3(src, f, tapsNum, buf);
   src += 32;
   buf += 32;
-  horiz_w32_ssse3(src, f, buf);
+  horiz_w32_ssse3(src, f, tapsNum, buf);
 }
 
-void (*horizTab[5])(const uint8_t *, const __m128i *, uint8_t *) = {
+void (*horizTab[5])(const uint8_t *, const __m128i *, int, uint8_t *) = {
    horiz_w4_ssse3,
    horiz_w8_ssse3,
    horiz_w16_ssse3,
@@ -204,36 +212,26 @@ void (*horizTab[5])(const uint8_t *, const __m128i *, uint8_t *) = {
 void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
                         int width, uint8_t *buffer) {
   const int16_t *filter = (const int16_t *) fData.coeffs;
-  __m128i f[7];
+  __m128i f[2];
 
-  if (fData.tapsNum == 12) {
-    f[0] = *((__m128i *)(fData.coeffs));
-    f[1] = *((__m128i *)(fData.coeffs + 1));
-  } else {
-    f[0] = *((__m128i *)(fData.coeffs));
-    f[1] = *((__m128i *)(fData.coeffs + 1));
-    f[2] = *((__m128i *)(fData.coeffs + 2));
-    f[3] = *((__m128i *)(fData.coeffs + 3));
-    f[4] = *((__m128i *)(fData.coeffs + 4));
-    f[5] = *((__m128i *)(fData.coeffs + 5));
-    f[6] = *((__m128i *)(fData.coeffs + 6));
-  }
+  f[0] = *((__m128i *)(fData.coeffs));
+  f[1] = *((__m128i *)(fData.coeffs + 1));
 
   switch (width) {
     case 4:
-      horizTab[0](src, f, buffer);
+      horizTab[0](src, f, fData.tapsNum, buffer);
       break;
     case 8:
-      horizTab[1](src, f, buffer);
+      horizTab[1](src, f, fData.tapsNum, buffer);
       break;
     case 16:
-      horizTab[2](src, f, buffer);
+      horizTab[2](src, f, fData.tapsNum, buffer);
       break;
     case 32:
-      horizTab[3](src, f, buffer);
+      horizTab[3](src, f, fData.tapsNum, buffer);
       break;
     case 64:
-      horizTab[4](src, f, buffer);
+      horizTab[4](src, f, fData.tapsNum, buffer);
       break;
     default:
       assert(0);
@@ -246,8 +244,7 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
 void run_prototype_filter(uint8_t *src, int width, const int16_t *filter,
                           int flen, uint8_t *dst) {
   uint32_t start, end;
-  int count;
-  count = 0;
+  int count = 0;
 
   start = readtsc();
   do {
@@ -262,10 +259,8 @@ void run_prototype_filter(uint8_t *src, int width, const int16_t *filter,
 void run_target_filter(uint8_t *src, struct Filter filter, int width,
                        uint8_t *dst) {
   uint32_t start, end;
-  int count;
-  count = 0;
+  int count = 0;
 
-  count = 0;
   start = readtsc();
   do {
     horiz_filter_ssse3(src, filter, width, dst);
@@ -299,6 +294,10 @@ int main(int argc, char **argv)
 
   run_prototype_filter(pixel, width, filter12, 12, buffer);
   run_target_filter(ppixel, pfilter_12tap, width, pbuffer);
+  check_buffer(buffer, pbuffer, width);
+
+  run_prototype_filter(pixel, width, filter10, 10, buffer);
+  run_target_filter(ppixel, pfilter_10tap, width, pbuffer);
   check_buffer(buffer, pbuffer, width);
 
   free(buffer);
