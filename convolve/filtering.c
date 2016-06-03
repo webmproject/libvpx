@@ -5,26 +5,50 @@
 #include <string.h>
 #include <tmmintrin.h>
 
+#define RAND_SEED (0xbeef)
+unsigned int seed = RAND_SEED;
+
 static inline unsigned int readtsc(void) {
   unsigned int tsc;
   __asm__ __volatile__("rdtsc\n\t":"=a"(tsc):);
   return tsc;
 }
 
+int round_power_of_two(int x, int n) {
+  int ret = (x + (1 << (n - 1))) >> n;
+  return ret;
+}
+
+uint8_t inline clip_pixel(int x) {
+  uint8_t ret = x;
+  if (x < 0) {
+    ret = 0;
+  }
+  if (x > 255) {
+    ret = 255;
+  }
+  return ret;
+}
+
 static int filtering(const uint8_t *src, const int16_t *filter, int flen) {
   int k;
   int sum = 0;
+  int prod;
   for (k = 0; k < flen; ++k) {
-    sum += src[k] * filter[k];
+    prod = src[k] * filter[k];
+    sum += prod;
   }
   return sum;
 }
 
-void convolve(const uint8_t *src, int w, const int16_t *filter, int flen, int *buffer) {
+void convolve(const uint8_t *src, int w, const int16_t *filter, int flen,
+              int *buffer) {
   int i;
+  int sum;
 
   for (i = 0; i < w; ++i) {
-    buffer[i] = filtering(src, filter, flen);
+    sum = filtering(src, filter, flen);
+    buffer[i] = sum;
     src += 1;
   }
 }
@@ -34,9 +58,9 @@ void init_state(int *buf, uint8_t *pixel, int w, int block) {
 
   memset(buf, 0, sizeof(buf[0]) * block);
   memset(pixel, 0, sizeof(pixel[0]) * block);
-
+  seed = RAND_SEED;
   for (i = 0; i < w; ++i) {
-    pixel[i] = i + 1;
+    pixel[i] = clip_pixel(rand_r(&seed) % RAND_SEED);
   }
 }
 
