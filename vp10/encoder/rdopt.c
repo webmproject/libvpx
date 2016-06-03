@@ -9925,6 +9925,10 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   mbmi->ref_frame[0] = LAST_FRAME;
   mbmi->ref_frame[1] = NONE;
   mbmi->mv[0].as_int = 0;
+#if CONFIG_REF_MV
+  mbmi->ref_mv_idx = 0;
+  mbmi->pred_mv[0].as_int = 0;
+#endif
   x->skip = 1;
 
   if (cm->interp_filter != BILINEAR) {
