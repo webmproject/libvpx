@@ -55,13 +55,13 @@ if ($opts{arch} eq "x86_64") {
 #
 
 add_proto qw/void vpx_d207_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d207_predictor_4x4/, "$ssse3_x86inc";
+specialize qw/vpx_d207_predictor_4x4/, "$sse2_x86inc";
 
 add_proto qw/void vpx_d207e_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_d207e_predictor_4x4/;
 
 add_proto qw/void vpx_d45_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d45_predictor_4x4 neon/, "$ssse3_x86inc";
+specialize qw/vpx_d45_predictor_4x4 neon/, "$sse2_x86inc";
 
 add_proto qw/void vpx_d45e_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_d45e_predictor_4x4/;
@@ -118,7 +118,7 @@ add_proto qw/void vpx_d207e_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, c
 specialize qw/vpx_d207e_predictor_8x8/;
 
 add_proto qw/void vpx_d45_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d45_predictor_8x8 neon/, "$ssse3_x86inc";
+specialize qw/vpx_d45_predictor_8x8 neon/, "$sse2_x86inc";
 
 add_proto qw/void vpx_d45e_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_d45e_predictor_8x8/;
