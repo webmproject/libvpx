@@ -156,8 +156,8 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   sr[0] = _mm_adds_epi16(sc[0], sc[1]);
   sr[0] = _mm_adds_epi16(sr[0], sc[2]);
 
-  sr[1] = _mm_adds_epi16(sc[7], sc[6]);
-  sr[1] = _mm_adds_epi16(sr[1], sc[5]);
+  //sr[1] = _mm_adds_epi16(sc[7], sc[6]);
+  sr[1] = _mm_adds_epi16(sc[6], sc[5]);
 
   sr[2] = _mm_min_epi16(sc[3], sc[4]);
   sr[3] = _mm_max_epi16(sc[3], sc[4]);
