@@ -1277,7 +1277,7 @@ static int get_twopass_worst_quality(VP9_COMP *cpi,
         DOUBLE_DIVIDE_CHECK((double)twopass->rolling_arf_group_target_bits);
     last_group_rate_err =
         VPXMAX(0.25, VPXMIN(4.0, last_group_rate_err));
-    twopass->bpm_factor *= (1.0 + last_group_rate_err) / 2.0;
+    twopass->bpm_factor *= (3.0 + last_group_rate_err) / 4.0;
     twopass->bpm_factor =
         VPXMAX(0.25, VPXMIN(4.0, twopass->bpm_factor));
 
@@ -2174,13 +2174,12 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     const double group_av_inactive_zone =
       ((gf_group_inactive_zone_rows * 2) /
        (rc->baseline_gf_interval * (double)cm->mb_rows));
-
     int tmp_q =
         get_twopass_worst_quality(cpi, group_av_err,
                                   (group_av_skip_pct + group_av_inactive_zone),
                                   vbr_group_bits_per_frame);
     twopass->active_worst_quality =
-        VPXMAX(tmp_q, twopass->active_worst_quality >> 1);
+        (tmp_q + (twopass->active_worst_quality * 3)) >> 2;
   }
 #endif
 
