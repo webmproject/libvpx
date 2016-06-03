@@ -90,14 +90,9 @@ const int8_t pfilter12[2][16] __attribute__ ((aligned(16))) = {
   { 0,  0, -1,  3,  -4,   8, -18, 120,  28, -12,   7,  -4,  2, -1,  0,  0},
 };
 
-const int8_t pfilter10[3][16] __attribute__ ((aligned(16))) = {
-  //{1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0, 0, 0, 0},
+const int8_t pfilter10[2][16] __attribute__ ((aligned(16))) = {
   {0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0, 0, 0},
-  //{0, 0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0, 0},
   {0, 0, 0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0},
-  //{0, 0, 0, 0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0},
-  {0, 0, 0, 0, 0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0},
-  //{0, 0, 0, 0, 0, 0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1},
 };
 
 struct Filter {
@@ -152,7 +147,17 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   sr[3] = _mm_srli_si128(sr[3], 2);
 
   transpose_4x8(sr, sc);
+#if 1
+  sr[0] = _mm_adds_epi16(sc[0], sc[1]);
+  sr[1] = _mm_adds_epi16(sc[4], sc[5]);
 
+  sr[2] = _mm_min_epi16(sc[2], sc[3]);
+  sr[3] = _mm_max_epi16(sc[2], sc[3]);
+
+  sr[0] = _mm_adds_epi16(sr[0], sr[1]);
+  sr[0] = _mm_adds_epi16(sr[0], sr[2]);
+  sr[0] = _mm_adds_epi16(sr[0], sr[3]);
+#else
   sr[0] = _mm_adds_epi16(sc[0], sc[1]);
   sr[0] = _mm_adds_epi16(sr[0], sc[2]);
 
@@ -165,7 +170,7 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   sr[0] = _mm_adds_epi16(sr[0], sr[1]);
   sr[0] = _mm_adds_epi16(sr[0], sr[2]);
   sr[0] = _mm_adds_epi16(sr[0], sr[3]);
-
+#endif
   sr[1] = _mm_mulhrs_epi16(sr[0], k_256);
   sr[2] = _mm_packus_epi16(sr[1], sr[1]);
 
