@@ -61,9 +61,9 @@
 #endif
 #include "aom_dsp/aom_dsp_common.h"
 #include "aom_dsp/aom_filter.h"
+#include "aom_ports/aom_timer.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/system_state.h"
-#include "aom_ports/aom_timer.h"
 #include "aom_scale/aom_scale.h"
 #include "aom_util/debug_util.h"
 

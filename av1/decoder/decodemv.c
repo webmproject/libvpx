@@ -20,8 +20,8 @@
 #include "av1/common/reconinter.h"
 #include "av1/common/seg_common.h"
 
-#include "av1/decoder/decodemv.h"
 #include "av1/decoder/decodeframe.h"
+#include "av1/decoder/decodemv.h"
 
 #include "aom_dsp/aom_dsp_common.h"
 

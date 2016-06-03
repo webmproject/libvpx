@@ -12,14 +12,14 @@
 #include <assert.h>
 #include <stdlib.h>  // qsort()
 
-#include "./av1_rtcd.h"
 #include "./aom_config.h"
 #include "./aom_dsp_rtcd.h"
 #include "./aom_scale_rtcd.h"
+#include "./av1_rtcd.h"
 
-#include "aom_dsp/bitreader_buffer.h"
-#include "av1/decoder/bitreader.h"
 #include "aom_dsp/aom_dsp_common.h"
+#include "aom_dsp/bitreader.h"
+#include "aom_dsp/bitreader_buffer.h"
 #include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/mem_ops.h"
@@ -37,18 +37,18 @@
 #include "av1/common/entropy.h"
 #include "av1/common/entropymode.h"
 #include "av1/common/idct.h"
-#include "av1/common/thread_common.h"
 #include "av1/common/pred_common.h"
 #include "av1/common/quant_common.h"
-#include "av1/common/reconintra.h"
 #include "av1/common/reconinter.h"
+#include "av1/common/reconintra.h"
 #include "av1/common/seg_common.h"
+#include "av1/common/thread_common.h"
 #include "av1/common/tile_common.h"
 
 #include "av1/decoder/decodeframe.h"
-#include "av1/decoder/detokenize.h"
 #include "av1/decoder/decodemv.h"
 #include "av1/decoder/decoder.h"
+#include "av1/decoder/detokenize.h"
 #include "av1/decoder/dsubexp.h"
 
 #define MAX_AV1_HEADER_SIZE 80
