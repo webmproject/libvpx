@@ -185,11 +185,6 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
 INSTANTIATE_TEST_CASE_P(C, AddNoiseTest,
                         ::testing::Values(vpx_plane_add_noise_c));
 
-#if HAVE_MMX
-INSTANTIATE_TEST_CASE_P(MMX, AddNoiseTest,
-                        ::testing::Values(vpx_plane_add_noise_mmx));
-#endif
-
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, AddNoiseTest,
                         ::testing::Values(vpx_plane_add_noise_sse2));

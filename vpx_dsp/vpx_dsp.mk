@@ -55,7 +55,6 @@ endif  # CONFIG_VP9_HIGHBITDEPTH
 ifneq ($(filter yes,$(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)
 DSP_SRCS-yes += add_noise.c
 DSP_SRCS-$(HAVE_MSA) += mips/add_noise_msa.c
-DSP_SRCS-$(HAVE_MMX) += x86/add_noise_mmx.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/add_noise_sse2.asm
 endif # CONFIG_POSTPROC
 
@@ -322,8 +321,6 @@ DSP_SRCS-$(HAVE_NEON)   += arm/variance_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/variance_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/sub_pixel_variance_msa.c
 
-DSP_SRCS-$(HAVE_MMX)    += x86/variance_mmx.c
-DSP_SRCS-$(HAVE_MMX)    += x86/variance_impl_mmx.asm
 DSP_SRCS-$(HAVE_SSE)    += x86/variance_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
 DSP_SRCS-$(HAVE_SSE2)   += x86/halfpix_variance_sse2.c
