@@ -8358,12 +8358,12 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     VP9_ALT_FLAG
   };
   int64_t best_rd = best_rd_so_far;
+  int best_rate_y = INT_MAX, best_rate_uv = INT_MAX;
   int64_t best_pred_diff[REFERENCE_MODES];
   int64_t best_pred_rd[REFERENCE_MODES];
   MB_MODE_INFO best_mbmode;
   int best_mode_skippable = 0;
   int midx, best_mode_index = -1;
-  const int FINAL_MODE_SEARCH = MAX_MODES;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vpx_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
@@ -8653,17 +8653,17 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     midx = end_pos;
   }
 
-
   if (cpi->sf.tx_type_search.fast_intra_tx_type_search)
     x->use_default_intra_tx_type = 1;
   else
     x->use_default_intra_tx_type = 0;
+
   if (cpi->sf.tx_type_search.fast_inter_tx_type_search)
     x->use_default_inter_tx_type = 1;
   else
     x->use_default_inter_tx_type = 0;
 
-  for (midx = 0; midx <= FINAL_MODE_SEARCH; ++midx) {
+  for (midx = 0; midx < MAX_MODES; ++midx) {
     int mode_index;
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
@@ -8683,22 +8683,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     uint8_t ref_frame_type;
 #endif
 
-    if (midx == FINAL_MODE_SEARCH) {
-      if (best_mode_index < 0)
-        break;
-      mode_index = best_mode_index;
-      if (!is_inter_mode(best_mbmode.mode) &&
-          x->use_default_intra_tx_type == 1) {
-        x->use_default_intra_tx_type = 0;
-      } else if (is_inter_mode(best_mbmode.mode) &&
-          x->use_default_inter_tx_type == 1) {
-        x->use_default_inter_tx_type = 0;
-      } else {
-        break;
-      }
-    } else {
-      mode_index = mode_map[midx];
-    }
+    mode_index = mode_map[midx];
     this_mode = vp10_mode_order[mode_index].mode;
     ref_frame = vp10_mode_order[mode_index].ref_frame[0];
     second_ref_frame = vp10_mode_order[mode_index].ref_frame[1];
@@ -9465,6 +9450,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         best_mode_skippable = skippable;
+        best_rate_y = rate_y +
+            vp10_cost_bit(vp10_get_skip_prob(cm, xd), this_skip2 || skippable);
+        best_rate_uv = rate_uv;
 
         if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
@@ -9533,6 +9521,99 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
     if (x->skip && !comp_pred)
       break;
+  }
+
+  if (sf->tx_type_search.fast_inter_tx_type_search == 1 &&
+      xd->lossless[mbmi->segment_id] == 0 &&
+      best_mode_index >= 0) {
+    int rate_y = 0, rate_uv = 0;
+    int64_t dist_y = 0, dist_uv = 0;
+    int skip_y = 0, skip_uv = 0, skip_blk = 0;
+    int64_t sse_y = 0, sse_uv = 0;
+
+    x->use_default_inter_tx_type = 0;
+    x->use_default_intra_tx_type = 0;
+
+    *mbmi = best_mbmode;
+
+    set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
+
+    // Select prediction reference frames.
+    for (i = 0; i < MAX_MB_PLANE; i++) {
+      xd->plane[i].pre[0] = yv12_mb[mbmi->ref_frame[0]][i];
+      if (has_second_ref(mbmi))
+        xd->plane[i].pre[1] = yv12_mb[mbmi->ref_frame[1]][i];
+    }
+
+    if (is_inter_mode(mbmi->mode)) {
+      vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+      vp10_subtract_plane(x, bsize, 0);
+#if CONFIG_VAR_TX
+      if (cm->tx_mode == TX_MODE_SELECT || xd->lossless[mbmi->segment_id]) {
+        select_tx_type_yrd(cpi, x, &rate_y, &dist_y, &skip_y, &sse_y,
+                           bsize, INT64_MAX);
+      } else {
+        int idx, idy;
+        super_block_yrd(cpi, x, &rate_y, &dist_y, &skip_y, &sse_y,
+                        bsize, INT64_MAX);
+        for (idy = 0; idy < xd->n8_h; ++idy)
+          for (idx = 0; idx < xd->n8_w; ++idx)
+            mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
+        memset(x->blk_skip[0], skip_y,
+               sizeof(uint8_t) * xd->n8_h * xd->n8_w * 4);
+      }
+
+      inter_block_uvrd(cpi, x, &rate_uv, &dist_uv, &skip_uv,
+                       &sse_uv, bsize, INT64_MAX);
+#else
+      super_block_yrd(cpi, x, &rate_y, &dist_y, &skip_y, &sse_y,
+                      bsize, INT64_MAX);
+      super_block_uvrd(cpi, x, &rate_uv, &dist_uv, &skip_uv,
+                       &sse_uv, bsize, INT64_MAX);
+#endif  // CONFIG_VAR_TX
+    } else {
+      super_block_yrd(cpi, x, &rate_y, &dist_y, &skip_y, &sse_y,
+                      bsize, INT64_MAX);
+      super_block_uvrd(cpi, x, &rate_uv, &dist_uv, &skip_uv,
+                       &sse_uv, bsize, INT64_MAX);
+    }
+
+    if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, (dist_y + dist_uv)) >
+        RDCOST(x->rdmult, x->rddiv, 0, (sse_y + sse_uv))) {
+      skip_blk = 1;
+      rate_y = vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
+      rate_uv = 0;
+      dist_y = sse_y;
+      dist_uv = sse_uv;
+    } else {
+      skip_blk = 0;
+      rate_y += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
+    }
+
+    if (RDCOST(x->rdmult, x->rddiv,
+               best_rate_y + best_rate_uv, rd_cost->dist) >
+        RDCOST(x->rdmult, x->rddiv,
+               rate_y + rate_uv, (dist_y + dist_uv))) {
+#if CONFIG_VAR_TX
+      int idx, idy;
+#endif
+      best_mbmode.tx_type = mbmi->tx_type;
+      best_mbmode.tx_size = mbmi->tx_size;
+#if CONFIG_VAR_TX
+      for (idy = 0; idy < xd->n8_h; ++idy)
+        for (idx = 0; idx < xd->n8_w; ++idx)
+          best_mbmode.inter_tx_size[idy][idx] = mbmi->inter_tx_size[idy][idx];
+
+      for (i = 0; i < MAX_MB_PLANE; ++i)
+        memcpy(ctx->blk_skip[i], x->blk_skip[i],
+               sizeof(uint8_t) * ctx->num_4x4_blk);
+#endif
+      rd_cost->rate += (rate_y + rate_uv - best_rate_y - best_rate_uv);
+      rd_cost->dist = dist_y + dist_uv;
+      rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv,
+                               rd_cost->rate, rd_cost->dist);
+      best_skip2 = skip_blk;
+    }
   }
 
   // Only try palette mode when the best mode so far is an intra mode.
