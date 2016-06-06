@@ -337,7 +337,6 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->total_actual_bits = 0;
   rc->total_target_bits = 0;
   rc->total_target_vs_actual = 0;
-  rc->avg_size_inter = 0;
   rc->avg_frame_low_motion = 0;
   rc->high_source_sad = 0;
   rc->count_last_scene_change = 0;
@@ -1469,9 +1468,6 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   if (oxcf->pass == 0) {
     if (cm->frame_type != KEY_FRAME)
       compute_frame_low_motion(cpi);
-    if (!cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame)
-      rc->avg_size_inter = ROUND_POWER_OF_TWO(
-          rc->avg_size_inter * 3 + rc->projected_frame_size, 2);
   }
 }
 
@@ -1547,6 +1543,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
   if (rc->frames_till_gf_update_due == 0) {
+    double rate_err = 1.0;
     rc->gfu_boost = DEFAULT_GF_BOOST;
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.pass == 0) {
       vp9_cyclic_refresh_set_golden_update(cpi);
@@ -1554,12 +1551,15 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
       rc->baseline_gf_interval =
           (rc->min_gf_interval + rc->max_gf_interval) / 2;
     }
+    if (rc->rolling_target_bits > 0)
+      rate_err =
+          (double)rc->rolling_actual_bits / (double)rc->rolling_target_bits;
     // Increase gf interval at high Q and high overshoot.
     if (cm->current_video_frame > 30 &&
         rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
-        rc->avg_size_inter > (5 * rc->avg_frame_bandwidth) >> 1) {
-        rc->baseline_gf_interval =
-            VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
+        rate_err > 4.0) {
+      rc->baseline_gf_interval =
+          VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
     } else if (cm->current_video_frame > 30 &&
                rc->avg_frame_low_motion < 20) {
       // Decrease boost and gf interval for high motion case.
