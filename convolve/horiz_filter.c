@@ -84,7 +84,7 @@ void check_buffer(const uint8_t *buf1, const uint8_t *buf2,
   for (row = 0; row < height; ++row) {
     for (col = 0; col < width; ++col) {
       if (buf1[col] != buf2[col]) {
-        printf("Not bit-exact on index %d\n", col);
+        printf("Not bit-exact at col: %d row: %d\n", col, row);
         printf("Expected: 0x%x, Actual: 0x%x\n", buf1[col], buf2[col]);
         return;
       }
@@ -329,15 +329,13 @@ static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
 static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
                                   uint8_t *dst, const int16_t *filter) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
-  const __m128i f_values = _mm_load_si128((const __m128i *)filter);
-  const __m128i f_values2 = _mm_load_si128((const __m128i *)(filter + 8));
   // pack and duplicate the filter values
-  const __m128i f1f0 = *((__m128i *)&filter12_subpixel_ns[0][0]);
-  const __m128i f3f2 = *((__m128i *)&filter12_subpixel_ns[1][0]);
-  const __m128i f5f4 = *((__m128i *)&filter12_subpixel_ns[2][0]);
-  const __m128i f7f6 = *((__m128i *)&filter12_subpixel_ns[3][0]);
-  const __m128i f9f8 = *((__m128i *)&filter12_subpixel_ns[4][0]);
-  const __m128i fbfa = *((__m128i *)&filter12_subpixel_ns[5][0]);
+  const __m128i f1f0 = *((__m128i *)(filter + 0 * 8));
+  const __m128i f3f2 = *((__m128i *)(filter + 1 * 8));
+  const __m128i f5f4 = *((__m128i *)(filter + 2 * 8));
+  const __m128i f7f6 = *((__m128i *)(filter + 3 * 8));
+  const __m128i f9f8 = *((__m128i *)(filter + 4 * 8));
+  const __m128i fbfa = *((__m128i *)(filter + 5 * 8));
   const __m128i A = _mm_loadu_si128((const __m128i *)src_ptr);
   const __m128i B = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch));
   const __m128i C = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 2));
@@ -423,8 +421,8 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
       transpose4x4_to_dst(temp, 4, dst + col, stride);
     }
     count++;
-    src_ptr = src + count * stride;
-    dst += stride;
+    src_ptr = src + count * stride * 4;
+    dst += stride * 4;
   } while (count < block_height);
   end = readtsc();
 
@@ -459,7 +457,8 @@ int main(int argc, char **argv)
   run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
 
-  run_subpixel_filter(ppixel, width, height, stride, filter12_subpixel, pbuffer);
+  run_subpixel_filter(ppixel, width, height, stride,
+                      (int16_t *) filter12_subpixel_ns, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
 
   run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
