@@ -329,10 +329,10 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   const __m128i f7f6 = _mm_shuffle_epi8(f_values, _mm_set1_epi16(0x0e0cu));
   const __m128i f9f8 = _mm_shuffle_epi8(f_values2, _mm_set1_epi16(0x0200u));
   const __m128i fbfa = _mm_shuffle_epi8(f_values2, _mm_set1_epi16(0x0604u));
-  const __m128i A = _mm_loadl_epi64((const __m128i *)src_ptr);
-  const __m128i B = _mm_loadl_epi64((const __m128i *)(src_ptr + src_pitch));
-  const __m128i C = _mm_loadl_epi64((const __m128i *)(src_ptr + src_pitch * 2));
-  const __m128i D = _mm_loadl_epi64((const __m128i *)(src_ptr + src_pitch * 3));
+  const __m128i A = _mm_loadu_si128((const __m128i *)src_ptr);
+  const __m128i B = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch));
+  const __m128i C = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 2));
+  const __m128i D = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 3));
   // TRANSPOSE...
   // 00 01 02 03 04 05 06 07
   // 10 11 12 13 14 15 16 17
@@ -351,9 +351,9 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   // 07 17 27 37
   //
   // 00 01 10 11 02 03 12 13 04 05 14 15 06 07 16 17
-  const __m128i tr0_0 = _mm_unpacklo_epi16(A, B);
+  __m128i tr0_0 = _mm_unpacklo_epi16(A, B);
   // 20 21 30 31 22 23 32 33 24 25 34 35 26 27 36 37
-  const __m128i tr0_1 = _mm_unpacklo_epi16(C, D);
+  __m128i tr0_1 = _mm_unpacklo_epi16(C, D);
   // 00 01 10 11 20 21 30 31 02 03 12 13 22 23 32 33
   const __m128i s1s0  = _mm_unpacklo_epi32(tr0_0, tr0_1);
   // 04 05 14 15 24 25 34 35 06 07 16 17 26 27 36 37
@@ -362,17 +362,28 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   const __m128i s3s2 = _mm_srli_si128(s1s0, 8);
   // 06 07 16 17 26 27 36 37
   const __m128i s7s6 = _mm_srli_si128(s5s4, 8);
+
+  tr0_0 = _mm_unpackhi_epi16(A, B);
+  tr0_1 = _mm_unpackhi_epi16(C, D);
+  const __m128i s9s8  = _mm_unpacklo_epi32(tr0_0, tr0_1);
+  const __m128i sbsa = _mm_srli_si128(s9s8, 8);
+
   // multiply 2 adjacent elements with the filter and add the result
   const __m128i x0 = _mm_maddubs_epi16(s1s0, f1f0);
   const __m128i x1 = _mm_maddubs_epi16(s3s2, f3f2);
   const __m128i x2 = _mm_maddubs_epi16(s5s4, f5f4);
   const __m128i x3 = _mm_maddubs_epi16(s7s6, f7f6);
+  const __m128i x4 = _mm_maddubs_epi16(s9s8, f9f8);
+  const __m128i x5 = _mm_maddubs_epi16(sbsa, fbfa);
   // add and saturate the results together
-  const __m128i min_x2x1 = _mm_min_epi16(x2, x1);
-  const __m128i max_x2x1 = _mm_max_epi16(x2, x1);
-  __m128i temp = _mm_adds_epi16(x0, x3);
-  temp = _mm_adds_epi16(temp, min_x2x1);
-  temp = _mm_adds_epi16(temp, max_x2x1);
+  const __m128i min_x2x3 = _mm_min_epi16(x2, x3);
+  const __m128i max_x2x3 = _mm_max_epi16(x2, x3);
+  __m128i temp = _mm_adds_epi16(x0, x1);
+  temp = _mm_adds_epi16(temp, x5);
+  temp = _mm_adds_epi16(temp, x4);
+
+  temp = _mm_adds_epi16(temp, min_x2x3);
+  temp = _mm_adds_epi16(temp, max_x2x3);
   // round and shift by 7 bit each 16 bit
   temp = _mm_mulhrs_epi16(temp, k_256);
   // shrink to 8 bit each 16 bits
@@ -387,6 +398,7 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
   assert(0 == height % 4);
 
   uint8_t temp[4 * 4] __attribute__ ((aligned(16)));
+  uint8_t *src_ptr = src;
   uint32_t start, end;
   int count = 0;
   int block_height = height >> 2;
@@ -396,12 +408,14 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
   do {
     for (col = 0; col < width; col += 4) {
       for (i = 0; i < 4; ++i) {
-        filter_horiz_w4_ssse3(src, stride, temp + (i * 4), filter);
-        src += 4;
+        filter_horiz_w4_ssse3(src_ptr, stride, temp + (i * 4), filter);
+        src_ptr += 1;
       }
       transpose4x4_to_dst(temp, 4, dst + col, stride);
     }
     count++;
+    src_ptr = src + count * stride;
+    dst += stride;
   } while (count < block_height);
   end = readtsc();
 
@@ -429,15 +443,15 @@ int main(int argc, char **argv)
   uint8_t *ppixel = pixel + block_size;
   uint8_t *pbuffer = buffer + block_size;
 
-  init_state(buffer, pixel, width, height, stride, random_seed);
-  init_state(pbuffer, ppixel, width, height, stride, random_seed);
+  init_state(buffer, pixel, 8 + width, height, stride, random_seed);
+  init_state(pbuffer, ppixel, 8 + width, height, stride, random_seed);
 
   run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
   run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
 
-  //run_subpixel_filter(ppixel, width, height, stride, filter12_subpixel, pbuffer);
-  //check_buffer(buffer, pbuffer, width, height, stride);
+  run_subpixel_filter(ppixel, width, height, stride, filter12_subpixel, pbuffer);
+  check_buffer(buffer, pbuffer, width, height, stride);
 
   run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
   run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
