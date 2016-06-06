@@ -1558,12 +1558,13 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     if (cm->current_video_frame > 30 &&
         rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
         rc->avg_size_inter > (5 * rc->avg_frame_bandwidth) >> 1) {
-        rc->baseline_gf_interval = (3 * rc->baseline_gf_interval) >> 1;
+        rc->baseline_gf_interval =
+            VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
     } else if (cm->current_video_frame > 30 &&
                rc->avg_frame_low_motion < 20) {
       // Decrease boost and gf interval for high motion case.
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
-      rc->baseline_gf_interval = VPXMIN(6, rc->baseline_gf_interval >> 1);
+      rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
     }
     adjust_gf_key_frame(cpi);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
