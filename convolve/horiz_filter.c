@@ -57,10 +57,12 @@ void convolve(const uint8_t *src, int w, const int16_t *filter, int flen,
   }
 }
 
-void init_state(uint8_t *buf, uint8_t *pixel, const unsigned int random,
-                int width, int height) {
+void init_state(uint8_t *buf, uint8_t *pixel,
+                int width, int height, int stride,
+                const unsigned int random) {
+
   int row, col;
-  int block = width * height;
+  int block = HD_WIDTH * SUPER_BLOCK_HEIGHT;
 
   memset(buf, 0, sizeof(buf[0]) * block);
   memset(pixel, 0, sizeof(pixel[0]) * block);
@@ -70,13 +72,14 @@ void init_state(uint8_t *buf, uint8_t *pixel, const unsigned int random,
     for (col = 0; col < width; ++col) {
       pixel[col] = clip_pixel(rand_r(&seed) % 255);
     }
-    pixel += width;
+    pixel += stride;
   }
 }
 
 void check_buffer(const uint8_t *buf1, const uint8_t *buf2,
-                  int width, int height) {
+                  int width, int height, int stride) {
   int row, col;
+
   for (row = 0; row < height; ++row) {
     for (col = 0; col < width; ++col) {
       if (buf1[col] != buf2[col]) {
@@ -85,8 +88,8 @@ void check_buffer(const uint8_t *buf1, const uint8_t *buf2,
         return;
       }
     }
-    buf1 += width;
-    buf2 += width;
+    buf1 += stride;
+    buf2 += stride;
   }
 }
 
@@ -252,7 +255,7 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
 
 // Testing wrapper functions
 
-void run_prototype_filter(uint8_t *src, int width, int height,
+void run_prototype_filter(uint8_t *src, int width, int height, int stride,
                           const int16_t *filter, int flen, uint8_t *dst) {
   uint32_t start, end;
   int count = 0;
@@ -260,8 +263,8 @@ void run_prototype_filter(uint8_t *src, int width, int height,
   start = readtsc();
   do {
     convolve(src, width, filter, flen, dst);
-    src += width;
-    dst += width;
+    src += stride;
+    dst += stride;
     count++;
   } while (count < height);
   end = readtsc();
@@ -269,16 +272,16 @@ void run_prototype_filter(uint8_t *src, int width, int height,
   printf("C version cycles:\t%d\n", end - start);
 }
 
-void run_target_filter(uint8_t *src, struct Filter filter,
-                       int width, int height, uint8_t *dst) {
+void run_target_filter(uint8_t *src, int width, int height, int stride,
+                       struct Filter filter, uint8_t *dst) {
   uint32_t start, end;
   int count = 0;
 
   start = readtsc();
   do {
     horiz_filter_ssse3(src, filter, width, dst);
-    src += width;
-    dst += width;
+    src += stride;
+    dst += stride;
     count++;
   } while (count < height);
   end = readtsc();
@@ -300,22 +303,23 @@ int main(int argc, char **argv)
   const int width = atoi(argv[2]);
   const unsigned int random_seed = atoi(argv[1]);
   const int height = 8;
+  const int stride = HD_WIDTH;
 
   uint8_t *buffer = (uint8_t *) malloc(2 * sizeof(buffer[0]) * block_size);
   uint8_t *pixel = (uint8_t *) malloc(2 * sizeof(pixel[0]) * block_size);
   uint8_t *ppixel = pixel + block_size;
   uint8_t *pbuffer = buffer + block_size;
 
-  init_state(buffer, pixel, random_seed, width, height);
-  init_state(pbuffer, ppixel, random_seed, width, height);
+  init_state(buffer, pixel, width, height, stride, random_seed);
+  init_state(pbuffer, ppixel, width, height, stride, random_seed);
 
-  run_prototype_filter(pixel, width, height, filter12, 12, buffer);
-  run_target_filter(ppixel, pfilter_12tap, width, height, pbuffer);
-  check_buffer(buffer, pbuffer, width, height);
+  run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
+  run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
+  check_buffer(buffer, pbuffer, width, height, stride);
 
-  run_prototype_filter(pixel, width, height, filter10, 10, buffer);
-  run_target_filter(ppixel, pfilter_10tap, width, height, pbuffer);
-  check_buffer(buffer, pbuffer, width, height);
+  run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
+  run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
+  check_buffer(buffer, pbuffer, width, height, stride);
 
   free(buffer);
   free(pixel);
