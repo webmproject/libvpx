@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3610821_96d02adb",
+        "filename": "vp10/common/restoration.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-06T21:39:53Z",
+      "side": 1,
+      "message": "you can remove these",
+      "revId": "4525c4ac3413f0b43b14367bd1bdac4ae97a1a18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3610821_36e95690",
+        "filename": "vp10/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-06T21:39:53Z",
+      "side": 1,
+      "message": "remove the code",
+      "revId": "4525c4ac3413f0b43b14367bd1bdac4ae97a1a18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3610821_16eeda97",
+        "filename": "vp10/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-06T21:39:53Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "4525c4ac3413f0b43b14367bd1bdac4ae97a1a18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3610821_76e3ceaf",
+        "filename": "vp10/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-06T21:39:53Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "4525c4ac3413f0b43b14367bd1bdac4ae97a1a18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3610821_b6128651",
+        "filename": "vp10/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-06T21:39:53Z",
+      "side": 1,
+      "message": "you can add the following here:\n\nrsi.restoration_type \u003d RESTORE_NONE;\nif (best_cost_ret) *best_cost_ret \u003d cost_norestore;\nvpx_yv12_copy_y(\u0026cpi-\u003elast_frame_uf, cm-\u003eframe_to_show);\nreturn 0;",
+      "revId": "4525c4ac3413f0b43b14367bd1bdac4ae97a1a18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
