@@ -106,6 +106,15 @@ static const int16_t filter10[10] __attribute__ ((aligned(16))) = {
 static const int16_t filter12_subpixel[16] __attribute__ ((aligned(16))) = {
   -1,   3,  -4,   8, -18, 120,  28, -12,   7,  -4,   2, -1, 0, 0, 0, 0};
 
+static const int8_t filter12_subpixel_ns[6][16] __attribute__ ((aligned(16))) = {
+  {-1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3},
+  {-4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8},
+  {-18, 120, -18, 120, -18, 120, -18, 120, -18, 120, -18, 120, -18, 120, -18, 120},
+  {28, -12, 28, -12, 28, -12, 28, -12, 28, -12, 28, -12, 28, -12, 28, -12},
+  {7, -4, 7, -4, 7, -4, 7, -4, 7, -4, 7, -4, 7, -4, 7, -4},
+  {2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1},
+};
+
 const int8_t pfilter12[2][16] __attribute__ ((aligned(16))) = {
   {-1,  3, -4,  8, -18, 120,  28, -12,   7,  -4,   2,  -1,  0,  0,  0,  0},
   { 0,  0, -1,  3,  -4,   8, -18, 120,  28, -12,   7,  -4,  2, -1,  0,  0},
@@ -291,7 +300,7 @@ void run_target_filter(uint8_t *src, int width, int height, int stride,
   } while (count < height);
   end = readtsc();
 
-  printf("SIMD version cycles:\t%d\n\n", end - start);
+  printf("SIMD HorizP cycles:\t%d\n\n", end - start);
 }
 
 // sub-pixel 4x4 method
@@ -323,12 +332,12 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   const __m128i f_values = _mm_load_si128((const __m128i *)filter);
   const __m128i f_values2 = _mm_load_si128((const __m128i *)(filter + 8));
   // pack and duplicate the filter values
-  const __m128i f1f0 = _mm_shuffle_epi8(f_values, _mm_set1_epi16(0x0200u));
-  const __m128i f3f2 = _mm_shuffle_epi8(f_values, _mm_set1_epi16(0x0604u));
-  const __m128i f5f4 = _mm_shuffle_epi8(f_values, _mm_set1_epi16(0x0a08u));
-  const __m128i f7f6 = _mm_shuffle_epi8(f_values, _mm_set1_epi16(0x0e0cu));
-  const __m128i f9f8 = _mm_shuffle_epi8(f_values2, _mm_set1_epi16(0x0200u));
-  const __m128i fbfa = _mm_shuffle_epi8(f_values2, _mm_set1_epi16(0x0604u));
+  const __m128i f1f0 = *((__m128i *)&filter12_subpixel_ns[0][0]);
+  const __m128i f3f2 = *((__m128i *)&filter12_subpixel_ns[1][0]);
+  const __m128i f5f4 = *((__m128i *)&filter12_subpixel_ns[2][0]);
+  const __m128i f7f6 = *((__m128i *)&filter12_subpixel_ns[3][0]);
+  const __m128i f9f8 = *((__m128i *)&filter12_subpixel_ns[4][0]);
+  const __m128i fbfa = *((__m128i *)&filter12_subpixel_ns[5][0]);
   const __m128i A = _mm_loadu_si128((const __m128i *)src_ptr);
   const __m128i B = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch));
   const __m128i C = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 2));
@@ -419,7 +428,7 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
   } while (count < block_height);
   end = readtsc();
 
-  printf("SIMD version cycles:\t%d\n\n", end - start);
+  printf("SIMD Horiz4 cycles:\t%d\n\n", end - start);
 }
 
 int main(int argc, char **argv)
