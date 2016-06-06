@@ -10,25 +10,25 @@
 
 #include <assert.h>
 
-#include "./bitwriter.h"
+#include "./dkboolwriter.h"
 
-void aom_start_encode(aom_writer *br, uint8_t *source) {
+void aom_dk_start_encode(aom_dk_writer *br, uint8_t *source) {
   br->lowvalue = 0;
   br->range = 255;
   br->count = -24;
   br->buffer = source;
   br->pos = 0;
-  aom_write_bit(br, 0);
+  aom_dk_write_bit(br, 0);
 }
 
-void aom_stop_encode(aom_writer *br) {
+void aom_dk_stop_encode(aom_dk_writer *br) {
   int i;
 
 #if CONFIG_BITSTREAM_DEBUG
   bitstream_queue_set_skip_write(1);
 #endif  // CONFIG_BITSTREAM_DEBUG
 
-  for (i = 0; i < 32; i++) aom_write_bit(br, 0);
+  for (i = 0; i < 32; i++) aom_dk_write_bit(br, 0);
 
 #if CONFIG_BITSTREAM_DEBUG
   bitstream_queue_set_skip_write(0);

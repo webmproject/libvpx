@@ -22,7 +22,8 @@ DSP_SRCS-yes += prob.c
 
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes += bitwriter.h
-DSP_SRCS-yes += bitwriter.c
+DSP_SRCS-yes += dkboolwriter.h
+DSP_SRCS-yes += dkboolwriter.c
 DSP_SRCS-yes += bitwriter_buffer.c
 DSP_SRCS-yes += bitwriter_buffer.h
 DSP_SRCS-yes += psnr.c
@@ -35,7 +36,8 @@ endif
 
 ifeq ($(CONFIG_DECODERS),yes)
 DSP_SRCS-yes += bitreader.h
-DSP_SRCS-yes += bitreader.c
+DSP_SRCS-yes += dkboolreader.h
+DSP_SRCS-yes += dkboolreader.c
 DSP_SRCS-yes += bitreader_buffer.c
 DSP_SRCS-yes += bitreader_buffer.h
 endif
