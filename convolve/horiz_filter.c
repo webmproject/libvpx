@@ -230,12 +230,21 @@ void horiz_w64_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
   horiz_w32_ssse3(src, f, tapsNum, buf);
 }
 
-void (*horizTab[5])(const uint8_t *, const __m128i *, int, uint8_t *) = {
+void horiz_w128_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                      uint8_t *buf) {
+  horiz_w64_ssse3(src, f, tapsNum, buf);
+  src += 64;
+  buf += 64;
+  horiz_w64_ssse3(src, f, tapsNum, buf);
+}
+
+void (*horizTab[6])(const uint8_t *, const __m128i *, int, uint8_t *) = {
    horiz_w4_ssse3,
    horiz_w8_ssse3,
    horiz_w16_ssse3,
    horiz_w32_ssse3,
    horiz_w64_ssse3,
+   horiz_w128_ssse3,
 };
 
 void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
@@ -261,6 +270,9 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
       break;
     case 64:
       horizTab[4](src, f, fData.tapsNum, buffer);
+      break;
+    case 128:
+      horizTab[5](src, f, fData.tapsNum, buffer);
       break;
     default:
       assert(0);
