@@ -102,10 +102,7 @@ static const int16_t filter10[10] __attribute__ ((aligned(16))) = {
 
 // SSSE3
 
-// for subpixel method
-static const int16_t filter12_subpixel[16] __attribute__ ((aligned(16))) = {
-  -1,   3,  -4,   8, -18, 120,  28, -12,   7,  -4,   2, -1, 0, 0, 0, 0};
-
+// for Horiz4 method (subpixel)
 static const int8_t filter12_subpixel_ns[6][16] __attribute__ ((aligned(16))) = {
   {-1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3},
   {-4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8},
@@ -115,11 +112,14 @@ static const int8_t filter12_subpixel_ns[6][16] __attribute__ ((aligned(16))) = 
   {2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1},
 };
 
+// for HorizP method
+// 12-tap filter
 const int8_t pfilter12[2][16] __attribute__ ((aligned(16))) = {
   {-1,  3, -4,  8, -18, 120,  28, -12,   7,  -4,   2,  -1,  0,  0,  0,  0},
   { 0,  0, -1,  3,  -4,   8, -18, 120,  28, -12,   7,  -4,  2, -1,  0,  0},
 };
 
+// 10-tap filter
 const int8_t pfilter10[2][16] __attribute__ ((aligned(16))) = {
   {0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0, 0, 0},
   {0, 0, 0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0},
@@ -128,15 +128,14 @@ const int8_t pfilter10[2][16] __attribute__ ((aligned(16))) = {
 struct Filter {
   const int8_t (*coeffs)[16];
   int tapsNum;
-  int signalSpan;
 };
 
 const struct Filter pfilter_12tap = {
-  pfilter12, 12, 5
+  pfilter12, 12
 };
 
 const struct Filter pfilter_10tap = {
-  pfilter10, 10, 7
+  pfilter10, 10
 };
 
 void inline transpose_4x8(const __m128i *in, __m128i *out) {
@@ -279,42 +278,6 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
   }
 }
 
-// Testing wrapper functions
-
-void run_prototype_filter(uint8_t *src, int width, int height, int stride,
-                          const int16_t *filter, int flen, uint8_t *dst) {
-  uint32_t start, end;
-  int count = 0;
-
-  start = readtsc();
-  do {
-    convolve(src, width, filter, flen, dst);
-    src += stride;
-    dst += stride;
-    count++;
-  } while (count < height);
-  end = readtsc();
-
-  printf("C version cycles:\t%d\n", end - start);
-}
-
-void run_target_filter(uint8_t *src, int width, int height, int stride,
-                       struct Filter filter, uint8_t *dst) {
-  uint32_t start, end;
-  int count = 0;
-
-  start = readtsc();
-  do {
-    horiz_filter_ssse3(src, filter, width, dst);
-    src += stride;
-    dst += stride;
-    count++;
-  } while (count < height);
-  end = readtsc();
-
-  printf("SIMD HorizP cycles:\t%d\n\n", end - start);
-}
-
 // sub-pixel 4x4 method
 static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
                                 uint8_t *dst, ptrdiff_t dst_stride) {
@@ -411,11 +374,45 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   *(int *)dst = _mm_cvtsi128_si32(temp);
 }
 
+// Testing wrapper functions
+
+void run_prototype_filter(uint8_t *src, int width, int height, int stride,
+                          const int16_t *filter, int flen, uint8_t *dst) {
+  uint32_t start, end;
+  int count = 0;
+
+  start = readtsc();
+  do {
+    convolve(src, width, filter, flen, dst);
+    src += stride;
+    dst += stride;
+    count++;
+  } while (count < height);
+  end = readtsc();
+
+  printf("C version cycles:\t%d\n", end - start);
+}
+
+void run_target_filter(uint8_t *src, int width, int height, int stride,
+                       struct Filter filter, uint8_t *dst) {
+  uint32_t start, end;
+  int count = 0;
+
+  start = readtsc();
+  do {
+    horiz_filter_ssse3(src, filter, width, dst);
+    src += stride;
+    dst += stride;
+    count++;
+  } while (count < height);
+  end = readtsc();
+
+  printf("SIMD HorizP cycles:\t%d\n\n", end - start);
+}
+
+// for Horiz4 method (subpixel)
 void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
                          const int16_t *filter, uint8_t *dst) {
-  assert(0 == width % 4);
-  assert(0 == height % 4);
-
   uint8_t temp[4 * 4] __attribute__ ((aligned(16)));
   uint8_t *src_ptr = src;
   uint32_t start, end;
@@ -441,21 +438,25 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
   printf("SIMD Horiz4 cycles:\t%d\n\n", end - start);
 }
 
+// Test driver main()
 int main(int argc, char **argv)
 {
   // We simulate HD width (1920) and max super block height (128)
   const size_t block_size = HD_WIDTH * SUPER_BLOCK_HEIGHT;
 
-  if (argc != 3) {
-    printf("Usage: filtering <seed> <width>\n");
-    printf("width = 4, 8, 16, 32, 64. seed = random seed number.\n");
+  if (argc != 4) {
+    printf("Usage: filtering <seed> <width> <height>\n");
+    printf("width/height = 4, 8, 16, 32, 64, 128, seed = random seed number.\n");
     return -1;
   }
 
   const int width = atoi(argv[2]);
   const unsigned int random_seed = atoi(argv[1]);
-  const int height = 8;
+  const int height = atoi(argv[3]);
   const int stride = HD_WIDTH;
+
+  assert(0 == width % 4);
+  assert(0 == height % 4);
 
   uint8_t *buffer = (uint8_t *) malloc(2 * sizeof(buffer[0]) * block_size);
   uint8_t *pixel = (uint8_t *) malloc(2 * sizeof(pixel[0]) * block_size);
