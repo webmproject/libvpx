@@ -87,16 +87,26 @@ VP9_INSTANTIATE_TEST_CASE(ActiveMapTest,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(0, 9));
 #if CONFIG_VP10
-// The new variance based partitioning scheme is incompatible with
-// SEGMENT_LEVEL_SKIP, so tests using cpu-used 6 or higher (and hence
-// using variance based paritioning) are disabled for now.
-
-// Temporarily disable all tests
+#if CONFIG_SUPERTX
 INSTANTIATE_TEST_CASE_P(
     DISABLED_VP10, ActiveMapTest,
     ::testing::Combine(
         ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
             &libvpx_test::kVP10)),
         ::testing::Values(::libvpx_test::kRealTime), ::testing::Range(0, 9)));
+#else
+VP10_INSTANTIATE_TEST_CASE(ActiveMapTest,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Range(0, 6));
+
+// The new variance based partitioning scheme is incompatible with
+// SEGMENT_LEVEL_SKIP.
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_VP10, ActiveMapTest,
+    ::testing::Combine(
+        ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
+            &libvpx_test::kVP10)),
+        ::testing::Values(::libvpx_test::kRealTime), ::testing::Range(6, 9)));
+#endif  // CONFIG_SUPERTX
 #endif  // CONFIG_VP10
 }  // namespace
