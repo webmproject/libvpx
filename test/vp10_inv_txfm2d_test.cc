@@ -108,47 +108,50 @@ class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
 
 TEST_P(VP10InvTxfm2d, RunRoundtripCheck) { RunRoundtripCheck(); }
 
+const VP10InvTxfm2dParam vp10_inv_txfm2d_param[] = {
+#if CONFIG_EXT_TX
+  VP10InvTxfm2dParam(FLIPADST_DCT, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(DCT_FLIPADST, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(ADST_FLIPADST, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(FLIPADST_ADST, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(FLIPADST_DCT, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(DCT_FLIPADST, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(ADST_FLIPADST, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(FLIPADST_ADST, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(FLIPADST_DCT, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(DCT_FLIPADST, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_16X16, 11, 0.04),
+  VP10InvTxfm2dParam(ADST_FLIPADST, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(FLIPADST_ADST, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(FLIPADST_DCT, TX_32X32, 4, 0.4),
+  VP10InvTxfm2dParam(DCT_FLIPADST, TX_32X32, 4, 0.4),
+  VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_32X32, 4, 0.4),
+  VP10InvTxfm2dParam(ADST_FLIPADST, TX_32X32, 4, 0.4),
+  VP10InvTxfm2dParam(FLIPADST_ADST, TX_32X32, 4, 0.4),
+#endif
+  VP10InvTxfm2dParam(DCT_DCT, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(ADST_DCT, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(DCT_ADST, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(ADST_ADST, TX_4X4, 2, 0.002),
+  VP10InvTxfm2dParam(DCT_DCT, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(ADST_DCT, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(DCT_ADST, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(ADST_ADST, TX_8X8, 2, 0.02),
+  VP10InvTxfm2dParam(DCT_DCT, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(ADST_DCT, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(DCT_ADST, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(ADST_ADST, TX_16X16, 2, 0.04),
+  VP10InvTxfm2dParam(DCT_DCT, TX_32X32, 4, 0.4),
+  VP10InvTxfm2dParam(ADST_DCT, TX_32X32, 4, 0.4),
+  VP10InvTxfm2dParam(DCT_ADST, TX_32X32, 4, 0.4),
+  VP10InvTxfm2dParam(ADST_ADST, TX_32X32, 4, 0.4)
+};
+
 INSTANTIATE_TEST_CASE_P(
     C, VP10InvTxfm2d,
-    ::testing::Values(
-#if CONFIG_EXT_TX
-        VP10InvTxfm2dParam(FLIPADST_DCT, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(DCT_FLIPADST, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(ADST_FLIPADST, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(FLIPADST_ADST, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(FLIPADST_DCT, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(DCT_FLIPADST, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(ADST_FLIPADST, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(FLIPADST_ADST, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(FLIPADST_DCT, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(DCT_FLIPADST, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_16X16, 11, 0.04),
-        VP10InvTxfm2dParam(ADST_FLIPADST, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(FLIPADST_ADST, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(FLIPADST_DCT, TX_32X32, 4, 0.4),
-        VP10InvTxfm2dParam(DCT_FLIPADST, TX_32X32, 4, 0.4),
-        VP10InvTxfm2dParam(FLIPADST_FLIPADST, TX_32X32, 4, 0.4),
-        VP10InvTxfm2dParam(ADST_FLIPADST, TX_32X32, 4, 0.4),
-        VP10InvTxfm2dParam(FLIPADST_ADST, TX_32X32, 4, 0.4),
-#endif
-        VP10InvTxfm2dParam(DCT_DCT, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(ADST_DCT, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(DCT_ADST, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(ADST_ADST, TX_4X4, 2, 0.002),
-        VP10InvTxfm2dParam(DCT_DCT, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(ADST_DCT, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(DCT_ADST, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(ADST_ADST, TX_8X8, 2, 0.02),
-        VP10InvTxfm2dParam(DCT_DCT, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(ADST_DCT, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(DCT_ADST, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(ADST_ADST, TX_16X16, 2, 0.04),
-        VP10InvTxfm2dParam(DCT_DCT, TX_32X32, 4, 0.4),
-        VP10InvTxfm2dParam(ADST_DCT, TX_32X32, 4, 0.4),
-        VP10InvTxfm2dParam(DCT_ADST, TX_32X32, 4, 0.4),
-        VP10InvTxfm2dParam(ADST_ADST, TX_32X32, 4, 0.4)));
+    ::testing::ValuesIn(vp10_inv_txfm2d_param));
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 

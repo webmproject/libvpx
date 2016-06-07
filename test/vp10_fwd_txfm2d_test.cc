@@ -132,48 +132,50 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
 TEST_P(VP10FwdTxfm2d, RunFwdAccuracyCheck) {
   RunFwdAccuracyCheck();
 }
+const VP10FwdTxfm2dParam vp10_fwd_txfm2d_param_c[] = {
+#if CONFIG_EXT_TX
+  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(ADST_FLIPADST, TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(FLIPADST_ADST, TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(ADST_FLIPADST, TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(FLIPADST_ADST, TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(ADST_FLIPADST, TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(FLIPADST_ADST, TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(ADST_FLIPADST, TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(FLIPADST_ADST, TX_32X32, 70, 7),
+#endif
+  VP10FwdTxfm2dParam(DCT_DCT,   TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(ADST_DCT,  TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(DCT_ADST,  TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(ADST_ADST, TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(DCT_DCT,   TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(ADST_DCT,  TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(DCT_ADST,  TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(ADST_ADST, TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(DCT_DCT,   TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(ADST_DCT,  TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(DCT_ADST,  TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(ADST_ADST, TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(DCT_DCT,   TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(ADST_DCT,  TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(DCT_ADST,  TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(ADST_ADST, TX_32X32, 70, 7)
+};
 
 INSTANTIATE_TEST_CASE_P(
     C, VP10FwdTxfm2d,
-    ::testing::Values(
-#if CONFIG_EXT_TX
-        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_32X32, 70, 7),
-        VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_32X32, 70, 7),
-        VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_32X32, 70, 7),
-        VP10FwdTxfm2dParam(ADST_FLIPADST, TX_32X32, 70, 7),
-        VP10FwdTxfm2dParam(FLIPADST_ADST, TX_32X32, 70, 7),
-#endif
-        VP10FwdTxfm2dParam(DCT_DCT,   TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(ADST_DCT,  TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(DCT_ADST,  TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(ADST_ADST, TX_4X4, 2, 0.2),
-        VP10FwdTxfm2dParam(DCT_DCT,   TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(ADST_DCT,  TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(DCT_ADST,  TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(ADST_ADST, TX_8X8, 5, 0.6),
-        VP10FwdTxfm2dParam(DCT_DCT,   TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(ADST_DCT,  TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(DCT_ADST,  TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(ADST_ADST, TX_16X16, 11, 1.5),
-        VP10FwdTxfm2dParam(DCT_DCT,   TX_32X32, 70, 7),
-        VP10FwdTxfm2dParam(ADST_DCT,  TX_32X32, 70, 7),
-        VP10FwdTxfm2dParam(DCT_ADST,  TX_32X32, 70, 7),
-        VP10FwdTxfm2dParam(ADST_ADST, TX_32X32, 70, 7)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+    ::testing::ValuesIn(vp10_fwd_txfm2d_param_c));
 
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace
