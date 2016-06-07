@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83c4707e_427d6802",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3537,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-07T23:29:29Z",
+      "side": 1,
+      "message": "select_tx_type_yrd() is used only for inter blocks, right? If so, we may remove the redundant codes in here.",
+      "range": {
+        "startLine": 3537,
+        "startChar": 8,
+        "endLine": 3537,
+        "endChar": 16
+      },
+      "revId": "33dafdb58b35c7710aeb6f66e62a2a5a85183e38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
