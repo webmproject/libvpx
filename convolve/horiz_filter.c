@@ -321,8 +321,9 @@ static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
 }
 
 static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
-                                  uint8_t *dst, const struct Filter filter) {
+                                  __m128i *f, int tapsNum, uint8_t *dst) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
+#if 0
   // pack and duplicate the filter values
   const __m128i f1f0 = *((__m128i *)(filter.coeffs + 0));
   const __m128i f3f2 = *((__m128i *)(filter.coeffs + 1));
@@ -330,7 +331,8 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   const __m128i f7f6 = *((__m128i *)(filter.coeffs + 3));
   const __m128i f9f8 = *((__m128i *)(filter.coeffs + 4));
   const __m128i fbfa = *((__m128i *)(filter.coeffs + 5));
-  if (filter.tapsNum == 10) {
+#endif
+  if (tapsNum == 10) {
     src_ptr -= 1;
   }
   const __m128i A = _mm_loadu_si128((const __m128i *)src_ptr);
@@ -373,12 +375,12 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   const __m128i sbsa = _mm_srli_si128(s9s8, 8);
 
   // multiply 2 adjacent elements with the filter and add the result
-  const __m128i x0 = _mm_maddubs_epi16(s1s0, f1f0);
-  const __m128i x1 = _mm_maddubs_epi16(s3s2, f3f2);
-  const __m128i x2 = _mm_maddubs_epi16(s5s4, f5f4);
-  const __m128i x3 = _mm_maddubs_epi16(s7s6, f7f6);
-  const __m128i x4 = _mm_maddubs_epi16(s9s8, f9f8);
-  const __m128i x5 = _mm_maddubs_epi16(sbsa, fbfa);
+  const __m128i x0 = _mm_maddubs_epi16(s1s0, f[0]);
+  const __m128i x1 = _mm_maddubs_epi16(s3s2, f[1]);
+  const __m128i x2 = _mm_maddubs_epi16(s5s4, f[2]);
+  const __m128i x3 = _mm_maddubs_epi16(s7s6, f[3]);
+  const __m128i x4 = _mm_maddubs_epi16(s9s8, f[4]);
+  const __m128i x5 = _mm_maddubs_epi16(sbsa, f[5]);
   // add and saturate the results together
   const __m128i min_x2x3 = _mm_min_epi16(x2, x3);
   const __m128i max_x2x3 = _mm_max_epi16(x2, x3);
@@ -436,17 +438,31 @@ void run_target_filter(uint8_t *src, int width, int height, int stride,
 void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
                          const struct Filter filter, uint8_t *dst) {
   uint8_t temp[4 * 4] __attribute__ ((aligned(16)));
-  uint8_t *src_ptr = src;
+  __m128i f[6];
+  int tapsNum;
+  uint8_t *src_ptr;
   uint32_t start, end;
-  int count = 0;
-  int block_height = height >> 2;
+  int count;
+  int block_height;
   int col, i;
 
   start = readtsc();
+
+  tapsNum = filter.tapsNum;
+  count = 0;
+  block_height = height >> 2;
+  src_ptr = src;
+  f[0] = *((__m128i *)(filter.coeffs));
+  f[1] = *((__m128i *)(filter.coeffs + 1));
+  f[2] = *((__m128i *)(filter.coeffs + 2));
+  f[3] = *((__m128i *)(filter.coeffs + 3));
+  f[4] = *((__m128i *)(filter.coeffs + 4));
+  f[5] = *((__m128i *)(filter.coeffs + 5));
+
   do {
     for (col = 0; col < width; col += 4) {
       for (i = 0; i < 4; ++i) {
-        filter_horiz_w4_ssse3(src_ptr, stride, temp + (i * 4), filter);
+        filter_horiz_w4_ssse3(src_ptr, stride, f, tapsNum, temp + (i * 4));
         src_ptr += 1;
       }
       transpose4x4_to_dst(temp, 4, dst + col, stride);
