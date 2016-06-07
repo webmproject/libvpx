@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83c4707e_d9b5f3da",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-07T16:49:04Z",
+      "side": 1,
+      "message": "Please don\u0027t. If the problem is ref-mv disable it under those conditions and file a bug. But it looks like ref-mv was fixed.",
+      "range": {
+        "startLine": 90,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 32
+      },
+      "revId": "6c4306c27d6a1b6e08a710633c1789ac1188cff6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
