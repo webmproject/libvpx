@@ -552,8 +552,8 @@ void run_target_filter(uint8_t *src, int width, int height, int stride,
 }
 
 // for Horiz4 method (subpixel)
-void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
-                         const struct Filter filter, uint8_t *dst) {
+void run_subpixel_v4p_filter(uint8_t *src, int width, int height, int stride,
+                             const struct Filter filter, uint8_t *dst) {
   uint8_t temp[4 * 4] __attribute__ ((aligned(16)));
   __m128i f[6];
   int tapsNum;
@@ -594,8 +594,8 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
 }
 
 // for Horiz8 method (subpixel)
-void run_subpixel_8_filter(uint8_t *src, int width, int height, int stride,
-                           const struct Filter filter, uint8_t *dst) {
+void run_subpixel_v8p_filter(uint8_t *src, int width, int height, int stride,
+                             const struct Filter filter, uint8_t *dst) {
   uint8_t temp[8 * 8] __attribute__ ((aligned(16)));
   __m128i f[6];
   int tapsNum;
@@ -664,36 +664,44 @@ int main(int argc, char **argv)
   init_state(pbuffer, ppixel, 8 + width, height, stride, random_seed);
 
   if (width >= 8 && height >= 8) {
-    run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
-    run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
-    check_buffer(buffer, pbuffer, width, height, stride);
-
-    run_subpixel_8_filter(ppixel, width, height, stride,
-      pfilter_12tap_subpixel, pbuffer);
-    check_buffer(buffer, pbuffer, width, height, stride);
-
     run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
     run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
     check_buffer(buffer, pbuffer, width, height, stride);
 
-    run_subpixel_8_filter(ppixel, width, height, stride,
+    run_subpixel_v4p_filter(ppixel, width, height, stride,
       pfilter_10tap_subpixel, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+
+    run_subpixel_v8p_filter(ppixel, width, height, stride,
+      pfilter_10tap_subpixel, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+
+    run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
+    run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+
+    run_subpixel_v4p_filter(ppixel, width, height, stride,
+      pfilter_12tap_subpixel, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+
+    run_subpixel_v8p_filter(ppixel, width, height, stride,
+      pfilter_12tap_subpixel, pbuffer);
     check_buffer(buffer, pbuffer, width, height, stride);
   } else {
     run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
     run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
     check_buffer(buffer, pbuffer, width, height, stride);
 
-    run_subpixel_filter(ppixel, width, height, stride,
-                        pfilter_12tap_subpixel, pbuffer);
+    run_subpixel_v4p_filter(ppixel, width, height, stride,
+                            pfilter_12tap_subpixel, pbuffer);
     check_buffer(buffer, pbuffer, width, height, stride);
 
     run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
     run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
     check_buffer(buffer, pbuffer, width, height, stride);
 
-    run_subpixel_filter(ppixel, width, height, stride,
-                        pfilter_10tap_subpixel, pbuffer);
+    run_subpixel_v4p_filter(ppixel, width, height, stride,
+                            pfilter_10tap_subpixel, pbuffer);
     check_buffer(buffer, pbuffer, width, height, stride);
   }
 
