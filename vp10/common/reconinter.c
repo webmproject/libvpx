@@ -490,7 +490,7 @@ static void build_masked_compound_wedge_extend_highbd(
   vpx_highbd_blend_mask6(dst_8, dst_stride,
                          src0_8, src0_stride,
                          src1_8, src1_stride,
-                         mask, bw,
+                         mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
