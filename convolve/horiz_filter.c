@@ -338,8 +338,9 @@ static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
   *(int *)(dst + dst_stride * 3) =  _mm_cvtsi128_si32(D);
 }
 
-static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
-                                  __m128i *f, int tapsNum, uint8_t *dst) {
+// Vertical 4-pixel parallel
+static void filter_horiz_v4p_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
+                                   __m128i *f, int tapsNum, uint8_t *dst) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
   if (tapsNum == 10) {
     src_ptr -= 1;
@@ -440,7 +441,7 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
   do {
     for (col = 0; col < width; col += 4) {
       for (i = 0; i < 4; ++i) {
-        filter_horiz_w4_ssse3(src_ptr, stride, f, tapsNum, temp + (i * 4));
+        filter_horiz_v4p_ssse3(src_ptr, stride, f, tapsNum, temp + (i * 4));
         src_ptr += 1;
       }
       transpose4x4_to_dst(temp, 4, dst + col, stride);
