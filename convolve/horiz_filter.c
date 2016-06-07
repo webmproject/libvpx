@@ -341,15 +341,6 @@ static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
 static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
                                   __m128i *f, int tapsNum, uint8_t *dst) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
-#if 0
-  // pack and duplicate the filter values
-  const __m128i f1f0 = *((__m128i *)(filter.coeffs + 0));
-  const __m128i f3f2 = *((__m128i *)(filter.coeffs + 1));
-  const __m128i f5f4 = *((__m128i *)(filter.coeffs + 2));
-  const __m128i f7f6 = *((__m128i *)(filter.coeffs + 3));
-  const __m128i f9f8 = *((__m128i *)(filter.coeffs + 4));
-  const __m128i fbfa = *((__m128i *)(filter.coeffs + 5));
-#endif
   if (tapsNum == 10) {
     src_ptr -= 1;
   }
@@ -357,23 +348,9 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   const __m128i B = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch));
   const __m128i C = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 2));
   const __m128i D = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 3));
+
   // TRANSPOSE...
-  // 00 01 02 03 04 05 06 07
-  // 10 11 12 13 14 15 16 17
-  // 20 21 22 23 24 25 26 27
-  // 30 31 32 33 34 35 36 37
-  //
-  // TO
-  //
-  // 00 10 20 30
-  // 01 11 21 31
-  // 02 12 22 32
-  // 03 13 23 33
-  // 04 14 24 34
-  // 05 15 25 35
-  // 06 16 26 36
-  // 07 17 27 37
-  //
+  // Vecotor represents column pixel pairs instead of a row
   // 00 01 10 11 02 03 12 13 04 05 14 15 06 07 16 17
   __m128i tr0_0 = _mm_unpacklo_epi16(A, B);
   // 20 21 30 31 22 23 32 33 24 25 34 35 26 27 36 37
@@ -504,7 +481,7 @@ int main(int argc, char **argv)
 
   init_state(buffer, pixel, 8 + width, height, stride, random_seed);
   init_state(pbuffer, ppixel, 8 + width, height, stride, random_seed);
-#if 1
+
   run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
   run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
@@ -512,7 +489,7 @@ int main(int argc, char **argv)
   run_subpixel_filter(ppixel, width, height, stride,
                       pfilter_12tap_subpixel, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
-#endif
+
   run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
   run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
