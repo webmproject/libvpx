@@ -317,6 +317,9 @@ void vp10_choose_segmap_coding_method(VP10_COMMON *cm, MACROBLOCKD *xd) {
 
   (void) xd;
 
+  // We are about to recompute all the segment counts, so zero the accumulators.
+  vp10_zero(cm->counts.seg);
+
   // First of all generate stats regarding how well the last segment map
   // predicts this one
   for (tile_row = 0; tile_row < cm->tile_rows; tile_row++) {
