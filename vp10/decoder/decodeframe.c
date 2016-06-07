@@ -1785,9 +1785,10 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
     if (!skip) {
       int eobtotal = 0;
-      MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+      MB_MODE_INFO *mbmi;
       set_offsets_topblock(cm, xd, tile, bsize, mi_row, mi_col);
-      xd->mi[0]->mbmi.tx_type = txfm;
+      mbmi = &xd->mi[0]->mbmi;
+      mbmi->tx_type = txfm;
       for (i = 0; i < MAX_MB_PLANE; ++i) {
         const struct macroblockd_plane *const pd = &xd->plane[i];
         const int num_4x4_w = pd->n4_w;
