@@ -297,6 +297,24 @@ void horiz_filter_ssse3(const uint8_t *src, const struct Filter fData,
   }
 }
 
+// C prototype wrapper function
+void run_prototype_filter(uint8_t *src, int width, int height, int stride,
+                          const int16_t *filter, int flen, uint8_t *dst) {
+  uint32_t start, end;
+  int count = 0;
+
+  start = readtsc();
+  do {
+    convolve(src, width, filter, flen, dst);
+    src += stride;
+    dst += stride;
+    count++;
+  } while (count < height);
+  end = readtsc();
+
+  printf("C version cycles:\t%d\n", end - start);
+}
+
 // sub-pixel 4x4 method
 static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
                                 uint8_t *dst, ptrdiff_t dst_stride) {
@@ -399,23 +417,6 @@ static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
 }
 
 // Testing wrapper functions
-
-void run_prototype_filter(uint8_t *src, int width, int height, int stride,
-                          const int16_t *filter, int flen, uint8_t *dst) {
-  uint32_t start, end;
-  int count = 0;
-
-  start = readtsc();
-  do {
-    convolve(src, width, filter, flen, dst);
-    src += stride;
-    dst += stride;
-    count++;
-  } while (count < height);
-  end = readtsc();
-
-  printf("C version cycles:\t%d\n", end - start);
-}
 
 void run_target_filter(uint8_t *src, int width, int height, int stride,
                        struct Filter filter, uint8_t *dst) {
