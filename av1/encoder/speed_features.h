@@ -410,11 +410,6 @@ typedef struct SPEED_FEATURES {
   // higher than the best rd we've seen so far.
   int use_rd_breakout;
 
-  // This enables us to use an estimate for intra rd based on dc mode rather
-  // than choosing an actual uv mode in the stage of encoding before the actual
-  // final encode.
-  int use_uv_intra_rd_estimate;
-
   // This feature controls how the loop filter level is determined.
   LPF_PICK_METHOD lpf_pick;
 

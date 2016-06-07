@@ -332,7 +332,6 @@ static void set_rt_speed_feature(AV1_COMP *cpi, SPEED_FEATURES *sf, int speed,
   if (speed >= 3) {
     sf->use_square_partition_only = 1;
     sf->disable_filter_search_var_thresh = 100;
-    sf->use_uv_intra_rd_estimate = 1;
     sf->mv.subpel_iters_per_step = 1;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
@@ -528,7 +527,6 @@ void av1_set_speed_features_framesize_independent(AV1_COMP *cpi) {
     sf->intra_uv_mode_mask[i] = INTRA_ALL;
   }
   sf->use_rd_breakout = 0;
-  sf->use_uv_intra_rd_estimate = 0;
   sf->lpf_pick = LPF_PICK_FROM_FULL_IMAGE;
   sf->use_fast_coef_updates = TWO_LOOP;
   sf->use_fast_coef_costing = 0;
