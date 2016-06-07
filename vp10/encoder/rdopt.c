@@ -3534,6 +3534,10 @@ static void select_tx_type_yrd(const VP10_COMP *cpi, MACROBLOCK *x,
         !do_tx_type_search(tx_type, prune))
       continue;
 #endif  // CONFIG_EXT_TX
+    if (is_inter && x->use_default_inter_tx_type &&
+        tx_type != get_default_tx_type(0, xd, 0, max_tx_size))
+      continue;
+
     rd = select_tx_size_fix_type(cpi, x, &this_rate, &this_dist, &this_skip,
                                  &this_sse, bsize, ref_best_rd, tx_type);
 
