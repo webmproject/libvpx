@@ -4627,7 +4627,8 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   int flags = VP9_REFFRAME_ALL;
 
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-  if (!cpi->rc.is_bwd_ref_frame)
+  // Disable the use of BWDREF_FRAME for non-bipredictive frames.
+  if (!(cpi->rc.is_bipred_frame || cpi->rc.is_last_bipred_frame))
     flags &= ~VP9_BWD_FLAG;
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
@@ -4842,6 +4843,14 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   set_arf_sign_bias(cpi);
 
 #if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  // NOTE:
+  // (1) Move the setup of the ref_frame_flags upfront as it would be
+  //     determined by the current frame properties;
+  // (2) The setup of the ref_frame_flags applies to both show_existing_frame's
+  //     and the other cases.
+  if (cm->current_video_frame > 0)
+    cpi->ref_frame_flags = get_ref_frame_flags(cpi);
+
   if (cm->show_existing_frame) {
     // NOTE(zoeliu): In BIDIR_PRED, the existing frame to show is the current
     //               BWDREF_FRAME in the reference frame buffer.
@@ -5062,7 +5071,9 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     cpi->frame_flags &= ~FRAMEFLAGS_BWDREF;
 #endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
 
+#if CONFIG_EXT_REFS || !CONFIG_BIDIR_PRED
   cpi->ref_frame_flags = get_ref_frame_flags(cpi);
+#endif  // CONFIG_EXT_REFS || !CONFIG_BIDIR_PRED
 
 #if CONFIG_EXT_REFS
   cm->last3_frame_type = cm->last2_frame_type;
