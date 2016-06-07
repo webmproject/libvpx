@@ -102,7 +102,13 @@ static const int16_t filter10[10] __attribute__ ((aligned(16))) = {
 
 // SSSE3
 
+struct Filter {
+  const int8_t (*coeffs)[16];
+  int tapsNum;
+};
+
 // for Horiz4 method (subpixel)
+// 12-tap filter
 static const int8_t filter12_subpixel_ns[6][16] __attribute__ ((aligned(16))) = {
   {-1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3},
   {-4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8, -4, 8},
@@ -110,6 +116,24 @@ static const int8_t filter12_subpixel_ns[6][16] __attribute__ ((aligned(16))) = 
   {28, -12, 28, -12, 28, -12, 28, -12, 28, -12, 28, -12, 28, -12, 28, -12},
   {7, -4, 7, -4, 7, -4, 7, -4, 7, -4, 7, -4, 7, -4, 7, -4},
   {2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1, 2, -1},
+};
+
+// 10-tap filter
+static const int8_t filter10_subpixel_ns[6][16] __attribute__ ((aligned(16))) = {
+  { 0, 1,  0, 1,  0, 1,  0, 1,  0, 1,  0, 1,  0, 1,  0, 1},
+  {-3, 7, -3, 7, -3, 7, -3, 7, -3, 7, -3, 7, -3, 7, -3, 7},
+  {-17, 119, -17, 119, -17, 119, -17, 119, -17, 119, -17, 119, -17, 119, -17, 119},
+  {28, -11, 28, -11, 28, -11, 28, -11, 28, -11, 28, -11, 28, -11, 28, -11},
+  {5, -2, 5, -2, 5, -2, 5, -2, 5, -2, 5, -2, 5, -2, 5, -2},
+  {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+};
+
+static const struct Filter pfilter_12tap_subpixel = {
+  filter12_subpixel_ns, 12
+};
+
+static const struct Filter pfilter_10tap_subpixel = {
+  filter10_subpixel_ns, 10
 };
 
 // for HorizP method
@@ -123,11 +147,6 @@ const int8_t pfilter12[2][16] __attribute__ ((aligned(16))) = {
 const int8_t pfilter10[2][16] __attribute__ ((aligned(16))) = {
   {0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0, 0, 0},
   {0, 0, 0, 1,  -3,   7, -17, 119,  28, -11,   5,  -2, 1, 0, 0, 0},
-};
-
-struct Filter {
-  const int8_t (*coeffs)[16];
-  int tapsNum;
 };
 
 const struct Filter pfilter_12tap = {
@@ -302,15 +321,18 @@ static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
 }
 
 static void filter_horiz_w4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
-                                  uint8_t *dst, const int16_t *filter) {
+                                  uint8_t *dst, const struct Filter filter) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
   // pack and duplicate the filter values
-  const __m128i f1f0 = *((__m128i *)(filter + 0 * 8));
-  const __m128i f3f2 = *((__m128i *)(filter + 1 * 8));
-  const __m128i f5f4 = *((__m128i *)(filter + 2 * 8));
-  const __m128i f7f6 = *((__m128i *)(filter + 3 * 8));
-  const __m128i f9f8 = *((__m128i *)(filter + 4 * 8));
-  const __m128i fbfa = *((__m128i *)(filter + 5 * 8));
+  const __m128i f1f0 = *((__m128i *)(filter.coeffs + 0));
+  const __m128i f3f2 = *((__m128i *)(filter.coeffs + 1));
+  const __m128i f5f4 = *((__m128i *)(filter.coeffs + 2));
+  const __m128i f7f6 = *((__m128i *)(filter.coeffs + 3));
+  const __m128i f9f8 = *((__m128i *)(filter.coeffs + 4));
+  const __m128i fbfa = *((__m128i *)(filter.coeffs + 5));
+  if (filter.tapsNum == 10) {
+    src_ptr -= 1;
+  }
   const __m128i A = _mm_loadu_si128((const __m128i *)src_ptr);
   const __m128i B = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch));
   const __m128i C = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 2));
@@ -412,7 +434,7 @@ void run_target_filter(uint8_t *src, int width, int height, int stride,
 
 // for Horiz4 method (subpixel)
 void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
-                         const int16_t *filter, uint8_t *dst) {
+                         const struct Filter filter, uint8_t *dst) {
   uint8_t temp[4 * 4] __attribute__ ((aligned(16)));
   uint8_t *src_ptr = src;
   uint32_t start, end;
@@ -445,7 +467,7 @@ int main(int argc, char **argv)
   const size_t block_size = HD_WIDTH * SUPER_BLOCK_HEIGHT;
 
   if (argc != 4) {
-    printf("Usage: filtering <seed> <width> <height>\n");
+    printf("Usage: horiz_filter <seed> <width> <height>\n");
     printf("width/height = 4, 8, 16, 32, 64, 128, seed = random seed number.\n");
     return -1;
   }
@@ -465,17 +487,21 @@ int main(int argc, char **argv)
 
   init_state(buffer, pixel, 8 + width, height, stride, random_seed);
   init_state(pbuffer, ppixel, 8 + width, height, stride, random_seed);
-
+#if 1
   run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
   run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
 
   run_subpixel_filter(ppixel, width, height, stride,
-                      (int16_t *) filter12_subpixel_ns, pbuffer);
+                      pfilter_12tap_subpixel, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
-
+#endif
   run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
   run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
+  check_buffer(buffer, pbuffer, width, height, stride);
+
+  run_subpixel_filter(ppixel, width, height, stride,
+                      pfilter_10tap_subpixel, pbuffer);
   check_buffer(buffer, pbuffer, width, height, stride);
 
   free(buffer);
