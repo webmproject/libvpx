@@ -338,6 +338,144 @@ static void transpose4x4_to_dst(const uint8_t *src, ptrdiff_t src_stride,
   *(int *)(dst + dst_stride * 3) =  _mm_cvtsi128_si32(D);
 }
 
+// Vertical 8-pixel parallel
+#define TRANSPOSE_8X8(in0, in1, in2, in3, in4, in5, in6, in7,           \
+                      out0, out1, out2, out3, out4, out5, out6, out7) { \
+  const __m128i tr0_0 = _mm_unpacklo_epi8(in0, in1);                    \
+  const __m128i tr0_1 = _mm_unpacklo_epi8(in2, in3);                    \
+  const __m128i tr0_2 = _mm_unpacklo_epi8(in4, in5);                    \
+  const __m128i tr0_3 = _mm_unpacklo_epi8(in6, in7);                    \
+                                                                        \
+  const __m128i tr1_0 = _mm_unpacklo_epi16(tr0_0, tr0_1);               \
+  const __m128i tr1_1 = _mm_unpackhi_epi16(tr0_0, tr0_1);               \
+  const __m128i tr1_2 = _mm_unpacklo_epi16(tr0_2, tr0_3);               \
+  const __m128i tr1_3 = _mm_unpackhi_epi16(tr0_2, tr0_3);               \
+                                                                        \
+  const __m128i tr2_0 = _mm_unpacklo_epi32(tr1_0, tr1_2);               \
+  const __m128i tr2_1 = _mm_unpackhi_epi32(tr1_0, tr1_2);               \
+  const __m128i tr2_2 = _mm_unpacklo_epi32(tr1_1, tr1_3);               \
+  const __m128i tr2_3 = _mm_unpackhi_epi32(tr1_1, tr1_3);               \
+                                                                        \
+  out0 = _mm_unpacklo_epi64(tr2_0, tr2_0);                              \
+  out1 = _mm_unpackhi_epi64(tr2_0, tr2_0);                              \
+  out2 = _mm_unpacklo_epi64(tr2_1, tr2_1);                              \
+  out3 = _mm_unpackhi_epi64(tr2_1, tr2_1);                              \
+  out4 = _mm_unpacklo_epi64(tr2_2, tr2_2);                              \
+  out5 = _mm_unpackhi_epi64(tr2_2, tr2_2);                              \
+  out6 = _mm_unpacklo_epi64(tr2_3, tr2_3);                              \
+  out7 = _mm_unpackhi_epi64(tr2_3, tr2_3);                              \
+}
+
+static void transpose8x8_to_dst(const uint8_t *src, ptrdiff_t src_stride,
+                                uint8_t *dst, ptrdiff_t dst_stride) {
+  __m128i A, B, C, D, E, F, G, H;
+
+  A = _mm_loadl_epi64((const __m128i *)src);
+  B = _mm_loadl_epi64((const __m128i *)(src + src_stride));
+  C = _mm_loadl_epi64((const __m128i *)(src + src_stride * 2));
+  D = _mm_loadl_epi64((const __m128i *)(src + src_stride * 3));
+  E = _mm_loadl_epi64((const __m128i *)(src + src_stride * 4));
+  F = _mm_loadl_epi64((const __m128i *)(src + src_stride * 5));
+  G = _mm_loadl_epi64((const __m128i *)(src + src_stride * 6));
+  H = _mm_loadl_epi64((const __m128i *)(src + src_stride * 7));
+
+  TRANSPOSE_8X8(A, B, C, D, E, F, G, H,
+                A, B, C, D, E, F, G, H);
+
+  _mm_storel_epi64((__m128i*)dst, A);
+  _mm_storel_epi64((__m128i*)(dst + dst_stride * 1), B);
+  _mm_storel_epi64((__m128i*)(dst + dst_stride * 2), C);
+  _mm_storel_epi64((__m128i*)(dst + dst_stride * 3), D);
+  _mm_storel_epi64((__m128i*)(dst + dst_stride * 4), E);
+  _mm_storel_epi64((__m128i*)(dst + dst_stride * 5), F);
+  _mm_storel_epi64((__m128i*)(dst + dst_stride * 6), G);
+  _mm_storel_epi64((__m128i*)(dst + dst_stride * 7), H);
+}
+
+void inline transpose_8x16(const __m128i *in, __m128i *out) {
+  __m128i t0, t1, t2, t3, u0, u1;
+
+  t0 = _mm_unpacklo_epi16(in[0], in[1]);
+  t1 = _mm_unpacklo_epi16(in[2], in[3]);
+  t2 = _mm_unpacklo_epi16(in[4], in[5]);
+  t3 = _mm_unpacklo_epi16(in[6], in[7]);
+
+  u0 = _mm_unpacklo_epi32(t0, t1);
+  u1 = _mm_unpacklo_epi32(t2, t3);
+
+  out[0] = _mm_unpacklo_epi64(u0, u1);
+  out[1] = _mm_unpackhi_epi64(u0, u1);
+
+  u0 = _mm_unpackhi_epi32(t0, t1);
+  u1 = _mm_unpackhi_epi32(t2, t3);
+
+  out[2] = _mm_unpacklo_epi64(u0, u1);
+  out[3] = _mm_unpackhi_epi64(u0, u1);
+
+  t0 = _mm_unpackhi_epi16(in[0], in[1]);
+  t1 = _mm_unpackhi_epi16(in[2], in[3]);
+  t2 = _mm_unpackhi_epi16(in[4], in[5]);
+  t3 = _mm_unpackhi_epi16(in[6], in[7]);
+
+  u0 = _mm_unpacklo_epi32(t0, t1);
+  u1 = _mm_unpacklo_epi32(t2, t3);
+
+  out[4] = _mm_unpacklo_epi64(u0, u1);
+  out[5] = _mm_unpackhi_epi64(u0, u1);
+  // Ignore out[6] and out[7]
+  //u0 = _mm_unpackhi_epi32(t0, t1);
+  //u1 = _mm_unpackhi_epi32(t2, t3);
+
+  //out[6] = _mm_unpacklo_epi64(u0, u1);
+  //out[7] = _mm_unpackhi_epi64(u0, u1);
+}
+
+static void filter_horiz_v8p_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
+                                   __m128i *f, int tapsNum, uint8_t *dst) {
+  __m128i s[8], t[6];
+  const __m128i k_256 = _mm_set1_epi16(1 << 8);
+  if (tapsNum == 10) {
+    src_ptr -= 1;
+  }
+  s[0] = _mm_loadu_si128((const __m128i *)src_ptr);
+  s[1] = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch));
+  s[2] = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 2));
+  s[3] = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 3));
+  s[4] = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 4));
+  s[5] = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 5));
+  s[6] = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 6));
+  s[7] = _mm_loadu_si128((const __m128i *)(src_ptr + src_pitch * 7));
+
+  // TRANSPOSE...
+  // Vecotor represents column pixel pairs instead of a row
+  transpose_8x16(s, t);
+
+  // multiply 2 adjacent elements with the filter and add the result
+  s[0] = _mm_maddubs_epi16(t[0], f[0]);
+  s[1] = _mm_maddubs_epi16(t[1], f[1]);
+  s[2] = _mm_maddubs_epi16(t[2], f[2]);
+  s[3] = _mm_maddubs_epi16(t[3], f[3]);
+  s[4] = _mm_maddubs_epi16(t[4], f[4]);
+  s[5] = _mm_maddubs_epi16(t[5], f[5]);
+
+  // add and saturate the results together
+  const __m128i min_x2x3 = _mm_min_epi16(s[2], s[3]);
+  const __m128i max_x2x3 = _mm_max_epi16(s[2], s[3]);
+  __m128i temp = _mm_adds_epi16(s[0], s[1]);
+  temp = _mm_adds_epi16(temp, s[5]);
+  temp = _mm_adds_epi16(temp, s[4]);
+
+  temp = _mm_adds_epi16(temp, min_x2x3);
+  temp = _mm_adds_epi16(temp, max_x2x3);
+  // round and shift by 7 bit each 16 bit
+  temp = _mm_mulhrs_epi16(temp, k_256);
+  // shrink to 8 bit each 16 bits
+  temp = _mm_packus_epi16(temp, temp);
+  // save only 8 bytes
+  //*(int64_t *)dst = _mm_cvtsi128_si64(temp);
+  _mm_storel_epi64((__m128i *)dst, temp);
+}
+
 // Vertical 4-pixel parallel
 static void filter_horiz_v4p_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
                                    __m128i *f, int tapsNum, uint8_t *dst) {
@@ -455,6 +593,48 @@ void run_subpixel_filter(uint8_t *src, int width, int height, int stride,
   printf("SIMD Horiz4 cycles:\t%d\n\n", end - start);
 }
 
+// for Horiz8 method (subpixel)
+void run_subpixel_8_filter(uint8_t *src, int width, int height, int stride,
+                           const struct Filter filter, uint8_t *dst) {
+  uint8_t temp[8 * 8] __attribute__ ((aligned(16)));
+  __m128i f[6];
+  int tapsNum;
+  uint8_t *src_ptr;
+  uint32_t start, end;
+  int count;
+  int block_height;
+  int col, i;
+
+  start = readtsc();
+
+  tapsNum = filter.tapsNum;
+  count = 0;
+  block_height = height >> 3;
+  src_ptr = src;
+  f[0] = *((__m128i *)(filter.coeffs));
+  f[1] = *((__m128i *)(filter.coeffs + 1));
+  f[2] = *((__m128i *)(filter.coeffs + 2));
+  f[3] = *((__m128i *)(filter.coeffs + 3));
+  f[4] = *((__m128i *)(filter.coeffs + 4));
+  f[5] = *((__m128i *)(filter.coeffs + 5));
+
+  do {
+    for (col = 0; col < width; col += 8) {
+      for (i = 0; i < 8; ++i) {
+        filter_horiz_v8p_ssse3(src_ptr, stride, f, tapsNum, temp + (i * 8));
+        src_ptr += 1;
+      }
+      transpose8x8_to_dst(temp, 8, dst + col, stride);
+    }
+    count++;
+    src_ptr = src + count * stride * 8;
+    dst += stride * 8;
+  } while (count < block_height);
+  end = readtsc();
+
+  printf("SIMD Horiz8 cycles:\t%d\n\n", end - start);
+}
+
 // Test driver main()
 int main(int argc, char **argv)
 {
@@ -483,21 +663,39 @@ int main(int argc, char **argv)
   init_state(buffer, pixel, 8 + width, height, stride, random_seed);
   init_state(pbuffer, ppixel, 8 + width, height, stride, random_seed);
 
-  run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
-  run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
-  check_buffer(buffer, pbuffer, width, height, stride);
+  if (width >= 8 && height >= 8) {
+    run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
+    run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
 
-  run_subpixel_filter(ppixel, width, height, stride,
-                      pfilter_12tap_subpixel, pbuffer);
-  check_buffer(buffer, pbuffer, width, height, stride);
+    run_subpixel_8_filter(ppixel, width, height, stride,
+      pfilter_12tap_subpixel, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
 
-  run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
-  run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
-  check_buffer(buffer, pbuffer, width, height, stride);
+    run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
+    run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
 
-  run_subpixel_filter(ppixel, width, height, stride,
-                      pfilter_10tap_subpixel, pbuffer);
-  check_buffer(buffer, pbuffer, width, height, stride);
+    run_subpixel_8_filter(ppixel, width, height, stride,
+      pfilter_10tap_subpixel, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+  } else {
+    run_prototype_filter(pixel, width, height, stride, filter12, 12, buffer);
+    run_target_filter(ppixel, width, height, stride, pfilter_12tap, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+
+    run_subpixel_filter(ppixel, width, height, stride,
+                        pfilter_12tap_subpixel, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+
+    run_prototype_filter(pixel, width, height, stride, filter10, 10, buffer);
+    run_target_filter(ppixel, width, height, stride, pfilter_10tap, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+
+    run_subpixel_filter(ppixel, width, height, stride,
+                        pfilter_10tap_subpixel, pbuffer);
+    check_buffer(buffer, pbuffer, width, height, stride);
+  }
 
   free(buffer);
   free(pixel);
