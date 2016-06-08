@@ -1707,7 +1707,6 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   ctx->is_coded = 0;
   ctx->skippable = 0;
   ctx->pred_pixel_ready = 0;
-  x->skip_recode = 0;
 
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
@@ -2263,8 +2262,6 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
 
       set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
       if (!x->skip) {
-        // TODO(geza.lore): Investigate if this can be relaxed
-        x->skip_recode = 0;
         memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 
         x->skip_optimize = 0;
@@ -4970,10 +4967,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
 
-  x->skip_recode = 0;
-
-  if (!x->skip_recode)
-    memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;

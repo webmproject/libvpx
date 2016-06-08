@@ -563,7 +563,6 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
     p[i].eobs = ctx->eobs_pbuf[i][1];
   }
-  x->skip_recode = 0;
 
   vp10_init_mv_probs(cm);
   vp10_initialize_rd_consts(cpi);

@@ -288,10 +288,6 @@ typedef struct SPEED_FEATURES {
   // mode to be evaluated. A high value means we will be faster.
   int adaptive_rd_thresh;
 
-  // Speed feature to allow or disallow skipping of recode at block
-  // level within a frame.
-  int allow_skip_recode;
-
   // Coefficient probability model approximation step size
   int coeff_prob_appx_step;
 

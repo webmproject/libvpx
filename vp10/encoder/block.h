@@ -77,7 +77,6 @@ struct macroblock {
   MB_MODE_INFO_EXT *mbmi_ext;
   int skip_block;
   int select_tx_size;
-  int skip_recode;
   int skip_optimize;
   int q_index;
 
