@@ -839,14 +839,12 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     if (is_compound) {
 #if CONFIG_EXT_REFS
       const int bit = (mbmi->ref_frame[0] == GOLDEN_FRAME ||
-                       mbmi->ref_frame[0] == LAST3_FRAME ||
-                       mbmi->ref_frame[0] == LAST4_FRAME);
+                       mbmi->ref_frame[0] == LAST3_FRAME);
+      const int bit_bwd = mbmi->ref_frame[1] == ALTREF_FRAME;
 #else  // CONFIG_EXT_REFS
       const int bit = mbmi->ref_frame[0] == GOLDEN_FRAME;
-#if CONFIG_BIDIR_PRED
-      const int bit_bwd = mbmi->ref_frame[1] == ALTREF_FRAME;
-#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
+
       vp10_write(w, bit, vp10_get_pred_prob_comp_ref_p(cm, xd));
 
 #if CONFIG_EXT_REFS
@@ -856,28 +854,21 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
       } else {
         const int bit2 = mbmi->ref_frame[0] == GOLDEN_FRAME;
         vp10_write(w, bit2, vp10_get_pred_prob_comp_ref_p2(cm, xd));
-        if (!bit2) {
-          const int bit3 = mbmi->ref_frame[0] == LAST3_FRAME;
-          vp10_write(w, bit3, vp10_get_pred_prob_comp_ref_p3(cm, xd));
-        }
       }
-#else  // CONFIG_EXT_REFS
-#if CONFIG_BIDIR_PRED
       vp10_write(w, bit_bwd, vp10_get_pred_prob_comp_bwdref_p(cm, xd));
-#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
     } else {
 #if CONFIG_EXT_REFS
-      const int bit0 = (mbmi->ref_frame[0] == GOLDEN_FRAME ||
-                        mbmi->ref_frame[0] == ALTREF_FRAME);
+      const int bit0 = (mbmi->ref_frame[0] == ALTREF_FRAME ||
+                        mbmi->ref_frame[0] == BWDREF_FRAME);
       vp10_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
 
       if (bit0) {
-        const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
+        const int bit1 = mbmi->ref_frame[0] == ALTREF_FRAME;
         vp10_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
       } else {
         const int bit2 = (mbmi->ref_frame[0] == LAST3_FRAME ||
-                          mbmi->ref_frame[0] == LAST4_FRAME);
+                          mbmi->ref_frame[0] == GOLDEN_FRAME);
         vp10_write(w, bit2, vp10_get_pred_prob_single_ref_p3(cm, xd));
 
         if (!bit2) {
@@ -891,15 +882,10 @@ static void write_ref_frames(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #else  // CONFIG_EXT_REFS
       const int bit0 = mbmi->ref_frame[0] != LAST_FRAME;
       vp10_write(w, bit0, vp10_get_pred_prob_single_ref_p1(cm, xd));
+
       if (bit0) {
         const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
         vp10_write(w, bit1, vp10_get_pred_prob_single_ref_p2(cm, xd));
-#if CONFIG_BIDIR_PRED
-        if (bit1) {
-          const int bit2 = mbmi->ref_frame[0] != BWDREF_FRAME;
-          vp10_write(w, bit2, vp10_get_pred_prob_single_ref_p3(cm, xd));
-        }
-#endif  // CONFIG_BIDIR_PRED
       }
 #endif  // CONFIG_EXT_REFS
     }
@@ -2681,21 +2667,19 @@ static int get_refresh_mask(VP10_COMP *cpi) {
 
 #if CONFIG_EXT_REFS
   // NOTE(zoeliu): When LAST_FRAME is to get refreshed, the decoder will be
-  // notified to get LAST4_FRAME refreshed and then the virtual indexes for all
-  // the 4 LAST reference frames will be updated accordingly, i.e.:
-  // (1) The original virtual index for LAST4_FRAME will become the new virtual
+  // notified to get LAST3_FRAME refreshed and then the virtual indexes for all
+  // the 3 LAST reference frames will be updated accordingly, i.e.:
+  // (1) The original virtual index for LAST3_FRAME will become the new virtual
   //     index for LAST_FRAME; and
-  // (2) The original virtual indexes for LAST_FRAME ~ LAST3_FRAME will be
-  //     shifted and become the new virtual indexes for LAST2_FRAME ~
-  //     LAST4_FRAME.
-  refresh_mask |= (cpi->refresh_last_frame <<
-      cpi->lst_fb_idxes[LAST4_FRAME - LAST_FRAME]);
-#else  // CONFIG_EXT_REFS
-  refresh_mask |= (cpi->refresh_last_frame << cpi->lst_fb_idx);
+  // (2) The original virtual indexes for LAST_FRAME and LAST2_FRAME will be
+  //     shifted and become the new virtual indexes for LAST2_FRAME and
+  //     LAST3_FRAME.
+  refresh_mask |=
+      (cpi->refresh_last_frame << cpi->lst_fb_idxes[LAST_REF_FRAMES - 1]);
 
-#if CONFIG_BIDIR_PRED
   refresh_mask |= (cpi->refresh_bwd_ref_frame << cpi->bwd_fb_idx);
-#endif  // CONFIG_BIDIR_PRED
+#else
+  refresh_mask |= (cpi->refresh_last_frame << cpi->lst_fb_idx);
 #endif  // CONFIG_EXT_REFS
 
   if (vp10_preserve_existing_gf(cpi)) {
@@ -3048,11 +3032,12 @@ static void write_uncompressed_header(VP10_COMP *cpi,
 
   write_profile(cm->profile, wb);
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // NOTE: By default all coded frames to be used as a reference
   cm->is_reference_frame = 1;
 
   if (cm->show_existing_frame) {
+    MV_REFERENCE_FRAME ref_frame;
     RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
     const int frame_to_show =
         cm->ref_frame_map[cpi->existing_fb_idx_to_show];
@@ -3069,23 +3054,21 @@ static void write_uncompressed_header(VP10_COMP *cpi,
 
     cpi->refresh_frame_mask = get_refresh_mask(cpi);
     vpx_wb_write_literal(wb, cpi->refresh_frame_mask, REF_FRAMES);
-    {
-      MV_REFERENCE_FRAME ref_frame;
-      for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-        assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
-        vpx_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),
-                             REF_FRAMES_LOG2);
-        vpx_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
-      }
+
+    for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+      assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
+      vpx_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),
+                           REF_FRAMES_LOG2);
+      vpx_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
     }
 
     return;
   } else {
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
     vpx_wb_write_bit(wb, 0);  // show_existing_frame
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   vpx_wb_write_bit(wb, cm->frame_type);
   vpx_wb_write_bit(wb, cm->show_frame);
@@ -3114,36 +3097,36 @@ static void write_uncompressed_header(VP10_COMP *cpi,
       }
     }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     cpi->refresh_frame_mask = get_refresh_mask(cpi);
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
     if (cm->intra_only) {
       write_sync_code(wb);
       write_bitdepth_colorspace_sampling(cm, wb);
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       vpx_wb_write_literal(wb, cpi->refresh_frame_mask, REF_FRAMES);
 #else
       vpx_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
       write_frame_size(cm, wb);
     } else {
       MV_REFERENCE_FRAME ref_frame;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       vpx_wb_write_literal(wb, cpi->refresh_frame_mask, REF_FRAMES);
 #else
       vpx_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       if (!cpi->refresh_frame_mask) {
         // NOTE: "cpi->refresh_frame_mask == 0" indicates that the coded frame
         //       will not be used as a reference
         cm->is_reference_frame = 0;
       }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
       for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
         assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
@@ -3333,7 +3316,7 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
 
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
         for (j = 0; j < (FWD_REFS - 1); j++) {
           vp10_cond_prob_diff_update(header_bc, &fc->comp_ref_prob[i][j],
                                      counts->comp_ref[i][j]);
@@ -3342,12 +3325,12 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
           vp10_cond_prob_diff_update(header_bc, &fc->comp_bwdref_prob[i][j],
                                      counts->comp_bwdref[i][j]);
         }
-#else  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#else
         for (j = 0; j < (COMP_REFS - 1); j++) {
           vp10_cond_prob_diff_update(header_bc, &fc->comp_ref_prob[i][j],
                                      counts->comp_ref[i][j]);
         }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
       }
     }
 
@@ -3541,12 +3524,12 @@ void vp10_pack_bitstream(VP10_COMP *const cpi, uint8_t *dst, size_t *size) {
   // Write the uncompressed header
   write_uncompressed_header(cpi, &wb);
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   if (cm->show_existing_frame) {
     *size = vpx_wb_bytes_written(&wb);
     return;
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   // We do not know these in advance. Output placeholder bit.
   saved_wb = wb;

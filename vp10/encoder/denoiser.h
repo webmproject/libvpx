@@ -36,9 +36,9 @@ void vp10_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     YV12_BUFFER_CONFIG src,
                                     FRAME_TYPE frame_type,
                                     int refresh_last_frame,
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
                                     int refresh_bwd_ref_frame,
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
                                     int refresh_alt_ref_frame,
                                     int refresh_golden_frame);
 

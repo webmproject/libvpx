@@ -159,10 +159,9 @@ void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
 #if CONFIG_VP9_HIGHBITDEPTH
   dst_cm->use_highbitdepth = src_cm->use_highbitdepth;
 #endif
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // TODO(zoeliu): To handle parallel decoding
-  assert(0);
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   dst_cm->prev_frame = src_cm->show_existing_frame ?
                        src_cm->prev_frame : src_cm->cur_frame;
   dst_cm->last_width = !src_cm->show_existing_frame ?

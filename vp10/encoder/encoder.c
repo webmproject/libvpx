@@ -901,16 +901,12 @@ static void init_buffer_indices(VP10_COMP *cpi) {
   for (fb_idx = 0; fb_idx < LAST_REF_FRAMES; ++fb_idx)
     cpi->lst_fb_idxes[fb_idx] = fb_idx;
   cpi->gld_fb_idx = LAST_REF_FRAMES;
-  cpi->alt_fb_idx = cpi->gld_fb_idx + 1;
-#else  // CONFIG_EXT_REFS
+  cpi->bwd_fb_idx = LAST_REF_FRAMES + 1;
+  cpi->alt_fb_idx = LAST_REF_FRAMES + 2;
+#else
   cpi->lst_fb_idx = 0;
   cpi->gld_fb_idx = 1;
-#if CONFIG_BIDIR_PRED
-  cpi->bwd_fb_idx = 2;
-  cpi->alt_fb_idx = 3;
-#else  // CONFIG_BIDIR_PRED
   cpi->alt_fb_idx = 2;
-#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
 }
 
@@ -2235,11 +2231,11 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
     rc->baseline_gf_interval = (MIN_GF_INTERVAL + MAX_GF_INTERVAL) / 2;
   }
 
-  cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+  cpi->refresh_golden_frame = 0;
+#if CONFIG_EXT_REFS
   cpi->refresh_bwd_ref_frame = 0;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   cm->refresh_frame_context =
       (oxcf->error_resilient_mode || oxcf->frame_parallel_decoding_mode) ?
@@ -2309,11 +2305,11 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
   cpi->alt_ref_source = NULL;
   rc->is_src_frame_alt_ref = 0;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   rc->is_bwd_ref_frame = 0;
   rc->is_last_bipred_frame = 0;
   rc->is_bipred_frame = 0;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
 #if 0
   // Experimental RD Code
@@ -2992,15 +2988,13 @@ static YV12_BUFFER_CONFIG *get_vp10_ref_frame_buffer(
     ref_frame = LAST2_FRAME;
   else if (ref_frame_flag == VP9_LAST3_FLAG)
     ref_frame = LAST3_FRAME;
-  else if (ref_frame_flag == VP9_LAST4_FLAG)
-    ref_frame = LAST4_FRAME;
 #endif  // CONFIG_EXT_REFS
   else if (ref_frame_flag == VP9_GOLD_FLAG)
     ref_frame = GOLDEN_FRAME;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   else if (ref_frame_flag == VP9_BWD_FLAG)
     ref_frame = BWDREF_FRAME;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   else if (ref_frame_flag == VP9_ALT_FLAG)
     ref_frame = ALTREF_FRAME;
 
@@ -3390,9 +3384,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
   BufferPool *const pool = cm->buffer_pool;
   const int use_upsampled_ref = cpi->sf.use_upsampled_references;
   int new_uidx = 0;
-
 #if CONFIG_EXT_REFS
-  int ref_frame;
 #endif  // CONFIG_EXT_REFS
 
   // NOTE: Save the new show frame buffer index for --test-code=warn, i.e.,
@@ -3400,7 +3392,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
   if (cm->show_frame)
     cpi->last_show_frame_buf_idx = cm->new_fb_idx;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // TODO(zoeliu): To remove the reference buffer update for the
   //               show_existing_frame==1 case.
 #if 0
@@ -3415,24 +3407,24 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     return;
   }
 #endif  // 0
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   if (use_upsampled_ref) {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     if (cm->show_existing_frame) {
       new_uidx = cpi->upsampled_ref_idx[cpi->existing_fb_idx_to_show];
       // TODO(zoeliu): Once following is confirmed, remove it.
       assert(cpi->upsampled_ref_bufs[new_uidx].ref_count > 0);
     } else {
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
       // Up-sample the current encoded frame.
       RefCntBuffer *bufs = pool->frame_bufs;
       const YV12_BUFFER_CONFIG *const ref = &bufs[cm->new_fb_idx].buf;
 
       new_uidx = upsample_ref_frame(cpi, ref);
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   }
 
   // At this point the new frame has been encoded.
@@ -3440,20 +3432,20 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
   if (cm->frame_type == KEY_FRAME) {
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->bwd_fb_idx], cm->new_fb_idx);
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
 
     if (use_upsampled_ref) {
       uref_cnt_fb(cpi->upsampled_ref_bufs,
                   &cpi->upsampled_ref_idx[cpi->gld_fb_idx], new_uidx);
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       uref_cnt_fb(cpi->upsampled_ref_bufs,
                   &cpi->upsampled_ref_idx[cpi->bwd_fb_idx], new_uidx);
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
       uref_cnt_fb(cpi->upsampled_ref_bufs,
                   &cpi->upsampled_ref_idx[cpi->alt_fb_idx], new_uidx);
     }
@@ -3516,7 +3508,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
                sizeof(cpi->interp_filter_selected[ALTREF_FRAME]));
     }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     if (cpi->refresh_bwd_ref_frame) {
       ref_cnt_fb(pool->frame_bufs,
                  &cm->ref_frame_map[cpi->bwd_fb_idx], cm->new_fb_idx);
@@ -3528,7 +3520,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
     }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   }
 
   if (cpi->refresh_last_frame) {
@@ -3537,110 +3529,94 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     // reference to the reference frame buffer virtual index; and then (2) from
     // the virtual index to the reference frame buffer physical index:
     //
-    // LAST_FRAME,      ..., LAST4_FRAME,     GOLDEN_FRAME,    ALTREF_FRAME
-    //      |                     |                |                |
-    //      v                     v                v                v
-    // lst_fb_idxes[0], ..., lst_fb_idxes[3], gld_fb_idx,      alt_fb_idx
-    //      |                     |                |                |
-    //      v                     v                v                v
-    // ref_frame_map[], ..., ref_frame_map[], ref_frame_map[], ref_frame_map[]
+    // LAST_FRAME,      ..., LAST3_FRAME,     ..., ALTREF_FRAME
+    //      |                     |                     |
+    //      v                     v                     v
+    // lst_fb_idxes[0], ..., lst_fb_idxes[2], ..., alt_fb_idx
+    //      |                     |                     |
+    //      v                     v                     v
+    // ref_frame_map[], ..., ref_frame_map[], ..., ref_frame_map[]
     //
-    // When refresh_last_frame is set, it is intended to retire LAST4_FRAME,
-    // have all the other 3 reference frames shifted as follows:
-    // LAST_FRAME -> LAST2_FRAME -> LAST3_FRAME -> LAST4_FRAME,
+    // When refresh_last_frame is set, it is intended to retire LAST3_FRAME,
+    // have the other 2 LAST reference frames shifted as follows:
+    // LAST_FRAME -> LAST2_FRAME -> LAST3_FRAME
     // , and then have LAST_FRAME refreshed by the newly coded frame.
     //
     // To fulfill it, the decoder will be notified to execute following 2 steps:
     //
-    // (a) To change ref_frame_map[] and have the virtual index of LAST4_FRAME
+    // (a) To change ref_frame_map[] and have the virtual index of LAST3_FRAME
     //     to point to the newly coded frame, i.e.
-    //     ref_frame_map[lst_fb_idexes[3]] => new_fb_idx;
+    //     ref_frame_map[lst_fb_idexes[2]] => new_fb_idx;
     //
     // (b) To change the 1st layer mapping to have LAST_FRAME mapped to the
-    //     original virtual index of LAST4_FRAME and have all the other mapping
+    //     original virtual index of LAST3_FRAME and have the other mappings
     //     shifted as follows:
-    // LAST_FRAME,      LAST2_FRAME,     LAST3_FRAME,     LAST4_FRAME
-    //      |                |                |                |
-    //      v                v                v                v
-    // lst_fb_idxes[3], lst_fb_idxes[0], lst_fb_idxes[1], lst_fb_idxes[2]
-    int tmp;
+    // LAST_FRAME,      LAST2_FRAME,     LAST3_FRAME
+    //      |                |                |
+    //      v                v                v
+    // lst_fb_idxes[2], lst_fb_idxes[0], lst_fb_idxes[1]
+    int ref_frame;
 
     if (cm->frame_type == KEY_FRAME) {
-      for (ref_frame = LAST_FRAME; ref_frame <= LAST4_FRAME; ++ref_frame) {
+      for (ref_frame = 0; ref_frame < LAST_REF_FRAMES; ++ref_frame) {
         ref_cnt_fb(pool->frame_bufs,
-                   &cm->ref_frame_map[cpi->lst_fb_idxes[ref_frame-LAST_FRAME]],
+                   &cm->ref_frame_map[cpi->lst_fb_idxes[ref_frame]],
                    cm->new_fb_idx);
 
         if (use_upsampled_ref)
           uref_cnt_fb(
               cpi->upsampled_ref_bufs,
-              &cpi->upsampled_ref_idx[cpi->lst_fb_idxes[ref_frame-LAST_FRAME]],
+              &cpi->upsampled_ref_idx[cpi->lst_fb_idxes[ref_frame]],
               new_uidx);
       }
     } else {
+      int tmp;
+
       ref_cnt_fb(pool->frame_bufs,
-                 &cm->ref_frame_map[cpi->lst_fb_idxes[LAST4_FRAME-LAST_FRAME]],
+                 &cm->ref_frame_map[cpi->lst_fb_idxes[LAST_REF_FRAMES-1]],
                  cm->new_fb_idx);
 
       if (use_upsampled_ref)
         uref_cnt_fb(
             cpi->upsampled_ref_bufs,
-            &cpi->upsampled_ref_idx[cpi->lst_fb_idxes[LAST4_FRAME-LAST_FRAME]],
+            &cpi->upsampled_ref_idx[cpi->lst_fb_idxes[LAST_REF_FRAMES-1]],
             new_uidx);
 
-      tmp = cpi->lst_fb_idxes[LAST4_FRAME-LAST_FRAME];
-      for (ref_frame = LAST4_FRAME; ref_frame > LAST_FRAME; --ref_frame) {
-        cpi->lst_fb_idxes[ref_frame - LAST_FRAME] =
-            cpi->lst_fb_idxes[ref_frame - LAST_FRAME - 1];
+      tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES-1];
+      for (ref_frame = LAST_REF_FRAMES - 1; ref_frame > 0; --ref_frame) {
+        cpi->lst_fb_idxes[ref_frame] = cpi->lst_fb_idxes[ref_frame - 1];
+
         if (!cpi->rc.is_src_frame_alt_ref) {
           memcpy(cpi->interp_filter_selected[ref_frame],
                  cpi->interp_filter_selected[ref_frame - 1],
                  sizeof(cpi->interp_filter_selected[ref_frame - 1]));
         }
       }
-      cpi->lst_fb_idxes[LAST_FRAME-LAST_FRAME] = tmp;
+      cpi->lst_fb_idxes[0] = tmp;
+
+      if (!cpi->rc.is_src_frame_alt_ref) {
+        if (cm->show_existing_frame) {
+          memcpy(cpi->interp_filter_selected[LAST_FRAME],
+                 cpi->interp_filter_selected[BWDREF_FRAME],
+                 sizeof(cpi->interp_filter_selected[BWDREF_FRAME]));
+        } else {
+          memcpy(cpi->interp_filter_selected[LAST_FRAME],
+                 cpi->interp_filter_selected[0],
+                 sizeof(cpi->interp_filter_selected[0]));
+        }
+      }
+    }
+#else
+    ref_cnt_fb(pool->frame_bufs,
+               &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
+    if (use_upsampled_ref)
+      uref_cnt_fb(cpi->upsampled_ref_bufs,
+                  &cpi->upsampled_ref_idx[cpi->lst_fb_idx], new_uidx);
+    if (!cpi->rc.is_src_frame_alt_ref) {
       memcpy(cpi->interp_filter_selected[LAST_FRAME],
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
     }
-#else  // CONFIG_EXT_REFS
-#if CONFIG_BIDIR_PRED
-    // TODO(zoeliu): To remove the reference buffer update for the
-    // show_existing_frame==1 case; Instead, we move the reference buffer update
-    // to the previous coded frame, i.e. the last-bipred-frame. In that case, no
-    // bit should be set in the refresh-mask, but the visual ref-idx should be
-    // updated and written to the bitstream accordingly, as the virtual ref-idx
-    // for LAST_FRAME and BWDREF_FRAME should be switched, i.e. cpi->lst_fb_idx
-    // and cpi->bwd_fb_idx should be switched.
-    if (cm->show_existing_frame) {
-      ref_cnt_fb(pool->frame_bufs,
-                 &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
-
-      if (use_upsampled_ref)
-        uref_cnt_fb(cpi->upsampled_ref_bufs,
-                    &cpi->upsampled_ref_idx[cpi->lst_fb_idx], new_uidx);
-
-      // NOTE(zoeliu): OVERLAY should not be the last non-reference frame.
-      assert(!cpi->rc.is_src_frame_alt_ref);
-
-      memcpy(cpi->interp_filter_selected[LAST_FRAME],
-             cpi->interp_filter_selected[BWDREF_FRAME],
-             sizeof(cpi->interp_filter_selected[BWDREF_FRAME]));
-    } else {
-#endif  // CONFIG_BIDIR_PRED
-      ref_cnt_fb(pool->frame_bufs,
-                 &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
-      if (use_upsampled_ref)
-        uref_cnt_fb(cpi->upsampled_ref_bufs,
-                    &cpi->upsampled_ref_idx[cpi->lst_fb_idx], new_uidx);
-      if (!cpi->rc.is_src_frame_alt_ref) {
-        memcpy(cpi->interp_filter_selected[LAST_FRAME],
-               cpi->interp_filter_selected[0],
-               sizeof(cpi->interp_filter_selected[0]));
-      }
-#if CONFIG_BIDIR_PRED
-    }
-#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
   }
 
@@ -3655,9 +3631,9 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
                                    *cpi->Source,
                                    cpi->common.frame_type,
                                    cpi->refresh_last_frame,
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
                                    cpi->refresh_bwd_ref_frame,
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
                                    cpi->refresh_alt_ref_frame,
                                    cpi->refresh_golden_frame);
   }
@@ -3733,12 +3709,11 @@ void vp10_scale_references(VP10_COMP *cpi) {
 #if CONFIG_EXT_REFS
     VP9_LAST2_FLAG,
     VP9_LAST3_FLAG,
-    VP9_LAST4_FLAG,
 #endif  // CONFIG_EXT_REFS
     VP9_GOLD_FLAG,
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     VP9_BWD_FLAG,
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
     VP9_ALT_FLAG
   };
 
@@ -3857,17 +3832,13 @@ static void release_scaled_references(VP10_COMP *cpi) {
     int refresh[REFS_PER_FRAME];
     refresh[0] = (cpi->refresh_last_frame) ? 1 : 0;
 #if CONFIG_EXT_REFS
-    refresh[1] = refresh[2] = refresh[3] = 0;
-    refresh[4] = (cpi->refresh_golden_frame) ? 1 : 0;
+    refresh[1] = refresh[2] = 0;
+    refresh[3] = (cpi->refresh_golden_frame) ? 1 : 0;
+    refresh[4] = (cpi->refresh_bwd_ref_frame) ? 1 : 0;
     refresh[5] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
-#else  // CONFIG_EXT_REFS
+#else
     refresh[1] = (cpi->refresh_golden_frame) ? 1 : 0;
-#if CONFIG_BIDIR_PRED
-    refresh[2] = (cpi->refresh_bwd_ref_frame) ? 1 : 0;
-    refresh[3] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
-#else  // CONFIG_BIDIR_PRED
     refresh[2] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
-#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
     for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
       const int idx = cpi->scaled_ref_idx[i - 1];
@@ -4002,12 +3973,7 @@ static void set_mv_search_params(VP10_COMP *cpi) {
       // after a key/intra-only frame.
       cpi->max_mv_magnitude = max_mv_def;
     } else {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-      // TODO(zoeliu): Maybe we should leave it the same as base.
-      if (cm->show_frame || cpi->rc.is_bwd_ref_frame) {
-#else
       if (cm->show_frame) {
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
         // Allow mv_steps to correspond to twice the max mv magnitude found
         // in the previous frame, capped by the default max_mv_magnitude based
         // on resolution.
@@ -4590,48 +4556,43 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
   const int *const map = cpi->common.ref_frame_map;
 
 #if CONFIG_EXT_REFS
-  const int gld_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[0]];
-  const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[0]];
-
   const int last2_is_last =
       map[cpi->lst_fb_idxes[1]] == map[cpi->lst_fb_idxes[0]];
-  const int gld_is_last2 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[1]];
-  const int last2_is_alt = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[1]];
-
   const int last3_is_last =
       map[cpi->lst_fb_idxes[2]] == map[cpi->lst_fb_idxes[0]];
+  const int gld_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[0]];
+  const int bwd_is_last = map[cpi->bwd_fb_idx] == map[cpi->lst_fb_idxes[0]];
+  const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[0]];
+
   const int last3_is_last2 =
       map[cpi->lst_fb_idxes[2]] == map[cpi->lst_fb_idxes[1]];
+  const int gld_is_last2 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[1]];
+  const int bwd_is_last2 = map[cpi->bwd_fb_idx] == map[cpi->lst_fb_idxes[1]];
+
   const int gld_is_last3 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[2]];
-  const int last3_is_alt = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[2]];
+  const int bwd_is_last3 = map[cpi->bwd_fb_idx] == map[cpi->lst_fb_idxes[2]];
 
-  const int last4_is_last =
-      map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[0]];
-  const int last4_is_last2 =
-      map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[1]];
-  const int last4_is_last3 =
-      map[cpi->lst_fb_idxes[3]] == map[cpi->lst_fb_idxes[2]];
+  const int bwd_is_gld = map[cpi->bwd_fb_idx] == map[cpi->gld_fb_idx];
 
-  const int last4_is_alt = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idxes[3]];
-  const int gld_is_last4 = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idxes[3]];
-#else  // CONFIG_EXT_REFS
+  const int last2_is_alt = map[cpi->lst_fb_idxes[1]] == map[cpi->alt_fb_idx];
+  const int last3_is_alt = map[cpi->lst_fb_idxes[2]] == map[cpi->alt_fb_idx];
+  const int gld_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
+  const int bwd_is_alt = map[cpi->bwd_fb_idx] == map[cpi->alt_fb_idx];
+#else
   const int gld_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idx];
-#if CONFIG_BIDIR_PRED
-  const int bwd_is_last = map[cpi->bwd_fb_idx] == map[cpi->lst_fb_idx];
-#endif  // CONFIG_BIDIR_PRED
+  const int gld_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
   const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idx];
 #endif  // CONFIG_EXT_REFS
-  const int gld_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
 
   int flags = VP9_REFFRAME_ALL;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // Disable the use of BWDREF_FRAME for non-bipredictive frames.
   if (!(cpi->rc.is_bipred_frame || cpi->rc.is_last_bipred_frame))
     flags &= ~VP9_BWD_FLAG;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
-  if (gld_is_alt || gld_is_last)
+  if (gld_is_last || gld_is_alt)
     flags &= ~VP9_GOLD_FLAG;
 
   if (cpi->rc.frames_till_gf_update_due == INT_MAX)
@@ -4641,22 +4602,18 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
     flags &= ~VP9_ALT_FLAG;
 
 #if CONFIG_EXT_REFS
-  if (last4_is_alt || last4_is_last || last4_is_last2 || last4_is_last3)
-    flags &= ~VP9_LAST4_FLAG;
-
-  if (last3_is_alt || last3_is_last || last3_is_last2)
-    flags &= ~VP9_LAST3_FLAG;
-
-  if (last2_is_alt || last2_is_last)
+  if (last2_is_last || last2_is_alt)
     flags &= ~VP9_LAST2_FLAG;
 
-  if (gld_is_last4 || gld_is_last3 || gld_is_last2)
+  if (last3_is_last || last3_is_last2 || last3_is_alt)
+    flags &= ~VP9_LAST3_FLAG;
+
+  if (gld_is_last2 || gld_is_last3)
     flags &= ~VP9_GOLD_FLAG;
-#else  // CONFIG_EXT_REFS
-#if CONFIG_BIDIR_PRED
-  if (bwd_is_last && (flags & VP9_BWD_FLAG))
+
+  if ((bwd_is_last || bwd_is_last2 || bwd_is_last3 ||
+       bwd_is_gld || bwd_is_alt) && (flags & VP9_BWD_FLAG))
     flags &= ~VP9_BWD_FLAG;
-#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
 
   return flags;
@@ -4724,9 +4681,9 @@ static void set_arf_sign_bias(VP10_COMP *cpi) {
       (cpi->rc.source_alt_ref_active && !cpi->refresh_alt_ref_frame);
   }
   cm->ref_frame_sign_bias[ALTREF_FRAME] = arf_sign_bias;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   cm->ref_frame_sign_bias[BWDREF_FRAME] = cm->ref_frame_sign_bias[ALTREF_FRAME];
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 }
 
 static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
@@ -4751,18 +4708,15 @@ static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
         (ref_total[LAST3_FRAME] == 0 ||
          cpi->interp_filter_selected[LAST3_FRAME][ifilter] * 50
          < ref_total[LAST3_FRAME]) &&
-        (ref_total[LAST4_FRAME] == 0 ||
-         cpi->interp_filter_selected[LAST4_FRAME][ifilter] * 50
-         < ref_total[LAST4_FRAME]) &&
 #endif  // CONFIG_EXT_REFS
         (ref_total[GOLDEN_FRAME] == 0 ||
          cpi->interp_filter_selected[GOLDEN_FRAME][ifilter] * 50
            < ref_total[GOLDEN_FRAME]) &&
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
         (ref_total[BWDREF_FRAME] == 0 ||
          cpi->interp_filter_selected[BWDREF_FRAME][ifilter] * 50
            < ref_total[BWDREF_FRAME]) &&
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
         (ref_total[ALTREF_FRAME] == 0 ||
          cpi->interp_filter_selected[ALTREF_FRAME][ifilter] * 50
            < ref_total[ALTREF_FRAME]))
@@ -4841,7 +4795,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   // Set the arf sign bias for this frame.
   set_arf_sign_bias(cpi);
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // NOTE:
   // (1) Move the setup of the ref_frame_flags upfront as it would be
   //     determined by the current frame properties;
@@ -4881,6 +4835,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     // Update the LAST_FRAME in the reference frame buffer.
     vp10_update_reference_frames(cpi);
 
+    // Update frame flags
     cpi->frame_flags &= ~FRAMEFLAGS_GOLDEN;
     cpi->frame_flags &= ~FRAMEFLAGS_BWDREF;
     cpi->frame_flags &= ~FRAMEFLAGS_ALTREF;
@@ -4897,7 +4852,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
 
     return;
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   // Set default state for segment based loop filter update flags.
   cm->lf.mode_ref_delta_update = 0;
@@ -5000,10 +4955,10 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   cm->frame_to_show->render_width  = cm->render_width;
   cm->frame_to_show->render_height = cm->render_height;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // TODO(zoeliu): For non-ref frames, loop filtering may need to be turned
   // off.
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
@@ -5017,13 +4972,13 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     dump_filtered_recon_frames(cpi);
 #endif  // DUMP_RECON_FRAMES
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   if (cpi->rc.is_last_bipred_frame) {
     // NOTE: If the current frame is a LAST_BIPRED_FRAME, next it is needed
     //       to show the BWDREF_FRAME.
     cpi->existing_fb_idx_to_show = cpi->bwd_fb_idx;
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   if (cm->seg.update_map)
     update_reference_segmentation_map(cpi);
@@ -5063,16 +5018,16 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
   else
     cpi->frame_flags &= ~FRAMEFLAGS_ALTREF;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   if (cpi->refresh_bwd_ref_frame == 1)
     cpi->frame_flags |= FRAMEFLAGS_BWDREF;
   else
     cpi->frame_flags &= ~FRAMEFLAGS_BWDREF;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
-#if CONFIG_EXT_REFS || !CONFIG_BIDIR_PRED
+#if !CONFIG_EXT_REFS
   cpi->ref_frame_flags = get_ref_frame_flags(cpi);
-#endif  // CONFIG_EXT_REFS || !CONFIG_BIDIR_PRED
+#endif  // !CONFIG_EXT_REFS
 
 #if CONFIG_EXT_REFS
   cm->last3_frame_type = cm->last2_frame_type;
@@ -5108,20 +5063,20 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     cm->last_show_frame = cm->show_frame;
 
   if (cm->show_frame) {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     // TODO(zoeliu): We may only swamp mi and prev_mi for those frames that are
     // being used as reference.
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
     vp10_swap_mi_and_prev_mi(cm);
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
     ++cm->current_video_frame;
   }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // NOTE: Shall not refer to any frame not used as reference.
   if (cm->is_reference_frame)
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
     cm->prev_frame = cm->cur_frame;
 }
 
@@ -5140,9 +5095,10 @@ static void Pass2Encode(VP10_COMP *cpi, size_t *size,
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
+  // Donot do the post-encoding update for show_existing_frame==1.
   if (!cpi->common.show_existing_frame)
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
     vp10_twopass_postencode_update(cpi);
 }
 
@@ -5259,9 +5215,9 @@ static int frame_is_reference(const VP10_COMP *cpi) {
   return cm->frame_type == KEY_FRAME ||
          cpi->refresh_last_frame ||
          cpi->refresh_golden_frame ||
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
          cpi->refresh_bwd_ref_frame ||
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
          cpi->refresh_alt_ref_frame ||
          !cm->error_resilient_mode ||
          cm->lf.mode_ref_delta_update ||
@@ -5326,7 +5282,7 @@ static int get_arf_src_index(VP10_COMP *cpi) {
   return arf_src_index;
 }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
 static int get_brf_src_index(VP10_COMP *cpi) {
   int brf_src_index = 0;
   const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
@@ -5345,7 +5301,7 @@ static int get_brf_src_index(VP10_COMP *cpi) {
 
   return brf_src_index;
 }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
 static void check_src_altref(VP10_COMP *cpi,
                              const struct lookahead_entry *source) {
@@ -5496,9 +5452,9 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   struct lookahead_entry *last_source = NULL;
   struct lookahead_entry *source = NULL;
   int arf_src_index;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   int brf_src_index;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   int i;
 
   vpx_usec_timer_start(&cmptimer);
@@ -5520,12 +5476,12 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
   cpi->refresh_last_frame = 1;
   cpi->refresh_golden_frame = 0;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   cpi->refresh_bwd_ref_frame = 0;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   cpi->refresh_alt_ref_frame = 0;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   if (oxcf->pass == 2 && cm->show_existing_frame) {
     // Manage the source buffer and flush out the source frame that has been
     // coded already; Also get prepared for PSNR calculation if needed.
@@ -5573,7 +5529,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
     return 0;
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   // Should we encode an arf frame.
   arf_src_index = get_arf_src_index(cpi);
@@ -5614,11 +5570,9 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
     rc->source_alt_ref_pending = 0;
   }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   rc->is_bwd_ref_frame = 0;
   brf_src_index = get_brf_src_index(cpi);
-  // TODO(zoeliu): Need to handle when alt-ref is disabled; Currently bwd-ref
-  //               works only when alt-ref is on.
   if (brf_src_index) {
     assert(brf_src_index <= rc->frames_to_key);
     if ((source = vp10_lookahead_peek(cpi->lookahead, brf_src_index)) != NULL) {
@@ -5633,7 +5587,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
       rc->is_bwd_ref_frame = 1;
     }
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   if (!source) {
     // Get last frame source.
@@ -5759,7 +5713,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
   vpx_clear_system_state();
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   if (cpi->rc.is_last_bipred_frame) {
     // NOTE(zoeliu): If the current frame is a last bi-predictive frame, it is
     //               needed next to show the BWDREF_FRAME.
@@ -5768,7 +5722,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   } else {
     cm->show_existing_frame = 0;
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   return 0;
 }
@@ -5884,7 +5838,6 @@ void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags) {
 #if CONFIG_EXT_REFS
       ref ^= VP9_LAST2_FLAG;
       ref ^= VP9_LAST3_FLAG;
-      ref ^= VP9_LAST4_FLAG;
 #endif  // CONFIG_EXT_REFS
     }
 
@@ -5907,7 +5860,6 @@ void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags) {
 #if CONFIG_EXT_REFS
       upd ^= VP9_LAST2_FLAG;
       upd ^= VP9_LAST3_FLAG;
-      upd ^= VP9_LAST4_FLAG;
 #endif  // CONFIG_EXT_REFS
     }
 

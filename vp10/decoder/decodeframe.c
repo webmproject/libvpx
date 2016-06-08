@@ -57,43 +57,31 @@ static int is_compound_reference_allowed(const VP10_COMMON *cm) {
 }
 
 static void setup_compound_reference_mode(VP10_COMMON *cm) {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   cm->comp_fwd_ref[0] = LAST_FRAME;
-  cm->comp_fwd_ref[1] = GOLDEN_FRAME;
+  cm->comp_fwd_ref[1] = LAST2_FRAME;
+  cm->comp_fwd_ref[2] = LAST3_FRAME;
+  cm->comp_fwd_ref[3] = GOLDEN_FRAME;
+
   cm->comp_bwd_ref[0] = BWDREF_FRAME;
   cm->comp_bwd_ref[1] = ALTREF_FRAME;
-
-#else  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-
+#else
   if (cm->ref_frame_sign_bias[LAST_FRAME] ==
           cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
     cm->comp_fixed_ref = ALTREF_FRAME;
     cm->comp_var_ref[0] = LAST_FRAME;
-#if CONFIG_EXT_REFS
-    cm->comp_var_ref[1] = LAST2_FRAME;
-    cm->comp_var_ref[2] = LAST3_FRAME;
-    cm->comp_var_ref[3] = LAST4_FRAME;
-    cm->comp_var_ref[4] = GOLDEN_FRAME;
-#else  // CONFIG_EXT_REFS
     cm->comp_var_ref[1] = GOLDEN_FRAME;
-#endif  // CONFIG_EXT_REFS
   } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
                  cm->ref_frame_sign_bias[ALTREF_FRAME]) {
-#if CONFIG_EXT_REFS
-    assert(0);
-#endif  // CONFIG_EXT_REFS
     cm->comp_fixed_ref = GOLDEN_FRAME;
     cm->comp_var_ref[0] = LAST_FRAME;
     cm->comp_var_ref[1] = ALTREF_FRAME;
   } else {
-#if CONFIG_EXT_REFS
-    assert(0);
-#endif  // CONFIG_EXT_REFS
     cm->comp_fixed_ref = LAST_FRAME;
     cm->comp_var_ref[0] = GOLDEN_FRAME;
     cm->comp_var_ref[1] = ALTREF_FRAME;
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 }
 
 static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
@@ -180,7 +168,7 @@ static void read_frame_reference_mode_probs(VP10_COMMON *cm, vp10_reader *r) {
 
   if (cm->reference_mode != SINGLE_REFERENCE) {
     for (i = 0; i < REF_CONTEXTS; ++i) {
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       for (j = 0; j < (FWD_REFS - 1); ++j)
         vp10_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
       for (j = 0; j < (BWD_REFS - 1); ++j)
@@ -188,7 +176,7 @@ static void read_frame_reference_mode_probs(VP10_COMMON *cm, vp10_reader *r) {
 #else
       for (j = 0; j < (COMP_REFS - 1); ++j)
         vp10_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
     }
   }
 }
@@ -3128,10 +3116,10 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   cm->last_frame_type = cm->frame_type;
   cm->last_intra_only = cm->intra_only;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // NOTE: By default all coded frames to be used as a reference
   cm->is_reference_frame = 1;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   if (vpx_rb_read_literal(rb, 2) != VP9_FRAME_MARKER)
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
@@ -3167,7 +3155,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
     cm->lf.filter_level = 0;
     cm->show_frame = 1;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     // NOTE(zoeliu): The existing frame to show is adopted as a reference frame.
     pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
 
@@ -3225,7 +3213,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       for (i = 0; i < REF_FRAMES; ++i)
         cm->next_ref_frame_map[i] = cm->ref_frame_map[i];
     }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
     return 0;
   }
@@ -3291,13 +3279,13 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
     } else if (pbi->need_resync != 1) {  /* Skip if need resync */
       pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       if (!pbi->refresh_frame_flags) {
         // NOTE: "pbi->refresh_frame_flags == 0" indicates that the coded frame
         //       will not be used as a reference
         cm->is_reference_frame = 0;
       }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         const int ref = vpx_rb_read_literal(rb, REF_FRAMES_LOG2);
@@ -3692,12 +3680,12 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
                  sizeof(cm->counts.single_ref)));
   assert(!memcmp(cm->counts.comp_ref, zero_counts.comp_ref,
                  sizeof(cm->counts.comp_ref)));
-  assert(!memcmp(&cm->counts.tx_size, &zero_counts.tx_size,
-                 sizeof(cm->counts.tx_size)));
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   assert(!memcmp(cm->counts.comp_bwdref, zero_counts.comp_bwdref,
                  sizeof(cm->counts.comp_bwdref)));
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
+  assert(!memcmp(&cm->counts.tx_size, &zero_counts.tx_size,
+                 sizeof(cm->counts.tx_size)));
   assert(!memcmp(cm->counts.skip, zero_counts.skip, sizeof(cm->counts.skip)));
 #if CONFIG_REF_MV
   assert(!memcmp(&cm->counts.mv[0], &zero_counts.mv[0],
@@ -3772,11 +3760,11 @@ void vp10_decode_frame(VP10Decoder *pbi,
 
   if (!first_partition_size) {
     // showing a frame directly
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
     if (cm->show_existing_frame)
       *p_data_end = data + vpx_rb_bytes_read(&rb);
     else
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
       *p_data_end = data + (cm->profile <= PROFILE_2 ? 1 : 2);
 
     return;
@@ -3793,7 +3781,7 @@ void vp10_decode_frame(VP10Decoder *pbi,
                            !cm->last_intra_only &&
                            cm->last_show_frame &&
                            (cm->last_frame_type != KEY_FRAME);
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // NOTE(zoeliu): As cm->prev_frame can take neither a frame of
   //               show_exisiting_frame=1, nor can it take a frame not used as
   //               a reference, it is probable that by the time it is being
@@ -3809,7 +3797,7 @@ void vp10_decode_frame(VP10Decoder *pbi,
     RefBuffer *last_fb_ref_buf = &cm->frame_refs[LAST_FRAME - LAST_FRAME];
     cm->prev_frame = &cm->buffer_pool->frame_bufs[last_fb_ref_buf->idx];
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   vp10_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
 

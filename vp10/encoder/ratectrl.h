@@ -28,7 +28,7 @@ extern "C" {
 #define MAX_GF_INTERVAL     16
 #define FIXED_GF_INTERVAL   8    // Used in some testing modes only
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
 typedef enum {
   INTER_NORMAL = 0,
   INTER_LOW = 1,
@@ -47,7 +47,7 @@ typedef enum {
   KF_STD = 4,
   RATE_FACTOR_LEVELS = 5
 } RATE_FACTOR_LEVEL;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
 // Internal frame scaling level.
 typedef enum {
@@ -102,7 +102,7 @@ typedef struct {
   int source_alt_ref_active;
   int is_src_frame_alt_ref;
 
-#if CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // Length of the bi-predictive frame group interval
   int bipred_group_interval;
 
@@ -111,7 +111,7 @@ typedef struct {
   int is_bwd_ref_frame;
   int is_last_bipred_frame;
   int is_bipred_frame;
-#endif  // CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   int avg_frame_bandwidth;  // Average frame size target for clip
   int min_frame_bandwidth;  // Minimum allocation used for any frame

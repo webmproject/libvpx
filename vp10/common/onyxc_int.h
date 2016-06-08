@@ -178,6 +178,7 @@ typedef struct VP10Common {
 #if CONFIG_EXT_REFS
   // frame type of the frame before last frame
   FRAME_TYPE last2_frame_type;
+  // TODO(zoeliu): To check whether last3_frame_type is still needed.
   // frame type of the frame two frames before last frame
   FRAME_TYPE last3_frame_type;
 #endif  // CONFIG_EXT_REFS
@@ -186,10 +187,10 @@ typedef struct VP10Common {
   int show_frame;
   int last_show_frame;
   int show_existing_frame;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // Flag for a frame used as a reference - not written to the bitstream
   int is_reference_frame;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   // Flag signaling that the frame is encoded using only INTRA modes.
   uint8_t intra_only;
@@ -278,13 +279,13 @@ typedef struct VP10Common {
   int frame_parallel_decode;  // frame-based threading.
 
   // Context probabilities for reference frame prediction
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   MV_REFERENCE_FRAME comp_fwd_ref[FWD_REFS];
   MV_REFERENCE_FRAME comp_bwd_ref[BWD_REFS];
 #else
   MV_REFERENCE_FRAME comp_fixed_ref;
   MV_REFERENCE_FRAME comp_var_ref[COMP_REFS];
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   REFERENCE_MODE reference_mode;
 
   FRAME_CONTEXT *fc;  /* this frame entropy */

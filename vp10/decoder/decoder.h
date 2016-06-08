@@ -152,7 +152,7 @@ static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,
   }
 }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
 static INLINE int dec_is_ref_frame_buf(VP10Decoder *const pbi,
                                        RefCntBuffer *frame_buf) {
   VP10_COMMON *const cm = &pbi->common;
@@ -165,7 +165,7 @@ static INLINE int dec_is_ref_frame_buf(VP10Decoder *const pbi,
   }
   return (i < REFS_PER_FRAME);
 }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
 #ifdef __cplusplus
 }  // extern "C"

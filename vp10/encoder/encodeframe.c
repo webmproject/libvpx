@@ -1909,17 +1909,18 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
       // the reference frame counts used to work out probabilities.
       if (inter_block) {
         const MV_REFERENCE_FRAME ref0 = mbmi->ref_frame[0];
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
         const MV_REFERENCE_FRAME ref1 = mbmi->ref_frame[1];
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
+
         if (cm->reference_mode == REFERENCE_MODE_SELECT)
           counts->comp_inter[vp10_get_reference_mode_context(cm, xd)]
                             [has_second_ref(mbmi)]++;
 
         if (has_second_ref(mbmi)) {
 #if CONFIG_EXT_REFS
-          const int bit = (ref0 == GOLDEN_FRAME || ref0 == LAST3_FRAME ||
-                           ref0 == LAST4_FRAME);
+          const int bit = (ref0 == GOLDEN_FRAME || ref0 == LAST3_FRAME);
+
           counts->comp_ref[vp10_get_pred_context_comp_ref_p(cm, xd)][0][bit]++;
           if (!bit) {
             counts->comp_ref[vp10_get_pred_context_comp_ref_p1(cm, xd)][1]
@@ -1927,26 +1928,22 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
           } else {
             counts->comp_ref[vp10_get_pred_context_comp_ref_p2(cm, xd)][2]
                             [ref0 == GOLDEN_FRAME]++;
-            if (ref0 != GOLDEN_FRAME) {
-              counts->comp_ref[vp10_get_pred_context_comp_ref_p3(cm, xd)][3]
-                              [ref0 == LAST3_FRAME]++;
-            }
           }
-#else  // CONFIG_EXT_REFS
-          counts->comp_ref[vp10_get_pred_context_comp_ref_p(cm, xd)][0]
-                          [ref0 == GOLDEN_FRAME]++;
-#if CONFIG_BIDIR_PRED
+
           counts->comp_bwdref[vp10_get_pred_context_comp_bwdref_p(cm, xd)][0]
                              [ref1 == ALTREF_FRAME]++;
-#endif  // CONFIG_BIDIR_PRED
+#else
+          counts->comp_ref[vp10_get_pred_context_comp_ref_p(cm, xd)][0]
+                          [ref0 == GOLDEN_FRAME]++;
 #endif  // CONFIG_EXT_REFS
         } else {
 #if CONFIG_EXT_REFS
-          const int bit = (ref0 == ALTREF_FRAME || ref0 == GOLDEN_FRAME);
+          const int bit = (ref0 == ALTREF_FRAME || ref0 == BWDREF_FRAME);
+
           counts->single_ref[vp10_get_pred_context_single_ref_p1(xd)][0][bit]++;
           if (bit) {
             counts->single_ref[vp10_get_pred_context_single_ref_p2(xd)][1]
-                              [ref0 != GOLDEN_FRAME]++;
+                              [ref0 != BWDREF_FRAME]++;
           } else {
             const int bit1 = !(ref0 == LAST2_FRAME || ref0 == LAST_FRAME);
             counts->single_ref[vp10_get_pred_context_single_ref_p3(xd)][2]
@@ -1959,18 +1956,12 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
                                 [ref0 != LAST3_FRAME]++;
             }
           }
-#else  // CONFIG_EXT_REFS
+#else
           counts->single_ref[vp10_get_pred_context_single_ref_p1(xd)][0]
                             [ref0 != LAST_FRAME]++;
           if (ref0 != LAST_FRAME) {
             counts->single_ref[vp10_get_pred_context_single_ref_p2(xd)][1]
                               [ref0 != GOLDEN_FRAME]++;
-#if CONFIG_BIDIR_PRED
-            if (ref0 != GOLDEN_FRAME) {
-              counts->single_ref[vp10_get_pred_context_single_ref_p3(xd)][2]
-                                [ref0 != BWDREF_FRAME]++;
-            }
-#endif  // CONFIG_BIDIR_PRED
           }
 #endif  // CONFIG_EXT_REFS
         }
@@ -4398,11 +4389,7 @@ static int check_dual_ref_flags(VP10_COMP *cpi) {
 #if CONFIG_EXT_REFS
             !!(ref_flags & VP9_LAST2_FLAG) +
             !!(ref_flags & VP9_LAST3_FLAG) +
-            !!(ref_flags & VP9_LAST4_FLAG) +
-#else  // CONFIG_EXT_REFS
-#if CONFIG_BIDIR_PRED
             !!(ref_flags & VP9_BWD_FLAG) +
-#endif  // CONFIG_BIDIR_PRED
 #endif  // CONFIG_EXT_REFS
             !!(ref_flags & VP9_ALT_FLAG)) >= 2;
   }
@@ -4586,7 +4573,7 @@ static void encode_frame_internal(VP10_COMP *cpi) {
                            cm->height == cm->last_height &&
                            !cm->intra_only &&
                            cm->last_show_frame;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // NOTE(zoeliu): As cm->prev_frame can take neither a frame of
   //               show_exisiting_frame=1, nor can it take a frame not used as
   //               a reference, it is probable that by the time it is being
@@ -4602,7 +4589,7 @@ static void encode_frame_internal(VP10_COMP *cpi) {
     const int last_fb_buf_idx = get_ref_frame_buf_idx(cpi, LAST_FRAME);
     cm->prev_frame = &cm->buffer_pool->frame_bufs[last_fb_buf_idx];
   }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   // Special case: set prev_mi to NULL when the previous mode info
   // context cannot be used.
@@ -4669,23 +4656,18 @@ void vp10_encode_frame(VP10_COMP *cpi) {
     } else {
       cpi->allow_comp_inter_inter = 1;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
       cm->comp_fwd_ref[0] = LAST_FRAME;
-      cm->comp_fwd_ref[1] = GOLDEN_FRAME;
+      cm->comp_fwd_ref[1] = LAST2_FRAME;
+      cm->comp_fwd_ref[2] = LAST3_FRAME;
+      cm->comp_fwd_ref[3] = GOLDEN_FRAME;
       cm->comp_bwd_ref[0] = BWDREF_FRAME;
       cm->comp_bwd_ref[1] = ALTREF_FRAME;
-#else  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#else
       cm->comp_fixed_ref = ALTREF_FRAME;
       cm->comp_var_ref[0] = LAST_FRAME;
-#if CONFIG_EXT_REFS
-      cm->comp_var_ref[1] = LAST2_FRAME;
-      cm->comp_var_ref[2] = LAST3_FRAME;
-      cm->comp_var_ref[3] = LAST4_FRAME;
-      cm->comp_var_ref[4] = GOLDEN_FRAME;
-#else  // CONFIG_EXT_REFS
       cm->comp_var_ref[1] = GOLDEN_FRAME;
 #endif  // CONFIG_EXT_REFS
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
     }
   } else {
     cpi->allow_comp_inter_inter = 0;

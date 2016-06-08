@@ -75,10 +75,6 @@ typedef struct {
   FRAME_CONTEXT fc;
 } CODING_CONTEXT;
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-#define BIDIR_PRED_PERIOD  2
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
-
 typedef enum {
   // encode_breakout is disabled.
   ENCODE_BREAKOUT_DISABLED = 0,
@@ -114,12 +110,12 @@ typedef enum {
 typedef enum {
   FRAMEFLAGS_KEY    = 1 << 0,
   FRAMEFLAGS_GOLDEN = 1 << 1,
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   FRAMEFLAGS_BWDREF = 1 << 2,
   FRAMEFLAGS_ALTREF = 1 << 3,
 #else
   FRAMEFLAGS_ALTREF = 1 << 2,
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 } FRAMETYPE_FLAGS;
 
 typedef enum {
@@ -205,9 +201,9 @@ typedef struct VP10EncoderConfig {
   // ----------------------------------------------------------------
 
   int enable_auto_arf;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   int enable_auto_brf;  // (b)ackward (r)ef (f)rame
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
   int encode_breakout;  // early breakout : for video conf recommend 800
 
@@ -364,22 +360,22 @@ typedef struct VP10_COMP {
   int scaled_ref_idx[MAX_REF_FRAMES];
 #if CONFIG_EXT_REFS
   int lst_fb_idxes[LAST_REF_FRAMES];
-#else  // CONFIG_EXT_REFS
+#else
   int lst_fb_idx;
 #endif  // CONFIG_EXT_REFS
   int gld_fb_idx;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   int bwd_fb_idx;  // BWD_REF_FRAME
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   int alt_fb_idx;
 
   int last_show_frame_buf_idx;  // last show frame buffer index
 
   int refresh_last_frame;
   int refresh_golden_frame;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   int refresh_bwd_ref_frame;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   int refresh_alt_ref_frame;
 
   int ext_refresh_frame_flags_pending;
@@ -615,10 +611,10 @@ typedef struct VP10_COMP {
 #if CONFIG_ANS
   struct BufAnsCoder buf_ans;
 #endif
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   int refresh_frame_mask;
   int existing_fb_idx_to_show;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 } VP10_COMP;
 
 void vp10_initialize_enc(void);
@@ -680,7 +676,7 @@ static INLINE int frame_is_kf_gf_arf(const VP10_COMP *cpi) {
 static INLINE int get_ref_frame_map_idx(const VP10_COMP *cpi,
                                         MV_REFERENCE_FRAME ref_frame) {
 #if CONFIG_EXT_REFS
-  if (ref_frame >= LAST_FRAME && ref_frame <= LAST4_FRAME)
+  if (ref_frame >= LAST_FRAME && ref_frame <= LAST3_FRAME)
     return cpi->lst_fb_idxes[ref_frame - 1];
 #else
   if (ref_frame == LAST_FRAME)
@@ -688,10 +684,10 @@ static INLINE int get_ref_frame_map_idx(const VP10_COMP *cpi,
 #endif  // CONFIG_EXT_REFS
   else if (ref_frame == GOLDEN_FRAME)
     return cpi->gld_fb_idx;
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   else if (ref_frame == BWDREF_FRAME)
     return cpi->bwd_fb_idx;
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   else
     return cpi->alt_fb_idx;
 }
@@ -719,7 +715,7 @@ static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(
   return &cpi->upsampled_ref_bufs[buf_idx].buf;
 }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
 static INLINE int enc_is_ref_frame_buf(VP10_COMP *cpi,
                                        RefCntBuffer *frame_buf) {
   MV_REFERENCE_FRAME ref_frame;
@@ -731,7 +727,7 @@ static INLINE int enc_is_ref_frame_buf(VP10_COMP *cpi,
   }
   return (ref_frame <= ALTREF_FRAME);
 }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
 static INLINE unsigned int get_token_alloc(int mb_rows, int mb_cols) {
   // TODO(JBB): double check we can't exceed this token count if we have a
@@ -774,15 +770,15 @@ static INLINE int is_altref_enabled(const VP10_COMP *const cpi) {
          cpi->oxcf.enable_auto_arf;
 }
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+// TODO(zoeliu): To set up cpi->oxcf.enable_auto_brf
+#if 0 && CONFIG_EXT_REFS
 static INLINE int is_bwdref_enabled(const VP10_COMP *const cpi) {
-  // NOTE(zoeliu): The enabling of backward prediction depends on the alt_ref
-  // period, and will be off when the alt_ref period is not sufficiently large.
-  return cpi->oxcf.mode != REALTIME && cpi->oxcf.lag_in_frames > 0;
-         // (zoeliu):
-         // && cpi->oxcf.enable_auto_brf && cpi->rc.bidir_pred_enabled;
+  // NOTE(zoeliu): The enabling of bi-predictive frames depends on the use of
+  //               alt_ref, and now will be off when the alt_ref interval is
+  //               not sufficiently large.
+  return is_altref_enabled(cpi) && cpi->oxcf.enable_auto_brf;
 }
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
 static INLINE void set_ref_ptrs(VP10_COMMON *cm, MACROBLOCKD *xd,
                                 MV_REFERENCE_FRAME ref0,

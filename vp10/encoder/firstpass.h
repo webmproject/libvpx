@@ -39,12 +39,12 @@ typedef struct {
 } FIRSTPASS_MB_STATS;
 #endif
 
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
 // Length of the bi-predictive frame group (BFG)
 // NOTE: Currently each BFG contains one backward ref (BWF) frame plus a certain
 //       number of bi-predictive frames.
 #define BFG_INTERVAL          2
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 
 #define VLOW_MOTION_THRESHOLD 950
 
@@ -79,14 +79,14 @@ typedef enum {
   GF_UPDATE = 2,
   ARF_UPDATE = 3,
   OVERLAY_UPDATE = 4,
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   BRF_UPDATE = 5,  // Backward Reference Frame
   LAST_BIPRED_UPDATE = 6,  // Last Bi-predictive Frame
   BIPRED_UPDATE = 7,  // Bi-predictive Frame, but not the last one
   FRAME_UPDATE_TYPES = 8
 #else
   FRAME_UPDATE_TYPES = 5
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 } FRAME_UPDATE_TYPE;
 
 #define FC_ANIMATION_THRESH 0.15
@@ -103,10 +103,10 @@ typedef struct {
   unsigned char arf_src_offset[(MAX_LAG_BUFFERS * 2) + 1];
   unsigned char arf_update_idx[(MAX_LAG_BUFFERS * 2) + 1];
   unsigned char arf_ref_idx[(MAX_LAG_BUFFERS * 2) + 1];
-#if !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   unsigned char brf_src_offset[(MAX_LAG_BUFFERS * 2) + 1];
   unsigned char bidir_pred_enabled[(MAX_LAG_BUFFERS * 2) + 1];
-#endif  // !CONFIG_EXT_REFS && CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
   int bit_allocation[(MAX_LAG_BUFFERS * 2) + 1];
 } GF_GROUP;
 
