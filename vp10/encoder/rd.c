@@ -374,9 +374,6 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
 
   set_error_per_bit(x, rd->RDMULT);
 
-  x->select_tx_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
-                       cm->frame_type != KEY_FRAME) ? 0 : 1;
-
   set_block_thresholds(cm, rd);
 
   if (!frame_is_intra_only(cm)) {

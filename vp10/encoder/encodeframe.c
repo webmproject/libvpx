@@ -4970,13 +4970,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
 
-  x->skip_recode = !x->select_tx_size && mbmi->sb_type >= BLOCK_8X8 &&
-#if CONFIG_OBMC
-                   !(is_inter_block(mbmi) && is_obmc_allowed(mbmi)) &&
-#endif  // CONFIG_OBMC
-                   cpi->oxcf.aq_mode != COMPLEXITY_AQ &&
-                   cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ &&
-                   cpi->sf.allow_skip_recode;
+  x->skip_recode = 0;
 
   if (!x->skip_recode)
     memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
