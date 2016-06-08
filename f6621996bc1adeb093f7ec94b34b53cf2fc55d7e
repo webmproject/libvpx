@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83c4707e_0d03216f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "add:\nBUG\u003dhttps://bugs.chromium.org/p/webm/issues/detail?id\u003d1168\nor\nBUG\u003dwebm:1168\n\nthat will allow the bug to be auto-updated",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_d0027c69",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "a note about rough speed-up and at which speed would be good",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3258844_d3029469",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "utilizes",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a31df4f8_fa23e9a6",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "63177cd9_f86bf105",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "these could be grouped into a comma separated list",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a31df4f8_fa51a92a",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "these could be grouped into a comma separated list if they can\u0027t be assigned to immediately.",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_d087dc1f",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "space before \u0027*\u0027 here and elsewhere",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_30d508f8",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "whitespace around \u0027+\u0027",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_10a6c4bb",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_30a3c8ac",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_30bc28be",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "couldn\u0027t this just be one _mm_set_epi32?",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_d0b03ced",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83c4707e_ed190dca",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": ", VP9_PROB_COST_SHIFT",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "638cdc87_10d8042f",
+        "filename": "vp9/encoder/x86/vp9_diamond_search_sad_avx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T00:06:40Z",
+      "side": 1,
+      "message": "this can have high latency, I wonder if a shift \u0026 mov would work better",
+      "revId": "f6621996bc1adeb093f7ec94b34b53cf2fc55d7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
