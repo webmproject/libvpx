@@ -139,12 +139,16 @@ typedef uint8_t TX_SIZE;
 
 #define MAX_TX_SIZE_LOG2  5
 #define MAX_TX_SIZE       (1 << MAX_TX_SIZE_LOG2)
+#define MIN_TX_SIZE_LOG2  2
+#define MIN_TX_SIZE       (1 << MIN_TX_SIZE_LOG2)
 #define MAX_TX_SQUARE     (MAX_TX_SIZE * MAX_TX_SIZE)
 
 // Number of maxium size transform blocks in the maximum size superblock
 #define MAX_TX_BLOCKS_IN_MAX_SB_LOG2 \
   ((MAX_SB_SIZE_LOG2 - MAX_TX_SIZE_LOG2) * 2)
 #define MAX_TX_BLOCKS_IN_MAX_SB (1 << MAX_TX_BLOCKS_IN_MAX_SB_LOG2)
+
+#define MAX_NUM_TXB  (1 << (MAX_SB_SIZE_LOG2 - MIN_TX_SIZE_LOG2))
 
 // frame transform mode
 typedef enum {
