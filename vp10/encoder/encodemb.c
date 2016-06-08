@@ -436,10 +436,9 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   // Assert not magic number (uninitialised).
   assert(x->blk_skip[plane][(blk_row << bwl) + blk_col] != 234);
 
-  if (!x->skip_recode &&
-      x->blk_skip[plane][(blk_row << bwl) + blk_col] == 0) {
+  if (x->blk_skip[plane][(blk_row << bwl) + blk_col] == 0) {
 #else
-  if (!x->skip_recode) {
+  {
 #endif
     if (x->quant_fp) {
       // Encoding process for rtc mode
@@ -479,12 +478,11 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   }
 #if CONFIG_VAR_TX
   else {
-    if (!x->skip_recode)
-      p->eobs[block] = 0;
+    p->eobs[block] = 0;
   }
 #endif
 
-  if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
+  if (x->optimize) {
     int ctx;
 #if CONFIG_VAR_TX
     switch (tx_size) {
@@ -661,10 +659,9 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     int block = 0;
     int step = 1 << (max_tx_size * 2);
 #endif
-    if (!x->skip_recode)
-      vp10_subtract_plane(x, bsize, plane);
+    vp10_subtract_plane(x, bsize, plane);
 
-    if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
+    if (x->optimize) {
 #if CONFIG_VAR_TX
       vp10_get_entropy_contexts(bsize, TX_4X4, pd,
                                 ctx.ta[plane], ctx.tl[plane]);
@@ -761,24 +758,15 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
                      src_stride, dst, dst_stride);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if CONFIG_EXT_INTRA
   vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                    VP10_XFORM_QUANT_B);
-#else
-  if (!x->skip_recode)
-    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
-                     VP10_XFORM_QUANT_B);
-  else
-    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
-                     VP10_XFORM_QUANT_SKIP_QUANT);
-#endif  // CONFIG_EXT_INTRA
 
   if (args->ctx != NULL) {
     struct optimize_ctx *const ctx = args->ctx;
     ENTROPY_CONTEXT *a, *l;
     a = &ctx->ta[plane][blk_col];
     l = &ctx->tl[plane][blk_row];
-    if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
+    if (x->optimize) {
       int ctx;
       ctx = combine_entropy_contexts(*a, *l);
       *a = *l = optimize_b(x, plane, block, tx_size, ctx) > 0;
@@ -814,8 +802,7 @@ void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
   struct optimize_ctx ctx;
   struct encode_b_args arg = {x, &ctx, &xd->mi[0]->mbmi.skip};
 
-  if (enable_optimize_b && x->optimize &&
-      (!x->skip_recode || !x->skip_optimize)) {
+  if (enable_optimize_b && x->optimize) {
     const struct macroblockd_plane* const pd = &xd->plane[plane];
     const TX_SIZE tx_size = plane ? get_uv_tx_size(&xd->mi[0]->mbmi, pd) :
         xd->mi[0]->mbmi.tx_size;

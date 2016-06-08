@@ -131,7 +131,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
   const int boosted = frame_is_boosted(cpi);
 
   sf->adaptive_rd_thresh = 1;
-  sf->allow_skip_recode = 1;
 
   if (speed >= 1) {
     if ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
@@ -335,7 +334,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     sf->mv.subpel_iters_per_step = 1;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
-    sf->allow_skip_recode = 0;
     sf->optimize_coefficients = 0;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
     sf->lpf_pick = LPF_PICK_FROM_Q;
@@ -369,7 +367,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
     sf->inter_mode_mask[BLOCK_128X128] = INTER_NEAREST;
 #endif  // CONFIG_EXT_PARTITION
     sf->max_intra_bsize = BLOCK_32X32;
-    sf->allow_skip_recode = 1;
   }
 
   if (speed >= 5) {
@@ -382,7 +379,6 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
         (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = is_keyframe ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
-    sf->allow_skip_recode = 0;
     sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST_NEW_ZERO;
@@ -532,7 +528,6 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   }
   sf->use_rd_breakout = 0;
   sf->use_uv_intra_rd_estimate = 0;
-  sf->allow_skip_recode = 0;
   sf->lpf_pick = LPF_PICK_FROM_FULL_IMAGE;
   sf->use_fast_coef_updates = TWO_LOOP;
   sf->use_fast_coef_costing = 0;
@@ -566,12 +561,6 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
     set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);
   else if (oxcf->mode == GOOD)
     set_good_speed_feature(cpi, cm, sf, oxcf->speed);
-
-#if CONFIG_REF_MV
-  // TODO(geza): Temporarily turn this off for ref-mv to fix tests.
-  //             Investigate/reimplement skip_recode better to enable this.
-  sf->allow_skip_recode = 0;
-#endif  // CONFIG_REF_MV
 
   // sf->partition_search_breakout_dist_thr is set assuming max 64x64
   // blocks. Normalise this if the blocks are bigger.
