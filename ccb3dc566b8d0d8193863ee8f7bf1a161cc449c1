@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f0b7c18_3818e969",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T23:00:31Z",
+      "side": 1,
+      "message": "this might be the only case of this, but if it became common you could increase table size by 1",
+      "revId": "ccb3dc566b8d0d8193863ee8f7bf1a161cc449c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_d82e8d86",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 4513,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T23:00:31Z",
+      "side": 1,
+      "message": "alignment is off this is part of the () grouping",
+      "revId": "ccb3dc566b8d0d8193863ee8f7bf1a161cc449c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_b842b922",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 4551,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T23:00:31Z",
+      "side": 1,
+      "message": "your decision to use {}s on single line if(/else) is quite mixed here. personally I think always using {}s is less error prone and somewhat more readable",
+      "revId": "ccb3dc566b8d0d8193863ee8f7bf1a161cc449c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_185405e4",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 4567,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T23:00:31Z",
+      "side": 1,
+      "message": "this could be joined with the line above",
+      "revId": "ccb3dc566b8d0d8193863ee8f7bf1a161cc449c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_18064514",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T23:00:31Z",
+      "side": 1,
+      "message": "this fits in an int, so no LL needed; the calculations can handle promoting to 64-bit if needed",
+      "revId": "ccb3dc566b8d0d8193863ee8f7bf1a161cc449c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
