@@ -1557,7 +1557,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     // Increase gf interval at high Q and high overshoot.
     if (cm->current_video_frame > 30 &&
         rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
-        rate_err > 4.0) {
+        rate_err > 3.5) {
       rc->baseline_gf_interval =
           VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
     } else if (cm->current_video_frame > 30 &&
