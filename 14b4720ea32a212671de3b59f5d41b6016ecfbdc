@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "038b20a4_e0a5bc13",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T20:09:33Z",
+      "side": 1,
+      "message": "this should be static for now, any followup can make the changes to expose it",
+      "revId": "14b4720ea32a212671de3b59f5d41b6016ecfbdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038b20a4_40ad90f5",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T20:09:33Z",
+      "side": 1,
+      "message": "these could be *const",
+      "revId": "14b4720ea32a212671de3b59f5d41b6016ecfbdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038b20a4_a02f3443",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T20:09:33Z",
+      "side": 1,
+      "message": "memset(0) is enough; you can start with that for both then manually assign the one\u0027s that aren\u0027t 0",
+      "revId": "14b4720ea32a212671de3b59f5d41b6016ecfbdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038b20a4_80b79843",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T20:09:33Z",
+      "side": 1,
+      "message": "just make this one line with ?:",
+      "revId": "14b4720ea32a212671de3b59f5d41b6016ecfbdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038b20a4_e0521ccd",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 4763,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T20:09:33Z",
+      "side": 1,
+      "message": "you should bundle this in a function. the containing function is big and bad as it is.",
+      "revId": "14b4720ea32a212671de3b59f5d41b6016ecfbdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038b20a4_e07e9c53",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 4775,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T20:09:33Z",
+      "side": 1,
+      "message": "total_compressed_size is uint64, this cast will be unnecessary",
+      "revId": "14b4720ea32a212671de3b59f5d41b6016ecfbdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "038b20a4_20e24442",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 4856,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-08T20:09:33Z",
+      "side": 1,
+      "message": "this cast isn\u0027t necessary",
+      "revId": "14b4720ea32a212671de3b59f5d41b6016ecfbdc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
