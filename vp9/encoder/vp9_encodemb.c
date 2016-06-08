@@ -913,7 +913,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                              pd->dequant, eob, scan_order->scan,
                              scan_order->iscan);
       }
-      if (args->ctx != NULL) {
+      if (args->ctx != NULL && !x->skip_recode) {
        *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -929,7 +929,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (args->ctx != NULL) {
+      if (args->ctx != NULL && !x->skip_recode) {
         *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -945,7 +945,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (args->ctx != NULL) {
+      if (args->ctx != NULL && !x->skip_recode) {
         *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -964,7 +964,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (args->ctx != NULL) {
+      if (args->ctx != NULL && !x->skip_recode) {
         *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob) {
