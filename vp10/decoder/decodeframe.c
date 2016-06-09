@@ -238,14 +238,13 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane,
                                     uint8_t *dst, int stride,
                                     int eob) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int seg_id = xd->mi[0]->mbmi.segment_id;
   if (eob > 0) {
     tran_low_t *const dqcoeff = pd->dqcoeff;
     INV_TXFM_PARAM inv_txfm_param;
     inv_txfm_param.tx_type = tx_type;
     inv_txfm_param.tx_size = tx_size;
     inv_txfm_param.eob = eob;
-    inv_txfm_param.lossless = xd->lossless[seg_id];
+    inv_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -376,7 +375,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
 #else
                                    vp10_reader *r,
 #endif
-                                   MB_MODE_INFO *const mbmi, int plane,
+                                   int segment_id, int plane,
                                    int row, int col, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
@@ -386,7 +385,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   const int eob = vp10_decode_block_tokens(xd,
                                            plane, sc, col, row,
                                            tx_size, tx_type, r,
-                                           mbmi->segment_id);
+                                           segment_id);
 
   inverse_transform_block(xd, plane, tx_type, tx_size,
                           &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
@@ -1228,6 +1227,36 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
       assert(0);
   }
 }
+
+static void set_segment_id_supertx(const VP10_COMMON *const cm,
+                                   const int mi_row, const int mi_col,
+                                   const BLOCK_SIZE bsize) {
+  const struct segmentation *seg = &cm->seg;
+  const int miw =
+      VPXMIN(num_8x8_blocks_wide_lookup[bsize], cm->mi_cols - mi_col);
+  const int mih =
+      VPXMIN(num_8x8_blocks_high_lookup[bsize], cm->mi_rows - mi_row);
+  const int mi_offset = mi_row * cm->mi_stride + mi_col;
+  MODE_INFO **const mip = cm->mi_grid_visible + mi_offset;
+  int r, c;
+  int seg_id_supertx = MAX_SEGMENTS;
+
+  if (!seg->enabled) {
+    seg_id_supertx = 0;
+  } else {
+    // Find the minimum segment_id
+    for (r = 0 ; r < mih ; r++)
+      for (c = 0 ; c < miw ; c++)
+        seg_id_supertx = VPXMIN(mip[r * cm->mi_stride + c]->mbmi.segment_id,
+                                seg_id_supertx);
+    assert(0 <= seg_id_supertx && seg_id_supertx < MAX_SEGMENTS);
+  }
+
+  // Assign the the segment_id back to segment_id_supertx
+  for (r = 0 ; r < mih ; r++)
+    for (c = 0 ; c < miw ; c++)
+      mip[r * cm->mi_stride + c]->mbmi.segment_id_supertx = seg_id_supertx;
+}
 #endif  // CONFIG_SUPERTX
 
 static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
@@ -1415,7 +1444,8 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
           for (col = 0; col < max_blocks_wide; col += step)
             eobtotal += reconstruct_inter_block(xd,
                                                 r,
-                                                mbmi, plane, row, col,
+                                                mbmi->segment_id,
+                                                plane, row, col,
                                                 tx_size);
 #endif
       }
@@ -1776,6 +1806,8 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     uint8_t *dst_buf[3];
     int dst_stride[3], i;
 
+    set_segment_id_supertx(cm, mi_row, mi_col, bsize);
+
     vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
     for (i = 0; i < MAX_MB_PLANE; i++) {
       dst_buf[i] = xd->plane[i].dst.buf;
@@ -1790,6 +1822,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       set_offsets_topblock(cm, xd, tile, bsize, mi_row, mi_col);
       mbmi = &xd->mi[0]->mbmi;
       mbmi->tx_type = txfm;
+      assert(mbmi->segment_id_supertx != MAX_SEGMENTS);
       for (i = 0; i < MAX_MB_PLANE; ++i) {
         const struct macroblockd_plane *const pd = &xd->plane[i];
         const int num_4x4_w = pd->n4_w;
@@ -1810,7 +1843,8 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
           for (col = 0; col < max_blocks_wide; col += step)
             eobtotal += reconstruct_inter_block(xd,
                                                 r,
-                                                mbmi, i, row, col,
+                                                mbmi->segment_id_supertx,
+                                                i, row, col,
                                                 tx_size);
       }
       if (!(subsize < BLOCK_8X8) && eobtotal == 0)

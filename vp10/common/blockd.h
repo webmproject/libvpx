@@ -171,6 +171,10 @@ typedef struct {
   int8_t skip;
   int8_t has_no_coeffs;
   int8_t segment_id;
+#if CONFIG_SUPERTX
+  // Minimum of all segment IDs under the current supertx block.
+  int8_t segment_id_supertx;
+#endif  // CONFIG_SUPERTX
   int8_t seg_id_predicted;  // valid only when temporal_update is enabled
 
   // Only for INTRA blocks
