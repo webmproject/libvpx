@@ -5379,9 +5379,8 @@ static void predict_b_extend(VP10_COMP *cpi, ThreadData *td,
                              int mi_row_pred, int mi_col_pred,
                              int mi_row_top, int mi_col_top,
                              uint8_t * dst_buf[3], int dst_stride[3],
-                             BLOCK_SIZE bsize_ori, BLOCK_SIZE bsize_top,
-                             BLOCK_SIZE bsize_pred, int output_enabled,
-                             int b_sub8x8, int bextend) {
+                             BLOCK_SIZE bsize_top, BLOCK_SIZE bsize_pred,
+                             int output_enabled, int b_sub8x8, int bextend) {
   // Used in supertx
   // (mi_row_ori, mi_col_ori): location for mv
   // (mi_row_pred, mi_col_pred, bsize_pred): region to predict
@@ -5397,8 +5396,6 @@ static void predict_b_extend(VP10_COMP *cpi, ThreadData *td,
   int c = (mi_col_pred - mi_col_top) * MI_SIZE;
   const int mi_width_top = num_8x8_blocks_wide_lookup[bsize_top];
   const int mi_height_top = num_8x8_blocks_high_lookup[bsize_top];
-
-  (void)bsize_ori;
 
   if (mi_row_pred < mi_row_top || mi_col_pred < mi_col_top ||
       mi_row_pred >= mi_row_top + mi_height_top ||
@@ -5461,7 +5458,7 @@ static void extend_dir(VP10_COMP *cpi, ThreadData *td,
     predict_b_extend(cpi, td, tile, block, mi_row, mi_col,
                      mi_row_pred, mi_col_pred,
                      mi_row_top, mi_col_top, dst_buf, dst_stride,
-                     bsize, top_bsize, extend_bsize,
+                     top_bsize, extend_bsize,
                      output_enabled, b_sub8x8, 1);
 
     if (mi_width > unit) {
@@ -5470,7 +5467,7 @@ static void extend_dir(VP10_COMP *cpi, ThreadData *td,
         mi_col_pred += unit;
         predict_b_extend(cpi, td, tile, block, mi_row, mi_col,
                          mi_row_pred, mi_col_pred, mi_row_top, mi_col_top,
-                         dst_buf, dst_stride, bsize, top_bsize, extend_bsize,
+                         dst_buf, dst_stride, top_bsize, extend_bsize,
                          output_enabled, b_sub8x8, 1);
       }
     }
@@ -5483,7 +5480,7 @@ static void extend_dir(VP10_COMP *cpi, ThreadData *td,
 
     predict_b_extend(cpi, td, tile, block, mi_row, mi_col,
                      mi_row_pred, mi_col_pred, mi_row_top, mi_col_top,
-                     dst_buf, dst_stride, bsize, top_bsize, extend_bsize,
+                     dst_buf, dst_stride, top_bsize, extend_bsize,
                      output_enabled, b_sub8x8, 1);
 
     if (mi_height > unit) {
@@ -5492,7 +5489,7 @@ static void extend_dir(VP10_COMP *cpi, ThreadData *td,
         mi_row_pred += unit;
         predict_b_extend(cpi, td, tile, block, mi_row, mi_col,
                          mi_row_pred, mi_col_pred, mi_row_top, mi_col_top,
-                         dst_buf, dst_stride, bsize, top_bsize, extend_bsize,
+                         dst_buf, dst_stride, top_bsize, extend_bsize,
                          output_enabled, b_sub8x8, 1);
       }
     }
@@ -5503,7 +5500,7 @@ static void extend_dir(VP10_COMP *cpi, ThreadData *td,
 
     predict_b_extend(cpi, td, tile, block, mi_row, mi_col,
                      mi_row_pred, mi_col_pred, mi_row_top, mi_col_top,
-                     dst_buf, dst_stride, bsize, top_bsize, extend_bsize,
+                     dst_buf, dst_stride, top_bsize, extend_bsize,
                      output_enabled, b_sub8x8, 1);
   }
 }
@@ -5618,7 +5615,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
       assert(bsize < top_bsize);
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride,
-                       bsize, top_bsize, bsize, output_enabled, 0, 0);
+                       top_bsize, bsize, output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize, top_bsize, mi_row, mi_col,
                  mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
       break;
@@ -5627,7 +5624,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
         // Fisrt half
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 0);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
                      mi_row_top, mi_col_top, output_enabled,
@@ -5636,7 +5633,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
         // Second half
         predict_b_extend(cpi, td, tile, 2, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 2, subsize, top_bsize, mi_row, mi_col,
                      mi_row_top, mi_col_top, output_enabled,
@@ -5656,7 +5653,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
         // First half
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride,
-                         subsize, top_bsize, subsize, output_enabled, 0, 0);
+                         top_bsize, subsize, output_enabled, 0, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
                      mi_row_top, mi_col_top, output_enabled,
@@ -5670,7 +5667,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
           // Second half
           predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col,
                            mi_row + hbs, mi_col, mi_row_top, mi_col_top,
-                           dst_buf1, dst_stride1, subsize, top_bsize, subsize,
+                           dst_buf1, dst_stride1, top_bsize, subsize,
                            output_enabled, 0, 0);
           if (bsize < top_bsize)
             extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs,
@@ -5698,7 +5695,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
         // First half
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 0);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
                      mi_row_top, mi_col_top, output_enabled,
@@ -5707,7 +5704,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
         // Second half
         predict_b_extend(cpi, td, tile, 1, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 1, subsize, top_bsize, mi_row, mi_col,
                      mi_row_top, mi_col_top, output_enabled,
@@ -5727,7 +5724,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
         // bsize: not important, not useful
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride,
-                         subsize, top_bsize, subsize, output_enabled, 0, 0);
+                         top_bsize, subsize, output_enabled, 0, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
                      mi_row_top, mi_col_top, output_enabled,
@@ -5741,7 +5738,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
         if (mi_col + hbs < cm->mi_cols) {
           predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs,
                            mi_row, mi_col + hbs, mi_row_top, mi_col_top,
-                           dst_buf1, dst_stride1, subsize, top_bsize, subsize,
+                           dst_buf1, dst_stride1, top_bsize, subsize,
                            output_enabled, 0, 0);
           if (bsize < top_bsize)
             extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row,
@@ -5767,16 +5764,16 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
       if (bsize == BLOCK_8X8) {
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 0);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 0);
         predict_b_extend(cpi, td, tile, 1, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
         predict_b_extend(cpi, td, tile, 2, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf2, dst_stride2,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
         predict_b_extend(cpi, td, tile, 3, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf3, dst_stride3,
-                         subsize, top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
 
         if (bsize < top_bsize) {
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
@@ -5863,20 +5860,20 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
     case PARTITION_HORZ_A:
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride,
-                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+                       top_bsize, bsize2, output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col,
                  mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs,
                        mi_row, mi_col + hbs, mi_row_top, mi_col_top,
-                       dst_buf1, dst_stride1, bsize2, top_bsize, bsize2,
+                       dst_buf1, dst_stride1, top_bsize, bsize2,
                        output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col + hbs,
                  mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
                        mi_col, mi_row_top, mi_col_top, dst_buf2, dst_stride2,
-                       subsize, top_bsize, subsize, output_enabled, 0, 0);
+                       top_bsize, subsize, output_enabled, 0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs, mi_col,
                    mi_row_top, mi_col_top, output_enabled,
@@ -5912,19 +5909,19 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride,
-                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+                       top_bsize, bsize2, output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col,
                  mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
                        mi_col, mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+                       top_bsize, bsize2, output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs, mi_col,
                  mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
                        mi_col + hbs, mi_row_top, mi_col_top, dst_buf2,
-                       dst_stride2, subsize, top_bsize, subsize, output_enabled,
+                       dst_stride2, top_bsize, subsize, output_enabled,
                        0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col + hbs,
@@ -5960,7 +5957,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride,
-                       subsize, top_bsize, subsize, output_enabled, 0, 0);
+                       top_bsize, subsize, output_enabled, 0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
                    mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
@@ -5971,13 +5968,13 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
                        mi_col, mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                       bsize2, top_bsize, bsize2, output_enabled, 0, 0);
+                       top_bsize, bsize2, output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs, mi_col,
                  mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col + hbs,
                        mi_row + hbs, mi_col + hbs, mi_row_top, mi_col_top,
-                       dst_buf2, dst_stride2, bsize2, top_bsize, bsize2,
+                       dst_buf2, dst_stride2, top_bsize, bsize2,
                        output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs,
                  mi_col + hbs, mi_row_top, mi_col_top, output_enabled, dst_buf2,
@@ -6010,7 +6007,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride,
-                       subsize, top_bsize, subsize, output_enabled, 0, 0);
+                       top_bsize, subsize, output_enabled, 0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
                    mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
@@ -6021,14 +6018,14 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
                        mi_col + hbs, mi_row_top, mi_col_top, dst_buf1,
-                       dst_stride1, bsize2, top_bsize, bsize2, output_enabled,
+                       dst_stride1, top_bsize, bsize2, output_enabled,
                        0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col + hbs,
                  mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col + hbs,
                        mi_row + hbs, mi_col + hbs, mi_row_top, mi_col_top,
-                       dst_buf2, dst_stride2, bsize2, top_bsize, bsize2,
+                       dst_buf2, dst_stride2, top_bsize, bsize2,
                        output_enabled, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs,
                  mi_col + hbs, mi_row_top, mi_col_top, output_enabled, dst_buf2,
