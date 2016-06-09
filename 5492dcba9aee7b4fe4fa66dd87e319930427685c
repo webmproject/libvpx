@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f0b7c18_a75614e0",
+        "filename": "vp10/vp10cx.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-06-09T18:54:10Z",
+      "side": 1,
+      "message": "Shouldn\u0027t it be added to vp10common.mk, since the decoder side also need to do the projection",
+      "revId": "5492dcba9aee7b4fe4fa66dd87e319930427685c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
