@@ -288,6 +288,7 @@ EXPERIMENT_LIST="
     ext_partition_types
     ext_tile
     obmc
+    warped_motion
     entropy
     bidir_pred
 "

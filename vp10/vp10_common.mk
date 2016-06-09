@@ -88,6 +88,10 @@ ifeq ($(CONFIG_VP9_POSTPROC),yes)
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/mfqe_sse2.asm
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
+ifeq (yes,$(filter yes,$(CONFIG_GLOBAL_MOTION) $(CONFIG_WARPED_MOTION)))
+VP10_COMMON_SRCS-yes += common/warped_motion.h
+VP10_COMMON_SRCS-yes += common/warped_motion.c
+endif
 
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans4_dspr2.c
