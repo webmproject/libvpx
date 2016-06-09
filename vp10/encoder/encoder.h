@@ -527,9 +527,9 @@ typedef struct VP10_COMP {
                                        [INTER_COMPOUND_MODES];
   unsigned int interintra_mode_cost[BLOCK_SIZE_GROUPS][INTERINTRA_MODES];
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC
-  int obmc_cost[BLOCK_SIZES][2];
-#endif  // CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+  int motvar_cost[BLOCK_SIZES][MOTION_VARIATIONS];
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
   int intra_uv_mode_cost[INTRA_MODES][INTRA_MODES];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];

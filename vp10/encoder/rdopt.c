@@ -6947,12 +6947,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   uint8_t *tmp_buf;
 
-#if CONFIG_OBMC
-  int allow_obmc =
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+  int allow_motvar =
 #if CONFIG_EXT_INTER
       !is_comp_interintra_pred &&
 #endif  // CONFIG_EXT_INTER
-      is_obmc_allowed(mbmi);
+      is_motvar_allowed(mbmi);
   int rate2_nocoeff, best_rate2 = INT_MAX,
       best_skippable, best_xskip, best_disable_skip = 0;
 #if CONFIG_SUPERTX
@@ -6969,7 +6969,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int rate_mv_bmc;
   MB_MODE_INFO best_bmc_mbmi;
 #endif  // CONFIG_EXT_INTER
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
   int pred_exists = 0;
   int intpel_mv;
@@ -7864,13 +7864,17 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   memcpy(x->skip_txfm, skip_txfm, sizeof(skip_txfm));
   memcpy(x->bsse, bsse, sizeof(bsse));
 
-#if CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
   best_rd = INT64_MAX;
-  for (mbmi->obmc = 0; mbmi->obmc <= allow_obmc; mbmi->obmc++) {
+  for (mbmi->motion_variation = SIMPLE_TRANSLATION;
+       mbmi->motion_variation < (allow_motvar ? MOTION_VARIATIONS : 1);
+       mbmi->motion_variation++) {
     int64_t tmp_rd, tmp_dist;
     int tmp_rate;
 #if CONFIG_EXT_INTER
-    int tmp_rate2 = mbmi->obmc ? rate2_bmc_nocoeff : rate2_nocoeff;
+    int tmp_rate2 =
+        mbmi->motion_variation != SIMPLE_TRANSLATION ?
+        rate2_bmc_nocoeff : rate2_nocoeff;
 #else
     int tmp_rate2 = rate2_nocoeff;
 #endif  // CONFIG_EXT_INTER
@@ -7888,10 +7892,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_DUAL_FILTER
 #endif  // CONFIG_EXT_INTERP
 
-    if (mbmi->obmc) {
+#if CONFIG_OBMC
+    if (mbmi->motion_variation == OBMC_CAUSAL) {
 #if CONFIG_EXT_INTER
       *mbmi = best_bmc_mbmi;
-      mbmi->obmc = 1;
+      mbmi->motion_variation = OBMC_CAUSAL;
 #endif  // CONFIG_EXT_INTER
       if (!is_comp_pred && have_newmv_in_inter_mode(this_mode)) {
         int_mv tmp_mv;
@@ -7943,13 +7948,22 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       model_rd_for_sb(cpi, bsize, x, xd, 0, MAX_MB_PLANE - 1,
                       &tmp_rate, &tmp_dist, &skip_txfm_sb, &skip_sse_sb);
     }
+#endif  // CONFIG_OBMC
+
+#if CONFIG_WARPED_MOTION
+    if (mbmi->motion_variation == WARPED_CAUSAL) {
+      // TODO(yuec): Add code
+    }
+#endif  // CONFIG_WARPED_MOTION
+
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      x->pred_variance = vp10_high_get_sby_perpixel_variance(cpi,
-                                              &xd->plane[0].dst, bsize, xd->bd);
+      x->pred_variance =
+          vp10_high_get_sby_perpixel_variance(
+              cpi, &xd->plane[0].dst, bsize, xd->bd);
     } else {
       x->pred_variance =
-        vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+          vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
     }
 #else
     x->pred_variance =
@@ -7958,124 +7972,128 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     x->skip = 0;
 
     *rate2 = tmp_rate2;
-    if (allow_obmc)
-      *rate2 += cpi->obmc_cost[bsize][mbmi->obmc];
+    if (allow_motvar)
+      *rate2 += cpi->motvar_cost[bsize][mbmi->motion_variation];
     *distortion = 0;
-#endif  // CONFIG_OBMC
-  if (!skip_txfm_sb) {
-    int skippable_y, skippable_uv;
-    int64_t sseuv = INT64_MAX;
-    int64_t rdcosty = INT64_MAX;
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+    if (!skip_txfm_sb) {
+      int skippable_y, skippable_uv;
+      int64_t sseuv = INT64_MAX;
+      int64_t rdcosty = INT64_MAX;
 
-    // Y cost and distortion
-    vp10_subtract_plane(x, bsize, 0);
+      // Y cost and distortion
+      vp10_subtract_plane(x, bsize, 0);
 #if CONFIG_VAR_TX
-    if (cm->tx_mode == TX_MODE_SELECT || xd->lossless[mbmi->segment_id]) {
-      select_tx_type_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
-                         bsize, ref_best_rd);
-    } else {
-      int idx, idy;
+      if (cm->tx_mode == TX_MODE_SELECT || xd->lossless[mbmi->segment_id]) {
+        select_tx_type_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
+                           bsize, ref_best_rd);
+      } else {
+        int idx, idy;
+        super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
+                        bsize, ref_best_rd);
+        for (idy = 0; idy < xd->n8_h; ++idy)
+          for (idx = 0; idx < xd->n8_w; ++idx)
+            mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
+        memset(x->blk_skip[0], skippable_y,
+               sizeof(uint8_t) * xd->n8_h * xd->n8_w * 4);
+      }
+#else
       super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                       bsize, ref_best_rd);
-      for (idy = 0; idy < xd->n8_h; ++idy)
-        for (idx = 0; idx < xd->n8_w; ++idx)
-          mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
-      memset(x->blk_skip[0], skippable_y,
-             sizeof(uint8_t) * xd->n8_h * xd->n8_w * 4);
-    }
-#else
-    super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
-                    bsize, ref_best_rd);
 #endif  // CONFIG_VAR_TX
 
-    if (*rate_y == INT_MAX) {
-      *rate2 = INT_MAX;
-      *distortion = INT64_MAX;
-#if CONFIG_OBMC
-      if (mbmi->obmc) {
-        continue;
-      } else {
-#endif  // CONFIG_OBMC
-      restore_dst_buf(xd, orig_dst, orig_dst_stride);
-      return INT64_MAX;
-#if CONFIG_OBMC
+      if (*rate_y == INT_MAX) {
+        *rate2 = INT_MAX;
+        *distortion = INT64_MAX;
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+        if (mbmi->motion_variation != SIMPLE_TRANSLATION) {
+          continue;
+        } else {
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+          restore_dst_buf(xd, orig_dst, orig_dst_stride);
+          return INT64_MAX;
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+        }
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
       }
-#endif  // CONFIG_OBMC
-    }
 
-    *rate2 += *rate_y;
-    *distortion += distortion_y;
+      *rate2 += *rate_y;
+      *distortion += distortion_y;
 
-    rdcosty = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
-    rdcosty = VPXMIN(rdcosty, RDCOST(x->rdmult, x->rddiv, 0, *psse));
+      rdcosty = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
+      rdcosty = VPXMIN(rdcosty, RDCOST(x->rdmult, x->rddiv, 0, *psse));
 
 #if CONFIG_VAR_TX
-    if (!inter_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
-                          &sseuv, bsize, ref_best_rd - rdcosty)) {
+      if (!inter_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
+                            &sseuv, bsize, ref_best_rd - rdcosty))
 #else
-    if (!super_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
-                          &sseuv, bsize, ref_best_rd - rdcosty)) {
+      if (!super_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
+                            &sseuv, bsize, ref_best_rd - rdcosty))
 #endif  // CONFIG_VAR_TX
-      *rate2 = INT_MAX;
-      *distortion = INT64_MAX;
-#if CONFIG_OBMC
-      continue;
+      {
+        *rate2 = INT_MAX;
+        *distortion = INT64_MAX;
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+        continue;
 #else
-      restore_dst_buf(xd, orig_dst, orig_dst_stride);
-      return INT64_MAX;
-#endif  // CONFIG_OBMC
-    }
+        restore_dst_buf(xd, orig_dst, orig_dst_stride);
+        return INT64_MAX;
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+      }
 
-    *psse += sseuv;
-    *rate2 += *rate_uv;
-    *distortion += distortion_uv;
-    *skippable = skippable_y && skippable_uv;
-#if CONFIG_OBMC
-    if (*skippable) {
-      *rate2 -= *rate_uv + *rate_y;
-      *rate_y = 0;
-      *rate_uv = 0;
-      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
-      mbmi->skip = 0;
-      // here mbmi->skip temporarily plays a role as what this_skip2 does
-    } else if (!xd->lossless[mbmi->segment_id] &&
-               (RDCOST(x->rdmult, x->rddiv, *rate_y + *rate_uv +
-                  vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0), *distortion) >=
-                RDCOST(x->rdmult, x->rddiv,
-                  vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1), *psse))) {
-      *rate2 -= *rate_uv + *rate_y;
-      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
-      *distortion = *psse;
-      *rate_y = 0;
-      *rate_uv = 0;
-      mbmi->skip = 1;
+      *psse += sseuv;
+      *rate2 += *rate_uv;
+      *distortion += distortion_uv;
+      *skippable = skippable_y && skippable_uv;
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+      if (*skippable) {
+        *rate2 -= *rate_uv + *rate_y;
+        *rate_y = 0;
+        *rate_uv = 0;
+        *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
+        mbmi->skip = 0;
+        // here mbmi->skip temporarily plays a role as what this_skip2 does
+      } else if (!xd->lossless[mbmi->segment_id] &&
+                 (RDCOST(x->rdmult, x->rddiv, *rate_y + *rate_uv +
+                         vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0),
+                         *distortion) >=
+                  RDCOST(x->rdmult, x->rddiv,
+                         vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1),
+                         *psse))) {
+        *rate2 -= *rate_uv + *rate_y;
+        *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
+        *distortion = *psse;
+        *rate_y = 0;
+        *rate_uv = 0;
+        mbmi->skip = 1;
+      } else {
+        *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
+        mbmi->skip = 0;
+      }
+      *disable_skip = 0;
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
     } else {
-      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
+      x->skip = 1;
+      *disable_skip = 1;
+
+      // The cost of skip bit needs to be added.
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
       mbmi->skip = 0;
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+      *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
+
+      *distortion = skip_sse_sb;
     }
-    *disable_skip = 0;
-#endif  // CONFIG_OBMC
-  } else {
-    x->skip = 1;
-    *disable_skip = 1;
 
-    // The cost of skip bit needs to be added.
-#if CONFIG_OBMC
-    mbmi->skip = 0;
-#endif  // CONFIG_OBMC
-    *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
-
-    *distortion = skip_sse_sb;
-  }
-#if CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
     tmp_rd = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
-    if (mbmi->obmc == 0 || (tmp_rd < best_rd)) {
+    if (mbmi->motion_variation == SIMPLE_TRANSLATION || (tmp_rd < best_rd)) {
 #if CONFIG_EXT_INTERP
 #if CONFIG_DUAL_FILTER
-      mbmi->interp_filter[0] = obmc_interp_filter[mbmi->obmc][0];
-      mbmi->interp_filter[1] = obmc_interp_filter[mbmi->obmc][1];
+      mbmi->interp_filter[0] = obmc_interp_filter[mbmi->motion_variation][0];
+      mbmi->interp_filter[1] = obmc_interp_filter[mbmi->motion_variation][1];
 #else
-      mbmi->interp_filter = obmc_interp_filter[mbmi->obmc];
+      mbmi->interp_filter = obmc_interp_filter[mbmi->motion_variation];
 #endif  // CONFIG_DUAL_FILTER
 #endif  // CONFIG_EXT_INTERP
       best_mbmi = *mbmi;
@@ -8120,7 +8138,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   x->skip = best_xskip;
   *disable_skip = best_disable_skip;
   x->pred_variance = best_pred_var;
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
   if (!is_comp_pred)
     single_skippable[this_mode][refs[0]] = *skippable;
@@ -8952,9 +8970,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                                           : cm->interp_filter;
 #endif
     mbmi->mv[0].as_int = mbmi->mv[1].as_int = 0;
-#if CONFIG_OBMC
-    mbmi->obmc = 0;
-#endif  // CONFIG_OBMC
+    mbmi->motion_variation = SIMPLE_TRANSLATION;
 
     x->skip = 0;
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
@@ -9386,10 +9402,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #if CONFIG_EXT_INTER
     rate2 += compmode_interintra_cost;
     if (cm->reference_mode != SINGLE_REFERENCE && comp_pred)
-#if CONFIG_OBMC
-      if (mbmi->obmc == 0)
-#endif  // CONFIG_OBMC
-      rate2 += compmode_wedge_cost;
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+      if (mbmi->motion_variation == SIMPLE_TRANSLATION)
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+        rate2 += compmode_wedge_cost;
 #endif  // CONFIG_EXT_INTER
 
     // Estimate the reference frame signaling cost and add it
@@ -9492,10 +9508,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
             disable_skip || skippable || this_skip2);
         *returnrate_nocoef -= vp10_cost_bit(vp10_get_intra_inter_prob(cm, xd),
                                             mbmi->ref_frame[0] != INTRA_FRAME);
-#if CONFIG_OBMC
-        if (is_inter_block(mbmi) && is_obmc_allowed(mbmi))
-          *returnrate_nocoef -= cpi->obmc_cost[bsize][mbmi->obmc];
-#endif  // CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+        if (is_inter_block(mbmi) && is_motvar_allowed(mbmi))
+          *returnrate_nocoef -= cpi->motvar_cost[bsize][mbmi->motion_variation];
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 #endif  // CONFIG_SUPERTX
         rd_cost->dist = distortion2;
         rd_cost->rdcost = this_rd;
@@ -10219,9 +10235,7 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
 #endif  // CONFIG_EXT_INTRA
-#if CONFIG_OBMC
-  mbmi->obmc = 0;
-#endif  // CONFIG_OBMC
+  mbmi->motion_variation = SIMPLE_TRANSLATION;
 #if CONFIG_EXT_INTER
   mbmi->use_wedge_interinter = 0;
   mbmi->use_wedge_interintra = 0;

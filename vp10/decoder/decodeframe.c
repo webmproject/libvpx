@@ -1319,7 +1319,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       vp10_build_inter_predictors_sb(xd, mi_row, mi_col,
                                      VPXMAX(bsize, BLOCK_8X8));
 #if CONFIG_OBMC
-      if (mbmi->obmc) {
+      if (mbmi->motion_variation == OBMC_CAUSAL) {
 #if CONFIG_VP9_HIGHBITDEPTH
         DECLARE_ALIGNED(16, uint8_t,
                         tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
@@ -3544,10 +3544,12 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
-    for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
-      vp10_diff_update_prob(&r, &fc->obmc_prob[i]);
-#endif  // CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+    for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i) {
+      for (j = 0; j < MOTION_VARIATIONS - 1; ++j)
+        vp10_diff_update_prob(&r, &fc->motvar_prob[i][j]);
+    }
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
     if (cm->interp_filter == SWITCHABLE)
       read_switchable_interp_probs(fc, &r);
@@ -3615,10 +3617,10 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
   assert(!memcmp(cm->counts.wedge_interinter, zero_counts.wedge_interinter,
                  sizeof(cm->counts.wedge_interinter)));
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC
-  assert(!memcmp(cm->counts.obmc, zero_counts.obmc,
-                 sizeof(cm->counts.obmc)));
-#endif  // CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+  assert(!memcmp(cm->counts.motvar, zero_counts.motvar,
+                 sizeof(cm->counts.motvar)));
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
   assert(!memcmp(cm->counts.intra_inter, zero_counts.intra_inter,
                  sizeof(cm->counts.intra_inter)));
   assert(!memcmp(cm->counts.comp_inter, zero_counts.comp_inter,

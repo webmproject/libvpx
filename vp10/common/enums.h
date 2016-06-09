@@ -281,6 +281,17 @@ typedef uint8_t PREDICTION_MODE;
 
 #define INTRA_MODES (TM_PRED + 1)
 
+typedef enum {
+  SIMPLE_TRANSLATION = 0,
+#if CONFIG_OBMC
+  OBMC_CAUSAL,    // 2-sided OBMC
+#endif  // CONFIG_OBMC
+#if CONFIG_WARPED_MOTION
+  WARPED_CAUSAL,  // 2-sided WARPED
+#endif  // CONFIG_WARPED_MOTION
+  MOTION_VARIATIONS
+} MOTION_VARIATION;
+
 #if CONFIG_EXT_INTER
 typedef enum {
   II_DC_PRED = 0,

@@ -472,12 +472,12 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
                          cm->fc->interintra_mode_prob[i],
                          vp10_interintra_mode_tree);
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
       for (i = BLOCK_8X8; i < BLOCK_SIZES; i++) {
-        cpi->obmc_cost[i][0] = vp10_cost_bit(cm->fc->obmc_prob[i], 0);
-        cpi->obmc_cost[i][1] = vp10_cost_bit(cm->fc->obmc_prob[i], 1);
+        vp10_cost_tokens((int *)cpi->motvar_cost[i],
+                         cm->fc->motvar_prob[i], vp10_motvar_tree);
       }
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
     }
   }
 }

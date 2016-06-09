@@ -117,6 +117,9 @@ static struct vp10_token intra_filter_encodings[INTRA_FILTERS];
 #if CONFIG_EXT_INTER
 static struct vp10_token interintra_mode_encodings[INTERINTRA_MODES];
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+static struct vp10_token motvar_encodings[MOTION_VARIATIONS];
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
 void vp10_encode_token_init() {
 #if CONFIG_EXT_TX
@@ -136,6 +139,9 @@ void vp10_encode_token_init() {
 #if CONFIG_EXT_INTER
   vp10_tokens_from_tree(interintra_mode_encodings, vp10_interintra_mode_tree);
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+  vp10_tokens_from_tree(motvar_encodings, vp10_motvar_tree);
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 }
 
 static void write_intra_mode(vp10_writer *w, PREDICTION_MODE mode,
@@ -1370,22 +1376,24 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
 #if CONFIG_SUPERTX
     if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
 #if CONFIG_EXT_INTER
       if (mbmi->ref_frame[1] != INTRA_FRAME)
 #endif  // CONFIG_EXT_INTER
-      if (is_obmc_allowed(mbmi))
-        vp10_write(w, mbmi->obmc, cm->fc->obmc_prob[bsize]);
-#endif  // CONFIG_OBMC
+      if (is_motvar_allowed(mbmi))
+        vp10_write_token(w, vp10_motvar_tree, cm->fc->motvar_prob[bsize],
+                         &motvar_encodings[mbmi->motion_variation]);
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
 #if CONFIG_EXT_INTER
     if (cpi->common.reference_mode != SINGLE_REFERENCE &&
         is_inter_compound_mode(mbmi->mode) &&
 #if CONFIG_OBMC
-        !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
+        !(is_motvar_allowed(mbmi) &&
+          mbmi->motion_variation != SIMPLE_TRANSLATION) &&
 #endif  // CONFIG_OBMC
         is_interinter_wedge_used(bsize)) {
       vp10_write(w, mbmi->use_wedge_interinter,
@@ -3283,11 +3291,11 @@ static uint32_t write_compressed_header(VP10_COMP *cpi, uint8_t *data) {
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
     for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
-      vp10_cond_prob_diff_update(header_bc, &fc->obmc_prob[i],
-                                 counts->obmc[i]);
-#endif  // CONFIG_OBMC
+      prob_diff_update(vp10_motvar_tree, fc->motvar_prob[i],
+                       counts->motvar[i], MOTION_VARIATIONS, header_bc);
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
     if (cm->interp_filter == SWITCHABLE)
       update_switchable_interp_probs(cm, header_bc, counts);

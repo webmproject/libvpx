@@ -339,7 +339,6 @@ static const uint8_t *get_wedge_mask(int wedge_index,
   return wedge_params_lookup[bsize].masks[neg][wedge_index];
 }
 
-
 const uint8_t *vp10_get_soft_mask(int wedge_index,
                                   int wedge_sign,
                                   BLOCK_SIZE sb_type,
