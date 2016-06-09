@@ -66,7 +66,8 @@ struct VP10Common;
 
 void vp10_frame_init_quantizer(struct VP10_COMP *cpi);
 
-void vp10_init_plane_quantizers(struct VP10_COMP *cpi, MACROBLOCK *x);
+void vp10_init_plane_quantizers(const struct VP10_COMP *cpi, MACROBLOCK *x,
+                                int segment_id);
 
 void vp10_init_quantizer(struct VP10_COMP *cpi);
 

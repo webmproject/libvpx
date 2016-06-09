@@ -406,7 +406,7 @@ int vp10_compute_rd_mult(const struct VP10_COMP *cpi, int qindex);
 
 void vp10_initialize_rd_consts(struct VP10_COMP *cpi);
 
-void vp10_initialize_me_consts(struct VP10_COMP *cpi,
+void vp10_initialize_me_consts(const struct VP10_COMP *cpi,
                                MACROBLOCK *x, int qindex);
 
 void vp10_model_rd_from_var_lapndz(unsigned int var, unsigned int n,

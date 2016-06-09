@@ -289,7 +289,8 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
   return VPXMAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
 
-void vp10_initialize_me_consts(VP10_COMP *cpi, MACROBLOCK *x, int qindex) {
+void vp10_initialize_me_consts(const VP10_COMP *cpi, MACROBLOCK *x,
+                               int qindex) {
 #if CONFIG_VP9_HIGHBITDEPTH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
