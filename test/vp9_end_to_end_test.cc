@@ -207,16 +207,9 @@ VP9_INSTANTIATE_TEST_CASE(
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kCpuUsedVectors));
 
-#if CONFIG_VP9_HIGHBITDEPTH
-# if CONFIG_VP10_ENCODER
-INSTANTIATE_TEST_CASE_P(
-    VP10, EndToEndTestLarge,
-    ::testing::Combine(
-        ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
-            &libvpx_test::kVP10)),
-        ::testing::ValuesIn(kEncodingModeVectors),
-        ::testing::ValuesIn(kTestVectors),
-        ::testing::ValuesIn(kCpuUsedVectors)));
-#endif  // CONFIG_VP10_ENCODER
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+VP10_INSTANTIATE_TEST_CASE(
+    EndToEndTestLarge,
+    ::testing::ValuesIn(kEncodingModeVectors),
+    ::testing::ValuesIn(kTestVectors),
+    ::testing::ValuesIn(kCpuUsedVectors));
 }  // namespace
