@@ -1280,26 +1280,130 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   }
 
 #if CONFIG_SUPERTX
-  if (!supertx_enabled) {
-#endif
-    if (mbmi->skip) {
-      dec_reset_skip_context(xd);
+  if (supertx_enabled) {
+    xd->corrupted |= vp10_reader_has_error(r);
+    return;
+  }
+#endif  // CONFIG_SUPERTX
+
+  if (mbmi->skip) {
+    dec_reset_skip_context(xd);
+  }
+  if (!is_inter_block(mbmi)) {
+    int plane;
+    for (plane = 0; plane <= 1; ++plane) {
+      if (mbmi->palette_mode_info.palette_size[plane])
+        vp10_decode_palette_tokens(xd, plane, r);
     }
-    if (!is_inter_block(mbmi)) {
-      int plane;
-      for (plane = 0; plane <= 1; ++plane) {
-        if (mbmi->palette_mode_info.palette_size[plane])
-          vp10_decode_palette_tokens(xd, plane, r);
+    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+      const struct macroblockd_plane *const pd = &xd->plane[plane];
+      const TX_SIZE tx_size =
+          plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
+          : mbmi->tx_size;
+      const int num_4x4_w = pd->n4_w;
+      const int num_4x4_h = pd->n4_h;
+      const int step = (1 << tx_size);
+      int row, col;
+      const int max_blocks_wide = num_4x4_w +
+          (xd->mb_to_right_edge >= 0 ?
+           0 : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
+      const int max_blocks_high = num_4x4_h +
+          (xd->mb_to_bottom_edge >= 0 ?
+           0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+
+      for (row = 0; row < max_blocks_high; row += step)
+        for (col = 0; col < max_blocks_wide; col += step)
+          predict_and_reconstruct_intra_block(xd,
+                                              r,
+                                              mbmi, plane,
+                                              row, col, tx_size);
+    }
+  } else {
+    // Prediction
+    vp10_build_inter_predictors_sb(xd, mi_row, mi_col,
+                                   VPXMAX(bsize, BLOCK_8X8));
+#if CONFIG_OBMC
+    if (mbmi->motion_variation == OBMC_CAUSAL) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+#else
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
+      DECLARE_ALIGNED(16, uint8_t,
+                      tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
+      int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+
+      assert(mbmi->sb_type >= BLOCK_8X8);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        int len = sizeof(uint16_t);
+        dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
+        dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * len);
+        dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * 2 * len);
+        dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
+        dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
+        dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
+      } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        dst_buf1[0] = tmp_buf1;
+        dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
+        dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
+        dst_buf2[0] = tmp_buf2;
+        dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
+        dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
+#if CONFIG_VP9_HIGHBITDEPTH
       }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col,
+                                           dst_buf1, dst_stride1);
+      vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col,
+                                          dst_buf2, dst_stride2);
+      vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
+                            mi_row, mi_col);
+      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0, NULL, NULL,
+                                       dst_buf1, dst_stride1,
+                                       dst_buf2, dst_stride2);
+    }
+#endif  // CONFIG_OBMC
+
+    // Reconstruction
+    if (!mbmi->skip) {
+      int eobtotal = 0;
+      int plane;
+
       for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
         const struct macroblockd_plane *const pd = &xd->plane[plane];
+        const int num_4x4_w = pd->n4_w;
+        const int num_4x4_h = pd->n4_h;
+        int row, col;
+#if CONFIG_VAR_TX
+        // TODO(jingning): This can be simplified for decoder performance.
+        const BLOCK_SIZE plane_bsize =
+            get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), pd);
+        const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+        const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
+        int bw = num_4x4_blocks_wide_lookup[txb_size];
+        int block = 0;
+        const int step = 1 << (max_tx_size << 1);
+
+        for (row = 0; row < num_4x4_h; row += bw) {
+          for (col = 0; col < num_4x4_w; col += bw) {
+            decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize,
+                                  block, row, col, max_tx_size, &eobtotal);
+            block += step;
+          }
+        }
+#else
         const TX_SIZE tx_size =
             plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
             : mbmi->tx_size;
-        const int num_4x4_w = pd->n4_w;
-        const int num_4x4_h = pd->n4_h;
         const int step = (1 << tx_size);
-        int row, col;
         const int max_blocks_wide = num_4x4_w +
             (xd->mb_to_right_edge >= 0 ?
              0 : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
@@ -1309,120 +1413,17 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
-            predict_and_reconstruct_intra_block(xd,
+            eobtotal += reconstruct_inter_block(xd,
                                                 r,
-                                                mbmi, plane,
-                                                row, col, tx_size);
-      }
-    } else {
-      // Prediction
-      vp10_build_inter_predictors_sb(xd, mi_row, mi_col,
-                                     VPXMAX(bsize, BLOCK_8X8));
-#if CONFIG_OBMC
-      if (mbmi->motion_variation == OBMC_CAUSAL) {
-#if CONFIG_VP9_HIGHBITDEPTH
-        DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-        DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-#else
-        DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
-        DECLARE_ALIGNED(16, uint8_t,
-                        tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
-        int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
-        int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
-
-        assert(mbmi->sb_type >= BLOCK_8X8);
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-          int len = sizeof(uint16_t);
-          dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
-          dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * len);
-          dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * 2 * len);
-          dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
-          dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
-          dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
-        } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-          dst_buf1[0] = tmp_buf1;
-          dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
-          dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
-          dst_buf2[0] = tmp_buf2;
-          dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
-          dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
-#if CONFIG_VP9_HIGHBITDEPTH
-        }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col,
-                                             dst_buf1, dst_stride1);
-        vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col,
-                                            dst_buf2, dst_stride2);
-        vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
-                              mi_row, mi_col);
-        vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0, NULL, NULL,
-                                         dst_buf1, dst_stride1,
-                                         dst_buf2, dst_stride2);
-      }
-#endif  // CONFIG_OBMC
-
-      // Reconstruction
-      if (!mbmi->skip) {
-        int eobtotal = 0;
-        int plane;
-
-        for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-          const struct macroblockd_plane *const pd = &xd->plane[plane];
-          const int num_4x4_w = pd->n4_w;
-          const int num_4x4_h = pd->n4_h;
-          int row, col;
-#if CONFIG_VAR_TX
-          // TODO(jingning): This can be simplified for decoder performance.
-          const BLOCK_SIZE plane_bsize =
-              get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), pd);
-          const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-          const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-          int bw = num_4x4_blocks_wide_lookup[txb_size];
-          int block = 0;
-          const int step = 1 << (max_tx_size << 1);
-
-          for (row = 0; row < num_4x4_h; row += bw) {
-            for (col = 0; col < num_4x4_w; col += bw) {
-              decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize,
-                                    block, row, col, max_tx_size, &eobtotal);
-              block += step;
-            }
-          }
-#else
-          const TX_SIZE tx_size =
-              plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
-              : mbmi->tx_size;
-          const int step = (1 << tx_size);
-          const int max_blocks_wide = num_4x4_w +
-              (xd->mb_to_right_edge >= 0 ?
-               0 : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
-          const int max_blocks_high = num_4x4_h +
-              (xd->mb_to_bottom_edge >= 0 ?
-               0 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-
-          for (row = 0; row < max_blocks_high; row += step)
-            for (col = 0; col < max_blocks_wide; col += step)
-              eobtotal += reconstruct_inter_block(xd,
-                                                  r,
-                                                  mbmi, plane, row, col,
-                                                  tx_size);
+                                                mbmi, plane, row, col,
+                                                tx_size);
 #endif
-        }
-
-        if (!less8x8 && eobtotal == 0)
-          mbmi->has_no_coeffs = 1;  // skip loopfilter
       }
+
+      if (!less8x8 && eobtotal == 0)
+        mbmi->has_no_coeffs = 1;  // skip loopfilter
     }
-#if CONFIG_SUPERTX
   }
-#endif  // CONFIG_SUPERTX
 
   xd->corrupted |= vp10_reader_has_error(r);
 }
