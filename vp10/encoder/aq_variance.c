@@ -52,6 +52,8 @@ void vp10_vaq_frame_setup(VP10_COMP *cpi) {
   if (frame_is_intra_only(cm) || cm->error_resilient_mode ||
       cpi->refresh_alt_ref_frame ||
       (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
+    cpi->vaq_refresh = 1;
+
     vp10_enable_segmentation(seg);
     vp10_clearall_segfeatures(seg);
 

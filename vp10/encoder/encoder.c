@@ -296,6 +296,8 @@ static void setup_frame(VP10_COMP *cpi) {
     vp10_zero(cpi->interp_filter_selected[0]);
   }
 
+  cpi->vaq_refresh = 0;
+
   set_sb_size(cm, select_sb_size(cpi));
 }
 

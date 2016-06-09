@@ -313,7 +313,7 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
 
   // Setup segment ID.
   if (seg->enabled) {
-    if (cpi->oxcf.aq_mode != VARIANCE_AQ) {
+    if (!cpi->vaq_refresh) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
@@ -388,7 +388,7 @@ static void set_offsets_extend(VP10_COMP *cpi, ThreadData *td,
 
   // Setup segment ID.
   if (seg->enabled) {
-    if (cpi->oxcf.aq_mode != VARIANCE_AQ) {
+    if (!cpi->vaq_refresh) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = get_segment_id(cm, map, bsize_ori,
@@ -1727,26 +1727,17 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   orig_rdmult = x->rdmult;
 
   if (aq_mode == VARIANCE_AQ) {
-    const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
-                                            : vp10_block_energy(cpi, x, bsize);
-    if (cm->frame_type == KEY_FRAME ||
-        cpi->refresh_alt_ref_frame ||
-        (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
+    if (cpi->vaq_refresh) {
+      const int energy = bsize <= BLOCK_16X16 ?
+                         x->mb_energy : vp10_block_energy(cpi, x, bsize);
       mbmi->segment_id = vp10_vaq_segment_id(energy);
-    } else {
-      const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
-                                                    : cm->last_frame_seg_map;
-      mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
     x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == COMPLEXITY_AQ) {
     x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == CYCLIC_REFRESH_AQ) {
-    const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
-                                                  : cm->last_frame_seg_map;
     // If segment is boosted, use rdmult for that segment.
-    if (cyclic_refresh_segment_id_boosted(
-            get_segment_id(cm, map, bsize, mi_row, mi_col)))
+    if (cyclic_refresh_segment_id_boosted(mbmi->segment_id))
       x->rdmult = vp10_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
   }
 
@@ -2556,7 +2547,7 @@ static void rd_use_partition(VP10_COMP *cpi,
 
   save_context(x, &x_ctx, mi_row, mi_col, bsize);
 
-  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode) {
+  if (bsize == BLOCK_16X16 && cpi->vaq_refresh) {
     set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
     x->mb_energy = vp10_block_energy(cpi, x, bsize);
   }
@@ -3440,7 +3431,7 @@ static void rd_pick_partition(VP10_COMP *cpi, ThreadData *td,
 
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
 
-  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode)
+  if (bsize == BLOCK_16X16 && cpi->vaq_refresh)
     x->mb_energy = vp10_block_energy(cpi, x, bsize);
 
   if (cpi->sf.cb_partition_search && bsize == BLOCK_16X16) {

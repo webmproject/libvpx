@@ -598,6 +598,9 @@ typedef struct VP10_COMP {
   int64_t vbp_threshold_sad;
   BLOCK_SIZE vbp_bsize_min;
 
+  // VARIANCE_AQ segment map refresh
+  int vaq_refresh;
+
   // Multi-threading
   int num_workers;
   VPxWorker *workers;
