@@ -23,6 +23,7 @@
 
 // Bits of precision used for the model
 #define WARPEDMODEL_PREC_BITS    8
+#define WARPEDMODEL_ROW3HOMO_PREC_BITS    12
 
 // Bits of subpel precision for warped interpolation
 #define WARPEDPIXEL_PREC_BITS    6
@@ -46,8 +47,13 @@ typedef enum {
 
 typedef struct {
   TransformationType wmtype;
-  int wmmat[9];
+  int wmmat[8];  // For homography wmmat[9] is assumed to be 1
 } WarpedMotionParams;
+
+// Integerize model into the WarpedMotionParams structure
+void vp10_integerize_model(double *H,
+                           TransformationType wmtype,
+                           WarpedMotionParams *wm);
 
 void vp10_warp_plane(WarpedMotionParams *wm,
                      uint8_t *ref,

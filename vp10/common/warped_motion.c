@@ -172,16 +172,20 @@ static void projectPointsHomography(int *mat, int *points, int *proj,
                                     const int subsampling_x,
                                     const int subsampling_y) {
   int i;
-  int x, y, Z;
-  int xp, yp;
+  int64_t x, y, Z;
+  int64_t xp, yp;
   for (i = 0; i < n; ++i) {
     x = *(points++), y = *(points++);
     x = (subsampling_x ? 4 * x + 1 : 2 * x);
     y = (subsampling_y ? 4 * y + 1 : 2 * y);
 
-    Z = (mat[6] * x + mat[7] * y + mat[8] * 2);
-    xp = (mat[0] * x + mat[1] * y + 2 * mat[2]) << WARPEDPIXEL_PREC_BITS;
-    yp = (mat[3] * x + mat[4] * y + 2 * mat[5]) << WARPEDPIXEL_PREC_BITS;
+    Z = (mat[6] * x + mat[7] * y + (1 << (WARPEDMODEL_ROW3HOMO_PREC_BITS + 1)));
+    xp = (mat[0] * x + mat[1] * y + 2 * mat[2])
+        << (WARPEDPIXEL_PREC_BITS +
+        WARPEDMODEL_ROW3HOMO_PREC_BITS - WARPEDMODEL_PREC_BITS);
+    yp = (mat[3] * x + mat[4] * y + 2 * mat[5])
+        << (WARPEDPIXEL_PREC_BITS +
+        WARPEDMODEL_ROW3HOMO_PREC_BITS - WARPEDMODEL_PREC_BITS);
 
     xp = xp > 0 ? (xp + Z / 2) / Z : (xp - Z / 2) / Z;
     yp = yp > 0 ? (yp + Z / 2) / Z : (yp - Z / 2) / Z;
@@ -662,3 +666,27 @@ void vp10_highbd_warp_plane(WarpedMotionParams *wm,
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+void vp10_integerize_model(double *H, TransformationType wmtype,
+                           WarpedMotionParams *wm) {
+  wm->wmtype = wmtype;
+  switch (wmtype) {
+    case HOMOGRAPHY:
+      assert(fabs(H[8] - 1.0) < 1e-12);
+      wm->wmmat[7] = rint(H[7] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+      wm->wmmat[6] = rint(H[6] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+    case AFFINE:
+      wm->wmmat[5] = rint(H[5] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[4] = rint(H[4] * (1 << WARPEDMODEL_PREC_BITS));
+    case ROTZOOM:
+      wm->wmmat[3] = rint(H[3] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[2] = rint(H[2] * (1 << WARPEDMODEL_PREC_BITS));
+    case TRANSLATION:
+      wm->wmmat[1] = rint(H[1] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[0] = rint(H[0] * (1 << WARPEDMODEL_PREC_BITS));
+      break;
+    default:
+      assert(0);
+  };
+  return;
+}
