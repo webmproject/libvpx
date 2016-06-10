@@ -22,6 +22,30 @@
       "revId": "b494eb658b3d659e33b4d361d306fe8c3e93011e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_b833ce04",
+        "filename": "vp10/encoder/encodemb.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-06-10T18:22:33Z",
+      "side": 0,
+      "message": "Done\n\nDrop it into a separate CL.",
+      "parentUuid": "4f0b7c18_f8b4a698",
+      "range": {
+        "startLine": 23,
+        "startChar": 9,
+        "endLine": 23,
+        "endChar": 21
+      },
+      "revId": "b494eb658b3d659e33b4d361d306fe8c3e93011e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
