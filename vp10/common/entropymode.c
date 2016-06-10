@@ -295,15 +295,58 @@ static const vpx_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
 };
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
-static const vpx_prob default_obmc_prob[BLOCK_SIZES] = {
-    255, 255, 255, 151, 153, 144, 178, 165, 160, 207, 195, 168, 244,
+// Change this section appropriately once warped motion is supported
+#if CONFIG_OBMC && !CONFIG_WARPED_MOTION
+const vpx_tree_index vp10_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)] = {
+  -SIMPLE_TRANSLATION, -OBMC_CAUSAL
+};
+static
+const vpx_prob default_motvar_prob[BLOCK_SIZES][MOTION_VARIATIONS - 1] = {
+  {255},
+  {255}, {255}, {151},
+  {153}, {144}, {178},
+  {165}, {160}, {207},
+  {195}, {168}, {244},
 #if CONFIG_EXT_PARTITION
-    // TODO(debargha) What are the correct values for these?
-    192, 192, 192
+  {252}, {252}, {252},
 #endif  // CONFIG_EXT_PARTITION
 };
-#endif  // CONFIG_OBMC
+
+#elif !CONFIG_OBMC && CONFIG_WARPED_MOTION
+
+const vpx_tree_index vp10_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)] = {
+  -SIMPLE_TRANSLATION, -WARPED_CAUSAL
+};
+static
+const vpx_prob default_motvar_prob[BLOCK_SIZES][MOTION_VARIATIONS - 1] = {
+  {255},
+  {255}, {255}, {151},
+  {153}, {144}, {178},
+  {165}, {160}, {207},
+  {195}, {168}, {244},
+#if CONFIG_EXT_PARTITION
+  {252}, {252}, {252},
+#endif  // CONFIG_EXT_PARTITION
+};
+
+#elif CONFIG_OBMC && CONFIG_WARPED_MOTION
+
+const vpx_tree_index vp10_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)] = {
+  -SIMPLE_TRANSLATION, 2,
+  -OBMC_CAUSAL, -WARPED_CAUSAL,
+};
+static
+const vpx_prob default_motvar_prob[BLOCK_SIZES][MOTION_VARIATIONS - 1] = {
+  {255, 200},
+  {255, 200}, {255, 200}, {151, 200},
+  {153, 200}, {144, 200}, {178, 200},
+  {165, 200}, {160, 200}, {207, 200},
+  {195, 200}, {168, 200}, {244, 200},
+#if CONFIG_EXT_PARTITION
+  {252, 200}, {252, 200}, {252, 200},
+#endif  // CONFIG_EXT_PARTITION
+};
+#endif  // CONFIG_OBMC || !CONFIG_WARPED_MOTION
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
@@ -1287,9 +1330,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #endif  // CONFIG_EXT_INTER
 #endif  // CONFIG_REF_MV
   vp10_copy(fc->inter_mode_probs, default_inter_mode_probs);
-#if CONFIG_OBMC
-  vp10_copy(fc->obmc_prob, default_obmc_prob);
-#endif  // CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+  vp10_copy(fc->motvar_prob, default_motvar_prob);
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 #if CONFIG_EXT_INTER
   vp10_copy(fc->inter_compound_mode_probs, default_inter_compound_mode_probs);
   vp10_copy(fc->interintra_prob, default_interintra_prob);
@@ -1381,14 +1424,14 @@ void vp10_adapt_inter_frame_probs(VP10_COMMON *cm) {
 #else
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     vpx_tree_merge_probs(vp10_inter_mode_tree, pre_fc->inter_mode_probs[i],
-                counts->inter_mode[i], fc->inter_mode_probs[i]);
+                         counts->inter_mode[i], fc->inter_mode_probs[i]);
 #endif
 
-#if CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
   for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
-    fc->obmc_prob[i] = vp10_mode_mv_merge_probs(pre_fc->obmc_prob[i],
-                                                counts->obmc[i]);
-#endif  // CONFIG_OBMC
+    vpx_tree_merge_probs(vp10_motvar_tree, pre_fc->motvar_prob[i],
+                         counts->motvar[i], fc->motvar_prob[i]);
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
 #if CONFIG_SUPERTX
   for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {

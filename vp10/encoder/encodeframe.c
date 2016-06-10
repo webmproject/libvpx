@@ -1337,10 +1337,8 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
         mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
   }
 #endif  // CONFIG_VAR_TX
-#if CONFIG_OBMC
-  // Turn OBMC off for supertx
-  mbmi->obmc = 0;
-#endif  // CONFIG_OBMC
+  // Turn motion variation off for supertx
+  mbmi->motion_variation = SIMPLE_TRANSLATION;
 
   if (!output_enabled)
     return;
@@ -1966,23 +1964,24 @@ static void update_stats(VP10_COMMON *cm, ThreadData *td
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
 #if CONFIG_SUPERTX
         if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
 #if CONFIG_EXT_INTER
         if (mbmi->ref_frame[1] != INTRA_FRAME)
 #endif  // CONFIG_EXT_INTER
-          if (is_obmc_allowed(mbmi))
-            counts->obmc[mbmi->sb_type][mbmi->obmc]++;
-#endif  // CONFIG_OBMC
+          if (is_motvar_allowed(mbmi))
+            counts->motvar[mbmi->sb_type][mbmi->motion_variation]++;
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
 #if CONFIG_EXT_INTER
         if (cm->reference_mode != SINGLE_REFERENCE &&
             is_inter_compound_mode(mbmi->mode) &&
-#if CONFIG_OBMC
-            !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
-#endif  // CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+            !(is_motvar_allowed(mbmi) &&
+              mbmi->motion_variation != SIMPLE_TRANSLATION) &&
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
             is_interinter_wedge_used(bsize)) {
           counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
         }
@@ -5034,7 +5033,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
                                      VPXMAX(bsize, BLOCK_8X8));
 
 #if CONFIG_OBMC
-    if (mbmi->obmc) {
+    if (mbmi->motion_variation == OBMC_CAUSAL) {
 #if CONFIG_VP9_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);

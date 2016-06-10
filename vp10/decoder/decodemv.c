@@ -883,23 +883,24 @@ static void read_ref_frames(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 
-#if CONFIG_OBMC
-static int read_is_obmc_block(VP10_COMMON *const cm, MACROBLOCKD *const xd,
-                              vp10_reader *r) {
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+static MOTION_VARIATION read_motvar_block(
+    VP10_COMMON *const cm, MACROBLOCKD *const xd, vp10_reader *r) {
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   FRAME_COUNTS *counts = xd->counts;
-  int is_obmc;
+  MOTION_VARIATION motvar;
 
-  if (is_obmc_allowed(&xd->mi[0]->mbmi)) {
-    is_obmc = vp10_read(r, cm->fc->obmc_prob[bsize]);
+  if (is_motvar_allowed(&xd->mi[0]->mbmi)) {
+    motvar = (MOTION_VARIATION)
+        vp10_read_tree(r, vp10_motvar_tree, cm->fc->motvar_prob[bsize]);
     if (counts)
-      ++counts->obmc[bsize][is_obmc];
-    return is_obmc;
+      ++counts->motvar[bsize][motvar];
+    return motvar;
   } else {
-    return 0;
+    return SIMPLE_TRANSLATION;
   }
 }
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
 static INLINE INTERP_FILTER read_interp_filter(
     VP10_COMMON *const cm, MACROBLOCKD *const xd,
@@ -1599,24 +1600,25 @@ static void read_inter_block_mode_info(VP10Decoder *const pbi,
   }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
-  mbmi->obmc = 0;
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+  mbmi->motion_variation = SIMPLE_TRANSLATION;
 #if CONFIG_SUPERTX
   if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
 #if CONFIG_EXT_INTER
     if (mbmi->ref_frame[1] != INTRA_FRAME)
 #endif  // CONFIG_EXT_INTER
-    mbmi->obmc = read_is_obmc_block(cm, xd, r);
-#endif  // CONFIG_OBMC
+    mbmi->motion_variation = read_motvar_block(cm, xd, r);
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
 #if CONFIG_EXT_INTER
   mbmi->use_wedge_interinter = 0;
   if (cm->reference_mode != SINGLE_REFERENCE &&
       is_inter_compound_mode(mbmi->mode) &&
-#if CONFIG_OBMC
-      !(is_obmc_allowed(mbmi) && mbmi->obmc) &&
-#endif  // CONFIG_OBMC
+#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+      !(is_motvar_allowed(mbmi) &&
+        mbmi->motion_variation != SIMPLE_TRANSLATION) &&
+#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
       is_interinter_wedge_used(bsize)) {
     mbmi->use_wedge_interinter =
         vp10_read(r, cm->fc->wedge_interinter_prob[bsize]);
