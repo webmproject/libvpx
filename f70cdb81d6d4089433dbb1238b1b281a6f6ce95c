@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f0b7c18_355467e4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "maybe say: Skip golden non-zeromv and newmv-last for bsize \u003e\u003d 16x16 if the temporal variance obtained from the choose_partitioning is very small.\n\n(i think no need to say mv ...it may be confusing..., enough to have comment for that in the code)",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_554fdb51",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "1-2 for 64x32, 3-4 for 32x64",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_d52beb73",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "update the comment",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_754adf43",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "comment about the variance threshold should go above?",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_b5287778",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1122,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "but these blocks, 32x16/16x32 are not handled here?\nshouldn\u0027t we use vert/horiz[j.variance for 32x16/16x32?",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_7571bf91",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1388,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "put comment: corresponds to DC, H, V, TM,\n\nor refer to: PREDICTION_MODE intra_mode_list[]",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_f535cfcb",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "we can remove the pass \u003d 0 condition as these speeds are only used for real-time (i.,e 1 pass mode)",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_d542cb23",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T15:47:06Z",
+      "side": 1,
+      "message": "same comment as above",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
