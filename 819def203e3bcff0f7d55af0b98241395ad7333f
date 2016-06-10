@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4f0b7c18_98712afe",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-06-10T17:17:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f0b7c18_b57ab708",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 36
+      },
+      "revId": "819def203e3bcff0f7d55af0b98241395ad7333f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f0b7c18_5891525c",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-10T16:54:44Z",
       "side": 1,
       "message": "Why this change?",
+      "range": {
+        "startLine": 456,
+        "startChar": 36,
+        "endLine": 456,
+        "endChar": 55
+      },
+      "revId": "819def203e3bcff0f7d55af0b98241395ad7333f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_587b92db",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-06-10T17:17:23Z",
+      "side": 1,
+      "message": "This effectively uses uniform quantizer.",
+      "parentUuid": "4f0b7c18_5891525c",
       "range": {
         "startLine": 456,
         "startChar": 36,
