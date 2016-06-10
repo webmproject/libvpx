@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f0b7c18_b57ab708",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-10T16:54:44Z",
+      "side": 1,
+      "message": "remove these?",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 36
+      },
+      "revId": "819def203e3bcff0f7d55af0b98241395ad7333f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_5891525c",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-10T16:54:44Z",
+      "side": 1,
+      "message": "Why this change?",
+      "range": {
+        "startLine": 456,
+        "startChar": 36,
+        "endLine": 456,
+        "endChar": 55
+      },
+      "revId": "819def203e3bcff0f7d55af0b98241395ad7333f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
