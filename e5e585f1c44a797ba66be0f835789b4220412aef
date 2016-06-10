@@ -16,6 +16,23 @@
       "revId": "e5e585f1c44a797ba66be0f835789b4220412aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f21bce1_ceb2f748",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T21:56:12Z",
+      "side": 1,
+      "message": "this conditon on intra-modes (line 462-466) can go above line 455 (i.e can be used for svc, vbr, screen-content)...",
+      "revId": "e5e585f1c44a797ba66be0f835789b4220412aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
