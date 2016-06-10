@@ -104,6 +104,23 @@
     },
     {
       "key": {
+        "uuid": "4f0b7c18_55747b71",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1911,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T16:04:23Z",
+      "side": 1,
+      "message": "so this would also change behavior for speed 6/7, since force_skip may be set there for bsize \u003e\u003d 32x32. But note that since we only use DC for bs \u003e\u003d 32x32 (see setting in speed_feature), it won\u0027t have any effect, so should be ok",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f0b7c18_f535cfcb",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 9
@@ -121,6 +138,23 @@
     },
     {
       "key": {
+        "uuid": "4f0b7c18_75e65f53",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T16:04:23Z",
+      "side": 1,
+      "message": "you can add the condition that we only check DC for speed 8 here, i think that makes sense. So something like:\nif (!is_keyframe) {\n  for (i \u003d 0; i \u003c BLOCK_SIZES; ++i)\n    sf-\u003eintra_y_mode_bsize_mask[i] \u003d INTRA_DC;\n}\n\n(see the setting done in speed \u003d 5)",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f0b7c18_d542cb23",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 9
@@ -132,6 +166,23 @@
       "writtenOn": "2016-06-10T15:47:06Z",
       "side": 1,
       "message": "same comment as above",
+      "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_f58a6f7d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-06-10T16:04:23Z",
+      "side": 1,
+      "message": "update comments in speed_features.h to explain what the two modes do...",
       "revId": "f70cdb81d6d4089433dbb1238b1b281a6f6ce95c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
