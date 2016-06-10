@@ -218,6 +218,10 @@ typedef struct VP10Common {
   int uv_ac_delta_q;
   int16_t y_dequant[MAX_SEGMENTS][2];
   int16_t uv_dequant[MAX_SEGMENTS][2];
+#if CONFIG_NEW_QUANT
+  dequant_val_type_nuq y_dequant_nuq[MAX_SEGMENTS][COEF_BANDS];
+  dequant_val_type_nuq uv_dequant_nuq[MAX_SEGMENTS][COEF_BANDS];
+#endif
 
   /* We allocate a MODE_INFO struct for each macroblock, together with
      an extra row on top and column on the left to simplify prediction. */
@@ -429,14 +433,21 @@ static INLINE int frame_is_intra_only(const VP10_COMMON *const cm) {
 static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
                                         tran_low_t *dqcoeff) {
   int i;
-
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     xd->plane[i].dqcoeff = dqcoeff;
     xd->above_context[i] = cm->above_context[i];
     if (xd->plane[i].plane_type == PLANE_TYPE_Y) {
       memcpy(xd->plane[i].seg_dequant, cm->y_dequant, sizeof(cm->y_dequant));
+#if CONFIG_NEW_QUANT
+      memcpy(xd->plane[i].seg_dequant_nuq, cm->y_dequant_nuq,
+             sizeof(cm->y_dequant_nuq));
+#endif
     } else {
       memcpy(xd->plane[i].seg_dequant, cm->uv_dequant, sizeof(cm->uv_dequant));
+#if CONFIG_NEW_QUANT
+      memcpy(xd->plane[i].seg_dequant_nuq, cm->uv_dequant_nuq,
+             sizeof(cm->uv_dequant_nuq));
+#endif
     }
     xd->fc = cm->fc;
   }

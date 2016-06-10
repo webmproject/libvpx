@@ -49,6 +49,9 @@ static int decode_coefs(const MACROBLOCKD *xd,
                         PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, TX_TYPE tx_type,
                         const int16_t *dq,
+#if CONFIG_NEW_QUANT
+                        dequant_val_type_nuq *dq_val,
+#endif  // CONFIG_NEW_QUANT
                         int ctx, const int16_t *scan, const int16_t *nb,
                         vp10_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
@@ -66,6 +69,9 @@ static int decode_coefs(const MACROBLOCKD *xd,
   int dq_shift;
   int v, token;
   int16_t dqv = dq[0];
+#if CONFIG_NEW_QUANT
+  const tran_low_t *dqv_val = &dq_val[0][0];
+#endif  // CONFIG_NEW_QUANT
   const uint8_t *cat1_prob;
   const uint8_t *cat2_prob;
   const uint8_t *cat3_prob;
@@ -125,6 +131,10 @@ static int decode_coefs(const MACROBLOCKD *xd,
       break;
     }
 
+#if CONFIG_NEW_QUANT
+    dqv_val = &dq_val[band][0];
+#endif  // CONFIG_NEW_QUANT
+
     while (!vp10_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       dqv = dq[1];
@@ -135,6 +145,9 @@ static int decode_coefs(const MACROBLOCKD *xd,
       ctx = get_coef_context(nb, token_cache, c);
       band = *band_translate++;
       prob = coef_probs[band][ctx];
+#if CONFIG_NEW_QUANT
+      dqv_val = &dq_val[band][0];
+#endif  // CONFIG_NEW_QUANT
     }
 
     if (!vp10_read(r, prob[ONE_CONTEXT_NODE])) {
@@ -191,7 +204,13 @@ static int decode_coefs(const MACROBLOCKD *xd,
         }
       }
     }
+#if CONFIG_NEW_QUANT
+    v = dequant_abscoeff_nuq(val, dqv, dqv_val);
+    v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
+#else
     v = (val * dqv) >> dq_shift;
+#endif  // CONFIG_NEW_QUANT
+
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
     dqcoeff[scan[c]] = highbd_check_range((vp10_read_bit(r) ? -v : v),
@@ -224,6 +243,9 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
                             tran_low_t *dqcoeff, TX_SIZE tx_size,
                             TX_TYPE tx_type,
                             const int16_t *dq,
+#if CONFIG_NEW_QUANT
+                            dequant_val_type_nuq *dq_val,
+#endif  // CONFIG_NEW_QUANT
                             int ctx, const int16_t *scan, const int16_t *nb,
                             struct AnsDecoder *const ans) {
   FRAME_COUNTS *counts = xd->counts;
@@ -245,6 +267,9 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
   int dq_shift;
   int v, token;
   int16_t dqv = dq[0];
+#if CONFIG_NEW_QUANT
+  const tran_low_t *dqv_val = &dq_val[0][0];
+#endif  // CONFIG_NEW_QUANT
   const uint8_t *cat1_prob;
   const uint8_t *cat2_prob;
   const uint8_t *cat3_prob;
@@ -306,6 +331,10 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
       }
     }
 
+#if CONFIG_NEW_QUANT
+    dqv_val = &dq_val[band][0];
+#endif  // CONFIG_NEW_QUANT
+
     cdf = &coef_cdfs[band][ctx];
     token = ZERO_TOKEN + rans_read(ans, *cdf);
     if (token == ZERO_TOKEN) {
@@ -359,7 +388,13 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
 #endif
         } break;
       }
-      v = (val * dqv) >> dq_shift;
+#if CONFIG_NEW_QUANT
+    v = dequant_abscoeff_nuq(val, dqv, dqv_val);
+    v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
+#else
+    v = (val * dqv) >> dq_shift;
+#endif  // CONFIG_NEW_QUANT
+
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
       dqcoeff[scan[c]] =
@@ -474,11 +509,19 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
 #if !CONFIG_ANS
   const int eob = decode_coefs(xd, pd->plane_type,
                                pd->dqcoeff, tx_size, tx_type,
-                               dequant, ctx, sc->scan, sc->neighbors, r);
+                               dequant,
+#if CONFIG_NEW_QUANT
+                               pd->seg_dequant_nuq[0],
+#endif  // CONFIG_NEW_QUANT
+                               ctx, sc->scan, sc->neighbors, r);
 #else
   const int eob = decode_coefs_ans(xd, pd->plane_type,
                                    pd->dqcoeff, tx_size, tx_type,
-                                   dequant, ctx, sc->scan, sc->neighbors, r);
+                                   dequant,
+#if CONFIG_NEW_QUANT
+                                   pd->seg_dequant_nuq[0],
+#endif  // CONFIG_NEW_QUANT
+                                   ctx, sc->scan, sc->neighbors, r);
 #endif  // !CONFIG_ANS
   dec_set_contexts(xd, pd, tx_size, eob > 0, x, y);
   return eob;

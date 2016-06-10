@@ -31,6 +31,8 @@ int vp10_get_qindex(const struct segmentation *seg, int segment_id,
 
 #if CONFIG_NEW_QUANT
 #define NUQ_KNOTS 3
+typedef tran_low_t dequant_val_type_nuq[NUQ_KNOTS + 1];
+typedef tran_low_t cuml_bins_type_nuq[NUQ_KNOTS];
 void get_dequant_val_nuq(int q, int lossless, int band,
                          tran_low_t *dq, tran_low_t *cumbins);
 tran_low_t dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq);

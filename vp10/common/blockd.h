@@ -19,6 +19,7 @@
 #include "vpx_scale/yv12config.h"
 
 #include "vp10/common/common_data.h"
+#include "vp10/common/quant_common.h"
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymode.h"
 #include "vp10/common/mv.h"
@@ -215,6 +216,10 @@ typedef struct {
 #if CONFIG_EXT_PARTITION_TYPES
   PARTITION_TYPE partition;
 #endif
+#if CONFIG_NEW_QUANT
+  int dq_off_index;
+  int send_dq_bit;
+#endif  // CONFIG_NEW_QUANT
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
@@ -261,6 +266,9 @@ typedef struct macroblockd_plane {
   ENTROPY_CONTEXT *above_context;
   ENTROPY_CONTEXT *left_context;
   int16_t seg_dequant[MAX_SEGMENTS][2];
+#if CONFIG_NEW_QUANT
+  dequant_val_type_nuq seg_dequant_nuq[MAX_SEGMENTS][COEF_BANDS];
+#endif
   uint8_t *color_index_map;
 
   // number of 4x4s in current block
@@ -270,6 +278,9 @@ typedef struct macroblockd_plane {
 
   // encoder
   const int16_t *dequant;
+#if CONFIG_NEW_QUANT
+  const dequant_val_type_nuq* dequant_val_nuq;
+#endif  // CONFIG_NEW_QUANT
 } MACROBLOCKD_PLANE;
 
 #define BLOCK_OFFSET(x, i) ((x) + (i) * 16)

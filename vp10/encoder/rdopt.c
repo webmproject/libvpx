@@ -1259,8 +1259,13 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
+#if CONFIG_NEW_QUANT
+      vp10_xform_quant_nuq(x, plane, block, blk_row, blk_col,
+                           plane_bsize, tx_size);
+#else
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                        plane_bsize, tx_size, VP10_XFORM_QUANT_B);
+#endif  // CONFIG_NEW_QUANT
       dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
     } else if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
@@ -1268,8 +1273,17 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
+#if CONFIG_NEW_QUANT
+      if (x->quant_fp)
+        vp10_xform_quant_dc_fp_nuq(x, plane, block, blk_row, blk_col,
+                                   plane_bsize, tx_size);
+      else
+        vp10_xform_quant_dc_nuq(x, plane, block, blk_row, blk_col,
+                                plane_bsize, tx_size);
+#else
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                           plane_bsize, tx_size, VP10_XFORM_QUANT_DC);
+#endif  // CONFIG_NEW_QUANT
       sse  = x->bsse[plane][block >> (tx_size << 1)] << 4;
       dist = sse;
       if (x->plane[plane].eobs[block]) {
@@ -1295,8 +1309,17 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     }
   } else {
     // full forward transform and quantization
+#if CONFIG_NEW_QUANT
+    if (x->quant_fp)
+      vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
+                              tx_size);
+    else
+      vp10_xform_quant_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
+                           tx_size);
+#else
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_B);
+#endif  // CONFIG_NEW_QUANT
     dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                tx_size, &dist, &sse);
   }
