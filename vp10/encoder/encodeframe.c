@@ -339,6 +339,10 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
     mbmi->segment_id = 0;
     x->encode_breakout = cpi->encode_breakout;
   }
+
+#if CONFIG_SUPERTX
+  mbmi->segment_id_supertx = MAX_SEGMENTS;
+#endif  // CONFIG_SUPERTX
 }
 
 #if CONFIG_SUPERTX
@@ -1329,6 +1333,7 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
                                                  : cm->last_frame_seg_map;
       mi_addr->mbmi.segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
+    mi_addr->mbmi.segment_id_supertx = MAX_SEGMENTS;
   }
 
   // Restore the coding context of the MB to that that was in place

@@ -1309,6 +1309,8 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   }
 
 #if CONFIG_SUPERTX
+  mbmi->segment_id_supertx = MAX_SEGMENTS;
+
   if (supertx_enabled) {
     xd->corrupted |= vp10_reader_has_error(r);
     return;
