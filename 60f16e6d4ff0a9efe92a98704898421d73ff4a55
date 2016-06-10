@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f800813_e75c6234",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-10T23:18:09Z",
+      "side": 1,
+      "message": "Huh, I hadn\u0027t even considered having two different classes in the file. Hopefully this is what you meant.",
+      "range": {
+        "startLine": 93,
+        "startChar": 6,
+        "endLine": 93,
+        "endChar": 21
+      },
+      "revId": "60f16e6d4ff0a9efe92a98704898421d73ff4a55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
