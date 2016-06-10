@@ -1217,6 +1217,9 @@ void vp10_init_quantizer(VP10_COMP *cpi) {
   VP10_COMMON *const cm = &cpi->common;
   QUANTS *const quants = &cpi->quants;
   int i, q, quant;
+#if CONFIG_NEW_QUANT
+  int dq;
+#endif
 
   for (q = 0; q < QINDEX_RANGE; q++) {
     const int qzbin_factor = get_qzbin_factor(q, cm->bit_depth);
@@ -1247,16 +1250,17 @@ void vp10_init_quantizer(VP10_COMP *cpi) {
     }
 
 #if CONFIG_NEW_QUANT
-    // TODO(sarahparker) do this for multiple profiles once they are added
-    for (i = 0; i < COEF_BANDS; i++) {
-      const int quant = cpi->y_dequant[q][i != 0];
-      const int uvquant = cpi->uv_dequant[q][i != 0];
-      get_dequant_val_nuq(quant, q == 0, i,
-                          cpi->y_dequant_val_nuq[q][i],
-                          quants->y_cuml_bins_nuq[q][i]);
-      get_dequant_val_nuq(uvquant, q == 0, i,
-                          cpi->uv_dequant_val_nuq[q][i],
-                          quants->uv_cuml_bins_nuq[q][i]);
+    for (dq = 0; dq < QUANT_PROFILES; dq++) {
+      for (i = 0; i < COEF_BANDS; i++) {
+        const int quant = cpi->y_dequant[q][i != 0];
+        const int uvquant = cpi->uv_dequant[q][i != 0];
+        get_dequant_val_nuq(quant, q == 0, i,
+                            cpi->y_dequant_val_nuq[dq][q][i],
+                            quants->y_cuml_bins_nuq[dq][q][i], dq);
+        get_dequant_val_nuq(uvquant, q == 0, i,
+                            cpi->uv_dequant_val_nuq[dq][q][i],
+                            quants->uv_cuml_bins_nuq[dq][q][i], dq);
+      }
     }
 #endif  // CONFIG_NEW_QUANT
 
@@ -1288,6 +1292,9 @@ void vp10_init_plane_quantizers(const VP10_COMP *cpi, MACROBLOCK *x,
   const int qindex = vp10_get_qindex(&cm->seg, segment_id, cm->base_qindex);
   const int rdmult = vp10_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
   int i;
+#if CONFIG_NEW_QUANT
+  int dq;
+#endif
 
   // Y
   x->plane[0].quant = quants->y_quant[qindex];
@@ -1298,8 +1305,12 @@ void vp10_init_plane_quantizers(const VP10_COMP *cpi, MACROBLOCK *x,
   x->plane[0].round = quants->y_round[qindex];
   xd->plane[0].dequant = cpi->y_dequant[qindex];
 #if CONFIG_NEW_QUANT
-  x->plane[0].cuml_bins_nuq = quants->y_cuml_bins_nuq[qindex];
-  xd->plane[0].dequant_val_nuq = cpi->y_dequant_val_nuq[qindex];
+  for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+    x->plane[0].cuml_bins_nuq[dq] = (cuml_bins_type_nuq*)
+                                    quants->y_cuml_bins_nuq[dq][qindex];
+    xd->plane[0].dequant_val_nuq[dq] = (const dequant_val_type_nuq*)
+                                   cpi->y_dequant_val_nuq[dq][qindex];
+  }
 #endif  // CONFIG_NEW_QUANT
 
   x->plane[0].quant_thred[0] = x->plane[0].zbin[0] * x->plane[0].zbin[0];
@@ -1315,8 +1326,12 @@ void vp10_init_plane_quantizers(const VP10_COMP *cpi, MACROBLOCK *x,
     x->plane[i].round = quants->uv_round[qindex];
     xd->plane[i].dequant = cpi->uv_dequant[qindex];
 #if CONFIG_NEW_QUANT
-    x->plane[i].cuml_bins_nuq = quants->uv_cuml_bins_nuq[qindex];
-    xd->plane[i].dequant_val_nuq = cpi->uv_dequant_val_nuq[qindex];
+    for (dq = 0; dq < QUANT_PROFILES; dq ++) {
+      x->plane[i].cuml_bins_nuq[dq] = (cuml_bins_type_nuq*)
+                                      quants->uv_cuml_bins_nuq[dq][qindex];
+      xd->plane[i].dequant_val_nuq[dq] = (const dequant_val_type_nuq*)
+                                     cpi->uv_dequant_val_nuq[dq][qindex];
+    }
 #endif  // CONFIG_NEW_QUANT
 
     x->plane[i].quant_thred[0] = x->plane[i].zbin[0] * x->plane[i].zbin[0];
