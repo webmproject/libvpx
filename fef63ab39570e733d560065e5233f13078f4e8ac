@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f21bce1_4851df1b",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 10240,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-06-10T18:12:43Z",
+      "side": 1,
+      "message": "For consistency, maybe remove the config flags here.",
+      "revId": "fef63ab39570e733d560065e5233f13078f4e8ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
