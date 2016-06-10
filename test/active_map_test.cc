@@ -88,25 +88,21 @@ VP9_INSTANTIATE_TEST_CASE(ActiveMapTest,
                           ::testing::Range(0, 9));
 #if CONFIG_VP10
 #if CONFIG_SUPERTX
+VP10_INSTANTIATE_TEST_CASE(ActiveMapTest,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Range(0, 5));
+// SuperTx and ActiveMap don't get along at speed 5.
+// https://bugs.chromium.org/p/webm/issues/detail?id=1234
 INSTANTIATE_TEST_CASE_P(
     DISABLED_VP10, ActiveMapTest,
     ::testing::Combine(
         ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
             &libvpx_test::kVP10)),
-        ::testing::Values(::libvpx_test::kRealTime), ::testing::Range(0, 9)));
+        ::testing::Values(::libvpx_test::kRealTime), ::testing::Range(5, 9)));
 #else
 VP10_INSTANTIATE_TEST_CASE(ActiveMapTest,
                            ::testing::Values(::libvpx_test::kRealTime),
-                           ::testing::Range(0, 6));
-
-// The new variance based partitioning scheme is incompatible with
-// SEGMENT_LEVEL_SKIP.
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_VP10, ActiveMapTest,
-    ::testing::Combine(
-        ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
-            &libvpx_test::kVP10)),
-        ::testing::Values(::libvpx_test::kRealTime), ::testing::Range(6, 9)));
+                           ::testing::Range(0, 9));
 #endif  // CONFIG_SUPERTX
 #endif  // CONFIG_VP10
 }  // namespace
