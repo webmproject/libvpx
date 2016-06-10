@@ -1020,7 +1020,7 @@ if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCO
   specialize qw/vpx_hadamard_8x8 sse2 neon/, "$ssse3_x86_64_x86inc";
 
   add_proto qw/void vpx_hadamard_16x16/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
-  specialize qw/vpx_hadamard_16x16 sse2/;
+  specialize qw/vpx_hadamard_16x16 sse2 neon/;
 
   add_proto qw/int vpx_satd/, "const int16_t *coeff, int length";
   specialize qw/vpx_satd sse2 neon/;

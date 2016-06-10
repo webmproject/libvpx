@@ -160,3 +160,42 @@ void vpx_hadamard_8x8_neon(const int16_t *src_diff, int src_stride,
   vst1q_s16(coeff + 48, a6);
   vst1q_s16(coeff + 56, a7);
 }
+
+void vpx_hadamard_16x16_neon(const int16_t *src_diff, int src_stride,
+                             int16_t *coeff) {
+  int i;
+
+  /* Rearrange 16x16 to 8x32 and remove stride.
+   * Top left first. */
+  vpx_hadamard_8x8_neon(src_diff + 0 + 0 * src_stride, src_stride, coeff + 0);
+  /* Top right. */
+  vpx_hadamard_8x8_neon(src_diff + 8 + 0 * src_stride, src_stride, coeff + 64);
+  /* Bottom left. */
+  vpx_hadamard_8x8_neon(src_diff + 0 + 8 * src_stride, src_stride, coeff + 128);
+  /* Bottom right. */
+  vpx_hadamard_8x8_neon(src_diff + 8 + 8 * src_stride, src_stride, coeff + 192);
+
+  for (i = 0; i < 64; i += 8) {
+    const int16x8_t a0 = vld1q_s16(coeff + 0);
+    const int16x8_t a1 = vld1q_s16(coeff + 64);
+    const int16x8_t a2 = vld1q_s16(coeff + 128);
+    const int16x8_t a3 = vld1q_s16(coeff + 192);
+
+    const int16x8_t b0 = vhaddq_s16(a0, a1);
+    const int16x8_t b1 = vhsubq_s16(a0, a1);
+    const int16x8_t b2 = vhaddq_s16(a2, a3);
+    const int16x8_t b3 = vhsubq_s16(a2, a3);
+
+    const int16x8_t c0 = vaddq_s16(b0, b2);
+    const int16x8_t c1 = vaddq_s16(b1, b3);
+    const int16x8_t c2 = vsubq_s16(b0, b2);
+    const int16x8_t c3 = vsubq_s16(b1, b3);
+
+    vst1q_s16(coeff + 0, c0);
+    vst1q_s16(coeff + 64, c1);
+    vst1q_s16(coeff + 128, c2);
+    vst1q_s16(coeff + 192, c3);
+
+    coeff += 8;
+  }
+}

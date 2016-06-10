@@ -212,4 +212,9 @@ INSTANTIATE_TEST_CASE_P(C, Hadamard16x16Test,
 INSTANTIATE_TEST_CASE_P(SSE2, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_sse2));
 #endif  // HAVE_SSE2
+
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(NEON, Hadamard16x16Test,
+                        ::testing::Values(&vpx_hadamard_16x16_neon));
+#endif  // HAVE_NEON
 }  // namespace
