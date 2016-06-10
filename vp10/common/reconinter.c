@@ -1275,7 +1275,7 @@ void vp10_build_inter_predictors_sb_sub8x8_extend(
 #if CONFIG_EXT_INTER
                            wedge_offset_x,
                            wedge_offset_y,
-#endif  // CONFIG_SUPERTX
+#endif  // CONFIG_EXT_INTER
                            mi_x, mi_y);
   }
 #if CONFIG_EXT_INTER
