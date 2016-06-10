@@ -56,10 +56,10 @@ void vpx_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
     c1 = e1 - c1;
     a1 -= b1;
     d1 += c1;
-    dest[stride * 0] = clip_pixel_add(dest[stride * 0], a1);
-    dest[stride * 1] = clip_pixel_add(dest[stride * 1], b1);
-    dest[stride * 2] = clip_pixel_add(dest[stride * 2], c1);
-    dest[stride * 3] = clip_pixel_add(dest[stride * 3], d1);
+    dest[stride * 0] = clip_pixel_add(dest[stride * 0], WRAPLOW(a1));
+    dest[stride * 1] = clip_pixel_add(dest[stride * 1], WRAPLOW(b1));
+    dest[stride * 2] = clip_pixel_add(dest[stride * 2], WRAPLOW(c1));
+    dest[stride * 3] = clip_pixel_add(dest[stride * 3], WRAPLOW(d1));
 
     ip++;
     dest++;
@@ -266,7 +266,7 @@ void iadst4_c(const tran_low_t *input, tran_low_t *output) {
   s4 = sinpi_1_9 * x2;
   s5 = sinpi_2_9 * x3;
   s6 = sinpi_4_9 * x3;
-  s7 = x0 - x2 + x3;
+  s7 = WRAPLOW(x0 - x2 + x3);
 
   s0 = s0 + s3 + s5;
   s1 = s1 - s4 - s6;
@@ -1309,10 +1309,14 @@ void vpx_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
     c1 = e1 - c1;
     a1 -= b1;
     d1 += c1;
-    dest[stride * 0] = highbd_clip_pixel_add(dest[stride * 0], a1, bd);
-    dest[stride * 1] = highbd_clip_pixel_add(dest[stride * 1], b1, bd);
-    dest[stride * 2] = highbd_clip_pixel_add(dest[stride * 2], c1, bd);
-    dest[stride * 3] = highbd_clip_pixel_add(dest[stride * 3], d1, bd);
+    dest[stride * 0] = highbd_clip_pixel_add(dest[stride * 0],
+                                             HIGHBD_WRAPLOW(a1, bd), bd);
+    dest[stride * 1] = highbd_clip_pixel_add(dest[stride * 1],
+                                             HIGHBD_WRAPLOW(b1, bd), bd);
+    dest[stride * 2] = highbd_clip_pixel_add(dest[stride * 2],
+                                             HIGHBD_WRAPLOW(c1, bd), bd);
+    dest[stride * 3] = highbd_clip_pixel_add(dest[stride * 3],
+                                             HIGHBD_WRAPLOW(d1, bd), bd);
 
     ip++;
     dest++;
@@ -1529,7 +1533,7 @@ void vpx_highbd_iadst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   s4 = sinpi_1_9 * x2;
   s5 = sinpi_2_9 * x3;
   s6 = sinpi_4_9 * x3;
-  s7 = (tran_high_t)(x0 - x2 + x3);
+  s7 = (tran_high_t)HIGHBD_WRAPLOW(x0 - x2 + x3, bd);
 
   s0 = s0 + s3 + s5;
   s1 = s1 - s4 - s6;
