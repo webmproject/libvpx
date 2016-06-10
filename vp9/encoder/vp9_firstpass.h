@@ -45,6 +45,7 @@ typedef struct {
   double intra_error;
   double coded_error;
   double sr_coded_error;
+  double frame_noise_energy;
   double pcnt_inter;
   double pcnt_motion;
   double pcnt_second_ref;
@@ -134,6 +135,7 @@ typedef struct {
   int extend_minq;
   int extend_maxq;
   int extend_minq_fast;
+  int arnr_strength_adjustment;
 
   GF_GROUP gf_group;
 } TWO_PASS;
