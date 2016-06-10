@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfa12c60_9f14973b",
+        "filename": "vp10/encoder/rd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-06-10T10:42:59Z",
+      "side": 1,
+      "message": "Why this change. It does not seem related directly to the merge ?",
+      "range": {
+        "startLine": 65,
+        "startChar": 18,
+        "endLine": 65,
+        "endChar": 20
+      },
+      "revId": "d552ecd8f7b96d045eaf5b98ba32f2b67d0297e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
