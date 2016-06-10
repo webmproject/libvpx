@@ -1514,6 +1514,8 @@ static void adjust_gf_key_frame(VP9_COMP *cpi) {
   if ((rc->frames_to_key <= 7 * rc->baseline_gf_interval >> 2) &&
       (rc->frames_to_key > rc->baseline_gf_interval)) {
     rc->baseline_gf_interval = rc->frames_to_key >> 1;
+    if (rc->baseline_gf_interval < 5)
+      rc->baseline_gf_interval = rc->frames_to_key;
     rc->constrained_gf_group = 1;
   } else {
     // Reset since frames_till_gf_update_due must be <= frames_to_key.
