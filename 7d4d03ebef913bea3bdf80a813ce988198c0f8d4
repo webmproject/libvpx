@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "4f0b7c18_58527253",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-06-10T17:16:05Z",
+      "side": 1,
+      "message": "I think IOC isn\u0027t down with signed integer left shifts. Meaning this might cause an IOC error.",
+      "range": {
+        "startLine": 203,
+        "startChar": 16,
+        "endLine": 203,
+        "endChar": 17
+      },
+      "revId": "7d4d03ebef913bea3bdf80a813ce988198c0f8d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f0b7c18_78c9b614",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-06-10T17:16:05Z",
+      "side": 1,
+      "message": "Please at least comment what you are doing with mul \u0026 x \u0026 dequant_ptr   ...  its not so easy to follow nor by the way was the original.   \n\nThis line of code is really hard to follow.",
+      "range": {
+        "startLine": 262,
+        "startChar": 14,
+        "endLine": 262,
+        "endChar": 17
+      },
+      "revId": "7d4d03ebef913bea3bdf80a813ce988198c0f8d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f0b7c18_189bda7e",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 3
