@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0f034492_89315d53",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-11T03:22:36Z",
+      "side": 1,
+      "message": "preincrement is preferred\n\nhttps://google.github.io/styleguide/cppguide.html#Preincrement_and_Predecrement",
+      "revId": "1fbdaa3595177969e1a76591486750041558b9c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f034492_c9275514",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-11T03:22:36Z",
+      "side": 1,
+      "message": "Without c++11 smart pointers, generally a pointer return is preferred with the function named MutableXXX to indicate there\u0027s no transfer of ownership",
+      "revId": "1fbdaa3595177969e1a76591486750041558b9c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f034492_a92c19f9",
+        "filename": "test/sum_squares_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-11T03:22:36Z",
+      "side": 1,
+      "message": "add whitespace around operators. there\u0027s a bit of ambiguity, but horizontal whitespace here is more consistent with the code base and in line with what aomedia is using for clang-format\n\nhttps://google.github.io/styleguide/cppguide.html#Horizontal_Whitespace",
+      "revId": "1fbdaa3595177969e1a76591486750041558b9c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
