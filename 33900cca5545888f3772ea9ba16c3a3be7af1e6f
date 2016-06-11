@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af6dd8b5_d390945c",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-06-11T16:11:07Z",
+      "side": 1,
+      "message": "\u0027mul\u0027 name hints that it\u0027s a multiplier, not a shift.\nHence \u00271 \u003c\u003c mul\u0027 sounds weird here (borderline erroneous, even).",
+      "range": {
+        "startLine": 175,
+        "startChar": 45,
+        "endLine": 175,
+        "endChar": 48
+      },
+      "revId": "33900cca5545888f3772ea9ba16c3a3be7af1e6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
