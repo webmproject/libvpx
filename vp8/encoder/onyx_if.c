@@ -1523,7 +1523,8 @@ static void update_layer_contexts (VP8_COMP *cpi)
 void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 {
     VP8_COMMON *cm = &cpi->common;
-    int last_w, last_h, prev_number_of_layers;
+    int last_w, last_h;
+    unsigned int prev_number_of_layers;
 
     if (!cpi)
         return;
