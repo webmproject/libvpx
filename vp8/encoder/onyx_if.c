@@ -5857,7 +5857,7 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigne
         return -1;
 
     // Check number of rows and columns match
-    if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
+    if (cpi->common.mb_rows != (int)rows || cpi->common.mb_cols != (int)cols)
         return -1;
 
     // Range check the delta Q values and convert the external Q range values
@@ -5913,7 +5913,7 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigne
 
 int vp8_set_active_map(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigned int cols)
 {
-    if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols)
+    if ((int)rows == cpi->common.mb_rows && (int)cols == cpi->common.mb_cols)
     {
         if (map)
         {
