@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfc4ccd4_a71f6464",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-13T20:25:46Z",
+      "side": 1,
+      "message": "Drop offsets",
+      "revId": "0ec2549740cfb65f0db3e9e129accca7a3ae9ff2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cfc4ccd4_8724e8b9",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-13T20:25:46Z",
+      "side": 1,
+      "message": "Drop offsets",
+      "revId": "0ec2549740cfb65f0db3e9e129accca7a3ae9ff2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
