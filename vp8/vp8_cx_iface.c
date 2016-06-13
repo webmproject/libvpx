@@ -760,7 +760,7 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
                                     unsigned long          duration,
                                     unsigned long          deadline)
 {
-    unsigned int new_qc;
+    int new_qc;
 
 #if !(CONFIG_REALTIME_ONLY)
     /* Use best quality mode if no deadline is given. */
