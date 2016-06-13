@@ -9505,9 +9505,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       break;
   }
 
-  if (sf->tx_type_search.fast_inter_tx_type_search == 1 &&
-      xd->lossless[mbmi->segment_id] == 0 &&
-      best_mode_index >= 0) {
+  if (xd->lossless[mbmi->segment_id] == 0 && best_mode_index >= 0 &&
+      ((sf->tx_type_search.fast_inter_tx_type_search == 1 &&
+        is_inter_mode(best_mbmode.mode)) ||
+       (sf->tx_type_search.fast_intra_tx_type_search == 1 &&
+        !is_inter_mode(best_mbmode.mode)))) {
     int rate_y = 0, rate_uv = 0;
     int64_t dist_y = 0, dist_uv = 0;
     int skip_y = 0, skip_uv = 0, skip_blk = 0;
