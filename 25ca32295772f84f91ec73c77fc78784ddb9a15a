@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "748739d2_04eef8bd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-06-13T22:34:07Z",
+      "side": 1,
+      "message": "Nice!\n\nI probably would have liked a new \"term\" here since \"adaptive quantization\" has been broadly used to indicate the strategy that uses different Qs for different blocks.",
+      "range": {
+        "startLine": 7,
+        "startChar": 14,
+        "endLine": 7,
+        "endChar": 35
+      },
+      "revId": "25ca32295772f84f91ec73c77fc78784ddb9a15a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
