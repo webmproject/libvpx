@@ -50,6 +50,24 @@
       "revId": "1fbdaa3595177969e1a76591486750041558b9c5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cfc4ccd4_8756a815",
+        "filename": "test/sum_squares_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-13T17:11:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f034492_a92c19f9",
+      "revId": "1fbdaa3595177969e1a76591486750041558b9c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
