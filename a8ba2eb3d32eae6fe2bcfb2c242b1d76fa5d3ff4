@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0f1d041b_dce365de",
+        "filename": "test/test-data.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-13T17:03:02Z",
+      "side": 1,
+      "message": "This one seems to be used by cpu_speed_test. Why doesn\u0027t the same issue apply?",
+      "range": {
+        "startLine": 24,
+        "startChar": 42,
+        "endLine": 24,
+        "endChar": 56
+      },
+      "revId": "a8ba2eb3d32eae6fe2bcfb2c242b1d76fa5d3ff4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
