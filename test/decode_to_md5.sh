@@ -18,8 +18,7 @@
 # Environment check: Make sure input is available:
 #   $AOM_IVF_FILE and $AV1_IVF_FILE are required.
 decode_to_md5_verify_environment() {
-  if [ ! -e "${AOM_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
-    echo "Libaom test data must exist in LIBAOM_TEST_DATA_PATH."
+  if [ "$(av1_encode_available)" != "yes" ] && [ ! -e "${AV1_IVF_FILE}" ]; then
     return 1
   fi
 }
@@ -49,25 +48,20 @@ decode_to_md5() {
   [ "${actual_md5}" = "${expected_md5}" ] || return 1
 }
 
-decode_to_md5_aom() {
-  # expected MD5 sum for the last frame.
-  local expected_md5="56794d911b02190212bca92f88ad60c6"
-
-  if [ "$(aom_decode_available)" = "yes" ]; then
-    decode_to_md5 "${AOM_IVF_FILE}" "aom" "${expected_md5}"
-  fi
-}
-
 decode_to_md5_av1() {
   # expected MD5 sum for the last frame.
-  local expected_md5="2952c0eae93f3dadd1aa84c50d3fd6d2"
+  local expected_md5="fef4c2a45fb89ef5f3a156d4a59aadc0"
+  local file="${AV1_IVF_FILE}"
 
   if [ "$(av1_decode_available)" = "yes" ]; then
-    decode_to_md5 "${AV1_IVF_FILE}" "av1" "${expected_md5}"
+    if [ ! -e "${AV1_IVF_FILE}" ]; then
+      file="${AOM_TEST_OUTPUT_DIR}/test_encode.ivf"
+      encode_yuv_raw_input_av1 "${file}" --ivf
+    fi
+    decode_to_md5 "${file}" "av1" "${expected_md5}"
   fi
 }
 
-decode_to_md5_tests="decode_to_md5_aom
-                     decode_to_md5_av1"
+decode_to_md5_tests="decode_to_md5_av1"
 
 run_tests decode_to_md5_verify_environment "${decode_to_md5_tests}"
