@@ -333,22 +333,15 @@ static const uint8_t *get_wedge_mask_inplace(int wedge_index,
   return master;
 }
 
-static const uint8_t *get_wedge_mask(int wedge_index,
-                                     int neg,
-                                     BLOCK_SIZE bsize) {
-  return wedge_params_lookup[bsize].masks[neg][wedge_index];
-}
-
 const uint8_t *vp10_get_soft_mask(int wedge_index,
                                   int wedge_sign,
                                   BLOCK_SIZE sb_type,
                                   int offset_x,
                                   int offset_y) {
-  const int bw = 4 * num_4x4_blocks_wide_lookup[sb_type];
   const uint8_t *mask =
-      get_wedge_mask(wedge_index, wedge_sign, sb_type);
+      get_wedge_mask_inplace(wedge_index, wedge_sign, sb_type);
   if (mask)
-    mask -= (offset_x + offset_y * bw);
+    mask -= (offset_x + offset_y * MASK_MASTER_STRIDE);
   return mask;
 }
 
@@ -469,7 +462,7 @@ static void build_masked_compound_wedge_extend(
   vpx_blend_mask6(dst, dst_stride,
                   src0, src0_stride,
                   src1, src1_stride,
-                  mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
+                  mask, MASK_MASTER_STRIDE,
                   h, w, subh, subw);
 }
 
@@ -489,7 +482,7 @@ static void build_masked_compound_wedge_extend_highbd(
   vpx_highbd_blend_mask6(dst_8, dst_stride,
                          src0_8, src0_stride,
                          src1_8, src1_stride,
-                         mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
+                         mask, MASK_MASTER_STRIDE,
                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -506,8 +499,8 @@ static void build_masked_compound_wedge(uint8_t *dst, int dst_stride,
   // pass in subsampling factors directly.
   const int subh = (2 << b_height_log2_lookup[sb_type]) == h;
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
-  const uint8_t *mask = vp10_get_soft_mask(wedge_index, wedge_sign,
-                                           sb_type, 0, 0);
+  const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign,
+                                                      sb_type);
   vpx_blend_mask6(dst, dst_stride,
                   src0, src0_stride,
                   src1, src1_stride,
@@ -526,8 +519,8 @@ static void build_masked_compound_wedge_highbd(uint8_t *dst_8, int dst_stride,
   // pass in subsampling factors directly.
   const int subh = (2 << b_height_log2_lookup[sb_type]) == h;
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
-  const uint8_t *mask = vp10_get_soft_mask(wedge_index, wedge_sign,
-                                           sb_type, 0, 0);
+  const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign,
+                                                      sb_type);
   vpx_highbd_blend_mask6(dst_8, dst_stride,
                          src0_8, src0_stride,
                          src1_8, src1_stride,
@@ -1887,8 +1880,9 @@ static void combine_interintra(INTERINTRA_MODE mode,
 
   if (use_wedge_interintra) {
     if (is_interintra_wedge_used(bsize)) {
-      const uint8_t *mask = vp10_get_soft_mask(wedge_index, wedge_sign,
-                                               bsize, 0, 0);
+      const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index,
+                                                          wedge_sign,
+                                                          bsize);
       const int subw = 2 * num_4x4_blocks_wide_lookup[bsize] == bw;
       const int subh = 2 * num_4x4_blocks_high_lookup[bsize] == bh;
       vpx_blend_mask6(comppred, compstride,
@@ -2026,8 +2020,9 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
 
   if (use_wedge_interintra) {
     if (is_interintra_wedge_used(bsize)) {
-      const uint8_t *mask = vp10_get_soft_mask(wedge_index, wedge_sign,
-                                               bsize, 0, 0);
+      const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index,
+                                                          wedge_sign,
+                                                          bsize);
       const int subh = 2 * num_4x4_blocks_high_lookup[bsize] == bh;
       const int subw = 2 * num_4x4_blocks_wide_lookup[bsize] == bw;
       vpx_highbd_blend_mask6(comppred8, compstride,
