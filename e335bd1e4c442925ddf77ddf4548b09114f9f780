@@ -33,6 +33,24 @@
       "revId": "e335bd1e4c442925ddf77ddf4548b09114f9f780",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f1d041b_ffb29315",
+        "filename": "vp8/decoder/decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1026,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-13T19:42:49Z",
+      "side": 1,
+      "message": "size_t in unsigned too?\nhttp://www.gnu.org/software/libc/manual/html_node/Important-Data-Types.html\n\nThat was the initial error - unsigned size_t vs signed data_end - data",
+      "parentUuid": "0f1d041b_ffc1f38c",
+      "revId": "e335bd1e4c442925ddf77ddf4548b09114f9f780",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
