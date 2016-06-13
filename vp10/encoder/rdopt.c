@@ -1213,6 +1213,10 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   int rate;
   int64_t dist;
   int64_t sse;
+#if !CONFIG_NEW_QUANT
+  ENTROPY_CONTEXT coeff_ctx = combine_entropy_contexts(
+      *(args->t_above + blk_col), *(args->t_left + blk_row));
+#endif
 
   if (args->exit_early)
     return;
@@ -1264,9 +1268,10 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
                            plane_bsize, tx_size);
 #else
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
-                       plane_bsize, tx_size, VP10_XFORM_QUANT_B);
+                       plane_bsize, tx_size, VP10_XFORM_QUANT_FP);
+      vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
 #endif  // CONFIG_NEW_QUANT
-      dist_block(args->cpi, x, plane, block, blk_row, blk_col,
+     dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
     } else if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
                SKIP_TXFM_AC_ONLY) {
@@ -1318,7 +1323,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
                            tx_size);
 #else
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
-                     VP10_XFORM_QUANT_B);
+                     VP10_XFORM_QUANT_FP);
+    vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
 #endif  // CONFIG_NEW_QUANT
     dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                tx_size, &dist, &sse);
@@ -3075,6 +3081,8 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 
   vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                    VP10_XFORM_QUANT_B);
+
+  vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
 
   // TODO(any): Use dist_block to compute distortion
 #if CONFIG_VP9_HIGHBITDEPTH
