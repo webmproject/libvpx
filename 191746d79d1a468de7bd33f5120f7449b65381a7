@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "748739d2_a1b61e3e",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-13T22:14:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f034492_861b8a1e",
+      "revId": "191746d79d1a468de7bd33f5120f7449b65381a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0f034492_e6335ea3",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-11T01:53:53Z",
       "side": 1,
       "message": "this dups the 8x8; make a HadamardTestBase class with all this and then derive each from it for the naming (multiple inheritance is allowed in tests).",
+      "revId": "191746d79d1a468de7bd33f5120f7449b65381a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "748739d2_613ed686",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-13T22:14:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f034492_e6335ea3",
       "revId": "191746d79d1a468de7bd33f5120f7449b65381a7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
