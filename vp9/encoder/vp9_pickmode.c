@@ -583,11 +583,11 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
-                      int *skippable, int64_t *sse, int plane,
-                      BLOCK_SIZE bsize, TX_SIZE tx_size) {
+                      int *skippable, int64_t *sse, BLOCK_SIZE bsize,
+                      TX_SIZE tx_size) {
   MACROBLOCKD *xd = &x->e_mbd;
   unsigned int var_y, sse_y;
-  (void)plane;
+
   (void)tx_size;
   model_rd_for_sb_y(cpi, bsize, x, xd, rate, dist, &var_y, &sse_y);
   *sse = INT_MAX;
@@ -596,25 +596,31 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
 }
 #else
 static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
-                      int *skippable, int64_t *sse, int plane,
-                      BLOCK_SIZE bsize, TX_SIZE tx_size) {
+                      int *skippable, int64_t *sse, BLOCK_SIZE bsize,
+                      TX_SIZE tx_size) {
   MACROBLOCKD *xd = &x->e_mbd;
-  const struct macroblockd_plane *pd = &xd->plane[plane];
-  const struct macroblock_plane *const p = &x->plane[plane];
+  const struct macroblockd_plane *pd = &xd->plane[0];
+  struct macroblock_plane *const p = &x->plane[0];
   const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
   const int step = 1 << (tx_size << 1);
   const int block_step = (1 << tx_size);
   int block = 0, r, c;
-  int shift = tx_size == TX_32X32 ? 0 : 2;
   const int max_blocks_wide = num_4x4_w + (xd->mb_to_right_edge >= 0 ? 0 :
-      xd->mb_to_right_edge >> (5 + pd->subsampling_x));
+      xd->mb_to_right_edge >> 5);
   const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ? 0 :
-      xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+      xd->mb_to_bottom_edge >> 5);
   int eob_cost = 0;
+  const int bw = 4 * num_4x4_w;
+  const int bh = 4 * num_4x4_h;
 
   (void)cpi;
-  vp9_subtract_plane(x, bsize, plane);
+
+  // The max tx_size passed in is TX_16X16.
+  assert(tx_size != TX_32X32);
+
+  vpx_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
+                     pd->dst.buf, pd->dst.stride);
   *skippable = 1;
   // Keep track of the row and column of the blocks we use so that we know
   // if we are in the unrestricted motion border.
@@ -626,18 +632,11 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
         tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
         tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
         uint16_t *const eob = &p->eobs[block];
-        const int diff_stride = 4 * num_4x4_blocks_wide_lookup[bsize];
+        const int diff_stride = bw;
         const int16_t *src_diff;
         src_diff = &p->src_diff[(r * diff_stride + c) << 2];
 
         switch (tx_size) {
-          case TX_32X32:
-            vpx_fdct32x32_rd(src_diff, coeff, diff_stride);
-            vp9_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin,
-                                  p->round_fp, p->quant_fp, p->quant_shift,
-                                  qcoeff, dqcoeff, pd->dequant, eob,
-                                  scan_order->scan, scan_order->iscan);
-            break;
           case TX_16X16:
             vpx_hadamard_16x16(src_diff, diff_stride, (int16_t *)coeff);
             vp9_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
@@ -670,18 +669,17 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
     }
   }
 
-  if (*skippable && *sse < INT64_MAX) {
-    *rate = 0;
-    *dist = (*sse << 6) >> shift;
-    *sse = *dist;
-    return;
+  *rate = 0;
+  if (*sse < INT64_MAX) {
+    *sse = (*sse << 6) >> 2;
+    if (*skippable) {
+      *dist = *sse;
+      return;
+    }
   }
 
   block = 0;
-  *rate = 0;
   *dist = 0;
-  if (*sse < INT64_MAX)
-    *sse = (*sse << 6) >> shift;
   for (r = 0; r < max_blocks_high; r += block_step) {
     for (c = 0; c < num_4x4_w; c += block_step) {
       if (c < max_blocks_wide) {
@@ -695,7 +693,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
         else if (*eob > 1)
           *rate += vpx_satd((const int16_t *)qcoeff, step << 4);
 
-        *dist += vp9_block_error_fp(coeff, dqcoeff, step << 4) >> shift;
+        *dist += vp9_block_error_fp(coeff, dqcoeff, step << 4) >> 2;
       }
       block += step;
     }
@@ -942,8 +940,8 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   if (plane == 0) {
     int64_t this_sse = INT64_MAX;
     // TODO(jingning): This needs further refactoring.
-    block_yrd(cpi, x, &rate, &dist, &args->skippable, &this_sse, 0,
-              bsize_tx, VPXMIN(tx_size, TX_16X16));
+    block_yrd(cpi, x, &rate, &dist, &args->skippable, &this_sse, bsize_tx,
+              VPXMIN(tx_size, TX_16X16));
   } else {
     unsigned int var = 0;
     unsigned int sse = 0;
@@ -1711,7 +1709,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (!this_early_term) {
       this_sse = (int64_t)sse_y;
       block_yrd(cpi, x, &this_rdc.rate, &this_rdc.dist, &is_skippable,
-                &this_sse, 0, bsize, VPXMIN(mi->tx_size, TX_16X16));
+                &this_sse, bsize, VPXMIN(mi->tx_size, TX_16X16));
       x->skip_txfm[0] = is_skippable;
       if (is_skippable) {
         this_rdc.rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
