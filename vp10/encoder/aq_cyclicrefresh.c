@@ -324,13 +324,15 @@ void vp10_cyclic_refresh_check_golden_update(VP10_COMP *const cpi) {
   double fraction_low = 0.0;
   int low_content_frame = 0;
 
-  MODE_INFO **mi = cm->mi_grid_visible;
+  MODE_INFO **mi;
   RATE_CONTROL *const rc = &cpi->rc;
   const int rows = cm->mi_rows, cols = cm->mi_cols;
   int cnt1 = 0, cnt2 = 0;
   int force_gf_refresh = 0;
 
   for (mi_row = 0; mi_row < rows; mi_row++) {
+    mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
+
     for (mi_col = 0; mi_col < cols; mi_col++) {
       int16_t abs_mvr = mi[0]->mbmi.mv[0].as_mv.row >= 0 ?
           mi[0]->mbmi.mv[0].as_mv.row : -1 * mi[0]->mbmi.mv[0].as_mv.row;
@@ -349,7 +351,6 @@ void vp10_cyclic_refresh_check_golden_update(VP10_COMP *const cpi) {
       if (cr->map[mi_row * cols + mi_col] < 1)
         low_content_frame++;
     }
-    mi += 8;
   }
 
   // For video conference clips, if the background has high motion in current
