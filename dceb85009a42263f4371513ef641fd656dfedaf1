@@ -145,6 +145,24 @@
       "revId": "dceb85009a42263f4371513ef641fd656dfedaf1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f44249dd_bd947f4e",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1224,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-06-14T21:28:19Z",
+      "side": 1,
+      "message": "ah, ok. I was mislead by the UI",
+      "parentUuid": "b4b0d10a_1bdb5b83",
+      "revId": "dceb85009a42263f4371513ef641fd656dfedaf1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
