@@ -22,6 +22,23 @@
       "revId": "8412111628e3af1fcd93ce7430a32ea6dd0d4c9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4de1159_cb26351a",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T23:25:11Z",
+      "side": 1,
+      "message": "you should prefer sizeof(var) here; that will take care of the type as well as the fixed size should it change again",
+      "revId": "8412111628e3af1fcd93ce7430a32ea6dd0d4c9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
