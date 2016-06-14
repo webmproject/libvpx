@@ -8,144 +8,125 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <cmath>
+#include <cstdlib>
+#include <string>
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
-
-#include "test/array_utils.h"
-#include "test/assertion_helpers.h"
-#include "test/function_equivalence_test.h"
-#include "test/randomise.h"
+#include "test/acm_random.h"
+#include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-#include "test/snapshot.h"
+#include "test/util.h"
 
-using libvpx_test::FunctionEquivalenceTest;
-using libvpx_test::Snapshot;
-using libvpx_test::Randomise;
-using libvpx_test::array_utils::arraySet;
-using libvpx_test::assertion_helpers::ArraysEq;
+
+using libvpx_test::ACMRandom;
 
 namespace {
+const int kNumIterations = 10000;
 
-static const int16_t int13_max = (1<<12) - 1;
+typedef uint64_t (*SSI16Func)(const int16_t *src,
+                             int stride ,
+                             int size);
 
-//////////////////////////////////////////////////////////////////////////////
-// 2D version
-//////////////////////////////////////////////////////////////////////////////
+typedef std::tr1::tuple<SSI16Func, SSI16Func> SumSquaresParam;
 
-typedef uint64_t (*F2D)(const int16_t *src, int stride, uint32_t size);
-
-class SumSquares2DTest : public FunctionEquivalenceTest<F2D> {
- protected:
-  void Common() {
-    const int sizelog2 = randomise.uniform<int>(2, 8);
-
-    const uint32_t size = 1 << sizelog2;
-    const int stride = 1 << randomise.uniform<int>(sizelog2, 9);
-
-    snapshot(src);
-
-    uint64_t ref_res, tst_res;
-
-    ref_res = ref_func_(src, stride, size);
-    ASM_REGISTER_STATE_CHECK(tst_res = tst_func_(src, stride, size));
-
-    ASSERT_EQ(ref_res, tst_res);
-
-    ASSERT_TRUE(ArraysEq(snapshot.get(src), src));
+class SumSquaresTest : public ::testing::TestWithParam<SumSquaresParam> {
+ public:
+  virtual ~SumSquaresTest() {}
+  virtual void SetUp() {
+    ref_func_ = GET_PARAM(0);
+    tst_func_ = GET_PARAM(1);
   }
 
-  Snapshot snapshot;
-  Randomise randomise;
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
-  DECLARE_ALIGNED(16, int16_t, src[256*256]);
+ protected:
+  SSI16Func ref_func_;
+  SSI16Func tst_func_;
 };
 
-TEST_P(SumSquares2DTest, RandomValues) {
-  for (int i = 0 ; i < 10000 && !HasFatalFailure(); i++) {
-    randomise(src, -int13_max, int13_max + 1);
+TEST_P(SumSquaresTest, OperationCheck) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  DECLARE_ALIGNED(16, int16_t, src[256*256]);
 
-    Common();
+  int failed = 0;
+
+  const int msb = 11;   // Up to 12 bit input
+  const int limit = 1 << (msb+1);
+
+  for (int k = 0; k < kNumIterations; k++) {
+    int size = 4 << rnd(6);     // Up to 128x128
+    int stride = 4 << rnd(7);   // Up to 256 stride
+    while (stride < size) {     // Make sure it's valid
+      stride = 4 << rnd(7);
+    }
+
+    for (int ii = 0 ; ii < size; ii++) {
+      for (int jj = 0; jj < size; jj++) {
+        src[ii*stride+jj] = rnd(2) ? rnd(limit) : -rnd(limit);
+      }
+    }
+
+    uint64_t res_ref = ref_func_(src, stride, size);
+    uint64_t res_tst;
+    ASM_REGISTER_STATE_CHECK(res_tst = tst_func_(src, stride, size));
+
+    if (!failed) {
+      failed = res_ref != res_tst;
+      EXPECT_EQ(res_ref, res_tst)
+        << "Error: Sum Squares Test"
+        << " C output does not match optimized output.";
+    }
   }
 }
 
-TEST_P(SumSquares2DTest, ExtremeValues) {
-  for (int i = 0 ; i < 10000 && !HasFatalFailure(); i++) {
-    if (randomise.uniform<bool>())
-      arraySet(src, int13_max);
-    else
-      arraySet(src, -int13_max);
+TEST_P(SumSquaresTest, ExtremeValues) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  DECLARE_ALIGNED(16, int16_t, src[256*256]);
 
-    Common();
+  int failed = 0;
+
+  const int msb = 11;   // Up to 12 bit input
+  const int limit = 1 << (msb+1);
+
+  for (int k = 0; k < kNumIterations; k++) {
+    int size = 4 << rnd(6);     // Up to 128x128
+    int stride = 4 << rnd(7);   // Up to 256 stride
+    while (stride < size) {     // Make sure it's valid
+      stride = 4 << rnd(7);
+    }
+
+    int val = rnd(2) ? limit-1 : -(limit-1);
+    for (int ii = 0 ; ii < size; ii++) {
+      for (int jj = 0; jj < size; jj++) {
+        src[ii*stride+jj] = val;
+      }
+    }
+
+    uint64_t res_ref = ref_func_(src, stride, size);
+    uint64_t res_tst;
+    ASM_REGISTER_STATE_CHECK(res_tst = tst_func_(src, stride, size));
+
+    if (!failed) {
+      failed = res_ref != res_tst;
+      EXPECT_EQ(res_ref, res_tst)
+        << "Error: Sum Squares Test"
+        << " C output does not match optimized output.";
+    }
   }
 }
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
+
 INSTANTIATE_TEST_CASE_P(
-    SSE2, SumSquares2DTest,
+    SSE2, SumSquaresTest,
     ::testing::Values(
         make_tuple(&vpx_sum_squares_2d_i16_c, &vpx_sum_squares_2d_i16_sse2)
-    )
-);
-#endif  // HAVE_SSE2
-
-//////////////////////////////////////////////////////////////////////////////
-// 1D version
-//////////////////////////////////////////////////////////////////////////////
-
-typedef uint64_t (*F1D)(const int16_t *src, uint32_t N);
-
-class SumSquares1DTest : public FunctionEquivalenceTest<F1D> {
- protected:
-  void Common() {
-    const int N = randomise.uniform<int>(1, 256*256-1);
-
-    snapshot(src);
-
-    uint64_t ref_res, tst_res;
-
-    ref_res = ref_func_(src, N);
-    ASM_REGISTER_STATE_CHECK(tst_res = tst_func_(src, N));
-
-    ASSERT_EQ(ref_res, tst_res);
-
-    ASSERT_TRUE(ArraysEq(snapshot.get(src), src));
-  }
-
-  Snapshot snapshot;
-  Randomise randomise;
-
-  DECLARE_ALIGNED(16, int16_t, src[256*256]);
-};
-
-TEST_P(SumSquares1DTest, RandomValues) {
-  for (int i = 0 ; i < 10000 && !HasFatalFailure(); i++) {
-    randomise(src, -int13_max, int13_max+1);
-
-    Common();
-  }
-}
-
-TEST_P(SumSquares1DTest, ExtremeValues) {
-  for (int i = 0 ; i < 10000 && !HasFatalFailure(); i++) {
-    if (randomise.uniform<bool>())
-      arraySet(src, int13_max);
-    else
-      arraySet(src, -int13_max);
-
-    Common();
-  }
-}
-using std::tr1::make_tuple;
-
-#if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
-    SSE2, SumSquares1DTest,
-    ::testing::Values(
-        make_tuple(&vpx_sum_squares_i16_c, &vpx_sum_squares_i16_sse2)
     )
 );
 #endif  // HAVE_SSE2
