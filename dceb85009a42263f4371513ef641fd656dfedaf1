@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14f27da7_2ec907b6",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 914,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2016-06-14T19:25:19Z",
+      "side": 1,
+      "message": "*a and *l can be declared const at 907 once for all:\n\nENTROPY_CONTEXT* const a \u003d \u0026args-\u003eta[blk_col];\nENTROPY_CONTEXT* const l \u003d \u0026args-\u003etl[blk_col];",
+      "range": {
+        "startLine": 914,
+        "startChar": 4,
+        "endLine": 914,
+        "endChar": 5
+      },
+      "revId": "dceb85009a42263f4371513ef641fd656dfedaf1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5467950e_d8bc6d22",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1260,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2016-06-14T19:25:19Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 1260,
+        "startChar": 2,
+        "endLine": 1260,
+        "endChar": 17
+      },
+      "revId": "dceb85009a42263f4371513ef641fd656dfedaf1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b461b121_d35d942e",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1224,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2016-06-14T19:25:19Z",
+      "side": 1,
+      "message": "why not join this with line 1223 above?",
+      "revId": "dceb85009a42263f4371513ef641fd656dfedaf1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
