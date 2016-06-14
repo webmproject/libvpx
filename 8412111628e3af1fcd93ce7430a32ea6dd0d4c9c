@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4de1159_eb21f103",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-14T23:24:41Z",
+      "side": 1,
+      "message": "If you use x-\u003evariance_low[0], the code become robust to type changes.",
+      "range": {
+        "startLine": 776,
+        "startChar": 36,
+        "endLine": 776,
+        "endChar": 43
+      },
+      "revId": "8412111628e3af1fcd93ce7430a32ea6dd0d4c9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
