@@ -207,6 +207,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_inv_txfm1d_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_fwd_txfm2d_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_inv_txfm2d_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_convolve_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10) += vp10_convolve_optimz_test.cc
 
 TEST_INTRA_PRED_SPEED_SRCS-yes := test_intra_pred_speed.cc
 TEST_INTRA_PRED_SPEED_SRCS-yes += ../md5_utils.h ../md5_utils.c

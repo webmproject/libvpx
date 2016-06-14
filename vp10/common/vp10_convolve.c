@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "./vp10_rtcd.h"
 #include "vp10/common/filter.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
@@ -10,7 +11,7 @@
 #define MAX_STEP (32)
 #define MAX_FILTER_TAP (12)
 
-static void convolve_horiz(const uint8_t *src, int src_stride, uint8_t *dst,
+void vp10_convolve_horiz_c(const uint8_t *src, int src_stride, uint8_t *dst,
                            int dst_stride, int w, int h,
                            const InterpFilterParams filter_params,
                            const int subpel_x_q4, int x_step_q4, int avg) {
@@ -121,8 +122,8 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
         vp10_get_interp_filter_params(interp_filter);
 #endif
     assert(filter_params.taps <= MAX_FILTER_TAP);
-    convolve_horiz(src, src_stride, dst, dst_stride, w, h, filter_params,
-                   subpel_x_q4, x_step_q4, ref_idx);
+    vp10_convolve_horiz(src, src_stride, dst, dst_stride, w, h, filter_params,
+                        subpel_x_q4, x_step_q4, ref_idx);
   } else if (ignore_horiz) {
 #if CONFIG_DUAL_FILTER
     InterpFilterParams filter_params =
@@ -162,9 +163,9 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
 
     assert(filter_params.taps <= MAX_FILTER_TAP);
 
-    convolve_horiz(src - src_stride * (filter_size / 2 - 1), src_stride, temp,
-                   temp_stride, w, intermediate_height, filter_params,
-                   subpel_x_q4, x_step_q4, 0);
+    vp10_convolve_horiz(src - src_stride * (filter_size / 2 - 1), src_stride,
+                        temp, temp_stride, w, intermediate_height,
+                        filter_params, subpel_x_q4, x_step_q4, 0);
 
 #if CONFIG_DUAL_FILTER
     filter_params = filter_params_y;

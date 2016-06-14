@@ -1,5 +1,6 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "./vp10_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "vp10/common/filter.h"
@@ -39,6 +40,8 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
 
   int w = 1;
   int h = 1;
+
+  vp10_rtcd();
 
   for (int i = 0; i < filter_size * filter_size; i++) {
     src[i] = rnd.Rand16() % (1 << 8);
@@ -85,6 +88,8 @@ TEST(VP10ConvolveTest, vp10_convolve) {
 
   int subpel_x_q4;
   int subpel_y_q4;
+
+  vp10_rtcd();
 
   for (int i = 0; i < filter_size * filter_size; i++) {
     src[i] = rnd.Rand16() % (1 << 8);
@@ -149,6 +154,8 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
 
   int subpel_x_q4;
   int subpel_y_q4;
+
+  vp10_rtcd();
 
   for (int i = 0; i < filter_size * filter_size; i++) {
     src0[i] = rnd.Rand16() % (1 << 8);

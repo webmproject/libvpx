@@ -8,6 +8,7 @@ print <<EOF
 #include "vp10/common/common.h"
 #include "vp10/common/enums.h"
 #include "vp10/common/quant_common.h"
+#include "vp10/common/filter.h"
 #include "vp10/common/vp10_txfm.h"
 
 struct macroblockd;
@@ -82,6 +83,12 @@ specialize qw/vp10_filter_by_weight16x16 sse2 msa/;
 add_proto qw/void vp10_filter_by_weight8x8/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
 specialize qw/vp10_filter_by_weight8x8 sse2 msa/;
 }
+
+#
+# 10/12-tap convolution filters
+#
+add_proto qw/void vp10_convolve_horiz/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg";
+specialize qw/vp10_convolve_horiz ssse3/;
 
 #
 # dct
