@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4bd31cc_13860c28",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2016-06-14T19:28:38Z",
+      "side": 1,
+      "message": "this is confusion: mul is set here, but overwritten later at line 134.\nline 134 should be moved above, at line 112,\nand all these shift and mul variable should be declared \u0027const int\u0027 once for all.",
+      "range": {
+        "startLine": 113,
+        "startChar": 2,
+        "endLine": 113,
+        "endChar": 5
+      },
+      "revId": "092a93ebb8073881afffe3b0fd78822f96f11356",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4bd31cc_338b082f",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002029
+      },
+      "writtenOn": "2016-06-14T19:28:38Z",
+      "side": 1,
+      "message": "const int16_t* const dequant_ptr \u003d ...",
+      "range": {
+        "startLine": 114,
+        "startChar": 17,
+        "endLine": 114,
+        "endChar": 28
+      },
+      "revId": "092a93ebb8073881afffe3b0fd78822f96f11356",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
