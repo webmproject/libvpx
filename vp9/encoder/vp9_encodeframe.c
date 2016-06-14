@@ -773,9 +773,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     }
   }
 
-  for (i = 0; i < 25; i++) {
-    x->variance_low[i] = 0;
-  }
+  memset(x->variance_low, 0, sizeof(x->variance_low));
 
   if (xd->mb_to_right_edge < 0)
     pixels_wide += (xd->mb_to_right_edge >> 3);
@@ -1083,7 +1081,7 @@ static int choose_partitioning(VP9_COMP *cpi,
   }
 
   if (cpi->sf.short_circuit_low_temp_var) {
-    int mv_thr = cm->width > 640 ? 8 : 4;
+    const int mv_thr = cm->width > 640 ? 8 : 4;
     // Check temporal variance for bsize >= 16x16, if LAST_FRAME was selected
     // and int_pro mv is small. If the temporal variance is small set the
     // variance_low flag for the block. The variance threshold can be adjusted,

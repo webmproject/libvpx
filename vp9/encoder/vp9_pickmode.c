@@ -1278,12 +1278,12 @@ static void recheck_zeromv_after_denoising(
 }
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
-static INLINE int set_force_skip_low_temp_var(uint8_t *variance_low,
+static INLINE int get_force_skip_low_temp_var(uint8_t *variance_low,
                                               int mi_row, int mi_col,
                                               BLOCK_SIZE bsize) {
+  const int i = (mi_row & 0x7) >> 1;
+  const int j = (mi_col & 0x7) >> 1;
   int force_skip_low_temp_var = 0;
-  int i = (mi_row & 0x7) >> 1;
-  int j = (mi_col & 0x7) >> 1;
   // Set force_skip_low_temp_var based on the block size and block offset.
   if (bsize == BLOCK_64X64) {
     force_skip_low_temp_var = variance_low[0];
@@ -1313,15 +1313,15 @@ static INLINE int set_force_skip_low_temp_var(uint8_t *variance_low,
     force_skip_low_temp_var = variance_low[pos_shift_16x16[i][j]];
   } else if (bsize == BLOCK_32X16) {
     // The col shift index for the second 16x16 block.
-    int j2 = ((mi_col + 2) & 0x7) >> 1;
+    const int j2 = ((mi_col + 2) & 0x7) >> 1;
     // Only if each 16x16 block inside has low temporal variance.
     force_skip_low_temp_var = variance_low[pos_shift_16x16[i][j]] &&
-      variance_low[pos_shift_16x16[i][j2]];
+                              variance_low[pos_shift_16x16[i][j2]];
   } else if (bsize == BLOCK_16X32) {
     // The row shift index for the second 16x16 block.
-    int i2 = ((mi_row + 2) & 0x7) >> 1;
+    const int i2 = ((mi_row + 2) & 0x7) >> 1;
     force_skip_low_temp_var = variance_low[pos_shift_16x16[i][j]] &&
-      variance_low[pos_shift_16x16[i2][j]];
+                              variance_low[pos_shift_16x16[i2][j]];
   }
   return force_skip_low_temp_var;
 }
@@ -1473,7 +1473,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (cpi->sf.short_circuit_low_temp_var) {
     force_skip_low_temp_var =
-        set_force_skip_low_temp_var(&x->variance_low[0], mi_row, mi_col, bsize);
+        get_force_skip_low_temp_var(&x->variance_low[0], mi_row, mi_col, bsize);
   }
 
   if (!((cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
