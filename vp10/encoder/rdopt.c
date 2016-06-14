@@ -9033,10 +9033,25 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         rate2 += vp10_cost_bit(cm->fc->ext_intra_probs[0],
                                mbmi->ext_intra_mode_info.use_ext_intra_mode[0]);
         if (mbmi->ext_intra_mode_info.use_ext_intra_mode[0]) {
-          EXT_INTRA_MODE ext_intra_mode =
-              mbmi->ext_intra_mode_info.ext_intra_mode[0];
-          rate2 += write_uniform_cost(FILTER_INTRA_MODES, ext_intra_mode);
+          rate2 +=
+              write_uniform_cost(FILTER_INTRA_MODES,
+                                 mbmi->ext_intra_mode_info.ext_intra_mode[0]);
         }
+      }
+
+      if (mbmi->uv_mode != DC_PRED && mbmi->uv_mode != TM_PRED) {
+        rate2 += write_uniform_cost(2 * MAX_ANGLE_DELTAS + 1,
+                                    MAX_ANGLE_DELTAS +
+                                    mbmi->angle_delta[1]);
+      }
+
+      if (ALLOW_FILTER_INTRA_MODES && mbmi->mode == DC_PRED) {
+        rate2 += vp10_cost_bit(cpi->common.fc->ext_intra_probs[1],
+                               mbmi->ext_intra_mode_info.use_ext_intra_mode[1]);
+        if (mbmi->ext_intra_mode_info.use_ext_intra_mode[1])
+          rate2 +=
+              write_uniform_cost(FILTER_INTRA_MODES,
+                                 mbmi->ext_intra_mode_info.ext_intra_mode[1]);
       }
 #endif  // CONFIG_EXT_INTRA
       if (this_mode != DC_PRED && this_mode != TM_PRED)
