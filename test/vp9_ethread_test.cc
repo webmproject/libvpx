@@ -125,6 +125,43 @@ class VPxEncoderThreadTest
     }
   }
 
+  void DoTest() {
+    ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 18);
+    cfg_.rc_target_bitrate = 1000;
+
+    // Encode using single thread.
+    cfg_.g_threads = 1;
+    init_flags_ = VPX_CODEC_USE_PSNR;
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    std::vector<size_t> single_thr_size_enc;
+    std::vector<std::string> single_thr_md5_enc;
+    std::vector<std::string> single_thr_md5_dec;
+    single_thr_size_enc = size_enc_;
+    single_thr_md5_enc = md5_enc_;
+    single_thr_md5_dec = md5_dec_;
+    size_enc_.clear();
+    md5_enc_.clear();
+    md5_dec_.clear();
+
+    // Encode using multiple threads.
+    cfg_.g_threads = 4;
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    std::vector<size_t> multi_thr_size_enc;
+    std::vector<std::string> multi_thr_md5_enc;
+    std::vector<std::string> multi_thr_md5_dec;
+    multi_thr_size_enc = size_enc_;
+    multi_thr_md5_enc = md5_enc_;
+    multi_thr_md5_dec = md5_dec_;
+    size_enc_.clear();
+    md5_enc_.clear();
+    md5_dec_.clear();
+
+    // Check that the vectors are equal.
+    ASSERT_EQ(single_thr_size_enc, multi_thr_size_enc);
+    ASSERT_EQ(single_thr_md5_enc, multi_thr_md5_enc);
+    ASSERT_EQ(single_thr_md5_dec, multi_thr_md5_dec);
+  }
+
   bool encoder_initialized_;
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
@@ -137,39 +174,13 @@ class VPxEncoderThreadTest
 };
 
 TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
-  std::vector<size_t> single_thr_size_enc, multi_thr_size_enc;
-  std::vector<std::string> single_thr_md5_enc, multi_thr_md5_enc;
-  std::vector<std::string> single_thr_md5_dec, multi_thr_md5_dec;
+  DoTest();
+}
 
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 18);
+class VPxEncoderThreadTestLarge : public VPxEncoderThreadTest {};
 
-  cfg_.rc_target_bitrate = 1000;
-
-  // Encode using single thread.
-  cfg_.g_threads = 1;
-  init_flags_ = VPX_CODEC_USE_PSNR;
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  single_thr_size_enc = size_enc_;
-  single_thr_md5_enc = md5_enc_;
-  single_thr_md5_dec = md5_dec_;
-  size_enc_.clear();
-  md5_enc_.clear();
-  md5_dec_.clear();
-
-  // Encode using multiple threads.
-  cfg_.g_threads = 4;
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  multi_thr_size_enc = size_enc_;
-  multi_thr_md5_enc = md5_enc_;
-  multi_thr_md5_dec = md5_dec_;
-  size_enc_.clear();
-  md5_enc_.clear();
-  md5_dec_.clear();
-
-  // Check that the vectors are equal.
-  ASSERT_EQ(single_thr_size_enc, multi_thr_size_enc);
-  ASSERT_EQ(single_thr_md5_enc, multi_thr_md5_enc);
-  ASSERT_EQ(single_thr_md5_dec, multi_thr_md5_dec);
+TEST_P(VPxEncoderThreadTestLarge, EncoderResultTest) {
+  DoTest();
 }
 
 VP9_INSTANTIATE_TEST_CASE(
@@ -181,5 +192,10 @@ VP9_INSTANTIATE_TEST_CASE(
 VP10_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(1, 9), ::testing::Values(1));
+    ::testing::Range(3, 9), ::testing::Values(1));
+
+VP10_INSTANTIATE_TEST_CASE(
+    VPxEncoderThreadTestLarge,
+    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
+    ::testing::Range(1, 3), ::testing::Values(1));
 }  // namespace

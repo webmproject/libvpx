@@ -64,7 +64,13 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
     if (video->frame() == 1) {
       encoder->Control(VP9E_SET_TILE_COLUMNS, n_tile_cols_);
       encoder->Control(VP9E_SET_TILE_ROWS, n_tile_rows_);
+      SetCpuUsed(encoder);
     }
+  }
+
+  virtual void SetCpuUsed(libvpx_test::Encoder *encoder) {
+    static const int kCpuUsed = 3;
+    encoder->Control(VP8E_SET_CPUUSED, kCpuUsed);
   }
 
   void UpdateMD5(::libvpx_test::Decoder *dec, const vpx_codec_cx_pkt_t *pkt,
@@ -84,6 +90,22 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
     UpdateMD5(inv_dec_, pkt, &md5_inv_order_);
   }
 
+  void DoTest() {
+    const vpx_rational timebase = { 33333333, 1000000000 };
+    cfg_.g_timebase = timebase;
+    cfg_.rc_target_bitrate = 500;
+    cfg_.g_lag_in_frames = 12;
+    cfg_.rc_end_usage = VPX_VBR;
+
+    libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 576,
+                                       timebase.den, timebase.num, 0, 5);
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+
+    const char *md5_fw_str = md5_fw_order_.Get();
+    const char *md5_inv_str = md5_inv_order_.Get();
+    ASSERT_STREQ(md5_fw_str, md5_inv_str);
+  }
+
   ::libvpx_test::MD5 md5_fw_order_, md5_inv_order_;
   ::libvpx_test::Decoder *fw_dec_, *inv_dec_;
 
@@ -96,33 +118,36 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
 // inverted tile ordering. Ensure that the MD5 of the output in both cases
 // is identical. If so, tiles are considered independent and the test passes.
 TEST_P(TileIndependenceTest, MD5Match) {
-  const vpx_rational timebase = { 33333333, 1000000000 };
-  cfg_.g_timebase = timebase;
-  cfg_.rc_target_bitrate = 500;
-  cfg_.g_lag_in_frames = 12;
-  cfg_.rc_end_usage = VPX_VBR;
+  DoTest();
+}
 
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 576,
-                                     timebase.den, timebase.num, 0, 5);
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+class TileIndependenceTestLarge : public TileIndependenceTest {
+  virtual void SetCpuUsed(libvpx_test::Encoder *encoder) {
+    static const int kCpuUsed = 0;
+    encoder->Control(VP8E_SET_CPUUSED, kCpuUsed);
+  }
+};
 
-  const char *md5_fw_str = md5_fw_order_.Get();
-  const char *md5_inv_str = md5_inv_order_.Get();
-
-  // could use ASSERT_EQ(!memcmp(.., .., 16) here, but this gives nicer
-  // output if it fails. Not sure if it's helpful since it's really just
-  // a MD5...
-  ASSERT_STREQ(md5_fw_str, md5_inv_str);
+TEST_P(TileIndependenceTestLarge, MD5Match) {
+  DoTest();
 }
 
 VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(0, 1),
                                                 ::testing::Values(0));
+VP9_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge, ::testing::Values(0, 1),
+                                                     ::testing::Values(0));
 
 #if CONFIG_EXT_TILE
 VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(1, 2, 32),
                                                  ::testing::Values(1, 2, 32));
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge,
+                           ::testing::Values(1, 2, 32),
+                           ::testing::Values(1, 2, 32));
 #else
 VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(0, 1),
                                                  ::testing::Values(0, 1));
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge,
+                           ::testing::Values(0, 1),
+                           ::testing::Values(0, 1));
 #endif  // CONFIG_EXT_TILE
 }  // namespace
