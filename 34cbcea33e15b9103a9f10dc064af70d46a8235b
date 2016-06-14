@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4b0d10a_64d1a063",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T23:21:50Z",
+      "side": 1,
+      "message": "can you do this in the process*() function itself and specialize CODEC_FAMILIES similar to how experiments are handled. this setup penalizes all callers which will slow down windows implementations a bit",
+      "revId": "34cbcea33e15b9103a9f10dc064af70d46a8235b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
