@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4b0d10a_5bc5633c",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T19:57:07Z",
+      "side": 1,
+      "message": "this could just be a memset",
+      "revId": "f9c0587200b56285e6847ec88c8ea876b422acc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4b0d10a_3bd29708",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T19:57:07Z",
+      "side": 1,
+      "message": "could be const I think",
+      "revId": "f9c0587200b56285e6847ec88c8ea876b422acc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4b0d10a_1bcfdb5c",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T19:57:07Z",
+      "side": 1,
+      "message": "I wonder how often this pattern of check is repeated, maybe a helper function or two if it\u0027s common",
+      "revId": "f9c0587200b56285e6847ec88c8ea876b422acc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4b0d10a_3bbdf7c9",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T19:57:07Z",
+      "side": 1,
+      "message": "this is a bit of a misnomer, it\u0027s not setting anything, but getting something as the return",
+      "revId": "f9c0587200b56285e6847ec88c8ea876b422acc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4b0d10a_dbd8532d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1285,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T19:57:07Z",
+      "side": 1,
+      "message": "const",
+      "revId": "f9c0587200b56285e6847ec88c8ea876b422acc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4b0d10a_bbdd871b",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1316,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T19:57:07Z",
+      "side": 1,
+      "message": "const",
+      "revId": "f9c0587200b56285e6847ec88c8ea876b422acc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4b0d10a_9be2cbdb",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1319,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T19:57:07Z",
+      "side": 1,
+      "message": "this should be aligned or broken after the \u003d and indented 4; prefer the aligned version if it fits",
+      "revId": "f9c0587200b56285e6847ec88c8ea876b422acc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
