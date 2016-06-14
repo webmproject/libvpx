@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4de1159_2bb379b1",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T23:38:14Z",
+      "side": 1,
+      "message": "as with the other change, maybe normalize the frames_since_golden type will be simpler",
+      "revId": "ad3701af0cbc19d07268d4f8c43f22e213d72fd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
