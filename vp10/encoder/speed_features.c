@@ -132,6 +132,9 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
 
   sf->adaptive_rd_thresh = 1;
 
+  sf->tx_type_search.fast_intra_tx_type_search = 1;
+  sf->tx_type_search.fast_inter_tx_type_search = 1;
+
   if (speed >= 1) {
     if ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
         vp10_internal_image_edge(cpi)) {
