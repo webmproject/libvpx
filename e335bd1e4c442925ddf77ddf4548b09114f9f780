@@ -123,6 +123,24 @@
       "revId": "e335bd1e4c442925ddf77ddf4548b09114f9f780",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "748739d2_e7ff56b3",
+        "filename": "vp8/decoder/decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1026,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-14T00:01:44Z",
+      "side": 1,
+      "message": "technically that\u0027s a conversion not a promotion. This will certainly result in a visual studio warning (and likely with -Wshorten-64-to-32, if not -Wconversion).",
+      "parentUuid": "0f1d041b_0a7bcbdc",
+      "revId": "e335bd1e4c442925ddf77ddf4548b09114f9f780",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
