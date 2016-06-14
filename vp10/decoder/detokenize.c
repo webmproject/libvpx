@@ -511,7 +511,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                                pd->dqcoeff, tx_size, tx_type,
                                dequant,
 #if CONFIG_NEW_QUANT
-                               pd->seg_dequant_nuq[0],
+                               pd->seg_dequant_nuq[seg_id],
 #endif  // CONFIG_NEW_QUANT
                                ctx, sc->scan, sc->neighbors, r);
 #else
@@ -519,7 +519,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                                    pd->dqcoeff, tx_size, tx_type,
                                    dequant,
 #if CONFIG_NEW_QUANT
-                                   pd->seg_dequant_nuq[0],
+                                   pd->seg_dequant_nuq[seg_id],
 #endif  // CONFIG_NEW_QUANT
                                    ctx, sc->scan, sc->neighbors, r);
 #endif  // !CONFIG_ANS
