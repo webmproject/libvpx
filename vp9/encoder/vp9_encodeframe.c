@@ -773,7 +773,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     }
   }
 
-  for (i = 0; i < 9; i++) {
+  for (i = 0; i < 25; i++) {
     x->variance_low[i] = 0;
   }
 
@@ -1083,28 +1083,53 @@ static int choose_partitioning(VP9_COMP *cpi,
   }
 
   if (cpi->sf.short_circuit_low_temp_var) {
-    // Set low variance flag, only for blocks >= 32x32 and if LAST_FRAME was
-    // selected.
-    if (ref_frame_partition == LAST_FRAME) {
+    int mv_thr = cm->width > 640 ? 8 : 4;
+    // Check temporal variance for bsize >= 16x16, if LAST_FRAME was selected
+    // and int_pro mv is small. If the temporal variance is small set the
+    // variance_low flag for the block. The variance threshold can be adjusted,
+    // the higher the more aggressive.
+    if (ref_frame_partition == LAST_FRAME &&
+        (cpi->sf.short_circuit_low_temp_var == 1 ||
+         (xd->mi[0]->mv[0].as_mv.col < mv_thr &&
+          xd->mi[0]->mv[0].as_mv.col > -mv_thr &&
+          xd->mi[0]->mv[0].as_mv.row < mv_thr &&
+          xd->mi[0]->mv[0].as_mv.row > -mv_thr))) {
       if (xd->mi[0]->sb_type == BLOCK_64X64 &&
           vt.part_variances.none.variance < (thresholds[0] >> 1)) {
         x->variance_low[0] = 1;
       } else if (xd->mi[0]->sb_type == BLOCK_64X32) {
-        if (vt.part_variances.horz[0].variance < (thresholds[0] >> 2))
-          x->variance_low[1] = 1;
-        if (vt.part_variances.horz[1].variance < (thresholds[0] >> 2))
-          x->variance_low[2] = 1;
+        for (j = 0; j < 2; j++) {
+          if (vt.part_variances.horz[j].variance < (thresholds[0] >> 2))
+            x->variance_low[j + 1] = 1;
+        }
       } else if (xd->mi[0]->sb_type == BLOCK_32X64) {
-        if (vt.part_variances.vert[0].variance < (thresholds[0] >> 2))
-          x->variance_low[3] = 1;
-        if (vt.part_variances.vert[1].variance < (thresholds[0] >> 2))
-          x->variance_low[4] = 1;
+        for (j = 0; j < 2; j++) {
+          if (vt.part_variances.vert[j].variance < (thresholds[0] >> 2))
+            x->variance_low[j + 3] = 1;
+        }
       } else {
-        // 32x32
         for (i = 0; i < 4; i++) {
-          if (!force_split[i + 1] &&
-              vt.split[i].part_variances.none.variance < (thresholds[1] >> 1))
-            x->variance_low[i + 5] = 1;
+          if (!force_split[i + 1]) {
+            // 32x32
+            if (vt.split[i].part_variances.none.variance <
+                (thresholds[1] >> 1))
+              x->variance_low[i + 5] = 1;
+          } else if (cpi->sf.short_circuit_low_temp_var == 2) {
+            int idx[4] = {0, 4, xd->mi_stride << 2, (xd->mi_stride << 2) + 4};
+            const int idx_str = cm->mi_stride * mi_row + mi_col + idx[i];
+            MODE_INFO **this_mi = cm->mi_grid_visible + idx_str;
+            // For 32x16 and 16x32 blocks, the flag is set on each 16x16 block
+            // inside.
+            if ((*this_mi)->sb_type == BLOCK_16X16 ||
+                (*this_mi)->sb_type == BLOCK_32X16 ||
+                (*this_mi)->sb_type == BLOCK_16X32) {
+              for (j = 0; j < 4; j++) {
+                if (vt.split[i].split[j].part_variances.none.variance <
+                    (thresholds[2] >> 8))
+                  x->variance_low[(i << 2) + j + 9] = 1;
+              }
+            }
+          }
         }
       }
     }
