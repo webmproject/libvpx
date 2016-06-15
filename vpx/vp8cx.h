@@ -562,7 +562,13 @@ enum vp8e_enc_control_id {
    *
    * Supported in codecs: VP9
    */
-  VP9E_SET_TARGET_LEVEL
+  VP9E_SET_TARGET_LEVEL,
+
+  /*!\brief Codec control function to get bitstream level.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_GET_LEVEL
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -820,6 +826,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_RENDER_SIZE, int *)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_TARGET_LEVEL,  unsigned int)
 #define VPX_CTRL_VP9E_SET_TARGET_LEVEL
+
+VPX_CTRL_USE_TYPE(VP9E_GET_LEVEL, int *)
+#define VPX_CTRL_VP9E_GET_LEVEL
 
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */

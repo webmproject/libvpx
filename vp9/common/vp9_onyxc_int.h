@@ -168,8 +168,6 @@ typedef struct VP9Common {
 
   int allow_high_precision_mv;
 
-  int keep_level_stats;
-
   // Flag signaling that the frame context should be reset to default values.
   // 0 or 1 implies don't reset, 2 reset just the context specified in the
   // frame header, 3 reset all contexts.
