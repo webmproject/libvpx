@@ -796,7 +796,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
 
     const YV12_BUFFER_CONFIG *yv12_g = NULL;
-    unsigned int y_sad, y_sad_g;
+    unsigned int y_sad, y_sad_g, y_sad_thr;
     const BLOCK_SIZE bsize = BLOCK_32X32
         + (mi_col + 4 < cm->mi_cols) * 2 + (mi_row + 4 < cm->mi_rows);
 
@@ -829,7 +829,10 @@ static int choose_partitioning(VP9_COMP *cpi,
     mi->interp_filter = BILINEAR;
 
     y_sad = vp9_int_pro_motion_estimation(cpi, x, bsize, mi_row, mi_col);
-    if (y_sad_g < y_sad) {
+    // Pick ref frame for partitioning, bias last frame when y_sad_g and y_sad
+    // are close if short_circuit_low_temp_var is on.
+    y_sad_thr = cpi->sf.short_circuit_low_temp_var ? (y_sad * 7) >> 3 : y_sad;
+    if (y_sad_g < y_sad_thr) {
       vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
                            &cm->frame_refs[GOLDEN_FRAME - 1].sf);
       mi->ref_frame[0] = GOLDEN_FRAME;
