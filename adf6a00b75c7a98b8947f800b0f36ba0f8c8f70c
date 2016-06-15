@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f45969e9_05d21208",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T00:42:57Z",
+      "side": 1,
+      "message": "corrections",
+      "revId": "adf6a00b75c7a98b8947f800b0f36ba0f8c8f70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f45969e9_a5e21edb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T00:42:57Z",
+      "side": 1,
+      "message": "split this commit on all 4 of these or at least 1+4, 2, 3. try not to mix cosmetic changes (indent, comments) with larger changes like moving things around. you can also add \u0027cosmetics: ...\u0027 to the subject of the former",
+      "revId": "adf6a00b75c7a98b8947f800b0f36ba0f8c8f70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
