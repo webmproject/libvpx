@@ -34,6 +34,24 @@
       "revId": "b545e409b27ff7f75c085e8f4a30eac714c6c40b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3406a1d0_460adc17",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T23:50:08Z",
+      "side": 1,
+      "message": "\u003e vp9 doesn\u0027t have the \u003e\u003e 1 either ...  i\u0027d rather not muck around\n \u003e with switching both to int, but then also switching this to a\n \u003e divide.\n\nright shift of a negative number (if this one could even be) is defined; left shift is not\n\n\u003e this is the minimum change to clear the warning.\n\u003e\n\nThat argument usually leads to a patchwork of code that becomes more unreadable over time.",
+      "parentUuid": "3406a1d0_fd661fd8",
+      "revId": "b545e409b27ff7f75c085e8f4a30eac714c6c40b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
