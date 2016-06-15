@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f45969e9_651c26bb",
+        "filename": "vp9/common/vp9_matx.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-15T00:57:05Z",
+      "side": 1,
+      "message": "we use \"vpx/vpx_integer.h\" for compilers lacking c99 support",
+      "range": {
+        "startLine": 21,
+        "startChar": 9,
+        "endLine": 21,
+        "endChar": 19
+      },
+      "revId": "19a113fee496f1f12b08c5257499549a31f2b357",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f45969e9_857922e4",
+        "filename": "vp9/common/vp9_matx.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-15T00:57:05Z",
+      "side": 1,
+      "message": "We typically avoid |bool| in favor of int or packed uint8_t for compilers lacking c99 support.",
+      "range": {
+        "startLine": 22,
+        "startChar": 9,
+        "endLine": 22,
+        "endChar": 20
+      },
+      "revId": "19a113fee496f1f12b08c5257499549a31f2b357",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f45969e9_454d6aac",
+        "filename": "vp9/common/vp9_matx.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-15T00:57:05Z",
+      "side": 1,
+      "message": "Put this one where it\u0027s actually used",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 19
+      },
+      "revId": "19a113fee496f1f12b08c5257499549a31f2b357",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f45969e9_056e9214",
+        "filename": "vp9/common/vp9_matx.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-15T00:57:05Z",
+      "side": 1,
+      "message": "We try to keep headers C++ clean. |this| is reserved in c++.",
+      "range": {
+        "startLine": 47,
+        "startChar": 31,
+        "endLine": 47,
+        "endChar": 35
+      },
+      "revId": "19a113fee496f1f12b08c5257499549a31f2b357",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f45969e9_2544ee86",
+        "filename": "vpx_dsp/vpx_dsp_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-15T00:57:05Z",
+      "side": 1,
+      "message": "We just use assert() and define NDEBUG in release builds to turn it off.",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 6
+      },
+      "revId": "19a113fee496f1f12b08c5257499549a31f2b357",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
