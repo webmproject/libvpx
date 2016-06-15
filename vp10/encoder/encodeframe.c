@@ -1731,6 +1731,9 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
       const int energy = bsize <= BLOCK_16X16 ?
                          x->mb_energy : vp10_block_energy(cpi, x, bsize);
       mbmi->segment_id = vp10_vaq_segment_id(energy);
+      // Re-initialise quantiser
+      vp10_init_plane_quantizers(cpi, x, mbmi->segment_id);
+      x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
     }
     x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == COMPLEXITY_AQ) {
