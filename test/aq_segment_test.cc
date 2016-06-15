@@ -38,6 +38,22 @@ class AqSegmentTest
     }
   }
 
+  void DoTest(int aq_mode) {
+    aq_mode_ = aq_mode;
+    cfg_.kf_max_dist = 12;
+    cfg_.rc_min_quantizer = 8;
+    cfg_.rc_max_quantizer = 56;
+    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.g_lag_in_frames = 6;
+    cfg_.rc_buf_initial_sz = 500;
+    cfg_.rc_buf_optimal_sz = 500;
+    cfg_.rc_buf_sz = 1000;
+    cfg_.rc_target_bitrate = 300;
+    ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv",
+                                         352, 288, 30, 1, 0, 15);
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  }
+
   int set_cpu_used_;
   int aq_mode_;
 };
@@ -45,65 +61,46 @@ class AqSegmentTest
 // Validate that this AQ segmentation mode (AQ=1, variance_ap)
 // encodes and decodes without a mismatch.
 TEST_P(AqSegmentTest, TestNoMisMatchAQ1) {
-  cfg_.rc_min_quantizer = 8;
-  cfg_.rc_max_quantizer = 56;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.rc_buf_initial_sz = 500;
-  cfg_.rc_buf_optimal_sz = 500;
-  cfg_.rc_buf_sz = 1000;
-  cfg_.rc_target_bitrate = 300;
-
-  aq_mode_ = 1;
-
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                        30, 1, 0, 100);
-
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  DoTest(1);
 }
 
 // Validate that this AQ segmentation mode (AQ=2, complexity_aq)
 // encodes and decodes without a mismatch.
 TEST_P(AqSegmentTest, TestNoMisMatchAQ2) {
-  cfg_.rc_min_quantizer = 8;
-  cfg_.rc_max_quantizer = 56;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.rc_buf_initial_sz = 500;
-  cfg_.rc_buf_optimal_sz = 500;
-  cfg_.rc_buf_sz = 1000;
-  cfg_.rc_target_bitrate = 300;
-
-  aq_mode_ = 2;
-
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                        30, 1, 0, 100);
-
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  DoTest(2);
 }
 
 // Validate that this AQ segmentation mode (AQ=3, cyclic_refresh_aq)
 // encodes and decodes without a mismatch.
 TEST_P(AqSegmentTest, TestNoMisMatchAQ3) {
-  cfg_.rc_min_quantizer = 8;
-  cfg_.rc_max_quantizer = 56;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.rc_buf_initial_sz = 500;
-  cfg_.rc_buf_optimal_sz = 500;
-  cfg_.rc_buf_sz = 1000;
-  cfg_.rc_target_bitrate = 300;
+  DoTest(3);
+}
 
-  aq_mode_ = 3;
+class AqSegmentTestLarge : public AqSegmentTest {};
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                        30, 1, 0, 100);
+TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ1) {
+  DoTest(1);
+}
 
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ2) {
+  DoTest(2);
+}
+
+TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ3) {
+  DoTest(3);
 }
 
 VP9_INSTANTIATE_TEST_CASE(AqSegmentTest,
                           ::testing::Values(::libvpx_test::kRealTime,
                                             ::libvpx_test::kOnePassGood),
                           ::testing::Range(3, 9));
+
+VP10_INSTANTIATE_TEST_CASE(AqSegmentTest,
+                           ::testing::Values(::libvpx_test::kRealTime,
+                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Range(5, 9));
+VP10_INSTANTIATE_TEST_CASE(AqSegmentTestLarge,
+                           ::testing::Values(::libvpx_test::kRealTime,
+                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Range(3, 5));
 }  // namespace
