@@ -1213,18 +1213,17 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   int rate;
   int64_t dist;
   int64_t sse;
-#if !CONFIG_NEW_QUANT
   ENTROPY_CONTEXT coeff_ctx = combine_entropy_contexts(
       *(args->t_above + blk_col), *(args->t_left + blk_row));
-#endif
 
   if (args->exit_early)
     return;
 
   if (!is_inter_block(mbmi)) {
-    struct encode_b_args arg = {x, NULL, &mbmi->skip};
+    struct encode_b_args intra_arg = {x, NULL, &mbmi->skip, args->t_above,
+                                      args->t_left};
     vp10_encode_block_intra(plane, block, blk_row, blk_col,
-                            plane_bsize, tx_size, &arg);
+                            plane_bsize, tx_size, &intra_arg);
 
     if (args->cpi->sf.use_transform_domain_distortion) {
       dist_block(args->cpi, x, plane, block, blk_row, blk_col,
@@ -1269,9 +1268,9 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 #else
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                        plane_bsize, tx_size, VP10_XFORM_QUANT_FP);
+#endif  // CONFIG_NEW_QUANT
       if (x->plane[plane].eobs[block])
         vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
-#endif  // CONFIG_NEW_QUANT
       dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
     } else if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
@@ -1325,9 +1324,9 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 #else
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_FP);
+#endif  // CONFIG_NEW_QUANT
     if (x->plane[plane].eobs[block])
       vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
-#endif  // CONFIG_NEW_QUANT
     dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                tx_size, &dist, &sse);
   }
@@ -9226,7 +9225,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       if (this_mode != DC_PRED && this_mode != TM_PRED)
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
-      vp10_encode_intra_block_plane(x, bsize, 0, 0);
+      vp10_encode_intra_block_plane(x, bsize, 0, 1);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         x->recon_variance =
