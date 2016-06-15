@@ -6578,6 +6578,13 @@ static int estimate_wedge_sign(const VP10_COMP *cpi,
   uint32_t esq[2][4], var;
   int64_t tl, br;
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    pred0 = CONVERT_TO_BYTEPTR(pred0);
+    pred1 = CONVERT_TO_BYTEPTR(pred1);
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
   var = cpi->fn_ptr[f_index].vf(
       src, src_stride,
       pred0, stride0, &esq[0][0]);
