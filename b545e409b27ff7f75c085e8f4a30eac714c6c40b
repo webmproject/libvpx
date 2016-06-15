@@ -16,6 +16,24 @@
       "revId": "b545e409b27ff7f75c085e8f4a30eac714c6c40b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3406a1d0_fd661fd8",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-15T19:25:59Z",
+      "side": 1,
+      "message": "vp9 doesn\u0027t have the \u003e\u003e 1 either ...  i\u0027d rather not muck around with switching both to int, but then also switching this to a divide. this is the minimum change to clear the warning.",
+      "parentUuid": "b4de1159_8b094d7d",
+      "revId": "b545e409b27ff7f75c085e8f4a30eac714c6c40b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
