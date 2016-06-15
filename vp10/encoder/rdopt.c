@@ -1269,9 +1269,10 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 #else
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                        plane_bsize, tx_size, VP10_XFORM_QUANT_FP);
-      vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
+      if (x->plane[plane].eobs[block])
+        vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
 #endif  // CONFIG_NEW_QUANT
-     dist_block(args->cpi, x, plane, block, blk_row, blk_col,
+      dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
     } else if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
                SKIP_TXFM_AC_ONLY) {
@@ -1324,7 +1325,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 #else
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_FP);
-    vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
+    if (x->plane[plane].eobs[block])
+      vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
 #endif  // CONFIG_NEW_QUANT
     dist_block(args->cpi, x, plane, block, blk_row, blk_col,
                tx_size, &dist, &sse);
