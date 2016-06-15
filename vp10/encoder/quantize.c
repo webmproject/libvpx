@@ -1280,11 +1280,11 @@ void vp10_init_quantizer(VP10_COMP *cpi) {
   }
 }
 
-void vp10_init_plane_quantizers(VP10_COMP *cpi, MACROBLOCK *x) {
+void vp10_init_plane_quantizers(const VP10_COMP *cpi, MACROBLOCK *x,
+                                const int segment_id) {
   const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-  QUANTS *const quants = &cpi->quants;
-  const int segment_id = xd->mi[0]->mbmi.segment_id;
+  const QUANTS *const quants = &cpi->quants;
   const int qindex = vp10_get_qindex(&cm->seg, segment_id, cm->base_qindex);
   const int rdmult = vp10_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
   int i;
@@ -1299,10 +1299,8 @@ void vp10_init_plane_quantizers(VP10_COMP *cpi, MACROBLOCK *x) {
   xd->plane[0].dequant = cpi->y_dequant[qindex];
 #if CONFIG_NEW_QUANT
   x->plane[0].cuml_bins_nuq = quants->y_cuml_bins_nuq[qindex];
-  xd->plane[0].dequant_val_nuq = (const dequant_val_type_nuq*)
-                                 cpi->y_dequant_val_nuq[qindex];
+  xd->plane[0].dequant_val_nuq = cpi->y_dequant_val_nuq[qindex];
 #endif  // CONFIG_NEW_QUANT
-
 
   x->plane[0].quant_thred[0] = x->plane[0].zbin[0] * x->plane[0].zbin[0];
   x->plane[0].quant_thred[1] = x->plane[0].zbin[1] * x->plane[0].zbin[1];
@@ -1318,8 +1316,7 @@ void vp10_init_plane_quantizers(VP10_COMP *cpi, MACROBLOCK *x) {
     xd->plane[i].dequant = cpi->uv_dequant[qindex];
 #if CONFIG_NEW_QUANT
     x->plane[i].cuml_bins_nuq = quants->uv_cuml_bins_nuq[qindex];
-    xd->plane[i].dequant_val_nuq = (const dequant_val_type_nuq*)
-                                   cpi->uv_dequant_val_nuq[qindex];
+    xd->plane[i].dequant_val_nuq = cpi->uv_dequant_val_nuq[qindex];
 #endif  // CONFIG_NEW_QUANT
 
     x->plane[i].quant_thred[0] = x->plane[i].zbin[0] * x->plane[i].zbin[0];
@@ -1335,7 +1332,9 @@ void vp10_init_plane_quantizers(VP10_COMP *cpi, MACROBLOCK *x) {
 }
 
 void vp10_frame_init_quantizer(VP10_COMP *cpi) {
-  vp10_init_plane_quantizers(cpi, &cpi->td.mb);
+  MACROBLOCK *const x = &cpi->td.mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  vp10_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
 }
 
 void vp10_set_quantizer(VP10_COMMON *cm, int q) {

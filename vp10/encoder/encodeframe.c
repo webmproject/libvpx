@@ -318,7 +318,7 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
-    vp10_init_plane_quantizers(cpi, x);
+    vp10_init_plane_quantizers(cpi, x, mbmi->segment_id);
 
     x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
   } else {
@@ -394,7 +394,7 @@ static void set_offsets_extend(VP10_COMP *cpi, ThreadData *td,
       mbmi->segment_id = get_segment_id(cm, map, bsize_ori,
                                         mi_row_ori, mi_col_ori);
     }
-    vp10_init_plane_quantizers(cpi, x);
+    vp10_init_plane_quantizers(cpi, x, mbmi->segment_id);
 
     x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
   } else {
@@ -1153,7 +1153,7 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
       }
 
   if (cpi->oxcf.aq_mode)
-    vp10_init_plane_quantizers(cpi, x);
+    vp10_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
 
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
@@ -1297,7 +1297,7 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
       vp10_cyclic_refresh_update_segment(cpi, &xd->mi[0]->mbmi,
                                          mi_row, mi_col, bsize,
                                          ctx->rate, ctx->dist, 1);
-      vp10_init_plane_quantizers(cpi, x);
+      vp10_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
     }
   }
 
@@ -1311,7 +1311,7 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
       }
 
   if (cpi->oxcf.aq_mode)
-    vp10_init_plane_quantizers(cpi, x);
+    vp10_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
 
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
@@ -1644,7 +1644,7 @@ static int set_segment_rdmult(VP10_COMP *const cpi,
                                int8_t segment_id) {
   int segment_qindex;
   VP10_COMMON *const cm = &cpi->common;
-  vp10_init_plane_quantizers(cpi, x);
+  vp10_init_plane_quantizers(cpi, x, segment_id);
   vpx_clear_system_state();
   segment_qindex = vp10_get_qindex(&cm->seg, segment_id,
                                   cm->base_qindex);
