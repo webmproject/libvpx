@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4de1159_2b425926",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T00:14:11Z",
+      "side": 1,
+      "message": "doesn\u0027t need to be virtual unless you intend on overriding it",
+      "revId": "f44becc9c43165ddf9467b228d08a39beecc8e67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4de1159_0b3f9daa",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T00:14:11Z",
+      "side": 1,
+      "message": "can be one line",
+      "revId": "f44becc9c43165ddf9467b228d08a39beecc8e67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4de1159_ab9be9dd",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T00:14:11Z",
+      "side": 1,
+      "message": "same comment re: virtual",
+      "revId": "f44becc9c43165ddf9467b228d08a39beecc8e67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4de1159_2bd1392b",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T00:14:11Z",
+      "side": 1,
+      "message": "same comment for virtual",
+      "revId": "f44becc9c43165ddf9467b228d08a39beecc8e67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4de1159_6bd74122",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-15T00:14:11Z",
+      "side": 1,
+      "message": "move these closer to their first use or just do the ASSERT immediately with a message (\u003c\u003c \"...\") if it helps to disambiguate",
+      "revId": "f44becc9c43165ddf9467b228d08a39beecc8e67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
