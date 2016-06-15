@@ -601,6 +601,7 @@ void vp10_pick_filter_restoration(
 
   if (method == LPF_PICK_MINIMAL_LPF && lf->filter_level) {
       lf->filter_level = 0;
+      cm->rst_info.restoration_type = RESTORE_NONE;
   } else if (method >= LPF_PICK_FROM_Q) {
     const int min_filter_level = 0;
     const int max_filter_level = vp10_get_max_filter_level(cpi);
