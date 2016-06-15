@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3406a1d0_6b3d2920",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1232,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-06-15T22:08:47Z",
+      "side": 1,
+      "message": "do we need another condition to capture the fact only such shortcut is needed only for internal bit-depth at 10 bit or 12 bit?",
+      "range": {
+        "startLine": 1232,
+        "startChar": 8,
+        "endLine": 1232,
+        "endChar": 76
+      },
+      "revId": "a7dea67ff26e9494aa15d2904a6cda62c67dea61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
