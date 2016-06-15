@@ -9894,7 +9894,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   // TODO(huisu): ext-intra is turned off in lossless mode for now to
   // avoid a unit test failure
   if (!xd->lossless[mbmi->segment_id] &&
-      mbmi->palette_mode_info.palette_size[0] == 0 && !dc_skipped) {
+      mbmi->palette_mode_info.palette_size[0] == 0 && !dc_skipped &&
+      best_mode_index >= 0 && (best_intra_rd >> 1)  < best_rd) {
     pick_ext_intra_iframe(cpi, x, ctx, bsize, rate_uv_intra,
                           rate_uv_tokenonly, dist_uv, skip_uv,
                           mode_uv, ext_intra_mode_info_uv,
