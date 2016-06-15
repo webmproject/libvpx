@@ -266,15 +266,15 @@ static void set_mode_info_offsets(VP10_COMP *const cpi,
   x->mbmi_ext = cpi->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 }
 
-static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
-                        MACROBLOCK *const x, int mi_row, int mi_col,
-                        BLOCK_SIZE bsize) {
+static void set_offsets_without_segment_id(VP10_COMP *cpi,
+                                           const TileInfo *const tile,
+                                           MACROBLOCK *const x,
+                                           int mi_row, int mi_col,
+                                           BLOCK_SIZE bsize) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
-  const struct segmentation *const seg = &cm->seg;
 
   set_skip_context(xd, mi_row, mi_col);
 
@@ -286,8 +286,6 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
     xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
   xd->max_tx_size = max_txsize_lookup[bsize];
 #endif
-
-  mbmi = &xd->mi[0]->mbmi;
 
   // Set up destination pointers.
   vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
@@ -311,6 +309,22 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
   x->rddiv = cpi->rd.RDDIV;
   x->rdmult = cpi->rd.RDMULT;
 
+  // required by vp10_append_sub8x8_mvs_for_idx() and vp10_find_best_ref_mvs()
+  xd->tile = *tile;
+}
+
+static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
+                        MACROBLOCK *const x, int mi_row, int mi_col,
+                        BLOCK_SIZE bsize) {
+  VP10_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi;
+  const struct segmentation *const seg = &cm->seg;
+
+  set_offsets_without_segment_id(cpi, tile, x, mi_row, mi_col, bsize);
+
+  mbmi = &xd->mi[0]->mbmi;
+
   // Setup segment ID.
   if (seg->enabled) {
     if (!cpi->vaq_refresh) {
@@ -325,9 +339,6 @@ static void set_offsets(VP10_COMP *cpi, const TileInfo *const tile,
     mbmi->segment_id = 0;
     x->encode_breakout = cpi->encode_breakout;
   }
-
-  // required by vp10_append_sub8x8_mvs_for_idx() and vp10_find_best_ref_mvs()
-  xd->tile = *tile;
 }
 
 #if CONFIG_SUPERTX
@@ -352,21 +363,17 @@ static void set_offsets_extend(VP10_COMP *cpi, ThreadData *td,
                                const TileInfo *const tile,
                                int mi_row_pred, int mi_col_pred,
                                int mi_row_ori, int mi_col_ori,
-                               BLOCK_SIZE bsize_pred, BLOCK_SIZE bsize_ori) {
+                               BLOCK_SIZE bsize_pred) {
   // Used in supertx
   // (mi_row_ori, mi_col_ori, bsize_ori): region for mv
   // (mi_row_pred, mi_col_pred, bsize_pred): region to predict
   MACROBLOCK *const x = &td->mb;
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize_pred];
   const int mi_height = num_8x8_blocks_high_lookup[bsize_pred];
-  const struct segmentation *const seg = &cm->seg;
 
   set_mode_info_offsets(cpi, x, xd, mi_row_ori, mi_col_ori);
-
-  mbmi = &xd->mi[0]->mbmi;
 
   // Set up limit values for MV components.
   // Mv beyond the range do not produce new/different prediction block.
@@ -385,22 +392,43 @@ static void set_offsets_extend(VP10_COMP *cpi, ThreadData *td,
   // R/D setup.
   x->rddiv = cpi->rd.RDDIV;
   x->rdmult = cpi->rd.RDMULT;
+}
 
-  // Setup segment ID.
-  if (seg->enabled) {
-    if (!cpi->vaq_refresh) {
-      const uint8_t *const map = seg->update_map ? cpi->segmentation_map
-                                                 : cm->last_frame_seg_map;
-      mbmi->segment_id = get_segment_id(cm, map, bsize_ori,
-                                        mi_row_ori, mi_col_ori);
-    }
-    vp10_init_plane_quantizers(cpi, x, mbmi->segment_id);
+static void set_segment_id_supertx(const VP10_COMP *const cpi,
+                                   MACROBLOCK *const x,
+                                   const int mi_row, const int mi_col,
+                                   const BLOCK_SIZE bsize) {
+  const VP10_COMMON *cm = &cpi->common;
+  const struct segmentation *seg = &cm->seg;
+  const int miw =
+      VPXMIN(num_8x8_blocks_wide_lookup[bsize], cm->mi_cols - mi_col);
+  const int mih =
+      VPXMIN(num_8x8_blocks_high_lookup[bsize], cm->mi_rows - mi_row);
+  const int mi_offset = mi_row * cm->mi_stride + mi_col;
+  MODE_INFO **const mip = cm->mi_grid_visible + mi_offset;
+  int r, c;
+  int seg_id_supertx = MAX_SEGMENTS;
 
-    x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
-  } else {
-    mbmi->segment_id = 0;
+  if (!seg->enabled) {
+    seg_id_supertx = 0;
     x->encode_breakout = cpi->encode_breakout;
+  } else {
+    // Find the minimum segment_id
+    for (r = 0 ; r < mih ; r++)
+      for (c = 0 ; c < miw ; c++)
+        seg_id_supertx = VPXMIN(mip[r * cm->mi_stride + c]->mbmi.segment_id,
+                               seg_id_supertx);
+    assert(0 <= seg_id_supertx && seg_id_supertx < MAX_SEGMENTS);
+
+    // Initialize plane quantisers
+    vp10_init_plane_quantizers(cpi, x, seg_id_supertx);
+    x->encode_breakout = cpi->segment_encode_breakout[seg_id_supertx];
   }
+
+  // Assign the the segment_id back to segment_id_supertx
+  for (r = 0 ; r < mih ; r++)
+    for (c = 0 ; c < miw ; c++)
+      mip[r * cm->mi_stride + c]->mbmi.segment_id_supertx = seg_id_supertx;
 }
 #endif  // CONFIG_SUPERTX
 
@@ -1284,20 +1312,22 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
 #endif
 
   // If segmentation in use
-  if (seg->enabled && output_enabled) {
-    // For in frame complexity AQ copy the segment id from the segment map.
-    if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
-      const uint8_t *const map = seg->update_map ? cpi->segmentation_map
-                                                 : cm->last_frame_seg_map;
-      mi_addr->mbmi.segment_id =
-        get_segment_id(cm, map, bsize, mi_row, mi_col);
+  if (seg->enabled) {
+    if (cpi->vaq_refresh) {
+      const int energy = bsize <= BLOCK_16X16 ?
+                         x->mb_energy : vp10_block_energy(cpi, x, bsize);
+      mi_addr->mbmi.segment_id = vp10_vaq_segment_id(energy);
     } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-      // Else for cyclic refresh mode update the segment map, set the segment id
-      // and then update the quantizer.
+      // For cyclic refresh mode, now update the segment map
+      // and set the segment id.
       vp10_cyclic_refresh_update_segment(cpi, &xd->mi[0]->mbmi,
                                          mi_row, mi_col, bsize,
                                          ctx->rate, ctx->dist, 1);
-      vp10_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
+    } else {
+      // Otherwise just set the segment id based on the current segment map
+      const uint8_t *const map = seg->update_map ? cpi->segmentation_map
+                                                 : cm->last_frame_seg_map;
+      mi_addr->mbmi.segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
   }
 
@@ -1309,9 +1339,6 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
         && (xd->mb_to_bottom_edge >> (3 + MI_SIZE_LOG2)) + mi_height > y) {
         xd->mi[x_idx + y * mis] = mi_addr;
       }
-
-  if (cpi->oxcf.aq_mode)
-    vp10_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
 
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
@@ -1397,6 +1424,9 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
+
+  if (bsize == BLOCK_16X16 && cpi->vaq_refresh)
+    x->mb_energy = vp10_block_energy(cpi, x, bsize);
 
   switch (partition) {
     case PARTITION_NONE:
@@ -2253,7 +2283,9 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
                          output_enabled, bsize, bsize,
                          dst_buf, dst_stride, pc_tree);
 
-      set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
+      set_offsets_without_segment_id(cpi, tile, x, mi_row, mi_col, bsize);
+      set_segment_id_supertx(cpi, x, mi_row, mi_col, bsize);
+
       if (!x->skip) {
         memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 
@@ -5366,6 +5398,8 @@ static void predict_b_extend(VP10_COMP *cpi, ThreadData *td,
   const int mi_width_top = num_8x8_blocks_wide_lookup[bsize_top];
   const int mi_height_top = num_8x8_blocks_high_lookup[bsize_top];
 
+  (void)bsize_ori;
+
   if (mi_row_pred < mi_row_top || mi_col_pred < mi_col_top ||
       mi_row_pred >= mi_row_top + mi_height_top ||
       mi_col_pred >= mi_col_top + mi_width_top ||
@@ -5373,7 +5407,7 @@ static void predict_b_extend(VP10_COMP *cpi, ThreadData *td,
     return;
 
   set_offsets_extend(cpi, td, tile, mi_row_pred, mi_col_pred,
-                     mi_row_ori, mi_col_ori, bsize_pred, bsize_ori);
+                     mi_row_ori, mi_col_ori, bsize_pred);
   xd->plane[0].dst.stride = dst_stride[0];
   xd->plane[1].dst.stride = dst_stride[1];
   xd->plane[2].dst.stride = dst_stride[2];
@@ -6075,7 +6109,8 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
   predict_sb_complex(cpi, td, tile, mi_row, mi_col, mi_row, mi_col,
                      0, bsize, bsize, dst_buf, dst_stride, pc_tree);
 
-  set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
+  set_offsets_without_segment_id(cpi, tile, x, mi_row, mi_col, bsize);
+  set_segment_id_supertx(cpi, x, mi_row, mi_col, bsize);
 
   // These skip_txfm flags are previously set by the non-supertx RD search.
   // vp10_txfm_rd_in_plane_supertx calls block_rd_txfm, which checks these
