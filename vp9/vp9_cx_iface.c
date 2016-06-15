@@ -905,6 +905,11 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
       break;
   }
 
+  if (deadline == VPX_DL_REALTIME) {
+    ctx->oxcf.pass = 0;
+    new_mode = REALTIME;
+  }
+
   if (ctx->oxcf.mode != new_mode) {
     ctx->oxcf.mode = new_mode;
     vp9_change_config(ctx->cpi, &ctx->oxcf);

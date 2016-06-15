@@ -786,7 +786,9 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
     new_qc = MODE_REALTIME;
 #endif
 
-    if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
+    if (deadline == VPX_DL_REALTIME)
+        new_qc = MODE_REALTIME;
+    else if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
         new_qc = MODE_FIRSTPASS;
     else if (ctx->cfg.g_pass == VPX_RC_LAST_PASS)
         new_qc = (new_qc == MODE_BESTQUALITY)
