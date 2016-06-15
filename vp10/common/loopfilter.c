@@ -240,8 +240,16 @@ static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
 
 static uint8_t get_filter_level(const loop_filter_info_n *lfi_n,
                                 const MB_MODE_INFO *mbmi) {
-  return lfi_n->lvl[mbmi->segment_id][mbmi->ref_frame[0]]
-                   [mode_lf_lut[mbmi->mode]];
+#if CONFIG_SUPERTX
+  const int segment_id = VPXMIN(mbmi->segment_id, mbmi->segment_id_supertx);
+  assert(IMPLIES(supertx_enabled(mbmi),
+                 mbmi->segment_id_supertx != MAX_SEGMENTS));
+  assert(IMPLIES(supertx_enabled(mbmi),
+                 mbmi->segment_id_supertx <= mbmi->segment_id));
+#else
+  const int segment_id = mbmi->segment_id;
+#endif  // CONFIG_SUPERTX
+  return lfi_n->lvl[segment_id][mbmi->ref_frame[0]][mode_lf_lut[mbmi->mode]];
 }
 
 void vp10_loop_filter_init(VP10_COMMON *cm) {
