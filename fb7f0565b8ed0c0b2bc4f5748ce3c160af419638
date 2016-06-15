@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3406a1d0_dd523bfa",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-06-15T19:24:18Z",
+      "side": 1,
+      "message": "Ideally, we shall allow all modes that do not require the top-left corner pixel value. For example, a look-up table for all modes with values indicate if they require top-left corner can be used here instead of DC_PRED check.",
+      "range": {
+        "startLine": 1218,
+        "startChar": 8,
+        "endLine": 1218,
+        "endChar": 72
+      },
+      "revId": "fb7f0565b8ed0c0b2bc4f5748ce3c160af419638",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
