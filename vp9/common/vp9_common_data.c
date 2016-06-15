@@ -159,3 +159,18 @@ const struct {
   {0,  8 },  // 64X32 - {0b0000, 0b1000}
   {0,  0 },  // 64X64 - {0b0000, 0b0000}
 };
+
+#if CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
+const uint8_t need_top_left[INTRA_MODES] = {
+    0,  // DC_PRED
+    0,  // V_PRED
+    0,  // H_PRED
+    0,  // D45_PRED
+    1,  // D135_PRED
+    1,  // D117_PRED
+    1,  // D153_PRED
+    0,  // D207_PRED
+    0,  // D63_PRED
+    1,  // TM_PRED
+};
+#endif  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
