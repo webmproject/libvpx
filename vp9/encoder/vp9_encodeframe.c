@@ -54,7 +54,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData * td,
                               PICK_MODE_CONTEXT *ctx);
 
 // This is used as a reference when computing the source variance for the
-//  purposes of activity masking.
+//  purpose of activity masking.
 // Eventually this should be replaced by custom no-reference routines,
 //  which will be faster.
 static const uint8_t VP9_VAR_OFFS[64] = {
@@ -4301,9 +4301,9 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     // either compound, single or hybrid prediction as per whatever has
     // worked best for that type of frame in the past.
     // It also predicts whether another coding mode would have worked
-    // better that this coding mode. If that is the case, it remembers
+    // better than this coding mode. If that is the case, it remembers
     // that for subsequent frames.
-    // It does the same analysis for transform size selection also.
+    // It also does the same analysis for transform size selection.
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
     int64_t *const mode_thrs = rd_opt->prediction_type_threshes[frame_type];
     int64_t *const filter_thrs = rd_opt->filter_threshes[frame_type];
@@ -4391,12 +4391,13 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     encode_frame_internal(cpi);
   }
 
-  // If segmentated AQ is enabled compute the average AQ weighting.
+  // If segmented AQ is enabled compute the average AQ weighting.
   if (cm->seg.enabled && (cpi->oxcf.aq_mode != NO_AQ) &&
       (cm->seg.update_map || cm->seg.update_data)) {
     cm->seg.aq_av_offset = compute_frame_aq_offset(cpi);
   }
 }
+
 static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   const PREDICTION_MODE y_mode = mi->mode;
   const PREDICTION_MODE uv_mode = mi->uv_mode;

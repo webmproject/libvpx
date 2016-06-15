@@ -420,7 +420,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tile_data);
   cpi->tile_data = NULL;
 
-  // Delete sementation map
   vpx_free(cpi->segmentation_map);
   cpi->segmentation_map = NULL;
   vpx_free(cpi->coding_context.last_frame_seg_map_copy);
@@ -3393,11 +3392,10 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   }
   apply_active_map(cpi);
 
-  // transform / motion compensation build reconstruction frame
   vp9_encode_frame(cpi);
 
   // Check if we should drop this frame because of high overshoot.
-  // Only for frames where high temporal-source sad is detected.
+  // Only for frames where high temporal-source SAD is detected.
   if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
       cpi->resize_state == 0 &&
@@ -3539,7 +3537,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
       vp9_setup_in_frame_q_adj(cpi);
     }
 
-    // transform / motion compensation build reconstruction frame
     vp9_encode_frame(cpi);
 
     // Update the skip mb flag probabilities based on the distribution
