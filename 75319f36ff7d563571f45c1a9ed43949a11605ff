@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "09534428_a63846e1",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 866,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-16T21:41:45Z",
+      "side": 1,
+      "message": "darwin is check below, so you could migrate this to that area. same for the above",
+      "revId": "75319f36ff7d563571f45c1a9ed43949a11605ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
