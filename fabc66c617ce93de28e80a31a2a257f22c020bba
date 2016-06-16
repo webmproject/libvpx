@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3406a1d0_8c2d338a",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-16T02:59:16Z",
+      "side": 1,
+      "message": "do you want this to be 5 still or is 5 all right? if the latter you should update the range at line 101 (it\u0027s [0, 5) now) and the bug",
+      "revId": "fabc66c617ce93de28e80a31a2a257f22c020bba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3406a1d0_ec52eff9",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-16T02:59:16Z",
+      "side": 1,
+      "message": "we do this elsewhere, not sure if it\u0027s worth an explanation",
+      "revId": "fabc66c617ce93de28e80a31a2a257f22c020bba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
