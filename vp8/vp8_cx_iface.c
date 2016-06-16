@@ -22,6 +22,7 @@
 #include "vpx/vp8cx.h"
 #include "vp8/encoder/firstpass.h"
 #include "vp8/common/onyx.h"
+#include "vp8/common/common.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -1116,7 +1117,8 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx)
 {
 
     YV12_BUFFER_CONFIG sd;
-    vp8_ppflags_t flags = {0};
+    vp8_ppflags_t flags;
+    vp8_zero(flags);
 
     if (ctx->preview_ppcfg.post_proc_flag)
     {
@@ -1305,8 +1307,8 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         30,                 /* rc_resize_up_thresold */
 
         VPX_VBR,            /* rc_end_usage */
-        {0},                /* rc_twopass_stats_in */
-        {0},                /* rc_firstpass_mb_stats_in */
+        {NULL, 0},          /* rc_twopass_stats_in */
+        {NULL, 0},          /* rc_firstpass_mb_stats_in */
         256,                /* rc_target_bandwidth */
         4,                  /* rc_min_quantizer */
         63,                 /* rc_max_quantizer */
@@ -1334,6 +1336,8 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         {0},                /* ts_rate_decimator */
         0,                  /* ts_periodicity */
         {0},                /* ts_layer_id */
+        {0},                /* layer_target_bitrate */
+        0                   /* temporal_layering_mode */
     }},
 };
 
