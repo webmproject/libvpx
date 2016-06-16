@@ -90,7 +90,7 @@ endif
 ifeq ($(findstring yes,$(CONFIG_VP9_ENCODER)$(CONFIG_VP10_ENCODER)),yes)
 LIBVPX_TEST_SRCS-yes += active_map_refresh_test.cc
 LIBVPX_TEST_SRCS-yes += active_map_test.cc
-LIBVPX_TEST_SRCS-yes += vp9_end_to_end_test.cc
+LIBVPX_TEST_SRCS-yes += end_to_end_test.cc
 endif
 
 ##
