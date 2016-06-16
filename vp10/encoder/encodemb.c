@@ -91,8 +91,8 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ref = is_inter_block(&xd->mi[0]->mbmi);
-  vp10_token_state tokens[MAX_TX_SQUARE+1][2];
-  unsigned best_index[MAX_TX_SQUARE+1][2];
+  vp10_token_state tokens[MAX_TX_SQUARE + 1][2];
+  unsigned best_index[MAX_TX_SQUARE + 1][2];
   uint8_t token_cache[MAX_TX_SQUARE];
   const tran_low_t *const coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
@@ -118,13 +118,14 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   int64_t rd_cost0, rd_cost1;
   int rate0, rate1, error0, error1;
   int16_t t0, t1;
-  EXTRABIT e0;
   int best, band, pt, i, final_eob;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
 #else
   const int *cat6_high_cost = vp10_get_high_cost_table(8);
 #endif
+  unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
+                   mb->token_costs[tx_size][type][ref];
 
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
@@ -146,6 +147,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
     int base_bits, d2, dx;
     const int rc = scan[i];
     int x = qcoeff[rc];
+
     /* Only add a trellis state for non-zero coefficients. */
     if (x) {
       int shortcut = 0;
@@ -154,20 +156,18 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       /* Evaluate the first possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
-      vp10_get_token_extra(x, &t0, &e0);
+
+      base_bits = vp10_get_token_cost(x, &t0, cat6_high_cost);
       /* Consider both possible successor states. */
       if (next < default_eob) {
         band = band_translate[i + 1];
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
-        rate0 += mb->token_costs[tx_size][type][ref][band][0][pt]
-                                [tokens[next][0].token];
-        rate1 += mb->token_costs[tx_size][type][ref][band][0][pt]
-                                [tokens[next][1].token];
+        rate0 += token_costs[band][0][pt][tokens[next][0].token];
+        rate1 += token_costs[band][0][pt][tokens[next][1].token];
       }
       UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
-      base_bits = vp10_get_cost(t0, e0, cat6_high_cost);
 
       dx = (dqcoeff[rc] - coeff[rc]) * (1 << shift);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -222,29 +222,26 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
          */
         t0 = tokens[next][0].token == EOB_TOKEN ? EOB_TOKEN : ZERO_TOKEN;
         t1 = tokens[next][1].token == EOB_TOKEN ? EOB_TOKEN : ZERO_TOKEN;
-        e0 = 0;
+        base_bits = 0;
       } else {
-        vp10_get_token_extra(x, &t0, &e0);
+        base_bits = vp10_get_token_cost(x, &t0, cat6_high_cost);
         t1 = t0;
       }
       if (next < default_eob) {
         band = band_translate[i + 1];
         if (t0 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
-          rate0 += mb->token_costs[tx_size][type][ref][band][!x][pt]
-                                  [tokens[next][0].token];
+          rate0 += token_costs[band][!x][pt][tokens[next][0].token];
         }
         if (t1 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache);
-          rate1 += mb->token_costs[tx_size][type][ref][band][!x][pt]
-                                  [tokens[next][1].token];
+          rate1 += token_costs[band][!x][pt][tokens[next][1].token];
         }
       }
 
       UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
-      base_bits = vp10_get_cost(t0, e0, cat6_high_cost);
 
       if (shortcut) {
 #if CONFIG_NEW_QUANT
@@ -304,13 +301,11 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
       if (t0 != EOB_TOKEN) {
-        tokens[next][0].rate +=
-            mb->token_costs[tx_size][type][ref][band][1][0][t0];
+        tokens[next][0].rate += token_costs[band][1][0][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
       if (t1 != EOB_TOKEN) {
-        tokens[next][1].rate +=
-            mb->token_costs[tx_size][type][ref][band][1][0][t1];
+        tokens[next][1].rate += token_costs[band][1][0][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
       best_index[i][0] = best_index[i][1] = 0;
@@ -326,8 +321,8 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[tx_size][type][ref][band][0][ctx][t0];
-  rate1 += mb->token_costs[tx_size][type][ref][band][0][ctx][t1];
+  rate0 += token_costs[band][0][ctx][t0];
+  rate1 += token_costs[band][0][ctx][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
 
