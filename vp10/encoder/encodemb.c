@@ -72,19 +72,6 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
   rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
 }
 
-// This function is a place holder for now but may ultimately need
-// to scan previous tokens to work out the correct context.
-static int trellis_get_coeff_context(const int16_t *scan,
-                                     const int16_t *nb,
-                                     int idx, int token,
-                                     uint8_t *token_cache) {
-  int bak = token_cache[scan[idx]], pt;
-  token_cache[scan[idx]] = vp10_pt_energy_class[token];
-  pt = get_coef_context(nb, token_cache, idx + 1);
-  token_cache[scan[idx]] = bak;
-  return pt;
-}
-
 int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
                     TX_SIZE tx_size, int ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
@@ -161,7 +148,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       /* Consider both possible successor states. */
       if (next < default_eob) {
         band = band_translate[i + 1];
-        pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
+        pt = get_coef_context(nb, token_cache, i + 1);
         rate0 += token_costs[band][0][pt][tokens[next][0].token];
         rate1 += token_costs[band][0][pt][tokens[next][1].token];
       }
@@ -230,11 +217,13 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       if (next < default_eob) {
         band = band_translate[i + 1];
         if (t0 != EOB_TOKEN) {
-          pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
+          token_cache[rc] = vp10_pt_energy_class[t0];
+          pt = get_coef_context(nb, token_cache, i + 1);
           rate0 += token_costs[band][!x][pt][tokens[next][0].token];
         }
         if (t1 != EOB_TOKEN) {
-          pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache);
+          token_cache[rc] = vp10_pt_energy_class[t1];
+          pt = get_coef_context(nb, token_cache, i + 1);
           rate1 += token_costs[band][!x][pt][tokens[next][1].token];
         }
       }
