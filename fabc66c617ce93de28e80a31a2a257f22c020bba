@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3406a1d0_6c7c1f05",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-16T06:08:53Z",
+      "side": 1,
+      "message": "Yes I want this to be (5, 9) eventually - once 5 is fixed.",
+      "parentUuid": "3406a1d0_8c2d338a",
+      "revId": "fabc66c617ce93de28e80a31a2a257f22c020bba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3406a1d0_ec52eff9",
         "filename": "test/tile_independence_test.cc",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-16T02:59:16Z",
       "side": 1,
       "message": "we do this elsewhere, not sure if it\u0027s worth an explanation",
+      "revId": "fabc66c617ce93de28e80a31a2a257f22c020bba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3406a1d0_20906b5a",
+        "filename": "test/tile_independence_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-16T06:08:53Z",
+      "side": 1,
+      "message": "removed.",
+      "parentUuid": "3406a1d0_ec52eff9",
       "revId": "fabc66c617ce93de28e80a31a2a257f22c020bba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
