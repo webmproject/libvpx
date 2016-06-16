@@ -77,25 +77,25 @@ static INLINE int aom_read_bit(aom_reader *r) {
 #if CONFIG_ANS
   return uabs_read_bit(r);  // Non trivial optimization at half probability
 #else
-  return aom_dk_read_bit(r);
+  return aom_read(r, 128);  // aom_prob_half
 #endif
 }
 
 static INLINE int aom_read_literal(aom_reader *r, int bits) {
-#if CONFIG_ANS
-  return uabs_read_literal(r, bits);
-#else
-  return aom_dk_read_literal(r, bits);
-#endif
+  int literal = 0, bit;
+
+  for (bit = bits - 1; bit >= 0; bit--) literal |= aom_read_bit(r) << bit;
+
+  return literal;
 }
 
 static INLINE int aom_read_tree(aom_reader *r, const aom_tree_index *tree,
                                 const aom_prob *probs) {
-#if CONFIG_ANS
-  return uabs_read_tree(r, tree, probs);
-#else
-  return aom_dk_read_tree(r, tree, probs);
-#endif
+  aom_tree_index i = 0;
+
+  while ((i = tree[i + aom_read(r, probs[i >> 1])]) > 0) continue;
+
+  return -i;
 }
 
 #ifdef __cplusplus
