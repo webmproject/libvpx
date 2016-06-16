@@ -453,7 +453,11 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
   const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+#if CONFIG_SUPERTX
+  const int segment_id = VPXMIN(mbmi->segment_id, mbmi->segment_id_supertx);
+#else
   const int segment_id = mbmi->segment_id;
+#endif  // CONFIG_SUEPRTX
   const int16_t *scan, *nb;
   const TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
   const scan_order *const so = get_scan(tx_size, tx_type, is_inter_block(mbmi));
@@ -713,7 +717,7 @@ void vp10_tokenize_sb_supertx(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   TOKENEXTRA *t_backup = *t;
   const int ctx = vp10_get_skip_context(xd);
-  const int skip_inc = !segfeature_active(&cm->seg, mbmi->segment_id,
+  const int skip_inc = !segfeature_active(&cm->seg, mbmi->segment_id_supertx,
                                           SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, td, t};
   if (mbmi->skip) {
