@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3406a1d0_f6f5995e",
+        "filename": "vp10/common/vp10_rtcd_defs.pl",
+        "patchSetId": 5
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-06-16T18:31:40Z",
+      "side": 1,
+      "message": "I think this one doesn\u0027t have to under CONFIG_EXT_INTERP since the c function is not under the CONFIG_EXT_INTERP too.",
+      "range": {
+        "startLine": 90,
+        "startChar": 16,
+        "endLine": 90,
+        "endChar": 33
+      },
+      "revId": "a43baf8fec18c09ebec0e360da091d8cd4dfb19c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3406a1d0_d6521525",
+        "filename": "vp10/common/x86/vp10_convolve_filters_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-06-16T18:31:40Z",
+      "side": 1,
+      "message": "Are you creating this file because the filters in filter.c are int16_t type?",
+      "range": {
+        "startLine": 15,
+        "startChar": 4,
+        "endLine": 15,
+        "endChar": 43
+      },
+      "revId": "a43baf8fec18c09ebec0e360da091d8cd4dfb19c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
