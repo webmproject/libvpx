@@ -275,7 +275,7 @@ void vpx_comp_avg_pred_c(uint8_t *comp_pred, const uint8_t *pred,
 #if CONFIG_VP9_HIGHBITDEPTH
 static void highbd_variance64(const uint8_t *a8, int  a_stride,
                               const uint8_t *b8, int  b_stride,
-                              int w, int h, uint64_t *sse, uint64_t *sum) {
+                              int w, int h, uint64_t *sse, int64_t *sum) {
   int i, j;
 
   uint16_t *a = CONVERT_TO_SHORTPTR(a8);
@@ -298,7 +298,7 @@ static void highbd_8_variance(const uint8_t *a8, int  a_stride,
                               const uint8_t *b8, int  b_stride,
                               int w, int h, uint32_t *sse, int *sum) {
   uint64_t sse_long = 0;
-  uint64_t sum_long = 0;
+  int64_t sum_long = 0;
   highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
   *sse = (uint32_t)sse_long;
   *sum = (int)sum_long;
@@ -308,7 +308,7 @@ static void highbd_10_variance(const uint8_t *a8, int  a_stride,
                                const uint8_t *b8, int  b_stride,
                                int w, int h, uint32_t *sse, int *sum) {
   uint64_t sse_long = 0;
-  uint64_t sum_long = 0;
+  int64_t sum_long = 0;
   highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
   *sse = (uint32_t)ROUND_POWER_OF_TWO(sse_long, 4);
   *sum = (int)ROUND_POWER_OF_TWO(sum_long, 2);
@@ -318,7 +318,7 @@ static void highbd_12_variance(const uint8_t *a8, int  a_stride,
                                const uint8_t *b8, int  b_stride,
                                int w, int h, uint32_t *sse, int *sum) {
   uint64_t sse_long = 0;
-  uint64_t sum_long = 0;
+  int64_t sum_long = 0;
   highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
   *sse = (uint32_t)ROUND_POWER_OF_TWO(sse_long, 8);
   *sum = (int)ROUND_POWER_OF_TWO(sum_long, 4);
