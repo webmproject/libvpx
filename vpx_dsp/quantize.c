@@ -53,7 +53,7 @@ void vpx_highbd_quantize_dc(const tran_low_t *coeff_ptr,
     const int coeff_sign = (coeff >> 31);
     const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
     const int64_t tmp = abs_coeff + round_ptr[0];
-    const uint32_t abs_qcoeff = (uint32_t)((tmp * quant) >> 16);
+    const int abs_qcoeff = (int)((tmp * quant) >> 16);
     qcoeff_ptr[0] = (tran_low_t)((abs_qcoeff ^ coeff_sign) - coeff_sign);
     dqcoeff_ptr[0] = qcoeff_ptr[0] * dequant_ptr;
     if (abs_qcoeff)
@@ -109,7 +109,7 @@ void vpx_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
     const int coeff_sign = (coeff >> 31);
     const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
     const int64_t tmp = abs_coeff + ROUND_POWER_OF_TWO(round_ptr[0], 1);
-    const uint32_t abs_qcoeff = (uint32_t)((tmp * quant) >> 15);
+    const int abs_qcoeff = (int)((tmp * quant) >> 15);
     qcoeff_ptr[0] = (tran_low_t)((abs_qcoeff ^ coeff_sign) - coeff_sign);
     dqcoeff_ptr[0] = qcoeff_ptr[0] * dequant_ptr / 2;
     if (abs_qcoeff)
