@@ -94,7 +94,7 @@ void vp9_highbd_quantize_fp_c(const tran_low_t *coeff_ptr,
       const int coeff_sign = (coeff >> 31);
       const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
       const int64_t tmp = abs_coeff + round_ptr[rc != 0];
-      const uint32_t abs_qcoeff = (uint32_t)((tmp * quant_ptr[rc != 0]) >> 16);
+      const int abs_qcoeff = (int)((tmp * quant_ptr[rc != 0]) >> 16);
       qcoeff_ptr[rc] = (tran_low_t)((abs_qcoeff ^ coeff_sign) - coeff_sign);
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
       if (abs_qcoeff)
