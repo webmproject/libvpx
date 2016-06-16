@@ -1810,14 +1810,20 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
 #endif  // CONFIG_SUPERTX
       }
     } else {
-      vp10_rd_pick_inter_mode_sub8x8(cpi, tile_data, x, mi_row, mi_col, rd_cost,
+      if (segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+        // The decoder rejects sub8x8 partitions when SEG_LVL_SKIP is set.
+        rd_cost->rate = INT_MAX;
+      } else {
+        vp10_rd_pick_inter_mode_sub8x8(cpi, tile_data, x, mi_row, mi_col,
+                                       rd_cost,
 #if CONFIG_SUPERTX
-                                     totalrate_nocoef,
+                                       totalrate_nocoef,
 #endif  // CONFIG_SUPERTX
-                                     bsize, ctx, best_rd);
+                                       bsize, ctx, best_rd);
 #if CONFIG_SUPERTX
       assert(*totalrate_nocoef >= 0);
 #endif  // CONFIG_SUPERTX
+      }
     }
   }
 
