@@ -16,6 +16,24 @@
       "revId": "b0c257aa9a340e94e2653193384e7b9cc2474c2c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3406a1d0_5161f4bd",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-16T00:47:05Z",
+      "side": 1,
+      "message": "Reinstated, but the test is now turned on for speeds 6-8. Only 5 is disabled now.",
+      "parentUuid": "3406a1d0_3108c054",
+      "revId": "b0c257aa9a340e94e2653193384e7b9cc2474c2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
