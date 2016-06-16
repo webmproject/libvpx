@@ -86,7 +86,7 @@ ifeq ($(CONFIG_ENCODE_PERF_TESTS)$(CONFIG_VP9_ENCODER), yesyes)
 LIBVPX_TEST_SRCS-yes += encode_perf_test.cc
 endif
 
-## Multi-codec / unconditional whitebox tests.
+## Multi-codec / unconditional black box tests.
 ifeq ($(findstring yes,$(CONFIG_VP9_ENCODER)$(CONFIG_VP10_ENCODER)),yes)
 LIBVPX_TEST_SRCS-yes += active_map_refresh_test.cc
 LIBVPX_TEST_SRCS-yes += active_map_test.cc
