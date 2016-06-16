@@ -5222,7 +5222,7 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
         vp8_second_pass(cpi);
 
     encode_frame_to_data_rate(cpi, size, dest, dest_end, frame_flags);
-    cpi->twopass.bits_left -= 8 * *size;
+    cpi->twopass.bits_left -= 8 * (int)(*size);
 
     if (!cpi->common.refresh_alt_ref_frame)
     {
