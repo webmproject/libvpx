@@ -65,32 +65,41 @@ class ActiveMapTest
     }
   }
 
+  void DoTest() {
+    // Validate that this non multiple of 64 wide clip encodes
+    cfg_.g_lag_in_frames = 0;
+    cfg_.rc_target_bitrate = 400;
+    cfg_.rc_resize_allowed = 0;
+    cfg_.g_pass = VPX_RC_ONE_PASS;
+    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.kf_max_dist = 90000;
+    ::libvpx_test::I420VideoSource video("hantro_odd.yuv", kWidth, kHeight, 30,
+                                         1, 0, 20);
+
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  }
+
   int cpu_used_;
 };
 
 TEST_P(ActiveMapTest, Test) {
-  // Validate that this non multiple of 64 wide clip encodes
-  cfg_.g_lag_in_frames = 0;
-  cfg_.rc_target_bitrate = 400;
-  cfg_.rc_resize_allowed = 0;
-  cfg_.g_pass = VPX_RC_ONE_PASS;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.kf_max_dist = 90000;
+  DoTest();
+}
 
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", kWidth, kHeight, 30,
-                                       1, 0, 20);
+class ActiveMapTestLarge : public ActiveMapTest {};
 
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+TEST_P(ActiveMapTestLarge, Test) {
+  DoTest();
 }
 
 VP9_INSTANTIATE_TEST_CASE(ActiveMapTest,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(0, 9));
 #if CONFIG_VP10
-#if CONFIG_SUPERTX
-VP10_INSTANTIATE_TEST_CASE(ActiveMapTest,
+VP10_INSTANTIATE_TEST_CASE(ActiveMapTestLarge,
                            ::testing::Values(::libvpx_test::kRealTime),
                            ::testing::Range(0, 5));
+#if CONFIG_SUPERTX
 // SuperTx and ActiveMap don't get along at speed 5.
 // https://bugs.chromium.org/p/webm/issues/detail?id=1234
 INSTANTIATE_TEST_CASE_P(
@@ -102,7 +111,7 @@ INSTANTIATE_TEST_CASE_P(
 #else
 VP10_INSTANTIATE_TEST_CASE(ActiveMapTest,
                            ::testing::Values(::libvpx_test::kRealTime),
-                           ::testing::Range(0, 9));
+                           ::testing::Range(5, 9));
 #endif  // CONFIG_SUPERTX
 #endif  // CONFIG_VP10
 }  // namespace
