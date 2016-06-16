@@ -1525,14 +1525,18 @@ static PARTITION_TYPE read_partition(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 #if CONFIG_SUPERTX
-static int read_skip_without_seg(VP10_COMMON *cm, const MACROBLOCKD *xd,
-                                 vp10_reader *r) {
-  const int ctx = vp10_get_skip_context(xd);
-  const int skip = vp10_read(r, cm->fc->skip_probs[ctx]);
-  FRAME_COUNTS *counts = xd->counts;
-  if (counts)
-    ++counts->skip[ctx][skip];
-  return skip;
+static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd,
+                     int segment_id, vp10_reader *r) {
+  if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
+    return 1;
+  } else {
+    const int ctx = vp10_get_skip_context(xd);
+    const int skip = vp10_read(r, cm->fc->skip_probs[ctx]);
+    FRAME_COUNTS *counts = xd->counts;
+    if (counts)
+      ++counts->skip[ctx][skip];
+    return skip;
+  }
 }
 #endif  // CONFIG_SUPERTX
 
@@ -1777,14 +1781,15 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     int dst_stride[3], i;
     int offset = mi_row * cm->mi_stride + mi_col;
 
+    set_segment_id_supertx(cm, mi_row, mi_col, bsize);
+
     xd->mi = cm->mi_grid_visible + offset;
     xd->mi[0] = cm->mi + offset;
     set_mi_row_col(xd, tile, mi_row, num_8x8_blocks_high_lookup[bsize],
                    mi_col, num_8x8_blocks_wide_lookup[bsize],
                    cm->mi_rows, cm->mi_cols);
     set_skip_context(xd, mi_row, mi_col);
-    // Here skip is read without using any segment level feature
-    skip = read_skip_without_seg(cm, xd, r);
+    skip = read_skip(cm, xd, xd->mi[0]->mbmi.segment_id_supertx, r);
     if (skip) {
       reset_skip_context(xd, bsize);
     } else {
@@ -1808,7 +1813,6 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #endif  // CONFIG_EXT_TX
     }
 
-    set_segment_id_supertx(cm, mi_row, mi_col, bsize);
 
     vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
     for (i = 0; i < MAX_MB_PLANE; i++) {
