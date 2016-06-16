@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3406a1d0_1975de6e",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1055,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-06-16T20:30:45Z",
+      "side": 1,
+      "message": "80 col wrap",
+      "revId": "879e198ab6622d30e8469ef5a8c098c5605e9e79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3406a1d0_598f568e",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1287,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-06-16T20:30:45Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "879e198ab6622d30e8469ef5a8c098c5605e9e79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
