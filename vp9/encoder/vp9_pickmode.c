@@ -1665,8 +1665,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     if ((this_mode == NEWMV || filter_ref == SWITCHABLE) && pred_filter_search
         && (ref_frame == LAST_FRAME ||
-            (ref_frame == GOLDEN_FRAME && cpi->use_svc))
-        && (((mi->mv[0].as_mv.row | mi->mv[0].as_mv.col) & 0x07) != 0)) {
+           (ref_frame == GOLDEN_FRAME &&
+           (cpi->use_svc || cpi->oxcf.rc_mode == VPX_VBR))) &&
+           (((mi->mv[0].as_mv.row | mi->mv[0].as_mv.col) & 0x07) != 0)) {
       int pf_rate[3];
       int64_t pf_dist[3];
       unsigned int pf_var[3];
@@ -1721,7 +1722,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
       // For large partition blocks, extra testing is done.
-      if (bsize > BLOCK_32X32 &&
+      if (cpi->oxcf.rc_mode == VPX_CBR && bsize > BLOCK_32X32 &&
         !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
         cm->base_qindex) {
         model_rd_for_sb_y_large(cpi, bsize, x, xd, &this_rdc.rate,
