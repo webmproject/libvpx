@@ -1584,41 +1584,9 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
         r, cm->fc->supertx_prob[supertx_context][supertx_size]);
     if (xd->counts)
       xd->counts->supertx[supertx_context][supertx_size][supertx_enabled]++;
-  }
-  if (supertx_enabled && read_token) {
-    int offset = mi_row * cm->mi_stride + mi_col;
-    xd->mi = cm->mi_grid_visible + offset;
-    xd->mi[0] = cm->mi + offset;
-    set_mi_row_col(xd, tile, mi_row, num_8x8_blocks_high_lookup[bsize],
-                   mi_col, num_8x8_blocks_wide_lookup[bsize],
-                   cm->mi_rows, cm->mi_cols);
-    set_skip_context(xd, mi_row, mi_col);
-    // Here skip is read without using any segment level feature
-    skip = read_skip_without_seg(cm, xd, r);
-    if (skip) {
-      reset_skip_context(xd, bsize);
-    } else {
-#if CONFIG_EXT_TX
-      if (get_ext_tx_types(supertx_size, bsize, 1) > 1) {
-        int eset = get_ext_tx_set(supertx_size, bsize, 1);
-        if (eset > 0) {
-          txfm = vp10_read_tree(r, vp10_ext_tx_inter_tree[eset],
-                               cm->fc->inter_ext_tx_prob[eset][supertx_size]);
-          if (xd->counts)
-            ++xd->counts->inter_ext_tx[eset][supertx_size][txfm];
-        }
-      }
-#else
-      if (supertx_size < TX_32X32) {
-        txfm = vp10_read_tree(r, vp10_ext_tx_tree,
-                             cm->fc->inter_ext_tx_prob[supertx_size]);
-        if (xd->counts)
-          ++xd->counts->inter_ext_tx[supertx_size][txfm];
-      }
-#endif  // CONFIG_EXT_TX
-    }
 #if CONFIG_VAR_TX
-    xd->supertx_size = supertx_size;
+    if (supertx_enabled)
+      xd->supertx_size = supertx_size;
 #endif
   }
 #endif  // CONFIG_SUPERTX
@@ -1807,6 +1775,38 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   if (supertx_enabled && read_token) {
     uint8_t *dst_buf[3];
     int dst_stride[3], i;
+    int offset = mi_row * cm->mi_stride + mi_col;
+
+    xd->mi = cm->mi_grid_visible + offset;
+    xd->mi[0] = cm->mi + offset;
+    set_mi_row_col(xd, tile, mi_row, num_8x8_blocks_high_lookup[bsize],
+                   mi_col, num_8x8_blocks_wide_lookup[bsize],
+                   cm->mi_rows, cm->mi_cols);
+    set_skip_context(xd, mi_row, mi_col);
+    // Here skip is read without using any segment level feature
+    skip = read_skip_without_seg(cm, xd, r);
+    if (skip) {
+      reset_skip_context(xd, bsize);
+    } else {
+#if CONFIG_EXT_TX
+      if (get_ext_tx_types(supertx_size, bsize, 1) > 1) {
+        int eset = get_ext_tx_set(supertx_size, bsize, 1);
+        if (eset > 0) {
+          txfm = vp10_read_tree(r, vp10_ext_tx_inter_tree[eset],
+                               cm->fc->inter_ext_tx_prob[eset][supertx_size]);
+          if (xd->counts)
+            ++xd->counts->inter_ext_tx[eset][supertx_size][txfm];
+        }
+      }
+#else
+      if (supertx_size < TX_32X32) {
+        txfm = vp10_read_tree(r, vp10_ext_tx_tree,
+                             cm->fc->inter_ext_tx_prob[supertx_size]);
+        if (xd->counts)
+          ++xd->counts->inter_ext_tx[supertx_size][txfm];
+      }
+#endif  // CONFIG_EXT_TX
+    }
 
     set_segment_id_supertx(cm, mi_row, mi_col, bsize);
 

@@ -1773,28 +1773,6 @@ static void write_modes_sb(VP10_COMP *const cpi,
                                [supertx_size];
     supertx_enabled = (xd->mi[0]->mbmi.tx_size == supertx_size);
     vp10_write(w, supertx_enabled, prob);
-    if (supertx_enabled) {
-      vp10_write(w, xd->mi[0]->mbmi.skip, vp10_get_skip_prob(cm, xd));
-#if CONFIG_EXT_TX
-      if (get_ext_tx_types(supertx_size, bsize, 1) > 1 &&
-          !xd->mi[0]->mbmi.skip) {
-        int eset = get_ext_tx_set(supertx_size, bsize, 1);
-        if (eset > 0) {
-          vp10_write_token(
-              w, vp10_ext_tx_inter_tree[eset],
-              cm->fc->inter_ext_tx_prob[eset][supertx_size],
-              &ext_tx_inter_encodings[eset][xd->mi[0]->mbmi.tx_type]);
-        }
-      }
-#else
-      if (supertx_size < TX_32X32 && !xd->mi[0]->mbmi.skip) {
-        vp10_write_token(
-            w, vp10_ext_tx_tree,
-            cm->fc->inter_ext_tx_prob[supertx_size],
-            &ext_tx_encodings[xd->mi[0]->mbmi.tx_type]);
-      }
-#endif  // CONFIG_EXT_TX
-    }
   }
 #endif  // CONFIG_SUPERTX
   if (subsize < BLOCK_8X8) {
@@ -1869,24 +1847,52 @@ static void write_modes_sb(VP10_COMP *const cpi,
     }
   }
 #if CONFIG_SUPERTX
-  if (partition != PARTITION_NONE && supertx_enabled && pack_token &&
-      !mbmi->skip) {
-    assert(*tok < tok_end);
-    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-      const int mbmi_txb_size = txsize_to_bsize[mbmi->tx_size];
-      const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi_txb_size];
-      const int num_4x4_h = num_4x4_blocks_high_lookup[mbmi_txb_size];
-      int row, col;
-      TX_SIZE tx = plane ? get_uv_tx_size(mbmi, &xd->plane[plane])
-                         : mbmi->tx_size;
-      BLOCK_SIZE txb_size = txsize_to_bsize[tx];
-      int bw = num_4x4_blocks_wide_lookup[txb_size];
+  if (partition != PARTITION_NONE && supertx_enabled && pack_token) {
+    xd->mi = cm->mi_grid_visible + mi_offset;
+    supertx_size = mbmi->tx_size;
+    set_mi_row_col(xd, tile,
+                   mi_row, num_8x8_blocks_high_lookup[bsize],
+                   mi_col, num_8x8_blocks_wide_lookup[bsize],
+                   cm->mi_rows, cm->mi_cols);
+    vp10_write(w, mbmi->skip, vp10_get_skip_prob(cm, xd));
+#if CONFIG_EXT_TX
+    if (get_ext_tx_types(supertx_size, bsize, 1) > 1 &&
+        !mbmi->skip) {
+      int eset = get_ext_tx_set(supertx_size, bsize, 1);
+      if (eset > 0) {
+        vp10_write_token(
+            w, vp10_ext_tx_inter_tree[eset],
+            cm->fc->inter_ext_tx_prob[eset][supertx_size],
+            &ext_tx_inter_encodings[eset][mbmi->tx_type]);
+      }
+    }
+#else
+    if (supertx_size < TX_32X32 && !mbmi->skip) {
+      vp10_write_token(
+          w, vp10_ext_tx_tree,
+          cm->fc->inter_ext_tx_prob[supertx_size],
+          &ext_tx_encodings[mbmi->tx_type]);
+    }
+#endif  // CONFIG_EXT_TX
 
-      for (row = 0; row < num_4x4_h; row += bw)
-        for (col = 0; col < num_4x4_w; col += bw)
-          pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
-      assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
-      (*tok)++;
+    if (!mbmi->skip) {
+      assert(*tok < tok_end);
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        const int mbmi_txb_size = txsize_to_bsize[mbmi->tx_size];
+        const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi_txb_size];
+        const int num_4x4_h = num_4x4_blocks_high_lookup[mbmi_txb_size];
+        int row, col;
+        TX_SIZE tx = plane ? get_uv_tx_size(mbmi, &xd->plane[plane])
+                           : mbmi->tx_size;
+        BLOCK_SIZE txb_size = txsize_to_bsize[tx];
+        int bw = num_4x4_blocks_wide_lookup[txb_size];
+
+        for (row = 0; row < num_4x4_h; row += bw)
+          for (col = 0; col < num_4x4_w; col += bw)
+            pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
+        assert(*tok < tok_end && (*tok)->token == EOSB_TOKEN);
+        (*tok)++;
+      }
     }
   }
 #endif  // CONFIG_SUPERTX
