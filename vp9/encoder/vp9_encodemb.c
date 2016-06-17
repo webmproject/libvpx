@@ -54,9 +54,10 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   (((1 << (VP9_PROB_COST_SHIFT - 1)) + (R) * (RM)) & \
    ((1 << VP9_PROB_COST_SHIFT) - 1))
 
+// TODO(aconverse): Re-pack this structure.
 typedef struct vp9_token_state {
   int           rate;
-  int           error;
+  int64_t       error;
   int           next;
   int16_t       token;
   tran_low_t    qc;
@@ -112,7 +113,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int64_t rdmult = (mb->rdmult * plane_rd_mult[ref][type]) >> 1;
   const int64_t rddiv = mb->rddiv;
   int64_t rd_cost0, rd_cost1;
-  int rate0, rate1, error0, error1;
+  int rate0, rate1;
+  int64_t error0, error1;
   int16_t t0, t1;
   EXTRABIT e0;
   int best, band, pt, i, final_eob;
