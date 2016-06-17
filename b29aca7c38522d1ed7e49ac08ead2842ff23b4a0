@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2991e80d_9f01f333",
+        "filename": "test/realtime_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-17T06:00:54Z",
+      "side": 1,
+      "message": "that happens at test invocation, not sure you need to reset here",
+      "revId": "b29aca7c38522d1ed7e49ac08ead2842ff23b4a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
