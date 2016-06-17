@@ -540,22 +540,20 @@ process_common_cmdline() {
         ;;
       --enable-?*|--disable-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
-        if echo "${ARCH_EXT_LIST}" | grep "^ *$option\$" >/dev/null; then
+        if is_in ${option} ${ARCH_EXT_LIST}; then
           [ $action = "disable" ] && RTCD_OPTIONS="${RTCD_OPTIONS}--disable-${option} "
         elif [ $action = "disable" ] && ! disabled $option ; then
-          echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
-            die_unknown $opt
+          is_in ${option} ${CMDLINE_SELECT} || die_unknown $opt
           log_echo "  disabling $option"
         elif [ $action = "enable" ] && ! enabled $option ; then
-          echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
-            die_unknown $opt
+          is_in ${option} ${CMDLINE_SELECT} || die_unknown $opt
           log_echo "  enabling $option"
         fi
         ${action}_feature $option
         ;;
       --require-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
-        if echo "${ARCH_EXT_LIST}" none | grep "^ *$option\$" >/dev/null; then
+        if is_in ${option} ${ARCH_EXT_LIST}; then
             RTCD_OPTIONS="${RTCD_OPTIONS}${opt} "
         else
             die_unknown $opt
