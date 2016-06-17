@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9bdd8cb_b326385e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-17T19:08:28Z",
+      "side": 1,
+      "message": "within the same repo, cherry-pick -x can be helpful to document the origin of a change",
+      "revId": "d1e210a9a13f0e2a42fdaa34fae0050a0db26f0e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
