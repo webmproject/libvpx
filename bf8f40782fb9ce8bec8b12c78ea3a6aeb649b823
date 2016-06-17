@@ -16,6 +16,41 @@
       "revId": "bf8f40782fb9ce8bec8b12c78ea3a6aeb649b823",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9bdd8cb_56eeb294",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-06-17T19:42:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9bdd8cb_f31270a2",
+      "revId": "bf8f40782fb9ce8bec8b12c78ea3a6aeb649b823",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9bdd8cb_76f3ae77",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 1140,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-06-17T19:42:27Z",
+      "side": 1,
+      "message": "fixed this",
+      "revId": "bf8f40782fb9ce8bec8b12c78ea3a6aeb649b823",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
