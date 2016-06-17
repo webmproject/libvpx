@@ -50,11 +50,10 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
                      pd->dst.buf, pd->dst.stride);
 }
 
-// TODO(aconverse): Re-pack this structure.
 typedef struct vp9_token_state {
-  int           rate;
   int64_t       error;
-  int           next;
+  int           rate;
+  int16_t       next;
   int16_t       token;
   tran_low_t    qc;
   tran_low_t    dqc;
