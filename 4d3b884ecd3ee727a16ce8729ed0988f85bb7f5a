@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9bdd8cb_3626961c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-17T19:28:48Z",
+      "side": 1,
+      "message": "add BUG\u003dwebm:1234",
+      "revId": "4d3b884ecd3ee727a16ce8729ed0988f85bb7f5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
