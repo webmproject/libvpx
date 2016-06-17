@@ -16,6 +16,24 @@
       "revId": "75319f36ff7d563571f45c1a9ed43949a11605ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09534428_2078b6aa",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 866,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-06-17T17:06:01Z",
+      "side": 1,
+      "message": "yeah, moved it there. kinda sucks that you see enabled neon followed by disabled neon: upgrade Xcode, but I think this would have triggered on non-darwin arm targets the way it was (because no xcodebuild)",
+      "parentUuid": "09534428_a63846e1",
+      "revId": "75319f36ff7d563571f45c1a9ed43949a11605ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
