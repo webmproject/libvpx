@@ -22,6 +22,30 @@
       "revId": "37bf29b916c65e189a7bad0f1972af9365a3ad19",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09534428_2021d6a8",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-06-17T17:15:09Z",
+      "side": 0,
+      "message": "The current node is indexed (idx - 1). It updates the current token to compute the context for (idx).\n\nThe value of (idx - 1) will not be used by next node, i.e., (idx - 2), due to causality.\n\nThe coding statistics remain identical before/after this CL.",
+      "parentUuid": "09534428_c08682c2",
+      "range": {
+        "startLine": 77,
+        "startChar": 11,
+        "endLine": 77,
+        "endChar": 36
+      },
+      "revId": "37bf29b916c65e189a7bad0f1972af9365a3ad19",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
