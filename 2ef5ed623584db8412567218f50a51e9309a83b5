@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9bdd8cb_f3d190ff",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-17T18:15:28Z",
+      "side": 1,
+      "message": "bring this to its own line since you were forced to break it",
+      "range": {
+        "startLine": 394,
+        "startChar": 25,
+        "endLine": 394,
+        "endChar": 34
+      },
+      "revId": "2ef5ed623584db8412567218f50a51e9309a83b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
