@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "09534428_80cd2a3f",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-17T16:51:27Z",
+      "side": 1,
+      "message": "undefined in this file",
+      "parentUuid": "2991e80d_bfb0779f",
+      "revId": "d70e35d0c43448a4a91e56cba6ba21f0e02a6826",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2991e80d_5f692be3",
         "filename": "configure",
         "patchSetId": 3
