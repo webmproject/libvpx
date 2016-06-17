@@ -22,6 +22,30 @@
       "revId": "2ef5ed623584db8412567218f50a51e9309a83b5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9bdd8cb_f9e7afb7",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-17T21:05:31Z",
+      "side": 1,
+      "message": "ah, i only moved down the ;;, style seemed to keep that on it\u0027s own line in general. done.",
+      "parentUuid": "a9bdd8cb_f3d190ff",
+      "range": {
+        "startLine": 394,
+        "startChar": 25,
+        "endLine": 394,
+        "endChar": 34
+      },
+      "revId": "2ef5ed623584db8412567218f50a51e9309a83b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
