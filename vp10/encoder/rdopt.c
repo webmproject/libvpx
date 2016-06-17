@@ -9668,6 +9668,12 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
     if (is_inter_mode(mbmi->mode)) {
       vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+#if CONFIG_OBMC
+      if (mbmi->motion_variation == OBMC_CAUSAL)
+        vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0, NULL, NULL,
+                                         dst_buf1, dst_stride1,
+                                         dst_buf2, dst_stride2);
+#endif  // CONFIG_OBMC
       vp10_subtract_plane(x, bsize, 0);
 #if CONFIG_VAR_TX
       if (cm->tx_mode == TX_MODE_SELECT || xd->lossless[mbmi->segment_id]) {
