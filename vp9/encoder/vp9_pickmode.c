@@ -1037,7 +1037,7 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   // Change the limit of this loop to add other intra prediction
   // mode tests.
   for (this_mode = DC_PRED; this_mode <= H_PRED; ++this_mode) {
-    this_rdc.rate = this_rdc.dist = 0;
+    this_rdc.dist = this_rdc.rate = 0;
     args.mode = this_mode;
     args.skippable = 1;
     args.rdc = &this_rdc;
@@ -1921,7 +1921,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       mi->mode = this_mode;
       mi->ref_frame[0] = INTRA_FRAME;
-      this_rdc.rate = this_rdc.dist = 0;
+      this_rdc.dist = this_rdc.rate = 0;
       args.mode = this_mode;
       args.skippable = 1;
       args.rdc = &this_rdc;
