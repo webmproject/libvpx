@@ -468,6 +468,11 @@ static void set_vt_partitioning(VP10_COMP *cpi,
 
   assert(hbh == hbw);
 
+  if (vt->bsize == BLOCK_8X8 && cm->frame_type != KEY_FRAME) {
+    set_block_size(cpi, x, xd, mi_row, mi_col, BLOCK_8X8);
+    return;
+  }
+
   if (vt->force_split || (!has_cols && !has_rows))
     goto split;
 
