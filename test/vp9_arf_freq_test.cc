@@ -229,24 +229,4 @@ VP9_INSTANTIATE_TEST_CASE(
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kEncodeVectors),
     ::testing::ValuesIn(kMinArfVectors));
-
-#if CONFIG_VP9_HIGHBITDEPTH
-# if CONFIG_VP10_ENCODER
-// TODO(angiebird): 25-29 fail in high bitdepth mode.
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_VP10, ArfFreqTest,
-    ::testing::Combine(
-        ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
-            &libvpx_test::kVP10)),
-        ::testing::ValuesIn(kTestVectors),
-        ::testing::ValuesIn(kEncodeVectors),
-        ::testing::ValuesIn(kMinArfVectors)));
-# endif  // CONFIG_VP10_ENCODER
-#else
-VP10_INSTANTIATE_TEST_CASE(
-    ArfFreqTest,
-    ::testing::ValuesIn(kTestVectors),
-    ::testing::ValuesIn(kEncodeVectors),
-    ::testing::ValuesIn(kMinArfVectors));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace

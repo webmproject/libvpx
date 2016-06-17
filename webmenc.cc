@@ -55,13 +55,8 @@ void write_webm_file_header(struct WebmOutputContext *webm_ctx,
     codec_id = "V_VP8";
     break;
   case VP9_FOURCC:
-    codec_id = "V_VP9";
-    break;
-  case VP10_FOURCC:
-    codec_id = "V_VP10";
-    break;
   default:
-    codec_id = "V_VP10";
+    codec_id = "V_VP9";
     break;
   }
   video_track->set_codec_id(codec_id);

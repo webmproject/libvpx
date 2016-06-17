@@ -43,15 +43,6 @@ void Encoder::InitEncoder(VideoSource *video) {
       ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
     } else
 #endif
-#if CONFIG_VP10_ENCODER
-    if (CodecInterface() == &vpx_codec_vp10_cx_algo) {
-      // Default to 1 tile column for VP10.
-      const int log2_tile_columns = 0;
-      res = vpx_codec_control_(&encoder_, VP9E_SET_TILE_COLUMNS,
-                               log2_tile_columns);
-      ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
-    } else
-#endif
     {
 #if CONFIG_VP8_ENCODER
       ASSERT_EQ(&vpx_codec_vp8_cx_algo, CodecInterface())

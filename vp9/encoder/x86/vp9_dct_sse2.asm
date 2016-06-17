@@ -45,7 +45,6 @@ SECTION .text
 
 INIT_XMM sse2
 cglobal fwht4x4, 3, 4, 8, input, output, stride
-; TODO(linfeng): The duplication with vp10 should be resolved.
   lea             r3q,       [inputq + strideq*4]
   movq            m0,        [inputq] ;a1
   movq            m1,        [inputq + strideq*2] ;b1

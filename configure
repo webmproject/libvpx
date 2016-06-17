@@ -40,7 +40,6 @@ Advanced options:
                                   hardware decoder compatibility
   ${toggle_vp8}                   VP8 codec support
   ${toggle_vp9}                   VP9 codec support
-  ${toggle_vp10}                  VP10 codec support
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_postproc}              postprocessing
   ${toggle_vp9_postproc}          vp9 specific postprocessing
@@ -197,10 +196,6 @@ fi
 # disable codecs when their source directory does not exist
 [ -d "${source_path}/vp8" ] || disable_codec vp8
 [ -d "${source_path}/vp9" ] || disable_codec vp9
-[ -d "${source_path}/vp10" ] || disable_codec vp10
-
-# disable vp10 codec by default
-disable_codec vp10
 
 # install everything except the sources, by default. sources will have
 # to be enabled when doing dist builds, since that's no longer a common
@@ -222,13 +217,10 @@ CODECS="
     vp8_decoder
     vp9_encoder
     vp9_decoder
-    vp10_encoder
-    vp10_decoder
 "
 CODEC_FAMILIES="
     vp8
     vp9
-    vp10
 "
 
 ARCH_LIST="

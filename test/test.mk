@@ -142,6 +142,7 @@ LIBVPX_TEST_SRCS-yes                   += lpf_8_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_decrypt_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_thread_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += avg_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct32x32_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
@@ -166,19 +167,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_arf_freq_test.cc
 
 endif # VP9
 
-## VP10
-ifeq ($(CONFIG_VP10),yes)
-
-LIBVPX_TEST_SRCS-yes                    += vp10_inv_txfm_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_dct_test.cc
-
-endif # VP10
-
 ## Multi-codec / unconditional whitebox tests.
-
-ifeq ($(findstring yes,$(CONFIG_VP9_ENCODER)$(CONFIG_VP10_ENCODER)),yes)
-LIBVPX_TEST_SRCS-yes += avg_test.cc
-endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
 
