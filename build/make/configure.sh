@@ -185,6 +185,25 @@ add_extralibs() {
 #
 # Boolean Manipulation Functions
 #
+
+enable_codec(){
+  enabled $1 || echo "  enabling $1"
+  set_all yes $1
+
+  is_in $1 vp8 vp9 vp10 && \
+    set_all yes $1_encoder && \
+    set_all yes $1_decoder
+}
+
+disable_codec(){
+  disabled $1 || echo "  disabling $1"
+  set_all no $1
+
+  is_in $1 vp8 vp9 vp10 && \
+    set_all no $1_encoder && \
+    set_all no $1_decoder
+}
+
 enable_feature(){
   set_all yes $*
 }
