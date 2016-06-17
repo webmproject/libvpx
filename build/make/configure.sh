@@ -751,13 +751,14 @@ process_common_toolchain() {
   enabled shared && soft_enable pic
 
   # Minimum iOS version for all target platforms (darwin and iphonesimulator).
+  # Shared library framework builds are only possible on iOS 8 and later.
   if enabled shared; then
     IOS_VERSION_OPTIONS="--enable-shared"
+    IOS_VERSION_MIN="8.0"
   else
     IOS_VERSION_OPTIONS=""
+    IOS_VERSION_MIN="6.0"
   fi
-  IOS_VERSION_MIN=$("${source_path}/build/make/ios-version.sh" \
-    ${IOS_VERSION_OPTIONS})
 
   # Handle darwin variants. Newer SDKs allow targeting older
   # platforms, so use the newest one available.
