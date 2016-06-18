@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "292488f2_a71b6ac2",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-18T09:59:30Z",
+      "side": 1,
+      "message": "VP10_INSTANTIATE_TEST_CASE is defined as a no op if CONFIG_VP10 is not defined, so it is not necessary. See test/codec_factory.h:344",
+      "parentUuid": "a9bdd8cb_c7b68e9d",
+      "revId": "7172e97abed64bf9c5cfc62c964cef9369efcab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9bdd8cb_e7b38aaa",
         "filename": "test/active_map_test.cc",
         "patchSetId": 3
