@@ -50,10 +50,6 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
                      pd->dst.buf, pd->dst.stride);
 }
 
-#define RDTRUNC(RM, DM, R, D)                        \
-  (((1 << (VP9_PROB_COST_SHIFT - 1)) + (R) * (RM)) & \
-   ((1 << VP9_PROB_COST_SHIFT) - 1))
-
 // TODO(aconverse): Re-pack this structure.
 typedef struct vp9_token_state {
   int           rate;
@@ -69,10 +65,6 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] ={ {10, 6}, {8, 7}, };
 {\
   rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);\
   rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
-  if (rd_cost0 == rd_cost1) {\
-    rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);\
-    rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);\
-  }\
 }
 
 // This function is a place holder for now but may ultimately need
@@ -103,7 +95,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int eob = p->eobs[block];
   const PLANE_TYPE type = get_plane_type(plane);
   const int default_eob = 16 << (tx_size << 1);
-  const int mul = 1 + (tx_size == TX_32X32);
+  int shift = (tx_size == TX_32X32);
   const int16_t *dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
   const scan_order *const so = get_scan(xd, tx_size, type, block);
@@ -166,7 +158,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
       base_bits = vp9_get_cost(t0, e0, cat6_high_cost);
-      dx = mul * (dqcoeff[rc] - coeff[rc]);
+      dx = (dqcoeff[rc] - coeff[rc]) * (1 << shift);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx >>= xd->bd - 8;
@@ -184,8 +176,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
 
-      if ((abs(x) * dequant_ptr[rc != 0] > abs(coeff[rc]) * mul) &&
-          (abs(x) * dequant_ptr[rc != 0] < abs(coeff[rc]) * mul +
+      if ((abs(x) * dequant_ptr[rc != 0] > (abs(coeff[rc]) << shift)) &&
+          (abs(x) * dequant_ptr[rc != 0] < (abs(coeff[rc]) << shift) +
                                                dequant_ptr[rc != 0]))
         shortcut = 1;
       else
@@ -194,6 +186,11 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       if (shortcut) {
         sz = -(x < 0);
         x -= 2 * sz + 1;
+      } else {
+        tokens[i][1] = tokens[i][0];
+        best_index[i][1] = best_index[i][0];
+        next = i;
+        continue;
       }
 
       /* Consider both possible successor states. */
@@ -293,7 +290,9 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
     }
 
     qcoeff[rc] = x;
-    dqcoeff[rc] = (x * dequant_ptr[rc != 0]) / mul;
+    dqcoeff[rc] = abs(x * dequant_ptr[rc != 0]) >> shift;
+    if (x < 0)
+      dqcoeff[rc] = -dqcoeff[rc];
 
     next = tokens[i][best].next;
     best = best_index[i][best];
