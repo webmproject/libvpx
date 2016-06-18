@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9bdd8cb_c7b68e9d",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-06-18T00:32:07Z",
+      "side": 1,
+      "message": "Keep #if CONFIG_VP10",
+      "revId": "7172e97abed64bf9c5cfc62c964cef9369efcab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9bdd8cb_e7b38aaa",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-06-18T00:32:07Z",
+      "side": 1,
+      "message": "keep #endif  // CONFIG_VP10",
+      "revId": "7172e97abed64bf9c5cfc62c964cef9369efcab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
