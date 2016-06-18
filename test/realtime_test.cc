@@ -24,7 +24,7 @@ class RealtimeTest
       public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   RealtimeTest()
-      : EncoderTest(GET_PARAM(0)), num_decoded_(0), frame_packets_(0) {}
+      : EncoderTest(GET_PARAM(0)), frame_packets_(0) {}
   virtual ~RealtimeTest() {}
 
   virtual void SetUp() {
@@ -44,18 +44,7 @@ class RealtimeTest
   virtual void FramePktHook(const vpx_codec_cx_pkt_t * /*pkt*/) {
     frame_packets_++;
   }
-  virtual void DecompressedFrameHook(const vpx_image_t & /*img*/,
-                                     vpx_codec_pts_t /*pts*/) {
-    num_decoded_++;
-  }
-  virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
-                                  const libvpx_test::VideoSource & /*video*/,
-                                  libvpx_test::Decoder *decoder) {
-    EXPECT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
-    return !::testing::Test::HasFailure();
-  }
 
-  int num_decoded_;
   int frame_packets_;
 };
 
@@ -64,7 +53,6 @@ TEST_P(RealtimeTest, RealtimeFirstPassProducesFrames) {
   video.SetSize(kVideoSourceWidth, kVideoSourceHeight);
   video.set_limit(kFramesToEncode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  EXPECT_EQ(kFramesToEncode, num_decoded_);
   EXPECT_EQ(kFramesToEncode, frame_packets_);
 }
 
