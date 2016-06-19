@@ -347,10 +347,11 @@ VERSION=$(echo "${FULLVERSION}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
 
 if [ "$ENABLE_SHARED" = "yes" ]; then
   IOS_VERSION_OPTIONS="--enable-shared"
+  IOS_VERSION_MIN="8.0"
 else
   IOS_VERSION_OPTIONS=""
+  IOS_VERSION_MIN="6.0"
 fi
-IOS_VERSION_MIN=$("${SCRIPT_DIR}/ios-version.sh" ${IOS_VERSION_OPTIONS})
 
 if [ "${VERBOSE}" = "yes" ]; then
 cat << EOF
