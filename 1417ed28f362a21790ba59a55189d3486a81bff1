@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9f6b89b_ee47ff8c",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-19T23:54:07Z",
+      "side": 0,
+      "message": "Heh, comment no longer needs to be fixed",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 68
+      },
+      "revId": "1417ed28f362a21790ba59a55189d3486a81bff1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
