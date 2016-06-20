@@ -131,6 +131,8 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
                    mb->token_costs[tx_size][type][ref];
   const int16_t *band_counts = &band_count_table[tx_size][band];
   int16_t band_left = eob - band_cum_count_table[tx_size][band] + 1;
+  int shortcut = 0;
+  int next_shortcut = 0;
 
   token_costs += band;
 
@@ -148,33 +150,42 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
 
   for (i = 0; i < eob; i++) {
     const int rc = scan[i];
-    token_cache[rc] = vp10_pt_energy_class[vp10_get_token(qcoeff[rc])];
+    tokens[i][0].rate = vp10_get_token_cost(qcoeff[rc], &t0, cat6_high_cost);
+    tokens[i][0].token = t0;
+    token_cache[rc] = vp10_pt_energy_class[t0];
   }
 
   for (i = eob; i-- > 0;) {
     int base_bits, d2, dx;
     const int rc = scan[i];
     int x = qcoeff[rc];
+    next_shortcut = shortcut;
 
     /* Only add a trellis state for non-zero coefficients. */
     if (x) {
-      int shortcut = 0;
       error0 = tokens[next][0].error;
       error1 = tokens[next][1].error;
       /* Evaluate the first possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
 
-      base_bits = vp10_get_token_cost(x, &t0, cat6_high_cost);
-      /* Consider both possible successor states. */
-      if (next < default_eob) {
-        pt = get_coef_context(nb, token_cache, i + 1);
-        rate0 += (*token_costs)[0][pt][tokens[next][0].token];
-        rate1 += (*token_costs)[0][pt][tokens[next][1].token];
+      if (next_shortcut) {
+        /* Consider both possible successor states. */
+        if (next < default_eob) {
+          pt = get_coef_context(nb, token_cache, i + 1);
+          rate0 += (*token_costs)[0][pt][tokens[next][0].token];
+          rate1 += (*token_costs)[0][pt][tokens[next][1].token];
+        }
+        UPDATE_RD_COST();
+        /* And pick the best. */
+        best = rd_cost1 < rd_cost0;
+      } else {
+        if (next < default_eob) {
+          pt = get_coef_context(nb, token_cache, i + 1);
+          rate0 += (*token_costs)[0][pt][tokens[next][0].token];
+        }
+        best = 0;
       }
-      UPDATE_RD_COST();
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
 
       dx = (dqcoeff[rc] - coeff[rc]) * (1 << shift);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -183,10 +194,9 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       d2 = dx * dx;
-      tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
+      tokens[i][0].rate += (best ? rate1 : rate0);
       tokens[i][0].error = d2 + (best ? error1 : error0);
       tokens[i][0].next = next;
-      tokens[i][0].token = t0;
       tokens[i][0].qc = x;
       tokens[i][0].dqc = dqcoeff[rc];
       best_index[i][0] = best;
@@ -240,22 +250,33 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
         base_bits = vp10_get_token_cost(x, &t0, cat6_high_cost);
         t1 = t0;
       }
-      if (next < default_eob) {
-        if (t0 != EOB_TOKEN) {
+
+      if (next_shortcut) {
+        if (next < default_eob) {
+          if (t0 != EOB_TOKEN) {
+            token_cache[rc] = vp10_pt_energy_class[t0];
+            pt = get_coef_context(nb, token_cache, i + 1);
+            rate0 += (*token_costs)[!x][pt][tokens[next][0].token];
+          }
+          if (t1 != EOB_TOKEN) {
+            token_cache[rc] = vp10_pt_energy_class[t1];
+            pt = get_coef_context(nb, token_cache, i + 1);
+            rate1 += (*token_costs)[!x][pt][tokens[next][1].token];
+          }
+        }
+
+        UPDATE_RD_COST();
+        /* And pick the best. */
+        best = rd_cost1 < rd_cost0;
+      } else {
+        // The two states in next stage are identical.
+        if (next < default_eob && t0 != EOB_TOKEN) {
           token_cache[rc] = vp10_pt_energy_class[t0];
           pt = get_coef_context(nb, token_cache, i + 1);
           rate0 += (*token_costs)[!x][pt][tokens[next][0].token];
         }
-        if (t1 != EOB_TOKEN) {
-          token_cache[rc] = vp10_pt_energy_class[t1];
-          pt = get_coef_context(nb, token_cache, i + 1);
-          rate1 += (*token_costs)[!x][pt][tokens[next][1].token];
-        }
+        best = 0;
       }
-
-      UPDATE_RD_COST();
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
 
       if (shortcut) {
 #if CONFIG_NEW_QUANT
@@ -323,6 +344,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
         tokens[next][1].token = ZERO_TOKEN;
       }
       best_index[i][0] = best_index[i][1] = 0;
+      shortcut = (tokens[next][0].rate != tokens[next][1].rate);
       /* Don't update next, because we didn't add a new node. */
     }
 
