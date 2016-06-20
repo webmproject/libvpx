@@ -158,8 +158,8 @@ void vpx_idct4x4_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   const __m128i zero = _mm_setzero_si128();
   int a;
 
-  a = dct_const_round_shift(input[0] * cospi_16_64);
-  a = dct_const_round_shift(a * cospi_16_64);
+  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
+  a = (int)dct_const_round_shift(a * cospi_16_64);
   a = ROUND_POWER_OF_TWO(a, 4);
 
   dc_value = _mm_set1_epi16(a);
@@ -527,8 +527,8 @@ void vpx_idct8x8_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   const __m128i zero = _mm_setzero_si128();
   int a;
 
-  a = dct_const_round_shift(input[0] * cospi_16_64);
-  a = dct_const_round_shift(a * cospi_16_64);
+  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
+  a = (int)dct_const_round_shift(a * cospi_16_64);
   a = ROUND_POWER_OF_TWO(a, 5);
 
   dc_value = _mm_set1_epi16(a);
@@ -1305,8 +1305,8 @@ void vpx_idct16x16_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   const __m128i zero = _mm_setzero_si128();
   int a, i;
 
-  a = dct_const_round_shift(input[0] * cospi_16_64);
-  a = dct_const_round_shift(a * cospi_16_64);
+  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
+  a = (int)dct_const_round_shift(a * cospi_16_64);
   a = ROUND_POWER_OF_TWO(a, 6);
 
   dc_value = _mm_set1_epi16(a);
@@ -3462,8 +3462,8 @@ void vpx_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   const __m128i zero = _mm_setzero_si128();
   int a, j;
 
-  a = dct_const_round_shift(input[0] * cospi_16_64);
-  a = dct_const_round_shift(a * cospi_16_64);
+  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
+  a = (int)dct_const_round_shift(a * cospi_16_64);
   a = ROUND_POWER_OF_TWO(a, 6);
 
   dc_value = _mm_set1_epi16(a);
