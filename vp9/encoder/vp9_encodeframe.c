@@ -134,7 +134,7 @@ unsigned int vp9_high_get_sby_perpixel_variance(
                                0, &sse);
       break;
   }
-  return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
+  return ROUND_POWER_OF_TWO((int64_t)var, num_pels_log2_lookup[bs]);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
