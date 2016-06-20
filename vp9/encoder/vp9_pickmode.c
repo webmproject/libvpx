@@ -157,7 +157,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   const int ref = mi->ref_frame[0];
   const MV ref_mv = x->mbmi_ext->ref_mvs[ref][0].as_mv;
   MV center_mv;
-  int dis;
+  uint32_t dis;
   int rate_mode;
   const int tmp_col_min = x->mv_col_min;
   const int tmp_col_max = x->mv_col_max;
@@ -1564,7 +1564,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           !cpi->use_svc &&
           cpi->oxcf.rc_mode == VPX_CBR) {
         int tmp_sad;
-        int dis, cost_list[5];
+        uint32_t dis;
+        int cost_list[5];
 
         if (bsize < BLOCK_16X16)
           continue;
@@ -2175,7 +2176,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             const int tmp_col_max = x->mv_col_max;
             const int tmp_row_min = x->mv_row_min;
             const int tmp_row_max = x->mv_row_max;
-            int dummy_dist;
+            uint32_t dummy_dist;
 
             if (i == 0) {
               mvp_full.row = b_mv[NEARESTMV].as_mv.row >> 3;
