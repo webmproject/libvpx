@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a97a3831_80bb4426",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-20T23:55:06Z",
+      "side": 1,
+      "message": "It\u0027s not necessary to define a variable here; can use qcoeff[rc] directly in the next line.",
+      "range": {
+        "startLine": 153,
+        "startChar": 4,
+        "endLine": 153,
+        "endChar": 23
+      },
+      "revId": "1a767ccc7bb3849ca9d2f461bb51b28a6777897e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a97a3831_f7cc4b42",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-20T23:55:06Z",
+      "side": 1,
+      "message": "rate1 will not be used as best is always 0 in this path.",
+      "range": {
+        "startLine": 187,
+        "startChar": 10,
+        "endLine": 187,
+        "endChar": 24
+      },
+      "revId": "1a767ccc7bb3849ca9d2f461bb51b28a6777897e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a97a3831_d7db4ff3",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-20T23:55:06Z",
+      "side": 1,
+      "message": "ditto.",
+      "range": {
+        "startLine": 281,
+        "startChar": 10,
+        "endLine": 281,
+        "endChar": 24
+      },
+      "revId": "1a767ccc7bb3849ca9d2f461bb51b28a6777897e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
