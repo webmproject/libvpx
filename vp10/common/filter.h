@@ -91,6 +91,27 @@ static INLINE int vp10_is_interpolating_filter(
   const InterpFilterParams ip = vp10_get_interp_filter_params(interp_filter);
   return (ip.filter_ptr[ip.taps / 2 - 1] == 128);
 }
+
+#if USE_TEMPORALFILTER_12TAP
+extern const int8_t sub_pel_filters_temporalfilter_12_signal_dir[15][2][16];
+extern const int8_t sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6][16];
+#endif
+
+#if CONFIG_EXT_INTERP
+extern const int8_t sub_pel_filters_12sharp_signal_dir[15][2][16];
+extern const int8_t sub_pel_filters_10sharp_signal_dir[15][2][16];
+extern const int8_t sub_pel_filters_12sharp_ver_signal_dir[15][6][16];
+extern const int8_t sub_pel_filters_10sharp_ver_signal_dir[15][6][16];
+#endif
+
+typedef const int8_t (*SubpelFilterCoeffs)[16];
+
+SubpelFilterCoeffs vp10_get_subpel_filter_signal_dir(
+    const InterpFilterParams p, int index);
+
+SubpelFilterCoeffs vp10_get_subpel_filter_ver_signal_dir(
+    const InterpFilterParams p, int index);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
