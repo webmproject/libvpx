@@ -26,6 +26,7 @@
 #include "aom_dsp/dkboolreader.h"
 #endif
 #include "aom_dsp/prob.h"
+#include "av1/common/odintrin.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -127,6 +128,19 @@ static INLINE int aom_read_symbol(aom_reader *r, const aom_cdf_prob *cdf,
 #if CONFIG_ANS
   (void)nsymbs;
   return rans_read(r, cdf);
+#else
+  (void)r;
+  (void)cdf;
+  (void)nsymbs;
+  assert(0 && "Unsupported bitreader operation");
+  return -1;
+#endif
+}
+
+static INLINE int aom_read_tree_cdf(aom_reader *r, const uint16_t *cdf,
+                                    int nsymbs) {
+#if CONFIG_DAALA_EC
+  return daala_read_tree_cdf(r, cdf, nsymbs);
 #else
   (void)r;
   (void)cdf;

@@ -66,6 +66,11 @@ static INLINE int daala_read_tree_bits(daala_reader *r,
   return -i;
 }
 
+static INLINE int daala_read_tree_cdf(daala_reader *r, const uint16_t *cdf,
+                                      int nsymbs) {
+  return od_ec_decode_cdf_q15(&r->ec, cdf, nsymbs, "aom");
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
