@@ -727,6 +727,13 @@ static void model_rd_for_sb_uv(VP9_COMP *cpi, BLOCK_SIZE plane_bsize,
   int rate;
   int64_t dist;
   int i;
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint64_t tot_var = *var_y;
+  uint64_t tot_sse = *sse_y;
+#else
+  uint32_t tot_var = *var_y;
+  uint32_t tot_sse = *sse_y;
+#endif
 
   this_rdc->rate = 0;
   this_rdc->dist = 0;
@@ -738,14 +745,14 @@ static void model_rd_for_sb_uv(VP9_COMP *cpi, BLOCK_SIZE plane_bsize,
     const uint32_t ac_quant = pd->dequant[1];
     const BLOCK_SIZE bs = plane_bsize;
     unsigned int var;
-
     if (!x->color_sensitivity[i - 1])
       continue;
 
     var = cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
                              pd->dst.buf, pd->dst.stride, &sse);
-    *var_y += var;
-    *sse_y += sse;
+    assert(sse >= var);
+    tot_var += var;
+    tot_sse += sse;
 
   #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -779,6 +786,14 @@ static void model_rd_for_sb_uv(VP9_COMP *cpi, BLOCK_SIZE plane_bsize,
     this_rdc->rate += rate;
     this_rdc->dist += dist << 4;
   }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+    *var_y = tot_var > UINT32_MAX ? UINT32_MAX : (uint32_t)tot_var;
+    *sse_y = tot_sse > UINT32_MAX ? UINT32_MAX : (uint32_t)tot_sse;
+#else
+    *var_y = tot_var;
+    *sse_y = tot_sse;
+#endif
 }
 
 static int get_pred_buffer(PRED_BUFFER *p, int len) {
