@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a97a3831_ab2f49ed",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 1359,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-06-20T16:41:59Z",
+      "side": 1,
+      "message": "I guess this statement mean Perl no longer generates the prototype declaration, vpx_high_10_sub_pixel_variance4x4_sse4_1. Is it correct?",
+      "range": {
+        "startLine": 1359,
+        "startChar": 2,
+        "endLine": 1359,
+        "endChar": 45
+      },
+      "revId": "d0de89a12a85657d8e3d982ad0841880aa0b4e40",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
