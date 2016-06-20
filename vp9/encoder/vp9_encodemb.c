@@ -57,6 +57,7 @@ typedef struct vp9_token_state {
   int           next;
   int16_t       token;
   tran_low_t    qc;
+  tran_low_t    dqc;
 } vp9_token_state;
 
 static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] ={ {10, 6}, {8, 7}, };
@@ -95,12 +96,13 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int eob = p->eobs[block];
   const PLANE_TYPE type = get_plane_type(plane);
   const int default_eob = 16 << (tx_size << 1);
-  int shift = (tx_size == TX_32X32);
-  const int16_t *dequant_ptr = pd->dequant;
-  const uint8_t *const band_translate = get_band_translate(tx_size);
+  const int shift = (tx_size == TX_32X32);
+  const int16_t* const dequant_ptr = pd->dequant;
+  const uint8_t* const band_translate = get_band_translate(tx_size);
   const scan_order *const so = get_scan(xd, tx_size, type, block);
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
+  const int dq_step[2] = { dequant_ptr[0] >> shift, dequant_ptr[1] >> shift };
   int next = eob, sz = 0;
   const int64_t rdmult = (mb->rdmult * plane_rd_mult[ref][type]) >> 1;
   const int64_t rddiv = mb->rddiv;
@@ -170,6 +172,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       tokens[i][0].next = next;
       tokens[i][0].token = t0;
       tokens[i][0].qc = x;
+      tokens[i][0].dqc = dqcoeff[rc];
       best_index[i][0] = best;
 
       /* Evaluate the second possibility for this state. */
@@ -241,6 +244,24 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       tokens[i][1].next = next;
       tokens[i][1].token = best ? t1 : t0;
       tokens[i][1].qc = x;
+
+      if (x) {
+        tran_low_t offset = dq_step[rc != 0];
+        // The 32x32 transform coefficient uses half quantization step size.
+        // Account for the rounding difference in the dequantized coefficeint
+        // value when the quantization index is dropped from an even number
+        // to an odd number.
+        if (shift & x)
+          offset += (dequant_ptr[rc != 0] & 0x01);
+
+        if (sz == 0)
+          tokens[i][1].dqc = dqcoeff[rc] - offset;
+        else
+          tokens[i][1].dqc = dqcoeff[rc] + offset;
+      } else {
+        tokens[i][1].dqc = 0;
+      }
+
       best_index[i][1] = best;
       /* Finally, make this the new head of the trellis. */
       next = i;
@@ -280,20 +301,13 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = -1;
-  memset(qcoeff, 0, sizeof(*qcoeff) * (16 << (tx_size * 2)));
-  memset(dqcoeff, 0, sizeof(*dqcoeff) * (16 << (tx_size * 2)));
+
   for (i = next; i < eob; i = next) {
     const int x = tokens[i][best].qc;
     const int rc = scan[i];
-    if (x) {
-      final_eob = i;
-    }
-
+    if (x) final_eob = i;
     qcoeff[rc] = x;
-    dqcoeff[rc] = abs(x * dequant_ptr[rc != 0]) >> shift;
-    if (x < 0)
-      dqcoeff[rc] = -dqcoeff[rc];
-
+    dqcoeff[rc] = tokens[i][best].dqc;
     next = tokens[i][best].next;
     best = best_index[i][best];
   }
