@@ -4443,6 +4443,12 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
 
   if (!is_inter_block(mi)) {
     int plane;
+#if CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
+    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) &&
+        (xd->above_mi == NULL || xd->left_mi == NULL) &&
+        need_top_left[mi->uv_mode])
+      assert(0);
+#endif  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
     mi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
       vp9_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane, 1);

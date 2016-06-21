@@ -1214,6 +1214,11 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     if (!(cpi->sf.intra_uv_mode_mask[max_tx_size] & (1 << mode)))
       continue;
+#if CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
+    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) &&
+        (xd->above_mi == NULL || xd->left_mi == NULL) && need_top_left[mode])
+      continue;
+#endif  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
 
     xd->mi[0]->uv_mode = mode;
 
