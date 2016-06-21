@@ -260,6 +260,7 @@ EXPERIMENT_LIST="
     dual_filter
     ext_tx
     tx64x64
+    sub8x8_mc
     ext_intra
     filter_intra
     ext_inter
