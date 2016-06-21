@@ -11069,7 +11069,6 @@ void calc_target_weighted_pred(VP10_COMMON *cm,
                                uint8_t *left_buf,  int left_stride,
                                int *mask_buf, int mask_stride,
                                int *weighted_src_buf, int weighted_src_stride) {
-  const TileInfo *const tile = &xd->tile;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int row, col, i, mi_step;
   int bw = 8 * xd->n8_w;
@@ -11090,11 +11089,7 @@ void calc_target_weighted_pred(VP10_COMMON *cm,
   }
 
   // handle above row
-#if CONFIG_EXT_TILE
-  if (mi_row > 0 && (mi_row - 1 >= tile->mi_row_start)) {
-#else
-  if (mi_row > 0) {
-#endif  // CONFIG_EXT_TILE
+  if (xd->up_available) {
     for (i = 0; i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {
       int mi_row_offset = -1;
       int mi_col_offset = i;
@@ -11163,7 +11158,7 @@ void calc_target_weighted_pred(VP10_COMMON *cm,
     mask2d += mask_stride;
   }
 
-  if (mi_col > 0 && (mi_col - 1 >= tile->mi_col_start)) {
+  if (xd->left_available) {
     for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row); i += mi_step) {
       int mi_row_offset = i;
       int mi_col_offset = -1;
