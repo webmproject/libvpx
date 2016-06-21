@@ -22,6 +22,30 @@
       "revId": "d0de89a12a85657d8e3d982ad0841880aa0b4e40",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae2ebe8e_d194244c",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 1359,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-21T23:09:35Z",
+      "side": 1,
+      "message": "\u003e I guess this statement mean Perl no longer generates the prototype\n \u003e declaration, vpx_high_10_sub_pixel_variance4x4_sse4_1. Is it\n \u003e correct?\n\ncorrect. that and the code that updates the function pointer if the processor supports sse4",
+      "parentUuid": "a97a3831_ab2f49ed",
+      "range": {
+        "startLine": 1359,
+        "startChar": 2,
+        "endLine": 1359,
+        "endChar": 45
+      },
+      "revId": "d0de89a12a85657d8e3d982ad0841880aa0b4e40",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
