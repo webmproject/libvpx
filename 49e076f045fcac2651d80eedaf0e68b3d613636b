@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a97a3831_8a135e59",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-06-21T01:20:18Z",
+      "side": 1,
+      "message": "I propose something like: \n\nThis commit adds an encoder work around to support better compatibility with a non-compliant hardware vp9 profile 2 decoder. The known issue with this decoder is:  \n\nThe decoder assumes a wrong value, 127 instead of the correct value of 511 and 2047, for any assumed top-left corner pixel in UV planes for 10 and 12 bit input respectively, such assumed top-left corner pixel is used for INTRA prediction when the pixel is a real decoded/reconstructed pixel, e.g. when it is located inside the row above the top row or inside the column left to the leftest column of a video image.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 34
+      },
+      "revId": "49e076f045fcac2651d80eedaf0e68b3d613636b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
