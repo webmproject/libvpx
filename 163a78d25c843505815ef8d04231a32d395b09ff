@@ -70,6 +70,30 @@
       "revId": "163a78d25c843505815ef8d04231a32d395b09ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae2ebe8e_6b09017f",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-21T20:51:38Z",
+      "side": 1,
+      "message": "On 148: sse \u003c var. diff is negative and casting that to uint32_t for the next call doesn\u0027t make sense.",
+      "parentUuid": "ae2ebe8e_2b2ad9de",
+      "range": {
+        "startLine": 754,
+        "startChar": 6,
+        "endLine": 754,
+        "endChar": 40
+      },
+      "revId": "163a78d25c843505815ef8d04231a32d395b09ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
