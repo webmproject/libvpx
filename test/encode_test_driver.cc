@@ -237,11 +237,11 @@ static bool compare_img(const vpx_image_t *img1,
 
 void EncoderTest::MismatchHook(const vpx_image_t* img_enc,
                                const vpx_image_t* img_dec) {
-  int mismatch_row;
-  int mismatch_col;
-  int mismatch_plane;
-  int mismatch_pix_enc;
-  int mismatch_pix_dec;
+  int mismatch_row = 0;
+  int mismatch_col = 0;
+  int mismatch_plane = 0;
+  int mismatch_pix_enc = 0;
+  int mismatch_pix_dec = 0;
 
   ASSERT_FALSE(compare_img(img_enc, img_dec,
                            &mismatch_row, &mismatch_col,
