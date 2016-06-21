@@ -37,27 +37,29 @@ static INLINE void transpose_4x8(const __m128i *in, __m128i *out) {
   // they're zero vectors.
 }
 
-typedef void (*store_pixel_t)(__m128i x, uint8_t *src, uint8_t *dst);
+typedef void (*store_pixel_t)(const __m128i *x, uint8_t *src, uint8_t *dst);
 
-static INLINE void store_4_pixel_only(__m128i x, uint8_t *src, uint8_t *dst) {
+static INLINE void store_4_pixel_only(const __m128i *x, uint8_t *src,
+                                      uint8_t *dst) {
+  __m128i u;
   (void)src;
-  x = _mm_packus_epi16(x, x);
-  *(int *)dst = _mm_cvtsi128_si32(x);
+  u = _mm_packus_epi16(*x, *x);
+  *(int *)dst = _mm_cvtsi128_si32(u);
 }
 
-static INLINE __m128i accumulate_store(__m128i x, uint8_t *src) {
+static INLINE __m128i accumulate_store(const __m128i *x, uint8_t *src) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i one = _mm_set1_epi16(1);
   __m128i y = _mm_loadl_epi64((__m128i const *)src);
   y = _mm_unpacklo_epi8(y, zero);
-  y = _mm_add_epi16(x, y);
+  y = _mm_add_epi16(*x, y);
   y = _mm_add_epi16(y, one);
   y = _mm_srai_epi16(y, 1);
   y = _mm_packus_epi16(y, y);
   return y;
 }
 
-static INLINE void accumulate_store_4_pixel(__m128i x, uint8_t *src,
+static INLINE void accumulate_store_4_pixel(const __m128i *x, uint8_t *src,
                                             uint8_t *dst) {
   __m128i y = accumulate_store(x, src);
   *(int *)dst = _mm_cvtsi128_si32(y);
@@ -102,7 +104,7 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
 
   sumPairRow[1] = _mm_mulhrs_epi16(sumPairRow[0], k_256);
 
-  store_func(sumPairRow[1], dst, buf);
+  store_func(&sumPairRow[1], dst, buf);
 }
 
 void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
@@ -712,5 +714,192 @@ void vp10_convolve_horiz_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
       src_ptr += src_stride;
       dst += dst_stride;
     }
+  }
+}
+
+// Vertical convolution filtering
+static INLINE void store_2_pixel_only(const __m128i *x, uint8_t *src,
+                                      uint8_t *dst) {
+  __m128i u;
+  uint32_t temp;
+  (void)src;
+  u = _mm_packus_epi16(*x, *x);
+  temp = _mm_cvtsi128_si32(u);
+  *(uint16_t *)dst = (uint16_t)temp;
+}
+
+static INLINE void accumulate_store_2_pixel(const __m128i *x, uint8_t *src,
+                                            uint8_t *dst) {
+  uint32_t temp;
+  __m128i y = accumulate_store(x, src);
+  temp = _mm_cvtsi128_si32(y);
+  *(uint16_t *)dst = (uint16_t)temp;
+}
+
+static INLINE void store_8_pixel_only(const __m128i *x, uint8_t *src,
+                                      uint8_t *dst) {
+  __m128i u;
+  (void)src;
+  u = _mm_packus_epi16(*x, *x);
+  _mm_storel_epi64((__m128i *)dst, u);
+}
+
+static INLINE void accumulate_store_8_pixel(const __m128i *x, uint8_t *src,
+                                            uint8_t *dst) {
+  __m128i y = accumulate_store(x, src);
+  _mm_storel_epi64((__m128i *)dst, y);
+}
+
+static store_pixel_t store8pixelTab[2] = {
+  store_8_pixel_only, accumulate_store_8_pixel};
+
+static store_pixel_t store2pixelTab[2] = {
+  store_2_pixel_only, accumulate_store_2_pixel};
+
+static __m128i filter_vert_ssse3(const uint8_t *src, int src_stride,
+                                 __m128i *f) {
+  const __m128i k_256 = _mm_set1_epi16(1 << 8);
+  const __m128i zero = _mm_setzero_si128();
+  __m128i min_x2x3, max_x2x3, sum;
+
+  __m128i s0 = _mm_loadu_si128((__m128i const *)(src));
+  __m128i s1 = _mm_loadu_si128((__m128i const *)(src + src_stride));
+  __m128i s2 = _mm_loadu_si128((__m128i const *)(src + 2 * src_stride));
+  __m128i s3 = _mm_loadu_si128((__m128i const *)(src + 3 * src_stride));
+  __m128i s4 = _mm_loadu_si128((__m128i const *)(src + 4 * src_stride));
+  __m128i s5 = _mm_loadu_si128((__m128i const *)(src + 5 * src_stride));
+  __m128i s6 = _mm_loadu_si128((__m128i const *)(src + 6 * src_stride));
+  __m128i s7 = _mm_loadu_si128((__m128i const *)(src + 7 * src_stride));
+  __m128i s8 = _mm_loadu_si128((__m128i const *)(src + 8 * src_stride));
+  __m128i s9 = _mm_loadu_si128((__m128i const *)(src + 9 * src_stride));
+  __m128i s10 = _mm_loadu_si128((__m128i const *)(src + 10 * src_stride));
+  __m128i s11 = _mm_loadu_si128((__m128i const *)(src + 11 * src_stride));
+
+  s0 = _mm_unpacklo_epi8(s0, s1);
+  s2 = _mm_unpacklo_epi8(s2, s3);
+  s4 = _mm_unpacklo_epi8(s4, s5);
+  s6 = _mm_unpacklo_epi8(s6, s7);
+  s8 = _mm_unpacklo_epi8(s8, s9);
+  s10 = _mm_unpacklo_epi8(s10, s11);
+
+  s0 = _mm_maddubs_epi16(s0, f[0]);
+  s2 = _mm_maddubs_epi16(s2, f[1]);
+  s4 = _mm_maddubs_epi16(s4, f[2]);
+  s6 = _mm_maddubs_epi16(s6, f[3]);
+  s8 = _mm_maddubs_epi16(s8, f[4]);
+  s10 = _mm_maddubs_epi16(s10, f[5]);
+
+  min_x2x3 = _mm_min_epi16(s4, s6);
+  max_x2x3 = _mm_max_epi16(s4, s6);
+  sum = _mm_adds_epi16(s0, s2);
+  sum = _mm_adds_epi16(sum, s10);
+  sum = _mm_adds_epi16(sum, s8);
+
+  sum = _mm_adds_epi16(sum, min_x2x3);
+  sum = _mm_adds_epi16(sum, max_x2x3);
+
+  sum = _mm_mulhrs_epi16(sum, k_256);
+  sum = _mm_packus_epi16(sum, sum);
+  sum = _mm_unpacklo_epi8(sum, zero);
+  return sum;
+}
+
+static void filter_vert_horiz_parallel_ssse3(const uint8_t *src, int src_stride,
+                                             __m128i *f, int tapsNum,
+                                             store_pixel_t store_func,
+                                             uint8_t *dst) {
+  __m128i sum;
+
+  if (10 == tapsNum) {
+    src -= src_stride;
+  }
+
+  sum = filter_vert_ssse3(src, src_stride, f);
+  store_func(&sum, dst, dst);
+}
+
+void filter_vert_compute_small(const uint8_t *src, int src_stride, __m128i *f,
+                               int tapsNum, store_pixel_t store_func, int h,
+                               uint8_t *dst, int dst_stride) {
+  int rowIndex = 0;
+  do {
+    filter_vert_horiz_parallel_ssse3(src, src_stride, f, tapsNum, store_func,
+                                     dst);
+    rowIndex++;
+    src += src_stride;
+    dst += dst_stride;
+  } while (rowIndex < h);
+}
+
+void filter_vert_compute_large(const uint8_t *src, int src_stride, __m128i *f,
+                               int tapsNum, store_pixel_t store_func, int w,
+                               int h, uint8_t *dst, int dst_stride) {
+  int col;
+  int rowIndex = 0;
+  const uint8_t *src_ptr = src;
+  uint8_t *dst_ptr = dst;
+
+  do {
+    for (col = 0; col < w; col += 8) {
+      filter_vert_horiz_parallel_ssse3(src_ptr, src_stride, f, tapsNum,
+                                       store_func, dst_ptr);
+      src_ptr += 8;
+      dst_ptr += 8;
+    }
+    rowIndex++;
+    src_ptr = src + rowIndex * src_stride;
+    dst_ptr = dst + rowIndex * dst_stride;
+  } while (rowIndex < h);
+}
+
+void vp10_convolve_vert_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
+                              int dst_stride, int w, int h,
+                              const InterpFilterParams filter_params,
+                              const int subpel_y_q4, int y_step_q4, int avg) {
+  __m128i verf[6];
+  SubpelFilterCoeffs vCoeffs;
+  const uint8_t *src_ptr;
+  uint8_t *dst_ptr = dst;
+  store_pixel_t store2p = store2pixelTab[avg];
+  store_pixel_t store4p = store4pixelTab[avg];
+  store_pixel_t store8p = store8pixelTab[avg];
+  const int tapsNum = filter_params.taps;
+
+  if (0 == subpel_y_q4 || 16 != y_step_q4) {
+    vp10_convolve_vert_c(src, src_stride, dst, dst_stride, w, h, filter_params,
+                         subpel_y_q4, y_step_q4, avg);
+    return;
+  }
+
+  vCoeffs = vp10_get_subpel_filter_ver_signal_dir(
+      filter_params, subpel_y_q4 - 1);
+
+  if (!vCoeffs) {
+    vp10_convolve_vert_c(src, src_stride, dst, dst_stride, w, h, filter_params,
+                         subpel_y_q4, y_step_q4, avg);
+    return;
+  }
+
+  verf[0] = *((const __m128i *)(vCoeffs));
+  verf[1] = *((const __m128i *)(vCoeffs + 1));
+  verf[2] = *((const __m128i *)(vCoeffs + 2));
+  verf[3] = *((const __m128i *)(vCoeffs + 3));
+  verf[4] = *((const __m128i *)(vCoeffs + 4));
+  verf[5] = *((const __m128i *)(vCoeffs + 5));
+
+  src -= src_stride * ((tapsNum >> 1) - 1);
+  src_ptr = src;
+
+  if (w > 4) {
+    filter_vert_compute_large(src_ptr, src_stride, verf, tapsNum, store8p,
+                              w, h, dst_ptr, dst_stride);
+  } else if (4 == w) {
+    filter_vert_compute_small(src_ptr, src_stride, verf, tapsNum, store4p,
+                              h, dst_ptr, dst_stride);
+  } else if (2 == w) {
+    filter_vert_compute_small(src_ptr, src_stride, verf, tapsNum, store2p,
+                              h, dst_ptr, dst_stride);
+  } else {
+    assert(0);
   }
 }

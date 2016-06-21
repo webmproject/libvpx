@@ -90,6 +90,9 @@ specialize qw/vp10_filter_by_weight8x8 sse2 msa/;
 add_proto qw/void vp10_convolve_horiz/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg";
 specialize qw/vp10_convolve_horiz ssse3/;
 
+add_proto qw/void vp10_convolve_vert/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg";
+specialize qw/vp10_convolve_vert ssse3/;
+
 #
 # dct
 #

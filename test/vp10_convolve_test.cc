@@ -11,6 +11,13 @@
 using libvpx_test::ACMRandom;
 
 namespace {
+void setup_convolve() {
+#if HAVE_SSSE3
+  vp10_convolve_horiz = vp10_convolve_horiz_c;
+  vp10_convolve_vert = vp10_convolve_vert_c;
+#endif
+}
+
 TEST(VP10ConvolveTest, vp10_convolve8) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
@@ -41,7 +48,7 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
   int w = 1;
   int h = 1;
 
-  vp10_rtcd();
+  setup_convolve();
 
   for (int i = 0; i < filter_size * filter_size; i++) {
     src[i] = rnd.Rand16() % (1 << 8);
@@ -89,7 +96,7 @@ TEST(VP10ConvolveTest, vp10_convolve) {
   int subpel_x_q4;
   int subpel_y_q4;
 
-  vp10_rtcd();
+  setup_convolve();
 
   for (int i = 0; i < filter_size * filter_size; i++) {
     src[i] = rnd.Rand16() % (1 << 8);
@@ -155,7 +162,7 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
   int subpel_x_q4;
   int subpel_y_q4;
 
-  vp10_rtcd();
+  setup_convolve();
 
   for (int i = 0; i < filter_size * filter_size; i++) {
     src0[i] = rnd.Rand16() % (1 << 8);
