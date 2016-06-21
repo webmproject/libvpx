@@ -27,3 +27,13 @@ uint64_t vpx_sum_squares_2d_i16_c(const int16_t *src, int src_stride,
 
   return ss;
 }
+
+uint64_t vpx_sum_squares_i16_c(const int16_t *src, uint32_t n) {
+  uint64_t ss = 0;
+  do {
+    const int16_t v = *src++;
+    ss += v*v;
+  } while (--n);
+
+  return ss;
+}
