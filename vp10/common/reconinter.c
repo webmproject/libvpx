@@ -2447,7 +2447,6 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
                                                  int wedge_offset_x,
                                                  int wedge_offset_y,
 #endif  // CONFIG_SUPERTX
-                                                 int mi_x, int mi_y,
                                                  uint8_t *ext_dst0,
                                                  int ext_dst_stride0,
                                                  uint8_t *ext_dst1,
@@ -2461,8 +2460,6 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
   (void) block;
   (void) bw;
   (void) bh;
-  (void) mi_x;
-  (void) mi_y;
 
   if (is_compound
       && is_interinter_wedge_used(mbmi->sb_type)
@@ -2526,12 +2523,9 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
 void vp10_build_wedge_inter_predictor_from_buf(
     MACROBLOCKD *xd, BLOCK_SIZE bsize,
     int plane_from, int plane_to,
-    int mi_row, int mi_col,
     uint8_t *ext_dst0[3], int ext_dst_stride0[3],
     uint8_t *ext_dst1[3], int ext_dst_stride1[3]) {
   int plane;
-  const int mi_x = mi_col * MI_SIZE;
-  const int mi_y = mi_row * MI_SIZE;
   for (plane = plane_from; plane <= plane_to; ++plane) {
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
                                                         &xd->plane[plane]);
@@ -2550,7 +2544,6 @@ void vp10_build_wedge_inter_predictor_from_buf(
 #if CONFIG_SUPERTX
                                                0, 0,
 #endif
-                                               mi_x, mi_y,
                                                ext_dst0[plane],
                                                ext_dst_stride0[plane],
                                                ext_dst1[plane],
@@ -2561,7 +2554,6 @@ void vp10_build_wedge_inter_predictor_from_buf(
 #if CONFIG_SUPERTX
                                            0, 0,
 #endif
-                                           mi_x, mi_y,
                                            ext_dst0[plane],
                                            ext_dst_stride0[plane],
                                            ext_dst1[plane],

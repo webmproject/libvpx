@@ -6525,8 +6525,8 @@ static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
 static int estimate_wedge_sign(const VP10_COMP *cpi,
                                const MACROBLOCK *x,
                                const BLOCK_SIZE bsize,
-                               uint8_t *pred0, int stride0,
-                               uint8_t *pred1, int stride1) {
+                               const uint8_t *pred0, int stride0,
+                               const uint8_t *pred1, int stride1) {
   const struct macroblock_plane *const p = &x->plane[0];
   const uint8_t *src = p->src.buf;
   int src_stride = p->src.stride;
@@ -6699,6 +6699,195 @@ static INTERP_FILTER predict_interp_filter(const VP10_COMP *cpi,
 }
 #endif
 
+#if CONFIG_EXT_INTER
+// Choose the best wedge index and sign
+static int64_t pick_wedge(const VP10_COMP *const cpi,
+                          const MACROBLOCK *const x,
+                          const BLOCK_SIZE bsize,
+                          const uint8_t *const p0,
+                          const uint8_t *const p1,
+                          int *const best_wedge_sign,
+                          int *const best_wedge_index) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const struct buf_2d *const src = &x->plane[0].src;
+  const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
+  const int bh = 4 * num_4x4_blocks_high_lookup[bsize];
+  const int N = bw * bh;
+  int rate;
+  int64_t dist;
+  int64_t rd, best_rd = INT64_MAX;
+  int wedge_index;
+  int wedge_sign;
+  int wedge_types = (1 << get_wedge_bits_lookup(bsize));
+  const uint8_t *mask;
+  uint64_t sse;
+#if CONFIG_VP9_HIGHBITDEPTH
+  const int hbd = xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH;
+  const int bd_round = hbd ? (xd->bd - 8) * 2 : 0;
+#else
+  const int bd_round = 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  DECLARE_ALIGNED(32, int16_t, r0[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, int16_t, r1[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, int16_t, d10[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, int16_t, ds[MAX_SB_SQUARE]);
+
+  int64_t sign_limit;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (hbd) {
+    vpx_highbd_subtract_block(bh, bw, r0, bw, src->buf, src->stride,
+                              CONVERT_TO_BYTEPTR(p0), bw, xd->bd);
+    vpx_highbd_subtract_block(bh, bw, r1, bw, src->buf, src->stride,
+                              CONVERT_TO_BYTEPTR(p1), bw, xd->bd);
+    vpx_highbd_subtract_block(bh, bw, d10, bw,
+                              CONVERT_TO_BYTEPTR(p1), bw,
+                              CONVERT_TO_BYTEPTR(p0), bw, xd->bd);
+  } else  // NOLINT
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  {
+    vpx_subtract_block(bh, bw, r0, bw, src->buf, src->stride, p0, bw);
+    vpx_subtract_block(bh, bw, r1, bw, src->buf, src->stride, p1, bw);
+    vpx_subtract_block(bh, bw, d10, bw, p1, bw, p0, bw);
+  }
+
+  sign_limit = ((int64_t)vpx_sum_squares_i16(r0, N)
+                - (int64_t)vpx_sum_squares_i16(r1, N))
+               * (1 << WEDGE_WEIGHT_BITS) / 2;
+
+  vp10_wedge_compute_delta_squares(ds, r0, r1, N);
+
+  for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
+    mask = vp10_get_contiguous_soft_mask(wedge_index, 0, bsize);
+    wedge_sign = vp10_wedge_sign_from_residuals(ds, mask, N, sign_limit);
+
+    mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
+    sse = vp10_wedge_sse_from_residuals(r1, d10, mask, N);
+    sse = ROUNDZ_POWER_OF_TWO(sse, bd_round);
+
+    model_rd_from_sse(cpi, xd, bsize, 0, sse, &rate, &dist);
+    rd =  RDCOST(x->rdmult, x->rddiv, rate, dist);
+
+    if (rd < best_rd) {
+      *best_wedge_index = wedge_index;
+      *best_wedge_sign = wedge_sign;
+      best_rd = rd;
+    }
+  }
+
+  return best_rd;
+}
+
+// Choose the best wedge index the specified sign
+static int64_t pick_wedge_fixed_sign(const VP10_COMP *const cpi,
+                                     const MACROBLOCK *const x,
+                                     const BLOCK_SIZE bsize,
+                                     const uint8_t *const p0,
+                                     const uint8_t *const p1,
+                                     const int wedge_sign,
+                                     int *const best_wedge_index) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const struct buf_2d *const src = &x->plane[0].src;
+  const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
+  const int bh = 4 * num_4x4_blocks_high_lookup[bsize];
+  const int N = bw * bh;
+  int rate;
+  int64_t dist;
+  int64_t rd, best_rd = INT64_MAX;
+  int wedge_index;
+  int wedge_types = (1 << get_wedge_bits_lookup(bsize));
+  const uint8_t *mask;
+  uint64_t sse;
+#if CONFIG_VP9_HIGHBITDEPTH
+  const int hbd = xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH;
+  const int bd_round = hbd ? (xd->bd - 8) * 2 : 0;
+#else
+  const int bd_round = 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  DECLARE_ALIGNED(32, int16_t, r1[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, int16_t, d10[MAX_SB_SQUARE]);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (hbd) {
+    vpx_highbd_subtract_block(bh, bw, r1, bw, src->buf, src->stride,
+                              CONVERT_TO_BYTEPTR(p1), bw, xd->bd);
+    vpx_highbd_subtract_block(bh, bw, d10, bw,
+                              CONVERT_TO_BYTEPTR(p1), bw,
+                              CONVERT_TO_BYTEPTR(p0), bw, xd->bd);
+  } else  // NOLINT
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  {
+    vpx_subtract_block(bh, bw, r1, bw, src->buf, src->stride, p1, bw);
+    vpx_subtract_block(bh, bw, d10, bw, p1, bw, p0, bw);
+  }
+
+  for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
+    mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
+    sse = vp10_wedge_sse_from_residuals(r1, d10, mask, N);
+    sse = ROUNDZ_POWER_OF_TWO(sse, bd_round);
+
+    model_rd_from_sse(cpi, xd, bsize, 0, sse, &rate, &dist);
+    rd =  RDCOST(x->rdmult, x->rddiv, rate, dist);
+
+    if (rd < best_rd) {
+      *best_wedge_index = wedge_index;
+      best_rd = rd;
+    }
+  }
+
+  return best_rd;
+}
+
+static int64_t pick_interinter_wedge(const VP10_COMP *const cpi,
+                                     const MACROBLOCK *const x,
+                                     const BLOCK_SIZE bsize,
+                                     const uint8_t *const p0,
+                                     const uint8_t *const p1) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
+
+  int64_t rd;
+  int wedge_index = -1;
+  int wedge_sign = 0;
+
+  assert(is_interinter_wedge_used(bsize));
+
+  if (cpi->sf.fast_wedge_sign_estimate) {
+    wedge_sign = estimate_wedge_sign(cpi, x, bsize, p0, bw, p1, bw);
+    rd = pick_wedge_fixed_sign(cpi, x, bsize, p0, p1, wedge_sign, &wedge_index);
+  } else {
+    rd = pick_wedge(cpi, x, bsize, p0, p1, &wedge_sign, &wedge_index);
+  }
+
+  mbmi->interinter_wedge_sign = wedge_sign;
+  mbmi->interinter_wedge_index = wedge_index;
+  return rd;
+}
+
+static int64_t pick_interintra_wedge(const VP10_COMP *const cpi,
+                                     const MACROBLOCK *const x,
+                                     const BLOCK_SIZE bsize,
+                                     const uint8_t *const p0,
+                                     const uint8_t *const p1) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+
+  int64_t rd;
+  int wedge_index = -1;
+
+  assert(is_interintra_wedge_used(bsize));
+
+  rd = pick_wedge_fixed_sign(cpi, x, bsize, p0, p1, 0, &wedge_index);
+
+  mbmi->interintra_wedge_sign = 0;
+  mbmi->interintra_wedge_index = wedge_index;
+  return rd;
+}
+#endif  // CONFIG_EXT_INTER
+
 static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE bsize,
                                  int *rate2, int64_t *distortion,
@@ -6738,6 +6927,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   int_mv cur_mv[2];
   int rate_mv = 0;
 #if CONFIG_EXT_INTER
+  const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
   int mv_idx = (this_mode == NEWFROMNEARMV) ? 1 : 0;
   int_mv single_newmv[MAX_REF_FRAMES];
   const unsigned int *const interintra_mode_cost =
@@ -6748,11 +6938,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, tmp_buf16[MAX_MB_PLANE * MAX_SB_SQUARE]);
-  uint8_t *tmp_buf;
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf_[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
 #else
-  DECLARE_ALIGNED(16, uint8_t, tmp_buf[MAX_MB_PLANE * MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf_[MAX_MB_PLANE * MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  uint8_t *tmp_buf;
 
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
   int allow_motvar =
@@ -6824,12 +7014,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    tmp_buf = CONVERT_TO_BYTEPTR(tmp_buf16);
-  } else {
-    tmp_buf = (uint8_t *)tmp_buf16;
-  }
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+    tmp_buf = CONVERT_TO_BYTEPTR(tmp_buf_);
+  else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+    tmp_buf = tmp_buf_;
 
   if (is_comp_pred) {
     if (frame_mv[refs[0]].as_int == INVALID_MV ||
@@ -7242,13 +7431,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_OBMC
 
   if (is_comp_pred && is_interinter_wedge_used(bsize)) {
-    int wedge_index, best_wedge_index = WEDGE_NONE;
-    int wedge_sign, best_wedge_sign = 0;
     int rate_sum, rs;
     int64_t dist_sum;
     int64_t best_rd_nowedge = INT64_MAX;
     int64_t best_rd_wedge = INT64_MAX;
-    int wedge_types;
     int tmp_skip_txfm_sb;
     int64_t tmp_skip_sse_sb;
 
@@ -7266,21 +7452,15 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     // Disbale wedge search if source variance is small
     if (x->source_variance > cpi->sf.disable_wedge_search_var_thresh &&
         best_rd_nowedge / 3 < ref_best_rd) {
-      uint8_t pred0[2 * MAX_SB_SQUARE * 3];
-      uint8_t pred1[2 * MAX_SB_SQUARE * 3];
-      uint8_t *preds0[3] = {pred0,
-        pred0 + 2 * MAX_SB_SQUARE,
-        pred0 + 4 * MAX_SB_SQUARE};
-      uint8_t *preds1[3] = {pred1,
-        pred1 + 2 * MAX_SB_SQUARE,
-        pred1 + 4 * MAX_SB_SQUARE};
-      int strides[3] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
-      int est_wedge_sign;
+      uint8_t pred0[2 * MAX_SB_SQUARE];
+      uint8_t pred1[2 * MAX_SB_SQUARE];
+      uint8_t *preds0[1] = {pred0};
+      uint8_t *preds1[1] = {pred1};
+      int strides[1] = {bw};
 
       mbmi->use_wedge_interinter = 1;
       rs = vp10_cost_literal(get_interinter_wedge_bits(bsize)) +
           vp10_cost_bit(cm->fc->wedge_interinter_prob[bsize], 1);
-      wedge_types = (1 << get_wedge_bits_lookup(bsize));
 
       vp10_build_inter_predictors_for_planes_single_buf(
           xd, bsize, 0, 0,  mi_row, mi_col, 0, preds0, strides);
@@ -7288,49 +7468,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
           xd, bsize, 0, 0, mi_row, mi_col, 1, preds1, strides);
 
       // Choose the best wedge
-      if (cpi->sf.fast_wedge_sign_estimate) {
-        est_wedge_sign = estimate_wedge_sign(
-            cpi, x, bsize, pred0, MAX_SB_SIZE, pred1, MAX_SB_SIZE);
-        best_wedge_sign = mbmi->interinter_wedge_sign = est_wedge_sign;
-        for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
-          mbmi->interinter_wedge_index = wedge_index;
-          vp10_build_wedge_inter_predictor_from_buf(xd, bsize,
-                                                    0, 0, mi_row, mi_col,
-                                                    preds0, strides,
-                                                    preds1, strides);
-          model_rd_for_sb(cpi, bsize, x, xd, 0, 0,
-                          &rate_sum, &dist_sum,
-                          &tmp_skip_txfm_sb, &tmp_skip_sse_sb);
-          rd = RDCOST(x->rdmult, x->rddiv, rs + rate_mv + rate_sum, dist_sum);
-          if (rd < best_rd_wedge) {
-            best_wedge_index = wedge_index;
-            best_rd_wedge = rd;
-          }
-        }
-      } else {
-        for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
-          for (wedge_sign = 0; wedge_sign < 2; ++wedge_sign) {
-            mbmi->interinter_wedge_index = wedge_index;
-            mbmi->interinter_wedge_sign = wedge_sign;
-            vp10_build_wedge_inter_predictor_from_buf(xd, bsize,
-                                                      0, 0, mi_row, mi_col,
-                                                      preds0, strides,
-                                                      preds1, strides);
-            model_rd_for_sb(cpi, bsize, x, xd, 0, 0,
-                            &rate_sum, &dist_sum,
-                            &tmp_skip_txfm_sb, &tmp_skip_sse_sb);
-            rd = RDCOST(x->rdmult, x->rddiv,
-                        rs + rate_mv + rate_sum, dist_sum);
-            if (rd < best_rd_wedge) {
-              best_wedge_index = wedge_index;
-              best_wedge_sign = wedge_sign;
-              best_rd_wedge = rd;
-            }
-          }
-        }
-      }
-      mbmi->interinter_wedge_index = best_wedge_index;
-      mbmi->interinter_wedge_sign = best_wedge_sign;
+      best_rd_wedge = pick_interinter_wedge(cpi, x, bsize, pred0, pred1);
+      best_rd_wedge += RDCOST(x->rdmult, x->rddiv, rs + rate_mv, 0);
 
       if (have_newmv_in_inter_mode(this_mode)) {
         int_mv tmp_mv[2];
@@ -7375,7 +7514,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
           mbmi->mv[1].as_int = cur_mv[1].as_int;
           tmp_rate_mv = rate_mv;
           vp10_build_wedge_inter_predictor_from_buf(xd, bsize, 0, 0,
-                                                    mi_row, mi_col,
                                                     preds0, strides,
                                                     preds1, strides);
         }
@@ -7390,8 +7528,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
         if (best_rd_wedge < best_rd_nowedge) {
           mbmi->use_wedge_interinter = 1;
-          mbmi->interinter_wedge_index = best_wedge_index;
-          mbmi->interinter_wedge_sign = best_wedge_sign;
           xd->mi[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
           xd->mi[0]->bmi[0].as_mv[1].as_int = mbmi->mv[1].as_int;
           *rate2 += tmp_rate_mv - rate_mv;
@@ -7405,7 +7541,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         }
       } else {
         vp10_build_wedge_inter_predictor_from_buf(xd, bsize,
-                                                  0, 0, mi_row, mi_col,
+                                                  0, 0,
                                                   preds0, strides,
                                                   preds1, strides);
         vp10_subtract_plane(x, bsize, 0);
@@ -7417,8 +7553,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
           best_rd_wedge = rd;
         if (best_rd_wedge < best_rd_nowedge) {
           mbmi->use_wedge_interinter = 1;
-          mbmi->interinter_wedge_index = best_wedge_index;
-          mbmi->interinter_wedge_sign = best_wedge_sign;
         } else {
           mbmi->use_wedge_interinter = 0;
         }
@@ -7441,13 +7575,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   if (is_comp_interintra_pred) {
-    const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
     INTERINTRA_MODE best_interintra_mode = II_DC_PRED;
     int64_t best_interintra_rd = INT64_MAX;
     int rmode, rate_sum;
     int64_t dist_sum;
     int j;
-    int wedge_types, wedge_index, best_wedge_index = -1;
     int64_t best_interintra_rd_nowedge = INT64_MAX;
     int64_t best_interintra_rd_wedge = INT64_MAX;
     int rwedge;
@@ -7455,8 +7587,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     int tmp_rate_mv = 0;
     int tmp_skip_txfm_sb;
     int64_t tmp_skip_sse_sb;
-    DECLARE_ALIGNED(16, uint8_t,
-                    intrapred_[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+    DECLARE_ALIGNED(16, uint8_t, intrapred_[2 * MAX_SB_SQUARE]);
     uint8_t *intrapred;
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -7469,7 +7600,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->ref_frame[1] = NONE;
     for (j = 0; j < MAX_MB_PLANE; j++) {
       xd->plane[j].dst.buf = tmp_buf + j * MAX_SB_SQUARE;
-      xd->plane[j].dst.stride = MAX_SB_SIZE;
+      xd->plane[j].dst.stride = bw;
     }
     vp10_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
     restore_dst_buf(xd, orig_dst, orig_dst_stride);
@@ -7480,9 +7611,9 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       mbmi->interintra_mode = (INTERINTRA_MODE)j;
       rmode = interintra_mode_cost[mbmi->interintra_mode];
       vp10_build_intra_predictors_for_interintra(
-          xd, bsize, 0, intrapred, MAX_SB_SIZE);
-      vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
-                              intrapred, MAX_SB_SIZE);
+          xd, bsize, 0, intrapred, bw);
+      vp10_combine_interintra(xd, bsize, 0, tmp_buf, bw,
+                              intrapred, bw);
       model_rd_for_sb(cpi, bsize, x, xd, 0, 0, &rate_sum, &dist_sum,
                       &tmp_skip_txfm_sb, &tmp_skip_sse_sb);
       rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate_mv + rate_sum, dist_sum);
@@ -7494,9 +7625,9 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     mbmi->interintra_mode = best_interintra_mode;
     rmode = interintra_mode_cost[mbmi->interintra_mode];
     vp10_build_intra_predictors_for_interintra(
-        xd, bsize, 0, intrapred, MAX_SB_SIZE);
-    vp10_combine_interintra(xd, bsize, 0, tmp_buf, MAX_SB_SIZE,
-                            intrapred, MAX_SB_SIZE);
+        xd, bsize, 0, intrapred, bw);
+    vp10_combine_interintra(xd, bsize, 0, tmp_buf, bw,
+                            intrapred, bw);
     vp10_subtract_plane(x, bsize, 0);
     rd = estimate_yrd_for_sb(cpi, bsize, x, &rate_sum, &dist_sum,
                              &tmp_skip_txfm_sb, &tmp_skip_sse_sb,
@@ -7519,32 +7650,20 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       // Disbale wedge search if source variance is small
       if (x->source_variance > cpi->sf.disable_wedge_search_var_thresh) {
         mbmi->use_wedge_interintra = 1;
-        wedge_types = (1 << get_wedge_bits_lookup(bsize));
+
         rwedge = vp10_cost_literal(get_interintra_wedge_bits(bsize)) +
             vp10_cost_bit(cm->fc->wedge_interintra_prob[bsize], 1);
-        for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
-          mbmi->interintra_wedge_index = wedge_index;
-          mbmi->interintra_wedge_sign = 0;
-          vp10_combine_interintra(xd, bsize, 0,
-                                  tmp_buf, MAX_SB_SIZE,
-                                  intrapred, MAX_SB_SIZE);
-          model_rd_for_sb(cpi, bsize, x, xd, 0, 0,
-                          &rate_sum, &dist_sum,
-                          &tmp_skip_txfm_sb, &tmp_skip_sse_sb);
-          rd = RDCOST(x->rdmult, x->rddiv,
-                      rmode + rate_mv + rwedge + rate_sum, dist_sum);
-          if (rd < best_interintra_rd_wedge) {
-            best_interintra_rd_wedge = rd;
-            best_wedge_index = wedge_index;
-          }
-        }
+
+        best_interintra_rd_wedge = pick_interintra_wedge(cpi, x, bsize,
+                                                         intrapred_, tmp_buf_);
+
+        best_interintra_rd_wedge += RDCOST(x->rdmult, x->rddiv,
+                                           rmode + rate_mv + rwedge, 0);
         // Refine motion vector.
-        if (have_newmv_in_inter_mode(this_mode) && best_wedge_index > -1) {
+        if (have_newmv_in_inter_mode(this_mode)) {
           // get negative of mask
           const uint8_t* mask = vp10_get_contiguous_soft_mask(
-              best_wedge_index, 1, bsize);
-          mbmi->interintra_wedge_index = best_wedge_index;
-          mbmi->interintra_wedge_sign = 0;
+              mbmi->interintra_wedge_index, 1, bsize);
           do_masked_motion_search(cpi, x, mask, bw, bsize,
                                   mi_row, mi_col, &tmp_mv, &tmp_rate_mv,
                                   0, mv_idx);
@@ -7561,13 +7680,11 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
             tmp_rate_mv = rate_mv;
           }
         } else {
-          mbmi->interintra_wedge_index = best_wedge_index;
-          mbmi->interintra_wedge_sign = 0;
           tmp_mv.as_int = cur_mv[0].as_int;
           tmp_rate_mv = rate_mv;
           vp10_combine_interintra(xd, bsize, 0,
-                                  tmp_buf, MAX_SB_SIZE,
-                                  intrapred, MAX_SB_SIZE);
+                                  tmp_buf, bw,
+                                  intrapred, bw);
         }
         // Evaluate closer to true rd
         vp10_subtract_plane(x, bsize, 0);
@@ -7580,8 +7697,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         best_interintra_rd_wedge = rd;
         if (best_interintra_rd_wedge < best_interintra_rd_nowedge) {
           mbmi->use_wedge_interintra = 1;
-          mbmi->interintra_wedge_index = best_wedge_index;
-          mbmi->interintra_wedge_sign = 0;
           best_interintra_rd = best_interintra_rd_wedge;
           mbmi->mv[0].as_int = tmp_mv.as_int;
           *rate2 += tmp_rate_mv - rate_mv;

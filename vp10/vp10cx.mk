@@ -124,6 +124,10 @@ endif
 ifeq ($(CONFIG_VP9_TEMPORAL_DENOISING),yes)
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/denoiser_sse2.c
 endif
+ifeq ($(CONFIG_EXT_INTER),yes)
+VP10_CX_SRCS-yes += encoder/wedge_utils.c
+VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/wedge_utils_sse2.c
+endif
 
 VP10_CX_SRCS-$(HAVE_AVX2) += encoder/x86/error_intrin_avx2.c
 
