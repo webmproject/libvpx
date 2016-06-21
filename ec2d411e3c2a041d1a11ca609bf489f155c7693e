@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9720c91_f41d7810",
+        "filename": "test/meta_array_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-21T18:52:18Z",
+      "side": 1,
+      "message": "what is the magic number 42? Can you explain and make it a const at the top?",
+      "revId": "ec2d411e3c2a041d1a11ca609bf489f155c7693e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9720c91_f4349888",
+        "filename": "test/meta_array_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-21T18:52:18Z",
+      "side": 1,
+      "message": "ditto for 25.",
+      "revId": "ec2d411e3c2a041d1a11ca609bf489f155c7693e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
