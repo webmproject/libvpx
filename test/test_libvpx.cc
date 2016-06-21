@@ -22,6 +22,9 @@ extern void vp8_rtcd();
 #if CONFIG_VP9
 extern void vp9_rtcd();
 #endif  // CONFIG_VP9
+#if CONFIG_VP10
+extern void vp10_rtcd();
+#endif  // CONFIG_VP10
 extern void vpx_dsp_rtcd();
 extern void vpx_scale_rtcd();
 }
@@ -69,6 +72,9 @@ int main(int argc, char **argv) {
 #if CONFIG_VP9
   vp9_rtcd();
 #endif  // CONFIG_VP9
+#if CONFIG_VP10
+  vp10_rtcd();
+#endif  // CONFIG_VP10
   vpx_dsp_rtcd();
   vpx_scale_rtcd();
 #endif  // !CONFIG_SHARED
