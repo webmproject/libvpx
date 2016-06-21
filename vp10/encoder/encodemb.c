@@ -205,22 +205,27 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
 
-#if CONFIG_NEW_QUANT
-      shortcut = (
-          (dequant_abscoeff_nuq(
-              abs(x), dequant_ptr[rc != 0],
-              dequant_val[band_translate[i]]) > (abs(coeff[rc]) << shift)) &&
-          (dequant_abscoeff_nuq(
-              abs(x) - 1, dequant_ptr[rc != 0],
-              dequant_val[band_translate[i]]) < (abs(coeff[rc]) << shift)));
-#else   // CONFIG_NEW_QUANT
-      if ((abs(x) * dequant_ptr[rc != 0] > (abs(coeff[rc]) << shift)) &&
-          (abs(x) * dequant_ptr[rc != 0] < (abs(coeff[rc]) << shift) +
-                                               dequant_ptr[rc != 0]))
-        shortcut = 1;
-      else
+      // The threshold of 3 is empirically obtained.
+      if (abs(x) > 3) {
         shortcut = 0;
+      } else {
+#if CONFIG_NEW_QUANT
+        shortcut = (
+            (dequant_abscoeff_nuq(
+                abs(x), dequant_ptr[rc != 0],
+                dequant_val[band_translate[i]]) > (abs(coeff[rc]) << shift)) &&
+            (dequant_abscoeff_nuq(
+                abs(x) - 1, dequant_ptr[rc != 0],
+                dequant_val[band_translate[i]]) < (abs(coeff[rc]) << shift)));
+#else   // CONFIG_NEW_QUANT
+        if ((abs(x) * dequant_ptr[rc != 0] > (abs(coeff[rc]) << shift)) &&
+            (abs(x) * dequant_ptr[rc != 0] < (abs(coeff[rc]) << shift) +
+              dequant_ptr[rc != 0]))
+          shortcut = 1;
+        else
+          shortcut = 0;
 #endif   // CONFIG_NEW_QUANT
+      }
 
       if (shortcut) {
         sz = -(x < 0);
