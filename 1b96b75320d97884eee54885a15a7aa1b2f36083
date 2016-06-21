@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a97a3831_57de7f71",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-06-21T00:25:40Z",
+      "side": 1,
+      "message": "Shall we add a short summary of the issue that this patch addresses? so other implementers of vp9 encoder know what to do if they like to have better hardware compatibility.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 36
+      },
+      "revId": "1b96b75320d97884eee54885a15a7aa1b2f36083",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
