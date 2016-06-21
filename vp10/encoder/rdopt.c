@@ -6762,7 +6762,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   uint8_t best_blk_skip[MAX_MB_PLANE][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
 #endif  // CONFIG_VAR_TX
   int64_t best_distortion = INT64_MAX;
-  unsigned int best_pred_var = UINT_MAX;
   MB_MODE_INFO best_mbmi;
 #if CONFIG_EXT_INTER
   int rate2_bmc_nocoeff;
@@ -7830,20 +7829,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       // TODO(yuec): Add code
     }
 #endif  // CONFIG_WARPED_MOTION
-
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      x->pred_variance =
-          vp10_high_get_sby_perpixel_variance(
-              cpi, &xd->plane[0].dst, bsize, xd->bd);
-    } else {
-      x->pred_variance =
-          vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
-    }
-#else
-    x->pred_variance =
-        vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
     x->skip = 0;
 
     *rate2 = tmp_rate2;
@@ -7985,7 +7970,19 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       best_skippable = *skippable;
       best_xskip = x->skip;
       best_disable_skip = *disable_skip;
-      best_pred_var = x->pred_variance;
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        x->recon_variance =
+            vp10_high_get_sby_perpixel_variance(
+                cpi, &xd->plane[0].dst, bsize, xd->bd);
+      } else {
+        x->recon_variance =
+            vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+      }
+#else
+      x->recon_variance =
+          vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     }
   }
 
@@ -8008,12 +8005,12 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   *skippable = best_skippable;
   x->skip = best_xskip;
   *disable_skip = best_disable_skip;
-  x->pred_variance = best_pred_var;
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
   if (!is_comp_pred)
     single_skippable[this_mode][refs[0]] = *skippable;
 
+#if !(CONFIG_OBMC || CONFIG_WARPED_MOTION)
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     x->recon_variance =
@@ -8027,6 +8024,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   x->recon_variance =
     vp10_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // !(CONFIG_OBMC || CONFIG_WARPED_MOTION)
 
   restore_dst_buf(xd, orig_dst, orig_dst_stride);
   return 0;  // The rate-distortion cost will be re-calculated by caller.
@@ -8091,9 +8089,6 @@ void vp10_rd_pick_intra_mode_sb(VP10_COMP *cpi, MACROBLOCK *x,
 static void rd_variance_adjustment(MACROBLOCK *x,
                                    int64_t *this_rd,
                                    MV_REFERENCE_FRAME ref_frame,
-#if CONFIG_OBMC
-                                   int is_pred_var_available,
-#endif  // CONFIG_OBMC
                                    unsigned int source_variance) {
   unsigned int recon_variance = x->recon_variance;
   unsigned int absvar_diff = 0;
@@ -8102,11 +8097,6 @@ static void rd_variance_adjustment(MACROBLOCK *x,
 
   if (*this_rd == INT64_MAX)
     return;
-
-#if CONFIG_OBMC
-  if (is_pred_var_available)
-    recon_variance = x->pred_variance;
-#endif  // CONFIG_OBMC
 
   if ((source_variance + recon_variance) > LOW_VAR_THRESH) {
     absvar_diff = (source_variance > recon_variance)
@@ -8407,11 +8397,7 @@ static void pick_ext_intra_iframe(VP10_COMP *cpi, MACROBLOCK *x,
     rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 0);
   }
   this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-  rd_variance_adjustment(x, &this_rd, INTRA_FRAME,
-#if CONFIG_OBMC
-                         is_inter_block(mbmi),
-#endif  // CONFIG_OBMC
-                         x->source_variance);
+  rd_variance_adjustment(x, &this_rd, INTRA_FRAME, x->source_variance);
 
   if (this_rd < *best_intra_rd) {
     *best_intra_rd = this_rd;
@@ -9507,11 +9493,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
     // Apply an adjustment to the rd value based on the similarity of the
     // source variance and reconstructed variance.
-    rd_variance_adjustment(x, &this_rd, ref_frame,
-#if CONFIG_OBMC
-                           is_inter_block(mbmi),
-#endif  // CONFIG_OBMC
-                           x->source_variance);
+    rd_variance_adjustment(x, &this_rd, ref_frame, x->source_variance);
 
     if (ref_frame == INTRA_FRAME) {
       // Keep record of best intra rd
