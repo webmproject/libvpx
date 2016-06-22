@@ -198,7 +198,7 @@ sym(vp8_post_proc_down_and_across_mb_row_sse2):
         UPDATE_FLIMIT
         jmp         .acrossnextcol
 
-.acrossdone
+.acrossdone:
         ; last 16 pixels
         movq        QWORD PTR [rdi+rdx-16], mm0
 
@@ -278,7 +278,7 @@ sym(vp8_mbpost_proc_down_xmm):
             lea         rdi,        [rdi+rdx]
             movq        xmm1,       QWORD ptr[rdi]              ; first row
             mov         rcx,        8
-.init_borderd                                                    ; initialize borders
+.init_borderd:                                                  ; initialize borders
             lea         rdi,        [rdi + rax]
             movq        [rdi],      xmm1
 
@@ -291,7 +291,7 @@ sym(vp8_mbpost_proc_down_xmm):
             mov         rdi,        rsi
             movq        xmm1,       QWORD ptr[rdi]              ; first row
             mov         rcx,        8
-.init_border                                                    ; initialize borders
+.init_border:                                                   ; initialize borders
             lea         rdi,        [rdi + rax]
             movq        [rdi],      xmm1
 
@@ -434,7 +434,7 @@ sym(vp8_mbpost_proc_down_xmm):
             movq        mm0,        [rsp + rcx*8] ;d[rcx*8]
             movq        [rsi],      mm0
 
-.skip_assignment
+.skip_assignment:
             lea         rsi,        [rsi+rax]
 
             lea         rdi,        [rdi+rax]

@@ -211,7 +211,7 @@ cglobal filter_block1d4_%1, 6, 6+(ARCH_X86_64*2), 11, LOCAL_VARS_SIZE, \
     pavgb               m1, m0
 %endif
     movd            [dstq], m1
-.done
+.done:
     RET
 %endm
 

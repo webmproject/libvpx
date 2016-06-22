@@ -59,7 +59,7 @@ sym(vp8_mbpost_proc_down_mmx):
             lea         rdi,        [rdi+rdx]
             movq        mm1,        QWORD ptr[rdi]              ; first row
             mov         rcx,        8
-.init_borderd                                                    ; initialize borders
+.init_borderd:                                                  ; initialize borders
             lea         rdi,        [rdi + rax]
             movq        [rdi],      mm1
 
@@ -72,7 +72,7 @@ sym(vp8_mbpost_proc_down_mmx):
             mov         rdi,        rsi
             movq        mm1,        QWORD ptr[rdi]              ; first row
             mov         rcx,        8
-.init_border                                                    ; initialize borders
+.init_border:                                                   ; initialize borders
             lea         rdi,        [rdi + rax]
             movq        [rdi],      mm1
 
@@ -213,7 +213,7 @@ sym(vp8_mbpost_proc_down_mmx):
             movd        mm1,        DWORD PTR [rsp+rcx*4] ;d[rcx*4]
             movd        [rsi],      mm1
 
-.skip_assignment
+.skip_assignment:
             lea         rsi,        [rsi+rax]
 
             lea         rdi,        [rdi+rax]
