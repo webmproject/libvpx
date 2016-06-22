@@ -16,6 +16,24 @@
       "revId": "98263ab83c5420f85e97117b9a489d6247cd3a04",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e67020f_d3720361",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1413,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-06-22T19:03:51Z",
+      "side": 1,
+      "message": "Case A\nThe one in vp9_get_pred_context_switchable_interp(xd) will set filter_ref only when 1) above and left are both interblocks and they agree to each other, or 2) there is only one interblock the other is intrablock\n\nCase B\nThis one will set filter_ref whenever there is at least one interblock and no matter above and left blocs agrees each other or not.\n\nWe can see Case A\u0027s condition of setting filter_ref is more strict. However, the code flow is not guaranteed to do filter search when the filter_ref is not set. This could cause performance drop.",
+      "parentUuid": "2e564e46_daaac1e8",
+      "revId": "98263ab83c5420f85e97117b9a489d6247cd3a04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
