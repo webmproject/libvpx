@@ -34,6 +34,24 @@
       "revId": "98263ab83c5420f85e97117b9a489d6247cd3a04",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aea6be25_ab71e9fc",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1413,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T22:26:55Z",
+      "side": 1,
+      "message": "some of this comment should at least go in the commit message, if not the code around the is_inter_block() checks",
+      "parentUuid": "4e67020f_d3720361",
+      "revId": "98263ab83c5420f85e97117b9a489d6247cd3a04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
