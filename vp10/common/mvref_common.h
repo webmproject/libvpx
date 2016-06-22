@@ -261,17 +261,36 @@ static INLINE int vp10_nmv_ctx(const uint8_t ref_mv_count,
 }
 
 static INLINE int8_t vp10_ref_frame_type(const MV_REFERENCE_FRAME *const rf) {
-  if (rf[1] > INTRA_FRAME)
-    return rf[0] + ALTREF_FRAME;
+  if (rf[1] > INTRA_FRAME) {
+    return MAX_REF_FRAMES + FWD_RF_OFFSET(rf[0]) +
+        BWD_RF_OFFSET(rf[1]) * FWD_REF_FRAMES;
+  }
 
   return rf[0];
 }
 
+static MV_REFERENCE_FRAME ref_frame_map[FWD_REF_FRAMES * BWD_REF_FRAMES][2] = {
+#if CONFIG_EXT_REFS
+  {LAST_FRAME, BWDREF_FRAME},
+  {LAST2_FRAME, BWDREF_FRAME},
+  {LAST3_FRAME, BWDREF_FRAME},
+  {GOLDEN_FRAME, BWDREF_FRAME},
+
+  {LAST_FRAME, ALTREF_FRAME},
+  {LAST2_FRAME, ALTREF_FRAME},
+  {LAST3_FRAME, ALTREF_FRAME},
+  {GOLDEN_FRAME, ALTREF_FRAME}
+#else
+  {LAST_FRAME, ALTREF_FRAME},
+  {GOLDEN_FRAME, ALTREF_FRAME}
+#endif
+};
+
 static INLINE void vp10_set_ref_frame(MV_REFERENCE_FRAME *rf,
                                       int8_t ref_frame_type) {
-  if (ref_frame_type > ALTREF_FRAME) {
-    rf[0] = ref_frame_type - ALTREF_FRAME;
-    rf[1] = ALTREF_FRAME;
+  if (ref_frame_type >= MAX_REF_FRAMES) {
+    rf[0] = ref_frame_map[ref_frame_type - MAX_REF_FRAMES][0];
+    rf[1] = ref_frame_map[ref_frame_type - MAX_REF_FRAMES][1];
   } else {
     rf[0] = ref_frame_type;
     rf[1] = NONE;
