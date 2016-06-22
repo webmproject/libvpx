@@ -186,24 +186,6 @@ add_extralibs() {
 # Boolean Manipulation Functions
 #
 
-enable_codec(){
-  enabled $1 || echo "  enabling $1"
-  set_all yes $1
-
-  is_in $1 vp8 vp9 vp10 && \
-    set_all yes $1_encoder && \
-    set_all yes $1_decoder
-}
-
-disable_codec(){
-  disabled $1 || echo "  disabling $1"
-  set_all no $1
-
-  is_in $1 vp8 vp9 vp10 && \
-    set_all no $1_encoder && \
-    set_all no $1_decoder
-}
-
 enable_feature(){
   set_all yes $*
 }
@@ -218,6 +200,20 @@ enabled(){
 
 disabled(){
   eval test "x\$$1" = "xno"
+}
+
+enable_codec(){
+  enabled "${1}" || echo "  enabling ${1}"
+  enable_feature "${1}"
+
+  is_in "${1}" vp8 vp9 vp10 && enable_feature "${1}_encoder" "${1}_decoder"
+}
+
+disable_codec(){
+  disabled "${1}" || echo "  disabling ${1}"
+  disable_feature "${1}"
+
+  is_in "${1}" vp8 vp9 vp10 && disable_feature "${1}_encoder" "${1}_decoder"
 }
 
 # Iterates through positional parameters, checks to confirm the parameter has
@@ -945,6 +941,9 @@ EOF
               check_add_cflags -mfpu=neon #-ftree-vectorize
               check_add_asflags -mfpu=neon
             fi
+          elif [ ${tgt_isa} = "arm64" ] || [ ${tgt_isa} = "armv8" ]; then
+            check_add_cflags -march=armv8-a
+            check_add_asflags -march=armv8-a
           else
             check_add_cflags -march=${tgt_isa}
             check_add_asflags -march=${tgt_isa}
@@ -1012,6 +1011,10 @@ EOF
           ;;
 
         android*)
+          if [ -z "${sdk_path}" ]; then
+            die "Must specify --sdk-path for Android builds."
+          fi
+
           SDK_PATH=${sdk_path}
           COMPILER_LOCATION=`find "${SDK_PATH}" \
                              -name "arm-linux-androideabi-gcc*" -print -quit`
@@ -1150,13 +1153,13 @@ EOF
       if [ -n "${tune_cpu}" ]; then
         case ${tune_cpu} in
           p5600)
-            check_add_cflags -mips32r5 -funroll-loops -mload-store-pairs
+            check_add_cflags -mips32r5 -mload-store-pairs
             check_add_cflags -msched-weight -mhard-float -mfp64
             check_add_asflags -mips32r5 -mhard-float -mfp64
             check_add_ldflags -mfp64
             ;;
-          i6400)
-            check_add_cflags -mips64r6 -mabi=64 -funroll-loops -msched-weight
+          i6400|p6600)
+            check_add_cflags -mips64r6 -mabi=64 -msched-weight
             check_add_cflags  -mload-store-pairs -mhard-float -mfp64
             check_add_asflags -mips64r6 -mabi=64 -mhard-float -mfp64
             check_add_ldflags -mips64r6 -mabi=64 -mfp64
@@ -1391,10 +1394,6 @@ EOF
     else
       enabled small && check_add_cflags -O2 ||  check_add_cflags -O3
     fi
-  fi
-
-  if [ "${tgt_isa}" = "x86_64" ] || [ "${tgt_isa}" = "x86" ]; then
-    soft_enable use_x86inc
   fi
 
   # Position Independent Code (PIC) support, for building relocatable

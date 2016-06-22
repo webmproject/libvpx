@@ -77,7 +77,8 @@ static void highbd_iidtx4_c(const tran_low_t *input, tran_low_t *output,
                             int bd) {
   int i;
   for (i = 0; i < 4; ++i)
-    output[i] = (tran_low_t)highbd_dct_const_round_shift(input[i] * Sqrt2, bd);
+    output[i] = HIGHBD_WRAPLOW(
+        highbd_dct_const_round_shift(input[i] * Sqrt2), bd);
 }
 
 static void highbd_iidtx8_c(const tran_low_t *input, tran_low_t *output,
@@ -92,8 +93,8 @@ static void highbd_iidtx16_c(const tran_low_t *input, tran_low_t *output,
                             int bd) {
   int i;
   for (i = 0; i < 16; ++i)
-    output[i] = (tran_low_t)highbd_dct_const_round_shift(
-        input[i] * 2 * Sqrt2, bd);
+    output[i] = HIGHBD_WRAPLOW(
+        highbd_dct_const_round_shift(input[i] * 2 * Sqrt2), bd);
 }
 
 static void highbd_iidtx32_c(const tran_low_t *input, tran_low_t *output,
@@ -113,8 +114,8 @@ static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
   }
   // Multiply input by sqrt(2)
   for (i = 0; i < 16; ++i) {
-    inputhalf[i] = (tran_low_t)highbd_dct_const_round_shift(
-        input[i] * Sqrt2, bd);
+    inputhalf[i] = HIGHBD_WRAPLOW(
+        highbd_dct_const_round_shift(input[i] * Sqrt2), bd);
   }
   vpx_highbd_idct16_c(inputhalf, output + 16, bd);
   // Note overall scaling factor is 4 times orthogonal
@@ -190,18 +191,18 @@ void highbd_idst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   // stage 1
   temp1 = (input[3] + input[1]) * cospi_16_64;
   temp2 = (input[3] - input[1]) * cospi_16_64;
-  step[0] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step[1] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step[0] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step[1] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   temp1 = input[2] * cospi_24_64 - input[0] * cospi_8_64;
   temp2 = input[2] * cospi_8_64 + input[0] * cospi_24_64;
-  step[2] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step[3] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step[2] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step[3] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
 
   // stage 2
-  output[0] = WRAPLOW(step[0] + step[3], bd);
-  output[1] = WRAPLOW(-step[1] - step[2], bd);
-  output[2] = WRAPLOW(step[1] - step[2], bd);
-  output[3] = WRAPLOW(step[3] - step[0], bd);
+  output[0] = HIGHBD_WRAPLOW(step[0] + step[3], bd);
+  output[1] = HIGHBD_WRAPLOW(-step[1] - step[2], bd);
+  output[2] = HIGHBD_WRAPLOW(step[1] - step[2], bd);
+  output[3] = HIGHBD_WRAPLOW(step[3] - step[0], bd);
 }
 
 void highbd_idst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
@@ -215,48 +216,48 @@ void highbd_idst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   step1[3] = input[1];
   temp1 = input[6] * cospi_28_64 - input[0] * cospi_4_64;
   temp2 = input[6] * cospi_4_64 + input[0] * cospi_28_64;
-  step1[4] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step1[7] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[4] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[7] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   temp1 = input[2] * cospi_12_64 - input[4] * cospi_20_64;
   temp2 = input[2] * cospi_20_64 + input[4] * cospi_12_64;
-  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[5] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
 
   // stage 2
   temp1 = (step1[0] + step1[2]) * cospi_16_64;
   temp2 = (step1[0] - step1[2]) * cospi_16_64;
-  step2[0] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[1] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[0] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[1] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   temp1 = step1[1] * cospi_24_64 - step1[3] * cospi_8_64;
   temp2 = step1[1] * cospi_8_64 + step1[3] * cospi_24_64;
-  step2[2] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[3] = WRAPLOW(dct_const_round_shift(temp2), bd);
-  step2[4] = WRAPLOW(step1[4] + step1[5], bd);
-  step2[5] = WRAPLOW(step1[4] - step1[5], bd);
-  step2[6] = WRAPLOW(-step1[6] + step1[7], bd);
-  step2[7] = WRAPLOW(step1[6] + step1[7], bd);
+  step2[2] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[3] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[4] = HIGHBD_WRAPLOW(step1[4] + step1[5], bd);
+  step2[5] = HIGHBD_WRAPLOW(step1[4] - step1[5], bd);
+  step2[6] = HIGHBD_WRAPLOW(-step1[6] + step1[7], bd);
+  step2[7] = HIGHBD_WRAPLOW(step1[6] + step1[7], bd);
 
   // stage 3
-  step1[0] = WRAPLOW(step2[0] + step2[3], bd);
-  step1[1] = WRAPLOW(step2[1] + step2[2], bd);
-  step1[2] = WRAPLOW(step2[1] - step2[2], bd);
-  step1[3] = WRAPLOW(step2[0] - step2[3], bd);
+  step1[0] = HIGHBD_WRAPLOW(step2[0] + step2[3], bd);
+  step1[1] = HIGHBD_WRAPLOW(step2[1] + step2[2], bd);
+  step1[2] = HIGHBD_WRAPLOW(step2[1] - step2[2], bd);
+  step1[3] = HIGHBD_WRAPLOW(step2[0] - step2[3], bd);
   step1[4] = step2[4];
   temp1 = (step2[6] - step2[5]) * cospi_16_64;
   temp2 = (step2[5] + step2[6]) * cospi_16_64;
-  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[5] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   step1[7] = step2[7];
 
   // stage 4
-  output[0] = WRAPLOW(step1[0] + step1[7], bd);
-  output[1] = WRAPLOW(-step1[1] - step1[6], bd);
-  output[2] = WRAPLOW(step1[2] + step1[5], bd);
-  output[3] = WRAPLOW(-step1[3] - step1[4], bd);
-  output[4] = WRAPLOW(step1[3] - step1[4], bd);
-  output[5] = WRAPLOW(-step1[2] + step1[5], bd);
-  output[6] = WRAPLOW(step1[1] - step1[6], bd);
-  output[7] = WRAPLOW(-step1[0] + step1[7], bd);
+  output[0] = HIGHBD_WRAPLOW(step1[0] + step1[7], bd);
+  output[1] = HIGHBD_WRAPLOW(-step1[1] - step1[6], bd);
+  output[2] = HIGHBD_WRAPLOW(step1[2] + step1[5], bd);
+  output[3] = HIGHBD_WRAPLOW(-step1[3] - step1[4], bd);
+  output[4] = HIGHBD_WRAPLOW(step1[3] - step1[4], bd);
+  output[5] = HIGHBD_WRAPLOW(-step1[2] + step1[5], bd);
+  output[6] = HIGHBD_WRAPLOW(step1[1] - step1[6], bd);
+  output[7] = HIGHBD_WRAPLOW(-step1[0] + step1[7], bd);
 }
 
 void highbd_idst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
@@ -295,23 +296,23 @@ void highbd_idst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
 
   temp1 = step1[8] * cospi_30_64 - step1[15] * cospi_2_64;
   temp2 = step1[8] * cospi_2_64 + step1[15] * cospi_30_64;
-  step2[8] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[15] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[8] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[15] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
 
   temp1 = step1[9] * cospi_14_64 - step1[14] * cospi_18_64;
   temp2 = step1[9] * cospi_18_64 + step1[14] * cospi_14_64;
-  step2[9] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[14] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[9] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[14] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
 
   temp1 = step1[10] * cospi_22_64 - step1[13] * cospi_10_64;
   temp2 = step1[10] * cospi_10_64 + step1[13] * cospi_22_64;
-  step2[10] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[13] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[10] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[13] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
 
   temp1 = step1[11] * cospi_6_64 - step1[12] * cospi_26_64;
   temp2 = step1[11] * cospi_26_64 + step1[12] * cospi_6_64;
-  step2[11] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[12] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[11] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[12] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
 
   // stage 3
   step1[0] = step2[0];
@@ -321,109 +322,109 @@ void highbd_idst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
 
   temp1 = step2[4] * cospi_28_64 - step2[7] * cospi_4_64;
   temp2 = step2[4] * cospi_4_64 + step2[7] * cospi_28_64;
-  step1[4] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step1[7] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[4] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[7] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   temp1 = step2[5] * cospi_12_64 - step2[6] * cospi_20_64;
   temp2 = step2[5] * cospi_20_64 + step2[6] * cospi_12_64;
-  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[5] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
 
-  step1[8] = WRAPLOW(step2[8] + step2[9], bd);
-  step1[9] = WRAPLOW(step2[8] - step2[9], bd);
-  step1[10] = WRAPLOW(-step2[10] + step2[11], bd);
-  step1[11] = WRAPLOW(step2[10] + step2[11], bd);
-  step1[12] = WRAPLOW(step2[12] + step2[13], bd);
-  step1[13] = WRAPLOW(step2[12] - step2[13], bd);
-  step1[14] = WRAPLOW(-step2[14] + step2[15], bd);
-  step1[15] = WRAPLOW(step2[14] + step2[15], bd);
+  step1[8] = HIGHBD_WRAPLOW(step2[8] + step2[9], bd);
+  step1[9] = HIGHBD_WRAPLOW(step2[8] - step2[9], bd);
+  step1[10] = HIGHBD_WRAPLOW(-step2[10] + step2[11], bd);
+  step1[11] = HIGHBD_WRAPLOW(step2[10] + step2[11], bd);
+  step1[12] = HIGHBD_WRAPLOW(step2[12] + step2[13], bd);
+  step1[13] = HIGHBD_WRAPLOW(step2[12] - step2[13], bd);
+  step1[14] = HIGHBD_WRAPLOW(-step2[14] + step2[15], bd);
+  step1[15] = HIGHBD_WRAPLOW(step2[14] + step2[15], bd);
 
   // stage 4
   temp1 = (step1[0] + step1[1]) * cospi_16_64;
   temp2 = (step1[0] - step1[1]) * cospi_16_64;
-  step2[0] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[1] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[0] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[1] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   temp1 = step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
   temp2 = step1[2] * cospi_8_64 + step1[3] * cospi_24_64;
-  step2[2] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[3] = WRAPLOW(dct_const_round_shift(temp2), bd);
-  step2[4] = WRAPLOW(step1[4] + step1[5], bd);
-  step2[5] = WRAPLOW(step1[4] - step1[5], bd);
-  step2[6] = WRAPLOW(-step1[6] + step1[7], bd);
-  step2[7] = WRAPLOW(step1[6] + step1[7], bd);
+  step2[2] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[3] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[4] = HIGHBD_WRAPLOW(step1[4] + step1[5], bd);
+  step2[5] = HIGHBD_WRAPLOW(step1[4] - step1[5], bd);
+  step2[6] = HIGHBD_WRAPLOW(-step1[6] + step1[7], bd);
+  step2[7] = HIGHBD_WRAPLOW(step1[6] + step1[7], bd);
 
   step2[8] = step1[8];
   step2[15] = step1[15];
   temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64;
   temp2 = step1[9] * cospi_24_64 + step1[14] * cospi_8_64;
-  step2[9] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[14] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[9] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[14] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   temp1 = -step1[10] * cospi_24_64 - step1[13] * cospi_8_64;
   temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64;
-  step2[10] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[13] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[10] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[13] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   step2[11] = step1[11];
   step2[12] = step1[12];
 
   // stage 5
-  step1[0] = WRAPLOW(step2[0] + step2[3], bd);
-  step1[1] = WRAPLOW(step2[1] + step2[2], bd);
-  step1[2] = WRAPLOW(step2[1] - step2[2], bd);
-  step1[3] = WRAPLOW(step2[0] - step2[3], bd);
+  step1[0] = HIGHBD_WRAPLOW(step2[0] + step2[3], bd);
+  step1[1] = HIGHBD_WRAPLOW(step2[1] + step2[2], bd);
+  step1[2] = HIGHBD_WRAPLOW(step2[1] - step2[2], bd);
+  step1[3] = HIGHBD_WRAPLOW(step2[0] - step2[3], bd);
   step1[4] = step2[4];
   temp1 = (step2[6] - step2[5]) * cospi_16_64;
   temp2 = (step2[5] + step2[6]) * cospi_16_64;
-  step1[5] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step1[6] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step1[5] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step1[6] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   step1[7] = step2[7];
 
-  step1[8] = WRAPLOW(step2[8] + step2[11], bd);
-  step1[9] = WRAPLOW(step2[9] + step2[10], bd);
-  step1[10] = WRAPLOW(step2[9] - step2[10], bd);
-  step1[11] = WRAPLOW(step2[8] - step2[11], bd);
-  step1[12] = WRAPLOW(-step2[12] + step2[15], bd);
-  step1[13] = WRAPLOW(-step2[13] + step2[14], bd);
-  step1[14] = WRAPLOW(step2[13] + step2[14], bd);
-  step1[15] = WRAPLOW(step2[12] + step2[15], bd);
+  step1[8] = HIGHBD_WRAPLOW(step2[8] + step2[11], bd);
+  step1[9] = HIGHBD_WRAPLOW(step2[9] + step2[10], bd);
+  step1[10] = HIGHBD_WRAPLOW(step2[9] - step2[10], bd);
+  step1[11] = HIGHBD_WRAPLOW(step2[8] - step2[11], bd);
+  step1[12] = HIGHBD_WRAPLOW(-step2[12] + step2[15], bd);
+  step1[13] = HIGHBD_WRAPLOW(-step2[13] + step2[14], bd);
+  step1[14] = HIGHBD_WRAPLOW(step2[13] + step2[14], bd);
+  step1[15] = HIGHBD_WRAPLOW(step2[12] + step2[15], bd);
 
   // stage 6
-  step2[0] = WRAPLOW(step1[0] + step1[7], bd);
-  step2[1] = WRAPLOW(step1[1] + step1[6], bd);
-  step2[2] = WRAPLOW(step1[2] + step1[5], bd);
-  step2[3] = WRAPLOW(step1[3] + step1[4], bd);
-  step2[4] = WRAPLOW(step1[3] - step1[4], bd);
-  step2[5] = WRAPLOW(step1[2] - step1[5], bd);
-  step2[6] = WRAPLOW(step1[1] - step1[6], bd);
-  step2[7] = WRAPLOW(step1[0] - step1[7], bd);
+  step2[0] = HIGHBD_WRAPLOW(step1[0] + step1[7], bd);
+  step2[1] = HIGHBD_WRAPLOW(step1[1] + step1[6], bd);
+  step2[2] = HIGHBD_WRAPLOW(step1[2] + step1[5], bd);
+  step2[3] = HIGHBD_WRAPLOW(step1[3] + step1[4], bd);
+  step2[4] = HIGHBD_WRAPLOW(step1[3] - step1[4], bd);
+  step2[5] = HIGHBD_WRAPLOW(step1[2] - step1[5], bd);
+  step2[6] = HIGHBD_WRAPLOW(step1[1] - step1[6], bd);
+  step2[7] = HIGHBD_WRAPLOW(step1[0] - step1[7], bd);
   step2[8] = step1[8];
   step2[9] = step1[9];
   temp1 = (-step1[10] + step1[13]) * cospi_16_64;
   temp2 = (step1[10] + step1[13]) * cospi_16_64;
-  step2[10] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[13] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[10] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[13] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   temp1 = (-step1[11] + step1[12]) * cospi_16_64;
   temp2 = (step1[11] + step1[12]) * cospi_16_64;
-  step2[11] = WRAPLOW(dct_const_round_shift(temp1), bd);
-  step2[12] = WRAPLOW(dct_const_round_shift(temp2), bd);
+  step2[11] = HIGHBD_WRAPLOW(dct_const_round_shift(temp1), bd);
+  step2[12] = HIGHBD_WRAPLOW(dct_const_round_shift(temp2), bd);
   step2[14] = step1[14];
   step2[15] = step1[15];
 
   // stage 7
-  output[0] = WRAPLOW(step2[0] + step2[15], bd);
-  output[1] = WRAPLOW(-step2[1] - step2[14], bd);
-  output[2] = WRAPLOW(step2[2] + step2[13], bd);
-  output[3] = WRAPLOW(-step2[3] - step2[12], bd);
-  output[4] = WRAPLOW(step2[4] + step2[11], bd);
-  output[5] = WRAPLOW(-step2[5] - step2[10], bd);
-  output[6] = WRAPLOW(step2[6] + step2[9], bd);
-  output[7] = WRAPLOW(-step2[7] - step2[8], bd);
-  output[8] = WRAPLOW(step2[7] - step2[8], bd);
-  output[9] = WRAPLOW(-step2[6] + step2[9], bd);
-  output[10] = WRAPLOW(step2[5] - step2[10], bd);
-  output[11] = WRAPLOW(-step2[4] + step2[11], bd);
-  output[12] = WRAPLOW(step2[3] - step2[12], bd);
-  output[13] = WRAPLOW(-step2[2] + step2[13], bd);
-  output[14] = WRAPLOW(step2[1] - step2[14], bd);
-  output[15] = WRAPLOW(-step2[0] + step2[15], bd);
+  output[0] = HIGHBD_WRAPLOW(step2[0] + step2[15], bd);
+  output[1] = HIGHBD_WRAPLOW(-step2[1] - step2[14], bd);
+  output[2] = HIGHBD_WRAPLOW(step2[2] + step2[13], bd);
+  output[3] = HIGHBD_WRAPLOW(-step2[3] - step2[12], bd);
+  output[4] = HIGHBD_WRAPLOW(step2[4] + step2[11], bd);
+  output[5] = HIGHBD_WRAPLOW(-step2[5] - step2[10], bd);
+  output[6] = HIGHBD_WRAPLOW(step2[6] + step2[9], bd);
+  output[7] = HIGHBD_WRAPLOW(-step2[7] - step2[8], bd);
+  output[8] = HIGHBD_WRAPLOW(step2[7] - step2[8], bd);
+  output[9] = HIGHBD_WRAPLOW(-step2[6] + step2[9], bd);
+  output[10] = HIGHBD_WRAPLOW(step2[5] - step2[10], bd);
+  output[11] = HIGHBD_WRAPLOW(-step2[4] + step2[11], bd);
+  output[12] = HIGHBD_WRAPLOW(step2[3] - step2[12], bd);
+  output[13] = HIGHBD_WRAPLOW(-step2[2] + step2[13], bd);
+  output[14] = HIGHBD_WRAPLOW(step2[1] - step2[14], bd);
+  output[15] = HIGHBD_WRAPLOW(-step2[0] + step2[15], bd);
 }
 
 static void highbd_inv_idtx_add_c(const tran_low_t *input, uint8_t *dest8,

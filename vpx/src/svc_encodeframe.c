@@ -397,13 +397,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   si->width = enc_cfg->g_w;
   si->height = enc_cfg->g_h;
 
-// wonkap: why is this necessary?
-  /*if (enc_cfg->kf_max_dist < 2) {
-    svc_log(svc_ctx, SVC_LOG_ERROR, "key frame distance too small: %d\n",
-            enc_cfg->kf_max_dist);
-    return VPX_CODEC_INVALID_PARAM;
-  }*/
-
   si->kf_dist = enc_cfg->kf_max_dist;
 
   if (svc_ctx->spatial_layers == 0)

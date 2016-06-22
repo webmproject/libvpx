@@ -453,7 +453,7 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
     memcpy(output_ref_, output_, kOutputBufferSize);
 #if CONFIG_VP9_HIGHBITDEPTH
     memcpy(output16_ref_, output16_,
-           kOutputBufferSize * sizeof(*output16_ref_));
+           kOutputBufferSize * sizeof(output16_ref_[0]));
 #endif
   }
 
@@ -465,41 +465,41 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   }
 
   uint8_t *input() const {
-    const int index = BorderTop() * kOuterBlockSize + BorderLeft();
+    const int offset = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return input_ + index;
+      return input_ + offset;
     } else {
-      return CONVERT_TO_BYTEPTR(input16_) + index;
+      return CONVERT_TO_BYTEPTR(input16_) + offset;
     }
 #else
-    return input_ + index;
+    return input_ + offset;
 #endif
   }
 
   uint8_t *output() const {
-    const int index = BorderTop() * kOuterBlockSize + BorderLeft();
+    const int offset = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return output_ + index;
+      return output_ + offset;
     } else {
-      return CONVERT_TO_BYTEPTR(output16_ + index);
+      return CONVERT_TO_BYTEPTR(output16_) + offset;
     }
 #else
-    return output_ + index;
+    return output_ + offset;
 #endif
   }
 
   uint8_t *output_ref() const {
-    const int index = BorderTop() * kOuterBlockSize + BorderLeft();
+    const int offset = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return output_ref_ + index;
+      return output_ref_ + offset;
     } else {
-      return CONVERT_TO_BYTEPTR(output16_ref_ + index);
+      return CONVERT_TO_BYTEPTR(output16_ref_) + offset;
     }
 #else
-    return output_ref_ + index;
+    return output_ref_ + offset;
 #endif
   }
 
@@ -1011,14 +1011,12 @@ void wrap_ ## func ## _ ## bd(const uint8_t *src, ptrdiff_t src_stride, \
                       w, h, bd); \
 }
 #if HAVE_SSE2 && ARCH_X86_64
-#if CONFIG_USE_X86INC
 WRAP(convolve_copy_sse2, 8)
 WRAP(convolve_avg_sse2, 8)
 WRAP(convolve_copy_sse2, 10)
 WRAP(convolve_avg_sse2, 10)
 WRAP(convolve_copy_sse2, 12)
 WRAP(convolve_avg_sse2, 12)
-#endif  // CONFIG_USE_X86INC
 WRAP(convolve8_horiz_sse2, 8)
 WRAP(convolve8_avg_horiz_sse2, 8)
 WRAP(convolve8_vert_sse2, 8)
@@ -1112,11 +1110,7 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest,
 #if HAVE_SSE2 && ARCH_X86_64
 #if CONFIG_VP9_HIGHBITDEPTH
 const ConvolveFunctions convolve8_sse2(
-#if CONFIG_USE_X86INC
     wrap_convolve_copy_sse2_8, wrap_convolve_avg_sse2_8,
-#else
-    wrap_convolve_copy_c_8, wrap_convolve_avg_c_8,
-#endif  // CONFIG_USE_X86INC
     wrap_convolve8_horiz_sse2_8, wrap_convolve8_avg_horiz_sse2_8,
     wrap_convolve8_vert_sse2_8, wrap_convolve8_avg_vert_sse2_8,
     wrap_convolve8_sse2_8, wrap_convolve8_avg_sse2_8,
@@ -1124,11 +1118,7 @@ const ConvolveFunctions convolve8_sse2(
     wrap_convolve8_vert_sse2_8, wrap_convolve8_avg_vert_sse2_8,
     wrap_convolve8_sse2_8, wrap_convolve8_avg_sse2_8, 8);
 const ConvolveFunctions convolve10_sse2(
-#if CONFIG_USE_X86INC
     wrap_convolve_copy_sse2_10, wrap_convolve_avg_sse2_10,
-#else
-    wrap_convolve_copy_c_10, wrap_convolve_avg_c_10,
-#endif  // CONFIG_USE_X86INC
     wrap_convolve8_horiz_sse2_10, wrap_convolve8_avg_horiz_sse2_10,
     wrap_convolve8_vert_sse2_10, wrap_convolve8_avg_vert_sse2_10,
     wrap_convolve8_sse2_10, wrap_convolve8_avg_sse2_10,
@@ -1136,11 +1126,7 @@ const ConvolveFunctions convolve10_sse2(
     wrap_convolve8_vert_sse2_10, wrap_convolve8_avg_vert_sse2_10,
     wrap_convolve8_sse2_10, wrap_convolve8_avg_sse2_10, 10);
 const ConvolveFunctions convolve12_sse2(
-#if CONFIG_USE_X86INC
     wrap_convolve_copy_sse2_12, wrap_convolve_avg_sse2_12,
-#else
-    wrap_convolve_copy_c_12, wrap_convolve_avg_c_12,
-#endif  // CONFIG_USE_X86INC
     wrap_convolve8_horiz_sse2_12, wrap_convolve8_avg_horiz_sse2_12,
     wrap_convolve8_vert_sse2_12, wrap_convolve8_avg_vert_sse2_12,
     wrap_convolve8_sse2_12, wrap_convolve8_avg_sse2_12,
@@ -1154,11 +1140,7 @@ const ConvolveParam kArrayConvolve_sse2[] = {
 };
 #else
 const ConvolveFunctions convolve8_sse2(
-#if CONFIG_USE_X86INC
     vpx_convolve_copy_sse2, vpx_convolve_avg_sse2,
-#else
-    vpx_convolve_copy_c, vpx_convolve_avg_c,
-#endif  // CONFIG_USE_X86INC
     vpx_convolve8_horiz_sse2, vpx_convolve8_avg_horiz_sse2,
     vpx_convolve8_vert_sse2, vpx_convolve8_avg_vert_sse2,
     vpx_convolve8_sse2, vpx_convolve8_avg_sse2,

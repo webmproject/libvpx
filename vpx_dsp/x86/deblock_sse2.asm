@@ -11,248 +11,230 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;void vp9_post_proc_down_and_across_xmm
+;macro in deblock functions
+%macro FIRST_2_ROWS 0
+        movdqa      xmm4,       xmm0
+        movdqa      xmm6,       xmm0
+        movdqa      xmm5,       xmm1
+        pavgb       xmm5,       xmm3
+
+        ;calculate absolute value
+        psubusb     xmm4,       xmm1
+        psubusb     xmm1,       xmm0
+        psubusb     xmm6,       xmm3
+        psubusb     xmm3,       xmm0
+        paddusb     xmm4,       xmm1
+        paddusb     xmm6,       xmm3
+
+        ;get threshold
+        movdqa      xmm2,       flimit
+        pxor        xmm1,       xmm1
+        movdqa      xmm7,       xmm2
+
+        ;get mask
+        psubusb     xmm2,       xmm4
+        psubusb     xmm7,       xmm6
+        pcmpeqb     xmm2,       xmm1
+        pcmpeqb     xmm7,       xmm1
+        por         xmm7,       xmm2
+%endmacro
+
+%macro SECOND_2_ROWS 0
+        movdqa      xmm6,       xmm0
+        movdqa      xmm4,       xmm0
+        movdqa      xmm2,       xmm1
+        pavgb       xmm1,       xmm3
+
+        ;calculate absolute value
+        psubusb     xmm6,       xmm2
+        psubusb     xmm2,       xmm0
+        psubusb     xmm4,       xmm3
+        psubusb     xmm3,       xmm0
+        paddusb     xmm6,       xmm2
+        paddusb     xmm4,       xmm3
+
+        pavgb       xmm5,       xmm1
+
+        ;get threshold
+        movdqa      xmm2,       flimit
+        pxor        xmm1,       xmm1
+        movdqa      xmm3,       xmm2
+
+        ;get mask
+        psubusb     xmm2,       xmm6
+        psubusb     xmm3,       xmm4
+        pcmpeqb     xmm2,       xmm1
+        pcmpeqb     xmm3,       xmm1
+
+        por         xmm7,       xmm2
+        por         xmm7,       xmm3
+
+        pavgb       xmm5,       xmm0
+
+        ;decide if or not to use filtered value
+        pand        xmm0,       xmm7
+        pandn       xmm7,       xmm5
+        paddusb     xmm0,       xmm7
+%endmacro
+
+%macro UPDATE_FLIMIT 0
+        movdqa      xmm2,       XMMWORD PTR [rbx]
+        movdqa      [rsp],      xmm2
+        add         rbx,        16
+%endmacro
+
+;void vpx_post_proc_down_and_across_mb_row_sse2
 ;(
 ;    unsigned char *src_ptr,
 ;    unsigned char *dst_ptr,
 ;    int src_pixels_per_line,
 ;    int dst_pixels_per_line,
-;    int rows,
 ;    int cols,
-;    int flimit
+;    int *flimits,
+;    int size
 ;)
-global sym(vp9_post_proc_down_and_across_xmm) PRIVATE
-sym(vp9_post_proc_down_and_across_xmm):
+global sym(vpx_post_proc_down_and_across_mb_row_sse2) PRIVATE
+sym(vpx_post_proc_down_and_across_mb_row_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
     SAVE_XMM 7
-    GET_GOT     rbx
+    push        rbx
     push        rsi
     push        rdi
     ; end prolog
-
-%if ABI_IS_32BIT=1 && CONFIG_PIC=1
     ALIGN_STACK 16, rax
-    ; move the global rd onto the stack, since we don't have enough registers
-    ; to do PIC addressing
-    movdqa      xmm0, [GLOBAL(rd42)]
     sub         rsp, 16
-    movdqa      [rsp], xmm0
-%define RD42 [rsp]
-%else
-%define RD42 [GLOBAL(rd42)]
-%endif
 
+        ; put flimit on stack
+        mov         rbx,        arg(5)           ;flimits ptr
+        UPDATE_FLIMIT
 
-        movd        xmm2,       dword ptr arg(6) ;flimit
-        punpcklwd   xmm2,       xmm2
-        punpckldq   xmm2,       xmm2
-        punpcklqdq  xmm2,       xmm2
+%define flimit [rsp]
 
-        mov         rsi,        arg(0) ;src_ptr
-        mov         rdi,        arg(1) ;dst_ptr
+        mov         rsi,        arg(0)           ;src_ptr
+        mov         rdi,        arg(1)           ;dst_ptr
 
-        movsxd      rcx,        DWORD PTR arg(4) ;rows
-        movsxd      rax,        DWORD PTR arg(2) ;src_pixels_per_line ; destination pitch?
-        pxor        xmm0,       xmm0              ; mm0 = 00000000
-
+        movsxd      rax,        DWORD PTR arg(2) ;src_pixels_per_line
+        movsxd      rcx,        DWORD PTR arg(6) ;rows in a macroblock
 .nextrow:
-
-        xor         rdx,        rdx       ; clear out rdx for use as loop counter
+        xor         rdx,        rdx              ;col
 .nextcol:
-        movq        xmm3,       QWORD PTR [rsi]         ; mm4 = r0 p0..p7
-        punpcklbw   xmm3,       xmm0                    ; mm3 = p0..p3
-        movdqa      xmm1,       xmm3                    ; mm1 = p0..p3
-        psllw       xmm3,       2                       ;
+        ;load current and next 2 rows
+        movdqu      xmm0,       XMMWORD PTR [rsi]
+        movdqu      xmm1,       XMMWORD PTR [rsi + rax]
+        movdqu      xmm3,       XMMWORD PTR [rsi + 2*rax]
 
-        movq        xmm5,       QWORD PTR [rsi + rax]   ; mm4 = r1 p0..p7
-        punpcklbw   xmm5,       xmm0                    ; mm5 = r1 p0..p3
-        paddusw     xmm3,       xmm5                    ; mm3 += mm6
+        FIRST_2_ROWS
 
-        ; thresholding
-        movdqa      xmm7,       xmm1                    ; mm7 = r0 p0..p3
-        psubusw     xmm7,       xmm5                    ; mm7 = r0 p0..p3 - r1 p0..p3
-        psubusw     xmm5,       xmm1                    ; mm5 = r1 p0..p3 - r0 p0..p3
-        paddusw     xmm7,       xmm5                    ; mm7 = abs(r0 p0..p3 - r1 p0..p3)
-        pcmpgtw     xmm7,       xmm2
-
-        movq        xmm5,       QWORD PTR [rsi + 2*rax] ; mm4 = r2 p0..p7
-        punpcklbw   xmm5,       xmm0                    ; mm5 = r2 p0..p3
-        paddusw     xmm3,       xmm5                    ; mm3 += mm5
-
-        ; thresholding
-        movdqa      xmm6,       xmm1                    ; mm6 = r0 p0..p3
-        psubusw     xmm6,       xmm5                    ; mm6 = r0 p0..p3 - r2 p0..p3
-        psubusw     xmm5,       xmm1                    ; mm5 = r2 p0..p3 - r2 p0..p3
-        paddusw     xmm6,       xmm5                    ; mm6 = abs(r0 p0..p3 - r2 p0..p3)
-        pcmpgtw     xmm6,       xmm2
-        por         xmm7,       xmm6                    ; accumulate thresholds
-
-
+        ;load above 2 rows
         neg         rax
-        movq        xmm5,       QWORD PTR [rsi+2*rax]   ; mm4 = r-2 p0..p7
-        punpcklbw   xmm5,       xmm0                    ; mm5 = r-2 p0..p3
-        paddusw     xmm3,       xmm5                    ; mm3 += mm5
+        movdqu      xmm1,       XMMWORD PTR [rsi + 2*rax]
+        movdqu      xmm3,       XMMWORD PTR [rsi + rax]
 
-        ; thresholding
-        movdqa      xmm6,       xmm1                    ; mm6 = r0 p0..p3
-        psubusw     xmm6,       xmm5                    ; mm6 = p0..p3 - r-2 p0..p3
-        psubusw     xmm5,       xmm1                    ; mm5 = r-2 p0..p3 - p0..p3
-        paddusw     xmm6,       xmm5                    ; mm6 = abs(r0 p0..p3 - r-2 p0..p3)
-        pcmpgtw     xmm6,       xmm2
-        por         xmm7,       xmm6                    ; accumulate thresholds
+        SECOND_2_ROWS
 
-        movq        xmm4,       QWORD PTR [rsi+rax]     ; mm4 = r-1 p0..p7
-        punpcklbw   xmm4,       xmm0                    ; mm4 = r-1 p0..p3
-        paddusw     xmm3,       xmm4                    ; mm3 += mm5
+        movdqu      XMMWORD PTR [rdi], xmm0
 
-        ; thresholding
-        movdqa      xmm6,       xmm1                    ; mm6 = r0 p0..p3
-        psubusw     xmm6,       xmm4                    ; mm6 = p0..p3 - r-2 p0..p3
-        psubusw     xmm4,       xmm1                    ; mm5 = r-1 p0..p3 - p0..p3
-        paddusw     xmm6,       xmm4                    ; mm6 = abs(r0 p0..p3 - r-1 p0..p3)
-        pcmpgtw     xmm6,       xmm2
-        por         xmm7,       xmm6                    ; accumulate thresholds
+        neg         rax                          ; positive stride
+        add         rsi,        16
+        add         rdi,        16
 
+        add         rdx,        16
+        cmp         edx,        dword arg(4)     ;cols
+        jge         .downdone
+        UPDATE_FLIMIT
+        jmp         .nextcol
 
-        paddusw     xmm3,       RD42                    ; mm3 += round value
-        psraw       xmm3,       3                       ; mm3 /= 8
-
-        pand        xmm1,       xmm7                    ; mm1 select vals > thresh from source
-        pandn       xmm7,       xmm3                    ; mm7 select vals < thresh from blurred result
-        paddusw     xmm1,       xmm7                    ; combination
-
-        packuswb    xmm1,       xmm0                    ; pack to bytes
-        movq        QWORD PTR [rdi], xmm1             ;
-
-        neg         rax                   ; pitch is positive
-        add         rsi,        8
-        add         rdi,        8
-
-        add         rdx,        8
-        cmp         edx,        dword arg(5) ;cols
-
-        jl          .nextcol
-
+.downdone:
         ; done with the all cols, start the across filtering in place
         sub         rsi,        rdx
         sub         rdi,        rdx
 
+        mov         rbx,        arg(5) ; flimits
+        UPDATE_FLIMIT
+
+        ; dup the first byte into the left border 8 times
+        movq        mm1,   [rdi]
+        punpcklbw   mm1,   mm1
+        punpcklwd   mm1,   mm1
+        punpckldq   mm1,   mm1
+        mov         rdx,    -8
+        movq        [rdi+rdx], mm1
+
+        ; dup the last byte into the right border
+        movsxd      rdx,    dword arg(4)
+        movq        mm1,   [rdi + rdx + -1]
+        punpcklbw   mm1,   mm1
+        punpcklwd   mm1,   mm1
+        punpckldq   mm1,   mm1
+        movq        [rdi+rdx], mm1
+
         xor         rdx,        rdx
-        movq        mm0,        QWORD PTR [rdi-8];
+        movq        mm0,        QWORD PTR [rdi-16];
+        movq        mm1,        QWORD PTR [rdi-8];
 
 .acrossnextcol:
-        movq        xmm7,       QWORD PTR [rdi +rdx -2]
-        movd        xmm4,       DWORD PTR [rdi +rdx +6]
+        movdqu      xmm0,       XMMWORD PTR [rdi + rdx]
+        movdqu      xmm1,       XMMWORD PTR [rdi + rdx -2]
+        movdqu      xmm3,       XMMWORD PTR [rdi + rdx -1]
 
-        pslldq      xmm4,       8
-        por         xmm4,       xmm7
+        FIRST_2_ROWS
 
-        movdqa      xmm3,       xmm4
-        psrldq      xmm3,       2
-        punpcklbw   xmm3,       xmm0              ; mm3 = p0..p3
-        movdqa      xmm1,       xmm3              ; mm1 = p0..p3
-        psllw       xmm3,       2
+        movdqu      xmm1,       XMMWORD PTR [rdi + rdx +1]
+        movdqu      xmm3,       XMMWORD PTR [rdi + rdx +2]
 
+        SECOND_2_ROWS
 
-        movdqa      xmm5,       xmm4
-        psrldq      xmm5,       3
-        punpcklbw   xmm5,       xmm0              ; mm5 = p1..p4
-        paddusw     xmm3,       xmm5              ; mm3 += mm6
+        movq        QWORD PTR [rdi+rdx-16], mm0  ; store previous 8 bytes
+        movq        QWORD PTR [rdi+rdx-8], mm1   ; store previous 8 bytes
+        movdq2q     mm0,        xmm0
+        psrldq      xmm0,       8
+        movdq2q     mm1,        xmm0
 
-        ; thresholding
-        movdqa      xmm7,       xmm1              ; mm7 = p0..p3
-        psubusw     xmm7,       xmm5              ; mm7 = p0..p3 - p1..p4
-        psubusw     xmm5,       xmm1              ; mm5 = p1..p4 - p0..p3
-        paddusw     xmm7,       xmm5              ; mm7 = abs(p0..p3 - p1..p4)
-        pcmpgtw     xmm7,       xmm2
+        add         rdx,        16
+        cmp         edx,        dword arg(4)     ;cols
+        jge         .acrossdone
+        UPDATE_FLIMIT
+        jmp         .acrossnextcol
 
-        movdqa      xmm5,       xmm4
-        psrldq      xmm5,       4
-        punpcklbw   xmm5,       xmm0              ; mm5 = p2..p5
-        paddusw     xmm3,       xmm5              ; mm3 += mm5
+.acrossdone:
+        ; last 16 pixels
+        movq        QWORD PTR [rdi+rdx-16], mm0
 
-        ; thresholding
-        movdqa      xmm6,       xmm1              ; mm6 = p0..p3
-        psubusw     xmm6,       xmm5              ; mm6 = p0..p3 - p1..p4
-        psubusw     xmm5,       xmm1              ; mm5 = p1..p4 - p0..p3
-        paddusw     xmm6,       xmm5              ; mm6 = abs(p0..p3 - p1..p4)
-        pcmpgtw     xmm6,       xmm2
-        por         xmm7,       xmm6              ; accumulate thresholds
-
-
-        movdqa      xmm5,       xmm4              ; mm5 = p-2..p5
-        punpcklbw   xmm5,       xmm0              ; mm5 = p-2..p1
-        paddusw     xmm3,       xmm5              ; mm3 += mm5
-
-        ; thresholding
-        movdqa      xmm6,       xmm1              ; mm6 = p0..p3
-        psubusw     xmm6,       xmm5              ; mm6 = p0..p3 - p1..p4
-        psubusw     xmm5,       xmm1              ; mm5 = p1..p4 - p0..p3
-        paddusw     xmm6,       xmm5              ; mm6 = abs(p0..p3 - p1..p4)
-        pcmpgtw     xmm6,       xmm2
-        por         xmm7,       xmm6              ; accumulate thresholds
-
-        psrldq      xmm4,       1                   ; mm4 = p-1..p5
-        punpcklbw   xmm4,       xmm0              ; mm4 = p-1..p2
-        paddusw     xmm3,       xmm4              ; mm3 += mm5
-
-        ; thresholding
-        movdqa      xmm6,       xmm1              ; mm6 = p0..p3
-        psubusw     xmm6,       xmm4              ; mm6 = p0..p3 - p1..p4
-        psubusw     xmm4,       xmm1              ; mm5 = p1..p4 - p0..p3
-        paddusw     xmm6,       xmm4              ; mm6 = abs(p0..p3 - p1..p4)
-        pcmpgtw     xmm6,       xmm2
-        por         xmm7,       xmm6              ; accumulate thresholds
-
-        paddusw     xmm3,       RD42              ; mm3 += round value
-        psraw       xmm3,       3                 ; mm3 /= 8
-
-        pand        xmm1,       xmm7              ; mm1 select vals > thresh from source
-        pandn       xmm7,       xmm3              ; mm7 select vals < thresh from blurred result
-        paddusw     xmm1,       xmm7              ; combination
-
-        packuswb    xmm1,       xmm0              ; pack to bytes
-        movq        QWORD PTR [rdi+rdx-8],  mm0   ; store previous four bytes
-        movdq2q     mm0,        xmm1
-
-        add         rdx,        8
-        cmp         edx,        dword arg(5) ;cols
-        jl          .acrossnextcol;
-
-        ; last 8 pixels
-        movq        QWORD PTR [rdi+rdx-8],  mm0
-
+        cmp         edx,        dword arg(4)
+        jne         .throw_last_8
+        movq        QWORD PTR [rdi+rdx-8], mm1
+.throw_last_8:
         ; done with this rwo
-        add         rsi,rax               ; next line
-        mov         eax, dword arg(3) ;dst_pixels_per_line ; destination pitch?
-        add         rdi,rax               ; next destination
-        mov         eax, dword arg(2) ;src_pixels_per_line ; destination pitch?
+        add         rsi,rax                      ;next src line
+        mov         eax, dword arg(3)            ;dst_pixels_per_line
+        add         rdi,rax                      ;next destination
+        mov         eax, dword arg(2)            ;src_pixels_per_line
 
-        dec         rcx                   ; decrement count
-        jnz         .nextrow              ; next row
+        mov         rbx,        arg(5)           ;flimits
+        UPDATE_FLIMIT
 
-%if ABI_IS_32BIT=1 && CONFIG_PIC=1
-    add rsp,16
+        dec         rcx                          ;decrement count
+        jnz         .nextrow                     ;next row
+
+    add rsp, 16
     pop rsp
-%endif
     ; begin epilog
     pop rdi
     pop rsi
-    RESTORE_GOT
+    pop rbx
     RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
-%undef RD42
+%undef flimit
 
-
-;void vp9_mbpost_proc_down_xmm(unsigned char *dst,
+;void vpx_mbpost_proc_down_xmm(unsigned char *dst,
 ;                            int pitch, int rows, int cols,int flimit)
-extern sym(vp9_rv)
-global sym(vp9_mbpost_proc_down_xmm) PRIVATE
-sym(vp9_mbpost_proc_down_xmm):
+extern sym(vpx_rv)
+global sym(vpx_mbpost_proc_down_xmm) PRIVATE
+sym(vpx_mbpost_proc_down_xmm):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -275,7 +257,7 @@ sym(vp9_mbpost_proc_down_xmm):
 %define flimit4 [rsp+128]
 
 %if ABI_IS_32BIT=0
-    lea         r8,       [GLOBAL(sym(vp9_rv))]
+    lea         r8,       [GLOBAL(sym(vpx_rv))]
 %endif
 
     ;rows +=8;
@@ -287,11 +269,39 @@ sym(vp9_mbpost_proc_down_xmm):
             pxor        xmm0,       xmm0        ;
 
             movsxd      rax,        dword ptr arg(1) ;pitch       ;
+
+            ; this copies the last row down into the border 8 rows
+            mov         rdi,        rsi
+            mov         rdx,        arg(2)
+            sub         rdx,        9
+            imul        rdx,        rax
+            lea         rdi,        [rdi+rdx]
+            movq        xmm1,       QWORD ptr[rdi]              ; first row
+            mov         rcx,        8
+.init_borderd:                                                  ; initialize borders
+            lea         rdi,        [rdi + rax]
+            movq        [rdi],      xmm1
+
+            dec         rcx
+            jne         .init_borderd
+
             neg         rax                                     ; rax = -pitch
+
+            ; this copies the first row up into the border 8 rows
+            mov         rdi,        rsi
+            movq        xmm1,       QWORD ptr[rdi]              ; first row
+            mov         rcx,        8
+.init_border:                                                   ; initialize borders
+            lea         rdi,        [rdi + rax]
+            movq        [rdi],      xmm1
+
+            dec         rcx
+            jne         .init_border
+
+
 
             lea         rsi,        [rsi + rax*8];              ; rdi = s[-pitch*8]
             neg         rax
-
 
             pxor        xmm5,       xmm5
             pxor        xmm6,       xmm6        ;
@@ -393,13 +403,13 @@ sym(vp9_mbpost_proc_down_xmm):
             and         rcx,        127
 %if ABI_IS_32BIT=1 && CONFIG_PIC=1
             push        rax
-            lea         rax,        [GLOBAL(sym(vp9_rv))]
-            movdqu      xmm4,       [rax + rcx*2] ;vp9_rv[rcx*2]
+            lea         rax,        [GLOBAL(sym(vpx_rv))]
+            movdqu      xmm4,       [rax + rcx*2] ;vpx_rv[rcx*2]
             pop         rax
 %elif ABI_IS_32BIT=0
-            movdqu      xmm4,       [r8 + rcx*2] ;vp9_rv[rcx*2]
+            movdqu      xmm4,       [r8 + rcx*2] ;vpx_rv[rcx*2]
 %else
-            movdqu      xmm4,       [sym(vp9_rv) + rcx*2]
+            movdqu      xmm4,       [sym(vpx_rv) + rcx*2]
 %endif
 
             paddw       xmm1,       xmm4
@@ -415,13 +425,16 @@ sym(vp9_mbpost_proc_down_xmm):
             and         rcx,        15
             movq        QWORD PTR   [rsp + rcx*8], xmm1 ;d[rcx*8]
 
+            cmp         edx,        8
+            jl          .skip_assignment
+
             mov         rcx,        rdx
             sub         rcx,        8
-
             and         rcx,        15
             movq        mm0,        [rsp + rcx*8] ;d[rcx*8]
-
             movq        [rsi],      mm0
+
+.skip_assignment:
             lea         rsi,        [rsi+rax]
 
             lea         rdi,        [rdi+rax]
@@ -449,10 +462,10 @@ sym(vp9_mbpost_proc_down_xmm):
 %undef flimit4
 
 
-;void vp9_mbpost_proc_across_ip_xmm(unsigned char *src,
+;void vpx_mbpost_proc_across_ip_xmm(unsigned char *src,
 ;                                int pitch, int rows, int cols,int flimit)
-global sym(vp9_mbpost_proc_across_ip_xmm) PRIVATE
-sym(vp9_mbpost_proc_across_ip_xmm):
+global sym(vpx_mbpost_proc_across_ip_xmm) PRIVATE
+sym(vpx_mbpost_proc_across_ip_xmm):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -480,7 +493,25 @@ sym(vp9_mbpost_proc_across_ip_xmm):
         xor         rdx,    rdx ;sumsq=0;
         xor         rcx,    rcx ;sum=0;
         mov         rsi,    arg(0); s
+
+
+        ; dup the first byte into the left border 8 times
+        movq        mm1,   [rsi]
+        punpcklbw   mm1,   mm1
+        punpcklwd   mm1,   mm1
+        punpckldq   mm1,   mm1
+
         mov         rdi,    -8
+        movq        [rsi+rdi], mm1
+
+        ; dup the last byte into the right border
+        movsxd      rdx,    dword arg(3)
+        movq        mm1,   [rsi + rdx + -1]
+        punpcklbw   mm1,   mm1
+        punpcklwd   mm1,   mm1
+        punpckldq   mm1,   mm1
+        movq        [rsi+rdx], mm1
+
 .ip_var_loop:
         ;for(i=-8;i<=6;i++)
         ;{
@@ -626,7 +657,5 @@ sym(vp9_mbpost_proc_across_ip_xmm):
 
 SECTION_RODATA
 align 16
-rd42:
-    times 8 dw 0x04
 four8s:
     times 4 dd 8

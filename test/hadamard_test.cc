@@ -152,10 +152,10 @@ INSTANTIATE_TEST_CASE_P(SSE2, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_sse2));
 #endif  // HAVE_SSE2
 
-#if HAVE_SSSE3 && CONFIG_USE_X86INC && ARCH_X86_64
+#if HAVE_SSSE3 && ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(SSSE3, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_ssse3));
-#endif  // HAVE_SSSE3 && CONFIG_USE_X86INC && ARCH_X86_64
+#endif  // HAVE_SSSE3 && ARCH_X86_64
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, Hadamard8x8Test,
