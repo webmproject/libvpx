@@ -341,8 +341,10 @@ uint32_t vpx_highbd_10_variance##W##x##H##_c(const uint8_t *a, \
                                              int b_stride, \
                                              uint32_t *sse) { \
   int sum; \
+  int64_t var; \
   highbd_10_variance(a, a_stride, b, b_stride, W, H, sse, &sum); \
-  return *sse - (((int64_t)sum * sum) / (W * H)); \
+  var = (int64_t)(*sse) - (((int64_t)sum * sum) / (W * H)); \
+  return (var >= 0) ? (uint32_t)var : 0; \
 } \
 \
 uint32_t vpx_highbd_12_variance##W##x##H##_c(const uint8_t *a, \
@@ -351,8 +353,10 @@ uint32_t vpx_highbd_12_variance##W##x##H##_c(const uint8_t *a, \
                                              int b_stride, \
                                              uint32_t *sse) { \
   int sum; \
+  int64_t var; \
   highbd_12_variance(a, a_stride, b, b_stride, W, H, sse, &sum); \
-  return *sse - (((int64_t)sum * sum) / (W * H)); \
+  var = (int64_t)(*sse) - (((int64_t)sum * sum) / (W * H)); \
+  return (var >= 0) ? (uint32_t)var : 0; \
 }
 
 #define HIGHBD_GET_VAR(S) \
