@@ -16,6 +16,24 @@
       "revId": "8c29d332c9a0d9db19b916d4910935d5ee6b6338",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ed5a6ce_3aa7a0c1",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-22T19:03:36Z",
+      "side": 1,
+      "message": "Nevermind, it does have an entry that says it\u0027s in intrin.h for vs2008:\nhttps://msdn.microsoft.com/en-us/library/twchhe95(v\u003dvs.90).aspx\n\nAnnoying that it\u0027s not here:\nhttps://msdn.microsoft.com/en-us/library/hd9bdb82(v\u003dvs.90).aspx",
+      "parentUuid": "ae9cfe2a_535fdfc8",
+      "revId": "8c29d332c9a0d9db19b916d4910935d5ee6b6338",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
