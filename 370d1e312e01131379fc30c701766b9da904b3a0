@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ceabf2ee_8ff9995b",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-22T23:15:34Z",
+      "side": 1,
+      "message": "Here we add the computed plane variance and sse to what was already in the pointer.",
+      "range": {
+        "startLine": 763,
+        "startChar": 0,
+        "endLine": 764,
+        "endChar": 18
+      },
+      "revId": "370d1e312e01131379fc30c701766b9da904b3a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aea6be25_eec01fed",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-22T23:15:34Z",
+      "side": 1,
+      "message": "This isn\u0027t quite what I meant. This makes us not set anything to *var_y and *var_sse for 8-bit data in highbd builds.",
+      "range": {
+        "startLine": 789,
+        "startChar": 0,
+        "endLine": 789,
+        "endChar": 52
+      },
+      "revId": "370d1e312e01131379fc30c701766b9da904b3a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ecb4ae3_0995ad45",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 791,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-22T23:15:34Z",
+      "side": 1,
+      "message": "Here we replace (not sum with) *var_y and *sse_y with the sum of the uv plane vars.\n\nIf we init tot_var and tot_sse to *var_y and *sse_y, then I think both high and low bitdepth should behave the same way.",
+      "range": {
+        "startLine": 790,
+        "startChar": 0,
+        "endLine": 791,
+        "endChar": 67
+      },
+      "revId": "370d1e312e01131379fc30c701766b9da904b3a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
