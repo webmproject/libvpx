@@ -263,13 +263,13 @@ static INLINE int vp10_nmv_ctx(const uint8_t ref_mv_count,
 static INLINE int8_t vp10_ref_frame_type(const MV_REFERENCE_FRAME *const rf) {
   if (rf[1] > INTRA_FRAME) {
     return MAX_REF_FRAMES + FWD_RF_OFFSET(rf[0]) +
-        BWD_RF_OFFSET(rf[1]) * FWD_REF_FRAMES;
+        BWD_RF_OFFSET(rf[1]) * FWD_REFS;
   }
 
   return rf[0];
 }
 
-static MV_REFERENCE_FRAME ref_frame_map[FWD_REF_FRAMES * BWD_REF_FRAMES][2] = {
+static MV_REFERENCE_FRAME ref_frame_map[COMP_REFS][2] = {
 #if CONFIG_EXT_REFS
   {LAST_FRAME, BWDREF_FRAME},
   {LAST2_FRAME, BWDREF_FRAME},
