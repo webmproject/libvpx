@@ -349,6 +349,7 @@ static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
        38,    28,    21,    16,    12,    10,     8,     6,
         5,     3,     2,     1,     1,     1,     0,     0,
   };
+
   // Normalized distortion:
   // This table models the normalized distortion for a Laplacian source
   // with given variance when quantized with a uniform quantizer

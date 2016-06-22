@@ -3395,9 +3395,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
           rate2 += skip_cost0;
         } else {
           // FIXME(rbultje) make this work for splitmv also
+          assert(total_sse >= 0);
+
           rate2 += skip_cost1;
           distortion2 = total_sse;
-          assert(total_sse >= 0);
           rate2 -= (rate_y + rate_uv);
           this_skip2 = 1;
         }

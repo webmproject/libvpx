@@ -116,11 +116,16 @@ static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
 // so memset cannot be used, instead only inactive blocks should be reset.
 static void suppress_active_map(VP9_COMP *cpi) {
   unsigned char *const seg_map = cpi->segmentation_map;
-  int i;
-  if (cpi->active_map.enabled || cpi->active_map.update)
-    for (i = 0; i < cpi->common.mi_rows * cpi->common.mi_cols; ++i)
+
+  if (cpi->active_map.enabled || cpi->active_map.update) {
+    const int rows = cpi->common.mi_rows;
+    const int cols = cpi->common.mi_cols;
+    int i;
+
+    for (i = 0; i < rows * cols; ++i)
       if (seg_map[i] == AM_SEGMENT_ID_INACTIVE)
         seg_map[i] = AM_SEGMENT_ID_ACTIVE;
+  }
 }
 
 static void apply_active_map(VP9_COMP *cpi) {

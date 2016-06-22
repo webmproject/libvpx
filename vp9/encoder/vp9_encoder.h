@@ -388,7 +388,7 @@ typedef struct VP9_COMP {
   uint8_t *segmentation_map;
 
   // segment threashold for encode breakout
-  int  segment_encode_breakout[MAX_SEGMENTS];
+  int segment_encode_breakout[MAX_SEGMENTS];
 
   CYCLIC_REFRESH *cyclic_refresh;
   ActiveMap active_map;
@@ -410,11 +410,10 @@ typedef struct VP9_COMP {
 
   YV12_BUFFER_CONFIG alt_ref_buffer;
 
-
 #if CONFIG_INTERNAL_STATS
   unsigned int mode_chosen_counts[MAX_MODES];
 
-  int    count;
+  int count;
   uint64_t total_sq_error;
   uint64_t total_samples;
   ImageStat psnr;
