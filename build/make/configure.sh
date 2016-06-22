@@ -1012,6 +1012,10 @@ EOF
           ;;
 
         android*)
+          if [ -z "${sdk_path}" ]; then
+            die "Must specify --sdk-path for Android builds."
+          fi
+
           SDK_PATH=${sdk_path}
           COMPILER_LOCATION=`find "${SDK_PATH}" \
                              -name "arm-linux-androideabi-gcc*" -print -quit`
