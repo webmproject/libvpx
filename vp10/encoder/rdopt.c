@@ -1077,13 +1077,13 @@ static int cost_coeffs(MACROBLOCK *x,
 static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
                        int block, int blk_row, int blk_col, TX_SIZE tx_size,
                        int64_t *out_dist, int64_t *out_sse) {
+  MACROBLOCKD* const xd = &x->e_mbd;
+  const struct macroblock_plane *const p = &x->plane[plane];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
   if (cpi->sf.use_transform_domain_distortion) {
     // Transform domain distortion computation is more accurate as it does
     // not involve an inverse transform, but it is less accurate.
     const int ss_txfrm_size = tx_size << 1;
-    MACROBLOCKD* const xd = &x->e_mbd;
-    const struct macroblock_plane *const p = &x->plane[plane];
-    const struct macroblockd_plane *const pd = &xd->plane[plane];
     int64_t this_sse;
     int tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
     int shift = (MAX_TX_SCALE - get_tx_scale(xd, tx_type, tx_size)) * 2;
@@ -1104,11 +1104,6 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
   } else {
     const BLOCK_SIZE tx_bsize = txsize_to_bsize[tx_size];
     const int bs = 4*num_4x4_blocks_wide_lookup[tx_bsize];
-
-    const MACROBLOCKD *xd = &x->e_mbd;
-    const struct macroblock_plane *p = &x->plane[plane];
-    const struct macroblockd_plane *pd = &xd->plane[plane];
-
     const int src_stride = x->plane[plane].src.stride;
     const int dst_stride = xd->plane[plane].dst.stride;
     const int src_idx = 4 * (blk_row * src_stride + blk_col);
@@ -1116,7 +1111,7 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
     const uint8_t *src = &x->plane[plane].src.buf[src_idx];
     const uint8_t *dst = &xd->plane[plane].dst.buf[dst_idx];
     const tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-    const uint16_t *eob = &p->eobs[block];
+    const uint16_t eob = p->eobs[block];
 
     unsigned int tmp;
 
@@ -1125,7 +1120,7 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
     cpi->fn_ptr[tx_bsize].vf(src, src_stride, dst, dst_stride, &tmp);
     *out_sse = (int64_t)tmp * 16;
 
-    if (*eob) {
+    if (eob) {
       const MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
 #if CONFIG_VP9_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint16_t, recon16[MAX_TX_SQUARE]);
@@ -1140,7 +1135,7 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
 
       inv_txfm_param.tx_type = get_tx_type(plane_type, xd, block, tx_size);
       inv_txfm_param.tx_size = tx_size;
-      inv_txfm_param.eob = *eob;
+      inv_txfm_param.eob = eob;
       inv_txfm_param.lossless = xd->lossless[mbmi->segment_id];
 
 #if CONFIG_VP9_HIGHBITDEPTH
