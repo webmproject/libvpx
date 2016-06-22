@@ -725,6 +725,15 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 }
 # End vp10_high encoder functions
 
+if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
+  add_proto qw/uint64_t vp10_wedge_sse_from_residuals/, "const int16_t *r1, const int16_t *d, const uint8_t *m, int N";
+  specialize qw/vp10_wedge_sse_from_residuals sse2/;
+  add_proto qw/int vp10_wedge_sign_from_residuals/, "const int16_t *ds, const uint8_t *m, int N, int64_t limit";
+  specialize qw/vp10_wedge_sign_from_residuals sse2/;
+  add_proto qw/void vp10_wedge_compute_delta_squares/, "int16_t *d, const int16_t *a, const int16_t *b, int N";
+  specialize qw/vp10_wedge_compute_delta_squares sse2/;
+}
+
 }
 # end encoder functions
 1;
