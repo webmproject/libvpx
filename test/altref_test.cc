@@ -100,11 +100,6 @@ class AltRefForcedKeyTestLarge
         encoder->Control(VP9E_SET_TILE_COLUMNS, 6);
       }
 #endif
-#if CONFIG_VP10_ENCODER
-      if (GET_PARAM(0) == &libvpx_test::kVP10) {
-        encoder->Control(VP9E_SET_TILE_COLUMNS, 6);
-      }
-#endif
     }
     frame_flags_ =
         (video->frame() == forced_kf_frame_num_) ? VPX_EFLAG_FORCE_KF : 0;
@@ -161,10 +156,4 @@ VP9_INSTANTIATE_TEST_CASE(
     AltRefForcedKeyTestLarge,
     ::testing::Values(::libvpx_test::kOnePassGood),
     ::testing::Range(0, 9));
-
-VP10_INSTANTIATE_TEST_CASE(
-    AltRefForcedKeyTestLarge,
-    ::testing::Values(::libvpx_test::kOnePassGood),
-    ::testing::Range(0, 9));
-
 }  // namespace

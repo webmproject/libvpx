@@ -174,9 +174,6 @@ endif
 ifeq ($(CONFIG_VP9), yes)
 $$(rtcd_dep_template_SRCS): vp9_rtcd.h
 endif
-ifeq ($(CONFIG_VP10), yes)
-$$(rtcd_dep_template_SRCS): vp10_rtcd.h
-endif
 $$(rtcd_dep_template_SRCS): vpx_scale_rtcd.h
 $$(rtcd_dep_template_SRCS): vpx_dsp_rtcd.h
 
