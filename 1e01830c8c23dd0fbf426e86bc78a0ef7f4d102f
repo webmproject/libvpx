@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e7046c4_fc1925c9",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1282,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-06-22T00:37:46Z",
+      "side": 1,
+      "message": "Would it be cleaner to do this following instead above: \n#if CONFIG_VAR_TX \nconst TX_SIZE tx_size \u003d TX_4X4;\n#else\nconst TX_SIZE tx_size \u003d plane ? get_uv_tx_size(mbmi, pd) : mbmi-\u003etx_size;\n#endif",
+      "range": {
+        "startLine": 1282,
+        "startChar": 0,
+        "endLine": 1282,
+        "endChar": 17
+      },
+      "revId": "1e01830c8c23dd0fbf426e86bc78a0ef7f4d102f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
