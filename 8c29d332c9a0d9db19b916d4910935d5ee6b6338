@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ae9cfe2a_535fdfc8",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-22T19:02:08Z",
+      "side": 1,
+      "message": "Strangely Microsoft doesn\u0027t seem to document cpuidex in the main \"x86 Intrinsic List\" until vs2012 but it shows up on the detail page for vs2008 and vs2010. rdtsc doesn\u0027t show up at all until vs2012.\n\nWould you please add (inside this ifdef, after the include):\n#if _MSC_VER \u003c 1700\nunsigned __int64 __rdtsc(void);\n#pragma intrinsic(__rdtsc)\n#endif\n\nIf we end up having trouble with cpuidex as well I\u0027ll look into that later.\n\nYeah, supporting VS older than 2015 is a bad idea, but that\u0027s what we\u0027re best at in libvpx.",
+      "revId": "8c29d332c9a0d9db19b916d4910935d5ee6b6338",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
