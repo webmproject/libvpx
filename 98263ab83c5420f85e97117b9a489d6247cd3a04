@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e564e46_daaac1e8",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1413,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-06-22T13:37:05Z",
+      "side": 1,
+      "message": "Why is this different than the logic in set_mode_info_seg_skip()?  Does the following produce the same results?\n\nfilter_ref \u003d vp9_get_pred_context_switchable_interp(xd);\nif (filter_ref \u003d\u003d SWITCHABLE_FILTERS)\n  filter_ref \u003d cm-\u003einterp_filter;",
+      "revId": "98263ab83c5420f85e97117b9a489d6247cd3a04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
