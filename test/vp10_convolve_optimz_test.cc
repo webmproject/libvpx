@@ -94,10 +94,7 @@ void VP10ConvolveOptimzTest::PrepFilterBuffer(uint8_t *src, uint8_t *src_ref,
   int r, c;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 
-  memset(src, 0, maxBlockSize);
-  memset(src_ref, 0, maxBlockSize);
-  memset(dst, 0, maxBlockSize);
-  memset(dst_ref, 0, maxBlockSize);
+  memset(alloc_, 0, 4 * maxBlockSize);
 
   uint8_t *src_ptr = src;
   uint8_t *dst_ptr = dst;
