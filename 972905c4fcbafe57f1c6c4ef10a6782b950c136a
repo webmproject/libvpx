@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e67020f_b34bcf46",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2524,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eec0b617_27b46600",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2960,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e564e46_e6aa90e8",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2961,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "const",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e67020f_535033f0",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2963,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ed2dae5_9c956aac",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3771,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae9cfe2a_b37e6350",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3772,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "const",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ec6ea30_4303a406",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3774,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e6aced9_74dbe1f3",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4046,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae9cfe2a_138dd797",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "this could be within the if()",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e67020f_13bf1b14",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-22T18:59:06Z",
+      "side": 1,
+      "message": "horizontal whitespace tends to be fragile as displayed in the earlier version, these are stable so should be OK. note an autoformatter like clang-format wouldn\u0027t preserve this with google defaults.",
+      "revId": "972905c4fcbafe57f1c6c4ef10a6782b950c136a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
