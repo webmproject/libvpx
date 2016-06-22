@@ -945,6 +945,9 @@ EOF
               check_add_cflags -mfpu=neon #-ftree-vectorize
               check_add_asflags -mfpu=neon
             fi
+          elif [ ${tgt_isa} = "arm64" ] || [ ${tgt_isa} = "armv8" ]; then
+            check_add_cflags -march=armv8-a
+            check_add_asflags -march=armv8-a
           else
             check_add_cflags -march=${tgt_isa}
             check_add_asflags -march=${tgt_isa}
