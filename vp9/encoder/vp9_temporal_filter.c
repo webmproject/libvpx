@@ -264,8 +264,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   int step_param;
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
-  int distortion;
-  unsigned int sse;
+  uint32_t distortion;
+  uint32_t sse;
   int cost_list[5];
 
   MV best_ref_mv1 = {0, 0};
