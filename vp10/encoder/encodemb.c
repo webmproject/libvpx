@@ -283,29 +283,28 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
         best = 0;
       }
 
-      if (shortcut) {
 #if CONFIG_NEW_QUANT
-        dx = dequant_coeff_nuq(
-            x, dequant_ptr[rc != 0],
-            dequant_val[band_translate[i]]) - (coeff[rc] << shift);
+      dx = dequant_coeff_nuq(
+          x, dequant_ptr[rc != 0],
+          dequant_val[band_translate[i]]) - (coeff[rc] << shift);
 #if CONFIG_VP9_HIGHBITDEPTH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-          dx >>= xd->bd - 8;
-        }
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        dx >>= xd->bd - 8;
+      }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else   // CONFIG_NEW_QUANT
 #if CONFIG_VP9_HIGHBITDEPTH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-          dx -= ((dequant_ptr[rc != 0] >> (xd->bd - 8)) + sz) ^ sz;
-        } else {
-          dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
-        }
-#else
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        dx -= ((dequant_ptr[rc != 0] >> (xd->bd - 8)) + sz) ^ sz;
+      } else {
         dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
+      }
+#else
+      dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_NEW_QUANT
-        d2 = dx * dx;
-      }
+      d2 = dx * dx;
+
       tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
       tokens[i][1].error = d2 + (best ? error1 : error0);
       tokens[i][1].next = next;
