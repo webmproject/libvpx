@@ -16,6 +16,24 @@
       "revId": "be43b35ce31985741cd035b561d11b9b7514e3b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "43a43dba_d34486a6",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-23T21:28:57Z",
+      "side": 1,
+      "message": "True. But there are at least some existing examples of ${1} and other single letter variables. What do you think is best as policy? Everything except single letters get {}? Only * and @ are exempted?",
+      "parentUuid": "43a43dba_d0b47c4c",
+      "revId": "be43b35ce31985741cd035b561d11b9b7514e3b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
