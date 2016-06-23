@@ -94,6 +94,8 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 {
 #if CONFIG_MULTITHREAD
     ctx->processor_core_count = get_cpu_count();
+#else
+    (void)ctx;
 #endif /* CONFIG_MULTITHREAD */
 
 #if ARCH_ARM
