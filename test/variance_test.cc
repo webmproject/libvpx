@@ -1151,7 +1151,9 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VpxSubpelVarianceTest,
     ::testing::Values(
-         make_tuple(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_sse4_1, 8)));
+         make_tuple(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_sse4_1, 8),
+         make_tuple(2, 2, &vpx_highbd_10_sub_pixel_variance4x4_sse4_1, 10),
+         make_tuple(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_sse4_1, 12)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VpxSubpelAvgVarianceTest,
