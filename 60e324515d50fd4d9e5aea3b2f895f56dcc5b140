@@ -16,6 +16,24 @@
       "revId": "60e324515d50fd4d9e5aea3b2f895f56dcc5b140",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2391090e_dfebfba9",
+        "filename": "vp8/common/generic/systemdependent.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-23T13:45:13Z",
+      "side": 1,
+      "message": "Only for arm and x86 - not for generic-gnu, mips. I flipped back and forth over which condition to put the #else on.",
+      "parentUuid": "03fc052a_bece1964",
+      "revId": "60e324515d50fd4d9e5aea3b2f895f56dcc5b140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
