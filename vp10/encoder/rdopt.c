@@ -1251,8 +1251,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
 #if CONFIG_NEW_QUANT
-      vp10_xform_quant_nuq(x, plane, block, blk_row, blk_col,
-                           plane_bsize, tx_size, ctx);
+      vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col,
+                              plane_bsize, tx_size, ctx);
 #else
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                        plane_bsize, tx_size, VP10_XFORM_QUANT_FP);
@@ -1267,12 +1267,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
 #if CONFIG_NEW_QUANT
-      if (x->quant_fp)
-        vp10_xform_quant_dc_fp_nuq(x, plane, block, blk_row, blk_col,
-                                   plane_bsize, tx_size, ctx);
-      else
-        vp10_xform_quant_dc_nuq(x, plane, block, blk_row, blk_col,
-                                plane_bsize, tx_size, ctx);
+      vp10_xform_quant_dc_fp_nuq(x, plane, block, blk_row, blk_col,
+                                 plane_bsize, tx_size, ctx);
 #else
       vp10_xform_quant(x, plane, block, blk_row, blk_col,
                           plane_bsize, tx_size, VP10_XFORM_QUANT_DC);
@@ -1303,12 +1299,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   } else {
     // full forward transform and quantization
 #if CONFIG_NEW_QUANT
-    if (x->quant_fp)
-      vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
-                              tx_size, ctx);
-    else
-      vp10_xform_quant_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
-                           tx_size, ctx);
+    vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
+                            tx_size, ctx);
 #else
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_FP);
@@ -3064,8 +3056,14 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   if (xd->mb_to_right_edge < 0)
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
-  vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
-                   VP10_XFORM_QUANT_FP);
+#if CONFIG_NEW_QUANT
+  vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col,
+                          plane_bsize, tx_size, coeff_ctx);
+#else
+  vp10_xform_quant(x, plane, block, blk_row, blk_col,
+                   plane_bsize, tx_size, VP10_XFORM_QUANT_FP);
+#endif  // CONFIG_NEW_QUANT
+
   vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
 
   // TODO(any): Use dist_block to compute distortion
