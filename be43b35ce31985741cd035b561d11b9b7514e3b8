@@ -52,6 +52,24 @@
       "revId": "be43b35ce31985741cd035b561d11b9b7514e3b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "43a43dba_f337caeb",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-23T21:54:10Z",
+      "side": 1,
+      "message": "Which? All single letters or just */@ default to no-{}?",
+      "parentUuid": "43a43dba_d372c6f5",
+      "revId": "be43b35ce31985741cd035b561d11b9b7514e3b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
