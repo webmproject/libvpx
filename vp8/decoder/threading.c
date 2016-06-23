@@ -136,8 +136,6 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
              */
             pbi->frame_corrupt_residual = 1;
             memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
-            vp8_conceal_corrupt_mb(xd);
-
 
             corruption_detected = 1;
 
@@ -447,8 +445,7 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
                     */
                    vp8_interpolate_motion(xd,
                                           mb_row, mb_col,
-                                          pc->mb_rows, pc->mb_cols,
-                                          pc->mode_info_stride);
+                                          pc->mb_rows, pc->mb_cols);
                }
            }
     #endif

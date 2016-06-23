@@ -783,6 +783,7 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
     }
 
 #else
+    (void)duration;
     new_qc = MODE_REALTIME;
 #endif
 
