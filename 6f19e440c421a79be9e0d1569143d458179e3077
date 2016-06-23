@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43a43dba_93059e44",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-23T21:36:55Z",
+      "side": 1,
+      "message": "this should say what is being fixed \u0027...: fix stack overflow\u0027\nwhat found it is a detail for the body of the message",
+      "revId": "6f19e440c421a79be9e0d1569143d458179e3077",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "43a43dba_13f28e74",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-23T21:36:55Z",
+      "side": 1,
+      "message": "these aren\u0027t guaranteed to remain stable; you should include the output of \u0027git log --oneline -1 \u003chash\u003e\u0027 for the commit that link references",
+      "revId": "6f19e440c421a79be9e0d1569143d458179e3077",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "43a43dba_f3e50aac",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-23T21:36:55Z",
+      "side": 1,
+      "message": "ideally these would be left-justified for easy extraction \u0027BUG\u003d...\u0027",
+      "revId": "6f19e440c421a79be9e0d1569143d458179e3077",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
