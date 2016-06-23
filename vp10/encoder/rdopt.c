@@ -2132,7 +2132,6 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
           int16_t *const src_diff = vp10_raster_block_offset_int16(BLOCK_8X8,
                                                                    block,
                                                                    p->src_diff);
-          tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
           xd->mi[0]->bmi[block].as_mode = mode;
           vp10_predict_intra_block(xd, 1, 1, TX_4X4, mode, dst, dst_stride,
                                   dst, dst_stride,
@@ -2146,8 +2145,8 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
 #endif  // CONFIG_VAR_TX
-            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1, xd->bd);
-            vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+            vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                             TX_4X4, VP10_XFORM_QUANT_B);
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                  so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -2173,8 +2172,8 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
 #endif  // CONFIG_VAR_TX
-            vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, 0, xd->bd);
-            vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+            vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                             TX_4X4, VP10_XFORM_QUANT_B);
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                  so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -2257,7 +2256,6 @@ next_highbd:
         uint8_t *const dst = &dst_init[idx * 4 + idy * 4 * dst_stride];
         int16_t *const src_diff =
             vp10_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
-        tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         xd->mi[0]->bmi[block].as_mode = mode;
         vp10_predict_intra_block(xd, 1, 1, TX_4X4, mode, dst, dst_stride,
                                 dst, dst_stride, col + idx, row + idy, 0);
@@ -2270,8 +2268,8 @@ next_highbd:
           const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                          *(templ + idy));
 #endif
-          vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT, 1);
-          vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+          vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                           TX_4X4, VP10_XFORM_QUANT_B);
 #if CONFIG_VAR_TX
           ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -2296,8 +2294,8 @@ next_highbd:
           const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                          *(templ + idy));
 #endif
-          vp10_fwd_txfm_4x4(src_diff, coeff, 8, tx_type, 0);
-          vp10_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+          vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                           TX_4X4, VP10_XFORM_QUANT_B);
 #if CONFIG_VAR_TX
           ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -4525,8 +4523,6 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   for (idy = 0; idy < height / 4; ++idy) {
     for (idx = 0; idx < width / 4; ++idx) {
       int64_t dist, ssz, rd, rd1, rd2;
-      const int16_t *src_diff;
-      tran_low_t* coeff;
 #if CONFIG_VAR_TX
       int coeff_ctx;
 #endif
@@ -4535,23 +4531,8 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)),
                                            *(tl + (k >> 1)));
 #endif
-      coeff = BLOCK_OFFSET(p->coeff, k);
-
-      src_diff = vp10_raster_block_offset_int16(BLOCK_8X8, k, p->src_diff);
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        vp10_highbd_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
-                                 xd->lossless[mi->mbmi.segment_id], xd->bd);
-      } else {
-        vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
-                          xd->lossless[mi->mbmi.segment_id]);
-      }
-#else
-      vp10_fwd_txfm_4x4(src_diff, coeff, 8, DCT_DCT,
-                        xd->lossless[mi->mbmi.segment_id]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-      vp10_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
+      vp10_xform_quant(x, 0, k, idy + (i >> 1), idx + (i & 0x01), BLOCK_8X8,
+                       TX_4X4, VP10_XFORM_QUANT_B);
       dist_block(cpi, x, 0, k, idy + (i >> 1), idx + (i & 0x1), TX_4X4,
                  &dist, &ssz);
       thisdistortion += dist;
