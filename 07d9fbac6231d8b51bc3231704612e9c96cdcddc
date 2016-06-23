@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "632a21c1_a917bd4b",
+        "filename": "vp10/common/vp10_convolve.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-06-23T19:12:25Z",
+      "side": 1,
+      "message": "I use temp[] buffer from the second row in horizontal filtering. Inside vp10_convolve_vert(), src pointer will decrease (filter_size/2 - 1) rows. So here I increase filter_size/2 rows, then src pointer will be on the second row.  The reason I skip the first row is for 10-tap filter. For 10-tap filter, I need to decrease one more row to conform the filtering operation (avoid saturation).  10-tap filter coefficients are padding-zero on this position.  So we don\u0027t care the first row\u0027s values.",
+      "parentUuid": "c3666d36_377e7252",
+      "revId": "07d9fbac6231d8b51bc3231704612e9c96cdcddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3666d36_37ccb2ca",
         "filename": "vp10/common/x86/vp10_convolve_ssse3.c",
         "patchSetId": 2
