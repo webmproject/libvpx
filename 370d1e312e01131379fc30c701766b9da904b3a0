@@ -68,6 +68,30 @@
       "revId": "370d1e312e01131379fc30c701766b9da904b3a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83bb959f_aa3b4fb9",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 791,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-06-23T16:37:05Z",
+      "side": 1,
+      "message": "Thanks, now I think I got what you meant, so simplified the logic in patch#8. Please take a look.",
+      "parentUuid": "0ecb4ae3_0995ad45",
+      "range": {
+        "startLine": 790,
+        "startChar": 0,
+        "endLine": 791,
+        "endChar": 67
+      },
+      "revId": "370d1e312e01131379fc30c701766b9da904b3a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
