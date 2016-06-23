@@ -16,6 +16,24 @@
       "revId": "f26a48bd52ad6bdd8afe4b6cd5abad87502e1914",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3fbcd84_4cc57f6a",
+        "filename": "test/vp10_convolve_optimz_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-06-23T18:47:38Z",
+      "side": 1,
+      "message": "I allocate 4 maxBlockSize blocks. To be clear, it should be, 4 * maxBlockSize * sizeof(alloc_[0]).  Will put it in next change.",
+      "parentUuid": "03f245a7_2e94675b",
+      "revId": "f26a48bd52ad6bdd8afe4b6cd5abad87502e1914",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
