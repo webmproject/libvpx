@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "03fc052a_bece1964",
+        "filename": "vp8/common/generic/systemdependent.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-23T03:08:13Z",
+      "side": 1,
+      "message": "it\u0027s used below too, but this is OK",
+      "revId": "60e324515d50fd4d9e5aea3b2f895f56dcc5b140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
