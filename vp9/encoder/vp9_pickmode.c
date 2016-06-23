@@ -1410,9 +1410,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   x->skip = 0;
 
-  if (xd->above_mi)
+  // Instead of using vp9_get_pred_context_switchable_interp(xd) to assign
+  // filter_ref, we use a less strict condition on assigning filter_ref.
+  // This is to reduce the probabily of entering the flow of not assigning
+  // filter_ref and then skip filter search.
+  if (xd->above_mi && is_inter_block(xd->above_mi))
     filter_ref = xd->above_mi->interp_filter;
-  else if (xd->left_mi)
+  else if (xd->left_mi && is_inter_block(xd->left_mi))
     filter_ref = xd->left_mi->interp_filter;
   else
     filter_ref = cm->interp_filter;
@@ -1976,6 +1980,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mi->mode = best_mode;
   mi->ref_frame[0] = best_ref_frame;
   x->skip_txfm[0] = best_mode_skip_txfm;
+
+  if (!is_inter_block(mi)) {
+    mi->interp_filter = SWITCHABLE_FILTERS;
+  }
 
   if (reuse_inter_pred && best_pred != NULL) {
     if (best_pred->data != orig_dst.buf && is_inter_mode(mi->mode)) {

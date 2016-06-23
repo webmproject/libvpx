@@ -1299,11 +1299,8 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   MODE_INFO *const mi = xd->mi[0];
   INTERP_FILTER filter_ref;
 
-  if (xd->above_mi)
-    filter_ref = xd->above_mi->interp_filter;
-  else if (xd->left_mi)
-    filter_ref = xd->left_mi->interp_filter;
-  else
+  filter_ref = vp9_get_pred_context_switchable_interp(xd);
+  if (filter_ref == SWITCHABLE_FILTERS)
     filter_ref = EIGHTTAP;
 
   mi->sb_type = bsize;
