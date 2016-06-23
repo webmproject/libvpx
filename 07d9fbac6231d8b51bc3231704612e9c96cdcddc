@@ -16,6 +16,40 @@
       "revId": "07d9fbac6231d8b51bc3231704612e9c96cdcddc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3666d36_37ccb2ca",
+        "filename": "vp10/common/x86/vp10_convolve_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-06-23T18:53:51Z",
+      "side": 1,
+      "message": "remove this empty line.",
+      "revId": "07d9fbac6231d8b51bc3231704612e9c96cdcddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3fbcd84_cc7e8ffa",
+        "filename": "vp10/common/x86/vp10_convolve_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-06-23T18:53:51Z",
+      "side": 1,
+      "message": "This function seems pretty long. Probably taking out INLINE would be better.",
+      "revId": "07d9fbac6231d8b51bc3231704612e9c96cdcddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
