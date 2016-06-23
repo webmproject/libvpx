@@ -16,6 +16,24 @@
       "revId": "f6f256ad4d52f1c5fa13960af97e720ae65e0592",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c0d117_4ddf594a",
+        "filename": "test/decode_api_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-06-23T16:48:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "43f27d56_8056561b",
+      "revId": "f6f256ad4d52f1c5fa13960af97e720ae65e0592",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
