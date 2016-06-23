@@ -21,13 +21,15 @@ namespace {
 using std::tr1::tuple;
 using libvpx_test::ACMRandom;
 
-typedef void (*conv_horiz_t)(const uint8_t*, int, uint8_t*, int,
-                             int, int, const InterpFilterParams,
-                             const int, int, int);
+typedef void (*conv_filter_t)(const uint8_t*, int, uint8_t*, int,
+                              int, int, const InterpFilterParams,
+                              const int, int, int);
 // Test parameter list:
-//  <convolve_horiz_func, <width, height>, filter_params, subpel_x_q4, avg>
+//  <convolve_horiz_func, convolve_vert_func,
+//  <width, height>, filter_params, subpel_x_q4, avg>
 typedef tuple<int, int> BlockDimension;
-typedef tuple<conv_horiz_t, BlockDimension, INTERP_FILTER, int, int> ConvParams;
+typedef tuple<conv_filter_t, conv_filter_t, BlockDimension, INTERP_FILTER,
+              int, int> ConvParams;
 
 // Note:
 //  src_ and src_ref_ have special boundary requirement
@@ -44,13 +46,14 @@ class VP10ConvolveOptimzTest : public ::testing::TestWithParam<ConvParams> {
  public:
   virtual ~VP10ConvolveOptimzTest() {}
   virtual void SetUp() {
-    conv_ = GET_PARAM(0);
-    BlockDimension block = GET_PARAM(1);
+    conv_horiz_ = GET_PARAM(0);
+    conv_vert_ = GET_PARAM(1);
+    BlockDimension block = GET_PARAM(2);
     width_ = std::tr1::get<0>(block);
     height_ = std::tr1::get<1>(block);
-    filter_ = GET_PARAM(2);
-    subpel_ = GET_PARAM(3);
-    avg_ = GET_PARAM(4);
+    filter_ = GET_PARAM(3);
+    subpel_ = GET_PARAM(4);
+    avg_ = GET_PARAM(5);
 
     alloc_ = new uint8_t[maxBlockSize * 4];
     src_ = alloc_ + (vertiOffset * maxWidth);
@@ -68,6 +71,7 @@ class VP10ConvolveOptimzTest : public ::testing::TestWithParam<ConvParams> {
 
  protected:
   void RunHorizFilterBitExactCheck();
+  void RunVertFilterBitExactCheck();
 
  private:
   void PrepFilterBuffer(uint8_t *src, uint8_t *src_ref,
@@ -75,7 +79,8 @@ class VP10ConvolveOptimzTest : public ::testing::TestWithParam<ConvParams> {
                         int w, int h);
   void DiffFilterBuffer(const uint8_t *buf, const uint8_t *buf_ref,
                         int w, int h, int fgroup, int findex);
-  conv_horiz_t conv_;
+  conv_filter_t conv_horiz_;
+  conv_filter_t conv_vert_;
   uint8_t *alloc_;
   uint8_t *src_;
   uint8_t *dst_;
@@ -94,7 +99,7 @@ void VP10ConvolveOptimzTest::PrepFilterBuffer(uint8_t *src, uint8_t *src_ref,
   int r, c;
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 
-  memset(alloc_, 0, 4 * maxBlockSize);
+  memset(alloc_, 0, 4 * maxBlockSize * sizeof(alloc_[0]));
 
   uint8_t *src_ptr = src;
   uint8_t *dst_ptr = dst;
@@ -144,8 +149,8 @@ void VP10ConvolveOptimzTest::RunHorizFilterBitExactCheck() {
   vp10_convolve_horiz_c(src_ref_, stride, dst_ref_, stride, width_, height_,
                         filter_params, subpel_, x_step_q4, avg_);
 
-  conv_(src_, stride, dst_, stride, width_, height_,
-        filter_params, subpel_, x_step_q4, avg_);
+  conv_horiz_(src_, stride, dst_, stride, width_, height_,
+              filter_params, subpel_, x_step_q4, avg_);
 
   DiffFilterBuffer(dst_, dst_ref_, width_, height_, filter_, subpel_);
 
@@ -160,21 +165,40 @@ void VP10ConvolveOptimzTest::RunHorizFilterBitExactCheck() {
                         intermediate_height, filter_params, subpel_, x_step_q4,
                         avg_);
 
-  conv_(src_, stride, dst_, stride, width_,
-        intermediate_height, filter_params, subpel_, x_step_q4,
-        avg_);
+  conv_horiz_(src_, stride, dst_, stride, width_,
+              intermediate_height, filter_params, subpel_, x_step_q4,
+              avg_);
 
   DiffFilterBuffer(dst_, dst_ref_, width_, intermediate_height, filter_,
                    subpel_);
 }
 
+void VP10ConvolveOptimzTest::RunVertFilterBitExactCheck() {
+  PrepFilterBuffer(src_, src_ref_, dst_, dst_ref_, width_, height_);
+
+  InterpFilterParams filter_params = vp10_get_interp_filter_params(filter_);
+
+  vp10_convolve_vert_c(src_ref_, stride, dst_ref_, stride, width_, height_,
+                       filter_params, subpel_, x_step_q4, avg_);
+
+  conv_vert_(src_, stride, dst_, stride, width_, height_,
+             filter_params, subpel_, x_step_q4, avg_);
+
+  DiffFilterBuffer(dst_, dst_ref_, width_, height_, filter_, subpel_);
+}
+
 TEST_P(VP10ConvolveOptimzTest, HorizBitExactCheck) {
   RunHorizFilterBitExactCheck();
+}
+TEST_P(VP10ConvolveOptimzTest, VerticalBitExactCheck) {
+  RunVertFilterBitExactCheck();
 }
 
 using std::tr1::make_tuple;
 
 const BlockDimension kBlockDim[] = {
+  make_tuple(2, 2),
+  make_tuple(2, 4),
   make_tuple(4, 4),
   make_tuple(4, 8),
   make_tuple(8, 4),
@@ -195,7 +219,7 @@ const BlockDimension kBlockDim[] = {
 // 10/12-tap filters
 const INTERP_FILTER kFilter[] = {6, 4, 2};
 
-const int kSubpelXQ4[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+const int kSubpelQ4[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
 const int kAvg[] = {0, 1};
 
@@ -204,9 +228,10 @@ INSTANTIATE_TEST_CASE_P(
     SSSE3, VP10ConvolveOptimzTest,
     ::testing::Combine(
          ::testing::Values(vp10_convolve_horiz_ssse3),
+         ::testing::Values(vp10_convolve_vert_ssse3),
          ::testing::ValuesIn(kBlockDim),
          ::testing::ValuesIn(kFilter),
-         ::testing::ValuesIn(kSubpelXQ4),
+         ::testing::ValuesIn(kSubpelQ4),
          ::testing::ValuesIn(kAvg)));
 #endif  // HAVE_SSSE3 && CONFIG_EXT_INTERP
 }  // namespace
