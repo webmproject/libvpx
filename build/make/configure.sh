@@ -186,24 +186,6 @@ add_extralibs() {
 # Boolean Manipulation Functions
 #
 
-enable_codec(){
-  enabled $1 || echo "  enabling $1"
-  set_all yes $1
-
-  is_in $1 vp8 vp9 && \
-    set_all yes $1_encoder && \
-    set_all yes $1_decoder
-}
-
-disable_codec(){
-  disabled $1 || echo "  disabling $1"
-  set_all no $1
-
-  is_in $1 vp8 vp9 && \
-    set_all no $1_encoder && \
-    set_all no $1_decoder
-}
-
 enable_feature(){
   set_all yes $*
 }
@@ -218,6 +200,20 @@ enabled(){
 
 disabled(){
   eval test "x\$$1" = "xno"
+}
+
+enable_codec(){
+  enabled "${1}" || echo "  enabling ${1}"
+  enable_feature "${1}"
+
+  is_in "${1}" vp8 vp9 && enable_feature "${1}_encoder" "${1}_decoder"
+}
+
+disable_codec(){
+  disabled "${1}" || echo "  disabling ${1}"
+  disable_feature "${1}"
+
+  is_in "${1}" vp8 vp9 && disable_feature "${1}_encoder" "${1}_decoder"
 }
 
 # Iterates through positional parameters, checks to confirm the parameter has
