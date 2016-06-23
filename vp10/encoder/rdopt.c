@@ -10238,6 +10238,7 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
 #endif  // CONFIG_EXT_INTRA
   mbmi->mode = ZEROMV;
+  mbmi->motion_variation = SIMPLE_TRANSLATION;
   mbmi->uv_mode = DC_PRED;
   mbmi->ref_frame[0] = LAST_FRAME;
   mbmi->ref_frame[1] = NONE;
