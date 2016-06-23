@@ -1053,7 +1053,7 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   }
 #endif
 
-  if (x->optimize && p->eobs[block]) {
+  if (p->eobs[block]) {
     int ctx;
 #if CONFIG_VAR_TX
     switch (tx_size) {
@@ -1234,24 +1234,15 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     int idx, idy;
     int block = 0;
     int step = 1 << (max_tx_size * 2);
+    vp10_get_entropy_contexts(bsize, TX_4X4, pd, ctx.ta[plane], ctx.tl[plane]);
+#else
+    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
+    vp10_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane], ctx.tl[plane]);
 #endif
     vp10_subtract_plane(x, bsize, plane);
-
     arg.ta = ctx.ta[plane];
     arg.tl = ctx.tl[plane];
-
-    if (x->optimize) {
-#if CONFIG_VAR_TX
-      vp10_get_entropy_contexts(bsize, TX_4X4, pd,
-                                ctx.ta[plane], ctx.tl[plane]);
-#else
-      const struct macroblockd_plane* const pd = &xd->plane[plane];
-      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-      vp10_get_entropy_contexts(bsize, tx_size, pd,
-                                ctx.ta[plane], ctx.tl[plane]);
-#endif
-    }
-
 #if CONFIG_VAR_TX
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
@@ -1351,7 +1342,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
 #endif  // CONFIG_NEW_QUANT
   a = &args->ta[blk_col];
   l = &args->tl[blk_row];
-  if (x->optimize && p->eobs[block]) {
+  if (p->eobs[block]) {
     int ctx;
     ctx = combine_entropy_contexts(*a, *l);
     *a = *l = vp10_optimize_b(x, plane, block, tx_size, ctx) > 0;
@@ -1388,7 +1379,7 @@ void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
 
   struct encode_b_args arg = {x, NULL, &xd->mi[0]->mbmi.skip, ta, tl};
 
-  if (enable_optimize_b && x->optimize) {
+  if (enable_optimize_b) {
     const struct macroblockd_plane* const pd = &xd->plane[plane];
     const TX_SIZE tx_size = plane ? get_uv_tx_size(&xd->mi[0]->mbmi, pd) :
         xd->mi[0]->mbmi.tx_size;
