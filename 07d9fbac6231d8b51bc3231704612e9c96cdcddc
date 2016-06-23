@@ -72,6 +72,23 @@
     },
     {
       "key": {
+        "uuid": "a30fb977_a3c4fa46",
+        "filename": "vp10/common/x86/vp10_convolve_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 720,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-06-23T19:36:39Z",
+      "side": 1,
+      "message": "This is probably ok, but it is safer to pass in __m128i * since __m128i requires 16-byte alignment, and it is hard to guarantee that would be true on all platforms.",
+      "revId": "07d9fbac6231d8b51bc3231704612e9c96cdcddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3fbcd84_cc7e8ffa",
         "filename": "vp10/common/x86/vp10_convolve_ssse3.c",
         "patchSetId": 2
