@@ -46,7 +46,7 @@ struct segmentation {
   vpx_prob pred_probs[PREDICTION_PROBS];
 
   int16_t feature_data[MAX_SEGMENTS][SEG_LVL_MAX];
-  unsigned int feature_mask[MAX_SEGMENTS];
+  uint32_t feature_mask[MAX_SEGMENTS];
   int aq_av_offset;
 };
 
