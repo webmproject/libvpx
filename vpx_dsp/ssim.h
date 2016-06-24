@@ -11,6 +11,8 @@
 #ifndef VPX_DSP_SSIM_H_
 #define VPX_DSP_SSIM_H_
 
+#define MAX_SSIM_DB 100.0;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,30 +70,16 @@ double vpx_calc_ssim(const YV12_BUFFER_CONFIG *source,
                      const YV12_BUFFER_CONFIG *dest,
                      double *weight);
 
-double vpx_calc_ssimg(const YV12_BUFFER_CONFIG *source,
-                      const YV12_BUFFER_CONFIG *dest,
-                      double *ssim_y, double *ssim_u, double *ssim_v);
-
 double vpx_calc_fastssim(const YV12_BUFFER_CONFIG *source,
                          const YV12_BUFFER_CONFIG *dest,
-                         double *ssim_y, double *ssim_u, double *ssim_v);
-
-double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
-                   const YV12_BUFFER_CONFIG *dest,
-                   double *ssim_y, double *ssim_u, double *ssim_v);
+                         double *ssim_y, double *ssim_u,
+                         double *ssim_v, uint32_t bd, uint32_t in_bd);
 
 #if CONFIG_VP9_HIGHBITDEPTH
 double vpx_highbd_calc_ssim(const YV12_BUFFER_CONFIG *source,
                             const YV12_BUFFER_CONFIG *dest,
                             double *weight,
-                            unsigned int bd);
-
-double vpx_highbd_calc_ssimg(const YV12_BUFFER_CONFIG *source,
-                             const YV12_BUFFER_CONFIG *dest,
-                             double *ssim_y,
-                             double *ssim_u,
-                             double *ssim_v,
-                             unsigned int bd);
+                            uint32_t bd, uint32_t in_bd);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #ifdef __cplusplus

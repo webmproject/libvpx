@@ -636,12 +636,6 @@ typedef struct VP8_COMP
     double summed_weights;
     unsigned int tot_recode_hits;
 
-
-    double total_ssimg_y;
-    double total_ssimg_u;
-    double total_ssimg_v;
-    double total_ssimg_all;
-
     int b_calculate_ssimg;
 #endif
     int b_calculate_psnr;

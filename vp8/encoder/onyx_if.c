@@ -21,7 +21,7 @@
 #include "vp8/common/alloccommon.h"
 #include "mcomp.h"
 #include "firstpass.h"
-#include "vpx/internal/vpx_psnr.h"
+#include "vpx_dsp/psnr.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vp8/common/extend.h"
 #include "ratectrl.h"
@@ -2023,14 +2023,6 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
         cpi->summed_weights = 0;
     }
 
-    if (cpi->b_calculate_ssimg)
-    {
-        cpi->total_ssimg_y = 0;
-        cpi->total_ssimg_u = 0;
-        cpi->total_ssimg_v = 0;
-        cpi->total_ssimg_all = 0;
-    }
-
 #endif
 
     cpi->first_time_stamp_ever = 0x7FFFFFFF;
@@ -2313,45 +2305,6 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                                rate_err, fabs(rate_err));
                 }
             }
-
-            if (cpi->b_calculate_ssimg)
-            {
-                if (cpi->oxcf.number_of_layers > 1)
-                {
-                    int i;
-
-                    fprintf(f, "Layer\tBitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t"
-                               "Time(us)\n");
-                    for (i=0; i<(int)cpi->oxcf.number_of_layers; i++)
-                    {
-                        double dr = (double)cpi->bytes_in_layer[i] *
-                                    8.0 / 1000.0  / time_encoded;
-                        fprintf(f, "%5d\t%7.3f\t%6.4f\t"
-                                "%6.4f\t%6.4f\t%6.4f\t%8.0f\n",
-                                i, dr,
-                                cpi->total_ssimg_y_in_layer[i] /
-                                     cpi->frames_in_layer[i],
-                                cpi->total_ssimg_u_in_layer[i] /
-                                     cpi->frames_in_layer[i],
-                                cpi->total_ssimg_v_in_layer[i] /
-                                     cpi->frames_in_layer[i],
-                                cpi->total_ssimg_all_in_layer[i] /
-                                     cpi->frames_in_layer[i],
-                                total_encode_time);
-                    }
-                }
-                else
-                {
-                    fprintf(f, "BitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t"
-                               "Time(us)\n");
-                    fprintf(f, "%7.3f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%8.0f\n", dr,
-                            cpi->total_ssimg_y / cpi->count,
-                            cpi->total_ssimg_u / cpi->count,
-                            cpi->total_ssimg_v / cpi->count,
-                            cpi->total_ssimg_all / cpi->count, total_encode_time);
-                }
-            }
-
             fclose(f);
 #if 0
             f = fopen("qskip.stt", "a");
@@ -5746,38 +5699,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 }
 #endif
             }
-
-            if (cpi->b_calculate_ssimg)
-            {
-                double y, u, v, frame_all;
-                frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show,
-                    &y, &u, &v);
-
-                if (cpi->oxcf.number_of_layers > 1)
-                {
-                    unsigned int i;
-
-                    for (i=cpi->current_layer;
-                         i<cpi->oxcf.number_of_layers; i++)
-                    {
-                        if (!cpi->b_calculate_psnr)
-                            cpi->frames_in_layer[i]++;
-
-                        cpi->total_ssimg_y_in_layer[i] += y;
-                        cpi->total_ssimg_u_in_layer[i] += u;
-                        cpi->total_ssimg_v_in_layer[i] += v;
-                        cpi->total_ssimg_all_in_layer[i] += frame_all;
-                    }
-                }
-                else
-                {
-                    cpi->total_ssimg_y += y;
-                    cpi->total_ssimg_u += u;
-                    cpi->total_ssimg_v += v;
-                    cpi->total_ssimg_all += frame_all;
-                }
-            }
-
         }
     }
 

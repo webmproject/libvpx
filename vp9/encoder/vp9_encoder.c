@@ -16,7 +16,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
-#include "vpx/internal/vpx_psnr.h"
+#include "vpx_dsp/psnr.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_dsp/vpx_filter.h"
 #if CONFIG_INTERNAL_STATS
@@ -1804,7 +1804,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   init_level_info(&cpi->level_info);
 
 #if CONFIG_INTERNAL_STATS
-  cpi->b_calculate_ssimg = 0;
   cpi->b_calculate_blockiness = 1;
   cpi->b_calculate_consistency = 1;
   cpi->total_inconsistency = 0;
@@ -1828,9 +1827,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     cpi->summedp_weights = 0;
   }
 
-  if (cpi->b_calculate_ssimg) {
-    cpi->ssimg.worst= 100.0;
-  }
   cpi->fastssim.worst = 100.0;
 
   cpi->psnrhvs.worst = 100.0;
@@ -2126,13 +2122,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
           SNPRINT2(results, "\t%7.3f", consistency);
           SNPRINT2(results, "\t%7.3f", cpi->worst_consistency);
         }
-
-        if (cpi->b_calculate_ssimg) {
-          SNPRINT(headings, "\t  SSIMG\tWtSSIMG");
-          SNPRINT2(results, "\t%7.3f", cpi->ssimg.stat[ALL] / cpi->count);
-          SNPRINT2(results, "\t%7.3f", cpi->ssimg.worst);
-        }
-
         fprintf(f, "%s\t    Time  Rc-Err Abs Err\n", headings);
         fprintf(f, "%s\t%8.0f %7.2f %7.2f\n", results,
                 total_encode_time, rate_err, fabs(rate_err));
@@ -2226,271 +2215,15 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 }
 
-/* TODO(yaowu): The block_variance calls the unoptimized versions of variance()
- * and highbd_8_variance(). It should not.
- */
-static void encoder_variance(const uint8_t *a, int  a_stride,
-                             const uint8_t *b, int  b_stride,
-                             int  w, int  h, unsigned int *sse, int *sum) {
-  int i, j;
-
-  *sum = 0;
-  *sse = 0;
-
-  for (i = 0; i < h; i++) {
-    for (j = 0; j < w; j++) {
-      const int diff = a[j] - b[j];
-      *sum += diff;
-      *sse += diff * diff;
-    }
-
-    a += a_stride;
-    b += b_stride;
-  }
-}
-
-#if CONFIG_VP9_HIGHBITDEPTH
-static void encoder_highbd_variance64(const uint8_t *a8, int  a_stride,
-                                      const uint8_t *b8, int  b_stride,
-                                      int w, int h, uint64_t *sse,
-                                      int64_t *sum) {
-  int i, j;
-
-  uint16_t *a = CONVERT_TO_SHORTPTR(a8);
-  uint16_t *b = CONVERT_TO_SHORTPTR(b8);
-  *sum = 0;
-  *sse = 0;
-
-  for (i = 0; i < h; i++) {
-    for (j = 0; j < w; j++) {
-      const int diff = a[j] - b[j];
-      *sum += diff;
-      *sse += diff * diff;
-    }
-    a += a_stride;
-    b += b_stride;
-  }
-}
-
-static void encoder_highbd_8_variance(const uint8_t *a8, int  a_stride,
-                                      const uint8_t *b8, int  b_stride,
-                                      int w, int h,
-                                      unsigned int *sse, int *sum) {
-  uint64_t sse_long = 0;
-  int64_t sum_long = 0;
-  encoder_highbd_variance64(a8, a_stride, b8, b_stride, w, h,
-                            &sse_long, &sum_long);
-  *sse = (unsigned int)sse_long;
-  *sum = (int)sum_long;
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-static int64_t get_sse(const uint8_t *a, int a_stride,
-                       const uint8_t *b, int b_stride,
-                       int width, int height) {
-  const int dw = width % 16;
-  const int dh = height % 16;
-  int64_t total_sse = 0;
-  unsigned int sse = 0;
-  int sum = 0;
-  int x, y;
-
-  if (dw > 0) {
-    encoder_variance(&a[width - dw], a_stride, &b[width - dw], b_stride,
-                     dw, height, &sse, &sum);
-    total_sse += sse;
-  }
-
-  if (dh > 0) {
-    encoder_variance(&a[(height - dh) * a_stride], a_stride,
-                     &b[(height - dh) * b_stride], b_stride,
-                     width - dw, dh, &sse, &sum);
-    total_sse += sse;
-  }
-
-  for (y = 0; y < height / 16; ++y) {
-    const uint8_t *pa = a;
-    const uint8_t *pb = b;
-    for (x = 0; x < width / 16; ++x) {
-      vpx_mse16x16(pa, a_stride, pb, b_stride, &sse);
-      total_sse += sse;
-
-      pa += 16;
-      pb += 16;
-    }
-
-    a += 16 * a_stride;
-    b += 16 * b_stride;
-  }
-
-  return total_sse;
-}
-
-#if CONFIG_VP9_HIGHBITDEPTH
-static int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
-                                    const uint8_t *b8, int b_stride,
-                                    int width, int height,
-                                    unsigned int input_shift) {
-  const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
-  const uint16_t *b = CONVERT_TO_SHORTPTR(b8);
-  int64_t total_sse = 0;
-  int x, y;
-  for (y = 0; y < height; ++y) {
-    for (x = 0; x < width; ++x) {
-      int64_t diff;
-      diff = (a[x] >> input_shift) - (b[x] >> input_shift);
-      total_sse += diff * diff;
-    }
-    a += a_stride;
-    b += b_stride;
-  }
-  return total_sse;
-}
-
-static int64_t highbd_get_sse(const uint8_t *a, int a_stride,
-                              const uint8_t *b, int b_stride,
-                              int width, int height) {
-  int64_t total_sse = 0;
-  int x, y;
-  const int dw = width % 16;
-  const int dh = height % 16;
-  unsigned int sse = 0;
-  int sum = 0;
-  if (dw > 0) {
-    encoder_highbd_8_variance(&a[width - dw], a_stride,
-                              &b[width - dw], b_stride,
-                              dw, height, &sse, &sum);
-    total_sse += sse;
-  }
-  if (dh > 0) {
-    encoder_highbd_8_variance(&a[(height - dh) * a_stride], a_stride,
-                              &b[(height - dh) * b_stride], b_stride,
-                              width - dw, dh, &sse, &sum);
-    total_sse += sse;
-  }
-  for (y = 0; y < height / 16; ++y) {
-    const uint8_t *pa = a;
-    const uint8_t *pb = b;
-    for (x = 0; x < width / 16; ++x) {
-      vpx_highbd_8_mse16x16(pa, a_stride, pb, b_stride, &sse);
-      total_sse += sse;
-      pa += 16;
-      pb += 16;
-    }
-    a += 16 * a_stride;
-    b += 16 * b_stride;
-  }
-  return total_sse;
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-typedef struct {
-  double psnr[4];       // total/y/u/v
-  uint64_t sse[4];      // total/y/u/v
-  uint32_t samples[4];  // total/y/u/v
-} PSNR_STATS;
-
-#if CONFIG_VP9_HIGHBITDEPTH
-static void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
-                             const YV12_BUFFER_CONFIG *b,
-                             PSNR_STATS *psnr,
-                             unsigned int bit_depth,
-                             unsigned int in_bit_depth) {
-  const int widths[3] =
-      {a->y_crop_width,  a->uv_crop_width,  a->uv_crop_width };
-  const int heights[3] =
-      {a->y_crop_height, a->uv_crop_height, a->uv_crop_height};
-  const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer,  a->v_buffer };
-  const int a_strides[3] = {a->y_stride, a->uv_stride, a->uv_stride};
-  const uint8_t *b_planes[3] = {b->y_buffer, b->u_buffer,  b->v_buffer };
-  const int b_strides[3] = {b->y_stride, b->uv_stride, b->uv_stride};
-  int i;
-  uint64_t total_sse = 0;
-  uint32_t total_samples = 0;
-  const double peak = (double)((1 << in_bit_depth) - 1);
-  const unsigned int input_shift = bit_depth - in_bit_depth;
-
-  for (i = 0; i < 3; ++i) {
-    const int w = widths[i];
-    const int h = heights[i];
-    const uint32_t samples = w * h;
-    uint64_t sse;
-    if (a->flags & YV12_FLAG_HIGHBITDEPTH) {
-      if (input_shift) {
-        sse = highbd_get_sse_shift(a_planes[i], a_strides[i],
-                                   b_planes[i], b_strides[i], w, h,
-                                   input_shift);
-      } else {
-        sse = highbd_get_sse(a_planes[i], a_strides[i],
-                             b_planes[i], b_strides[i], w, h);
-      }
-    } else {
-      sse = get_sse(a_planes[i], a_strides[i],
-                    b_planes[i], b_strides[i],
-                    w, h);
-    }
-    psnr->sse[1 + i] = sse;
-    psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, peak, (double)sse);
-
-    total_sse += sse;
-    total_samples += samples;
-  }
-
-  psnr->sse[0] = total_sse;
-  psnr->samples[0] = total_samples;
-  psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, peak,
-                                  (double)total_sse);
-}
-
-#else  // !CONFIG_VP9_HIGHBITDEPTH
-
-static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
-                      PSNR_STATS *psnr) {
-  static const double peak = 255.0;
-  const int widths[3]        = {
-      a->y_crop_width, a->uv_crop_width, a->uv_crop_width};
-  const int heights[3]       = {
-      a->y_crop_height, a->uv_crop_height, a->uv_crop_height};
-  const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer, a->v_buffer};
-  const int a_strides[3]     = {a->y_stride, a->uv_stride, a->uv_stride};
-  const uint8_t *b_planes[3] = {b->y_buffer, b->u_buffer, b->v_buffer};
-  const int b_strides[3]     = {b->y_stride, b->uv_stride, b->uv_stride};
-  int i;
-  uint64_t total_sse = 0;
-  uint32_t total_samples = 0;
-
-  for (i = 0; i < 3; ++i) {
-    const int w = widths[i];
-    const int h = heights[i];
-    const uint32_t samples = w * h;
-    const uint64_t sse = get_sse(a_planes[i], a_strides[i],
-                                 b_planes[i], b_strides[i],
-                                 w, h);
-    psnr->sse[1 + i] = sse;
-    psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, peak, (double)sse);
-
-    total_sse += sse;
-    total_samples += samples;
-  }
-
-  psnr->sse[0] = total_sse;
-  psnr->samples[0] = total_samples;
-  psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, peak,
-                                  (double)total_sse);
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
 static void generate_psnr_packet(VP9_COMP *cpi) {
   struct vpx_codec_cx_pkt pkt;
   int i;
   PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
-  calc_highbd_psnr(cpi->Source, cpi->common.frame_to_show, &psnr,
-                   cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
+  vpx_calc_highbd_psnr(cpi->Source, cpi->common.frame_to_show, &psnr,
+                       cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
 #else
-  calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr);
+  vpx_calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr);
 #endif
 
   for (i = 0; i < 4; ++i) {
@@ -3160,12 +2893,12 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
-    recon_err = vp9_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+    recon_err = vpx_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
   } else {
-    recon_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+    recon_err = vpx_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
   }
 #else
-  recon_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+  recon_err = vpx_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 
@@ -3721,12 +3454,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
 #if CONFIG_VP9_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          kf_err = vp9_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+          kf_err = vpx_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
         } else {
-          kf_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+          kf_err = vpx_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
         }
 #else
-        kf_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+        kf_err = vpx_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
         // Prevent possible divide by zero error below for perfect KF
@@ -4142,13 +3875,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (cpi->rc.next_key_frame_forced && cpi->rc.frames_to_key == 1) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
-      cpi->ambient_err = vp9_highbd_get_y_sse(cpi->Source,
+      cpi->ambient_err = vpx_highbd_get_y_sse(cpi->Source,
                                               get_frame_new_buffer(cm));
     } else {
-      cpi->ambient_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+      cpi->ambient_err = vpx_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
     }
 #else
-    cpi->ambient_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+    cpi->ambient_err = vpx_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
@@ -4872,7 +4605,15 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->bytes += (int)(*size);
 
     if (cm->show_frame) {
+      uint32_t bit_depth = 8;
+      uint32_t in_bit_depth = 8;
       cpi->count++;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cm->use_highbitdepth) {
+      in_bit_depth = cpi->oxcf.input_bit_depth;
+      bit_depth = cm->bit_depth;
+    }
+#endif
 
       if (cpi->b_calculate_psnr) {
         YV12_BUFFER_CONFIG *orig = cpi->Source;
@@ -4880,10 +4621,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
         PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
-        calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd,
-                         cpi->oxcf.input_bit_depth);
+        vpx_calc_highbd_psnr(orig, recon, &psnr, cpi->td.mb.e_mbd.bd,
+                             in_bit_depth);
 #else
-        calc_psnr(orig, recon, &psnr);
+        vpx_calc_psnr(orig, recon, &psnr);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
         adjust_image_stat(psnr.psnr[1], psnr.psnr[2], psnr.psnr[3],
@@ -4896,7 +4637,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           PSNR_STATS psnr2;
           double frame_ssim2 = 0, weight = 0;
 #if CONFIG_VP9_POSTPROC
-          if (vpx_alloc_frame_buffer(&cm->post_proc_buffer,
+          if (vpx_alloc_frame_buffer(pp,
                                      recon->y_crop_width, recon->y_crop_height,
                                      cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -4908,16 +4649,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                                "Failed to allocate post processing buffer");
           }
 
-          vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer,
+          vp9_deblock(cm->frame_to_show, pp,
                       cm->lf.filter_level * 10 / 6);
 #endif
           vpx_clear_system_state();
 
 #if CONFIG_VP9_HIGHBITDEPTH
-          calc_highbd_psnr(orig, pp, &psnr2, cpi->td.mb.e_mbd.bd,
+          vpx_calc_highbd_psnr(orig, pp, &psnr2, cpi->td.mb.e_mbd.bd,
                            cpi->oxcf.input_bit_depth);
 #else
-          calc_psnr(orig, pp, &psnr2);
+          vpx_calc_psnr(orig, pp, &psnr2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->totalp_sq_error += psnr2.sse[0];
@@ -4928,7 +4669,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
             frame_ssim2 = vpx_highbd_calc_ssim(orig, recon, &weight,
-                                               (int)cm->bit_depth);
+                                               bit_depth, in_bit_depth);
           } else {
             frame_ssim2 = vpx_calc_ssim(orig, recon, &weight);
           }
@@ -4943,12 +4684,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
             frame_ssim2 = vpx_highbd_calc_ssim(
-                orig, &cm->post_proc_buffer, &weight, (int)cm->bit_depth);
+                orig, pp, &weight, bit_depth, in_bit_depth);
           } else {
-            frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+            frame_ssim2 = vpx_calc_ssim(orig, pp, &weight);
           }
 #else
-          frame_ssim2 = vpx_calc_ssim(orig, &cm->post_proc_buffer, &weight);
+          frame_ssim2 = vpx_calc_ssim(orig, pp, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           cpi->summedp_quality += frame_ssim2 * weight;
@@ -5000,37 +4741,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         }
       }
 
-      if (cpi->b_calculate_ssimg) {
-        double y, u, v, frame_all;
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (cm->use_highbitdepth) {
-          frame_all = vpx_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
-                                            &u, &v, (int)cm->bit_depth);
-        } else {
-          frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
-                                     &v);
-        }
-#else
-        frame_all = vpx_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        adjust_image_stat(y, u, v, frame_all, &cpi->ssimg);
-      }
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (!cm->use_highbitdepth)
-#endif
       {
         double y, u, v, frame_all;
         frame_all = vpx_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
-                                      &v);
+                                      &v, bit_depth, in_bit_depth);
         adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
-        /* TODO(JBB): add 10/12 bit support */
       }
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (!cm->use_highbitdepth)
-#endif
       {
         double y, u, v, frame_all;
-        frame_all = vpx_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
+        frame_all = vpx_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v,
+                                bit_depth, in_bit_depth);
         adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
       }
     }
@@ -5157,28 +4877,6 @@ void vp9_set_svc(VP9_COMP *cpi, int use_svc) {
   cpi->use_svc = use_svc;
   return;
 }
-
-int64_t vp9_get_y_sse(const YV12_BUFFER_CONFIG *a,
-                      const YV12_BUFFER_CONFIG *b) {
-  assert(a->y_crop_width == b->y_crop_width);
-  assert(a->y_crop_height == b->y_crop_height);
-
-  return get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
-                 a->y_crop_width, a->y_crop_height);
-}
-
-#if CONFIG_VP9_HIGHBITDEPTH
-int64_t vp9_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
-                             const YV12_BUFFER_CONFIG *b) {
-  assert(a->y_crop_width == b->y_crop_width);
-  assert(a->y_crop_height == b->y_crop_height);
-  assert((a->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
-  assert((b->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
-
-  return highbd_get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
-                        a->y_crop_width, a->y_crop_height);
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 int vp9_get_quantizer(VP9_COMP *cpi) {
   return cpi->common.base_qindex;
