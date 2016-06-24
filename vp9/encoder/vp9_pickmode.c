@@ -1727,9 +1727,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
       // For large partition blocks, extra testing is done.
-      if (cpi->oxcf.rc_mode == VPX_CBR && bsize > BLOCK_32X32 &&
-        !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
-        cm->base_qindex) {
+      if (cpi->oxcf.rc_mode == VPX_CBR && bsize >= BLOCK_32X32 &&
+          !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
+          cm->base_qindex) {
         model_rd_for_sb_y_large(cpi, bsize, x, xd, &this_rdc.rate,
                                 &this_rdc.dist, &var_y, &sse_y, mi_row, mi_col,
                                 &this_early_term);
