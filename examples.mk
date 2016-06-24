@@ -9,6 +9,7 @@
 ##
 
 LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
+                third_party/libyuv/include/libyuv/compare_row.h \
                 third_party/libyuv/include/libyuv/convert.h \
                 third_party/libyuv/include/libyuv/convert_argb.h \
                 third_party/libyuv/include/libyuv/convert_from.h \
@@ -18,6 +19,7 @@ LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/include/libyuv/row.h  \
                 third_party/libyuv/include/libyuv/scale.h  \
                 third_party/libyuv/include/libyuv/scale_row.h  \
+                third_party/libyuv/include/libyuv.h \
                 third_party/libyuv/source/cpu_id.cc \
                 third_party/libyuv/source/planar_functions.cc \
                 third_party/libyuv/source/row_any.cc \

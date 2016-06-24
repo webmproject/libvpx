@@ -1,6 +1,6 @@
 Name: libyuv
 URL: http://code.google.com/p/libyuv/
-Version: 1456
+Version: 1b3e4aee47
 License: BSD
 License File: LICENSE
 
@@ -13,3 +13,6 @@ which down-samples the original input video (f.g. 1280x720) a number of times
 in order to encode multiple resolution bit streams.
 
 Local Modifications:
+Removed all unnecessary files including all gyp, make files, docs, unit_tests
+and tools directories
+
