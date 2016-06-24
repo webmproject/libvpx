@@ -32,15 +32,10 @@ extern "C" {
 
 void fwd_txfm(const int16_t *src_diff, tran_low_t *coeff, int diff_stride,
               FWD_TXFM_PARAM *fwd_txfm_param);
-void vp10_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
-                       int diff_stride, TX_TYPE tx_type, int lossless);
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void highbd_fwd_txfm(const int16_t *src_diff, tran_low_t *coeff,
                      int diff_stride, FWD_TXFM_PARAM *fwd_txfm_param);
-void vp10_highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
-                              int diff_stride, TX_TYPE tx_type, int lossless,
-                              const int bd);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static INLINE int get_tx1d_size(TX_SIZE tx_size) {
