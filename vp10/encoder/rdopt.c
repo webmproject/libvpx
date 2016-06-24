@@ -3060,8 +3060,7 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
   vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
-                   VP10_XFORM_QUANT_B);
-
+                   VP10_XFORM_QUANT_FP);
   vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
 
   // TODO(any): Use dist_block to compute distortion
