@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "637f814d_c76c52b8",
+        "filename": "third_party/libyuv/README.libvpx",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-24T23:27:36Z",
+      "side": 1,
+      "message": "and \u0027rm\u0027 command like \u0027rm -r *.gyp *.mk docs/ unit_test/\u0027 would make it easier for later updates to make the same changes.",
+      "range": {
+        "startLine": 16,
+        "startChar": 12,
+        "endLine": 16,
+        "endChar": 23
+      },
+      "revId": "0c6caf187c59e5d6bdabd8596c1910c6866da7aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
