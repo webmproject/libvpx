@@ -113,8 +113,13 @@ TEST_P(ActiveMapRefreshTest, Test) {
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.kf_max_dist = 90000;
 
-  ::libvpx_test::Y4mVideoSource video("desktop_credits.y4m", 0, 30);
-  ::libvpx_test::Y4mVideoSource video_holder("desktop_credits.y4m", 0, 30);
+#if CONFIG_VP10
+  const int nframes = codec_ == &libvpx_test::kVP10 ? 10 : 30;
+#else
+  const int nframes = 30;
+#endif  // CONFIG_VP10
+  ::libvpx_test::Y4mVideoSource video("desktop_credits.y4m", 0, nframes);
+  ::libvpx_test::Y4mVideoSource video_holder("desktop_credits.y4m", 0, nframes);
   video_holder.Begin();
   y4m_holder_ = &video_holder;
 
@@ -125,18 +130,8 @@ VP9_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(5, 6));
 #if CONFIG_VP10
-#if CONFIG_EXT_PARTITION
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_VP10,
-    ActiveMapRefreshTest,
-    ::testing::Combine(
-        ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
-            &libvpx_test::kVP10)),
-        ::testing::Values(::libvpx_test::kRealTime), ::testing::Range(5, 6)));
-#else
 VP10_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
                            ::testing::Values(::libvpx_test::kRealTime),
                            ::testing::Range(5, 6));
-#endif  // CONFIG_EXT_PARTITION
 #endif  // CONFIG_VP10
 }  // namespace
