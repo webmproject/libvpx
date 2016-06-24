@@ -29,15 +29,15 @@ static INLINE void variance4x4_64_sse4_1(const uint8_t *a8, int a_stride,
   uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   uint16_t *b = CONVERT_TO_SHORTPTR(b8);
 
-  a0 = _mm_loadu_si128((__m128i const *) (a + 0 * a_stride));
-  a1 = _mm_loadu_si128((__m128i const *) (a + 1 * a_stride));
-  a2 = _mm_loadu_si128((__m128i const *) (a + 2 * a_stride));
-  a3 = _mm_loadu_si128((__m128i const *) (a + 3 * a_stride));
+  a0 = _mm_loadl_epi64((__m128i const *)(a + 0 * a_stride));
+  a1 = _mm_loadl_epi64((__m128i const *)(a + 1 * a_stride));
+  a2 = _mm_loadl_epi64((__m128i const *)(a + 2 * a_stride));
+  a3 = _mm_loadl_epi64((__m128i const *)(a + 3 * a_stride));
 
-  b0 = _mm_loadu_si128((__m128i const *) (b + 0 * b_stride));
-  b1 = _mm_loadu_si128((__m128i const *) (b + 1 * b_stride));
-  b2 = _mm_loadu_si128((__m128i const *) (b + 2 * b_stride));
-  b3 = _mm_loadu_si128((__m128i const *) (b + 3 * b_stride));
+  b0 = _mm_loadl_epi64((__m128i const *)(b + 0 * b_stride));
+  b1 = _mm_loadl_epi64((__m128i const *)(b + 1 * b_stride));
+  b2 = _mm_loadl_epi64((__m128i const *)(b + 2 * b_stride));
+  b3 = _mm_loadl_epi64((__m128i const *)(b + 3 * b_stride));
 
   u0 = _mm_unpacklo_epi16(a0, a1);
   u1 = _mm_unpacklo_epi16(a2, a3);
@@ -128,6 +128,44 @@ uint32_t vpx_highbd_8_sub_pixel_variance4x4_sse4_1(
 
   return vpx_highbd_8_variance4x4(CONVERT_TO_BYTEPTR(temp2),
                                   4, dst, dst_stride, sse);
+}
+
+uint32_t vpx_highbd_10_sub_pixel_variance4x4_sse4_1(
+    const uint8_t *src, int  src_stride,
+    int xoffset, int  yoffset,
+    const uint8_t *dst, int dst_stride,
+    uint32_t *sse) {
+  uint16_t fdata3[(4 + 1) * 4];
+  uint16_t temp2[4 * 4];
+
+  vpx_highbd_var_filter_block2d_bil_first_pass(
+      src, fdata3, src_stride, 1, 4 + 1,
+      4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(
+      fdata3, temp2, 4, 4, 4, 4,
+      bilinear_filters_2t[yoffset]);
+
+  return vpx_highbd_10_variance4x4(CONVERT_TO_BYTEPTR(temp2),
+                                   4, dst, dst_stride, sse);
+}
+
+uint32_t vpx_highbd_12_sub_pixel_variance4x4_sse4_1(
+    const uint8_t *src, int  src_stride,
+    int xoffset, int  yoffset,
+    const uint8_t *dst, int dst_stride,
+    uint32_t *sse) {
+  uint16_t fdata3[(4 + 1) * 4];
+  uint16_t temp2[4 * 4];
+
+  vpx_highbd_var_filter_block2d_bil_first_pass(
+      src, fdata3, src_stride, 1, 4 + 1,
+      4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(
+      fdata3, temp2, 4, 4, 4, 4,
+      bilinear_filters_2t[yoffset]);
+
+  return vpx_highbd_12_variance4x4(CONVERT_TO_BYTEPTR(temp2),
+                                   4, dst, dst_stride, sse);
 }
 
 // Sub-pixel average

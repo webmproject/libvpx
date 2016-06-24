@@ -1359,8 +1359,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
       }
     }
   }
-  $vpx_highbd_10_sub_pixel_variance4x4_sse4_1='';
-  $vpx_highbd_12_sub_pixel_variance4x4_sse4_1='';
 }  # CONFIG_VP9_HIGHBITDEPTH
 
 if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
