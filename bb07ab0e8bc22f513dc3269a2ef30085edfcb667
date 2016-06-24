@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "637f814d_e130664c",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-24T18:27:13Z",
+      "side": 1,
+      "message": "I probably scanned patchset 8 a bit too quickly, my comment looks incorrect.\nIt should probably be:\n\nIf not applying MC the default behavior is to weight all MBs equal.",
+      "revId": "bb07ab0e8bc22f513dc3269a2ef30085edfcb667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
