@@ -2146,7 +2146,7 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
                                                            *(templ + idy));
 #endif  // CONFIG_VAR_TX
             vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
-                             TX_4X4, VP10_XFORM_QUANT_B);
+                             TX_4X4, VP10_XFORM_QUANT_FP);
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                  so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -2168,12 +2168,11 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             unsigned int tmp;
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
             const scan_order *so = get_scan(TX_4X4, tx_type, 0);
-#if CONFIG_VAR_TX
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
-#endif  // CONFIG_VAR_TX
             vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
-                             TX_4X4, VP10_XFORM_QUANT_B);
+                             TX_4X4, VP10_XFORM_QUANT_FP);
+            vp10_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                  so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -2290,12 +2289,11 @@ next_highbd:
           unsigned int tmp;
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
           const scan_order *so = get_scan(TX_4X4, tx_type, 0);
-#if CONFIG_VAR_TX
           const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                          *(templ + idy));
-#endif
           vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
-                           TX_4X4, VP10_XFORM_QUANT_B);
+                           TX_4X4, VP10_XFORM_QUANT_FP);
+          vp10_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
 #if CONFIG_VAR_TX
           ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -4523,16 +4521,14 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   for (idy = 0; idy < height / 4; ++idy) {
     for (idx = 0; idx < width / 4; ++idx) {
       int64_t dist, ssz, rd, rd1, rd2;
-#if CONFIG_VAR_TX
       int coeff_ctx;
-#endif
       k += (idy * 2 + idx);
-#if CONFIG_VAR_TX
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)),
                                            *(tl + (k >> 1)));
-#endif
       vp10_xform_quant(x, 0, k, idy + (i >> 1), idx + (i & 0x01), BLOCK_8X8,
-                       TX_4X4, VP10_XFORM_QUANT_B);
+                       TX_4X4, VP10_XFORM_QUANT_FP);
+      if (xd->lossless[xd->mi[0]->mbmi.segment_id] == 0)
+        vp10_optimize_b(x, 0, k, TX_4X4, coeff_ctx);
       dist_block(cpi, x, 0, k, idy + (i >> 1), idx + (i & 0x1), TX_4X4,
                  &dist, &ssz);
       thisdistortion += dist;
