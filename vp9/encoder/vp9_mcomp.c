@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
@@ -69,6 +70,8 @@ int vp9_init_search_range(int size) {
 
 static INLINE int mv_cost(const MV *mv,
                           const int *joint_cost, int *const comp_cost[2]) {
+  assert(mv->row >= -MV_MAX && mv->row < MV_MAX);
+  assert(mv->col >= -MV_MAX && mv->col < MV_MAX);
   return joint_cost[vp9_get_mv_joint(mv)] +
              comp_cost[0][mv->row] + comp_cost[1][mv->col];
 }
@@ -445,7 +448,7 @@ uint32_t vp9_skip_sub_pixel_tree(
 
   if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return INT_MAX;
+    return UINT32_MAX;
 
   return besterr;
 }
@@ -599,7 +602,7 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
 
   if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return INT_MAX;
+    return UINT32_MAX;
 
   return besterr;
 }
