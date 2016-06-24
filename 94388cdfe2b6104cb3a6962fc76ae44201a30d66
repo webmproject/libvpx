@@ -22,6 +22,30 @@
       "revId": "94388cdfe2b6104cb3a6962fc76ae44201a30d66",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "637f814d_81e31acf",
+        "filename": "test/active_map_refresh_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-24T18:26:19Z",
+      "side": 1,
+      "message": "(codec_ \u003d\u003d \u0026libvpx_test::kVP10) should work",
+      "parentUuid": "c3abcdee_6c8d5be0",
+      "range": {
+        "startLine": 71,
+        "startChar": 4,
+        "endLine": 71,
+        "endChar": 25
+      },
+      "revId": "94388cdfe2b6104cb3a6962fc76ae44201a30d66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
