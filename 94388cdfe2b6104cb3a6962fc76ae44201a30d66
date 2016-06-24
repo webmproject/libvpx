@@ -46,6 +46,30 @@
       "revId": "94388cdfe2b6104cb3a6962fc76ae44201a30d66",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "637f814d_a1bf3e74",
+        "filename": "test/active_map_refresh_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-06-24T18:48:40Z",
+      "side": 1,
+      "message": "Done.\n\nThanks for the pointer. I think in some of the other test we send in a parameter. We should change it to this.",
+      "parentUuid": "637f814d_81e31acf",
+      "range": {
+        "startLine": 71,
+        "startChar": 4,
+        "endLine": 71,
+        "endChar": 25
+      },
+      "revId": "94388cdfe2b6104cb3a6962fc76ae44201a30d66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
