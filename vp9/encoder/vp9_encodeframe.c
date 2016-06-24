@@ -1213,7 +1213,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
         xd->mi[x_idx + y * mis] = mi_addr;
       }
 
-  if (cpi->oxcf.aq_mode)
+  if (cpi->oxcf.aq_mode != NO_AQ)
     vp9_init_plane_quantizers(cpi, x);
 
   if (is_inter_block(xdmi) && xdmi->sb_type < BLOCK_8X8) {
@@ -1859,12 +1859,10 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   *(xd->mi[0]) = ctx->mic;
   *(x->mbmi_ext) = ctx->mbmi_ext;
 
-  if (seg->enabled && cpi->oxcf.aq_mode) {
+  if (seg->enabled && cpi->oxcf.aq_mode != NO_AQ) {
     // For in frame complexity AQ or variance AQ, copy segment_id from
     // segmentation_map.
-    if (cpi->oxcf.aq_mode == COMPLEXITY_AQ ||
-        cpi->oxcf.aq_mode == VARIANCE_AQ ||
-        cpi->oxcf.aq_mode == EQUATOR360_AQ) {
+    if (cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
                                                  : cm->last_frame_seg_map;
       mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
@@ -2044,7 +2042,7 @@ static void rd_use_partition(VP9_COMP *cpi,
   pc_tree->partitioning = partition;
   save_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
 
-  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode) {
+  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode != NO_AQ) {
     set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
   }
@@ -2574,7 +2572,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
 
-  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode)
+  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode != NO_AQ)
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
 
   if (cpi->sf.cb_partition_search && bsize == BLOCK_16X16) {
