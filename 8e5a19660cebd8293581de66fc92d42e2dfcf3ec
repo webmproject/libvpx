@@ -22,6 +22,30 @@
       "revId": "8e5a19660cebd8293581de66fc92d42e2dfcf3ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "637f814d_d5cf9c34",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-25T19:16:33Z",
+      "side": 1,
+      "message": "oops, good catch",
+      "parentUuid": "637f814d_9547d48e",
+      "range": {
+        "startLine": 7,
+        "startChar": 13,
+        "endLine": 7,
+        "endChar": 23
+      },
+      "revId": "8e5a19660cebd8293581de66fc92d42e2dfcf3ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
