@@ -362,8 +362,8 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
   }
   *distortion = (uint32_t)besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
-  if (besterr >= UINT32_MAX)
-    return UINT32_MAX;
+  if (besterr >= UINT_MAX)
+    return UINT_MAX;
   return (uint32_t)besterr;
 #else
   uint32_t besterr;
@@ -448,7 +448,7 @@ uint32_t vp9_skip_sub_pixel_tree(
 
   if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return UINT32_MAX;
+    return UINT_MAX;
 
   return besterr;
 }
@@ -602,7 +602,7 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
 
   if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return UINT32_MAX;
+    return UINT_MAX;
 
   return besterr;
 }
