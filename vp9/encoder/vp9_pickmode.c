@@ -1723,11 +1723,19 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         pd->dst.stride = this_mode_pred->stride;
       }
     } else {
+      // TODO(jackychen): the low-bitdepth condition causes a segfault in
+      // high-bitdepth builds.
+      // https://bugs.chromium.org/p/webm/issues/detail?id=1250
+#if CONFIG_VP9_HIGHBITDEPTH
+      const int large_block = bsize > BLOCK_32X32;
+#else
+      const int large_block = bsize >= BLOCK_32X32;
+#endif
       mi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
       // For large partition blocks, extra testing is done.
-      if (cpi->oxcf.rc_mode == VPX_CBR && bsize >= BLOCK_32X32 &&
+      if (cpi->oxcf.rc_mode == VPX_CBR && large_block &&
           !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
           cm->base_qindex) {
         model_rd_for_sb_y_large(cpi, bsize, x, xd, &this_rdc.rate,
