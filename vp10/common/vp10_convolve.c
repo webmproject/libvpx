@@ -139,7 +139,7 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
     // temp's size is set to (maximum possible intermediate_height) *
     // MAX_BLOCK_WIDTH
     uint8_t temp[((((MAX_BLOCK_HEIGHT - 1) * MAX_STEP + 15) >> SUBPEL_BITS) +
-                  MAX_FILTER_TAP + 1) *
+                  MAX_FILTER_TAP) *
                  MAX_BLOCK_WIDTH];
     int temp_stride = MAX_BLOCK_WIDTH;
 #if CONFIG_DUAL_FILTER
@@ -164,7 +164,7 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
     assert(filter_params.taps <= MAX_FILTER_TAP);
 
     vp10_convolve_horiz(src - src_stride * (filter_size / 2 - 1), src_stride,
-                        temp + temp_stride, temp_stride, w, intermediate_height,
+                        temp, temp_stride, w, intermediate_height,
                         filter_params, subpel_x_q4, x_step_q4, 0);
 
 #if CONFIG_DUAL_FILTER
@@ -175,7 +175,7 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
     filter_size = filter_params.taps;
     assert(filter_params.taps <= MAX_FILTER_TAP);
 
-    vp10_convolve_vert(temp + temp_stride * (filter_size / 2), temp_stride,
+    vp10_convolve_vert(temp + temp_stride * (filter_size / 2 - 1), temp_stride,
                        dst, dst_stride, w, h, filter_params,
                        subpel_y_q4, y_step_q4, ref_idx);
   }
