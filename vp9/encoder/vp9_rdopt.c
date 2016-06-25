@@ -1594,7 +1594,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Do joint motion search in compound mode to get more accurate mv.
   struct buf_2d backup_yv12[2][MAX_MB_PLANE];
-  uint32_t last_besterr[2] = {UINT32_MAX, UINT32_MAX};
+  uint32_t last_besterr[2] = {UINT_MAX, UINT_MAX};
   const YV12_BUFFER_CONFIG *const scaled_ref_frame[2] = {
     vp9_get_scaled_ref_frame(cpi, mi->ref_frame[0]),
     vp9_get_scaled_ref_frame(cpi, mi->ref_frame[1])
@@ -1640,7 +1640,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // and break out of the search loop if it couldn't find a better mv.
   for (ite = 0; ite < 4; ite++) {
     struct buf_2d ref_yv12[2];
-    uint32_t bestsme = UINT32_MAX;
+    uint32_t bestsme = UINT_MAX;
     int sadpb = x->sadperbit16;
     MV tmp_mv;
     int search_range = 3;
@@ -1705,7 +1705,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                        search_range,
                                        &cpi->fn_ptr[bsize],
                                        &ref_mv[id].as_mv, second_pred);
-    if (bestsme < UINT32_MAX)
+    if (bestsme < UINT_MAX)
       bestsme = vp9_get_mvpred_av_var(x, &tmp_mv, &ref_mv[id].as_mv,
                                       second_pred, &cpi->fn_ptr[bsize], 1);
 
@@ -1714,7 +1714,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     x->mv_row_min = tmp_row_min;
     x->mv_row_max = tmp_row_max;
 
-    if (bestsme < UINT32_MAX) {
+    if (bestsme < UINT_MAX) {
       uint32_t dis; /* TODO: use dis in distortion calculation later. */
       uint32_t sse;
       bestsme = cpi->find_fractional_mv_step(
@@ -1860,7 +1860,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
             seg_mvs[i][mi->ref_frame[0]].as_int == INVALID_MV) {
           MV *const new_mv = &mode_mv[NEWMV][0].as_mv;
           int step_param = 0;
-          uint32_t bestsme = UINT32_MAX;
+          uint32_t bestsme = UINT_MAX;
           int sadpb = x->sadperbit4;
           MV mvp_full;
           int max_mv;
@@ -1915,7 +1915,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
               &bsi->ref_mv[0]->as_mv, new_mv,
               INT_MAX, 1);
 
-          if (bestsme < UINT32_MAX) {
+          if (bestsme < UINT_MAX) {
             uint32_t distortion;
             cpi->find_fractional_mv_step(
                 x,
