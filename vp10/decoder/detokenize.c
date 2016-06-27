@@ -506,12 +506,16 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
+#if CONFIG_NEW_QUANT
+  int dq = get_dq_profile_from_ctx(ctx);
+#endif  //  CONFIG_NEW_QUANT
+
 #if !CONFIG_ANS
   const int eob = decode_coefs(xd, pd->plane_type,
                                pd->dqcoeff, tx_size, tx_type,
                                dequant,
 #if CONFIG_NEW_QUANT
-                               pd->seg_dequant_nuq[seg_id],
+                               pd->seg_dequant_nuq[seg_id][dq],
 #endif  // CONFIG_NEW_QUANT
                                ctx, sc->scan, sc->neighbors, r);
 #else
@@ -519,7 +523,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                                    pd->dqcoeff, tx_size, tx_type,
                                    dequant,
 #if CONFIG_NEW_QUANT
-                                   pd->seg_dequant_nuq[seg_id],
+                                   pd->seg_dequant_nuq[seg_id][dq],
 #endif  // CONFIG_NEW_QUANT
                                    ctx, sc->scan, sc->neighbors, r);
 #endif  // !CONFIG_ANS

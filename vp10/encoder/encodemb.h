@@ -18,6 +18,11 @@
 extern "C" {
 #endif
 
+struct optimize_ctx {
+  ENTROPY_CONTEXT ta[MAX_MB_PLANE][2 * MAX_MIB_SIZE];
+  ENTROPY_CONTEXT tl[MAX_MB_PLANE][2 * MAX_MIB_SIZE];
+};
+
 struct encode_b_args {
   MACROBLOCK *x;
   struct optimize_ctx *ctx;
@@ -46,16 +51,17 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
 #if CONFIG_NEW_QUANT
 void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
                           int blk_col, BLOCK_SIZE plane_bsize,
-                          TX_SIZE tx_size);
+                          TX_SIZE tx_size, int ctx);
 void vp10_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
                              int blk_col, BLOCK_SIZE plane_bsize,
-                             TX_SIZE tx_size);
+                             TX_SIZE tx_size, int ctx);
 void vp10_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
                              int blk_col, BLOCK_SIZE plane_bsize,
-                             TX_SIZE tx_size);
+                             TX_SIZE tx_size, int ctx);
 void vp10_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
                                 int blk_row, int blk_col,
-                                BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
+                                BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                                int ctx);
 #endif
 
 int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,

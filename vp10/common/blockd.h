@@ -31,6 +31,14 @@
 extern "C" {
 #endif
 
+#if CONFIG_NEW_QUANT
+#define QUANT_PROFILES 3
+
+static INLINE int get_dq_profile_from_ctx(int q_ctx) {
+  return VPXMIN(q_ctx, QUANT_PROFILES - 1);
+}
+#endif  // CONFIG_NEW_QUANT
+
 #define MAX_MB_PLANE 3
 
 typedef enum {
@@ -224,7 +232,8 @@ typedef struct macroblockd_plane {
   ENTROPY_CONTEXT *left_context;
   int16_t seg_dequant[MAX_SEGMENTS][2];
 #if CONFIG_NEW_QUANT
-  dequant_val_type_nuq seg_dequant_nuq[MAX_SEGMENTS][COEF_BANDS];
+  dequant_val_type_nuq
+    seg_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES][COEF_BANDS];
 #endif
   uint8_t *color_index_map;
 
@@ -236,7 +245,7 @@ typedef struct macroblockd_plane {
   // encoder
   const int16_t *dequant;
 #if CONFIG_NEW_QUANT
-  const dequant_val_type_nuq* dequant_val_nuq;
+  const dequant_val_type_nuq* dequant_val_nuq[QUANT_PROFILES];
 #endif  // CONFIG_NEW_QUANT
 } MACROBLOCKD_PLANE;
 

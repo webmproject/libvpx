@@ -220,8 +220,8 @@ typedef struct VP10Common {
   int16_t y_dequant[MAX_SEGMENTS][2];
   int16_t uv_dequant[MAX_SEGMENTS][2];
 #if CONFIG_NEW_QUANT
-  dequant_val_type_nuq y_dequant_nuq[MAX_SEGMENTS][COEF_BANDS];
-  dequant_val_type_nuq uv_dequant_nuq[MAX_SEGMENTS][COEF_BANDS];
+  dequant_val_type_nuq y_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES][COEF_BANDS];
+  dequant_val_type_nuq uv_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES][COEF_BANDS];
 #endif
 
   /* We allocate a MODE_INFO struct for each macroblock, together with
