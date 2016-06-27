@@ -9,7 +9,6 @@
  */
 
 #include "libyuv/convert.h"
-#include "libyuv/convert_argb.h"
 
 #ifdef HAVE_JPEG
 #include "libyuv/mjpeg_decoder.h"
