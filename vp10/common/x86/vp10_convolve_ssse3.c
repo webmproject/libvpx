@@ -37,15 +37,7 @@ static INLINE void transpose_4x8(const __m128i *in, __m128i *out) {
   // they're zero vectors.
 }
 
-typedef void (*store_pixel_t)(const __m128i *x, uint8_t *src, uint8_t *dst);
-
-static INLINE void store_4_pixel_only(const __m128i *x, uint8_t *src,
-                                      uint8_t *dst) {
-  __m128i u;
-  (void)src;
-  u = _mm_packus_epi16(*x, *x);
-  *(int *)dst = _mm_cvtsi128_si32(u);
-}
+typedef void (*store_pixel_t)(const __m128i *x, uint8_t *dst);
 
 static INLINE __m128i accumulate_store(const __m128i *x, uint8_t *src) {
   const __m128i zero = _mm_setzero_si128();
@@ -59,9 +51,30 @@ static INLINE __m128i accumulate_store(const __m128i *x, uint8_t *src) {
   return y;
 }
 
-static INLINE void accumulate_store_4_pixel(const __m128i *x, uint8_t *src,
-                                            uint8_t *dst) {
-  __m128i y = accumulate_store(x, src);
+static INLINE void store_2_pixel_only(const __m128i *x, uint8_t *dst) {
+  uint32_t temp;
+  __m128i u = _mm_packus_epi16(*x, *x);
+  temp = _mm_cvtsi128_si32(u);
+  *(uint16_t *)dst = (uint16_t)temp;
+}
+
+static INLINE void accumulate_store_2_pixel(const __m128i *x, uint8_t *dst) {
+  uint32_t temp;
+  __m128i y = accumulate_store(x, dst);
+  temp = _mm_cvtsi128_si32(y);
+  *(uint16_t *)dst = (uint16_t)temp;
+}
+
+static store_pixel_t store2pixelTab[2] = {
+  store_2_pixel_only, accumulate_store_2_pixel};
+
+static INLINE void store_4_pixel_only(const __m128i *x, uint8_t *dst) {
+  __m128i u = _mm_packus_epi16(*x, *x);
+  *(int *)dst = _mm_cvtsi128_si32(u);
+}
+
+static INLINE void accumulate_store_4_pixel(const __m128i *x, uint8_t *dst) {
+  __m128i y = accumulate_store(x, dst);
   *(int *)dst = _mm_cvtsi128_si32(y);
 }
 
@@ -69,12 +82,12 @@ static store_pixel_t store4pixelTab[2] = {
   store_4_pixel_only, accumulate_store_4_pixel};
 
 void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
-                    int tapsNum, store_pixel_t store_func, uint8_t *dst,
-                    uint8_t *buf) {
+                    int tapsNum, store_pixel_t store_func, uint8_t *dst) {
   __m128i sumPairRow[4];
   __m128i sumPairCol[8];
   __m128i pixel;
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
+  const __m128i zero = _mm_setzero_si128();
 
   if (10 == tapsNum) {
     src -= 1;
@@ -103,52 +116,54 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   sumPairRow[0] = _mm_adds_epi16(sumPairRow[0], sumPairRow[3]);
 
   sumPairRow[1] = _mm_mulhrs_epi16(sumPairRow[0], k_256);
+  sumPairRow[1] = _mm_packus_epi16(sumPairRow[1], sumPairRow[1]);
+  sumPairRow[1] = _mm_unpacklo_epi8(sumPairRow[1], zero);
 
-  store_func(&sumPairRow[1], dst, buf);
+  store_func(&sumPairRow[1], dst);
 }
 
 void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                    store_pixel_t store, uint8_t *dst, uint8_t *buf) {
-  horiz_w4_ssse3(src, f, tapsNum, store, dst, buf);
+                    store_pixel_t store, uint8_t *buf) {
+  horiz_w4_ssse3(src, f, tapsNum, store, buf);
   src += 4;
   buf += 4;
-  horiz_w4_ssse3(src, f, tapsNum, store, dst, buf);
+  horiz_w4_ssse3(src, f, tapsNum, store, buf);
 }
 
 void horiz_w16_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                     store_pixel_t store, uint8_t *dst, uint8_t *buf) {
-  horiz_w8_ssse3(src, f, tapsNum, store, dst, buf);
+                     store_pixel_t store, uint8_t *buf) {
+  horiz_w8_ssse3(src, f, tapsNum, store, buf);
   src += 8;
   buf += 8;
-  horiz_w8_ssse3(src, f, tapsNum, store, dst, buf);
+  horiz_w8_ssse3(src, f, tapsNum, store, buf);
 }
 
 void horiz_w32_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                     store_pixel_t store, uint8_t *dst, uint8_t *buf) {
-  horiz_w16_ssse3(src, f, tapsNum, store, dst, buf);
+                     store_pixel_t store, uint8_t *buf) {
+  horiz_w16_ssse3(src, f, tapsNum, store, buf);
   src += 16;
   buf += 16;
-  horiz_w16_ssse3(src, f, tapsNum, store, dst, buf);
+  horiz_w16_ssse3(src, f, tapsNum, store, buf);
 }
 
 void horiz_w64_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                     store_pixel_t store, uint8_t *dst, uint8_t *buf) {
-  horiz_w32_ssse3(src, f, tapsNum, store, dst, buf);
+                     store_pixel_t store, uint8_t *buf) {
+  horiz_w32_ssse3(src, f, tapsNum, store, buf);
   src += 32;
   buf += 32;
-  horiz_w32_ssse3(src, f, tapsNum, store, dst, buf);
+  horiz_w32_ssse3(src, f, tapsNum, store, buf);
 }
 
 void horiz_w128_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                      store_pixel_t store, uint8_t *dst, uint8_t *buf) {
-  horiz_w64_ssse3(src, f, tapsNum, store, dst, buf);
+                      store_pixel_t store, uint8_t *buf) {
+  horiz_w64_ssse3(src, f, tapsNum, store, buf);
   src += 64;
   buf += 64;
-  horiz_w64_ssse3(src, f, tapsNum, store, dst, buf);
+  horiz_w64_ssse3(src, f, tapsNum, store, buf);
 }
 
 static void (*horizTab[6])(const uint8_t *, const __m128i *, int,
-                           store_pixel_t, uint8_t *, uint8_t *) = {
+                           store_pixel_t, uint8_t *) = {
   horiz_w4_ssse3,
   horiz_w8_ssse3,
   horiz_w16_ssse3,
@@ -158,26 +173,28 @@ static void (*horizTab[6])(const uint8_t *, const __m128i *, int,
 };
 
 void filter_horiz_ssse3(const uint8_t *src, __m128i *f, int tapsNum, int width,
-                        store_pixel_t store, uint8_t *dst, uint8_t *buffer) {
+                        store_pixel_t store, uint8_t *dst) {
   switch (width) {
+    // Note:
+    // For width=2 and 4, store function must be different
     case 2:
     case 4:
-      horizTab[0](src, f, tapsNum, store, dst, buffer);
+      horizTab[0](src, f, tapsNum, store, dst);
       break;
     case 8:
-      horizTab[1](src, f, tapsNum, store, dst, buffer);
+      horizTab[1](src, f, tapsNum, store, dst);
       break;
     case 16:
-      horizTab[2](src, f, tapsNum, store, dst, buffer);
+      horizTab[2](src, f, tapsNum, store, dst);
       break;
     case 32:
-      horizTab[3](src, f, tapsNum, store, dst, buffer);
+      horizTab[3](src, f, tapsNum, store, dst);
       break;
     case 64:
-      horizTab[4](src, f, tapsNum, store, dst, buffer);
+      horizTab[4](src, f, tapsNum, store, dst);
       break;
     case 128:
-      horizTab[5](src, f, tapsNum, store, dst, buffer);
+      horizTab[5](src, f, tapsNum, store, dst);
       break;
     default:
       assert(0);
@@ -625,6 +642,7 @@ void vp10_convolve_horiz_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
   __m128i horf[2];
   SubpelFilterCoeffs hCoeffs, vCoeffs;
   const uint8_t *src_ptr;
+  store_pixel_t store2p = store2pixelTab[avg];
   store_pixel_t store4p = store4pixelTab[avg];
   transpose_to_dst_t transpose_4x4 = trans4x4Tab[avg];
   transpose_to_dst_t transpose_8x8 = trans8x8Tab[avg];
@@ -686,114 +704,97 @@ void vp10_convolve_horiz_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
     } while (count < block_height);
 
     for (i = 0; i < block_residu; ++i) {
-      filter_horiz_ssse3(src_ptr, horf, tapsNum, w, store4p, dst, dst);
+      filter_horiz_ssse3(src_ptr, horf, tapsNum, w, store4p, dst);
       src_ptr += src_stride;
       dst += dst_stride;
     }
   } else {
-    // 4-pixels parallel
-    block_height = h >> 2;
-    block_residu = h & 3;
+    if (w > 2) {
+      // 4-pixels parallel
+      block_height = h >> 2;
+      block_residu = h & 3;
 
-    do {
-      for (col = 0; col < w; col += 4) {
-        for (i = 0; i < 4; ++i) {
-          filter_horiz_v4p_ssse3(src_ptr, src_stride, verf, tapsNum,
-                                 temp + (i * 4));
-          src_ptr += 1;
+      do {
+        for (col = 0; col < w; col += 4) {
+          for (i = 0; i < 4; ++i) {
+            filter_horiz_v4p_ssse3(src_ptr, src_stride, verf, tapsNum,
+                                   temp + (i * 4));
+            src_ptr += 1;
+          }
+          transpose_4x4(temp, 4, dst + col, dst_stride);
         }
-        transpose_4x4(temp, 4, dst + col, dst_stride);
-      }
-      count++;
-      src_ptr = src + count * src_stride * 4;
-      dst += dst_stride * 4;
-    } while (count < block_height);
+        count++;
+        src_ptr = src + count * src_stride * 4;
+        dst += dst_stride * 4;
+      } while (count < block_height);
 
-    for (i = 0; i < block_residu; ++i) {
-      filter_horiz_ssse3(src_ptr, horf, tapsNum, w, store4p, dst, dst);
-      src_ptr += src_stride;
-      dst += dst_stride;
+      for (i = 0; i < block_residu; ++i) {
+        filter_horiz_ssse3(src_ptr, horf, tapsNum, w, store4p, dst);
+        src_ptr += src_stride;
+        dst += dst_stride;
+      }
+    } else {
+      for (i = 0; i < h; i++) {
+        filter_horiz_ssse3(src_ptr, horf, tapsNum, w, store2p, dst);
+        src_ptr += src_stride;
+        dst += dst_stride;
+      }
     }
   }
 }
 
 // Vertical convolution filtering
-static INLINE void store_2_pixel_only(const __m128i *x, uint8_t *src,
-                                      uint8_t *dst) {
-  __m128i u;
-  uint32_t temp;
-  (void)src;
-  u = _mm_packus_epi16(*x, *x);
-  temp = _mm_cvtsi128_si32(u);
-  *(uint16_t *)dst = (uint16_t)temp;
-}
-
-static INLINE void accumulate_store_2_pixel(const __m128i *x, uint8_t *src,
-                                            uint8_t *dst) {
-  uint32_t temp;
-  __m128i y = accumulate_store(x, src);
-  temp = _mm_cvtsi128_si32(y);
-  *(uint16_t *)dst = (uint16_t)temp;
-}
-
-static INLINE void store_8_pixel_only(const __m128i *x, uint8_t *src,
-                                      uint8_t *dst) {
-  __m128i u;
-  (void)src;
-  u = _mm_packus_epi16(*x, *x);
+static INLINE void store_8_pixel_only(const __m128i *x, uint8_t *dst) {
+  __m128i u = _mm_packus_epi16(*x, *x);
   _mm_storel_epi64((__m128i *)dst, u);
 }
 
-static INLINE void accumulate_store_8_pixel(const __m128i *x, uint8_t *src,
-                                            uint8_t *dst) {
-  __m128i y = accumulate_store(x, src);
+static INLINE void accumulate_store_8_pixel(const __m128i *x, uint8_t *dst) {
+  __m128i y = accumulate_store(x, dst);
   _mm_storel_epi64((__m128i *)dst, y);
 }
 
 static store_pixel_t store8pixelTab[2] = {
   store_8_pixel_only, accumulate_store_8_pixel};
 
-static store_pixel_t store2pixelTab[2] = {
-  store_2_pixel_only, accumulate_store_2_pixel};
-
 static __m128i filter_vert_ssse3(const uint8_t *src, int src_stride,
-                                 __m128i *f) {
+                                 int tapsNum, __m128i *f) {
+  __m128i s[12];
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
   const __m128i zero = _mm_setzero_si128();
   __m128i min_x2x3, max_x2x3, sum;
+  int i = 0;
+  int r = 0;
 
-  __m128i s0 = _mm_loadu_si128((__m128i const *)(src));
-  __m128i s1 = _mm_loadu_si128((__m128i const *)(src + src_stride));
-  __m128i s2 = _mm_loadu_si128((__m128i const *)(src + 2 * src_stride));
-  __m128i s3 = _mm_loadu_si128((__m128i const *)(src + 3 * src_stride));
-  __m128i s4 = _mm_loadu_si128((__m128i const *)(src + 4 * src_stride));
-  __m128i s5 = _mm_loadu_si128((__m128i const *)(src + 5 * src_stride));
-  __m128i s6 = _mm_loadu_si128((__m128i const *)(src + 6 * src_stride));
-  __m128i s7 = _mm_loadu_si128((__m128i const *)(src + 7 * src_stride));
-  __m128i s8 = _mm_loadu_si128((__m128i const *)(src + 8 * src_stride));
-  __m128i s9 = _mm_loadu_si128((__m128i const *)(src + 9 * src_stride));
-  __m128i s10 = _mm_loadu_si128((__m128i const *)(src + 10 * src_stride));
-  __m128i s11 = _mm_loadu_si128((__m128i const *)(src + 11 * src_stride));
+  if (10 == tapsNum) {
+    i += 1;
+    s[0] = zero;
+  }
+  while (i < 12) {
+    s[i] = _mm_loadu_si128((__m128i const *)(src + r * src_stride));
+    i += 1;
+    r += 1;
+  }
 
-  s0 = _mm_unpacklo_epi8(s0, s1);
-  s2 = _mm_unpacklo_epi8(s2, s3);
-  s4 = _mm_unpacklo_epi8(s4, s5);
-  s6 = _mm_unpacklo_epi8(s6, s7);
-  s8 = _mm_unpacklo_epi8(s8, s9);
-  s10 = _mm_unpacklo_epi8(s10, s11);
+  s[0] = _mm_unpacklo_epi8(s[0], s[1]);
+  s[2] = _mm_unpacklo_epi8(s[2], s[3]);
+  s[4] = _mm_unpacklo_epi8(s[4], s[5]);
+  s[6] = _mm_unpacklo_epi8(s[6], s[7]);
+  s[8] = _mm_unpacklo_epi8(s[8], s[9]);
+  s[10] = _mm_unpacklo_epi8(s[10], s[11]);
 
-  s0 = _mm_maddubs_epi16(s0, f[0]);
-  s2 = _mm_maddubs_epi16(s2, f[1]);
-  s4 = _mm_maddubs_epi16(s4, f[2]);
-  s6 = _mm_maddubs_epi16(s6, f[3]);
-  s8 = _mm_maddubs_epi16(s8, f[4]);
-  s10 = _mm_maddubs_epi16(s10, f[5]);
+  s[0] = _mm_maddubs_epi16(s[0], f[0]);
+  s[2] = _mm_maddubs_epi16(s[2], f[1]);
+  s[4] = _mm_maddubs_epi16(s[4], f[2]);
+  s[6] = _mm_maddubs_epi16(s[6], f[3]);
+  s[8] = _mm_maddubs_epi16(s[8], f[4]);
+  s[10] = _mm_maddubs_epi16(s[10], f[5]);
 
-  min_x2x3 = _mm_min_epi16(s4, s6);
-  max_x2x3 = _mm_max_epi16(s4, s6);
-  sum = _mm_adds_epi16(s0, s2);
-  sum = _mm_adds_epi16(sum, s10);
-  sum = _mm_adds_epi16(sum, s8);
+  min_x2x3 = _mm_min_epi16(s[4], s[6]);
+  max_x2x3 = _mm_max_epi16(s[4], s[6]);
+  sum = _mm_adds_epi16(s[0], s[2]);
+  sum = _mm_adds_epi16(sum, s[10]);
+  sum = _mm_adds_epi16(sum, s[8]);
 
   sum = _mm_adds_epi16(sum, min_x2x3);
   sum = _mm_adds_epi16(sum, max_x2x3);
@@ -808,14 +809,8 @@ static void filter_vert_horiz_parallel_ssse3(const uint8_t *src, int src_stride,
                                              __m128i *f, int tapsNum,
                                              store_pixel_t store_func,
                                              uint8_t *dst) {
-  __m128i sum;
-
-  if (10 == tapsNum) {
-    src -= src_stride;
-  }
-
-  sum = filter_vert_ssse3(src, src_stride, f);
-  store_func(&sum, dst, dst);
+  __m128i sum = filter_vert_ssse3(src, src_stride, tapsNum, f);
+  store_func(&sum, dst);
 }
 
 void filter_vert_compute_small(const uint8_t *src, int src_stride, __m128i *f,
