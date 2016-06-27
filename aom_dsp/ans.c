@@ -39,7 +39,7 @@ void aom_rans_merge_prob8_pdf(aom_cdf_prob *const out_pdf,
   const int out_syms = in_syms + 1;
   assert(src_pdf != out_pdf);
 
-  out_pdf[0] = node_prob << (10 - 8);
+  out_pdf[0] = node_prob << (RANS_PROB_BITS - ANS_P8_SHIFT);
   adjustment -= out_pdf[0];
   for (i = 0; i < in_syms; ++i) {
     int p = (p1 * src_pdf[i] + round_fact) >> ANS_P8_SHIFT;
