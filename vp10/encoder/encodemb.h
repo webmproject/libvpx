@@ -29,6 +29,7 @@ struct encode_b_args {
   int8_t *skip;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
+  int8_t enable_optimize_b;
 };
 
 typedef enum VP10_XFORM_QUANT {
