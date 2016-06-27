@@ -998,61 +998,13 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 #else
   {
 #endif
-    if (x->quant_fp) {
-      // Encoding process for rtc mode
-      if (x->skip_txfm[0][0] == SKIP_TXFM_AC_DC && plane == 0) {
-        // skip forward transform
-        p->eobs[block] = 0;
-        *a = *l = 0;
-        return;
-      } else {
 #if CONFIG_NEW_QUANT
-        vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
-                                tx_size, ctx);
+    vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
+                            tx_size, ctx);
 #else
-        vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
-                         tx_size, VP10_XFORM_QUANT_FP);
-#endif
-      }
-    } else {
-      if (max_txsize_lookup[plane_bsize] == tx_size) {
-        int blk_index = (block >> (tx_size << 1));
-        if (x->skip_txfm[plane][blk_index] == SKIP_TXFM_NONE) {
-          // full forward transform and quantization
-#if CONFIG_NEW_QUANT
-          vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col,
-                                  plane_bsize, tx_size, ctx);
-#else
-          vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
-                           tx_size, VP10_XFORM_QUANT_FP);
+    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
+                     tx_size, VP10_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
-        } else if (x->skip_txfm[plane][blk_index] == SKIP_TXFM_AC_ONLY) {
-          // fast path forward transform and quantization
-#if CONFIG_NEW_QUANT
-          vp10_xform_quant_dc_fp_nuq(x, plane, block, blk_row, blk_col,
-                                     plane_bsize, tx_size, ctx);
-#else
-          vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
-                           tx_size, VP10_XFORM_QUANT_DC);
-#endif  // CONFIG_NEW_QUANT
-        } else {
-          // skip forward transform
-          p->eobs[block] = 0;
-          *a = *l = 0;
-#if !CONFIG_VAR_TX
-          return;
-#endif
-        }
-      } else {
-#if CONFIG_NEW_QUANT
-        vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
-                                tx_size, ctx);
-#else
-        vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
-                         tx_size, VP10_XFORM_QUANT_FP);
-#endif  // CONFIG_NEW_QUANT
-      }
-    }
   }
 #if CONFIG_VAR_TX
   else {
