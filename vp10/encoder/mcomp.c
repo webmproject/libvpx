@@ -937,7 +937,7 @@ static INLINE int is_mv_in(const MACROBLOCK *x, const MV *mv) {
 
 // Calculate and return a sad+mvcost list around an integer best pel.
 static INLINE void calc_int_cost_list(const MACROBLOCK *x,
-                                      const MV *ref_mv,
+                                      const MV *const ref_mv,
                                       int sadpb,
                                       const vp10_variance_fn_ptr_t *fn_ptr,
                                       const MV *best_mv,
@@ -946,8 +946,8 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &x->e_mbd.plane[0].pre[0];
   const MV fcenter_mv = {ref_mv->row >> 3, ref_mv->col >> 3};
-  int br = best_mv->row;
-  int bc = best_mv->col;
+  const int br = best_mv->row;
+  const int bc = best_mv->col;
   MV this_mv;
   int i;
   unsigned int sse;
@@ -1155,7 +1155,7 @@ static int vp10_pattern_search(const MACROBLOCK *x,
   // cost_list[4]: cost at delta {-1, 0} (top)    from the best integer pel
   if (cost_list) {
     const MV best_mv = { br, bc };
-    calc_int_cost_list(x, &fcenter_mv, sad_per_bit, vfp, &best_mv, cost_list);
+    calc_int_cost_list(x, center_mv, sad_per_bit, vfp, &best_mv, cost_list);
   }
   best_mv->row = br;
   best_mv->col = bc;
