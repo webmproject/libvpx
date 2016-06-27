@@ -1208,9 +1208,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     return;
 
   if (!is_inter_block(mbmi)) {
-    struct encode_b_args intra_arg = {x, NULL, &mbmi->skip, args->t_above,
-                                      args->t_left};
-
+    struct encode_b_args intra_arg = {
+        x, NULL, &mbmi->skip, args->t_above, args->t_left, 1};
     vp10_encode_block_intra(plane, block, blk_row, blk_col,
                             plane_bsize, tx_size, &intra_arg);
 
