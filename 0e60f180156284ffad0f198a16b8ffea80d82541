@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "637f814d_9b0e232b",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-27T18:06:28Z",
+      "side": 1,
+      "message": "Could you combine vp9_post_quantize_c and vp9_post_quantize_32x32_c? Maybe use a input parameter to signal if the block is 32x32 or not.",
+      "range": {
+        "startLine": 393,
+        "startChar": 5,
+        "endLine": 393,
+        "endChar": 24
+      },
+      "revId": "0e60f180156284ffad0f198a16b8ffea80d82541",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
