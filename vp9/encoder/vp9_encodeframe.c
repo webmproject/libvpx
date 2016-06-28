@@ -788,6 +788,29 @@ static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
+static void chroma_check(VP9_COMP *cpi, MACROBLOCK *x, int bsize,
+                         unsigned int y_sad, int is_key_frame) {
+  int i;
+  MACROBLOCKD *xd = &x->e_mbd;
+  if (is_key_frame)
+    return;
+
+  for (i = 1; i <= 2; ++i) {
+    unsigned int uv_sad = UINT_MAX;
+    struct macroblock_plane  *p = &x->plane[i];
+    struct macroblockd_plane *pd = &xd->plane[i];
+    const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
+
+    if (bs != BLOCK_INVALID)
+      uv_sad = cpi->fn_ptr[bs].sdf(p->src.buf, p->src.stride,
+                                   pd->dst.buf, pd->dst.stride);
+
+    // TODO(marpan): Investigate if we should lower this threshold if
+    // superblock is detected as skin.
+    x->color_sensitivity[i - 1] = uv_sad > (y_sad >> 2);
+  }
+}
+
 // This function chooses partitioning based on the variance between source and
 // reconstructed last, where variance is computed for down-sampled inputs.
 static int choose_partitioning(VP9_COMP *cpi,
@@ -806,6 +829,8 @@ static int choose_partitioning(VP9_COMP *cpi,
   const uint8_t *d;
   int sp;
   int dp;
+  unsigned int y_sad = UINT_MAX;
+  BLOCK_SIZE bsize = BLOCK_64X64;
   // Ref frame used in partitioning.
   MV_REFERENCE_FRAME ref_frame_partition = LAST_FRAME;
   int pixels_wide = 64, pixels_high = 64;
@@ -851,12 +876,11 @@ static int choose_partitioning(VP9_COMP *cpi,
     // that the temporal reference frame will always be of type LAST_FRAME.
     // TODO(marpan): If that assumption is broken, we need to revisit this code.
     MODE_INFO *mi = xd->mi[0];
-    unsigned int uv_sad;
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
 
     const YV12_BUFFER_CONFIG *yv12_g = NULL;
-    unsigned int y_sad, y_sad_g, y_sad_thr;
-    const BLOCK_SIZE bsize = BLOCK_32X32
+    unsigned int y_sad_g, y_sad_thr;
+    bsize = BLOCK_32X32
         + (mi_col + 4 < cm->mi_cols) * 2 + (mi_row + 4 < cm->mi_rows);
 
     assert(yv12 != NULL);
@@ -910,24 +934,8 @@ static int choose_partitioning(VP9_COMP *cpi,
 #if !CONFIG_VP9_HIGHBITDEPTH
     if (cpi->use_skin_detection)
       x->sb_is_skin = skin_sb_split(cpi, x, low_res, mi_row, mi_col,
-                                    &force_split[0]);
+                                    force_split);
 #endif
-
-    for (i = 1; i <= 2; ++i) {
-      struct macroblock_plane  *p = &x->plane[i];
-      struct macroblockd_plane *pd = &xd->plane[i];
-      const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
-
-      if (bs == BLOCK_INVALID)
-        uv_sad = UINT_MAX;
-      else
-        uv_sad = cpi->fn_ptr[bs].sdf(p->src.buf, p->src.stride,
-                                     pd->dst.buf, pd->dst.stride);
-
-        // TODO(marpan): Investigate if we should lower this threshold if
-        // superblock is detected as skin.
-        x->color_sensitivity[i - 1] = uv_sad > (y_sad >> 2);
-    }
 
     d = xd->plane[0].dst.buf;
     dp = xd->plane[0].dst.stride;
@@ -941,6 +949,7 @@ static int choose_partitioning(VP9_COMP *cpi,
       if (mi_col + block_width / 2 < cm->mi_cols &&
           mi_row + block_height / 2 < cm->mi_rows) {
         set_block_size(cpi, x, xd, mi_row, mi_col, BLOCK_64X64);
+        chroma_check(cpi, x, bsize, y_sad, is_key_frame);
         return 0;
       }
     }
@@ -1146,6 +1155,8 @@ static int choose_partitioning(VP9_COMP *cpi,
     set_low_temp_var_flag(cpi, x, xd, &vt, force_split, thresholds,
                           ref_frame_partition, mi_col, mi_row);
   }
+
+  chroma_check(cpi, x, bsize, y_sad, is_key_frame);
   return 0;
 }
 
