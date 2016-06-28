@@ -20,8 +20,23 @@
 #include "aom_dsp/ans.h"
 #include "aom_dsp/prob.h"
 #include "aom_ports/mem_ops.h"
+#include "av1/common/odintrin.h"
 
-#define ANS_DIV(dividend, divisor) ((dividend) / (divisor))
+#if RANS_PRECISION <= OD_DIVU_DMAX
+#define ANS_DIVREM(quotient, remainder, dividend, divisor) \
+  do {                                                     \
+    quotient = OD_DIVU_SMALL((dividend), (divisor));       \
+    remainder = (dividend) - (quotient) * (divisor);       \
+  } while (0)
+#else
+#define ANS_DIVREM(quotient, remainder, dividend, divisor) \
+  do {                                                     \
+    quotient = (dividend) / (divisor);                     \
+    remainder = (dividend) % (divisor);                    \
+  } while (0)
+#endif
+
+#define ANS_DIV8(dividend, divisor) OD_DIVU_SMALL((dividend), (divisor))
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,9 +87,9 @@ static INLINE void uabs_write(struct AnsCoder *ans, int val, AnsP8 p0) {
     ans->state /= IO_BASE;
   }
   if (!val)
-    ans->state = ANS_DIV(ans->state * ANS_P8_PRECISION, p0);
+    ans->state = ANS_DIV8(ans->state * ANS_P8_PRECISION, p0);
   else
-    ans->state = ANS_DIV((ans->state + 1) * ANS_P8_PRECISION + p - 1, p) - 1;
+    ans->state = ANS_DIV8((ans->state + 1) * ANS_P8_PRECISION + p - 1, p) - 1;
 }
 
 struct rans_sym {
@@ -88,15 +103,17 @@ struct rans_sym {
 static INLINE void rans_write(struct AnsCoder *ans,
                               const struct rans_sym *const sym) {
   const aom_cdf_prob p = sym->prob;
+  unsigned quot, rem;
   while (ans->state >= L_BASE / RANS_PRECISION * IO_BASE * p) {
     ans->buf[ans->buf_offset++] = ans->state % IO_BASE;
     ans->state /= IO_BASE;
   }
-  ans->state =
-      (ans->state / p) * RANS_PRECISION + ans->state % p + sym->cum_prob;
+  ANS_DIVREM(quot, rem, ans->state, p);
+  ans->state = quot * RANS_PRECISION + rem + sym->cum_prob;
 }
 
-#undef ANS_DIV
+#undef ANS_DIV8
+#undef ANS_DIVREM
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
