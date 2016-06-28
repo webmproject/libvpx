@@ -16,8 +16,7 @@
 #include "vpx_ports/msvc.h"
 
 #ifdef _MSC_VER
-# include <math.h>  // the ceil() definition must precede intrin.h
-# if _MSC_VER > 1310 && (defined(_M_X64) || defined(_M_IX86))
+# if defined(_M_X64) || defined(_M_IX86)
 #  include <intrin.h>
 #  define USE_MSC_INTRINSICS
 # endif
