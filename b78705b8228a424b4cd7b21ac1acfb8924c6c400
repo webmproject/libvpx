@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a0ca4f37_6b9b21e4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-28T18:14:50Z",
+      "side": 1,
+      "message": "space before \u0027update\u0027",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 25
+      },
+      "revId": "b78705b8228a424b4cd7b21ac1acfb8924c6c400",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0ca4f37_4b7f454d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-28T18:14:50Z",
+      "side": 1,
+      "message": "BUG\u003d can be the whole url to the bug or, like frank\u0027s change:\nBUG\u003dwebm:1252,libyuv:613 (but probably not necessary to include the yuv bug here? either way)",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 47
+      },
+      "revId": "b78705b8228a424b4cd7b21ac1acfb8924c6c400",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
