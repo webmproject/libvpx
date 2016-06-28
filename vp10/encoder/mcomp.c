@@ -1043,7 +1043,7 @@ static INLINE void calc_int_sad_list(const MACROBLOCK *x,
 // passed into this function
 //
 static int vp10_pattern_search(const MACROBLOCK *x,
-                               MV *ref_mv,
+                               MV *start_mv,
                                int search_param,
                                int sad_per_bit,
                                int do_init_search,
@@ -1070,9 +1070,10 @@ static int vp10_pattern_search(const MACROBLOCK *x,
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   int best_init_s = search_param_to_steps[search_param];
   // adjust ref_mv to make sure it is within MV range
-  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
-  br = ref_mv->row;
-  bc = ref_mv->col;
+  clamp_mv(start_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min,
+           x->mv_row_max);
+  br = start_mv->row;
+  bc = start_mv->col;
   if (cost_list != NULL) {
     cost_list[0] = cost_list[1] = cost_list[2] = cost_list[3] = cost_list[4] =
         INT_MAX;
@@ -1081,8 +1082,8 @@ static int vp10_pattern_search(const MACROBLOCK *x,
   // Work out the start point for the search
   bestsad =
       vfp->sdf(what->buf, what->stride,
-               get_buf_from_mv(in_what, ref_mv), in_what->stride) +
-      mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
+               get_buf_from_mv(in_what, start_mv), in_what->stride) +
+      mvsad_err_cost(x, start_mv, &fcenter_mv, sad_per_bit);
 
   // Search all possible scales upto the search param around the center point
   // pick the scale of the point that is best as the starting scale of
@@ -1337,7 +1338,7 @@ int vp10_get_mvpred_av_var(const MACROBLOCK *x,
 }
 
 int vp10_hex_search(const MACROBLOCK *x,
-                   MV *ref_mv,
+                   MV *start_mv,
                    int search_param,
                    int sad_per_bit,
                    int do_init_search,
@@ -1365,14 +1366,14 @@ int vp10_hex_search(const MACROBLOCK *x,
     {{-512, -1024}, {512, -1024}, {1024, 0}, {512, 1024}, { -512, 1024},
       { -1024, 0}},
   };
-  return vp10_pattern_search(x, ref_mv, search_param, sad_per_bit,
+  return vp10_pattern_search(x, start_mv, search_param, sad_per_bit,
                              do_init_search, cost_list, vfp, use_mvcost,
                              center_mv, best_mv, hex_num_candidates,
                              hex_candidates);
 }
 
 int vp10_bigdia_search(const MACROBLOCK *x,
-                      MV *ref_mv,
+                      MV *start_mv,
                       int search_param,
                       int sad_per_bit,
                       int do_init_search,
@@ -1407,14 +1408,14 @@ int vp10_bigdia_search(const MACROBLOCK *x,
     {{-512, -512}, {0, -1024}, {512, -512}, {1024, 0}, {512, 512}, {0, 1024},
       {-512, 512}, {-1024, 0}},
   };
-  return vp10_pattern_search(x, ref_mv, search_param, sad_per_bit,
+  return vp10_pattern_search(x, start_mv, search_param, sad_per_bit,
                              do_init_search, cost_list, vfp, use_mvcost,
                              center_mv, best_mv, bigdia_num_candidates,
                              bigdia_candidates);
 }
 
 int vp10_square_search(const MACROBLOCK *x,
-                      MV *ref_mv,
+                      MV *start_mv,
                       int search_param,
                       int sad_per_bit,
                       int do_init_search,
@@ -1449,7 +1450,7 @@ int vp10_square_search(const MACROBLOCK *x,
     {{-1024, -1024}, {0, -1024}, {1024, -1024}, {1024, 0}, {1024, 1024},
       {0, 1024}, {-1024, 1024}, {-1024, 0}},
   };
-  return vp10_pattern_search(x, ref_mv, search_param, sad_per_bit,
+  return vp10_pattern_search(x, start_mv, search_param, sad_per_bit,
                              do_init_search, cost_list, vfp, use_mvcost,
                              center_mv, best_mv, square_num_candidates,
                              square_candidates);
