@@ -1153,13 +1153,13 @@ EOF
       if [ -n "${tune_cpu}" ]; then
         case ${tune_cpu} in
           p5600)
-            check_add_cflags -mips32r5 -funroll-loops -mload-store-pairs
+            check_add_cflags -mips32r5 -mload-store-pairs
             check_add_cflags -msched-weight -mhard-float -mfp64
             check_add_asflags -mips32r5 -mhard-float -mfp64
             check_add_ldflags -mfp64
             ;;
-          i6400)
-            check_add_cflags -mips64r6 -mabi=64 -funroll-loops -msched-weight
+          i6400|p6600)
+            check_add_cflags -mips64r6 -mabi=64 -msched-weight
             check_add_cflags  -mload-store-pairs -mhard-float -mfp64
             check_add_asflags -mips64r6 -mabi=64 -mhard-float -mfp64
             check_add_ldflags -mips64r6 -mabi=64 -mfp64
