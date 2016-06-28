@@ -1593,7 +1593,7 @@ int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
     if (Q < thresh_qp &&
         cpi->projected_frame_size > thresh_rate &&
         pred_err_mb > thresh_pred_err_mb) {
-      double new_correction_factor = cpi->rate_correction_factor;
+      double new_correction_factor;
       const int target_size = cpi->av_per_frame_bandwidth;
       int target_bits_per_mb;
       // Drop this frame: advance frame counters, and set force_maxqp flag.
