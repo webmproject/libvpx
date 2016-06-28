@@ -503,16 +503,18 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
       else if (noise_level < kLow)
         threshold_base = (7 * threshold_base) >> 3;
     }
+    thresholds[0] = threshold_base;
+    thresholds[2] = threshold_base << cpi->oxcf.speed;
     if (cm->width <= 352 && cm->height <= 288) {
       thresholds[0] = threshold_base >> 3;
       thresholds[1] = threshold_base >> 1;
       thresholds[2] = threshold_base << 3;
-    } else {
-      thresholds[0] = threshold_base;
+    } else if (cm->width < 1280 && cm->height < 720) {
       thresholds[1] = (5 * threshold_base) >> 2;
-      if (cm->width >= 1920 && cm->height >= 1080)
-        thresholds[1] = (7 * threshold_base) >> 2;
-      thresholds[2] = threshold_base << cpi->oxcf.speed;
+    } else if (cm->width < 1920 && cm->height < 1080) {
+      thresholds[1] = threshold_base << 1;
+    } else {
+      thresholds[1] = (5 * threshold_base) >> 1;
     }
   }
 }
