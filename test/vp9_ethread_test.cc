@@ -20,15 +20,13 @@
 namespace {
 class VPxEncoderThreadTest
     : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith3Params<libvpx_test::TestMode,
-                                                 int, int> {
+      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   VPxEncoderThreadTest()
       : EncoderTest(GET_PARAM(0)),
         encoder_initialized_(false),
         encoding_mode_(GET_PARAM(1)),
-        set_cpu_used_(GET_PARAM(2)),
-        vp10_(GET_PARAM(3)) {
+        set_cpu_used_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.w = 1280;
@@ -74,9 +72,9 @@ class VPxEncoderThreadTest
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource * /*video*/,
                                   ::libvpx_test::Encoder *encoder) {
     if (!encoder_initialized_) {
-#if CONFIG_EXT_TILE
+#if CONFIG_VP10 && CONFIG_EXT_TILE
       encoder->Control(VP9E_SET_TILE_COLUMNS, 1);
-      if (vp10_) {
+      if (codec_ == &libvpx_test::kVP10) {
         // TODO(geza): Start using multiple tile rows when the multi-threaded
         // encoder can handle them
         encoder->Control(VP9E_SET_TILE_ROWS, 32);
@@ -87,7 +85,7 @@ class VPxEncoderThreadTest
       // Encode 4 tile columns.
       encoder->Control(VP9E_SET_TILE_COLUMNS, 2);
       encoder->Control(VP9E_SET_TILE_ROWS, 0);
-#endif  // CONFIG_EXT_TILE
+#endif  // CONFIG_VP10 && CONFIG_EXT_TILE
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
@@ -169,8 +167,6 @@ class VPxEncoderThreadTest
   std::vector<size_t> size_enc_;
   std::vector<std::string> md5_enc_;
   std::vector<std::string> md5_dec_;
-
-  bool vp10_;
 };
 
 TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
@@ -187,15 +183,15 @@ VP9_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
                       ::libvpx_test::kRealTime),
-    ::testing::Range(1, 9), ::testing::Values(0));
+    ::testing::Range(1, 9));
 
 VP10_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(3, 9), ::testing::Values(1));
+    ::testing::Range(3, 9));
 
 VP10_INSTANTIATE_TEST_CASE(
     VPxEncoderThreadTestLarge,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(1, 3), ::testing::Values(1));
+    ::testing::Range(1, 3));
 }  // namespace
