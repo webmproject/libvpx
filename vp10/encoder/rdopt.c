@@ -6885,6 +6885,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
                                  int single_newmvs_rate[2][MAX_REF_FRAMES],
                                  int *compmode_interintra_cost,
                                  int *compmode_wedge_cost,
+                                 int64_t (*const modelled_rd)[MAX_REF_FRAMES],
 #else
                                  int_mv single_newmv[MAX_REF_FRAMES],
 #endif  // CONFIG_EXT_INTER
@@ -7818,6 +7819,23 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
 #endif  // CONFIG_EXT_INTER
 
+#if CONFIG_EXT_INTER
+  if (modelled_rd != NULL) {
+    if (is_comp_pred) {
+      const int mode0 = compound_ref0_mode(this_mode);
+      const int mode1 = compound_ref1_mode(this_mode);
+      int64_t mrd = VPXMIN(modelled_rd[mode0][refs[0]],
+                           modelled_rd[mode1][refs[1]]);
+      if (rd / 4 * 3 > mrd && ref_best_rd < INT64_MAX) {
+        restore_dst_buf(xd, orig_dst, orig_dst_stride);
+        return INT64_MAX;
+      }
+    } else if (!is_comp_interintra_pred) {
+      modelled_rd[this_mode][refs[0]] = rd;
+    }
+  }
+#endif  // CONFIG_EXT_INTER
+
   if (cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
     // if current pred_error modeled rd is substantially more than the best
     // so far, do not bother doing full rd
@@ -8557,6 +8575,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #if CONFIG_EXT_INTER
   int_mv single_newmvs[2][MAX_REF_FRAMES] = { { { 0 } },  { { 0 } } };
   int single_newmvs_rate[2][MAX_REF_FRAMES] = { { 0 }, { 0 } };
+  int64_t modelled_rd[MB_MODE_COUNT][MAX_REF_FRAMES];
 #else
   int_mv single_newmv[MAX_REF_FRAMES] = { { 0 } };
 #endif  // CONFIG_EXT_INTER
@@ -8876,6 +8895,12 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     x->use_default_inter_tx_type = 1;
   else
     x->use_default_inter_tx_type = 0;
+
+#if CONFIG_EXT_INTER
+  for (i = 0 ; i < MB_MODE_COUNT ; ++i)
+    for (ref_frame = 0; ref_frame < MAX_REF_FRAMES; ++ref_frame)
+      modelled_rd[i][ref_frame] = INT64_MAX;
+#endif  // CONFIG_EXT_INTER
 
   for (midx = 0; midx < MAX_MODES; ++midx) {
     int mode_index;
@@ -9324,6 +9349,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                   single_newmvs_rate,
                                   &compmode_interintra_cost,
                                   &compmode_wedge_cost,
+                                  modelled_rd,
 #else
                                   single_newmv,
 #endif  // CONFIG_EXT_INTER
@@ -9438,6 +9464,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                            dummy_single_newmvs_rate,
                                            &dummy_compmode_interintra_cost,
                                            &dummy_compmode_wedge_cost,
+                                           NULL,
 #else
                                            dummy_single_newmv,
 #endif
