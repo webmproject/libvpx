@@ -986,24 +986,75 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
   }
 }
 
+static INLINE void calc_int_sad_list(const MACROBLOCK *x,
+                                     const MV *const ref_mv,
+                                     int sadpb,
+                                     const vp10_variance_fn_ptr_t *fn_ptr,
+                                     const MV *best_mv, int *cost_list,
+                                     const int use_mvcost,
+                                     const int bestsad) {
+  static const MV neighbors[4] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+  const struct buf_2d *const what = &x->plane[0].src;
+  const struct buf_2d *const in_what = &x->e_mbd.plane[0].pre[0];
+  const MV fcenter_mv = {ref_mv->row >> 3, ref_mv->col >> 3};
+  int i;
+  const int br = best_mv->row;
+  const int bc = best_mv->col;
+
+  if (cost_list[0] == INT_MAX) {
+    cost_list[0] = bestsad;
+    if (check_bounds(x, br, bc, 1)) {
+      for (i = 0; i < 4; i++) {
+        const MV this_mv = { br + neighbors[i].row,
+            bc + neighbors[i].col };
+        cost_list[i + 1] = fn_ptr->sdf(what->buf, what->stride,
+                                       get_buf_from_mv(in_what, &this_mv),
+                                       in_what->stride);
+      }
+    } else {
+      for (i = 0; i < 4; i++) {
+        const MV this_mv = {br + neighbors[i].row,
+            bc + neighbors[i].col};
+        if (!is_mv_in(x, &this_mv))
+          cost_list[i + 1] = INT_MAX;
+        else
+          cost_list[i + 1] = fn_ptr->sdf(what->buf, what->stride,
+                                         get_buf_from_mv(in_what, &this_mv),
+                                         in_what->stride);
+      }
+    }
+  } else {
+    if (use_mvcost) {
+      for (i = 0; i < 4; i++) {
+        const MV this_mv = {br + neighbors[i].row,
+            bc + neighbors[i].col};
+        if (cost_list[i + 1] != INT_MAX) {
+          cost_list[i + 1] +=
+              mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
+        }
+      }
+    }
+  }
+}
+
 // Generic pattern search function that searches over multiple scales.
 // Each scale can have a different number of candidates and shape of
 // candidates as indicated in the num_candidates and candidates arrays
 // passed into this function
 //
 static int vp10_pattern_search(const MACROBLOCK *x,
-                              MV *ref_mv,
-                              int search_param,
-                              int sad_per_bit,
-                              int do_init_search,
-                              int *cost_list,
-                              const vp10_variance_fn_ptr_t *vfp,
-                              int use_mvcost,
-                              const MV *center_mv,
-                              MV *best_mv,
-                              const int num_candidates[MAX_PATTERN_SCALES],
-                              const MV candidates[MAX_PATTERN_SCALES]
-                                                 [MAX_PATTERN_CANDIDATES]) {
+                               MV *ref_mv,
+                               int search_param,
+                               int sad_per_bit,
+                               int do_init_search,
+                               int *cost_list,
+                               const vp10_variance_fn_ptr_t *vfp,
+                               int use_mvcost,
+                               const MV *center_mv,
+                               MV *best_mv,
+                               const int num_candidates[MAX_PATTERN_SCALES],
+                               const MV candidates[MAX_PATTERN_SCALES]
+                                                  [MAX_PATTERN_CANDIDATES]) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   static const int search_param_to_steps[MAX_MVSEARCH_STEPS] = {
     10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
@@ -1011,181 +1062,7 @@ static int vp10_pattern_search(const MACROBLOCK *x,
   int i, s, t;
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
-  int br, bc;
-  int bestsad = INT_MAX;
-  int thissad;
-  int k = -1;
-  const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
-  int best_init_s = search_param_to_steps[search_param];
-  // adjust ref_mv to make sure it is within MV range
-  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
-  br = ref_mv->row;
-  bc = ref_mv->col;
-
-  // Work out the start point for the search
-  bestsad = vfp->sdf(what->buf, what->stride,
-                     get_buf_from_mv(in_what, ref_mv), in_what->stride) +
-      mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
-
-  // Search all possible scales upto the search param around the center point
-  // pick the scale of the point that is best as the starting scale of
-  // further steps around it.
-  if (do_init_search) {
-    s = best_init_s;
-    best_init_s = -1;
-    for (t = 0; t <= s; ++t) {
-      int best_site = -1;
-      if (check_bounds(x, br, bc, 1 << t)) {
-        for (i = 0; i < num_candidates[t]; i++) {
-          const MV this_mv = {br + candidates[t][i].row,
-                              bc + candidates[t][i].col};
-          thissad = vfp->sdf(what->buf, what->stride,
-                             get_buf_from_mv(in_what, &this_mv),
-                             in_what->stride);
-          CHECK_BETTER
-        }
-      } else {
-        for (i = 0; i < num_candidates[t]; i++) {
-          const MV this_mv = {br + candidates[t][i].row,
-                              bc + candidates[t][i].col};
-          if (!is_mv_in(x, &this_mv))
-            continue;
-          thissad = vfp->sdf(what->buf, what->stride,
-                             get_buf_from_mv(in_what, &this_mv),
-                             in_what->stride);
-          CHECK_BETTER
-        }
-      }
-      if (best_site == -1) {
-        continue;
-      } else {
-        best_init_s = t;
-        k = best_site;
-      }
-    }
-    if (best_init_s != -1) {
-      br += candidates[best_init_s][k].row;
-      bc += candidates[best_init_s][k].col;
-    }
-  }
-
-  // If the center point is still the best, just skip this and move to
-  // the refinement step.
-  if (best_init_s != -1) {
-    int best_site = -1;
-    s = best_init_s;
-
-    do {
-      // No need to search all 6 points the 1st time if initial search was used
-      if (!do_init_search || s != best_init_s) {
-        if (check_bounds(x, br, bc, 1 << s)) {
-          for (i = 0; i < num_candidates[s]; i++) {
-            const MV this_mv = {br + candidates[s][i].row,
-                                bc + candidates[s][i].col};
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
-            CHECK_BETTER
-          }
-        } else {
-          for (i = 0; i < num_candidates[s]; i++) {
-            const MV this_mv = {br + candidates[s][i].row,
-                                bc + candidates[s][i].col};
-            if (!is_mv_in(x, &this_mv))
-              continue;
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
-            CHECK_BETTER
-          }
-        }
-
-        if (best_site == -1) {
-          continue;
-        } else {
-          br += candidates[s][best_site].row;
-          bc += candidates[s][best_site].col;
-          k = best_site;
-        }
-      }
-
-      do {
-        int next_chkpts_indices[PATTERN_CANDIDATES_REF];
-        best_site = -1;
-        next_chkpts_indices[0] = (k == 0) ? num_candidates[s] - 1 : k - 1;
-        next_chkpts_indices[1] = k;
-        next_chkpts_indices[2] = (k == num_candidates[s] - 1) ? 0 : k + 1;
-
-        if (check_bounds(x, br, bc, 1 << s)) {
-          for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
-            const MV this_mv = {br + candidates[s][next_chkpts_indices[i]].row,
-                                bc + candidates[s][next_chkpts_indices[i]].col};
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
-            CHECK_BETTER
-          }
-        } else {
-          for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
-            const MV this_mv = {br + candidates[s][next_chkpts_indices[i]].row,
-                                bc + candidates[s][next_chkpts_indices[i]].col};
-            if (!is_mv_in(x, &this_mv))
-              continue;
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
-            CHECK_BETTER
-          }
-        }
-
-        if (best_site != -1) {
-          k = next_chkpts_indices[best_site];
-          br += candidates[s][k].row;
-          bc += candidates[s][k].col;
-        }
-      } while (best_site != -1);
-    } while (s--);
-  }
-
-  // Returns the one-away integer pel sad values around the best as follows:
-  // cost_list[0]: cost at the best integer pel
-  // cost_list[1]: cost at delta {0, -1} (left)   from the best integer pel
-  // cost_list[2]: cost at delta { 1, 0} (bottom) from the best integer pel
-  // cost_list[3]: cost at delta { 0, 1} (right)  from the best integer pel
-  // cost_list[4]: cost at delta {-1, 0} (top)    from the best integer pel
-  if (cost_list) {
-    const MV best_mv = { br, bc };
-    calc_int_cost_list(x, center_mv, sad_per_bit, vfp, &best_mv, cost_list);
-  }
-  best_mv->row = br;
-  best_mv->col = bc;
-  return bestsad;
-}
-
-// A specialized function where the smallest scale search candidates
-// are 4 1-away neighbors, and cost_list is non-null
-// TODO(debargha): Merge this function with the one above. Also remove
-// use_mvcost option since it is always 1, to save unnecessary branches.
-static int vp10_pattern_search_sad(const MACROBLOCK *x,
-                                  MV *ref_mv,
-                                  int search_param,
-                                  int sad_per_bit,
-                                  int do_init_search,
-                                  int *cost_list,
-                                  const vp10_variance_fn_ptr_t *vfp,
-                                  int use_mvcost,
-                                  const MV *center_mv,
-                                  MV *best_mv,
-                                  const int num_candidates[MAX_PATTERN_SCALES],
-                                  const MV candidates[MAX_PATTERN_SCALES]
-                                                     [MAX_PATTERN_CANDIDATES]) {
-  const MACROBLOCKD *const xd = &x->e_mbd;
-  static const int search_param_to_steps[MAX_MVSEARCH_STEPS] = {
-    10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
-  };
-  int i, s, t;
-  const struct buf_2d *const what = &x->plane[0].src;
-  const struct buf_2d *const in_what = &xd->plane[0].pre[0];
+  const int last_is_4 = num_candidates[0] == 4;
   int br, bc;
   int bestsad = INT_MAX;
   int thissad;
@@ -1202,8 +1079,9 @@ static int vp10_pattern_search_sad(const MACROBLOCK *x,
   }
 
   // Work out the start point for the search
-  bestsad = vfp->sdf(what->buf, what->stride,
-                     get_buf_from_mv(in_what, ref_mv), in_what->stride) +
+  bestsad =
+      vfp->sdf(what->buf, what->stride,
+               get_buf_from_mv(in_what, ref_mv), in_what->stride) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
 
   // Search all possible scales upto the search param around the center point
@@ -1251,11 +1129,12 @@ static int vp10_pattern_search_sad(const MACROBLOCK *x,
   // If the center point is still the best, just skip this and move to
   // the refinement step.
   if (best_init_s != -1) {
-    int do_sad = (num_candidates[0] == 4 && cost_list != NULL);
+    const int last_s = (last_is_4 && cost_list != NULL);
     int best_site = -1;
     s = best_init_s;
 
-    for (; s >= do_sad; s--) {
+    for (; s >= last_s; s--) {
+      // No need to search all points the 1st time if initial search was used
       if (!do_init_search || s != best_init_s) {
         if (check_bounds(x, br, bc, 1 << s)) {
           for (i = 0; i < num_candidates[s]; i++) {
@@ -1334,9 +1213,9 @@ static int vp10_pattern_search_sad(const MACROBLOCK *x,
             const MV this_mv = {br + candidates[s][i].row,
                                 bc + candidates[s][i].col};
             cost_list[i + 1] =
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                thissad = vfp->sdf(what->buf, what->stride,
+                                   get_buf_from_mv(in_what, &this_mv),
+                                   in_what->stride);
             CHECK_BETTER
           }
         } else {
@@ -1346,9 +1225,9 @@ static int vp10_pattern_search_sad(const MACROBLOCK *x,
             if (!is_mv_in(x, &this_mv))
               continue;
             cost_list[i + 1] =
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                thissad = vfp->sdf(what->buf, what->stride,
+                                   get_buf_from_mv(in_what, &this_mv),
+                                   in_what->stride);
             CHECK_BETTER
           }
         }
@@ -1374,9 +1253,9 @@ static int vp10_pattern_search_sad(const MACROBLOCK *x,
             const MV this_mv = {br + candidates[s][next_chkpts_indices[i]].row,
                                 bc + candidates[s][next_chkpts_indices[i]].col};
             cost_list[next_chkpts_indices[i] + 1] =
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                thissad = vfp->sdf(what->buf, what->stride,
+                                   get_buf_from_mv(in_what, &this_mv),
+                                   in_what->stride);
             CHECK_BETTER
           }
         } else {
@@ -1388,9 +1267,9 @@ static int vp10_pattern_search_sad(const MACROBLOCK *x,
               continue;
             }
             cost_list[next_chkpts_indices[i] + 1] =
-            thissad = vfp->sdf(what->buf, what->stride,
-                               get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                thissad = vfp->sdf(what->buf, what->stride,
+                                   get_buf_from_mv(in_what, &this_mv),
+                                   in_what->stride);
             CHECK_BETTER
           }
         }
@@ -1404,47 +1283,19 @@ static int vp10_pattern_search_sad(const MACROBLOCK *x,
     }
   }
 
-  // Returns the one-away integer pel sad values around the best as follows:
-  // cost_list[0]: sad at the best integer pel
-  // cost_list[1]: sad at delta {0, -1} (left)   from the best integer pel
-  // cost_list[2]: sad at delta { 1, 0} (bottom) from the best integer pel
-  // cost_list[3]: sad at delta { 0, 1} (right)  from the best integer pel
-  // cost_list[4]: sad at delta {-1, 0} (top)    from the best integer pel
+  // Returns the one-away integer pel cost/sad around the best as follows:
+  // cost_list[0]: cost/sad at the best integer pel
+  // cost_list[1]: cost/sad at delta {0, -1} (left)   from the best integer pel
+  // cost_list[2]: cost/sad at delta { 1, 0} (bottom) from the best integer pel
+  // cost_list[3]: cost/sad at delta { 0, 1} (right)  from the best integer pel
+  // cost_list[4]: cost/sad at delta {-1, 0} (top)    from the best integer pel
   if (cost_list) {
-    static const MV neighbors[4] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
-    if (cost_list[0] == INT_MAX) {
-      cost_list[0] = bestsad;
-      if (check_bounds(x, br, bc, 1)) {
-        for (i = 0; i < 4; i++) {
-          const MV this_mv = { br + neighbors[i].row,
-                               bc + neighbors[i].col };
-          cost_list[i + 1] = vfp->sdf(what->buf, what->stride,
-                                     get_buf_from_mv(in_what, &this_mv),
-                                     in_what->stride);
-        }
-      } else {
-        for (i = 0; i < 4; i++) {
-          const MV this_mv = {br + neighbors[i].row,
-            bc + neighbors[i].col};
-          if (!is_mv_in(x, &this_mv))
-            cost_list[i + 1] = INT_MAX;
-          else
-            cost_list[i + 1] = vfp->sdf(what->buf, what->stride,
-                                       get_buf_from_mv(in_what, &this_mv),
-                                       in_what->stride);
-        }
-      }
+    const MV best_mv = { br, bc };
+    if (last_is_4) {
+      calc_int_sad_list(x, center_mv, sad_per_bit, vfp, &best_mv, cost_list,
+                        use_mvcost, bestsad);
     } else {
-      if (use_mvcost) {
-        for (i = 0; i < 4; i++) {
-          const MV this_mv = {br + neighbors[i].row,
-            bc + neighbors[i].col};
-          if (cost_list[i + 1] != INT_MAX) {
-            cost_list[i + 1] +=
-                mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit);
-          }
-        }
-      }
+      calc_int_cost_list(x, center_mv, sad_per_bit, vfp, &best_mv, cost_list);
     }
   }
   best_mv->row = br;
@@ -1515,9 +1366,9 @@ int vp10_hex_search(const MACROBLOCK *x,
       { -1024, 0}},
   };
   return vp10_pattern_search(x, ref_mv, search_param, sad_per_bit,
-                            do_init_search, cost_list, vfp, use_mvcost,
-                            center_mv, best_mv,
-                            hex_num_candidates, hex_candidates);
+                             do_init_search, cost_list, vfp, use_mvcost,
+                             center_mv, best_mv, hex_num_candidates,
+                             hex_candidates);
 }
 
 int vp10_bigdia_search(const MACROBLOCK *x,
@@ -1556,10 +1407,10 @@ int vp10_bigdia_search(const MACROBLOCK *x,
     {{-512, -512}, {0, -1024}, {512, -512}, {1024, 0}, {512, 512}, {0, 1024},
       {-512, 512}, {-1024, 0}},
   };
-  return vp10_pattern_search_sad(x, ref_mv, search_param, sad_per_bit,
-                                do_init_search, cost_list, vfp, use_mvcost,
-                                center_mv, best_mv,
-                                bigdia_num_candidates, bigdia_candidates);
+  return vp10_pattern_search(x, ref_mv, search_param, sad_per_bit,
+                             do_init_search, cost_list, vfp, use_mvcost,
+                             center_mv, best_mv, bigdia_num_candidates,
+                             bigdia_candidates);
 }
 
 int vp10_square_search(const MACROBLOCK *x,
@@ -1599,9 +1450,9 @@ int vp10_square_search(const MACROBLOCK *x,
       {0, 1024}, {-1024, 1024}, {-1024, 0}},
   };
   return vp10_pattern_search(x, ref_mv, search_param, sad_per_bit,
-                            do_init_search, cost_list, vfp, use_mvcost,
-                            center_mv, best_mv,
-                            square_num_candidates, square_candidates);
+                             do_init_search, cost_list, vfp, use_mvcost,
+                             center_mv, best_mv, square_num_candidates,
+                             square_candidates);
 }
 
 int vp10_fast_hex_search(const MACROBLOCK *x,
