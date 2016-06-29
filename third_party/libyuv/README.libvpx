@@ -1,6 +1,6 @@
 Name: libyuv
 URL: http://code.google.com/p/libyuv/
-Version: 1456
+Version: 2f101fdb
 License: BSD
 License File: LICENSE
 
@@ -13,3 +13,12 @@ which down-samples the original input video (f.g. 1280x720) a number of times
 in order to encode multiple resolution bit streams.
 
 Local Modifications:
+Remove files unnecessary to libvpx build.
+
+rm -rf .gitignore .gn AUTHORS Android.mk BUILD.gn CMakeLists.txt DEPS LICENSE \
+  LICENSE_THIRD_PARTY OWNERS PATENTS PRESUBMIT.py README.chromium README.md \
+  all.gyp build_overrides/ chromium/ codereview.settings docs/ \
+  download_vs_toolchain.py gyp_libyuv gyp_libyuv.py include/libyuv.h \
+  include/libyuv/compare_row.h libyuv.gyp libyuv.gypi libyuv_nacl.gyp \
+  libyuv_test.gyp linux.mk public.mk setup_links.py sync_chromium.py \
+  third_party/ tools/ unit_test/ util/ winarm.mk
