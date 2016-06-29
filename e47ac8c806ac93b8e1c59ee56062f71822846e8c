@@ -98,6 +98,24 @@
       "revId": "e47ac8c806ac93b8e1c59ee56062f71822846e8c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c07f4320_ec2a4bd9",
+        "filename": "vpx_util/convolve/conv_filter_coeffs.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-06-29T22:14:24Z",
+      "side": 1,
+      "message": "If you include filter.h, you don\u0027t need to modify filter.c (right?) It is better not to modify source code. Maybe add a fake vpx_config.h here?",
+      "parentUuid": "e02b6715_b58260e3",
+      "revId": "e47ac8c806ac93b8e1c59ee56062f71822846e8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
