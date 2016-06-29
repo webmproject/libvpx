@@ -1066,9 +1066,6 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGHBITDEPTH
     const int bd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? xd->bd : 8;
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH && xd->bd == BITDEPTH_10) {
-      shift = 2;
-    }
     *out_dist = vp10_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                         &this_sse, bd) >> shift;
 #else
