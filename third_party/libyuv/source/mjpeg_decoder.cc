@@ -59,7 +59,8 @@ const int MJpegDecoder::kColorSpaceYCCK = JCS_YCCK;
 // Methods that are passed to jpeglib.
 boolean fill_input_buffer(jpeg_decompress_struct* cinfo);
 void init_source(jpeg_decompress_struct* cinfo);
-void skip_input_data(jpeg_decompress_struct* cinfo, long num_bytes);  // NOLINT
+void skip_input_data(jpeg_decompress_struct* cinfo,
+                     long num_bytes);  // NOLINT
 void term_source(jpeg_decompress_struct* cinfo);
 void ErrorHandler(jpeg_common_struct* cinfo);
 
@@ -428,7 +429,8 @@ boolean fill_input_buffer(j_decompress_ptr cinfo) {
   return TRUE;
 }
 
-void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {  // NOLINT
+void skip_input_data(j_decompress_ptr cinfo,
+                     long num_bytes) {  // NOLINT
   cinfo->src->next_input_byte += num_bytes;
 }
 
