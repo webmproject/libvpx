@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60b857d5_bf151f46",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-06-29T17:37:24Z",
+      "side": 1,
+      "message": "Could you update the numbers for the coding performance and speed impact, and also describe briefly what this patch does?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 29
+      },
+      "revId": "6f2d75811c263296ed007165061736982b58e2cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
