@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60b857d5_99fb1bc4",
+        "filename": "vpx_scale/generic/yv12extend.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-29T03:26:10Z",
+      "side": 1,
+      "message": "this would appear if vp9/10 are both disabled and a high-bitdepth build were requested. a chain of follow-ups might be to have configure recognize high bitdepth codecs and disable this one if they aren\u0027t present (it should probably be renamed too). otherwise all the CONFIG_VP9_HIGHBITDEPTH checks would be more properly written: CONFIG_VP9_HIGHBITDEPTH \u0026\u0026 (CONFIG_VP9 || CONFIG_VP10). this file suffers from a few other instances like this.",
+      "revId": "29f36f7e3734d83393be7865d8ec9104f06abe92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
