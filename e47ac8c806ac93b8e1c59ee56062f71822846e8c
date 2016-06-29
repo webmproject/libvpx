@@ -39,6 +39,23 @@
       "revId": "e47ac8c806ac93b8e1c59ee56062f71822846e8c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e02b6715_75c12835",
+        "filename": "vpx_util/convolve/conv_filter_coeffs.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-06-29T21:48:16Z",
+      "side": 1,
+      "message": "Is it possible to use filter.h included in filter.c?",
+      "revId": "e47ac8c806ac93b8e1c59ee56062f71822846e8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
