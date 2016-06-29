@@ -2294,8 +2294,6 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
       set_segment_id_supertx(cpi, x, mi_row, mi_col, bsize);
 
       if (!x->skip) {
-        memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
-
         x->skip_optimize = 0;
         x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
 
@@ -4608,7 +4606,6 @@ static void encode_frame_internal(VP10_COMP *cpi) {
                 cm->prev_mip + cm->mi_stride + 1 : NULL;
 
   x->quant_fp = cpi->sf.use_quant_fp;
-  vp10_zero(x->skip_txfm);
 #if CONFIG_VAR_TX
 #if CONFIG_REF_MV
   vp10_zero(x->blk_skip_drl);
@@ -4989,8 +4986,6 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
   const int mis = cm->mi_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
-
-  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
@@ -6106,13 +6101,6 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
 
   set_offsets_without_segment_id(cpi, tile, x, mi_row, mi_col, bsize);
   set_segment_id_supertx(cpi, x, mi_row, mi_col, bsize);
-
-  // These skip_txfm flags are previously set by the non-supertx RD search.
-  // vp10_txfm_rd_in_plane_supertx calls block_rd_txfm, which checks these
-  // to reuse distortion values from the RD estimation, so we reset these
-  // flags here before evaluating RD for supertx coding.
-  for (plane = 0 ; plane < MAX_MB_PLANE ; plane++)
-    x->skip_txfm[plane][0] = SKIP_TXFM_NONE;
 
   mbmi = &xd->mi[0]->mbmi;
   best_tx_nostx = mbmi->tx_type;

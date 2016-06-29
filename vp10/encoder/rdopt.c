@@ -824,66 +824,41 @@ static void model_rd_for_sb(const VP10_COMP *const cpi, BLOCK_SIZE bsize,
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
-  int i;
+  int plane;
+  const int ref = xd->mi[0]->mbmi.ref_frame[0];
+
   int64_t rate_sum = 0;
   int64_t dist_sum = 0;
-  const int ref = xd->mi[0]->mbmi.ref_frame[0];
-  unsigned int sse;
-  unsigned int sum_sse = 0;
   int64_t total_sse = 0;
-  int skip_flag = 1;
-  int rate;
-  int64_t dist;
 
   x->pred_sse[ref] = 0;
 
-  for (i = plane_from; i <= plane_to; ++i) {
-    struct macroblock_plane *const p = &x->plane[i];
-    struct macroblockd_plane *const pd = &xd->plane[i];
+  for (plane = plane_from; plane <= plane_to; ++plane) {
+    struct macroblock_plane *const p = &x->plane[plane];
+    struct macroblockd_plane *const pd = &xd->plane[plane];
     const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
-    const TX_SIZE max_tx_size = max_txsize_lookup[bs];
-    const BLOCK_SIZE unit_size = txsize_to_bsize[max_tx_size];
-    int bw_shift = (b_width_log2_lookup[bs] - b_width_log2_lookup[unit_size]);
-    int bh_shift = (b_height_log2_lookup[bs] - b_width_log2_lookup[unit_size]);
-    int bw = 1 << bw_shift;
-    int bh = 1 << bh_shift;
-    int idx, idy;
-    int lw = b_width_log2_lookup[unit_size] + 2;
-    int lh = b_height_log2_lookup[unit_size] + 2;
 
-    sum_sse = 0;
+    unsigned int sse;
+    int rate;
+    int64_t dist;
 
-    for (idy = 0; idy < bh; ++idy) {
-      for (idx = 0; idx < bw; ++idx) {
-        uint8_t *src = p->src.buf + (idy * p->src.stride << lh) + (idx << lw);
-        uint8_t *dst = pd->dst.buf + (idy * pd->dst.stride << lh) + (idx << lh);
-        int block_idx = (idy << bw_shift) + idx;
-        int low_err_skip = 0;
+    // TODO(geza): Write direct sse functions that do not compute
+    // variance as well.
+    cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
+                       pd->dst.buf, pd->dst.stride, &sse);
 
-        cpi->fn_ptr[unit_size].vf(src, p->src.stride,
-                                  dst, pd->dst.stride, &sse);
-        x->bsse[i][block_idx] = sse;
-        sum_sse += sse;
+    if (plane == 0)
+      x->pred_sse[ref] = sse;
 
-        x->skip_txfm[i][block_idx] = SKIP_TXFM_NONE;
+    total_sse += sse;
 
-        if (skip_flag && !low_err_skip)
-          skip_flag = 0;
-
-        if (i == 0)
-          x->pred_sse[ref] += sse;
-      }
-    }
-
-    total_sse += sum_sse;
-
-    model_rd_from_sse(cpi, xd, bs, i, sum_sse, &rate, &dist);
+    model_rd_from_sse(cpi, xd, bs, plane, sse, &rate, &dist);
 
     rate_sum += rate;
     dist_sum += dist;
   }
 
-  *skip_txfm_sb = skip_flag;
+  *skip_txfm_sb = total_sse == 0;
   *skip_sse_sb = total_sse << 4;
   *out_rate_sum = (int)rate_sum;
   *out_dist_sum = dist_sum;
@@ -1245,56 +1220,6 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 
       variance(src, src_stride, dst, dst_stride, &tmp);
       dist = (int64_t)tmp * 16;
-    }
-  } else if (max_txsize_lookup[plane_bsize] == tx_size) {
-    if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
-        SKIP_TXFM_NONE) {
-      // full forward transform and quantization
-#if CONFIG_NEW_QUANT
-      vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col,
-                              plane_bsize, tx_size, ctx);
-#else
-      vp10_xform_quant(x, plane, block, blk_row, blk_col,
-                       plane_bsize, tx_size, VP10_XFORM_QUANT_FP);
-#endif  // CONFIG_NEW_QUANT
-      if (x->plane[plane].eobs[block])
-        vp10_optimize_b(x, plane, block, tx_size, coeff_ctx);
-      dist_block(args->cpi, x, plane, block, blk_row, blk_col,
-                 tx_size, &dist, &sse);
-    } else if (x->skip_txfm[plane][block >> (tx_size << 1)] ==
-               SKIP_TXFM_AC_ONLY) {
-      // compute DC coefficient
-      tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
-      tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
-#if CONFIG_NEW_QUANT
-      vp10_xform_quant_dc_fp_nuq(x, plane, block, blk_row, blk_col,
-                                 plane_bsize, tx_size, ctx);
-#else
-      vp10_xform_quant(x, plane, block, blk_row, blk_col,
-                          plane_bsize, tx_size, VP10_XFORM_QUANT_DC);
-#endif  // CONFIG_NEW_QUANT
-      sse  = x->bsse[plane][block >> (tx_size << 1)] << 4;
-      dist = sse;
-      if (x->plane[plane].eobs[block]) {
-        const int64_t orig_sse = (int64_t)coeff[0] * coeff[0];
-        const int64_t resd_sse = coeff[0] - dqcoeff[0];
-        int64_t dc_correct = orig_sse - resd_sse * resd_sse;
-        const struct macroblockd_plane *const pd = &xd->plane[plane];
-        TX_TYPE tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
-        int shift = (MAX_TX_SCALE - get_tx_scale(xd, tx_type, tx_size)) * 2;
-#if CONFIG_VP9_HIGHBITDEPTH
-        dc_correct >>= ((xd->bd - 8) * 2);
-#endif
-        dc_correct >>= shift;
-
-        dist = VPXMAX(0, sse - dc_correct);
-      }
-    } else {
-      // SKIP_TXFM_AC_DC
-      // skip forward transform
-      x->plane[plane].eobs[block] = 0;
-      sse  = x->bsse[plane][block >> (tx_size << 1)] << 4;
-      dist = sse;
     }
   } else {
     // full forward transform and quantization
@@ -2876,7 +2801,6 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #endif
     angle_estimation(src, src_stride, rows, cols, directional_mode_skip_mask);
 #endif  // CONFIG_EXT_INTRA
-  memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   palette_mode_info.palette_size[0] = 0;
   pmi->palette_size[0] = 0;
   if (above_mi)
@@ -4104,7 +4028,6 @@ static int64_t rd_pick_intra_sbuv_mode(VP10_COMP *cpi, MACROBLOCK *x,
   ext_intra_mode_info.use_ext_intra_mode[1] = 0;
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
 #endif  // CONFIG_EXT_INTRA
-  memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   palette_mode_info.palette_size[1] = 0;
   pmi->palette_size[1] = 0;
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
@@ -4209,7 +4132,6 @@ static int64_t rd_sbuv_dcpred(const VP10_COMP *cpi, MACROBLOCK *x,
   int64_t unused;
 
   x->e_mbd.mi[0]->mbmi.uv_mode = DC_PRED;
-  memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   super_block_uvrd(cpi, x, rate_tokenonly, distortion,
                    skippable, &unused, bsize, INT64_MAX);
   *rate = *rate_tokenonly +
@@ -6960,8 +6882,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #else
   INTERP_FILTER best_filter = SWITCHABLE;
 #endif
-  uint8_t skip_txfm[MAX_MB_PLANE][MAX_TX_BLOCKS_IN_MAX_SB] = {{0}};
-  int64_t bsse[MAX_MB_PLANE][MAX_TX_BLOCKS_IN_MAX_SB] = {{0}};
 
   int skip_txfm_sb = 0;
   int64_t skip_sse_sb = INT64_MAX;
@@ -7371,8 +7291,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
         skip_txfm_sb = tmp_skip_sb;
         skip_sse_sb = tmp_skip_sse;
-        memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
-        memcpy(bsse, x->bsse, sizeof(bsse));
       } else {
         pred_exists = 0;
       }
@@ -7740,8 +7658,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
     model_rd_for_sb(cpi, bsize, x, xd, 0, MAX_MB_PLANE - 1,
                     &tmp_rate, &tmp_dist, &skip_txfm_sb, &skip_sse_sb);
     rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
-    memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
-    memcpy(bsse, x->bsse, sizeof(bsse));
   }
 
 #if CONFIG_DUAL_FILTER
@@ -7751,72 +7667,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
   if (!is_comp_pred)
     single_filter[this_mode][refs[0]] = mbmi->interp_filter;
 #endif
-
-  if (cpi->sf.adaptive_mode_search)
-    if (is_comp_pred)
-#if CONFIG_EXT_INTER
-      switch (this_mode) {
-        case NEAREST_NEARESTMV:
-          if (single_skippable[NEARESTMV][refs[0]] &&
-              single_skippable[NEARESTMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case ZERO_ZEROMV:
-          if (single_skippable[ZEROMV][refs[0]] &&
-              single_skippable[ZEROMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEW_NEWMV:
-          if (single_skippable[NEWMV][refs[0]] &&
-              single_skippable[NEWMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEAREST_NEWMV:
-          if (single_skippable[NEARESTMV][refs[0]] &&
-              single_skippable[NEWMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEAR_NEWMV:
-          if (single_skippable[NEARMV][refs[0]] &&
-              single_skippable[NEWMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEW_NEARESTMV:
-          if (single_skippable[NEWMV][refs[0]] &&
-              single_skippable[NEARESTMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEW_NEARMV:
-          if (single_skippable[NEWMV][refs[0]] &&
-              single_skippable[NEARMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEAREST_NEARMV:
-          if (single_skippable[NEARESTMV][refs[0]] &&
-              single_skippable[NEARMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEAR_NEARMV:
-          if (single_skippable[NEARMV][refs[0]] &&
-              single_skippable[NEARMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        case NEAR_NEARESTMV:
-          if (single_skippable[NEARMV][refs[0]] &&
-              single_skippable[NEARESTMV][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-        default:
-          if (single_skippable[this_mode][refs[0]] &&
-              single_skippable[this_mode][refs[1]])
-            memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-          break;
-      }
-#else
-      if (single_skippable[this_mode][refs[0]] &&
-          single_skippable[this_mode][refs[1]])
-        memset(skip_txfm, SKIP_TXFM_AC_DC, sizeof(skip_txfm));
-#endif  // CONFIG_EXT_INTER
 
   if (cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
     // if current pred_error modeled rd is substantially more than the best
@@ -7832,9 +7682,6 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_OBMC
   rate2_nocoeff = *rate2;
 #endif  // CONFIG_OBMC
-
-  memcpy(x->skip_txfm, skip_txfm, sizeof(skip_txfm));
-  memcpy(x->bsse, bsse, sizeof(bsse));
 
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
   best_rd = INT64_MAX;
@@ -8395,7 +8242,6 @@ static void pick_ext_intra_iframe(VP10_COMP *cpi, MACROBLOCK *x,
   mbmi->uv_mode = DC_PRED;
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
-  memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
   if (!rd_pick_ext_intra_sby(cpi, x, &rate_dummy, &rate_y, &distortion_y,
                              &skippable, bsize,
                              intra_mode_cost[mbmi->mode], &this_rd, 0))
@@ -9118,7 +8964,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
       struct macroblockd_plane *const pd = &xd->plane[1];
-      memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 #if CONFIG_EXT_INTRA
       is_directional_mode = (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED);
       if (is_directional_mode) {
@@ -9838,7 +9683,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame[0] = INTRA_FRAME;
     mbmi->ref_frame[1] = NONE;
-    memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
     palette_mode_info.palette_size[0] = 0;
     rate_overhead =
         rd_pick_palette_intra_sby(cpi, x, bsize, palette_ctx,
@@ -10904,7 +10748,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
         // then dont bother looking at UV
         vp10_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_8X8);
-        memset(x->skip_txfm, SKIP_TXFM_NONE, sizeof(x->skip_txfm));
 #if CONFIG_VAR_TX
         if (!inter_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
                               &uv_sse, BLOCK_8X8, tmp_best_rdu))
