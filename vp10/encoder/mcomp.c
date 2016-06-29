@@ -176,11 +176,12 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
     MV this_mv = {r, c};                                               \
     v = mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit); \
     if (second_pred == NULL)                                           \
-      thismse = vfp->svf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), z, \
-                             src_stride, &sse);                        \
+      thismse = vfp->svf(pre(y, y_stride, r, c), y_stride, sp(c),      \
+                         sp(r), src_address, src_stride, &sse);        \
     else                                                               \
-      thismse = vfp->svaf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), \
-                              z, src_stride, &sse, second_pred);       \
+      thismse = vfp->svaf(pre(y, y_stride, r, c), y_stride, sp(c),     \
+                          sp(r), src_address, src_stride, &sse,        \
+                          second_pred);                                \
     v += thismse;                                                      \
     if (v < besterr) {                                                 \
       besterr = v;                                                     \
@@ -204,7 +205,7 @@ static INLINE const uint8_t *upre(const uint8_t *buf, int stride,
 #define CHECK_BETTER1(v, r, c) \
   if (c >= minc && c <= maxc && r >= minr && r <= maxr) {              \
     MV this_mv = {r, c};                                               \
-    thismse = upsampled_pref_error(xd, vfp, z, src_stride,             \
+    thismse = upsampled_pref_error(xd, vfp, src_address, src_stride,   \
                                    upre(y, y_stride, r, c), y_stride,  \
                                    second_pred, w, h, &sse);           \
     v = mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit); \
@@ -307,7 +308,7 @@ static INLINE const uint8_t *upre(const uint8_t *buf, int stride,
   }
 
 #define SETUP_SUBPEL_SEARCH                                                \
-  const uint8_t *const z = x->plane[0].src.buf;                            \
+  const uint8_t *const src_address = x->plane[0].src.buf;                  \
   const int src_stride = x->plane[0].src.stride;                           \
   const MACROBLOCKD *xd = &x->e_mbd;                                       \
   unsigned int besterr = INT_MAX;                                          \
@@ -425,8 +426,8 @@ int vp10_find_best_sub_pixel_tree_pruned_evenmore(
     int w, int h, int use_upsampled_ref) {
   SETUP_SUBPEL_SEARCH;
   besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
-                               z, src_stride, y, y_stride, second_pred,
-                               w, h, offset, mvjcost, mvcost,
+                               src_address, src_stride, y, y_stride,
+                               second_pred, w, h, offset, mvjcost, mvcost,
                                sse1, distortion);
   (void) halfiters;
   (void) quarteriters;
@@ -508,8 +509,8 @@ int vp10_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
   (void) use_upsampled_ref;
 
   besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
-                               z, src_stride, y, y_stride, second_pred,
-                               w, h, offset, mvjcost, mvcost,
+                               src_address, src_stride, y, y_stride,
+                               second_pred, w, h, offset, mvjcost, mvcost,
                                sse1, distortion);
   if (cost_list &&
       cost_list[0] != INT_MAX && cost_list[1] != INT_MAX &&
@@ -584,8 +585,8 @@ int vp10_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
   (void) use_upsampled_ref;
 
   besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
-                               z, src_stride, y, y_stride, second_pred,
-                               w, h, offset, mvjcost, mvcost,
+                               src_address, src_stride, y, y_stride,
+                               second_pred, w, h, offset, mvjcost, mvcost,
                                sse1, distortion);
   if (cost_list &&
       cost_list[0] != INT_MAX && cost_list[1] != INT_MAX &&
@@ -736,8 +737,7 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                  unsigned int *sse1,
                                  const uint8_t *second_pred,
                                  int w, int h, int use_upsampled_ref) {
-  const uint8_t *const z = x->plane[0].src.buf;
-  const uint8_t *const src_address = z;
+  const uint8_t *const src_address = x->plane[0].src.buf;
   const int src_stride = x->plane[0].src.stride;
   const MACROBLOCKD *xd = &x->e_mbd;
   unsigned int besterr = INT_MAX;
@@ -772,13 +772,14 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
   // use_upsampled_ref can be 0 or 1
   if (use_upsampled_ref)
     besterr = upsampled_setup_center_error(xd, bestmv, ref_mv, error_per_bit,
-                                           vfp, z, src_stride, y, y_stride,
-                                           second_pred, w, h, (offset * 8),
-                                           mvjcost, mvcost, sse1, distortion);
+                                           vfp, src_address, src_stride, y,
+                                           y_stride, second_pred, w, h,
+                                           (offset * 8), mvjcost, mvcost, sse1,
+                                           distortion);
   else
     besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
-                                 z, src_stride, y, y_stride, second_pred,
-                                 w, h, offset, mvjcost, mvcost,
+                                 src_address, src_stride, y, y_stride,
+                                 second_pred, w, h, offset, mvjcost, mvcost,
                                  sse1, distortion);
 
   (void) cost_list;  // to silence compiler warning
@@ -835,8 +836,8 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
         const uint8_t *const pre_address = y + tr * y_stride + tc;
 
         thismse = upsampled_pref_error(xd, vfp, src_address, src_stride,
-                                       pre_address, y_stride, second_pred,
-                                       w, h, &sse);
+                                       pre_address, y_stride, second_pred, w, h,
+                                       &sse);
       } else {
         const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
 
@@ -877,16 +878,10 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
       }
     }
 
-    tr = br;
-    tc = bc;
-
     search_step += 4;
     hstep >>= 1;
     best_idx = -1;
   }
-
-  // Each subsequent iteration checks at least one point in common with
-  // the last iteration could be 2 ( if diag selected) 1/4 pel
 
   // These lines insure static analysis doesn't warn that
   // tr and tc aren't used after the above point.
