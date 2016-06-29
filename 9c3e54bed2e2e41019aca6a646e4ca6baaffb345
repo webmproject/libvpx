@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60b857d5_39fe8f70",
+        "filename": "build/make/gen_msvs_sln.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-29T01:02:54Z",
+      "side": 1,
+      "message": "replace sfx with vcproj everywhere? or set it above (2nd pass)",
+      "revId": "9c3e54bed2e2e41019aca6a646e4ca6baaffb345",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60b857d5_d9cd9369",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-29T01:02:54Z",
+      "side": 1,
+      "message": "Second pass?",
+      "revId": "9c3e54bed2e2e41019aca6a646e4ca6baaffb345",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
