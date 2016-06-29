@@ -16,6 +16,24 @@
       "revId": "028ecac0bb3d5ffc00da5b6f975ea05d2474d6dd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60b857d5_f9f897b6",
+        "filename": "vpx/vpx_integer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-06-29T03:43:31Z",
+      "side": 1,
+      "message": "probably as a follow-up. I don\u0027t know of a situation where people are still building with older toolchains",
+      "parentUuid": "60b857d5_d943d39b",
+      "revId": "028ecac0bb3d5ffc00da5b6f975ea05d2474d6dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
