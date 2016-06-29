@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60b857d5_d943d39b",
+        "filename": "vpx/vpx_integer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-06-29T01:06:31Z",
+      "side": 1,
+      "message": "Can VPX_EMULATE_INTTYPES be defined? I can\u0027t find it in the configs. Remove this whole block?",
+      "revId": "028ecac0bb3d5ffc00da5b6f975ea05d2474d6dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
