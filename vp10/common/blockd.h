@@ -31,14 +31,6 @@
 extern "C" {
 #endif
 
-#if CONFIG_NEW_QUANT
-#define QUANT_PROFILES 3
-
-static INLINE int get_dq_profile_from_ctx(int q_ctx) {
-  return VPXMIN(q_ctx, QUANT_PROFILES - 1);
-}
-#endif  // CONFIG_NEW_QUANT
-
 #define MAX_MB_PLANE 3
 
 typedef enum {
