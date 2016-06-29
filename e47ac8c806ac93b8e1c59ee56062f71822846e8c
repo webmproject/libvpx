@@ -16,6 +16,29 @@
       "revId": "e47ac8c806ac93b8e1c59ee56062f71822846e8c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0b583f9_ff5c1b6d",
+        "filename": "vpx_util/convolve/conv_filter_coeffs.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-06-29T21:17:20Z",
+      "side": 1,
+      "message": "Just make sure I understand this right. The process is to build and run this file to generate vp10_convolve_filters_ssse3.c before building the vpxenc.",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 27
+      },
+      "revId": "e47ac8c806ac93b8e1c59ee56062f71822846e8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
