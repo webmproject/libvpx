@@ -640,6 +640,7 @@ process_toolchain() {
     case "$tgt_cc" in
         vs*) enable_feature msvs
              enable_feature solution
+             vs_version=${tgt_cc##vs}
              VCPROJ_SFX=vcxproj
              gen_vcproj_cmd=${source_path}/build/make/gen_msvs_vcxproj.sh
              enabled werror && gen_vcproj_cmd="${gen_vcproj_cmd} --enable-werror"
