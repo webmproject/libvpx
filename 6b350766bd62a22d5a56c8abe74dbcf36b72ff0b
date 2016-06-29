@@ -16,6 +16,24 @@
       "revId": "6b350766bd62a22d5a56c8abe74dbcf36b72ff0b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0bfaf31_634442a5",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-06-29T23:58:05Z",
+      "side": 1,
+      "message": "Yes, 6 is the original general register count for x86 before the change. src1q reuses register filterq; sstride6q reuses register dstrideq; dst_stride replaces dstrideq and is actually an in stack memory (as passed in argument), not a register.",
+      "parentUuid": "00487bfc_922c0c8a",
+      "revId": "6b350766bd62a22d5a56c8abe74dbcf36b72ff0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
