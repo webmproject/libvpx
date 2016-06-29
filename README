@@ -79,9 +79,6 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86-os2-gcc
     x86-solaris-gcc
     x86-win32-gcc
-    x86-win32-vs7
-    x86-win32-vs8
-    x86-win32-vs9
     x86-win32-vs10
     x86-win32-vs11
     x86-win32-vs12
@@ -98,8 +95,6 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86_64-linux-icc
     x86_64-solaris-gcc
     x86_64-win64-gcc
-    x86_64-win64-vs8
-    x86_64-win64-vs9
     x86_64-win64-vs10
     x86_64-win64-vs11
     x86_64-win64-vs12
