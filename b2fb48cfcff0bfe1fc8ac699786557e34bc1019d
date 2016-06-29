@@ -22,6 +22,30 @@
       "revId": "b2fb48cfcff0bfe1fc8ac699786557e34bc1019d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "637f814d_f6d4a6cb",
+        "filename": "vpx_dsp/x86/vpx_subpixel_bilinear_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1159114
+      },
+      "writtenOn": "2016-06-29T22:50:48Z",
+      "side": 1,
+      "message": "in the Agner\u0027s instruction document, the pshufd and punpcklqdq are same uops/cycles/throughout on Atom. 16-bytes constant will be faster in here. in future AVX2 vesion, I want to use vbroadcast*",
+      "parentUuid": "637f814d_56e9d2b0",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 29
+      },
+      "revId": "b2fb48cfcff0bfe1fc8ac699786557e34bc1019d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
