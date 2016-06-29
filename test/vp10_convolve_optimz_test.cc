@@ -217,6 +217,8 @@ const BlockDimension kBlockDim[] = {
   make_tuple(128, 64),
   make_tuple(128, 128),
 };
+
+#if HAVE_SSSE3 && CONFIG_EXT_INTERP
 // 10/12-tap filters
 const INTERP_FILTER kFilter[] = {6, 4, 2};
 
@@ -224,7 +226,6 @@ const int kSubpelQ4[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
 const int kAvg[] = {0, 1};
 
-#if HAVE_SSSE3 && CONFIG_EXT_INTERP
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VP10ConvolveOptimzTest,
     ::testing::Combine(
