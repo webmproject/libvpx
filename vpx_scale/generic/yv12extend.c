@@ -233,6 +233,7 @@ void vpx_extend_frame_borders_y_c(YV12_BUFFER_CONFIG *ybf) {
                ext_size + ybf->y_height - ybf->y_crop_height,
                ext_size + ybf->y_width - ybf->y_crop_width);
 }
+#endif  // CONFIG_VP9 || CONFIG_VP10
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {
@@ -241,7 +242,6 @@ static void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {
   memcpy(dst, src, num * sizeof(uint16_t));
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-#endif  // CONFIG_VP9 || CONFIG_VP10
 
 // Copies the source image into the destination image and updates the
 // destination's UMV borders.
