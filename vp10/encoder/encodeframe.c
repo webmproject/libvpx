@@ -4605,7 +4605,6 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   cm->prev_mi = cm->use_prev_frame_mvs ?
                 cm->prev_mip + cm->mi_stride + 1 : NULL;
 
-  x->quant_fp = cpi->sf.use_quant_fp;
 #if CONFIG_VAR_TX
 #if CONFIG_REF_MV
   vp10_zero(x->blk_skip_drl);

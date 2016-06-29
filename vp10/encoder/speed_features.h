@@ -383,9 +383,6 @@ typedef struct SPEED_FEATURES {
 
   int alt_ref_search_fp;
 
-  // Fast quantization process path
-  int use_quant_fp;
-
   // Use finer quantizer in every other few frames that run variable block
   // partition type search.
   int force_frame_boost;

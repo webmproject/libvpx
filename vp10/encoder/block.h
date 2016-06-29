@@ -162,9 +162,6 @@ struct macroblock {
   // indicate if it is in the rd search loop or encoding process
   int use_lp32x32fdct;
 
-  // use fast quantization process
-  int quant_fp;
-
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
 
