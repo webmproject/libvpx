@@ -143,24 +143,28 @@ uint32_t vpx_highbd_10_variance##w##x##h##_sse2( \
     const uint8_t *src8, int src_stride, \
     const uint8_t *ref8, int ref_stride, uint32_t *sse) { \
   int sum; \
+  int64_t var; \
   uint16_t *src = CONVERT_TO_SHORTPTR(src8); \
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8); \
   highbd_10_variance_sse2( \
       src, src_stride, ref, ref_stride, w, h, sse, &sum, \
       vpx_highbd_calc##block_size##x##block_size##var_sse2, block_size); \
-  return *sse - (((int64_t)sum * sum) >> shift); \
+  var = (int64_t)(*sse) - (((int64_t)sum * sum) >> shift); \
+  return (var >= 0) ? (uint32_t)var : 0; \
 } \
 \
 uint32_t vpx_highbd_12_variance##w##x##h##_sse2( \
     const uint8_t *src8, int src_stride, \
     const uint8_t *ref8, int ref_stride, uint32_t *sse) { \
   int sum; \
+  int64_t var; \
   uint16_t *src = CONVERT_TO_SHORTPTR(src8); \
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8); \
   highbd_12_variance_sse2( \
       src, src_stride, ref, ref_stride, w, h, sse, &sum, \
       vpx_highbd_calc##block_size##x##block_size##var_sse2, block_size); \
-  return *sse - (((int64_t)sum * sum) >> shift); \
+  var = (int64_t)(*sse) - (((int64_t)sum * sum) >> shift); \
+  return (var >= 0) ? (uint32_t)var : 0; \
 }
 
 VAR_FN(64, 64, 16, 12);
