@@ -506,10 +506,10 @@ static int get_ul_intra_threshold(VP9_COMMON *cm) {
         ret_val = UL_INTRA_THRESH;
         break;
       case VPX_BITS_10:
-        ret_val = UL_INTRA_THRESH >> 2;
+        ret_val = UL_INTRA_THRESH << 2;
         break;
       case VPX_BITS_12:
-        ret_val = UL_INTRA_THRESH >> 4;
+        ret_val = UL_INTRA_THRESH << 4;
         break;
       default:
         assert(0 && "cm->bit_depth should be VPX_BITS_8, "
