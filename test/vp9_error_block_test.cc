@@ -157,9 +157,9 @@ TEST_P(ErrorBlockTest, ExtremeValues) {
       << "First failed at test case " << first_failure;
 }
 
+#if HAVE_SSE2 || HAVE_AVX
 using std::tr1::make_tuple;
 
-#if CONFIG_USE_X86INC
 int64_t wrap_vp9_highbd_block_error_8bit_c(const tran_low_t *coeff,
                                            const tran_low_t *dqcoeff,
                                            intptr_t block_size,
@@ -167,6 +167,7 @@ int64_t wrap_vp9_highbd_block_error_8bit_c(const tran_low_t *coeff,
   EXPECT_EQ(8, bps);
   return vp9_highbd_block_error_8bit_c(coeff, dqcoeff, block_size, ssz);
 }
+#endif  // HAVE_SSE2 || HAVE_AVX
 
 #if HAVE_SSE2
 int64_t wrap_vp9_highbd_block_error_8bit_sse2(const tran_low_t *coeff,
@@ -206,6 +207,5 @@ INSTANTIATE_TEST_CASE_P(
                    &wrap_vp9_highbd_block_error_8bit_c, VPX_BITS_8)));
 #endif  // HAVE_AVX
 
-#endif  // CONFIG_USE_X86INC
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace

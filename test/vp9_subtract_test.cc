@@ -93,7 +93,7 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
 INSTANTIATE_TEST_CASE_P(C, VP9SubtractBlockTest,
                         ::testing::Values(vpx_subtract_block_c));
 
-#if HAVE_SSE2 && CONFIG_USE_X86INC
+#if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, VP9SubtractBlockTest,
                         ::testing::Values(vpx_subtract_block_sse2));
 #endif

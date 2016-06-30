@@ -690,7 +690,6 @@ INSTANTIATE_TEST_CASE_P(NEON, SADx4Test, ::testing::ValuesIn(x4d_neon_tests));
 //------------------------------------------------------------------------------
 // x86 functions
 #if HAVE_SSE2
-#if CONFIG_USE_X86INC
 const SadMxNParam sse2_tests[] = {
   make_tuple(64, 64, &vpx_sad64x64_sse2, -1),
   make_tuple(64, 32, &vpx_sad64x32_sse2, -1),
@@ -852,7 +851,6 @@ const SadMxNx4Param x4d_sse2_tests[] = {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 };
 INSTANTIATE_TEST_CASE_P(SSE2, SADx4Test, ::testing::ValuesIn(x4d_sse2_tests));
-#endif  // CONFIG_USE_X86INC
 #endif  // HAVE_SSE2
 
 #if HAVE_SSE3
