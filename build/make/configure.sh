@@ -1396,10 +1396,6 @@ EOF
     fi
   fi
 
-  if [ "${tgt_isa}" = "x86_64" ] || [ "${tgt_isa}" = "x86" ]; then
-    enable_feature use_x86inc
-  fi
-
   # Position Independent Code (PIC) support, for building relocatable
   # shared objects
   enabled gcc && enabled pic && check_add_cflags -fPIC
