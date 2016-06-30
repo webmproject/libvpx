@@ -1397,7 +1397,7 @@ EOF
   fi
 
   if [ "${tgt_isa}" = "x86_64" ] || [ "${tgt_isa}" = "x86" ]; then
-    soft_enable use_x86inc
+    enable_feature use_x86inc
   fi
 
   # Position Independent Code (PIC) support, for building relocatable
