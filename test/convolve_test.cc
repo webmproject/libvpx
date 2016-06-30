@@ -431,7 +431,8 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   void CopyOutputToRef() {
     memcpy(output_ref_, output_, kOutputBufferSize);
 #if CONFIG_VP9_HIGHBITDEPTH
-    memcpy(output16_ref_, output16_, kOutputBufferSize);
+    memcpy(output16_ref_, output16_,
+           kOutputBufferSize * sizeof(output16_ref_[0]));
 #endif
   }
 
@@ -443,41 +444,41 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   }
 
   uint8_t *input() const {
+    const int offset = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return input_ + BorderTop() * kOuterBlockSize + BorderLeft();
+      return input_ + offset;
     } else {
-      return CONVERT_TO_BYTEPTR(input16_ + BorderTop() * kOuterBlockSize +
-                                BorderLeft());
+      return CONVERT_TO_BYTEPTR(input16_) + offset;
     }
 #else
-    return input_ + BorderTop() * kOuterBlockSize + BorderLeft();
+    return input_ + offset;
 #endif
   }
 
   uint8_t *output() const {
+    const int offset = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return output_ + BorderTop() * kOuterBlockSize + BorderLeft();
+      return output_ + offset;
     } else {
-      return CONVERT_TO_BYTEPTR(output16_ + BorderTop() * kOuterBlockSize +
-                                BorderLeft());
+      return CONVERT_TO_BYTEPTR(output16_) + offset;
     }
 #else
-    return output_ + BorderTop() * kOuterBlockSize + BorderLeft();
+    return output_ + offset;
 #endif
   }
 
   uint8_t *output_ref() const {
+    const int offset = BorderTop() * kOuterBlockSize + BorderLeft();
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ == 0) {
-      return output_ref_ + BorderTop() * kOuterBlockSize + BorderLeft();
+      return output_ref_ + offset;
     } else {
-      return CONVERT_TO_BYTEPTR(output16_ref_ + BorderTop() * kOuterBlockSize +
-                                BorderLeft());
+      return CONVERT_TO_BYTEPTR(output16_ref_) + offset;
     }
 #else
-    return output_ref_ + BorderTop() * kOuterBlockSize + BorderLeft();
+    return output_ref_ + offset;
 #endif
   }
 
