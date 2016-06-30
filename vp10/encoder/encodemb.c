@@ -207,10 +207,10 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       } else {
 #if CONFIG_NEW_QUANT
         shortcut = (
-            (dequant_abscoeff_nuq(
+            (vp10_dequant_abscoeff_nuq(
                 abs(x), dequant_ptr[rc != 0],
                 dequant_val[band_translate[i]]) > (abs(coeff[rc]) << shift)) &&
-            (dequant_abscoeff_nuq(
+            (vp10_dequant_abscoeff_nuq(
                 abs(x) - 1, dequant_ptr[rc != 0],
                 dequant_val[band_translate[i]]) < (abs(coeff[rc]) << shift)));
 #else   // CONFIG_NEW_QUANT
@@ -280,7 +280,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       }
 
 #if CONFIG_NEW_QUANT
-      dx = dequant_coeff_nuq(
+      dx = vp10_dequant_coeff_nuq(
           x, dequant_ptr[rc != 0],
           dequant_val[band_translate[i]]) - (coeff[rc] << shift);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -378,8 +378,8 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
     dqcoeff[rc] = tokens[i][best].dqc;
 
 #if CONFIG_NEW_QUANT
-    dqcoeff[rc] = dequant_abscoeff_nuq(abs(x), dequant_ptr[rc != 0],
-                                       dequant_val[band_translate[i]]);
+    dqcoeff[rc] = vp10_dequant_abscoeff_nuq(abs(x), dequant_ptr[rc != 0],
+                                            dequant_val[band_translate[i]]);
     if (shift) dqcoeff[rc] = ROUND_POWER_OF_TWO(dqcoeff[rc], shift);
     if (x < 0) dqcoeff[rc] = -dqcoeff[rc];
 #endif  // CONFIG_NEW_QUANT

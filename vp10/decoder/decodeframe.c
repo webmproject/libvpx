@@ -2093,11 +2093,11 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
 #if CONFIG_NEW_QUANT
       for (dq = 0; dq < QUANT_PROFILES; dq ++) {
         for (b = 0; b < COEF_BANDS; ++b) {
-          get_dequant_val_nuq(
-              cm->y_dequant[i][b != 0], qindex == 0, b,
+          vp10_get_dequant_val_nuq(
+              cm->y_dequant[i][b != 0], qindex, b,
               cm->y_dequant_nuq[i][dq][b], NULL, dq);
-          get_dequant_val_nuq(
-              cm->uv_dequant[i][b != 0], qindex == 0, b,
+          vp10_get_dequant_val_nuq(
+              cm->uv_dequant[i][b != 0], qindex, b,
               cm->uv_dequant_nuq[i][dq][b], NULL, dq);
         }
       }
@@ -2116,11 +2116,11 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
 #if CONFIG_NEW_QUANT
     for (dq = 0; dq < QUANT_PROFILES; dq ++) {
       for (b = 0; b < COEF_BANDS; ++b) {
-        get_dequant_val_nuq(
-            cm->y_dequant[0][b != 0], qindex == 0, b,
+        vp10_get_dequant_val_nuq(
+            cm->y_dequant[0][b != 0], qindex, b,
             cm->y_dequant_nuq[0][dq][b], NULL, dq);
-        get_dequant_val_nuq(
-            cm->uv_dequant[0][b != 0], qindex == 0, b,
+        vp10_get_dequant_val_nuq(
+            cm->uv_dequant[0][b != 0], qindex, b,
             cm->uv_dequant_nuq[0][dq][b], NULL, dq);
       }
     }

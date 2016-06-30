@@ -205,7 +205,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
       }
     }
 #if CONFIG_NEW_QUANT
-    v = dequant_abscoeff_nuq(val, dqv, dqv_val);
+    v = vp10_dequant_abscoeff_nuq(val, dqv, dqv_val);
     v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
 #else
     v = (val * dqv) >> dq_shift;
@@ -389,7 +389,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
         } break;
       }
 #if CONFIG_NEW_QUANT
-    v = dequant_abscoeff_nuq(val, dqv, dqv_val);
+    v = vp10_dequant_abscoeff_nuq(val, dqv, dqv_val);
     v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
 #else
     v = (val * dqv) >> dq_shift;

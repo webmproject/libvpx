@@ -48,7 +48,7 @@ static INLINE int quantize_coeff_nuq(const tran_low_t coeffv,
   }
   if (q) {
     *dqcoeff_ptr =
-        dequant_abscoeff_nuq(q, dequant, dequant_val);
+        vp10_dequant_abscoeff_nuq(q, dequant, dequant_val);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
   } else {
@@ -85,9 +85,9 @@ static INLINE int quantize_coeff_bigtx_nuq(const tran_low_t coeffv,
   }
   if (q) {
     *dqcoeff_ptr =
-         ROUND_POWER_OF_TWO(dequant_abscoeff_nuq(q, dequant, dequant_val),
+         ROUND_POWER_OF_TWO(vp10_dequant_abscoeff_nuq(q, dequant, dequant_val),
                             1 + logsizeby32);
-    // *dqcoeff_ptr = dequant_abscoeff_nuq(q, dequant, dequant_val) >>
+    // *dqcoeff_ptr = vp10_dequant_abscoeff_nuq(q, dequant, dequant_val) >>
     // (1 + logsizeby32);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
@@ -122,7 +122,7 @@ static INLINE int quantize_coeff_fp_nuq(const tran_low_t coeffv,
   }
   if (q) {
     *dqcoeff_ptr =
-        dequant_abscoeff_nuq(q, dequant, dequant_val);
+        vp10_dequant_abscoeff_nuq(q, dequant, dequant_val);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
   } else {
@@ -159,9 +159,9 @@ static INLINE int quantize_coeff_bigtx_fp_nuq(const tran_low_t coeffv,
   }
   if (q) {
     *dqcoeff_ptr =
-        ROUND_POWER_OF_TWO(dequant_abscoeff_nuq(q, dequant, dequant_val),
+        ROUND_POWER_OF_TWO(vp10_dequant_abscoeff_nuq(q, dequant, dequant_val),
                            1 + logsizeby32);
-    // *dqcoeff_ptr = dequant_abscoeff_nuq(q, dequant, dequant_val) >>
+    // *dqcoeff_ptr = vp10_dequant_abscoeff_nuq(q, dequant, dequant_val) >>
     // (1 + logsizeby32);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
@@ -557,7 +557,7 @@ static INLINE int highbd_quantize_coeff_nuq(const tran_low_t coeffv,
   }
   if (q) {
     *dqcoeff_ptr =
-        dequant_abscoeff_nuq(q, dequant, dequant_val);
+        vp10_dequant_abscoeff_nuq(q, dequant, dequant_val);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
   } else {
@@ -591,7 +591,7 @@ static INLINE int highbd_quantize_coeff_fp_nuq(const tran_low_t coeffv,
   }
   if (q) {
     *dqcoeff_ptr =
-        dequant_abscoeff_nuq(q, dequant, dequant_val);
+        vp10_dequant_abscoeff_nuq(q, dequant, dequant_val);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
   } else {
@@ -629,7 +629,7 @@ static INLINE int highbd_quantize_coeff_bigtx_fp_nuq(
   }
   if (q) {
     *dqcoeff_ptr =
-        ROUND_POWER_OF_TWO(dequant_abscoeff_nuq(q, dequant, dequant_val),
+        ROUND_POWER_OF_TWO(vp10_dequant_abscoeff_nuq(q, dequant, dequant_val),
                            1 + logsizeby32);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
@@ -668,7 +668,7 @@ static INLINE int highbd_quantize_coeff_bigtx_nuq(const tran_low_t coeffv,
   }
   if (q) {
     *dqcoeff_ptr =
-        ROUND_POWER_OF_TWO(dequant_abscoeff_nuq(q, dequant, dequant_val),
+        ROUND_POWER_OF_TWO(vp10_dequant_abscoeff_nuq(q, dequant, dequant_val),
                            1 + logsizeby32);
     *qcoeff_ptr  = (q ^ coeff_sign) - coeff_sign;
     *dqcoeff_ptr = *qcoeff_ptr < 0 ? -*dqcoeff_ptr : *dqcoeff_ptr;
@@ -1228,12 +1228,12 @@ void vp10_init_quantizer(VP10_COMP *cpi) {
       for (i = 0; i < COEF_BANDS; i++) {
         const int quant = cpi->y_dequant[q][i != 0];
         const int uvquant = cpi->uv_dequant[q][i != 0];
-        get_dequant_val_nuq(quant, q == 0, i,
-                            cpi->y_dequant_val_nuq[dq][q][i],
-                            quants->y_cuml_bins_nuq[dq][q][i], dq);
-        get_dequant_val_nuq(uvquant, q == 0, i,
-                            cpi->uv_dequant_val_nuq[dq][q][i],
-                            quants->uv_cuml_bins_nuq[dq][q][i], dq);
+        vp10_get_dequant_val_nuq(quant, q, i,
+                                 cpi->y_dequant_val_nuq[dq][q][i],
+                                 quants->y_cuml_bins_nuq[dq][q][i], dq);
+        vp10_get_dequant_val_nuq(uvquant, q, i,
+                                 cpi->uv_dequant_val_nuq[dq][q][i],
+                                 quants->uv_cuml_bins_nuq[dq][q][i], dq);
       }
     }
 #endif  // CONFIG_NEW_QUANT
