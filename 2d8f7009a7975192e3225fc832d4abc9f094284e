@@ -16,6 +16,24 @@
       "revId": "2d8f7009a7975192e3225fc832d4abc9f094284e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdaeb264_86d0ca00",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 7829,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-06-30T16:41:59Z",
+      "side": 1,
+      "message": "that is the place to add a factor. mrd might be INT64_MAX there, so you need to scale the left hand side.",
+      "parentUuid": "60b857d5_bf599f18",
+      "revId": "2d8f7009a7975192e3225fc832d4abc9f094284e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
