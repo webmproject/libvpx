@@ -3159,66 +3159,12 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 
     cm->lf.filter_level = 0;
     cm->show_frame = 1;
-
-#if CONFIG_EXT_REFS
-    // NOTE(zoeliu): The existing frame to show is adopted as a reference frame.
-    pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
-
-    for (i = 0; i < REFS_PER_FRAME; ++i) {
-      const int ref = vpx_rb_read_literal(rb, REF_FRAMES_LOG2);
-      const int idx = cm->ref_frame_map[ref];
-      RefBuffer *const ref_frame = &cm->frame_refs[i];
-      ref_frame->idx = idx;
-      ref_frame->buf = &frame_bufs[idx].buf;
-      cm->ref_frame_sign_bias[LAST_FRAME + i] = vpx_rb_read_bit(rb);
-    }
-
-    for (i = 0; i < REFS_PER_FRAME; ++i) {
-      RefBuffer *const ref_buf = &cm->frame_refs[i];
-#if CONFIG_VP9_HIGHBITDEPTH
-      vp10_setup_scale_factors_for_frame(&ref_buf->sf,
-                                         ref_buf->buf->y_crop_width,
-                                         ref_buf->buf->y_crop_height,
-                                         cm->width, cm->height,
-                                         cm->use_highbitdepth);
-#else  // CONFIG_VP9_HIGHBITDEPTH
-      vp10_setup_scale_factors_for_frame(&ref_buf->sf,
-                                         ref_buf->buf->y_crop_width,
-                                         ref_buf->buf->y_crop_height,
-                                         cm->width, cm->height);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    }
-
-    // Generate next_ref_frame_map.
-    lock_buffer_pool(pool);
-    for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
-      if (mask & 1) {
-        cm->next_ref_frame_map[ref_index] = cm->new_fb_idx;
-        ++frame_bufs[cm->new_fb_idx].ref_count;
-      } else {
-        cm->next_ref_frame_map[ref_index] = cm->ref_frame_map[ref_index];
-      }
-      // Current thread holds the reference frame.
-      if (cm->ref_frame_map[ref_index] >= 0)
-        ++frame_bufs[cm->ref_frame_map[ref_index]].ref_count;
-      ++ref_index;
-    }
-
-    for (; ref_index < REF_FRAMES; ++ref_index) {
-      cm->next_ref_frame_map[ref_index] = cm->ref_frame_map[ref_index];
-      // Current thread holds the reference frame.
-      if (cm->ref_frame_map[ref_index] >= 0)
-        ++frame_bufs[cm->ref_frame_map[ref_index]].ref_count;
-    }
-    unlock_buffer_pool(pool);
-    pbi->hold_ref_buf = 1;
-#else
     pbi->refresh_frame_flags = 0;
+
     if (cm->frame_parallel_decode) {
       for (i = 0; i < REF_FRAMES; ++i)
         cm->next_ref_frame_map[i] = cm->ref_frame_map[i];
     }
-#endif  // CONFIG_EXT_REFS
 
     return 0;
   }

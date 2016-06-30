@@ -285,19 +285,12 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   }
 
   // Current thread releases the holding of reference frame.
-#if CONFIG_EXT_REFS
-  for (; ref_index < REF_FRAMES; ++ref_index) {
-    const int old_idx = cm->ref_frame_map[ref_index];
-    decrease_ref_count(old_idx, frame_bufs, pool);
-    cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
-  }
-#else
   for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
     const int old_idx = cm->ref_frame_map[ref_index];
     decrease_ref_count(old_idx, frame_bufs, pool);
     cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
   }
-#endif  // CONFIG_EXT_REFS
+
   unlock_buffer_pool(pool);
   pbi->hold_ref_buf = 0;
   cm->frame_to_show = get_frame_new_buffer(cm);
@@ -406,17 +399,10 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
       }
 
       // Current thread releases the holding of reference frame.
-#if CONFIG_EXT_REFS
-      for (; ref_index < REF_FRAMES; ++ref_index) {
-        const int old_idx = cm->ref_frame_map[ref_index];
-        decrease_ref_count(old_idx, frame_bufs, pool);
-      }
-#else
       for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
         const int old_idx = cm->ref_frame_map[ref_index];
         decrease_ref_count(old_idx, frame_bufs, pool);
       }
-#endif  // CONFIG_EXT_REFS
       pbi->hold_ref_buf = 0;
     }
     // Release current frame.

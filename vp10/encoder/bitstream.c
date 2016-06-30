@@ -3042,7 +3042,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   cm->is_reference_frame = 1;
 
   if (cm->show_existing_frame) {
-    MV_REFERENCE_FRAME ref_frame;
     RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
     const int frame_to_show =
         cm->ref_frame_map[cpi->existing_fb_idx_to_show];
@@ -3056,16 +3055,6 @@ static void write_uncompressed_header(VP10_COMP *cpi,
 
     vpx_wb_write_bit(wb, 1);  // show_existing_frame
     vpx_wb_write_literal(wb, cpi->existing_fb_idx_to_show, 3);
-
-    cpi->refresh_frame_mask = get_refresh_mask(cpi);
-    vpx_wb_write_literal(wb, cpi->refresh_frame_mask, REF_FRAMES);
-
-    for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-      assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
-      vpx_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),
-                           REF_FRAMES_LOG2);
-      vpx_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
-    }
 
     return;
   } else {

@@ -3390,23 +3390,6 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
   if (cm->show_frame)
     cpi->last_show_frame_buf_idx = cm->new_fb_idx;
 
-#if CONFIG_EXT_REFS
-  // TODO(zoeliu): To remove the reference buffer update for the
-  //               show_existing_frame==1 case.
-#if 0
-  if (cpi->rc.is_last_bipred_frame) {
-    // NOTE: After the encoding of the LAST_BIPRED_FRAME, the flag of
-    //       show_existing_frame will be set, to notify the decoder to show the
-    //       coded BWDREF_FRAME. During the handling of the show_existing_frame,
-    //       no update will be conducted on the reference frame buffer.
-    //       Following is to get the BWDREF_FRAME to show to be regarded as the
-    //       LAST_FRAME, preparing for the encoding of the next BWDREF_FRAME.
-    cpi->lst_fb_idx = cpi->bwd_fb_idx;
-    return;
-  }
-#endif  // 0
-#endif  // CONFIG_EXT_REFS
-
   if (use_upsampled_ref) {
 #if CONFIG_EXT_REFS
     if (cm->show_existing_frame) {
@@ -3470,6 +3453,29 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
 
     // TODO(zoeliu): Do we need to copy cpi->interp_filter_selected[0] over to
     // cpi->interp_filter_selected[GOLDEN_FRAME]?
+#if CONFIG_EXT_REFS
+  } else if (cpi->rc.is_last_bipred_frame) {
+    // Refresh the LAST_FRAME with the BWDREF_FRAME and retire the LAST3_FRAME
+    // by updating the virtual indices. Note that the frame BWDREF_FRAME points
+    // to now should be retired, and it should not be used before refreshed.
+    int ref_frame, tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES-1];
+    for (ref_frame = LAST_REF_FRAMES - 1; ref_frame > 0; --ref_frame) {
+      cpi->lst_fb_idxes[ref_frame] = cpi->lst_fb_idxes[ref_frame - 1];
+
+      if (!cpi->rc.is_src_frame_alt_ref) {
+        memcpy(cpi->interp_filter_selected[ref_frame],
+               cpi->interp_filter_selected[ref_frame - 1],
+               sizeof(cpi->interp_filter_selected[ref_frame - 1]));
+      }
+    }
+    cpi->lst_fb_idxes[0] = cpi->bwd_fb_idx;
+    if (!cpi->rc.is_src_frame_alt_ref) {
+      memcpy(cpi->interp_filter_selected[0],
+             cpi->interp_filter_selected[BWDREF_FRAME],
+             sizeof(cpi->interp_filter_selected[BWDREF_FRAME]));
+    }
+    cpi->bwd_fb_idx = tmp;
+#endif  // CONFIG_EXT_REFS
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
@@ -4810,7 +4816,7 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     cm->show_frame = 1;
     cpi->frame_flags = *frame_flags;
 
-    cpi->refresh_last_frame = 1;
+    cpi->refresh_last_frame = 0;
     cpi->refresh_golden_frame = 0;
     cpi->refresh_bwd_ref_frame = 0;
     cpi->refresh_alt_ref_frame = 0;
