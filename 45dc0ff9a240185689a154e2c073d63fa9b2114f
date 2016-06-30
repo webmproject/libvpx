@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dd672e30_f5afd83d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-30T18:16:15Z",
+      "side": 1,
+      "message": "This says \"AC coefficients\" but the code seems to process the DC coef as well.",
+      "range": {
+        "startLine": 71,
+        "startChar": 3,
+        "endLine": 71,
+        "endChar": 18
+      },
+      "revId": "45dc0ff9a240185689a154e2c073d63fa9b2114f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd672e30_958b04e0",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-30T18:16:15Z",
+      "side": 1,
+      "message": "This cast and extra parentheses aren\u0027t necessary.",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 27
+      },
+      "revId": "45dc0ff9a240185689a154e2c073d63fa9b2114f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd672e30_75bc687d",
+        "filename": "vp9/encoder/vp9_encodemb.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-06-30T18:16:15Z",
+      "side": 1,
+      "message": "These could live in the .c",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 20
+      },
+      "revId": "45dc0ff9a240185689a154e2c073d63fa9b2114f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
