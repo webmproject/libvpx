@@ -308,7 +308,6 @@ unsigned int vpx_mse16x16_sse2(const uint8_t *src, int src_stride,
   return *sse;
 }
 
-#if CONFIG_USE_X86INC
 // The 2 unused parameters are place holders for PIC enabled build.
 // These definitions are for functions defined in subpel_variance.asm
 #define DECL(w, opt) \
@@ -474,4 +473,3 @@ FNS(ssse3, ssse3);
 
 #undef FNS
 #undef FN
-#endif  // CONFIG_USE_X86INC

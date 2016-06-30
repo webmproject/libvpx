@@ -246,7 +246,6 @@ unsigned int vpx_highbd_12_mse8x8_sse2(const uint8_t *src8, int src_stride,
   return *sse;
 }
 
-#if CONFIG_USE_X86INC
 // The 2 unused parameters are place holders for PIC enabled build.
 // These definitions are for functions defined in
 // highbd_subpel_variance_impl_sse2.asm
@@ -593,4 +592,3 @@ FNS(sse2);
 
 #undef FNS
 #undef FN
-#endif  // CONFIG_USE_X86INC
