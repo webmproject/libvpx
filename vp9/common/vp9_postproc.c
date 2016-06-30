@@ -618,15 +618,16 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
   // Alloc memory for prev_mip in the first frame.
   if (cm->current_video_frame == 1) {
-    cm->postproc_state.last_base_qindex = cm->base_qindex;
-    cm->postproc_state.last_frame_valid = 1;
+    ppstate->last_base_qindex = cm->base_qindex;
+    ppstate->last_frame_valid = 1;
+  }
+
+  if ((flags & VP9D_MFQE) && ppstate->prev_mip == NULL) {
     ppstate->prev_mip = vpx_calloc(cm->mi_alloc_size, sizeof(*cm->mip));
     if (!ppstate->prev_mip) {
       return 1;
     }
     ppstate->prev_mi = ppstate->prev_mip + cm->mi_stride + 1;
-    memset(ppstate->prev_mip, 0,
-           cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
   }
 
   // Allocate post_proc_buffer_int if needed.
@@ -664,9 +665,9 @@ int vp9_post_proc_frame(struct VP9Common *cm,
                        "Failed to allocate post-processing buffer");
 
   if ((flags & VP9D_MFQE) && cm->current_video_frame >= 2 &&
-      cm->postproc_state.last_frame_valid && cm->bit_depth == 8 &&
-      cm->postproc_state.last_base_qindex <= last_q_thresh &&
-      cm->base_qindex - cm->postproc_state.last_base_qindex >= q_diff_thresh) {
+      ppstate->last_frame_valid && cm->bit_depth == 8 &&
+      ppstate->last_base_qindex <= last_q_thresh &&
+      cm->base_qindex - ppstate->last_base_qindex >= q_diff_thresh) {
     vp9_mfqe(cm);
     // TODO(jackychen): Consider whether enable deblocking by default
     // if mfqe is enabled. Need to take both the quality and the speed
@@ -692,8 +693,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     vp8_yv12_copy_frame(cm->frame_to_show, ppbuf);
   }
 
-  cm->postproc_state.last_base_qindex = cm->base_qindex;
-  cm->postproc_state.last_frame_valid = 1;
+  ppstate->last_base_qindex = cm->base_qindex;
+  ppstate->last_frame_valid = 1;
 
   if (flags & VP9D_ADDNOISE) {
     const int noise_level = ppflags->noise_level;
@@ -714,7 +715,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   dest->uv_width = dest->y_width >> cm->subsampling_x;
   dest->uv_height = dest->y_height >> cm->subsampling_y;
 
-  swap_mi_and_prev_mi(cm);
+  if (flags & VP9D_MFQE)
+    swap_mi_and_prev_mi(cm);
   return 0;
 }
 #endif  // CONFIG_VP9_POSTPROC
