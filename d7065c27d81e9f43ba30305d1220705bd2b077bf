@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "600cd7ee_1344a407",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-01T19:10:37Z",
+      "side": 1,
+      "message": "could add some detail here too \u0027compile failures...\u0027",
+      "revId": "d7065c27d81e9f43ba30305d1220705bd2b077bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
