@@ -902,10 +902,10 @@ void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
       frame_mvs += cm->mi_cols;
     }
   }
-#if CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
-    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) &&
-        (xd->above_mi == NULL || xd->left_mi == NULL) &&
-        !is_inter_block(mi) && need_top_left[mi->uv_mode])
-      assert(0);
+#if 0  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
+  if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) &&
+      (xd->above_mi == NULL || xd->left_mi == NULL) &&
+      !is_inter_block(mi) && need_top_left[mi->uv_mode])
+    assert(0);
 #endif  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
 }
