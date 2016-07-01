@@ -341,6 +341,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->high_source_sad = 0;
   rc->count_last_scene_change = 0;
   rc->avg_source_sad = 0;
+  rc->af_ratio_onepass_vbr = 10;
 
   rc->frames_since_key = 8;  // Sensible default for first frame.
   rc->this_key_frame_forced = 0;
@@ -1484,9 +1485,9 @@ void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
 #define USE_ALTREF_FOR_ONE_PASS   1
 
 static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
-  static const int af_ratio = 10;
   const RATE_CONTROL *const rc = &cpi->rc;
   int target;
+  const int af_ratio = rc->af_ratio_onepass_vbr;
 #if USE_ALTREF_FOR_ONE_PASS
   target = (!rc->is_src_frame_alt_ref &&
             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) ?
@@ -1553,20 +1554,24 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
       rc->baseline_gf_interval =
           (rc->min_gf_interval + rc->max_gf_interval) / 2;
     }
+    rc->af_ratio_onepass_vbr = 10;
     if (rc->rolling_target_bits > 0)
       rate_err =
           (double)rc->rolling_actual_bits / (double)rc->rolling_target_bits;
-    // Increase gf interval at high Q and high overshoot.
-    if (cm->current_video_frame > 30 &&
-        rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
-        rate_err > 3.5) {
-      rc->baseline_gf_interval =
-          VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
-    } else if (cm->current_video_frame > 30 &&
-               rc->avg_frame_low_motion < 20) {
-      // Decrease boost and gf interval for high motion case.
-      rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
-      rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
+    if (cm->current_video_frame > 30) {
+      if (rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
+          rate_err > 3.5) {
+        rc->baseline_gf_interval =
+            VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
+      } else if (rc->avg_frame_low_motion < 20) {
+        // Decrease gf interval for high motion case.
+        rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
+      }
+      // Adjust boost and af_ratio based on avg_frame_low_motion, which varies
+      // between 0 and 100 (stationary, 100% zero/small motion).
+      rc->gfu_boost = VPXMAX(500, DEFAULT_GF_BOOST *
+          (rc->avg_frame_low_motion << 1) / (rc->avg_frame_low_motion + 100));
+      rc->af_ratio_onepass_vbr = VPXMIN(15, VPXMAX(5, 3 * rc->gfu_boost / 400));
     }
     adjust_gf_key_frame(cpi);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
