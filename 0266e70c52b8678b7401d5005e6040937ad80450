@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "600cd7ee_d307ccc5",
+        "filename": "test/vp9_error_block_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-01T19:21:07Z",
+      "side": 1,
+      "message": "HAVE_SSE2 might be sufficient as if --disable-sse2 is given sse2 and beyond will be disabled now",
+      "revId": "0266e70c52b8678b7401d5005e6040937ad80450",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dd672e30_157254c9",
         "filename": "test/vp9_error_block_test.cc",
         "patchSetId": 4
@@ -13,6 +30,24 @@
       "writtenOn": "2016-06-30T18:16:35Z",
       "side": 1,
       "message": "This function became \u0027unused\u0027 for non-x86 builds because the x86inc guard was de-facto x86. it also should have failed for mmx/sse-only builds, but who does that?",
+      "revId": "0266e70c52b8678b7401d5005e6040937ad80450",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "600cd7ee_53fc5cbb",
+        "filename": "test/vp9_error_block_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-01T19:21:07Z",
+      "side": 1,
+      "message": "these wraps could really use a look; a template would probably reduce this noise",
+      "parentUuid": "dd672e30_157254c9",
       "revId": "0266e70c52b8678b7401d5005e6040937ad80450",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
