@@ -177,10 +177,11 @@ static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
   const int has_above = xd->up_available;
   const int has_left = xd->left_available;
-  int above_ctx = (has_above && !above_mbmi->skip) ? (int)above_mbmi->tx_size
-                                                   : max_tx_size;
-  int left_ctx = (has_left && !left_mbmi->skip) ? (int)left_mbmi->tx_size
-                                                : max_tx_size;
+  int above_ctx = (has_above && !above_mbmi->skip) ?
+      (int)txsize_sqr_map[above_mbmi->tx_size] : max_tx_size;
+  int left_ctx = (has_left && !left_mbmi->skip) ?
+      (int)txsize_sqr_map[left_mbmi->tx_size] : max_tx_size;
+  assert(xd->mi[0]->mbmi.sb_type >= BLOCK_8X8);
   if (!has_left)
     left_ctx = above_ctx;
 

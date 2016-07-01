@@ -393,7 +393,7 @@ static INLINE void add_token_no_extra(TOKENEXTRA **t,
 
 static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
                              TX_SIZE tx_size) {
-  const int eob_max = 16 << (tx_size << 1);
+  const int eob_max = num_4x4_blocks_txsize_lookup[tx_size] << 4;
   return segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
@@ -463,21 +463,21 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   const scan_order *const so = get_scan(tx_size, tx_type, is_inter_block(mbmi));
   const int ref = is_inter_block(mbmi);
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
-      td->rd_counts.coef_counts[tx_size][type][ref];
+      td->rd_counts.coef_counts[txsize_sqr_map[tx_size]][type][ref];
 #if CONFIG_ENTROPY
   vpx_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->subframe_stats.coef_probs_buf[cpi->common.coef_probs_update_idx]
-                                        [tx_size][type][ref];
+                                        [txsize_sqr_map[tx_size]][type][ref];
 #else
   vpx_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
-      cpi->common.fc->coef_probs[tx_size][type][ref];
+      cpi->common.fc->coef_probs[txsize_sqr_map[tx_size]][type][ref];
 #endif  // CONFIG_ENTROPY
 #if CONFIG_ANS
   rans_dec_lut (*const coef_cdfs)[COEFF_CONTEXTS] =
-      cpi->common.fc->coef_cdfs[tx_size][type][ref];
+      cpi->common.fc->coef_cdfs[txsize_sqr_map[tx_size]][type][ref];
 #endif  // CONFIG_ANS
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
-      td->counts->eob_branch[tx_size][type][ref];
+      td->counts->eob_branch[txsize_sqr_map[tx_size]][type][ref];
   const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   int skip_eob = 0;
@@ -539,7 +539,7 @@ int vp10_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   int result = 1;
   struct is_skippable_args args = {x->plane[plane].eobs, &result};
   vp10_foreach_transformed_block_in_plane(&x->e_mbd, bsize, plane, is_skippable,
-                                         &args);
+                                          &args);
   return result;
 }
 
@@ -560,7 +560,7 @@ int vp10_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   int result = 0;
   struct is_skippable_args args = {x->plane[plane].eobs, &result};
   vp10_foreach_transformed_block_in_plane(&x->e_mbd, bsize, plane,
-                                         has_high_freq_coeff, &args);
+                                          has_high_freq_coeff, &args);
   return result;
 }
 
@@ -582,6 +582,9 @@ void tokenize_tx(ThreadData *td, TOKENEXTRA **t,
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  assert(tx_size < TX_SIZES);
+
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
   if (xd->mb_to_right_edge < 0)
@@ -608,7 +611,7 @@ void tokenize_tx(ThreadData *td, TOKENEXTRA **t,
     for (i = 0; i < 4; ++i) {
       const int offsetr = blk_row + ((i >> 1) << bsl);
       const int offsetc = blk_col + ((i & 0x01) << bsl);
-      int step = 1 << (2 * (tx_size - 1));
+      int step = num_4x4_blocks_txsize_lookup[tx_size - 1];
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
         continue;
@@ -659,7 +662,7 @@ void vp10_tokenize_sb_inter(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     int bh = num_4x4_blocks_wide_lookup[txb_size];
     int idx, idy;
     int block = 0;
-    int step = 1 << (max_tx_size * 2);
+    int step = num_4x4_blocks_txsize_lookup[max_tx_size];
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         tokenize_tx(td, t, dry_run, max_tx_size, plane_bsize, idy, idx,
@@ -674,7 +677,7 @@ void vp10_tokenize_sb_inter(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     }
   }
 }
-#endif
+#endif  // CONFIG_VAR_TX
 
 void vp10_tokenize_sb(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                      int dry_run, BLOCK_SIZE bsize) {

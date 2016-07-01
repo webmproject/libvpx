@@ -137,6 +137,14 @@ typedef uint8_t TX_SIZE;
 #define TX_32X32 ((TX_SIZE)3)   // 32x32 transform
 #define TX_SIZES ((TX_SIZE)4)
 
+#if CONFIG_EXT_TX
+#define TX_4X8   ((TX_SIZE)4)      // 4x8 transform
+#define TX_8X4   ((TX_SIZE)5)      // 8x4 transform
+#define TX_SIZES_ALL ((TX_SIZE)6)  // Includes rectangular transforms
+#else
+#define TX_SIZES_ALL ((TX_SIZE)4)
+#endif  // CONFIG_EXT_TX
+
 #define MAX_TX_SIZE_LOG2  5
 #define MAX_TX_SIZE       (1 << MAX_TX_SIZE_LOG2)
 #define MIN_TX_SIZE_LOG2  2
@@ -170,10 +178,10 @@ typedef enum {
 } TX_TYPE_1D;
 
 typedef enum {
-  DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
-  ADST_DCT  = 1,                      // ADST in vertical, DCT in horizontal
-  DCT_ADST  = 2,                      // DCT  in vertical, ADST in horizontal
-  ADST_ADST = 3,                      // ADST in both directions
+  DCT_DCT   = 0,                  // DCT  in both horizontal and vertical
+  ADST_DCT  = 1,                  // ADST in vertical, DCT in horizontal
+  DCT_ADST  = 2,                  // DCT  in vertical, ADST in horizontal
+  ADST_ADST = 3,                  // ADST in both directions
 #if CONFIG_EXT_TX
   FLIPADST_DCT = 4,
   DCT_FLIPADST = 5,

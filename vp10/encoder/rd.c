@@ -597,6 +597,18 @@ static void get_entropy_contexts_plane(
       memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
       memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
       break;
+#if CONFIG_EXT_TX
+    case TX_4X8:
+      memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
+      for (i = 0; i < num_4x4_h; i += 2)
+        t_left[i] = !!*(const uint16_t *)&left[i];
+      break;
+    case TX_8X4:
+      for (i = 0; i < num_4x4_w; i += 2)
+        t_above[i] = !!*(const uint16_t *)&above[i];
+      memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
+      break;
+#endif  // CONFIG_EXT_TX
     case TX_8X8:
       for (i = 0; i < num_4x4_w; i += 2)
         t_above[i] = !!*(const uint16_t *)&above[i];
@@ -622,9 +634,9 @@ static void get_entropy_contexts_plane(
 }
 
 void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
-                              const struct macroblockd_plane *pd,
-                              ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
-                              ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]) {
+                               const struct macroblockd_plane *pd,
+                               ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
+                               ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]) {
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   get_entropy_contexts_plane(plane_bsize, tx_size, pd, t_above, t_left);
 }

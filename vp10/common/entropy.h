@@ -155,11 +155,28 @@ void vp10_partial_adapt_probs(struct VP10Common *cm, int mi_row, int mi_col);
 #define MAXBAND_INDEX 21
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp10_coefband_trans_8x8plus[1024]);
+#if CONFIG_EXT_TX
+DECLARE_ALIGNED(16, extern const uint8_t, vp10_coefband_trans_8x4_4x8[32]);
+#endif  // CONFIG_EXT_TX
 DECLARE_ALIGNED(16, extern const uint8_t, vp10_coefband_trans_4x4[16]);
 
+DECLARE_ALIGNED(16, extern const uint16_t,
+                band_count_table[TX_SIZES_ALL][8]);
+DECLARE_ALIGNED(16, extern const uint16_t,
+                band_cum_count_table[TX_SIZES_ALL][8]);
+
 static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
-  return tx_size == TX_4X4 ? vp10_coefband_trans_4x4
-                           : vp10_coefband_trans_8x8plus;
+  switch (tx_size) {
+    case TX_4X4:
+      return vp10_coefband_trans_4x4;
+#if CONFIG_EXT_TX
+    case TX_4X8:
+    case TX_8X4:
+      return vp10_coefband_trans_8x4_4x8;
+#endif  // CONFIG_EXT_TX
+    default:
+      return vp10_coefband_trans_8x8plus;
+  }
 }
 
 // 128 lists of probabilities are stored for the following ONE node probs:
@@ -198,7 +215,8 @@ static INLINE int combine_entropy_contexts(ENTROPY_CONTEXT a,
   return (a != 0) + (b != 0);
 }
 
-static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
+static INLINE int get_entropy_context(TX_SIZE tx_size,
+                                      const ENTROPY_CONTEXT *a,
                                       const ENTROPY_CONTEXT *l) {
   ENTROPY_CONTEXT above_ec = 0, left_ec = 0;
 
@@ -207,6 +225,16 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       above_ec = a[0] != 0;
       left_ec = l[0] != 0;
       break;
+#if CONFIG_EXT_TX
+    case TX_4X8:
+      above_ec = a[0] != 0;
+      left_ec = !!*(const uint16_t *)l;
+      break;
+    case TX_8X4:
+      above_ec = !!*(const uint16_t *)a;
+      left_ec = l[0] != 0;
+      break;
+#endif  // CONFIG_EXT_TX
     case TX_8X8:
       above_ec = !!*(const uint16_t *)a;
       left_ec  = !!*(const uint16_t *)l;
@@ -223,7 +251,6 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       assert(0 && "Invalid transform size.");
       break;
   }
-
   return combine_entropy_contexts(above_ec, left_ec);
 }
 

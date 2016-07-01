@@ -722,8 +722,11 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
                         LOOP_FILTER_MASK *lfm) {
   const MB_MODE_INFO *mbmi = &mi->mbmi;
   const BLOCK_SIZE block_size = mbmi->sb_type;
-  const TX_SIZE tx_size_y = mbmi->tx_size;
-  const TX_SIZE tx_size_uv = get_uv_tx_size_impl(tx_size_y, block_size, 1, 1);
+  // TODO(debargha): Check if masks can be setup correctly when
+  // rectangular transfroms are used with the EXT_TX expt.
+  const TX_SIZE tx_size_y = txsize_sqr_map[mbmi->tx_size];
+  const TX_SIZE tx_size_uv =
+      get_uv_tx_size_impl(mbmi->tx_size, block_size, 1, 1);
   const int filter_level = get_filter_level(lfi_n, mbmi);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
@@ -803,7 +806,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
 #endif  // CONFIG_SUPERTX
                          LOOP_FILTER_MASK *lfm) {
   const MB_MODE_INFO *mbmi = &mi->mbmi;
-  const TX_SIZE tx_size_y = mbmi->tx_size;
+  const TX_SIZE tx_size_y = txsize_sqr_map[mbmi->tx_size];
 #if CONFIG_SUPERTX
   const BLOCK_SIZE block_size =
       supertx_enabled ? (BLOCK_SIZE)(3 * tx_size_y) : mbmi->sb_type;
@@ -1267,8 +1270,8 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
-      TX_SIZE tx_size_c = tx_size;
-      TX_SIZE tx_size_r = tx_size;
+      TX_SIZE tx_size_c = num_4x4_blocks_wide_txsize_log2_lookup[tx_size];
+      TX_SIZE tx_size_r = num_4x4_blocks_high_txsize_log2_lookup[tx_size];
 
       int tx_size_mask = 0;
       // Filter level can vary per MI

@@ -53,7 +53,9 @@ void vp10_foreach_transformed_block_in_plane(
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
-  const int step = 1 << (tx_size << 1);
+  const uint8_t num_4x4_tw = num_4x4_blocks_wide_txsize_lookup[tx_size];
+  const uint8_t num_4x4_th = num_4x4_blocks_high_txsize_lookup[tx_size];
+  const int step = num_4x4_tw * num_4x4_th;
   int i = 0, r, c;
 
   // If mb_to_right_edge is < 0 we are in a situation in which
@@ -63,13 +65,15 @@ void vp10_foreach_transformed_block_in_plane(
       xd->mb_to_right_edge >> (5 + pd->subsampling_x));
   const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ? 0 :
       xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-  const int extra_step = ((num_4x4_w - max_blocks_wide) >> tx_size) * step;
+  const int extra_step =
+      ((num_4x4_w - max_blocks_wide) >>
+       num_4x4_blocks_wide_txsize_log2_lookup[tx_size]) * step;
 
   // Keep track of the row and column of the blocks we use so that we know
   // if we are in the unrestricted motion border.
-  for (r = 0; r < max_blocks_high; r += (1 << tx_size)) {
+  for (r = 0; r < max_blocks_high; r += num_4x4_th) {
     // Skip visiting the sub blocks that are wholly within the UMV.
-    for (c = 0; c < max_blocks_wide; c += (1 << tx_size)) {
+    for (c = 0; c < max_blocks_wide; c += num_4x4_tw) {
       visit(plane, i, r, c, plane_bsize, tx_size, arg);
       i += step;
     }
@@ -82,33 +86,33 @@ void vp10_foreach_transformed_block(const MACROBLOCKD* const xd,
                                    foreach_transformed_block_visitor visit,
                                    void *arg) {
   int plane;
-
   for (plane = 0; plane < MAX_MB_PLANE; ++plane)
     vp10_foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
 void vp10_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
-                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,
-                      int aoff, int loff) {
+                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,
+                       int aoff, int loff) {
   ENTROPY_CONTEXT *const a = pd->above_context + aoff;
   ENTROPY_CONTEXT *const l = pd->left_context + loff;
-  const int tx_size_in_blocks = 1 << tx_size;
+  const int tx_w_in_blocks = num_4x4_blocks_wide_txsize_lookup[tx_size];
+  const int tx_h_in_blocks = num_4x4_blocks_high_txsize_lookup[tx_size];
 
   // above
   if (has_eob && xd->mb_to_right_edge < 0) {
     int i;
     const int blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize] +
                             (xd->mb_to_right_edge >> (5 + pd->subsampling_x));
-    int above_contexts = tx_size_in_blocks;
+    int above_contexts = tx_w_in_blocks;
     if (above_contexts + aoff > blocks_wide)
       above_contexts = blocks_wide - aoff;
 
     for (i = 0; i < above_contexts; ++i)
       a[i] = has_eob;
-    for (i = above_contexts; i < tx_size_in_blocks; ++i)
+    for (i = above_contexts; i < tx_w_in_blocks; ++i)
       a[i] = 0;
   } else {
-    memset(a, has_eob, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+    memset(a, has_eob, sizeof(ENTROPY_CONTEXT) * tx_w_in_blocks);
   }
 
   // left
@@ -116,16 +120,16 @@ void vp10_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
     int i;
     const int blocks_high = num_4x4_blocks_high_lookup[plane_bsize] +
                             (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-    int left_contexts = tx_size_in_blocks;
+    int left_contexts = tx_h_in_blocks;
     if (left_contexts + loff > blocks_high)
       left_contexts = blocks_high - loff;
 
     for (i = 0; i < left_contexts; ++i)
       l[i] = has_eob;
-    for (i = left_contexts; i < tx_size_in_blocks; ++i)
+    for (i = left_contexts; i < tx_h_in_blocks; ++i)
       l[i] = 0;
   } else {
-    memset(l, has_eob, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+    memset(l, has_eob, sizeof(ENTROPY_CONTEXT) * tx_h_in_blocks);
   }
 }
 

@@ -21,6 +21,7 @@
 #include "vpx_ports/system_state.h"
 
 #include "vp10/common/common.h"
+#include "vp10/common/common_data.h"
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymode.h"
 #include "vp10/common/idct.h"
@@ -927,12 +928,6 @@ int64_t vp10_highbd_block_error_c(const tran_low_t *coeff,
  * can skip this if the last coefficient in this transform block, e.g. the
  * 16th coefficient in a 4x4 block or the 64th coefficient in a 8x8 block,
  * were non-zero). */
-static const int16_t band_counts[TX_SIZES][8] = {
-  { 1, 2, 3, 4,  3,   16 - 13, 0 },
-  { 1, 2, 3, 4, 11,   64 - 21, 0 },
-  { 1, 2, 3, 4, 11,  256 - 21, 0 },
-  { 1, 2, 3, 4, 11, 1024 - 21, 0 },
-};
 static int cost_coeffs(MACROBLOCK *x,
                        int plane, int block,
 #if CONFIG_VAR_TX
@@ -948,11 +943,12 @@ static int cost_coeffs(MACROBLOCK *x,
   const struct macroblock_plane *p = &x->plane[plane];
   const struct macroblockd_plane *pd = &xd->plane[plane];
   const PLANE_TYPE type = pd->plane_type;
-  const int16_t *band_count = &band_counts[tx_size][1];
+  const uint16_t *band_count = &band_count_table[tx_size][1];
   const int eob = p->eobs[block];
   const tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  const int tx_size_ctx = txsize_sqr_map[tx_size];
   unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
-                   x->token_costs[tx_size][type][is_inter_block(mbmi)];
+                   x->token_costs[tx_size_ctx][type][is_inter_block(mbmi)];
   uint8_t token_cache[MAX_TX_SQUARE];
 #if CONFIG_VAR_TX
   int pt = coeff_ctx;
@@ -1064,7 +1060,7 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
   if (cpi->sf.use_transform_domain_distortion) {
     // Transform domain distortion computation is more accurate as it does
     // not involve an inverse transform, but it is less accurate.
-    const int ss_txfrm_size = tx_size << 1;
+    const int ss_txfrm_size = num_4x4_blocks_txsize_log2_lookup[tx_size];
     int64_t this_sse;
     int tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
     int shift = (MAX_TX_SCALE - get_tx_scale(xd, tx_type, tx_size)) * 2;
@@ -1081,7 +1077,8 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
     *out_sse = this_sse >> shift;
   } else {
     const BLOCK_SIZE tx_bsize = txsize_to_bsize[tx_size];
-    const int bs = 4*num_4x4_blocks_wide_lookup[tx_bsize];
+    const int bsw = 4 * num_4x4_blocks_wide_lookup[tx_bsize];
+    const int bsh = 4 * num_4x4_blocks_high_lookup[tx_bsize];
     const int src_stride = x->plane[plane].src.stride;
     const int dst_stride = xd->plane[plane].dst.stride;
     const int src_idx = 4 * (blk_row * src_stride + blk_col);
@@ -1121,13 +1118,13 @@ static void dist_block(const VP10_COMP *cpi, MACROBLOCK *x, int plane,
         recon = CONVERT_TO_BYTEPTR(recon);
         inv_txfm_param.bd = xd->bd;
         vpx_highbd_convolve_copy(dst, dst_stride, recon, MAX_TX_SIZE,
-                                 NULL, 0, NULL, 0, bs, bs, xd->bd);
+                                 NULL, 0, NULL, 0, bsw, bsh, xd->bd);
         highbd_inv_txfm_add(dqcoeff, recon, MAX_TX_SIZE, &inv_txfm_param);
       } else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       {
         vpx_convolve_copy(dst, dst_stride, recon, MAX_TX_SIZE,
-                          NULL, 0, NULL, 0, bs, bs);
+                          NULL, 0, NULL, 0, bsw, bsh);
         inv_txfm_add(dqcoeff, recon, MAX_TX_SIZE, &inv_txfm_param);
       }
 
@@ -1159,6 +1156,29 @@ static int rate_block(int plane, int block, int blk_row, int blk_col,
 #endif  // CONFIG_VAR_TX
 }
 
+static uint64_t sum_squares_2d(const int16_t *diff, int diff_stride,
+                               TX_SIZE tx_size) {
+  uint64_t sse;
+  switch (tx_size) {
+#if CONFIG_EXT_TX
+    case TX_4X8:
+      sse = vpx_sum_squares_2d_i16(diff, diff_stride, 4) +
+          vpx_sum_squares_2d_i16(diff + 4 * diff_stride, diff_stride, 4);
+      break;
+    case TX_8X4:
+      sse = vpx_sum_squares_2d_i16(diff, diff_stride, 4) +
+          vpx_sum_squares_2d_i16(diff + 4, diff_stride, 4);;
+      break;
+#endif  // CONFIG_EXT_TX
+    default:
+      assert(tx_size < TX_SIZES);
+      sse = vpx_sum_squares_2d_i16(
+          diff, diff_stride, num_4x4_blocks_wide_txsize_lookup[tx_size] << 2);
+      break;
+  }
+  return sse;
+}
+
 static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
                           BLOCK_SIZE plane_bsize,
                           TX_SIZE tx_size, void *arg) {
@@ -1188,7 +1208,6 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     } else {
       // Note that the encode block_intra call above already calls
       // inv_txfm_add, so we can't just call dist_block here.
-      const int bs = 4 << tx_size;
       const BLOCK_SIZE tx_bsize = txsize_to_bsize[tx_size];
       const vpx_variance_fn_t variance = args->cpi->fn_ptr[tx_bsize].vf;
 
@@ -1204,8 +1223,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
       unsigned int tmp;
+      sse = sum_squares_2d(diff, diff_stride, tx_size);
 
-      sse = vpx_sum_squares_2d_i16(diff, diff_stride, bs);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
         sse = ROUND_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
@@ -1316,6 +1335,10 @@ void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
   args.best_rd = ref_best_rd;
   args.use_fast_coef_costing = use_fast_coef_casting;
 
+#if CONFIG_EXT_TX
+  assert(tx_size < TX_SIZES);
+#endif  // CONFIG_EXT_TX
+
   if (plane == 0)
     xd->mi[0]->mbmi.tx_size = tx_size;
 
@@ -1361,6 +1384,7 @@ static int64_t txfm_yrd(VP10_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_EXT_TX
 
   assert(skip_prob > 0);
+
   s0 = vp10_cost_bit(skip_prob, 0);
   s1 = vp10_cost_bit(skip_prob, 1);
 
@@ -2955,6 +2979,10 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
 
+#if CONFIG_EXT_TX
+  assert(tx_size < TX_SIZES);
+#endif  // CONFIG_EXT_TX
+
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
   if (xd->mb_to_right_edge < 0)
@@ -3087,6 +3115,10 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   int tmp_eob = 0;
   int zero_blk_rate;
 
+#if CONFIG_EXT_TX
+  assert(tx_size < TX_SIZES);
+#endif  // CONFIG_EXT_TX
+
   if (ref_best_rd < 0) {
     *is_cost_valid = 0;
     return;
@@ -3158,7 +3190,7 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
   if (tx_size > TX_4X4) {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_height_log2_lookup[bsize];
-    int sub_step = 1 << (2 * (tx_size - 1));
+    int sub_step = num_4x4_blocks_txsize_lookup[tx_size - 1];
     int i;
     int this_rate;
     int64_t this_dist;
@@ -3167,6 +3199,9 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
     int this_cost_valid = 1;
     int64_t tmp_rd = 0;
 
+#if CONFIG_EXT_TX
+    assert(tx_size < TX_SIZES);
+#endif  // CONFIG_EXT_TX
     --bsl;
     for (i = 0; i < 4 && this_cost_valid; ++i) {
       int offsetr = (i >> 1) << bsl;
@@ -3191,13 +3226,15 @@ static void select_tx_block(const VP10_COMP *cpi, MACROBLOCK *x,
 
   if (this_rd < sum_rd) {
     int idx, idy;
-    for (i = 0; i < (1 << tx_size); ++i)
-      pta[i] = ptl[i] = !(tmp_eob == 0);
+    for (i = 0; i < num_4x4_blocks_wide_txsize_lookup[tx_size]; ++i)
+      pta[i] = !(tmp_eob == 0);
+    for (i = 0; i < num_4x4_blocks_high_txsize_lookup[tx_size]; ++i)
+      ptl[i] = !(tmp_eob == 0);
     txfm_partition_update(tx_above + (blk_col >> 1),
                           tx_left + (blk_row >> 1), tx_size);
     inter_tx_size[0][0] = tx_size;
-    for (idy = 0; idy < (1 << tx_size) / 2; ++idy)
-      for (idx = 0; idx < (1 << tx_size) / 2; ++idx)
+    for (idy = 0; idy < num_4x4_blocks_high_txsize_lookup[tx_size] / 2; ++idy)
+      for (idx = 0; idx < num_4x4_blocks_wide_txsize_lookup[tx_size] / 2; ++idx)
         inter_tx_size[idy][idx] = tx_size;
     mbmi->tx_size = tx_size;
     if (this_rd == INT64_MAX)
@@ -3453,6 +3490,10 @@ static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x,
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
 
+#if CONFIG_EXT_TX
+  assert(tx_size < TX_SIZES);
+#endif  // CONFIG_EXT_TX
+
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
   if (xd->mb_to_right_edge < 0)
@@ -3487,13 +3528,13 @@ static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x,
     coeff_ctx = combine_entropy_contexts(ta[0], tl[0]);
     vp10_tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                        plane_bsize, coeff_ctx, rate, dist, bsse, skip);
-    for (i = 0; i < (1 << tx_size); ++i) {
+    for (i = 0; i < num_4x4_blocks_wide_txsize_lookup[tx_size]; ++i)
       ta[i] = !(p->eobs[block] == 0);
+    for (i = 0; i < num_4x4_blocks_high_txsize_lookup[tx_size]; ++i)
       tl[i] = !(p->eobs[block] == 0);
-    }
   } else {
     int bsl = b_width_log2_lookup[bsize];
-    int step = 1 << (2 * (tx_size - 1));
+    int step = num_4x4_blocks_txsize_lookup[tx_size - 1];
     int i;
 
     assert(bsl > 0);
@@ -3590,7 +3631,7 @@ static int inter_block_uvrd(const VP10_COMP *cpi, MACROBLOCK *x,
 
   return is_cost_valid;
 }
-#endif
+#endif  // CONFIG_VAR_TX
 
 // Return value 0: early termination triggered, no valid rd cost available;
 //              1: rd cost values are valid.
@@ -4402,11 +4443,22 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   const uint8_t *const src =
       &p->src.buf[vp10_raster_block_offset(BLOCK_8X8, i, p->src.stride)];
   uint8_t *const dst = &pd->dst.buf[vp10_raster_block_offset(BLOCK_8X8, i,
-                                                            pd->dst.stride)];
+                                                             pd->dst.stride)];
   int64_t thisdistortion = 0, thissse = 0;
   int thisrate = 0;
-  TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, i, TX_4X4);
-  const scan_order *so = get_scan(TX_4X4, tx_type, 1);
+  TX_SIZE tx_size = mi->mbmi.tx_size;
+
+  TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, i, tx_size);
+  const scan_order *so = get_scan(tx_size, tx_type, 1);
+  const int num_4x4_w = num_4x4_blocks_wide_txsize_lookup[tx_size];
+  const int num_4x4_h = num_4x4_blocks_high_txsize_lookup[tx_size];
+
+#if CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+  assert(tx_size == max_txsize_rect_lookup[mi->mbmi.sb_type]);
+#else
+  assert(tx_size == TX_4X4);
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+  assert(tx_type == DCT_DCT);
 
   vp10_build_inter_predictor_sub8x8(xd, 0, i, ir, ic, mi_row, mi_col);
 
@@ -4427,39 +4479,51 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   k = i;
-  for (idy = 0; idy < height / 4; ++idy) {
-    for (idx = 0; idx < width / 4; ++idx) {
-      int64_t dist, ssz, rd, rd1, rd2;
+  for (idy = 0; idy < height / 4; idy += num_4x4_h) {
+    for (idx = 0; idx < width / 4; idx += num_4x4_w) {
+      int64_t dist, ssz, rd, rd1, rd2, block;
       int coeff_ctx;
       k += (idy * 2 + idx);
+      if (tx_size == TX_4X4)
+        block = k;
+      else
+        block = (i ? 2 : 0);
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)),
                                            *(tl + (k >> 1)));
 #if CONFIG_NEW_QUANT
-      vp10_xform_quant_fp_nuq(x, 0, k, idy + (i >> 1), idx + (i & 0x01),
-                              BLOCK_8X8, TX_4X4, coeff_ctx);
+      vp10_xform_quant_fp_nuq(x, 0, block, idy + (i >> 1), idx + (i & 0x01),
+                              BLOCK_8X8, tx_size, coeff_ctx);
 #else
-      vp10_xform_quant(x, 0, k, idy + (i >> 1), idx + (i & 0x01), BLOCK_8X8,
-                       TX_4X4, VP10_XFORM_QUANT_FP);
+      vp10_xform_quant(x, 0, block, idy + (i >> 1), idx + (i & 0x01), BLOCK_8X8,
+                       tx_size, VP10_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
       if (xd->lossless[xd->mi[0]->mbmi.segment_id] == 0)
-        vp10_optimize_b(x, 0, k, TX_4X4, coeff_ctx);
-      dist_block(cpi, x, 0, k, idy + (i >> 1), idx + (i & 0x1), TX_4X4,
+        vp10_optimize_b(x, 0, block, tx_size, coeff_ctx);
+      dist_block(cpi, x, 0, block, idy + (i >> 1), idx + (i & 0x1), tx_size,
                  &dist, &ssz);
       thisdistortion += dist;
       thissse += ssz;
 #if CONFIG_VAR_TX
-      thisrate += cost_coeffs(x, 0, k, coeff_ctx,
-                              TX_4X4,
+      thisrate += cost_coeffs(x, 0, block, coeff_ctx,
+                              tx_size,
                               so->scan, so->neighbors,
                               cpi->sf.use_fast_coef_costing);
-      *(ta + (k & 1)) = !(p->eobs[k] == 0);
-      *(tl + (k >> 1)) = !(p->eobs[k] == 0);
+      *(ta + (k & 1)) = !(p->eobs[block] == 0);
+      *(tl + (k >> 1)) = !(p->eobs[block] == 0);
 #else
-      thisrate += cost_coeffs(x, 0, k, ta + (k & 1), tl + (k >> 1),
-                              TX_4X4,
+      thisrate += cost_coeffs(x, 0, block, ta + (k & 1), tl + (k >> 1),
+                              tx_size,
                               so->scan, so->neighbors,
                               cpi->sf.use_fast_coef_costing);
-#endif
+#if CONFIG_EXT_TX
+      if (tx_size == TX_8X4) {
+        *(ta + (k & 1) + 1) = *(ta + (k & 1));
+      }
+      if (tx_size == TX_4X8) {
+        *(tl + (k >> 1) + 1) = *(tl + (k >> 1));
+      }
+#endif  // CONFIG_EXT_TX
+#endif  // CONFIG_VAR_TX
       rd1 = RDCOST(x->rdmult, x->rddiv, thisrate, thisdistortion);
       rd2 = RDCOST(x->rdmult, x->rddiv, 0, thissse);
       rd = VPXMIN(rd1, rd2);
@@ -4951,6 +5015,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
   const int has_second_rf = has_second_ref(mbmi);
   const int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
   MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
+#if CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+  mbmi->tx_size = max_txsize_rect_lookup[bsize];
+#else
+  mbmi->tx_size = TX_4X4;
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
 
   vp10_zero(*bsi);
 
@@ -5020,8 +5089,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTER
                                        mv_ref_list,
 #endif  // CONFIG_EXT_INTER
-                                      &frame_mv[NEARESTMV][frame],
-                                      &frame_mv[NEARMV][frame]);
+                                       &frame_mv[NEARESTMV][frame],
+                                       &frame_mv[NEARMV][frame]);
 
 #if CONFIG_REF_MV
         tmp_ref_mv[ref] = frame_mv[NEARESTMV][mbmi->ref_frame[ref]];
@@ -5072,10 +5141,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTER
       for (this_mode = (has_second_rf ? NEAREST_NEARESTMV : NEARESTMV);
            this_mode <= (has_second_rf ? NEW_NEWMV : NEWFROMNEARMV);
-           ++this_mode) {
+           ++this_mode)
 #else
-      for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
+      for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode)
 #endif  // CONFIG_EXT_INTER
+      {
         const struct buf_2d orig_src = x->plane[0].src;
         struct buf_2d orig_pre[2];
         // This flag controls if the motion estimation will kick off. When it
@@ -5342,10 +5412,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
             this_mode == NEWMV &&
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_DUAL_FILTER
-            (mbmi->interp_filter[0] == EIGHTTAP_REGULAR || run_mv_search)) {
+            (mbmi->interp_filter[0] == EIGHTTAP_REGULAR || run_mv_search))
 #else
-            (mbmi->interp_filter == EIGHTTAP_REGULAR || run_mv_search)) {
+            (mbmi->interp_filter == EIGHTTAP_REGULAR || run_mv_search))
 #endif
+            {
           // adjust src pointers
           mi_buf_shift(x, i);
           if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
