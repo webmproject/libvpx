@@ -14,6 +14,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vp8_rtcd.h"
 #include "blockd.h"
+#include "reconintra4x4.h"
 
 typedef void (*intra_pred_fn)(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left);
