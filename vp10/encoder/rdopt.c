@@ -8779,51 +8779,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         continue;
     }
 
-    if (this_mode == NEAREST_NEARESTMV) {
-      frame_mv[NEAREST_NEARESTMV][ref_frame].as_int =
-          frame_mv[NEARESTMV][ref_frame].as_int;
-      frame_mv[NEAREST_NEARESTMV][second_ref_frame].as_int =
-          frame_mv[NEARESTMV][second_ref_frame].as_int;
-    } else if (this_mode == NEAREST_NEARMV) {
-      frame_mv[NEAREST_NEARMV][ref_frame].as_int =
-          frame_mv[NEARESTMV][ref_frame].as_int;
-      frame_mv[NEAREST_NEARMV][second_ref_frame].as_int =
-          frame_mv[NEARMV][second_ref_frame].as_int;
-    } else if (this_mode == NEAR_NEARMV) {
-      frame_mv[NEAR_NEARMV][ref_frame].as_int =
-          frame_mv[NEARMV][ref_frame].as_int;
-      frame_mv[NEAR_NEARMV][second_ref_frame].as_int =
-          frame_mv[NEARMV][second_ref_frame].as_int;
-    } else if (this_mode == NEAR_NEARESTMV) {
-      frame_mv[NEAR_NEARESTMV][ref_frame].as_int =
-          frame_mv[NEARMV][ref_frame].as_int;
-      frame_mv[NEAR_NEARESTMV][second_ref_frame].as_int =
-          frame_mv[NEARESTMV][second_ref_frame].as_int;
-    } else if (this_mode == NEAREST_NEWMV) {
-      frame_mv[NEAREST_NEWMV][ref_frame].as_int =
-          frame_mv[NEARESTMV][ref_frame].as_int;
-      frame_mv[NEAREST_NEWMV][second_ref_frame].as_int =
-          frame_mv[NEWMV][second_ref_frame].as_int;
-    } else if (this_mode == NEW_NEARESTMV) {
-      frame_mv[NEW_NEARESTMV][ref_frame].as_int =
-          frame_mv[NEWMV][ref_frame].as_int;
-      frame_mv[NEW_NEARESTMV][second_ref_frame].as_int =
-          frame_mv[NEARESTMV][second_ref_frame].as_int;
-    } else if (this_mode == NEAR_NEWMV) {
-      frame_mv[NEAR_NEWMV][ref_frame].as_int =
-        frame_mv[NEARMV][ref_frame].as_int;
-      frame_mv[NEAR_NEWMV][second_ref_frame].as_int =
-          frame_mv[NEWMV][second_ref_frame].as_int;
-    } else if (this_mode == NEW_NEARMV) {
-      frame_mv[NEW_NEARMV][ref_frame].as_int =
-          frame_mv[NEWMV][ref_frame].as_int;
-      frame_mv[NEW_NEARMV][second_ref_frame].as_int =
-        frame_mv[NEARMV][second_ref_frame].as_int;
-    } else if (this_mode == NEW_NEWMV) {
-      frame_mv[NEW_NEWMV][ref_frame].as_int =
-          frame_mv[NEWMV][ref_frame].as_int;
-      frame_mv[NEW_NEWMV][second_ref_frame].as_int =
-          frame_mv[NEWMV][second_ref_frame].as_int;
+    if (is_inter_compound_mode(this_mode)) {
+      frame_mv[this_mode][ref_frame].as_int =
+          frame_mv[compound_ref0_mode(this_mode)][ref_frame].as_int;
+      frame_mv[this_mode][second_ref_frame].as_int =
+          frame_mv[compound_ref1_mode(this_mode)][second_ref_frame].as_int;
     }
 #endif  // CONFIG_EXT_INTER
 
