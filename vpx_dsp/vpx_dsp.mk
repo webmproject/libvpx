@@ -277,6 +277,8 @@ endif  # CONFIG_VP9_ENCODER
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes            += sad.c
 DSP_SRCS-yes            += subtract.c
+DSP_SRCS-yes            += sum_squares.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/sum_squares_sse2.c
 
 DSP_SRCS-$(HAVE_MEDIA)  += arm/sad_media$(ASM)
 DSP_SRCS-$(HAVE_NEON)   += arm/sad4d_neon.c

@@ -170,6 +170,7 @@ endif # VP9
 ## Multi-codec / unconditional whitebox tests.
 
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sum_squares_test.cc
 
 TEST_INTRA_PRED_SPEED_SRCS-yes := test_intra_pred_speed.cc
 TEST_INTRA_PRED_SPEED_SRCS-yes += ../md5_utils.h ../md5_utils.c
