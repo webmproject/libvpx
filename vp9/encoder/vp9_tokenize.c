@@ -319,7 +319,8 @@ struct tokenize_b_args {
   TOKENEXTRA **tp;
 };
 
-static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
+static void set_entropy_context_b(int plane, int block, int row, int col,
+                                  BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   ThreadData *const td = args->td;
@@ -327,10 +328,8 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *p = &x->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
-  int aoff, loff;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0,
-                   aoff, loff);
+                   col, row);
 }
 
 static INLINE void add_token(TOKENEXTRA **t, const vpx_prob *context_tree,
@@ -353,7 +352,8 @@ static INLINE void add_token_no_extra(TOKENEXTRA **t,
   ++counts[token];
 }
 
-static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
+static void tokenize_b(int plane, int block, int row, int col,
+                       BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   VP9_COMP *cpi = args->cpi;
@@ -384,11 +384,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const int tx_eob = 16 << (tx_size << 1);
   int16_t token;
   EXTRABIT extra;
-  int aoff, loff;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
-
-  pt = get_entropy_context(tx_size, pd->above_context + aoff,
-                           pd->left_context + loff);
+  pt = get_entropy_context(tx_size, pd->above_context + col,
+                           pd->left_context + row);
   so = get_scan(xd, tx_size, type, block);
   scan = so->scan;
   nb = so->neighbors;
@@ -426,20 +423,23 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   *tp = t;
 
-  vp9_set_contexts(xd, pd, plane_bsize, tx_size, c > 0, aoff, loff);
+  vp9_set_contexts(xd, pd, plane_bsize, tx_size, c > 0, col, row);
 }
 
 struct is_skippable_args {
   uint16_t *eobs;
   int *skippable;
 };
-static void is_skippable(int plane, int block,
+
+static void is_skippable(int plane, int block, int row, int col,
                          BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                          void *argv) {
   struct is_skippable_args *args = argv;
   (void)plane;
   (void)plane_bsize;
   (void)tx_size;
+  (void)row;
+  (void)col;
   args->skippable[0] &= (!args->eobs[block]);
 }
 
@@ -453,14 +453,15 @@ int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   return result;
 }
 
-static void has_high_freq_coeff(int plane, int block,
+static void has_high_freq_coeff(int plane, int block, int row, int col,
                                 BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                                 void *argv) {
   struct is_skippable_args *args = argv;
   int eobs = (tx_size == TX_4X4) ? 3 : 10;
   (void) plane;
   (void) plane_bsize;
-
+  (void) row;
+  (void) col;
   *(args->skippable) |= (args->eobs[block] > eobs);
 }
 

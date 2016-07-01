@@ -270,6 +270,7 @@ static INLINE const vpx_prob *get_y_mode_probs(const MODE_INFO *mi,
 }
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
+                                                  int row, int col,
                                                   BLOCK_SIZE plane_bsize,
                                                   TX_SIZE tx_size,
                                                   void *arg);
@@ -282,17 +283,6 @@ void vp9_foreach_transformed_block_in_plane(
 void vp9_foreach_transformed_block(
     const MACROBLOCKD* const xd, BLOCK_SIZE bsize,
     foreach_transformed_block_visitor visit, void *arg);
-
-static INLINE void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
-                                            TX_SIZE tx_size, int block,
-                                            int *x, int *y) {
-  const int bwl = b_width_log2_lookup[plane_bsize];
-  const int tx_cols_log2 = bwl - tx_size;
-  const int tx_cols = 1 << tx_cols_log2;
-  const int raster_mb = block >> (tx_size << 1);
-  *x = (raster_mb & (tx_cols - 1)) << tx_size;
-  *y = (raster_mb >> tx_cols_log2) << tx_size;
-}
 
 void vp9_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,

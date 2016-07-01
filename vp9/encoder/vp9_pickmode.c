@@ -932,7 +932,8 @@ struct estimate_block_intra_args {
   RD_COST *rdc;
 };
 
-static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
+static void estimate_block_intra(int plane, int block, int row, int col,
+                                 BLOCK_SIZE plane_bsize,
                                  TX_SIZE tx_size, void *arg) {
   struct estimate_block_intra_args* const args = arg;
   VP9_COMP *const cpi = args->cpi;
@@ -945,20 +946,19 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   uint8_t *const dst_buf_base = pd->dst.buf;
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
-  int i, j;
   RD_COST this_rdc;
 
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+  (void)block;
 
-  p->src.buf = &src_buf_base[4 * (j * src_stride + i)];
-  pd->dst.buf = &dst_buf_base[4 * (j * dst_stride + i)];
+  p->src.buf = &src_buf_base[4 * (row * src_stride + col)];
+  pd->dst.buf = &dst_buf_base[4 * (row * dst_stride + col)];
   // Use source buffer as an approximation for the fully reconstructed buffer.
   vp9_predict_intra_block(xd, b_width_log2_lookup[plane_bsize],
                           tx_size, args->mode,
                           x->skip_encode ? p->src.buf : pd->dst.buf,
                           x->skip_encode ? src_stride : dst_stride,
                           pd->dst.buf, dst_stride,
-                          i, j, plane);
+                          col, row, plane);
 
   if (plane == 0) {
     int64_t this_sse = INT64_MAX;
