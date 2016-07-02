@@ -81,8 +81,9 @@ static INLINE void accumulate_store_4_pixel(const __m128i *x, uint8_t *dst) {
 static store_pixel_t store4pixelTab[2] = {
   store_4_pixel_only, accumulate_store_4_pixel};
 
-void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
-                    int tapsNum, store_pixel_t store_func, uint8_t *dst) {
+static void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
+                           int tapsNum, store_pixel_t store_func,
+                           uint8_t *dst) {
   __m128i sumPairRow[4];
   __m128i sumPairCol[8];
   __m128i pixel;
@@ -122,40 +123,40 @@ void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
   store_func(&sumPairRow[1], dst);
 }
 
-void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                    store_pixel_t store, uint8_t *buf) {
+static void horiz_w8_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                           store_pixel_t store, uint8_t *buf) {
   horiz_w4_ssse3(src, f, tapsNum, store, buf);
   src += 4;
   buf += 4;
   horiz_w4_ssse3(src, f, tapsNum, store, buf);
 }
 
-void horiz_w16_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                     store_pixel_t store, uint8_t *buf) {
+static void horiz_w16_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                            store_pixel_t store, uint8_t *buf) {
   horiz_w8_ssse3(src, f, tapsNum, store, buf);
   src += 8;
   buf += 8;
   horiz_w8_ssse3(src, f, tapsNum, store, buf);
 }
 
-void horiz_w32_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                     store_pixel_t store, uint8_t *buf) {
+static void horiz_w32_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                            store_pixel_t store, uint8_t *buf) {
   horiz_w16_ssse3(src, f, tapsNum, store, buf);
   src += 16;
   buf += 16;
   horiz_w16_ssse3(src, f, tapsNum, store, buf);
 }
 
-void horiz_w64_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                     store_pixel_t store, uint8_t *buf) {
+static void horiz_w64_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                            store_pixel_t store, uint8_t *buf) {
   horiz_w32_ssse3(src, f, tapsNum, store, buf);
   src += 32;
   buf += 32;
   horiz_w32_ssse3(src, f, tapsNum, store, buf);
 }
 
-void horiz_w128_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
-                      store_pixel_t store, uint8_t *buf) {
+static void horiz_w128_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                             store_pixel_t store, uint8_t *buf) {
   horiz_w64_ssse3(src, f, tapsNum, store, buf);
   src += 64;
   buf += 64;
@@ -172,8 +173,8 @@ static void (*horizTab[6])(const uint8_t *, const __m128i *, int,
   horiz_w128_ssse3,
 };
 
-void filter_horiz_ssse3(const uint8_t *src, __m128i *f, int tapsNum, int width,
-                        store_pixel_t store, uint8_t *dst) {
+static void filter_horiz_ssse3(const uint8_t *src, __m128i *f, int tapsNum,
+                               int width, store_pixel_t store, uint8_t *dst) {
   switch (width) {
     // Note:
     // For width=2 and 4, store function must be different
@@ -813,9 +814,10 @@ static void filter_vert_horiz_parallel_ssse3(const uint8_t *src, int src_stride,
   store_func(&sum, dst);
 }
 
-void filter_vert_compute_small(const uint8_t *src, int src_stride, __m128i *f,
-                               int tapsNum, store_pixel_t store_func, int h,
-                               uint8_t *dst, int dst_stride) {
+static void filter_vert_compute_small(const uint8_t *src, int src_stride,
+                                      __m128i *f, int tapsNum,
+                                      store_pixel_t store_func, int h,
+                                      uint8_t *dst, int dst_stride) {
   int rowIndex = 0;
   do {
     filter_vert_horiz_parallel_ssse3(src, src_stride, f, tapsNum, store_func,
@@ -826,9 +828,10 @@ void filter_vert_compute_small(const uint8_t *src, int src_stride, __m128i *f,
   } while (rowIndex < h);
 }
 
-void filter_vert_compute_large(const uint8_t *src, int src_stride, __m128i *f,
-                               int tapsNum, store_pixel_t store_func, int w,
-                               int h, uint8_t *dst, int dst_stride) {
+static void filter_vert_compute_large(const uint8_t *src, int src_stride,
+                                      __m128i *f, int tapsNum,
+                                      store_pixel_t store_func, int w, int h,
+                                      uint8_t *dst, int dst_stride) {
   int col;
   int rowIndex = 0;
   const uint8_t *src_ptr = src;
