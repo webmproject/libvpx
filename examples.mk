@@ -215,6 +215,17 @@ vp8cx_set_ref.SRCS                 += vpx_ports/msvc.h
 vp8cx_set_ref.GUID                  = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
 vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
+ifeq ($(CONFIG_VP9_ENCODER),yes)
+ifeq ($(CONFIG_DECODERS),yes)
+EXAMPLES-yes                       += vpx_cx_set_ref.c
+vpx_cx_set_ref.SRCS                += ivfenc.h ivfenc.c
+vpx_cx_set_ref.SRCS                += tools_common.h tools_common.c
+vpx_cx_set_ref.SRCS                += video_common.h
+vpx_cx_set_ref.SRCS                += video_writer.h video_writer.c
+vpx_cx_set_ref.GUID                 = 65D7F14A-2EE6-4293-B958-AB5107A03B55
+vpx_cx_set_ref.DESCRIPTION          = VP9 set encoder reference frame
+endif
+endif
 
 ifeq ($(CONFIG_MULTI_RES_ENCODING),yes)
 ifeq ($(CONFIG_LIBYUV),yes)
