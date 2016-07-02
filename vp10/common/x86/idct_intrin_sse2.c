@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vp10_rtcd.h"
 #include "vpx_dsp/x86/inv_txfm_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"

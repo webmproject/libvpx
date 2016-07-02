@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vp10_rtcd.h"
 #include "vp10/common/vp10_fwd_txfm.h"
 
 void vp10_fdct4x4_c(const int16_t *input, tran_low_t *output, int stride) {

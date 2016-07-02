@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "./vp10_rtcd.h"
+#include "vp10/common/vp10_convolve.h"
 #include "vp10/common/filter.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/mem.h"
