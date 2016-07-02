@@ -604,11 +604,10 @@ static void get_energy_distribution_fine(const VP10_COMP *cpi,
   (void) var[15];
 }
 
-int adst_vs_flipadst(const VP10_COMP *cpi,
-                     BLOCK_SIZE bsize,
-                     uint8_t *src, int src_stride,
-                     uint8_t *dst, int dst_stride,
-                     double *hdist, double *vdist) {
+static int adst_vs_flipadst(const VP10_COMP *cpi, BLOCK_SIZE bsize,
+                            uint8_t *src, int src_stride,
+                            uint8_t *dst, int dst_stride,
+                            double *hdist, double *vdist) {
   int prune_bitmask = 0;
   double svm_proj_h = 0, svm_proj_v = 0;
   get_energy_distribution_fine(cpi, bsize, src, src_stride,
