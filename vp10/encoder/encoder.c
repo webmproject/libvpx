@@ -1228,19 +1228,16 @@ MAKE_MBFP_SAD_WRAPPER(vpx_highbd_masked_sad4x4)
 
 #define MAKE_OBFP_SAD_WRAPPER(fnname)                                      \
 static unsigned int fnname##_bits8(const uint8_t *ref, int ref_stride,     \
-                                   const int *wsrc, int wsrc_stride,       \
-                                   const int *msk, int msk_stride) {       \
-  return fnname(ref, ref_stride, wsrc, wsrc_stride, msk, msk_stride);      \
+                                   const int32_t *wsrc, const int32_t *msk) { \
+  return fnname(ref, ref_stride, wsrc, msk);                               \
 }                                                                          \
 static unsigned int fnname##_bits10(const uint8_t *ref, int ref_stride,    \
-                                    const int *wsrc, int wsrc_stride,      \
-                                    const int *msk, int msk_stride) {      \
-  return fnname(ref, ref_stride, wsrc, wsrc_stride, msk, msk_stride) >> 2; \
+                                    const int32_t *wsrc, const int32_t *msk) { \
+  return fnname(ref, ref_stride, wsrc, msk) >> 2;                          \
 }                                                                          \
 static unsigned int fnname##_bits12(const uint8_t *ref, int ref_stride,    \
-                                    const int *wsrc, int wsrc_stride,      \
-                                    const int *msk, int msk_stride) {      \
-  return fnname(ref, ref_stride, wsrc, wsrc_stride, msk, msk_stride) >> 4; \
+                                    const int32_t *wsrc, const int32_t *msk) { \
+  return fnname(ref, ref_stride, wsrc, msk) >> 4;                          \
 }
 
 #if CONFIG_EXT_PARTITION

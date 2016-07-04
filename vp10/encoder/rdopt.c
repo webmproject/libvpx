@@ -6073,8 +6073,7 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
 #if CONFIG_OBMC
 static void single_motion_search_obmc(VP10_COMP *cpi, MACROBLOCK *x,
                                       BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                      const int* wsrc, int wsrc_stride,
-                                      const int* mask, int mask_stride,
+                                      const int32_t* wsrc, const int32_t* mask,
 #if CONFIG_EXT_INTER
                                       int ref_idx,
                                       int mv_idx,
@@ -6173,8 +6172,7 @@ static void single_motion_search_obmc(VP10_COMP *cpi, MACROBLOCK *x,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  bestsme = vp10_obmc_full_pixel_diamond(cpi, x, wsrc, wsrc_stride,
-                                         mask, mask_stride,
+  bestsme = vp10_obmc_full_pixel_diamond(cpi, x, wsrc, mask,
                                          &mvp_full, step_param, sadpb,
                                          MAX_MVSEARCH_STEPS - 1 - step_param,
                                          1, &cpi->fn_ptr[bsize],
@@ -6188,8 +6186,7 @@ static void single_motion_search_obmc(VP10_COMP *cpi, MACROBLOCK *x,
   if (bestsme < INT_MAX) {
     int dis;
     vp10_find_best_obmc_sub_pixel_tree_up(cpi, x,
-                                          wsrc, wsrc_stride,
-                                          mask, mask_stride,
+                                          wsrc, mask,
                                           mi_row, mi_col,
                                           &tmp_mv->as_mv, &ref_mv,
                                           cm->allow_high_precision_mv,
@@ -6796,8 +6793,8 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_OBMC
                                  uint8_t *dst_buf1[3], int dst_stride1[3],
                                  uint8_t *dst_buf2[3], int dst_stride2[3],
-                                 int *wsrc, int wsrc_strides,
-                                 int *mask2d, int mask2d_strides,
+                                 const int32_t *const wsrc,
+                                 const int32_t *const mask2d,
 #endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
                                  int_mv single_newmvs[2][MAX_REF_FRAMES],
@@ -7739,8 +7736,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
         pred_mv.as_int = mbmi->mv[0].as_int;
         single_motion_search_obmc(cpi, x, bsize, mi_row, mi_col,
-                                  wsrc, wsrc_strides,
-                                  mask2d, mask2d_strides,
+                                  wsrc, mask2d,
 #if CONFIG_EXT_INTER
                                   0, mv_idx,
 #endif  // CONFIG_EXT_INTER
@@ -8494,13 +8490,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
   DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, int, weighted_src_buf[MAX_SB_SQUARE]);
-  DECLARE_ALIGNED(16, int, mask2d_buf[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, int32_t, weighted_src_buf[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, int32_t, mask2d_buf[MAX_SB_SQUARE]);
   uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
   int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
   int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
-  int weighted_src_stride = MAX_SB_SIZE;
-  int mask2d_stride = MAX_SB_SIZE;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -8605,8 +8599,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   calc_target_weighted_pred(cm, x, xd, mi_row, mi_col,
                             dst_buf1[0], dst_stride1[0],
                             dst_buf2[0], dst_stride2[0],
-                            mask2d_buf, mask2d_stride,
-                            weighted_src_buf, weighted_src_stride);
+                            mask2d_buf, weighted_src_buf);
 #endif  // CONFIG_OBMC
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
@@ -9143,8 +9136,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #if CONFIG_OBMC
                                   dst_buf1, dst_stride1,
                                   dst_buf2, dst_stride2,
-                                  weighted_src_buf, weighted_src_stride,
-                                  mask2d_buf, mask2d_stride,
+                                  weighted_src_buf,
+                                  mask2d_buf,
 #endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
                                   single_newmvs,
@@ -9258,8 +9251,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                            dst_buf1, dst_stride1,
                                            dst_buf2, dst_stride2,
                                            weighted_src_buf,
-                                           weighted_src_stride,
-                                           mask2d_buf, mask2d_stride,
+                                           mask2d_buf,
 #endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
                                            dummy_single_newmvs,
@@ -10970,14 +10962,16 @@ void calc_target_weighted_pred(VP10_COMMON *cm,
                                int mi_row, int mi_col,
                                uint8_t *above_buf, int above_stride,
                                uint8_t *left_buf,  int left_stride,
-                               int *mask_buf, int mask_stride,
-                               int *weighted_src_buf, int weighted_src_stride) {
+                               int32_t *mask_buf,
+                               int32_t *weighted_src_buf) {
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int row, col, i, mi_step;
   int bw = 8 * xd->n8_w;
   int bh = 8 * xd->n8_h;
-  int *dst = weighted_src_buf;
-  int *mask2d = mask_buf;
+  const int mask_stride = bw;
+  const int weighted_src_stride = bw;
+  int32_t *dst = weighted_src_buf;
+  int32_t *mask2d = mask_buf;
   uint8_t *src;
 #if CONFIG_VP9_HIGHBITDEPTH
   int is_hbd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
@@ -11009,11 +11003,11 @@ void calc_target_weighted_pred(VP10_COMMON *cm,
         int bw = (mi_step * MI_SIZE) >> pd->subsampling_x;
         int bh = overlap >> pd->subsampling_y;
         int dst_stride = weighted_src_stride;
-        int *dst = weighted_src_buf + (i * MI_SIZE >> pd->subsampling_x);
+        int32_t *dst = weighted_src_buf + (i * MI_SIZE >> pd->subsampling_x);
         int tmp_stride = above_stride;
         uint8_t *tmp = above_buf + (i * MI_SIZE >> pd->subsampling_x);
         int mask2d_stride = mask_stride;
-        int *mask2d = mask_buf + (i * MI_SIZE >> pd->subsampling_x);
+        int32_t *mask2d = mask_buf + (i * MI_SIZE >> pd->subsampling_x);
         const uint8_t *mask1d[2];
 
         setup_obmc_mask(bh, mask1d);
@@ -11078,14 +11072,14 @@ void calc_target_weighted_pred(VP10_COMMON *cm,
         int bw = overlap >> pd->subsampling_x;
         int bh = (mi_step * MI_SIZE) >> pd->subsampling_y;
         int dst_stride = weighted_src_stride;
-        int *dst = weighted_src_buf +
+        int32_t *dst = weighted_src_buf +
                    (i * MI_SIZE * dst_stride >> pd->subsampling_y);
         int tmp_stride = left_stride;
         uint8_t *tmp = left_buf +
                        (i * MI_SIZE * tmp_stride >> pd->subsampling_y);
         int mask2d_stride = mask_stride;
-        int *mask2d = mask_buf +
-                      (i * MI_SIZE * mask2d_stride >> pd->subsampling_y);
+        int32_t *mask2d = mask_buf +
+                          (i * MI_SIZE * mask2d_stride >> pd->subsampling_y);
         const uint8_t *mask1d[2];
 
         setup_obmc_mask(bw, mask1d);

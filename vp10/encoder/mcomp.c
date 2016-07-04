@@ -3109,8 +3109,7 @@ int vp10_masked_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_OBMC
 /* returns subpixel variance error function */
 #define DIST(r, c)                                                     \
-  vfp->osvf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), z,         \
-            src_stride, mask, mask_stride, &sse)
+  vfp->osvf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), z, mask, &sse)
 
 /* checks if (r, c) has better score than previous best */
 #define MVC(r, c)                                                      \
@@ -3140,8 +3139,8 @@ int vp10_masked_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
 #define CHECK_BETTER1(v, r, c) \
   if (c >= minc && c <= maxc && r >= minr && r <= maxr) {              \
     thismse = upsampled_obmc_pref_error(xd,                            \
-                                        mask, mask_stride,             \
-                                        vfp, z, src_stride,            \
+                                        mask,                          \
+                                        vfp, z,                        \
                                         upre(y, y_stride, r, c),       \
                                         y_stride,                      \
                                         w, h, &sse);                   \
@@ -3156,14 +3155,12 @@ int vp10_masked_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
     v = INT_MAX;                                                       \
   }
 
-static unsigned int setup_obmc_center_error(const int *mask,
-                                            int mask_stride,
+static unsigned int setup_obmc_center_error(const int32_t *mask,
                                             const MV *bestmv,
                                             const MV *ref_mv,
                                             int error_per_bit,
                                             const vp10_variance_fn_ptr_t *vfp,
-                                            const int *const wsrc,
-                                            const int wsrc_stride,
+                                            const int32_t *const wsrc,
                                             const uint8_t *const y,
                                             int y_stride,
                                             int offset,
@@ -3171,18 +3168,16 @@ static unsigned int setup_obmc_center_error(const int *mask,
                                             unsigned int *sse1,
                                             int *distortion) {
   unsigned int besterr;
-  besterr = vfp->ovf(y + offset, y_stride, wsrc, wsrc_stride,
-                     mask, mask_stride, sse1);
+  besterr = vfp->ovf(y + offset, y_stride, wsrc, mask, sse1);
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
   return besterr;
 }
 
 static int upsampled_obmc_pref_error(const MACROBLOCKD *xd,
-                                     const int *mask, int mask_stride,
+                                     const int32_t *mask,
                                      const vp10_variance_fn_ptr_t *vfp,
-                                     const int *const wsrc,
-                                     const int wsrc_stride,
+                                     const int32_t *const wsrc,
                                      const uint8_t *const y, int y_stride,
                                      int w, int h, unsigned int *sse) {
   unsigned int besterr;
@@ -3191,8 +3186,7 @@ static int upsampled_obmc_pref_error(const MACROBLOCKD *xd,
     DECLARE_ALIGNED(16, uint16_t, pred16[MAX_SB_SQUARE]);
     vpx_highbd_upsampled_pred(pred16, w, h, y, y_stride);
 
-    besterr = vfp->ovf(CONVERT_TO_BYTEPTR(pred16), w, wsrc, wsrc_stride,
-                       mask, mask_stride, sse);
+    besterr = vfp->ovf(CONVERT_TO_BYTEPTR(pred16), w, wsrc, mask, sse);
   } else {
     DECLARE_ALIGNED(16, uint8_t, pred[MAX_SB_SQUARE]);
 #else
@@ -3201,7 +3195,7 @@ static int upsampled_obmc_pref_error(const MACROBLOCKD *xd,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     vpx_upsampled_pred(pred, w, h, y, y_stride);
 
-    besterr = vfp->ovf(pred, w, wsrc, wsrc_stride, mask, mask_stride, sse);
+    besterr = vfp->ovf(pred, w, wsrc, mask, sse);
 #if CONFIG_VP9_HIGHBITDEPTH
   }
 #endif
@@ -3210,15 +3204,14 @@ static int upsampled_obmc_pref_error(const MACROBLOCKD *xd,
 
 static unsigned int upsampled_setup_obmc_center_error(
                         const MACROBLOCKD *xd,
-                        const int *mask, int mask_stride,
+                        const int32_t *mask,
                         const MV *bestmv, const MV *ref_mv,
                         int error_per_bit, const vp10_variance_fn_ptr_t *vfp,
-                        const int *const wsrc, const int wsrc_stride,
+                        const int32_t *const wsrc,
                         const uint8_t *const y, int y_stride,
                         int w, int h, int offset, int *mvjcost, int *mvcost[2],
                         unsigned int *sse1, int *distortion) {
-  unsigned int besterr = upsampled_obmc_pref_error(xd, mask, mask_stride, vfp,
-                                                   wsrc, wsrc_stride,
+  unsigned int besterr = upsampled_obmc_pref_error(xd, mask, vfp, wsrc,
                                                    y + offset, y_stride,
                                                    w, h, sse1);
   *distortion = besterr;
@@ -3227,8 +3220,8 @@ static unsigned int upsampled_setup_obmc_center_error(
 }
 
 int vp10_find_best_obmc_sub_pixel_tree_up(VP10_COMP *cpi, MACROBLOCK *x,
-                                          const int *wsrc, int wsrc_stride,
-                                          const int *mask, int mask_stride,
+                                          const int32_t *wsrc,
+                                          const int32_t *mask,
                                           int mi_row, int mi_col,
                                           MV *bestmv, const MV *ref_mv,
                                           int allow_hp, int error_per_bit,
@@ -3240,7 +3233,6 @@ int vp10_find_best_obmc_sub_pixel_tree_up(VP10_COMP *cpi, MACROBLOCK *x,
                                           int use_upsampled_ref) {
   const int *const z = wsrc;
   const int *const src_address = z;
-  const int src_stride = wsrc_stride;
   MACROBLOCKD *xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[0];
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
@@ -3292,14 +3284,14 @@ int vp10_find_best_obmc_sub_pixel_tree_up(VP10_COMP *cpi, MACROBLOCK *x,
   // use_upsampled_ref can be 0 or 1
   if (use_upsampled_ref)
     besterr = upsampled_setup_obmc_center_error(
-        xd, mask, mask_stride, bestmv, ref_mv, error_per_bit,
-        vfp, z, src_stride, y, y_stride,
+        xd, mask, bestmv, ref_mv, error_per_bit,
+        vfp, z, y, y_stride,
         w, h, (offset << 3),
         mvjcost, mvcost, sse1, distortion);
   else
     besterr = setup_obmc_center_error(
-        mask, mask_stride, bestmv, ref_mv, error_per_bit,
-        vfp, z, src_stride, y, y_stride,
+        mask, bestmv, ref_mv, error_per_bit,
+        vfp, z, y, y_stride,
         offset, mvjcost, mvcost, sse1, distortion);
 
   for (iter = 0; iter < round; ++iter) {
@@ -3313,16 +3305,15 @@ int vp10_find_best_obmc_sub_pixel_tree_up(VP10_COMP *cpi, MACROBLOCK *x,
         if (use_upsampled_ref) {
           const uint8_t *const pre_address = y + tr * y_stride + tc;
 
-          thismse = upsampled_obmc_pref_error(xd, mask, mask_stride,
-                                              vfp, src_address, src_stride,
+          thismse = upsampled_obmc_pref_error(xd, mask,
+                                              vfp, src_address,
                                               pre_address, y_stride,
                                               w, h, &sse);
         } else {
           const uint8_t *const pre_address = y + (tr >> 3) * y_stride +
               (tc >> 3);
           thismse = vfp->osvf(pre_address, y_stride, sp(tc), sp(tr),
-                              src_address, src_stride,
-                              mask, mask_stride, &sse);
+                              src_address, mask, &sse);
         }
 
         cost_array[idx] = thismse +
@@ -3350,15 +3341,14 @@ int vp10_find_best_obmc_sub_pixel_tree_up(VP10_COMP *cpi, MACROBLOCK *x,
       if (use_upsampled_ref) {
         const uint8_t *const pre_address = y + tr * y_stride + tc;
 
-        thismse = upsampled_obmc_pref_error(xd, mask, mask_stride,
-                                            vfp, src_address, src_stride,
+        thismse = upsampled_obmc_pref_error(xd, mask, vfp, src_address,
                                             pre_address, y_stride,
                                             w, h, &sse);
       } else {
         const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
 
         thismse = vfp->osvf(pre_address, y_stride, sp(tc), sp(tr),
-                            src_address, src_stride, mask, mask_stride, &sse);
+                            src_address, mask, &sse);
       }
 
       cost_array[4] = thismse +
@@ -3422,8 +3412,8 @@ int vp10_find_best_obmc_sub_pixel_tree_up(VP10_COMP *cpi, MACROBLOCK *x,
 #undef CHECK_BETTER
 
 static int get_obmc_mvpred_var(const MACROBLOCK *x,
-                               const int *wsrc, int wsrc_stride,
-                               const int *mask, int mask_stride,
+                               const int32_t *wsrc,
+                               const int32_t *mask,
                                const MV *best_mv, const MV *center_mv,
                                const vp10_variance_fn_ptr_t *vfp,
                                int use_mvcost, int is_second) {
@@ -3433,14 +3423,14 @@ static int get_obmc_mvpred_var(const MACROBLOCK *x,
   unsigned int unused;
 
   return vfp->ovf(get_buf_from_mv(in_what, best_mv), in_what->stride,
-                  wsrc, wsrc_stride, mask, mask_stride, &unused) +
+                  wsrc, mask, &unused) +
          (use_mvcost ?  mv_err_cost(&mv, center_mv, x->nmvjointcost,
                                     x->mvcost, x->errorperbit) : 0);
 }
 
 int obmc_refining_search_sad(const MACROBLOCK *x,
-                             const int *wsrc, int wsrc_stride,
-                             const int *mask, int mask_stride,
+                             const int32_t *wsrc,
+                             const int32_t *mask,
                              MV *ref_mv, int error_per_bit,
                              int search_range,
                              const vp10_variance_fn_ptr_t *fn_ptr,
@@ -3450,8 +3440,7 @@ int obmc_refining_search_sad(const MACROBLOCK *x,
   const struct buf_2d *const in_what = &xd->plane[0].pre[is_second];
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   unsigned int best_sad = fn_ptr->osdf(get_buf_from_mv(in_what, ref_mv),
-                                       in_what->stride,
-                                       wsrc, wsrc_stride, mask, mask_stride) +
+                                       in_what->stride, wsrc, mask) +
                          mvsad_err_cost(x, ref_mv, &fcenter_mv, error_per_bit);
   int i, j;
 
@@ -3463,8 +3452,7 @@ int obmc_refining_search_sad(const MACROBLOCK *x,
                      ref_mv->col + neighbors[j].col};
       if (is_mv_in(x, &mv)) {
         unsigned int sad = fn_ptr->osdf(get_buf_from_mv(in_what, &mv),
-                                        in_what->stride, wsrc, wsrc_stride,
-                                        mask, mask_stride);
+                                        in_what->stride, wsrc, mask);
         if (sad < best_sad) {
           sad += mvsad_err_cost(x, &mv, &fcenter_mv, error_per_bit);
           if (sad < best_sad) {
@@ -3487,8 +3475,7 @@ int obmc_refining_search_sad(const MACROBLOCK *x,
 
 int obmc_diamond_search_sad(const MACROBLOCK *x,
                             const search_site_config *cfg,
-                            const int *wsrc, int wsrc_stride,
-                            const int *mask, int mask_stride,
+                            const int32_t *wsrc, const int32_t *mask,
                             MV *ref_mv, MV *best_mv,
                             int search_param,
                             int sad_per_bit, int *num00,
@@ -3516,8 +3503,7 @@ int obmc_diamond_search_sad(const MACROBLOCK *x,
   *best_mv = *ref_mv;
 
   // Check the starting position
-  best_sad = fn_ptr->osdf(best_address, in_what->stride,
-                          wsrc, wsrc_stride, mask, mask_stride) +
+  best_sad = fn_ptr->osdf(best_address, in_what->stride, wsrc, mask) +
              mvsad_err_cost(x, best_mv, &fcenter_mv, sad_per_bit);
 
   i = 1;
@@ -3528,7 +3514,7 @@ int obmc_diamond_search_sad(const MACROBLOCK *x,
                      best_mv->col + ss[i].mv.col};
       if (is_mv_in(x, &mv)) {
        int sad = fn_ptr->osdf(best_address + ss[i].offset, in_what->stride,
-                              wsrc, wsrc_stride, mask, mask_stride);
+                              wsrc, mask);
         if (sad < best_sad) {
           sad += mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
           if (sad < best_sad) {
@@ -3552,8 +3538,7 @@ int obmc_diamond_search_sad(const MACROBLOCK *x,
                             best_mv->col + ss[best_site].mv.col};
         if (is_mv_in(x, &this_mv)) {
           int sad = fn_ptr->osdf(best_address + ss[best_site].offset,
-                                 in_what->stride, wsrc, wsrc_stride,
-                                 mask, mask_stride);
+                                 in_what->stride, wsrc, mask);
           if (sad < best_sad) {
             sad += mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit);
             if (sad < best_sad) {
@@ -3576,8 +3561,7 @@ int obmc_diamond_search_sad(const MACROBLOCK *x,
 }
 
 int vp10_obmc_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
-                                 const int *wsrc, int wsrc_stride,
-                                 const int *mask, int mask_stride,
+                                 const int32_t *wsrc, const int32_t *mask,
                                  MV *mvp_full, int step_param,
                                  int sadpb, int further_steps, int do_refine,
                                  const vp10_variance_fn_ptr_t *fn_ptr,
@@ -3586,13 +3570,12 @@ int vp10_obmc_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
   MV temp_mv;
   int thissme, n, num00 = 0;
   int bestsme = obmc_diamond_search_sad(x, &cpi->ss_cfg,
-                                        wsrc, wsrc_stride,
-                                        mask, mask_stride,
+                                        wsrc, mask,
                                         mvp_full, &temp_mv,
                                         step_param, sadpb, &n,
                                         fn_ptr, ref_mv, is_second);
   if (bestsme < INT_MAX)
-    bestsme = get_obmc_mvpred_var(x, wsrc, wsrc_stride, mask, mask_stride,
+    bestsme = get_obmc_mvpred_var(x, wsrc, mask,
                                   &temp_mv, ref_mv, fn_ptr, 1, is_second);
   *dst_mv = temp_mv;
 
@@ -3608,13 +3591,12 @@ int vp10_obmc_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
       num00--;
     } else {
       thissme = obmc_diamond_search_sad(x, &cpi->ss_cfg,
-                                        wsrc, wsrc_stride,
-                                        mask, mask_stride,
+                                        wsrc, mask,
                                         mvp_full, &temp_mv,
                                         step_param + n, sadpb, &num00,
                                         fn_ptr, ref_mv, is_second);
       if (thissme < INT_MAX)
-        thissme = get_obmc_mvpred_var(x, wsrc, wsrc_stride, mask, mask_stride,
+        thissme = get_obmc_mvpred_var(x, wsrc, mask,
                                       &temp_mv, ref_mv, fn_ptr, 1, is_second);
 
       // check to see if refining search is needed.
@@ -3632,11 +3614,11 @@ int vp10_obmc_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
   if (do_refine) {
     const int search_range = 8;
     MV best_mv = *dst_mv;
-    thissme = obmc_refining_search_sad(x, wsrc, wsrc_stride, mask, mask_stride,
+    thissme = obmc_refining_search_sad(x, wsrc, mask,
                                        &best_mv, sadpb, search_range,
                                        fn_ptr, ref_mv, is_second);
     if (thissme < INT_MAX)
-      thissme = get_obmc_mvpred_var(x, wsrc, wsrc_stride, mask, mask_stride,
+      thissme = get_obmc_mvpred_var(x, wsrc, mask,
                                     &best_mv, ref_mv, fn_ptr, 1, is_second);
     if (thissme < bestsme) {
       bestsme = thissme;
