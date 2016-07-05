@@ -306,6 +306,30 @@
       "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dd68a0d_cfb229a5",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-05T17:33:58Z",
+      "side": 1,
+      "message": "if you remove the inline, you\u0027ll lose the \u0027% width\u0027 optimization for power-of-two, and it\u0027s going to be expensive.\n\nI think binary size is something to keep a close eye on.\nThe idea was to have a only the width hard-coded and let the height be free-range:\n\n#define vpx_highbd_obmc_sad##w##_sse41(..., int height) \\\n  ...\n\ninstead of vpx_highbd_obmc_sad##w##x##h##_sse4_1( ...)\n\n(that, only a generated function for each possible width, not all possible widthxheight pairs)",
+      "parentUuid": "7d0f22b2_8d7a8557",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 252,
+        "endChar": 14
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
