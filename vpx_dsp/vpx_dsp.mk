@@ -314,6 +314,9 @@ ifeq ($(CONFIG_EXT_INTER),yes)
 DSP_SRCS-$(HAVE_SSSE3)  += x86/masked_sad_intrin_ssse3.c
 DSP_SRCS-$(HAVE_SSSE3)  += x86/masked_variance_intrin_ssse3.c
 endif  #CONFIG_EXT_INTER
+ifeq ($(CONFIG_OBMC),yes)
+DSP_SRCS-$(HAVE_SSE4_1) += x86/obmc_sad_sse4.c
+endif  #CONFIG_OBMC
 endif  #CONFIG_VP10_ENCODER
 
 ifeq ($(CONFIG_USE_X86INC),yes)
