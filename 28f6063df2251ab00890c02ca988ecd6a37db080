@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3dd68a0d_4fad399b",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-05T14:27:24Z",
+      "side": 1,
+      "message": "why not use:\n\nconst __m128i zero  \u003d _mm_setzero_si128();\n...\n\nconst __m128i v_a0_w \u003d xx_load_128(a + n);\nconst __m128i v_a0_d \u003d _mm_unpacklo_epi16(v_a0_w);\nconst __m128i v_a1_d \u003d _mm_unpackhi_epi16(v_a0_w);\n\nto avoid the extra (partial) load of v_a1_w?",
+      "range": {
+        "startLine": 195,
+        "startChar": 27,
+        "endLine": 195,
+        "endChar": 45
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
