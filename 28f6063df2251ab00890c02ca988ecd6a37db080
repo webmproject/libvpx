@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7d0f22b2_8da3a515",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-05T16:49:51Z",
+      "side": 1,
+      "message": "width and height are always powers of 2. width is always bigger than 8, and hence \"width * height\" is always a multiple of 8, n always inrements by 8. Each iteration loads 8 values from a.",
+      "parentUuid": "3dd68a0d_af1fa5b2",
+      "range": {
+        "startLine": 190,
+        "startChar": 27,
+        "endLine": 190,
+        "endChar": 38
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3dd68a0d_4fad399b",
         "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
         "patchSetId": 3
@@ -107,6 +131,30 @@
       "writtenOn": "2016-07-05T16:33:07Z",
       "side": 1,
       "message": "that\u0027s a pretty expensive operation. Some downward counter might be better.",
+      "range": {
+        "startLine": 217,
+        "startChar": 9,
+        "endLine": 217,
+        "endChar": 10
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d0f22b2_ad9e69cf",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-05T16:49:51Z",
+      "side": 1,
+      "message": "Width is always a power of 2 so this is a single TEST instruction. This \u0027if\u0027 statement compiles into 3 branchless scalar instructions (ADD, TEST, CMOVE), which will be basically free due to ILP. Even if it compiles into a branch, it is perfectly predictable.",
+      "parentUuid": "3dd68a0d_8f0bc179",
       "range": {
         "startLine": 217,
         "startChar": 9,
