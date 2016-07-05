@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7d0f22b2_ad754969",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-05T17:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3dd68a0d_cfd949ff",
+      "range": {
+        "startLine": 181,
+        "startChar": 16,
+        "endLine": 181,
+        "endChar": 35
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3dd68a0d_af1fa5b2",
         "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
         "patchSetId": 3
@@ -249,6 +273,30 @@
       "writtenOn": "2016-07-05T17:12:28Z",
       "side": 1,
       "message": "why not make \u0027height\u0027 a real parameter instead of hard-coded value, to save code size?\nThat\u0027s a lot of generated code, but \u0027height\u0027 is not a critical value here. It just appear in a test (line 219), that could be turned into a test-to-zero with a down counter.",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 252,
+        "endChar": 14
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d0f22b2_8d7a8557",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-05T17:27:14Z",
+      "side": 1,
+      "message": "These are dispatched to via vp10_variance_vtable which is indexed by the block size, so you need a specific function symbol for each block size. If code size is a matter, disable inlining of the implementations above (at which point you can also visit the masked and regular variance functions, they all do the same).",
+      "parentUuid": "3dd68a0d_af03253f",
       "range": {
         "startLine": 252,
         "startChar": 0,
