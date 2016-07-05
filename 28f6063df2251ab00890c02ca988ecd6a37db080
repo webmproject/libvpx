@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3dd68a0d_cfd949ff",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-05T17:12:28Z",
+      "side": 1,
+      "message": "why not \u0027const uint16_t*\u0027 ?",
+      "range": {
+        "startLine": 181,
+        "startChar": 16,
+        "endLine": 181,
+        "endChar": 35
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3dd68a0d_af1fa5b2",
         "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
         "patchSetId": 3
@@ -37,6 +60,30 @@
       "side": 1,
       "message": "width and height are always powers of 2. width is always bigger than 8, and hence \"width * height\" is always a multiple of 8, n always inrements by 8. Each iteration loads 8 values from a.",
       "parentUuid": "3dd68a0d_af1fa5b2",
+      "range": {
+        "startLine": 190,
+        "startChar": 27,
+        "endLine": 190,
+        "endChar": 38
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dd68a0d_afdc05f0",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-05T17:12:28Z",
+      "side": 1,
+      "message": "some asserts and comments would do well, then.",
+      "parentUuid": "7d0f22b2_8da3a515",
       "range": {
         "startLine": 190,
         "startChar": 27,
@@ -160,6 +207,53 @@
         "startChar": 9,
         "endLine": 217,
         "endChar": 10
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dd68a0d_4ff53958",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-05T17:12:28Z",
+      "side": 1,
+      "message": "i see. A comment would be helpful.\nIn case, you could also replace by \u0027!(n \u0026 (width - 1))\u0027, just to be explicit.",
+      "parentUuid": "7d0f22b2_ad9e69cf",
+      "range": {
+        "startLine": 217,
+        "startChar": 9,
+        "endLine": 217,
+        "endChar": 10
+      },
+      "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dd68a0d_af03253f",
+        "filename": "vpx_dsp/x86/obmc_sad_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-05T17:12:28Z",
+      "side": 1,
+      "message": "why not make \u0027height\u0027 a real parameter instead of hard-coded value, to save code size?\nThat\u0027s a lot of generated code, but \u0027height\u0027 is not a critical value here. It just appear in a test (line 219), that could be turned into a test-to-zero with a down counter.",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 252,
+        "endChar": 14
       },
       "revId": "28f6063df2251ab00890c02ca988ecd6a37db080",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
