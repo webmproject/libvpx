@@ -16,8 +16,6 @@
 #include "test/register_state_check.h"
 
 #include "test/function_equivalence_test.h"
-#include "test/randomise.h"
-#include "test/snapshot.h"
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
@@ -25,15 +23,11 @@
 
 #include "./vp10_rtcd.h"
 
-#include "test/assertion_helpers.h"
+#include "test/acm_random.h"
 #include "vp10/common/enums.h"
 
-using libvpx_test::assertion_helpers::BuffersEqWithin;
-using libvpx_test::assertion_helpers::BuffersEqOutside;
-using libvpx_test::assertion_helpers::ArraysEq;
+using libvpx_test::ACMRandom;
 using libvpx_test::FunctionEquivalenceTest;
-using libvpx_test::Snapshot;
-using libvpx_test::Randomise;
 using std::tr1::make_tuple;
 
 namespace {
@@ -41,118 +35,95 @@ namespace {
 template<typename F, typename T>
 class BlendMask6Test : public FunctionEquivalenceTest<F> {
  protected:
+  static const int kIterations = 10000;
+  static const int kMaxWidth = MAX_SB_SIZE * 5;  // * 5 to cover longer strides
+  static const int kMaxHeight = MAX_SB_SIZE;
+  static const int kBufSize = kMaxWidth * kMaxHeight;
+  static const int kMaxMaskWidth = 2 * MAX_SB_SIZE;
+  static const int kMaxMaskSize = kMaxMaskWidth * kMaxMaskWidth;
+
+  BlendMask6Test() : rng_(ACMRandom::DeterministicSeed()) {}
+
   virtual ~BlendMask6Test() {}
 
   virtual void Execute(T *p_src0, T *p_src1) = 0;
 
   void Common() {
-    w = 1 << randomise.uniform<int>(2, MAX_SB_SIZE_LOG2 + 1);
-    h = 1 << randomise.uniform<int>(2, MAX_SB_SIZE_LOG2 + 1);
+    w_ = 1 << (rng_(MAX_SB_SIZE_LOG2 + 1 - 2) + 2);
+    h_ = 1 << (rng_(MAX_SB_SIZE_LOG2 + 1 - 2) + 2);
 
-    randomise(subx);
-    randomise(suby);
+    subx_ = rng_(2);
+    suby_ = rng_(2);
 
-    randomise(dst_offset, 0, 32);
-    randomise(dst_stride, w, MAX_SB_SIZE * 5 + 1);
+    dst_offset_ = rng_(33);
+    dst_stride_ = rng_(kMaxWidth + 1 - w_) + w_;
 
-    randomise(src0_offset, 0, 32);
-    randomise(src0_stride, w, MAX_SB_SIZE * 5 + 1);
+    src0_offset_ = rng_(33);
+    src0_stride_ = rng_(kMaxWidth + 1 - w_) + w_;
 
-    randomise(src1_offset, 0, 32);
-    randomise(src1_stride, w, MAX_SB_SIZE * 5 + 1);
+    src1_offset_ = rng_(33);
+    src1_stride_ = rng_(kMaxWidth + 1 - w_) + w_;
 
-    randomise(mask_stride, w * (subx ? 2: 1), 2 * MAX_SB_SIZE + 1);
+    mask_stride_ = rng_(kMaxWidth + 1 - w_ * (subx_ ? 2 : 1))
+                  + w_ * (subx_ ? 2 : 1);
 
     T *p_src0;
     T *p_src1;
 
-    switch (randomise.uniform<int>(3)) {
+    switch (rng_(3)) {
       case 0:   // Separate sources
-        p_src0 = &src0[0][0];
-        p_src1 = &src1[0][0];
+        p_src0 = src0_;
+        p_src1 = src1_;
         break;
       case 1:   // src0 == dst
-        p_src0 = &dst_tst[0][0];
-        src0_stride = dst_stride;
-        src0_offset = dst_offset;
-        p_src1 = &src1[0][0];
+        p_src0 = dst_tst_;
+        src0_stride_ = dst_stride_;
+        src0_offset_ = dst_offset_;
+        p_src1 = src1_;
         break;
       case 2:   // src1 == dst
-        p_src0 = &src0[0][0];
-        p_src1 = &dst_tst[0][0];
-        src1_stride = dst_stride;
-        src1_offset = dst_offset;
+        p_src0 = src0_;
+        p_src1 = dst_tst_;
+        src1_stride_ = dst_stride_;
+        src1_offset_ = dst_offset_;
         break;
       default:
         FAIL();
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    // Prepare
-    //////////////////////////////////////////////////////////////////////////
-
-    snapshot(dst_ref);
-    snapshot(dst_tst);
-
-    snapshot(src0);
-    snapshot(src1);
-
-    snapshot(mask);
-
-    //////////////////////////////////////////////////////////////////////////
-    // Execute
-    //////////////////////////////////////////////////////////////////////////
-
     Execute(p_src0, p_src1);
 
-    //////////////////////////////////////////////////////////////////////////
-    // Check
-    //////////////////////////////////////////////////////////////////////////
-
-    ASSERT_TRUE(BuffersEqWithin(dst_ref, dst_tst,
-                                dst_stride, dst_stride,
-                                dst_offset, dst_offset,
-                                h, w));
-
-    ASSERT_TRUE(ArraysEq(snapshot.get(src0), src0));
-    ASSERT_TRUE(ArraysEq(snapshot.get(src1), src1));
-    ASSERT_TRUE(ArraysEq(snapshot.get(mask), mask));
-
-    ASSERT_TRUE(BuffersEqOutside(snapshot.get(dst_ref), dst_ref,
-                                 dst_stride,
-                                 dst_offset,
-                                 h, w));
-
-    ASSERT_TRUE(BuffersEqOutside(snapshot.get(dst_tst), dst_tst,
-                                 dst_stride,
-                                 dst_offset,
-                                 h, w));
+    for (int r = 0 ; r < h_ ; ++r) {
+      for (int c = 0 ; c < w_ ; ++c) {
+        ASSERT_EQ(dst_ref_[dst_offset_ + r * dst_stride_ + c],
+                  dst_tst_[dst_offset_ + r * dst_stride_ + c]);
+      }
+    }
   }
 
-  Snapshot snapshot;
-  Randomise randomise;
+  ACMRandom rng_;
 
-  T dst_ref[MAX_SB_SIZE][MAX_SB_SIZE * 5];
-  T dst_tst[MAX_SB_SIZE][MAX_SB_SIZE * 5];
-  size_t dst_stride;
-  size_t dst_offset;
+  T dst_ref_[kBufSize];
+  T dst_tst_[kBufSize];
+  size_t dst_stride_;
+  size_t dst_offset_;
 
-  T src0[MAX_SB_SIZE][MAX_SB_SIZE * 5];
-  size_t src0_stride;
-  size_t src0_offset;
+  T src0_[kBufSize];
+  size_t src0_stride_;
+  size_t src0_offset_;
 
-  T src1[MAX_SB_SIZE][MAX_SB_SIZE * 5];
-  size_t src1_stride;
-  size_t src1_offset;
+  T src1_[kBufSize];
+  size_t src1_stride_;
+  size_t src1_offset_;
 
-  uint8_t mask[2 * MAX_SB_SIZE][2 * MAX_SB_SIZE];
-  size_t mask_stride;
+  uint8_t mask_[kMaxMaskSize];
+  size_t mask_stride_;
 
-  int w;
-  int h;
+  int w_;
+  int h_;
 
-  bool suby;
-  bool subx;
+  bool suby_;
+  bool subx_;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -168,52 +139,48 @@ typedef void (*F8B)(uint8_t *dst, uint32_t dst_stride,
 class BlendMask6Test8B : public BlendMask6Test<F8B, uint8_t> {
  protected:
   void Execute(uint8_t *p_src0, uint8_t *p_src1) {
-    ref_func_(&dst_ref[0][dst_offset], dst_stride,
-              p_src0 + src0_offset, src0_stride,
-              p_src1 + src1_offset, src1_stride,
-              &mask[0][0], sizeof(mask[0]),
-              h, w, suby, subx);
+    ref_func_(dst_ref_ + dst_offset_, dst_stride_,
+              p_src0 + src0_offset_, src0_stride_,
+              p_src1 + src1_offset_, src1_stride_,
+              mask_, kMaxMaskWidth,
+              h_, w_, suby_, subx_);
 
-    ASM_REGISTER_STATE_CHECK(
-      tst_func_(&dst_tst[0][dst_offset], dst_stride,
-                p_src0 + src0_offset, src0_stride,
-                p_src1 + src1_offset, src1_stride,
-                &mask[0][0], sizeof(mask[0]),
-                h, w, suby, subx));
+    tst_func_(dst_tst_ + dst_offset_, dst_stride_,
+              p_src0 + src0_offset_, src0_stride_,
+              p_src1 + src1_offset_, src1_stride_,
+              mask_, kMaxMaskWidth,
+              h_, w_, suby_, subx_);
   }
 };
 
 TEST_P(BlendMask6Test8B, RandomValues) {
-  for (int i = 0 ; i < 10000 && !HasFatalFailure(); i++) {
-    //////////////////////////////////////////////////////////////////////////
-    // Randomise
-    //////////////////////////////////////////////////////////////////////////
+  for (int iter = 0 ; iter < kIterations && !HasFatalFailure(); ++iter) {
+    for (int i = 0 ; i < kBufSize ; ++i) {
+      dst_ref_[i] = rng_.Rand8();
+      dst_tst_[i] = rng_.Rand8();
 
-    randomise(dst_ref);
-    randomise(dst_tst);
+      src0_[i] = rng_.Rand8();
+      src1_[i] = rng_.Rand8();
+    }
 
-    randomise(src0);
-    randomise(src1);
-
-    randomise(mask, 65);
+    for (int i = 0 ; i < kMaxMaskSize ; ++i)
+      mask_[i] = rng_(65);
 
     Common();
   }
 }
 
 TEST_P(BlendMask6Test8B, ExtremeValues) {
-  for (int i = 0 ; i < 1000 && !HasFatalFailure(); i++) {
-    //////////////////////////////////////////////////////////////////////////
-    // Randomise
-    //////////////////////////////////////////////////////////////////////////
+  for (int iter = 0 ; iter < kIterations && !HasFatalFailure(); ++iter) {
+    for (int i = 0 ; i < kBufSize ; ++i) {
+      dst_ref_[i] = rng_(2) + 254;
+      dst_tst_[i] = rng_(2) + 254;
+      src0_[i] = rng_(2) + 254;
+      src1_[i] = rng_(2) + 254;
+    }
 
-    randomise(dst_ref, 254, 256);
-    randomise(dst_tst, 254, 256);
-
-    randomise(src0, 254, 256);
-    randomise(src1, 254, 256);
-
-    randomise(mask, 63, 65);
+    for (int i = 0 ; i < kMaxMaskSize ; ++i)
+      mask_[i] = rng_(2) + 63;
 
     Common();
   }
@@ -239,63 +206,79 @@ typedef void (*FHBD)(uint8_t *dst, uint32_t dst_stride,
 class BlendMask6TestHBD : public BlendMask6Test<FHBD, uint16_t> {
  protected:
   void Execute(uint16_t *p_src0, uint16_t *p_src1) {
-    ref_func_(CONVERT_TO_BYTEPTR(&dst_ref[0][dst_offset]), dst_stride,
-              CONVERT_TO_BYTEPTR(p_src0 + src0_offset), src0_stride,
-              CONVERT_TO_BYTEPTR(p_src1 + src1_offset), src1_stride,
-              &mask[0][0], sizeof(mask[0]),
-              h, w, suby, subx, bit_depth);
+    ref_func_(CONVERT_TO_BYTEPTR(dst_ref_ + dst_offset_), dst_stride_,
+              CONVERT_TO_BYTEPTR(p_src0 + src0_offset_), src0_stride_,
+              CONVERT_TO_BYTEPTR(p_src1 + src1_offset_), src1_stride_,
+              mask_, kMaxMaskWidth,
+              h_, w_, suby_, subx_, bit_depth_);
 
     ASM_REGISTER_STATE_CHECK(
-      tst_func_(CONVERT_TO_BYTEPTR(&dst_tst[0][dst_offset]), dst_stride,
-                CONVERT_TO_BYTEPTR(p_src0 + src0_offset), src0_stride,
-                CONVERT_TO_BYTEPTR(p_src1 + src1_offset), src1_stride,
-                &mask[0][0], sizeof(mask[0]),
-                h, w, suby, subx, bit_depth));
+      tst_func_(CONVERT_TO_BYTEPTR(dst_tst_ + dst_offset_), dst_stride_,
+                CONVERT_TO_BYTEPTR(p_src0 + src0_offset_), src0_stride_,
+                CONVERT_TO_BYTEPTR(p_src1 + src1_offset_), src1_stride_,
+                mask_, kMaxMaskWidth,
+                h_, w_, suby_, subx_, bit_depth_));
   }
 
-  int bit_depth;
+  int bit_depth_;
 };
 
 TEST_P(BlendMask6TestHBD, RandomValues) {
-  for (int i = 0 ; i < 10000 && !HasFatalFailure(); i++) {
-    //////////////////////////////////////////////////////////////////////////
-    // Randomise
-    //////////////////////////////////////////////////////////////////////////
+  for (int iter = 0 ; iter < kIterations && !HasFatalFailure(); ++iter) {
+    switch (rng_(3)) {
+    case 0:
+      bit_depth_ = 8;
+      break;
+    case 1:
+      bit_depth_ = 10;
+      break;
+    default:
+      bit_depth_ = 12;
+      break;
+    }
 
-    bit_depth = randomise.choice(8, 10, 12);
+    const int hi = 1 << bit_depth_;
 
-    const int hi = 1 << bit_depth;
+    for (int i = 0 ; i < kBufSize ; ++i) {
+      dst_ref_[i] = rng_(hi);
+      dst_tst_[i] = rng_(hi);
+      src0_[i] = rng_(hi);
+      src1_[i] = rng_(hi);
+    }
 
-    randomise(dst_ref, hi);
-    randomise(dst_tst, hi);
-
-    randomise(src0, hi);
-    randomise(src1, hi);
-
-    randomise(mask, 65);
+    for (int i = 0 ; i < kMaxMaskSize ; ++i)
+      mask_[i] = rng_(65);
 
     Common();
   }
 }
 
 TEST_P(BlendMask6TestHBD, ExtremeValues) {
-  for (int i = 0 ; i < 1000 && !HasFatalFailure(); i++) {
-    //////////////////////////////////////////////////////////////////////////
-    // Randomise
-    //////////////////////////////////////////////////////////////////////////
+  for (int iter = 0 ; iter < 1000 && !HasFatalFailure(); ++iter) {
+    switch (rng_(3)) {
+    case 0:
+      bit_depth_ = 8;
+      break;
+    case 1:
+      bit_depth_ = 10;
+      break;
+    default:
+      bit_depth_ = 12;
+      break;
+    }
 
-    bit_depth = randomise.choice(8, 10, 12);
-
-    const int hi = 1 << bit_depth;
+    const int hi = 1 << bit_depth_;
     const int lo = hi - 2;
 
-    randomise(dst_ref, lo, hi);
-    randomise(dst_tst, lo, hi);
+    for (int i = 0 ; i < kBufSize ; ++i) {
+      dst_ref_[i] = rng_(hi - lo) + lo;
+      dst_tst_[i] = rng_(hi - lo) + lo;
+      src0_[i] = rng_(hi - lo) + lo;
+      src1_[i] = rng_(hi - lo) + lo;
+    }
 
-    randomise(src0, lo, hi);
-    randomise(src1, lo, hi);
-
-    randomise(mask, 63, 65);
+    for (int i = 0 ; i < kMaxMaskSize ; ++i)
+      mask_[i] = rng_(65);
 
     Common();
   }
