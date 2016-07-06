@@ -25,19 +25,11 @@
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/msvc.h"  // for round()
 
 using libvpx_test::ACMRandom;
 
 namespace {
-
-#ifdef _MSC_VER
-static int round(double x) {
-  if (x < 0)
-    return static_cast<int>(ceil(x - 0.5));
-  else
-    return static_cast<int>(floor(x + 0.5));
-}
-#endif
 
 const int kNumCoeffs = 256;
 const double C1 = 0.995184726672197;

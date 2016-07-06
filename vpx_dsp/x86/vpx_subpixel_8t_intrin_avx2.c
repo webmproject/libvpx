@@ -8,10 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-// Due to a header conflict between math.h and intrinsics includes with ceil()
-// in certain configurations under vs9 this include needs to precede
-// immintrin.h.
-
 #include <immintrin.h>
 
 #include "./vpx_dsp_rtcd.h"

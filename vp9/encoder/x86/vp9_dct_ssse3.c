@@ -9,11 +9,6 @@
  */
 
 #include <assert.h>
-#if defined(_MSC_VER) && _MSC_VER <= 1500
-// Need to include math.h before calling tmmintrin.h/intrin.h
-// in certain versions of MSVS.
-#include <math.h>
-#endif
 #include <tmmintrin.h>  // SSSE3
 
 #include "./vp9_rtcd.h"

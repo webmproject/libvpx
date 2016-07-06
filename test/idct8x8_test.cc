@@ -17,19 +17,11 @@
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/msvc.h"  // for round()
 
 using libvpx_test::ACMRandom;
 
 namespace {
-
-#ifdef _MSC_VER
-static int round(double x) {
-  if (x < 0)
-    return static_cast<int>(ceil(x - 0.5));
-  else
-    return static_cast<int>(floor(x + 0.5));
-}
-#endif
 
 void reference_dct_1d(double input[8], double output[8]) {
   const double kPi = 3.141592653589793238462643383279502884;
@@ -86,7 +78,7 @@ TEST(VP9Idct8x8Test, AccuracyCheck) {
 
     reference_dct_2d(input, output_r);
     for (int j = 0; j < 64; ++j)
-      coeff[j] = round(output_r[j]);
+      coeff[j] = static_cast<tran_low_t>(round(output_r[j]));
     vpx_idct8x8_64_add_c(coeff, dst, 8);
     for (int j = 0; j < 64; ++j) {
       const int diff = dst[j] - src[j];
