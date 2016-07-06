@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d7a1632_cb7655ee",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-06T23:32:55Z",
+      "side": 1,
+      "message": "can be const",
+      "revId": "170050407408cbe9971e56542f2622e5a9a2fb7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d7a1632_0b1a1dc2",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1077,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-06T23:32:55Z",
+      "side": 1,
+      "message": "you\u0027re inconsistent with most of these and line 1580; removing ?: should be fine everywhere",
+      "revId": "170050407408cbe9971e56542f2622e5a9a2fb7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
