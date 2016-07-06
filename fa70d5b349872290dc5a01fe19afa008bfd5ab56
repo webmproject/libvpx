@@ -16,6 +16,24 @@
       "revId": "fa70d5b349872290dc5a01fe19afa008bfd5ab56",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dd68a0d_fd424099",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-06T22:13:06Z",
+      "side": 1,
+      "message": "that\u0027s part of the c-spec (I couldn\u0027t find a pdf on a quick search) though this note speaks to it:\n\nThe C syntax treats D() as an instance of an empty identifier-list, while the C++ syntax treats it as an\nempty parameter-type-list.\n\nThat\u0027s the difference between an old-style and new-style function declaration.",
+      "parentUuid": "3dd68a0d_55adc69a",
+      "revId": "fa70d5b349872290dc5a01fe19afa008bfd5ab56",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
