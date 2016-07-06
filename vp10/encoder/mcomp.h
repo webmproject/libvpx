@@ -82,31 +82,24 @@ int vp10_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
 
 // Perform integral projection based motion estimation.
 unsigned int vp10_int_pro_motion_estimation(const struct VP10_COMP *cpi,
-                                           MACROBLOCK *x,
-                                           BLOCK_SIZE bsize,
-                                           int mi_row, int mi_col);
+                                            MACROBLOCK *x,
+                                            BLOCK_SIZE bsize,
+                                            int mi_row, int mi_col);
 
-typedef int (integer_mv_pattern_search_fn) (
-    const MACROBLOCK *x,
-    MV *ref_mv,
-    int search_param,
-    int error_per_bit,
-    int do_init_search,
-    int *cost_list,
-    const vp10_variance_fn_ptr_t *vf,
-    int use_mvcost,
-    const MV *center_mv,
-    MV *best_mv);
 
-integer_mv_pattern_search_fn vp10_hex_search;
-integer_mv_pattern_search_fn vp10_bigdia_search;
-integer_mv_pattern_search_fn vp10_square_search;
-integer_mv_pattern_search_fn vp10_fast_hex_search;
-integer_mv_pattern_search_fn vp10_fast_dia_search;
+int vp10_hex_search(MACROBLOCK *x,
+                    MV *start_mv,
+                    int search_param,
+                    int sad_per_bit,
+                    int do_init_search,
+                    int *cost_list,
+                    const vp10_variance_fn_ptr_t *vfp,
+                    int use_mvcost,
+                    const MV *center_mv);
 
 typedef int (fractional_mv_step_fp) (
-    const MACROBLOCK *x,
-    MV *bestmv, const MV *ref_mv,
+    MACROBLOCK *x,
+    const MV *ref_mv,
     int allow_hp,
     int error_per_bit,
     const vp10_variance_fn_ptr_t *vfp,
@@ -124,39 +117,32 @@ extern fractional_mv_step_fp vp10_find_best_sub_pixel_tree_pruned_more;
 extern fractional_mv_step_fp vp10_find_best_sub_pixel_tree_pruned_evenmore;
 
 typedef int (*vp10_full_search_fn_t)(const MACROBLOCK *x,
-                                    const MV *ref_mv, int sad_per_bit,
-                                    int distance,
-                                    const vp10_variance_fn_ptr_t *fn_ptr,
-                                    const MV *center_mv, MV *best_mv);
+                                     const MV *ref_mv, int sad_per_bit,
+                                     int distance,
+                                     const vp10_variance_fn_ptr_t *fn_ptr,
+                                     const MV *center_mv, MV *best_mv);
 
-typedef int (*vp10_refining_search_fn_t)(const MACROBLOCK *x,
-                                        MV *ref_mv, int sad_per_bit,
-                                        int distance,
+typedef int (*vp10_diamond_search_fn_t)(const MACROBLOCK *x,
+                                        const search_site_config *cfg,
+                                        MV *ref_mv, MV *best_mv,
+                                        int search_param, int sad_per_bit,
+                                        int *num00,
                                         const vp10_variance_fn_ptr_t *fn_ptr,
                                         const MV *center_mv);
 
-typedef int (*vp10_diamond_search_fn_t)(const MACROBLOCK *x,
-                                       const search_site_config *cfg,
-                                       MV *ref_mv, MV *best_mv,
-                                       int search_param, int sad_per_bit,
-                                       int *num00,
-                                       const vp10_variance_fn_ptr_t *fn_ptr,
-                                       const MV *center_mv);
-
-int vp10_refining_search_8p_c(const MACROBLOCK *x,
-                             MV *ref_mv, int error_per_bit,
-                             int search_range,
-                             const vp10_variance_fn_ptr_t *fn_ptr,
-                             const MV *center_mv, const uint8_t *second_pred);
+int vp10_refining_search_8p_c(MACROBLOCK *x,
+                              int error_per_bit,
+                              int search_range,
+                              const vp10_variance_fn_ptr_t *fn_ptr,
+                              const MV *center_mv, const uint8_t *second_pred);
 
 struct VP10_COMP;
 
 int vp10_full_pixel_search(struct VP10_COMP *cpi, MACROBLOCK *x,
-                          BLOCK_SIZE bsize, MV *mvp_full,
-                          int step_param, int error_per_bit,
-                          int *cost_list,
-                          const MV *ref_mv, MV *tmp_mv,
-                          int var_max, int rd);
+                           BLOCK_SIZE bsize, MV *mvp_full,
+                           int step_param, int error_per_bit,
+                           int *cost_list, const MV *ref_mv,
+                           int var_max, int rd);
 
 #if CONFIG_EXT_INTER
 int vp10_find_best_masked_sub_pixel_tree(const MACROBLOCK *x,
