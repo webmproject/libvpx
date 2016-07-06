@@ -1744,8 +1744,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
       const int large_block = bsize > BLOCK_32X32;
 #else
-      const int large_block = (this_mode == NEWMV && ref_frame == LAST_FRAME) ?
-          bsize > BLOCK_32X32 : bsize >= BLOCK_32X32;
+      const int large_block =
+          x->sb_is_skin ? bsize > BLOCK_32X32 : bsize >= BLOCK_32X32;
 #endif
       mi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
