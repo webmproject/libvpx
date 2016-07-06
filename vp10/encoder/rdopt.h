@@ -97,8 +97,7 @@ void calc_target_weighted_pred(VP10_COMMON *cm,
                                int mi_row, int mi_col,
                                uint8_t *above_buf, int above_stride,
                                uint8_t *left_buf, int left_stride,
-                               int *mask_buf, int mask_stride,
-                               int *weighted_src_buf, int weighted_src_stride);
+                               int32_t *mask_buf, int32_t *weighted_src_buf);
 #endif  // CONFIG_OBMC
 
 #ifdef __cplusplus

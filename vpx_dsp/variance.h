@@ -101,24 +101,18 @@ typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(const uint8_t *src,
 #if CONFIG_VP10 && CONFIG_OBMC
 typedef unsigned int(*vpx_obmc_sad_fn_t)(const uint8_t *pred,
                                          int pred_stride,
-                                         const int *wsrc,
-                                         int wsrc_stride,
-                                         const int *msk,
-                                         int msk_stride);
+                                         const int32_t *wsrc,
+                                         const int32_t *msk);
 typedef unsigned int (*vpx_obmc_variance_fn_t)(const uint8_t *pred,
                                                int pred_stride,
-                                               const int *wsrc,
-                                               int wsrc_stride,
-                                               const int *msk,
-                                               int msk_stride,
+                                               const int32_t *wsrc,
+                                               const int32_t *msk,
                                                unsigned int *sse);
 typedef unsigned int (*vpx_obmc_subpixvariance_fn_t)(const uint8_t *pred,
                                                      int pred_stride,
                                                      int xoffset, int yoffset,
-                                                     const int *wsrc,
-                                                     int wsrc_stride,
-                                                     const int *msk,
-                                                     int msk_stride,
+                                                     const int32_t *wsrc,
+                                                     const int32_t *msk,
                                                      unsigned int *sse);
 #endif  // CONFIG_VP10 && CONFIG_OBMC
 
