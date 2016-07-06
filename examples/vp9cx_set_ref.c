@@ -25,7 +25,7 @@
 // -----
 // This example encodes a raw video. And the last argument passed in specifies
 // the frame number to update the reference frame on. For example, run
-// examples/vpx_cx_set_ref vp9 352 288 in.yuv out.ivf 4 30
+// examples/vp9cx_set_ref 352 288 in.yuv out.ivf 4 30
 // The parameter is parsed as follows:
 //
 //
@@ -61,7 +61,7 @@
 static const char *exec_name;
 
 void usage_exit() {
-  fprintf(stderr, "Usage: %s <codec> <width> <height> <infile> <outfile> "
+  fprintf(stderr, "Usage: %s <width> <height> <infile> <outfile> "
           "<frame> <limit(optional)>\n",
           exec_name);
   exit(EXIT_FAILURE);
@@ -312,36 +312,34 @@ int main(int argc, char **argv) {
   const int fps = 30;
   const int bitrate = 500;
 
-  const char *codec_arg = NULL;
   const char *width_arg = NULL;
   const char *height_arg = NULL;
   const char *infile_arg = NULL;
   const char *outfile_arg = NULL;
-  int limit = 0;
+  unsigned int limit = 0;
   exec_name = argv[0];
 
-  if (argc < 7)
+  if (argc < 6)
     die("Invalid number of arguments");
 
-  codec_arg = argv[1];
-  width_arg = argv[2];
-  height_arg = argv[3];
-  infile_arg = argv[4];
-  outfile_arg = argv[5];
+  width_arg = argv[1];
+  height_arg = argv[2];
+  infile_arg = argv[3];
+  outfile_arg = argv[4];
 
-  encoder = get_vpx_encoder_by_name(codec_arg);
+  encoder = get_vpx_encoder_by_name("vp9");
   if (!encoder)
     die("Unsupported codec.");
 
-  update_frame_num = atoi(argv[6]);
+  update_frame_num = atoi(argv[5]);
   // In VP9, the reference buffers (cm->buffer_pool->frame_bufs[i].buf) are
   // allocated while calling vpx_codec_encode(), thus, setting reference for
   // 1st frame isn't supported.
   if (update_frame_num <= 1)
-    die("Couldn't parse frame number '%s'\n", argv[6]);
+    die("Couldn't parse frame number '%s'\n", argv[5]);
 
-  if (argc > 7) {
-    limit = atoi(argv[7]);
+  if (argc > 6) {
+    limit = atoi(argv[6]);
     if (update_frame_num > limit)
       die("Update frame number couldn't larger than limit\n");
   }
@@ -392,7 +390,7 @@ int main(int argc, char **argv) {
     die_codec(&ecodec, "Failed to set enable auto alt ref");
 
   if (test_decode) {
-      const VpxInterface *decoder = get_vpx_decoder_by_name(codec_arg);
+      const VpxInterface *decoder = get_vpx_decoder_by_name("vp9");
       if (vpx_codec_dec_init(&dcodec, decoder->codec_interface(), NULL, 0))
         die_codec(&dcodec, "Failed to initialize decoder.");
   }
