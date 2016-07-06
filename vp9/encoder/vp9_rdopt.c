@@ -355,10 +355,8 @@ static const int16_t band_counts[TX_SIZES][8] = {
   { 1, 2, 3, 4, 11,  256 - 21, 0 },
   { 1, 2, 3, 4, 11, 1024 - 21, 0 },
 };
-static int cost_coeffs(MACROBLOCK *x,
-                       int plane, int block,
-                       ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
-                       TX_SIZE tx_size,
+static int cost_coeffs(MACROBLOCK *x, int plane, int block,
+                       TX_SIZE tx_size, int pt,
                        const int16_t *scan, const int16_t *nb,
                        int use_fast_coef_costing) {
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -371,7 +369,6 @@ static int cost_coeffs(MACROBLOCK *x,
   unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
                    x->token_costs[tx_size][type][is_inter_block(mi)];
   uint8_t token_cache[32 * 32];
-  int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
@@ -457,9 +454,6 @@ static int cost_coeffs(MACROBLOCK *x,
       }
     }
   }
-
-  // is eob first coefficient;
-  *A = *L = (c > 0);
 
   return cost;
 }
@@ -584,10 +578,9 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane, int block,
   }
 }
 
-static int rate_block(int plane, int block, int row, int col,
-                      TX_SIZE tx_size, struct rdcost_block_args* args) {
-  return cost_coeffs(args->x, plane, block, args->t_above + col,
-                     args->t_left + row, tx_size,
+static int rate_block(int plane, int block, TX_SIZE tx_size, int coeff_ctx,
+                      struct rdcost_block_args* args) {
+  return cost_coeffs(args->x, plane, block, tx_size, coeff_ctx,
                      args->so->scan, args->so->neighbors,
                      args->use_fast_coef_costing);
 }
@@ -602,6 +595,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   int rate;
   int64_t dist;
   int64_t sse;
+  const int coeff_ctx = combine_entropy_contexts(args->t_left[blk_row],
+                                                 args->t_above[blk_col]);
 
   if (args->exit_early)
     return;
@@ -683,7 +678,9 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     return;
   }
 
-  rate = rate_block(plane, block, blk_row, blk_col, tx_size, args);
+  rate = rate_block(plane, block, tx_size, coeff_ctx, args);
+  args->t_above[blk_col] = (x->plane[plane].eobs[block] > 0) ? 1 : 0;
+  args->t_left[blk_row] = (x->plane[plane].eobs[block] > 0) ? 1 : 0;
   rd1 = RDCOST(x->rdmult, x->rddiv, rate, dist);
   rd2 = RDCOST(x->rdmult, x->rddiv, 0, sse);
 
@@ -963,11 +960,14 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x,
                                     dst, dst_stride, xd->bd);
           if (xd->lossless) {
             const scan_order *so = &vp9_default_scan_orders[TX_4X4];
+            const int coeff_ctx = combine_entropy_contexts(tempa[idx],
+                                                           templ[idy]);
             vp9_highbd_fwht4x4(src_diff, coeff, 8);
             vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+            ratey += cost_coeffs(x, 0, block, TX_4X4, coeff_ctx,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
+            tempa[idx] = templ[idy] = (x->plane[0].eobs[block] > 0 ? 1 : 0);
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
             vp9_highbd_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
@@ -977,17 +977,20 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x,
             int64_t unused;
             const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
             const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
+            const int coeff_ctx = combine_entropy_contexts(tempa[idx],
+                                                           templ[idy]);
             if (tx_type == DCT_DCT)
               vpx_highbd_fdct4x4(src_diff, coeff, 8);
             else
               vp9_highbd_fht4x4(src_diff, coeff, 8, tx_type);
             vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+            ratey += cost_coeffs(x, 0, block, TX_4X4, coeff_ctx,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
             distortion += vp9_highbd_block_error_dispatch(
                 coeff, BLOCK_OFFSET(pd->dqcoeff, block),
                 16, &unused, xd->bd) >> 2;
+            tempa[idx] = templ[idy] = (x->plane[0].eobs[block] > 0 ? 1 : 0);
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
             vp9_highbd_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
@@ -1065,11 +1068,14 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x,
 
         if (xd->lossless) {
           const scan_order *so = &vp9_default_scan_orders[TX_4X4];
+          const int coeff_ctx = combine_entropy_contexts(tempa[idx],
+                                                         templ[idy]);
           vp9_fwht4x4(src_diff, coeff, 8);
           vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-          ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+          ratey += cost_coeffs(x, 0, block, TX_4X4, coeff_ctx,
                                so->scan, so->neighbors,
                                cpi->sf.use_fast_coef_costing);
+          tempa[idx] = templ[idy] = (x->plane[0].eobs[block] > 0) ? 1 : 0;
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
           vp9_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, dst_stride,
@@ -1078,11 +1084,14 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x,
           int64_t unused;
           const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
           const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
+          const int coeff_ctx = combine_entropy_contexts(tempa[idx],
+                                                         templ[idy]);
           vp9_fht4x4(src_diff, coeff, 8, tx_type);
           vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-          ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
-                             so->scan, so->neighbors,
-                             cpi->sf.use_fast_coef_costing);
+          ratey += cost_coeffs(x, 0, block, TX_4X4, coeff_ctx,
+                               so->scan, so->neighbors,
+                               cpi->sf.use_fast_coef_costing);
+          tempa[idx] = templ[idy] = (x->plane[0].eobs[block] > 0) ? 1 : 0;
 #if CONFIG_VP9_HIGHBITDEPTH
           distortion += vp9_highbd_block_error_8bit(
               coeff, BLOCK_OFFSET(pd->dqcoeff, block), 16, &unused) >> 2;
@@ -1551,8 +1560,9 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
 #endif
       int64_t ssz, rd, rd1, rd2;
       tran_low_t* coeff;
-
+      int coeff_ctx;
       k += (idy * 2 + idx);
+      coeff_ctx = combine_entropy_contexts(ta[k & 1], tl[k >> 1]);
       coeff = BLOCK_OFFSET(p->coeff, k);
       x->fwd_txm4x4(vp9_raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
                     coeff, 8);
@@ -1565,9 +1575,10 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                                         16, &ssz);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       thissse += ssz;
-      thisrate += cost_coeffs(x, 0, k, ta + (k & 1), tl + (k >> 1), TX_4X4,
+      thisrate += cost_coeffs(x, 0, k, TX_4X4, coeff_ctx,
                               so->scan, so->neighbors,
                               cpi->sf.use_fast_coef_costing);
+      ta[k & 1] = tl[k >> 1] = (x->plane[0].eobs[k] > 0) ? 1 : 0;
       rd1 = RDCOST(x->rdmult, x->rddiv, thisrate, thisdistortion >> 2);
       rd2 = RDCOST(x->rdmult, x->rddiv, 0, thissse >> 2);
       rd = VPXMIN(rd1, rd2);
