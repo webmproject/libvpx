@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3dd68a0d_0ab31c61",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-07-06T21:10:20Z",
+      "side": 1,
+      "message": "From what I understand a lot of the newer LTO features in GCC and clang are getting sloppier about DCE. Is cpi-\u003ecommon.bit_depth defined when CONFIG_VP9_HIGHBITDEPTH is 0? If it is, does it default to 8?",
+      "range": {
+        "startLine": 335,
+        "startChar": 0,
+        "endLine": 336,
+        "endChar": 21
+      },
+      "revId": "d088125c410651332b11cf535bbdaf2ba1e1686a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
