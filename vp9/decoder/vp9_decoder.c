@@ -187,47 +187,45 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9Decoder *pbi,
 vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
                                       VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
-  RefBuffer *ref_buf = NULL;
-  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
+  int idx;
+  YV12_BUFFER_CONFIG *ref_buf = NULL;
 
   // TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
   // encoder is using the frame buffers for. This is just a stub to keep the
   // vpxenc --test-decode functionality working, and will be replaced in a
   // later commit that adds VP9-specific controls for this functionality.
+  // (Yunqing) The set_reference control depends on the following setting in
+  // encoder.
+  // cpi->lst_fb_idx = 0;
+  // cpi->gld_fb_idx = 1;
+  // cpi->alt_fb_idx = 2;
   if (ref_frame_flag == VP9_LAST_FLAG) {
-    ref_buf = &cm->frame_refs[0];
+    idx = cm->ref_frame_map[0];
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
-    ref_buf = &cm->frame_refs[1];
+    idx = cm->ref_frame_map[1];
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
-    ref_buf = &cm->frame_refs[2];
+    idx = cm->ref_frame_map[2];
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
     return cm->error.error_code;
   }
 
-  if (!equal_dimensions(ref_buf->buf, sd)) {
+  if (idx < 0 || idx >= FRAME_BUFFERS) {
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                       "Invalid reference frame map");
+    return cm->error.error_code;
+  }
+
+  // Get the destination reference buffer.
+  ref_buf = &cm->buffer_pool->frame_bufs[idx].buf;
+
+  if (!equal_dimensions(ref_buf, sd)) {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Incorrect buffer dimensions");
   } else {
-    int *ref_fb_ptr = &ref_buf->idx;
-
-    // Find an empty frame buffer.
-    const int free_fb = get_free_fb(cm);
-    if (cm->new_fb_idx == INVALID_IDX) {
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                         "Unable to find free frame buffer");
-      return cm->error.error_code;
-    }
-
-    // Decrease ref_count since it will be increased again in
-    // ref_cnt_fb() below.
-    --frame_bufs[free_fb].ref_count;
-
-    // Manage the reference counters and copy image.
-    ref_cnt_fb(frame_bufs, ref_fb_ptr, free_fb);
-    ref_buf->buf = &frame_bufs[*ref_fb_ptr].buf;
-    vp8_yv12_copy_frame(sd, ref_buf->buf);
+    // Overwrite the reference frame buffer.
+    vp8_yv12_copy_frame(sd, ref_buf);
   }
 
   return cm->error.error_code;
