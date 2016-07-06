@@ -20,7 +20,9 @@ extern "C" {
 
 struct encode_b_args {
   MACROBLOCK *x;
-  struct optimize_ctx *ctx;
+  int enable_coeff_opt;
+  ENTROPY_CONTEXT *ta;
+  ENTROPY_CONTEXT *tl;
   int8_t *skip;
 };
 int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,

@@ -643,15 +643,14 @@ static void encode_block(int plane, int block, int row, int col,
   struct encode_b_args *const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct optimize_ctx *const ctx = args->ctx;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint8_t *dst;
   ENTROPY_CONTEXT *a, *l;
   dst = &pd->dst.buf[4 * row * pd->dst.stride + 4 * col];
-  a = &ctx->ta[plane][col];
-  l = &ctx->tl[plane][row];
+  a = &args->ta[col];
+  l = &args->tl[row];
 
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.
@@ -790,7 +789,7 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
   MODE_INFO *mi = xd->mi[0];
-  struct encode_b_args arg = {x, &ctx, &mi->skip};
+  struct encode_b_args arg = {x, 1, NULL, NULL, &mi->skip};
   int plane;
 
   mi->skip = 1;
@@ -807,7 +806,12 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
       const TX_SIZE tx_size = plane ? get_uv_tx_size(mi, pd) : mi->tx_size;
       vp9_get_entropy_contexts(bsize, tx_size, pd,
                                ctx.ta[plane], ctx.tl[plane]);
+      arg.enable_coeff_opt = 1;
+    } else {
+      arg.enable_coeff_opt = 0;
     }
+    arg.ta = ctx.ta[plane];
+    arg.tl = ctx.tl[plane];
 
     vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
                                            &arg);
@@ -836,16 +840,15 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
   uint16_t *eob = &p->eobs[block];
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
-  struct optimize_ctx *const ctx = args->ctx;
   ENTROPY_CONTEXT *a = NULL;
   ENTROPY_CONTEXT *l = NULL;
   int entropy_ctx = 0;
   dst = &pd->dst.buf[4 * (row * dst_stride + col)];
   src = &p->src.buf[4 * (row * src_stride + col)];
   src_diff = &p->src_diff[4 * (row * diff_stride + col)];
-  if (args->ctx != NULL) {
-    a = &ctx->ta[plane][col];
-    l = &ctx->tl[plane][row];
+  if (args->enable_coeff_opt) {
+    a = &args->ta[col];
+    l = &args->tl[row];
     entropy_ctx = combine_entropy_contexts(*a, *l);
   }
 
@@ -970,7 +973,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 eob, scan_order->scan);
         }
       }
-      if (args->ctx != NULL && !x->skip_recode) {
+      if (args->enable_coeff_opt && !x->skip_recode) {
        *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -990,7 +993,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 eob, scan_order->scan);
         }
       }
-      if (args->ctx != NULL && !x->skip_recode) {
+      if (args->enable_coeff_opt && !x->skip_recode) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -1010,7 +1013,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 eob, scan_order->scan);
         }
       }
-      if (args->ctx != NULL && !x->skip_recode) {
+      if (args->enable_coeff_opt && !x->skip_recode) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -1033,7 +1036,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 eob, scan_order->scan);
         }
       }
-      if (args->ctx != NULL && !x->skip_recode) {
+      if (args->enable_coeff_opt && !x->skip_recode) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob) {
@@ -1058,7 +1061,9 @@ void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
                                   int enable_optimize_b) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, NULL, &xd->mi[0]->skip};
+  struct encode_b_args arg = {x, enable_optimize_b,
+                              ctx.ta[plane], ctx.tl[plane],
+                              &xd->mi[0]->skip};
 
   if (enable_optimize_b && x->optimize &&
       (!x->skip_recode || !x->skip_optimize)) {
@@ -1066,7 +1071,8 @@ void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
     const TX_SIZE tx_size = plane ? get_uv_tx_size(xd->mi[0], pd) :
         xd->mi[0]->tx_size;
     vp9_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane], ctx.tl[plane]);
-    arg.ctx = &ctx;
+  } else {
+    arg.enable_coeff_opt = 0;
   }
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,

@@ -602,7 +602,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     return;
 
   if (!is_inter_block(mi)) {
-    struct encode_b_args intra_arg = {x, NULL, &mi->skip};
+    struct encode_b_args intra_arg = {x, args->cpi->sf.quant_coeff_opt,
+                                      args->t_above, args->t_left, &mi->skip};
     vp9_encode_block_intra(plane, block, blk_row, blk_col, plane_bsize, tx_size,
                            &intra_arg);
     if (args->cpi->sf.txfm_domain_distortion) {
