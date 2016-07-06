@@ -602,9 +602,9 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     return;
 
   if (!is_inter_block(mi)) {
-    struct encode_b_args arg = {x, NULL, &mi->skip};
+    struct encode_b_args intra_arg = {x, NULL, &mi->skip};
     vp9_encode_block_intra(plane, block, blk_row, blk_col, plane_bsize, tx_size,
-                           &arg);
+                           &intra_arg);
     if (args->cpi->sf.txfm_domain_distortion) {
       dist_block(args->cpi, x, plane, block, blk_row, blk_col, tx_size, &dist,
                  &sse);
@@ -635,6 +635,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
+      if (args->cpi->sf.quant_coeff_opt)
+        vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
       dist_block(args->cpi, x, plane, block, blk_row, blk_col, tx_size, &dist,
                  &sse);
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
@@ -668,6 +670,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   } else {
     // full forward transform and quantization
     vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
+    if (args->cpi->sf.quant_coeff_opt)
+      vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
     dist_block(args->cpi, x, plane, block, blk_row, blk_col, tx_size, &dist,
                &sse);
   }

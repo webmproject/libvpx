@@ -163,6 +163,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->txfm_domain_distortion = 1;
+    sf->quant_coeff_opt = 0;
   }
 
   if (speed >= 2) {
@@ -281,6 +282,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
 
   if (speed >= 1) {
     sf->txfm_domain_distortion = 1;
+    sf->quant_coeff_opt = 0;
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check = 1;
     sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
@@ -544,6 +546,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->adaptive_interp_filter_search = 0;
   sf->allow_partition_search_skip = 0;
   sf->txfm_domain_distortion = 0;
+  sf->quant_coeff_opt = 1;
 
   for (i = 0; i < TX_SIZES; i++) {
     sf->intra_y_mode_mask[i] = INTRA_ALL;

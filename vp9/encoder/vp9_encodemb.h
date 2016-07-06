@@ -23,6 +23,8 @@ struct encode_b_args {
   struct optimize_ctx *ctx;
   int8_t *skip;
 };
+int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
+                   TX_SIZE tx_size, int ctx);
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize);
 void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize);
 void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
