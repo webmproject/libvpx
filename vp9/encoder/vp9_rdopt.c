@@ -498,18 +498,16 @@ static void dist_block(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   }
 }
 
-static int rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
+static int rate_block(int plane, int block, int row, int col,
                       TX_SIZE tx_size, struct rdcost_block_args* args) {
-  int x_idx, y_idx;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x_idx, &y_idx);
-
-  return cost_coeffs(args->x, plane, block, args->t_above + x_idx,
-                     args->t_left + y_idx, tx_size,
+  return cost_coeffs(args->x, plane, block, args->t_above + col,
+                     args->t_left + row, tx_size,
                      args->so->scan, args->so->neighbors,
                      args->use_fast_coef_costing);
 }
 
-static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
+static void block_rd_txfm(int plane, int block, int row, int col,
+                          BLOCK_SIZE plane_bsize,
                           TX_SIZE tx_size, void *arg) {
   struct rdcost_block_args *args = arg;
   MACROBLOCK *const x = args->x;
@@ -525,20 +523,20 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 
   if (!is_inter_block(mi)) {
     struct encode_b_args arg = {x, NULL, &mi->skip};
-    vp9_encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
+    vp9_encode_block_intra(plane, block, row, col, plane_bsize, tx_size, &arg);
     dist_block(x, plane, block, tx_size, &dist, &sse);
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
     if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
-      vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+      vp9_xform_quant(x, plane, block, row, col, plane_bsize, tx_size);
       dist_block(x, plane, block, tx_size, &dist, &sse);
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
                SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
-      vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
+      vp9_xform_quant_dc(x, plane, block, row, col, plane_bsize, tx_size);
       sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       dist = sse;
       if (x->plane[plane].eobs[block]) {
@@ -562,7 +560,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     }
   } else {
     // full forward transform and quantization
-    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+    vp9_xform_quant(x, plane, block, row, col, plane_bsize, tx_size);
     dist_block(x, plane, block, tx_size, &dist, &sse);
   }
 
@@ -572,7 +570,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
   }
 
-  rate = rate_block(plane, block, plane_bsize, tx_size, args);
+  rate = rate_block(plane, block, row, col, tx_size, args);
   rd1 = RDCOST(x->rdmult, x->rddiv, rate, dist);
   rd2 = RDCOST(x->rdmult, x->rddiv, 0, sse);
 

@@ -66,7 +66,7 @@ void vp9_foreach_transformed_block_in_plane(
   for (r = 0; r < max_blocks_high; r += (1 << tx_size)) {
     // Skip visiting the sub blocks that are wholly within the UMV.
     for (c = 0; c < max_blocks_wide; c += (1 << tx_size)) {
-      visit(plane, i, plane_bsize, tx_size, arg);
+      visit(plane, i, r, c, plane_bsize, tx_size, arg);
       i += step;
     }
     i += extra_step;
