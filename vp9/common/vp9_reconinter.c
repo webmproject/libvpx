@@ -178,7 +178,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       // Co-ordinate of containing block to pixel precision.
       const int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
       const int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
-#if CONFIG_BETTER_HW_COMPATIBILITY
+#if 0  // CONFIG_BETTER_HW_COMPATIBILITY
       assert(xd->mi[0]->sb_type != BLOCK_4X8 &&
              xd->mi[0]->sb_type != BLOCK_8X4);
       assert(mv_q4.row == mv.row * (1 << (1 - pd->subsampling_y)) &&
