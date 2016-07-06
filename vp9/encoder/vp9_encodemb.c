@@ -314,17 +314,18 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
        *  add a new trellis node, but we do need to update the costs.
        */
       band = band_translate[i + 1];
+      pt = get_coef_context(nb, token_cache, i + 1);
       t0 = tokens[next][0].token;
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
       if (t0 != EOB_TOKEN) {
         tokens[next][0].rate +=
-            mb->token_costs[tx_size][type][ref][band][1][0][t0];
+            mb->token_costs[tx_size][type][ref][band][1][pt][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
       if (t1 != EOB_TOKEN) {
         tokens[next][1].rate +=
-            mb->token_costs[tx_size][type][ref][band][1][0][t1];
+            mb->token_costs[tx_size][type][ref][band][1][pt][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
       best_index[i][0] = best_index[i][1] = 0;
