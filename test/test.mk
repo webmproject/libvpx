@@ -187,6 +187,10 @@ LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += blend_mask6_test.cc
 endif
 
+ifeq ($(CONFIG_OBMC),yes)
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += obmc_sad_test.cc
+endif
+
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 LIBVPX_TEST_SRCS-$(HAVE_SSE4_1) += vp10_highbd_iht_test.cc
 endif # CONFIG_VP9_HIGHBITDEPTH

@@ -66,4 +66,18 @@ static INLINE __m128i xx_roundn_epu16(__m128i v_val_w, int bits) {
   return _mm_avg_epu16(v_s_w, _mm_setzero_si128());
 }
 
+static INLINE __m128i xx_roundn_epu32(__m128i v_val_d, int bits) {
+  const __m128i v_bias_d = _mm_set1_epi32(1 << (bits - 1));
+  const __m128i v_tmp_d = _mm_add_epi32(v_val_d, v_bias_d);
+  return _mm_srli_epi32(v_tmp_d, bits);
+}
+
+#ifdef __SSSE3__
+static INLINE int32_t xx_hsum_epi32_si32(__m128i v_d) {
+  v_d = _mm_hadd_epi32(v_d, v_d);
+  v_d = _mm_hadd_epi32(v_d, v_d);
+  return _mm_cvtsi128_si32(v_d);
+}
+#endif  // __SSSE3__
+
 #endif  // VPX_DSP_X86_SYNONYS_H_
