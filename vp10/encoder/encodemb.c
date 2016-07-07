@@ -1184,16 +1184,6 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     arg.ta = ctx.ta[plane];
     arg.tl = ctx.tl[plane];
 
-#if CONFIG_NEW_QUANT
-#if CONFIG_VAR_TX
-    vp10_get_entropy_contexts(bsize, TX_4X4, pd,
-                              ctx.ta[plane], ctx.tl[plane]);
-#else
-    vp10_get_entropy_contexts(bsize, tx_size, pd,
-                              ctx.ta[plane], ctx.tl[plane]);
-#endif  // CONFIG_VAR_TX
-#endif  // CONFIG_NEW_QUANT
-
 #if CONFIG_VAR_TX
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
