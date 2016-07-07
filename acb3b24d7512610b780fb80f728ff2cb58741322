@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd8f92ab_44fcc2b9",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-07T19:21:45Z",
+      "side": 1,
+      "message": "plain english would be better than pseudo-code\n\n\"if ref_frame[idx] is equal to ALTREF_FRAME, then  MACROBLOCKD::block_ref[idx] is an altref\"",
+      "range": {
+        "startLine": 83,
+        "startChar": 6,
+        "endLine": 83,
+        "endChar": 17
+      },
+      "revId": "acb3b24d7512610b780fb80f728ff2cb58741322",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
